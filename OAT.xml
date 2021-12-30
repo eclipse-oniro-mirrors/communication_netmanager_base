@@ -59,9 +59,9 @@
 
         <filefilterlist>
             <filefilter name="binaryFileTypePolicyFilter" desc="Filters for binary file policies">
-                <filteritem type="filename" name="prebuilts/librarys/netd/arm/*.so" desc="Netd is not included in this open source plan"/>
-                <filteritem type="filename" name="prebuilts/librarys/netd/arm64/*.so" desc="Netd is not included in this open source plan"/>
-                <filteritem type="filename" name="figures/*.png" desc="Image files used in readme"/>
+                <filteritem type="filepath" name="prebuilts/librarys/netd/arm/.*" desc="Netd is not included in this open source plan"/>
+                <filteritem type="filepath" name="prebuilts/librarys/netd/arm64/.*" desc="Netd is not included in this open source plan"/>
+                <filteritem type="filename" name="*.png" desc="Image files used in readme"/>
             </filefilter>
         </filefilterlist>
     </oatconfig>
