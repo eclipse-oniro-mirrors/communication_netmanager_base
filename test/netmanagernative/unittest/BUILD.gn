@@ -1,0 +1,67 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
+
+ohos_unittest("netd_native_manager_test") {
+    module_out_path = "netmanager_base/netd_native_manager_test"
+    sources = [
+        "network_route_test.cpp",
+        "resolver_config_test.cpp"
+    ]
+
+    include_dirs = [
+        "$NETDNATIVE_INNERKITS_SOURCE_DIR",
+        "$INNERKITS_ROOT/netmanagernative/include",
+        "$NETDNATIVE_SOURCE_DIR/include",
+        "$NETMANAGER_PREBUILTS_DIR/librarys/netd/include/net_mgr_native/include",
+        "$NETMANAGER_PREBUILTS_DIR/librarys/netd/include/common/include",
+        "$NETDNATIVE_SOURCE_DIR/test",
+    ]
+
+    deps = [
+       "//utils/native/base:utils",
+       "$NETMANAGER_BASE_ROOT/services/netmanagernative:netd_native_manager",
+    ]
+
+    external_deps = [
+        "safwk:system_ability_fwk",
+        "samgr_standard:samgr_proxy",
+        "ipc:ipc_core",
+        "aafwk_standard:want",
+        "appexecfwk_standard:appexecfwk_base",
+        "appexecfwk_standard:appexecfwk_core",
+    ]
+
+    defines = [
+        "NETMGRNATIVE_LOG_TAG = \"NetdNativeService\"",
+        "LOG_DOMAIN = 0xD0015B0"
+    ]
+
+    if (is_standard_system) {
+        external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+    } else {
+        external_deps += [ "hilog:libhilog" ]
+    }
+
+    part_name = "netmanager_base"
+    subsystem_name = "communication"
+}
+
+group("unittest") {
+    testonly = true
+    deps = [ ":netd_native_manager_test" ]
+}
+
+

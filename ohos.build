@@ -1,0 +1,101 @@
+{
+  "subsystem": "communication",
+  "parts": {
+    "netmanager_base": {
+      "variants": [
+         "phone",
+         "wearable",
+         "ivi"
+      ],
+      "module_list": [
+        "//foundation/communication/netmanager_base/services/netmanagernative:netd_native_manager",
+        "//foundation/communication/netmanager_base/prebuilts/librarys/netd:libnet_manager_native",
+        "//foundation/communication/netmanager_base/services/netdcontroller:netd_controller",
+        "//foundation/communication/netmanager_base/services/netconnmanager:net_conn_manager",
+        "//foundation/communication/netmanager_base/services/dnsresolvermanager:dns_resolver_manager",
+        "//foundation/communication/netmanager_base/services/netpolicymanager:net_policy_manager",
+        "//foundation/communication/netmanager_base/services/netstatsmanager:net_stats_manager",
+        "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
+        "//foundation/communication/netmanager_base/interfaces/innerkits/dnsresolverclient:dns_resolver_manager_if",
+        "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient:net_policy_manager_if",
+        "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient:net_stats_manager_if",
+        "//foundation/communication/netmanager_base/interfaces/innerkits/ethernetclient:ethernet_manager_if",
+        "//foundation/communication/netmanager_base/interfaces/innerkits/nettetherclient:net_tether_manager_if",
+        "//foundation/communication/netmanager_base/utils:net_manager_common",
+        "//foundation/communication/netmanager_base/services/etc/init:netmanager_base.rc",
+        "//foundation/communication/netmanager_base/services/etc/init:netdnative.rc",
+        "//foundation/communication/netmanager_base/sa_profile:net_manager_profile",
+        "//foundation/communication/netmanager_base/services/ethernetmanager:ethernet_manager",
+        "//foundation/communication/netmanager_base/services/nettethermanager:net_tether_manager",
+        "//foundation/communication/netmanager_base/frameworks/js/netpolicy:netpolicy",
+        "//foundation/communication/netmanager_base/frameworks/js/ethernet:ethernet",
+        "//foundation/communication/netmanager_base/frameworks/js/dnsresolver:dnsresolver",
+        "//foundation/communication/netmanager_base/frameworks/js/netstats:netstats",
+        "//foundation/communication/netmanager_base/frameworks/js/netconn:netconn",
+        "//foundation/communication/netmanager_base/test/netmanagernative/local_test:test_netd_native_manager",
+        "//foundation/communication/netmanager_base/test/dnsresolvermanager/local_test:dns_resolver_manager_local_test",
+        "//foundation/communication/netmanager_base/test/netconnmanager/local_test:net_conn_manager_local_test",
+        "//foundation/communication/netmanager_base/test/ethernetmanager/local_test:ethernet_manager_local_test",
+        "//foundation/communication/netmanager_base/test/netstatsmanager/local_test:net_stats_manager_local_test",
+        "//foundation/communication/netmanager_base/test/netpolicymanager/local_test:net_policy_manager_local_test",
+        "//foundation/communication/netmanager_base/test/nettethermanager/local_test:net_tether_manager_local_test"
+      ],
+      "inner_kits": [
+        {
+          "type": "so",
+          "name": "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
+          "header": {
+            "header_files": [
+                "net_conn_client.h",
+                "net_link_info.h",
+                "net_supplier_info.h",
+                "net_conn_callback_info.h",
+                "net_specifier.h",
+                "route.h"
+            ],
+            "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient/include"
+          }
+        },
+        {
+          "type": "so",
+          "name": "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient:net_policy_manager_if",
+          "header": {
+            "header_files": [
+                "net_policy_client.h"
+            ],
+            "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient/include"
+          }
+        },
+        {
+          "type": "so",
+          "name": "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient:net_stats_manager_if",
+          "header": {
+            "header_files": [
+                "net_stats_info.h",
+                "net_stats_client.h"
+            ],
+            "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient/include"
+          }
+        },
+        {
+          "type": "so",
+          "name": "//foundation/communication/netmanager_base/interfaces/innerkits/nettetherclient:net_tether_manager_if",
+          "header": {
+            "header_files": [
+                "net_tether_client.h"
+            ],
+            "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/nettetherclient/include"
+          }
+        }
+      ],
+      "test_list": [
+          "//foundation/communication/netmanager_base/test/dnsresolvermanager:unittest",
+          "//foundation/communication/netmanager_base/test/ethernetmanager:unittest",
+          "//foundation/communication/netmanager_base/test/netconnmanager:unittest",
+          "//foundation/communication/netmanager_base/test/netpolicymanager:unittest",
+          "//foundation/communication/netmanager_base/test/netstatsmanager:unittest",
+          "//foundation/communication/netmanager_base/test/nettethermanager:unittest"
+      ]
+    }
+  }
+}

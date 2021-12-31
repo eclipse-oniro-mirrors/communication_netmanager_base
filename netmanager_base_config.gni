@@ -1,0 +1,40 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+SUBSYSTEM_DIR = "//foundation/communication"
+NETMANAGER_BASE_ROOT = "$SUBSYSTEM_DIR/netmanager_base"
+NETMANAGERNATIVE_ROOT = "$NETMANAGER_BASE_ROOT/services/netmanagernative"
+INNERKITS_ROOT = "$NETMANAGER_BASE_ROOT/interfaces/innerkits"
+NETCONNMANAGER_INNERKITS_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/frameworks/native/netconnclient"
+NETPOLICYMANAGER_INNERKITS_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/frameworks/native/netpolicyclient"
+DNSRESOLVERMANAGER_INNERKITS_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/frameworks/native/dnsresolverclient"
+ETHERNETMANAGER_INNERKITS_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/frameworks/native/ethernetclient"
+NETSTATSMANAGER_INNERKITS_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/frameworks/native/netstatsclient"
+NETTETHERMANAGER_INNERKITS_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/frameworks/native/nettetherclient"
+NETCONNMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netconnmanager"
+NETPOLICYMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netpolicymanager"
+NETSTATSMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netstatsmanager"
+NETCONNMANAGER_COMMON_DIR = "$NETMANAGER_BASE_ROOT/services/common"
+DNSRESOLVERMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/dnsresolvermanager"
+ETHERNETMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/ethernetmanager"
+NETTETHERMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/nettethermanager"
+NETDNATIVE_INNERKITS_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/frameworks/native/netmanagernative"
+NETDNATIVE_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netmanagernative"
+NETMANAGER_PREBUILTS_DIR = "$NETMANAGER_BASE_ROOT/prebuilts"
+NETDCONTROLLER_ROOT_DIR = "$NETMANAGER_BASE_ROOT/services/netdcontroller"
+
+use_js_debug = false
+declare_args() {
+  enable_netmgr_debug = true
+  enable_sys_dns = true
+}

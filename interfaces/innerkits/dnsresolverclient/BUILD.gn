@@ -1,0 +1,96 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
+
+config("net_conn_manager_if_config") {
+  # header file path
+  include_dirs = [
+    "$INNERKITS_ROOT/dnsresolverclient/include",
+    "$INNERKITS_ROOT/dnsresolverclient/include/proxy",
+    "$INNERKITS_ROOT/include",
+  ]
+
+  cflags = []
+  if (is_double_framework) {
+    cflags = [ "-DCONFIG_DUAL_FRAMEWORK" ]
+  }
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+  if (is_standard_system) {
+    cflags += [ "-DCONFIG_STANDARD_SYSTEM" ]
+  }
+  if (defined(build_public_version) && build_public_version) {
+    cflags += [ "-DBUILD_PUBLIC_VERSION" ]
+  }
+}
+
+ohos_source_set("dns_resolver_parcel") {
+  sources = [
+    "$DNSRESOLVERMANAGER_INNERKITS_SOURCE_DIR/src/dns_addr_info.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/inet_addr.cpp",
+  ]
+
+  include_dirs = [
+    "$INNERKITS_ROOT/include",
+    "$INNERKITS_ROOT/dnsresolverclient/include",
+  ]
+
+  deps = [
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "//utils/native/base:utils",
+  ]
+
+  external_deps = []
+  if (is_standard_system) {
+    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps += [ "hilog:libhilog" ]
+  }
+}
+
+ohos_shared_library("dns_resolver_manager_if") {
+  sources = [
+    "$DNSRESOLVERMANAGER_INNERKITS_SOURCE_DIR/src/dns_resolver_client.cpp",
+    "$DNSRESOLVERMANAGER_INNERKITS_SOURCE_DIR/src/proxy/dns_resolver_service_proxy.cpp",
+  ]
+
+  public_configs = [ ":net_conn_manager_if_config" ]
+
+  deps = [
+    ":dns_resolver_parcel",
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+  ]
+
+  external_deps = [
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr_standard:samgr_proxy",
+  ]
+
+  defines = [
+    "NETMGR_LOG_TAG = \"DnsResolverManager\"",
+    "LOG_DOMAIN = 0xD0015B0",
+  ]
+
+  if (is_standard_system) {
+    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps += [ "hilog:libhilog" ]
+  }
+
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}

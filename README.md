@@ -1,39 +1,95 @@
-# communication_netmanager_base
+# Net Manager<a name="EN-US_TOPIC_0000001105058232"></a>
 
-#### 介绍
-{**以下是 Gitee 平台说明，您可以替换此简介**
-Gitee 是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN）。专为开发者提供稳定、高效、安全的云端软件开发协作平台
-无论是个人、团队、或是企业，都能够用 Gitee 实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
-
-#### 软件架构
-软件架构说明
+-    [简介](#section112mcpsimp)
+-    [目录](#section125mcpsimp)
+-    [约束](#section133mcpsimp)
+-    [相关仓](#section155mcpsimp)
 
 
-#### 安装教程
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+## 简介
 
-#### 使用说明
+网络管理介绍：
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+​    网络管理模块作为电话子系统可裁剪部件，依赖于蜂窝数据管理，主要分为连接管理、策略管理、流量管理、网络共享、VPN管理五大模块；如图1：网络管理架构图；
 
-#### 参与贡献
+**图 1**  网络管理架构图
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+![](figures/net_manager_arch_zh.png)
 
+连接管理介绍：
 
-#### 特技
+​    负责与蜂窝数据交互，请求到IP后，再与Netd交互并将路由参数设置到内核，使得蜂窝数据连接且可用，最终实现上网，如图2：网络连接架构图；
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+**图  2**  网络连接架构图
+
+![](figures/net_conn_manager_arch_zh.png)
+
+**图 3**  网络策略架构图
+
+![](figures\net_policy_manager_arch_zh.png)
+
+## 目录
+
+```
+/foundation/communication/netmanager_standard/netmanager_standard/
+├── frameworks                         # 框架代码
+│   ├── innerkitsimpl                  # 内部接口实现
+│   │   └── netconnmanager
+│   │   │   └── src
+│   │   └── netpolicymanager
+│   │       └── src
+│   └── js                             # JS接口实现
+│       └── napi
+│           ├── http
+│           ├── socket
+│           └── websocket
+├── interfaces                         # 接口代码
+│   ├── innerkits                      # 内部接口
+│   │   └── native
+│   │       └── netconnmanager
+│   │       │   └── include
+│   │       └── netpolicymanager
+│   │           └── include
+│   └── kits                           # 外部接口
+│       └── js
+├── sa_profile                         # 服务配置文件
+├── services                           # 核心服务代码目录
+│   ├── common                         # 网络管理公共组件
+│   ├── etc                            # 网络管理进程配置脚本
+│   │   └── init
+│   ├── netconnmanager                 # 网络连接管理代码
+│   │   ├── include                    # 头文件
+│   │   │   ├── ipc                    # IPC通信头文件
+│   │   │   ├── net_controller         # 网络控制
+│   │   ├── src                        # 源文件目录
+│   │   │   ├── ipc                    # IPC通信源文件
+│   │   │   ├── net_controller         # 网络控制实现
+│   │   └── test                       # 单元测试代码
+│   ├── netpolicymanager               # 网络策略管理代码
+│   │   ├── include                    # 头文件
+│   │   │   └── ipc                    # IPC通信头文件
+│   │   ├── src                        # 源文件目录
+│   │   │   └── ipc                    # IPC通信源文件
+│   │   └── test                       # 单元测试代码
+│   ├── netmanagernative               # Netd代码
+│   └── prebuild                       # 预编译库文件
+└── utils                              # 公共功能实现
+|   └── log                            # 日志实现
+└── ohos.build                         # 编译文件
+```
+
+## 约束
+
+-    开发语言：C++
+-    软件层，需要以下子系统和服务配合使用：蜂窝数据、安全子系统、软总线子系统、USB子系统、电源管理子系统等；
+-    硬件层，需要搭载的设备支持以下硬件：可以进行独立蜂窝通信的Modem以及SIM卡；
+
+## 相关仓
+
+[netmanager_standard](https://gitee.com/openharmony/communication_netmanager_standard/blob/master/README.md)
+
+[电话服务子系统](https://gitee.com/openharmony/docs/blob/master/zh-cn/readme/%E7%94%B5%E8%AF%9D%E6%9C%8D%E5%8A%A1%E5%AD%90%E7%B3%BB%E7%BB%9F.md)
+
+[ telephony_cellular_data](https://gitee.com/openharmony/telephony_cellular_data/blob/master/README.md)
+
