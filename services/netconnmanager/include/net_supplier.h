@@ -51,17 +51,19 @@ enum CallbackType {
 
 class NetSupplier : public virtual RefBase {
 public:
-    NetSupplier(NetworkType netSupplierType, const std::string &netSupplierIdent, uint64_t netCapabilities);
+    NetSupplier(NetBearType bearerType, const std::string &netSupplierIdent,
+        const std::set<NetCap> &netCaps);
     ~NetSupplier();
     bool operator==(const NetSupplier &netSupplier) const;
     void SetNetwork(const sptr<Network> &network);
     void UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo);
-    void UpdateNetCapabilities(uint64_t netCapabilities);
     int32_t UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo);
     uint32_t GetSupplierId() const;
-    NetworkType GetNetSupplierType() const;
+    NetBearType GetNetSupplierType() const;
     std::string GetNetSupplierIdent() const;
-    uint64_t GetNetCapabilities() const;
+    const std::set<NetCap> &GetNetCaps() const;
+    std::set<NetCap> GetNetCaps();
+    NetAllCapabilities GetNetCapabilities() const;
     NetLinkInfo GetNetLinkInfo() const;
     bool GetRoaming() const;
     int8_t GetStrength() const;
@@ -69,6 +71,7 @@ public:
     int32_t GetSupplierUid() const;
     sptr<Network> GetNetwork() const;
     int32_t GetNetId() const;
+    sptr<NetHandle> GetNetHandle() const;
     void UpdateServiceState(ServiceState serviceState);
     ServiceState GetServiceState() const;
     bool IsConnecting() const;
@@ -79,8 +82,10 @@ public:
     int32_t GetNetScore() const;
     void SetRealScore(int32_t score);
     int32_t GetRealScore();
-    bool SupplierConnection(uint64_t netCapabilities);
-    bool SupplierDisconnection(uint64_t netCapabilities);
+    bool SupplierConnection(const std::set<NetCap> &netCaps);
+    bool SupplierDisconnection(const std::set<NetCap> &netCaps);
+    void SetRestrictBackground(bool restrictBackground);
+    bool GetRestrictBackground() const;
     bool RequestToConnect(uint32_t reqId);
     void AddRequsetIdToList(uint32_t requestId);
     int32_t SelectAsBestNetwork(uint32_t reqId);
@@ -88,25 +93,20 @@ public:
     int32_t CancleRequest(uint32_t reqId);
     void RemoveBestRequest(uint32_t reqId);
     std::set<uint32_t>& GetBestRequestList();
-    void RegisterNetConnCallback(const sptr<INetConnCallback> &callback);
-    void RegisterNetConnCallback(const std::vector<sptr<INetConnCallback>> &callback);
-    void UnregisterNetConnCallback(const sptr<INetConnCallback> &callback);
     void SetDefault();
     void ClearDefault();
     void UpdateNetStateForTest(int32_t netState);
     void RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback);
 
 private:
-    int32_t NotifyNetConnStateChanged(const sptr<NetConnCallbackInfo> &info);
-
-private:
     const int32_t REG_OK = 0;
 
-    NetworkType netSupplierType_ = NET_TYPE_UNKNOWN;
+    NetBearType netSupplierType_;
     std::string netSupplierIdent_;
-    uint64_t netCapabilities_ = NET_CAPABILITIES_NONE;
+    std::set<NetCap> netCaps_;
     NetLinkInfo netLinkInfo_;
     NetSupplierInfo netSupplierInfo_;
+    NetAllCapabilities netAllCapabilities_;
     uint32_t supplierId_ = 0;
     ServiceState state_ = SERVICE_STATE_IDLE;
     int32_t netScore_ = 0;
@@ -116,8 +116,9 @@ private:
     std::set<uint32_t> bestReqList_;
     sptr<INetSupplierCallback> netController_ = nullptr;
     sptr<Network> network_ = nullptr;
-    std::vector<sptr<INetConnCallback>> netConnCallback_;
+    sptr<NetHandle> netHandle_ = nullptr;
+    bool restrictBackground_ = true;
 };
-} // namespace NetManagerStandard
-} // namespace OHOS
-#endif // NET_SUPPLIER_H
+}  // namespace NetManagerStandard
+}  // namespace OHOS
+#endif  // NET_SUPPLIER_H

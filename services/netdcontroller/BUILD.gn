@@ -35,8 +35,8 @@ ohos_shared_library("netd_controller") {
   ]
 
   deps = [
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netd_native_manager",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-    "$NETMANAGER_PREBUILTS_DIR/librarys/netd:libnet_manager_native",
     "//utils/native/base:utils",
   ]
 
@@ -58,8 +58,8 @@ ohos_shared_library("netd_controller") {
     defines += [ "NETMGR_DEBUG" ]
   }
 
-  if (enable_sys_dns) {
-    defines += [ "SYS_DNS" ]
+  if (enable_sys_func) {
+    defines += [ "SYS_FUNC" ]
   }
 
   if (is_standard_system) {

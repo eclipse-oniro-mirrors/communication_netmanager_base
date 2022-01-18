@@ -23,21 +23,21 @@ NetManagerCenter &NetManagerCenter::GetInstance()
     return gInstance;
 }
 
-int32_t NetManagerCenter::GetIfaceNameByType(uint32_t netType, const std::string &ident, std::string &ifaceName)
+int32_t NetManagerCenter::GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName)
 {
     if (connService_ == nullptr) {
         return NETMANAGER_ERROR;
     }
-    return connService_->GetIfaceNameByType(netType, ident, ifaceName);
+    return connService_->GetIfaceNameByType(bearerType, ident, ifaceName);
 }
 
-int32_t NetManagerCenter::RegisterNetSupplier(uint32_t netType, const std::string &ident, uint64_t netCapabilities,
-    uint32_t &supplierId)
+int32_t NetManagerCenter::RegisterNetSupplier(
+    NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {
     if (connService_ == nullptr) {
         return NETMANAGER_ERROR;
     }
-    return connService_->RegisterNetSupplier(netType, ident, netCapabilities, supplierId);
+    return connService_->RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
 }
 
 int32_t NetManagerCenter::UnregisterNetSupplier(uint32_t supplierId)
@@ -78,9 +78,74 @@ int32_t NetManagerCenter::GetIfaceStatsDetail(const std::string &iface, uint32_t
     return statsService_->GetIfaceStatsDetail(iface, start, end, info);
 }
 
+int32_t NetManagerCenter::ResetStatsFactory()
+{
+    if (statsService_ == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return statsService_->ResetStatsFactory();
+}
+
 void NetManagerCenter::RegisterStatsService(const sptr<NetStatsBaseService> &service)
 {
     statsService_ = service;
+}
+
+
+int32_t NetManagerCenter::ResetPolicyFactory()
+{
+    if (policyService_ == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return policyService_->ResetPolicyFactory();
+}
+
+void NetManagerCenter::RegisterPolicyService(const sptr<NetPolicyBaseService> &service)
+{
+    policyService_ = service;
+}
+
+int32_t NetManagerCenter::ResetEthernetFactory()
+{
+    if (ethernetService_ == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return ethernetService_->ResetEthernetFactory();
+}
+
+void NetManagerCenter::RegisterEthernetService(const sptr<NetEthernetBaseService> &service)
+{
+    ethernetService_ = service;
+}
+
+int32_t NetManagerCenter::GetAddressesByName(const std::string &hostName, int32_t netId,
+    std::vector<INetAddr> &addrInfo)
+{
+    if (dnsService_ == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return dnsService_->GetAddressesByName(hostName, netId, addrInfo);
+}
+
+void NetManagerCenter::RegisterDnsService(const sptr<DnsBaseService> &service)
+{
+    dnsService_ = service;
+}
+
+int32_t NetManagerCenter::RestrictBackgroundChanged(bool isRestrictBackground)
+{
+    if (connService_ == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return connService_->RestrictBackgroundChanged(isRestrictBackground);
+}
+
+bool NetManagerCenter::IsUidNetAccess(uint32_t uid, bool metered)
+{
+    if (policyService_ == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return policyService_->IsUidNetAccess(uid, metered);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

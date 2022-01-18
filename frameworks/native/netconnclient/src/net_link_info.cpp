@@ -285,6 +285,5 @@ std::string NetLinkInfo::ToStringRoute(const std::string &tab) const
     str.append("End");
     return str;
 }
-
 } // namespace NetManagerStandard
 } // namespace OHOS

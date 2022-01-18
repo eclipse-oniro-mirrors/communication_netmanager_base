@@ -26,7 +26,6 @@ constexpr int NETMANAGER_SUCCESS = 0;
 enum {
     NETMANAGER_COMMON = 0x00,
     NETMANAGER_DNS_RESOLVER_MANAGER = 0x01,
-    NETMANAGER_ETHERNET_MANAGER = 0x02,
     NETMANAGER_NET_CONN_MANAGER = 0x03,
     NETMANAGER_NET_POLICY_MANAGER = 0x04,
 };
@@ -56,8 +55,6 @@ enum {
 
 // Error code for netmanager dns resolver
 constexpr ErrCode DNS_ERR_OFFSET = ErrCodeOffset(SUBSYS_COMMUNICATION, NETMANAGER_DNS_RESOLVER_MANAGER);
-// Error code for netmanager ethernet
-constexpr ErrCode ETHERNET_ERR_OFFSET = ErrCodeOffset(SUBSYS_COMMUNICATION, NETMANAGER_ETHERNET_MANAGER);
 // Error code for netmanager conn manager
 constexpr ErrCode CONN_MANAGER_ERR_OFFSET = ErrCodeOffset(SUBSYS_COMMUNICATION, NETMANAGER_NET_CONN_MANAGER);
 // Error code for netmanager policy manager

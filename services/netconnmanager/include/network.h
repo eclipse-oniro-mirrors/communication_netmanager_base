@@ -38,6 +38,7 @@ public:
     bool UpdateBasicNetwork(bool isAvailable_);
     bool UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo);
     NetLinkInfo GetNetLinkInfo() const;
+    void UpdateIpAddrs(const NetLinkInfo &netLinkInfo);
     void UpdateInterfaces(const NetLinkInfo &netLinkInfo);
     void UpdateRoutes(const NetLinkInfo &netLinkInfo);
     void UpdateDnses(const NetLinkInfo &netLinkInfo);
@@ -45,13 +46,13 @@ public:
     void RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
     int32_t UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
     void StartNetDetection();
-    void StopNetDetection();
     uint64_t GetNetWorkMonitorResult();
     void SetDefaultNetWork();
     void ClearDefaultNetWorkNetId();
     void SetExternDetection();
 
 private:
+    void StopNetDetection();
     bool CreateBasicNetwork();
     bool ReleaseBasicNetwork();
     void StartDetectionThread();

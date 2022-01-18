@@ -27,13 +27,10 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER] =
         &NetConnServiceStub::OnRegisterNetConnCallbackBySpecifier;
     memberFuncMap_[CMD_NM_UNREGISTER_NET_CONN_CALLBACK] = &NetConnServiceStub::OnUnregisterNetConnCallback;
-    memberFuncMap_[CMD_NM_UNREGISTER_NET_CONN_CALLBACK_BY_SPECIFIER] =
-        &NetConnServiceStub::OnUnregisterNetConnCallbackBySpecifier;
     memberFuncMap_[CMD_NM_UPDATE_NET_STATE_FOR_TEST]    = &NetConnServiceStub::OnUpdateNetStateForTest;
     memberFuncMap_[CMD_NM_REG_NET_SUPPLIER]             = &NetConnServiceStub::OnRegisterNetSupplier;
     memberFuncMap_[CMD_NM_UNREG_NETWORK]                = &NetConnServiceStub::OnUnregisterNetSupplier;
     memberFuncMap_[CMD_NM_SET_NET_SUPPLIER_INFO]        = &NetConnServiceStub::OnUpdateNetSupplierInfo;
-    memberFuncMap_[CMD_NM_SET_NET_CAPABILTITES]         = &NetConnServiceStub::OnUpdateNetCapabilities;
     memberFuncMap_[CMD_NM_SET_NET_LINK_INFO]            = &NetConnServiceStub::OnUpdateNetLinkInfo;
     memberFuncMap_[CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK] =
         &NetConnServiceStub::OnRegisterNetDetectionCallback;
@@ -41,8 +38,6 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnUnRegisterNetDetectionCallback;
     memberFuncMap_[CMD_NM_NET_DETECTION]                = &NetConnServiceStub::OnNetDetection;
     memberFuncMap_[CMD_NM_GET_IFACENAME_BY_TYPE]        = &NetConnServiceStub::OnGetIfaceNameByType;
-    memberFuncMap_[CMD_NM_ACTIVATENETWORK]              = &NetConnServiceStub::OnActivateNetwork;
-    memberFuncMap_[CMD_NM_DEACTIVATENETWORK]            = &NetConnServiceStub::OnDeactivateNetwork;
     memberFuncMap_[CMD_NM_GETDEFAULTNETWORK]            = &NetConnServiceStub::OnGetDefaultNet;
     memberFuncMap_[CMD_NM_HASDEFAULTNET] =                &NetConnServiceStub::OnHasDefaultNet;
     memberFuncMap_[CMD_NM_GET_SPECIFIC_NET]             = &NetConnServiceStub::OnGetSpecificNet;
@@ -55,6 +50,7 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_BIND_SOCKET]                  = &NetConnServiceStub::OnBindSocket;
     memberFuncMap_[CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK] = &NetConnServiceStub::OnRegisterNetSupplierCallback;
     memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE] = &NetConnServiceStub::OnSetAirplaneMode;
+    memberFuncMap_[CMD_NM_RESTORE_FACTORY_DATA] = &NetConnServiceStub::OnRestoreFactoryData;
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -92,23 +88,33 @@ int32_t NetConnServiceStub::OnSystemReady(MessageParcel &data, MessageParcel &re
 int32_t NetConnServiceStub::OnRegisterNetSupplier(MessageParcel &data, MessageParcel &reply)
 {
     NETMGR_LOG_D("stub processing");
-    uint32_t netType;
+    NetBearType bearerType;
     std::string ident;
-    uint64_t netCapabilities;
-    if (!data.ReadUint32(netType)) {
+    std::set<NetCap> netCaps;
+
+    uint32_t type = 0;
+    if (!data.ReadUint32(type)) {
         return ERR_FLATTEN_OBJECT;
     }
+    bearerType = static_cast<NetBearType>(type);
 
     if (!data.ReadString(ident)) {
         return ERR_FLATTEN_OBJECT;
     }
-
-    if (!data.ReadUint64(netCapabilities)) {
+    uint32_t size = 0;
+    uint32_t value = 0;
+    if (!data.ReadUint32(size)) {
         return ERR_FLATTEN_OBJECT;
+    }
+    for (uint32_t i = 0; i < size; ++i) {
+        if (!data.ReadUint32(value)) {
+            return ERR_FLATTEN_OBJECT;
+        }
+        netCaps.insert(static_cast<NetCap>(value));
     }
 
     uint32_t supplierId = 0;
-    int32_t ret = RegisterNetSupplier(netType, ident, netCapabilities, supplierId);
+    int32_t ret = RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
     if (!reply.WriteInt32(ret)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -186,7 +192,7 @@ int32_t NetConnServiceStub::OnRegisterNetConnCallback(MessageParcel &data, Messa
 int32_t NetConnServiceStub::OnRegisterNetConnCallbackBySpecifier(MessageParcel &data, MessageParcel &reply)
 {
     sptr<NetSpecifier> netSpecifier = NetSpecifier::Unmarshalling(data);
-
+    uint32_t timeoutMS = data.ReadUint32();
     int32_t result = ERR_FLATTEN_OBJECT;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
@@ -202,7 +208,7 @@ int32_t NetConnServiceStub::OnRegisterNetConnCallbackBySpecifier(MessageParcel &
         return result;
     }
 
-    result = ConvertCode(RegisterNetConnCallback(netSpecifier, callback));
+    result = ConvertCode(RegisterNetConnCallback(netSpecifier, callback, timeoutMS));
     reply.WriteInt32(result);
     return result;
 }
@@ -225,30 +231,6 @@ int32_t NetConnServiceStub::OnUnregisterNetConnCallback(MessageParcel &data, Mes
     }
 
     result = ConvertCode(UnregisterNetConnCallback(callback));
-    reply.WriteInt32(result);
-    return result;
-}
-
-int32_t NetConnServiceStub::OnUnregisterNetConnCallbackBySpecifier(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<NetSpecifier> netSpecifier = NetSpecifier::Unmarshalling(data);
-
-    int32_t result = ERR_FLATTEN_OBJECT;
-    sptr<IRemoteObject> remote = data.ReadRemoteObject();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("callback ptr is nullptr.");
-        reply.WriteInt32(result);
-        return result;
-    }
-
-    sptr<INetConnCallback> callback = iface_cast<INetConnCallback>(remote);
-    if (callback == nullptr) {
-        result = NET_CONN_ERR_INPUT_NULL_PTR;
-        reply.WriteInt32(result);
-        return result;
-    }
-
-    result = ConvertCode(UnregisterNetConnCallback(netSpecifier, callback));
     reply.WriteInt32(result);
     return result;
 }
@@ -286,28 +268,6 @@ int32_t NetConnServiceStub::OnUpdateNetSupplierInfo(MessageParcel &data, Message
     return ERR_NONE;
 }
 
-int32_t NetConnServiceStub::OnUpdateNetCapabilities(MessageParcel &data, MessageParcel &reply)
-{
-    uint32_t supplierId;
-    uint64_t netCapabilities;
-
-    if (!data.ReadUint32(supplierId)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    if (!data.ReadUint64(netCapabilities)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    NETMGR_LOG_D("stub execute UpdateNetCapabilities");
-    int32_t ret = UpdateNetCapabilities(supplierId, netCapabilities);
-    if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    return ERR_NONE;
-}
-
 int32_t NetConnServiceStub::OnUpdateNetLinkInfo(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t supplierId;
@@ -333,7 +293,7 @@ int32_t  NetConnServiceStub::OnRegisterNetDetectionCallback(MessageParcel &data,
     }
     int32_t netId = 0;
     if (!data.ReadInt32(netId)) {
-        return ERR_FLATTEN_OBJECT;
+        return NET_CONN_ERR_INVALID_PARAMETER;
     }
 
     int32_t result = NET_CONN_SUCCESS;
@@ -364,7 +324,7 @@ int32_t NetConnServiceStub::OnUnRegisterNetDetectionCallback(MessageParcel &data
     }
     int32_t netId = 0;
     if (!data.ReadInt32(netId)) {
-        return ERR_FLATTEN_OBJECT;
+        return NET_CONN_ERR_INVALID_PARAMETER;
     }
 
     int32_t result = NET_CONN_SUCCESS;
@@ -392,11 +352,11 @@ int32_t NetConnServiceStub::OnNetDetection(MessageParcel &data, MessageParcel &r
 {
     int32_t netId = 0;
     if (!data.ReadInt32(netId)) {
-        return ERR_FLATTEN_OBJECT;
+        return NET_CONN_ERR_INVALID_PARAMETER;
     }
-    int32_t ret = NetDetection(netId);
+    int32_t ret = ConvertCode(NetDetection(netId));
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NET_CONN_ERR_INVALID_PARAMETER;
     }
     return ERR_NONE;
 }
@@ -407,13 +367,15 @@ int32_t NetConnServiceStub::OnGetIfaceNameByType(MessageParcel &data, MessagePar
     if (!data.ReadUint32(netType)) {
         return ERR_FLATTEN_OBJECT;
     }
+    NetBearType bearerType = static_cast<NetBearType>(netType);
+
     std::string ident;
     if (!data.ReadString(ident)) {
         return ERR_FLATTEN_OBJECT;
     }
 
     std::string ifaceName;
-    int32_t ret = GetIfaceNameByType(netType, ident, ifaceName);
+    int32_t ret = GetIfaceNameByType(bearerType, ident, ifaceName);
     if (!reply.WriteInt32(ret)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -440,6 +402,8 @@ int32_t NetConnServiceStub::ConvertCode(int32_t internalCode)
             return static_cast<int32_t>(NET_CONN_ERR_NO_ANY_NET_TYPE);
         case static_cast<int32_t>(ERR_NO_REGISTERED):
             return static_cast<int32_t>(NET_CONN_ERR_NO_REGISTERED);
+        case static_cast<int32_t>(ERR_NET_NOT_FIND_NETID):
+            return static_cast<int32_t>(NET_CONN_ERR_NETID_NOT_FOUND);
         default:
             break;
     }
@@ -447,56 +411,11 @@ int32_t NetConnServiceStub::ConvertCode(int32_t internalCode)
     return static_cast<int32_t>(NET_CONN_ERR_INTERNAL_ERROR);
 }
 
-int32_t NetConnServiceStub::OnActivateNetwork(MessageParcel& data, MessageParcel& reply)
-{
-    sptr<IRemoteObject> remote = data.ReadRemoteObject();
-    sptr<INetConnCallback> callback = iface_cast<INetConnCallback>(remote);
-    sptr<NetSpecifier> netSpecifier = NetSpecifier::Unmarshalling(data);
-    uint32_t reqId;
-    int32_t result = ERR_FLATTEN_OBJECT;
-    if (remote == nullptr) {
-        NETMGR_LOG_E("callback ptr is nullptr.");
-        reply.WriteInt32(result);
-        return result;
-    }
-    result = ActivateNetwork(netSpecifier, callback, reqId);
-    if (!reply.WriteInt32(result)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (result == ERR_NONE) {
-        if (!reply.WriteUint32(reqId)) {
-            return ERR_FLATTEN_OBJECT;
-        }
-    }
-    return ERR_NONE;
-}
-
-int32_t NetConnServiceStub::OnDeactivateNetwork(MessageParcel& data, MessageParcel& reply)
-{
-    uint32_t reqId;
-    if (!data.ReadUint32(reqId)) {
-        NETMGR_LOG_E("Read DeactivateNetwork reqId  failed, reqId code:[%{public}d].", reqId);
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    int32_t result = ERR_FLATTEN_OBJECT;
-    result = DeactivateNetwork(reqId);
-    if (!reply.WriteInt32(result)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    return  ERR_NONE;
-}
-
 int32_t NetConnServiceStub::OnGetDefaultNet(MessageParcel& data, MessageParcel& reply)
 {
     NETMGR_LOG_D("OnGetDefaultNet Begin...");
     int32_t netId;
-    if (!data.ReadInt32(netId)) {
-        NETMGR_LOG_E("Read GetDefaultNetWork  failed, netId code:[%{public}d].", netId);
-        return ERR_FLATTEN_OBJECT;
-    }
-    int32_t result = ERR_FLATTEN_OBJECT;
-    result = GetDefaultNet(netId);
+    int32_t result = GetDefaultNet(netId);
     NETMGR_LOG_D("GetDefaultNet result is: [%{public}d]", result);
     if (!reply.WriteInt32(result)) {
         return ERR_FLATTEN_OBJECT;
@@ -513,8 +432,7 @@ int32_t NetConnServiceStub::OnHasDefaultNet(MessageParcel& data, MessageParcel& 
 {
     NETMGR_LOG_D("OnHasDefaultNet Begin...");
     bool flag = false;
-    int32_t result = ERR_FLATTEN_OBJECT;
-    result = HasDefaultNet(flag);
+    int32_t result = HasDefaultNet(flag);
     NETMGR_LOG_D("HasDefaultNet result is: [%{public}d]", result);
     if (!reply.WriteInt32(result)) {
         return ERR_FLATTEN_OBJECT;
@@ -533,10 +451,11 @@ int32_t NetConnServiceStub::OnGetSpecificNet(MessageParcel &data, MessageParcel 
     if (!data.ReadUint32(type)) {
         return ERR_FLATTEN_OBJECT;
     }
+    NetBearType bearerType = static_cast<NetBearType>(type);
 
     NETMGR_LOG_D("stub execute GetSpecificNet");
     std::list<int32_t> netIdList;
-    int32_t ret = GetSpecificNet(type, netIdList);
+    int32_t ret = GetSpecificNet(bearerType, netIdList);
     if (!reply.WriteInt32(ret)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -631,15 +550,34 @@ int32_t NetConnServiceStub::OnGetNetCapabilities(MessageParcel &data, MessagePar
 
     NETMGR_LOG_D("stub execute GetNetCapabilities");
 
-    uint64_t cap = 0;
-    int32_t ret = GetNetCapabilities(netId, cap);
+    NetAllCapabilities netAllCap;
+    int32_t ret = GetNetCapabilities(netId, netAllCap);
     if (!reply.WriteInt32(ret)) {
         return ERR_FLATTEN_OBJECT;
     }
     if (ret == ERR_NONE) {
-        if (!reply.WriteUint64(cap)) {
-            NETMGR_LOG_E("proxy Marshalling failed");
+        if (!reply.WriteUint32(netAllCap.linkUpBandwidthKbps_) ||
+            !reply.WriteUint32(netAllCap.linkDownBandwidthKbps_)) {
+            return IPC_PROXY_ERR;
+        }
+        uint32_t size = netAllCap.netCaps_.size();
+        if (!reply.WriteUint32(size)) {
             return ERR_FLATTEN_OBJECT;
+        }
+        for (auto netCap : netAllCap.netCaps_) {
+            if (!reply.WriteUint32(static_cast<uint32_t>(netCap))) {
+                return ERR_FLATTEN_OBJECT;
+            }
+        }
+
+        size = netAllCap.bearerTypes_.size();
+        if (!reply.WriteUint32(size)) {
+            return ERR_FLATTEN_OBJECT;
+        }
+        for (auto bearerType : netAllCap.bearerTypes_) {
+            if (!reply.WriteUint32(static_cast<uint32_t>(bearerType))) {
+                return ERR_FLATTEN_OBJECT;
+            }
         }
     }
     return ret;
@@ -656,7 +594,7 @@ int32_t NetConnServiceStub::OnGetAddressesByName(MessageParcel &data, MessagePar
         return ERR_FLATTEN_OBJECT;
     }
     NETMGR_LOG_D("stub execute GetAddressesByName");
-    std::list<INetAddr> addrList;
+    std::vector<INetAddr> addrList;
     int32_t ret = GetAddressesByName(host, netId, addrList);
     if (!reply.WriteInt32(ret)) {
         return ERR_FLATTEN_OBJECT;
@@ -729,6 +667,16 @@ int32_t NetConnServiceStub::OnSetAirplaneMode(MessageParcel &data, MessageParcel
         return ERR_FLATTEN_OBJECT;
     }
     int32_t ret = SetAirplaneMode(state);
+    if (!reply.WriteInt32(ret)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
+
+int32_t NetConnServiceStub::OnRestoreFactoryData(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("stub execute RestoreFactoryData");
+    int32_t ret = RestoreFactoryData();
     if (!reply.WriteInt32(ret)) {
         return ERR_FLATTEN_OBJECT;
     }

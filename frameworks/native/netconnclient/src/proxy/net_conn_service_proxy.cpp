@@ -14,8 +14,6 @@
  */
 #include "net_conn_service_proxy.h"
 
-#include <cinttypes>
-
 #include "net_conn_constants.h"
 #include "net_mgr_log_wrapper.h"
 
@@ -49,8 +47,8 @@ int32_t NetConnServiceProxy::SystemReady()
     return error;
 }
 
-int32_t NetConnServiceProxy::RegisterNetSupplier(
-    uint32_t netType, const std::string &ident, uint64_t netCapabilities, uint32_t &supplierId)
+int32_t NetConnServiceProxy::RegisterNetSupplier(NetBearType bearerType,
+    const std::string &ident, const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -60,16 +58,22 @@ int32_t NetConnServiceProxy::RegisterNetSupplier(
         return NET_CONN_ERR_INVALID_SUPPLIER_ID;
     }
 
-    NETMGR_LOG_D("proxy netType[%{public}d], ident[%{public}s], netCapabilities[%{public}" PRId64 "]",
-        netType, ident.c_str(), netCapabilities);
-    if (!data.WriteUint32(netType)) {
-        return NET_CONN_ERR_INVALID_SUPPLIER_ID;
+    if (!data.WriteUint32(static_cast<uint32_t>(bearerType))) {
+        return NET_CONN_ERR_INVALID_PARAMETER;
     }
+
     if (!data.WriteString(ident)) {
-        return NET_CONN_ERR_INVALID_SUPPLIER_ID;
+        return NET_CONN_ERR_INVALID_PARAMETER;
     }
-    if (!data.WriteUint64(netCapabilities)) {
-        return NET_CONN_ERR_INVALID_SUPPLIER_ID;
+
+    uint32_t size = static_cast<uint32_t>(netCaps.size());
+    if (!data.WriteUint32(size)) {
+        return NET_CONN_ERR_INVALID_PARAMETER;
+    }
+    for (auto netCap : netCaps) {
+        if (!data.WriteUint32(static_cast<uint32_t>(netCap))) {
+            return NET_CONN_ERR_INVALID_PARAMETER;
+        }
     }
 
     sptr<IRemoteObject> remote = Remote();
@@ -186,7 +190,7 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<INetConnCallback
 }
 
 int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-    const sptr<INetConnCallback> &callback)
+    const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
 {
     if (netSpecifier == nullptr || callback == nullptr) {
         NETMGR_LOG_E("The parameter of netSpecifier or callback is nullptr");
@@ -199,8 +203,9 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<NetSpecifier> &n
         return NET_CONN_ERR_INVALID_PARAMETER;
     }
     netSpecifier->Marshalling(dataParcel);
+    dataParcel.WriteUint32(timeoutMS);
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
-
+    
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
@@ -241,39 +246,6 @@ int32_t NetConnServiceProxy::UnregisterNetConnCallback(const sptr<INetConnCallba
     MessageOption option;
     MessageParcel replyParcel;
     int32_t retCode = remote->SendRequest(CMD_NM_UNREGISTER_NET_CONN_CALLBACK, dataParcel, replyParcel, option);
-    NETMGR_LOG_D("SendRequest retCode:[%{public}d]", retCode);
-    if (retCode != NET_CONN_SUCCESS) {
-        return retCode;
-    }
-    return replyParcel.ReadInt32();
-}
-
-int32_t NetConnServiceProxy::UnregisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-    const sptr<INetConnCallback> &callback)
-{
-    if (netSpecifier == nullptr || callback == nullptr) {
-        NETMGR_LOG_E("The parameter of netSpecifier or callback is nullptr");
-        return NET_CONN_ERR_INPUT_NULL_PTR;
-    }
-
-    MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NET_CONN_ERR_INVALID_PARAMETER;
-    }
-    netSpecifier->Marshalling(dataParcel);
-    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NET_CONN_ERR_GET_REMOTE_OBJECT_FAILED;
-    }
-
-    MessageOption option;
-    MessageParcel replyParcel;
-    int32_t retCode = remote->SendRequest(
-        CMD_NM_UNREGISTER_NET_CONN_CALLBACK_BY_SPECIFIER, dataParcel, replyParcel, option);
     NETMGR_LOG_D("SendRequest retCode:[%{public}d]", retCode);
     if (retCode != NET_CONN_SUCCESS) {
         return retCode;
@@ -344,40 +316,6 @@ int32_t NetConnServiceProxy::UpdateNetSupplierInfo(uint32_t supplierId,
         return ERR_NULL_OBJECT;
     }
     int32_t error = remote->SendRequest(CMD_NM_SET_NET_SUPPLIER_INFO, data, reply, option);
-    if (error != ERR_NONE) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return error;
-    }
-
-    return reply.ReadInt32();
-}
-
-int32_t NetConnServiceProxy::UpdateNetCapabilities(uint32_t supplierId, uint64_t netCapabilities)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return IPC_PROXY_ERR;
-    }
-
-    NETMGR_LOG_D("proxy supplierId[%{public}d], netCapabilities[%{public}" PRId64 "]", supplierId,
-        netCapabilities);
-    if (!data.WriteUint32(supplierId)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteUint64(netCapabilities)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    NETMGR_LOG_D("proxy Marshalling success");
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
-    }
-    int32_t error = remote->SendRequest(CMD_NM_SET_NET_CAPABILTITES, data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -513,7 +451,8 @@ int32_t NetConnServiceProxy::NetDetection(int32_t netId)
     return replyParcel.ReadInt32();
 }
 
-int32_t NetConnServiceProxy::GetIfaceNameByType(uint32_t netType, const std::string &ident, std::string &ifaceName)
+int32_t NetConnServiceProxy::GetIfaceNameByType(
+    NetBearType bearerType, const std::string &ident, std::string &ifaceName)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -521,6 +460,7 @@ int32_t NetConnServiceProxy::GetIfaceNameByType(uint32_t netType, const std::str
         return IPC_PROXY_ERR;
     }
 
+    uint32_t netType = static_cast<NetBearType>(bearerType);
     if (!data.WriteUint32(netType)) {
         return IPC_PROXY_ERR;
     }
@@ -563,83 +503,6 @@ bool NetConnServiceProxy::WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 
-int32_t NetConnServiceProxy::ActivateNetwork(const sptr<NetSpecifier>& netSpecifier,
-    const sptr<INetConnCallback>& callback, uint32_t& reqId)
-{
-    if (netSpecifier == nullptr) {
-        NETMGR_LOG_E("The parameter of netSpecifier is nullptr");
-        return ERR_NULL_OBJECT;
-    }
-
-    if (callback == nullptr) {
-        NETMGR_LOG_E("The parameter of callback is nullptr");
-        return ERR_NULL_OBJECT;
-    }
-
-    MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NET_CONN_ERR_INVALID_PARAMETER;
-    }
-    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
-    MessageOption option;
-    MessageParcel replyParcel;
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
-    }
-    if (!netSpecifier->Marshalling(dataParcel)) {
-        NETMGR_LOG_E("proxy Marshalling failed");
-        return IPC_PROXY_ERR;
-    }
-    int32_t retCode = remote->SendRequest(CMD_NM_ACTIVATENETWORK, dataParcel,
-        replyParcel, option);
-    NETMGR_LOG_D("SendRequest retCode:[%{public}d]", retCode);
-    if (retCode != ERR_NONE) {
-        return retCode;
-    }
-    int32_t ret = 0;
-    if (!replyParcel.ReadInt32(ret)) {
-        return IPC_PROXY_ERR;
-    }
-    if (ret == ERR_NONE) {
-        if (!replyParcel.ReadUint32(reqId)) {
-            return IPC_PROXY_ERR;
-        }
-    }
-    return ret;
-}
-
-int32_t NetConnServiceProxy::DeactivateNetwork(uint32_t& reqId)
-{
-    MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NET_CONN_ERR_INVALID_PARAMETER;
-    }
-
-    if (!dataParcel.WriteUint32(reqId)) {
-        return false;
-    }
-
-    MessageOption option;
-    MessageParcel replyParcel;
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
-    }
-
-    uint32_t errcode = remote->SendRequest(CMD_NM_DEACTIVATENETWORK, dataParcel,
-                                           replyParcel, option);
-    NETMGR_LOG_D("SendRequest errcode:[%{public}d]", errcode);
-    if (errcode != ERR_NONE) {
-        return errcode;
-    }
-    return replyParcel.ReadInt32();
-}
-
 int32_t NetConnServiceProxy::GetDefaultNet(int32_t& netId)
 {
     MessageParcel dataParcel;
@@ -648,10 +511,6 @@ int32_t NetConnServiceProxy::GetDefaultNet(int32_t& netId)
         return NET_CONN_ERR_INVALID_PARAMETER;
     }
 
-    if (!dataParcel.WriteInt32(netId)) {
-        return IPC_PROXY_ERR;
-    }
-
     MessageOption option;
     MessageParcel replyParcel;
     sptr<IRemoteObject> remote = Remote();
@@ -660,13 +519,21 @@ int32_t NetConnServiceProxy::GetDefaultNet(int32_t& netId)
         return ERR_NULL_OBJECT;
     }
 
-    int32_t errCode = remote->SendRequest(CMD_NM_GETDEFAULTNETWORK, dataParcel,
-                                          replyParcel, option);
+    int32_t errCode = remote->SendRequest(CMD_NM_GETDEFAULTNETWORK, dataParcel, replyParcel, option);
     NETMGR_LOG_D("SendRequest errcode:[%{public}d]", errCode);
     if (errCode != ERR_NONE) {
         return errCode;
     }
-    return replyParcel.ReadInt32();
+    int32_t ret = 0;
+    if (!replyParcel.ReadInt32(ret)) {
+        return IPC_PROXY_ERR;
+    }
+    if (ret == ERR_NONE) {
+        if (!replyParcel.ReadInt32(netId)) {
+            return IPC_PROXY_ERR;
+        }
+    }
+    return ret;
 }
 
 
@@ -704,7 +571,7 @@ int32_t NetConnServiceProxy::HasDefaultNet(bool &flag)
     return ret;
 }
 
-int32_t NetConnServiceProxy::GetSpecificNet(uint32_t type, std::list<int32_t> &netIdList)
+int32_t NetConnServiceProxy::GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -712,6 +579,7 @@ int32_t NetConnServiceProxy::GetSpecificNet(uint32_t type, std::list<int32_t> &n
         return IPC_PROXY_ERR;
     }
 
+    uint32_t type = static_cast<uint32_t>(bearerType);
     if (!data.WriteUint32(type)) {
         return IPC_PROXY_ERR;
     }
@@ -867,7 +735,7 @@ int32_t NetConnServiceProxy::GetConnectionProperties(int32_t netId, NetLinkInfo 
     return ret;
 }
 
-int32_t NetConnServiceProxy::GetNetCapabilities(int32_t netId, uint64_t &cap)
+int32_t NetConnServiceProxy::GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -897,15 +765,41 @@ int32_t NetConnServiceProxy::GetNetCapabilities(int32_t netId, uint64_t &cap)
     if (!reply.ReadInt32(ret)) {
         return IPC_PROXY_ERR;
     }
-    if (ret == ERR_NONE) {
-        if (!reply.ReadUint64(cap)) {
-            return IPC_PROXY_ERR;
-        }
-    }
-    return ret;
+    return (ret == ERR_NONE) ? GetNetCapData(reply, netAllCap) : ret;
 }
 
-int32_t NetConnServiceProxy::GetAddressesByName(const std::string &host, int32_t netId, std::list<INetAddr> &addrList)
+int32_t NetConnServiceProxy::GetNetCapData(MessageParcel &reply, NetAllCapabilities &netAllCap)
+{
+    if (!reply.ReadUint32(netAllCap.linkUpBandwidthKbps_)) {
+        return IPC_PROXY_ERR;
+    }
+    if (!reply.ReadUint32(netAllCap.linkDownBandwidthKbps_)) {
+        return IPC_PROXY_ERR;
+    }
+    uint32_t size = 0;
+    if (!reply.ReadUint32(size)) {
+        return IPC_PROXY_ERR;
+    }
+    uint32_t value = 0;
+    for (uint32_t i = 0; i < size; ++i) {
+        if (!reply.ReadUint32(value)) {
+            return IPC_PROXY_ERR;
+        }
+        netAllCap.netCaps_.insert(static_cast<NetCap>(value));
+    }
+    if (!reply.ReadUint32(size)) {
+        return IPC_PROXY_ERR;
+    }
+    for (uint32_t i = 0; i < size; ++i) {
+        if (!reply.ReadUint32(value)) {
+            return IPC_PROXY_ERR;
+        }
+        netAllCap.bearerTypes_.insert(static_cast<NetBearType>(value));
+    }
+    return ERR_NONE;
+}
+
+int32_t NetConnServiceProxy::GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -1044,6 +938,35 @@ int32_t NetConnServiceProxy::SetAirplaneMode(bool state)
     MessageParcel reply;
     MessageOption option;
     int32_t error = remote->SendRequest(CMD_NM_SET_AIRPLANE_MODE, data, reply, option);
+    if (error != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        return error;
+    }
+
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        return IPC_PROXY_ERR;
+    }
+    return ret;
+}
+
+int32_t NetConnServiceProxy::RestoreFactoryData()
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return IPC_PROXY_ERR;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = remote->SendRequest(CMD_NM_RESTORE_FACTORY_DATA, data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;

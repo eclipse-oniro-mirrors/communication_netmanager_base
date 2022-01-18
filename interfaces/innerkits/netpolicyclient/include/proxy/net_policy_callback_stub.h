@@ -31,6 +31,12 @@ public:
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
+public:
+    int32_t NetUidPolicyChanged(uint32_t uid, NetUidPolicy policy) override;
+    int32_t NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicies) override;
+    int32_t NetStrategySwitch(int32_t slotId, bool enable) override;
+    int32_t NetBackgroundPolicyChanged(bool isBackgroundPolicyAllow) override;
+
 private:
     using NetPolicyCallbackFunc = int32_t (NetPolicyCallbackStub::*)(MessageParcel &, MessageParcel &);
 
@@ -38,6 +44,7 @@ private:
     int32_t OnNetUidPolicyChanged(MessageParcel &data, MessageParcel &reply);
     int32_t OnNetCellularPolicyChanged(MessageParcel &data, MessageParcel &reply);
     int32_t OnNetStrategySwitch(MessageParcel &data, MessageParcel &reply);
+    int32_t OnNetBackgroundPolicyChanged(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetPolicyCallbackFunc> memberFuncMap_;

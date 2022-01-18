@@ -24,7 +24,7 @@ NetSupplierCallbackProxy::NetSupplierCallbackProxy(const sptr<IRemoteObject> &im
 
 NetSupplierCallbackProxy::~NetSupplierCallbackProxy() {}
 
-int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, uint64_t netCapability)
+int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -32,7 +32,11 @@ int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, uint6
         return ERR_FLATTEN_OBJECT;
     }
     data.WriteString(ident);
-    data.WriteUint64(netCapability);
+    uint32_t size = static_cast<uint32_t>(netCaps.size());
+    data.WriteUint32(size);
+    for (auto netCap : netCaps) {
+        data.WriteUint32(static_cast<uint32_t>(netCap));
+    }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -49,7 +53,7 @@ int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, uint6
     return ret;
 }
 
-int32_t NetSupplierCallbackProxy::ReleaseNetwork(const std::string &ident, uint64_t netCapability)
+int32_t NetSupplierCallbackProxy::ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -57,7 +61,11 @@ int32_t NetSupplierCallbackProxy::ReleaseNetwork(const std::string &ident, uint6
         return ERR_FLATTEN_OBJECT;
     }
     data.WriteString(ident);
-    data.WriteUint64(netCapability);
+    uint32_t size = static_cast<int32_t>(netCaps.size());
+    data.WriteUint32(size);
+    for (auto netCap : netCaps) {
+        data.WriteInt32(static_cast<uint32_t>(netCap));
+    }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {

@@ -27,6 +27,7 @@
 #include "net_supplier_callback_base.h"
 #include "net_link_info.h"
 #include "net_specifier.h"
+#include "net_handle.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -35,34 +36,27 @@ class NetConnClient {
 
 public:
     int32_t SystemReady();
-    int32_t RegisterNetSupplier(uint32_t netType, const std::string &ident, uint64_t netCapabilities);
-    int32_t RegisterNetSupplier(uint32_t netType, const std::string &ident, uint64_t netCapabilities,
-        uint32_t &supplierId);
+    int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
+        const std::set<NetCap> &netCaps, uint32_t &supplierId);
     int32_t UnregisterNetSupplier(uint32_t supplierId);
     int32_t RegisterNetSupplierCallback(uint32_t supplierId, const sptr<NetSupplierCallbackBase> &callback);
     int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo);
-    int32_t UpdateNetCapabilities(uint32_t supplierId, uint64_t netCapabilities);
     int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo);
-
-    int32_t ActivateNetwork(
-        const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback, uint32_t &reqId);
-    int32_t DeactivateNetwork(uint32_t &reqId);
     int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback);
-    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback);
+    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
+        const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS);
     int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback);
-    int32_t UnregisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback);
-    int32_t UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState);
-    int32_t GetDefaultNet(int32_t &netId);
-    int32_t GetSpecificNet(uint32_t type, std::list<int32_t> &netIdList);
-    int32_t GetAllNets(std::list<int32_t> &netIdList);
-    int32_t GetSpecificUidNet(int32_t uid, int32_t &netId);
-    int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info);
-    int32_t GetNetCapabilities(int32_t netId, uint64_t &cap);
-    int32_t GetIfaceNameByType(uint32_t netType, const std::string &ident, std::string &ifaceName);
-    int32_t RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback);
-    int32_t UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback);
-    int32_t NetDetection(int32_t netId);
+    int32_t GetDefaultNet(NetHandle &netHandle);
+    int32_t HasDefaultNet(bool &flag);
+    int32_t GetAllNets(std::list<sptr<NetHandle>> &netList);
+    int32_t GetConnectionProperties(const NetHandle &netHandle, NetLinkInfo &info);
+    int32_t GetNetCapabilities(const NetHandle &netHandle, NetAllCapabilities &netAllCap);
+    int32_t GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList);
+    int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr);
+    int32_t BindSocket(int32_t socket_fd, int32_t netId);
+    int32_t NetDetection(const NetHandle &netHandle);
     int32_t SetAirplaneMode(bool state);
+    int32_t RestoreFactoryData();
 
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {

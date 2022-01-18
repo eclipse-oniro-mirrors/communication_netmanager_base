@@ -17,8 +17,11 @@
 #define I_NET_SUPPLIER_CALLBACK_H
 
 #include <string>
+#include <set>
 
 #include "iremote_broker.h"
+
+#include "net_all_capabilities.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -33,8 +36,8 @@ public:
     };
 
 public:
-    virtual int32_t RequestNetwork(const std::string &ident, uint64_t netCapability) = 0;
-    virtual int32_t ReleaseNetwork(const std::string &ident, uint64_t netCapability) = 0;
+    virtual int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps) = 0;
+    virtual int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

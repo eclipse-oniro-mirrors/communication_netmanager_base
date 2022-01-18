@@ -72,10 +72,5 @@ int64_t DataFlowStatistics::GetIfaceTxPackets(const std::string &interfaceName)
 {
     return NetdController::GetInstance().GetIfaceTxPackets(interfaceName);
 }
-
-std::vector<std::string> DataFlowStatistics::InterfaceGetList()
-{
-    return NetdController::GetInstance().InterfaceGetList();
-}
 } // namespace NetManagerStandard
 } // namespace OHOS

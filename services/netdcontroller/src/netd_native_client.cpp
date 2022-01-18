@@ -14,28 +14,81 @@
  */
 #include "netd_native_client.h"
 
-#include "iservice_registry.h"
-#include "system_ability_definition.h"
-#include "securec.h"
-#include "netd_native_service_proxy.h"
-
-#include "net_conn_types.h"
-#include "net_mgr_log_wrapper.h"
 #include <cstdlib>
-#include <linux/if_tun.h>
+#include <cstring>
+#include <unistd.h>
+#include <fcntl.h>
+#include <arpa/inet.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <net/route.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
-#include <cstring>
+#include <linux/if_tun.h>
+
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
+#include "securec.h"
+
+#include "net_conn_types.h"
+#include "net_mgr_log_wrapper.h"
+#include "netd_native_service_proxy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+NetdNativeClient::NativeNotifyCallback::NativeNotifyCallback(NetdNativeClient &netdNativeClient)
+    : netdNativeClient_(netdNativeClient)
+{
+}
+
+NetdNativeClient::NativeNotifyCallback::~NativeNotifyCallback() {}
+
+int32_t NetdNativeClient::NativeNotifyCallback::OnInterfaceAddressUpdated(const std::string &,
+    const std::string &, int, int)
+{
+    return 0;
+}
+
+int32_t NetdNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(const std::string &,
+    const std::string &, int, int)
+{
+    return 0;
+}
+
+int32_t NetdNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::string &)
+{
+    return 0;
+}
+
+int32_t NetdNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::string &)
+{
+    return 0;
+}
+
+int32_t NetdNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::string &, bool)
+{
+    return 0;
+}
+
+int32_t NetdNativeClient::NativeNotifyCallback::OnInterfaceLinkStateChanged(const std::string &, bool)
+{
+    return 0;
+}
+
+int32_t NetdNativeClient::NativeNotifyCallback::OnRouteChanged(bool, const std::string &, const std::string &,
+    const std::string &)
+{
+    return 0;
+}
+
+int32_t NetdNativeClient::NativeNotifyCallback::OnDhcpSuccess(sptr<OHOS::NetdNative::DhcpResultParcel> &dhcpResult)
+{
+    NETMGR_LOG_I("NetdNativeClient::NativeNotifyCallback::OnDhcpSuccess");
+    netdNativeClient_.ProcessDhcpResult(dhcpResult);
+    return 0;
+}
+
 NetdNativeClient::NetdNativeClient()
 {
     Init();
@@ -51,7 +104,11 @@ void NetdNativeClient::Init()
         return;
     }
     initFlag_ = true;
+    nativeNotifyCallback_ = std::make_unique<NativeNotifyCallback>(*this).release();
     netdNativeService_ = GetProxy();
+    if (netdNativeService_ != nullptr) {
+        netdNativeService_->RegisterNotifyCallback(nativeNotifyCallback_);
+    }
 }
 
 int32_t NetdNativeClient::NetworkCreatePhysical(int32_t netId, int32_t permission)
@@ -125,6 +182,15 @@ void NetdNativeClient::SetInterfaceDown(const std::string &iface)
         NETMGR_LOG_E("netdNativeService_ is null");
         return;
     }
+    OHOS::nmd::interface_configuration_parcel ifcfg;
+    ifcfg.ifName = iface;
+    netdNativeService_->InterfaceGetConfig(ifcfg);
+    auto fit = std::find(ifcfg.flags.begin(), ifcfg.flags.end(), "up");
+    if (fit != ifcfg.flags.end()) {
+        ifcfg.flags.erase(fit);
+    }
+    ifcfg.flags.push_back("down");
+    netdNativeService_->InterfaceSetConfig(ifcfg);
 }
 
 void NetdNativeClient::SetInterfaceUp(const std::string &iface)
@@ -134,6 +200,15 @@ void NetdNativeClient::SetInterfaceUp(const std::string &iface)
         NETMGR_LOG_E("netdNativeService_ is null");
         return;
     }
+    OHOS::nmd::interface_configuration_parcel ifcfg;
+    ifcfg.ifName = iface;
+    netdNativeService_->InterfaceGetConfig(ifcfg);
+    auto fit = std::find(ifcfg.flags.begin(), ifcfg.flags.end(), "down");
+    if (fit != ifcfg.flags.end()) {
+        ifcfg.flags.erase(fit);
+    }
+    ifcfg.flags.push_back("up");
+    netdNativeService_->InterfaceSetConfig(ifcfg);
 }
 
 void NetdNativeClient::InterfaceClearAddrs(const std::string &ifName)
@@ -317,6 +392,28 @@ int64_t NetdNativeClient::GetUidTxBytes(uint32_t uid)
     return 0;
 }
 
+int64_t NetdNativeClient::GetUidOnIfaceRxBytes(uint32_t uid, const std::string &interfaceName)
+{
+    NETMGR_LOG_I("NetdNativeClient GetUidOnIfaceRxBytes uid is [%{public}u] iface name is [%{public}s]",
+        uid, interfaceName.c_str());
+    if (netdNativeService_ == nullptr) {
+        NETMGR_LOG_E("netdNativeService_ is null");
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+    }
+    return 0;
+}
+
+int64_t NetdNativeClient::GetUidOnIfaceTxBytes(uint32_t uid, const std::string &interfaceName)
+{
+    NETMGR_LOG_I("NetdNativeClient GetUidOnIfaceTxBytes uid is [%{public}u] iface name is [%{public}s]",
+        uid, interfaceName.c_str());
+    if (netdNativeService_ == nullptr) {
+        NETMGR_LOG_E("netdNativeService_ is null");
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+    }
+    return 0;
+}
+
 int64_t NetdNativeClient::GetIfaceRxBytes(const std::string &interfaceName)
 {
     NETMGR_LOG_I("NetdNativeClient GetIfaceRxBytes iface name is [%{public}s]", interfaceName.c_str());
@@ -340,6 +437,17 @@ int64_t NetdNativeClient::GetIfaceTxBytes(const std::string &interfaceName)
 std::vector<std::string> NetdNativeClient::InterfaceGetList()
 {
     NETMGR_LOG_I("NetdNativeClient InterfaceGetList");
+    std::vector<std::string> ret;
+    if (netdNativeService_ == nullptr) {
+        NETMGR_LOG_E("netdService_ is null");
+        return ret;
+    }
+    return {};
+}
+
+std::vector<std::string> NetdNativeClient::UidGetList()
+{
+    NETMGR_LOG_I("NetdNativeClient UidGetList");
     std::vector<std::string> ret;
     if (netdNativeService_ == nullptr) {
         NETMGR_LOG_E("netdService_ is null");
@@ -508,7 +616,7 @@ int32_t NetdNativeClient::EnableVirtualNetIfaceCard(int32_t socketFd, struct ifr
 
 static inline in_addr_t *as_in_addr(sockaddr *sa)
 {
-    return &((sockaddr_in *)sa)->sin_addr.s_addr;
+    return &(reinterpret_cast<sockaddr_in*>(sa))->sin_addr.s_addr;
 }
 
 int32_t NetdNativeClient::SetIpAddress(int32_t socketFd, const std::string &ipAddress, int32_t prefixLen,
@@ -559,6 +667,75 @@ int32_t NetdNativeClient::SetBlocking(int32_t ifaceFd, bool isBlock)
         return ERR_VPN;
     }
     return 0;
+}
+
+int32_t NetdNativeClient::StartDhcpClient(const std::string &iface, bool bIpv6)
+{
+    NETMGR_LOG_D("NetdNativeClient::StartDhcpClient");
+    if (netdNativeService_ == nullptr) {
+        NETMGR_LOG_E("netdService_ is null");
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+    }
+    return netdNativeService_->StartDhcpClient(iface, bIpv6);
+}
+
+int32_t NetdNativeClient::StopDhcpClient(const std::string &iface, bool bIpv6)
+{
+    NETMGR_LOG_D("NetdNativeClient::StopDhcpClient");
+    if (netdNativeService_ == nullptr) {
+        NETMGR_LOG_E("netdService_ is null");
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+    }
+    return netdNativeService_->StopDhcpClient(iface, bIpv6);
+}
+
+int32_t NetdNativeClient::RegisterCallback(sptr<NetdControllerCallback> callback)
+{
+    NETMGR_LOG_D("NetdNativeClient::RegisterCallback");
+    if (netdNativeService_ == nullptr) {
+        NETMGR_LOG_E("netdService_ is null");
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+    }
+    cbObjects.push_back(callback);
+    return 0;
+}
+
+void NetdNativeClient::ProcessDhcpResult(sptr<OHOS::NetdNative::DhcpResultParcel> &dhcpResult)
+{
+    NETMGR_LOG_I("NetdNativeClient::ProcessDhcpResult");
+    NetdControllerCallback::DhcpResult result;
+    for (std::vector<sptr<NetdControllerCallback>>::iterator it = cbObjects.begin();
+        it != cbObjects.end(); ++it) {
+        result.iface_ = dhcpResult->iface_;
+        result.ipAddr_ = dhcpResult->ipAddr_;
+        result.gateWay_ = dhcpResult->gateWay_;
+        result.subNet_ = dhcpResult->subNet_;
+        result.route1_ = dhcpResult->route1_;
+        result.route2_ = dhcpResult->route2_;
+        result.dns1_ = dhcpResult->dns1_;
+        result.dns2_ = dhcpResult->dns2_;
+        (*it)->OnDhcpSuccess(result);
+    }
+}
+
+int32_t NetdNativeClient::StartDhcpService(const std::string &iface, const std::string &ipv4addr)
+{
+    NETMGR_LOG_I("NetdNativeClient StartDhcpService");
+    if (netdNativeService_ == nullptr) {
+        NETMGR_LOG_E("StartDhcpService netdNativeService_ is null");
+        return ERR_NATIVESERVICE_NOTFIND;
+    }
+    return netdNativeService_->StartDhcpService(iface, ipv4addr);
+}
+
+int32_t NetdNativeClient::StopDhcpService(const std::string &iface)
+{
+    NETMGR_LOG_I("NetdNativeClient StopDhcpService");
+    if (netdNativeService_ == nullptr) {
+        NETMGR_LOG_E("StopDhcpService netdNativeService_ is null");
+        return ERR_NATIVESERVICE_NOTFIND;
+    }
+    return netdNativeService_->StopDhcpService(iface);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

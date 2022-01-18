@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-using NetTypeScore = std::unordered_map<NetworkType, int32_t>;
+using NetTypeScore = std::unordered_map<NetBearType, int32_t>;
 constexpr int32_t NET_TYPE_SCORE_INTERVAL = 10;
 constexpr int32_t NET_VALID_SCORE = 4 * NET_TYPE_SCORE_INTERVAL;
 enum class NetTypeScoreValue : int32_t {
@@ -46,8 +46,8 @@ private:
     int32_t GetWifiSignalBar(int32_t rssi, int32_t signalBars);
 private:
     NetTypeScore netTypeScore_ = {
-        {NET_TYPE_CELLULAR, static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE)},
-        {NET_TYPE_ETHERNET, static_cast<int32_t>(NetTypeScoreValue::ETHERNET_VALUE)}};
+        {BEARER_CELLULAR, static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE)},
+        {BEARER_ETHERNET, static_cast<int32_t>(NetTypeScoreValue::ETHERNET_VALUE)}};
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

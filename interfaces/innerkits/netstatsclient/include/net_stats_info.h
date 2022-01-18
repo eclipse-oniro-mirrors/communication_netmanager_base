@@ -27,10 +27,8 @@ struct NetStatsInfo : public Parcelable {
     int64_t rxPackets_ = 0;
     int64_t txPackets_ = 0;
 
-    NetStatsInfo& operator=(const NetStatsInfo &statsInfo);
-
     virtual bool Marshalling(Parcel &parcel) const override;
-    static bool Marshalling(Parcel &parcel, NetStatsInfo &stats);
+    static bool Marshalling(Parcel &parcel, const NetStatsInfo &stats);
     static bool Unmarshalling(Parcel &parcel, NetStatsInfo &stats);
 };
 } // namespace NetManagerStandard

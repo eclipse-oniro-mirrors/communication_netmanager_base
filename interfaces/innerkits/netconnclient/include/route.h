@@ -32,10 +32,11 @@ struct Route : public Parcelable {
     std::string iface_;
     INetAddr destination_;
     INetAddr gateway_;
-    int32_t rtn_type_ = RTN_UNICAST;
+    int32_t rtnType_ = RTN_UNICAST;
     int32_t mtu_ = 0;
     bool isHost_ = false;
     bool hasGateway_ = true;
+    bool isDefaultRoute_ = false;
 
     bool operator==(const Route& obj) const;
 

@@ -25,7 +25,7 @@ NetPolicyClient::NetPolicyClient() : netPolicyService_(nullptr), deathRecipient_
 
 NetPolicyClient::~NetPolicyClient() {}
 
-NetPolicyResultCode NetPolicyClient::SetUidPolicy(uint32_t uid, NetUidPolicy policy)
+NetPolicyResultCode NetPolicyClient::SetPolicyByUid(uint32_t uid, NetUidPolicy policy)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -33,10 +33,10 @@ NetPolicyResultCode NetPolicyClient::SetUidPolicy(uint32_t uid, NetUidPolicy pol
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return proxy->SetUidPolicy(uid, policy);
+    return proxy->SetPolicyByUid(uid, policy);
 }
 
-NetUidPolicy NetPolicyClient::GetUidPolicy(uint32_t uid)
+NetUidPolicy NetPolicyClient::GetPolicyByUid(uint32_t uid)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -44,10 +44,10 @@ NetUidPolicy NetPolicyClient::GetUidPolicy(uint32_t uid)
         return NetUidPolicy::NET_POLICY_NONE;
     }
 
-    return proxy->GetUidPolicy(uid);
+    return proxy->GetPolicyByUid(uid);
 }
 
-std::vector<uint32_t> NetPolicyClient::GetUids(NetUidPolicy policy)
+std::vector<uint32_t> NetPolicyClient::GetUidsByPolicy(NetUidPolicy policy)
 {
     std::vector<uint32_t> uids;
     sptr<INetPolicyService> proxy = GetProxy();
@@ -56,7 +56,7 @@ std::vector<uint32_t> NetPolicyClient::GetUids(NetUidPolicy policy)
         return uids;
     }
 
-    uids = proxy->GetUids(policy);
+    uids = proxy->GetUidsByPolicy(policy);
     return uids;
 }
 
@@ -165,10 +165,10 @@ int32_t NetPolicyClient::UnregisterNetPolicyCallback(const sptr<INetPolicyCallba
     return proxy->UnregisterNetPolicyCallback(callback);
 }
 
-NetPolicyResultCode NetPolicyClient::SetNetPolicys(const std::vector<NetPolicyQuotaPolicy> &quotaPolicys)
+NetPolicyResultCode NetPolicyClient::SetNetQuotaPolicies(const std::vector<NetPolicyQuotaPolicy> &quotaPolicies)
 {
-    if (quotaPolicys.empty()) {
-        NETMGR_LOG_E("quotaPolicys is empty");
+    if (quotaPolicies.empty()) {
+        NETMGR_LOG_E("quotaPolicies is empty");
         return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
     }
 
@@ -178,10 +178,10 @@ NetPolicyResultCode NetPolicyClient::SetNetPolicys(const std::vector<NetPolicyQu
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return proxy->SetNetPolicys(quotaPolicys);
+    return proxy->SetNetQuotaPolicies(quotaPolicies);
 }
 
-NetPolicyResultCode NetPolicyClient::GetNetPolicys(std::vector<NetPolicyQuotaPolicy> &quotaPolicys)
+NetPolicyResultCode NetPolicyClient::GetNetQuotaPolicies(std::vector<NetPolicyQuotaPolicy> &quotaPolicies)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -189,13 +189,13 @@ NetPolicyResultCode NetPolicyClient::GetNetPolicys(std::vector<NetPolicyQuotaPol
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return proxy->GetNetPolicys(quotaPolicys);
+    return proxy->GetNetQuotaPolicies(quotaPolicies);
 }
 
-NetPolicyResultCode NetPolicyClient::SetCellularPolicys(const std::vector<NetPolicyCellularPolicy> &cellularPolicys)
+NetPolicyResultCode NetPolicyClient::SetCellularPolicies(const std::vector<NetPolicyCellularPolicy> &cellularPolicies)
 {
-    if (cellularPolicys.empty()) {
-        NETMGR_LOG_E("cellularPolicys is empty");
+    if (cellularPolicies.empty()) {
+        NETMGR_LOG_E("cellularPolicies is empty");
         return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
     }
 
@@ -205,10 +205,10 @@ NetPolicyResultCode NetPolicyClient::SetCellularPolicys(const std::vector<NetPol
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return proxy->SetCellularPolicys(cellularPolicys);
+    return proxy->SetCellularPolicies(cellularPolicies);
 }
 
-NetPolicyResultCode NetPolicyClient::GetCellularPolicys(std::vector<NetPolicyCellularPolicy> &cellularPolicys)
+NetPolicyResultCode NetPolicyClient::GetCellularPolicies(std::vector<NetPolicyCellularPolicy> &cellularPolicies)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -216,26 +216,10 @@ NetPolicyResultCode NetPolicyClient::GetCellularPolicys(std::vector<NetPolicyCel
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return proxy->GetCellularPolicys(cellularPolicys);
+    return proxy->GetCellularPolicies(cellularPolicies);
 }
 
-NetPolicyResultCode NetPolicyClient::ResetFactory(const std::string &subscriberId)
-{
-    if (subscriberId.empty()) {
-        NETMGR_LOG_E("subscriberId is empty");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    sptr<INetPolicyService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    return proxy->ResetFactory(subscriberId);
-}
-
-NetPolicyResultCode NetPolicyClient::SetBackgroundPolicy(bool backgroundPolicy)
+NetPolicyResultCode NetPolicyClient::SetFactoryPolicy(const std::string &slotId)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -243,7 +227,18 @@ NetPolicyResultCode NetPolicyClient::SetBackgroundPolicy(bool backgroundPolicy)
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return proxy->SetBackgroundPolicy(backgroundPolicy);
+    return proxy->SetFactoryPolicy(slotId);
+}
+
+NetPolicyResultCode NetPolicyClient::SetBackgroundPolicy(bool isBackgroundPolicyAllow)
+{
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+    }
+
+    return proxy->SetBackgroundPolicy(isBackgroundPolicyAllow);
 }
 
 bool NetPolicyClient::GetBackgroundPolicy()
@@ -268,18 +263,18 @@ bool NetPolicyClient::GetBackgroundPolicyByUid(uint32_t uid)
     return proxy->GetBackgroundPolicyByUid(uid);
 }
 
-bool NetPolicyClient::GetCurrentBackgroundPolicy()
+NetBackgroundPolicy NetPolicyClient::GetCurrentBackgroundPolicy()
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return false;
+        return NetBackgroundPolicy::NET_BACKGROUND_POLICY_NONE;
     }
 
     return proxy->GetCurrentBackgroundPolicy();
 }
 
-NetPolicyResultCode NetPolicyClient::SnoozePolicy(const NetPolicyQuotaPolicy &quotaPolicy)
+NetPolicyResultCode NetPolicyClient::SetSnoozePolicy(int8_t netType, int32_t slotId)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -287,10 +282,10 @@ NetPolicyResultCode NetPolicyClient::SnoozePolicy(const NetPolicyQuotaPolicy &qu
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return proxy->SnoozePolicy(quotaPolicy);
+    return proxy->SetSnoozePolicy(netType, slotId);
 }
 
-NetPolicyResultCode NetPolicyClient::SetIdleWhitelist(uint32_t uid, bool isWhiteList)
+NetPolicyResultCode NetPolicyClient::SetIdleTrustlist(uint32_t uid, bool isTrustlist)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -298,10 +293,10 @@ NetPolicyResultCode NetPolicyClient::SetIdleWhitelist(uint32_t uid, bool isWhite
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return proxy->SetIdleWhitelist(uid, isWhiteList);
+    return proxy->SetIdleTrustlist(uid, isTrustlist);
 }
 
-NetPolicyResultCode NetPolicyClient::GetIdleWhitelist(std::vector<uint32_t> &uids)
+NetPolicyResultCode NetPolicyClient::GetIdleTrustlist(std::vector<uint32_t> &uids)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -309,7 +304,7 @@ NetPolicyResultCode NetPolicyClient::GetIdleWhitelist(std::vector<uint32_t> &uid
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return proxy->GetIdleWhitelist(uids);
+    return proxy->GetIdleTrustlist(uids);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

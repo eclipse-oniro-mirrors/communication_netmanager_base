@@ -18,35 +18,52 @@
 
 #include <string>
 #include <vector>
+#include <functional>
 #include "i_net_conn_callback.h"
 #include "net_specifier.h"
 #include "net_supplier.h"
+#include "timer.h"
 
 class NetSupplier;
 
 namespace OHOS {
 namespace NetManagerStandard {
+constexpr uint32_t DEFAULT_REQUEST_ID = 0;
+constexpr uint32_t MIN_REQUEST_ID = DEFAULT_REQUEST_ID + 1;
+constexpr uint32_t MAX_REQUEST_ID = 0x7FFFFFFF;
 class NetActivate : public virtual RefBase {
 public:
-    NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback);
+     using TimeOutHandler = std::function<int32_t(uint32_t& reqId)>;
+public:
+    NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
+        TimeOutHandler timeOutHandler, const uint32_t &timeoutMS);
     ~NetActivate() = default;
     bool MatchRequestAndNetwork(sptr<NetSupplier> supplier);
+    void SetRequestId(uint32_t reqId);
     uint32_t GetRequestId() const;
     sptr<NetSupplier> GetServiceSupply() const;
     void SetServiceSupply(sptr<NetSupplier> netServiceSupplied);
     sptr<INetConnCallback>& GetNetCallback();
     sptr<NetSpecifier>& GetNetSpecifier();
+    std::unique_ptr<Timer>&  GetTimer();
 
 private:
     bool CompareByNetworkIdent(const std::string &ident);
-    bool CompareByNetworkCapabilities(const uint64_t &netCapabilities);
-    bool CompareByNetworkNetType(uint32_t netType);
+    bool CompareByNetworkCapabilities(const std::set<NetCap> &netCaps);
+    bool CompareByNetworkNetType(NetBearType bearerType);
+    bool CompareByNetworkBand(uint32_t netLinkUpBand, uint32_t netLinkDownBand);
+    bool HaveCapability(NetCap netCap) const;
+    bool HaveTypes(const std::set<NetBearType> &bearerTypes) const;
+    void TimeOutNetAvailable();
 
 private:
     uint32_t requestId_ = 1;
     sptr<NetSpecifier> netSpecifier_ = nullptr;
     sptr<INetConnCallback> netConnCallback_ = nullptr;
     sptr<NetSupplier> netServiceSupplied_ = nullptr;
+    std::unique_ptr<Timer> lpTimer_ = nullptr;
+    uint32_t timeoutMS_ = 0;
+    TimeOutHandler timeOutHandler_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

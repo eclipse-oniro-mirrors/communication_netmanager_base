@@ -14,9 +14,10 @@
  */
 
 #include <gtest/gtest.h>
-
+#include "netd_native_service_proxy.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
 #include "netnative_log_wrapper.h"
-
 
 namespace OHOS {
 namespace NetdNative {
@@ -37,17 +38,47 @@ void NetworkRouteTest::SetUp() {}
 
 void NetworkRouteTest::TearDown() {}
 
+sptr<INetdService> GetProxy()
+{
+    NETNATIVE_LOGE("Get samgr >>>>>>>>>>>>>>>>>>>>>>>>>>");
+    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    NETNATIVE_LOGI("Get samgr %{public}p", samgr.GetRefPtr());
+    std::cout << "Get samgr  "<< samgr.GetRefPtr() << std::endl;
+
+    auto remote = samgr->GetSystemAbility(COMM_NETD_NATIVE_SYS_ABILITY_ID);
+    NETNATIVE_LOGI("Get remote %{public}p", remote.GetRefPtr());
+    std::cout << "Get remote "<< remote.GetRefPtr() << std::endl;
+
+    auto proxy = iface_cast<NetdNative::INetdService>(remote);
+    NETNATIVE_LOGI("Get proxy %{public}p", proxy.GetRefPtr());
+    std::cout << "Get proxy "<<proxy.GetRefPtr()<<std::endl;
+    
+    return proxy;
+}
+
 HWTEST_F(NetworkRouteTest, NetworkRouteTest001, TestSize.Level1)
 {
+    OHOS::sptr<OHOS::NetdNative::INetdService> netdNativeService = GetProxy();
+    if (netdNativeService == nullptr) {
+        std::cout << "netdNativeService is nullptr" << std::endl;
+        EXPECT_FALSE(0);
+    }
+
     int32_t ret = 0;
-	NETNATIVE_LOGE("NetworkRouteTest001 NetworkRouteTest001 NetworkRouteTest001");
+    NETNATIVE_LOGE("NetworkRouteTest001 NetworkRouteTest001 NetworkRouteTest001");
     EXPECT_TRUE(ret == 0);
 }
 
 HWTEST_F(NetworkRouteTest, NetworkRouteTest002, TestSize.Level1)
 {
+    OHOS::sptr<OHOS::NetdNative::INetdService> netdNativeService = GetProxy();
+    if (netdNativeService == nullptr) {
+        std::cout << "netdNativeService is nullptr" << std::endl;
+        EXPECT_FALSE(0);
+    }
+
     int32_t ret = 0;
-	NETNATIVE_LOGE("NetworkRouteTest002 NetworkRouteTest002 NetworkRouteTest002");
+    NETNATIVE_LOGE("NetworkRouteTest002 NetworkRouteTest002 NetworkRouteTest002");
     EXPECT_TRUE(ret == 0);
 }
 } // namespace NetdNative

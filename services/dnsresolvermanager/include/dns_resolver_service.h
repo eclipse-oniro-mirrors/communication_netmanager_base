@@ -20,6 +20,7 @@
 #include "system_ability.h"
 
 #include "dns_resolver_service_stub.h"
+#include "dns_service_iface.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -38,14 +39,15 @@ public:
     void OnStop() override;
 
     int32_t GetAddressesByName(const std::string &hostName, std::vector<INetAddr> &addrInfo) override;
+    int32_t GetAddressesByName(const std::string &hostName, int32_t netId, std::vector<INetAddr> &addrInfo);
     int32_t GetAddrInfo(const std::string &hostName, const std::string &server,
         const sptr<DnsAddrInfo> &hints, std::vector<sptr<DnsAddrInfo>> &dnsAddrInfo) override;
-    int32_t CreateNetworkCache(uint16_t netId) override;
-    int32_t DestoryNetworkCache(uint16_t netId) override;
-    int32_t FlushNetworkCache(uint16_t netId) override;
-    int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
+    int32_t CreateNetworkCache(int32_t netId) override;
+    int32_t DestoryNetworkCache(int32_t netId) override;
+    int32_t FlushNetworkCache(int32_t netId) override;
+    int32_t SetResolverConfig(int32_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
         const std::vector<std::string> &servers, const std::vector<std::string> &domains) override;
-    int32_t GetResolverInfo(uint16_t netId, std::vector<std::string> &servers,
+    int32_t GetResolverInfo(int32_t netId, std::vector<std::string> &servers,
         std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount) override;
 
 private:
@@ -54,6 +56,7 @@ private:
 private:
     ServiceRunningState state_ = ServiceRunningState::STATE_STOPPED;
     bool registerToService_ = false;
+    sptr<DnsServiceIface> serviceIface_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

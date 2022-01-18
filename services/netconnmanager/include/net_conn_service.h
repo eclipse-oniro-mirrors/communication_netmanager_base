@@ -57,14 +57,14 @@ public:
     /**
      * @brief The interface is register the network
      *
-     * @param netType Network Type
+     * @param bearerType Bearer Network Type
      * @param ident Unique identification of mobile phone card
-     * @param netCapabilities Network capabilities registered by the network supplier
+     * @param netCaps Network capabilities registered by the network supplier
      * @param supplierId out param, return supplier id
      *
      * @return function result
      */
-    int32_t RegisterNetSupplier(uint32_t netType, const std::string &ident, uint64_t netCapabilities,
+    int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
         uint32_t &supplierId) override;
 
     /**
@@ -101,11 +101,12 @@ public:
      *
      * @param netSpecifier specifier information
      * @param callback The callback of INetConnCallback interface
+     * @param timeoutMS net connection time out
      *
      * @return Returns 0, successfully register net connection callback, otherwise it will failed
      */
     int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-        const sptr<INetConnCallback> &callback) override;
+        const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS) override;
 
     /**
      * @brief Unregister net connection callback
@@ -113,14 +114,6 @@ public:
      * @return Returns 0, successfully unregister net connection callback, otherwise it will fail
      */
     int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
-
-    /**
-     * @brief Unregister net connection callback by NetSpecifier
-     *
-     * @return Returns 0, successfully unregister net connection callback, otherwise it will fail
-     */
-    int32_t UnregisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-        const sptr<INetConnCallback> &callback) override;
 
     int32_t UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState) override;
     /**
@@ -132,16 +125,6 @@ public:
      * @return Returns 0, successfully update the network connection status information, otherwise it will fail
      */
     int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) override;
-
-    /**
-     * @brief The interface is Create or delete network services based on the supplierId and the netCapabilities
-     *
-     * @param supplierId The id of the network supplier
-     * @param netCapabilities Network capabilities registered by the network supplier
-     *
-     * @return Returns 0, successfully create network service or delete network service, otherwise fail
-     */
-    int32_t UpdateNetCapabilities(uint32_t supplierId, uint64_t netCapabilities) override;
 
     /**
      * @brief The interface is update network link attribute information
@@ -156,12 +139,12 @@ public:
     /**
      * @brief The interface is get the iface name for network
      *
-     * @param netType Network Type
+     * @param bearerType Network bearer type
      * @param ident Unique identification of mobile phone card
      * @param ifaceName save the obtained ifaceName
      * @return Returns 0, successfully get the network link attribute iface name, otherwise it will fail
      */
-    int32_t GetIfaceNameByType(uint32_t netType, const std::string &ident, std::string &ifaceName) override;
+    int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) override;
 
     /**
      * @brief register network detection return result method
@@ -188,23 +171,18 @@ public:
      * @return int32_t Whether the network probe is successful
      */
     int32_t NetDetection(int32_t netId) override;
-
-    int32_t ActivateNetwork(const sptr<NetSpecifier> &netSpecifier,
-                            const sptr<INetConnCallback> &callback,
-                            uint32_t &reqId) override;
-    int32_t  DeactivateNetwork(uint32_t &reqId) override;
-
     int32_t GetDefaultNet(int32_t &netId) override;
     int32_t HasDefaultNet(bool &flag) override;
-    int32_t GetAddressesByName(const std::string &host, int32_t netId, std::list<INetAddr> &addrList) override;
+    int32_t GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList) override;
     int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr) override;
-    int32_t GetSpecificNet(uint32_t type, std::list<int32_t> &netIdList) override;
+    int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList) override;
     int32_t GetAllNets(std::list<int32_t> &netIdList) override;
     int32_t GetSpecificUidNet(int32_t uid, int32_t &netId) override;
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override;
-    int32_t GetNetCapabilities(int32_t netId, uint64_t &cap) override;
+    int32_t GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap) override;
     int32_t BindSocket(int32_t socket_fd, int32_t netId) override;
     void HandleDetectionResult(uint32_t supplierId, bool ifValid);
+    int32_t RestrictBackgroundChanged(bool isRestrictBackground);
     /**
      * @brief Set airplane mode
      *
@@ -212,27 +190,33 @@ public:
      * @return int32_t result
      */
     int32_t SetAirplaneMode(bool state) override;
-    int32_t ResetNetConnService();
+    /**
+     * @brief restore NetConn factory setting
+     *
+     * @return int32_t result
+     */
+    int32_t RestoreFactoryData() override;
 
 private:
     bool Init();
-    sptr<NetSupplier> GetNetSupplierFromList(uint32_t netType, const std::string &ident);
-    sptr<NetSupplier> GetNetSupplierFromList(uint32_t netType, const std::string &ident, uint64_t capabilities);
+    sptr<NetSupplier> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident);
+    sptr<NetSupplier> GetNetSupplierFromList(
+        NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps);
     void ThreadExitTask();
-    int32_t NotifyNetConnStateChanged(const sptr<NetConnCallbackInfo> &info);
-    void CallbackForNetwork(sptr<Network>& network, CallbackType type);
+    int32_t ActivateNetwork(const sptr<NetSpecifier> &netSpecifier,
+        const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS);
+    int32_t DeactivateNetwork(uint32_t reqId);
     void CallbackForSupplier(sptr<NetSupplier>& supplier, CallbackType type);
+    void CallbackForAvailable(sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
     uint32_t FindBestNetworkForRequest(sptr<NetSupplier>& supplier, sptr<NetActivate>& netActivateNetwork);
     void SendRequestToAllNetwork(sptr<NetActivate> request);
     void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore);
     void SendAllRequestToNetwork(sptr<NetSupplier> supplier);
-    void RegisterSupplierCallback(sptr<NetSupplier> supplier, uint32_t netType, uint64_t netCapabilities);
     void FindBestNetworkForAllRequest();
     void MakeDefaultNetWork(sptr<NetSupplier>& oldService, sptr<NetSupplier>& newService);
     void NotFindBestSupplier(uint32_t reqId, const sptr<NetActivate> &active,
         const sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
     void CreateDefaultRequest();
-    sptr<Network> FindExitNetworkTestNetDetection();
     int32_t RegUnRegNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback, bool isReg);
     int32_t GenerateNetId();
 
@@ -244,15 +228,14 @@ private:
 
     bool registerToService_;
     ServiceRunningState state_;
+    sptr<NetSpecifier> defaultNetSpecifier_ = nullptr;
     sptr<NetActivate> defaultNetActivate_ = nullptr;
     sptr<NetSupplier> defaultNetSupplier_ = nullptr;
     NET_SUPPLIER_MAP netSuppliers_;
     NET_ACTIVATE_MAP netActivates_;
+    NET_ACTIVATE_MAP deleteNetActivates_;
     NET_NETWORK_MAP networks_;
     std::unique_ptr<NetScore> netScore_ = nullptr;
-    NetSpecifier specAll_;
-    std::map<NetSpecifier, std::vector<sptr<INetConnCallback>>> netConnCallback_;
-    bool isNeedTestNetDetection_ = true;
     sptr<NetConnServiceIface> serviceIface_ = nullptr;
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
 };

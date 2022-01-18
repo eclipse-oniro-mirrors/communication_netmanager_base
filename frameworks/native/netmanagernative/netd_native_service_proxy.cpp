@@ -12,19 +12,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "netd_native_service_proxy.h"
+#include  <securec.h>
+#include "netd_addr_info_parcel.h"
 #include "netnative_log_wrapper.h"
+#include "netd_native_service_proxy.h"
+
 namespace OHOS {
 namespace NetdNative {
 using namespace std;
+
+bool NetdNativeServiceProxy::WriteInterfaceToken(MessageParcel &data)
+{
+    if (!data.WriteInterfaceToken(NetdNativeServiceProxy::GetDescriptor())) {
+        NETNATIVE_LOGI("WriteInterfaceToken failed");
+        return false;
+    }
+    return true;
+}
 
 int32_t NetdNativeServiceProxy::SetResolverConfigParcel(const DnsresolverParamsParcel& resolvParams)
 {
     NETNATIVE_LOGI("Begin to SetResolverConfig %{public}d", resolvParams.retryCount_);
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteParcelable(&resolvParams);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteParcelable(&resolvParams)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -37,8 +52,9 @@ int32_t NetdNativeServiceProxy::SetResolverConfig(const dnsresolver_params &reso
 {
     NETNATIVE_LOGI("Begin to SetResolverConfig %{public}d", resolvParams.retryCount);
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
     if (!data.WriteUint16(resolvParams.netId)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -53,7 +69,7 @@ int32_t NetdNativeServiceProxy::SetResolverConfig(const dnsresolver_params &reso
     if (!data.WriteInt32(vServerSize1)) {
         return ERR_FLATTEN_OBJECT;
     }
-    std::vector<std::string> vServers;
+    std::vector<std::string>   vServers;
     vServers.assign(resolvParams.servers.begin(), resolvParams.servers.end());
     NETNATIVE_LOGI("PROXY: SetResolverConfig Write Servers  String_SIZE: %{public}d",
         static_cast<int32_t>(vServers.size()));
@@ -66,7 +82,7 @@ int32_t NetdNativeServiceProxy::SetResolverConfig(const dnsresolver_params &reso
         return ERR_FLATTEN_OBJECT;
     }
 
-    std::vector<std::string> vDomains;
+    std::vector<std::string>   vDomains;
     vDomains.assign(resolvParams.domains.begin(), resolvParams.domains.end());
     NETNATIVE_LOGI("PROXY: InterfaceSetConfig Write Domains String_SIZE: %{public}d",
         static_cast<int32_t>(vDomains.size()));
@@ -77,6 +93,7 @@ int32_t NetdNativeServiceProxy::SetResolverConfig(const dnsresolver_params &reso
     MessageParcel reply;
     MessageOption option;
     Remote()->SendRequest(INetdService::NETD_SET_RESOLVER_CONFIG, data, reply, option);
+
     return reply.ReadInt32();
 }
 
@@ -85,8 +102,12 @@ int32_t NetdNativeServiceProxy::GetResolverConfig(const uint16_t netid, std::vec
 {
     NETNATIVE_LOGI("PROXY:Begin to GetResolverConfig %{public}d", netid);
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteUint16(netid);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint16(netid)) {
+        return ERR_FLATTEN_OBJECT;
+    }
     MessageParcel reply;
     MessageOption option;
     Remote()->SendRequest(INetdService::NETD_GET_RESOLVER_CONFIG, data, reply, option);
@@ -94,31 +115,35 @@ int32_t NetdNativeServiceProxy::GetResolverConfig(const uint16_t netid, std::vec
     reply.ReadUint16(param.baseTimeoutMsec);
     reply.ReadUint8(param.retryCount);
     int32_t vServerSize = reply.ReadInt32();
-    std::vector<std::string> vecString;
-    for (int i = 0; i<vServerSize; i++) {
+    std::vector<std::string>  vecString;
+    for (int i = 0; i < vServerSize; i++) {
         vecString.push_back(reply.ReadString());
     }
     if (vServerSize > 0) {
-        servers.assign(vecString.begin(), vecString.end()) ;
+        servers.assign(vecString.begin(), vecString.end());
     }
     int32_t vDomainSize = reply.ReadInt32();
-    std::vector<std::string> vecDomain;
+    std::vector<std::string>  vecDomain;
     for (int i = 0; i < vDomainSize; i++) {
         vecDomain.push_back(reply.ReadString());
     }
     if (vDomainSize > 0) {
-        domains.assign(vecDomain.begin(), vecDomain.end()) ;
+        domains.assign(vecDomain.begin(), vecDomain.end());
     }
     NETNATIVE_LOGI("Begin to GetResolverConfig %{public}d", result);
-    return  result ;
+    return  result;
 }
 
 int32_t NetdNativeServiceProxy::CreateNetworkCache(const uint16_t netid)
 {
     NETNATIVE_LOGI("Begin to CreateNetworkCache");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteUint16(netid);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint16(netid)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -131,8 +156,12 @@ int32_t NetdNativeServiceProxy::FlushNetworkCache(const uint16_t netid)
 {
     NETNATIVE_LOGI("Begin to FlushNetworkCache");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteUint16(netid);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint16(netid)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -145,8 +174,12 @@ int32_t NetdNativeServiceProxy::DestoryNetworkCache(const uint16_t netid)
 {
     NETNATIVE_LOGI("Begin to DestoryNetworkCache");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteUint16(netid);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint16(netid)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -158,23 +191,30 @@ int32_t NetdNativeServiceProxy::DestoryNetworkCache(const uint16_t netid)
 int32_t NetdNativeServiceProxy::Getaddrinfo(const char* node, const char* service, const struct addrinfo* hints,
     struct addrinfo** result, const uint16_t  netid)
 {
-#ifdef SYS_DNS
+    NETNATIVE_LOGI("Begin to Getaddrinfo");
+#ifdef SYS_FUNC
+    NETNATIVE_LOGI("Begin to sys getaddrinfo");
     return getaddrinfo(node, service, hints, result);
 #else
-    NETNATIVE_LOGI("Begin to Getaddrinfo");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteCString(node);
-    data.WriteCString(service);
-    data.WriteInt16(hints->ai_family);
-    data.WriteInt16(hints->ai_socktype);
-    data.WriteInt16(hints->ai_flags);
-    data.WriteInt16(hints->ai_protocol);
-    data.WriteUint16(netid);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    NetdAddrInfoParcel   addrParcel(hints, netid, node, service);
+    if (!addrParcel.Marshalling(data)) {
+        NETNATIVE_LOGI("addrinfo marshing fail");
+    }
     MessageParcel reply;
     MessageOption option;
     Remote()->SendRequest(INetdService::NETD_GET_ADDR_INFO, data, reply, option);
-    return reply.ReadInt32();
+    int  ret;
+    sptr<NetdAddrInfoParcel>  ptr=addrParcel.Unmarshalling(reply);
+    *result = ptr->Head;
+    if (ptr->addrSize == 0) {
+        *result=nullptr;
+    }
+    ret=ptr->ret;
+    return  ret;
 #endif
 }
 
@@ -182,9 +222,15 @@ int32_t NetdNativeServiceProxy::InterfaceSetMtu(const std::string &interfaceName
 {
     NETNATIVE_LOGI("Begin to InterfaceSetMtu");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteString(interfaceName);
-    data.WriteInt32(mtu);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(mtu)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -197,8 +243,12 @@ int32_t NetdNativeServiceProxy::InterfaceGetMtu(const std::string &interfaceName
 {
     NETNATIVE_LOGI("Begin to InterfaceGetMtu");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteString(interfaceName);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -216,9 +266,8 @@ int32_t NetdNativeServiceProxy::RegisterNotifyCallback(sptr<INotifyCallback> &ca
         return ERR_NULL_OBJECT;
     }
 
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        NETNATIVE_LOGE("WriteInterfaceToken failed");
-        return false;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
     }
     data.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
@@ -234,11 +283,21 @@ int32_t NetdNativeServiceProxy::NetworkAddRoute(int32_t netId, const std::string
 {
     NETNATIVE_LOGI("Begin to NetworkAddRoute");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteInt32(netId);
-    data.WriteString(interfaceName);
-    data.WriteString(destination);
-    data.WriteString(nextHop);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(destination)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(nextHop)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -252,11 +311,21 @@ int32_t NetdNativeServiceProxy::NetworkRemoveRoute(int32_t netId, const std::str
 {
     NETNATIVE_LOGI("Begin to NetworkRemoveRoute");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteInt32(netId);
-    data.WriteString(interfaceName);
-    data.WriteString(destination);
-    data.WriteString(nextHop);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(destination)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(nextHop)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -269,11 +338,21 @@ int32_t NetdNativeServiceProxy::NetworkAddRouteParcel(int32_t netId, const route
 {
     NETNATIVE_LOGI("Begin to NetworkAddRouteParcel");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteInt32(netId);
-    data.WriteString(routeInfo.ifName);
-    data.WriteString(routeInfo.destination);
-    data.WriteString(routeInfo.nextHop);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(routeInfo.ifName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(routeInfo.destination)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(routeInfo.nextHop)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -286,11 +365,21 @@ int32_t NetdNativeServiceProxy::NetworkRemoveRouteParcel(int32_t netId, const ro
 {
     NETNATIVE_LOGI("Begin to NetworkRemoveRouteParcel");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteInt32(netId);
-    data.WriteString(routeInfo.ifName);
-    data.WriteString(routeInfo.destination);
-    data.WriteString(routeInfo.nextHop);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(routeInfo.ifName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(routeInfo.destination)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(routeInfo.nextHop)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -303,8 +392,12 @@ int32_t NetdNativeServiceProxy::NetworkSetDefault(int32_t netId)
 {
     NETNATIVE_LOGI("Begin to NetworkSetDefault");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteInt32(netId);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -317,7 +410,9 @@ int32_t NetdNativeServiceProxy::NetworkGetDefault()
 {
     NETNATIVE_LOGI("Begin to NetworkGetDefault");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -326,13 +421,95 @@ int32_t NetdNativeServiceProxy::NetworkGetDefault()
     return reply.ReadInt32();
 }
 
+int32_t NetdNativeServiceProxy::NetworkClearDefault()
+{
+    NETNATIVE_LOGI("Begin to NetworkClearDefault");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetdService::NETD_NETWORK_CLEAR_DEFAULT, data, reply, option);
+
+    return reply.ReadInt32();
+}
+
+int32_t NetdNativeServiceProxy::GetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
+    const std::string &parameter, std::string &value)
+{
+    NETNATIVE_LOGI("Begin to GetSysProcNet");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteInt32(ipversion)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(which)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (data.WriteString(ifname)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(parameter)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetdService::NETD_GET_PROC_SYS_NET, data, reply, option);
+    int32_t ret = reply.ReadInt32();
+    std::string valueRsl = reply.ReadString();
+    NETNATIVE_LOGE("NETD_GET_PROC_SYS_NET value %{public}s", valueRsl.c_str());
+    value = valueRsl;
+    return  ret;
+}
+
+int32_t NetdNativeServiceProxy::SetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
+    const std::string &parameter, std::string  &value)
+{
+    NETNATIVE_LOGI("Begin to SetSysProcNet");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(ipversion)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(which)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (data.WriteString(ifname)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(parameter)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(value)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetdService::NETD_SET_PROC_SYS_NET, data, reply, option);
+
+    return reply.ReadInt32();
+}
+
 int32_t NetdNativeServiceProxy::NetworkCreatePhysical(int32_t netId, int32_t permission)
 {
     NETNATIVE_LOGI("Begin to NetworkCreatePhysical");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteInt32(netId);
-    data.WriteInt32(permission);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(permission)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -346,10 +523,18 @@ int32_t NetdNativeServiceProxy::InterfaceAddAddress(const std::string &interface
 {
     NETNATIVE_LOGI("Begin to InterfaceAddAddress");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteString(interfaceName);
-    data.WriteString(addrString);
-    data.WriteInt32(prefixLength);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(addrString)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(prefixLength)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -363,10 +548,18 @@ int32_t NetdNativeServiceProxy::InterfaceDelAddress(const std::string &interface
 {
     NETNATIVE_LOGI("Begin to InterfaceDelAddress");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteString(interfaceName);
-    data.WriteString(addrString);
-    data.WriteInt32(prefixLength);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(addrString)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(prefixLength)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -379,9 +572,15 @@ int32_t NetdNativeServiceProxy::NetworkAddInterface(int32_t netId, const std::st
 {
     NETNATIVE_LOGI("Begin to NetworkAddInterface");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteInt32(netId);
-    data.WriteString(iface);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(iface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -394,9 +593,15 @@ int32_t NetdNativeServiceProxy::NetworkRemoveInterface(int32_t netId, const std:
 {
     NETNATIVE_LOGI("Begin to NetworkRemoveInterface");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteInt32(netId);
-    data.WriteString(iface);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(iface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -409,8 +614,12 @@ int32_t NetdNativeServiceProxy::NetworkDestroy(int32_t netId)
 {
     NETNATIVE_LOGI("Begin to NetworkDestroy");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteInt32(netId);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -423,10 +632,18 @@ int32_t NetdNativeServiceProxy::GetFwmarkForNetwork(int32_t netId, mark_mask_par
 {
     NETNATIVE_LOGI("Begin to GetFwmarkForNetwork");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteInt32(netId);
-    data.WriteInt32(markMaskParcel.mark);
-    data.WriteInt32(markMaskParcel.mask);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(markMaskParcel.mark)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(markMaskParcel.mask)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -439,26 +656,36 @@ int32_t NetdNativeServiceProxy::InterfaceSetConfig(const interface_configuration
 {
     NETNATIVE_LOGI("Begin to InterfaceSetConfig");
     MessageParcel data;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteString(cfg.ifName);
-    data.WriteString(cfg.hwAddr);
-    data.WriteString(cfg.ipv4Addr);
-    data.WriteInt32(cfg.prefixLength);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(cfg.ifName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(cfg.hwAddr)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(cfg.ipv4Addr)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(cfg.prefixLength)) {
+        return ERR_FLATTEN_OBJECT;
+    }
     int32_t vsize = cfg.flags.size();
     if (!data.WriteInt32(vsize)) {
         return ERR_FLATTEN_OBJECT;
     }
-    std::vector<std::string> vCflags;
+    std::vector<std::string>   vCflags;
     vCflags.assign(cfg.flags.begin(), cfg.flags.end());
     NETNATIVE_LOGI("PROXY: InterfaceSetConfig Write flags String_SIZE: %{public}d",
         static_cast<int32_t>(vCflags.size()));
     for (std::vector<std::string>::iterator it = vCflags.begin(); it != vCflags.end(); ++it) {
-        NETNATIVE_LOGI("PROXY: InterfaceSetConfig Write: %{public}s", (*it).c_str());
-        data.WriteString(*it) ;
+        data.WriteString(*it);
     }
     MessageParcel reply;
     MessageOption option;
     Remote()->SendRequest(INetdService::NETD_INTERFACE_SET_CONFIG, data, reply, option);
+
     return reply.ReadInt32();
 }
 
@@ -466,10 +693,14 @@ int32_t NetdNativeServiceProxy::InterfaceGetConfig(interface_configuration_parce
 {
     NETNATIVE_LOGI("Begin to InterfaceGetConfig");
     MessageParcel data;
-    int32_t ret;
-    int32_t vSize;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteString(cfg.ifName);
+    int32_t   ret ;
+    int32_t   vSize ;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(cfg.ifName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
@@ -480,48 +711,105 @@ int32_t NetdNativeServiceProxy::InterfaceGetConfig(interface_configuration_parce
     reply.ReadString(cfg.ipv4Addr);
     reply.ReadInt32(cfg.prefixLength);
     vSize =  reply.ReadInt32();
-    std::vector<std::string> vecString;
+    std::vector<std::string>  vecString;
     for (int i = 0; i < vSize; i++) {
-        vecString.push_back(reply.ReadString());
+            vecString.push_back(reply.ReadString());
     }
     if (vSize > 0) {
         cfg.flags.assign(vecString.begin(), vecString.end());
     }
     NETNATIVE_LOGI("End to InterfaceGetConfig, ret =%{public}d", ret);
-    return  ret ;
+    return   ret;
 }
 
 int32_t NetdNativeServiceProxy::StartDhcpClient(const std::string &iface, bool bIpv6)
 {
     NETNATIVE_LOGI("Begin to StartDhcpClient");
     MessageParcel data;
-    int32_t   ret  ;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteString(iface);
-    data.WriteBool(bIpv6);
+    int32_t ret;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(iface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(bIpv6)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
     MessageParcel reply;
     MessageOption option;
     Remote()->SendRequest(INetdService::NETD_START_DHCP_CLIENT, data, reply, option);
+
     ret = reply.ReadInt32();
     NETNATIVE_LOGI("End to StartDhcpClient, ret =%{public}d", ret);
-    return ret ;
+    return ret;
 }
 
 int32_t NetdNativeServiceProxy::StopDhcpClient(const std::string &iface, bool bIpv6)
 {
     NETNATIVE_LOGI("Begin to StopDhcpClient");
     MessageParcel data;
-    int32_t   ret  ;
-    data.WriteInterfaceToken(GetDescriptor());
-    data.WriteString(iface);
-    data.WriteBool(bIpv6);
+    int32_t   ret ;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(iface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(bIpv6)) {
+        return ERR_FLATTEN_OBJECT;
+    }
 
     MessageParcel reply;
     MessageOption option;
     ret = Remote()->SendRequest(INetdService::NETD_STOP_DHCP_CLIENT, data, reply, option);
+
     ret = reply.ReadInt32();
     NETNATIVE_LOGI("End to StopDhcpClient, ret =%{public}d", ret);
-    return ret ;
+    return ret;
+}
+
+int32_t NetdNativeServiceProxy::StartDhcpService(const std::string &iface, const std::string &ipv4addr)
+{
+    NETNATIVE_LOGI("Begin to StartDhcpService");
+    MessageParcel data;
+
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(iface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(ipv4addr)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetdService::NETD_START_DHCP_SERVICE, data, reply, option);
+    int32_t ret = reply.ReadInt32();
+    NETNATIVE_LOGI("End to StartDhcpService, ret =%{public}d", ret);
+    return ret;
+}
+
+int32_t NetdNativeServiceProxy::StopDhcpService(const std::string &iface)
+{
+    NETNATIVE_LOGI("Begin to StopDhcpService");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(iface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetdService::NETD_STOP_DHCP_SERVICE, data, reply, option);
+    int32_t ret = reply.ReadInt32();
+    NETNATIVE_LOGI("End to StopDhcpService, ret =%{public}d", ret);
+    return ret;
 }
 } // namespace NetdNative
 } // namespace OHOS

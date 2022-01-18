@@ -17,12 +17,12 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-int32_t NetSupplierCallbackBase::RequestNetwork(const std::string &ident, uint64_t netCapability)
+int32_t NetSupplierCallbackBase::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
 {
     return 0;
 }
 
-int32_t NetSupplierCallbackBase::ReleaseNetwork(const std::string &ident, uint64_t netCapability)
+int32_t NetSupplierCallbackBase::ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
 {
     return 0;
 }

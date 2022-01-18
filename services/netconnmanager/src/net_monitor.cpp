@@ -30,21 +30,17 @@ NetMonitor::NetMonitor(NetDetectionStateHandler handle)
 
 NetMonitor::~NetMonitor()
 {
-    NETMGR_LOG_D("NetMonitor::~NetMonitor enter");
     ExitNetMonitorThread();
-    NETMGR_LOG_D("NetMonitor::~NetMonitor complete");
 }
 
 bool NetMonitor::HttpDetection()
 {
-    NETMGR_LOG_D("Enter httpDetection");
     HttpRequest httpRequest;
     httpRequest.SetIfaceName(ifaceName_);
 
     std::string httpMsg(DEFAULT_PORTAL_HTTPS_URL);
     std::string httpHeader;
     int32_t ret = httpRequest.HttpGetHeader(httpMsg, httpHeader);
-    NETMGR_LOG_D("HttpDetection httpHeader[%{public}s],ret[%{public}d].", httpHeader.c_str(), ret);
     std::string urlRedirect;
     if (ret != 0 || httpHeader.empty()) {
         NETMGR_LOG_E("The network is abnormal or Response code returned by http [httpHeader] is empty!");
@@ -89,7 +85,6 @@ bool NetMonitor::HttpDetection()
 
 void NetMonitor::RunNetMonitorThreadFunc()
 {
-    NETMGR_LOG_D("enter RunNetMonitorThreadFunc!");
     int32_t timeoutMs = HTTP_DETECTION_WAIT_TIME_MS;
     for (;;) {
         while (isStopNetMonitor_ && !isExitNetMonitorThread_) {
@@ -127,14 +122,14 @@ ResultCode NetMonitor::InitNetMonitorThread()
 
 void NetMonitor::StopNetMonitorThread()
 {
-    NETMGR_LOG_D("enter StopNetMonitorThread!");
+    NETMGR_LOG_D("Enter StopNetMonitorThread");
     std::unique_lock<std::mutex> lock(mutex_);
     isStopNetMonitor_ = true;
 }
 
 void NetMonitor::SignalNetMonitorThread(const std::string &ifaceName)
 {
-    NETMGR_LOG_D("enter SignalNetMonitorThread!");
+    NETMGR_LOG_D("Enter SignalNetMonitorThread");
     std::unique_lock<std::mutex> lock(mutex_);
     ifaceName_ = ifaceName;
     lastDetectionState_ = INVALID_DETECTION_STATE;
@@ -146,7 +141,7 @@ void NetMonitor::SignalNetMonitorThread(const std::string &ifaceName)
 
 void NetMonitor::ExitNetMonitorThread()
 {
-    NETMGR_LOG_D("enter NetMonitor::ExitNetMonitorThread");
+    NETMGR_LOG_D("Enter NetMonitor::ExitNetMonitorThread");
     {
         std::unique_lock<std::mutex> lock(mutex_);
         isStopNetMonitor_ = false;
@@ -156,12 +151,10 @@ void NetMonitor::ExitNetMonitorThread()
     }
 
     if (netMonitorThread_ != nullptr) {
-        NETMGR_LOG_D("enter netMonitorThread_->join()");
         netMonitorThread_->join();
         delete netMonitorThread_;
         netMonitorThread_ = nullptr;
     }
-    NETMGR_LOG_D("NetMonitor::ExitNetMonitorThread ok");
 }
 
 int32_t NetMonitor::GetStatusCodeFromResponse(const std::string &strResponse)

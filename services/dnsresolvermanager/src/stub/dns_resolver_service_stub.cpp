@@ -106,8 +106,8 @@ int32_t DnsResolverServiceStub::OnGetAddrInfo(MessageParcel &data, MessageParcel
 
 int32_t DnsResolverServiceStub::OnCreateNetworkCache(MessageParcel &data, MessageParcel &reply)
 {
-    uint16_t netId = 0;
-    if (!data.ReadUint16(netId)) {
+    int32_t netId = 0;
+    if (!data.ReadInt32(netId)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     int32_t ret = CreateNetworkCache(netId);
@@ -119,8 +119,8 @@ int32_t DnsResolverServiceStub::OnCreateNetworkCache(MessageParcel &data, Messag
 
 int32_t DnsResolverServiceStub::OnDestoryNetworkCache(MessageParcel &data, MessageParcel &reply)
 {
-    uint16_t netId = 0;
-    if (!data.ReadUint16(netId)) {
+    int32_t netId = 0;
+    if (!data.ReadInt32(netId)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     int32_t ret = DestoryNetworkCache(netId);
@@ -132,8 +132,8 @@ int32_t DnsResolverServiceStub::OnDestoryNetworkCache(MessageParcel &data, Messa
 
 int32_t DnsResolverServiceStub::OnFlushNetworkCache(MessageParcel &data, MessageParcel &reply)
 {
-    uint16_t netId = 0;
-    if (!data.ReadUint16(netId)) {
+    int32_t netId = 0;
+    if (!data.ReadInt32(netId)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     int32_t ret = FlushNetworkCache(netId);
@@ -145,13 +145,13 @@ int32_t DnsResolverServiceStub::OnFlushNetworkCache(MessageParcel &data, Message
 
 int32_t DnsResolverServiceStub::OnSetResolverConfig(MessageParcel &data, MessageParcel &reply)
 {
-    uint16_t netId = 0;
+    int32_t netId = 0;
     uint16_t baseTimeoutMsec = 0;
     uint8_t retryCount = 0;
     std::vector<std::string> servers;
     std::vector<std::string> domains;
 
-    if (!data.ReadUint16(netId)) {
+    if (!data.ReadInt32(netId)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     if (!data.ReadUint16(baseTimeoutMsec)) {
@@ -194,12 +194,12 @@ int32_t DnsResolverServiceStub::OnSetResolverConfig(MessageParcel &data, Message
 
 int32_t DnsResolverServiceStub::OnGetResolverInfo(MessageParcel &data, MessageParcel &reply)
 {
-    uint16_t netId = 0;
+    int32_t netId = 0;
     std::vector<std::string> servers;
     std::vector<std::string> domains;
     uint16_t baseTimeoutMsec = 0;
     uint8_t retryCount = 0;
-    if (!data.ReadUint16(netId)) {
+    if (!data.ReadInt32(netId)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     int32_t ret = GetResolverInfo(netId, servers, domains, baseTimeoutMsec, retryCount);

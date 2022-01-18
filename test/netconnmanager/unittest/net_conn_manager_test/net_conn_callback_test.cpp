@@ -35,44 +35,63 @@ void NetConnCallbackTest::WaitFor(int timeoutSecond)
     cv_.wait_for(callbackLock, std::chrono::seconds(timeoutSecond));
 }
 
-int32_t NetConnCallbackTest::NetConnStateChanged(const sptr<NetConnCallbackInfo> &info)
+int32_t NetConnCallbackTest::NetAvailable(sptr<NetHandle> &netHandle)
 {
-    if (info == nullptr) {
-        NETMGR_LOG_I("NetConnCallbackTest::NetConnStateChanged(), info is nullptr");
-        return -1;
+    if (netHandle != nullptr) {
+        return 0;
     }
 
-    NETMGR_LOG_I("NetConnCallbackTest::NetConnStateChanged(), netState_:[%{public}d], netType_:[%{public}d]",
-        info->netState_, info->netType_);
-
-    netState_ = info->netState_;
+    NETMGR_LOG_D("NetAvailable: netId = %{public}d", netHandle->GetNetId());
     NotifyAll();
-
     return 0;
 }
 
-int32_t NetConnCallbackTest::NetAvailable(int32_t netId)
+int32_t NetConnCallbackTest::NetCapabilitiesChange(
+    sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap)
 {
-    NETMGR_LOG_D("NetConnCallbackTest::NetAvailable: netId = %{public}d", netId);
+    if (netHandle == nullptr || netAllCap == nullptr) {
+        return 0;
+    }
+
+    NETMGR_LOG_D("NetCapabilitiesChange: netId = [%{public}d]", netHandle->GetNetId());
+    NETMGR_LOG_D("[%{public}s]", netAllCap->ToString("|").c_str());
     NotifyAll();
     return 0;
 }
-int32_t NetConnCallbackTest::NetCapabilitiesChange(int32_t netId, const uint64_t &netCap)
+
+int32_t NetConnCallbackTest::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle,
+    const sptr<NetLinkInfo> &info)
 {
-    NETMGR_LOG_D("NetConnCallbackTest::NetCapabilitiesChange: netId = %{public}d netCap = %{public}llu", netId, netCap);
+    if (netHandle == nullptr || info == nullptr) {
+        return 0;
+    }
+    NETMGR_LOG_D("NetConnectionPropertiesChange: netId = %{public}d info = %{public}s", netHandle->GetNetId(),
+        info->ToString("").c_str());
     NotifyAll();
     return 0;
 }
-int32_t NetConnCallbackTest::NetConnectionPropertiesChange(int32_t netId, const sptr<NetLinkInfo> &info)
+
+int32_t NetConnCallbackTest::NetLost(sptr<NetHandle> &netHandle)
 {
-    NETMGR_LOG_D("NetConnCallbackTest::NetConnectionPropertiesChange: netId = %{public}d info = %{public}s",
-        netId, info->ToString("").c_str());
+    if (netHandle == nullptr) {
+        return 0;
+    }
+    NETMGR_LOG_D("NetLost: netId = %{public}d", netHandle->GetNetId());
     NotifyAll();
     return 0;
 }
-int32_t NetConnCallbackTest::NetLost(int32_t netId)
+
+int32_t NetConnCallbackTest::NetUnavailable()
 {
-    NETMGR_LOG_D("NetConnCallbackTest::NetLost: netId = %{public}d", netId);
+    NETMGR_LOG_D("NetUnavailable");
+    NotifyAll();
+    return 0;
+}
+
+int32_t NetConnCallbackTest::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool isBlocked)
+{
+    NETMGR_LOG_D("NetConnCallbackTest::NetLost: netId = %{public}d bolcked = %{public}s",
+        netHandle->GetNetId(), isBlocked ? "true" : "false");
     NotifyAll();
     return 0;
 }

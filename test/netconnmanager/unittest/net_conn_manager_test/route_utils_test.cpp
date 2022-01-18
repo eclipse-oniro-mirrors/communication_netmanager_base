@@ -44,8 +44,9 @@ HWTEST_F(RouteUtilsTest, AddRouteToLocal01, TestSize.Level1)
     Route r;
 
     r.iface_ = iface;
-    r.rtn_type_ = RTN_UNICAST;
+    r.rtnType_ = RTN_UNICAST;
     r.hasGateway_ = true;
+    r.isDefaultRoute_ = false;
     r.destination_.type_ = INetAddr::IPV4;
     r.destination_.family_ = AF_INET;
     r.destination_.prefixlen_ = 0x18;
@@ -70,8 +71,9 @@ HWTEST_F(RouteUtilsTest, RemoveRouteFromLocal01, TestSize.Level1)
     Route r;
 
     r.iface_ = iface;
-    r.rtn_type_ = RTN_UNICAST;
+    r.rtnType_ = RTN_UNICAST;
     r.hasGateway_ = true;
+    r.isDefaultRoute_ = false;
     r.destination_.type_ = INetAddr::IPV4;
     r.destination_.family_ = AF_INET;
     r.destination_.prefixlen_ = 0x18;
@@ -95,8 +97,9 @@ HWTEST_F(RouteUtilsTest, AddRoute01, TestSize.Level1)
     Route r;
 
     r.iface_ = iface;
-    r.rtn_type_ = RTN_UNICAST;
+    r.rtnType_ = RTN_UNICAST;
     r.hasGateway_ = true;
+    r.isDefaultRoute_ = false;
     r.destination_.type_ = INetAddr::IPV4;
     r.destination_.family_ = AF_INET;
     r.destination_.prefixlen_ = 0x18;
@@ -119,8 +122,9 @@ HWTEST_F(RouteUtilsTest, RemoveRoute01, TestSize.Level1)
     Route r;
 
     r.iface_ = iface;
-    r.rtn_type_ = RTN_UNICAST;
+    r.rtnType_ = RTN_UNICAST;
     r.hasGateway_ = true;
+    r.isDefaultRoute_ = false;
     r.destination_.type_ = INetAddr::IPV4;
     r.destination_.family_ = AF_INET;
     r.destination_.prefixlen_ = 0x18;
@@ -145,8 +149,9 @@ HWTEST_F(RouteUtilsTest, UpdateRoutes01, TestSize.Level1)
     Route r;
 
     r.iface_ = iface;
-    r.rtn_type_ = RTN_UNICAST;
+    r.rtnType_ = RTN_UNICAST;
     r.hasGateway_ = true;
+    r.isDefaultRoute_ = false;
     r.destination_.type_ = INetAddr::IPV4;
     r.destination_.family_ = AF_INET;
     r.destination_.prefixlen_ = 0x18;

@@ -20,42 +20,24 @@
 
 #include "parcel.h"
 
+#include "net_all_capabilities.h"
+
 namespace OHOS {
 namespace NetManagerStandard {
-typedef enum {
-    NET_CAPABILITIES_NONE,
-    NET_CAPABILITIES_INTERNET = 1 << 0,
-    NET_CAPABILITIES_MMS = 1 << 1,
-    NET_CAPABILITIES_VPN = 1 << 2,
-} NetCapabilities;
-const uint64_t NET_CAPABILITIES_MAX = (NET_CAPABILITIES_INTERNET | NET_CAPABILITIES_MMS);
-
-typedef enum {
-    NET_TYPE_UNKNOWN,
-    NET_TYPE_CELLULAR,
-    NET_TYPE_ETHERNET,
-    NET_TYPE_WIFI,
-    NET_TYPE_VPN,
-    NET_TYPE_MAX
-} NetworkType;
-
 struct NetSpecifier : public Parcelable {
-    NetSpecifier(const std::string& ident, uint32_t netType, uint64_t netCapabilities);
-    NetSpecifier() {};
     std::string ident_;
-    uint32_t netType_ = NET_TYPE_UNKNOWN;
-    uint64_t netCapabilities_ = NET_CAPABILITIES_NONE;
-    bool IfValid();
+    NetAllCapabilities netCapabilities_;
+
+    bool SpecifierIsValid() const;
+    void SetCapabilities(const std::set<NetCap> &netCaps);
+    void SetCapability(NetCap netCap);
+    void SetTypes(const std::set<NetBearType> &bearerTypes);
+    void SetType(NetBearType bearerType);
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<NetSpecifier> Unmarshalling(Parcel &parcel);
     static bool Marshalling(Parcel &parcel, const sptr<NetSpecifier> &object);
     std::string ToString(const std::string &tab) const;
-
-    bool operator< (const NetSpecifier &spec) const
-    {
-        return (netType_ < spec.netType_) || (netType_ == spec.netType_ && netCapabilities_ < spec.netCapabilities_);
-    }
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

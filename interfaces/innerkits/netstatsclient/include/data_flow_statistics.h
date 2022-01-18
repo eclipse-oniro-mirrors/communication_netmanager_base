@@ -101,13 +101,6 @@ public:
      * @return The number of sent packets.
      */
     int64_t GetIfaceTxPackets(const std::string &interfaceName);
-
-    /**
-     * @brief Obtains the NIC list.
-     *
-     * @return The list of interface.
-     */
-    std::vector<std::string> InterfaceGetList();
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

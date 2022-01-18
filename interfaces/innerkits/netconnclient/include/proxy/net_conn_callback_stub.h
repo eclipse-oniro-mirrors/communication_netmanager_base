@@ -32,15 +32,24 @@ public:
     int32_t OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
+public:
+    int32_t NetAvailable(sptr<NetHandle> &netHandle) override;
+    int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap) override;
+    int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info) override;
+    int32_t NetLost(sptr<NetHandle> &netHandle) override;
+    int32_t NetUnavailable() override;
+    int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override;
+
 private:
     using NetConnCallbackFunc = int32_t (NetConnCallbackStub::*)(MessageParcel &, MessageParcel &);
 
 private:
-    int32_t OnNetConnStateChanged(MessageParcel &data, MessageParcel &reply);
     int32_t OnNetAvailable(MessageParcel &data, MessageParcel &reply);
     int32_t OnNetCapabilitiesChange(MessageParcel &data, MessageParcel &reply);
     int32_t OnNetConnectionPropertiesChange(MessageParcel &data, MessageParcel &reply);
     int32_t OnNetLost(MessageParcel &data, MessageParcel &reply);
+    int32_t OnNetUnavailable(MessageParcel &data, MessageParcel &reply);
+    int32_t OnNetBlockStatusChange(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetConnCallbackFunc> memberFuncMap_;

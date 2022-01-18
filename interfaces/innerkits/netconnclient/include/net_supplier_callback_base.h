@@ -17,8 +17,11 @@
 #define NET_SUPPLIER_CALLBACK_BASE_H
 
 #include <string>
+#include <set>
 
 #include "refbase.h"
+
+#include "net_all_capabilities.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -26,8 +29,8 @@ class NetSupplierCallbackBase : public virtual RefBase {
 public:
     virtual ~NetSupplierCallbackBase() = default;
 
-    virtual int32_t RequestNetwork(const std::string &ident, uint64_t netCapability);
-    virtual int32_t ReleaseNetwork(const std::string &ident, uint64_t netCapability);
+    virtual int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps);
+    virtual int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps);
 };
 } // NetManagerStandard
 } // OHOS

@@ -38,12 +38,6 @@ class NetStatsService : public SystemAbility,
 public:
     void OnStart() override;
     void OnStop() override;
-    /**
-    * @brief The interface in NetStatsService can be called when the system is ready
-    *
-    * @return Returns 0, the system is ready, otherwise the system is not ready
-    */
-    int32_t SystemReady() override;
     int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;
     int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;
     NetStatsResultCode GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end,

@@ -51,13 +51,10 @@ void NetScoreTest::TearDown() {}
 
 HWTEST_F(NetScoreTest, GetServiceScore, TestSize.Level1)
 {
-    uint64_t netCapabilities = 0x03;
-    netCapabilities |= NET_CAPABILITIES_INTERNET;
-    netCapabilities |= NET_CAPABILITIES_MMS;
-
+    std::set<NetCap> netCaps {NET_CAPABILITY_MMS, NET_CAPABILITY_INTERNET};
     std::string ident = "ident";
-    NetworkType netType = NET_TYPE_CELLULAR;
-    sptr<NetSupplier> supplier = (std::make_unique<NetSupplier>(netType, ident, netCapabilities)).release();
+    NetBearType bearerType = BEARER_CELLULAR;
+    sptr<NetSupplier> supplier = (std::make_unique<NetSupplier>(bearerType, ident, netCaps)).release();
 
     // mock Failed to detect network
     supplier->SetNetValid(false);

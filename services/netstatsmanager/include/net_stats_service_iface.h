@@ -22,6 +22,7 @@ namespace NetManagerStandard {
 class NetStatsServiceIface : public NetStatsBaseService {
 public:
     int32_t GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end, NetStatsInfo &info) override;
+    int32_t ResetStatsFactory() override;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

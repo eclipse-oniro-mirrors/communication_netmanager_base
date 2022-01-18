@@ -44,12 +44,12 @@ public:
     virtual int32_t GetAddressesByName(const std::string &hostName, std::vector<INetAddr> &addrInfo) = 0;
     virtual int32_t GetAddrInfo(const std::string &hostName, const std::string &server,
         const sptr<DnsAddrInfo> &hints, std::vector<sptr<DnsAddrInfo>> &dnsAddrInfo) = 0;
-    virtual int32_t CreateNetworkCache(uint16_t netId) = 0;
-    virtual int32_t DestoryNetworkCache(uint16_t netId) = 0;
-    virtual int32_t FlushNetworkCache(uint16_t netId) = 0;
-    virtual int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
+    virtual int32_t CreateNetworkCache(int32_t netId) = 0;
+    virtual int32_t DestoryNetworkCache(int32_t netId) = 0;
+    virtual int32_t FlushNetworkCache(int32_t netId) = 0;
+    virtual int32_t SetResolverConfig(int32_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
         const std::vector<std::string> &servers, const std::vector<std::string> &domains) = 0;
-    virtual int32_t GetResolverInfo(uint16_t netId, std::vector<std::string> &servers,
+    virtual int32_t GetResolverInfo(int32_t netId, std::vector<std::string> &servers,
         std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount) = 0;
 };
 } // namespace NetManagerStandard

@@ -29,8 +29,9 @@ public:
     void RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
     void UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
     int32_t NotifyNetUidPolicyChanged(uint32_t uid, NetUidPolicy policy);
-    int32_t NotifyNetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicys);
-    int32_t NotifyNetStrategySwitch(const std::string &subscriberId, bool enable);
+    int32_t NotifyNetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicies);
+    int32_t NotifyNetStrategySwitch(int32_t slotId, bool enable);
+    int32_t NotifyNetBackgroundPolicyChanged(bool isBackgroundPolicyAllow);
 
 private:
     std::vector<sptr<INetPolicyCallback>> netPolicyCallback_;

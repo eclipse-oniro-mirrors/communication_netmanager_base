@@ -25,6 +25,13 @@ struct NetdNotifyCallback {
     std::function<void(const std::string &iface)> NetdResponseInterfaceAdd;
     std::function<void(const std::string &iface)> NetdResponseInterfaceRemoved;
 };
+
+enum NetdContrlResultCode {
+    ERR_NULLPTR = 0,
+    ERR_NATIVESERVICE_NOTFIND = (-1),
+    ERR_START_DHCPSERVICE_FAILED = (-2),
+    ERR_STOP_DHCPSERVICE_FAILED = (-3),
+};
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NETD_CONTROLLER_DEFINE_H

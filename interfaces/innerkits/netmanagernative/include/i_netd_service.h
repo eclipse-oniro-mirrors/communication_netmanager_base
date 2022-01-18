@@ -44,6 +44,9 @@ public:
         NETD_NETWORK_REMOVE_ROUTE_PARCEL,
         NETD_NETWORK_SET_DEFAULT,
         NETD_NETWORK_GET_DEFAULT,
+        NETD_NETWORK_CLEAR_DEFAULT,
+        NETD_GET_PROC_SYS_NET,
+        NETD_SET_PROC_SYS_NET,
         NETD_NETWORK_CREATE_PHYSICAL,
         NETD_INTERFACE_ADD_ADDRESS,
         NETD_INTERFACE_DEL_ADDRESS,
@@ -55,12 +58,14 @@ public:
         NETD_INTERFACE_GET_CONFIG,
         NETD_START_DHCP_CLIENT,
         NETD_STOP_DHCP_CLIENT,
+        NETD_START_DHCP_SERVICE,
+        NETD_STOP_DHCP_SERVICE,
     };
 
     virtual int32_t SetResolverConfigParcel(const DnsresolverParamsParcel& resolvParams) = 0;
     virtual int32_t SetResolverConfig(const dnsresolver_params &resolvParams) = 0;
-    virtual int32_t GetResolverConfig(const uint16_t netid, std::vector<std::string> &servers,
-        std::vector<std::string> &domains, nmd::dns_res_params &param)=0;
+    virtual int32_t GetResolverConfig(const  uint16_t  netid,  std::vector<std::string> &servers,
+           std::vector<std::string> &domains, nmd::dns_res_params &param)=0;
     virtual int32_t CreateNetworkCache(const uint16_t netid) = 0;
     virtual int32_t FlushNetworkCache(const uint16_t netid) = 0;
     virtual int32_t DestoryNetworkCache(const uint16_t netid) = 0;
@@ -79,6 +84,11 @@ public:
     virtual int32_t NetworkRemoveRouteParcel(int32_t netId, const route_info_parcel &routeInfo) = 0;
     virtual int32_t NetworkSetDefault(int32_t netId) = 0;
     virtual int32_t NetworkGetDefault() = 0;
+    virtual int32_t NetworkClearDefault() = 0;
+    virtual int32_t GetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
+        const std::string &parameter, std::string  &value) = 0;
+    virtual int32_t SetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
+        const std::string &parameter, std::string  &value) = 0;
     virtual int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) = 0;
     virtual int32_t InterfaceAddAddress(const std::string &interfaceName, const std::string &addrString,
         int32_t prefixLength) = 0;
@@ -92,6 +102,8 @@ public:
     virtual int32_t InterfaceGetConfig(interface_configuration_parcel &cfg) = 0;
     virtual int32_t StartDhcpClient(const std::string &iface, bool bIpv6) = 0;
     virtual int32_t StopDhcpClient(const std::string &iface, bool bIpv6) = 0;
+    virtual int32_t StartDhcpService(const std::string &iface, const std::string &ipv4addr) = 0;
+    virtual int32_t StopDhcpService(const std::string &iface) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetdNative.INetdService")
 };

@@ -20,7 +20,6 @@ namespace OHOS {
 namespace NetManagerStandard {
 NetStatsServiceStub::NetStatsServiceStub()
 {
-    memberFuncMap_[CMD_SYSTEM_READY] = &NetStatsServiceStub::OnSystemReady;
     memberFuncMap_[CMD_GET_IFACE_STATS_DETAIL] = &NetStatsServiceStub::OnGetIfaceStatsDetail;
     memberFuncMap_[CMD_GET_UID_STATS_DETAIL] = &NetStatsServiceStub::OnGetUidStatsDetail;
     memberFuncMap_[CMD_UPDATE_IFACES_STATS] = &NetStatsServiceStub::OnUpdateIfacesStats;
@@ -53,12 +52,6 @@ int32_t NetStatsServiceStub::OnRemoteRequest(
     }
     NETMGR_LOG_D("stub default case, need check");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-}
-
-int32_t NetStatsServiceStub::OnSystemReady(MessageParcel &data, MessageParcel &reply)
-{
-    SystemReady();
-    return ERR_NONE;
 }
 
 int32_t NetStatsServiceStub::OnRegisterNetStatsCallback(MessageParcel &data, MessageParcel &reply)
@@ -171,7 +164,7 @@ int32_t NetStatsServiceStub::OnUpdateIfacesStats(MessageParcel &data, MessagePar
     }
 
     NetStatsInfo stats;
-    if (!NetStatsInfo::Unmarshalling(reply, stats)) {
+    if (!NetStatsInfo::Unmarshalling(data, stats)) {
         NETMGR_LOG_E("NetStatsInfo::Unmarshalling failed");
     }
     int32_t ret = static_cast<int32_t>(UpdateIfacesStats(iface, start, end, stats));

@@ -22,7 +22,7 @@ bool NetPolicyQuotaPolicy::Marshalling(Parcel &parcel) const
     if (!parcel.WriteInt8(netType_)) {
         return false;
     }
-    if (!parcel.WriteString(subscriberId_)) {
+    if (!parcel.WriteInt32(slotId_)) {
         return false;
     }
     if (!parcel.WriteInt64(periodStartTime_)) {
@@ -56,15 +56,15 @@ bool NetPolicyQuotaPolicy::Marshalling(Parcel &parcel, const NetPolicyQuotaPolic
     return true;
 }
 
-bool NetPolicyQuotaPolicy::Marshalling(Parcel &parcel, const std::vector<NetPolicyQuotaPolicy> &quotaPolicys)
+bool NetPolicyQuotaPolicy::Marshalling(Parcel &parcel, const std::vector<NetPolicyQuotaPolicy> &quotaPolicies)
 {
-    uint32_t vsize = static_cast<uint32_t>(quotaPolicys.size());
+    uint32_t vsize = static_cast<uint32_t>(quotaPolicies.size());
     if (!parcel.WriteInt32(vsize)) {
         return false;
     }
 
     for (uint32_t i = 0; i < vsize; ++i) {
-        quotaPolicys[i].Marshalling(parcel);
+        quotaPolicies[i].Marshalling(parcel);
     }
 
     return true;
@@ -75,7 +75,7 @@ bool NetPolicyQuotaPolicy::Unmarshalling(Parcel &parcel, NetPolicyQuotaPolicy &q
     if (!parcel.ReadInt8(quotaPolicy.netType_)) {
         return false;
     }
-    if (!parcel.ReadString(quotaPolicy.subscriberId_)) {
+    if (!parcel.ReadInt32(quotaPolicy.slotId_)) {
         return false;
     }
     if (!parcel.ReadInt64(quotaPolicy.periodStartTime_)) {
@@ -103,7 +103,7 @@ bool NetPolicyQuotaPolicy::Unmarshalling(Parcel &parcel, NetPolicyQuotaPolicy &q
     return true;
 }
 
-bool NetPolicyQuotaPolicy::Unmarshalling(Parcel &parcel, std::vector<NetPolicyQuotaPolicy> &quotaPolicys)
+bool NetPolicyQuotaPolicy::Unmarshalling(Parcel &parcel, std::vector<NetPolicyQuotaPolicy> &quotaPolicies)
 {
     uint32_t vSize = 0;
     if (!parcel.ReadUint32(vSize)) {
@@ -115,7 +115,7 @@ bool NetPolicyQuotaPolicy::Unmarshalling(Parcel &parcel, std::vector<NetPolicyQu
         if (!parcel.ReadInt8(quotaPolicyTmp.netType_)) {
             return false;
         }
-        if (!parcel.ReadString(quotaPolicyTmp.subscriberId_)) {
+        if (!parcel.ReadInt32(quotaPolicyTmp.slotId_)) {
             return false;
         }
         if (!parcel.ReadInt64(quotaPolicyTmp.periodStartTime_)) {
@@ -139,7 +139,7 @@ bool NetPolicyQuotaPolicy::Unmarshalling(Parcel &parcel, std::vector<NetPolicyQu
         if (!parcel.ReadInt8(quotaPolicyTmp.source_)) {
             return false;
         }
-        quotaPolicys.push_back(quotaPolicyTmp);
+        quotaPolicies.push_back(quotaPolicyTmp);
     }
 
     return true;

@@ -19,6 +19,7 @@ ohos_sa_profile("net_manager_profile") {
     "1152.xml",
     "1153.xml",
     "1154.xml",
+    "1155.xml",
     "1156.xml",
     "1157.xml",
     "1158.xml",

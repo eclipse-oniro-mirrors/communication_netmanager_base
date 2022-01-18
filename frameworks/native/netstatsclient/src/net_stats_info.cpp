@@ -19,15 +19,6 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetStatsInfo& NetStatsInfo::operator=(const NetStatsInfo &statsInfo)
-{
-    rxBytes_ = statsInfo.rxBytes_;
-    txBytes_ = statsInfo.txBytes_;
-    rxPackets_ = statsInfo.rxPackets_;
-    txPackets_ = statsInfo.txPackets_;
-    return *this;
-}
-
 bool NetStatsInfo::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteInt64(rxBytes_)) {
@@ -39,7 +30,7 @@ bool NetStatsInfo::Marshalling(Parcel &parcel) const
     return true;
 }
 
-bool NetStatsInfo::Marshalling(Parcel &parcel, NetStatsInfo &stats)
+bool NetStatsInfo::Marshalling(Parcel &parcel, const NetStatsInfo &stats)
 {
     if (!parcel.WriteInt64(stats.rxBytes_)) {
         return false;

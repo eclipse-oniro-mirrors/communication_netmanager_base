@@ -42,7 +42,6 @@ public:
     };
 
 public:
-    virtual int32_t SystemReady() = 0;
     virtual int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback) = 0;
     virtual int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) = 0;
     virtual NetStatsResultCode GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end,

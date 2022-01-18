@@ -21,7 +21,7 @@ ohos_unittest("net_conn_manager_test") {
     "net_conn_callback_test.cpp",
     "net_conn_manager_test.cpp",
     "net_detection_callback_test.cpp",
-    "net_handler_test.cpp",
+    "net_handle_test.cpp",
     "net_score_test.cpp",
     "route_utils_test.cpp",
   ]
@@ -63,6 +63,10 @@ ohos_unittest("net_conn_manager_test") {
     external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
   } else {
     external_deps += [ "hilog:libhilog" ]
+  }
+
+  if (enable_sys_func) {
+    defines += [ "SYS_FUNC" ]
   }
 
   part_name = "netmanager_base"

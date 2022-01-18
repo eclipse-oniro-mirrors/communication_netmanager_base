@@ -31,7 +31,7 @@ static constexpr OHOS::HiviewDFX::HiLogLabel NET_MGR_LABEL = {LOG_CORE, LOG_DOMA
     (void)OHOS::HiviewDFX::HiLog::op(NET_MGR_LABEL, "[%{public}s-(%{public}s:%{public}d)]" fmt, __FUNCTION__, \
         FILENAME__, __LINE__, ##__VA_ARGS__)
 
-#define NETNATIVE_LOGD(fmt, ...) PRINT_NATIVE_LOG(Debug, fmt, ##__VA_ARGS__)
+#define NETNATIVE_LOG_D(fmt, ...) PRINT_NATIVE_LOG(Debug, fmt, ##__VA_ARGS__)
 #define NETNATIVE_LOGE(fmt, ...) PRINT_NATIVE_LOG(Error, fmt, ##__VA_ARGS__)
 #define NETNATIVE_LOGW(fmt, ...) PRINT_NATIVE_LOG(Warn, fmt, ##__VA_ARGS__)
 #define NETNATIVE_LOGI(fmt, ...) PRINT_NATIVE_LOG(Info, fmt, ##__VA_ARGS__)

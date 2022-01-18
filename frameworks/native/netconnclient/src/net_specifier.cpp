@@ -13,24 +13,40 @@
  * limitations under the License.
  */
 
-#include "net_mgr_log_wrapper.h"
 #include "net_specifier.h"
+
+#include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetSpecifier::NetSpecifier(const std::string& ident, uint32_t netType, uint64_t netCapabilities)
-    : ident_(ident), netType_(netType), netCapabilities_(netCapabilities)
-{}
-
-bool NetSpecifier::IfValid()
+bool NetSpecifier::SpecifierIsValid() const
 {
-    if (netType_ > NET_TYPE_MAX) {
+    if (ident_.empty() && netCapabilities_.CapsIsNull()) {
         return false;
     }
-    if (netCapabilities_ > NET_CAPABILITIES_MAX) {
-        return false;
-    }
-    return true;
+    return netCapabilities_.CapsIsValid();
+}
+
+void NetSpecifier::SetCapabilities(const std::set<NetCap> &netCaps)
+{
+    netCapabilities_.netCaps_ = netCaps;
+}
+
+void NetSpecifier::SetCapability(NetCap netCap)
+{
+    netCapabilities_.netCaps_.clear();
+    netCapabilities_.netCaps_.insert(netCap);
+}
+
+void NetSpecifier::SetTypes(const std::set<NetBearType> &bearerTypes)
+{
+    netCapabilities_.bearerTypes_ = bearerTypes;
+}
+
+void NetSpecifier::SetType(NetBearType bearerType)
+{
+    netCapabilities_.bearerTypes_.clear();
+    netCapabilities_.bearerTypes_.insert(bearerType);
 }
 
 bool NetSpecifier::Marshalling(Parcel &parcel) const
@@ -38,13 +54,7 @@ bool NetSpecifier::Marshalling(Parcel &parcel) const
     if (!parcel.WriteString(ident_)) {
         return false;
     }
-    if (!parcel.WriteUint32(netType_)) {
-        return false;
-    }
-    if (!parcel.WriteUint64(netCapabilities_)) {
-        return false;
-    }
-    return true;
+    return netCapabilities_.Marshalling(parcel);
 }
 
 sptr<NetSpecifier> NetSpecifier::Unmarshalling(Parcel &parcel)
@@ -57,10 +67,7 @@ sptr<NetSpecifier> NetSpecifier::Unmarshalling(Parcel &parcel)
     if (!parcel.ReadString(ptr->ident_)) {
         return nullptr;
     }
-    if (!parcel.ReadUint32(ptr->netType_)) {
-        return nullptr;
-    }
-    if (!parcel.ReadUint64(ptr->netCapabilities_)) {
+    if (!ptr->netCapabilities_.Unmarshalling(parcel)) {
         return nullptr;
     }
     return ptr;
@@ -75,13 +82,7 @@ bool NetSpecifier::Marshalling(Parcel &parcel, const sptr<NetSpecifier> &object)
     if (!parcel.WriteString(object->ident_)) {
         return false;
     }
-    if (!parcel.WriteUint32(object->netType_)) {
-        return false;
-    }
-    if (!parcel.WriteUint64(object->netCapabilities_)) {
-        return false;
-    }
-    return true;
+    return object->netCapabilities_.Marshalling(parcel);
 }
 
 std::string NetSpecifier::ToString(const std::string &tab) const
@@ -96,15 +97,7 @@ std::string NetSpecifier::ToString(const std::string &tab) const
     str.append("ident_ = ");
     str.append(ident_);
 
-    str.append("\n");
-    str.append(tab);
-    str.append("netType_ = ");
-    str.append(std::to_string(netType_));
-
-    str.append("\n");
-    str.append(tab);
-    str.append("netCapabilities_ = ");
-    str.append(std::to_string(netCapabilities_));
+    str.append(netCapabilities_.ToString(tab));
 
     return str;
 }

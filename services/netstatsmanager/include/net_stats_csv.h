@@ -21,6 +21,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <map>
 
 #include "net_stats_info.h"
 
@@ -82,6 +83,7 @@ public:
     bool UpdateUidStats();
     bool UpdateIfaceStatsCsv(const std::string &iface);
     bool UpdateUidStatsCsv(uint32_t uid, const std::string &iface);
+    bool DeleteUidStatsCsv(uint32_t uid);
     NetStatsResultCode GetIfaceBytes(const std::string &iface, uint32_t start, uint32_t end,
         NetStatsInfo &statsInfo);
     NetStatsResultCode GetUidBytes(const std::string &iface, uint32_t uid, uint32_t start,
@@ -96,7 +98,9 @@ private:
         uint32_t timeCloumn, std::vector<NetStatsInfo> &vecRow);
     void GetSumStats(const std::vector<NetStatsInfo> &vecRow, NetStatsInfo &sumStats);
     void GetPeriodStats(const NetStatsInfo &startStats, const NetStatsInfo &endStats, NetStatsInfo &totalStats);
-    bool RenameIfacesStatsCsv(const std::string &fromFileName);
+    bool RenameStatsCsv(const std::string &fromFileName, const std::string &bakFile, const std::string &toFile);
+    void GenerateNewIfaceStats(uint32_t start, uint32_t end, const NetStatsInfo &stats,
+        std::map<uint32_t, NetStatsInfo> &newIfaceStats);
 
 private:
     std::mutex mutex_;

@@ -40,14 +40,10 @@ public:
         CMD_NM_REGISTER_NET_CONN_CALLBACK,
         CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER,
         CMD_NM_UNREGISTER_NET_CONN_CALLBACK,
-        CMD_NM_UNREGISTER_NET_CONN_CALLBACK_BY_SPECIFIER,
         CMD_NM_REG_NET_SUPPLIER,
         CMD_NM_UNREG_NETWORK,
         CMD_NM_SET_NET_SUPPLIER_INFO,
-        CMD_NM_SET_NET_CAPABILTITES,
         CMD_NM_SET_NET_LINK_INFO,
-        CMD_NM_ACTIVATENETWORK,
-        CMD_NM_DEACTIVATENETWORK,
         CMD_NM_GETDEFAULTNETWORK,
         CMD_NM_HASDEFAULTNET,
         CMD_NM_NET_DETECTION,
@@ -65,43 +61,40 @@ public:
         CMD_NM_UPDATE_NET_STATE_FOR_TEST,
         CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK,
         CMD_NM_SET_AIRPLANE_MODE,
+        CMD_NM_RESTORE_FACTORY_DATA,
         CMD_NM_END,
     };
 
 public:
     virtual int32_t SystemReady() = 0;
-    virtual int32_t RegisterNetSupplier(uint32_t netType, const std::string &ident, uint64_t netCapabilities,
-        uint32_t &supplierId) = 0;
+    virtual int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
+        const std::set<NetCap> &netCaps, uint32_t &supplierId) = 0;
     virtual int32_t UnregisterNetSupplier(uint32_t supplierId) = 0;
-    virtual int32_t RegisterNetSupplierCallback(uint32_t supplierId, const sptr<INetSupplierCallback> &callback) = 0;
+    virtual int32_t RegisterNetSupplierCallback(uint32_t supplierId,
+        const sptr<INetSupplierCallback> &callback) = 0;
     virtual int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) = 0;
     virtual int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-        const sptr<INetConnCallback> &callback) = 0;
+        const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS) = 0;
     virtual int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback) = 0;
-    virtual int32_t UnregisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-        const sptr<INetConnCallback> &callback) = 0;
     virtual int32_t UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState) = 0;
     virtual int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) = 0;
-    virtual int32_t UpdateNetCapabilities(uint32_t supplierId, uint64_t netCapabilities) = 0;
     virtual int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo) = 0;
-    virtual int32_t ActivateNetwork(
-        const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback, uint32_t &reqId) = 0;
-    virtual int32_t DeactivateNetwork(uint32_t &reqId) = 0;
-    virtual int32_t GetIfaceNameByType(uint32_t netType, const std::string &ident, std::string &ifaceName) = 0;
+    virtual int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) = 0;
     virtual int32_t RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) = 0;
     virtual int32_t UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) = 0;
     virtual int32_t NetDetection(int32_t netId) = 0;
     virtual int32_t GetDefaultNet(int32_t& netId) = 0;
     virtual int32_t HasDefaultNet(bool &flag) = 0;
-    virtual int32_t GetAddressesByName(const std::string &host, int32_t netId, std::list<INetAddr> &addrList) = 0;
+    virtual int32_t GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList) = 0;
     virtual int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr) = 0;
-    virtual int32_t GetSpecificNet(uint32_t type, std::list<int32_t> &netIdList) = 0;
+    virtual int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList) = 0;
     virtual int32_t GetAllNets(std::list<int32_t> &netIdList) = 0;
     virtual int32_t GetSpecificUidNet(int32_t uid, int32_t &netId) = 0;
     virtual int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) = 0;
-    virtual int32_t GetNetCapabilities(int32_t netId, uint64_t &cap) = 0;
+    virtual int32_t GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap) = 0;
     virtual int32_t BindSocket(int32_t socket_fd, int32_t netId) =0;
     virtual int32_t SetAirplaneMode(bool state) = 0;
+    virtual int32_t RestoreFactoryData() = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

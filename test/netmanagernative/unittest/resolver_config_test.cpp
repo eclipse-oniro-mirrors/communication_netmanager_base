@@ -14,9 +14,10 @@
  */
 
 #include <gtest/gtest.h>
-
+#include "iservice_registry.h"
 #include "netnative_log_wrapper.h"
-
+#include "netd_native_service_proxy.h"
+#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace NetdNative {
@@ -37,25 +38,66 @@ void ResolverConfigTest::SetUp() {}
 
 void ResolverConfigTest::TearDown() {}
 
+sptr<INetdService> GetProxy()
+{
+    NETNATIVE_LOGE("Get samgr >>>>>>>>>>>>>>>>>>>>>>>>>>");
+    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    NETNATIVE_LOGI("Get samgr %{public}p", samgr.GetRefPtr());
+    std::cout << "Get samgr  "<< samgr.GetRefPtr() << std::endl;
+
+    auto remote = samgr->GetSystemAbility(COMM_NETD_NATIVE_SYS_ABILITY_ID);
+    NETNATIVE_LOGI("Get remote %{public}p", remote.GetRefPtr());
+    std::cout << "Get remote "<< remote.GetRefPtr() << std::endl;
+
+    auto proxy = iface_cast<NetdNative::INetdService>(remote);
+    NETNATIVE_LOGI("Get proxy %{public}p", proxy.GetRefPtr());
+    std::cout << "Get proxy "<< proxy.GetRefPtr()<< std::endl;
+    return proxy;
+}
+
 HWTEST_F(ResolverConfigTest, ResolverConfigTest001, TestSize.Level1)
 {
+    OHOS::sptr<OHOS::NetdNative::INetdService> netdNativeService = GetProxy();
+    if (netdNativeService == nullptr) {
+        std::cout << "netdNativeService is nullptr" << std::endl;
+        EXPECT_FALSE(0);
+    }
     int32_t ret = 0;
-	NETNATIVE_LOGE("ResolverConfigTest001 ResolverConfigTest001 ResolverConfigTest001");
+    nmd::dnsresolver_params param0= {
+        0, 0, 1, {"8.8.8.8", "114.114.114.114"}, {"baidu.com", "sohu.com"}};
+    ret = -1;
+    ret = netdNativeService->CreateNetworkCache(0);
+    NETNATIVE_LOGE("NETD: CreateNetworkCache0   ret=%{public}d", ret);
+    ret = netdNativeService->SetResolverConfig(param0);
+    NETNATIVE_LOGE("NETD: SetResolverConfig0   ret=%{public}d", ret);
+    NETNATIVE_LOGE("ResolverConfigTest001 ResolverConfigTest001 ResolverConfigTest001");
     EXPECT_TRUE(ret == 0);
 }
 
 
 HWTEST_F(ResolverConfigTest, ResolverConfigTest002, TestSize.Level1)
 {
+    OHOS::sptr<OHOS::NetdNative::INetdService> netdNativeService = GetProxy();
+    if (netdNativeService == nullptr) {
+        std::cout << "netdNativeService is nullptr" << std::endl;
+        EXPECT_FALSE(0);
+    }
+
     int32_t ret = 0;
-	NETNATIVE_LOGE("ResolverConfigTest002 ResolverConfigTest002 ResolverConfigTest002");
+    NETNATIVE_LOGE("ResolverConfigTest002 ResolverConfigTest002 ResolverConfigTest002");
     EXPECT_TRUE(ret == 0);
 }
 
 HWTEST_F(ResolverConfigTest, ResolverConfigTest003, TestSize.Level1)
 {
+    OHOS::sptr<OHOS::NetdNative::INetdService> netdNativeService = GetProxy();
+    if (netdNativeService == nullptr) {
+        std::cout << "netdNativeService is nullptr" << std::endl;
+        EXPECT_FALSE(0);
+    }
+
     int32_t ret = 0;
-	NETNATIVE_LOGE("ResolverConfigTest003 ResolverConfigTest003 ResolverConfigTest003");
+    NETNATIVE_LOGE("ResolverConfigTest003 ResolverConfigTest003 ResolverConfigTest003");
     EXPECT_TRUE(ret == 0);
 }
 } // namespace NetdNative

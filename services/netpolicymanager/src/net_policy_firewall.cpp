@@ -30,19 +30,38 @@ bool NetPolicyFirewall::GetBackgroundPolicyByUid(uint32_t uid)
         return true;
     }
 
-    NetUidPolicy policy = netPolicyFile_->GetUidPolicy(uid);
-    if ((static_cast<uint32_t>(policy) & static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_ALL)) ||
-        (static_cast<uint32_t>(policy) & static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_METERED)) ||
-        (static_cast<uint32_t>(policy) & static_cast<uint32_t>(NetUidPolicy::NET_POLICY_TEMPORARY_ALLOW_METERED))) {
+    NetUidPolicy uidPolicy = netPolicyFile_->GetPolicyByUid(uid);
+    if ((static_cast<uint32_t>(uidPolicy) &
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_ALL)) ==
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_ALL)) {
+        return false;
+    } else if ((static_cast<uint32_t>(uidPolicy) &
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_ALL)) ==
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_ALL)) {
         return true;
     }
 
-    if (netPolicyFile_->GetBackgroundPolicy()) {
+    if ((static_cast<uint32_t>(uidPolicy) &
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED)) ==
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED)) {
+        return false;
+    } else if ((static_cast<uint32_t>(uidPolicy) &
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_METERED)) ==
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_METERED) ||
+        (static_cast<uint32_t>(uidPolicy) &
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_TEMPORARY_ALLOW_METERED)) ==
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_TEMPORARY_ALLOW_METERED)) {
         return true;
-    } else if (static_cast<uint32_t>(policy) &
+    }
+
+    if ((static_cast<uint32_t>(uidPolicy) &
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND)) ==
         static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND)) {
         return false;
-    } else if (static_cast<uint32_t>(policy) &
+    } else if (netPolicyFile_->GetBackgroundPolicy()) {
+        return true;
+    } else if ((static_cast<uint32_t>(uidPolicy) &
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND)) ==
         static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND)) {
         return true;
     }
@@ -50,10 +69,25 @@ bool NetPolicyFirewall::GetBackgroundPolicyByUid(uint32_t uid)
     return false;
 }
 
-bool NetPolicyFirewall::GetCurrentBackgroundPolicy()
+NetBackgroundPolicy NetPolicyFirewall::GetCurrentBackgroundPolicy()
 {
     uint32_t uid = IPCSkeleton::GetCallingUid();
-    return GetBackgroundPolicyByUid(uid);
+    NetUidPolicy policy = netPolicyFile_->GetPolicyByUid(uid);
+    if ((static_cast<uint32_t>(policy) &
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND)) ==
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND)) {
+        return NetBackgroundPolicy::NET_BACKGROUND_POLICY_ENABLED;
+    }
+    if (netPolicyFile_->GetBackgroundPolicy()) {
+        return NetBackgroundPolicy::NET_BACKGROUND_POLICY_DISABLE;
+    }
+    if ((static_cast<uint32_t>(policy) &
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND)) ==
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND)) {
+        return NetBackgroundPolicy::NET_BACKGROUND_POLICY_ALLOWLISTED;
+    }
+
+    return NetBackgroundPolicy::NET_BACKGROUND_POLICY_ENABLED;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

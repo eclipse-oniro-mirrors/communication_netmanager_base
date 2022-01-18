@@ -25,27 +25,6 @@ NetStatsServiceProxy::NetStatsServiceProxy(const sptr<IRemoteObject> &impl)
 
 NetStatsServiceProxy::~NetStatsServiceProxy() {}
 
-int32_t NetStatsServiceProxy::SystemReady()
-{
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
-    }
-    MessageParcel reply;
-    MessageOption option;
-    int32_t error = remote->SendRequest(CMD_SYSTEM_READY, data, reply, option);
-    if (error != ERR_NONE) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-    }
-    return error;
-}
-
 bool NetStatsServiceProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(NetStatsServiceProxy::GetDescriptor())) {
@@ -208,7 +187,7 @@ NetStatsResultCode NetStatsServiceProxy::UpdateIfacesStats(const std::string &if
         return NetStatsResultCode::ERR_INTERNAL_ERROR;
     }
 
-    if (!stats.Marshalling(data)) {
+    if (!NetStatsInfo::Marshalling(data, stats)) {
         NETMGR_LOG_E("Proxy Marshalling failed");
         return NetStatsResultCode::ERR_INTERNAL_ERROR;
     }

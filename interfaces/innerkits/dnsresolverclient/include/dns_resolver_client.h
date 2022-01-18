@@ -29,16 +29,14 @@ class DnsResolverClient {
     DECLARE_DELAYED_SINGLETON(DnsResolverClient)
 
 public:
+    /**
+     * @brief Get Addresses By domain Name
+     *
+     * @param The domain name
+     * @param The address information is parsed successfully
+     * @return Returns 0 as success, other values as failure
+     */
     int32_t GetAddressesByName(const std::string &hostName, std::vector<INetAddr> &addrInfo);
-    int32_t GetAddrInfo(const std::string &hostName, const std::string &server,
-        const sptr<DnsAddrInfo> &hints, std::vector<sptr<DnsAddrInfo>> &dnsAddrInfo);
-    int32_t CreateNetworkCache(uint16_t netId);
-    int32_t DestoryNetworkCache(uint16_t netId);
-    int32_t FlushNetworkCache(uint16_t netId);
-    int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
-        const std::vector<std::string> &servers, const std::vector<std::string> &domains);
-    int32_t GetResolverInfo(uint16_t netId, std::vector<std::string> &servers,
-        std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount);
 
 private:
     class DnsResolverDeathRecipient : public IRemoteObject::DeathRecipient {

@@ -40,6 +40,28 @@ NetStatsService::NetStatsService()
 
 NetStatsService::~NetStatsService() {}
 
+static void UpdateStatsTimer()
+{
+    sptr<NetStatsCsv> statsCsv = (std::make_unique<NetStatsCsv>()).release();
+    if (statsCsv == nullptr) {
+        NETMGR_LOG_E("statsCsv is nullptr");
+        return;
+    }
+    if (!statsCsv->UpdateIfaceStats()) {
+        NETMGR_LOG_E("UpdateIfaceStats failed");
+    }
+    if (!statsCsv->UpdateUidStats()) {
+        NETMGR_LOG_E("UpdateUidStats failed");
+    }
+    BroadcastInfo info;
+    info.action = "usual.event.netmanager.NETMANAGER_NET_STATE_UPDATED";
+    info.data = "Net Manager Iface and Uid States Updated";
+    info.ordered = true;
+    std::map<std::string, std::string> param;
+    DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
+    NETMGR_LOG_D("NetStatsService Update Iface and Uid Stats.");
+}
+
 void NetStatsService::OnStart()
 {
     struct timeval tv;
@@ -54,6 +76,9 @@ void NetStatsService::OnStart()
         NETMGR_LOG_E("init failed");
         return;
     }
+
+    InitListener();
+    updateStatsTimer_.Start(INTERVAL_UPDATE_STATS_TIME_MS, UpdateStatsTimer);
 
     state_ = STATE_RUNNING;
     gettimeofday(&tv, NULL);
@@ -106,39 +131,14 @@ void NetStatsService::InitListener()
 {
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent("usual.event.netmanager.NETMANAGER_NET_STATE_LIMITED");
+    matchingSkills.AddEvent("usual.event.netmanager.NETMANAGER_DELETE_UID");
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscribeInfo.SetPriority(1);
     subscriber_ = std::make_shared<NetStatsListener>(subscribeInfo);
     subscriber_->SetStatsCallback(netStatsCallback_);
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
-}
-
-static void UpdateStatsTimer()
-{
-    sptr<NetStatsCsv> statsCsv = (std::make_unique<NetStatsCsv>()).release();
-    if (statsCsv == nullptr) {
-        NETMGR_LOG_E("statsCsv is nullptr");
-        return;
-    }
-    if (!statsCsv->UpdateIfaceStats()) {
-        NETMGR_LOG_E("UpdateIfaceStats failed");
-    }
-    if (!statsCsv->UpdateUidStats()) {
-        NETMGR_LOG_E("UpdateUidStats failed");
-    }
-    BroadcastInfo info;
-    info.data = "Net Stats Updated";
-    info.ordered = true;
-    std::map<std::string, std::string> param;
-    DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
-}
-
-int32_t NetStatsService::SystemReady()
-{
-    NETMGR_LOG_D("System ready.");
-    InitListener();
-    updateStatsTimer_.Start(INTERVAL_UPDATE_STATS_TIME_MS, UpdateStatsTimer);
-    return 0;
+    NETMGR_LOG_D("NetStatsService SubscribeCommonEvent"
+        " NETMANAGER_NET_STATE_LIMITED and NETMANAGER_DELETE_UID");
 }
 
 int32_t NetStatsService::RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
@@ -170,11 +170,11 @@ NetStatsResultCode NetStatsService::GetIfaceStatsDetail(const std::string &iface
 {
     if (!netStatsCsv_->ExistsIface(iface)) {
         NETMGR_LOG_E("iface not exist");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
+        return NetStatsResultCode::ERR_INVALID_PARAMETER;
     }
     if (start >= end) {
         NETMGR_LOG_E("the start time should be less than the end time.");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
+        return NetStatsResultCode::ERR_INVALID_PARAMETER;
     }
     NetStatsResultCode result = netStatsCsv_->GetIfaceBytes(iface, start, end, statsInfo);
     NETMGR_LOG_I("GetIfaceStatsDetail iface[%{public}s], statsInfo.rxBytes[%{public}" PRId64 "]"
@@ -189,13 +189,17 @@ NetStatsResultCode NetStatsService::GetIfaceStatsDetail(const std::string &iface
 NetStatsResultCode NetStatsService::GetUidStatsDetail(const std::string &iface, uint32_t uid,
     uint32_t start, uint32_t end, NetStatsInfo &statsInfo)
 {
-    if ((!netStatsCsv_->ExistsIface(iface)) || (!netStatsCsv_->ExistsUid(uid))) {
-        NETMGR_LOG_E("iface not exist or uid not exist");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
+    if (!netStatsCsv_->ExistsIface(iface)) {
+        NETMGR_LOG_E("iface not exist");
+        return NetStatsResultCode::ERR_INVALID_PARAMETER;
+    }
+    if (!netStatsCsv_->ExistsUid(uid)) {
+        NETMGR_LOG_E("uid not exist");
+        return NetStatsResultCode::ERR_INVALID_PARAMETER;
     }
     if (start >= end) {
         NETMGR_LOG_E("the start time should be less than the end time.");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
+        return NetStatsResultCode::ERR_INVALID_PARAMETER;
     }
     NetStatsResultCode result = netStatsCsv_->GetUidBytes(iface, uid, start, end, statsInfo);
     NETMGR_LOG_I("GetUidStatsDetail iface[%{public}s], uid[%{public}d] statsInfo.rxBytes[%{public}" PRId64 "] "

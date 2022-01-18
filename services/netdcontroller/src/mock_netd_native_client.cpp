@@ -15,6 +15,7 @@
 
 #include "mock_netd_native_client.h"
 
+#include <ctime>
 #include <dirent.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
@@ -23,6 +24,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <net/route.h>
@@ -35,6 +37,8 @@
 namespace OHOS {
 namespace NetManagerStandard {
 const std::string INTERFACE_LIST_DIR = "/sys/class/net/";
+const std::string UID_LIST_DIR = "/data/data/uid/";
+const std::string UID_TRAFFIC_BPF_PATH = "/dev/socket/traffic";
 const std::string TEST_CELL_RX = "/data/cell_rx";
 const std::string TEST_CELL_TX = "/data/cell_tx";
 const std::string TEST_IFACE_RX = "/data/iface_rx";
@@ -47,6 +51,8 @@ const std::string NET_STATS_FILE_RX_BYTES = "rx_bytes";
 const std::string NET_STATS_FILE_TX_BYTES = "tx_bytes";
 const std::string NET_STATS_FILE_RX_PACKETS = "rx_packets";
 const std::string NET_STATS_FILE_TX_PACKETS = "tx_packets";
+constexpr int32_t MOCK_MODULO_LAST_SIX_DIGITS = 100000;
+
 MockNetdNativeClient::MockNetdNativeClient()
 {
     Init();
@@ -61,33 +67,22 @@ void MockNetdNativeClient::Init()
 
 void MockNetdNativeClient::RegisterMockApi()
 {
-    mockApi_.insert(MOCK_NETWORKCREATEPHYSICAL_API);
     mockApi_.insert(MOCK_NETWORKDESTROY_API);
     mockApi_.insert(MOCK_NETWORKADDINTERFACE_API);
     mockApi_.insert(MOCK_NETWORKREMOVEINTERFACE_API);
-    mockApi_.insert(MOCK_NETWORKADDROUTE_API);
-    mockApi_.insert(MOCK_NETWORKREMOVEROUTE_API);
-    mockApi_.insert(MOCK_SETINTERFACEDOWN_API);
-    mockApi_.insert(MOCK_SETINTERFACEUP_API);
     mockApi_.insert(MOCK_INTERFACECLEARADDRS_API);
-    mockApi_.insert(MOCK_INTERFACEGETMTU_API);
-    mockApi_.insert(MOCK_INTERFACESETMTU_API);
-    mockApi_.insert(MOCK_INTERFACEADDADDRESS_API);
-    mockApi_.insert(MOCK_INTERFACEDELADDRESS_API);
-    mockApi_.insert(MOCK_SETRESOLVERCONFIG_API);
-    mockApi_.insert(MOCK_GETRESOLVERINFO_API);
-    mockApi_.insert(MOCK_CREATENETWORKCACHE_API);
-    mockApi_.insert(MOCK_DESTORYNETWORKCACHE_API);
-    mockApi_.insert(MOCK_FLUSHNETWORKCACHE_API);
     mockApi_.insert(MOCK_GETCELLULARRXBYTES_API);
     mockApi_.insert(MOCK_GETCELLULARTXBYTES_API);
     mockApi_.insert(MOCK_GETALLRXBYTES_API);
     mockApi_.insert(MOCK_GETALLTXBYTES_API);
     mockApi_.insert(MOCK_GETUIDRXBYTES_API);
     mockApi_.insert(MOCK_GETUIDTXBYTES_API);
+    mockApi_.insert(MOCK_GETUIDONIFACETXBYTES_API);
+    mockApi_.insert(MOCK_GETUIDONIFACETXBYTES_API);
     mockApi_.insert(MOCK_GETIFACERXBYTES_API);
     mockApi_.insert(MOCK_GETIFACETXBYTES_API);
     mockApi_.insert(MOCK_INTERFACEGETLIST_API);
+    mockApi_.insert(MOCK_UIDGETLIST_API);
     mockApi_.insert(MOCK_GETIFACERXPACKETS_API);
     mockApi_.insert(MOCK_GETIFACETXPACKETS_API);
     mockApi_.insert(MOCK_SETDEFAULTNETWORK_API);
@@ -315,16 +310,78 @@ int64_t MockNetdNativeClient::GetAllTxBytes()
     return GetAllBytes(NET_STATS_FILE_TX_BYTES.c_str());
 }
 
+static long getUidTrafficFromBPF(int uid, int cgroupType)
+{
+    int sock = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (sock < 0) {
+        close(sock);
+        return -1;
+    }
+    sockaddr_un s_un;
+    s_un.sun_family = AF_UNIX;
+    if (strcpy_s(s_un.sun_path, sizeof(s_un.sun_path), UID_TRAFFIC_BPF_PATH.c_str()) != 0) {
+        close(sock);
+        return -1;
+    }
+    if (connect(sock, reinterpret_cast<sockaddr*>(&s_un), sizeof(s_un)) != 0) {
+        close(sock);
+        return -1;
+    }
+    char buf[128];
+    bzero(buf, sizeof(buf));
+    std::string query = std::to_string(uid) + "," + std::to_string(cgroupType);
+    if (strcpy_s(buf, sizeof(buf), query.c_str()) != 0) {
+        close(sock);
+        return -1;
+    }
+    ssize_t writeRet = write(sock, buf, strlen(buf));
+    if (writeRet < 0) {
+        close(sock);
+        return -1;
+    }
+    bzero(buf, sizeof(buf));
+    ssize_t readRet = read(sock, buf, sizeof(buf));
+    if (readRet < 0) {
+        close(sock);
+        return -1;
+    }
+    close(sock);
+    return atol(buf);
+}
+
 int64_t MockNetdNativeClient::GetUidRxBytes(uint32_t uid)
 {
     NETMGR_LOG_I("MockNetdNativeClient GetUidRxBytes uid is [%{public}u]", uid);
-    return 0;
+    long result = getUidTrafficFromBPF(uid, 0);
+    return static_cast<int64_t>(result);
 }
 
 int64_t MockNetdNativeClient::GetUidTxBytes(uint32_t uid)
 {
     NETMGR_LOG_I("MockNetdNativeClient GetUidTxBytes uid is [%{public}u]", uid);
-    return 0;
+    long result = getUidTrafficFromBPF(uid, 1);
+    return static_cast<int64_t>(result);
+}
+
+static int64_t GetUidOnIfaceBytes(uint32_t uid, const std::string &interfaceName)
+{
+    time_t now = time(nullptr);
+    now %= MOCK_MODULO_LAST_SIX_DIGITS;
+    return static_cast<int64_t>(now);
+}
+
+int64_t MockNetdNativeClient::GetUidOnIfaceRxBytes(uint32_t uid, const std::string &interfaceName)
+{
+    NETMGR_LOG_I("MockNetdNativeClient GetUidOnIfaceRxBytes uid is [%{public}u] "
+        "iface name is [%{public}s]", uid, interfaceName.c_str());
+    return GetUidOnIfaceBytes(uid, interfaceName);
+}
+
+int64_t MockNetdNativeClient::GetUidOnIfaceTxBytes(uint32_t uid, const std::string &interfaceName)
+{
+    NETMGR_LOG_I("MockNetdNativeClient GetUidOnIfaceRxBytes uid is [%{public}u] "
+        "iface name is [%{public}s]", uid, interfaceName.c_str());
+    return GetUidOnIfaceBytes(uid, interfaceName);
 }
 
 int64_t MockNetdNativeClient::GetIfaceBytes(const std::string &interfaceName, const std::string &filename)
@@ -397,6 +454,25 @@ std::vector<std::string> MockNetdNativeClient::InterfaceGetList()
     }
     closedir(dir);
     return ifList;
+}
+
+std::vector<std::string> MockNetdNativeClient::UidGetList()
+{
+    NETMGR_LOG_I("MockNetdNativeClient UidGetList");
+    DIR *dir(nullptr);
+    std::vector<std::string> uidList;
+    if ((dir = opendir(UID_LIST_DIR.c_str())) == NULL) {
+        return uidList;
+    }
+    struct dirent *ptr(nullptr);
+    while ((ptr = readdir(dir)) != NULL) {
+        if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) {
+            continue;
+        }
+        uidList.push_back(ptr->d_name);
+    }
+    closedir(dir);
+    return uidList;
 }
 
 int32_t MockNetdNativeClient::AddRoute(const std::string &ip, const std::string &mask,
@@ -526,6 +602,7 @@ int32_t MockNetdNativeClient::EnableVirtualNetIfaceCard(int32_t socketFd, struct
     const char *ifaceName = "wlan0";
     strncpy_s(ifRequest.ifr_name, sizeof(ifRequest.ifr_name), ifaceName, strlen(ifaceName));
     NETMGR_LOG_D("ifRequest.ifr_name[%{public}s]", ifRequest.ifr_name);
+    ifaceFd = 1;
     return 0;
 }
 
@@ -541,6 +618,36 @@ int32_t MockNetdNativeClient::SetIpAddress(int32_t socketFd, const std::string &
 int32_t MockNetdNativeClient::SetBlocking(int32_t ifaceFd, bool isBlock)
 {
     NETMGR_LOG_D("MockNetdNativeClient::SetBlocking: ifaceFd[%{public}d], isBlock[%{public}d]", ifaceFd, isBlock);
+    return 0;
+}
+
+int32_t MockNetdNativeClient::StartDhcpClient(const std::string &iface, bool bIpv6)
+{
+    NETMGR_LOG_D("MockNetdNativeClient::StartDhcpClient: iface[%{public}s], bIpv6[%{public}d]", iface.c_str(),
+        bIpv6);
+    return 0;
+}
+
+int32_t MockNetdNativeClient::StopDhcpClient(const std::string &iface, bool bIpv6)
+{
+    NETMGR_LOG_D("MockNetdNativeClient::StopDhcpClient: iface[%{public}s], bIpv6[%{public}d]", iface.c_str(),
+        bIpv6);
+    return 0;
+}
+
+int32_t MockNetdNativeClient::RegisterCallback(sptr<NetdControllerCallback> callback)
+{
+    NETMGR_LOG_D("MockNetdNativeClient::RegisterCallback");
+    return 0;
+}
+
+int32_t MockNetdNativeClient::StartDhcpService(const std::string &iface, const std::string &ipv4addr)
+{
+    return 0;
+}
+
+int32_t MockNetdNativeClient::StopDhcpService(const std::string &iface)
+{
     return 0;
 }
 } // namespace NetManagerStandard

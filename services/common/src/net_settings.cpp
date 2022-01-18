@@ -16,7 +16,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetSettings::NetSettings() {}
+constexpr uint32_t DEFAULT_SYSTEM_UID = 456;
+NetSettings::NetSettings()
+{
+    AddSystemUid(DEFAULT_SYSTEM_UID);
+}
 
 NetSettings::~NetSettings() {}
 

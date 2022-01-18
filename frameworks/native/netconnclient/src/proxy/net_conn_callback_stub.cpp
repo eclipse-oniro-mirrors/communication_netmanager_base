@@ -20,11 +20,12 @@ namespace OHOS {
 namespace NetManagerStandard {
 NetConnCallbackStub::NetConnCallbackStub()
 {
-    memberFuncMap_[NET_CONN_STATE_CHANGED] = &NetConnCallbackStub::OnNetConnStateChanged;
-    memberFuncMap_[NET_AVAILIABLE] = &NetConnCallbackStub::OnNetAvailable;
+    memberFuncMap_[NET_AVAILABLE] = &NetConnCallbackStub::OnNetAvailable;
     memberFuncMap_[NET_CAPABILITIES_CHANGE] = &NetConnCallbackStub::OnNetCapabilitiesChange;
     memberFuncMap_[NET_CONNECTION_PROPERTIES_CHANGE] = &NetConnCallbackStub::OnNetConnectionPropertiesChange;
     memberFuncMap_[NET_LOST] = &NetConnCallbackStub::OnNetLost;
+    memberFuncMap_[NET_UNAVAILABLE] = &NetConnCallbackStub::OnNetUnavailable;
+    memberFuncMap_[NET_BLOCK_STATUS_CHANGE] = &NetConnCallbackStub::OnNetBlockStatusChange;
 }
 
 NetConnCallbackStub::~NetConnCallbackStub() {}
@@ -52,32 +53,17 @@ int32_t NetConnCallbackStub::OnRemoteRequest(
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int32_t NetConnCallbackStub::OnNetConnStateChanged(MessageParcel &data, MessageParcel &reply)
-{
-    if (!data.ContainFileDescriptors()) {
-        NETMGR_LOG_E("Execute ContainFileDescriptors failed");
-    }
-
-    sptr<NetConnCallbackInfo> info = NetConnCallbackInfo::Unmarshalling(data);
-    int32_t result = NetConnStateChanged(info);
-    if (!reply.WriteInt32(result)) {
-        NETMGR_LOG_E("Write parcel failed");
-        return result;
-    }
-
-    return ERR_NONE;
-}
-
 int32_t NetConnCallbackStub::OnNetAvailable(MessageParcel& data, MessageParcel& reply)
 {
     if (!data.ContainFileDescriptors()) {
         NETMGR_LOG_W("sent raw data is less than 32k");
     }
-    int32_t netId;
+    int32_t netId = 0;
     if (!data.ReadInt32(netId)) {
         return IPC_PROXY_ERR;
     }
-    int32_t result = NetAvailable(netId);
+    sptr<NetHandle> netHandle = std::make_unique<NetHandle>(netId).release();
+    int32_t result = NetAvailable(netHandle);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
         return result;
@@ -92,15 +78,35 @@ int32_t NetConnCallbackStub::OnNetCapabilitiesChange(MessageParcel& data, Messag
         NETMGR_LOG_W("sent raw data is less than 32k");
     }
 
-    int32_t netId;
-    if (!data.ReadInt32(netId)) {
+    int32_t netId = 0;
+    sptr<NetAllCapabilities> netAllCap = std::make_unique<NetAllCapabilities>().release();
+    if (!data.ReadInt32(netId) || !data.ReadUint32(netAllCap->linkUpBandwidthKbps_) ||
+        !data.ReadUint32(netAllCap->linkDownBandwidthKbps_)) {
         return IPC_PROXY_ERR;
     }
-    uint64_t netCap;
-    if (!data.ReadUint64(netCap)) {
+    uint32_t size = 0;
+    uint32_t value = 0;
+    if (!data.ReadUint32(size)) {
         return IPC_PROXY_ERR;
     }
-    int32_t result = NetCapabilitiesChange(netId, netCap);
+    for (uint32_t i = 0; i < size; i++) {
+        if (!data.ReadUint32(value)) {
+            return IPC_PROXY_ERR;
+        }
+        netAllCap->netCaps_.insert(static_cast<NetCap>(value));
+    }
+    if (!data.ReadUint32(size)) {
+        return IPC_PROXY_ERR;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        if (!data.ReadUint32(value)) {
+            return IPC_PROXY_ERR;
+        }
+        netAllCap->bearerTypes_.insert(static_cast<NetBearType>(value));
+    }
+
+    sptr<NetHandle> netHandle = std::make_unique<NetHandle>(netId).release();
+    int32_t result = NetCapabilitiesChange(netHandle, netAllCap);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
         return result;
@@ -120,7 +126,8 @@ int32_t NetConnCallbackStub::OnNetConnectionPropertiesChange(MessageParcel& data
         return IPC_PROXY_ERR;
     }
     sptr<NetLinkInfo> info = NetLinkInfo::Unmarshalling(data);
-    int32_t result = NetConnectionPropertiesChange(netId, info);
+    sptr<NetHandle> netHandle = std::make_unique<NetHandle>(netId).release();
+    int32_t result = NetConnectionPropertiesChange(netHandle, info);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
         return result;
@@ -139,13 +146,82 @@ int32_t NetConnCallbackStub::OnNetLost(MessageParcel& data, MessageParcel& reply
     if (!data.ReadInt32(netId)) {
         return IPC_PROXY_ERR;
     }
-
-    int32_t result = NetLost(netId);
+    sptr<NetHandle> netHandle = std::make_unique<NetHandle>(netId).release();
+    int32_t result = NetLost(netHandle);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
         return result;
     }
 
+    return ERR_NONE;
+}
+
+int32_t NetConnCallbackStub::OnNetUnavailable(MessageParcel& data, MessageParcel& reply)
+{
+    if (!data.ContainFileDescriptors()) {
+        NETMGR_LOG_W("sent raw data is less than 32k");
+    }
+
+    int32_t result = NetUnavailable();
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write parcel failed");
+        return result;
+    }
+    return ERR_NONE;
+}
+
+int32_t NetConnCallbackStub::OnNetBlockStatusChange(MessageParcel& data, MessageParcel& reply)
+{
+    if (!data.ContainFileDescriptors()) {
+        NETMGR_LOG_W("sent raw data is less than 32k");
+    }
+
+    int32_t netId;
+    if (!data.ReadInt32(netId)) {
+        return IPC_PROXY_ERR;
+    }
+    bool blocked;
+    if (!data.ReadBool(blocked)) {
+        return IPC_PROXY_ERR;
+    }
+
+    sptr<NetHandle> netHandle = std::make_unique<NetHandle>(netId).release();
+    int32_t result = NetBlockStatusChange(netHandle, blocked);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write parcel failed");
+        return result;
+    }
+    return ERR_NONE;
+}
+
+int32_t NetConnCallbackStub::NetAvailable(sptr<NetHandle> &netHandle)
+{
+    return ERR_NONE;
+}
+
+int32_t NetConnCallbackStub::NetCapabilitiesChange(sptr<NetHandle> &netHandle,
+    const sptr<NetAllCapabilities> &netAllCap)
+{
+    return ERR_NONE;
+}
+
+int32_t NetConnCallbackStub::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
+{
+    return ERR_NONE;
+}
+
+int32_t NetConnCallbackStub::NetLost(sptr<NetHandle> &netHandle)
+{
+    return ERR_NONE;
+}
+
+int32_t NetConnCallbackStub::NetUnavailable()
+{
+    return ERR_NONE;
+}
+
+int32_t NetConnCallbackStub::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
+{
     return ERR_NONE;
 }
 }  // namespace NetManagerStandard

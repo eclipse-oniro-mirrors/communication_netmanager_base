@@ -37,6 +37,16 @@ enum class NetUidPolicy {
     NET_POLICY_ALLOW_ALL = 1 << 5,
     NET_POLICY_REJECT_ALL = 1 << 6,
 };
+
+enum class NetBackgroundPolicy {
+    NET_BACKGROUND_POLICY_NONE = 0,
+    // Indicates that applications can use metered networks.
+    NET_BACKGROUND_POLICY_DISABLE = 1,
+    // Indicates that only applications in the allowlist can use metered networks.
+    NET_BACKGROUND_POLICY_ALLOWLISTED = 2,
+    // Indicates that applications cannot use metered networks.
+    NET_BACKGROUND_POLICY_ENABLED = 3,
+};
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NET_POLICY_CONSTANTS_H

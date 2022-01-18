@@ -24,6 +24,7 @@ namespace NetManagerStandard {
 class NetStatsBaseService : public virtual RefBase {
 public:
     virtual int32_t GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end, NetStatsInfo &info) = 0;
+    virtual int32_t ResetStatsFactory() = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -21,6 +21,12 @@ namespace NetdNative {
 NotifyCallbackStub::NotifyCallbackStub()
 {
     memberFuncMap_[ON_INTERFACE_ADDRESS_UPDATED] = &NotifyCallbackStub::CmdOnInterfaceAddressUpdated;
+    memberFuncMap_[ON_INTERFACE_ADDRESS_REMOVED] = &NotifyCallbackStub::CmdOnInterfaceAddressRemoved;
+    memberFuncMap_[ON_INTERFACE_ADDED] = &NotifyCallbackStub::CmdOnInterfaceAdded;
+    memberFuncMap_[ON_INTERFACE_REMOVED] = &NotifyCallbackStub::CmdOnInterfaceRemoved;
+    memberFuncMap_[ON_INTERFACE_CHANGED] = &NotifyCallbackStub::CmdOnInterfaceChanged;
+    memberFuncMap_[ON_INTERFACE_LINK_STATE_CHANGED] = &NotifyCallbackStub::CmdOnInterfaceLinkStateChanged;
+    memberFuncMap_[ON_ROUTE_CHANGED] = &NotifyCallbackStub::CmdOnRouteChanged;
     memberFuncMap_[ON_DHCP_SUCCESS] = &NotifyCallbackStub::CmdDhcpSuccess;
 }
 
@@ -51,20 +57,22 @@ int32_t NotifyCallbackStub::OnRemoteRequest(
 
 int32_t NotifyCallbackStub::CmdOnInterfaceAddressUpdated(MessageParcel &data, MessageParcel &reply)
 {
-    std::string str1 = "test1";
-    std::string str2 = "test2";
+    std::string str1 = "";
+    std::string str2 = "";
+
     int32_t result = OnInterfaceAddressUpdated(str1, str2, 0, 0);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write parcel failed");
         return result;
     }
+
     return ERR_NONE;
 }
 
 int32_t NotifyCallbackStub::CmdOnInterfaceAddressRemoved(MessageParcel &data, MessageParcel &reply)
 {
-    std::string str1 = "test1";
-    std::string str2 = "test2";
+    std::string str1 = "";
+    std::string str2 = "";
 
     int32_t result = OnInterfaceAddressRemoved(str1, str2, 0, 0);
     if (!reply.WriteInt32(result)) {
@@ -77,8 +85,8 @@ int32_t NotifyCallbackStub::CmdOnInterfaceAddressRemoved(MessageParcel &data, Me
 
 int32_t NotifyCallbackStub::CmdOnInterfaceAdded(MessageParcel &data, MessageParcel &reply)
 {
-    std::string str1 = "test1";
-
+    std::string str1 = "";
+    
     int32_t result = OnInterfaceAdded(str1);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write parcel failed");
@@ -89,7 +97,7 @@ int32_t NotifyCallbackStub::CmdOnInterfaceAdded(MessageParcel &data, MessageParc
 }
 int32_t NotifyCallbackStub::CmdOnInterfaceRemoved(MessageParcel &data, MessageParcel &reply)
 {
-	std::string str1 = "test1";
+    std::string str1 = "";
 
     int32_t result = OnInterfaceRemoved(str1);
     if (!reply.WriteInt32(result)) {
@@ -102,7 +110,7 @@ int32_t NotifyCallbackStub::CmdOnInterfaceRemoved(MessageParcel &data, MessagePa
 
 int32_t NotifyCallbackStub::CmdOnInterfaceChanged(MessageParcel &data, MessageParcel &reply)
 {
-	std::string str1 = "test1";
+    std::string str1 = "";
 
     int32_t result = OnInterfaceChanged(str1, true);
     if (!reply.WriteInt32(result)) {
@@ -115,7 +123,7 @@ int32_t NotifyCallbackStub::CmdOnInterfaceChanged(MessageParcel &data, MessagePa
 
 int32_t NotifyCallbackStub::CmdOnInterfaceLinkStateChanged(MessageParcel &data, MessageParcel &reply)
 {
-	std::string str1 = "test1";
+    std::string str1 = "";
 
     int32_t result = OnInterfaceLinkStateChanged(str1, true);
     if (!reply.WriteInt32(result)) {
@@ -128,9 +136,9 @@ int32_t NotifyCallbackStub::CmdOnInterfaceLinkStateChanged(MessageParcel &data, 
 
 int32_t NotifyCallbackStub::CmdOnRouteChanged(MessageParcel &data, MessageParcel &reply)
 {
-	std::string str1 = "test1";
-	std::string str2 = "test2";
-	std::string str3 = "test3";
+    std::string str1 = "";
+    std::string str2 = "";
+    std::string str3 = "";
 
     int32_t result = OnRouteChanged(true, str1, str2, str3);
     if (!reply.WriteInt32(result)) {

@@ -57,12 +57,18 @@ int32_t NetSupplierCallbackStub::OnRemoteRequest(
 int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessageParcel &reply)
 {
     std::string ident;
-    uint64_t netCapability = 0;
+    std::set<NetCap> netCaps;
 
     data.ReadString(ident);
-    data.ReadUint64(netCapability);
+    uint32_t size = 0;
+    uint32_t value = 0;
+    data.ReadUint32(size);
+    for (uint32_t i = 0; i < size; i++) {
+        data.ReadUint32(value);
+        netCaps.insert(static_cast<NetCap>(value));
+    }
 
-    RequestNetwork(ident, netCapability);
+    RequestNetwork(ident, netCaps);
 
     reply.WriteInt32(0);
     return ERR_NONE;
@@ -71,29 +77,35 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
 int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessageParcel &reply)
 {
     std::string ident;
-    uint64_t netCapability = 0;
+    std::set<NetCap> netCaps;
 
     data.ReadString(ident);
-    data.ReadUint64(netCapability);
+    uint32_t size = 0;
+    uint32_t value = 0;
+    data.ReadUint32(size);
+    for (uint32_t i = 0; i < size; i++) {
+        data.ReadUint32(value);
+        netCaps.insert(static_cast<NetCap>(value));
+    }
 
-    ReleaseNetwork(ident, netCapability);
+    ReleaseNetwork(ident, netCaps);
 
     reply.WriteInt32(0);
     return ERR_NONE;
 }
 
-int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, uint64_t netCapability)
+int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
 {
     if (callback_ != nullptr) {
-        callback_->RequestNetwork(ident, netCapability);
+        callback_->RequestNetwork(ident, netCaps);
     }
     return 0;
 }
 
-int32_t NetSupplierCallbackStub::ReleaseNetwork(const std::string &ident, uint64_t netCapability)
+int32_t NetSupplierCallbackStub::ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
 {
     if (callback_ != nullptr) {
-        callback_->ReleaseNetwork(ident, netCapability);
+        callback_->ReleaseNetwork(ident, netCaps);
     }
     return 0;
 }

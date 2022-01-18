@@ -58,37 +58,37 @@ sptr<NetPolicyCallbackTest> NetPolicyManagerTest::GetINetPolicyCallbackSample() 
 
 /**
  * @tc.name: NetPolicyManager001
- * @tc.desc: Test NetPolicyManager SetUidPolicy.
+ * @tc.desc: Test NetPolicyManager SetPolicyByUid.
  * @tc.type: FUNC
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager001, TestSize.Level1)
 {
-    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetUidPolicy(1,
+    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(1,
         NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
     ASSERT_TRUE(result != NetPolicyResultCode::ERR_INVALID_UID);
 }
 
 /**
  * @tc.name: NetPolicyManager002
- * @tc.desc: Test NetPolicyManager GetUidPolicy.
+ * @tc.desc: Test NetPolicyManager GetPolicyByUid.
  * @tc.type: FUNC
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager002, TestSize.Level1)
 {
-    NetUidPolicy result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetUidPolicy(1);
+    NetUidPolicy result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetPolicyByUid(1);
     ASSERT_TRUE(result == NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
 }
 
 /**
  * @tc.name: NetPolicyManager003
- * @tc.desc: Test NetPolicyManager GetUids.
+ * @tc.desc: Test NetPolicyManager GetUidsByPolicy.
  * @tc.type: FUNC
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager003, TestSize.Level1)
 {
     std::vector<uint32_t> result;
     NetUidPolicy policy = NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND;
-    result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetUids(policy);
+    result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetUidsByPolicy(policy);
     ASSERT_TRUE(result.size() != 0);
 }
 
@@ -117,7 +117,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager005, TestSize.Level1)
 void TrigerCallback()
 {
     usleep(TRIGER_DELAY_US);
-    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetUidPolicy(1,
+    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(1,
         NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
     ASSERT_TRUE(result != NetPolicyResultCode::ERR_INVALID_UID);
 }
@@ -151,57 +151,54 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager006, TestSize.Level1)
 
 /**
  * @tc.name: NetPolicyManager007
- * @tc.desc: Test NetPolicyManager SetNetPolicys.
+ * @tc.desc: Test NetPolicyManager SetNetQuotaPolicies.
  * @tc.type: FUNC
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager007, TestSize.Level1)
 {
-    std::vector<NetPolicyQuotaPolicy> quotaPolicys;
+    std::vector<NetPolicyQuotaPolicy> quotaPolicies;
 
     NetPolicyQuotaPolicy quotaPolicy;
-    for (uint8_t i = 0; i < TEST_CONSTANT_NUM; ++i) {
-        quotaPolicy.netType_ = static_cast<uint8_t>(NetQuotaPolicyType::NET_POLICY_MOBILE) + i;
-        quotaPolicy.subscriberId_ = std::to_string(TRIGER_DELAY_US + i);
-        quotaPolicy.periodStartTime_ = TRIGER_DELAY_US + i;
-        quotaPolicy.periodDuration_ = TEST_STRING_PERIODDURATION;
-        quotaPolicy.warningBytes_ = TRIGER_DELAY_US + i;
-        quotaPolicy.limitBytes_ = TRIGER_DELAY_US + i;
-        quotaPolicy.lastLimitSnooze_ = TRIGER_DELAY_US + i;
-        quotaPolicy.metered_ = i;
-        quotaPolicy.source_ = i;
+    quotaPolicy.netType_ = 0;
+    quotaPolicy.slotId_ = TRIGER_DELAY_US;
+    quotaPolicy.periodStartTime_ = TRIGER_DELAY_US;
+    quotaPolicy.periodDuration_ = TEST_STRING_PERIODDURATION;
+    quotaPolicy.warningBytes_ = TRIGER_DELAY_US;
+    quotaPolicy.limitBytes_ = TRIGER_DELAY_US;
+    quotaPolicy.lastLimitSnooze_ = -1;
+    quotaPolicy.metered_ = 0;
+    quotaPolicy.source_ = 0;
+    quotaPolicies.push_back(quotaPolicy);
 
-        quotaPolicys.push_back(quotaPolicy);
-    }
-
-    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetPolicys(quotaPolicys);
+    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetQuotaPolicies(quotaPolicies);
     ASSERT_TRUE(result == NetPolicyResultCode::ERR_NONE);
 }
 
 /**
  * @tc.name: NetPolicyManager008
- * @tc.desc: Test NetPolicyManager GetNetPolicys.
+ * @tc.desc: Test NetPolicyManager GetNetQuotaPolicies.
  * @tc.type: FUNC
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager008, TestSize.Level1)
 {
-    std::vector<NetPolicyQuotaPolicy> quotaPolicys;
+    std::vector<NetPolicyQuotaPolicy> quotaPolicies;
 
-    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetNetPolicys(quotaPolicys);
+    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetNetQuotaPolicies(quotaPolicies);
     ASSERT_TRUE(result == NetPolicyResultCode::ERR_NONE);
 }
 
 /**
  * @tc.name: NetPolicyManager009
- * @tc.desc: Test NetPolicyManager SetCellularPolicys.
+ * @tc.desc: Test NetPolicyManager SetCellularPolicies.
  * @tc.type: FUNC
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager009, TestSize.Level1)
 {
-    std::vector<NetPolicyCellularPolicy> cellularPolicys;
+    std::vector<NetPolicyCellularPolicy> cellularPolicies;
 
     NetPolicyCellularPolicy cellularPolicy;
     for (uint32_t i = 0; i < TEST_CONSTANT_NUM; ++i) {
-        cellularPolicy.subscriberId_ = std::to_string(static_cast<uint32_t>(NetQuotaPolicyType::NET_POLICY_MOBILE) + i);
+        cellularPolicy.slotId_ = i;
         cellularPolicy.periodStartTime_ = TRIGER_DELAY_US + i;
         cellularPolicy.periodDuration_ = TEST_STRING_PERIODDURATION;
         cellularPolicy.title_ = std::to_string(TRIGER_DELAY_US + i);
@@ -212,81 +209,73 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager009, TestSize.Level1)
         cellularPolicy.usedTimeDuration_ = TRIGER_DELAY_US + i;
         cellularPolicy.possessor_ = std::to_string(TRIGER_DELAY_US + i);
 
-        cellularPolicys.push_back(cellularPolicy);
+        cellularPolicies.push_back(cellularPolicy);
     }
 
-    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetCellularPolicys(cellularPolicys);
+    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetCellularPolicies(
+        cellularPolicies);
     ASSERT_TRUE(result == NetPolicyResultCode::ERR_NONE);
 }
 
 /**
  * @tc.name: NetPolicyManager010
- * @tc.desc: Test NetPolicyManager GetCellularPolicys.
+ * @tc.desc: Test NetPolicyManager GetCellularPolicies.
  * @tc.type: FUNC
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager010, TestSize.Level1)
 {
-    std::vector<NetPolicyCellularPolicy> cellularPolicys;
+    std::vector<NetPolicyCellularPolicy> cellularPolicies;
 
-    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetCellularPolicys(cellularPolicys);
+    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetCellularPolicies(
+        cellularPolicies);
     ASSERT_TRUE(result == NetPolicyResultCode::ERR_NONE);
 }
 
 /**
  * @tc.name: NetPolicyManager011
- * @tc.desc: Test NetPolicyManager ResetFactory.
+ * @tc.desc: Test NetPolicyManager SetFactoryPolicy.
  * @tc.type: FUNC
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager011, TestSize.Level1)
 {
-    std::string subscriberId=std::to_string(static_cast<uint32_t>(NetQuotaPolicyType::NET_POLICY_MOBILE));
+    std::string slotId = "0";
 
-    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->ResetFactory(subscriberId);
+    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetFactoryPolicy(slotId);
     ASSERT_TRUE(result == NetPolicyResultCode::ERR_NONE);
 }
 
 /**
  * @tc.name: NetPolicyManager0012
- * @tc.desc: Test NetPolicyManager SnoozePolicy.
+ * @tc.desc: Test NetPolicyManager SetSnoozePolicy.
  * @tc.type: FUNC
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager012, TestSize.Level1)
 {
-    NetPolicyQuotaPolicy quotaPolicy;
-    quotaPolicy.netType_ = static_cast<uint8_t>(NetQuotaPolicyType::NET_POLICY_MOBILE);
-    quotaPolicy.subscriberId_ = std::to_string(TRIGER_DELAY_US);
-    quotaPolicy.periodStartTime_ = TRIGER_DELAY_US;
-    quotaPolicy.periodDuration_ = std::to_string(TRIGER_DELAY_US);
-    quotaPolicy.warningBytes_ = TRIGER_DELAY_US;
-    quotaPolicy.limitBytes_ = TRIGER_DELAY_US;
-    quotaPolicy.lastLimitSnooze_ = TRIGER_DELAY_US;
-    quotaPolicy.metered_ = 0;
-    quotaPolicy.source_ = 0;
-
-    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->SnoozePolicy(quotaPolicy);
+    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetSnoozePolicy(0,
+        TRIGER_DELAY_US);
     ASSERT_TRUE(result == NetPolicyResultCode::ERR_NONE);
 }
 
 /**
  * @tc.name: NetPolicyManager0013
- * @tc.desc: Test NetPolicyManager SetIdleWhitelist.
+ * @tc.desc: Test NetPolicyManager SetIdleTrustlist.
  * @tc.type: FUNC
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager013, TestSize.Level1)
 {
-    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetIdleWhitelist(1, true);
+    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetIdleTrustlist(1, true);
     ASSERT_TRUE(result == NetPolicyResultCode::ERR_NONE);
 }
 
 /**
  * @tc.name: NetPolicyManager0014
- * @tc.desc: Test NetPolicyManager GetIdleWhitelist.
+ * @tc.desc: Test NetPolicyManager GetIdleTrustlist.
  * @tc.type: FUNC
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager014, TestSize.Level1)
 {
     std::vector<uint32_t> uids;
-    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetIdleWhitelist(uids);
+    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetIdleTrustlist(uids);
     ASSERT_TRUE(result == NetPolicyResultCode::ERR_NONE);
 }
 
@@ -331,8 +320,8 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager017, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager018, TestSize.Level1)
 {
-    bool result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetCurrentBackgroundPolicy();
-    ASSERT_TRUE(result);
+    NetBackgroundPolicy result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetCurrentBackgroundPolicy();
+    ASSERT_TRUE(result == NetBackgroundPolicy::NET_BACKGROUND_POLICY_DISABLE);
 }
 }
 }
