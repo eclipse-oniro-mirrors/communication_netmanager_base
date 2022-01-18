@@ -456,6 +456,22 @@ napi_value NapiNetPolicy::DeclareNetBearTypeData(napi_env env, napi_value export
     return exports;
 }
 
+napi_value NapiNetPolicy::DeclareBackgroundPolicyData(napi_env env, napi_value exports)
+{
+        napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("NET_BACKGROUND_POLICY_NONE", NapiCommon::NapiValueByInt32(env,
+            static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_NONE))),
+        DECLARE_NAPI_STATIC_PROPERTY("NET_BACKGROUND_POLICY_DISABLE", NapiCommon::NapiValueByInt32(env,
+            static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_DISABLE))),
+        DECLARE_NAPI_STATIC_PROPERTY("NET_BACKGROUND_POLICY_ALLOWLISTED", NapiCommon::NapiValueByInt32(env,
+            static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_ALLOWLISTED))),
+        DECLARE_NAPI_STATIC_PROPERTY("NET_BACKGROUND_POLICY_ENABLED", NapiCommon::NapiValueByInt32(env,
+            static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_ENABLED))),
+    };
+    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
+    return exports;
+}
+
 bool MatchSetFactoryPolicyParameters(napi_env env, napi_value argv[], size_t argc)
 {
     switch (argc) {
@@ -506,7 +522,7 @@ napi_value NapiNetPolicy::SetFactoryPolicy(napi_env env, napi_callback_info info
     NAPI_ASSERT(env, MatchSetFactoryPolicyParameters(env, argv, argc), "type mismatch");
     auto context = std::make_unique<SetFactoryPolicyContext>().release();
     NETMGR_LOG_I("napi_policy SetFactoryPolicy start.");
-    context->slotId = NapiCommon::GetNapiInt32Value(env, argv[0], "slotId");
+    napi_get_value_int32(env, argv[0], &context->slotId);
     if (argc == ARGV_NUM_2) {
         napi_create_reference(env, argv[1], CALLBACK_REF_CNT, &context->callbackRef);
     }
@@ -850,6 +866,7 @@ napi_value NapiNetPolicy::RegisterNetPolicyInterface(napi_env env, napi_value ex
     DeclareNapiNetPolicyData(env, exports);
     DeclareNapiNetPolicyResultData(env, exports);
     DeclareNetBearTypeData(env, exports);
+    DeclareBackgroundPolicyData(env, exports);
     return exports;
 }
 

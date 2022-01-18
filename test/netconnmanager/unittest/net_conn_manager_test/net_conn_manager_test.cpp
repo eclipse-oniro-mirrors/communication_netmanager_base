@@ -400,7 +400,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager011, TestSize.Level1)
     std::cout << "supplierId3 : " << supplierId3 << std::endl;
 
     sptr<INetConnService> proxy = NetConnManagerTest::GetProxy();
-    if(proxy == nullptr) {
+    if (proxy == nullptr) {
         return;
     }
     std::list<int32_t> netIdList;

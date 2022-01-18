@@ -44,7 +44,7 @@ public:
     ResultCode InitNetMonitorThread();
 
     /**
-     * @brief : wake up the DHCP processing thread.
+     * @brief : Trigger thread to perform network detection
      * @param ifaceName
      */
     void SignalNetMonitorThread(const std::string &ifaceName);
@@ -54,23 +54,6 @@ public:
      *
      */
     void StopNetMonitorThread();
-
-    /**
-     * @brief Get the Status Code From Response object
-     *
-     * @param strResponse
-     * @return int32_t
-     */
-    int32_t GetStatusCodeFromResponse(const std::string &strResponse);
-
-    /**
-     * @brief Get the Url Redirect From Response object
-     *
-     * @param strResponse  Response data obtained from the server
-     * @param urlRedirect    The redirected url obtained from the response data
-     * @return int32_t   if urlRedirect > -1 Get url
-     */
-    int32_t GetUrlRedirectFromResponse(const std::string &strResponse, std::string &urlRedirect);
 
 private:
     /**
@@ -89,6 +72,23 @@ private:
      *
      */
     void ExitNetMonitorThread();
+
+    /**
+     * @brief Get the Status Code From Response object
+     *
+     * @param strResponse
+     * @return int32_t Returns -1, strResponse is invalid; otherwise returns statusCode
+     */
+    int32_t GetStatusCodeFromResponse(const std::string &strResponse);
+
+    /**
+     * @brief Get the Url Redirect From Response object
+     *
+     * @param strResponse  Response data obtained from the server
+     * @param urlRedirect    The redirected url obtained from the response data
+     * @return int32_t Returns 0, get urlRedirect; returns -1, urlRedirect is empty
+     */
+    int32_t GetUrlRedirectFromResponse(const std::string &strResponse, std::string &urlRedirect);
 
 private:
     std::mutex mutex_;

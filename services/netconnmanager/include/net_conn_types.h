@@ -60,14 +60,13 @@ enum NetMonitorResponseCode {
     NO_CONTENT = 204,
     URL_REDIRECT_MAX = 399,
     BAD_REQUEST = 400,
-    CLIENT_ERROR_MAX = 499,
+    CLIENT_ERROR_MAX = 499
 };
 
 enum NetDetectionStatus {
     INVALID_DETECTION_STATE,
     VERIFICATION_STATE,
-    EVALUATING_STATE,
-    CAPTIVE_PORTAL_STATE,
+    CAPTIVE_PORTAL_STATE
 };
 using NetDetectionStateHandler = std::function<void(NetDetectionStatus netDetectionState,
     const std::string &urlRedirect)>;

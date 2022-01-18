@@ -153,30 +153,35 @@ void NetStatsCsv::GenerateNewIfaceStats(uint32_t start, uint32_t end, const NetS
     uint32_t exist = startExist * DIFF_START_END + endExist;
     switch (exist) {
         case START_END_NOT_EXIST:
-            newIfaceStats.insert({start, calStats});
-            newIfaceStats.insert({end, stats});
+            newIfaceStats.insert( {start, calStats} );
+            newIfaceStats.insert( {end, stats} );
             break;
         case START_NOT_EXIST_BUT_END_EXIST:
-            calStats.rxBytes_ = (searchEnd->second).rxBytes_ - stats.rxBytes_;
-            calStats.rxBytes_ = (searchEnd->second).txBytes_ - stats.txBytes_;
-            newIfaceStats.insert({start, calStats});
+            newIfaceStats.insert( {start, calStats} );
+            calStats.rxBytes_ = (searchStart->second).rxBytes_ + stats.rxBytes_;
+            calStats.txBytes_ = (searchStart->second).txBytes_ + stats.txBytes_;
+            newIfaceStats[end].rxBytes_ = calStats.rxBytes_;
+            newIfaceStats[end].txBytes_ = calStats.txBytes_;
             break;
         case START_EXIST_BUT_END_NOT_EXIST:
             calStats.rxBytes_ = (searchStart->second).rxBytes_ + stats.rxBytes_;
-            calStats.rxBytes_ = (searchStart->second).txBytes_ + stats.txBytes_;
-            newIfaceStats.insert({end, calStats});
+            calStats.txBytes_ = (searchStart->second).txBytes_ + stats.txBytes_;
+            newIfaceStats.insert( {end, calStats} );
             break;
         case START_END_EXIST:
-            calStats.rxBytes_ = (searchEnd->second).rxBytes_ - stats.rxBytes_;
-            calStats.rxBytes_ = (searchEnd->second).txBytes_ - stats.txBytes_;
-            newIfaceStats[start] = calStats;
+            calStats.rxBytes_ = (searchStart->second).rxBytes_ + stats.rxBytes_;
+            calStats.txBytes_ = (searchStart->second).txBytes_ + stats.txBytes_;
+            newIfaceStats[end].rxBytes_ = calStats.rxBytes_;
+            newIfaceStats[end].txBytes_ = calStats.txBytes_;
             break;
         default:
             break;
     }
-    for (auto const& [key, val] : newIfaceStats) {
-        if (key > start && key < end) {
-            newIfaceStats.erase(key);
+    for (auto it = newIfaceStats.cbegin(); it != newIfaceStats.cend();) {
+        if (it->first > start && it->first < end) {
+            newIfaceStats.erase(it++);
+        } else {
+            ++it;
         }
     }
 }
@@ -206,7 +211,7 @@ bool NetStatsCsv::CorrectedIfacesStats(const std::string &iface,
                 static_cast<int64_t>(std::stol(row[static_cast<uint32_t>(IfaceStatsCsvColumn::RXBYTES)]));
             statsRow.txBytes_ =
                 static_cast<int64_t>(std::stol(row[static_cast<uint32_t>(IfaceStatsCsvColumn::TXBYTES)]));
-            newIfaceStats.insert({colTime, statsRow});
+            newIfaceStats.insert( {colTime, statsRow} );
             continue;
         }
         newIfaceStatsCsvFile << row[static_cast<uint32_t>(IfaceStatsCsvColumn::IFACE_NAME)] << ","

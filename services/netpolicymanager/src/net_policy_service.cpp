@@ -480,14 +480,16 @@ NetPolicyResultCode NetPolicyService::SetSnoozePolicy(int8_t netType, int32_t sl
     NETMGR_LOG_I("SetSnoozePolicy begin");
 
     NetPolicyQuotaPolicy quotaPolicy;
-    quotaPolicy.netType_ = netType;
-    quotaPolicy.slotId_ = slotId;
-    std::vector<NetPolicyQuotaPolicy> quotaPolicies = {quotaPolicy};
-    /* Set the sleep time to the current time. */
-    quotaPolicies[0].lastLimitSnooze_ = GetCurrentTime();
-
     std::unique_lock<std::mutex> lock(mutex_);
-    NetPolicyResultCode ret = netPolicyTraffic_->SetSnoozePolicy(netType, slotId, quotaPolicies);
+    NetPolicyResultCode ret = netPolicyFile_->GetNetQuotaPolicy(netType, slotId, quotaPolicy);
+    if (NetPolicyResultCode::ERR_NONE != ret) {
+        NETMGR_LOG_E("SetSnoozePolicy GetQuotaPolicy failed");
+        return ret;
+    }
+    /* Set the sleep time to the current time. */
+    quotaPolicy.lastLimitSnooze_ = GetCurrentTime();
+    std::vector<NetPolicyQuotaPolicy> quotaPolicies = {quotaPolicy};
+    ret = netPolicyTraffic_->SetSnoozePolicy(netType, slotId, quotaPolicies);
     lock.unlock();
     if (ret == NetPolicyResultCode::ERR_NONE) {
         /* Judge whether the flow exceeds the limit */

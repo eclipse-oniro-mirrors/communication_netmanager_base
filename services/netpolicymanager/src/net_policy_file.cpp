@@ -461,6 +461,27 @@ NetPolicyResultCode NetPolicyFile::GetNetQuotaPolicies(std::vector<NetPolicyQuot
     return NetPolicyResultCode::ERR_NONE;
 }
 
+NetPolicyResultCode NetPolicyFile::GetNetQuotaPolicy(int8_t netType, int32_t slotId, NetPolicyQuotaPolicy &quotaPolicy)
+{
+    for (auto &quotaPolicyTemp : netPolicy_.netQuotaPolicys) {
+        if (netType == static_cast<int8_t>(std::stol(quotaPolicyTemp.netType)) &&
+            slotId == static_cast<int32_t>(std::stol(quotaPolicyTemp.slotId))) {
+            quotaPolicy.lastLimitSnooze_ = static_cast<int64_t>(std::stoll(quotaPolicyTemp.lastLimitSnooze));
+            quotaPolicy.limitBytes_ = static_cast<int64_t>(std::stoll(quotaPolicyTemp.limitBytes));
+            quotaPolicy.metered_ = static_cast<int8_t>(std::stol(quotaPolicyTemp.metered));
+            quotaPolicy.netType_ = static_cast<int8_t>(std::stol(quotaPolicyTemp.netType));
+            quotaPolicy.periodDuration_ = quotaPolicyTemp.periodDuration;
+            quotaPolicy.periodStartTime_ = static_cast<int64_t>(std::stoll(quotaPolicyTemp.periodStartTime));
+            quotaPolicy.source_ = static_cast<int8_t>(std::stol(quotaPolicyTemp.source));
+            quotaPolicy.slotId_ = static_cast<int32_t>(std::stol(quotaPolicyTemp.slotId));
+            quotaPolicy.warningBytes_ = static_cast<int64_t>(std::stoll(quotaPolicyTemp.warningBytes));
+            return NetPolicyResultCode::ERR_NONE;
+        }
+    }
+
+    return NetPolicyResultCode::ERR_QUOTA_POLICY_NOT_EXIST;
+}
+
 bool NetPolicyFile::IsInterfaceMetered(const std::string &ifaceName)
 {
     for (auto &quotaPolicy : netPolicy_.netQuotaPolicys) {
@@ -468,7 +489,7 @@ bool NetPolicyFile::IsInterfaceMetered(const std::string &ifaceName)
         NetBearType bearerType = static_cast<NetBearType>(netType);
         std::string policyIfaceName;
         int32_t ret = NetManagerCenter::GetInstance().GetIfaceNameByType(bearerType,
-            quotaPolicy.slotId, policyIfaceName);
+            IDENT_PREFIX + quotaPolicy.slotId, policyIfaceName);
         if (ret != 0 || policyIfaceName.empty()) {
             continue;
         }

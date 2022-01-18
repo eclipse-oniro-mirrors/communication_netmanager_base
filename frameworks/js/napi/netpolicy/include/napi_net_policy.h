@@ -88,6 +88,7 @@ public:
     static napi_value DeclareNapiNetPolicyData(napi_env env, napi_value exports);
     static napi_value DeclareNapiNetPolicyResultData(napi_env env, napi_value exports);
     static napi_value DeclareNetBearTypeData(napi_env env, napi_value exports);
+    static napi_value DeclareBackgroundPolicyData(napi_env env, napi_value exports);
 
     static void ExecSetPolicyByUid(napi_env env, void *data);
     static void ExecGetUidsByPolicy(napi_env env, void *data);

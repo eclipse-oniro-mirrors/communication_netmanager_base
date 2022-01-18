@@ -74,11 +74,10 @@ bool Network::ReleaseBasicNetwork()
     if (isPhyNetCreated_) {
         NETMGR_LOG_D("Destroy physical network");
         StopNetDetection();
-        std::list<INetAddr>().swap(netLinkInfo_.netAddrList_);
-        std::list<Route>().swap(netLinkInfo_.routeList_);
         NetdController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
         NetdController::GetInstance().NetworkDestroy(netId_);
         NetdController::GetInstance().DestoryNetworkCache(netId_);
+        netLinkInfo_.Initialize();
         isPhyNetCreated_ = false;
     }
     return true;

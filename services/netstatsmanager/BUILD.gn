@@ -18,9 +18,9 @@ ohos_shared_library("net_stats_manager") {
   sources = [
     "$NETSTATSMANAGER_SOURCE_DIR/src/net_stats_callback.cpp",
     "$NETSTATSMANAGER_SOURCE_DIR/src/net_stats_csv.cpp",
-    "$NETSTATSMANAGER_SOURCE_DIR/src/net_stats_listener.cpp",
     "$NETSTATSMANAGER_SOURCE_DIR/src/net_stats_service.cpp",
     "$NETSTATSMANAGER_SOURCE_DIR/src/net_stats_service_iface.cpp",
+    "$NETSTATSMANAGER_SOURCE_DIR/src/net_stats_listener.cpp",
     "$NETSTATSMANAGER_SOURCE_DIR/src/stub/net_stats_callback_proxy.cpp",
     "$NETSTATSMANAGER_SOURCE_DIR/src/stub/net_stats_service_stub.cpp",
   ]

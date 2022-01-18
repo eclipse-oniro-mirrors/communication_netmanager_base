@@ -18,10 +18,79 @@
 #include "napi_net_conn.h"
 #include "napi_common.h"
 #include "event_listener_context.h"
+#include "napi_net_conn.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-static void OnEvent(EventListener & listen)
+static void OnNetAvailableEvent(EventListener &listen, sptr<NetHandle> &netHandle)
+{
+    napi_value info = nullptr;
+    napi_value callbackValues[CALLBACK_ARGV_CNT] = {nullptr, nullptr};
+    napi_value recv = nullptr;
+    napi_value result = nullptr;
+    napi_value callbackFunc = nullptr;
+    info = NapiNetConn::CreateNetHandle(listen.env, netHandle);
+    napi_get_undefined(listen.env, &recv);
+    napi_get_reference_value(listen.env, listen.callbackRef, &callbackFunc);
+    callbackValues[CALLBACK_ARGV_INDEX_1] = info;
+    napi_call_function(listen.env, recv, callbackFunc, std::size(callbackValues), callbackValues, &result);
+}
+
+static void OnNetCapabilitiesChangeEvent(
+    EventListener &listen, sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap)
+{
+    napi_value info = nullptr;
+    napi_value callbackValues[CALLBACK_ARGV_CNT] = {nullptr, nullptr};
+    napi_value recv = nullptr;
+    napi_value result = nullptr;
+    napi_value callbackFunc = nullptr;
+    std::string content;
+    napi_create_object(listen.env, &info);
+    napi_value handle = NapiNetConn::CreateNetHandle(listen.env, netHandle);
+    napi_set_named_property(listen.env, info, "handle", handle);
+    std::string netAllCapStr = netAllCap->ToString(" ");
+    NapiCommon::SetPropertyString(listen.env, info, "netAllCap", netAllCapStr);
+    napi_get_undefined(listen.env, &recv);
+    napi_get_reference_value(listen.env, listen.callbackRef, &callbackFunc);
+    callbackValues[CALLBACK_ARGV_INDEX_1] = info;
+    napi_call_function(listen.env, recv, callbackFunc, std::size(callbackValues), callbackValues, &result);
+}
+
+static void OnNetConnectionPropertiesChangeEvent(
+    EventListener &listen, sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &linkInfo)
+{
+    napi_value info = nullptr;
+    napi_value callbackValues[CALLBACK_ARGV_CNT] = {nullptr, nullptr};
+    napi_value recv = nullptr;
+    napi_value result = nullptr;
+    napi_value callbackFunc = nullptr;
+    std::string content;
+    napi_create_object(listen.env, &info);
+    napi_value handle = NapiNetConn::CreateNetHandle(listen.env, netHandle);
+    napi_set_named_property(listen.env, info, "handle", handle);
+    std::string linkInfoStr = linkInfo->ToString(" ");
+    NapiCommon::SetPropertyString(listen.env, info, "linkInfo", linkInfoStr);
+    napi_get_undefined(listen.env, &recv);
+    napi_get_reference_value(listen.env, listen.callbackRef, &callbackFunc);
+    callbackValues[CALLBACK_ARGV_INDEX_1] = info;
+    napi_call_function(listen.env, recv, callbackFunc, std::size(callbackValues), callbackValues, &result);
+}
+
+static void OnNetLostEvent(EventListener &listen, sptr<NetHandle> &netHandle)
+{
+    napi_value info = nullptr;
+    napi_value callbackValues[CALLBACK_ARGV_CNT] = {nullptr, nullptr};
+    napi_value recv = nullptr;
+    napi_value result = nullptr;
+    napi_value callbackFunc = nullptr;
+    info = NapiNetConn::CreateNetHandle(listen.env, netHandle);
+    napi_get_undefined(listen.env, &recv);
+    napi_get_reference_value(listen.env, listen.callbackRef, &callbackFunc);
+    callbackValues[CALLBACK_ARGV_INDEX_1] = info;
+    napi_call_function(listen.env, recv, callbackFunc, std::size(callbackValues), callbackValues, &result);
+}
+
+static void OnNetUnavailableEvent(EventListener &listen)
 {
     napi_value info = nullptr;
     napi_value callbackValues[CALLBACK_ARGV_CNT] = {nullptr, nullptr};
@@ -35,14 +104,33 @@ static void OnEvent(EventListener & listen)
     napi_call_function(listen.env, recv, callbackFunc, std::size(callbackValues), callbackValues, &result);
 }
 
+static void OnNetBlockStatusChangeEvent(
+    EventListener &listen, sptr<NetHandle> &netHandle, bool blocked)
+{
+    napi_value info = nullptr;
+    napi_value callbackValues[CALLBACK_ARGV_CNT] = {nullptr, nullptr};
+    napi_value recv = nullptr;
+    napi_value result = nullptr;
+    napi_value callbackFunc = nullptr;
+    napi_create_object(listen.env, &info);
+    napi_value handle = NapiNetConn::CreateNetHandle(listen.env, netHandle);
+    napi_set_named_property(listen.env, info, "handle", handle);
+    napi_value isBlock = nullptr;
+    napi_get_boolean(listen.env, blocked, &isBlock);
+    napi_set_named_property(listen.env, info, "blocked", isBlock);
+    napi_get_undefined(listen.env, &recv);
+    napi_get_reference_value(listen.env, listen.callbackRef, &callbackFunc);
+    callbackValues[CALLBACK_ARGV_INDEX_1] = info;
+    napi_call_function(listen.env, recv, callbackFunc, std::size(callbackValues), callbackValues, &result);
+}
+
 int32_t NapiNetConnObserver::NetAvailable(sptr<NetHandle> &netHandle)
 {
     NETMGR_LOG_D("NetAvailable netId [%{public}d]", netHandle->GetNetId());
-    std::unique_ptr<int32_t> id = std::make_unique<int32_t>(netHandle->GetNetId());
     EventListener listen;
     listen.eventId = EVENT_NET_AVAILABLE_CHANGE;
     if (EventListenerContext::GetInstance().FindListener(this, listen) != EVENT_NET_UNKNOW_CHANGE) {
-        OnEvent(listen);
+        OnNetAvailableEvent(listen, netHandle);
     }
     return 0;
 }
@@ -51,12 +139,10 @@ int32_t NapiNetConnObserver::NetCapabilitiesChange(
     sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap)
 {
     NETMGR_LOG_D("NetCapabilitiesChange netId [%{public}d]", netHandle->GetNetId());
-    std::unique_ptr<CapabilitiesEvent> capabilities = std::make_unique<CapabilitiesEvent>(netHandle->GetNetId(),
-        netAllCap);
     EventListener listen;
     listen.eventId = EVENT_NET_CAPABILITIES_CHANGE;
     if (EventListenerContext::GetInstance().FindListener(this, listen) != EVENT_NET_UNKNOW_CHANGE) {
-        OnEvent(listen);
+        OnNetCapabilitiesChangeEvent(listen, netHandle, netAllCap);
     }
     return 0;
 }
@@ -66,11 +152,10 @@ int32_t NapiNetConnObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netH
 {
     NETMGR_LOG_D("NetConnectionPropertiesChange netId [%{public}d], info is [%{public}s]",
         netHandle->GetNetId(), info == nullptr ? "nullptr" : "not nullptr");
-    std::unique_ptr<ConnectionEvent> connection = std::make_unique<ConnectionEvent>(netHandle->GetNetId(), info);
     EventListener listen;
     listen.eventId = EVENT_NET_CONNECTION_CHANGE;
     if (EventListenerContext::GetInstance().FindListener(this, listen) != EVENT_NET_UNKNOW_CHANGE) {
-        OnEvent(listen);
+        OnNetConnectionPropertiesChangeEvent(listen, netHandle, info);
     }
     return 0;
 }
@@ -82,7 +167,7 @@ int32_t NapiNetConnObserver::NetLost(sptr<NetHandle> &netHandle)
     EventListener listen;
     listen.eventId = EVENT_NET_LOST_CHANGE;
     if (EventListenerContext::GetInstance().FindListener(this, listen) != EVENT_NET_UNKNOW_CHANGE) {
-        OnEvent(listen);
+        OnNetLostEvent(listen, netHandle);
     }
     return 0;
 }
@@ -92,7 +177,7 @@ int32_t NapiNetConnObserver::NetUnavailable()
     EventListener listen;
     listen.eventId = EVENT_NET_UNAVAILABLE_CHANGE;
     if (EventListenerContext::GetInstance().FindListener(this, listen) != EVENT_NET_UNKNOW_CHANGE) {
-        OnEvent(listen);
+        OnNetUnavailableEvent(listen);
     }
     return 0;
 }
@@ -103,7 +188,7 @@ int32_t NapiNetConnObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle, bo
     EventListener listen;
     listen.eventId = EVENT_NET_BLOCK_STATUS_CHANGE;
     if (EventListenerContext::GetInstance().FindListener(this, listen) != EVENT_NET_UNKNOW_CHANGE) {
-        OnEvent(listen);
+        OnNetBlockStatusChangeEvent(listen, netHandle, blocked);
     }
     return 0;
 }

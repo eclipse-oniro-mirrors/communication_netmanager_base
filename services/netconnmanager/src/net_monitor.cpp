@@ -43,7 +43,7 @@ bool NetMonitor::HttpDetection()
     int32_t ret = httpRequest.HttpGetHeader(httpMsg, httpHeader);
     std::string urlRedirect;
     if (ret != 0 || httpHeader.empty()) {
-        NETMGR_LOG_E("The network is abnormal or Response code returned by http [httpHeader] is empty!");
+        NETMGR_LOG_E("The network is abnormal or Response code returned by httpRequest is empty!");
         netDetectionStatus_(NetDetectionStatus::INVALID_DETECTION_STATE, urlRedirect);
         lastDetectionState_ = INVALID_DETECTION_STATE;
         return true;
