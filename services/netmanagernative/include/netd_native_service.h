@@ -13,20 +13,19 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef  NETD_NATIVE_SERVICE_H__
+#define  NETD_NATIVE_SERVICE_H__
 
 #include <mutex>
-
+#include "dhcp_controller.h"
+#include "dnsresolv_service.h"
+#include "fwmark_server.h"
 #include "i_netd_service.h"
 #include "iremote_stub.h"
-#include "system_ability.h"
-
-#include "netd_native_service_stub.h"
 #include "net_manager_native.h"
+#include "netd_native_service_stub.h"
 #include "netlink_manager.h"
-#include "fwmark_server.h"
-#include "dnsresolv_service.h"
-#include "dhcp_controller.h"
+#include "system_ability.h"
 
 namespace OHOS {
 namespace NetdNative {
@@ -34,7 +33,7 @@ class NetdNativeService : public SystemAbility, public NetdNativeServiceStub, pr
     DECLARE_SYSTEM_ABILITY(NetdNativeService);
 
 public:
-    explicit NetdNativeService(int32_t saID, bool runOnCreate = true) : SystemAbility(saID, runOnCreate){};
+    explicit NetdNativeService(int32_t saID, bool runOnCreate = true) : SystemAbility(saID, runOnCreate) {};
     ~NetdNativeService() = default;
 
     void OnStart() override;
@@ -42,7 +41,7 @@ public:
 
     int32_t SetResolverConfigParcel(const DnsresolverParamsParcel& resolvParams) override;
     int32_t SetResolverConfig(const dnsresolver_params &resolvParams) override;
-    int32_t GetResolverConfig( const  uint16_t  netid,  std::vector<std::string> &servers, 
+    int32_t GetResolverConfig(const  uint16_t  netid,  std::vector<std::string> &servers,
            std::vector<std::string> &domains, nmd::dns_res_params &param) override;
     int32_t CreateNetworkCache(const uint16_t netid) override;
     int32_t FlushNetworkCache(const uint16_t netid) override;
@@ -62,13 +61,17 @@ public:
     int32_t NetworkRemoveRouteParcel(int32_t netId, const route_info_parcel &routeInfo) override;
     int32_t NetworkSetDefault(int32_t netId) override;
     int32_t NetworkGetDefault() override;
+    int32_t NetworkClearDefault() override;
+    int32_t GetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
+        const std::string &parameter, std::string  &value) override;
+    int32_t SetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
+        const std::string &parameter, std::string &value) override;
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) override;
     int32_t InterfaceAddAddress(const std::string &interfaceName, const std::string &addrString,
         int32_t prefixLength) override;
     int32_t InterfaceDelAddress(const std::string &interfaceName, const std::string &addrString,
         int32_t prefixLength) override;
     int32_t NetworkAddInterface(int32_t netId, const std::string &iface) override;
-    //int32_t NetworkUpdateRouteParcel(int netId, std::string iface) override;
     int32_t NetworkRemoveInterface(int32_t netId, const std::string &iface) override;
     int32_t NetworkDestroy(int32_t netId) override;
     int32_t GetFwmarkForNetwork(int32_t netId,     mark_mask_parcel &markMaskParcel) override;
@@ -76,6 +79,8 @@ public:
     int32_t InterfaceGetConfig(interface_configuration_parcel &cfg) override;
     int32_t StartDhcpClient(const std::string &iface, bool bIpv6) override;
     int32_t StopDhcpClient(const std::string &iface, bool bIpv6) override;
+    int32_t StartDhcpService(const std::string &iface, const std::string &ipv4addr) override;
+    int32_t StopDhcpService(const std::string &iface) override;
 private:
     NetdNativeService();
     bool Init();
@@ -103,3 +108,4 @@ private:
 };
 } // namespace NetdNative
 } // namespace OHOS
+#endif // NETD_NATIVE_SERVICE_H__

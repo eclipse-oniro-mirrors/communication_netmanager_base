@@ -36,69 +36,6 @@ int32_t DnsResolverClient::GetAddressesByName(const std::string &hostName, std::
     return proxy->GetAddressesByName(hostName, addrInfo);
 }
 
-int32_t DnsResolverClient::GetAddrInfo(const std::string &hostName, const std::string &server,
-    const sptr<DnsAddrInfo> &hints, std::vector<sptr<DnsAddrInfo>> &dnsAddrInfo)
-{
-    sptr<IDnsResolverService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
-    return proxy->GetAddrInfo(hostName, server, hints, dnsAddrInfo);
-}
-
-int32_t DnsResolverClient::CreateNetworkCache(uint16_t netId)
-{
-    sptr<IDnsResolverService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
-    return proxy->CreateNetworkCache(netId);
-}
-
-int32_t DnsResolverClient::DestoryNetworkCache(uint16_t netId)
-{
-    sptr<IDnsResolverService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
-    return proxy->DestoryNetworkCache(netId);
-}
-
-int32_t DnsResolverClient::FlushNetworkCache(uint16_t netId)
-{
-    sptr<IDnsResolverService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
-    return proxy->FlushNetworkCache(netId);
-}
-
-int32_t DnsResolverClient::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
-    const std::vector<std::string> &servers, const std::vector<std::string> &domains)
-{
-    sptr<IDnsResolverService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
-    return proxy->SetResolverConfig(netId, baseTimeoutMsec, retryCount, servers, domains);
-}
-
-int32_t DnsResolverClient::GetResolverInfo(uint16_t netId, std::vector<std::string> &servers,
-    std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount)
-{
-    sptr<IDnsResolverService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
-    return proxy->GetResolverInfo(netId, servers, domains, baseTimeoutMsec, retryCount);
-}
-
 sptr<IDnsResolverService> DnsResolverClient::GetProxy()
 {
     std::lock_guard lock(mutex_);

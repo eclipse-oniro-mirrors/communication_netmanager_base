@@ -40,6 +40,21 @@ bool Route::Marshalling(Parcel &parcel) const
         NETMGR_LOG_E("write gateway_ to parcel failed");
         return false;
     }
+    if (!parcel.WriteInt32(rtnType_)) {
+        return false;
+    }
+    if (!parcel.WriteInt32(mtu_)) {
+        return false;
+    }
+    if (!parcel.WriteBool(isHost_)) {
+        return false;
+    }
+    if (!parcel.WriteBool(hasGateway_)) {
+        return false;
+    }
+    if (!parcel.WriteBool(isDefaultRoute_)) {
+        return false;
+    }
     return true;
 }
 
@@ -65,6 +80,21 @@ sptr<Route> Route::Unmarshalling(Parcel &parcel)
         return nullptr;
     }
     ptr->gateway_ = *gateway;
+    if (!parcel.ReadInt32(ptr->rtnType_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadInt32(ptr->mtu_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadBool(ptr->isHost_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadBool(ptr->hasGateway_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadBool(ptr->isDefaultRoute_)) {
+        return nullptr;
+    }
     return ptr;
 }
 
@@ -83,6 +113,21 @@ bool Route::Marshalling(Parcel &parcel, const sptr<Route> &object)
     }
     if (!object->gateway_.Marshalling(parcel)) {
         NETMGR_LOG_E("write object->gateway_ to parcel failed");
+        return false;
+    }
+    if (!parcel.WriteInt32(object->rtnType_)) {
+        return false;
+    }
+    if (!parcel.WriteInt32(object->mtu_)) {
+        return false;
+    }
+    if (!parcel.WriteBool(object->isHost_)) {
+        return false;
+    }
+    if (!parcel.WriteBool(object->hasGateway_)) {
+        return false;
+    }
+    if (!parcel.WriteBool(object->isDefaultRoute_)) {
         return false;
     }
     return true;
@@ -109,6 +154,31 @@ std::string Route::ToString(const std::string &tab) const
     str.append(tab);
     str.append("gateway_ = ");
     str.append(gateway_.ToString(tab + "    "));
+
+    str.append("\n");
+    str.append(tab);
+    str.append("rtnType_ = ");
+    str.append(std::to_string(rtnType_));
+
+    str.append("\n");
+    str.append(tab);
+    str.append("mtu_ = ");
+    str.append(std::to_string(mtu_));
+
+    str.append("\n");
+    str.append(tab);
+    str.append("isHost_ = ");
+    str.append(isHost_?"true":"false");
+
+    str.append("\n");
+    str.append(tab);
+    str.append("hasGateway_ = ");
+    str.append(hasGateway_?"true":"false");
+
+    str.append("\n");
+    str.append(tab);
+    str.append("isDefaultRoute = ");
+    str.append(isDefaultRoute_?"true":"false");
 
     return str;
 }

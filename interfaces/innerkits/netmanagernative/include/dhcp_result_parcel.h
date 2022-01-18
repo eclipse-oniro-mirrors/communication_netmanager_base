@@ -15,8 +15,8 @@
 #ifndef  DHCP_RESULT_PARCEL_H__
 #define  DHCP_RESULT_PARCEL_H__
 
-#include "parcel.h"
 #include <string>
+#include "parcel.h"
 
 namespace OHOS {
 namespace NetdNative {

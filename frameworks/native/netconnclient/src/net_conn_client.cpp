@@ -38,7 +38,8 @@ int32_t NetConnClient::SystemReady()
     return proxy->SystemReady();
 }
 
-int32_t NetConnClient::RegisterNetSupplier(uint32_t netType, const std::string &ident, uint64_t netCapabilities)
+int32_t NetConnClient::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
+    const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -46,24 +47,7 @@ int32_t NetConnClient::RegisterNetSupplier(uint32_t netType, const std::string &
         return IPC_PROXY_ERR;
     }
 
-    uint32_t supplierId = 0;
-    int32_t result = proxy->RegisterNetSupplier(netType, ident, netCapabilities, supplierId);
-    if (result != ERR_NONE) {
-        return result;
-    }
-    return supplierId;
-}
-
-int32_t NetConnClient::RegisterNetSupplier(uint32_t netType, const std::string &ident, uint64_t netCapabilities,
-    uint32_t &supplierId)
-{
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
-
-    return proxy->RegisterNetSupplier(netType, ident, netCapabilities, supplierId);
+    return proxy->RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
 }
 
 int32_t NetConnClient::UnregisterNetSupplier(uint32_t supplierId)
@@ -102,15 +86,19 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<INetConnCallback> &cal
 }
 
 int32_t NetConnClient::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-    const sptr<INetConnCallback> &callback)
+    const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
 {
+    if (netSpecifier == nullptr || !netSpecifier->SpecifierIsValid()) {
+        NETMGR_LOG_E("The parameter of netSpecifier is invalid");
+        return NET_CONN_ERR_INVALID_PARAMETER;
+    }
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("The parameter of proxy is nullptr");
         return NET_CONN_ERR_INTERNAL_ERROR;
     }
 
-    return proxy->RegisterNetConnCallback(netSpecifier, callback);
+    return proxy->RegisterNetConnCallback(netSpecifier, callback, timeoutMS);
 }
 
 int32_t NetConnClient::UnregisterNetConnCallback(const sptr<INetConnCallback> &callback)
@@ -124,30 +112,6 @@ int32_t NetConnClient::UnregisterNetConnCallback(const sptr<INetConnCallback> &c
     return proxy->UnregisterNetConnCallback(callback);
 }
 
-int32_t NetConnClient::UnregisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-    const sptr<INetConnCallback> &callback)
-{
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NET_CONN_ERR_INTERNAL_ERROR;
-    }
-
-    return proxy->UnregisterNetConnCallback(netSpecifier, callback);
-}
-
-int32_t NetConnClient::UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState)
-{
-    NETMGR_LOG_I("====Test NetConnClient::UpdateNetStateForTest(), begin");
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NET_CONN_ERR_INTERNAL_ERROR;
-    }
-
-    return proxy->UpdateNetStateForTest(netSpecifier, netState);
-}
-
 int32_t NetConnClient::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo)
 {
     sptr<INetConnService> proxy = GetProxy();
@@ -157,17 +121,6 @@ int32_t NetConnClient::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<Net
     }
 
     return proxy->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
-}
-
-int32_t NetConnClient::UpdateNetCapabilities(uint32_t supplierId, uint64_t netCapabilities)
-{
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
-
-    return proxy->UpdateNetCapabilities(supplierId, netCapabilities);
 }
 
 int32_t NetConnClient::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo)
@@ -181,8 +134,7 @@ int32_t NetConnClient::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLink
     return proxy->UpdateNetLinkInfo(supplierId, netLinkInfo);
 }
 
-int32_t NetConnClient::ActivateNetwork(const sptr<NetSpecifier>& netSpecifier,
-    const sptr<INetConnCallback>& callback, uint32_t& reqId)
+int32_t NetConnClient::GetDefaultNet(NetHandle &netHandle)
 {
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -190,10 +142,26 @@ int32_t NetConnClient::ActivateNetwork(const sptr<NetSpecifier>& netSpecifier,
         return IPC_PROXY_ERR;
     }
 
-    return proxy->ActivateNetwork(netSpecifier, callback, reqId);
+    int32_t netId = 0;
+    int32_t result = proxy->GetDefaultNet(netId);
+    if (result != ERR_NONE) {
+        return result;
+    }
+    netHandle.SetNetId(netId);
+    return ERR_NONE;
 }
 
-int32_t NetConnClient::DeactivateNetwork(uint32_t& reqId)
+int32_t NetConnClient::HasDefaultNet(bool& flag)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy==nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return IPC_PROXY_ERR;
+    }
+    return proxy->HasDefaultNet(flag);
+}
+
+int32_t NetConnClient::GetAllNets(std::list<sptr<NetHandle>> &netList)
 {
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -201,10 +169,20 @@ int32_t NetConnClient::DeactivateNetwork(uint32_t& reqId)
         return IPC_PROXY_ERR;
     }
 
-    return proxy->DeactivateNetwork(reqId);
+    std::list<int32_t> netIdList;
+    int32_t result = proxy->GetAllNets(netIdList);
+    if (result != ERR_NONE) {
+        return result;
+    }
+    std::list<int32_t>::iterator iter;
+    for (iter = netIdList.begin(); iter != netIdList.end(); iter++) {
+        sptr<NetHandle> netHandle = std::make_unique<NetHandle>(*iter).release();
+        netList.push_back(netHandle);
+    }
+    return ERR_NONE;
 }
 
-int32_t NetConnClient::GetDefaultNet(int32_t& netId)
+int32_t NetConnClient::GetConnectionProperties(const NetHandle &netHandle, NetLinkInfo &info)
 {
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -212,10 +190,10 @@ int32_t NetConnClient::GetDefaultNet(int32_t& netId)
         return IPC_PROXY_ERR;
     }
 
-    return proxy->GetDefaultNet(netId);
+    return proxy->GetConnectionProperties(netHandle.GetNetId(), info);
 }
 
-int32_t NetConnClient::GetSpecificNet(uint32_t type, std::list<int32_t> &netIdList)
+int32_t NetConnClient::GetNetCapabilities(const NetHandle &netHandle, NetAllCapabilities &netAllCap)
 {
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -223,10 +201,10 @@ int32_t NetConnClient::GetSpecificNet(uint32_t type, std::list<int32_t> &netIdLi
         return IPC_PROXY_ERR;
     }
 
-    return proxy->GetSpecificNet(type, netIdList);
+    return proxy->GetNetCapabilities(netHandle.GetNetId(), netAllCap);
 }
 
-int32_t NetConnClient::GetAllNets(std::list<int32_t> &netIdList)
+int32_t NetConnClient::GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList)
 {
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -234,10 +212,10 @@ int32_t NetConnClient::GetAllNets(std::list<int32_t> &netIdList)
         return IPC_PROXY_ERR;
     }
 
-    return proxy->GetAllNets(netIdList);
+    return proxy->GetAddressesByName(host, netId, addrList);
 }
 
-int32_t NetConnClient::GetSpecificUidNet(int32_t uid, int32_t &netId)
+int32_t NetConnClient::GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr)
 {
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -245,10 +223,10 @@ int32_t NetConnClient::GetSpecificUidNet(int32_t uid, int32_t &netId)
         return IPC_PROXY_ERR;
     }
 
-    return proxy->GetSpecificUidNet(uid, netId);
+    return proxy->GetAddressByName(host, netId, addr);
 }
 
-int32_t NetConnClient::GetConnectionProperties(int32_t netId, NetLinkInfo &info)
+int32_t NetConnClient::BindSocket(int32_t socket_fd, int32_t netId)
 {
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -256,51 +234,10 @@ int32_t NetConnClient::GetConnectionProperties(int32_t netId, NetLinkInfo &info)
         return IPC_PROXY_ERR;
     }
 
-    return proxy->GetConnectionProperties(netId, info);
+    return proxy->BindSocket(socket_fd, netId);
 }
 
-int32_t NetConnClient::GetNetCapabilities(int32_t netId, uint64_t &cap)
-{
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
-
-    return proxy->GetNetCapabilities(netId, cap);
-}
-
-int32_t NetConnClient::RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback)
-{
-    if (callback == nullptr) {
-        NETMGR_LOG_E("The parameter of callback is nullptr");
-        return NET_CONN_ERR_INPUT_NULL_PTR;
-    }
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NET_CONN_ERR_INPUT_NULL_PTR;
-    }
-
-    return proxy->RegisterNetDetectionCallback(netId, callback);
-}
-
-int32_t NetConnClient::UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback)
-{
-    if (callback == nullptr) {
-        NETMGR_LOG_E("The parameter of callback is nullptr");
-        return NET_CONN_ERR_INPUT_NULL_PTR;
-    }
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NET_CONN_ERR_INPUT_NULL_PTR;
-    }
-
-    return proxy->UnRegisterNetDetectionCallback(netId, callback);
-}
-
-int32_t NetConnClient::NetDetection(int32_t netId)
+int32_t NetConnClient::NetDetection(const NetHandle &netHandle)
 {
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -308,22 +245,7 @@ int32_t NetConnClient::NetDetection(int32_t netId)
         return NET_CONN_ERR_INPUT_NULL_PTR;
     }
 
-    return proxy->NetDetection(netId);
-}
-
-int32_t NetConnClient::GetIfaceNameByType(uint32_t netType, const std::string &ident, std::string &ifaceName)
-{
-    if (ident.empty()) {
-        NETMGR_LOG_E("ident is nullptr");
-        return NET_CONN_ERR_INVALID_PARAMETER;
-    }
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
-
-    return proxy->GetIfaceNameByType(netType, ident, ifaceName);
+    return proxy->NetDetection(netHandle.GetNetId());
 }
 
 sptr<INetConnService> NetConnClient::GetProxy()
@@ -372,6 +294,17 @@ int32_t NetConnClient::SetAirplaneMode(bool state)
     }
 
     return proxy->SetAirplaneMode(state);
+}
+
+int32_t NetConnClient::RestoreFactoryData()
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return IPC_PROXY_ERR;
+    }
+
+    return proxy->RestoreFactoryData();
 }
 
 void NetConnClient::OnRemoteDied(const wptr<IRemoteObject> &remote)

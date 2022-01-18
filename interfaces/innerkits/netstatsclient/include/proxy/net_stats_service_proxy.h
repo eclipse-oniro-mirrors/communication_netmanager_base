@@ -25,7 +25,6 @@ class NetStatsServiceProxy : public IRemoteProxy<INetStatsService> {
 public:
     explicit NetStatsServiceProxy(const sptr<IRemoteObject> &impl);
     virtual ~NetStatsServiceProxy();
-    int32_t SystemReady() override;
     int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;
     int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;
     NetStatsResultCode GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end,

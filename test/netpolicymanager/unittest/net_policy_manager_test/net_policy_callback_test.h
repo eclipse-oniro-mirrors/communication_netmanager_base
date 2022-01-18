@@ -30,8 +30,9 @@ public:
     NetPolicyCallbackTest();
     virtual ~NetPolicyCallbackTest() override;
     int32_t NetUidPolicyChanged(uint32_t uid, NetUidPolicy policy) override;
-    int32_t NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicys) override;
-    int32_t NetStrategySwitch(const std::string &subscriberId, bool enable) override;
+    int32_t NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicies) override;
+    int32_t NetStrategySwitch(int32_t slotId, bool enable) override;
+    int32_t NetBackgroundPolicyChanged(bool isBackgroundPolicyAllow) override;
     void WaitFor(int32_t timeoutSecond);
 
     NetUidPolicy GetPolicy() const
@@ -46,6 +47,7 @@ private:
     void NotifyAll();
     NetUidPolicy uidPolicy_ = NetUidPolicy::NET_POLICY_NONE;
     uint32_t uid_ = 0;
+    bool isBackgroundPolicyAllow_ = true;
     std::mutex callbackMutex_;
     std::condition_variable cv_;
 };

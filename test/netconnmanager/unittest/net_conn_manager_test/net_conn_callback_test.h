@@ -27,11 +27,12 @@ class NetConnCallbackTest : public NetConnCallbackStub {
 public:
     NetConnCallbackTest();
     virtual ~NetConnCallbackTest() override;
-    int32_t NetConnStateChanged(const sptr<NetConnCallbackInfo> &info) override;
-    int32_t NetAvailable(int32_t netId) override;
-    int32_t NetCapabilitiesChange(int32_t netId, const uint64_t &netCap) override;
-    int32_t NetConnectionPropertiesChange(int32_t netId, const sptr<NetLinkInfo> &info) override;
-    int32_t NetLost(int32_t netId) override;
+    int32_t NetAvailable(sptr<NetHandle> &netHandle) override;
+    int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap) override;
+    int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info) override;
+    int32_t NetLost(sptr<NetHandle> &netHandle) override;
+    int32_t NetUnavailable() override;
+    int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override;
     void WaitFor(int timeoutSecond);
 
     int GetNetState() const

@@ -12,11 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <memory>
 #include "dnsresolver_params_parcel.h"
-
 #include "netnative_log_wrapper.h"
-
 
 namespace OHOS {
 namespace NetdNative {

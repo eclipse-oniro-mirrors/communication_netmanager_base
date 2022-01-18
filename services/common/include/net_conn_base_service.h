@@ -15,21 +15,25 @@
 #ifndef NET_CONN_BASE_SERVICE_H
 #define NET_CONN_BASE_SERVICE_H
 
+#include <set>
+
 #include "refbase.h"
 
 #include "net_link_info.h"
 #include "net_supplier_info.h"
+#include "net_all_capabilities.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 class NetConnBaseService : public virtual RefBase {
 public:
-    virtual int32_t GetIfaceNameByType(uint32_t netType, const std::string &ident, std::string &ifaceName) = 0;
-    virtual int32_t RegisterNetSupplier(uint32_t netType, const std::string &ident, uint64_t netCapabilities,
-        uint32_t &supplierId) = 0;
+    virtual int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) = 0;
+    virtual int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
+        const std::set<NetCap> &netCaps, uint32_t &supplierId) = 0;
     virtual int32_t UnregisterNetSupplier(uint32_t supplierId) = 0;
     virtual int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo) = 0;
     virtual int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) = 0;
+    virtual int32_t RestrictBackgroundChanged(bool isRestrictBackground) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

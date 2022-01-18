@@ -21,8 +21,6 @@
 namespace OHOS {
 namespace NetManagerStandard {
 const mode_t CHOWN_RWX_USR_GRP = 0770;
-constexpr int16_t CONVERT_LENGTH_TEN  = 10;
-constexpr int16_t CONVERT_LENGTH_EIGHTEEN = 18;
 constexpr int16_t PERIODDURATION_POS_NUM_ONE  = 1;
 constexpr int16_t DAY_ONE  = 1;
 constexpr int16_t DAY_THIRTY_ONE = 31;
@@ -40,7 +38,7 @@ const std::string CONFIG_BACKGROUND_POLICY = "backgroundPolicy";
 const std::string CONFIG_BACKGROUND_POLICY_STATUS = "status";
 const std::string CONFIG_QUOTA_POLICY = "quotaPolicy";
 const std::string CONFIG_QUOTA_POLICY_NETTYPE = "netType";
-const std::string CONFIG_QUOTA_POLICY_SUBSCRIBERID = "subscriberId";
+const std::string CONFIG_QUOTA_POLICY_SUBSCRIBERID = "slotId";
 const std::string CONFIG_QUOTA_POLICY_PERIODSTARTTIME = "periodStartTime";
 const std::string CONFIG_QUOTA_POLICY_PERIODDURATION = "periodDuration";
 const std::string CONFIG_QUOTA_POLICY_WARNINGBYTES = "warningBytes";
@@ -49,7 +47,7 @@ const std::string CONFIG_QUOTA_POLICY_LASTLIMITSNOOZE = "lastLimitSnooze";
 const std::string CONFIG_QUOTA_POLICY_METERED = "metered";
 const std::string CONFIG_QUOTA_POLICY_SOURCE = "source";
 const std::string CONFIG_CELLULAR_POLICY = "cellularPolicy";
-const std::string CONFIG_CELLULAR_POLICY_SUBSCRIBERID = "subscriberId";
+const std::string CONFIG_CELLULAR_POLICY_SUBSCRIBERID = "slotId";
 const std::string CONFIG_CELLULAR_POLICY_PERIODSTARTTIME = "periodStartTime";
 const std::string CONFIG_CELLULAR_POLICY_PERIODDURATION = "periodDuration";
 const std::string CONFIG_CELLULAR_POLICY_TITLE = "title";
@@ -61,6 +59,7 @@ const std::string CONFIG_CELLULAR_POLICY_USEDTIMEDURATION = "usedTimeDuration";
 const std::string CONFIG_CELLULAR_POLICY_POSSESSOR = "possessor";
 const std::string BACKGROUND_POLICY_ALLOW = "allow";
 const std::string BACKGROUND_POLICY_REJECT = "reject";
+const std::string IDENT_PREFIX = "slotId";
 
 struct UidPolicy {
     std::string uid;
@@ -69,7 +68,7 @@ struct UidPolicy {
 
 struct NetPolicyQuota {
     std::string netType;
-    std::string subscriberId;
+    std::string slotId;
     std::string periodStartTime;
     std::string periodDuration;
     std::string warningBytes;
@@ -80,7 +79,7 @@ struct NetPolicyQuota {
 };
 
 struct NetPolicyCellular {
-    std::string subscriberId;
+    std::string slotId;
     std::string periodStartTime;
     std::string periodDuration;
     std::string title;

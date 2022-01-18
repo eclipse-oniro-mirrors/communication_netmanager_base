@@ -18,16 +18,12 @@ INNERKITS_ROOT = "$NETMANAGER_BASE_ROOT/interfaces/innerkits"
 NETCONNMANAGER_INNERKITS_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/frameworks/native/netconnclient"
 NETPOLICYMANAGER_INNERKITS_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/frameworks/native/netpolicyclient"
 DNSRESOLVERMANAGER_INNERKITS_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/frameworks/native/dnsresolverclient"
-ETHERNETMANAGER_INNERKITS_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/frameworks/native/ethernetclient"
 NETSTATSMANAGER_INNERKITS_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/frameworks/native/netstatsclient"
-NETTETHERMANAGER_INNERKITS_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/frameworks/native/nettetherclient"
 NETCONNMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netconnmanager"
 NETPOLICYMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netpolicymanager"
 NETSTATSMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netstatsmanager"
 NETCONNMANAGER_COMMON_DIR = "$NETMANAGER_BASE_ROOT/services/common"
 DNSRESOLVERMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/dnsresolvermanager"
-ETHERNETMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/ethernetmanager"
-NETTETHERMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/nettethermanager"
 NETDNATIVE_INNERKITS_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/frameworks/native/netmanagernative"
 NETDNATIVE_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netmanagernative"
 NETMANAGER_PREBUILTS_DIR = "$NETMANAGER_BASE_ROOT/prebuilts"
@@ -36,5 +32,5 @@ NETDCONTROLLER_ROOT_DIR = "$NETMANAGER_BASE_ROOT/services/netdcontroller"
 use_js_debug = false
 declare_args() {
   enable_netmgr_debug = true
-  enable_sys_dns = true
+  enable_sys_func = true
 }

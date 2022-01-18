@@ -24,6 +24,7 @@ NetPolicyCallbackStub::NetPolicyCallbackStub()
     memberFuncMap_[NET_POLICY_UIDPOLICY_CHANGED] = &NetPolicyCallbackStub::OnNetUidPolicyChanged;
     memberFuncMap_[NET_POLICY_CELLULARPOLICY_CHANGED] = &NetPolicyCallbackStub::OnNetCellularPolicyChanged;
     memberFuncMap_[NET_POLICY_STRATEGYSWITCH_CHANGED] = &NetPolicyCallbackStub::OnNetStrategySwitch;
+    memberFuncMap_[NET_POLICY_BACKGROUNDPOLICY_CHANGED] = &NetPolicyCallbackStub::OnNetBackgroundPolicyChanged;
 }
 
 NetPolicyCallbackStub::~NetPolicyCallbackStub() {}
@@ -73,15 +74,20 @@ int32_t NetPolicyCallbackStub::OnNetUidPolicyChanged(MessageParcel &data, Messag
     return ERR_NONE;
 }
 
-int32_t NetPolicyCallbackStub::OnNetCellularPolicyChanged(MessageParcel &data, MessageParcel &reply)
+int32_t NetPolicyCallbackStub::NetUidPolicyChanged(uint32_t uid, NetUidPolicy policy)
 {
-    std::vector<NetPolicyCellularPolicy> cellularPolicys;
-    if (!NetPolicyCellularPolicy::Unmarshalling(data, cellularPolicys)) {
-        NETMGR_LOG_E("Unmarshalling failed.");
+    return ERR_NONE;
+}
+
+int32_t NetPolicyCallbackStub::OnNetBackgroundPolicyChanged(MessageParcel &data, MessageParcel &reply)
+{
+    bool isBackgroundPolicyAllow = false;
+    if (!data.ReadBool(isBackgroundPolicyAllow)) {
+        NETMGR_LOG_E("ReadBool isBackgroundPolicyAllow failed");
         return ERR_FLATTEN_OBJECT;
     }
 
-    int32_t result = NetCellularPolicyChanged(cellularPolicys);
+    int32_t result = NetBackgroundPolicyChanged(isBackgroundPolicyAllow);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
         return result;
@@ -90,10 +96,38 @@ int32_t NetPolicyCallbackStub::OnNetCellularPolicyChanged(MessageParcel &data, M
     return ERR_NONE;
 }
 
+int32_t NetPolicyCallbackStub::NetBackgroundPolicyChanged(bool isBackgroundPolicyAllow)
+{
+    return ERR_NONE;
+}
+
+int32_t NetPolicyCallbackStub::OnNetCellularPolicyChanged(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<NetPolicyCellularPolicy> cellularPolicies;
+    if (!NetPolicyCellularPolicy::Unmarshalling(data, cellularPolicies)) {
+        NETMGR_LOG_E("Unmarshalling failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = NetCellularPolicyChanged(cellularPolicies);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write parcel failed");
+        return result;
+    }
+
+    return ERR_NONE;
+}
+
+int32_t NetPolicyCallbackStub::NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy>
+    &cellularPolicies)
+{
+    return ERR_NONE;
+}
+
 int32_t NetPolicyCallbackStub::OnNetStrategySwitch(MessageParcel &data, MessageParcel &reply)
 {
-    std::string subscriberId;
-    if (!data.ReadString(subscriberId)) {
+    int32_t slotId = 0;
+    if (!data.ReadInt32(slotId)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -102,12 +136,17 @@ int32_t NetPolicyCallbackStub::OnNetStrategySwitch(MessageParcel &data, MessageP
         return ERR_FLATTEN_OBJECT;
     }
 
-    int32_t result = NetStrategySwitch(subscriberId, enable);
+    int32_t result = NetStrategySwitch(slotId, enable);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
         return result;
     }
 
+    return ERR_NONE;
+}
+
+int32_t NetPolicyCallbackStub::NetStrategySwitch(int32_t slotId, bool enable)
+{
     return ERR_NONE;
 }
 } // namespace NetManagerStandard

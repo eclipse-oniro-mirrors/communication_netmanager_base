@@ -19,9 +19,11 @@
 #include <string>
 #include <vector>
 #include <unordered_set>
+#include <cstring>
 #include <netdb.h>
 #include <linux/if.h>
-#include <cstring>
+
+#include "netd_controller_callback.h"
 #include "netd_controller_define.h"
 
 namespace OHOS {
@@ -51,9 +53,12 @@ const std::string MOCK_GETALLRXBYTES_API = "GetAllRxBytes";
 const std::string MOCK_GETALLTXBYTES_API = "GetAllTxBytes";
 const std::string MOCK_GETUIDRXBYTES_API = "GetUidRxBytes";
 const std::string MOCK_GETUIDTXBYTES_API = "GetUidTxBytes";
+const std::string MOCK_GETUIDONIFACERXBYTES_API = "GetUidOnIfaceRxBytes";
+const std::string MOCK_GETUIDONIFACETXBYTES_API = "GetUidOnIfaceTxBytes";
 const std::string MOCK_GETIFACERXBYTES_API = "GetIfaceRxBytes";
 const std::string MOCK_GETIFACETXBYTES_API = "GetIfaceTxBytes";
 const std::string MOCK_INTERFACEGETLIST_API = "InterfaceGetList";
+const std::string MOCK_UIDGETLIST_API = "UidGetList";
 const std::string MOCK_GETIFACERXPACKETS_API = "GetIfaceRxPackets";
 const std::string MOCK_GETIFACETXPACKETS_API = "GetIfaceTxPackets";
 const std::string MOCK_SETDEFAULTNETWORK_API = "SetDefaultNetWork";
@@ -71,6 +76,11 @@ const std::string MOCK_BINDNETWORKSERVICEVPN_API = "BindNetworkServiceVpn";
 const std::string MOCK_ENABLEVIRTUALNETIFACECARD_API = "EnableVirtualNetIfaceCard";
 const std::string MOCK_SETIPADDRESS_API = "SetIpAddress";
 const std::string MOCK_SETBLOCKING_API = "SetBlocking";
+const std::string MOCK_STARTDHCPCLIENT_API = "StartDhcpClient";
+const std::string MOCK_STOPDHCPCLIENT_API = "StopDhcpClient";
+const std::string MOCK_REGISTERNOTIFYCALLBACK_API = "RegisterNotifyCallback";
+const std::string MOCK_STARTDHCPSERVICE_API = "StartDhcpService";
+const std::string MOCK_STOPDHCPSERVICE_API = "StopDhcpService";
 
 class MockNetdNativeClient {
 public:
@@ -304,6 +314,24 @@ public:
     int64_t GetUidTxBytes(uint32_t uid);
 
     /**
+     * @brief Obtains the bytes received through a specified UID on Iface.
+     *
+     * @param uid app id.
+     * @param iface The name of the interface.
+     * @return The number of received bytes.
+     */
+    int64_t GetUidOnIfaceRxBytes(uint32_t uid, const std::string &interfaceName);
+
+    /**
+     * @brief Obtains the bytes sent through a specified UID on Iface.
+     *
+     * @param uid app id.
+     * @param iface The name of the interface.
+     * @return The number of sent bytes.
+     */
+    int64_t GetUidOnIfaceTxBytes(uint32_t uid, const std::string &interfaceName);
+
+    /**
      * @brief Obtains the bytes received through a specified NIC.
      *
      * @param iface The name of the interface.
@@ -325,6 +353,13 @@ public:
      * @return The list of interface.
      */
     std::vector<std::string> InterfaceGetList();
+
+    /**
+     * @brief Obtains the uid list.
+     *
+     * @return The list of uid.
+     */
+    std::vector<std::string> UidGetList();
 
     /**
      * @brief Obtains the packets received through a specified NIC.
@@ -470,7 +505,45 @@ public:
      * @return Return the return value of the netd interface call.
      */
     int32_t SetBlocking(int32_t ifaceFd, bool isBlock);
+    /**
+    * @brief Start Dhcp Client.
+    *
+    * @param iface interface file description
+    * @param bIpv6 network blocking
+    * @return.
+    */
+    int32_t StartDhcpClient(const std::string &iface, bool bIpv6);
+    /**
+     * @brief Stop Dhcp Client.
+     *
+     * @param iface interface file description
+     * @param bIpv6 network blocking
+     * @return .
+     */
+    int32_t StopDhcpClient(const std::string &iface, bool bIpv6);
+    /**
+    * @brief Register Notify Callback
+    *
+    * @param callback
+    * @return .
+    */
+    int32_t RegisterCallback(sptr<NetdControllerCallback> callback);
+    /**
+     * @brief start dhcpservice.
+     *
+     * @param iface interface name
+     * @param ipv4addr ipv4 addr
+     * @return Return the return value of the netd interface call.
+     */
+    int32_t StartDhcpService(const std::string &iface, const std::string &ipv4addr);
 
+    /**
+     * @brief stop dhcpservice.
+     *
+     * @param iface interface name
+     * @return Return the return value of the netd interface call.
+     */
+    int32_t StopDhcpService(const std::string &iface);
 private:
     int64_t GetIfaceBytes(const std::string &interfaceName, const std::string &filename);
     int64_t GetAllBytes(const std::string &filename);

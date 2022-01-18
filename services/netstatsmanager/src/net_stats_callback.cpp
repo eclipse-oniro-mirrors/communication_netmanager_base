@@ -28,7 +28,7 @@ void NetStatsCallback::RegisterNetStatsCallback(const sptr<INetStatsCallback> &c
 
     for (uint32_t i = 0; i < netStatsCallback_.size(); i++) {
         if (callback->AsObject().GetRefPtr() == netStatsCallback_[i]->AsObject().GetRefPtr()) {
-            NETMGR_LOG_I("netPolicyCallback_ had this callback");
+            NETMGR_LOG_I("netStatsCallback_ had this callback");
             return;
         }
     }

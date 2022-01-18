@@ -311,6 +311,26 @@ int64_t NetdController::GetUidTxBytes(uint32_t uid)
     return netdService_->GetUidTxBytes(uid);
 }
 
+int64_t NetdController::GetUidOnIfaceRxBytes(uint32_t uid, const std::string &interfaceName)
+{
+    NETMGR_LOG_I("NetdController GetUidOnIfaceRxBytes");
+    if (netdService_ == nullptr) {
+        NETMGR_LOG_E("netdService_ is null");
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+    }
+    return netdService_->GetUidOnIfaceRxBytes(uid, interfaceName);
+}
+
+int64_t NetdController::GetUidOnIfaceTxBytes(uint32_t uid, const std::string &interfaceName)
+{
+    NETMGR_LOG_I("NetdController GetUidOnIfaceTxBytes");
+    if (netdService_ == nullptr) {
+        NETMGR_LOG_E("netdService_ is null");
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+    }
+    return netdService_->GetUidOnIfaceTxBytes(uid, interfaceName);
+}
+
 int64_t NetdController::GetIfaceRxBytes(const std::string &interfaceName)
 {
     NETMGR_LOG_I("NetdController GetIfaceRxBytes");
@@ -340,6 +360,17 @@ std::vector<std::string> NetdController::InterfaceGetList()
         return ret;
     }
     return netdService_->InterfaceGetList();
+}
+
+std::vector<std::string> NetdController::UidGetList()
+{
+    NETMGR_LOG_I("NetdController UidGetList");
+    std::vector<std::string> ret;
+    if (netdService_ == nullptr) {
+        NETMGR_LOG_E("netdService_ is null");
+        return ret;
+    }
+    return netdService_->UidGetList();
 }
 
 int64_t NetdController::GetIfaceRxPackets(const std::string &interfaceName)
@@ -487,9 +518,9 @@ int32_t NetdController::SetIpAddress(int32_t socketFd, const std::string &ipAddr
 {
     NETMGR_LOG_D("NetdController::SetIpAddress: socketFd[%{public}d]", socketFd);
     if ((socketFd <= 0) || (ipAddress.length() == 0) || (ipAddress.length() > MAX_IPV4_ADDRESS_LEN) ||
-        (prefixLen <= 0) || (prefixLen > MAX_IPV4_ADDRESS_LEN) ) {
-        NETMGR_LOG_E("The paramemters of SetIpAddress is failed, socketFd[%{public}d], \
-            ipAddress[%{public}s], prefixLen[%{public}d].",
+        (prefixLen <= 0) || (prefixLen > MAX_IPV4_ADDRESS_LEN)) {
+        NETMGR_LOG_E("The paramemters of SetIpAddress is failed, socketFd[%{public}d], "
+            "ipAddress[%{public}s], prefixLen[%{public}d].",
             socketFd, ipAddress.c_str(), prefixLen);
         return ERR_VPN;
     }
@@ -500,6 +531,37 @@ int32_t NetdController::SetBlocking(int32_t ifaceFd, bool isBlock)
 {
     NETMGR_LOG_D("NetdController::SetBlocking: ifaceFd[%{public}d], isBlock[%{public}d]", ifaceFd, isBlock);
     return netdService_->SetBlocking(ifaceFd, isBlock);
+}
+
+int32_t NetdController::StartDhcpClient(const std::string &iface, bool bIpv6)
+{
+    NETMGR_LOG_D("NetdController::StartDhcpClient: iface[%{public}s], bIpv6[%{public}d]", iface.c_str(), bIpv6);
+    return netdService_->StartDhcpClient(iface, bIpv6);
+}
+
+int32_t NetdController::StopDhcpClient(const std::string &iface, bool bIpv6)
+{
+    NETMGR_LOG_D("NetdController::SetBlocking: iface[%{public}s], bIpv6[%{public}d]", iface.c_str(), bIpv6);
+    return netdService_->StopDhcpClient(iface, bIpv6);
+}
+
+int32_t NetdController::RegisterCallback(sptr<NetdControllerCallback> callback)
+{
+    NETMGR_LOG_D("NetdController::RegisterCallback");
+    return netdService_->RegisterCallback(callback);
+}
+
+int32_t NetdController::StartDhcpService(const std::string &iface, const std::string &ipv4addr)
+{
+    NETMGR_LOG_D("NetdController::StartDhcpService: iface[%{public}s], ipv4addr[%{public}s]",
+        iface.c_str(), ipv4addr.c_str());
+    return netdService_->StartDhcpService(iface, ipv4addr);
+}
+
+int32_t NetdController::StopDhcpService(const std::string &iface)
+{
+    NETMGR_LOG_D("NetdController::StopDhcpService: ifaceFd[%{public}s]", iface.c_str());
+    return netdService_->StopDhcpService(iface);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

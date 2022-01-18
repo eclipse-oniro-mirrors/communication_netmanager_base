@@ -21,7 +21,6 @@ namespace OHOS {
 namespace NetManagerStandard {
 Network::Network(int32_t netId, uint32_t supplierId, NetDetectionHandler handler)
     : netId_(netId), supplierId_(supplierId), netCallback_(handler)
-      
 {
     StartDetectionThread();
 }
@@ -61,7 +60,6 @@ bool Network::CreateBasicNetwork()
     NETMGR_LOG_D("Enter CreateBasicNetwork");
     if (!isPhyNetCreated_) {
         NETMGR_LOG_D("Create physical network");
-        std::string permission;
         // Create a physical network
         NetdController::GetInstance().NetworkCreatePhysical(netId_, 0);
         NetdController::GetInstance().CreateNetworkCache(netId_);
@@ -76,6 +74,8 @@ bool Network::ReleaseBasicNetwork()
     if (isPhyNetCreated_) {
         NETMGR_LOG_D("Destroy physical network");
         StopNetDetection();
+        std::list<INetAddr>().swap(netLinkInfo_.netAddrList_);
+        std::list<Route>().swap(netLinkInfo_.routeList_);
         NetdController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
         NetdController::GetInstance().NetworkDestroy(netId_);
         NetdController::GetInstance().DestoryNetworkCache(netId_);
@@ -88,6 +88,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
 {
     NETMGR_LOG_D("update net link information process");
     UpdateInterfaces(netLinkInfo);
+    UpdateIpAddrs(netLinkInfo);
     UpdateRoutes(netLinkInfo);
     UpdateDnses(netLinkInfo);
     UpdateMtu(netLinkInfo);
@@ -115,6 +116,27 @@ void Network::UpdateInterfaces(const NetLinkInfo &netLinkInfo)
         NetdController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
     }
     netLinkInfo_.ifaceName_ = netLinkInfo.ifaceName_;
+}
+
+void Network::UpdateIpAddrs(const NetLinkInfo &netLinkInfo)
+{
+    for (auto it = netLinkInfo.netAddrList_.begin(); it != netLinkInfo.netAddrList_.end(); ++it) {
+        const struct INetAddr &inetAddr = *it;
+        if (std::find(netLinkInfo_.netAddrList_.begin(), netLinkInfo_.netAddrList_.end(), *it) ==
+            netLinkInfo_.netAddrList_.end()) {
+            NetdController::GetInstance().InterfaceAddAddress(netLinkInfo.ifaceName_, inetAddr.address_,
+                inetAddr.prefixlen_);
+        }
+    }
+
+    for (auto it = netLinkInfo_.netAddrList_.begin(); it != netLinkInfo_.netAddrList_.end(); ++it) {
+        const struct INetAddr &inetAddr = *it;
+        if (std::find(netLinkInfo.netAddrList_.begin(), netLinkInfo.netAddrList_.end(), *it) ==
+            netLinkInfo.netAddrList_.end()) {
+            NetdController::GetInstance().InterfaceDelAddress(netLinkInfo.ifaceName_, inetAddr.address_,
+                inetAddr.prefixlen_);
+        }
+    }
 }
 
 void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
@@ -162,8 +184,7 @@ void Network::UpdateMtu(const NetLinkInfo &netLinkInfo)
 
 void Network::RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback)
 {
-    NETMGR_LOG_D("Enter Network RegisterNetDetectionCallback,netDetectionRetCallback_.size()[%{public}d]",
-        static_cast<int32_t>(netDetectionRetCallback_.size()));
+    NETMGR_LOG_D("Enter RegisterNetDetectionCallback");
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter callback is null");
         return;
@@ -177,14 +198,11 @@ void Network::RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &ca
     }
 
     netDetectionRetCallback_.emplace_back(callback);
-    NETMGR_LOG_D("Network RegisterNetDetectionCallback end,netDetectionRetCallback_.size()[%{public}d]",
-        static_cast<int32_t>(netDetectionRetCallback_.size()));
 }
 
 int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback)
 {
-    NETMGR_LOG_D("Enter UnRegisterNetDetectionCallback,netDetectionRetCallback_.size()[%{public}d]",
-        static_cast<int32_t>(netDetectionRetCallback_.size()));
+    NETMGR_LOG_D("Enter UnRegisterNetDetectionCallback");
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter of callback is null");
         return ERR_SERVICE_NULL_PTR;
@@ -197,14 +215,12 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
         }
     }
 
-    NETMGR_LOG_D("UnRegisterNetDetectionCallback has no register,netDetectionRetCallback_.size()[%{public}d]",
-        static_cast<int32_t>(netDetectionRetCallback_.size()));
     return ERR_NONE;
 }
 
 void Network::StartNetDetection()
 {
-    NETMGR_LOG_D("enter Network::StartNetDetection");
+    NETMGR_LOG_D("Enter Network::StartNetDetection");
     if (netMonitor_ != nullptr) {
         netMonitor_->SignalNetMonitorThread(netLinkInfo_.ifaceName_);
     }
@@ -212,7 +228,7 @@ void Network::StartNetDetection()
 
 void Network::StopNetDetection()
 {
-    NETMGR_LOG_D("enter Network::StopNetDetection");
+    NETMGR_LOG_D("Enter Network::StopNetDetection");
     if (netMonitor_ != nullptr) {
         netMonitor_->StopNetMonitorThread();
     }
@@ -242,8 +258,6 @@ uint64_t Network::GetNetWorkMonitorResult()
 
 void Network::HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
 {
-    NETMGR_LOG_D("enter Network HandleNetMonitorResult! netDetectionState:[%{public}d]",
-        static_cast<int32_t>(netDetectionState));
     bool needReport = false;
     if (netDetectionState_ != netDetectionState || isExternDetection_) {
         needReport = true;
@@ -262,7 +276,7 @@ void Network::HandleNetMonitorResult(NetDetectionStatus netDetectionState, const
 void Network::NotifyNetDetectionResult(NetDetectionResultCode detectionResult, const std::string &urlRedirect)
 {
     for (auto callback : netDetectionRetCallback_) {
-        NETMGR_LOG_D("Enter Network NotifyNetDetectionResult for,start callback!");
+        NETMGR_LOG_D("start callback!");
         callback->OnNetDetectionResultChanged(detectionResult, urlRedirect);
     }
 }

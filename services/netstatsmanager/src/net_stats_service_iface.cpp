@@ -26,5 +26,11 @@ int32_t NetStatsServiceIface::GetIfaceStatsDetail(const std::string &iface, uint
         end, info);
     return static_cast<int32_t>(result);
 }
+
+int32_t NetStatsServiceIface::ResetStatsFactory()
+{
+    NetStatsResultCode result = DelayedSingleton<NetStatsService>::GetInstance()->ResetFactory();
+    return static_cast<int32_t>(result);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

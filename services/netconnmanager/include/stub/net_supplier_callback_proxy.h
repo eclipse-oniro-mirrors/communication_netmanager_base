@@ -28,8 +28,8 @@ public:
     virtual ~NetSupplierCallbackProxy();
 
 public:
-    int32_t RequestNetwork(const std::string &ident, uint64_t netCapability) override;
-    int32_t ReleaseNetwork(const std::string &ident, uint64_t netCapability) override;
+    int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override;
+    int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

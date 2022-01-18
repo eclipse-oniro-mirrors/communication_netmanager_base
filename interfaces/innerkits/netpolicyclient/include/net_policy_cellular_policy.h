@@ -24,7 +24,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 struct NetPolicyCellularPolicy : public Parcelable {
     /* subscriber ID, get from telephone module */
-    std::string subscriberId_ = "";
+    int32_t slotId_ = 0;
     /*  Time rubbing, for example:1636598990 */
     int64_t periodStartTime_ = -1;
     /* Unit: Month for example:M1 (The 1st of each month) */
@@ -42,8 +42,8 @@ struct NetPolicyCellularPolicy : public Parcelable {
     std::string possessor_ = "";
 
     virtual bool Marshalling(Parcel &parcel) const override;
-    static bool Marshalling(Parcel &parcel, const std::vector<NetPolicyCellularPolicy> &cellularPolicys);
-    static bool Unmarshalling(Parcel &parcel, std::vector<NetPolicyCellularPolicy> &cellularPolicys);
+    static bool Marshalling(Parcel &parcel, const std::vector<NetPolicyCellularPolicy> &cellularPolicies);
+    static bool Unmarshalling(Parcel &parcel, std::vector<NetPolicyCellularPolicy> &cellularPolicies);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

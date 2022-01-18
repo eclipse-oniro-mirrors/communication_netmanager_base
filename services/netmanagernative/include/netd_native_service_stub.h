@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
+#ifndef NETD_NATIVE_SERVICE_STUB_H__
+#define NETD_NATIVE_SERVICE_STUB_H__
 
 #include <map>
 
@@ -26,6 +27,7 @@ public:
     NetdNativeServiceStub();
     ~NetdNativeServiceStub() = default;
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int32_t NetdFreeAddrinfo(struct addrinfo *aihead) ;
 
 private:
     using ServiceInterface = int32_t (NetdNativeServiceStub::*)(MessageParcel &data, MessageParcel &reply);
@@ -50,6 +52,9 @@ private:
     int32_t CmdNetworkRemoveRouteParcel(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkSetDefault(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkGetDefault(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNetworkClearDefault(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetProcSysNet(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetProcSysNet(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkCreatePhysical(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceAddAddress(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceDelAddress(MessageParcel &data, MessageParcel &reply);
@@ -61,6 +66,9 @@ private:
     int32_t CmdInterfaceGetConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStartDhcpClient(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStopDhcpClient(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdStartDhcpService(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdStopDhcpService(MessageParcel &data, MessageParcel &reply);
 };
 } // namespace NetdNative
 } // namespace OHOS
+#endif // NETD_NATIVE_SERVICE_STUB_H__

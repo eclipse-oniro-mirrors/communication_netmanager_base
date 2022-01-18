@@ -37,21 +37,21 @@ public:
      *
      * @return Returns 0 success, otherwise fail
      */
-    NetPolicyResultCode SetUidPolicy(uint32_t uid, NetUidPolicy policy);
+    NetPolicyResultCode SetPolicyByUid(uint32_t uid, NetUidPolicy policy);
     /**
      * @brief The interface is get uid policy
      *
      * @param uid uid
      * @return Returns NetUidPolicy, otherwise fail
      */
-    NetUidPolicy GetUidPolicy(uint32_t uid);
+    NetUidPolicy GetPolicyByUid(uint32_t uid);
     /**
      * @brief The interface is get uids by policy
      *
      * @param policy policy
      * @return uids
      */
-    std::vector<uint32_t> GetUids(NetUidPolicy policy);
+    std::vector<uint32_t> GetUidsByPolicy(NetUidPolicy policy);
     /**
      * @brief The interface determine whether you have access to the network
      *
@@ -83,43 +83,43 @@ public:
      */
     int32_t UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
     /**
-     * @brief SetNetPolicys set policys by NetPolicyQuotaPolicy
+     * @brief SetNetQuotaPolicies set policys by NetPolicyQuotaPolicy
      *
      * @return Returns 0, successfully
      */
-    NetPolicyResultCode SetNetPolicys(const std::vector<NetPolicyQuotaPolicy> &quotaPolicys);
+    NetPolicyResultCode SetNetQuotaPolicies(const std::vector<NetPolicyQuotaPolicy> &quotaPolicies);
     /**
-     * @brief GetNetPolicys get policys for NetPolicyQuotaPolicy
+     * @brief GetNetQuotaPolicies get policys for NetPolicyQuotaPolicy
      *
      * @return Returns 0, successfully
      */
-    NetPolicyResultCode GetNetPolicys(std::vector<NetPolicyQuotaPolicy> &quotaPolicys);
+    NetPolicyResultCode GetNetQuotaPolicies(std::vector<NetPolicyQuotaPolicy> &quotaPolicies);
     /**
-     * @brief SetCellularPolicys set policys by NetPolicyCellularPolicy
+     * @brief SetCellularPolicies set policys by NetPolicyCellularPolicy
      *
      * @return Returns 0, successfully
      */
-    NetPolicyResultCode SetCellularPolicys(const std::vector<NetPolicyCellularPolicy> &cellularPolicys);
+    NetPolicyResultCode SetCellularPolicies(const std::vector<NetPolicyCellularPolicy> &cellularPolicies);
     /**
-     * @brief GetCellularPolicys get policys for NetPolicyCellularPolicy
+     * @brief GetCellularPolicies get policys for NetPolicyCellularPolicy
      *
      * @return Returns 0, successfully
      */
-    NetPolicyResultCode GetCellularPolicys(std::vector<NetPolicyCellularPolicy> &cellularPolicys);
+    NetPolicyResultCode GetCellularPolicies(std::vector<NetPolicyCellularPolicy> &cellularPolicies);
     /**
-     * @brief ResetFactory reset policys for subscriberId
+     * @brief SetFactoryPolicy reset policys for slotId
      *
-     * @param subscriberId subscriber ID, get from telephone module
+     * @param slotId subscriber ID, get from telephone module
      * @return Returns 0, successfully
      */
-    NetPolicyResultCode ResetFactory(const std::string &subscriberId);
+    NetPolicyResultCode SetFactoryPolicy(const std::string &slotId);
     /**
      * @brief SetBackgroundPolicy reset backgroundpolicy for all app
      *
      * @param backgroundPolicy refuse app visit network
      * @return Returns 0, successfully
      */
-    NetPolicyResultCode SetBackgroundPolicy(bool backgroundPolicy);
+    NetPolicyResultCode SetBackgroundPolicy(bool isBackgroundPolicyAllow);
     /**
      * @brief GetBackgroundPolicy get background policy
      *
@@ -136,33 +136,33 @@ public:
     /**
      * @brief GetCurrentBackgroundPolicy get background policy by current
      *
-     * @return bool
+     * @return Returns NetBackgroundPolicy
      */
-    bool GetCurrentBackgroundPolicy();
+    NetBackgroundPolicy GetCurrentBackgroundPolicy();
     /**
-     * @brief SnoozePolicy for Hibernate current policy
+     * @brief SetSnoozePolicy for Hibernate current policy
      *
      * @return Returns 0, successfully
      */
-    NetPolicyResultCode SnoozePolicy(const NetPolicyQuotaPolicy &quotaPolicy);
+    NetPolicyResultCode SetSnoozePolicy(int8_t netType, int32_t slotId);
     /**
-     * @brief SetIdleWhitelist for add white list for Idle status
+     * @brief SetIdleTrustlist for add trust list for Idle status
      *
      * @param uid uid
-     * @param isWhiteList true/false
+     * @param isTrustlist true/false
      *
      * @return Returns 0, successfully
      */
-    NetPolicyResultCode SetIdleWhitelist(uint32_t uid, bool isWhiteList);
+    NetPolicyResultCode SetIdleTrustlist(uint32_t uid, bool isTrustlist);
     /**
-     * @brief GetIdleWhitelist for get white list for Idle status
+     * @brief GetIdleTrustlist for get trust list for Idle status
      *
      * @param uid uid
      * @param uids
      *
      * @return Returns 0, successfully
      */
-    NetPolicyResultCode GetIdleWhitelist(std::vector<uint32_t> &uids);
+    NetPolicyResultCode GetIdleTrustlist(std::vector<uint32_t> &uids);
 
 private:
     class NetPolicyDeathRecipient : public IRemoteObject::DeathRecipient {

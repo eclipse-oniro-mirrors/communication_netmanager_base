@@ -117,13 +117,13 @@ int32_t DnsResolverServiceProxy::GetAddrInfo(const std::string &hostName, const 
     return reply.ReadInt32();
 }
 
-int32_t DnsResolverServiceProxy::CreateNetworkCache(uint16_t netId)
+int32_t DnsResolverServiceProxy::CreateNetworkCache(int32_t netId)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
-    if (!data.WriteUint16(netId)) {
+    if (!data.WriteInt32(netId)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -141,13 +141,13 @@ int32_t DnsResolverServiceProxy::CreateNetworkCache(uint16_t netId)
     return reply.ReadInt32();
 }
 
-int32_t DnsResolverServiceProxy::DestoryNetworkCache(uint16_t netId)
+int32_t DnsResolverServiceProxy::DestoryNetworkCache(int32_t netId)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
-    if (!data.WriteUint16(netId)) {
+    if (!data.WriteInt32(netId)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -165,13 +165,13 @@ int32_t DnsResolverServiceProxy::DestoryNetworkCache(uint16_t netId)
     return reply.ReadInt32();
 }
 
-int32_t DnsResolverServiceProxy::FlushNetworkCache(uint16_t netId)
+int32_t DnsResolverServiceProxy::FlushNetworkCache(int32_t netId)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
-    if (!data.WriteUint16(netId)) {
+    if (!data.WriteInt32(netId)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -189,14 +189,14 @@ int32_t DnsResolverServiceProxy::FlushNetworkCache(uint16_t netId)
     return reply.ReadInt32();
 }
 
-int32_t DnsResolverServiceProxy::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
+int32_t DnsResolverServiceProxy::SetResolverConfig(int32_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
     const std::vector<std::string> &servers, const std::vector<std::string> &domains)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
-    if (!data.WriteUint16(netId)) {
+    if (!data.WriteInt32(netId)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     if (!data.WriteUint16(baseTimeoutMsec)) {
@@ -238,14 +238,14 @@ int32_t DnsResolverServiceProxy::SetResolverConfig(uint16_t netId, uint16_t base
     return reply.ReadInt32();
 }
 
-int32_t DnsResolverServiceProxy::GetResolverInfo(uint16_t netId, std::vector<std::string> &servers,
+int32_t DnsResolverServiceProxy::GetResolverInfo(int32_t netId, std::vector<std::string> &servers,
     std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
-    if (!data.WriteUint16(netId)) {
+    if (!data.WriteInt32(netId)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     sptr<IRemoteObject> remote = Remote();

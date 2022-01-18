@@ -16,9 +16,11 @@
 #ifndef NETD_CONTROLLER_H
 #define NETD_CONTROLLER_H
 
-#include "i_netd_controller_service.h"
-#include "refbase.h"
 #include <linux/if.h>
+
+#include "refbase.h"
+
+#include "i_netd_controller_service.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -251,6 +253,24 @@ public:
     int64_t GetUidTxBytes(uint32_t uid);
 
     /**
+     * @brief Obtains the bytes received through a specified UID on Iface.
+     *
+     * @param uid app id.
+     * @param iface The name of the interface.
+     * @return The number of received bytes.
+     */
+    int64_t GetUidOnIfaceRxBytes(uint32_t uid, const std::string &interfaceName);
+
+    /**
+     * @brief Obtains the bytes sent through a specified UID on Iface.
+     *
+     * @param uid app id.
+     * @param iface The name of the interface.
+     * @return The number of sent bytes.
+     */
+    int64_t GetUidOnIfaceTxBytes(uint32_t uid, const std::string &interfaceName);
+
+    /**
      * @brief Obtains the bytes received through a specified NIC.
      *
      * @param iface The name of the interface.
@@ -272,6 +292,13 @@ public:
      * @return The list of interface.
      */
     std::vector<std::string> InterfaceGetList();
+
+    /**
+     * @brief Obtains the uid list.
+     *
+     * @return The list of uid.
+     */
+    std::vector<std::string> UidGetList();
 
     /**
      * @brief Obtains the packets received through a specified NIC.
@@ -418,6 +445,46 @@ public:
      * @return Return the return value of the netd interface call.
      */
     int32_t SetBlocking(int32_t ifaceFd, bool isBlock);
+    /**
+     * @brief Start Dhcp Client.
+     *
+     * @param iface interface file description
+     * @param bIpv6 network blocking
+     * @return.
+     */
+    int32_t StartDhcpClient(const std::string &iface, bool bIpv6);
+    /**
+     * @brief Stop Dhcp Client.
+     *
+     * @param iface interface file description
+     * @param bIpv6 network blocking
+     * @return .
+     */
+    int32_t StopDhcpClient(const std::string &iface, bool bIpv6);
+    /**
+    * @brief Register Notify Callback
+    *
+    * @param callback
+    * @return .
+    */
+    int32_t RegisterCallback(sptr<NetdControllerCallback> callback);
+
+    /**
+     * @brief start dhcpservice.
+     *
+     * @param iface interface name
+     * @param ipv4addr ipv4 addr
+     * @return Return the return value of the netd interface call.
+     */
+    int32_t StartDhcpService(const std::string &iface, const std::string &ipv4addr);
+
+    /**
+     * @brief stop dhcpservice.
+     *
+     * @param iface interface name
+     * @return Return the return value of the netd interface call.
+     */
+    int32_t StopDhcpService(const std::string &iface);
 
 private:
     NetdController();

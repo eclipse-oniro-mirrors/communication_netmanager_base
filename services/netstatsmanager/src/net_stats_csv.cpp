@@ -14,6 +14,7 @@
  */
 
 #include <fstream>
+#include <filesystem>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -29,12 +30,20 @@
 namespace OHOS {
 namespace NetManagerStandard {
 const std::string CSV_DIR = "/data/data/";
+const std::string UID_LIST_DIR = "/data/data/uid/";
 const std::string IFACE_CSV_FILE_NAME = "iface.csv";
 const std::string UID_CSV_FILE_NAME = "uid.csv";
 const std::string IFACE_STATS_CSV_FILE_NAME = "iface_stats.csv";
 const std::string IFACE_STATS_CSV_BAK = "iface_stats_bak";
 const std::string IFACE_STATS_CSV_NEW = "iface_stats_new";
 const std::string UID_STATS_CSV_FILE_NAME = "uid_stats.csv";
+const std::string UID_STATS_CSV_BAK = "uid_stats_bak";
+const std::string UID_STATS_CSV_NEW = "uid_stats_new";
+constexpr uint32_t START_END_NOT_EXIST = 0;
+constexpr uint32_t START_NOT_EXIST_BUT_END_EXIST = 1;
+constexpr uint32_t START_EXIST_BUT_END_NOT_EXIST = 10;
+constexpr uint32_t START_END_EXIST = 11;
+constexpr uint32_t DIFF_START_END = 10;
 
 static std::istream& operator>>(std::istream& str, CSVRow& data)
 {
@@ -100,14 +109,15 @@ bool NetStatsCsv::ExistsUid(const uint32_t uid)
     return false;
 }
 
-bool NetStatsCsv::RenameIfacesStatsCsv(const std::string& fromFileName)
+bool NetStatsCsv::RenameStatsCsv(const std::string &fromFileName,
+    const std::string &bakFile, const std::string &toFile)
 {
     if (fromFileName.empty()) {
         NETMGR_LOG_E("fromFileName is empty");
         return false;
     }
-    std::string bakIfaceStatsFileName = CSV_DIR + IFACE_STATS_CSV_BAK + "_" + GetCurrentTime();
-    std::string toFileName = CSV_DIR + IFACE_STATS_CSV_FILE_NAME;
+    std::string bakIfaceStatsFileName = CSV_DIR + bakFile + "_" + GetCurrentTime();
+    std::string toFileName = CSV_DIR + toFile;
     std::lock_guard lock(mutex_);
     if (std::rename(toFileName.c_str(), bakIfaceStatsFileName.c_str())) {
         NETMGR_LOG_E("ofstream open failed");
@@ -121,16 +131,59 @@ bool NetStatsCsv::RenameIfacesStatsCsv(const std::string& fromFileName)
     return true;
 }
 
+void NetStatsCsv::GenerateNewIfaceStats(uint32_t start, uint32_t end, const NetStatsInfo &stats,
+    std::map<uint32_t, NetStatsInfo> &newIfaceStats)
+{
+    uint32_t startExist = 0;
+    uint32_t endExist = 0;
+    auto searchStart = newIfaceStats.find(start);
+    if (searchStart != newIfaceStats.end()) {
+        startExist = 1;
+    } else {
+        startExist = 0;
+    }
+    auto searchEnd = newIfaceStats.find(end);
+    if (searchEnd != newIfaceStats.end()) {
+        endExist = 1;
+    } else {
+        endExist = 0;
+    }
+
+    NetStatsInfo calStats;
+    uint32_t exist = startExist * DIFF_START_END + endExist;
+    switch (exist) {
+        case START_END_NOT_EXIST:
+            newIfaceStats.insert({start, calStats});
+            newIfaceStats.insert({end, stats});
+            break;
+        case START_NOT_EXIST_BUT_END_EXIST:
+            calStats.rxBytes_ = (searchEnd->second).rxBytes_ - stats.rxBytes_;
+            calStats.rxBytes_ = (searchEnd->second).txBytes_ - stats.txBytes_;
+            newIfaceStats.insert({start, calStats});
+            break;
+        case START_EXIST_BUT_END_NOT_EXIST:
+            calStats.rxBytes_ = (searchStart->second).rxBytes_ + stats.rxBytes_;
+            calStats.rxBytes_ = (searchStart->second).txBytes_ + stats.txBytes_;
+            newIfaceStats.insert({end, calStats});
+            break;
+        case START_END_EXIST:
+            calStats.rxBytes_ = (searchEnd->second).rxBytes_ - stats.rxBytes_;
+            calStats.rxBytes_ = (searchEnd->second).txBytes_ - stats.txBytes_;
+            newIfaceStats[start] = calStats;
+            break;
+        default:
+            break;
+    }
+    for (auto const& [key, val] : newIfaceStats) {
+        if (key > start && key < end) {
+            newIfaceStats.erase(key);
+        }
+    }
+}
+
 bool NetStatsCsv::CorrectedIfacesStats(const std::string &iface,
     uint32_t start, uint32_t end, const NetStatsInfo &stats)
 {
-    uint32_t calStartTime = GetIfaceCalculateTime(iface, start);
-    uint32_t calEndTime = GetIfaceCalculateTime(iface, end);
-    if (calStartTime == calEndTime) {
-        NETMGR_LOG_E("The end time must be greater than the start time, or the interval time cannot be too small.");
-        return false;
-    }
-
     std::ofstream newIfaceStatsCsvFile;
     std::string newIfaceStatsFileName = CSV_DIR + IFACE_STATS_CSV_NEW + "_" + GetCurrentTime();
     newIfaceStatsCsvFile.open(newIfaceStatsFileName, std::fstream::app);
@@ -140,32 +193,34 @@ bool NetStatsCsv::CorrectedIfacesStats(const std::string &iface,
     }
 
     CSVRow row;
-    uint32_t rowTime = 0;
-    bool correctedFlg = false;
-    bool isWrited = false;
-    std::ifstream iface_file(CSV_DIR + IFACE_STATS_CSV_FILE_NAME, std::fstream::in);
-    while (iface_file >> row) {
+    uint32_t colTime = 0;
+    uint32_t timeCloumn = 0;
+    NetStatsInfo statsRow;
+    std::map<uint32_t, NetStatsInfo> newIfaceStats;
+    std::ifstream iface_stats_file(CSV_DIR + IFACE_STATS_CSV_FILE_NAME, std::fstream::in);
+    while (iface_stats_file >> row) {
         if (iface.compare(row[static_cast<uint32_t>(IfaceStatsCsvColumn::IFACE_NAME)]) == 0) {
-            uint32_t timeCloumn = static_cast<uint32_t>(IfaceStatsCsvColumn::TIME);
-            rowTime = static_cast<uint32_t>(std::stoi(row[(timeCloumn)]));
-            if (calStartTime <= rowTime && rowTime  <= calEndTime) {
-                correctedFlg = true;
-                continue;
-            }
-            if (correctedFlg && !isWrited) {
-                isWrited = true;
-                newIfaceStatsCsvFile << iface << "," << start << ",0,0" << "" << std::endl;
-                newIfaceStatsCsvFile << iface << "," << end << ","
-                    << stats.rxBytes_ << "," << stats.txBytes_ << std::endl;
-            }
+            timeCloumn = static_cast<uint32_t>(IfaceStatsCsvColumn::TIME);
+            colTime = static_cast<uint32_t>(std::stoi(row[(timeCloumn)]));
+            statsRow.rxBytes_ =
+                static_cast<int64_t>(std::stol(row[static_cast<uint32_t>(IfaceStatsCsvColumn::RXBYTES)]));
+            statsRow.txBytes_ =
+                static_cast<int64_t>(std::stol(row[static_cast<uint32_t>(IfaceStatsCsvColumn::TXBYTES)]));
+            newIfaceStats.insert({colTime, statsRow});
+            continue;
         }
-        newIfaceStatsCsvFile << iface << "," << row[static_cast<uint32_t>(IfaceStatsCsvColumn::TIME)] << ","
+        newIfaceStatsCsvFile << row[static_cast<uint32_t>(IfaceStatsCsvColumn::IFACE_NAME)] << ","
+            << row[static_cast<uint32_t>(IfaceStatsCsvColumn::TIME)] << ","
             << row[static_cast<uint32_t>(IfaceStatsCsvColumn::RXBYTES)] << ","
             << row[static_cast<uint32_t>(IfaceStatsCsvColumn::TXBYTES)] << std::endl;
     }
-    iface_file.close();
+    iface_stats_file.close();
+    GenerateNewIfaceStats(start, end, stats, newIfaceStats);
+    for (auto const& [key, val] : newIfaceStats) {
+        newIfaceStatsCsvFile << iface << "," << key << "," << val.rxBytes_ << "," << val.txBytes_ << std::endl;
+    }
     newIfaceStatsCsvFile.close();
-    if (!RenameIfacesStatsCsv(newIfaceStatsFileName)) {
+    if (!RenameStatsCsv(newIfaceStatsFileName, IFACE_STATS_CSV_BAK, IFACE_STATS_CSV_FILE_NAME)) {
         return false;
     }
     return true;
@@ -199,8 +254,7 @@ bool NetStatsCsv::UpdateUidCsvInfo()
         uidCsvFile.close();
         return false;
     }
-    // need get uid list by netd, todo
-    std::vector<std::string> uidList;
+    std::vector<std::string> uidList = NetdController::GetInstance().UidGetList();
     for (std::vector<std::string>::iterator iter = uidList.begin(); iter != uidList.end(); ++iter) {
         uidCsvFile << *iter << std::endl;
     }
@@ -259,8 +313,8 @@ bool NetStatsCsv::UpdateIfaceStatsCsv(const std::string &iface)
         return false;
     }
     ifaceStatsCsvFile << iface << "," << GetCurrentTime() << ","
-        << NetdController::GetInstance().GetIfaceRxBytes(iface) << ","
-        << NetdController::GetInstance().GetIfaceTxBytes(iface) << std::endl;
+        << NetdController::GetInstance().GetIfaceRxBytes(iface) << "," <<
+        NetdController::GetInstance().GetIfaceTxBytes(iface) << std::endl;
 
     ifaceStatsCsvFile.close();
     return true;
@@ -276,11 +330,44 @@ bool NetStatsCsv::UpdateUidStatsCsv(uint32_t uid, const std::string &iface)
         return false;
     }
 
-    // need get uid stats on iface by netd, todo
-    uidStatsCsvFile << uid<< "," << iface << GetCurrentTime() << ","
-        << NetdController::GetInstance().GetUidRxBytes(uid) << ","
-        << NetdController::GetInstance().GetUidTxBytes(uid) << std::endl;
+    uidStatsCsvFile << uid<< "," << iface  << "," << GetCurrentTime() << ","
+        << NetdController::GetInstance().GetUidOnIfaceRxBytes(uid, iface) << "," <<
+        NetdController::GetInstance().GetUidOnIfaceTxBytes(uid, iface) << std::endl;
     uidStatsCsvFile.close();
+    return true;
+}
+
+bool NetStatsCsv::DeleteUidStatsCsv(uint32_t uid)
+{
+    std::string strUid = std::to_string(uid);
+    std::filesystem::remove_all(UID_LIST_DIR + strUid.c_str());
+    NETMGR_LOG_I("Delete mock uid directory: /data/data/uid/[%{public}d]", uid);
+    UpdateUidCsvInfo();
+
+    std::ofstream newUidStatsCsvFile;
+    std::string newUidStatsFileName = CSV_DIR + UID_STATS_CSV_NEW + "_" + GetCurrentTime();
+    newUidStatsCsvFile.open(newUidStatsFileName, std::fstream::app);
+    if (!newUidStatsCsvFile.is_open()) {
+        NETMGR_LOG_E("ofstream open failed");
+        return false;
+    }
+
+    std::ifstream uid_file(CSV_DIR + UID_STATS_CSV_FILE_NAME, std::fstream::in);
+    CSVRow row;
+    while (uid_file >> row) {
+        if ((std::to_string(uid).compare(row[static_cast<uint32_t>(UidStatCsvColumn::UID)]) == 0)) {
+            continue;
+        }
+        newUidStatsCsvFile << row[static_cast<uint32_t>(UidStatCsvColumn::UID)] << ","
+            << row[static_cast<uint32_t>(UidStatCsvColumn::IFACE_NAME)]  << ","
+            << row[static_cast<uint32_t>(UidStatCsvColumn::TIME)] << ","
+            << row[static_cast<uint32_t>(UidStatCsvColumn::RXBYTES)] << ","
+            << row[static_cast<uint32_t>(UidStatCsvColumn::TXBYTES)] << std::endl;
+    }
+    newUidStatsCsvFile.close();
+    if (!RenameStatsCsv(newUidStatsFileName, UID_STATS_CSV_BAK, UID_STATS_CSV_FILE_NAME)) {
+        return false;
+    }
     return true;
 }
 
@@ -414,8 +501,10 @@ NetStatsResultCode NetStatsCsv::GetUidBytes(const std::string &iface, uint32_t u
 
 std::string NetStatsCsv::GetCurrentTime()
 {
-    time_t now;
-    time(&now);
+    std::time_t now = std::time(nullptr);
+    if (now < 0) {
+        NETMGR_LOG_E("NetStatsCsv GetCurrentTime failed");
+    }
     std::stringstream ss;
     ss << now;
     return ss.str();
@@ -430,6 +519,10 @@ NetStatsResultCode NetStatsCsv::ResetFactory()
         NETMGR_LOG_I("ResetFactory is failed");
         return NetStatsResultCode::ERR_INTERNAL_ERROR;
     }
+    NETMGR_LOG_I("Reset Factory Stats, delete files /data/data/iface.csv");
+    NETMGR_LOG_I("Reset Factory Stats, delete files /data/data/uid.csv");
+    NETMGR_LOG_I("Reset Factory Stats, delete files /data/data/iface_stats.csv");
+    NETMGR_LOG_I("Reset Factory Stats, delete files /data/data/uid_stats.csv");
     return NetStatsResultCode::ERR_NONE;
 }
 } // namespace NetManagerStandard

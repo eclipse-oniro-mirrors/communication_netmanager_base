@@ -40,8 +40,8 @@ RouteUtils::~RouteUtils()
 int32_t RouteUtils::AddRoutesToLocal(const std::string &iface, const std::list<Route> &routes)
 {
     std::list<Route>::const_iterator iter;
-    for (iter = routes.begin(); iter != routes.end(); iter++) {
-        if (!(iter->rtn_type_ == RTN_UNICAST && iter->destination_.prefixlen_ == 0)) {
+    for (iter = routes.begin(); iter != routes.end(); ++iter) {
+        if (!(iter->rtnType_ == RTN_UNICAST && iter->destination_.prefixlen_ == 0)) {
             NETMGR_LOG_D("AddRoutesToLocalNetwork: dest addr[%{public}s], gw addr[%{public}s]",
                 iter->destination_.address_.c_str(), iter->gateway_.address_.c_str());
             AddRoute(LOCAL_NET_ID, *iter);
@@ -56,14 +56,15 @@ int32_t RouteUtils::AddRoutesToLocal(const std::string &iface, const std::list<R
     ipv6Rt.gateway_.address_ = IPV6_DEFAULT_GATEWAY;
     ipv6Rt.gateway_.prefixlen_ = 0;
     ipv6Rt.hasGateway_ = false;
-    ipv6Rt.rtn_type_ = RTN_UNICAST;
+    ipv6Rt.rtnType_ = RTN_UNICAST;
+    ipv6Rt.isDefaultRoute_ = false;
     return AddRoute(LOCAL_NET_ID, ipv6Rt);
 }
 
 int32_t RouteUtils::RemoveRoutesFromLocal(const std::list<Route> &routes)
 {
     std::list<Route>::const_iterator iter;
-    for (iter = routes.begin(); iter != routes.end(); iter++) {
+    for (iter = routes.begin(); iter != routes.end(); ++iter) {
         RemoveRoute(LOCAL_NET_ID, *iter);
     }
 
@@ -89,38 +90,38 @@ int32_t RouteUtils::UpdateRoutes(int32_t netId, const NetLinkInfo &newnl, const 
     std::list<Route>::const_iterator itern;
     std::list<Route>::const_iterator iterf;
 
-    for (itero = oldnl.routeList_.begin(); itero != oldnl.routeList_.end(); itero++) {
+    for (itero = oldnl.routeList_.begin(); itero != oldnl.routeList_.end(); ++itero) {
         iterf = std::find(newnl.routeList_.begin(), newnl.routeList_.end(), *itero);
         if (iterf == newnl.routeList_.end()) {
             removed.push_back(*itero);
         } else {
-            if (itero->rtn_type_ != iterf->rtn_type_ || itero->mtu_ != iterf->mtu_) {
+            if (itero->rtnType_ != iterf->rtnType_ || itero->mtu_ != iterf->mtu_) {
                 updated.push_back(*iterf);
             }
         }
     }
 
-    for (itern = newnl.routeList_.begin(); itern != newnl.routeList_.end(); itern++) {
+    for (itern = newnl.routeList_.begin(); itern != newnl.routeList_.end(); ++itern) {
         if (std::find(oldnl.routeList_.begin(), oldnl.routeList_.end(), *itern) == oldnl.routeList_.end()) {
             added.push_back(*itern);
         }
     }
 
-    for (itern = added.begin(); itern != added.end(); itern++) {
+    for (itern = added.begin(); itern != added.end(); ++itern) {
         if (itern->hasGateway_) {
             continue;
         }
         AddRoute(netId, *itern);
     }
 
-    for (itern = added.begin(); itern != added.end(); itern++) {
+    for (itern = added.begin(); itern != added.end(); ++itern) {
         if (!itern->hasGateway_) {
             continue;
         }
         AddRoute(netId, *itern);
     }
 
-    for (itern = removed.begin(); itern != removed.end(); itern++) {
+    for (itern = removed.begin(); itern != removed.end(); ++itern) {
         RemoveRoute(netId, *itern);
     }
 
@@ -136,7 +137,7 @@ int32_t RouteUtils::ModifyRoute(routeOperateType op, int32_t netId, const Route 
     NETMGR_LOG_D("ModifyRoute: netId[%{public}d], dest addr[%{public}s], gw addr[%{public}s]", netId,
         route.destination_.address_.c_str(), route.gateway_.address_.c_str());
 
-    switch (route.rtn_type_) {
+    switch (route.rtnType_) {
         case RTN_UNICAST:
             if (route.hasGateway_) {
                 nextHop = route.gateway_.address_;

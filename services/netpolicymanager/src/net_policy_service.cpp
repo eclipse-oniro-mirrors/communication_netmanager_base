@@ -29,6 +29,7 @@
 
 #include "net_mgr_log_wrapper.h"
 #include "net_settings.h"
+#include "net_manager_center.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -42,6 +43,9 @@ NetPolicyService::NetPolicyService()
     netPolicyTraffic_ = (std::make_unique<NetPolicyTraffic>(netPolicyFile_)).release();
     netPolicyFirewall_ = (std::make_unique<NetPolicyFirewall>(netPolicyFile_)).release();
     netPolicyCallback_ = (std::make_unique<NetPolicyCallback>()).release();
+    monthDay_ = {MONTH_THIRTY_ONE, MONTH_TWENTY_EIGHT, MONTH_THIRTY_ONE, MONTH_THIRTY,
+        MONTH_THIRTY_ONE, MONTH_THIRTY, MONTH_THIRTY_ONE, MONTH_THIRTY_ONE, MONTH_THIRTY,
+        MONTH_THIRTY_ONE, MONTH_THIRTY, MONTH_THIRTY_ONE};
 }
 
 NetPolicyService::~NetPolicyService() {}
@@ -91,18 +95,20 @@ bool NetPolicyService::Init()
         NETMGR_LOG_E("InitPolicyTraffic failed");
         return false;
     }
-
+    serviceComm_ = (std::make_unique<NetPolicyServiceCommon>()).release();
+    NetManagerCenter::GetInstance().RegisterPolicyService(serviceComm_);
     return true;
 }
 
-NetPolicyResultCode NetPolicyService::SetUidPolicy(uint32_t uid, NetUidPolicy policy)
+NetPolicyResultCode NetPolicyService::SetPolicyByUid(uint32_t uid, NetUidPolicy policy)
 {
     std::unique_lock<std::mutex> lock(mutex_);
     NetPolicyResultCode ret = NetPolicyResultCode::ERR_INTERNAL_ERROR;
-    NETMGR_LOG_I("SetUidPolicy info: uid[%{public}d] policy[%{public}d]", uid, static_cast<uint32_t>(policy));
+    NETMGR_LOG_I("SetPolicyByUid info: uid[%{public}d] policy[%{public}d]", uid, static_cast<uint32_t>(policy));
     /* delete uid policy */
     if (policy == NetUidPolicy::NET_POLICY_NONE) {
-        ret = netPolicyTraffic_->DeleteUidPolicy(uid, policy);
+        ret = netPolicyTraffic_->DeletePolicyByUid(uid, policy);
+        lock.unlock();
         if (ret == NetPolicyResultCode::ERR_NONE) {
             netPolicyCallback_->NotifyNetUidPolicyChanged(uid, policy);
         }
@@ -111,12 +117,14 @@ NetPolicyResultCode NetPolicyService::SetUidPolicy(uint32_t uid, NetUidPolicy po
 
     /* update policy */
     if (!netPolicyFile_->IsUidPolicyExist(uid)) {
-        ret = netPolicyTraffic_->AddUidPolicy(uid, policy);
+        ret = netPolicyTraffic_->AddPolicyByUid(uid, policy);
+        lock.unlock();
         if (ret == NetPolicyResultCode::ERR_NONE) {
             netPolicyCallback_->NotifyNetUidPolicyChanged(uid, policy);
         }
     } else {
-        ret = netPolicyTraffic_->SetUidPolicy(uid, policy);
+        ret = netPolicyTraffic_->SetPolicyByUid(uid, policy);
+        lock.unlock();
         if (ret == NetPolicyResultCode::ERR_NONE) {
             netPolicyCallback_->NotifyNetUidPolicyChanged(uid, policy);
         }
@@ -125,20 +133,20 @@ NetPolicyResultCode NetPolicyService::SetUidPolicy(uint32_t uid, NetUidPolicy po
     return ret;
 }
 
-NetUidPolicy NetPolicyService::GetUidPolicy(uint32_t uid)
+NetUidPolicy NetPolicyService::GetPolicyByUid(uint32_t uid)
 {
     std::unique_lock<std::mutex> lock(mutex_);
-    NETMGR_LOG_I("GetUidPolicy info: uid[%{public}d]", uid);
-    return netPolicyFile_->GetUidPolicy(uid);
+    NETMGR_LOG_I("GetPolicyByUid info: uid[%{public}d]", uid);
+    return netPolicyFile_->GetPolicyByUid(uid);
 }
 
-std::vector<uint32_t> NetPolicyService::GetUids(NetUidPolicy policy)
+std::vector<uint32_t> NetPolicyService::GetUidsByPolicy(NetUidPolicy policy)
 {
     std::unique_lock<std::mutex> lock(mutex_);
-    NETMGR_LOG_I("GetUids info: policy[%{public}d]", static_cast<uint32_t>(policy));
+    NETMGR_LOG_I("GetUidsByPolicy info: policy[%{public}d]", static_cast<uint32_t>(policy));
     std::vector<uint32_t> uids;
-    if (!netPolicyFile_->GetUids(policy, uids)) {
-        NETMGR_LOG_E("GetUids  failed");
+    if (!netPolicyFile_->GetUidsByPolicy(policy, uids)) {
+        NETMGR_LOG_E("GetUidsByPolicy  failed");
     };
 
     return uids;
@@ -153,28 +161,42 @@ bool NetPolicyService::IsUidNetAccess(uint32_t uid, bool metered)
         return true;
     }
 
-    NetUidPolicy uidPolicy = netPolicyFile_->GetUidPolicy(uid);
-    if (static_cast<uint32_t>(uidPolicy) & static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_ALL)) {
+    NetUidPolicy uidPolicy = netPolicyFile_->GetPolicyByUid(uid);
+    if ((static_cast<uint32_t>(uidPolicy) &
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_ALL)) ==
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_ALL)) {
         return false;
-    } else if (static_cast<uint32_t>(uidPolicy) & static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_ALL)) {
+    } else if ((static_cast<uint32_t>(uidPolicy) &
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_ALL)) ==
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_ALL)) {
         return true;
     }
 
     if (!metered) {
         return true;
-    } else if (static_cast<uint32_t>(uidPolicy) & static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED)) {
+    } else if ((static_cast<uint32_t>(uidPolicy) &
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED)) ==
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED)) {
         return false;
-    } else if ((static_cast<uint32_t>(uidPolicy) & static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_METERED)) ||
-        (static_cast<uint32_t>(uidPolicy) & static_cast<uint32_t>(NetUidPolicy::NET_POLICY_TEMPORARY_ALLOW_METERED))) {
+    } else if ((static_cast<uint32_t>(uidPolicy) &
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_METERED)) ==
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_METERED) ||
+        (static_cast<uint32_t>(uidPolicy) &
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_TEMPORARY_ALLOW_METERED)) ==
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_TEMPORARY_ALLOW_METERED)) {
         return true;
     }
 
-    if (netPolicyFile_->GetBackgroundPolicy() || NetSettings::GetInstance().IsUidForeground(uid)) {
+    if (NetSettings::GetInstance().IsUidForeground(uid)) {
         return true;
-    } else if (static_cast<uint32_t>(uidPolicy) &
+    } else if ((static_cast<uint32_t>(uidPolicy) &
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND)) ==
         static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND)) {
         return false;
-    } else if (static_cast<uint32_t>(uidPolicy) &
+    } else if (netPolicyFile_->GetBackgroundPolicy()) {
+        return true;
+    } else if ((static_cast<uint32_t>(uidPolicy) &
+        static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND)) ==
         static_cast<uint32_t>(NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND)) {
         return true;
     }
@@ -215,61 +237,221 @@ int32_t NetPolicyService::UnregisterNetPolicyCallback(const sptr<INetPolicyCallb
     return static_cast<int32_t>(NetPolicyResultCode::ERR_NONE);
 }
 
-NetPolicyResultCode NetPolicyService::SetNetPolicys(const std::vector<NetPolicyQuotaPolicy> &quotaPolicys)
+std::int64_t NetPolicyService::GetCurrentTime()
 {
-    std::unique_lock<std::mutex> lock(mutex_);
-    NETMGR_LOG_I("SetNetPolicys quotaPolicySize[%{public}d]", static_cast<uint32_t>(quotaPolicys.size()));
-    if (quotaPolicys.empty()) {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    return tv.tv_sec;
+}
+
+int32_t NetPolicyService::GetPeriodEndTime()
+{
+    struct tm *timeNow;
+    time_t second = time(nullptr);
+    if (!second) {
+        NETMGR_LOG_E("time second error");
+        return -1;
+    }
+    timeNow = localtime(&second);
+    if (timeNow == nullptr) {
+        NETMGR_LOG_E("timeNow is nullptr");
+        return -1;
+    }
+
+    if (timeNow->tm_mon == NET_POLICY_FEBRUARY
+        && ((timeNow->tm_year % NET_POLICY_LEAP_YEAR_FOUR == 0
+        && timeNow->tm_year % NET_POLICY_LEAP_YEAR_ONEHUNDRED != 0)
+        || timeNow->tm_year % NET_POLICY_LEAP_YEAR_FOURHUNDRED == 0)) {
+        return (monthDay_[timeNow->tm_mon] + NET_POLICY_LEAP_YEAR_ONE) * NET_POLICY_ONEDAYTIME;
+    } else {
+        return monthDay_[timeNow->tm_mon] * NET_POLICY_ONEDAYTIME;
+    }
+}
+
+void NetPolicyService::CheckNetStatsOverLimit(const std::vector<NetPolicyCellularPolicy> &cellularPolicies)
+{
+    if (cellularPolicies.empty()) {
+        NETMGR_LOG_W("cellularPolicies size is 0.");
+        return;
+    }
+
+    int32_t periodEndTime = GetPeriodEndTime();
+    if (periodEndTime <= 0) {
+        NETMGR_LOG_E("periodEndTime error.");
+        return;
+    }
+
+    std::string ifaceName;
+    for (uint32_t i = 0; i < cellularPolicies.size(); ++i) {
+        /* -1 : unlimited */
+        if (cellularPolicies[i].limitBytes_ == -1) {
+            if (netPolicyCallback_ != nullptr) {
+                netPolicyCallback_->NotifyNetStrategySwitch(cellularPolicies[i].slotId_, true);
+            }
+            continue;
+        }
+        std::string slotId = IDENT_PREFIX + std::to_string(cellularPolicies[i].slotId_);
+        int32_t ret = NetManagerCenter::GetInstance().GetIfaceNameByType(BEARER_CELLULAR,
+            slotId, ifaceName);
+        if (ret != 0 || ifaceName.empty()) {
+            NETMGR_LOG_E("GetIfaceNameByType ret [%{public}d] ifaceName [%{public}s]", ret, ifaceName.c_str());
+            continue;
+        }
+        NetStatsInfo netStatsInfo;
+        ret = NetManagerCenter::GetInstance().GetIfaceStatsDetail(ifaceName, cellularPolicies[i].periodStartTime_,
+            cellularPolicies[i].periodStartTime_ + periodEndTime, netStatsInfo);
+        if (ret != 0) {
+            NETMGR_LOG_E("GetIfaceStatsDetail ret [%{public}d] ifaceName [%{public}s]", ret, ifaceName.c_str());
+            continue;
+        }
+        NETMGR_LOG_I("GetIfaceStatsDetail txBytes_[%{public}" PRId64 "] rxBytes_[%{public}" PRId64 "]",
+            netStatsInfo.txBytes_, netStatsInfo.rxBytes_);
+        /*  The traffic exceeds the limit. You need to notify telephony to shut down the network. */
+        if (netStatsInfo.txBytes_ + netStatsInfo.rxBytes_ < cellularPolicies[i].limitBytes_) {
+            if (netPolicyCallback_ != nullptr) {
+                netPolicyCallback_->NotifyNetStrategySwitch(cellularPolicies[i].slotId_, true);
+            }
+        } else {
+            if (netPolicyCallback_ != nullptr) {
+                netPolicyCallback_->NotifyNetStrategySwitch(cellularPolicies[i].slotId_, false);
+            }
+        }
+    }
+}
+
+void NetPolicyService::CheckNetStatsOverLimit(const std::vector<NetPolicyQuotaPolicy> &quotaPolicies)
+{
+    if (quotaPolicies.empty()) {
+        NETMGR_LOG_W("quotaPolicies size is 0.");
+        return;
+    }
+
+    int32_t periodEndTime = GetPeriodEndTime();
+    if (periodEndTime <= 0) {
+        NETMGR_LOG_E("periodEndTime error.");
+        return;
+    }
+
+    std::string ifaceName;
+    for (uint32_t i = 0; i < quotaPolicies.size(); ++i) {
+        /* only control cellular traffic */
+        if (static_cast<NetBearType>(quotaPolicies[i].netType_) != BEARER_CELLULAR) {
+            NETMGR_LOG_I("need not notify telephony netType_[%{public}d]", quotaPolicies[i].netType_);
+            continue;
+        }
+        NetBearType bearerType = static_cast<NetBearType>(quotaPolicies[i].netType_);
+        std::string slotId = IDENT_PREFIX + std::to_string(quotaPolicies[i].slotId_);
+        int32_t ret = NetManagerCenter::GetInstance().GetIfaceNameByType(
+            bearerType, slotId, ifaceName);
+        if (ret != 0 || ifaceName.empty()) {
+            NETMGR_LOG_E("GetIfaceNameByType ret [%{public}d] ifaceName [%{public}s]", ret, ifaceName.c_str());
+            continue;
+        }
+        NetStatsInfo netStatsInfo;
+        ret = NetManagerCenter::GetInstance().GetIfaceStatsDetail(ifaceName, quotaPolicies[i].periodStartTime_,
+            quotaPolicies[i].periodStartTime_ + periodEndTime, netStatsInfo);
+        if (ret != 0) {
+            NETMGR_LOG_E("GetIfaceStatsDetail ret [%{public}d] ifaceName [%{public}s]", ret, ifaceName.c_str());
+            continue;
+        }
+        NETMGR_LOG_I("GetIfaceStatsDetail txBytes_[%{public}" PRId64 "] rxBytes_[%{public}" PRId64 "]",
+            netStatsInfo.txBytes_, netStatsInfo.rxBytes_);
+
+        /* Sleep time is not up Or nerverSnooze : lastLimitSnooze_=1 */
+        if ((quotaPolicies[i].lastLimitSnooze_ >= quotaPolicies[i].periodStartTime_ ||
+            quotaPolicies[i].lastLimitSnooze_ == -1)
+            && (netStatsInfo.txBytes_ + netStatsInfo.rxBytes_ < quotaPolicies[i].limitBytes_)) {
+            if (netPolicyCallback_ != nullptr) {
+                netPolicyCallback_->NotifyNetStrategySwitch(quotaPolicies[i].slotId_, true);
+            }
+        } else {
+            if (netPolicyCallback_ != nullptr) {
+                netPolicyCallback_->NotifyNetStrategySwitch(quotaPolicies[i].slotId_, false);
+            }
+        }
+    }
+}
+
+NetPolicyResultCode NetPolicyService::SetNetQuotaPolicies(const std::vector<NetPolicyQuotaPolicy> &quotaPolicies)
+{
+    NETMGR_LOG_I("SetNetQuotaPolicies quotaPolicySize[%{public}zd]", quotaPolicies.size());
+    if (quotaPolicies.empty()) {
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return netPolicyTraffic_->SetNetPolicys(quotaPolicys, netPolicyCallback_);
-}
-
-NetPolicyResultCode NetPolicyService::GetNetPolicys(std::vector<NetPolicyQuotaPolicy> &quotaPolicys)
-{
     std::unique_lock<std::mutex> lock(mutex_);
-    NETMGR_LOG_I("GetNetPolicys begin");
-    return netPolicyFile_->GetNetPolicys(quotaPolicys);
-}
-
-NetPolicyResultCode NetPolicyService::SetCellularPolicys(const std::vector<NetPolicyCellularPolicy> &cellularPolicys)
-{
-    std::unique_lock<std::mutex> lock(mutex_);
-    NETMGR_LOG_I("SetCellularPolicys cellularPolicys[%{public}d]", static_cast<uint32_t>(cellularPolicys.size()));
-    if (cellularPolicys.empty()) {
-        NETMGR_LOG_E("cellularPolicys size 0");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    NetPolicyResultCode ret = netPolicyTraffic_->SetCellularPolicys(cellularPolicys, netPolicyCallback_);
+    NetPolicyResultCode ret = netPolicyTraffic_->SetNetQuotaPolicies(quotaPolicies);
+    lock.unlock();
     if (ret == NetPolicyResultCode::ERR_NONE) {
-        netPolicyCallback_->NotifyNetCellularPolicyChanged(cellularPolicys);
+        /* Judge whether the flow exceeds the limit */
+        CheckNetStatsOverLimit(quotaPolicies);
     }
 
-    return NetPolicyResultCode::ERR_NONE;
+    return ret;
 }
 
-NetPolicyResultCode NetPolicyService::GetCellularPolicys(std::vector<NetPolicyCellularPolicy> &cellularPolicys)
+NetPolicyResultCode NetPolicyService::GetNetQuotaPolicies(std::vector<NetPolicyQuotaPolicy> &quotaPolicies)
 {
     std::unique_lock<std::mutex> lock(mutex_);
-    NETMGR_LOG_I("GetCellularPolicys begin");
-    return netPolicyFile_->GetCellularPolicys(cellularPolicys);
+    NETMGR_LOG_I("GetNetQuotaPolicies begin");
+    return netPolicyFile_->GetNetQuotaPolicies(quotaPolicies);
 }
 
-NetPolicyResultCode NetPolicyService::ResetFactory(const std::string &subscriberId)
+NetPolicyResultCode NetPolicyService::SetCellularPolicies(const std::vector<NetPolicyCellularPolicy> &cellularPolicies)
+{
+    NETMGR_LOG_I("SetCellularPolicies cellularPolicies[%{public}zd]", cellularPolicies.size());
+    if (cellularPolicies.empty()) {
+        NETMGR_LOG_E("cellularPolicies size 0");
+        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+    }
+
+    std::unique_lock<std::mutex> lock(mutex_);
+    NetPolicyResultCode ret = netPolicyTraffic_->SetCellularPolicies(cellularPolicies);
+    lock.unlock();
+    if (ret == NetPolicyResultCode::ERR_NONE) {
+        /* Judge whether the flow exceeds the limit */
+        CheckNetStatsOverLimit(cellularPolicies);
+        netPolicyCallback_->NotifyNetCellularPolicyChanged(cellularPolicies);
+    }
+
+    return ret;
+}
+
+NetPolicyResultCode NetPolicyService::GetCellularPolicies(std::vector<NetPolicyCellularPolicy> &cellularPolicies)
 {
     std::unique_lock<std::mutex> lock(mutex_);
-    NETMGR_LOG_I("ResetFactory begin");
-    netPolicyTraffic_->ClearIdleWhiteList();
-    return netPolicyFile_->ResetFactory(subscriberId);
+    NETMGR_LOG_I("GetCellularPolicies begin");
+    return netPolicyFile_->GetCellularPolicies(cellularPolicies);
+}
+
+NetPolicyResultCode NetPolicyService::SetFactoryPolicy(const std::string &slotId)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    NETMGR_LOG_I("SetFactoryPolicy begin");
+    netPolicyTraffic_->ClearIdleTrustList();
+    return netPolicyFile_->SetFactoryPolicy(slotId);
 }
 
 NetPolicyResultCode NetPolicyService::SetBackgroundPolicy(bool backgroundPolicy)
 {
     std::unique_lock<std::mutex> lock(mutex_);
     NETMGR_LOG_I("SetBackgroundPolicy begin");
-    return netPolicyFile_->SetBackgroundPolicy(backgroundPolicy);
+
+    bool oldBackgroundPolicy = netPolicyFile_->GetBackgroundPolicy();
+    NetPolicyResultCode ret = netPolicyFile_->SetBackgroundPolicy(backgroundPolicy);
+    if (ret != NetPolicyResultCode::ERR_NONE) {
+        return ret;
+    }
+
+    bool newBackgroundPolicy = netPolicyFile_->GetBackgroundPolicy();
+    lock.unlock();
+    if (newBackgroundPolicy != oldBackgroundPolicy) {
+        netPolicyCallback_->NotifyNetBackgroundPolicyChanged(newBackgroundPolicy);
+        NetManagerCenter::GetInstance().RestrictBackgroundChanged(newBackgroundPolicy);
+    }
+
+    return ret;
 }
 
 bool NetPolicyService::GetBackgroundPolicy()
@@ -286,35 +468,49 @@ bool NetPolicyService::GetBackgroundPolicyByUid(uint32_t uid)
     return netPolicyFirewall_->GetBackgroundPolicyByUid(uid);
 }
 
-bool NetPolicyService::GetCurrentBackgroundPolicy()
+NetBackgroundPolicy NetPolicyService::GetCurrentBackgroundPolicy()
 {
     std::unique_lock<std::mutex> lock(mutex_);
     NETMGR_LOG_I("GetCurrentBackgroundPolicy begin");
     return netPolicyFirewall_->GetCurrentBackgroundPolicy();
 }
 
-NetPolicyResultCode NetPolicyService::SnoozePolicy(const NetPolicyQuotaPolicy &quotaPolicy)
+NetPolicyResultCode NetPolicyService::SetSnoozePolicy(int8_t netType, int32_t slotId)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
-    NETMGR_LOG_I("SnoozePolicy begin");
+    NETMGR_LOG_I("SetSnoozePolicy begin");
 
-    return netPolicyTraffic_->SnoozePolicy(quotaPolicy, netPolicyCallback_);
+    NetPolicyQuotaPolicy quotaPolicy;
+    quotaPolicy.netType_ = netType;
+    quotaPolicy.slotId_ = slotId;
+    std::vector<NetPolicyQuotaPolicy> quotaPolicies = {quotaPolicy};
+    /* Set the sleep time to the current time. */
+    quotaPolicies[0].lastLimitSnooze_ = GetCurrentTime();
+
+    std::unique_lock<std::mutex> lock(mutex_);
+    NetPolicyResultCode ret = netPolicyTraffic_->SetSnoozePolicy(netType, slotId, quotaPolicies);
+    lock.unlock();
+    if (ret == NetPolicyResultCode::ERR_NONE) {
+        /* Judge whether the flow exceeds the limit */
+        CheckNetStatsOverLimit(quotaPolicies);
+    }
+
+    return ret;
 }
 
-NetPolicyResultCode NetPolicyService::SetIdleWhitelist(uint32_t uid, bool isWhiteList)
+NetPolicyResultCode NetPolicyService::SetIdleTrustlist(uint32_t uid, bool isTrustlist)
 {
-    std::unique_lock<std::mutex> lock(mutex_);
-    NETMGR_LOG_I("SetIdleWhitelist info: uid[%{public}d] isWhiteList[%{public}d]", uid,
-        static_cast<uint32_t>(isWhiteList));
+    NETMGR_LOG_I("SetIdleTrustlist info: uid[%{public}d] isTrustlist[%{public}d]", uid,
+        static_cast<uint32_t>(isTrustlist));
 
-    return netPolicyTraffic_->SetIdleWhitelist(uid, isWhiteList);
+    std::unique_lock<std::mutex> lock(mutex_);
+    return netPolicyTraffic_->SetIdleTrustlist(uid, isTrustlist);
 }
 
-NetPolicyResultCode NetPolicyService::GetIdleWhitelist(std::vector<uint32_t> &uids)
+NetPolicyResultCode NetPolicyService::GetIdleTrustlist(std::vector<uint32_t> &uids)
 {
     std::unique_lock<std::mutex> lock(mutex_);
-    NETMGR_LOG_I("GetIdleWhitelist begin");
-    return netPolicyTraffic_->GetIdleWhitelist(uids);
+    NETMGR_LOG_I("GetIdleTrustlist begin");
+    return netPolicyTraffic_->GetIdleTrustlist(uids);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

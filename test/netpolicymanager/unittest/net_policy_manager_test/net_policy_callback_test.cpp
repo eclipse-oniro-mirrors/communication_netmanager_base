@@ -47,18 +47,29 @@ int32_t NetPolicyCallbackTest::NetUidPolicyChanged(uint32_t uid, NetUidPolicy po
     return 0;
 }
 
-int32_t NetPolicyCallbackTest::NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicys)
+int32_t NetPolicyCallbackTest::NetBackgroundPolicyChanged(bool isBackgroundPolicyAllow)
 {
-    NETMGR_LOG_D("unittest NetCellularPolicyChanged, cellularPolicys.size:[%{public}d]",
-        cellularPolicys.size());
+    NETMGR_LOG_D("unittest NetBackgroundPolicyChanged, isBackgroundPolicyAllow:[%{public}d]",
+        isBackgroundPolicyAllow);
+
+    isBackgroundPolicyAllow_ = isBackgroundPolicyAllow;
+    NotifyAll();
 
     return 0;
 }
 
-int32_t NetPolicyCallbackTest::NetStrategySwitch(const std::string &subscriberId, bool enable)
+int32_t NetPolicyCallbackTest::NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicies)
 {
-    NETMGR_LOG_D("unittest NetStrategySwitch, subscriberId:[%{public}s], enable:[%{public}d]",
-        subscriberId.c_str(), static_cast<uint32_t>(enable));
+    NETMGR_LOG_D("unittest NetCellularPolicyChanged, cellularPolicies.size:[%{public}d]",
+        cellularPolicies.size());
+
+    return 0;
+}
+
+int32_t NetPolicyCallbackTest::NetStrategySwitch(int32_t slotId, bool enable)
+{
+    NETMGR_LOG_D("unittest NetStrategySwitch, slotId:[%{public}d], enable:[%{public}d]",
+        slotId, static_cast<uint32_t>(enable));
 
     return 0;
 }

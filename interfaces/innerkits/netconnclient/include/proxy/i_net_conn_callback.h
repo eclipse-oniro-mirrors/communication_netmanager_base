@@ -18,9 +18,9 @@
 
 #include "iremote_broker.h"
 
-#include "net_conn_callback_info.h"
 #include "net_specifier.h"
 #include "net_link_info.h"
+#include "net_handle.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -30,19 +30,21 @@ public:
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetManagerStandard.INetConnCallback");
     enum {
-        NET_CONN_STATE_CHANGED = 0,
-        NET_AVAILIABLE,
+        NET_AVAILABLE,
         NET_CAPABILITIES_CHANGE,
         NET_CONNECTION_PROPERTIES_CHANGE,
         NET_LOST,
+        NET_UNAVAILABLE,
+        NET_BLOCK_STATUS_CHANGE,
     };
 
 public:
-    virtual int32_t NetConnStateChanged(const sptr<NetConnCallbackInfo> &info) = 0;
-    virtual int32_t NetAvailable(int32_t netId) = 0;
-    virtual int32_t NetCapabilitiesChange(int32_t netId, const uint64_t &netCap) = 0;
-    virtual int32_t NetConnectionPropertiesChange(int32_t netId, const sptr<NetLinkInfo> &info) = 0;
-    virtual int32_t NetLost(int32_t netId) = 0;
+    virtual int32_t NetAvailable(sptr<NetHandle> &netHandle) = 0;
+    virtual int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap) = 0;
+    virtual int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info) = 0;
+    virtual int32_t NetLost(sptr<NetHandle> &netHandle) = 0;
+    virtual int32_t NetUnavailable() = 0;
+    virtual int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

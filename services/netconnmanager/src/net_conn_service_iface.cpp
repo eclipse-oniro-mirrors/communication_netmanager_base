@@ -17,16 +17,17 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-int32_t NetConnServiceIface::GetIfaceNameByType(uint32_t netType, const std::string &ident, std::string &ifaceName)
+int32_t NetConnServiceIface::GetIfaceNameByType(
+    NetBearType bearerType, const std::string &ident, std::string &ifaceName)
 {
-    return DelayedSingleton<NetConnService>::GetInstance()->GetIfaceNameByType(netType, ident, ifaceName);
+    return DelayedSingleton<NetConnService>::GetInstance()->GetIfaceNameByType(bearerType, ident, ifaceName);
 }
 
-int32_t NetConnServiceIface::RegisterNetSupplier(uint32_t netType, const std::string &ident, uint64_t netCapabilities,
-    uint32_t &supplierId)
+int32_t NetConnServiceIface::RegisterNetSupplier(NetBearType bearerType,
+    const std::string &ident, const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {
-    return DelayedSingleton<NetConnService>::GetInstance()->RegisterNetSupplier(netType, ident, netCapabilities,
-        supplierId);
+    return DelayedSingleton<NetConnService>::GetInstance()->RegisterNetSupplier(
+        bearerType, ident, netCaps, supplierId);
 }
 
 int32_t NetConnServiceIface::UnregisterNetSupplier(uint32_t supplierId)
@@ -42,6 +43,11 @@ int32_t NetConnServiceIface::UpdateNetLinkInfo(uint32_t supplierId, const sptr<N
 int32_t NetConnServiceIface::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo)
 {
     return DelayedSingleton<NetConnService>::GetInstance()->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
+}
+
+int32_t NetConnServiceIface::RestrictBackgroundChanged(bool isRestrictBackground)
+{
+    return DelayedSingleton<NetConnService>::GetInstance()->RestrictBackgroundChanged(isRestrictBackground);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

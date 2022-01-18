@@ -43,8 +43,8 @@ public:
         CMD_NSM_NET_GET_CELLULAR_POLICY = 11,
         CMD_NSM_FACTORY_RESET = 12,
         CMD_NSM_SNOOZE_POLICY = 13,
-        CMD_NSM_SET_IDLE_WHITELIST = 14,
-        CMD_NSM_GET_IDLE_WHITELIST = 15,
+        CMD_NSM_SET_IDLE_TRUSTLIST = 14,
+        CMD_NSM_GET_IDLE_TRUSTLIST = 15,
         CMD_NSM_SET_BACKGROUND_POLICY = 16,
         CMD_NSM_GET_BACKGROUND_POLICY = 17,
         CMD_NSM_GET_BACKGROUND_POLICY_BY_UID = 18,
@@ -53,25 +53,25 @@ public:
     };
 
 public:
-    virtual NetPolicyResultCode SetUidPolicy(uint32_t uid, NetUidPolicy policy) = 0;
-    virtual NetUidPolicy GetUidPolicy(uint32_t uid) = 0;
-    virtual std::vector<uint32_t> GetUids(NetUidPolicy policy) = 0;
+    virtual NetPolicyResultCode SetPolicyByUid(uint32_t uid, NetUidPolicy policy) = 0;
+    virtual NetUidPolicy GetPolicyByUid(uint32_t uid) = 0;
+    virtual std::vector<uint32_t> GetUidsByPolicy(NetUidPolicy policy) = 0;
     virtual bool IsUidNetAccess(uint32_t uid, bool metered) = 0;
     virtual bool IsUidNetAccess(uint32_t uid, const std::string &ifaceName) = 0;
     virtual int32_t RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback) = 0;
     virtual int32_t UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback) = 0;
-    virtual NetPolicyResultCode SetNetPolicys(const std::vector<NetPolicyQuotaPolicy> &quotaPolicys) = 0;
-    virtual NetPolicyResultCode GetNetPolicys(std::vector<NetPolicyQuotaPolicy> &quotaPolicys) = 0;
-    virtual NetPolicyResultCode SetCellularPolicys(const std::vector<NetPolicyCellularPolicy> &cellularPolicys) = 0;
-    virtual NetPolicyResultCode GetCellularPolicys(std::vector<NetPolicyCellularPolicy> &cellularPolicys) = 0;
-    virtual NetPolicyResultCode ResetFactory(const std::string &subscriberId) = 0;
+    virtual NetPolicyResultCode SetNetQuotaPolicies(const std::vector<NetPolicyQuotaPolicy> &quotaPolicies) = 0;
+    virtual NetPolicyResultCode GetNetQuotaPolicies(std::vector<NetPolicyQuotaPolicy> &quotaPolicies) = 0;
+    virtual NetPolicyResultCode SetCellularPolicies(const std::vector<NetPolicyCellularPolicy> &cellularPolicies) = 0;
+    virtual NetPolicyResultCode GetCellularPolicies(std::vector<NetPolicyCellularPolicy> &cellularPolicies) = 0;
+    virtual NetPolicyResultCode SetFactoryPolicy(const std::string &slotId) = 0;
     virtual NetPolicyResultCode SetBackgroundPolicy(bool backgroundPolicy) = 0;
     virtual bool GetBackgroundPolicy() = 0;
     virtual bool GetBackgroundPolicyByUid(uint32_t uid) = 0;
-    virtual bool GetCurrentBackgroundPolicy() = 0;
-    virtual NetPolicyResultCode SnoozePolicy(const NetPolicyQuotaPolicy &quotaPolicy) = 0;
-    virtual NetPolicyResultCode SetIdleWhitelist(uint32_t uid, bool isWhiteList) = 0;
-    virtual NetPolicyResultCode GetIdleWhitelist(std::vector<uint32_t> &uids) = 0;
+    virtual NetBackgroundPolicy GetCurrentBackgroundPolicy() = 0;
+    virtual NetPolicyResultCode SetSnoozePolicy(int8_t netType, int32_t slotId) = 0;
+    virtual NetPolicyResultCode SetIdleTrustlist(uint32_t uid, bool isTrustlist) = 0;
+    virtual NetPolicyResultCode GetIdleTrustlist(std::vector<uint32_t> &uids) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

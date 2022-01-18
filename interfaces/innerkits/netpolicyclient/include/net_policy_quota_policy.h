@@ -22,19 +22,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-enum class NetQuotaPolicyType {
-    NET_POLICY_MOBILE = 1,
-    NET_POLICY_ETHERNET = 2,
-    NET_POLICY_WIFI = 3,
-    NET_POLICY_BLUETOOTH = 4,
-    NET_POLICY_PROXY = 5,
-};
-
 struct NetPolicyQuotaPolicy : public Parcelable {
-    /* netType value range in NetQuotaPolicyType */
+    /* netType value in NetBearType */
     int8_t netType_ = -1;
-    /* subscriber ID, get from telephone module */
-    std::string subscriberId_ = "";
+    /* slot ID, get from telephone module */
+    int32_t slotId_ = 0;
     /*  Time rubbing, for example:1636598990 */
     int64_t periodStartTime_ = -1;
     /* Unit: Month for example:M1 (The 1st of each month) */
@@ -52,9 +44,9 @@ struct NetPolicyQuotaPolicy : public Parcelable {
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static bool Marshalling(Parcel &parcel, const NetPolicyQuotaPolicy &quotaPolicy);
-    static bool Marshalling(Parcel &parcel, const std::vector<NetPolicyQuotaPolicy> &quotaPolicys);
+    static bool Marshalling(Parcel &parcel, const std::vector<NetPolicyQuotaPolicy> &quotaPolicies);
     static bool Unmarshalling(Parcel &parcel, NetPolicyQuotaPolicy &quotaPolicy);
-    static bool Unmarshalling(Parcel &parcel, std::vector<NetPolicyQuotaPolicy> &quotaPolicys);
+    static bool Unmarshalling(Parcel &parcel, std::vector<NetPolicyQuotaPolicy> &quotaPolicies);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

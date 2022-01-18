@@ -27,41 +27,37 @@ public:
     explicit NetConnServiceProxy(const sptr<IRemoteObject> &impl);
     virtual ~NetConnServiceProxy();
     int32_t SystemReady() override;
-    int32_t RegisterNetSupplier(uint32_t netType, const std::string &ident, uint64_t netCapabilities,
+    int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
         uint32_t &supplierId) override;
     int32_t UnregisterNetSupplier(uint32_t supplierId) override;
     int32_t RegisterNetSupplierCallback(uint32_t supplierId, const sptr<INetSupplierCallback> &callback) override;
     int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
     int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-        const sptr<INetConnCallback> &callback) override;
+        const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS) override;
     int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
-    int32_t UnregisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-        const sptr<INetConnCallback> &callback) override;
     int32_t UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState) override;
     int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) override;
-    int32_t UpdateNetCapabilities(uint32_t supplierId, uint64_t netCapabilities) override;
     int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo) override;
-    int32_t  ActivateNetwork(const sptr<NetSpecifier>& netSpecifier,
-        const sptr<INetConnCallback>& callback, uint32_t& reqId) override;
-    int32_t  DeactivateNetwork(uint32_t& reqId) override;
     int32_t  GetDefaultNet(int32_t& netId) override;
     int32_t HasDefaultNet(bool &flag) override;
-    int32_t GetIfaceNameByType(uint32_t netType, const std::string &ident, std::string &ifaceName) override;
+    int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) override;
     int32_t RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) override;
     int32_t UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) override;
     int32_t NetDetection(int32_t netId) override;
-    int32_t GetAddressesByName(const std::string &host, int32_t netId, std::list<INetAddr> &addrList) override;
+    int32_t GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList) override;
     int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr) override;
-    int32_t GetSpecificNet(uint32_t type, std::list<int32_t> &netIdList) override;
+    int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList) override;
     int32_t GetAllNets(std::list<int32_t> &netIdList) override;
     int32_t GetSpecificUidNet(int32_t uid, int32_t &netId) override;
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override;
-    int32_t GetNetCapabilities(int32_t netId, uint64_t &cap) override;
+    int32_t GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap) override;
     int32_t BindSocket(int32_t socket_fd, int32_t netId) override;
     int32_t SetAirplaneMode(bool state) override;
+    int32_t RestoreFactoryData() override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
+    int32_t GetNetCapData(MessageParcel &reply, NetAllCapabilities &netAllCap);
 
 private:
     static inline BrokerDelegator<NetConnServiceProxy> delegator_;

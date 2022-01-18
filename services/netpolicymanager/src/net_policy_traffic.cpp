@@ -37,9 +37,6 @@ namespace OHOS {
 namespace NetManagerStandard {
 NetPolicyTraffic::NetPolicyTraffic(sptr<NetPolicyFile> netPolicyFile) : netPolicyFile_(netPolicyFile)
 {
-    monthDay_ = {MONTH_THIRTY_ONE, MONTH_TWENTY_EIGHT, MONTH_THIRTY_ONE, MONTH_THIRTY,
-        MONTH_THIRTY_ONE, MONTH_THIRTY, MONTH_THIRTY_ONE, MONTH_THIRTY_ONE, MONTH_THIRTY,
-        MONTH_THIRTY_ONE, MONTH_THIRTY, MONTH_THIRTY_ONE};
 }
 
 bool NetPolicyTraffic::IsPolicyValid(NetUidPolicy policy)
@@ -49,6 +46,8 @@ bool NetPolicyTraffic::IsPolicyValid(NetUidPolicy policy)
         case NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND:
         case NetUidPolicy::NET_POLICY_TEMPORARY_ALLOW_METERED:
         case NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND:
+        case NetUidPolicy::NET_POLICY_ALLOW_METERED:
+        case NetUidPolicy::NET_POLICY_REJECT_METERED:
         case NetUidPolicy::NET_POLICY_ALLOW_ALL:
         case NetUidPolicy::NET_POLICY_REJECT_ALL: {
             return true;
@@ -60,14 +59,15 @@ bool NetPolicyTraffic::IsPolicyValid(NetUidPolicy policy)
     }
 }
 
-bool NetPolicyTraffic::IsNetPolicyTypeValid(NetQuotaPolicyType netType)
+bool NetPolicyTraffic::IsNetPolicyTypeValid(NetBearType netType)
 {
     switch (netType) {
-        case NetQuotaPolicyType::NET_POLICY_MOBILE:
-        case NetQuotaPolicyType::NET_POLICY_ETHERNET:
-        case NetQuotaPolicyType::NET_POLICY_WIFI:
-        case NetQuotaPolicyType::NET_POLICY_BLUETOOTH:
-        case NetQuotaPolicyType::NET_POLICY_PROXY: {
+        case NetBearType::BEARER_CELLULAR:
+        case NetBearType::BEARER_WIFI:
+        case NetBearType::BEARER_BLUETOOTH:
+        case NetBearType::BEARER_ETHERNET:
+        case NetBearType::BEARER_VPN:
+        case NetBearType::BEARER_WIFI_AWARE: {
             return true;
         }
         default: {
@@ -77,10 +77,10 @@ bool NetPolicyTraffic::IsNetPolicyTypeValid(NetQuotaPolicyType netType)
     }
 }
 
-NetPolicyResultCode NetPolicyTraffic::AddUidPolicy(uint32_t uid, NetUidPolicy policy)
+NetPolicyResultCode NetPolicyTraffic::AddPolicyByUid(uint32_t uid, NetUidPolicy policy)
 {
     if (netPolicyFile_ == nullptr) {
-        NETMGR_LOG_E("AddUidPolicy netPolicyFile is null");
+        NETMGR_LOG_E("AddPolicyByUid netPolicyFile is null");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
@@ -89,17 +89,17 @@ NetPolicyResultCode NetPolicyTraffic::AddUidPolicy(uint32_t uid, NetUidPolicy po
     }
 
     if (!netPolicyFile_->WriteFile(NetUidPolicyOpType::NET_POLICY_UID_OP_TYPE_ADD, uid, policy)) {
-        NETMGR_LOG_E("AddUidPolicy WriteFile failed");
+        NETMGR_LOG_E("AddPolicyByUid WriteFile failed");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
     return NetPolicyResultCode::ERR_NONE;
 }
 
-NetPolicyResultCode NetPolicyTraffic::SetUidPolicy(uint32_t uid, NetUidPolicy policy)
+NetPolicyResultCode NetPolicyTraffic::SetPolicyByUid(uint32_t uid, NetUidPolicy policy)
 {
     if (netPolicyFile_ == nullptr) {
-        NETMGR_LOG_E("SetUidPolicy netPolicyFile is null");
+        NETMGR_LOG_E("SetPolicyByUid netPolicyFile is null");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
@@ -108,17 +108,17 @@ NetPolicyResultCode NetPolicyTraffic::SetUidPolicy(uint32_t uid, NetUidPolicy po
     }
 
     if (!netPolicyFile_->WriteFile(NetUidPolicyOpType::NET_POLICY_UID_OP_TYPE_UPDATE, uid, policy)) {
-        NETMGR_LOG_E("SetUidPolicy WriteFile failed");
+        NETMGR_LOG_E("SetPolicyByUid WriteFile failed");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
     return NetPolicyResultCode::ERR_NONE;
 }
 
-NetPolicyResultCode NetPolicyTraffic::DeleteUidPolicy(uint32_t uid, NetUidPolicy policy)
+NetPolicyResultCode NetPolicyTraffic::DeletePolicyByUid(uint32_t uid, NetUidPolicy policy)
 {
     if (netPolicyFile_ == nullptr) {
-        NETMGR_LOG_E("DeleteUidPolicy netPolicyFile is null");
+        NETMGR_LOG_E("DeletePolicyByUid netPolicyFile is null");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
@@ -127,177 +127,38 @@ NetPolicyResultCode NetPolicyTraffic::DeleteUidPolicy(uint32_t uid, NetUidPolicy
     }
 
     if (!netPolicyFile_->WriteFile(NetUidPolicyOpType::NET_POLICY_UID_OP_TYPE_DELETE, uid, policy)) {
-        NETMGR_LOG_E("DeleteUidPolicy WriteFile failed");
+        NETMGR_LOG_E("DeletePolicyByUid WriteFile failed");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
     return NetPolicyResultCode::ERR_NONE;
 }
 
-std::int64_t NetPolicyTraffic::GetCurrentTime()
+NetPolicyResultCode NetPolicyTraffic::SetNetQuotaPolicies(const std::vector<NetPolicyQuotaPolicy> &quotaPolicies)
 {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-
-    return tv.tv_sec;
-}
-
-int32_t NetPolicyTraffic::GetPeriodEndTime()
-{
-    struct tm *timeNow;
-    time_t second = time(nullptr);
-    if (!second) {
-        NETMGR_LOG_E("time second error");
-        return -1;
-    }
-    timeNow = localtime(&second);
-    if (timeNow == nullptr) {
-        NETMGR_LOG_E("timeNow is nullptr");
-        return -1;
-    }
-
-    if (timeNow->tm_mon == NET_POLICY_FEBRUARY
-        && ((timeNow->tm_year % NET_POLICY_LEAP_YEAR_FOUR == 0
-        && timeNow->tm_year % NET_POLICY_LEAP_YEAR_ONEHUNDRED != 0)
-        || timeNow->tm_year % NET_POLICY_LEAP_YEAR_FOURHUNDRED == 0)) {
-        return (monthDay_[timeNow->tm_mon] + NET_POLICY_LEAP_YEAR_ONE) * NET_POLICY_ONEDAYTIME;
-    } else {
-        return monthDay_[timeNow->tm_mon] * NET_POLICY_ONEDAYTIME;
-    }
-}
-
-void NetPolicyTraffic::CheckNetStatsOverLimit(const std::vector<NetPolicyCellularPolicy> &cellularPolicys,
-    const sptr<NetPolicyCallback> netPolicyCallback)
-{
-    if (cellularPolicys.empty()) {
-        NETMGR_LOG_W("cellularPolicys size is 0.");
-        return;
-    }
-
-    int32_t periodEndTime = GetPeriodEndTime();
-    if (periodEndTime <= 0) {
-        NETMGR_LOG_E("periodEndTime error.");
-        return;
-    }
-
-    std::string ifaceName;
-    for (uint32_t i = 0; i < cellularPolicys.size(); ++i) {
-        /* -1 : unlimited */
-        if (cellularPolicys[i].limitBytes_ == -1) {
-            if (netPolicyCallback != nullptr) {
-                netPolicyCallback->NotifyNetStrategySwitch(cellularPolicys[i].subscriberId_, true);
-            }
-            continue;
-        }
-        int32_t ret = NetManagerCenter::GetInstance().GetIfaceNameByType(NET_TYPE_CELLULAR,
-            cellularPolicys[i].subscriberId_, ifaceName);
-        if (ret != 0 || ifaceName.empty()) {
-            NETMGR_LOG_E("GetIfaceNameByType ret [%{public}d] ifaceName [%{public}s]", ret, ifaceName.c_str());
-            continue;
-        }
-        NetStatsInfo netStatsInfo;
-        ret = NetManagerCenter::GetInstance().GetIfaceStatsDetail(ifaceName, cellularPolicys[i].periodStartTime_,
-            cellularPolicys[i].periodStartTime_ + periodEndTime, netStatsInfo);
-        if (ret != 0) {
-            NETMGR_LOG_E("GetIfaceStatsDetail ret [%{public}d] ifaceName [%{public}s]", ret, ifaceName.c_str());
-            continue;
-        }
-        NETMGR_LOG_I("GetIfaceStatsDetail txBytes_[%{public}" PRId64 "] rxBytes_[%{public}" PRId64 "]",
-            netStatsInfo.txBytes_, netStatsInfo.rxBytes_);
-        /*  The traffic exceeds the limit. You need to notify telephony to shut down the network. */
-        if (netStatsInfo.txBytes_ + netStatsInfo.rxBytes_ < cellularPolicys[i].limitBytes_) {
-            if (netPolicyCallback != nullptr) {
-                netPolicyCallback->NotifyNetStrategySwitch(cellularPolicys[i].subscriberId_, true);
-            }
-        } else {
-            if (netPolicyCallback != nullptr) {
-                netPolicyCallback->NotifyNetStrategySwitch(cellularPolicys[i].subscriberId_, false);
-            }
-        }
-    }
-}
-
-void NetPolicyTraffic::CheckNetStatsOverLimit(const std::vector<NetPolicyQuotaPolicy> &quotaPolicys,
-    const sptr<NetPolicyCallback> netPolicyCallback)
-{
-    if (quotaPolicys.empty()) {
-        NETMGR_LOG_W("quotaPolicys size is 0.");
-        return;
-    }
-
-    int32_t periodEndTime = GetPeriodEndTime();
-    if (periodEndTime <= 0) {
-        NETMGR_LOG_E("periodEndTime error.");
-        return;
-    }
-
-    std::string ifaceName;
-    for (uint32_t i = 0; i < quotaPolicys.size(); ++i) {
-        /* only control cellular traffic */
-        if (static_cast<NetQuotaPolicyType>(quotaPolicys[i].netType_) != NetQuotaPolicyType::NET_POLICY_MOBILE) {
-            NETMGR_LOG_I("need not notify telephony netType_[%{public}d]", quotaPolicys[i].netType_);
-            continue;
-        }
-        int32_t ret = NetManagerCenter::GetInstance().GetIfaceNameByType(quotaPolicys[i].netType_,
-            quotaPolicys[i].subscriberId_, ifaceName);
-        if (ret != 0 || ifaceName.empty()) {
-            NETMGR_LOG_E("GetIfaceNameByType ret [%{public}d] ifaceName [%{public}s]", ret, ifaceName.c_str());
-            continue;
-        }
-        NetStatsInfo netStatsInfo;
-        ret = NetManagerCenter::GetInstance().GetIfaceStatsDetail(ifaceName, quotaPolicys[i].periodStartTime_,
-            quotaPolicys[i].periodStartTime_ + periodEndTime, netStatsInfo);
-        if (ret != 0) {
-            NETMGR_LOG_E("GetIfaceStatsDetail ret [%{public}d] ifaceName [%{public}s]", ret, ifaceName.c_str());
-            continue;
-        }
-        NETMGR_LOG_I("GetIfaceStatsDetail txBytes_[%{public}" PRId64 "] rxBytes_[%{public}" PRId64 "]",
-            netStatsInfo.txBytes_, netStatsInfo.rxBytes_);
-
-        /* Sleep time is not up Or nerverSnooze : lastLimitSnooze_=1 */
-        if ((quotaPolicys[i].lastLimitSnooze_ >= quotaPolicys[i].periodStartTime_ ||
-            quotaPolicys[i].lastLimitSnooze_ == -1)
-            && (netStatsInfo.txBytes_ + netStatsInfo.rxBytes_ < quotaPolicys[i].limitBytes_)) {
-            if (netPolicyCallback != nullptr) {
-                netPolicyCallback->NotifyNetStrategySwitch(quotaPolicys[i].subscriberId_, true);
-            }
-        } else {
-            if (netPolicyCallback != nullptr) {
-                netPolicyCallback->NotifyNetStrategySwitch(quotaPolicys[i].subscriberId_, false);
-            }
-        }
-    }
-}
-
-NetPolicyResultCode NetPolicyTraffic::SetNetPolicys(const std::vector<NetPolicyQuotaPolicy> &quotaPolicys,
-    const sptr<NetPolicyCallback> &netPolicyCallback)
-{
-    if (quotaPolicys.empty()) {
-        NETMGR_LOG_E("quotaPolicys size is 0");
+    if (quotaPolicies.empty()) {
+        NETMGR_LOG_E("quotaPolicies size is 0");
         return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
     }
 
-    int32_t netPolicyType = 0;
-    for (uint32_t i = 0; i < quotaPolicys.size(); ++i) {
-        netPolicyType = static_cast<int32_t>(quotaPolicys[i].netType_);
-        if (!IsNetPolicyTypeValid(static_cast<NetQuotaPolicyType>(netPolicyType))) {
+    for (uint32_t i = 0; i < quotaPolicies.size(); ++i) {
+        int32_t netPolicyType = static_cast<int32_t>(quotaPolicies[i].netType_);
+        if (!IsNetPolicyTypeValid(static_cast<NetBearType>(netPolicyType))) {
             NETMGR_LOG_E("NetPolicyType is invalid policy[%{public}d]", netPolicyType);
             return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
         }
 
-        if (!IsNetPolicyPeriodDurationValid(quotaPolicys[i].periodDuration_)) {
-            NETMGR_LOG_E("periodDuration [%{public}s] must Mx", quotaPolicys[i].periodDuration_.c_str());
+        if (!IsNetPolicyPeriodDurationValid(quotaPolicies[i].periodDuration_)) {
+            NETMGR_LOG_E("periodDuration [%{public}s] must Mx", quotaPolicies[i].periodDuration_.c_str());
             return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
         }
     }
 
-    /* Judge whether the flow exceeds the limit */
-    CheckNetStatsOverLimit(quotaPolicys, netPolicyCallback);
-
-    if (!netPolicyFile_->WriteFile(quotaPolicys)) {
-        NETMGR_LOG_E("SetNetPolicys WriteFile failed");
+    if (!netPolicyFile_->WriteFile(quotaPolicies)) {
+        NETMGR_LOG_E("SetNetQuotaPolicies WriteFile failed");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
+
     return NetPolicyResultCode::ERR_NONE;
 }
 
@@ -324,53 +185,49 @@ bool NetPolicyTraffic::IsNetPolicyPeriodDurationValid(const std::string &periodD
     return true;
 }
 
-NetPolicyResultCode NetPolicyTraffic::SetCellularPolicys(const std::vector<NetPolicyCellularPolicy> &cellularPolicys,
-    const sptr<NetPolicyCallback> &netPolicyCallback)
+NetPolicyResultCode NetPolicyTraffic::SetCellularPolicies(const std::vector<NetPolicyCellularPolicy> &cellularPolicies)
 {
-    if (cellularPolicys.empty()) {
-        NETMGR_LOG_E("cellularPolicys size is 0");
+    if (cellularPolicies.empty()) {
+        NETMGR_LOG_E("cellularPolicies size is 0");
         return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
     }
 
-    for (uint32_t i = 0; i < cellularPolicys.size(); ++i) {
-        if (!IsNetPolicyPeriodDurationValid(cellularPolicys[i].periodDuration_)) {
-            NETMGR_LOG_E("periodDuration [%{public}s] must Mx", cellularPolicys[i].periodDuration_.c_str());
+    for (uint32_t i = 0; i < cellularPolicies.size(); ++i) {
+        if (!IsNetPolicyPeriodDurationValid(cellularPolicies[i].periodDuration_)) {
+            NETMGR_LOG_E("periodDuration [%{public}s] must Mx", cellularPolicies[i].periodDuration_.c_str());
             return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
         }
 
-        if (cellularPolicys[i].limitAction_ < LIMIT_ACTION_ONE
-            || cellularPolicys[i].limitAction_ > LIMIT_ACTION_THREE) {
-            NETMGR_LOG_E("limitAction [%{public}d] must 1-3 ", cellularPolicys[i].limitAction_);
+        if (cellularPolicies[i].limitAction_ < LIMIT_ACTION_ONE
+            || cellularPolicies[i].limitAction_ > LIMIT_ACTION_THREE) {
+            NETMGR_LOG_E("limitAction [%{public}d] must 1-3 ", cellularPolicies[i].limitAction_);
             return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
         }
     }
 
-    /* Judge whether the flow exceeds the limit */
-    CheckNetStatsOverLimit(cellularPolicys, netPolicyCallback);
-
-    if (!netPolicyFile_->WriteFile(cellularPolicys)) {
-        NETMGR_LOG_E("SetCellularPolicys WriteFile failed");
+    if (!netPolicyFile_->WriteFile(cellularPolicies)) {
+        NETMGR_LOG_E("SetCellularPolicies WriteFile failed");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
+
     return NetPolicyResultCode::ERR_NONE;
 }
 
-bool NetPolicyTraffic::IsQuotaPolicyExist(const NetPolicyQuotaPolicy &quotaPolicy)
+bool NetPolicyTraffic::IsQuotaPolicyExist(int8_t netType, int32_t slotId)
 {
-    std::vector<NetPolicyQuotaPolicy> quotaPolicys;
-    if (netPolicyFile_->GetNetPolicys(quotaPolicys) != NetPolicyResultCode::ERR_NONE) {
-        NETMGR_LOG_E("GetNetPolicys failed");
+    std::vector<NetPolicyQuotaPolicy> quotaPolicies;
+    if (netPolicyFile_->GetNetQuotaPolicies(quotaPolicies) != NetPolicyResultCode::ERR_NONE) {
+        NETMGR_LOG_E("GetNetQuotaPolicies failed");
         return false;
     }
 
-    if (quotaPolicys.empty()) {
-        NETMGR_LOG_E("quotaPolicys is empty");
+    if (quotaPolicies.empty()) {
+        NETMGR_LOG_E("quotaPolicies is empty");
         return false;
     }
 
-    for (uint32_t i = 0; i < quotaPolicys.size(); i++) {
-        if (quotaPolicy.netType_ == quotaPolicys[i].netType_
-            && quotaPolicy.subscriberId_ == quotaPolicys[i].subscriberId_) {
+    for (uint32_t i = 0; i < quotaPolicies.size(); i++) {
+        if (netType == quotaPolicies[i].netType_ && slotId == quotaPolicies[i].slotId_) {
             NETMGR_LOG_D("netQuotaPolicy exist");
             return true;
         }
@@ -379,44 +236,39 @@ bool NetPolicyTraffic::IsQuotaPolicyExist(const NetPolicyQuotaPolicy &quotaPolic
     return false;
 }
 
-NetPolicyResultCode NetPolicyTraffic::SnoozePolicy(const NetPolicyQuotaPolicy &quotaPolicy,
-    const sptr<NetPolicyCallback> &netPolicyCallback)
+NetPolicyResultCode NetPolicyTraffic::SetSnoozePolicy(int8_t netType, int32_t slotId,
+    std::vector<NetPolicyQuotaPolicy> &quotaPolicies)
 {
-    if (!IsNetPolicyTypeValid(static_cast<NetQuotaPolicyType>(quotaPolicy.netType_))) {
-        NETMGR_LOG_E("NetPolicyType is invalid policy[%{public}d]", static_cast<int32_t>(quotaPolicy.netType_));
+    if (!IsNetPolicyTypeValid(static_cast<NetBearType>(netType))) {
+        NETMGR_LOG_E("NetPolicyType is invalid policy[%{public}d]", netType);
         return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
     }
 
-    if (!IsQuotaPolicyExist(quotaPolicy)) {
+    if (!IsQuotaPolicyExist(netType, slotId)) {
         NETMGR_LOG_E("quotaPolicy is not exist");
         return NetPolicyResultCode::ERR_QUOTA_POLICY_NOT_EXIST;
     }
 
-    std::vector<NetPolicyQuotaPolicy> quotaPolicys = {quotaPolicy};
-    /* Set the sleep time to the current time. */
-    quotaPolicys[0].lastLimitSnooze_ = GetCurrentTime();
-    /* Judge whether the flow exceeds the limit */
-    CheckNetStatsOverLimit(quotaPolicys, netPolicyCallback);
-    if (!netPolicyFile_->WriteFile(quotaPolicys)) {
-        NETMGR_LOG_E("SnoozePolicy WriteFile failed");
+    if (!netPolicyFile_->WriteFile(quotaPolicies)) {
+        NETMGR_LOG_E("SetSnoozePolicy WriteFile failed");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
     return NetPolicyResultCode::ERR_NONE;
 }
 
-NetPolicyResultCode NetPolicyTraffic::SetIdleWhitelist(uint32_t uid, bool isWhiteList)
+NetPolicyResultCode NetPolicyTraffic::SetIdleTrustlist(uint32_t uid, bool isTrustlist)
 {
     if (netPolicyFile_ == nullptr) {
-        NETMGR_LOG_E("SetIdleWhitelist netPolicyFile is null");
+        NETMGR_LOG_E("SetIdleTrustlist netPolicyFile is null");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
     /* If it exists, update it directly */
-    for (auto iter = idleWhiteList_.begin(); iter != idleWhiteList_.end(); ++iter) {
+    for (auto iter = idleTrustList_.begin(); iter != idleTrustList_.end(); ++iter) {
         if (uid == *iter) {
-            if (!isWhiteList) {
-                idleWhiteList_.erase(iter);
+            if (!isTrustlist) {
+                idleTrustList_.erase(iter);
                 return NetPolicyResultCode::ERR_NONE;
             } else {
                 return NetPolicyResultCode::ERR_NONE;
@@ -424,27 +276,27 @@ NetPolicyResultCode NetPolicyTraffic::SetIdleWhitelist(uint32_t uid, bool isWhit
         }
     }
     /* Does not exist, add it */
-    if (isWhiteList) {
-        idleWhiteList_.emplace_back(uid);
+    if (isTrustlist) {
+        idleTrustList_.emplace_back(uid);
     }
     /* Determine whether the app is idle ? than update netd's interface. */
     return NetPolicyResultCode::ERR_NONE;
 }
 
-NetPolicyResultCode NetPolicyTraffic::GetIdleWhitelist(std::vector<uint32_t> &uids)
+NetPolicyResultCode NetPolicyTraffic::GetIdleTrustlist(std::vector<uint32_t> &uids)
 {
-    if (idleWhiteList_.empty()) {
-        NETMGR_LOG_I("idleWhiteList_ is empty.");
+    if (idleTrustList_.empty()) {
+        NETMGR_LOG_I("idleTrustList_ is empty.");
     } else {
-        uids = idleWhiteList_;
+        uids = idleTrustList_;
     }
 
     return NetPolicyResultCode::ERR_NONE;
 }
 
-void NetPolicyTraffic::ClearIdleWhiteList()
+void NetPolicyTraffic::ClearIdleTrustList()
 {
-    idleWhiteList_.clear();
+    idleTrustList_.clear();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

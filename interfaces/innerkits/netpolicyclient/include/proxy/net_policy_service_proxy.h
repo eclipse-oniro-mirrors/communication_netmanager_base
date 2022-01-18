@@ -29,25 +29,25 @@ class NetPolicyServiceProxy : public IRemoteProxy<INetPolicyService> {
 public:
     explicit NetPolicyServiceProxy(const sptr<IRemoteObject> &impl);
     virtual ~NetPolicyServiceProxy();
-    NetPolicyResultCode SetUidPolicy(uint32_t uid, NetUidPolicy policy) override;
-    NetUidPolicy GetUidPolicy(uint32_t uid) override;
-    std::vector<uint32_t> GetUids(NetUidPolicy policy) override;
+    NetPolicyResultCode SetPolicyByUid(uint32_t uid, NetUidPolicy policy) override;
+    NetUidPolicy GetPolicyByUid(uint32_t uid) override;
+    std::vector<uint32_t> GetUidsByPolicy(NetUidPolicy policy) override;
     bool IsUidNetAccess(uint32_t uid, bool metered) override;
     bool IsUidNetAccess(uint32_t uid, const std::string &ifaceName) override;
     int32_t RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback) override;
     int32_t UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback) override;
-    NetPolicyResultCode SetNetPolicys(const std::vector<NetPolicyQuotaPolicy> &quotaPolicys) override;
-    NetPolicyResultCode GetNetPolicys(std::vector<NetPolicyQuotaPolicy> &quotaPolicys) override;
-    NetPolicyResultCode SetCellularPolicys(const std::vector<NetPolicyCellularPolicy> &cellularPolicys) override;
-    NetPolicyResultCode GetCellularPolicys(std::vector<NetPolicyCellularPolicy> &cellularPolicys) override;
-    NetPolicyResultCode ResetFactory(const std::string &subscriberId) override;
+    NetPolicyResultCode SetNetQuotaPolicies(const std::vector<NetPolicyQuotaPolicy> &quotaPolicies) override;
+    NetPolicyResultCode GetNetQuotaPolicies(std::vector<NetPolicyQuotaPolicy> &quotaPolicies) override;
+    NetPolicyResultCode SetCellularPolicies(const std::vector<NetPolicyCellularPolicy> &cellularPolicies) override;
+    NetPolicyResultCode GetCellularPolicies(std::vector<NetPolicyCellularPolicy> &cellularPolicies) override;
+    NetPolicyResultCode SetFactoryPolicy(const std::string &slotId) override;
     NetPolicyResultCode SetBackgroundPolicy(bool backgroundPolicy) override;
     bool GetBackgroundPolicy() override;
     bool GetBackgroundPolicyByUid(uint32_t uid) override;
-    bool GetCurrentBackgroundPolicy() override;
-    NetPolicyResultCode SnoozePolicy(const NetPolicyQuotaPolicy &quotaPolicy) override;
-    NetPolicyResultCode SetIdleWhitelist(uint32_t uid, bool isWhiteList) override;
-    NetPolicyResultCode GetIdleWhitelist(std::vector<uint32_t> &uids) override;
+    NetBackgroundPolicy GetCurrentBackgroundPolicy() override;
+    NetPolicyResultCode SetSnoozePolicy(int8_t netType, int32_t slotId) override;
+    NetPolicyResultCode SetIdleTrustlist(uint32_t uid, bool isTrustlist) override;
+    NetPolicyResultCode GetIdleTrustlist(std::vector<uint32_t> &uids) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

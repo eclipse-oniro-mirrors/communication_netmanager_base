@@ -43,13 +43,9 @@ private:
     int32_t OnRegisterNetConnCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetConnCallbackBySpecifier(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnregisterNetConnCallback(MessageParcel &data, MessageParcel &reply);
-    int32_t OnUnregisterNetConnCallbackBySpecifier(MessageParcel &data, MessageParcel &reply);
     int32_t OnUpdateNetStateForTest(MessageParcel &data, MessageParcel &reply);
     int32_t OnUpdateNetSupplierInfo(MessageParcel &data, MessageParcel &reply);
-    int32_t OnUpdateNetCapabilities(MessageParcel &data, MessageParcel &reply);
     int32_t OnUpdateNetLinkInfo(MessageParcel &data, MessageParcel &reply);
-    int32_t OnActivateNetwork(MessageParcel &data, MessageParcel &reply);
-    int32_t OnDeactivateNetwork(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetDefaultNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnHasDefaultNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetIfaceNameByType(MessageParcel &data, MessageParcel &reply);
@@ -65,7 +61,7 @@ private:
     int32_t OnGetAddressByName(MessageParcel &data, MessageParcel &reply);
     int32_t OnBindSocket(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetAirplaneMode(MessageParcel &data, MessageParcel &reply);
-
+    int32_t OnRestoreFactoryData(MessageParcel &data, MessageParcel &reply);
 private:
     int32_t ConvertCode(int32_t internalCode);
 

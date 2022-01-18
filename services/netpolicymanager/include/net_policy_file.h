@@ -53,13 +53,13 @@ public:
     bool Json2Obj(const std::string& content, NetPolicy& netPolicy);
     bool WriteFile(const std::string& fileName);
     bool WriteFile(NetUidPolicyOpType netUidPolicyOpType, uint32_t uid, NetUidPolicy policy);
-    bool WriteFile(const std::vector<NetPolicyQuotaPolicy> &quotaPolicys);
-    bool WriteFile(const std::vector<NetPolicyCellularPolicy> &cellularPolicys);
-    NetUidPolicy GetUidPolicy(uint32_t uid);
-    bool GetUids(NetUidPolicy policy, std::vector<uint32_t> &uids);
-    NetPolicyResultCode GetNetPolicys(std::vector<NetPolicyQuotaPolicy> &quotaPolicys);
-    NetPolicyResultCode GetCellularPolicys(std::vector<NetPolicyCellularPolicy> &cellularPolicys);
-    NetPolicyResultCode ResetFactory(const std::string &subscriberId);
+    bool WriteFile(const std::vector<NetPolicyQuotaPolicy> &quotaPolicies);
+    bool WriteFile(const std::vector<NetPolicyCellularPolicy> &cellularPolicies);
+    NetUidPolicy GetPolicyByUid(uint32_t uid);
+    bool GetUidsByPolicy(NetUidPolicy policy, std::vector<uint32_t> &uids);
+    NetPolicyResultCode GetNetQuotaPolicies(std::vector<NetPolicyQuotaPolicy> &quotaPolicies);
+    NetPolicyResultCode GetCellularPolicies(std::vector<NetPolicyCellularPolicy> &cellularPolicies);
+    NetPolicyResultCode SetFactoryPolicy(const std::string &slotId);
     NetPolicyResultCode SetBackgroundPolicy(bool backgroundPolicy);
     bool GetBackgroundPolicy();
     bool IsInterfaceMetered(const std::string &ifaceName);
@@ -75,8 +75,8 @@ private:
     void ParseBackgroundPolicy(const Json::Value &root, NetPolicy& netPolicy);
     void ParseQuotaPolicy(const Json::Value &root, NetPolicy& netPolicy);
     void ParseCellularPolicy(const Json::Value &root, NetPolicy& netPolicy);
-    bool UpdateQuotaPolicyExist(const std::string &subscriberId, const NetPolicyQuotaPolicy &quotaPolicy);
-    bool UpdateCellularPolicyExist(const std::string &subscriberId, const NetPolicyCellularPolicy &cellularPolicy);
+    bool UpdateQuotaPolicyExist(const NetPolicyQuotaPolicy &quotaPolicy);
+    bool UpdateCellularPolicyExist(const NetPolicyCellularPolicy &cellularPolicy);
 
 private:
     NetPolicy netPolicy_;

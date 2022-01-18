@@ -18,7 +18,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 bool NetPolicyCellularPolicy::Marshalling(Parcel &parcel) const
 {
-    if (!parcel.WriteString(subscriberId_)) {
+    if (!parcel.WriteInt32(slotId_)) {
         return false;
     }
     if (!parcel.WriteInt64(periodStartTime_)) {
@@ -52,21 +52,21 @@ bool NetPolicyCellularPolicy::Marshalling(Parcel &parcel) const
     return true;
 }
 
-bool NetPolicyCellularPolicy::Marshalling(Parcel &parcel, const std::vector<NetPolicyCellularPolicy> &cellularPolicys)
+bool NetPolicyCellularPolicy::Marshalling(Parcel &parcel, const std::vector<NetPolicyCellularPolicy> &cellularPolicies)
 {
-    uint32_t vsize = static_cast<uint32_t>(cellularPolicys.size());
+    uint32_t vsize = static_cast<uint32_t>(cellularPolicies.size());
     if (!parcel.WriteInt32(vsize)) {
         return false;
     }
 
     for (uint32_t i = 0; i < vsize; ++i) {
-        cellularPolicys[i].Marshalling(parcel);
+        cellularPolicies[i].Marshalling(parcel);
     }
 
     return true;
 }
 
-bool NetPolicyCellularPolicy::Unmarshalling(Parcel &parcel, std::vector<NetPolicyCellularPolicy> &cellularPolicys)
+bool NetPolicyCellularPolicy::Unmarshalling(Parcel &parcel, std::vector<NetPolicyCellularPolicy> &cellularPolicies)
 {
     uint32_t vSize = 0;
     if (!parcel.ReadUint32(vSize)) {
@@ -75,7 +75,7 @@ bool NetPolicyCellularPolicy::Unmarshalling(Parcel &parcel, std::vector<NetPolic
 
     NetPolicyCellularPolicy quotaPolicyTmp;
     for (uint32_t i = 0; i < vSize; i++) {
-        if (!parcel.ReadString(quotaPolicyTmp.subscriberId_)) {
+        if (!parcel.ReadInt32(quotaPolicyTmp.slotId_)) {
             return false;
         }
         if (!parcel.ReadInt64(quotaPolicyTmp.periodStartTime_)) {
@@ -105,7 +105,7 @@ bool NetPolicyCellularPolicy::Unmarshalling(Parcel &parcel, std::vector<NetPolic
         if (!parcel.ReadString(quotaPolicyTmp.possessor_)) {
             return false;
         }
-        cellularPolicys.push_back(quotaPolicyTmp);
+        cellularPolicies.push_back(quotaPolicyTmp);
     }
 
     return true;

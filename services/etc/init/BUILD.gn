@@ -14,25 +14,15 @@ import("//build/ohos.gni")
 
 ## Install netmanager_base.rc/netmanager_base.rc to /system/etc/init
 ohos_prebuilt_etc("netmanager_base.rc") {
-  if (use_musl) {
-    source = "netmanager_base.cfg"
-  } else {
-    source = "netmanager_base.rc"
-  }
-
+  source = "netmanager_base.cfg"
   relative_install_dir = "init"
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
 
-## Install netd.rc/netd.cfg to /system/etc/init
+## Install netdnative.rc/netdnative.rc to /system/etc/init
 ohos_prebuilt_etc("netdnative.rc") {
-  if (use_musl) {
-    source = "netdnative.cfg"
-  } else {
-    source = "netdnative.rc"
-  }
-
+  source = "netdnative.cfg"
   relative_install_dir = "init"
   part_name = "netmanager_base"
   subsystem_name = "communication"

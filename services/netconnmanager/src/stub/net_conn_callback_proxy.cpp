@@ -24,7 +24,7 @@ NetConnCallbackProxy::NetConnCallbackProxy(const sptr<IRemoteObject> &impl)
 
 NetConnCallbackProxy::~NetConnCallbackProxy() {}
 
-int32_t NetConnCallbackProxy::NetConnStateChanged(const sptr<NetConnCallbackInfo> &info)
+int32_t NetConnCallbackProxy::NetAvailable(sptr<NetHandle> &netHandle)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -32,35 +32,7 @@ int32_t NetConnCallbackProxy::NetConnStateChanged(const sptr<NetConnCallbackInfo
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!info->Marshalling(data)) {
-        NETMGR_LOG_E("Proxy Marshalling failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int32_t ret = remote->SendRequest(NET_CONN_STATE_CHANGED, data, reply, option);
-    if (ret != ERR_NONE) {
-        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
-    }
-    return ret;
-}
-
-int32_t NetConnCallbackProxy::NetAvailable(int32_t netId)
-{
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    if (!data.WriteInt32(netId)) {
+    if (!data.WriteInt32(netHandle->GetNetId())) {
         return IPC_PROXY_ERR;
     }
 
@@ -72,14 +44,15 @@ int32_t NetConnCallbackProxy::NetAvailable(int32_t netId)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = remote->SendRequest(NET_AVAILIABLE, data, reply, option);
+    int32_t ret = remote->SendRequest(NET_AVAILABLE, data, reply, option);
     if (ret != ERR_NONE) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
     return ret;
 }
 
-int32_t NetConnCallbackProxy::NetCapabilitiesChange(int32_t netId, const uint64_t &netCap)
+int32_t NetConnCallbackProxy::NetCapabilitiesChange(
+    sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -87,12 +60,31 @@ int32_t NetConnCallbackProxy::NetCapabilitiesChange(int32_t netId, const uint64_
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!data.WriteInt32(netId)) {
-        return IPC_PROXY_ERR;
+    if (netHandle == nullptr || netAllCap == nullptr) {
+        return ERR_NULL_OBJECT;
     }
 
-    if (!data.WriteUint64(netCap)) {
+    if (!data.WriteInt32(netHandle->GetNetId()) || !data.WriteUint32(netAllCap->linkUpBandwidthKbps_) ||
+        !data.WriteUint32(netAllCap->linkDownBandwidthKbps_)) {
         return IPC_PROXY_ERR;
+    }
+    uint32_t size = static_cast<uint32_t>(netAllCap->netCaps_.size());
+    if (!data.WriteUint32(size)) {
+        return IPC_PROXY_ERR;
+    }
+    for (auto netCap : netAllCap->netCaps_) {
+        if (!data.WriteUint32(static_cast<uint32_t>(netCap))) {
+            return IPC_PROXY_ERR;
+        }
+    }
+    size = static_cast<uint32_t>(netAllCap->bearerTypes_.size());
+    if (!data.WriteUint32(size)) {
+        return IPC_PROXY_ERR;
+    }
+    for (auto bearerType : netAllCap->bearerTypes_) {
+        if (!data.WriteUint32(static_cast<uint32_t>(bearerType))) {
+            return IPC_PROXY_ERR;
+        }
     }
 
     sptr<IRemoteObject> remote = Remote();
@@ -110,7 +102,7 @@ int32_t NetConnCallbackProxy::NetCapabilitiesChange(int32_t netId, const uint64_
     return ret;
 }
 
-int32_t NetConnCallbackProxy::NetConnectionPropertiesChange(int32_t netId, const sptr<NetLinkInfo> &info)
+int32_t NetConnCallbackProxy::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -118,7 +110,7 @@ int32_t NetConnCallbackProxy::NetConnectionPropertiesChange(int32_t netId, const
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!data.WriteInt32(netId)) {
+    if (!data.WriteInt32(netHandle->GetNetId())) {
         return IPC_PROXY_ERR;
     }
 
@@ -142,7 +134,7 @@ int32_t NetConnCallbackProxy::NetConnectionPropertiesChange(int32_t netId, const
     return ret;
 }
 
-int32_t NetConnCallbackProxy::NetLost(int32_t netId)
+int32_t NetConnCallbackProxy::NetLost(sptr<NetHandle> &netHandle)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -150,7 +142,7 @@ int32_t NetConnCallbackProxy::NetLost(int32_t netId)
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!data.WriteInt32(netId)) {
+    if (!data.WriteInt32(netHandle->GetNetId())) {
         return IPC_PROXY_ERR;
     }
 
@@ -163,6 +155,58 @@ int32_t NetConnCallbackProxy::NetLost(int32_t netId)
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(NET_LOST, data, reply, option);
+    if (ret != ERR_NONE) {
+        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
+    }
+    return ret;
+}
+
+int32_t NetConnCallbackProxy::NetUnavailable()
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(NET_UNAVAILABLE, data, reply, option);
+    if (ret != ERR_NONE) {
+        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
+    }
+    return ret;
+}
+
+int32_t NetConnCallbackProxy::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteInt32(netHandle->GetNetId())) {
+        return IPC_PROXY_ERR;
+    }
+    if (!data.WriteBool(blocked)) {
+        return IPC_PROXY_ERR;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return ERR_NULL_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(NET_BLOCK_STATUS_CHANGE, data, reply, option);
     if (ret != ERR_NONE) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }

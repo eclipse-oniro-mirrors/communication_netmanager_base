@@ -23,7 +23,6 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-const std::string HttpRequest::INTERFACE_PREFIX("if!");
 HttpRequest::HttpRequest()
 {
     CURLcode errCode = curl_global_init(CURL_GLOBAL_ALL);
@@ -39,36 +38,36 @@ HttpRequest::~HttpRequest()
 
 void HttpRequest::SetIfaceName(const std::string &ifaceName)
 {
-    const auto preLength = INTERFACE_PREFIX.length();
-    if ((ifaceName.length() > preLength && ifaceName.substr(0, preLength) == INTERFACE_PREFIX) ||
-        ifaceName.empty()) {
+    const std::string ifPrefix("if!");
+    const auto preLength = ifPrefix.length();
+    if ((ifaceName.length() > preLength && ifaceName.substr(0, preLength) == ifPrefix) || ifaceName.empty()) {
         ifaceName_ = ifaceName;
     } else {
-        ifaceName_ = INTERFACE_PREFIX + ifaceName;
+        ifaceName_ = ifPrefix + ifaceName;
     }
 }
 
 int32_t HttpRequest::HttpGetHeader(const std::string &strUrl, std::string &strHeader)
 {
-    NETMGR_LOG_I("Enter HttpGetHeader!");
+    NETMGR_LOG_I("Enter HttpGetHeader");
     return HttpRequestHeaderExec(strUrl, strHeader);
 }
 
 int32_t HttpRequest::HttpGet(const std::string &strUrl, std::string &strResponse)
 {
-    NETMGR_LOG_I("Enter HttpGet!");
+    NETMGR_LOG_I("Enter HttpGet");
     return HttpRequestExec(HttpReqType::HTTP_REQUEST_TYPE_GET, strUrl, "", strResponse);
 }
 
 int32_t HttpRequest::HttpPost(const std::string &strUrl, const std::string &strData, std::string &strResponse)
 {
-    NETMGR_LOG_I("Enter HttpPost!");
+    NETMGR_LOG_I("Enter HttpPost");
     return HttpRequestExec(HttpReqType::HTTP_REQUEST_TYPE_POST, strUrl, strData, strResponse);
 }
 
 void HttpRequest::SetTransportTimeout(int64_t timeout)
 {
-    NETMGR_LOG_I("Enter SetTransportTimeout!");
+    NETMGR_LOG_I("Enter SetTransportTimeout");
     if (timeout > 0) {
         const double ratio = 0.75;
         connectionTimeout_ = static_cast<int64_t>(timeout * ratio);
@@ -80,7 +79,7 @@ void HttpRequest::SetTransportTimeout(int64_t timeout)
 
 int64_t HttpRequest::GetLastTotalTime() const
 {
-    NETMGR_LOG_I("Enter GetLastTotalTime!");
+    NETMGR_LOG_I("Enter GetLastTotalTime");
     return lastTransTime_;
 }
 
@@ -117,7 +116,7 @@ int32_t HttpRequest::HttpRequestExec(
 
 int32_t HttpRequest::HttpRequestHeaderExec(const std::string &strUrl, std::string &strHeader)
 {
-    NETMGR_LOG_D("HttpRequestHeaderExec ifaceName:[%{public}s]", ifaceName_.c_str());
+    NETMGR_LOG_D("Enter HttpRequestHeaderExec, ifaceName:[%{public}s]", ifaceName_.c_str());
     /* Check whether the URL is valid. */
     if (strUrl.empty() || strUrl.length() > URL_SIZE) {
         NETMGR_LOG_E("URL error!");

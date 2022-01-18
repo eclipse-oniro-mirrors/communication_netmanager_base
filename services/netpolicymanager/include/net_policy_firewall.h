@@ -24,7 +24,7 @@ class NetPolicyFirewall : public virtual RefBase {
 public:
     NetPolicyFirewall(sptr<NetPolicyFile> netPolicyFile);
     bool GetBackgroundPolicyByUid(uint32_t uid);
-    bool GetCurrentBackgroundPolicy();
+    NetBackgroundPolicy GetCurrentBackgroundPolicy();
 
 private:
     sptr<NetPolicyFile> netPolicyFile_;

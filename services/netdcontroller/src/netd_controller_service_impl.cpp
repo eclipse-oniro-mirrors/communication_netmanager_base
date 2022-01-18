@@ -264,6 +264,24 @@ int64_t NetdControllerServiceImpl::GetUidTxBytes(uint32_t uid)
     return netdClient_.GetUidTxBytes(uid);
 }
 
+int64_t NetdControllerServiceImpl::GetUidOnIfaceRxBytes(uint32_t uid, const std::string &interfaceName)
+{
+    NETMGR_LOG_I("NetdControllerServiceImpl GetUidOnIfaceRxBytes");
+    if (mockNetdClient_.CheckMockApi(MOCK_GETUIDRXBYTES_API)) {
+        return mockNetdClient_.GetUidOnIfaceRxBytes(uid, interfaceName);
+    }
+    return netdClient_.GetUidOnIfaceRxBytes(uid, interfaceName);
+}
+
+int64_t NetdControllerServiceImpl::GetUidOnIfaceTxBytes(uint32_t uid, const std::string &interfaceName)
+{
+    NETMGR_LOG_I("NetdControllerServiceImpl GetUidOnIfaceTxBytes");
+    if (mockNetdClient_.CheckMockApi(MOCK_GETUIDTXBYTES_API)) {
+        return mockNetdClient_.GetUidOnIfaceTxBytes(uid, interfaceName);
+    }
+    return netdClient_.GetUidOnIfaceTxBytes(uid, interfaceName);
+}
+
 int64_t NetdControllerServiceImpl::GetIfaceRxBytes(const std::string &interfaceName)
 {
     NETMGR_LOG_I("NetdControllerServiceImpl GetIfaceRxBytes");
@@ -289,6 +307,15 @@ std::vector<std::string> NetdControllerServiceImpl::InterfaceGetList()
         return mockNetdClient_.InterfaceGetList();
     }
     return netdClient_.InterfaceGetList();
+}
+
+std::vector<std::string> NetdControllerServiceImpl::UidGetList()
+{
+    NETMGR_LOG_I("NetdControllerServiceImpl UidGetList");
+    if (mockNetdClient_.CheckMockApi(MOCK_UIDGETLIST_API)) {
+        return mockNetdClient_.UidGetList();
+    }
+    return netdClient_.UidGetList();
 }
 
 int64_t NetdControllerServiceImpl::GetIfaceRxPackets(const std::string &interfaceName)
@@ -447,6 +474,51 @@ int32_t NetdControllerServiceImpl::SetBlocking(int32_t ifaceFd, bool isBlock)
         return mockNetdClient_.SetBlocking(ifaceFd, isBlock);
     }
     return netdClient_.SetBlocking(ifaceFd, isBlock);
+}
+
+int32_t NetdControllerServiceImpl::StartDhcpClient(const std::string &iface, bool bIpv6)
+{
+    NETMGR_LOG_D("NetdControllerServiceImpl::StartDhcpClient");
+    if (mockNetdClient_.CheckMockApi(MOCK_STARTDHCPCLIENT_API)) {
+        return mockNetdClient_.StartDhcpClient(iface, bIpv6);
+    }
+    return netdClient_.StartDhcpClient(iface, bIpv6);
+}
+
+int32_t NetdControllerServiceImpl::StopDhcpClient(const std::string &iface, bool bIpv6)
+{
+    NETMGR_LOG_D("NetdControllerServiceImpl::StopDhcpClient");
+    if (mockNetdClient_.CheckMockApi(MOCK_STOPDHCPCLIENT_API)) {
+        return mockNetdClient_.StopDhcpClient(iface, bIpv6);
+    }
+    return netdClient_.StopDhcpClient(iface, bIpv6);
+}
+
+int32_t NetdControllerServiceImpl::RegisterCallback(sptr<NetdControllerCallback> callback)
+{
+    NETMGR_LOG_D("NetdControllerServiceImpl::RegisterCallback");
+    if (mockNetdClient_.CheckMockApi(MOCK_REGISTERNOTIFYCALLBACK_API)) {
+        return mockNetdClient_.RegisterCallback(callback);
+    }
+    return netdClient_.RegisterCallback(callback);
+}
+
+int32_t NetdControllerServiceImpl::StartDhcpService(const std::string &iface, const std::string &ipv4addr)
+{
+    NETMGR_LOG_D("NetdControllerServiceImpl::SetBlocking");
+    if (mockNetdClient_.CheckMockApi(MOCK_STARTDHCPSERVICE_API)) {
+        return mockNetdClient_.StartDhcpService(iface, ipv4addr);
+    }
+    return netdClient_.StartDhcpService(iface, ipv4addr);
+}
+
+int32_t NetdControllerServiceImpl::StopDhcpService(const std::string &iface)
+{
+    NETMGR_LOG_D("NetdControllerServiceImpl::StopDhcpService");
+    if (mockNetdClient_.CheckMockApi(MOCK_STOPDHCPSERVICE_API)) {
+        return mockNetdClient_.StopDhcpService(iface);
+    }
+    return netdClient_.StopDhcpService(iface);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

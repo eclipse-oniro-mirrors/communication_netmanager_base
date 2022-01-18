@@ -33,12 +33,14 @@ public:
         NET_POLICY_UIDPOLICY_CHANGED = 0,
         NET_POLICY_CELLULARPOLICY_CHANGED = 1,
         NET_POLICY_STRATEGYSWITCH_CHANGED = 2,
+        NET_POLICY_BACKGROUNDPOLICY_CHANGED = 3,
     };
 
 public:
     virtual int32_t NetUidPolicyChanged(uint32_t uid, NetUidPolicy policy) = 0;
-    virtual int32_t NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicys) = 0;
-    virtual int32_t NetStrategySwitch(const std::string &subscriberId, bool enable) = 0;
+    virtual int32_t NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicies) = 0;
+    virtual int32_t NetStrategySwitch(int32_t slotId, bool enable) = 0;
+    virtual int32_t NetBackgroundPolicyChanged(bool isBackgroundPolicyAllow) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

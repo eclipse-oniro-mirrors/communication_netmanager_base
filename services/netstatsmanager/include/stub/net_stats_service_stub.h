@@ -35,7 +35,6 @@ private:
     using NetStatsServiceFunc = int32_t (NetStatsServiceStub::*)(MessageParcel &, MessageParcel &);
 
 private:
-    int32_t OnSystemReady(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetStatsCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnregisterNetStatsCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetIfaceStatsDetail(MessageParcel &data, MessageParcel &reply);

@@ -27,6 +27,7 @@ bool INetAddr::operator==(const INetAddr &obj) const
     out = out && (address_ == obj.address_);
     out = out && (netMask_ == obj.netMask_);
     out = out && (hostName_ == obj.hostName_);
+    out = out && (port_ == obj.port_);
     return out;
 }
 
@@ -48,6 +49,9 @@ bool INetAddr::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!parcel.WriteString(hostName_)) {
+        return false;
+    }
+    if (!parcel.WriteUint8(port_)) {
         return false;
     }
     return true;
@@ -76,6 +80,9 @@ sptr<INetAddr> INetAddr::Unmarshalling(Parcel &parcel)
         return nullptr;
     }
     if (!parcel.ReadString(ptr->hostName_)) {
+        return nullptr;
+    }
+    if (!parcel.ReadUint8(ptr->port_)) {
         return nullptr;
     }
     return ptr;
@@ -111,6 +118,9 @@ bool INetAddr::Marshalling(Parcel &parcel, const sptr<INetAddr> &object)
         return false;
     }
 
+    if (!parcel.WriteUint8(object->port_)) {
+        return false;
+    }
     return true;
 }
 
@@ -151,6 +161,10 @@ std::string INetAddr::ToString(const std::string &tab) const
     str.append("hostName_ = ");
     str.append(hostName_);
 
+    str.append("\n");
+    str.append(tab);
+    str.append("port_ = ");
+    str.append(std::to_string(port_));
     return str;
 }
 } // namespace NetManagerStandard

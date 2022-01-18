@@ -52,8 +52,8 @@ void NetPolicyCallback::UnregisterNetPolicyCallback(const sptr<INetPolicyCallbac
 
 int32_t NetPolicyCallback::NotifyNetUidPolicyChanged(uint32_t uid, NetUidPolicy policy)
 {
-    NETMGR_LOG_I("NotifyNetUidPolicyChanged  uid[%{public}d] policy[%{public}d] netPolicyCallback_[%{public}d]",
-        uid, static_cast<uint32_t>(policy), static_cast<uint32_t>(netPolicyCallback_.size()));
+    NETMGR_LOG_I("NotifyNetUidPolicyChanged  uid[%{public}d] policy[%{public}d] netPolicyCallback_[%{public}zd]",
+        uid, static_cast<uint32_t>(policy), netPolicyCallback_.size());
 
     for (const auto &callback : netPolicyCallback_) {
         if (callback != nullptr) {
@@ -64,32 +64,45 @@ int32_t NetPolicyCallback::NotifyNetUidPolicyChanged(uint32_t uid, NetUidPolicy 
     return static_cast<int32_t>(NetPolicyResultCode::ERR_NONE);
 }
 
-int32_t NetPolicyCallback::NotifyNetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicys)
+int32_t NetPolicyCallback::NotifyNetBackgroundPolicyChanged(bool isBackgroundPolicyAllow)
 {
-    if (cellularPolicys.empty()) {
-        NETMGR_LOG_E("NotifyNetCellularPolicyChanged cellularPolicys empty");
-        return static_cast<int32_t>(NetPolicyResultCode::ERR_INTERNAL_ERROR);
-    }
-    NETMGR_LOG_I("NotifyNetCellularPolicyChanged cellularPolicys.size[%{public}d]",
-        static_cast<int32_t>(cellularPolicys.size()));
+    NETMGR_LOG_I("NotifyNetBackgroundPolicyChanged  backgroundPolicy[%{public}d] netPolicyCallback_[%{public}d]",
+        isBackgroundPolicyAllow, static_cast<uint32_t>(netPolicyCallback_.size()));
 
     for (const auto &callback : netPolicyCallback_) {
         if (callback != nullptr) {
-            callback->NetCellularPolicyChanged(cellularPolicys);
+            callback->NetBackgroundPolicyChanged(isBackgroundPolicyAllow);
         }
     }
 
     return static_cast<int32_t>(NetPolicyResultCode::ERR_NONE);
 }
 
-int32_t NetPolicyCallback::NotifyNetStrategySwitch(const std::string &subscriberId, bool enable)
+int32_t NetPolicyCallback::NotifyNetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicies)
 {
-    NETMGR_LOG_I("NotifyNetStrategySwitch subscriberId[%{public}s] enable[%{public}d]",
-        subscriberId.c_str(), static_cast<int32_t>(enable));
+    if (cellularPolicies.empty()) {
+        NETMGR_LOG_E("NotifyNetCellularPolicyChanged cellularPolicies empty");
+        return static_cast<int32_t>(NetPolicyResultCode::ERR_INTERNAL_ERROR);
+    }
+    NETMGR_LOG_I("NotifyNetCellularPolicyChanged cellularPolicies.size[%{public}zd]", cellularPolicies.size());
 
     for (const auto &callback : netPolicyCallback_) {
         if (callback != nullptr) {
-            callback->NetStrategySwitch(subscriberId, enable);
+            callback->NetCellularPolicyChanged(cellularPolicies);
+        }
+    }
+
+    return static_cast<int32_t>(NetPolicyResultCode::ERR_NONE);
+}
+
+int32_t NetPolicyCallback::NotifyNetStrategySwitch(int32_t slotId, bool enable)
+{
+    NETMGR_LOG_I("NotifyNetStrategySwitch slotId[%{public}d] enable[%{public}d]",
+        slotId, static_cast<int32_t>(enable));
+
+    for (const auto &callback : netPolicyCallback_) {
+        if (callback != nullptr) {
+            callback->NetStrategySwitch(slotId, enable);
         }
     }
 

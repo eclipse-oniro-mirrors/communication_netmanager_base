@@ -150,7 +150,6 @@ private:
     static constexpr int64_t TRANS_OP_TIMEOUT = 2000;
     static constexpr int32_t MAX_CONNECT_NUM = 8;
     static constexpr int32_t DEFAULT_ERROR_SIZE = 256;
-    static const std::string INTERFACE_PREFIX;
     int64_t connectionTimeout_ = CONNECTION_TIMEOUT;
     int64_t transOpTimeout_ = TRANS_OP_TIMEOUT;
     char errorBuffer_[DEFAULT_ERROR_SIZE] = {0};

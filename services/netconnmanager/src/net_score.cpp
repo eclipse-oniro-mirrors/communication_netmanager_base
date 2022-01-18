@@ -41,6 +41,7 @@ int32_t NetScore::CalculateScoreForWifi(sptr<NetSupplier> &supplier)
     if (wifiScore > static_cast<int32_t>(NetTypeScoreValue::WIFI_VALUE)) {
         wifiScore = static_cast<int32_t>(NetTypeScoreValue::WIFI_VALUE);
     }
+    NETMGR_LOG_I("The wifi score is [%{public}d]", wifiScore);
     return wifiScore;
 }
 
@@ -64,12 +65,12 @@ bool NetScore::GetServiceScore(sptr<NetSupplier> &supplier)
         return false;
     }
 
-    NetworkType netType = supplier->GetNetSupplierType();
+    NetBearType bearerType = supplier->GetNetSupplierType();
     int32_t netScore = 0;
-    if (netType == NET_TYPE_WIFI) {
+    if (bearerType == BEARER_WIFI) {
         netScore = CalculateScoreForWifi(supplier);
     } else {
-        NetTypeScore::iterator iter = netTypeScore_.find(netType);
+        NetTypeScore::iterator iter = netTypeScore_.find(bearerType);
         if (iter == netTypeScore_.end()) {
             NETMGR_LOG_E("can not find net type for this net service");
             return false;

@@ -16,10 +16,12 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_shared_library("netd_native_manager") {
   sources = [
-    "$NETDNATIVE_INNERKITS_SOURCE_DIR/dnsresolver_params_parcel.cpp",
     "$NETDNATIVE_INNERKITS_SOURCE_DIR/dhcp_result_parcel.cpp",
+    "$NETDNATIVE_INNERKITS_SOURCE_DIR/dnsresolver_params_parcel.cpp",
+    "$NETDNATIVE_INNERKITS_SOURCE_DIR/netd_addr_info_parcel.cpp",
     "$NETDNATIVE_INNERKITS_SOURCE_DIR/netd_native_service_proxy.cpp",
     "$NETDNATIVE_INNERKITS_SOURCE_DIR/notify_callback_proxy.cpp",
+    "$NETDNATIVE_SOURCE_DIR/src/dhcp_controller.cpp",
     "$NETDNATIVE_SOURCE_DIR/src/netd_native_service.cpp",
     "$NETDNATIVE_SOURCE_DIR/src/netd_native_service_stub.cpp",
     "$NETDNATIVE_SOURCE_DIR/src/notify_callback_stub.cpp",
@@ -38,6 +40,7 @@ ohos_shared_library("netd_native_manager") {
 
   deps = [
     "$NETMANAGER_PREBUILTS_DIR/librarys/netd:libnet_manager_native",
+    "//foundation/communication/wifi/services/wifi_standard/wifi_framework/dhcp_manage/mgr_service:dhcp_manager_service",
     "//utils/native/base:utils",
   ]
 
@@ -55,8 +58,8 @@ ohos_shared_library("netd_native_manager") {
     "LOG_DOMAIN = 0xD0015B0",
   ]
 
-  if (enable_sys_dns) {
-    defines += [ "SYS_DNS" ]
+  if (enable_sys_func) {
+    defines += [ "SYS_FUNC" ]
   }
 
   if (is_standard_system) {

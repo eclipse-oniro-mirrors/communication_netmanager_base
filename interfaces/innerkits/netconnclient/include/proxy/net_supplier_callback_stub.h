@@ -17,11 +17,13 @@
 #define NET_SUPPLIER_CALLBACK_STUB_H
 
 #include <map>
+#include <set>
 
 #include "iremote_stub.h"
 
 #include "i_net_supplier_callback.h"
 #include "net_supplier_callback_base.h"
+#include "net_all_capabilities.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -35,8 +37,8 @@ public:
     int32_t OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
-    int32_t RequestNetwork(const std::string &ident, uint64_t netCapability) override;
-    int32_t ReleaseNetwork(const std::string &ident, uint64_t netCapability) override;
+    int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override;
+    int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override;
 
 private:
     using NetSupplierCallbackFunc = int32_t (NetSupplierCallbackStub::*)(MessageParcel &, MessageParcel &);

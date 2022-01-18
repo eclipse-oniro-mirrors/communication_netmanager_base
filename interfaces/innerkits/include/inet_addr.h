@@ -35,6 +35,7 @@ struct INetAddr : public Parcelable {
     std::string address_;
     std::string netMask_;
     std::string hostName_;
+    uint8_t port_ = 0;
 
     bool operator==(const INetAddr& obj) const;
 
