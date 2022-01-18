@@ -24,15 +24,15 @@ ohos_shared_library("statistics") {
     "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$NETSTATSMANAGER_SOURCE_DIR/include",
     "$NETSTATSMANAGER_SOURCE_DIR/include/stub",
-    "$INNERKITS_ROOT/netstatsclient/include/proxy",
+    "$INNERKITS_ROOT/netstatsclient/include/proxy"
   ]
 
   sources = [
     "$NETMANAGER_NAPI_ROOT/common/napi_common.cpp",
     "$NETMANAGER_NAPI_ROOT/netstats/src/napi_net_stats.cpp",
     "$NETMANAGER_NAPI_ROOT/netstats/src/net_stats_callback.cpp",
-    "$NETMANAGER_NAPI_ROOT/netstats/src/net_stats_event_listener_handler.cpp",
     "$NETMANAGER_NAPI_ROOT/netstats/src/net_stats_event_listener_manager.cpp",
+    "$NETMANAGER_NAPI_ROOT/netstats/src/net_stats_event_listener_handler.cpp",
   ]
 
   defines = [ "NETMGR_DEBUG" ]

@@ -39,13 +39,10 @@ const std::string NET_STATS_CHANGE = "netStatsChange";
 constexpr int32_t EVENT_CONTENT_MAX_BYTE = 64;
 
 enum {
-    // net unknown;
     EVENT_NET_UNKNOW_CHANGE = -1,
-    // net policy;
     EVENT_NET_UID_POLICY_CHANGE = 21,
     EVENT_NET_CELLULAR_POLICY_CHANGE = 22,
     EVENT_NET_STRATEGY_SWITCH_CHANGE = 23,
-    // net status;
     EVENT_NET_AVAILABLE_CHANGE = 31,
     EVENT_NET_CAPABILITIES_CHANGE = 32,
     EVENT_NET_CONNECTION_CHANGE = 33,

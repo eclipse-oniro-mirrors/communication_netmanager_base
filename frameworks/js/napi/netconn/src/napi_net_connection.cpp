@@ -62,8 +62,8 @@ void RegisterExecute(napi_env env, void *data)
         return;
     }
     ObserverContext *asyncContext = static_cast<ObserverContext *>(data);
-    int32_t result = EventListenerContext::GetInstance().Register(asyncContext->thisObj);
-    asyncContext->resolved = !result;
+    asyncContext->errorCode = EventListenerContext::GetInstance().Register(asyncContext->thisObj);
+    asyncContext->resolved = !asyncContext->errorCode;
 }
 
 void RegisterComplete(napi_env env, napi_status status, void *data)
@@ -73,10 +73,14 @@ void RegisterComplete(napi_env env, napi_status status, void *data)
         return;
     }
     std::unique_ptr<ObserverContext> asyncContext(static_cast<ObserverContext *>(data));
+    napi_value callbackValue = nullptr;
     if (!asyncContext->resolved) {
-        NETMGR_LOG_E("RegisterComplete error by add observer failed");
+        callbackValue = NapiCommon::CreateErrorMessage(
+            env, "RegisterComplete error by add observer failed", asyncContext->errorCode);
+    } else {
+        callbackValue = NapiCommon::CreateUndefined(env);
     }
-    napi_delete_async_work(env, asyncContext->work);
+    NapiCommon::Handle2ValueCallback(env, asyncContext.release(), callbackValue);
 }
 
 void UnregisterExecute(napi_env env, void *data)
@@ -86,8 +90,8 @@ void UnregisterExecute(napi_env env, void *data)
         return;
     }
     ObserverContext *asyncContext = static_cast<ObserverContext *>(data);
-    int32_t result = EventListenerContext::GetInstance().Unregister(asyncContext->thisObj);
-    asyncContext->resolved = !result;
+    asyncContext->errorCode = EventListenerContext::GetInstance().Unregister(asyncContext->thisObj);
+    asyncContext->resolved = !asyncContext->errorCode;
 }
 
 void UnregisterComplete(napi_env env, napi_status status, void *data)
@@ -97,18 +101,17 @@ void UnregisterComplete(napi_env env, napi_status status, void *data)
         return;
     }
     std::unique_ptr<ObserverContext> asyncContext(static_cast<ObserverContext *>(data));
+    napi_value callbackValue = nullptr;
     if (!asyncContext->resolved) {
-        NETMGR_LOG_E("UnregisterComplete error by add observer failed");
+        callbackValue = NapiCommon::CreateErrorMessage(
+            env, "RegisterComplete error by add observer failed", asyncContext->errorCode);
+    } else {
+        callbackValue = NapiCommon::CreateUndefined(env);
     }
-    napi_delete_async_work(env, asyncContext->work);
+    NapiCommon::Handle2ValueCallback(env, asyncContext.release(), callbackValue);
 }
 } // namespace
 
-NapiNetConnection::NapiNetConnection(napi_env env, napi_value thisVar) {}
-NapiNetConnection::~NapiNetConnection()
-{
-    NETMGR_LOG_I("NapiNetConnection::~NapiNetConnection");
-}
 napi_value NapiNetConnection::On(napi_env env, napi_callback_info info)
 {
     NETMGR_LOG_I("NapiNetConnection::On");
@@ -125,52 +128,86 @@ napi_value NapiNetConnection::On(napi_env env, napi_callback_info info)
     if (NapiCommon::MatchValueType(env, thisVar, napi_object)) {
         napi_unwrap(env, thisVar, (void **)&objectInfo);
     }
-    std::unique_ptr<ObserverContext> asyncContext = std::make_unique<ObserverContext>();
-    asyncContext->thisObj = objectInfo;
-    if (NapiCommon::MatchValueType(env, argv[ARGV_INDEX_0], napi_string)) {
-        std::string type = NapiCommon::GetStringFromValue(env, argv[ARGV_INDEX_0]);
-        if (!NapiCommon::IsValidEvent(type, asyncContext->eventId)) {
-            NETMGR_LOG_E("Invalid listen type");
-            return nullptr;
-        }
-    }
-    if (NapiCommon::MatchValueType(env, argv[ARGV_INDEX_1], napi_function)) {
-        NAPI_CALL(env, napi_create_reference(env, argv[ARGV_INDEX_1], 1, &asyncContext->callbackRef));
+    if (objectInfo == nullptr) {
+        NETMGR_LOG_E("this object parsing failed!");
+        return nullptr;
     }
 
+    std::unique_ptr<ObserverContext> asyncContext = std::make_unique<ObserverContext>();
+    asyncContext->thisObj = objectInfo;
+    if (!NapiCommon::MatchValueType(env, argv[ARGV_INDEX_0], napi_string)) {
+        NETMGR_LOG_E("the first parameter type is invalid！");
+        return nullptr;
+    }
+    std::string type = NapiCommon::GetStringFromValue(env, argv[ARGV_INDEX_0]);
+    if (!NapiCommon::IsValidEvent(type, asyncContext->eventId)) {
+        NETMGR_LOG_E("Invalid listen type");
+        return nullptr;
+    }
+    if (!NapiCommon::MatchValueType(env, argv[ARGV_INDEX_1], napi_function)) {
+        NETMGR_LOG_E("the second parameter type is invalid！");
+    }
+    NAPI_CALL(env, napi_create_reference(env, argv[ARGV_INDEX_1], 1, &asyncContext->callbackRef));
     return NapiCommon::HandleAsyncWork(env, asyncContext.release(), "On", OnExecute, OnComplete);
 }
 
 napi_value NapiNetConnection::Register(napi_env env, napi_callback_info info)
 {
     NETMGR_LOG_I("NapiNetConnection::Register");
+    size_t argc = 1;
+    napi_value argv[] = {nullptr};
     napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
+    if (argc != std::size(argv)) {
+        NETMGR_LOG_E("Invalid number of arguments");
+        return nullptr;
+    }
+
     NapiNetConnection *objectInfo = nullptr;
     if (NapiCommon::MatchValueType(env, thisVar, napi_object)) {
         napi_unwrap(env, thisVar, (void **)&objectInfo);
     }
+    if (objectInfo == nullptr) {
+        NETMGR_LOG_E("this object parsing failed!");
+        return nullptr;
+    }
 
     std::unique_ptr<ObserverContext> asyncContext = std::make_unique<ObserverContext>();
     asyncContext->thisObj = objectInfo;
-
+    if (!NapiCommon::MatchValueType(env, argv[ARGV_INDEX_0], napi_function)) {
+        NETMGR_LOG_E("Invalid type of argument");
+    }
+    NAPI_CALL(env, napi_create_reference(env, argv[ARGV_INDEX_0], 1, &asyncContext->callbackRef));
     return NapiCommon::HandleAsyncWork(env, asyncContext.release(), "Register", RegisterExecute, RegisterComplete);
 }
 
 napi_value NapiNetConnection::Unregister(napi_env env, napi_callback_info info)
 {
     NETMGR_LOG_I("NapiNetConnection::Unregister");
+    size_t argc = 1;
+    napi_value argv[] = {nullptr};
     napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
+    if (argc != std::size(argv)) {
+        NETMGR_LOG_E("Invalid number of arguments");
+        return nullptr;
+    }
 
     NapiNetConnection *objectInfo = nullptr;
     if (NapiCommon::MatchValueType(env, thisVar, napi_object)) {
         napi_unwrap(env, thisVar, (void **)&objectInfo);
     }
+    if (objectInfo == nullptr) {
+        NETMGR_LOG_E("this object parsing failed!");
+        return nullptr;
+    }
 
     std::unique_ptr<ObserverContext> asyncContext = std::make_unique<ObserverContext>();
     asyncContext->thisObj = objectInfo;
-
+    if (!NapiCommon::MatchValueType(env, argv[ARGV_INDEX_0], napi_function)) {
+        NETMGR_LOG_E("Invalid type of argument");
+    }
+    NAPI_CALL(env, napi_create_reference(env, argv[ARGV_INDEX_0], 1, &asyncContext->callbackRef));
     return NapiCommon::HandleAsyncWork(
         env, asyncContext.release(), "Unregister", UnregisterExecute, UnregisterComplete);
 }

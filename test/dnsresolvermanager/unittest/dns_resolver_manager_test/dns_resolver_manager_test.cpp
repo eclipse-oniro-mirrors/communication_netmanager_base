@@ -43,7 +43,7 @@ void DnsResolverManagerTest::TearDown() {}
 
 /**
  * @tc.name: DnsResolverManagerTest001
- * @tc.desc: Test DnsResolverManager SetIfaceConfig.
+ * @tc.desc: Test DnsResolverManager GetAddressesByName.
  * @tc.type: FUNC
  */
 HWTEST_F(DnsResolverManagerTest, DnsResolverManagerTest001, TestSize.Level1)

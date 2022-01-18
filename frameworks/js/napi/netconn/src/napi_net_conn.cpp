@@ -80,15 +80,17 @@ napi_value JS_Constructor(napi_env env, napi_callback_info cbinfo)
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, cbinfo, &argc, argv, &thisVar, nullptr));
 
-    NapiNetConnection *netConnection = new NapiNetConnection(env, thisVar);
+    NapiNetConnection *netConnection = new NapiNetConnection();
     if (argc == ARGV_INDEX_1) {
         napi_valuetype valueType = napi_undefined;
         NAPI_CALL(env, napi_typeof(env, argv[ARGV_INDEX_0], &valueType));
         if (valueType == napi_object) {
             NAPI_CALL(env, ParseNetSpecifier(env, argv[ARGV_INDEX_0], netConnection->netSpecifier_));
+            netConnection->hasSpecifier = true;
         } else if (valueType == napi_number) {
             NETMGR_LOG_I("JS_Constructor valueType napi_number");
             NAPI_CALL(env, napi_get_value_uint32(env, argv[ARGV_INDEX_0], &netConnection->timeout_));
+            netConnection->hasTimeout = true;
         } else {
             NETMGR_LOG_E("invalid data type!");
             return nullptr;
@@ -96,6 +98,8 @@ napi_value JS_Constructor(napi_env env, napi_callback_info cbinfo)
     } else if (argc == ARGV_INDEX_2) {
         NAPI_CALL(env, ParseNetSpecifier(env, argv[ARGV_INDEX_0], netConnection->netSpecifier_));
         NAPI_CALL(env, napi_get_value_uint32(env, argv[ARGV_INDEX_0], &netConnection->timeout_));
+        netConnection->hasSpecifier = true;
+        netConnection->hasTimeout = true;
     } else {
         if (argc != 0) {
             NETMGR_LOG_E("Invalid number of arguments");
@@ -156,6 +160,7 @@ napi_value NapiNetConn::DeclareNetConnInterface(napi_env env, napi_value exports
         DECLARE_NAPI_FUNCTION("reportNetDisconnected", NetDetection),
         DECLARE_NAPI_FUNCTION("createNetConnection", CreateNetConnection),
         DECLARE_NAPI_FUNCTION("getAddressesByName", GetAddressesByName),
+        DECLARE_NAPI_FUNCTION("restoreFactoryData", RestoreFactoryData),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
@@ -182,8 +187,8 @@ napi_value NapiNetConn::DeclareNetConnNew(napi_env env, napi_callback_info info)
     }
     NapiCommon::SetPropertyInt32(env, thisVar, "netId", netId);
     sptr<NetHandle> *handlerPtr = new sptr<NetHandle>(std::make_unique<NetHandle>(netId).release());
-    napi_status status = napi_wrap(
-        env, thisVar, reinterpret_cast<void *>(handlerPtr), NapiNetConn::DeclareNetConnDestructor, nullptr, &wrapper);
+    napi_status status = napi_wrap(env, thisVar, reinterpret_cast<void *>(handlerPtr),
+        NapiNetConn::DeclareNetConnDestructor, nullptr, &wrapper);
     if (status != napi_ok) {
         NETMGR_LOG_E("Failed to wrap DeclareNetConnNew.");
         delete handlerPtr;
@@ -313,7 +318,7 @@ void ReadNetCapabilities(napi_env env, napi_value &info, const NetAllCapabilitie
     napi_set_named_property(env, info, "bearerTypes_", bearerTypeSet);
 }
 
-static napi_value CreateNetHandle(napi_env env, sptr<NetHandle> &net)
+napi_value NapiNetConn::CreateNetHandle(napi_env env, sptr<NetHandle> &net)
 {
     napi_value constructor;
     napi_status status = napi_get_reference_value(env, *g_constructor, &constructor);
@@ -324,7 +329,7 @@ static napi_value CreateNetHandle(napi_env env, sptr<NetHandle> &net)
     napi_value result = nullptr;
     napi_value arg = nullptr;
     napi_create_int32(env, net->GetNetId(), &arg);
-    napi_value* argv = &arg;
+    napi_value *argv = &arg;
     size_t argc = ARGV_NUM_1;
     status = napi_new_instance(env, constructor, argc, argv, &result);
     if (status != napi_ok) {
@@ -529,15 +534,16 @@ void NapiNetConn::ExecGetAddressesByName(napi_env env, void *data)
     std::vector<INetAddr> addrList;
     std::string hostName = context->host;
     if (context->useDnsResolver) {
-        context->result = DelayedSingleton<DnsResolverClient>::GetInstance()->GetAddressesByName(hostName, addrList);
+        context->result =
+            DelayedSingleton<DnsResolverClient>::GetInstance()->GetAddressesByName(hostName, addrList);
     } else {
         context->result = context->addon->GetAddressesByName(hostName, addrList);
     }
     for (auto val : addrList) {
         context->addr.push_back(val.address_);
     }
-    NETMGR_LOG_D("ExecGetAddressesByName result =[%{public}d], addr.size =[%{public}d]",
-        context->result, static_cast<int32_t>(context->addr.size()));
+    NETMGR_LOG_D("ExecGetAddressesByName result =[%{public}d], addr.size =[%{public}d]", context->result,
+        static_cast<int32_t>(context->addr.size()));
 }
 
 void NapiNetConn::CompleteGetAddressesByName(napi_env env, napi_status status, void *data)
@@ -1197,6 +1203,8 @@ bool MatchRestoreFactoryDataParam(napi_env env, const napi_value parameters[], s
 {
     switch (parameterCount) {
         case ARGV_NUM_0:
+            return true;
+        case ARGV_NUM_1:
             return NapiCommon::MatchValueType(env, parameters[0], napi_function);
         default:
             return false;
@@ -1290,7 +1298,7 @@ void NapiNetConn::RestoreFactoryDataCallback(napi_env env, napi_status status, v
     napi_value callbackValue = nullptr;
     if (status == napi_ok) {
         if (context->resolved) {
-            napi_create_int32(env, context->resolved, &callbackValue);
+            napi_get_undefined(env, &callbackValue);
         } else {
             callbackValue = NapiCommon::CreateCodeMessage(env, "Failed to RestoreFactoryData", context->errorCode);
         }
@@ -1309,8 +1317,11 @@ napi_value NapiNetConn::RestoreFactoryData(napi_env env, napi_callback_info info
     void *data = nullptr;
     napi_get_cb_info(env, info, &paramsCount, params, &arg, &data);
     NAPI_ASSERT(
-        env, MatchRestoreFactoryDataParam(env, params, paramsCount), "GetNetPolicys input param type mismatch");
+        env, MatchRestoreFactoryDataParam(env, params, paramsCount), "RestoreFactoryData input param type mismatch");
     auto context = std::make_unique<RestoreFactoryDataContext>().release();
+    if (paramsCount == 1) {
+        NAPI_CALL(env, napi_create_reference(env, params[0], 1, &context->callbackRef));
+    }
     napi_value result = NapiCommon::HandleAsyncWork(
         env, context, "RestoreFactoryData", NativeRestoreFactoryData, RestoreFactoryDataCallback);
     return result;

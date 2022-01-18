@@ -36,8 +36,8 @@ public:
     static int32_t Display();
     static int32_t FindListener(NapiNetConnObserver *observer, EventListener &listen);
 private:
-    static std::map<int32_t, std::map<int32_t, EventListener>> listenses; // Netconnection obj to a group refences
-    static std::map<int32_t, sptr<INetConnCallback>> callbacks; // Netconnection obj to callback obj
+    static std::map<intptr_t, std::map<int32_t, EventListener>> listenses; // Netconnection obj to a group refences
+    static std::map<intptr_t, sptr<INetConnCallback>> callbacks; // Netconnection obj to callback obj
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

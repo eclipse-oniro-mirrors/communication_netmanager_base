@@ -70,6 +70,7 @@ public:
     static napi_value DeclareNetConnConstructor(napi_env env, napi_value exports);
     static napi_value DeclareNetConnNew(napi_env env, napi_callback_info info);
     static void DeclareNetConnDestructor(napi_env env, void *nativeObject, void *hint);
+    static napi_value CreateNetHandle(napi_env env, sptr<NetHandle> &net);
 
     static void ExecAddNetStatusCallback(napi_env env, void *data);
     static void ExecRemoveNetStatusCallback(napi_env env, void *data);

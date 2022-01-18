@@ -22,15 +22,13 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class NapiNetConnection {
-public:
-    NapiNetConnection(napi_env env, napi_value thisVar);
-    virtual ~NapiNetConnection();
-
+struct NapiNetConnection {
     static napi_value On(napi_env env, napi_callback_info info);
     static napi_value Register(napi_env env, napi_callback_info info);
     static napi_value Unregister(napi_env env, napi_callback_info info);
 
+    bool hasSpecifier = false;
+    bool hasTimeout = false;
     NetSpecifier netSpecifier_;
     uint32_t timeout_;
 };

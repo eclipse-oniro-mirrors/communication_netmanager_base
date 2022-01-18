@@ -222,6 +222,11 @@ NetStatsResultCode NetStatsService::UpdateIfacesStats(const std::string &iface,
         return NetStatsResultCode::ERR_INVALID_PARAMETER;
     }
 
+    if (start >= end) {
+        NETMGR_LOG_E("the start time should be less than the end time.");
+        return NetStatsResultCode::ERR_INVALID_PARAMETER;
+    }
+
     if (stats.rxBytes_ < 0 || stats.txBytes_ < 0) {
         NETMGR_LOG_E("the bytes cannot be negative.");
         return NetStatsResultCode::ERR_INVALID_PARAMETER;

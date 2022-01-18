@@ -40,9 +40,9 @@ config("net_conn_manager_if_config") {
 ohos_source_set("net_conn_parcel") {
   sources = [
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/inet_addr.cpp",
-    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_all_capabilities.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_link_info.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_specifier.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_all_capabilities.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_supplier_info.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/route.cpp",
   ]

@@ -64,6 +64,7 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
     network_->UpdateBasicNetwork(netSupplierInfo_.isAvailable_);
     if (!netSupplierInfo_.isAvailable_) {
         UpdateServiceState(SERVICE_STATE_DISCONNECTED);
+        netLinkInfo_.Initialize();
     }
     return;
 }

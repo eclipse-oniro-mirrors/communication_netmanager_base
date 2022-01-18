@@ -16,15 +16,15 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_shared_library("netd_native_manager") {
   sources = [
-    "$NETDNATIVE_INNERKITS_SOURCE_DIR/dhcp_result_parcel.cpp",
     "$NETDNATIVE_INNERKITS_SOURCE_DIR/dnsresolver_params_parcel.cpp",
+    "$NETDNATIVE_INNERKITS_SOURCE_DIR/dhcp_result_parcel.cpp",
     "$NETDNATIVE_INNERKITS_SOURCE_DIR/netd_addr_info_parcel.cpp",
     "$NETDNATIVE_INNERKITS_SOURCE_DIR/netd_native_service_proxy.cpp",
     "$NETDNATIVE_INNERKITS_SOURCE_DIR/notify_callback_proxy.cpp",
-    "$NETDNATIVE_SOURCE_DIR/src/dhcp_controller.cpp",
     "$NETDNATIVE_SOURCE_DIR/src/netd_native_service.cpp",
     "$NETDNATIVE_SOURCE_DIR/src/netd_native_service_stub.cpp",
     "$NETDNATIVE_SOURCE_DIR/src/notify_callback_stub.cpp",
+    "$NETDNATIVE_SOURCE_DIR/src/dhcp_controller.cpp",
   ]
 
   include_dirs = [

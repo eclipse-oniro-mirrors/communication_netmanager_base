@@ -35,8 +35,8 @@ ohos_shared_library("netd_controller") {
   ]
 
   deps = [
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netd_native_manager",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netd_native_manager",
     "//utils/native/base:utils",
   ]
 

@@ -21,20 +21,6 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-struct CapabilitiesEvent {
-    CapabilitiesEvent(int32_t netId, const sptr<NetAllCapabilities> &netAllCap)
-        : netId(netId), netAllCap(*netAllCap) {}
-    int32_t netId;
-    NetAllCapabilities netAllCap;
-};
-
-struct ConnectionEvent {
-    ConnectionEvent(int32_t netId = 0, sptr<NetLinkInfo> linkInfo = nullptr)
-        : netId(netId), linkInfo(linkInfo) {}
-    int32_t netId;
-    sptr<NetLinkInfo> linkInfo;
-};
-
 class NapiNetConnObserver : public NetConnCallbackStub {
 public:
     int32_t NetAvailable(sptr<NetHandle> &netHandle);

@@ -158,6 +158,17 @@ bool NetLinkInfo::Marshalling(Parcel &parcel, const sptr<NetLinkInfo> &object)
     return true;
 }
 
+void NetLinkInfo::Initialize()
+{
+    ifaceName_ = "";
+    domain_ = "";
+    std::list<INetAddr>().swap(netAddrList_);
+    std::list<INetAddr>().swap(dnsList_);
+    std::list<Route>().swap(routeList_);
+    mtu_ = 0;
+    tcpBufferSizes_ = "";
+}
+
 std::string NetLinkInfo::ToString(const std::string &tab) const
 {
     std::string str;

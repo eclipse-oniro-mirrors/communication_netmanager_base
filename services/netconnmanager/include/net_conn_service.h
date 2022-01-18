@@ -202,7 +202,6 @@ private:
     sptr<NetSupplier> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident);
     sptr<NetSupplier> GetNetSupplierFromList(
         NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps);
-    void ThreadExitTask();
     int32_t ActivateNetwork(const sptr<NetSpecifier> &netSpecifier,
         const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS);
     int32_t DeactivateNetwork(uint32_t reqId);

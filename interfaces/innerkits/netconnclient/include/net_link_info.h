@@ -36,6 +36,7 @@ struct NetLinkInfo : public Parcelable {
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<NetLinkInfo> Unmarshalling(Parcel &parcel);
     static bool Marshalling(Parcel &parcel, const sptr<NetLinkInfo> &object);
+    void Initialize();
     std::string ToString(const std::string &tab) const;
     std::string ToStringBase(const std::string &tab) const;
     std::string ToStringAddr(const std::string &tab) const;

@@ -62,7 +62,9 @@ ohos_shared_library("net_stats_manager_if") {
     "$NETSTATSMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_stats_service_proxy.cpp",
   ]
 
-  include_dirs = [ "$NETDCONTROLLER_ROOT_DIR/include/" ]
+  include_dirs = [
+    "$NETDCONTROLLER_ROOT_DIR/include/",
+  ]
 
   public_configs = [ ":net_stats_manager_if_config" ]
 

@@ -23,7 +23,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 struct NetPolicyCellularPolicy : public Parcelable {
-    /* subscriber ID, get from telephone module */
+    /* slot ID, get from telephone module */
     int32_t slotId_ = 0;
     /*  Time rubbing, for example:1636598990 */
     int64_t periodStartTime_ = -1;
