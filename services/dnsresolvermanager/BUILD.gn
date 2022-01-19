@@ -35,14 +35,14 @@ ohos_shared_library("dns_resolver_manager") {
 
   deps = [
     "$INNERKITS_ROOT/dnsresolverclient:dns_resolver_parcel",
-    "$NETDCONTROLLER_ROOT_DIR:netd_controller",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
+    "$NETDCONTROLLER_ROOT_DIR:netd_controller",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "//utils/native/base:utils",
   ]
 
   external_deps = [
-    "aafwk_standard:want",
+    "ability_runtime:want",
     "appexecfwk_standard:libeventhandler",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
