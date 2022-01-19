@@ -33,7 +33,6 @@ ohos_shared_library("policy") {
     "$NETMANAGER_NAPI_ROOT/netpolicy/src/napi_net_policy_observer.cpp",
     "$NETMANAGER_NAPI_ROOT/netpolicy/src/net_policy_event_listener_handler.cpp",
     "$NETMANAGER_NAPI_ROOT/netpolicy/src/net_policy_event_listener_manager.cpp",
-
   ]
 
   defines = [ "NETMGR_DEBUG" ]
@@ -46,7 +45,7 @@ ohos_shared_library("policy") {
   ]
 
   external_deps = [
-    "aafwk_standard:want",
+    "ability_runtime:want",
     "appexecfwk_standard:libeventhandler",
     "ces_standard:cesfwk_innerkits",
     "hiviewdfx_hilog_native:libhilog",
