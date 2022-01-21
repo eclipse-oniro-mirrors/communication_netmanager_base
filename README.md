@@ -17,7 +17,7 @@
 
 **图 1**  网络管理架构图
 
-![net_conn_manager_arch_zh](figures\net_conn_manager_arch_zh.png)
+![net_conn_manager_arch_zh](figures/net_conn_manager_arch_zh.png)
 
 ## 目录
 
