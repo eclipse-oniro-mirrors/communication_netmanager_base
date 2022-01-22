@@ -19,8 +19,8 @@ ohos_shared_library("net_policy_manager") {
     "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_callback.cpp",
     "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_file.cpp",
     "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_firewall.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_service_common.cpp",
     "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_service.cpp",
+    "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_service_common.cpp",
     "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_traffic.cpp",
     "$NETPOLICYMANAGER_SOURCE_DIR/src/stub/net_policy_callback_proxy.cpp",
     "$NETPOLICYMANAGER_SOURCE_DIR/src/stub/net_policy_service_stub.cpp",
@@ -40,7 +40,6 @@ ohos_shared_library("net_policy_manager") {
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "//third_party/jsoncpp:jsoncpp",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
@@ -50,6 +49,7 @@ ohos_shared_library("net_policy_manager") {
     "netmanager_base:net_stats_manager_if",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
+    "utils_base:utils",
   ]
 
   defines = [

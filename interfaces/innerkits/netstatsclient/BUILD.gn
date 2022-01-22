@@ -41,12 +41,9 @@ ohos_source_set("net_stats_parcel") {
 
   include_dirs = [ "$INNERKITS_ROOT/netstatsclient/include" ]
 
-  deps = [
-    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
 
-  external_deps = []
+  external_deps = [ "utils_base:utils" ]
   if (is_standard_system) {
     external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
   } else {
@@ -62,9 +59,7 @@ ohos_shared_library("net_stats_manager_if") {
     "$NETSTATSMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_stats_service_proxy.cpp",
   ]
 
-  include_dirs = [
-    "$NETDCONTROLLER_ROOT_DIR/include/",
-  ]
+  include_dirs = [ "$NETDCONTROLLER_ROOT_DIR/include/" ]
 
   public_configs = [ ":net_stats_manager_if_config" ]
 

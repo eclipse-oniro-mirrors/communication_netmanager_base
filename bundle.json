@@ -1,0 +1,112 @@
+{
+    "name": "@ohos/netmanager_base",
+    "version": "3.1.0",
+    "description": "net manager service",
+    "publishAs": "code-segment",
+    "homePage": "https://gitee.com/openharmony",
+    "repository": "https://gitee.com/openharmony/communication_netmanager_base",
+    "license": "Apache License 2.0",
+    "language": "",
+    "private": false,
+    "scripts": {},
+    "envs": [],
+    "dirs": [],
+    "author": {},
+    "contributors": [],
+    "segment": {
+        "destPath": "//foundation/communication/netmanager_base"
+    },
+    "component": {
+        "name": "netmanager_base",
+        "subsystem": "communication",
+        "syscap": [
+            "SystemCapability.Communication.NetManagerBase"
+        ],
+        "features": [],
+        "adapted_system_type": [
+            "standard"
+        ],
+        "rom": "",
+        "ram": "",
+        "deps": {
+            "components": [
+                "ability_runtime",
+                "appexecfwk_standard",
+                "ces_standard",
+                "ipc",
+                "safwk",
+                "samgr_standard",
+                "utils_base"
+            ],
+            "third_party": [
+                "curl",
+                "jsoncpp"
+            ]
+        },
+        "build": {
+            "sub_component": [
+                "//foundation/communication/netmanager_base/services/netmanagernative:netd_native_manager",
+                "//foundation/communication/netmanager_base/prebuilts/librarys/netd:libnet_manager_native",
+                "//foundation/communication/netmanager_base/services/netdcontroller:netd_controller",
+                "//foundation/communication/netmanager_base/services/netconnmanager:net_conn_manager",
+                "//foundation/communication/netmanager_base/services/dnsresolvermanager:dns_resolver_manager",
+                "//foundation/communication/netmanager_base/services/netpolicymanager:net_policy_manager",
+                "//foundation/communication/netmanager_base/services/netstatsmanager:net_stats_manager",
+                "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
+                "//foundation/communication/netmanager_base/interfaces/innerkits/dnsresolverclient:dns_resolver_manager_if",
+                "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient:net_policy_manager_if",
+                "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient:net_stats_manager_if",
+                "//foundation/communication/netmanager_base/utils:net_manager_common",
+                "//foundation/communication/netmanager_base/services/etc/init:netmanager_base.rc",
+                "//foundation/communication/netmanager_base/services/etc/init:netdnative.rc",
+                "//foundation/communication/netmanager_base/sa_profile:net_manager_profile",
+                "//foundation/communication/netmanager_base/frameworks/js/napi/netpolicy:policy",
+                "//foundation/communication/netmanager_base/frameworks/js/napi/netstats:statistics",
+                "//foundation/communication/netmanager_base/frameworks/js/napi/netconn:connection"
+            ],
+            "inner_kits": [
+                {
+                    "type": "so",
+                    "name": "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
+                    "header": {
+                        "header_files": [
+                            "net_conn_client.h",
+                            "net_link_info.h",
+                            "net_supplier_info.h",
+                            "net_specifier.h",
+                            "route.h"
+                        ],
+                    "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient/include"
+                    }
+                },
+                {
+                    "type": "so",
+                    "name": "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient:net_policy_manager_if",
+                    "header": {
+                        "header_files": [
+                            "net_policy_client.h"
+                        ],
+                    "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient/include"
+                    }
+                },
+                {
+                    "type": "so",
+                    "name": "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient:net_stats_manager_if",
+                    "header": {
+                        "header_files": [
+                            "net_stats_info.h",
+                            "net_stats_client.h"
+                        ],
+                    "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient/include"
+                    }
+                }
+            ],
+            "test": [
+                "//foundation/communication/netmanager_base/test/dnsresolvermanager:unittest",
+                "//foundation/communication/netmanager_base/test/netconnmanager:unittest",
+                "//foundation/communication/netmanager_base/test/netpolicymanager:unittest",
+                "//foundation/communication/netmanager_base/test/netstatsmanager:unittest"
+            ]
+        }
+    }
+}
