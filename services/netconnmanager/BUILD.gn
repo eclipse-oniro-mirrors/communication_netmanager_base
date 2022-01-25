@@ -53,8 +53,8 @@ ohos_shared_library("net_conn_manager") {
 
   external_deps = [
     "ability_runtime:want",
-    "appexecfwk_standard:libeventhandler",
     "ces_standard:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
