@@ -97,7 +97,7 @@ static void OnNetUnavailableEvent(EventListener &listen)
     napi_value recv = nullptr;
     napi_value result = nullptr;
     napi_value callbackFunc = nullptr;
-    napi_create_int32(listen.env, listen.eventId, &info);
+    info = NapiCommon::CreateUndefined(listen.env);
     napi_get_undefined(listen.env, &recv);
     napi_get_reference_value(listen.env, listen.callbackRef, &callbackFunc);
     callbackValues[CALLBACK_ARGV_INDEX_1] = info;
@@ -126,7 +126,7 @@ static void OnNetBlockStatusChangeEvent(
 
 int32_t NapiNetConnObserver::NetAvailable(sptr<NetHandle> &netHandle)
 {
-    NETMGR_LOG_D("NetAvailable netId [%{public}d]", netHandle->GetNetId());
+    NETMGR_LOG_I("NetAvailable netId [%{public}d]", netHandle->GetNetId());
     EventListener listen;
     listen.eventId = EVENT_NET_AVAILABLE_CHANGE;
     if (EventListenerContext::GetInstance().FindListener(this, listen) != EVENT_NET_UNKNOW_CHANGE) {
@@ -138,7 +138,7 @@ int32_t NapiNetConnObserver::NetAvailable(sptr<NetHandle> &netHandle)
 int32_t NapiNetConnObserver::NetCapabilitiesChange(
     sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap)
 {
-    NETMGR_LOG_D("NetCapabilitiesChange netId [%{public}d]", netHandle->GetNetId());
+    NETMGR_LOG_I("NetCapabilitiesChange netId [%{public}d]", netHandle->GetNetId());
     EventListener listen;
     listen.eventId = EVENT_NET_CAPABILITIES_CHANGE;
     if (EventListenerContext::GetInstance().FindListener(this, listen) != EVENT_NET_UNKNOW_CHANGE) {
@@ -150,7 +150,7 @@ int32_t NapiNetConnObserver::NetCapabilitiesChange(
 int32_t NapiNetConnObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle,
     const sptr<NetLinkInfo> &info)
 {
-    NETMGR_LOG_D("NetConnectionPropertiesChange netId [%{public}d], info is [%{public}s]",
+    NETMGR_LOG_I("NetConnectionPropertiesChange netId [%{public}d], info is [%{public}s]",
         netHandle->GetNetId(), info == nullptr ? "nullptr" : "not nullptr");
     EventListener listen;
     listen.eventId = EVENT_NET_CONNECTION_CHANGE;
@@ -162,7 +162,7 @@ int32_t NapiNetConnObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netH
 
 int32_t NapiNetConnObserver::NetLost(sptr<NetHandle> &netHandle)
 {
-    NETMGR_LOG_D("NetLost netId [%{public}d]", netHandle->GetNetId());
+    NETMGR_LOG_I("NetLost netId [%{public}d]", netHandle->GetNetId());
     std::unique_ptr<int32_t> id = std::make_unique<int32_t>(netHandle->GetNetId());
     EventListener listen;
     listen.eventId = EVENT_NET_LOST_CHANGE;
@@ -174,17 +174,19 @@ int32_t NapiNetConnObserver::NetLost(sptr<NetHandle> &netHandle)
 
 int32_t NapiNetConnObserver::NetUnavailable()
 {
+    NETMGR_LOG_I("NetUnavailable");
     EventListener listen;
     listen.eventId = EVENT_NET_UNAVAILABLE_CHANGE;
     if (EventListenerContext::GetInstance().FindListener(this, listen) != EVENT_NET_UNKNOW_CHANGE) {
         OnNetUnavailableEvent(listen);
+        EventListenerContext::GetInstance().RemoveCallback(this);
     }
     return 0;
 }
 
 int32_t NapiNetConnObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
 {
-    NETMGR_LOG_D("NapiNetConnObserver NetBlockStatusChange netId [%{public}d]", netHandle->GetNetId());
+    NETMGR_LOG_I("NapiNetConnObserver NetBlockStatusChange netId [%{public}d]", netHandle->GetNetId());
     EventListener listen;
     listen.eventId = EVENT_NET_BLOCK_STATUS_CHANGE;
     if (EventListenerContext::GetInstance().FindListener(this, listen) != EVENT_NET_UNKNOW_CHANGE) {

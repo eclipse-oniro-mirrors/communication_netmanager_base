@@ -39,7 +39,7 @@ public:
 public:
     virtual int32_t NetUidPolicyChanged(uint32_t uid, NetUidPolicy policy) = 0;
     virtual int32_t NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicies) = 0;
-    virtual int32_t NetStrategySwitch(int32_t slotId, bool enable) = 0;
+    virtual int32_t NetStrategySwitch(const std::string &simId, bool enable) = 0;
     virtual int32_t NetBackgroundPolicyChanged(bool isBackgroundPolicyAllow) = 0;
 };
 } // namespace NetManagerStandard

@@ -96,7 +96,7 @@ private:
     std::condition_variable conditionTimeout_;
     bool isStopNetMonitor_;
     bool isExitNetMonitorThread_;
-    std::thread *netMonitorThread_;
+    std::unique_ptr<std::thread> netMonitorThread_;
     NetDetectionStateHandler netDetectionStatus_;
     NetDetectionStatus lastDetectionState_;
     std::string ifaceName_;

@@ -14,6 +14,7 @@
  */
 #include "net_policy_callback.h"
 #include "net_policy_constants.h"
+#include "net_policy_define.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
@@ -25,7 +26,14 @@ void NetPolicyCallback::RegisterNetPolicyCallback(const sptr<INetPolicyCallback>
         return;
     }
 
-    for (uint32_t i = 0; i < netPolicyCallback_.size(); i++) {
+    uint32_t callBackNum = netPolicyCallback_.size();
+    NETMGR_LOG_D("netPolicyCallback_ callback num [%{public}d]", callBackNum);
+    if (callBackNum >= LIMIT_CALLBACK_NUM) {
+        NETMGR_LOG_E("netPolicyCallback_ callback num cannot more than [%{public}d]", LIMIT_CALLBACK_NUM);
+        return;
+    }
+
+    for (uint32_t i = 0; i < callBackNum; i++) {
         if (callback->AsObject().GetRefPtr() == netPolicyCallback_[i]->AsObject().GetRefPtr()) {
             NETMGR_LOG_I("netPolicyCallback_ had this callback");
             return;
@@ -95,14 +103,14 @@ int32_t NetPolicyCallback::NotifyNetCellularPolicyChanged(const std::vector<NetP
     return static_cast<int32_t>(NetPolicyResultCode::ERR_NONE);
 }
 
-int32_t NetPolicyCallback::NotifyNetStrategySwitch(int32_t slotId, bool enable)
+int32_t NetPolicyCallback::NotifyNetStrategySwitch(const std::string &simId, bool enable)
 {
-    NETMGR_LOG_I("NotifyNetStrategySwitch slotId[%{public}d] enable[%{public}d]",
-        slotId, static_cast<int32_t>(enable));
+    NETMGR_LOG_I("NotifyNetStrategySwitch simId[%{public}s] enable[%{public}d]",
+        simId.c_str(), static_cast<int32_t>(enable));
 
     for (const auto &callback : netPolicyCallback_) {
         if (callback != nullptr) {
-            callback->NetStrategySwitch(slotId, enable);
+            callback->NetStrategySwitch(simId, enable);
         }
     }
 

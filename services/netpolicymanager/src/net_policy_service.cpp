@@ -287,13 +287,12 @@ void NetPolicyService::CheckNetStatsOverLimit(const std::vector<NetPolicyCellula
         /* -1 : unlimited */
         if (cellularPolicies[i].limitBytes_ == -1) {
             if (netPolicyCallback_ != nullptr) {
-                netPolicyCallback_->NotifyNetStrategySwitch(cellularPolicies[i].slotId_, true);
+                netPolicyCallback_->NotifyNetStrategySwitch(cellularPolicies[i].simId_, true);
             }
             continue;
         }
-        std::string slotId = IDENT_PREFIX + std::to_string(cellularPolicies[i].slotId_);
         int32_t ret = NetManagerCenter::GetInstance().GetIfaceNameByType(BEARER_CELLULAR,
-            slotId, ifaceName);
+            IDENT_PREFIX, ifaceName);
         if (ret != 0 || ifaceName.empty()) {
             NETMGR_LOG_E("GetIfaceNameByType ret [%{public}d] ifaceName [%{public}s]", ret, ifaceName.c_str());
             continue;
@@ -310,11 +309,11 @@ void NetPolicyService::CheckNetStatsOverLimit(const std::vector<NetPolicyCellula
         /*  The traffic exceeds the limit. You need to notify telephony to shut down the network. */
         if (netStatsInfo.txBytes_ + netStatsInfo.rxBytes_ < cellularPolicies[i].limitBytes_) {
             if (netPolicyCallback_ != nullptr) {
-                netPolicyCallback_->NotifyNetStrategySwitch(cellularPolicies[i].slotId_, true);
+                netPolicyCallback_->NotifyNetStrategySwitch(cellularPolicies[i].simId_, true);
             }
         } else {
             if (netPolicyCallback_ != nullptr) {
-                netPolicyCallback_->NotifyNetStrategySwitch(cellularPolicies[i].slotId_, false);
+                netPolicyCallback_->NotifyNetStrategySwitch(cellularPolicies[i].simId_, false);
             }
         }
     }
@@ -341,9 +340,8 @@ void NetPolicyService::CheckNetStatsOverLimit(const std::vector<NetPolicyQuotaPo
             continue;
         }
         NetBearType bearerType = static_cast<NetBearType>(quotaPolicies[i].netType_);
-        std::string slotId = IDENT_PREFIX + std::to_string(quotaPolicies[i].slotId_);
         int32_t ret = NetManagerCenter::GetInstance().GetIfaceNameByType(
-            bearerType, slotId, ifaceName);
+            bearerType, IDENT_PREFIX, ifaceName);
         if (ret != 0 || ifaceName.empty()) {
             NETMGR_LOG_E("GetIfaceNameByType ret [%{public}d] ifaceName [%{public}s]", ret, ifaceName.c_str());
             continue;
@@ -363,11 +361,11 @@ void NetPolicyService::CheckNetStatsOverLimit(const std::vector<NetPolicyQuotaPo
             quotaPolicies[i].lastLimitSnooze_ == -1)
             && (netStatsInfo.txBytes_ + netStatsInfo.rxBytes_ < quotaPolicies[i].limitBytes_)) {
             if (netPolicyCallback_ != nullptr) {
-                netPolicyCallback_->NotifyNetStrategySwitch(quotaPolicies[i].slotId_, true);
+                netPolicyCallback_->NotifyNetStrategySwitch(quotaPolicies[i].simId_, true);
             }
         } else {
             if (netPolicyCallback_ != nullptr) {
-                netPolicyCallback_->NotifyNetStrategySwitch(quotaPolicies[i].slotId_, false);
+                netPolicyCallback_->NotifyNetStrategySwitch(quotaPolicies[i].simId_, false);
             }
         }
     }
@@ -425,12 +423,12 @@ NetPolicyResultCode NetPolicyService::GetCellularPolicies(std::vector<NetPolicyC
     return netPolicyFile_->GetCellularPolicies(cellularPolicies);
 }
 
-NetPolicyResultCode NetPolicyService::SetFactoryPolicy(const std::string &slotId)
+NetPolicyResultCode NetPolicyService::SetFactoryPolicy(const std::string &simId)
 {
     std::unique_lock<std::mutex> lock(mutex_);
     NETMGR_LOG_I("SetFactoryPolicy begin");
     netPolicyTraffic_->ClearIdleTrustList();
-    return netPolicyFile_->SetFactoryPolicy(slotId);
+    return netPolicyFile_->SetFactoryPolicy(simId);
 }
 
 NetPolicyResultCode NetPolicyService::SetBackgroundPolicy(bool backgroundPolicy)
@@ -475,13 +473,13 @@ NetBackgroundPolicy NetPolicyService::GetCurrentBackgroundPolicy()
     return netPolicyFirewall_->GetCurrentBackgroundPolicy();
 }
 
-NetPolicyResultCode NetPolicyService::SetSnoozePolicy(int8_t netType, int32_t slotId)
+NetPolicyResultCode NetPolicyService::SetSnoozePolicy(int8_t netType, const std::string &simId)
 {
     NETMGR_LOG_I("SetSnoozePolicy begin");
 
     NetPolicyQuotaPolicy quotaPolicy;
     std::unique_lock<std::mutex> lock(mutex_);
-    NetPolicyResultCode ret = netPolicyFile_->GetNetQuotaPolicy(netType, slotId, quotaPolicy);
+    NetPolicyResultCode ret = netPolicyFile_->GetNetQuotaPolicy(netType, simId, quotaPolicy);
     if (NetPolicyResultCode::ERR_NONE != ret) {
         NETMGR_LOG_E("SetSnoozePolicy GetQuotaPolicy failed");
         return ret;
@@ -489,7 +487,7 @@ NetPolicyResultCode NetPolicyService::SetSnoozePolicy(int8_t netType, int32_t sl
     /* Set the sleep time to the current time. */
     quotaPolicy.lastLimitSnooze_ = GetCurrentTime();
     std::vector<NetPolicyQuotaPolicy> quotaPolicies = {quotaPolicy};
-    ret = netPolicyTraffic_->SetSnoozePolicy(netType, slotId, quotaPolicies);
+    ret = netPolicyTraffic_->SetSnoozePolicy(netType, simId, quotaPolicies);
     lock.unlock();
     if (ret == NetPolicyResultCode::ERR_NONE) {
         /* Judge whether the flow exceeds the limit */

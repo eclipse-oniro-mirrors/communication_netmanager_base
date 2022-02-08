@@ -457,8 +457,8 @@ NetStatsResultCode NetStatsCsv::GetIfaceBytes(const std::string &iface, uint32_t
     if (calStartTime == calEndTime) {
         statsInfo.rxBytes_ = 0;
         statsInfo.txBytes_ = 0;
-        NETMGR_LOG_E("start and end less equal Minimum time or greater equal Maximum time");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
+        NETMGR_LOG_E("there is no data in this time period, please enter a valid time period.");
+        return NetStatsResultCode::ERR_INVALID_TIME_PERIOD;
     }
 
     CSVRow row;
@@ -484,8 +484,8 @@ NetStatsResultCode NetStatsCsv::GetUidBytes(const std::string &iface, uint32_t u
     if (calStartTime == calEndTime) {
         statsInfo.rxBytes_ = 0;
         statsInfo.txBytes_ = 0;
-        NETMGR_LOG_E("start and end less equal Minimum time or greater equal Maximum time");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
+        NETMGR_LOG_E("there is no data in this time period, please enter a valid time period.");
+        return NetStatsResultCode::ERR_INVALID_TIME_PERIOD;
     }
 
     std::ifstream uid_file(CSV_DIR + UID_STATS_CSV_FILE_NAME, std::fstream::in);

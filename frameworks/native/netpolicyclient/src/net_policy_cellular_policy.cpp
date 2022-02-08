@@ -18,7 +18,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 bool NetPolicyCellularPolicy::Marshalling(Parcel &parcel) const
 {
-    if (!parcel.WriteInt32(slotId_)) {
+    if (!parcel.WriteString(simId_)) {
         return false;
     }
     if (!parcel.WriteInt64(periodStartTime_)) {
@@ -75,7 +75,7 @@ bool NetPolicyCellularPolicy::Unmarshalling(Parcel &parcel, std::vector<NetPolic
 
     NetPolicyCellularPolicy quotaPolicyTmp;
     for (uint32_t i = 0; i < vSize; i++) {
-        if (!parcel.ReadInt32(quotaPolicyTmp.slotId_)) {
+        if (!parcel.ReadString(quotaPolicyTmp.simId_)) {
             return false;
         }
         if (!parcel.ReadInt64(quotaPolicyTmp.periodStartTime_)) {

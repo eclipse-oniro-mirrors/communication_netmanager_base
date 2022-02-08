@@ -35,7 +35,6 @@ struct BooleanValueContext : BaseContext {
 };
 
 struct RestoreFactoryDataContext : BaseContext {
-    int32_t resolved = 0;
     int32_t errorCode = 0;
 };
 

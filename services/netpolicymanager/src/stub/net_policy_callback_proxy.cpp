@@ -116,7 +116,7 @@ int32_t NetPolicyCallbackProxy::NetCellularPolicyChanged(const std::vector<NetPo
     return ret;
 }
 
-int32_t NetPolicyCallbackProxy::NetStrategySwitch(int32_t slotId, bool enable)
+int32_t NetPolicyCallbackProxy::NetStrategySwitch(const std::string &simId, bool enable)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -124,7 +124,7 @@ int32_t NetPolicyCallbackProxy::NetStrategySwitch(int32_t slotId, bool enable)
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!data.WriteInt32(slotId)) {
+    if (!data.WriteString(simId)) {
         return ERR_NULL_OBJECT;
     }
 

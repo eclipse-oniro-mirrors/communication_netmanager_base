@@ -351,7 +351,7 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore)
     return;
 }
 
-int32_t NetSupplier::CancleRequest(uint32_t reqId)
+int32_t NetSupplier::CancelRequest(uint32_t reqId)
 {
     std::set<uint32_t>::iterator iter = requestList_.find(reqId);
     if (iter == requestList_.end()) {

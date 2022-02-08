@@ -126,8 +126,8 @@ int32_t NetPolicyCallbackStub::NetCellularPolicyChanged(const std::vector<NetPol
 
 int32_t NetPolicyCallbackStub::OnNetStrategySwitch(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t slotId = 0;
-    if (!data.ReadInt32(slotId)) {
+    std::string simId;
+    if (!data.ReadString(simId)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -136,7 +136,7 @@ int32_t NetPolicyCallbackStub::OnNetStrategySwitch(MessageParcel &data, MessageP
         return ERR_FLATTEN_OBJECT;
     }
 
-    int32_t result = NetStrategySwitch(slotId, enable);
+    int32_t result = NetStrategySwitch(simId, enable);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
         return result;
@@ -145,7 +145,7 @@ int32_t NetPolicyCallbackStub::OnNetStrategySwitch(MessageParcel &data, MessageP
     return ERR_NONE;
 }
 
-int32_t NetPolicyCallbackStub::NetStrategySwitch(int32_t slotId, bool enable)
+int32_t NetPolicyCallbackStub::NetStrategySwitch(const std::string &simId, bool enable)
 {
     return ERR_NONE;
 }

@@ -58,9 +58,10 @@ public:
     NetUidPolicy GetPolicyByUid(uint32_t uid);
     bool GetUidsByPolicy(NetUidPolicy policy, std::vector<uint32_t> &uids);
     NetPolicyResultCode GetNetQuotaPolicies(std::vector<NetPolicyQuotaPolicy> &quotaPolicies);
-    NetPolicyResultCode GetNetQuotaPolicy(int8_t netType, int32_t slotId, NetPolicyQuotaPolicy &quotaPolicy);
+    NetPolicyResultCode GetNetQuotaPolicy(int8_t netType, const std::string &simId,
+        NetPolicyQuotaPolicy &quotaPolicy);
     NetPolicyResultCode GetCellularPolicies(std::vector<NetPolicyCellularPolicy> &cellularPolicies);
-    NetPolicyResultCode SetFactoryPolicy(const std::string &slotId);
+    NetPolicyResultCode SetFactoryPolicy(const std::string &simId);
     NetPolicyResultCode SetBackgroundPolicy(bool backgroundPolicy);
     bool GetBackgroundPolicy();
     bool IsInterfaceMetered(const std::string &ifaceName);

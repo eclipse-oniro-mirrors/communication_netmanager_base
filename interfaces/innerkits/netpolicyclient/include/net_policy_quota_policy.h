@@ -25,8 +25,8 @@ namespace NetManagerStandard {
 struct NetPolicyQuotaPolicy : public Parcelable {
     /* netType value in NetBearType */
     int8_t netType_ = -1;
-    /* slot ID, get from telephone module */
-    int32_t slotId_ = 0;
+    /* IccId, get from telephone module */
+    std::string simId_;
     /*  Time rubbing, for example:1636598990 */
     int64_t periodStartTime_ = -1;
     /* Unit: Month for example:M1 (The 1st of each month) */

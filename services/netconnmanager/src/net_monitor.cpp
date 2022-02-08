@@ -20,7 +20,6 @@ namespace OHOS {
 namespace NetManagerStandard {
 NetMonitor::NetMonitor(NetDetectionStateHandler handle)
 {
-    netMonitorThread_ = nullptr;
     isExitNetMonitorThread_ = false;
     isStopNetMonitor_ = true;
     isExitNetMonitorThread_ = false;
@@ -43,7 +42,6 @@ bool NetMonitor::HttpDetection()
     int32_t ret = httpRequest.HttpGetHeader(httpMsg, httpHeader);
     std::string urlRedirect;
     if (ret != 0 || httpHeader.empty()) {
-        NETMGR_LOG_E("The network is abnormal or Response code returned by httpRequest is empty!");
         netDetectionStatus_(NetDetectionStatus::INVALID_DETECTION_STATE, urlRedirect);
         lastDetectionState_ = INVALID_DETECTION_STATE;
         return true;
@@ -58,10 +56,8 @@ bool NetMonitor::HttpDetection()
             netDetectionStatus_(NetDetectionStatus::CAPTIVE_PORTAL_STATE, urlRedirect);
         }
         lastDetectionState_ = CAPTIVE_PORTAL_STATE;
-        NETMGR_LOG_D("This network is portal AP, need certification!");
         isNotPortal = false;
     } else if (statusCode == NO_CONTENT) {
-        NETMGR_LOG_D("This network is normal!");
         netDetectionStatus_(NetDetectionStatus::VERIFICATION_STATE, urlRedirect);
         lastDetectionState_ = VERIFICATION_STATE;
         isNotPortal = true;
@@ -70,10 +66,8 @@ bool NetMonitor::HttpDetection()
             netDetectionStatus_(NetDetectionStatus::CAPTIVE_PORTAL_STATE, urlRedirect);
         }
         lastDetectionState_ = CAPTIVE_PORTAL_STATE;
-        NETMGR_LOG_D("This network is portal AP, need certification!");
         isNotPortal = false;
     } else {
-        NETMGR_LOG_D("This network can't online!");
         netDetectionStatus_(NetDetectionStatus::INVALID_DETECTION_STATE, urlRedirect);
         lastDetectionState_ = INVALID_DETECTION_STATE;
         isNotPortal = true;
@@ -99,20 +93,15 @@ void NetMonitor::RunNetMonitorThreadFunc()
         }
         HttpDetection();
         if (!isExitNetMonitorThread_) {
-            NETMGR_LOG_D("conditionTimeout_ wait_for.");
             std::unique_lock<std::mutex> lock(mutex_);
-            if (conditionTimeout_.wait_for(lock, std::chrono::milliseconds(timeoutMs)) == std::cv_status::timeout) {
-                NETMGR_LOG_D("conditionTimeout_ timeout.");
-            } else {
-                NETMGR_LOG_D("for SignalNetMonitor, wakeup!");
-            }
+            conditionTimeout_.wait_for(lock, std::chrono::milliseconds(timeoutMs));
         }
     }
 }
 
 ResultCode NetMonitor::InitNetMonitorThread()
 {
-    netMonitorThread_ = new (std::nothrow) std::thread(&NetMonitor::RunNetMonitorThreadFunc, this);
+    netMonitorThread_ = std::make_unique<std::thread>(&NetMonitor::RunNetMonitorThreadFunc, this);
     if (netMonitorThread_ == nullptr) {
         NETMGR_LOG_E("Start NetMonitor thread failed!");
         return  ResultCode::ERR_NET_MONITOR_OPT_FAILED;
@@ -141,7 +130,7 @@ void NetMonitor::SignalNetMonitorThread(const std::string &ifaceName)
 
 void NetMonitor::ExitNetMonitorThread()
 {
-    NETMGR_LOG_D("Enter NetMonitor::ExitNetMonitorThread");
+    NETMGR_LOG_D("Enter ExitNetMonitorThread");
     {
         std::unique_lock<std::mutex> lock(mutex_);
         isStopNetMonitor_ = false;
@@ -152,8 +141,7 @@ void NetMonitor::ExitNetMonitorThread()
 
     if (netMonitorThread_ != nullptr) {
         netMonitorThread_->join();
-        delete netMonitorThread_;
-        netMonitorThread_ = nullptr;
+        NETMGR_LOG_D("ExitNetMonitorThread OK");
     }
 }
 

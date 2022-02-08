@@ -179,11 +179,10 @@ NetStatsResultCode NetStatsService::GetIfaceStatsDetail(const std::string &iface
     NetStatsResultCode result = netStatsCsv_->GetIfaceBytes(iface, start, end, statsInfo);
     NETMGR_LOG_I("GetIfaceStatsDetail iface[%{public}s], statsInfo.rxBytes[%{public}" PRId64 "]"
         "statsInfo.txBytes[%{public}" PRId64 "]", iface.c_str(), statsInfo.rxBytes_, statsInfo.txBytes_);
-    if (result == NetStatsResultCode::ERR_INTERNAL_ERROR) {
-        NETMGR_LOG_E("GetIfaceBytes data is error.");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
+    if (result == NetStatsResultCode::ERR_INVALID_TIME_PERIOD) {
+        NETMGR_LOG_E("GetIfaceBytes is error.");
     }
-    return NetStatsResultCode::ERR_NONE;
+    return result;
 }
 
 NetStatsResultCode NetStatsService::GetUidStatsDetail(const std::string &iface, uint32_t uid,
@@ -204,11 +203,10 @@ NetStatsResultCode NetStatsService::GetUidStatsDetail(const std::string &iface, 
     NetStatsResultCode result = netStatsCsv_->GetUidBytes(iface, uid, start, end, statsInfo);
     NETMGR_LOG_I("GetUidStatsDetail iface[%{public}s], uid[%{public}d] statsInfo.rxBytes[%{public}" PRId64 "] "
         "statsInfo.txBytes[%{public}" PRId64 "]", iface.c_str(), uid, statsInfo.rxBytes_, statsInfo.txBytes_);
-    if (result == NetStatsResultCode::ERR_INTERNAL_ERROR) {
-        NETMGR_LOG_E("GetIfaceBytes data is error.");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
+    if (result == NetStatsResultCode::ERR_INVALID_TIME_PERIOD) {
+        NETMGR_LOG_E("GetUidBytes is error.");
     }
-    return NetStatsResultCode::ERR_NONE;
+    return result;
 }
 
 NetStatsResultCode NetStatsService::UpdateIfacesStats(const std::string &iface,

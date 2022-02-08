@@ -34,7 +34,7 @@ public:
 public:
     int32_t NetUidPolicyChanged(uint32_t uid, NetUidPolicy policy) override;
     int32_t NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicies) override;
-    int32_t NetStrategySwitch(int32_t slotId, bool enable) override;
+    int32_t NetStrategySwitch(const std::string &simId, bool enable) override;
     int32_t NetBackgroundPolicyChanged(bool isBackgroundPolicyAllow) override;
 
 private:

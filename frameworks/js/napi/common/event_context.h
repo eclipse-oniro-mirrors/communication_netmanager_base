@@ -59,14 +59,6 @@ struct EventListener {
     napi_env env = nullptr;
     napi_ref callbackRef = nullptr;
 };
-
-struct NetStatusListenser : public EventListener {
-    NetStatusListenser() {}
-    std::string identifier;
-    int32_t netType = 0;
-    int32_t netCapabilities = 0;
-    int32_t netId = 0;
-};
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // EVENT_CONTEXT_H

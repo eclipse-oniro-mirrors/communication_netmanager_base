@@ -35,9 +35,12 @@ public:
     static int32_t Unregister(NapiNetConnection *conn);
     static int32_t Display();
     static int32_t FindListener(NapiNetConnObserver *observer, EventListener &listen);
+    static int32_t RemoveCallback(NapiNetConnObserver *observer);
 private:
+    static int32_t RemoveIndexListense(intptr_t index);
     static std::map<intptr_t, std::map<int32_t, EventListener>> listenses; // Netconnection obj to a group refences
-    static std::map<intptr_t, sptr<INetConnCallback>> callbacks; // Netconnection obj to callback obj
+    static std::map<intptr_t, sptr<INetConnCallback>> callbacks; // Netconnection obj to napi callback obj
+    static std::mutex mtx;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

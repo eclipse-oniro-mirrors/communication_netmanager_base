@@ -26,12 +26,13 @@
         "adapted_system_type": [
             "standard"
         ],
-        "rom": "",
-        "ram": "",
+        "rom": "4.5MB",
+        "ram": "5MB",
         "deps": {
             "components": [
                 "ability_runtime",
-                "appexecfwk_standard",
+                "bundle_framework",
+                "eventhandler",
                 "ces_standard",
                 "ipc",
                 "safwk",

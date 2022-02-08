@@ -228,9 +228,17 @@ int32_t NetConnService::RegisterNetConnCallback(const sptr<INetConnCallback> &ca
 int32_t NetConnService::RegisterNetConnCallback(
     const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
 {
+    if (netActivates_.size() >= MAX_REQUEST_NUM) {
+        NETMGR_LOG_E("Over the max request number");
+        return ERR_NET_OVER_MAX_REQUEST_NUM;
+    }
     if (netSpecifier == nullptr || callback == nullptr) {
         NETMGR_LOG_E("The parameter of netSpecifier or callback is null");
         return ERR_SERVICE_NULL_PTR;
+    }
+    uint32_t reqId = 0;
+    if (FindSameCallback(callback, reqId)) {
+        return ERR_REGISTER_THE_SAME_CALLBACK;
     }
     return ActivateNetwork(netSpecifier, callback, timeoutMS);
 }
@@ -242,6 +250,16 @@ int32_t NetConnService::UnregisterNetConnCallback(const sptr<INetConnCallback> &
         NETMGR_LOG_E("callback is null");
         return ERR_SERVICE_NULL_PTR;
     }
+    uint32_t reqId = 0;
+    if (!FindSameCallback(callback, reqId)) {
+        return ERR_UNREGISTER_CALLBACK_NOT_FOUND;
+    }
+    deleteNetActivates_.clear();
+    return DeactivateNetwork(reqId);
+}
+
+bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId)
+{
     NET_ACTIVATE_MAP::iterator iterActive;
     for (iterActive = netActivates_.begin(); iterActive != netActivates_.end(); ++iterActive) {
         if (!iterActive->second) {
@@ -252,12 +270,11 @@ int32_t NetConnService::UnregisterNetConnCallback(const sptr<INetConnCallback> &
             continue;
         }
         if (callback->AsObject().GetRefPtr() == saveCallback->AsObject().GetRefPtr()) {
-            DeactivateNetwork(iterActive->first);
-            return ERR_NONE;
+            reqId = iterActive->first;
+            return true;
         }
     }
-    deleteNetActivates_.clear();
-    return ERR_NET_TYPE_NOT_FOUND;
+    return false;
 }
 
 int32_t NetConnService::UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState)
@@ -470,13 +487,13 @@ int32_t NetConnService::DeactivateNetwork(uint32_t reqId)
     if (pNetActivate) {
         sptr<NetSupplier> pNetService = pNetActivate->GetServiceSupply();
         if (pNetService) {
-            pNetService->CancleRequest(reqId);
+            pNetService->CancelRequest(reqId);
         }
     }
 
     NET_SUPPLIER_MAP::iterator iterSupplier;
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
-        iterSupplier->second->CancleRequest(reqId);
+        iterSupplier->second->CancelRequest(reqId);
     }
     deleteNetActivates_.insert(std::pair<uint32_t, sptr<NetActivate>>(reqId, pNetActivate));
     netActivates_.erase(reqId);

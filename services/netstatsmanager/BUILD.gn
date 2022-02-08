@@ -42,6 +42,7 @@ ohos_shared_library("net_stats_manager") {
     "$NETDCONTROLLER_ROOT_DIR:netd_controller",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
+    "//utils/native/base:utils",
   ]
 
   external_deps = [
@@ -51,7 +52,6 @@ ohos_shared_library("net_stats_manager") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
-    "utils_base:utils",
   ]
 
   defines = [

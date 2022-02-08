@@ -66,10 +66,10 @@ int32_t NetPolicyCallbackTest::NetCellularPolicyChanged(const std::vector<NetPol
     return 0;
 }
 
-int32_t NetPolicyCallbackTest::NetStrategySwitch(int32_t slotId, bool enable)
+int32_t NetPolicyCallbackTest::NetStrategySwitch(const std::string &simId, bool enable)
 {
-    NETMGR_LOG_D("unittest NetStrategySwitch, slotId:[%{public}d], enable:[%{public}d]",
-        slotId, static_cast<uint32_t>(enable));
+    NETMGR_LOG_D("unittest NetStrategySwitch, simId:[%{public}s], enable:[%{public}d]",
+        simId.c_str(), static_cast<uint32_t>(enable));
 
     return 0;
 }
