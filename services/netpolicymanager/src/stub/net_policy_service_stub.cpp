@@ -316,12 +316,12 @@ int32_t NetPolicyServiceStub::OnSnoozePolicy(MessageParcel &data, MessageParcel 
         return ERR_FLATTEN_OBJECT;
     }
 
-    int32_t slotId = 0;
-    if (!data.ReadInt32(slotId)) {
+    std::string simId;
+    if (!data.ReadString(simId)) {
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!reply.WriteInt32(static_cast<int32_t>(SetSnoozePolicy(netType, slotId)))) {
+    if (!reply.WriteInt32(static_cast<int32_t>(SetSnoozePolicy(netType, simId)))) {
         return ERR_FLATTEN_OBJECT;
     }
 

@@ -60,15 +60,30 @@ struct NetPolicyAsyncContext {
     bool isTrustList = false;
     std::vector<uint32_t> uids;
     int8_t netType = 0;
-    int32_t slotId = 0;
+    int32_t simId = 0;
+    bool allow = false;
 };
 
 struct GetNetPolicyContext : BaseContext {
     std::vector<NetPolicyQuotaPolicy> result;
 };
 
+enum MeteringMode {
+    /* non metering */
+    UN_METERED = 0,
+    /* metering */
+    METERED,
+};
+
+enum ApplicationType {
+    /* common application */
+    COMMON = 0,
+    /* system application */
+    SYSTEM,
+};
+
 struct SetFactoryPolicyContext : BaseContext {
-    int32_t slotId;
+    int32_t simId;
 };
 
 struct GetBackgroundPolicyContext : BaseContext {
@@ -89,6 +104,8 @@ public:
     static napi_value DeclareNapiNetPolicyResultData(napi_env env, napi_value exports);
     static napi_value DeclareNetBearTypeData(napi_env env, napi_value exports);
     static napi_value DeclareBackgroundPolicyData(napi_env env, napi_value exports);
+    static napi_value DeclareEnumMeteringMode(napi_env env, napi_value exports);
+    static napi_value DeclareEnumApplicationType(napi_env env, napi_value exports);
 
     static void ExecSetPolicyByUid(napi_env env, void *data);
     static void ExecGetUidsByPolicy(napi_env env, void *data);
@@ -96,6 +113,7 @@ public:
     static void ExecSetNetQuotaPolicies(napi_env env, void *data);
     static void ExecSetSnoozePolicy(napi_env env, void *data);
     static void ExecSetFactoryPolicy(napi_env env, void *data);
+    static void ExecSetBackgroundPolicy(napi_env env, void *data);
     static void ExecGetBackgroundPolicy(napi_env env, void *data);
     static void ExecOn(napi_env env, void *data);
     static void ExecOff(napi_env env, void *data);
@@ -106,6 +124,7 @@ public:
     static void CompleteSetSnoozePolicy(napi_env env, napi_status status, void *data);
     static void CompleteNetPolicyResultCode(napi_env env, napi_status status, void *data);
     static void CompleteSetFactoryPolicy(napi_env env, napi_status status, void *data);
+    static void CompleteSetBackgroundPolicy(napi_env env, napi_status status, void *data);
     static void CompleteGetBackgroundPolicy(napi_env env, napi_status status, void *data);
     static void CompleteOn(napi_env env, napi_status status, void *data);
     static void CompleteOff(napi_env env, napi_status status, void *data);
@@ -119,6 +138,7 @@ public:
     static napi_value GetNetQuotaPolicies(napi_env env, napi_callback_info info);
     static napi_value SetSnoozePolicy(napi_env env, napi_callback_info info);
     static napi_value SetFactoryPolicy(napi_env env, napi_callback_info info);
+    static napi_value SetBackgroundPolicy(napi_env env, napi_callback_info info);
     static napi_value GetBackgroundPolicy(napi_env env, napi_callback_info info);
     static napi_value On(napi_env env, napi_callback_info info);
     static napi_value Off(napi_env env, napi_callback_info info);

@@ -72,8 +72,6 @@ public:
     static void DeclareNetConnDestructor(napi_env env, void *nativeObject, void *hint);
     static napi_value CreateNetHandle(napi_env env, sptr<NetHandle> &net);
 
-    static void ExecAddNetStatusCallback(napi_env env, void *data);
-    static void ExecRemoveNetStatusCallback(napi_env env, void *data);
     static void ExecNetDetection(napi_env env, void *data);
     static void ExecBindSocket(napi_env env, void *data);
     static void ExecGetAddressesByName(napi_env env, void *data);
@@ -84,8 +82,6 @@ public:
     static void ExecGetNetCapabilities(napi_env env, void *data);
     static void ExecHasDefaultNet(napi_env env, void *data);
     static void NativeRestoreFactoryData(napi_env env, void *data);
-    static void CompleteAddNetStatusCallback(napi_env env, napi_status status, void *data);
-    static void CompleteRemoveNetStatusCallback(napi_env env, napi_status status, void *data);
     static void CompleteNetDetection(napi_env env, napi_status status, void *data);
     static void CompleteBindSocket(napi_env env, napi_status status, void *data);
     static void CompleteGetAddressesByName(napi_env env, napi_status status, void *data);
@@ -110,8 +106,6 @@ public:
     static napi_value EnableAirplaneMode(napi_env env, napi_callback_info info);
     static napi_value DisableAirplaneMode(napi_env env, napi_callback_info info);
     static napi_value RestoreFactoryData(napi_env env, napi_callback_info info);
-    static napi_value AddNetStatusCallback(napi_env env, napi_callback_info info);
-    static napi_value RemoveNetStatusCallback(napi_env env, napi_callback_info info);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

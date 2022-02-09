@@ -219,7 +219,7 @@ NetPolicyResultCode NetPolicyClient::GetCellularPolicies(std::vector<NetPolicyCe
     return proxy->GetCellularPolicies(cellularPolicies);
 }
 
-NetPolicyResultCode NetPolicyClient::SetFactoryPolicy(const std::string &slotId)
+NetPolicyResultCode NetPolicyClient::SetFactoryPolicy(const std::string &simId)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -227,7 +227,7 @@ NetPolicyResultCode NetPolicyClient::SetFactoryPolicy(const std::string &slotId)
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return proxy->SetFactoryPolicy(slotId);
+    return proxy->SetFactoryPolicy(simId);
 }
 
 NetPolicyResultCode NetPolicyClient::SetBackgroundPolicy(bool isBackgroundPolicyAllow)
@@ -274,7 +274,7 @@ NetBackgroundPolicy NetPolicyClient::GetCurrentBackgroundPolicy()
     return proxy->GetCurrentBackgroundPolicy();
 }
 
-NetPolicyResultCode NetPolicyClient::SetSnoozePolicy(int8_t netType, int32_t slotId)
+NetPolicyResultCode NetPolicyClient::SetSnoozePolicy(int8_t netType, const std::string &simId)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -282,7 +282,7 @@ NetPolicyResultCode NetPolicyClient::SetSnoozePolicy(int8_t netType, int32_t slo
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return proxy->SetSnoozePolicy(netType, slotId);
+    return proxy->SetSnoozePolicy(netType, simId);
 }
 
 NetPolicyResultCode NetPolicyClient::SetIdleTrustlist(uint32_t uid, bool isTrustlist)

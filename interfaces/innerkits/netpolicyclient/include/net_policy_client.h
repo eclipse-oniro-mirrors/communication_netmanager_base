@@ -107,12 +107,12 @@ public:
      */
     NetPolicyResultCode GetCellularPolicies(std::vector<NetPolicyCellularPolicy> &cellularPolicies);
     /**
-     * @brief SetFactoryPolicy reset policys for slotId
+     * @brief SetFactoryPolicy reset policys for simId
      *
-     * @param slotId subscriber ID, get from telephone module
+     * @param simId ID, get from telephone module
      * @return Returns 0, successfully
      */
-    NetPolicyResultCode SetFactoryPolicy(const std::string &slotId);
+    NetPolicyResultCode SetFactoryPolicy(const std::string &simId);
     /**
      * @brief SetBackgroundPolicy reset backgroundpolicy for all app
      *
@@ -144,7 +144,7 @@ public:
      *
      * @return Returns 0, successfully
      */
-    NetPolicyResultCode SetSnoozePolicy(int8_t netType, int32_t slotId);
+    NetPolicyResultCode SetSnoozePolicy(int8_t netType, const std::string &simId);
     /**
      * @brief SetIdleTrustlist for add trust list for Idle status
      *

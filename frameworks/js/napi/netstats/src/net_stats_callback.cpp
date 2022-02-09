@@ -19,19 +19,43 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+void OnNetStatsChangeEvent(napi_env env, napi_ref callbackRef, napi_value callbackValue)
+{
+    napi_value recv = nullptr;
+    napi_value result = nullptr;
+    napi_value callbackFunc = nullptr;
+    napi_get_undefined(env, &recv);
+    napi_get_reference_value(env, callbackRef, &callbackFunc);
+    napi_value callbackValues[] = {callbackValue};
+    napi_call_function(env, recv, callbackFunc, std::size(callbackValues), callbackValues, &result);
+}
+
 int32_t NetStatsCallback::NetIfaceStatsChanged(const std::string &iface)
 {
     NETMGR_LOG_I("NetStatsCallback NetIfaceStatsChanged iface = %{public}s", iface.c_str());
-    std::unique_ptr<IfaceStatsEvent> event = std::make_unique<IfaceStatsEvent>(iface);
-    NetStatsEventListenerManager::GetInstance().SendEvent(NET_STATS_IFACE_CHANGED, event);
+    EventListener listen;
+    listen.eventId = EVENT_NET_STATS_CHANGE;
+    if (NetStatsEventListenerManager::GetInstance().FindListener(listen) != EVENT_NET_UNKNOW_CHANGE) {
+        napi_value callbackValue = nullptr;
+        napi_create_object(listen.env, &callbackValue);
+        NapiCommon::SetPropertyString(listen.env, callbackValue, "iface", iface);
+        OnNetStatsChangeEvent(listen.env, listen.callbackRef, callbackValue);
+    }
     return 0;
 };
 
 int32_t NetStatsCallback::NetUidStatsChanged(const std::string &iface, uint32_t uid)
 {
     NETMGR_LOG_I("NetStatsCallback NetUidStatsChanged iface = %{public}s, uid = %{public}d", iface.c_str(), uid);
-    std::unique_ptr<UidStatsEvent> event = std::make_unique<UidStatsEvent>(iface, uid);
-    NetStatsEventListenerManager::GetInstance().SendEvent(NET_STATS_UID_CHANGED, event);
+    EventListener listen;
+    listen.eventId = EVENT_NET_STATS_CHANGE;
+    if (NetStatsEventListenerManager::GetInstance().FindListener(listen) != EVENT_NET_UNKNOW_CHANGE) {
+        napi_value callbackValue = nullptr;
+        napi_create_object(listen.env, &callbackValue);
+        NapiCommon::SetPropertyString(listen.env, callbackValue, "iface", iface);
+        NapiCommon::SetPropertyInt32(listen.env, callbackValue, "uid", static_cast<int32_t>(uid));
+        OnNetStatsChangeEvent(listen.env, listen.callbackRef, callbackValue);
+    }
     return 0;
 }
 } // namespace NetManagerStandard

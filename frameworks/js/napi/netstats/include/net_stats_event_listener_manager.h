@@ -16,8 +16,9 @@
 #ifndef NETMANAGER_BASE_NET_STATS_EVENT_LISTENER_MANAGER_H
 #define NETMANAGER_BASE_NET_STATS_EVENT_LISTENER_MANAGER_H
 #include <memory>
-#include "net_stats_event_listener_handler.h"
+#include <list>
 #include "net_mgr_log_wrapper.h"
+#include "napi_common.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -25,27 +26,14 @@ enum EventHandleRun { STATE_NOT_START, STATE_RUNNING };
 
 class NetStatsEventListenerManager {
 public:
-    static NetStatsEventListenerManager& GetInstance();
-    
-    template<typename T, typename D>
-    inline bool SendEvent(uint32_t innerEventId, std::unique_ptr<T, D> &object, int64_t delayTime = 0)
-    {
-        if (eventListenerHandler != nullptr) {
-            return eventListenerHandler->SendEvent(innerEventId, object, delayTime);
-        } else {
-            NETMGR_LOG_I("eventListenerHandler fail....");
-            return false;
-        }
-        return false;
-    }
+    static NetStatsEventListenerManager &GetInstance();
     int32_t AddEventListener(EventListener &eventListener);
     int32_t RemoveEventListener(EventListener &eventListener);
+    int32_t FindListener(EventListener &listen);
 
 private:
     NetStatsEventListenerManager();
-    std::shared_ptr<NetStatsEventListenerHandler> eventListenerHandler = nullptr;
-    std::shared_ptr<AppExecFwk::EventRunner> eventLoop = nullptr;
-    EventHandleRun eventStateRun_ = STATE_NOT_START;
+    std::list<EventListener> listenerList;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

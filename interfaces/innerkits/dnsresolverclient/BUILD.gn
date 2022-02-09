@@ -48,9 +48,12 @@ ohos_source_set("dns_resolver_parcel") {
     "$INNERKITS_ROOT/dnsresolverclient/include",
   ]
 
-  deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
+  deps = [
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "//utils/native/base:utils",
+  ]
 
-  external_deps = [ "utils_base:utils" ]
+  external_deps = []
   if (is_standard_system) {
     external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
   } else {

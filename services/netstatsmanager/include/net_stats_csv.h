@@ -58,7 +58,7 @@ enum class UidStatCsvColumn {
 
 class CSVRow {
 public:
-    std::string const& operator[](uint32_t index) const
+    const std::string& operator[](uint32_t index) const
     {
         return data_[index];
     }

@@ -75,7 +75,7 @@ void NetPolicyFile::ParseQuotaPolicy(const Json::Value &root, NetPolicy &netPoli
     NetPolicyQuota quotaPolicy;
     for (uint32_t i = 0; i < size; i++) {
         quotaPolicy.netType = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_NETTYPE].asString();
-        quotaPolicy.slotId = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_SUBSCRIBERID].asString();
+        quotaPolicy.simId = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_SUBSCRIBERID].asString();
         quotaPolicy.periodStartTime = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_PERIODSTARTTIME].asString();
         quotaPolicy.periodDuration = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_PERIODDURATION].asString();
         quotaPolicy.warningBytes = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_WARNINGBYTES].asString();
@@ -93,7 +93,7 @@ void NetPolicyFile::ParseCellularPolicy(const Json::Value &root, NetPolicy &netP
     uint32_t size = arrayCellularPolicy.size();
     NetPolicyCellular cellularPolicy;
     for (uint32_t i = 0; i < size; i++) {
-        cellularPolicy.slotId = arrayCellularPolicy[i][CONFIG_CELLULAR_POLICY_SUBSCRIBERID].asString();
+        cellularPolicy.simId = arrayCellularPolicy[i][CONFIG_CELLULAR_POLICY_SUBSCRIBERID].asString();
         cellularPolicy.periodStartTime = arrayCellularPolicy[i][CONFIG_CELLULAR_POLICY_PERIODSTARTTIME].asString();
         cellularPolicy.periodDuration = arrayCellularPolicy[i][CONFIG_CELLULAR_POLICY_PERIODDURATION].asString();
         cellularPolicy.title = arrayCellularPolicy[i][CONFIG_CELLULAR_POLICY_TITLE].asString();
@@ -170,7 +170,7 @@ void NetPolicyFile::AppendQuotaPolicy(Json::Value &root)
     for (uint32_t i = 0; i < size; i++) {
         Json::Value quotaPolicy;
         quotaPolicy[CONFIG_QUOTA_POLICY_NETTYPE] = netPolicy_.netQuotaPolicys[i].netType;
-        quotaPolicy[CONFIG_QUOTA_POLICY_SUBSCRIBERID] = netPolicy_.netQuotaPolicys[i].slotId;
+        quotaPolicy[CONFIG_QUOTA_POLICY_SUBSCRIBERID] = netPolicy_.netQuotaPolicys[i].simId;
         quotaPolicy[CONFIG_QUOTA_POLICY_PERIODSTARTTIME] = netPolicy_.netQuotaPolicys[i].periodStartTime;
         quotaPolicy[CONFIG_QUOTA_POLICY_PERIODDURATION] = netPolicy_.netQuotaPolicys[i].periodDuration;
         quotaPolicy[CONFIG_QUOTA_POLICY_WARNINGBYTES] = netPolicy_.netQuotaPolicys[i].warningBytes;
@@ -187,7 +187,7 @@ void NetPolicyFile::AppendCellularPolicy(Json::Value &root)
     uint32_t size = netPolicy_.netCellularPolicys.size();
     for (uint32_t i = 0; i < size; i++) {
         Json::Value cellularPolicy;
-        cellularPolicy[CONFIG_CELLULAR_POLICY_SUBSCRIBERID] = netPolicy_.netCellularPolicys[i].slotId;
+        cellularPolicy[CONFIG_CELLULAR_POLICY_SUBSCRIBERID] = netPolicy_.netCellularPolicys[i].simId;
         cellularPolicy[CONFIG_CELLULAR_POLICY_PERIODSTARTTIME] =
             netPolicy_.netCellularPolicys[i].periodStartTime;
         cellularPolicy[CONFIG_CELLULAR_POLICY_PERIODDURATION] = netPolicy_.netCellularPolicys[i].periodDuration;
@@ -306,7 +306,7 @@ bool NetPolicyFile::UpdateQuotaPolicyExist(const NetPolicyQuotaPolicy &quotaPoli
     }
 
     for (uint32_t i = 0; i < netPolicy_.netQuotaPolicys.size(); ++i) {
-        if (std::to_string(quotaPolicy.slotId_) == netPolicy_.netQuotaPolicys[i].slotId &&
+        if (quotaPolicy.simId_ == netPolicy_.netQuotaPolicys[i].simId &&
             netPolicy_.netQuotaPolicys[i].netType == std::to_string(quotaPolicy.netType_)) {
             netPolicy_.netQuotaPolicys[i].lastLimitSnooze = std::to_string(quotaPolicy.lastLimitSnooze_);
             netPolicy_.netQuotaPolicys[i].limitBytes = std::to_string(quotaPolicy.limitBytes_);
@@ -315,7 +315,7 @@ bool NetPolicyFile::UpdateQuotaPolicyExist(const NetPolicyQuotaPolicy &quotaPoli
             netPolicy_.netQuotaPolicys[i].periodDuration = quotaPolicy.periodDuration_;
             netPolicy_.netQuotaPolicys[i].periodStartTime = std::to_string(quotaPolicy.periodStartTime_);
             netPolicy_.netQuotaPolicys[i].source = std::to_string(quotaPolicy.source_);
-            netPolicy_.netQuotaPolicys[i].slotId = std::to_string(quotaPolicy.slotId_);
+            netPolicy_.netQuotaPolicys[i].simId = quotaPolicy.simId_;
             netPolicy_.netQuotaPolicys[i].warningBytes = std::to_string(quotaPolicy.warningBytes_);
             return true;
         }
@@ -339,7 +339,7 @@ bool NetPolicyFile::WriteFile(const std::vector<NetPolicyQuotaPolicy> &quotaPoli
         quotaPolicy.periodDuration = quotaPolicies[i].periodDuration_;
         quotaPolicy.periodStartTime = std::to_string(quotaPolicies[i].periodStartTime_);
         quotaPolicy.source = std::to_string(quotaPolicies[i].source_);
-        quotaPolicy.slotId = std::to_string(quotaPolicies[i].slotId_);
+        quotaPolicy.simId = quotaPolicies[i].simId_;
         quotaPolicy.warningBytes = std::to_string(quotaPolicies[i].warningBytes_);
         netPolicy_.netQuotaPolicys.push_back(quotaPolicy);
     }
@@ -360,8 +360,8 @@ bool NetPolicyFile::UpdateCellularPolicyExist(const NetPolicyCellularPolicy &cel
     }
 
     for (uint32_t i = 0; i < netPolicy_.netCellularPolicys.size(); ++i) {
-        if (std::to_string(cellularPolicy.slotId_) == netPolicy_.netCellularPolicys[i].slotId) {
-            netPolicy_.netCellularPolicys[i].slotId = std::to_string(cellularPolicy.slotId_);
+        if (cellularPolicy.simId_ == netPolicy_.netCellularPolicys[i].simId) {
+            netPolicy_.netCellularPolicys[i].simId = cellularPolicy.simId_;
             netPolicy_.netCellularPolicys[i].periodStartTime = std::to_string(cellularPolicy.periodStartTime_);
             netPolicy_.netCellularPolicys[i].periodDuration = cellularPolicy.periodDuration_;
             netPolicy_.netCellularPolicys[i].title = cellularPolicy.title_;
@@ -386,7 +386,7 @@ bool NetPolicyFile::WriteFile(const std::vector<NetPolicyCellularPolicy> &cellul
         if (UpdateCellularPolicyExist(cellularPolicies[i])) {
             continue;
         }
-        cellularPolicy.slotId = std::to_string(cellularPolicies[i].slotId_);
+        cellularPolicy.simId = cellularPolicies[i].simId_;
         cellularPolicy.periodStartTime = std::to_string(cellularPolicies[i].periodStartTime_);
         cellularPolicy.periodDuration = cellularPolicies[i].periodDuration_;
         cellularPolicy.title = cellularPolicies[i].title_;
@@ -453,7 +453,7 @@ NetPolicyResultCode NetPolicyFile::GetNetQuotaPolicies(std::vector<NetPolicyQuot
         quotaPolicyTmp.periodDuration_ = quotaPolicy.periodDuration;
         quotaPolicyTmp.periodStartTime_ = static_cast<int64_t>(std::stoll(quotaPolicy.periodStartTime));
         quotaPolicyTmp.source_ = static_cast<int8_t>(std::stol(quotaPolicy.source));
-        quotaPolicyTmp.slotId_ = static_cast<int32_t>(std::stol(quotaPolicy.slotId));
+        quotaPolicyTmp.simId_ = quotaPolicy.simId;
         quotaPolicyTmp.warningBytes_ = static_cast<int64_t>(std::stoll(quotaPolicy.warningBytes));
         quotaPolicies.push_back(quotaPolicyTmp);
     }
@@ -461,11 +461,12 @@ NetPolicyResultCode NetPolicyFile::GetNetQuotaPolicies(std::vector<NetPolicyQuot
     return NetPolicyResultCode::ERR_NONE;
 }
 
-NetPolicyResultCode NetPolicyFile::GetNetQuotaPolicy(int8_t netType, int32_t slotId, NetPolicyQuotaPolicy &quotaPolicy)
+NetPolicyResultCode NetPolicyFile::GetNetQuotaPolicy(int8_t netType, const std::string &simId,
+    NetPolicyQuotaPolicy &quotaPolicy)
 {
     for (auto &quotaPolicyTemp : netPolicy_.netQuotaPolicys) {
         if (netType == static_cast<int8_t>(std::stol(quotaPolicyTemp.netType)) &&
-            slotId == static_cast<int32_t>(std::stol(quotaPolicyTemp.slotId))) {
+            simId == quotaPolicyTemp.simId) {
             quotaPolicy.lastLimitSnooze_ = static_cast<int64_t>(std::stoll(quotaPolicyTemp.lastLimitSnooze));
             quotaPolicy.limitBytes_ = static_cast<int64_t>(std::stoll(quotaPolicyTemp.limitBytes));
             quotaPolicy.metered_ = static_cast<int8_t>(std::stol(quotaPolicyTemp.metered));
@@ -473,7 +474,7 @@ NetPolicyResultCode NetPolicyFile::GetNetQuotaPolicy(int8_t netType, int32_t slo
             quotaPolicy.periodDuration_ = quotaPolicyTemp.periodDuration;
             quotaPolicy.periodStartTime_ = static_cast<int64_t>(std::stoll(quotaPolicyTemp.periodStartTime));
             quotaPolicy.source_ = static_cast<int8_t>(std::stol(quotaPolicyTemp.source));
-            quotaPolicy.slotId_ = static_cast<int32_t>(std::stol(quotaPolicyTemp.slotId));
+            quotaPolicy.simId_ = quotaPolicyTemp.simId;
             quotaPolicy.warningBytes_ = static_cast<int64_t>(std::stoll(quotaPolicyTemp.warningBytes));
             return NetPolicyResultCode::ERR_NONE;
         }
@@ -489,7 +490,7 @@ bool NetPolicyFile::IsInterfaceMetered(const std::string &ifaceName)
         NetBearType bearerType = static_cast<NetBearType>(netType);
         std::string policyIfaceName;
         int32_t ret = NetManagerCenter::GetInstance().GetIfaceNameByType(bearerType,
-            IDENT_PREFIX + quotaPolicy.slotId, policyIfaceName);
+            IDENT_PREFIX, policyIfaceName);
         if (ret != 0 || policyIfaceName.empty()) {
             continue;
         }
@@ -504,7 +505,7 @@ NetPolicyResultCode NetPolicyFile::GetCellularPolicies(std::vector<NetPolicyCell
 {
     NetPolicyCellularPolicy cellularPolicyTmp;
     for (auto &cellularPolicy : netPolicy_.netCellularPolicys) {
-        cellularPolicyTmp.slotId_ = static_cast<int32_t>(std::stol(cellularPolicy.slotId));
+        cellularPolicyTmp.simId_ = cellularPolicy.simId;
         cellularPolicyTmp.periodStartTime_ = static_cast<int64_t>(std::stoll(cellularPolicy.periodStartTime));
         cellularPolicyTmp.periodDuration_ = cellularPolicy.periodDuration;
         cellularPolicyTmp.title_ = cellularPolicy.title;
@@ -520,24 +521,24 @@ NetPolicyResultCode NetPolicyFile::GetCellularPolicies(std::vector<NetPolicyCell
     return NetPolicyResultCode::ERR_NONE;
 }
 
-NetPolicyResultCode NetPolicyFile::SetFactoryPolicy(const std::string &slotId)
+NetPolicyResultCode NetPolicyFile::SetFactoryPolicy(const std::string &simId)
 {
     netPolicy_.uidPolicys.clear();
     netPolicy_.backgroundPolicyStatus_ = BACKGROUND_POLICY_ALLOW;
 
-    if (slotId.empty()) {
+    if (simId.empty()) {
         netPolicy_.netQuotaPolicys.clear();
         netPolicy_.netCellularPolicys.clear();
     } else {
         for (auto iter = netPolicy_.netQuotaPolicys.begin(); iter != netPolicy_.netQuotaPolicys.end(); ++iter) {
-            if (slotId == iter->slotId) {
+            if (simId == iter->simId) {
                 netPolicy_.netQuotaPolicys.erase(iter);
                 break;
             }
         }
 
         for (auto iter = netPolicy_.netCellularPolicys.begin(); iter != netPolicy_.netCellularPolicys.end(); ++iter) {
-            if (slotId == iter->slotId) {
+            if (simId == iter->simId) {
                 netPolicy_.netCellularPolicys.erase(iter);
                 break;
             }

@@ -34,6 +34,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+constexpr uint32_t MAX_REQUEST_NUM = 200;
 class NetConnService : public SystemAbility,
     public NetConnServiceStub,
     public std::enable_shared_from_this<NetConnService> {
@@ -218,6 +219,7 @@ private:
     void CreateDefaultRequest();
     int32_t RegUnRegNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback, bool isReg);
     int32_t GenerateNetId();
+    bool FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId);
 
 private:
     enum ServiceRunningState {

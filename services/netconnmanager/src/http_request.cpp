@@ -49,7 +49,6 @@ void HttpRequest::SetIfaceName(const std::string &ifaceName)
 
 int32_t HttpRequest::HttpGetHeader(const std::string &strUrl, std::string &strHeader)
 {
-    NETMGR_LOG_I("Enter HttpGetHeader");
     return HttpRequestHeaderExec(strUrl, strHeader);
 }
 
@@ -116,7 +115,7 @@ int32_t HttpRequest::HttpRequestExec(
 
 int32_t HttpRequest::HttpRequestHeaderExec(const std::string &strUrl, std::string &strHeader)
 {
-    NETMGR_LOG_D("Enter HttpRequestHeaderExec, ifaceName:[%{public}s]", ifaceName_.c_str());
+    NETMGR_LOG_D("ifaceName:[%{public}s]", ifaceName_.c_str());
     /* Check whether the URL is valid. */
     if (strUrl.empty() || strUrl.length() > URL_SIZE) {
         NETMGR_LOG_E("URL error!");
@@ -234,7 +233,6 @@ int32_t HttpRequest::SetCurlOptCommon(const std::unique_ptr<CURL, CURLClean> &cu
 
     CURLcode errCode = CURLE_OK;
     if (!ifaceName_.empty()) {
-        NETMGR_LOG_D("CURLOPT_INTERFACE:[%{public}s]!", ifaceName_.c_str());
         errCode = curl_easy_setopt(curl.get(), CURLOPT_INTERFACE, ifaceName_.c_str());
         if (errCode != CURLE_OK) {
             NETMGR_LOG_E("CURLOPT_INTERFACE failed:%d!", errCode);

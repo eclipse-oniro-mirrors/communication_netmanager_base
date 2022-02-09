@@ -376,7 +376,7 @@ NetPolicyResultCode NetPolicyServiceProxy::GetCellularPolicies(std::vector<NetPo
     return static_cast<NetPolicyResultCode>(reply.ReadInt32());
 }
 
-NetPolicyResultCode NetPolicyServiceProxy::SetFactoryPolicy(const std::string &slotId)
+NetPolicyResultCode NetPolicyServiceProxy::SetFactoryPolicy(const std::string &simId)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -384,7 +384,7 @@ NetPolicyResultCode NetPolicyServiceProxy::SetFactoryPolicy(const std::string &s
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    if (!data.WriteString(slotId)) {
+    if (!data.WriteString(simId)) {
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
@@ -513,7 +513,7 @@ NetBackgroundPolicy NetPolicyServiceProxy::GetCurrentBackgroundPolicy()
     return static_cast<NetBackgroundPolicy>(reply.ReadInt32());
 }
 
-NetPolicyResultCode NetPolicyServiceProxy::SetSnoozePolicy(int8_t netType, int32_t slotId)
+NetPolicyResultCode NetPolicyServiceProxy::SetSnoozePolicy(int8_t netType, const std::string &simId)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -531,7 +531,7 @@ NetPolicyResultCode NetPolicyServiceProxy::SetSnoozePolicy(int8_t netType, int32
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    if (!data.WriteInt32(slotId)) {
+    if (!data.WriteString(simId)) {
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 

@@ -42,16 +42,19 @@ enum ResultCode {
     ERR_NET_TYPE_NOT_FOUND                                          = (-18),
     ERR_NO_ANY_NET_TYPE                                             = (-19),
     ERR_NO_REGISTERED                                               = (-20),
-    ERR_NET_HOST_EMPTY = (-21),
-    ERR_SERVICE_NO_REQUEST = (-22),
-    ERR_NO_ADDRESS = (-23),
-    ERR_NET_FIND_BESTNETWORK_FOR_REQUEST = (-24),
-    ERR_NET_NOT_FIND_BESTNETWORK_FOR_REQUEST = (-25),
-    ERR_NET_NOT_FIND_REQUEST_ID = (-26),
-    ERR_NET_NOT_FIND_NETID = (-27),
-    ERR_VPN = (-28),
-    ERR_NET_DEFAULTNET_NOT_EXIST = (-29),
-    ERR_NET_NO_RESTRICT_BACKGROUND = (-30)
+    ERR_NET_HOST_EMPTY                                              = (-21),
+    ERR_SERVICE_NO_REQUEST                                          = (-22),
+    ERR_NO_ADDRESS                                                  = (-23),
+    ERR_NET_FIND_BESTNETWORK_FOR_REQUEST                            = (-24),
+    ERR_NET_NOT_FIND_BESTNETWORK_FOR_REQUEST                        = (-25),
+    ERR_NET_NOT_FIND_REQUEST_ID                                     = (-26),
+    ERR_NET_NOT_FIND_NETID                                          = (-27),
+    ERR_VPN                                                         = (-28),
+    ERR_NET_DEFAULTNET_NOT_EXIST                                    = (-29),
+    ERR_NET_NO_RESTRICT_BACKGROUND                                  = (-30),
+    ERR_NET_OVER_MAX_REQUEST_NUM                                    = (-31),
+    ERR_REGISTER_THE_SAME_CALLBACK                                  = (-32),
+    ERR_UNREGISTER_CALLBACK_NOT_FOUND                               = (-33)
 };
 
 enum NetMonitorResponseCode {

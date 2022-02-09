@@ -213,7 +213,7 @@ NetPolicyResultCode NetPolicyTraffic::SetCellularPolicies(const std::vector<NetP
     return NetPolicyResultCode::ERR_NONE;
 }
 
-bool NetPolicyTraffic::IsQuotaPolicyExist(int8_t netType, int32_t slotId)
+bool NetPolicyTraffic::IsQuotaPolicyExist(int8_t netType, const std::string &simId)
 {
     std::vector<NetPolicyQuotaPolicy> quotaPolicies;
     if (netPolicyFile_->GetNetQuotaPolicies(quotaPolicies) != NetPolicyResultCode::ERR_NONE) {
@@ -227,7 +227,7 @@ bool NetPolicyTraffic::IsQuotaPolicyExist(int8_t netType, int32_t slotId)
     }
 
     for (uint32_t i = 0; i < quotaPolicies.size(); i++) {
-        if (netType == quotaPolicies[i].netType_ && slotId == quotaPolicies[i].slotId_) {
+        if (netType == quotaPolicies[i].netType_ && simId == quotaPolicies[i].simId_) {
             NETMGR_LOG_D("netQuotaPolicy exist");
             return true;
         }
@@ -236,7 +236,7 @@ bool NetPolicyTraffic::IsQuotaPolicyExist(int8_t netType, int32_t slotId)
     return false;
 }
 
-NetPolicyResultCode NetPolicyTraffic::SetSnoozePolicy(int8_t netType, int32_t slotId,
+NetPolicyResultCode NetPolicyTraffic::SetSnoozePolicy(int8_t netType, const std::string &simId,
     std::vector<NetPolicyQuotaPolicy> &quotaPolicies)
 {
     if (!IsNetPolicyTypeValid(static_cast<NetBearType>(netType))) {
@@ -244,7 +244,7 @@ NetPolicyResultCode NetPolicyTraffic::SetSnoozePolicy(int8_t netType, int32_t sl
         return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
     }
 
-    if (!IsQuotaPolicyExist(netType, slotId)) {
+    if (!IsQuotaPolicyExist(netType, simId)) {
         NETMGR_LOG_E("quotaPolicy is not exist");
         return NetPolicyResultCode::ERR_QUOTA_POLICY_NOT_EXIST;
     }

@@ -46,7 +46,7 @@ public:
     bool IsUidPolicyExist(uint32_t uid);
     NetPolicyResultCode SetNetQuotaPolicies(const std::vector<NetPolicyQuotaPolicy> &quotaPolicies);
     NetPolicyResultCode SetCellularPolicies(const std::vector<NetPolicyCellularPolicy> &cellularPolicies);
-    NetPolicyResultCode SetSnoozePolicy(int8_t netType, int32_t slotId,
+    NetPolicyResultCode SetSnoozePolicy(int8_t netType, const std::string &simId,
         std::vector<NetPolicyQuotaPolicy> &quotaPolicies);
     NetPolicyResultCode SetIdleTrustlist(uint32_t uid, bool isTrustlist);
     NetPolicyResultCode GetIdleTrustlist(std::vector<uint32_t> &uids);
@@ -57,7 +57,7 @@ private:
     bool IsNetPolicyTypeValid(NetBearType netType);
     bool IsNetPolicyPeriodDurationValid(const std::string &periodDuration);
     void InitController();
-    bool IsQuotaPolicyExist(int8_t netType, int32_t slotId);
+    bool IsQuotaPolicyExist(int8_t netType, const std::string &simId);
 
 private:
     sptr<NetPolicyFile> netPolicyFile_;

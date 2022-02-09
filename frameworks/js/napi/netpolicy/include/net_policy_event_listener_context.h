@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef NETD_COMMON_SERVER_SOCKET_H__
-#define NETD_COMMON_SERVER_SOCKET_H__
+#ifndef NET_POLICY_EVENT_LISTENER_CONTEXT_H
+#define NET_POLICY_EVENT_LISTENER_CONTEXT_H
 
-#include "socket_base.h"
+#include <memory>
+#include <map>
+#include "net_mgr_log_wrapper.h"
+#include "napi_common.h"
+
 namespace OHOS {
-namespace nmd {
-namespace common {
-class server_socket : public socket_base {
+namespace NetManagerStandard {
+class NetPolicyEventListenerContext {
 public:
-    server_socket();
-    ~server_socket();
-
-    int bindPort(uint16_t port);
-    int bindFile(const char *filePath, const char *name);
-
+    static NetPolicyEventListenerContext& GetInstance();
+    static int32_t AddEventListener(EventListener &eventListener);
+    static int32_t RemoveEventListener(EventListener &eventListener);
+    static int32_t FindEventListense(EventListener &eventListener);
 private:
-    struct sockaddr addr_ {};
+    static std::map<int32_t, EventListener> listenses;
 };
-} // namespace common
-} // namespace nmd
+} // namespace NetManagerStandard
 } // namespace OHOS
-#endif  // !NETD_COMMON_SERVER_SOCKET_H__
+#endif // NET_POLICY_EVENT_LISTENER_CONTEXT_H

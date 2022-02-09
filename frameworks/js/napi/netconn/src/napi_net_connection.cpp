@@ -30,7 +30,7 @@ struct ObserverContext : public BaseContext {
 void OnExecute(napi_env env, void *data)
 {
     if (data == nullptr) {
-        NETMGR_LOG_E("OnExecute data is nullptr");
+        NETMGR_LOG_E("onExecute data is nullptr");
         return;
     }
     ObserverContext *asyncContext = static_cast<ObserverContext *>(data);
@@ -45,12 +45,12 @@ void OnExecute(napi_env env, void *data)
 void OnComplete(napi_env env, napi_status status, void *data)
 {
     if (data == nullptr) {
-        NETMGR_LOG_E("OnComplete data is nullptr");
+        NETMGR_LOG_E("onComplete data is nullptr");
         return;
     }
     std::unique_ptr<ObserverContext> asyncContext(static_cast<ObserverContext *>(data));
     if (!asyncContext->resolved) {
-        NETMGR_LOG_E("OnComplete error by add observer failed");
+        NETMGR_LOG_E("onComplete error by add observer failed");
     }
     napi_delete_async_work(env, asyncContext->work);
 }
@@ -58,7 +58,7 @@ void OnComplete(napi_env env, napi_status status, void *data)
 void RegisterExecute(napi_env env, void *data)
 {
     if (data == nullptr) {
-        NETMGR_LOG_E("RegisterExecute data is nullptr");
+        NETMGR_LOG_E("registerExecute data is nullptr");
         return;
     }
     ObserverContext *asyncContext = static_cast<ObserverContext *>(data);
@@ -69,14 +69,14 @@ void RegisterExecute(napi_env env, void *data)
 void RegisterComplete(napi_env env, napi_status status, void *data)
 {
     if (data == nullptr) {
-        NETMGR_LOG_E("RegisterComplete data is nullptr");
+        NETMGR_LOG_E("registerComplete data is nullptr");
         return;
     }
     std::unique_ptr<ObserverContext> asyncContext(static_cast<ObserverContext *>(data));
     napi_value callbackValue = nullptr;
     if (!asyncContext->resolved) {
         callbackValue = NapiCommon::CreateErrorMessage(
-            env, "RegisterComplete error by add observer failed", asyncContext->errorCode);
+            env, "registerComplete error by add observer failed", asyncContext->errorCode);
     } else {
         callbackValue = NapiCommon::CreateUndefined(env);
     }
@@ -103,8 +103,7 @@ void UnregisterComplete(napi_env env, napi_status status, void *data)
     std::unique_ptr<ObserverContext> asyncContext(static_cast<ObserverContext *>(data));
     napi_value callbackValue = nullptr;
     if (!asyncContext->resolved) {
-        callbackValue = NapiCommon::CreateErrorMessage(
-            env, "RegisterComplete error by add observer failed", asyncContext->errorCode);
+        callbackValue = NapiCommon::CreateErrorMessage(env, "unregister failed", asyncContext->errorCode);
     } else {
         callbackValue = NapiCommon::CreateUndefined(env);
     }
@@ -114,7 +113,6 @@ void UnregisterComplete(napi_env env, napi_status status, void *data)
 
 napi_value NapiNetConnection::On(napi_env env, napi_callback_info info)
 {
-    NETMGR_LOG_I("NapiNetConnection::On");
     size_t argc = 2;
     napi_value argv[] = {nullptr, nullptr};
     napi_value thisVar = nullptr;
@@ -153,7 +151,6 @@ napi_value NapiNetConnection::On(napi_env env, napi_callback_info info)
 
 napi_value NapiNetConnection::Register(napi_env env, napi_callback_info info)
 {
-    NETMGR_LOG_I("NapiNetConnection::Register");
     size_t argc = 1;
     napi_value argv[] = {nullptr};
     napi_value thisVar = nullptr;
@@ -183,7 +180,6 @@ napi_value NapiNetConnection::Register(napi_env env, napi_callback_info info)
 
 napi_value NapiNetConnection::Unregister(napi_env env, napi_callback_info info)
 {
-    NETMGR_LOG_I("NapiNetConnection::Unregister");
     size_t argc = 1;
     napi_value argv[] = {nullptr};
     napi_value thisVar = nullptr;

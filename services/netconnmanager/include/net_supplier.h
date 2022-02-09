@@ -90,7 +90,7 @@ public:
     void AddRequsetIdToList(uint32_t requestId);
     int32_t SelectAsBestNetwork(uint32_t reqId);
     void ReceiveBestScore(uint32_t reqId, int32_t bestScore);
-    int32_t CancleRequest(uint32_t reqId);
+    int32_t CancelRequest(uint32_t reqId);
     void RemoveBestRequest(uint32_t reqId);
     std::set<uint32_t>& GetBestRequestList();
     void SetDefault();

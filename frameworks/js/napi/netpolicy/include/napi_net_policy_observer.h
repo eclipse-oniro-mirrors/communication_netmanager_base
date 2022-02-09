@@ -23,31 +23,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-struct UidPolicyEvent {
-    UidPolicyEvent(int32_t uid, NetUidPolicy policy)
-        : uid(uid), policy(policy) {}
-    int32_t uid;
-    NetUidPolicy policy;
-};
-
-struct CellularPolicyEvent {
-    CellularPolicyEvent (const std::vector<NetPolicyCellularPolicy> &cellularPolicys)
-        : cellularPolicys(cellularPolicys) {}
-    std::vector<NetPolicyCellularPolicy> cellularPolicys;
-};
-
-struct StrategySwitchEvent {
-    StrategySwitchEvent(int32_t slotId, bool enable)
-        : slotId(slotId), enable(enable) {}
-    int32_t slotId;
-    bool enable;
-};
-
 class NapiNetPolicyObserver : public NetPolicyCallbackStub {
 public:
     int32_t NetUidPolicyChanged(uint32_t uid, NetUidPolicy policy) override;
     int32_t NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicys) override;
-    int32_t NetStrategySwitch(int32_t slotId, bool enable) override;
+    int32_t NetStrategySwitch(const std::string &simId, bool enable) override;
     int32_t NetBackgroundPolicyChanged(bool isBackgroundPolicyAllow) override;
 };
 } // namespace NetManagerStandard

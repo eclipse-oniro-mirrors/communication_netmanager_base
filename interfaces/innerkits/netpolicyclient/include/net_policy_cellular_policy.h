@@ -24,13 +24,13 @@ namespace OHOS {
 namespace NetManagerStandard {
 struct NetPolicyCellularPolicy : public Parcelable {
     /* slot ID, get from telephone module */
-    int32_t slotId_ = 0;
+    std::string simId_;
     /*  Time rubbing, for example:1636598990 */
     int64_t periodStartTime_ = -1;
     /* Unit: Month for example:M1 (The 1st of each month) */
     std::string periodDuration_ = "M1";
-    std::string title_ = "";
-    std::string summary_ = "";
+    std::string title_;
+    std::string summary_;
     /* Limit threshold */
     int64_t limitBytes_ = -1;
     /* Limit action; 1 : prohibit; 2 : charging; 3 : Speed limit */
@@ -39,7 +39,7 @@ struct NetPolicyCellularPolicy : public Parcelable {
     int64_t usedBytes_ = -1;
     int64_t usedTimeDuration_ = -1;
     /*  possessor */
-    std::string possessor_ = "";
+    std::string possessor_;
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static bool Marshalling(Parcel &parcel, const std::vector<NetPolicyCellularPolicy> &cellularPolicies);

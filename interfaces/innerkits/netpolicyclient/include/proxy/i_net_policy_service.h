@@ -64,12 +64,12 @@ public:
     virtual NetPolicyResultCode GetNetQuotaPolicies(std::vector<NetPolicyQuotaPolicy> &quotaPolicies) = 0;
     virtual NetPolicyResultCode SetCellularPolicies(const std::vector<NetPolicyCellularPolicy> &cellularPolicies) = 0;
     virtual NetPolicyResultCode GetCellularPolicies(std::vector<NetPolicyCellularPolicy> &cellularPolicies) = 0;
-    virtual NetPolicyResultCode SetFactoryPolicy(const std::string &slotId) = 0;
+    virtual NetPolicyResultCode SetFactoryPolicy(const std::string &simId) = 0;
     virtual NetPolicyResultCode SetBackgroundPolicy(bool backgroundPolicy) = 0;
     virtual bool GetBackgroundPolicy() = 0;
     virtual bool GetBackgroundPolicyByUid(uint32_t uid) = 0;
     virtual NetBackgroundPolicy GetCurrentBackgroundPolicy() = 0;
-    virtual NetPolicyResultCode SetSnoozePolicy(int8_t netType, int32_t slotId) = 0;
+    virtual NetPolicyResultCode SetSnoozePolicy(int8_t netType, const std::string &simId) = 0;
     virtual NetPolicyResultCode SetIdleTrustlist(uint32_t uid, bool isTrustlist) = 0;
     virtual NetPolicyResultCode GetIdleTrustlist(std::vector<uint32_t> &uids) = 0;
 };

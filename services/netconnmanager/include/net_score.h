@@ -32,7 +32,8 @@ enum class NetTypeScoreValue : int32_t {
     CELLULAR_VALUE          = 6 * NET_TYPE_SCORE_INTERVAL,
     WIFI_VALUE              = 7 * NET_TYPE_SCORE_INTERVAL,
     ETHERNET_VALUE          = 8 * NET_TYPE_SCORE_INTERVAL,
-    VPN_VALUE               = 9 * NET_TYPE_SCORE_INTERVAL
+    VPN_VALUE               = 9 * NET_TYPE_SCORE_INTERVAL,
+    WIFI_AWARE_VALUE        = 10 * NET_TYPE_SCORE_INTERVAL
 };
 
 class NetScore {
@@ -47,7 +48,11 @@ private:
 private:
     NetTypeScore netTypeScore_ = {
         {BEARER_CELLULAR, static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE)},
-        {BEARER_ETHERNET, static_cast<int32_t>(NetTypeScoreValue::ETHERNET_VALUE)}};
+        {BEARER_WIFI, static_cast<int32_t>(NetTypeScoreValue::WIFI_VALUE)},
+        {BEARER_BLUETOOTH, static_cast<int32_t>(NetTypeScoreValue::BLUETOOTH_VALUE)},
+        {BEARER_ETHERNET, static_cast<int32_t>(NetTypeScoreValue::ETHERNET_VALUE)},
+        {BEARER_VPN, static_cast<int32_t>(NetTypeScoreValue::VPN_VALUE)},
+        {BEARER_WIFI_AWARE, static_cast<int32_t>(NetTypeScoreValue::WIFI_AWARE_VALUE)}};
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

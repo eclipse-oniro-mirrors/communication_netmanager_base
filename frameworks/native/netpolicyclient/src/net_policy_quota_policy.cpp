@@ -22,7 +22,7 @@ bool NetPolicyQuotaPolicy::Marshalling(Parcel &parcel) const
     if (!parcel.WriteInt8(netType_)) {
         return false;
     }
-    if (!parcel.WriteInt32(slotId_)) {
+    if (!parcel.WriteString(simId_)) {
         return false;
     }
     if (!parcel.WriteInt64(periodStartTime_)) {
@@ -75,7 +75,7 @@ bool NetPolicyQuotaPolicy::Unmarshalling(Parcel &parcel, NetPolicyQuotaPolicy &q
     if (!parcel.ReadInt8(quotaPolicy.netType_)) {
         return false;
     }
-    if (!parcel.ReadInt32(quotaPolicy.slotId_)) {
+    if (!parcel.ReadString(quotaPolicy.simId_)) {
         return false;
     }
     if (!parcel.ReadInt64(quotaPolicy.periodStartTime_)) {
@@ -115,7 +115,7 @@ bool NetPolicyQuotaPolicy::Unmarshalling(Parcel &parcel, std::vector<NetPolicyQu
         if (!parcel.ReadInt8(quotaPolicyTmp.netType_)) {
             return false;
         }
-        if (!parcel.ReadInt32(quotaPolicyTmp.slotId_)) {
+        if (!parcel.ReadString(quotaPolicyTmp.simId_)) {
             return false;
         }
         if (!parcel.ReadInt64(quotaPolicyTmp.periodStartTime_)) {

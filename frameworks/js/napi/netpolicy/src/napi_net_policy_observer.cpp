@@ -15,16 +15,40 @@
 
 #include "napi_net_policy_observer.h"
 #include "net_mgr_log_wrapper.h"
-#include "net_policy_event_listener_manager.h"
+#include "net_policy_event_listener_context.h"
 #include "napi_common.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+static void OnNetUidPolicyEvent(EventListener &eventListener,
+    uint32_t uid, NetUidPolicy policy)
+{
+    napi_value info = nullptr;
+    napi_create_object(eventListener.env, &info);
+    NapiCommon::SetPropertyUint32(eventListener.env, info, "uid", uid);
+    NapiCommon::SetPropertyInt32(eventListener.env, info, "policy", static_cast<int32_t>(policy));
+    napi_value callbackValues[CALLBACK_ARGV_CNT] = {nullptr, nullptr};
+    napi_value recv = nullptr;
+    napi_value result = nullptr;
+    napi_value callbackFunc = nullptr;
+    if ((eventListener.env == nullptr) || (eventListener.callbackRef == nullptr)) {
+        NETMGR_LOG_E("eventListener.env = nullptr || eventListener.callbackRef =nullptr");
+        return;
+    }
+    napi_get_undefined(eventListener.env, &recv);
+    napi_get_reference_value(eventListener.env, eventListener.callbackRef, &callbackFunc);
+    callbackValues[ARGV_INDEX_1] = info;
+    napi_call_function(eventListener.env, recv, callbackFunc, std::size(callbackValues), callbackValues, &result);
+}
+
 int32_t NapiNetPolicyObserver::NetUidPolicyChanged(uint32_t uid, NetUidPolicy policy)
 {
     NETMGR_LOG_I("NapiNetPolicyObserver NetUidPolicyChanged(), uid = [%{public}d], policy = [%{public}u]", uid, policy);
-    std::unique_ptr<UidPolicyEvent> event = std::make_unique<UidPolicyEvent>(uid, policy);
-    NetPolicyEventListenerManager::GetInstance().SendEvent(EVENT_NET_UID_POLICY_CHANGE, event);
+    EventListener eventListener;
+    eventListener.eventId = EVENT_NET_UID_POLICY_CHANGE;
+    if (NetPolicyEventListenerContext::FindEventListense(eventListener) != EVENT_NET_UNKNOW_CHANGE) {
+        OnNetUidPolicyEvent(eventListener, uid, policy);
+    }
     return 0;
 }
 
@@ -38,17 +62,13 @@ int32_t NapiNetPolicyObserver::NetCellularPolicyChanged(
 {
     NETMGR_LOG_I("NapiNetPolicyObserver NetCellularPolicyChanged(), cellularPolicys.size = [%{public}zd]",
         cellularPolicys.size());
-    std::unique_ptr<CellularPolicyEvent> event = std::make_unique<CellularPolicyEvent>(cellularPolicys);
-    NetPolicyEventListenerManager::GetInstance().SendEvent(EVENT_NET_CELLULAR_POLICY_CHANGE, event);
     return 0;
 }
 
-int32_t NapiNetPolicyObserver::NetStrategySwitch(int32_t slotId, bool enable)
+int32_t NapiNetPolicyObserver::NetStrategySwitch(const std::string &simId, bool enable)
 {
-    NETMGR_LOG_I("NapiNetPolicyObserver NetStrategySwitch(), subscriberId = [%{public}d], enable = [%{public}d]",
-        slotId, enable);
-    std::unique_ptr<StrategySwitchEvent> event = std::make_unique<StrategySwitchEvent>(slotId, enable);
-    NetPolicyEventListenerManager::GetInstance().SendEvent(EVENT_NET_STRATEGY_SWITCH_CHANGE, event);
+    NETMGR_LOG_I("NapiNetPolicyObserver NetStrategySwitch(), simId = [%{public}s], enable = [%{public}d]",
+        simId.c_str(), enable);
     return 0;
 }
 } // namespace NetManagerStandard

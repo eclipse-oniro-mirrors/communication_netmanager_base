@@ -27,6 +27,35 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 napi_value netConnectionObject;
+template<typename T>
+napi_value ParseTypesArray(napi_env env, napi_value obj, std::set<T> &typeArray)
+{
+    bool result = false;
+    napi_status status = napi_is_array(env, obj, &result);
+    if (status != napi_ok || !result) {
+        NETMGR_LOG_E("Invalid input parameter type!");
+        return nullptr;
+    }
+
+    napi_value elementValue = nullptr;
+    int32_t element = ERROR_DEFAULT;
+    uint32_t arrayLength = 0;
+    NAPI_CALL(env, napi_get_array_length(env, obj, &arrayLength));
+    for (uint32_t i = 0; i < arrayLength; ++i) {
+        NAPI_CALL(env, napi_get_element(env, obj, i, &elementValue));
+        napi_valuetype valueType = napi_undefined;
+        napi_typeof(env, elementValue, &valueType);
+        if (valueType == napi_number) {
+            NAPI_CALL(env, napi_get_value_int32(env, elementValue, &element));
+            typeArray.insert(static_cast<T>(element));
+        } else {
+            NETMGR_LOG_E("Invalid parameter type of array element!");
+            return nullptr;
+        }
+    }
+    return NapiCommon::CreateUndefined(env);
+}
+
 napi_value ParseCapabilities(napi_env env, napi_value obj, NetAllCapabilities &capabilities)
 {
     capabilities.linkUpBandwidthKbps_ = NapiCommon::GetNapiInt32Value(env, obj, "linkUpBandwidthKbps");
@@ -34,30 +63,18 @@ napi_value ParseCapabilities(napi_env env, napi_value obj, NetAllCapabilities &c
 
     napi_value networkCap = NapiCommon::GetNamedProperty(env, obj, "networkCap");
     if (networkCap) {
-        napi_value elementValue = nullptr;
-        int32_t element = ERROR_DEFAULT;
-        uint32_t arrayLength = 0;
-        NAPI_CALL(env, napi_get_array_length(env, networkCap, &arrayLength));
-        for (uint32_t i = 0; i < arrayLength; ++i) {
-            NAPI_CALL(env, napi_get_element(env, networkCap, i, &elementValue));
-            NAPI_CALL(env, napi_get_value_int32(env, elementValue, &element));
-            capabilities.netCaps_.insert(static_cast<NetCap>(element));
+        if (ParseTypesArray(env, networkCap, capabilities.netCaps_) == nullptr) {
+            return nullptr;
         }
     }
 
     napi_value bearerTypes = NapiCommon::GetNamedProperty(env, obj, "bearerTypes");
     if (bearerTypes) {
-        napi_value elementValue = nullptr;
-        int32_t element = ERROR_DEFAULT;
-        uint32_t arrayLength = 0;
-        NAPI_CALL(env, napi_get_array_length(env, bearerTypes, &arrayLength));
-        for (uint32_t i = 0; i < arrayLength; ++i) {
-            NAPI_CALL(env, napi_get_element(env, bearerTypes, i, &elementValue));
-            NAPI_CALL(env, napi_get_value_int32(env, elementValue, &element));
-            capabilities.bearerTypes_.insert(static_cast<NetBearType>(element));
+        if (ParseTypesArray(env, bearerTypes, capabilities.bearerTypes_) == nullptr) {
+            return nullptr;
         }
     }
-    return obj;
+    return NapiCommon::CreateUndefined(env);
 }
 
 napi_status ParseNetSpecifier(napi_env env, napi_value obj, NetSpecifier &specifier)
@@ -75,6 +92,7 @@ napi_status ParseNetSpecifier(napi_env env, napi_value obj, NetSpecifier &specif
 
 napi_value JS_Constructor(napi_env env, napi_callback_info cbinfo)
 {
+    NETMGR_LOG_I("netConnection JS_Constructor");
     size_t argc = 2;
     napi_value argv[] = {nullptr, nullptr};
     napi_value thisVar = nullptr;
@@ -85,19 +103,25 @@ napi_value JS_Constructor(napi_env env, napi_callback_info cbinfo)
         napi_valuetype valueType = napi_undefined;
         NAPI_CALL(env, napi_typeof(env, argv[ARGV_INDEX_0], &valueType));
         if (valueType == napi_object) {
-            NAPI_CALL(env, ParseNetSpecifier(env, argv[ARGV_INDEX_0], netConnection->netSpecifier_));
-            netConnection->hasSpecifier = true;
+            if (ParseNetSpecifier(env, argv[ARGV_INDEX_0], netConnection->netSpecifier_) == napi_ok) {
+                netConnection->timeout_ = 0;
+                netConnection->hasSpecifier = true;
+                netConnection->hasTimeout = true;
+            }
+            NETMGR_LOG_I("netConnection hasSpecifier:%{public}d, hasTimeout:%{public}d",
+                netConnection->hasSpecifier, netConnection->hasTimeout);
         } else if (valueType == napi_number) {
-            NETMGR_LOG_I("JS_Constructor valueType napi_number");
-            NAPI_CALL(env, napi_get_value_uint32(env, argv[ARGV_INDEX_0], &netConnection->timeout_));
-            netConnection->hasTimeout = true;
+            std::string msg("The parameter 'timeout' is only valid when the parameter 'netSpecifier' is input!");
+            NETMGR_LOG_E("%{public}s", msg.c_str());
+            napi_throw_error(env, "1", msg.c_str());
+            return nullptr;
         } else {
             NETMGR_LOG_E("invalid data type!");
             return nullptr;
         }
     } else if (argc == ARGV_INDEX_2) {
         NAPI_CALL(env, ParseNetSpecifier(env, argv[ARGV_INDEX_0], netConnection->netSpecifier_));
-        NAPI_CALL(env, napi_get_value_uint32(env, argv[ARGV_INDEX_0], &netConnection->timeout_));
+        NAPI_CALL(env, napi_get_value_uint32(env, argv[ARGV_INDEX_1], &netConnection->timeout_));
         netConnection->hasSpecifier = true;
         netConnection->hasTimeout = true;
     } else {
@@ -134,6 +158,7 @@ napi_value RegisternetConnectionObject(napi_env env, napi_value exports)
 
 napi_value CreateNetConnection(napi_env env, napi_callback_info info)
 {
+    NETMGR_LOG_I("netConnection CreateNetConnection");
     std::size_t argc = 2;
     napi_value argv[] = {nullptr, nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
@@ -174,7 +199,6 @@ napi_value NapiNetConn::DeclareNetConnNew(napi_env env, napi_callback_info info)
     napi_value thisVar = nullptr;
     void *data = nullptr;
     int32_t netId = 0;
-    napi_ref wrapper = nullptr;
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
     if (argc == ARGV_NUM_1) {
         napi_get_value_int32(env, argv[ARGV_INDEX_0], &netId);
@@ -188,7 +212,7 @@ napi_value NapiNetConn::DeclareNetConnNew(napi_env env, napi_callback_info info)
     NapiCommon::SetPropertyInt32(env, thisVar, "netId", netId);
     sptr<NetHandle> *handlerPtr = new sptr<NetHandle>(std::make_unique<NetHandle>(netId).release());
     napi_status status = napi_wrap(env, thisVar, reinterpret_cast<void *>(handlerPtr),
-        NapiNetConn::DeclareNetConnDestructor, nullptr, &wrapper);
+        NapiNetConn::DeclareNetConnDestructor, nullptr, nullptr);
     if (status != napi_ok) {
         NETMGR_LOG_E("Failed to wrap DeclareNetConnNew.");
         delete handlerPtr;
@@ -1316,8 +1340,8 @@ napi_value NapiNetConn::RestoreFactoryData(napi_env env, napi_callback_info info
     napi_value arg = nullptr;
     void *data = nullptr;
     napi_get_cb_info(env, info, &paramsCount, params, &arg, &data);
-    NAPI_ASSERT(
-        env, MatchRestoreFactoryDataParam(env, params, paramsCount), "RestoreFactoryData input param type mismatch");
+    NAPI_ASSERT(env, MatchRestoreFactoryDataParam(env, params, paramsCount),
+        "RestoreFactoryData input param type mismatch");
     auto context = std::make_unique<RestoreFactoryDataContext>().release();
     if (paramsCount == 1) {
         NAPI_CALL(env, napi_create_reference(env, params[0], 1, &context->callbackRef));

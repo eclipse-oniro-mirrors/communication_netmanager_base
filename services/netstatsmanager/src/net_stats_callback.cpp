@@ -26,7 +26,14 @@ void NetStatsCallback::RegisterNetStatsCallback(const sptr<INetStatsCallback> &c
         return;
     }
 
-    for (uint32_t i = 0; i < netStatsCallback_.size(); i++) {
+    uint32_t callBackNum = netStatsCallback_.size();
+    NETMGR_LOG_D("netStatsCallback_ callback num [%{public}d]", callBackNum);
+    if (callBackNum >= LIMIT_STATS_CALLBACK_NUM) {
+        NETMGR_LOG_E("netStatsCallback_ callback num cannot more than [%{public}d]", LIMIT_STATS_CALLBACK_NUM);
+        return;
+    }
+
+    for (uint32_t i = 0; i < callBackNum; i++) {
         if (callback->AsObject().GetRefPtr() == netStatsCallback_[i]->AsObject().GetRefPtr()) {
             NETMGR_LOG_I("netStatsCallback_ had this callback");
             return;

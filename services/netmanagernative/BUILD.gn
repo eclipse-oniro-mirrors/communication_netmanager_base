@@ -35,11 +35,13 @@ ohos_shared_library("netd_native_manager") {
     "$NETMANAGER_PREBUILTS_DIR/librarys/netd/include/common/include",
     "//foundation/communication/wifi/services/wifi_standard/wifi_framework/dhcp_manage/mgr_service/include",
     "//foundation/communication/wifi/services/wifi_standard/wifi_framework/dhcp_manage/mgr_service/interfaces",
+    "utils/native/base/include",
   ]
 
   deps = [
     "$NETMANAGER_PREBUILTS_DIR/librarys/netd:libnet_manager_native",
     "//foundation/communication/wifi/services/wifi_standard/wifi_framework/dhcp_manage/mgr_service:dhcp_manager_service",
+    "//utils/native/base:utils",
   ]
 
   external_deps = [
@@ -49,7 +51,6 @@ ohos_shared_library("netd_native_manager") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
-    "utils_base:utils",
   ]
 
   defines = [

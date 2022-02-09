@@ -31,8 +31,7 @@ ohos_shared_library("policy") {
     "$NETMANAGER_NAPI_ROOT/common/napi_common.cpp",
     "$NETMANAGER_NAPI_ROOT/netpolicy/src/napi_net_policy.cpp",
     "$NETMANAGER_NAPI_ROOT/netpolicy/src/napi_net_policy_observer.cpp",
-    "$NETMANAGER_NAPI_ROOT/netpolicy/src/net_policy_event_listener_handler.cpp",
-    "$NETMANAGER_NAPI_ROOT/netpolicy/src/net_policy_event_listener_manager.cpp",
+    "$NETMANAGER_NAPI_ROOT/netpolicy/src/net_policy_event_listener_context.cpp",
   ]
 
   defines = [ "NETMGR_DEBUG" ]

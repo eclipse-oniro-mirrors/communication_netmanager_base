@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NAPI_NETCONN_INCLUDE_NAPI_NET_CONNECTION
-#define NAPI_NETCONN_INCLUDE_NAPI_NET_CONNECTION
+#ifndef NAPI_NETCONN_INCLUDE_NAPI_NET_CONNECTION_H
+#define NAPI_NETCONN_INCLUDE_NAPI_NET_CONNECTION_H
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
@@ -30,7 +30,7 @@ struct NapiNetConnection {
     bool hasSpecifier = false;
     bool hasTimeout = false;
     NetSpecifier netSpecifier_;
-    uint32_t timeout_;
+    uint32_t timeout_ = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

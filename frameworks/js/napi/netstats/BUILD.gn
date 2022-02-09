@@ -31,7 +31,6 @@ ohos_shared_library("statistics") {
     "$NETMANAGER_NAPI_ROOT/common/napi_common.cpp",
     "$NETMANAGER_NAPI_ROOT/netstats/src/napi_net_stats.cpp",
     "$NETMANAGER_NAPI_ROOT/netstats/src/net_stats_callback.cpp",
-    "$NETMANAGER_NAPI_ROOT/netstats/src/net_stats_event_listener_handler.cpp",
     "$NETMANAGER_NAPI_ROOT/netstats/src/net_stats_event_listener_manager.cpp",
   ]
 

@@ -84,7 +84,7 @@ public:
      *
      * @param netId
      * @param newnl route info will add or update to route table
-     * @oldnl oldnl route info will remove from route table
+     * @param oldnl route info will remove from route table
      *
      * @return 1, route changed between oldnl and newnl
      */

@@ -160,7 +160,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager007, TestSize.Level1)
 
     NetPolicyQuotaPolicy quotaPolicy;
     quotaPolicy.netType_ = 0;
-    quotaPolicy.slotId_ = TRIGER_DELAY_US;
+    quotaPolicy.simId_ = std::to_string(TRIGER_DELAY_US);
     quotaPolicy.periodStartTime_ = TRIGER_DELAY_US;
     quotaPolicy.periodDuration_ = TEST_STRING_PERIODDURATION;
     quotaPolicy.warningBytes_ = TRIGER_DELAY_US;
@@ -198,7 +198,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager009, TestSize.Level1)
 
     NetPolicyCellularPolicy cellularPolicy;
     for (uint32_t i = 0; i < TEST_CONSTANT_NUM; ++i) {
-        cellularPolicy.slotId_ = i;
+        cellularPolicy.simId_ = std::to_string(i);
         cellularPolicy.periodStartTime_ = TRIGER_DELAY_US + i;
         cellularPolicy.periodDuration_ = TEST_STRING_PERIODDURATION;
         cellularPolicy.title_ = std::to_string(TRIGER_DELAY_US + i);
@@ -238,9 +238,9 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager010, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager011, TestSize.Level1)
 {
-    std::string slotId = "0";
+    std::string simId = "0";
 
-    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetFactoryPolicy(slotId);
+    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetFactoryPolicy(simId);
     ASSERT_TRUE(result == NetPolicyResultCode::ERR_NONE);
 }
 
@@ -252,7 +252,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager011, TestSize.Level1)
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager012, TestSize.Level1)
 {
     NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetSnoozePolicy(0,
-        TRIGER_DELAY_US);
+        std::to_string(TRIGER_DELAY_US));
     ASSERT_TRUE(result == NetPolicyResultCode::ERR_NONE);
 }
 

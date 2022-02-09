@@ -14,7 +14,7 @@
  */
 
 #include <memory>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "netnative_log_wrapper.h"
 #include "netd_native_service_stub.h"

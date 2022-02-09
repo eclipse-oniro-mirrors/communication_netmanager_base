@@ -52,12 +52,12 @@ public:
     NetPolicyResultCode GetNetQuotaPolicies(std::vector<NetPolicyQuotaPolicy> &quotaPolicies) override;
     NetPolicyResultCode SetCellularPolicies(const std::vector<NetPolicyCellularPolicy> &cellularPolicies) override;
     NetPolicyResultCode GetCellularPolicies(std::vector<NetPolicyCellularPolicy> &cellularPolicies) override;
-    NetPolicyResultCode SetFactoryPolicy(const std::string &slotId) override;
+    NetPolicyResultCode SetFactoryPolicy(const std::string &simId) override;
     NetPolicyResultCode SetBackgroundPolicy(bool backgroundPolicy) override;
     bool GetBackgroundPolicy() override;
     bool GetBackgroundPolicyByUid(uint32_t uid) override;
     NetBackgroundPolicy GetCurrentBackgroundPolicy() override;
-    NetPolicyResultCode SetSnoozePolicy(int8_t netType, int32_t slotId) override;
+    NetPolicyResultCode SetSnoozePolicy(int8_t netType, const std::string &simId) override;
     NetPolicyResultCode SetIdleTrustlist(uint32_t uid, bool isTrustlist) override;
     NetPolicyResultCode GetIdleTrustlist(std::vector<uint32_t> &uids) override;
     void CheckNetStatsOverLimit(const std::vector<NetPolicyQuotaPolicy> &quotaPolicies);

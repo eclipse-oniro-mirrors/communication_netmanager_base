@@ -103,13 +103,13 @@ int32_t NetStatsServiceStub::OnGetIfaceStatsDetail(MessageParcel &data, MessageP
     }
 
     NetStatsInfo stats;
-    if (GetIfaceStatsDetail(iface, start, end, stats) != NetStatsResultCode::ERR_NONE) {
-        NETMGR_LOG_E("GetIfaceStatsDetail failed.");
-        return ERR_FLATTEN_OBJECT;
-    }
-
+    int32_t result = static_cast<int32_t>(GetIfaceStatsDetail(iface, start, end, stats));
     if (!NetStatsInfo::Marshalling(reply, stats)) {
         NETMGR_LOG_E("proxy Marshalling failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    NETMGR_LOG_I("NetStatsServiceStub::OnGetIfaceStatsDetail, result[%{public}d]", result);
+    if (!reply.WriteInt32(result)) {
         return ERR_FLATTEN_OBJECT;
     }
     return ERR_NONE;
@@ -138,13 +138,13 @@ int32_t NetStatsServiceStub::OnGetUidStatsDetail(MessageParcel &data, MessagePar
     }
 
     NetStatsInfo stats;
-    if (GetUidStatsDetail(iface, uid, start, end, stats) != NetStatsResultCode::ERR_NONE) {
-        NETMGR_LOG_E("GetUidStatsDetail failed.");
+    int32_t result = static_cast<int32_t>(GetUidStatsDetail(iface, uid, start, end, stats));
+    if (!NetStatsInfo::Marshalling(reply, stats)) {
+        NETMGR_LOG_E("proxy Marshalling failed");
         return ERR_FLATTEN_OBJECT;
     }
-
-    if (!NetStatsInfo::Marshalling(reply, stats)) {
-        NETMGR_LOG_E("NetStatsInfo Marshalling failed");
+    NETMGR_LOG_I("NetStatsServiceStub::OnGetUidStatsDetail, result[%{public}d]", result);
+    if (!reply.WriteInt32(result)) {
         return ERR_FLATTEN_OBJECT;
     }
     return ERR_NONE;
