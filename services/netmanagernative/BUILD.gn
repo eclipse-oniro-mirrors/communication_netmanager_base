@@ -39,10 +39,16 @@ ohos_shared_library("netd_native_manager") {
   ]
 
   deps = [
-    "$NETMANAGER_PREBUILTS_DIR/librarys/netd:libnet_manager_native",
     "//foundation/communication/wifi/services/wifi_standard/wifi_framework/dhcp_manage/mgr_service:dhcp_manager_service",
     "//utils/native/base:utils",
   ]
+
+  if (enable_libnet_manager_native_prebuilt) {
+    deps += [ "$NETMANAGER_PREBUILTS_DIR/librarys/netd:libnet_manager_native" ]
+  } else {
+    deps +=
+        [ "//foundation/communication/netmanager_native:net_manager_native" ]
+  }
 
   external_deps = [
     "ability_runtime:want",

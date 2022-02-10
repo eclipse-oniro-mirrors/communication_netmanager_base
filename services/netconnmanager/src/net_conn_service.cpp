@@ -44,8 +44,7 @@ void NetConnService::OnStart()
 {
     struct timeval tv;
     gettimeofday(&tv, nullptr);
-    NETMGR_LOG_D("NetConnService::OnStart begin timestamp [%{public}" PRId64 ".%{public}" PRId64 "]",
-        tv.tv_sec, tv.tv_usec);
+    NETMGR_LOG_D("NetConnService::OnStart begin");
     if (state_ == STATE_RUNNING) {
         NETMGR_LOG_D("the state is already running");
         return;
@@ -56,8 +55,7 @@ void NetConnService::OnStart()
     }
     state_ = STATE_RUNNING;
     gettimeofday(&tv, nullptr);
-    NETMGR_LOG_D("NetConnService::OnStart end timestamp [%{public}" PRId64 ".%{public}" PRId64 "]",
-        tv.tv_sec, tv.tv_usec);
+    NETMGR_LOG_D("NetConnService::OnStart end");
 }
 
 void NetConnService::CreateDefaultRequest()

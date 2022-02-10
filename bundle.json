@@ -27,7 +27,7 @@
             "standard"
         ],
         "rom": "4.5MB",
-        "ram": "5MB",
+        "ram": "10MB",
         "deps": {
             "components": [
                 "ability_runtime",
@@ -47,7 +47,6 @@
         "build": {
             "sub_component": [
                 "//foundation/communication/netmanager_base/services/netmanagernative:netd_native_manager",
-                "//foundation/communication/netmanager_base/prebuilts/librarys/netd:libnet_manager_native",
                 "//foundation/communication/netmanager_base/services/netdcontroller:netd_controller",
                 "//foundation/communication/netmanager_base/services/netconnmanager:net_conn_manager",
                 "//foundation/communication/netmanager_base/services/dnsresolvermanager:dns_resolver_manager",

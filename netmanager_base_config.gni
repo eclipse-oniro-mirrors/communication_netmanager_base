@@ -36,6 +36,13 @@ NETMANAGER_PREBUILTS_DIR = "$NETMANAGER_BASE_ROOT/prebuilts"
 NETDCONTROLLER_ROOT_DIR = "$NETMANAGER_BASE_ROOT/services/netdcontroller"
 
 use_js_debug = false
+
+netmanager_native_path =
+    rebase_path("//foundation/communication/netmanager_native")
+cmd = "if [ -f ${netmanager_native_path}/bundle.json ]; then echo false; else echo true; fi"
+enable_libnet_manager_native_prebuilt =
+    exec_script("//build/lite/run_shell_cmd.py", [ cmd ], "value")
+
 declare_args() {
   enable_netmgr_debug = true
   enable_sys_func = true

@@ -23,7 +23,7 @@ namespace OHOS {
 namespace nmd {
 namespace common {
 class server_template {
-    const char *const SOCKET_FILE_PATH = "/dev/socket";
+    const char *const SOCKET_FILE_PATH = "/dev/socket_netd";
 
 public:
     void start();

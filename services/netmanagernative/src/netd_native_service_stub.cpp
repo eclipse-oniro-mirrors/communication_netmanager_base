@@ -14,7 +14,7 @@
  */
 
 #include <memory>
-#include <cstdlib>
+#include <stdlib.h>
 
 #include "netnative_log_wrapper.h"
 #include "netd_native_service_stub.h"
@@ -317,7 +317,7 @@ int32_t NetdNativeServiceStub::CmdNetworkAddRoute(MessageParcel &data, MessagePa
 
 #ifdef SYS_FUNC
     NETNATIVE_LOGI("Begin to sys CmdNetworkAddRoute");
-    std::string cmd = "route add default gw ";
+    std::string cmd = "ip route add default via ";
     cmd += nextHop;
     system(cmd.c_str());
     reply.WriteInt32(0);
@@ -338,7 +338,7 @@ int32_t NetdNativeServiceStub::CmdNetworkRemoveRoute(MessageParcel &data, Messag
     std::string nextHop = data.ReadString();
 #ifdef SYS_FUNC
     NETNATIVE_LOGI("Begin to sys CmdNetworkRemoveRoute");
-    std::string cmd = "route del default gw ";
+    std::string cmd = "ip route del default via ";
     cmd += nextHop;
     system(cmd.c_str());
     reply.WriteInt32(0);
