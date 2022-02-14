@@ -345,7 +345,7 @@ bool NetStatsCsv::UpdateUidStatsCsv(uint32_t uid, const std::string &iface)
 bool NetStatsCsv::DeleteUidStatsCsv(uint32_t uid)
 {
     std::string strUid = std::to_string(uid);
-    std::filesystem::remove_all(UID_LIST_DIR + strUid.c_str());
+    // std::filesystem::remove_all(UID_LIST_DIR + strUid.c_str());
     NETMGR_LOG_I("Delete mock uid directory: /data/data/uid/[%{public}d]", uid);
     UpdateUidCsvInfo();
 
@@ -471,8 +471,6 @@ NetStatsResultCode NetStatsCsv::GetIfaceBytes(const std::string &iface, uint32_t
         }
     }
     GetSumStats(vecRow, statsInfo);
-    NETMGR_LOG_I("GetIfaceBytes statsInfo.rxBytes[%{public}" PRId64 "]"
-        "statsInfo.txBytes[%{public}" PRId64 "]", statsInfo.rxBytes_, statsInfo.txBytes_);
     return NetStatsResultCode::ERR_NONE;
 }
 
@@ -499,8 +497,6 @@ NetStatsResultCode NetStatsCsv::GetUidBytes(const std::string &iface, uint32_t u
         }
     }
     GetSumStats(vecRow, statsInfo);
-    NETMGR_LOG_I("GetUidBytes statsInfo.rxBytes[%{public}" PRId64 "]"
-        "statsInfo.txBytes[%{public}" PRId64 "]", statsInfo.rxBytes_, statsInfo.txBytes_);
     return NetStatsResultCode::ERR_NONE;
 }
 

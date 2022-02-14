@@ -54,8 +54,7 @@ void NetPolicyService::OnStart()
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    NETMGR_LOG_D("NetPolicyService::OnStart begin timestamp [%{public}" PRId64 ".%{public}" PRId64 "]",
-        tv.tv_sec, tv.tv_usec);
+    NETMGR_LOG_D("NetPolicyService::OnStart begin");
     if (state_ == STATE_RUNNING) {
         return;
     }
@@ -65,8 +64,7 @@ void NetPolicyService::OnStart()
     }
     state_ = STATE_RUNNING;
     gettimeofday(&tv, NULL);
-    NETMGR_LOG_D("NetPolicyService::OnStart end timestamp [%{public}" PRId64 ".%{public}" PRId64 "]",
-        tv.tv_sec, tv.tv_usec);
+    NETMGR_LOG_D("NetPolicyService::OnStart end");
 }
 
 void NetPolicyService::OnStop()

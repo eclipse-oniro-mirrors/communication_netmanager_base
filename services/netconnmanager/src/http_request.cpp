@@ -115,7 +115,7 @@ int32_t HttpRequest::HttpRequestExec(
 
 int32_t HttpRequest::HttpRequestHeaderExec(const std::string &strUrl, std::string &strHeader)
 {
-    NETMGR_LOG_D("ifaceName:[%{public}s]", ifaceName_.c_str());
+    NETMGR_LOG_D("Enter HttpRequestHeaderExec, ifaceName:[%{public}s]", ifaceName_.c_str());
     /* Check whether the URL is valid. */
     if (strUrl.empty() || strUrl.length() > URL_SIZE) {
         NETMGR_LOG_E("URL error!");

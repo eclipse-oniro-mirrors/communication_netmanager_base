@@ -48,7 +48,7 @@ void NetdNativeService::OnStart()
         NETNATIVE_LOGE("publishing NetdNativeService to sa manager failed!");
         return;
     }
-    NETNATIVE_LOGI("Publish CallManagerService SUCCESS");
+    NETNATIVE_LOGI("Publish NetdNativeService SUCCESS");
     state_ = ServiceRunningState::STATE_RUNNING;
     struct tm *timeNow;
     time_t second = time(0);
@@ -58,7 +58,7 @@ void NetdNativeService::OnStart()
     timeNow = localtime(&second);
     if (timeNow != nullptr) {
         NETNATIVE_LOGI(
-            "CallManagerService start time:%{public}d-%{public}d-%{public}d %{public}d:%{public}d:%{public}d",
+            "NetdNativeService start time:%{public}d-%{public}d-%{public}d %{public}d:%{public}d:%{public}d",
             timeNow->tm_year + startTime_, timeNow->tm_mon + extraMonth_, timeNow->tm_mday, timeNow->tm_hour,
             timeNow->tm_min, timeNow->tm_sec);
     }
@@ -75,7 +75,7 @@ void NetdNativeService::OnStop()
     timeNow = localtime(&second);
     if (timeNow != nullptr) {
         NETNATIVE_LOGI(
-            "CallManagerService dump time:%{public}d-%{public}d-%{public}d %{public}d:%{public}d:%{public}d",
+            "NetdNativeService dump time:%{public}d-%{public}d-%{public}d %{public}d:%{public}d:%{public}d",
             timeNow->tm_year + startTime_, timeNow->tm_mon + extraMonth_, timeNow->tm_mday, timeNow->tm_hour,
             timeNow->tm_min, timeNow->tm_sec);
     }
@@ -110,13 +110,11 @@ bool NetdNativeService::Init()
     std::thread fwserve([&] { fwmarkServer_->start(); });
 
     dnsResolvService_ = std::make_unique<OHOS::nmd::dnsresolv_service>();
-    std::thread dnsresolvServe([&] { dnsResolvService_->start(); });
 
     dhcpController_ = std::make_unique<OHOS::nmd::DhcpController>();
 
     nlManager.detach();
     fwserve.detach();
-    dnsresolvServe.detach();
     return true;
 }
 

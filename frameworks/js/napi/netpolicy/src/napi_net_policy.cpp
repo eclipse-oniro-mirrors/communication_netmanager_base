@@ -333,12 +333,12 @@ NetPolicyQuotaPolicy NapiNetPolicy::ReadQuotaPolicy(napi_env env, napi_value val
 {
     NetPolicyQuotaPolicy data;
     data.netType_ = static_cast<int8_t>(NapiCommon::GetNapiInt32Value(env, value, "netType"));
-    data.simId_ = std::to_string(NapiCommon::GetNapiInt64Value(env, value, "simId"));
-    data.periodStartTime_ = NapiCommon::GetNapiInt64Value(env, value, "periodStartTime");
+    data.simId_ = std::to_string(NapiCommon::GetNapiInt32Value(env, value, "simId"));
+    data.periodStartTime_ = NapiCommon::GetNapiInt32Value(env, value, "periodStartTime");
     data.periodDuration_ = NapiCommon::GetNapiStringValue(env, value, "periodDuration");
     data.warningBytes_ = NapiCommon::GetNapiInt64Value(env, value, "warningBytes");
     data.limitBytes_ = NapiCommon::GetNapiInt64Value(env, value, "limitBytes");
-    data.lastLimitSnooze_ = NapiCommon::GetNapiInt64Value(env, value, "lastLimitSnooze");
+    data.lastLimitSnooze_ = NapiCommon::GetNapiInt32Value(env, value, "lastLimitSnooze");
     data.metered_ = static_cast<int8_t>(NapiCommon::GetNapiInt32Value(env, value, "metered"));
     return data;
 }
@@ -381,9 +381,9 @@ void GetNetQuotaPoliciesCallback(napi_env env, napi_status status, void *data)
                 napi_create_object(env, &elementObject);
                 NetPolicyQuotaPolicy item = context->result[i];
                 NapiCommon::SetPropertyInt32(env, elementObject, "netType", item.netType_);
-                int64_t simIdValue = 0;
+                int32_t simIdValue = 0;
                 std::from_chars(&(*item.simId_.begin()), &(*item.simId_.end()), simIdValue, DECIMAL);
-                NapiCommon::SetPropertyInt64(env, elementObject, "simId", simIdValue);
+                NapiCommon::SetPropertyInt32(env, elementObject, "simId", simIdValue);
                 NapiCommon::SetPropertyInt64(env, elementObject, "periodStartTime", item.periodStartTime_);
                 NapiCommon::SetPropertyString(env, elementObject, "periodDuration", item.periodDuration_);
                 NapiCommon::SetPropertyInt64(env, elementObject, "warningBytes", item.warningBytes_);
