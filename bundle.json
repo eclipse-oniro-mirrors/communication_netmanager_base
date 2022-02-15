@@ -30,7 +30,7 @@
         "ram": "10MB",
         "deps": {
             "components": [
-                "ability_runtime",
+                "ability_base",
                 "bundle_framework",
                 "eventhandler",
                 "ces_standard",
