@@ -1,0 +1,88 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+
+SUBSYSTEM_DIR = "//foundation/communication"
+NETMANAGER_BASE_NAPI_ROOT = "$SUBSYSTEM_DIR/netmanager_base/frameworks/js/napi/"
+
+utils_source = [
+  "$SUBSYSTEM_DIR/netmanager_base/utils/base_context/src/netmanager_base_base_context.cpp",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/common_utils/src/netmanager_base_common_utils.cpp",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/event_manager/src/netmanager_base_event_listener.cpp",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/event_manager/src/netmanager_base_event_manager.cpp",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/module_template/src/netmanager_base_module_template.cpp",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/napi_utils/src/netmanager_base_napi_utils.cpp",
+]
+
+utils_include = [
+  "$SUBSYSTEM_DIR/netmanager_base/utils/base_async_work/include",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/base_context/include",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/common_utils/include",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/event_manager/include",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/log/include",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/module_template/include",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/napi_utils/include",
+]
+
+common_include = [
+  "//foundation/ace/ace_engine/frameworks/base/utils",
+  "//foundation/ace/napi/interfaces/kits",
+  "//foundation/ace/napi",
+  "//third_party/node/src",
+]
+
+common_deps = [
+  "//foundation/ace/napi/:ace_napi",
+  "//utils/native/base:utils",
+]
+
+common_external_deps = [
+  "hiviewdfx_hilog_native:libhilog",
+  "ipc:ipc_core",
+]
+
+common_relative_install_dir = "module/net"
+common_part_name = "netmanager_base"
+common_subsystem_name = "communication"
+
+ohos_shared_library("connection") {
+  include_dirs = [
+    "$NETMANAGER_BASE_NAPI_ROOT/connection/async_context/include",
+    "$NETMANAGER_BASE_NAPI_ROOT/connection/async_work/include",
+    "$NETMANAGER_BASE_NAPI_ROOT/connection/constant/include",
+    "$NETMANAGER_BASE_NAPI_ROOT/connection/connection_exec/include",
+    "$NETMANAGER_BASE_NAPI_ROOT/connection/connection_module/include",
+    "$NETMANAGER_BASE_NAPI_ROOT/connection/options/include",
+  ]
+  include_dirs += utils_include
+  include_dirs += common_include
+
+  sources = [
+    "async_context/src/getaddressbyname_context.cpp",
+    "async_context/src/getdefaultnet_context.cpp",
+    "async_work/src/connection_async_work.cpp",
+    "connection_exec/src/connection_exec.cpp",
+    "connection_module/src/connection_module.cpp",
+    "options/src/net_address.cpp",
+  ]
+  sources += utils_source
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  relative_install_dir = common_relative_install_dir
+  part_name = common_part_name
+  subsystem_name = common_subsystem_name
+}
