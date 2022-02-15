@@ -15,8 +15,6 @@
 
 #include "connection_exec.h"
 
-#include <netdb.h>
-
 #include "connection_module.h"
 #include "constant.h"
 #include "netmanager_base_log.h"
@@ -56,6 +54,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
     int status = getaddrinfo(context->host.c_str(), nullptr, nullptr, &res);
     if (status < 0) {
         NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s", errno, strerror(errno));
+        context->SetErrorCode(errno);
         return false;
     }
 
@@ -68,15 +67,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
         NETMANAGER_BASE_LOGI("host ip: %{public}s", host);
 
         NetAddress address;
-        address.SetAddress(host);
-        address.SetFamilyBySaFamily(tmp->ai_addr->sa_family);
-        if (tmp->ai_addr->sa_family == AF_INET) {
-            auto addr4 = reinterpret_cast<sockaddr_in *>(tmp->ai_addr);
-            address.SetPort(addr4->sin_port);
-        } else if (tmp->ai_addr->sa_family == AF_INET6) {
-            auto addr6 = reinterpret_cast<sockaddr_in6 *>(tmp->ai_addr);
-            address.SetPort(addr6->sin6_port);
-        }
+        SetAddressInfo(host, tmp, address);
 
         context->addresses.emplace_back(address);
     }
@@ -96,7 +87,29 @@ napi_value ConnectionExec::NetHandleExec::GetAddressesByNameCallback(GetAddressB
 
 bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext *context)
 {
-    return ExecGetAddressesByName(context);
+    addrinfo *res = nullptr;
+    int status = getaddrinfo(context->host.c_str(), nullptr, nullptr, &res);
+    if (status < 0) {
+        NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s", errno, strerror(errno));
+        context->SetErrorCode(errno);
+        return false;
+    }
+
+    char host[MAX_HOST_LEN] = {0};
+    if (res != nullptr) {
+        if (getnameinfo(res->ai_addr, res->ai_addrlen, host, sizeof(host), nullptr, 0, 0) < 0) {
+            context->SetErrorCode(errno);
+            return false;
+        }
+        NETMANAGER_BASE_LOGI("host ip: %{public}s", host);
+
+        NetAddress address;
+        SetAddressInfo(host, res, address);
+
+        context->addresses.emplace_back(address);
+    }
+    freeaddrinfo(res);
+    return true;
 }
 
 napi_value ConnectionExec::NetHandleExec::GetAddressByNameCallback(GetAddressByNameContext *context)
@@ -118,5 +131,18 @@ napi_value ConnectionExec::NetHandleExec::MakeNetAddressJsValue(napi_env env, co
     NapiUtils::SetUint32Property(env, obj, KEY_FAMILY, address.GetJsValueFamily());
     NapiUtils::SetUint32Property(env, obj, KEY_PORT, address.GetPort());
     return obj;
+}
+
+void ConnectionExec::NetHandleExec::SetAddressInfo(const char *host, addrinfo *info, NetAddress &address)
+{
+    address.SetAddress(host);
+    address.SetFamilyBySaFamily(info->ai_addr->sa_family);
+    if (info->ai_addr->sa_family == AF_INET) {
+        auto addr4 = reinterpret_cast<sockaddr_in *>(info->ai_addr);
+        address.SetPort(addr4->sin_port);
+    } else if (info->ai_addr->sa_family == AF_INET6) {
+        auto addr6 = reinterpret_cast<sockaddr_in6 *>(info->ai_addr);
+        address.SetPort(addr6->sin6_port);
+    }
 }
 } // namespace OHOS::NetManagerBase

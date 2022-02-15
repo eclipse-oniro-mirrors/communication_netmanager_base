@@ -16,6 +16,8 @@
 #ifndef COMMUNICATIONNETMANAGERBASE_CONNECTION_EXEC_H
 #define COMMUNICATIONNETMANAGERBASE_CONNECTION_EXEC_H
 
+#include <netdb.h>
+
 #include "getaddressbyname_context.h"
 #include "getdefaultnet_context.h"
 #include "napi/native_api.h"
@@ -52,9 +54,10 @@ public:
 
     private:
         static napi_value MakeNetAddressJsValue(napi_env env, const NetAddress &address);
+
+        static void SetAddressInfo(const char *host, addrinfo *info, NetAddress &address);
     };
 };
-
 } // namespace OHOS::NetManagerBase
 
 #endif /* COMMUNICATIONNETMANAGERBASE_CONNECTION_EXEC_H */
