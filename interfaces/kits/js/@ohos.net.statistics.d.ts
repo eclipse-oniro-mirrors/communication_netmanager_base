@@ -19,8 +19,7 @@ import {AsyncCallback} from "./basic";
  * Obtains traffic statistics.
  *
  * @since 8
- * @sysCap SystemCapability.Communication.NetManager
- * @devices phone, tablet, tv, wearable, car
+ * @sysCap SystemCapability.Communication.NetManager.Core
  */
 declare namespace statistics {
   /**
