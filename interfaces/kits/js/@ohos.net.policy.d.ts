@@ -20,8 +20,7 @@ import connection from "./@ohos.net.connection";
  * Provides interfaces to manage network policy rules.
  *
  * @since 8
- * @sysCap SystemCapability.Communication.NetManager
- * @devices phone, tablet, tv, wearable, car
+ * @sysCap SystemCapability.Communication.NetManager.Core
  */
 declare namespace policy {
   type NetBearType = connection.NetBearType;

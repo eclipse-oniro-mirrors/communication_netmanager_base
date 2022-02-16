@@ -21,8 +21,7 @@ import socket from "./@ohos.net.socket";
  * Provides interfaces to manage and use data networks.
  *
  * @since 8
- * @sysCap SystemCapability.Communication.NetManager
- * @devices phone, tablet, tv, wearable, car
+ * @sysCap SystemCapability.Communication.NetManager.Core
  */
 declare namespace connection {
   type HttpRequest = http.HttpRequest;
