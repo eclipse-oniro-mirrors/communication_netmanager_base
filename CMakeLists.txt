@@ -331,7 +331,6 @@ include_directories(utils/log/include)
 
 include_directories(../../../utils/native/base/include/)
 include_directories(../../../base/hiviewdfx/hilog/interfaces/native/innerkits/include)
-include_directories(../../../foundation/ace/ace_engine/frameworks/base/utils)
 include_directories(../../../third_party/quickjs)
 include_directories(../../../third_party/googletest/googletest/include)
 include_directories(../../../third_party/libuv/include)

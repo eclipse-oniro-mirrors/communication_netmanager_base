@@ -27,7 +27,7 @@
 namespace OHOS::NetManagerStandard {
 class ConnectionExec final {
 public:
-    ACE_DISALLOW_COPY_AND_MOVE(ConnectionExec);
+    DISALLOW_COPY_AND_MOVE(ConnectionExec);
 
     ConnectionExec() = delete;
 
@@ -39,7 +39,7 @@ public:
 
     class NetHandleExec final {
     public:
-        ACE_DISALLOW_COPY_AND_MOVE(NetHandleExec);
+        DISALLOW_COPY_AND_MOVE(NetHandleExec);
 
         NetHandleExec() = delete;
 
@@ -61,7 +61,7 @@ public:
 
     class NetConnectionExec final {
     public:
-        ACE_DISALLOW_COPY_AND_MOVE(NetConnectionExec);
+        DISALLOW_COPY_AND_MOVE(NetConnectionExec);
 
         NetConnectionExec() = delete;
 

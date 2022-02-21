@@ -23,7 +23,7 @@
 namespace OHOS::NetManagerStandard {
 class ConnectionAsyncWork final {
 public:
-    ACE_DISALLOW_COPY_AND_MOVE(ConnectionAsyncWork);
+    DISALLOW_COPY_AND_MOVE(ConnectionAsyncWork);
 
     ConnectionAsyncWork() = delete;
 
@@ -35,7 +35,7 @@ public:
 
     class NetHandleAsyncWork final {
     public:
-        ACE_DISALLOW_COPY_AND_MOVE(NetHandleAsyncWork);
+        DISALLOW_COPY_AND_MOVE(NetHandleAsyncWork);
 
         NetHandleAsyncWork() = delete;
 
@@ -52,7 +52,7 @@ public:
 
     class NetConnectionAsyncWork final {
     public:
-        ACE_DISALLOW_COPY_AND_MOVE(NetConnectionAsyncWork);
+        DISALLOW_COPY_AND_MOVE(NetConnectionAsyncWork);
 
         NetConnectionAsyncWork() = delete;
 

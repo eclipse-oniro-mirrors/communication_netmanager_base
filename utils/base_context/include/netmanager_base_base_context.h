@@ -31,7 +31,7 @@ typedef void (*AsyncWorkCallback)(napi_env env, napi_status status, void *data);
 
 class BaseContext {
 public:
-    ACE_DISALLOW_COPY_AND_MOVE(BaseContext);
+    DISALLOW_COPY_AND_MOVE(BaseContext);
 
     BaseContext() = delete;
 

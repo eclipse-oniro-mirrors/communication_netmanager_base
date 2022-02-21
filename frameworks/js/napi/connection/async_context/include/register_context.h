@@ -26,7 +26,7 @@
 namespace OHOS::NetManagerStandard {
 class RegisterContext final : public BaseContext {
 public:
-    ACE_DISALLOW_COPY_AND_MOVE(RegisterContext);
+    DISALLOW_COPY_AND_MOVE(RegisterContext);
 
     RegisterContext() = delete;
 

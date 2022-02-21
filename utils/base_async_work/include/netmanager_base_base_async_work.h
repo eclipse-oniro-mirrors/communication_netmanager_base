@@ -31,7 +31,7 @@ static constexpr const char *BUSINESS_ERROR_KEY = "code";
 namespace OHOS::NetManagerStandard {
 class BaseAsyncWork final {
 public:
-    ACE_DISALLOW_COPY_AND_MOVE(BaseAsyncWork);
+    DISALLOW_COPY_AND_MOVE(BaseAsyncWork);
 
     BaseAsyncWork() = delete;
 

@@ -26,7 +26,7 @@
 namespace OHOS::NetManagerStandard {
 class GetAddressByNameContext final : public BaseContext {
 public:
-    ACE_DISALLOW_COPY_AND_MOVE(GetAddressByNameContext);
+    DISALLOW_COPY_AND_MOVE(GetAddressByNameContext);
 
     GetAddressByNameContext() = delete;
 

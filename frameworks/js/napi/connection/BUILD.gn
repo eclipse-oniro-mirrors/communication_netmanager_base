@@ -36,7 +36,6 @@ utils_include = [
 ]
 
 common_include = [
-  "//foundation/ace/ace_engine/frameworks/base/utils",
   "//foundation/ace/napi/interfaces/kits",
   "//foundation/ace/napi",
   "//third_party/libuv/include",

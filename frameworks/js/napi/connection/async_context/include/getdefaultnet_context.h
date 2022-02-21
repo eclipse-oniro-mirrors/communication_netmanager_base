@@ -23,7 +23,7 @@
 namespace OHOS::NetManagerStandard {
 class GetDefaultNetContext final : public BaseContext {
 public:
-    ACE_DISALLOW_COPY_AND_MOVE(GetDefaultNetContext);
+    DISALLOW_COPY_AND_MOVE(GetDefaultNetContext);
 
     GetDefaultNetContext() = delete;
 
