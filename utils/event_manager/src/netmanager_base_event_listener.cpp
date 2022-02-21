@@ -17,7 +17,7 @@
 
 #include "netmanager_base_napi_utils.h"
 
-namespace OHOS::NetManagerBase {
+namespace OHOS::NetManagerStandard {
 EventListener::EventListener(napi_env env, std::string type, napi_value callback, bool once, bool asyncCallback)
     : env_(env),
       type_(std::move(type)),
@@ -105,4 +105,35 @@ bool EventListener::IsAsyncCallback() const
 {
     return asyncCallback_;
 }
-} // namespace OHOS::NetManagerBase
+
+void EventListener::EmitByUv(const std::string &type, void *data, void(Handler)(uv_work_t *, int status)) const
+{
+    if (type_ != type) {
+        return;
+    }
+
+    if (callbackRef_ == nullptr) {
+        return;
+    }
+
+    NapiUtils::CreateUvQueueWork(env_, data, Handler);
+}
+
+napi_env EventListener::GetEnv() const
+{
+    return env_;
+}
+
+napi_value EventListener::GetCallback() const
+{
+    if (callbackRef_ == nullptr) {
+        return nullptr;
+    }
+
+    return NapiUtils::GetReference(env_, callbackRef_);
+}
+
+UvWorkWrapper::UvWorkWrapper(void *theData, const EventListener &eventListener) : data(theData), listener(eventListener)
+{
+}
+} // namespace OHOS::NetManagerStandard

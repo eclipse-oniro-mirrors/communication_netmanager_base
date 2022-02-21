@@ -21,7 +21,7 @@
 
 #include "securec.h"
 
-namespace OHOS::NetManagerBase::NapiUtils {
+namespace OHOS::NetManagerStandard::NapiUtils {
 static constexpr const int MAX_STRING_LENGTH = 65536;
 
 napi_valuetype GetValueType(napi_env env, napi_value value)
@@ -320,4 +320,51 @@ void SetArrayElement(napi_env env, napi_value array, uint32_t index, napi_value 
 {
     (void)napi_set_element(env, array, index, value);
 }
-} // namespace OHOS::NetManagerBase::NapiUtils
+
+bool IsArray(napi_env env, napi_value value)
+{
+    bool result = false;
+    NAPI_CALL_BASE(env, napi_is_array(env, value, &result), false);
+    return result;
+}
+
+uint32_t GetArrayLength(napi_env env, napi_value arr)
+{
+    uint32_t arrayLength = 0;
+    NAPI_CALL_BASE(env, napi_get_array_length(env, arr, &arrayLength), 0);
+    return arrayLength;
+}
+
+napi_value GetArrayElement(napi_env env, napi_value arr, uint32_t index)
+{
+    napi_value elementValue = nullptr;
+    NAPI_CALL(env, napi_get_element(env, arr, index, &elementValue));
+    return elementValue;
+}
+
+/* libuv */
+void CreateUvQueueWork(napi_env env, void *data, void(Handler)(uv_work_t *, int status))
+{
+    uv_loop_s *loop = nullptr;
+    NAPI_CALL_RETURN_VOID(env, napi_get_uv_event_loop(env, &loop));
+
+    auto work = new uv_work_t;
+    work->data = data;
+
+    (void)uv_queue_work(
+        loop, work, [](uv_work_t *) {}, Handler);
+}
+
+/* scope */
+napi_handle_scope OpenScope(napi_env env)
+{
+    napi_handle_scope scope = nullptr;
+    NAPI_CALL(env, napi_open_handle_scope(env, &scope));
+    return scope;
+}
+
+void CloseScope(napi_env env, napi_handle_scope scope)
+{
+    (void)napi_close_handle_scope(env, scope);
+}
+} // namespace OHOS::NetManagerStandard::NapiUtils

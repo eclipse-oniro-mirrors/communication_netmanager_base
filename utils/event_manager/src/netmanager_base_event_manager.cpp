@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-namespace OHOS::NetManagerBase {
+namespace OHOS::NetManagerStandard {
 static constexpr const int CALLBACK_PARAM_NUM = 1;
 
 static constexpr const int ASYNC_CALLBACK_PARAM_NUM = 2;
@@ -75,4 +75,18 @@ void *EventManager::GetData()
     std::lock_guard<std::mutex> lock(mutex_);
     return data_;
 }
-} // namespace OHOS::NetManagerBase
+
+void EventManager::EmitByUv(const std::string &type, void *data, void(Handler)(uv_work_t *, int status))
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    std::for_each(listeners_.begin(), listeners_.end(), [type, data, Handler](const EventListener &listener) {
+        auto workWrapper = new UvWorkWrapper(data, listener);
+        listener.EmitByUv(type, workWrapper, Handler);
+    });
+
+    auto it = std::remove_if(listeners_.begin(), listeners_.end(),
+                             [type](const EventListener &listener) -> bool { return listener.MatchOnce(type); });
+    listeners_.erase(it, listeners_.end());
+}
+} // namespace OHOS::NetManagerStandard

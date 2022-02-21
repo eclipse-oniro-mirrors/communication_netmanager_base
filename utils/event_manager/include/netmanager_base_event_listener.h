@@ -20,8 +20,9 @@
 
 #include "napi/native_api.h"
 #include "noncopyable.h"
+#include "uv.h"
 
-namespace OHOS::NetManagerBase {
+namespace OHOS::NetManagerStandard {
 class EventListener {
 public:
     EventListener() = delete;
@@ -42,6 +43,11 @@ public:
 
     [[nodiscard]] bool IsAsyncCallback() const;
 
+    void EmitByUv(const std::string &type, void *data, void(Handler)(uv_work_t *, int status)) const;
+
+    [[nodiscard]] napi_env GetEnv() const;
+
+    [[nodiscard]] napi_value GetCallback() const;
 private:
     napi_env env_;
 
@@ -53,6 +59,15 @@ private:
 
     bool asyncCallback_;
 };
-} // namespace OHOS::NetManagerBase
+
+struct UvWorkWrapper {
+    UvWorkWrapper() = delete;
+
+    explicit UvWorkWrapper(void *theData, const EventListener &eventListener);
+
+    void *data;
+    EventListener listener;
+};
+} // namespace OHOS::NetManagerStandard
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_EVENT_LISTENER_H */

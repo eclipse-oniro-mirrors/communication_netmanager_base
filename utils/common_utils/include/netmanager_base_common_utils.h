@@ -19,12 +19,12 @@
 #include <string>
 #include <vector>
 
-namespace OHOS::NetManagerBase::CommonUtils {
+namespace OHOS::NetManagerStandard::CommonUtils {
 std::vector<std::string> Split(const std::string &str, const std::string &sep);
 
 std::string Strip(const std::string &str, char ch = ' ');
 
 std::string ToLower(const std::string &s);
-} // namespace OHOS::NetManagerBase::CommonUtils
+} // namespace OHOS::NetManagerStandard::CommonUtils
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H */

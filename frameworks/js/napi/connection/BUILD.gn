@@ -39,11 +39,14 @@ common_include = [
   "//foundation/ace/ace_engine/frameworks/base/utils",
   "//foundation/ace/napi/interfaces/kits",
   "//foundation/ace/napi",
+  "//third_party/libuv/include",
   "//third_party/node/src",
 ]
 
 common_deps = [
   "//foundation/ace/napi/:ace_napi",
+  "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
+  "//third_party/libuv:uv_static",
   "//utils/native/base:utils",
 ]
 
@@ -63,6 +66,7 @@ ohos_shared_library("connection") {
     "$NETMANAGER_BASE_NAPI_ROOT/connection/constant/include",
     "$NETMANAGER_BASE_NAPI_ROOT/connection/connection_exec/include",
     "$NETMANAGER_BASE_NAPI_ROOT/connection/connection_module/include",
+    "$NETMANAGER_BASE_NAPI_ROOT/connection/observer/include",
     "$NETMANAGER_BASE_NAPI_ROOT/connection/options/include",
   ]
   include_dirs += utils_include
@@ -71,10 +75,13 @@ ohos_shared_library("connection") {
   sources = [
     "async_context/src/getaddressbyname_context.cpp",
     "async_context/src/getdefaultnet_context.cpp",
+    "async_context/src/register_context.cpp",
     "async_work/src/connection_async_work.cpp",
     "connection_exec/src/connection_exec.cpp",
     "connection_module/src/connection_module.cpp",
+    "observer/src/net_conn_callback_observer.cpp",
     "options/src/net_address.cpp",
+    "options/src/netconnection.cpp",
   ]
   sources += utils_source
 

@@ -13,38 +13,35 @@
  * limitations under the License.
  */
 
-#include "getaddressbyname_context.h"
+#include "register_context.h"
 
 #include "constant.h"
 #include "netmanager_base_napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
-GetAddressByNameContext::GetAddressByNameContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+RegisterContext::RegisterContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
 
-void GetAddressByNameContext::ParseParams(napi_value *params, size_t paramsCount)
+void RegisterContext::ParseParams(napi_value *params, size_t paramsCount)
 {
     if (!CheckParamsType(params, paramsCount)) {
         return;
     }
 
-    host = NapiUtils::GetStringFromValueUtf8(GetEnv(), params[0]);
-
-    if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
-        SetParseOK(SetCallback(params[1]) == napi_ok);
+    if (paramsCount == PARAM_JUST_CALLBACK) {
+        SetParseOK(SetCallback(params[0]) == napi_ok);
         return;
     }
     SetParseOK(true);
 }
 
-bool GetAddressByNameContext::CheckParamsType(napi_value *params, size_t paramsCount)
+bool RegisterContext::CheckParamsType(napi_value *params, size_t paramsCount)
 {
-    if (paramsCount == PARAM_JUST_OPTIONS) {
-        return NapiUtils::GetValueType(GetEnv(), params[0]) == napi_string;
+    if (paramsCount == PARAM_NONE) {
+        return true;
     }
 
-    if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
-        return NapiUtils::GetValueType(GetEnv(), params[0]) == napi_string &&
-               NapiUtils::GetValueType(GetEnv(), params[1]) == napi_function;
+    if (paramsCount == PARAM_JUST_CALLBACK) {
+        return NapiUtils::GetValueType(GetEnv(), params[0]) == napi_function;
     }
     return false;
 }

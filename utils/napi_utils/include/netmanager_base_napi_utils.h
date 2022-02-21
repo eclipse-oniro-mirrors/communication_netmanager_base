@@ -21,8 +21,9 @@
 
 #include "napi/native_api.h"
 #include "napi/native_common.h"
+#include "uv.h"
 
-namespace OHOS::NetManagerBase::NapiUtils {
+namespace OHOS::NetManagerStandard::NapiUtils {
 napi_valuetype GetValueType(napi_env env, napi_value value);
 
 /* named property */
@@ -100,6 +101,20 @@ void DefineProperties(napi_env env,
 napi_value CreateArray(napi_env env, size_t length);
 
 void SetArrayElement(napi_env env, napi_value array, uint32_t index, napi_value value);
-} // namespace OHOS::NetManagerBase::NapiUtils
+
+bool IsArray(napi_env env, napi_value value);
+
+uint32_t GetArrayLength(napi_env env, napi_value arr);
+
+napi_value GetArrayElement(napi_env env, napi_value arr, uint32_t index);
+
+/* libuv */
+void CreateUvQueueWork(napi_env env, void *data, void(Handler)(uv_work_t *, int status));
+
+/* scope */
+napi_handle_scope OpenScope(napi_env env);
+
+void CloseScope(napi_env env, napi_handle_scope scope);
+} // namespace OHOS::NetManagerStandard::NapiUtils
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_NAPI_UTILS_H */

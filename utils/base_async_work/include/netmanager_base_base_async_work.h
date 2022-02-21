@@ -28,7 +28,7 @@ static constexpr const int PARSE_PARAM_FAILED = -1;
 
 static constexpr const char *BUSINESS_ERROR_KEY = "code";
 
-namespace OHOS::NetManagerBase {
+namespace OHOS::NetManagerStandard {
 class BaseAsyncWork final {
 public:
     ACE_DISALLOW_COPY_AND_MOVE(BaseAsyncWork);
@@ -100,6 +100,6 @@ public:
         (void)NapiUtils::CallFunction(env, undefined, func, argc, argv);
     }
 };
-} // namespace OHOS::NetManagerBase
+} // namespace OHOS::NetManagerStandard
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_BASE_ASYNC_WORK_H */

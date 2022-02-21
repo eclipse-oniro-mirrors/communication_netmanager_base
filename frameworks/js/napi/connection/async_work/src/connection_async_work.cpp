@@ -18,7 +18,7 @@
 #include "connection_exec.h"
 #include "netmanager_base_base_async_work.h"
 
-namespace OHOS::NetManagerBase {
+namespace OHOS::NetManagerStandard {
 void ConnectionAsyncWork::ExecGetDefaultNet(napi_env env, void *data)
 {
     BaseAsyncWork::ExecAsyncWork<GetDefaultNetContext, ConnectionExec::ExecGetDefaultNet>(env, data);
@@ -52,4 +52,26 @@ void ConnectionAsyncWork::NetHandleAsyncWork::GetAddressByNameCallback(napi_env 
     BaseAsyncWork::AsyncWorkCallback<GetAddressByNameContext, ConnectionExec::NetHandleExec::GetAddressByNameCallback>(
         env, status, data);
 }
-} // namespace OHOS::NetManagerBase
+
+void ConnectionAsyncWork::NetConnectionAsyncWork::ExecRegister(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<RegisterContext, ConnectionExec::NetConnectionExec::ExecRegister>(env, data);
+}
+
+void ConnectionAsyncWork::NetConnectionAsyncWork::RegisterCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<RegisterContext, ConnectionExec::NetConnectionExec::RegisterCallback>(env, status,
+                                                                                                           data);
+}
+
+void ConnectionAsyncWork::NetConnectionAsyncWork::ExecUnregister(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<UnregisterContext, ConnectionExec::NetConnectionExec::ExecUnregister>(env, data);
+}
+
+void ConnectionAsyncWork::NetConnectionAsyncWork::UnregisterCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<UnregisterContext, ConnectionExec::NetConnectionExec::UnregisterCallback>(
+        env, status, data);
+}
+} // namespace OHOS::NetManagerStandard

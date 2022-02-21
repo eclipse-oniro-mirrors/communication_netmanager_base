@@ -24,7 +24,7 @@
 #include "node_api_types.h"
 #include "noncopyable.h"
 
-namespace OHOS::NetManagerBase {
+namespace OHOS::NetManagerStandard {
 typedef void (*AsyncWorkExecutor)(napi_env env, void *data);
 
 typedef void (*AsyncWorkCallback)(napi_env env, napi_status status, void *data);
@@ -69,6 +69,8 @@ public:
 
     [[nodiscard]] const std::string &GetAsyncWorkName() const;
 
+    [[nodiscard]] EventManager *GetManager() const;
+
     void Emit(const std::string &type, const std::pair<napi_value, napi_value> &argv);
 
 protected:
@@ -91,6 +93,6 @@ private:
 
     std::string asyncWorkName_;
 };
-} // namespace OHOS::NetManagerBase
+} // namespace OHOS::NetManagerStandard
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_BASE_CONTEXT_H */

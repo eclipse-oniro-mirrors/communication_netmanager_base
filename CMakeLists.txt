@@ -343,6 +343,7 @@ include_directories(../../../foundation/distributedschedule/samgr/interfaces/inn
 include_directories(../../../foundation/communication/ipc/interfaces/innerkits/ipc_core/include)
 include_directories(../../../foundation/distributedschedule/safwk/services/safwk/include/)
 include_directories(../../../base/notification/ces_standard/interfaces/innerkits/native/include)
+include_directories(../../../third_party/curl/include/)
 
 link_directories(../../../utils/native/base/cmake-build-debug/src/securec)
 link_directories(../../../foundation/ace/napi/cmake-build-debug)

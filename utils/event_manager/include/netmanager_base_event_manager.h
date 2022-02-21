@@ -20,8 +20,9 @@
 #include <mutex>
 
 #include "netmanager_base_event_listener.h"
+#include "uv.h"
 
-namespace OHOS::NetManagerBase {
+namespace OHOS::NetManagerStandard {
 class EventManager {
 public:
     EventManager();
@@ -36,6 +37,8 @@ public:
 
     [[nodiscard]] void *GetData();
 
+    void EmitByUv(const std::string &type, void *data, void(Handler)(uv_work_t *, int status));
+
 private:
     std::mutex mutex_;
 
@@ -43,5 +46,5 @@ private:
 
     void *data_;
 };
-} // namespace OHOS::NetManagerBase
+} // namespace OHOS::NetManagerStandard
 #endif /* COMMUNICATIONNETMANAGER_BASE_EVENT_MANAGER_H */

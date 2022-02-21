@@ -13,27 +13,32 @@
  * limitations under the License.
  */
 
-#ifndef COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H
-#define COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H
+#ifndef NETMANAGER_BASE_REGISTER_CONTEXT_H
+#define NETMANAGER_BASE_REGISTER_CONTEXT_H
 
 #include "napi/native_api.h"
+#include "net_all_capabilities.h"
+#include "net_handle.h"
+#include "net_link_info.h"
 #include "netmanager_base_base_context.h"
 #include "noncopyable.h"
 
 namespace OHOS::NetManagerStandard {
-class GetDefaultNetContext final : public BaseContext {
+class RegisterContext final : public BaseContext {
 public:
-    ACE_DISALLOW_COPY_AND_MOVE(GetDefaultNetContext);
+    ACE_DISALLOW_COPY_AND_MOVE(RegisterContext);
 
-    GetDefaultNetContext() = delete;
+    RegisterContext() = delete;
 
-    explicit GetDefaultNetContext(napi_env env, EventManager *manager);
+    explicit RegisterContext(napi_env env, EventManager *manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
 };
+
+typedef RegisterContext UnregisterContext;
 } // namespace OHOS::NetManagerStandard
 
-#endif /* COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H */
+#endif /* NETMANAGER_BASE_REGISTER_CONTEXT_H */
