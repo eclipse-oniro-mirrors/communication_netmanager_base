@@ -57,9 +57,7 @@ static bool ParseCapabilities(napi_env env, napi_value obj, NetAllCapabilities &
     capabilities.linkDownBandwidthKbps_ = NapiUtils::GetUint32Property(env, obj, KEY_LINK_DOWN_BAND_WIDTH_KPS);
 
     napi_value networkCap = NapiUtils::GetNamedProperty(env, obj, KEY_NETWORK_CAP);
-    if (!ParseTypesArray<NetCap>(env, networkCap, capabilities.netCaps_)) {
-        return false;
-    }
+    (void)ParseTypesArray<NetCap>(env, networkCap, capabilities.netCaps_);
 
     napi_value bearerTypes = NapiUtils::GetNamedProperty(env, obj, KEY_BEARER_TYPE);
     if (!ParseTypesArray<NetBearType>(env, bearerTypes, capabilities.bearerTypes_)) {

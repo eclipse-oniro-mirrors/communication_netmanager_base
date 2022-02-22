@@ -136,7 +136,7 @@ napi_value NewInstance(napi_env env,
     napi_value thisVal = nullptr;
     std::size_t argc = MAX_PARAM_NUM;
     napi_value argv[MAX_PARAM_NUM] = {nullptr};
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
 
     napi_value jsConstructor = NapiUtils::GetNamedProperty(env, thisVal, className);
     if (NapiUtils::GetValueType(env, jsConstructor) == napi_undefined) {

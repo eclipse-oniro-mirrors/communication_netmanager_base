@@ -24,8 +24,7 @@ int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetAvailable");
     NetConnection *netConnection = NET_CONNECTIONS[this];
-    netConnection->GetEventManager()->EmitByUv(EVENT_NET_AVAILABLE, netHandle.GetRefPtr(),
-                                               CallbackTemplate<CreateNetAvailableParam>);
+    netConnection->GetEventManager()->EmitByUv(EVENT_NET_AVAILABLE, netHandle.GetRefPtr(), NetAvailableCallback);
     return 0;
 }
 
@@ -35,8 +34,7 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetCapabilitiesChange");
     NetConnection *netConnection = NET_CONNECTIONS[this];
     auto pair = std::make_pair(netHandle.GetRefPtr(), netAllCap.GetRefPtr());
-    netConnection->GetEventManager()->EmitByUv(EVENT_NET_CAPABILITIES_CHANGE, &pair,
-                                               CallbackTemplate<CreateNetCapabilitiesChangeParam>);
+    netConnection->GetEventManager()->EmitByUv(EVENT_NET_CAPABILITIES_CHANGE, &pair, NetCapabilitiesChangeCallback);
     return 0;
 }
 
@@ -47,7 +45,7 @@ int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &
     NetConnection *netConnection = NET_CONNECTIONS[this];
     auto pair = std::make_pair(netHandle.GetRefPtr(), info.GetRefPtr());
     netConnection->GetEventManager()->EmitByUv(EVENT_NET_CONNECTION_PROPERTIES_CHANGE, &pair,
-                                               CallbackTemplate<CreateNetConnectionPropertiesChangeParam>);
+                                               NetConnectionPropertiesChangeCallback);
     return 0;
 }
 
@@ -55,8 +53,7 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetLost");
     NetConnection *netConnection = NET_CONNECTIONS[this];
-    netConnection->GetEventManager()->EmitByUv(EVENT_NET_LOST, netHandle.GetRefPtr(),
-                                               CallbackTemplate<CreateNetLostParam>);
+    netConnection->GetEventManager()->EmitByUv(EVENT_NET_LOST, netHandle.GetRefPtr(), NetLostCallback);
     return 0;
 }
 
@@ -64,8 +61,7 @@ int32_t NetConnCallbackObserver::NetUnavailable()
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetUnavailable");
     NetConnection *netConnection = NET_CONNECTIONS[this];
-    netConnection->GetEventManager()->EmitByUv(EVENT_NET_UNAVAILABLE, nullptr,
-                                               CallbackTemplate<CreateNetUnavailableParam>);
+    netConnection->GetEventManager()->EmitByUv(EVENT_NET_UNAVAILABLE, nullptr, NetUnavailableCallback);
     return 0;
 }
 
@@ -74,8 +70,7 @@ int32_t NetConnCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetBlockStatusChange");
     NetConnection *netConnection = NET_CONNECTIONS[this];
     auto pair = std::make_pair(netHandle.GetRefPtr(), blocked);
-    netConnection->GetEventManager()->EmitByUv(EVENT_NET_BLOCK_STATUS_CHANGE, &pair,
-                                               CallbackTemplate<CreateNetBlockStatusChangeParam>);
+    netConnection->GetEventManager()->EmitByUv(EVENT_NET_BLOCK_STATUS_CHANGE, &pair, NetBlockStatusChangeCallback);
     return 0;
 }
 
@@ -247,5 +242,131 @@ napi_value NetConnCallbackObserver::CreateNetBlockStatusChangeParam(napi_env env
     NapiUtils::SetNamedProperty(env, obj, KEY_NET_HANDLE, netHandle);
     NapiUtils::SetBooleanProperty(env, obj, KEY_BLOCKED, pair->second);
     return obj;
+}
+
+void NetConnCallbackObserver::NetAvailableCallback(uv_work_t *work, int status)
+{
+    (void)status;
+
+    auto workWrapper = static_cast<UvWorkWrapper *>(work->data);
+    napi_env env = workWrapper->listener.GetEnv();
+    auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
+    std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
+
+    napi_value obj = CreateNetAvailableParam(env, workWrapper->data);
+
+    napi_value callback = workWrapper->listener.GetCallback();
+    napi_value argv[1] = {obj};
+    if (NapiUtils::GetValueType(env, callback) == napi_function) {
+        (void)NapiUtils::CallFunction(env, NapiUtils::GetUndefined(env), callback, 1, argv);
+    }
+
+    delete workWrapper;
+    delete work;
+}
+
+void NetConnCallbackObserver::NetCapabilitiesChangeCallback(uv_work_t *work, int status)
+{
+    (void)status;
+
+    auto workWrapper = static_cast<UvWorkWrapper *>(work->data);
+    napi_env env = workWrapper->listener.GetEnv();
+    auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
+    std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
+
+    napi_value obj = CreateNetCapabilitiesChangeParam(env, workWrapper->data);
+
+    napi_value callback = workWrapper->listener.GetCallback();
+    napi_value argv[1] = {obj};
+    if (NapiUtils::GetValueType(env, callback) == napi_function) {
+        (void)NapiUtils::CallFunction(env, NapiUtils::GetUndefined(env), callback, 1, argv);
+    }
+
+    delete workWrapper;
+    delete work;
+}
+
+void NetConnCallbackObserver::NetConnectionPropertiesChangeCallback(uv_work_t *work, int status)
+{
+    (void)status;
+
+    auto workWrapper = static_cast<UvWorkWrapper *>(work->data);
+    napi_env env = workWrapper->listener.GetEnv();
+    auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
+    std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
+
+    napi_value obj = CreateNetConnectionPropertiesChangeParam(env, workWrapper->data);
+
+    napi_value callback = workWrapper->listener.GetCallback();
+    napi_value argv[1] = {obj};
+    if (NapiUtils::GetValueType(env, callback) == napi_function) {
+        (void)NapiUtils::CallFunction(env, NapiUtils::GetUndefined(env), callback, 1, argv);
+    }
+
+    delete workWrapper;
+    delete work;
+}
+
+void NetConnCallbackObserver::NetLostCallback(uv_work_t *work, int status)
+{
+    (void)status;
+
+    auto workWrapper = static_cast<UvWorkWrapper *>(work->data);
+    napi_env env = workWrapper->listener.GetEnv();
+    auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
+    std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
+
+    napi_value obj = CreateNetLostParam(env, workWrapper->data);
+
+    napi_value callback = workWrapper->listener.GetCallback();
+    napi_value argv[1] = {obj};
+    if (NapiUtils::GetValueType(env, callback) == napi_function) {
+        (void)NapiUtils::CallFunction(env, NapiUtils::GetUndefined(env), callback, 1, argv);
+    }
+
+    delete workWrapper;
+    delete work;
+}
+
+void NetConnCallbackObserver::NetUnavailableCallback(uv_work_t *work, int status)
+{
+    (void)status;
+
+    auto workWrapper = static_cast<UvWorkWrapper *>(work->data);
+    napi_env env = workWrapper->listener.GetEnv();
+    auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
+    std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
+
+    napi_value obj = CreateNetUnavailableParam(env, workWrapper->data);
+
+    napi_value callback = workWrapper->listener.GetCallback();
+    napi_value argv[1] = {obj};
+    if (NapiUtils::GetValueType(env, callback) == napi_function) {
+        (void)NapiUtils::CallFunction(env, NapiUtils::GetUndefined(env), callback, 1, argv);
+    }
+
+    delete workWrapper;
+    delete work;
+}
+
+void NetConnCallbackObserver::NetBlockStatusChangeCallback(uv_work_t *work, int status)
+{
+    (void)status;
+
+    auto workWrapper = static_cast<UvWorkWrapper *>(work->data);
+    napi_env env = workWrapper->listener.GetEnv();
+    auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
+    std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
+
+    napi_value obj = CreateNetBlockStatusChangeParam(env, workWrapper->data);
+
+    napi_value callback = workWrapper->listener.GetCallback();
+    napi_value argv[1] = {obj};
+    if (NapiUtils::GetValueType(env, callback) == napi_function) {
+        (void)NapiUtils::CallFunction(env, NapiUtils::GetUndefined(env), callback, 1, argv);
+    }
+
+    delete workWrapper;
+    delete work;
 }
 } // namespace OHOS::NetManagerStandard

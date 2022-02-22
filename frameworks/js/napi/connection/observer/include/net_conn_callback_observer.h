@@ -37,27 +37,6 @@ public:
     int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked);
 
 private:
-    template <napi_value (*MakeJsValue)(napi_env, void *)> static void CallbackTemplate(uv_work_t *work, int status)
-    {
-        (void)status;
-
-        auto workWrapper = static_cast<UvWorkWrapper *>(work->data);
-        napi_env env = workWrapper->listener.GetEnv();
-        auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
-        std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
-
-        napi_value obj = MakeJsValue(env, workWrapper->data);
-
-        napi_value callback = workWrapper->listener.GetCallback();
-        napi_value argv[1] = {obj};
-        if (NapiUtils::GetValueType(env, callback) == napi_function) {
-            (void)NapiUtils::CallFunction(env, NapiUtils::GetUndefined(env), callback, 1, argv);
-        }
-
-        delete workWrapper;
-        delete work;
-    }
-
     static napi_value CreateNetHandle(napi_env env, NetHandle *handle);
 
     static napi_value CreateNetCapabilities(napi_env env, NetAllCapabilities *capabilities);
@@ -75,6 +54,18 @@ private:
     static napi_value CreateNetUnavailableParam(napi_env env, void *data);
 
     static napi_value CreateNetBlockStatusChangeParam(napi_env env, void *data);
+
+    static void NetAvailableCallback(uv_work_t *work, int status);
+
+    static void NetCapabilitiesChangeCallback(uv_work_t *work, int status);
+
+    static void NetConnectionPropertiesChangeCallback(uv_work_t *work, int status);
+
+    static void NetLostCallback(uv_work_t *work, int status);
+
+    static void NetUnavailableCallback(uv_work_t *work, int status);
+
+    static void NetBlockStatusChangeCallback(uv_work_t *work, int status);
 };
 } // namespace OHOS::NetManagerStandard
 
