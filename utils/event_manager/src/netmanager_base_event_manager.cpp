@@ -81,7 +81,7 @@ void EventManager::EmitByUv(const std::string &type, void *data, void(Handler)(u
     std::lock_guard<std::mutex> lock(mutex_);
 
     std::for_each(listeners_.begin(), listeners_.end(), [type, data, Handler](const EventListener &listener) {
-        auto workWrapper = new UvWorkWrapper(data, listener);
+        auto workWrapper = new UvWorkWrapper(data, listener.GetEnv(), listener.GetCallbackRef());
         listener.EmitByUv(type, workWrapper, Handler);
     });
 

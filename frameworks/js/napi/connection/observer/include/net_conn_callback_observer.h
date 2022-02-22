@@ -24,19 +24,40 @@
 namespace OHOS::NetManagerStandard {
 class NetConnCallbackObserver : public NetConnCallbackStub {
 public:
-    int32_t NetAvailable(sptr<NetHandle> &netHandle);
+    int32_t NetAvailable(sptr<NetHandle> &netHandle) override;
 
-    int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap);
+    int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap) override;
 
-    int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info);
+    int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info) override;
 
-    int32_t NetLost(sptr<NetHandle> &netHandle);
+    int32_t NetLost(sptr<NetHandle> &netHandle) override;
 
-    int32_t NetUnavailable();
+    int32_t NetUnavailable() override;
 
-    int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked);
+    int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override;
 
 private:
+    template <napi_value (*MakeJsValue)(napi_env, void *)> static void CallbackTemplate(uv_work_t *work, int status)
+    {
+        (void)status;
+
+        auto workWrapper = static_cast<UvWorkWrapper *>(work->data);
+        napi_env env = workWrapper->env;
+        auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
+        std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
+
+        napi_value obj = MakeJsValue(env, workWrapper->data);
+
+        napi_value callback = NapiUtils::GetReference(env, workWrapper->callbackRef);
+        napi_value argv[1] = {obj};
+        if (NapiUtils::GetValueType(env, callback) == napi_function) {
+            (void)NapiUtils::CallFunction(env, NapiUtils::GetUndefined(env), callback, 1, argv);
+        }
+
+        delete workWrapper;
+        delete work;
+    }
+
     static napi_value CreateNetHandle(napi_env env, NetHandle *handle);
 
     static napi_value CreateNetCapabilities(napi_env env, NetAllCapabilities *capabilities);

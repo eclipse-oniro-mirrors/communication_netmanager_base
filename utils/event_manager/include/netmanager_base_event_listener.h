@@ -47,7 +47,8 @@ public:
 
     [[nodiscard]] napi_env GetEnv() const;
 
-    [[nodiscard]] napi_value GetCallback() const;
+    [[nodiscard]] napi_ref GetCallbackRef() const;
+
 private:
     napi_env env_;
 
@@ -63,10 +64,11 @@ private:
 struct UvWorkWrapper {
     UvWorkWrapper() = delete;
 
-    explicit UvWorkWrapper(void *theData, const EventListener &eventListener);
+    explicit UvWorkWrapper(void *theData, napi_env theEnv, napi_ref theCallbackRef);
 
     void *data;
-    EventListener listener;
+    napi_env env;
+    napi_ref callbackRef;
 };
 } // namespace OHOS::NetManagerStandard
 

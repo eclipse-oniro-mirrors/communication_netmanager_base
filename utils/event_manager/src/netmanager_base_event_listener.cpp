@@ -124,16 +124,13 @@ napi_env EventListener::GetEnv() const
     return env_;
 }
 
-napi_value EventListener::GetCallback() const
+napi_ref EventListener::GetCallbackRef() const
 {
-    if (callbackRef_ == nullptr) {
-        return nullptr;
-    }
-
-    return NapiUtils::GetReference(env_, callbackRef_);
+    return callbackRef_;
 }
 
-UvWorkWrapper::UvWorkWrapper(void *theData, const EventListener &eventListener) : data(theData), listener(eventListener)
+UvWorkWrapper::UvWorkWrapper(void *theData, napi_env theEnv, napi_ref theCallbackRef)
+    : data(theData), env(theEnv), callbackRef(theCallbackRef)
 {
 }
 } // namespace OHOS::NetManagerStandard
