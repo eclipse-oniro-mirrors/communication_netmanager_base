@@ -26,7 +26,7 @@ int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetAvailable");
     NetConnection *netConnection = NET_CONNECTIONS[this];
-    netConnection->GetEventManager()->EmitByUv(EVENT_NET_AVAILABLE, netHandle.GetRefPtr(), NetAvailableCallback);
+    netConnection->GetEventManager()->EmitByUv(EVENT_NET_AVAILABLE, new NetHandle(*netHandle), NetAvailableCallback);
     return 0;
 }
 
@@ -36,8 +36,8 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetCapabilitiesChange");
     NetConnection *netConnection = NET_CONNECTIONS[this];
     auto pair = new std::pair<NetHandle *, NetAllCapabilities *>;
-    pair->first = netHandle.GetRefPtr();
-    pair->second = netAllCap.GetRefPtr();
+    pair->first = new NetHandle(*netHandle);
+    pair->second = new NetAllCapabilities(*netAllCap);
     netConnection->GetEventManager()->EmitByUv(EVENT_NET_CAPABILITIES_CHANGE, pair, NetCapabilitiesChangeCallback);
     return 0;
 }
@@ -48,8 +48,8 @@ int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetConnectionPropertiesChange");
     NetConnection *netConnection = NET_CONNECTIONS[this];
     auto pair = new std::pair<NetHandle *, NetLinkInfo *>;
-    pair->first = netHandle.GetRefPtr();
-    pair->second = info.GetRefPtr();
+    pair->first = new NetHandle(*netHandle);
+    pair->second = new NetLinkInfo(*info);
     netConnection->GetEventManager()->EmitByUv(EVENT_NET_CONNECTION_PROPERTIES_CHANGE, pair,
                                                NetConnectionPropertiesChangeCallback);
     return 0;
@@ -59,7 +59,7 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetLost");
     NetConnection *netConnection = NET_CONNECTIONS[this];
-    netConnection->GetEventManager()->EmitByUv(EVENT_NET_LOST, netHandle.GetRefPtr(), NetLostCallback);
+    netConnection->GetEventManager()->EmitByUv(EVENT_NET_LOST, new NetHandle(*netHandle), NetLostCallback);
     return 0;
 }
 
@@ -76,7 +76,7 @@ int32_t NetConnCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetBlockStatusChange");
     NetConnection *netConnection = NET_CONNECTIONS[this];
     auto pair = new std::pair<NetHandle *, bool>;
-    pair->first = netHandle.GetRefPtr();
+    pair->first = new NetHandle(*netHandle);
     pair->second = blocked;
     netConnection->GetEventManager()->EmitByUv(EVENT_NET_BLOCK_STATUS_CHANGE, pair, NetBlockStatusChangeCallback);
     return 0;
@@ -98,6 +98,7 @@ napi_value NetConnCallbackObserver::CreateNetHandle(napi_env env, NetHandle *han
     NapiUtils::DefineProperties(env, netHandle, properties);
     NapiUtils::SetUint32Property(env, netHandle, ConnectionModule::NetHandleInterface::PROPERTY_NET_ID,
                                  handle->GetNetId());
+    delete handle;
     return netHandle;
 }
 
@@ -130,6 +131,7 @@ napi_value NetConnCallbackObserver::CreateNetCapabilities(napi_env env, NetAllCa
         }
         NapiUtils::SetNamedProperty(env, netCapabilities, KEY_BEARER_TYPE, bearerTypes);
     }
+    delete capabilities;
     return netCapabilities;
 }
 
@@ -193,6 +195,7 @@ napi_value NetConnCallbackObserver::CreateConnectionProperties(napi_env env, Net
         }
         NapiUtils::SetNamedProperty(env, connectionProperties, KEY_LINK_ADDRESSES, dnsList);
     }
+    delete linkInfo;
     return connectionProperties;
 }
 
