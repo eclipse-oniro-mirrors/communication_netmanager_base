@@ -18,7 +18,7 @@
 
 #include "napi/native_api.h"
 #include "netmanager_base_base_context.h"
-#include "noncopyable.h"
+#include "nocopyable.h"
 
 namespace OHOS::NetManagerStandard {
 class GetDefaultNetContext final : public BaseContext {

@@ -22,7 +22,7 @@
 #include "napi/native_common.h"
 #include "netmanager_base_base_context.h"
 #include "netmanager_base_napi_utils.h"
-#include "noncopyable.h"
+#include "nocopyable.h"
 
 static constexpr const int PARSE_PARAM_FAILED = -1;
 

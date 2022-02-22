@@ -22,7 +22,7 @@
 #include "napi/native_common.h"
 #include "netmanager_base_event_manager.h"
 #include "node_api_types.h"
-#include "noncopyable.h"
+#include "nocopyable.h"
 
 namespace OHOS::NetManagerStandard {
 typedef void (*AsyncWorkExecutor)(napi_env env, void *data);

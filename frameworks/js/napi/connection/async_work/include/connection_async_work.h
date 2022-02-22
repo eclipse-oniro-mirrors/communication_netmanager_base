@@ -18,7 +18,7 @@
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
-#include "noncopyable.h"
+#include "nocopyable.h"
 
 namespace OHOS::NetManagerStandard {
 class ConnectionAsyncWork final {

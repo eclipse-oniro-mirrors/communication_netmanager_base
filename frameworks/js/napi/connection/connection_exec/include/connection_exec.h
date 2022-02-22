@@ -21,7 +21,7 @@
 #include "getaddressbyname_context.h"
 #include "getdefaultnet_context.h"
 #include "napi/native_api.h"
-#include "noncopyable.h"
+#include "nocopyable.h"
 #include "register_context.h"
 
 namespace OHOS::NetManagerStandard {
