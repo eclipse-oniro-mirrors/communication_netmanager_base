@@ -112,7 +112,7 @@ napi_value NetConnCallbackObserver::CreateNetCapabilities(napi_env env, NetAllCa
     NapiUtils::SetUint32Property(env, netCapabilities, KEY_LINK_DOWN_BAND_WIDTH_KPS,
                                  capabilities->linkDownBandwidthKbps_);
     NETMANAGER_BASE_LOGI("capabilities->netCaps_.size() = %{public}zu", capabilities->netCaps_.size());
-    if (!capabilities->netCaps_.empty()) {
+    if (!capabilities->netCaps_.empty() && capabilities->netCaps_.size() <= MAX_ARRAY_LENGTH) {
         napi_value networkCap = NapiUtils::CreateArray(env, std::min(capabilities->netCaps_.size(), MAX_ARRAY_LENGTH));
         auto it = capabilities->netCaps_.begin();
         for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != capabilities->netCaps_.end(); ++index, ++it) {
@@ -121,7 +121,7 @@ napi_value NetConnCallbackObserver::CreateNetCapabilities(napi_env env, NetAllCa
         NapiUtils::SetNamedProperty(env, netCapabilities, KEY_NETWORK_CAP, networkCap);
     }
     NETMANAGER_BASE_LOGI("capabilities->bearerTypes_.size() = %{public}zu", capabilities->bearerTypes_.size());
-    if (!capabilities->bearerTypes_.empty()) {
+    if (!capabilities->bearerTypes_.empty() && capabilities->bearerTypes_.size() <= MAX_ARRAY_LENGTH) {
         napi_value bearerTypes =
             NapiUtils::CreateArray(env, std::min(capabilities->bearerTypes_.size(), MAX_ARRAY_LENGTH));
         auto it = capabilities->bearerTypes_.begin();
@@ -143,7 +143,7 @@ napi_value NetConnCallbackObserver::CreateConnectionProperties(napi_env env, Net
     NapiUtils::SetStringPropertyUtf8(env, connectionProperties, KEY_DOMAINS, linkInfo->domain_);
     NapiUtils::SetUint32Property(env, connectionProperties, KEY_MTU, linkInfo->mtu_);
     NETMANAGER_BASE_LOGI("linkInfo->netAddrList_.size() = %{public}zu", linkInfo->netAddrList_.size());
-    if (!linkInfo->netAddrList_.empty()) {
+    if (!linkInfo->netAddrList_.empty() && linkInfo->netAddrList_.size() <= MAX_ARRAY_LENGTH) {
         napi_value linkAddresses =
             NapiUtils::CreateArray(env, std::min(linkInfo->netAddrList_.size(), MAX_ARRAY_LENGTH));
         auto it = linkInfo->netAddrList_.begin();
@@ -156,7 +156,7 @@ napi_value NetConnCallbackObserver::CreateConnectionProperties(napi_env env, Net
         NapiUtils::SetNamedProperty(env, connectionProperties, KEY_LINK_ADDRESSES, linkAddresses);
     }
     NETMANAGER_BASE_LOGI("linkInfo->routeList_.size() = %{public}zu", linkInfo->routeList_.size());
-    if (!linkInfo->routeList_.empty()) {
+    if (!linkInfo->routeList_.empty() && linkInfo->routeList_.size() <= MAX_ARRAY_LENGTH) {
         napi_value routes = NapiUtils::CreateArray(env, std::min(linkInfo->routeList_.size(), MAX_ARRAY_LENGTH));
         auto it = linkInfo->routeList_.begin();
         for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != linkInfo->routeList_.end(); ++index, ++it) {
@@ -181,7 +181,7 @@ napi_value NetConnCallbackObserver::CreateConnectionProperties(napi_env env, Net
         NapiUtils::SetNamedProperty(env, connectionProperties, KEY_ROUTES, routes);
     }
     NETMANAGER_BASE_LOGI("linkInfo->dnsList_.size() = %{public}zu", linkInfo->dnsList_.size());
-    if (!linkInfo->dnsList_.empty()) {
+    if (!linkInfo->dnsList_.empty() && linkInfo->dnsList_.size() <= MAX_ARRAY_LENGTH) {
         napi_value dnsList = NapiUtils::CreateArray(env, std::min(linkInfo->dnsList_.size(), MAX_ARRAY_LENGTH));
         auto it = linkInfo->dnsList_.begin();
         for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != linkInfo->dnsList_.end(); ++index, ++it) {
