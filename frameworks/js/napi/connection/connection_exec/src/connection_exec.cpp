@@ -17,13 +17,15 @@
 
 #include "connection_module.h"
 #include "constant.h"
+#include "net_conn_client.h"
+#include "netconnection.h"
 #include "netmanager_base_log.h"
 #include "netmanager_base_napi_utils.h"
 #include "securec.h"
 
 static constexpr const int MAX_HOST_LEN = 256;
 
-namespace OHOS::NetManagerBase {
+namespace OHOS::NetManagerStandard {
 bool ConnectionExec::ExecGetDefaultNet(GetDefaultNetContext *context)
 {
     (void)context;
@@ -39,10 +41,10 @@ napi_value ConnectionExec::GetDefaultNetCallback(GetDefaultNetContext *context)
     }
 
     std::initializer_list<napi_property_descriptor> properties = {
-        DECLARE_NAPI_FUNCTION(ConnectionModule::NetHandle::FUNCTION_GET_ADDRESSES_BY_NAME,
-                              ConnectionModule::NetHandle::GetAddressesByName),
-        DECLARE_NAPI_FUNCTION(ConnectionModule::NetHandle::FUNCTION_GET_ADDRESS_BY_NAME,
-                              ConnectionModule::NetHandle::GetAddressByName),
+        DECLARE_NAPI_FUNCTION(ConnectionModule::NetHandleInterface::FUNCTION_GET_ADDRESSES_BY_NAME,
+                              ConnectionModule::NetHandleInterface::GetAddressesByName),
+        DECLARE_NAPI_FUNCTION(ConnectionModule::NetHandleInterface::FUNCTION_GET_ADDRESS_BY_NAME,
+                              ConnectionModule::NetHandleInterface::GetAddressByName),
     };
     NapiUtils::DefineProperties(context->GetEnv(), netHandle, properties);
     return netHandle;
@@ -145,4 +147,55 @@ void ConnectionExec::NetHandleExec::SetAddressInfo(const char *host, addrinfo *i
         address.SetPort(addr6->sin6_port);
     }
 }
-} // namespace OHOS::NetManagerBase
+
+bool ConnectionExec::NetConnectionExec::ExecRegister(RegisterContext *context)
+{
+    NETMANAGER_BASE_LOGI("ConnectionExec::NetConnectionExec::ExecRegister");
+
+    EventManager *manager = context->GetManager();
+    auto conn = static_cast<NetConnection *>(manager->GetData());
+    sptr<INetConnCallback> callback = conn->GetObserver();
+
+    if (conn->hasNetSpecifier && conn->hasTimeout) {
+        sptr<NetSpecifier> specifier = new NetSpecifier(conn->netSpecifier);
+        int32_t ret =
+            DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback, conn->timeout);
+        NETMANAGER_BASE_LOGI("Register result hasNetSpecifier and hasTimeout %{public}d", ret);
+        return ret == 0;
+    }
+
+    if (conn->hasNetSpecifier) {
+        sptr<NetSpecifier> specifier = new NetSpecifier(conn->netSpecifier);
+        int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback, 0);
+        NETMANAGER_BASE_LOGI("Register result hasNetSpecifier %{public}d", ret);
+        return ret == 0;
+    }
+
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(callback);
+    NETMANAGER_BASE_LOGI("Register result %{public}d", ret);
+    return ret == 0;
+}
+
+napi_value ConnectionExec::NetConnectionExec::RegisterCallback(RegisterContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+bool ConnectionExec::NetConnectionExec::ExecUnregister(UnregisterContext *context)
+{
+    NETMANAGER_BASE_LOGI("ConnectionExec::NetConnectionExec::ExecUnregister");
+
+    EventManager *manager = context->GetManager();
+    auto conn = static_cast<NetConnection *>(manager->GetData());
+    sptr<INetConnCallback> callback = conn->GetObserver();
+
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
+    NETMANAGER_BASE_LOGI("Unregister result %{public}d", ret);
+    return ret == 0;
+}
+
+napi_value ConnectionExec::NetConnectionExec::UnregisterCallback(RegisterContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+} // namespace OHOS::NetManagerStandard

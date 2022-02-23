@@ -21,12 +21,13 @@
 #include "getaddressbyname_context.h"
 #include "getdefaultnet_context.h"
 #include "napi/native_api.h"
-#include "noncopyable.h"
+#include "nocopyable.h"
+#include "register_context.h"
 
-namespace OHOS::NetManagerBase {
+namespace OHOS::NetManagerStandard {
 class ConnectionExec final {
 public:
-    ACE_DISALLOW_COPY_AND_MOVE(ConnectionExec);
+    DISALLOW_COPY_AND_MOVE(ConnectionExec);
 
     ConnectionExec() = delete;
 
@@ -38,7 +39,7 @@ public:
 
     class NetHandleExec final {
     public:
-        ACE_DISALLOW_COPY_AND_MOVE(NetHandleExec);
+        DISALLOW_COPY_AND_MOVE(NetHandleExec);
 
         NetHandleExec() = delete;
 
@@ -57,7 +58,24 @@ public:
 
         static void SetAddressInfo(const char *host, addrinfo *info, NetAddress &address);
     };
+
+    class NetConnectionExec final {
+    public:
+        DISALLOW_COPY_AND_MOVE(NetConnectionExec);
+
+        NetConnectionExec() = delete;
+
+        ~NetConnectionExec() = delete;
+
+        static bool ExecRegister(RegisterContext *context);
+
+        static napi_value RegisterCallback(RegisterContext *context);
+
+        static bool ExecUnregister(UnregisterContext *context);
+
+        static napi_value UnregisterCallback(UnregisterContext *context);
+    };
 };
-} // namespace OHOS::NetManagerBase
+} // namespace OHOS::NetManagerStandard
 
 #endif /* COMMUNICATIONNETMANAGERBASE_CONNECTION_EXEC_H */

@@ -21,12 +21,12 @@
 #include "napi/native_api.h"
 #include "net_address.h"
 #include "netmanager_base_base_context.h"
-#include "noncopyable.h"
+#include "nocopyable.h"
 
-namespace OHOS::NetManagerBase {
+namespace OHOS::NetManagerStandard {
 class GetAddressByNameContext final : public BaseContext {
 public:
-    ACE_DISALLOW_COPY_AND_MOVE(GetAddressByNameContext);
+    DISALLOW_COPY_AND_MOVE(GetAddressByNameContext);
 
     GetAddressByNameContext() = delete;
 
@@ -41,6 +41,6 @@ public:
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
 };
-} // namespace OHOS::NetManagerBase
+} // namespace OHOS::NetManagerStandard
 
 #endif /* COMMUNICATIONNETMANAGERBASE_GETADDRESSBYNAME_CONTEXT_H */

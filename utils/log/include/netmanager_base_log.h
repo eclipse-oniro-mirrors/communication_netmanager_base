@@ -44,18 +44,18 @@ static constexpr OHOS::HiviewDFX::HiLogLabel NETMANAGER_BASE_LOG_LABEL = {LOG_CO
 
 static constexpr uint32_t NETMANAGER_BASE_MAX_BUFFER_SIZE = 4096;
 
-static void NetManagerBaseStripFormatString(const std::string &prefix, std::string &str)
+static void NetManagerStandardStripFormatString(const std::string &prefix, std::string &str)
 {
     for (auto pos = str.find(prefix, 0); pos != std::string::npos; pos = str.find(prefix, pos)) {
         str.erase(pos, prefix.size());
     }
 }
 
-static void NetManagerBasePrintLog(const char *fmt, ...)
+static void NetManagerStandardPrintLog(const char *fmt, ...)
 {
     std::string newFmt(fmt);
-    NetManagerBaseStripFormatString("{public}", newFmt);
-    NetManagerBaseStripFormatString("{private}", newFmt);
+    NetManagerStandardStripFormatString("{public}", newFmt);
+    NetManagerStandardStripFormatString("{private}", newFmt);
 
     va_list args;
     va_start(args, fmt);
@@ -72,7 +72,7 @@ static void NetManagerBasePrintLog(const char *fmt, ...)
 }
 
 #define NETMANAGER_BASE_HILOG_PRINT(Level, fmt, ...) \
-    NetManagerBasePrintLog("NETMANAGER_BASE %s [%s %d] " fmt, #Level, MAKE_FILE_NAME, __LINE__, ##__VA_ARGS__)
+    NetManagerStandardPrintLog("NETMANAGER_BASE %s [%s %d] " fmt, #Level, MAKE_FILE_NAME, __LINE__, ##__VA_ARGS__)
 
 #endif /* !defined(_WIN32) && !defined(__APPLE__) */
 

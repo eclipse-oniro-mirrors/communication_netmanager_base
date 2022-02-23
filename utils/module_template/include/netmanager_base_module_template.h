@@ -24,7 +24,7 @@
 
 #define MAX_PARAM_NUM 64
 
-namespace OHOS::NetManagerBase::ModuleTemplate {
+namespace OHOS::NetManagerStandard::ModuleTemplate {
 typedef void (*Finalizer)(napi_env, void *data, void *);
 
 template <class Context>
@@ -102,6 +102,10 @@ void DefineClass(napi_env env,
                  const std::initializer_list<napi_property_descriptor> &properties,
                  const std::string &className);
 
-napi_value NewInstance(napi_env env, napi_callback_info info, const std::string &className, Finalizer finalizer);
-} // namespace OHOS::NetManagerBase::ModuleTemplate
+napi_value NewInstance(napi_env env,
+                       napi_callback_info info,
+                       const std::string &className,
+                       void *(*MakeData)(napi_env, size_t, napi_value *, EventManager *),
+                       Finalizer finalizer);
+} // namespace OHOS::NetManagerStandard::ModuleTemplate
 #endif /* COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_MODULE_TEMPLATE_H */

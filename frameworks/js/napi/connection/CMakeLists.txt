@@ -17,6 +17,7 @@ include_directories(connection_exec/include)
 include_directories(async_context/include)
 include_directories(options/include)
 include_directories(constant/include)
+include_directories(observer/include)
 
 add_library(connection SHARED
     options/src/net_address.cpp
@@ -25,4 +26,7 @@ add_library(connection SHARED
     connection_exec/src/connection_exec.cpp
     async_work/src/connection_async_work.cpp
     connection_module/src/connection_module.cpp
+    options/src/netconnection.cpp
+    async_context/src/register_context.cpp
+    observer/src/net_conn_callback_observer.cpp
     )

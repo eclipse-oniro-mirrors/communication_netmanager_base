@@ -14,22 +14,29 @@
  */
 
 #include "netmanager_base_module_template.h"
+#include "netmanager_base_log.h"
 
 #include <algorithm>
 
-namespace OHOS::NetManagerBase::ModuleTemplate {
+namespace OHOS::NetManagerStandard::ModuleTemplate {
 static constexpr const int EVENT_PARAM_NUM = 2;
 
 napi_value
     On(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events, bool asyncCallback)
 {
     napi_value thisVal = nullptr;
-    size_t paramsCount = EVENT_PARAM_NUM;
-    napi_value params[EVENT_PARAM_NUM] = {nullptr};
+    size_t paramsCount = MAX_PARAM_NUM;
+    napi_value params[MAX_PARAM_NUM] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &paramsCount, params, &thisVal, nullptr));
 
+    if (paramsCount != EVENT_PARAM_NUM || NapiUtils::GetValueType(env, params[0]) != napi_string ||
+        NapiUtils::GetValueType(env, params[1]) != napi_function) {
+        NETMANAGER_BASE_LOGE("on off once interface para: [string, function]");
+        return NapiUtils::GetUndefined(env);
+    }
+
     std::string event = NapiUtils::GetStringFromValueUtf8(env, params[0]);
-    if (paramsCount != EVENT_PARAM_NUM || std::find(events.begin(), events.end(), event) == events.end()) {
+    if (std::find(events.begin(), events.end(), event) == events.end()) {
         return NapiUtils::GetUndefined(env);
     }
 
@@ -46,12 +53,18 @@ napi_value
     Once(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events, bool asyncCallback)
 {
     napi_value thisVal = nullptr;
-    size_t paramsCount = EVENT_PARAM_NUM;
-    napi_value params[EVENT_PARAM_NUM] = {nullptr};
+    size_t paramsCount = MAX_PARAM_NUM;
+    napi_value params[MAX_PARAM_NUM] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &paramsCount, params, &thisVal, nullptr));
 
+    if (paramsCount != EVENT_PARAM_NUM || NapiUtils::GetValueType(env, params[0]) != napi_string ||
+        NapiUtils::GetValueType(env, params[1]) != napi_function) {
+        NETMANAGER_BASE_LOGE("on off once interface para: [string, function]");
+        return NapiUtils::GetUndefined(env);
+    }
+
     std::string event = NapiUtils::GetStringFromValueUtf8(env, params[0]);
-    if (paramsCount != EVENT_PARAM_NUM || std::find(events.begin(), events.end(), event) == events.end()) {
+    if (std::find(events.begin(), events.end(), event) == events.end()) {
         return NapiUtils::GetUndefined(env);
     }
 
@@ -67,12 +80,18 @@ napi_value
 napi_value Off(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events)
 {
     napi_value thisVal = nullptr;
-    size_t paramsCount = EVENT_PARAM_NUM;
-    napi_value params[EVENT_PARAM_NUM] = {nullptr};
+    size_t paramsCount = MAX_PARAM_NUM;
+    napi_value params[MAX_PARAM_NUM] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &paramsCount, params, &thisVal, nullptr));
 
+    if (paramsCount != EVENT_PARAM_NUM || NapiUtils::GetValueType(env, params[0]) != napi_string ||
+        NapiUtils::GetValueType(env, params[1]) != napi_function) {
+        NETMANAGER_BASE_LOGE("on off once interface para: [string, function]");
+        return NapiUtils::GetUndefined(env);
+    }
+
     std::string event = NapiUtils::GetStringFromValueUtf8(env, params[0]);
-    if (paramsCount != EVENT_PARAM_NUM || std::find(events.begin(), events.end(), event) == events.end()) {
+    if (std::find(events.begin(), events.end(), event) == events.end()) {
         return NapiUtils::GetUndefined(env);
     }
 
@@ -108,10 +127,16 @@ void DefineClass(napi_env env,
     NapiUtils::SetNamedProperty(env, exports, className, jsConstructor);
 }
 
-napi_value NewInstance(napi_env env, napi_callback_info info, const std::string &className, Finalizer finalizer)
+napi_value NewInstance(napi_env env,
+                       napi_callback_info info,
+                       const std::string &className,
+                       void *(*MakeData)(napi_env, size_t, napi_value *, EventManager *),
+                       Finalizer finalizer)
 {
     napi_value thisVal = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVal, nullptr));
+    std::size_t argc = MAX_PARAM_NUM;
+    napi_value argv[MAX_PARAM_NUM] = {nullptr};
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
 
     napi_value jsConstructor = NapiUtils::GetNamedProperty(env, thisVal, className);
     if (NapiUtils::GetValueType(env, jsConstructor) == napi_undefined) {
@@ -122,8 +147,15 @@ napi_value NewInstance(napi_env env, napi_callback_info info, const std::string 
     NAPI_CALL(env, napi_new_instance(env, jsConstructor, 0, nullptr, &result));
 
     auto manager = new EventManager();
+    if (MakeData != nullptr) {
+        auto data = MakeData(env, argc, argv, manager);
+        if (data == nullptr) {
+            return NapiUtils::GetUndefined(env);
+        }
+        manager->SetData(data);
+    }
     napi_wrap(env, result, reinterpret_cast<void *>(manager), finalizer, nullptr, nullptr);
 
     return result;
 }
-} // namespace OHOS::NetManagerBase::ModuleTemplate
+} // namespace OHOS::NetManagerStandard::ModuleTemplate

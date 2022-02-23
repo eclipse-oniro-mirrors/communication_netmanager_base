@@ -18,12 +18,12 @@
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
-#include "noncopyable.h"
+#include "nocopyable.h"
 
-namespace OHOS::NetManagerBase {
+namespace OHOS::NetManagerStandard {
 class ConnectionAsyncWork final {
 public:
-    ACE_DISALLOW_COPY_AND_MOVE(ConnectionAsyncWork);
+    DISALLOW_COPY_AND_MOVE(ConnectionAsyncWork);
 
     ConnectionAsyncWork() = delete;
 
@@ -35,7 +35,7 @@ public:
 
     class NetHandleAsyncWork final {
     public:
-        ACE_DISALLOW_COPY_AND_MOVE(NetHandleAsyncWork);
+        DISALLOW_COPY_AND_MOVE(NetHandleAsyncWork);
 
         NetHandleAsyncWork() = delete;
 
@@ -49,7 +49,24 @@ public:
 
         static void GetAddressesByNameCallback(napi_env env, napi_status status, void *data);
     };
+
+    class NetConnectionAsyncWork final {
+    public:
+        DISALLOW_COPY_AND_MOVE(NetConnectionAsyncWork);
+
+        NetConnectionAsyncWork() = delete;
+
+        ~NetConnectionAsyncWork() = delete;
+
+        static void ExecRegister(napi_env env, void *data);
+
+        static void RegisterCallback(napi_env env, napi_status status, void *data);
+
+        static void ExecUnregister(napi_env env, void *data);
+
+        static void UnregisterCallback(napi_env env, napi_status status, void *data);
+    };
 };
-} // namespace OHOS::NetManagerBase
+} // namespace OHOS::NetManagerStandard
 
 #endif /* COMMUNICATIONNETMANAGERBASE_CONNECTION_ASYNC_WORK_H */

@@ -18,7 +18,7 @@
 #include "netmanager_base_napi_utils.h"
 #include "node_api.h"
 
-namespace OHOS::NetManagerBase {
+namespace OHOS::NetManagerStandard {
 BaseContext::BaseContext(napi_env env, EventManager *manager)
     : manager_(manager),
       env_(env),
@@ -141,4 +141,9 @@ void BaseContext::Emit(const std::string &type, const std::pair<napi_value, napi
         manager_->Emit(type, argv);
     }
 }
-} // namespace OHOS::NetManagerBase
+
+EventManager *BaseContext::GetManager() const
+{
+    return manager_;
+}
+} // namespace OHOS::NetManagerStandard

@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-namespace OHOS::NetManagerBase::CommonUtils {
+namespace OHOS::NetManagerStandard::CommonUtils {
 std::vector<std::string> Split(const std::string &str, const std::string &sep)
 {
     std::string s = str;
@@ -56,4 +56,4 @@ std::string ToLower(const std::string &s)
     std::transform(res.begin(), res.end(), res.begin(), tolower);
     return res;
 }
-} // namespace OHOS::NetManagerBase::CommonUtils
+} // namespace OHOS::NetManagerStandard::CommonUtils

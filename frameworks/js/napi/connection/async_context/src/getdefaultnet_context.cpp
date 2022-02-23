@@ -18,7 +18,7 @@
 #include "constant.h"
 #include "netmanager_base_napi_utils.h"
 
-namespace OHOS::NetManagerBase {
+namespace OHOS::NetManagerStandard {
 GetDefaultNetContext::GetDefaultNetContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
 
 void GetDefaultNetContext::ParseParams(napi_value *params, size_t paramsCount)
@@ -45,4 +45,4 @@ bool GetDefaultNetContext::CheckParamsType(napi_value *params, size_t paramsCoun
     }
     return false;
 }
-} // namespace OHOS::NetManagerBase
+} // namespace OHOS::NetManagerStandard

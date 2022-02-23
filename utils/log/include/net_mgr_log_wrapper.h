@@ -16,8 +16,8 @@
 #ifndef NETMGR_LOG_WRAPPER_H
 #define NETMGR_LOG_WRAPPER_H
 
-#include <string>
 #include "hilog/log.h"
+#include <string>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -56,9 +56,10 @@ private:
 static constexpr OHOS::HiviewDFX::HiLogLabel NET_MGR_LABEL = {LOG_CORE, LOG_DOMAIN, NETMGR_LOG_TAG};
 
 #ifdef NETMGR_DEBUG
+#define MAKE_FILE_NAME (strrchr(__FILE__, '/') + 1)
 #define PRINT_LOG(op, fmt, ...)                                                                               \
     (void)OHOS::HiviewDFX::HiLog::op(NET_MGR_LABEL, "[%{public}s-(%{public}s:%{public}d)]" fmt, __FUNCTION__, \
-        __FILE__, __LINE__, ##__VA_ARGS__)
+                                     MAKE_FILE_NAME, __LINE__, ##__VA_ARGS__)
 #else
 #define PRINT_LOG(op, fmt, ...)
 #endif
