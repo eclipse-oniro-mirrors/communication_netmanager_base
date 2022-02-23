@@ -23,6 +23,7 @@ add_library(connection SHARED
     options/src/net_address.cpp
     async_context/src/getaddressbyname_context.cpp
     async_context/src/getdefaultnet_context.cpp
+    async_context/src/parse_nethandle_context.cpp
     connection_exec/src/connection_exec.cpp
     async_work/src/connection_async_work.cpp
     connection_module/src/connection_module.cpp

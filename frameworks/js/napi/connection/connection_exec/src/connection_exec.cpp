@@ -15,8 +15,8 @@
 
 #include "connection_exec.h"
 
-#include "connection_module.h"
 #include "constant.h"
+#include "net_conn_callback_observer.h"
 #include "net_conn_client.h"
 #include "netconnection.h"
 #include "netmanager_base_log.h"
@@ -26,28 +26,57 @@
 static constexpr const int MAX_HOST_LEN = 256;
 
 namespace OHOS::NetManagerStandard {
+bool ConnectionExec::ExecGetAddressByName(GetAddressByNameContext *context)
+{
+    return NetHandleExec::ExecGetAddressesByName(context);
+}
+
+napi_value ConnectionExec::GetAddressByNameCallback(GetAddressByNameContext *context)
+{
+    return NetHandleExec::GetAddressesByNameCallback(context);
+}
+
 bool ConnectionExec::ExecGetDefaultNet(GetDefaultNetContext *context)
 {
-    (void)context;
-
-    return true;
+    return DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(context->netHandle) == 0;
 }
 
 napi_value ConnectionExec::GetDefaultNetCallback(GetDefaultNetContext *context)
 {
-    napi_value netHandle = NapiUtils::CreateObject(context->GetEnv());
-    if (NapiUtils::GetValueType(context->GetEnv(), netHandle) != napi_object) {
-        return NapiUtils::GetUndefined(context->GetEnv());
-    }
+    return NetConnCallbackObserver::CreateNetHandle(context->GetEnv(), new NetHandle(context->netHandle));
+}
 
-    std::initializer_list<napi_property_descriptor> properties = {
-        DECLARE_NAPI_FUNCTION(ConnectionModule::NetHandleInterface::FUNCTION_GET_ADDRESSES_BY_NAME,
-                              ConnectionModule::NetHandleInterface::GetAddressesByName),
-        DECLARE_NAPI_FUNCTION(ConnectionModule::NetHandleInterface::FUNCTION_GET_ADDRESS_BY_NAME,
-                              ConnectionModule::NetHandleInterface::GetAddressByName),
-    };
-    NapiUtils::DefineProperties(context->GetEnv(), netHandle, properties);
-    return netHandle;
+bool ConnectionExec::ExecHasDefaultNet(HasDefaultNetContext *context)
+{
+    return DelayedSingleton<NetConnClient>::GetInstance()->HasDefaultNet(context->hasDefaultNet) == 0;
+}
+
+napi_value ConnectionExec::HasDefaultNetCallback(HasDefaultNetContext *context)
+{
+    return NapiUtils::GetBoolean(context->GetEnv(), context->hasDefaultNet);
+}
+
+bool ConnectionExec::ExecGetNetCapabilities(GetNetCapabilitiesContext *context)
+{
+    return DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(context->netHandle,
+                                                                              context->capabilities) == 0;
+}
+
+napi_value ConnectionExec::GetNetCapabilitiesCallback(GetNetCapabilitiesContext *context)
+{
+    return NetConnCallbackObserver::CreateNetCapabilities(context->GetEnv(),
+                                                          new NetAllCapabilities(context->capabilities));
+}
+
+bool ConnectionExec::ExecGetConnectProperties(GetConnectPropertiesContext *context)
+{
+    return DelayedSingleton<NetConnClient>::GetInstance()->GetConnectionProperties(context->netHandle,
+                                                                                   context->linkInfo) == 0;
+}
+
+napi_value ConnectionExec::GetConnectPropertiesCallback(GetConnectPropertiesContext *context)
+{
+    return NetConnCallbackObserver::CreateConnectionProperties(context->GetEnv(), new NetLinkInfo(context->linkInfo));
 }
 
 bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameContext *context)

@@ -33,6 +33,22 @@ public:
 
     static void GetDefaultNetCallback(napi_env env, napi_status status, void *data);
 
+    static void ExecHasDefaultNet(napi_env env, void *data);
+
+    static void HasDefaultNetCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecGetNetCapabilities(napi_env env, void *data);
+
+    static void GetNetCapabilitiesCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecGetConnectProperties(napi_env env, void *data);
+
+    static void GetConnectPropertiesCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecGetAddressesByName(napi_env env, void *data);
+
+    static void GetAddressesByNameCallback(napi_env env, napi_status status, void *data);
+
     class NetHandleAsyncWork final {
     public:
         DISALLOW_COPY_AND_MOVE(NetHandleAsyncWork);

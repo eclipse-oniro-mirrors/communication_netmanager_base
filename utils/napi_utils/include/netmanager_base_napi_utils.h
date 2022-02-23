@@ -92,6 +92,8 @@ bool GetBooleanProperty(napi_env env, napi_value object, const std::string &prop
 
 void SetBooleanProperty(napi_env env, napi_value object, const std::string &name, bool value);
 
+napi_value GetBoolean(napi_env env, bool value);
+
 /* define properties */
 void DefineProperties(napi_env env,
                       napi_value object,

@@ -292,6 +292,13 @@ void SetBooleanProperty(napi_env env, napi_value object, const std::string &name
     napi_set_named_property(env, object, name.c_str(), jsValue);
 }
 
+napi_value GetBoolean(napi_env env, bool value)
+{
+    napi_value jsValue = nullptr;
+    NAPI_CALL(env, napi_get_boolean(env, value, &jsValue));
+    return jsValue;
+}
+
 /* define properties */
 void DefineProperties(napi_env env,
                       napi_value object,

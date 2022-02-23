@@ -23,6 +23,7 @@
 #include "netconnection.h"
 #include "netmanager_base_log.h"
 #include "netmanager_base_module_template.h"
+#include "parse_nethandle_context.h"
 #include "register_context.h"
 
 static constexpr const char *CONNECTION_MODULE_NAME = "net.connection";
@@ -117,6 +118,10 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
     std::initializer_list<napi_property_descriptor> functions = {
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_NET, GetDefaultNet),
         DECLARE_NAPI_FUNCTION(FUNCTION_CREATE_NET_CONNECTION, CreateNetConnection),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_ADDRESSES_BY_NAME, GetAddressesByName),
+        DECLARE_NAPI_FUNCTION(FUNCTION_HAS_DEFAULT_NET, HasDefaultNet),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_NET_CAPABILITIES, GetNetCapabilities),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_CONNECTION_PROPERTIES, GetConnectionProperties),
     };
     NapiUtils::DefineProperties(env, exports, functions);
 
@@ -128,6 +133,34 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
     ModuleTemplate::DefineClass(env, exports, netConnectionFunctions, INTERFACE_NET_CONNECTION);
 
     return exports;
+}
+
+napi_value ConnectionModule::GetAddressesByName(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetAddressByNameContext>(env, info, FUNCTION_GET_ADDRESSES_BY_NAME, nullptr,
+                                                              ConnectionAsyncWork::ExecGetAddressesByName,
+                                                              ConnectionAsyncWork::GetAddressesByNameCallback);
+}
+
+napi_value ConnectionModule::HasDefaultNet(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<HasDefaultNetContext>(env, info, FUNCTION_HAS_DEFAULT_NET, nullptr,
+                                                           ConnectionAsyncWork::ExecHasDefaultNet,
+                                                           ConnectionAsyncWork::GetAddressesByNameCallback);
+}
+
+napi_value ConnectionModule::GetNetCapabilities(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetNetCapabilitiesContext>(env, info, FUNCTION_GET_NET_CAPABILITIES, nullptr,
+                                                                ConnectionAsyncWork::ExecGetNetCapabilities,
+                                                                ConnectionAsyncWork::GetNetCapabilitiesCallback);
+}
+
+napi_value ConnectionModule::GetConnectionProperties(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetConnectPropertiesContext>(
+        env, info, FUNCTION_GET_CONNECTION_PROPERTIES, nullptr, ConnectionAsyncWork::ExecGetConnectProperties,
+        ConnectionAsyncWork::GetConnectPropertiesCallback);
 }
 
 napi_value ConnectionModule::CreateNetConnection(napi_env env, napi_callback_info info)

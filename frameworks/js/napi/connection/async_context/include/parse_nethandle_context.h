@@ -13,34 +13,39 @@
  * limitations under the License.
  */
 
-#ifndef COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H
-#define COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H
+#ifndef NETMANAGER_BASE_PARSE_NETHANDLE_CONTEXT_H
+#define NETMANAGER_BASE_PARSE_NETHANDLE_CONTEXT_H
 
 #include "napi/native_api.h"
+#include "net_all_capabilities.h"
 #include "net_handle.h"
+#include "net_link_info.h"
 #include "netmanager_base_base_context.h"
 #include "nocopyable.h"
 
 namespace OHOS::NetManagerStandard {
-class GetDefaultNetContext final : public BaseContext {
+class ParseNetHandleContext final : public BaseContext {
 public:
-    DISALLOW_COPY_AND_MOVE(GetDefaultNetContext);
+    DISALLOW_COPY_AND_MOVE(ParseNetHandleContext);
 
-    GetDefaultNetContext() = delete;
+    ParseNetHandleContext() = delete;
 
-    explicit GetDefaultNetContext(napi_env env, EventManager *manager);
+    explicit ParseNetHandleContext(napi_env env, EventManager *manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
     NetHandle netHandle;
 
-    bool hasDefaultNet;
+    NetAllCapabilities capabilities;
+
+    NetLinkInfo linkInfo;
 
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
 };
 
-using HasDefaultNetContext = GetDefaultNetContext;
+using GetNetCapabilitiesContext = ParseNetHandleContext;
+using GetConnectPropertiesContext = ParseNetHandleContext;
 } // namespace OHOS::NetManagerStandard
 
-#endif /* COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H */
+#endif /* NETMANAGER_BASE_PARSE_NETHANDLE_CONTEXT_H */
