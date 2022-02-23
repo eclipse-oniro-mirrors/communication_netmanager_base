@@ -26,6 +26,10 @@ int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetAvailable");
     NetConnection *netConnection = NET_CONNECTIONS[this];
+    if (netConnection == nullptr) {
+        NETMANAGER_BASE_LOGI("can not find netConnection handle");
+        return 0;
+    }
     netConnection->GetEventManager()->EmitByUv(EVENT_NET_AVAILABLE, new NetHandle(*netHandle), NetAvailableCallback);
     return 0;
 }
@@ -35,6 +39,10 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetCapabilitiesChange");
     NetConnection *netConnection = NET_CONNECTIONS[this];
+    if (netConnection == nullptr) {
+        NETMANAGER_BASE_LOGI("can not find netConnection handle");
+        return 0;
+    }
     auto pair = new std::pair<NetHandle *, NetAllCapabilities *>;
     pair->first = new NetHandle(*netHandle);
     pair->second = new NetAllCapabilities(*netAllCap);
@@ -47,6 +55,10 @@ int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetConnectionPropertiesChange");
     NetConnection *netConnection = NET_CONNECTIONS[this];
+    if (netConnection == nullptr) {
+        NETMANAGER_BASE_LOGI("can not find netConnection handle");
+        return 0;
+    }
     auto pair = new std::pair<NetHandle *, NetLinkInfo *>;
     pair->first = new NetHandle(*netHandle);
     pair->second = new NetLinkInfo(*info);
@@ -59,6 +71,10 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetLost");
     NetConnection *netConnection = NET_CONNECTIONS[this];
+    if (netConnection == nullptr) {
+        NETMANAGER_BASE_LOGI("can not find netConnection handle");
+        return 0;
+    }
     netConnection->GetEventManager()->EmitByUv(EVENT_NET_LOST, new NetHandle(*netHandle), NetLostCallback);
     return 0;
 }
@@ -67,6 +83,10 @@ int32_t NetConnCallbackObserver::NetUnavailable()
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetUnavailable");
     NetConnection *netConnection = NET_CONNECTIONS[this];
+    if (netConnection == nullptr) {
+        NETMANAGER_BASE_LOGI("can not find netConnection handle");
+        return 0;
+    }
     netConnection->GetEventManager()->EmitByUv(EVENT_NET_UNAVAILABLE, nullptr, NetUnavailableCallback);
     return 0;
 }
@@ -75,6 +95,10 @@ int32_t NetConnCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetBlockStatusChange");
     NetConnection *netConnection = NET_CONNECTIONS[this];
+    if (netConnection == nullptr) {
+        NETMANAGER_BASE_LOGI("can not find netConnection handle");
+        return 0;
+    }
     auto pair = new std::pair<NetHandle *, bool>;
     pair->first = new NetHandle(*netHandle);
     pair->second = blocked;

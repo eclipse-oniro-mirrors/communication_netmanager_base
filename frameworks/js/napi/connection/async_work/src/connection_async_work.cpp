@@ -52,14 +52,14 @@ void ConnectionAsyncWork::GetNetCapabilitiesCallback(napi_env env, napi_status s
                                                                                                             data);
 }
 
-void ConnectionAsyncWork::ExecGetConnectProperties(napi_env env, void *data)
+void ConnectionAsyncWork::ExecGetConnectionProperties(napi_env env, void *data)
 {
-    BaseAsyncWork::ExecAsyncWork<GetConnectPropertiesContext, ConnectionExec::ExecGetConnectProperties>(env, data);
+    BaseAsyncWork::ExecAsyncWork<GetConnectionPropertiesContext, ConnectionExec::ExecGetConnectionProperties>(env, data);
 }
 
-void ConnectionAsyncWork::GetConnectPropertiesCallback(napi_env env, napi_status status, void *data)
+void ConnectionAsyncWork::GetConnectionPropertiesCallback(napi_env env, napi_status status, void *data)
 {
-    BaseAsyncWork::AsyncWorkCallback<GetConnectPropertiesContext, ConnectionExec::GetConnectPropertiesCallback>(
+    BaseAsyncWork::AsyncWorkCallback<GetConnectionPropertiesContext, ConnectionExec::GetConnectionPropertiesCallback>(
         env, status, data);
 }
 

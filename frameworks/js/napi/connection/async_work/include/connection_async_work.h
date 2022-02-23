@@ -41,9 +41,9 @@ public:
 
     static void GetNetCapabilitiesCallback(napi_env env, napi_status status, void *data);
 
-    static void ExecGetConnectProperties(napi_env env, void *data);
+    static void ExecGetConnectionProperties(napi_env env, void *data);
 
-    static void GetConnectPropertiesCallback(napi_env env, napi_status status, void *data);
+    static void GetConnectionPropertiesCallback(napi_env env, napi_status status, void *data);
 
     static void ExecGetAddressesByName(napi_env env, void *data);
 

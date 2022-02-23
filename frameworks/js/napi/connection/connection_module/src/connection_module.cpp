@@ -146,7 +146,7 @@ napi_value ConnectionModule::HasDefaultNet(napi_env env, napi_callback_info info
 {
     return ModuleTemplate::Interface<HasDefaultNetContext>(env, info, FUNCTION_HAS_DEFAULT_NET, nullptr,
                                                            ConnectionAsyncWork::ExecHasDefaultNet,
-                                                           ConnectionAsyncWork::GetAddressesByNameCallback);
+                                                           ConnectionAsyncWork::HasDefaultNetCallback);
 }
 
 napi_value ConnectionModule::GetNetCapabilities(napi_env env, napi_callback_info info)
@@ -158,15 +158,16 @@ napi_value ConnectionModule::GetNetCapabilities(napi_env env, napi_callback_info
 
 napi_value ConnectionModule::GetConnectionProperties(napi_env env, napi_callback_info info)
 {
-    return ModuleTemplate::Interface<GetConnectPropertiesContext>(
-        env, info, FUNCTION_GET_CONNECTION_PROPERTIES, nullptr, ConnectionAsyncWork::ExecGetConnectProperties,
-        ConnectionAsyncWork::GetConnectPropertiesCallback);
+    return ModuleTemplate::Interface<GetConnectionPropertiesContext>(
+        env, info, FUNCTION_GET_CONNECTION_PROPERTIES, nullptr, ConnectionAsyncWork::ExecGetConnectionProperties,
+        ConnectionAsyncWork::GetConnectionPropertiesCallback);
 }
 
 napi_value ConnectionModule::CreateNetConnection(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::NewInstance(env, info, INTERFACE_NET_CONNECTION, ParseNetConnectionParams,
                                        [](napi_env, void *data, void *) {
+                                           NETMANAGER_BASE_LOGI("finalize netConnection");
                                            auto manager = static_cast<EventManager *>(data);
                                            auto netConnection = static_cast<NetConnection *>(manager->GetData());
                                            delete manager;

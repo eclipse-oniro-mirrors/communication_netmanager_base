@@ -46,9 +46,9 @@ public:
 
     static napi_value GetNetCapabilitiesCallback(GetNetCapabilitiesContext *context);
 
-    static bool ExecGetConnectProperties(GetConnectPropertiesContext *context);
+    static bool ExecGetConnectionProperties(GetConnectionPropertiesContext *context);
 
-    static napi_value GetConnectPropertiesCallback(GetConnectPropertiesContext *context);
+    static napi_value GetConnectionPropertiesCallback(GetConnectionPropertiesContext *context);
 
     static bool ExecGetAddressByName(GetAddressByNameContext *context);
 

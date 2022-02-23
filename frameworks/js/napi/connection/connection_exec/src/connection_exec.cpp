@@ -68,13 +68,13 @@ napi_value ConnectionExec::GetNetCapabilitiesCallback(GetNetCapabilitiesContext 
                                                           new NetAllCapabilities(context->capabilities));
 }
 
-bool ConnectionExec::ExecGetConnectProperties(GetConnectPropertiesContext *context)
+bool ConnectionExec::ExecGetConnectionProperties(GetConnectionPropertiesContext *context)
 {
     return DelayedSingleton<NetConnClient>::GetInstance()->GetConnectionProperties(context->netHandle,
                                                                                    context->linkInfo) == 0;
 }
 
-napi_value ConnectionExec::GetConnectPropertiesCallback(GetConnectPropertiesContext *context)
+napi_value ConnectionExec::GetConnectionPropertiesCallback(GetConnectionPropertiesContext *context)
 {
     return NetConnCallbackObserver::CreateConnectionProperties(context->GetEnv(), new NetLinkInfo(context->linkInfo));
 }
