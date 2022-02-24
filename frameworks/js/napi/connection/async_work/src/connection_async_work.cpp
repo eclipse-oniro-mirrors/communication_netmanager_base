@@ -17,8 +17,52 @@
 
 #include "connection_exec.h"
 #include "netmanager_base_base_async_work.h"
+#include "parse_nethandle_context.h"
 
 namespace OHOS::NetManagerStandard {
+void ConnectionAsyncWork::ExecGetAddressesByName(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetAddressByNameContext, ConnectionExec::ExecGetAddressByName>(env, data);
+}
+
+void ConnectionAsyncWork::GetAddressesByNameCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetAddressByNameContext, ConnectionExec::GetAddressByNameCallback>(env, status,
+                                                                                                        data);
+}
+
+void ConnectionAsyncWork::ExecHasDefaultNet(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<HasDefaultNetContext, ConnectionExec::ExecHasDefaultNet>(env, data);
+}
+
+void ConnectionAsyncWork::HasDefaultNetCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<HasDefaultNetContext, ConnectionExec::HasDefaultNetCallback>(env, status, data);
+}
+
+void ConnectionAsyncWork::ExecGetNetCapabilities(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetNetCapabilitiesContext, ConnectionExec::ExecGetNetCapabilities>(env, data);
+}
+
+void ConnectionAsyncWork::GetNetCapabilitiesCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetNetCapabilitiesContext, ConnectionExec::GetNetCapabilitiesCallback>(env, status,
+                                                                                                            data);
+}
+
+void ConnectionAsyncWork::ExecGetConnectionProperties(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetConnectionPropertiesContext, ConnectionExec::ExecGetConnectionProperties>(env, data);
+}
+
+void ConnectionAsyncWork::GetConnectionPropertiesCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetConnectionPropertiesContext, ConnectionExec::GetConnectionPropertiesCallback>(
+        env, status, data);
+}
+
 void ConnectionAsyncWork::ExecGetDefaultNet(napi_env env, void *data)
 {
     BaseAsyncWork::ExecAsyncWork<GetDefaultNetContext, ConnectionExec::ExecGetDefaultNet>(env, data);

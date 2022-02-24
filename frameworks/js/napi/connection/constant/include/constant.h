@@ -60,6 +60,7 @@ static constexpr const char *KEY_NET_HANDLE = "netHandle";
 static constexpr const char *KEY_BLOCKED = "blocked";
 static constexpr const char *KEY_NET_CAP = "netCap";
 static constexpr const char *KEY_CONNECTION_PROPERTIES = "connectionProperties";
+static constexpr const char *KEY_NET_ID = "netId";
 
 enum {
     ARG_NUM_0,

@@ -22,6 +22,7 @@
 #include "getdefaultnet_context.h"
 #include "napi/native_api.h"
 #include "nocopyable.h"
+#include "parse_nethandle_context.h"
 #include "register_context.h"
 
 namespace OHOS::NetManagerStandard {
@@ -36,6 +37,22 @@ public:
     static bool ExecGetDefaultNet(GetDefaultNetContext *context);
 
     static napi_value GetDefaultNetCallback(GetDefaultNetContext *context);
+
+    static bool ExecHasDefaultNet(HasDefaultNetContext *context);
+
+    static napi_value HasDefaultNetCallback(HasDefaultNetContext *context);
+
+    static bool ExecGetNetCapabilities(GetNetCapabilitiesContext *context);
+
+    static napi_value GetNetCapabilitiesCallback(GetNetCapabilitiesContext *context);
+
+    static bool ExecGetConnectionProperties(GetConnectionPropertiesContext *context);
+
+    static napi_value GetConnectionPropertiesCallback(GetConnectionPropertiesContext *context);
+
+    static bool ExecGetAddressByName(GetAddressByNameContext *context);
+
+    static napi_value GetAddressByNameCallback(GetAddressByNameContext *context);
 
     class NetHandleExec final {
     public:
