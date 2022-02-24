@@ -380,7 +380,7 @@ int64_t NetdController::GetIfaceRxPackets(const std::string &interfaceName)
         NETMGR_LOG_E("netdService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
-    return 0;
+    return netdService_->GetIfaceRxPackets(interfaceName);
 }
 
 int64_t NetdController::GetIfaceTxPackets(const std::string &interfaceName)
@@ -390,7 +390,7 @@ int64_t NetdController::GetIfaceTxPackets(const std::string &interfaceName)
         NETMGR_LOG_E("netdService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
-    return 0;
+    return netdService_->GetIfaceTxPackets(interfaceName);
 }
 
 int32_t NetdController::SetDefaultNetWork(int32_t netId)
