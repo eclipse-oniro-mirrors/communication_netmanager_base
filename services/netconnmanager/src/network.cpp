@@ -119,43 +119,39 @@ void Network::UpdateInterfaces(const NetLinkInfo &netLinkInfo)
 
 void Network::UpdateIpAddrs(const NetLinkInfo &netLinkInfo)
 {
-    for (auto it = netLinkInfo.netAddrList_.begin(); it != netLinkInfo.netAddrList_.end(); ++it) {
-        const struct INetAddr &inetAddr = *it;
-        if (std::find(netLinkInfo_.netAddrList_.begin(), netLinkInfo_.netAddrList_.end(), *it) ==
-            netLinkInfo_.netAddrList_.end()) {
-            NetdController::GetInstance().InterfaceAddAddress(netLinkInfo.ifaceName_, inetAddr.address_,
-                inetAddr.prefixlen_);
-        }
-    }
-
+    // netLinkInfo_ represents the old, netLinkInfo represents the new
+    // Update: remove old Ips first, then add the new Ips
+    NETMGR_LOG_D("UpdateIpAddrs, old ip addrs: [%{public}s]", netLinkInfo_.ToStringAddr("").c_str());
     for (auto it = netLinkInfo_.netAddrList_.begin(); it != netLinkInfo_.netAddrList_.end(); ++it) {
         const struct INetAddr &inetAddr = *it;
-        if (std::find(netLinkInfo.netAddrList_.begin(), netLinkInfo.netAddrList_.end(), *it) ==
-            netLinkInfo.netAddrList_.end()) {
-            NetdController::GetInstance().InterfaceDelAddress(netLinkInfo.ifaceName_, inetAddr.address_,
-                inetAddr.prefixlen_);
-        }
+        NetdController::GetInstance().InterfaceDelAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
+            inetAddr.prefixlen_);
+    }
+
+    NETMGR_LOG_D("UpdateIpAddrs, new ip addrs: [%{public}s]", netLinkInfo.ToStringAddr("").c_str());
+    for (auto it = netLinkInfo.netAddrList_.begin(); it != netLinkInfo.netAddrList_.end(); ++it) {
+        const struct INetAddr &inetAddr = *it;
+        NetdController::GetInstance().InterfaceAddAddress(netLinkInfo.ifaceName_, inetAddr.address_,
+            inetAddr.prefixlen_);
     }
 }
 
 void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
 {
-    for (auto it = netLinkInfo.routeList_.begin(); it != netLinkInfo.routeList_.end(); ++it) {
-        const struct Route &route = *it;
-        if (std::find(netLinkInfo_.routeList_.begin(), netLinkInfo_.routeList_.end(), *it) ==
-            netLinkInfo_.routeList_.end()) {
-                NetdController::GetInstance().NetworkAddRoute(
-                    netId_, route.iface_, route.destination_.address_, route.gateway_.address_);
-        }
-    }
-
+    // netLinkInfo_ contains the old routes info, netLinkInfo contains the new routes info
+    // Update: remove old routes first, then add the new routes
+    NETMGR_LOG_D("UpdateRoutes, old routes: [%{public}s]", netLinkInfo_.ToStringRoute("").c_str());
     for (auto it = netLinkInfo_.routeList_.begin(); it != netLinkInfo_.routeList_.end(); ++it) {
         const struct Route &route = *it;
-        if (std::find(netLinkInfo.routeList_.begin(), netLinkInfo.routeList_.end(), *it) ==
-            netLinkInfo.routeList_.end()) {
-                NetdController::GetInstance().NetworkRemoveRoute(
-                    netId_, route.iface_, route.destination_.address_, route.gateway_.address_);
-        }
+        NetdController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, route.destination_.address_,
+            route.gateway_.address_);
+    }
+
+    NETMGR_LOG_D("UpdateRoutes, new routes: [%{public}s]", netLinkInfo.ToStringRoute("").c_str());
+    for (auto it = netLinkInfo.routeList_.begin(); it != netLinkInfo.routeList_.end(); ++it) {
+        const struct Route &route = *it;
+        NetdController::GetInstance().NetworkAddRoute(netId_, route.iface_, route.destination_.address_,
+            route.gateway_.address_);
     }
 }
 
