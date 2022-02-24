@@ -190,6 +190,7 @@ bool ConnectionExec::NetConnectionExec::ExecRegister(RegisterContext *context)
         int32_t ret =
             DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback, conn->timeout);
         NETMANAGER_BASE_LOGI("Register result hasNetSpecifier and hasTimeout %{public}d", ret);
+        context->SetErrorCode(ret);
         return ret == 0;
     }
 
@@ -197,11 +198,13 @@ bool ConnectionExec::NetConnectionExec::ExecRegister(RegisterContext *context)
         sptr<NetSpecifier> specifier = new NetSpecifier(conn->netSpecifier);
         int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback, 0);
         NETMANAGER_BASE_LOGI("Register result hasNetSpecifier %{public}d", ret);
+        context->SetErrorCode(ret);
         return ret == 0;
     }
 
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(callback);
     NETMANAGER_BASE_LOGI("Register result %{public}d", ret);
+    context->SetErrorCode(ret);
     return ret == 0;
 }
 
@@ -220,6 +223,7 @@ bool ConnectionExec::NetConnectionExec::ExecUnregister(UnregisterContext *contex
 
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
     NETMANAGER_BASE_LOGI("Unregister result %{public}d", ret);
+    context->SetErrorCode(ret);
     return ret == 0;
 }
 
