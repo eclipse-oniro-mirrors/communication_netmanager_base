@@ -61,7 +61,7 @@ HWTEST_F(RouteUtilsTest, AddRouteToLocal01, TestSize.Level1)
     r.gateway_.hostName_ = "netAddr";
     rList.push_back(r);
 
-    EXPECT_EQ(-1, RouteUtils::AddRoutesToLocal(iface, rList));
+    EXPECT_EQ(0, RouteUtils::AddRoutesToLocal(iface, rList));
 }
 
 HWTEST_F(RouteUtilsTest, RemoveRouteFromLocal01, TestSize.Level1)
@@ -113,7 +113,7 @@ HWTEST_F(RouteUtilsTest, AddRoute01, TestSize.Level1)
     r.gateway_.netMask_ = "255.255.255.0";
     r.gateway_.hostName_ = "netAddr";
 
-    EXPECT_EQ(-1, RouteUtils::AddRoute(1, r));
+    EXPECT_EQ(0, RouteUtils::AddRoute(1, r));
 }
 
 HWTEST_F(RouteUtilsTest, RemoveRoute01, TestSize.Level1)

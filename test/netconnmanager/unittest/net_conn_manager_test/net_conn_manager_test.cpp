@@ -26,7 +26,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr int WAIT_TIME_SECOND_LONG = 60;
+constexpr int WAIT_TIME_SECOND_LONG = 5;
 constexpr int WAIT_TIME_SECOND_NET_DETECTION = 2;
 using namespace testing::ext;
 class NetConnManagerTest : public testing::Test {
