@@ -14,10 +14,15 @@
  */
 
 #include <memory>
-#include <stdlib.h>
+#include <cstdlib>
+#include <sys/ioctl.h>
+#include <net/route.h>
+#include <netdb.h>
 
 #include "netnative_log_wrapper.h"
 #include "netd_native_service_stub.h"
+
+#include "securec.h"
 
 namespace OHOS {
 namespace NetdNative {
@@ -304,6 +309,45 @@ int32_t NetdNativeServiceStub::CmdRegisterNotifyCallback(MessageParcel &data, Me
     return ERR_NONE;
 }
 
+#ifdef SYS_FUNC
+static int32_t ModifyRoute(int cmd, const std::string &ip, const std::string &gateWay,
+    const std::string &devName)
+{
+    struct sockaddr_in _sin;
+    struct rtentry  rt;
+    bzero(&rt, sizeof(struct rtentry));
+    bzero(&_sin, sizeof(struct sockaddr_in));
+    _sin.sin_family = AF_INET;
+    _sin.sin_port = 0;
+    if (inet_aton(gateWay.c_str(), &(_sin.sin_addr)) < 0) {
+        NETNATIVE_LOGE("ModifyRoute inet_aton gateWay[%{public}s]", gateWay.c_str());
+        return -1;
+    }
+    memcpy_s(&rt.rt_gateway, sizeof(rt.rt_gateway), &_sin, sizeof(struct sockaddr_in));
+    (reinterpret_cast<struct sockaddr_in*>(&rt.rt_dst))->sin_family=AF_INET;
+    if (inet_aton(ip.c_str(), &((struct sockaddr_in*)&rt.rt_dst)->sin_addr) < 0) {
+        NETNATIVE_LOGE("ModifyRoute inet_aton ip[%{public}s]", ip.c_str());
+        return -1;
+    }
+    if (!devName.empty()) {
+        rt.rt_dev = (char*)devName.c_str();
+    }
+    rt.rt_flags = RTF_GATEWAY;
+    int fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) {
+        NETNATIVE_LOGE("ModifyRoute create socket fd[%{public}d]", fd);
+        return -1;
+    }
+    if (ioctl(fd, cmd, &rt) < 0) {
+        NETNATIVE_LOGE("ModifyRoute ioctl error");
+        close(fd);
+        return -1;
+    }
+    close(fd);
+    return 1;
+}
+#endif
+
 int32_t NetdNativeServiceStub::CmdNetworkAddRoute(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOGI("Begin to dispatch cmd NetworkAddRoute");
@@ -316,11 +360,8 @@ int32_t NetdNativeServiceStub::CmdNetworkAddRoute(MessageParcel &data, MessagePa
         netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
 
 #ifdef SYS_FUNC
-    NETNATIVE_LOGI("Begin to sys CmdNetworkAddRoute");
-    std::string cmd = "ip route add default via ";
-    cmd += nextHop;
-    system(cmd.c_str());
-    reply.WriteInt32(0);
+    NETNATIVE_LOGI("Begin to ioctl NetworkAddRoute");
+    reply.WriteInt32(ModifyRoute(SIOCADDRT, destination, nextHop, ifName));
     return 0;
 #endif
     int32_t result = NetworkAddRoute(netId, ifName, destination, nextHop);
@@ -337,11 +378,8 @@ int32_t NetdNativeServiceStub::CmdNetworkRemoveRoute(MessageParcel &data, Messag
     std::string destination = data.ReadString();
     std::string nextHop = data.ReadString();
 #ifdef SYS_FUNC
-    NETNATIVE_LOGI("Begin to sys CmdNetworkRemoveRoute");
-    std::string cmd = "ip route del default via ";
-    cmd += nextHop;
-    system(cmd.c_str());
-    reply.WriteInt32(0);
+    NETNATIVE_LOGI("Begin to ioctl NetworkRemoveRoute");
+    reply.WriteInt32(ModifyRoute(SIOCDELRT, destination, nextHop, interfaceName));
     return 0;
 #endif
     int32_t result = NetworkRemoveRoute(netId, interfaceName, destination, nextHop);
