@@ -59,10 +59,10 @@ foundation/communication/netmanager_base/
 ### 使用默认网络解析域名，以Promise的方式异步返回执行结果。
 
 * 示例
-  ```typescript
+  ```javascript
   import net_connection from "@ohos.net.connection" 
   ```
-  ```js
+  ```javascript
   net_connection.getAddressesByName("www.example.com").then(function (addresses) {
     console.log(JSON.stringify(addresses))
   })
@@ -71,10 +71,10 @@ foundation/communication/netmanager_base/
 ### 注册默认网络的监听。
 
 * 示例
-  ```typescript
+  ```javascript
   import net_connection from "@ohos.net.connection" 
   ```
-  ```js
+  ```javascript
   let netConnection = net_connection.createNetConnection()
   netConnection.on('netAvailable', function(data) {
     console.log(JSON.stringify(data))
