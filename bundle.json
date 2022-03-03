@@ -104,8 +104,7 @@
             "test": [
                 "//foundation/communication/netmanager_base/test/dnsresolvermanager:unittest",
                 "//foundation/communication/netmanager_base/test/netconnmanager:unittest",
-                "//foundation/communication/netmanager_base/test/netpolicymanager:unittest",
-                "//foundation/communication/netmanager_base/test/netstatsmanager:unittest"
+                "//foundation/communication/netmanager_base/test/netpolicymanager:unittest"
             ]
         }
     }
