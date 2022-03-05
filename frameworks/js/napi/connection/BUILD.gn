@@ -15,7 +15,8 @@ if ("${product_name}" == "m40") {
   import("//build/ohos.gni")
 
   SUBSYSTEM_DIR = "//foundation/communication"
-  NETMANAGER_BASE_NAPI_ROOT = "$SUBSYSTEM_DIR/netmanager_base/frameworks/js/napi/"
+  NETMANAGER_BASE_NAPI_ROOT =
+      "$SUBSYSTEM_DIR/netmanager_base/frameworks/js/napi/"
 
   utils_source = [
     "$SUBSYSTEM_DIR/netmanager_base/utils/base_context/src/netmanager_base_base_context.cpp",
@@ -96,7 +97,8 @@ if ("${product_name}" == "m40") {
   }
 } else {
   import("//build/ohos.gni")
-  import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
+  import(
+      "//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
   SUBSYSTEM_DIR = "//foundation/communication"
   NETMANAGER_NAPI_ROOT = "$SUBSYSTEM_DIR/netmanager_base/frameworks/js/napi/"
@@ -133,10 +135,11 @@ if ("${product_name}" == "m40") {
     ]
 
     if (enable_libnet_manager_native_prebuilt) {
-      deps += [ "$NETMANAGER_PREBUILTS_DIR/librarys/netd:libnet_manager_native" ]
+      deps +=
+          [ "$NETMANAGER_PREBUILTS_DIR/librarys/netd:libnet_manager_native" ]
     } else {
       deps +=
-      [ "//foundation/communication/netmanager_native:net_manager_native" ]
+          [ "//foundation/communication/netmanager_native:net_manager_native" ]
     }
 
     external_deps = [
