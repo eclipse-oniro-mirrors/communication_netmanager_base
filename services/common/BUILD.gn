@@ -28,13 +28,13 @@ ohos_shared_library("net_service_common") {
     "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netconnclient/include",
     "$INNERKITS_ROOT/netstatsclient/include",
-    "$NETDCONTROLLER_ROOT_DIR/include",
+    "$NETSYSCONTROLLER_ROOT_DIR/include",
   ]
 
   deps = [
     "$INNERKITS_ROOT/netconnclient:net_conn_parcel",
-    "$NETDCONTROLLER_ROOT_DIR:netd_controller",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
     "//utils/native/base:utils",
   ]
 

@@ -24,7 +24,7 @@ DnsResolverServiceStub::DnsResolverServiceStub()
     memberFuncMap_[CMD_GET_ADDR_BY_NAME] = &DnsResolverServiceStub::OnGetAddressesByName;
     memberFuncMap_[CMD_GET_ADDR_INFO] = &DnsResolverServiceStub::OnGetAddrInfo;
     memberFuncMap_[CMD_CRT_NETWORK_CACHE] = &DnsResolverServiceStub::OnCreateNetworkCache;
-    memberFuncMap_[CMD_DEL_NETWORK_CACHE] = &DnsResolverServiceStub::OnDestoryNetworkCache;
+    memberFuncMap_[CMD_DEL_NETWORK_CACHE] = &DnsResolverServiceStub::OnDestroyNetworkCache;
     memberFuncMap_[CMD_FLS_NETWORK_CACHE] = &DnsResolverServiceStub::OnFlushNetworkCache;
     memberFuncMap_[CMD_SET_RESOLVER_CONFIG] = &DnsResolverServiceStub::OnSetResolverConfig;
     memberFuncMap_[CMD_GET_RESOLVER_INFO] = &DnsResolverServiceStub::OnGetResolverInfo;
@@ -117,13 +117,13 @@ int32_t DnsResolverServiceStub::OnCreateNetworkCache(MessageParcel &data, Messag
     return NETMANAGER_SUCCESS;
 }
 
-int32_t DnsResolverServiceStub::OnDestoryNetworkCache(MessageParcel &data, MessageParcel &reply)
+int32_t DnsResolverServiceStub::OnDestroyNetworkCache(MessageParcel &data, MessageParcel &reply)
 {
     int32_t netId = 0;
     if (!data.ReadInt32(netId)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
-    int32_t ret = DestoryNetworkCache(netId);
+    int32_t ret = DestroyNetworkCache(netId);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

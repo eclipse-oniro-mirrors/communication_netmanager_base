@@ -15,7 +15,7 @@
 
 #include "route_utils.h"
 #include <arpa/inet.h>
-#include "netd_controller.h"
+#include "netsys_controller.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
@@ -161,10 +161,10 @@ int32_t RouteUtils::ModifyRoute(routeOperateType op, int32_t netId, const Route 
 
     switch (op) {
         case ROUTE_ADD:
-            ret = NetdController::GetInstance().NetworkAddRoute(netId, route.iface_, dest, nextHop);
+            ret = NetsysController::GetInstance().NetworkAddRoute(netId, route.iface_, dest, nextHop);
             break;
         case ROUTE_REMOVE:
-            ret = NetdController::GetInstance().NetworkRemoveRoute(netId, route.iface_, dest, nextHop);
+            ret = NetsysController::GetInstance().NetworkRemoveRoute(netId, route.iface_, dest, nextHop);
             break;
         default:
             break;

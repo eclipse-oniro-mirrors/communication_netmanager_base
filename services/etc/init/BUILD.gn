@@ -20,10 +20,17 @@ ohos_prebuilt_etc("netmanager_base.rc") {
   subsystem_name = "communication"
 }
 
-## Install netdnative.rc/netdnative.rc to /system/etc/init
-ohos_prebuilt_etc("netdnative.rc") {
-  source = "netdnative.cfg"
+## Install netsysnative.rc/netsysnative.rc to /system/etc/init
+ohos_prebuilt_etc("netsysnative.rc") {
+  source = "netsysnative.cfg"
   relative_install_dir = "init"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+## Install resolv.conf to /system/etc
+ohos_prebuilt_etc("resolv.conf") {
+  source = "resolv.conf"
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

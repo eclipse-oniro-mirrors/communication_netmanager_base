@@ -21,12 +21,12 @@
 #include "dhcp_result_parcel.h"
 
 namespace OHOS {
-namespace NetdNative {
+namespace NetsysNative {
 class INotifyCallback : public IRemoteBroker {
 public:
     virtual ~INotifyCallback() = default;
 public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetdNative.INotifyCallback");
+    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INotifyCallback");
     enum {
         ON_INTERFACE_ADDRESS_UPDATED = 0,
 		ON_INTERFACE_ADDRESS_REMOVED,
@@ -48,6 +48,6 @@ public:
     virtual int32_t OnRouteChanged(bool, const std::string &, const std::string &, const std::string &) = 0;
     virtual int32_t OnDhcpSuccess(sptr<DhcpResultParcel> &dhcpResult) = 0;
 };
-} // namespace NetdNative
+} // namespace NetsysNative
 } // namespace OHOS
 #endif

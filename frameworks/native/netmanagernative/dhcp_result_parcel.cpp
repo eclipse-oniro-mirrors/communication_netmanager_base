@@ -16,7 +16,7 @@
 #include "netnative_log_wrapper.h"
 
 namespace OHOS {
-namespace NetdNative {
+namespace NetsysNative {
 DhcpResultParcel::DhcpResultParcel() {}
 
 bool DhcpResultParcel::Marshalling(Parcel &parcel) const
@@ -45,5 +45,5 @@ sptr<DhcpResultParcel> DhcpResultParcel::Unmarshalling(Parcel &parcel)
     ptr->dns2_ = parcel.ReadString();
     return ptr;
 }
-} // namespace NetdNative
+} // namespace NetsysNative
 } // namespace OHOS

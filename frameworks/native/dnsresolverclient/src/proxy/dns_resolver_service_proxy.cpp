@@ -141,7 +141,7 @@ int32_t DnsResolverServiceProxy::CreateNetworkCache(int32_t netId)
     return reply.ReadInt32();
 }
 
-int32_t DnsResolverServiceProxy::DestoryNetworkCache(int32_t netId)
+int32_t DnsResolverServiceProxy::DestroyNetworkCache(int32_t netId)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {

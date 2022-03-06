@@ -14,24 +14,24 @@
 import("//build/test.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-ohos_unittest("netd_native_manager_test") {
-  module_out_path = "netmanager_base/netd_native_manager_test"
+ohos_unittest("netsys_native_manager_test") {
+  module_out_path = "netmanager_base/netsys_native_manager_test"
   sources = [
     "network_route_test.cpp",
     "resolver_config_test.cpp",
   ]
 
   include_dirs = [
-    "$NETDNATIVE_INNERKITS_SOURCE_DIR",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$INNERKITS_ROOT/netmanagernative/include",
-    "$NETDNATIVE_SOURCE_DIR/include",
-    "$NETMANAGER_PREBUILTS_DIR/librarys/netd/include/net_mgr_native/include",
-    "$NETMANAGER_PREBUILTS_DIR/librarys/netd/include/common/include",
-    "$NETDNATIVE_SOURCE_DIR/test",
+    "$NETSYSNATIVE_SOURCE_DIR/include",
+    "$NETMANAGER_PREBUILTS_DIR/librarys/netsys/include/net_mgr_native/include",
+    "$NETMANAGER_PREBUILTS_DIR/librarys/netsys/include/common/include",
+    "$NETSYSNATIVE_SOURCE_DIR/test",
   ]
 
   deps = [
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netd_native_manager",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "//utils/native/base:utils",
   ]
 
@@ -45,7 +45,7 @@ ohos_unittest("netd_native_manager_test") {
   ]
 
   defines = [
-    "NETMGRNATIVE_LOG_TAG = \"NetdNativeService\"",
+    "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
     "LOG_DOMAIN = 0xD0015B0",
   ]
 
@@ -61,5 +61,5 @@ ohos_unittest("netd_native_manager_test") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":netd_native_manager_test" ]
+  deps = [ ":netsys_native_manager_test" ]
 }
