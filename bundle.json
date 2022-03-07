@@ -20,7 +20,7 @@
         "name": "netmanager_base",
         "subsystem": "communication",
         "syscap": [
-            "SystemCapability.Communication.NetManagerBase"
+            "SystemCapability.Communication.NetManager.Core"
         ],
         "features": [],
         "adapted_system_type": [
