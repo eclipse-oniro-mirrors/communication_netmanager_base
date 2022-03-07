@@ -19,7 +19,7 @@
 #include "parcel.h"
 
 namespace OHOS {
-namespace NetdNative {
+namespace NetsysNative {
 struct DhcpResultParcel : public Parcelable {
     DhcpResultParcel();
     ~DhcpResultParcel() {}
@@ -35,6 +35,6 @@ struct DhcpResultParcel : public Parcelable {
     bool Marshalling(Parcel &parcel) const override;
     static sptr<DhcpResultParcel> Unmarshalling(Parcel &parcel);
 };
-} // namespace NetdNative
+} // namespace NetsysNative
 } // namespace OHOS
 #endif

@@ -19,11 +19,11 @@
 #include "dnsresolv.h"
 
 namespace OHOS {
-namespace NetdNative {
+namespace NetsysNative {
 using namespace nmd;
 struct DnsresolverParamsParcel : public Parcelable {
     DnsresolverParamsParcel();
-    DnsresolverParamsParcel(const dnsresolver_params &resolvParams);
+    DnsresolverParamsParcel(const DnsresolverParams &resolvParams);
     ~DnsresolverParamsParcel() {}
 
     uint16_t netId_;
@@ -33,6 +33,6 @@ struct DnsresolverParamsParcel : public Parcelable {
     bool Marshalling(Parcel &parcel) const override;
     static sptr<DnsresolverParamsParcel> Unmarshalling(Parcel &parcel);
 };
-} // namespace NetdNative
+} // namespace NetsysNative
 } // namespace OHOS
 #endif

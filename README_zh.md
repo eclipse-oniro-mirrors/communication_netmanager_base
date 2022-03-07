@@ -19,8 +19,6 @@ foundation/communication/netmanager_base/
 ├─interfaces                  // 接口定义
 │  ├─innerkits                // JS接口
 │  └─kits                     // native接口
-├─prebuilts                   // 预编译依赖
-│  └─librarys                 // 预编译库
 ├─sa_profile                  // sa定义
 ├─services                    // IPC服务端实现
 ├─test                        // 测试代码

@@ -48,12 +48,7 @@ ohos_shared_library("connection") {
     "//utils/native/base:utils",
   ]
 
-  if (enable_libnet_manager_native_prebuilt) {
-    deps += [ "$NETMANAGER_PREBUILTS_DIR/librarys/netd:libnet_manager_native" ]
-  } else {
-    deps +=
-        [ "//foundation/communication/netmanager_native:net_manager_native" ]
-  }
+  deps += [ "$NETSYSNATIVE_SOURCE_DIR:netsys_native_manager" ]
 
   external_deps = [
     "ability_base:want",

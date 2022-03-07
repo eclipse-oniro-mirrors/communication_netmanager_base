@@ -19,7 +19,7 @@
 #include "i_notify_callback.h"
 
 namespace OHOS {
-namespace NetdNative {
+namespace NetsysNative {
 class NotifyCallbackProxy : public IRemoteProxy<INotifyCallback> {
 public:
     explicit NotifyCallbackProxy(const sptr<IRemoteObject> &impl);
@@ -38,6 +38,6 @@ public:
 private:
     static inline BrokerDelegator<NotifyCallbackProxy> delegator_;
 };
-} // namespace NetdNative
+} // namespace NetsysNative
 } // namespace OHOS
 #endif
