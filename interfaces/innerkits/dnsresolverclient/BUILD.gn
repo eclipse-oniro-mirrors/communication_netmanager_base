@@ -59,6 +59,9 @@ ohos_source_set("dns_resolver_parcel") {
   } else {
     external_deps += [ "hilog:libhilog" ]
   }
+
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
 }
 
 ohos_shared_library("dns_resolver_manager_if") {
