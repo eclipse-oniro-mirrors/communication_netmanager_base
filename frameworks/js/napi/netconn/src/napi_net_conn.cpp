@@ -265,50 +265,72 @@ void NapiNetConn::DeclareNetConnDestructor(napi_env env, void *nativeObject, voi
     delete addonPtr;
 }
 
+void ReadNetAddressInfo(napi_env env, napi_value &info, INetAddr &netAddr)
+{
+    napi_create_object(env, &info);
+    NapiCommon::SetPropertyString(env, info, "address", netAddr.address_);
+    NapiCommon::SetPropertyInt32(env, info, "family", netAddr.type_);
+    NapiCommon::SetPropertyInt32(env, info, "port", netAddr.port_);
+}
+
+void ReadLinkAddressInfo(napi_env env, napi_value &info, INetAddr &netAddr)
+{
+    napi_create_object(env, &info);
+    napi_value netAddrInfo = nullptr;
+    ReadNetAddressInfo(env, netAddrInfo, netAddr);
+    napi_set_named_property(env, info, "address", netAddrInfo);
+    NapiCommon::SetPropertyInt32(env, info, "prefixLength", netAddr.prefixlen_);
+}
+
+void ReadRouteInfo(napi_env env, napi_value &info, Route &route)
+{
+    napi_create_object(env, &info);
+    NapiCommon::SetPropertyString(env, info, "interface", route.iface_);
+    napi_value netAddrInfo = nullptr;
+    napi_value linkAddrInfo = nullptr;
+    ReadLinkAddressInfo(env, linkAddrInfo, route.destination_);
+    ReadNetAddressInfo(env, netAddrInfo, route.gateway_);
+    napi_set_named_property(env, info, "destination", linkAddrInfo);
+    napi_set_named_property(env, info, "gateway", netAddrInfo);
+    NapiCommon::SetPropertyBool(env, info, "hasGateway", route.hasGateway_);
+    NapiCommon::SetPropertyBool(env, info, "isDefaultRoute", route.isDefaultRoute_);
+}
+
 void ReadNetLinkInfo(napi_env env, napi_value &info, NetLinkInfo &netLinkInfo)
 {
     napi_create_object(env, &info);
-    NapiCommon::SetPropertyString(env, info, "ifaceName", netLinkInfo.ifaceName_);
-    NapiCommon::SetPropertyString(env, info, "domain", netLinkInfo.domain_);
+    NapiCommon::SetPropertyString(env, info, "interfaceName", netLinkInfo.ifaceName_);
+    NapiCommon::SetPropertyString(env, info, "domains", netLinkInfo.domain_);
     // insert netAddr list to js return value.
     int netAddrListNum = 0;
     napi_value netAddrList = nullptr;
     napi_create_array_with_length(env, netLinkInfo.netAddrList_.size(), &netAddrList);
-    for_each(netLinkInfo.netAddrList_.begin(), netLinkInfo.netAddrList_.end(), [&](INetAddr &val) {
+    for (auto val : netLinkInfo.netAddrList_) {
         napi_value obj = nullptr;
-        napi_create_object(env, &obj);
-        NapiCommon::SetPropertyInt32(env, obj, "type", val.type_);
-        NapiCommon::SetPropertyInt32(env, obj, "prefixLen", val.prefixlen_);
-        NapiCommon::SetPropertyString(env, obj, "netMask", val.netMask_);
-        NapiCommon::SetPropertyString(env, obj, "address", val.address_);
-        NapiCommon::SetPropertyString(env, obj, "hostName", val.hostName_);
+        ReadLinkAddressInfo(env, obj, val);
         napi_set_element(env, netAddrList, netAddrListNum++, obj);
-    });
-    napi_set_named_property(env, info, "netAddrList", netAddrList);
+    }
+    napi_set_named_property(env, info, "linkAddresses", netAddrList);
     // insert dns list to js return value.
     int dnsListNum = 0;
     napi_value dnsList = nullptr;
     napi_create_array_with_length(env, netLinkInfo.dnsList_.size(), &dnsList);
-    for_each(netLinkInfo.dnsList_.begin(), netLinkInfo.dnsList_.end(), [&](INetAddr &val) {
+    for (auto val : netLinkInfo.dnsList_) {
         napi_value obj = nullptr;
-        napi_create_string_utf8(env, val.address_.c_str(), NAPI_AUTO_LENGTH, &obj);
+        ReadNetAddressInfo(env, obj, val);
         napi_set_element(env, dnsList, dnsListNum++, obj);
-    });
-    napi_set_named_property(env, info, "dnsList", dnsList);
+    }
+    napi_set_named_property(env, info, "dnses", dnsList);
     // insert route list to js return value.
     int routeListNum = 0;
     napi_value routeList = nullptr;
     napi_create_array_with_length(env, netLinkInfo.routeList_.size(), &routeList);
-    for_each(netLinkInfo.routeList_.begin(), netLinkInfo.routeList_.end(), [&](Route &val) {
+    for (auto val : netLinkInfo.routeList_) {
         napi_value obj = nullptr;
-        napi_create_object(env, &obj);
-        NapiCommon::SetPropertyString(env, obj, "iface", val.iface_);
-        NapiCommon::SetPropertyString(env, obj, "destination", val.destination_.address_);
-        NapiCommon::SetPropertyString(env, obj, "gateway", val.gateway_.address_);
-        NapiCommon::SetPropertyInt32(env, obj, "rtn_type", val.rtnType_);
+        ReadRouteInfo(env, obj, val);
         napi_set_element(env, routeList, routeListNum++, obj);
-    });
-    napi_set_named_property(env, info, "routeList", routeList);
+    }
+    napi_set_named_property(env, info, "routes", routeList);
     NapiCommon::SetPropertyInt32(env, info, "mtu", netLinkInfo.mtu_);
 }
 
@@ -1351,7 +1373,7 @@ napi_value NapiNetConn::RestoreFactoryData(napi_env env, napi_callback_info info
     return result;
 }
 
-napi_value NapiNetConn::DeclareNetworkTypeData(napi_env env, napi_value exports)
+static napi_value CreateNetBearType(napi_env env, napi_value exports)
 {
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_STATIC_PROPERTY("BEARER_CELLULAR",
@@ -1367,11 +1389,14 @@ napi_value NapiNetConn::DeclareNetworkTypeData(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_PROPERTY("BEARER_WIFI_AWARE",
             NapiCommon::NapiValueByInt32(env, static_cast<uint32_t>(NetBearType::BEARER_WIFI_AWARE))),
     };
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
+    napi_value result = nullptr;
+    napi_define_class(env, "NetBearType", NAPI_AUTO_LENGTH, NapiCommon::CreateEnumConstructor, nullptr,
+        sizeof(desc) / sizeof(*desc), desc, &result);
+    napi_set_named_property(env, exports, "NetBearType", result);
     return exports;
 }
 
-napi_value NapiNetConn::DeclareNetCapabilityData(napi_env env, napi_value exports)
+static napi_value CreateNetCap(napi_env env, napi_value exports)
 {
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_STATIC_PROPERTY("NET_CAPABILITY_MMS",
@@ -1387,7 +1412,10 @@ napi_value NapiNetConn::DeclareNetCapabilityData(napi_env env, napi_value export
         DECLARE_NAPI_STATIC_PROPERTY("NET_CAPABILITY_CAPTIVE_PORTAL",
             NapiCommon::NapiValueByInt32(env, static_cast<uint32_t>(NetCap::NET_CAPABILITY_CAPTIVE_PORTAL))),
     };
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
+    napi_value result = nullptr;
+    napi_define_class(env, "NetCap", NAPI_AUTO_LENGTH, NapiCommon::CreateEnumConstructor, nullptr,
+        sizeof(desc) / sizeof(*desc), desc, &result);
+    napi_set_named_property(env, exports, "NetCap", result);
     return exports;
 }
 
@@ -1395,9 +1423,9 @@ napi_value NapiNetConn::RegisterNetConnInterface(napi_env env, napi_value export
 {
     RegisternetConnectionObject(env, exports);
     DeclareNetConnInterface(env, exports);
-    DeclareNetworkTypeData(env, exports);
-    DeclareNetCapabilityData(env, exports);
     DeclareNetConnConstructor(env, exports);
+    CreateNetCap(env, exports);
+    CreateNetBearType(env, exports);
     return nullptr;
 }
 

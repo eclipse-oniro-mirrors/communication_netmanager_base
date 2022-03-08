@@ -40,8 +40,8 @@ napi_value NapiNetStats::DeclareNapiNetStatsInterface(napi_env env, napi_value e
         DECLARE_NAPI_FUNCTION("getUidTxBytes", GetUidTxBytes),
         DECLARE_NAPI_FUNCTION("getIfaceRxBytes", GetIfaceRxBytes),
         DECLARE_NAPI_FUNCTION("getIfaceTxBytes", GetIfaceTxBytes),
-        DECLARE_NAPI_FUNCTION("getIfaceStatsDetail", GetIfaceStatsDetail),
-        DECLARE_NAPI_FUNCTION("getUidStatsDetail", GetUidStatsDetail),
+        DECLARE_NAPI_FUNCTION("getIfaceStats", GetIfaceStats),
+        DECLARE_NAPI_FUNCTION("getIfaceUidStats", GetIfaceUidStats),
         DECLARE_NAPI_FUNCTION("updateIfacesStats", UpdateIfacesStats),
         DECLARE_NAPI_FUNCTION("updateStatsData", UpdateStatsData),
         DECLARE_NAPI_FUNCTION("on", On),
@@ -117,9 +117,9 @@ void NapiNetStats::CompleteGetBytes(napi_env env, napi_status status, void *data
     context = nullptr;
 }
 
-void NapiNetStats::CompleteGetIfaceStatsDetail(napi_env env, napi_status status, void *data)
+void NapiNetStats::CompleteGetIfaceStats(napi_env env, napi_status status, void *data)
 {
-    NETMGR_LOG_I("CompleteGetIfaceStatsDetail");
+    NETMGR_LOG_I("CompleteGetIfaceStats");
     auto context = static_cast<NetStatsAsyncContext *>(data);
     napi_value callbackValue = nullptr;
     if (status == napi_ok) {
@@ -140,9 +140,9 @@ void NapiNetStats::CompleteGetIfaceStatsDetail(napi_env env, napi_status status,
     NapiCommon::Handle2ValueCallback(env, context, callbackValue);
 }
 
-void NapiNetStats::CompleteGetUidStatsDetail(napi_env env, napi_status status, void *data)
+void NapiNetStats::CompleteGetIfaceUidStats(napi_env env, napi_status status, void *data)
 {
-    NETMGR_LOG_I("CompleteGetUidStatsDetail");
+    NETMGR_LOG_I("CompleteGetIfaceUidStats");
     auto context = static_cast<NetStatsAsyncContext *>(data);
     napi_value callbackValue = nullptr;
     if (status == napi_ok) {
@@ -327,9 +327,9 @@ void NapiNetStats::ExecGetIfaceTxBytes(napi_env env, void *data)
     NETMGR_LOG_I("get bytes = [%{public}" PRId64 "]", context->bytes64);
 }
 
-void NapiNetStats::ExecGetIfaceStatsDetail(napi_env env, void *data)
+void NapiNetStats::ExecGetIfaceStats(napi_env env, void *data)
 {
-    NETMGR_LOG_I("ExecGetIfaceStatsDetail");
+    NETMGR_LOG_I("ExecGetIfaceStats");
     NetStatsAsyncContext *context = static_cast<NetStatsAsyncContext *>(data);
     if (context == nullptr) {
         NETMGR_LOG_E("context == nullptr");
@@ -340,9 +340,9 @@ void NapiNetStats::ExecGetIfaceStatsDetail(napi_env env, void *data)
     context->resolved = context->result == static_cast<int32_t>(NetStatsResultCode::ERR_NONE);
 }
 
-void NapiNetStats::ExecGetUidStatsDetail(napi_env env, void *data)
+void NapiNetStats::ExecGetIfaceUidStats(napi_env env, void *data)
 {
-    NETMGR_LOG_I("ExecGetUidStatsDetail");
+    NETMGR_LOG_I("ExecGetIfaceUidStats");
     NetStatsAsyncContext *context = static_cast<NetStatsAsyncContext *>(data);
     if (context == nullptr) {
         NETMGR_LOG_E("context == nullptr");
@@ -629,9 +629,9 @@ napi_value NapiNetStats::GetIfaceTxBytes(napi_env env, napi_callback_info info)
     return result;
 }
 
-bool MatchGetIfaceStatsDetail(napi_env env, const napi_value parameters[], size_t parameterCount)
+bool MatchGetIfaceStats(napi_env env, const napi_value parameters[], size_t parameterCount)
 {
-    NETMGR_LOG_I("napi_stats MatchGetIfaceStatsDetail start");
+    NETMGR_LOG_I("napi_stats MatchGetIfaceStats start");
     bool paramsTypeMatched = false;
     switch (parameterCount) {
         case ARGV_NUM_1:
@@ -652,13 +652,13 @@ bool MatchGetIfaceStatsDetail(napi_env env, const napi_value parameters[], size_
     return hasIface && hasStart && hasEnd;
 }
 
-napi_value NapiNetStats::GetIfaceStatsDetail(napi_env env, napi_callback_info info)
+napi_value NapiNetStats::GetIfaceStats(napi_env env, napi_callback_info info)
 {
-    NETMGR_LOG_I("GetIfaceStatsDetail");
+    NETMGR_LOG_I("GetIfaceStats");
     size_t argc = ARGV_NUM_2;
     napi_value argv[] = {nullptr, nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-    NAPI_ASSERT(env, MatchGetIfaceStatsDetail(env, argv, argc), "type mismatch");
+    NAPI_ASSERT(env, MatchGetIfaceStats(env, argv, argc), "type mismatch");
     NetStatsAsyncContext *context = std::make_unique<NetStatsAsyncContext>().release();
     context->interfaceName = NapiCommon::GetNapiStringValue(env, argv[ARGV_INDEX_0], "iface");
     context->start = NapiCommon::GetNapiInt32Value(env, argv[ARGV_INDEX_0], "startTime");
@@ -679,17 +679,17 @@ napi_value NapiNetStats::GetIfaceStatsDetail(napi_env env, napi_callback_info in
     napi_value resource = nullptr;
     napi_value resourceName = nullptr;
     NAPI_CALL(env, napi_get_undefined(env, &resource));
-    NAPI_CALL(env, napi_create_string_utf8(env, "GetIfaceStatsDetail", NAPI_AUTO_LENGTH, &resourceName));
+    NAPI_CALL(env, napi_create_string_utf8(env, "GetIfaceStats", NAPI_AUTO_LENGTH, &resourceName));
     NAPI_CALL(env,
-        napi_create_async_work(env, resource, resourceName, ExecGetIfaceStatsDetail, CompleteGetIfaceStatsDetail,
+        napi_create_async_work(env, resource, resourceName, ExecGetIfaceStats, CompleteGetIfaceStats,
             (void *)context, &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
 }
 
-bool MatchGetUidStatsDetail(napi_env env, const napi_value parameters[], size_t parameterCount)
+bool MatchGetIfaceUidStats(napi_env env, const napi_value parameters[], size_t parameterCount)
 {
-    NETMGR_LOG_I("napi_stats MatchGetUidStatsDetail start");
+    NETMGR_LOG_I("napi_stats MatchGetIfaceUidStats start");
     bool paramsTypeMatched = false;
     switch (parameterCount) {
         case ARGV_NUM_1:
@@ -712,13 +712,13 @@ bool MatchGetUidStatsDetail(napi_env env, const napi_value parameters[], size_t 
     return hasUid && hasIface && hasStart && hasEnd;
 }
 
-napi_value NapiNetStats::GetUidStatsDetail(napi_env env, napi_callback_info info)
+napi_value NapiNetStats::GetIfaceUidStats(napi_env env, napi_callback_info info)
 {
-    NETMGR_LOG_E("GetUidStatsDetail");
+    NETMGR_LOG_E("GetIfaceUidStats");
     size_t argc = ARGV_NUM_2;
     napi_value argv[] = {nullptr, nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-    NAPI_ASSERT(env, MatchGetUidStatsDetail(env, argv, argc), "type mismatch");
+    NAPI_ASSERT(env, MatchGetIfaceUidStats(env, argv, argc), "type mismatch");
     NetStatsAsyncContext *context = std::make_unique<NetStatsAsyncContext>().release();
     context->uid = NapiCommon::GetNapiInt32Value(env, argv[ARGV_INDEX_0], "uid");
     napi_value ifaceInfoValue = NapiCommon::GetNamedProperty(env, argv[ARGV_INDEX_0], "ifaceInfo");
@@ -741,9 +741,9 @@ napi_value NapiNetStats::GetUidStatsDetail(napi_env env, napi_callback_info info
     napi_value resource = nullptr;
     napi_value resourceName = nullptr;
     NAPI_CALL(env, napi_get_undefined(env, &resource));
-    NAPI_CALL(env, napi_create_string_utf8(env, "GetUidStatsDetail", NAPI_AUTO_LENGTH, &resourceName));
+    NAPI_CALL(env, napi_create_string_utf8(env, "GetIfaceUidStats", NAPI_AUTO_LENGTH, &resourceName));
     NAPI_CALL(env,
-        napi_create_async_work(env, resource, resourceName, ExecGetUidStatsDetail, CompleteGetUidStatsDetail,
+        napi_create_async_work(env, resource, resourceName, ExecGetIfaceUidStats, CompleteGetIfaceUidStats,
             (void *)context, &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
