@@ -55,6 +55,9 @@ ohos_source_set("net_policy_parcel") {
   } else {
     external_deps += [ "hilog:libhilog" ]
   }
+
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
 }
 
 ohos_shared_library("net_policy_manager_if") {
