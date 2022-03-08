@@ -59,6 +59,14 @@ napi_value NapiCommon::CreateCodeMessage(napi_env env, const std::string &msg, i
     return messageCodeInfo;
 }
 
+void NapiCommon::SetPropertyBool(
+    napi_env env, napi_value object, const std::string &propertyName, bool property)
+{
+    napi_value propertyDest = nullptr;
+    NAPI_CALL_RETURN_VOID(env, napi_get_boolean(env, property, &propertyDest));
+    NAPI_CALL_RETURN_VOID(env, napi_set_named_property(env, object, propertyName.c_str(), propertyDest));
+}
+
 void NapiCommon::SetPropertyInt32(
     napi_env env, napi_value object, const std::string &propertyName, int32_t property)
 {
@@ -371,6 +379,16 @@ bool NapiCommon::MatchObjectProperty(
         }
     }
     return true;
+}
+
+napi_value NapiCommon::CreateEnumConstructor(napi_env env, napi_callback_info info)
+{
+    napi_value thisArg = nullptr;
+    void *data = nullptr;
+    napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, &data);
+    napi_value global = nullptr;
+    napi_get_global(env, &global);
+    return thisArg;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -61,6 +61,8 @@ public:
     static bool IsValidEvent(const std::string &eventInfo, int32_t &eventId);
     static napi_value CreateCodeMessage(napi_env env, const std::string &msg, int32_t code);
     static napi_value NapiValueByInt32(napi_env env, int32_t property);
+    static void SetPropertyBool(
+        napi_env env, napi_value object, const std::string &propertyName, bool property);
     static void SetPropertyInt32(
         napi_env env, napi_value object, const std::string &propertyName, int32_t property);
     static void SetPropertyInt64(
@@ -97,6 +99,7 @@ public:
     static bool MatchObjectProperty(
         napi_env env, napi_value object, std::initializer_list<std::pair<std::string, napi_valuetype>> pairList);
     static bool HasNamedTypeProperty(napi_env env, napi_value object, napi_valuetype type, std::string propertyName);
+    static napi_value CreateEnumConstructor(napi_env env, napi_callback_info info);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
