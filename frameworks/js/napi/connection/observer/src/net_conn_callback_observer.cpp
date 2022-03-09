@@ -176,7 +176,12 @@ napi_value NetConnCallbackObserver::CreateConnectionProperties(napi_env env, Net
         for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != linkInfo->netAddrList_.end(); ++index, ++it) {
             napi_value netAddr = NapiUtils::CreateObject(env);
             NapiUtils::SetStringPropertyUtf8(env, netAddr, KEY_ADDRESS, it->address_);
-            NapiUtils::SetUint32Property(env, netAddr, KEY_PREFIX_LENGTH, it->prefixlen_);
+            NapiUtils::SetUint32Property(env, netAddr, KEY_FAMILY, it->family_);
+            NapiUtils::SetUint32Property(env, netAddr, KEY_PORT, it->port_);
+
+            napi_value linkAddr = NapiUtils::CreateObject(env);
+            NapiUtils::SetNamedProperty(env, linkAddr, KEY_ADDRESS, netAddr);
+            NapiUtils::SetUint32Property(env, linkAddr, KEY_PREFIX_LENGTH, it->prefixlen_);
             NapiUtils::SetArrayElement(env, linkAddresses, index, netAddr);
         }
         NapiUtils::SetNamedProperty(env, connectionProperties, KEY_LINK_ADDRESSES, linkAddresses);
@@ -217,7 +222,7 @@ napi_value NetConnCallbackObserver::CreateConnectionProperties(napi_env env, Net
             NapiUtils::SetUint32Property(env, netAddr, KEY_PORT, it->port_);
             NapiUtils::SetArrayElement(env, dnsList, index, netAddr);
         }
-        NapiUtils::SetNamedProperty(env, connectionProperties, KEY_LINK_ADDRESSES, dnsList);
+        NapiUtils::SetNamedProperty(env, connectionProperties, KEY_DNSES, dnsList);
     }
     delete linkInfo;
     return connectionProperties;
