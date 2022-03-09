@@ -195,7 +195,7 @@ bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps)
         NETMGR_LOG_E("RequestNetwork fail");
         return false;
     }
-    UpdateNetConnState(NET_CONN_STATE_READY);
+    UpdateNetConnState(NET_CONN_STATE_CONNECTING);
     return true;
 }
 
@@ -235,16 +235,13 @@ void NetSupplier::UpdateNetConnState(NetConnState netConnState)
     switch (netConnState) {
         case NET_CONN_STATE_IDLE:
         case NET_CONN_STATE_CONNECTING:
-        case NET_CONN_STATE_READY:
         case NET_CONN_STATE_CONNECTED:
         case NET_CONN_STATE_DISCONNECTING:
         case NET_CONN_STATE_DISCONNECTED:
-        case NET_CONN_STATE_FAILURE:
             state_ = netConnState;
             break;
-        case NET_CONN_STATE_UNKNOWN:
         default:
-            state_ = NET_CONN_STATE_FAILURE;
+            state_ = NET_CONN_STATE_UNKNOWN;
             break;
     }
 
@@ -269,10 +266,8 @@ bool NetSupplier::IsConnecting() const
 
     switch (state_) {
         case NET_CONN_STATE_UNKNOWN:
-        case NET_CONN_STATE_FAILURE:
         case NET_CONN_STATE_IDLE:
             break;
-        case NET_CONN_STATE_READY:
         case NET_CONN_STATE_CONNECTING:
             isConnecting = true;
             break;
@@ -292,10 +287,8 @@ bool NetSupplier::IsConnected() const
     bool isConnected = false;
     switch (state_) {
         case NET_CONN_STATE_UNKNOWN:
-        case NET_CONN_STATE_FAILURE:
         case NET_CONN_STATE_IDLE:
         case NET_CONN_STATE_CONNECTING:
-        case NET_CONN_STATE_READY:
         case NET_CONN_STATE_DISCONNECTING:
         case NET_CONN_STATE_DISCONNECTED:
             break;
