@@ -17,6 +17,8 @@
 #include <atomic>
 #include <cinttypes>
 
+#include "common_event_support.h"
+
 #include "net_activate.h"
 #include "net_mgr_log_wrapper.h"
 #include "broadcast_manager.h"
@@ -63,7 +65,7 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
     }
     network_->UpdateBasicNetwork(netSupplierInfo_.isAvailable_);
     if (!netSupplierInfo_.isAvailable_) {
-        UpdateServiceState(SERVICE_STATE_DISCONNECTED);
+        UpdateNetConnState(NET_CONN_STATE_DISCONNECTED);
         netLinkInfo_.Initialize();
     }
     return;
@@ -84,7 +86,7 @@ int32_t NetSupplier::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
     netLinkInfo_ = netLinkInfo;
-    UpdateServiceState(SERVICE_STATE_CONNECTED);
+    UpdateNetConnState(NET_CONN_STATE_CONNECTED);
     return ERR_SERVICE_UPDATE_NET_LINK_INFO_SUCCES;
 }
 
@@ -180,7 +182,7 @@ bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps)
         NETMGR_LOG_D("this service is already connected");
         return true;
     }
-    UpdateServiceState(SERVICE_STATE_IDLE);
+    UpdateNetConnState(NET_CONN_STATE_IDLE);
 
     if (netController_ == nullptr) {
         NETMGR_LOG_E("netController_ is nullptr");
@@ -193,7 +195,7 @@ bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps)
         NETMGR_LOG_E("RequestNetwork fail");
         return false;
     }
-    UpdateServiceState(SERVICE_STATE_READY);
+    UpdateNetConnState(NET_CONN_STATE_READY);
     return true;
 }
 
@@ -224,41 +226,39 @@ bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
         NETMGR_LOG_E("ReleaseNetwork fail");
         return false;
     }
-    UpdateServiceState(SERVICE_STATE_DISCONNECTING);
+    UpdateNetConnState(NET_CONN_STATE_DISCONNECTING);
     return true;
 }
 
-void NetSupplier::UpdateServiceState(ServiceState serviceState)
+void NetSupplier::UpdateNetConnState(NetConnState netConnState)
 {
-    switch (serviceState) {
-        case SERVICE_STATE_IDLE:
-        case SERVICE_STATE_CONNECTING:
-        case SERVICE_STATE_READY:
-        case SERVICE_STATE_CONNECTED:
-        case SERVICE_STATE_DISCONNECTING:
-        case SERVICE_STATE_DISCONNECTED:
-        case SERVICE_STATE_FAILURE:
-            state_ = serviceState;
+    switch (netConnState) {
+        case NET_CONN_STATE_IDLE:
+        case NET_CONN_STATE_CONNECTING:
+        case NET_CONN_STATE_READY:
+        case NET_CONN_STATE_CONNECTED:
+        case NET_CONN_STATE_DISCONNECTING:
+        case NET_CONN_STATE_DISCONNECTED:
+        case NET_CONN_STATE_FAILURE:
+            state_ = netConnState;
             break;
-        case SERVICE_STATE_UNKNOWN:
+        case NET_CONN_STATE_UNKNOWN:
         default:
-            state_ = SERVICE_STATE_FAILURE;
+            state_ = NET_CONN_STATE_FAILURE;
             break;
     }
 
     BroadcastInfo info;
-    // EventFwk::CommonEventSupport::COMMON_EVENT_NETMANAGER_CONNECTION_STATE_CHANGED
-    info.action = "usual.event.netmanager.NETMANAGER_CONNECTION_STATE_CHANGED";
+    info.action = EventFwk::CommonEventSupport::COMMON_EVENT_CONNECTIVITY_CHANGE;
     info.data = "Net Manager Connection State Changed";
-    info.code = static_cast<int32_t>(serviceState);
+    info.code = static_cast<int32_t>(netConnState);
     info.ordered = true;
-    std::string netTypeName = std::to_string(static_cast<int32_t>(netSupplierType_));
-    std::map<std::string, std::string> param = {{"NetType", netTypeName}};
+    std::map<std::string, int32_t> param = {{"NetType", static_cast<int32_t>(netSupplierType_)}};
     DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
-    NETMGR_LOG_D("serviceState is [%{public}d]", state_);
+    NETMGR_LOG_D("netConnState is [%{public}d]", state_);
 }
 
-ServiceState NetSupplier::GetServiceState() const
+NetConnState NetSupplier::GetNetConnState() const
 {
     return state_;
 }
@@ -268,17 +268,17 @@ bool NetSupplier::IsConnecting() const
     bool isConnecting = false;
 
     switch (state_) {
-        case SERVICE_STATE_UNKNOWN:
-        case SERVICE_STATE_FAILURE:
-        case SERVICE_STATE_IDLE:
+        case NET_CONN_STATE_UNKNOWN:
+        case NET_CONN_STATE_FAILURE:
+        case NET_CONN_STATE_IDLE:
             break;
-        case SERVICE_STATE_READY:
-        case SERVICE_STATE_CONNECTING:
+        case NET_CONN_STATE_READY:
+        case NET_CONN_STATE_CONNECTING:
             isConnecting = true;
             break;
-        case SERVICE_STATE_CONNECTED:
-        case SERVICE_STATE_DISCONNECTING:
-        case SERVICE_STATE_DISCONNECTED:
+        case NET_CONN_STATE_CONNECTED:
+        case NET_CONN_STATE_DISCONNECTING:
+        case NET_CONN_STATE_DISCONNECTED:
         default:
             break;
     }
@@ -291,15 +291,15 @@ bool NetSupplier::IsConnected() const
 {
     bool isConnected = false;
     switch (state_) {
-        case SERVICE_STATE_UNKNOWN:
-        case SERVICE_STATE_FAILURE:
-        case SERVICE_STATE_IDLE:
-        case SERVICE_STATE_CONNECTING:
-        case SERVICE_STATE_READY:
-        case SERVICE_STATE_DISCONNECTING:
-        case SERVICE_STATE_DISCONNECTED:
+        case NET_CONN_STATE_UNKNOWN:
+        case NET_CONN_STATE_FAILURE:
+        case NET_CONN_STATE_IDLE:
+        case NET_CONN_STATE_CONNECTING:
+        case NET_CONN_STATE_READY:
+        case NET_CONN_STATE_DISCONNECTING:
+        case NET_CONN_STATE_DISCONNECTED:
             break;
-        case SERVICE_STATE_CONNECTED:
+        case NET_CONN_STATE_CONNECTED:
             isConnected = true;
             break;
         default:
