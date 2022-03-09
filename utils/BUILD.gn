@@ -12,22 +12,34 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 group("common_target") {
   deps = [ ":net_manager_common" ]
 }
 
 config("netmgr_common_config") {
-  include_dirs = [ "log/include" ]
+  include_dirs = [
+    "common_utils/include",
+    "log/include",
+  ]
 }
 
 ohos_shared_library("net_manager_common") {
-  sources = [ "log/src/net_mgr_log_wrapper.cpp" ]
+  sources = [
+    "common_utils/src/netmanager_base_common_utils.cpp",
+    "common_utils/src/netmanager_base_permission.cpp",
+    "log/src/net_mgr_log_wrapper.cpp",
+  ]
 
   defines = [
     "NETMGR_LOG_TAG = \"NetMgrCommon\"",
     "LOG_DOMAIN = 0xD0015B0",
   ]
+
+  if (enable_netmgr_debug) {
+    defines += [ "NETMGR_DEBUG" ]
+  }
 
   if (is_standard_system) {
     defines += [ "STANDARD_SYSTEM_ENABLE" ]
@@ -45,6 +57,11 @@ ohos_shared_library("net_manager_common") {
   } else {
     external_deps = [ "hilog:libhilog" ]
   }
+
+  external_deps += [
+    "access_token:libaccesstoken_sdk",
+    "ipc:ipc_single",
+  ]
 
   part_name = "netmanager_base"
   subsystem_name = "communication"

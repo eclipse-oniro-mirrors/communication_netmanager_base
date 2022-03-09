@@ -20,7 +20,6 @@ if ("${product_name}" == "m40") {
 
   utils_source = [
     "$SUBSYSTEM_DIR/netmanager_base/utils/base_context/src/netmanager_base_base_context.cpp",
-    "$SUBSYSTEM_DIR/netmanager_base/utils/common_utils/src/netmanager_base_common_utils.cpp",
     "$SUBSYSTEM_DIR/netmanager_base/utils/event_manager/src/netmanager_base_event_listener.cpp",
     "$SUBSYSTEM_DIR/netmanager_base/utils/event_manager/src/netmanager_base_event_manager.cpp",
     "$SUBSYSTEM_DIR/netmanager_base/utils/module_template/src/netmanager_base_module_template.cpp",
@@ -30,7 +29,6 @@ if ("${product_name}" == "m40") {
   utils_include = [
     "$SUBSYSTEM_DIR/netmanager_base/utils/base_async_work/include",
     "$SUBSYSTEM_DIR/netmanager_base/utils/base_context/include",
-    "$SUBSYSTEM_DIR/netmanager_base/utils/common_utils/include",
     "$SUBSYSTEM_DIR/netmanager_base/utils/event_manager/include",
     "$SUBSYSTEM_DIR/netmanager_base/utils/log/include",
     "$SUBSYSTEM_DIR/netmanager_base/utils/module_template/include",
