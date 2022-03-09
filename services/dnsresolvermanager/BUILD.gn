@@ -27,7 +27,7 @@ ohos_shared_library("dns_resolver_manager") {
     "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/dnsresolverclient/include",
     "$INNERKITS_ROOT/dnsresolverclient/include/proxy",
-    "$NETDCONTROLLER_ROOT_DIR/include",
+    "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETCONNMANAGER_COMMON_DIR/include",
     "$INNERKITS_ROOT/netconnclient/include",
     "$INNERKITS_ROOT/netstatsclient/include",
@@ -36,8 +36,8 @@ ohos_shared_library("dns_resolver_manager") {
   deps = [
     "$INNERKITS_ROOT/dnsresolverclient:dns_resolver_parcel",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
-    "$NETDCONTROLLER_ROOT_DIR:netd_controller",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
     "//utils/native/base:utils",
   ]
 

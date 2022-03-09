@@ -16,18 +16,18 @@
 #include "netnative_log_wrapper.h"
 
 namespace OHOS {
-namespace NetdNative {
+namespace NetsysNative {
 using namespace std;
 
 DnsresolverParamsParcel::DnsresolverParamsParcel(): netId_(0), baseTimeoutMsec_(0), retryCount_(0)
 {
 }
 
-DnsresolverParamsParcel::DnsresolverParamsParcel(const dnsresolver_params &resolvParams)
+DnsresolverParamsParcel::DnsresolverParamsParcel(const DnsresolverParams &resolvParams)
     : netId_(resolvParams.netId), baseTimeoutMsec_(resolvParams.baseTimeoutMsec),
     retryCount_(resolvParams.retryCount)  // ,servers_(resolvParams.servers), domains_(resolvParams.domains)
 {
-    NETNATIVE_LOGI("DnsresolverParamsParcel::XXXXXXXXXXXXXXX  %{public}d", retryCount_);
+    NETNATIVE_LOGI("DnsresolverParamsParcel %{public}d", retryCount_);
 }
 
 bool DnsresolverParamsParcel::Marshalling(Parcel &parcel) const
@@ -49,7 +49,7 @@ bool DnsresolverParamsParcel::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    NETNATIVE_LOGI("DnsresolverParamsParcel::zzzzzzzzzzzzzzzzzzzzz11  %{public}d and %{public}d",
+    NETNATIVE_LOGI("DnsresolverParamsParcel::Marshalling %{public}d and %{public}d",
         retryCount_, retryCount_t);
     return true;
 }
@@ -71,8 +71,8 @@ sptr<DnsresolverParamsParcel> DnsresolverParamsParcel::Unmarshalling(Parcel &par
     if (!parcel.ReadUint8(ptr->retryCount_)) {
         return nullptr;
     }
-    NETNATIVE_LOGI("DnsresolverParamsParcel::YYYYYYYYYYYYYYYY  %{public}d", ptr->retryCount_);
+    NETNATIVE_LOGI("DnsresolverParamsParcel::Unmarshalling %{public}d", ptr->retryCount_);
     return ptr;
 }
-} // namespace NetdNative
+} // namespace NetsysNative
 } // namespace OHOS

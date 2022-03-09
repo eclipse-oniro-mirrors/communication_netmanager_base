@@ -21,7 +21,7 @@
 #include "i_notify_callback.h"
 
 namespace OHOS {
-namespace NetdNative {
+namespace NetsysNative {
 class NotifyCallbackStub : public IRemoteStub<INotifyCallback> {
 public:
     NotifyCallbackStub();
@@ -46,6 +46,6 @@ private:
 private:
     std::map<uint32_t, NotifyCallbackFunc> memberFuncMap_;
 };
-} // namespace NetdNative
+} // namespace NetsysNative
 } // namespace OHOS
 #endif

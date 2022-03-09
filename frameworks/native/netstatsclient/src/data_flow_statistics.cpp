@@ -14,7 +14,7 @@
  */
 
 #include "data_flow_statistics.h"
-#include "netd_controller.h"
+#include "netsys_controller.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -25,52 +25,52 @@ DataFlowStatistics::~DataFlowStatistics() {}
 
 int64_t DataFlowStatistics::GetCellularRxBytes()
 {
-    return NetdController::GetInstance().GetCellularRxBytes();
+    return NetsysController::GetInstance().GetCellularRxBytes();
 }
 
 int64_t DataFlowStatistics::GetCellularTxBytes()
 {
-    return NetdController::GetInstance().GetCellularTxBytes();
+    return NetsysController::GetInstance().GetCellularTxBytes();
 }
 
 int64_t DataFlowStatistics::GetAllRxBytes()
 {
-    return NetdController::GetInstance().GetAllRxBytes();
+    return NetsysController::GetInstance().GetAllRxBytes();
 }
 
 int64_t DataFlowStatistics::GetAllTxBytes()
 {
-    return NetdController::GetInstance().GetAllTxBytes();
+    return NetsysController::GetInstance().GetAllTxBytes();
 }
 
 int64_t DataFlowStatistics::GetUidRxBytes(uint32_t uid)
 {
-    return NetdController::GetInstance().GetUidRxBytes(uid);
+    return NetsysController::GetInstance().GetUidRxBytes(uid);
 }
 
 int64_t DataFlowStatistics::GetUidTxBytes(uint32_t uid)
 {
-    return NetdController::GetInstance().GetUidTxBytes(uid);
+    return NetsysController::GetInstance().GetUidTxBytes(uid);
 }
 
 int64_t DataFlowStatistics::GetIfaceRxBytes(const std::string &interfaceName)
 {
-    return NetdController::GetInstance().GetIfaceRxBytes(interfaceName);
+    return NetsysController::GetInstance().GetIfaceRxBytes(interfaceName);
 }
 
 int64_t DataFlowStatistics::GetIfaceTxBytes(const std::string &interfaceName)
 {
-    return NetdController::GetInstance().GetIfaceTxBytes(interfaceName);
+    return NetsysController::GetInstance().GetIfaceTxBytes(interfaceName);
 }
 
 int64_t DataFlowStatistics::GetIfaceRxPackets(const std::string &interfaceName)
 {
-    return NetdController::GetInstance().GetIfaceRxPackets(interfaceName);
+    return NetsysController::GetInstance().GetIfaceRxPackets(interfaceName);
 }
 
 int64_t DataFlowStatistics::GetIfaceTxPackets(const std::string &interfaceName)
 {
-    return NetdController::GetInstance().GetIfaceTxPackets(interfaceName);
+    return NetsysController::GetInstance().GetIfaceTxPackets(interfaceName);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

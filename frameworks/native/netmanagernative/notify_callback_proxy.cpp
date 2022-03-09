@@ -17,7 +17,7 @@
 #include "netnative_log_wrapper.h"
 
 namespace OHOS {
-namespace NetdNative {
+namespace NetsysNative {
 NotifyCallbackProxy::NotifyCallbackProxy(const sptr<IRemoteObject> &impl)
     : IRemoteProxy<INotifyCallback>(impl)
 {}
@@ -215,5 +215,5 @@ int32_t NotifyCallbackProxy::OnDhcpSuccess(sptr<DhcpResultParcel> &dhcpResult)
     }
     return ret;
 }
-} // namespace NetdNative
+} // namespace NetsysNative
 } // namespace OHOS

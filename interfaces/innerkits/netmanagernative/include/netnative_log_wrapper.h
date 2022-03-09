@@ -20,7 +20,7 @@
 #include "hilog/log.h"
 
 #ifndef NETMGRNATIVE_LOG_TAG
-#define NETMGRNATIVE_LOG_TAG "NetdNativeService"
+#define NETMGRNATIVE_LOG_TAG "NetsysNativeService"
 #endif
 
 static constexpr OHOS::HiviewDFX::HiLogLabel NET_MGR_LABEL = {LOG_CORE, LOG_DOMAIN, NETMGRNATIVE_LOG_TAG};
