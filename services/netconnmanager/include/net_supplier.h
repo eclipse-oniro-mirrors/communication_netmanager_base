@@ -28,16 +28,6 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-enum NetConnState {
-    NET_CONN_STATE_UNKNOWN = 0,
-    NET_CONN_STATE_IDLE = 1,
-    NET_CONN_STATE_CONNECTING = 2,
-    NET_CONN_STATE_READY = 3,
-    NET_CONN_STATE_CONNECTED = 4,
-    NET_CONN_STATE_DISCONNECTING = 5,
-    NET_CONN_STATE_DISCONNECTED = 6,
-    NET_CONN_STATE_FAILURE = 7,
-};
 enum CallbackType {
     CALL_TYPE_UNKNOWN = 0,
     CALL_TYPE_AVAILABLE = 1,
