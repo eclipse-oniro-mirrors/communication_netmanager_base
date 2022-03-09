@@ -65,6 +65,8 @@ public:
     ~NapiNetConn() = default;
     static napi_value RegisterNetConnInterface(napi_env env, napi_value exports);
     static napi_value DeclareNetConnInterface(napi_env env, napi_value exports);
+    static napi_value DeclareNetworkTypeData(napi_env env, napi_value exports);
+    static napi_value DeclareNetCapabilityData(napi_env env, napi_value exports);
     static napi_value DeclareNetConnConstructor(napi_env env, napi_value exports);
     static napi_value DeclareNetConnNew(napi_env env, napi_callback_info info);
     static void DeclareNetConnDestructor(napi_env env, void *nativeObject, void *hint);

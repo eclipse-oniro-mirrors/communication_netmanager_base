@@ -56,8 +56,8 @@ public:
     static void ExecGetUidTxBytes(napi_env env, void *data);
     static void ExecGetIfaceRxBytes(napi_env env, void *data);
     static void ExecGetIfaceTxBytes(napi_env env, void *data);
-    static void ExecGetIfaceStats(napi_env env, void *data);
-    static void ExecGetIfaceUidStats(napi_env env, void *data);
+    static void ExecGetIfaceStatsDetail(napi_env env, void *data);
+    static void ExecGetUidStatsDetail(napi_env env, void *data);
     static void ExecUpdateIfacesStats(napi_env env, void *data);
     static void ExecUpdateStatsData(napi_env env, void *data);
     static void ExecOn(napi_env env, void *data);
@@ -71,8 +71,8 @@ public:
     static void CompleteGetIfaceRxBytes(napi_env env, napi_status status, void *data);
     static void CompleteGetIfaceTxBytes(napi_env env, napi_status status, void *data);
     static void CompleteGetBytes(napi_env env, napi_status status, void *data);
-    static void CompleteGetIfaceStats(napi_env env, napi_status status, void *data);
-    static void CompleteGetIfaceUidStats(napi_env env, napi_status status, void *data);
+    static void CompleteGetIfaceStatsDetail(napi_env env, napi_status status, void *data);
+    static void CompleteGetUidStatsDetail(napi_env env, napi_status status, void *data);
     static void CompleteUpdateIfacesStats(napi_env env, napi_status status, void *data);
     static void CompleteUpdateStatsData(napi_env env, napi_status status, void *data);
     static void CompleteOn(napi_env env, napi_status status, void *data);
@@ -86,8 +86,8 @@ public:
     static napi_value GetUidTxBytes(napi_env env, napi_callback_info info);
     static napi_value GetIfaceRxBytes(napi_env env, napi_callback_info info);
     static napi_value GetIfaceTxBytes(napi_env env, napi_callback_info info);
-    static napi_value GetIfaceStats(napi_env env, napi_callback_info info);
-    static napi_value GetIfaceUidStats(napi_env env, napi_callback_info info);
+    static napi_value GetIfaceStatsDetail(napi_env env, napi_callback_info info);
+    static napi_value GetUidStatsDetail(napi_env env, napi_callback_info info);
     static napi_value UpdateIfacesStats(napi_env env, napi_callback_info info);
     static napi_value UpdateStatsData(napi_env env, napi_callback_info info);
     static napi_value On(napi_env env, napi_callback_info info);
