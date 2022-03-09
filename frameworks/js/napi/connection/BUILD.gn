@@ -72,6 +72,7 @@ if ("${product_name}" == "m40") {
     include_dirs += common_include
 
     sources = [
+      "async_context/src/bindsocket_context.cpp",
       "async_context/src/getaddressbyname_context.cpp",
       "async_context/src/getdefaultnet_context.cpp",
       "async_context/src/parse_nethandle_context.cpp",

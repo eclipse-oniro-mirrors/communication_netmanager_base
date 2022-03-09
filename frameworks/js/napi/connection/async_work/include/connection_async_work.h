@@ -49,6 +49,26 @@ public:
 
     static void GetAddressesByNameCallback(napi_env env, napi_status status, void *data);
 
+    static void ExecGetAllNets(napi_env env, void *data);
+
+    static void GetAllNetsCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecEnableAirplaneMode(napi_env env, void *data);
+
+    static void EnableAirplaneModeCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecDisableAirplaneMode(napi_env env, void *data);
+
+    static void DisableAirplaneModeCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecReportNetConnected(napi_env env, void *data);
+
+    static void ReportNetConnectedCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecReportNetDisconnected(napi_env env, void *data);
+
+    static void ReportNetDisconnectedCallback(napi_env env, napi_status status, void *data);
+
     class NetHandleAsyncWork final {
     public:
         DISALLOW_COPY_AND_MOVE(NetHandleAsyncWork);
@@ -64,6 +84,10 @@ public:
         static void ExecGetAddressesByName(napi_env env, void *data);
 
         static void GetAddressesByNameCallback(napi_env env, napi_status status, void *data);
+
+        static void ExecBindSocket(napi_env env, void *data);
+
+        static void BindSocketCallback(napi_env env, napi_status status, void *data);
     };
 
     class NetConnectionAsyncWork final {

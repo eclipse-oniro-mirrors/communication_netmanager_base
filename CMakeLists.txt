@@ -310,6 +310,9 @@ include_directories(../../../foundation/communication/ipc/interfaces/innerkits/i
 include_directories(../../../foundation/distributedschedule/safwk/services/safwk/include/)
 include_directories(../../../base/notification/ces_standard/interfaces/innerkits/native/include)
 include_directories(../../../third_party/curl/include/)
+include_directories(../wifi/services/wifi_standard/wifi_framework/dhcp_manage/mgr_service/include)
+include_directories(../wifi/services/wifi_standard/wifi_framework/dhcp_manage/mgr_service/interfaces)
+include_directories(../../aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content)
 
 link_directories(../../../utils/native/base/cmake-build-debug/src/securec)
 link_directories(../../../foundation/ace/napi/cmake-build-debug)
