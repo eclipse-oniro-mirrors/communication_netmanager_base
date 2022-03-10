@@ -136,7 +136,7 @@ int32_t Network::Ipv4PrefixLen(const std::string &ip)
     uint8_t c2 = 0;
     uint8_t c3 = 0;
     uint8_t c4 = 0;
-    uint32_t cnt = 0;
+    int32_t cnt = 0;
     ret = sscanf_s(ip.c_str(), "%hhu.%hhu.%hhu.%hhu", &c1, &c2, &c3, &c4);
     if (ret != sizeof(int32_t)) {
         return 0;
