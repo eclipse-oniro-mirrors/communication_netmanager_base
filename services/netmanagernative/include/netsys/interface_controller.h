@@ -51,7 +51,12 @@ public:
     ~InterfaceController();
     static int SetMtu(const char *interfaceName, const char *mtuValue);
     static int GetMtu(const char *interfaceName);
+    static int AddAddress(const char *interfaceName, const char *addr, int prefixLen);
+    static int DelAddress(const char *interfaceName, const char *addr, int prefixLen);
     static std::vector<std::string> GetInterfaceNames();
+
+private:
+    static int ModifyAddress(uint32_t action, const char *interfaceName, const char *addr, int prefixLen);
 };
 } // namespace nmd
 } // namespace OHOS
