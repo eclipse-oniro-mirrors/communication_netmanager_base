@@ -29,7 +29,6 @@ namespace NetManagerStandard {
  */
 bool NetManagerPermission::CheckPermission(const std::string &permissionName)
 {
-#ifdef SUPPORT_PERMISSION
     if (permissionName.empty()) {
         NETMGR_LOG_E("permission check failed，permission name is empty.");
         return false;
@@ -54,9 +53,6 @@ bool NetManagerPermission::CheckPermission(const std::string &permissionName)
         return false;
     }
     return true;
-#else
-    return true;
-#endif
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
