@@ -876,7 +876,7 @@ int32_t NetConnService::SetAirplaneMode(bool state)
     info.data = "Net Manager Airplane Mode Changed";
     info.code = static_cast<int32_t>(state);
     info.ordered = true;
-    std::map<std::string, std::string> param;
+    std::map<std::string, int32_t> param;
     DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
     return 0;
 }

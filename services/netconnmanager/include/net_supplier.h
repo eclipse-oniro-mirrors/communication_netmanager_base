@@ -28,16 +28,6 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-enum ServiceState {
-    SERVICE_STATE_UNKNOWN = 0,
-    SERVICE_STATE_IDLE = 1,
-    SERVICE_STATE_CONNECTING = 2,
-    SERVICE_STATE_READY = 3,
-    SERVICE_STATE_CONNECTED = 4,
-    SERVICE_STATE_DISCONNECTING = 5,
-    SERVICE_STATE_DISCONNECTED = 6,
-    SERVICE_STATE_FAILURE = 7,
-};
 enum CallbackType {
     CALL_TYPE_UNKNOWN = 0,
     CALL_TYPE_AVAILABLE = 1,
@@ -72,8 +62,8 @@ public:
     sptr<Network> GetNetwork() const;
     int32_t GetNetId() const;
     sptr<NetHandle> GetNetHandle() const;
-    void UpdateServiceState(ServiceState serviceState);
-    ServiceState GetServiceState() const;
+    void UpdateNetConnState(NetConnState netConnState);
+    NetConnState GetNetConnState() const;
     bool IsConnecting() const;
     bool IsConnected() const;
     void SetNetValid(bool ifValid);
@@ -108,7 +98,7 @@ private:
     NetSupplierInfo netSupplierInfo_;
     NetAllCapabilities netAllCapabilities_;
     uint32_t supplierId_ = 0;
-    ServiceState state_ = SERVICE_STATE_IDLE;
+    NetConnState state_ = NET_CONN_STATE_IDLE;
     int32_t netScore_ = 0;
     int32_t netRealScore_ = 0;
     bool ifNetValid_ = false;

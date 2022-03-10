@@ -54,10 +54,10 @@ static void UpdateStatsTimer()
         NETMGR_LOG_E("UpdateUidStats failed");
     }
     BroadcastInfo info;
-    info.action = "usual.event.netmanager.NETMANAGER_NET_STATE_UPDATED";
+    info.action = EventFwk::CommonEventSupport::COMMON_EVENT_NETMANAGER_NETSTATES_UPDATED;
     info.data = "Net Manager Iface and Uid States Updated";
     info.ordered = true;
-    std::map<std::string, std::string> param;
+    std::map<std::string, bool> param = {{"NetStatsUpdated", true}};
     DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
     NETMGR_LOG_D("NetStatsService Update Iface and Uid Stats.");
 }
@@ -128,15 +128,15 @@ bool NetStatsService::Init()
 void NetStatsService::InitListener()
 {
     EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent("usual.event.netmanager.NETMANAGER_NET_STATE_LIMITED");
-    matchingSkills.AddEvent("usual.event.netmanager.NETMANAGER_DELETE_UID");
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_NETMANAGER_NETSTATES_LIMITED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_UID_REMOVED);
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscribeInfo.SetPriority(1);
     subscriber_ = std::make_shared<NetStatsListener>(subscribeInfo);
     subscriber_->SetStatsCallback(netStatsCallback_);
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
     NETMGR_LOG_D("NetStatsService SubscribeCommonEvent"
-        " NETMANAGER_NET_STATE_LIMITED and NETMANAGER_DELETE_UID");
+        " COMMON_EVENT_NETMANAGER_NETSTATES_LIMITED and COMMON_EVENT_UID_REMOVED");
 }
 
 int32_t NetStatsService::RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
