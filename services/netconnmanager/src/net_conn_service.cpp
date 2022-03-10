@@ -576,7 +576,6 @@ void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<Net
     NETMGR_LOG_D("default Supplier set to: [%{public}d, %{public}s]",
         oldSupplier ? oldSupplier->GetSupplierId() : 0,
         oldSupplier ? oldSupplier->GetNetSupplierIdent().c_str() : "null");
-    return;
 }
 
 int32_t NetConnService::GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList)
