@@ -32,6 +32,8 @@
 
 namespace OHOS {
 namespace nmd {
+static const uint32_t NETLINK_MAX_LEN = 1024;
+
 class NetlinkMsg {
 public:
     NetlinkMsg(uint16_t flags, size_t maxBufLen, int pid);
@@ -39,7 +41,7 @@ public:
 
     void AddRoute(unsigned short action, struct rtmsg msg);
     void AddRule(unsigned short action, struct fib_rule_hdr msg);
-
+    void AddAddress(unsigned short action, struct ifaddrmsg msg);
     int AddAttr(unsigned int rtaType, void *buf, size_t bufLen);
     int AddAttr16(unsigned int rtaType, uint16_t data);
     int AddAttr32(unsigned int rtaType, uint32_t data);
