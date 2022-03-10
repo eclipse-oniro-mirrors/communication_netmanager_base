@@ -58,6 +58,7 @@ private:
     void StartDetectionThread();
     void HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect);
     void NotifyNetDetectionResult(NetDetectionResultCode detectionResult, const std::string &urlRedirect);
+    int32_t Ipv4PrefixLen(const std::string &ip);
     NetDetectionResultCode NetDetectionResultConvert(int32_t internalRet);
 
 private:

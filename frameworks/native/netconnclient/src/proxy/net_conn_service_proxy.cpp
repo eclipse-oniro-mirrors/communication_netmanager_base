@@ -320,7 +320,7 @@ int32_t NetConnServiceProxy::UpdateNetSupplierInfo(uint32_t supplierId,
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
     }
-
+    NETMGR_LOG_D("UpdateNetSupplierInfo out.");
     return reply.ReadInt32();
 }
 
