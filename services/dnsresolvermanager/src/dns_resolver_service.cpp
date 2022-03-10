@@ -22,7 +22,7 @@
 #include <unistd.h>
 
 #include "system_ability_definition.h"
-#include "netd_controller.h"
+#include "netsys_controller.h"
 #include "net_manager_center.h"
 #include "net_mgr_log_wrapper.h"
 #include "dns_resolver_constants.h"
@@ -167,15 +167,15 @@ int32_t DnsResolverService::GetAddressesByName(const std::string &hostName, int3
     InitAddrInfo(hints, AF_INET, AI_PASSIVE, 0, SOCK_DGRAM);
     std::unique_ptr<addrinfo> res;
     std::string server;
-    int32_t ret = NetdController::GetInstance().GetAddrInfo(hostName, server, hints, res, static_cast<uint16_t>(netId));
+    int32_t ret = NetsysController::GetInstance().GetAddrInfo(hostName, server, hints, res, static_cast<uint16_t>(netId));
     if (ret != 0) {
-        NETMGR_LOG_E("GetAddressesByName Call GetAddrInfo of NetdController ret[%{public}d]", ret);
+        NETMGR_LOG_E("GetAddressesByName Call GetAddrInfo of NetsysController ret[%{public}d]", ret);
         return ret;
     }
     struct addrinfo *cur = nullptr;
     struct addrinfo *resAddr = res.release();
     if (resAddr == nullptr) {
-        NETMGR_LOG_E("GetAddrInfo of NetdController return resAddr error");
+        NETMGR_LOG_E("GetAddrInfo of NetsysController return resAddr error");
         return DNS_ERROR;
     }
     for (cur = resAddr; cur != nullptr; cur = cur->ai_next) {
@@ -206,7 +206,7 @@ int32_t DnsResolverService::GetAddrInfo(const std::string &hostName, const std::
     InitAddrInfo(hints2, hints->family_, hints->flags_, hints->protocol_, hints->sockType_);
     std::unique_ptr<addrinfo> res;
     uint16_t netId = 0;
-    int32_t ret = NetdController::GetInstance().GetAddrInfo(hostName, server, hints2, res, netId);
+    int32_t ret = NetsysController::GetInstance().GetAddrInfo(hostName, server, hints2, res, netId);
     if (ret < 0) {
         return ret;
     }
@@ -239,26 +239,26 @@ int32_t DnsResolverService::GetAddrInfo(const std::string &hostName, const std::
 int32_t DnsResolverService::CreateNetworkCache(int32_t netId)
 {
     NETMGR_LOG_D("DnsResolverService CreateNetworkCache netId[%{public}d]", netId);
-    return static_cast<int32_t>(NetdController::GetInstance().CreateNetworkCache(static_cast<uint16_t>(netId)));
+    return static_cast<int32_t>(NetsysController::GetInstance().CreateNetworkCache(static_cast<uint16_t>(netId)));
 }
 
-int32_t DnsResolverService::DestoryNetworkCache(int32_t netId)
+int32_t DnsResolverService::DestroyNetworkCache(int32_t netId)
 {
-    NETMGR_LOG_D("DnsResolverService DestoryNetworkCache netId[%{public}d]", netId);
-    return static_cast<int32_t>(NetdController::GetInstance().DestoryNetworkCache(static_cast<uint16_t>(netId)));
+    NETMGR_LOG_D("DnsResolverService DestroyNetworkCache netId[%{public}d]", netId);
+    return static_cast<int32_t>(NetsysController::GetInstance().DestroyNetworkCache(static_cast<uint16_t>(netId)));
 }
 
 int32_t DnsResolverService::FlushNetworkCache(int32_t netId)
 {
     NETMGR_LOG_D("DnsResolverService FlushNetworkCache netId[%{public}d]", netId);
-    return static_cast<int32_t>(NetdController::GetInstance().FlushNetworkCache(static_cast<uint16_t>(netId)));
+    return static_cast<int32_t>(NetsysController::GetInstance().FlushNetworkCache(static_cast<uint16_t>(netId)));
 }
 
 int32_t DnsResolverService::SetResolverConfig(int32_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
     const std::vector<std::string> &servers, const std::vector<std::string> &domains)
 {
     NETMGR_LOG_D("DnsResolverService SetResolverConfig netId[%{public}d]", netId);
-    return static_cast<int32_t>(NetdController::GetInstance().SetResolverConfig(
+    return static_cast<int32_t>(NetsysController::GetInstance().SetResolverConfig(
         static_cast<uint16_t>(netId), baseTimeoutMsec, retryCount, servers, domains));
 }
 
@@ -266,7 +266,7 @@ int32_t DnsResolverService::GetResolverInfo(int32_t netId, std::vector<std::stri
     std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount)
 {
     NETMGR_LOG_D("DnsResolverService GetResolverInfo netId[%{public}d]", netId);
-    return static_cast<int32_t>(NetdController::GetInstance().GetResolverInfo(
+    return static_cast<int32_t>(NetsysController::GetInstance().GetResolverInfo(
         static_cast<uint16_t>(netId), servers, domains, baseTimeoutMsec, retryCount));
 }
 } // namespace NetManagerStandard

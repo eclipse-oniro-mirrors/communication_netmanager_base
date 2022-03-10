@@ -35,7 +35,7 @@ private:
     int32_t OnGetAddressesByName(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetAddrInfo(MessageParcel &data, MessageParcel &reply);
     int32_t OnCreateNetworkCache(MessageParcel &data, MessageParcel &reply);
-    int32_t OnDestoryNetworkCache(MessageParcel &data, MessageParcel &reply);
+    int32_t OnDestroyNetworkCache(MessageParcel &data, MessageParcel &reply);
     int32_t OnFlushNetworkCache(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetResolverInfo(MessageParcel &data, MessageParcel &reply);

@@ -68,16 +68,6 @@ foundation/communication/netmanager_base/
 │      └─netstatsclient
 │          └─include
 │              └─proxy
-├─prebuilts
-│  └─librarys
-│      └─netd
-│          ├─arm
-│          ├─arm64
-│          └─include
-│              ├─common
-│              │  └─include
-│              └─net_mgr_native
-│                  └─include
 ├─sa_profile
 ├─services
 │  ├─common

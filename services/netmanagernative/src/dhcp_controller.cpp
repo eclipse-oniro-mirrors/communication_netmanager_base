@@ -61,7 +61,7 @@ DhcpController::DhcpController()
 
 DhcpController::~DhcpController() {}
 
-int32_t DhcpController::RegisterNotifyCallback(sptr<OHOS::NetdNative::INotifyCallback> &callback)
+int32_t DhcpController::RegisterNotifyCallback(sptr<OHOS::NetsysNative::INotifyCallback> &callback)
 {
     NETNATIVE_LOGI("DhcpController RegisterNotifyCallback");
     callback_ = callback;
@@ -86,8 +86,8 @@ void DhcpController::StopDhcpClient(const std::string &iface, bool bIpv6)
 void DhcpController::Process(const std::string &iface, OHOS::Wifi::DhcpResult &result)
 {
     NETNATIVE_LOGI("DhcpController Process");
-    sptr<OHOS::NetdNative::DhcpResultParcel> ptr =
-        (std::make_unique<OHOS::NetdNative::DhcpResultParcel>()).release();
+    sptr<OHOS::NetsysNative::DhcpResultParcel> ptr =
+        (std::make_unique<OHOS::NetsysNative::DhcpResultParcel>()).release();
     ptr->iface_ = iface;
     ptr->ipAddr_ = result.strYourCli;
     ptr->gateWay_ = result.strServer;

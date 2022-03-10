@@ -23,7 +23,7 @@
 #include "net_conn_types.h"
 #include "net_supplier.h"
 #include "net_activate.h"
-#include "netd_controller.h"
+#include "netsys_controller.h"
 #include "net_manager_center.h"
 #include "net_mgr_log_wrapper.h"
 
@@ -192,7 +192,7 @@ int32_t NetConnService::UnregisterNetSupplier(uint32_t supplierId)
         networks_.erase(iterNetwork);
     }
     netSuppliers_.erase(iterSupplier);
-    NETMGR_LOG_D("Destory supplier network.");
+    NETMGR_LOG_D("Destroy supplier network.");
     FindBestNetworkForAllRequest();
 
     return ERR_NONE;
@@ -633,7 +633,7 @@ int32_t NetConnService::GetNetCapabilities(int32_t netId, NetAllCapabilities &ne
 int32_t NetConnService::BindSocket(int32_t socket_fd, int32_t netId)
 {
     NETMGR_LOG_D("Enter BindSocket.");
-    return NetdController::GetInstance().BindSocket(socket_fd, netId);
+    return NetsysController::GetInstance().BindSocket(socket_fd, netId);
 }
 
 void NetConnService::NotFindBestSupplier(uint32_t reqId, const sptr<NetActivate> &active,

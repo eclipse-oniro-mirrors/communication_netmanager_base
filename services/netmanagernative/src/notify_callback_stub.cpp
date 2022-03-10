@@ -17,7 +17,7 @@
 #include "netnative_log_wrapper.h"
 
 namespace OHOS {
-namespace NetdNative {
+namespace NetsysNative {
 NotifyCallbackStub::NotifyCallbackStub()
 {
     memberFuncMap_[ON_INTERFACE_ADDRESS_UPDATED] = &NotifyCallbackStub::CmdOnInterfaceAddressUpdated;
@@ -156,5 +156,5 @@ int32_t NotifyCallbackStub::CmdDhcpSuccess(MessageParcel &data, MessageParcel &r
     OnDhcpSuccess(dhcpResult);
     return ERR_NONE;
 }
-} // namespace NetdNative
+} // namespace NetsysNative
 } // namespace OHOS

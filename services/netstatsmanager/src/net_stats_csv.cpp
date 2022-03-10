@@ -25,7 +25,7 @@
 
 #include "net_mgr_log_wrapper.h"
 
-#include "netd_controller.h"
+#include "netsys_controller.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -240,7 +240,7 @@ bool NetStatsCsv::UpdateIfaceCsvInfo()
         ifaceCsvFile.close();
         return false;
     }
-    std::vector<std::string> ifNameList = NetdController::GetInstance().InterfaceGetList();
+    std::vector<std::string> ifNameList = NetsysController::GetInstance().InterfaceGetList();
     for (std::vector<std::string>::iterator iter = ifNameList.begin(); iter != ifNameList.end(); ++iter) {
         if (*iter != "lo") {
             ifaceCsvFile << *iter << std::endl;
@@ -259,7 +259,7 @@ bool NetStatsCsv::UpdateUidCsvInfo()
         uidCsvFile.close();
         return false;
     }
-    std::vector<std::string> uidList = NetdController::GetInstance().UidGetList();
+    std::vector<std::string> uidList = NetsysController::GetInstance().UidGetList();
     for (std::vector<std::string>::iterator iter = uidList.begin(); iter != uidList.end(); ++iter) {
         uidCsvFile << *iter << std::endl;
     }
@@ -318,8 +318,8 @@ bool NetStatsCsv::UpdateIfaceStatsCsv(const std::string &iface)
         return false;
     }
     ifaceStatsCsvFile << iface << "," << GetCurrentTime() << ","
-        << NetdController::GetInstance().GetIfaceRxBytes(iface) << "," <<
-        NetdController::GetInstance().GetIfaceTxBytes(iface) << std::endl;
+        << NetsysController::GetInstance().GetIfaceRxBytes(iface) << "," <<
+        NetsysController::GetInstance().GetIfaceTxBytes(iface) << std::endl;
 
     ifaceStatsCsvFile.close();
     return true;
@@ -336,8 +336,8 @@ bool NetStatsCsv::UpdateUidStatsCsv(uint32_t uid, const std::string &iface)
     }
 
     uidStatsCsvFile << uid<< "," << iface  << "," << GetCurrentTime() << ","
-        << NetdController::GetInstance().GetUidOnIfaceRxBytes(uid, iface) << "," <<
-        NetdController::GetInstance().GetUidOnIfaceTxBytes(uid, iface) << std::endl;
+        << NetsysController::GetInstance().GetUidOnIfaceRxBytes(uid, iface) << "," <<
+        NetsysController::GetInstance().GetUidOnIfaceTxBytes(uid, iface) << std::endl;
     uidStatsCsvFile.close();
     return true;
 }

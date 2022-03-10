@@ -14,7 +14,7 @@
  */
 
 #include "network.h"
-#include "netd_controller.h"
+#include "netsys_controller.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
@@ -61,8 +61,8 @@ bool Network::CreateBasicNetwork()
     if (!isPhyNetCreated_) {
         NETMGR_LOG_D("Create physical network");
         // Create a physical network
-        NetdController::GetInstance().NetworkCreatePhysical(netId_, 0);
-        NetdController::GetInstance().CreateNetworkCache(netId_);
+        NetsysController::GetInstance().NetworkCreatePhysical(netId_, 0);
+        NetsysController::GetInstance().CreateNetworkCache(netId_);
         isPhyNetCreated_ = true;
     }
     return true;
@@ -74,9 +74,9 @@ bool Network::ReleaseBasicNetwork()
     if (isPhyNetCreated_) {
         NETMGR_LOG_D("Destroy physical network");
         StopNetDetection();
-        NetdController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
-        NetdController::GetInstance().NetworkDestroy(netId_);
-        NetdController::GetInstance().DestoryNetworkCache(netId_);
+        NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
+        NetsysController::GetInstance().NetworkDestroy(netId_);
+        NetsysController::GetInstance().DestroyNetworkCache(netId_);
         netLinkInfo_.Initialize();
         isPhyNetCreated_ = false;
     }
@@ -107,12 +107,12 @@ void Network::UpdateInterfaces(const NetLinkInfo &netLinkInfo)
         return;
     }
 
-    // Call netd to add and remove interface
+    // Call netsys to add and remove interface
     if (!netLinkInfo.ifaceName_.empty()) {
-        NetdController::GetInstance().NetworkAddInterface(netId_, netLinkInfo.ifaceName_);
+        NetsysController::GetInstance().NetworkAddInterface(netId_, netLinkInfo.ifaceName_);
     }
     if (!netLinkInfo_.ifaceName_.empty()) {
-        NetdController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
+        NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
     }
     netLinkInfo_.ifaceName_ = netLinkInfo.ifaceName_;
 }
@@ -124,14 +124,14 @@ void Network::UpdateIpAddrs(const NetLinkInfo &netLinkInfo)
     NETMGR_LOG_D("UpdateIpAddrs, old ip addrs: [%{public}s]", netLinkInfo_.ToStringAddr("").c_str());
     for (auto it = netLinkInfo_.netAddrList_.begin(); it != netLinkInfo_.netAddrList_.end(); ++it) {
         const struct INetAddr &inetAddr = *it;
-        NetdController::GetInstance().InterfaceDelAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
+        NetsysController::GetInstance().InterfaceDelAddress(netLinkInfo_.ifaceName_, inetAddr.address_,
             inetAddr.prefixlen_);
     }
 
     NETMGR_LOG_D("UpdateIpAddrs, new ip addrs: [%{public}s]", netLinkInfo.ToStringAddr("").c_str());
     for (auto it = netLinkInfo.netAddrList_.begin(); it != netLinkInfo.netAddrList_.end(); ++it) {
         const struct INetAddr &inetAddr = *it;
-        NetdController::GetInstance().InterfaceAddAddress(netLinkInfo.ifaceName_, inetAddr.address_,
+        NetsysController::GetInstance().InterfaceAddAddress(netLinkInfo.ifaceName_, inetAddr.address_,
             inetAddr.prefixlen_);
     }
 }
@@ -143,14 +143,14 @@ void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
     NETMGR_LOG_D("UpdateRoutes, old routes: [%{public}s]", netLinkInfo_.ToStringRoute("").c_str());
     for (auto it = netLinkInfo_.routeList_.begin(); it != netLinkInfo_.routeList_.end(); ++it) {
         const struct Route &route = *it;
-        NetdController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, route.destination_.address_,
+        NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, route.destination_.address_,
             route.gateway_.address_);
     }
 
     NETMGR_LOG_D("UpdateRoutes, new routes: [%{public}s]", netLinkInfo.ToStringRoute("").c_str());
     for (auto it = netLinkInfo.routeList_.begin(); it != netLinkInfo.routeList_.end(); ++it) {
         const struct Route &route = *it;
-        NetdController::GetInstance().NetworkAddRoute(netId_, route.iface_, route.destination_.address_,
+        NetsysController::GetInstance().NetworkAddRoute(netId_, route.iface_, route.destination_.address_,
             route.gateway_.address_);
     }
 }
@@ -164,8 +164,8 @@ void Network::UpdateDnses(const NetLinkInfo &netLinkInfo)
         servers.push_back(dns.address_);
         doamains.push_back(dns.hostName_);
     }
-    // Call netd to set dns
-    NetdController::GetInstance().SetResolverConfig(netId_, 0, 1, servers, doamains);
+    // Call netsys to set dns
+    NetsysController::GetInstance().SetResolverConfig(netId_, 0, 1, servers, doamains);
 }
 
 void Network::UpdateMtu(const NetLinkInfo &netLinkInfo)
@@ -174,7 +174,7 @@ void Network::UpdateMtu(const NetLinkInfo &netLinkInfo)
         return;
     }
 
-    NetdController::GetInstance().InterfaceSetMtu(netLinkInfo.ifaceName_, netLinkInfo.mtu_);
+    NetsysController::GetInstance().InterfaceSetMtu(netLinkInfo.ifaceName_, netLinkInfo.mtu_);
 }
 
 void Network::RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback)
@@ -293,12 +293,12 @@ NetDetectionResultCode Network::NetDetectionResultConvert(int32_t internalRet)
 
 void Network::SetDefaultNetWork()
 {
-    NetdController::GetInstance().SetDefaultNetWork(netId_);
+    NetsysController::GetInstance().SetDefaultNetWork(netId_);
 }
 
 void Network::ClearDefaultNetWorkNetId()
 {
-    NetdController::GetInstance().ClearDefaultNetWorkNetId();
+    NetsysController::GetInstance().ClearDefaultNetWorkNetId();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

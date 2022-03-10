@@ -43,7 +43,7 @@ public:
     int32_t GetAddrInfo(const std::string &hostName, const std::string &server,
         const sptr<DnsAddrInfo> &hints, std::vector<sptr<DnsAddrInfo>> &dnsAddrInfo) override;
     int32_t CreateNetworkCache(int32_t netId) override;
-    int32_t DestoryNetworkCache(int32_t netId) override;
+    int32_t DestroyNetworkCache(int32_t netId) override;
     int32_t FlushNetworkCache(int32_t netId) override;
     int32_t SetResolverConfig(int32_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
         const std::vector<std::string> &servers, const std::vector<std::string> &domains) override;

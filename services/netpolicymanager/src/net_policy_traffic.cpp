@@ -279,7 +279,7 @@ NetPolicyResultCode NetPolicyTraffic::SetIdleTrustlist(uint32_t uid, bool isTrus
     if (isTrustlist) {
         idleTrustList_.emplace_back(uid);
     }
-    /* Determine whether the app is idle ? than update netd's interface. */
+    /* Determine whether the app is idle ? than update netsys's interface. */
     return NetPolicyResultCode::ERR_NONE;
 }
 

@@ -14,25 +14,33 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-ohos_shared_library("netd_native_manager") {
+ohos_shared_library("netsys_native_manager") {
   sources = [
-    "$NETDNATIVE_INNERKITS_SOURCE_DIR/dhcp_result_parcel.cpp",
-    "$NETDNATIVE_INNERKITS_SOURCE_DIR/dnsresolver_params_parcel.cpp",
-    "$NETDNATIVE_INNERKITS_SOURCE_DIR/netd_addr_info_parcel.cpp",
-    "$NETDNATIVE_INNERKITS_SOURCE_DIR/netd_native_service_proxy.cpp",
-    "$NETDNATIVE_INNERKITS_SOURCE_DIR/notify_callback_proxy.cpp",
-    "$NETDNATIVE_SOURCE_DIR/src/dhcp_controller.cpp",
-    "$NETDNATIVE_SOURCE_DIR/src/netd_native_service.cpp",
-    "$NETDNATIVE_SOURCE_DIR/src/netd_native_service_stub.cpp",
-    "$NETDNATIVE_SOURCE_DIR/src/notify_callback_stub.cpp",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/dhcp_result_parcel.cpp",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/dnsresolver_params_parcel.cpp",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_addr_info_parcel.cpp",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_native_service_proxy.cpp",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/notify_callback_proxy.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/dhcp_controller.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/interface_controller.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/net_manager_native.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netlink_manager.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netlink_msg.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netlink_socket.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/network_controller.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/nmd_network.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/route_controller.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/traffic_controller.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys_native_service.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys_native_service_stub.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/notify_callback_stub.cpp",
   ]
 
   include_dirs = [
-    "$NETDNATIVE_INNERKITS_SOURCE_DIR",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$INNERKITS_ROOT/netmanagernative/include",
-    "$NETDNATIVE_SOURCE_DIR/include",
-    "$NETMANAGER_PREBUILTS_DIR/librarys/netd/include/net_mgr_native/include",
-    "$NETMANAGER_PREBUILTS_DIR/librarys/netd/include/common/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "//foundation/communication/wifi/services/wifi_standard/wifi_framework/dhcp_manage/mgr_service/include",
     "//foundation/communication/wifi/services/wifi_standard/wifi_framework/dhcp_manage/mgr_service/interfaces",
     "utils/native/base/include",
@@ -42,13 +50,6 @@ ohos_shared_library("netd_native_manager") {
     "//foundation/communication/wifi/services/wifi_standard/wifi_framework/dhcp_manage/mgr_service:dhcp_manager_service",
     "//utils/native/base:utils",
   ]
-
-  if (enable_libnet_manager_native_prebuilt) {
-    deps += [ "$NETMANAGER_PREBUILTS_DIR/librarys/netd:libnet_manager_native" ]
-  } else {
-    deps +=
-        [ "//foundation/communication/netmanager_native:net_manager_native" ]
-  }
 
   external_deps = [
     "ability_base:want",
@@ -60,7 +61,7 @@ ohos_shared_library("netd_native_manager") {
   ]
 
   defines = [
-    "NETMGRNATIVE_LOG_TAG = \"NetdNativeService\"",
+    "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
     "LOG_DOMAIN = 0xD0015B0",
   ]
 

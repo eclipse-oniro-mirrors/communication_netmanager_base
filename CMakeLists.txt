@@ -25,20 +25,12 @@ include_directories(interfaces/innerkits/netpolicyclient/include/proxy)
 include_directories(interfaces/innerkits/netstatsclient)
 include_directories(interfaces/innerkits/netstatsclient/include)
 include_directories(interfaces/innerkits/netstatsclient/include/proxy)
-include_directories(prebuilts)
-include_directories(prebuilts/librarys)
-include_directories(prebuilts/librarys/netd)
-include_directories(prebuilts/librarys/netd/include)
-include_directories(prebuilts/librarys/netd/include/common)
-include_directories(prebuilts/librarys/netd/include/common/include)
-include_directories(prebuilts/librarys/netd/include/net_mgr_native)
-include_directories(prebuilts/librarys/netd/include/net_mgr_native/include)
 include_directories(services/common/include)
 include_directories(services/dnsresolvermanager/include)
 include_directories(services/dnsresolvermanager/include/stub)
 include_directories(services/netconnmanager/include)
 include_directories(services/netconnmanager/include/stub)
-include_directories(services/netdcontroller/include)
+include_directories(services/netsyscontroller/include)
 include_directories(services/netmanagernative/include)
 include_directories(services/netpolicymanager/include)
 include_directories(services/netpolicymanager/include/stub)
@@ -99,9 +91,9 @@ add_executable(netmanager_base
         frameworks/native/netconnclient/src/route.cpp
         frameworks/native/netmanagernative/dhcp_result_parcel.cpp
         frameworks/native/netmanagernative/dnsresolver_params_parcel.cpp
-        frameworks/native/netmanagernative/netd_addr_info_parcel.cpp
-        frameworks/native/netmanagernative/netd_native_service_proxy.cpp
-        frameworks/native/netmanagernative/netd_native_service_proxy.h
+        frameworks/native/netmanagernative/netsys_addr_info_parcel.cpp
+        frameworks/native/netmanagernative/netsys_native_service_proxy.cpp
+        frameworks/native/netmanagernative/netsys_native_service_proxy.h
         frameworks/native/netmanagernative/notify_callback_proxy.cpp
         frameworks/native/netmanagernative/notify_callback_proxy.h
         frameworks/native/netpolicyclient/src/proxy/net_policy_callback_stub.cpp
@@ -140,9 +132,9 @@ add_executable(netmanager_base
         interfaces/innerkits/netconnclient/include/route.h
         interfaces/innerkits/netmanagernative/include/dhcp_result_parcel.h
         interfaces/innerkits/netmanagernative/include/dnsresolver_params_parcel.h
-        interfaces/innerkits/netmanagernative/include/i_netd_service.h
+        interfaces/innerkits/netmanagernative/include/i_netsys_service.h
         interfaces/innerkits/netmanagernative/include/i_notify_callback.h
-        interfaces/innerkits/netmanagernative/include/netd_addr_info_parcel.h
+        interfaces/innerkits/netmanagernative/include/netsys_addr_info_parcel.h
         interfaces/innerkits/netmanagernative/include/netnative_log_wrapper.h
         interfaces/innerkits/netmanagernative/include/notify_callback_stub.h
         interfaces/innerkits/netpolicyclient/include/proxy/i_net_policy_callback.h
@@ -161,31 +153,6 @@ add_executable(netmanager_base
         interfaces/innerkits/netstatsclient/include/net_stats_client.h
         interfaces/innerkits/netstatsclient/include/net_stats_constants.h
         interfaces/innerkits/netstatsclient/include/net_stats_info.h
-        prebuilts/librarys/netd/include/common/include/blocking_queue.h
-        prebuilts/librarys/netd/include/common/include/job.h
-        prebuilts/librarys/netd/include/common/include/net_utils.h
-        prebuilts/librarys/netd/include/common/include/server_socket.h
-        prebuilts/librarys/netd/include/common/include/server_template.h
-        prebuilts/librarys/netd/include/common/include/socket_base.h
-        prebuilts/librarys/netd/include/common/include/thread_pool.h
-        prebuilts/librarys/netd/include/common/include/warning_disable.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/dhcp_controller.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/dnsresolv.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/dnsresolv_controller.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/dnsresolv_service.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/event_reporter.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/fwmark_server.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/interface_controller.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/net_manager_native.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/netlink_event.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/netlink_handler.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/netlink_listener.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/netlink_manager.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/netlink_socket.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/network_controller.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/nmd_network.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/route_controller.h
-        prebuilts/librarys/netd/include/net_mgr_native/include/traffic_controller.h
         services/common/include/broadcast_manager.h
         services/common/include/dns_base_service.h
         services/common/include/net_conn_base_service.h
@@ -231,22 +198,22 @@ add_executable(netmanager_base
         services/netconnmanager/src/net_score.cpp
         services/netconnmanager/src/net_supplier.cpp
         services/netconnmanager/src/network.cpp
-        services/netdcontroller/include/i_netd_controller_service.h
-        services/netdcontroller/include/mock_netd_native_client.h
-        services/netdcontroller/include/netd_controller.h
-        services/netdcontroller/include/netd_controller_callback.h
-        services/netdcontroller/include/netd_controller_define.h
-        services/netdcontroller/include/netd_controller_service_impl.h
-        services/netdcontroller/include/netd_native_client.h
-        services/netdcontroller/src/mock_netd_native_client.cpp
-        services/netdcontroller/src/netd_controller.cpp
-        services/netdcontroller/src/netd_controller_service_impl.cpp
-        services/netdcontroller/src/netd_native_client.cpp
-        services/netmanagernative/include/netd_native_service.h
-        services/netmanagernative/include/netd_native_service_stub.h
+        services/netsyscontroller/include/i_netsys_controller_service.h
+        services/netsyscontroller/include/mock_netsys_native_client.h
+        services/netsyscontroller/include/netsys_controller.h
+        services/netsyscontroller/include/netsys_controller_callback.h
+        services/netsyscontroller/include/netsys_controller_define.h
+        services/netsyscontroller/include/netsys_controller_service_impl.h
+        services/netsyscontroller/include/netsys_native_client.h
+        services/netsyscontroller/src/mock_netsys_native_client.cpp
+        services/netsyscontroller/src/netsys_controller.cpp
+        services/netsyscontroller/src/netsys_controller_service_impl.cpp
+        services/netsyscontroller/src/netsys_native_client.cpp
+        services/netmanagernative/include/netsys_native_service.h
+        services/netmanagernative/include/netsys_native_service_stub.h
         services/netmanagernative/src/dhcp_controller.cpp
-        services/netmanagernative/src/netd_native_service.cpp
-        services/netmanagernative/src/netd_native_service_stub.cpp
+        services/netmanagernative/src/netsys_native_service.cpp
+        services/netmanagernative/src/netsys_native_service_stub.cpp
         services/netmanagernative/src/notify_callback_stub.cpp
         services/netpolicymanager/include/stub/net_policy_callback_proxy.h
         services/netpolicymanager/include/stub/net_policy_service_stub.h
