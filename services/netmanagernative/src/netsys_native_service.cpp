@@ -214,8 +214,9 @@ int32_t NetsysNativeService::NetworkRemoveRouteParcel(int32_t netId, const Route
 
 int32_t NetsysNativeService::NetworkSetDefault(int32_t netId)
 {
+    NETNATIVE_LOG_D("NetdNativeService::NetworkSetDefault in.");
     int32_t result = this->netsysService_->NetworkSetDefault(netId);
-    NETNATIVE_LOGI("NetworkSetDefault");
+    NETNATIVE_LOGI("NetworkSetDefault out.");
     return result;
 }
 
@@ -252,7 +253,7 @@ int32_t NetsysNativeService::SetProcSysNet(int32_t ipversion, int32_t which, con
 int32_t NetsysNativeService::NetworkCreatePhysical(int32_t netId, int32_t permission)
 {
     int32_t result = this->netsysService_->NetworkCreatePhysical(netId, permission);
-    NETNATIVE_LOGI("NetworkCreatePhysical");
+    NETNATIVE_LOGI("NetworkCreatePhysical out.");
     return result;
 }
 

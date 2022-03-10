@@ -67,9 +67,6 @@ void MockNetsysNativeClient::Init()
 
 void MockNetsysNativeClient::RegisterMockApi()
 {
-    mockApi_.insert(MOCK_NETWORKDESTROY_API);
-    mockApi_.insert(MOCK_NETWORKADDINTERFACE_API);
-    mockApi_.insert(MOCK_NETWORKREMOVEINTERFACE_API);
     mockApi_.insert(MOCK_INTERFACECLEARADDRS_API);
     mockApi_.insert(MOCK_GETCELLULARRXBYTES_API);
     mockApi_.insert(MOCK_GETCELLULARTXBYTES_API);
@@ -85,8 +82,6 @@ void MockNetsysNativeClient::RegisterMockApi()
     mockApi_.insert(MOCK_UIDGETLIST_API);
     mockApi_.insert(MOCK_GETIFACERXPACKETS_API);
     mockApi_.insert(MOCK_GETIFACETXPACKETS_API);
-    mockApi_.insert(MOCK_SETDEFAULTNETWORK_API);
-    mockApi_.insert(MOCK_CLEARDEFAULTNETWORK_API);
     mockApi_.insert(MOCK_BINDSOCKET_API);
     mockApi_.insert(MOCK_IPENABLEFORWARDING_API);
     mockApi_.insert(MOCK_IPDISABLEFORWARDING_API);

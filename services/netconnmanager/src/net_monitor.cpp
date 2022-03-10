@@ -34,6 +34,7 @@ NetMonitor::~NetMonitor()
 
 bool NetMonitor::HttpDetection()
 {
+    NETMGR_LOG_D("HttpDetction in. ifaceName_: %{public}s", ifaceName_.c_str());
     HttpRequest httpRequest;
     httpRequest.SetIfaceName(ifaceName_);
 
@@ -49,6 +50,8 @@ bool NetMonitor::HttpDetection()
 
     int32_t retCode = GetUrlRedirectFromResponse(httpHeader, urlRedirect);
     int32_t statusCode = GetStatusCodeFromResponse(httpHeader);
+    NETMGR_LOG_D("ifaceName[%{public}s], statusCode[%{public}d], retCode[%{public}d]", ifaceName_.c_str(), statusCode,
+        retCode);
     bool isNotPortal = true;
     if ((statusCode == OK || (statusCode >= BAD_REQUEST && statusCode <= CLIENT_ERROR_MAX)) &&
         retCode > PORTAL_CONTENT_LENGTH_MIN) {
@@ -79,6 +82,7 @@ bool NetMonitor::HttpDetection()
 
 void NetMonitor::RunNetMonitorThreadFunc()
 {
+    NETMGR_LOG_D("RunNetMonitorThreadFunc in. ifaceName[%{public}s]", ifaceName_.c_str());
     int32_t timeoutMs = HTTP_DETECTION_WAIT_TIME_MS;
     for (;;) {
         while (isStopNetMonitor_ && !isExitNetMonitorThread_) {
@@ -104,9 +108,9 @@ ResultCode NetMonitor::InitNetMonitorThread()
     netMonitorThread_ = std::make_unique<std::thread>(&NetMonitor::RunNetMonitorThreadFunc, this);
     if (netMonitorThread_ == nullptr) {
         NETMGR_LOG_E("Start NetMonitor thread failed!");
-        return  ResultCode::ERR_NET_MONITOR_OPT_FAILED;
+        return ResultCode::ERR_NET_MONITOR_OPT_FAILED;
     }
-    return  ResultCode::ERR_NET_MONITOR_OPT_SUCCESS;
+    return ResultCode::ERR_NET_MONITOR_OPT_SUCCESS;
 }
 
 void NetMonitor::StopNetMonitorThread()
@@ -210,5 +214,5 @@ int32_t NetMonitor::GetUrlRedirectFromResponse(const std::string &strResponse, s
 
     return -1;
 }
-}  // namespace NetManagerStandard
-}  // namespace OHOS
+} // namespace NetManagerStandard
+} // namespace OHOS

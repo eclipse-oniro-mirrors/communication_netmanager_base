@@ -51,7 +51,8 @@ bool NetSupplier::operator==(const NetSupplier &netSupplier) const
 
 void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
 {
-    NETMGR_LOG_D("Update net supplier info: netSupplierInfo[%{public}s]", netSupplierInfo_.ToString("").c_str());
+    NETMGR_LOG_D("Update net supplier[%{public}d, %{public}s], netSupplierInfo[%{public}s]", supplierId_,
+                 netSupplierIdent_.c_str(), netSupplierInfo_.ToString("").c_str());
     bool oldAvailable = netSupplierInfo_.isAvailable_;
     netSupplierInfo_ = netSupplierInfo;
     netAllCapabilities_.linkUpBandwidthKbps_ = netSupplierInfo_.linkUpBandwidthKbps_;
@@ -210,7 +211,7 @@ bool NetSupplier::GetRestrictBackground() const
 
 bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
 {
-    NETMGR_LOG_D("param ident_[%{public}s]", netSupplierIdent_.c_str());
+    NETMGR_LOG_D("supplier[%{public}d, %{public}s]", supplierId_, netSupplierIdent_.c_str());
     if ((!IsConnecting()) && (!IsConnected())) {
         NETMGR_LOG_D("no need to disconnect");
         return true;
@@ -221,7 +222,7 @@ bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
     }
     NETMGR_LOG_D("execute ReleaseNetwork");
     int32_t errCode = netController_->ReleaseNetwork(netSupplierIdent_, netCaps);
-    NETMGR_LOG_D("ReleaseNetwork errCode[%{public}d]", errCode);
+    NETMGR_LOG_D("ReleaseNetwork retCode[%{public}d]", errCode);
     if (errCode != REG_OK) {
         NETMGR_LOG_E("ReleaseNetwork fail");
         return false;
@@ -252,7 +253,8 @@ void NetSupplier::UpdateNetConnState(NetConnState netConnState)
     info.ordered = true;
     std::map<std::string, int32_t> param = {{"NetType", static_cast<int32_t>(netSupplierType_)}};
     DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
-    NETMGR_LOG_D("netConnState is [%{public}d]", state_);
+    NETMGR_LOG_D("supplier[%{public}d, %{public}s], serviceState[%{public}d]", supplierId_, netSupplierIdent_.c_str(),
+                 state_);
 }
 
 NetConnState NetSupplier::GetNetConnState() const
@@ -328,13 +330,21 @@ int32_t NetSupplier::SelectAsBestNetwork(uint32_t reqId)
     return ERR_NONE;
 }
 
-void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore)
+void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t supplierId)
 {
-    std::set<uint32_t>::iterator iter = requestList_.find(reqId);
-    if (iter == requestList_.end()) {
+    NETMGR_LOG_D("NetSupplier::ReceiveBestScore, supplierId[%{public}d, %{public}s], bestSupplierId[%{public}d]",
+                 supplierId_, netSupplierIdent_.c_str(), supplierId);
+    if (requestList_.empty()) {
+        SupplierDisconnection(netCaps_);
         return;
     }
-    if (netScore_ < bestScore) {
+    std::set<uint32_t>::iterator iter = requestList_.find(reqId);
+    if (iter == requestList_.end()) {
+        NETMGR_LOG_D("NetSupplier::ReceiveBestScore, supplierId[%{public}d], can not find request[%{public}d]",
+                     supplierId_, reqId);
+        return;
+    }
+    if (supplierId != supplierId_ && netScore_ < bestScore) {
         requestList_.erase(reqId);
         if (requestList_.empty()) {
             SupplierDisconnection(netCaps_);
@@ -376,7 +386,8 @@ std::set<uint32_t>& NetSupplier::GetBestRequestList()
 
 void NetSupplier::SetNetValid(bool ifValid)
 {
-    NETMGR_LOG_D("Enter SetNetValid");
+    NETMGR_LOG_D("Enter SetNetValid. supplier[%{public}d, %{public}s], ifValid[%{public}d]", supplierId_,
+                 netSupplierIdent_.c_str(), ifValid);
     ifNetValid_ = ifValid;
     if (netAllCapabilities_.netCaps_.find(NET_CAPABILITY_VALIDATED) != netAllCapabilities_.netCaps_.end()) {
         netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_VALIDATED);

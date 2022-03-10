@@ -118,7 +118,7 @@ int32_t NetsysNativeServiceStub::CmdSetResolverConfig(MessageParcel &data, Messa
         return ERR_FLATTEN_OBJECT;
     }
     std::string s;
-    for (int32_t i = 0; i < vServerSize ; ++i) {
+    for (int32_t i = 0; i < vServerSize; ++i) {
         std::string().swap(s);
         if (!data.ReadString(s)) {
             return ERR_FLATTEN_OBJECT;
@@ -136,7 +136,7 @@ int32_t NetsysNativeServiceStub::CmdSetResolverConfig(MessageParcel &data, Messa
         }
         domains.push_back(s);
     }
-    resolvParams.netId = netId ;
+    resolvParams.netId = netId;
     resolvParams.baseTimeoutMsec = baseTimeoutMsec;
     resolvParams.retryCount = retryCount;
     resolvParams.servers.assign(servers.begin(), servers.end());
@@ -163,13 +163,13 @@ int32_t NetsysNativeServiceStub::CmdGetResolverConfig(MessageParcel &data, Messa
     reply.WriteUint8(resParams.retryCount);
     int32_t vServerSize = servers.size();
     reply.WriteInt32(vServerSize);
-    std::vector<std::string>::iterator  iterServers;
+    std::vector<std::string>::iterator iterServers;
     for (iterServers = servers.begin(); iterServers != servers.end(); iterServers++) {
         reply.WriteString(*iterServers);
     }
     int32_t vDomainsSize = domains.size();
     reply.WriteInt32(vDomainsSize);
-    std::vector<std::string>::iterator  iterDomains;
+    std::vector<std::string>::iterator iterDomains;
     for (iterDomains = domains.begin(); iterDomains != domains.end(); iterDomains++) {
         reply.WriteString(*iterDomains);
     }
@@ -214,7 +214,7 @@ int32_t NetsysNativeServiceStub::CmdDestroyNetworkCache(MessageParcel &data, Mes
 int32_t NetsysNativeServiceStub::NetsysFreeAddrinfo(struct addrinfo *aihead)
 {
     struct addrinfo *ai, *ainext;
-    for (ai = aihead ; ai != NULL ; ai = ainext) {
+    for (ai = aihead; ai != NULL; ai = ainext) {
         if (ai->ai_addr != NULL)
             free(ai->ai_addr);
         if (ai->ai_canonname != NULL)
@@ -222,30 +222,30 @@ int32_t NetsysNativeServiceStub::NetsysFreeAddrinfo(struct addrinfo *aihead)
         ainext = ai->ai_next;
         free(ai);
     }
-    return  ERR_NONE;
+    return ERR_NONE;
 }
 
 int32_t NetsysNativeServiceStub::CmdGetaddrinfo(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOGI("Begin to dispatch cmd Getaddrinfo");
-    struct addrinfo   hints;
-    struct addrinfo  *result;
+    struct addrinfo hints;
+    struct addrinfo *result;
     uint16_t netid;
-    struct addrinfo  *res_p1;
-    int   addr_size = 0;
+    struct addrinfo *res_p1;
+    int addr_size = 0;
     bzero(&hints, sizeof(addrinfo));
     hints.ai_family = data.ReadInt16();
     hints.ai_socktype = data.ReadInt16();
     hints.ai_flags = data.ReadInt16();
     hints.ai_protocol = data.ReadInt16();
     netid = data.ReadUint16();
-    std::string  strNode = data.ReadString();
-    std::string  strService = data.ReadString();
-    const char *node = strNode.length()>0?strNode.c_str():NULL;
-    const char *service = strService.length()>0?strService.c_str():NULL;
-    int32_t  ret = Getaddrinfo(node, service, &hints, &result, netid);
+    std::string strNode = data.ReadString();
+    std::string strService = data.ReadString();
+    const char *node = (strNode.length() > 0) ? strNode.c_str() : NULL;
+    const char *service = (strService.length() > 0) ? strService.c_str() : NULL;
+    int32_t ret = Getaddrinfo(node, service, &hints, &result, netid);
     reply.WriteInt32(ret);
-    for (res_p1 = result ; res_p1 != NULL; res_p1 = res_p1->ai_next) {
+    for (res_p1 = result; res_p1 != NULL; res_p1 = res_p1->ai_next) {
         addr_size++;
     }
     reply.WriteInt32(addr_size);
@@ -255,15 +255,15 @@ int32_t NetsysNativeServiceStub::CmdGetaddrinfo(MessageParcel &data, MessageParc
         reply.WriteInt16(res_p1->ai_socktype);
         reply.WriteInt16(res_p1->ai_protocol);
         reply.WriteUint32(res_p1->ai_addrlen);
-        int  canSize = 0;
+        int canSize = 0;
         if (res_p1->ai_canonname != NULL) {
             canSize = strlen(res_p1->ai_canonname);
         }
         reply.WriteInt16(canSize);
-        if (canSize >0) {
+        if (canSize > 0) {
             reply.WriteBuffer(res_p1->ai_canonname, canSize);
         }
-        reply.WriteRawData((const void*)res_p1->ai_addr, sizeof(struct sockaddr));
+        reply.WriteRawData((const void *)res_p1->ai_addr, sizeof(struct sockaddr));
     }
     if (result != nullptr) {
         NetsysFreeAddrinfo(result);
@@ -309,45 +309,6 @@ int32_t NetsysNativeServiceStub::CmdRegisterNotifyCallback(MessageParcel &data, 
     return ERR_NONE;
 }
 
-#ifdef SYS_FUNC
-static int32_t ModifyRoute(int cmd, const std::string &ip, const std::string &gateWay,
-    const std::string &devName)
-{
-    struct sockaddr_in _sin;
-    struct rtentry rt;
-    bzero(&rt, sizeof(struct rtentry));
-    bzero(&_sin, sizeof(struct sockaddr_in));
-    _sin.sin_family = AF_INET;
-    _sin.sin_port = 0;
-    if (inet_aton(gateWay.c_str(), &(_sin.sin_addr)) < 0) {
-        NETNATIVE_LOGE("ModifyRoute inet_aton gateWay[%{public}s]", gateWay.c_str());
-        return -1;
-    }
-    (void)memcpy_s(&rt.rt_gateway, sizeof(rt.rt_gateway), &_sin, sizeof(struct sockaddr_in));
-    (reinterpret_cast<struct sockaddr_in*>(&rt.rt_dst))->sin_family = AF_INET;
-    if (inet_aton(ip.c_str(), &((struct sockaddr_in*)&rt.rt_dst)->sin_addr) < 0) {
-        NETNATIVE_LOGE("ModifyRoute inet_aton ip[%{public}s]", ip.c_str());
-        return -1;
-    }
-    if (!devName.empty()) {
-        rt.rt_dev = (char*)devName.c_str();
-    }
-    rt.rt_flags = RTF_GATEWAY;
-    int fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (fd < 0) {
-        NETNATIVE_LOGE("ModifyRoute create socket fd[%{public}d]", fd);
-        return -1;
-    }
-    if (ioctl(fd, cmd, &rt) < 0) {
-        NETNATIVE_LOGE("ModifyRoute ioctl error");
-        close(fd);
-        return -1;
-    }
-    close(fd);
-    return 1;
-}
-#endif
-
 int32_t NetsysNativeServiceStub::CmdNetworkAddRoute(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOGI("Begin to dispatch cmd NetworkAddRoute");
@@ -356,14 +317,8 @@ int32_t NetsysNativeServiceStub::CmdNetworkAddRoute(MessageParcel &data, Message
     std::string destination = data.ReadString();
     std::string nextHop = data.ReadString();
 
-    NETNATIVE_LOGI("NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s",
-        netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
-
-#ifdef SYS_FUNC
-    NETNATIVE_LOGI("Begin to ioctl NetworkAddRoute");
-    reply.WriteInt32(ModifyRoute(SIOCADDRT, destination, nextHop, ifName));
-    return 0;
-#endif
+    NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s], destination[%{public}s}, nextHop[%{public}s]",
+                   netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
     int32_t result = NetworkAddRoute(netId, ifName, destination, nextHop);
     reply.WriteInt32(result);
     NETNATIVE_LOGI("NetworkAddRoute has recved result %{public}d", result);
@@ -378,11 +333,8 @@ int32_t NetsysNativeServiceStub::CmdNetworkRemoveRoute(MessageParcel &data, Mess
     std::string destination = data.ReadString();
     std::string nextHop = data.ReadString();
 
-#ifdef SYS_FUNC
-    NETNATIVE_LOGI("Begin to ioctl NetworkRemoveRoute");
-    reply.WriteInt32(ModifyRoute(SIOCDELRT, destination, nextHop, interfaceName));
-    return 0;
-#endif
+    NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s], destination[%{public}s}, nextHop[%{public}s]",
+                   netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
     int32_t result = NetworkRemoveRoute(netId, interfaceName, destination, nextHop);
     reply.WriteInt32(result);
     NETNATIVE_LOGI("NetworkRemoveRoute has recved result %{public}d", result);
@@ -456,14 +408,14 @@ int32_t NetsysNativeServiceStub::CmdNetworkClearDefault(MessageParcel &data, Mes
 int32_t NetsysNativeServiceStub::CmdGetProcSysNet(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOGI("Begin to dispatch cmd GetProcSysNet");
-    int32_t  ipversion = data.ReadInt32();
-    int32_t  which = data.ReadInt32();
-    std::string  ifname = data.ReadString();
-    std::string  parameter = data.ReadString();
-    std::string   value  ;
+    int32_t ipversion = data.ReadInt32();
+    int32_t which = data.ReadInt32();
+    std::string ifname = data.ReadString();
+    std::string parameter = data.ReadString();
+    std::string value  ;
     int32_t result = GetProcSysNet(ipversion, which, ifname, parameter, value);
     reply.WriteInt32(result);
-    std::string  valueRsl = value;
+    std::string valueRsl = value;
     reply.WriteString(valueRsl);
     return result;
 }
@@ -471,11 +423,11 @@ int32_t NetsysNativeServiceStub::CmdGetProcSysNet(MessageParcel &data, MessagePa
 int32_t NetsysNativeServiceStub::CmdSetProcSysNet(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOGI("Begin to dispatch cmd SetProcSysNet");
-    int32_t  ipversion = data.ReadInt32();
-    int32_t  which = data.ReadInt32();
-    std::string  ifname = data.ReadString();
-    std::string  parameter = data.ReadString();
-    std::string  value = data.ReadString();
+    int32_t ipversion = data.ReadInt32();
+    int32_t which = data.ReadInt32();
+    std::string ifname = data.ReadString();
+    std::string parameter = data.ReadString();
+    std::string value = data.ReadString();
     int32_t result = SetProcSysNet(ipversion, which, ifname, parameter, value);
     reply.WriteInt32(result);
     NETNATIVE_LOGI("SetProcSysNet has recved result %{public}d", result);
@@ -582,11 +534,11 @@ int32_t NetsysNativeServiceStub::CmdInterfaceSetConfig(MessageParcel &data, Mess
     cfg.hwAddr = data.ReadString();
     cfg.ipv4Addr = data.ReadString();
     cfg.prefixLength = data.ReadInt32();
-    int32_t vsize =  data.ReadInt32();
-    std::string   vString;
-    std::vector<std::string>  vCflags;
+    int32_t vsize = data.ReadInt32();
+    std::string vString;
+    std::vector<std::string> vCflags;
     for (int i = 0; i < vsize; i++) {
-        vString=data.ReadString();
+        vString = data.ReadString();
         vCflags.push_back(vString);
     }
     cfg.flags.assign(vCflags.begin(), vCflags.end());
@@ -604,15 +556,15 @@ int32_t NetsysNativeServiceStub::CmdInterfaceGetConfig(MessageParcel &data, Mess
     cfg.ifName = data.ReadString();
     int32_t result = InterfaceGetConfig(cfg);
     reply.WriteInt32(result);
-    reply.WriteString(cfg.ifName) ;
-    reply.WriteString(cfg.hwAddr) ;
-    reply.WriteString(cfg.ipv4Addr) ;
+    reply.WriteString(cfg.ifName);
+    reply.WriteString(cfg.hwAddr);
+    reply.WriteString(cfg.ipv4Addr);
     reply.WriteInt32(cfg.prefixLength);
-    int32_t vsize =  cfg.flags.size();
+    int32_t vsize = cfg.flags.size();
     reply.WriteInt32(vsize);
-    std::vector<std::string>::iterator    iter ;
+    std::vector<std::string>::iterator iter ;
     for (iter = cfg.flags.begin(); iter != cfg.flags.end(); iter++) {
-        reply.WriteString(*iter) ;
+        reply.WriteString(*iter);
     }
     return result;
 }
