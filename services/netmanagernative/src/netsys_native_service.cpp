@@ -214,9 +214,9 @@ int32_t NetsysNativeService::NetworkRemoveRouteParcel(int32_t netId, const Route
 
 int32_t NetsysNativeService::NetworkSetDefault(int32_t netId)
 {
-    NETNATIVE_LOG_D("NetdNativeService::NetworkSetDefault in.");
+    NETNATIVE_LOG_D("NetworkSetDefault in.");
     int32_t result = this->netsysService_->NetworkSetDefault(netId);
-    NETNATIVE_LOGI("NetworkSetDefault out.");
+    NETNATIVE_LOGD("NetworkSetDefault out.");
     return result;
 }
 

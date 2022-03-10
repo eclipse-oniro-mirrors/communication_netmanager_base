@@ -41,7 +41,7 @@ int32_t Network::GetNetId() const
     return netId_;
 }
 
-bool Network::operator==(const Network &network) const
+bool Network::operator == (const Network &network) const
 {
     return netId_ == network.netId_;
 }
@@ -131,15 +131,15 @@ int32_t Network::Ipv4PrefixLen(const std::string &ip)
         return 0;
     }
     int32_t ret = 0;
-    uint32_t  ipNum = 0;
+    uint32_t ipNum = 0;
     uint8_t c1 = 0;
     uint8_t c2 = 0;
     uint8_t c3 = 0;
     uint8_t c4 = 0;
-    uint8_t cnt = 0;
-    ret = sscanf_s(ip.c_str(), "%hhu, %hhu, %hhu, %hhu", &c1, &c2, &c3, &c4);
+    uint32_t cnt = 0;
+    ret = sscanf_s(ip.c_str(), "%hhu.%hhu.%hhu.%hhu", &c1, &c2, &c3, &c4);
     if (ret != sizeof(int32_t)) {
-        return BIT32;
+        return 0;
     }
     ipNum = (c1 << BIT24) | (c2 << BIT16) | (c3 << BIT8) | c4;
     if (ipNum == 0xFFFFFFFF) {
@@ -187,6 +187,7 @@ void Network::UpdateIpAddrs(const NetLinkInfo &netLinkInfo)
         }
         NetsysController::GetInstance().InterfaceAddAddress(netLinkInfo.ifaceName_, inetAddr.address_, prefixLen);
     }
+    NETMGR_LOG_D("Network UpdateIpAddrs out.");
 }
 
 void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)

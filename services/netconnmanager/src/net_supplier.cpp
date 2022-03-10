@@ -220,7 +220,7 @@ bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
         NETMGR_LOG_E("netController_ is nullptr");
         return false;
     }
-    NETMGR_LOG_D("execute ReleaseNetwork");
+    NETMGR_LOG_D("execute ReleaseNetwork, supplierId[%{public}d]", supplierId_);
     int32_t errCode = netController_->ReleaseNetwork(netSupplierIdent_, netCaps);
     NETMGR_LOG_D("ReleaseNetwork retCode[%{public}d]", errCode);
     if (errCode != REG_OK) {
@@ -351,7 +351,6 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
         }
         bestReqList_.erase(reqId);
     }
-    return;
 }
 
 int32_t NetSupplier::CancelRequest(uint32_t reqId)

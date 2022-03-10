@@ -412,7 +412,7 @@ int32_t NetsysNativeServiceStub::CmdGetProcSysNet(MessageParcel &data, MessagePa
     int32_t which = data.ReadInt32();
     std::string ifname = data.ReadString();
     std::string parameter = data.ReadString();
-    std::string value  ;
+    std::string value;
     int32_t result = GetProcSysNet(ipversion, which, ifname, parameter, value);
     reply.WriteInt32(result);
     std::string valueRsl = value;
@@ -562,7 +562,7 @@ int32_t NetsysNativeServiceStub::CmdInterfaceGetConfig(MessageParcel &data, Mess
     reply.WriteInt32(cfg.prefixLength);
     int32_t vsize = cfg.flags.size();
     reply.WriteInt32(vsize);
-    std::vector<std::string>::iterator iter ;
+    std::vector<std::string>::iterator iter;
     for (iter = cfg.flags.begin(); iter != cfg.flags.end(); iter++) {
         reply.WriteString(*iter);
     }

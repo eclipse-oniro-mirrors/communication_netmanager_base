@@ -34,7 +34,7 @@ NetMonitor::~NetMonitor()
 
 bool NetMonitor::HttpDetection()
 {
-    NETMGR_LOG_D("HttpDetction in. ifaceName_: %{public}s", ifaceName_.c_str());
+    NETMGR_LOG_D("HttpDetection in. ifaceName_: %{public}s", ifaceName_.c_str());
     HttpRequest httpRequest;
     httpRequest.SetIfaceName(ifaceName_);
 
