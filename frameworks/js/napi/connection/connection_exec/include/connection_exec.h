@@ -123,6 +123,12 @@ public:
 
         static napi_value UnregisterCallback(UnregisterContext *context);
     };
+private:
+    static void FillLinkAddress(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo);
+
+    static void FillRouoteList(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo);
+
+    static void FillDns(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo);
 };
 } // namespace OHOS::NetManagerStandard
 

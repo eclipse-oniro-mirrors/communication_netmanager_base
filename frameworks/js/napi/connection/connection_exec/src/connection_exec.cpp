@@ -91,62 +91,9 @@ napi_value ConnectionExec::CreateConnectionProperties(napi_env env, NetLinkInfo 
     NapiUtils::SetStringPropertyUtf8(env, connectionProperties, KEY_INTERFACE_NAME, linkInfo->ifaceName_);
     NapiUtils::SetStringPropertyUtf8(env, connectionProperties, KEY_DOMAINS, linkInfo->domain_);
     NapiUtils::SetUint32Property(env, connectionProperties, KEY_MTU, linkInfo->mtu_);
-    NETMANAGER_BASE_LOGI("linkInfo->netAddrList_.size() = %{public}zu", linkInfo->netAddrList_.size());
-    if (!linkInfo->netAddrList_.empty() && linkInfo->netAddrList_.size() <= MAX_ARRAY_LENGTH) {
-        napi_value linkAddresses =
-            NapiUtils::CreateArray(env, std::min(linkInfo->netAddrList_.size(), MAX_ARRAY_LENGTH));
-        auto it = linkInfo->netAddrList_.begin();
-        for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != linkInfo->netAddrList_.end(); ++index, ++it) {
-            napi_value netAddr = NapiUtils::CreateObject(env);
-            NapiUtils::SetStringPropertyUtf8(env, netAddr, KEY_ADDRESS, it->address_);
-            NapiUtils::SetUint32Property(env, netAddr, KEY_FAMILY, it->family_);
-            NapiUtils::SetUint32Property(env, netAddr, KEY_PORT, it->port_);
-
-            napi_value linkAddr = NapiUtils::CreateObject(env);
-            NapiUtils::SetNamedProperty(env, linkAddr, KEY_ADDRESS, netAddr);
-            NapiUtils::SetUint32Property(env, linkAddr, KEY_PREFIX_LENGTH, it->prefixlen_);
-            NapiUtils::SetArrayElement(env, linkAddresses, index, linkAddr);
-        }
-        NapiUtils::SetNamedProperty(env, connectionProperties, KEY_LINK_ADDRESSES, linkAddresses);
-    }
-    NETMANAGER_BASE_LOGI("linkInfo->routeList_.size() = %{public}zu", linkInfo->routeList_.size());
-    if (!linkInfo->routeList_.empty() && linkInfo->routeList_.size() <= MAX_ARRAY_LENGTH) {
-        napi_value routes = NapiUtils::CreateArray(env, std::min(linkInfo->routeList_.size(), MAX_ARRAY_LENGTH));
-        auto it = linkInfo->routeList_.begin();
-        for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != linkInfo->routeList_.end(); ++index, ++it) {
-            napi_value route = NapiUtils::CreateObject(env);
-            NapiUtils::SetStringPropertyUtf8(env, route, KEY_INTERFACE, it->iface_);
-
-            napi_value dest = NapiUtils::CreateObject(env);
-            NapiUtils::SetStringPropertyUtf8(env, dest, KEY_ADDRESS, it->destination_.address_);
-            NapiUtils::SetUint32Property(env, dest, KEY_PREFIX_LENGTH, it->destination_.prefixlen_);
-            NapiUtils::SetNamedProperty(env, route, KEY_DESTINATION, dest);
-
-            napi_value gateway = NapiUtils::CreateObject(env);
-            NapiUtils::SetStringPropertyUtf8(env, gateway, KEY_ADDRESS, it->gateway_.address_);
-            NapiUtils::SetUint32Property(env, gateway, KEY_PREFIX_LENGTH, it->gateway_.prefixlen_);
-            NapiUtils::SetNamedProperty(env, route, KEY_GATE_WAY, gateway);
-
-            NapiUtils::SetBooleanProperty(env, route, KEY_HAS_GET_WAY, it->hasGateway_);
-            NapiUtils::SetBooleanProperty(env, route, KEY_IS_DEFAULT_ROUE, it->isDefaultRoute_);
-
-            NapiUtils::SetArrayElement(env, routes, index, route);
-        }
-        NapiUtils::SetNamedProperty(env, connectionProperties, KEY_ROUTES, routes);
-    }
-    NETMANAGER_BASE_LOGI("linkInfo->dnsList_.size() = %{public}zu", linkInfo->dnsList_.size());
-    if (!linkInfo->dnsList_.empty() && linkInfo->dnsList_.size() <= MAX_ARRAY_LENGTH) {
-        napi_value dnsList = NapiUtils::CreateArray(env, std::min(linkInfo->dnsList_.size(), MAX_ARRAY_LENGTH));
-        auto it = linkInfo->dnsList_.begin();
-        for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != linkInfo->dnsList_.end(); ++index, ++it) {
-            napi_value netAddr = NapiUtils::CreateObject(env);
-            NapiUtils::SetStringPropertyUtf8(env, netAddr, KEY_ADDRESS, it->address_);
-            NapiUtils::SetUint32Property(env, netAddr, KEY_FAMILY, it->family_);
-            NapiUtils::SetUint32Property(env, netAddr, KEY_PORT, it->port_);
-            NapiUtils::SetArrayElement(env, dnsList, index, netAddr);
-        }
-        NapiUtils::SetNamedProperty(env, connectionProperties, KEY_DNSES, dnsList);
-    }
+    FillLinkAddress(env, connectionProperties, linkInfo);
+    FillRouoteList(env, connectionProperties, linkInfo);
+    FillDns(env, connectionProperties, linkInfo);
     return connectionProperties;
 }
 
@@ -458,5 +405,73 @@ bool ConnectionExec::NetConnectionExec::ExecUnregister(UnregisterContext *contex
 napi_value ConnectionExec::NetConnectionExec::UnregisterCallback(RegisterContext *context)
 {
     return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+void ConnectionExec::FillLinkAddress(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo)
+{
+    NETMANAGER_BASE_LOGI("linkInfo->netAddrList_.size() = %{public}zu", linkInfo->netAddrList_.size());
+    if (!linkInfo->netAddrList_.empty() && linkInfo->netAddrList_.size() <= MAX_ARRAY_LENGTH) {
+        napi_value linkAddresses =
+            NapiUtils::CreateArray(env, std::min(linkInfo->netAddrList_.size(), MAX_ARRAY_LENGTH));
+        auto it = linkInfo->netAddrList_.begin();
+        for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != linkInfo->netAddrList_.end(); ++index, ++it) {
+            napi_value netAddr = NapiUtils::CreateObject(env);
+            NapiUtils::SetStringPropertyUtf8(env, netAddr, KEY_ADDRESS, it->address_);
+            NapiUtils::SetUint32Property(env, netAddr, KEY_FAMILY, it->family_);
+            NapiUtils::SetUint32Property(env, netAddr, KEY_PORT, it->port_);
+
+            napi_value linkAddr = NapiUtils::CreateObject(env);
+            NapiUtils::SetNamedProperty(env, linkAddr, KEY_ADDRESS, netAddr);
+            NapiUtils::SetUint32Property(env, linkAddr, KEY_PREFIX_LENGTH, it->prefixlen_);
+            NapiUtils::SetArrayElement(env, linkAddresses, index, linkAddr);
+        }
+        NapiUtils::SetNamedProperty(env, connectionProperties, KEY_LINK_ADDRESSES, linkAddresses);
+    }
+}
+
+void ConnectionExec::FillRouoteList(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo)
+{
+    NETMANAGER_BASE_LOGI("linkInfo->routeList_.size() = %{public}zu", linkInfo->routeList_.size());
+    if (!linkInfo->routeList_.empty() && linkInfo->routeList_.size() <= MAX_ARRAY_LENGTH) {
+        napi_value routes = NapiUtils::CreateArray(env, std::min(linkInfo->routeList_.size(), MAX_ARRAY_LENGTH));
+        auto it = linkInfo->routeList_.begin();
+        for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != linkInfo->routeList_.end(); ++index, ++it) {
+            napi_value route = NapiUtils::CreateObject(env);
+            NapiUtils::SetStringPropertyUtf8(env, route, KEY_INTERFACE, it->iface_);
+
+            napi_value dest = NapiUtils::CreateObject(env);
+            NapiUtils::SetStringPropertyUtf8(env, dest, KEY_ADDRESS, it->destination_.address_);
+            NapiUtils::SetUint32Property(env, dest, KEY_PREFIX_LENGTH, it->destination_.prefixlen_);
+            NapiUtils::SetNamedProperty(env, route, KEY_DESTINATION, dest);
+
+            napi_value gateway = NapiUtils::CreateObject(env);
+            NapiUtils::SetStringPropertyUtf8(env, gateway, KEY_ADDRESS, it->gateway_.address_);
+            NapiUtils::SetUint32Property(env, gateway, KEY_PREFIX_LENGTH, it->gateway_.prefixlen_);
+            NapiUtils::SetNamedProperty(env, route, KEY_GATE_WAY, gateway);
+
+            NapiUtils::SetBooleanProperty(env, route, KEY_HAS_GET_WAY, it->hasGateway_);
+            NapiUtils::SetBooleanProperty(env, route, KEY_IS_DEFAULT_ROUE, it->isDefaultRoute_);
+
+            NapiUtils::SetArrayElement(env, routes, index, route);
+        }
+        NapiUtils::SetNamedProperty(env, connectionProperties, KEY_ROUTES, routes);
+    }
+}
+
+void ConnectionExec::FillDns(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo)
+{
+    NETMANAGER_BASE_LOGI("linkInfo->dnsList_.size() = %{public}zu", linkInfo->dnsList_.size());
+    if (!linkInfo->dnsList_.empty() && linkInfo->dnsList_.size() <= MAX_ARRAY_LENGTH) {
+        napi_value dnsList = NapiUtils::CreateArray(env, std::min(linkInfo->dnsList_.size(), MAX_ARRAY_LENGTH));
+        auto it = linkInfo->dnsList_.begin();
+        for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != linkInfo->dnsList_.end(); ++index, ++it) {
+            napi_value netAddr = NapiUtils::CreateObject(env);
+            NapiUtils::SetStringPropertyUtf8(env, netAddr, KEY_ADDRESS, it->address_);
+            NapiUtils::SetUint32Property(env, netAddr, KEY_FAMILY, it->family_);
+            NapiUtils::SetUint32Property(env, netAddr, KEY_PORT, it->port_);
+            NapiUtils::SetArrayElement(env, dnsList, index, netAddr);
+        }
+        NapiUtils::SetNamedProperty(env, connectionProperties, KEY_DNSES, dnsList);
+    }
 }
 } // namespace OHOS::NetManagerStandard
