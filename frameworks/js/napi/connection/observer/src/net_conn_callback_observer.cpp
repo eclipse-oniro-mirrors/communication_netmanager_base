@@ -182,7 +182,7 @@ napi_value NetConnCallbackObserver::CreateConnectionProperties(napi_env env, Net
             napi_value linkAddr = NapiUtils::CreateObject(env);
             NapiUtils::SetNamedProperty(env, linkAddr, KEY_ADDRESS, netAddr);
             NapiUtils::SetUint32Property(env, linkAddr, KEY_PREFIX_LENGTH, it->prefixlen_);
-            NapiUtils::SetArrayElement(env, linkAddresses, index, netAddr);
+            NapiUtils::SetArrayElement(env, linkAddresses, index, linkAddr);
         }
         NapiUtils::SetNamedProperty(env, connectionProperties, KEY_LINK_ADDRESSES, linkAddresses);
     }
