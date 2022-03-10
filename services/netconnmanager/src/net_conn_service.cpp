@@ -748,7 +748,7 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier, 
     NET_SUPPLIER_MAP::iterator iter;
     for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
         NETMGR_LOG_I("supplier info, supplier[%{public}d, %{public}s], realScore[%{public}d], isConnected[%{public}d]",
-            iter->second->GetSupplierId(), iter->second->GetNetSupplierIdent().c_str() : "null",
+            iter->second->GetSupplierId(), iter->second->GetNetSupplierIdent().c_str(),
             iter->second->GetRealScore(), iter->second->IsConnected());
         if ((!netActivateNetwork->MatchRequestAndNetwork(iter->second)) || (!iter->second->IsConnected())) {
             NETMGR_LOG_D("supplier[%{public}d] is not connected or not match request.", iter->second->GetSupplierId());

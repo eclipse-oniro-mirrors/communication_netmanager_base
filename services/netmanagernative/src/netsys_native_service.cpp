@@ -216,7 +216,7 @@ int32_t NetsysNativeService::NetworkSetDefault(int32_t netId)
 {
     NETNATIVE_LOG_D("NetworkSetDefault in.");
     int32_t result = this->netsysService_->NetworkSetDefault(netId);
-    NETNATIVE_LOGD("NetworkSetDefault out.");
+    NETNATIVE_LOG_D("NetworkSetDefault out.");
     return result;
 }
 

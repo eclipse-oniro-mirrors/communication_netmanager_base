@@ -334,7 +334,7 @@ int32_t NetsysNativeServiceStub::CmdNetworkRemoveRoute(MessageParcel &data, Mess
     std::string nextHop = data.ReadString();
 
     NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s], destination[%{public}s}, nextHop[%{public}s]",
-                   netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
+                   netId, interfaceName.c_str(), destination.c_str(), nextHop.c_str());
     int32_t result = NetworkRemoveRoute(netId, interfaceName, destination, nextHop);
     reply.WriteInt32(result);
     NETNATIVE_LOGI("NetworkRemoveRoute has recved result %{public}d", result);
