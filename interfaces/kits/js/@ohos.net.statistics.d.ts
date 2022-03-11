@@ -18,8 +18,8 @@ import {AsyncCallback} from "./basic";
 /**
  * Obtains traffic statistics.
  *
- * @since 8
- * @sysCap SystemCapability.Communication.NetManager.Core
+ * @since 9
+ * @syscap SystemCapability.Communication.NetManager.Core
  */
 declare namespace statistics {
   /**
@@ -112,8 +112,8 @@ declare namespace statistics {
    * @permission ohos.permission.GET_NETSTATS_SUMMARY
    * @systemapi Hide this for inner system use.
    */
-  function getIfaceStatsDetail(ifaceInfo: IfaceInfo, callback: AsyncCallback<NetStatsInfo>): void;
-  function getIfaceStatsDetail(ifaceInfo: IfaceInfo): Promise<NetStatsInfo>;
+  function getIfaceStats(ifaceInfo: IfaceInfo, callback: AsyncCallback<NetStatsInfo>): void;
+  function getIfaceStats(ifaceInfo: IfaceInfo): Promise<NetStatsInfo>;
 
   /**
    * Get the traffic usage details of the specified time period of the application.
@@ -122,8 +122,8 @@ declare namespace statistics {
    * @permission ohos.permission.GET_NETSTATS_SUMMARY
    * @systemapi Hide this for inner system use.
    */
-  function getUidStatsDetail(uidStatsInfo: UidStatsInfo, callback: AsyncCallback<NetStatsInfo>): void;
-  function getUidStatsDetail(uidStatsInfo: UidStatsInfo): Promise<NetStatsInfo>;
+  function getIfaceUidStats(uidStatsInfo: UidStatsInfo, callback: AsyncCallback<NetStatsInfo>): void;
+  function getIfaceUidStats(uidStatsInfo: UidStatsInfo): Promise<NetStatsInfo>;
 
   /**
    * @systemapi Hide this for inner system use.

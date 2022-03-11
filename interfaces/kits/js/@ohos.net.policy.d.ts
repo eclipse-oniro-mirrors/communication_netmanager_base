@@ -19,8 +19,8 @@ import connection from "./@ohos.net.connection";
 /**
  * Provides interfaces to manage network policy rules.
  *
- * @since 8
- * @sysCap SystemCapability.Communication.NetManager.Core
+ * @since 9
+ * @syscap SystemCapability.Communication.NetManager.Core
  */
 declare namespace policy {
   type NetBearType = connection.NetBearType;
@@ -133,8 +133,8 @@ declare namespace policy {
    * @permission ohos.permission.SET_NETWORK_POLICY
    * @systemapi Hide this for inner system use.
    */
-  function setFactoryPolicy(simId: number, callback: AsyncCallback<void>): void;
-  function setFactoryPolicy(simId: number): Promise<void>;
+  function restoreAllPolicies(simId: number, callback: AsyncCallback<void>): void;
+  function restoreAllPolicies(simId: number): Promise<void>;
 
   export enum BackgroundPolicy {
     /**
