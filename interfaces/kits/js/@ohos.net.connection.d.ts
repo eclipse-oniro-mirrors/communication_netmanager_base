@@ -21,7 +21,7 @@ import socket from "./@ohos.net.socket";
  * Provides interfaces to manage and use data networks.
  *
  * @since 8
- * @sysCap SystemCapability.Communication.NetManager.Core
+ * @syscap SystemCapability.Communication.NetManager.Core
  */
 declare namespace connection {
   type HttpRequest = http.HttpRequest;
@@ -181,16 +181,6 @@ declare namespace connection {
     bindSocket(socketParam: TCPSocket | UDPSocket): Promise<void>;
 
     /**
-     * Accesses a specified URL.
-     *
-     * @param url Indicates a URL connection.
-     * @param callback Returns a {@code URLConnection} object matching the given {@code url}.
-     */
-    openConnection(url: string, callback: AsyncCallback<HttpRequest>): void;
-    openConnection(url: string, proxy: NetProxy, callback: AsyncCallback<HttpRequest>): void;
-    openConnection(url: string, proxy?: NetProxy): Promise<HttpRequest>;
-
-    /**
      * Resolves a host name to obtain all IP addresses based on the specified NetHandle.
      *
      * @param host Indicates the host name or the domain.
@@ -223,56 +213,6 @@ declare namespace connection {
     NET_CAPABILITY_MMS = 0,
 
     /**
-     * Indicates that the network can access the carrier's SUPL server.
-     */
-    NET_CAPABILITY_SUPL = 1,
-
-    /**
-     * Indicates that the network can access the carrier's DUN or Tethering gateway.
-     */
-    NET_CAPABILITY_DUN = 2,
-
-    /**
-     * Indicates that the network can access the FOTA server for remote device upgrade.
-     */
-    NET_CAPABILITY_FOTA = 3,
-
-    /**
-     * Indicates that the network can access the IMS server.
-     */
-    NET_CAPABILITY_IMS = 4,
-
-    /**
-     * Indicates that the network can access the carrier's CBS server.
-     */
-    NET_CAPABILITY_CBS = 5,
-
-    /**
-     * Indicates that the network can be used for Wi-Fi Direct.
-     */
-    NET_CAPABILITY_WIFI_P2P = 6,
-
-    /**
-     * Indicates that the network can access the carrier's Initial Attach server.
-     */
-    NET_CAPABILITY_IA = 7,
-
-    /**
-     * Indicates that the network can access the carrier's RCS server.
-     */
-    NET_CAPABILITY_RCS = 8,
-
-    /**
-     * Indicates that the network can access the carrier's XCAP server.
-     */
-    NET_CAPABILITY_XCAP = 9,
-
-    /**
-     * Indicates that the network can access the carrier's IMS emergency call server.
-     */
-    NET_CAPABILITY_EIMS = 10,
-
-    /**
      * Indicates that the network traffic is not metered.
      */
     NET_CAPABILITY_NOT_METERED = 11,
@@ -283,16 +223,6 @@ declare namespace connection {
     NET_CAPABILITY_INTERNET = 12,
 
     /**
-     * Indicates that the network is not restricted.
-     */
-    NET_CAPABILITY_NOT_RESTRICTED = 13,
-
-    /**
-     * Indicates that the network is trusted.
-     */
-    NET_CAPABILITY_TRUSTED = 14,
-
-    /**
      * Indicates that the network does not use a VPN.
      */
     NET_CAPABILITY_NOT_VPN = 15,
@@ -301,115 +231,6 @@ declare namespace connection {
      * Indicates that the network is available.
      */
     NET_CAPABILITY_VALIDATED = 16,
-
-    /**
-     * Indicates that this network was found to have a captive portal in place last time it was
-     * probed.
-     */
-    NET_CAPABILITY_CAPTIVE_PORTAL = 17,
-
-    /**
-     * Indicates that the network is unavailable during roaming.
-     */
-    NET_CAPABILITY_NOT_ROAMING = 18,
-
-    /**
-     * Indicates that the network is available only for foreground applications.
-     */
-    NET_CAPABILITY_FOREGROUND = 19,
-
-    /**
-     * Indicates that the network is not congested.
-     */
-    NET_CAPABILITY_NOT_CONGESTED = 20,
-
-    /**
-     * Indicates that the network is not suspended.
-     */
-    NET_CAPABILITY_NOT_SUSPENDED = 21,
-
-    /**
-     * Indicates that traffic that goes through this network is paid by oem. For example,
-     * this network can be used by system apps to upload telemetry data.
-     *
-     * @systemapi Hide this for inner system use.
-     */
-    NET_CAPABILITY_OEM_PAID = 22,
-
-    /**
-     * Indicates that the network can access the Mission Critical server of the carrier.
-     */
-    NET_CAPABILITY_MCX = 23,
-
-    /**
-     * Indicates that the network was tested to only provide partial connectivity.
-     *
-     * @systemapi Hide this for inner system use.
-     */
-    NET_CAPABILITY_PARTIAL_CONNECTIVITY = 24,
-
-    /**
-     * Indicates that the network extends cap
-     *
-     * @systemapi Hide this for inner system use.
-     */
-    NET_CAPABILITY_HW_BASE = NET_CAPABILITY_PARTIAL_CONNECTIVITY,
-
-    /**
-     * Indicates that the network can access the BIP0 server.
-     *
-     * @systemapi Hide this for inner system use.
-     */
-    NET_CAPABILITY_BIP0 = NET_CAPABILITY_HW_BASE + 1,
-
-    /**
-     * Indicates that the network can access the BIP1 server.
-     *
-     * @systemapi Hide this for inner system use.
-     */
-    NET_CAPABILITY_BIP1 = NET_CAPABILITY_HW_BASE + 2,
-
-    /**
-     * Indicates that the network can access the BIP2 server.
-     *
-     * @systemapi Hide this for inner system use.
-     */
-    NET_CAPABILITY_BIP2 = NET_CAPABILITY_HW_BASE + 3,
-
-    /**
-     * Indicates that the network can access the BIP3 server.
-     *
-     * @systemapi Hide this for inner system use.
-     */
-    NET_CAPABILITY_BIP3 = NET_CAPABILITY_HW_BASE + 4,
-
-    /**
-     * Indicates that the network can access the BIP4 server.
-     *
-     * @systemapi Hide this for inner system use.
-     */
-    NET_CAPABILITY_BIP4 = NET_CAPABILITY_HW_BASE + 5,
-
-    /**
-     * Indicates that the network can access the BIP5 server.
-     *
-     * @systemapi Hide this for inner system use.
-     */
-    NET_CAPABILITY_BIP5 = NET_CAPABILITY_HW_BASE + 6,
-
-    /**
-     * Indicates that the network can access the BIP6 server.
-     *
-     * @systemapi Hide this for inner system use.
-     */
-    NET_CAPABILITY_BIP6 = NET_CAPABILITY_HW_BASE + 7,
-
-    /**
-     * Indicates that the network can access internal default servers.
-     *
-     * @systemapi Hide this for inner system use.
-     */
-    NET_CAPABILITY_INTERNAL_DEFAULT
   }
 
   export enum NetBearType {
@@ -424,47 +245,18 @@ declare namespace connection {
     BEARER_WIFI = 1,
 
     /**
-     * Indicates that the network is based on a Bluetooth network.
-     */
-    BEARER_BLUETOOTH = 2,
-
-    /**
      * Indicates that the network is an Ethernet network.
      */
     BEARER_ETHERNET = 3,
-
-    /**
-     * Indicates that the network is a VPN.
-     */
-    BEARER_VPN = 4,
-
-    /**
-     * Indicates that the network is a Wi-Fi Aware network.
-     */
-    BEARER_WIFI_AWARE = 5,
-
-    /**
-     * Indicates that the network is a LoWPAN network.
-     */
-    BEARER_LOWPAN = 6
   }
 
   export interface ConnectionProperties {
     interfaceName: string;
-    isUsePrivateDns: boolean;
-    privateDnsServerName: string;
     domains: string;
-    httpProxy: HttpProxy;
     linkAddresses: Array<LinkAddress>;
     dnses: Array<NetAddress>;
     routes: Array<RouteInfo>;
     mtu: number;
-  }
-
-  export interface HttpProxy {
-    host: string;
-    port: number;
-    parsedExclusionList: Array<string>;
   }
 
   export interface RouteInfo {
@@ -487,22 +279,6 @@ declare namespace connection {
     address: string;
     family?: number; // IPv4 = 1; IPv6 = 2, default is IPv4
     port?: number; // [0, 65535]
-  }
-
-  export interface NetProxy {
-    type: ProxyType;
-    address: NetAddress;
-  }
-
-  export enum ProxyType {
-    /**
-     * Represents proxy for high level protocols such as HTTP or FTP.
-     */
-    HTTP,
-    /**
-     * Represents a SOCKS (V4 or V5) proxy.
-     */
-    SOCKS
   }
 }
 
