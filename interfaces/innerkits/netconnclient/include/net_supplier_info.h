@@ -22,6 +22,14 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+enum NetConnState {
+    NET_CONN_STATE_UNKNOWN = 0,
+    NET_CONN_STATE_IDLE = 1,
+    NET_CONN_STATE_CONNECTING = 2,
+    NET_CONN_STATE_CONNECTED = 3,
+    NET_CONN_STATE_DISCONNECTING = 4,
+    NET_CONN_STATE_DISCONNECTED = 5,
+};
 struct NetSupplierInfo : public Parcelable {
     bool isAvailable_ = false;
     bool isRoaming_ = false;
