@@ -42,7 +42,7 @@ void NetlinkMsg::AddRoute(unsigned short action, struct rtmsg msg)
     this->netlinkMessage->nlmsg_type = action;
     int32_t result = memcpy_s(NLMSG_DATA(this->netlinkMessage), sizeof(struct rtmsg), &msg, sizeof(struct rtmsg));
     if (result != 0) {
-        NETNATIVE_LOGE("[get_addr_info]: string copy failed result %{public}d", result);
+        NETNATIVE_LOGE("[AddRoute]: string copy failed result %{public}d", result);
     }
     this->netlinkMessage->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
 }
@@ -53,9 +53,20 @@ void NetlinkMsg::AddRule(unsigned short action, struct fib_rule_hdr msg)
     int32_t result = memcpy_s(NLMSG_DATA(this->netlinkMessage), sizeof(struct fib_rule_hdr),
         &msg, sizeof(struct fib_rule_hdr));
     if (result != 0) {
-        NETNATIVE_LOGE("[get_addr_info]: string copy failed result %{public}d", result);
+        NETNATIVE_LOGE("[AddRule]: string copy failed result %{public}d", result);
     }
     this->netlinkMessage->nlmsg_len = NLMSG_LENGTH(sizeof(struct fib_rule_hdr));
+}
+
+void NetlinkMsg::AddAddress(unsigned short action, struct ifaddrmsg msg)
+{
+    this->netlinkMessage->nlmsg_type = action;
+    int32_t result = memcpy_s(NLMSG_DATA(this->netlinkMessage), sizeof(struct ifaddrmsg),
+        &msg, sizeof(struct ifaddrmsg));
+    if (result != 0) {
+        NETNATIVE_LOGE("[AddAddress]: string copy failed result %{public}d", result);
+    }
+    this->netlinkMessage->nlmsg_len = NLMSG_LENGTH(sizeof(struct ifaddrmsg));
 }
 
 int NetlinkMsg::AddAttr(unsigned int type, void *data, size_t alen)
