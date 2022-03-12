@@ -55,7 +55,7 @@ napi_value NetworkModule::Unsubscribe(napi_env env, napi_callback_info info)
     return NapiUtils::GetUndefined(env);
 }
 
-static napi_module g_fetchModule = {
+static napi_module g_networkModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
@@ -65,8 +65,8 @@ static napi_module g_fetchModule = {
     .reserved = {nullptr},
 };
 
-extern "C" __attribute__((constructor)) void RegisterFetchModule(void)
+extern "C" __attribute__((constructor)) void RegisterNetworkModule(void)
 {
-    napi_module_register(&g_fetchModule);
+    napi_module_register(&g_networkModule);
 }
 } // namespace OHOS::NetManagerStandard
