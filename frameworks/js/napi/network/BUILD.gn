@@ -17,41 +17,41 @@ SUBSYSTEM_DIR = "//foundation/communication"
 NETMANAGER_BASE_NAPI_ROOT = "$SUBSYSTEM_DIR/netmanager_base/frameworks/js/napi/"
 
 utils_source = [
-    "$SUBSYSTEM_DIR/netmanager_base/utils/base_context/src/netmanager_base_base_context.cpp",
-    "$SUBSYSTEM_DIR/netmanager_base/utils/common_utils/src/netmanager_base_common_utils.cpp",
-    "$SUBSYSTEM_DIR/netmanager_base/utils/event_manager/src/netmanager_base_event_listener.cpp",
-    "$SUBSYSTEM_DIR/netmanager_base/utils/event_manager/src/netmanager_base_event_manager.cpp",
-    "$SUBSYSTEM_DIR/netmanager_base/utils/module_template/src/netmanager_base_module_template.cpp",
-    "$SUBSYSTEM_DIR/netmanager_base/utils/napi_utils/src/netmanager_base_napi_utils.cpp",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/base_context/src/netmanager_base_base_context.cpp",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/common_utils/src/netmanager_base_common_utils.cpp",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/event_manager/src/netmanager_base_event_listener.cpp",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/event_manager/src/netmanager_base_event_manager.cpp",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/module_template/src/netmanager_base_module_template.cpp",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/napi_utils/src/netmanager_base_napi_utils.cpp",
 ]
 
 utils_include = [
-    "$SUBSYSTEM_DIR/netmanager_base/utils/base_async_work/include",
-    "$SUBSYSTEM_DIR/netmanager_base/utils/base_context/include",
-    "$SUBSYSTEM_DIR/netmanager_base/utils/common_utils/include",
-    "$SUBSYSTEM_DIR/netmanager_base/utils/event_manager/include",
-    "$SUBSYSTEM_DIR/netmanager_base/utils/log/include",
-    "$SUBSYSTEM_DIR/netmanager_base/utils/module_template/include",
-    "$SUBSYSTEM_DIR/netmanager_base/utils/napi_utils/include",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/base_async_work/include",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/base_context/include",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/common_utils/include",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/event_manager/include",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/log/include",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/module_template/include",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/napi_utils/include",
 ]
 
 common_include = [
-    "//foundation/ace/napi/interfaces/kits",
-    "//foundation/ace/napi",
-    "//third_party/libuv/include",
-    "//third_party/node/src",
+  "//foundation/ace/napi/interfaces/kits",
+  "//foundation/ace/napi",
+  "//third_party/libuv/include",
+  "//third_party/node/src",
 ]
 
 common_deps = [
-    "//foundation/ace/napi/:ace_napi",
-    "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
-    "//third_party/libuv:uv_static",
-    "//utils/native/base:utils",
+  "//foundation/ace/napi/:ace_napi",
+  "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
+  "//third_party/libuv:uv_static",
+  "//utils/native/base:utils",
 ]
 
 common_external_deps = [
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
+  "hiviewdfx_hilog_native:libhilog",
+  "ipc:ipc_core",
 ]
 
 common_relative_install_dir = "module"
@@ -59,18 +59,18 @@ common_part_name = "netmanager_base"
 common_subsystem_name = "communication"
 
 ohos_shared_library("network") {
-    include_dirs = [ "$NETMANAGER_BASE_NAPI_ROOT/network/network_module/include" ]
-    include_dirs += utils_include
-    include_dirs += common_include
+  include_dirs = [ "$NETMANAGER_BASE_NAPI_ROOT/network/network_module/include" ]
+  include_dirs += utils_include
+  include_dirs += common_include
 
-    sources = [ "network_module/src/network_module.cpp" ]
-    sources += utils_source
+  sources = [ "network_module/src/network_module.cpp" ]
+  sources += utils_source
 
-    deps = common_deps
+  deps = common_deps
 
-    external_deps = common_external_deps
+  external_deps = common_external_deps
 
-    relative_install_dir = common_relative_install_dir
-    part_name = common_part_name
-    subsystem_name = common_subsystem_name
+  relative_install_dir = common_relative_install_dir
+  part_name = common_part_name
+  subsystem_name = common_subsystem_name
 }
