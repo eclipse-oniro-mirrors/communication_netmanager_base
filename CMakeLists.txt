@@ -324,3 +324,4 @@ add_compile_definitions(NETMGR_DEBUG)
 
 add_subdirectory(utils)
 add_subdirectory(frameworks/js/napi/connection)
+add_subdirectory(frameworks/js/napi/network)
