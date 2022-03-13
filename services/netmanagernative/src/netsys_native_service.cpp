@@ -313,6 +313,7 @@ int32_t NetsysNativeService::InterfaceGetConfig(InterfaceConfigurationParcel &cf
     NETNATIVE_LOGI("InterfaceGetConfig");
     std::string ifName = cfg.ifName;
     cfg = this->netsysService_->InterfaceGetConfig(ifName);
+    NETNATIVE_LOGI("InterfaceGetConfig end");
     return ERR_NONE;
 }
 
