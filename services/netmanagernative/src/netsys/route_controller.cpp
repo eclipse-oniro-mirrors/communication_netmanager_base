@@ -38,19 +38,48 @@
 namespace OHOS {
 namespace nmd {
 namespace {
-    constexpr uint32_t NETLINK_MAX_LEN = 1024;
     constexpr uint32_t OUTPUT_MAX = 128;
     constexpr uint32_t BIT_32_LEN = 32;
     constexpr uint32_t BIT_MAX_LEN = 255;
     constexpr uint32_t DECIMAL_DIGITAL = 10;
     constexpr uint32_t BYTE_ALIGNMENT = 8;
     constexpr uint32_t THOUSAND_LEN = 1000;
+
+    constexpr uint32_t RULE_LOCAL_NETWORK_PRI = 18000;
+    constexpr uint32_t RULE_DEFAULT_NETWORK_PRI = 19000;
+
+    constexpr uint32_t ROUTE_LOCAL_NETWORK_TABLE = 100;
 }
 std::map<std::string, uint32_t> RouteController::interfaceToTable;
 
-RouteController::RouteController() {}
+RouteController::RouteController()
+{
+    int status = ModifyRule(RTM_NEWRULE, ROUTE_LOCAL_NETWORK_TABLE, FR_ACT_TO_TBL, RULE_LOCAL_NETWORK_PRI);
+    if (status < 0) {
+        NETNATIVE_LOGE("RouteController::RouteController, add rule error");
+    }
+}
 
 RouteController::~RouteController() {}
+
+int RouteController::ModifyRule(uint32_t type, uint32_t table, uint8_t action, uint32_t priority)
+{
+    nmd::NetlinkSocket netLinker;
+    netLinker.Create(NETLINK_ROUTE);
+    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, NetlinkManager::GetPid());
+
+    struct fib_rule_hdr msg = {0};
+
+    msg.action = action;
+    msg.family = AF_INET;
+    msg.table = RT_TABLE_UNSPEC;
+
+    nlmsg.AddRule(type, msg);
+    nlmsg.AddAttr32(FRA_PRIORITY, priority);
+    nlmsg.AddAttr32(FRA_TABLE, table);
+
+    return netLinker.SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+}
 
 int RouteController::AddInterfaceToDefaultNetwork(const char *interfaceName, NetworkPermission permission)
 {
@@ -61,21 +90,7 @@ int RouteController::AddInterfaceToDefaultNetwork(const char *interfaceName, Net
         return -ESRCH;
     }
 
-    nmd::NetlinkSocket netLinker;
-    netLinker.Create(NETLINK_ROUTE);
-    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, NETLINK_MAX_LEN, NetlinkManager::GetPid());
-
-    struct fib_rule_hdr msg;
-    (void)memset_s(&msg, sizeof(msg), 0, sizeof(msg));
-
-    msg.action = FR_ACT_TO_TBL;
-    msg.family = AF_INET;
-    msg.table = RT_TABLE_UNSPEC;
-
-    nlmsg.AddRule(RTM_NEWRULE, msg);
-    nlmsg.AddAttr32(FRA_TABLE, table);
-
-    return netLinker.SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    return ModifyRule(RTM_NEWRULE, table, FR_ACT_TO_TBL, RULE_DEFAULT_NETWORK_PRI);
 }
 
 int RouteController::RemoveInterfaceFromDefaultNetwork(const char *interfaceName, NetworkPermission permission)
@@ -87,21 +102,7 @@ int RouteController::RemoveInterfaceFromDefaultNetwork(const char *interfaceName
         return -ESRCH;
     }
 
-    nmd::NetlinkSocket netLinker;
-    netLinker.Create(NETLINK_ROUTE);
-    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, NETLINK_MAX_LEN, NetlinkManager::GetPid());
-
-    struct fib_rule_hdr msg;
-    (void)memset_s(&msg, sizeof(msg), 0, sizeof(msg));
-
-    msg.action = FR_ACT_TO_TBL;
-    msg.family = AF_INET;
-    msg.table = RT_TABLE_UNSPEC;
-
-    nlmsg.AddRule(RTM_DELRULE, msg);
-    nlmsg.AddAttr32(FRA_TABLE, table);
-
-    return netLinker.SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    return ModifyRule(RTM_DELRULE, table, FR_ACT_TO_TBL, RULE_DEFAULT_NETWORK_PRI);
 }
 
 int nmd::RouteController::ReadAddrGw(const char *addr, InetAddr *res)
@@ -149,13 +150,13 @@ int nmd::RouteController::ReadAddr(const char *addr, InetAddr *res)
     return inet_pton(res->family, addressString.c_str(), res->data);
 }
 
-int nmd::RouteController::AddRoute(int, std::string interfaceName, std::string destination, std::string nextHop)
+int nmd::RouteController::AddRoute(int netId, std::string interfaceName, std::string destination, std::string nextHop)
 {
     NETNATIVE_LOGE("Entry nmd::RouteController::AddRoute");
 
     nmd::NetlinkSocket netLinker;
     netLinker.Create(NETLINK_ROUTE);
-    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, NETLINK_MAX_LEN, NetlinkManager::GetPid());
+    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, NetlinkManager::GetPid());
 
     struct rtmsg msg;
     (void)memset_s(&msg, sizeof(msg), 0, sizeof(msg));
@@ -167,9 +168,14 @@ int nmd::RouteController::AddRoute(int, std::string interfaceName, std::string d
     msg.rtm_type = RTN_UNICAST;
     msg.rtm_table = RT_TABLE_UNSPEC;
 
-    unsigned int table = GetRouteTableForInterface(interfaceName.c_str());
-    if (table == RT_TABLE_UNSPEC) {
-        return -1;
+    unsigned int table;
+    if (netId == nmd::LOCAL_NETWORK_NETID) {
+        table = ROUTE_LOCAL_NETWORK_TABLE;
+    } else {
+        table = GetRouteTableForInterface(interfaceName.c_str());
+        if (table == RT_TABLE_UNSPEC) {
+            return -1;
+        }
     }
 
     InetAddr dst;
@@ -207,17 +213,17 @@ int nmd::RouteController::AddRoute(int, std::string interfaceName, std::string d
     nlmsg.AddAttr32(RTA_OIF, index);
 
     netLinker.SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
-    NETNATIVE_LOGI("nmd::RouteController::AddRoute:%{public}s %{public}s %{public}s",
-        interfaceName.c_str(), destination.c_str(), nextHop.c_str());
+    NETNATIVE_LOGI("nmd::RouteController::AddRoute:%{public}d %{public}s %{public}s %{public}s",
+        netId, interfaceName.c_str(), destination.c_str(), nextHop.c_str());
 
     return 1;
 }
 
-int RouteController::RemoveRoute(int, std::string interfaceName, std::string destination, std::string nextHop)
+int RouteController::RemoveRoute(int netId, std::string interfaceName, std::string destination, std::string nextHop)
 {
     nmd::NetlinkSocket netLinker;
     netLinker.Create(NETLINK_ROUTE);
-    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, NETLINK_MAX_LEN, NetlinkManager::GetPid());
+    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, NetlinkManager::GetPid());
 
     struct rtmsg msg;
     (void)memset_s(&msg, sizeof(msg), 0, sizeof(msg));
@@ -227,9 +233,14 @@ int RouteController::RemoveRoute(int, std::string interfaceName, std::string des
     msg.rtm_scope = RT_SCOPE_UNIVERSE;
     msg.rtm_table = RT_TABLE_UNSPEC;
 
-    unsigned int table = GetRouteTableForInterface(interfaceName.c_str());
-    if (table == RT_TABLE_UNSPEC) {
-        return -1;
+    unsigned int table;
+    if (netId == nmd::LOCAL_NETWORK_NETID) {
+        table = ROUTE_LOCAL_NETWORK_TABLE;
+    } else {
+        table = GetRouteTableForInterface(interfaceName.c_str());
+        if (table == RT_TABLE_UNSPEC) {
+            return -1;
+        }
     }
 
     InetAddr dst;
@@ -266,8 +277,8 @@ int RouteController::RemoveRoute(int, std::string interfaceName, std::string des
     nlmsg.AddAttr32(RTA_OIF, index);
 
     netLinker.SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
-    NETNATIVE_LOGI("nmd::RouteController::RemoveRoute:%{public}s %{public}s %{public}s",
-        interfaceName.c_str(), destination.c_str(), nextHop.c_str());
+    NETNATIVE_LOGI("nmd::RouteController::RemoveRoute:%{public}d %{public}s %{public}s %{public}s",
+        netId, interfaceName.c_str(), destination.c_str(), nextHop.c_str());
 
     return 1;
 }

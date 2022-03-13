@@ -475,7 +475,8 @@ int32_t NetsysNativeClient::SetDefaultNetWork(int32_t netId)
         NETMGR_LOG_E("netsysService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
-    return 0;
+    int32_t ret = netsysNativeService_->NetworkSetDefault(netId);
+    return ret;
 }
 
 int32_t NetsysNativeClient::ClearDefaultNetWorkNetId()

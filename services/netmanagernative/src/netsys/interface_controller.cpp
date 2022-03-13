@@ -23,12 +23,16 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <net/if.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <linux/if_ether.h>
 #include <linux/if.h>
 #include "securec.h"
+#include "netlink_socket.h"
+#include "netlink_manager.h"
+#include "netlink_msg.h"
 #include "netnative_log_wrapper.h"
 
 const char g_sysNetPath[] = "/sys/class/net/";
@@ -37,6 +41,7 @@ namespace OHOS {
 namespace nmd {
 namespace {
     constexpr int32_t FILE_PERMISSION = 0666;
+    constexpr uint32_t BIT_MAX = 32;
 }
 
 InterfaceController::InterfaceController() {}
@@ -150,6 +155,61 @@ std::vector<std::string> InterfaceController::GetInterfaceNames()
     closedir(dir);
 
     return ifaceNames;
+}
+
+int InterfaceController::ModifyAddress(uint32_t action, const char *interfaceName, const char *addr, int prefixLen)
+{
+    uint32_t index = if_nametoindex(interfaceName);
+    if (index == 0) {
+        NETNATIVE_LOGE("InterfaceController::ModifyAddress, if_nametoindex error %{public}d", errno);
+        return -errno;
+    }
+
+    nmd::NetlinkSocket netLinker;
+    netLinker.Create(NETLINK_ROUTE);
+    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, NetlinkManager::GetPid());
+
+    struct ifaddrmsg ifm = {0};
+    ifm.ifa_family = AF_INET;
+    ifm.ifa_index = index;
+    ifm.ifa_scope = 0;
+    ifm.ifa_prefixlen = static_cast<uint32_t>(prefixLen);
+
+    nlmsg.AddAddress(action, ifm);
+
+    struct in_addr inAddr;
+    int ret = inet_pton(AF_INET, addr, &inAddr);
+    if (ret == -1) {
+        NETNATIVE_LOGE("InterfaceController::ModifyAddress, inet_pton error %{public}d", errno);
+        return -errno;
+    }
+
+    nlmsg.AddAttr(IFA_LOCAL, &inAddr, sizeof(inAddr));
+
+    if (action == RTM_NEWADDR) {
+        inAddr.s_addr |= htonl((1U << (BIT_MAX - prefixLen)) - 1);
+        nlmsg.AddAttr(IFA_BROADCAST, &inAddr, sizeof(inAddr));
+    }
+
+    NETNATIVE_LOGI("InterfaceController::ModifyAddress:%{public}u %{public}s %{public}s %{public}d",
+        action, interfaceName, addr, prefixLen);
+
+    ret = netLinker.SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    if (ret < 0) {
+        return -EIO;
+    }
+
+    return 0;
+}
+
+int InterfaceController::AddAddress(const char *interfaceName, const char *addr, int prefixLen)
+{
+    return ModifyAddress(RTM_NEWADDR, interfaceName, addr, prefixLen);
+}
+
+int InterfaceController::DelAddress(const char *interfaceName, const char *addr, int prefixLen)
+{
+    return ModifyAddress(RTM_DELADDR, interfaceName, addr, prefixLen);
 }
 } // namespace nmd
 } // namespace OHOS
