@@ -55,6 +55,11 @@ NetConnServiceStub::NetConnServiceStub()
 
 NetConnServiceStub::~NetConnServiceStub() {}
 
+std::string ToUtf8(std::u16string str16)
+{
+    return std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> {}.to_bytes(str16);
+}
+
 int32_t NetConnServiceStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
@@ -62,6 +67,8 @@ int32_t NetConnServiceStub::OnRemoteRequest(
 
     std::u16string myDescripter = NetConnServiceStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
+    NETMGR_LOG_D("myDescripter[%{public}s], remoteDescripter[%{public}s]", ToUtf8(myDescripter).c_str(),
+                 ToUtf8(remoteDescripter).c_str());
     if (myDescripter != remoteDescripter) {
         NETMGR_LOG_E("descriptor checked fail");
         return ERR_FLATTEN_OBJECT;
@@ -119,6 +126,7 @@ int32_t NetConnServiceStub::OnRegisterNetSupplier(MessageParcel &data, MessagePa
         return ERR_FLATTEN_OBJECT;
     }
     if (ret == ERR_NONE) {
+        NETMGR_LOG_E("supplierId[%{public}d].", supplierId);
         if (!reply.WriteUint32(supplierId)) {
             return ERR_FLATTEN_OBJECT;
         }
@@ -254,16 +262,21 @@ int32_t NetConnServiceStub::OnUpdateNetStateForTest(MessageParcel &data, Message
 
 int32_t NetConnServiceStub::OnUpdateNetSupplierInfo(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_D("OnUpdateNetSupplierInfo in.");
     uint32_t supplierId;
     if (!data.ReadUint32(supplierId)) {
+        NETMGR_LOG_D("fail to get supplier id.");
         return ERR_FLATTEN_OBJECT;
     }
 
+    NETMGR_LOG_D("OnUpdateNetSupplierInfo supplierId=[%{public}d].", supplierId);
     sptr<NetSupplierInfo> netSupplierInfo = NetSupplierInfo::Unmarshalling(data);
     int32_t ret = UpdateNetSupplierInfo(supplierId, netSupplierInfo);
     if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_D("fail to update net supplier info.");
         return ERR_FLATTEN_OBJECT;
     }
+    NETMGR_LOG_D("OnUpdateNetSupplierInfo out.");
 
     return ERR_NONE;
 }

@@ -29,6 +29,8 @@ typedef struct InetAddr {
     uint8_t data[sizeof(struct in6_addr)];
 } InetAddr;
 
+static const int LOCAL_NETWORK_NETID = 99;
+
 class RouteController {
 public:
     RouteController();
@@ -46,6 +48,7 @@ public:
 private:
     static std::map<std::string, uint32_t> interfaceToTable;
     static uint32_t GetRouteTableForInterface(const char *interfaceName);
+    static int ModifyRule(uint32_t type, uint32_t table, uint8_t action, uint32_t priority);
 };
 } // namespace nmd
 } // namespace OHOS
