@@ -134,7 +134,7 @@ std::vector<std::string> NetManagerNative::InterfaceGetList()
 
 nmd::InterfaceConfigurationParcel NetManagerNative::InterfaceGetConfig(std::string interfaceName)
 {
-    nmd::InterfaceConfigurationParcel cfgResult = {0};
+    nmd::InterfaceConfigurationParcel cfgResult = {};
     return cfgResult;
 }
 
