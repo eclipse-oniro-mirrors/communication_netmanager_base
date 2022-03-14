@@ -26,6 +26,7 @@
 #include "netsys_controller.h"
 #include "net_manager_center.h"
 #include "net_mgr_log_wrapper.h"
+#include "netmanager_base_permission.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -227,6 +228,9 @@ int32_t NetConnService::RegisterNetSupplierCallback(uint32_t supplierId, const s
 
 int32_t NetConnService::RegisterNetConnCallback(const sptr<INetConnCallback> &callback)
 {
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
     NETMGR_LOG_D("RegisterNetConnCallback service in.");
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter callback is null");
@@ -238,6 +242,9 @@ int32_t NetConnService::RegisterNetConnCallback(const sptr<INetConnCallback> &ca
 int32_t NetConnService::RegisterNetConnCallback(
     const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
 {
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
     NETMGR_LOG_D("RegisterNetConnCallback service in.");
     if (netActivates_.size() >= MAX_REQUEST_NUM) {
         NETMGR_LOG_E("Over the max request number");
@@ -391,6 +398,10 @@ int32_t NetConnService::UnRegisterNetDetectionCallback(int32_t netId, const sptr
 int32_t NetConnService::NetDetection(int32_t netId)
 {
     NETMGR_LOG_D("Enter NetConnService::NetDetection");
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO) ||
+        !NetManagerPermission::CheckPermission(Permission::INTERNET)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
     sptr<Network> dectionNetwork = nullptr;
     NET_NETWORK_MAP::iterator iterNetwork = networks_.find(netId);
     if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
@@ -518,6 +529,9 @@ int32_t NetConnService::DeactivateNetwork(uint32_t reqId)
 int32_t NetConnService::GetDefaultNet(int32_t &netId)
 {
     NETMGR_LOG_D("GetDefaultNet Enter");
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
     if (!defaultNetSupplier_) {
         NETMGR_LOG_E("not found the netId");
         return ERR_NET_NOT_FIND_NETID;
@@ -567,12 +581,18 @@ void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<Net
 int32_t NetConnService::GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList)
 {
     NETMGR_LOG_D("Enter GetAddressesByName");
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
     return NetManagerCenter::GetInstance().GetAddressesByName(host, static_cast<uint16_t>(netId), addrList);
 }
 
 int32_t NetConnService::GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr)
 {
     NETMGR_LOG_D("Enter GetAddressByName");
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
     std::vector<INetAddr> addrList;
     int ret = GetAddressesByName(host, netId, addrList);
     if (ret == ERR_NONE) {
@@ -605,6 +625,9 @@ int32_t NetConnService::GetSpecificNet(NetBearType bearerType, std::list<int32_t
 
 int32_t NetConnService::GetAllNets(std::list<int32_t> &netIdList)
 {
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
     for (auto p = networks_.begin(); p != networks_.end(); ++p) {
         netIdList.push_back(p->second->GetNetId());
     }
@@ -633,6 +656,9 @@ int32_t NetConnService::GetSpecificUidNet(int32_t uid, int32_t &netId)
 
 int32_t NetConnService::GetConnectionProperties(int32_t netId, NetLinkInfo &info)
 {
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
     NET_NETWORK_MAP::iterator iterNetwork = networks_.find(netId);
     if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
         return ERR_NO_NETWORK;
@@ -645,6 +671,9 @@ int32_t NetConnService::GetConnectionProperties(int32_t netId, NetLinkInfo &info
 int32_t NetConnService::GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap)
 {
     NETMGR_LOG_D("Enter GetNetCapabilities.");
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
     NET_SUPPLIER_MAP::iterator iterSupplier;
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         if (netId == iterSupplier->second->GetNetId()) {
