@@ -28,6 +28,8 @@ namespace OHOS {
 namespace NetsysNative {
 using namespace std;
 
+static constexpr const int32_t MAX_FLAG_NUM = 64;
+
 NetsysNativeServiceStub::NetsysNativeServiceStub()
 {
     opToInterfaceMap_[NETSYS_SET_RESOLVER_CONFIG_PARCEL] = &NetsysNativeServiceStub::CmdSetResolverConfigParcel;
@@ -535,6 +537,7 @@ int32_t NetsysNativeServiceStub::CmdInterfaceSetConfig(MessageParcel &data, Mess
     cfg.ipv4Addr = data.ReadString();
     cfg.prefixLength = data.ReadInt32();
     int32_t vsize = data.ReadInt32();
+    vsize = (vsize > MAX_FLAG_NUM) ? MAX_FLAG_NUM : vsize;
     std::string vString;
     std::vector<std::string> vCflags;
     for (int i = 0; i < vsize; i++) {
