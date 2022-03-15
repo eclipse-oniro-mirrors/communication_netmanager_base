@@ -557,7 +557,13 @@ int32_t NetsysNativeClient::RegisterNetsysNotifyCallback(const NetsysNotifyCallb
 sptr<OHOS::NetsysNative::INetsysService> NetsysNativeClient::GetProxy()
 {
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgr == nullptr) {
+        return nullptr;
+    }
     auto remote = samgr->GetSystemAbility(OHOS::COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
+    if (remote == nullptr) {
+        return nullptr;
+    }
     auto proxy = iface_cast<NetsysNative::INetsysService>(remote);
     return proxy;
 }
