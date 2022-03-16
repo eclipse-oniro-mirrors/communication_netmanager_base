@@ -16,6 +16,8 @@
 
 #include "net_mgr_log_wrapper.h"
 
+static constexpr const uint32_t MAX_NET_CAP_NUM = 64;
+
 namespace OHOS {
 namespace NetManagerStandard {
 NetSupplierCallbackStub::NetSupplierCallbackStub()
@@ -63,6 +65,7 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
     uint32_t size = 0;
     uint32_t value = 0;
     data.ReadUint32(size);
+    size = (size > MAX_NET_CAP_NUM) ? MAX_NET_CAP_NUM : size;
     for (uint32_t i = 0; i < size; i++) {
         data.ReadUint32(value);
         netCaps.insert(static_cast<NetCap>(value));
