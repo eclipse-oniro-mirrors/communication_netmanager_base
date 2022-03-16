@@ -20,7 +20,7 @@ foundation/communication/netmanager_base/
 │  ├─innerkits                // JavaScript APIs
 │  └─kits                     // Native APIs
 ├─sa_profile                  // SA profile
-├─services                    //  IPC server-side implementation
+├─services                    // IPC server-side implementation
 ├─test                        // Test code
 └─utils                       // Utilities
 ```
