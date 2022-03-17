@@ -91,7 +91,7 @@ int32_t DnsResolverServiceStub::OnGetAddrInfo(MessageParcel &data, MessageParcel
     std::vector<sptr<DnsAddrInfo>> dnsAddrInfo;
     int32_t ret = GetAddrInfo(hostname, server, hints, dnsAddrInfo);
 
-    int32_t vsize = dnsAddrInfo.size();
+    int32_t vsize = static_cast<int32_t>(dnsAddrInfo.size());
     if (!reply.WriteInt32(vsize)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
@@ -204,7 +204,7 @@ int32_t DnsResolverServiceStub::OnGetResolverInfo(MessageParcel &data, MessagePa
     }
     int32_t ret = GetResolverInfo(netId, servers, domains, baseTimeoutMsec, retryCount);
 
-    int32_t vsize = servers.size();
+    int32_t vsize = static_cast<int32_t>(servers.size());
     if (!reply.WriteInt32(vsize)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
@@ -214,7 +214,7 @@ int32_t DnsResolverServiceStub::OnGetResolverInfo(MessageParcel &data, MessagePa
         }
     }
 
-    vsize = domains.size();
+    vsize = static_cast<int32_t>(domains.size());
     if (!reply.WriteInt32(vsize)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

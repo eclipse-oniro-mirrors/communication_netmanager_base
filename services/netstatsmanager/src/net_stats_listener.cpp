@@ -56,7 +56,8 @@ void NetStatsListener::OnReceiveEvent(const CommonEventData &data)
         }
     } else if (eventName.compare((EventFwk::CommonEventSupport::COMMON_EVENT_UID_REMOVED).c_str()) == 0) {
         NETMGR_LOG_I("usual.event.UID_REMOVED");
-        uint32_t uid = std::stoi(data.GetWant().GetStringParam(EVENT_DATA_DELETED_UID_PARAM.c_str()));
+        uint32_t uid =
+            static_cast<uint32_t>(std::stoi(data.GetWant().GetStringParam(EVENT_DATA_DELETED_UID_PARAM.c_str())));
         sptr<NetStatsCsv> statsCsv = (std::make_unique<NetStatsCsv>()).release();
         statsCsv->DeleteUidStatsCsv(uid);
         NETMGR_LOG_I("Net Manager delete uid, uid:[%{public}d]", uid);
