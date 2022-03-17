@@ -205,7 +205,7 @@ int32_t DnsResolverServiceProxy::SetResolverConfig(int32_t netId, uint16_t baseT
     if (!data.WriteUint8(retryCount)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
-    int32_t vsize = servers.size();
+    int32_t vsize = static_cast<int32_t>(servers.size());
     if (!data.WriteInt32(vsize)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
@@ -214,7 +214,7 @@ int32_t DnsResolverServiceProxy::SetResolverConfig(int32_t netId, uint16_t baseT
             return NETMANAGER_ERR_WRITE_DATA_FAIL;
         }
     }
-    vsize = domains.size();
+    vsize = static_cast<int32_t>(domains.size());
     if (!data.WriteInt32(vsize)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
