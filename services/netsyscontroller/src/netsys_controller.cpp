@@ -516,7 +516,7 @@ int32_t NetsysController::EnableVirtualNetIfaceCard(int32_t socketFd, struct ifr
 int32_t NetsysController::SetIpAddress(int32_t socketFd, const std::string &ipAddress, int32_t prefixLen,
     struct ifreq &ifRequest)
 {
-    NETMGR_LOG_D("NetsysController::SetIpAddress: socketFd[%{public}d]", socketFd);
+    NETMGR_LOG_D("NetsysController::set addr");
     if ((socketFd <= 0) || (ipAddress.length() == 0) || (ipAddress.length() > MAX_IPV4_ADDRESS_LEN) ||
         (prefixLen <= 0) || (prefixLen > MAX_IPV4_ADDRESS_LEN)) {
         NETMGR_LOG_E("The paramemters of SetIpAddress is failed, socketFd[%{public}d], "
