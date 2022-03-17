@@ -163,13 +163,13 @@ int32_t NetsysNativeServiceStub::CmdGetResolverConfig(MessageParcel &data, Messa
     reply.WriteInt32(result);
     reply.WriteUint16(resParams.baseTimeoutMsec);
     reply.WriteUint8(resParams.retryCount);
-    int32_t vServerSize = servers.size();
+    int32_t vServerSize = static_cast<int32_t>(servers.size());
     reply.WriteInt32(vServerSize);
     std::vector<std::string>::iterator iterServers;
     for (iterServers = servers.begin(); iterServers != servers.end(); iterServers++) {
         reply.WriteString(*iterServers);
     }
-    int32_t vDomainsSize = domains.size();
+    int32_t vDomainsSize = static_cast<int32_t>(domains.size());
     reply.WriteInt32(vDomainsSize);
     std::vector<std::string>::iterator iterDomains;
     for (iterDomains = domains.begin(); iterDomains != domains.end(); iterDomains++) {
@@ -563,7 +563,7 @@ int32_t NetsysNativeServiceStub::CmdInterfaceGetConfig(MessageParcel &data, Mess
     reply.WriteString(cfg.hwAddr);
     reply.WriteString(cfg.ipv4Addr);
     reply.WriteInt32(cfg.prefixLength);
-    int32_t vsize = cfg.flags.size();
+    int32_t vsize = static_cast<int32_t>(cfg.flags.size());
     reply.WriteInt32(vsize);
     std::vector<std::string>::iterator iter;
     for (iter = cfg.flags.begin(); iter != cfg.flags.end(); iter++) {

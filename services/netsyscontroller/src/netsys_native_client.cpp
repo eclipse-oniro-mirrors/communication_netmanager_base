@@ -664,9 +664,9 @@ int32_t NetsysNativeClient::SetBlocking(int32_t ifaceFd, bool isBlock)
     }
 
     if (!isBlock) {
-        blockingFlag = blockingFlag | O_NONBLOCK;
+        blockingFlag = static_cast<int>(static_cast<uint32_t>(blockingFlag) | static_cast<uint32_t>(O_NONBLOCK));
     } else {
-        blockingFlag = blockingFlag & (~O_NONBLOCK);
+        blockingFlag = static_cast<int>(static_cast<uint32_t>(blockingFlag) | static_cast<uint32_t>(~O_NONBLOCK));
     }
 
     if (fcntl(ifaceFd, F_SETFL, blockingFlag) < 0) {

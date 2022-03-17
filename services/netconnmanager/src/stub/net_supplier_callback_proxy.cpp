@@ -61,7 +61,7 @@ int32_t NetSupplierCallbackProxy::ReleaseNetwork(const std::string &ident, const
         return ERR_FLATTEN_OBJECT;
     }
     data.WriteString(ident);
-    uint32_t size = static_cast<int32_t>(netCaps.size());
+    uint32_t size = static_cast<uint32_t>(netCaps.size());
     data.WriteUint32(size);
     for (auto netCap : netCaps) {
         data.WriteInt32(static_cast<uint32_t>(netCap));
