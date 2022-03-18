@@ -90,7 +90,6 @@ int32_t NetsysNativeServiceStub::CmdSetResolverConfigParcel(MessageParcel &data,
     auto resolvParamsParcel = DnsresolverParamsParcel::Unmarshalling(data);
     NETNATIVE_LOGI("Begin to CmdSetResolverConfig %{public}d", resolvParamsParcel->retryCount_);
     int32_t result = SetResolverConfigParcel(*resolvParamsParcel);
-    delete resolvParamsParcel;
     reply.WriteInt32(result);
     NETNATIVE_LOGI("SetResolverConfig has recved result %{public}d", result);
 
