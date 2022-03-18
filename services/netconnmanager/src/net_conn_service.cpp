@@ -486,7 +486,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier,
     NETMGR_LOG_D("ActivateNetwork  reqId is [%{public}d]", reqId);
     netActivates_.insert(std::pair<uint32_t, sptr<NetActivate>>(reqId, request));
     sptr<NetSupplier> bestNet = nullptr;
-    int bestscore = static_cast<int>(FindBestNetworkForRequest(bestNet, request));
+    int bestscore = FindBestNetworkForRequest(bestNet, request);
     if (bestscore != 0 && bestNet != nullptr) {
         NETMGR_LOG_D("The bestscore is: [%{public}d]", bestscore);
         bestNet->SelectAsBestNetwork(reqId);
@@ -714,7 +714,7 @@ void NetConnService::FindBestNetworkForAllRequest()
         if (!iterActive->second) {
             continue;
         }
-        int score = static_cast<int>(FindBestNetworkForRequest(bestSupplier, iterActive->second));
+        int score = FindBestNetworkForRequest(bestSupplier, iterActive->second);
         NETMGR_LOG_D("bestSupplier is: [%{public}d, %{public}s]", bestSupplier ? bestSupplier->GetSupplierId() : 0,
             bestSupplier ? bestSupplier->GetNetSupplierIdent().c_str() : "null");
         if (iterActive->second == defaultNetActivate_) {

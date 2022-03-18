@@ -56,7 +56,7 @@ bool IfaceNameValidCheck(const std::string &name)
         return false;
     }
 
-    int len = static_cast<int>(name.size());
+    int len = name.size();
     if (len > 16) { /* 16: interface name min size. */
         return false;
     }

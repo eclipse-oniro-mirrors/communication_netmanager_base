@@ -21,7 +21,7 @@ namespace OHOS {
 namespace NetsysNative {
 using namespace  std;
 NetsysAddrInfoParcel::NetsysAddrInfoParcel(const struct addrinfo* addr, const uint16_t netId,
-    const char *Node, const char *Service): Head(nullptr)
+    const char *Node, const char *Service)
 {
     NETNATIVE_LOGE("Construct   begin");
     ai_family=addr->ai_family;
@@ -43,7 +43,7 @@ NetsysAddrInfoParcel::NetsysAddrInfoParcel(const struct addrinfo* addr, const ui
         service="";
     }
     NETNATIVE_LOGE("Construct   over");
-}
+};
 
 bool NetsysAddrInfoParcel::Marshalling(Parcel &parcel) const
 {
@@ -103,15 +103,12 @@ sptr<NetsysAddrInfoParcel> NetsysAddrInfoParcel::Unmarshalling(Parcel &parcel)
         addrints.ai_family = parcelMsg->ReadInt16();
         addrints.ai_socktype = parcelMsg->ReadInt16();
         addrints.ai_protocol = parcelMsg->ReadInt16();
-        addrints.ai_addrlen = static_cast<socklen_t>(parcelMsg->ReadUint32());
+        addrints.ai_addrlen = parcelMsg->ReadUint32();
         int canSize = parcelMsg->ReadInt16();
         addrints.ai_canonname = NULL;
         const uint8_t *buffer1 = canSize > 0?parcelMsg->ReadBuffer(canSize):nullptr;
         if (buffer1 != nullptr) {
-            int copyRet = memcpy_s(addrints.ai_canonname, canSize, buffer1, canSize);
-            if (copyRet != 0) {
-                NETNATIVE_LOGE("copyRet = %{public}d", copyRet);
-            }
+            memcpy_s(addrints.ai_canonname, canSize, buffer1, canSize);
         }
         addrints.ai_addr = (struct  sockaddr *) parcelMsg->ReadRawData(sizeof(struct sockaddr));
         addrints.ai_next = NULL;

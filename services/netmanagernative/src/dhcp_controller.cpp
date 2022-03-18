@@ -20,9 +20,6 @@
 namespace OHOS {
 namespace nmd {
 constexpr int32_t DHCP_TIMEOUT = 300;
-static constexpr const char *DEFAULT_STR_SUBNET = "255.255.255.0";
-static constexpr const char *DEFAULT_STR_STARTIP = ".3";
-static constexpr const char *DEFAULT_STR_ENDIP = ".254";
 DhcpController::DhcpControllerResultNotify::DhcpControllerResultNotify(DhcpController &dhcpController)
     : dhcpController_(dhcpController)
 {
@@ -117,9 +114,9 @@ ipv4addr)
     std::string ipHead = ipAddr.substr(0, pos);
     OHOS::Wifi::DhcpRange range;
     range.iptype = IP_V4;
-    range.strStartip = ipHead + DEFAULT_STR_STARTIP;
-    range.strEndip = ipHead + DEFAULT_STR_ENDIP;
-    range.strSubnet = DEFAULT_STR_SUBNET;
+    range.strStartip = ipHead + ".3";
+    range.strEndip = ipHead + ".254";
+    range.strSubnet = "255.255.255.0";
     range.strTagName = iface;
     if (dhcpService_->SetDhcpRange(iface, range) != 0) {
         return false;

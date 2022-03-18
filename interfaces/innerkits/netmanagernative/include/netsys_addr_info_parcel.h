@@ -26,9 +26,9 @@ namespace OHOS {
 namespace NetsysNative {
 struct  NetsysAddrInfoParcel  final  : public Parcelable {
 public:
-    NetsysAddrInfoParcel() = default;
+    NetsysAddrInfoParcel() {};
     NetsysAddrInfoParcel(const  struct addrinfo* addr, const  uint16_t netId, const char *Node, const char *Service);
-    ~NetsysAddrInfoParcel() = default;
+    ~NetsysAddrInfoParcel() {};
     struct addrinfo  *Head;
     int32_t   ai_family;
     int32_t   ai_socktype;

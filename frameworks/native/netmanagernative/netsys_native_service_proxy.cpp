@@ -65,7 +65,7 @@ int32_t NetsysNativeServiceProxy::SetResolverConfig(const DnsresolverParams &res
         return ERR_FLATTEN_OBJECT;
     }
 
-    int32_t vServerSize1 = static_cast<int32_t>(resolvParams.servers.size());
+    int32_t vServerSize1 = resolvParams.servers.size();
     if (!data.WriteInt32(vServerSize1)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -77,7 +77,7 @@ int32_t NetsysNativeServiceProxy::SetResolverConfig(const DnsresolverParams &res
         data.WriteString(*it);
     }
 
-    int vDomainSize1 = static_cast<int>(resolvParams.domains.size());
+    int vDomainSize1 = resolvParams.domains.size();
     if (!data.WriteInt32(vDomainSize1)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -671,7 +671,7 @@ int32_t NetsysNativeServiceProxy::InterfaceSetConfig(const InterfaceConfiguratio
     if (!data.WriteInt32(cfg.prefixLength)) {
         return ERR_FLATTEN_OBJECT;
     }
-    int32_t vsize = static_cast<int32_t>(cfg.flags.size());
+    int32_t vsize = cfg.flags.size();
     if (!data.WriteInt32(vsize)) {
         return ERR_FLATTEN_OBJECT;
     }

@@ -661,8 +661,8 @@ napi_value NapiNetStats::GetIfaceStats(napi_env env, napi_callback_info info)
     NAPI_ASSERT(env, MatchGetIfaceStats(env, argv, argc), "type mismatch");
     NetStatsAsyncContext *context = std::make_unique<NetStatsAsyncContext>().release();
     context->interfaceName = NapiCommon::GetNapiStringValue(env, argv[ARGV_INDEX_0], "iface");
-    context->start = static_cast<uint32_t>(NapiCommon::GetNapiInt32Value(env, argv[ARGV_INDEX_0], "startTime"));
-    context->end = static_cast<uint32_t>(NapiCommon::GetNapiInt32Value(env, argv[ARGV_INDEX_0], "endTime"));
+    context->start = NapiCommon::GetNapiInt32Value(env, argv[ARGV_INDEX_0], "startTime");
+    context->end = NapiCommon::GetNapiInt32Value(env, argv[ARGV_INDEX_0], "endTime");
     napi_value result = nullptr;
     if (argc == ARGV_NUM_1) {
         if (!context->callbackRef) {
@@ -723,8 +723,8 @@ napi_value NapiNetStats::GetIfaceUidStats(napi_env env, napi_callback_info info)
     context->uid = NapiCommon::GetNapiInt32Value(env, argv[ARGV_INDEX_0], "uid");
     napi_value ifaceInfoValue = NapiCommon::GetNamedProperty(env, argv[ARGV_INDEX_0], "ifaceInfo");
     context->interfaceName = NapiCommon::GetNapiStringValue(env, ifaceInfoValue, "iface");
-    context->start = static_cast<uint32_t>(NapiCommon::GetNapiInt32Value(env, ifaceInfoValue, "startTime"));
-    context->end = static_cast<uint32_t>(NapiCommon::GetNapiInt32Value(env, ifaceInfoValue, "endTime"));
+    context->start = NapiCommon::GetNapiInt32Value(env, ifaceInfoValue, "startTime");
+    context->end = NapiCommon::GetNapiInt32Value(env, ifaceInfoValue, "endTime");
     napi_value result = nullptr;
     if (argc == ARGV_NUM_1) {
         if (!context->callbackRef) {

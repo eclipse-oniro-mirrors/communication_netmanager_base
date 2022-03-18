@@ -141,8 +141,7 @@ int32_t Network::Ipv4PrefixLen(const std::string &ip)
     if (ret != sizeof(int32_t)) {
         return 0;
     }
-    ipNum = (c1 << static_cast<uint32_t>(BIT24)) | (c2 << static_cast<uint32_t>(BIT16)) |
-            (c3 << static_cast<uint32_t>(BIT8)) | c4;
+    ipNum = (c1 << BIT24) | (c2 << BIT16) | (c3 << BIT8) | c4;
     if (ipNum == 0xFFFFFFFF) {
         return BIT32;
     }

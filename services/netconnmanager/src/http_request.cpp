@@ -247,7 +247,7 @@ int32_t HttpRequest::DataCallback(char *data, size_t size, size_t nmemb, std::st
         return 0;
     }
 
-    int32_t writtenLen = static_cast<int32_t>(size * nmemb);
+    int32_t writtenLen = size * nmemb;
     strBuffer->append(data, writtenLen);
     return writtenLen;
 }

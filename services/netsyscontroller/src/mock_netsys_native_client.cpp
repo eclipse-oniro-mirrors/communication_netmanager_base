@@ -483,8 +483,7 @@ int32_t MockNetsysNativeClient::AddRoute(const std::string &ip, const std::strin
         NETMGR_LOG_E("MockNetsysNativeClient inet_aton gateWay[%{public}s]", gateWay.c_str());
         return -1;
     }
-    int copyRet = memcpy_s(&rt.rt_gateway, sizeof(rt.rt_gateway), &_sin, sizeof(struct sockaddr_in));
-    NETMGR_LOG_I("copyRet = %{public}d", copyRet);
+    memcpy_s(&rt.rt_gateway, sizeof(rt.rt_gateway), &_sin, sizeof(struct sockaddr_in));
     (reinterpret_cast<struct sockaddr_in*>(&rt.rt_dst))->sin_family=AF_INET;
     if (inet_aton(ip.c_str(), &((struct sockaddr_in*)&rt.rt_dst)->sin_addr) < 0) {
         NETMGR_LOG_E("MockNetsysNativeClient inet_aton ip[%{public}s]", ip.c_str());
@@ -605,6 +604,9 @@ int32_t MockNetsysNativeClient::EnableVirtualNetIfaceCard(int32_t socketFd, stru
 int32_t MockNetsysNativeClient::SetIpAddress(int32_t socketFd, const std::string &ipAddress, int32_t prefixLen,
     struct ifreq &ifRequest)
 {
+    NETMGR_LOG_D("MockNetsysNativeClient::SetIpAddress: socketFd[%{public}d], ipAddress[%{public}s], "
+        "prefixLen[%{public}d]",
+        socketFd, ipAddress.c_str(), prefixLen);
     return 0;
 }
 

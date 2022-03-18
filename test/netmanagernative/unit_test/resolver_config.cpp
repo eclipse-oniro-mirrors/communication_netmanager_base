@@ -154,8 +154,7 @@ void TestGetaddrinfo()
     hints.ai_socktype = SOCK_DGRAM;
     hints.ai_flags = AI_PASSIVE;
     hints.ai_protocol = 0;
-    int copyRet = strncpy_s(hostName, OHOS::nmd::MAX_NAME_LEN, "www.ifeng.com", strlen("www.ifeng.com") + 1);
-    NETNATIVE_LOGI("copyRet = %{public}d", copyRet);
+    strncpy_s(hostName, OHOS::nmd::MAX_NAME_LEN, "www.ifeng.com", strlen("www.ifeng.com") + 1);
     ret = netsysServiceK_->Getaddrinfo(hostName, NULL, &hints, &res1, 0);
     NETNATIVE_LOGE("NETSYS: Getaddrinfo   ret=%{public}d,HostName  %{public}s", ret, hostName);
     if (res1 == nullptr) {

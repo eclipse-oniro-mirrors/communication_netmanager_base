@@ -28,7 +28,7 @@ NetlinkMsg::NetlinkMsg(uint16_t flags, size_t maxBufLen, int pid)
         NETNATIVE_LOGE("[NetlinkMessage]: memset result %{public}d", result);
     }
     this->netlinkMessage->nlmsg_flags = NLM_F_REQUEST | NLM_F_ACK | flags;
-    this->netlinkMessage->nlmsg_pid = static_cast<uint32_t>(pid);
+    this->netlinkMessage->nlmsg_pid = pid;
     this->netlinkMessage->nlmsg_seq = 1;
 }
 
@@ -90,7 +90,7 @@ int NetlinkMsg::AddAttr(unsigned int type, void *data, size_t alen)
     struct rtattr *rta =
         (struct rtattr *)(((char *)this->netlinkMessage) + NLMSG_ALIGN(this->netlinkMessage->nlmsg_len));
     rta->rta_type = type;
-    rta->rta_len = static_cast<uint16_t>(len);
+    rta->rta_len = len;
 
     if (data != nullptr) {
         int32_t result = memcpy_s(RTA_DATA(rta), alen, data, alen);

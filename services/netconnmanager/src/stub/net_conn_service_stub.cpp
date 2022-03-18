@@ -473,7 +473,7 @@ int32_t NetConnServiceStub::OnGetSpecificNet(MessageParcel &data, MessageParcel 
         return ERR_FLATTEN_OBJECT;
     }
     if (ret == ERR_NONE) {
-        int32_t size = static_cast<int32_t>(netIdList.size());
+        int32_t size = netIdList.size();
         if (!reply.WriteInt32(size)) {
             return ERR_FLATTEN_OBJECT;
         }
@@ -496,7 +496,7 @@ int32_t NetConnServiceStub::OnGetAllNets(MessageParcel &data, MessageParcel &rep
         return ERR_FLATTEN_OBJECT;
     }
     if (ret == ERR_NONE) {
-        int32_t size = static_cast<int32_t>(netIdList.size());
+        int32_t size = netIdList.size();
         if (!reply.WriteInt32(size)) {
             return ERR_FLATTEN_OBJECT;
         }
@@ -613,7 +613,7 @@ int32_t NetConnServiceStub::OnGetAddressesByName(MessageParcel &data, MessagePar
         return ERR_FLATTEN_OBJECT;
     }
     if (ret == ERR_NONE) {
-        int32_t size = static_cast<int32_t>(addrList.size());
+        int32_t size = addrList.size();
         if (!reply.WriteInt32(size)) {
             return ERR_FLATTEN_OBJECT;
         }

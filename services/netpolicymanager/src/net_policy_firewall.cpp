@@ -71,7 +71,7 @@ bool NetPolicyFirewall::GetBackgroundPolicyByUid(uint32_t uid)
 
 NetBackgroundPolicy NetPolicyFirewall::GetCurrentBackgroundPolicy()
 {
-    uint32_t uid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
+    uint32_t uid = IPCSkeleton::GetCallingUid();
     NetUidPolicy policy = netPolicyFile_->GetPolicyByUid(uid);
     if ((static_cast<uint32_t>(policy) &
         static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND)) ==
