@@ -230,9 +230,9 @@ int32_t NetsysNativeServiceStub::CmdGetaddrinfo(MessageParcel &data, MessageParc
 {
     NETNATIVE_LOGI("Begin to dispatch cmd Getaddrinfo");
     struct addrinfo hints;
-    struct addrinfo *result;
+    struct addrinfo *result = nullptr;
     uint16_t netid;
-    struct addrinfo *res_p1;
+    struct addrinfo *res_p1 = nullptr;
     int addr_size = 0;
     bzero(&hints, sizeof(addrinfo));
     hints.ai_family = data.ReadInt16();
