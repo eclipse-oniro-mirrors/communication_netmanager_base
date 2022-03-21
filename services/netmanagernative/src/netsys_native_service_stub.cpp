@@ -90,7 +90,6 @@ int32_t NetsysNativeServiceStub::CmdSetResolverConfigParcel(MessageParcel &data,
     auto resolvParamsParcel = DnsresolverParamsParcel::Unmarshalling(data);
     NETNATIVE_LOGI("Begin to CmdSetResolverConfig %{public}d", resolvParamsParcel->retryCount_);
     int32_t result = SetResolverConfigParcel(*resolvParamsParcel);
-    delete resolvParamsParcel;
     reply.WriteInt32(result);
     NETNATIVE_LOGI("SetResolverConfig has recved result %{public}d", result);
 
@@ -231,9 +230,9 @@ int32_t NetsysNativeServiceStub::CmdGetaddrinfo(MessageParcel &data, MessageParc
 {
     NETNATIVE_LOGI("Begin to dispatch cmd Getaddrinfo");
     struct addrinfo hints;
-    struct addrinfo *result;
+    struct addrinfo *result = nullptr;
     uint16_t netid;
-    struct addrinfo *res_p1;
+    struct addrinfo *res_p1 = nullptr;
     int addr_size = 0;
     bzero(&hints, sizeof(addrinfo));
     hints.ai_family = data.ReadInt16();
