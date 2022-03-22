@@ -38,7 +38,7 @@ int32_t NetStatsEventListenerManager::AddEventListener(EventListener &eventListe
 
 int32_t NetStatsEventListenerManager::RemoveEventListener(EventListener &eventListener)
 {
-    for (std::list<EventListener>::iterator it = listenerList.begin(); it != listenerList.end(); it++) {
+    for (std::list<EventListener>::iterator it = listenerList.begin(); it != listenerList.end(); ++it) {
         if (it->env != nullptr && it->callbackRef != nullptr) {
             napi_delete_reference(it->env, it->callbackRef);
         }
