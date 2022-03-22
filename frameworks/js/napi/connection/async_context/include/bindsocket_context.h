@@ -13,42 +13,30 @@
  * limitations under the License.
  */
 
-#ifndef COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H
-#define COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H
+#ifndef NETMANAGER_BASE_BINDSOCKET_CONTEXT_H
+#define NETMANAGER_BASE_BINDSOCKET_CONTEXT_H
 
 #include "napi/native_api.h"
-#include "net_handle.h"
 #include "netmanager_base_base_context.h"
 #include "nocopyable.h"
 
 namespace OHOS::NetManagerStandard {
-class GetDefaultNetContext final : public BaseContext {
+class BindSocketContext final : public BaseContext {
 public:
-    DISALLOW_COPY_AND_MOVE(GetDefaultNetContext);
+    DISALLOW_COPY_AND_MOVE(BindSocketContext);
 
-    GetDefaultNetContext() = delete;
+    BindSocketContext() = delete;
 
-    explicit GetDefaultNetContext(napi_env env, EventManager *manager);
+    explicit BindSocketContext(napi_env env, EventManager *manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
-    // for GetDefaultNet
-    NetHandle netHandle;
+    int32_t netId;
 
-    // for HasDefaultNet
-    bool hasDefaultNet;
-
-    // for GetAllNets
-    std::list<sptr<NetHandle>> netHandleList;
+    int socketFd;
 
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
 };
-
-using HasDefaultNetContext = GetDefaultNetContext;
-using GetAllNetsContext = GetDefaultNetContext;
-using EnableAirplaneModeContext = GetDefaultNetContext;
-using DisableAirplaneModeContext = GetDefaultNetContext;
 } // namespace OHOS::NetManagerStandard
-
-#endif /* COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H */
+#endif /* NETMANAGER_BASE_BINDSOCKET_CONTEXT_H */

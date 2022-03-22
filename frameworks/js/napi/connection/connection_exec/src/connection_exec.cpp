@@ -15,6 +15,7 @@
 
 #include "connection_exec.h"
 
+#include "connection_module.h"
 #include "constant.h"
 #include "net_conn_callback_observer.h"
 #include "net_conn_client.h"
@@ -25,7 +26,77 @@
 
 static constexpr const int MAX_HOST_LEN = 256;
 
+static constexpr const size_t MAX_ARRAY_LENGTH = 64;
+
 namespace OHOS::NetManagerStandard {
+napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
+{
+    napi_value netHandle = NapiUtils::CreateObject(env);
+    if (NapiUtils::GetValueType(env, netHandle) != napi_object) {
+        return NapiUtils::GetUndefined(env);
+    }
+
+    std::initializer_list<napi_property_descriptor> properties = {
+        DECLARE_NAPI_FUNCTION(ConnectionModule::NetHandleInterface::FUNCTION_GET_ADDRESSES_BY_NAME,
+                              ConnectionModule::NetHandleInterface::GetAddressesByName),
+        DECLARE_NAPI_FUNCTION(ConnectionModule::NetHandleInterface::FUNCTION_GET_ADDRESS_BY_NAME,
+                              ConnectionModule::NetHandleInterface::GetAddressByName),
+        DECLARE_NAPI_FUNCTION(ConnectionModule::NetHandleInterface::FUNCTION_BIND_SOCKET,
+                              ConnectionModule::NetHandleInterface::BindSocket),
+    };
+    NapiUtils::DefineProperties(env, netHandle, properties);
+    NapiUtils::SetUint32Property(env, netHandle, ConnectionModule::NetHandleInterface::PROPERTY_NET_ID,
+                                 handle->GetNetId());
+    return netHandle;
+}
+
+napi_value ConnectionExec::CreateNetCapabilities(napi_env env, NetAllCapabilities *capabilities)
+{
+    napi_value netCapabilities = NapiUtils::CreateObject(env);
+    if (NapiUtils::GetValueType(env, netCapabilities) != napi_object) {
+        return NapiUtils::GetUndefined(env);
+    }
+
+    NapiUtils::SetUint32Property(env, netCapabilities, KEY_LINK_UP_BAND_WIDTH_KPS, capabilities->linkUpBandwidthKbps_);
+    NapiUtils::SetUint32Property(env, netCapabilities, KEY_LINK_DOWN_BAND_WIDTH_KPS,
+                                 capabilities->linkDownBandwidthKbps_);
+    NETMANAGER_BASE_LOGI("capabilities->netCaps_.size() = %{public}zu", capabilities->netCaps_.size());
+    if (!capabilities->netCaps_.empty() && capabilities->netCaps_.size() <= MAX_ARRAY_LENGTH) {
+        napi_value networkCap = NapiUtils::CreateArray(env, std::min(capabilities->netCaps_.size(), MAX_ARRAY_LENGTH));
+        auto it = capabilities->netCaps_.begin();
+        for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != capabilities->netCaps_.end(); ++index, ++it) {
+            NapiUtils::SetArrayElement(env, networkCap, index, NapiUtils::CreateUint32(env, *it));
+        }
+        NapiUtils::SetNamedProperty(env, netCapabilities, KEY_NETWORK_CAP, networkCap);
+    }
+    NETMANAGER_BASE_LOGI("capabilities->bearerTypes_.size() = %{public}zu", capabilities->bearerTypes_.size());
+    if (!capabilities->bearerTypes_.empty() && capabilities->bearerTypes_.size() <= MAX_ARRAY_LENGTH) {
+        napi_value bearerTypes =
+            NapiUtils::CreateArray(env, std::min(capabilities->bearerTypes_.size(), MAX_ARRAY_LENGTH));
+        auto it = capabilities->bearerTypes_.begin();
+        for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != capabilities->bearerTypes_.end(); ++index, ++it) {
+            NapiUtils::SetArrayElement(env, bearerTypes, index, NapiUtils::CreateUint32(env, *it));
+        }
+        NapiUtils::SetNamedProperty(env, netCapabilities, KEY_BEARER_TYPE, bearerTypes);
+    }
+    return netCapabilities;
+}
+
+napi_value ConnectionExec::CreateConnectionProperties(napi_env env, NetLinkInfo *linkInfo)
+{
+    napi_value connectionProperties = NapiUtils::CreateObject(env);
+    if (NapiUtils::GetValueType(env, connectionProperties) != napi_object) {
+        return NapiUtils::GetUndefined(env);
+    }
+    NapiUtils::SetStringPropertyUtf8(env, connectionProperties, KEY_INTERFACE_NAME, linkInfo->ifaceName_);
+    NapiUtils::SetStringPropertyUtf8(env, connectionProperties, KEY_DOMAINS, linkInfo->domain_);
+    NapiUtils::SetUint32Property(env, connectionProperties, KEY_MTU, linkInfo->mtu_);
+    FillLinkAddress(env, connectionProperties, linkInfo);
+    FillRouoteList(env, connectionProperties, linkInfo);
+    FillDns(env, connectionProperties, linkInfo);
+    return connectionProperties;
+}
+
 bool ConnectionExec::ExecGetAddressByName(GetAddressByNameContext *context)
 {
     return NetHandleExec::ExecGetAddressesByName(context);
@@ -43,7 +114,7 @@ bool ConnectionExec::ExecGetDefaultNet(GetDefaultNetContext *context)
 
 napi_value ConnectionExec::GetDefaultNetCallback(GetDefaultNetContext *context)
 {
-    return NetConnCallbackObserver::CreateNetHandle(context->GetEnv(), new NetHandle(context->netHandle));
+    return CreateNetHandle(context->GetEnv(), &context->netHandle);
 }
 
 bool ConnectionExec::ExecHasDefaultNet(HasDefaultNetContext *context)
@@ -64,8 +135,7 @@ bool ConnectionExec::ExecGetNetCapabilities(GetNetCapabilitiesContext *context)
 
 napi_value ConnectionExec::GetNetCapabilitiesCallback(GetNetCapabilitiesContext *context)
 {
-    return NetConnCallbackObserver::CreateNetCapabilities(context->GetEnv(),
-                                                          new NetAllCapabilities(context->capabilities));
+    return CreateNetCapabilities(context->GetEnv(), &context->capabilities);
 }
 
 bool ConnectionExec::ExecGetConnectionProperties(GetConnectionPropertiesContext *context)
@@ -76,7 +146,95 @@ bool ConnectionExec::ExecGetConnectionProperties(GetConnectionPropertiesContext 
 
 napi_value ConnectionExec::GetConnectionPropertiesCallback(GetConnectionPropertiesContext *context)
 {
-    return NetConnCallbackObserver::CreateConnectionProperties(context->GetEnv(), new NetLinkInfo(context->linkInfo));
+    return CreateConnectionProperties(context->GetEnv(), &context->linkInfo);
+}
+
+bool ConnectionExec::ExecGetAllNets(GetAllNetsContext *context)
+{
+    int32_t res = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(context->netHandleList);
+    if (res != 0) {
+        NETMANAGER_BASE_LOGE("ExecGetAllNets failed %{public}d", res);
+        context->SetErrorCode(res);
+    }
+    NETMANAGER_BASE_LOGE("ExecGetAllNets OK");
+    return res == 0;
+}
+
+napi_value ConnectionExec::GetAllNetsCallback(GetAllNetsContext *context)
+{
+    napi_value array = NapiUtils::CreateArray(context->GetEnv(), context->netHandleList.size());
+    uint32_t index = 0;
+    std::for_each(context->netHandleList.begin(), context->netHandleList.end(),
+                  [array, &index, context](const sptr<NetHandle> &handle) {
+                      NapiUtils::SetArrayElement(context->GetEnv(), array, index,
+                                                 CreateNetHandle(context->GetEnv(), handle.GetRefPtr()));
+                      ++index;
+                  });
+    return array;
+}
+
+bool ConnectionExec::ExecEnableAirplaneMode(EnableAirplaneModeContext *context)
+{
+    int32_t res = DelayedSingleton<NetConnClient>::GetInstance()->SetAirplaneMode(true);
+    if (res != 0) {
+        NETMANAGER_BASE_LOGE("ExecEnableAirplaneMode failed %{public}d", res);
+        context->SetErrorCode(res);
+    }
+    NETMANAGER_BASE_LOGE("ExecEnableAirplaneMode OK");
+    return res == 0;
+}
+
+napi_value ConnectionExec::EnableAirplaneModeCallback(EnableAirplaneModeContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+bool ConnectionExec::ExecDisableAirplaneMode(DisableAirplaneModeContext *context)
+{
+    int32_t res = DelayedSingleton<NetConnClient>::GetInstance()->SetAirplaneMode(false);
+    if (res != 0) {
+        NETMANAGER_BASE_LOGE("ExecDisableAirplaneMode failed %{public}d", res);
+        context->SetErrorCode(res);
+    }
+    NETMANAGER_BASE_LOGE("ExecDisableAirplaneMode OK");
+    return res == 0;
+}
+
+napi_value ConnectionExec::DisableAirplaneModeCallback(DisableAirplaneModeContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+bool ConnectionExec::ExecReportNetConnected(ReportNetConnectedContext *context)
+{
+    int32_t res = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(context->netHandle);
+    if (res != 0) {
+        NETMANAGER_BASE_LOGE("ExecReportNetConnected failed %{public}d", res);
+        context->SetErrorCode(res);
+    }
+    NETMANAGER_BASE_LOGE("ExecReportNetConnected OK");
+    return res == 0;
+}
+
+napi_value ConnectionExec::ReportNetConnectedCallback(ReportNetConnectedContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+bool ConnectionExec::ExecReportNetDisconnected(ReportNetConnectedContext *context)
+{
+    int32_t res = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(context->netHandle);
+    if (res != 0) {
+        NETMANAGER_BASE_LOGE("ExecReportNetDisconnected failed %{public}d", res);
+        context->SetErrorCode(res);
+    }
+    NETMANAGER_BASE_LOGE("ExecReportNetDisconnected OK");
+    return res == 0;
+}
+
+napi_value ConnectionExec::ReportNetDisconnectedCallback(ReportNetConnectedContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
 }
 
 bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameContext *context)
@@ -164,6 +322,23 @@ napi_value ConnectionExec::NetHandleExec::MakeNetAddressJsValue(napi_env env, co
     return obj;
 }
 
+bool ConnectionExec::NetHandleExec::ExecBindSocket(BindSocketContext *context)
+{
+    NetHandle handle(context->netId);
+    int32_t res = handle.BindSocket(context->socketFd);
+    if (res != 0) {
+        NETMANAGER_BASE_LOGE("ExecBindSocket failed %{public}d", res);
+        context->SetErrorCode(res);
+    }
+    NETMANAGER_BASE_LOGE("ExecBindSocket OK");
+    return res == 0;
+}
+
+napi_value ConnectionExec::NetHandleExec::BindSocketCallback(BindSocketContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
 void ConnectionExec::NetHandleExec::SetAddressInfo(const char *host, addrinfo *info, NetAddress &address)
 {
     address.SetAddress(host);
@@ -230,5 +405,73 @@ bool ConnectionExec::NetConnectionExec::ExecUnregister(UnregisterContext *contex
 napi_value ConnectionExec::NetConnectionExec::UnregisterCallback(RegisterContext *context)
 {
     return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+void ConnectionExec::FillLinkAddress(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo)
+{
+    NETMANAGER_BASE_LOGI("linkInfo->netAddrList_.size() = %{public}zu", linkInfo->netAddrList_.size());
+    if (!linkInfo->netAddrList_.empty() && linkInfo->netAddrList_.size() <= MAX_ARRAY_LENGTH) {
+        napi_value linkAddresses =
+            NapiUtils::CreateArray(env, std::min(linkInfo->netAddrList_.size(), MAX_ARRAY_LENGTH));
+        auto it = linkInfo->netAddrList_.begin();
+        for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != linkInfo->netAddrList_.end(); ++index, ++it) {
+            napi_value netAddr = NapiUtils::CreateObject(env);
+            NapiUtils::SetStringPropertyUtf8(env, netAddr, KEY_ADDRESS, it->address_);
+            NapiUtils::SetUint32Property(env, netAddr, KEY_FAMILY, it->family_);
+            NapiUtils::SetUint32Property(env, netAddr, KEY_PORT, it->port_);
+
+            napi_value linkAddr = NapiUtils::CreateObject(env);
+            NapiUtils::SetNamedProperty(env, linkAddr, KEY_ADDRESS, netAddr);
+            NapiUtils::SetUint32Property(env, linkAddr, KEY_PREFIX_LENGTH, it->prefixlen_);
+            NapiUtils::SetArrayElement(env, linkAddresses, index, linkAddr);
+        }
+        NapiUtils::SetNamedProperty(env, connectionProperties, KEY_LINK_ADDRESSES, linkAddresses);
+    }
+}
+
+void ConnectionExec::FillRouoteList(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo)
+{
+    NETMANAGER_BASE_LOGI("linkInfo->routeList_.size() = %{public}zu", linkInfo->routeList_.size());
+    if (!linkInfo->routeList_.empty() && linkInfo->routeList_.size() <= MAX_ARRAY_LENGTH) {
+        napi_value routes = NapiUtils::CreateArray(env, std::min(linkInfo->routeList_.size(), MAX_ARRAY_LENGTH));
+        auto it = linkInfo->routeList_.begin();
+        for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != linkInfo->routeList_.end(); ++index, ++it) {
+            napi_value route = NapiUtils::CreateObject(env);
+            NapiUtils::SetStringPropertyUtf8(env, route, KEY_INTERFACE, it->iface_);
+
+            napi_value dest = NapiUtils::CreateObject(env);
+            NapiUtils::SetStringPropertyUtf8(env, dest, KEY_ADDRESS, it->destination_.address_);
+            NapiUtils::SetUint32Property(env, dest, KEY_PREFIX_LENGTH, it->destination_.prefixlen_);
+            NapiUtils::SetNamedProperty(env, route, KEY_DESTINATION, dest);
+
+            napi_value gateway = NapiUtils::CreateObject(env);
+            NapiUtils::SetStringPropertyUtf8(env, gateway, KEY_ADDRESS, it->gateway_.address_);
+            NapiUtils::SetUint32Property(env, gateway, KEY_PREFIX_LENGTH, it->gateway_.prefixlen_);
+            NapiUtils::SetNamedProperty(env, route, KEY_GATE_WAY, gateway);
+
+            NapiUtils::SetBooleanProperty(env, route, KEY_HAS_GET_WAY, it->hasGateway_);
+            NapiUtils::SetBooleanProperty(env, route, KEY_IS_DEFAULT_ROUE, it->isDefaultRoute_);
+
+            NapiUtils::SetArrayElement(env, routes, index, route);
+        }
+        NapiUtils::SetNamedProperty(env, connectionProperties, KEY_ROUTES, routes);
+    }
+}
+
+void ConnectionExec::FillDns(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo)
+{
+    NETMANAGER_BASE_LOGI("linkInfo->dnsList_.size() = %{public}zu", linkInfo->dnsList_.size());
+    if (!linkInfo->dnsList_.empty() && linkInfo->dnsList_.size() <= MAX_ARRAY_LENGTH) {
+        napi_value dnsList = NapiUtils::CreateArray(env, std::min(linkInfo->dnsList_.size(), MAX_ARRAY_LENGTH));
+        auto it = linkInfo->dnsList_.begin();
+        for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != linkInfo->dnsList_.end(); ++index, ++it) {
+            napi_value netAddr = NapiUtils::CreateObject(env);
+            NapiUtils::SetStringPropertyUtf8(env, netAddr, KEY_ADDRESS, it->address_);
+            NapiUtils::SetUint32Property(env, netAddr, KEY_FAMILY, it->family_);
+            NapiUtils::SetUint32Property(env, netAddr, KEY_PORT, it->port_);
+            NapiUtils::SetArrayElement(env, dnsList, index, netAddr);
+        }
+        NapiUtils::SetNamedProperty(env, connectionProperties, KEY_DNSES, dnsList);
+    }
 }
 } // namespace OHOS::NetManagerStandard

@@ -62,6 +62,8 @@ static constexpr const char *KEY_NET_CAP = "netCap";
 static constexpr const char *KEY_CONNECTION_PROPERTIES = "connectionProperties";
 static constexpr const char *KEY_NET_ID = "netId";
 
+static constexpr const char *KEY_SOCKET_FD = "socketFd";
+
 enum {
     ARG_NUM_0,
     ARG_NUM_1,

@@ -46,6 +46,8 @@ private:
 
 using GetNetCapabilitiesContext = ParseNetHandleContext;
 using GetConnectionPropertiesContext = ParseNetHandleContext;
+using ReportNetConnectedContext = ParseNetHandleContext;
+using ReportNetDisconnectedContext = ParseNetHandleContext;
 } // namespace OHOS::NetManagerStandard
 
 #endif /* NETMANAGER_BASE_PARSE_NETHANDLE_CONTEXT_H */

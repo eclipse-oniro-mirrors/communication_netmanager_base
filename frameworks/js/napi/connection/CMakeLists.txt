@@ -29,5 +29,6 @@ add_library(connection SHARED
     connection_module/src/connection_module.cpp
     options/src/netconnection.cpp
     async_context/src/register_context.cpp
+    async_context/src/bindsocket_context.cpp
     observer/src/net_conn_callback_observer.cpp
     )
