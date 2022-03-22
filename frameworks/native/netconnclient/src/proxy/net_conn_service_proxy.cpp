@@ -730,7 +730,9 @@ int32_t NetConnServiceProxy::GetConnectionProperties(int32_t netId, NetLinkInfo 
     }
     if (ret == ERR_NONE) {
         sptr<NetLinkInfo> netLinkInfo_ptr = NetLinkInfo::Unmarshalling(reply);
-        info = *netLinkInfo_ptr;
+        if (netLinkInfo_ptr != nullptr) {
+            info = *netLinkInfo_ptr;
+        }
     }
     return ret;
 }
@@ -838,7 +840,9 @@ int32_t NetConnServiceProxy::GetAddressesByName(const std::string &host, int32_t
         }
         for (int32_t i = 0; i < size; ++i) {
             sptr<INetAddr> netaddr_ptr = INetAddr::Unmarshalling(reply);
-            addrList.push_back(*netaddr_ptr);
+            if (netaddr_ptr != nullptr) {
+                addrList.push_back(*netaddr_ptr);
+            }
         }
     }
     return ret;
@@ -878,7 +882,9 @@ int32_t NetConnServiceProxy::GetAddressByName(const std::string &host, int32_t n
     }
     if (ret == ERR_NONE) {
         sptr<INetAddr> netaddr_ptr = INetAddr::Unmarshalling(reply);
-        addr = *netaddr_ptr;
+        if (netaddr_ptr != nullptr) {
+            addr = *netaddr_ptr;
+        }
     }
     return ret;
 }

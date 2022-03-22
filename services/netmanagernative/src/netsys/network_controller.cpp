@@ -26,8 +26,7 @@ namespace {
 
 NetworkController::~NetworkController()
 {
-    std::map<int, NmdNetwork *>::iterator it = networks.begin();
-    for (it = networks.begin(); it != networks.end(); ++it) {
+    for (std::map<int, NmdNetwork *>::iterator it = networks.begin(); it != networks.end(); ++it) {
         delete it->second;
     }
 }
