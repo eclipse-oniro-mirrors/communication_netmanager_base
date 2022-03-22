@@ -66,7 +66,9 @@ int32_t DnsResolverServiceProxy::GetAddressesByName(const std::string &hostName,
     }
     for (int32_t i = 0; i < vsize; ++i) {
         sptr<INetAddr> addr = INetAddr::Unmarshalling(reply);
-        addrInfo.push_back(*addr);
+        if (addr != nullptr) {
+            addrInfo.push_back(*addr);
+        }
     }
     return reply.ReadInt32();
 }

@@ -176,11 +176,9 @@ void NapiNetStats::CompleteUpdateIfacesStats(napi_env env, napi_status status, v
     if (context->callbackRef == nullptr) {
         if (context->result != static_cast<int32_t>(NetStatsResultCode::ERR_NONE)) {
             napi_create_int32(env, context->result, &info);
-            callbackValues[0] = info;
             NAPI_CALL_RETURN_VOID(env, napi_reject_deferred(env, context->deferred, info));
         } else {
             napi_create_int32(env, context->result, &info);
-            callbackValues[1] = info;
             NAPI_CALL_RETURN_VOID(env, napi_resolve_deferred(env, context->deferred, info));
         }
     } else {
@@ -189,6 +187,10 @@ void NapiNetStats::CompleteUpdateIfacesStats(napi_env env, napi_status status, v
         napi_value callbackFunc = nullptr;
         napi_get_undefined(env, &recv);
         napi_get_reference_value(env, context->callbackRef, &callbackFunc);
+        napi_value err = nullptr;
+        napi_get_undefined(env, &err);
+        callbackValues[0] = err;
+        callbackValues[1] = info;
         napi_call_function(env, recv, callbackFunc, std::size(callbackValues), callbackValues, &result);
         napi_delete_reference(env, context->callbackRef);
     }
@@ -210,11 +212,9 @@ void NapiNetStats::CompleteUpdateStatsData(napi_env env, napi_status status, voi
     if (context->callbackRef == nullptr) {
         if (context->result != static_cast<int32_t>(NetStatsResultCode::ERR_NONE)) {
             napi_create_int32(env, context->result, &info);
-            callbackValues[0] = info;
             NAPI_CALL_RETURN_VOID(env, napi_reject_deferred(env, context->deferred, info));
         } else {
             napi_create_int32(env, context->result, &info);
-            callbackValues[1] = info;
             NAPI_CALL_RETURN_VOID(env, napi_resolve_deferred(env, context->deferred, info));
         }
     } else {
@@ -223,6 +223,10 @@ void NapiNetStats::CompleteUpdateStatsData(napi_env env, napi_status status, voi
         napi_value callbackFunc = nullptr;
         napi_get_undefined(env, &recv);
         napi_get_reference_value(env, context->callbackRef, &callbackFunc);
+        napi_value err = nullptr;
+        napi_get_undefined(env, &err);
+        callbackValues[0] = err;
+        callbackValues[1] = info;
         napi_call_function(env, recv, callbackFunc, std::size(callbackValues), callbackValues, &result);
         napi_delete_reference(env, context->callbackRef);
     }

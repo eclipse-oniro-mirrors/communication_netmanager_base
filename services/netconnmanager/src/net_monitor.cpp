@@ -191,10 +191,9 @@ int32_t NetMonitor::GetUrlRedirectFromResponse(const std::string &strResponse, s
     }
 
     std::string::size_type startPos = strResponse.find(PORTAL_URL_REDIRECT_FIRST_CASE);
-    std::string::size_type endPos = 0;
     if (startPos != std::string::npos) {
         startPos += PORTAL_URL_REDIRECT_FIRST_CASE.length();
-        endPos = strResponse.find(PORTAL_END_STR);
+        std::string::size_type endPos = strResponse.find(PORTAL_END_STR);
         if (endPos != std::string::npos) {
             urlRedirect = strResponse.substr(startPos, endPos - startPos);
         }
@@ -204,7 +203,7 @@ int32_t NetMonitor::GetUrlRedirectFromResponse(const std::string &strResponse, s
     startPos = strResponse.find(PORTAL_URL_REDIRECT_SECOND_CASE);
     if (startPos != std::string::npos) {
         startPos += PORTAL_URL_REDIRECT_SECOND_CASE.length();
-        endPos = strResponse.find(PORTAL_END_STR);
+        std::string::size_type endPos = strResponse.find(PORTAL_END_STR);
         if (endPos != std::string::npos) {
             urlRedirect = strResponse.substr(startPos, endPos - startPos);
         }

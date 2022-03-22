@@ -247,6 +247,9 @@ napi_value NapiCommon::HandleAsyncWork(napi_env env, BaseContext *baseContext, c
         std::string errorCode = std::to_string(napi_invalid_arg);
         std::string errorMessage = "error at baseContext is nullptr";
         NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        napi_value res = nullptr;
+        NAPI_CALL(env, napi_get_undefined(env, &res));
+        return res;
     }
     napi_value result = nullptr;
     if (context->callbackRef == nullptr) {
@@ -281,6 +284,7 @@ void NapiCommon::Handle1ValueCallback(napi_env env, BaseContext *baseContext, na
         std::string errorCode = std::to_string(napi_invalid_arg);
         std::string errorMessage = "error at baseContext is nullptr";
         NAPI_CALL_RETURN_VOID(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return;
     }
     if (baseContext->callbackRef != nullptr) {
         NETMGR_LOG_I("Handle1ValueCallback start normal callback");
@@ -306,7 +310,6 @@ void NapiCommon::Handle1ValueCallback(napi_env env, BaseContext *baseContext, na
     }
     napi_delete_async_work(env, baseContext->work);
     delete baseContext;
-    baseContext = nullptr;
     NETMGR_LOG_I("Handle1ValueCallback end");
 }
 
@@ -318,6 +321,7 @@ void NapiCommon::Handle2ValueCallback(napi_env env, BaseContext *baseContext, na
         std::string errorCode = std::to_string(napi_invalid_arg);
         std::string errorMessage = "error at baseContext is nullptr";
         NAPI_CALL_RETURN_VOID(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return;
     }
     if (baseContext->callbackRef != nullptr) {
         NETMGR_LOG_I("Handle2ValueCallback start normal callback");
@@ -343,7 +347,6 @@ void NapiCommon::Handle2ValueCallback(napi_env env, BaseContext *baseContext, na
     }
     napi_delete_async_work(env, baseContext->work);
     delete baseContext;
-    baseContext = nullptr;
     NETMGR_LOG_I("Handle2ValueCallback end");
 }
 

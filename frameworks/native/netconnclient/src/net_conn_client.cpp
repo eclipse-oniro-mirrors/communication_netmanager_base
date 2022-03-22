@@ -187,9 +187,11 @@ int32_t NetConnClient::GetAllNets(std::list<sptr<NetHandle>> &netList)
         return result;
     }
     std::list<int32_t>::iterator iter;
-    for (iter = netIdList.begin(); iter != netIdList.end(); iter++) {
+    for (iter = netIdList.begin(); iter != netIdList.end(); ++iter) {
         sptr<NetHandle> netHandle = std::make_unique<NetHandle>(*iter).release();
-        netList.push_back(netHandle);
+        if (netHandle != nullptr) {
+            netList.push_back(netHandle);
+        }
     }
     return ERR_NONE;
 }

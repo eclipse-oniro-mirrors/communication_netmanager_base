@@ -209,6 +209,9 @@ int32_t NetsysNativeServiceProxy::Getaddrinfo(const char* node, const char* serv
     Remote()->SendRequest(INetsysService::NETSYS_GET_ADDR_INFO, data, reply, option);
     int ret;
     sptr<NetsysAddrInfoParcel>  ptr=addrParcel.Unmarshalling(reply);
+    if (ptr == nullptr) {
+        return ERR_NO_MEMORY;
+    }
     *result = ptr->Head;
     if (ptr->addrSize == 0) {
         *result=nullptr;
@@ -764,7 +767,7 @@ int32_t NetsysNativeServiceProxy::StopDhcpClient(const std::string &iface, bool 
     MessageParcel reply;
     MessageOption option;
     ret = Remote()->SendRequest(INetsysService::NETSYS_STOP_DHCP_CLIENT, data, reply, option);
-
+    NETNATIVE_LOGI("SendRequest, ret =%{public}d", ret);
     ret = reply.ReadInt32();
     NETNATIVE_LOGI("End to StopDhcpClient, ret =%{public}d", ret);
     return ret;
