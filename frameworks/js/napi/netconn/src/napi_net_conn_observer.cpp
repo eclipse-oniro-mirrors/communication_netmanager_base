@@ -44,7 +44,6 @@ static void OnNetCapabilitiesChangeEvent(
     napi_value recv = nullptr;
     napi_value result = nullptr;
     napi_value callbackFunc = nullptr;
-    std::string content;
     napi_create_object(listen.env, &info);
     napi_value handle = NapiNetConn::CreateNetHandle(listen.env, netHandle);
     napi_set_named_property(listen.env, info, "handle", handle);
@@ -64,7 +63,6 @@ static void OnNetConnectionPropertiesChangeEvent(
     napi_value recv = nullptr;
     napi_value result = nullptr;
     napi_value callbackFunc = nullptr;
-    std::string content;
     napi_create_object(listen.env, &info);
     napi_value handle = NapiNetConn::CreateNetHandle(listen.env, netHandle);
     napi_set_named_property(listen.env, info, "handle", handle);
@@ -163,7 +161,6 @@ int32_t NapiNetConnObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netH
 int32_t NapiNetConnObserver::NetLost(sptr<NetHandle> &netHandle)
 {
     NETMGR_LOG_I("NetLost netId [%{public}d]", netHandle->GetNetId());
-    std::unique_ptr<int32_t> id = std::make_unique<int32_t>(netHandle->GetNetId());
     EventListener listen;
     listen.eventId = EVENT_NET_LOST_CHANGE;
     if (EventListenerContext::GetInstance().FindListener(this, listen) != EVENT_NET_UNKNOW_CHANGE) {

@@ -84,7 +84,7 @@ bool NetAllCapabilities::Unmarshalling(Parcel &parcel)
         if (!parcel.ReadUint32(cap)) {
             return false;
         }
-        if ((cap < 0) || (cap >= NET_CAPABILITY_INTERNAL_DEFAULT)) {
+        if (cap >= NET_CAPABILITY_INTERNAL_DEFAULT) {
             continue;
         }
         netCaps_.insert(static_cast<NetCap>(cap));
@@ -97,7 +97,7 @@ bool NetAllCapabilities::Unmarshalling(Parcel &parcel)
         if (!parcel.ReadUint32(type)) {
             return false;
         }
-        if ((type < 0) || (type >= BEARER_DEFAULT)) {
+        if (type >= BEARER_DEFAULT) {
             continue;
         }
         bearerTypes_.insert(static_cast<NetBearType>(type));
