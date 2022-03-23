@@ -36,12 +36,13 @@ public:
 
     int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override;
 
+private:
     static napi_value CreateNetHandle(napi_env env, NetHandle *handle);
 
     static napi_value CreateNetCapabilities(napi_env env, NetAllCapabilities *capabilities);
 
     static napi_value CreateConnectionProperties(napi_env env, NetLinkInfo *linkInfo);
-private:
+
     template <napi_value (*MakeJsValue)(napi_env, void *)> static void CallbackTemplate(uv_work_t *work, int status)
     {
         (void)status;
