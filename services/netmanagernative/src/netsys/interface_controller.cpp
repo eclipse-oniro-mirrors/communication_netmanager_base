@@ -272,6 +272,7 @@ InterfaceConfigurationParcel InterfaceController::GetConfig(const std::string &i
     cfgResult.ifName = ifName;
     cfgResult.hwAddr = HwAddrToStr(hwaddr);
     cfgResult.ipv4Addr = std::string(inet_ntoa(addr));
+    cfgResult.prefixLength = prefixLength;
     cfgResult.flags.push_back(flags & IFF_UP ? "up" : "down");
     if (flags & IFF_BROADCAST) {
         cfgResult.flags.push_back("broadcast");
@@ -299,14 +300,14 @@ int InterfaceController::SetConfig(const nmd::InterfaceConfigurationParcel &cfg)
     memcpy_s(ifr.ifr_name, IFNAMSIZ, cfg.ifName.c_str(), cfg.ifName.length());
 
     if (!cfg.flags.empty()) {
-        if (ioctl(fd, SIOCGIFFLAGS, &ifr) != -1) {
+        if (ioctl(fd, SIOCGIFFLAGS, &ifr) == -1) {
             NETNATIVE_LOGE("InterfaceController::SetConfig strerror[%{public}s]", strerror(errno));
             return -1;
         }
         uint16_t flags = ifr.ifr_flags;
         for (const auto &flag : cfg.flags) {
             NETNATIVE_LOGI("InterfaceController::SetConfig flags[%{public}s]", flags.c_str());
-            if (flags == std::string("up")) {
+            if (flag == std::string("up")) {
                 ifr.ifr_flags = ifr.ifr_flags | IFF_UP;
             } else if (flag == std::string("down")) {
                 ifr.ifr_flags = (ifr.ifr_flags & (~IFF_UP));
@@ -314,7 +315,7 @@ int InterfaceController::SetConfig(const nmd::InterfaceConfigurationParcel &cfg)
         }
         if (ifr.ifr_flags != flags) {
             NETNATIVE_LOGI("update ifr_flags");
-            if (ioctl(fd, SIOCGIFFLAGS, &ifr) == -1) {
+            if (ioctl(fd, SIOCSIFFLAGS, &ifr) == -1) {
                 NETNATIVE_LOGE("fail to set ifr flags, strerror[%{public}s]", strerror(errno));
                 return -1;
             }
