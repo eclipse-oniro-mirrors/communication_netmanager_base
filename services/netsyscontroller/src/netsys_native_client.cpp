@@ -175,12 +175,12 @@ int32_t NetsysNativeClient::NetworkRemoveRoute(int32_t netId, const std::string 
     return netsysNativeService_->NetworkRemoveRoute(netId, ifName, destination, nextHop);
 }
 
-void NetsysNativeClient::SetInterfaceDown(const std::string &iface)
+int32_t NetsysNativeClient::SetInterfaceDown(const std::string &iface)
 {
     NETMGR_LOG_I("Set interface down: iface[%{public}s]", iface.c_str());
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysNativeService_ is null");
-        return;
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
     OHOS::nmd::InterfaceConfigurationParcel ifcfg;
     ifcfg.ifName = iface;
@@ -190,15 +190,15 @@ void NetsysNativeClient::SetInterfaceDown(const std::string &iface)
         ifcfg.flags.erase(fit);
     }
     ifcfg.flags.push_back("down");
-    netsysNativeService_->InterfaceSetConfig(ifcfg);
+    return netsysNativeService_->InterfaceSetConfig(ifcfg);
 }
 
-void NetsysNativeClient::SetInterfaceUp(const std::string &iface)
+int32_t NetsysNativeClient::SetInterfaceUp(const std::string &iface)
 {
     NETMGR_LOG_I("Set interface up: iface[%{public}s]", iface.c_str());
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysNativeService_ is null");
-        return;
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
     OHOS::nmd::InterfaceConfigurationParcel ifcfg;
     ifcfg.ifName = iface;
@@ -208,7 +208,7 @@ void NetsysNativeClient::SetInterfaceUp(const std::string &iface)
         ifcfg.flags.erase(fit);
     }
     ifcfg.flags.push_back("up");
-    netsysNativeService_->InterfaceSetConfig(ifcfg);
+    return netsysNativeService_->InterfaceSetConfig(ifcfg);
 }
 
 void NetsysNativeClient::InterfaceClearAddrs(const std::string &ifName)

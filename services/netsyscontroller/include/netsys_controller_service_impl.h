@@ -91,15 +91,17 @@ public:
      * @brief Turn off the device
      *
      * @param iface Network port device name
+     * @return Return the result of this action
      */
-    void SetInterfaceDown(const std::string &iface) override;
+    int32_t SetInterfaceDown(const std::string &iface) override;
 
     /**
      * @brief Turn on the device
      *
      * @param iface Network port device name
+     * @return Return the result of this action
      */
-    void SetInterfaceUp(const std::string &iface) override;
+    int32_t SetInterfaceUp(const std::string &iface) override;
 
     /**
      * @brief Clear the network interface ip address

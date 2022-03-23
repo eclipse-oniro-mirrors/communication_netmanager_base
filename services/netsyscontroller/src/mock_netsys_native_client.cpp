@@ -143,16 +143,16 @@ int32_t MockNetsysNativeClient::NetworkRemoveRoute(int32_t netId, const std::str
     return 0;
 }
 
-void MockNetsysNativeClient::SetInterfaceDown(const std::string &iface)
+int32_t MockNetsysNativeClient::SetInterfaceDown(const std::string &iface)
 {
     NETMGR_LOG_I("Set interface down: iface[%{public}s]", iface.c_str());
-    return;
+    return 0;
 }
 
-void MockNetsysNativeClient::SetInterfaceUp(const std::string &iface)
+int32_t MockNetsysNativeClient::SetInterfaceUp(const std::string &iface)
 {
     NETMGR_LOG_I("Set interface up: iface[%{public}s]", iface.c_str());
-    return;
+    return 0;
 }
 
 void MockNetsysNativeClient::InterfaceClearAddrs(const std::string &ifName)

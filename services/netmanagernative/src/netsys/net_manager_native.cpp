@@ -134,12 +134,12 @@ std::vector<std::string> NetManagerNative::InterfaceGetList()
 
 nmd::InterfaceConfigurationParcel NetManagerNative::InterfaceGetConfig(std::string interfaceName)
 {
-    nmd::InterfaceConfigurationParcel cfgResult = {};
-    return cfgResult;
+    return InterfaceController::GetConfig(interfaceName.c_str());
 }
 
 void NetManagerNative::InterfaceSetConfig(nmd::InterfaceConfigurationParcel parcel)
 {
+    InterfaceController::SetConfig(parcel);
 }
 
 void NetManagerNative::InterfaceClearAddrs(const std::string ifName)
