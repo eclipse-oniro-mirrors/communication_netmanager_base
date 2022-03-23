@@ -177,7 +177,7 @@ void Network::UpdateIpAddrs(const NetLinkInfo &netLinkInfo)
 {
     // netLinkInfo_ represents the old, netLinkInfo represents the new
     // Update: remove old Ips first, then add the new Ips
-    NETMGR_LOG_D("UpdateIpAddrs, old ip addrs: [%{public}s]", netLinkInfo_.ToStringAddr("").c_str());
+    NETMGR_LOG_D("UpdateIpAddrs, old ip addrs: ...");
     for (auto it = netLinkInfo_.netAddrList_.begin(); it != netLinkInfo_.netAddrList_.end(); ++it) {
         const struct INetAddr &inetAddr = *it;
         int32_t prefixLen = inetAddr.prefixlen_;
@@ -187,7 +187,7 @@ void Network::UpdateIpAddrs(const NetLinkInfo &netLinkInfo)
         NetsysController::GetInstance().InterfaceDelAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
     }
 
-    NETMGR_LOG_D("UpdateIpAddrs, new ip addrs: [%{public}s]", netLinkInfo.ToStringAddr("").c_str());
+    NETMGR_LOG_D("UpdateIpAddrs, new ip addrs: ...");
     for (auto it = netLinkInfo.netAddrList_.begin(); it != netLinkInfo.netAddrList_.end(); ++it) {
         const struct INetAddr &inetAddr = *it;
         int32_t prefixLen = inetAddr.prefixlen_;
