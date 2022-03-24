@@ -294,7 +294,7 @@ InterfaceConfigurationParcel InterfaceController::GetConfig(const std::string &i
 
 int InterfaceController::SetConfig(const nmd::InterfaceConfigurationParcel &cfg)
 {
-    NETNATIVE_LOGI("InterfaceController::SetConfig ifName %{public}s", ifName.c_str());
+    NETNATIVE_LOGI("SetConfig in.");
     int fd = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
     struct ifreq ifr = {};
     memcpy_s(ifr.ifr_name, IFNAMSIZ, cfg.ifName.c_str(), cfg.ifName.length());
@@ -306,7 +306,7 @@ int InterfaceController::SetConfig(const nmd::InterfaceConfigurationParcel &cfg)
         }
         uint16_t flags = ifr.ifr_flags;
         for (const auto &flag : cfg.flags) {
-            NETNATIVE_LOGI("InterfaceController::SetConfig flags[%{public}s]", flags.c_str());
+            NETNATIVE_LOGI("InterfaceController::SetConfig flag[%{public}s]", flag.c_str());
             if (flag == std::string("up")) {
                 ifr.ifr_flags = ifr.ifr_flags | IFF_UP;
             } else if (flag == std::string("down")) {
