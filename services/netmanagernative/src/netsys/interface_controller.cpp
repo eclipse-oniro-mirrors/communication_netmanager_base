@@ -283,7 +283,7 @@ InterfaceConfigurationParcel InterfaceController::GetIfaceConfig(const std::stri
         UpdateIfaceConfigFlags(ifr.ifr_flags, ifaceConfig);
     }
     if (ioctl(fd, SIOCGIFHWADDR, &ifr) != -1) {
-        ifaceConfig.hwAddr = HwAddrToStr(ifr.ifr_flags, ifaceConfig);
+        ifaceConfig.hwAddr = HwAddrToStr(ifr.ifr_hwaddr.sa_data);
     }
     close(fd);
     return ifaceConfig;
@@ -293,7 +293,7 @@ int InterfaceController::SetIfaceConfig(const nmd::InterfaceConfigurationParcel 
 {
     NETNATIVE_LOGI("SetIfaceConfig in.");
     struct ifreq ifr = {};
-    memcpy_s(ifr.ifr_name, IFNAMSIZ, ifaceConfig.ifName.c_str(), ifaceConfig.ifName.length());
+    strncpy_s(ifr.ifr_name, IFNAMSIZ, ifaceConfig.ifName.c_str(), ifaceConfig.ifName.length());
 
     if (ifaceConfig.flags.empty()) {
         NETNATIVE_LOGI("ifaceConfig flags is empty.");
@@ -302,6 +302,7 @@ int InterfaceController::SetIfaceConfig(const nmd::InterfaceConfigurationParcel 
     int fd = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
     if (ioctl(fd, SIOCGIFFLAGS, &ifr) == -1) {
         NETNATIVE_LOGE("fail to set interface config. strerror[%{public}s]", strerror(errno));
+        close(fd);
         return -1;
     }
     uint16_t flags = ifr.ifr_flags;
@@ -309,14 +310,13 @@ int InterfaceController::SetIfaceConfig(const nmd::InterfaceConfigurationParcel 
     if (fit != std::end(ifaceConfig.flags)) {
         ifr.ifr_flags = ifr.ifr_flags | IFF_UP;
     }
-
     fit = std::find(ifaceConfig.flags.begin(), ifaceConfig.flags.end(), "down");
     if (fit != std::end(ifaceConfig.flags)) {
         ifr.ifr_flags = (ifr.ifr_flags & (~IFF_UP));
     }
-    if (ifr.ifr_flags != flags) {
+    if (ifr.ifr_flags == flags) {
         close(fd);
-        return -1;
+        return 1;
     }
     NETNATIVE_LOGI("set ifr flags to [%{public}d]", ifr.ifr_flags);
     if (ioctl(fd, SIOCSIFFLAGS, &ifr) == -1) {
