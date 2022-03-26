@@ -271,6 +271,7 @@ InterfaceConfigurationParcel InterfaceController::GetIfaceConfig(const std::stri
     struct ifreq ifr = {};
     strncpy_s(ifr.ifr_name, IFNAMSIZ, ifName.c_str(), ifName.length());
 
+    ifaceConfig.ifName = ifName;
     if (ioctl(fd, SIOCGIFADDR, &ifr) != -1) {
         addr.s_addr = ((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr;
         ifaceConfig.ipv4Addr = std::string(inet_ntoa(addr));
