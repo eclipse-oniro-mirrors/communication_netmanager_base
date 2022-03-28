@@ -724,7 +724,7 @@ napi_value NapiNetStats::GetIfaceUidStats(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     NAPI_ASSERT(env, MatchGetIfaceUidStats(env, argv, argc), "type mismatch");
     NetStatsAsyncContext *context = std::make_unique<NetStatsAsyncContext>().release();
-    context->uid = NapiCommon::GetNapiInt32Value(env, argv[ARGV_INDEX_0], "uid");
+    context->uid = static_cast<uint32_t>(NapiCommon::GetNapiInt32Value(env, argv[ARGV_INDEX_0], "uid"));
     napi_value ifaceInfoValue = NapiCommon::GetNamedProperty(env, argv[ARGV_INDEX_0], "ifaceInfo");
     context->interfaceName = NapiCommon::GetNapiStringValue(env, ifaceInfoValue, "iface");
     context->start = static_cast<uint32_t>(NapiCommon::GetNapiInt32Value(env, ifaceInfoValue, "startTime"));
