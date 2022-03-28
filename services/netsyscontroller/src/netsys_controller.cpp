@@ -114,22 +114,22 @@ int32_t NetsysController::NetworkRemoveRoute(int32_t netId, const std::string &i
     return netsysService_->NetworkRemoveRoute(netId, ifName, destination, nextHop);
 }
 
-void NetsysController::SetInterfaceDown(const std::string &iface)
+int32_t NetsysController::SetInterfaceDown(const std::string &iface)
 {
     NETMGR_LOG_I("Set interface down: iface[%{public}s]", iface.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
-        return;
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
     return netsysService_->SetInterfaceDown(iface);
 }
 
-void NetsysController::SetInterfaceUp(const std::string &iface)
+int32_t NetsysController::SetInterfaceUp(const std::string &iface)
 {
     NETMGR_LOG_I("Set interface up: iface[%{public}s]", iface.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
-        return;
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
     return netsysService_->SetInterfaceUp(iface);
 }

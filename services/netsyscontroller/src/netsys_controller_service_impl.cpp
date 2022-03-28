@@ -86,7 +86,7 @@ int32_t NetsysControllerServiceImpl::NetworkRemoveRoute(int32_t netId, const std
     return netsysClient_.NetworkRemoveRoute(netId, ifName, destination, nextHop);
 }
 
-void NetsysControllerServiceImpl::SetInterfaceDown(const std::string &iface)
+int32_t NetsysControllerServiceImpl::SetInterfaceDown(const std::string &iface)
 {
     NETMGR_LOG_I("Set interface down: iface[%{public}s]", iface.c_str());
     if (mockNetsysClient_.CheckMockApi(MOCK_SETINTERFACEDOWN_API)) {
@@ -95,7 +95,7 @@ void NetsysControllerServiceImpl::SetInterfaceDown(const std::string &iface)
     return netsysClient_.SetInterfaceDown(iface);
 }
 
-void NetsysControllerServiceImpl::SetInterfaceUp(const std::string &iface)
+int32_t NetsysControllerServiceImpl::SetInterfaceUp(const std::string &iface)
 {
     NETMGR_LOG_I("Set interface up: iface[%{public}s]", iface.c_str());
     if (mockNetsysClient_.CheckMockApi(MOCK_SETINTERFACEUP_API)) {
