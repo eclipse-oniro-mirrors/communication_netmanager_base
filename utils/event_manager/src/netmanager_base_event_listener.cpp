@@ -101,6 +101,11 @@ bool EventListener::MatchOnce(const std::string &type) const
     return once_;
 }
 
+bool EventListener::MatchType(const std::string &type) const
+{
+    return type_ == type;
+}
+
 bool EventListener::IsAsyncCallback() const
 {
     return asyncCallback_;

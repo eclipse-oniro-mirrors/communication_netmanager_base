@@ -41,6 +41,8 @@ public:
 
     [[nodiscard]] bool MatchOnce(const std::string &type) const;
 
+    [[nodiscard]] bool MatchType(const std::string &type) const;
+
     [[nodiscard]] bool IsAsyncCallback() const;
 
     void EmitByUv(const std::string &type, void *data, void(Handler)(uv_work_t *, int status)) const;

@@ -30,6 +30,10 @@ void EventManager::AddListener(napi_env env,
                                bool once,
                                bool asyncCallback)
 {
+    auto it = std::remove_if(listeners_.begin(), listeners_.end(),
+                             [type](const EventListener &listener) -> bool { return listener.MatchType(type); });
+    listeners_.erase(it, listeners_.end());
+
     listeners_.emplace_back(EventListener(env, type, callback, once, asyncCallback));
 }
 
