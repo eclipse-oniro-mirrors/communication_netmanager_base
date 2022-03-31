@@ -98,7 +98,7 @@ bool EventManager::HasEventListener(const std::string &type)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    return std::ranges::any_of(listeners_.begin(), listeners_.end(),
-                               [&type](const EventListener &listener) -> bool { return listener.MatchType(type); });
+    return std::any_of(listeners_.begin(), listeners_.end(),
+                       [&type](const EventListener &listener) -> bool { return listener.MatchType(type); });
 }
 } // namespace OHOS::NetManagerStandard
