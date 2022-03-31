@@ -54,7 +54,8 @@ public:
     static int AddAddress(const char *interfaceName, const char *addr, int prefixLen);
     static int DelAddress(const char *interfaceName, const char *addr, int prefixLen);
     static std::vector<std::string> GetInterfaceNames();
-
+    static InterfaceConfigurationParcel GetIfaceConfig(const std::string &ifName);
+    static int SetIfaceConfig(const nmd::InterfaceConfigurationParcel &ifaceConfig);
 private:
     static int ModifyAddress(uint32_t action, const char *interfaceName, const char *addr, int prefixLen);
 };

@@ -41,6 +41,12 @@ namespace OHOS {
 namespace nmd {
 namespace {
     constexpr int32_t FILE_PERMISSION = 0666;
+    constexpr uint32_t ARRAY_OFFSET_1_INDEX = 1;
+    constexpr uint32_t ARRAY_OFFSET_2_INDEX = 2;
+    constexpr uint32_t ARRAY_OFFSET_3_INDEX = 3;
+    constexpr uint32_t ARRAY_OFFSET_4_INDEX = 4;
+    constexpr uint32_t ARRAY_OFFSET_5_INDEX = 5;
+    constexpr uint32_t MOVE_BIT_LEFT31 = 31;
     constexpr uint32_t BIT_MAX = 32;
 }
 
@@ -210,6 +216,116 @@ int InterfaceController::AddAddress(const char *interfaceName, const char *addr,
 int InterfaceController::DelAddress(const char *interfaceName, const char *addr, int prefixLen)
 {
     return ModifyAddress(RTM_DELADDR, interfaceName, addr, prefixLen);
+}
+
+int Ipv4NetmaskToPrefixLength(in_addr_t mask)
+{
+    int prefixLength = 0;
+    uint32_t m = ntohl(mask);
+    while (m & (1 << MOVE_BIT_LEFT31)) {
+        prefixLength++;
+        m = m << 1;
+    }
+    return prefixLength;
+}
+
+std::string HwAddrToStr(char *hwaddr)
+{
+    char buf[64] = {'\0'};
+    errno_t result = sprintf_s(buf, sizeof(buf), "%02x:%02x:%02x:%02x:%02x:%02x", hwaddr[0],
+        hwaddr[ARRAY_OFFSET_1_INDEX], hwaddr[ARRAY_OFFSET_2_INDEX], hwaddr[ARRAY_OFFSET_3_INDEX],
+        hwaddr[ARRAY_OFFSET_4_INDEX], hwaddr[ARRAY_OFFSET_5_INDEX]);
+    if (result != 0) {
+        NETNATIVE_LOGE("[hwAddrToStr]: result %{public}d", result);
+    }
+    return std::string(buf);
+}
+
+void UpdateIfaceConfigFlags(unsigned flags, nmd::InterfaceConfigurationParcel &ifaceConfig)
+{
+    ifaceConfig.flags.emplace_back(flags & IFF_UP ? "up" : "down");
+    if (flags & IFF_BROADCAST) {
+        ifaceConfig.flags.emplace_back("broadcast");
+    }
+    if (flags & IFF_LOOPBACK) {
+        ifaceConfig.flags.emplace_back("loopback");
+    }
+    if (flags & IFF_POINTOPOINT) {
+        ifaceConfig.flags.emplace_back("point-to-point");
+    }
+    if (flags & IFF_RUNNING) {
+        ifaceConfig.flags.emplace_back("running");
+    }
+    if (flags & IFF_MULTICAST) {
+        ifaceConfig.flags.emplace_back("multicast");
+    }
+}
+
+InterfaceConfigurationParcel InterfaceController::GetIfaceConfig(const std::string &ifName)
+{
+    NETNATIVE_LOGI("GetIfaceConfig in. ifName %{public}s", ifName.c_str());
+    struct in_addr addr = {};
+    nmd::InterfaceConfigurationParcel ifaceConfig;
+
+    int fd = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+    struct ifreq ifr = {};
+    strncpy_s(ifr.ifr_name, IFNAMSIZ, ifName.c_str(), ifName.length());
+
+    ifaceConfig.ifName = ifName;
+    if (ioctl(fd, SIOCGIFADDR, &ifr) != -1) {
+        addr.s_addr = ((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr;
+        ifaceConfig.ipv4Addr = std::string(inet_ntoa(addr));
+    }
+    if (ioctl(fd, SIOCGIFNETMASK, &ifr) != -1) {
+        ifaceConfig.prefixLength = Ipv4NetmaskToPrefixLength(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr.s_addr);
+    }
+    if (ioctl(fd, SIOCGIFFLAGS, &ifr) != -1) {
+        UpdateIfaceConfigFlags(ifr.ifr_flags, ifaceConfig);
+    }
+    if (ioctl(fd, SIOCGIFHWADDR, &ifr) != -1) {
+        ifaceConfig.hwAddr = HwAddrToStr(ifr.ifr_hwaddr.sa_data);
+    }
+    close(fd);
+    return ifaceConfig;
+}
+
+int InterfaceController::SetIfaceConfig(const nmd::InterfaceConfigurationParcel &ifaceConfig)
+{
+    NETNATIVE_LOGI("SetIfaceConfig in.");
+    struct ifreq ifr = {};
+    strncpy_s(ifr.ifr_name, IFNAMSIZ, ifaceConfig.ifName.c_str(), ifaceConfig.ifName.length());
+
+    if (ifaceConfig.flags.empty()) {
+        NETNATIVE_LOGI("ifaceConfig flags is empty.");
+        return -1;
+    }
+    int fd = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+    if (ioctl(fd, SIOCGIFFLAGS, &ifr) == -1) {
+        NETNATIVE_LOGE("fail to set interface config. strerror[%{public}s]", strerror(errno));
+        close(fd);
+        return -1;
+    }
+    uint16_t flags = ifr.ifr_flags;
+    auto fit = std::find(ifaceConfig.flags.begin(), ifaceConfig.flags.end(), "up");
+    if (fit != std::end(ifaceConfig.flags)) {
+        ifr.ifr_flags = ifr.ifr_flags | IFF_UP;
+    }
+    fit = std::find(ifaceConfig.flags.begin(), ifaceConfig.flags.end(), "down");
+    if (fit != std::end(ifaceConfig.flags)) {
+        ifr.ifr_flags = (ifr.ifr_flags & (~IFF_UP));
+    }
+    if (ifr.ifr_flags == flags) {
+        close(fd);
+        return 1;
+    }
+    NETNATIVE_LOGI("set ifr flags to [%{public}d]", ifr.ifr_flags);
+    if (ioctl(fd, SIOCSIFFLAGS, &ifr) == -1) {
+        NETNATIVE_LOGE("fail to set ifr flags, strerror[%{public}s]", strerror(errno));
+        close(fd);
+        return -1;
+    }
+    close(fd);
+    return 1;
 }
 } // namespace nmd
 } // namespace OHOS
