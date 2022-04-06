@@ -5,6 +5,7 @@ include_directories(options/include)
 include_directories(observer/include)
 include_directories(network_exec/include)
 include_directories(constant/include)
+include_directories(../../../../../../../base/telephony/core_service/interfaces/innerkits/include)
 
 add_library(network SHARED
     network_module/src/network_module.cpp

@@ -15,29 +15,66 @@
 
 #include "net_conn_callback_observer.h"
 #include "constant.h"
+#include "core_service_client.h"
 #include "netconnection.h"
 #include "netmanager_base_log.h"
+
+static constexpr const char *NETWORK_NONE = "none";
+
+static constexpr const char *NETWORK_WIFI = "WiFi";
 
 namespace OHOS::NetManagerStandard {
 struct NetworkType {
     std::set<NetBearType> bearerTypes;
 };
 
+static std::string CellularTypeToString(Telephony::SignalInformation::NetworkType type)
+{
+    switch (type) {
+        case Telephony::SignalInformation::NetworkType::GSM:
+            return "2g";
+        case Telephony::SignalInformation::NetworkType::CDMA:
+        case Telephony::SignalInformation::NetworkType::WCDMA:
+        case Telephony::SignalInformation::NetworkType::TDSCDMA:
+            return "3g";
+        case Telephony::SignalInformation::NetworkType::LTE:
+            return "4g";
+        default:
+            break;
+    }
+    return "5g";
+}
+
 static napi_value MakeNetworkResponse(napi_env env, void *data)
 {
-    auto netType = reinterpret_cast<NetworkType *>(data);
+    auto deleter = [](NetworkType *t) { delete t; };
+    std::unique_ptr<NetworkType, decltype(deleter)> netType(reinterpret_cast<NetworkType *>(data), deleter);
+
     napi_value obj = NapiUtils::CreateObject(env);
-    if (netType->bearerTypes.contains(BEARER_WIFI)) {
-        NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, "WiFi");
+    if (netType->bearerTypes.find(BEARER_WIFI) != netType->bearerTypes.end()) {
+        NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, NETWORK_WIFI);
         NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, false);
-    } else if (netType->bearerTypes.contains(BEARER_CELLULAR)) {
-        NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, "cellular");
-        NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, true);
-    } else {
-        NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, "none");
-        NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, false);
+        return obj;
     }
-    delete netType;
+
+    if (netType->bearerTypes.find(BEARER_CELLULAR) != netType->bearerTypes.end()) {
+        auto vec = DelayedRefSingleton<Telephony::CoreServiceClient>::GetInstance().GetSignalInfoList(0);
+        if (vec.empty()) {
+            NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, NETWORK_NONE);
+            NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, false);
+            return obj;
+        }
+
+        std::sort(vec.begin(), vec.end(),
+                  [](const sptr<Telephony::SignalInformation> &info1, const sptr<Telephony::SignalInformation> &info2)
+                      -> bool { return info1->GetSignalLevel() > info2->GetSignalLevel(); });
+        NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, CellularTypeToString(vec[0]->GetNetworkType()));
+        NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, true);
+        return obj;
+    }
+
+    NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, NETWORK_NONE);
+    NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, false);
     return obj;
 }
 

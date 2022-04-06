@@ -83,6 +83,10 @@ ohos_shared_library("network") {
   sources += utils_source
 
   deps = common_deps
+  deps += [
+    "//base/telephony/core_service:tel_core_service",
+    "//base/telephony/core_service/interfaces/innerkits:tel_core_service_api",
+  ]
 
   external_deps = common_external_deps
 

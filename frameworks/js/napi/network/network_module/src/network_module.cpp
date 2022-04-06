@@ -69,6 +69,7 @@ napi_value NetworkModule::Unsubscribe(napi_env env, napi_callback_info info)
         env, info, "SystemNetworkUnsubscribe",
         [](napi_env, napi_value, UnsubscribeContext *context) -> bool {
             context->GetManager()->DeleteListener(EVENT_SUBSCRIBE);
+            return true;
         },
         NetworkAsyncWork::ExecUnsubscribe, NetworkAsyncWork::UnsubscribeCallback);
 }
