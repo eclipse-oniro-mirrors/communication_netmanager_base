@@ -14,7 +14,6 @@
 import("//build/ohos.gni")
 
 SUBSYSTEM_DIR = "//foundation/communication"
-NETMANAGER_BASE_NAPI_ROOT = "$SUBSYSTEM_DIR/netmanager_base/frameworks/js/napi/"
 
 utils_source = [
   "$SUBSYSTEM_DIR/netmanager_base/utils/base_context/src/netmanager_base_base_context.cpp",
@@ -60,13 +59,13 @@ common_subsystem_name = "communication"
 
 ohos_shared_library("network") {
   include_dirs = [
-    "$NETMANAGER_BASE_NAPI_ROOT/async_context/include",
-    "$NETMANAGER_BASE_NAPI_ROOT/async_work/include",
-    "$NETMANAGER_BASE_NAPI_ROOT/constant/include",
-    "$NETMANAGER_BASE_NAPI_ROOT/network_exec/include",
-    "$NETMANAGER_BASE_NAPI_ROOT/network_module/include",
-    "$NETMANAGER_BASE_NAPI_ROOT/observer/include",
-    "$NETMANAGER_BASE_NAPI_ROOT/options/include",
+    "async_context/include",
+    "async_work/include",
+    "constant/include",
+    "network_exec/include",
+    "network_module/include",
+    "observer/include",
+    "options/include",
   ]
   include_dirs += utils_include
   include_dirs += common_include

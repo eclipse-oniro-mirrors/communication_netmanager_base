@@ -40,7 +40,7 @@ napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
         NetConnection::DeleteNetConnection(netConnection);
     };
     auto manager = new EventManager;
-    NetConnection::MakeNetConnection(manager);
+    manager->SetData(NetConnection::MakeNetConnection(manager));
     napi_wrap(env, exports, reinterpret_cast<void *>(manager), finalizer, nullptr, nullptr);
 
     return exports;

@@ -15,13 +15,9 @@
 
 #include "unsubscribe_context.h"
 
-#include "constant.h"
 #include "netmanager_base_log.h"
-#include "netmanager_base_napi_utils.h"
 
 static constexpr const int PARAM_NO_OPTIONS = 0;
-
-static constexpr const int PARAM_HAS_OPTIONS = 1;
 
 namespace OHOS::NetManagerStandard {
 UnsubscribeContext::UnsubscribeContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}

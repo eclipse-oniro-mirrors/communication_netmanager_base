@@ -24,7 +24,10 @@ static constexpr const int PARAM_NO_OPTIONS = 0;
 static constexpr const int PARAM_HAS_OPTIONS = 1;
 
 namespace OHOS::NetManagerStandard {
-SubscribeContext::SubscribeContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+SubscribeContext::SubscribeContext(napi_env env, EventManager *manager)
+    : BaseContext(env, manager), successCallback_(nullptr), failCallback_(nullptr)
+{
+}
 
 void SubscribeContext::ParseParams(napi_value *params, size_t paramsCount)
 {

@@ -24,7 +24,10 @@ static constexpr const int PARAM_NO_OPTIONS = 0;
 static constexpr const int PARAM_HAS_OPTIONS = 1;
 
 namespace OHOS::NetManagerStandard {
-GetTypeContext::GetTypeContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+GetTypeContext::GetTypeContext(napi_env env, EventManager *manager)
+    : BaseContext(env, manager), successCallback_(nullptr), failCallback_(nullptr), completeCallback_(nullptr)
+{
+}
 
 void GetTypeContext::ParseParams(napi_value *params, size_t paramsCount)
 {
