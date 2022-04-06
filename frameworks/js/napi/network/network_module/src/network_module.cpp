@@ -14,9 +14,13 @@
  */
 
 #include "network_module.h"
+#include "gettype_context.h"
+#include "netconnection.h"
 #include "netmanager_base_log.h"
-
-static constexpr const char *NETWORK_MODULE_NAME = "network";
+#include "netmanager_base_module_template.h"
+#include "network_async_work.h"
+#include "subscribe_context.h"
+#include "unsubscribe_context.h"
 
 namespace OHOS::NetManagerStandard {
 napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
@@ -28,45 +32,42 @@ napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
     };
     NapiUtils::DefineProperties(env, exports, properties);
 
+    auto finalizer = [](napi_env, void *data, void *) {
+        NETMANAGER_BASE_LOGI("finalize netConnection");
+        auto manager = static_cast<EventManager *>(data);
+        auto netConnection = static_cast<NetConnection *>(manager->GetData());
+        delete manager;
+        NetConnection::DeleteNetConnection(netConnection);
+    };
+    auto manager = new EventManager;
+    NetConnection::MakeNetConnection(manager);
+    napi_wrap(env, exports, reinterpret_cast<void *>(manager), finalizer, nullptr, nullptr);
+
     return exports;
 }
 
 napi_value NetworkModule::GetType(napi_env env, napi_callback_info info)
 {
     NETMANAGER_BASE_LOGI("NetworkModule::GetType is called");
-    (void)info;
-
-    return NapiUtils::GetUndefined(env);
+    return ModuleTemplate::Interface<GetTypeContext>(env, info, "SystemNetworkGetType", nullptr,
+                                                     NetworkAsyncWork::ExecGetType, NetworkAsyncWork::GetTypeCallback);
 }
 
 napi_value NetworkModule::Subscribe(napi_env env, napi_callback_info info)
 {
     NETMANAGER_BASE_LOGI("NetworkModule::Subscribe is called");
-    (void)info;
-
-    return NapiUtils::GetUndefined(env);
+    return ModuleTemplate::Interface<SubscribeContext>(env, info, "SystemNetworkSubscribe", nullptr,
+                                                       NetworkAsyncWork::ExecSubscribe,
+                                                       NetworkAsyncWork::SubscribeCallback);
 }
 
 napi_value NetworkModule::Unsubscribe(napi_env env, napi_callback_info info)
 {
     NETMANAGER_BASE_LOGI("NetworkModule::Unsubscribe is called");
-    (void)info;
-
-    return NapiUtils::GetUndefined(env);
+    return ModuleTemplate::Interface<UnsubscribeContext>(env, info, "SystemNetworkUnsubscribe", nullptr,
+                                                         NetworkAsyncWork::ExecUnsubscribe,
+                                                         NetworkAsyncWork::UnsubscribeCallback);
 }
 
-static napi_module g_networkModule = {
-    .nm_version = 1,
-    .nm_flags = 0,
-    .nm_filename = nullptr,
-    .nm_register_func = NetworkModule::InitNetworkModule,
-    .nm_modname = NETWORK_MODULE_NAME,
-    .nm_priv = nullptr,
-    .reserved = {nullptr},
-};
-
-extern "C" __attribute__((constructor)) void RegisterNetworkModule(void)
-{
-    napi_module_register(&g_networkModule);
-}
+NAPI_MODULE(network, NetworkModule::InitNetworkModule)
 } // namespace OHOS::NetManagerStandard
