@@ -41,12 +41,32 @@ public:
 
     bool HasEventListener(const std::string &type);
 
+    void DeleteListener(const std::string &type);
+
 private:
     std::mutex mutex_;
 
     std::list<EventListener> listeners_;
 
     void *data_;
+};
+
+struct UvWorkWrapper {
+    UvWorkWrapper() = delete;
+
+    explicit UvWorkWrapper(void *theData,
+                           napi_env theEnv,
+                           napi_ref theCallbackRef,
+                           const std::string &eventType,
+                           EventManager *eventManager,
+                           bool isOnce);
+
+    void *data;
+    napi_env env;
+    napi_ref callbackRef;
+    std::string type;
+    EventManager *manager;
+    bool once;
 };
 } // namespace OHOS::NetManagerStandard
 #endif /* COMMUNICATIONNETMANAGER_BASE_EVENT_MANAGER_H */

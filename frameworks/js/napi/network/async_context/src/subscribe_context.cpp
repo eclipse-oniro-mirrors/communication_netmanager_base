@@ -71,6 +71,7 @@ bool SubscribeContext::SetSuccessCallback(napi_value options)
     if (successCallback_ != nullptr) {
         (void)napi_delete_reference(GetEnv(), successCallback_);
     }
+    GetManager()->AddListener(GetEnv(), EVENT_SUBSCRIBE, callback, false, false);
     return napi_create_reference(GetEnv(), callback, 1, &successCallback_) == napi_ok;
 }
 

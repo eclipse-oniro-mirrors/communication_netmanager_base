@@ -84,14 +84,11 @@ void EventManager::EmitByUv(const std::string &type, void *data, void(Handler)(u
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    std::for_each(listeners_.begin(), listeners_.end(), [type, data, Handler](const EventListener &listener) {
-        auto workWrapper = new UvWorkWrapper(data, listener.GetEnv(), listener.GetCallbackRef());
+    std::for_each(listeners_.begin(), listeners_.end(), [type, data, Handler, this](const EventListener &listener) {
+        auto workWrapper =
+            new UvWorkWrapper(data, listener.GetEnv(), listener.GetCallbackRef(), type, this, listener.MatchOnce(type));
         listener.EmitByUv(type, workWrapper, Handler);
     });
-
-    auto it = std::remove_if(listeners_.begin(), listeners_.end(),
-                             [type](const EventListener &listener) -> bool { return listener.MatchOnce(type); });
-    listeners_.erase(it, listeners_.end());
 }
 
 bool EventManager::HasEventListener(const std::string &type)
@@ -100,5 +97,23 @@ bool EventManager::HasEventListener(const std::string &type)
 
     return std::any_of(listeners_.begin(), listeners_.end(),
                        [&type](const EventListener &listener) -> bool { return listener.MatchType(type); });
+}
+
+void EventManager::DeleteListener(const std::string &type)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto it = std::remove_if(listeners_.begin(), listeners_.end(),
+                             [type](const EventListener &listener) -> bool { return listener.MatchType(type); });
+    listeners_.erase(it, listeners_.end());
+}
+
+UvWorkWrapper::UvWorkWrapper(void *theData,
+                             napi_env theEnv,
+                             napi_ref theCallbackRef,
+                             const std::string &eventType,
+                             EventManager *eventManager,
+                             bool isOnce)
+    : data(theData), env(theEnv), callbackRef(theCallbackRef), type(eventType), manager(eventManager), once(isOnce)
+{
 }
 } // namespace OHOS::NetManagerStandard

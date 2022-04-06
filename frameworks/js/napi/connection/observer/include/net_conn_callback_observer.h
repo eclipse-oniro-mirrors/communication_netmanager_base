@@ -58,6 +58,9 @@ private:
         napi_value argv[1] = {obj};
         if (NapiUtils::GetValueType(env, callback) == napi_function) {
             (void)NapiUtils::CallFunction(env, NapiUtils::GetUndefined(env), callback, 1, argv);
+            if (workWrapper->once) {
+                workWrapper->manager->DeleteListener(workWrapper->type, callback);
+            }
         }
 
         delete workWrapper;
