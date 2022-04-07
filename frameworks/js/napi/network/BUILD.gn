@@ -14,7 +14,6 @@
 import("//build/ohos.gni")
 
 SUBSYSTEM_DIR = "//foundation/communication"
-NETMANAGER_BASE_NAPI_ROOT = "$SUBSYSTEM_DIR/netmanager_base/frameworks/js/napi/"
 
 utils_source = [
   "$SUBSYSTEM_DIR/netmanager_base/utils/base_context/src/netmanager_base_base_context.cpp",
@@ -59,14 +58,35 @@ common_part_name = "netmanager_base"
 common_subsystem_name = "communication"
 
 ohos_shared_library("network") {
-  include_dirs = [ "$NETMANAGER_BASE_NAPI_ROOT/network/network_module/include" ]
+  include_dirs = [
+    "async_context/include",
+    "async_work/include",
+    "constant/include",
+    "network_exec/include",
+    "network_module/include",
+    "observer/include",
+    "options/include",
+  ]
   include_dirs += utils_include
   include_dirs += common_include
 
-  sources = [ "network_module/src/network_module.cpp" ]
+  sources = [
+    "async_context/src/gettype_context.cpp",
+    "async_context/src/subscribe_context.cpp",
+    "async_context/src/unsubscribe_context.cpp",
+    "async_work/src/network_async_work.cpp",
+    "network_exec/src/network_exec.cpp",
+    "network_module/src/network_module.cpp",
+    "observer/src/net_conn_callback_observer.cpp",
+    "options/src/netconnection.cpp",
+  ]
   sources += utils_source
 
   deps = common_deps
+  deps += [
+    "//base/telephony/core_service:tel_core_service",
+    "//base/telephony/core_service/interfaces/innerkits:tel_core_service_api",
+  ]
 
   external_deps = common_external_deps
 

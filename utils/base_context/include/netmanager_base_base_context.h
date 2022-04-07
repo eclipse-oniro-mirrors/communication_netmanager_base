@@ -73,6 +73,10 @@ public:
 
     void Emit(const std::string &type, const std::pair<napi_value, napi_value> &argv);
 
+    void SetNeedPromise(bool needPromise);
+
+    [[nodiscard]] bool IsNeedPromise() const;
+
 protected:
     EventManager *manager_;
 
@@ -92,6 +96,8 @@ private:
     napi_deferred deferred_;
 
     std::string asyncWorkName_;
+
+    bool needPromise_;
 };
 } // namespace OHOS::NetManagerStandard
 
