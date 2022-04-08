@@ -88,7 +88,7 @@ ohos_shared_library("network") {
       "//base/telephony/core_service:tel_core_service",
       "//base/telephony/core_service/interfaces/innerkits:tel_core_service_api",
     ]
-    defines = ["HAS_TELEPHONY=1"]
+    defines = [ "HAS_TELEPHONY=1" ]
   }
 
   external_deps = common_external_deps
