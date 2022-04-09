@@ -15,7 +15,11 @@
 
 #include "net_conn_callback_observer.h"
 #include "constant.h"
+
+#if HAS_TELEPHONY
 #include "core_service_client.h"
+#endif
+
 #include "netconnection.h"
 #include "netmanager_base_log.h"
 
@@ -28,6 +32,7 @@ struct NetworkType {
     std::set<NetBearType> bearerTypes;
 };
 
+#if HAS_TELEPHONY
 static std::string CellularTypeToString(Telephony::SignalInformation::NetworkType type)
 {
     switch (type) {
@@ -44,6 +49,7 @@ static std::string CellularTypeToString(Telephony::SignalInformation::NetworkTyp
     }
     return "5g";
 }
+#endif
 
 static napi_value MakeNetworkResponse(napi_env env, void *data)
 {
@@ -57,6 +63,7 @@ static napi_value MakeNetworkResponse(napi_env env, void *data)
         return obj;
     }
 
+#if HAS_TELEPHONY
     if (netType->bearerTypes.find(BEARER_CELLULAR) != netType->bearerTypes.end()) {
         auto vec = DelayedRefSingleton<Telephony::CoreServiceClient>::GetInstance().GetSignalInfoList(0);
         if (vec.empty()) {
@@ -72,6 +79,7 @@ static napi_value MakeNetworkResponse(napi_env env, void *data)
         NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, true);
         return obj;
     }
+#endif
 
     NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, NETWORK_NONE);
     NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, false);

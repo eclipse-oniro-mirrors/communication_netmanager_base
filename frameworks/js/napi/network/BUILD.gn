@@ -83,10 +83,13 @@ ohos_shared_library("network") {
   sources += utils_source
 
   deps = common_deps
-  deps += [
-    "//base/telephony/core_service:tel_core_service",
-    "//base/telephony/core_service/interfaces/innerkits:tel_core_service_api",
-  ]
+  if ("${product_name}" == "m40" || "${product_name}" == "rk3568") {
+    deps += [
+      "//base/telephony/core_service:tel_core_service",
+      "//base/telephony/core_service/interfaces/innerkits:tel_core_service_api",
+    ]
+    defines = [ "HAS_TELEPHONY=1" ]
+  }
 
   external_deps = common_external_deps
 
