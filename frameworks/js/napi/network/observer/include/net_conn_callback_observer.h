@@ -48,14 +48,8 @@ private:
 
         napi_value obj = MakeJsValue(env, workWrapper->data);
 
-        napi_value callback = NapiUtils::GetReference(env, workWrapper->callbackRef);
-        napi_value argv[1] = {obj};
-        if (NapiUtils::GetValueType(env, callback) == napi_function) {
-            (void)NapiUtils::CallFunction(env, NapiUtils::GetUndefined(env), callback, 1, argv);
-            if (workWrapper->once) {
-                workWrapper->manager->DeleteListener(workWrapper->type, callback);
-            }
-        }
+        std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(workWrapper->env), obj};
+        workWrapper->manager->Emit(workWrapper->type, arg);
 
         delete workWrapper;
         delete work;

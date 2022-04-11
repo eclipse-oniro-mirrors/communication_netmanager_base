@@ -78,7 +78,7 @@ bool GetTypeContext::SetSuccessCallback(napi_value options)
 bool GetTypeContext::SetFailCallback(napi_value options)
 {
     if (!NapiUtils::HasNamedProperty(GetEnv(), options, KEY_FAIL)) {
-        NETMANAGER_BASE_LOGI("do not need success fun");
+        NETMANAGER_BASE_LOGI("do not need fail fun");
         return true;
     }
     napi_value callback = NapiUtils::GetNamedProperty(GetEnv(), options, KEY_FAIL);
@@ -95,7 +95,7 @@ bool GetTypeContext::SetFailCallback(napi_value options)
 bool GetTypeContext::SetCompleteCallback(napi_value options)
 {
     if (!NapiUtils::HasNamedProperty(GetEnv(), options, KEY_COMPLETE)) {
-        NETMANAGER_BASE_LOGI("do not need success fun");
+        NETMANAGER_BASE_LOGI("do not need complete fun");
         return true;
     }
     napi_value callback = NapiUtils::GetNamedProperty(GetEnv(), options, KEY_COMPLETE);

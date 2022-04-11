@@ -78,7 +78,7 @@ bool SubscribeContext::SetSuccessCallback(napi_value options)
 bool SubscribeContext::SetFailCallback(napi_value options)
 {
     if (!NapiUtils::HasNamedProperty(GetEnv(), options, KEY_FAIL)) {
-        NETMANAGER_BASE_LOGI("do not need success fun");
+        NETMANAGER_BASE_LOGI("do not need fail fun");
         return true;
     }
     napi_value callback = NapiUtils::GetNamedProperty(GetEnv(), options, KEY_FAIL);
