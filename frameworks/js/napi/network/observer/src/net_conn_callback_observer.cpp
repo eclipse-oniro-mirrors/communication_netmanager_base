@@ -96,7 +96,7 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
                                                        const sptr<NetAllCapabilities> &netAllCap)
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetCapabilitiesChange");
-    NetConnection *netConnection = NET_CONNECTIONS[this];
+    NetConnection *netConnection = NetConnection::GetNetConnection(this);
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
@@ -105,11 +105,15 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
         auto netType = new NetworkType;
         netType->bearerTypes = netAllCap->bearerTypes_;
         netConnection->GetEventManager()->EmitByUv(EVENT_GET_TYPE, netType, CallbackTemplate<MakeNetworkResponse>);
+    } else {
+        NETMANAGER_BASE_LOGI("NO EVENT_GET_TYPE");
     }
     if (netConnection->GetEventManager()->HasEventListener(EVENT_SUBSCRIBE)) {
         auto netType = new NetworkType;
         netType->bearerTypes = netAllCap->bearerTypes_;
         netConnection->GetEventManager()->EmitByUv(EVENT_SUBSCRIBE, netType, CallbackTemplate<MakeNetworkResponse>);
+    } else {
+        NETMANAGER_BASE_LOGI("NO EVENT_SUBSCRIBE");
     }
     return 0;
 }
@@ -130,7 +134,7 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
 int32_t NetConnCallbackObserver::NetUnavailable()
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetUnavailable");
-    NetConnection *netConnection = NET_CONNECTIONS[this];
+    NetConnection *netConnection = NetConnection::GetNetConnection(this);
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
         return 0;
@@ -138,10 +142,14 @@ int32_t NetConnCallbackObserver::NetUnavailable()
     if (netConnection->GetEventManager()->HasEventListener(EVENT_GET_TYPE)) {
         auto netType = new NetworkType;
         netConnection->GetEventManager()->EmitByUv(EVENT_GET_TYPE, netType, CallbackTemplate<MakeNetworkResponse>);
+    } else {
+        NETMANAGER_BASE_LOGI("NO EVENT_GET_TYPE");
     }
     if (netConnection->GetEventManager()->HasEventListener(EVENT_SUBSCRIBE)) {
         auto netType = new NetworkType;
         netConnection->GetEventManager()->EmitByUv(EVENT_SUBSCRIBE, netType, CallbackTemplate<MakeNetworkResponse>);
+    } else {
+        NETMANAGER_BASE_LOGI("NO EVENT_SUBSCRIBE");
     }
     return 0;
 }

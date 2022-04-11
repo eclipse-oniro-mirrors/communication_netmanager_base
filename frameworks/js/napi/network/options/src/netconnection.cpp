@@ -41,6 +41,12 @@ void NetConnection::DeleteNetConnection(NetConnection *netConnection)
     delete netConnection;
 }
 
+NetConnection *NetConnection::GetNetConnection(NetConnCallbackObserver *observer)
+{
+    std::lock_guard<std::mutex> lock(NET_CONNECTIONS_MUTEX);
+    return NET_CONNECTIONS[observer];
+}
+
 sptr<NetConnCallbackObserver> NetConnection::GetObserver() const
 {
     return observer_;
