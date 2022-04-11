@@ -65,13 +65,9 @@ napi_value NetworkModule::Subscribe(napi_env env, napi_callback_info info)
 napi_value NetworkModule::Unsubscribe(napi_env env, napi_callback_info info)
 {
     NETMANAGER_BASE_LOGI("NetworkModule::Unsubscribe is called");
-    return ModuleTemplate::Interface<UnsubscribeContext>(
-        env, info, "SystemNetworkUnsubscribe",
-        [](napi_env, napi_value, UnsubscribeContext *context) -> bool {
-            context->GetManager()->DeleteListener(EVENT_SUBSCRIBE);
-            return true;
-        },
-        NetworkAsyncWork::ExecUnsubscribe, NetworkAsyncWork::UnsubscribeCallback);
+    return ModuleTemplate::Interface<UnsubscribeContext>(env, info, "SystemNetworkUnsubscribe", nullptr,
+                                                         NetworkAsyncWork::ExecUnsubscribe,
+                                                         NetworkAsyncWork::UnsubscribeCallback);
 }
 
 NAPI_MODULE(network, NetworkModule::InitNetworkModule)

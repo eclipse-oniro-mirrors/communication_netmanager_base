@@ -31,6 +31,8 @@ public:
 
     static NetConnection *MakeNetConnection(EventManager *eventManager);
 
+    static NetConnection *GetNetConnection(NetConnCallbackObserver *observer);
+
     static void DeleteNetConnection(NetConnection *netConnection);
 
 private:

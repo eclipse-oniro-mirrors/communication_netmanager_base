@@ -39,6 +39,7 @@ bool NetworkExec::ExecGetType(GetTypeContext *context)
 
     sptr<NetSpecifier> specifier = new NetSpecifier;
     specifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
+    (void)DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback,
                                                                                           DEFAULT_TIMEOUT_MS);
     NETMANAGER_BASE_LOGI("ExecGetType result %{public}d", ret);
@@ -85,6 +86,7 @@ bool NetworkExec::ExecSubscribe(SubscribeContext *context)
 
     sptr<NetSpecifier> specifier = new NetSpecifier;
     specifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
+    (void)DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback,
                                                                                           DEFAULT_TIMEOUT_MS);
     NETMANAGER_BASE_LOGI("ExecSubscribe result %{public}d", ret);
@@ -123,6 +125,8 @@ bool NetworkExec::ExecUnsubscribe(UnsubscribeContext *context)
 
 napi_value NetworkExec::UnsubscribeCallback(UnsubscribeContext *context)
 {
+    context->GetManager()->DeleteListener(EVENT_GET_TYPE);
+    context->GetManager()->DeleteListener(EVENT_SUBSCRIBE);
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 } // namespace OHOS::NetManagerStandard
