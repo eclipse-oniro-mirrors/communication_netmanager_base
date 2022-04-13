@@ -18,6 +18,7 @@
 #include "constant.h"
 #include "net_conn_callback_observer.h"
 #include "net_conn_client.h"
+#include "net_conn_types.h"
 #include "netconnection.h"
 #include "netmanager_base_log.h"
 #include "netmanager_base_napi_utils.h"
@@ -28,6 +29,8 @@ static constexpr const int ERROR_PARAM_NUM = 2;
 static constexpr const char *ERROR_MSG = "failed";
 
 static constexpr const uint32_t DEFAULT_TIMEOUT_MS = 1000;
+
+static constexpr const int32_t NETWORK_NO_PERMISSION = 602;
 
 namespace OHOS::NetManagerStandard {
 bool NetworkExec::ExecGetType(GetTypeContext *context)
@@ -43,6 +46,9 @@ bool NetworkExec::ExecGetType(GetTypeContext *context)
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback,
                                                                                           DEFAULT_TIMEOUT_MS);
     NETMANAGER_BASE_LOGI("ExecGetType result %{public}d", ret);
+    if (ret == ERR_PERMISSION_CHECK_FAIL) {
+        ret = NETWORK_NO_PERMISSION;
+    }
     context->SetErrorCode(ret);
     return ret == 0;
 }
@@ -90,6 +96,9 @@ bool NetworkExec::ExecSubscribe(SubscribeContext *context)
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback,
                                                                                           DEFAULT_TIMEOUT_MS);
     NETMANAGER_BASE_LOGI("ExecSubscribe result %{public}d", ret);
+    if (ret == ERR_PERMISSION_CHECK_FAIL) {
+        ret = NETWORK_NO_PERMISSION;
+    }
     context->SetErrorCode(ret);
     return ret == 0;
 }
@@ -119,6 +128,9 @@ bool NetworkExec::ExecUnsubscribe(UnsubscribeContext *context)
 
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
     NETMANAGER_BASE_LOGI("ExecUnsubscribe result %{public}d", ret);
+    if (ret == ERR_PERMISSION_CHECK_FAIL) {
+        ret = NETWORK_NO_PERMISSION;
+    }
     context->SetErrorCode(ret);
     return ret == 0;
 }
