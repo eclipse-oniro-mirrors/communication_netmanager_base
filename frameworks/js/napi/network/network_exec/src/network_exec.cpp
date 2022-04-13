@@ -45,7 +45,7 @@ bool NetworkExec::ExecGetType(GetTypeContext *context)
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback,
                                                                                           DEFAULT_TIMEOUT_MS);
     NETMANAGER_BASE_LOGI("ExecGetType result %{public}d", ret);
-    if (ret == NET_CONN_ERR_NETID_NOT_FOUND) {
+    if (ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED) {
         ret = NETWORK_NO_PERMISSION;
     }
     context->SetErrorCode(ret);
@@ -95,7 +95,7 @@ bool NetworkExec::ExecSubscribe(SubscribeContext *context)
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback,
                                                                                           DEFAULT_TIMEOUT_MS);
     NETMANAGER_BASE_LOGI("ExecSubscribe result %{public}d", ret);
-    if (ret == NET_CONN_ERR_NETID_NOT_FOUND) {
+    if (ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED) {
         ret = NETWORK_NO_PERMISSION;
     }
     context->SetErrorCode(ret);
@@ -127,7 +127,7 @@ bool NetworkExec::ExecUnsubscribe(UnsubscribeContext *context)
 
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
     NETMANAGER_BASE_LOGI("ExecUnsubscribe result %{public}d", ret);
-    if (ret == NET_CONN_ERR_NETID_NOT_FOUND) {
+    if (ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED) {
         ret = NETWORK_NO_PERMISSION;
     }
     context->SetErrorCode(ret);
