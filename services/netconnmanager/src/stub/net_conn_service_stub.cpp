@@ -417,6 +417,8 @@ int32_t NetConnServiceStub::ConvertCode(int32_t internalCode)
             return static_cast<int32_t>(NET_CONN_ERR_NO_REGISTERED);
         case static_cast<int32_t>(ERR_NET_NOT_FIND_NETID):
             return static_cast<int32_t>(NET_CONN_ERR_NETID_NOT_FOUND);
+        case static_cast<int32_t>(ERR_PERMISSION_CHECK_FAIL):
+            return static_cast<int32_t>(NET_CONN_ERR_PERMISSION_CHECK_FAILED);
         default:
             break;
     }
