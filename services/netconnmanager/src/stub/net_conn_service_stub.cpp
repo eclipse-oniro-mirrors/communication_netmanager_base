@@ -419,6 +419,10 @@ int32_t NetConnServiceStub::ConvertCode(int32_t internalCode)
             return static_cast<int32_t>(NET_CONN_ERR_NETID_NOT_FOUND);
         case static_cast<int32_t>(ERR_PERMISSION_CHECK_FAIL):
             return static_cast<int32_t>(NET_CONN_ERR_PERMISSION_CHECK_FAILED);
+        case static_cast<int32_t>(ERR_REGISTER_THE_SAME_CALLBACK):
+            return static_cast<int32_t>(NET_CONN_ERR_SAME_CALLBACK);
+        case static_cast<int32_t>(ERR_UNREGISTER_CALLBACK_NOT_FOUND):
+            return static_cast<int32_t>(NET_CONN_ERR_CALLBACK_NOT_FOUND);
         default:
             break;
     }
