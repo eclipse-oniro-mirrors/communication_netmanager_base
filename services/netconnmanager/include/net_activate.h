@@ -43,8 +43,8 @@ public:
     uint32_t GetRequestId() const;
     sptr<NetSupplier> GetServiceSupply() const;
     void SetServiceSupply(sptr<NetSupplier> netServiceSupplied);
-    sptr<INetConnCallback>& GetNetCallback();
-    sptr<NetSpecifier>& GetNetSpecifier();
+    sptr<INetConnCallback> GetNetCallback();
+    sptr<NetSpecifier> GetNetSpecifier();
     std::unique_ptr<Timer>&  GetTimer();
 
 private:

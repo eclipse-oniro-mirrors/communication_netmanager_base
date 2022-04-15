@@ -132,7 +132,7 @@ bool NetActivate::CompareByNetworkBand(uint32_t netLinkUpBand, uint32_t netLinkD
     return false;
 }
 
-sptr<NetSpecifier>& NetActivate::GetNetSpecifier()
+sptr<NetSpecifier> NetActivate::GetNetSpecifier()
 {
     return netSpecifier_;
 }
@@ -157,7 +157,7 @@ void NetActivate::SetServiceSupply(sptr<NetSupplier> netServiceSupplied)
     netServiceSupplied_ = netServiceSupplied;
 }
 
-sptr<INetConnCallback>& NetActivate::GetNetCallback()
+sptr<INetConnCallback> NetActivate::GetNetCallback()
 {
     return netConnCallback_;
 }
