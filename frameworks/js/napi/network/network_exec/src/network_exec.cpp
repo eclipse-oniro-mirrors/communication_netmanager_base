@@ -41,9 +41,11 @@ bool NetworkExec::ExecGetType(GetTypeContext *context)
 
     sptr<NetSpecifier> specifier = new NetSpecifier;
     specifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
-    (void)DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback,
                                                                                           DEFAULT_TIMEOUT_MS);
+    if (ret == NET_CONN_ERR_SAME_CALLBACK) {
+        ret = 0;
+    }
     NETMANAGER_BASE_LOGI("ExecGetType result %{public}d", ret);
     if (ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED) {
         ret = NETWORK_NO_PERMISSION;
@@ -91,9 +93,11 @@ bool NetworkExec::ExecSubscribe(SubscribeContext *context)
 
     sptr<NetSpecifier> specifier = new NetSpecifier;
     specifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
-    (void)DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback,
                                                                                           DEFAULT_TIMEOUT_MS);
+    if (ret == NET_CONN_ERR_SAME_CALLBACK) {
+        ret = 0;
+    }
     NETMANAGER_BASE_LOGI("ExecSubscribe result %{public}d", ret);
     if (ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED) {
         ret = NETWORK_NO_PERMISSION;
@@ -126,6 +130,9 @@ bool NetworkExec::ExecUnsubscribe(UnsubscribeContext *context)
     sptr<INetConnCallback> callback = conn->GetObserver();
 
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
+    if (ret == NET_CONN_ERR_CALLBACK_NOT_FOUND) {
+        ret = 0;
+    }
     NETMANAGER_BASE_LOGI("ExecUnsubscribe result %{public}d", ret);
     if (ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED) {
         ret = NETWORK_NO_PERMISSION;

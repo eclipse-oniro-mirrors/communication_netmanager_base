@@ -264,6 +264,9 @@ int32_t NetConnService::RegisterNetConnCallback(
 int32_t NetConnService::UnregisterNetConnCallback(const sptr<INetConnCallback> &callback)
 {
     NETMGR_LOG_D("UnregisterNetConnCallback Enter");
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
     if (callback == nullptr) {
         NETMGR_LOG_E("callback is null");
         return ERR_SERVICE_NULL_PTR;
