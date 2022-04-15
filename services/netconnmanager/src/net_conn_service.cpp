@@ -67,7 +67,7 @@ void NetConnService::CreateDefaultRequest()
         defaultNetActivate_ = std::make_unique<NetActivate>(defaultNetSpecifier_, nullptr,
             std::bind(&NetConnService::DeactivateNetwork, this, std::placeholders::_1), 0).release();
         defaultNetActivate_->SetRequestId(DEFAULT_REQUEST_ID);
-        netActivates_.insert(std::pair<uint32_t, sptr<NetActivate>>(DEFAULT_REQUEST_ID, defaultNetActivate_));
+        netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
     }
     return;
 }
@@ -487,7 +487,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier,
         std::bind(&NetConnService::DeactivateNetwork, this, std::placeholders::_1), timeoutMS)).release();
     uint32_t reqId = request->GetRequestId();
     NETMGR_LOG_D("ActivateNetwork  reqId is [%{public}d]", reqId);
-    netActivates_.insert(std::pair<uint32_t, sptr<NetActivate>>(reqId, request));
+    netActivates_[reqId] = request;
     sptr<NetSupplier> bestNet = nullptr;
     int bestscore = static_cast<int>(FindBestNetworkForRequest(bestNet, request));
     if (bestscore != 0 && bestNet != nullptr) {
