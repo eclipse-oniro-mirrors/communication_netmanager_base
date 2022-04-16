@@ -423,6 +423,8 @@ int32_t NetConnServiceStub::ConvertCode(int32_t internalCode)
             return static_cast<int32_t>(NET_CONN_ERR_SAME_CALLBACK);
         case static_cast<int32_t>(ERR_UNREGISTER_CALLBACK_NOT_FOUND):
             return static_cast<int32_t>(NET_CONN_ERR_CALLBACK_NOT_FOUND);
+        case static_cast<int32_t>(ERR_NET_NOT_FIND_REQUEST_ID):
+            return static_cast<int32_t>(NET_CONN_ERR_REQ_ID_NOT_FOUND);
         default:
             break;
     }

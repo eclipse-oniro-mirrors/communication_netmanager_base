@@ -524,7 +524,7 @@ int32_t NetConnService::DeactivateNetwork(uint32_t reqId)
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         iterSupplier->second->CancelRequest(reqId);
     }
-    deleteNetActivates_.insert(std::pair<uint32_t, sptr<NetActivate>>(reqId, pNetActivate));
+    deleteNetActivates_[reqId] = pNetActivate;
     netActivates_.erase(reqId);
     return ERR_NONE;
 }
