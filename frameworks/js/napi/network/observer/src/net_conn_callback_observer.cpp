@@ -101,7 +101,7 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
     std::lock_guard<std::mutex> lock(OBSERVER_MUTEX);
     if (!GLOBAL_MANAGER) {
         NETMANAGER_BASE_LOGI("no event manager");
-        return true;
+        return 0;
     }
 
     if (GLOBAL_MANAGER->HasEventListener(EVENT_GET_TYPE)) {
@@ -140,7 +140,7 @@ int32_t NetConnCallbackObserver::NetUnavailable()
     std::lock_guard<std::mutex> lock(OBSERVER_MUTEX);
     if (!GLOBAL_MANAGER) {
         NETMANAGER_BASE_LOGI("no event manager");
-        return true;
+        return 0;
     }
 
     if (GLOBAL_MANAGER->HasEventListener(EVENT_GET_TYPE)) {

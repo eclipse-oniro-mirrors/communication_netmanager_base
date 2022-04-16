@@ -256,8 +256,8 @@ int32_t NetConnService::RegisterNetConnCallback(
         NETMGR_LOG_E("The parameter of netSpecifier or callback is null");
         return ERR_SERVICE_NULL_PTR;
     }
-    uint32_t reqId = 0;
     std::lock_guard<std::mutex> lock(NET_CONN_CALLBACK_MUTEX);
+    uint32_t reqId = 0;
     if (FindSameCallback(callback, reqId)) {
         NETMGR_LOG_D("RegisterNetConnCallback FindSameCallback(callback, reqId)");
         return ERR_REGISTER_THE_SAME_CALLBACK;
@@ -309,12 +309,12 @@ int32_t NetConnService::UnregisterNetConnCallback(const sptr<INetConnCallback> &
                 iterSupplier->second->CancelRequest(reqId);
             }
             deleteNetActivates_[reqId] = netActivate;
-            netActivates_.erase(iterActive);
+            iterActive = netActivates_.erase(iterActive);
         } else {
             ++iterActive;
         }
     }
-    return DeactivateNetwork(reqId);
+    return ERR_NONE;
 }
 
 bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId)

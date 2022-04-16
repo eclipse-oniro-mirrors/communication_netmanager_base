@@ -25,7 +25,7 @@
 
 namespace OHOS::NetManagerStandard {
 EventManager GLOBAL_MANAGER_WRAPPER;
-EventManager *GLOBAL_MANAGER;
+EventManager *GLOBAL_MANAGER = &GLOBAL_MANAGER_WRAPPER;
 
 napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
 {
