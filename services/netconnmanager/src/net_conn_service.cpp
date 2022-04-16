@@ -28,6 +28,8 @@
 #include "net_mgr_log_wrapper.h"
 #include "netmanager_base_permission.h"
 
+static std::mutex NET_CONN_CALLBACK_MUTEX;
+
 namespace OHOS {
 namespace NetManagerStandard {
 const bool REGISTER_LOCAL_RESULT =
@@ -255,7 +257,9 @@ int32_t NetConnService::RegisterNetConnCallback(
         return ERR_SERVICE_NULL_PTR;
     }
     uint32_t reqId = 0;
+    std::lock_guard<std::mutex> lock(NET_CONN_CALLBACK_MUTEX);
     if (FindSameCallback(callback, reqId)) {
+        NETMGR_LOG_D("RegisterNetConnCallback FindSameCallback(callback, reqId)");
         return ERR_REGISTER_THE_SAME_CALLBACK;
     }
     return ActivateNetwork(netSpecifier, callback, timeoutMS);
@@ -272,10 +276,44 @@ int32_t NetConnService::UnregisterNetConnCallback(const sptr<INetConnCallback> &
         return ERR_SERVICE_NULL_PTR;
     }
     uint32_t reqId = 0;
+    std::lock_guard<std::mutex> lock(NET_CONN_CALLBACK_MUTEX);
     if (!FindSameCallback(callback, reqId)) {
+        NETMGR_LOG_D("UnregisterNetConnCallback FindSameCallback(callback, reqId)");
         return ERR_UNREGISTER_CALLBACK_NOT_FOUND;
     }
     deleteNetActivates_.clear();
+
+    NET_ACTIVATE_MAP::iterator iterActive;
+    for (iterActive = netActivates_.begin(); iterActive != netActivates_.end();) {
+        if (!iterActive->second) {
+            ++iterActive;
+            continue;
+        }
+        sptr<INetConnCallback> saveCallback = iterActive->second->GetNetCallback();
+        if (saveCallback == nullptr) {
+            ++iterActive;
+            continue;
+        }
+        if (callback->AsObject().GetRefPtr() == saveCallback->AsObject().GetRefPtr()) {
+            reqId = iterActive->first;
+            sptr<NetActivate> netActivate = iterActive->second;
+            if (netActivate) {
+                sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
+                if (supplier) {
+                    supplier->CancelRequest(reqId);
+                }
+            }
+
+            NET_SUPPLIER_MAP::iterator iterSupplier;
+            for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
+                iterSupplier->second->CancelRequest(reqId);
+            }
+            deleteNetActivates_[reqId] = netActivate;
+            netActivates_.erase(iterActive);
+        } else {
+            ++iterActive;
+        }
+    }
     return DeactivateNetwork(reqId);
 }
 
@@ -525,7 +563,7 @@ int32_t NetConnService::DeactivateNetwork(uint32_t reqId)
         iterSupplier->second->CancelRequest(reqId);
     }
     deleteNetActivates_[reqId] = pNetActivate;
-    netActivates_.erase(reqId);
+    netActivates_.erase(iterActivate);
     return ERR_NONE;
 }
 

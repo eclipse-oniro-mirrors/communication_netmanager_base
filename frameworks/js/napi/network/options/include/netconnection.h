@@ -25,27 +25,14 @@
 namespace OHOS::NetManagerStandard {
 class NetConnection final {
 public:
+    explicit NetConnection();
+
+    ~NetConnection() = default;
+
     [[nodiscard]] sptr<NetConnCallbackObserver> GetObserver() const;
-
-    [[nodiscard]] EventManager *GetEventManager() const;
-
-    static NetConnection *MakeNetConnection(EventManager *eventManager);
-
-    static NetConnection *GetNetConnection(NetConnCallbackObserver *observer);
-
-    static void DeleteNetConnection(NetConnection *netConnection);
 
 private:
     sptr<NetConnCallbackObserver> observer_;
-
-    EventManager *manager_;
-
-    explicit NetConnection(EventManager *eventManager);
-
-    ~NetConnection() = default;
 };
-
-extern std::map<NetConnCallbackObserver *, NetConnection *> NET_CONNECTIONS;
 } // namespace OHOS::NetManagerStandard
-
 #endif /* NETMANAGER_BASE_NETCONNECTION_H */

@@ -24,6 +24,9 @@
 #include "unsubscribe_context.h"
 
 namespace OHOS::NetManagerStandard {
+EventManager GLOBAL_MANAGER_WRAPPER;
+EventManager *GLOBAL_MANAGER;
+
 napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
 {
     std::initializer_list<napi_property_descriptor> properties = {
@@ -35,14 +38,14 @@ napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
 
     auto finalizer = [](napi_env, void *data, void *) {
         NETMANAGER_BASE_LOGI("finalize netConnection");
-        auto manager = static_cast<EventManager *>(data);
-        auto netConnection = static_cast<NetConnection *>(manager->GetData());
-        delete manager;
-        NetConnection::DeleteNetConnection(netConnection);
+        if (GLOBAL_MANAGER_WRAPPER.GetData()) {
+            auto netConnection = reinterpret_cast<NetConnection *>(GLOBAL_MANAGER_WRAPPER.GetData());
+            delete netConnection;
+        }
+        GLOBAL_MANAGER_WRAPPER.SetData(nullptr);
     };
-    auto manager = new EventManager;
-    manager->SetData(NetConnection::MakeNetConnection(manager));
-    napi_wrap(env, exports, reinterpret_cast<void *>(manager), finalizer, nullptr, nullptr);
+    GLOBAL_MANAGER_WRAPPER.SetData(new NetConnection);
+    napi_wrap(env, exports, reinterpret_cast<void *>(GLOBAL_MANAGER), finalizer, nullptr, nullptr);
 
     return exports;
 }

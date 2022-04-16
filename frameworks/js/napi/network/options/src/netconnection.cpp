@@ -18,42 +18,10 @@
 #include <mutex>
 
 namespace OHOS::NetManagerStandard {
-std::map<NetConnCallbackObserver *, NetConnection *> NET_CONNECTIONS;
-std::mutex NET_CONNECTIONS_MUTEX;
-
-NetConnection::NetConnection(EventManager *eventManager)
-    : observer_(new NetConnCallbackObserver), manager_(eventManager)
-{
-}
-
-NetConnection *NetConnection::MakeNetConnection(EventManager *eventManager)
-{
-    std::lock_guard<std::mutex> lock(NET_CONNECTIONS_MUTEX);
-    auto netConnection = new NetConnection(eventManager);
-    NET_CONNECTIONS[netConnection->observer_.GetRefPtr()] = netConnection;
-    return netConnection;
-}
-
-void NetConnection::DeleteNetConnection(NetConnection *netConnection)
-{
-    std::lock_guard<std::mutex> lock(NET_CONNECTIONS_MUTEX);
-    NET_CONNECTIONS.erase(netConnection->observer_.GetRefPtr());
-    delete netConnection;
-}
-
-NetConnection *NetConnection::GetNetConnection(NetConnCallbackObserver *observer)
-{
-    std::lock_guard<std::mutex> lock(NET_CONNECTIONS_MUTEX);
-    return NET_CONNECTIONS[observer];
-}
+NetConnection::NetConnection() : observer_(new NetConnCallbackObserver) {}
 
 sptr<NetConnCallbackObserver> NetConnection::GetObserver() const
 {
     return observer_;
-}
-
-EventManager *NetConnection::GetEventManager() const
-{
-    return manager_;
 }
 } // namespace OHOS::NetManagerStandard
