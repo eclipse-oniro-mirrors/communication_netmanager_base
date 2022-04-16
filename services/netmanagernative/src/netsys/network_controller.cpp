@@ -34,7 +34,7 @@ NetworkController::~NetworkController()
 int NetworkController::CreatePhysicalNetwork(uint16_t netId, NetworkPermission permission)
 {
     NmdNetwork *nw = new NmdNetwork(netId, permission);
-    this->networks.insert(std::pair<long, NmdNetwork *>(netId, nw));
+    this->networks[netId] = nw;
     return netId;
 }
 

@@ -47,6 +47,7 @@ include_directories(utils/event_manager/include)
 include_directories(utils/log/include)
 include_directories(utils/module_template/include)
 include_directories(utils/napi_utils/include)
+include_directories(services/netmanagernative/include/netsys)
 
 add_executable(netmanager_base
         frameworks/js/napi/common/base_context.h
@@ -275,6 +276,7 @@ add_executable(netmanager_base
         utils/log/include/net_mgr_log_wrapper.h
         utils/log/include/netmanager_base_log.h
         utils/log/src/net_mgr_log_wrapper.cpp
+        services/netmanagernative/src/netsys/network_controller.cpp
         utils/module_template/include/netmanager_base_module_template.h
         utils/module_template/src/netmanager_base_module_template.cpp
         utils/napi_utils/include/netmanager_base_napi_utils.h

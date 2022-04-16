@@ -157,8 +157,8 @@ int32_t NetConnService::RegisterNetSupplier(
     supplier->SetNetValid(true);
 
     // save supplier
-    netSuppliers_.insert(std::pair<uint32_t, sptr<NetSupplier>>(supplierId, supplier));
-    networks_.insert(std::pair<uint32_t, sptr<Network>>(netId, network));
+    netSuppliers_[supplierId] = supplier;
+    networks_[netId] = network;
 
     NETMGR_LOG_D("RegisterNetSupplier service out. netSuppliers_ size[%{public}zd]", netSuppliers_.size());
     return ERR_NONE;
