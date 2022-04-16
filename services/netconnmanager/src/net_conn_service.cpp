@@ -294,25 +294,25 @@ int32_t NetConnService::UnregisterNetConnCallback(const sptr<INetConnCallback> &
             ++iterActive;
             continue;
         }
-        if (callback->AsObject().GetRefPtr() == saveCallback->AsObject().GetRefPtr()) {
-            reqId = iterActive->first;
-            sptr<NetActivate> netActivate = iterActive->second;
-            if (netActivate) {
-                sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
-                if (supplier) {
-                    supplier->CancelRequest(reqId);
-                }
-            }
-
-            NET_SUPPLIER_MAP::iterator iterSupplier;
-            for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
-                iterSupplier->second->CancelRequest(reqId);
-            }
-            deleteNetActivates_[reqId] = netActivate;
-            iterActive = netActivates_.erase(iterActive);
-        } else {
+        if (callback->AsObject().GetRefPtr() != saveCallback->AsObject().GetRefPtr()) {
             ++iterActive;
+            continue;
         }
+        reqId = iterActive->first;
+        sptr<NetActivate> netActivate = iterActive->second;
+        if (netActivate) {
+            sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
+            if (supplier) {
+                supplier->CancelRequest(reqId);
+            }
+        }
+
+        NET_SUPPLIER_MAP::iterator iterSupplier;
+        for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
+            iterSupplier->second->CancelRequest(reqId);
+        }
+        deleteNetActivates_[reqId] = netActivate;
+        iterActive = netActivates_.erase(iterActive);
     }
     return ERR_NONE;
 }

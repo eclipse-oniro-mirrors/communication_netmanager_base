@@ -15,8 +15,6 @@
 
 #include "netconnection.h"
 
-#include <mutex>
-
 namespace OHOS::NetManagerStandard {
 NetConnection::NetConnection() : observer_(new NetConnCallbackObserver) {}
 
