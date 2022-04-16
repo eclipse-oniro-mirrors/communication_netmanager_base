@@ -130,7 +130,7 @@ bool NetworkExec::ExecUnsubscribe(UnsubscribeContext *context)
     sptr<INetConnCallback> callback = conn->GetObserver();
 
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
-    if (ret == NET_CONN_ERR_CALLBACK_NOT_FOUND) {
+    if (ret == NET_CONN_ERR_CALLBACK_NOT_FOUND || ret == NET_CONN_ERR_REQ_ID_NOT_FOUND) {
         ret = 0;
     }
     NETMANAGER_BASE_LOGI("ExecUnsubscribe result %{public}d", ret);

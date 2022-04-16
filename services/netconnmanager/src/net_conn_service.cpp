@@ -157,8 +157,8 @@ int32_t NetConnService::RegisterNetSupplier(
     supplier->SetNetValid(true);
 
     // save supplier
-    netSuppliers_.insert(std::pair<uint32_t, sptr<NetSupplier>>(supplierId, supplier));
-    networks_.insert(std::pair<uint32_t, sptr<Network>>(netId, network));
+    netSuppliers_[supplierId] = supplier;
+    networks_[netId] = network;
 
     NETMGR_LOG_D("RegisterNetSupplier service out. netSuppliers_ size[%{public}zd]", netSuppliers_.size());
     return ERR_NONE;
@@ -524,7 +524,7 @@ int32_t NetConnService::DeactivateNetwork(uint32_t reqId)
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         iterSupplier->second->CancelRequest(reqId);
     }
-    deleteNetActivates_.insert(std::pair<uint32_t, sptr<NetActivate>>(reqId, pNetActivate));
+    deleteNetActivates_[reqId] = pNetActivate;
     netActivates_.erase(reqId);
     return ERR_NONE;
 }
