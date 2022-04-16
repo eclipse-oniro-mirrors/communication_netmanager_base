@@ -17,10 +17,15 @@
 
 #include <algorithm>
 
+#include "netmanager_base_log.h"
+#include "securec.h"
+
 namespace OHOS::NetManagerStandard {
 static constexpr const int CALLBACK_PARAM_NUM = 1;
 
 static constexpr const int ASYNC_CALLBACK_PARAM_NUM = 2;
+
+static constexpr const int LOG_LENGTH = 1024;
 
 EventManager::EventManager() : data_(nullptr) {}
 
@@ -80,6 +85,12 @@ void *EventManager::GetData()
 
 void EventManager::EmitByUv(const std::string &type, void *data, void(Handler)(uv_work_t *, int status))
 {
+    char log[LOG_LENGTH] = {0};
+    if (sprintf_s(log, LOG_LENGTH, "Func is called", __FUNCTION__) < 0) {
+        return;
+    }
+    NETMANAGER_BASE_LOGI("%{public}s", log);
+
     std::lock_guard<std::mutex> lock(mutex_);
 
     std::for_each(listeners_.begin(), listeners_.end(), [type, data, Handler, this](const EventListener &listener) {

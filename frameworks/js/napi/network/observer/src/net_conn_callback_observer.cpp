@@ -22,10 +22,13 @@
 
 #include "netmanager_base_log.h"
 #include "network_module.h"
+#include "securec.h"
 
 static constexpr const char *NETWORK_NONE = "none";
 
 static constexpr const char *NETWORK_WIFI = "WiFi";
+
+static constexpr const int LOG_LENGTH = 1024;
 
 static std::mutex OBSERVER_MUTEX;
 
@@ -98,6 +101,12 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
                                                        const sptr<NetAllCapabilities> &netAllCap)
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetCapabilitiesChange");
+    char log[LOG_LENGTH] = {0};
+    if (sprintf_s(log, LOG_LENGTH, "Func is called", __FUNCTION__) < 0) {
+        return 0;
+    }
+    NETMANAGER_BASE_LOGI("%{public}s", log);
+
     std::lock_guard<std::mutex> lock(OBSERVER_MUTEX);
     if (!GLOBAL_MANAGER) {
         NETMANAGER_BASE_LOGI("no event manager");
@@ -137,6 +146,12 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
 int32_t NetConnCallbackObserver::NetUnavailable()
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetUnavailable");
+    char log[LOG_LENGTH] = {0};
+    if (sprintf_s(log, LOG_LENGTH, "Func is called", __FUNCTION__) < 0) {
+        return 0;
+    }
+    NETMANAGER_BASE_LOGI("%{public}s", log);
+
     std::lock_guard<std::mutex> lock(OBSERVER_MUTEX);
     if (!GLOBAL_MANAGER) {
         NETMANAGER_BASE_LOGI("no event manager");

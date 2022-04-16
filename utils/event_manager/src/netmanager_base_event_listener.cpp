@@ -15,7 +15,11 @@
 
 #include "netmanager_base_event_listener.h"
 
+#include "netmanager_base_log.h"
 #include "netmanager_base_napi_utils.h"
+#include "securec.h"
+
+static constexpr const int LOG_LENGTH = 1024;
 
 namespace OHOS::NetManagerStandard {
 EventListener::EventListener(napi_env env, std::string type, napi_value callback, bool once, bool asyncCallback)
@@ -113,6 +117,12 @@ bool EventListener::IsAsyncCallback() const
 
 void EventListener::EmitByUv(const std::string &type, void *data, void(Handler)(uv_work_t *, int status)) const
 {
+    char log[LOG_LENGTH] = {0};
+    if (sprintf_s(log, LOG_LENGTH, "Func is called", __FUNCTION__) < 0) {
+        return;
+    }
+    NETMANAGER_BASE_LOGI("%{public}s", log);
+
     if (type_ != type) {
         return;
     }
