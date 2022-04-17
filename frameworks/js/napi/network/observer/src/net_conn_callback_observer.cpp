@@ -20,12 +20,17 @@
 #include "core_service_client.h"
 #endif
 
-#include "netconnection.h"
 #include "netmanager_base_log.h"
+#include "network_module.h"
+#include "securec.h"
 
 static constexpr const char *NETWORK_NONE = "none";
 
 static constexpr const char *NETWORK_WIFI = "WiFi";
+
+static constexpr const int LOG_LENGTH = 1024;
+
+static std::mutex OBSERVER_MUTEX;
 
 namespace OHOS::NetManagerStandard {
 struct NetworkType {
@@ -96,22 +101,29 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
                                                        const sptr<NetAllCapabilities> &netAllCap)
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetCapabilitiesChange");
-    NetConnection *netConnection = NetConnection::GetNetConnection(this);
-    if (netConnection == nullptr) {
-        NETMANAGER_BASE_LOGI("can not find netConnection handle");
+    char log[LOG_LENGTH] = {0};
+    if (sprintf_s(log, LOG_LENGTH, "Func is called %s", __FUNCTION__) < 0) {
         return 0;
     }
-    if (netConnection->GetEventManager()->HasEventListener(EVENT_GET_TYPE)) {
+    NETMANAGER_BASE_LOGI("%{public}s", log);
+
+    std::lock_guard<std::mutex> lock(OBSERVER_MUTEX);
+    if (!GLOBAL_MANAGER) {
+        NETMANAGER_BASE_LOGI("no event manager");
+        return 0;
+    }
+
+    if (GLOBAL_MANAGER->HasEventListener(EVENT_GET_TYPE)) {
         auto netType = new NetworkType;
         netType->bearerTypes = netAllCap->bearerTypes_;
-        netConnection->GetEventManager()->EmitByUv(EVENT_GET_TYPE, netType, CallbackTemplate<MakeNetworkResponse>);
+        GLOBAL_MANAGER->EmitByUv(EVENT_GET_TYPE, netType, CallbackTemplate<MakeNetworkResponse>);
     } else {
         NETMANAGER_BASE_LOGI("NO EVENT_GET_TYPE");
     }
-    if (netConnection->GetEventManager()->HasEventListener(EVENT_SUBSCRIBE)) {
+    if (GLOBAL_MANAGER->HasEventListener(EVENT_SUBSCRIBE)) {
         auto netType = new NetworkType;
         netType->bearerTypes = netAllCap->bearerTypes_;
-        netConnection->GetEventManager()->EmitByUv(EVENT_SUBSCRIBE, netType, CallbackTemplate<MakeNetworkResponse>);
+        GLOBAL_MANAGER->EmitByUv(EVENT_SUBSCRIBE, netType, CallbackTemplate<MakeNetworkResponse>);
     } else {
         NETMANAGER_BASE_LOGI("NO EVENT_SUBSCRIBE");
     }
@@ -134,20 +146,27 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
 int32_t NetConnCallbackObserver::NetUnavailable()
 {
     NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetUnavailable");
-    NetConnection *netConnection = NetConnection::GetNetConnection(this);
-    if (netConnection == nullptr) {
-        NETMANAGER_BASE_LOGI("can not find netConnection handle");
+    char log[LOG_LENGTH] = {0};
+    if (sprintf_s(log, LOG_LENGTH, "Func is called %s", __FUNCTION__) < 0) {
         return 0;
     }
-    if (netConnection->GetEventManager()->HasEventListener(EVENT_GET_TYPE)) {
+    NETMANAGER_BASE_LOGI("%{public}s", log);
+
+    std::lock_guard<std::mutex> lock(OBSERVER_MUTEX);
+    if (!GLOBAL_MANAGER) {
+        NETMANAGER_BASE_LOGI("no event manager");
+        return 0;
+    }
+
+    if (GLOBAL_MANAGER->HasEventListener(EVENT_GET_TYPE)) {
         auto netType = new NetworkType;
-        netConnection->GetEventManager()->EmitByUv(EVENT_GET_TYPE, netType, CallbackTemplate<MakeNetworkResponse>);
+        GLOBAL_MANAGER->EmitByUv(EVENT_GET_TYPE, netType, CallbackTemplate<MakeNetworkResponse>);
     } else {
         NETMANAGER_BASE_LOGI("NO EVENT_GET_TYPE");
     }
-    if (netConnection->GetEventManager()->HasEventListener(EVENT_SUBSCRIBE)) {
+    if (GLOBAL_MANAGER->HasEventListener(EVENT_SUBSCRIBE)) {
         auto netType = new NetworkType;
-        netConnection->GetEventManager()->EmitByUv(EVENT_SUBSCRIBE, netType, CallbackTemplate<MakeNetworkResponse>);
+        GLOBAL_MANAGER->EmitByUv(EVENT_SUBSCRIBE, netType, CallbackTemplate<MakeNetworkResponse>);
     } else {
         NETMANAGER_BASE_LOGI("NO EVENT_SUBSCRIBE");
     }

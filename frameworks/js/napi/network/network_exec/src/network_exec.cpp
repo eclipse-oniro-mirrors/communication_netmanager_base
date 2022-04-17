@@ -37,10 +37,15 @@ bool NetworkExec::ExecGetType(GetTypeContext *context)
     NETMANAGER_BASE_LOGI("NetworkExec::ExecGetType");
     EventManager *manager = context->GetManager();
     auto conn = static_cast<NetConnection *>(manager->GetData());
+    if (!conn) {
+        NETMANAGER_BASE_LOGI("NetworkExec::ExecGetType no conn");
+        return true;
+    }
     sptr<INetConnCallback> callback = conn->GetObserver();
 
     sptr<NetSpecifier> specifier = new NetSpecifier;
     specifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
+    DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback,
                                                                                           DEFAULT_TIMEOUT_MS);
     if (ret == NET_CONN_ERR_SAME_CALLBACK) {
@@ -89,10 +94,15 @@ bool NetworkExec::ExecSubscribe(SubscribeContext *context)
     NETMANAGER_BASE_LOGI("NetworkExec::ExecSubscribe");
     EventManager *manager = context->GetManager();
     auto conn = static_cast<NetConnection *>(manager->GetData());
+    if (!conn) {
+        NETMANAGER_BASE_LOGI("NetworkExec::ExecSubscribe no conn");
+        return true;
+    }
     sptr<INetConnCallback> callback = conn->GetObserver();
 
     sptr<NetSpecifier> specifier = new NetSpecifier;
     specifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
+    DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback,
                                                                                           DEFAULT_TIMEOUT_MS);
     if (ret == NET_CONN_ERR_SAME_CALLBACK) {
