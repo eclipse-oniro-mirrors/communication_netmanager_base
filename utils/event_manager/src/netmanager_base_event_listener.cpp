@@ -48,6 +48,7 @@ EventListener::EventListener(const EventListener &listener)
 
 EventListener::~EventListener()
 {
+    NETMANAGER_BASE_LOGI("~EventListener() is called, to delete EventListener");
     if (callbackRef_ != nullptr) {
         NapiUtils::DeleteReference(env_, callbackRef_);
     }
@@ -117,6 +118,7 @@ bool EventListener::IsAsyncCallback() const
 
 void EventListener::EmitByUv(const std::string &type, void *data, void(Handler)(uv_work_t *, int status)) const
 {
+    NETMANAGER_BASE_LOGI("EventListener::EmitByUv() is called, to EmitByUv");
     char log[LOG_LENGTH] = {0};
     if (sprintf_s(log, LOG_LENGTH, "Func is called %s", __FUNCTION__) < 0) {
         return;
