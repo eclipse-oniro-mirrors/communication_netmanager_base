@@ -38,6 +38,13 @@ NetActivate::NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetCon
     }
 }
 
+NetActivate::~NetActivate()
+{
+    if (lpTimer_) {
+        lpTimer_->Stop();
+    }
+}
+
 void NetActivate::TimeOutNetAvailable()
 {
     if (netServiceSupplied_) {
