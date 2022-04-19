@@ -425,6 +425,8 @@ int32_t NetConnServiceStub::ConvertCode(int32_t internalCode)
             return static_cast<int32_t>(NET_CONN_ERR_CALLBACK_NOT_FOUND);
         case static_cast<int32_t>(ERR_NET_NOT_FIND_REQUEST_ID):
             return static_cast<int32_t>(NET_CONN_ERR_REQ_ID_NOT_FOUND);
+        case static_cast<int32_t>(ERR_NET_DEFAULTNET_NOT_EXIST):
+            return static_cast<int32_t>(NET_CONN_ERR_NO_DEFAULT_NET);
         default:
             break;
     }
@@ -436,7 +438,7 @@ int32_t NetConnServiceStub::OnGetDefaultNet(MessageParcel& data, MessageParcel& 
 {
     NETMGR_LOG_D("OnGetDefaultNet Begin...");
     int32_t netId;
-    int32_t result = GetDefaultNet(netId);
+    int32_t result = ConvertCode(GetDefaultNet(netId));
     NETMGR_LOG_D("GetDefaultNet result is: [%{public}d]", result);
     if (!reply.WriteInt32(result)) {
         return ERR_FLATTEN_OBJECT;
@@ -453,7 +455,7 @@ int32_t NetConnServiceStub::OnHasDefaultNet(MessageParcel& data, MessageParcel& 
 {
     NETMGR_LOG_D("OnHasDefaultNet Begin...");
     bool flag = false;
-    int32_t result = HasDefaultNet(flag);
+    int32_t result = ConvertCode(HasDefaultNet(flag));
     NETMGR_LOG_D("HasDefaultNet result is: [%{public}d]", result);
     if (!reply.WriteInt32(result)) {
         return ERR_FLATTEN_OBJECT;

@@ -109,7 +109,9 @@ napi_value ConnectionExec::GetAddressByNameCallback(GetAddressByNameContext *con
 
 bool ConnectionExec::ExecGetDefaultNet(GetDefaultNetContext *context)
 {
-    return DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(context->netHandle) == 0;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(context->netHandle);
+    NETMANAGER_BASE_LOGI("ExecGetDefaultNet ret %{public}d", ret);
+    return ret == 0 || ret == NET_CONN_ERR_NO_DEFAULT_NET;
 }
 
 napi_value ConnectionExec::GetDefaultNetCallback(GetDefaultNetContext *context)
@@ -119,7 +121,9 @@ napi_value ConnectionExec::GetDefaultNetCallback(GetDefaultNetContext *context)
 
 bool ConnectionExec::ExecHasDefaultNet(HasDefaultNetContext *context)
 {
-    return DelayedSingleton<NetConnClient>::GetInstance()->HasDefaultNet(context->hasDefaultNet) == 0;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->HasDefaultNet(context->hasDefaultNet);
+    NETMANAGER_BASE_LOGI("ExecHasDefaultNet ret %{public}d", ret);
+    return ret == 0 || ret == NET_CONN_ERR_NO_DEFAULT_NET;
 }
 
 napi_value ConnectionExec::HasDefaultNetCallback(HasDefaultNetContext *context)
