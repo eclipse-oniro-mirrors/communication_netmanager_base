@@ -575,7 +575,7 @@ int32_t NetConnService::GetDefaultNet(int32_t &netId)
     }
     if (!defaultNetSupplier_) {
         NETMGR_LOG_E("not found the netId");
-        return ERR_NET_NOT_FIND_NETID;
+        return ERR_NET_DEFAULTNET_NOT_EXIST;
     }
 
     netId = defaultNetSupplier_->GetNetId();
@@ -586,6 +586,9 @@ int32_t NetConnService::GetDefaultNet(int32_t &netId)
 int32_t NetConnService::HasDefaultNet(bool &flag)
 {
     NETMGR_LOG_D("HasDefaultNet Enter");
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
     if (!defaultNetSupplier_) {
         flag = false;
         return ERR_NET_DEFAULTNET_NOT_EXIST;
