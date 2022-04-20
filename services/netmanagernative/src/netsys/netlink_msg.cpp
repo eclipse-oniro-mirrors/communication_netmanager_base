@@ -22,7 +22,7 @@ namespace nmd {
 NetlinkMsg::NetlinkMsg(uint16_t flags, size_t maxBufLen, int pid)
 {
     this->maxBufLen = maxBufLen;
-    this->netlinkMessage = reinterpret_cast<struct nlmsghdr *>(malloc(NLMSG_SPACE(maxBufLen)));
+    this->netlinkMessage = reinterpret_cast<struct nlmsghdr *>(new char[NLMSG_SPACE(maxBufLen)]);
     errno_t result = memset_s(this->netlinkMessage, NLMSG_SPACE(maxBufLen), 0, NLMSG_SPACE(maxBufLen));
     if (result != 0) {
         NETNATIVE_LOGE("[NetlinkMessage]: memset result %{public}d", result);
@@ -34,7 +34,7 @@ NetlinkMsg::NetlinkMsg(uint16_t flags, size_t maxBufLen, int pid)
 
 NetlinkMsg::~NetlinkMsg()
 {
-    delete this->netlinkMessage;
+    delete [] this->netlinkMessage;
 }
 
 void NetlinkMsg::AddRoute(unsigned short action, struct rtmsg msg)
