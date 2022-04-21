@@ -39,7 +39,7 @@ ohos_shared_library("policy") {
   deps = [
     "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if",
     "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-    "//foundation/ace/napi/:ace_napi",
+    "//foundation/arkui/napi/:ace_napi",
     "//utils/native/base:utils",
   ]
 

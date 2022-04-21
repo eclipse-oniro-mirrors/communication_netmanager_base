@@ -40,7 +40,7 @@ ohos_shared_library("statistics") {
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-    "//foundation/ace/napi/:ace_napi",
+    "//foundation/arkui/napi/:ace_napi",
     "//utils/native/base:utils",
   ]
 

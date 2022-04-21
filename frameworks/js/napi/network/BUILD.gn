@@ -35,14 +35,14 @@ utils_include = [
 ]
 
 common_include = [
-  "//foundation/ace/napi/interfaces/kits",
-  "//foundation/ace/napi",
+  "//foundation/arkui/napi/interfaces/kits",
+  "//foundation/arkui/napi",
   "//third_party/libuv/include",
   "//third_party/node/src",
 ]
 
 common_deps = [
-  "//foundation/ace/napi/:ace_napi",
+  "//foundation/arkui/napi/:ace_napi",
   "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
   "//third_party/libuv:uv_static",
   "//utils/native/base:utils",

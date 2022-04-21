@@ -281,10 +281,10 @@ add_executable(netmanager_base
         utils/napi_utils/src/netmanager_base_napi_utils.cpp)
 
 include_directories(
-        ../../ace/napi/interfaces/kits
-        ../../ace/napi/interfaces/innerkits
-        ../../ace/napi/native_engine/impl/quickjs
-        ../../ace/napi/
+        ../../arkui/napi/interfaces/kits
+        ../../arkui/napi/interfaces/inner_api
+        ../../arkui/napi/native_engine/impl/quickjs
+        ../../arkui/napi/
         ../../../third_party/node/src
 )
 
@@ -315,7 +315,7 @@ include_directories(../wifi/services/wifi_standard/wifi_framework/dhcp_manage/mg
 include_directories(../../aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content)
 
 link_directories(../../../utils/native/base/cmake-build-debug/src/securec)
-link_directories(../../../foundation/ace/napi/cmake-build-debug)
+link_directories(../../../foundation/arkui/napi/cmake-build-debug)
 link_directories(../../../third_party/quickjs)
 link_directories(../../../third_party/googletest/cmake-build-debug/googlemock/gtest)
 link_directories(../../../third_party/googletest/cmake-build-debug/googlemock)
