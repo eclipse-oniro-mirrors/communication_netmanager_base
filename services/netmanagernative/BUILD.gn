@@ -41,13 +41,13 @@ ohos_shared_library("netsys_native_manager") {
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
-    "//foundation/communication/wifi/services/wifi_standard/wifi_framework/dhcp_manage/mgr_service/include",
-    "//foundation/communication/wifi/services/wifi_standard/wifi_framework/dhcp_manage/mgr_service/interfaces",
+    "//foundation/communication/wifi/dhcp/interfaces/innerkits/native_cpp/include",
+    "//foundation/communication/wifi/dhcp/interfaces/innerkits/native_cpp/interfaces",
     "utils/native/base/include",
   ]
 
   deps = [
-    "//foundation/communication/wifi/services/wifi_standard/wifi_framework/dhcp_manage/mgr_service:dhcp_manager_service",
+    "//foundation/communication/wifi/dhcp/services/mgr_service:dhcp_manager_service",
     "//utils/native/base:utils",
   ]
 
