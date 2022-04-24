@@ -301,14 +301,18 @@ int InterfaceController::SetIfaceConfig(const nmd::InterfaceConfigurationParcel 
     }
     int fd = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
     if (ioctl(fd, SIOCGIFFLAGS, &ifr) == -1) {
-        NETNATIVE_LOGE("fail to set interface config. strerror[%{public}s]", strerror(errno));
+        char errmsg[INTERFACE_ERR_MAX_LEN] = {0};
+        strerror_r(errno, errmsg, INTERFACE_ERR_MAX_LEN);
+        NETNATIVE_LOGE("fail to set interface config. strerror[%{public}s]", errmsg);
         close(fd);
         return -1;
     }
-    uint16_t flags = ifr.ifr_flags;
+    uint16_t flags = static_cast<uint16_t>(ifr.ifr_flags);
     auto fit = std::find(ifaceConfig.flags.begin(), ifaceConfig.flags.end(), "up");
     if (fit != std::end(ifaceConfig.flags)) {
-        ifr.ifr_flags = ifr.ifr_flags | IFF_UP;
+        uint16_t ifrFlags = static_cast<uint16_t>(ifr.ifr_flags);
+        ifrFlags = ifrFlags | IFF_UP;
+        ifr.ifr_flags = static_cast<short>(ifrFlags);
     }
     fit = std::find(ifaceConfig.flags.begin(), ifaceConfig.flags.end(), "down");
     if (fit != std::end(ifaceConfig.flags)) {
@@ -320,7 +324,9 @@ int InterfaceController::SetIfaceConfig(const nmd::InterfaceConfigurationParcel 
     }
     NETNATIVE_LOGI("set ifr flags to [%{public}d]", ifr.ifr_flags);
     if (ioctl(fd, SIOCSIFFLAGS, &ifr) == -1) {
-        NETNATIVE_LOGE("fail to set ifr flags, strerror[%{public}s]", strerror(errno));
+        char errmsg[INTERFACE_ERR_MAX_LEN] = {0};
+        strerror_r(errno, errmsg, INTERFACE_ERR_MAX_LEN);
+        NETNATIVE_LOGE("fail to set ifr flags, strerror[%{public}s]", errmsg);
         close(fd);
         return -1;
     }

@@ -22,6 +22,7 @@
 
 namespace OHOS {
 namespace nmd {
+static const uint32_t INTERFACE_ERR_MAX_LEN = 256;
 typedef struct InterfaceConfigurationParcel {
     std::string ifName;
     std::string hwAddr;
