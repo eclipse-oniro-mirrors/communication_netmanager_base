@@ -310,7 +310,7 @@ include_directories(../../../foundation/distributedschedule/samgr/interfaces/inn
 include_directories(../../../foundation/distributedschedule/samgr/interfaces/innerkits/lsamgr/include)
 include_directories(../../../foundation/communication/ipc/interfaces/innerkits/ipc_core/include)
 include_directories(../../../foundation/distributedschedule/safwk/services/safwk/include/)
-include_directories(../../../base/notification/ces_standard/interfaces/innerkits/native/include)
+include_directories(../../../base/notification/common_event_service/interfaces/innerkits/native/include)
 include_directories(../../../third_party/curl/include/)
 include_directories(../wifi/dhcp/services/mgr_service/include)
 include_directories(../wifi/dhcp/services/mgr_service/interfaces)
