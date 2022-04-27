@@ -28,7 +28,6 @@
 #include "net_policy_traffic.h"
 
 #include "net_mgr_log_wrapper.h"
-#include "net_settings.h"
 #include "net_manager_center.h"
 
 namespace OHOS {
@@ -155,10 +154,6 @@ bool NetPolicyService::IsUidNetAccess(uint32_t uid, bool metered)
     std::unique_lock<std::mutex> lock(mutex_);
     NETMGR_LOG_I("IsUidNetAccess info: uid[%{public}d]", uid);
 
-    if (NetSettings::GetInstance().IsSystem(uid)) {
-        return true;
-    }
-
     NetUidPolicy uidPolicy = netPolicyFile_->GetPolicyByUid(uid);
     if ((static_cast<uint32_t>(uidPolicy) &
         static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_ALL)) ==
@@ -185,9 +180,7 @@ bool NetPolicyService::IsUidNetAccess(uint32_t uid, bool metered)
         return true;
     }
 
-    if (NetSettings::GetInstance().IsUidForeground(uid)) {
-        return true;
-    } else if ((static_cast<uint32_t>(uidPolicy) &
+    if ((static_cast<uint32_t>(uidPolicy) &
         static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND)) ==
         static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND)) {
         return false;

@@ -57,7 +57,7 @@
                 "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient:net_policy_manager_if",
                 "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient:net_stats_manager_if",
                 "//foundation/communication/netmanager_base/utils:net_manager_common",
-                "//foundation/communication/netmanager_base/services/etc/init:netmanager_base.rc",
+                "//foundation/communication/netmanager_base/services/etc/init:netmanager_base.cfg",
                 "//foundation/communication/netmanager_base/services/etc/init:netsysnative.rc",
                 "//foundation/communication/netmanager_base/services/etc/init:resolv.conf",
                 "//foundation/communication/netmanager_base/sa_profile:net_manager_profile",
