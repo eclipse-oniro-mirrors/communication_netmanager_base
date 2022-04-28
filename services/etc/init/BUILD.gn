@@ -12,8 +12,8 @@
 # limitations under the License.
 import("//build/ohos.gni")
 
-## Install netmanager_base.rc/netmanager_base.rc to /system/etc/init
-ohos_prebuilt_etc("netmanager_base.rc") {
+## Install netmanager_base.rc to /system/etc/init
+ohos_prebuilt_etc("netmanager_base.cfg") {
   source = "netmanager_base.cfg"
   relative_install_dir = "init"
   part_name = "netmanager_base"

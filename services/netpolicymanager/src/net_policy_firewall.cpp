@@ -16,8 +16,6 @@
 
 #include "ipc_skeleton.h"
 
-#include "net_settings.h"
-
 namespace OHOS {
 namespace NetManagerStandard {
 NetPolicyFirewall::NetPolicyFirewall(sptr<NetPolicyFile> netPolicyFile) : netPolicyFile_(netPolicyFile)
@@ -26,10 +24,6 @@ NetPolicyFirewall::NetPolicyFirewall(sptr<NetPolicyFile> netPolicyFile) : netPol
 
 bool NetPolicyFirewall::GetBackgroundPolicyByUid(uint32_t uid)
 {
-    if (NetSettings::GetInstance().IsSystem(uid)) {
-        return true;
-    }
-
     NetUidPolicy uidPolicy = netPolicyFile_->GetPolicyByUid(uid);
     if ((static_cast<uint32_t>(uidPolicy) &
         static_cast<uint32_t>(NetUidPolicy::NET_POLICY_REJECT_ALL)) ==
