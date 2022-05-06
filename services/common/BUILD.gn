@@ -18,6 +18,7 @@ ohos_shared_library("net_service_common") {
   sources = [
     "$NETCONNMANAGER_COMMON_DIR/src/broadcast_manager.cpp",
     "$NETCONNMANAGER_COMMON_DIR/src/net_manager_center.cpp",
+    "$NETCONNMANAGER_COMMON_DIR/src/net_settings.cpp",
     "$NETCONNMANAGER_COMMON_DIR/src/route_utils.cpp",
   ]
 
