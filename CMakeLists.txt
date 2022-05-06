@@ -160,11 +160,13 @@ add_executable(netmanager_base
         services/common/include/net_ethernet_base_service.h
         services/common/include/net_manager_center.h
         services/common/include/net_policy_base_service.h
+        services/common/include/net_settings.h
         services/common/include/net_stats_base_service.h
         services/common/include/route_utils.h
         services/common/include/timer.h
         services/common/src/broadcast_manager.cpp
         services/common/src/net_manager_center.cpp
+        services/common/src/net_settings.cpp
         services/common/src/route_utils.cpp
         services/dnsresolvermanager/include/stub/dns_resolver_service_stub.h
         services/dnsresolvermanager/include/dns_resolver_service.h
