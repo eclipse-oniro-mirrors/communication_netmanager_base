@@ -15,10 +15,6 @@ import("//build/ohos.gni")
 
 SUBSYSTEM_DIR = "//foundation/communication"
 
-declare_args() {
-  telephony_feature_core_service = false
-}
-
 utils_source = [
   "$SUBSYSTEM_DIR/netmanager_base/utils/base_context/src/netmanager_base_base_context.cpp",
   "$SUBSYSTEM_DIR/netmanager_base/utils/common_utils/src/netmanager_base_common_utils.cpp",
@@ -87,7 +83,9 @@ ohos_shared_library("network") {
   sources += utils_source
 
   deps = common_deps
-  if (telephony_feature_core_service) {
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.telephony_core_service) &&
+      global_parts_info.telephony_core_service) {
     deps += [
       "//base/telephony/core_service:tel_core_service",
       "//base/telephony/core_service/interfaces/innerkits:tel_core_service_api",
