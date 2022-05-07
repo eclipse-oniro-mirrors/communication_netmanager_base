@@ -303,6 +303,7 @@ include_directories(../../../base/hiviewdfx/hilog/interfaces/native/innerkits/in
 include_directories(../../../third_party/quickjs)
 include_directories(../../../third_party/googletest/googletest/include)
 include_directories(../../../third_party/libuv/include)
+include_directories(../../../third_party/jsoncpp/include)
 
 include_directories(../../../for_linux)
 include_directories(../../../foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy/include)
