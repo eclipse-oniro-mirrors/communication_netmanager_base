@@ -111,7 +111,7 @@ bool ConnectionExec::ExecGetDefaultNet(GetDefaultNetContext *context)
 {
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(context->netHandle);
     NETMANAGER_BASE_LOGI("ExecGetDefaultNet ret %{public}d", ret);
-    return ret == 0 || ret == NET_CONN_ERR_NO_DEFAULT_NET;
+    return ret == 0;
 }
 
 napi_value ConnectionExec::GetDefaultNetCallback(GetDefaultNetContext *context)
@@ -123,7 +123,7 @@ bool ConnectionExec::ExecHasDefaultNet(HasDefaultNetContext *context)
 {
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->HasDefaultNet(context->hasDefaultNet);
     NETMANAGER_BASE_LOGI("ExecHasDefaultNet ret %{public}d", ret);
-    return ret == 0 || ret == NET_CONN_ERR_NO_DEFAULT_NET;
+    return ret == 0;
 }
 
 napi_value ConnectionExec::HasDefaultNetCallback(HasDefaultNetContext *context)
