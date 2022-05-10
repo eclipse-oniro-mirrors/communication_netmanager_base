@@ -39,12 +39,27 @@ public:
 
     void EmitByUv(const std::string &type, void *data, void(Handler)(uv_work_t *, int status));
 
+    bool HasEventListener(const std::string &type);
+
+    void DeleteListener(const std::string &type);
+
 private:
     std::mutex mutex_;
 
     std::list<EventListener> listeners_;
 
     void *data_;
+};
+
+struct UvWorkWrapper {
+    UvWorkWrapper() = delete;
+
+    explicit UvWorkWrapper(void *theData, napi_env theEnv, std::string eventType, EventManager *eventManager);
+
+    void *data;
+    napi_env env;
+    std::string type;
+    EventManager *manager;
 };
 } // namespace OHOS::NetManagerStandard
 #endif /* COMMUNICATIONNETMANAGER_BASE_EVENT_MANAGER_H */

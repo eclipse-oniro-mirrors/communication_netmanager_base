@@ -41,6 +41,8 @@ public:
 
     [[nodiscard]] bool MatchOnce(const std::string &type) const;
 
+    [[nodiscard]] bool MatchType(const std::string &type) const;
+
     [[nodiscard]] bool IsAsyncCallback() const;
 
     void EmitByUv(const std::string &type, void *data, void(Handler)(uv_work_t *, int status)) const;
@@ -59,16 +61,6 @@ private:
     napi_ref callbackRef_;
 
     bool asyncCallback_;
-};
-
-struct UvWorkWrapper {
-    UvWorkWrapper() = delete;
-
-    explicit UvWorkWrapper(void *theData, napi_env theEnv, napi_ref theCallbackRef);
-
-    void *data;
-    napi_env env;
-    napi_ref callbackRef;
 };
 } // namespace OHOS::NetManagerStandard
 

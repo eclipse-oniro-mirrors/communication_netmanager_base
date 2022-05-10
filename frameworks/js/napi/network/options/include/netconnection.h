@@ -13,29 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef NETMANAGER_BASE_NETWORK_MODULE_H
-#define NETMANAGER_BASE_NETWORK_MODULE_H
+#ifndef NETMANAGER_BASE_NETCONNECTION_H
+#define NETMANAGER_BASE_NETCONNECTION_H
 
+#include <map>
+
+#include "net_conn_callback_observer.h"
+#include "net_specifier.h"
 #include "netmanager_base_event_manager.h"
-#include "netmanager_base_napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
-extern EventManager *GLOBAL_MANAGER;
-class NetworkModule {
+class NetConnection final {
 public:
-    static constexpr const char *FUNCTION_GET_TYPE = "getType";
-    static constexpr const char *FUNCTION_SUBSCRIBE = "subscribe";
-    static constexpr const char *FUNCTION_UNSUBSCRIBE = "unsubscribe";
+    explicit NetConnection();
 
-    static napi_value InitNetworkModule(napi_env env, napi_value exports);
+    ~NetConnection() = default;
+
+    [[nodiscard]] sptr<NetConnCallbackObserver> GetObserver() const;
 
 private:
-    static napi_value GetType(napi_env env, napi_callback_info info);
-
-    static napi_value Subscribe(napi_env env, napi_callback_info info);
-
-    static napi_value Unsubscribe(napi_env env, napi_callback_info info);
+    sptr<NetConnCallbackObserver> observer_;
 };
 } // namespace OHOS::NetManagerStandard
-
-#endif /* NETMANAGER_BASE_NETWORK_MODULE_H */
+#endif /* NETMANAGER_BASE_NETCONNECTION_H */

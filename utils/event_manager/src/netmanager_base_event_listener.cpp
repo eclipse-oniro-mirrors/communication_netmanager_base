@@ -15,7 +15,9 @@
 
 #include "netmanager_base_event_listener.h"
 
+#include "netmanager_base_log.h"
 #include "netmanager_base_napi_utils.h"
+#include "securec.h"
 
 namespace OHOS::NetManagerStandard {
 EventListener::EventListener(napi_env env, std::string type, napi_value callback, bool once, bool asyncCallback)
@@ -44,6 +46,7 @@ EventListener::EventListener(const EventListener &listener)
 
 EventListener::~EventListener()
 {
+    NETMANAGER_BASE_LOGI("~EventListener() is called, to delete EventListener");
     if (callbackRef_ != nullptr) {
         NapiUtils::DeleteReference(env_, callbackRef_);
     }
@@ -101,6 +104,11 @@ bool EventListener::MatchOnce(const std::string &type) const
     return once_;
 }
 
+bool EventListener::MatchType(const std::string &type) const
+{
+    return type_ == type;
+}
+
 bool EventListener::IsAsyncCallback() const
 {
     return asyncCallback_;
@@ -108,6 +116,8 @@ bool EventListener::IsAsyncCallback() const
 
 void EventListener::EmitByUv(const std::string &type, void *data, void(Handler)(uv_work_t *, int status)) const
 {
+    NETMANAGER_BASE_LOGI("EventListener::EmitByUv() is called, to EmitByUv");
+
     if (type_ != type) {
         return;
     }
@@ -127,10 +137,5 @@ napi_env EventListener::GetEnv() const
 napi_ref EventListener::GetCallbackRef() const
 {
     return callbackRef_;
-}
-
-UvWorkWrapper::UvWorkWrapper(void *theData, napi_env theEnv, napi_ref theCallbackRef)
-    : data(theData), env(theEnv), callbackRef(theCallbackRef)
-{
 }
 } // namespace OHOS::NetManagerStandard
