@@ -38,6 +38,13 @@ NetActivate::NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetCon
     }
 }
 
+NetActivate::~NetActivate()
+{
+    if (lpTimer_) {
+        lpTimer_->Stop();
+    }
+}
+
 void NetActivate::TimeOutNetAvailable()
 {
     if (netServiceSupplied_) {
@@ -132,7 +139,7 @@ bool NetActivate::CompareByNetworkBand(uint32_t netLinkUpBand, uint32_t netLinkD
     return false;
 }
 
-sptr<NetSpecifier>& NetActivate::GetNetSpecifier()
+sptr<NetSpecifier> NetActivate::GetNetSpecifier()
 {
     return netSpecifier_;
 }
@@ -157,7 +164,7 @@ void NetActivate::SetServiceSupply(sptr<NetSupplier> netServiceSupplied)
     netServiceSupplied_ = netServiceSupplied;
 }
 
-sptr<INetConnCallback>& NetActivate::GetNetCallback()
+sptr<INetConnCallback> NetActivate::GetNetCallback()
 {
     return netConnCallback_;
 }
