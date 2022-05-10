@@ -283,6 +283,7 @@ add_executable(netmanager_base
 include_directories(
         ../../ace/napi/interfaces/kits
         ../../ace/napi/interfaces/innerkits
+        ../../ace/napi/interfaces/inner_api
         ../../ace/napi/native_engine/impl/quickjs
         ../../ace/napi/
         ../../../third_party/node/src
