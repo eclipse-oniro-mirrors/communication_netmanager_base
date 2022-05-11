@@ -28,6 +28,8 @@
 #include "net_mgr_log_wrapper.h"
 #include "netmanager_base_permission.h"
 
+static std::mutex NET_CONN_CALLBACK_MUTEX;
+
 namespace OHOS {
 namespace NetManagerStandard {
 const bool REGISTER_LOCAL_RESULT =
@@ -67,7 +69,7 @@ void NetConnService::CreateDefaultRequest()
         defaultNetActivate_ = std::make_unique<NetActivate>(defaultNetSpecifier_, nullptr,
             std::bind(&NetConnService::DeactivateNetwork, this, std::placeholders::_1), 0).release();
         defaultNetActivate_->SetRequestId(DEFAULT_REQUEST_ID);
-        netActivates_.insert(std::pair<uint32_t, sptr<NetActivate>>(DEFAULT_REQUEST_ID, defaultNetActivate_));
+        netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
     }
     return;
 }
@@ -157,8 +159,8 @@ int32_t NetConnService::RegisterNetSupplier(
     supplier->SetNetValid(true);
 
     // save supplier
-    netSuppliers_.insert(std::pair<uint32_t, sptr<NetSupplier>>(supplierId, supplier));
-    networks_.insert(std::pair<uint32_t, sptr<Network>>(netId, network));
+    netSuppliers_[supplierId] = supplier;
+    networks_[netId] = network;
 
     NETMGR_LOG_D("RegisterNetSupplier service out. netSuppliers_ size[%{public}zd]", netSuppliers_.size());
     return ERR_NONE;
@@ -228,10 +230,10 @@ int32_t NetConnService::RegisterNetSupplierCallback(uint32_t supplierId, const s
 
 int32_t NetConnService::RegisterNetConnCallback(const sptr<INetConnCallback> &callback)
 {
+    NETMGR_LOG_D("RegisterNetConnCallback service in.");
     if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
         return ERR_PERMISSION_CHECK_FAIL;
     }
-    NETMGR_LOG_D("RegisterNetConnCallback service in.");
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter callback is null");
         return ERR_SERVICE_NULL_PTR;
@@ -242,10 +244,10 @@ int32_t NetConnService::RegisterNetConnCallback(const sptr<INetConnCallback> &ca
 int32_t NetConnService::RegisterNetConnCallback(
     const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
 {
+    NETMGR_LOG_D("RegisterNetConnCallback service in.");
     if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
         return ERR_PERMISSION_CHECK_FAIL;
     }
-    NETMGR_LOG_D("RegisterNetConnCallback service in.");
     if (netActivates_.size() >= MAX_REQUEST_NUM) {
         NETMGR_LOG_E("Over the max request number");
         return ERR_NET_OVER_MAX_REQUEST_NUM;
@@ -254,8 +256,10 @@ int32_t NetConnService::RegisterNetConnCallback(
         NETMGR_LOG_E("The parameter of netSpecifier or callback is null");
         return ERR_SERVICE_NULL_PTR;
     }
+    std::lock_guard<std::mutex> lock(NET_CONN_CALLBACK_MUTEX);
     uint32_t reqId = 0;
     if (FindSameCallback(callback, reqId)) {
+        NETMGR_LOG_D("RegisterNetConnCallback FindSameCallback(callback, reqId)");
         return ERR_REGISTER_THE_SAME_CALLBACK;
     }
     return ActivateNetwork(netSpecifier, callback, timeoutMS);
@@ -264,16 +268,53 @@ int32_t NetConnService::RegisterNetConnCallback(
 int32_t NetConnService::UnregisterNetConnCallback(const sptr<INetConnCallback> &callback)
 {
     NETMGR_LOG_D("UnregisterNetConnCallback Enter");
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
     if (callback == nullptr) {
         NETMGR_LOG_E("callback is null");
         return ERR_SERVICE_NULL_PTR;
     }
     uint32_t reqId = 0;
+    std::lock_guard<std::mutex> lock(NET_CONN_CALLBACK_MUTEX);
     if (!FindSameCallback(callback, reqId)) {
+        NETMGR_LOG_D("UnregisterNetConnCallback FindSameCallback(callback, reqId)");
         return ERR_UNREGISTER_CALLBACK_NOT_FOUND;
     }
     deleteNetActivates_.clear();
-    return DeactivateNetwork(reqId);
+
+    NET_ACTIVATE_MAP::iterator iterActive;
+    for (iterActive = netActivates_.begin(); iterActive != netActivates_.end();) {
+        if (!iterActive->second) {
+            ++iterActive;
+            continue;
+        }
+        sptr<INetConnCallback> saveCallback = iterActive->second->GetNetCallback();
+        if (saveCallback == nullptr) {
+            ++iterActive;
+            continue;
+        }
+        if (callback->AsObject().GetRefPtr() != saveCallback->AsObject().GetRefPtr()) {
+            ++iterActive;
+            continue;
+        }
+        reqId = iterActive->first;
+        sptr<NetActivate> netActivate = iterActive->second;
+        if (netActivate) {
+            sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
+            if (supplier) {
+                supplier->CancelRequest(reqId);
+            }
+        }
+
+        NET_SUPPLIER_MAP::iterator iterSupplier;
+        for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
+            iterSupplier->second->CancelRequest(reqId);
+        }
+        deleteNetActivates_[reqId] = netActivate;
+        iterActive = netActivates_.erase(iterActive);
+    }
+    return ERR_NONE;
 }
 
 bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId)
@@ -484,7 +525,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier,
         std::bind(&NetConnService::DeactivateNetwork, this, std::placeholders::_1), timeoutMS)).release();
     uint32_t reqId = request->GetRequestId();
     NETMGR_LOG_D("ActivateNetwork  reqId is [%{public}d]", reqId);
-    netActivates_.insert(std::pair<uint32_t, sptr<NetActivate>>(reqId, request));
+    netActivates_[reqId] = request;
     sptr<NetSupplier> bestNet = nullptr;
     int bestscore = static_cast<int>(FindBestNetworkForRequest(bestNet, request));
     if (bestscore != 0 && bestNet != nullptr) {
@@ -521,8 +562,8 @@ int32_t NetConnService::DeactivateNetwork(uint32_t reqId)
     for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
         iterSupplier->second->CancelRequest(reqId);
     }
-    deleteNetActivates_.insert(std::pair<uint32_t, sptr<NetActivate>>(reqId, pNetActivate));
-    netActivates_.erase(reqId);
+    deleteNetActivates_[reqId] = pNetActivate;
+    netActivates_.erase(iterActivate);
     return ERR_NONE;
 }
 
@@ -534,7 +575,7 @@ int32_t NetConnService::GetDefaultNet(int32_t &netId)
     }
     if (!defaultNetSupplier_) {
         NETMGR_LOG_E("not found the netId");
-        return ERR_NET_NOT_FIND_NETID;
+        return ERR_NET_DEFAULTNET_NOT_EXIST;
     }
 
     netId = defaultNetSupplier_->GetNetId();
@@ -545,6 +586,9 @@ int32_t NetConnService::GetDefaultNet(int32_t &netId)
 int32_t NetConnService::HasDefaultNet(bool &flag)
 {
     NETMGR_LOG_D("HasDefaultNet Enter");
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
     if (!defaultNetSupplier_) {
         flag = false;
         return ERR_NET_DEFAULTNET_NOT_EXIST;
