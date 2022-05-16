@@ -307,7 +307,7 @@ int InterfaceController::SetIfaceConfig(const nmd::InterfaceConfigurationParcel 
         close(fd);
         return -1;
     }
-    uint16_t flags = static_cast<uint16_t>(ifr.ifr_flags);
+    short flags = ifr.ifr_flags;
     auto fit = std::find(ifaceConfig.flags.begin(), ifaceConfig.flags.end(), "up");
     if (fit != std::end(ifaceConfig.flags)) {
         uint16_t ifrFlags = static_cast<uint16_t>(ifr.ifr_flags);
@@ -316,7 +316,7 @@ int InterfaceController::SetIfaceConfig(const nmd::InterfaceConfigurationParcel 
     }
     fit = std::find(ifaceConfig.flags.begin(), ifaceConfig.flags.end(), "down");
     if (fit != std::end(ifaceConfig.flags)) {
-        ifr.ifr_flags = (ifr.ifr_flags & (~IFF_UP));
+        ifr.ifr_flags = (short)((uint16_t)ifr.ifr_flags & (~IFF_UP));
     }
     if (ifr.ifr_flags == flags) {
         close(fd);
