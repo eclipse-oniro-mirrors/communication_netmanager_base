@@ -61,7 +61,7 @@ int32_t NetPolicyCallbackTest::NetBackgroundPolicyChanged(bool isBackgroundPolic
 int32_t NetPolicyCallbackTest::NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicies)
 {
     NETMGR_LOG_D("unittest NetCellularPolicyChanged, cellularPolicies.size:[%{public}d]",
-        cellularPolicies.size());
+        static_cast<int>(cellularPolicies.size()));
 
     return 0;
 }
