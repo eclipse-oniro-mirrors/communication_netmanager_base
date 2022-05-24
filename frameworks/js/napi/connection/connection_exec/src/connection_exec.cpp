@@ -280,29 +280,7 @@ napi_value ConnectionExec::NetHandleExec::GetAddressesByNameCallback(GetAddressB
 
 bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext *context)
 {
-    addrinfo *res = nullptr;
-    int status = getaddrinfo(context->host.c_str(), nullptr, nullptr, &res);
-    if (status < 0) {
-        NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s", errno, strerror(errno));
-        context->SetErrorCode(errno);
-        return false;
-    }
-
-    char host[MAX_HOST_LEN] = {0};
-    if (res != nullptr) {
-        if (getnameinfo(res->ai_addr, res->ai_addrlen, host, sizeof(host), nullptr, 0, 0) < 0) {
-            context->SetErrorCode(errno);
-            return false;
-        }
-        NETMANAGER_BASE_LOGI("host ip: %{public}s", host);
-
-        NetAddress address;
-        SetAddressInfo(host, res, address);
-
-        context->addresses.emplace_back(address);
-    }
-    freeaddrinfo(res);
-    return true;
+    return ExecGetAddressesByName(context);
 }
 
 napi_value ConnectionExec::NetHandleExec::GetAddressByNameCallback(GetAddressByNameContext *context)
