@@ -25,6 +25,14 @@ std::vector<std::string> Split(const std::string &str, const std::string &sep);
 std::string Strip(const std::string &str, char ch = ' ');
 
 std::string ToLower(const std::string &s);
+
+bool IsValidIPV4(const std::string &ip);
+
+bool IsValidIPV6(const std::string &ip);
+
+int8_t GetAddrFamily(const std::string &ip);
+
+int32_t Ipv4PrefixLen(const std::string &ip);
 } // namespace OHOS::NetManagerStandard::CommonUtils
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H */
