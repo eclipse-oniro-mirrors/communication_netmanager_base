@@ -13,11 +13,8 @@
  * limitations under the License.
  */
 
-#include <memory>
-#include <stdlib.h>
-#include <sys/ioctl.h>
+#include <cstdlib>
 #include <net/route.h>
-#include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
 #include "securec.h"
@@ -26,8 +23,6 @@
 
 namespace OHOS {
 namespace NetsysNative {
-using namespace std;
-
 static constexpr const int32_t MAX_FLAG_NUM = 64;
 
 NetsysNativeServiceStub::NetsysNativeServiceStub()

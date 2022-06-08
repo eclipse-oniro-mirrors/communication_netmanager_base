@@ -17,8 +17,6 @@
 
 namespace OHOS {
 namespace NetsysNative {
-using namespace std;
-
 DnsresolverParamsParcel::DnsresolverParamsParcel(): netId_(0), baseTimeoutMsec_(0), retryCount_(0)
 {
 }
@@ -56,7 +54,7 @@ bool DnsresolverParamsParcel::Marshalling(Parcel &parcel) const
 
 sptr<DnsresolverParamsParcel> DnsresolverParamsParcel::Unmarshalling(Parcel &parcel)
 {
-    auto ptr = (make_unique<DnsresolverParamsParcel>()).release();
+    auto ptr = std::make_unique<DnsresolverParamsParcel>().release();
     if (ptr == nullptr) {
         NETNATIVE_LOGE("The parameter of ptr is nullptr");
         return nullptr;

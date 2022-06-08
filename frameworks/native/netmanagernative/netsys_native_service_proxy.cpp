@@ -19,8 +19,6 @@
 
 namespace OHOS {
 namespace NetsysNative {
-using namespace std;
-
 bool NetsysNativeServiceProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(NetsysNativeServiceProxy::GetDescriptor())) {
