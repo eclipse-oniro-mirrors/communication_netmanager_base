@@ -55,6 +55,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_GET_FWMARK_FOR_NETWORK] = &NetsysNativeServiceStub::CmdGetFwmarkForNetwork;
     opToInterfaceMap_[NETSYS_INTERFACE_SET_CONFIG] = &NetsysNativeServiceStub::CmdInterfaceSetConfig;
     opToInterfaceMap_[NETSYS_INTERFACE_GET_CONFIG] = &NetsysNativeServiceStub::CmdInterfaceGetConfig;
+    opToInterfaceMap_[NETSYS_INTERFACE_GET_LIST] = &NetsysNativeServiceStub::CmdInterfaceGetList;
     opToInterfaceMap_[NETSYS_START_DHCP_CLIENT] = &NetsysNativeServiceStub::CmdStartDhcpClient;
     opToInterfaceMap_[NETSYS_STOP_DHCP_CLIENT] = &NetsysNativeServiceStub::CmdStopDhcpClient;
     opToInterfaceMap_[NETSYS_START_DHCP_SERVICE] = &NetsysNativeServiceStub::CmdStartDhcpService;
@@ -564,6 +565,21 @@ int32_t NetsysNativeServiceStub::CmdInterfaceGetConfig(MessageParcel &data, Mess
     reply.WriteInt32(vsize);
     std::vector<std::string>::iterator iter;
     for (iter = cfg.flags.begin(); iter != cfg.flags.end(); ++iter) {
+        reply.WriteString(*iter);
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdInterfaceGetList(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("Begin to dispatch cmd InterfaceGetList");
+    std::vector<std::string> ifaces;
+    int32_t result = InterfaceGetList(ifaces);
+    reply.WriteInt32(result);
+    auto vsize = static_cast<int32_t>(ifaces.size());
+    reply.WriteInt32(vsize);
+    std::vector<std::string>::iterator iter;
+    for (iter = ifaces.begin(); iter != ifaces.end(); ++iter) {
         reply.WriteString(*iter);
     }
     return result;

@@ -32,7 +32,7 @@ bool IsValidIPV6(const std::string &ip);
 
 int8_t GetAddrFamily(const std::string &ip);
 
-int32_t Ipv4PrefixLen(const std::string &ip);
+int GetMaskLength(const std::string &mask);
 } // namespace OHOS::NetManagerStandard::CommonUtils
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H */

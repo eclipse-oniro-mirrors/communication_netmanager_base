@@ -20,11 +20,8 @@
 #include <arpa/inet.h>
 
 namespace OHOS::NetManagerStandard::CommonUtils {
-constexpr int32_t BIT32 = 32;
-constexpr int32_t BIT24 = 24;
-constexpr int32_t BIT16 = 16;
-constexpr int32_t BIT8 = 8;
 constexpr int32_t INET_PTION_SUC = 1;
+constexpr uint32_t CONST_MASK = 0x80000000;
 std::vector<std::string> Split(const std::string &str, const std::string &sep)
 {
     std::string s = str;
@@ -101,42 +98,14 @@ int8_t GetAddrFamily(const std::string &ip)
     return 0;
 }
 
-int32_t Ipv4PrefixLen(const std::string &ip)
+int GetMaskLength(const std::string &mask)
 {
-    if (ip.empty()) {
-        return 0;
+    int netMask = 0;
+    unsigned int maskTmp = ntohl(static_cast<int>(inet_addr(mask.c_str())));
+    while (maskTmp & CONST_MASK) {
+        ++netMask;
+        maskTmp = (maskTmp << 1);
     }
-    int32_t ret = 0;
-    uint32_t ipNum = 0;
-    uint8_t c1 = 0;
-    uint8_t c2 = 0;
-    uint8_t c3 = 0;
-    uint8_t c4 = 0;
-    int32_t cnt = 0;
-    ret = sscanf_s(ip.c_str(), "%hhu.%hhu.%hhu.%hhu", &c1, &c2, &c3, &c4);
-    if (ret != sizeof(int32_t)) {
-        return 0;
-    }
-    ipNum = (c1 << BIT24) | (c2 << BIT16) | (c3 << BIT8) | c4;
-    if (ipNum == 0xFFFFFFFF) {
-        return BIT32;
-    }
-    if (ipNum == 0xFFFFFF00) {
-        return BIT24;
-    }
-    if (ipNum == 0xFFFF0000) {
-        return BIT16;
-    }
-    if (ipNum == 0xFF000000) {
-        return BIT8;
-    }
-    for (int32_t i = 0; i < BIT32; i++) {
-        if ((ipNum << i) & 0x80000000) {
-            cnt++;
-        } else {
-            break;
-        }
-    }
-    return cnt;
+    return netMask;
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils

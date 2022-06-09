@@ -39,6 +39,8 @@ const char g_sysNetPath[] = "/sys/class/net/";
 
 namespace OHOS {
 namespace nmd {
+static constexpr const int IOCTL_RETRY_TIME = 32;
+
 namespace {
     constexpr int32_t FILE_PERMISSION = 0666;
     constexpr uint32_t ARRAY_OFFSET_1_INDEX = 1;
@@ -323,13 +325,10 @@ int InterfaceController::SetIfaceConfig(const nmd::InterfaceConfigurationParcel 
         return 1;
     }
     NETNATIVE_LOGI("set ifr flags to [%{public}d]", ifr.ifr_flags);
-    if (ioctl(fd, SIOCSIFFLAGS, &ifr) == -1) {
-        char errmsg[INTERFACE_ERR_MAX_LEN] = {0};
-        strerror_r(errno, errmsg, INTERFACE_ERR_MAX_LEN);
-        NETNATIVE_LOGE("fail to set ifr flags, strerror[%{public}s]", errmsg);
-        close(fd);
-        return -1;
-    }
+    for (int retry = 0; ioctl(fd, SIOCSIFFLAGS, &ifr) == -1 && errno == ETIMEDOUT && retry < IOCTL_RETRY_TIME; ++retry);
+    char errmsg[INTERFACE_ERR_MAX_LEN] = {0};
+    strerror_r(errno, errmsg, INTERFACE_ERR_MAX_LEN);
+    NETNATIVE_LOGE("ioctl set ifr flags, strerror[%{public}s]", errmsg);
     close(fd);
     return 1;
 }

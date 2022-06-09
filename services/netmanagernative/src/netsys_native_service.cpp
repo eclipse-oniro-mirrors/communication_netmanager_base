@@ -314,6 +314,13 @@ int32_t NetsysNativeService::InterfaceGetConfig(InterfaceConfigurationParcel &cf
     return ERR_NONE;
 }
 
+int32_t NetsysNativeService::InterfaceGetList(std::vector<std::string> &ifaces)
+{
+    NETNATIVE_LOGI("InterfaceGetList");
+    ifaces = this->netsysService_->InterfaceGetList();
+    return ERR_NONE;
+}
+
 int32_t NetsysNativeService::StartDhcpClient(const std::string &iface, bool bIpv6)
 {
     NETNATIVE_LOGI("StartDhcpClient");
