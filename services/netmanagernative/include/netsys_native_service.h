@@ -76,6 +76,7 @@ public:
     int32_t GetFwmarkForNetwork(int32_t netId,       MarkMaskParcel &markMaskParcel) override;
     int32_t InterfaceSetConfig(const InterfaceConfigurationParcel &cfg) override;
     int32_t InterfaceGetConfig(InterfaceConfigurationParcel &cfg) override;
+    int32_t InterfaceGetList(std::vector<std::string> &ifaces) override;
     int32_t StartDhcpClient(const std::string &iface, bool bIpv6) override;
     int32_t StopDhcpClient(const std::string &iface, bool bIpv6) override;
     int32_t StartDhcpService(const std::string &iface, const std::string &ipv4addr) override;

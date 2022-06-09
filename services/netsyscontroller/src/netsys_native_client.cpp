@@ -442,7 +442,8 @@ std::vector<std::string> NetsysNativeClient::InterfaceGetList()
         NETMGR_LOG_E("netsysService_ is null");
         return ret;
     }
-    return {};
+    netsysNativeService_->InterfaceGetList(ret);
+    return ret;
 }
 
 std::vector<std::string> NetsysNativeClient::UidGetList()
