@@ -204,6 +204,8 @@ int32_t NetConnService::UnregisterNetSupplier(uint32_t supplierId)
         sptr<NetSupplier> newSupplier = nullptr;
         MakeDefaultNetWork(defaultNetSupplier_, newSupplier);
     }
+    NetSupplierInfo info;
+    iterSupplier->second->UpdateNetSupplierInfo(info);
     netSuppliers_.erase(iterSupplier);
     FindBestNetworkForAllRequest();
     NETMGR_LOG_D("Destroy supplier network.");
