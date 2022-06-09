@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_ROUTE_CONTROLLER_H__
-#define INCLUDE_ROUTE_CONTROLLER_H__
+#ifndef INCLUDE_ROUTE_MANAGER_H__
+#define INCLUDE_ROUTE_MANAGER_H__
 
 #include <map>
 #include <netinet/in.h>
 #include "nmd_network.h"
+#include "route_type.h"
 
 namespace OHOS {
 namespace nmd {
@@ -29,12 +30,10 @@ typedef struct InetAddr {
     uint8_t data[sizeof(struct in6_addr)];
 } InetAddr;
 
-static const int LOCAL_NETWORK_NETID = 99;
-
-class RouteController {
+class RouteManager {
 public:
-    RouteController();
-    ~RouteController();
+    RouteManager();
+    ~RouteManager();
 
     static int AddInterfaceToDefaultNetwork(const char *interface, NetworkPermission permission);
     static int RemoveInterfaceFromDefaultNetwork(const char *interface, NetworkPermission permission);
@@ -52,4 +51,4 @@ private:
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // !INCLUDE_ROUTE_CONTROLLER_H__
+#endif // !INCLUDE_ROUTE_MANAGER_H__

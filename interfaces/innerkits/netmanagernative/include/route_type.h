@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,33 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_DNSRESOLV_H__
-#define INCLUDE_DNSRESOLV_H__
+#ifndef INCLUDE_ROUTE_TYPE_H__
+#define INCLUDE_ROUTE_TYPE_H__
 
 #include <string>
-#include <vector>
 
 namespace OHOS {
 namespace nmd {
-const uint32_t MAX_NAME_LEN = 64;
+static const int LOCAL_NETWORK_NETID = 99;
 
-struct DnsResParams {
-    uint16_t baseTimeoutMsec;
-    uint8_t retryCount = 1;
-    void operator=(const DnsResParams &param)
-    {
-        baseTimeoutMsec = param.baseTimeoutMsec;
-        retryCount = param.retryCount;
-    }
-};
+typedef struct RouteInfoParcel {
+    std::string destination;
+    std::string ifName;
+    std::string nextHop;
+    int mtu;
+} RouteInfoParcel;
 
-struct DnsresolverParams {
-    uint16_t netId = 0;
-    uint16_t baseTimeoutMsec = 0;
-    uint8_t retryCount = 0;
-    std::vector<std::string> servers;
-    std::vector<std::string> domains;
-};
+typedef struct MarkMaskParcel {
+    int mark;
+    int mask;
+} MarkMaskParcel;
 } // namespace nmd
 } // namespace OHOS
-#endif // !INCLUDE_DNSRESOLV_H__
+#endif // !INCLUDE_ROUTE_TYPE_H__

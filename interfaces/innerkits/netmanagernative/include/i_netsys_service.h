@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,11 @@
 
 #include <string>
 #include <netdb.h>
+#include "interface_type.h"
 #include "iremote_broker.h"
 #include "dnsresolver_params_parcel.h"
-#include "net_manager_native.h"
 #include "i_notify_callback.h"
+#include "route_type.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -66,7 +67,7 @@ public:
     virtual int32_t SetResolverConfigParcel(const DnsresolverParamsParcel& resolvParams) = 0;
     virtual int32_t SetResolverConfig(const DnsresolverParams &resolvParams) = 0;
     virtual int32_t GetResolverConfig(const  uint16_t  netid,  std::vector<std::string> &servers,
-           std::vector<std::string> &domains, nmd::DnsResParams &param)=0;
+           std::vector<std::string> &domains, nmd::DnsResParams &param) = 0;
     virtual int32_t CreateNetworkCache(const uint16_t netid) = 0;
     virtual int32_t FlushNetworkCache(const uint16_t netid) = 0;
     virtual int32_t DestroyNetworkCache(const uint16_t netid) = 0;

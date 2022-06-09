@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 #include "nmd_network.h"
-#include "route_controller.h"
+#include "route_manager.h"
 #include "netnative_log_wrapper.h"
 
 namespace OHOS {
@@ -27,7 +27,7 @@ void NmdNetwork::AddDefault()
 {
     std::set<std::string>::iterator it;
     for (it = this->interfaces.begin(); it != this->interfaces.end(); ++it) {
-        RouteController::AddInterfaceToDefaultNetwork(it->c_str(), this->permission);
+        RouteManager::AddInterfaceToDefaultNetwork(it->c_str(), this->permission);
     }
     this->isDefault = true;
 }
@@ -36,7 +36,7 @@ void NmdNetwork::RemoveDefault()
 {
     std::set<std::string>::iterator it;
     for (it = this->interfaces.begin(); it != this->interfaces.end(); ++it) {
-        RouteController::RemoveInterfaceFromDefaultNetwork(it->c_str(), this->permission);
+        RouteManager::RemoveInterfaceFromDefaultNetwork(it->c_str(), this->permission);
     }
     this->isDefault = false;
 }
@@ -49,7 +49,7 @@ int NmdNetwork::AddInterface(std::string &interfaceName)
     }
 
     if (this->isDefault) {
-        RouteController::AddInterfaceToDefaultNetwork(interfaceName.c_str(), this->permission);
+        RouteManager::AddInterfaceToDefaultNetwork(interfaceName.c_str(), this->permission);
     }
 
     this->interfaces.insert(interfaceName);
@@ -63,7 +63,7 @@ int NmdNetwork::RemoveInterface(std::string &interfaceName)
     }
 
     if (this->isDefault) {
-        RouteController::RemoveInterfaceFromDefaultNetwork(interfaceName.c_str(), this->permission);
+        RouteManager::RemoveInterfaceFromDefaultNetwork(interfaceName.c_str(), this->permission);
     }
 
     this->interfaces.erase(interfaceName);

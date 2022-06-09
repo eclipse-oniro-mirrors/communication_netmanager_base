@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,27 +16,17 @@
 #ifndef INCLUDE_NET_MANAGER_NATIVE_H__
 #define INCLUDE_NET_MANAGER_NATIVE_H__
 
-#include <interface_controller.h>
+#include <interface_manager.h>
+#include <interface_type.h>
 #include <memory>
-#include <network_controller.h>
-#include <route_controller.h>
+#include <network_manager.h>
+#include <route_manager.h>
+#include <route_type.h>
 #include <string>
 #include <vector>
 
 namespace OHOS {
 namespace nmd {
-typedef struct RouteInfoParcel {
-    std::string destination;
-    std::string ifName;
-    std::string nextHop;
-    int mtu;
-} RouteInfoParcel;
-
-typedef struct MarkMaskParcel {
-    int mark;
-    int mask;
-} MarkMaskParcel;
-
 class NetManagerNative {
 public:
     NetManagerNative();
@@ -90,9 +80,9 @@ public:
     long GetTetherTxBytes();
 
 private:
-    std::shared_ptr<NetworkController> networkController;
-    std::shared_ptr<RouteController> routeController;
-    std::shared_ptr<InterfaceController> interfaceController;
+    std::shared_ptr<NetworkManager> networkManager;
+    std::shared_ptr<RouteManager> routeManager;
+    std::shared_ptr<InterfaceManager> interfaceManager;
     static std::vector<unsigned int> interfaceIdex;
 };
 } // namespace nmd

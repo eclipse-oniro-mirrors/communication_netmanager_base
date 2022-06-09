@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_TRAFFIC_CONTROLLER_H__
-#define INCLUDE_TRAFFIC_CONTROLLER_H__
+#ifndef INCLUDE_TRAFFIC_MANAGER_H__
+#define INCLUDE_TRAFFIC_MANAGER_H__
 
 #include <ostream>
 #include <string>
@@ -39,16 +39,16 @@ typedef struct TrafficStatsParcel {
     }
 } TrafficStatsParcel;
 
-class TrafficController {
+class TrafficManager {
 public:
-    TrafficController();
-    ~TrafficController();
+    TrafficManager();
+    ~TrafficManager();
 
     static nmd::TrafficStatsParcel GetInterfaceTraffic(const std::string &ifName);
     static long GetAllRxTraffic();
     static long GetAllTxTraffic();
-    static void TrafficControllerLog();
+    static void TrafficManagerLog();
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // !INCLUDE_TRAFFIC_CONTROLLER_H__
+#endif // !INCLUDE_TRAFFIC_MANAGER_H__
