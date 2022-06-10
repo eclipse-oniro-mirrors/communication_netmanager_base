@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
+#include <arpa/inet.h>
+
 #include "netmanager_base_common_utils.h"
 
-#include <algorithm>
-
 namespace OHOS::NetManagerStandard::CommonUtils {
+constexpr int32_t INET_PTION_SUC = 1;
+constexpr uint32_t CONST_MASK = 0x80000000;
 std::vector<std::string> Split(const std::string &str, const std::string &sep)
 {
     std::string s = str;
@@ -55,5 +57,53 @@ std::string ToLower(const std::string &s)
     std::string res = s;
     std::transform(res.begin(), res.end(), res.begin(), tolower);
     return res;
+}
+
+bool IsValidIPV4(const std::string &ip)
+{
+    if (ip.empty()) {
+        return false;
+    }
+    struct in_addr s;
+    int32_t result = inet_pton(AF_INET, ip.c_str(), reinterpret_cast<void *>(&s));
+    if (result == INET_PTION_SUC) {
+        return true;
+    }
+    return false;
+}
+
+bool IsValidIPV6(const std::string &ip)
+{
+    if (ip.empty()) {
+        return false;
+    }
+    struct in6_addr s;
+    int32_t result = inet_pton(AF_INET6, ip.c_str(), reinterpret_cast<void *>(&s));
+    if (result == INET_PTION_SUC) {
+        return true;
+    }
+    return false;
+}
+
+int8_t GetAddrFamily(const std::string &ip)
+{
+    if (IsValidIPV4(ip)) {
+        return AF_INET;
+    }
+    if (IsValidIPV6(ip)) {
+        return AF_INET6;
+    }
+    return 0;
+}
+
+int GetMaskLength(const std::string &mask)
+{
+    int netMask = 0;
+    unsigned int maskTmp = ntohl(static_cast<int>(inet_addr(mask.c_str())));
+    while (maskTmp & CONST_MASK) {
+        ++netMask;
+        maskTmp = (maskTmp << 1);
+    }
+    return netMask;
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils

@@ -725,6 +725,31 @@ int32_t NetsysNativeServiceProxy::InterfaceGetConfig(InterfaceConfigurationParce
     return   ret;
 }
 
+int32_t NetsysNativeServiceProxy::InterfaceGetList(std::vector<std::string> &ifaces)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceProxy Begin to InterfaceGetList");
+    MessageParcel data;
+    int32_t ret ;
+    int32_t vSize;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetsysService::NETSYS_INTERFACE_GET_LIST, data, reply, option);
+    ret = reply.ReadInt32();
+    vSize =  reply.ReadInt32();
+    std::vector<std::string>  vecString;
+    for (int i = 0; i < vSize; i++) {
+        vecString.push_back(reply.ReadString());
+    }
+    if (vSize > 0) {
+        ifaces.assign(vecString.begin(), vecString.end());
+    }
+    NETNATIVE_LOGI("NetsysNativeServiceProxy End to InterfaceGetList, ret =%{public}d", ret);
+    return ret;
+}
+
 int32_t NetsysNativeServiceProxy::StartDhcpClient(const std::string &iface, bool bIpv6)
 {
     NETNATIVE_LOGI("Begin to StartDhcpClient");

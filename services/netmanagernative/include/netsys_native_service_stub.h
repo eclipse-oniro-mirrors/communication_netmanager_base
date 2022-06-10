@@ -64,6 +64,7 @@ private:
     int32_t CmdGetFwmarkForNetwork(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceSetConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceGetConfig(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdInterfaceGetList(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStartDhcpClient(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStopDhcpClient(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStartDhcpService(MessageParcel &data, MessageParcel &reply);

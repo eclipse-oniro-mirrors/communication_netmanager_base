@@ -56,6 +56,7 @@ public:
         NETSYS_GET_FWMARK_FOR_NETWORK,
         NETSYS_INTERFACE_SET_CONFIG,
         NETSYS_INTERFACE_GET_CONFIG,
+        NETSYS_INTERFACE_GET_LIST,
         NETSYS_START_DHCP_CLIENT,
         NETSYS_STOP_DHCP_CLIENT,
         NETSYS_START_DHCP_SERVICE,
@@ -100,6 +101,7 @@ public:
     virtual int32_t GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel) = 0;
     virtual int32_t InterfaceSetConfig(const InterfaceConfigurationParcel &cfg) = 0;
     virtual int32_t InterfaceGetConfig(InterfaceConfigurationParcel &cfg) = 0;
+    virtual int32_t InterfaceGetList(std::vector<std::string> &ifaces) = 0;
     virtual int32_t StartDhcpClient(const std::string &iface, bool bIpv6) = 0;
     virtual int32_t StopDhcpClient(const std::string &iface, bool bIpv6) = 0;
     virtual int32_t StartDhcpService(const std::string &iface, const std::string &ipv4addr) = 0;
