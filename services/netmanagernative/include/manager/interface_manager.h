@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,43 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef __INCLUDE_INTERFACE_CONTROLLER_H__
-#define __INCLUDE_INTERFACE_CONTROLLER_H__
+#ifndef __INCLUDE_INTERFACE_MANAGER_H__
+#define __INCLUDE_INTERFACE_MANAGER_H__
 
 #include <string>
 #include <vector>
 #include <ostream>
+#include "interface_type.h"
 
 namespace OHOS {
 namespace nmd {
 static const uint32_t INTERFACE_ERR_MAX_LEN = 256;
-typedef struct InterfaceConfigurationParcel {
-    std::string ifName;
-    std::string hwAddr;
-    std::string ipv4Addr;
-    int prefixLength;
-    std::vector<std::string> flags;
-    friend std::ostream &operator<<(std::ostream &os, const nmd::InterfaceConfigurationParcel &parcel)
-    {
-        os << "ifName: " << parcel.ifName << "\n"
-           << "hwAddr: " << parcel.hwAddr << "\n"
-           << "ipv4Addr: " << parcel.ipv4Addr << "\n"
-           << "prefixLength: " << parcel.prefixLength << "\n"
-           << "flags: ["
-           << "\n";
-        for (unsigned long i = 0; i < parcel.flags.size(); i++) {
-            os << "  " << parcel.flags[i] << "\n";
-        }
-        os << "] "
-           << "\n";
-        return os;
-    }
-} InterfaceConfigurationParcel;
 
-class InterfaceController {
+class InterfaceManager {
 public:
-    InterfaceController();
-    ~InterfaceController();
+    InterfaceManager();
+    ~InterfaceManager();
     static int SetMtu(const char *interfaceName, const char *mtuValue);
     static int GetMtu(const char *interfaceName);
     static int AddAddress(const char *interfaceName, const char *addr, int prefixLen);
@@ -62,4 +41,4 @@ private:
 };
 } // namespace nmd
 } // namespace OHOS
-#endif //  !__INCLUDE_INTERFACE_CONTROLLER_H__
+#endif //  !__INCLUDE_INTERFACE_MANAGER_H__

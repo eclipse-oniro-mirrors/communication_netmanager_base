@@ -47,6 +47,7 @@ include_directories(utils/event_manager/include)
 include_directories(utils/log/include)
 include_directories(utils/module_template/include)
 include_directories(utils/napi_utils/include)
+include_directories(services/netmanagernative/include/manager)
 include_directories(services/netmanagernative/include/netsys)
 
 add_executable(netmanager_base
