@@ -24,9 +24,11 @@
 #include "netmanager_base_napi_utils.h"
 #include "securec.h"
 
-static constexpr const int MAX_HOST_LEN = 256;
-
 static constexpr const size_t MAX_ARRAY_LENGTH = 64;
+
+static constexpr const size_t MAX_IPV4_STR_LEN = 16;
+
+static constexpr const size_t MAX_IPV6_STR_LEN = 64;
 
 namespace OHOS::NetManagerStandard {
 napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
@@ -251,16 +253,23 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
         return false;
     }
 
-    char host[MAX_HOST_LEN] = {0};
     for (addrinfo *tmp = res; tmp != nullptr; tmp = tmp->ai_next) {
-        (void)memset_s(host, sizeof(host), 0, sizeof(host));
-        if (getnameinfo(tmp->ai_addr, tmp->ai_addrlen, host, sizeof(host), nullptr, 0, 0) < 0) {
-            continue;
+        std::string host;
+        if (tmp->ai_family == AF_INET) {
+            auto addr = reinterpret_cast<sockaddr_in *>(tmp->ai_addr);
+            char ip[MAX_IPV4_STR_LEN] = {0};
+            inet_ntop(AF_INET, &addr->sin_addr, ip, sizeof(ip));
+            host = ip;
+        } else if (tmp->ai_family == AF_INET6) {
+            auto addr = reinterpret_cast<sockaddr_in6 *>(tmp->ai_addr);
+            char ip[MAX_IPV6_STR_LEN] = {0};
+            inet_ntop(AF_INET6, &addr->sin6_addr, ip, sizeof(ip));
+            host = ip;
         }
-        NETMANAGER_BASE_LOGI("host ip: %{public}s", host);
+        NETMANAGER_BASE_LOGI("host ip: %{public}s", host.c_str());
 
         NetAddress address;
-        SetAddressInfo(host, tmp, address);
+        SetAddressInfo(host.c_str(), tmp, address);
 
         context->addresses.emplace_back(address);
     }
@@ -280,7 +289,36 @@ napi_value ConnectionExec::NetHandleExec::GetAddressesByNameCallback(GetAddressB
 
 bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext *context)
 {
-    return ExecGetAddressesByName(context);
+    addrinfo *res = nullptr;
+    int status = getaddrinfo(context->host.c_str(), nullptr, nullptr, &res);
+    if (status < 0) {
+        NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s", errno, strerror(errno));
+        context->SetErrorCode(errno);
+        return false;
+    }
+
+    if (res != nullptr) {
+        std::string host;
+        if (res->ai_family == AF_INET) {
+            auto addr = reinterpret_cast<sockaddr_in *>(res->ai_addr);
+            char ip[MAX_IPV4_STR_LEN] = {0};
+            inet_ntop(AF_INET, &addr->sin_addr, ip, sizeof(ip));
+            host = ip;
+        } else if (res->ai_family == AF_INET6) {
+            auto addr = reinterpret_cast<sockaddr_in6 *>(res->ai_addr);
+            char ip[MAX_IPV6_STR_LEN] = {0};
+            inet_ntop(AF_INET6, &addr->sin6_addr, ip, sizeof(ip));
+            host = ip;
+        }
+        NETMANAGER_BASE_LOGI("host ip: %{public}s", host.c_str());
+
+        NetAddress address;
+        SetAddressInfo(host.c_str(), res, address);
+
+        context->addresses.emplace_back(address);
+    }
+    freeaddrinfo(res);
+    return true;
 }
 
 napi_value ConnectionExec::NetHandleExec::GetAddressByNameCallback(GetAddressByNameContext *context)
