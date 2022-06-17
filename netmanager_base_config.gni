@@ -12,7 +12,7 @@
 # limitations under the License.
 
 aafwk_kits_path = "//foundation/ability/ability_runtime/frameworks/kits"
-
+aafwk_path = "//foundation/ability/ability_runtime"
 SUBSYSTEM_DIR = "//foundation/communication"
 NETMANAGER_BASE_ROOT = "$SUBSYSTEM_DIR/netmanager_base"
 NETMANAGERNATIVE_ROOT = "$NETMANAGER_BASE_ROOT/services/netmanagernative"

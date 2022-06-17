@@ -39,7 +39,7 @@ ohos_shared_library("statistics") {
   deps = [
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
-    "${aafwk_kits_path}/ability/native:abilitykit_native",
+    "${aafwk_path}/frameworks/native/ability/native:abilitykit_native",
     "//foundation/arkui/napi/:ace_napi",
     "//utils/native/base:utils",
   ]
