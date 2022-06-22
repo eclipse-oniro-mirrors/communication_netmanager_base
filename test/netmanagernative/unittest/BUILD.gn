@@ -17,11 +17,11 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 ohos_unittest("netsys_native_manager_test") {
   module_out_path = "netmanager_base/netsys_native_manager_test"
   sources = [
+    "conn_manager_test.cpp",
+    "fwmark_network_test.cpp",
     "network_route_test.cpp",
     "resolver_config_test.cpp",
     "sharing_manager_test.cpp",
-    "conn_manager_test.cpp",
-    "fwmark_network_test.cpp",
   ]
 
   include_dirs = [
