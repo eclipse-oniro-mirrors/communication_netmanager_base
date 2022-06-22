@@ -108,4 +108,20 @@ int GetMaskLength(const std::string &mask)
     }
     return netMask;
 }
+
+bool ParseInt(const char *str, int32_t *value)
+{
+    char *end;
+    long long v = strtoll(str, &end, 10);
+    if (end == str || *end != '\0' || v < INT_MIN || v > INT_MAX) {
+        return false;
+    }
+    *value = v;
+    return true;
+}
+
+int64_t ConvertToInt64(const std::string& str)
+{
+    return strtoll(str.c_str(), nullptr, 10);
+}
 } // namespace OHOS::NetManagerStandard::CommonUtils

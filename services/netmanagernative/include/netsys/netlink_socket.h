@@ -34,7 +34,7 @@ using NetlinkDumpCallback = std::function<void(nlmsghdr *)>;
  * @param msg nlmsghdr struct
  * @return Returns 0, send netklink message to kernel successfully, otherwise it will fail
  */
-int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg);
+int32_t SendNetlinkMsgToKernel(nlmsghdr *msg);
 
 /**
  * @brief Flush route or rule configure
