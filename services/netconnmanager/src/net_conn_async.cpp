@@ -19,10 +19,10 @@
 namespace OHOS {
 namespace NetManagerStandard {
 NetConnAsync::NetConnAsync() {}
-    
+
 NetConnAsync::~NetConnAsync() {}
 
-Scheduler& NetConnAsync::GetScheduler()
+Scheduler &NetConnAsync::GetScheduler()
 {
     return async_;
 }
@@ -52,5 +52,5 @@ void NetConnAsync::CallbackOnNetScoreChanged(uint32_t supplierId, uint32_t score
 {
     async_.Post(std::bind(&NetConnAsync::OnNetScoreChanged, this, supplierId, score));
 }
-}
-}
+} // namespace NetManagerStandard
+} // namespace OHOS

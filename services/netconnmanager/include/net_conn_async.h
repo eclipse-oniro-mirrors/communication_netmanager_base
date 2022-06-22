@@ -24,13 +24,13 @@ namespace NetManagerStandard {
 class NetConnAsync {
 public:
     NetConnAsync();
-    
+
     virtual ~NetConnAsync();
 
-    Scheduler& GetScheduler();
+    Scheduler &GetScheduler();
 
     void CallbackOnNetAvailableChanged(uint32_t supplierId, bool available);
-    
+
     void CallbackOnNetCapabilitiesChanged(uint32_t supplierId, const NetAllCapabilities &allCaps);
 
     void CallbackOnNetLinkInfoChanged(uint32_t supplierId, const NetLinkInfo &linkInfo);
@@ -39,10 +39,10 @@ public:
         uint32_t netId, NetDetectionResultCode detectionResult, const std::string &urlRedirect);
 
     void CallbackOnNetScoreChanged(uint32_t supplierId, uint32_t score);
-    
+
 protected:
     virtual void OnNetAvailableChanged(uint32_t supplierId, bool available) = 0;
-    
+
     virtual void OnNetCapabilitiesChanged(uint32_t supplierId, const NetAllCapabilities &allCaps) = 0;
 
     virtual void OnNetLinkInfoChanged(uint32_t supplierId, const NetLinkInfo &linkInfo) = 0;
@@ -51,6 +51,7 @@ protected:
         uint32_t netId, NetDetectionResultCode detectionResult, const std::string &urlRedirect) = 0;
 
     virtual void OnNetScoreChanged(uint32_t supplierId, uint32_t score) = 0;
+
 private:
     Scheduler async_;
 };

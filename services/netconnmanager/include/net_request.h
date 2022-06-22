@@ -27,11 +27,11 @@ namespace NetManagerStandard {
 constexpr uint32_t DEFAULT_REQUEST_ID = 0;
 class NetRequest : public virtual RefBase {
 public:
-    NetRequest(const sptr<NetSpecifier> &specifier,
-        const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS, NetConnAsync& async);
-    
+    NetRequest(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS,
+        NetConnAsync &async);
+
     ~NetRequest();
-    
+
     uint32_t GetId() const;
 
     void SetId(uint32_t reqId);
@@ -60,11 +60,11 @@ private:
     void OnRequestTimeout();
 
 private:
-    uint32_t id_ {0};
-    uint32_t supplierId_ {0};
+    uint32_t id_{0};
+    uint32_t supplierId_{0};
     sptr<NetSpecifier> netSpecifier_;
     sptr<INetConnCallback> netConnCallback_;
-    NetConnAsync& async_;
+    NetConnAsync &async_;
     std::shared_ptr<Scheduler::Task> timeTask_;
 };
 } // namespace NetManagerStandard

@@ -21,13 +21,9 @@ namespace OHOS {
 namespace NetManagerStandard {
 static constexpr int32_t LOOP_INTERVAL_MS = 100;
 
-Scheduler::Task::Task(TaskFunction func) : func_(func)
-{
-}
-        
-Scheduler::Task::~Task()
-{
-}
+Scheduler::Task::Task(TaskFunction func) : func_(func) {}
+
+Scheduler::Task::~Task() {}
 
 void Scheduler::Task::Process()
 {
@@ -76,9 +72,7 @@ bool Scheduler::Task::Delay(uint64_t delayMs)
     return false;
 }
 
-Scheduler::Scheduler()
-{
-}
+Scheduler::Scheduler() {}
 
 Scheduler::~Scheduler()
 {
@@ -140,5 +134,5 @@ bool Scheduler::InRunThread() const
 {
     return runThreadId_ == std::this_thread::get_id();
 }
-}   // namespace NetManagerStandard
-}   // namespace OHOS
+} // namespace NetManagerStandard
+} // namespace OHOS

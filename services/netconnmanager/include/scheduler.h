@@ -29,16 +29,17 @@ public:
     typedef std::function<void(void)> TaskFunction;
 
     class Task {
-    friend class Scheduler;
+        friend class Scheduler;
+
     public:
         Task(TaskFunction func);
-        
+
         virtual ~Task();
-        
+
         void Wait();
-        
+
         bool WaitFor(uint64_t timeoutMs);
-        
+
         void Cancel();
 
     private:
@@ -50,7 +51,7 @@ public:
         TaskFunction func_;
         std::mutex mtx_;
         std::condition_variable cond_;
-        bool canceled_ {false};
+        bool canceled_{false};
         std::mutex delayMtx_;
         std::condition_variable delayCond_;
     };
@@ -58,7 +59,7 @@ public:
     Scheduler();
 
     virtual ~Scheduler();
-    
+
     void Post(std::shared_ptr<Task> task);
 
     std::shared_ptr<Task> Post(TaskFunction taskFunc);
@@ -70,10 +71,10 @@ public:
     void Stop();
 
     bool InRunThread() const;
-    
+
 private:
     std::list<std::shared_ptr<Task>> tasks_;
-    bool running_ {false};
+    bool running_{false};
     std::mutex mtx_;
     std::condition_variable_any cond_;
     std::thread::id runThreadId_;

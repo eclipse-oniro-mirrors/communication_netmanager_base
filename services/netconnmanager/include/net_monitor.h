@@ -28,10 +28,10 @@ namespace OHOS {
 namespace NetManagerStandard {
 class NetMonitor : public virtual RefBase {
 public:
-    NetMonitor(uint32_t netId, SocketFactory& sockFactory, NetConnAsync& async);
+    NetMonitor(uint32_t netId, SocketFactory &sockFactory, NetConnAsync &async);
 
     virtual ~NetMonitor();
-    
+
     void Start();
 
     void Stop();
@@ -50,25 +50,25 @@ private:
     void OnProbeResultChanged();
 
 private:
-    HttpProbeResult SendParallelHttpProbes(const Url& httpUrl, const Url& httpsUrl);
+    HttpProbeResult SendParallelHttpProbes(const Url &httpUrl, const Url &httpsUrl);
 
-    HttpProbeResult SendDnsAndHttpProbes(const Url& url, HttpProbe::ProbeType probeType);
+    HttpProbeResult SendDnsAndHttpProbes(const Url &url, HttpProbe::ProbeType probeType);
 
-    HttpProbeResult SendHttpProbe(const std::string& url, HttpProbe::ProbeType probeType);
-    
-    void SendDnsProbe(const std::string& host);
+    HttpProbeResult SendHttpProbe(const std::string &url, HttpProbe::ProbeType probeType);
+
+    void SendDnsProbe(const std::string &host);
 
 private:
     uint32_t netId_;
-    SocketFactory& sockFactory_;
+    SocketFactory &sockFactory_;
     std::thread evaluationThread_;
-    bool evaluating_ {false};
+    bool evaluating_{false};
     std::mutex evaluationTimerMtx_;
     std::condition_variable evaluationTimerCond_;
     HttpProbeResult result_;
-    NetConnAsync& async_;
-    uint32_t reevaluateDelay_ {0};
+    NetConnAsync &async_;
+    uint32_t reevaluateDelay_{0};
 };
-}  // namespace NetManagerStandard
-}  // namespace OHOS
+} // namespace NetManagerStandard
+} // namespace OHOS
 #endif // NET_CONN_MANAGER_NET_MONITOR_H

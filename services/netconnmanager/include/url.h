@@ -22,9 +22,9 @@ namespace OHOS {
 namespace NetManagerStandard {
 class Url {
 public:
-    Url(const std::string& url);
-    
-    Url(const Url& other);
+    Url(const std::string &url);
+
+    Url(const Url &other);
 
     ~Url();
 
@@ -36,8 +36,8 @@ public:
 
     int32_t GetPort();
 
-    Url& operator=(const std::string& url);
-    bool operator==(const Url& other) const;
+    Url &operator=(const std::string &url);
+    bool operator==(const Url &other) const;
 
 private:
     std::string url_;
@@ -45,6 +45,6 @@ private:
     std::string path_;
     int32_t port_;
 };
-}  // namespace NetManagerStandard
-}  // namespace OHOS
+} // namespace NetManagerStandard
+} // namespace OHOS
 #endif // NET_CONN_URL_H

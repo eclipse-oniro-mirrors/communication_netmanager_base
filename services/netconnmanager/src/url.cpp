@@ -19,20 +19,20 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-static void CurlParserUrl(const std::string& url, std::string& host, std::string& path, int32_t& port)
+static void CurlParserUrl(const std::string &url, std::string &host, std::string &path, int32_t &port)
 {
     CURLU *h;
     CURLUcode uc;
- 
+
     h = curl_url(); /* get a handle to work with */
     if (!h) {
-        return ;
+        return;
     }
- 
+
     /* parse a full URL */
     uc = curl_url_set(h, CURLUPART_URL, url.c_str(), 0);
     if (!uc) {
-        char* result;
+        char *result;
 
         uc = curl_url_get(h, CURLUPART_HOST, &result, 0);
         if (!uc) {
@@ -56,19 +56,17 @@ static void CurlParserUrl(const std::string& url, std::string& host, std::string
     curl_url_cleanup(h); /* free url handle */
 }
 
-Url::Url(const std::string& url): url_(url)
+Url::Url(const std::string &url) : url_(url)
 {
     CurlParserUrl(url_, host_, path_, port_);
 }
 
-Url::Url(const Url& other): url_(other.url_)
+Url::Url(const Url &other) : url_(other.url_)
 {
     CurlParserUrl(url_, host_, path_, port_);
 }
 
-Url::~Url()
-{
-}
+Url::~Url() {}
 
 std::string Url::ToString() const
 {
@@ -90,16 +88,16 @@ int32_t Url::GetPort()
     return port_;
 }
 
-Url& Url::operator=(const std::string& url)
+Url &Url::operator=(const std::string &url)
 {
     url_ = url;
     CurlParserUrl(url_, host_, path_, port_);
     return *this;
 }
 
-bool Url::operator==(const Url& other)  const
+bool Url::operator==(const Url &other) const
 {
     return url_ == other.url_;
 }
-}
-}
+} // namespace NetManagerStandard
+} // namespace OHOS

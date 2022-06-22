@@ -149,7 +149,7 @@ int32_t ConnManager::GetNetworkForInterface(std::string &interfaceName)
 int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interfaceName)
 {
     NETNATIVE_LOGI("Entry ConnManager::AddInterfaceToNetwork netId:%{public}d, interfaceName:%{public}s", netId,
-                   interfaceName.c_str());
+        interfaceName.c_str());
     int32_t alreadySetNetId = GetNetworkForInterface(interfaceName);
     if ((alreadySetNetId != netId) && (alreadySetNetId != INTERFACE_UNSET)) {
         NETNATIVE_LOGE("AddInterfaceToNetwork failed alreadySetNetId:%{public}d", alreadySetNetId);

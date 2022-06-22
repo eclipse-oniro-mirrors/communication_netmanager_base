@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
 #include <future>
 #include <list>
 #include <arpa/inet.h>
@@ -28,14 +29,14 @@ namespace OHOS {
 namespace NetManagerStandard {
 static const std::string DEFAULT_PORTAL_HTTP_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
 static const std::string DEFAULT_PORTAL_HTTPS_URL = "https://connectivitycheck.platform.hicloud.com/generate_204";
-static constexpr int32_t INIT_REEVALUATE_DELAY_MS = 8*1000;
+static constexpr int32_t INIT_REEVALUATE_DELAY_MS = 8 * 1000;
 static constexpr int32_t MAX_FAILED_REEVALUATE_DELAY_MS = 10 * 60 * 1000;
 static constexpr int32_t SUCCESSED_REEVALUATE_DELAY_MS = 30 * 1000;
 static constexpr int32_t CAPTIVE_PORTAL_REEVALUATE_DELAY_MS = 10 * 60 * 1000;
 static constexpr int32_t DOUBLE = 2; // so ugly
 
-NetMonitor::NetMonitor(uint32_t netId, SocketFactory& sockFactory, NetConnAsync &async)
-    :netId_(netId), sockFactory_(sockFactory), async_(async)
+NetMonitor::NetMonitor(uint32_t netId, SocketFactory &sockFactory, NetConnAsync &async)
+    : netId_(netId), sockFactory_(sockFactory), async_(async)
 {
 }
 
@@ -48,7 +49,7 @@ void NetMonitor::Start()
 {
     NETMGR_LOG_I("NetMonitor[%{public}d] start evaluation", netId_);
     if (IsEvaluating()) {
-        return ;
+        return;
     }
 
     evaluating_ = true;
@@ -97,9 +98,9 @@ void NetMonitor::OnEvaluating()
     HttpProbeResult result;
 
     result = SendParallelHttpProbes(DEFAULT_PORTAL_HTTP_URL, DEFAULT_PORTAL_HTTPS_URL);
-    
+
     std::unique_lock<std::mutex> lock(evaluationTimerMtx_);
-    
+
     if (result.IsPortal()) {
         reevaluateDelay_ = CAPTIVE_PORTAL_REEVALUATE_DELAY_MS;
     } else if (result.IsSuccessful()) {
@@ -137,7 +138,7 @@ void NetMonitor::OnProbeResultChanged()
     async_.CallbackOnNetDetectionResultChanged(netId_, code, result_.GetRedirectUrl());
 }
 
-HttpProbeResult NetMonitor::SendParallelHttpProbes(const Url& httpUrl, const Url& httpsUrl)
+HttpProbeResult NetMonitor::SendParallelHttpProbes(const Url &httpUrl, const Url &httpsUrl)
 {
     auto now = std::chrono::system_clock::now();
     auto httpResult = std::async(std::launch::async,
@@ -156,13 +157,13 @@ HttpProbeResult NetMonitor::SendParallelHttpProbes(const Url& httpUrl, const Url
     return httpsResult.get();
 }
 
-HttpProbeResult NetMonitor::SendDnsAndHttpProbes(const Url& url, HttpProbe::ProbeType probeType)
+HttpProbeResult NetMonitor::SendDnsAndHttpProbes(const Url &url, HttpProbe::ProbeType probeType)
 {
     SendDnsProbe(url.GetHost());
     return SendHttpProbe(url.ToString(), probeType);
 }
 
-HttpProbeResult NetMonitor::SendHttpProbe(const std::string& url, HttpProbe::ProbeType probeType)
+HttpProbeResult NetMonitor::SendHttpProbe(const std::string &url, HttpProbe::ProbeType probeType)
 {
     int sockFd = sockFactory_.CreateSocket(AF_INET, SOCK_STREAM, 0);
     HttpProbeResult result;
@@ -171,8 +172,8 @@ HttpProbeResult NetMonitor::SendHttpProbe(const std::string& url, HttpProbe::Pro
         if (!httpProbe.HasError()) {
             result = httpProbe.GetResult();
         } else {
-            NETMGR_LOG_W("NetMonitor[%{public}d] Http probe failed,[ %{public}s]", netId_,
-                httpProbe.ErrorString().c_str());
+            NETMGR_LOG_W(
+                "NetMonitor[%{public}d] Http probe failed,[ %{public}s]", netId_, httpProbe.ErrorString().c_str());
         }
         sockFactory_.DestroySocket(sockFd);
     } else {
@@ -182,7 +183,7 @@ HttpProbeResult NetMonitor::SendHttpProbe(const std::string& url, HttpProbe::Pro
     return result;
 }
 
-void NetMonitor::SendDnsProbe(const std::string& host)
+void NetMonitor::SendDnsProbe(const std::string &host)
 {
     auto now = std::chrono::system_clock::now();
     std::list<std::string> addrList;
@@ -197,10 +198,10 @@ void NetMonitor::SendDnsProbe(const std::string& host)
 
     int32_t err = 0;
     // call getaddrinfo to resolve host
-    
+
     for (struct addrinfo *addrInfo = result; addrInfo != nullptr; addrInfo = addrInfo->ai_next) {
         struct in_addr addr;
-        struct sockaddr_in* addrin = reinterpret_cast<struct sockaddr_in*>(addrInfo->ai_addr);
+        struct sockaddr_in *addrin = reinterpret_cast<struct sockaddr_in *>(addrInfo->ai_addr);
         addr.s_addr = addrin->sin_addr.s_addr;
         addrList.push_back(inet_ntoa(addr));
     }

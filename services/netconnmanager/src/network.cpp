@@ -28,8 +28,7 @@ constexpr int32_t MIN_NET_ID = 100;
 constexpr int32_t MAX_NET_ID = 0xFFFF - 0x400;
 static int32_t g_netId = MIN_NET_ID;
 
-Network::Network()
-    :id_(g_netId++)
+Network::Network() : id_(g_netId++)
 {
     if (id_ > MAX_NET_ID) {
         id_ = MIN_NET_ID;
@@ -55,7 +54,7 @@ int32_t Network::CreatePhy()
             NETMGR_LOG_W("NetworkCreatePhysical failed, [%{public}d]", err);
             return err;
         }
-            
+
         err = NetsysController::GetInstance().CreateNetworkCache(id_);
         if (err < 0) {
             NETMGR_LOG_W("CreateNetworkCache failed, [%{public}d]", err);
@@ -97,7 +96,7 @@ int32_t Network::DestroyPhy()
     return ERR_NONE;
 }
 
-int32_t Network::SetIfaceName(const std::string& ifaceName)
+int32_t Network::SetIfaceName(const std::string &ifaceName)
 {
     int32_t err;
     if (ifaceName_ != ifaceName) {
@@ -120,13 +119,13 @@ int32_t Network::SetIfaceName(const std::string& ifaceName)
     return ERR_NONE;
 }
 
-int32_t Network::SetDomain(const std::string& domain)
+int32_t Network::SetDomain(const std::string &domain)
 {
     domain_ = domain;
     return ERR_NONE;
 }
 
-int32_t Network::SetNetAddrList(const std::list<INetAddr>& netAddrList)
+int32_t Network::SetNetAddrList(const std::list<INetAddr> &netAddrList)
 {
     int32_t err;
     if (netAddrList_ != netAddrList) {
@@ -158,7 +157,7 @@ int32_t Network::SetNetAddrList(const std::list<INetAddr>& netAddrList)
     return ERR_NONE;
 }
 
-int32_t Network::SetRouteList(const std::list<Route>& routeList)
+int32_t Network::SetRouteList(const std::list<Route> &routeList)
 {
     int32_t err;
     if (routeList_ != routeList) {
@@ -175,8 +174,8 @@ int32_t Network::SetRouteList(const std::list<Route>& routeList)
         for (auto it = routeList.begin(); it != routeList.end(); ++it) {
             const struct Route &route = *it;
             std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
-            err = NetsysController::GetInstance()
-                .NetworkAddRoute(id_, route.iface_, destAddress, route.gateway_.address_);
+            err = NetsysController::GetInstance().NetworkAddRoute(
+                id_, route.iface_, destAddress, route.gateway_.address_);
             if (err) {
                 NETMGR_LOG_W("NetworkAddRoute failed, [%{public}d]", err);
             }
@@ -186,7 +185,7 @@ int32_t Network::SetRouteList(const std::list<Route>& routeList)
     return ERR_NONE;
 }
 
-int32_t Network::SetDnsList(const std::list<INetAddr>& dnsAddrList)
+int32_t Network::SetDnsList(const std::list<INetAddr> &dnsAddrList)
 {
     int32_t err;
     if (dnsList_ != dnsAddrList) {
@@ -207,7 +206,7 @@ int32_t Network::SetDnsList(const std::list<INetAddr>& dnsAddrList)
     return ERR_NONE;
 }
 
-int32_t Network::SetMtu(const uint16_t& mtu)
+int32_t Network::SetMtu(const uint16_t &mtu)
 {
     int32_t err;
     if (mtu_ != mtu) {
@@ -220,7 +219,7 @@ int32_t Network::SetMtu(const uint16_t& mtu)
     return ERR_NONE;
 }
 
-int32_t Network::SetTcpBufferSizes(const std::string& tcpBufferSizes)
+int32_t Network::SetTcpBufferSizes(const std::string &tcpBufferSizes)
 {
     tcpBufferSizes_ = tcpBufferSizes;
     return ERR_NONE;

@@ -27,13 +27,11 @@ public:
     static constexpr int32_t SUCCESS_CODE_MAX = 299;
     static constexpr int32_t PORTAL_CODE_MIN = 300;
     static constexpr int32_t PORTAL_CODE_MAX = 399;
- 
-    HttpProbeResult() : code_(0), redirectUrl_("")
-    {}
 
-    HttpProbeResult(int32_t code, std::string redirectUrl) : code_(code), redirectUrl_(redirectUrl)
-    {}
-    
+    HttpProbeResult() : code_(0), redirectUrl_("") {}
+
+    HttpProbeResult(int32_t code, std::string redirectUrl) : code_(code), redirectUrl_(redirectUrl) {}
+
     int32_t GetCode() const
     {
         return code_;
@@ -65,7 +63,7 @@ public:
         redirectUrl_ = "";
     }
 
-    bool operator==(const HttpProbeResult& other) const
+    bool operator==(const HttpProbeResult &other) const
     {
         if (IsSuccessful() && other.IsSuccessful()) {
             return true;
@@ -79,13 +77,13 @@ public:
         return false;
     }
 
-    bool operator!=(const HttpProbeResult& other) const
+    bool operator!=(const HttpProbeResult &other) const
     {
         return !(*this == other);
     }
 
 private:
-    int32_t code_ {0};
+    int32_t code_{0};
     std::string redirectUrl_;
 };
 
@@ -96,7 +94,7 @@ public:
         PROBE_HTTPS
     };
 
-    HttpProbe(ProbeType probeType, const std::string& url, int32_t sockFd = -1);
+    HttpProbe(ProbeType probeType, const std::string &url, int32_t sockFd = -1);
 
     virtual ~HttpProbe();
 
@@ -107,11 +105,11 @@ public:
     std::string ErrorString() const;
 
 private:
-    std::string GetHeaderField(const std::string& name) const;
+    std::string GetHeaderField(const std::string &name) const;
 
 private:
     std::unique_ptr<struct CurlOptions> curlOpts_;
 };
-}  // namespace NetManagerStandard
-}  // namespace OHOS
+} // namespace NetManagerStandard
+} // namespace OHOS
 #endif // NET_CONN_HTTP_PROBE_H

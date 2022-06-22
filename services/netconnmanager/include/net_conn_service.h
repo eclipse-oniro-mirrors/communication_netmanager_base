@@ -16,7 +16,6 @@
 #ifndef NET_CONN_SERVICE_H
 #define NET_CONN_SERVICE_H
 
-
 #include "singleton.h"
 #include "system_ability.h"
 #include "net_conn_service_stub.h"
@@ -27,11 +26,10 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class NetConnService :
-    public std::enable_shared_from_this<NetConnService>,
-    public SystemAbility,
-    public NetConnServiceStub,
-    public NetConnAsync {
+class NetConnService : public std::enable_shared_from_this<NetConnService>,
+                       public SystemAbility,
+                       public NetConnServiceStub,
+                       public NetConnAsync {
     DECLARE_DELAYED_SINGLETON(NetConnService)
     DECLARE_SYSTEM_ABILITY(NetConnService)
 public:
@@ -67,7 +65,7 @@ public:
      */
     int32_t RegisterNetSupplierCallback(uint32_t supplierId, const sptr<INetSupplierCallback> &callback) override;
 
-     /**
+    /**
      * @brief Register net connection callback
      *
      * @param netSpecifier specifier information
@@ -86,8 +84,8 @@ public:
      *
      * @return Returns 0, successfully register net connection callback, otherwise it will failed
      */
-    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-        const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS) override;
+    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
+        const uint32_t &timeoutMS) override;
 
     /**
      * @brief Unregister net connection callback
@@ -185,7 +183,7 @@ public:
      */
     int32_t RestoreFactoryData() override;
 
-// net preferred
+    // net preferred
 private:
     enum RematchAllNetworksReason {
         REASON_NET_AVAILABLE_CHANGED,
@@ -196,10 +194,10 @@ private:
     void RematchAllNetworks(RematchAllNetworksReason reason);
     sptr<NetSupplier> GetBestNetworkForRequest(const sptr<NetRequest> &request);
 
-// callbacks
+    // callbacks
 private:
     void OnNetAvailableChanged(uint32_t supplierId, bool available) override;
-    
+
     void OnNetCapabilitiesChanged(uint32_t supplierId, const NetAllCapabilities &allCaps) override;
 
     void OnNetLinkInfoChanged(uint32_t supplierId, const NetLinkInfo &linkInfo) override;
@@ -208,14 +206,14 @@ private:
         uint32_t netId, NetDetectionResultCode detectionResult, const std::string &urlRedirect) override;
 
     void OnNetScoreChanged(uint32_t supplierId, uint32_t score) override;
-// sa
+    // sa
 private:
     void OnStart() override;
     void OnStop() override;
     int32_t SystemReady() override;
 
 private:
-    sptr<NetSupplier> CreateNetSupplier(NetBearType bearType, const std::string &ident, const std::set<NetCap>& caps);
+    sptr<NetSupplier> CreateNetSupplier(NetBearType bearType, const std::string &ident, const std::set<NetCap> &caps);
     sptr<NetSupplier> FindNetSupplier(uint32_t supplierId);
     sptr<NetSupplier> FindNetSupplierByNetId(uint32_t netId);
     std::list<sptr<NetSupplier>> FindNetSuppliersByInfo(
@@ -234,8 +232,8 @@ private:
 
 private:
     int32_t InvokeMethodSafety(std::function<int32_t(void)> func);
-    
-// debug
+
+    // debug
 private:
     void DumpSuppliersInfo();
 

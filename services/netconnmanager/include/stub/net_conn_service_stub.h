@@ -27,8 +27,7 @@ public:
     NetConnServiceStub();
     ~NetConnServiceStub();
 
-    int32_t OnRemoteRequest(
-        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
     using NetConnServiceFunc = int32_t (NetConnServiceStub::*)(MessageParcel &, MessageParcel &);
@@ -60,6 +59,7 @@ private:
     int32_t OnGetAddressByName(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetAirplaneMode(MessageParcel &data, MessageParcel &reply);
     int32_t OnRestoreFactoryData(MessageParcel &data, MessageParcel &reply);
+
 private:
     int32_t ConvertCode(int32_t internalCode);
 

@@ -28,6 +28,6 @@ public:
 
     virtual void DestroySocket(int32_t sockFd) = 0;
 };
-}  // namespace NetManagerStandard
-}  // namespace OHOS
+} // namespace NetManagerStandard
+} // namespace OHOS
 #endif // NET_CONN_URL_H

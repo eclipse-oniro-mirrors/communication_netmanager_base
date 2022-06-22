@@ -21,17 +21,16 @@ constexpr uint32_t MIN_REQUEST_ID = DEFAULT_REQUEST_ID + 1;
 constexpr uint32_t MAX_REQUEST_ID = 0x7FFFFFFF;
 static std::atomic<uint32_t> g_nextRequestId = DEFAULT_REQUEST_ID;
 using TimeOutCallback = std::function<void()>;
-NetRequest::NetRequest(const sptr<NetSpecifier> &specifier,
-    const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS, NetConnAsync& async)
-    :id_(g_nextRequestId++), netSpecifier_(specifier), netConnCallback_(callback), async_(async)
+NetRequest::NetRequest(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
+    const uint32_t &timeoutMS, NetConnAsync &async)
+    : id_(g_nextRequestId++), netSpecifier_(specifier), netConnCallback_(callback), async_(async)
 {
     if (id_ > MAX_REQUEST_ID) {
         id_ = MIN_REQUEST_ID;
     }
 
     if (timeoutMS > 0) {
-        timeTask_ = async_.GetScheduler().DelayPost(
-            std::bind(&NetRequest::OnRequestTimeout, this), timeoutMS);
+        timeTask_ = async_.GetScheduler().DelayPost(std::bind(&NetRequest::OnRequestTimeout, this), timeoutMS);
     }
 }
 
@@ -100,8 +99,7 @@ void NetRequest::CallbackForNetCapabilitiesChanged(
     }
 }
 
-void NetRequest::CallbackForNetConnectionPropertiesChanged(
-    sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
+void NetRequest::CallbackForNetConnectionPropertiesChanged(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
 {
     if (netConnCallback_) {
         netConnCallback_->NetConnectionPropertiesChange(netHandle, info);

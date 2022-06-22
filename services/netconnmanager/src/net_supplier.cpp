@@ -30,22 +30,16 @@ static constexpr int32_t SCORE_MIN = 0;
 
 NetSupplier::NetSupplier(
     NetBearType bearerType, const std::string &ident, const std::set<NetCap> &caps, NetConnAsync &async)
-    :id_(g_nextNetSupplierId++),
-    bearerType_(bearerType), ident_(ident), caps_(caps), async_(async),
-    allCaps_(new NetAllCapabilities),
-    supplierInfo_(new NetSupplierInfo),
-    linkInfo_(new NetLinkInfo),
-    network_(new Network),
-    netHandle_(new NetHandle(network_->GetId())),
-    netMonitor_(new NetMonitor(network_->GetId(), *network_, async_))
+    : id_(g_nextNetSupplierId++), bearerType_(bearerType), ident_(ident), caps_(caps), async_(async),
+      allCaps_(new NetAllCapabilities), supplierInfo_(new NetSupplierInfo), linkInfo_(new NetLinkInfo),
+      network_(new Network), netHandle_(new NetHandle(network_->GetId())),
+      netMonitor_(new NetMonitor(network_->GetId(), *network_, async_))
 {
     allCaps_->netCaps_ = caps;
     allCaps_->bearerTypes_.insert(bearerType_);
 }
 
-NetSupplier::~NetSupplier()
-{
-}
+NetSupplier::~NetSupplier() {}
 
 uint32_t NetSupplier::GetId() const
 {
@@ -133,7 +127,7 @@ int32_t NetSupplier::GetCurrentScore() const
 
     return score;
 }
-    
+
 bool NetSupplier::IsAvailable() const
 {
     return supplierInfo_->isAvailable_;
@@ -149,7 +143,7 @@ bool NetSupplier::IsRequested() const
     return false;
 }
 
-bool NetSupplier::HasNetCaps(const std::set<NetCap>& caps) const
+bool NetSupplier::HasNetCaps(const std::set<NetCap> &caps) const
 {
     for (auto cap : caps) {
         if (!HasNetCap(cap)) {
@@ -188,8 +182,8 @@ void NetSupplier::UpdateNetSupplierInfo(sptr<NetSupplierInfo> supplierInfo)
 {
     if (supplierInfo) {
         if (supplierInfo_->isAvailable_ != supplierInfo->isAvailable_) {
-            NETMGR_LOG_I("NetSupplier[%{public}s] available changed:%{public}s",
-                ident_.c_str(), supplierInfo->isAvailable_ ? "true":"false");
+            NETMGR_LOG_I("NetSupplier[%{public}s] available changed:%{public}s", ident_.c_str(),
+                supplierInfo->isAvailable_ ? "true" : "false");
             if (supplierInfo->isAvailable_) {
                 network_->CreatePhy();
                 netMonitor_->Start();
@@ -202,8 +196,7 @@ void NetSupplier::UpdateNetSupplierInfo(sptr<NetSupplierInfo> supplierInfo)
             }
             async_.CallbackOnNetAvailableChanged(id_, supplierInfo_->isAvailable_);
         } else if (supplierInfo_->score_ != supplierInfo->score_) {
-            NETMGR_LOG_I("NetSupplier[%{public}s] score changed:%{public}d",
-                ident_.c_str(), supplierInfo->score_);
+            NETMGR_LOG_I("NetSupplier[%{public}s] score changed:%{public}d", ident_.c_str(), supplierInfo->score_);
             async_.CallbackOnNetScoreChanged(id_, supplierInfo->score_);
         }
 
@@ -254,9 +247,8 @@ void NetSupplier::RegisterNetDetectionCallback(sptr<INetDetectionCallback> callb
 
 void NetSupplier::UnregisterNetDetectionCallback(sptr<INetDetectionCallback> callback)
 {
-    netDetectionCbs_.remove_if([&](sptr<INetDetectionCallback> cb) {
-        return cb->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr();
-    });
+    netDetectionCbs_.remove_if(
+        [&](sptr<INetDetectionCallback> cb) { return cb->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr(); });
 }
 
 bool NetSupplier::SatisfiyNetRequest(sptr<NetRequest> netRequest)
@@ -332,8 +324,8 @@ void NetSupplier::RemoveAllNetRequests()
 
 void NetSupplier::NotifyNetDetectionResult(NetDetectionResultCode detectionResult, const std::string &urlRedirect)
 {
-    NETMGR_LOG_I("NetSupplier[%{public}s] notify detection result:[%{public}d, %{public}s]",
-        ident_.c_str(), detectionResult, urlRedirect.c_str());
+    NETMGR_LOG_I("NetSupplier[%{public}s] notify detection result:[%{public}d, %{public}s]", ident_.c_str(),
+        detectionResult, urlRedirect.c_str());
     for (auto cb : netDetectionCbs_) {
         cb->OnNetDetectionResultChanged(detectionResult, urlRedirect);
     }
@@ -342,11 +334,11 @@ void NetSupplier::NotifyNetDetectionResult(NetDetectionResultCode detectionResul
 void NetSupplier::RequestNetwork()
 {
     if ((netConnState_ == NET_CONN_STATE_CONNECTING) || (netConnState_ == NET_CONN_STATE_CONNECTED)) {
-        return ;
+        return;
     }
 
     if (netSupplierCb_ == nullptr) {
-        return ;
+        return;
     }
 
     SetNetConnState(NET_CONN_STATE_CONNECTING);
@@ -360,9 +352,7 @@ void NetSupplier::RequestNetwork()
             std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - now).count());
         if (err) {
             NETMGR_LOG_W("NetSupplier[%{public}s] request network failed", ident_.c_str());
-            async_.GetScheduler().Post([&]() {
-                SetNetConnState(NET_CONN_STATE_IDLE);
-            });
+            async_.GetScheduler().Post([&]() { SetNetConnState(NET_CONN_STATE_IDLE); });
         }
     });
 }
@@ -370,11 +360,11 @@ void NetSupplier::RequestNetwork()
 void NetSupplier::ReleaseNetwork()
 {
     if ((netConnState_ != NET_CONN_STATE_CONNECTING) && (netConnState_ != NET_CONN_STATE_CONNECTED)) {
-        return ;
+        return;
     }
 
     if (netSupplierCb_ == nullptr) {
-        return ;
+        return;
     }
 
     SetNetConnState(NET_CONN_STATE_DISCONNECTING);
@@ -414,8 +404,8 @@ void NetSupplier::NotifyNetRequestCallbacks(int32_t cmd)
                 req->CallbackForNetAvailable(netHandle_);
                 break;
             case INetConnCallback::NET_CONNECTION_PROPERTIES_CHANGE:
-                NETMGR_LOG_I("NetSupplier[%{public}s] notify to requests: NET_CONNECTION_PROPERTIES_CHANGE",
-                    ident_.c_str());
+                NETMGR_LOG_I(
+                    "NetSupplier[%{public}s] notify to requests: NET_CONNECTION_PROPERTIES_CHANGE", ident_.c_str());
                 req->CallbackForNetConnectionPropertiesChanged(netHandle_, linkInfo_);
                 break;
             case INetConnCallback::NET_LOST:
@@ -423,7 +413,7 @@ void NetSupplier::NotifyNetRequestCallbacks(int32_t cmd)
                 req->CallbackForNetLost(netHandle_);
                 break;
             default:
-                return ;
+                return;
         }
     }
 }

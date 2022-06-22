@@ -39,53 +39,53 @@ struct CurlGlobalInitializer {
     {
         curl_global_cleanup();
     }
-}g_curlGlobalInitializer;
+} g_curlGlobalInitializer;
 
 struct CurlOptions {
-    bool verbose {false};
-    CURLcode errCode {CURLE_OK};
+    bool verbose{false};
+    CURLcode errCode{CURLE_OK};
     char errorBuf[CURL_ERROR_SIZE];
-    int64_t connTimeout {CONNECTION_TIMEOUT};
-    int64_t transTimeout {TRANSFOR_TIMEOUT};
+    int64_t connTimeout{CONNECTION_TIMEOUT};
+    int64_t transTimeout{TRANSFOR_TIMEOUT};
     std::string url;
-    bool useHttps {false};
-    int32_t sockFd {0};
-    int32_t resCode {0};
+    bool useHttps{false};
+    int32_t sockFd{0};
+    int32_t resCode{0};
     std::string resMsg;
     std::map<std::string, std::string> fields;
 };
 
 static size_t CurlWriteFunction(void *data, size_t size, size_t nmemb, void *userp)
 {
-    CurlOptions* opts = static_cast<CurlOptions*>(userp);
+    CurlOptions *opts = static_cast<CurlOptions *>(userp);
     if (!opts) {
-        return 0 ;
+        return 0;
     }
 
-    size_t realSize = size*nmemb;
+    size_t realSize = size * nmemb;
     if (realSize <= 0) {
         return 0;
     }
-        
-    std::string line(static_cast<const char*>(data), realSize);
+
+    std::string line(static_cast<const char *>(data), realSize);
     if (line.rfind("HTTP/1.", 0) == 0) {
         int codePos = line.rfind(' ', ::strlen("HTTP/1.x"));
         if (codePos > 0) {
-            size_t phrasePos = line.rfind(' ', codePos+1);
+            size_t phrasePos = line.rfind(' ', codePos + 1);
             if (phrasePos > 0 && phrasePos < line.length()) {
-                opts->resMsg = line.substr(phrasePos+1);
+                opts->resMsg = line.substr(phrasePos + 1);
             }
             if (phrasePos < 0) {
                 phrasePos = line.length();
             }
             // cannot use 'try' with exceptions disabled even -fexceptions specified.
-            opts->resCode = std::stoi(line.substr(codePos+1, phrasePos));
+            opts->resCode = std::stoi(line.substr(codePos + 1, phrasePos));
         }
     } else {
         int pos = line.rfind(": ", 0);
         if (pos > 0) {
-            std::string fieldName = line.substr(0, pos-1);
-            std::string fieldData = line.substr(pos+1);
+            std::string fieldName = line.substr(0, pos - 1);
+            std::string fieldData = line.substr(pos + 1);
             opts->fields[fieldName] = fieldData;
         }
     }
@@ -94,7 +94,7 @@ static size_t CurlWriteFunction(void *data, size_t size, size_t nmemb, void *use
 
 static curl_socket_t CurlOpenSocketFunction(void *userp, curlsocktype purpose, struct curl_sockaddr *address)
 {
-    CurlOptions* opts = static_cast<CurlOptions*>(userp);
+    CurlOptions *opts = static_cast<CurlOptions *>(userp);
     if (opts) {
         return opts->sockFd;
     } else {
@@ -102,7 +102,7 @@ static curl_socket_t CurlOpenSocketFunction(void *userp, curlsocktype purpose, s
     }
 }
 
-static void CurlSetOptions(CURL* curl, CurlOptions* opts)
+static void CurlSetOptions(CURL *curl, CurlOptions *opts)
 {
     /* Print request connection process and return http data on the screen */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, opts->verbose ? 1L : 0L);
@@ -137,7 +137,7 @@ static void CurlSetOptions(CURL* curl, CurlOptions* opts)
     }
 }
 
-static void CurlPerform(CURL* curl, CurlOptions* opts)
+static void CurlPerform(CURL *curl, CurlOptions *opts)
 {
     CURLcode errCode = curl_easy_perform(curl);
     if (opts) {
@@ -145,10 +145,10 @@ static void CurlPerform(CURL* curl, CurlOptions* opts)
     }
 }
 
-HttpProbe::HttpProbe(ProbeType probeType, const std::string& url, int32_t sockFd)
-    :curlOpts_(std::make_unique<CurlOptions>())
+HttpProbe::HttpProbe(ProbeType probeType, const std::string &url, int32_t sockFd)
+    : curlOpts_(std::make_unique<CurlOptions>())
 {
-    std::unique_ptr<CURL, std::function<void(CURL*)>> curl(curl_easy_init(), [](CURL* curl) {
+    std::unique_ptr<CURL, std::function<void(CURL *)>> curl(curl_easy_init(), [](CURL *curl) {
         if (curl) {
             curl_easy_cleanup(curl);
         }
@@ -167,13 +167,11 @@ HttpProbe::HttpProbe(ProbeType probeType, const std::string& url, int32_t sockFd
     }
 }
 
-HttpProbe::~HttpProbe()
-{
-}
+HttpProbe::~HttpProbe() {}
 
 HttpProbeResult HttpProbe::GetResult() const
 {
-    return HttpProbeResult { curlOpts_->resCode, GetHeaderField("Location") };
+    return HttpProbeResult{curlOpts_->resCode, GetHeaderField("Location")};
 }
 
 bool HttpProbe::HasError() const
@@ -186,7 +184,7 @@ std::string HttpProbe::ErrorString() const
     return std::string(curlOpts_->errorBuf);
 }
 
-std::string HttpProbe::GetHeaderField(const std::string& name) const
+std::string HttpProbe::GetHeaderField(const std::string &name) const
 {
     auto iter = curlOpts_->fields.find(name);
     if (iter != curlOpts_->fields.end()) {
@@ -194,5 +192,5 @@ std::string HttpProbe::GetHeaderField(const std::string& name) const
     }
     return "";
 }
-}  // namespace NetManagerStandard
-}  // namespace OHOS
+} // namespace NetManagerStandard
+} // namespace OHOS

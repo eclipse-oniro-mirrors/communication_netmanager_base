@@ -42,27 +42,27 @@ void CloseSocket(int32_t *socket, int32_t ret, int32_t errorCode)
 {
     switch (errorCode) {
         case ERROR_CODE_RECVMSG_FAILED:
-            NETNATIVE_LOGE("recvmsg failed, clientSockfd:%{public}d, ret:%{public}d, errno: %{public}d", *socket, ret,
-                           errno);
+            NETNATIVE_LOGE(
+                "recvmsg failed, clientSockfd:%{public}d, ret:%{public}d, errno: %{public}d", *socket, ret, errno);
             break;
         case ERROR_CODE_SOCKETFD_INVALID:
             NETNATIVE_LOGE("socketFd invalid:%{public}d, ret:%{public}d, errno: %{public}d", *socket, ret, errno);
             break;
         case ERROR_CODE_WRITE_FAILED:
-            NETNATIVE_LOGE("wirte failed, clientSockfd:%{public}d, ret:%{public}d, errno: %{public}d", *socket, ret,
-                           errno);
+            NETNATIVE_LOGE(
+                "wirte failed, clientSockfd:%{public}d, ret:%{public}d, errno: %{public}d", *socket, ret, errno);
             break;
         case ERROR_CODE_GETSOCKOPT_FAILED:
-            NETNATIVE_LOGE("getsockopt failed, socketFd:%{public}d, ret:%{public}d, errno: %{public}d", *socket, ret,
-                           errno);
+            NETNATIVE_LOGE(
+                "getsockopt failed, socketFd:%{public}d, ret:%{public}d, errno: %{public}d", *socket, ret, errno);
             break;
         case ERROR_CODE_SETSOCKOPT_FAILED:
-            NETNATIVE_LOGE("setsockopt failed socketFd:%{public}d, ret:%{public}d, errno: %{public}d", *socket, ret,
-                           errno);
+            NETNATIVE_LOGE(
+                "setsockopt failed socketFd:%{public}d, ret:%{public}d, errno: %{public}d", *socket, ret, errno);
             break;
         case ERROR_CODE_SET_MARK:
-            NETNATIVE_LOGE("SetMark failed, clientSockfd:%{public}d, ret:%{public}d, errno: %{public}d", *socket, ret,
-                           errno);
+            NETNATIVE_LOGE(
+                "SetMark failed, clientSockfd:%{public}d, ret:%{public}d, errno: %{public}d", *socket, ret, errno);
             break;
         default:
             NETNATIVE_LOGI("NO_ERROR_CODE CloseSocket socket:%{public}d, ret:%{public}d", *socket, ret);

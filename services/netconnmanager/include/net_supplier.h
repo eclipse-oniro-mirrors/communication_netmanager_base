@@ -52,14 +52,14 @@ public:
     void InsertNetCap(NetCap cap)
     {
         if (IsValidNetCap(cap)) {
-            caps_ |= (1<<cap);
+            caps_ |= (1 << cap);
         }
     }
 
     void RemoveNetCap(NetCap cap)
     {
         if (IsValidNetCap(cap)) {
-            caps_ &= ~(1<<cap);
+            caps_ &= ~(1 << cap);
         }
     }
 
@@ -71,8 +71,8 @@ public:
     std::set<NetCap> ToSet() const
     {
         std::set<NetCap> ret;
-        for (auto cap = static_cast<NetCap>(0);
-            cap < NET_CAPABILITY_INTERNAL_DEFAULT; cap = static_cast<NetCap>(cap+1)) {
+        for (auto cap = static_cast<NetCap>(0); cap < NET_CAPABILITY_INTERNAL_DEFAULT;
+             cap = static_cast<NetCap>(cap + 1)) {
             if (HasNetCap(cap)) {
                 ret.insert(cap);
             }
@@ -81,17 +81,17 @@ public:
     }
 
 private:
-    uint32_t caps_ {0};
+    uint32_t caps_{0};
 };
 
 class NetSupplier : public virtual RefBase {
 public:
     NetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &caps, NetConnAsync &async);
-    
+
     virtual ~NetSupplier();
 
     uint32_t GetId() const;
-   
+
     uint32_t GetNetId() const;
 
     NetBearType GetBearerType() const;
@@ -111,14 +111,14 @@ public:
     sptr<NetLinkInfo> GetNetLinkInfo() const;
 
     sptr<NetAllCapabilities> GetNetAllCapabilities() const;
-    
+
     int32_t GetCurrentScore() const;
-    
+
     bool IsAvailable() const;
 
     bool IsRequested() const;
 
-    bool HasNetCaps(const std::set<NetCap>& caps) const;
+    bool HasNetCaps(const std::set<NetCap> &caps) const;
 
     bool HasNetCap(NetCap cap) const;
 
@@ -137,20 +137,20 @@ public:
     void UnregisterNetDetectionCallback(sptr<INetDetectionCallback> callback);
 
     bool SatisfiyNetRequest(sptr<NetRequest> netRequest);
-    
+
     void AddNetRequest(sptr<NetRequest> netRequest);
 
     void RemoveNetRequest(sptr<NetRequest> netRequest);
 
     void RemoveAllNetRequests();
-    
+
     void NotifyNetDetectionResult(NetDetectionResultCode detectionResult, const std::string &urlRedirect);
 
 private:
     void RequestNetwork();
 
     void ReleaseNetwork();
-    
+
     void SetNetConnState(NetConnState netConnState);
 
     void NotifyNetRequestCallbacks(int32_t cmd);
@@ -160,7 +160,7 @@ private:
     NetBearType bearerType_;
     std::string ident_;
     NetCaps caps_;
-    NetConnAsync& async_;
+    NetConnAsync &async_;
     sptr<NetAllCapabilities> allCaps_;
     sptr<NetSupplierInfo> supplierInfo_;
     sptr<NetLinkInfo> linkInfo_;
@@ -170,9 +170,9 @@ private:
     sptr<INetSupplierCallback> netSupplierCb_;
     std::list<sptr<INetDetectionCallback>> netDetectionCbs_;
     std::set<sptr<NetRequest>> netReqs_;
-    NetConnState netConnState_ {NET_CONN_STATE_UNKNOWN};
+    NetConnState netConnState_{NET_CONN_STATE_UNKNOWN};
     std::future<void> reqRelAsync_;
 };
-}  // namespace NetManagerStandard
-}  // namespace OHOS
-#endif  // NET_CONN_NET_SUPPLIER_H
+} // namespace NetManagerStandard
+} // namespace OHOS
+#endif // NET_CONN_NET_SUPPLIER_H

@@ -19,13 +19,12 @@
 namespace OHOS {
 namespace NetManagerStandard {
 NetDetectionCallbackProxy::NetDetectionCallbackProxy(const sptr<IRemoteObject> &impl)
-    : IRemoteProxy<INetDetectionCallback>(impl)
-{}
+    : IRemoteProxy<INetDetectionCallback>(impl) {}
 
 NetDetectionCallbackProxy::~NetDetectionCallbackProxy() {}
 
-int32_t NetDetectionCallbackProxy::OnNetDetectionResultChanged(NetDetectionResultCode detectionResult,
-    const std::string &urlRedirect)
+int32_t NetDetectionCallbackProxy::OnNetDetectionResultChanged(
+    NetDetectionResultCode detectionResult, const std::string &urlRedirect)
 {
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {

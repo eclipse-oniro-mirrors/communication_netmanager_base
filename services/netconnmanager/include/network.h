@@ -35,38 +35,38 @@ public:
 
     int32_t DestroyPhy();
 
-    int32_t SetIfaceName(const std::string& ifaceName);
+    int32_t SetIfaceName(const std::string &ifaceName);
 
-    int32_t SetDomain(const std::string& domain);
+    int32_t SetDomain(const std::string &domain);
 
-    int32_t SetNetAddrList(const std::list<INetAddr>& netAddrList);
+    int32_t SetNetAddrList(const std::list<INetAddr> &netAddrList);
 
-    int32_t SetRouteList(const std::list<Route>& routeList);
+    int32_t SetRouteList(const std::list<Route> &routeList);
 
-    int32_t SetDnsList(const std::list<INetAddr>& dnsAddrList);
+    int32_t SetDnsList(const std::list<INetAddr> &dnsAddrList);
 
-    int32_t SetMtu(const uint16_t& mtu);
+    int32_t SetMtu(const uint16_t &mtu);
 
-    int32_t SetTcpBufferSizes(const std::string& tcpBufferSizes);
-    
+    int32_t SetTcpBufferSizes(const std::string &tcpBufferSizes);
+
     int32_t SetDefault();
 
     int32_t CreateSocket(int32_t domain, int32_t type, int32_t protocol) override;
-    
+
     void DestroySocket(int32_t sockFd) override;
-    
+
 private:
     void ClearData();
-    
+
 private:
-    uint32_t id_ {0};
-    bool phyCreated_ {false};
+    uint32_t id_{0};
+    bool phyCreated_{false};
     std::string ifaceName_;
     std::string domain_;
     std::list<INetAddr> netAddrList_;
     std::list<INetAddr> dnsList_;
     std::list<Route> routeList_;
-    uint16_t mtu_ {0};
+    uint16_t mtu_{0};
     std::string tcpBufferSizes_;
 };
 } // namespace NetManagerStandard
