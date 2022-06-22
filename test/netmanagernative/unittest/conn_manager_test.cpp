@@ -43,7 +43,7 @@ void ConnManagerTest::SetUp() {}
 
 void ConnManagerTest::TearDown() {}
 
-sptr<INetsysService> GetProxy()
+sptr<INetsysService> ConnManagerGetProxy()
 {
     NETNATIVE_LOGI("Get samgr >>>>>>>>>>>>>>>>>>>>>>>>>>");
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -68,7 +68,7 @@ sptr<INetsysService> GetProxy()
  */
 HWTEST_F(ConnManagerTest, CreatePhysicalNetworkTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -87,7 +87,7 @@ HWTEST_F(ConnManagerTest, CreatePhysicalNetworkTest001, TestSize.Level1)
  */
 HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -108,7 +108,7 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest001, TestSize.Level1)
  */
 HWTEST_F(ConnManagerTest, AddRouteTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -129,7 +129,7 @@ HWTEST_F(ConnManagerTest, AddRouteTest001, TestSize.Level1)
  */
 HWTEST_F(ConnManagerTest, SetDefaultNetworkTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -148,7 +148,7 @@ HWTEST_F(ConnManagerTest, SetDefaultNetworkTest001, TestSize.Level1)
  */
 HWTEST_F(ConnManagerTest, GetDefaultNetworkTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -167,7 +167,7 @@ HWTEST_F(ConnManagerTest, GetDefaultNetworkTest001, TestSize.Level1)
  */
 HWTEST_F(ConnManagerTest, RemoveInterfaceFromNetworkTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -188,7 +188,7 @@ HWTEST_F(ConnManagerTest, RemoveInterfaceFromNetworkTest001, TestSize.Level1)
  */
 HWTEST_F(ConnManagerTest, DestroyNetworkTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -207,7 +207,7 @@ HWTEST_F(ConnManagerTest, DestroyNetworkTest001, TestSize.Level1)
  */
 HWTEST_F(ConnManagerTest, ClearDefaultNetwork001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
