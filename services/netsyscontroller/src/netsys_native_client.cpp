@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,29 +14,32 @@
  */
 #include "netsys_native_client.h"
 
+#include <arpa/inet.h>
 #include <cstdlib>
 #include <cstring>
-#include <unistd.h>
 #include <fcntl.h>
-#include <arpa/inet.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/stat.h>
+#include <thread>
+#include <unistd.h>
+
+#include <linux/if_tun.h>
 #include <net/route.h>
 #include <netinet/in.h>
-#include <linux/if_tun.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "iservice_registry.h"
-#include "system_ability_definition.h"
-#include "securec.h"
-
 #include "net_conn_types.h"
 #include "net_mgr_log_wrapper.h"
 #include "netsys_native_service_proxy.h"
+#include "securec.h"
+#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+constexpr int64_t DELAY_TIME = 1000 * 100;
+constexpr int32_t RETRY_TIMES = 10;
 NetsysNativeClient::NativeNotifyCallback::NativeNotifyCallback(NetsysNativeClient &netsysNativeClient)
     : netsysNativeClient_(netsysNativeClient)
 {
@@ -44,41 +47,68 @@ NetsysNativeClient::NativeNotifyCallback::NativeNotifyCallback(NetsysNativeClien
 
 NetsysNativeClient::NativeNotifyCallback::~NativeNotifyCallback() {}
 
-int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressUpdated(const std::string &,
-    const std::string &, int, int)
+int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressUpdated(const std::string &addr,
+                                                                            const std::string &ifName,
+                                                                            int flags,
+                                                                            int scope)
 {
+    for (auto &cb : netsysNativeClient_.cbObjects) {
+        cb->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
+    }
     return 0;
 }
 
-int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(const std::string &,
-    const std::string &, int, int)
+int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(const std::string &addr,
+                                                                            const std::string &ifName,
+                                                                            int flags,
+                                                                            int scope)
 {
+    for (auto &cb : netsysNativeClient_.cbObjects) {
+        cb->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
+    }
     return 0;
 }
 
-int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::string &)
+int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::string &ifName)
 {
+    for (auto &cb : netsysNativeClient_.cbObjects) {
+        cb->OnInterfaceAdded(ifName);
+    }
     return 0;
 }
 
-int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::string &)
+int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::string &ifName)
 {
+    for (auto &cb : netsysNativeClient_.cbObjects) {
+        cb->OnInterfaceRemoved(ifName);
+    }
     return 0;
 }
 
-int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::string &, bool)
+int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::string &ifName, bool up)
 {
+    for (auto &cb : netsysNativeClient_.cbObjects) {
+        cb->OnInterfaceChanged(ifName, up);
+    }
     return 0;
 }
 
-int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceLinkStateChanged(const std::string &, bool)
+int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
 {
+    for (auto &cb : netsysNativeClient_.cbObjects) {
+        cb->OnInterfaceLinkStateChanged(ifName, up);
+    }
     return 0;
 }
 
-int32_t NetsysNativeClient::NativeNotifyCallback::OnRouteChanged(bool, const std::string &, const std::string &,
-    const std::string &)
+int32_t NetsysNativeClient::NativeNotifyCallback::OnRouteChanged(bool updated,
+                                                                 const std::string &route,
+                                                                 const std::string &gateway,
+                                                                 const std::string &ifName)
 {
+    for (auto &cb : netsysNativeClient_.cbObjects) {
+        cb->OnRouteChanged(updated, route, gateway, ifName);
+    }
     return 0;
 }
 
@@ -86,6 +116,14 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnDhcpSuccess(sptr<OHOS::Netsy
 {
     NETMGR_LOG_I("NetsysNativeClient::NativeNotifyCallback::OnDhcpSuccess");
     netsysNativeClient_.ProcessDhcpResult(dhcpResult);
+    return 0;
+}
+
+int32_t NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit(const std::string &limitName,
+                                                                          const std::string &iface)
+{
+    NETMGR_LOG_I("NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit");
+    netsysNativeClient_.ProcessBandwidthReachedLimit(limitName, iface);
     return 0;
 }
 
@@ -106,7 +144,23 @@ void NetsysNativeClient::Init()
     initFlag_ = true;
     nativeNotifyCallback_ = std::make_unique<NativeNotifyCallback>(*this).release();
     netsysNativeService_ = GetProxy();
-    if (netsysNativeService_ != nullptr) {
+    if (netsysNativeService_ == nullptr) {
+        std::thread thread([this]() {
+            int i = 0;
+            while (netsysNativeService_ == nullptr) {
+                netsysNativeService_ = GetProxy();
+                NETMGR_LOG_I("netsysNativeService_ is null waiting for netsys service");
+                usleep(DELAY_TIME);
+                i++;
+                if (i > RETRY_TIMES) {
+                    NETMGR_LOG_E("netsysNativeService_ is null for 10 times");
+                    break;
+                }
+            }
+            netsysNativeService_->RegisterNotifyCallback(nativeNotifyCallback_);
+        });
+        thread.detach();
+    } else {
         netsysNativeService_->RegisterNotifyCallback(nativeNotifyCallback_);
     }
 }
@@ -722,10 +776,6 @@ int32_t NetsysNativeClient::StopDhcpClient(const std::string &iface, bool bIpv6)
 int32_t NetsysNativeClient::RegisterCallback(sptr<NetsysControllerCallback> callback)
 {
     NETMGR_LOG_D("NetsysNativeClient::RegisterCallback");
-    if (netsysNativeService_ == nullptr) {
-        NETMGR_LOG_E("netsysService_ is null");
-        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
-    }
     cbObjects.push_back(callback);
     return 0;
 }
@@ -766,6 +816,16 @@ int32_t NetsysNativeClient::StopDhcpService(const std::string &iface)
         return ERR_NATIVESERVICE_NOTFIND;
     }
     return netsysNativeService_->StopDhcpService(iface);
+}
+
+void NetsysNativeClient::ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface)
+{
+    NETMGR_LOG_I("NetsysNativeClient ProcessBandwidthReachedLimit, limitName=%{public}s, iface=%{public}s",
+                 limitName.c_str(), iface.c_str());
+    std::for_each(cbObjects.begin(), cbObjects.end(),
+                  [limitName, iface](const sptr<NetsysControllerCallback> &callback) {
+                      callback->OnBandwidthReachedLimit(limitName, iface);
+                  });
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

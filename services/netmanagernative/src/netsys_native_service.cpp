@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,6 +62,7 @@ void NetsysNativeService::OnStart()
             timeNow->tm_year + startTime_, timeNow->tm_mon + extraMonth_, timeNow->tm_mday, timeNow->tm_hour,
             timeNow->tm_min, timeNow->tm_sec);
     }
+    manager_->StartListener();
 }
 
 void NetsysNativeService::OnStop()
@@ -80,6 +81,7 @@ void NetsysNativeService::OnStop()
             timeNow->tm_min, timeNow->tm_sec);
     }
     state_ = ServiceRunningState::STATE_STOPPED;
+    manager_->StopListener();
 }
 
 void ExitHandler(int32_t signum)
@@ -106,6 +108,7 @@ bool NetsysNativeService::Init()
         return false;
     }
     dhcpController_ = std::make_unique<OHOS::nmd::DhcpController>();
+    fwmarkNetwork_ = std::make_unique<OHOS::nmd::FwmarkNetwork>();
 
     return true;
 }
@@ -173,6 +176,7 @@ int32_t NetsysNativeService::RegisterNotifyCallback(sptr<INotifyCallback> &callb
     NETNATIVE_LOGI("RegisterNotifyCallback");
     notifyCallback_ = callback;
     dhcpController_->RegisterNotifyCallback(callback);
+    manager_-> RegisterNetlinkCallback(callback);
     return 0;
 }
 

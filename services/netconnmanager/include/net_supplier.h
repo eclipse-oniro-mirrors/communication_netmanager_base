@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,102 +13,166 @@
  * limitations under the License.
  */
 
-#ifndef NET_SUPPLIER_H
-#define NET_SUPPLIER_H
+#ifndef NET_CONN_NET_SUPPLIER_H
+#define NET_CONN_NET_SUPPLIER_H
 
 #include <string>
 #include <set>
 #include <vector>
 #include <map>
+#include <future>
 #include "network.h"
+#include "net_request.h"
+#include "net_monitor.h"
 #include "net_supplier_info.h"
-#include "net_specifier.h"
+#include "net_conn_async.h"
 #include "i_net_supplier_callback.h"
-#include "i_net_conn_callback.h"
+#include "i_net_detection_callback.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-enum CallbackType {
-    CALL_TYPE_UNKNOWN = 0,
-    CALL_TYPE_AVAILABLE = 1,
-    CALL_TYPE_LOSTING = 2,
-    CALL_TYPE_LOST = 3,
-    CALL_TYPE_UPDATE_CAP = 4,
-    CALL_TYPE_UPDATE_LINK = 5,
-    CALL_TYPE_UNAVAILABLE = 6,
-    CALL_TYPE_BLOCK_STATUS = 7,
+class NetCaps {
+public:
+    NetCaps() = default;
+
+    NetCaps(const std::set<NetCap> &caps)
+    {
+        for (auto cap : caps) {
+            InsertNetCap(cap);
+        }
+    }
+
+    ~NetCaps() = default;
+
+    static bool IsValidNetCap(NetCap cap)
+    {
+        return (cap >= 0) || (cap < NET_CAPABILITY_INTERNAL_DEFAULT);
+    }
+
+    void InsertNetCap(NetCap cap)
+    {
+        if (IsValidNetCap(cap)) {
+            caps_ |= (1 << cap);
+        }
+    }
+
+    void RemoveNetCap(NetCap cap)
+    {
+        if (IsValidNetCap(cap)) {
+            caps_ &= ~(1 << cap);
+        }
+    }
+
+    bool HasNetCap(NetCap cap) const
+    {
+        return (caps_ >> cap) & 1;
+    }
+
+    std::set<NetCap> ToSet() const
+    {
+        std::set<NetCap> ret;
+        for (auto cap = static_cast<NetCap>(0); cap < NET_CAPABILITY_INTERNAL_DEFAULT;
+             cap = static_cast<NetCap>(cap + 1)) {
+            if (HasNetCap(cap)) {
+                ret.insert(cap);
+            }
+        }
+        return ret;
+    }
+
+private:
+    uint32_t caps_{0};
 };
 
 class NetSupplier : public virtual RefBase {
 public:
-    NetSupplier(NetBearType bearerType, const std::string &netSupplierIdent,
-        const std::set<NetCap> &netCaps);
-    ~NetSupplier();
-    bool operator==(const NetSupplier &netSupplier) const;
-    void SetNetwork(const sptr<Network> &network);
-    void UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo);
-    int32_t UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo);
-    uint32_t GetSupplierId() const;
-    NetBearType GetNetSupplierType() const;
-    std::string GetNetSupplierIdent() const;
-    const std::set<NetCap> &GetNetCaps() const;
-    std::set<NetCap> GetNetCaps();
-    NetAllCapabilities GetNetCapabilities() const;
-    NetLinkInfo GetNetLinkInfo() const;
-    bool GetRoaming() const;
-    int8_t GetStrength() const;
-    uint16_t GetFrequency() const;
-    int32_t GetSupplierUid() const;
+    NetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &caps, NetConnAsync &async);
+
+    virtual ~NetSupplier();
+
+    uint32_t GetId() const;
+
+    uint32_t GetNetId() const;
+
+    NetBearType GetBearerType() const;
+
+    std::string GetIdent() const;
+
+    std::set<NetCap> GetCaps() const;
+
     sptr<Network> GetNetwork() const;
-    int32_t GetNetId() const;
+
+    sptr<NetMonitor> GetNetMonitor() const;
+
     sptr<NetHandle> GetNetHandle() const;
-    void UpdateNetConnState(NetConnState netConnState);
-    NetConnState GetNetConnState() const;
-    bool IsConnecting() const;
-    bool IsConnected() const;
-    void SetNetValid(bool ifValid);
-    bool IfNetValid();
-    void SetNetScore(int32_t score);
-    int32_t GetNetScore() const;
-    void SetRealScore(int32_t score);
-    int32_t GetRealScore();
-    bool SupplierConnection(const std::set<NetCap> &netCaps);
-    bool SupplierDisconnection(const std::set<NetCap> &netCaps);
-    void SetRestrictBackground(bool restrictBackground);
-    bool GetRestrictBackground() const;
-    bool RequestToConnect(uint32_t reqId);
-    void AddRequsetIdToList(uint32_t requestId);
-    int32_t SelectAsBestNetwork(uint32_t reqId);
-    void ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
-    int32_t CancelRequest(uint32_t reqId);
-    void RemoveBestRequest(uint32_t reqId);
-    std::set<uint32_t>& GetBestRequestList();
-    void SetDefault();
-    void ClearDefault();
-    void UpdateNetStateForTest(int32_t netState);
-    void RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback);
+
+    sptr<NetSupplierInfo> GetSupplierInfo() const;
+
+    sptr<NetLinkInfo> GetNetLinkInfo() const;
+
+    sptr<NetAllCapabilities> GetNetAllCapabilities() const;
+
+    int32_t GetCurrentScore() const;
+
+    bool IsAvailable() const;
+
+    bool IsRequested() const;
+
+    bool HasNetCaps(const std::set<NetCap> &caps) const;
+
+    bool HasNetCap(NetCap cap) const;
+
+    void InsertNetCap(NetCap cap);
+
+    void RemoveNetCap(NetCap cap);
+
+    void UpdateNetSupplierInfo(sptr<NetSupplierInfo> supplierInfo);
+
+    void UpdateNetLinkInfo(sptr<NetLinkInfo> linkInfo);
+
+    void SetSupplierCallback(sptr<INetSupplierCallback> supplierCb);
+
+    void RegisterNetDetectionCallback(sptr<INetDetectionCallback> callback);
+
+    void UnregisterNetDetectionCallback(sptr<INetDetectionCallback> callback);
+
+    bool SatisfiyNetRequest(sptr<NetRequest> netRequest);
+
+    void AddNetRequest(sptr<NetRequest> netRequest);
+
+    void RemoveNetRequest(sptr<NetRequest> netRequest);
+
+    void RemoveAllNetRequests();
+
+    void NotifyNetDetectionResult(NetDetectionResultCode detectionResult, const std::string &urlRedirect);
 
 private:
-    const int32_t REG_OK = 0;
+    void RequestNetwork();
 
-    NetBearType netSupplierType_;
-    std::string netSupplierIdent_;
-    std::set<NetCap> netCaps_;
-    NetLinkInfo netLinkInfo_;
-    NetSupplierInfo netSupplierInfo_;
-    NetAllCapabilities netAllCapabilities_;
-    uint32_t supplierId_ = 0;
-    NetConnState state_ = NET_CONN_STATE_IDLE;
-    int32_t netScore_ = 0;
-    int32_t netRealScore_ = 0;
-    bool ifNetValid_ = false;
-    std::set<uint32_t> requestList_;
-    std::set<uint32_t> bestReqList_;
-    sptr<INetSupplierCallback> netController_ = nullptr;
-    sptr<Network> network_ = nullptr;
-    sptr<NetHandle> netHandle_ = nullptr;
-    bool restrictBackground_ = true;
+    void ReleaseNetwork();
+
+    void SetNetConnState(NetConnState netConnState);
+
+    void NotifyNetRequestCallbacks(int32_t cmd);
+
+private:
+    uint32_t id_;
+    NetBearType bearerType_;
+    std::string ident_;
+    NetCaps caps_;
+    NetConnAsync &async_;
+    sptr<NetAllCapabilities> allCaps_;
+    sptr<NetSupplierInfo> supplierInfo_;
+    sptr<NetLinkInfo> linkInfo_;
+    sptr<Network> network_;
+    sptr<NetHandle> netHandle_;
+    sptr<NetMonitor> netMonitor_;
+    sptr<INetSupplierCallback> netSupplierCb_;
+    std::list<sptr<INetDetectionCallback>> netDetectionCbs_;
+    std::set<sptr<NetRequest>> netReqs_;
+    NetConnState netConnState_{NET_CONN_STATE_UNKNOWN};
+    std::future<void> reqRelAsync_;
 };
-}  // namespace NetManagerStandard
-}  // namespace OHOS
-#endif  // NET_SUPPLIER_H
+} // namespace NetManagerStandard
+} // namespace OHOS
+#endif // NET_CONN_NET_SUPPLIER_H

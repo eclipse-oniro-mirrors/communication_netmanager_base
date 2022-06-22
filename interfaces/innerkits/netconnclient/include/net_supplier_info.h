@@ -17,7 +17,6 @@
 #define NET_SUPPLIER_INFO_H
 
 #include <string>
-
 #include "parcel.h"
 
 namespace OHOS {
@@ -38,6 +37,10 @@ struct NetSupplierInfo : public Parcelable {
     uint32_t linkUpBandwidthKbps_ = 0;
     uint32_t linkDownBandwidthKbps_ = 0;
     int32_t uid_ = 0;
+    uint32_t score_ = 0;
+
+    bool operator==(const NetSupplierInfo& other) const;
+    bool operator!=(const NetSupplierInfo& other) const;
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<NetSupplierInfo> Unmarshalling(Parcel &parcel);

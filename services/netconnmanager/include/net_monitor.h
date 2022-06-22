@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,94 +13,62 @@
  * limitations under the License.
  */
 
-#ifndef NET_MONITOR_H
-#define NET_MONITOR_H
+#ifndef NET_CONN_NET_MONITOR_H
+#define NET_CONN_NET_MONITOR_H
 
 #include <mutex>
+#include <condition_variable>
 #include <thread>
-
-#include "http_request.h"
-#include "net_conn_types.h"
+#include "url.h"
+#include "http_probe.h"
+#include "socket_factory.h"
+#include "net_conn_async.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-const std::string DEFAULT_PORTAL_HTTPS_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
-constexpr int32_t HTTP_DETECTION_WAIT_TIME_MS = 10000;
-const std::string PORTAL_URL_REDIRECT_FIRST_CASE = "Location: ";
-const std::string PORTAL_URL_REDIRECT_SECOND_CASE = "http";
-const std::string CONTENT_STR = "Content-Length:";
-const std::string PORTAL_END_STR = "?";
-constexpr int32_t PORTAL_CONTENT_LENGTH_MIN = 4;
-constexpr int32_t NET_CONTENT_LENGTH = 6;
-
-class NetMonitor {
+class NetMonitor : public virtual RefBase {
 public:
-    NetMonitor(NetDetectionStateHandler handle);
+    NetMonitor(uint32_t netId, SocketFactory &sockFactory, NetConnAsync &async);
+
     virtual ~NetMonitor();
-    /**
-     * @brief : Start NetMonitor thread
-     * @Return success : NET_OPT_SUCCESS  failed : NET_OPT_FAILED
-     */
-    ResultCode InitNetMonitorThread();
 
-    /**
-     * @brief : Trigger thread to perform network detection
-     * @param ifaceName
-     */
-    void SignalNetMonitorThread(const std::string &ifaceName);
+    void Start();
 
-    /**
-     * @brief : stop the NetMonitor processing thread.
-     *
-     */
-    void StopNetMonitorThread();
+    void Stop();
+
+    void Restart();
+
+    bool IsEvaluating() const;
+
+    bool IsValidated() const;
+
+    HttpProbeResult GetEvaluationResult() const;
 
 private:
-    /**
-     * @brief : Detect Internet ability
-     * @return true http detection success, false http detection failed
-     */
-    bool HttpDetection();
+    void OnEvaluating();
 
-    /**
-     * @brief : NetMonitor thread function
-     */
-    void RunNetMonitorThreadFunc();
-
-    /**
-     * @brief : Exit the NetMonitor thread.
-     *
-     */
-    void ExitNetMonitorThread();
-
-    /**
-     * @brief Get the Status Code From Response object
-     *
-     * @param strResponse
-     * @return int32_t Returns -1, strResponse is invalid; otherwise returns statusCode
-     */
-    int32_t GetStatusCodeFromResponse(const std::string &strResponse);
-
-    /**
-     * @brief Get the Url Redirect From Response object
-     *
-     * @param strResponse  Response data obtained from the server
-     * @param urlRedirect    The redirected url obtained from the response data
-     * @return int32_t Returns 0, get urlRedirect; returns -1, urlRedirect is empty
-     */
-    int32_t GetUrlRedirectFromResponse(const std::string &strResponse, std::string &urlRedirect);
+    void OnProbeResultChanged();
 
 private:
-    std::mutex mutex_;
-    std::condition_variable condition_;
-    std::condition_variable conditionTimeout_;
-    bool isStopNetMonitor_;
-    bool isExitNetMonitorThread_;
-    std::unique_ptr<std::thread> netMonitorThread_;
-    NetDetectionStateHandler netDetectionStatus_;
-    NetDetectionStatus lastDetectionState_;
-    std::string ifaceName_;
+    HttpProbeResult SendParallelHttpProbes(const Url &httpUrl, const Url &httpsUrl);
+
+    HttpProbeResult SendDnsAndHttpProbes(const Url &url, HttpProbe::ProbeType probeType);
+
+    HttpProbeResult SendHttpProbe(const std::string &url, HttpProbe::ProbeType probeType);
+
+    void SendDnsProbe(const std::string &host);
+
+private:
+    uint32_t netId_;
+    SocketFactory &sockFactory_;
+    std::thread evaluationThread_;
+    bool evaluating_{false};
+    std::mutex evaluationTimerMtx_;
+    std::condition_variable evaluationTimerCond_;
+    HttpProbeResult result_;
+    NetConnAsync &async_;
+    uint32_t reevaluateDelay_{0};
 };
-}  // namespace NetManagerStandard
-}  // namespace OHOS
-#endif // NET_MONITOR_H
+} // namespace NetManagerStandard
+} // namespace OHOS
+#endif // NET_CONN_MANAGER_NET_MONITOR_H
