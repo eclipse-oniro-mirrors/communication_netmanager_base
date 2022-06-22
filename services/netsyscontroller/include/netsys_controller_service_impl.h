@@ -24,8 +24,8 @@ namespace OHOS {
 namespace NetManagerStandard {
 class NetsysControllerServiceImpl : public INetsysControllerService {
 public:
-    NetsysControllerServiceImpl();
-    ~NetsysControllerServiceImpl();
+    NetsysControllerServiceImpl() = default;
+    ~NetsysControllerServiceImpl() = default;
     void Init() override;
 
     /**

@@ -43,7 +43,6 @@ ohos_shared_library("netsys_native_manager") {
     "$NETSYSNATIVE_SOURCE_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
-    "$NETSYSNATIVE_SOURCE_DIR/include/manager",
     "//foundation/communication/wifi/dhcp/interfaces/inner_api/include",
     "//foundation/communication/wifi/dhcp/interfaces/inner_api/interfaces",
     "utils/native/base/include",

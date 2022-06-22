@@ -17,11 +17,6 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetsysControllerServiceImpl::NetsysControllerServiceImpl()
-{}
-
-NetsysControllerServiceImpl::~NetsysControllerServiceImpl() {}
-
 void NetsysControllerServiceImpl::Init()
 {
     mockNetsysClient_.RegisterMockApi();
@@ -363,64 +358,44 @@ int32_t NetsysControllerServiceImpl::BindSocket(int32_t socket_fd, uint32_t netI
     return netsysClient_.BindSocket(socket_fd, netId);
 }
 
-int32_t NetsysControllerServiceImpl::IpEnableForwarding(const std::string& requestor)
+int32_t NetsysControllerServiceImpl::IpEnableForwarding(const std::string &requestor)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl IpEnableForwarding");
-    if (mockNetsysClient_.CheckMockApi(MOCK_IPENABLEFORWARDING_API)) {
-        return mockNetsysClient_.IpEnableForwarding(requestor);
-    }
     return netsysClient_.IpEnableForwarding(requestor);
 }
 
-int32_t NetsysControllerServiceImpl::IpDisableForwarding(const std::string& requestor)
+int32_t NetsysControllerServiceImpl::IpDisableForwarding(const std::string &requestor)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl IpDisableForwarding");
-    if (mockNetsysClient_.CheckMockApi(MOCK_IPDISABLEFORWARDING_API)) {
-        return mockNetsysClient_.IpDisableForwarding(requestor);
-    }
     return netsysClient_.IpDisableForwarding(requestor);
 }
 
-int32_t NetsysControllerServiceImpl::EnableNat(const std::string& downstreamIface,
-    const std::string& upstreamIface)
+int32_t NetsysControllerServiceImpl::EnableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl EnableNat");
-    if (mockNetsysClient_.CheckMockApi(MOCK_ENABLENAT_API)) {
-        return mockNetsysClient_.EnableNat(downstreamIface, upstreamIface);
-    }
     return netsysClient_.EnableNat(downstreamIface, upstreamIface);
 }
 
-int32_t NetsysControllerServiceImpl::DisableNat(const std::string& downstreamIface,
-    const std::string& upstreamIface)
+int32_t NetsysControllerServiceImpl::DisableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl DisableNat");
-    if (mockNetsysClient_.CheckMockApi(MOCK_DISABLENAT_API)) {
-        return mockNetsysClient_.DisableNat(downstreamIface, upstreamIface);
-    }
     return netsysClient_.DisableNat(downstreamIface, upstreamIface);
 }
 
-int32_t NetsysControllerServiceImpl::IpfwdAddInterfaceForward(const std::string& fromIface, const std::string& toIface)
+int32_t NetsysControllerServiceImpl::IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl IpfwdAddInterfaceForward");
-    if (mockNetsysClient_.CheckMockApi(MOCK_IPFWDADDIFACEFORWARD_API)) {
-        return mockNetsysClient_.IpfwdAddInterfaceForward(fromIface, toIface);
-    }
     return netsysClient_.IpfwdAddInterfaceForward(fromIface, toIface);
 }
 
-int32_t NetsysControllerServiceImpl::IpfwdRemoveInterfaceForward(const std::string& fromIface,
-    const std::string& toIface)
+int32_t NetsysControllerServiceImpl::IpfwdRemoveInterfaceForward(
+    const std::string &fromIface, const std::string &toIface)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl IpfwdRemoveInterfaceForward");
-    if (mockNetsysClient_.CheckMockApi(MOCK_IPFWDREMOVEIFACEFORWARD_API)) {
-        return mockNetsysClient_.IpfwdRemoveInterfaceForward(fromIface, toIface);
-    }
     return netsysClient_.IpfwdRemoveInterfaceForward(fromIface, toIface);
 }
 
-int32_t NetsysControllerServiceImpl::TetherDnsSet(uint32_t netId, const std::vector<std::string>& dnsAddrs)
+int32_t NetsysControllerServiceImpl::TetherDnsSet(uint32_t netId, const std::vector<std::string> &dnsAddrs)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl IpfwdRemoveInterfaceForward");
     if (mockNetsysClient_.CheckMockApi(MOCK_TETHERDNSSET_API)) {
@@ -438,7 +413,6 @@ int32_t NetsysControllerServiceImpl::RegisterNetsysNotifyCallback(const NetsysNo
     return netsysClient_.RegisterNetsysNotifyCallback(callback);
 }
 
-
 int32_t NetsysControllerServiceImpl::BindNetworkServiceVpn(int32_t socketFd)
 {
     NETMGR_LOG_D("NetsysNativeClient::BindNetworkServiceVpn");
@@ -448,8 +422,8 @@ int32_t NetsysControllerServiceImpl::BindNetworkServiceVpn(int32_t socketFd)
     return netsysClient_.BindNetworkServiceVpn(socketFd);
 }
 
-int32_t NetsysControllerServiceImpl::EnableVirtualNetIfaceCard(int32_t socketFd, struct ifreq &ifRequest,
-    int32_t &ifaceFd)
+int32_t NetsysControllerServiceImpl::EnableVirtualNetIfaceCard(
+    int32_t socketFd, struct ifreq &ifRequest, int32_t &ifaceFd)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::EnableVirtualNetIfaceCard");
     if (mockNetsysClient_.CheckMockApi(MOCK_ENABLEVIRTUALNETIFACECARD_API)) {
@@ -458,8 +432,8 @@ int32_t NetsysControllerServiceImpl::EnableVirtualNetIfaceCard(int32_t socketFd,
     return netsysClient_.EnableVirtualNetIfaceCard(socketFd, ifRequest, ifaceFd);
 }
 
-int32_t NetsysControllerServiceImpl::SetIpAddress(int32_t socketFd, const std::string &ipAddress, int32_t prefixLen,
-    struct ifreq &ifRequest)
+int32_t NetsysControllerServiceImpl::SetIpAddress(
+    int32_t socketFd, const std::string &ipAddress, int32_t prefixLen, struct ifreq &ifRequest)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::SetIpAddress");
     if (mockNetsysClient_.CheckMockApi(MOCK_SETIPADDRESS_API)) {
