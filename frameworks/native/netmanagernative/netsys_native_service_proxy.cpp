@@ -841,6 +841,9 @@ int32_t NetsysNativeServiceProxy::StopDhcpService(const std::string &iface)
 int32_t NetsysNativeServiceProxy::IpEnableForwarding(const std::string &requestor)
 {
     MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
     if (!data.WriteString(requestor)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -857,6 +860,9 @@ int32_t NetsysNativeServiceProxy::IpEnableForwarding(const std::string &requesto
 int32_t NetsysNativeServiceProxy::IpDisableForwarding(const std::string &requestor)
 {
     MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
     if (!data.WriteString(requestor)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -873,6 +879,9 @@ int32_t NetsysNativeServiceProxy::IpDisableForwarding(const std::string &request
 int32_t NetsysNativeServiceProxy::EnableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
     MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
     if (!data.WriteString(downstreamIface)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -892,6 +901,9 @@ int32_t NetsysNativeServiceProxy::EnableNat(const std::string &downstreamIface, 
 int32_t NetsysNativeServiceProxy::DisableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
     MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
     if (!data.WriteString(downstreamIface)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -911,6 +923,9 @@ int32_t NetsysNativeServiceProxy::DisableNat(const std::string &downstreamIface,
 int32_t NetsysNativeServiceProxy::IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface)
 {
     MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
     if (!data.WriteString(fromIface)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -930,6 +945,9 @@ int32_t NetsysNativeServiceProxy::IpfwdAddInterfaceForward(const std::string &fr
 int32_t NetsysNativeServiceProxy::IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface)
 {
     MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
     if (!data.WriteString(fromIface)) {
         return ERR_FLATTEN_OBJECT;
     }
