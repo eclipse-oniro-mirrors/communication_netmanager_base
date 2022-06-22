@@ -411,46 +411,46 @@ int32_t NetsysController::BindSocket(int32_t socket_fd, uint32_t netId)
     return netsysService_->BindSocket(socket_fd, netId);
 }
 
-int32_t NetsysController::IpEnableForwarding(const std::string& requester)
+int32_t NetsysController::IpEnableForwarding(const std::string& requestor)
 {
-    NETMGR_LOG_D("IpEnableForwarding: requester[%{public}s]", requester.c_str());
+    NETMGR_LOG_D("IpEnableForwarding: requestor[%{public}s]", requestor.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
-    return netsysService_->IpEnableForwarding(requester);
+    return netsysService_->IpEnableForwarding(requestor);
 }
 
-int32_t NetsysController::IpDisableForwarding(const std::string& requester)
+int32_t NetsysController::IpDisableForwarding(const std::string& requestor)
 {
-    NETMGR_LOG_D("IpDisableForwarding: requester[%{public}s]", requester.c_str());
+    NETMGR_LOG_D("IpDisableForwarding: requestor[%{public}s]", requestor.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
-    return netsysService_->IpDisableForwarding(requester);
+    return netsysService_->IpDisableForwarding(requestor);
 }
 
-int32_t NetsysController::TetherAddForward(const std::string& downstreamIface, const std::string& upstreamIface)
+int32_t NetsysController::EnableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
-    NETMGR_LOG_D("TetherAddForward: downstreamIface[%{public}s], upstreamIface[%{public}s]",
+    NETMGR_LOG_D("MockNetsysNativeClient EnableNat: intIface[%{public}s] intIface[%{public}s]",
         downstreamIface.c_str(), upstreamIface.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
-    return netsysService_->TetherAddForward(downstreamIface, upstreamIface);
+    return netsysService_->EnableNat(downstreamIface, upstreamIface);
 }
 
-int32_t NetsysController::TetherRemoveForward(const std::string& downstreamIface, const std::string& upstreamIface)
+int32_t NetsysController::DisableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
-    NETMGR_LOG_D("TetherRemoveForward: downstreamIface[%{public}s], upstreamIface[%{public}s]",
+    NETMGR_LOG_D("MockNetsysNativeClient DisableNat: intIface[%{public}s] intIface[%{public}s]",
         downstreamIface.c_str(), upstreamIface.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
-    return netsysService_->TetherRemoveForward(downstreamIface, upstreamIface);
+    return netsysService_->DisableNat(downstreamIface, upstreamIface);
 }
 
 int32_t NetsysController::IpfwdAddInterfaceForward(const std::string& fromIface, const std::string& toIface)

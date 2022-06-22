@@ -21,6 +21,7 @@
 #include <memory>
 #include <network_manager.h>
 #include <route_manager.h>
+#include <sharing_manager.h>
 #include <route_type.h>
 #include <string>
 #include <vector>
@@ -78,11 +79,18 @@ public:
     long GetIfaceTxBytes(std::string interfaceName);
     long GetTetherRxBytes();
     long GetTetherTxBytes();
+    int32_t IpEnableForwarding(const std::string &requester);
+    int32_t IpDisableForwarding(const std::string &requester);
+    int32_t EnableNat(const std::string &downstreamIface, const std::string &upstreamIface);
+    int32_t DisableNat(const std::string &downstreamIface, const std::string &upsteramIface);
+    int32_t IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface);
+    int32_t IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface);
 
 private:
     std::shared_ptr<NetworkManager> networkManager;
     std::shared_ptr<RouteManager> routeManager;
     std::shared_ptr<InterfaceManager> interfaceManager;
+    std::shared_ptr<SharingManager> sharingManager_ = nullptr;
     static std::vector<unsigned int> interfaceIdex;
 };
 } // namespace nmd

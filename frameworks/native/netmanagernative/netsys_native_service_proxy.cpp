@@ -837,5 +837,113 @@ int32_t NetsysNativeServiceProxy::StopDhcpService(const std::string &iface)
     NETNATIVE_LOGI("End to StopDhcpService, ret =%{public}d", ret);
     return ret;
 }
+
+int32_t NetsysNativeServiceProxy::IpEnableForwarding(const std::string &requestor)
+{
+    MessageParcel data;
+    if (!data.WriteString(requestor)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetsysService::NETSYS_IPENABLE_FORWARDING, data, reply, option);
+
+    int32_t ret = reply.ReadInt32();
+    NETNATIVE_LOGI("End to IpEnableForwarding, ret =%{public}d", ret);
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::IpDisableForwarding(const std::string &requestor)
+{
+    MessageParcel data;
+    if (!data.WriteString(requestor)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetsysService::NETSYS_IPDISABLE_FORWARDING, data, reply, option);
+
+    int32_t ret = reply.ReadInt32();
+    NETNATIVE_LOGI("End to IpDisableForwarding, ret =%{public}d", ret);
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::EnableNat(const std::string &downstreamIface, const std::string &upstreamIface)
+{
+    MessageParcel data;
+    if (!data.WriteString(downstreamIface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(upstreamIface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetsysService::NETSYS_ENABLE_NAT, data, reply, option);
+
+    int32_t ret = reply.ReadInt32();
+    NETNATIVE_LOGI("End to EnableNat, ret =%{public}d", ret);
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::DisableNat(const std::string &downstreamIface, const std::string &upstreamIface)
+{
+    MessageParcel data;
+    if (!data.WriteString(downstreamIface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(upstreamIface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetsysService::NETSYS_ENABLE_NAT, data, reply, option);
+
+    int32_t ret = reply.ReadInt32();
+    NETNATIVE_LOGI("End to DisableNat, ret =%{public}d", ret);
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface)
+{
+    MessageParcel data;
+    if (!data.WriteString(fromIface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(toIface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetsysService::NETSYS_IPFWD_ADD_INTERFACE_FORWARD, data, reply, option);
+
+    int32_t ret = reply.ReadInt32();
+    NETNATIVE_LOGI("End to IpfwdAddInterfaceForward, ret =%{public}d", ret);
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface)
+{
+    MessageParcel data;
+    if (!data.WriteString(fromIface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(toIface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetsysService::NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD, data, reply, option);
+
+    int32_t ret = reply.ReadInt32();
+    NETNATIVE_LOGI("End to IpfwdRemoveInterfaceForward, ret =%{public}d", ret);
+    return ret;
+}
 } // namespace NetsysNative
 } // namespace OHOS

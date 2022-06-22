@@ -60,6 +60,12 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_STOP_DHCP_CLIENT] = &NetsysNativeServiceStub::CmdStopDhcpClient;
     opToInterfaceMap_[NETSYS_START_DHCP_SERVICE] = &NetsysNativeServiceStub::CmdStartDhcpService;
     opToInterfaceMap_[NETSYS_STOP_DHCP_SERVICE] = &NetsysNativeServiceStub::CmdStopDhcpService;
+    opToInterfaceMap_[NETSYS_IPENABLE_FORWARDING] = &NetsysNativeServiceStub::CmdIpEnableForwarding;
+    opToInterfaceMap_[NETSYS_IPDISABLE_FORWARDING] = &NetsysNativeServiceStub::CmdIpDisableForwarding;
+    opToInterfaceMap_[NETSYS_ENABLE_NAT] = &NetsysNativeServiceStub::CmdEnableNat;
+    opToInterfaceMap_[NETSYS_DISABLE_NAT] = &NetsysNativeServiceStub::CmdDisableNat;
+    opToInterfaceMap_[NETSYS_IPFWD_ADD_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward;
+    opToInterfaceMap_[NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward;
 }
 
 int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -620,6 +626,64 @@ int32_t NetsysNativeServiceStub::CmdStopDhcpService(MessageParcel &data, Message
     NETNATIVE_LOGI("Begin to dispatch cmd CmdStopDhcpService");
     std::string iface = data.ReadString();
     int32_t result = StopDhcpService(iface);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdIpEnableForwarding(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("Begin to dispatch cmd CmdIpEnableForwarding");
+    const auto &requester = data.ReadString();
+    int32_t result = IpEnableForwarding(requester);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdIpDisableForwarding(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("Begin to dispatch cmd CmdIpDisableForwarding");
+    const auto &requester = data.ReadString();
+    int32_t result = IpDisableForwarding(requester);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdEnableNat(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("Begin to dispatch cmd CmdEnableNat");
+    const auto &downstreamIface = data.ReadString();
+    const auto &upstreamIface = data.ReadString();
+    int32_t result = EnableNat(downstreamIface, upstreamIface);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdDisableNat(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("Begin to dispatch cmd CmdDisableNat");
+    const auto &downstreamIface = data.ReadString();
+    const auto &upstreamIface = data.ReadString();
+    int32_t result = DisableNat(downstreamIface, upstreamIface);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("Begin to dispatch cmd CmdIpfwdAddInterfaceForward");
+    const auto &fromIface = data.ReadString();
+    const auto &toIface = data.ReadString();
+    int32_t result = IpfwdAddInterfaceForward(fromIface, toIface);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("Begin to dispatch cmd CmdIpfwdRemoveInterfaceForward");
+    const auto &fromIface = data.ReadString();
+    const auto &toIface = data.ReadString();
+    int32_t result = IpfwdRemoveInterfaceForward(fromIface, toIface);
     reply.WriteInt32(result);
     return result;
 }

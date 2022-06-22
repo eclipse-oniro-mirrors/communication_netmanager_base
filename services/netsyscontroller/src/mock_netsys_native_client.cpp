@@ -85,8 +85,8 @@ void MockNetsysNativeClient::RegisterMockApi()
     mockApi_.insert(MOCK_BINDSOCKET_API);
     mockApi_.insert(MOCK_IPENABLEFORWARDING_API);
     mockApi_.insert(MOCK_IPDISABLEFORWARDING_API);
-    mockApi_.insert(MOCK_TETHERADDFORWARD_API);
-    mockApi_.insert(MOCK_TETHERREMOVEFORWARD_API);
+    mockApi_.insert(MOCK_ENABLENAT_API);
+    mockApi_.insert(MOCK_DISABLENAT_API);
     mockApi_.insert(MOCK_IPFWDADDIFACEFORWARD_API);
     mockApi_.insert(MOCK_IPFWDREMOVEIFACEFORWARD_API);
     mockApi_.insert(MOCK_TETHERDNSSET_API);
@@ -531,28 +531,28 @@ int32_t MockNetsysNativeClient::BindSocket(int32_t socket_fd, uint32_t netId)
     return 0;
 }
 
-int32_t MockNetsysNativeClient::IpEnableForwarding(const std::string& requester)
+int32_t MockNetsysNativeClient::IpEnableForwarding(const std::string& requestor)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient IpEnableForwarding: requester[%{public}s]", requester.c_str());
+    NETMGR_LOG_D("MockNetsysNativeClient IpEnableForwarding: requestor[%{public}s]", requestor.c_str());
     return 0;
 }
 
-int32_t MockNetsysNativeClient::IpDisableForwarding(const std::string& requester)
+int32_t MockNetsysNativeClient::IpDisableForwarding(const std::string& requestor)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient IpDisableForwarding: requester[%{public}s]", requester.c_str());
+    NETMGR_LOG_D("MockNetsysNativeClient IpDisableForwarding: requestor[%{public}s]", requestor.c_str());
     return 0;
 }
 
-int32_t MockNetsysNativeClient::TetherAddForward(const std::string& downstreamIface, const std::string& upstreamIface)
+int32_t MockNetsysNativeClient::EnableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient TetherAddForward: downstreamIface[%{public}s], upstreamIface[%{public}s]",
+    NETMGR_LOG_D("MockNetsysNativeClient EnableNat: intIface[%{public}s] intIface[%{public}s]",
         downstreamIface.c_str(), upstreamIface.c_str());
     return 0;
 }
 
-int32_t MockNetsysNativeClient::TetherRemoveForward(const std::string& downstreamIface, const std::string& upstreamIface)
+int32_t MockNetsysNativeClient::DisableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient TetherRemoveForward: downstreamIface[%{public}s], upstreamIface[%{public}s]",
+    NETMGR_LOG_D("MockNetsysNativeClient DisableNat: intIface[%{public}s] intIface[%{public}s]",
         downstreamIface.c_str(), upstreamIface.c_str());
     return 0;
 }

@@ -28,7 +28,8 @@ namespace nmd {
 NetManagerNative::NetManagerNative()
     : networkManager(std::make_shared<NetworkManager>()),
       routeManager(std::make_shared<RouteManager>()),
-      interfaceManager(std::make_shared<InterfaceManager>())
+      interfaceManager(std::make_shared<InterfaceManager>()),
+      sharingManager_(std::make_shared<SharingManager>())
 {}
 
 NetManagerNative::~NetManagerNative() {}
@@ -237,6 +238,36 @@ long NetManagerNative::GetTetherRxBytes()
 long NetManagerNative::GetTetherTxBytes()
 {
     return 0;
+}
+
+int32_t NetManagerNative::IpEnableForwarding(const std::string &requester)
+{
+    return this->sharingManager_->IpEnableForwarding(requester);
+}
+
+int32_t NetManagerNative::IpDisableForwarding(const std::string &requester)
+{
+    return this->sharingManager_->IpDisableForwarding(requester);
+}
+
+int32_t NetManagerNative::EnableNat(const std::string &downstreamIface, const std::string &upstreamIface)
+{
+    return this->sharingManager_->EnableNat(downstreamIface, upstreamIface);
+}
+
+int32_t NetManagerNative::DisableNat(const std::string &downstreamIface, const std::string &upstreamIface)
+{
+    return this->sharingManager_->DisableNat(downstreamIface, upstreamIface);
+}
+
+int32_t NetManagerNative::IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface)
+{
+    return this->sharingManager_->IpfwdAddInterfaceForward(fromIface, toIface);
+}
+
+int32_t NetManagerNative::IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface)
+{
+    return this->sharingManager_->IpfwdRemoveInterfaceForward(fromIface, toIface);
 }
 } // namespace nmd
 } // namespace OHOS

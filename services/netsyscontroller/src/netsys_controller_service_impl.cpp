@@ -363,42 +363,42 @@ int32_t NetsysControllerServiceImpl::BindSocket(int32_t socket_fd, uint32_t netI
     return netsysClient_.BindSocket(socket_fd, netId);
 }
 
-int32_t NetsysControllerServiceImpl::IpEnableForwarding(const std::string& requester)
+int32_t NetsysControllerServiceImpl::IpEnableForwarding(const std::string& requestor)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl IpEnableForwarding");
     if (mockNetsysClient_.CheckMockApi(MOCK_IPENABLEFORWARDING_API)) {
-        return mockNetsysClient_.IpEnableForwarding(requester);
+        return mockNetsysClient_.IpEnableForwarding(requestor);
     }
-    return netsysClient_.IpEnableForwarding(requester);
+    return netsysClient_.IpEnableForwarding(requestor);
 }
 
-int32_t NetsysControllerServiceImpl::IpDisableForwarding(const std::string& requester)
+int32_t NetsysControllerServiceImpl::IpDisableForwarding(const std::string& requestor)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl IpDisableForwarding");
     if (mockNetsysClient_.CheckMockApi(MOCK_IPDISABLEFORWARDING_API)) {
-        return mockNetsysClient_.IpDisableForwarding(requester);
+        return mockNetsysClient_.IpDisableForwarding(requestor);
     }
-    return netsysClient_.IpDisableForwarding(requester);
+    return netsysClient_.IpDisableForwarding(requestor);
 }
 
-int32_t NetsysControllerServiceImpl::TetherAddForward(const std::string& downstreamIface,
+int32_t NetsysControllerServiceImpl::EnableNat(const std::string& downstreamIface,
     const std::string& upstreamIface)
 {
-    NETMGR_LOG_D("NetsysControllerServiceImpl TetherAddForward");
-    if (mockNetsysClient_.CheckMockApi(MOCK_TETHERADDFORWARD_API)) {
-        return mockNetsysClient_.TetherAddForward(downstreamIface, upstreamIface);
+    NETMGR_LOG_D("NetsysControllerServiceImpl EnableNat");
+    if (mockNetsysClient_.CheckMockApi(MOCK_ENABLENAT_API)) {
+        return mockNetsysClient_.EnableNat(downstreamIface, upstreamIface);
     }
-    return netsysClient_.TetherAddForward(downstreamIface, upstreamIface);
+    return netsysClient_.EnableNat(downstreamIface, upstreamIface);
 }
 
-int32_t NetsysControllerServiceImpl::TetherRemoveForward(const std::string& downstreamIface,
+int32_t NetsysControllerServiceImpl::DisableNat(const std::string& downstreamIface,
     const std::string& upstreamIface)
 {
-    NETMGR_LOG_D("NetsysControllerServiceImpl TetherRemoveForward");
-    if (mockNetsysClient_.CheckMockApi(MOCK_TETHERREMOVEFORWARD_API)) {
-        return mockNetsysClient_.TetherRemoveForward(downstreamIface, upstreamIface);
+    NETMGR_LOG_D("NetsysControllerServiceImpl DisableNat");
+    if (mockNetsysClient_.CheckMockApi(MOCK_DISABLENAT_API)) {
+        return mockNetsysClient_.DisableNat(downstreamIface, upstreamIface);
     }
-    return netsysClient_.TetherRemoveForward(downstreamIface, upstreamIface);
+    return netsysClient_.DisableNat(downstreamIface, upstreamIface);
 }
 
 int32_t NetsysControllerServiceImpl::IpfwdAddInterfaceForward(const std::string& fromIface, const std::string& toIface)
@@ -410,7 +410,8 @@ int32_t NetsysControllerServiceImpl::IpfwdAddInterfaceForward(const std::string&
     return netsysClient_.IpfwdAddInterfaceForward(fromIface, toIface);
 }
 
-int32_t NetsysControllerServiceImpl::IpfwdRemoveInterfaceForward(const std::string& fromIface, const std::string& toIface)
+int32_t NetsysControllerServiceImpl::IpfwdRemoveInterfaceForward(const std::string& fromIface,
+    const std::string& toIface)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl IpfwdRemoveInterfaceForward");
     if (mockNetsysClient_.CheckMockApi(MOCK_IPFWDREMOVEIFACEFORWARD_API)) {

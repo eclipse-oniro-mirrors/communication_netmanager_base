@@ -343,36 +343,35 @@ public:
     /**
      * @brief Enable ip forwarding.
      *
-     * @param requester the requester of forwarding
+     * @param requestor the requestor of forwarding
      * @return Return the return value of the netsys interface call.
      */
-    int32_t IpEnableForwarding(const std::string& requester) override;
+    int32_t IpEnableForwarding(const std::string& requestor) override;
 
     /**
      * @brief Disable ip forwarding.
      *
-     * @param requester the requester of forwarding
+     * @param requestor the requestor of forwarding
      * @return Return the return value of the netsys interface call.
      */
-    int32_t IpDisableForwarding(const std::string& requester) override;
+    int32_t IpDisableForwarding(const std::string& requestor) override;
 
     /**
-     * @brief Add tether forward.
+     * @brief Enable Nat.
      *
      * @param downstreamIface the name of downstream interface
      * @param upstreamIface the name of upstream interface
      * @return Return the return value of the netsys interface call.
      */
-    int32_t TetherAddForward(const std::string& downstreamIface, const std::string& upstreamIface) override;
-
+    int32_t EnableNat(const std::string &downstramIface, const std::string &upstreamIface) override;
     /**
-     * @brief Remove tether forward.
+     * @brief Disable Nat.
      *
      * @param downstreamIface the name of downstream interface
      * @param upstreamIface the name of upstream interface
      * @return Return the return value of the netsys interface call.
      */
-    int32_t TetherRemoveForward(const std::string& downstreamIface, const std::string& upstreamIface) override;
+    int32_t DisableNat(const std::string &downstramIface, const std::string &upstreamIface) override;
 
     /**
      * @brief Add interface forward.

@@ -69,6 +69,12 @@ private:
     int32_t CmdStopDhcpClient(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStartDhcpService(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStopDhcpService(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdIpEnableForwarding(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdIpDisableForwarding(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdEnableNat(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDisableNat(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdIpfwdAddInterfaceForward(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdIpfwdRemoveInterfaceForward(MessageParcel &data, MessageParcel &reply);
 };
 } // namespace NetsysNative
 } // namespace OHOS
