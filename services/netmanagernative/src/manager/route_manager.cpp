@@ -417,14 +417,17 @@ int32_t RouteManager::ModifyIncomingPacketMark(uint16_t netId, const std::string
     fwmark.protectedFromVpn = true;
     fwmark.permission = permission;
     const uint32_t mask = ~Fwmark::GetUidBillingMask();
-    char buffer[255];
-    errno_t err = sprintf_s(buffer, sizeof(buffer), "%s %s -i %s -j MARK --set-mark 0x%x/0x%x", add ? "-A" : "-D",
-        LOCAL_MANGLE_INPUT.c_str(), interfaceName.c_str(), fwmark.intValue, mask);
-    if (err < 0) {
-        NETNATIVE_LOGE("SetMark sprintf_s failed, err= %{public}d ", err);
-        return -1;
+    std::string command = "";
+    std::string action = "";
+    if (add) {
+        action = " -A ";
+    } else {
+        action = " -D ";
     }
-    std::string command(buffer);
+    std::stringstream ss;
+    ss << action << LOCAL_MANGLE_INPUT << " -i " << interfaceName << " -j MARK --set-mark 0x" << std::nouppercase
+       << std::hex << fwmark.intValue << "/0x" << std::nouppercase << std::hex << mask;
+    command = ss.str();
     // need to call IptablesWrapper's RunCommand function.
 
     return 0;
