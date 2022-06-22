@@ -38,7 +38,7 @@ void NetworkRouteTest::SetUp() {}
 
 void NetworkRouteTest::TearDown() {}
 
-sptr<INetsysService> GetProxy()
+sptr<INetsysService> GetProxyTest()
 {
     NETNATIVE_LOGE("Get samgr >>>>>>>>>>>>>>>>>>>>>>>>>>");
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -58,7 +58,7 @@ sptr<INetsysService> GetProxy()
 
 HWTEST_F(NetworkRouteTest, NetworkRouteTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxyTest();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -71,7 +71,7 @@ HWTEST_F(NetworkRouteTest, NetworkRouteTest001, TestSize.Level1)
 
 HWTEST_F(NetworkRouteTest, NetworkRouteTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxyTest();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);

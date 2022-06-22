@@ -348,5 +348,41 @@ int32_t NetsysNativeService::StopDhcpService(const std::string &iface)
     this->dhcpController_->StopDhcpService(iface);
     return ERR_NONE;
 }
+
+int32_t NetsysNativeService::IpEnableForwarding(const std::string &requester)
+{
+    NETNATIVE_LOGI("ipEnableForwarding");
+    return this->netsysService_->IpEnableForwarding(requester);
+}
+
+int32_t NetsysNativeService::IpDisableForwarding(const std::string &requester)
+{
+    NETNATIVE_LOGI("ipDisableForwarding");
+    return this->netsysService_->IpDisableForwarding(requester);
+}
+
+int32_t NetsysNativeService::EnableNat(const std::string &downstreamIface, const std::string &upstreamIface)
+{
+    NETNATIVE_LOGI("enableNat");
+    return this->netsysService_->EnableNat(downstreamIface, upstreamIface);
+}
+
+int32_t NetsysNativeService::DisableNat(const std::string &downstreamIface, const std::string &upstreamIface)
+{
+    NETNATIVE_LOGI("disableNat");
+    return this->netsysService_->DisableNat(downstreamIface, upstreamIface);
+}
+
+int32_t NetsysNativeService::IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface)
+{
+    NETNATIVE_LOGI("ipfwdAddInterfaceForward");
+    return this->netsysService_->IpfwdAddInterfaceForward(fromIface, toIface);
+}
+
+int32_t NetsysNativeService::IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface)
+{
+    NETNATIVE_LOGI("ipfwdRemoveInterfaceForward");
+    return this->netsysService_->IpfwdRemoveInterfaceForward(fromIface, toIface);
+}
 } // namespace NetsysNative
 } // namespace OHOS

@@ -81,6 +81,12 @@ public:
     int32_t StopDhcpClient(const std::string &iface, bool bIpv6) override;
     int32_t StartDhcpService(const std::string &iface, const std::string &ipv4addr) override;
     int32_t StopDhcpService(const std::string &iface) override;
+    int32_t IpEnableForwarding(const std::string &requester) override;
+    int32_t IpDisableForwarding(const std::string &requester) override;
+    int32_t EnableNat(const std::string &downstreamIface, const std::string &upstreamIface) override;
+    int32_t DisableNat(const std::string &downstreamIface, const std::string &upstreamIface) override;
+    int32_t IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toiIface) override;
+    int32_t IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toiIface) override;
 private:
     NetsysNativeService();
     bool Init();

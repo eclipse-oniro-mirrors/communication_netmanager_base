@@ -25,6 +25,7 @@ ohos_shared_library("netsys_native_manager") {
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/interface_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/network_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/route_manager.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/manager/sharing_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/traffic_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/net_manager_native.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netlink_manager.cpp",
@@ -64,6 +65,7 @@ ohos_shared_library("netsys_native_manager") {
   defines = [
     "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
     "LOG_DOMAIN = 0xD0015B0",
+    "SHARING_MANAGER_DEPS",
   ]
 
   if (enable_sys_func) {

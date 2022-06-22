@@ -365,36 +365,35 @@ public:
     /**
      * @brief Enable ip forwarding.
      *
-     * @param requester the requester of forwarding
+     * @param requestor the requestor of forwarding
      * @return Return the return value of the netsys interface call.
      */
-    int32_t IpEnableForwarding(const std::string& requester);
+    int32_t IpEnableForwarding(const std::string& requestor);
 
     /**
      * @brief Disable ip forwarding.
      *
-     * @param requester the requester of forwarding
+     * @param requestor the requestor of forwarding
      * @return Return the return value of the netsys interface call.
      */
-    int32_t IpDisableForwarding(const std::string& requester);
+    int32_t IpDisableForwarding(const std::string& requestor);
 
     /**
-     * @brief Add tether forward.
+     * @brief Enable Nat.
      *
      * @param downstreamIface the name of downstream interface
      * @param upstreamIface the name of upstream interface
      * @return Return the return value of the netsys interface call.
      */
-    int32_t TetherAddForward(const std::string& downstreamIface, const std::string& upstreamIface);
-
+    int32_t EnableNat(const std::string &downstreamIface, const std::string &upstreamIface);
     /**
-     * @brief Remove tether forward.
+     * @brief Disable Nat.
      *
      * @param downstreamIface the name of downstream interface
      * @param upstreamIface the name of upstream interface
      * @return Return the return value of the netsys interface call.
      */
-    int32_t TetherRemoveForward(const std::string& downstreamIface, const std::string& upstreamIface);
+    int32_t DisableNat(const std::string &downstreamIface, const std::string &upstreamIface);
 
     /**
      * @brief Add interface forward.
@@ -513,7 +512,7 @@ private:
     sptr<OHOS::NetsysNative::INetsysService> GetProxy();
 private:
     sptr<OHOS::NetsysNative::INotifyCallback> nativeNotifyCallback_ = nullptr;
-    sptr<OHOS::NetsysNative::INetsysService> netsysNativeService_;
+    sptr<OHOS::NetsysNative::INetsysService> netsysNativeService_ = nullptr;
     std::vector<sptr<NetsysControllerCallback>> cbObjects;
     bool initFlag_ = false;
 };

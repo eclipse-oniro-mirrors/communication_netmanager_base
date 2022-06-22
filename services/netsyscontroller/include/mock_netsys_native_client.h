@@ -64,12 +64,6 @@ const std::string MOCK_GETIFACETXPACKETS_API = "GetIfaceTxPackets";
 const std::string MOCK_SETDEFAULTNETWORK_API = "SetDefaultNetWork";
 const std::string MOCK_CLEARDEFAULTNETWORK_API = "ClearDefaultNetWorkNetId";
 const std::string MOCK_BINDSOCKET_API = "BindSocket";
-const std::string MOCK_IPENABLEFORWARDING_API = "IpEnableForwarding";
-const std::string MOCK_IPDISABLEFORWARDING_API = "IpDisableForwarding";
-const std::string MOCK_TETHERADDFORWARD_API = "TetherAddForward";
-const std::string MOCK_TETHERREMOVEFORWARD_API = "TetherRemoveForward";
-const std::string MOCK_IPFWDADDIFACEFORWARD_API = "IpfwdAddInterfaceForward";
-const std::string MOCK_IPFWDREMOVEIFACEFORWARD_API = "IpfwdRemoveInterfaceForward";
 const std::string MOCK_TETHERDNSSET_API = "TetherDnsSet";
 const std::string MOCK_REGISTERNETSYSNOTIFYCALLBACK_API = "RegisterNetsysNotifyCallback";
 const std::string MOCK_BINDNETWORKSERVICEVPN_API = "BindNetworkServiceVpn";
@@ -401,58 +395,6 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t BindSocket(int32_t socket_fd, uint32_t netId);
-
-    /**
-     * @brief Enable ip forwarding.
-     *
-     * @param requester the requester of forwarding
-     * @return Return the return value of the netsys interface call.
-     */
-    int32_t IpEnableForwarding(const std::string& requester);
-
-    /**
-     * @brief Disable ip forwarding.
-     *
-     * @param requester the requester of forwarding
-     * @return Return the return value of the netsys interface call.
-     */
-    int32_t IpDisableForwarding(const std::string& requester);
-
-    /**
-     * @brief Add tether forward.
-     *
-     * @param downstreamIface the name of downstream interface
-     * @param upstreamIface the name of upstream interface
-     * @return Return the return value of the netsys interface call.
-     */
-    int32_t TetherAddForward(const std::string& downstreamIface, const std::string& upstreamIface);
-
-    /**
-     * @brief Remove tether forward.
-     *
-     * @param downstreamIface the name of downstream interface
-     * @param upstreamIface the name of upstream interface
-     * @return Return the return value of the netsys interface call.
-     */
-    int32_t TetherRemoveForward(const std::string& downstreamIface, const std::string& upstreamIface);
-
-    /**
-     * @brief Add interface forward.
-     *
-     * @param fromIface the name of incoming interface
-     * @param toIface the name of outcoming interface
-     * @return Return the return value of the netsys interface call.
-     */
-    int32_t IpfwdAddInterfaceForward(const std::string& fromIface, const std::string& toIface);
-
-    /**
-     * @brief Remove interface forward.
-     *
-     * @param fromIface the name of incoming interface
-     * @param toIface the name of outcoming interface
-     * @return Return the return value of the netsys interface call.
-     */
-    int32_t IpfwdRemoveInterfaceForward(const std::string& fromIface, const std::string& toIface);
 
     /**
      * @brief Set tether dns.

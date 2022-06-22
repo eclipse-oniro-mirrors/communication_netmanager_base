@@ -83,12 +83,6 @@ void MockNetsysNativeClient::RegisterMockApi()
     mockApi_.insert(MOCK_GETIFACERXPACKETS_API);
     mockApi_.insert(MOCK_GETIFACETXPACKETS_API);
     mockApi_.insert(MOCK_BINDSOCKET_API);
-    mockApi_.insert(MOCK_IPENABLEFORWARDING_API);
-    mockApi_.insert(MOCK_IPDISABLEFORWARDING_API);
-    mockApi_.insert(MOCK_TETHERADDFORWARD_API);
-    mockApi_.insert(MOCK_TETHERREMOVEFORWARD_API);
-    mockApi_.insert(MOCK_IPFWDADDIFACEFORWARD_API);
-    mockApi_.insert(MOCK_IPFWDREMOVEIFACEFORWARD_API);
     mockApi_.insert(MOCK_TETHERDNSSET_API);
     mockApi_.insert(MOCK_REGISTERNETSYSNOTIFYCALLBACK_API);
     mockApi_.insert(MOCK_BINDNETWORKSERVICEVPN_API);
@@ -528,46 +522,6 @@ int32_t MockNetsysNativeClient::ClearDefaultNetWorkNetId()
 int32_t MockNetsysNativeClient::BindSocket(int32_t socket_fd, uint32_t netId)
 {
     NETMGR_LOG_D("MockNetsysNativeClient::BindSocket: netId = [%{public}u]", netId);
-    return 0;
-}
-
-int32_t MockNetsysNativeClient::IpEnableForwarding(const std::string& requester)
-{
-    NETMGR_LOG_D("MockNetsysNativeClient IpEnableForwarding: requester[%{public}s]", requester.c_str());
-    return 0;
-}
-
-int32_t MockNetsysNativeClient::IpDisableForwarding(const std::string& requester)
-{
-    NETMGR_LOG_D("MockNetsysNativeClient IpDisableForwarding: requester[%{public}s]", requester.c_str());
-    return 0;
-}
-
-int32_t MockNetsysNativeClient::TetherAddForward(const std::string& downstreamIface, const std::string& upstreamIface)
-{
-    NETMGR_LOG_D("MockNetsysNativeClient TetherAddForward: downstreamIface[%{public}s], upstreamIface[%{public}s]",
-        downstreamIface.c_str(), upstreamIface.c_str());
-    return 0;
-}
-
-int32_t MockNetsysNativeClient::TetherRemoveForward(const std::string& downstreamIface, const std::string& upstreamIface)
-{
-    NETMGR_LOG_D("MockNetsysNativeClient TetherRemoveForward: downstreamIface[%{public}s], upstreamIface[%{public}s]",
-        downstreamIface.c_str(), upstreamIface.c_str());
-    return 0;
-}
-
-int32_t MockNetsysNativeClient::IpfwdAddInterfaceForward(const std::string& fromIface, const std::string& toIface)
-{
-    NETMGR_LOG_D("MockNetsysNativeClient IpfwdAddInterfaceForward: fromIface[%{public}s], toIface[%{public}s]",
-        fromIface.c_str(), toIface.c_str());
-    return 0;
-}
-
-int32_t MockNetsysNativeClient::IpfwdRemoveInterfaceForward(const std::string& fromIface, const std::string& toIface)
-{
-    NETMGR_LOG_D("MockNetsysNativeClient IpfwdRemoveInterfaceForward: fromIface[%{public}s], toIface[%{public}s]",
-        fromIface.c_str(), toIface.c_str());
     return 0;
 }
 

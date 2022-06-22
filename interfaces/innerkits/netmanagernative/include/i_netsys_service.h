@@ -62,6 +62,12 @@ public:
         NETSYS_STOP_DHCP_CLIENT,
         NETSYS_START_DHCP_SERVICE,
         NETSYS_STOP_DHCP_SERVICE,
+        NETSYS_IPENABLE_FORWARDING,
+        NETSYS_IPDISABLE_FORWARDING,
+        NETSYS_ENABLE_NAT,
+        NETSYS_DISABLE_NAT,
+        NETSYS_IPFWD_ADD_INTERFACE_FORWARD,
+        NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD,
     };
 
     virtual int32_t SetResolverConfigParcel(const DnsresolverParamsParcel& resolvParams) = 0;
@@ -107,6 +113,12 @@ public:
     virtual int32_t StopDhcpClient(const std::string &iface, bool bIpv6) = 0;
     virtual int32_t StartDhcpService(const std::string &iface, const std::string &ipv4addr) = 0;
     virtual int32_t StopDhcpService(const std::string &iface) = 0;
+    virtual int32_t IpEnableForwarding(const std::string &requestor) = 0;
+    virtual int32_t IpDisableForwarding(const std::string &requestor) = 0;
+    virtual int32_t EnableNat(const std::string &downstreamIface, const std::string &upstreamIface) = 0;
+    virtual int32_t DisableNat(const std::string &downstreamIface, const std::string &upstreamIface) = 0;
+    virtual int32_t IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface) = 0;
+    virtual int32_t IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
