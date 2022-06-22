@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -171,9 +171,7 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
         return -errno;
     }
 
-    nmd::NetlinkSocket netLinker;
-    netLinker.Create(NETLINK_ROUTE);
-    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, NetlinkManager::GetPid());
+    nmd::NetlinkMsg nlmsg(NETLINK_ROUTE_CREATE_FLAGS, nmd::NETLINK_MAX_LEN, NetlinkManager::GetPid());
 
     struct ifaddrmsg ifm = {0};
     ifm.ifa_family = AF_INET;
@@ -200,7 +198,7 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
     NETNATIVE_LOGI("InterfaceManager::ModifyAddress:%{public}u %{public}s %{public}s %{public}d",
         action, interfaceName, addr, prefixLen);
 
-    ret = netLinker.SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    ret = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
     if (ret < 0) {
         return -EIO;
     }

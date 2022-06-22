@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,45 +16,25 @@
 #ifndef NET_CONN_SERVICE_H
 #define NET_CONN_SERVICE_H
 
-#include <list>
-#include <mutex>
-#include <string>
-#include <vector>
-#include <functional>
+
 #include "singleton.h"
 #include "system_ability.h"
-
 #include "net_conn_service_stub.h"
-#include "net_conn_service_iface.h"
+#include "scheduler.h"
 #include "net_supplier.h"
-#include "net_activate.h"
-#include "network.h"
-#include "net_score.h"
-#include "timer.h"
+#include "net_request.h"
+#include "net_conn_async.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr uint32_t MAX_REQUEST_NUM = 200;
-class NetConnService : public SystemAbility,
+class NetConnService :
+    public std::enable_shared_from_this<NetConnService>,
+    public SystemAbility,
     public NetConnServiceStub,
-    public std::enable_shared_from_this<NetConnService> {
+    public NetConnAsync {
     DECLARE_DELAYED_SINGLETON(NetConnService)
     DECLARE_SYSTEM_ABILITY(NetConnService)
-
-    using NET_SUPPLIER_MAP = std::map<uint32_t, sptr<NetSupplier>>;
-    using NET_NETWORK_MAP = std::map<int32_t, sptr<Network>>;
-    using NET_ACTIVATE_MAP = std::map<uint32_t, sptr<NetActivate>>;
-
 public:
-    void OnStart() override;
-    void OnStop() override;
-    /**
-     * @brief The interface in NetConnService can be called when the system is ready
-     *
-     * @return Returns 0, the system is ready, otherwise the system is not ready
-     */
-    int32_t SystemReady() override;
-
     /**
      * @brief The interface is register the network
      *
@@ -138,6 +118,15 @@ public:
     int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo) override;
 
     /**
+     * @brief The interface names which NetBearType is equal than bearerType
+     *
+     * @param bearerType Network bearer type
+     * @param ifaceNames save the obtained ifaceNames
+     * @return Returns 0, successfully get the network link attribute iface name, otherwise it will fail
+     */
+    int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames) override;
+
+    /**
      * @brief The interface is get the iface name for network
      *
      * @param bearerType Network bearer type
@@ -181,8 +170,6 @@ public:
     int32_t GetSpecificUidNet(int32_t uid, int32_t &netId) override;
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override;
     int32_t GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap) override;
-    int32_t BindSocket(int32_t socket_fd, int32_t netId) override;
-    void HandleDetectionResult(uint32_t supplierId, bool ifValid);
     int32_t RestrictBackgroundChanged(bool isRestrictBackground);
     /**
      * @brief Set airplane mode
@@ -198,47 +185,66 @@ public:
      */
     int32_t RestoreFactoryData() override;
 
+// net preferred
 private:
-    bool Init();
-    sptr<NetSupplier> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident);
-    sptr<NetSupplier> GetNetSupplierFromList(
-        NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps);
-    int32_t ActivateNetwork(const sptr<NetSpecifier> &netSpecifier,
-        const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS);
-    int32_t DeactivateNetwork(uint32_t reqId);
-    void CallbackForSupplier(sptr<NetSupplier>& supplier, CallbackType type);
-    void CallbackForAvailable(sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
-    uint32_t FindBestNetworkForRequest(sptr<NetSupplier>& supplier, sptr<NetActivate>& netActivateNetwork);
-    void SendRequestToAllNetwork(sptr<NetActivate> request);
-    void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
-    void SendAllRequestToNetwork(sptr<NetSupplier> supplier);
-    void FindBestNetworkForAllRequest();
-    void MakeDefaultNetWork(sptr<NetSupplier>& oldService, sptr<NetSupplier>& newService);
-    void NotFindBestSupplier(uint32_t reqId, const sptr<NetActivate> &active,
-        const sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
-    void CreateDefaultRequest();
-    int32_t RegUnRegNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback, bool isReg);
-    int32_t GenerateNetId();
-    bool FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId);
-
-private:
-    enum ServiceRunningState {
-        STATE_STOPPED = 0,
-        STATE_RUNNING,
+    enum RematchAllNetworksReason {
+        REASON_NET_AVAILABLE_CHANGED,
+        REASON_NET_CAPABILITIES_CHANGED,
+        REASON_NET_LINK_INFO_CHANGED,
+        REASON_NET_SCORE_CHANGED
     };
+    void RematchAllNetworks(RematchAllNetworksReason reason);
+    sptr<NetSupplier> GetBestNetworkForRequest(const sptr<NetRequest> &request);
 
-    bool registerToService_;
-    ServiceRunningState state_;
-    sptr<NetSpecifier> defaultNetSpecifier_ = nullptr;
-    sptr<NetActivate> defaultNetActivate_ = nullptr;
-    sptr<NetSupplier> defaultNetSupplier_ = nullptr;
-    NET_SUPPLIER_MAP netSuppliers_;
-    NET_ACTIVATE_MAP netActivates_;
-    NET_ACTIVATE_MAP deleteNetActivates_;
-    NET_NETWORK_MAP networks_;
-    std::unique_ptr<NetScore> netScore_ = nullptr;
-    sptr<NetConnServiceIface> serviceIface_ = nullptr;
-    std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
+// callbacks
+private:
+    void OnNetAvailableChanged(uint32_t supplierId, bool available) override;
+    
+    void OnNetCapabilitiesChanged(uint32_t supplierId, const NetAllCapabilities &allCaps) override;
+
+    void OnNetLinkInfoChanged(uint32_t supplierId, const NetLinkInfo &linkInfo) override;
+
+    void OnNetDetectionResultChanged(
+        uint32_t netId, NetDetectionResultCode detectionResult, const std::string &urlRedirect) override;
+
+    void OnNetScoreChanged(uint32_t supplierId, uint32_t score) override;
+// sa
+private:
+    void OnStart() override;
+    void OnStop() override;
+    int32_t SystemReady() override;
+
+private:
+    sptr<NetSupplier> CreateNetSupplier(NetBearType bearType, const std::string &ident, const std::set<NetCap>& caps);
+    sptr<NetSupplier> FindNetSupplier(uint32_t supplierId);
+    sptr<NetSupplier> FindNetSupplierByNetId(uint32_t netId);
+    std::list<sptr<NetSupplier>> FindNetSuppliersByInfo(
+        NetBearType bearerType = BEARER_DEFAULT, const std::string &ident = "");
+    std::list<sptr<NetSupplier>> GetAvailableNetSuppliers() const;
+    bool RemoveNetSupplier(int32_t supplierId);
+
+    void CreateDefaultRequest();
+    sptr<NetRequest> CreateNetRequest(
+        sptr<NetSpecifier> netSpecifier, sptr<INetConnCallback> callback, uint32_t timeoutMs);
+    sptr<NetRequest> FindNetRequest(uint32_t reqId);
+    sptr<NetRequest> FindNetRequestByCallback(const sptr<INetConnCallback> &callback);
+    std::list<sptr<NetRequest>> FindNetRequestsBySameSpecifier(const NetSpecifier &netSpecifier);
+    std::list<sptr<NetRequest>> FindNetRequestsBySupplierId(uint32_t supplierId);
+    bool RemoveNetRequest(const sptr<NetRequest> &request);
+
+private:
+    int32_t InvokeMethodSafety(std::function<int32_t(void)> func);
+    
+// debug
+private:
+    void DumpSuppliersInfo();
+
+private:
+    std::map<uint32_t, sptr<NetSupplier>> netSuppliers_;
+    std::map<uint32_t, sptr<NetRequest>> netRequests_;
+    sptr<NetSupplier> defaultNetSupplier_;
+    sptr<NetRequest> defaultNetRequest_;
+    std::thread asyncThread_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

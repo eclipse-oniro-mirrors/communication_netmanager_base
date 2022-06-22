@@ -23,22 +23,42 @@
 namespace OHOS {
 namespace NetManagerStandard {
 enum NetCap {
-    NET_CAPABILITY_MMS = 0,
-    NET_CAPABILITY_NOT_METERED = 11,
-    NET_CAPABILITY_INTERNET = 12,
-    NET_CAPABILITY_NOT_VPN = 15,
-    NET_CAPABILITY_VALIDATED = 16,
-    NET_CAPABILITY_CAPTIVE_PORTAL = 17,
+    NET_CAPABILITY_MMS,
+    NET_CAPABILITY_SUPL,
+    NET_CAPABILITY_DUN,
+    NET_CAPABILITY_FOTA,
+    NET_CAPABILITY_IMS,
+    NET_CAPABILITY_CBS,
+    NET_CAPABILITY_WIFI_P2P,
+    NET_CAPABILITY_IA,
+    NET_CAPABILITY_RCS,
+    NET_CAPABILITY_XCAP,
+    NET_CAPABILITY_EIMS,
+    NET_CAPABILITY_NOT_METERED,
+    NET_CAPABILITY_INTERNET,
+    NET_CAPABILITY_NOT_RESTRICTED,
+    NET_CAPABILITY_TRUSTED,
+    NET_CAPABILITY_NOT_VPN,
+    NET_CAPABILITY_VALIDATED,
+    NET_CAPABILITY_CAPTIVE_PORTAL,
+    NET_CAPABILITY_NOT_ROAMING,
+    NET_CAPABILITY_FOREGROUND,
+    NET_CAPABILITY_NOT_CONGESTED,
+    NET_CAPABILITY_NOT_SUSPENDED,
+    NET_CAPABILITY_OEM_PAID,
+    NET_CAPABILITY_MCX,
+    NET_CAPABILITY_PARTIAL_CONNECTIVITY,
     NET_CAPABILITY_INTERNAL_DEFAULT
 };
 
 enum NetBearType {
-    BEARER_CELLULAR = 0,
-    BEARER_WIFI = 1,
-    BEARER_BLUETOOTH = 2,
-    BEARER_ETHERNET = 3,
-    BEARER_VPN = 4,
-    BEARER_WIFI_AWARE = 5,
+    BEARER_CELLULAR,
+    BEARER_WIFI,
+    BEARER_BLUETOOTH,
+    BEARER_ETHERNET,
+    BEARER_VPN,
+    BEARER_WIFI_AWARE,
+    BEARER_LOWPAN,
     BEARER_DEFAULT
 };
 
@@ -48,6 +68,9 @@ struct NetAllCapabilities : public Parcelable {
     std::set<NetCap> netCaps_;
     std::set<NetBearType> bearerTypes_;
 
+    bool operator==(const NetAllCapabilities &other) const;
+    bool operator!=(const NetAllCapabilities &other) const;
+    
     bool CapsIsValid() const;
     bool CapsIsNull() const;
     virtual bool Marshalling(Parcel &parcel) const override;

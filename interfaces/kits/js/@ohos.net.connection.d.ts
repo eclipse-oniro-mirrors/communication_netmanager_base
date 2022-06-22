@@ -136,6 +136,47 @@ declare namespace connection {
   function getAddressesByName(host: string, callback: AsyncCallback<Array<NetAddress>>): void;
   function getAddressesByName(host: string): Promise<Array<NetAddress>>;
 
+  /**
+   * Get app routing information
+   * @param callback
+   */
+  function getAppNet(callback: AsyncCallback<NetHandle>): void;
+  function getAppNet(): Promise<NetHandle>;
+  /**
+   * set app routing information
+   * @param callback
+   */
+  function setAppNet(netHandle: NetHandle, callback: AsyncCallback<void>): void;
+  function setAppNet(netHandle: NetHandle): Promise<void>;
+  /**
+   * Register network detection callback function
+   * @param netHandle
+   * @param callback
+   */
+  function registerReportNetConnectCallback(netHandle: NetHandle, callback: AsyncCallback<void>): void;
+  function registerReportNetConnectCallback(netHandle: NetHandle): Promise<void>;
+  /**
+   * Unregister network detection callback function
+   * @param netHandle
+   * @param callback
+   */
+  function unregisterReportNetConnectCallback(netHandle: NetHandle, callback: AsyncCallback<void>): void;
+  function unregisterReportNetConnectCallback(netHandle: NetHandle): Promise<void>;
+
+  /**
+   * Gets the list of netids for the specified network
+   * @param bearerType
+   * @param callback
+   */
+  function getSpecificNet(bearerType:number,callback:AsybcCallback<Array<number>>);
+  function getSpecificNet(bearerType:number):Promise<Array<number>>;
+  /**
+   * Restore factory settings
+   * @param callback
+   */
+  function restoreFactoryData(callback: AsyncCallback<void>): void;
+  function restoreFactoryData():Promise<void>;
+
   export interface NetConnection {
     on(type: 'netAvailable', callback: Callback<NetHandle>): void;
 

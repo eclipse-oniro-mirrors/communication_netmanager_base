@@ -55,25 +55,9 @@ enum ResultCode {
     ERR_NET_OVER_MAX_REQUEST_NUM                                    = (-31),
     ERR_REGISTER_THE_SAME_CALLBACK                                  = (-32),
     ERR_UNREGISTER_CALLBACK_NOT_FOUND                               = (-33),
-    ERR_PERMISSION_CHECK_FAIL                                       = (-34)
+    ERR_PERMISSION_CHECK_FAIL                                       = (-34),
+    ERR_METHOD_BLOCKING                                             = (-35)
 };
-
-enum NetMonitorResponseCode {
-    OK = 200,
-    CREATED = 201,
-    NO_CONTENT = 204,
-    URL_REDIRECT_MAX = 399,
-    BAD_REQUEST = 400,
-    CLIENT_ERROR_MAX = 499
-};
-
-enum NetDetectionStatus {
-    INVALID_DETECTION_STATE,
-    VERIFICATION_STATE,
-    CAPTIVE_PORTAL_STATE
-};
-using NetDetectionStateHandler = std::function<void(NetDetectionStatus netDetectionState,
-    const std::string &urlRedirect)>;
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NET_CONN_TYPES_H

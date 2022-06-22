@@ -15,10 +15,7 @@
 #ifndef NET_CONN_SERVICE_IFACE_H
 #define NET_CONN_SERVICE_IFACE_H
 
-#include <set>
-
 #include "net_conn_base_service.h"
-#include "net_all_capabilities.h"
 
 namespace OHOS {
 namespace NetManagerStandard {

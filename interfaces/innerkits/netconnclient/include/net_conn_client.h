@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,6 @@
 
 #include "parcel.h"
 #include "singleton.h"
-
 #include "i_net_conn_service.h"
 #include "i_net_supplier_callback.h"
 #include "net_supplier_callback_base.h"
@@ -30,6 +29,9 @@
 #include "net_handle.h"
 
 namespace OHOS {
+namespace nmd {
+    class FwmarkClient;
+}
 namespace NetManagerStandard {
 class NetConnClient {
     DECLARE_DELAYED_SINGLETON(NetConnClient)
@@ -48,6 +50,7 @@ public:
     int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback);
     int32_t GetDefaultNet(NetHandle &netHandle);
     int32_t HasDefaultNet(bool &flag);
+    int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames);
     int32_t GetAllNets(std::list<sptr<NetHandle>> &netList);
     int32_t GetConnectionProperties(const NetHandle &netHandle, NetLinkInfo &info);
     int32_t GetNetCapabilities(const NetHandle &netHandle, NetAllCapabilities &netAllCap);
@@ -57,6 +60,8 @@ public:
     int32_t NetDetection(const NetHandle &netHandle);
     int32_t SetAirplaneMode(bool state);
     int32_t RestoreFactoryData();
+    int32_t SetAppNet(const uint32_t& netId);
+    int32_t GetAppNet(uint32_t& netId);
 
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -81,6 +86,8 @@ private:
     sptr<INetConnService> NetConnService_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
     std::map<uint32_t, sptr<INetSupplierCallback>> netSupplierCallback_;
+    std::shared_ptr<nmd::FwmarkClient> fwmarkClient_;
+    uint32_t curNetwork_ {0};
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

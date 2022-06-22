@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,28 @@
  */
 
 #include "net_supplier_info.h"
-
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+bool NetSupplierInfo::operator==(const NetSupplierInfo& other) const
+{
+    if (isAvailable_ != other.isAvailable_ ||
+        isRoaming_ != other.isRoaming_ ||
+        strength_ != other.strength_ ||
+        frequency_ != other.frequency_ ||
+        linkUpBandwidthKbps_ != other.linkUpBandwidthKbps_ ||
+        linkDownBandwidthKbps_ != other.linkDownBandwidthKbps_) {
+        return false;
+    }
+    return true;
+}
+
+bool NetSupplierInfo::operator!=(const NetSupplierInfo& other) const
+{
+    return !(*this == other);
+}
+
 bool NetSupplierInfo::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteBool(isAvailable_)) {

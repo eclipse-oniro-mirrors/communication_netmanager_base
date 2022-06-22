@@ -47,7 +47,6 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_GET_NET_CAPABILITIES]         = &NetConnServiceStub::OnGetNetCapabilities;
     memberFuncMap_[CMD_NM_GET_ADDRESSES_BY_NAME]        = &NetConnServiceStub::OnGetAddressesByName;
     memberFuncMap_[CMD_NM_GET_ADDRESS_BY_NAME]          = &NetConnServiceStub::OnGetAddressByName;
-    memberFuncMap_[CMD_NM_BIND_SOCKET]                  = &NetConnServiceStub::OnBindSocket;
     memberFuncMap_[CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK] = &NetConnServiceStub::OnRegisterNetSupplierCallback;
     memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE] = &NetConnServiceStub::OnSetAirplaneMode;
     memberFuncMap_[CMD_NM_RESTORE_FACTORY_DATA] = &NetConnServiceStub::OnRestoreFactoryData;
@@ -126,7 +125,6 @@ int32_t NetConnServiceStub::OnRegisterNetSupplier(MessageParcel &data, MessagePa
         return ERR_FLATTEN_OBJECT;
     }
     if (ret == ERR_NONE) {
-        NETMGR_LOG_E("supplierId[%{public}d].", supplierId);
         if (!reply.WriteUint32(supplierId)) {
             return ERR_FLATTEN_OBJECT;
         }
@@ -372,6 +370,32 @@ int32_t NetConnServiceStub::OnNetDetection(MessageParcel &data, MessageParcel &r
         return NET_CONN_ERR_INVALID_PARAMETER;
     }
     return ERR_NONE;
+}
+
+int32_t NetConnServiceStub::OnGetIfaceNames(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t netType = 0;
+    if (!data.ReadUint32(netType)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    NetBearType bearerType = static_cast<NetBearType>(netType);
+    std::list<std::string> ifaceNames;
+    int32_t ret = GetIfaceNames(bearerType, ifaceNames);
+    if (!reply.WriteInt32(ret)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret == ERR_NONE) {
+        if (!reply.WriteUint32(ifaceNames.size())) {
+            return ERR_FLATTEN_OBJECT;
+        }
+
+        for (const auto& ifaceName : ifaceNames) {
+            if (!reply.WriteString(ifaceName)) {
+                return ERR_FLATTEN_OBJECT;
+            }
+        }
+    }
+    return ret;
 }
 
 int32_t NetConnServiceStub::OnGetIfaceNameByType(MessageParcel &data, MessageParcel &reply)
@@ -660,25 +684,6 @@ int32_t NetConnServiceStub::OnGetAddressByName(MessageParcel &data, MessageParce
             NETMGR_LOG_E("proxy Marshalling failed");
             return ERR_FLATTEN_OBJECT;
         }
-    }
-    return ret;
-}
-
-int32_t NetConnServiceStub::OnBindSocket(MessageParcel &data, MessageParcel &reply)
-{
-    int32_t socket_fd;
-    if (!data.ReadInt32(socket_fd)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    int32_t netId;
-    if (!data.ReadInt32(netId)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    NETMGR_LOG_D("stub execute BindSocket");
-
-    int32_t ret = BindSocket(socket_fd, netId);
-    if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
     }
     return ret;
 }

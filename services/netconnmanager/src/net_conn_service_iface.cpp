@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "net_conn_service_iface.h"
+
 #include "net_conn_service.h"
+#include "net_conn_service_iface.h"
 
 namespace OHOS {
 namespace NetManagerStandard {

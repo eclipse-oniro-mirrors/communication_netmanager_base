@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,13 +17,15 @@
 #define  NETSYS_NATIVE_SERVICE_H__
 
 #include <mutex>
+
 #include "dhcp_controller.h"
 #include "dnsresolv.h"
+#include "fwmark_network.h"
 #include "i_netsys_service.h"
 #include "iremote_stub.h"
 #include "net_manager_native.h"
-#include "netsys_native_service_stub.h"
 #include "netlink_manager.h"
+#include "netsys_native_service_stub.h"
 #include "system_ability.h"
 
 namespace OHOS {
@@ -103,6 +105,7 @@ private:
     std::unique_ptr<OHOS::nmd::NetManagerNative> netsysService_ = nullptr;
     std::unique_ptr<OHOS::nmd::NetlinkManager> manager_ = nullptr;
     std::unique_ptr<OHOS::nmd::DhcpController> dhcpController_ = nullptr;
+    std::unique_ptr<OHOS::nmd::FwmarkNetwork> fwmarkNetwork_ = nullptr;
 
     sptr<INotifyCallback> notifyCallback_ = nullptr;
 

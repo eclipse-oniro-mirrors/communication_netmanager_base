@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,71 +14,71 @@
  */
 
 #include "net_manager_native.h"
+
 #include <net/if.h>
+
+#include "conn_manager.h"
 #include "interface_manager.h"
 #include "netnative_log_wrapper.h"
-#include "network_manager.h"
+#include "network_permission.h"
 #include "route_manager.h"
 #include "traffic_manager.h"
 
-std::vector<unsigned int> OHOS::nmd::NetManagerNative::interfaceIdex;
+std::vector<unsigned int> OHOS::nmd::NetManagerNative::interfaceIndex;
 
 namespace OHOS {
 namespace nmd {
 NetManagerNative::NetManagerNative()
-    : networkManager(std::make_shared<NetworkManager>()),
-      routeManager(std::make_shared<RouteManager>()),
-      interfaceManager(std::make_shared<InterfaceManager>()),
-      sharingManager_(std::make_shared<SharingManager>())
-{}
-
-NetManagerNative::~NetManagerNative() {}
+    : routeManager(std::make_shared<RouteManager>()), interfaceManager(std::make_shared<InterfaceManager>()),
+      sharingManager(std::make_shared<SharingManager>()), connManager(std::make_shared<ConnManager>())
+{
+}
 
 void NetManagerNative::GetOriginInterfaceIndex()
 {
     std::vector<std::string> ifNameList = InterfaceManager::GetInterfaceNames();
-    NetManagerNative::interfaceIdex.clear();
+    NetManagerNative::interfaceIndex.clear();
     for (auto iter = ifNameList.begin(); iter != ifNameList.end(); ++iter) {
         unsigned int infIndex = if_nametoindex((*iter).c_str());
-        NetManagerNative::interfaceIdex.push_back(infIndex);
+        NetManagerNative::interfaceIndex.push_back(infIndex);
     }
 }
 
 void NetManagerNative::UpdateInterfaceIndex(unsigned int infIndex)
 {
-    NetManagerNative::interfaceIdex.push_back(infIndex);
+    NetManagerNative::interfaceIndex.push_back(infIndex);
 }
 
 std::vector<unsigned int> NetManagerNative::GetCurrentInterfaceIndex()
 {
-    return NetManagerNative::interfaceIdex;
+    return NetManagerNative::interfaceIndex;
 }
 
 void NetManagerNative::Init()
 {
-    this->GetOriginInterfaceIndex();
+    GetOriginInterfaceIndex();
 }
 
 int NetManagerNative::NetworkCreatePhysical(int netId, int permission)
 {
-    return this->networkManager->CreatePhysicalNetwork(
+    return connManager->CreatePhysicalNetwork(
         static_cast<uint16_t>(netId), static_cast<NetworkPermission>(permission));
 }
 
 int NetManagerNative::NetworkDestroy(int netId)
 {
-    return this->networkManager->DestroyNetwork(netId);
+    return connManager->DestroyNetwork(netId);
 }
 
 int NetManagerNative::NetworkAddInterface(int netId, std::string interfaceName)
 {
     NETNATIVE_LOGI("Entry NetManagerNative::NetworkAddInterface");
-    return this->networkManager->AddInterfaceToNetwork(netId, interfaceName);
+    return connManager->AddInterfaceToNetwork(netId, interfaceName);
 }
 
 int NetManagerNative::NetworkRemoveInterface(int netId, std::string interfaceName)
 {
-    return this->networkManager->RemoveInterfaceFromNetwork(netId, interfaceName);
+    return connManager->RemoveInterfaceFromNetwork(netId, interfaceName);
 }
 
 int NetManagerNative::InterfaceAddAddress(std::string ifName, std::string addrString, int prefixLength)
@@ -86,46 +86,46 @@ int NetManagerNative::InterfaceAddAddress(std::string ifName, std::string addrSt
     NETNATIVE_LOGI("NetManagerNative::InterfaceAddAddress, ifName:%{public}s, addrString:%{public}s,"
         "prefixLength:%{public}d", ifName.c_str(), addrString.c_str(), prefixLength);
 
-    return this->interfaceManager->AddAddress(ifName.c_str(), addrString.c_str(), prefixLength);
+    return interfaceManager->AddAddress(ifName.c_str(), addrString.c_str(), prefixLength);
 }
 
 int NetManagerNative::InterfaceDelAddress(std::string ifName, std::string addrString, int prefixLength)
 {
     NETNATIVE_LOGI("NetManagerNative::InterfaceAddAddress, ifName:%{public}s, addrString:%{public}s,"                                                                                                                                                "prefixLength:%{public}d", ifName.c_str(), addrString.c_str(), prefixLength);
 
-    return this->interfaceManager->DelAddress(ifName.c_str(), addrString.c_str(), prefixLength);
+    return interfaceManager->DelAddress(ifName.c_str(), addrString.c_str(), prefixLength);
 }
 
 int NetManagerNative::NetworkAddRoute(
     int netId, std::string interfaceName, std::string destination, std::string nextHop)
 {
-    return this->networkManager->AddRoute(netId, interfaceName, destination, nextHop);
+    return connManager->AddRoute(netId, interfaceName, destination, nextHop);
 }
 
 int NetManagerNative::NetworkRemoveRoute(
     int netId, std::string interfaceName, std::string destination, std::string nextHop)
 {
-    return this->networkManager->RemoveRoute(netId, interfaceName, destination, nextHop);
+    return connManager->RemoveRoute(netId, interfaceName, destination, nextHop);
 }
 
 int NetManagerNative::NetworkGetDefault()
 {
-    return this->networkManager->GetDefaultNetwork();
+    return connManager->GetDefaultNetwork();
 }
 
 int NetManagerNative::NetworkSetDefault(int netId)
 {
-    return this->networkManager->SetDefaultNetwork(netId);
+    return connManager->SetDefaultNetwork(netId);
 }
 
 int NetManagerNative::NetworkClearDefault()
 {
-    return this->networkManager->ClearDefaultNetwork();
+    return connManager->ClearDefaultNetwork();
 }
 
 int NetManagerNative::NetworkSetPermissionForNetwork(int netId, NetworkPermission permission)
 {
-    return this->networkManager->SetPermissionForNetwork(netId, permission);
+    return connManager->SetPermissionForNetwork(netId, permission);
 }
 
 std::vector<std::string> NetManagerNative::InterfaceGetList()
@@ -161,19 +161,19 @@ int NetManagerNative::InterfaceSetMtu(std::string ifName, int mtuValue)
 nmd::MarkMaskParcel NetManagerNative::GetFwmarkForNetwork(int netId)
 {
     nmd::MarkMaskParcel mark;
-    mark.mark = this->networkManager->GetFwmarkForNetwork(netId);
+    mark.mark = connManager->GetFwmarkForNetwork(netId);
     mark.mask = 0XFFFF;
     return mark;
 }
 
 int NetManagerNative::NetworkAddRouteParcel(int netId, RouteInfoParcel parcel)
 {
-    return this->networkManager->AddRoute(netId, parcel.ifName, parcel.destination, parcel.nextHop);
+    return connManager->AddRoute(netId, parcel.ifName, parcel.destination, parcel.nextHop);
 }
 
 int NetManagerNative::NetworkRemoveRouteParcel(int netId, RouteInfoParcel parcel)
 {
-    return this->networkManager->RemoveRoute(netId, parcel.ifName, parcel.destination, parcel.nextHop);
+    return connManager->RemoveRoute(netId, parcel.ifName, parcel.destination, parcel.nextHop);
 }
 
 int NetManagerNative::SetProcSysNet(int32_t ipversion, int32_t which, const std::string ifname,
@@ -242,32 +242,32 @@ long NetManagerNative::GetTetherTxBytes()
 
 int32_t NetManagerNative::IpEnableForwarding(const std::string &requester)
 {
-    return this->sharingManager_->IpEnableForwarding(requester);
+    return this->sharingManager->IpEnableForwarding(requester);
 }
 
 int32_t NetManagerNative::IpDisableForwarding(const std::string &requester)
 {
-    return this->sharingManager_->IpDisableForwarding(requester);
+    return this->sharingManager->IpDisableForwarding(requester);
 }
 
 int32_t NetManagerNative::EnableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
-    return this->sharingManager_->EnableNat(downstreamIface, upstreamIface);
+    return this->sharingManager->EnableNat(downstreamIface, upstreamIface);
 }
 
 int32_t NetManagerNative::DisableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
-    return this->sharingManager_->DisableNat(downstreamIface, upstreamIface);
+    return this->sharingManager->DisableNat(downstreamIface, upstreamIface);
 }
 
 int32_t NetManagerNative::IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface)
 {
-    return this->sharingManager_->IpfwdAddInterfaceForward(fromIface, toIface);
+    return this->sharingManager->IpfwdAddInterfaceForward(fromIface, toIface);
 }
 
 int32_t NetManagerNative::IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface)
 {
-    return this->sharingManager_->IpfwdRemoveInterfaceForward(fromIface, toIface);
+    return this->sharingManager->IpfwdRemoveInterfaceForward(fromIface, toIface);
 }
 } // namespace nmd
 } // namespace OHOS
