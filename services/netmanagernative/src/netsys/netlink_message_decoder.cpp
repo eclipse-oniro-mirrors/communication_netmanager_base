@@ -60,10 +60,10 @@ constexpr int32_t HEX_OFFSET_FIVE = 5;
 constexpr int32_t HEX_MULTIPLE = 2;
 constexpr int32_t HEX_ALLOC_NUM = 1;
 
-constexpr int32_t ND_OPT_RDNSS = 25;
-constexpr int32_t ND_OPT_DNSSL = 31;
-constexpr int32_t ND_OPT_CAPTIVE_PORTAL = 37;
-constexpr int32_t ND_OPT_PREF64 = 38;
+constexpr int32_t OPT_RDNSS = 25;
+constexpr int32_t OPT_DNSSL = 31;
+constexpr int32_t OPT_CAPTIVE_PORTAL = 37;
+constexpr int32_t OPT_PREF64 = 38;
 
 struct nd_opt_rdnss {
     u_int8_t nd_opt_rdnss_type;
@@ -535,18 +535,18 @@ bool NetlinkMessageDecoder::ParseNdUserOptMessage(const nlmsghdr *nh)
     }
 
     switch (opthdr->nd_opt_type) {
-        case ND_OPT_RDNSS: {
+        case OPT_RDNSS: {
             // The RDNSS option is a list of DNS servers.
             ParseNdOptRnss(opthdr, ifname);
             action_ = Action::RDNSS;
             subSystem_ = "net";
             }
             break;
-        case ND_OPT_DNSSL:
+        case OPT_DNSSL:
             break;
-        case ND_OPT_CAPTIVE_PORTAL:
+        case OPT_CAPTIVE_PORTAL:
             break;
-        case ND_OPT_PREF64:
+        case OPT_PREF64:
             break;
         default:
             NETNATIVE_LOG_D("Unknown ND option type %{public}d\n", opthdr->nd_opt_type);
