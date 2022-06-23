@@ -277,8 +277,7 @@ void NetlinkProcessor::OnQuotaLimitReache(const std::string &labelName, const st
 
 void NetlinkProcessor::OnInterfaceClassActivityChange(int32_t label, bool isActive, int64_t timestamp, int32_t uid)
 {
-    NETNATIVE_LOGI("OnInterfaceClassActivityChange: %{public}d, %{public}d, %{public}" PRId64 ", %{public}d", label,
-                   isActive, timestamp, uid);
+    NETNATIVE_LOGI("OnInterfaceClassActivityChange: %{public}d, %{public}d, %{public}d", label, isActive, uid);
 }
 
 void NetlinkProcessor::OnInterfaceAddressUpdate(const std::string &addr,
@@ -309,8 +308,7 @@ void NetlinkProcessor::OnInterfaceDnsServersUpdate(const std::string &ifName,
                                                    int64_t lifetime,
                                                    const std::vector<std::string> &servers)
 {
-    NETNATIVE_LOGI("NotifyInterfaceDnsServers: %{public}s, %{public}" PRId64 ", %{public}s", ifName.c_str(), lifetime,
-                   servers.data()->c_str());
+    NETNATIVE_LOGI("NotifyInterfaceDnsServers: %{public}s, %{public}s", ifName.c_str(), servers.data()->c_str());
 }
 
 void NetlinkProcessor::OnRouteChange(bool updated,
