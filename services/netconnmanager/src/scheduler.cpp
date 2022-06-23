@@ -72,7 +72,7 @@ bool Scheduler::Task::Delay(uint64_t delayMs)
     return false;
 }
 
-Scheduler::Scheduler() {}
+Scheduler::Scheduler() = default;
 
 Scheduler::~Scheduler()
 {
@@ -96,11 +96,14 @@ std::shared_ptr<Scheduler::Task> Scheduler::Post(TaskFunction taskFunc)
 std::shared_ptr<Scheduler::Task> Scheduler::DelayPost(TaskFunction taskFunc, uint64_t delayMs)
 {
     auto task = std::make_shared<Task>(taskFunc);
-    std::async(std::launch::async, [&](std::shared_ptr<Task> task, uint64_t delayMs) {
-        if (task->Delay(delayMs)) {
-            Post(task);
-        }
-    }, task, delayMs);
+    (void)std::async(
+        std::launch::async,
+        [&](std::shared_ptr<Task> task, uint64_t delayMs) {
+            if (task->Delay(delayMs)) {
+                Post(task);
+            }
+        },
+        task, delayMs);
 
     return task;
 }

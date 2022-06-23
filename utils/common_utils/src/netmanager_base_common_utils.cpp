@@ -40,11 +40,11 @@ std::vector<std::string> Split(const std::string &str, const std::string &sep)
 
 std::string Strip(const std::string &str, char ch)
 {
-    int64_t i = 0;
+    size_t i = 0;
     while (i < str.size() && str[i] == ch) {
         ++i;
     }
-    int64_t j = static_cast<int64_t>(str.size()) - 1;
+    size_t j = str.size() - 1;
     while (j > 0 && str[j] == ch) {
         --j;
     }
