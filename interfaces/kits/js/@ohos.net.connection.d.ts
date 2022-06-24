@@ -138,13 +138,18 @@ declare namespace connection {
 
   /**
    * Get app routing information
-   * @param callback
+   * 
+   * @param callback Returns the {@link NetHandle} object;
    */
   function getAppNet(callback: AsyncCallback<NetHandle>): void;
   function getAppNet(): Promise<NetHandle>;
+
   /**
    * set app routing information
-   * @param callback
+   * 
+   * @param netHandle Indicates the network whose state is to be reported.
+   * @permission ohos.permission.INTERNET
+   * 
    */
   function setAppNet(netHandle: NetHandle, callback: AsyncCallback<void>): void;
   function setAppNet(netHandle: NetHandle): Promise<void>;

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include <future>
 #include <list>
 #include <arpa/inet.h>
@@ -47,35 +47,18 @@ NetMonitor::~NetMonitor()
 
 void NetMonitor::Start()
 {
-    NETMGR_LOG_I("NetMonitor[%{public}d] start evaluation", netId_);
-    if (IsEvaluating()) {
-        return;
+    std::lock_guard<std::mutex> locker(mtx_);
+    if (!evaluating_) {
+        evaluating_ = true;
+        Reevaluate();
     }
-
-    evaluating_ = true;
-    reevaluateDelay_ = INIT_REEVALUATE_DELAY_MS;
-    evaluationThread_ = std::thread([&]() {
-        while (evaluating_) {
-            OnEvaluating();
-        }
-    });
 }
 
 void NetMonitor::Stop()
 {
-    NETMGR_LOG_I("NetMonitor[%{public}d] stop evaluation", netId_);
+    std::lock_guard<std::mutex> locker(mtx_);
     evaluating_ = false;
-    evaluationTimerCond_.notify_all();
-    if (evaluationThread_.joinable()) {
-        evaluationThread_.join();
-    }
-}
-
-void NetMonitor::Restart()
-{
-    NETMGR_LOG_I("NetMonitor[%{public}d] restart evaluation", netId_);
-    Stop();
-    Start();
+    reevaluateSteps_ = 0;
 }
 
 bool NetMonitor::IsEvaluating() const
@@ -93,34 +76,36 @@ HttpProbeResult NetMonitor::GetEvaluationResult() const
     return result_;
 }
 
-void NetMonitor::OnEvaluating()
+void NetMonitor::Reevaluate()
 {
-    HttpProbeResult result;
+    std::thread asyncThread([&]() {
+        HttpProbeResult result;
+        result = SendParallelHttpProbes(DEFAULT_PORTAL_HTTP_URL, DEFAULT_PORTAL_HTTPS_URL);
 
-    result = SendParallelHttpProbes(DEFAULT_PORTAL_HTTP_URL, DEFAULT_PORTAL_HTTPS_URL);
+        std::lock_guard<std::mutex> locker(mtx_);
+        reevaluateSteps_++;
+        if (evaluating_) {
+            if (result.IsPortal()) {
+                reevaluateDelay_ = CAPTIVE_PORTAL_REEVALUATE_DELAY_MS;
+            } else if (result.IsSuccessful()) {
+                reevaluateDelay_ = SUCCESSED_REEVALUATE_DELAY_MS;
+            } else {
+                NETMGR_LOG_I("NetMonitor[%{public}d] evaluation failed, code[%{public}d]", netId_, result.GetCode());
+                reevaluateDelay_ = INIT_REEVALUATE_DELAY_MS * DOUBLE * reevaluateSteps_;
+                if (reevaluateDelay_ >= MAX_FAILED_REEVALUATE_DELAY_MS) {
+                    reevaluateDelay_ = MAX_FAILED_REEVALUATE_DELAY_MS;
+                }
+            }
 
-    std::unique_lock<std::mutex> lock(evaluationTimerMtx_);
-
-    if (result.IsPortal()) {
-        reevaluateDelay_ = CAPTIVE_PORTAL_REEVALUATE_DELAY_MS;
-    } else if (result.IsSuccessful()) {
-        reevaluateDelay_ = SUCCESSED_REEVALUATE_DELAY_MS;
-    } else {
-        NETMGR_LOG_I("NetMonitor[%{public}d] evaluation failed, code[%{public}d]", netId_, result.GetCode());
-        reevaluateDelay_ *= DOUBLE;
-        if (reevaluateDelay_ >= MAX_FAILED_REEVALUATE_DELAY_MS) {
-            reevaluateDelay_ = MAX_FAILED_REEVALUATE_DELAY_MS;
+            if (result != result_) {
+                result_ = result;
+                OnProbeResultChanged();
+            }
+            reevaluateTask_ =
+                async_.GetScheduler().DelayPost(std::bind(&NetMonitor::Reevaluate, this), reevaluateDelay_);
         }
-    }
-
-    if (result != result_) {
-        result_ = result;
-        OnProbeResultChanged();
-    }
-
-    if (evaluating_) {
-        evaluationTimerCond_.wait_for(lock, std::chrono::milliseconds(reevaluateDelay_));
-    }
+    });
+    asyncThread.detach();
 }
 
 void NetMonitor::OnProbeResultChanged()
@@ -141,15 +126,15 @@ void NetMonitor::OnProbeResultChanged()
 HttpProbeResult NetMonitor::SendParallelHttpProbes(const Url &httpUrl, const Url &httpsUrl)
 {
     auto now = std::chrono::system_clock::now();
-    auto httpResult = std::async(std::launch::async,
-        std::bind(&NetMonitor::SendDnsAndHttpProbes, this, httpUrl.ToString(), HttpProbe::PROBE_HTTP));
-    auto httpsResult = std::async(std::launch::async,
-        std::bind(&NetMonitor::SendDnsAndHttpProbes, this, httpsUrl.ToString(), HttpProbe::PROBE_HTTPS));
+    auto httpResult = std::async(std::launch::async, std::bind(&NetMonitor::SendDnsAndHttpProbes, this,
+                                                               httpUrl.ToString(), HttpProbe::PROBE_HTTP));
+    auto httpsResult = std::async(std::launch::async, std::bind(&NetMonitor::SendDnsAndHttpProbes, this,
+                                                                httpsUrl.ToString(), HttpProbe::PROBE_HTTPS));
 
     httpResult.wait();
     httpsResult.wait();
     NETMGR_LOG_I("NetMonitor[%{public}d] send http&https probes cost %{public}lld ms", netId_,
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - now).count());
+                 std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - now).count());
 
     if (httpResult.get().IsPortal()) {
         return httpResult.get();
@@ -172,8 +157,8 @@ HttpProbeResult NetMonitor::SendHttpProbe(const std::string &url, HttpProbe::Pro
         if (!httpProbe.HasError()) {
             result = httpProbe.GetResult();
         } else {
-            NETMGR_LOG_W(
-                "NetMonitor[%{public}d] Http probe failed,[ %{public}s]", netId_, httpProbe.ErrorString().c_str());
+            NETMGR_LOG_W("NetMonitor[%{public}d] Http probe failed,[ %{public}s]", netId_,
+                         httpProbe.ErrorString().c_str());
         }
         sockFactory_.DestroySocket(sockFd);
     } else {
@@ -211,7 +196,7 @@ void NetMonitor::SendDnsProbe(const std::string &host)
     }
 
     NETMGR_LOG_I("NetMonitor[%{public}d] send dns probe cost %{public}lld ms", netId_,
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - now).count());
+                 std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - now).count());
     if (addrList.size() > 0) {
         // dns probe success...
     } else {

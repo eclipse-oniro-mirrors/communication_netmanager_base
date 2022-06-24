@@ -164,8 +164,8 @@ int32_t Network::SetRouteList(const std::list<Route> &routeList)
         for (auto it = routeList_.begin(); it != routeList_.end(); ++it) {
             const struct Route &route = *it;
             std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
-            err = NetsysController::GetInstance().NetworkRemoveRoute(
-                id_, route.iface_, destAddress, route.gateway_.address_);
+            err = NetsysController::GetInstance().NetworkRemoveRoute(id_, route.iface_, destAddress,
+                                                                     route.gateway_.address_);
             if (err) {
                 NETMGR_LOG_W("NetworkRemoveRoute failed, [%{public}d]", err);
             }
@@ -174,8 +174,8 @@ int32_t Network::SetRouteList(const std::list<Route> &routeList)
         for (auto it = routeList.begin(); it != routeList.end(); ++it) {
             const struct Route &route = *it;
             std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
-            err = NetsysController::GetInstance().NetworkAddRoute(
-                id_, route.iface_, destAddress, route.gateway_.address_);
+            err = NetsysController::GetInstance().NetworkAddRoute(id_, route.iface_, destAddress,
+                                                                  route.gateway_.address_);
             if (err) {
                 NETMGR_LOG_W("NetworkAddRoute failed, [%{public}d]", err);
             }

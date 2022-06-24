@@ -28,8 +28,8 @@ static constexpr int32_t SCORE_VALIDATED = 30;
 static constexpr int32_t SCORE_MAX = 100;
 static constexpr int32_t SCORE_MIN = 0;
 
-NetSupplier::NetSupplier(
-    NetBearType bearerType, const std::string &ident, const std::set<NetCap> &caps, NetConnAsync &async)
+NetSupplier::NetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &caps,
+                         NetConnAsync &async)
     : id_(g_nextNetSupplierId++), bearerType_(bearerType), ident_(ident), caps_(caps), async_(async),
       allCaps_(new NetAllCapabilities), supplierInfo_(new NetSupplierInfo), linkInfo_(new NetLinkInfo),
       network_(new Network), netHandle_(new NetHandle(network_->GetId())),
@@ -183,7 +183,7 @@ void NetSupplier::UpdateNetSupplierInfo(sptr<NetSupplierInfo> supplierInfo)
     if (supplierInfo) {
         if (supplierInfo_->isAvailable_ != supplierInfo->isAvailable_) {
             NETMGR_LOG_I("NetSupplier[%{public}s] available changed:%{public}s", ident_.c_str(),
-                supplierInfo->isAvailable_ ? "true" : "false");
+                         supplierInfo->isAvailable_ ? "true" : "false");
             if (supplierInfo->isAvailable_) {
                 network_->CreatePhy();
                 netMonitor_->Start();
@@ -194,7 +194,7 @@ void NetSupplier::UpdateNetSupplierInfo(sptr<NetSupplierInfo> supplierInfo)
                 NotifyNetRequestCallbacks(INetConnCallback::NET_LOST);
                 SetNetConnState(NET_CONN_STATE_DISCONNECTED);
             }
-            async_.CallbackOnNetAvailableChanged(id_, supplierInfo_->isAvailable_);
+            async_.CallbackOnNetAvailableChanged(id_, supplierInfo->isAvailable_);
         } else if (supplierInfo_->score_ != supplierInfo->score_) {
             NETMGR_LOG_I("NetSupplier[%{public}s] score changed:%{public}d", ident_.c_str(), supplierInfo->score_);
             async_.CallbackOnNetScoreChanged(id_, supplierInfo->score_);
@@ -325,7 +325,7 @@ void NetSupplier::RemoveAllNetRequests()
 void NetSupplier::NotifyNetDetectionResult(NetDetectionResultCode detectionResult, const std::string &urlRedirect)
 {
     NETMGR_LOG_I("NetSupplier[%{public}s] notify detection result:[%{public}d, %{public}s]", ident_.c_str(),
-        detectionResult, urlRedirect.c_str());
+                 detectionResult, urlRedirect.c_str());
     for (auto cb : netDetectionCbs_) {
         cb->OnNetDetectionResultChanged(detectionResult, urlRedirect);
     }
@@ -348,7 +348,8 @@ void NetSupplier::RequestNetwork()
     reqRelAsync_.wait();
     reqRelAsync_ = std::async(std::launch::async, [&, now]() {
         int32_t err = netSupplierCb_->RequestNetwork(ident_, caps_.ToSet());
-        NETMGR_LOG_I("NetSupplier[%{public}s] request network finished, cost %{public}lld ms", ident_.c_str(),
+        NETMGR_LOG_I(
+            "NetSupplier[%{public}s] request network finished, cost %{public}lld ms", ident_.c_str(),
             std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - now).count());
         if (err) {
             NETMGR_LOG_W("NetSupplier[%{public}s] request network failed", ident_.c_str());
@@ -373,7 +374,8 @@ void NetSupplier::ReleaseNetwork()
     reqRelAsync_.wait();
     reqRelAsync_ = std::async(std::launch::async, [&, now]() {
         netSupplierCb_->ReleaseNetwork(ident_, caps_.ToSet());
-        NETMGR_LOG_I("NetSupplier[%{public}s] release network finished, cost %{public}lld ms", ident_.c_str(),
+        NETMGR_LOG_I(
+            "NetSupplier[%{public}s] release network finished, cost %{public}lld ms", ident_.c_str(),
             std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - now).count());
     });
 }
@@ -404,8 +406,8 @@ void NetSupplier::NotifyNetRequestCallbacks(int32_t cmd)
                 req->CallbackForNetAvailable(netHandle_);
                 break;
             case INetConnCallback::NET_CONNECTION_PROPERTIES_CHANGE:
-                NETMGR_LOG_I(
-                    "NetSupplier[%{public}s] notify to requests: NET_CONNECTION_PROPERTIES_CHANGE", ident_.c_str());
+                NETMGR_LOG_I("NetSupplier[%{public}s] notify to requests: NET_CONNECTION_PROPERTIES_CHANGE",
+                             ident_.c_str());
                 req->CallbackForNetConnectionPropertiesChanged(netHandle_, linkInfo_);
                 break;
             case INetConnCallback::NET_LOST:

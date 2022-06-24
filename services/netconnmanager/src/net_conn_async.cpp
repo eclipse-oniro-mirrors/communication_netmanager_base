@@ -42,8 +42,8 @@ void NetConnAsync::CallbackOnNetLinkInfoChanged(uint32_t supplierId, const NetLi
     async_.Post(std::bind(&NetConnAsync::OnNetLinkInfoChanged, this, supplierId, linkInfo));
 }
 
-void NetConnAsync::CallbackOnNetDetectionResultChanged(
-    uint32_t netId, NetDetectionResultCode detectionResult, const std::string &urlRedirect)
+void NetConnAsync::CallbackOnNetDetectionResultChanged(uint32_t netId, NetDetectionResultCode detectionResult,
+                                                       const std::string &urlRedirect)
 {
     async_.Post(std::bind(&NetConnAsync::OnNetDetectionResultChanged, this, netId, detectionResult, urlRedirect));
 }

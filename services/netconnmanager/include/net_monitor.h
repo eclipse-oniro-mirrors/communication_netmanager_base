@@ -28,24 +28,56 @@ namespace OHOS {
 namespace NetManagerStandard {
 class NetMonitor : public virtual RefBase {
 public:
+    /**
+     * Construct a new NetMonitor to detection a network
+     *
+     * @param netId Detection network's id
+     * @param sockFactory Use to create detection socket
+     * @param async Async callback
+     */
     NetMonitor(uint32_t netId, SocketFactory &sockFactory, NetConnAsync &async);
 
+    /**
+     * Destroy the NetMonitor
+     *
+     */
     virtual ~NetMonitor();
 
+    /**
+     * Start evaluation
+     *
+     */
     void Start();
 
+    /**
+     * Stop evaluation
+     *
+     */
     void Stop();
 
-    void Restart();
-
+    /**
+     * Determine NetMonitor is evaluating or not
+     *
+     * @return bool NetMonitor is evaluating or not
+     */
     bool IsEvaluating() const;
 
+    /**
+     * Determine NetMonitor's current evaluation result is validated or not
+     *
+     * @return bool NetMonitor's current evaluation result is validated or not
+     */
     bool IsValidated() const;
 
+    /**
+     * Get current evaluation result
+     *
+     * @return Current evaluation result
+     */
     HttpProbeResult GetEvaluationResult() const;
 
 private:
-    void OnEvaluating();
+    void Reevaluate();
 
     void OnProbeResultChanged();
 
@@ -61,13 +93,13 @@ private:
 private:
     uint32_t netId_;
     SocketFactory &sockFactory_;
-    std::thread evaluationThread_;
     bool evaluating_{false};
-    std::mutex evaluationTimerMtx_;
-    std::condition_variable evaluationTimerCond_;
+    std::mutex mtx_;
     HttpProbeResult result_;
     NetConnAsync &async_;
-    uint32_t reevaluateDelay_{0};
+    uint32_t reevaluateDelay_ {0};
+    uint32_t reevaluateSteps_ {0};
+    std::shared_ptr<Scheduler::Task> reevaluateTask_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -62,10 +62,10 @@ int32_t NetConnService::SystemReady()
     return 0;
 }
 
-int32_t NetConnService::RegisterNetSupplier(
-    NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps, uint32_t &supplierId)
+int32_t NetConnService::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
+                                            const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (bearerType < BEARER_CELLULAR || bearerType >= BEARER_DEFAULT) {
             return ERR_INVALID_NETORK_TYPE;
         }
@@ -84,7 +84,7 @@ int32_t NetConnService::RegisterNetSupplier(
 
 int32_t NetConnService::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (netSupplierInfo == nullptr) {
             return ERR_INVALID_PARAMS;
         }
@@ -102,7 +102,7 @@ int32_t NetConnService::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<Ne
 
 int32_t NetConnService::RegisterNetSupplierCallback(uint32_t supplierId, const sptr<INetSupplierCallback> &callback)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (callback == nullptr) {
             return ERR_INVALID_PARAMS;
         }
@@ -117,17 +117,17 @@ int32_t NetConnService::RegisterNetSupplierCallback(uint32_t supplierId, const s
 
 int32_t NetConnService::RegisterNetConnCallback(const sptr<INetConnCallback> &callback)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         sptr<NetSpecifier> netSpecifier = new NetSpecifier;
         netSpecifier->SetCapability(NET_CAPABILITY_INTERNET);
         return RegisterNetConnCallback(netSpecifier, callback, 0);
     });
 }
 
-int32_t NetConnService::RegisterNetConnCallback(
-    const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
+int32_t NetConnService::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
+                                                const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
             NETMGR_LOG_W("Permission check failed");
             return ERR_PERMISSION_CHECK_FAIL;
@@ -149,7 +149,7 @@ int32_t NetConnService::RegisterNetConnCallback(
 
 int32_t NetConnService::UnregisterNetSupplier(uint32_t supplierId)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (RemoveNetSupplier(supplierId)) {
             return ERR_NONE;
         }
@@ -159,7 +159,7 @@ int32_t NetConnService::UnregisterNetSupplier(uint32_t supplierId)
 
 int32_t NetConnService::UnregisterNetConnCallback(const sptr<INetConnCallback> &callback)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
             return ERR_PERMISSION_CHECK_FAIL;
         }
@@ -185,7 +185,8 @@ int32_t NetConnService::RestrictBackgroundChanged(bool restrictBackground)
 
 int32_t NetConnService::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
+        NETMGR_LOG_W("Task Debug: UpdateNetLinkInfo task");
         if (netLinkInfo == nullptr) {
             return ERR_INVALID_PARAMS;
         }
@@ -203,7 +204,7 @@ int32_t NetConnService::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLin
 
 int32_t NetConnService::RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (callback == nullptr) {
             return ERR_INVALID_PARAMS;
         }
@@ -219,7 +220,7 @@ int32_t NetConnService::RegisterNetDetectionCallback(int32_t netId, const sptr<I
 
 int32_t NetConnService::UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (callback == nullptr) {
             return ERR_INVALID_PARAMS;
         }
@@ -235,7 +236,7 @@ int32_t NetConnService::UnRegisterNetDetectionCallback(int32_t netId, const sptr
 
 int32_t NetConnService::NetDetection(int32_t netId)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO) ||
             !NetManagerPermission::CheckPermission(Permission::INTERNET)) {
             NETMGR_LOG_W("Permission check failed");
@@ -245,14 +246,14 @@ int32_t NetConnService::NetDetection(int32_t netId)
         if (supplier == nullptr) {
             return ERR_NO_SUPPLIER;
         }
-        supplier->GetNetMonitor()->Restart();
+        supplier->GetNetMonitor()->Start();
         return ERR_NONE;
     });
 }
 
 int32_t NetConnService::GetDefaultNet(int32_t &netId)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
             NETMGR_LOG_W("Permission check failed");
             return ERR_PERMISSION_CHECK_FAIL;
@@ -269,7 +270,7 @@ int32_t NetConnService::GetDefaultNet(int32_t &netId)
 
 int32_t NetConnService::HasDefaultNet(bool &flag)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
             NETMGR_LOG_W("Permission check failed");
             return ERR_PERMISSION_CHECK_FAIL;
@@ -285,7 +286,7 @@ int32_t NetConnService::HasDefaultNet(bool &flag)
 
 int32_t NetConnService::GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
             NETMGR_LOG_W("Permission check failed");
             return ERR_PERMISSION_CHECK_FAIL;
@@ -296,7 +297,7 @@ int32_t NetConnService::GetAddressesByName(const std::string &host, int32_t netI
 
 int32_t NetConnService::GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
             NETMGR_LOG_W("Permission check failed");
             return ERR_PERMISSION_CHECK_FAIL;
@@ -316,7 +317,7 @@ int32_t NetConnService::GetAddressByName(const std::string &host, int32_t netId,
 
 int32_t NetConnService::GetSpecificNet(NetBearType bearType, std::list<int32_t> &netIdList)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (bearType < BEARER_CELLULAR || bearType >= BEARER_DEFAULT) {
             return ERR_INVALID_NETORK_TYPE;
         }
@@ -332,7 +333,7 @@ int32_t NetConnService::GetSpecificNet(NetBearType bearType, std::list<int32_t> 
 
 int32_t NetConnService::GetAllNets(std::list<int32_t> &netIdList)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
             NETMGR_LOG_W("Permission check failed");
             return ERR_PERMISSION_CHECK_FAIL;
@@ -348,7 +349,7 @@ int32_t NetConnService::GetAllNets(std::list<int32_t> &netIdList)
 
 int32_t NetConnService::GetSpecificUidNet(int32_t uid, int32_t &netId)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (defaultNetSupplier_) {
             netId = defaultNetSupplier_->GetNetId();
             return ERR_NONE;
@@ -360,7 +361,7 @@ int32_t NetConnService::GetSpecificUidNet(int32_t uid, int32_t &netId)
 
 int32_t NetConnService::GetConnectionProperties(int32_t netId, NetLinkInfo &info)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
             NETMGR_LOG_W("Permission check failed");
             return ERR_PERMISSION_CHECK_FAIL;
@@ -378,7 +379,7 @@ int32_t NetConnService::GetConnectionProperties(int32_t netId, NetLinkInfo &info
 
 int32_t NetConnService::GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
             NETMGR_LOG_W("Permission check failed");
             return ERR_PERMISSION_CHECK_FAIL;
@@ -396,7 +397,7 @@ int32_t NetConnService::GetNetCapabilities(int32_t netId, NetAllCapabilities &ne
 
 int32_t NetConnService::GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (bearerType < BEARER_CELLULAR || bearerType >= BEARER_DEFAULT) {
             return ERR_INVALID_NETORK_TYPE;
         }
@@ -414,7 +415,7 @@ int32_t NetConnService::GetIfaceNames(NetBearType bearerType, std::list<std::str
 
 int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         if (bearerType < BEARER_CELLULAR || bearerType >= BEARER_DEFAULT) {
             return ERR_INVALID_NETORK_TYPE;
         }
@@ -432,7 +433,7 @@ int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::st
 
 int32_t NetConnService::SetAirplaneMode(bool state)
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         NETMGR_LOG_I("Broadcast air plane mode changed[%{public}s]", state ? "true" : "false");
         BroadcastInfo info;
         info.action = EventFwk::CommonEventSupport::COMMON_EVENT_AIRPLANE_MODE_CHANGED;
@@ -447,7 +448,7 @@ int32_t NetConnService::SetAirplaneMode(bool state)
 
 int32_t NetConnService::RestoreFactoryData()
 {
-    return InvokeMethodSafety([&]() -> int32_t {
+    return InvokeMethodSafety(__FUNCTION__, [&]() -> int32_t {
         NETMGR_LOG_I("Restore factory data begin");
         NetManagerCenter::GetInstance().ResetEthernetFactory();
         NetManagerCenter::GetInstance().ResetPolicyFactory();
@@ -462,15 +463,15 @@ int32_t NetConnService::RestoreFactoryData()
     });
 }
 
-sptr<NetSupplier> NetConnService::CreateNetSupplier(
-    NetBearType bearerType, const std::string &ident, const std::set<NetCap> &caps)
+sptr<NetSupplier> NetConnService::CreateNetSupplier(NetBearType bearerType, const std::string &ident,
+                                                    const std::set<NetCap> &caps)
 {
     std::string netCapsStr;
     for (auto cap : caps) {
         netCapsStr += std::to_string(cap) + ",";
     }
     NETMGR_LOG_I("bearerType[%{public}d], ident[%{public}s], netCaps[%{public}s]", bearerType, ident.c_str(),
-        netCapsStr.c_str());
+                 netCapsStr.c_str());
 
     sptr<NetSupplier> supplier = new NetSupplier(bearerType, ident, caps, *this);
     netSuppliers_[supplier->GetId()] = supplier;
@@ -513,8 +514,8 @@ sptr<NetSupplier> NetConnService::FindNetSupplierByNetId(uint32_t netId)
     return nullptr;
 }
 
-sptr<NetRequest> NetConnService::CreateNetRequest(
-    sptr<NetSpecifier> netSpecifier, sptr<INetConnCallback> callback, uint32_t timeoutMs)
+sptr<NetRequest> NetConnService::CreateNetRequest(sptr<NetSpecifier> netSpecifier, sptr<INetConnCallback> callback,
+                                                  uint32_t timeoutMs)
 {
     NETMGR_LOG_I("%{public}s", netSpecifier->ToString(" ").c_str());
     sptr<NetRequest> request = new NetRequest(netSpecifier, callback, timeoutMs, *this);
@@ -687,8 +688,8 @@ void NetConnService::OnNetLinkInfoChanged(uint32_t supplierId, const NetLinkInfo
     RematchAllNetworks(REASON_NET_LINK_INFO_CHANGED);
 }
 
-void NetConnService::OnNetDetectionResultChanged(
-    uint32_t netId, NetDetectionResultCode detectionResult, const std::string &urlRedirect)
+void NetConnService::OnNetDetectionResultChanged(uint32_t netId, NetDetectionResultCode detectionResult,
+                                                 const std::string &urlRedirect)
 {
     auto supplier = FindNetSupplierByNetId(netId);
     if (supplier) {
@@ -706,8 +707,9 @@ void NetConnService::OnNetScoreChanged(uint32_t supplierId, uint32_t score)
     RematchAllNetworks(REASON_NET_SCORE_CHANGED);
 }
 
-int32_t NetConnService::InvokeMethodSafety(std::function<int32_t(void)> func)
+int32_t NetConnService::InvokeMethodSafety(const char *methodName, std::function<int32_t(void)> func)
 {
+    NETMGR_LOG_I("method name [%{public}s]", methodName);
     if (GetScheduler().InRunThread()) {
         return func();
     } else {

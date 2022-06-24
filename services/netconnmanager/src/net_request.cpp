@@ -22,7 +22,7 @@ constexpr uint32_t MAX_REQUEST_ID = 0x7FFFFFFF;
 static std::atomic<uint32_t> g_nextRequestId = DEFAULT_REQUEST_ID;
 using TimeOutCallback = std::function<void()>;
 NetRequest::NetRequest(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
-    const uint32_t &timeoutMS, NetConnAsync &async)
+                       const uint32_t &timeoutMS, NetConnAsync &async)
     : id_(g_nextRequestId++), netSpecifier_(specifier), netConnCallback_(callback), async_(async)
 {
     if (id_ > MAX_REQUEST_ID) {
@@ -91,8 +91,8 @@ void NetRequest::CallbackForNetUnavailable()
     }
 }
 
-void NetRequest::CallbackForNetCapabilitiesChanged(
-    sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCaps)
+void NetRequest::CallbackForNetCapabilitiesChanged(sptr<NetHandle> &netHandle,
+                                                   const sptr<NetAllCapabilities> &netAllCaps)
 {
     if (netConnCallback_) {
         netConnCallback_->NetCapabilitiesChange(netHandle, netAllCaps);

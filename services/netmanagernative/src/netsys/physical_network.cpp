@@ -60,7 +60,12 @@ int32_t PhysicalNetwork::AddInterface(std::string &interfaceName)
         return NETMANAGER_ERROR;
     }
 
+    if (isDefault_) {
+        RouteManager::AddInterfaceToDefaultNetwork(interfaceName, permission_);
+    }
+
     interfaces_.insert(interfaceName);
+
     return NETMANAGER_SUCCESS;
 }
 

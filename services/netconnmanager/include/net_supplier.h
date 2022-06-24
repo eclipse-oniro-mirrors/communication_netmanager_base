@@ -33,8 +33,17 @@ namespace OHOS {
 namespace NetManagerStandard {
 class NetCaps {
 public:
+    /**
+     * Construct a new NetCaps
+     *
+     */
     NetCaps() = default;
 
+    /**
+     * Construct a new NetCaps and insert all from caps
+     *
+     * @param caps caps to insert
+     */
     NetCaps(const std::set<NetCap> &caps)
     {
         for (auto cap : caps) {
@@ -42,13 +51,28 @@ public:
         }
     }
 
+    /**
+     * Destroy the NetCaps
+     *
+     */
     ~NetCaps() = default;
 
+    /**
+     * Determine if a cap is valid or not
+     *
+     * @param cap cap to check
+     * @return bool cap is valid or not
+     */
     static bool IsValidNetCap(NetCap cap)
     {
         return (cap >= 0) || (cap < NET_CAPABILITY_INTERNAL_DEFAULT);
     }
 
+    /**
+     * Insert a cap
+     *
+     * @param cap cap to insert
+     */
     void InsertNetCap(NetCap cap)
     {
         if (IsValidNetCap(cap)) {
@@ -56,6 +80,11 @@ public:
         }
     }
 
+    /**
+     * Remove if cap exist
+     *
+     * @param cap cap to remove
+     */
     void RemoveNetCap(NetCap cap)
     {
         if (IsValidNetCap(cap)) {
@@ -63,11 +92,22 @@ public:
         }
     }
 
+    /**
+     * Determine cap exist or not
+     *
+     * @param cap cap to check
+     * @return bool cap exist or not
+     */
     bool HasNetCap(NetCap cap) const
     {
         return (caps_ >> cap) & 1;
     }
 
+    /**
+     * Restorage all caps to a std::set<NetCap>
+     *
+     * @return std::set<NetCap> With all caps
+     */
     std::set<NetCap> ToSet() const
     {
         std::set<NetCap> ret;
@@ -86,64 +126,219 @@ private:
 
 class NetSupplier : public virtual RefBase {
 public:
+    /**
+     * Construct a new NetSupplier
+     *
+     * @param bearerType Network bearerType
+     * @param ident Network ident
+     * @param caps  Network caps
+     * @param async Async callback
+     */
     NetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &caps, NetConnAsync &async);
 
+    /**
+     * Destroy the NetSupplier
+     *
+     */
     virtual ~NetSupplier();
 
+    /**
+     * Get supplier id
+     *
+     * @return uint32_t supplier id
+     */
     uint32_t GetId() const;
 
+    /**
+     * Get the network id of this supplier
+     *
+     * @return uint32_t network id
+     */
     uint32_t GetNetId() const;
 
+    /**
+     * Get the bearer type
+     *
+     * @return NetBearType bearer type
+     */
     NetBearType GetBearerType() const;
 
+    /**
+     * Get the ident
+     *
+     * @return std::string ident
+     */
     std::string GetIdent() const;
 
+    /**
+     * Get the caps in std::set<NetCap>
+     *
+     * @return std::set<NetCap> caps
+     */
     std::set<NetCap> GetCaps() const;
 
+    /**
+     * Get the network
+     *
+     * @return sptr<Network> network
+     */
     sptr<Network> GetNetwork() const;
 
+    /**
+     * Get the net monitor
+     *
+     * @return sptr<NetMonitor> net monitor
+     */
     sptr<NetMonitor> GetNetMonitor() const;
 
+    /**
+     * Get the net handle
+     *
+     * @return sptr<NetHandle> net handle
+     */
     sptr<NetHandle> GetNetHandle() const;
 
+    /**
+     * Get the supplier's info
+     *
+     * @return sptr<NetSupplierInfo> supplier's info
+     */
     sptr<NetSupplierInfo> GetSupplierInfo() const;
 
+    /**
+     * Get the net link info
+     *
+     * @return sptr<NetLinkInfo> net link info
+     */
     sptr<NetLinkInfo> GetNetLinkInfo() const;
 
+    /**
+     * Get the net all capabilities
+     *
+     * @return sptr<NetAllCapabilities>  all capabilities
+     */
     sptr<NetAllCapabilities> GetNetAllCapabilities() const;
 
+    /**
+     * Get the current score
+     *
+     * @return int32_t current score, 0 is min, 100 is max
+     */
     int32_t GetCurrentScore() const;
 
+    /**
+     * Determine network is available or not
+     *
+     * @return bool Network is available or not
+     */
     bool IsAvailable() const;
 
+    /**
+     * Determine network is requested or not
+     *
+     * @return Network is requested or not
+     */
     bool IsRequested() const;
 
+    /**
+     * Determine supplier has all of caps
+     *
+     * @param caps caps to check
+     * @return bool Has caps or not
+     */
     bool HasNetCaps(const std::set<NetCap> &caps) const;
 
+    /**
+     * Determine supplier has cap
+     *
+     * @param cap cap to check
+     * @return Has cap or not
+     */
     bool HasNetCap(NetCap cap) const;
 
+    /**
+     * Insert a cap
+     *
+     * @param cap cap to insert
+     */
     void InsertNetCap(NetCap cap);
 
+    /**
+     * Remove a cap
+     *
+     * @param cap cap to remove
+     */
     void RemoveNetCap(NetCap cap);
 
+    /**
+     * Update net supplier info
+     *
+     * @param supplierInfo Supplier info use to update
+     */
     void UpdateNetSupplierInfo(sptr<NetSupplierInfo> supplierInfo);
 
+    /**
+     * Update net link info
+     *
+     * @param linkInfo Net link info use to update
+     */
     void UpdateNetLinkInfo(sptr<NetLinkInfo> linkInfo);
 
+    /**
+     * Set the supplier callback
+     *
+     * @param supplierCb supplier callback
+     */
     void SetSupplierCallback(sptr<INetSupplierCallback> supplierCb);
 
+    /**
+     * Register a net detection callback
+     *
+     * @param callback net detection callback use to register
+     */
     void RegisterNetDetectionCallback(sptr<INetDetectionCallback> callback);
 
+    /**
+     * Unregister a net detection callback
+     *
+     * @param callback net detection callback use to unregister
+     */
     void UnregisterNetDetectionCallback(sptr<INetDetectionCallback> callback);
 
+    /**
+     * Determine a request is satisfied to this supplier
+     *
+     * @param netRequest Net request to satisfy
+     * @return bool Net request is satisfied or not
+     */
     bool SatisfiyNetRequest(sptr<NetRequest> netRequest);
 
+    /**
+     * Add a satisfied net request
+     *
+     * @param netRequest Net request to add
+     */
     void AddNetRequest(sptr<NetRequest> netRequest);
 
+    /**
+     * Remove a satisfied net request if exist
+     *
+     * @param netRequest Net request to remove
+     */
     void RemoveNetRequest(sptr<NetRequest> netRequest);
 
+    /**
+     * Remove all satisfied net requests
+     *
+     */
     void RemoveAllNetRequests();
 
+    /**
+     * Notify to all of registered net detection callbacks that detection result was changed
+     *
+     * @param detectionResult Detection result status
+     * @param urlRedirect Detection result redirect url
+     */
     void NotifyNetDetectionResult(NetDetectionResultCode detectionResult, const std::string &urlRedirect);
 
 private:

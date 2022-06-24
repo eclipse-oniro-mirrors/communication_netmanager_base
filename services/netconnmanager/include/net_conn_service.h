@@ -34,7 +34,7 @@ class NetConnService : public std::enable_shared_from_this<NetConnService>,
     DECLARE_SYSTEM_ABILITY(NetConnService)
 public:
     /**
-     * @brief The interface is register the network
+     * The interface is register the network
      *
      * @param bearerType Bearer Network Type
      * @param ident Unique identification of mobile phone card
@@ -44,10 +44,10 @@ public:
      * @return function result
      */
     int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
-        uint32_t &supplierId) override;
+                                uint32_t &supplierId) override;
 
     /**
-     * @brief The interface is unregister the network
+     * The interface is unregister the network
      *
      * @param supplierId The id of the network supplier
      *
@@ -56,7 +56,7 @@ public:
     int32_t UnregisterNetSupplier(uint32_t supplierId) override;
 
     /**
-     * @brief Register supplier callback
+     * Register supplier callback
      *
      * @param supplierId The id of the network supplier
      * @param callback INetSupplierCallback callback interface
@@ -66,7 +66,7 @@ public:
     int32_t RegisterNetSupplierCallback(uint32_t supplierId, const sptr<INetSupplierCallback> &callback) override;
 
     /**
-     * @brief Register net connection callback
+     * Register net connection callback
      *
      * @param netSpecifier specifier information
      * @param callback The callback of INetConnCallback interface
@@ -76,7 +76,7 @@ public:
     int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
 
     /**
-     * @brief Register net connection callback by NetSpecifier
+     * Register net connection callback by NetSpecifier
      *
      * @param netSpecifier specifier information
      * @param callback The callback of INetConnCallback interface
@@ -85,10 +85,10 @@ public:
      * @return Returns 0, successfully register net connection callback, otherwise it will failed
      */
     int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
-        const uint32_t &timeoutMS) override;
+                                    const uint32_t &timeoutMS) override;
 
     /**
-     * @brief Unregister net connection callback
+     * Unregister net connection callback
      *
      * @return Returns 0, successfully unregister net connection callback, otherwise it will fail
      */
@@ -96,7 +96,7 @@ public:
 
     int32_t UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState) override;
     /**
-     * @brief The interface is update network connection status information
+     * The interface is update network connection status information
      *
      * @param supplierId The id of the network supplier
      * @param netSupplierInfo network connection status information
@@ -106,7 +106,7 @@ public:
     int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) override;
 
     /**
-     * @brief The interface is update network link attribute information
+     * The interface is update network link attribute information
      *
      * @param supplierId The id of the network supplier
      * @param netLinkInfo network link attribute information
@@ -116,7 +116,7 @@ public:
     int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo) override;
 
     /**
-     * @brief The interface names which NetBearType is equal than bearerType
+     * The interface names which NetBearType is equal than bearerType
      *
      * @param bearerType Network bearer type
      * @param ifaceNames save the obtained ifaceNames
@@ -125,7 +125,7 @@ public:
     int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames) override;
 
     /**
-     * @brief The interface is get the iface name for network
+     * The interface is get the iface name for network
      *
      * @param bearerType Network bearer type
      * @param ident Unique identification of mobile phone card
@@ -135,7 +135,7 @@ public:
     int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) override;
 
     /**
-     * @brief register network detection return result method
+     * Register network detection return result method
      *
      * @param netId  Network ID
      * @param callback The callback of INetDetectionCallback interface
@@ -144,7 +144,7 @@ public:
     int32_t RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) override;
 
     /**
-     * @brief unregister network detection return result method
+     * Unregister network detection return result method
      *
      * @param netId Network ID
      * @param callback  The callback of INetDetectionCallback interface
@@ -153,37 +153,116 @@ public:
     int32_t UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) override;
 
     /**
-     * @brief The interface of network detection called by the application
+     * The interface of network detection called by the application
      *
      * @param netId network ID
      * @return int32_t Whether the network probe is successful
      */
     int32_t NetDetection(int32_t netId) override;
-    int32_t GetDefaultNet(int32_t &netId) override;
-    int32_t HasDefaultNet(bool &flag) override;
-    int32_t GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList) override;
-    int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr) override;
-    int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList) override;
-    int32_t GetAllNets(std::list<int32_t> &netIdList) override;
-    int32_t GetSpecificUidNet(int32_t uid, int32_t &netId) override;
-    int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override;
-    int32_t GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap) override;
-    int32_t RestrictBackgroundChanged(bool isRestrictBackground);
+
     /**
-     * @brief Set airplane mode
+     * Get current default net id
+     *
+     * @param netId Current default net id alias
+     * @return int32_t 0 for success, others are failed
+     */
+    int32_t GetDefaultNet(int32_t &netId) override;
+
+    /**
+     * Determine if NetConnService has a default net
+     *
+     * @param flag Boolean flag alias if has default net or not
+     * @return int32_t 0 for success, others are failed
+     */
+    int32_t HasDefaultNet(bool &flag) override;
+
+    /**
+     * Resolve host addresses use the network represented by the netId
+     *
+     * @param host Host name to resolve
+     * @param netId The network's id which use to resolve
+     * @param addrList Resolved addresses list alias
+     * @return int32_t 0 for success, others are failed
+     */
+    int32_t GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList) override;
+
+    /**
+     * Same as GetAddressesByName, but only return one resolved address
+     *
+     * @param host Host name to resolve
+     * @param netId The network's id which use to resolv
+     * @param addr Resolved address alias
+     * @return int32_t 0 for success, others are failed
+     */
+    int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr) override;
+
+    /**
+     * Get the specific network list those matched bearerType
+     *
+     * @param bearerType NetBearType to match
+     * @param netIdList matched networ list alias
+     * @return int32_t 0 for success, others are failed
+     */
+    int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList) override;
+
+    /**
+     * Get all registered networks
+     *
+     * @param netIdList registered networks list alias
+     * @return int32_t 0 for success, others are failed
+     */
+    int32_t GetAllNets(std::list<int32_t> &netIdList) override;
+
+    /**
+     * Get the network's id match spedific uid
+     *
+     * @param uid Network's uid to match
+     * @param netId Match network's id alias
+     * @return int32_t 0 for success, others are failed
+     */
+    int32_t GetSpecificUidNet(int32_t uid, int32_t &netId) override;
+
+    /**
+     * Get network's connection properties which network's id is netId
+     *
+     * @param netId network's id
+     * @param info  network's connection properties alias
+     * @return int32_t 0 for success, others are failed
+     */
+    int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override;
+
+    /**
+     * Get networks all capabilities which network's id is netId
+     *
+     * @param netId network's id
+     * @param netAllCap network's all capabilities alias
+     * @return int32_t 0 for success, others are failed
+     */
+    int32_t GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap) override;
+
+    /**
+     * Set restrict background state
+     *
+     * @param isRestrictBackground restrict background state
+     * @return int32_t 0 for success, others are failed
+     */
+    int32_t RestrictBackgroundChanged(bool isRestrictBackground);
+
+    /**
+     * Set airplane mode
      *
      * @param state airplane state
      * @return int32_t result
      */
     int32_t SetAirplaneMode(bool state) override;
+
     /**
-     * @brief restore NetConn factory setting
+     * Restore NetConn factory setting
      *
      * @return int32_t result
      */
     int32_t RestoreFactoryData() override;
 
-    // net preferred
 private:
     enum RematchAllNetworksReason {
         REASON_NET_AVAILABLE_CHANGED,
@@ -194,7 +273,6 @@ private:
     void RematchAllNetworks(RematchAllNetworksReason reason);
     sptr<NetSupplier> GetBestNetworkForRequest(const sptr<NetRequest> &request);
 
-    // callbacks
 private:
     void OnNetAvailableChanged(uint32_t supplierId, bool available) override;
 
@@ -202,11 +280,11 @@ private:
 
     void OnNetLinkInfoChanged(uint32_t supplierId, const NetLinkInfo &linkInfo) override;
 
-    void OnNetDetectionResultChanged(
-        uint32_t netId, NetDetectionResultCode detectionResult, const std::string &urlRedirect) override;
+    void OnNetDetectionResultChanged(uint32_t netId, NetDetectionResultCode detectionResult,
+                                     const std::string &urlRedirect) override;
 
     void OnNetScoreChanged(uint32_t supplierId, uint32_t score) override;
-    // sa
+
 private:
     void OnStart() override;
     void OnStop() override;
@@ -216,14 +294,14 @@ private:
     sptr<NetSupplier> CreateNetSupplier(NetBearType bearType, const std::string &ident, const std::set<NetCap> &caps);
     sptr<NetSupplier> FindNetSupplier(uint32_t supplierId);
     sptr<NetSupplier> FindNetSupplierByNetId(uint32_t netId);
-    std::list<sptr<NetSupplier>> FindNetSuppliersByInfo(
-        NetBearType bearerType = BEARER_DEFAULT, const std::string &ident = "");
+    std::list<sptr<NetSupplier>> FindNetSuppliersByInfo(NetBearType bearerType = BEARER_DEFAULT,
+                                                        const std::string &ident = "");
     std::list<sptr<NetSupplier>> GetAvailableNetSuppliers() const;
     bool RemoveNetSupplier(int32_t supplierId);
 
     void CreateDefaultRequest();
-    sptr<NetRequest> CreateNetRequest(
-        sptr<NetSpecifier> netSpecifier, sptr<INetConnCallback> callback, uint32_t timeoutMs);
+    sptr<NetRequest> CreateNetRequest(sptr<NetSpecifier> netSpecifier, sptr<INetConnCallback> callback,
+                                      uint32_t timeoutMs);
     sptr<NetRequest> FindNetRequest(uint32_t reqId);
     sptr<NetRequest> FindNetRequestByCallback(const sptr<INetConnCallback> &callback);
     std::list<sptr<NetRequest>> FindNetRequestsBySameSpecifier(const NetSpecifier &netSpecifier);
@@ -231,9 +309,8 @@ private:
     bool RemoveNetRequest(const sptr<NetRequest> &request);
 
 private:
-    int32_t InvokeMethodSafety(std::function<int32_t(void)> func);
+    int32_t InvokeMethodSafety(const char *methodName, std::function<int32_t(void)> func);
 
-    // debug
 private:
     void DumpSuppliersInfo();
 

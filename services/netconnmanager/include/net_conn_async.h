@@ -23,21 +23,63 @@ namespace OHOS {
 namespace NetManagerStandard {
 class NetConnAsync {
 public:
+    /**
+     * Construct a new NetConnAsync
+     */
     NetConnAsync();
 
+    /**
+     * Destroy the NetConnAsync
+     *
+     */
     virtual ~NetConnAsync();
 
+    /**
+     * Get the scheduler of the async
+     * @return Scheduler& scheduler of the async
+     */
     Scheduler &GetScheduler();
 
+    /**
+     * Callback OnNetAvailableChanged asynchronous
+     *
+     * @param supplierId Supplier's id who's available has changed
+     * @param available Supplier's new available state
+     */
     void CallbackOnNetAvailableChanged(uint32_t supplierId, bool available);
 
+    /**
+     * Callback OnNetCapabilitiesChanged asynchronous
+     *
+     * @param supplierId Supplier's id who's allCaps has changed
+     * @param allCaps Supplier's new allCaps
+     */
     void CallbackOnNetCapabilitiesChanged(uint32_t supplierId, const NetAllCapabilities &allCaps);
 
+    /**
+     * Callback OnNetLinkInfoChanged asynchronous
+     *
+     * @param supplierId Supplier's id who's linkInfo has changed
+     * @param linkInfo Supplier's new link info
+     */
     void CallbackOnNetLinkInfoChanged(uint32_t supplierId, const NetLinkInfo &linkInfo);
 
-    void CallbackOnNetDetectionResultChanged(
-        uint32_t netId, NetDetectionResultCode detectionResult, const std::string &urlRedirect);
+    /**
+     * Callback OnNetDetectionResultChanged asynchronous
+     *
+     * @param netId Network's id who's detection result has changed
+     * @param detectionResult Detection code
+     * @param urlRedirect Detection url
+     */
+    void CallbackOnNetDetectionResultChanged(uint32_t netId, NetDetectionResultCode detectionResult,
+                                             const std::string &urlRedirect);
 
+    /**
+     * Callback OnNetScoreChanged asynchronous
+     *
+     * @param supplierId Supplier's id who's score has changed
+     * @param score Supplier's new score
+     */
     void CallbackOnNetScoreChanged(uint32_t supplierId, uint32_t score);
 
 protected:
@@ -47,8 +89,8 @@ protected:
 
     virtual void OnNetLinkInfoChanged(uint32_t supplierId, const NetLinkInfo &linkInfo) = 0;
 
-    virtual void OnNetDetectionResultChanged(
-        uint32_t netId, NetDetectionResultCode detectionResult, const std::string &urlRedirect) = 0;
+    virtual void OnNetDetectionResultChanged(uint32_t netId, NetDetectionResultCode detectionResult,
+                                             const std::string &urlRedirect) = 0;
 
     virtual void OnNetScoreChanged(uint32_t supplierId, uint32_t score) = 0;
 
