@@ -22,18 +22,50 @@ namespace OHOS {
 namespace NetManagerStandard {
 class Url {
 public:
+    /**
+     * Construct a new Url with a string url
+     *
+     * @param url Url string
+     */
     Url(const std::string &url);
 
+    /**
+     * Copy Constructor
+     */
     Url(const Url &other);
 
+    /**
+     * Destroy the Url
+     *
+     */
     ~Url();
 
+    /**
+     * Get url string
+     *
+     * @return std::string Url string
+     */
     std::string ToString() const;
 
+    /**
+     * Get the host string
+     *
+     * @return std::string Host string
+     */
     std::string GetHost() const;
 
+    /**
+     * Get the path string
+     *
+     * @return std::string Path string
+     */
     std::string GetPath() const;
 
+    /**
+     * Get the port
+     *
+     * @return int32_t Port in url if exist or 0
+     */
     int32_t GetPort();
 
     Url &operator=(const std::string &url);

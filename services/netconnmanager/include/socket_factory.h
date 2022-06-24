@@ -24,8 +24,23 @@ class SocketFactory {
 public:
     virtual ~SocketFactory() {}
 
+    /**
+     * Same as posix socket(). Create a new socket of type TYPE in domain DOMAIN, using
+     *        protocol PROTOCOL.  If PROTOCOL is zero, one is chosen automatically.
+     *        Returns a file descriptor for the new socket, or -1 for errors.
+     *
+     * @param domain DOMAIN
+     * @param type enum __socket_type
+     * @param protocol PROTOCOL
+     * @return int32_t  A file descriptor for the new socket, or -1 for errors.
+     */
     virtual int32_t CreateSocket(int32_t domain, int32_t type, int32_t protocol) = 0;
 
+    /**
+     * Destroy socket
+     *
+     * @param sockFd socket file descriptor to destroy
+     */
     virtual void DestroySocket(int32_t sockFd) = 0;
 };
 } // namespace NetManagerStandard

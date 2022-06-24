@@ -21,6 +21,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <thread>
+#include <future>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -32,14 +33,37 @@ public:
         friend class Scheduler;
 
     public:
+        /**
+         * Construct a async task
+         *
+         * @param func Task process function
+         */
         Task(TaskFunction func);
 
+        /**
+         * Destroy the task
+         *
+         */
         virtual ~Task();
 
+        /**
+         * Wait for task processed or may be canceled by call Cancel()
+         *
+         */
         void Wait();
 
+        /**
+         * Wait for task processed for timeoutMs milliseconds
+         *
+         * @param timeoutMs Milliseconds to wait
+         * @return Return true if not timeout, otherwise return false
+         */
         bool WaitFor(uint64_t timeoutMs);
 
+        /**
+         * Cancel Wait() or WaitFor()
+         *
+         */
         void Cancel();
 
     private:
@@ -51,25 +75,66 @@ public:
         TaskFunction func_;
         std::mutex mtx_;
         std::condition_variable cond_;
-        bool canceled_{false};
+        bool canceled_ {false};
+        bool processed_ {false};
         std::mutex delayMtx_;
         std::condition_variable delayCond_;
+        std::future<void> delayFuture_;
     };
 
+    /**
+     * Construct a new Scheduler
+     *
+     */
     Scheduler();
 
+    /**
+     * Destroy the Scheduler
+     *
+     */
     virtual ~Scheduler();
 
+    /**
+     * Insert task to scheduler task list, task will be processed async
+     *
+     * @param task task to async processed
+     */
     void Post(std::shared_ptr<Task> task);
 
+    /**
+     * Create a task with taskFunc and post it
+     *
+     * @param taskFunc task function
+     * @return std::shared_ptr<Task> Created task
+     */
     std::shared_ptr<Task> Post(TaskFunction taskFunc);
 
+    /**
+     * Create a task with taskFunc and delay post it after delayMs milliseconds
+     *
+     * @param taskFunc task function
+     * @return std::shared_ptr<Task> Created task
+     * @return std::shared_ptr<Task>
+     */
     std::shared_ptr<Task> DelayPost(TaskFunction taskFunc, uint64_t delayMs);
 
+    /**
+     * Start async process loop, block call
+     *
+     */
     void Run();
 
+    /**
+     * Stop async process loop
+     *
+     */
     void Stop();
 
+    /**
+     * Determine if current thread is same with the Scheduler's run thread
+     *
+     * @return bool Current thread is same with the Scheduler's run thread
+     */
     bool InRunThread() const;
 
 private:

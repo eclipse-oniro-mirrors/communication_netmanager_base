@@ -28,35 +28,70 @@ public:
     static constexpr int32_t PORTAL_CODE_MIN = 300;
     static constexpr int32_t PORTAL_CODE_MAX = 399;
 
+    /**
+     * Construct a new HttpProbeResult
+     */
     HttpProbeResult() : code_(0), redirectUrl_("") {}
 
+    /**
+     * Construct a new HttpProbeResult
+     *
+     * @param code
+     * @param redirectUrl
+     */
     HttpProbeResult(int32_t code, std::string redirectUrl) : code_(code), redirectUrl_(redirectUrl) {}
-
+    /**
+     * Get the http code in result
+     *
+     * @return int32_t Http code in result
+     */
     int32_t GetCode() const
     {
         return code_;
     }
-
+    /**
+     * Get the redirect url in result
+     *
+     * @return std::string Redirect url in result
+     */
     std::string GetRedirectUrl() const
     {
         return redirectUrl_;
     }
 
+    /**
+     * Determine probe result is successed
+     *
+     * @return bool  Is successed or not
+     */
     bool IsSuccessful() const
     {
         return (code_ >= SUCCESS_CODE_MIN && code_ <= SUCCESS_CODE_MAX);
     }
 
+    /**
+     * Determine probe result is portal
+     *
+     * @return bool Is portal or not
+     */
     bool IsPortal() const
     {
         return !IsSuccessful() && (code_ >= PORTAL_CODE_MIN) && (code_ <= PORTAL_CODE_MAX);
     }
 
+    /**
+     * Determine probe result is failed
+     *
+     * @return bool Is failed or not
+     */
     bool IsFailed() const
     {
         return !IsSuccessful() && !IsPortal();
     }
 
+    /**
+     * Clear result
+     */
     void Clear()
     {
         code_ = 0;
@@ -89,19 +124,45 @@ private:
 
 class HttpProbe {
 public:
-    enum ProbeType {
-        PROBE_HTTP,
-        PROBE_HTTPS
-    };
+    /**
+     * Http probe support both http & https protocol probe, specify probe type in constructor
+     */
+    enum ProbeType { PROBE_HTTP, PROBE_HTTPS };
 
+    /**
+     * Construct a new HttpProbe
+     *
+     * @param probeType
+     * @param url
+     * @param sockFd
+     */
     HttpProbe(ProbeType probeType, const std::string &url, int32_t sockFd = -1);
 
+    /**
+     * Destroy the HttpProbe
+     *
+     */
     virtual ~HttpProbe();
 
+    /**
+     * Get the current probe result
+     *
+     * @return HttpProbeResult Current probe result
+     */
     HttpProbeResult GetResult() const;
 
+    /**
+     * Determine current probing has an error or not
+     *
+     * @return bool Has error or not
+     */
     bool HasError() const;
 
+    /**
+     * Error string if has an error or empty string
+     *
+     * @return std::string error string or empty string
+     */
     std::string ErrorString() const;
 
 private:

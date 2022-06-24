@@ -15,7 +15,6 @@
 
 #include "scheduler.h"
 #include <future>
-#include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -28,8 +27,9 @@ Scheduler::Task::~Task() {}
 void Scheduler::Task::Process()
 {
     std::unique_lock<std::mutex> locker(mtx_);
-    if (func_) {
+    if (func_ && !processed_) {
         func_();
+        processed_ = true;
     }
     cond_.notify_all();
 }
@@ -37,7 +37,7 @@ void Scheduler::Task::Process()
 void Scheduler::Task::Wait()
 {
     std::unique_lock<std::mutex> locker(mtx_);
-    if (func_) {
+    if (func_ && !processed_) {
         cond_.wait(locker);
     }
 }
@@ -45,6 +45,9 @@ void Scheduler::Task::Wait()
 bool Scheduler::Task::WaitFor(uint64_t timeoutMs)
 {
     std::unique_lock<std::mutex> locker(mtx_);
+    if (processed_) {
+        return true;
+    }
     if (func_) {
         return std::cv_status::timeout != cond_.wait_for(locker, std::chrono::milliseconds(timeoutMs));
     }
@@ -96,7 +99,7 @@ std::shared_ptr<Scheduler::Task> Scheduler::Post(TaskFunction taskFunc)
 std::shared_ptr<Scheduler::Task> Scheduler::DelayPost(TaskFunction taskFunc, uint64_t delayMs)
 {
     auto task = std::make_shared<Task>(taskFunc);
-    (void)std::async(
+    task->delayFuture_ = std::async(
         std::launch::async,
         [&](std::shared_ptr<Task> task, uint64_t delayMs) {
             if (task->Delay(delayMs)) {

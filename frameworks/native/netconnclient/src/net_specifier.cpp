@@ -100,7 +100,7 @@ std::string NetSpecifier::ToString(const std::string &tab) const
     str.append("\n");
     str.append(tab);
     str.append("isRequested = ");
-    str.append(isRequested_ ? "true":"false");
+    str.append(isRequested_ ? "true" : "false");
 
     str.append(netCapabilities_.ToString(tab));
 
