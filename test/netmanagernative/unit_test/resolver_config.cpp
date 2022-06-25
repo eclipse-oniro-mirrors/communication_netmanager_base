@@ -49,7 +49,7 @@ sptr<INetsysService> GetProxyK()
     } else {
         std::cout << "Get proxy nullptr" << std::endl;
     }
-    
+
     return proxy;
 }
 
@@ -74,18 +74,14 @@ void freeNetsysAddrInfo(struct addrinfo *aihead)
 
 void TestSetResolverConfig()
 {
-    nmd::DnsresolverParams param0 = {
-        0, 0, 1, {"8.8.8.8", "114.114.114.114"}, {"baidu.com", "sohu.com"}};
-    nmd::DnsresolverParams param1 = {
-        1, 0, 1, {"8.8.8.8", "114.114.114.114"}, {"yahoo.com", "163.com"}};
     int  ret = -1;
     ret = netsysServiceK_->CreateNetworkCache(0);
     NETNATIVE_LOGE("NETSYS: CreateNetworkCache0   ret=%{public}d", ret);
     ret = netsysServiceK_->CreateNetworkCache(1);
     NETNATIVE_LOGE("NETSYS: CreateNetworkCache1   ret=%{public}d", ret);
-    ret = netsysServiceK_->SetResolverConfig(param0);
+    ret = netsysServiceK_->SetResolverConfig(0, 0, 1, {"8.8.8.8", "114.114.114.114"}, {"baidu.com", "sohu.com"});
     NETNATIVE_LOGE("NETSYS: SetResolverConfig0   ret=%{public}d", ret);
-    ret = netsysServiceK_->SetResolverConfig(param1);
+    ret = netsysServiceK_->SetResolverConfig(1, 0, 1, {"8.8.8.8", "114.114.114.114"}, {"yahoo.com", "163.com"});
     NETNATIVE_LOGE("NETSYS: SetResolverConfig1   ret=%{public}d", ret);
 }
 
@@ -94,15 +90,14 @@ void TestGetResolverConfig()
     int  ret = -1;
     std::vector<std::string> servers;
     std::vector<std::string> domains;
-    DnsResParams  dnsParam;
     int  num = 3;
+    uint16_t timeout;
+    uint8_t retry;
     for (int i = 0; i < num; i++) {
-        ret = netsysServiceK_->GetResolverConfig(i, servers, domains, dnsParam);
+        ret = netsysServiceK_->GetResolverConfig(i, servers, domains, timeout, retry);
         NETNATIVE_LOGE("NETSYS: getResolverConfig   ret=%{public}d, iii=%{public}d", ret, i);
         NETNATIVE_LOGE("NETSYS:  server size %{public}d, domains  size %{public}d",
             static_cast<int32_t>(servers.size()), static_cast<int32_t>(domains.size()));
-        NETNATIVE_LOGE("NETSYS:  TimeOut %{public}d, retryCount  %{public}d", dnsParam.baseTimeoutMsec,
-            dnsParam.retryCount);
         for (auto item:servers) {
             std::cout<<"Server:" <<item.c_str()<<std::endl;
         }

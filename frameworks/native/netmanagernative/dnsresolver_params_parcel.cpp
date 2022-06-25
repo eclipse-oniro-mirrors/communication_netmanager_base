@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,23 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "dnsresolver_params_parcel.h"
+
 #include "netnative_log_wrapper.h"
+
+#include "dnsresolver_params_parcel.h"
 
 namespace OHOS {
 namespace NetsysNative {
-DnsresolverParamsParcel::DnsresolverParamsParcel(): netId_(0), baseTimeoutMsec_(0), retryCount_(0)
-{
-}
+DnsResolverParamsParcel::DnsResolverParamsParcel() : netId_(0), baseTimeoutMsec_(0), retryCount_(0) {}
 
-DnsresolverParamsParcel::DnsresolverParamsParcel(const DnsresolverParams &resolvParams)
-    : netId_(resolvParams.netId), baseTimeoutMsec_(resolvParams.baseTimeoutMsec),
-    retryCount_(resolvParams.retryCount)  // ,servers_(resolvParams.servers), domains_(resolvParams.domains)
-{
-    NETNATIVE_LOGI("DnsresolverParamsParcel %{public}d", retryCount_);
-}
-
-bool DnsresolverParamsParcel::Marshalling(Parcel &parcel) const
+bool DnsResolverParamsParcel::Marshalling(Parcel &parcel) const
 {
     parcel.WriteUint16(netId_);
     parcel.WriteUint16(baseTimeoutMsec_);
@@ -47,14 +40,13 @@ bool DnsresolverParamsParcel::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    NETNATIVE_LOGI("DnsresolverParamsParcel::Marshalling %{public}d and %{public}d",
-        retryCount_, retryCount_t);
+    NETNATIVE_LOGI("DnsResolverParamsParcel::Marshalling %{public}d and %{public}d", retryCount_, retryCount_t);
     return true;
 }
 
-sptr<DnsresolverParamsParcel> DnsresolverParamsParcel::Unmarshalling(Parcel &parcel)
+sptr<DnsResolverParamsParcel> DnsResolverParamsParcel::Unmarshalling(Parcel &parcel)
 {
-    auto ptr = std::make_unique<DnsresolverParamsParcel>().release();
+    auto ptr = std::make_unique<DnsResolverParamsParcel>().release();
     if (ptr == nullptr) {
         NETNATIVE_LOGE("The parameter of ptr is nullptr");
         return nullptr;
@@ -69,7 +61,7 @@ sptr<DnsresolverParamsParcel> DnsresolverParamsParcel::Unmarshalling(Parcel &par
     if (!parcel.ReadUint8(ptr->retryCount_)) {
         return nullptr;
     }
-    NETNATIVE_LOGI("DnsresolverParamsParcel::Unmarshalling %{public}d", ptr->retryCount_);
+    NETNATIVE_LOGI("DnsResolverParamsParcel::Unmarshalling %{public}d", ptr->retryCount_);
     return ptr;
 }
 } // namespace NetsysNative
