@@ -29,12 +29,12 @@ ohos_unittest("netsys_native_manager_test") {
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
-    "$NETSYSCLIENT_SOURCE_DIR/include",
+    "$FWMARK_CLIENT_DIR/include",
   ]
 
   deps = [
+    "$FWMARK_CLIENT_DIR:fwmark_client",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
-    "$NETSYSCLIENT_SOURCE_DIR:netsys_client",
     "//utils/native/base:utils",
   ]
 

@@ -202,7 +202,7 @@ public:
      * @param retryCount
      * @return Return the return value of the netsys interface call
      */
-    int32_t GetResolverInfo(uint16_t netId, std::vector<std::string> &servers,
+    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
         std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount);
 
     /**

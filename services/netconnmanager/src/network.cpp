@@ -188,21 +188,23 @@ int32_t Network::SetRouteList(const std::list<Route> &routeList)
 int32_t Network::SetDnsList(const std::list<INetAddr> &dnsAddrList)
 {
     int32_t err;
-    if (dnsList_ != dnsAddrList) {
-        std::vector<std::string> servers;
-        std::vector<std::string> doamains;
-        for (auto it = dnsAddrList.begin(); it != dnsAddrList.end(); ++it) {
-            auto dns = *it;
-            servers.push_back(dns.address_);
-            doamains.push_back(dns.hostName_);
-        }
-
-        err = NetsysController::GetInstance().SetResolverConfig(id_, 0, 1, servers, doamains);
-        if (err) {
-            NETMGR_LOG_W("SetResolverConfig failed, [%{public}d]", err);
-        }
-        dnsList_ = dnsAddrList;
+    if (dnsList_ == dnsAddrList) {
+        NETMGR_LOG_W("dns list is same, do not update");
+        return ERR_NONE;
     }
+
+    std::vector<std::string> servers;
+    std::vector<std::string> domains;
+    for (const auto &dns : dnsAddrList) {
+        servers.push_back(dns.address_);
+        domains.push_back(dns.hostName_);
+    }
+
+    err = NetsysController::GetInstance().SetResolverConfig(static_cast<uint16_t>(id_), 0, 1, servers, domains);
+    if (err) {
+        NETMGR_LOG_W("SetResolverConfig failed, [%{public}d]", err);
+    }
+    dnsList_ = dnsAddrList;
     return ERR_NONE;
 }
 

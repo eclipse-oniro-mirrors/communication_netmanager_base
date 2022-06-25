@@ -46,8 +46,9 @@
         },
         "build": {
             "sub_component": [
+                "//foundation/communication/netmanager_base/services/netmanagernative/netsys_client:netsys_client",
                 "//foundation/communication/netmanager_base/services/netmanagernative:netsys_native_manager",
-                "//foundation/communication/netmanager_base/services/netsysclient:netsys_client",
+                "//foundation/communication/netmanager_base/services/fwmarkclient:fwmark_client",
                 "//foundation/communication/netmanager_base/services/netsyscontroller:netsys_controller",
                 "//foundation/communication/netmanager_base/services/netconnmanager:net_conn_manager",
                 "//foundation/communication/netmanager_base/services/dnsresolvermanager:dns_resolver_manager",
@@ -61,6 +62,7 @@
                 "//foundation/communication/netmanager_base/services/etc/init:netmanager_base.rc",
                 "//foundation/communication/netmanager_base/services/etc/init:netsysnative.rc",
                 "//foundation/communication/netmanager_base/services/etc/init:resolv.conf",
+                "//foundation/communication/netmanager_base/services/etc/init:xtables.lock",
                 "//foundation/communication/netmanager_base/sa_profile:net_manager_profile",
                 "//foundation/communication/netmanager_base/frameworks/js/napi/netpolicy:policy",
                 "//foundation/communication/netmanager_base/frameworks/js/napi/netstats:statistics",

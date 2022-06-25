@@ -43,15 +43,15 @@ sptr<INetsysService> ResolverConfigGetProxy()
     NETNATIVE_LOGE("Get samgr >>>>>>>>>>>>>>>>>>>>>>>>>>");
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     NETNATIVE_LOGI("Get samgr %{public}p", samgr.GetRefPtr());
-    std::cout << "Get samgr  "<< samgr.GetRefPtr() << std::endl;
+    std::cout << "Get samgr  " << samgr.GetRefPtr() << std::endl;
 
     auto remote = samgr->GetSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
     NETNATIVE_LOGI("Get remote %{public}p", remote.GetRefPtr());
-    std::cout << "Get remote "<< remote.GetRefPtr() << std::endl;
+    std::cout << "Get remote " << remote.GetRefPtr() << std::endl;
 
     auto proxy = iface_cast<NetsysNative::INetsysService>(remote);
     NETNATIVE_LOGI("Get proxy %{public}p", proxy.GetRefPtr());
-    std::cout << "Get proxy "<< proxy.GetRefPtr()<< std::endl;
+    std::cout << "Get proxy " << proxy.GetRefPtr() << std::endl;
     return proxy;
 }
 
@@ -62,18 +62,14 @@ HWTEST_F(ResolverConfigTest, ResolverConfigTest001, TestSize.Level1)
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
     }
-    int32_t ret = 0;
-    nmd::DnsresolverParams param0 = {
-        0, 0, 1, {"8.8.8.8", "114.114.114.114"}, {"baidu.com", "sohu.com"}};
-    ret = -1;
+    int32_t ret = -1;
     ret = netsysNativeService->CreateNetworkCache(0);
     NETNATIVE_LOGE("NETSYS: CreateNetworkCache0   ret=%{public}d", ret);
-    ret = netsysNativeService->SetResolverConfig(param0);
+    ret = netsysNativeService->SetResolverConfig(0, 0, 1, {"8.8.8.8", "114.114.114.114"}, {"baidu.com", "sohu.com"});
     NETNATIVE_LOGE("NETSYS: SetResolverConfig0   ret=%{public}d", ret);
     NETNATIVE_LOGE("ResolverConfigTest001 ResolverConfigTest001 ResolverConfigTest001");
     EXPECT_TRUE(ret == 0);
 }
-
 
 HWTEST_F(ResolverConfigTest, ResolverConfigTest002, TestSize.Level1)
 {
