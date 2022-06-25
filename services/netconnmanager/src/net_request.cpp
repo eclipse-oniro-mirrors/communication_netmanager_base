@@ -37,7 +37,7 @@ NetRequest::NetRequest(const sptr<NetSpecifier> &specifier, const sptr<INetConnC
 NetRequest::~NetRequest()
 {
     if (timeTask_) {
-        timeTask_->Cancel();
+        timeTask_->Ignore();
     }
 }
 
