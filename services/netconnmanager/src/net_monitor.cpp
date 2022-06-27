@@ -29,7 +29,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 static const std::string DEFAULT_PORTAL_HTTP_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
 static const std::string DEFAULT_PORTAL_HTTPS_URL = "https://connectivitycheck.platform.hicloud.com/generate_204";
-static constexpr int32_t INIT_REEVALUATE_DELAY_MS = 8 * 1000;
+static constexpr int32_t INIT_REEVALUATE_DELAY_MS = 1 * 1000;
 static constexpr int32_t MAX_FAILED_REEVALUATE_DELAY_MS = 10 * 60 * 1000;
 static constexpr int32_t SUCCESSED_REEVALUATE_DELAY_MS = 30 * 1000;
 static constexpr int32_t CAPTIVE_PORTAL_REEVALUATE_DELAY_MS = 10 * 60 * 1000;
