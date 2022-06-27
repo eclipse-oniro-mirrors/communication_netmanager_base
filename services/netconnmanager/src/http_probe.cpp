@@ -92,16 +92,6 @@ static size_t CurlWriteFunction(void *data, size_t size, size_t nmemb, void *use
     return realSize;
 }
 
-static curl_socket_t CurlOpenSocketFunction(void *userp, curlsocktype purpose, struct curl_sockaddr *address)
-{
-    CurlOptions *opts = static_cast<CurlOptions *>(userp);
-    if (opts) {
-        return opts->sockFd;
-    } else {
-        return -1;
-    }
-}
-
 static void CurlSetOptions(CURL *curl, CurlOptions *opts)
 {
     /* Print request connection process and return http data on the screen */
@@ -130,11 +120,6 @@ static void CurlSetOptions(CURL *curl, CurlOptions *opts)
     /* cache response data */
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWriteFunction);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, opts);
-    /* let curl use external socket fd */
-    if (opts->sockFd > 0) {
-        curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, CurlOpenSocketFunction);
-        curl_easy_setopt(curl, CURLOPT_OPENSOCKETDATA, opts);
-    }
 }
 
 static void CurlPerform(CURL *curl, CurlOptions *opts)

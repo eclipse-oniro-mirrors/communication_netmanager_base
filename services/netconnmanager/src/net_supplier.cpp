@@ -165,6 +165,7 @@ void NetSupplier::InsertNetCap(NetCap cap)
         allCaps_->netCaps_.insert(cap);
         NETMGR_LOG_I("NetSupplier[%{public}s] inserted new cap:%{public}d", ident_.c_str(), cap);
         async_.CallbackOnNetCapabilitiesChanged(id_, *GetNetAllCapabilities());
+        NotifyNetRequestCallbacks(INetConnCallback::NET_CAPABILITIES_CHANGE);
     }
 }
 
@@ -175,6 +176,7 @@ void NetSupplier::RemoveNetCap(NetCap cap)
         allCaps_->netCaps_.erase(cap);
         NETMGR_LOG_I("NetSupplier[%{public}s] remove new cap:%{public}d", ident_.c_str(), cap);
         async_.CallbackOnNetCapabilitiesChanged(id_, *GetNetAllCapabilities());
+        NotifyNetRequestCallbacks(INetConnCallback::NET_CAPABILITIES_CHANGE);
     }
 }
 
@@ -413,6 +415,10 @@ void NetSupplier::NotifyNetRequestCallbacks(int32_t cmd)
             case INetConnCallback::NET_LOST:
                 NETMGR_LOG_I("NetSupplier[%{public}s] notify to requests: NET_LOST", ident_.c_str());
                 req->CallbackForNetLost(netHandle_);
+                break;
+            case INetConnCallback::NET_CAPABILITIES_CHANGE:
+                NETMGR_LOG_I("NetSupplier[%{public}s] notify to requests: NET_CAPABILITIES_CHANGE", ident_.c_str());
+                req->CallbackForNetCapabilitiesChanged(netHandle_, allCaps_);
                 break;
             default:
                 return;
