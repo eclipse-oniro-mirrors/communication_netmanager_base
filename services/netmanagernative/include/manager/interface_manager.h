@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,12 +29,64 @@ class InterfaceManager {
 public:
     InterfaceManager();
     ~InterfaceManager();
+    /**
+     * @brief Set network device mtu
+     *
+     * @param interfaceName Network device name
+     * @param mtuValue Value of mtu
+     * @return Returns 0, set network device mtu successfully, otherwise it will fail
+     */
     static int SetMtu(const char *interfaceName, const char *mtuValue);
+
+    /**
+     * @brief Get network device mtu
+     *
+     * @param interfaceName Network device name
+     * @return Returns value of mtu
+     */
     static int GetMtu(const char *interfaceName);
+
+    /**
+     * @brief Add local IP address to network
+     *
+     * @param interfaceName Network device name
+     * @param addr Network IP address
+     * @param prefixLen Length of the network number of the subnet mask
+     * @return Returns 0, add local IP address to network successfully, otherwise it will fail
+     */
     static int AddAddress(const char *interfaceName, const char *addr, int prefixLen);
+
+    /**
+     * @brief Delete local IP address to network
+     *
+     * @param interfaceName Network device name
+     * @param addr Network IP address
+     * @param prefixLen Length of the network number of the subnet mask
+     * @return Returns 0, delete local IP address to network successfully, otherwise it will fail
+     */
     static int DelAddress(const char *interfaceName, const char *addr, int prefixLen);
+
+    /**
+     * @brief Get the network interface names
+     *
+     * @return Network interface names
+     */
     static std::vector<std::string> GetInterfaceNames();
+
+    /**
+     * @brief Get the network interface config
+     *
+     * @param ifName Network device name
+     * @return Interface configuration parcel
+     */
     static InterfaceConfigurationParcel GetIfaceConfig(const std::string &ifName);
+
+    /**
+     * @brief Set network interface config
+     *
+     * @param ifaceConfig Interface configuration parcel
+     * @return Returns 1, set network interface config successfully, otherwise it will fail
+     */
     static int SetIfaceConfig(const nmd::InterfaceConfigurationParcel &ifaceConfig);
 private:
     static int ModifyAddress(uint32_t action, const char *interfaceName, const char *addr, int prefixLen);

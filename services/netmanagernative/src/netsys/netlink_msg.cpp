@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,12 @@
  */
 
 #include "netlink_msg.h"
-#include "securec.h"
 #include "netnative_log_wrapper.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace nmd {
-NetlinkMsg::NetlinkMsg(uint16_t flags, size_t maxBufLen, int pid)
+NetlinkMsg::NetlinkMsg(uint16_t flags, size_t maxBufLen, int32_t pid)
 {
     this->maxBufLen = maxBufLen;
     this->netlinkMessage = reinterpret_cast<struct nlmsghdr *>(new char[NLMSG_SPACE(maxBufLen)]);
@@ -27,17 +27,17 @@ NetlinkMsg::NetlinkMsg(uint16_t flags, size_t maxBufLen, int pid)
     if (result != 0) {
         NETNATIVE_LOGE("[NetlinkMessage]: memset result %{public}d", result);
     }
-    this->netlinkMessage->nlmsg_flags = NLM_F_REQUEST | NLM_F_ACK | flags;
+    this->netlinkMessage->nlmsg_flags = flags;
     this->netlinkMessage->nlmsg_pid = static_cast<uint32_t>(pid);
     this->netlinkMessage->nlmsg_seq = 1;
 }
 
 NetlinkMsg::~NetlinkMsg()
 {
-    delete [] this->netlinkMessage;
+    delete[] this->netlinkMessage;
 }
 
-void NetlinkMsg::AddRoute(unsigned short action, struct rtmsg msg)
+void NetlinkMsg::AddRoute(uint16_t action, struct rtmsg msg)
 {
     this->netlinkMessage->nlmsg_type = action;
     int32_t result = memcpy_s(NLMSG_DATA(this->netlinkMessage), sizeof(struct rtmsg), &msg, sizeof(struct rtmsg));
@@ -47,29 +47,29 @@ void NetlinkMsg::AddRoute(unsigned short action, struct rtmsg msg)
     this->netlinkMessage->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
 }
 
-void NetlinkMsg::AddRule(unsigned short action, struct fib_rule_hdr msg)
+void NetlinkMsg::AddRule(uint16_t action, struct fib_rule_hdr msg)
 {
     this->netlinkMessage->nlmsg_type = action;
-    int32_t result = memcpy_s(NLMSG_DATA(this->netlinkMessage), sizeof(struct fib_rule_hdr),
-        &msg, sizeof(struct fib_rule_hdr));
+    int32_t result =
+        memcpy_s(NLMSG_DATA(this->netlinkMessage), sizeof(struct fib_rule_hdr), &msg, sizeof(struct fib_rule_hdr));
     if (result != 0) {
         NETNATIVE_LOGE("[AddRule]: string copy failed result %{public}d", result);
     }
     this->netlinkMessage->nlmsg_len = NLMSG_LENGTH(sizeof(struct fib_rule_hdr));
 }
 
-void NetlinkMsg::AddAddress(unsigned short action, struct ifaddrmsg msg)
+void NetlinkMsg::AddAddress(uint16_t action, struct ifaddrmsg msg)
 {
     this->netlinkMessage->nlmsg_type = action;
-    int32_t result = memcpy_s(NLMSG_DATA(this->netlinkMessage), sizeof(struct ifaddrmsg),
-        &msg, sizeof(struct ifaddrmsg));
+    int32_t result =
+        memcpy_s(NLMSG_DATA(this->netlinkMessage), sizeof(struct ifaddrmsg), &msg, sizeof(struct ifaddrmsg));
     if (result != 0) {
         NETNATIVE_LOGE("[AddAddress]: string copy failed result %{public}d", result);
     }
     this->netlinkMessage->nlmsg_len = NLMSG_LENGTH(sizeof(struct ifaddrmsg));
 }
 
-int NetlinkMsg::AddAttr(unsigned int type, void *data, size_t alen)
+int32_t NetlinkMsg::AddAttr(uint16_t type, void *data, size_t alen)
 {
     if (alen == 0) {
         NETNATIVE_LOGE("[NetlinkMessage]: length  data can not be 0");
@@ -81,7 +81,7 @@ int NetlinkMsg::AddAttr(unsigned int type, void *data, size_t alen)
         return -1;
     }
 
-    int len = RTA_LENGTH(alen);
+    int32_t len = RTA_LENGTH(alen);
     if (NLMSG_ALIGN(this->netlinkMessage->nlmsg_len) + RTA_ALIGN(len) > this->maxBufLen) {
         NETNATIVE_LOGE("[NetlinkMessage]: attr length than max len: %{public}d", (int32_t)this->maxBufLen);
         return -1;
@@ -101,15 +101,15 @@ int NetlinkMsg::AddAttr(unsigned int type, void *data, size_t alen)
     }
 
     this->netlinkMessage->nlmsg_len = NLMSG_ALIGN(this->netlinkMessage->nlmsg_len) + RTA_ALIGN(len);
-    return 1;
+    return 0;
 }
 
-int NetlinkMsg::AddAttr16(unsigned int type, uint16_t data)
+int32_t NetlinkMsg::AddAttr16(uint16_t type, uint16_t data)
 {
     return this->AddAttr(type, &data, sizeof(uint16_t));
 }
 
-int NetlinkMsg::AddAttr32(unsigned int type, uint32_t data)
+int32_t NetlinkMsg::AddAttr32(uint16_t type, uint32_t data)
 {
     return this->AddAttr(type, &data, sizeof(uint32_t));
 }

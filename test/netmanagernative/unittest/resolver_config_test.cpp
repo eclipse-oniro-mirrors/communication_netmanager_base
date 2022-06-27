@@ -38,7 +38,7 @@ void ResolverConfigTest::SetUp() {}
 
 void ResolverConfigTest::TearDown() {}
 
-sptr<INetsysService> GetProxy()
+sptr<INetsysService> ResolverConfigGetProxy()
 {
     NETNATIVE_LOGE("Get samgr >>>>>>>>>>>>>>>>>>>>>>>>>>");
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -57,7 +57,7 @@ sptr<INetsysService> GetProxy()
 
 HWTEST_F(ResolverConfigTest, ResolverConfigTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ResolverConfigGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -77,7 +77,7 @@ HWTEST_F(ResolverConfigTest, ResolverConfigTest001, TestSize.Level1)
 
 HWTEST_F(ResolverConfigTest, ResolverConfigTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ResolverConfigGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -90,7 +90,7 @@ HWTEST_F(ResolverConfigTest, ResolverConfigTest002, TestSize.Level1)
 
 HWTEST_F(ResolverConfigTest, ResolverConfigTest003, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ResolverConfigGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);

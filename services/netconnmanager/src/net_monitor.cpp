@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,206 +12,196 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "net_monitor.h"
 
+#include <future>
+#include <list>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <fcntl.h>
+#include <cstring>
+#include <securec.h>
 #include "net_mgr_log_wrapper.h"
+#include "netsys_controller.h"
+#include "net_monitor.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetMonitor::NetMonitor(NetDetectionStateHandler handle)
+static const std::string DEFAULT_PORTAL_HTTP_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
+static const std::string DEFAULT_PORTAL_HTTPS_URL = "https://connectivitycheck.platform.hicloud.com/generate_204";
+static constexpr int32_t INIT_REEVALUATE_DELAY_MS = 8 * 1000;
+static constexpr int32_t MAX_FAILED_REEVALUATE_DELAY_MS = 10 * 60 * 1000;
+static constexpr int32_t SUCCESSED_REEVALUATE_DELAY_MS = 30 * 1000;
+static constexpr int32_t CAPTIVE_PORTAL_REEVALUATE_DELAY_MS = 10 * 60 * 1000;
+static constexpr int32_t DOUBLE = 2; // so ugly
+
+NetMonitor::NetMonitor(uint32_t netId, SocketFactory &sockFactory, NetConnAsync &async)
+    : netId_(netId), sockFactory_(sockFactory), async_(async)
 {
-    isExitNetMonitorThread_ = false;
-    isStopNetMonitor_ = true;
-    isExitNetMonitorThread_ = false;
-    netDetectionStatus_ = handle;
-    lastDetectionState_ = INVALID_DETECTION_STATE;
 }
 
 NetMonitor::~NetMonitor()
 {
-    ExitNetMonitorThread();
+    Stop();
 }
 
-bool NetMonitor::HttpDetection()
+void NetMonitor::Start()
 {
-    NETMGR_LOG_D("HttpDetection in. ifaceName_: %{public}s", ifaceName_.c_str());
-    HttpRequest httpRequest;
-    httpRequest.SetIfaceName(ifaceName_);
-
-    std::string httpMsg(DEFAULT_PORTAL_HTTPS_URL);
-    std::string httpHeader;
-    int32_t ret = httpRequest.HttpGetHeader(httpMsg, httpHeader);
-    std::string urlRedirect;
-    if (ret != 0 || httpHeader.empty()) {
-        netDetectionStatus_(NetDetectionStatus::INVALID_DETECTION_STATE, urlRedirect);
-        lastDetectionState_ = INVALID_DETECTION_STATE;
-        return true;
+    std::lock_guard<std::mutex> locker(mtx_);
+    if (!evaluating_) {
+        evaluating_ = true;
+        Reevaluate();
     }
+}
 
-    int32_t retCode = GetUrlRedirectFromResponse(httpHeader, urlRedirect);
-    int32_t statusCode = GetStatusCodeFromResponse(httpHeader);
-    NETMGR_LOG_D("ifaceName[%{public}s], statusCode[%{public}d], retCode[%{public}d]", ifaceName_.c_str(), statusCode,
-        retCode);
-    bool isNotPortal = true;
-    if ((statusCode == OK || (statusCode >= BAD_REQUEST && statusCode <= CLIENT_ERROR_MAX)) &&
-        retCode > PORTAL_CONTENT_LENGTH_MIN) {
-        if (retCode > -1) {
-            netDetectionStatus_(NetDetectionStatus::CAPTIVE_PORTAL_STATE, urlRedirect);
+void NetMonitor::Stop()
+{
+    std::lock_guard<std::mutex> locker(mtx_);
+    evaluating_ = false;
+    reevaluateSteps_ = 0;
+}
+
+bool NetMonitor::IsEvaluating() const
+{
+    return evaluating_;
+}
+
+bool NetMonitor::IsValidated() const
+{
+    return result_.IsSuccessful();
+}
+
+HttpProbeResult NetMonitor::GetEvaluationResult() const
+{
+    return result_;
+}
+
+void NetMonitor::Reevaluate()
+{
+    std::thread asyncThread([&]() {
+        HttpProbeResult result;
+        result = SendParallelHttpProbes(DEFAULT_PORTAL_HTTP_URL, DEFAULT_PORTAL_HTTPS_URL);
+
+        std::lock_guard<std::mutex> locker(mtx_);
+        reevaluateSteps_++;
+        if (evaluating_) {
+            if (result.IsPortal()) {
+                reevaluateDelay_ = CAPTIVE_PORTAL_REEVALUATE_DELAY_MS;
+            } else if (result.IsSuccessful()) {
+                reevaluateDelay_ = SUCCESSED_REEVALUATE_DELAY_MS;
+            } else {
+                NETMGR_LOG_I("NetMonitor[%{public}d] evaluation failed, code[%{public}d]", netId_, result.GetCode());
+                reevaluateDelay_ = INIT_REEVALUATE_DELAY_MS * DOUBLE * reevaluateSteps_;
+                if (reevaluateDelay_ >= MAX_FAILED_REEVALUATE_DELAY_MS) {
+                    reevaluateDelay_ = MAX_FAILED_REEVALUATE_DELAY_MS;
+                }
+            }
+
+            if (result != result_) {
+                result_ = result;
+                OnProbeResultChanged();
+            }
+            reevaluateTask_ =
+                async_.GetScheduler().DelayPost(std::bind(&NetMonitor::Reevaluate, this), reevaluateDelay_);
         }
-        lastDetectionState_ = CAPTIVE_PORTAL_STATE;
-        isNotPortal = false;
-    } else if (statusCode == NO_CONTENT) {
-        netDetectionStatus_(NetDetectionStatus::VERIFICATION_STATE, urlRedirect);
-        lastDetectionState_ = VERIFICATION_STATE;
-        isNotPortal = true;
-    } else if (statusCode != NO_CONTENT && statusCode >= CREATED && statusCode <= URL_REDIRECT_MAX) {
-        if (retCode > -1) {
-            netDetectionStatus_(NetDetectionStatus::CAPTIVE_PORTAL_STATE, urlRedirect);
-        }
-        lastDetectionState_ = CAPTIVE_PORTAL_STATE;
-        isNotPortal = false;
+    });
+    asyncThread.detach();
+}
+
+void NetMonitor::OnProbeResultChanged()
+{
+    NetDetectionResultCode code;
+
+    if (result_.IsPortal()) {
+        code = NET_DETECTION_CAPTIVE_PORTAL;
+    } else if (result_.IsSuccessful()) {
+        code = NET_DETECTION_SUCCESS;
     } else {
-        netDetectionStatus_(NetDetectionStatus::INVALID_DETECTION_STATE, urlRedirect);
-        lastDetectionState_ = INVALID_DETECTION_STATE;
-        isNotPortal = true;
+        code = NET_DETECTION_FAIL;
     }
 
-    NETMGR_LOG_D("statusCode[%{public}d], urlRedirect[%{public}s]", statusCode, urlRedirect.c_str());
-    return isNotPortal;
+    async_.CallbackOnNetDetectionResultChanged(netId_, code, result_.GetRedirectUrl());
 }
 
-void NetMonitor::RunNetMonitorThreadFunc()
+HttpProbeResult NetMonitor::SendParallelHttpProbes(const Url &httpUrl, const Url &httpsUrl)
 {
-    NETMGR_LOG_D("RunNetMonitorThreadFunc in. ifaceName[%{public}s]", ifaceName_.c_str());
-    int32_t timeoutMs = HTTP_DETECTION_WAIT_TIME_MS;
-    for (;;) {
-        while (isStopNetMonitor_ && !isExitNetMonitorThread_) {
-            NETMGR_LOG_D("waiting for signal");
-            std::unique_lock<std::mutex> lock(mutex_);
-            condition_.wait(lock);
+    auto now = std::chrono::system_clock::now();
+    auto httpResult = std::async(std::launch::async, std::bind(&NetMonitor::SendDnsAndHttpProbes, this,
+                                                               httpUrl.ToString(), HttpProbe::PROBE_HTTP));
+    auto httpsResult = std::async(std::launch::async, std::bind(&NetMonitor::SendDnsAndHttpProbes, this,
+                                                                httpsUrl.ToString(), HttpProbe::PROBE_HTTPS));
+
+    httpResult.wait();
+    httpsResult.wait();
+    NETMGR_LOG_I("NetMonitor[%{public}d] send http&https probes cost %{public}lld ms", netId_,
+                 std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - now).count());
+
+    if (httpResult.get().IsPortal()) {
+        return httpResult.get();
+    }
+    return httpsResult.get();
+}
+
+HttpProbeResult NetMonitor::SendDnsAndHttpProbes(const Url &url, HttpProbe::ProbeType probeType)
+{
+    SendDnsProbe(url.GetHost());
+    return SendHttpProbe(url.ToString(), probeType);
+}
+
+HttpProbeResult NetMonitor::SendHttpProbe(const std::string &url, HttpProbe::ProbeType probeType)
+{
+    int sockFd = sockFactory_.CreateSocket(AF_INET, SOCK_STREAM, 0);
+    HttpProbeResult result;
+    if (sockFd > 0) {
+        HttpProbe httpProbe(probeType, url, sockFd);
+        if (!httpProbe.HasError()) {
+            result = httpProbe.GetResult();
+        } else {
+            NETMGR_LOG_W("NetMonitor[%{public}d] Http probe failed,[ %{public}s]", netId_,
+                         httpProbe.ErrorString().c_str());
         }
-
-        if (isExitNetMonitorThread_) {
-            NETMGR_LOG_D("break the loop");
-            break;
-        }
-        HttpDetection();
-        if (!isExitNetMonitorThread_) {
-            std::unique_lock<std::mutex> lock(mutex_);
-            conditionTimeout_.wait_for(lock, std::chrono::milliseconds(timeoutMs));
-        }
+        sockFactory_.DestroySocket(sockFd);
+    } else {
+        NETMGR_LOG_W("Create socket failed");
     }
+
+    return result;
 }
 
-ResultCode NetMonitor::InitNetMonitorThread()
+void NetMonitor::SendDnsProbe(const std::string &host)
 {
-    netMonitorThread_ = std::make_unique<std::thread>(&NetMonitor::RunNetMonitorThreadFunc, this);
-    if (netMonitorThread_ == nullptr) {
-        NETMGR_LOG_E("Start NetMonitor thread failed!");
-        return ResultCode::ERR_NET_MONITOR_OPT_FAILED;
-    }
-    return ResultCode::ERR_NET_MONITOR_OPT_SUCCESS;
-}
+    auto now = std::chrono::system_clock::now();
+    std::list<std::string> addrList;
+    struct addrinfo hints;
+    struct addrinfo *result = nullptr;
 
-void NetMonitor::StopNetMonitorThread()
-{
-    NETMGR_LOG_D("Enter StopNetMonitorThread");
-    std::unique_lock<std::mutex> lock(mutex_);
-    isStopNetMonitor_ = true;
-}
+    (void)memset_s(&hints, sizeof(hints), 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = 0;
+    hints.ai_protocol = IPPROTO_TCP;
 
-void NetMonitor::SignalNetMonitorThread(const std::string &ifaceName)
-{
-    NETMGR_LOG_D("Enter SignalNetMonitorThread");
-    std::unique_lock<std::mutex> lock(mutex_);
-    ifaceName_ = ifaceName;
-    lastDetectionState_ = INVALID_DETECTION_STATE;
-    isStopNetMonitor_ = false;
-    condition_.notify_one();
-    conditionTimeout_.notify_one();
-    NETMGR_LOG_D("leave SignalNetMonitorThread!");
-}
+    int32_t err = 0;
+    // call getaddrinfo to resolve host
 
-void NetMonitor::ExitNetMonitorThread()
-{
-    NETMGR_LOG_D("Enter ExitNetMonitorThread");
-    {
-        std::unique_lock<std::mutex> lock(mutex_);
-        isStopNetMonitor_ = false;
-        isExitNetMonitorThread_ = true;
-        condition_.notify_one();
-        conditionTimeout_.notify_one();
+    for (struct addrinfo *addrInfo = result; addrInfo != nullptr; addrInfo = addrInfo->ai_next) {
+        struct in_addr addr;
+        struct sockaddr_in *addrin = reinterpret_cast<struct sockaddr_in *>(addrInfo->ai_addr);
+        addr.s_addr = addrin->sin_addr.s_addr;
+        addrList.push_back(inet_ntoa(addr));
     }
 
-    if (netMonitorThread_ != nullptr) {
-        netMonitorThread_->join();
-        NETMGR_LOG_D("ExitNetMonitorThread OK");
-    }
-}
-
-int32_t NetMonitor::GetStatusCodeFromResponse(const std::string &strResponse)
-{
-    if (strResponse.empty()) {
-        NETMGR_LOG_E("strResponse is empty");
-        return -1;
+    if (result) {
+        freeaddrinfo(result);
     }
 
-    std::string::size_type newLinePos = strResponse.find("\r\n");
-    if (newLinePos == std::string::npos) {
-        NETMGR_LOG_E("StrResponse did not find the response line!");
-        return -1;
+    NETMGR_LOG_I("NetMonitor[%{public}d] send dns probe cost %{public}lld ms", netId_,
+                 std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - now).count());
+    if (addrList.size() > 0) {
+        // dns probe success...
+    } else {
+        NETMGR_LOG_I("Resolve url failed %{public}d", err);
     }
-    std::string statusLine = strResponse.substr(0, newLinePos);
-    std::string::size_type spacePos = statusLine.find(" ");
-    if (spacePos == std::string::npos) {
-        NETMGR_LOG_E("No spaces found in the response line!");
-        return -1;
-    }
-    std::string strStatusCode = statusLine.substr(spacePos + 1, statusLine.length() - 1);
-    std::string::size_type pos = strStatusCode.find(" ");
-    if (pos == std::string::npos) {
-        NETMGR_LOG_E("No other space was found in the response line!");
-        return -1;
-    }
-    strStatusCode = strStatusCode.substr(0, pos);
-    if (strStatusCode.empty()) {
-        NETMGR_LOG_E("String status code is empty!");
-        return -1;
-    }
-
-    int32_t statusCode = std::stoi(strStatusCode);
-    return statusCode;
-}
-
-int32_t NetMonitor::GetUrlRedirectFromResponse(const std::string &strResponse, std::string &urlRedirect)
-{
-    if (strResponse.empty()) {
-        NETMGR_LOG_E("strResponse is empty");
-        return -1;
-    }
-
-    std::string::size_type startPos = strResponse.find(PORTAL_URL_REDIRECT_FIRST_CASE);
-    if (startPos != std::string::npos) {
-        startPos += PORTAL_URL_REDIRECT_FIRST_CASE.length();
-        std::string::size_type endPos = strResponse.find(PORTAL_END_STR);
-        if (endPos != std::string::npos) {
-            urlRedirect = strResponse.substr(startPos, endPos - startPos);
-        }
-        return 0;
-    }
-
-    startPos = strResponse.find(PORTAL_URL_REDIRECT_SECOND_CASE);
-    if (startPos != std::string::npos) {
-        startPos += PORTAL_URL_REDIRECT_SECOND_CASE.length();
-        std::string::size_type endPos = strResponse.find(PORTAL_END_STR);
-        if (endPos != std::string::npos) {
-            urlRedirect = strResponse.substr(startPos, endPos - startPos);
-        }
-        startPos = strResponse.find(CONTENT_STR);
-        return std::atoi(strResponse.substr(startPos + CONTENT_STR.length(), NET_CONTENT_LENGTH).c_str());
-    }
-
-    return -1;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

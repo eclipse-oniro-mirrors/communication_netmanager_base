@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,10 @@
 #ifndef INCLUDE_NET_MANAGER_NATIVE_H__
 #define INCLUDE_NET_MANAGER_NATIVE_H__
 
+#include <conn_manager.h>
 #include <interface_manager.h>
 #include <interface_type.h>
 #include <memory>
-#include <network_manager.h>
 #include <route_manager.h>
 #include <sharing_manager.h>
 #include <route_type.h>
@@ -31,7 +31,7 @@ namespace nmd {
 class NetManagerNative {
 public:
     NetManagerNative();
-    ~NetManagerNative();
+    ~NetManagerNative() = default;
 
     static void GetOriginInterfaceIndex();
     static std::vector<unsigned int> GetCurrentInterfaceIndex();
@@ -87,11 +87,11 @@ public:
     int32_t IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface);
 
 private:
-    std::shared_ptr<NetworkManager> networkManager;
     std::shared_ptr<RouteManager> routeManager;
     std::shared_ptr<InterfaceManager> interfaceManager;
-    std::shared_ptr<SharingManager> sharingManager_ = nullptr;
-    static std::vector<unsigned int> interfaceIdex;
+    std::shared_ptr<SharingManager> sharingManager;
+    std::shared_ptr<ConnManager> connManager;
+    static std::vector<unsigned int> interfaceIndex;
 };
 } // namespace nmd
 } // namespace OHOS

@@ -34,6 +34,7 @@ public:
     int32_t NetLost(sptr<NetHandle> &netHandle) override;
     int32_t NetUnavailable() override;
     int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override;
+
 private:
     bool WriteInterfaceToken(MessageParcel &data);
 
