@@ -27,7 +27,7 @@ Scheduler::Task::~Task() {}
 void Scheduler::Task::Process()
 {
     std::unique_lock<std::mutex> locker(mtx_);
-    if (func_ && !processed_ && !ignore_) {
+    if (func_ && !processed_ && !ignored_) {
         func_();
         processed_ = true;
     }
