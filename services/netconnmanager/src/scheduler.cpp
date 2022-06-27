@@ -27,7 +27,7 @@ Scheduler::Task::~Task() {}
 void Scheduler::Task::Process()
 {
     std::unique_lock<std::mutex> locker(mtx_);
-    if (func_ && !processed_) {
+    if (func_ && !processed_ && !ignored_) {
         func_();
         processed_ = true;
     }
@@ -61,6 +61,12 @@ void Scheduler::Task::Cancel()
         canceled_ = true;
         delayCond_.notify_one();
     }
+}
+
+void Scheduler::Task::Ignore()
+{
+    Cancel();
+    ignored_ = true;
 }
 
 bool Scheduler::Task::Delay(uint64_t delayMs)
@@ -123,7 +129,9 @@ void Scheduler::Run()
             auto task = tasks_.front();
             tasks_.pop_front();
             locker.unlock();
-            task->Process();
+            if (!task->ignored_) {
+                task->Process();
+            }
         }
     }
 }

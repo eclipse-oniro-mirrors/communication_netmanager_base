@@ -66,6 +66,12 @@ public:
          */
         void Cancel();
 
+        /**
+         * Ignore this task, task will not be processed, and deley will be canceled
+         *
+         */
+        void Ignore();
+
     private:
         bool Delay(uint64_t delayMs);
 
@@ -77,6 +83,7 @@ public:
         std::condition_variable cond_;
         bool canceled_ {false};
         bool processed_ {false};
+        bool ignored_ {false};
         std::mutex delayMtx_;
         std::condition_variable delayCond_;
         std::future<void> delayFuture_;
