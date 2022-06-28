@@ -138,6 +138,9 @@ bool DhcpController::StartDhcpService(const std::string &iface, const std::strin
 }
 bool DhcpController::StopDhcpService(const std::string &iface)
 {
+    if (OHOS::Wifi::DhcpServiceApi::GetInstance() == nullptr) {
+        return false;
+    }
     if (OHOS::Wifi::DhcpServiceApi::GetInstance()->RemoveAllDhcpRange(iface) != 0) {
         NETNATIVE_LOGI("failed to remove [%{public}s] dhcp range.", iface.c_str());
     }
