@@ -115,6 +115,15 @@ static bool MakeKey(char *hostName, char *serv, struct addrinfo *hints, char key
     return sprintf_s(key, MAX_KEY_LENGTH, "%s", hostName) > 0;
 }
 
+static void NetsysGetDefaultConfig(struct ResolvConfig *config)
+{
+    config->timeoutMs = DEFAULT_TIMEOUT;
+    config->retryCount = DEFAULT_RETRY;
+    if (strcpy_s(config->nameservers[0], sizeof(config->nameservers[0]), DEFAULT_SERVER) <= 0) {
+        DNS_CONFIG_PRINT("NetsysGetDefaultConfig strcpy_s failed");
+    }
+}
+
 static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct ResolvConfig *config) //
 {
     struct RequestInfo info = {
@@ -158,13 +167,15 @@ int32_t NetSysGetResolvConf(uint16_t netId, struct ResolvConfig *config)
     int sockFd = CreateConnectionToNetSys();
     if (sockFd < 0) {
         DNS_CONFIG_PRINT("NetSysGetResolvConf CreateConnectionToNetSys connect to netsys err: %d", errno);
-        return sockFd;
+        NetsysGetDefaultConfig(config);
+        return 0;
     }
 
     int32_t err = NetSysGetResolvConfInternal(sockFd, netId, config);
     if (err < 0) {
         DNS_CONFIG_PRINT("NetSysGetResolvConf NetSysGetResolvConfInternal err: %d", errno);
-        return err;
+        NetsysGetDefaultConfig(config);
+        return 0;
     }
 
     DNS_CONFIG_PRINT("GetResolvConfFromNetsys end");
