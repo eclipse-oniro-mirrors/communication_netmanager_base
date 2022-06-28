@@ -428,5 +428,8 @@ include_directories(../../../base/hiviewdfx/hilog/interfaces/native/innerkits/in
 include_directories(../wifi/dhcp/services/mgr_service/include)
 include_directories(../../../foundation/bundlemanager/bundle_framework/interfaces/innerkits/libeventhandler/include)
 
+include_directories(../../../foundation/communication/wifi/dhcp/interfaces/inner_api/interfaces)
+include_directories(../../../foundation/communication/wifi/dhcp/interfaces/inner_api/include)
+
 add_compile_definitions(NETMGR_DEBUG=1)
 add_subdirectory(services/netmanagernative/netsys_client)

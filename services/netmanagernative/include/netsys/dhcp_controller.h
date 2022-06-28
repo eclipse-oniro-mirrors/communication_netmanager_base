@@ -47,7 +47,6 @@ public:
 
     void Process(const std::string &iface, OHOS::Wifi::DhcpResult &result);
 private:
-    std::unique_ptr<OHOS::Wifi::IDhcpService> dhcpService_ = nullptr;
     std::unique_ptr<DhcpControllerResultNotify> dhcpResultNotify_ = nullptr;
     sptr<OHOS::NetsysNative::INotifyCallback> callback_ = nullptr;
 };
