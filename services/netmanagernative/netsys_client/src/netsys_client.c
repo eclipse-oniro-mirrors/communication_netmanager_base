@@ -117,6 +117,10 @@ static bool MakeKey(char *hostName, char *serv, struct addrinfo *hints, char key
 
 static void NetsysGetDefaultConfig(struct ResolvConfig *config)
 {
+    if (memset_s(config, sizeof(struct ResolvConfig), 0, sizeof(struct ResolvConfig)) != EOK) {
+        DNS_CONFIG_PRINT("NetsysGetDefaultConfig memset_s failed");
+        return;
+    }
     config->timeoutMs = DEFAULT_TIMEOUT;
     config->retryCount = DEFAULT_RETRY;
     if (strcpy_s(config->nameservers[0], sizeof(config->nameservers[0]), DEFAULT_SERVER) <= 0) {
@@ -179,6 +183,10 @@ int32_t NetSysGetResolvConf(uint16_t netId, struct ResolvConfig *config)
     }
 
     DNS_CONFIG_PRINT("GetResolvConfFromNetsys end");
+    if (strlen(config->nameservers[0]) == 0) {
+        NetsysGetDefaultConfig(config);
+        return 0;
+    }
     return 0;
 }
 
