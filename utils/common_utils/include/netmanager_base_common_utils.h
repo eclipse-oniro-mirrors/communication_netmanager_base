@@ -33,10 +33,6 @@ bool IsValidIPV6(const std::string &ip);
 int8_t GetAddrFamily(const std::string &ip);
 
 int GetMaskLength(const std::string &mask);
-
-bool ParseInt(const char *str, int32_t *value);
-
-int64_t ConvertToInt64(const std::string& str);
 } // namespace OHOS::NetManagerStandard::CommonUtils
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H */

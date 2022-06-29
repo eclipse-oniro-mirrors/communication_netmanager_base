@@ -1,41 +1,12 @@
-# Copyright (C) 2022 Huawei Device Co., Ltd.
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 cmake_minimum_required(VERSION 3.20)
 project(netmanager_base)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 23)
 
 include_directories(frameworks/js/napi/common)
-include_directories(frameworks/js/napi/connection/async_context/include)
-include_directories(frameworks/js/napi/connection/async_work/include)
-include_directories(frameworks/js/napi/connection/connection_exec/include)
-include_directories(frameworks/js/napi/connection/connection_module/include)
-include_directories(frameworks/js/napi/connection/constant)
-include_directories(frameworks/js/napi/connection/constant/include)
-include_directories(frameworks/js/napi/connection/observer/include)
-include_directories(frameworks/js/napi/connection/options/include)
 include_directories(frameworks/js/napi/netconn/include)
 include_directories(frameworks/js/napi/netpolicy/include)
 include_directories(frameworks/js/napi/netstats/include)
-include_directories(frameworks/js/napi/network/async_context/include)
-include_directories(frameworks/js/napi/network/async_work/include)
-include_directories(frameworks/js/napi/network/constant)
-include_directories(frameworks/js/napi/network/constant/include)
-include_directories(frameworks/js/napi/network/network_exec/include)
-include_directories(frameworks/js/napi/network/network_module/include)
-include_directories(frameworks/js/napi/network/observer/include)
-include_directories(frameworks/js/napi/network/options/include)
 include_directories(frameworks/native/netmanagernative)
 include_directories(interfaces)
 include_directories(interfaces/innerkits)
@@ -59,15 +30,15 @@ include_directories(services/dnsresolvermanager/include)
 include_directories(services/dnsresolvermanager/include/stub)
 include_directories(services/netconnmanager/include)
 include_directories(services/netconnmanager/include/stub)
+include_directories(services/netsyscontroller/include)
 include_directories(services/netmanagernative/include)
-include_directories(services/netmanagernative/include/manager)
-include_directories(services/netmanagernative/include/netsys)
 include_directories(services/netpolicymanager/include)
 include_directories(services/netpolicymanager/include/stub)
 include_directories(services/netstatsmanager/include)
 include_directories(services/netstatsmanager/include/stub)
-include_directories(services/fwmarkclient/include)
-include_directories(services/netsyscontroller/include)
+include_directories(test/netconnmanager/unittest/net_conn_manager_test)
+include_directories(test/netpolicymanager/unittest/net_policy_manager_test)
+include_directories(test/netstatsmanager/unittest/net_stats_manager_test)
 include_directories(utils/base_async_work)
 include_directories(utils/base_async_work/include)
 include_directories(utils/base_context/include)
@@ -76,35 +47,14 @@ include_directories(utils/event_manager/include)
 include_directories(utils/log/include)
 include_directories(utils/module_template/include)
 include_directories(utils/napi_utils/include)
+include_directories(services/netmanagernative/include/manager)
+include_directories(services/netmanagernative/include/netsys)
 
 add_executable(netmanager_base
         frameworks/js/napi/common/base_context.h
         frameworks/js/napi/common/event_context.h
         frameworks/js/napi/common/napi_common.cpp
         frameworks/js/napi/common/napi_common.h
-        frameworks/js/napi/connection/async_context/include/bindsocket_context.h
-        frameworks/js/napi/connection/async_context/include/getaddressbyname_context.h
-        frameworks/js/napi/connection/async_context/include/getdefaultnet_context.h
-        frameworks/js/napi/connection/async_context/include/parse_nethandle_context.h
-        frameworks/js/napi/connection/async_context/include/register_context.h
-        frameworks/js/napi/connection/async_context/src/bindsocket_context.cpp
-        frameworks/js/napi/connection/async_context/src/getaddressbyname_context.cpp
-        frameworks/js/napi/connection/async_context/src/getdefaultnet_context.cpp
-        frameworks/js/napi/connection/async_context/src/parse_nethandle_context.cpp
-        frameworks/js/napi/connection/async_context/src/register_context.cpp
-        frameworks/js/napi/connection/async_work/include/connection_async_work.h
-        frameworks/js/napi/connection/async_work/src/connection_async_work.cpp
-        frameworks/js/napi/connection/connection_exec/include/connection_exec.h
-        frameworks/js/napi/connection/connection_exec/src/connection_exec.cpp
-        frameworks/js/napi/connection/connection_module/include/connection_module.h
-        frameworks/js/napi/connection/connection_module/src/connection_module.cpp
-        frameworks/js/napi/connection/constant/include/constant.h
-        frameworks/js/napi/connection/observer/include/net_conn_callback_observer.h
-        frameworks/js/napi/connection/observer/src/net_conn_callback_observer.cpp
-        frameworks/js/napi/connection/options/include/net_address.h
-        frameworks/js/napi/connection/options/include/netconnection.h
-        frameworks/js/napi/connection/options/src/net_address.cpp
-        frameworks/js/napi/connection/options/src/netconnection.cpp
         frameworks/js/napi/netconn/include/event_listener_context.h
         frameworks/js/napi/netconn/include/napi_net_conn.h
         frameworks/js/napi/netconn/include/napi_net_conn_observer.h
@@ -125,23 +75,6 @@ add_executable(netmanager_base
         frameworks/js/napi/netstats/src/napi_net_stats.cpp
         frameworks/js/napi/netstats/src/net_stats_callback.cpp
         frameworks/js/napi/netstats/src/net_stats_event_listener_manager.cpp
-        frameworks/js/napi/network/async_context/include/gettype_context.h
-        frameworks/js/napi/network/async_context/include/subscribe_context.h
-        frameworks/js/napi/network/async_context/include/unsubscribe_context.h
-        frameworks/js/napi/network/async_context/src/gettype_context.cpp
-        frameworks/js/napi/network/async_context/src/subscribe_context.cpp
-        frameworks/js/napi/network/async_context/src/unsubscribe_context.cpp
-        frameworks/js/napi/network/async_work/include/network_async_work.h
-        frameworks/js/napi/network/async_work/src/network_async_work.cpp
-        frameworks/js/napi/network/constant/include/constant.h
-        frameworks/js/napi/network/network_exec/include/network_exec.h
-        frameworks/js/napi/network/network_exec/src/network_exec.cpp
-        frameworks/js/napi/network/network_module/include/network_module.h
-        frameworks/js/napi/network/network_module/src/network_module.cpp
-        frameworks/js/napi/network/observer/include/net_conn_callback_observer.h
-        frameworks/js/napi/network/observer/src/net_conn_callback_observer.cpp
-        frameworks/js/napi/network/options/include/netconnection.h
-        frameworks/js/napi/network/options/src/netconnection.cpp
         frameworks/native/dnsresolverclient/src/proxy/dns_resolver_service_proxy.cpp
         frameworks/native/dnsresolverclient/src/dns_addr_info.cpp
         frameworks/native/dnsresolverclient/src/dns_resolver_client.cpp
@@ -200,18 +133,12 @@ add_executable(netmanager_base
         interfaces/innerkits/netconnclient/include/net_supplier_info.h
         interfaces/innerkits/netconnclient/include/route.h
         interfaces/innerkits/netmanagernative/include/dhcp_result_parcel.h
-        interfaces/innerkits/netmanagernative/include/dnsresolv.h
         interfaces/innerkits/netmanagernative/include/dnsresolver_params_parcel.h
-        interfaces/innerkits/netmanagernative/include/fwmark.h
-        interfaces/innerkits/netmanagernative/include/fwmark_command.h
         interfaces/innerkits/netmanagernative/include/i_netsys_service.h
         interfaces/innerkits/netmanagernative/include/i_notify_callback.h
-        interfaces/innerkits/netmanagernative/include/interface_type.h
-        interfaces/innerkits/netmanagernative/include/netnative_log_wrapper.h
         interfaces/innerkits/netmanagernative/include/netsys_addr_info_parcel.h
-        interfaces/innerkits/netmanagernative/include/network_permission.h
+        interfaces/innerkits/netmanagernative/include/netnative_log_wrapper.h
         interfaces/innerkits/netmanagernative/include/notify_callback_stub.h
-        interfaces/innerkits/netmanagernative/include/route_type.h
         interfaces/innerkits/netpolicyclient/include/proxy/i_net_policy_callback.h
         interfaces/innerkits/netpolicyclient/include/proxy/i_net_policy_service.h
         interfaces/innerkits/netpolicyclient/include/proxy/net_policy_callback_stub.h
@@ -252,83 +179,40 @@ add_executable(netmanager_base
         services/netconnmanager/include/stub/net_conn_service_stub.h
         services/netconnmanager/include/stub/net_detection_callback_proxy.h
         services/netconnmanager/include/stub/net_supplier_callback_proxy.h
-        services/netconnmanager/include/http_probe.h
-        services/netconnmanager/include/net_conn_async.h
+        services/netconnmanager/include/http_request.h
+        services/netconnmanager/include/net_activate.h
         services/netconnmanager/include/net_conn_service.h
         services/netconnmanager/include/net_conn_service_iface.h
         services/netconnmanager/include/net_conn_types.h
         services/netconnmanager/include/net_monitor.h
-        services/netconnmanager/include/net_request.h
+        services/netconnmanager/include/net_score.h
         services/netconnmanager/include/net_supplier.h
         services/netconnmanager/include/network.h
-        services/netconnmanager/include/scheduler.h
-        services/netconnmanager/include/socket_factory.h
-        services/netconnmanager/include/url.h
         services/netconnmanager/src/stub/net_conn_callback_proxy.cpp
         services/netconnmanager/src/stub/net_conn_service_stub.cpp
         services/netconnmanager/src/stub/net_detection_callback_proxy.cpp
         services/netconnmanager/src/stub/net_supplier_callback_proxy.cpp
-        services/netconnmanager/src/http_probe.cpp
-        services/netconnmanager/src/net_conn_async.cpp
+        services/netconnmanager/src/http_request.cpp
+        services/netconnmanager/src/net_activate.cpp
         services/netconnmanager/src/net_conn_service.cpp
         services/netconnmanager/src/net_conn_service_iface.cpp
         services/netconnmanager/src/net_monitor.cpp
-        services/netconnmanager/src/net_request.cpp
+        services/netconnmanager/src/net_score.cpp
         services/netconnmanager/src/net_supplier.cpp
         services/netconnmanager/src/network.cpp
-        services/netconnmanager/src/scheduler.cpp
-        services/netconnmanager/src/url.cpp
-        services/netmanagernative/include/manager/conn_manager.h
-        services/netmanagernative/include/manager/interface_manager.h
-        services/netmanagernative/include/manager/route_manager.h
-        services/netmanagernative/include/manager/sharing_manager.h
-        services/netmanagernative/include/manager/traffic_manager.h
-        services/netmanagernative/include/netsys/bitcast.h
-        services/netmanagernative/include/netsys/dhcp_controller.h
-        services/netmanagernative/include/netsys/dns_config_client.h
-        services/netmanagernative/include/netsys/dns_manager.h
-        services/netmanagernative/include/netsys/dns_param_cache.h
-        services/netmanagernative/include/netsys/dns_resolv_config.h
-        services/netmanagernative/include/netsys/dns_resolv_listen.h
-        services/netmanagernative/include/netsys/fwmark_network.h
-        services/netmanagernative/include/netsys/local_network.h
-        services/netmanagernative/include/netsys/lru_cache.h
-        services/netmanagernative/include/netsys/net_manager_native.h
-        services/netmanagernative/include/netsys/netlink_define.h
-        services/netmanagernative/include/netsys/netlink_manager.h
-        services/netmanagernative/include/netsys/netlink_message_decoder.h
-        services/netmanagernative/include/netsys/netlink_msg.h
-        services/netmanagernative/include/netsys/netlink_native_listener.h
-        services/netmanagernative/include/netsys/netlink_processor.h
-        services/netmanagernative/include/netsys/netlink_socket.h
-        services/netmanagernative/include/netsys/netsys_client.h
-        services/netmanagernative/include/netsys/netsys_network.h
-        services/netmanagernative/include/netsys/physical_network.h
-        services/netmanagernative/include/netsys/socket_client.h
+        services/netsyscontroller/include/i_netsys_controller_service.h
+        services/netsyscontroller/include/mock_netsys_native_client.h
+        services/netsyscontroller/include/netsys_controller.h
+        services/netsyscontroller/include/netsys_controller_callback.h
+        services/netsyscontroller/include/netsys_controller_define.h
+        services/netsyscontroller/include/netsys_controller_service_impl.h
+        services/netsyscontroller/include/netsys_native_client.h
+        services/netsyscontroller/src/mock_netsys_native_client.cpp
+        services/netsyscontroller/src/netsys_controller.cpp
+        services/netsyscontroller/src/netsys_controller_service_impl.cpp
+        services/netsyscontroller/src/netsys_native_client.cpp
         services/netmanagernative/include/netsys_native_service.h
         services/netmanagernative/include/netsys_native_service_stub.h
-        services/netmanagernative/netsys_client/src/netsys_client.c
-        services/netmanagernative/src/manager/conn_manager.cpp
-        services/netmanagernative/src/manager/dns_manager.cpp
-        services/netmanagernative/src/manager/interface_manager.cpp
-        services/netmanagernative/src/manager/route_manager.cpp
-        services/netmanagernative/src/manager/sharing_manager.cpp
-        services/netmanagernative/src/manager/traffic_manager.cpp
-        services/netmanagernative/src/netsys/dnsresolv/dns_param_cache.cpp
-        services/netmanagernative/src/netsys/dnsresolv/dns_resolv_config.cpp
-        services/netmanagernative/src/netsys/dnsresolv/dns_resolv_listen.cpp
-        services/netmanagernative/src/netsys/fwmark_network.cpp
-        services/netmanagernative/src/netsys/local_network.cpp
-        services/netmanagernative/src/netsys/net_manager_native.cpp
-        services/netmanagernative/src/netsys/netlink_manager.cpp
-        services/netmanagernative/src/netsys/netlink_message_decoder.cpp
-        services/netmanagernative/src/netsys/netlink_msg.cpp
-        services/netmanagernative/src/netsys/netlink_native_listener.cpp
-        services/netmanagernative/src/netsys/netlink_processor.cpp
-        services/netmanagernative/src/netsys/netlink_socket.cpp
-        services/netmanagernative/src/netsys/netsys_network.cpp
-        services/netmanagernative/src/netsys/physical_network.cpp
-        services/netmanagernative/src/netsys/socket_client.cpp
         services/netmanagernative/src/dhcp_controller.cpp
         services/netmanagernative/src/netsys_native_service.cpp
         services/netmanagernative/src/netsys_native_service_stub.cpp
@@ -364,26 +248,28 @@ add_executable(netmanager_base
         services/netstatsmanager/src/net_stats_listener.cpp
         services/netstatsmanager/src/net_stats_service.cpp
         services/netstatsmanager/src/net_stats_service_iface.cpp
-        services/fwmarkclient/include/fwmark_client.h
-        services/fwmarkclient/src/fwmark_client.cpp
-        services/netsyscontroller/include/i_netsys_controller_service.h
-        services/netsyscontroller/include/mock_netsys_native_client.h
-        services/netsyscontroller/include/netsys_controller.h
-        services/netsyscontroller/include/netsys_controller_callback.h
-        services/netsyscontroller/include/netsys_controller_define.h
-        services/netsyscontroller/include/netsys_controller_service_impl.h
-        services/netsyscontroller/include/netsys_native_client.h
-        services/netsyscontroller/src/mock_netsys_native_client.cpp
-        services/netsyscontroller/src/netsys_controller.cpp
-        services/netsyscontroller/src/netsys_controller_service_impl.cpp
-        services/netsyscontroller/src/netsys_native_client.cpp
+        test/dnsresolvermanager/unittest/dns_resolver_manager_test/dns_resolver_manager_test.cpp
+        test/netconnmanager/unittest/net_conn_manager_test/net_conn_callback_test.cpp
+        test/netconnmanager/unittest/net_conn_manager_test/net_conn_callback_test.h
+        test/netconnmanager/unittest/net_conn_manager_test/net_conn_manager_test.cpp
+        test/netconnmanager/unittest/net_conn_manager_test/net_detection_callback_test.cpp
+        test/netconnmanager/unittest/net_conn_manager_test/net_detection_callback_test.h
+        test/netconnmanager/unittest/net_conn_manager_test/net_handle_test.cpp
+        test/netconnmanager/unittest/net_conn_manager_test/net_score_test.cpp
+        test/netconnmanager/unittest/net_conn_manager_test/route_utils_test.cpp
+        test/netmanagernative/unittest/network_route_test.cpp
+        test/netmanagernative/unittest/resolver_config_test.cpp
+        test/netpolicymanager/unittest/net_policy_manager_test/net_policy_callback_test.cpp
+        test/netpolicymanager/unittest/net_policy_manager_test/net_policy_callback_test.h
+        test/netpolicymanager/unittest/net_policy_manager_test/net_policy_manager_test.cpp
+        test/netstatsmanager/unittest/net_stats_manager_test/net_stats_callback_test.cpp
+        test/netstatsmanager/unittest/net_stats_manager_test/net_stats_callback_test.h
+        test/netstatsmanager/unittest/net_stats_manager_test/net_stats_manager_test.cpp
         utils/base_async_work/include/netmanager_base_base_async_work.h
         utils/base_context/include/netmanager_base_base_context.h
         utils/base_context/src/netmanager_base_base_context.cpp
         utils/common_utils/include/netmanager_base_common_utils.h
-        utils/common_utils/include/netmanager_base_permission.h
         utils/common_utils/src/netmanager_base_common_utils.cpp
-        utils/common_utils/src/netmanager_base_permission.cpp
         utils/event_manager/include/netmanager_base_event_listener.h
         utils/event_manager/include/netmanager_base_event_manager.h
         utils/event_manager/src/netmanager_base_event_listener.cpp
@@ -391,15 +277,19 @@ add_executable(netmanager_base
         utils/log/include/net_mgr_log_wrapper.h
         utils/log/include/netmanager_base_log.h
         utils/log/src/net_mgr_log_wrapper.cpp
+        services/netmanagernative/src/netsys/network_controller.cpp
         utils/module_template/include/netmanager_base_module_template.h
         utils/module_template/src/netmanager_base_module_template.cpp
         utils/napi_utils/include/netmanager_base_napi_utils.h
         utils/napi_utils/src/netmanager_base_napi_utils.cpp)
 
-include_directories(../../arkui/napi/interfaces/kits)
-include_directories(../../arkui/napi/interfaces/inner_api)
-include_directories(../../arkui/napi/native_engine/impl/quickjs)
-include_directories(../../arkui/napi/)
+include_directories(
+        ../../arkui/napi/interfaces/kits
+        ../../arkui/napi/interfaces/inner_api
+        ../../arkui/napi/native_engine/impl/quickjs
+        ../../arkui/napi/
+        ../../../third_party/node/src
+)
 
 include_directories(utils/napi_utils/include)
 include_directories(utils/common_utils/include)
@@ -410,26 +300,34 @@ include_directories(utils/module_template/include)
 include_directories(utils/log/include)
 
 include_directories(../../../utils/native/base/include/)
+include_directories(../../../base/hiviewdfx/hilog/interfaces/native/innerkits/include)
 include_directories(../../../third_party/quickjs)
 include_directories(../../../third_party/googletest/googletest/include)
 include_directories(../../../third_party/libuv/include)
-include_directories(../../../third_party/jsoncpp/include)
-include_directories(../../../third_party/curl/include/)
-include_directories(../../../third_party/node/src)
 
+include_directories(../../../for_linux)
 include_directories(../../../foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy/include)
 include_directories(../../../foundation/distributedschedule/samgr/interfaces/innerkits/common/include)
-include_directories(../../../foundation/distributedschedule/samgr/interfaces/innerkits/lsamgr)
-include_directories(../../../foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy/include)
+include_directories(../../../foundation/distributedschedule/samgr/interfaces/innerkits/lsamgr/include)
 include_directories(../../../foundation/communication/ipc/interfaces/innerkits/ipc_core/include)
 include_directories(../../../foundation/distributedschedule/safwk/services/safwk/include/)
-include_directories(../../../base/notification/common_event_service/interfaces/inner_api/)
-include_directories(../../../base/hiviewdfx/hilog/interfaces/native/innerkits/include)
+include_directories(../../../base/notification/common_event_service/interfaces/innerkits/native/include)
+include_directories(../../../third_party/curl/include/)
 include_directories(../wifi/dhcp/services/mgr_service/include)
-include_directories(../../../foundation/bundlemanager/bundle_framework/interfaces/innerkits/libeventhandler/include)
+include_directories(../wifi/dhcp/services/mgr_service/interfaces)
+include_directories(../../aafwk/standard/interfaces/innerkits/want/include/ohos/aafwk/content)
 
-include_directories(../../../foundation/communication/wifi/dhcp/interfaces/inner_api/interfaces)
-include_directories(../../../foundation/communication/wifi/dhcp/interfaces/inner_api/include)
+link_directories(../../../utils/native/base/cmake-build-debug/src/securec)
+link_directories(../../../foundation/arkui/napi/cmake-build-debug)
+link_directories(../../../third_party/quickjs)
+link_directories(../../../third_party/googletest/cmake-build-debug/googlemock/gtest)
+link_directories(../../../third_party/googletest/cmake-build-debug/googlemock)
+link_directories(../../../third_party/libuv/cmake-build-debug)
 
-add_compile_definitions(NETMGR_DEBUG=1)
-add_subdirectory(services/netmanagernative/netsys_client)
+link_directories(cmake-build-debug/utils)
+
+add_compile_definitions(NETMGR_DEBUG)
+
+add_subdirectory(utils)
+add_subdirectory(frameworks/js/napi/connection)
+add_subdirectory(frameworks/js/napi/network)

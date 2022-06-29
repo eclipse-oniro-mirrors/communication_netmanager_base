@@ -27,11 +27,6 @@ bool Route::operator==(const Route &obj) const
     return out;
 }
 
-bool Route::operator!=(const Route& obj) const
-{
-    return !(*this ==obj);
-}
-
 bool Route::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteString(iface_)) {

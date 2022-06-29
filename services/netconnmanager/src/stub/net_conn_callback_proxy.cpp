@@ -18,7 +18,9 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetConnCallbackProxy::NetConnCallbackProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<INetConnCallback>(impl) {}
+NetConnCallbackProxy::NetConnCallbackProxy(const sptr<IRemoteObject> &impl)
+    : IRemoteProxy<INetConnCallback>(impl)
+{}
 
 NetConnCallbackProxy::~NetConnCallbackProxy() {}
 

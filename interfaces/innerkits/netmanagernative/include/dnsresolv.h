@@ -26,11 +26,19 @@ const uint32_t MAX_NAME_LEN = 64;
 struct DnsResParams {
     uint16_t baseTimeoutMsec;
     uint8_t retryCount = 1;
-    DnsResParams &operator=(const DnsResParams &param)
+    void operator=(const DnsResParams &param)
     {
         baseTimeoutMsec = param.baseTimeoutMsec;
         retryCount = param.retryCount;
     }
+};
+
+struct DnsresolverParams {
+    uint16_t netId = 0;
+    uint16_t baseTimeoutMsec = 0;
+    uint8_t retryCount = 0;
+    std::vector<std::string> servers;
+    std::vector<std::string> domains;
 };
 } // namespace nmd
 } // namespace OHOS

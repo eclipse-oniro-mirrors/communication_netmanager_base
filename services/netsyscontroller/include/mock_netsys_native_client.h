@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ const std::string MOCK_INTERFACESETMTU_API = "InterfaceSetMtu";
 const std::string MOCK_INTERFACEADDADDRESS_API = "InterfaceAddAddress";
 const std::string MOCK_INTERFACEDELADDRESS_API = "InterfaceDelAddress";
 const std::string MOCK_SETRESOLVERCONFIG_API = "SetResolverConfig";
-const std::string MOCK_GETRESOLVERICONFIG_API = "GetResolverConfig";
+const std::string MOCK_GETRESOLVERINFO_API = "GetResolverInfo";
 const std::string MOCK_CREATENETWORKCACHE_API = "CreateNetworkCache";
 const std::string MOCK_DESTROYNETWORKCACHE_API = "DestroyNetworkCache";
 const std::string MOCK_FLUSHNETWORKCACHE_API = "FlushNetworkCache";
@@ -226,7 +226,7 @@ public:
      * @param retryCount
      * @return Return the return value of the netsys interface call
      */
-    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
+    int32_t GetResolverInfo(uint16_t netId, std::vector<std::string> &servers,
         std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount);
 
     /**
