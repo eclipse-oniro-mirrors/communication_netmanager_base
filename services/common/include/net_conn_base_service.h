@@ -15,7 +15,10 @@
 #ifndef NET_CONN_BASE_SERVICE_H
 #define NET_CONN_BASE_SERVICE_H
 
+#include <set>
+
 #include "refbase.h"
+
 #include "net_link_info.h"
 #include "net_supplier_info.h"
 #include "net_all_capabilities.h"

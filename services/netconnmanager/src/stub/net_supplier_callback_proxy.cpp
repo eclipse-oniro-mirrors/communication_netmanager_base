@@ -19,7 +19,8 @@
 namespace OHOS {
 namespace NetManagerStandard {
 NetSupplierCallbackProxy::NetSupplierCallbackProxy(const sptr<IRemoteObject> &impl)
-    : IRemoteProxy<INetSupplierCallback>(impl) {}
+    : IRemoteProxy<INetSupplierCallback>(impl)
+{}
 
 NetSupplierCallbackProxy::~NetSupplierCallbackProxy() {}
 

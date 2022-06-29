@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,11 +96,6 @@ std::string NetSpecifier::ToString(const std::string &tab) const
     str.append(tab);
     str.append("ident_ = ");
     str.append(ident_);
-
-    str.append("\n");
-    str.append(tab);
-    str.append("isRequested = ");
-    str.append(isRequested_ ? "true" : "false");
 
     str.append(netCapabilities_.ToString(tab));
 

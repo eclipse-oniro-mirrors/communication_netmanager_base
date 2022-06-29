@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,7 +89,7 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
 int32_t NetsysNativeServiceStub::CmdSetResolverConfigParcel(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOGI("Begin to dispatch cmd SetResolverConfig");
-    auto resolvParamsParcel = DnsResolverParamsParcel::Unmarshalling(data);
+    auto resolvParamsParcel = DnsresolverParamsParcel::Unmarshalling(data);
     if (resolvParamsParcel == nullptr) {
         return ERR_NO_MEMORY;
     }
@@ -104,6 +104,7 @@ int32_t NetsysNativeServiceStub::CmdSetResolverConfigParcel(MessageParcel &data,
 int32_t NetsysNativeServiceStub::CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOGI("Begin to dispatch cmd SetResolverConfig");
+    DnsresolverParams resolvParams;
     uint16_t netId = 0;
     uint16_t baseTimeoutMsec = 0;
     uint8_t retryCount = 0;
@@ -141,10 +142,14 @@ int32_t NetsysNativeServiceStub::CmdSetResolverConfig(MessageParcel &data, Messa
         }
         domains.push_back(s);
     }
-
-    int32_t result = SetResolverConfig(netId, baseTimeoutMsec, retryCount, servers, domains);
+    resolvParams.netId = netId;
+    resolvParams.baseTimeoutMsec = baseTimeoutMsec;
+    resolvParams.retryCount = retryCount;
+    resolvParams.servers.assign(servers.begin(), servers.end());
+    resolvParams.domains.assign(domains.begin(), domains.end());
+    int32_t result = SetResolverConfig(resolvParams);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("SetResolverConfig has received result %{public}d", result);
+    NETNATIVE_LOGI("SetResolverConfig has recved result %{public}d", result);
 
     return ERR_NONE;
 }
@@ -152,23 +157,23 @@ int32_t NetsysNativeServiceStub::CmdSetResolverConfig(MessageParcel &data, Messa
 int32_t NetsysNativeServiceStub::CmdGetResolverConfig(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOGI("Begin to dispatch cmd GetResolverConfig");
-    uint16_t baseTimeoutMsec;
-    uint8_t retryCount;
+    DnsResParams resParams;
     uint16_t netId = 0;
     std::vector<std::string> servers;
     std::vector<std::string> domains;
 
     data.ReadUint16(netId);
-    int32_t result = GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
+    int32_t result = GetResolverConfig(netId, servers, domains, resParams);
     reply.WriteInt32(result);
-    reply.WriteUint16(baseTimeoutMsec);
-    reply.WriteUint8(retryCount);
-    auto vServerSize = static_cast<int32_t>(servers.size());
+    reply.WriteUint16(resParams.baseTimeoutMsec);
+    reply.WriteUint8(resParams.retryCount);
+    int32_t vServerSize = static_cast<int32_t>(servers.size());
     reply.WriteInt32(vServerSize);
-    for (auto & server : servers) {
-        reply.WriteString(server);
+    std::vector<std::string>::iterator iterServers;
+    for (iterServers = servers.begin(); iterServers != servers.end(); ++iterServers) {
+        reply.WriteString(*iterServers);
     }
-    auto vDomainsSize = static_cast<int32_t>(domains.size());
+    int32_t vDomainsSize = static_cast<int32_t>(domains.size());
     reply.WriteInt32(vDomainsSize);
     std::vector<std::string>::iterator iterDomains;
     for (iterDomains = domains.begin(); iterDomains != domains.end(); ++iterDomains) {
