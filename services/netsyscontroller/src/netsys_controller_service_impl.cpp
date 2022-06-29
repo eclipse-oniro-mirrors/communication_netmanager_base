@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -158,14 +158,14 @@ int32_t NetsysControllerServiceImpl::SetResolverConfig(uint16_t netId, uint16_t 
     return netsysClient_.SetResolverConfig(netId, baseTimeoutMsec, retryCount, servers, domains);
 }
 
-int32_t NetsysControllerServiceImpl::GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
+int32_t NetsysControllerServiceImpl::GetResolverInfo(uint16_t netId, std::vector<std::string> &servers,
     std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount)
 {
     NETMGR_LOG_I("Get resolver config: netId[%{public}d]", netId);
-    if (mockNetsysClient_.CheckMockApi(MOCK_GETRESOLVERICONFIG_API)) {
-        return mockNetsysClient_.GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
+    if (mockNetsysClient_.CheckMockApi(MOCK_GETRESOLVERINFO_API)) {
+        return mockNetsysClient_.GetResolverInfo(netId, servers, domains, baseTimeoutMsec, retryCount);
     }
-    return netsysClient_.GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
+    return netsysClient_.GetResolverInfo(netId, servers, domains, baseTimeoutMsec, retryCount);
 }
 
 int32_t NetsysControllerServiceImpl::CreateNetworkCache(uint16_t netId)

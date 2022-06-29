@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -184,7 +184,7 @@ public:
      * @param retryCount
      * @return Return the return value of the netsys interface call
      */
-    virtual int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
+    virtual int32_t GetResolverInfo(uint16_t netId, std::vector<std::string> &servers,
         std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount) = 0;
 
     /**

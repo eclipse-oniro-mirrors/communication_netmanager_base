@@ -42,7 +42,6 @@ public:
     virtual int32_t OnInterfaceLinkStateChanged(const std::string &, bool) = 0;
     virtual int32_t OnRouteChanged(bool, const std::string &, const std::string &, const std::string &) = 0;
     virtual int32_t OnDhcpSuccess(NetsysControllerCallback::DhcpResult &dhcpResult) = 0;
-    virtual int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

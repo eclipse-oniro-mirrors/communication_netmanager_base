@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,9 @@
 #define NET_CONN_SERVICE_STUB_H
 
 #include <map>
+
 #include "iremote_stub.h"
+
 #include "i_net_conn_service.h"
 
 namespace OHOS {
@@ -27,7 +29,8 @@ public:
     NetConnServiceStub();
     ~NetConnServiceStub();
 
-    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int32_t OnRemoteRequest(
+        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
     using NetConnServiceFunc = int32_t (NetConnServiceStub::*)(MessageParcel &, MessageParcel &);
@@ -45,7 +48,6 @@ private:
     int32_t OnUpdateNetLinkInfo(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetDefaultNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnHasDefaultNet(MessageParcel &data, MessageParcel &reply);
-    int32_t OnGetIfaceNames(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetIfaceNameByType(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetDetectionCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnRegisterNetDetectionCallback(MessageParcel &data, MessageParcel &reply);
@@ -57,9 +59,9 @@ private:
     int32_t OnGetNetCapabilities(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetAddressesByName(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetAddressByName(MessageParcel &data, MessageParcel &reply);
+    int32_t OnBindSocket(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetAirplaneMode(MessageParcel &data, MessageParcel &reply);
     int32_t OnRestoreFactoryData(MessageParcel &data, MessageParcel &reply);
-
 private:
     int32_t ConvertCode(int32_t internalCode);
 

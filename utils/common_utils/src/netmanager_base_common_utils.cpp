@@ -40,11 +40,11 @@ std::vector<std::string> Split(const std::string &str, const std::string &sep)
 
 std::string Strip(const std::string &str, char ch)
 {
-    size_t i = 0;
+    int64_t i = 0;
     while (i < str.size() && str[i] == ch) {
         ++i;
     }
-    size_t j = str.size() - 1;
+    int64_t j = static_cast<int64_t>(str.size()) - 1;
     while (j > 0 && str[j] == ch) {
         --j;
     }
@@ -107,21 +107,5 @@ int GetMaskLength(const std::string &mask)
         maskTmp = (maskTmp << 1);
     }
     return netMask;
-}
-
-bool ParseInt(const char *str, int32_t *value)
-{
-    char *end;
-    long long v = strtoll(str, &end, 10);
-    if (end == str || *end != '\0' || v < INT_MIN || v > INT_MAX) {
-        return false;
-    }
-    *value = v;
-    return true;
-}
-
-int64_t ConvertToInt64(const std::string& str)
-{
-    return strtoll(str.c_str(), nullptr, 10);
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils

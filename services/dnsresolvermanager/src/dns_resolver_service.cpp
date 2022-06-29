@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -266,7 +266,8 @@ int32_t DnsResolverService::GetResolverInfo(int32_t netId, std::vector<std::stri
     std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount)
 {
     NETMGR_LOG_D("DnsResolverService GetResolverInfo netId[%{public}d]", netId);
-    return 0;
+    return static_cast<int32_t>(NetsysController::GetInstance().GetResolverInfo(
+        static_cast<uint16_t>(netId), servers, domains, baseTimeoutMsec, retryCount));
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

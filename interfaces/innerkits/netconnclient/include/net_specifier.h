@@ -17,7 +17,9 @@
 #define NET_SPECIFIER_H
 
 #include <string>
+
 #include "parcel.h"
+
 #include "net_all_capabilities.h"
 
 namespace OHOS {
@@ -25,7 +27,6 @@ namespace NetManagerStandard {
 struct NetSpecifier : public Parcelable {
     std::string ident_;
     NetAllCapabilities netCapabilities_;
-    bool isRequested_ {true};
 
     bool SpecifierIsValid() const;
     void SetCapabilities(const std::set<NetCap> &netCaps);
