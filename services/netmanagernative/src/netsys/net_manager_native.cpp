@@ -31,7 +31,8 @@ NetManagerNative::NetManagerNative()
     : networkManager(std::make_shared<NetworkManager>()),
       routeManager(std::make_shared<RouteManager>()),
       interfaceManager(std::make_shared<InterfaceManager>()),
-      sharingManager_(std::make_shared<SharingManager>())
+      sharingManager_(std::make_shared<SharingManager>()),
+      dnsManager_(std::make_shared<DnsManager>())
 {
 }
 
