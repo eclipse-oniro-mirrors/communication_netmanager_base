@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,30 +110,39 @@ bool NetsysNativeService::Init()
     return true;
 }
 
-int32_t NetsysNativeService::SetResolverConfigParcel(const DnsresolverParamsParcel& resolvParams)
+int32_t NetsysNativeService::SetResolverConfigParcel(const DnsResolverParamsParcel & resolvParams)
 {
     NETNATIVE_LOGI("SetResolverConfig retryCount = %{public}d", resolvParams.retryCount_);
 
     return 0;
 }
 
-int32_t NetsysNativeService::SetResolverConfig(const DnsresolverParams &resolvParams)
+int32_t NetsysNativeService::SetResolverConfig(uint16_t netId,
+                                               uint16_t baseTimeoutMsec,
+                                               uint8_t retryCount,
+                                               const std::vector<std::string> &servers,
+                                               const std::vector<std::string> &domains)
 {
-    NETNATIVE_LOGI("SetResolverConfig retryCount = %{public}d", resolvParams.retryCount);
+    netsysService_->DnsSetResolverConfig(netId, baseTimeoutMsec, retryCount, servers, domains);
     return 0;
 }
 
-int32_t NetsysNativeService::GetResolverConfig(const  uint16_t  netid, std::vector<std::string> &servers,
-    std::vector<std::string> &domains, nmd::DnsResParams &param)
+int32_t NetsysNativeService::GetResolverConfig(const uint16_t netid,
+                                               std::vector<std::string> &servers,
+                                               std::vector<std::string> &domains,
+                                               uint16_t &baseTimeoutMsec,
+                                               uint8_t &retryCount)
 {
     NETNATIVE_LOGI("GetResolverConfig netid = %{public}d", netid);
-    NETNATIVE_LOGE("NETSYSSERVICE: %{public}d,  %{public}d", param.baseTimeoutMsec,  param.retryCount);
+    netsysService_->DnsGetResolverConfig(netid, servers, domains, baseTimeoutMsec, retryCount);
     return 0;
 }
 
 int32_t NetsysNativeService::CreateNetworkCache(const uint16_t netid)
 {
     NETNATIVE_LOGI("CreateNetworkCache Begin");
+    netsysService_->DnsCreateNetworkCache(netid);
+
     return 0;
 }
 

@@ -16,15 +16,17 @@
 #ifndef INCLUDE_NET_MANAGER_NATIVE_H__
 #define INCLUDE_NET_MANAGER_NATIVE_H__
 
-#include <interface_manager.h>
-#include <interface_type.h>
 #include <memory>
-#include <network_manager.h>
-#include <route_manager.h>
-#include <sharing_manager.h>
-#include <route_type.h>
 #include <string>
 #include <vector>
+
+#include "dns_manager.h"
+#include "interface_manager.h"
+#include "interface_type.h"
+#include "network_manager.h"
+#include "route_manager.h"
+#include "route_type.h"
+#include "sharing_manager.h"
 
 namespace OHOS {
 namespace nmd {
@@ -54,9 +56,9 @@ public:
     std::vector<std::string> InterfaceGetList();
 
     int SetProcSysNet(int32_t ipversion, int32_t which, const std::string ifname, const std::string parameter,
-        const std::string value);
+                      const std::string value);
     int GetProcSysNet(int32_t ipversion, int32_t which, const std::string ifname, const std::string parameter,
-        std::string *value);
+                      std::string *value);
 
     nmd::InterfaceConfigurationParcel InterfaceGetConfig(std::string ifName);
     void InterfaceSetConfig(InterfaceConfigurationParcel cfg);
@@ -86,11 +88,18 @@ public:
     int32_t IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface);
     int32_t IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface);
 
+    int32_t DnsSetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
+                                 const std::vector<std::string> &servers, const std::vector<std::string> &domains);
+    int32_t DnsGetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
+                                 uint16_t &baseTimeoutMsec, uint8_t &retryCount);
+    int32_t DnsCreateNetworkCache(uint16_t netid);
+
 private:
     std::shared_ptr<NetworkManager> networkManager;
     std::shared_ptr<RouteManager> routeManager;
     std::shared_ptr<InterfaceManager> interfaceManager;
     std::shared_ptr<SharingManager> sharingManager_ = nullptr;
+    std::shared_ptr<DnsManager> dnsManager_;
     static std::vector<unsigned int> interfaceIdex;
 };
 } // namespace nmd
