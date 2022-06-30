@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -273,11 +273,10 @@ int32_t NetsysNativeClient::SetResolverConfig(uint16_t netId, uint16_t baseTimeo
         NETMGR_LOG_E("netsysNativeService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
-    const nmd::DnsresolverParams params = {netId, baseTimeoutMsec, retryCount, servers, domains};
-    return netsysNativeService_->SetResolverConfig(params);
+    return netsysNativeService_->SetResolverConfig(netId, baseTimeoutMsec, retryCount, servers, domains);
 }
 
-int32_t NetsysNativeClient::GetResolverInfo(uint16_t netId, std::vector<std::string> &servers,
+int32_t NetsysNativeClient::GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
     std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount)
 {
     NETMGR_LOG_I("Get resolver config: netId[%{public}d]", netId);
@@ -285,7 +284,7 @@ int32_t NetsysNativeClient::GetResolverInfo(uint16_t netId, std::vector<std::str
         NETMGR_LOG_E("netsysNativeService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
-    return 0;
+    return netsysNativeService_->GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
 }
 
 int32_t NetsysNativeClient::CreateNetworkCache(uint16_t netId)

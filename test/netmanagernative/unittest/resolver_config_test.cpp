@@ -63,12 +63,8 @@ HWTEST_F(ResolverConfigTest, ResolverConfigTest001, TestSize.Level1)
         EXPECT_FALSE(0);
     }
     int32_t ret = 0;
-    nmd::DnsresolverParams param0 = {
-        0, 0, 1, {"8.8.8.8", "114.114.114.114"}, {"baidu.com", "sohu.com"}};
-    ret = -1;
     ret = netsysNativeService->CreateNetworkCache(0);
     NETNATIVE_LOGE("NETSYS: CreateNetworkCache0   ret=%{public}d", ret);
-    ret = netsysNativeService->SetResolverConfig(param0);
     NETNATIVE_LOGE("NETSYS: SetResolverConfig0   ret=%{public}d", ret);
     NETNATIVE_LOGE("ResolverConfigTest001 ResolverConfigTest001 ResolverConfigTest001");
     EXPECT_TRUE(ret == 0);

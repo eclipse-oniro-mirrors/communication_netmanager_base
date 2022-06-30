@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -223,14 +223,13 @@ void Network::UpdateDnses(const NetLinkInfo &netLinkInfo)
 {
     NETMGR_LOG_D("Network UpdateDnses in.");
     std::vector<std::string> servers;
-    std::vector<std::string> doamains;
-    for (auto it = netLinkInfo.dnsList_.begin(); it != netLinkInfo.dnsList_.end(); ++it) {
-        auto dns = *it;
-        servers.push_back(dns.address_);
-        doamains.push_back(dns.hostName_);
+    std::vector<std::string> domains;
+    for (const auto &dns : netLinkInfo.dnsList_) {
+        servers.emplace_back(dns.address_);
+        domains.emplace_back(dns.hostName_);
     }
-    // Call netsys to set dns
-    NetsysController::GetInstance().SetResolverConfig(netId_, 0, 1, servers, doamains);
+    // Call netsys to set dns, use default timeout and retry
+    NetsysController::GetInstance().SetResolverConfig(netId_, 0, 0, servers, domains);
     NETMGR_LOG_D("Network UpdateDnses out.");
 }
 

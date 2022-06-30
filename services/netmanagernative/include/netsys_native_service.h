@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 
 #include <mutex>
 #include "dhcp_controller.h"
-#include "dnsresolv.h"
 #include "i_netsys_service.h"
 #include "iremote_stub.h"
 #include "net_manager_native.h"
@@ -38,10 +37,11 @@ public:
     void OnStart() override;
     void OnStop() override;
 
-    int32_t SetResolverConfigParcel(const DnsresolverParamsParcel& resolvParams) override;
-    int32_t SetResolverConfig(const DnsresolverParams &resolvParams) override;
+    int32_t SetResolverConfigParcel(const DnsResolverParamsParcel & resolvParams) override;
+    int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
+        const std::vector<std::string> &servers, const std::vector<std::string> &domains) override;
     int32_t GetResolverConfig(const  uint16_t  netid,  std::vector<std::string> &servers,
-           std::vector<std::string> &domains, nmd::DnsResParams &param) override;
+           std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount) override;
     int32_t CreateNetworkCache(const uint16_t netid) override;
     int32_t FlushNetworkCache(const uint16_t netid) override;
     int32_t DestroyNetworkCache(const uint16_t netid) override;
