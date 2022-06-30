@@ -65,7 +65,11 @@ void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint32_t netId)
         static_cast<uint16_t>(netId), servers, domains, baseTimeoutMsec, retryCount);
     DNS_CONFIG_PRINT("GetResolverConfig status: %{public}d", status);
     if (status < 0) {
-        sendData.error = status;
+        sendData.retryCount = retryCount;
+        sendData.timeoutMs = baseTimeoutMsec;
+        if (strcpy_s(sendData.nameservers[0], sizeof(sendData.nameservers[0]), DEFAULT_SERVER) <= 0) {
+            DNS_CONFIG_PRINT("ProcGetConfigCommand strcpy_s failed");
+        }
     } else {
         sendData.retryCount = retryCount;
         sendData.timeoutMs = baseTimeoutMsec;

@@ -39,6 +39,9 @@ extern "C" {
 #define MAX_CANON_NAME 256
 #define MAX_HOST_NAME_LEN 256
 #define MAX_KEY_LENGTH (MAX_HOST_NAME_LEN + 1 + MAX_SERVER_LENGTH + 1 + sizeof(uint32_t) * 4 + 3 + 1)
+#define DEFAULT_SERVER "114.114.114.114"
+#define DEFAULT_TIMEOUT 5000
+#define DEFAULT_RETRY 2
 
 enum CommandType { GET_CONFIG = 1, GET_CACHE = 2, SET_CACHE = 3 };
 
