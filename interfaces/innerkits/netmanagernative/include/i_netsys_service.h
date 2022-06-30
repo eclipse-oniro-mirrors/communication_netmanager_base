@@ -15,13 +15,14 @@
 #ifndef I_NETSYS_SERVICE_H__
 #define I_NETSYS_SERVICE_H__
 
+#include <netdb.h>
+#include <string>
+
 #include "dnsresolver_params_parcel.h"
 #include "i_notify_callback.h"
 #include "interface_type.h"
 #include "iremote_broker.h"
 #include "route_type.h"
-#include <netdb.h>
-#include <string>
 
 namespace OHOS {
 namespace NetsysNative {

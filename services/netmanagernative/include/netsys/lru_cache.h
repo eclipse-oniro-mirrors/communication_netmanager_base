@@ -72,7 +72,8 @@ public:
         nodeList_.erase(it);
     }
 
-    void Clear() {
+    void Clear()
+    {
         cache_.clear();
         nodeList_.clear();
     }

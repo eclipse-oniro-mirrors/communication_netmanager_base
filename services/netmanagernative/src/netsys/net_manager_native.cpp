@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-#include "net_manager_native.h"
+#include <net/if.h>
+
 #include "interface_manager.h"
 #include "netnative_log_wrapper.h"
 #include "network_manager.h"
 #include "route_manager.h"
 #include "traffic_manager.h"
-#include <net/if.h>
+
+#include "net_manager_native.h"
 
 std::vector<unsigned int> OHOS::nmd::NetManagerNative::interfaceIdex;
 
