@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,13 +20,10 @@
 
 #include "net_mgr_log_wrapper.h"
 #include "net_supplier_callback_stub.h"
-#include "fwmark_client.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetConnClient::NetConnClient()
-    :NetConnService_(nullptr), deathRecipient_(nullptr), fwmarkClient_(std::make_shared<nmd::FwmarkClient>())
-{}
+NetConnClient::NetConnClient() : NetConnService_(nullptr), deathRecipient_(nullptr) {}
 
 NetConnClient::~NetConnClient() {}
 
@@ -176,17 +173,6 @@ int32_t NetConnClient::HasDefaultNet(bool& flag)
     return proxy->HasDefaultNet(flag);
 }
 
-int32_t NetConnClient::GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames)
-{
-    NETMGR_LOG_D("GetIfaceNames client in.");
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy==nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
-    return proxy->GetIfaceNames(bearerType, ifaceNames);
-}
-
 int32_t NetConnClient::GetAllNets(std::list<sptr<NetHandle>> &netList)
 {
     sptr<INetConnService> proxy = GetProxy();
@@ -256,8 +242,13 @@ int32_t NetConnClient::GetAddressByName(const std::string &host, int32_t netId, 
 
 int32_t NetConnClient::BindSocket(int32_t socket_fd, int32_t netId)
 {
-    fwmarkClient_->BindSocket(socket_fd, netId);
-    return NET_CONN_SUCCESS;
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return IPC_PROXY_ERR;
+    }
+
+    return proxy->BindSocket(socket_fd, netId);
 }
 
 int32_t NetConnClient::NetDetection(const NetHandle &netHandle)
@@ -328,21 +319,6 @@ int32_t NetConnClient::RestoreFactoryData()
     }
 
     return proxy->RestoreFactoryData();
-}
-
-int32_t NetConnClient::SetAppNet(const uint32_t& netId)
-{
-    if (netId != curNetwork_) {
-        curNetwork_ = netId;
-        fwmarkClient_->BindNetwork(curNetwork_);
-    }
-    return NET_CONN_SUCCESS;
-}
-
-int32_t NetConnClient::GetAppNet(uint32_t& netId)
-{
-    netId = curNetwork_;
-    return NET_CONN_SUCCESS;
 }
 
 void NetConnClient::OnRemoteDied(const wptr<IRemoteObject> &remote)

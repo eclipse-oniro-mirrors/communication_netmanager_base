@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,33 +25,24 @@
 
 namespace OHOS {
 namespace nmd {
-constexpr uint32_t KNETLINK_DUMP_BUFFER_SIZE = 8192;
-constexpr uint32_t LOCAL_PRIORITY = 32767;
-using NetlinkDumpCallback = std::function<void(nlmsghdr *)>;
-/**
- * @brief Send netklink message to kernel
- *
- * @param msg nlmsghdr struct
- * @return Returns 0, send netklink message to kernel successfully, otherwise it will fail
- */
-int32_t SendNetlinkMsgToKernel(nlmsghdr *msg);
+class NetlinkSocket {
+public:
+    int socketFd;
 
-/**
- * @brief Flush route or rule configure
- *
- * @param getAction Decide to flush route or rule. Must be one of RTM_GETRULE/RTM_GETROUTE
- * @param deleteAction Decide to flush route or rule. Must be one of RTM_DELRULE/RTM_DELROUTE
- * @param what Decide to flush route or rule. Must be one of "rules"/"routes"
- * @param table If refresh route，this is table number, otherwise it will is 0
- * @return Returns 0, flush route or rule configure successfully, otherwise it will fail
- */
-int32_t RtNetlinkFlush(uint16_t getAction, uint16_t deleteAction, const char *what, uint32_t table);
-int32_t OpenNetlinkSocket(int32_t protocol);
-int32_t RecvNetlinkAck(int32_t sock);
-int32_t SendNetlinkRequest(uint16_t action, uint16_t flags, iovec *iov, int32_t iovlen,
-    const NetlinkDumpCallback *callback);
-int32_t ProcessNetlinkDump(int32_t sock, const NetlinkDumpCallback &callback);
-uint32_t GetRtmU32Attribute(const nlmsghdr *nlh, int32_t attribute);
+    virtual ~NetlinkSocket();
+
+    void SetPid(int pid)
+    {
+        this->pid = pid;
+    }
+
+    int Create(int protocol);
+    int Create(int type, int protocol);
+    int SendNetlinkMsgToKernel(struct nlmsghdr *msg);
+    int Shutdown();
+private:
+    int pid = 0;
+};
 } // namespace nmd
 } // namespace OHOS
 #endif // !INCLUDE_NETLINK_SOCKET_H__

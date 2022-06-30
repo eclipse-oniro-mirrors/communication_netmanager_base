@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ bool NetsysNativeServiceProxy::WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 
-int32_t NetsysNativeServiceProxy::SetResolverConfigParcel(const DnsResolverParamsParcel & resolvParams)
+int32_t NetsysNativeServiceProxy::SetResolverConfigParcel(const DnsresolverParamsParcel& resolvParams)
 {
     NETNATIVE_LOGI("Begin to SetResolverConfig %{public}d", resolvParams.retryCount_);
     MessageParcel data;
@@ -46,47 +46,46 @@ int32_t NetsysNativeServiceProxy::SetResolverConfigParcel(const DnsResolverParam
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
-    const std::vector<std::string> &servers, const std::vector<std::string> &domains)
+int32_t NetsysNativeServiceProxy::SetResolverConfig(const DnsresolverParams &resolvParams)
 {
-    NETNATIVE_LOGI("Begin to SetResolverConfig %{public}d", retryCount);
+    NETNATIVE_LOGI("Begin to SetResolverConfig %{public}d", resolvParams.retryCount);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteUint16(netId)) {
+    if (!data.WriteUint16(resolvParams.netId)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteUint16(baseTimeoutMsec)) {
+    if (!data.WriteUint16(resolvParams.baseTimeoutMsec)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteUint8(retryCount)) {
+    if (!data.WriteUint8(resolvParams.retryCount)) {
         return ERR_FLATTEN_OBJECT;
     }
 
-    auto vServerSize1 = static_cast<int32_t>(servers.size());
+    int32_t vServerSize1 = static_cast<int32_t>(resolvParams.servers.size());
     if (!data.WriteInt32(vServerSize1)) {
         return ERR_FLATTEN_OBJECT;
     }
     std::vector<std::string> vServers;
-    vServers.assign(servers.begin(), servers.end());
+    vServers.assign(resolvParams.servers.begin(), resolvParams.servers.end());
     NETNATIVE_LOGI("PROXY: SetResolverConfig Write Servers  String_SIZE: %{public}d",
         static_cast<int32_t>(vServers.size()));
-    for (auto & vServer : vServers) {
-        data.WriteString(vServer);
+    for (std::vector<std::string>::iterator it = vServers.begin(); it != vServers.end(); ++it) {
+        data.WriteString(*it);
     }
 
-    int vDomainSize1 = static_cast<int>(domains.size());
+    int vDomainSize1 = static_cast<int>(resolvParams.domains.size());
     if (!data.WriteInt32(vDomainSize1)) {
         return ERR_FLATTEN_OBJECT;
     }
 
     std::vector<std::string>   vDomains;
-    vDomains.assign(domains.begin(), domains.end());
+    vDomains.assign(resolvParams.domains.begin(), resolvParams.domains.end());
     NETNATIVE_LOGI("PROXY: InterfaceSetConfig Write Domains String_SIZE: %{public}d",
         static_cast<int32_t>(vDomains.size()));
-    for (auto & vDomain : vDomains) {
-        data.WriteString(vDomain);
+    for (std::vector<std::string>::iterator it = vDomains.begin(); it != vDomains.end(); ++it) {
+        data.WriteString(*it);
     }
 
     MessageParcel reply;
@@ -97,7 +96,7 @@ int32_t NetsysNativeServiceProxy::SetResolverConfig(uint16_t netId, uint16_t bas
 }
 
 int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netid, std::vector<std::string> &servers,
-    std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount)
+    std::vector<std::string> &domains, nmd::DnsResParams &param)
 {
     NETNATIVE_LOGI("PROXY:Begin to GetResolverConfig %{public}d", netid);
     MessageParcel data;
@@ -111,8 +110,8 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netid, std::v
     MessageOption option;
     Remote()->SendRequest(INetsysService::NETSYS_GET_RESOLVER_CONFIG, data, reply, option);
     int result = reply.ReadInt32();
-    reply.ReadUint16(baseTimeoutMsec);
-    reply.ReadUint8(retryCount);
+    reply.ReadUint16(param.baseTimeoutMsec);
+    reply.ReadUint8(param.retryCount);
     int32_t vServerSize = reply.ReadInt32();
     std::vector<std::string>  vecString;
     for (int i = 0; i < vServerSize; i++) {

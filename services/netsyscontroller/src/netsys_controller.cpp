@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -199,7 +199,7 @@ int32_t NetsysController::SetResolverConfig(uint16_t netId, uint16_t baseTimeout
     return netsysService_->SetResolverConfig(netId, baseTimeoutMsec, retryCount, servers, domains);
 }
 
-int32_t NetsysController::GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
+int32_t NetsysController::GetResolverInfo(uint16_t netId, std::vector<std::string> &servers,
     std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount)
 {
     NETMGR_LOG_I("Get resolver config: netId[%{public}d]", netId);
@@ -207,7 +207,7 @@ int32_t NetsysController::GetResolverConfig(uint16_t netId, std::vector<std::str
         NETMGR_LOG_E("netsysService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
-    return netsysService_->GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
+    return netsysService_->GetResolverInfo(netId, servers, domains, baseTimeoutMsec, retryCount);
 }
 
 int32_t NetsysController::CreateNetworkCache(uint16_t netId)

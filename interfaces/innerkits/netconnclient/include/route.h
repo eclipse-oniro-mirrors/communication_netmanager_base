@@ -39,7 +39,6 @@ struct Route : public Parcelable {
     bool isDefaultRoute_ = false;
 
     bool operator==(const Route& obj) const;
-    bool operator!=(const Route& obj) const;
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<Route> Unmarshalling(Parcel &parcel);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,6 @@ const char g_sysNetPath[] = "/sys/class/net/";
 
 namespace OHOS {
 namespace nmd {
-static constexpr const int IOCTL_RETRY_TIME = 32;
 namespace {
     constexpr int32_t FILE_PERMISSION = 0666;
     constexpr uint32_t ARRAY_OFFSET_1_INDEX = 1;
@@ -172,7 +171,9 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
         return -errno;
     }
 
-    nmd::NetlinkMsg nlmsg(NETLINK_ROUTE_CREATE_FLAGS, nmd::NETLINK_MAX_LEN, NetlinkManager::GetPid());
+    nmd::NetlinkSocket netLinker;
+    netLinker.Create(NETLINK_ROUTE);
+    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, NetlinkManager::GetPid());
 
     struct ifaddrmsg ifm = {0};
     ifm.ifa_family = AF_INET;
@@ -199,7 +200,7 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
     NETNATIVE_LOGI("InterfaceManager::ModifyAddress:%{public}u %{public}s %{public}s %{public}d",
         action, interfaceName, addr, prefixLen);
 
-    ret = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    ret = netLinker.SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
     if (ret < 0) {
         return -EIO;
     }
@@ -321,10 +322,14 @@ int InterfaceManager::SetIfaceConfig(const nmd::InterfaceConfigurationParcel &if
         close(fd);
         return 1;
     }
-    int retry = 0;
-    for (; ioctl(fd, SIOCSIFFLAGS, &ifr) == -1 && errno == ETIMEDOUT && retry < IOCTL_RETRY_TIME; ++retry);
-    NETNATIVE_LOGI("set ifr flags=[%{public}d] strerror=[%{public}s] retry=[%{public}d]", ifr.ifr_flags,
-        strerror(errno), retry);
+    NETNATIVE_LOGI("set ifr flags to [%{public}d]", ifr.ifr_flags);
+    if (ioctl(fd, SIOCSIFFLAGS, &ifr) == -1) {
+        char errmsg[INTERFACE_ERR_MAX_LEN] = {0};
+        strerror_r(errno, errmsg, INTERFACE_ERR_MAX_LEN);
+        NETNATIVE_LOGE("fail to set ifr flags, strerror[%{public}s]", errmsg);
+        close(fd);
+        return -1;
+    }
     close(fd);
     return 1;
 }

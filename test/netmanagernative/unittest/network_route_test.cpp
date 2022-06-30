@@ -52,7 +52,7 @@ sptr<INetsysService> GetProxyTest()
     auto proxy = iface_cast<NetsysNative::INetsysService>(remote);
     NETNATIVE_LOGI("Get proxy %{public}p", proxy.GetRefPtr());
     std::cout << "Get proxy "<<proxy.GetRefPtr()<<std::endl;
-
+    
     return proxy;
 }
 

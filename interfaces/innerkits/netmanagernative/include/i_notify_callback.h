@@ -36,28 +36,17 @@ public:
 		ON_INTERFACE_LINK_STATE_CHANGED,
 		ON_ROUTE_CHANGED,
         ON_DHCP_SUCCESS,
-        ON_BANDWIDTH_REACHED_LIMIT,
     };
 
 public:
-    virtual int32_t OnInterfaceAddressUpdated(const std::string &addr,
-                                              const std::string &ifName,
-                                              int flags,
-                                              int scope) = 0;
-    virtual int32_t OnInterfaceAddressRemoved(const std::string &addr,
-                                              const std::string &ifName,
-                                              int flags,
-                                              int scope) = 0;
-    virtual int32_t OnInterfaceAdded(const std::string &ifName) = 0;
-    virtual int32_t OnInterfaceRemoved(const std::string &ifName) = 0;
-    virtual int32_t OnInterfaceChanged(const std::string &ifName, bool up) = 0;
-    virtual int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) = 0;
-    virtual int32_t OnRouteChanged(bool updated,
-                                   const std::string &route,
-                                   const std::string &gateway,
-                                   const std::string &ifName) = 0;
+    virtual int32_t OnInterfaceAddressUpdated(const std::string &, const std::string &, int, int) = 0;
+    virtual int32_t OnInterfaceAddressRemoved(const std::string &, const std::string &, int, int) = 0;
+    virtual int32_t OnInterfaceAdded(const std::string &) = 0;
+    virtual int32_t OnInterfaceRemoved(const std::string &) = 0;
+    virtual int32_t OnInterfaceChanged(const std::string &, bool) = 0;
+    virtual int32_t OnInterfaceLinkStateChanged(const std::string &, bool) = 0;
+    virtual int32_t OnRouteChanged(bool, const std::string &, const std::string &, const std::string &) = 0;
     virtual int32_t OnDhcpSuccess(sptr<DhcpResultParcel> &dhcpResult) = 0;
-    virtual int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) = 0;
 };
 } // namespace NetsysNative
 } // namespace OHOS
