@@ -40,6 +40,7 @@ public:
         NETSYS_INTERFACE_SET_MTU,
         NETSYS_INTERFACE_GET_MTU,
         NETSYS_REGISTER_NOTIFY_CALLBACK,
+        NETSYS_UNREGISTER_NOTIFY_CALLBACK,
         NETSYS_NETWORK_ADD_ROUTE,
         NETSYS_NETWORK_REMOVE_ROUTE,
         NETSYS_NETWORK_ADD_ROUTE_PARCEL,
@@ -87,6 +88,7 @@ public:
     virtual int32_t InterfaceGetMtu(const std::string &interfaceName) = 0;
 
     virtual int32_t RegisterNotifyCallback(sptr<INotifyCallback> &callback) = 0;
+    virtual int32_t UnRegisterNotifyCallback(sptr<INotifyCallback> &callback) = 0;
 
     virtual int32_t NetworkAddRoute(int32_t netId, const std::string &interfaceName, const std::string &destination,
                                     const std::string &nextHop) = 0;

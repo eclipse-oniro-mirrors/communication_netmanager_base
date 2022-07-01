@@ -38,7 +38,7 @@ public:
 
     int Create(int protocol);
     int Create(int type, int protocol);
-    int SendNetlinkMsgToKernel(struct nlmsghdr *msg);
+    int SendNetlinkMsgToKernel(nlmsghdr *msg);
     int Shutdown();
 private:
     int pid = 0;

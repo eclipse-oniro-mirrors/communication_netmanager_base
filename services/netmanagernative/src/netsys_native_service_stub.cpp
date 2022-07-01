@@ -37,6 +37,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_INTERFACE_SET_MTU] = &NetsysNativeServiceStub::CmdInterfaceSetMtu;
     opToInterfaceMap_[NETSYS_INTERFACE_GET_MTU] = &NetsysNativeServiceStub::CmdInterfaceGetMtu;
     opToInterfaceMap_[NETSYS_REGISTER_NOTIFY_CALLBACK] = &NetsysNativeServiceStub::CmdRegisterNotifyCallback;
+    opToInterfaceMap_[NETSYS_UNREGISTER_NOTIFY_CALLBACK] = &NetsysNativeServiceStub::CmdUnRegisterNotifyCallback;
     opToInterfaceMap_[NETSYS_NETWORK_ADD_ROUTE] = &NetsysNativeServiceStub::CmdNetworkAddRoute;
     opToInterfaceMap_[NETSYS_NETWORK_REMOVE_ROUTE] = &NetsysNativeServiceStub::CmdNetworkRemoveRoute;
     opToInterfaceMap_[NETSYS_NETWORK_ADD_ROUTE_PARCEL] = &NetsysNativeServiceStub::CmdNetworkAddRouteParcel;
@@ -306,6 +307,21 @@ int32_t NetsysNativeServiceStub::CmdRegisterNotifyCallback(MessageParcel &data, 
 
     sptr<INotifyCallback> callback = iface_cast<INotifyCallback>(remote);
     int32_t result = RegisterNotifyCallback(callback);
+    reply.WriteInt32(result);
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceStub::CmdUnRegisterNotifyCallback(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("Begin to dispatch cmd UnRegisterNotifyCallback");
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Callback ptr is nullptr.");
+        return 0;
+    }
+
+    sptr<INotifyCallback> callback = iface_cast<INotifyCallback>(remote);
+    int32_t result = UnRegisterNotifyCallback(callback);
     reply.WriteInt32(result);
     return ERR_NONE;
 }

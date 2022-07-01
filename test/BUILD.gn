@@ -13,6 +13,5 @@
 
 group("test") {
   testonly = true
-
-  deps = [ "fuzztest:fuzztest" ]
+  deps = [ "netmanagernative:netmanager_native_test" ]
 }
