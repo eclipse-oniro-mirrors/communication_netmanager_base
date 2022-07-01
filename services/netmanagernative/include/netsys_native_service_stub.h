@@ -45,6 +45,7 @@ private:
     int32_t CmdInterfaceGetMtu(MessageParcel &data, MessageParcel &reply);
 
     int32_t CmdRegisterNotifyCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdUnRegisterNotifyCallback(MessageParcel &data, MessageParcel &reply);
 
     int32_t CmdNetworkAddRoute(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkRemoveRoute(MessageParcel &data, MessageParcel &reply);

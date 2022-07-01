@@ -14,29 +14,32 @@
  */
 #include "netsys_native_client.h"
 
+#include <arpa/inet.h>
 #include <cstdlib>
 #include <cstring>
-#include <unistd.h>
 #include <fcntl.h>
-#include <arpa/inet.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/stat.h>
+#include <thread>
+#include <unistd.h>
+
+#include <linux/if_tun.h>
 #include <net/route.h>
 #include <netinet/in.h>
-#include <linux/if_tun.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "iservice_registry.h"
-#include "system_ability_definition.h"
-#include "securec.h"
-
 #include "net_conn_types.h"
 #include "net_mgr_log_wrapper.h"
 #include "netsys_native_service_proxy.h"
+#include "securec.h"
+#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+constexpr int64_t DELAY_TIME = 1000 * 100;
+constexpr int32_t RETRY_TIMES = 10;
 NetsysNativeClient::NativeNotifyCallback::NativeNotifyCallback(NetsysNativeClient &netsysNativeClient)
     : netsysNativeClient_(netsysNativeClient)
 {
@@ -44,41 +47,64 @@ NetsysNativeClient::NativeNotifyCallback::NativeNotifyCallback(NetsysNativeClien
 
 NetsysNativeClient::NativeNotifyCallback::~NativeNotifyCallback() {}
 
-int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressUpdated(const std::string &,
-    const std::string &, int, int)
+int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressUpdated(const std::string &addr,
+                                                                            const std::string &ifName, int flags,
+                                                                            int scope)
 {
+    for (auto &cb : netsysNativeClient_.cbObjects) {
+        cb->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
+    }
     return 0;
 }
 
-int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(const std::string &,
-    const std::string &, int, int)
+int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(const std::string &addr,
+                                                                            const std::string &ifName, int flags,
+                                                                            int scope)
 {
+    for (auto &cb : netsysNativeClient_.cbObjects) {
+        cb->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
+    }
     return 0;
 }
 
-int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::string &)
+int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::string &ifName)
 {
+    for (auto &cb : netsysNativeClient_.cbObjects) {
+        cb->OnInterfaceAdded(ifName);
+    }
     return 0;
 }
 
-int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::string &)
+int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::string &ifName)
 {
+    for (auto &cb : netsysNativeClient_.cbObjects) {
+        cb->OnInterfaceRemoved(ifName);
+    }
     return 0;
 }
 
-int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::string &, bool)
+int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::string &ifName, bool up)
 {
+    for (auto &cb : netsysNativeClient_.cbObjects) {
+        cb->OnInterfaceChanged(ifName, up);
+    }
     return 0;
 }
 
-int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceLinkStateChanged(const std::string &, bool)
+int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
 {
+    for (auto &cb : netsysNativeClient_.cbObjects) {
+        cb->OnInterfaceLinkStateChanged(ifName, up);
+    }
     return 0;
 }
 
-int32_t NetsysNativeClient::NativeNotifyCallback::OnRouteChanged(bool, const std::string &, const std::string &,
-    const std::string &)
+int32_t NetsysNativeClient::NativeNotifyCallback::OnRouteChanged(bool updated, const std::string &route,
+                                                                 const std::string &gateway, const std::string &ifName)
 {
+    for (auto &cb : netsysNativeClient_.cbObjects) {
+        cb->OnRouteChanged(updated, route, gateway, ifName);
+    }
     return 0;
 }
 
@@ -86,6 +112,14 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnDhcpSuccess(sptr<OHOS::Netsy
 {
     NETMGR_LOG_I("NetsysNativeClient::NativeNotifyCallback::OnDhcpSuccess");
     netsysNativeClient_.ProcessDhcpResult(dhcpResult);
+    return 0;
+}
+
+int32_t NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit(const std::string &limitName,
+                                                                          const std::string &iface)
+{
+    NETMGR_LOG_I("NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit");
+    netsysNativeClient_.ProcessBandwidthReachedLimit(limitName, iface);
     return 0;
 }
 
@@ -106,7 +140,23 @@ void NetsysNativeClient::Init()
     initFlag_ = true;
     nativeNotifyCallback_ = std::make_unique<NativeNotifyCallback>(*this).release();
     netsysNativeService_ = GetProxy();
-    if (netsysNativeService_ != nullptr) {
+    if (netsysNativeService_ == nullptr) {
+        std::thread thread([this]() {
+            int i = 0;
+            while (netsysNativeService_ == nullptr) {
+                netsysNativeService_ = GetProxy();
+                NETMGR_LOG_I("netsysNativeService_ is null waiting for netsys service");
+                usleep(DELAY_TIME);
+                i++;
+                if (i > RETRY_TIMES) {
+                    NETMGR_LOG_E("netsysNativeService_ is null for 10 times");
+                    break;
+                }
+            }
+            netsysNativeService_->RegisterNotifyCallback(nativeNotifyCallback_);
+        });
+        thread.detach();
+    } else {
         netsysNativeService_->RegisterNotifyCallback(nativeNotifyCallback_);
     }
 }
@@ -151,11 +201,11 @@ int32_t NetsysNativeClient::NetworkRemoveInterface(int32_t netId, const std::str
     return netsysNativeService_->NetworkRemoveInterface(netId, iface);
 }
 
-int32_t NetsysNativeClient::NetworkAddRoute(int32_t netId, const std::string &ifName,
-    const std::string &destination, const std::string &nextHop)
+int32_t NetsysNativeClient::NetworkAddRoute(int32_t netId, const std::string &ifName, const std::string &destination,
+                                            const std::string &nextHop)
 {
     NETMGR_LOG_I("Add Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s]",
-        netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
+                 netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysNativeService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
@@ -163,11 +213,11 @@ int32_t NetsysNativeClient::NetworkAddRoute(int32_t netId, const std::string &if
     return netsysNativeService_->NetworkAddRoute(netId, ifName, destination, nextHop);
 }
 
-int32_t NetsysNativeClient::NetworkRemoveRoute(int32_t netId, const std::string &ifName,
-    const std::string &destination, const std::string &nextHop)
+int32_t NetsysNativeClient::NetworkRemoveRoute(int32_t netId, const std::string &ifName, const std::string &destination,
+                                               const std::string &nextHop)
 {
     NETMGR_LOG_I("Remove Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s]",
-        netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
+                 netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysNativeService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
@@ -241,11 +291,11 @@ int32_t NetsysNativeClient::InterfaceSetMtu(const std::string &ifName, int32_t m
     return netsysNativeService_->InterfaceSetMtu(ifName, mtu);
 }
 
-int32_t NetsysNativeClient::InterfaceAddAddress(const std::string &ifName,
-    const std::string &ipAddr, int32_t prefixLength)
+int32_t NetsysNativeClient::InterfaceAddAddress(const std::string &ifName, const std::string &ipAddr,
+                                                int32_t prefixLength)
 {
-    NETMGR_LOG_I("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
-        ifName.c_str(), ipAddr.c_str(), prefixLength);
+    NETMGR_LOG_I("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
+                 ipAddr.c_str(), prefixLength);
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysNativeService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
@@ -253,11 +303,11 @@ int32_t NetsysNativeClient::InterfaceAddAddress(const std::string &ifName,
     return netsysNativeService_->InterfaceAddAddress(ifName, ipAddr, prefixLength);
 }
 
-int32_t NetsysNativeClient::InterfaceDelAddress(const std::string &ifName,
-    const std::string &ipAddr, int32_t prefixLength)
+int32_t NetsysNativeClient::InterfaceDelAddress(const std::string &ifName, const std::string &ipAddr,
+                                                int32_t prefixLength)
 {
-    NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
-        ifName.c_str(), ipAddr.c_str(), prefixLength);
+    NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
+                 ipAddr.c_str(), prefixLength);
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysNativeService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
@@ -266,7 +316,8 @@ int32_t NetsysNativeClient::InterfaceDelAddress(const std::string &ifName,
 }
 
 int32_t NetsysNativeClient::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
-    const std::vector<std::string> &servers, const std::vector<std::string> &domains)
+                                              const std::vector<std::string> &servers,
+                                              const std::vector<std::string> &domains)
 {
     NETMGR_LOG_I("Set resolver config: netId[%{public}d]", netId);
     if (netsysNativeService_ == nullptr) {
@@ -277,7 +328,8 @@ int32_t NetsysNativeClient::SetResolverConfig(uint16_t netId, uint16_t baseTimeo
 }
 
 int32_t NetsysNativeClient::GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
-    std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount)
+                                              std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
+                                              uint8_t &retryCount)
 {
     NETMGR_LOG_I("Get resolver config: netId[%{public}d]", netId);
     if (netsysNativeService_ == nullptr) {
@@ -317,8 +369,8 @@ int32_t NetsysNativeClient::FlushNetworkCache(uint16_t netId)
     return netsysNativeService_->FlushNetworkCache(netId);
 }
 
-int32_t NetsysNativeClient::GetAddrInfo(const std::string &hostName,
-    const std::string &serverName, const struct addrinfo &hints, std::unique_ptr<addrinfo> &res, uint16_t netId)
+int32_t NetsysNativeClient::GetAddrInfo(const std::string &hostName, const std::string &serverName,
+                                        const struct addrinfo &hints, std::unique_ptr<addrinfo> &res, uint16_t netId)
 {
     NETMGR_LOG_I("NetsysNativeClient GetAddrInfo");
     if (netsysNativeService_ == nullptr) {
@@ -393,8 +445,8 @@ int64_t NetsysNativeClient::GetUidTxBytes(uint32_t uid)
 
 int64_t NetsysNativeClient::GetUidOnIfaceRxBytes(uint32_t uid, const std::string &interfaceName)
 {
-    NETMGR_LOG_I("NetsysNativeClient GetUidOnIfaceRxBytes uid is [%{public}u] iface name is [%{public}s]",
-        uid, interfaceName.c_str());
+    NETMGR_LOG_I("NetsysNativeClient GetUidOnIfaceRxBytes uid is [%{public}u] iface name is [%{public}s]", uid,
+                 interfaceName.c_str());
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysNativeService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
@@ -404,8 +456,8 @@ int64_t NetsysNativeClient::GetUidOnIfaceRxBytes(uint32_t uid, const std::string
 
 int64_t NetsysNativeClient::GetUidOnIfaceTxBytes(uint32_t uid, const std::string &interfaceName)
 {
-    NETMGR_LOG_I("NetsysNativeClient GetUidOnIfaceTxBytes uid is [%{public}u] iface name is [%{public}s]",
-        uid, interfaceName.c_str());
+    NETMGR_LOG_I("NetsysNativeClient GetUidOnIfaceTxBytes uid is [%{public}u] iface name is [%{public}s]", uid,
+                 interfaceName.c_str());
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysNativeService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
@@ -499,7 +551,7 @@ int32_t NetsysNativeClient::BindSocket(int32_t socket_fd, uint32_t netId)
     return 0;
 }
 
-int32_t NetsysNativeClient::IpEnableForwarding(const std::string& requestor)
+int32_t NetsysNativeClient::IpEnableForwarding(const std::string &requestor)
 {
     NETMGR_LOG_D("NetsysNativeClient IpEnableForwarding: requestor[%{public}s]", requestor.c_str());
     if (netsysNativeService_ == nullptr) {
@@ -509,7 +561,7 @@ int32_t NetsysNativeClient::IpEnableForwarding(const std::string& requestor)
     return netsysNativeService_->IpEnableForwarding(requestor);
 }
 
-int32_t NetsysNativeClient::IpDisableForwarding(const std::string& requestor)
+int32_t NetsysNativeClient::IpDisableForwarding(const std::string &requestor)
 {
     NETMGR_LOG_D("NetsysNativeClient IpDisableForwarding: requestor[%{public}s]", requestor.c_str());
     if (netsysNativeService_ == nullptr) {
@@ -519,10 +571,10 @@ int32_t NetsysNativeClient::IpDisableForwarding(const std::string& requestor)
     return netsysNativeService_->IpDisableForwarding(requestor);
 }
 
-int32_t NetsysNativeClient::EnableNat(const std::string& downstreamIface, const std::string& upstreamIface)
+int32_t NetsysNativeClient::EnableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
-    NETMGR_LOG_D("NetsysNativeClient EnableNat: intIface[%{public}s] intIface[%{public}s]",
-        downstreamIface.c_str(), upstreamIface.c_str());
+    NETMGR_LOG_D("NetsysNativeClient EnableNat: intIface[%{public}s] intIface[%{public}s]", downstreamIface.c_str(),
+                 upstreamIface.c_str());
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
@@ -530,10 +582,10 @@ int32_t NetsysNativeClient::EnableNat(const std::string& downstreamIface, const 
     return netsysNativeService_->EnableNat(downstreamIface, upstreamIface);
 }
 
-int32_t NetsysNativeClient::DisableNat(const std::string& downstreamIface, const std::string& upstreamIface)
+int32_t NetsysNativeClient::DisableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
-    NETMGR_LOG_D("NetsysNativeClient DisableNat: intIface[%{public}s] intIface[%{public}s]",
-        downstreamIface.c_str(), upstreamIface.c_str());
+    NETMGR_LOG_D("NetsysNativeClient DisableNat: intIface[%{public}s] intIface[%{public}s]", downstreamIface.c_str(),
+                 upstreamIface.c_str());
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
@@ -541,7 +593,7 @@ int32_t NetsysNativeClient::DisableNat(const std::string& downstreamIface, const
     return netsysNativeService_->DisableNat(downstreamIface, upstreamIface);
 }
 
-int32_t NetsysNativeClient::IpfwdAddInterfaceForward(const std::string& fromIface, const std::string& toIface)
+int32_t NetsysNativeClient::IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface)
 {
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
@@ -550,10 +602,10 @@ int32_t NetsysNativeClient::IpfwdAddInterfaceForward(const std::string& fromIfac
     return netsysNativeService_->IpfwdAddInterfaceForward(fromIface, toIface);
 }
 
-int32_t NetsysNativeClient::IpfwdRemoveInterfaceForward(const std::string& fromIface, const std::string& toIface)
+int32_t NetsysNativeClient::IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface)
 {
     NETMGR_LOG_D("NetsysNativeClient IpfwdRemoveInterfaceForward: fromIface[%{public}s], toIface[%{public}s]",
-        fromIface.c_str(), toIface.c_str());
+                 fromIface.c_str(), toIface.c_str());
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
@@ -561,7 +613,7 @@ int32_t NetsysNativeClient::IpfwdRemoveInterfaceForward(const std::string& fromI
     return netsysNativeService_->IpfwdRemoveInterfaceForward(fromIface, toIface);
 }
 
-int32_t NetsysNativeClient::TetherDnsSet(uint32_t netId, const std::vector<std::string>& dnsAddrs)
+int32_t NetsysNativeClient::TetherDnsSet(uint32_t netId, const std::vector<std::string> &dnsAddrs)
 {
     NETMGR_LOG_D("NetsysNativeClient TetherDnsSet: netId[%{public}d]", netId);
     for (auto iter = dnsAddrs.begin(); iter != dnsAddrs.end(); ++iter) {
@@ -594,7 +646,7 @@ int32_t NetsysNativeClient::BindNetworkServiceVpn(int32_t socketFd)
 {
     NETMGR_LOG_D("NetsysNativeClient::BindNetworkServiceVpn: socketFd[%{public}d]", socketFd);
     /* netsys provide default interface name */
-    const char* defaultNetName = "wlan0";
+    const char *defaultNetName = "wlan0";
     int defaultNetNameLen = strlen(defaultNetName);
     /* set socket by option. */
     int32_t ret = setsockopt(socketFd, SOL_SOCKET, SO_MARK, defaultNetName, defaultNetNameLen);
@@ -615,20 +667,19 @@ int32_t NetsysNativeClient::EnableVirtualNetIfaceCard(int32_t socketFd, struct i
     }
 
     /*
-    * Flags:
-    * IFF_TUN   - TUN device (no Ethernet headers)
-    * IFF_TAP   - TAP device
-    * IFF_NO_PI - Do not provide packet information
-    **/
+     * Flags:
+     * IFF_TUN   - TUN device (no Ethernet headers)
+     * IFF_TAP   - TAP device
+     * IFF_NO_PI - Do not provide packet information
+     **/
     ifRequest.ifr_flags = IFF_TUN | IFF_NO_PI;
     /**
-    * Try to create the device. if it cannot assign the device interface name, kernel can
-    * allocate the next device interface name. for example, there is tun0, kernel can
-    * allocate tun1.
-    **/
+     * Try to create the device. if it cannot assign the device interface name, kernel can
+     * allocate the next device interface name. for example, there is tun0, kernel can
+     * allocate tun1.
+     **/
     if (ioctl(ifaceFdTemp, TUNSETIFF, &ifRequest) < 0) {
-        NETMGR_LOG_E("The TUNSETIFF of ioctl failed, ifRequest.ifr_name[%{public}s]",
-            ifRequest.ifr_name);
+        NETMGR_LOG_E("The TUNSETIFF of ioctl failed, ifRequest.ifr_name[%{public}s]", ifRequest.ifr_name);
         return ERR_VPN;
     }
 
@@ -645,11 +696,11 @@ int32_t NetsysNativeClient::EnableVirtualNetIfaceCard(int32_t socketFd, struct i
 
 static inline in_addr_t *as_in_addr(sockaddr *sa)
 {
-    return &(reinterpret_cast<sockaddr_in*>(sa))->sin_addr.s_addr;
+    return &(reinterpret_cast<sockaddr_in *>(sa))->sin_addr.s_addr;
 }
 
 int32_t NetsysNativeClient::SetIpAddress(int32_t socketFd, const std::string &ipAddress, int32_t prefixLen,
-    struct ifreq &ifRequest)
+                                         struct ifreq &ifRequest)
 {
     NETMGR_LOG_D("NetsysNativeClient::SetIpAddress: socketFd[%{public}d]", socketFd);
 
@@ -721,10 +772,6 @@ int32_t NetsysNativeClient::StopDhcpClient(const std::string &iface, bool bIpv6)
 int32_t NetsysNativeClient::RegisterCallback(sptr<NetsysControllerCallback> callback)
 {
     NETMGR_LOG_D("NetsysNativeClient::RegisterCallback");
-    if (netsysNativeService_ == nullptr) {
-        NETMGR_LOG_E("netsysService_ is null");
-        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
-    }
     cbObjects.push_back(callback);
     return 0;
 }
@@ -733,8 +780,7 @@ void NetsysNativeClient::ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultPa
 {
     NETMGR_LOG_I("NetsysNativeClient::ProcessDhcpResult");
     NetsysControllerCallback::DhcpResult result;
-    for (std::vector<sptr<NetsysControllerCallback>>::iterator it = cbObjects.begin();
-        it != cbObjects.end(); ++it) {
+    for (std::vector<sptr<NetsysControllerCallback>>::iterator it = cbObjects.begin(); it != cbObjects.end(); ++it) {
         result.iface_ = dhcpResult->iface_;
         result.ipAddr_ = dhcpResult->ipAddr_;
         result.gateWay_ = dhcpResult->gateWay_;
@@ -765,6 +811,16 @@ int32_t NetsysNativeClient::StopDhcpService(const std::string &iface)
         return ERR_NATIVESERVICE_NOTFIND;
     }
     return netsysNativeService_->StopDhcpService(iface);
+}
+
+void NetsysNativeClient::ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface)
+{
+    NETMGR_LOG_I("NetsysNativeClient ProcessBandwidthReachedLimit, limitName=%{public}s, iface=%{public}s",
+                 limitName.c_str(), iface.c_str());
+    std::for_each(cbObjects.begin(), cbObjects.end(),
+                  [limitName, iface](const sptr<NetsysControllerCallback> &callback) {
+                      callback->OnBandwidthReachedLimit(limitName, iface);
+                  });
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

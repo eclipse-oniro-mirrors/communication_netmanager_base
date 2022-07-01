@@ -35,17 +35,23 @@ class NetsysNativeClient {
     public:
         NativeNotifyCallback(NetsysNativeClient &netsysNativeClient);
         virtual ~NativeNotifyCallback() override;
-        int32_t OnInterfaceAddressUpdated(const std::string &, const std::string &, int, int) override;
-        int32_t OnInterfaceAddressRemoved(const std::string &, const std::string &, int, int) override;
-        int32_t OnInterfaceAdded(const std::string &) override;
-        int32_t OnInterfaceRemoved(const std::string &) override;
-        int32_t OnInterfaceChanged(const std::string &, bool) override;
-        int32_t OnInterfaceLinkStateChanged(const std::string &, bool) override;
-        int32_t OnRouteChanged(bool, const std::string &, const std::string &, const std::string &) override;
+        int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
+                                          int scope) override;
+        int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags,
+                                          int scope) override;
+        int32_t OnInterfaceAdded(const std::string &ifName) override;
+        int32_t OnInterfaceRemoved(const std::string &ifName) override;
+        int32_t OnInterfaceChanged(const std::string &ifName, bool up) override;
+        int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) override;
+        int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
+                               const std::string &ifName) override;
         int32_t OnDhcpSuccess(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult) override;
+        int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override;
+
     private:
         NetsysNativeClient &netsysNativeClient_;
     };
+
 public:
     NetsysNativeClient();
     ~NetsysNativeClient();
@@ -96,7 +102,7 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t NetworkAddRoute(int32_t netId, const std::string &ifName, const std::string &destination,
-        const std::string &nextHop);
+                            const std::string &nextHop);
 
     /**
      * @brief Remove route
@@ -108,7 +114,7 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t NetworkRemoveRoute(int32_t netId, const std::string &ifName, const std::string &destination,
-        const std::string &nextHop);
+                               const std::string &nextHop);
 
     /**
      * @brief Turn off the device
@@ -181,7 +187,7 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
-        const std::vector<std::string> &servers, const std::vector<std::string> &domains);
+                              const std::vector<std::string> &servers, const std::vector<std::string> &domains);
     /**
      * @brief Get dns server param info
      *
@@ -192,8 +198,8 @@ public:
      * @param retryCount
      * @return Return the return value of the netsys interface call
      */
-    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
-        std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount);
+    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
+                              uint16_t &baseTimeoutMsec, uint8_t &retryCount);
 
     /**
      * @brief Create dns cache before set dns
@@ -228,8 +234,8 @@ public:
      * @param res
      * @return Return the return value of the netsys interface call
      */
-    int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName,
-        const struct addrinfo &hints, std::unique_ptr<addrinfo> &res, uint16_t netId);
+    int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName, const struct addrinfo &hints,
+                        std::unique_ptr<addrinfo> &res, uint16_t netId);
 
     /**
      * @brief Obtains the bytes received over the cellular network.
@@ -344,14 +350,14 @@ public:
      *
      * @return Return the return value of the netsys interface call
      */
-    int32_t  SetDefaultNetWork(int32_t   netId);
+    int32_t SetDefaultNetWork(int32_t netId);
 
-	 /**
+    /**
      * @brief clear default network netId.
      *
      * @return Return the return value of the netsys interface call
      */
-    int32_t  ClearDefaultNetWorkNetId();
+    int32_t ClearDefaultNetWorkNetId();
 
     /**
      * @brief Obtains the NIC list.
@@ -368,7 +374,7 @@ public:
      * @param requestor the requestor of forwarding
      * @return Return the return value of the netsys interface call.
      */
-    int32_t IpEnableForwarding(const std::string& requestor);
+    int32_t IpEnableForwarding(const std::string &requestor);
 
     /**
      * @brief Disable ip forwarding.
@@ -376,7 +382,7 @@ public:
      * @param requestor the requestor of forwarding
      * @return Return the return value of the netsys interface call.
      */
-    int32_t IpDisableForwarding(const std::string& requestor);
+    int32_t IpDisableForwarding(const std::string &requestor);
 
     /**
      * @brief Enable Nat.
@@ -402,7 +408,7 @@ public:
      * @param toIface the name of outcoming interface
      * @return Return the return value of the netsys interface call.
      */
-    int32_t IpfwdAddInterfaceForward(const std::string& fromIface, const std::string& toIface);
+    int32_t IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface);
 
     /**
      * @brief Remove interface forward.
@@ -411,7 +417,7 @@ public:
      * @param toIface the name of outcoming interface
      * @return Return the return value of the netsys interface call.
      */
-    int32_t IpfwdRemoveInterfaceForward(const std::string& fromIface, const std::string& toIface);
+    int32_t IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface);
 
     /**
      * @brief Set tether dns.
@@ -420,7 +426,7 @@ public:
      * @param dnsAddr the list of dns address
      * @return Return the return value of the netsys interface call.
      */
-    int32_t TetherDnsSet(uint32_t netId, const std::vector<std::string>& dnsAddrs);
+    int32_t TetherDnsSet(uint32_t netId, const std::vector<std::string> &dnsAddrs);
 
     /**
      * @brief Set net callbackfuction.
@@ -467,12 +473,12 @@ public:
      */
     int32_t SetBlocking(int32_t ifaceFd, bool isBlock);
     /**
-    * @brief Start Dhcp Client.
-    *
-    * @param iface interface file description
-    * @param bIpv6 network blocking
-    * @return.
-    */
+     * @brief Start Dhcp Client.
+     *
+     * @param iface interface file description
+     * @param bIpv6 network blocking
+     * @return.
+     */
     int32_t StartDhcpClient(const std::string &iface, bool bIpv6);
     /**
      * @brief Stop Dhcp Client.
@@ -483,11 +489,11 @@ public:
      */
     int32_t StopDhcpClient(const std::string &iface, bool bIpv6);
     /**
-    * @brief Register Notify Callback
-    *
-    * @param callback
-    * @return .
-    */
+     * @brief Register Notify Callback
+     *
+     * @param callback
+     * @return .
+     */
     int32_t RegisterCallback(sptr<NetsysControllerCallback> callback);
 
     /**
@@ -509,7 +515,9 @@ public:
 
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);
+    void ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface);
     sptr<OHOS::NetsysNative::INetsysService> GetProxy();
+
 private:
     sptr<OHOS::NetsysNative::INotifyCallback> nativeNotifyCallback_ = nullptr;
     sptr<OHOS::NetsysNative::INetsysService> netsysNativeService_ = nullptr;

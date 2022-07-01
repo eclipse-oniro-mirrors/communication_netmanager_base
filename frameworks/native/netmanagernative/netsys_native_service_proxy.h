@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef NETSYS_NATIVE_SERVICE_PROXY_H__
 #define NETSYS_NATIVE_SERVICE_PROXY_H__
 
@@ -39,6 +40,7 @@ public:
     int32_t InterfaceGetMtu(const std::string &interfaceName) override;
 
     int32_t RegisterNotifyCallback(sptr<INotifyCallback> &callback) override;
+    int32_t UnRegisterNotifyCallback(sptr<INotifyCallback> &callback) override;
 
     int32_t NetworkAddRoute(int32_t netId, const std::string &interfaceName, const std::string &destination,
         const std::string &nextHop) override;

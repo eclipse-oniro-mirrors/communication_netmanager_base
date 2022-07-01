@@ -12,10 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include  <securec.h>
-#include "netsys_addr_info_parcel.h"
-#include "netnative_log_wrapper.h"
+
 #include "netsys_native_service_proxy.h"
+
+#include <securec.h>
+
+#include "netnative_log_wrapper.h"
+#include "netsys_addr_info_parcel.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -114,7 +117,7 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netid, std::v
     reply.ReadUint16(baseTimeoutMsec);
     reply.ReadUint8(retryCount);
     int32_t vServerSize = reply.ReadInt32();
-    std::vector<std::string>  vecString;
+    std::vector<std::string> vecString;
     for (int i = 0; i < vServerSize; i++) {
         vecString.push_back(reply.ReadString());
     }
@@ -122,7 +125,7 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netid, std::v
         servers.assign(vecString.begin(), vecString.end());
     }
     int32_t vDomainSize = reply.ReadInt32();
-    std::vector<std::string>  vecDomain;
+    std::vector<std::string> vecDomain;
     for (int i = 0; i < vDomainSize; i++) {
         vecDomain.push_back(reply.ReadString());
     }
@@ -130,7 +133,7 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netid, std::v
         domains.assign(vecDomain.begin(), vecDomain.end());
     }
     NETNATIVE_LOGI("Begin to GetResolverConfig %{public}d", result);
-    return  result;
+    return result;
 }
 
 int32_t NetsysNativeServiceProxy::CreateNetworkCache(const uint16_t netid)
@@ -187,8 +190,8 @@ int32_t NetsysNativeServiceProxy::DestroyNetworkCache(const uint16_t netid)
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::Getaddrinfo(const char* node, const char* service, const struct addrinfo* hints,
-    struct addrinfo** result, const uint16_t netid)
+int32_t NetsysNativeServiceProxy::Getaddrinfo(const char *node, const char *service, const struct addrinfo *hints,
+                                              struct addrinfo **result, const uint16_t netid)
 {
     NETNATIVE_LOGI("Begin to Getaddrinfo");
 #ifdef SYS_FUNC
@@ -207,16 +210,16 @@ int32_t NetsysNativeServiceProxy::Getaddrinfo(const char* node, const char* serv
     MessageOption option;
     Remote()->SendRequest(INetsysService::NETSYS_GET_ADDR_INFO, data, reply, option);
     int ret;
-    sptr<NetsysAddrInfoParcel>  ptr=addrParcel.Unmarshalling(reply);
+    sptr<NetsysAddrInfoParcel> ptr = addrParcel.Unmarshalling(reply);
     if (ptr == nullptr) {
         return ERR_NO_MEMORY;
     }
     *result = ptr->Head;
     if (ptr->addrSize == 0) {
-        *result=nullptr;
+        *result = nullptr;
     }
-    ret=ptr->ret;
-    return  ret;
+    ret = ptr->ret;
+    return ret;
 #endif
 }
 
@@ -280,8 +283,31 @@ int32_t NetsysNativeServiceProxy::RegisterNotifyCallback(sptr<INotifyCallback> &
     return reply.ReadInt32();
 }
 
+int32_t NetsysNativeServiceProxy::UnRegisterNotifyCallback(sptr<INotifyCallback> &callback)
+{
+    NETNATIVE_LOGI("Begin to UnRegisterNotifyCallback");
+    MessageParcel data;
+    if (callback == nullptr) {
+        NETNATIVE_LOGE("The parameter of callback is nullptr");
+        return ERR_NULL_OBJECT;
+    }
+
+    if (!WriteInterfaceToken(data)) {
+        NETNATIVE_LOGE("WriteInterfaceToken fail");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    data.WriteRemoteObject(callback->AsObject().GetRefPtr());
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetsysService::NETSYS_UNREGISTER_NOTIFY_CALLBACK, data, reply, option);
+
+    return reply.ReadInt32();
+}
+
 int32_t NetsysNativeServiceProxy::NetworkAddRoute(int32_t netId, const std::string &interfaceName,
-    const std::string &destination, const std::string &nextHop)
+                                                  const std::string &destination, const std::string &nextHop)
 {
     NETNATIVE_LOGI("Begin to NetworkAddRoute");
     MessageParcel data;
@@ -309,7 +335,7 @@ int32_t NetsysNativeServiceProxy::NetworkAddRoute(int32_t netId, const std::stri
 }
 
 int32_t NetsysNativeServiceProxy::NetworkRemoveRoute(int32_t netId, const std::string &interfaceName,
-    const std::string &destination, const std::string &nextHop)
+                                                     const std::string &destination, const std::string &nextHop)
 {
     NETNATIVE_LOGI("Begin to NetworkRemoveRoute");
     MessageParcel data;
@@ -439,7 +465,7 @@ int32_t NetsysNativeServiceProxy::NetworkClearDefault()
 }
 
 int32_t NetsysNativeServiceProxy::GetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
-    const std::string &parameter, std::string &value)
+                                                const std::string &parameter, std::string &value)
 {
     NETNATIVE_LOGI("Begin to GetSysProcNet");
     MessageParcel data;
@@ -466,11 +492,11 @@ int32_t NetsysNativeServiceProxy::GetProcSysNet(int32_t ipversion, int32_t which
     std::string valueRsl = reply.ReadString();
     NETNATIVE_LOGE("NETSYS_GET_PROC_SYS_NET value %{public}s", valueRsl.c_str());
     value = valueRsl;
-    return  ret;
+    return ret;
 }
 
 int32_t NetsysNativeServiceProxy::SetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
-    const std::string &parameter, std::string  &value)
+                                                const std::string &parameter, std::string &value)
 {
     NETNATIVE_LOGI("Begin to SetSysProcNet");
     MessageParcel data;
@@ -521,7 +547,7 @@ int32_t NetsysNativeServiceProxy::NetworkCreatePhysical(int32_t netId, int32_t p
 }
 
 int32_t NetsysNativeServiceProxy::InterfaceAddAddress(const std::string &interfaceName, const std::string &addrString,
-    int32_t prefixLength)
+                                                      int32_t prefixLength)
 {
     NETNATIVE_LOGI("Begin to InterfaceAddAddress");
     MessageParcel data;
@@ -546,7 +572,7 @@ int32_t NetsysNativeServiceProxy::InterfaceAddAddress(const std::string &interfa
 }
 
 int32_t NetsysNativeServiceProxy::InterfaceDelAddress(const std::string &interfaceName, const std::string &addrString,
-    int32_t prefixLength)
+                                                      int32_t prefixLength)
 {
     NETNATIVE_LOGI("Begin to InterfaceDelAddress");
     MessageParcel data;
@@ -677,10 +703,10 @@ int32_t NetsysNativeServiceProxy::InterfaceSetConfig(const InterfaceConfiguratio
     if (!data.WriteInt32(vsize)) {
         return ERR_FLATTEN_OBJECT;
     }
-    std::vector<std::string>   vCflags;
+    std::vector<std::string> vCflags;
     vCflags.assign(cfg.flags.begin(), cfg.flags.end());
     NETNATIVE_LOGI("PROXY: InterfaceSetConfig Write flags String_SIZE: %{public}d",
-        static_cast<int32_t>(vCflags.size()));
+                   static_cast<int32_t>(vCflags.size()));
     for (std::vector<std::string>::iterator it = vCflags.begin(); it != vCflags.end(); ++it) {
         data.WriteString(*it);
     }
@@ -695,7 +721,7 @@ int32_t NetsysNativeServiceProxy::InterfaceGetConfig(InterfaceConfigurationParce
 {
     NETNATIVE_LOGI("Begin to InterfaceGetConfig");
     MessageParcel data;
-    int32_t ret ;
+    int32_t ret;
     int32_t vSize;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -712,23 +738,23 @@ int32_t NetsysNativeServiceProxy::InterfaceGetConfig(InterfaceConfigurationParce
     reply.ReadString(cfg.hwAddr);
     reply.ReadString(cfg.ipv4Addr);
     reply.ReadInt32(cfg.prefixLength);
-    vSize =  reply.ReadInt32();
-    std::vector<std::string>  vecString;
+    vSize = reply.ReadInt32();
+    std::vector<std::string> vecString;
     for (int i = 0; i < vSize; i++) {
-            vecString.push_back(reply.ReadString());
+        vecString.push_back(reply.ReadString());
     }
     if (vSize > 0) {
         cfg.flags.assign(vecString.begin(), vecString.end());
     }
     NETNATIVE_LOGI("End to InterfaceGetConfig, ret =%{public}d", ret);
-    return   ret;
+    return ret;
 }
 
 int32_t NetsysNativeServiceProxy::InterfaceGetList(std::vector<std::string> &ifaces)
 {
     NETNATIVE_LOGI("NetsysNativeServiceProxy Begin to InterfaceGetList");
     MessageParcel data;
-    int32_t ret ;
+    int32_t ret;
     int32_t vSize;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -737,8 +763,8 @@ int32_t NetsysNativeServiceProxy::InterfaceGetList(std::vector<std::string> &ifa
     MessageOption option;
     Remote()->SendRequest(INetsysService::NETSYS_INTERFACE_GET_LIST, data, reply, option);
     ret = reply.ReadInt32();
-    vSize =  reply.ReadInt32();
-    std::vector<std::string>  vecString;
+    vSize = reply.ReadInt32();
+    std::vector<std::string> vecString;
     for (int i = 0; i < vSize; i++) {
         vecString.push_back(reply.ReadString());
     }

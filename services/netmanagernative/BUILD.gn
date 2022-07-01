@@ -33,9 +33,13 @@ ohos_shared_library("netsys_native_manager") {
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/dnsresolv/dns_resolv_listen.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/net_manager_native.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netlink_manager.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netlink_message_decoder.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netlink_msg.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netlink_native_listener.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netlink_processor.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netlink_socket.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/nmd_network.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/socket_client.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys_native_service.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys_native_service_stub.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/notify_callback_stub.cpp",
@@ -44,6 +48,7 @@ ohos_shared_library("netsys_native_manager") {
   include_dirs = [
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$NETMANAGER_BASE_ROOT/services/common/include",
+    "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
@@ -54,6 +59,7 @@ ohos_shared_library("netsys_native_manager") {
   ]
 
   deps = [
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "//foundation/communication/wifi/dhcp/services/mgr_service:dhcp_manager_service",
     "//utils/native/base:utils",
   ]
@@ -72,6 +78,8 @@ ohos_shared_library("netsys_native_manager") {
     "LOG_DOMAIN = 0xD0015B0",
     "SHARING_MANAGER_DEPS",
   ]
+
+  public_configs = [ "$NETMANAGER_BASE_ROOT/utils:netmgr_common_config" ]
 
   if (enable_sys_func) {
     defines += [ "SYS_FUNC" ]

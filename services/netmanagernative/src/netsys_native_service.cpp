@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
+#include "netsys_native_service.h"
+
 #include <csignal>
 #include <thread>
-#include <sys/types.h>
 #include <unistd.h>
+
+#include <sys/types.h>
+
 #include "netnative_log_wrapper.h"
 #include "system_ability_definition.h"
-#include "netsys_native_service.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -62,6 +65,7 @@ void NetsysNativeService::OnStart()
             timeNow->tm_year + startTime_, timeNow->tm_mon + extraMonth_, timeNow->tm_mday, timeNow->tm_hour,
             timeNow->tm_min, timeNow->tm_sec);
     }
+    manager_->StartListener();
 }
 
 void NetsysNativeService::OnStop()
@@ -80,6 +84,7 @@ void NetsysNativeService::OnStop()
             timeNow->tm_min, timeNow->tm_sec);
     }
     state_ = ServiceRunningState::STATE_STOPPED;
+    manager_->StopListener();
 }
 
 void ExitHandler(int32_t signum)
@@ -182,6 +187,14 @@ int32_t NetsysNativeService::RegisterNotifyCallback(sptr<INotifyCallback> &callb
     NETNATIVE_LOGI("RegisterNotifyCallback");
     notifyCallback_ = callback;
     dhcpController_->RegisterNotifyCallback(callback);
+    manager_-> RegisterNetlinkCallback(callback);
+    return 0;
+}
+
+int32_t NetsysNativeService::UnRegisterNotifyCallback(sptr<INotifyCallback> &callback)
+{
+    NETNATIVE_LOGI("UnRegisterNotifyCallback");
+    manager_->UnRegisterNetlinkCallback(notifyCallback_);
     return 0;
 }
 
@@ -191,7 +204,7 @@ int32_t NetsysNativeService::NetworkAddRoute(int32_t netId, const std::string &i
     NETNATIVE_LOGI("NetsysNativeService::NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s",
         netId, interfaceName.c_str(), destination.c_str(), nextHop.c_str());
 
-    int32_t result = this->netsysService_->NetworkAddRoute(netId, interfaceName, destination, nextHop);
+    int32_t result = netsysService_->NetworkAddRoute(netId, interfaceName, destination, nextHop);
     NETNATIVE_LOGI("NetworkAddRoute %{public}d", result);
     return result;
 }
@@ -199,21 +212,21 @@ int32_t NetsysNativeService::NetworkAddRoute(int32_t netId, const std::string &i
 int32_t NetsysNativeService::NetworkRemoveRoute(int32_t netId, const std::string &interfaceName,
     const std::string &destination, const std::string &nextHop)
 {
-    int32_t result = this->netsysService_->NetworkRemoveRoute(netId, interfaceName, destination, nextHop);
+    int32_t result = netsysService_->NetworkRemoveRoute(netId, interfaceName, destination, nextHop);
     NETNATIVE_LOGI("NetworkRemoveRoute %{public}d", result);
     return result;
 }
 
 int32_t NetsysNativeService::NetworkAddRouteParcel(int32_t netId, const RouteInfoParcel &routeInfo)
 {
-    int32_t result = this->netsysService_->NetworkAddRouteParcel(netId, routeInfo);
+    int32_t result = netsysService_->NetworkAddRouteParcel(netId, routeInfo);
     NETNATIVE_LOGI("NetworkAddRouteParcel %{public}d", result);
     return result;
 }
 
 int32_t NetsysNativeService::NetworkRemoveRouteParcel(int32_t netId, const RouteInfoParcel &routeInfo)
 {
-    int32_t result = this->netsysService_->NetworkRemoveRouteParcel(netId, routeInfo);
+    int32_t result = netsysService_->NetworkRemoveRouteParcel(netId, routeInfo);
     NETNATIVE_LOGI("NetworkRemoveRouteParcel %{public}d", result);
     return result;
 }
@@ -221,21 +234,21 @@ int32_t NetsysNativeService::NetworkRemoveRouteParcel(int32_t netId, const Route
 int32_t NetsysNativeService::NetworkSetDefault(int32_t netId)
 {
     NETNATIVE_LOG_D("NetworkSetDefault in.");
-    int32_t result = this->netsysService_->NetworkSetDefault(netId);
+    int32_t result = netsysService_->NetworkSetDefault(netId);
     NETNATIVE_LOG_D("NetworkSetDefault out.");
     return result;
 }
 
 int32_t NetsysNativeService::NetworkGetDefault()
 {
-    int32_t result = this->netsysService_->NetworkGetDefault();
+    int32_t result = netsysService_->NetworkGetDefault();
     NETNATIVE_LOGI("NetworkGetDefault");
     return result;
 }
 
 int32_t NetsysNativeService::NetworkClearDefault()
 {
-    int32_t result = this->netsysService_->NetworkClearDefault();
+    int32_t result = netsysService_->NetworkClearDefault();
     NETNATIVE_LOGI("NetworkClearDefault");
     return result;
 }
@@ -258,7 +271,7 @@ int32_t NetsysNativeService::SetProcSysNet(int32_t ipversion, int32_t which, con
 
 int32_t NetsysNativeService::NetworkCreatePhysical(int32_t netId, int32_t permission)
 {
-    int32_t result = this->netsysService_->NetworkCreatePhysical(netId, permission);
+    int32_t result = netsysService_->NetworkCreatePhysical(netId, permission);
     NETNATIVE_LOGI("NetworkCreatePhysical out.");
     return result;
 }
@@ -266,7 +279,7 @@ int32_t NetsysNativeService::NetworkCreatePhysical(int32_t netId, int32_t permis
 int32_t NetsysNativeService::InterfaceAddAddress(const std::string &interfaceName, const std::string &addrString,
     int32_t prefixLength)
 {
-    int32_t result = this->netsysService_->InterfaceAddAddress(interfaceName, addrString, prefixLength);
+    int32_t result = netsysService_->InterfaceAddAddress(interfaceName, addrString, prefixLength);
     NETNATIVE_LOGI("InterfaceAddAddress");
     return result;
 }
@@ -274,7 +287,7 @@ int32_t NetsysNativeService::InterfaceAddAddress(const std::string &interfaceNam
 int32_t NetsysNativeService::InterfaceDelAddress(const std::string &interfaceName, const std::string &addrString,
     int32_t prefixLength)
 {
-    int32_t result = this->netsysService_->InterfaceDelAddress(interfaceName, addrString, prefixLength);
+    int32_t result = netsysService_->InterfaceDelAddress(interfaceName, addrString, prefixLength);
     NETNATIVE_LOGI("InterfaceDelAddress");
     return result;
 }
@@ -282,27 +295,27 @@ int32_t NetsysNativeService::InterfaceDelAddress(const std::string &interfaceNam
 int32_t NetsysNativeService::NetworkAddInterface(int32_t netId, const std::string &iface)
 {
     NETNATIVE_LOGI("NetworkAddInterface");
-    int32_t result = this->netsysService_->NetworkAddInterface(netId, iface);
+    int32_t result = netsysService_->NetworkAddInterface(netId, iface);
     return result;
 }
 
 int32_t NetsysNativeService::NetworkRemoveInterface(int32_t netId, const std::string &iface)
 {
-    int32_t result = this->netsysService_->NetworkRemoveInterface(netId, iface);
+    int32_t result = netsysService_->NetworkRemoveInterface(netId, iface);
     NETNATIVE_LOGI("NetworkRemoveInterface");
     return result;
 }
 
 int32_t NetsysNativeService::NetworkDestroy(int32_t netId)
 {
-    int32_t result = this->netsysService_->NetworkDestroy(netId);
+    int32_t result = netsysService_->NetworkDestroy(netId);
     NETNATIVE_LOGI("NetworkDestroy");
     return result;
 }
 
 int32_t NetsysNativeService::GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel)
 {
-    markMaskParcel = this->netsysService_->GetFwmarkForNetwork(netId);
+    markMaskParcel = netsysService_->GetFwmarkForNetwork(netId);
     NETNATIVE_LOGI("GetFwmarkForNetwork");
     return ERR_NONE;
 }
@@ -310,7 +323,7 @@ int32_t NetsysNativeService::GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &
 int32_t NetsysNativeService::InterfaceSetConfig(const InterfaceConfigurationParcel &cfg)
 {
     NETNATIVE_LOGI("InterfaceSetConfig");
-    this->netsysService_->InterfaceSetConfig(cfg);
+    netsysService_->InterfaceSetConfig(cfg);
     return ERR_NONE;
 }
 
@@ -318,7 +331,7 @@ int32_t NetsysNativeService::InterfaceGetConfig(InterfaceConfigurationParcel &cf
 {
     NETNATIVE_LOGI("InterfaceGetConfig");
     std::string ifName = cfg.ifName;
-    cfg = this->netsysService_->InterfaceGetConfig(ifName);
+    cfg = netsysService_->InterfaceGetConfig(ifName);
     NETNATIVE_LOGI("InterfaceGetConfig end");
     return ERR_NONE;
 }
@@ -326,35 +339,35 @@ int32_t NetsysNativeService::InterfaceGetConfig(InterfaceConfigurationParcel &cf
 int32_t NetsysNativeService::InterfaceGetList(std::vector<std::string> &ifaces)
 {
     NETNATIVE_LOGI("InterfaceGetList");
-    ifaces = this->netsysService_->InterfaceGetList();
+    ifaces = netsysService_->InterfaceGetList();
     return ERR_NONE;
 }
 
 int32_t NetsysNativeService::StartDhcpClient(const std::string &iface, bool bIpv6)
 {
     NETNATIVE_LOGI("StartDhcpClient");
-    this->dhcpController_->StartDhcpClient(iface, bIpv6);
+    dhcpController_->StartDhcpClient(iface, bIpv6);
     return ERR_NONE;
 }
 
 int32_t NetsysNativeService::StopDhcpClient(const std::string &iface, bool bIpv6)
 {
     NETNATIVE_LOGI("StopDhcpClient");
-    this->dhcpController_->StopDhcpClient(iface, bIpv6);
+    dhcpController_->StopDhcpClient(iface, bIpv6);
     return ERR_NONE;
 }
 
 int32_t NetsysNativeService::StartDhcpService(const std::string &iface, const std::string &ipv4addr)
 {
     NETNATIVE_LOGI("StartDhcpService");
-    this->dhcpController_->StartDhcpService(iface, ipv4addr);
+    dhcpController_->StartDhcpService(iface, ipv4addr);
     return ERR_NONE;
 }
 
 int32_t NetsysNativeService::StopDhcpService(const std::string &iface)
 {
     NETNATIVE_LOGI("StopDhcpService");
-    this->dhcpController_->StopDhcpService(iface);
+    dhcpController_->StopDhcpService(iface);
     return ERR_NONE;
 }
 
