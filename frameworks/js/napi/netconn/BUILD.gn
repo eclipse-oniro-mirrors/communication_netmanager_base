@@ -42,7 +42,7 @@ ohos_shared_library("connection") {
     "$INNERKITS_ROOT/dnsresolverclient:dns_resolver_manager_if",
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-    "${aafwk_path}/frameworks/native/ability/native:abilitykit_native",
+    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
     "//foundation/arkui/napi/:ace_napi",
     "//third_party/libuv:uv_static",
     "//utils/native/base:utils",

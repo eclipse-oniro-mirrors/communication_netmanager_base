@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-aafwk_kits_path = "//foundation/ability/ability_runtime/frameworks/kits"
-aafwk_path = "//foundation/ability/ability_runtime"
+ability_runtime_path = "//foundation/ability/ability_runtime"
+ability_runtime_kits_path = "${ability_runtime_path}/frameworks/kits"
 SUBSYSTEM_DIR = "//foundation/communication"
 NETMANAGER_BASE_ROOT = "$SUBSYSTEM_DIR/netmanager_base"
 NETMANAGERNATIVE_ROOT = "$NETMANAGER_BASE_ROOT/services/netmanagernative"
