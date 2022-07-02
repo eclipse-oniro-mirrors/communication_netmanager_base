@@ -18,12 +18,13 @@
 #include <csignal>
 #include <thread>
 #include <unistd.h>
-
 #include <sys/types.h>
 
+#include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "system_ability_definition.h"
 
+using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetsysNative {
 REGISTER_SYSTEM_ABILITY_BY_ID(NetsysNativeService, COMM_NETSYS_NATIVE_SYS_ABILITY_ID, true)
@@ -111,6 +112,7 @@ bool NetsysNativeService::Init()
         return false;
     }
     dhcpController_ = std::make_unique<OHOS::nmd::DhcpController>();
+    fwmarkNetwork_ = std::make_unique<OHOS::nmd::FwmarkNetwork>();
 
     return true;
 }
@@ -202,7 +204,7 @@ int32_t NetsysNativeService::NetworkAddRoute(int32_t netId, const std::string &i
     const std::string &destination, const std::string &nextHop)
 {
     NETNATIVE_LOGI("NetsysNativeService::NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s",
-        netId, interfaceName.c_str(), destination.c_str(), nextHop.c_str());
+        netId, interfaceName.c_str(), GetAnonyString(destination).c_str(), GetAnonyString(nextHop).c_str());
 
     int32_t result = netsysService_->NetworkAddRoute(netId, interfaceName, destination, nextHop);
     NETNATIVE_LOGI("NetworkAddRoute %{public}d", result);

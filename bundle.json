@@ -47,6 +47,7 @@
         "build": {
             "sub_component": [
                 "//foundation/communication/netmanager_base/services/netmanagernative:netsys_native_manager",
+                "//foundation/communication/netmanager_base/services/netmanagernative/fwmarkclient:fwmark_client",
                 "//foundation/communication/netmanager_base/services/netmanagernative/netsys_client:netsys_client",
                 "//foundation/communication/netmanager_base/services/netsyscontroller:netsys_controller",
                 "//foundation/communication/netmanager_base/services/netconnmanager:net_conn_manager",

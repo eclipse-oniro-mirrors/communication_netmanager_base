@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,15 +18,41 @@
 
 #include <map>
 #include <netinet/in.h>
-#include "nmd_network.h"
-#include "route_type.h"
+#include <linux/netlink.h>
+#include "netlink_msg.h"
+#include "network_permission.h"
 
 namespace OHOS {
 namespace nmd {
+constexpr int32_t RULE_LEVEL_SYSTEM = 10000;
+constexpr int32_t RULE_LEVEL_EXPLICIT_NETWORK = 11000;
+constexpr int32_t RULE_LEVEL_OUTPUT_INTERFACE = 12000;
+constexpr int32_t RULE_LEVEL_LOCAL_NETWORK = 13000;
+constexpr int32_t RULE_LEVEL_SHARING = 14000;
+constexpr int32_t RULE_LEVEL_IMPLICIT_NETWORK = 15000;
+constexpr int32_t RULE_LEVEL_DEFAULT = 16000;
+constexpr int32_t RULE_LEVEL_UNREACHABLE = 17000;
+
+typedef struct RuleInfo {
+    uint32_t ruleTable;
+    uint32_t rulePriority;
+    uint32_t ruleFwmark;
+    uint32_t ruleMask;
+    std::string ruleIif;
+    std::string ruleOif;
+} RuleInfo;
+
+typedef struct RouteInfo {
+    uint32_t routeTable;
+    std::string routeInterfaceName;
+    std::string routeDestinationName;
+    std::string routeNextHop;
+} RouteInfo;
+
 typedef struct InetAddr {
-    int family;
-    int bitlen;
-    int prefixlen;
+    int32_t family;
+    int32_t bitlen;
+    int32_t prefixlen;
     uint8_t data[sizeof(struct in6_addr)];
 } InetAddr;
 
@@ -35,19 +61,190 @@ public:
     RouteManager();
     ~RouteManager();
 
-    static int AddInterfaceToDefaultNetwork(const char *interface, NetworkPermission permission);
-    static int RemoveInterfaceFromDefaultNetwork(const char *interface, NetworkPermission permission);
+    /**
+     * Route table type
+     *
+     */
+    enum TableType {
+        INTERFACE,
+        VPN_NETWORK,
+        LOCAL_NETWORK,
+    };
 
-    static int AddRoute(int netId, std::string interfaceName, std::string destination, std::string nextHop);
-    static int RemoveRoute(int netId, std::string interfaceName, std::string destination, std::string nextHop);
+    /**
+     * The interface is add route table
+     *
+     * @param tableType Route table type.Must be one of INTERFACE/VPN_NETWORK/LOCAL_NETWORK.
+     * @param interfaceName Output network device name of the route item
+     * @param destinationName Destination address of route item
+     * @param nextHop Gateway address of the route item
+     * @return Returns 0, add route table successfully, otherwise it will fail
+     */
+    static int32_t AddRoute(TableType tableType, const std::string &interfaceName, const std::string &destinationName,
+        const std::string &nextHop);
 
-    static int ReadAddr(const char *addr, InetAddr *res);
-    static int ReadAddrGw(const char *addr, InetAddr *res);
+    /**
+     * The interface is remove route table
+     *
+     * @param tableType Route table type.Must be one of INTERFACE/VPN_NETWORK/LOCAL_NETWORK.
+     * @param interfaceName Output network device name of the route item
+     * @param destinationName Destination address of route item
+     * @param nextHop Gateway address of the route item
+     * @return Returns 0, remove route table successfully, otherwise it will fail
+     */
+    static int32_t RemoveRoute(TableType tableType, const std::string &interfaceName,
+        const std::string &destinationName, const std::string &nextHop);
+
+    /**
+     * The interface is update route table
+     *
+     * @param tableType Route table type.Must be one of INTERFACE/VPN_NETWORK/LOCAL_NETWORK.
+     * @param interfaceName Output network device name of the route item
+     * @param destinationName Destination address of route item
+     * @param nextHop Gateway address of the route item
+     * @return Returns 0, update route table successfully, otherwise it will fail
+     */
+    static int32_t UpdateRoute(TableType tableType, const std::string &interfaceName,
+        const std::string &destinationName, const std::string &nextHop);
+
+    /**
+     * Add interface to default network
+     *
+     * @param interfaceName Output network device name of the route item
+     * @param permission Network permission. Must be one of
+     *        PERMISSION_NONE/PERMISSION_NETWORK/PERMISSION_SYSTEM.
+     * @return Returns 0, add interface to default network successfully, otherwise it will fail
+     */
+    static int32_t AddInterfaceToDefaultNetwork(const std::string &interfaceName, NetworkPermission permission);
+
+    /**
+     * Remove interface from default network
+     *
+     * @param interfaceName Output network device name of the route item
+     * @param permission Network permission. Must be one of
+     *        PERMISSION_NONE/PERMISSION_NETWORK/PERMISSION_SYSTEM.
+     * @return Returns 0, remove interface from default network  successfully, otherwise it will fail
+     */
+    static int32_t RemoveInterfaceFromDefaultNetwork(const std::string &interfaceName, NetworkPermission permission);
+
+    /**
+     * Add interface to physical network
+     *
+     * @param netId Network number
+     * @param interfaceName Output network device name of the route item
+     * @param permission Network permission. Must be one of
+     *        PERMISSION_NONE/PERMISSION_NETWORK/PERMISSION_SYSTEM.
+     * @return Returns 0, add interface to physical network successfully, otherwise it will fail
+     */
+    static int32_t AddInterfaceToPhysicalNetwork(uint16_t netId, const std::string &interfaceName,
+        NetworkPermission permission);
+
+    /**
+     * Remove interface from physical network
+     *
+     * @param netId Network number
+     * @param interfaceName Output network device name of the route item
+     * @param permission Network permission. Must be one of
+     *        PERMISSION_NONE/PERMISSION_NETWORK/PERMISSION_SYSTEM.
+     * @return Returns 0, remove interface from physical network successfully, otherwise it will fail
+     */
+    static int32_t RemoveInterfaceFromPhysicalNetwork(uint16_t netId, const std::string &interfaceName,
+        NetworkPermission permission);
+
+    /**
+     * Modify physical network permission
+     *
+     * @param netId Network number
+     * @param interfaceName Output network device name of the route item
+     * @param oldPermission Old network permission. Must be one of
+     *        PERMISSION_NONE/PERMISSION_NETWORK/PERMISSION_SYSTEM.
+     * @param newPermission New network permission. Must be one of
+     *        PERMISSION_NONE/PERMISSION_NETWORK/PERMISSION_SYSTEM.
+     * @return Returns 0, modify physical network permission successfully, otherwise it will fail
+     */
+    static int32_t ModifyPhysicalNetworkPermission(uint16_t netId, const std::string &interfaceName,
+        NetworkPermission oldPermission, NetworkPermission newPermission);
+
+    /**
+     * Add interface to local network
+     *
+     * @param netId Network number
+     * @param interfaceName Output network device name of the route item
+     * @return Returns 0, add interface to local network successfully, otherwise it will fail
+     */
+    static int32_t AddInterfaceToLocalNetwork(uint16_t netId, const std::string &interfaceName);
+
+    /**
+     * Remove interface from local network
+     *
+     * @param netId Network number
+     * @param interfaceName Output network device name of the route item
+     * @return Returns 0, remove interface from local network successfully, otherwise it will fail
+     */
+    static int32_t RemoveInterfaceFromLocalNetwork(uint16_t netId, const std::string &interfaceName);
+
+    /**
+     * Enable sharing network
+     *
+     * @param inputInterface Input network device name of the route item
+     * @param outputInterface Output network device name of the route item
+     * @return Returns 0, enable sharing network successfully, otherwise it will fail
+     */
+    static int32_t EnableSharing(const std::string &inputInterface, const std::string &outputInterface);
+
+    /**
+     * Disable sharing network
+     *
+     * @param inputInterface Input network device name of the route item
+     * @param outputInterface Output network device name of the route item
+     * @return Returns 0, disable sharing network successfully, otherwise it will fail
+     */
+    static int32_t DisableSharing(const std::string &inputInterface, const std::string &outputInterface);
+
+    /**
+     * Parse destination address
+     *
+     * @param addr Address to be parse
+     * @param res Parse result
+     * @return Returns 0, parse destination address successfully, otherwise it will fail
+     */
+    static int32_t ReadAddr(const std::string &addr, InetAddr *res);
+
+    /**
+     * Parse gateway address
+     *
+     * @param addr Address to be parse
+     * @param res Parse result
+     * @return Returns 0, parse gateway address successfully, otherwise it will fail
+     */
+    static int32_t ReadAddrGw(const std::string &addr, InetAddr *res);
 
 private:
-    static std::map<std::string, uint32_t> interfaceToTable;
-    static uint32_t GetRouteTableForInterface(const char *interfaceName);
-    static int ModifyRule(uint32_t type, uint32_t table, uint8_t action, uint32_t priority);
+    static std::mutex m_interfaceToTableLock_;
+    static std::map<std::string, uint32_t> m_interfaceToTable_;
+    static int32_t Init();
+    static int32_t FlushRules();
+    static int32_t FlushRoutes(const std::string &interfaceName);
+    static int32_t AddLocalNetworkRules();
+    static int32_t ModifyPhysicalNetwork(uint16_t netId, const std::string &interfaceName, NetworkPermission permission,
+        bool add);
+    static int32_t ModifyLocalNetwork(uint16_t netId, const std::string &interfaceName, bool add);
+    static int32_t ModifyIncomingPacketMark(uint16_t netId, const std::string &interfaceName,
+        NetworkPermission permission, bool add);
+    static int32_t ModifyExplicitNetworkRule(uint16_t netId, uint32_t table, NetworkPermission permission, bool add);
+    static int32_t ModifyOutputInterfaceRules(const std::string &interfaceName, uint32_t table,
+        NetworkPermission permission, bool add);
+    static int32_t ModifySharingNetwork(uint16_t action, const std::string &inputInterface,
+        const std::string &outputInterface);
+    static int32_t ClearSharingRules(const std::string &inputInterface);
+    static int32_t ModifyRule(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo);
+    static int32_t SendRuleToKernel(uint32_t action, uint16_t ruleFlag, uint8_t ruleType, RuleInfo ruleInfo);
+    static int32_t ModifyRoute(uint16_t action, uint16_t flags, RouteInfo routeInfo);
+    static int32_t SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtmsg msg, RouteInfo routeInfo,
+        uint32_t index);
+    static int32_t PadInterfaceName(const std::string &input, char *name, size_t *length, uint16_t *padding);
+    static uint32_t GetRouteTableForInterface(const std::string &interfaceName);
+    static uint32_t GetRouteTableFromType(TableType tableType, const std::string &interfaceName);
 };
 } // namespace nmd
 } // namespace OHOS

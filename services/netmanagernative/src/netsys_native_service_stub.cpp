@@ -18,9 +18,11 @@
 #include <netdb.h>
 #include <unistd.h>
 #include "securec.h"
+#include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_stub.h"
 
+using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetsysNative {
 static constexpr const int32_t MAX_FLAG_NUM = 64;
@@ -335,7 +337,7 @@ int32_t NetsysNativeServiceStub::CmdNetworkAddRoute(MessageParcel &data, Message
     std::string nextHop = data.ReadString();
 
     NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s], destination[%{public}s}, nextHop[%{public}s]",
-                   netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
+                   netId, ifName.c_str(), GetAnonyString(destination).c_str(), GetAnonyString(nextHop).c_str());
     int32_t result = NetworkAddRoute(netId, ifName, destination, nextHop);
     reply.WriteInt32(result);
     NETNATIVE_LOGI("NetworkAddRoute has recved result %{public}d", result);
@@ -351,7 +353,7 @@ int32_t NetsysNativeServiceStub::CmdNetworkRemoveRoute(MessageParcel &data, Mess
     std::string nextHop = data.ReadString();
 
     NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s], destination[%{public}s}, nextHop[%{public}s]",
-                   netId, interfaceName.c_str(), destination.c_str(), nextHop.c_str());
+                   netId, interfaceName.c_str(), GetAnonyString(destination).c_str(), GetAnonyString(nextHop).c_str());
     int32_t result = NetworkRemoveRoute(netId, interfaceName, destination, nextHop);
     reply.WriteInt32(result);
     NETNATIVE_LOGI("NetworkRemoveRoute has recved result %{public}d", result);

@@ -13,16 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef  NETSYS_NATIVE_SERVICE_H__
-#define  NETSYS_NATIVE_SERVICE_H__
+#ifndef NETSYS_NATIVE_SERVICE_H__
+#define NETSYS_NATIVE_SERVICE_H__
 
 #include <mutex>
+
 #include "dhcp_controller.h"
+#include "fwmark_network.h"
 #include "i_netsys_service.h"
 #include "iremote_stub.h"
 #include "net_manager_native.h"
-#include "netsys_native_service_stub.h"
 #include "netlink_manager.h"
+#include "netsys_native_service_stub.h"
 #include "system_ability.h"
 
 namespace OHOS {
@@ -104,6 +106,7 @@ private:
     std::unique_ptr<OHOS::nmd::NetManagerNative> netsysService_ = nullptr;
     std::unique_ptr<OHOS::nmd::NetlinkManager> manager_ = nullptr;
     std::unique_ptr<OHOS::nmd::DhcpController> dhcpController_ = nullptr;
+    std::unique_ptr<OHOS::nmd::FwmarkNetwork> fwmarkNetwork_ = nullptr;
 
     sptr<INotifyCallback> notifyCallback_ = nullptr;
 

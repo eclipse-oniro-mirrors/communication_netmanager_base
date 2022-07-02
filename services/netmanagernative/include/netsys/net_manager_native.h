@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 #include <string>
 #include <vector>
 
+#include "conn_manager.h"
 #include "dns_manager.h"
 #include "interface_manager.h"
 #include "interface_type.h"
-#include "network_manager.h"
 #include "route_manager.h"
 #include "route_type.h"
 #include "sharing_manager.h"
@@ -33,7 +33,7 @@ namespace nmd {
 class NetManagerNative {
 public:
     NetManagerNative();
-    ~NetManagerNative();
+    ~NetManagerNative() = default;
 
     static void GetOriginInterfaceIndex();
     static std::vector<unsigned int> GetCurrentInterfaceIndex();
@@ -95,7 +95,7 @@ public:
     int32_t DnsCreateNetworkCache(uint16_t netid);
 
 private:
-    std::shared_ptr<NetworkManager> networkManager;
+    std::shared_ptr<ConnManager> connManager;
     std::shared_ptr<RouteManager> routeManager;
     std::shared_ptr<InterfaceManager> interfaceManager;
     std::shared_ptr<SharingManager> sharingManager_ = nullptr;

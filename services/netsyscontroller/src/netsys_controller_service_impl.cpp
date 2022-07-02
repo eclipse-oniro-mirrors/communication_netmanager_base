@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 #include "netsys_controller_service_impl.h"
+#include "netmanager_base_common_utils.h"
 #include "net_mgr_log_wrapper.h"
 
+using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetManagerStandard {
 void NetsysControllerServiceImpl::Init()
@@ -63,7 +65,7 @@ int32_t NetsysControllerServiceImpl::NetworkAddRoute(int32_t netId, const std::s
     const std::string &destination, const std::string &nextHop)
 {
     NETMGR_LOG_I("Add Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s]",
-        netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
+        netId, ifName.c_str(), GetAnonyString(destination).c_str(), GetAnonyString(nextHop).c_str());
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKADDROUTE_API)) {
         return mockNetsysClient_.NetworkAddRoute(netId, ifName, destination, nextHop);
     }
@@ -74,7 +76,7 @@ int32_t NetsysControllerServiceImpl::NetworkRemoveRoute(int32_t netId, const std
     const std::string &destination, const std::string &nextHop)
 {
     NETMGR_LOG_I("Remove Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s]",
-        netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
+        netId, ifName.c_str(), GetAnonyString(destination).c_str(), GetAnonyString(nextHop).c_str());
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKREMOVEROUTE_API)) {
         return mockNetsysClient_.NetworkRemoveRoute(netId, ifName, destination, nextHop);
     }
@@ -130,7 +132,7 @@ int32_t NetsysControllerServiceImpl::InterfaceAddAddress(const std::string &ifNa
     const std::string &ipAddr, int32_t prefixLength)
 {
     NETMGR_LOG_I("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
-        ifName.c_str(), ipAddr.c_str(), prefixLength);
+        ifName.c_str(), GetAnonyString(ipAddr).c_str(), prefixLength);
     if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACEADDADDRESS_API)) {
         return mockNetsysClient_.InterfaceAddAddress(ifName, ipAddr, prefixLength);
     }
@@ -141,7 +143,7 @@ int32_t NetsysControllerServiceImpl::InterfaceDelAddress(const std::string &ifNa
     const std::string &ipAddr, int32_t prefixLength)
 {
     NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
-        ifName.c_str(), ipAddr.c_str(), prefixLength);
+        ifName.c_str(), GetAnonyString(ipAddr).c_str(), prefixLength);
     if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACEDELADDRESS_API)) {
         return mockNetsysClient_.InterfaceDelAddress(ifName, ipAddr, prefixLength);
     }
