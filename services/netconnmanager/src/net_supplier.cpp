@@ -227,7 +227,6 @@ bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
         NETMGR_LOG_E("ReleaseNetwork fail");
         return false;
     }
-    UpdateNetConnState(NET_CONN_STATE_DISCONNECTING);
     return true;
 }
 

@@ -50,6 +50,7 @@ ohos_source_set("net_conn_parcel") {
   include_dirs = [
     "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netconnclient/include",
+    "$INNERKITS_ROOT/netmanagernative/include",
   ]
 
   deps = [
@@ -79,10 +80,16 @@ ohos_shared_library("net_conn_manager_if") {
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_supplier_callback_stub.cpp",
   ]
 
+  include_dirs = [
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient/include",
+    "$INNERKITS_ROOT/netmanagernative/include",
+  ]
+
   public_configs = [ ":net_conn_manager_if_config" ]
 
   deps = [
     ":net_conn_parcel",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   ]
 
