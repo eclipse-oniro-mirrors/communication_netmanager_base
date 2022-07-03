@@ -37,6 +37,12 @@ int GetMaskLength(const std::string &mask);
 bool ParseInt(const char *str, int32_t *value);
 
 int64_t ConvertToInt64(const std::string& str);
+
+inline static std::string GetAnonyString(const std::string &ip)
+{
+    (void)ip;
+    return "***";
+}
 } // namespace OHOS::NetManagerStandard::CommonUtils
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H */

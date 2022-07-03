@@ -41,11 +41,14 @@ ohos_shared_library("net_conn_manager") {
     "$NETCONNMANAGER_COMMON_DIR/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETCONNMANAGER_COMMON_DIR/include",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient/include",
     "//third_party/curl/include",
+    "$INNERKITS_ROOT/netmanagernative/include",
   ]
 
   deps = [
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
     "//third_party/curl:curl",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "net_mgr_log_wrapper.h"
 #include "net_supplier_callback_stub.h"
+#include "fwmark_client.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -34,7 +35,6 @@ int32_t NetConnClient::SystemReady()
         NETMGR_LOG_E("proxy is nullptr");
         return IPC_PROXY_ERR;
     }
-
     return proxy->SystemReady();
 }
 
@@ -242,13 +242,9 @@ int32_t NetConnClient::GetAddressByName(const std::string &host, int32_t netId, 
 
 int32_t NetConnClient::BindSocket(int32_t socket_fd, int32_t netId)
 {
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
-
-    return proxy->BindSocket(socket_fd, netId);
+    std::shared_ptr<nmd::FwmarkClient> fwmarkClient_= std::make_shared<nmd::FwmarkClient>();
+    fwmarkClient_->BindSocket(socket_fd, netId);
+    return NET_CONN_SUCCESS;
 }
 
 int32_t NetConnClient::NetDetection(const NetHandle &netHandle)
