@@ -15,8 +15,23 @@
 
 #include "dns_resolv_config.h"
 
-namespace OHOS {
-namespace nmd {
+namespace OHOS::nmd {
+DnsResolvConfig::DelayedTaskWrapper::DelayedTaskWrapper(std::string hostName,
+                                                        NetManagerStandard::LRUCache<AddrInfo> &cache)
+    : hostName_(std::move(hostName)), cache_(cache)
+{
+}
+
+void DnsResolvConfig::DelayedTaskWrapper::Execute() const
+{
+    cache_.Delete(hostName_);
+}
+
+bool DnsResolvConfig::DelayedTaskWrapper::operator<(const DelayedTaskWrapper &other) const
+{
+    return hostName_ < other.hostName_;
+}
+
 DnsResolvConfig::DnsResolvConfig() : netId_(0), netIdIsSet_(false), revisionId_(0), timeoutMsec_(0), retryCount_(0) {}
 
 void DnsResolvConfig::SetNetId(uint16_t netId)
@@ -74,9 +89,13 @@ std::vector<std::string> DnsResolvConfig::GetDomains() const
     return searchDomains_;
 }
 
-LRUCache<AddrInfo> &DnsResolvConfig::GetCache()
+NetManagerStandard::LRUCache<AddrInfo> &DnsResolvConfig::GetCache()
 {
     return cache_;
 }
-} // namespace nmd
-} // namespace OHOS
+
+void DnsResolvConfig::SetCacheDelayed(const std::string &hostName)
+{
+    delayedQueue_.Put(DelayedTaskWrapper(hostName, cache_));
+}
+} // namespace OHOS::nmd

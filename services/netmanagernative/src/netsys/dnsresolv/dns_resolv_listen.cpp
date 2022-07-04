@@ -35,8 +35,7 @@
 #define DNS_CONFIG_PRINT(fmt, ...)
 #endif
 
-namespace OHOS {
-namespace nmd {
+namespace OHOS::nmd {
 static constexpr const uint32_t MAX_LISTEN_NUM = 1024;
 
 DnsResolvListen::DnsResolvListen() : serverSockFd_(-1)
@@ -180,6 +179,8 @@ void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint32_t netId)
     for (int i = 0; i < resNum; ++i) {
         DelayedSingleton<DnsParamCache>::GetInstance()->SetDnsCache(netId, name, addrInfo[i]);
     }
+
+    DelayedSingleton<DnsParamCache>::GetInstance()->SetCacheDelayed(netId, name);
     DNS_CONFIG_PRINT("ProcSetCacheCommand end");
 }
 
@@ -274,5 +275,4 @@ void DnsResolvListen::StartListen()
         std::thread(DnsResolvListen::ProcCommand, clientSockFd).detach();
     }
 }
-} // namespace nmd
-} // namespace OHOS
+} // namespace OHOS::nmd
