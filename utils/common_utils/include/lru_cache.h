@@ -11,9 +11,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ \
-#ifndef NETMANAGER_BASE_DNS_RESOLV_CACHE_H
-#define NETMANAGER_BASE_DNS_RESOLV_CACHE_H
+ */
+
+#ifndef NETMANAGER_BASE_LRU_CACHE_H
+#define NETMANAGER_BASE_LRU_CACHE_H
 
 #include <list>
 #include <mutex>
@@ -21,8 +22,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace OHOS {
-namespace nmd {
+namespace OHOS::NetManagerStandard {
 static constexpr const size_t DEFAULT_CAPABILITY = 100;
 template <typename T> class LRUCache {
 public:
@@ -63,6 +63,8 @@ public:
 
     void Delete(const std::string &key)
     {
+        std::lock_guard<std::mutex> guard(mutex_);
+
         if (cache_.find(key) == cache_.end()) {
             return;
         }
@@ -74,6 +76,8 @@ public:
 
     void Clear()
     {
+        std::lock_guard<std::mutex> guard(mutex_);
+
         cache_.clear();
         nodeList_.clear();
     }
@@ -118,7 +122,5 @@ private:
     std::list<Node> nodeList_;
     size_t capacity_;
 };
-} // namespace nmd
-} // namespace OHOS
-
-#endif // NETMANAGER_BASE_DNS_RESOLV_CACHE_H
+} // namespace OHOS::NetManagerStandard
+#endif // NETMANAGER_BASE_LRU_CACHE_H

@@ -12,9 +12,9 @@
 # limitations under the License.
 
 cmake_minimum_required(VERSION 3.20)
-project(communication_netmanager_base_huitui)
+project(communication_netmanager_base)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 23)
 
 include_directories(frameworks/js/napi/common)
 include_directories(frameworks/js/napi/connection/async_context/include)
@@ -59,6 +59,7 @@ include_directories(services/dnsresolvermanager/include)
 include_directories(services/dnsresolvermanager/include/stub)
 include_directories(services/netconnmanager/include)
 include_directories(services/netconnmanager/include/stub)
+include_directories(services/netmanagernative/fwmarkclient/include)
 include_directories(services/netmanagernative/include)
 include_directories(services/netmanagernative/include/manager)
 include_directories(services/netmanagernative/include/netsys)
@@ -76,7 +77,7 @@ include_directories(utils/log/include)
 include_directories(utils/module_template/include)
 include_directories(utils/napi_utils/include)
 
-add_executable(communication_netmanager_base_huitui
+add_executable(communication_netmanager_base_dns_tdd
         frameworks/js/napi/common/base_context.h
         frameworks/js/napi/common/event_context.h
         frameworks/js/napi/common/napi_common.cpp
@@ -200,11 +201,14 @@ add_executable(communication_netmanager_base_huitui
         interfaces/innerkits/netconnclient/include/route.h
         interfaces/innerkits/netmanagernative/include/dhcp_result_parcel.h
         interfaces/innerkits/netmanagernative/include/dnsresolver_params_parcel.h
+        interfaces/innerkits/netmanagernative/include/fwmark.h
+        interfaces/innerkits/netmanagernative/include/fwmark_command.h
         interfaces/innerkits/netmanagernative/include/i_netsys_service.h
         interfaces/innerkits/netmanagernative/include/i_notify_callback.h
         interfaces/innerkits/netmanagernative/include/interface_type.h
         interfaces/innerkits/netmanagernative/include/netnative_log_wrapper.h
         interfaces/innerkits/netmanagernative/include/netsys_addr_info_parcel.h
+        interfaces/innerkits/netmanagernative/include/network_permission.h
         interfaces/innerkits/netmanagernative/include/notify_callback_stub.h
         interfaces/innerkits/netmanagernative/include/route_type.h
         interfaces/innerkits/netpolicyclient/include/proxy/i_net_policy_callback.h
@@ -268,8 +272,10 @@ add_executable(communication_netmanager_base_huitui
         services/netconnmanager/src/net_score.cpp
         services/netconnmanager/src/net_supplier.cpp
         services/netconnmanager/src/network.cpp
+        services/netmanagernative/fwmarkclient/include/fwmark_client.h
+        services/netmanagernative/fwmarkclient/src/fwmark_client.cpp
+        services/netmanagernative/include/manager/conn_manager.h
         services/netmanagernative/include/manager/interface_manager.h
-        services/netmanagernative/include/manager/network_manager.h
         services/netmanagernative/include/manager/route_manager.h
         services/netmanagernative/include/manager/sharing_manager.h
         services/netmanagernative/include/manager/traffic_manager.h
@@ -280,30 +286,45 @@ add_executable(communication_netmanager_base_huitui
         services/netmanagernative/include/netsys/dns_param_cache.h
         services/netmanagernative/include/netsys/dns_resolv_config.h
         services/netmanagernative/include/netsys/dns_resolv_listen.h
-        services/netmanagernative/include/netsys/lru_cache.h
+        services/netmanagernative/include/netsys/fwmark_network.h
+        services/netmanagernative/include/netsys/local_network.h
+        utils/common_utils/include/lru_cache.h
         services/netmanagernative/include/netsys/net_manager_native.h
+        services/netmanagernative/include/netsys/netlink_define.h
         services/netmanagernative/include/netsys/netlink_manager.h
+        services/netmanagernative/include/netsys/netlink_message_decoder.h
         services/netmanagernative/include/netsys/netlink_msg.h
+        services/netmanagernative/include/netsys/netlink_native_listener.h
+        services/netmanagernative/include/netsys/netlink_processor.h
         services/netmanagernative/include/netsys/netlink_socket.h
         services/netmanagernative/include/netsys/netsys_client.h
-        services/netmanagernative/include/netsys/nmd_network.h
+        services/netmanagernative/include/netsys/netsys_network.h
+        services/netmanagernative/include/netsys/physical_network.h
+        services/netmanagernative/include/netsys/socket_client.h
         services/netmanagernative/include/netsys_native_service.h
         services/netmanagernative/include/netsys_native_service_stub.h
         services/netmanagernative/netsys_client/src/netsys_client.c
+        services/netmanagernative/src/manager/conn_manager.cpp
         services/netmanagernative/src/manager/dns_manager.cpp
         services/netmanagernative/src/manager/interface_manager.cpp
-        services/netmanagernative/src/manager/network_manager.cpp
         services/netmanagernative/src/manager/route_manager.cpp
         services/netmanagernative/src/manager/sharing_manager.cpp
         services/netmanagernative/src/manager/traffic_manager.cpp
         services/netmanagernative/src/netsys/dnsresolv/dns_param_cache.cpp
         services/netmanagernative/src/netsys/dnsresolv/dns_resolv_config.cpp
         services/netmanagernative/src/netsys/dnsresolv/dns_resolv_listen.cpp
+        services/netmanagernative/src/netsys/fwmark_network.cpp
+        services/netmanagernative/src/netsys/local_network.cpp
         services/netmanagernative/src/netsys/net_manager_native.cpp
         services/netmanagernative/src/netsys/netlink_manager.cpp
+        services/netmanagernative/src/netsys/netlink_message_decoder.cpp
         services/netmanagernative/src/netsys/netlink_msg.cpp
+        services/netmanagernative/src/netsys/netlink_native_listener.cpp
+        services/netmanagernative/src/netsys/netlink_processor.cpp
         services/netmanagernative/src/netsys/netlink_socket.cpp
-        services/netmanagernative/src/netsys/nmd_network.cpp
+        services/netmanagernative/src/netsys/netsys_network.cpp
+        services/netmanagernative/src/netsys/physical_network.cpp
+        services/netmanagernative/src/netsys/socket_client.cpp
         services/netmanagernative/src/dhcp_controller.cpp
         services/netmanagernative/src/netsys_native_service.cpp
         services/netmanagernative/src/netsys_native_service_stub.cpp
@@ -367,7 +388,7 @@ add_executable(communication_netmanager_base_huitui
         utils/module_template/include/netmanager_base_module_template.h
         utils/module_template/src/netmanager_base_module_template.cpp
         utils/napi_utils/include/netmanager_base_napi_utils.h
-        utils/napi_utils/src/netmanager_base_napi_utils.cpp)
+        utils/napi_utils/src/netmanager_base_napi_utils.cpp utils/common_utils/include/delayed_queue.h)
 
 include_directories(../../arkui/napi/interfaces/kits)
 include_directories(../../arkui/napi/interfaces/inner_api)

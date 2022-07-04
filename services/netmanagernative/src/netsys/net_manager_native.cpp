@@ -123,6 +123,7 @@ int NetManagerNative::NetworkGetDefault()
 
 int NetManagerNative::NetworkSetDefault(int netId)
 {
+    dnsManager_->SetDefaultNetwork(netId); // set default netId to dns manager, do not delete this line!
     return this->connManager->SetDefaultNetwork(netId);
 }
 

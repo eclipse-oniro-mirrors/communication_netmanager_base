@@ -21,8 +21,7 @@
 
 #include "dns_resolv_config.h"
 
-namespace OHOS {
-namespace nmd {
+namespace OHOS::nmd {
 class DnsParamCache {
 public:
     DnsParamCache();
@@ -30,11 +29,8 @@ public:
     ~DnsParamCache() = default;
 
     // for net_conn_service
-    int32_t SetResolverConfig(uint16_t netId,
-                              uint16_t baseTimeoutMsec,
-                              uint8_t retryCount,
-                              const std::vector<std::string> &servers,
-                              const std::vector<std::string> &domains);
+    int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
+                              const std::vector<std::string> &servers, const std::vector<std::string> &domains);
 
     int32_t CreateCacheForNet(uint16_t netId);
 
@@ -43,13 +39,12 @@ public:
     // for client
     void SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo);
 
+    void SetCacheDelayed(uint16_t netId, const std::string &hostName);
+
     std::vector<AddrInfo> GetDnsCache(uint16_t netId, const std::string &hostName);
 
-    int32_t GetResolverConfig(uint16_t netId,
-                              std::vector<std::string> &servers,
-                              std::vector<std::string> &domains,
-                              uint16_t &baseTimeoutMsec,
-                              uint8_t &retryCount);
+    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
+                              uint16_t &baseTimeoutMsec, uint8_t &retryCount);
 
 private:
     std::mutex cacheMutex_;
@@ -60,6 +55,5 @@ private:
 
     static std::vector<std::string> SelectNameservers(const std::vector<std::string> &servers);
 };
-} // namespace nmd
-} // namespace OHOS
+} // namespace OHOS::nmd
 #endif // NETSYS_DNS_PARAM_CACHE_H

@@ -52,6 +52,7 @@ ohos_shared_library("netsys_native_manager") {
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
     "$INNERKITS_ROOT/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include",

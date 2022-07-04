@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <algorithm>
 
 #include "netnative_log_wrapper.h"
@@ -27,8 +28,7 @@
 #define DNS_CONFIG_PRINT(fmt, ...)
 #endif
 
-namespace OHOS {
-namespace nmd {
+namespace OHOS::nmd {
 static constexpr const int RES_TIMEOUT = 5000;    // min. milliseconds between retries
 static constexpr const int RES_DEFAULT_RETRY = 2; // Default
 
@@ -55,9 +55,7 @@ int32_t DnsParamCache::CreateCacheForNet(uint16_t netId)
     return 0;
 }
 
-int32_t DnsParamCache::SetResolverConfig(uint16_t netId,
-                                         uint16_t baseTimeoutMsec,
-                                         uint8_t retryCount,
+int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
                                          const std::vector<std::string> &servers,
                                          const std::vector<std::string> &domains)
 {
@@ -104,10 +102,8 @@ void DnsParamCache::SetDefaultNetwork(int netId)
     defaultNetId_ = netId;
 }
 
-int32_t DnsParamCache::GetResolverConfig(uint16_t netId,
-                                         std::vector<std::string> &servers,
-                                         std::vector<std::string> &domains,
-                                         uint16_t &baseTimeoutMsec,
+int32_t DnsParamCache::GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
+                                         std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
                                          uint8_t &retryCount)
 {
     if (netId == 0) {
@@ -164,5 +160,20 @@ std::vector<AddrInfo> DnsParamCache::GetDnsCache(uint16_t netId, const std::stri
     DNS_CONFIG_PRINT("GetDnsCache end netId = %{public}hu", netId);
     return serverConfigMap_[netId].GetCache().Get(hostName);
 }
-} // namespace nmd
-} // namespace OHOS
+
+void DnsParamCache::SetCacheDelayed(uint16_t netId, const std::string &hostName)
+{
+    if (netId == 0) {
+        netId = defaultNetId_;
+    }
+
+    DNS_CONFIG_PRINT("SetDnsCache begin netId = %{public}hu", netId);
+    std::lock_guard<std::mutex> guard(cacheMutex_);
+    if (serverConfigMap_.find(netId) == serverConfigMap_.end()) {
+        DNS_CONFIG_PRINT("SetCacheDelayed failed: netid is not have netid:%{public}d,", netId);
+        return;
+    }
+
+    serverConfigMap_[netId].SetCacheDelayed(hostName);
+}
+} // namespace OHOS::nmd
