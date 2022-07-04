@@ -17,6 +17,7 @@
 
 #include <cerrno>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/un.h>
 #include <thread>
 #include <unistd.h>
@@ -163,6 +164,14 @@ void StartListener()
         NETNATIVE_LOGE("FwmarkNetwork: bind failed result %{public}d, errno: %{public}d", result, errno);
         close(serverSockfd);
         serverSockfd = -1;
+        return;
+    }
+
+    if (chmod(FWMARK_SERVER_PATH.sun_path, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH) < 0) {
+        NETNATIVE_LOGE("FwmarkNetwork: chmod errno %{public}d", errno);
+        close(serverSockfd);
+        serverSockfd = -1;
+        return;
     }
 
     result = listen(serverSockfd, MAX_CONCURRENT_CONNECTION_REQUESTS);
@@ -170,6 +179,7 @@ void StartListener()
         NETNATIVE_LOGE("FwmarkNetwork: listen failed result %{public}d, errno: %{public}d", result, errno);
         close(serverSockfd);
         serverSockfd = -1;
+        return;
     }
     SendMessage(&serverSockfd);
     close(serverSockfd);
