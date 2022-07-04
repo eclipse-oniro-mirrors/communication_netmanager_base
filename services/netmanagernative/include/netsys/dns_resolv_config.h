@@ -56,9 +56,9 @@ private:
         bool operator<(const DelayedTaskWrapper &other) const;
 
     private:
-        NetManagerStandard::LRUCache<AddrInfo> &cache_;
-
         std::string hostName_;
+
+        NetManagerStandard::LRUCache<AddrInfo> &cache_;
     };
 
     uint16_t netId_;
