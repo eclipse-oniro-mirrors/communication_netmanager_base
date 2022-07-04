@@ -339,7 +339,7 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, struct P
         return -errno;
     }
 
-    struct AddrInfo addrInfo[MAX_RESULTS] = {0};
+    struct AddrInfo addrInfo[MAX_RESULTS] = {};
     uint32_t resNum = FillAddrInfo(addrInfo, res);
     if (resNum < 0) {
         close(sockFd);

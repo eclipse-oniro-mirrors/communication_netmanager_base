@@ -562,12 +562,10 @@ bool NetlinkMessageDecoder::ParseBinaryNetlinkMessage(const char *buffer, int32_
                 result = ParseUlogPacketMessage(nh);
                 break;
             case RTM_NEWADDR:
-                result = ParseIfAddrMessage(nh);
             case RTM_DELADDR:
                 result = ParseIfAddrMessage(nh);
                 break;
             case RTM_NEWROUTE:
-                result = ParseRtMessage(nh);
             case RTM_DELROUTE:
                 result = ParseRtMessage(nh);
                 break;

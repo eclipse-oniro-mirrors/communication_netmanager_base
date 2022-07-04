@@ -73,7 +73,7 @@ void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint32_t netId)
     } else {
         sendData.retryCount = retryCount;
         sendData.timeoutMs = baseTimeoutMsec;
-        for (int i = 0; i < std::min<size_t>(MAX_SERVER_NUM, servers.size()); i++) {
+        for (size_t i = 0; i < std::min<size_t>(MAX_SERVER_NUM, servers.size()); i++) {
             if (memcpy_s(sendData.nameservers[i], sizeof(sendData.nameservers[i]), servers[i].c_str(),
                          servers[i].length()) < 0) {
                 DNS_CONFIG_PRINT("mem copy failed");
@@ -177,7 +177,7 @@ void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint32_t netId)
         return;
     }
 
-    for (int i = 0; i < resNum; ++i) {
+    for (size_t i = 0; i < resNum; ++i) {
         DelayedSingleton<DnsParamCache>::GetInstance()->SetDnsCache(netId, name, addrInfo[i]);
     }
     DNS_CONFIG_PRINT("ProcSetCacheCommand end");
