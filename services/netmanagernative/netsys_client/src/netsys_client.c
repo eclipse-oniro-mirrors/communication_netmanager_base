@@ -190,11 +190,8 @@ int32_t NetSysGetResolvConf(uint16_t netId, struct ResolvConfig *config)
     return 0;
 }
 
-static int32_t NetSysGetResolvCacheInternal(int sockFd,
-                                            uint16_t netId,
-                                            struct ParamWrapper param,
-                                            struct AddrInfo addrInfo[static MAX_RESULTS],
-                                            uint32_t *num)
+static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, struct ParamWrapper param,
+                                            struct AddrInfo addrInfo[static MAX_RESULTS], uint32_t *num)
 {
     struct RequestInfo info = {
         .command = GET_CACHE,
@@ -250,9 +247,7 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd,
     return 0;
 }
 
-int32_t NetSysGetResolvCache(uint16_t netId,
-                             struct ParamWrapper param,
-                             struct AddrInfo addrInfo[static MAX_RESULTS],
+int32_t NetSysGetResolvCache(uint16_t netId, struct ParamWrapper param, struct AddrInfo addrInfo[static MAX_RESULTS],
                              uint32_t *num)
 {
     DNS_CONFIG_PRINT("NetSysGetResolvCache begin");
@@ -281,6 +276,10 @@ int32_t NetSysGetResolvCache(uint16_t netId,
 
 static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct addrinfo *res)
 {
+    if (memset_s(addrInfo, sizeof(struct AddrInfo) * MAX_RESULTS, 0, sizeof(struct AddrInfo) * MAX_RESULTS) < 0) {
+        return -1;
+    }
+
     int32_t resNum = 0;
     for (struct addrinfo *tmp = res; tmp != NULL; tmp = tmp->ai_next) {
         addrInfo[resNum].aiFlags = tmp->ai_flags;
