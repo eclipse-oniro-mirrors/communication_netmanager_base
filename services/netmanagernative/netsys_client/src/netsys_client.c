@@ -276,7 +276,7 @@ int32_t NetSysGetResolvCache(uint16_t netId, struct ParamWrapper param, struct A
 
 static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct addrinfo *res)
 {
-    if (memset_s(addrInfo, sizeof(addrInfo), 0, sizeof(addrInfo)) < 0) {
+    if (memset_s(addrInfo, sizeof(struct AddrInfo) * MAX_RESULTS, 0, sizeof(struct AddrInfo) * MAX_RESULTS) < 0) {
         return -1;
     }
 
