@@ -340,6 +340,10 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, struct P
     }
 
     struct AddrInfo addrInfo[MAX_RESULTS] = {};
+    if (memset_s(addrInfo, sizeof(addrInfo), 0, sizeof(addrInfo)) < 0) {
+        close(sockFd);
+        return -1;
+    }
     uint32_t resNum = FillAddrInfo(addrInfo, res);
     if (resNum < 0) {
         close(sockFd);

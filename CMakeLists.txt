@@ -77,7 +77,7 @@ include_directories(utils/log/include)
 include_directories(utils/module_template/include)
 include_directories(utils/napi_utils/include)
 
-add_executable(communication_netmanager_base_dns_tdd
+add_executable(communication_netmanager_base
         frameworks/js/napi/common/base_context.h
         frameworks/js/napi/common/event_context.h
         frameworks/js/napi/common/napi_common.cpp
