@@ -71,7 +71,8 @@ public:
         std::lock_guard<std::mutex> guard(mutex_);
         if (indexMap_.find(elem) != indexMap_.end()) {
             int oldIndex = indexMap_[elem];
-            if (oldIndex > 0 && oldIndex < elems_.size() && (elems_[oldIndex].find(elem) != elems_[oldIndex].end())) {
+            if (oldIndex >= 0 && oldIndex < static_cast<int>(elems_.size()) &&
+                (elems_[oldIndex].find(elem) != elems_[oldIndex].end())) {
                 elems_[oldIndex].erase(elem);
             }
         }
