@@ -41,7 +41,6 @@ const std::regex IPV6_MASK_PATTERN {
     "([\\da-fA-F]{0,4}:){2,7}([\\da-fA-F]{0,4})/(1[0-2][0-8]|[1-9]\\d|[1-9])"
 };
 
-
 std::vector<std::string> Split(const std::string &str, const std::string &sep)
 {
     std::string s = str;
@@ -195,5 +194,4 @@ std::string ToAnonymousIp(const std::string &input)
     }
     return input;
 }
-
 } // namespace OHOS::NetManagerStandard::CommonUtils

@@ -279,7 +279,7 @@ void NetlinkProcessor::OnInterfaceAddressUpdate(const std::string &addr, const s
                                                 int32_t scope)
 {
     NETNATIVE_LOGI("OnInterfaceAddressUpdated: %{public}s, %{public}s, %{public}d, %{public}d",
-                   NetManagerStandard::CommonUtils::ToAnonymousIp(addr).c_str(), ifName.c_str(), flags, scope);
+                   ToAnonymousIp(addr).c_str(), ifName.c_str(), flags, scope);
     for (auto &callback : *netlinkCallbacks_) {
         callback->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
     }

@@ -244,7 +244,7 @@ std::string NetLinkInfo::ToStringRoute(const std::string &tab) const
         str.append("null");
         str.append(tab);
     } else {
-        for (const auto & it : routeList_) {
+        for (const auto &it : routeList_) {
             str.append(it.ToString(tab));
         }
     }
