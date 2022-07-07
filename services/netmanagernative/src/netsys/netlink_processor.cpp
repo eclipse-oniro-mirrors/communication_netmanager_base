@@ -288,8 +288,8 @@ void NetlinkProcessor::OnInterfaceAddressUpdate(const std::string &addr, const s
 void NetlinkProcessor::OnInterfaceAddressRemove(const std::string &addr, const std::string &ifName, int32_t flags,
                                                 int32_t scope)
 {
-    NETNATIVE_LOGI("OnInterfaceAddressRemov: %{public}s, %{public}s, %{public}d, %{public}d",
-                   NetManagerStandard::CommonUtils::ToAnonymousIp(addr).c_str(), ifName.c_str(), flags, scope);
+    NETNATIVE_LOGI("OnInterfaceAddressRemove: %{public}s, %{public}s, %{public}d, %{public}d",
+                   ToAnonymousIp(addr).c_str(), ifName.c_str(), flags, scope);
     for (auto &callback : *netlinkCallbacks_) {
         callback->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
     }
@@ -304,8 +304,8 @@ void NetlinkProcessor::OnInterfaceDnsServersUpdate(const std::string &ifName, in
 void NetlinkProcessor::OnRouteChange(bool updated, const std::string &route, const std::string &gateway,
                                      const std::string &ifName)
 {
-    NETNATIVE_LOGI("OnRouteChange: %{public}s, %{private}s, %{private}s, %{public}s", updated ? "updated" : "removed",
-                   route.c_str(), gateway.c_str(), ifName.c_str());
+    NETNATIVE_LOGI("OnRouteChange: %{public}s, %{public}s, %{public}s, %{public}s", updated ? "updated" : "removed",
+                   ToAnonymousIp(route).c_str(), ToAnonymousIp(gateway).c_str(), ifName.c_str());
     for (auto &callback : *netlinkCallbacks_) {
         callback->OnRouteChanged(updated, route, gateway, ifName);
     }
