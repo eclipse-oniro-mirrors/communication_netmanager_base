@@ -31,8 +31,6 @@ public:
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
-    [[nodiscard]] napi_value GetSuccessCallback() const;
-
     [[nodiscard]] napi_value GetFailCallback() const;
 
 private:
@@ -41,8 +39,6 @@ private:
     bool SetFailCallback(napi_value options);
 
     bool CheckParamsType(napi_value *params, size_t paramsCount);
-
-    napi_ref successCallback_;
 
     napi_ref failCallback_;
 };

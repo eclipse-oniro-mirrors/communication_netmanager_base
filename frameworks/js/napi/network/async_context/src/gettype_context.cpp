@@ -15,7 +15,7 @@
 
 #include "gettype_context.h"
 
-#include "constant.h"
+#include "network_constant.h"
 #include "netmanager_base_log.h"
 #include "netmanager_base_napi_utils.h"
 

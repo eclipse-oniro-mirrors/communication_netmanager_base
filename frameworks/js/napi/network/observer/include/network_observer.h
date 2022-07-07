@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NETMANAGER_BASE_NET_CONN_CALLBACK_OBSERVER_H
-#define NETMANAGER_BASE_NET_CONN_CALLBACK_OBSERVER_H
+#ifndef NETMANAGER_BASE_NETWORK_OBSERVER_H
+#define NETMANAGER_BASE_NETWORK_OBSERVER_H
 
 #include "net_all_capabilities.h"
 #include "net_conn_callback_stub.h"
@@ -22,7 +22,11 @@
 #include "netmanager_base_napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
-class NetConnCallbackObserver : public NetConnCallbackStub {
+struct NetworkType {
+    std::set<NetBearType> bearerTypes;
+};
+
+class NetworkObserver : public NetConnCallbackStub {
 public:
     int32_t NetAvailable(sptr<NetHandle> &netHandle) override;
 
@@ -36,8 +40,11 @@ public:
 
     int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override;
 
+    void SetManager(EventManager *manager);
+
 private:
-    template <napi_value (*MakeJsValue)(napi_env, void *)> static void CallbackTemplate(uv_work_t *work, int status)
+    template <napi_value (*MakeJsValue)(napi_env, NetworkType *)>
+    static void CallbackTemplate(uv_work_t *work, int status)
     {
         (void)status;
 
@@ -46,7 +53,7 @@ private:
         auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
         std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
 
-        napi_value obj = MakeJsValue(env, workWrapper->data);
+        napi_value obj = MakeJsValue(env, static_cast<NetworkType *>(workWrapper->data));
 
         std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(workWrapper->env), obj};
         workWrapper->manager->Emit(workWrapper->type, arg);
@@ -54,7 +61,10 @@ private:
         delete workWrapper;
         delete work;
     }
-};
-} // namespace OHOS::NetManagerStandard
 
-#endif /* NETMANAGER_BASE_NET_CONN_CALLBACK_OBSERVER_H */
+    EventManager *manager_;
+};
+
+extern std::map<EventManager *, sptr<NetworkObserver>> g_observerMap;
+} // namespace OHOS::NetManagerStandard
+#endif /* NETMANAGER_BASE_NETWORK_OBSERVER_H */

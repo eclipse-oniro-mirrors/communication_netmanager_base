@@ -14,9 +14,7 @@
  */
 
 #include "network_module.h"
-#include "constant.h"
 #include "gettype_context.h"
-#include "netconnection.h"
 #include "netmanager_base_log.h"
 #include "netmanager_base_module_template.h"
 #include "network_async_work.h"
@@ -24,9 +22,6 @@
 #include "unsubscribe_context.h"
 
 namespace OHOS::NetManagerStandard {
-EventManager GLOBAL_MANAGER_WRAPPER;
-EventManager *GLOBAL_MANAGER = &GLOBAL_MANAGER_WRAPPER;
-
 napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
 {
     std::initializer_list<napi_property_descriptor> properties = {
@@ -35,17 +30,13 @@ napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION(FUNCTION_UNSUBSCRIBE, Unsubscribe),
     };
     NapiUtils::DefineProperties(env, exports, properties);
+    auto manager = new EventManager;
+    auto observer = new NetworkObserver;
+    observer->SetManager(manager);
+    g_observerMap[manager] = observer;
 
-    auto finalizer = [](napi_env, void *data, void *) {
-        NETMANAGER_BASE_LOGI("finalize netConnection");
-        if (GLOBAL_MANAGER_WRAPPER.GetData()) {
-            auto netConnection = reinterpret_cast<NetConnection *>(GLOBAL_MANAGER_WRAPPER.GetData());
-            delete netConnection;
-        }
-        GLOBAL_MANAGER_WRAPPER.SetData(nullptr);
-    };
-    GLOBAL_MANAGER_WRAPPER.SetData(new NetConnection);
-    napi_wrap(env, exports, reinterpret_cast<void *>(GLOBAL_MANAGER), finalizer, nullptr, nullptr);
+    auto finalizer = [](napi_env, void *data, void *) {};
+    napi_wrap(env, exports, reinterpret_cast<void *>(manager), finalizer, nullptr, nullptr);
 
     return exports;
 }

@@ -15,10 +15,9 @@
 
 #include "network_exec.h"
 
-#include "constant.h"
-#include "net_conn_callback_observer.h"
+#include "network_constant.h"
 #include "net_conn_client.h"
-#include "netconnection.h"
+#include "network_observer.h"
 #include "netmanager_base_log.h"
 #include "netmanager_base_napi_utils.h"
 #include "securec.h"
@@ -36,12 +35,10 @@ bool NetworkExec::ExecGetType(GetTypeContext *context)
 {
     NETMANAGER_BASE_LOGI("NetworkExec::ExecGetType");
     EventManager *manager = context->GetManager();
-    auto conn = static_cast<NetConnection *>(manager->GetData());
-    if (!conn) {
-        NETMANAGER_BASE_LOGI("NetworkExec::ExecGetType no conn");
-        return true;
+    sptr<INetConnCallback> callback = g_observerMap[manager];
+    if (callback == nullptr) {
+        return false;
     }
-    sptr<INetConnCallback> callback = conn->GetObserver();
 
     sptr<NetSpecifier> specifier = new NetSpecifier;
     specifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
@@ -93,12 +90,10 @@ bool NetworkExec::ExecSubscribe(SubscribeContext *context)
 {
     NETMANAGER_BASE_LOGI("NetworkExec::ExecSubscribe");
     EventManager *manager = context->GetManager();
-    auto conn = static_cast<NetConnection *>(manager->GetData());
-    if (!conn) {
-        NETMANAGER_BASE_LOGI("NetworkExec::ExecSubscribe no conn");
-        return true;
+    sptr<INetConnCallback> callback = g_observerMap[manager];
+    if (callback == nullptr) {
+        return false;
     }
-    sptr<INetConnCallback> callback = conn->GetObserver();
 
     sptr<NetSpecifier> specifier = new NetSpecifier;
     specifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
@@ -136,8 +131,10 @@ napi_value NetworkExec::SubscribeCallback(SubscribeContext *context)
 bool NetworkExec::ExecUnsubscribe(UnsubscribeContext *context)
 {
     EventManager *manager = context->GetManager();
-    auto conn = static_cast<NetConnection *>(manager->GetData());
-    sptr<INetConnCallback> callback = conn->GetObserver();
+    sptr<INetConnCallback> callback = g_observerMap[manager];
+    if (callback == nullptr) {
+        return false;
+    }
 
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
     if (ret == NET_CONN_ERR_CALLBACK_NOT_FOUND || ret == NET_CONN_ERR_REQ_ID_NOT_FOUND) {
