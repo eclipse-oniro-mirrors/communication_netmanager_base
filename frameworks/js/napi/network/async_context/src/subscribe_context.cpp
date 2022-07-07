@@ -15,7 +15,7 @@
 
 #include "subscribe_context.h"
 
-#include "constant.h"
+#include "network_constant.h"
 #include "netmanager_base_log.h"
 #include "netmanager_base_napi_utils.h"
 
@@ -25,7 +25,7 @@ static constexpr const int PARAM_HAS_OPTIONS = 1;
 
 namespace OHOS::NetManagerStandard {
 SubscribeContext::SubscribeContext(napi_env env, EventManager *manager)
-    : BaseContext(env, manager), successCallback_(nullptr), failCallback_(nullptr)
+    : BaseContext(env, manager), failCallback_(nullptr)
 {
 }
 
@@ -68,11 +68,8 @@ bool SubscribeContext::SetSuccessCallback(napi_value options)
         NETMANAGER_BASE_LOGE("success should be function");
         return false;
     }
-    if (successCallback_ != nullptr) {
-        (void)napi_delete_reference(GetEnv(), successCallback_);
-    }
     GetManager()->AddListener(GetEnv(), EVENT_SUBSCRIBE, callback, false, false);
-    return napi_create_reference(GetEnv(), callback, 1, &successCallback_) == napi_ok;
+    return true;
 }
 
 bool SubscribeContext::SetFailCallback(napi_value options)
@@ -90,16 +87,6 @@ bool SubscribeContext::SetFailCallback(napi_value options)
         (void)napi_delete_reference(GetEnv(), failCallback_);
     }
     return napi_create_reference(GetEnv(), callback, 1, &failCallback_) == napi_ok;
-}
-
-napi_value SubscribeContext::GetSuccessCallback() const
-{
-    if (successCallback_ == nullptr) {
-        return nullptr;
-    }
-    napi_value callback = nullptr;
-    NAPI_CALL(GetEnv(), napi_get_reference_value(GetEnv(), successCallback_, &callback));
-    return callback;
 }
 
 napi_value SubscribeContext::GetFailCallback() const

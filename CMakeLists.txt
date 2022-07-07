@@ -25,7 +25,6 @@ include_directories(frameworks/js/napi/connection/constant)
 include_directories(frameworks/js/napi/connection/constant/include)
 include_directories(frameworks/js/napi/connection/observer/include)
 include_directories(frameworks/js/napi/connection/options/include)
-include_directories(frameworks/js/napi/netconn/include)
 include_directories(frameworks/js/napi/netpolicy/include)
 include_directories(frameworks/js/napi/netstats/include)
 include_directories(frameworks/js/napi/network/async_context/include)
@@ -105,14 +104,6 @@ add_executable(communication_netmanager_base
         frameworks/js/napi/connection/options/include/netconnection.h
         frameworks/js/napi/connection/options/src/net_address.cpp
         frameworks/js/napi/connection/options/src/netconnection.cpp
-        frameworks/js/napi/netconn/include/event_listener_context.h
-        frameworks/js/napi/netconn/include/napi_net_conn.h
-        frameworks/js/napi/netconn/include/napi_net_conn_observer.h
-        frameworks/js/napi/netconn/include/napi_net_connection.h
-        frameworks/js/napi/netconn/src/event_listener_context.cpp
-        frameworks/js/napi/netconn/src/napi_net_conn.cpp
-        frameworks/js/napi/netconn/src/napi_net_conn_observer.cpp
-        frameworks/js/napi/netconn/src/napi_net_connection.cpp
         frameworks/js/napi/netpolicy/include/napi_net_policy.h
         frameworks/js/napi/netpolicy/include/napi_net_policy_observer.h
         frameworks/js/napi/netpolicy/include/net_policy_event_listener_context.h
@@ -133,15 +124,13 @@ add_executable(communication_netmanager_base
         frameworks/js/napi/network/async_context/src/unsubscribe_context.cpp
         frameworks/js/napi/network/async_work/include/network_async_work.h
         frameworks/js/napi/network/async_work/src/network_async_work.cpp
-        frameworks/js/napi/network/constant/include/constant.h
+        frameworks/js/napi/network/constant/include/network_constant.h
         frameworks/js/napi/network/network_exec/include/network_exec.h
         frameworks/js/napi/network/network_exec/src/network_exec.cpp
         frameworks/js/napi/network/network_module/include/network_module.h
         frameworks/js/napi/network/network_module/src/network_module.cpp
-        frameworks/js/napi/network/observer/include/net_conn_callback_observer.h
-        frameworks/js/napi/network/observer/src/net_conn_callback_observer.cpp
-        frameworks/js/napi/network/options/include/netconnection.h
-        frameworks/js/napi/network/options/src/netconnection.cpp
+        frameworks/js/napi/network/observer/include/network_observer.h
+        frameworks/js/napi/network/observer/src/network_observer.cpp
         frameworks/native/dnsresolverclient/src/proxy/dns_resolver_service_proxy.cpp
         frameworks/native/dnsresolverclient/src/dns_addr_info.cpp
         frameworks/native/dnsresolverclient/src/dns_resolver_client.cpp

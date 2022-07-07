@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NETMANAGER_BASE_NET_CONN_CALLBACK_OBSERVER_H
-#define NETMANAGER_BASE_NET_CONN_CALLBACK_OBSERVER_H
+#ifndef NETMANAGER_BASE_NETWORK_OBSERVER_H
+#define NETMANAGER_BASE_NETWORK_OBSERVER_H
 
 #include "net_all_capabilities.h"
 #include "net_conn_callback_stub.h"
@@ -22,7 +22,7 @@
 #include "netmanager_base_napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
-class NetConnCallbackObserver : public NetConnCallbackStub {
+class NetworkObserver : public NetConnCallbackStub {
 public:
     int32_t NetAvailable(sptr<NetHandle> &netHandle) override;
 
@@ -35,6 +35,8 @@ public:
     int32_t NetUnavailable() override;
 
     int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override;
+
+    void SetManager(EventManager *manager);
 
 private:
     template <napi_value (*MakeJsValue)(napi_env, void *)> static void CallbackTemplate(uv_work_t *work, int status)
@@ -54,7 +56,10 @@ private:
         delete workWrapper;
         delete work;
     }
-};
-} // namespace OHOS::NetManagerStandard
 
-#endif /* NETMANAGER_BASE_NET_CONN_CALLBACK_OBSERVER_H */
+    EventManager *manager_;
+};
+
+extern std::map<EventManager *, sptr<NetworkObserver>> g_observerMap;
+} // namespace OHOS::NetManagerStandard
+#endif /* NETMANAGER_BASE_NETWORK_OBSERVER_H */

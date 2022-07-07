@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "net_conn_callback_observer.h"
-#include "constant.h"
+#include "network_observer.h"
+#include "network_constant.h"
 
 #if HAS_TELEPHONY
 #include "core_service_client.h"
@@ -31,6 +31,8 @@ static constexpr const char *NETWORK_WIFI = "WiFi";
 static std::mutex OBSERVER_MUTEX;
 
 namespace OHOS::NetManagerStandard {
+std::map<EventManager *, sptr<NetworkObserver>> g_observerMap;
+
 struct NetworkType {
     std::set<NetBearType> bearerTypes;
 };
@@ -89,81 +91,80 @@ static napi_value MakeNetworkResponse(napi_env env, void *data)
     return obj;
 }
 
-int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
+int32_t NetworkObserver::NetAvailable(sptr<NetHandle> &netHandle)
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetAvailable");
     return 0;
 }
 
-int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandle,
-                                                       const sptr<NetAllCapabilities> &netAllCap)
+int32_t NetworkObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap)
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetCapabilitiesChange");
+    NETMANAGER_BASE_LOGI("NetworkObserver::NetCapabilitiesChange");
 
     std::lock_guard<std::mutex> lock(OBSERVER_MUTEX);
-    if (!GLOBAL_MANAGER) {
+    if (!manager_) {
         NETMANAGER_BASE_LOGI("no event manager");
         return 0;
     }
 
-    if (GLOBAL_MANAGER->HasEventListener(EVENT_GET_TYPE)) {
+    if (manager_->HasEventListener(EVENT_GET_TYPE)) {
         auto netType = new NetworkType;
         netType->bearerTypes = netAllCap->bearerTypes_;
-        GLOBAL_MANAGER->EmitByUv(EVENT_GET_TYPE, netType, CallbackTemplate<MakeNetworkResponse>);
+        manager_->EmitByUv(EVENT_GET_TYPE, netType, CallbackTemplate<MakeNetworkResponse>);
     } else {
         NETMANAGER_BASE_LOGI("NO EVENT_GET_TYPE");
     }
-    if (GLOBAL_MANAGER->HasEventListener(EVENT_SUBSCRIBE)) {
+    if (manager_->HasEventListener(EVENT_SUBSCRIBE)) {
         auto netType = new NetworkType;
         netType->bearerTypes = netAllCap->bearerTypes_;
-        GLOBAL_MANAGER->EmitByUv(EVENT_SUBSCRIBE, netType, CallbackTemplate<MakeNetworkResponse>);
+        manager_->EmitByUv(EVENT_SUBSCRIBE, netType, CallbackTemplate<MakeNetworkResponse>);
     } else {
         NETMANAGER_BASE_LOGI("NO EVENT_SUBSCRIBE");
     }
     return 0;
 }
 
-int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle,
-                                                               const sptr<NetLinkInfo> &info)
+int32_t NetworkObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetConnectionPropertiesChange");
     return 0;
 }
 
-int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
+int32_t NetworkObserver::NetLost(sptr<NetHandle> &netHandle)
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetLost");
     return 0;
 }
 
-int32_t NetConnCallbackObserver::NetUnavailable()
+int32_t NetworkObserver::NetUnavailable()
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetUnavailable");
+    NETMANAGER_BASE_LOGI("NetworkObserver::NetUnavailable");
 
     std::lock_guard<std::mutex> lock(OBSERVER_MUTEX);
-    if (!GLOBAL_MANAGER) {
+    if (!manager_) {
         NETMANAGER_BASE_LOGI("no event manager");
         return 0;
     }
 
-    if (GLOBAL_MANAGER->HasEventListener(EVENT_GET_TYPE)) {
+    if (manager_->HasEventListener(EVENT_GET_TYPE)) {
         auto netType = new NetworkType;
-        GLOBAL_MANAGER->EmitByUv(EVENT_GET_TYPE, netType, CallbackTemplate<MakeNetworkResponse>);
+        manager_->EmitByUv(EVENT_GET_TYPE, netType, CallbackTemplate<MakeNetworkResponse>);
     } else {
         NETMANAGER_BASE_LOGI("NO EVENT_GET_TYPE");
     }
-    if (GLOBAL_MANAGER->HasEventListener(EVENT_SUBSCRIBE)) {
+    if (manager_->HasEventListener(EVENT_SUBSCRIBE)) {
         auto netType = new NetworkType;
-        GLOBAL_MANAGER->EmitByUv(EVENT_SUBSCRIBE, netType, CallbackTemplate<MakeNetworkResponse>);
+        manager_->EmitByUv(EVENT_SUBSCRIBE, netType, CallbackTemplate<MakeNetworkResponse>);
     } else {
         NETMANAGER_BASE_LOGI("NO EVENT_SUBSCRIBE");
     }
     return 0;
 }
 
-int32_t NetConnCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
+int32_t NetworkObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetBlockStatusChange");
     return 0;
+}
+
+void NetworkObserver::SetManager(EventManager *manager)
+{
+    manager_ = manager;
 }
 } // namespace OHOS::NetManagerStandard

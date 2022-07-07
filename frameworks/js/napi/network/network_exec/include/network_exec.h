@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMUNICATIONNETMANAGERBASE_CONNECTION_EXEC_H
-#define COMMUNICATIONNETMANAGERBASE_CONNECTION_EXEC_H
+#ifndef NETMANAGER_BASE_NETWORK_EXEC_H
+#define NETMANAGER_BASE_NETWORK_EXEC_H
 
 #include <netdb.h>
 
@@ -48,4 +48,4 @@ public:
 };
 } // namespace OHOS::NetManagerStandard
 
-#endif /* COMMUNICATIONNETMANAGERBASE_CONNECTION_EXEC_H */
+#endif /* NETMANAGER_BASE_NETWORK_EXEC_H */
