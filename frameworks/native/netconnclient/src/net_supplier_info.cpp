@@ -110,41 +110,33 @@ bool NetSupplierInfo::Marshalling(Parcel &parcel, const sptr<NetSupplierInfo> &o
 std::string NetSupplierInfo::ToString(const std::string &tab) const
 {
     std::string str;
-    str.append("\n");
     str.append(tab);
     str.append("[NetSupplierInfo]");
 
-    str.append("\n");
     str.append(tab);
     str.append("isAvailable_ = ");
     str.append(std::to_string(isAvailable_));
 
-    str.append("\n");
     str.append(tab);
     str.append("isRoaming_ = ");
     str.append(std::to_string(isRoaming_));
 
-    str.append("\n");
     str.append(tab);
     str.append("strength_ = ");
     str.append(std::to_string(strength_));
 
-    str.append("\n");
     str.append(tab);
     str.append("frequency_ = ");
     str.append(std::to_string(frequency_));
 
-    str.append("\n");
     str.append(tab);
     str.append("linkUpBandwidthKbps_ = ");
     str.append(std::to_string(linkUpBandwidthKbps_));
 
-    str.append("\n");
     str.append(tab);
     str.append("linkDownBandwidthKbps_ = ");
     str.append(std::to_string(linkDownBandwidthKbps_));
 
-    str.append("\n");
     str.append(tab);
     str.append("uid_ = ");
     str.append(std::to_string(uid_));

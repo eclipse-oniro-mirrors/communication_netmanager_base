@@ -207,7 +207,7 @@ int32_t NetsysNativeClient::NetworkAddRoute(int32_t netId, const std::string &if
                                             const std::string &nextHop)
 {
     NETMGR_LOG_I("Add Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s]",
-        netId, ifName.c_str(), GetAnonyString(destination).c_str(), GetAnonyString(nextHop).c_str());
+        netId, ifName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysNativeService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
@@ -219,7 +219,7 @@ int32_t NetsysNativeClient::NetworkRemoveRoute(int32_t netId, const std::string 
                                                const std::string &nextHop)
 {
     NETMGR_LOG_I("Remove Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s]",
-        netId, ifName.c_str(), GetAnonyString(destination).c_str(), GetAnonyString(nextHop).c_str());
+        netId, ifName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysNativeService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
@@ -297,7 +297,7 @@ int32_t NetsysNativeClient::InterfaceAddAddress(const std::string &ifName, const
                                                 int32_t prefixLength)
 {
     NETMGR_LOG_I("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
-        ifName.c_str(), GetAnonyString(ipAddr).c_str(), prefixLength);
+        ifName.c_str(), ToAnonymousIp(ipAddr).c_str(), prefixLength);
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysNativeService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
@@ -309,7 +309,7 @@ int32_t NetsysNativeClient::InterfaceDelAddress(const std::string &ifName, const
                                                 int32_t prefixLength)
 {
     NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
-        ifName.c_str(), GetAnonyString(ipAddr).c_str(), prefixLength);
+        ifName.c_str(), ToAnonymousIp(ipAddr).c_str(), prefixLength);
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysNativeService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;

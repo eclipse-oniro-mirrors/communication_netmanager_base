@@ -73,7 +73,7 @@ int32_t RouteManager::AddRoute(TableType tableType, const std::string &interface
     const std::string &destinationName, const std::string &nextHop)
 {
     NETNATIVE_LOGI("Entry RouteManager::AddRoute,interfaceName:%{public}s,destination:%{public}s, nextHop:%{public}s",
-        interfaceName.c_str(), GetAnonyString(destinationName).c_str(), GetAnonyString(nextHop).c_str());
+        interfaceName.c_str(), ToAnonymousIp(destinationName).c_str(), ToAnonymousIp(nextHop).c_str());
     uint32_t table = GetRouteTableFromType(tableType, interfaceName);
     if (table == RT_TABLE_UNSPEC) {
         return -1;
@@ -92,7 +92,7 @@ int32_t RouteManager::RemoveRoute(TableType tableType, const std::string &interf
     const std::string &destinationName, const std::string &nextHop)
 {
     NETNATIVE_LOGI("Entry RouteManager::RemoveRoute,interfaceName:%{public}s,destination:%{public}s,nextHop:%{public}s",
-        interfaceName.c_str(), GetAnonyString(destinationName).c_str(), GetAnonyString(nextHop).c_str());
+        interfaceName.c_str(), ToAnonymousIp(destinationName).c_str(), ToAnonymousIp(nextHop).c_str());
     uint32_t table = GetRouteTableFromType(tableType, interfaceName);
     if (table == RT_TABLE_UNSPEC) {
         return -1;
@@ -110,7 +110,7 @@ int32_t RouteManager::UpdateRoute(TableType tableType, const std::string &interf
     const std::string &destinationName, const std::string &nextHop)
 {
     NETNATIVE_LOGI("Entry RouteManager::UpdateRoute,interfaceName:%{public}s,destination:%{public}s,nextHop:%{public}s",
-        interfaceName.c_str(), GetAnonyString(destinationName).c_str(), GetAnonyString(nextHop).c_str());
+        interfaceName.c_str(), ToAnonymousIp(destinationName).c_str(), ToAnonymousIp(nextHop).c_str());
     uint32_t table = GetRouteTableFromType(tableType, interfaceName);
     if (table == RT_TABLE_UNSPEC) {
         return -1;

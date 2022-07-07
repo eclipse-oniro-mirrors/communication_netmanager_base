@@ -126,7 +126,7 @@ int32_t MockNetsysNativeClient::NetworkAddRoute(int32_t netId, const std::string
     const std::string &destination, const std::string &nextHop)
 {
     NETMGR_LOG_I("Add Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s]",
-        netId, ifName.c_str(), GetAnonyString(destination).c_str(), GetAnonyString(nextHop).c_str());
+        netId, ifName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
     std::string mask = "0.0.0.0";
     return AddRoute(destination, mask, nextHop, ifName);
 }
@@ -135,7 +135,7 @@ int32_t MockNetsysNativeClient::NetworkRemoveRoute(int32_t netId, const std::str
     const std::string &destination, const std::string &nextHop)
 {
     NETMGR_LOG_I("Remove Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s]",
-        netId, ifName.c_str(), GetAnonyString(destination).c_str(), GetAnonyString(nextHop).c_str());
+        netId, ifName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
     return 0;
 }
 
@@ -173,7 +173,7 @@ int32_t MockNetsysNativeClient::InterfaceAddAddress(const std::string &ifName, c
     int32_t prefixLength)
 {
     NETMGR_LOG_I("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
-        ifName.c_str(), GetAnonyString(ipAddr).c_str(), prefixLength);
+        ifName.c_str(), ToAnonymousIp(ipAddr).c_str(), prefixLength);
     return 0;
 }
 
@@ -181,7 +181,7 @@ int32_t MockNetsysNativeClient::InterfaceDelAddress(const std::string &ifName, c
     int32_t prefixLength)
 {
     NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
-        ifName.c_str(), GetAnonyString(ipAddr).c_str(), prefixLength);
+        ifName.c_str(), ToAnonymousIp(ipAddr).c_str(), prefixLength);
     return 0;
 }
 
@@ -483,7 +483,7 @@ int32_t MockNetsysNativeClient::AddRoute(const std::string &ip, const std::strin
     NETMGR_LOG_I("copyRet = %{public}d", copyRet);
     (reinterpret_cast<struct sockaddr_in*>(&rt.rt_dst))->sin_family=AF_INET;
     if (inet_aton(ip.c_str(), &((struct sockaddr_in*)&rt.rt_dst)->sin_addr) < 0) {
-        NETMGR_LOG_E("MockNetsysNativeClient inet_aton ip[%{public}s]", GetAnonyString(ip).c_str());
+        NETMGR_LOG_E("MockNetsysNativeClient inet_aton ip[%{public}s]", ToAnonymousIp(ip).c_str());
         return -1;
     }
     (reinterpret_cast<struct sockaddr_in*>(&rt.rt_genmask))->sin_family=AF_INET;

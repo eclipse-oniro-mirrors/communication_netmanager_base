@@ -45,7 +45,7 @@ public:
     void SetServiceSupply(sptr<NetSupplier> netServiceSupplied);
     sptr<INetConnCallback> GetNetCallback();
     sptr<NetSpecifier> GetNetSpecifier();
-    std::unique_ptr<Timer>&  GetTimer();
+    std::unique_ptr<Timer> &GetTimer();
 
 private:
     bool CompareByNetworkIdent(const std::string &ident);

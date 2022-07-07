@@ -204,7 +204,7 @@ int32_t NetsysNativeService::NetworkAddRoute(int32_t netId, const std::string &i
     const std::string &destination, const std::string &nextHop)
 {
     NETNATIVE_LOGI("NetsysNativeService::NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s",
-        netId, interfaceName.c_str(), GetAnonyString(destination).c_str(), GetAnonyString(nextHop).c_str());
+        netId, interfaceName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
 
     int32_t result = netsysService_->NetworkAddRoute(netId, interfaceName, destination, nextHop);
     NETNATIVE_LOGI("NetworkAddRoute %{public}d", result);

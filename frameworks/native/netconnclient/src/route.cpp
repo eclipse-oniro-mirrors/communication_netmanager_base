@@ -136,24 +136,21 @@ bool Route::Marshalling(Parcel &parcel, const sptr<Route> &object)
 std::string Route::ToString(const std::string &tab) const
 {
     std::string str;
-    str.append("\n");
     str.append(tab);
     str.append("[Route]");
 
-    str.append("\n");
     str.append(tab);
     str.append("iface_ = ");
     str.append(iface_);
 
-    str.append("\n");
     str.append(tab);
     str.append("destination_ = ");
-    str.append(destination_.ToString(tab + "    "));
+    str.append(destination_.ToString(tab));
 
     str.append("\n");
     str.append(tab);
     str.append("gateway_ = ");
-    str.append(gateway_.ToString(tab + "    "));
+    str.append(gateway_.ToString(tab));
 
     str.append("\n");
     str.append(tab);
@@ -168,17 +165,17 @@ std::string Route::ToString(const std::string &tab) const
     str.append("\n");
     str.append(tab);
     str.append("isHost_ = ");
-    str.append(isHost_?"true":"false");
+    str.append(isHost_ ? "true" : "false");
 
     str.append("\n");
     str.append(tab);
     str.append("hasGateway_ = ");
-    str.append(hasGateway_?"true":"false");
+    str.append(hasGateway_ ? "true" : "false");
 
     str.append("\n");
     str.append(tab);
     str.append("isDefaultRoute = ");
-    str.append(isDefaultRoute_?"true":"false");
+    str.append(isDefaultRoute_ ? "true" : "false");
 
     return str;
 }

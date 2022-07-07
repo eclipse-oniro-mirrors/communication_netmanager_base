@@ -199,7 +199,7 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
     }
 
     NETNATIVE_LOGI("InterfaceManager::ModifyAddress:%{public}u %{public}s %{public}s %{public}d",
-        action, interfaceName, GetAnonyString(addr).c_str(), prefixLen);
+        action, interfaceName, ToAnonymousIp(addr).c_str(), prefixLen);
 
     ret = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
     if (ret < 0) {

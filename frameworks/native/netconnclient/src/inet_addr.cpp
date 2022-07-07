@@ -15,6 +15,7 @@
 
 #include "inet_addr.h"
 #include "net_mgr_log_wrapper.h"
+#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -127,43 +128,35 @@ bool INetAddr::Marshalling(Parcel &parcel, const sptr<INetAddr> &object)
 std::string INetAddr::ToString(const std::string &tab) const
 {
     std::string str;  // print the member values of the INetAddr class
-    str.append("\n");
     str.append(tab);
     str.append("[INetAddr]");
 
-    str.append("\n");
     str.append(tab);
-    str.append("type_ = ");
+    str.append("type = ");
     str.append(std::to_string(type_));
 
-    str.append("\n");
     str.append(tab);
-    str.append("family_ = ");
+    str.append("family = ");
     str.append(std::to_string(family_));
 
-    str.append("\n");
     str.append(tab);
-    str.append("prefixlen_ = ");
+    str.append("prefixLength = ");
     str.append(std::to_string(prefixlen_));
 
-    str.append("\n");
     str.append(tab);
-    str.append("address_ = ");
-    str.append(address_);
+    str.append("address = ");
+    str.append(CommonUtils::ToAnonymousIp(address_));
 
-    str.append("\n");
     str.append(tab);
-    str.append("netMask_ = ");
+    str.append("netMask = ");
     str.append(netMask_);
 
-    str.append("\n");
     str.append(tab);
-    str.append("hostName_ = ");
+    str.append("hostName = ");
     str.append(hostName_);
 
-    str.append("\n");
     str.append(tab);
-    str.append("port_ = ");
+    str.append("port = ");
     str.append(std::to_string(port_));
     return str;
 }

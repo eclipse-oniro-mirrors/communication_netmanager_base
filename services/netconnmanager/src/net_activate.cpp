@@ -187,7 +187,7 @@ bool NetActivate::HaveTypes(const std::set<NetBearType> &bearerTypes) const
         return false;
     }
     auto &typesRef = netSpecifier_->netCapabilities_.bearerTypes_;
-    bool result = bearerTypes.size() > 0 ? true : false;
+    bool result = bearerTypes.size() > 0;
     for (auto type : bearerTypes) {
         if (typesRef.find(type) == typesRef.end()) {
             result = false;

@@ -529,16 +529,17 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier,
     NETMGR_LOG_D("ActivateNetwork  reqId is [%{public}d]", reqId);
     netActivates_[reqId] = request;
     sptr<NetSupplier> bestNet = nullptr;
-    int bestscore = static_cast<int>(FindBestNetworkForRequest(bestNet, request));
-    if (bestscore != 0 && bestNet != nullptr) {
-        NETMGR_LOG_D("The bestscore is: [%{public}d]", bestscore);
+    int bestScore = static_cast<int>(FindBestNetworkForRequest(bestNet, request));
+    if (bestScore != 0 && bestNet != nullptr) {
+        NETMGR_LOG_I("ActivateNetwork:The bestScore is: [%{public}d], netHandle is [%{public}d]", bestScore,
+                     bestNet->GetNetId());
         bestNet->SelectAsBestNetwork(reqId);
         request->SetServiceSupply(bestNet);
         CallbackForAvailable(bestNet, callback);
         return ERR_NONE;
     }
 
-    NETMGR_LOG_D("not found the bestnet");
+    NETMGR_LOG_I("ActivateNetwork: can't found best network, send request to all networks.");
     SendRequestToAllNetwork(request);
     deleteNetActivates_.clear();
     return ERR_NONE;
@@ -930,7 +931,6 @@ void NetConnService::CallbackForAvailable(sptr<NetSupplier> &supplier, const spt
     sptr<NetLinkInfo> pInfo = std::make_unique<NetLinkInfo>().release();
     *pInfo = supplier->GetNetLinkInfo();
     callback->NetConnectionPropertiesChange(netHandle, pInfo);
-    return;
 }
 
 int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName)
