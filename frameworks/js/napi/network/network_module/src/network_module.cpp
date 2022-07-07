@@ -22,8 +22,6 @@
 #include "unsubscribe_context.h"
 
 namespace OHOS::NetManagerStandard {
-std::map<napi_env, EventManager *> g_managerMap;
-
 napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
 {
     std::initializer_list<napi_property_descriptor> properties = {
@@ -33,7 +31,6 @@ napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
     };
     NapiUtils::DefineProperties(env, exports, properties);
     auto manager = new EventManager;
-    g_managerMap[env] = manager;
     auto observer = new NetworkObserver;
     observer->SetManager(manager);
     g_observerMap[manager] = observer;

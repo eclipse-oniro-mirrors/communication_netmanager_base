@@ -22,6 +22,10 @@
 #include "netmanager_base_napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
+struct NetworkType {
+    std::set<NetBearType> bearerTypes;
+};
+
 class NetworkObserver : public NetConnCallbackStub {
 public:
     int32_t NetAvailable(sptr<NetHandle> &netHandle) override;
@@ -39,7 +43,8 @@ public:
     void SetManager(EventManager *manager);
 
 private:
-    template <napi_value (*MakeJsValue)(napi_env, void *)> static void CallbackTemplate(uv_work_t *work, int status)
+    template <napi_value (*MakeJsValue)(napi_env, NetworkType *)>
+    static void CallbackTemplate(uv_work_t *work, int status)
     {
         (void)status;
 
@@ -48,7 +53,7 @@ private:
         auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
         std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);
 
-        napi_value obj = MakeJsValue(env, workWrapper->data);
+        napi_value obj = MakeJsValue(env, static_cast<NetworkType *>(workWrapper->data));
 
         std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(workWrapper->env), obj};
         workWrapper->manager->Emit(workWrapper->type, arg);

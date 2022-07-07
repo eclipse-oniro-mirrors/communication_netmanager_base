@@ -23,8 +23,6 @@
 #include "network_observer.h"
 
 namespace OHOS::NetManagerStandard {
-extern std::map<napi_env, EventManager *> g_managerMap;
-
 class NetworkModule {
 public:
     static constexpr const char *FUNCTION_GET_TYPE = "getType";

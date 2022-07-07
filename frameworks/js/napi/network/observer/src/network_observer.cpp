@@ -21,7 +21,6 @@
 #endif
 
 #include "netmanager_base_log.h"
-#include "network_module.h"
 #include "securec.h"
 
 static constexpr const char *NETWORK_NONE = "none";
@@ -32,10 +31,6 @@ static std::mutex OBSERVER_MUTEX;
 
 namespace OHOS::NetManagerStandard {
 std::map<EventManager *, sptr<NetworkObserver>> g_observerMap;
-
-struct NetworkType {
-    std::set<NetBearType> bearerTypes;
-};
 
 #if HAS_TELEPHONY
 static std::string CellularTypeToString(Telephony::SignalInformation::NetworkType type)
@@ -56,10 +51,10 @@ static std::string CellularTypeToString(Telephony::SignalInformation::NetworkTyp
 }
 #endif
 
-static napi_value MakeNetworkResponse(napi_env env, void *data)
+static napi_value MakeNetworkResponse(napi_env env, NetworkType *data)
 {
     auto deleter = [](NetworkType *t) { delete t; };
-    std::unique_ptr<NetworkType, decltype(deleter)> netType(reinterpret_cast<NetworkType *>(data), deleter);
+    std::unique_ptr<NetworkType, decltype(deleter)> netType(data, deleter);
 
     napi_value obj = NapiUtils::CreateObject(env);
     if (netType->bearerTypes.find(BEARER_WIFI) != netType->bearerTypes.end()) {
