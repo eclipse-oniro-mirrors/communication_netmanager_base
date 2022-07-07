@@ -168,6 +168,9 @@ std::string MaskIpv6(std::string &maskedResult)
 {
     size_t colonCount = 0;
     for (char &i : maskedResult) {
+        if (i == '/') {
+            break;
+        }
         if (i == ':') {
             colonCount++;
         }
