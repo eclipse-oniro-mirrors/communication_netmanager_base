@@ -184,22 +184,14 @@ std::string NetLinkInfo::ToString(const std::string &tab) const
     str.append(domain_);
 
     str.append(tab);
-    str.append("netAddrList_ = ");
-    for (const auto & it : netAddrList_) {
-        str.append(it.ToString(tab));
-    }
+    str.append(ToStringAddr(tab));
 
     str.append(tab);
-    str.append("dnsList_ = ");
-    for (const auto & it : dnsList_) {
-        str.append(it.ToString(tab));
-    }
+    str.append(ToStringDns(tab));
 
     str.append(tab);
+    str.append(ToStringRoute(tab));
     str.append("routeList_ = ");
-    for (const auto & it : routeList_) {
-        str.append(it.ToString(tab));
-    }
 
     str.append(tab);
     str.append("mtu_ = ");
@@ -208,84 +200,54 @@ std::string NetLinkInfo::ToString(const std::string &tab) const
     str.append(tab);
     str.append("tcpBufferSizes_ = ");
     str.append(tcpBufferSizes_);
-    return str;
-}
-
-std::string NetLinkInfo::ToStringBase(const std::string &tab) const
-{
-    std::string str;
-    str.append("\n");
-    str.append(tab);
-    str.append("[NetLinkInfo]");
-
-    str.append("\n");
-    str.append(tab);
-    str.append("ifaceName_ = ");
-    str.append(ifaceName_);
-
-    str.append("\n");
-    str.append(tab);
-    str.append("domain_ = ");
-    str.append(domain_);
-
-    str.append("\n");
-    str.append(tab);
-    str.append("mtu_ = ");
-    str.append(std::to_string(mtu_));
-
-    str.append("\n");
-    str.append(tab);
-    str.append("tcpBufferSizes_ = ");
-    str.append(tcpBufferSizes_);
-
-    str.append("\n");
-    str.append(tab);
-    str.append("End");
     return str;
 }
 
 std::string NetLinkInfo::ToStringAddr(const std::string &tab) const
 {
     std::string str;
-    str.append("\n");
     str.append(tab);
     str.append("netAddrList_ = ");
-    for (auto it = netAddrList_.begin(); it != netAddrList_.end(); it++) {
-        str.append(it->ToString(tab + "    "));
+    if (netAddrList_.empty()) {
+        str.append("null");
+        str.append(tab);
+    } else {
+        for (const auto &it : netAddrList_) {
+            str.append(it.ToString(tab));
+        }
     }
-    str.append("\n");
-    str.append(tab);
-    str.append("End");
     return str;
 }
 
 std::string NetLinkInfo::ToStringDns(const std::string &tab) const
 {
     std::string str;
-    str.append("\n");
     str.append(tab);
     str.append("dnsList_ = ");
-    for (auto it = dnsList_.begin(); it != dnsList_.end(); it++) {
-        str.append(it->ToString(tab + "    "));
+    if (dnsList_.empty()) {
+        str.append("null");
+        str.append(tab);
+    } else {
+        for (const auto &it : dnsList_) {
+            str.append(it.ToString(tab));
+        }
     }
-    str.append("\n");
-    str.append(tab);
-    str.append("End");
     return str;
 }
 
 std::string NetLinkInfo::ToStringRoute(const std::string &tab) const
 {
     std::string str;
-    str.append("\n");
     str.append(tab);
     str.append("routeList_ = ");
-    for (auto it = routeList_.begin(); it != routeList_.end(); it++) {
-        str.append(it->ToString(tab + "    "));
+    if (routeList_.empty()) {
+        str.append("null");
+        str.append(tab);
+    } else {
+        for (const auto & it : routeList_) {
+            str.append(it.ToString(tab));
+        }
     }
-    str.append("\n");
-    str.append(tab);
-    str.append("End");
     return str;
 }
 } // namespace NetManagerStandard

@@ -66,7 +66,7 @@ int32_t NetConnCallbackTest::NetConnectionPropertiesChange(sptr<NetHandle> &netH
         return 0;
     }
     NETMGR_LOG_D("NetConnectionPropertiesChange: netId = %{public}d info = %{public}s", netHandle->GetNetId(),
-        info->ToString("").c_str());
+        info->ToString(" ").c_str());
     NotifyAll();
     return 0;
 }

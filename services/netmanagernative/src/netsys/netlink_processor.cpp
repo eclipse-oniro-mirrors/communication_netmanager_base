@@ -278,8 +278,8 @@ void NetlinkProcessor::OnInterfaceClassActivityChange(int32_t label, bool isActi
 void NetlinkProcessor::OnInterfaceAddressUpdate(const std::string &addr, const std::string &ifName, int32_t flags,
                                                 int32_t scope)
 {
-    NETNATIVE_LOGI("OnInterfaceAddressUpdated: %{public}s, %{public}s, %{public}d, %{public}d", "***", ifName.c_str(),
-                   flags, scope);
+    NETNATIVE_LOGI("OnInterfaceAddressUpdated: %{public}s, %{public}s, %{public}d, %{public}d",
+                   NetManagerStandard::CommonUtils::ToAnonymousIp(addr).c_str(), ifName.c_str(), flags, scope);
     for (auto &callback : *netlinkCallbacks_) {
         callback->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
     }
@@ -288,8 +288,8 @@ void NetlinkProcessor::OnInterfaceAddressUpdate(const std::string &addr, const s
 void NetlinkProcessor::OnInterfaceAddressRemove(const std::string &addr, const std::string &ifName, int32_t flags,
                                                 int32_t scope)
 {
-    NETNATIVE_LOGI("OnInterfaceAddressRemov: %{public}s, %{public}s, %{public}d, %{public}d", "***", ifName.c_str(),
-                   flags, scope);
+    NETNATIVE_LOGI("OnInterfaceAddressRemov: %{public}s, %{public}s, %{public}d, %{public}d",
+                   NetManagerStandard::CommonUtils::ToAnonymousIp(addr).c_str(), ifName.c_str(), flags, scope);
     for (auto &callback : *netlinkCallbacks_) {
         callback->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
     }
