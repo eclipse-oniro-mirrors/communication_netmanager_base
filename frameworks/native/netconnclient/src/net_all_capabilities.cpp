@@ -108,25 +108,20 @@ bool NetAllCapabilities::Unmarshalling(Parcel &parcel)
 std::string NetAllCapabilities::ToString(const std::string &tab) const
 {
     std::string str;
-    str.append("\n");
     str.append(tab);
     str.append("[NetAllCapabilities]");
 
-    str.append("\n");
     str.append(tab);
     str.append("linkUpBandwidthKbps_ = ");
     str.append(std::to_string(linkUpBandwidthKbps_));
 
-    str.append("\n");
     str.append(tab);
     str.append("linkDownBandwidthKbps_ = ");
     str.append(std::to_string(linkDownBandwidthKbps_));
 
-    str.append("\n");
     str.append(tab);
     ToStrNetCaps(netCaps_, str);
 
-    str.append("\n");
     str.append(tab);
     ToStrNetBearTypes(bearerTypes_, str);
 

@@ -74,10 +74,7 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
 
 int32_t NetSupplier::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
 {
-    NETMGR_LOG_D("Update netlink info: netLinkInfo[%{public}s]", netLinkInfo.ToStringBase("").c_str());
-    NETMGR_LOG_D("[%{public}s]", netLinkInfo.ToStringAddr("").c_str());
-    NETMGR_LOG_D("[%{public}s]", netLinkInfo.ToStringDns("").c_str());
-    NETMGR_LOG_D("[%{public}s]", netLinkInfo.ToStringRoute("").c_str());
+    NETMGR_LOG_D("Update netlink info: netLinkInfo[%{public}s]", netLinkInfo.ToString(" ").c_str());
     if (network_ == nullptr) {
         NETMGR_LOG_E("network_ is nullptr!");
         return ERR_NO_NETWORK;

@@ -18,10 +18,29 @@
 
 #include <algorithm>
 #include <arpa/inet.h>
+#include <regex>
 
 namespace OHOS::NetManagerStandard::CommonUtils {
-constexpr int32_t INET_PTION_SUC = 1;
+constexpr int32_t INET_OPTION_SUC = 1;
 constexpr uint32_t CONST_MASK = 0x80000000;
+constexpr size_t MAX_DISPLAY_NUM = 2;
+
+const std::regex IP_PATTERN {
+    "((2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)\\.){3}(2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)"
+};
+
+const std::regex IP_MASK_PATTERN {
+    "((2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)\\.){3}(2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)/(3[0-2]|[1-2]\\d|\\d)"
+};
+
+const std::regex IPV6_PATTERN {
+    "([\\da-fA-F]{0,4}:){2,7}([\\da-fA-F]{0,4})"
+};
+
+const std::regex IPV6_MASK_PATTERN {
+    "([\\da-fA-F]{0,4}:){2,7}([\\da-fA-F]{0,4})/(1[0-2][0-8]|[1-9]\\d|[1-9])"
+};
+
 std::vector<std::string> Split(const std::string &str, const std::string &sep)
 {
     std::string s = str;
@@ -68,7 +87,7 @@ bool IsValidIPV4(const std::string &ip)
     }
     struct in_addr s;
     int32_t result = inet_pton(AF_INET, ip.c_str(), reinterpret_cast<void*>(&s));
-    if (result == INET_PTION_SUC) {
+    if (result == INET_OPTION_SUC) {
         return true;
     }
     return false;
@@ -81,7 +100,7 @@ bool IsValidIPV6(const std::string &ip)
     }
     struct in6_addr s;
     int32_t result = inet_pton(AF_INET6, ip.c_str(), reinterpret_cast<void*>(&s));
-    if (result == INET_PTION_SUC) {
+    if (result == INET_OPTION_SUC) {
         return true;
     }
     return false;
@@ -123,5 +142,59 @@ bool ParseInt(const char *str, int32_t *value)
 int64_t ConvertToInt64(const std::string& str)
 {
     return strtoll(str.c_str(), nullptr, 10);
+}
+
+std::string MakIpv4(std::string &maskedResult)
+{
+    int maxDisplayNum = MAX_DISPLAY_NUM;
+    for (char &i : maskedResult) {
+        if (i == '/') {
+            break;
+        }
+        if (maxDisplayNum > 0) {
+            if (i == '.') {
+                maxDisplayNum--;
+            }
+        } else {
+            if (i != '.') {
+                i = '*';
+            }
+        }
+    }
+    return maskedResult;
+}
+
+std::string MaskIpv6(std::string &maskedResult)
+{
+    size_t colonCount = 0;
+    for (char &i : maskedResult) {
+        if (i == '/') {
+            break;
+        }
+        if (i == ':') {
+            colonCount++;
+        }
+
+        if (colonCount >= MAX_DISPLAY_NUM) { // An legal ipv6 address has at least 2 ':'.
+            if (i != ':' && i != '/') {
+                i = '*';
+            }
+        }
+    }
+    return maskedResult;
+}
+
+std::string ToAnonymousIp(const std::string &input)
+{
+    std::string maskedResult{input};
+    // Mask ipv4 address.
+    if (std::regex_match(maskedResult, IP_PATTERN) || std::regex_match(maskedResult, IP_MASK_PATTERN)) {
+        return MakIpv4(maskedResult);
+    }
+    // Mask ipv6 address.
+    if (std::regex_match(maskedResult, IPV6_PATTERN) || std::regex_match(maskedResult, IPV6_MASK_PATTERN)) {
+        return MaskIpv6(maskedResult);
+    }
+    return input;
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils

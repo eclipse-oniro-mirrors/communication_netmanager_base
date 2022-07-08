@@ -88,11 +88,8 @@ bool NetSpecifier::Marshalling(Parcel &parcel, const sptr<NetSpecifier> &object)
 std::string NetSpecifier::ToString(const std::string &tab) const
 {
     std::string str;
-    str.append("\n");
     str.append(tab);
     str.append("[NetSpecifier]");
-
-    str.append("\n");
     str.append(tab);
     str.append("ident_ = ");
     str.append(ident_);

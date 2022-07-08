@@ -33,12 +33,11 @@ struct NetLinkInfo : public Parcelable {
     uint16_t mtu_ = 0;
     std::string tcpBufferSizes_;
 
-    virtual bool Marshalling(Parcel &parcel) const override;
+    bool Marshalling(Parcel &parcel) const override;
     static sptr<NetLinkInfo> Unmarshalling(Parcel &parcel);
     static bool Marshalling(Parcel &parcel, const sptr<NetLinkInfo> &object);
     void Initialize();
     std::string ToString(const std::string &tab) const;
-    std::string ToStringBase(const std::string &tab) const;
     std::string ToStringAddr(const std::string &tab) const;
     std::string ToStringDns(const std::string &tab) const;
     std::string ToStringRoute(const std::string &tab) const;
