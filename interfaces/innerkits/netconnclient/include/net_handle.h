@@ -28,9 +28,9 @@ namespace OHOS {
 namespace NetManagerStandard {
 class NetHandle : public virtual RefBase {
 public:
-    NetHandle() {}
+    NetHandle() : netId_(0) {}
     explicit NetHandle(int32_t netId) : netId_(netId) {}
-    ~NetHandle() {}
+    ~NetHandle() override = default;
 
     int32_t BindSocket(int32_t socket_fd);
     int32_t GetAddressesByName(const std::string &host, std::vector<INetAddr> &addrList);
