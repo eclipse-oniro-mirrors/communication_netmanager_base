@@ -112,7 +112,7 @@ std::unique_ptr<NetlinkProcessor> NetlinkManager::SetSocket(int32_t &sock, int32
         return nullptr;
     }
 
-    if (bind(sock, (sockaddr *)&nladdr, sizeof(nladdr)) < 0) {
+    if (bind(sock, reinterpret_cast<sockaddr *>(&nladdr), sizeof(nladdr)) < 0) {
         NETNATIVE_LOGE("Unable to bind netlink socket: %{public}d, EMSG: %{public}s", errno, strerror(errno));
         close(sock);
         return nullptr;

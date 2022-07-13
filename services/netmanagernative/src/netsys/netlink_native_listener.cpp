@@ -36,7 +36,9 @@
 namespace OHOS {
 namespace nmd {
 using namespace NetlinkDefine;
+namespace {
 constexpr int32_t PRET_SIZE = 2;
+}
 
 NetlinkNativeListener::NetlinkNativeListener(int32_t socketFd, bool listen, int32_t format)
 {
@@ -279,7 +281,7 @@ ssize_t NetlinkNativeListener::ReceiveUEvent(int32_t socket, void *buffer, size_
         goto out;
     }
 
-    cred = (ucred *)CMSG_DATA(cmsg);
+    cred = reinterpret_cast<ucred *>(CMSG_DATA(cmsg));
     *uid = cred->uid;
 
     if (addr.nl_pid != 0) {

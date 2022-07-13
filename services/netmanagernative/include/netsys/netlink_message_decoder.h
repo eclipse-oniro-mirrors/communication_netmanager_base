@@ -70,7 +70,7 @@ private:
     std::string subSystem_;
     std::vector<std::string> params_ = std::vector<std::string>(NL_PARAMS_MAX);
 
-    bool ParseBinaryNetlinkMessage(const char *buffer, int32_t size);
+    bool ParseBinaryNetlinkMessage(char *buffer, int32_t size);
     bool ParseAsciiNetlinkMessage(char *buffer, int32_t size);
     bool ParseIfInfoMessage(const nlmsghdr *nh);
     bool ParseIfAddrMessage(const nlmsghdr *nh);
@@ -78,8 +78,8 @@ private:
     bool ParseNfPacketMessage(nlmsghdr *nh);
     bool ParseRtMessage(const nlmsghdr *nh);
     bool ParseNdUserOptMessage(const nlmsghdr *nh);
-    bool ParseNdOptRnss(const nd_opt_hdr *opthdr, const char *ifname);
-    nlattr *FindNlAttr(const nlmsghdr *nl, size_t hdrlen, uint16_t attr);
+    bool ParseNdOptRnss(nd_opt_hdr *opthdr, const char *ifname);
+    nlattr *FindNlAttr(nlmsghdr *nh, size_t hdrlen, uint16_t attr);
     bool ProcessIFAddress(ifaddrmsg *ifaddr, char *addrstr, socklen_t len, const char *msgtype, char *ifname,
                           rtattr *rta);
     void AddParam(const char *addrstr, const ifaddrmsg *ifaddr, uint32_t flags, const ifa_cacheinfo *cacheinfo,
