@@ -64,7 +64,7 @@ bool NetLinkInfo::Marshalling(Parcel &parcel) const
 
 sptr<NetLinkInfo> NetLinkInfo::Unmarshalling(Parcel &parcel)
 {
-    sptr<NetLinkInfo> ptr = (std::make_unique<NetLinkInfo>()).release();
+    sptr<NetLinkInfo> ptr = new (std::nothrow) NetLinkInfo();
     if (ptr == nullptr) {
         return nullptr;
     }

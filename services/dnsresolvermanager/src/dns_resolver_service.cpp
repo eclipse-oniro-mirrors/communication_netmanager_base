@@ -77,7 +77,7 @@ bool DnsResolverService::Init()
         }
         registerToService_ = true;
     }
-    serviceIface_ = std::make_unique<DnsServiceIface>().release();
+    serviceIface_ = new (std::nothrow) DnsServiceIface();
     NetManagerCenter::GetInstance().RegisterDnsService(serviceIface_);
     NETMGR_LOG_D("GetDnsServer suc");
     return true;
@@ -217,7 +217,7 @@ int32_t DnsResolverService::GetAddrInfo(const std::string &hostName, const std::
     }
     char ipbuf[IPV4_SIZE];
     for (cur = resAddr; cur != nullptr; cur = cur->ai_next) {
-        sptr<DnsAddrInfo> d = (std::make_unique<DnsAddrInfo>()).release();
+        sptr<DnsAddrInfo> d = new (std::nothrow) DnsAddrInfo();
         if (d == nullptr) {
             continue;
         }

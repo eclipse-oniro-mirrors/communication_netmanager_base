@@ -59,7 +59,7 @@ bool NetSpecifier::Marshalling(Parcel &parcel) const
 
 sptr<NetSpecifier> NetSpecifier::Unmarshalling(Parcel &parcel)
 {
-    sptr<NetSpecifier> ptr = (std::make_unique<NetSpecifier>()).release();
+    sptr<NetSpecifier> ptr = new (std::nothrow) NetSpecifier();
     if (ptr == nullptr) {
         NETMGR_LOG_E("make_unique<NetSpecifier>() failed");
         return nullptr;

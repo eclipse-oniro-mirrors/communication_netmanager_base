@@ -47,7 +47,7 @@ bool NetSupplierInfo::Marshalling(Parcel &parcel) const
 
 sptr<NetSupplierInfo> NetSupplierInfo::Unmarshalling(Parcel &parcel)
 {
-    sptr<NetSupplierInfo> ptr = (std::make_unique<NetSupplierInfo>()).release();
+    sptr<NetSupplierInfo> ptr = new (std::nothrow) NetSupplierInfo();
     if (ptr == nullptr) {
         NETMGR_LOG_E("make_unique<NetSupplierInfo>() failed");
         return nullptr;

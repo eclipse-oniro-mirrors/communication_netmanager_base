@@ -41,7 +41,7 @@ bool DnsAddrInfo::Marshalling(Parcel &parcel) const
 
 sptr<DnsAddrInfo> DnsAddrInfo::Unmarshalling(Parcel &parcel)
 {
-    sptr<DnsAddrInfo> ptr = (std::make_unique<DnsAddrInfo>()).release();
+    sptr<DnsAddrInfo> ptr = new (std::nothrow) DnsAddrInfo();
     if (ptr == nullptr) {
         NETMGR_LOG_E("create DnsAddrInfo failed");
         return nullptr;

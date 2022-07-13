@@ -34,7 +34,7 @@ bool DhcpResultParcel::Marshalling(Parcel &parcel) const
 
 sptr<DhcpResultParcel> DhcpResultParcel::Unmarshalling(Parcel &parcel)
 {
-    sptr<DhcpResultParcel> ptr = (std::make_unique<DhcpResultParcel>()).release();
+    sptr<DhcpResultParcel> ptr = new (std::nothrow) DhcpResultParcel();
     ptr->iface_ = parcel.ReadString();
     ptr->ipAddr_ = parcel.ReadString();
     ptr->gateWay_ = parcel.ReadString();
