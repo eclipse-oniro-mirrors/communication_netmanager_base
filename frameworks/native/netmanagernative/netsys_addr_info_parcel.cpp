@@ -77,7 +77,7 @@ sptr<NetsysAddrInfoParcel> NetsysAddrInfoParcel::Unmarshalling(Parcel &parcel)
 {
     Parcel *pParcel = &parcel;
     MessageParcel  *parcelMsg = static_cast<MessageParcel*>(pParcel);
-    auto ptr = (make_unique<NetsysAddrInfoParcel>()).release();
+    sptr<NetsysAddrInfoParcel> ptr = new (std::nothrow) NetsysAddrInfoParcel();
     if (ptr == nullptr) {
         return nullptr;
     }

@@ -46,7 +46,7 @@ bool DnsResolverParamsParcel::Marshalling(Parcel &parcel) const
 
 sptr<DnsResolverParamsParcel> DnsResolverParamsParcel::Unmarshalling(Parcel &parcel)
 {
-    auto ptr = std::make_unique<DnsResolverParamsParcel>().release();
+    sptr<DnsResolverParamsParcel> ptr = new (std::nothrow) DnsResolverParamsParcel();
     if (ptr == nullptr) {
         NETNATIVE_LOGE("The parameter of ptr is nullptr");
         return nullptr;

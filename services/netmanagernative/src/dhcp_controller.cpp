@@ -92,8 +92,7 @@ void DhcpController::StopDhcpClient(const std::string &iface, bool bIpv6)
 void DhcpController::Process(const std::string &iface, OHOS::Wifi::DhcpResult &result)
 {
     NETNATIVE_LOGI("DhcpController Process");
-    sptr<OHOS::NetsysNative::DhcpResultParcel> ptr =
-        (std::make_unique<OHOS::NetsysNative::DhcpResultParcel>()).release();
+    sptr<OHOS::NetsysNative::DhcpResultParcel> ptr = new (std::nothrow) OHOS::NetsysNative::DhcpResultParcel();
     ptr->iface_ = iface;
     ptr->ipAddr_ = result.strYourCli;
     ptr->gateWay_ = result.strServer;

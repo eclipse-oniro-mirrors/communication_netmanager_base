@@ -555,7 +555,7 @@ int32_t NetConnServiceStub::OnGetConnectionProperties(MessageParcel &data, Messa
         return ERR_FLATTEN_OBJECT;
     }
     if (ret == ERR_NONE) {
-        sptr<NetLinkInfo> netLinkInfo_ptr = (std::make_unique<NetLinkInfo>(info)).release();
+        sptr<NetLinkInfo> netLinkInfo_ptr = new (std::nothrow) NetLinkInfo(info);
         if (!NetLinkInfo::Marshalling(reply, netLinkInfo_ptr)) {
             NETMGR_LOG_E("proxy Marshalling failed");
             return ERR_FLATTEN_OBJECT;

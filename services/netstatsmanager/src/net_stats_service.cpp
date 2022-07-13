@@ -34,8 +34,8 @@ const bool REGISTER_LOCAL_RESULT =
 NetStatsService::NetStatsService()
     : SystemAbility(COMM_NET_STATS_MANAGER_SYS_ABILITY_ID, true), registerToService_(false), state_(STATE_STOPPED)
 {
-    netStatsCsv_.reset(std::make_unique<NetStatsCsv>().release());
-    netStatsCallback_ = (std::make_unique<NetStatsCallback>()).release();
+    netStatsCsv_ = std::make_unique<NetStatsCsv>();
+    netStatsCallback_ = new (std::nothrow) NetStatsCallback();
 }
 
 NetStatsService::~NetStatsService() {}
@@ -120,7 +120,7 @@ bool NetStatsService::Init()
         NETMGR_LOG_E("update uid_stats.csv failed");
         return false;
     }
-    serviceIface_ = (std::make_unique<NetStatsServiceIface>()).release();
+    serviceIface_ = new (std::nothrow) NetStatsServiceIface();
     NetManagerCenter::GetInstance().RegisterStatsService(serviceIface_);
     return true;
 }

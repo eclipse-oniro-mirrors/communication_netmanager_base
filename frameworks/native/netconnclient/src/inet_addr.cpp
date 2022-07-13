@@ -60,7 +60,7 @@ bool INetAddr::Marshalling(Parcel &parcel) const
 
 sptr<INetAddr> INetAddr::Unmarshalling(Parcel &parcel)
 {
-    sptr<INetAddr> ptr = (std::make_unique<INetAddr>()).release();
+    sptr<INetAddr> ptr = new (std::nothrow) INetAddr();
     if (ptr == nullptr) {
         NETMGR_LOG_E("create INetAddr failed");
         return nullptr;

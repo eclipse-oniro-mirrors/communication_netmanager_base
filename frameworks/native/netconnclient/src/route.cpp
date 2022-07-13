@@ -60,7 +60,7 @@ bool Route::Marshalling(Parcel &parcel) const
 
 sptr<Route> Route::Unmarshalling(Parcel &parcel)
 {
-    sptr<Route> ptr = (std::make_unique<Route>()).release();
+    sptr<Route> ptr = new (std::nothrow) Route();
     if (ptr == nullptr) {
         NETMGR_LOG_E("make_unique<Route>() failed");
         return nullptr;

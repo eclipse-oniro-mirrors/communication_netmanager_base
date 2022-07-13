@@ -58,7 +58,7 @@ void NetStatsListener::OnReceiveEvent(const CommonEventData &data)
         NETMGR_LOG_I("usual.event.UID_REMOVED");
         uint32_t uid =
             static_cast<uint32_t>(std::stoi(data.GetWant().GetStringParam(EVENT_DATA_DELETED_UID_PARAM.c_str())));
-        sptr<NetStatsCsv> statsCsv = (std::make_unique<NetStatsCsv>()).release();
+        auto statsCsv = std::make_unique<NetStatsCsv>();
         statsCsv->DeleteUidStatsCsv(uid);
         NETMGR_LOG_I("Net Manager delete uid, uid:[%{public}d]", uid);
     }
