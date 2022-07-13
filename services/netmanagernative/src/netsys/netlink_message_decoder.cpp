@@ -43,6 +43,7 @@ namespace OHOS {
 namespace nmd {
 using namespace NetlinkDefine;
 using namespace OHOS::NetManagerStandard::CommonUtils;
+namespace {
 constexpr int16_t LOCAL_QLOG_NL_EVENT = 112;
 constexpr int16_t LOCAL_NFLOG_PACKET = NFNL_SUBSYS_ULOG << 8 | NFULNL_MSG_PACKET;
 
@@ -64,7 +65,7 @@ constexpr int32_t OPT_RDNSS = 25;
 constexpr int32_t OPT_DNSSL = 31;
 constexpr int32_t OPT_CAPTIVE_PORTAL = 37;
 constexpr int32_t OPT_PREF64 = 38;
-
+} // namespace
 struct nd_opt_rdnss {
     u_int8_t nd_opt_rdnss_type;
     u_int8_t nd_opt_rdnss_len;
@@ -149,7 +150,7 @@ static bool MaybeLogDuplicateAttribute(bool isDup, const char *attributeName, co
 
 bool NetlinkMessageDecoder::ParseIfInfoMessage(const nlmsghdr *nh)
 {
-    ifinfomsg *ifi = (ifinfomsg *)NLMSG_DATA(nh);
+    ifinfomsg *ifi = reinterpret_cast<ifinfomsg *> (NLMSG_DATA(nh));
     if (!CheckRtNetlinkLength(nh, sizeof(*ifi))) {
         return false;
     }
@@ -165,7 +166,7 @@ bool NetlinkMessageDecoder::ParseIfInfoMessage(const nlmsghdr *nh)
         }
         switch (rta->rta_type) {
             case IFLA_IFNAME:
-                params_[INDEX_ZERO] = "INTERFACE=" + std::string((char *)RTA_DATA(rta));
+                params_[INDEX_ZERO] = "INTERFACE=" + std::string(reinterpret_cast<char *>RTA_DATA(rta));
                 params_[INDEX_ONE] = "IFINDEX=" + std::to_string(ifi->ifi_index);
                 action_ = (ifi->ifi_flags & IFF_LOWER_UP) ? Action::LINKUP : Action::LINKDOWN;
                 subSystem_ = "net";
@@ -179,7 +180,7 @@ bool NetlinkMessageDecoder::ParseIfInfoMessage(const nlmsghdr *nh)
 
 bool NetlinkMessageDecoder::ParseIfAddrMessage(const nlmsghdr *nh)
 {
-    ifaddrmsg *ifaddr = (ifaddrmsg *)NLMSG_DATA(nh);
+    ifaddrmsg *ifaddr = reinterpret_cast<ifaddrmsg *>(NLMSG_DATA(nh));
     ifa_cacheinfo *cacheinfo = nullptr;
     char addrstr[INET6_ADDRSTRLEN] = "";
     char ifname[IFNAMSIZ] = "";
@@ -215,9 +216,9 @@ bool NetlinkMessageDecoder::ParseIfAddrMessage(const nlmsghdr *nh)
                                sizeof(*cacheinfo), msgtype);
                 continue;
             }
-            cacheinfo = (ifa_cacheinfo *)RTA_DATA(rta);
+            cacheinfo = reinterpret_cast<ifa_cacheinfo *>(RTA_DATA(rta));
         } else if (rta->rta_type == IFA_FLAGS) {
-            flags = *(uint32_t *)RTA_DATA(rta);
+            flags = *(reinterpret_cast<uint32_t *>(RTA_DATA(rta)));
         }
     }
     if (addrstr[INDEX_ZERO] == '\0') {
@@ -253,14 +254,14 @@ bool NetlinkMessageDecoder::ProcessIFAddress(ifaddrmsg *ifaddr, char *addrstr, s
         return false;
     }
     if (ifaddr->ifa_family == AF_INET) {
-        in_addr *addr4 = (in_addr *)RTA_DATA(rta);
+        in_addr *addr4 = reinterpret_cast<in_addr *>(RTA_DATA(rta));
         if (RTA_PAYLOAD(rta) < sizeof(*addr4)) {
             NETNATIVE_LOGE("Short IPv4 address (%{public}zu bytes) in %{public}s", RTA_PAYLOAD(rta), msgtype);
             return false;
         }
         inet_ntop(AF_INET, addr4, addrstr, len);
     } else if (ifaddr->ifa_family == AF_INET6) {
-        in6_addr *addr6 = (in6_addr *)RTA_DATA(rta);
+        in6_addr *addr6 = reinterpret_cast<in6_addr *>(RTA_DATA(rta));
         if (RTA_PAYLOAD(rta) < sizeof(*addr6)) {
             NETNATIVE_LOGE("Short IPv6 address (%{public}zu bytes) in %{public}s", RTA_PAYLOAD(rta), msgtype);
             return false;
@@ -279,7 +280,7 @@ bool NetlinkMessageDecoder::ProcessIFAddress(ifaddrmsg *ifaddr, char *addrstr, s
 bool NetlinkMessageDecoder::ParseUlogPacketMessage(const nlmsghdr *nh)
 {
     std::string devname;
-    ulog_packet_msg_t *pm = (ulog_packet_msg_t *)NLMSG_DATA(nh);
+    ulog_packet_msg_t *pm = reinterpret_cast<ulog_packet_msg_t *>(NLMSG_DATA(nh));
     if (!CheckRtNetlinkLength(nh, sizeof(*pm))) {
         return false;
     }
@@ -310,7 +311,7 @@ bool NetlinkMessageDecoder::ParseNfPacketMessage(nlmsghdr *nh)
 {
     int32_t uid = -1;
     int32_t len = 0;
-    char *raw = nullptr;
+    const char *raw = nullptr;
 
     nlattr *uid_attr = FindNlAttr(nh, sizeof(genlmsghdr), NFULA_UID);
     if (uid_attr) {
@@ -322,16 +323,16 @@ bool NetlinkMessageDecoder::ParseNfPacketMessage(nlmsghdr *nh)
         if (len > LEN_MAX) {
             len = LEN_MAX;
         }
-        raw = (char *)NlAttrData(payload);
+        raw = reinterpret_cast<const char *>(NlAttrData(payload));
     }
     size_t hexSize = HEX_OFFSET_FIVE + (len * HEX_MULTIPLE);
     static const char *HEX_PREFIX = "HEX=";
-    char *hex = (char *)calloc(HEX_ALLOC_NUM, hexSize);
+    char *hex = reinterpret_cast<char *>(calloc(HEX_ALLOC_NUM, hexSize));
     if (hex == nullptr) {
         return false;
     }
     strcpy_s(hex, strlen(HEX_PREFIX), HEX_PREFIX);
-    for (int32_t i = 0; i < len; i++) {
+    for (uint32_t i = 0; i < len; i++) {
         hex[HEX_OFFSET_FIVE + (i * HEX_MULTIPLE)] = "0123456789abcdef"[(raw[i] >> HEX_OFFSET_FOUR) & 0xf];
         hex[HEX_OFFSET_FIVE + (i * HEX_MULTIPLE)] = "0123456789abcdef"[raw[i] & 0xf];
     }
@@ -382,7 +383,7 @@ bool NetlinkMessageDecoder::ParseRtMessage(const nlmsghdr *nh)
                 if (MaybeLogDuplicateAttribute(*dev, "RTA_OIF", msgname)) {
                     continue;
                 }
-                if (!if_indextoname(*(int32_t *)RTA_DATA(rta), dev)) {
+                if (!if_indextoname(*(reinterpret_cast<int32_t *>(RTA_DATA(rta))), dev)) {
                     return false;
                 }
                 continue;
@@ -425,7 +426,7 @@ rtmsg *NetlinkMessageDecoder::CheckRtParam(const nlmsghdr *nh, uint8_t type)
         return nullptr;
     }
 
-    rtmsg *rtm = (rtmsg *)NLMSG_DATA(nh);
+    rtmsg *rtm = reinterpret_cast<rtmsg *>(NLMSG_DATA(nh));
     if (!CheckRtNetlinkLength(nh, sizeof(*rtm))) {
         return nullptr;
     }
@@ -442,7 +443,7 @@ rtmsg *NetlinkMessageDecoder::CheckRtParam(const nlmsghdr *nh, uint8_t type)
  * Parse a RTM_NEWNDUSEROPT message.
  */
 
-bool NetlinkMessageDecoder::ParseNdOptRnss(const nd_opt_hdr *opthdr, const char *ifname)
+bool NetlinkMessageDecoder::ParseNdOptRnss(nd_opt_hdr *opthdr, const char *ifname)
 {
     uint16_t optlen = opthdr->nd_opt_len;
     if ((optlen < OPT_MAX) || !(optlen & OPT_OFFSET)) {
@@ -451,7 +452,7 @@ bool NetlinkMessageDecoder::ParseNdOptRnss(const nd_opt_hdr *opthdr, const char 
     }
     const int32_t numaddrs = (optlen - ADDR_OFFSET) / ADDR_SITE;
     // Find the lifetime.
-    nd_opt_rdnss *rndss_opt = (nd_opt_rdnss *)opthdr;
+    nd_opt_rdnss *rndss_opt = reinterpret_cast<nd_opt_rdnss *>(opthdr);
     const uint32_t lifetime = ntohl(rndss_opt->nd_opt_rdnss_lifetime);
     // Create a buffer to hold the message.
     static const size_t kMaxSingleAddressLength = INET6_ADDRSTRLEN + strlen("%") + IFNAMSIZ + strlen(",");
@@ -459,7 +460,7 @@ bool NetlinkMessageDecoder::ParseNdOptRnss(const nd_opt_hdr *opthdr, const char 
     auto buf = std::make_unique<char[]>(bufsize);
     memset_s(buf.get(), bufsize, 0, bufsize);
 
-    in6_addr *addrs = (in6_addr *)(rndss_opt + ADDR_OFFSET);
+    in6_addr *addrs = reinterpret_cast<in6_addr *>(rndss_opt + ADDR_OFFSET);
     size_t pos = 0;
     for (int32_t i = 0; i < numaddrs; i++) {
         if (i > 0) {
@@ -481,7 +482,7 @@ bool NetlinkMessageDecoder::ParseNdOptRnss(const nd_opt_hdr *opthdr, const char 
 
 bool NetlinkMessageDecoder::ParseNdUserOptMessage(const nlmsghdr *nh)
 {
-    nduseroptmsg *msg = (nduseroptmsg *)NLMSG_DATA(nh);
+    nduseroptmsg *msg = reinterpret_cast<nduseroptmsg *>(NLMSG_DATA(nh));
     if (!CheckRtNetlinkLength(nh, sizeof(*msg))) {
         return false;
     }
@@ -513,7 +514,7 @@ bool NetlinkMessageDecoder::ParseNdUserOptMessage(const nlmsghdr *nh)
     }
 
     // Kernel will send the message with the following options: type, length,
-    nd_opt_hdr *opthdr = (nd_opt_hdr *)(msg + 1);
+    nd_opt_hdr *opthdr = reinterpret_cast<nd_opt_hdr *>(msg + 1);
 
     // The first option should be the source link-layer address option.
     uint16_t optlen = opthdr->nd_opt_len;
@@ -544,11 +545,11 @@ bool NetlinkMessageDecoder::ParseNdUserOptMessage(const nlmsghdr *nh)
     return true;
 }
 
-bool NetlinkMessageDecoder::ParseBinaryNetlinkMessage(const char *buffer, int32_t size)
+bool NetlinkMessageDecoder::ParseBinaryNetlinkMessage(char *buffer, int32_t size)
 {
     nlmsghdr *nh = nullptr;
     bool result = false;
-    for (nh = (nlmsghdr *)buffer; NLMSG_OK(nh, (unsigned)size) && (nh->nlmsg_type != NLMSG_DONE);
+    for (nh = reinterpret_cast<nlmsghdr *>(buffer); NLMSG_OK(nh, (unsigned)size) && (nh->nlmsg_type != NLMSG_DONE);
          nh = NLMSG_NEXT(nh, size)) {
         if (!RtMessageName(nh->nlmsg_type)) {
             NETNATIVE_LOG_D("Unexpected netlink message type %{public}d\n", nh->nlmsg_type);
@@ -669,7 +670,7 @@ const std::string NetlinkMessageDecoder::FindParam(const char *paramName)
     return "";
 }
 
-nlattr *NetlinkMessageDecoder::FindNlAttr(const nlmsghdr *nh, size_t hdrlen, uint16_t attr)
+nlattr *NetlinkMessageDecoder::FindNlAttr(nlmsghdr *nh, size_t hdrlen, uint16_t attr)
 {
     if (nh == nullptr || NLMSG_HDRLEN + NLMSG_ALIGN(hdrlen) > SSIZE_MAX) {
         return nullptr;
@@ -677,10 +678,10 @@ nlattr *NetlinkMessageDecoder::FindNlAttr(const nlmsghdr *nh, size_t hdrlen, uin
 
     const ssize_t NLA_START = NLMSG_HDRLEN + NLMSG_ALIGN(hdrlen);
     ssize_t left = nh->nlmsg_len - NLA_START;
-    uint8_t *hdr = ((uint8_t *)nh) + NLA_START;
+    uint8_t *hdr = (reinterpret_cast<uint8_t *>(nh)) + NLA_START;
 
     while (left >= NLA_HDRLEN) {
-        nlattr *nla = (nlattr *)hdr;
+        nlattr *nla = reinterpret_cast<nlattr *>(hdr);
         if (nla->nla_type == attr) {
             return nla;
         }
