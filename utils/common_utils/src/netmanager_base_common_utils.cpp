@@ -40,15 +40,16 @@ std::vector<std::string> Split(const std::string &str, const std::string &sep)
 
 std::string Strip(const std::string &str, char ch)
 {
+    auto size = static_cast<int64_t>(str.size());
     int64_t i = 0;
-    while (i < str.size() && str[i] == ch) {
+    while (i < size && str[i] == ch) {
         ++i;
     }
-    int64_t j = static_cast<int64_t>(str.size()) - 1;
+    int64_t j = size - 1;
     while (j > 0 && str[j] == ch) {
         --j;
     }
-    if (i >= 0 && i < str.size() && j >= 0 && j < str.size() && j - i + 1 > 0) {
+    if (i >= 0 && i < size && j >= 0 && j < size && j - i + 1 > 0) {
         return str.substr(i, j - i + 1);
     }
     return "";
@@ -67,7 +68,7 @@ bool IsValidIPV4(const std::string &ip)
         return false;
     }
     struct in_addr s;
-    int32_t result = inet_pton(AF_INET, ip.c_str(), reinterpret_cast<void*>(&s));
+    int32_t result = inet_pton(AF_INET, ip.c_str(), reinterpret_cast<void *>(&s));
     if (result == INET_PTION_SUC) {
         return true;
     }
@@ -80,7 +81,7 @@ bool IsValidIPV6(const std::string &ip)
         return false;
     }
     struct in6_addr s;
-    int32_t result = inet_pton(AF_INET6, ip.c_str(), reinterpret_cast<void*>(&s));
+    int32_t result = inet_pton(AF_INET6, ip.c_str(), reinterpret_cast<void *>(&s));
     if (result == INET_PTION_SUC) {
         return true;
     }
