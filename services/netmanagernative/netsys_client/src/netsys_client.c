@@ -170,13 +170,15 @@ int32_t NetSysGetResolvConf(uint16_t netId, struct ResolvConfig *config)
     int sockFd = CreateConnectionToNetSys();
     if (sockFd < 0) {
         DNS_CONFIG_PRINT("NetSysGetResolvConf CreateConnectionToNetSys connect to netsys err: %d", errno);
-        return sockFd;
+        NetsysGetDefaultConfig(config);
+        return 0;
     }
 
     int32_t err = NetSysGetResolvConfInternal(sockFd, netId, config);
     if (err < 0) {
         DNS_CONFIG_PRINT("NetSysGetResolvConf NetSysGetResolvConfInternal err: %d", errno);
-        return err;
+        NetsysGetDefaultConfig(config);
+        return 0;
     }
 
     DNS_CONFIG_PRINT("GetResolvConfFromNetsys end");
