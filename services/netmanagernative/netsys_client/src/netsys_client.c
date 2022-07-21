@@ -22,6 +22,20 @@
 extern "C" {
 #endif
 
+void MakeDefaultDnsServer(char *server, size_t length)
+{
+    int ret = memset_s(server, length, 0, DEFAULT_SERVER_LENTH);
+    if (ret < 0) {
+        DNS_CONFIG_PRINT("MakeDefaultDnsServer failed");
+        return;
+    }
+    ret = sprintf_s(server, length, "%d.%d.%d.%d", DEFAULT_SERVER_NAME, DEFAULT_SERVER_NAME, DEFAULT_SERVER_NAME,
+                    DEFAULT_SERVER_NAME);
+    if (ret < 0) {
+        DNS_CONFIG_PRINT("MakeDefaultDnsServer failed");
+    }
+}
+
 static inline uint32_t Min(uint32_t a, uint32_t b)
 {
     return a < b ? a : b;
@@ -123,9 +137,7 @@ static void NetsysGetDefaultConfig(struct ResolvConfig *config)
     }
     config->timeoutMs = DEFAULT_TIMEOUT;
     config->retryCount = DEFAULT_RETRY;
-    if (strcpy_s(config->nameservers[0], sizeof(config->nameservers[0]), DEFAULT_SERVER) <= 0) {
-        DNS_CONFIG_PRINT("NetsysGetDefaultConfig strcpy_s failed");
-    }
+    MakeDefaultDnsServer(config->nameservers[0], MAX_SERVER_LENGTH + 1);
 }
 
 static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct ResolvConfig *config) //

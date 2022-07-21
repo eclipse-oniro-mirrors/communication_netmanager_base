@@ -38,6 +38,20 @@
 namespace OHOS::nmd {
 static constexpr const uint32_t MAX_LISTEN_NUM = 1024;
 
+void MakeDefaultDnsServer(char *server, size_t length)
+{
+    int ret = memset_s(server, length, 0, DEFAULT_SERVER_LENTH);
+    if (ret < 0) {
+        DNS_CONFIG_PRINT("MakeDefaultDnsServer failed");
+        return;
+    }
+    ret = sprintf_s(server, length, "%d.%d.%d.%d", DEFAULT_SERVER_NAME, DEFAULT_SERVER_NAME, DEFAULT_SERVER_NAME,
+                    DEFAULT_SERVER_NAME);
+    if (ret < 0) {
+        DNS_CONFIG_PRINT("MakeDefaultDnsServer failed");
+    }
+}
+
 DnsResolvListen::DnsResolvListen() : serverSockFd_(-1)
 {
     NETNATIVE_LOGE("DnsResolvListen start");
@@ -66,9 +80,7 @@ void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint32_t netId)
     if (status < 0) {
         sendData.retryCount = retryCount;
         sendData.timeoutMs = baseTimeoutMsec;
-        if (strcpy_s(sendData.nameservers[0], sizeof(sendData.nameservers[0]), DEFAULT_SERVER) <= 0) {
-            DNS_CONFIG_PRINT("ProcGetConfigCommand strcpy_s failed");
-        }
+        MakeDefaultDnsServer(sendData.nameservers[0], MAX_SERVER_LENGTH + 1);
     } else {
         sendData.retryCount = retryCount;
         sendData.timeoutMs = baseTimeoutMsec;
