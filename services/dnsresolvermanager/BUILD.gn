@@ -38,11 +38,11 @@ ohos_shared_library("dns_resolver_manager") {
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
     "ability_base:want",
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",

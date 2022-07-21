@@ -44,10 +44,10 @@ common_deps = [
   "//foundation/arkui/napi/:ace_napi",
   "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
   "//third_party/libuv:uv_static",
-  "//utils/native/base:utils",
 ]
 
 common_external_deps = [
+  "c_utils:utils",
   "hiviewdfx_hilog_native:libhilog",
   "ipc:ipc_core",
 ]

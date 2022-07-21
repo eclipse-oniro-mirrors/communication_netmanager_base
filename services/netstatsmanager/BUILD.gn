@@ -42,11 +42,11 @@ ohos_shared_library("net_stats_manager") {
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
     "ability_base:want",
+    "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "ipc:ipc_core",
