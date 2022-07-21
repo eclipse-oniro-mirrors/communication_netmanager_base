@@ -20,8 +20,6 @@
 #include <netdb.h>
 #include <stdint.h>
 
-#include "securec.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
