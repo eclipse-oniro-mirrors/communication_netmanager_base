@@ -46,7 +46,7 @@ ohos_shared_library("netsys_controller") {
     "bundle_framework:appexecfwk_core",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 
   defines = [

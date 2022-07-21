@@ -28,7 +28,7 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "$INNERKITS_ROOT/netconnclient/include/proxy",
     "$NETCONNMANAGER_SOURCE_DIR/include/stub",
     "$NETCONNMANAGER_SOURCE_DIR/include",
-    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy/include",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
     "$NETMANAGERNATIVE_ROOT/net_mgr_native/include",
     "$NETMANAGERNATIVE_ROOT/common/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
@@ -63,8 +63,8 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "ipc:ipc_core",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 }
 

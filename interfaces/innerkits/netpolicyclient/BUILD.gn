@@ -77,7 +77,7 @@ ohos_shared_library("net_policy_manager_if") {
   external_deps = [
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 
   defines = [

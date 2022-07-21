@@ -38,7 +38,7 @@ ohos_executable("test_netsys_native_manager") {
     "ability_base:want",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 
   defines = [
