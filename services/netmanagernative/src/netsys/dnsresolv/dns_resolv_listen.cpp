@@ -57,18 +57,14 @@ void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint32_t netId)
     ResolvConfig sendData = {0};
     std::vector<std::string> servers;
     std::vector<std::string> domains;
-    uint16_t baseTimeoutMsec;
-    uint8_t retryCount;
+    uint16_t baseTimeoutMsec = DEFAULT_TIMEOUT;
+    uint8_t retryCount = DEFAULT_RETRY;
 
     auto status = DelayedSingleton<DnsParamCache>::GetInstance()->GetResolverConfig(
         static_cast<uint16_t>(netId), servers, domains, baseTimeoutMsec, retryCount);
     DNS_CONFIG_PRINT("GetResolverConfig status: %{public}d", status);
     if (status < 0) {
-        sendData.retryCount = retryCount;
-        sendData.timeoutMs = baseTimeoutMsec;
-        if (strcpy_s(sendData.nameservers[0], sizeof(sendData.nameservers[0]), DEFAULT_SERVER) <= 0) {
-            DNS_CONFIG_PRINT("ProcGetConfigCommand strcpy_s failed");
-        }
+        sendData.error = status;
     } else {
         sendData.retryCount = retryCount;
         sendData.timeoutMs = baseTimeoutMsec;
