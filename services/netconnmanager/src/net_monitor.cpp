@@ -18,6 +18,18 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+static std::string MakeDefaultNetDetectionUrl()
+{
+    std::string url = "http";
+    url += "://";
+    url += "connectivitycheck";
+    url += ".platform";
+    url += ".hicloud";
+    url += ".com/";
+    url += "generate_204";
+    return url;
+}
+
 NetMonitor::NetMonitor(NetDetectionStateHandler handle)
 {
     isExitNetMonitorThread_ = false;
@@ -38,7 +50,7 @@ bool NetMonitor::HttpDetection()
     HttpRequest httpRequest;
     httpRequest.SetIfaceName(ifaceName_);
 
-    std::string httpMsg(DEFAULT_PORTAL_HTTPS_URL);
+    std::string httpMsg = MakeDefaultNetDetectionUrl();
     std::string httpHeader;
     int32_t ret = httpRequest.HttpGetHeader(httpMsg, httpHeader);
     std::string urlRedirect;
@@ -51,7 +63,7 @@ bool NetMonitor::HttpDetection()
     int32_t retCode = GetUrlRedirectFromResponse(httpHeader, urlRedirect);
     int32_t statusCode = GetStatusCodeFromResponse(httpHeader);
     NETMGR_LOG_D("ifaceName[%{public}s], statusCode[%{public}d], retCode[%{public}d]", ifaceName_.c_str(), statusCode,
-        retCode);
+                 retCode);
     bool isNotPortal = true;
     if ((statusCode == OK || (statusCode >= BAD_REQUEST && statusCode <= CLIENT_ERROR_MAX)) &&
         retCode > PORTAL_CONTENT_LENGTH_MIN) {

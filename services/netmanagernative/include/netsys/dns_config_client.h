@@ -20,6 +20,8 @@
 #include <netdb.h>
 #include <stdint.h>
 
+#include "securec.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -39,11 +41,27 @@ extern "C" {
 #define MAX_CANON_NAME 256
 #define MAX_HOST_NAME_LEN 256
 #define MAX_KEY_LENGTH (MAX_HOST_NAME_LEN + 1 + MAX_SERVER_LENGTH + 1 + sizeof(uint32_t) * 4 + 3 + 1)
-#define DEFAULT_SERVER "114.114.114.114"
 #define DEFAULT_TIMEOUT 5000
 #define DEFAULT_RETRY 2
+#define DEFAULT_SERVER_LENTH 16
+#define DEFAULT_SERVER_NAME 114
 
 enum CommandType { GET_CONFIG = 1, GET_CACHE = 2, SET_CACHE = 3 };
+
+void MakeDefaultDnsServer(char *server, size_t length)
+{
+    int ret = memset_s(server, length, 0, DEFAULT_SERVER_LENTH);
+    if (ret < 0) {
+        DNS_CONFIG_PRINT("MakeDefaultDnsServer failed");
+        return;
+    }
+
+    ret = sprintf_s(server, length, "%d.%d.%d.%d", DEFAULT_SERVER_NAME, DEFAULT_SERVER_NAME, DEFAULT_SERVER_NAME,
+                    DEFAULT_SERVER_NAME);
+    if (ret < 0) {
+        DNS_CONFIG_PRINT("MakeDefaultDnsServer failed");
+    }
+}
 
 struct RequestInfo {
     uint32_t command;
