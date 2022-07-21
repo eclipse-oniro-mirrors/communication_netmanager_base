@@ -48,21 +48,6 @@ extern "C" {
 
 enum CommandType { GET_CONFIG = 1, GET_CACHE = 2, SET_CACHE = 3 };
 
-void MakeDefaultDnsServer(char *server, size_t length)
-{
-    int ret = memset_s(server, length, 0, DEFAULT_SERVER_LENTH);
-    if (ret < 0) {
-        DNS_CONFIG_PRINT("MakeDefaultDnsServer failed");
-        return;
-    }
-
-    ret = sprintf_s(server, length, "%d.%d.%d.%d", DEFAULT_SERVER_NAME, DEFAULT_SERVER_NAME, DEFAULT_SERVER_NAME,
-                    DEFAULT_SERVER_NAME);
-    if (ret < 0) {
-        DNS_CONFIG_PRINT("MakeDefaultDnsServer failed");
-    }
-}
-
 struct RequestInfo {
     uint32_t command;
     uint32_t netId;
