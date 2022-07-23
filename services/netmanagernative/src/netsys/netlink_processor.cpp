@@ -195,7 +195,7 @@ void NetlinkProcessor::HandleSubSysIdLetimer(const std::shared_ptr<NetlinkMessag
         bool isActive = !(state == "active");
         int64_t processTimestamp = timestamp.empty() ? 0 : std::strtoll(timestamp.c_str(), nullptr, DECIMALISM);
         int32_t intLabel;
-        if (ParseInt(label.c_str(), &intLabel)) {
+        if (ParseInt(label, &intLabel)) {
             const int32_t reportedUid = (!uid.empty() && isActive) ? ConvertToInt64(uid) : -1;
             OnInterfaceClassActivityChange(intLabel, isActive, processTimestamp, reportedUid);
         }

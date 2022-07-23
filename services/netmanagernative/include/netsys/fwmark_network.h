@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_FWMARK_NETWORK_H__
-#define INCLUDE_FWMARK_NETWORK_H__
+#ifndef INCLUDE_FWMARK_NETWORK_H
+#define INCLUDE_FWMARK_NETWORK_H
 
 #include <cstdint>
 
@@ -30,4 +30,4 @@ private:
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // INCLUDE_FWMARK_NETWORK_H__
+#endif // INCLUDE_FWMARK_NETWORK_H

@@ -156,13 +156,12 @@ void NetlinkNativeListener::RunListener()
             fds.push_back(pfd);
         }
         lock.unlock();
-        int32_t rc = TEMP_FAILURE_RETRY(poll(fds.data(), fds.size(), -1));
-        if (rc < 0) {
+        if (TEMP_FAILURE_RETRY(poll(fds.data(), fds.size(), -1)) < 0) {
             sleep(1);
             continue;
         }
 
-        if (fds[0].revents & (POLLIN | POLLERR)) {
+        if (static_cast<uint32_t>(fds[0].revents) & (POLLIN | POLLERR)) {
             char ctlp = CTRLPIPE_SHUTDOWN;
             TEMP_FAILURE_RETRY(read(ctrlPipe_[0], &ctlp, 1));
             if (ctlp == CTRLPIPE_SHUTDOWN) {
@@ -170,17 +169,15 @@ void NetlinkNativeListener::RunListener()
             }
             continue;
         }
-        if (listen_ && (fds[1].revents & (POLLIN | POLLERR))) {
+        lock.lock();
+        if (listen_ && (static_cast<uint32_t>(fds[1].revents) & (POLLIN | POLLERR))) {
             int32_t clientfd = TEMP_FAILURE_RETRY(accept4(socket_, nullptr, nullptr, SOCK_CLOEXEC));
             if (clientfd < 0) {
                 sleep(1);
                 continue;
             }
-            lock.lock();
             socketClients_[clientfd] = std::make_unique<SocketClient>(clientfd, true, useCmdNum_);
-            lock.unlock();
         }
-        lock.lock();
         ProcessMessage(fds);
         lock.unlock();
     }
@@ -189,10 +186,10 @@ void NetlinkNativeListener::RunListener()
 void NetlinkNativeListener::ProcessMessage(const std::vector<pollfd> &fds)
 {
     std::vector<SocketClient *> pending;
-    const int32_t size = fds.size();
-    for (int32_t i = listen_ ? 2 : 1; i < size; ++i) {
+    const size_t size = fds.size();
+    for (size_t i = listen_ ? 2 : 1; i < size; ++i) {
         const pollfd &pfd = fds[i];
-        if (pfd.revents & (POLLIN | POLLERR)) {
+        if (static_cast<uint32_t>(pfd.revents) & (POLLIN | POLLERR)) {
             auto it = socketClients_.find(pfd.fd);
             if (it == socketClients_.end()) {
                 NETNATIVE_LOGE("fd vanished: %{public}d", pfd.fd);

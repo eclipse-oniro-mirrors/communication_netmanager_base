@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_ROUTE_MANAGER_H__
-#define INCLUDE_ROUTE_MANAGER_H__
+#ifndef INCLUDE_ROUTE_MANAGER_H
+#define INCLUDE_ROUTE_MANAGER_H
 
 #include <map>
 #include <netinet/in.h>
@@ -248,4 +248,4 @@ private:
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // !INCLUDE_ROUTE_MANAGER_H__
+#endif // !INCLUDE_ROUTE_MANAGER_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,21 +19,11 @@
 
 #include "dns_config_client.h"
 #include "dns_param_cache.h"
-#include "netnative_log_wrapper.h"
 #include "netsys_client.h"
 #include "securec.h"
 #include "singleton.h"
 
 #include "dns_resolv_listen.h"
-
-#if DNS_CONFIG_DEBUG
-#ifdef DNS_CONFIG_PRINT
-#undef DNS_CONFIG_PRINT
-#endif
-#define DNS_CONFIG_PRINT(fmt, ...) NETNATIVE_LOGI("DNS" fmt, ##__VA_ARGS__)
-#else
-#define DNS_CONFIG_PRINT(fmt, ...)
-#endif
 
 namespace OHOS::nmd {
 static constexpr const uint32_t MAX_LISTEN_NUM = 1024;
@@ -64,7 +54,11 @@ void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint32_t netId)
         static_cast<uint16_t>(netId), servers, domains, baseTimeoutMsec, retryCount);
     DNS_CONFIG_PRINT("GetResolverConfig status: %{public}d", status);
     if (status < 0) {
-        sendData.error = status;
+        sendData.retryCount = retryCount;
+        sendData.timeoutMs = baseTimeoutMsec;
+        if (strcpy_s(sendData.nameservers[0], sizeof(sendData.nameservers[0]), DEFAULT_SERVER) <= 0) {
+            DNS_CONFIG_PRINT("ProcGetConfigCommand strcpy_s failed");
+        }
     } else {
         sendData.retryCount = retryCount;
         sendData.timeoutMs = baseTimeoutMsec;
@@ -83,26 +77,37 @@ void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint32_t netId)
     DNS_CONFIG_PRINT("ProcGetConfigCommand end");
 }
 
-void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint32_t netId)
+int32_t DnsResolvListen::ProcGetKeyForCache(int clientSockFd, char *name)
 {
-    DNS_CONFIG_PRINT("ProcGetCacheCommand");
+    DNS_CONFIG_PRINT("ProcGetKeyForCache");
     uint32_t nameLen = 0;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&nameLen), sizeof(nameLen))) {
         DNS_CONFIG_PRINT("read errno %{public}d", errno);
         close(clientSockFd);
-        return;
+        return -1;
     }
 
     if (nameLen > MAX_HOST_NAME_LEN) {
         DNS_CONFIG_PRINT("MAX_HOST_NAME_LEN is %{public}u, but get %{public}u", MAX_HOST_NAME_LEN, nameLen);
         close(clientSockFd);
-        return;
+        return -1;
     }
 
-    char name[MAX_HOST_NAME_LEN] = {0};
     if (!PollRecvData(clientSockFd, name, nameLen)) {
         DNS_CONFIG_PRINT("read errno %{public}d", errno);
         close(clientSockFd);
+        return -1;
+    }
+    DNS_CONFIG_PRINT("ProcGetKeyForCache end");
+    return 0;
+}
+
+void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint32_t netId)
+{
+    DNS_CONFIG_PRINT("ProcGetCacheCommand");
+    char name[MAX_HOST_NAME_LEN] = {0};
+    int32_t res = ProcGetKeyForCache(clientSockFd, name);
+    if (res < 0) {
         return;
     }
 
@@ -133,23 +138,9 @@ void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint32_t netId)
 void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint32_t netId)
 {
     DNS_CONFIG_PRINT("ProcSetCacheCommand");
-    uint32_t nameLen = 0;
-    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&nameLen), sizeof(nameLen))) {
-        DNS_CONFIG_PRINT("read errno %{public}d", errno);
-        close(clientSockFd);
-        return;
-    }
-
-    if (nameLen > MAX_HOST_NAME_LEN) {
-        DNS_CONFIG_PRINT("MAX_HOST_NAME_LEN is %{public}u, but get %{public}u", MAX_HOST_NAME_LEN, nameLen);
-        close(clientSockFd);
-        return;
-    }
-
     char name[MAX_HOST_NAME_LEN] = {0};
-    if (!PollRecvData(clientSockFd, name, nameLen)) {
-        DNS_CONFIG_PRINT("read errno %{public}d", errno);
-        close(clientSockFd);
+    int32_t res = ProcGetKeyForCache(clientSockFd, name);
+    if (res < 0) {
         return;
     }
 
@@ -231,7 +222,7 @@ void DnsResolvListen::StartListen()
         return;
     }
 
-    int addrLen = offsetof(sockaddr_un, sun_path) + strlen(server_addr.sun_path) + 1;
+    uint32_t addrLen = offsetof(sockaddr_un, sun_path) + strlen(server_addr.sun_path) + 1;
     if (bind(serverSockFd_, (sockaddr *)&server_addr, addrLen) < 0) {
         NETNATIVE_LOGE("bind errno %{public}d", errno);
         close(serverSockFd_);

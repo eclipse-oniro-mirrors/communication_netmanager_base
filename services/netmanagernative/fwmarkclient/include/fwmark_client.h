@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_FWMARK_CLIENT_H__
-#define INCLUDE_FWMARK_CLIENT_H__
+#ifndef INCLUDE_FWMARK_CLIENT_H
+#define INCLUDE_FWMARK_CLIENT_H
 
 #include <cstdint>
 

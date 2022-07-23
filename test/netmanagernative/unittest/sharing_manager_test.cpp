@@ -25,7 +25,7 @@ using namespace testing::ext;
 using namespace nmd;
 
 namespace {
-const char *GetResult(char *res, const std::string &cmd, int size)
+const std::string GetResult(char *res, const std::string &cmd, int size)
 {
     FILE *fp = popen(cmd.c_str(), "r");
     char *result = fgets(res, size, fp);
@@ -86,7 +86,7 @@ HWTEST_F(UnitTestSharingManager, IpEnableForwarding, TestSize.Level1)
     char res[2];
     const std::string cmd = "/bin/cat /proc/sys/net/ipv4/ip_forward";
     const char *result = GetResult(res, cmd, 2);
-    ASSERT_STREQ(result, "1");
+    ASSERT_EQ(result, "1");
 }
 
 HWTEST_F(UnitTestSharingManager, IpDisableForwarding, TestSize.Level1)
@@ -96,7 +96,7 @@ HWTEST_F(UnitTestSharingManager, IpDisableForwarding, TestSize.Level1)
     char res[2];
     const std::string cmd = "/bin/cat /proc/sys/net/ipv4/ip_forward";
     const char *result = GetResult(res, cmd, 2);
-    ASSERT_STREQ(result, "0");
+    ASSERT_EQ(result, "0");
 }
 
 HWTEST_F(UnitTestSharingManager, EnableNat, TestSize.Level1)

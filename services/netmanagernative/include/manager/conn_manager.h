@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_CONN_MANAGER_H__
-#define INCLUDE_CONN_MANAGER_H__
+#ifndef INCLUDE_CONN_MANAGER_H
+#define INCLUDE_CONN_MANAGER_H
 
 #include <map>
 #include <set>
@@ -166,4 +166,4 @@ private:
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // INCLUDE_CONN_MANAGER_H__
+#endif // INCLUDE_CONN_MANAGER_H

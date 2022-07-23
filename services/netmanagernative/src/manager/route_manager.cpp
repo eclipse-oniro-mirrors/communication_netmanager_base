@@ -645,8 +645,8 @@ int32_t RouteManager::SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtm
         NETNATIVE_LOGE("dest parse failed:%{public}d", readAddrResult);
         return -1;
     }
-    msg.rtm_family = dst.family;
-    msg.rtm_dst_len = dst.prefixlen;
+    msg.rtm_family = static_cast<uint8_t>(dst.family);
+    msg.rtm_dst_len = static_cast<uint8_t>(dst.prefixlen);
     if (dst.family == AF_INET) {
         msg.rtm_scope = RT_SCOPE_LINK;
     } else if (dst.family == AF_INET6) {
@@ -660,7 +660,7 @@ int32_t RouteManager::SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtm
     }
     if (gw.bitlen != 0) {
         msg.rtm_scope = RT_SCOPE_UNIVERSE;
-        msg.rtm_family = gw.family;
+        msg.rtm_family = static_cast<uint8_t>(gw.family);
     }
 
     NetlinkMsg nlmsg(routeFlag, NETLINK_MAX_LEN, NetlinkManager::GetPid());

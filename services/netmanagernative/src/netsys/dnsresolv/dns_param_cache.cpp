@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,18 +15,7 @@
 
 #include <algorithm>
 
-#include "netnative_log_wrapper.h"
-
 #include "dns_param_cache.h"
-
-#if DNS_CONFIG_DEBUG
-#ifdef DNS_CONFIG_PRINT
-#undef DNS_CONFIG_PRINT
-#endif
-#define DNS_CONFIG_PRINT(fmt, ...) NETNATIVE_LOGI("DNS" fmt, ##__VA_ARGS__)
-#else
-#define DNS_CONFIG_PRINT(fmt, ...)
-#endif
 
 namespace OHOS::nmd {
 static constexpr const int RES_TIMEOUT = 5000;    // min. milliseconds between retries
@@ -97,7 +86,7 @@ int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMse
     return 0;
 }
 
-void DnsParamCache::SetDefaultNetwork(int netId)
+void DnsParamCache::SetDefaultNetwork(uint16_t netId)
 {
     defaultNetId_ = netId;
 }

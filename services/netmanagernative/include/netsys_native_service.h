@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NETSYS_NATIVE_SERVICE_H__
-#define NETSYS_NATIVE_SERVICE_H__
+#ifndef NETSYS_NATIVE_SERVICE_H
+#define NETSYS_NATIVE_SERVICE_H
 
 #include <mutex>
 
@@ -39,7 +39,7 @@ public:
     void OnStart() override;
     void OnStop() override;
 
-    int32_t SetResolverConfigParcel(const DnsResolverParamsParcel & resolvParams) override;
+    int32_t SetResolverConfigParcel(const DnsResolverParamsParcel &resolvParams) override;
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
         const std::vector<std::string> &servers, const std::vector<std::string> &domains) override;
     int32_t GetResolverConfig(const  uint16_t  netid,  std::vector<std::string> &servers,
@@ -116,4 +116,4 @@ private:
 };
 } // namespace NetsysNative
 } // namespace OHOS
-#endif // NETSYS_NATIVE_SERVICE_H__
+#endif // NETSYS_NATIVE_SERVICE_H

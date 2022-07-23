@@ -26,10 +26,10 @@ namespace OHOS {
 namespace nmd {
 class NetlinkManager {
 public:
-    static constexpr int32_t NFLOG_QUOTA_GROUP = 1;
-    static constexpr int32_t NETFILTER_STRICT_GROUP = 2;
-    static constexpr int32_t NFLOG_WAKEUP_GROUP = 3;
-    static constexpr int32_t UEVENT_GROUP = 0xffffffff;
+    static constexpr uint32_t NFLOG_QUOTA_GROUP = 1;
+    static constexpr uint32_t NETFILTER_STRICT_GROUP = 2;
+    static constexpr uint32_t NFLOG_WAKEUP_GROUP = 3;
+    static constexpr uint32_t UEVENT_GROUP = 0xffffffff;
 
     static int32_t GetPid()
     {
@@ -61,7 +61,7 @@ private:
     std::unique_ptr<NetlinkProcessor> strictProc_ = nullptr;
     std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> netlinkCallbacks_;
 
-    std::unique_ptr<NetlinkProcessor> SetSocket(int32_t &sock, int32_t netlinkType, int32_t groups, int32_t format,
+    std::unique_ptr<NetlinkProcessor> SetSocket(int32_t &sock, int32_t netlinkType, uint32_t groups, int32_t format,
                                                 bool configNflog);
 };
 } // namespace nmd
