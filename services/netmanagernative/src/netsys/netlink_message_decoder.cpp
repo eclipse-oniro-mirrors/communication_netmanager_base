@@ -66,23 +66,23 @@ constexpr int32_t OPT_DNSSL = 31;
 constexpr int32_t OPT_CAPTIVE_PORTAL = 37;
 constexpr int32_t OPT_PREF64 = 38;
 } // namespace
-struct nd_opt_rdnss {
-    u_int8_t nd_opt_rdnss_type;
-    u_int8_t nd_opt_rdnss_len;
-    u_int16_t nd_opt_rdnss_reserved;
-    u_int32_t nd_opt_rdnss_lifetime;
+struct NdOptRdnss {
+    u_int8_t ndOptRdnssType;
+    u_int8_t ndOptRdnssLen;
+    u_int16_t ndOptRdnssReserved;
+    u_int32_t ndOptRdnssLifetime;
 };
 
-struct ulog_packet_msg_t {
+struct UlogPacketMsgT {
     uint64_t mark;
-    int64_t timestamp_sec;
-    int64_t timestamp_usec;
+    int64_t timestampSec;
+    int64_t timestampUsec;
     uint32_t hook;
-    char indev_name[IFNAMSIZ];
-    char outdev_name[IFNAMSIZ];
-    size_t data_len;
+    char indevName[IFNAMSIZ];
+    char outdevName[IFNAMSIZ];
+    size_t dataLen;
     char prefix[ULOG_PREFIX_LEN];
-    uint8_t mac_len;
+    uint8_t macLen;
     uint8_t mac[ULOG_MAC_LEN];
     uint8_t payload[0];
 };
@@ -221,7 +221,7 @@ bool NetlinkMessageDecoder::ParseIfAddrMessage(const nlmsghdr *nh)
             flags = *(reinterpret_cast<uint32_t *>(RTA_DATA(rta)));
         }
     }
-    if (addrstr[INDEX_ZERO] == '\0') {
+    if (addrstr[0] == '\0') {
         NETNATIVE_LOGE("No IFA_ADDRESS in %{public}s\n", msgtype);
         return false;
     }
@@ -280,11 +280,11 @@ bool NetlinkMessageDecoder::ProcessIFAddress(ifaddrmsg *ifaddr, char *addrstr, s
 bool NetlinkMessageDecoder::ParseUlogPacketMessage(const nlmsghdr *nh)
 {
     std::string devname;
-    ulog_packet_msg_t *pm = reinterpret_cast<ulog_packet_msg_t *>(NLMSG_DATA(nh));
+    UlogPacketMsgT *pm = reinterpret_cast<UlogPacketMsgT *>(NLMSG_DATA(nh));
     if (!CheckRtNetlinkLength(nh, sizeof(*pm))) {
         return false;
     }
-    devname = pm->indev_name[INDEX_ZERO] ? pm->indev_name : pm->outdev_name;
+    devname = pm->indevName[0] ? pm->indevName : pm->outdevName;
     params_[INDEX_ZERO] = "ALERT_NAME=" + std::string(pm->prefix);
     params_[INDEX_ONE] = "INTERFACE=" + devname;
     subSystem_ = "qlog";
@@ -309,8 +309,8 @@ static uint32_t NlAttrU32(const nlattr *nla)
 
 bool NetlinkMessageDecoder::ParseNfPacketMessage(nlmsghdr *nh)
 {
-    int32_t uid = -1;
-    int32_t len = 0;
+    uint32_t uid = 0;
+    uint32_t len = 0;
     const char *raw = nullptr;
 
     nlattr *uid_attr = FindNlAttr(nh, sizeof(genlmsghdr), NFULA_UID);
@@ -354,8 +354,8 @@ bool NetlinkMessageDecoder::ParseRtMessage(const nlmsghdr *nh)
         return false;
     }
 
-    int32_t family = rtm->rtm_family;
-    int32_t prefixLength = rtm->rtm_dst_len;
+    uint8_t family = rtm->rtm_family;
+    uint8_t prefixLength = rtm->rtm_dst_len;
     char dst[INET6_ADDRSTRLEN] = "";
     char gw[INET6_ADDRSTRLEN] = "";
     char dev[IFNAMSIZ] = "";
@@ -445,22 +445,22 @@ rtmsg *NetlinkMessageDecoder::CheckRtParam(const nlmsghdr *nh, uint8_t type)
 
 bool NetlinkMessageDecoder::ParseNdOptRnss(nd_opt_hdr *opthdr, const char *ifname)
 {
-    uint16_t optlen = opthdr->nd_opt_len;
+    uint32_t optlen = opthdr->nd_opt_len;
     if ((optlen < OPT_MAX) || !(optlen & OPT_OFFSET)) {
         NETNATIVE_LOGE("Invalid optlen %{public}d for RDNSS option\n", optlen);
         return false;
     }
     const int32_t numaddrs = (optlen - ADDR_OFFSET) / ADDR_SITE;
     // Find the lifetime.
-    nd_opt_rdnss *rndss_opt = reinterpret_cast<nd_opt_rdnss *>(opthdr);
-    const uint32_t lifetime = ntohl(rndss_opt->nd_opt_rdnss_lifetime);
+    NdOptRdnss *rndssOpt = reinterpret_cast<NdOptRdnss *>(opthdr);
+    const uint32_t lifetime = ntohl(rndssOpt->ndOptRdnssLifetime);
     // Create a buffer to hold the message.
     static const size_t kMaxSingleAddressLength = INET6_ADDRSTRLEN + strlen("%") + IFNAMSIZ + strlen(",");
     const size_t bufsize = numaddrs * kMaxSingleAddressLength;
     auto buf = std::make_unique<char[]>(bufsize);
     memset_s(buf.get(), bufsize, 0, bufsize);
 
-    in6_addr *addrs = reinterpret_cast<in6_addr *>(rndss_opt + ADDR_OFFSET);
+    in6_addr *addrs = reinterpret_cast<in6_addr *>(rndssOpt + ADDR_OFFSET);
     size_t pos = 0;
     for (int32_t i = 0; i < numaddrs; i++) {
         if (i > 0) {
@@ -487,7 +487,7 @@ bool NetlinkMessageDecoder::ParseNdUserOptMessage(const nlmsghdr *nh)
         return false;
     }
     // Get the length of the options and check that it is not too long.
-    int32_t len = NLMSG_PAYLOAD(nh, sizeof(*msg));
+    uint32_t len = NLMSG_PAYLOAD(nh, sizeof(*msg));
     if (msg->nduseropt_opts_len > len) {
         NETNATIVE_LOGE("RTM_NEWNDUSEROPT invalid length %{public}d > %{public}d\n", msg->nduseropt_opts_len, len);
         return false;
@@ -539,7 +539,6 @@ bool NetlinkMessageDecoder::ParseNdUserOptMessage(const nlmsghdr *nh)
         case OPT_PREF64:
             break;
         default:
-            NETNATIVE_LOG_D("Unknown ND option type %{public}d\n", opthdr->nd_opt_type);
             return false;
     }
     return true;

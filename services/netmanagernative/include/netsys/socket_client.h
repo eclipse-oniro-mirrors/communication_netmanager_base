@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SOCKET_CLIENT_H__
-#define SOCKET_CLIENT_H__
+#ifndef SOCKET_CLIENT_H
+#define SOCKET_CLIENT_H
 
 #include <pthread.h>
 #include <sys/types.h>
@@ -63,4 +63,4 @@ private:
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // SOCKET_CLIENT_H__
+#endif // SOCKET_CLIENT_H

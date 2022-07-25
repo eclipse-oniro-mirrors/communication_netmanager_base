@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef COMMUNICATION_NETMANAGER_BASE_NEW_DNS_NETSYS_CLIENT_H
 #define COMMUNICATION_NETMANAGER_BASE_NEW_DNS_NETSYS_CLIENT_H
 
@@ -54,9 +55,10 @@ static bool MakeNonBlock(int sock)
         NETSYS_CLIENT_PRINT("make non block failed %s", strerror(errno));
         return false;
     }
-    int ret = fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+    uint32_t tempFlags = (uint32_t)flags | O_NONBLOCK;
+    int ret = fcntl(sock, F_SETFL, tempFlags);
     while (ret == -1 && errno == EINTR) {
-        ret = fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+        ret = fcntl(sock, F_SETFL, tempFlags);
     }
     if (ret == -1) {
         NETSYS_CLIENT_PRINT("make non block failed %s", strerror(errno));

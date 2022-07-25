@@ -53,12 +53,12 @@ void DnsResolvConfig::SetTimeoutMsec(int32_t baseTimeoutMsec)
     timeoutMsec_ = baseTimeoutMsec;
 }
 
-int32_t DnsResolvConfig::GetTimeoutMsec() const
+uint16_t DnsResolvConfig::GetTimeoutMsec() const
 {
     return timeoutMsec_;
 }
 
-void DnsResolvConfig::SetRetryCount(int32_t retryCount)
+void DnsResolvConfig::SetRetryCount(uint8_t retryCount)
 {
     retryCount_ = retryCount;
 }

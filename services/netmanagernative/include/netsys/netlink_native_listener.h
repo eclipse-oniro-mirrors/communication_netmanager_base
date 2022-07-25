@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SOCKET_LISTENER_H__
-#define SOCKET_LISTENER_H__
+#ifndef SOCKET_LISTENER_H
+#define SOCKET_LISTENER_H
 
 #include <memory>
 #include <mutex>
@@ -55,11 +55,11 @@ private:
     int32_t socket_ = -1;
     std::unordered_map<int32_t, std::unique_ptr<SocketClient>> socketClients_;
     std::mutex clientsLock_;
-    int32_t ctrlPipe_[2];
+    int32_t ctrlPipe_[2] = {0};
     std::thread thread_;
     bool useCmdNum_ = false;
 
-    char buffer_[NetlinkDefine::BUFFER_SIZE] __attribute__((aligned(4)));
+    char buffer_[NetlinkDefine::BUFFER_SIZE] __attribute__((aligned(4))) = {0};
     int32_t format_ = NetlinkDefine::NETLINK_FORMAT_ASCII;
 
     static constexpr int32_t CTRLPIPE_SHUTDOWN = 0;
@@ -75,4 +75,4 @@ private:
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // !SOCKET_LISTENER_H__
+#endif // !SOCKET_LISTENER_H

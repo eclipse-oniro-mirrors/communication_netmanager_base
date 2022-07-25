@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,6 @@
  */
 
 #include "dns_config_client.h"
-#include "securec.h"
 
 #include "netsys_client.h"
 
@@ -141,7 +140,9 @@ static void NetsysGetDefaultConfig(struct ResolvConfig *config)
     }
     config->timeoutMs = DEFAULT_TIMEOUT;
     config->retryCount = DEFAULT_RETRY;
-    MakeDefaultDnsServer(config->nameservers[0], MAX_SERVER_LENGTH + 1);
+    if (strcpy_s(config->nameservers[0], sizeof(config->nameservers[0]), DEFAULT_SERVER) <= 0) {
+        DNS_CONFIG_PRINT("NetsysGetDefaultConfig strcpy_s failed");
+    }
 }
 
 static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct ResolvConfig *config) //
@@ -202,20 +203,14 @@ int32_t NetSysGetResolvConf(uint16_t netId, struct ResolvConfig *config)
     return 0;
 }
 
-static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, struct ParamWrapper param,
-                                            struct AddrInfo addrInfo[static MAX_RESULTS], uint32_t *num)
+static int32_t NetsysSendKeyForCache(int sockFd, struct ParamWrapper param, struct RequestInfo info)
 {
-    struct RequestInfo info = {
-        .command = GET_CACHE,
-        .netId = netId,
-    };
-
     char key[MAX_KEY_LENGTH] = {0};
     if (!MakeKey(param.host, param.serv, param.hint, key)) {
         return CloseSocketReturn(sockFd, -1);
     }
 
-    DNS_CONFIG_PRINT("NetSysGetResolvCacheInternal begin netid: %d", info.netId);
+    DNS_CONFIG_PRINT("NetSysSetResolvCacheInternal begin netid: %d", info.netId);
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
         return CloseSocketReturn(sockFd, -errno);
@@ -230,6 +225,21 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, struct P
     if (!PollSendData(sockFd, key, nameLen)) {
         DNS_CONFIG_PRINT("send failed %d", errno);
         return CloseSocketReturn(sockFd, -errno);
+    }
+    return 0;
+};
+
+static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, struct ParamWrapper param,
+                                            struct AddrInfo addrInfo[static MAX_RESULTS], uint32_t *num)
+{
+    struct RequestInfo info = {
+        .command = GET_CACHE,
+        .netId = netId,
+    };
+
+    uint32_t res = NetsysSendKeyForCache(sockFd, param, info);
+    if (res < 0) {
+        return res;
     }
 
     if (!PollRecvData(sockFd, (char *)num, sizeof(uint32_t))) {
@@ -316,26 +326,9 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, struct P
         .netId = netId,
     };
 
-    char key[MAX_KEY_LENGTH] = {0};
-    if (!MakeKey(param.host, param.serv, param.hint, key)) {
-        return CloseSocketReturn(sockFd, -1);
-    }
-
-    DNS_CONFIG_PRINT("NetSysSetResolvCacheInternal begin netid: %d", info.netId);
-    if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
-        DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -errno);
-    }
-
-    uint32_t nameLen = strlen(key) + 1;
-    if (!PollSendData(sockFd, (const char *)&nameLen, sizeof(nameLen))) {
-        DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -errno);
-    }
-
-    if (!PollSendData(sockFd, key, nameLen)) {
-        DNS_CONFIG_PRINT("send failed %d", errno);
-        return CloseSocketReturn(sockFd, -errno);
+    int32_t result = NetsysSendKeyForCache(sockFd, param, info);
+    if (result < 0) {
+        return result;
     }
 
     struct AddrInfo addrInfo[MAX_RESULTS] = {};

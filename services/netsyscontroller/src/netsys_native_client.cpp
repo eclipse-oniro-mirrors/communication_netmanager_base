@@ -142,25 +142,21 @@ void NetsysNativeClient::Init()
     initFlag_ = true;
     nativeNotifyCallback_ = std::make_unique<NativeNotifyCallback>(*this).release();
     netsysNativeService_ = GetProxy();
-    if (netsysNativeService_ == nullptr) {
-        std::thread thread([this]() {
-            int i = 0;
-            while (netsysNativeService_ == nullptr) {
-                netsysNativeService_ = GetProxy();
-                NETMGR_LOG_I("netsysNativeService_ is null waiting for netsys service");
-                usleep(DELAY_TIME);
-                i++;
-                if (i > RETRY_TIMES) {
-                    NETMGR_LOG_E("netsysNativeService_ is null for 10 times");
-                    break;
-                }
+    std::thread thread([this]() {
+        int i = 0;
+        while (netsysNativeService_ == nullptr) {
+            netsysNativeService_ = GetProxy();
+            NETMGR_LOG_I("netsysNativeService_ is null waiting for netsys service");
+            usleep(DELAY_TIME);
+            i++;
+            if (i > RETRY_TIMES) {
+                NETMGR_LOG_E("netsysNativeService_ is null for 10 times");
+                break;
             }
-            netsysNativeService_->RegisterNotifyCallback(nativeNotifyCallback_);
-        });
-        thread.detach();
-    } else {
+        }
         netsysNativeService_->RegisterNotifyCallback(nativeNotifyCallback_);
-    }
+    });
+    thread.detach();
 }
 
 int32_t NetsysNativeClient::NetworkCreatePhysical(int32_t netId, int32_t permission)

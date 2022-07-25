@@ -31,8 +31,8 @@ namespace nmd {
 using namespace NetManagerStandard;
 #endif
 namespace {
-const char *IPV4_FORWARDING_PROC_FILE = "/proc/sys/net/ipv4/ip_forward";
-const char *IPV6_FORWARDING_PROC_FILE = "/proc/sys/net/ipv6/conf/all/forwarding";
+constexpr const char *IPV4_FORWARDING_PROC_FILE = "/proc/sys/net/ipv4/ip_forward";
+constexpr const char *IPV6_FORWARDING_PROC_FILE = "/proc/sys/net/ipv6/conf/all/forwarding";
 
 // commands of create tables
 const std::string CREATE_TETHERCTRL_NAT_POSTROUTING = "-t nat -N tetherctrl_nat_POSTROUTING";
@@ -89,6 +89,9 @@ const std::string SET_TETHERCTRL_COUNTERS2(const std::string &from, const std::s
 
 bool WriteToFile(const char *filename, const char *value)
 {
+    if (filename == nullptr) {
+        return false;
+    }
     int fd = open(filename, O_WRONLY | O_CLOEXEC);
     if (fd < 0) {
 #ifndef SHARING_MANAGER_DEPS

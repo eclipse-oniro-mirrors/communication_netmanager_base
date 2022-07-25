@@ -129,11 +129,11 @@ int GetMaskLength(const std::string &mask)
     return netMask;
 }
 
-bool ParseInt(const char *str, int32_t *value)
+bool ParseInt(const std::string &str, int32_t *value)
 {
     char *end;
-    long long v = strtoll(str, &end, 10);
-    if (end == str || *end != '\0' || v < INT_MIN || v > INT_MAX) {
+    long long v = strtoll(str.c_str(), &end, 10);
+    if (std::string(end) == str || *end != '\0' || v < INT_MIN || v > INT_MAX) {
         return false;
     }
     *value = v;

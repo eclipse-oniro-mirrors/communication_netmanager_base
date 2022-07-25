@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef __INCLUDE_MANAGER_DNS_MANAGER_H__
-#define __INCLUDE_MANAGER_DNS_MANAGER_H__
+#ifndef INCLUDE_MANAGER_DNS_MANAGER_H
+#define INCLUDE_MANAGER_DNS_MANAGER_H
 
 #include <vector>
 
@@ -34,8 +34,8 @@ public:
 
     int32_t CreateNetworkCache(uint16_t netId);
 
-    void SetDefaultNetwork(int netId);
+    void SetDefaultNetwork(uint16_t netId);
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // !__INCLUDE_MANAGER_DNS_MANAGER_H__
+#endif // !INCLUDE_MANAGER_DNS_MANAGER_H

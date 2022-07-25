@@ -28,6 +28,8 @@
 
 namespace OHOS::nmd {
 using namespace testing::ext;
+static constexpr const char* IFACENAME = "wlan0";
+static bool flag = true;
 sptr<OHOS::NetsysNative::INotifyCallback> nativeNotifyCallback_ = nullptr;
 sptr<OHOS::NetsysNative::INetsysService> netsysNativeService_ = nullptr;
 
@@ -77,51 +79,84 @@ int32_t NetlinkNativeNotifyCallBack::OnInterfaceAddressUpdated(const std::string
                                                                int flags, int scope)
 {
     std::cout << " [OnInterfaceAddressUpdated] " << ifName << " Address: " << addr << std::endl;
+    EXPECT_FALSE(addr.empty());
+    EXPECT_STRCASEEQ(IFACENAME, ifName.c_str());
+    EXPECT_GE(flags, 0);
+    EXPECT_GE(scope, 0);
     return 0;
 }
 int32_t NetlinkNativeNotifyCallBack::OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName,
                                                                int flags, int scope)
 {
     std::cout << " [OnInterfaceAddressRemoved] " << ifName << " Address: " << addr << std::endl;
+    EXPECT_FALSE(addr.empty());
+    EXPECT_STRCASEEQ(IFACENAME, ifName.c_str());
+    EXPECT_GE(flags, 0);
+    EXPECT_GE(scope, 0);
     return 0;
 }
 int32_t NetlinkNativeNotifyCallBack::OnInterfaceAdded(const std::string &ifName)
 {
     std::cout << " [OnInterfaceAdded] " << ifName << std::endl;
+    EXPECT_STRCASEEQ(IFACENAME, ifName.c_str());
     return 0;
 }
 int32_t NetlinkNativeNotifyCallBack::OnInterfaceRemoved(const std::string &ifName)
 {
     std::cout << " [OnInterfaceRemoved] " << ifName << std::endl;
+    EXPECT_STRCASEEQ(IFACENAME, ifName.c_str());
     return 0;
 }
 int32_t NetlinkNativeNotifyCallBack::OnInterfaceChanged(const std::string &ifName, bool up)
 {
     std::cout << " [OnInterfaceChanged] " << ifName << " status :" << (up ? "[update]" : "[remove]") << std::endl;
+    EXPECT_STRCASEEQ(IFACENAME, ifName.c_str());
+    if (flag) {
+        EXPECT_TRUE(up);
+    } else {
+        EXPECT_FALSE(up);
+    }
     return 0;
 }
 int32_t NetlinkNativeNotifyCallBack::OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
 {
     std::cout << " [OnInterfaceLinkStateChanged] " << ifName << " Status: " << (up ? "[update]" : "[remove]")
               << std::endl;
+    EXPECT_STRCASEEQ(IFACENAME, ifName.c_str());
+    if (flag) {
+        EXPECT_TRUE(up);
+    } else {
+        EXPECT_FALSE(up);
+    }
     return 0;
 }
 int32_t NetlinkNativeNotifyCallBack::OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
                                                     const std::string &ifName)
 {
-    std::cout << " [OnRouteChanged] " << ifName << " Route: " << route
+    std::cout << " [OnRouteChanged] " << ifName << " Route: " << route << "GateWay: " << gateway
               << " State :" << (updated ? "[update]" : "[remove]") << std::endl;
+    EXPECT_STRCASEEQ(IFACENAME, ifName.c_str());
+    EXPECT_FALSE(route.empty());
+    EXPECT_FALSE(gateway.empty());
+    if (flag) {
+        EXPECT_TRUE(updated);
+    } else {
+        EXPECT_FALSE(updated);
+    }
     return 0;
 }
 
 int32_t NetlinkNativeNotifyCallBack::OnDhcpSuccess(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult)
 {
     std::cout << " [OnDhcpSuccess] " << std::endl;
+    EXPECT_NE(dhcpResult, nullptr);
     return 0;
 }
 int32_t NetlinkNativeNotifyCallBack::OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface)
 {
     std::cout << " [OnBandwidthReachedLimit] " << std::endl;
+    EXPECT_FALSE(limitName.empty());
+    EXPECT_FALSE(iface.empty());
     return 0;
 }
 
@@ -138,6 +173,7 @@ HWTEST_F(NetlinkManagerTest, RegisterCallbackTest001, TestSize.Level1)
 
 HWTEST_F(NetlinkManagerTest, NotifyAll001, TestSize.Level1)
 {
+    flag = true;
     wifiHotspot_->EnableHotspot(Wifi::ServiceType::DEFAULT);
     // Wait for the callback to be called.
     sleep(10);
@@ -145,6 +181,7 @@ HWTEST_F(NetlinkManagerTest, NotifyAll001, TestSize.Level1)
 
 HWTEST_F(NetlinkManagerTest, NotifyAll002, TestSize.Level1)
 {
+    flag = false;
     wifiHotspot_->DisableHotspot(Wifi::ServiceType::DEFAULT);
     // Wait for the callback to be called.
     sleep(10);
@@ -159,6 +196,7 @@ HWTEST_F(NetlinkManagerTest, UnRegisterCallbackTest001, TestSize.Level1)
 // For this it will not recview the interface status change event.
 HWTEST_F(NetlinkManagerTest, NotNotifyAnymore001, TestSize.Level1)
 {
+    flag = true;
     wifiHotspot_->EnableHotspot(Wifi::ServiceType::DEFAULT);
     // Wait for the callback to be called.
     sleep(10);
@@ -167,6 +205,7 @@ HWTEST_F(NetlinkManagerTest, NotNotifyAnymore001, TestSize.Level1)
 // For this it will not recview the interface status change event.
 HWTEST_F(NetlinkManagerTest, NotNotifyAnymore002, TestSize.Level1)
 {
+    flag = false;
     wifiHotspot_->DisableHotspot(Wifi::ServiceType::DEFAULT);
     // Wait for the callback to be called.
     sleep(10);

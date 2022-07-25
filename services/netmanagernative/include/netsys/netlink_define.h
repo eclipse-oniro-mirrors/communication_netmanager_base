@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,19 +26,19 @@ static const int32_t NETLINK_FORMAT_ASCII = 0;
 static const int32_t NETLINK_FORMAT_BINARY = 1;
 static const int32_t NETLINK_FORMAT_BINARY_UNICAST = 2;
 
-static constexpr int32_t BUFFER_SIZE = 64 * 1024;
+static constexpr uint32_t BUFFER_SIZE = 64 * 1024;
 static constexpr int32_t DECIMALISM = 10;
 
-static constexpr int32_t INDEX_ZERO = 0;
-static constexpr int32_t INDEX_ONE = 1;
-static constexpr int32_t INDEX_TWO = 2;
-static constexpr int32_t INDEX_THREE = 3;
-static constexpr int32_t INDEX_FOUR = 4;
-static constexpr int32_t INDEX_FIVE = 5;
-static constexpr int32_t INDEX_SIX = 6;
-static constexpr int32_t INDEX_SEVEN = 7;
-static constexpr int32_t INDEX_EIGHT = 8;
-static constexpr int32_t INDEX_NINE = 9;
+static constexpr uint32_t INDEX_ZERO = 0;
+static constexpr uint32_t INDEX_ONE = 1;
+static constexpr uint32_t INDEX_TWO = 2;
+static constexpr uint32_t INDEX_THREE = 3;
+static constexpr uint32_t INDEX_FOUR = 4;
+static constexpr uint32_t INDEX_FIVE = 5;
+static constexpr uint32_t INDEX_SIX = 6;
+static constexpr uint32_t INDEX_SEVEN = 7;
+static constexpr uint32_t INDEX_EIGHT = 8;
+static constexpr uint32_t INDEX_NINE = 9;
 } // namespace NetlinkDefine
 
 namespace NetlinkResult {

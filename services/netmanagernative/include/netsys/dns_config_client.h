@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,7 @@ extern "C" {
 #define MAX_CANON_NAME 256
 #define MAX_HOST_NAME_LEN 256
 #define MAX_KEY_LENGTH (MAX_HOST_NAME_LEN + 1 + MAX_SERVER_LENGTH + 1 + sizeof(uint32_t) * 4 + 3 + 1)
+#define DEFAULT_SERVER "114.114.114.114"
 #define DEFAULT_TIMEOUT 5000
 #define DEFAULT_RETRY 2
 #define DEFAULT_SERVER_LENTH 16
