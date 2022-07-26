@@ -16,10 +16,15 @@
 #ifndef COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H
 #define COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H
 
+#include <cstddef>
+#include <list>
+
 #include "napi/native_api.h"
+#include "nocopyable.h"
+#include "refbase.h"
+
 #include "net_handle.h"
 #include "netmanager_base_base_context.h"
-#include "nocopyable.h"
 
 namespace OHOS::NetManagerStandard {
 class GetDefaultNetContext final : public BaseContext {

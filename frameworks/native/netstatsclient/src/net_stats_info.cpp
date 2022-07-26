@@ -15,7 +15,7 @@
 
 #include "net_stats_info.h"
 
-#include "net_mgr_log_wrapper.h"
+#include "parcel.h"
 
 namespace OHOS {
 namespace NetManagerStandard {

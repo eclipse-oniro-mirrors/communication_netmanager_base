@@ -14,6 +14,12 @@
  */
 
 #include "net_link_info.h"
+
+#include "parcel.h"
+#include "refbase.h"
+#include "route.h"
+
+#include "inet_addr.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {

@@ -13,9 +13,19 @@
  * limitations under the License.
  */
 
-#include "dns_config_client.h"
-
 #include "netsys_client.h"
+
+#include <sys/socket.h>
+#include <sys/time.h>
+#include "bits/errno.h"
+#include "securec.h"
+#include "stdbool.h"
+#include "sys/select.h"
+#include "sys/un.h"
+#include "netdb.h"
+#include "unistd.h"
+
+#include "dns_config_client.h"
 
 #ifdef __cplusplus
 extern "C" {

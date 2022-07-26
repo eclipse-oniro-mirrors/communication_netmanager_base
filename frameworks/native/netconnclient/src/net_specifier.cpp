@@ -15,6 +15,12 @@
 
 #include "net_specifier.h"
 
+#include "__functional_base"
+
+#include "parcel.h"
+#include "refbase.h"
+
+#include "net_all_capabilities.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
