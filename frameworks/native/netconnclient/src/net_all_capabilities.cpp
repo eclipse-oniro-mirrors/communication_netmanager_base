@@ -15,7 +15,10 @@
 
 #include "net_all_capabilities.h"
 
-#include "net_mgr_log_wrapper.h"
+#include "__functional_base"
+#include "__tree"
+
+#include "parcel.h"
 
 namespace OHOS {
 namespace NetManagerStandard {

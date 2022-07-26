@@ -16,7 +16,7 @@
 #ifndef COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H
 #define COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H
 
-#include <string>
+#include <iosfwd>
 #include <vector>
 
 namespace OHOS::NetManagerStandard::CommonUtils {

@@ -16,10 +16,11 @@
 #ifndef COMMUNICATIONNETMANAGER_BASE_EVENT_LISTENER_H
 #define COMMUNICATIONNETMANAGER_BASE_EVENT_LISTENER_H
 
+#include <iosfwd>
+#include <cstddef>
 #include <string>
 
 #include "napi/native_api.h"
-#include "nocopyable.h"
 #include "uv.h"
 
 namespace OHOS::NetManagerStandard {

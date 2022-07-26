@@ -16,6 +16,9 @@
 #ifndef COMMUNICATIONNETMANAGERBASE_GETADDRESSBYNAME_CONTEXT_H
 #define COMMUNICATIONNETMANAGERBASE_GETADDRESSBYNAME_CONTEXT_H
 
+#include <iosfwd>
+#include <string>
+#include <cstddef>
 #include <vector>
 
 #include "napi/native_api.h"

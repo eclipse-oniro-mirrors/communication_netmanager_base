@@ -14,6 +14,10 @@
  */
 
 #include "inet_addr.h"
+
+#include "parcel.h"
+#include "refbase.h"
+
 #include "net_mgr_log_wrapper.h"
 #include "netmanager_base_common_utils.h"
 

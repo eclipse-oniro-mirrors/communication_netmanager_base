@@ -14,11 +14,17 @@
  */
 
 #include "netmanager_base_common_utils.h"
-#include "securec.h"
 
 #include <algorithm>
 #include <arpa/inet.h>
 #include <regex>
+#include <cstddef>
+#include <cstdlib>
+#include <string>
+#include <type_traits>
+#include <vector>
+#include "netinet/in.h"
+#include "sys/socket.h"
 
 namespace OHOS::NetManagerStandard::CommonUtils {
 constexpr int32_t INET_OPTION_SUC = 1;

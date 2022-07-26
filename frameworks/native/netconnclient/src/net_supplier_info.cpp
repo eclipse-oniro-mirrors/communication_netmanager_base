@@ -15,8 +15,10 @@
 
 #include "net_supplier_info.h"
 
-#include "net_mgr_log_wrapper.h"
+#include "parcel.h"
+#include "refbase.h"
 
+#include "net_mgr_log_wrapper.h"
 namespace OHOS {
 namespace NetManagerStandard {
 bool NetSupplierInfo::Marshalling(Parcel &parcel) const

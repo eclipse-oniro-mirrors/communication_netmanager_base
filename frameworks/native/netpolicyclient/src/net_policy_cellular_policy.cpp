@@ -14,6 +14,8 @@
  */
 #include "net_policy_cellular_policy.h"
 
+#include "parcel.h"
+
 namespace OHOS {
 namespace NetManagerStandard {
 bool NetPolicyCellularPolicy::Marshalling(Parcel &parcel) const
