@@ -31,6 +31,18 @@
 extern "C" {
 #endif
 
+static volatile uint8_t g_allowInternet = 1;
+
+void DisallowInternet(void)
+{
+    g_allowInternet = 0;
+}
+
+uint8_t IsAllowInternet(void)
+{
+    return g_allowInternet;
+}
+
 static inline uint32_t Min(uint32_t a, uint32_t b)
 {
     return a < b ? a : b;
