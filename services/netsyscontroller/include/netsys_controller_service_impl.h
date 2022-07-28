@@ -88,6 +88,14 @@ public:
         const std::string &nextHop) override;
 
     /**
+     * @brief Get interface config
+     *
+     * @param iface Network port device name
+     * @return Return the result of this action
+     */
+    int32_t InterfaceGetConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg) override;
+
+    /**
      * @brief Turn off the device
      *
      * @param iface Network port device name

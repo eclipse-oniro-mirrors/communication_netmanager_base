@@ -29,6 +29,7 @@ ohos_shared_library("net_service_common") {
     "$INNERKITS_ROOT/netconnclient/include",
     "$INNERKITS_ROOT/netstatsclient/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$INNERKITS_ROOT/netmanagernative/include",
   ]
 
   deps = [

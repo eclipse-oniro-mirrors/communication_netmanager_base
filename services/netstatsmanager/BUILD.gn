@@ -34,6 +34,7 @@ ohos_shared_library("net_stats_manager") {
     "$NETSTATSMANAGER_SOURCE_DIR/include/stub",
     "$NETCONNMANAGER_COMMON_DIR/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$INNERKITS_ROOT/netmanagernative/include",
   ]
 
   deps = [

@@ -223,6 +223,12 @@ int32_t NetsysNativeClient::NetworkRemoveRoute(int32_t netId, const std::string 
     return netsysNativeService_->NetworkRemoveRoute(netId, ifName, destination, nextHop);
 }
 
+int32_t NetsysNativeClient::InterfaceGetConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg)
+{
+    NETMGR_LOG_I("Get interface config: ifName[%{public}s]", cfg.ifName.c_str());
+    return netsysNativeService_->InterfaceGetConfig(cfg);
+}
+
 int32_t NetsysNativeClient::SetInterfaceDown(const std::string &iface)
 {
     NETMGR_LOG_I("Set interface down: iface[%{public}s]", iface.c_str());
