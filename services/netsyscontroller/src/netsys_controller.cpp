@@ -116,6 +116,16 @@ int32_t NetsysController::NetworkRemoveRoute(int32_t netId, const std::string &i
     return netsysService_->NetworkRemoveRoute(netId, ifName, destination, nextHop);
 }
 
+int32_t NetsysController::InterfaceGetConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg)
+{
+    NETMGR_LOG_I("get interface config");
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+    }
+    return netsysService_->InterfaceGetConfig(cfg);
+}
+
 int32_t NetsysController::SetInterfaceDown(const std::string &iface)
 {
     NETMGR_LOG_I("Set interface down: iface[%{public}s]", iface.c_str());

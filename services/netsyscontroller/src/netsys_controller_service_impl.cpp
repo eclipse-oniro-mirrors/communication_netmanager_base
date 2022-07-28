@@ -83,6 +83,12 @@ int32_t NetsysControllerServiceImpl::NetworkRemoveRoute(int32_t netId, const std
     return netsysClient_.NetworkRemoveRoute(netId, ifName, destination, nextHop);
 }
 
+int32_t NetsysControllerServiceImpl::InterfaceGetConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg)
+{
+    NETMGR_LOG_I("Interface get config");
+    return netsysClient_.InterfaceGetConfig(cfg);
+}
+
 int32_t NetsysControllerServiceImpl::SetInterfaceDown(const std::string &iface)
 {
     NETMGR_LOG_I("Set interface down: iface[%{public}s]", iface.c_str());
