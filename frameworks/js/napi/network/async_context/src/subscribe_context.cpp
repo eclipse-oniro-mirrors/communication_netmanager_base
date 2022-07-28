@@ -17,7 +17,7 @@
 
 #include "network_constant.h"
 #include "netmanager_base_log.h"
-#include "netmanager_base_napi_utils.h"
+#include "napi_utils.h"
 
 static constexpr const int PARAM_NO_OPTIONS = 0;
 

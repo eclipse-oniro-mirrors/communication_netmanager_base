@@ -16,7 +16,7 @@
 #include "parse_nethandle_context.h"
 
 #include "constant.h"
-#include "netmanager_base_napi_utils.h"
+#include "napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
 ParseNetHandleContext::ParseNetHandleContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}

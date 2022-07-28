@@ -15,7 +15,7 @@
 
 #include "network_async_work.h"
 
-#include "netmanager_base_base_async_work.h"
+#include "base_async_work.h"
 #include "network_exec.h"
 
 namespace OHOS::NetManagerStandard {

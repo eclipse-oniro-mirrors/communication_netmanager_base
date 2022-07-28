@@ -123,6 +123,7 @@ public:
 
         static napi_value UnregisterCallback(UnregisterContext *context);
     };
+
 private:
     static void FillLinkAddress(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo);
 

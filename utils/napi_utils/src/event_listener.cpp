@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,19 @@
  * limitations under the License.
  */
 
-#include "netmanager_base_event_listener.h"
+#include "event_listener.h"
 
 #include "netmanager_base_log.h"
-#include "netmanager_base_napi_utils.h"
+#include "napi_utils.h"
 #include "securec.h"
 
-namespace OHOS::NetManagerStandard {
+namespace OHOS {
+namespace NetManagerStandard {
 EventListener::EventListener(napi_env env, std::string type, napi_value callback, bool once, bool asyncCallback)
     : env_(env),
       type_(std::move(type)),
-      once_(once),
       callbackRef_(NapiUtils::CreateReference(env, callback)),
+      once_(once),
       asyncCallback_(asyncCallback)
 {
 }
@@ -71,13 +72,10 @@ EventListener &EventListener::operator=(const EventListener &listener)
 
 void EventListener::Emit(const std::string &eventType, size_t argc, napi_value *argv) const
 {
-    if (type_ != eventType) {
+    if (type_ != eventType || callbackRef_ == nullptr) {
         return;
     }
 
-    if (callbackRef_ == nullptr) {
-        return;
-    }
     napi_value callback = NapiUtils::GetReference(env_, callbackRef_);
     if (NapiUtils::GetValueType(env_, callback) == napi_function) {
         (void)NapiUtils::CallFunction(env_, NapiUtils::GetUndefined(env_), callback, argc, argv);
@@ -98,10 +96,7 @@ bool EventListener::Match(const std::string &type, napi_value callback) const
 
 bool EventListener::MatchOnce(const std::string &type) const
 {
-    if (type_ != type) {
-        return false;
-    }
-    return once_;
+    return (type_ == type) ? once_ : false;
 }
 
 bool EventListener::MatchType(const std::string &type) const
@@ -118,11 +113,7 @@ void EventListener::EmitByUv(const std::string &type, void *data, void(Handler)(
 {
     NETMANAGER_BASE_LOGI("EventListener::EmitByUv() is called, to EmitByUv");
 
-    if (type_ != type) {
-        return;
-    }
-
-    if (callbackRef_ == nullptr) {
+    if (type_ != type || callbackRef_ == nullptr) {
         return;
     }
 
@@ -138,4 +129,5 @@ napi_ref EventListener::GetCallbackRef() const
 {
     return callbackRef_;
 }
-} // namespace OHOS::NetManagerStandard
+} // namespace NetManagerStandard
+} // namespace OHOS

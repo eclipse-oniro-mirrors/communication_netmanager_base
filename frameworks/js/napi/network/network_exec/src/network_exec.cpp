@@ -19,7 +19,7 @@
 #include "net_conn_client.h"
 #include "network_observer.h"
 #include "netmanager_base_log.h"
-#include "netmanager_base_napi_utils.h"
+#include "napi_utils.h"
 #include "securec.h"
 
 static constexpr const int ERROR_PARAM_NUM = 2;

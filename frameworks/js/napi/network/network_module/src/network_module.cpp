@@ -16,7 +16,7 @@
 #include "network_module.h"
 #include "gettype_context.h"
 #include "netmanager_base_log.h"
-#include "netmanager_base_module_template.h"
+#include "module_template.h"
 #include "network_async_work.h"
 #include "subscribe_context.h"
 #include "unsubscribe_context.h"
