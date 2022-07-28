@@ -21,7 +21,7 @@
 #include "net_conn_client.h"
 #include "netconnection.h"
 #include "netmanager_base_log.h"
-#include "netmanager_base_napi_utils.h"
+#include "napi_utils.h"
 #include "securec.h"
 
 static constexpr const size_t MAX_ARRAY_LENGTH = 64;

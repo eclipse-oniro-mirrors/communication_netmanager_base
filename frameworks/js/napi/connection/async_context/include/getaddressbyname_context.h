@@ -23,7 +23,7 @@
 
 #include "napi/native_api.h"
 #include "net_address.h"
-#include "netmanager_base_base_context.h"
+#include "base_context.h"
 #include "nocopyable.h"
 
 namespace OHOS::NetManagerStandard {

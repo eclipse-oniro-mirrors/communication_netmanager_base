@@ -20,7 +20,7 @@
 #include "net_all_capabilities.h"
 #include "net_handle.h"
 #include "net_link_info.h"
-#include "netmanager_base_base_context.h"
+#include "base_context.h"
 #include "nocopyable.h"
 
 namespace OHOS::NetManagerStandard {

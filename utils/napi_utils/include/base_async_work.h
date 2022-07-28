@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,17 +18,18 @@
 
 #include <memory>
 
-#include "napi/native_api.h"
-#include "napi/native_common.h"
-#include "netmanager_base_base_context.h"
-#include "netmanager_base_napi_utils.h"
+#include <napi/native_api.h>
+#include <napi/native_common.h>
+
+#include "base_context.h"
+#include "napi_utils.h"
 #include "nocopyable.h"
 
 static constexpr const int PARSE_PARAM_FAILED = -1;
-
 static constexpr const char *BUSINESS_ERROR_KEY = "code";
 
-namespace OHOS::NetManagerStandard {
+namespace OHOS {
+namespace NetManagerStandard {
 class BaseAsyncWork final {
 public:
     DISALLOW_COPY_AND_MOVE(BaseAsyncWork);
@@ -115,6 +116,7 @@ public:
         }
     }
 };
-} // namespace OHOS::NetManagerStandard
+} // namespace NetManagerStandard
+} // namespace OHOS
 
-#endif /* COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_BASE_ASYNC_WORK_H */
+#endif // COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_BASE_ASYNC_WORK_H

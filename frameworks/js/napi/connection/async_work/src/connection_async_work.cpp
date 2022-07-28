@@ -16,7 +16,7 @@
 #include "connection_async_work.h"
 
 #include "connection_exec.h"
-#include "netmanager_base_base_async_work.h"
+#include "base_async_work.h"
 #include "parse_nethandle_context.h"
 
 namespace OHOS::NetManagerStandard {
@@ -54,7 +54,8 @@ void ConnectionAsyncWork::GetNetCapabilitiesCallback(napi_env env, napi_status s
 
 void ConnectionAsyncWork::ExecGetConnectionProperties(napi_env env, void *data)
 {
-    BaseAsyncWork::ExecAsyncWork<GetConnectionPropertiesContext, ConnectionExec::ExecGetConnectionProperties>(env, data);
+    BaseAsyncWork::ExecAsyncWork<GetConnectionPropertiesContext, ConnectionExec::ExecGetConnectionProperties>(env,
+                                                                                                              data);
 }
 
 void ConnectionAsyncWork::GetConnectionPropertiesCallback(napi_env env, napi_status status, void *data)

@@ -18,8 +18,8 @@
 
 #include "net_all_capabilities.h"
 #include "net_conn_callback_stub.h"
-#include "netmanager_base_event_manager.h"
-#include "netmanager_base_napi_utils.h"
+#include "event_manager.h"
+#include "napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
 class NetConnCallbackObserver : public NetConnCallbackStub {

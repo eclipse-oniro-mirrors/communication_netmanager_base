@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,20 @@
  * limitations under the License.
  */
 
-#include "netmanager_base_module_template.h"
+#include "module_template.h"
 #include "netmanager_base_log.h"
 
 #include <algorithm>
 
-namespace OHOS::NetManagerStandard::ModuleTemplate {
+namespace OHOS {
+namespace NetManagerStandard {
+namespace ModuleTemplate {
+namespace {
 static constexpr const int EVENT_PARAM_NUM = 2;
+} // namespace
 
-napi_value
-    On(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events, bool asyncCallback)
+napi_value On(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events,
+              bool asyncCallback)
 {
     napi_value thisVal = nullptr;
     size_t paramsCount = MAX_PARAM_NUM;
@@ -49,8 +53,8 @@ napi_value
     return NapiUtils::GetUndefined(env);
 }
 
-napi_value
-    Once(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events, bool asyncCallback)
+napi_value Once(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events,
+                bool asyncCallback)
 {
     napi_value thisVal = nullptr;
     size_t paramsCount = MAX_PARAM_NUM;
@@ -113,9 +117,7 @@ napi_value Off(napi_env env, napi_callback_info info, const std::initializer_lis
     return NapiUtils::GetUndefined(env);
 }
 
-void DefineClass(napi_env env,
-                 napi_value exports,
-                 const std::initializer_list<napi_property_descriptor> &properties,
+void DefineClass(napi_env env, napi_value exports, const std::initializer_list<napi_property_descriptor> &properties,
                  const std::string &className)
 {
     auto constructor = [](napi_env env, napi_callback_info info) -> napi_value {
@@ -136,11 +138,8 @@ void DefineClass(napi_env env,
     NapiUtils::SetNamedProperty(env, exports, className, jsConstructor);
 }
 
-napi_value NewInstance(napi_env env,
-                       napi_callback_info info,
-                       const std::string &className,
-                       void *(*MakeData)(napi_env, size_t, napi_value *, EventManager *),
-                       Finalizer finalizer)
+napi_value NewInstance(napi_env env, napi_callback_info info, const std::string &className,
+                       void *(*MakeData)(napi_env, size_t, napi_value *, EventManager *), Finalizer finalizer)
 {
     napi_value thisVal = nullptr;
     std::size_t argc = MAX_PARAM_NUM;
@@ -167,4 +166,6 @@ napi_value NewInstance(napi_env env,
 
     return result;
 }
-} // namespace OHOS::NetManagerStandard::ModuleTemplate
+} // namespace ModuleTemplate
+} // namespace NetManagerStandard
+} // namespace OHOS
