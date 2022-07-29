@@ -35,10 +35,10 @@ ohos_unittest("net_stats_manager_test") {
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
+    "c_utils:utils",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
   ]

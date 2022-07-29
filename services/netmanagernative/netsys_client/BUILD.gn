@@ -18,7 +18,7 @@ ohos_shared_library("netsys_client") {
 
   include_dirs = [ "//foundation/communication/netmanager_base/services/netmanagernative/include/netsys" ]
 
-  deps = [ "//utils/native/base:utils" ]
+  external_deps = [ "c_utils:utils" ]
 
   defines = [
     "NETSYS_CONFIG_DEBUG=0",

@@ -39,11 +39,11 @@ ohos_shared_library("policy") {
   deps = [
     "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if",
     "//foundation/arkui/napi/:ace_napi",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
     "ability_base:want",
+    "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
