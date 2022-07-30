@@ -23,7 +23,7 @@
 #include "net_all_capabilities.h"
 #include "netconnection.h"
 #include "netmanager_base_log.h"
-#include "netmanager_base_module_template.h"
+#include "module_template.h"
 #include "parse_nethandle_context.h"
 #include "register_context.h"
 

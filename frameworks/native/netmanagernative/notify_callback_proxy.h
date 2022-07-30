@@ -24,8 +24,6 @@ class NotifyCallbackProxy : public IRemoteProxy<INotifyCallback> {
 public:
     explicit NotifyCallbackProxy(const sptr<IRemoteObject> &impl);
     virtual ~NotifyCallbackProxy();
-
-public:
     int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
                                       int scope) override;
     int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags,

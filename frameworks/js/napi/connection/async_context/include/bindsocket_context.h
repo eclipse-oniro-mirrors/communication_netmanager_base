@@ -16,8 +16,11 @@
 #ifndef NETMANAGER_BASE_BINDSOCKET_CONTEXT_H
 #define NETMANAGER_BASE_BINDSOCKET_CONTEXT_H
 
+#include <cstddef>
+#include <cstdint>
+
 #include "napi/native_api.h"
-#include "netmanager_base_base_context.h"
+#include "base_context.h"
 #include "nocopyable.h"
 
 namespace OHOS::NetManagerStandard {

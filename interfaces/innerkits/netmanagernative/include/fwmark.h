@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_FWMARK_H__
-#define INCLUDE_FWMARK_H__
+#ifndef INCLUDE_FWMARK_H
+#define INCLUDE_FWMARK_H
 
 #include <sys/un.h>
 
@@ -43,4 +43,4 @@ static constexpr uint32_t FWMARK_NET_ID_MASK = 0xffff;
 static const struct sockaddr_un FWMARK_SERVER_PATH = {AF_UNIX, "/dev/fwmarkd"};
 } // namespace nmd
 } // namespace OHOS
-#endif // INCLUDE_FWMARK_H__
+#endif // INCLUDE_FWMARK_H

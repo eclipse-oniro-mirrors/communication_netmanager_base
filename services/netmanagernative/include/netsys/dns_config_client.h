@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,8 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdint.h>
+
+#include "securec.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,6 +44,8 @@ extern "C" {
 #define DEFAULT_SERVER "114.114.114.114"
 #define DEFAULT_TIMEOUT 5000
 #define DEFAULT_RETRY 2
+#define DEFAULT_SERVER_LENTH 16
+#define DEFAULT_SERVER_NAME 114
 
 enum CommandType { GET_CONFIG = 1, GET_CACHE = 2, SET_CACHE = 3 };
 

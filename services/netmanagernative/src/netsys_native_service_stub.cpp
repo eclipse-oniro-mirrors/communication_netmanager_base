@@ -168,7 +168,7 @@ int32_t NetsysNativeServiceStub::CmdGetResolverConfig(MessageParcel &data, Messa
     reply.WriteUint8(retryCount);
     auto vServerSize = static_cast<int32_t>(servers.size());
     reply.WriteInt32(vServerSize);
-    for (auto & server : servers) {
+    for (auto &server : servers) {
         reply.WriteString(server);
     }
     auto vDomainsSize = static_cast<int32_t>(domains.size());

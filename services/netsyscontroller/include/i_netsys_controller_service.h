@@ -22,6 +22,7 @@
 #include <netdb.h>
 #include <linux/if.h>
 
+#include "interface_type.h"
 #include "refbase.h"
 
 #include "netsys_controller_callback.h"
@@ -98,6 +99,14 @@ public:
      */
     virtual int32_t NetworkRemoveRoute(int32_t netId, const std::string &ifName, const std::string &destination,
         const std::string &nextHop) = 0;
+
+    /**
+     * @brief Get interface config
+     *
+     * @param iface Network port device name
+     * @return Return the result of this action
+     */
+    virtual int32_t InterfaceGetConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg) = 0;
 
     /**
      * @brief Turn off the device

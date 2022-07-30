@@ -16,7 +16,7 @@
 #ifndef COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H
 #define COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H
 
-#include <string>
+#include <iosfwd>
 #include <vector>
 
 namespace OHOS::NetManagerStandard::CommonUtils {
@@ -34,7 +34,7 @@ int8_t GetAddrFamily(const std::string &ip);
 
 int GetMaskLength(const std::string &mask);
 
-bool ParseInt(const char *str, int32_t *value);
+bool ParseInt(const std::string &str, int32_t *value);
 
 int64_t ConvertToInt64(const std::string& str);
 

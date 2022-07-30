@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NETLINK_MESSAGE_DECODER_H__
-#define NETLINK_MESSAGE_DECODER_H__
+#ifndef NETLINK_MESSAGE_DECODER_H
+#define NETLINK_MESSAGE_DECODER_H
 
 #include <string>
 
@@ -90,4 +90,4 @@ private:
 } // namespace nmd
 } // namespace OHOS
 
-#endif // NETLINK_MESSAGE_DECODER_H__
+#endif // NETLINK_MESSAGE_DECODER_H

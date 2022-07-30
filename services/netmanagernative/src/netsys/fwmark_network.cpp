@@ -139,7 +139,11 @@ void SendMessage(int32_t *serverSockfd)
         cmsghdr *const cmsgh = CMSG_FIRSTHDR(&message);
         if (cmsgh && cmsgh->cmsg_level == SOL_SOCKET && cmsgh->cmsg_type == SCM_RIGHTS &&
             cmsgh->cmsg_len == CMSG_LEN(sizeof(socketFd))) {
-            (void)memcpy_s(&socketFd, sizeof(socketFd), CMSG_DATA(cmsgh), sizeof(socketFd));
+            int rst = memcpy_s(&socketFd, sizeof(socketFd), CMSG_DATA(cmsgh), sizeof(socketFd));
+            if (rst != 0) {
+                NETNATIVE_LOGE("memcpy_s failed, rst: %{public}d", rst);
+                return;
+            }
         }
         if (socketFd < 0) {
             CloseSocket(&clientSockfd, ret, ERROR_CODE_SOCKETFD_INVALID);
@@ -163,7 +167,11 @@ void StartListener()
     int32_t serverSockfd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
     struct sockaddr_un serverAddr = {0};
     serverAddr.sun_family = AF_UNIX;
-    (void)strcpy_s(serverAddr.sun_path, sizeof(serverAddr.sun_path), FWMARK_SERVER_PATH.sun_path);
+    int ret = strcpy_s(serverAddr.sun_path, sizeof(serverAddr.sun_path), FWMARK_SERVER_PATH.sun_path);
+    if (ret != 0) {
+        NETNATIVE_LOGE("strcpy_s failed, ret: %{public}d", ret);
+        return;
+    }
     NETNATIVE_LOGI("FwmarkNetwork: address.sun_path: %{public}s", serverAddr.sun_path);
 
     int32_t result = bind(serverSockfd, reinterpret_cast<struct sockaddr *>(&serverAddr), sizeof(serverAddr));

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,21 @@
  * limitations under the License.
  */
 
-#include "netmanager_base_event_manager.h"
-
-#include <algorithm>
+#include "event_manager.h"
 
 #include "netmanager_base_log.h"
 #include "securec.h"
 
-namespace OHOS::NetManagerStandard {
+namespace OHOS {
+namespace NetManagerStandard {
+namespace {
 static constexpr const int CALLBACK_PARAM_NUM = 1;
-
 static constexpr const int ASYNC_CALLBACK_PARAM_NUM = 2;
+} // namespace
 
 EventManager::EventManager() : data_(nullptr) {}
 
-void EventManager::AddListener(napi_env env,
-                               const std::string &type,
-                               napi_value callback,
-                               bool once,
+void EventManager::AddListener(napi_env env, const std::string &type, napi_value callback, bool once,
                                bool asyncCallback)
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -113,4 +110,5 @@ UvWorkWrapper::UvWorkWrapper(void *theData, napi_env theEnv, std::string eventTy
     : data(theData), env(theEnv), type(std::move(eventType)), manager(eventManager)
 {
 }
-} // namespace OHOS::NetManagerStandard
+} // namespace NetManagerStandard
+} // namespace OHOS

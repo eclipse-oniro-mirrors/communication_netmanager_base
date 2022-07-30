@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,21 +18,22 @@
 
 #include <initializer_list>
 
-#include "netmanager_base_base_async_work.h"
-#include "netmanager_base_base_context.h"
+#include "base_async_work.h"
+#include "base_context.h"
 #include "netmanager_base_log.h"
 
 #define MAX_PARAM_NUM 64
 
-namespace OHOS::NetManagerStandard::ModuleTemplate {
-typedef void (*Finalizer)(napi_env, void *data, void *);
+namespace OHOS {
+namespace NetManagerStandard {
+namespace ModuleTemplate {
+namespace {
+using Finalizer = void (*)(napi_env env, void *data, void *);
+} // namespace
 
 template <class Context>
-napi_value Interface(napi_env env,
-                     napi_callback_info info,
-                     const std::string &asyncWorkName,
-                     bool (*Work)(napi_env, napi_value, Context *),
-                     AsyncWorkExecutor executor,
+napi_value Interface(napi_env env, napi_callback_info info, const std::string &asyncWorkName,
+                     bool (*Work)(napi_env, napi_value, Context *), AsyncWorkExecutor executor,
                      AsyncWorkCallback callback)
 {
     static_assert(std::is_base_of<BaseContext, Context>::value);
@@ -62,8 +63,8 @@ napi_value Interface(napi_env env,
 }
 
 template <class Context>
-napi_value
-    InterfaceWithOutAsyncWork(napi_env env, napi_callback_info info, bool (*Work)(napi_env, napi_value, Context *))
+napi_value InterfaceWithOutAsyncWork(napi_env env, napi_callback_info info,
+                                     bool (*Work)(napi_env, napi_value, Context *))
 {
     static_assert(std::is_base_of<BaseContext, Context>::value);
 
@@ -89,23 +90,20 @@ napi_value
     return NapiUtils::GetUndefined(env);
 }
 
-napi_value
-    On(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events, bool asyncCallback);
+napi_value On(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events,
+              bool asyncCallback);
 
-napi_value
-    Once(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events, bool asyncCallback);
+napi_value Once(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events,
+                bool asyncCallback);
 
 napi_value Off(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events);
 
-void DefineClass(napi_env env,
-                 napi_value exports,
-                 const std::initializer_list<napi_property_descriptor> &properties,
+void DefineClass(napi_env env, napi_value exports, const std::initializer_list<napi_property_descriptor> &properties,
                  const std::string &className);
 
-napi_value NewInstance(napi_env env,
-                       napi_callback_info info,
-                       const std::string &className,
-                       void *(*MakeData)(napi_env, size_t, napi_value *, EventManager *),
-                       Finalizer finalizer);
-} // namespace OHOS::NetManagerStandard::ModuleTemplate
-#endif /* COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_MODULE_TEMPLATE_H */
+napi_value NewInstance(napi_env env, napi_callback_info info, const std::string &className,
+                       void *(*MakeData)(napi_env, size_t, napi_value *, EventManager *), Finalizer finalizer);
+} // namespace ModuleTemplate
+} // namespace NetManagerStandard
+} // namespace OHOS
+#endif // COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_MODULE_TEMPLATE_H

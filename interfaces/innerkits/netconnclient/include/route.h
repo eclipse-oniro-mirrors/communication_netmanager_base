@@ -16,7 +16,12 @@
 #ifndef ROUTE_H
 #define ROUTE_H
 
+#include <iosfwd>
+#include <cstdint>
 #include <string>
+
+#include "parcel.h"
+#include "refbase.h"
 
 #include "inet_addr.h"
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,18 @@
 #include <iostream>
 #include <map>
 
+#include "netnative_log_wrapper.h"
+
 #include "dns_resolv_config.h"
+
+#if DNS_CONFIG_DEBUG
+#ifdef DNS_CONFIG_PRINT
+#undef DNS_CONFIG_PRINT
+#endif
+#define DNS_CONFIG_PRINT(fmt, ...) NETNATIVE_LOGI("DNS" fmt, ##__VA_ARGS__)
+#else
+#define DNS_CONFIG_PRINT(fmt, ...)
+#endif
 
 namespace OHOS::nmd {
 class DnsParamCache {
@@ -34,7 +45,7 @@ public:
 
     int32_t CreateCacheForNet(uint16_t netId);
 
-    void SetDefaultNetwork(int netId);
+    void SetDefaultNetwork(uint16_t netId);
 
     // for client
     void SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo);
@@ -49,7 +60,7 @@ public:
 private:
     std::mutex cacheMutex_;
 
-    std::atomic_int defaultNetId_;
+    std::atomic_uint defaultNetId_;
 
     std::map<uint16_t, DnsResolvConfig> serverConfigMap_;
 

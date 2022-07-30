@@ -15,6 +15,8 @@
 
 #include "net_policy_quota_policy.h"
 
+#include "parcel.h"
+
 namespace OHOS {
 namespace NetManagerStandard {
 bool NetPolicyQuotaPolicy::Marshalling(Parcel &parcel) const

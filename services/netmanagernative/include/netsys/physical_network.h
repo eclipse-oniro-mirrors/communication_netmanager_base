@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_PHYSICAL_NETWORK_H__
-#define INCLUDE_PHYSICAL_NETWORK_H__
+#ifndef INCLUDE_PHYSICAL_NETWORK_H
+#define INCLUDE_PHYSICAL_NETWORK_H
 
 #include <string>
 
@@ -72,4 +72,4 @@ private:
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // INCLUDE_PHYSICAL_NETWORK_H__
+#endif // INCLUDE_PHYSICAL_NETWORK_H

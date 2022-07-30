@@ -31,11 +31,11 @@ ohos_executable("test_netsys_native_manager") {
 
   deps = [
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
     "ability_base:want",
+    "c_utils:utils",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",

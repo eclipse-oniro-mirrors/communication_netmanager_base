@@ -15,6 +15,8 @@
 
 #include "dns_addr_info.h"
 
+#include "parcel.h"
+#include "refbase.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {

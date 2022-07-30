@@ -24,7 +24,6 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-const std::string DEFAULT_PORTAL_HTTPS_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
 constexpr int32_t HTTP_DETECTION_WAIT_TIME_MS = 10000;
 const std::string PORTAL_URL_REDIRECT_FIRST_CASE = "Location: ";
 const std::string PORTAL_URL_REDIRECT_SECOND_CASE = "http";

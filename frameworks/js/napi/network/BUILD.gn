@@ -15,40 +15,14 @@ import("//build/ohos.gni")
 
 SUBSYSTEM_DIR = "//foundation/communication"
 
-utils_source = [
-  "$SUBSYSTEM_DIR/netmanager_base/utils/base_context/src/netmanager_base_base_context.cpp",
-  "$SUBSYSTEM_DIR/netmanager_base/utils/common_utils/src/netmanager_base_common_utils.cpp",
-  "$SUBSYSTEM_DIR/netmanager_base/utils/event_manager/src/netmanager_base_event_listener.cpp",
-  "$SUBSYSTEM_DIR/netmanager_base/utils/event_manager/src/netmanager_base_event_manager.cpp",
-  "$SUBSYSTEM_DIR/netmanager_base/utils/module_template/src/netmanager_base_module_template.cpp",
-  "$SUBSYSTEM_DIR/netmanager_base/utils/napi_utils/src/netmanager_base_napi_utils.cpp",
-]
-
-utils_include = [
-  "$SUBSYSTEM_DIR/netmanager_base/utils/base_async_work/include",
-  "$SUBSYSTEM_DIR/netmanager_base/utils/base_context/include",
-  "$SUBSYSTEM_DIR/netmanager_base/utils/common_utils/include",
-  "$SUBSYSTEM_DIR/netmanager_base/utils/event_manager/include",
-  "$SUBSYSTEM_DIR/netmanager_base/utils/log/include",
-  "$SUBSYSTEM_DIR/netmanager_base/utils/module_template/include",
-  "$SUBSYSTEM_DIR/netmanager_base/utils/napi_utils/include",
-]
-
-common_include = [
-  "//foundation/arkui/napi/interfaces/kits",
-  "//foundation/arkui/napi",
-  "//third_party/libuv/include",
-  "//third_party/node/src",
-]
-
 common_deps = [
-  "//foundation/arkui/napi/:ace_napi",
+  "$SUBSYSTEM_DIR/netmanager_base/utils/napi_utils:napi_utils",
   "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
   "//third_party/libuv:uv_static",
-  "//utils/native/base:utils",
 ]
 
 common_external_deps = [
+  "c_utils:utils",
   "hiviewdfx_hilog_native:libhilog",
   "ipc:ipc_core",
 ]
@@ -67,8 +41,6 @@ ohos_shared_library("network") {
     "observer/include",
     "options/include",
   ]
-  include_dirs += utils_include
-  include_dirs += common_include
 
   sources = [
     "async_context/src/gettype_context.cpp",
@@ -79,7 +51,6 @@ ohos_shared_library("network") {
     "network_module/src/network_module.cpp",
     "observer/src/network_observer.cpp",
   ]
-  sources += utils_source
 
   deps = common_deps
   if (defined(global_parts_info) &&

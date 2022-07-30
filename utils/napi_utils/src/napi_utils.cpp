@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "netmanager_base_napi_utils.h"
+#include "napi_utils.h"
 
 #include <cstring>
 #include <initializer_list>
@@ -21,8 +21,12 @@
 
 #include "securec.h"
 
-namespace OHOS::NetManagerStandard::NapiUtils {
+namespace OHOS {
+namespace NetManagerStandard {
+namespace NapiUtils {
+namespace {
 static constexpr const int MAX_STRING_LENGTH = 65536;
+} // namespace
 
 napi_valuetype GetValueType(napi_env env, napi_value value)
 {
@@ -147,6 +151,40 @@ void SetInt32Property(napi_env env, napi_value object, const std::string &name, 
     napi_set_named_property(env, object, name.c_str(), jsValue);
 }
 
+/* INT64 */
+napi_value CreateInt64(napi_env env, int64_t code)
+{
+    napi_value value = nullptr;
+    if (napi_create_int64(env, code, &value) != napi_ok) {
+        return nullptr;
+    }
+    return value;
+}
+
+int64_t GetInt64Property(napi_env env, napi_value object, const std::string &propertyName)
+{
+    if (!HasNamedProperty(env, object, propertyName)) {
+        return 0;
+    }
+    napi_value value = GetNamedProperty(env, object, propertyName);
+    return GetInt64FromValue(env, value);
+}
+int64_t GetInt64FromValue(napi_env env, napi_value value)
+{
+    int64_t ret = 0;
+    NAPI_CALL_BASE(env, napi_get_value_int64(env, value, &ret), 0);
+    return ret;
+}
+void SetInt64Property(napi_env env, napi_value object, const std::string &name, int64_t value)
+{
+    napi_value jsValue = CreateInt64(env, value);
+    if (GetValueType(env, jsValue) != napi_number) {
+        return;
+    }
+
+    napi_set_named_property(env, object, name.c_str(), jsValue);
+}
+
 /* String UTF8 */
 napi_value CreateStringUtf8(napi_env env, const std::string &str)
 {
@@ -160,13 +198,11 @@ napi_value CreateStringUtf8(napi_env env, const std::string &str)
 std::string GetStringFromValueUtf8(napi_env env, napi_value value)
 {
     std::string result;
-    auto deleter = [](char *s) { free(reinterpret_cast<void *>(s)); };
-    std::unique_ptr<char, decltype(deleter)> str(static_cast<char *>(malloc(MAX_STRING_LENGTH)), deleter);
-    (void)memset_s(str.get(), MAX_STRING_LENGTH, 0, MAX_STRING_LENGTH);
+    char str[MAX_STRING_LENGTH] = {0};
     size_t length = 0;
-    NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, value, str.get(), MAX_STRING_LENGTH, &length), result);
+    NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, value, str, MAX_STRING_LENGTH, &length), result);
     if (length > 0) {
-        return result.append(str.get(), length);
+        return result.append(str, length);
     }
     return result;
 }
@@ -299,9 +335,15 @@ napi_value GetBoolean(napi_env env, bool value)
     return jsValue;
 }
 
+bool GetBooleanValue(napi_env env, napi_value value)
+{
+    bool ret = false;
+    NAPI_CALL_BASE(env, napi_get_value_bool(env, value, &ret), 0);
+    return ret;
+}
+
 /* define properties */
-void DefineProperties(napi_env env,
-                      napi_value object,
+void DefineProperties(napi_env env, napi_value object,
                       const std::initializer_list<napi_property_descriptor> &properties)
 {
     napi_property_descriptor descriptors[properties.size()];
@@ -374,4 +416,16 @@ void CloseScope(napi_env env, napi_handle_scope scope)
 {
     (void)napi_close_handle_scope(env, scope);
 }
-} // namespace OHOS::NetManagerStandard::NapiUtils
+
+napi_value CreateEnumConstructor(napi_env env, napi_callback_info info)
+{
+    napi_value thisArg = nullptr;
+    void *data = nullptr;
+    napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, &data);
+    napi_value global = nullptr;
+    napi_get_global(env, &global);
+    return thisArg;
+}
+} // namespace NapiUtils
+} // namespace NetManagerStandard
+} // namespace OHOS

@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "net_mgr_log_wrapper.h"
 #include "route.h"
+
+#include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {

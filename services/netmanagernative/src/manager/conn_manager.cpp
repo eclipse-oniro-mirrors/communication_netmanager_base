@@ -30,6 +30,7 @@ constexpr int32_t INTERFACE_UNSET = -1;
 ConnManager::ConnManager()
 {
     networks_[LOCAL_NET_ID] = std::make_shared<LocalNetwork>(LOCAL_NET_ID);
+    defaultNetId_ = 0;
 }
 
 ConnManager::~ConnManager()

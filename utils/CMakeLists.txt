@@ -15,9 +15,9 @@ add_library(
     netmanager_base_utils
     SHARED
     common_utils/src/netmanager_base_common_utils.cpp
-    napi_utils/src/netmanager_base_napi_utils.cpp
-    event_manager/src/netmanager_base_event_listener.cpp
-    event_manager/src/netmanager_base_event_manager.cpp
-    base_context/src/netmanager_base_base_context.cpp
-    module_template/src/netmanager_base_module_template.cpp
+    napi_utils/src/napi_utils.cpp
+    napi_utils/src/event_listener.cpp
+    napi_utils/src/event_manager.cpp
+    napi_utils/src/base_context.cpp
+    napi_utils/src/module_template.cpp
 )

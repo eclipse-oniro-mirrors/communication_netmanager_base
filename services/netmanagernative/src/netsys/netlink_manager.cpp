@@ -80,7 +80,7 @@ int32_t NetlinkManager::UnRegisterNetlinkCallback(sptr<NetsysNative::INotifyCall
     return NetlinkResult::ERR_INVALID_PARAM;
 }
 
-std::unique_ptr<NetlinkProcessor> NetlinkManager::SetSocket(int32_t &sock, int32_t netlinkType, int32_t groups,
+std::unique_ptr<NetlinkProcessor> NetlinkManager::SetSocket(int32_t &sock, int32_t netlinkType, uint32_t groups,
                                                             int32_t format, bool configNflog)
 {
     sockaddr_nl nladdr;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _NETSYS_NETLINK_PROCESSOR_H
-#define _NETSYS_NETLINK_PROCESSOR_H
+#ifndef NETSYS_NETLINK_PROCESSOR_H
+#define NETSYS_NETLINK_PROCESSOR_H
 
 #include "i_notify_callback.h"
 #include "netlink_message_decoder.h"
@@ -63,4 +63,4 @@ private:
 } // namespace nmd
 } // namespace OHOS
 
-#endif // _NETSYS_NETLINK_PROCESSOR_H
+#endif // NETSYS_NETLINK_PROCESSOR_H

@@ -17,7 +17,7 @@
 
 #include "constant.h"
 #include "netmanager_base_log.h"
-#include "netmanager_base_napi_utils.h"
+#include "napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
 BindSocketContext::BindSocketContext(napi_env env, EventManager *manager)

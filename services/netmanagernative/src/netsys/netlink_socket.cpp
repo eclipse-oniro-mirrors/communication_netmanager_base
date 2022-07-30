@@ -225,10 +225,10 @@ int32_t ProcessNetlinkDump(int32_t sock, const NetlinkDumpCallback &callback)
 // It is used to extract the information returned by the kernel and decide whether to delete the configuration.
 uint32_t GetRtmU32Attribute(const nlmsghdr *nlh, int32_t attribute)
 {
-    uint32_t rta_len = RTM_PAYLOAD(nlh);
+    uint32_t rtaLen = RTM_PAYLOAD(nlh);
     rtmsg *msg = reinterpret_cast<rtmsg *>(NLMSG_DATA(nlh));
     rtattr *rta = reinterpret_cast<rtattr *> RTM_RTA(msg);
-    for (; RTA_OK(rta, rta_len); rta = RTA_NEXT(rta, rta_len)) {
+    for (; RTA_OK(rta, rtaLen); rta = RTA_NEXT(rta, rtaLen)) {
         if (rta->rta_type == attribute) {
             return *(reinterpret_cast<uint32_t *>(RTA_DATA(rta)));
         }
