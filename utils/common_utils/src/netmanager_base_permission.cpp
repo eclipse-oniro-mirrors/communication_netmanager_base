@@ -39,7 +39,9 @@ bool NetManagerPermission::CheckPermission(const std::string &permissionName)
     int result = Security::AccessToken::PERMISSION_DENIED;
 
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        result = Security::AccessToken::AccessTokenKit::VerifyNativeToken(callerToken, permissionName);
+#ifdef NETMANAGER_SUPPORT_NATIVE_PERMISSION
+        result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
+#endif
     } else if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
         result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
     } else {
