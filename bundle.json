@@ -45,30 +45,36 @@
             ]
         },
         "build": {
-            "sub_component": [
-                "//foundation/communication/netmanager_base/services/netmanagernative:netsys_native_manager",
-                "//foundation/communication/netmanager_base/services/netmanagernative/fwmarkclient:fwmark_client",
-                "//foundation/communication/netmanager_base/services/netmanagernative/netsys_client:netsys_client",
-                "//foundation/communication/netmanager_base/services/netsyscontroller:netsys_controller",
-                "//foundation/communication/netmanager_base/services/netconnmanager:net_conn_manager",
-                "//foundation/communication/netmanager_base/services/dnsresolvermanager:dns_resolver_manager",
-                "//foundation/communication/netmanager_base/services/netpolicymanager:net_policy_manager",
-                "//foundation/communication/netmanager_base/services/netstatsmanager:net_stats_manager",
-                "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
-                "//foundation/communication/netmanager_base/interfaces/innerkits/dnsresolverclient:dns_resolver_manager_if",
-                "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient:net_policy_manager_if",
-                "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient:net_stats_manager_if",
-                "//foundation/communication/netmanager_base/utils:net_manager_common",
-                "//foundation/communication/netmanager_base/services/etc/init:netmanager_base.rc",
-                "//foundation/communication/netmanager_base/services/etc/init:netsysnative.rc",
-                "//foundation/communication/netmanager_base/services/etc/init:resolv.conf",
-                "//foundation/communication/netmanager_base/services/etc/init:xtables.lock",
-                "//foundation/communication/netmanager_base/sa_profile:net_manager_profile",
-                "//foundation/communication/netmanager_base/frameworks/js/napi/netpolicy:policy",
-                "//foundation/communication/netmanager_base/frameworks/js/napi/netstats:statistics",
-                "//foundation/communication/netmanager_base/frameworks/js/napi/connection:connection",
-                "//foundation/communication/netmanager_base/frameworks/js/napi/network:network"
-            ],
+            "group_type": {
+                "base_group": [
+                ],
+                "fwk_group": [
+                    "//foundation/communication/netmanager_base/utils:net_manager_common",
+                    "//foundation/communication/netmanager_base/frameworks/js/napi/connection:connection",
+                    "//foundation/communication/netmanager_base/frameworks/js/napi/network:network",
+                    "//foundation/communication/netmanager_base/frameworks/js/napi/netpolicy:policy",
+                    "//foundation/communication/netmanager_base/frameworks/js/napi/netstats:statistics",
+                    "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
+                    "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient:net_policy_manager_if",
+                    "//foundation/communication/netmanager_base/interfaces/innerkits/dnsresolverclient:dns_resolver_manager_if",
+                    "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient:net_stats_manager_if"
+                ],
+                "service_group": [
+                    "//foundation/communication/netmanager_base/services/netmanagernative:netsys_native_manager",
+                    "//foundation/communication/netmanager_base/services/netmanagernative/fwmarkclient:fwmark_client",
+                    "//foundation/communication/netmanager_base/services/netmanagernative/netsys_client:netsys_client",
+                    "//foundation/communication/netmanager_base/services/netsyscontroller:netsys_controller",
+                    "//foundation/communication/netmanager_base/services/netconnmanager:net_conn_manager",
+                    "//foundation/communication/netmanager_base/services/dnsresolvermanager:dns_resolver_manager",
+                    "//foundation/communication/netmanager_base/services/netpolicymanager:net_policy_manager",
+                    "//foundation/communication/netmanager_base/services/netstatsmanager:net_stats_manager",
+                    "//foundation/communication/netmanager_base/services/etc/init:netmanager_base.rc",
+                    "//foundation/communication/netmanager_base/services/etc/init:netsysnative.rc",
+                    "//foundation/communication/netmanager_base/services/etc/init:resolv.conf",
+                    "//foundation/communication/netmanager_base/services/etc/init:xtables.lock",
+                    "//foundation/communication/netmanager_base/sa_profile:net_manager_profile"
+                ]
+            },
             "inner_kits": [
                 {
                     "type": "so",
