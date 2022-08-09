@@ -30,7 +30,14 @@ namespace OHOS::NetManagerStandard::CommonUtils {
 constexpr int32_t INET_OPTION_SUC = 1;
 constexpr uint32_t CONST_MASK = 0x80000000;
 constexpr size_t MAX_DISPLAY_NUM = 2;
-
+constexpr uint32_t IPV4_DOT_NUM = 3;
+constexpr int32_t MIN_BYTE = 0;
+constexpr int32_t MAX_BYTE = 255;
+constexpr uint32_t BIT_NUM_BYTE = 8;
+constexpr int32_t BITS_24 = 24;
+constexpr int32_t BITS_16 = 16;
+constexpr int32_t BITS_8 = 8;
+const std::string IPADDR_DELIMITER = ".";
 const std::regex IP_PATTERN {
     "((2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)\\.){3}(2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)"
 };
@@ -133,6 +140,51 @@ int GetMaskLength(const std::string &mask)
         maskTmp = (maskTmp << 1);
     }
     return netMask;
+}
+
+std::string ConvertIpv4Address(uint32_t addressIpv4)
+{
+    if (addressIpv4 == 0) {
+        return "";
+    }
+
+    std::ostringstream stream;
+    stream << ((addressIpv4 >> BITS_24) & 0xFF) << IPADDR_DELIMITER
+           << ((addressIpv4 >> BITS_16) & 0xFF) << IPADDR_DELIMITER
+           << ((addressIpv4 >> BITS_8) & 0xFF) << IPADDR_DELIMITER
+           << (addressIpv4 & 0xFF);
+    return stream.str();
+}
+
+uint32_t ConvertIpv4Address(const std::string &address)
+{
+    std::string tmpAddress = address;
+    uint32_t addrInt = 0;
+    uint32_t i = 0;
+    for (i = 0; i < IPV4_DOT_NUM; i++) {
+        std::string::size_type npos = tmpAddress.find(IPADDR_DELIMITER);
+        if (npos == std::string::npos) {
+            break;
+        }
+        const auto &value = tmpAddress.substr(0, npos);
+        uint32_t tmp = std::atoi(value.c_str());
+        if ((tmp < MIN_BYTE) || (tmp > MAX_BYTE)) {
+            break;
+        }
+        addrInt += tmp << ((IPV4_DOT_NUM - i) * BIT_NUM_BYTE);
+        tmpAddress = tmpAddress.substr(npos + 1);
+    }
+
+    if (i != IPV4_DOT_NUM) {
+        return 0;
+    }
+    int tmp = std::atoi(tmpAddress.c_str());
+    if ((tmp < MIN_BYTE) || (tmp > MAX_BYTE)) {
+        return 0;
+    }
+    addrInt += tmp;
+
+    return addrInt;
 }
 
 bool ParseInt(const std::string &str, int32_t *value)

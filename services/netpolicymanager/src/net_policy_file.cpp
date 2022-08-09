@@ -190,7 +190,8 @@ void NetPolicyFile::AppendCellularPolicy(Json::Value &root)
         cellularPolicy[CONFIG_CELLULAR_POLICY_SUBSCRIBERID] = netPolicy_.netCellularPolicys[i].simId;
         cellularPolicy[CONFIG_CELLULAR_POLICY_PERIODSTARTTIME] =
             netPolicy_.netCellularPolicys[i].periodStartTime;
-        cellularPolicy[CONFIG_CELLULAR_POLICY_PERIODDURATION] = netPolicy_.netCellularPolicys[i].periodDuration;
+        cellularPolicy[CONFIG_CELLULAR_POLICY_PERIODDURATION] = netPolicy_.netCellularPolicys[i]
+            .periodDuration;
         cellularPolicy[CONFIG_CELLULAR_POLICY_TITLE] = netPolicy_.netCellularPolicys[i].title;
         cellularPolicy[CONFIG_CELLULAR_POLICY_SUMMARY] = netPolicy_.netCellularPolicys[i].summary;
         cellularPolicy[CONFIG_CELLULAR_POLICY_LIMITBYTES] = netPolicy_.netCellularPolicys[i].limitBytes;
@@ -583,7 +584,7 @@ bool NetPolicyFile::InitPolicy()
     std::string content;
     if (!ReadFile(POLICY_FILE_NAME, content)) {
         if (!CreateFile(POLICY_FILE_NAME)) {
-            NETMGR_LOG_D("CreateFile [%{public}s] failed", POLICY_FILE_NAME.c_str());
+            NETMGR_LOG_D("CreateFile [%{public}s] failed", POLICY_FILE_NAME);
             return false;
         }
     }

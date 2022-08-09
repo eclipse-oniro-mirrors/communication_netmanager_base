@@ -53,19 +53,21 @@ static std::istream& operator>>(std::istream& str, CSVRow& data)
 
 void CSVRow::ReadNextRow(std::istream& str)
 {
-    std::string line;
-    std::getline(str, line);
+    std::string content;
+    std::string space;
+    const char sep = ',';
+    const char* emptyStr = "";
 
-    std::stringstream lineStream(line);
-    std::string cell;
+    std::getline(str, content);
+    std::stringstream stream(content);
 
     data_.clear();
-    while (std::getline(lineStream, cell, ',')) {
-        data_.push_back(cell);
+    while (std::getline(stream, space, sep)) {
+        data_.emplace_back(space);
     }
 
-    if (!lineStream && cell.empty()) {
-        data_.push_back("");
+    if (!stream && space.empty()) {
+        data_.emplace_back(emptyStr);
     }
 }
 

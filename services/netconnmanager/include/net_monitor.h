@@ -25,10 +25,10 @@
 namespace OHOS {
 namespace NetManagerStandard {
 constexpr int32_t HTTP_DETECTION_WAIT_TIME_MS = 10000;
-const std::string PORTAL_URL_REDIRECT_FIRST_CASE = "Location: ";
-const std::string PORTAL_URL_REDIRECT_SECOND_CASE = "http";
-const std::string CONTENT_STR = "Content-Length:";
-const std::string PORTAL_END_STR = "?";
+constexpr const char *PORTAL_URL_REDIRECT_FIRST_CASE = "Location: ";
+constexpr const char *PORTAL_URL_REDIRECT_SECOND_CASE = "http";
+constexpr const char *CONTENT_STR = "Content-Length:";
+constexpr const char *PORTAL_END_STR = "?";
 constexpr int32_t PORTAL_CONTENT_LENGTH_MIN = 4;
 constexpr int32_t NET_CONTENT_LENGTH = 6;
 
