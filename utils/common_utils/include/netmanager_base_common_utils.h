@@ -18,6 +18,7 @@
 
 #include <iosfwd>
 #include <vector>
+#include <sstream>
 
 namespace OHOS::NetManagerStandard::CommonUtils {
 std::vector<std::string> Split(const std::string &str, const std::string &sep);
@@ -33,6 +34,10 @@ bool IsValidIPV6(const std::string &ip);
 int8_t GetAddrFamily(const std::string &ip);
 
 int GetMaskLength(const std::string &mask);
+
+std::string ConvertIpv4Address(uint32_t addressIpv4);
+
+uint32_t ConvertIpv4Address(const std::string &address);
 
 bool ParseInt(const std::string &str, int32_t *value);
 

@@ -170,7 +170,7 @@ bool NetPolicyTraffic::IsNetPolicyPeriodDurationValid(const std::string &periodD
     }
 
     std::string subString = periodDuration.substr(0, PERIODDURATION_POS_NUM_ONE);
-    if (subString != POLICY_QUOTA_MONTH_U && subString != POLICY_QUOTA_MONTH_L) {
+    if (subString.compare(POLICY_QUOTA_MONTH_U) && subString.compare(POLICY_QUOTA_MONTH_L)) {
         NETMGR_LOG_E("periodDuration must Mx");
         return false;
     }

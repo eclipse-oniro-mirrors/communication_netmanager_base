@@ -32,8 +32,8 @@ enum routeLocalNetId {
     LOCAL_NET_ID = 99
 };
 
-const std::string NEXTHOP_UNREACHABLE = "unreachable";
-const std::string NEXTHOP_THROW = "throw";
+constexpr const char *NEXTHOP_UNREACHABLE = "unreachable";
+constexpr const char *NEXTHOP_THROW = "throw";
 
 class RouteUtils {
 public:

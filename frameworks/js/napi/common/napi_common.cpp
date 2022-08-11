@@ -21,25 +21,25 @@ namespace NetManagerStandard {
 bool NapiCommon::IsValidEvent(const std::string &eventInfo, int32_t &eventId)
 {
     bool isEvent = true;
-    if (eventInfo == NET_UID_POLICY_CHANGE) {
+    if (!eventInfo.compare(NET_UID_POLICY_CHANGE)) {
         eventId = EVENT_NET_UID_POLICY_CHANGE;
-    } else if (eventInfo == NET_CELLULAR_POLICY_CHANGE) {
+    } else if (!eventInfo.compare(NET_CELLULAR_POLICY_CHANGE)) {
         eventId = EVENT_NET_CELLULAR_POLICY_CHANGE;
-    } else if (eventInfo == NET_STRATEGY_SWITCH_CHANGE) {
+    } else if (!eventInfo.compare(NET_STRATEGY_SWITCH_CHANGE)) {
         eventId = EVENT_NET_STRATEGY_SWITCH_CHANGE;
-    } else if (eventInfo == NET_AVAILABLE_CHANGE) {
+    } else if (!eventInfo.compare(NET_AVAILABLE_CHANGE)) {
         eventId = EVENT_NET_AVAILABLE_CHANGE;
-    } else if (eventInfo == NET_CAPABILITIES_CHANGE) {
+    } else if (!eventInfo.compare(NET_CAPABILITIES_CHANGE)) {
         eventId = EVENT_NET_CAPABILITIES_CHANGE;
-    } else if (eventInfo == NET_CONNECTION_CHANGE) {
+    } else if (!eventInfo.compare(NET_CONNECTION_CHANGE)) {
         eventId = EVENT_NET_CONNECTION_CHANGE;
-    } else if (eventInfo == NET_LOST_CHANGE) {
+    } else if (!eventInfo.compare(NET_LOST_CHANGE)) {
         eventId = EVENT_NET_LOST_CHANGE;
-    } else if (eventInfo == NET_STATS_CHANGE) {
+    } else if (!eventInfo.compare(NET_STATS_CHANGE)) {
         eventId = EVENT_NET_STATS_CHANGE;
-    } else if (eventInfo == NET_BLOCK_STATUS_CHANGE) {
+    } else if (!eventInfo.compare(NET_BLOCK_STATUS_CHANGE)) {
         eventId = EVENT_NET_BLOCK_STATUS_CHANGE;
-    } else if (eventInfo == NET_UNAVAILABLE_CHANGE) {
+    } else if (!eventInfo.compare(NET_UNAVAILABLE_CHANGE)) {
         eventId = EVENT_NET_UNAVAILABLE_CHANGE;
     } else {
         isEvent = false;

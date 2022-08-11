@@ -48,9 +48,9 @@ public:
         uint32_t start, uint32_t end, const NetStatsInfo &stats) override;
     NetStatsResultCode UpdateStatsData() override;
     NetStatsResultCode ResetFactory() override;
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
 private:
     bool Init();
-    void InitListener();
 
 private:
     enum ServiceRunningState {

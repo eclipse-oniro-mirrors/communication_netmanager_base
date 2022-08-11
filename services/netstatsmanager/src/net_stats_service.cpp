@@ -76,7 +76,7 @@ void NetStatsService::OnStart()
         return;
     }
 
-    InitListener();
+    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
     updateStatsTimer_.Start(INTERVAL_UPDATE_STATS_TIME_MS, UpdateStatsTimer);
 
     state_ = STATE_RUNNING;
@@ -125,7 +125,7 @@ bool NetStatsService::Init()
     return true;
 }
 
-void NetStatsService::InitListener()
+void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_NETMANAGER_NETSTATES_LIMITED);
