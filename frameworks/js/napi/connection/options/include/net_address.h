@@ -17,10 +17,8 @@
 #define COMMUNICATIONNETMANAGER_BASE_NET_ADDRESS_H
 
 #include <arpa/inet.h>
-#include <cstdint>
 #include <string>
 #include <iosfwd>
-#include "bits/alltypes.h"
 
 namespace OHOS::NetManagerStandard {
 class NetAddress final {
