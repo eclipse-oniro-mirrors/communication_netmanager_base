@@ -17,88 +17,85 @@
 #define NET_MONITOR_H
 
 #include <mutex>
+#include <condition_variable>
 #include <thread>
-
-#include "http_request.h"
 #include "net_conn_types.h"
-
+#include "refbase.h"
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr int32_t HTTP_DETECTION_WAIT_TIME_MS = 10000;
-constexpr const char *PORTAL_URL_REDIRECT_FIRST_CASE = "Location: ";
-constexpr const char *PORTAL_URL_REDIRECT_SECOND_CASE = "http";
-constexpr const char *CONTENT_STR = "Content-Length:";
-constexpr const char *PORTAL_END_STR = "?";
-constexpr int32_t PORTAL_CONTENT_LENGTH_MIN = 4;
-constexpr int32_t NET_CONTENT_LENGTH = 6;
-
-class NetMonitor {
+class NetMonitor : public virtual RefBase {
 public:
-    NetMonitor(NetDetectionStateHandler handle);
-    virtual ~NetMonitor();
     /**
-     * @brief : Start NetMonitor thread
-     * @Return success : NET_OPT_SUCCESS  failed : NET_OPT_FAILED
+     * Construct a new NetMonitor to detection a network
+     *
+     * @param netId Detection network's id
+     * @param handle NetDetectionState's handle
      */
-    ResultCode InitNetMonitorThread();
+    NetMonitor(uint32_t netId, NetDetectionStateHandler handle);
 
     /**
-     * @brief : Trigger thread to perform network detection
-     * @param ifaceName
-     */
-    void SignalNetMonitorThread(const std::string &ifaceName);
-
-    /**
-     * @brief : stop the NetMonitor processing thread.
+     * Destroy the NetMonitor
      *
      */
-    void StopNetMonitorThread();
+    virtual ~NetMonitor();
+
+    /**
+     * Start detection
+     *
+     */
+    void Start(bool needReport);
+
+    /**
+     * Stop detecting
+     *
+     */
+    void Stop();
+
+    /**
+     * Determine NetMonitor is detecting or not
+     *
+     * @return bool NetMonitor is detecting or not
+     */
+    bool IsDetecting() const;
+
+    /**
+     * Get current detection result
+     *
+     * @return Current detection result
+     */
+    NetDetectionStatus GetDetectionResult() const;
 
 private:
-    /**
-     * @brief : Detect Internet ability
-     * @return true http detection success, false http detection failed
-     */
-    bool HttpDetection();
+    void Detection();
 
-    /**
-     * @brief : NetMonitor thread function
-     */
-    void RunNetMonitorThreadFunc();
+    NetDetectionStatus SendParallelHttpProbes();
 
-    /**
-     * @brief : Exit the NetMonitor thread.
-     *
-     */
-    void ExitNetMonitorThread();
+    NetDetectionStatus SendHttpProbe(const std::string &defaultDomain, const std::string &defaultUrl,
+        const uint16_t defaultPort);
 
-    /**
-     * @brief Get the Status Code From Response object
-     *
-     * @param strResponse
-     * @return int32_t Returns -1, strResponse is invalid; otherwise returns statusCode
-     */
     int32_t GetStatusCodeFromResponse(const std::string &strResponse);
 
-    /**
-     * @brief Get the Url Redirect From Response object
-     *
-     * @param strResponse  Response data obtained from the server
-     * @param urlRedirect    The redirected url obtained from the response data
-     * @return int32_t Returns 0, get urlRedirect; returns -1, urlRedirect is empty
-     */
     int32_t GetUrlRedirectFromResponse(const std::string &strResponse, std::string &urlRedirect);
 
+    NetDetectionStatus dealRecvResult(const std::string &strResponse, int32_t sockFd);
+
+    int32_t ParseUrl(const std::string &url, std::string &domain, std::string &urlPath);
+
+    int32_t GetIpAddr(const char *domain, char *ip_addr, struct hostent &ipHost);
+
+    int32_t SetSocketParameter(int32_t sockFd);
 private:
-    std::mutex mutex_;
-    std::condition_variable condition_;
-    std::condition_variable conditionTimeout_;
-    bool isStopNetMonitor_;
-    bool isExitNetMonitorThread_;
-    std::unique_ptr<std::thread> netMonitorThread_;
+    uint32_t netId_;
+    bool detecting_ = false;
+    std::mutex detectionMtx_;
+    std::condition_variable detectionCond_;
+    std::thread detectionThread_;
+    NetDetectionStatus result_;
+    uint32_t detectionDelay_ = 0;
+    uint32_t detectionSteps_ = 0;
     NetDetectionStateHandler netDetectionStatus_;
-    NetDetectionStatus lastDetectionState_;
-    std::string ifaceName_;
+    std::string portalUrlRedirect_;
+    bool needReport_ = false;
 };
 }  // namespace NetManagerStandard
 }  // namespace OHOS

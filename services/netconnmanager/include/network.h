@@ -45,17 +45,16 @@ public:
     void UpdateMtu(const NetLinkInfo &netLinkInfo);
     void RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
     int32_t UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
-    void StartNetDetection();
+    void StartNetDetection(bool needReport);
     uint64_t GetNetWorkMonitorResult();
     void SetDefaultNetWork();
     void ClearDefaultNetWorkNetId();
-    void SetExternDetection();
 
 private:
     void StopNetDetection();
     bool CreateBasicNetwork();
     bool ReleaseBasicNetwork();
-    void StartDetectionThread();
+    void InitNetMonitor();
     void HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect);
     void NotifyNetDetectionResult(NetDetectionResultCode detectionResult, const std::string &urlRedirect);
     int32_t Ipv4PrefixLen(const std::string &ip);
@@ -68,10 +67,7 @@ private:
     bool isPhyNetCreated_ = false;
     std::unique_ptr<NetMonitor> netMonitor_ = nullptr;
     NetDetectionHandler  netCallback_;
-    NetDetectionStatus netDetectionState_;
-    std::string urlRedirect_;
     std::vector<sptr<INetDetectionCallback>> netDetectionRetCallback_;
-    bool isExternDetection_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
