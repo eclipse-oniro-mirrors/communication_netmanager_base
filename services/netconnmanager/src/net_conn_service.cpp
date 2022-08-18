@@ -456,8 +456,7 @@ int32_t NetConnService::NetDetection(int32_t netId)
         NETMGR_LOG_E("Network is not find, need register!");
         return ERR_NET_NOT_FIND_NETID;
     }
-    detectionNetwork->SetExternDetection();
-    detectionNetwork->StartNetDetection();
+    detectionNetwork->StartNetDetection(true);
     return ERR_NONE;
 }
 

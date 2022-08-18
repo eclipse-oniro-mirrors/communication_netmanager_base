@@ -23,16 +23,13 @@ namespace NetManagerStandard {
 Network::Network(int32_t netId, uint32_t supplierId, NetDetectionHandler handler)
     : netId_(netId), supplierId_(supplierId), netCallback_(handler)
 {
-    StartDetectionThread();
+    InitNetMonitor();
 }
 
 Network::~Network()
 {
     if (!ReleaseBasicNetwork()) {
         NETMGR_LOG_E("ReleaseBasicNetwork fail.");
-    }
-    if (netMonitor_ != nullptr) {
-        netMonitor_->StopNetMonitorThread();
     }
 }
 
@@ -101,7 +98,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateDnses(netLinkInfo);
     UpdateMtu(netLinkInfo);
     netLinkInfo_ = netLinkInfo;
-    StartNetDetection();
+    StartNetDetection(false);
     return true;
 }
 
@@ -281,11 +278,11 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
     return ERR_NONE;
 }
 
-void Network::StartNetDetection()
+void Network::StartNetDetection(bool needReport)
 {
     NETMGR_LOG_D("Enter Network::StartNetDetection");
     if (netMonitor_ != nullptr) {
-        netMonitor_->SignalNetMonitorThread(netLinkInfo_.ifaceName_);
+        netMonitor_->Start(needReport);
     }
 }
 
@@ -293,51 +290,32 @@ void Network::StopNetDetection()
 {
     NETMGR_LOG_D("Enter Network::StopNetDetection");
     if (netMonitor_ != nullptr) {
-        netMonitor_->StopNetMonitorThread();
+        netMonitor_->Stop();
     }
 }
 
-void Network::SetExternDetection()
+void Network::InitNetMonitor()
 {
-    isExternDetection_ = true;
-}
-
-void Network::StartDetectionThread()
-{
-    netDetectionState_ = INVALID_DETECTION_STATE;
-    netMonitor_ = std::make_unique<NetMonitor>(
+    netMonitor_ = std::make_unique<NetMonitor>(netId_,
         std::bind(&Network::HandleNetMonitorResult, this, std::placeholders::_1, std::placeholders::_2));
     if (netMonitor_ == nullptr) {
         NETMGR_LOG_E("make_unique NetMonitor failed,netMonitor_ is null!");
         return;
     }
-    netMonitor_->InitNetMonitorThread();
 }
 
 uint64_t Network::GetNetWorkMonitorResult()
 {
-    return netDetectionState_;
+    return netMonitor_->GetDetectionResult();
 }
 
 void Network::HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
 {
-    NETMGR_LOG_D("HandleNetMonitorResult, oldState[%{public}d], newState[%{public}d], isExternDetection[%{public}d]",
-                 netDetectionState_, netDetectionState, isExternDetection_);
-    bool needReport = false;
-    if (netDetectionState_ != netDetectionState || isExternDetection_) {
-        needReport = true;
-        isExternDetection_ = false;
+    NETMGR_LOG_D("HandleNetMonitorResult, netDetectionState[%{public}d]", netDetectionState);
+    NotifyNetDetectionResult(NetDetectionResultConvert(static_cast<int32_t>(netDetectionState)), urlRedirect);
+    if (netCallback_) {
+        netCallback_(supplierId_, netDetectionState == VERIFICATION_STATE);
     }
-    if (needReport) {
-        NETMGR_LOG_D("need to report net detection result.");
-        NotifyNetDetectionResult(NetDetectionResultConvert(static_cast<int32_t>(netDetectionState)), urlRedirect);
-        if (netCallback_) {
-            netCallback_(supplierId_, netDetectionState == VERIFICATION_STATE);
-        }
-    }
-    netDetectionState_ = netDetectionState;
-    urlRedirect_ = urlRedirect;
-    NETMGR_LOG_D("HandleNetMonitorResult out.");
 }
 
 void Network::NotifyNetDetectionResult(NetDetectionResultCode detectionResult, const std::string &urlRedirect)
