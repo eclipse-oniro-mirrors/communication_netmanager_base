@@ -32,7 +32,10 @@ public:
 private:
     using ServiceInterface = int32_t (NetsysNativeServiceStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, ServiceInterface> opToInterfaceMap_;
-
+#ifdef BUILD_POLYCY_NETSYS
+    void InitBandwidthOpToInterfaceMap();
+    void InitFirewallOpToInterfaceMap();
+#endif
     int32_t CmdEchoServer(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetResolverConfigParcel(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply);
@@ -76,6 +79,19 @@ private:
     int32_t CmdDisableNat(MessageParcel &data, MessageParcel &reply);
     int32_t CmdIpfwdAddInterfaceForward(MessageParcel &data, MessageParcel &reply);
     int32_t CmdIpfwdRemoveInterfaceForward(MessageParcel &data, MessageParcel &reply);
+#ifdef BUILD_POLYCY_NETSYS
+    int32_t CmdBandwidthEnableDataSaver(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdBandwidthSetIfaceQuota(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdBandwidthRemoveIfaceQuota(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdBandwidthAddDeniedList(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdBandwidthRemoveDeniedList(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdBandwidthAddAllowedList(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdBandwidthRemoveAllowedList(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdFirewallSetUidsAllowedListChain(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdFirewallSetUidsDeniedListChain(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdFirewallEnableChain(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdFirewallSetUidRule(MessageParcel &data, MessageParcel &reply);
+#endif
 };
 } // namespace NetsysNative
 } // namespace OHOS
