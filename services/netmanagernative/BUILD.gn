@@ -25,6 +25,7 @@ ohos_shared_library("netsys_native_manager") {
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/bandwidth_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/conn_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/dns_manager.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/manager/firewall_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/interface_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/route_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/sharing_manager.cpp",
