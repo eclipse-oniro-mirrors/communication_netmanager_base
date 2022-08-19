@@ -36,13 +36,13 @@ public:
     {}
 
     /**
-     * @brief Init netsys service proxy
+     * Init netsys service proxy
      *
      */
     virtual void Init() = 0;
 
     /**
-     * @brief Create a physical network
+     * Create a physical network
      *
      * @param netId
      * @param permission Permission to create a physical network
@@ -51,7 +51,7 @@ public:
     virtual int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) = 0;
 
     /**
-     * @brief Destroy the network
+     * Destroy the network
      *
      * @param netId
      * @return Return the return value of the netsys interface call
@@ -59,7 +59,7 @@ public:
     virtual int32_t NetworkDestroy(int32_t netId) = 0;
 
     /**
-     * @brief Add network port device
+     * Add network port device
      *
      * @param netId
      * @param iface Network port device name
@@ -68,7 +68,7 @@ public:
     virtual int32_t NetworkAddInterface(int32_t netId, const std::string &iface) = 0;
 
     /**
-     * @brief Delete network port device
+     * Delete network port device
      *
      * @param netId
      * @param iface Network port device name
@@ -77,7 +77,7 @@ public:
     virtual int32_t NetworkRemoveInterface(int32_t netId, const std::string &iface) = 0;
 
     /**
-     * @brief Add route
+     * Add route
      *
      * @param netId
      * @param ifName Network port device name
@@ -89,7 +89,7 @@ public:
         const std::string &nextHop) = 0;
 
     /**
-     * @brief Remove route
+     * Remove route
      *
      * @param netId
      * @param ifName Network port device name
@@ -109,7 +109,7 @@ public:
     virtual int32_t InterfaceGetConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg) = 0;
 
     /**
-     * @brief Turn off the device
+     * Turn off the device
      *
      * @param iface Network port device name
      * @return Return the result of this action
@@ -117,7 +117,7 @@ public:
     virtual int32_t SetInterfaceDown(const std::string &iface) = 0;
 
     /**
-     * @brief Turn on the device
+     * Turn on the device
      *
      * @param iface Network port device name
      * @return Return the result of this action
@@ -125,14 +125,14 @@ public:
     virtual int32_t SetInterfaceUp(const std::string &iface) = 0;
 
     /**
-     * @brief Clear the network interface ip address
+     * Clear the network interface ip address
      *
      * @param ifName Network port device name
      */
     virtual void InterfaceClearAddrs(const std::string &ifName) = 0;
 
     /**
-     * @brief Obtain mtu from the network interface device
+     * Obtain mtu from the network interface device
      *
      * @param ifName Network port device name
      * @return Return the return value of the netsys interface call
@@ -140,7 +140,7 @@ public:
     virtual int32_t InterfaceGetMtu(const std::string &ifName) = 0;
 
     /**
-     * @brief Set mtu to network interface device
+     * Set mtu to network interface device
      *
      * @param ifName Network port device name
      * @param mtu
@@ -149,7 +149,7 @@ public:
     virtual int32_t InterfaceSetMtu(const std::string &ifName, int32_t mtu) = 0;
 
     /**
-     * @brief Add ip address
+     * Add ip address
      *
      * @param ifName Network port device name
      * @param ipAddr    ip address
@@ -160,7 +160,7 @@ public:
         int32_t prefixLength) = 0;
 
     /**
-     * @brief Delete ip address
+     * Delete ip address
      *
      * @param ifName Network port device name
      * @param ipAddr ip address
@@ -171,7 +171,7 @@ public:
         int32_t prefixLength) = 0;
 
     /**
-     * @brief Set dns
+     * Set dns
      *
      * @param netId
      * @param baseTimeoutMsec
@@ -184,7 +184,7 @@ public:
         const std::vector<std::string> &servers, const std::vector<std::string> &domains) = 0;
 
     /**
-     * @brief Get dns server param info
+     * Get dns server param info
      *
      * @param netId
      * @param servers
@@ -197,7 +197,7 @@ public:
         std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount) = 0;
 
     /**
-     * @brief Create dns cache before set dns
+     * Create dns cache before set dns
      *
      * @param netId
      * @return Return the return value for status of call
@@ -205,7 +205,7 @@ public:
     virtual int32_t CreateNetworkCache(uint16_t netId) = 0;
 
     /**
-     * @brief Destroy dns cache
+     * Destroy dns cache
      *
      * @param netId
      * @return Return the return value of the netsys interface call
@@ -213,7 +213,7 @@ public:
     virtual int32_t DestroyNetworkCache(uint16_t netId) = 0;
 
     /**
-     * @brief Flush dns cache
+     * Flush dns cache
      *
      * @param netId
      * @return Return the return value of the netsys interface call
@@ -221,7 +221,7 @@ public:
     virtual int32_t FlushNetworkCache(uint16_t netId) = 0;
 
     /**
-     * @brief Domain name resolution Obtains the domain name address
+     * Domain name resolution Obtains the domain name address
      *
      * @param hostName
      * @param serverName
@@ -233,35 +233,35 @@ public:
         const struct addrinfo &hints, std::unique_ptr<addrinfo> &res, uint16_t netId) = 0;
 
     /**
-     * @brief Obtains the bytes received over the cellular network.
+     * Obtains the bytes received over the cellular network.
      *
      * @return The number of received bytes.
      */
     virtual int64_t GetCellularRxBytes() = 0;
 
     /**
-     * @brief Obtains the bytes sent over the cellular network.
+     * Obtains the bytes sent over the cellular network.
      *
      * @return The number of sent bytes.
      */
     virtual int64_t GetCellularTxBytes() = 0;
 
     /**
-     * @brief Obtains the bytes received through all NICs.
+     * Obtains the bytes received through all NICs.
      *
      * @return The number of received bytes.
      */
     virtual int64_t GetAllRxBytes() = 0;
 
     /**
-     * @brief Obtains the bytes sent through all NICs.
+     * Obtains the bytes sent through all NICs.
      *
      * @return The number of sent bytes.
      */
     virtual int64_t GetAllTxBytes() = 0;
 
     /**
-     * @brief Obtains the bytes received through a specified UID.
+     * Obtains the bytes received through a specified UID.
      *
      * @param uid app id.
      * @return The number of received bytes.
@@ -269,7 +269,7 @@ public:
     virtual int64_t GetUidRxBytes(uint32_t uid) = 0;
 
     /**
-     * @brief Obtains the bytes sent through a specified UID.
+     * Obtains the bytes sent through a specified UID.
      *
      * @param uid app id.
      * @return The number of sent bytes.
@@ -277,7 +277,7 @@ public:
     virtual int64_t GetUidTxBytes(uint32_t uid) = 0;
 
     /**
-     * @brief Obtains the bytes received through a specified UID on Iface.
+     * Obtains the bytes received through a specified UID on Iface.
      *
      * @param uid app id.
      * @param iface The name of the interface.
@@ -286,7 +286,7 @@ public:
     virtual int64_t GetUidOnIfaceRxBytes(uint32_t uid, const std::string &interfaceName) = 0;
 
     /**
-     * @brief Obtains the bytes sent through a specified UID on Iface.
+     * Obtains the bytes sent through a specified UID on Iface.
      *
      * @param uid app id.
      * @param iface The name of the interface.
@@ -295,7 +295,7 @@ public:
     virtual int64_t GetUidOnIfaceTxBytes(uint32_t uid, const std::string &interfaceName) = 0;
 
     /**
-     * @brief Obtains the bytes received through a specified NIC.
+     * Obtains the bytes received through a specified NIC.
      *
      * @param iface The name of the interface.
      * @return The number of received bytes.
@@ -303,7 +303,7 @@ public:
     virtual int64_t GetIfaceRxBytes(const std::string &interfaceName) = 0;
 
     /**
-     * @brief Obtains the bytes sent through a specified NIC.
+     * Obtains the bytes sent through a specified NIC.
      *
      * @param iface The name of the interface.
      * @return The number of sent bytes.
@@ -311,21 +311,21 @@ public:
     virtual int64_t GetIfaceTxBytes(const std::string &interfaceName) = 0;
 
     /**
-     * @brief Obtains the NIC list.
+     * Obtains the NIC list.
      *
      * @return The list of interface.
      */
     virtual std::vector<std::string> InterfaceGetList() = 0;
 
     /**
-     * @brief Obtains the uid list.
+     * Obtains the uid list.
      *
      * @return The list of uid.
      */
     virtual std::vector<std::string> UidGetList() = 0;
 
     /**
-     * @brief Obtains the packets received through a specified NIC.
+     * Obtains the packets received through a specified NIC.
      *
      * @param iface The name of the interface.
      * @return The number of received packets.
@@ -333,7 +333,7 @@ public:
     virtual int64_t GetIfaceRxPackets(const std::string &interfaceName) = 0;
 
     /**
-     * @brief Obtains the packets sent through a specified NIC.
+     * Obtains the packets sent through a specified NIC.
      *
      * @param iface The name of the interface.
      * @return The number of sent packets.
@@ -341,21 +341,21 @@ public:
     virtual int64_t GetIfaceTxPackets(const std::string &interfaceName) = 0;
 
     /**
-     * @brief  set default network.
+     *  set default network.
      *
      * @return Return the return value of the netsys interface call
      */
     virtual int32_t  SetDefaultNetWork(int32_t netId) = 0;
 
 	 /**
-     * @brief clear default network netId.
+     * clear default network netId.
      *
      * @return Return the return value of the netsys interface call
      */
     virtual int32_t  ClearDefaultNetWorkNetId() = 0;
 
     /**
-     * @brief Obtains the NIC list.
+     * Obtains the NIC list.
      *
      * @param socket_fd
      * @param netId
@@ -364,7 +364,7 @@ public:
     virtual int32_t BindSocket(int32_t socket_fd, uint32_t netId) = 0;
 
     /**
-     * @brief Enable ip forwarding.
+     * Enable ip forwarding.
      *
      * @param requestor the requestor of forwarding
      * @return Return the return value of the netsys interface call.
@@ -372,7 +372,7 @@ public:
     virtual int32_t IpEnableForwarding(const std::string& requestor) = 0;
 
     /**
-     * @brief Disable ip forwarding.
+     * Disable ip forwarding.
      *
      * @param requestor the requestor of forwarding
      * @return Return the return value of the netsys interface call.
@@ -380,7 +380,7 @@ public:
     virtual int32_t IpDisableForwarding(const std::string& requestor) = 0;
 
     /**
-     * @brief EnableNat.
+     * EnableNat.
      *
      * @param downstreamIface the name of downstream interface
      * @param upstreamIface the name of upstream interface
@@ -389,7 +389,7 @@ public:
     virtual int32_t EnableNat(const std::string &downstreamIface, const std::string &upstreamIface) = 0;
 
     /**
-     * @brief DisableNat.
+     * DisableNat.
      *
      * @param downstreamIface the name of downstream interface
      * @param upstreamIface the name of upstream interface
@@ -398,7 +398,7 @@ public:
     virtual int32_t DisableNat(const std::string &downstreamIface, const std::string &upstreamIface) = 0;
 
     /**
-     * @brief Add interface forward.
+     * Add interface forward.
      *
      * @param fromIface the name of incoming interface
      * @param toIface the name of outcoming interface
@@ -407,7 +407,7 @@ public:
     virtual int32_t IpfwdAddInterfaceForward(const std::string& fromIface, const std::string& toIface) = 0;
 
     /**
-     * @brief Remove interface forward.
+     * Remove interface forward.
      *
      * @param fromIface the name of incoming interface
      * @param toIface the name of outcoming interface
@@ -416,7 +416,7 @@ public:
     virtual int32_t IpfwdRemoveInterfaceForward(const std::string& fromIface, const std::string& toIface) = 0;
 
     /**
-     * @brief Set tether dns.
+     * Set tether dns.
      *
      * @param netId network id
      * @param dnsAddr the list of dns address
@@ -425,7 +425,7 @@ public:
     virtual int32_t TetherDnsSet(uint32_t netId, const std::vector<std::string>& dnsAddrs) = 0;
 
     /**
-     * @brief Set net callbackfuction.
+     * Set net callbackfuction.
      *
      * @param callback callbackfuction class
      * @return Return the return value of the netsys interface call.
@@ -433,7 +433,7 @@ public:
     virtual int32_t RegisterNetsysNotifyCallback(const NetsysNotifyCallback &callback) = 0;
 
     /**
-     * @brief protect tradition network to connect VPN.
+     * protect tradition network to connect VPN.
      *
      * @param socketFd socket file description
      * @return Return the return value of the netsys interface call.
@@ -441,7 +441,7 @@ public:
     virtual int32_t BindNetworkServiceVpn(int32_t socketFd) = 0;
 
     /**
-     * @brief Enable virtual network iterface card.
+     * Enable virtual network iterface card.
      *
      * @param socketFd socket file description
      * @param ifRequest interface request
@@ -451,7 +451,7 @@ public:
     virtual int32_t EnableVirtualNetIfaceCard(int32_t socketFd, struct ifreq &ifRequest, int32_t &ifaceFd) = 0;
 
     /**
-     * @brief Set ip address.
+     * Set ip address.
      *
      * @param socketFd socket file description
      * @param ipAddress ip address
@@ -463,7 +463,7 @@ public:
         struct ifreq &ifRequest) = 0;
 
     /**
-     * @brief Set network blocking.
+     * Set network blocking.
      *
      * @param ifaceFd interface file description
      * @param isBlock network blocking
@@ -471,7 +471,7 @@ public:
      */
     virtual int32_t SetBlocking(int32_t ifaceFd, bool isBlock) = 0;
     /**
-    * @brief Start Dhcp Client.
+    * Start Dhcp Client.
     *
     * @param iface interface file description
     * @param bIpv6 network blocking
@@ -479,7 +479,7 @@ public:
     */
     virtual int32_t StartDhcpClient(const std::string &iface, bool bIpv6) = 0;
     /**
-     * @brief Stop Dhcp Client.
+     * Stop Dhcp Client.
      *
      * @param iface interface file description
      * @param bIpv6 network blocking
@@ -487,7 +487,7 @@ public:
      */
     virtual int32_t StopDhcpClient(const std::string &iface, bool bIpv6) = 0;
     /**
-     * @brief Register Notify Callback
+     * Register Notify Callback
      *
      * @param callback
      * @return .
@@ -495,7 +495,7 @@ public:
     virtual int32_t RegisterCallback(sptr<NetsysControllerCallback> callback) = 0;
 
     /**
-     * @brief start dhcpservice.
+     * start dhcpservice.
      *
      * @param iface interface name
      * @param ipv4addr ipv4 addr
@@ -504,12 +504,109 @@ public:
     virtual int32_t StartDhcpService(const std::string &iface, const std::string &ipv4addr) = 0;
 
     /**
-     * @brief stop dhcpservice.
+     * stop dhcpservice.
      *
      * @param iface interface name
      * @return Return the return value of the netsys interface call.
      */
     virtual int32_t StopDhcpService(const std::string &iface) = 0;
+#ifdef BUILD_POLYCY_NETSYS
+    /**
+     * Turn on data saving mode.
+     *
+     * @param enable enable or disable
+     * @return value the return value of the netsys interface call.
+     */
+    virtual int32_t BandwidthEnableDataSaver(bool enable) = 0;
+
+    /**
+     * Set quota.
+     *
+     * @param iface interface name
+     * @param bytes
+     * @return .
+     */
+    virtual int32_t BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes) = 0;
+
+    /**
+     * Delete quota.
+     *
+     * @param iface interface name
+     * @return .
+     */
+    virtual int32_t BandwidthRemoveIfaceQuota(const std::string &ifName) = 0;
+
+    /**
+     * Add DeniedList.
+     *
+     * @param uid
+     * @return .
+     */
+    virtual int32_t BandwidthAddDeniedList(uint32_t uid) = 0;
+
+    /**
+     * Remove DeniedList.
+     *
+     * @param uid
+     * @return .
+     */
+    virtual int32_t BandwidthRemoveDeniedList(uint32_t uid) = 0;
+
+    /**
+     * Add DeniedList.
+     *
+     * @param uid
+     * @return .
+     */
+    virtual int32_t BandwidthAddAllowedList(uint32_t uid) = 0;
+
+    /**
+     * Remove DeniedList.
+     *
+     * @param uid
+     * @return .
+     */
+    virtual int32_t BandwidthRemoveAllowedList(uint32_t uid) = 0;
+
+    /**
+     * Set firewall rules.
+     *
+     * @param chain chain type
+     * @param isAllowedList is or not AllowedList
+     * @param uids
+     * @return value the return value of the netsys interface call.
+     */
+    virtual int32_t FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids) = 0;
+
+    /**
+     * Set firewall rules.
+     *
+     * @param chain chain type
+     * @param isAllowedList is or not AllowedList
+     * @param uids
+     * @return value the return value of the netsys interface call.
+     */
+    virtual int32_t FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids) = 0;
+
+    /**
+     * Enable or disable the specified firewall chain.
+     *
+     * @param chain chain type
+     * @param enable enable or disable
+     * @return .
+     */
+    virtual int32_t FirewallEnableChain(uint32_t chain, bool enable) = 0;
+
+    /**
+     * Firewall set uid rule.
+     *
+     * @param chain chain type
+     * @param uid uid
+     * @param firewallRule firewall rule
+     * @return .
+     */
+    virtual int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) = 0;
+#endif
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
