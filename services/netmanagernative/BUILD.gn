@@ -22,6 +22,7 @@ ohos_shared_library("netsys_native_manager") {
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_native_service_proxy.cpp",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/notify_callback_proxy.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/dhcp_controller.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/manager/bandwidth_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/conn_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/dns_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/interface_manager.cpp",
