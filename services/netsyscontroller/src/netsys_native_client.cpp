@@ -826,5 +826,105 @@ void NetsysNativeClient::ProcessBandwidthReachedLimit(const std::string &limitNa
                       callback->OnBandwidthReachedLimit(limitName, iface);
                   });
 }
+#ifdef BUILD_POLYCY_NETSYS
+int32_t NetsysNativeClient::BandwidthEnableDataSaver(bool enable)
+{
+    if (netsysNativeService_ == nullptr) {
+        NETMGR_LOG_E("BandwidthEnableDataSaver netsysNativeService_ is null");
+        return ERR_NATIVESERVICE_NOTFIND;
+    }
+    return netsysNativeService_->BandwidthEnableDataSaver(enable);
+}
+
+int32_t NetsysNativeClient::BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes)
+{
+    if (netsysNativeService_ == nullptr) {
+        NETMGR_LOG_E("BandwidthSetIfaceQuota netsysNativeService_ is null");
+        return ERR_NATIVESERVICE_NOTFIND;
+    }
+    return netsysNativeService_->BandwidthSetIfaceQuota(ifName, bytes);
+}
+
+int32_t NetsysNativeClient::BandwidthRemoveIfaceQuota(const std::string &ifName)
+{
+    if (netsysNativeService_ == nullptr) {
+        NETMGR_LOG_E("BandwidthRemoveIfaceQuota netsysNativeService_ is null");
+        return ERR_NATIVESERVICE_NOTFIND;
+    }
+    return netsysNativeService_->BandwidthRemoveIfaceQuota(ifName);
+}
+
+int32_t NetsysNativeClient::BandwidthAddDeniedList(uint32_t uid)
+{
+    if (netsysNativeService_ == nullptr) {
+        NETMGR_LOG_E("BandwidthAddDeniedList netsysNativeService_ is null");
+        return ERR_NATIVESERVICE_NOTFIND;
+    }
+    return netsysNativeService_->BandwidthAddDeniedList(uid);
+}
+
+int32_t NetsysNativeClient::BandwidthRemoveDeniedList(uint32_t uid)
+{
+    if (netsysNativeService_ == nullptr) {
+        NETMGR_LOG_E("BandwidthRemoveDeniedList netsysNativeService_ is null");
+        return ERR_NATIVESERVICE_NOTFIND;
+    }
+    return netsysNativeService_->BandwidthRemoveDeniedList(uid);
+}
+
+int32_t NetsysNativeClient::BandwidthAddAllowedList(uint32_t uid)
+{
+    if (netsysNativeService_ == nullptr) {
+        NETMGR_LOG_E("BandwidthAddAllowedList netsysNativeService_ is null");
+        return ERR_NATIVESERVICE_NOTFIND;
+    }
+    return netsysNativeService_->BandwidthAddAllowedList(uid);
+}
+
+int32_t NetsysNativeClient::BandwidthRemoveAllowedList(uint32_t uid)
+{
+    if (netsysNativeService_ == nullptr) {
+        NETMGR_LOG_E("BandwidthRemoveAllowedList netsysNativeService_ is null");
+        return ERR_NATIVESERVICE_NOTFIND;
+    }
+    return netsysNativeService_->BandwidthRemoveAllowedList(uid);
+}
+
+int32_t NetsysNativeClient::FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
+{
+    if (netsysNativeService_ == nullptr) {
+        NETMGR_LOG_E("FirewallSetUidsAllowedListChain netsysNativeService_ is null");
+        return ERR_NATIVESERVICE_NOTFIND;
+    }
+    return netsysNativeService_->FirewallSetUidsAllowedListChain(chain, uids);
+}
+
+int32_t NetsysNativeClient::FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
+{
+    if (netsysNativeService_ == nullptr) {
+        NETMGR_LOG_E("FirewallSetUidsDeniedListChain netsysNativeService_ is null");
+        return ERR_NATIVESERVICE_NOTFIND;
+    }
+    return netsysNativeService_->FirewallSetUidsDeniedListChain(chain, uids);
+}
+
+int32_t NetsysNativeClient::FirewallEnableChain(uint32_t chain, bool enable)
+{
+    if (netsysNativeService_ == nullptr) {
+        NETMGR_LOG_E("FirewallEnableChain netsysNativeService_ is null");
+        return ERR_NATIVESERVICE_NOTFIND;
+    }
+    return netsysNativeService_->FirewallEnableChain(chain, enable);
+}
+
+int32_t NetsysNativeClient::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
+{
+    if (netsysNativeService_ == nullptr) {
+        NETMGR_LOG_E("FirewallSetUidRule netsysNativeService_ is null");
+        return ERR_NATIVESERVICE_NOTFIND;
+    }
+    return netsysNativeService_->FirewallSetUidRule(chain, uid, firewallRule);
+}
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS
