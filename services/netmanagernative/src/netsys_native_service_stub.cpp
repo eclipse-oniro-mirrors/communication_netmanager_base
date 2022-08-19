@@ -69,8 +69,33 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_DISABLE_NAT] = &NetsysNativeServiceStub::CmdDisableNat;
     opToInterfaceMap_[NETSYS_IPFWD_ADD_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward;
     opToInterfaceMap_[NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward;
+#ifdef BUILD_POLYCY_NETSYS
+    InitBandwidthOpToInterfaceMap();
+    InitFirewallOpToInterfaceMap();
+#endif
+}
+#ifdef BUILD_POLYCY_NETSYS
+void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
+{
+    opToInterfaceMap_[NETSYS_BANDWIDTH_ENABLE_DATA_SAVER] = &NetsysNativeServiceStub::CmdBandwidthEnableDataSaver;
+    opToInterfaceMap_[NETSYS_BANDWIDTH_SET_IFACE_QUOTA] = &NetsysNativeServiceStub::CmdBandwidthSetIfaceQuota;
+    opToInterfaceMap_[NETSYS_BANDWIDTH_REMOVE_IFACE_QUOTA] = &NetsysNativeServiceStub::CmdBandwidthRemoveIfaceQuota;
+    opToInterfaceMap_[NETSYS_BANDWIDTH_ADD_DENIED_LIST] = &NetsysNativeServiceStub::CmdBandwidthAddDeniedList;
+    opToInterfaceMap_[NETSYS_BANDWIDTH_REMOVE_DENIED_LIST] = &NetsysNativeServiceStub::CmdBandwidthRemoveDeniedList;
+    opToInterfaceMap_[NETSYS_BANDWIDTH_ADD_ALLOWED_LIST] = &NetsysNativeServiceStub::CmdBandwidthAddAllowedList;
+    opToInterfaceMap_[NETSYS_BANDWIDTH_REMOVE_ALLOWED_LIST] = &NetsysNativeServiceStub::CmdBandwidthRemoveAllowedList;
 }
 
+void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
+{
+    opToInterfaceMap_[NETSYS_FIREWALL_SET_UID_ALLOWED_LIST_CHAIN] =
+        &NetsysNativeServiceStub::CmdFirewallSetUidsAllowedListChain;
+    opToInterfaceMap_[NETSYS_FIREWALL_SET_UID_DENIED_LIST_CHAIN] =
+        &NetsysNativeServiceStub::CmdFirewallSetUidsDeniedListChain;
+    opToInterfaceMap_[NETSYS_FIREWALL_ENABLE_CHAIN] = &NetsysNativeServiceStub::CmdFirewallEnableChain;
+    opToInterfaceMap_[NETSYS_FIREWALL_SET_UID_RULE] = &NetsysNativeServiceStub::CmdFirewallSetUidRule;
+}
+#endif
 int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
 {
@@ -700,5 +725,120 @@ int32_t NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward(MessageParcel &d
     reply.WriteInt32(result);
     return result;
 }
+#ifdef BUILD_POLYCY_NETSYS
+int32_t NetsysNativeServiceStub::CmdBandwidthEnableDataSaver(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdBandwidthEnableDataSaver");
+    bool enable = data.ReadBool();
+    int32_t result = BandwidthEnableDataSaver(enable);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdBandwidthSetIfaceQuota(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdBandwidthSetIfaceQuota");
+    std::string ifName = data.ReadString();
+    int64_t bytes = data.ReadInt64();
+    int32_t result = BandwidthSetIfaceQuota(ifName, bytes);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdBandwidthRemoveIfaceQuota(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdBandwidthRemoveIfaceQuota");
+    std::string ifName = data.ReadString();
+    int32_t result = BandwidthRemoveIfaceQuota(ifName);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdBandwidthAddDeniedList(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdBandwidthAddDeniedList");
+    uint32_t uid = data.ReadUint32();
+    int32_t result = BandwidthAddDeniedList(uid);
+    reply.WriteInt32(result);
+    return result;
+}
+int32_t NetsysNativeServiceStub::CmdBandwidthRemoveDeniedList(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdBandwidthRemoveDeniedList");
+    uint32_t uid = data.ReadUint32();
+    int32_t result = BandwidthRemoveDeniedList(uid);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdBandwidthAddAllowedList(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdBandwidthAddAllowedList");
+    uint32_t uid = data.ReadUint32();
+    int32_t result = BandwidthAddAllowedList(uid);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdBandwidthRemoveAllowedList(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdBandwidthRemoveAllowedList");
+    uint32_t uid = data.ReadUint32();
+    int32_t result = BandwidthRemoveAllowedList(uid);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdFirewallSetUidsAllowedListChain(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdFirewallSetUidsAllowedListChain");
+    uint32_t chain = data.ReadUint32();
+    std::vector<uint32_t> uids;
+    size_t uid_size = data.ReadInt32();
+    for (uint32_t i = 0; i < uid_size; i++) {
+        uint32_t uid = data.ReadUint32();
+        uids.push_back(uid);
+    }
+    int32_t result = FirewallSetUidsAllowedListChain(chain, uids);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdFirewallSetUidsDeniedListChain(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdFirewallSetUidsDeniedListChain");
+    uint32_t chain = data.ReadUint32();
+    std::vector<uint32_t> uids;
+    size_t uid_size = data.ReadUint32();
+    for (uint32_t i = 0; i < uid_size; i++) {
+        uint32_t uid = data.ReadUint32();
+        uids.push_back(uid);
+    }
+    int32_t result = FirewallSetUidsDeniedListChain(chain, uids);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdFirewallEnableChain(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdFirewallEnableChain");
+    uint32_t chain = data.ReadUint32();
+    bool enable = data.ReadBool();
+    int32_t result = FirewallEnableChain(chain, enable);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdFirewallSetUidRule(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdFirewallSetUidRule");
+    uint32_t chain = data.ReadUint32();
+    uint32_t uid = data.ReadInt32();
+    uint32_t firewallRule = data.ReadInt32();
+    int32_t result = FirewallSetUidRule(chain, uid, firewallRule);
+    reply.WriteInt32(result);
+    return result;
+}
+#endif
 } // namespace NetsysNative
 } // namespace OHOS

@@ -70,6 +70,17 @@ public:
         NETSYS_DISABLE_NAT,
         NETSYS_IPFWD_ADD_INTERFACE_FORWARD,
         NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD,
+        NETSYS_BANDWIDTH_ENABLE_DATA_SAVER,
+        NETSYS_BANDWIDTH_SET_IFACE_QUOTA,
+        NETSYS_BANDWIDTH_REMOVE_IFACE_QUOTA,
+        NETSYS_BANDWIDTH_ADD_DENIED_LIST,
+        NETSYS_BANDWIDTH_REMOVE_DENIED_LIST,
+        NETSYS_BANDWIDTH_ADD_ALLOWED_LIST,
+        NETSYS_BANDWIDTH_REMOVE_ALLOWED_LIST,
+        NETSYS_FIREWALL_SET_UID_ALLOWED_LIST_CHAIN,
+        NETSYS_FIREWALL_SET_UID_DENIED_LIST_CHAIN,
+        NETSYS_FIREWALL_ENABLE_CHAIN,
+        NETSYS_FIREWALL_SET_UID_RULE,
     };
 
     virtual int32_t SetResolverConfigParcel(const DnsResolverParamsParcel &resolvParams) = 0;
@@ -125,7 +136,19 @@ public:
     virtual int32_t DisableNat(const std::string &downstreamIface, const std::string &upstreamIface) = 0;
     virtual int32_t IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface) = 0;
     virtual int32_t IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface) = 0;
-
+#ifdef BUILD_POLYCY_NETSYS
+    virtual int32_t BandwidthEnableDataSaver(bool enable) = 0;
+    virtual int32_t BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes) = 0;
+    virtual int32_t BandwidthRemoveIfaceQuota(const std::string &ifName) = 0;
+    virtual int32_t BandwidthAddDeniedList(uint32_t uid) = 0;
+    virtual int32_t BandwidthRemoveDeniedList(uint32_t uid) = 0;
+    virtual int32_t BandwidthAddAllowedList(uint32_t uid) = 0;
+    virtual int32_t BandwidthRemoveAllowedList(uint32_t uid) = 0;
+    virtual int32_t FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids) = 0;
+    virtual int32_t FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids) = 0;
+    virtual int32_t FirewallEnableChain(uint32_t chain, bool enable) = 0;
+    virtual int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) = 0;
+#endif
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

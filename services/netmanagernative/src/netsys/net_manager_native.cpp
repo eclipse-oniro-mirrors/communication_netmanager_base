@@ -29,9 +29,13 @@ std::vector<unsigned int> OHOS::nmd::NetManagerNative::interfaceIdex;
 namespace OHOS {
 namespace nmd {
 NetManagerNative::NetManagerNative()
-    : connManager(std::make_shared<ConnManager>()),
-      routeManager(std::make_shared<RouteManager>()),
-      interfaceManager(std::make_shared<InterfaceManager>()),
+    : connManager_(std::make_shared<ConnManager>()),
+#ifdef BUILD_POLYCY_NETSYS
+      bandwidthManager_(std::make_shared<BandwidthManager>()),
+      firewallManager_(std::make_shared<FirewallManager>()),
+#endif
+      routeManager_(std::make_shared<RouteManager>()),
+      interfaceManager_(std::make_shared<InterfaceManager>()),
       sharingManager_(std::make_shared<SharingManager>()),
       dnsManager_(std::make_shared<DnsManager>())
 {
@@ -64,24 +68,24 @@ void NetManagerNative::Init()
 
 int NetManagerNative::NetworkCreatePhysical(int netId, int permission)
 {
-    return this->connManager->CreatePhysicalNetwork(static_cast<uint16_t>(netId),
-                                                    static_cast<NetworkPermission>(permission));
+    return this->connManager_->CreatePhysicalNetwork(static_cast<uint16_t>(netId),
+                                                     static_cast<NetworkPermission>(permission));
 }
 
 int NetManagerNative::NetworkDestroy(int netId)
 {
-    return this->connManager->DestroyNetwork(netId);
+    return this->connManager_->DestroyNetwork(netId);
 }
 
 int NetManagerNative::NetworkAddInterface(int netId, std::string interfaceName)
 {
     NETNATIVE_LOGI("Entry NetManagerNative::NetworkAddInterface");
-    return this->connManager->AddInterfaceToNetwork(netId, interfaceName);
+    return this->connManager_->AddInterfaceToNetwork(netId, interfaceName);
 }
 
 int NetManagerNative::NetworkRemoveInterface(int netId, std::string interfaceName)
 {
-    return this->connManager->RemoveInterfaceFromNetwork(netId, interfaceName);
+    return this->connManager_->RemoveInterfaceFromNetwork(netId, interfaceName);
 }
 
 int NetManagerNative::InterfaceAddAddress(std::string ifName, std::string addrString, int prefixLength)
@@ -91,7 +95,7 @@ int NetManagerNative::InterfaceAddAddress(std::string ifName, std::string addrSt
         "prefixLength:%{public}d",
         ifName.c_str(), addrString.c_str(), prefixLength);
 
-    return this->interfaceManager->AddAddress(ifName.c_str(), addrString.c_str(), prefixLength);
+    return this->interfaceManager_->AddAddress(ifName.c_str(), addrString.c_str(), prefixLength);
 }
 
 int NetManagerNative::InterfaceDelAddress(std::string ifName, std::string addrString, int prefixLength)
@@ -101,40 +105,40 @@ int NetManagerNative::InterfaceDelAddress(std::string ifName, std::string addrSt
         "prefixLength:%{public}d",
         ifName.c_str(), addrString.c_str(), prefixLength);
 
-    return this->interfaceManager->DelAddress(ifName.c_str(), addrString.c_str(), prefixLength);
+    return this->interfaceManager_->DelAddress(ifName.c_str(), addrString.c_str(), prefixLength);
 }
 
 int NetManagerNative::NetworkAddRoute(int netId, std::string interfaceName, std::string destination,
                                       std::string nextHop)
 {
-    return this->connManager->AddRoute(netId, interfaceName, destination, nextHop);
+    return this->connManager_->AddRoute(netId, interfaceName, destination, nextHop);
 }
 
 int NetManagerNative::NetworkRemoveRoute(int netId, std::string interfaceName, std::string destination,
                                          std::string nextHop)
 {
-    return this->connManager->RemoveRoute(netId, interfaceName, destination, nextHop);
+    return this->connManager_->RemoveRoute(netId, interfaceName, destination, nextHop);
 }
 
 int NetManagerNative::NetworkGetDefault()
 {
-    return this->connManager->GetDefaultNetwork();
+    return this->connManager_->GetDefaultNetwork();
 }
 
 int NetManagerNative::NetworkSetDefault(int netId)
 {
     dnsManager_->SetDefaultNetwork(netId); // set default netId to dns manager, do not delete this line!
-    return this->connManager->SetDefaultNetwork(netId);
+    return this->connManager_->SetDefaultNetwork(netId);
 }
 
 int NetManagerNative::NetworkClearDefault()
 {
-    return this->connManager->ClearDefaultNetwork();
+    return this->connManager_->ClearDefaultNetwork();
 }
 
 int NetManagerNative::NetworkSetPermissionForNetwork(int netId, NetworkPermission permission)
 {
-    return this->connManager->SetPermissionForNetwork(netId, permission);
+    return this->connManager_->SetPermissionForNetwork(netId, permission);
 }
 
 std::vector<std::string> NetManagerNative::InterfaceGetList()
@@ -168,19 +172,19 @@ int NetManagerNative::InterfaceSetMtu(std::string ifName, int mtuValue)
 nmd::MarkMaskParcel NetManagerNative::GetFwmarkForNetwork(int netId)
 {
     nmd::MarkMaskParcel mark;
-    mark.mark = this->connManager->GetFwmarkForNetwork(netId);
+    mark.mark = this->connManager_->GetFwmarkForNetwork(netId);
     mark.mask = 0XFFFF;
     return mark;
 }
 
 int NetManagerNative::NetworkAddRouteParcel(int netId, RouteInfoParcel parcel)
 {
-    return this->connManager->AddRoute(netId, parcel.ifName, parcel.destination, parcel.nextHop);
+    return this->connManager_->AddRoute(netId, parcel.ifName, parcel.destination, parcel.nextHop);
 }
 
 int NetManagerNative::NetworkRemoveRouteParcel(int netId, RouteInfoParcel parcel)
 {
-    return this->connManager->RemoveRoute(netId, parcel.ifName, parcel.destination, parcel.nextHop);
+    return this->connManager_->RemoveRoute(netId, parcel.ifName, parcel.destination, parcel.nextHop);
 }
 
 int NetManagerNative::SetProcSysNet(int32_t ipversion, int32_t which, const std::string ifname,
@@ -293,5 +297,66 @@ int32_t NetManagerNative::DnsCreateNetworkCache(uint16_t netid)
 {
     return dnsManager_->CreateNetworkCache(netid);
 }
+#ifdef BUILD_POLYCY_NETSYS
+int32_t NetManagerNative::BandwidthEnableDataSaver(bool enable)
+{
+    return this->bandwidthManager_->EnableDataSaver(enable);
+}
+
+int32_t NetManagerNative::BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes)
+{
+    return this->bandwidthManager_->SetIfaceQuota(ifName, bytes);
+}
+
+int32_t NetManagerNative::BandwidthRemoveIfaceQuota(const std::string &ifName)
+{
+    return this->bandwidthManager_->RemoveIfaceQuota(ifName);
+}
+
+int32_t NetManagerNative::BandwidthAddDeniedList(uint32_t uid)
+{
+    return this->bandwidthManager_->AddDeniedList(uid);
+}
+
+int32_t NetManagerNative::BandwidthRemoveDeniedList(uint32_t uid)
+{
+    return this->bandwidthManager_->RemoveDeniedList(uid);
+}
+
+int32_t NetManagerNative::BandwidthAddAllowedList(uint32_t uid)
+{
+    return this->bandwidthManager_->AddAllowedList(uid);
+}
+
+int32_t NetManagerNative::BandwidthRemoveAllowedList(uint32_t uid)
+{
+    return this->bandwidthManager_->RemoveAllowedList(uid);
+}
+
+int32_t NetManagerNative::FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
+{
+    auto chainType = static_cast<NetManagerStandard::ChainType>(chain);
+    return this->firewallManager_->SetUidsAllowedListChain(chainType, uids);
+}
+
+int32_t NetManagerNative::FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
+{
+    auto chainType = static_cast<NetManagerStandard::ChainType>(chain);
+    return this->firewallManager_->SetUidsDeniedListChain(chainType, uids);
+}
+
+int32_t NetManagerNative::FirewallEnableChain(uint32_t chain, bool enable)
+{
+    auto chainType = static_cast<NetManagerStandard::ChainType>(chain);
+    return this->firewallManager_->EnableChain(chainType, enable);
+}
+
+int32_t NetManagerNative::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
+{
+    auto chainType = static_cast<NetManagerStandard::ChainType>(chain);
+    auto rule = static_cast<NetManagerStandard::FirewallRule>(firewallRule);
+    return this->firewallManager_->SetUidRule(chainType, uid, rule);
+}
+#endif
 } // namespace nmd
 } // namespace OHOS
