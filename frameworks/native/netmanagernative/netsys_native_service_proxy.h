@@ -79,7 +79,19 @@ public:
     int32_t DisableNat(const std::string &downstreamIface, const std::string &upstreamIface) override;
     int32_t IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface) override;
     int32_t IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface) override;
-
+#ifdef BUILD_POLYCY_NETSYS
+    int32_t BandwidthEnableDataSaver(bool enable) override;
+    int32_t BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes) override;
+    int32_t BandwidthRemoveIfaceQuota(const std::string &ifName) override;
+    int32_t BandwidthAddDeniedList(uint32_t uid) override;
+    int32_t BandwidthRemoveDeniedList(uint32_t uid) override;
+    int32_t BandwidthAddAllowedList(uint32_t uid) override;
+    int32_t BandwidthRemoveAllowedList(uint32_t uid) override;
+    int32_t FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids) override;
+    int32_t FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids) override;
+    int32_t FirewallEnableChain(uint32_t chain, bool enable) override;
+    int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) override;
+#endif
 private:
     static inline BrokerDelegator<NetsysNativeServiceProxy> delegator_;
 };

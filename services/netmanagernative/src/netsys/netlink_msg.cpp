@@ -21,52 +21,50 @@ namespace OHOS {
 namespace nmd {
 NetlinkMsg::NetlinkMsg(uint16_t flags, size_t maxBufLen, int32_t pid)
 {
-    this->maxBufLen = maxBufLen;
-    this->netlinkMessage = reinterpret_cast<struct nlmsghdr *>(new char[NLMSG_SPACE(maxBufLen)]);
-    errno_t result = memset_s(this->netlinkMessage, NLMSG_SPACE(maxBufLen), 0, NLMSG_SPACE(maxBufLen));
+    maxBufLen_ = maxBufLen;
+    msghdrBuf_ = std::make_unique<char[]>(NLMSG_SPACE(maxBufLen));
+    netlinkMessage_ = reinterpret_cast<struct nlmsghdr *>(msghdrBuf_.get());
+    errno_t result = memset_s(netlinkMessage_, NLMSG_SPACE(maxBufLen), 0, NLMSG_SPACE(maxBufLen));
     if (result != 0) {
         NETNATIVE_LOGE("[NetlinkMessage]: memset result %{public}d", result);
     }
-    this->netlinkMessage->nlmsg_flags = flags;
-    this->netlinkMessage->nlmsg_pid = static_cast<uint32_t>(pid);
-    this->netlinkMessage->nlmsg_seq = 1;
+    netlinkMessage_->nlmsg_flags = NLM_F_REQUEST | NLM_F_ACK | flags;
+    netlinkMessage_->nlmsg_pid = static_cast<uint32_t>(pid);
+    netlinkMessage_->nlmsg_seq = 1;
 }
 
-NetlinkMsg::~NetlinkMsg()
-{
-    delete[] this->netlinkMessage;
-}
+NetlinkMsg::~NetlinkMsg() = default;
 
 void NetlinkMsg::AddRoute(uint16_t action, struct rtmsg msg)
 {
-    this->netlinkMessage->nlmsg_type = action;
-    int32_t result = memcpy_s(NLMSG_DATA(this->netlinkMessage), sizeof(struct rtmsg), &msg, sizeof(struct rtmsg));
+    netlinkMessage_->nlmsg_type = action;
+    int32_t result = memcpy_s(NLMSG_DATA(netlinkMessage_), sizeof(struct rtmsg), &msg, sizeof(struct rtmsg));
     if (result != 0) {
         NETNATIVE_LOGE("[AddRoute]: string copy failed result %{public}d", result);
     }
-    this->netlinkMessage->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
+    netlinkMessage_->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
 }
 
 void NetlinkMsg::AddRule(uint16_t action, struct fib_rule_hdr msg)
 {
-    this->netlinkMessage->nlmsg_type = action;
+    netlinkMessage_->nlmsg_type = action;
     int32_t result =
-        memcpy_s(NLMSG_DATA(this->netlinkMessage), sizeof(struct fib_rule_hdr), &msg, sizeof(struct fib_rule_hdr));
+        memcpy_s(NLMSG_DATA(netlinkMessage_), sizeof(struct fib_rule_hdr), &msg, sizeof(struct fib_rule_hdr));
     if (result != 0) {
         NETNATIVE_LOGE("[AddRule]: string copy failed result %{public}d", result);
     }
-    this->netlinkMessage->nlmsg_len = NLMSG_LENGTH(sizeof(struct fib_rule_hdr));
+    netlinkMessage_->nlmsg_len = NLMSG_LENGTH(sizeof(struct fib_rule_hdr));
 }
 
 void NetlinkMsg::AddAddress(uint16_t action, struct ifaddrmsg msg)
 {
-    this->netlinkMessage->nlmsg_type = action;
+    netlinkMessage_->nlmsg_type = action;
     int32_t result =
-        memcpy_s(NLMSG_DATA(this->netlinkMessage), sizeof(struct ifaddrmsg), &msg, sizeof(struct ifaddrmsg));
+        memcpy_s(NLMSG_DATA(netlinkMessage_), sizeof(struct ifaddrmsg), &msg, sizeof(struct ifaddrmsg));
     if (result != 0) {
         NETNATIVE_LOGE("[AddAddress]: string copy failed result %{public}d", result);
     }
-    this->netlinkMessage->nlmsg_len = NLMSG_LENGTH(sizeof(struct ifaddrmsg));
+    netlinkMessage_->nlmsg_len = NLMSG_LENGTH(sizeof(struct ifaddrmsg));
 }
 
 int32_t NetlinkMsg::AddAttr(uint16_t type, void *data, size_t alen)
@@ -82,13 +80,13 @@ int32_t NetlinkMsg::AddAttr(uint16_t type, void *data, size_t alen)
     }
 
     int32_t len = RTA_LENGTH(alen);
-    if (NLMSG_ALIGN(this->netlinkMessage->nlmsg_len) + RTA_ALIGN(len) > this->maxBufLen) {
-        NETNATIVE_LOGE("[NetlinkMessage]: attr length than max len: %{public}d", (int32_t)this->maxBufLen);
+    if (NLMSG_ALIGN(netlinkMessage_->nlmsg_len) + RTA_ALIGN(len) > maxBufLen_) {
+        NETNATIVE_LOGE("[NetlinkMessage]: attr length than max len: %{public}d", (int32_t)maxBufLen_);
         return -1;
     }
 
     struct rtattr *rta =
-        (struct rtattr *)(((char *)this->netlinkMessage) + NLMSG_ALIGN(this->netlinkMessage->nlmsg_len));
+        (struct rtattr *)(((char *)netlinkMessage_) + NLMSG_ALIGN(netlinkMessage_->nlmsg_len));
     rta->rta_type = type;
     rta->rta_len = static_cast<uint16_t>(len);
 
@@ -100,23 +98,23 @@ int32_t NetlinkMsg::AddAttr(uint16_t type, void *data, size_t alen)
         }
     }
 
-    this->netlinkMessage->nlmsg_len = NLMSG_ALIGN(this->netlinkMessage->nlmsg_len) + RTA_ALIGN(len);
+    netlinkMessage_->nlmsg_len = NLMSG_ALIGN(netlinkMessage_->nlmsg_len) + RTA_ALIGN(len);
     return 0;
 }
 
 int32_t NetlinkMsg::AddAttr16(uint16_t type, uint16_t data)
 {
-    return this->AddAttr(type, &data, sizeof(uint16_t));
+    return AddAttr(type, &data, sizeof(uint16_t));
 }
 
 int32_t NetlinkMsg::AddAttr32(uint16_t type, uint32_t data)
 {
-    return this->AddAttr(type, &data, sizeof(uint32_t));
+    return AddAttr(type, &data, sizeof(uint32_t));
 }
 
 nlmsghdr *NetlinkMsg::GetNetLinkMessage()
 {
-    return this->netlinkMessage;
+    return netlinkMessage_;
 }
 } // namespace nmd
 } // namespace OHOS

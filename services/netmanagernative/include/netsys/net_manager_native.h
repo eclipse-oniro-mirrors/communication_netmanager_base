@@ -19,9 +19,14 @@
 #include <memory>
 #include <string>
 #include <vector>
-
+#ifdef BUILD_POLYCY_NETSYS
+#include "bandwidth_manager.h"
+#endif
 #include "conn_manager.h"
 #include "dns_manager.h"
+#ifdef BUILD_POLYCY_NETSYS
+#include "firewall_manager.h"
+#endif
 #include "interface_manager.h"
 #include "interface_type.h"
 #include "route_manager.h"
@@ -93,11 +98,30 @@ public:
     int32_t DnsGetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
                                  uint16_t &baseTimeoutMsec, uint8_t &retryCount);
     int32_t DnsCreateNetworkCache(uint16_t netid);
+#ifdef BUILD_POLYCY_NETSYS
+    int32_t BandwidthEnableDataSaver(bool enable);
+    int32_t BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes);
+    int32_t BandwidthRemoveIfaceQuota(const std::string &ifName);
+    int32_t BandwidthAddDeniedList(uint32_t uid);
+    int32_t BandwidthRemoveDeniedList(uint32_t uid);
+    int32_t BandwidthAddAllowedList(uint32_t uid);
+    int32_t BandwidthRemoveAllowedList(uint32_t uid);
 
+    int32_t FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids);
+    int32_t FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids);
+    int32_t FirewallEnableChain(uint32_t chain, bool enable);
+    int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule);
+#endif
 private:
-    std::shared_ptr<ConnManager> connManager;
-    std::shared_ptr<RouteManager> routeManager;
-    std::shared_ptr<InterfaceManager> interfaceManager;
+#ifdef BUILD_POLYCY_NETSYS
+    std::shared_ptr<BandwidthManager> bandwidthManager_;
+#endif
+    std::shared_ptr<ConnManager> connManager_;
+#ifdef BUILD_POLYCY_NETSYS
+    std::shared_ptr<FirewallManager> firewallManager_;
+#endif
+    std::shared_ptr<RouteManager> routeManager_;
+    std::shared_ptr<InterfaceManager> interfaceManager_;
     std::shared_ptr<SharingManager> sharingManager_ = nullptr;
     std::shared_ptr<DnsManager> dnsManager_;
     static std::vector<unsigned int> interfaceIdex;

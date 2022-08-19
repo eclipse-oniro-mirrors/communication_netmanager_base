@@ -575,5 +575,75 @@ int32_t NetsysController::StopDhcpService(const std::string &iface)
     NETMGR_LOG_D("NetsysController::StopDhcpService: ifaceFd[%{public}s]", iface.c_str());
     return netsysService_->StopDhcpService(iface);
 }
+#ifdef BUILD_POLYCY_NETSYS
+int32_t NetsysController::BandwidthEnableDataSaver(bool enable)
+{
+    NETMGR_LOG_D("NetsysController::BandwidthEnableDataSaver: enable=%{public}d", enable);
+    return netsysService_->BandwidthEnableDataSaver(enable);
+}
+
+int32_t NetsysController::BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes)
+{
+    NETMGR_LOG_D("NetsysController::BandwidthSetIfaceQuota: ifName=%{public}s, bytes=%{public}" PRId64,
+                 ifName.c_str(), bytes);
+    return netsysService_->BandwidthSetIfaceQuota(ifName, bytes);
+}
+
+int32_t NetsysController::BandwidthRemoveIfaceQuota(const std::string &ifName)
+{
+    NETMGR_LOG_D("NetsysController::BandwidthRemoveIfaceQuota: ifName=%{public}s", ifName.c_str());
+    return netsysService_->BandwidthRemoveIfaceQuota(ifName);
+}
+
+int32_t NetsysController::BandwidthAddDeniedList(uint32_t uid)
+{
+    NETMGR_LOG_D("NetsysController::BandwidthAddDeniedList: uid=%{public}d", uid);
+    return netsysService_->BandwidthAddDeniedList(uid);
+}
+
+int32_t NetsysController::BandwidthRemoveDeniedList(uint32_t uid)
+{
+    NETMGR_LOG_D("NetsysController::BandwidthRemoveDeniedList: uid=%{public}d", uid);
+    return netsysService_->BandwidthRemoveDeniedList(uid);
+}
+
+int32_t NetsysController::BandwidthAddAllowedList(uint32_t uid)
+{
+    NETMGR_LOG_D("NetsysController::BandwidthAddAllowedList: uid=%{public}d", uid);
+    return netsysService_->BandwidthAddAllowedList(uid);
+}
+
+int32_t NetsysController::BandwidthRemoveAllowedList(uint32_t uid)
+{
+    NETMGR_LOG_D("NetsysController::BandwidthRemoveAllowedList: uid=%{public}d", uid);
+    return netsysService_->BandwidthRemoveAllowedList(uid);
+}
+
+int32_t NetsysController::FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
+{
+    NETMGR_LOG_D("NetsysController::FirewallSetUidsAllowedListChain: chain=%{public}d", chain);
+    return netsysService_->FirewallSetUidsAllowedListChain(chain, uids);
+}
+
+int32_t NetsysController::FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
+{
+    NETMGR_LOG_D("NetsysController::FirewallSetUidsDeniedListChain: chain=%{public}d", chain);
+    return netsysService_->FirewallSetUidsDeniedListChain(chain, uids);
+}
+
+int32_t NetsysController::FirewallEnableChain(uint32_t chain, bool enable)
+{
+    NETMGR_LOG_D("NetsysController::FirewallEnableChain: chain=%{public}d, enable=%{public}d",
+                 chain, enable);
+    return netsysService_->FirewallEnableChain(chain, enable);
+}
+
+int32_t NetsysController::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
+{
+    NETMGR_LOG_D("NetsysController::FirewallSetUidRule: chain=%{public}d,uid=%{public}d,firewallRule=%{public}d",
+                 chain, uid, firewallRule);
+    return netsysService_->FirewallSetUidRule(chain, uid, firewallRule);
+}
+#endif
 } // namespace NetManagerStandard
 } // namespace OHOS
