@@ -567,7 +567,7 @@ int32_t RouteManager::SendRuleToKernel(uint32_t action, uint16_t ruleFlag, uint8
     struct fib_rule_hdr msg = {0};
     msg.action = ruleType;
     msg.family = AF_INET;
-    NetlinkMsg nlmsg(ruleFlag, NETLINK_MAX_LEN, NetlinkManager::GetPid());
+    NetlinkMsg nlmsg(ruleFlag, NETLINK_MAX_LEN, getpid());
     nlmsg.AddRule(action, msg);
     if (int32_t ret = nlmsg.AddAttr32(FRA_PRIORITY, ruleInfo.rulePriority)) {
         return ret;
@@ -663,7 +663,7 @@ int32_t RouteManager::SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtm
         msg.rtm_family = static_cast<uint8_t>(gw.family);
     }
 
-    NetlinkMsg nlmsg(routeFlag, NETLINK_MAX_LEN, NetlinkManager::GetPid());
+    NetlinkMsg nlmsg(routeFlag, NETLINK_MAX_LEN, getpid());
     nlmsg.AddRoute(action, msg);
     if (int32_t ret = nlmsg.AddAttr32(RTA_TABLE, routeInfo.routeTable)) {
         return ret;
