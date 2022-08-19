@@ -32,6 +32,7 @@ ohos_shared_library("netsys_native_manager") {
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/dnsresolv/dns_resolv_config.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/dnsresolv/dns_resolv_listen.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/fwmark_network.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/iptables_wrapper.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/local_network.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/net_manager_native.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netlink_manager.cpp",
