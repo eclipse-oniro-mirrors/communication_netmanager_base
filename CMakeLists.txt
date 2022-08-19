@@ -192,6 +192,7 @@ add_executable(communication_netmanager_base
         interfaces/innerkits/netmanagernative/include/dnsresolver_params_parcel.h
         interfaces/innerkits/netmanagernative/include/fwmark.h
         interfaces/innerkits/netmanagernative/include/fwmark_command.h
+        interfaces/innerkits/netmanagernative/include/iptables_type.h
         interfaces/innerkits/netmanagernative/include/i_netsys_service.h
         interfaces/innerkits/netmanagernative/include/i_notify_callback.h
         interfaces/innerkits/netmanagernative/include/interface_type.h
