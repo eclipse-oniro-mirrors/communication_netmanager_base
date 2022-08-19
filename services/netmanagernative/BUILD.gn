@@ -69,6 +69,9 @@ ohos_shared_library("netsys_native_manager") {
   deps = [
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "//foundation/communication/wifi/dhcp/services/mgr_service:dhcp_manager_service",
+    "//third_party/iptables:iptables",
+    "//third_party/iptables:iptables-restore",
+    "//third_party/iptables:iptables-save",
   ]
 
   external_deps = [
