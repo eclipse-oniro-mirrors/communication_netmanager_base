@@ -31,7 +31,7 @@
 #include "netlink_socket.h"
 namespace OHOS {
 namespace nmd {
-int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg)
+int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table)
 {
     if (msg == nullptr) {
         NETNATIVE_LOGE("[NetlinkSocket] msg can not be null ");
@@ -70,167 +70,97 @@ int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg)
         return -1;
     }
     NETNATIVE_LOGI("msgState=== is %{public}zd", msgState);
+    if (msg->nlmsg_flags & NLM_F_DUMP) {
+        msgState = GetInfoFromKernel(kernelSocket, msg->nlmsg_type, table);
+    }
     close(kernelSocket);
     return msgState;
 }
 
-int32_t RtNetlinkFlush(uint16_t getAction, uint16_t deleteAction, const char *what, uint32_t table)
+int32_t ClearRouteInfo(uint16_t clearThing, uint32_t table)
 {
-    if (getAction != deleteAction + 1) {
-        NETNATIVE_LOGE("Unknown flush type getAction=%{public}d deleteAction=%{public}d", getAction, deleteAction);
-        return -EINVAL;
+    if (clearThing != RTM_GETROUTE && clearThing != RTM_GETRULE) {
+        NETNATIVE_LOGE("ClearRouteInfo %{public}d type error", clearThing);
+        return -1;
     }
-    int32_t writeSock = OpenNetlinkSocket(NETLINK_ROUTE);
-    if (writeSock < 0) {
-        NETNATIVE_LOGE("OpenNetlinkSocket error, writrSock=%{public}d", writeSock);
-        return writeSock;
-    }
-    // This is a callback to process the information read back from the kernel.
-    NetlinkDumpCallback callback = [writeSock, deleteAction, table, what](nlmsghdr *nlh) {
-        if (deleteAction == RTM_DELRULE) {
-            if (GetRtmU32Attribute(nlh, FRA_PRIORITY) != LOCAL_PRIORITY) {
-                return;
-            }
-        } else if (deleteAction == RTM_DELROUTE) {
-            uint32_t currentTable = GetRtmU32Attribute(nlh, RTA_TABLE);
-            if (currentTable != table) {
-                return;
-            }
-            NETNATIVE_LOGI("current table : %{public}d will be delete", currentTable);
-        }
-        nlh->nlmsg_type = deleteAction;
-        nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ACK;
-        // delete unnecessary routes and rules through sockets
-        if (write(writeSock, nlh, nlh->nlmsg_len) == -1) {
-            NETNATIVE_LOGE("Error writing flush request: %{public}s", strerror(errno));
-            return;
-        }
-        int32_t ret = RecvNetlinkAck(writeSock);
-        if (ret != 0 && ret != -ENOENT) {
-            NETNATIVE_LOGI("Flushing %{public}s: %{public}s", what, strerror(-ret));
-        }
-    };
-    rtmsg rule = {
-        .rtm_family = AF_INET,
-    };
-    iovec iov[] = {
-        {nullptr, 0},
-        {&rule, sizeof(rule)},
-    };
-    uint16_t flags = NLM_F_REQUEST | NLM_F_DUMP;
-    int32_t iovlen = sizeof(iov) / sizeof(*(iov));
     // Request the kernel to send a list of all routes or rules.
-    int32_t ret = SendNetlinkRequest(getAction, flags, iov, iovlen, &callback);
-    close(writeSock);
+    std::unique_ptr<char[]> msghdrBuf = std::make_unique<char[]>(NLMSG_SPACE(NETLINKMESSAGE_MAX_LEN));
+    struct nlmsghdr *msghdr = reinterpret_cast<struct nlmsghdr *>(msghdrBuf.get());
+    errno_t result = memset_s(msghdr, NLMSG_SPACE(NETLINKMESSAGE_MAX_LEN), 0, NLMSG_SPACE(NETLINKMESSAGE_MAX_LEN));
+    if (result != 0) {
+        NETNATIVE_LOGE("[NetlinkMessage]: memset result %{public}d", result);
+    }
+    rtmsg msg;
+    msg.rtm_family = AF_INET;
+    int32_t copeResult = memcpy_s(NLMSG_DATA(msghdr), sizeof(struct rtmsg), &msg, sizeof(struct rtmsg));
+    if (copeResult != 0) {
+        NETNATIVE_LOGE("[AddRoute]: string copy failed result %{public}d", copeResult);
+    }
+    msghdr->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
+    msghdr->nlmsg_type = clearThing;
+    msghdr->nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
+    int32_t ret = SendNetlinkMsgToKernel(msghdr);
     return ret;
 }
 
-int32_t OpenNetlinkSocket(int32_t protocol)
+int32_t GetInfoFromKernel(int32_t sock, uint16_t clearThing, uint32_t table)
 {
-    int32_t sock = socket(AF_NETLINK, SOCK_DGRAM | SOCK_CLOEXEC, protocol);
-    if (sock == -1) {
+    char readBuffer[KERNEL_BUFFER_SIZE];
+    // Read the information returned by the kernel through the socket.
+    ssize_t readedInfos = read(sock, readBuffer, sizeof(readBuffer));
+    if (readedInfos < 0) {
         return -errno;
     }
-    struct sockaddr kernel;
-    memset_s(&kernel, sizeof(kernel), 0, sizeof(kernel));
-    kernel.sa_family = AF_NETLINK;
-    if (connect(sock, &kernel, sizeof(kernel)) == -1) {
-        close(sock);
-        return -errno;
-    }
-    return sock;
-}
-
-int32_t RecvNetlinkAck(int32_t sock)
-{
-    struct {
-        nlmsghdr msg;
-        nlmsgerr err;
-    } response;
-
-    int32_t ret = recv(sock, &response, sizeof(response), 0);
-    if (ret == -1) {
-        ret = -errno;
-        NETNATIVE_LOGE("netlink recv failed (%{public}s)", strerror(-ret));
-        return ret;
-    }
-
-    if (ret != sizeof(response)) {
-        NETNATIVE_LOGE("bad netlink response message size (%{public}d != %{public}zu)", ret, sizeof(response));
-        return -EBADMSG;
-    }
-
-    return response.err.error;
-}
-
-int32_t SendNetlinkRequest(uint16_t action, uint16_t flags, iovec *iov, int32_t iovlen,
-    const NetlinkDumpCallback *callback)
-{
-    int32_t sock = OpenNetlinkSocket(NETLINK_ROUTE);
-    if (sock < 0) {
-        return sock;
-    }
-    nlmsghdr nlmsg = {
-        .nlmsg_type = action,
-        .nlmsg_flags = flags,
-    };
-    iov[0].iov_base = &nlmsg;
-    iov[0].iov_len = sizeof(nlmsg);
-    for (int32_t i = 0; i < iovlen; ++i) {
-        nlmsg.nlmsg_len += iov[i].iov_len;
-    }
-    ssize_t writevRet = writev(sock, iov, iovlen);
-    iov[0] = {nullptr, 0};
-    int32_t ret = 1;
-    if (writevRet == -1) {
-        ret = -errno;
-        NETNATIVE_LOGE("netlink socket connect/writev failed (%{public}s)", strerror(-ret));
-        close(sock);
-        return ret;
-    };
-    ret = ProcessNetlinkDump(sock, *callback);
-    close(sock);
-    return ret;
-}
-
-int32_t ProcessNetlinkDump(int32_t sock, const NetlinkDumpCallback &callback)
-{
-    char buf[KNETLINK_DUMP_BUFFER_SIZE];
-    ssize_t bytesread;
-    do {
-        // Read the information returned by the kernel through the socket.
-        bytesread = read(sock, buf, sizeof(buf));
-        if (bytesread < 0) {
-            return -1;
-        }
-        uint32_t len = bytesread;
+    while (readedInfos > 0) {
+        uint32_t readLength = readedInfos;
         // Traverse and read the information returned by the kernel for item by item processing.
-        for (nlmsghdr *nlh = reinterpret_cast<nlmsghdr *>(buf); NLMSG_OK(nlh, len); nlh = NLMSG_NEXT(nlh, len)) {
-            switch (nlh->nlmsg_type) {
-                case NLMSG_DONE:
-                    return 0;
-                case NLMSG_ERROR: {
-                    nlmsgerr *err = reinterpret_cast<nlmsgerr *>(NLMSG_DATA(nlh));
-                    NETNATIVE_LOGE("netlink read socket failed error = %{public}d", err->error);
-                    return err->error;
-                }
-                default:
-                    callback(nlh);
+        for (nlmsghdr *nlmsgHeader = reinterpret_cast<nlmsghdr *>(readBuffer); NLMSG_OK(nlmsgHeader, readLength);
+            nlmsgHeader = NLMSG_NEXT(nlmsgHeader, readLength)) {
+            if (nlmsgHeader->nlmsg_type == NLMSG_ERROR) {
+                nlmsgerr *err = reinterpret_cast<nlmsgerr *>(NLMSG_DATA(nlmsgHeader));
+                NETNATIVE_LOGE("netlink read socket failed error = %{public}d", err->error);
+                return err->error;
+            } else if (nlmsgHeader->nlmsg_type == NLMSG_DONE) {
+                return 0;
+            } else {
+                DealInfoFromKernel(nlmsgHeader, clearThing, table);
             }
         }
-    } while (bytesread > 0);
+        readedInfos = read(sock, readBuffer, sizeof(readBuffer));
+        if (readedInfos < 0) {
+            return -errno;
+        }
+    }
     return 0;
 }
 
-// It is used to extract the information returned by the kernel and decide whether to delete the configuration.
-uint32_t GetRtmU32Attribute(const nlmsghdr *nlh, int32_t attribute)
+void DealInfoFromKernel(nlmsghdr *nlmsgHeader, uint16_t clearThing, uint32_t table)
 {
-    uint32_t rtaLen = RTM_PAYLOAD(nlh);
-    rtmsg *msg = reinterpret_cast<rtmsg *>(NLMSG_DATA(nlh));
-    rtattr *rta = reinterpret_cast<rtattr *> RTM_RTA(msg);
-    for (; RTA_OK(rta, rtaLen); rta = RTA_NEXT(rta, rtaLen)) {
-        if (rta->rta_type == attribute) {
-            return *(reinterpret_cast<uint32_t *>(RTA_DATA(rta)));
+    struct nlmsghdr *msg = nlmsgHeader;
+    msg->nlmsg_flags = NLM_F_REQUEST | NLM_F_ACK;
+    if (clearThing == RTM_GETRULE) {
+        msg->nlmsg_type = RTM_DELRULE;
+        if (GetRouteProperty(nlmsgHeader, FRA_PRIORITY) != LOCAL_PRIORITY) {
+            return;
+        }
+    } else if (clearThing == RTM_GETROUTE) {
+        msg->nlmsg_type = RTM_DELROUTE;
+        if (GetRouteProperty(nlmsgHeader, RTA_TABLE) != table) {
+            return;
+        }
+    }
+    SendNetlinkMsgToKernel(msg);
+}
+
+// It is used to extract the information returned by the kernel and decide whether to delete the configuration.
+uint32_t GetRouteProperty(const nlmsghdr *nlmsgHeader, int32_t property)
+{
+    uint32_t rtaLength = RTM_PAYLOAD(nlmsgHeader);
+    rtmsg *infoMsg = reinterpret_cast<rtmsg *>(NLMSG_DATA(nlmsgHeader));
+    for (rtattr *infoRta = reinterpret_cast<rtattr *> RTM_RTA(infoMsg);
+        RTA_OK(infoRta, rtaLength); infoRta = RTA_NEXT(infoRta, rtaLength)) {
+        if (infoRta->rta_type == property) {
+            return *(reinterpret_cast<uint32_t *>(RTA_DATA(infoRta)));
         }
     }
     return 0;

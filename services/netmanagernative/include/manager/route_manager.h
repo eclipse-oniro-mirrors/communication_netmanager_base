@@ -223,27 +223,26 @@ private:
     static std::mutex m_interfaceToTableLock_;
     static std::map<std::string, uint32_t> m_interfaceToTable_;
     static int32_t Init();
-    static int32_t FlushRules();
-    static int32_t FlushRoutes(const std::string &interfaceName);
+    static int32_t ClearRules();
+    static int32_t ClearRoutes(const std::string &interfaceName);
     static int32_t AddLocalNetworkRules();
-    static int32_t ModifyPhysicalNetwork(uint16_t netId, const std::string &interfaceName, NetworkPermission permission,
+    static int32_t UpdatePhysicalNetwork(uint16_t netId, const std::string &interfaceName, NetworkPermission permission,
         bool add);
-    static int32_t ModifyLocalNetwork(uint16_t netId, const std::string &interfaceName, bool add);
-    static int32_t ModifyIncomingPacketMark(uint16_t netId, const std::string &interfaceName,
+    static int32_t UpdateLocalNetwork(uint16_t netId, const std::string &interfaceName, bool add);
+    static int32_t UpdateIncomingPacketMark(uint16_t netId, const std::string &interfaceName,
         NetworkPermission permission, bool add);
-    static int32_t ModifyExplicitNetworkRule(uint16_t netId, uint32_t table, NetworkPermission permission, bool add);
-    static int32_t ModifyOutputInterfaceRules(const std::string &interfaceName, uint32_t table,
+    static int32_t UpdateExplicitNetworkRule(uint16_t netId, uint32_t table, NetworkPermission permission, bool add);
+    static int32_t UpdateOutputInterfaceRules(const std::string &interfaceName, uint32_t table,
         NetworkPermission permission, bool add);
-    static int32_t ModifySharingNetwork(uint16_t action, const std::string &inputInterface,
+    static int32_t UpdateSharingNetwork(uint16_t action, const std::string &inputInterface,
         const std::string &outputInterface);
     static int32_t ClearSharingRules(const std::string &inputInterface);
-    static int32_t ModifyRule(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo);
+    static int32_t UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo);
     static int32_t SendRuleToKernel(uint32_t action, uint16_t ruleFlag, uint8_t ruleType, RuleInfo ruleInfo);
-    static int32_t ModifyRoute(uint16_t action, uint16_t flags, RouteInfo routeInfo);
+    static int32_t UpdateRouteRule(uint16_t action, uint16_t flags, RouteInfo routeInfo);
     static int32_t SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtmsg msg, RouteInfo routeInfo,
         uint32_t index);
-    static int32_t PadInterfaceName(const std::string &input, char *name, size_t *length, uint16_t *padding);
-    static uint32_t GetRouteTableForInterface(const std::string &interfaceName);
+    static uint32_t FindTableByInterfacename(const std::string &interfaceName);
     static uint32_t GetRouteTableFromType(TableType tableType, const std::string &interfaceName);
 };
 } // namespace nmd

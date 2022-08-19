@@ -33,10 +33,6 @@
 namespace OHOS {
 namespace nmd {
 constexpr uint32_t NETLINK_MAX_LEN = 1024;
-constexpr uint16_t NETLINK_REQUEST_FLAGS = NLM_F_REQUEST | NLM_F_ACK;
-constexpr uint16_t NETLINK_ROUTE_CREATE_FLAGS = NETLINK_REQUEST_FLAGS | NLM_F_CREATE | NLM_F_EXCL;
-constexpr uint16_t NETLINK_ROUTE_REPLACE_FLAGS = NETLINK_REQUEST_FLAGS | NLM_F_REPLACE;
-constexpr uint16_t NETLINK_RULE_CREATE_FLAGS = NETLINK_REQUEST_FLAGS | NLM_F_CREATE;
 class NetlinkMsg {
 public:
     NetlinkMsg(uint16_t flags, size_t maxBufLen, int32_t pid);
@@ -101,8 +97,9 @@ public:
     struct nlmsghdr *GetNetLinkMessage();
 
 private:
-    struct nlmsghdr *netlinkMessage;
-    size_t maxBufLen;
+    std::unique_ptr<char[]> msghdrBuf_;
+    struct nlmsghdr *netlinkMessage_;
+    size_t maxBufLen_;
 };
 } // namespace nmd
 } // namespace OHOS

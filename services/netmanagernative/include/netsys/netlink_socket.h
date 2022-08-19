@@ -25,33 +25,29 @@
 
 namespace OHOS {
 namespace nmd {
-constexpr uint32_t KNETLINK_DUMP_BUFFER_SIZE = 8192;
+constexpr uint32_t NETLINKMESSAGE_MAX_LEN = 1024;
+constexpr uint32_t KERNEL_BUFFER_SIZE = 8192;
 constexpr uint32_t LOCAL_PRIORITY = 32767;
-using NetlinkDumpCallback = std::function<void(nlmsghdr *)>;
 /**
  * Send netklink message to kernel
  *
  * @param msg nlmsghdr struct
+ * @param table If clear route，this is table number, otherwise it will is 0
  * @return Returns 0, send netklink message to kernel successfully, otherwise it will fail
  */
-int32_t SendNetlinkMsgToKernel(nlmsghdr *msg);
+int32_t SendNetlinkMsgToKernel(nlmsghdr *msg, uint32_t table = 0);
 
 /**
- * Flush route or rule configure
+ * Clear route or rule configure
  *
- * @param getAction Decide to flush route or rule. Must be one of RTM_GETRULE/RTM_GETROUTE
- * @param deleteAction Decide to flush route or rule. Must be one of RTM_DELRULE/RTM_DELROUTE
- * @param what Decide to flush route or rule. Must be one of "rules"/"routes"
- * @param table If refresh route，this is table number, otherwise it will is 0
- * @return Returns 0, flush route or rule configure successfully, otherwise it will fail
+ * @param clearThing Decide to clear route or rule. Must be one of RTM_GETRULE/RTM_GETROUTE
+ * @param table If clear route，this is table number, otherwise it will is 0
+ * @return Returns 0, clear route or rule configure successfully, otherwise it will fail
  */
-int32_t RtNetlinkFlush(uint16_t getAction, uint16_t deleteAction, const char *what, uint32_t table);
-int32_t OpenNetlinkSocket(int32_t protocol);
-int32_t RecvNetlinkAck(int32_t sock);
-int32_t SendNetlinkRequest(uint16_t action, uint16_t flags, iovec *iov, int32_t iovlen,
-    const NetlinkDumpCallback *callback);
-int32_t ProcessNetlinkDump(int32_t sock, const NetlinkDumpCallback &callback);
-uint32_t GetRtmU32Attribute(const nlmsghdr *nlh, int32_t attribute);
+int32_t ClearRouteInfo(uint16_t clearThing, uint32_t table);
+int32_t GetInfoFromKernel(int32_t sock, uint16_t clearThing, uint32_t table);
+void DealInfoFromKernel(nlmsghdr *nlmsgHeader, uint16_t clearThing, uint32_t table);
+uint32_t GetRouteProperty(const nlmsghdr *nlmsgHeader, int32_t property);
 } // namespace nmd
 } // namespace OHOS
 #endif // !INCLUDE_NETLINK_SOCKET_H__
