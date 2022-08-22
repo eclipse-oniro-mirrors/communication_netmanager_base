@@ -93,8 +93,7 @@ int32_t NetsysController::NetworkRemoveInterface(int32_t netId, const std::strin
 int32_t NetsysController::NetworkAddRoute(int32_t netId, const std::string &ifName,
     const std::string &destination, const std::string &nextHop)
 {
-    NETMGR_LOG_I("Add Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s]",
-        netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
+    NETMGR_LOG_I("Add Route: netId[%{public}d], ifName[%{public}s]", netId, ifName.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
@@ -105,8 +104,7 @@ int32_t NetsysController::NetworkAddRoute(int32_t netId, const std::string &ifNa
 int32_t NetsysController::NetworkRemoveRoute(int32_t netId, const std::string &ifName,
     const std::string &destination, const std::string &nextHop)
 {
-    NETMGR_LOG_I("Remove Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s]",
-        netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
+    NETMGR_LOG_I("Remove Route: netId[%{public}d], ifName[%{public}s]", netId, ifName.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
@@ -167,8 +165,7 @@ int32_t NetsysController::InterfaceSetMtu(const std::string &ifName, int32_t mtu
 int32_t NetsysController::InterfaceAddAddress(const std::string &ifName,
     const std::string &ipAddr, int32_t prefixLength)
 {
-    NETMGR_LOG_I("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
-        ifName.c_str(), ipAddr.c_str(), prefixLength);
+    NETMGR_LOG_I("Add address: ifName[%{public}s], prefixLength[%{public}d]", ifName.c_str(), prefixLength);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
@@ -179,8 +176,7 @@ int32_t NetsysController::InterfaceAddAddress(const std::string &ifName,
 int32_t NetsysController::InterfaceDelAddress(const std::string &ifName,
     const std::string &ipAddr, int32_t prefixLength)
 {
-    NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
-        ifName.c_str(), ipAddr.c_str(), prefixLength);
+    NETMGR_LOG_I("Delete address: ifName[%{public}s], prefixLength[%{public}d]", ifName.c_str(), prefixLength);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
@@ -520,8 +516,7 @@ int32_t NetsysController::SetIpAddress(int32_t socketFd, const std::string &ipAd
     if ((socketFd <= 0) || (ipAddress.length() == 0) || (ipAddress.length() > MAX_IPV4_ADDRESS_LEN) ||
         (prefixLen <= 0) || (prefixLen > MAX_IPV4_ADDRESS_LEN)) {
         NETMGR_LOG_E("The paramemters of SetIpAddress is failed, socketFd[%{public}d], "
-            "ipAddress[%{public}s], prefixLen[%{public}d].",
-            socketFd, ipAddress.c_str(), prefixLen);
+            "prefixLen[%{public}d].", socketFd, prefixLen);
         return ERR_VPN;
     }
     return netsysService_->SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);

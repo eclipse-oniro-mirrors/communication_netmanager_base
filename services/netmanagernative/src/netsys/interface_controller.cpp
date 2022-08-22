@@ -199,8 +199,8 @@ int InterfaceController::ModifyAddress(uint32_t action, const char *interfaceNam
         nlmsg.AddAttr(IFA_BROADCAST, &inAddr, sizeof(inAddr));
     }
 
-    NETNATIVE_LOGI("InterfaceController::ModifyAddress:%{public}u %{public}s %{public}s %{public}d",
-        action, interfaceName, addr, prefixLen);
+    NETNATIVE_LOGI("InterfaceController::ModifyAddress:%{public}u %{public}s %{public}d",
+        action, interfaceName, prefixLen);
 
     ret = netLinker.SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
     if (ret < 0) {

@@ -129,8 +129,7 @@ int32_t MockNetsysNativeClient::NetworkRemoveInterface(int32_t netId, const std:
 int32_t MockNetsysNativeClient::NetworkAddRoute(int32_t netId, const std::string &ifName,
     const std::string &destination, const std::string &nextHop)
 {
-    NETMGR_LOG_I("Add Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s]",
-        netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
+    NETMGR_LOG_I("Add Route: netId[%{public}d], ifName[%{public}s]", netId, ifName.c_str());
     std::string mask = "0.0.0.0";
     return AddRoute(destination, mask, nextHop, ifName);
 }
@@ -138,8 +137,7 @@ int32_t MockNetsysNativeClient::NetworkAddRoute(int32_t netId, const std::string
 int32_t MockNetsysNativeClient::NetworkRemoveRoute(int32_t netId, const std::string &ifName,
     const std::string &destination, const std::string &nextHop)
 {
-    NETMGR_LOG_I("Remove Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s]",
-        netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
+    NETMGR_LOG_I("Remove Route: netId[%{public}d], ifName[%{public}s]", netId, ifName.c_str());
     return 0;
 }
 

@@ -213,8 +213,7 @@ int nmd::RouteController::AddRoute(int netId, std::string interfaceName, std::st
     nlmsg.AddAttr32(RTA_OIF, index);
 
     netLinker.SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
-    NETNATIVE_LOGI("nmd::RouteController::AddRoute:%{public}d %{public}s %{public}s %{public}s",
-        netId, interfaceName.c_str(), destination.c_str(), nextHop.c_str());
+    NETNATIVE_LOGI("nmd::RouteController::AddRoute:%{public}d %{public}s", netId, interfaceName.c_str());
 
     return 1;
 }
@@ -277,8 +276,7 @@ int RouteController::RemoveRoute(int netId, std::string interfaceName, std::stri
     nlmsg.AddAttr32(RTA_OIF, index);
 
     netLinker.SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
-    NETNATIVE_LOGI("nmd::RouteController::RemoveRoute:%{public}d %{public}s %{public}s %{public}s",
-        netId, interfaceName.c_str(), destination.c_str(), nextHop.c_str());
+    NETNATIVE_LOGI("nmd::RouteController::RemoveRoute:%{public}d %{public}s", netId, interfaceName.c_str());
 
     return 1;
 }

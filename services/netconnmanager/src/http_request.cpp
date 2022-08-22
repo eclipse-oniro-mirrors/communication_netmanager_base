@@ -141,8 +141,7 @@ int32_t HttpRequest::ParseExecResult(const std::unique_ptr<CURL, CURLClean> &cur
 {
     CURLcode errCode = static_cast<CURLcode>(rlt);
     if (errCode != CURLE_OK) {
-        NETMGR_LOG_E("HTTP request failed, errStr:[%{public}s], errorBuffer_:[%{public}s]!",
-            curl_easy_strerror(errCode), errorBuffer_);
+        NETMGR_LOG_E("HTTP request failed, errStr:[%{public}s]!", curl_easy_strerror(errCode));
         return rlt;
     }
 
