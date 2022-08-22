@@ -105,8 +105,7 @@ bool NetsysNativeService::Init()
     }
     netsysService_->Init();
 
-    int32_t pid = getpid();
-    manager_ = std::make_unique<OHOS::nmd::NetlinkManager>(pid);
+    manager_ = std::make_unique<OHOS::nmd::NetlinkManager>();
     if (manager_ == nullptr) {
         NETNATIVE_LOGE("manager_ is nullptr!");
         return false;
@@ -195,8 +194,8 @@ int32_t NetsysNativeService::RegisterNotifyCallback(sptr<INotifyCallback> &callb
 
 int32_t NetsysNativeService::UnRegisterNotifyCallback(sptr<INotifyCallback> &callback)
 {
-    NETNATIVE_LOG_D("UnRegisterNotifyCallback");
-    manager_->UnRegisterNetlinkCallback(notifyCallback_);
+    NETNATIVE_LOGI("UnRegisterNotifyCallback");
+    manager_->UnregisterNetlinkCallback(notifyCallback_);
     return 0;
 }
 

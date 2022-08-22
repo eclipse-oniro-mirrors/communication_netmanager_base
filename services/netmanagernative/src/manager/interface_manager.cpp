@@ -174,7 +174,7 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
         return -errno;
     }
 
-    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, NetlinkManager::GetPid());
+    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, getpid());
 
     struct ifaddrmsg ifm = {0};
     ifm.ifa_family = AF_INET;

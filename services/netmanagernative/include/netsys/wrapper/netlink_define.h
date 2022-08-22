@@ -28,17 +28,6 @@ static const int32_t NETLINK_FORMAT_BINARY_UNICAST = 2;
 
 static constexpr uint32_t BUFFER_SIZE = 64 * 1024;
 static constexpr int32_t DECIMALISM = 10;
-
-static constexpr uint32_t INDEX_ZERO = 0;
-static constexpr uint32_t INDEX_ONE = 1;
-static constexpr uint32_t INDEX_TWO = 2;
-static constexpr uint32_t INDEX_THREE = 3;
-static constexpr uint32_t INDEX_FOUR = 4;
-static constexpr uint32_t INDEX_FIVE = 5;
-static constexpr uint32_t INDEX_SIX = 6;
-static constexpr uint32_t INDEX_SEVEN = 7;
-static constexpr uint32_t INDEX_EIGHT = 8;
-static constexpr uint32_t INDEX_NINE = 9;
 } // namespace NetlinkDefine
 
 namespace NetlinkResult {
