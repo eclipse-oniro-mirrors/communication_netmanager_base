@@ -14,7 +14,10 @@
 import("//build/ohos.gni")
 
 ohos_shared_library("netsys_client") {
-  sources = [ "//foundation/communication/netmanager_base/services/netmanagernative/netsys_client/src/netsys_client.c" ]
+  sources = [
+    "//foundation/communication/netmanager_base/services/netmanagernative/netsys_client/src/netsys_client.c",
+    "//foundation/communication/netmanager_base/services/netmanagernative/netsys_client/src/netsys_tcp_client.c",
+  ]
 
   include_dirs = [ "//foundation/communication/netmanager_base/services/netmanagernative/include/netsys" ]
 

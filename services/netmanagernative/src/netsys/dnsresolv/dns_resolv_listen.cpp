@@ -20,7 +20,6 @@
 #include "dns_config_client.h"
 #include "dns_param_cache.h"
 #include "netsys_client.h"
-#include "securec.h"
 #include "singleton.h"
 
 #include "dns_resolv_listen.h"

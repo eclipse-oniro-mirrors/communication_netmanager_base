@@ -69,6 +69,9 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_DISABLE_NAT] = &NetsysNativeServiceStub::CmdDisableNat;
     opToInterfaceMap_[NETSYS_IPFWD_ADD_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward;
     opToInterfaceMap_[NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward;
+    opToInterfaceMap_[NETSYS_TETHER_DNS_SET] = &NetsysNativeServiceStub::CmdShareDnsSet;
+    opToInterfaceMap_[NETSYS_START_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStartDnsProxyListen;
+    opToInterfaceMap_[NETSYS_STOP_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStopDnsProxyListen;
 #ifdef BUILD_POLYCY_NETSYS
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
@@ -840,5 +843,34 @@ int32_t NetsysNativeServiceStub::CmdFirewallSetUidRule(MessageParcel &data, Mess
     return result;
 }
 #endif
+
+int32_t NetsysNativeServiceStub::CmdShareDnsSet(MessageParcel &data, MessageParcel &reply)
+{
+    uint16_t netId = 0;
+    data.ReadUint16(netId);
+    int32_t result = ShareDnsSet(netId);
+    reply.WriteInt32(result);
+    NETNATIVE_LOGI("ShareDnsSet has received result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdStartDnsProxyListen(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t result = StartDnsProxyListen();
+    reply.WriteInt32(result);
+    NETNATIVE_LOGI("StartDnsProxyListen has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdStopDnsProxyListen(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t result = StopDnsProxyListen();
+    reply.WriteInt32(result);
+    NETNATIVE_LOGI("StopDnsProxyListen has recved result %{public}d", result);
+
+    return result;
+}
 } // namespace NetsysNative
 } // namespace OHOS

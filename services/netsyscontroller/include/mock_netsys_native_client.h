@@ -64,7 +64,7 @@ constexpr const char *MOCK_GETIFACETXPACKETS_API = "GetIfaceTxPackets";
 constexpr const char *MOCK_SETDEFAULTNETWORK_API = "SetDefaultNetWork";
 constexpr const char *MOCK_CLEARDEFAULTNETWORK_API = "ClearDefaultNetWorkNetId";
 constexpr const char *MOCK_BINDSOCKET_API = "BindSocket";
-constexpr const char *MOCK_TETHERDNSSET_API = "TetherDnsSet";
+constexpr const char *MOCK_SHAREDNSSET_API = "ShareDnsSet";
 constexpr const char *MOCK_REGISTERNETSYSNOTIFYCALLBACK_API = "RegisterNetsysNotifyCallback";
 constexpr const char *MOCK_BINDNETWORKSERVICEVPN_API = "BindNetworkServiceVpn";
 constexpr const char *MOCK_ENABLEVIRTUALNETIFACECARD_API = "EnableVirtualNetIfaceCard";
@@ -397,13 +397,13 @@ public:
     int32_t BindSocket(int32_t socket_fd, uint32_t netId);
 
     /**
-     * @brief Set tether dns.
+     * Set tether dns.
      *
      * @param netId network id
      * @param dnsAddr the list of dns address
      * @return Return the return value of the netsys interface call.
      */
-    int32_t TetherDnsSet(uint32_t netId, const std::vector<std::string>& dnsAddrs);
+    int32_t ShareDnsSet(uint16_t netId);
 
     /**
      * @brief Set net callbackfuction.

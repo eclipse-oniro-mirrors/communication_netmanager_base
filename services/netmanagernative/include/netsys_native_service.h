@@ -103,6 +103,10 @@ public:
     int32_t FirewallEnableChain(uint32_t chain, bool enable) override;
     int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) override;
 #endif
+    int32_t ShareDnsSet(uint16_t netid) override;
+    int32_t StartDnsProxyListen() override;
+    int32_t StopDnsProxyListen() override;
+
 private:
     NetsysNativeService();
     bool Init();

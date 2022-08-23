@@ -112,6 +112,10 @@ public:
     int32_t FirewallEnableChain(uint32_t chain, bool enable);
     int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule);
 #endif
+    void ShareDnsSet(uint16_t netId);
+    void StartDnsProxyListen();
+    void StopDnsProxyListen();
+
 private:
 #ifdef BUILD_POLYCY_NETSYS
     std::shared_ptr<BandwidthManager> bandwidthManager_;

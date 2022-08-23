@@ -85,7 +85,7 @@ void MockNetsysNativeClient::RegisterMockApi()
     mockApi_.insert(MOCK_GETIFACERXPACKETS_API);
     mockApi_.insert(MOCK_GETIFACETXPACKETS_API);
     mockApi_.insert(MOCK_BINDSOCKET_API);
-    mockApi_.insert(MOCK_TETHERDNSSET_API);
+    mockApi_.insert(MOCK_SHAREDNSSET_API);
     mockApi_.insert(MOCK_REGISTERNETSYSNOTIFYCALLBACK_API);
     mockApi_.insert(MOCK_BINDNETWORKSERVICEVPN_API);
     mockApi_.insert(MOCK_ENABLEVIRTUALNETIFACECARD_API);
@@ -527,12 +527,9 @@ int32_t MockNetsysNativeClient::BindSocket(int32_t socket_fd, uint32_t netId)
     return 0;
 }
 
-int32_t MockNetsysNativeClient::TetherDnsSet(uint32_t netId, const std::vector<std::string>& dnsAddrs)
+int32_t MockNetsysNativeClient::ShareDnsSet(uint16_t netId)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient TetherDnsSet: netId[%{public}d]", netId);
-    for (auto iter = dnsAddrs.begin(); iter != dnsAddrs.end(); ++iter) {
-        NETMGR_LOG_D("MockNetsysNativeClient TetherDnsSet: dnsAddrs[%{public}s]", iter->c_str());
-    }
+    NETMGR_LOG_D("MockNetsysNativeClient ShareDnsSet: netId[%{public}d]", netId);
     return 0;
 }
 

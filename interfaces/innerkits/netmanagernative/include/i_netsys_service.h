@@ -81,6 +81,9 @@ public:
         NETSYS_FIREWALL_SET_UID_DENIED_LIST_CHAIN,
         NETSYS_FIREWALL_ENABLE_CHAIN,
         NETSYS_FIREWALL_SET_UID_RULE,
+        NETSYS_TETHER_DNS_SET,
+        NETSYS_START_DNS_PROXY_LISTEN,
+        NETSYS_STOP_DNS_PROXY_LISTEN,
     };
 
     virtual int32_t SetResolverConfigParcel(const DnsResolverParamsParcel &resolvParams) = 0;
@@ -149,6 +152,10 @@ public:
     virtual int32_t FirewallEnableChain(uint32_t chain, bool enable) = 0;
     virtual int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) = 0;
 #endif
+    virtual int32_t ShareDnsSet(uint16_t netId) = 0;
+    virtual int32_t StartDnsProxyListen() = 0;
+    virtual int32_t StopDnsProxyListen() = 0;
+
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

@@ -34,10 +34,10 @@ std::vector<std::string> DnsParamCache::SelectNameservers(const std::vector<std:
 
 int32_t DnsParamCache::CreateCacheForNet(uint16_t netId)
 {
-    NETNATIVE_LOGI("DnsParamCache::CreateCacheForNet, netid:%{public}d,", netId);
+    NETNATIVE_LOG_D("DnsParamCache::CreateCacheForNet, netid:%{public}d,", netId);
     std::lock_guard<std::mutex> guard(cacheMutex_);
     if (serverConfigMap_.find(netId) != serverConfigMap_.end()) {
-        NETNATIVE_LOGI("DnsParamCache::CreateCacheForNet, netid is have");
+        NETNATIVE_LOGE("DnsParamCache::CreateCacheForNet, netid is have");
         return -EEXIST;
     }
     serverConfigMap_[netId].SetNetId(netId);
@@ -49,14 +49,14 @@ int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMse
                                          const std::vector<std::string> &domains)
 {
     std::vector<std::string> nameservers = SelectNameservers(servers);
-    NETNATIVE_LOGI("DnsParamCache::SetResolverConfig, netid:%{public}d, numServers:%{public}d,", netId,
-                   static_cast<int>(nameservers.size()));
+    NETNATIVE_LOG_D("DnsParamCache::SetResolverConfig, netid:%{public}d, numServers:%{public}d,", netId,
+                    static_cast<int>(nameservers.size()));
 
     std::lock_guard<std::mutex> guard(cacheMutex_);
 
     // select_domains
     if (serverConfigMap_.find(netId) == serverConfigMap_.end()) {
-        NETNATIVE_LOGI("DnsParamCache::SetResolverConfig failed netid is no haven");
+        NETNATIVE_LOGE("DnsParamCache::SetResolverConfig failed netid is no haven");
         return -ENOENT;
     }
 

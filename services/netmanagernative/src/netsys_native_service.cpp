@@ -257,7 +257,7 @@ int32_t NetsysNativeService::NetworkClearDefault()
 int32_t NetsysNativeService::GetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
     const std::string  &parameter, std::string  &value)
 {
-    int32_t result = this->netsysService_->GetProcSysNet(ipversion,  which,  ifname,  parameter, &value);
+    int32_t result = netsysService_->GetProcSysNet(ipversion,  which,  ifname,  parameter, &value);
     NETNATIVE_LOG_D("GetProcSysNet");
     return result;
 }
@@ -265,7 +265,7 @@ int32_t NetsysNativeService::GetProcSysNet(int32_t ipversion, int32_t which, con
 int32_t NetsysNativeService::SetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
     const std::string  &parameter, std::string  &value)
 {
-    int32_t result = this->netsysService_->SetProcSysNet(ipversion,  which,  ifname,  parameter, value);
+    int32_t result = netsysService_->SetProcSysNet(ipversion,  which,  ifname,  parameter, value);
     NETNATIVE_LOG_D("SetProcSysNet");
     return result;
 }
@@ -375,104 +375,137 @@ int32_t NetsysNativeService::StopDhcpService(const std::string &iface)
 int32_t NetsysNativeService::IpEnableForwarding(const std::string &requester)
 {
     NETNATIVE_LOG_D("ipEnableForwarding");
-    return this->netsysService_->IpEnableForwarding(requester);
+    return netsysService_->IpEnableForwarding(requester);
 }
 
 int32_t NetsysNativeService::IpDisableForwarding(const std::string &requester)
 {
     NETNATIVE_LOG_D("ipDisableForwarding");
-    return this->netsysService_->IpDisableForwarding(requester);
+    return netsysService_->IpDisableForwarding(requester);
 }
 
 int32_t NetsysNativeService::EnableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
     NETNATIVE_LOG_D("enableNat");
-    return this->netsysService_->EnableNat(downstreamIface, upstreamIface);
+    return netsysService_->EnableNat(downstreamIface, upstreamIface);
 }
 
 int32_t NetsysNativeService::DisableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
     NETNATIVE_LOG_D("disableNat");
-    return this->netsysService_->DisableNat(downstreamIface, upstreamIface);
+    return netsysService_->DisableNat(downstreamIface, upstreamIface);
 }
 
 int32_t NetsysNativeService::IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface)
 {
     NETNATIVE_LOG_D("ipfwdAddInterfaceForward");
-    return this->netsysService_->IpfwdAddInterfaceForward(fromIface, toIface);
+    return netsysService_->IpfwdAddInterfaceForward(fromIface, toIface);
 }
 
 int32_t NetsysNativeService::IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface)
 {
     NETNATIVE_LOG_D("ipfwdRemoveInterfaceForward");
-    return this->netsysService_->IpfwdRemoveInterfaceForward(fromIface, toIface);
+    return netsysService_->IpfwdRemoveInterfaceForward(fromIface, toIface);
 }
 #ifdef BUILD_POLYCY_NETSYS
 int32_t NetsysNativeService::BandwidthEnableDataSaver(bool enable)
 {
     NETNATIVE_LOG_D("bandwidthEnableDataSaver");
-    return this->netsysService_->BandwidthEnableDataSaver(enable);
+    return netsysService_->BandwidthEnableDataSaver(enable);
 }
 
 int32_t NetsysNativeService::BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes)
 {
     NETNATIVE_LOG_D("BandwidthSetIfaceQuota");
-    return this->netsysService_->BandwidthSetIfaceQuota(ifName, bytes);
+    return netsysService_->BandwidthSetIfaceQuota(ifName, bytes);
 }
 
 int32_t NetsysNativeService::BandwidthRemoveIfaceQuota(const std::string &ifName)
 {
     NETNATIVE_LOG_D("BandwidthRemoveIfaceQuota");
-    return this->netsysService_->BandwidthRemoveIfaceQuota(ifName);
+    return netsysService_->BandwidthRemoveIfaceQuota(ifName);
 }
 
 int32_t NetsysNativeService::BandwidthAddDeniedList(uint32_t uid)
 {
     NETNATIVE_LOG_D("BandwidthAddDeniedList");
-    return this->netsysService_->BandwidthAddDeniedList(uid);
+    return netsysService_->BandwidthAddDeniedList(uid);
 }
 
 int32_t NetsysNativeService::BandwidthRemoveDeniedList(uint32_t uid)
 {
     NETNATIVE_LOG_D("BandwidthRemoveDeniedList");
-    return this->netsysService_->BandwidthRemoveDeniedList(uid);
+    return netsysService_->BandwidthRemoveDeniedList(uid);
 }
 
 int32_t NetsysNativeService::BandwidthAddAllowedList(uint32_t uid)
 {
     NETNATIVE_LOG_D("BandwidthAddAllowedList");
-    return this->netsysService_->BandwidthAddAllowedList(uid);
+    return netsysService_->BandwidthAddAllowedList(uid);
 }
 
 int32_t NetsysNativeService::BandwidthRemoveAllowedList(uint32_t uid)
 {
     NETNATIVE_LOG_D("BandwidthRemoveAllowedList");
-    return this->netsysService_->BandwidthRemoveAllowedList(uid);
+    return netsysService_->BandwidthRemoveAllowedList(uid);
 }
 
 int32_t NetsysNativeService::FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
 {
     NETNATIVE_LOG_D("FirewallSetUidsAllowedListChain");
-    return this->netsysService_->FirewallSetUidsAllowedListChain(chain, uids);
+    return netsysService_->FirewallSetUidsAllowedListChain(chain, uids);
 }
 
 int32_t NetsysNativeService::FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
 {
     NETNATIVE_LOG_D("FirewallSetUidsDeniedListChain");
-    return this->netsysService_->FirewallSetUidsDeniedListChain(chain, uids);
+    return netsysService_->FirewallSetUidsDeniedListChain(chain, uids);
 }
 
 int32_t NetsysNativeService::FirewallEnableChain(uint32_t chain, bool enable)
 {
     NETNATIVE_LOG_D("FirewallEnableChain");
-    return this->netsysService_->FirewallEnableChain(chain, enable);
+    return netsysService_->FirewallEnableChain(chain, enable);
 }
 
 int32_t NetsysNativeService::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
 {
     NETNATIVE_LOG_D("firewallSetUidRule");
-    return this->netsysService_->FirewallSetUidRule(chain, uid, firewallRule);
+    return netsysService_->FirewallSetUidRule(chain, uid, firewallRule);
 }
 #endif
+
+int32_t NetsysNativeService::ShareDnsSet(uint16_t netid)
+{
+    NETNATIVE_LOG_D("NetsysNativeService ShareDnsSet");
+    if (netsysService_ == nullptr) {
+        NETNATIVE_LOGE("netsysService_ is null");
+        return -1;
+    }
+    netsysService_->ShareDnsSet(netid);
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeService::StartDnsProxyListen()
+{
+    NETNATIVE_LOG_D("NetsysNativeService StartDnsProxyListen");
+    if (netsysService_ == nullptr) {
+        NETNATIVE_LOGE("netsysService_ is null");
+        return -1;
+    }
+    netsysService_->StartDnsProxyListen();
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeService::StopDnsProxyListen()
+{
+    NETNATIVE_LOG_D("NetsysNativeService StopDnsProxyListen");
+    if (netsysService_ == nullptr) {
+        NETNATIVE_LOGE("netsysService_ is null");
+        return -1;
+    }
+    netsysService_->StopDnsProxyListen();
+    return ERR_NONE;
+}
 } // namespace NetsysNative
 } // namespace OHOS

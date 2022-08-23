@@ -617,13 +617,19 @@ int32_t NetsysNativeClient::IpfwdRemoveInterfaceForward(const std::string &fromI
     return netsysNativeService_->IpfwdRemoveInterfaceForward(fromIface, toIface);
 }
 
-int32_t NetsysNativeClient::TetherDnsSet(uint32_t netId, const std::vector<std::string> &dnsAddrs)
+int32_t NetsysNativeClient::ShareDnsSet(uint16_t netId)
 {
-    NETMGR_LOG_D("NetsysNativeClient TetherDnsSet: netId[%{public}d]", netId);
-    for (auto iter = dnsAddrs.begin(); iter != dnsAddrs.end(); ++iter) {
-        NETMGR_LOG_D("NetsysNativeClient TetherDnsSet: dnsAddrs[%{public}s]", iter->c_str());
-    }
-    return 0;
+    return netsysNativeService_->ShareDnsSet(netId);
+}
+
+int32_t NetsysNativeClient::StartDnsProxyListen()
+{
+    return netsysNativeService_->StartDnsProxyListen();
+}
+
+int32_t NetsysNativeClient::StopDnsProxyListen()
+{
+    return netsysNativeService_->StopDnsProxyListen();
 }
 
 int32_t NetsysNativeClient::RegisterNetsysNotifyCallback(const NetsysNotifyCallback &callback)

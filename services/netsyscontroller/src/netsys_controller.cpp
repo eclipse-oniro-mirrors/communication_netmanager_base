@@ -487,17 +487,34 @@ int32_t NetsysController::IpfwdRemoveInterfaceForward(const std::string& fromIfa
     return netsysService_->IpfwdRemoveInterfaceForward(fromIface, toIface);
 }
 
-int32_t NetsysController::TetherDnsSet(uint32_t netId, const std::vector<std::string>& dnsAddrs)
+int32_t NetsysController::ShareDnsSet(uint16_t netId)
 {
-    NETMGR_LOG_D("TetherDnsSet: netId[%{public}d]", netId);
-    for (auto iter = dnsAddrs.begin(); iter != dnsAddrs.end(); ++iter) {
-        NETMGR_LOG_D("TetherDnsSet: dnsAddrs[%{public}s]", iter->c_str());
-    }
+    NETMGR_LOG_D("ShareDnsSet: netId[%{public}d]", netId);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
-    return netsysService_->TetherDnsSet(netId, dnsAddrs);
+    return netsysService_->ShareDnsSet(netId);
+}
+
+int32_t NetsysController::StartDnsProxyListen()
+{
+    NETMGR_LOG_D("NetsysController::StartDnsProxyListen");
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+    }
+    return netsysService_->StartDnsProxyListen();
+}
+
+int32_t NetsysController::StopDnsProxyListen()
+{
+    NETMGR_LOG_D("NetsysController::StopDnsProxyListen");
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+    }
+    return netsysService_->StopDnsProxyListen();
 }
 
 int32_t NetsysController::RegisterNetsysNotifyCallback(const NetsysNotifyCallback &callback)
