@@ -92,6 +92,9 @@ private:
     int32_t CmdFirewallEnableChain(MessageParcel &data, MessageParcel &reply);
     int32_t CmdFirewallSetUidRule(MessageParcel &data, MessageParcel &reply);
 #endif
+    int32_t CmdShareDnsSet(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdStartDnsProxyListen(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdStopDnsProxyListen(MessageParcel &data, MessageParcel &reply);
 };
 } // namespace NetsysNative
 } // namespace OHOS

@@ -403,13 +403,25 @@ int32_t NetsysControllerServiceImpl::IpfwdRemoveInterfaceForward(
     return netsysClient_.IpfwdRemoveInterfaceForward(fromIface, toIface);
 }
 
-int32_t NetsysControllerServiceImpl::TetherDnsSet(uint32_t netId, const std::vector<std::string> &dnsAddrs)
+int32_t NetsysControllerServiceImpl::ShareDnsSet(uint16_t netId)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl IpfwdRemoveInterfaceForward");
-    if (mockNetsysClient_.CheckMockApi(MOCK_TETHERDNSSET_API)) {
-        return mockNetsysClient_.TetherDnsSet(netId, dnsAddrs);
+    if (mockNetsysClient_.CheckMockApi(MOCK_SHAREDNSSET_API)) {
+        return mockNetsysClient_.ShareDnsSet(netId);
     }
-    return netsysClient_.TetherDnsSet(netId, dnsAddrs);
+    return netsysClient_.ShareDnsSet(netId);
+}
+
+int32_t NetsysControllerServiceImpl::StartDnsProxyListen()
+{
+    NETMGR_LOG_D("NetsysControllerServiceImpl StartDnsProxyListen");
+    return netsysClient_.StartDnsProxyListen();
+}
+
+int32_t NetsysControllerServiceImpl::StopDnsProxyListen()
+{
+    NETMGR_LOG_D("NetsysControllerServiceImpl StopDnsProxyListen");
+    return netsysClient_.StopDnsProxyListen();
 }
 
 int32_t NetsysControllerServiceImpl::RegisterNetsysNotifyCallback(const NetsysNotifyCallback &callback)

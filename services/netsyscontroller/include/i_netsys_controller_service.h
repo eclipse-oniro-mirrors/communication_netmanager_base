@@ -101,7 +101,7 @@ public:
         const std::string &nextHop) = 0;
 
     /**
-     * @brief Get interface config
+     * Get interface config
      *
      * @param iface Network port device name
      * @return Return the result of this action
@@ -422,7 +422,21 @@ public:
      * @param dnsAddr the list of dns address
      * @return Return the return value of the netsys interface call.
      */
-    virtual int32_t TetherDnsSet(uint32_t netId, const std::vector<std::string>& dnsAddrs) = 0;
+    virtual int32_t ShareDnsSet(uint16_t netId) = 0;
+
+    /**
+     * start dns proxy listen
+     *
+     * @return int32_t 0--success -1---failed
+     */
+    virtual int32_t StartDnsProxyListen() = 0;
+
+    /**
+     * stop dns proxy listen
+     *
+     * @return int32_t int32_t 0--success -1---failed
+     */
+    virtual int32_t StopDnsProxyListen() = 0;
 
     /**
      * Set net callbackfuction.

@@ -25,11 +25,11 @@ namespace OHOS {
 namespace nmd {
 void StartListen()
 {
-    NETNATIVE_LOGI("Enter threadStart");
+    NETNATIVE_LOG_D("Enter threadStart");
     DnsResolvListen().StartListen();
 }
 
-DnsManager::DnsManager()
+DnsManager::DnsManager() : dnsProxyListen_(std::make_shared<DnsProxyListen>())
 {
     std::thread(StartListen).detach();
 }
@@ -37,7 +37,7 @@ DnsManager::DnsManager()
 int32_t DnsManager::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMillis, uint8_t retryCount,
                                       const std::vector<std::string> &servers, const std::vector<std::string> &domains)
 {
-    NETNATIVE_LOGI("manager_SetResolverConfig netId[%{public}d]", netId);
+    NETNATIVE_LOG_D("manager_SetResolverConfig netId[%{public}d]", netId);
     return DelayedSingleton<DnsParamCache>::GetInstance()->SetResolverConfig(netId, baseTimeoutMillis, retryCount,
                                                                              servers, domains);
 }
@@ -46,20 +46,42 @@ int32_t DnsManager::GetResolverConfig(uint16_t netId, std::vector<std::string> &
                                       std::vector<std::string> &domains, uint16_t &baseTimeoutMillis,
                                       uint8_t &retryCount)
 {
-    NETNATIVE_LOGI("manager_GetResolverConfig netId[%{public}d]", netId);
+    NETNATIVE_LOG_D("manager_GetResolverConfig netId[%{public}d]", netId);
     return DelayedSingleton<DnsParamCache>::GetInstance()->GetResolverConfig(netId, servers, domains, baseTimeoutMillis,
                                                                              retryCount);
 }
 
 int32_t DnsManager::CreateNetworkCache(uint16_t netId)
 {
-    NETNATIVE_LOGI("manager_CreateNetworkCache netId[%{public}d]", netId);
+    NETNATIVE_LOG_D("manager_CreateNetworkCache netId[%{public}d]", netId);
     return DelayedSingleton<DnsParamCache>::GetInstance()->CreateCacheForNet(netId);
 }
 
 void DnsManager::SetDefaultNetwork(uint16_t netId)
 {
     DelayedSingleton<DnsParamCache>::GetInstance()->SetDefaultNetwork(netId);
+}
+
+void StartProxyListen()
+{
+    NETNATIVE_LOG_D("begin StartProxyListen");
+    DnsProxyListen().StartListen();
+}
+
+void DnsManager::ShareDnsSet(uint16_t netId)
+{
+    return dnsProxyListen_->SetParseNetId(netId);
+}
+
+void DnsManager::StartDnsProxyListen()
+{
+    dnsProxyListen_->OnListen();
+    std::thread(StartProxyListen).detach();
+}
+
+void DnsManager::StopDnsProxyListen()
+{
+    dnsProxyListen_->OffListen();
 }
 
 DnsManager::~DnsManager() = default;

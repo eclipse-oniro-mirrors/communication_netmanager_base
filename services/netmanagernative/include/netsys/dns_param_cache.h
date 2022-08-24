@@ -36,7 +36,6 @@ namespace OHOS::nmd {
 class DnsParamCache {
 public:
     DnsParamCache();
-
     ~DnsParamCache() = default;
 
     // for net_conn_service

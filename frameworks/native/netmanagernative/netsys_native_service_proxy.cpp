@@ -1287,5 +1287,59 @@ int32_t NetsysNativeServiceProxy::FirewallSetUidRule(uint32_t chain, uint32_t ui
     return ret;
 }
 #endif
+
+int32_t NetsysNativeServiceProxy::ShareDnsSet(uint16_t netId)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint16(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = Remote()->SendRequest(INetsysService::NETSYS_TETHER_DNS_SET, data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::StartDnsProxyListen()
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = Remote()->SendRequest(INetsysService::NETSYS_START_DNS_PROXY_LISTEN, data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::StopDnsProxyListen()
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = Remote()->SendRequest(INetsysService::NETSYS_STOP_DNS_PROXY_LISTEN, data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
 } // namespace NetsysNative
 } // namespace OHOS

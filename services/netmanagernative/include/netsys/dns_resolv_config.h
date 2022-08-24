@@ -19,9 +19,9 @@
 #include <atomic>
 #include <vector>
 
+#include "delayed_queue.h"
 #include "dns_config_client.h"
 #include "lru_cache.h"
-#include "delayed_queue.h"
 
 namespace OHOS::nmd {
 static constexpr const size_t DEFAULT_DELAYED_COUNT = 30;

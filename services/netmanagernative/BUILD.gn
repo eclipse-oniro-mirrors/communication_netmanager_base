@@ -31,6 +31,7 @@ ohos_shared_library("netsys_native_manager") {
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/sharing_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/traffic_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/dnsresolv/dns_param_cache.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/dnsresolv/dns_proxy_listen.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/dnsresolv/dns_resolv_config.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/dnsresolv/dns_resolv_listen.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/fwmark_network.cpp",
@@ -40,6 +41,7 @@ ohos_shared_library("netsys_native_manager") {
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netlink_msg.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netlink_socket.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netsys_network.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netsys_udp_transfer.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/physical_network.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/wrapper/data_receiver.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/netsys/wrapper/netlink_manager.cpp",
@@ -70,6 +72,7 @@ ohos_shared_library("netsys_native_manager") {
 
   deps = [
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "//foundation/communication/netmanager_base/services/netmanagernative/netsys_client",
     "//foundation/communication/wifi/dhcp/services/mgr_service:dhcp_manager_service",
     "//third_party/iptables:iptables",
     "//third_party/iptables:iptables-restore",

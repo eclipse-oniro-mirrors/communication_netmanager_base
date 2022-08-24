@@ -17,6 +17,7 @@
 
 #include <sys/socket.h>
 #include <sys/time.h>
+#include "bits/errno.h"
 #include "securec.h"
 #include "stdbool.h"
 #include "sys/select.h"

@@ -406,7 +406,21 @@ public:
      * @param dnsAddr the list of dns address
      * @return Return the return value of the netsys interface call.
      */
-    int32_t TetherDnsSet(uint32_t netId, const std::vector<std::string>& dnsAddrs) override;
+    int32_t ShareDnsSet(uint16_t netId) override;
+
+    /**
+     * start dns proxy listen
+     *
+     * @return int32_t
+     */
+    int32_t StartDnsProxyListen() override;
+
+    /**
+     * stop dns proxy listen
+     *
+     * @return int32_t
+     */
+    int32_t StopDnsProxyListen() override;
 
     /**
      * Set net callbackfuction.
