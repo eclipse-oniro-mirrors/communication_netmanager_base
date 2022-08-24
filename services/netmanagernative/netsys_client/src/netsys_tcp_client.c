@@ -27,7 +27,7 @@ enum PollRec {
 bool MakeNonBlock(int sock)
 {
     int flags = fcntl(sock, F_GETFL, 0);
-    while (flags == -1 && errno == EINTR) {
+    if (flags == -1 && errno == EINTR) {
         flags = fcntl(sock, F_GETFL, 0);
     }
     if (flags == -1) {
@@ -36,7 +36,7 @@ bool MakeNonBlock(int sock)
     }
     uint32_t tempFlags = (uint32_t)flags | O_NONBLOCK;
     int ret = fcntl(sock, F_SETFL, tempFlags);
-    while (ret == -1 && errno == EINTR) {
+    if (ret == -1 && errno == EINTR) {
         ret = fcntl(sock, F_SETFL, tempFlags);
     }
     if (ret == -1) {
