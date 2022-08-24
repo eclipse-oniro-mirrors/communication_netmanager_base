@@ -182,8 +182,7 @@ int32_t NetsysNativeService::RegisterNotifyCallback(sptr<INotifyCallback> &callb
 int32_t NetsysNativeService::NetworkAddRoute(int32_t netId, const std::string &interfaceName,
     const std::string &destination, const std::string &nextHop)
 {
-    NETNATIVE_LOGI("NetsysNativeService::NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s",
-        netId, interfaceName.c_str(), destination.c_str(), nextHop.c_str());
+    NETNATIVE_LOGI("NetsysNativeService::NetworkAddRoute unpacket %{public}d %{public}s", netId, interfaceName.c_str());
 
     int32_t result = this->netsysService_->NetworkAddRoute(netId, interfaceName, destination, nextHop);
     NETNATIVE_LOGI("NetworkAddRoute %{public}d", result);

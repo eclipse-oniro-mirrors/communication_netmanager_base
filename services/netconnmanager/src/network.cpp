@@ -203,14 +203,14 @@ void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
 {
     // netLinkInfo_ contains the old routes info, netLinkInfo contains the new routes info
     // Update: remove old routes first, then add the new routes
-    NETMGR_LOG_D("UpdateRoutes, old routes: [%{public}s]", netLinkInfo_.ToStringRoute("").c_str());
+    NETMGR_LOG_D("UpdateRoutes");
     for (auto it = netLinkInfo_.routeList_.begin(); it != netLinkInfo_.routeList_.end(); ++it) {
         const struct Route &route = *it;
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
         NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, destAddress, route.gateway_.address_);
     }
 
-    NETMGR_LOG_D("UpdateRoutes, new routes: [%{public}s]", netLinkInfo.ToStringRoute("").c_str());
+    NETMGR_LOG_D("UpdateRoutes");
     for (auto it = netLinkInfo.routeList_.begin(); it != netLinkInfo.routeList_.end(); ++it) {
         const struct Route &route = *it;
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);

@@ -322,8 +322,7 @@ int32_t NetsysNativeServiceStub::CmdNetworkAddRoute(MessageParcel &data, Message
     std::string destination = data.ReadString();
     std::string nextHop = data.ReadString();
 
-    NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s], destination[%{public}s}, nextHop[%{public}s]",
-                   netId, ifName.c_str(), destination.c_str(), nextHop.c_str());
+    NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s]", netId, ifName.c_str());
     int32_t result = NetworkAddRoute(netId, ifName, destination, nextHop);
     reply.WriteInt32(result);
     NETNATIVE_LOGI("NetworkAddRoute has recved result %{public}d", result);
@@ -338,8 +337,7 @@ int32_t NetsysNativeServiceStub::CmdNetworkRemoveRoute(MessageParcel &data, Mess
     std::string destination = data.ReadString();
     std::string nextHop = data.ReadString();
 
-    NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s], destination[%{public}s}, nextHop[%{public}s]",
-                   netId, interfaceName.c_str(), destination.c_str(), nextHop.c_str());
+    NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s]", netId, interfaceName.c_str());
     int32_t result = NetworkRemoveRoute(netId, interfaceName, destination, nextHop);
     reply.WriteInt32(result);
     NETNATIVE_LOGI("NetworkRemoveRoute has recved result %{public}d", result);

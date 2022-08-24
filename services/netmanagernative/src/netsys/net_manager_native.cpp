@@ -82,8 +82,8 @@ int NetManagerNative::NetworkRemoveInterface(int netId, std::string interfaceNam
 
 int NetManagerNative::InterfaceAddAddress(std::string ifName, std::string addrString, int prefixLength)
 {
-    NETNATIVE_LOGI("NetManagerNative::InterfaceAddAddress, ifName:%{public}s, addrString:%{public}s,"
-        "prefixLength:%{public}d", ifName.c_str(), addrString.c_str(), prefixLength);
+    NETNATIVE_LOGI("NetManagerNative::InterfaceAddAddress, ifName:%{public}s"
+        "prefixLength:%{public}d", ifName.c_str(), prefixLength);
 
     return this->interfaceController->AddAddress(ifName.c_str(), addrString.c_str(), prefixLength);
 }
