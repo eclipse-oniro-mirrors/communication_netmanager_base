@@ -63,6 +63,7 @@
                     "//foundation/communication/netmanager_base/services/netmanagernative:netsys_native_manager",
                     "//foundation/communication/netmanager_base/services/netmanagernative/fwmarkclient:fwmark_client",
                     "//foundation/communication/netmanager_base/services/netmanagernative/netsys_client:netsys_client",
+                    "//foundation/communication/netmanager_base/services/netsys_bpf_stats:netsys_bpf_stats",
                     "//foundation/communication/netmanager_base/services/netsyscontroller:netsys_controller",
                     "//foundation/communication/netmanager_base/services/netconnmanager:net_conn_manager",
                     "//foundation/communication/netmanager_base/services/dnsresolvermanager:dns_resolver_manager",

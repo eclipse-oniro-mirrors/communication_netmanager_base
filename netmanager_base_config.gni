@@ -31,11 +31,13 @@ NETSTATSMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netstatsmanager"
 NETCONNMANAGER_COMMON_DIR = "$NETMANAGER_BASE_ROOT/services/common"
 FWMARK_CLIENT_DIR =
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient"
+NETSTATSMANAGER_BPFLIB_DIR = "$NETMANAGER_BASE_ROOT/services/netsys_bpf_stats"
 DNSRESOLVERMANAGER_SOURCE_DIR =
     "$NETMANAGER_BASE_ROOT/services/dnsresolvermanager"
 NETSYSNATIVE_INNERKITS_SOURCE_DIR =
     "$NETMANAGER_BASE_ROOT/frameworks/native/netmanagernative"
 NETSYSNATIVE_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netmanagernative"
+NETSYSBPFMAP_SOURCE_DIR = "$NETSYSNATIVE_SOURCE_DIR/netsys_bpf_map"
 NETSYSCONTROLLER_ROOT_DIR = "$NETMANAGER_BASE_ROOT/services/netsyscontroller"
 
 use_js_debug = false
