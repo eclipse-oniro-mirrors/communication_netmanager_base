@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifdef BUILD_POLICY_NETSYS
 #include "bandwidth_manager.h"
 
 #include <cinttypes>
@@ -524,4 +523,3 @@ int32_t BandwidthManager::RemoveAllowedList(uint32_t uid)
 }
 } // namespace nmd
 } // namespace OHOS
-#endif

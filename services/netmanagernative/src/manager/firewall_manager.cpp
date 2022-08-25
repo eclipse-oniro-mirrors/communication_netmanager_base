@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifdef BUILD_POLICY_NETSYS
 #include "firewall_manager.h"
 
 #include <fstream>
@@ -410,4 +409,3 @@ int32_t FirewallManager::SetUidRule(ChainType chain, uint32_t uid, FirewallRule 
 }
 } // namespace nmd
 } // namespace OHOS
-#endif

@@ -979,7 +979,7 @@ int32_t NetsysNativeServiceProxy::IpfwdRemoveInterfaceForward(const std::string 
     NETNATIVE_LOGI("End to IpfwdRemoveInterfaceForward, ret =%{public}d", ret);
     return ret;
 }
-#ifdef BUILD_POLYCY_NETSYS
+
 int32_t NetsysNativeServiceProxy::BandwidthEnableDataSaver(bool enable)
 {
     MessageParcel data;
@@ -1286,7 +1286,6 @@ int32_t NetsysNativeServiceProxy::FirewallSetUidRule(uint32_t chain, uint32_t ui
     int32_t ret = reply.ReadInt32();
     return ret;
 }
-#endif
 
 int32_t NetsysNativeServiceProxy::ShareDnsSet(uint16_t netId)
 {

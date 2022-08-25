@@ -592,7 +592,7 @@ int32_t NetsysController::StopDhcpService(const std::string &iface)
     NETMGR_LOG_D("NetsysController::StopDhcpService: ifaceFd[%{public}s]", iface.c_str());
     return netsysService_->StopDhcpService(iface);
 }
-#ifdef BUILD_POLYCY_NETSYS
+
 int32_t NetsysController::BandwidthEnableDataSaver(bool enable)
 {
     NETMGR_LOG_D("NetsysController::BandwidthEnableDataSaver: enable=%{public}d", enable);
@@ -661,6 +661,5 @@ int32_t NetsysController::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint3
                  chain, uid, firewallRule);
     return netsysService_->FirewallSetUidRule(chain, uid, firewallRule);
 }
-#endif
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -832,7 +832,7 @@ void NetsysNativeClient::ProcessBandwidthReachedLimit(const std::string &limitNa
                       callback->OnBandwidthReachedLimit(limitName, iface);
                   });
 }
-#ifdef BUILD_POLYCY_NETSYS
+
 int32_t NetsysNativeClient::BandwidthEnableDataSaver(bool enable)
 {
     if (netsysNativeService_ == nullptr) {
@@ -931,6 +931,5 @@ int32_t NetsysNativeClient::FirewallSetUidRule(uint32_t chain, uint32_t uid, uin
     }
     return netsysNativeService_->FirewallSetUidRule(chain, uid, firewallRule);
 }
-#endif
 } // namespace NetManagerStandard
 } // namespace OHOS

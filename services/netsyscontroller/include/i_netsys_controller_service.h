@@ -524,7 +524,7 @@ public:
      * @return Return the return value of the netsys interface call.
      */
     virtual int32_t StopDhcpService(const std::string &iface) = 0;
-#ifdef BUILD_POLYCY_NETSYS
+
     /**
      * Turn on data saving mode.
      *
@@ -620,7 +620,6 @@ public:
      * @return .
      */
     virtual int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) = 0;
-#endif
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
