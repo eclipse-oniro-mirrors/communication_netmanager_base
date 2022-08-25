@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifdef BUILD_POLYCY_NETSYS
+
 #include <gtest/gtest.h>
 
 #include "iptables_type.h"
@@ -441,4 +441,3 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidsDeniedListChainTest003, TestSize.Le
 }
 } // namespace NetsysNative
 } // namespace OHOS
-#endif

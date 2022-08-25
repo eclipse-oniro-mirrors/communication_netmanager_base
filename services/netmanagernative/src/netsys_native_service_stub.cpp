@@ -72,12 +72,10 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_TETHER_DNS_SET] = &NetsysNativeServiceStub::CmdShareDnsSet;
     opToInterfaceMap_[NETSYS_START_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStartDnsProxyListen;
     opToInterfaceMap_[NETSYS_STOP_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStopDnsProxyListen;
-#ifdef BUILD_POLYCY_NETSYS
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
-#endif
 }
-#ifdef BUILD_POLYCY_NETSYS
+
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
 {
     opToInterfaceMap_[NETSYS_BANDWIDTH_ENABLE_DATA_SAVER] = &NetsysNativeServiceStub::CmdBandwidthEnableDataSaver;
@@ -98,7 +96,7 @@ void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
     opToInterfaceMap_[NETSYS_FIREWALL_ENABLE_CHAIN] = &NetsysNativeServiceStub::CmdFirewallEnableChain;
     opToInterfaceMap_[NETSYS_FIREWALL_SET_UID_RULE] = &NetsysNativeServiceStub::CmdFirewallSetUidRule;
 }
-#endif
+
 int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
 {
@@ -728,7 +726,7 @@ int32_t NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward(MessageParcel &d
     reply.WriteInt32(result);
     return result;
 }
-#ifdef BUILD_POLYCY_NETSYS
+
 int32_t NetsysNativeServiceStub::CmdBandwidthEnableDataSaver(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOG_D("Begin to dispatch cmd CmdBandwidthEnableDataSaver");
@@ -842,7 +840,6 @@ int32_t NetsysNativeServiceStub::CmdFirewallSetUidRule(MessageParcel &data, Mess
     reply.WriteInt32(result);
     return result;
 }
-#endif
 
 int32_t NetsysNativeServiceStub::CmdShareDnsSet(MessageParcel &data, MessageParcel &reply)
 {

@@ -139,7 +139,6 @@ public:
     virtual int32_t DisableNat(const std::string &downstreamIface, const std::string &upstreamIface) = 0;
     virtual int32_t IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface) = 0;
     virtual int32_t IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface) = 0;
-#ifdef BUILD_POLYCY_NETSYS
     virtual int32_t BandwidthEnableDataSaver(bool enable) = 0;
     virtual int32_t BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes) = 0;
     virtual int32_t BandwidthRemoveIfaceQuota(const std::string &ifName) = 0;
@@ -151,7 +150,6 @@ public:
     virtual int32_t FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids) = 0;
     virtual int32_t FirewallEnableChain(uint32_t chain, bool enable) = 0;
     virtual int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) = 0;
-#endif
     virtual int32_t ShareDnsSet(uint16_t netId) = 0;
     virtual int32_t StartDnsProxyListen() = 0;
     virtual int32_t StopDnsProxyListen() = 0;

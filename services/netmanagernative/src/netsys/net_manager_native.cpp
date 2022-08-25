@@ -29,11 +29,9 @@ std::vector<unsigned int> OHOS::nmd::NetManagerNative::interfaceIdex;
 namespace OHOS {
 namespace nmd {
 NetManagerNative::NetManagerNative()
-    : connManager_(std::make_shared<ConnManager>()),
-#ifdef BUILD_POLYCY_NETSYS
-      bandwidthManager_(std::make_shared<BandwidthManager>()),
+    : bandwidthManager_(std::make_shared<BandwidthManager>()),
+      connManager_(std::make_shared<ConnManager>()),
       firewallManager_(std::make_shared<FirewallManager>()),
-#endif
       routeManager_(std::make_shared<RouteManager>()),
       interfaceManager_(std::make_shared<InterfaceManager>()),
       sharingManager_(std::make_shared<SharingManager>()),
@@ -299,7 +297,7 @@ int32_t NetManagerNative::DnsCreateNetworkCache(uint16_t netid)
 {
     return dnsManager_->CreateNetworkCache(netid);
 }
-#ifdef BUILD_POLYCY_NETSYS
+
 int32_t NetManagerNative::BandwidthEnableDataSaver(bool enable)
 {
     return bandwidthManager_->EnableDataSaver(enable);
@@ -359,7 +357,6 @@ int32_t NetManagerNative::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint3
     auto rule = static_cast<NetManagerStandard::FirewallRule>(firewallRule);
     return firewallManager_->SetUidRule(chainType, uid, rule);
 }
-#endif
 
 void NetManagerNative::ShareDnsSet(uint16_t netId)
 {

@@ -15,7 +15,6 @@
 
 #ifndef NETMANAGER_BASE_FIREWALL_MANAGER_H
 #define NETMANAGER_BASE_FIREWALL_MANAGER_H
-#ifdef BUILD_POLICY_NETSYS
 #include <map>
 #include <mutex>
 #include <iostream>
@@ -86,5 +85,4 @@ private:
 };
 } // namespace nmd
 } // namespace OHOS
-#endif
 #endif // /* NETMANAGER_BASE */

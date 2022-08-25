@@ -507,7 +507,7 @@ public:
      * @return Return the return value of the netsys interface call.
      */
     int32_t StopDhcpService(const std::string &iface) override;
-#ifdef BUILD_POLYCY_NETSYS
+
     /**
      * Turn on data saving mode.
      *
@@ -603,7 +603,6 @@ public:
      * @return .
      */
     int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) override;
-#endif
 private:
     MockNetsysNativeClient mockNetsysClient_;
     NetsysNativeClient netsysClient_;

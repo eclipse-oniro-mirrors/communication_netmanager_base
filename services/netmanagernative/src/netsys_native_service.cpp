@@ -407,7 +407,7 @@ int32_t NetsysNativeService::IpfwdRemoveInterfaceForward(const std::string &from
     NETNATIVE_LOG_D("ipfwdRemoveInterfaceForward");
     return netsysService_->IpfwdRemoveInterfaceForward(fromIface, toIface);
 }
-#ifdef BUILD_POLYCY_NETSYS
+
 int32_t NetsysNativeService::BandwidthEnableDataSaver(bool enable)
 {
     NETNATIVE_LOG_D("bandwidthEnableDataSaver");
@@ -473,7 +473,6 @@ int32_t NetsysNativeService::FirewallSetUidRule(uint32_t chain, uint32_t uid, ui
     NETNATIVE_LOG_D("firewallSetUidRule");
     return netsysService_->FirewallSetUidRule(chain, uid, firewallRule);
 }
-#endif
 
 int32_t NetsysNativeService::ShareDnsSet(uint16_t netid)
 {
