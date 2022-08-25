@@ -96,7 +96,7 @@ uint32_t GetArrayLength(napi_env env, napi_value arr);
 napi_value GetArrayElement(napi_env env, napi_value arr, uint32_t index);
 
 /* libuv */
-void CreateUvQueueWork(napi_env env, void *data, void(Handler)(uv_work_t *, int status));
+void CreateUvQueueWork(napi_env env, void *data, void(handler)(uv_work_t *, int status));
 
 /* scope */
 napi_handle_scope OpenScope(napi_env env);

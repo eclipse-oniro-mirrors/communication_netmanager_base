@@ -167,22 +167,24 @@ uint32_t ConvertIpv4Address(const std::string &address)
             break;
         }
         const auto &value = tmpAddress.substr(0, npos);
-        uint32_t tmp = std::atoi(value.c_str());
-        if ((tmp < MIN_BYTE) || (tmp > MAX_BYTE)) {
+        int32_t itmp = std::atoi(value.c_str());
+        if ((itmp < MIN_BYTE) || (itmp > MAX_BYTE)) {
             break;
         }
-        addrInt += tmp << ((IPV4_DOT_NUM - i) * BIT_NUM_BYTE);
+        uint32_t utmp = static_cast<uint32_t>(itmp);
+        addrInt += utmp << ((IPV4_DOT_NUM - i) * BIT_NUM_BYTE);
         tmpAddress = tmpAddress.substr(npos + 1);
     }
 
     if (i != IPV4_DOT_NUM) {
         return 0;
     }
-    int tmp = std::atoi(tmpAddress.c_str());
-    if ((tmp < MIN_BYTE) || (tmp > MAX_BYTE)) {
+    int32_t itmp = std::atoi(tmpAddress.c_str());
+    if ((itmp < MIN_BYTE) || (itmp > MAX_BYTE)) {
         return 0;
     }
-    addrInt += tmp;
+    uint32_t utmp = static_cast<uint32_t>(itmp);
+    addrInt += utmp;
 
     return addrInt;
 }

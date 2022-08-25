@@ -107,21 +107,17 @@ void SendMessage(int32_t *serverSockfd)
     socklen_t len = sizeof(clientAddr);
     while (true) {
         clientSockfd = accept(*serverSockfd, reinterpret_cast<struct sockaddr *>(&clientAddr), &len);
-        NETNATIVE_LOGI("FwmarkNetwork: clientSockfd: %{public}d", clientSockfd);
-
         FwmarkCommand fwmCmd;
         iovec iov = {
             .iov_base = &fwmCmd,
             .iov_len = sizeof(fwmCmd),
         };
-
         int32_t socketFd = -1;
         union {
             cmsghdr cmh;
             char cmsg[CMSG_SPACE(sizeof(socketFd))];
         } cmsgu;
         (void)memset_s(cmsgu.cmsg, sizeof(cmsgu.cmsg), 0, sizeof(cmsgu.cmsg));
-
         msghdr message;
         (void)memset_s(&message, sizeof(message), 0, sizeof(message));
         message = {
@@ -130,7 +126,6 @@ void SendMessage(int32_t *serverSockfd)
             .msg_control = cmsgu.cmsg,
             .msg_controllen = sizeof(cmsgu.cmsg),
         };
-
         int32_t ret = recvmsg(clientSockfd, &message, 0);
         if (ret < 0) {
             CloseSocket(&clientSockfd, ret, ERROR_CODE_RECVMSG_FAILED);
@@ -141,7 +136,6 @@ void SendMessage(int32_t *serverSockfd)
             cmsgh->cmsg_len == CMSG_LEN(sizeof(socketFd))) {
             int rst = memcpy_s(&socketFd, sizeof(socketFd), CMSG_DATA(cmsgh), sizeof(socketFd));
             if (rst != 0) {
-                NETNATIVE_LOGE("memcpy_s failed, rst: %{public}d", rst);
                 return;
             }
         }

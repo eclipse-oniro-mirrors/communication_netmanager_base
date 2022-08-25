@@ -35,7 +35,7 @@ napi_value On(napi_env env, napi_callback_info info, const std::initializer_list
 
     if (paramsCount != EVENT_PARAM_NUM || NapiUtils::GetValueType(env, params[0]) != napi_string ||
         NapiUtils::GetValueType(env, params[1]) != napi_function) {
-        NETMANAGER_BASE_LOGE("on off once interface para: [string, function]");
+        NETMANAGER_BASE_LOGE("napi on interface para: [string, function]");
         return NapiUtils::GetUndefined(env);
     }
 
@@ -63,7 +63,7 @@ napi_value Once(napi_env env, napi_callback_info info, const std::initializer_li
 
     if (paramsCount != EVENT_PARAM_NUM || NapiUtils::GetValueType(env, params[0]) != napi_string ||
         NapiUtils::GetValueType(env, params[1]) != napi_function) {
-        NETMANAGER_BASE_LOGE("on off once interface para: [string, function]");
+        NETMANAGER_BASE_LOGE("napi once interface para: [string, function]");
         return NapiUtils::GetUndefined(env);
     }
 
@@ -90,12 +90,12 @@ napi_value Off(napi_env env, napi_callback_info info, const std::initializer_lis
 
     if ((paramsCount != 1 && paramsCount != EVENT_PARAM_NUM) ||
         NapiUtils::GetValueType(env, params[0]) != napi_string) {
-        NETMANAGER_BASE_LOGE("on off once interface para: [string, function?]");
+        NETMANAGER_BASE_LOGE("napi off interface para: [string, function?]");
         return NapiUtils::GetUndefined(env);
     }
 
     if (paramsCount == EVENT_PARAM_NUM && NapiUtils::GetValueType(env, params[1]) != napi_function) {
-        NETMANAGER_BASE_LOGE("on off once interface para: [string, function]");
+        NETMANAGER_BASE_LOGE("napi off interface para: [string, function]");
         return NapiUtils::GetUndefined(env);
     }
 

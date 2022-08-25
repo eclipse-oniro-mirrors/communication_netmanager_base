@@ -23,10 +23,12 @@ namespace OHOS {
 namespace NetsysNative {
 using namespace testing::ext;
 using namespace nmd;
+constexpr int RES_LEN = 2;
 
 namespace {
-const std::string GetResult(char *res, const std::string &cmd, int size)
+const std::string GetResult(const std::string &cmd, int size)
 {
+    char res[RES_LEN];
     FILE *fp = popen(cmd.c_str(), "r");
     char *result = fgets(res, size, fp);
     pclose(fp);
@@ -83,9 +85,8 @@ HWTEST_F(UnitTestSharingManager, IpEnableForwarding, TestSize.Level1)
 {
     sharingManager->IpEnableForwarding("aTestName");
 
-    char res[2];
     const std::string cmd = "/bin/cat /proc/sys/net/ipv4/ip_forward";
-    const char *result = GetResult(res, cmd, 2);
+    const char *result = GetResult(cmd, 2);
     ASSERT_EQ(result, "1");
 }
 
@@ -93,9 +94,8 @@ HWTEST_F(UnitTestSharingManager, IpDisableForwarding, TestSize.Level1)
 {
     sharingManager->IpDisableForwarding("aTestName");
 
-    char res[2];
     const std::string cmd = "/bin/cat /proc/sys/net/ipv4/ip_forward";
-    const char *result = GetResult(res, cmd, 2);
+    const char *result = GetResult(cmd, 2);
     ASSERT_EQ(result, "0");
 }
 
