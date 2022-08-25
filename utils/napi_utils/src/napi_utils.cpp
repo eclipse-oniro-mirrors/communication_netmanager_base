@@ -392,7 +392,7 @@ napi_value GetArrayElement(napi_env env, napi_value arr, uint32_t index)
 }
 
 /* libuv */
-void CreateUvQueueWork(napi_env env, void *data, void(Handler)(uv_work_t *, int status))
+void CreateUvQueueWork(napi_env env, void *data, void(handler)(uv_work_t *, int status))
 {
     uv_loop_s *loop = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_get_uv_event_loop(env, &loop));
@@ -401,7 +401,7 @@ void CreateUvQueueWork(napi_env env, void *data, void(Handler)(uv_work_t *, int 
     work->data = data;
 
     (void)uv_queue_work(
-        loop, work, [](uv_work_t *) {}, Handler);
+        loop, work, [](uv_work_t *) {}, handler);
 }
 
 /* scope */

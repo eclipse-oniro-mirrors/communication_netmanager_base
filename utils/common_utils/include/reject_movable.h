@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_REJECT_MOVABLE_H__
-#define INCLUDE_REJECT_MOVABLE_H__
+#ifndef INCLUDE_REJECT_MOVABLE_H
+#define INCLUDE_REJECT_MOVABLE_H
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -45,4 +45,4 @@ private:
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // INCLUDE_REJECT_MOVABLE_H__
+#endif // INCLUDE_REJECT_MOVABLE_H

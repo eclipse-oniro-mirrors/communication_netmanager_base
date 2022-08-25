@@ -28,8 +28,8 @@
 
 namespace OHOS::nmd {
 using namespace testing::ext;
-static constexpr const char* IFACENAME = "wlan0";
-static bool flag = true;
+constexpr const char* IFACENAME = "wlan0";
+bool g_flag = true;
 sptr<OHOS::NetsysNative::INotifyCallback> nativeNotifyCallback_ = nullptr;
 sptr<OHOS::NetsysNative::INetsysService> netsysNativeService_ = nullptr;
 
@@ -111,7 +111,7 @@ int32_t NetlinkNativeNotifyCallBack::OnInterfaceChanged(const std::string &ifNam
 {
     std::cout << " [OnInterfaceChanged] " << ifName << " status :" << (up ? "[update]" : "[remove]") << std::endl;
     EXPECT_STRCASEEQ(IFACENAME, ifName.c_str());
-    if (flag) {
+    if (g_flag) {
         EXPECT_TRUE(up);
     } else {
         EXPECT_FALSE(up);
@@ -123,7 +123,7 @@ int32_t NetlinkNativeNotifyCallBack::OnInterfaceLinkStateChanged(const std::stri
     std::cout << " [OnInterfaceLinkStateChanged] " << ifName << " Status: " << (up ? "[update]" : "[remove]")
               << std::endl;
     EXPECT_STRCASEEQ(IFACENAME, ifName.c_str());
-    if (flag) {
+    if (g_flag) {
         EXPECT_TRUE(up);
     } else {
         EXPECT_FALSE(up);
@@ -138,7 +138,7 @@ int32_t NetlinkNativeNotifyCallBack::OnRouteChanged(bool updated, const std::str
     EXPECT_STRCASEEQ(IFACENAME, ifName.c_str());
     EXPECT_FALSE(route.empty());
     EXPECT_FALSE(gateway.empty());
-    if (flag) {
+    if (g_flag) {
         EXPECT_TRUE(updated);
     } else {
         EXPECT_FALSE(updated);
@@ -173,7 +173,7 @@ HWTEST_F(NetlinkManagerTest, RegisterCallbackTest001, TestSize.Level1)
 
 HWTEST_F(NetlinkManagerTest, NotifyAll001, TestSize.Level1)
 {
-    flag = true;
+    g_flag = true;
     wifiHotspot_->EnableHotspot(Wifi::ServiceType::DEFAULT);
     // Wait for the callback to be called.
     sleep(10);
@@ -181,7 +181,7 @@ HWTEST_F(NetlinkManagerTest, NotifyAll001, TestSize.Level1)
 
 HWTEST_F(NetlinkManagerTest, NotifyAll002, TestSize.Level1)
 {
-    flag = false;
+    g_flag = false;
     wifiHotspot_->DisableHotspot(Wifi::ServiceType::DEFAULT);
     // Wait for the callback to be called.
     sleep(10);
@@ -196,7 +196,7 @@ HWTEST_F(NetlinkManagerTest, UnRegisterCallbackTest001, TestSize.Level1)
 // For this it will not recview the interface status change event.
 HWTEST_F(NetlinkManagerTest, NotNotifyAnymore001, TestSize.Level1)
 {
-    flag = true;
+    g_flag = true;
     wifiHotspot_->EnableHotspot(Wifi::ServiceType::DEFAULT);
     // Wait for the callback to be called.
     sleep(10);
@@ -205,7 +205,7 @@ HWTEST_F(NetlinkManagerTest, NotNotifyAnymore001, TestSize.Level1)
 // For this it will not recview the interface status change event.
 HWTEST_F(NetlinkManagerTest, NotNotifyAnymore002, TestSize.Level1)
 {
-    flag = false;
+    g_flag = false;
     wifiHotspot_->DisableHotspot(Wifi::ServiceType::DEFAULT);
     // Wait for the callback to be called.
     sleep(10);

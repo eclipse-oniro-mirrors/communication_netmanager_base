@@ -135,7 +135,8 @@ static int CreateConnectionToNetSys(void)
     return sockFd;
 }
 
-static bool MakeKey(char *hostName, char *serv, struct addrinfo *hints, char key[static MAX_KEY_LENGTH])
+static bool MakeKey(const char *hostName, const char *serv, const struct addrinfo *hints,
+                    char key[static MAX_KEY_LENGTH])
 {
     if (serv && hints) {
         return sprintf_s(key, MAX_KEY_LENGTH, "%s %s %u %u %u %u", hostName, serv, hints->ai_family, hints->ai_flags,
@@ -251,7 +252,7 @@ static int32_t NetsysSendKeyForCache(int sockFd, struct ParamWrapper param, stru
     return 0;
 };
 
-static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, struct ParamWrapper param,
+static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, const struct ParamWrapper param,
                                             struct AddrInfo addrInfo[static MAX_RESULTS], uint32_t *num)
 {
     struct RequestInfo info = {
@@ -259,7 +260,7 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, struct P
         .netId = netId,
     };
 
-    uint32_t res = NetsysSendKeyForCache(sockFd, param, info);
+    int32_t res = NetsysSendKeyForCache(sockFd, param, info);
     if (res < 0) {
         return res;
     }
@@ -283,8 +284,8 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, struct P
     return CloseSocketReturn(sockFd, 0);
 }
 
-int32_t NetSysGetResolvCache(uint16_t netId, struct ParamWrapper param, struct AddrInfo addrInfo[static MAX_RESULTS],
-                             uint32_t *num)
+int32_t NetSysGetResolvCache(uint16_t netId, const struct ParamWrapper param,
+                             struct AddrInfo addrInfo[static MAX_RESULTS], uint32_t *num)
 {
     DNS_CONFIG_PRINT("NetSysGetResolvCache begin");
 
@@ -341,7 +342,8 @@ static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct
     return resNum;
 }
 
-static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, struct ParamWrapper param, struct addrinfo *res)
+static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const struct ParamWrapper param,
+                                            struct addrinfo *res)
 {
     struct RequestInfo info = {
         .command = SET_CACHE,
@@ -377,7 +379,7 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, struct P
     return CloseSocketReturn(sockFd, 0);
 }
 
-int32_t NetSysSetResolvCache(uint16_t netId, struct ParamWrapper param, struct addrinfo *res)
+int32_t NetSysSetResolvCache(uint16_t netId, const struct ParamWrapper param, struct addrinfo *res)
 {
     DNS_CONFIG_PRINT("NetSysSetResolvCache begin");
 

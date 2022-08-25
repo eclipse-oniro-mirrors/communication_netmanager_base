@@ -94,6 +94,7 @@ ohos_shared_library("netsys_native_manager") {
     "LOG_DOMAIN = 0xD0015B0",
     "SHARING_MANAGER_DEPS",
     "NETSYS_CONFIG_DEBUG=0",
+    "DNS_CONFIG_DEBUG=0",
   ]
 
   public_configs = [ "$NETMANAGER_BASE_ROOT/utils:netmgr_common_config" ]
