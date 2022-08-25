@@ -451,6 +451,52 @@ int32_t NetConnServiceProxy::NetDetection(int32_t netId)
     return replyParcel.ReadInt32();
 }
 
+int32_t NetConnServiceProxy::GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return IPC_PROXY_ERR;
+    }
+
+    if (!data.WriteUint32(bearerType)) {
+        return IPC_PROXY_ERR;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = remote->SendRequest(CMD_NM_GET_IFACE_NAMES, data, reply, option);
+    if (error != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        return error;
+    }
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        return IPC_PROXY_ERR;
+    }
+    if (ret == ERR_NONE) {
+        uint32_t size = 0;
+        if (!reply.ReadUint32(size)) {
+            return IPC_PROXY_ERR;
+        }
+        for (uint32_t i = 0; i < size; ++i) {
+            std::string value;
+            if (!reply.ReadString(value)) {
+                return IPC_PROXY_ERR;
+            }
+            ifaceNames.push_back(value);
+        }
+    }
+    return ret;
+}
+
 int32_t NetConnServiceProxy::GetIfaceNameByType(
     NetBearType bearerType, const std::string &ident, std::string &ifaceName)
 {

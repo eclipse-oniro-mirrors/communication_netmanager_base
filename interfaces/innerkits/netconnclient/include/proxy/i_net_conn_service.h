@@ -47,6 +47,7 @@ public:
         CMD_NM_GETDEFAULTNETWORK,
         CMD_NM_HASDEFAULTNET,
         CMD_NM_NET_DETECTION,
+        CMD_NM_GET_IFACE_NAMES,
         CMD_NM_GET_IFACENAME_BY_TYPE,
         CMD_NM_GET_ADDRESSES_BY_NAME,
         CMD_NM_GET_ADDRESS_BY_NAME,
@@ -79,6 +80,7 @@ public:
     virtual int32_t UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState) = 0;
     virtual int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) = 0;
     virtual int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo) = 0;
+    virtual int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames) = 0;
     virtual int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) = 0;
     virtual int32_t RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) = 0;
     virtual int32_t UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) = 0;

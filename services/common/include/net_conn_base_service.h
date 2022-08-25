@@ -27,6 +27,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 class NetConnBaseService : public virtual RefBase {
 public:
+    virtual int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames) = 0;
     virtual int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) = 0;
     virtual int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
         const std::set<NetCap> &netCaps, uint32_t &supplierId) = 0;

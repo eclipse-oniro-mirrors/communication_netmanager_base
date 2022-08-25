@@ -29,6 +29,7 @@ namespace NetManagerStandard {
 class NetManagerCenter {
 public:
     static NetManagerCenter &GetInstance();
+    int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames);
     int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName);
     int32_t RegisterNetSupplier(
         NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps, uint32_t &supplierId);

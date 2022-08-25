@@ -23,6 +23,14 @@ NetManagerCenter &NetManagerCenter::GetInstance()
     return gInstance;
 }
 
+int32_t NetManagerCenter::GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames)
+{
+    if (connService_ == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return connService_->GetIfaceNames(bearerType, ifaceNames);
+}
+
 int32_t NetManagerCenter::GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName)
 {
     if (connService_ == nullptr) {

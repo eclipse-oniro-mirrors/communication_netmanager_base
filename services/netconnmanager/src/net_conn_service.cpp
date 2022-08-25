@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -488,17 +488,19 @@ int32_t NetConnService::RegUnRegNetDetectionCallback(
     }
 }
 
-sptr<NetSupplier> NetConnService::GetNetSupplierFromList(NetBearType bearerType, const std::string &ident)
+std::list<sptr<NetSupplier>> NetConnService::GetNetSupplierFromList(NetBearType bearerType, const std::string &ident)
 {
+    std::list<sptr<NetSupplier>> ret;
     for (auto &netSupplier : netSuppliers_) {
-        if ((bearerType == netSupplier.second->GetNetSupplierType()) &&
-            (ident == netSupplier.second->GetNetSupplierIdent())) {
-            return netSupplier.second;
+        if ((bearerType != netSupplier.second->GetNetSupplierType())) {
+            continue;
         }
+        if (!ident.empty() && netSupplier.second->GetNetSupplierIdent() != ident) {
+            continue;
+        }
+        ret.push_back(netSupplier.second);
     }
-
-    NETMGR_LOG_E("net supplier is nullptr");
-    return nullptr;
+    return ret;
 }
 
 sptr<NetSupplier> NetConnService::GetNetSupplierFromList(NetBearType bearerType, const std::string &ident,
@@ -919,6 +921,23 @@ void NetConnService::CallbackForAvailable(sptr<NetSupplier> &supplier, const spt
     callback->NetConnectionPropertiesChange(netHandle, pInfo);
 }
 
+int32_t NetConnService::GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames)
+{
+    if (bearerType < BEARER_CELLULAR || bearerType >= BEARER_DEFAULT) {
+        return ERR_INVALID_NETORK_TYPE;
+    }
+
+    auto suppliers = GetNetSupplierFromList(bearerType);
+    for (auto supplier : suppliers) {
+        sptr<Network> network = supplier->GetNetwork();
+        std::string ifaceName = network->GetNetLinkInfo().ifaceName_;
+        if (!ifaceName.empty()) {
+            ifaceNames.push_back(ifaceName);
+        }
+    }
+    return ERR_NONE;
+}
+
 int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName)
 {
     if (bearerType < BEARER_CELLULAR || bearerType >= BEARER_DEFAULT) {
@@ -926,12 +945,12 @@ int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::st
         return ERR_INVALID_NETORK_TYPE;
     }
 
-    sptr<NetSupplier> supplier = GetNetSupplierFromList(bearerType, ident);
-    if (supplier == nullptr) {
+    auto suppliers = GetNetSupplierFromList(bearerType, ident);
+    if (suppliers.empty()) {
         NETMGR_LOG_D("supplier is nullptr.");
         return ERR_NO_SUPPLIER;
     }
-
+    auto supplier = suppliers.front();
     sptr<Network> network = supplier->GetNetwork();
     if (network == nullptr) {
         NETMGR_LOG_E("network is nullptr");

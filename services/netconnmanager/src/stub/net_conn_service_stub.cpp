@@ -37,6 +37,7 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK] =
         &NetConnServiceStub::OnUnRegisterNetDetectionCallback;
     memberFuncMap_[CMD_NM_NET_DETECTION]                = &NetConnServiceStub::OnNetDetection;
+    memberFuncMap_[CMD_NM_GET_IFACE_NAMES]              = &NetConnServiceStub::OnGetIfaceNames;
     memberFuncMap_[CMD_NM_GET_IFACENAME_BY_TYPE]        = &NetConnServiceStub::OnGetIfaceNameByType;
     memberFuncMap_[CMD_NM_GETDEFAULTNETWORK]            = &NetConnServiceStub::OnGetDefaultNet;
     memberFuncMap_[CMD_NM_HASDEFAULTNET] =                &NetConnServiceStub::OnHasDefaultNet;
@@ -372,6 +373,32 @@ int32_t NetConnServiceStub::OnNetDetection(MessageParcel &data, MessageParcel &r
         return NET_CONN_ERR_INVALID_PARAMETER;
     }
     return ERR_NONE;
+}
+
+int32_t NetConnServiceStub::OnGetIfaceNames(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t netType = 0;
+    if (!data.ReadUint32(netType)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    NetBearType bearerType = static_cast<NetBearType>(netType);
+    std::list<std::string> ifaceNames;
+    int32_t ret = GetIfaceNames(bearerType, ifaceNames);
+    if (!reply.WriteInt32(ret)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret == ERR_NONE) {
+        if (!reply.WriteUint32(ifaceNames.size())) {
+            return ERR_FLATTEN_OBJECT;
+        }
+
+        for (const auto &ifaceName : ifaceNames) {
+            if (!reply.WriteString(ifaceName)) {
+                return ERR_FLATTEN_OBJECT;
+            }
+        }
+    }
+    return ret;
 }
 
 int32_t NetConnServiceStub::OnGetIfaceNameByType(MessageParcel &data, MessageParcel &reply)

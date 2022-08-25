@@ -138,7 +138,16 @@ public:
     int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo) override;
 
     /**
-     * @brief The interface is get the iface name for network
+     * The interface names which NetBearType is equal than bearerType
+     *
+     * @param bearerType Network bearer type
+     * @param ifaceNames save the obtained ifaceNames
+     * @return Returns 0, successfully get the network link attribute iface name, otherwise it will fail
+     */
+    int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames) override;
+
+    /**
+     * The interface is get the iface name for network
      *
      * @param bearerType Network bearer type
      * @param ident Unique identification of mobile phone card
@@ -200,7 +209,7 @@ public:
 
 private:
     bool Init();
-    sptr<NetSupplier> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident);
+    std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
     sptr<NetSupplier> GetNetSupplierFromList(
         NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps);
     int32_t ActivateNetwork(const sptr<NetSpecifier> &netSpecifier,
