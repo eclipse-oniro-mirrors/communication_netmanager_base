@@ -119,7 +119,7 @@ void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint32_t netId)
         return;
     }
 
-    if (resNum == 0) {
+    if (resNum == 0 || resNum > MAX_RESULTS) {
         return;
     }
 
