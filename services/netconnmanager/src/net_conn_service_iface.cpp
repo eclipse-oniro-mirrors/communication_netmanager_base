@@ -17,6 +17,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+int32_t NetConnServiceIface::GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames)
+{
+    return DelayedSingleton<NetConnService>::GetInstance()->GetIfaceNames(bearerType, ifaceNames);
+}
+
 int32_t NetConnServiceIface::GetIfaceNameByType(
     NetBearType bearerType, const std::string &ident, std::string &ifaceName)
 {
