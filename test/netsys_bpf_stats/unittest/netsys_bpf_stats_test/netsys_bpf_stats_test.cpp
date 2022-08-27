@@ -112,18 +112,18 @@ HWTEST_F(NetsysBpfStatsTest, NetsysBpfStats002, TestSize.Level1)
     ASSERT_TRUE(fakeIfaceStatsMap.WriteValue(TEST_IFACE_INDEX_3, value2, BPF_ANY));
     ASSERT_TRUE(fakeIfaceStatsMap.WriteValue(TEST_IFACE_INDEX_4, value1, BPF_ANY));
     std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
-    ASSERT_EQ(
-        bpfStats->BpfGetIfaceStats(STATS_TYPE_RX_PACKETS, TEST_IFACE_NAME_WLAN0, fakeIfaceNameMap, fakeIfaceStatsMap),
-        TEST_PACKET0 * 2 + TEST_PACKET1);
-    ASSERT_EQ(
-        bpfStats->BpfGetIfaceStats(STATS_TYPE_RX_BYTES, TEST_IFACE_NAME_WLAN0, fakeIfaceNameMap, fakeIfaceStatsMap),
-        TEST_BYTES0 * 2 + TEST_BYTES1);
-    ASSERT_EQ(
-        bpfStats->BpfGetIfaceStats(STATS_TYPE_TX_PACKETS, TEST_IFACE_NAME_DUMMY0, fakeIfaceNameMap, fakeIfaceStatsMap),
-        TEST_PACKET1 * 2);
-    ASSERT_EQ(
-        bpfStats->BpfGetIfaceStats(STATS_TYPE_TX_BYTES, TEST_IFACE_NAME_DUMMY0, fakeIfaceNameMap, fakeIfaceStatsMap),
-        TEST_BYTES1 * 2);
+    ASSERT_EQ(bpfStats->BpfGetIfaceStats(StatsType::STATS_TYPE_RX_PACKETS, TEST_IFACE_NAME_WLAN0, fakeIfaceNameMap,
+                                         fakeIfaceStatsMap),
+              TEST_PACKET0 * 2 + TEST_PACKET1);
+    ASSERT_EQ(bpfStats->BpfGetIfaceStats(StatsType::STATS_TYPE_RX_BYTES, TEST_IFACE_NAME_WLAN0, fakeIfaceNameMap,
+                                         fakeIfaceStatsMap),
+              TEST_BYTES0 * 2 + TEST_BYTES1);
+    ASSERT_EQ(bpfStats->BpfGetIfaceStats(StatsType::STATS_TYPE_TX_PACKETS, TEST_IFACE_NAME_DUMMY0, fakeIfaceNameMap,
+                                         fakeIfaceStatsMap),
+              TEST_PACKET1 * 2);
+    ASSERT_EQ(bpfStats->BpfGetIfaceStats(StatsType::STATS_TYPE_TX_BYTES, TEST_IFACE_NAME_DUMMY0, fakeIfaceNameMap,
+                                         fakeIfaceStatsMap),
+              TEST_BYTES1 * 2);
     ASSERT_EQ(fakeIfaceNameMap.ReadValueFromMap(TEST_IFACE_INDEX_2).name, TEST_IFACE_NAME_LO);
     ASSERT_EQ(fakeIfaceNameMap.ReadValueFromMap(TEST_IFACE_INDEX_4).name, TEST_IFACE_NAME_DUMMY0);
 }
@@ -146,14 +146,20 @@ HWTEST_F(NetsysBpfStatsTest, NetsysBpfStats003, TestSize.Level1)
     ASSERT_EQ(fakeAppUidStatsMap.WriteValue(TEST_UID1, value1, BPF_ANY), true);
     ASSERT_EQ(fakeAppUidStatsMap.WriteValue(TEST_UID2, value2, BPF_ANY), true);
     std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
-    ASSERT_EQ(bpfStats->BpfGetUidStats(STATS_TYPE_RX_BYTES, TEST_UID1, fakeAppUidStatsMap), TEST_BYTES0);
-    ASSERT_EQ(bpfStats->BpfGetUidStats(STATS_TYPE_TX_BYTES, TEST_UID1, fakeAppUidStatsMap), TEST_BYTES1);
-    ASSERT_EQ(bpfStats->BpfGetUidStats(STATS_TYPE_RX_PACKETS, TEST_UID1, fakeAppUidStatsMap), TEST_PACKET0);
-    ASSERT_EQ(bpfStats->BpfGetUidStats(STATS_TYPE_TX_PACKETS, TEST_UID1, fakeAppUidStatsMap), TEST_PACKET1);
-    ASSERT_EQ(bpfStats->BpfGetUidStats(STATS_TYPE_RX_BYTES, TEST_UID2, fakeAppUidStatsMap), TEST_BYTES0 * 2);
-    ASSERT_EQ(bpfStats->BpfGetUidStats(STATS_TYPE_TX_BYTES, TEST_UID2, fakeAppUidStatsMap), TEST_BYTES1 * 2);
-    ASSERT_EQ(bpfStats->BpfGetUidStats(STATS_TYPE_RX_PACKETS, TEST_UID2, fakeAppUidStatsMap), TEST_PACKET0 * 2);
-    ASSERT_EQ(bpfStats->BpfGetUidStats(STATS_TYPE_TX_PACKETS, TEST_UID2, fakeAppUidStatsMap), TEST_PACKET1 * 2);
+    ASSERT_EQ(bpfStats->BpfGetUidStats(StatsType::STATS_TYPE_RX_BYTES, TEST_UID1, fakeAppUidStatsMap), TEST_BYTES0);
+    ASSERT_EQ(bpfStats->BpfGetUidStats(StatsType::STATS_TYPE_TX_BYTES, TEST_UID1, fakeAppUidStatsMap), TEST_BYTES1);
+    ASSERT_EQ(bpfStats->BpfGetUidStats(StatsType::STATS_TYPE_RX_PACKETS, TEST_UID1, fakeAppUidStatsMap),
+              TEST_PACKET0);
+    ASSERT_EQ(bpfStats->BpfGetUidStats(StatsType::STATS_TYPE_TX_PACKETS, TEST_UID1, fakeAppUidStatsMap),
+              TEST_PACKET1);
+    ASSERT_EQ(bpfStats->BpfGetUidStats(StatsType::STATS_TYPE_RX_BYTES, TEST_UID2, fakeAppUidStatsMap),
+              TEST_BYTES0 * 2);
+    ASSERT_EQ(bpfStats->BpfGetUidStats(StatsType::STATS_TYPE_TX_BYTES, TEST_UID2, fakeAppUidStatsMap),
+              TEST_BYTES1 * 2);
+    ASSERT_EQ(bpfStats->BpfGetUidStats(StatsType::STATS_TYPE_RX_PACKETS, TEST_UID2, fakeAppUidStatsMap),
+              TEST_PACKET0 * 2);
+    ASSERT_EQ(bpfStats->BpfGetUidStats(StatsType::STATS_TYPE_TX_PACKETS, TEST_UID2, fakeAppUidStatsMap),
+              TEST_PACKET1 * 2);
 }
 
 HWTEST_F(NetsysBpfStatsTest, NetsysBpfStats004, TestSize.Level1)
@@ -176,10 +182,10 @@ HWTEST_F(NetsysBpfStatsTest, NetsysBpfStats004, TestSize.Level1)
     ASSERT_TRUE(fakeIfaceStatsMap.WriteValue(TEST_IFACE_INDEX_3, value1, BPF_ANY));
     ASSERT_TRUE(fakeIfaceStatsMap.WriteValue(TEST_IFACE_INDEX_4, value2, BPF_ANY));
     std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
-    ASSERT_EQ(bpfStats->BpfGetTotalStats(STATS_TYPE_RX_PACKETS, fakeIfaceStatsMap), TEST_PACKET0 * 8);
-    ASSERT_EQ(bpfStats->BpfGetTotalStats(STATS_TYPE_RX_BYTES, fakeIfaceStatsMap), TEST_BYTES0 * 8);
-    ASSERT_EQ(bpfStats->BpfGetTotalStats(STATS_TYPE_TX_PACKETS, fakeIfaceStatsMap), TEST_PACKET1 * 5);
-    ASSERT_EQ(bpfStats->BpfGetTotalStats(STATS_TYPE_TX_BYTES, fakeIfaceStatsMap), TEST_BYTES1 * 5);
+    ASSERT_EQ(bpfStats->BpfGetTotalStats(StatsType::STATS_TYPE_RX_PACKETS, fakeIfaceStatsMap), TEST_PACKET0 * 8);
+    ASSERT_EQ(bpfStats->BpfGetTotalStats(StatsType::STATS_TYPE_RX_BYTES, fakeIfaceStatsMap), TEST_BYTES0 * 8);
+    ASSERT_EQ(bpfStats->BpfGetTotalStats(StatsType::STATS_TYPE_TX_PACKETS, fakeIfaceStatsMap), TEST_PACKET1 * 5);
+    ASSERT_EQ(bpfStats->BpfGetTotalStats(StatsType::STATS_TYPE_TX_BYTES, fakeIfaceStatsMap), TEST_BYTES1 * 5);
     ASSERT_TRUE(fakeIfaceStatsMap.DeleteEntryFromMap(TEST_IFACE_INDEX_1));
     ASSERT_TRUE(fakeIfaceStatsMap.DeleteEntryFromMap(TEST_IFACE_INDEX_3));
 }

@@ -14,9 +14,9 @@
  */
 #include "net_stats_service.h"
 
+#include <cinttypes>
 #include <sys/time.h>
 #include <unistd.h>
-#include <cinttypes>
 
 #include "broadcast_manager.h"
 #include "system_ability_definition.h"
@@ -250,6 +250,70 @@ NetStatsResultCode NetStatsService::ResetFactory()
 {
     NETMGR_LOG_I("ResetFactory begin");
     return netStatsCsv_->ResetFactory();
+}
+
+int64_t NetStatsService::GetIfaceRxBytes(const std::string &interfaceName)
+{
+    return NetStatsWrapper::GetInstance().GetIfaceStats(StatsType::STATS_TYPE_RX_BYTES, interfaceName);
+}
+
+int64_t NetStatsService::GetIfaceTxBytes(const std::string &interfaceName)
+{
+    return NetStatsWrapper::GetInstance().GetIfaceStats(StatsType::STATS_TYPE_TX_BYTES, interfaceName);
+}
+
+int64_t NetStatsService::GetCellularRxBytes()
+{
+    int64_t err = -1;
+    std::list<std::string> ifaceNames;
+    int64_t totalCellular = 0;
+    int32_t ret = NetManagerCenter::GetInstance().GetIfaceNames(BEARER_CELLULAR, ifaceNames);
+    if (ret != 0 || ifaceNames.empty()) {
+        NETMGR_LOG_E("GetCellularRxBytes iface list is empty, ret = %{public}d", ret);
+        return err;
+    }
+    for (const auto &name : ifaceNames) {
+        totalCellular = totalCellular + NetStatsWrapper::GetInstance().GetIfaceStats(
+            StatsType::STATS_TYPE_RX_BYTES, name);
+    }
+    return totalCellular;
+}
+
+int64_t NetStatsService::GetCellularTxBytes()
+{
+    int64_t err = -1;
+    std::list<std::string> ifaceNames;
+    int64_t totalCellular = 0;
+    int32_t ret = NetManagerCenter::GetInstance().GetIfaceNames(BEARER_CELLULAR, ifaceNames);
+    if (ret != 0 || ifaceNames.empty()) {
+        NETMGR_LOG_E("GetCellularRxBytes iface list is empty, ret = %{public}d", ret);
+        return err;
+    }
+    for (const auto &name : ifaceNames) {
+        totalCellular = totalCellular + NetStatsWrapper::GetInstance().GetIfaceStats(
+            StatsType::STATS_TYPE_TX_BYTES, name);
+    }
+    return totalCellular;
+}
+
+int64_t NetStatsService::GetAllRxBytes()
+{
+    return NetStatsWrapper::GetInstance().GetTotalStats(StatsType::STATS_TYPE_RX_BYTES);
+}
+
+int64_t NetStatsService::GetAllTxBytes()
+{
+    return NetStatsWrapper::GetInstance().GetTotalStats(StatsType::STATS_TYPE_TX_BYTES);
+}
+
+int64_t NetStatsService::GetUidRxBytes(uint32_t uid)
+{
+    return NetStatsWrapper::GetInstance().GetUidStats(StatsType::STATS_TYPE_RX_BYTES, uid);
+}
+
+int64_t NetStatsService::GetUidTxBytes(uint32_t uid)
+{
+    return NetStatsWrapper::GetInstance().GetUidStats(StatsType::STATS_TYPE_TX_BYTES, uid);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -41,6 +41,14 @@ public:
         uint32_t start, uint32_t end, const NetStatsInfo &stats);
     NetStatsResultCode UpdateStatsData();
     NetStatsResultCode ResetFactory();
+    int64_t GetIfaceRxBytes(const std::string &interfaceName);
+    int64_t GetIfaceTxBytes(const std::string &interfaceName);
+    int64_t GetCellularRxBytes();
+    int64_t GetCellularTxBytes();
+    int64_t GetAllRxBytes();
+    int64_t GetAllTxBytes();
+    int64_t GetUidRxBytes(uint32_t uid);
+    int64_t GetUidTxBytes(uint32_t uid);
 
 private:
     class NetStatsDeathRecipient : public IRemoteObject::DeathRecipient {

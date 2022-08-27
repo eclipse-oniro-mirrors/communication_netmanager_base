@@ -16,8 +16,8 @@
 #ifndef NET_STATS_SERVICE_PROXY_H
 #define NET_STATS_SERVICE_PROXY_H
 
-#include "iremote_proxy.h"
 #include "i_net_stats_service.h"
+#include "iremote_proxy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -35,6 +35,14 @@ public:
         uint32_t start, uint32_t end, const NetStatsInfo &stats) override;
     NetStatsResultCode UpdateStatsData() override;
     NetStatsResultCode ResetFactory() override;
+    int64_t GetIfaceRxBytes(const std::string &interfaceName) override;
+    int64_t GetIfaceTxBytes(const std::string &interfaceName) override;
+    int64_t GetCellularRxBytes() override;
+    int64_t GetCellularTxBytes() override;
+    int64_t GetAllRxBytes() override;
+    int64_t GetAllTxBytes() override;
+    int64_t GetUidRxBytes(uint32_t uid) override;
+    int64_t GetUidTxBytes(uint32_t uid) override;
 private:
     bool WriteInterfaceToken(MessageParcel &data);
 

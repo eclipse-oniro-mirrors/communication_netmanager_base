@@ -17,9 +17,9 @@
 #define I_NET_STATS_SERVICE_H
 
 #include <string>
-#include "iremote_broker.h"
 
 #include "i_net_stats_callback.h"
+#include "iremote_broker.h"
 #include "net_stats_constants.h"
 #include "net_stats_info.h"
 
@@ -38,6 +38,14 @@ public:
         CMD_NSM_REGISTER_NET_STATS_CALLBACK = 6,
         CMD_NSM_UNREGISTER_NET_STATS_CALLBACK = 7,
         CMD_NSM_RESET_FACTORY = 8,
+        CMD_GET_IFACE_RXBYTES = 9,
+        CMD_GET_IFACE_TXBYTES = 10,
+        CMD_GET_CELLULAR_RXBYTES = 11,
+        CMD_GET_CELLULAR_TXBYTES = 12,
+        CMD_GET_ALL_RXBYTES = 13,
+        CMD_GET_ALL_TXBYTES = 14,
+        CMD_GET_UID_RXBYTES = 15,
+        CMD_GET_UID_TXBYTES = 16,
         CMD_END = 100,
     };
 
@@ -52,6 +60,14 @@ public:
         uint32_t start, uint32_t end, const NetStatsInfo &stats) = 0;
     virtual NetStatsResultCode UpdateStatsData() = 0;
     virtual NetStatsResultCode ResetFactory() = 0;
+    virtual int64_t GetIfaceRxBytes(const std::string &interfaceName) = 0;
+    virtual int64_t GetIfaceTxBytes(const std::string &interfaceName) = 0;
+    virtual int64_t GetCellularRxBytes() = 0;
+    virtual int64_t GetCellularTxBytes() = 0;
+    virtual int64_t GetAllRxBytes() = 0;
+    virtual int64_t GetAllTxBytes() = 0;
+    virtual int64_t GetUidRxBytes(uint32_t uid) = 0;
+    virtual int64_t GetUidTxBytes(uint32_t uid) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
