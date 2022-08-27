@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "net_stats_service_stub.h"
 #include "net_mgr_log_wrapper.h"
+#include "net_stats_service_stub.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -27,6 +27,14 @@ NetStatsServiceStub::NetStatsServiceStub()
     memberFuncMap_[CMD_NSM_REGISTER_NET_STATS_CALLBACK] = &NetStatsServiceStub::OnRegisterNetStatsCallback;
     memberFuncMap_[CMD_NSM_UNREGISTER_NET_STATS_CALLBACK] = &NetStatsServiceStub::OnUnregisterNetStatsCallback;
     memberFuncMap_[CMD_NSM_RESET_FACTORY] = &NetStatsServiceStub::OnResetFactory;
+    memberFuncMap_[CMD_GET_IFACE_RXBYTES] = &NetStatsServiceStub::OnGetIfaceRxBytes;
+    memberFuncMap_[CMD_GET_IFACE_TXBYTES] = &NetStatsServiceStub::OnGetIfaceTxBytes;
+    memberFuncMap_[CMD_GET_CELLULAR_RXBYTES] = &NetStatsServiceStub::OnGetCellularRxBytes;
+    memberFuncMap_[CMD_GET_CELLULAR_TXBYTES] = &NetStatsServiceStub::OnGetCellularTxBytes;
+    memberFuncMap_[CMD_GET_ALL_RXBYTES] = &NetStatsServiceStub::OnGetAllRxBytes;
+    memberFuncMap_[CMD_GET_ALL_TXBYTES] = &NetStatsServiceStub::OnGetAllTxBytes;
+    memberFuncMap_[CMD_GET_UID_RXBYTES] = &NetStatsServiceStub::OnGetUidRxBytes;
+    memberFuncMap_[CMD_GET_UID_TXBYTES] = &NetStatsServiceStub::OnGetUidTxBytes;
 }
 
 NetStatsServiceStub::~NetStatsServiceStub() {}
@@ -50,7 +58,6 @@ int32_t NetStatsServiceStub::OnRemoteRequest(
             return (this->*requestFunc)(data, reply);
         }
     }
-    NETMGR_LOG_D("stub default case, need check");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
@@ -108,7 +115,6 @@ int32_t NetStatsServiceStub::OnGetIfaceStatsDetail(MessageParcel &data, MessageP
         NETMGR_LOG_E("proxy Marshalling failed");
         return ERR_FLATTEN_OBJECT;
     }
-    NETMGR_LOG_I("NetStatsServiceStub::OnGetIfaceStatsDetail, result[%{public}d]", result);
     if (!reply.WriteInt32(result)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -143,7 +149,6 @@ int32_t NetStatsServiceStub::OnGetUidStatsDetail(MessageParcel &data, MessagePar
         NETMGR_LOG_E("proxy Marshalling failed");
         return ERR_FLATTEN_OBJECT;
     }
-    NETMGR_LOG_I("NetStatsServiceStub::OnGetUidStatsDetail, result[%{public}d]", result);
     if (!reply.WriteInt32(result)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -187,6 +192,96 @@ int32_t NetStatsServiceStub::OnResetFactory(MessageParcel &data, MessageParcel &
 {
     if (!reply.WriteInt32(static_cast<int32_t>(ResetFactory()))) {
         NETMGR_LOG_E("WriteInt32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_NONE;
+}
+
+int32_t NetStatsServiceStub::OnGetIfaceRxBytes(MessageParcel &data, MessageParcel &reply)
+{
+    std::string iface;
+    if (!data.ReadString(iface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    int64_t result = GetIfaceRxBytes(iface);
+    if (!reply.WriteInt64(result)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_NONE;
+}
+
+int32_t NetStatsServiceStub::OnGetIfaceTxBytes(MessageParcel &data, MessageParcel &reply)
+{
+    std::string iface;
+    if (!data.ReadString(iface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    int64_t result = GetIfaceTxBytes(iface);
+    if (!reply.WriteInt64(result)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_NONE;
+}
+
+int32_t NetStatsServiceStub::OnGetCellularRxBytes(MessageParcel &data, MessageParcel &reply)
+{
+    if (!reply.WriteInt64(GetCellularRxBytes())) {
+        NETMGR_LOG_E("WriteInt64 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_NONE;
+}
+
+int32_t NetStatsServiceStub::OnGetCellularTxBytes(MessageParcel &data, MessageParcel &reply)
+{
+    if (!reply.WriteInt64(GetCellularTxBytes())) {
+        NETMGR_LOG_E("WriteInt64 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_NONE;
+}
+
+int32_t NetStatsServiceStub::OnGetAllRxBytes(MessageParcel &data, MessageParcel &reply)
+{
+    if (!reply.WriteInt64(GetAllRxBytes())) {
+        NETMGR_LOG_E("WriteInt64 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_NONE;
+}
+
+int32_t NetStatsServiceStub::OnGetAllTxBytes(MessageParcel &data, MessageParcel &reply)
+{
+    if (!reply.WriteInt64(GetAllTxBytes())) {
+        NETMGR_LOG_E("WriteInt64 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_NONE;
+}
+
+int32_t NetStatsServiceStub::OnGetUidRxBytes(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid;
+    if (!data.ReadUint32(uid)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int64_t result = GetUidRxBytes(uid);
+    if (!reply.WriteInt64(result)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_NONE;
+}
+
+int32_t NetStatsServiceStub::OnGetUidTxBytes(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid;
+    if (!data.ReadUint32(uid)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int64_t result = GetUidTxBytes(uid);
+    if (!reply.WriteInt64(result)) {
         return ERR_FLATTEN_OBJECT;
     }
     return ERR_NONE;

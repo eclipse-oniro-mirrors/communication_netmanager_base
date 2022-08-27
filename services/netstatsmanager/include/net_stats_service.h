@@ -19,11 +19,12 @@
 #include "singleton.h"
 #include "system_ability.h"
 
-#include "net_stats_listener.h"
 #include "net_stats_callback.h"
-#include "net_stats_service_stub.h"
-#include "net_stats_service_iface.h"
 #include "net_stats_csv.h"
+#include "net_stats_listener.h"
+#include "net_stats_service_iface.h"
+#include "net_stats_service_stub.h"
+#include "net_stats_wrapper.h"
 #include "timer.h"
 
 namespace OHOS {
@@ -48,7 +49,15 @@ public:
         uint32_t start, uint32_t end, const NetStatsInfo &stats) override;
     NetStatsResultCode UpdateStatsData() override;
     NetStatsResultCode ResetFactory() override;
+    int64_t GetIfaceRxBytes(const std::string &interfaceName) override;
+    int64_t GetIfaceTxBytes(const std::string &interfaceName) override;
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+    int64_t GetCellularRxBytes() override;
+    int64_t GetCellularTxBytes() override;
+    int64_t GetAllRxBytes() override;
+    int64_t GetAllTxBytes() override;
+    int64_t GetUidRxBytes(uint32_t uid) override;
+    int64_t GetUidTxBytes(uint32_t uid) override;
 private:
     bool Init();
 
@@ -65,6 +74,7 @@ private:
     std::shared_ptr<NetStatsListener> subscriber_ = nullptr;
     std::unique_ptr<NetStatsCsv> netStatsCsv_ = nullptr;
     sptr<NetStatsServiceIface> serviceIface_ = nullptr;
+    std::unique_ptr<NetStatsWrapper> netStatsWrapper_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

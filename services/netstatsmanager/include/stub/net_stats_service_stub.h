@@ -18,8 +18,8 @@
 
 #include <map>
 
-#include "iremote_stub.h"
 #include "i_net_stats_service.h"
+#include "iremote_stub.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -42,7 +42,14 @@ private:
     int32_t OnUpdateIfacesStats(MessageParcel &data, MessageParcel &reply);
     int32_t OnUpdateStatsData(MessageParcel &data, MessageParcel &reply);
     int32_t OnResetFactory(MessageParcel &data, MessageParcel &reply);
-
+    int32_t OnGetIfaceRxBytes(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetIfaceTxBytes(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetCellularRxBytes(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetCellularTxBytes(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetAllRxBytes(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetAllTxBytes(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetUidRxBytes(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetUidTxBytes(MessageParcel &data, MessageParcel &reply);
 private:
     std::map<uint32_t, NetStatsServiceFunc> memberFuncMap_;
 };

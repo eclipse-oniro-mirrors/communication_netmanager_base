@@ -195,6 +195,7 @@ HWTEST_F(NetStatsManagerTest, NetStatsManager012, TestSize.Level1)
     NetStatsInfo statsInfo ;
     NetStatsResultCode result = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(iface,
         start, end, statsInfo);
+    ASSERT_TRUE(result == NetStatsResultCode::ERR_INVALID_PARAMETER);
 }
 
 /**
@@ -212,6 +213,7 @@ HWTEST_F(NetStatsManagerTest, NetStatsManager013, TestSize.Level1)
     NetStatsInfo statsInfo;
     NetStatsResultCode result = DelayedSingleton<NetStatsClient>::GetInstance()->GetUidStatsDetail(
         iface, uid, start, end, statsInfo);
+    ASSERT_TRUE(result == NetStatsResultCode::ERR_INVALID_PARAMETER);
 }
 
 /**
