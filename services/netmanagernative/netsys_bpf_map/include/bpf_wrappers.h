@@ -47,6 +47,8 @@ struct StatsValue {
 
 constexpr int IFNAMESIZE = 16;
 
+constexpr int INVALID = -1;
+
 typedef struct {
     std::string name;
 } IfaceName;
@@ -177,7 +179,7 @@ public:
      */
     static int GetFirstKey(const int mapfd, Key &key)
     {
-        return GetNextKey(mapfd, NULL, key);
+        return GetNextKey(mapfd, INVALID, key);
     }
 
     /**
