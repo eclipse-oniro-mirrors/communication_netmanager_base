@@ -167,7 +167,6 @@ void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint32_t netId)
         DelayedSingleton<DnsParamCache>::GetInstance()->SetDnsCache(netId, name, addrInfo[i]);
     }
 
-    DelayedSingleton<DnsParamCache>::GetInstance()->SetCacheDelayed(netId, name);
     DNS_CONFIG_PRINT("ProcSetCacheCommand end");
 }
 
