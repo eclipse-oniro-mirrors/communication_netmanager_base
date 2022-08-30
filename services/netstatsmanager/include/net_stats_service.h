@@ -39,6 +39,7 @@ class NetStatsService : public SystemAbility,
 public:
     void OnStart() override;
     void OnStop() override;
+    int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
     int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;
     int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;
     NetStatsResultCode GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end,
@@ -60,6 +61,7 @@ public:
     int64_t GetUidTxBytes(uint32_t uid) override;
 private:
     bool Init();
+    void GetDumpMessage(std::string &message);
 
 private:
     enum ServiceRunningState {

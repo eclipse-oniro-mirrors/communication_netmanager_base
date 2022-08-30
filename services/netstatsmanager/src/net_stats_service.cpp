@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 #include "net_stats_service.h"
 
 #include <cinttypes>
+#include <initializer_list>
 #include <sys/time.h>
 #include <unistd.h>
 
@@ -28,6 +29,16 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
+constexpr std::initializer_list<NetBearType> BEAR_TYPE_LIST = {
+    NetBearType::BEARER_CELLULAR,
+    NetBearType::BEARER_WIFI,
+    NetBearType::BEARER_BLUETOOTH,
+    NetBearType::BEARER_ETHERNET,
+    NetBearType::BEARER_VPN,
+    NetBearType::BEARER_WIFI_AWARE,
+};
+} // namespace
 const bool REGISTER_LOCAL_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<NetStatsService>::GetInstance().get());
 
@@ -88,6 +99,43 @@ void NetStatsService::OnStop()
 {
     state_ = STATE_STOPPED;
     registerToService_ = true;
+}
+
+int32_t NetStatsService::Dump(int32_t fd, const std::vector<std::u16string> &args)
+{
+    NETMGR_LOG_D("Start Dump, fd: %{public}d", fd);
+    std::string result;
+    GetDumpMessage(result);
+    int32_t ret = dprintf(fd, "%s\n", result.c_str());
+    return ret < 0 ? static_cast<int32_t>(NetStatsResultCode::ERR_INTERNAL_ERROR)
+                   : static_cast<int32_t>(NetStatsResultCode::ERR_NONE);
+}
+
+void NetStatsService::GetDumpMessage(std::string &message)
+{
+    message.append("Net Stats Info:\n");
+    message.append("\tRxBytes: " +
+                   std::to_string(NetStatsWrapper::GetInstance().GetTotalStats(StatsType::STATS_TYPE_RX_BYTES)) +
+                   "\n");
+    message.append("\tTxBytes: " +
+                   std::to_string(NetStatsWrapper::GetInstance().GetTotalStats(StatsType::STATS_TYPE_TX_BYTES)) +
+                   "\n");
+    message.append("\tRxPackets: " +
+                   std::to_string(NetStatsWrapper::GetInstance().GetTotalStats(StatsType::STATS_TYPE_RX_PACKETS)) +
+                   "\n");
+    message.append("\tTxPackets: " +
+                   std::to_string(NetStatsWrapper::GetInstance().GetTotalStats(StatsType::STATS_TYPE_TX_PACKETS)) +
+                   "\n");
+    std::for_each(BEAR_TYPE_LIST.begin(), BEAR_TYPE_LIST.end(), [&message, this](const auto &bearType) {
+        std::list<std::string> ifaceNames;
+        if (NetManagerCenter::GetInstance().GetIfaceNames(bearType, ifaceNames)) {
+            return;
+        }
+        for (const auto &name : ifaceNames) {
+            message.append("\t" + name + "-TxBytes: " + std::to_string(GetIfaceTxBytes(name)));
+            message.append("\t" + name + "-RxBytes: " + std::to_string(GetIfaceRxBytes(name)));
+        }
+    });
 }
 
 bool NetStatsService::Init()
