@@ -524,7 +524,7 @@ int32_t NetsysControllerServiceImpl::BandwidthEnableDataSaver(bool enable)
 
 int32_t NetsysControllerServiceImpl::BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes)
 {
-    NETMGR_LOG_D("NetsysControllerServiceImpl::BandwidthSetIfaceQuota: ifName=%{public}s, bytes=%{public}" PRId64,
+    NETMGR_LOG_D("NetsysControllerServiceImpl::BandwidthSetIfaceQuota: ifName=%{public}s, bytes=%{public}lld",
                  ifName.c_str(), bytes);
     return netsysClient_.BandwidthSetIfaceQuota(ifName, bytes);
 }
