@@ -147,9 +147,7 @@ void DnsProxyListen::StartListen()
         if (DnsThreadClose()) {
             break;
         }
-        if (memset_s(recvBuff.questionsBuff, MAX_REQUESDATA_LEN, 0, MAX_REQUESDATA_LEN) != 0) {
-            return;
-        }
+        (void)memset_s(recvBuff.questionsBuff, MAX_REQUESDATA_LEN, 0, MAX_REQUESDATA_LEN);
         socklen_t len;
         recvBuff.questionLen = recvfrom(proxySockFd_, recvBuff.questionsBuff, MAX_REQUESDATA_LEN, 0,
                                         reinterpret_cast<sockaddr *>(&proxyAddr), &len);

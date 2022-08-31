@@ -132,7 +132,7 @@ const std::string CastNameToStr(int32_t form)
 bool CheckRtNetlinkLength(const nlmsghdr *hdrMsg, size_t size)
 {
     int32_t type = hdrMsg->nlmsg_type;
-    bool ret = hdrMsg->nlmsg_len >= NLMSG_LENGTH((int)size);
+    bool ret = hdrMsg->nlmsg_len >= NLMSG_LENGTH(int(size));
     if (!ret) {
         if (MSG_NAME_MAP.find(type) != MSG_NAME_MAP.end()) {
             const std::string &netlinkType = MSG_NAME_MAP.at(type);
