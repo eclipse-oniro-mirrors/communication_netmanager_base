@@ -96,7 +96,7 @@ int32_t ClearRouteInfo(uint16_t clearThing, uint32_t table)
     if (copeResult != 0) {
         NETNATIVE_LOGE("[AddRoute]: string copy failed result %{public}d", copeResult);
     }
-    msghdr->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
+    msghdr->nlmsg_len = (unsigned)NLMSG_LENGTH(sizeof(struct rtmsg));
     msghdr->nlmsg_type = clearThing;
     msghdr->nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
     int32_t ret = SendNetlinkMsgToKernel(msghdr);
