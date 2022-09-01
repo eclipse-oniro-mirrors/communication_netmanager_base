@@ -32,10 +32,10 @@ ohos_unittest("netsys_bpf_stats_test") {
     "$NETSTATSMANAGER_BPFLIB_DIR:netsys_bpf_stats",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
     "//foundation/communication/netmanager_base/services/netsys_bpf_stats:netsys_bpf_stats",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
+    "c_utils:utils",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
   ]
