@@ -941,7 +941,7 @@ int32_t NetsysNativeServiceProxy::DisableNat(const std::string &downstreamIface,
 
     MessageParcel reply;
     MessageOption option;
-    Remote()->SendRequest(INetsysService::NETSYS_ENABLE_NAT, data, reply, option);
+    Remote()->SendRequest(INetsysService::NETSYS_DISABLE_NAT, data, reply, option);
 
     int32_t ret = reply.ReadInt32();
     NETNATIVE_LOGI("End to DisableNat, ret =%{public}d", ret);
