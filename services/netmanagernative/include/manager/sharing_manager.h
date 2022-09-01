@@ -22,9 +22,7 @@
 #include <string>
 #include <vector>
 
-#ifndef SHARING_MANAGER_DEPS
 #include "iptables_wrapper.h"
-#endif
 
 namespace OHOS {
 namespace nmd {
@@ -88,9 +86,7 @@ public:
 private:
     std::set<std::string> forwardingRequests_;
     std::set<std::string> interfaceForwards_;
-#ifndef SHARING_MANAGER_DEPS
     std::shared_ptr<IptablesWrapper> iptablesWrapper_ = nullptr;
-#endif
     bool inited_ = false;
     std::mutex initedMutex_;
 

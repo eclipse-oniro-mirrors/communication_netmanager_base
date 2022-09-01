@@ -52,7 +52,6 @@ ohos_shared_library("netsys_controller") {
   defines = [
     "NETMGR_LOG_TAG = \"NetConnManager\"",
     "LOG_DOMAIN = 0xD0015B0",
-    "SHARING_MANAGER_DEPS",
   ]
 
   if (enable_netmgr_debug) {

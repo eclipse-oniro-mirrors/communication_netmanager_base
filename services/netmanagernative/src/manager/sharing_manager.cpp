@@ -19,20 +19,17 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#ifndef SHARING_MANAGER_DEPS
 #include "netnative_log_wrapper.h"
 #include "net_manager_constants.h"
 #include "route_manager.h"
-#endif
 
 namespace OHOS {
 namespace nmd {
-#ifndef SHARING_MANAGER_DEPS
 using namespace NetManagerStandard;
-#endif
 namespace {
 constexpr const char *IPV4_FORWARDING_PROC_FILE = "/proc/sys/net/ipv4/ip_forward";
 constexpr const char *IPV6_FORWARDING_PROC_FILE = "/proc/sys/net/ipv6/conf/all/forwarding";
+constexpr const char *IPTABLES_TMP_BAK = "/data/service/el1/public/netmanager/ipfwd.bak";
 
 // commands of create tables
 const std::string CREATE_TETHERCTRL_NAT_POSTROUTING = "-t nat -N tetherctrl_nat_POSTROUTING";
@@ -51,20 +48,19 @@ const std::string CLEAR_TETHERCTRL_MANGLE_FORWARD = "-t mangle -F tetherctrl_man
 const std::string DELETE_TETHERCTRL_NAT_POSTROUTING = "-t nat -D POSTROUTING -j tetherctrl_nat_POSTROUTING";
 const std::string DELETE_TETHERCTRL_MANGLE_FORWARD = "-t mangle -D FORWARD -j tetherctrl_mangle_FORWARD";
 
-#ifndef SHARING_MANAGER_DEPS
 const std::string ENABLE_NAT(const std::string &down)
 {
     return "-t nat -A tetherctrl_nat_POSTROUTING -o " + down + " -j MASQUERADE";
 }
-#endif
 
 // commands of set ipfwd, all commands with filter
 const std::string FORWARD_JUMP_TETHERCTRL_FORWARD = " FORWARD -j tetherctrl_FORWARD";
 const std::string SET_TETHERCTRL_FORWARD_DROP = " tetherctrl_FORWARD -j DROP";
 const std::string SET_TETHERCTRL_FORWARD1(const std::string &from, const std::string &to)
 {
-    return " tetherctrl_FORWARD -i " + from + " -o " + to + " -m state --state RELATED,ESTABLISHED"
-        " -g tetherctrl_counters";
+    return " tetherctrl_FORWARD -i " + from + " -o " + to +
+           " -m state --state RELATED,ESTABLISHED"
+           " -g tetherctrl_counters";
 }
 
 const std::string SET_TETHERCTRL_FORWARD2(const std::string &from, const std::string &to)
@@ -94,17 +90,13 @@ bool WriteToFile(const char *filename, const char *value)
     }
     int fd = open(filename, O_WRONLY | O_CLOEXEC);
     if (fd < 0) {
-#ifndef SHARING_MANAGER_DEPS
-        NETNATIVE_LOGE("failed to open %{public}s: %{public}s", filename, strerror(errno));
-#endif
+        NETNATIVE_LOGE("failed to open %{private}s: %{public}s", filename, strerror(errno));
         return false;
     }
 
     const ssize_t len = strlen(value);
     if (write(fd, value, len) != len) {
-#ifndef SHARING_MANAGER_DEPS
-        NETNATIVE_LOGE("faield to write %{public}s to %{public}s: %{public}s", value, filename, strerror(errno));
-#endif
+        NETNATIVE_LOGE("faield to write %{public}s to %{private}s: %{public}s", value, filename, strerror(errno));
         close(fd);
         return false;
     }
@@ -115,45 +107,37 @@ bool WriteToFile(const char *filename, const char *value)
 
 void Rollback()
 {
-#ifndef SHARING_MANAGER_DEPS
-    NETNATIVE_LOGE("rollback");
-#endif
-    system("iptables-restore -filter < /tmp/ipfwd.bak");
+    NETNATIVE_LOGE("iptables rollback");
+    std::string rollBak = "iptables-restore -T filter < ";
+    rollBak.append(IPTABLES_TMP_BAK);
+    system(rollBak.c_str());
 }
 } // namespace
 
 SharingManager::SharingManager()
 {
-#ifndef SHARING_MANAGER_DEPS
     iptablesWrapper_ = DelayedSingleton<IptablesWrapper>::GetInstance();
-#endif
 }
 
 void SharingManager::InitChildChains()
 {
-#ifndef SHARING_MANAGER_DEPS
     iptablesWrapper_->RunCommand(IPTYPE_IPV4, CREATE_TETHERCTRL_NAT_POSTROUTING);
     iptablesWrapper_->RunCommand(IPTYPE_IPV4, CREATE_TETHERCTRL_FORWARD);
     iptablesWrapper_->RunCommand(IPTYPE_IPV4, CREATE_TETHERCTRL_COUNTERS);
     iptablesWrapper_->RunCommand(IPTYPE_IPV4, CREATE_TETHERCTRL_MANGLE_FORWARD);
-#endif
     inited_ = true;
 }
 
 int32_t SharingManager::IpEnableForwarding(const std::string &requestor)
 {
-#ifndef SHARING_MANAGER_DEPS
-    NETNATIVE_LOGE("IpEnableForwarding requestor: %{public}s", requestor.c_str());
-#endif
+    NETNATIVE_LOG_D("IpEnableForwarding requestor: %{public}s", requestor.c_str());
     forwardingRequests_.insert(requestor);
     return SetIpFwdEnable();
 }
 
 int32_t SharingManager::IpDisableForwarding(const std::string &requestor)
 {
-#ifndef SHARING_MANAGER_DEPS
-    NETNATIVE_LOGE("IpDisableForwarding requestor: %{public}s", requestor.c_str());
-#endif
+    NETNATIVE_LOG_D("IpDisableForwarding requestor: %{public}s", requestor.c_str());
     forwardingRequests_.erase(requestor);
     return SetIpFwdEnable();
 }
@@ -162,21 +146,18 @@ int32_t SharingManager::EnableNat(const std::string &downstreamIface, const std:
 {
     CheckInited();
     if (downstreamIface == upstreamIface) {
-#ifndef SHARING_MANAGER_DEPS
-        NETNATIVE_LOGE("Duplicate interface specified: %{public}s %{public}s",
-            downstreamIface.c_str(), upstreamIface.c_str());
-#endif
+        NETNATIVE_LOGE("Duplicate interface specified: %{public}s %{public}s", downstreamIface.c_str(),
+                       upstreamIface.c_str());
         return -1;
     }
     int32_t result = 0;
-#ifndef SHARING_MANAGER_DEPS
     iptablesWrapper_->RunCommand(IPTYPE_IPV4, APPEND_NAT_POSTROUTING);
     iptablesWrapper_->RunCommand(IPTYPE_IPV4, APPEND_MANGLE_FORWARD);
 
-    NETNATIVE_LOGE("EnableNat downstreamIface: %{public}s, upstreamIface: %{public}s",
-        downstreamIface.c_str(), upstreamIface.c_str());
+    NETNATIVE_LOGI("EnableNat downstreamIface: %{public}s, upstreamIface: %{public}s", downstreamIface.c_str(),
+                   upstreamIface.c_str());
 
-    result = iptablesWrapper_->RunCommand(IPTYPE_IPV4, ENABLE_NAT(downstreamIface));
+    result = iptablesWrapper_->RunCommand(IPTYPE_IPV4, ENABLE_NAT(upstreamIface));
     if (result) {
         return result;
     }
@@ -185,7 +166,6 @@ int32_t SharingManager::EnableNat(const std::string &downstreamIface, const std:
     if (result) {
         return result;
     }
-#endif
 
     return result;
 }
@@ -194,16 +174,13 @@ int32_t SharingManager::DisableNat(const std::string &downstreamIface, const std
 {
     CheckInited();
     if (downstreamIface == upstreamIface) {
-#ifndef SHARING_MANAGER_DEPS
         NETNATIVE_LOGE("Duplicate interface specified: %{public}s %s", downstreamIface.c_str(), upstreamIface.c_str());
-#endif
         return -1;
     }
     int32_t result = 0;
 
-#ifndef SHARING_MANAGER_DEPS
-    NETNATIVE_LOGE("DisableNat downstreamIface: %{public}s, upstreamIface: %{public}s", downstreamIface.c_str(),
-        upstreamIface.c_str());
+    NETNATIVE_LOGI("DisableNat downstreamIface: %{public}s, upstreamIface: %{public}s", downstreamIface.c_str(),
+                   upstreamIface.c_str());
 
     result = iptablesWrapper_->RunCommand(IPTYPE_IPV4, CLEAR_TETHERCTRL_NAT_POSTROUTING);
     if (result) {
@@ -213,7 +190,6 @@ int32_t SharingManager::DisableNat(const std::string &downstreamIface, const std
 
     iptablesWrapper_->RunCommand(IPTYPE_IPV4, DELETE_TETHERCTRL_NAT_POSTROUTING);
     iptablesWrapper_->RunCommand(IPTYPE_IPV4, DELETE_TETHERCTRL_MANGLE_FORWARD);
-#endif
     return result;
 }
 
@@ -225,24 +201,20 @@ int32_t SharingManager::SetIpFwdEnable()
     success &= WriteToFile(IPV4_FORWARDING_PROC_FILE, value);
     success &= WriteToFile(IPV6_FORWARDING_PROC_FILE, value);
     if (success) {
-        return -1;
+        return 0;
     }
-    return 0;
+    return -1;
 }
 
 int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface)
 {
     CheckInited();
     if (fromIface == toIface) {
-#ifndef SHARING_MANAGER_DEPS
         NETNATIVE_LOGE("Duplicate interface specified: %{public}s %{public}s", fromIface.c_str(), toIface.c_str());
-#endif
         return -1;
     }
-#ifndef SHARING_MANAGER_DEPS
-    NETNATIVE_LOGE("IpfwdAddInterfaceForward fromIface: %{public}s, toIface: %{public}s",
-        fromIface.c_str(), toIface.c_str());
-#endif
+    NETNATIVE_LOGI("IpfwdAddInterfaceForward fromIface: %{public}s, toIface: %{public}s", fromIface.c_str(),
+                   toIface.c_str());
 
     if (interfaceForwards_.empty()) {
         SetForwardRules(true, FORWARD_JUMP_TETHERCTRL_FORWARD);
@@ -250,13 +222,15 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
 
     int32_t result = 0;
 
-    system("iptables-save -t filter > /tmp/ipfwd.bak");
+    std::string saveBak = "iptables-save -t filter > ";
+    saveBak.append(IPTABLES_TMP_BAK);
+    system(saveBak.c_str());
 
     /*
      * Add a forward rule, when the status of packets is RELATED,
      * ESTABLISED and from fromIface to toIface, goto tetherctrl_counters
      */
-    result = SetForwardRules(true, SET_TETHERCTRL_FORWARD1(fromIface, toIface));
+    result = SetForwardRules(true, SET_TETHERCTRL_FORWARD1(toIface, fromIface));
     if (result) {
         return result;
     }
@@ -264,7 +238,7 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
     /*
      * Add a forward rule, when the status is INVALID and from toIface to fromIface, just drop
      */
-    result = SetForwardRules(true, SET_TETHERCTRL_FORWARD2(fromIface, toIface));
+    result = SetForwardRules(true, SET_TETHERCTRL_FORWARD2(toIface, fromIface));
     if (result) {
         Rollback();
         return result;
@@ -273,7 +247,7 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
     /*
      * Add a forward rule, from toIface to fromIface, goto tetherctrl_counters
      */
-    result = SetForwardRules(true, SET_TETHERCTRL_FORWARD3(fromIface, toIface));
+    result = SetForwardRules(true, SET_TETHERCTRL_FORWARD3(toIface, fromIface));
     if (result) {
         Rollback();
         return result;
@@ -305,8 +279,14 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
         Rollback();
         return result;
     }
-    interfaceForwards_.insert(fromIface + toIface);
 
+    result = RouteManager::EnableSharing(fromIface, toIface);
+    if (result) {
+        Rollback();
+        return result;
+    }
+
+    interfaceForwards_.insert(fromIface + toIface);
     return 0;
 }
 
@@ -314,30 +294,26 @@ int32_t SharingManager::IpfwdRemoveInterfaceForward(const std::string &fromIface
 {
     CheckInited();
     if (fromIface == toIface) {
-#ifndef SHARING_MANAGER_DEPS
         NETNATIVE_LOGE("Duplicate interface specified: %{public}s %{public}s", fromIface.c_str(), toIface.c_str());
-#endif
         return -1;
     }
 
-#ifndef SHARING_MANAGER_DEPS
-    NETNATIVE_LOGE("IpfwdRemoveInterfaceForward fromIface: %{public}s, toIface: %{public}s",
-        fromIface.c_str(), toIface.c_str());
-#endif
+    NETNATIVE_LOGI("IpfwdRemoveInterfaceForward fromIface: %{public}s, toIface: %{public}s", fromIface.c_str(),
+                   toIface.c_str());
 
-#ifndef SHARING_MANAGER_DEPS
-    SetForwardRules(false, SET_TETHERCTRL_FORWARD1(fromIface, toIface));
-    SetForwardRules(false, SET_TETHERCTRL_FORWARD2(fromIface, toIface));
-    SetForwardRules(false, SET_TETHERCTRL_FORWARD2(fromIface, toIface));
+    SetForwardRules(false, SET_TETHERCTRL_FORWARD1(toIface, fromIface));
+    SetForwardRules(false, SET_TETHERCTRL_FORWARD2(toIface, fromIface));
+    SetForwardRules(false, SET_TETHERCTRL_FORWARD3(toIface, fromIface));
     SetForwardRules(false, SET_TETHERCTRL_FORWARD_DROP);
     SetForwardRules(false, SET_TETHERCTRL_COUNTERS1(fromIface, toIface));
     SetForwardRules(false, SET_TETHERCTRL_COUNTERS2(fromIface, toIface));
+
+    RouteManager::DisableSharing(fromIface, toIface);
 
     interfaceForwards_.erase(fromIface + toIface);
     if (interfaceForwards_.empty()) {
         SetForwardRules(false, FORWARD_JUMP_TETHERCTRL_FORWARD);
     }
-#endif
 
     return 0;
 }
@@ -354,9 +330,7 @@ void SharingManager::CheckInited()
 int32_t SharingManager::SetForwardRules(bool set, const std::string &cmds)
 {
     const std::string op = set ? "-A" : "-D";
-#ifndef SHARING_MANAGER_DEPS
     return iptablesWrapper_->RunCommand(IPTYPE_IPV4, "-t filter " + op + cmds);
-#endif
     return 0;
 }
 } // namespace nmd
