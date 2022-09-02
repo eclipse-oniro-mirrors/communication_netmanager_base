@@ -147,7 +147,7 @@ void DnsProxyListen::StartListen()
         if (DnsThreadClose()) {
             break;
         }
-        (void)strcpy_s(recvBuff.questionsBuff, MAX_REQUESDATA_LEN, 0);
+        (void)memset_s(recvBuff.questionsBuff, MAX_REQUESDATA_LEN, 0, MAX_REQUESDATA_LEN);
         socklen_t len;
         recvBuff.questionLen = recvfrom(proxySockFd_, recvBuff.questionsBuff, MAX_REQUESDATA_LEN, 0,
                                         reinterpret_cast<sockaddr *>(&proxyAddr), &len);
@@ -171,7 +171,10 @@ bool DnsProxyListen::CheckDnsRespone(char* recBuff)
 {
     uint8_t flagBuff;
     char *recFlagBuff = recBuff + 2;
-    memcpy_s(reinterpret_cast<char *>(&flagBuff), 1, recFlagBuff, 1);
+    unsigned int count = 1;
+    if (memcpy_s(reinterpret_cast<char *>(&flagBuff), count, recFlagBuff, count) != 0) {
+        return false;
+    }
     int reqFlag = (flagBuff & RESPONSE_FLAG) / RESPONSE_FLAG_USED;
     if (reqFlag) {
         return true; // answer

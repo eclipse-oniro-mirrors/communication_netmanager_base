@@ -795,7 +795,7 @@ int32_t NetsysNativeServiceStub::CmdFirewallSetUidsAllowedListChain(MessageParce
     NETNATIVE_LOG_D("Begin to dispatch cmd CmdFirewallSetUidsAllowedListChain");
     uint32_t chain = data.ReadUint32();
     std::vector<uint32_t> uids;
-    size_t uid_size = data.ReadInt32();
+    size_t uid_size = (unsigned)data.ReadInt32();
     for (uint32_t i = 0; i < uid_size; i++) {
         uint32_t uid = data.ReadUint32();
         uids.push_back(uid);
@@ -833,9 +833,9 @@ int32_t NetsysNativeServiceStub::CmdFirewallEnableChain(MessageParcel &data, Mes
 int32_t NetsysNativeServiceStub::CmdFirewallSetUidRule(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOG_D("Begin to dispatch cmd CmdFirewallSetUidRule");
-    uint32_t chain = data.ReadUint32();
-    uint32_t uid = data.ReadInt32();
-    uint32_t firewallRule = data.ReadInt32();
+    uint32_t chain = (unsigned)data.ReadUint32();
+    uint32_t uid = (unsigned)data.ReadInt32();
+    uint32_t firewallRule = (unsigned)data.ReadInt32();
     int32_t result = FirewallSetUidRule(chain, uid, firewallRule);
     reply.WriteInt32(result);
     return result;

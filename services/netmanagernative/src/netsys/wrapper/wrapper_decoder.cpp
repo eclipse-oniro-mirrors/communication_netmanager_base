@@ -132,7 +132,7 @@ const std::string CastNameToStr(int32_t form)
 bool CheckRtNetlinkLength(const nlmsghdr *hdrMsg, size_t size)
 {
     int32_t type = hdrMsg->nlmsg_type;
-    bool ret = hdrMsg->nlmsg_len >= NLMSG_LENGTH(size);
+    bool ret = hdrMsg->nlmsg_len >= NLMSG_LENGTH(int(size));
     if (!ret) {
         if (MSG_NAME_MAP.find(type) != MSG_NAME_MAP.end()) {
             const std::string &netlinkType = MSG_NAME_MAP.at(type);
@@ -454,7 +454,7 @@ bool WrapperDecoder::InterpreteRtMsg(const nlmsghdr *hdrMsg)
     std::string msgName = CastNameToStr(type);
     size_t size = RTM_PAYLOAD(hdrMsg);
     rtattr *rtAttr = nullptr;
-    for (rtAttr = RTM_RTA(rtMsg); RTA_OK(rtAttr, size); rtAttr = RTA_NEXT(rtAttr, size)) {
+    for (rtAttr = RTM_RTA(rtMsg); RTA_OK(rtAttr, (int)size); rtAttr = RTA_NEXT(rtAttr, size)) {
         switch (rtAttr->rta_type) {
             case RTA_GATEWAY:
                 if (IsValid(*gateWay, RTA_GATEWAY_STR, msgName) &&

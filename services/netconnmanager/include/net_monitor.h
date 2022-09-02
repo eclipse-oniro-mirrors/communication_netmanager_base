@@ -71,7 +71,7 @@ private:
     NetDetectionStatus SendParallelHttpProbes();
 
     NetDetectionStatus SendHttpProbe(const std::string &defaultDomain, const std::string &defaultUrl,
-        const uint16_t defaultPort);
+                                     const uint16_t defaultPort);
 
     int32_t GetStatusCodeFromResponse(const std::string &strResponse);
 
@@ -84,19 +84,20 @@ private:
     int32_t GetIpAddr(const char *domain, char *ip_addr, struct hostent &ipHost);
 
     int32_t SetSocketParameter(int32_t sockFd);
+
 private:
     uint32_t netId_;
     bool detecting_ = false;
     std::mutex detectionMtx_;
     std::condition_variable detectionCond_;
     std::thread detectionThread_;
-    NetDetectionStatus result_;
+    NetDetectionStatus result_ = INVALID_DETECTION_STATE;
     uint32_t detectionDelay_ = 0;
     uint32_t detectionSteps_ = 0;
     NetDetectionStateHandler netDetectionStatus_;
     std::string portalUrlRedirect_;
     bool needReport_ = false;
 };
-}  // namespace NetManagerStandard
-}  // namespace OHOS
+} // namespace NetManagerStandard
+} // namespace OHOS
 #endif // NET_MONITOR_H
