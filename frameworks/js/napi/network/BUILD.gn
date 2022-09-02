@@ -18,7 +18,7 @@ SUBSYSTEM_DIR = "//foundation/communication"
 common_deps = [
   "$SUBSYSTEM_DIR/netmanager_base/utils/napi_utils:napi_utils",
   "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
-  "//third_party/libuv:uv_static",
+  "//third_party/libuv:uv",
 ]
 
 common_external_deps = [
