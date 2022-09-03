@@ -218,6 +218,14 @@ public:
         const struct addrinfo &hints, std::unique_ptr<addrinfo> &res, uint16_t netId) override;
 
     /**
+     * Obtains the bytes of the sharing network.
+     *
+     * @return Success return 0.
+     */
+    int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
+        nmd::NetworkSharingTraffic &traffic) override;
+
+    /**
      * Obtains the bytes received over the cellular network.
      *
      * @return The number of received bytes.

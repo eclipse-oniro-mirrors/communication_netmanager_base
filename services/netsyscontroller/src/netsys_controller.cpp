@@ -263,6 +263,17 @@ int32_t NetsysController::GetAddrInfo(const std::string &hostName, const std::st
     return netsysService_->GetAddrInfo(hostName, serverName, hints, res, netId);
 }
 
+int32_t NetsysController::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
+    nmd::NetworkSharingTraffic &traffic)
+{
+    NETMGR_LOG_I("NetsysController GetNetworkSharingTraffic");
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+    }
+    return netsysService_->GetNetworkSharingTraffic(downIface, upIface, traffic);
+}
+
 int64_t NetsysController::GetCellularRxBytes()
 {
     NETMGR_LOG_I("NetsysController GetCellularRxBytes");

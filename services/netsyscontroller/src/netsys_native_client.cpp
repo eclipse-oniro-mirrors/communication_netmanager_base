@@ -387,6 +387,17 @@ int32_t NetsysNativeClient::GetAddrInfo(const std::string &hostName, const std::
     return ret;
 }
 
+int32_t NetsysNativeClient::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
+    nmd::NetworkSharingTraffic &traffic)
+{
+    NETMGR_LOG_I("NetsysNativeClient GetNetworkSharingTraffic");
+    if (netsysNativeService_ == nullptr) {
+        NETMGR_LOG_E("netsysNativeService_ is null");
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+    }
+    return netsysNativeService_->GetNetworkSharingTraffic(downIface, upIface, traffic);
+}
+
 int64_t NetsysNativeClient::GetCellularRxBytes()
 {
     NETMGR_LOG_I("NetsysNativeClient GetCellularRxBytes");

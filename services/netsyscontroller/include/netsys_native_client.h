@@ -27,6 +27,7 @@
 
 #include "netsys_controller_callback.h"
 #include "netsys_controller_define.h"
+#include "network_sharing.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -244,6 +245,14 @@ public:
      */
     int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName, const struct addrinfo &hints,
                         std::unique_ptr<addrinfo> &res, uint16_t netId);
+
+    /**
+     * Obtains the bytes of the sharing network.
+     *
+     * @return Success return 0.
+     */
+    int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
+        nmd::NetworkSharingTraffic &traffic);
 
     /**
      * Obtains the bytes received over the cellular network.

@@ -93,7 +93,8 @@ public:
     int32_t ShareDnsSet(uint16_t netId) override;
     int32_t StartDnsProxyListen() override;
     int32_t StopDnsProxyListen() override;
-
+    int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
+                                     NetworkSharingTraffic &traffic) override;
 private:
     static inline BrokerDelegator<NetsysNativeServiceProxy> delegator_;
 };

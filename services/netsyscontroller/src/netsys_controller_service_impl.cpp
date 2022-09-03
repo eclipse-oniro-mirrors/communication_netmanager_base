@@ -213,6 +213,13 @@ int32_t NetsysControllerServiceImpl::GetAddrInfo(const std::string &hostName, co
     return netsysClient_.GetAddrInfo(hostName, serverName, hints, res, netId);
 }
 
+int32_t NetsysControllerServiceImpl::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
+    nmd::NetworkSharingTraffic &traffic)
+{
+    NETMGR_LOG_I("NetsysControllerServiceImpl GetNetworkSharingTraffic");
+    return netsysClient_.GetNetworkSharingTraffic(downIface, upIface, traffic);
+}
+
 int64_t NetsysControllerServiceImpl::GetCellularRxBytes()
 {
     NETMGR_LOG_I("NetsysControllerServiceImpl GetCellularRxBytes");

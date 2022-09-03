@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "iptables_wrapper.h"
+#include "network_sharing.h"
 
 namespace OHOS {
 namespace nmd {
@@ -82,6 +83,18 @@ public:
      * @return NETMANAGER_ERROR code
      */
     int32_t IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface);
+
+    /*
+     * @brief Get trafic of network sharing
+     *
+     * @param downIface
+     * @param upIface
+     * @param traffic
+     * @return NETMANAGER_ERROR code
+     */
+    int32_t GetNetworkSharingTraffic(const std::string &downIface,
+                                     const std::string &upIface,
+                                     NetworkSharingTraffic &traffic);
 
 private:
     std::set<std::string> forwardingRequests_;

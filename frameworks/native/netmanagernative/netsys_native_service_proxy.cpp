@@ -1340,5 +1340,32 @@ int32_t NetsysNativeServiceProxy::StopDnsProxyListen()
     }
     return reply.ReadInt32();
 }
+
+int32_t NetsysNativeServiceProxy::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
+    NetworkSharingTraffic &traffic) 
+{
+    NETNATIVE_LOGI("NetsysNativeServiceProxy GetNetworkSharingTraffic ERR_FLATTEN_OBJECT=%{public}d", ERR_FLATTEN_OBJECT);
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(downIface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(upIface)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetsysService::NETSYS_GET_SHARING_NETWORK_TRAFFIC, data, reply, option);
+
+    int32_t ret = reply.ReadInt32();
+    traffic.receive = reply.ReadInt64();
+    traffic.send = reply.ReadInt64();
+    traffic.all = reply.ReadInt64();
+    NETNATIVE_LOGI("NetsysNativeServiceProxy GetNetworkSharingTraffic ret=%{public}d", ret);
+    return ret;
+}
 } // namespace NetsysNative
 } // namespace OHOS

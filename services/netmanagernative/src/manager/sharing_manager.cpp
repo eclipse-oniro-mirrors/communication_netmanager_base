@@ -17,11 +17,13 @@
 
 #include <cerrno>
 #include <fcntl.h>
+#include <regex>
 #include <unistd.h>
 
 #include "netnative_log_wrapper.h"
 #include "net_manager_constants.h"
 #include "route_manager.h"
+#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace nmd {
@@ -316,6 +318,55 @@ int32_t SharingManager::IpfwdRemoveInterfaceForward(const std::string &fromIface
     }
 
     return 0;
+}
+
+int32_t SharingManager::GetNetworkSharingTraffic(const std::string &downIface,
+                                                 const std::string &upIface,
+                                                 NetworkSharingTraffic &traffic)
+{
+    const std::string cmds = "-t filter -L tetherctrl_counters -nvx";
+    std::string result = iptablesWrapper_->RunCommandForRes(IPTYPE_IPV4, cmds);
+
+    const std::string NUM = "(\\d+)";
+    const std::string IFACE = "([^\\s]+)";
+    const std::string DST = "(0.0.0.0/0|::/0)";
+    const std::string COUNTERS = "\\s*" + NUM + "\\s+" + NUM + " RETURN     all(  --  |      )" + IFACE + "\\s+" +
+                                 IFACE + "\\s+" + DST + "\\s+" + DST;
+    static const std::regex IP_RE(COUNTERS);
+
+    bool isFindTx = false;
+    bool isFindRx = false;
+    const std::vector<std::string> lines = CommonUtils::Split(result, "\n");
+    for (auto line : lines) {
+        std::smatch matches;
+        std::regex_search(line, matches, IP_RE);
+        if (matches.size() < 4) {
+            continue;
+        }
+        for (int i = 0; i < matches.size() - 1; i++) {
+            std::string tempMatch = matches[i];
+            NETNATIVE_LOGE("GetNetworkSharingTraffic matche[%{public}s]", tempMatch.c_str());
+            if (matches[i] == downIface && matches[i + 1] == upIface && ((i - 2) >= 0)) {
+                int64_t send = strtoul(matches[i - 2].str().c_str(), nullptr, 0);
+                isFindTx = true;
+                traffic.send = send;
+                traffic.all += send;
+                NETNATIVE_LOGE("GetNetworkSharingTraffic success, send[%{public}lld]", send);
+            } else if (matches[i] == upIface && matches[i + 1] == downIface && ((i - 2) >= 0)) {
+                int64_t receive = strtoul(matches[i - 2].str().c_str(), nullptr, 0);
+                isFindRx = true;
+                traffic.receive = receive;
+                traffic.all += receive;
+                NETNATIVE_LOGE("GetNetworkSharingTraffic success, receive[%{public}lld]", receive);
+            }
+            if (isFindTx && isFindRx) {
+                NETNATIVE_LOGE("GetNetworkSharingTraffic success total");
+                return NETMANAGER_SUCCESS;
+            }
+        }
+    }
+    NETNATIVE_LOGE("GetNetworkSharingTraffic failed");
+    return NETMANAGER_ERROR;
 }
 
 void SharingManager::CheckInited()

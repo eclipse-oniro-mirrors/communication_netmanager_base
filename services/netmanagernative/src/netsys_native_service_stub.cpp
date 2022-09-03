@@ -72,6 +72,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_TETHER_DNS_SET] = &NetsysNativeServiceStub::CmdShareDnsSet;
     opToInterfaceMap_[NETSYS_START_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStartDnsProxyListen;
     opToInterfaceMap_[NETSYS_STOP_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStopDnsProxyListen;
+    opToInterfaceMap_[NETSYS_GET_SHARING_NETWORK_TRAFFIC] = &NetsysNativeServiceStub::CmdGetNetworkSharingTraffic;
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
 }
@@ -866,6 +867,21 @@ int32_t NetsysNativeServiceStub::CmdStopDnsProxyListen(MessageParcel &data, Mess
     int32_t result = StopDnsProxyListen();
     reply.WriteInt32(result);
     NETNATIVE_LOGI("StopDnsProxyListen has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdGetNetworkSharingTraffic(MessageParcel &data, MessageParcel &reply)
+{
+    NETNATIVE_LOGI("Begin to dispatch cmd GetNetworkSharingTraffic");
+    std::string downIface = data.ReadString();
+    std::string upIface = data.ReadString();
+    NetworkSharingTraffic traffic;
+    int32_t result = GetNetworkSharingTraffic(downIface, upIface, traffic);
+    reply.WriteInt32(result);
+    reply.WriteInt64(traffic.receive);
+    reply.WriteInt64(traffic.send);
+    reply.WriteInt64(traffic.all);
 
     return result;
 }
