@@ -57,4 +57,23 @@ NET_CONN_MONITOR_FAULT:
 NET_CONN_MONITOR_STAT:
   __BASE: {type: BEHAVIOR, level: CRITICAL, tag: NetManager, desc: send monitor behavior event}
   NET_MONITOR_STATUS: {type: INT32, desc: monitor status}
+
+NET_SHARING_SETUP_FAULT:
+  __BASE: {type: FAULT, level: CRITICAL, tag: NetManager, desc: send setup fault event}
+  SHARING_TYPE: {type: INT32, desc: if the sharing or not}
+  OPERATION_TYPE: {type: INT32, desc: the operator type}
+  ERROR_TYPE: {type: INT32, desc: the error code}
+  ERROR_MSG: {type: STRING, desc: the error message}
+
+NET_SHARING_CANCLE_FAULT:
+  __BASE: {type: FAULT, level: CRITICAL, tag: NetManager, desc: send cancle fault event}
+  SHARING_TYPE: {type: INT32, desc: if the sharing or not}
+  OPERATION_TYPE: {type: INT32, desc: the operator type}
+  ERROR_TYPE: {type: INT32, desc: the error code}
+  ERROR_MSG: {type: STRING, desc: the error message}
+
+NET_SHARING_TIME_STAT:
+  __BASE: {type: BEHAVIOR, level: MINOR, tag: NetManager, desc: sharing state message}
+  SHARING_COUNT: {type: INT32, desc: the number of sharing}
+  SHARING_TYPE: {type: INT32, desc: type code of sharing}
  
