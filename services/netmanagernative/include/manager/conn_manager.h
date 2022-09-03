@@ -157,6 +157,13 @@ public:
      */
     int32_t SetPermissionForNetwork(int32_t netId, NetworkPermission permission);
 
+    /**
+     * Get the Dump Infos object
+     *
+     * @param infos The output message
+     */
+    void GetDumpInfos(std::string &infos);
+
 private:
     int32_t defaultNetId_;
     std::map<int32_t, std::shared_ptr<NetsysNetwork>> networks_;

@@ -13,11 +13,22 @@
  * limitations under the License.
  */
 
-#include <algorithm>
-
 #include "dns_param_cache.h"
 
+#include <algorithm>
+
+#include "netmanager_base_common_utils.h"
+
 namespace OHOS::nmd {
+using namespace OHOS::NetManagerStandard::CommonUtils;
+namespace {
+void GetVectorData(const std::vector<std::string> &data, std::string &result)
+{
+    result.append("{ ");
+    std::for_each(data.begin(), data.end(), [&result](const auto &str) { result.append(ToAnonymousIp(str) + ", "); });
+    result.append("}\n");
+}
+} // namespace
 static constexpr const int RES_TIMEOUT = 5000;    // min. milliseconds between retries
 static constexpr const int RES_DEFAULT_RETRY = 2; // Default
 
@@ -164,5 +175,21 @@ void DnsParamCache::SetCacheDelayed(uint16_t netId, const std::string &hostName)
     }
 
     serverConfigMap_[netId].SetCacheDelayed(hostName);
+}
+
+void DnsParamCache::GetDumpInfo(std::string &info)
+{
+    std::string dnsData;
+    static const std::string TAB = "  ";
+    std::for_each(serverConfigMap_.begin(), serverConfigMap_.end(), [&dnsData](const auto &serverConfig) {
+        dnsData.append(TAB + "NetId: " + std::to_string(serverConfig.second.GetNetId()) + "\n");
+        dnsData.append(TAB + "TimeoutMsec: " + std::to_string(serverConfig.second.GetTimeoutMsec()) + "\n");
+        dnsData.append(TAB + "RetryCount: " + std::to_string(serverConfig.second.GetRetryCount()) + "\n");
+        dnsData.append(TAB + "Servers:");
+        GetVectorData(serverConfig.second.GetServers(), dnsData);
+        dnsData.append(TAB + "Domains:");
+        GetVectorData(serverConfig.second.GetDomains(), dnsData);
+    });
+    info.append(dnsData);
 }
 } // namespace OHOS::nmd

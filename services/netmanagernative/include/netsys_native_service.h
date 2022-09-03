@@ -38,6 +38,7 @@ public:
 
     void OnStart() override;
     void OnStop() override;
+    int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
 
     int32_t SetResolverConfigParcel(const DnsResolverParamsParcel &resolvParams) override;
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
@@ -108,6 +109,7 @@ public:
 private:
     NetsysNativeService();
     bool Init();
+    void GetDumpMessage(std::string &message);
 
     enum ServiceRunningState {
         STATE_STOPPED = 0,

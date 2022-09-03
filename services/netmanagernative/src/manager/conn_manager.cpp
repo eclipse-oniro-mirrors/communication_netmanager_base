@@ -215,5 +215,20 @@ int32_t ConnManager::SetPermissionForNetwork(int32_t netId, NetworkPermission pe
 {
     return NETMANAGER_ERROR;
 }
+
+void ConnManager::GetDumpInfos(std::string &infos)
+{
+    static const std::string TAB = "  ";
+    infos.append("Netsys connect manager :\n");
+    infos.append(TAB + "default NetId: " + std::to_string(defaultNetId_) + "\n");
+    std::for_each(networks_.begin(), networks_.end(), [&infos](const auto &network) {
+        infos.append(TAB + "NetId:" + std::to_string(network.first));
+        std::string interfaces = TAB + "interfaces: {";
+        for (const auto &interface : network.second->GetAllInterface()) {
+            interfaces.append(interface + ", ");
+        }
+        infos.append(interfaces + "}\n");
+    });
+}
 } // namespace nmd
 } // namespace OHOS

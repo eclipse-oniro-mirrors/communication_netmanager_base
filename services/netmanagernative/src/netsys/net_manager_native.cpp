@@ -372,5 +372,11 @@ void NetManagerNative::StopDnsProxyListen()
 {
     dnsManager_->StopDnsProxyListen();
 }
+
+void NetManagerNative::GetDumpInfo(std::string &infos)
+{
+    connManager_->GetDumpInfos(infos);
+    dnsManager_->GetDumpInfo(infos);
+}
 } // namespace nmd
 } // namespace OHOS
