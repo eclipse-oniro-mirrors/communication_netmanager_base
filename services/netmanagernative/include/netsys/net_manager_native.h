@@ -109,6 +109,7 @@ public:
     void ShareDnsSet(uint16_t netId);
     void StartDnsProxyListen();
     void StopDnsProxyListen();
+    void GetDumpInfo(std::string &infos);
 
 private:
     std::shared_ptr<BandwidthManager> bandwidthManager_;

@@ -87,6 +87,13 @@ public:
      */
     void StopDnsProxyListen();
 
+    /**
+     * Get the Dump Info object, this is for dump.
+     *
+     * @param info Infos for dump
+     */
+    void GetDumpInfo(std::string &info);
+
 private:
     std::shared_ptr<DnsProxyListen> dnsProxyListen_;
 };

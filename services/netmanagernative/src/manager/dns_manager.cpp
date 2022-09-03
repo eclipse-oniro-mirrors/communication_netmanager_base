@@ -84,6 +84,12 @@ void DnsManager::StopDnsProxyListen()
     dnsProxyListen_->OffListen();
 }
 
+void DnsManager::GetDumpInfo(std::string &info)
+{
+    NETNATIVE_LOG_D("Get dump info");
+    DelayedSingleton<DnsParamCache>::GetInstance()->GetDumpInfo(info);
+}
+
 DnsManager::~DnsManager() = default;
 } // namespace nmd
 } // namespace OHOS

@@ -56,6 +56,8 @@ public:
     int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
                               uint16_t &baseTimeoutMsec, uint8_t &retryCount);
 
+    void GetDumpInfo(std::string &info);
+
 private:
     std::mutex cacheMutex_;
 

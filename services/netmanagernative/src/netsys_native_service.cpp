@@ -88,6 +88,20 @@ void NetsysNativeService::OnStop()
     manager_->StopListener();
 }
 
+int32_t NetsysNativeService::Dump(int32_t fd, const std::vector<std::u16string> &args)
+{
+    NETNATIVE_LOG_D("Start Dump, fd: %{public}d", fd);
+    std::string result;
+    GetDumpMessage(result);
+    int32_t ret = dprintf(fd, "%s\n", result.c_str());
+    return ret < 0 ? SESSION_UNOPEN_ERR : ERR_NONE;
+}
+
+void NetsysNativeService::GetDumpMessage(std::string &message)
+{
+    netsysService_->GetDumpInfo(message);
+}
+
 void ExitHandler(int32_t signum)
 {
     exit(1);
