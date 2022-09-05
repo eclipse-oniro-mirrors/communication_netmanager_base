@@ -15,6 +15,7 @@
 
 #include "network.h"
 #include "netsys_controller.h"
+#include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "securec.h"
 
@@ -59,7 +60,10 @@ bool Network::CreateBasicNetwork()
     if (!isPhyNetCreated_) {
         NETMGR_LOG_D("Create physical network");
         // Create a physical network
-        NetsysController::GetInstance().NetworkCreatePhysical(netId_, 0);
+        if (NetsysController::GetInstance().NetworkCreatePhysical(netId_, 0) != NETMANAGER_SUCCESS) {
+            std::string errMsg = std::string("Create physical network failed, net id:").append(std::to_string(netId_));
+            SendSupplierFaultHiSysEvent(FAULT_CREATE_PHYSICAL_NETWORK_FAILED, errMsg);
+        }
         NetsysController::GetInstance().CreateNetworkCache(netId_);
         isPhyNetCreated_ = true;
     }
@@ -115,12 +119,21 @@ void Network::UpdateInterfaces(const NetLinkInfo &netLinkInfo)
         return;
     }
 
+    int32_t ret = NETMANAGER_SUCCESS;
     // Call netsys to add and remove interface
     if (!netLinkInfo.ifaceName_.empty()) {
-        NetsysController::GetInstance().NetworkAddInterface(netId_, netLinkInfo.ifaceName_);
+        ret = NetsysController::GetInstance().NetworkAddInterface(netId_, netLinkInfo.ifaceName_);
+        if (ret != NETMANAGER_SUCCESS) {
+            std::string errMsg = "Add network interface failed";
+            SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, errMsg);
+        }
     }
     if (!netLinkInfo_.ifaceName_.empty()) {
-        NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
+        ret = NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
+        if (ret != NETMANAGER_SUCCESS) {
+            std::string errMsg = "Remove network interface failed";
+            SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, errMsg);
+        }
     }
     netLinkInfo_.ifaceName_ = netLinkInfo.ifaceName_;
     NETMGR_LOG_D("Network UpdateInterfaces out.");
@@ -181,7 +194,12 @@ void Network::UpdateIpAddrs(const NetLinkInfo &netLinkInfo)
         if (prefixLen == 0) {
             prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
         }
-        NetsysController::GetInstance().InterfaceDelAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
+        int32_t ret =  NetsysController::GetInstance().InterfaceDelAddress(
+            netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
+        if (ret != NETMANAGER_SUCCESS) {
+            std::string errMsg = "Delete network ip address failed";
+            SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, errMsg);
+        }
     }
 
     NETMGR_LOG_D("UpdateIpAddrs, new ip addrs: ...");
@@ -191,7 +209,12 @@ void Network::UpdateIpAddrs(const NetLinkInfo &netLinkInfo)
         if (prefixLen == 0) {
             prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
         }
-        NetsysController::GetInstance().InterfaceAddAddress(netLinkInfo.ifaceName_, inetAddr.address_, prefixLen);
+        int32_t ret =  NetsysController::GetInstance().InterfaceAddAddress(
+            netLinkInfo.ifaceName_, inetAddr.address_, prefixLen);
+        if (ret != NETMANAGER_SUCCESS) {
+            std::string errMsg = "Add network ip address failed";
+            SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, errMsg);
+        }
     }
     NETMGR_LOG_D("Network UpdateIpAddrs out.");
 }
@@ -204,16 +227,30 @@ void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
     for (auto it = netLinkInfo_.routeList_.begin(); it != netLinkInfo_.routeList_.end(); ++it) {
         const struct Route &route = *it;
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
-        NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, destAddress, route.gateway_.address_);
+        int32_t ret = NetsysController::GetInstance().NetworkRemoveRoute(
+            netId_, route.iface_, destAddress, route.gateway_.address_);
+        if (ret != NETMANAGER_SUCCESS) {
+            std::string errMsg = "Remove network routes failed";
+            SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, errMsg);
+        }
     }
 
     NETMGR_LOG_D("UpdateRoutes, new routes: [%{public}s]", netLinkInfo.ToStringRoute("").c_str());
     for (auto it = netLinkInfo.routeList_.begin(); it != netLinkInfo.routeList_.end(); ++it) {
         const struct Route &route = *it;
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
-        NetsysController::GetInstance().NetworkAddRoute(netId_, route.iface_, destAddress, route.gateway_.address_);
+        int32_t ret = NetsysController::GetInstance().NetworkAddRoute(
+            netId_, route.iface_, destAddress, route.gateway_.address_);
+        if (ret != NETMANAGER_SUCCESS) {
+            std::string errMsg = "Network add routes failed";
+            SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, errMsg);
+        }
     }
     NETMGR_LOG_D("Network UpdateRoutes out.");
+    if (netLinkInfo.routeList_.size() == 0) {
+        std::string errMsg = "Update netlink routes failed,routes list is empty";
+        SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, errMsg);
+    }
 }
 
 void Network::UpdateDnses(const NetLinkInfo &netLinkInfo)
@@ -226,8 +263,16 @@ void Network::UpdateDnses(const NetLinkInfo &netLinkInfo)
         domains.emplace_back(dns.hostName_);
     }
     // Call netsys to set dns, use default timeout and retry
-    NetsysController::GetInstance().SetResolverConfig(netId_, 0, 0, servers, domains);
+    int32_t ret = NetsysController::GetInstance().SetResolverConfig(netId_, 0, 0, servers, domains);
+    if (ret != NETMANAGER_SUCCESS) {
+        std::string errMsg = "Set network resolver config failed";
+        SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, errMsg);
+    }
     NETMGR_LOG_D("Network UpdateDnses out.");
+    if (netLinkInfo.dnsList_.size() == 0) {
+        std::string errMsg = "Update netlink dns failed,dns list is empty";
+        SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, errMsg);
+    }
 }
 
 void Network::UpdateMtu(const NetLinkInfo &netLinkInfo)
@@ -238,7 +283,11 @@ void Network::UpdateMtu(const NetLinkInfo &netLinkInfo)
         return;
     }
 
-    NetsysController::GetInstance().InterfaceSetMtu(netLinkInfo.ifaceName_, netLinkInfo.mtu_);
+    int32_t ret = NetsysController::GetInstance().InterfaceSetMtu(netLinkInfo.ifaceName_, netLinkInfo.mtu_);
+    if (ret != NETMANAGER_SUCCESS) {
+        std::string errMsg = "Update network mtu failed";
+        SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, errMsg);
+    }
     NETMGR_LOG_D("Network UpdateMtu out.");
 }
 
@@ -343,12 +392,31 @@ NetDetectionResultCode Network::NetDetectionResultConvert(int32_t internalRet)
 
 void Network::SetDefaultNetWork()
 {
-    NetsysController::GetInstance().SetDefaultNetWork(netId_);
+    int32_t ret = NetsysController::GetInstance().SetDefaultNetWork(netId_);
+    if (ret != NETMANAGER_SUCCESS) {
+        std::string errMsg = "Set default network failed";
+        SendSupplierFaultHiSysEvent(FAULT_SET_DEFAULT_NETWORK_FAILED, errMsg);
+    }
 }
 
 void Network::ClearDefaultNetWorkNetId()
 {
-    NetsysController::GetInstance().ClearDefaultNetWorkNetId();
+    int32_t ret = NetsysController::GetInstance().ClearDefaultNetWorkNetId();
+    if (ret != NETMANAGER_SUCCESS) {
+        std::string errMsg = "Clear default network failed";
+        SendSupplierFaultHiSysEvent(FAULT_CLEAR_DEFAULT_NETWORK_FAILED, errMsg);
+    }
+}
+
+void Network::SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const std::string &errMsg)
+{
+    struct EventInfo eventInfo = {
+        .supplierId = supplierId_,
+        .netlinkInfo = netLinkInfo_.ToString(" "),
+        .errorType = static_cast<int32_t>(errorType),
+        .errorMsg = errMsg
+    };
+    EventReport::SendSupplierFaultEvent(eventInfo);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

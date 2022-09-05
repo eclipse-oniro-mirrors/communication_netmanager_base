@@ -27,6 +27,7 @@
 #include <securec.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include "event_report.h"
 #include "net_mgr_log_wrapper.h"
 #include "fwmark_client.h"
 #include "netsys_controller.h"
@@ -115,6 +116,10 @@ NetDetectionStatus NetMonitor::GetDetectionResult() const
 void NetMonitor::Detection()
 {
     NetDetectionStatus result  = SendParallelHttpProbes();
+    struct EventInfo eventInfo = {
+        .monitorStatus = static_cast<int32_t>(result)
+    };
+    EventReport::SendMonitorBehaviorEvent(eventInfo);
     std::unique_lock<std::mutex> locker(detectionMtx_);
     if (detecting_) {
         if (result == CAPTIVE_PORTAL_STATE) {
@@ -208,6 +213,12 @@ int32_t NetMonitor::SetSocketParameter(int32_t sockFd)
     std::unique_ptr<nmd::FwmarkClient> fwmarkClient = std::make_unique<nmd::FwmarkClient>();
     if (fwmarkClient->BindSocket(sockFd, netId_) < 0) {
         NETMGR_LOG_E("Error at BindSocket");
+        struct EventInfo eventInfo = {
+            .socketFd = sockFd,
+            .errorType = static_cast<int32_t>(FAULT_BIND_SOCKET_FAILED),
+            .errorMsg = std::string("Bind socket:").append(std::to_string(sockFd)).append(" failed")
+        };
+        EventReport::SendMonitorFaultEvent(eventInfo);
         return -1;
     }
     int32_t syncnt = SOCKET_TIMEOUT;

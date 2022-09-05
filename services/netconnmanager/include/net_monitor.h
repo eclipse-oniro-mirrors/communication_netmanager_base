@@ -65,6 +65,13 @@ public:
      */
     NetDetectionStatus GetDetectionResult() const;
 
+    /**
+     * Set network socket parameter
+     *
+     * @return Socket parameter setting result
+     */
+    int32_t SetSocketParameter(int32_t sockFd);
+
 private:
     void Detection();
 
@@ -82,8 +89,6 @@ private:
     int32_t ParseUrl(const std::string &url, std::string &domain, std::string &urlPath);
 
     int32_t GetIpAddr(const char *domain, char *ip_addr, struct hostent &ipHost);
-
-    int32_t SetSocketParameter(int32_t sockFd);
 
 private:
     uint32_t netId_;

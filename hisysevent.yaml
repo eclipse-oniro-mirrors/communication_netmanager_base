@@ -25,7 +25,7 @@ NET_CONN_SUPPLER_FAULT:
 NET_CONN_SUPPLER_STAT:
   __BASE: {type: BEHAVIOR, level: CRITICAL, tag: NetManager, desc: send supplier behavior event}
   NET_SUPPLIER_REGISTER_BEARERTYPE: {type: INT32, desc: bearer type code}
-  NET_SUPPLIER_REGISTER_IDENT: {type: INT32, desc: ident code}
+  NET_SUPPLIER_REGISTER_IDENT: {type: STRING, desc: ident code}
   NET_SUPPLIER_REGISTER_SUPPLIERID: {type: INT32, desc: supplier id}
   NET_SUPPLIER_UPDATE_SUPPLIERID: {type: INT32, desc: supplier info}
   NET_SUPPLIER_UPDATE_SUPPLIERINFO: {type: STRING, desc: supplier info}
@@ -44,7 +44,7 @@ NET_CONN_REQUEST_STAT:
   __BASE: {type: BEHAVIOR, level: CRITICAL, tag: NetManager, desc: send request behavior event}
   NET_REQUEST_CAPABILITIE: {type: STRING, desc: cap abilities info}
   NET_REQUEST_CALLBACK_AVAILABLE: {type: STRING, desc: the callback available}
-  NET_REQUEST_SUPPLIERIDENT: {type: INT32, desc: supplier ident}
+  NET_REQUEST_SUPPLIERIDENT: {type: STRING, desc: supplier ident}
   NET_REQUEST_NETCAPS: {type: STRING, desc: net caps}
 
 NET_CONN_MONITOR_FAULT:

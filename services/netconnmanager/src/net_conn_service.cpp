@@ -20,6 +20,7 @@
 #include "common_event_support.h"
 
 #include "broadcast_manager.h"
+#include "event_report.h"
 #include "net_conn_types.h"
 #include "net_supplier.h"
 #include "net_activate.h"
@@ -163,6 +164,13 @@ int32_t NetConnService::RegisterNetSupplier(
     networks_[netId] = network;
 
     NETMGR_LOG_D("RegisterNetSupplier service out. netSuppliers_ size[%{public}zd]", netSuppliers_.size());
+    struct EventInfo eventInfo = {
+        .netId = netId,
+        .bearerType = bearerType,
+        .ident = ident,
+        .supplierId = supplierId
+    };
+    EventReport::SendSupplierBehaviorEvent(eventInfo);
     return ERR_NONE;
 }
 
@@ -193,6 +201,13 @@ int32_t NetConnService::UnregisterNetSupplier(uint32_t supplierId)
         iterSupplier->second->GetSupplierId(), iterSupplier->second->GetNetSupplierIdent().c_str(),
         defaultNetSupplier_ ? defaultNetSupplier_->GetSupplierId() : 0,
         defaultNetSupplier_ ? defaultNetSupplier_->GetNetSupplierIdent().c_str() : "null");
+
+    struct EventInfo eventInfo = {
+        .bearerType = iterSupplier->second->GetNetSupplierType(),
+        .ident = iterSupplier->second->GetNetSupplierIdent(),
+        .supplierId = iterSupplier->second->GetSupplierId()
+    };
+    EventReport::SendSupplierBehaviorEvent(eventInfo);
 
     int32_t netId = iterSupplier->second->GetNetId();
     NET_NETWORK_MAP::iterator iterNetwork = networks_.find(netId);
@@ -256,6 +271,11 @@ int32_t NetConnService::RegisterNetConnCallback(
     }
     if (netSpecifier == nullptr || callback == nullptr) {
         NETMGR_LOG_E("The parameter of netSpecifier or callback is null");
+        struct EventInfo eventInfo = {
+            .errorType = static_cast<int32_t>(FAULT_INVALID_PARAMETER),
+            .errorMsg = "The parameter of netSpecifier or callback is null"
+        };
+        EventReport::SendRequestFaultEvent(eventInfo);
         return ERR_SERVICE_NULL_PTR;
     }
     std::lock_guard<std::mutex> lock(NET_CONN_CALLBACK_MUTEX);
@@ -350,18 +370,29 @@ int32_t NetConnService::UpdateNetStateForTest(const sptr<NetSpecifier> &netSpeci
 
 int32_t NetConnService::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo)
 {
+    struct EventInfo eventInfo = {
+        .updateSupplierId = supplierId
+    };
     if (netSupplierInfo == nullptr) {
         NETMGR_LOG_E("netSupplierInfo is nullptr");
+        eventInfo.errorType = static_cast<int32_t>(FAULT_UPDATE_SUPPLIERINFO_INV_PARAM);
+        eventInfo.errorMsg = "netSupplierInfo is nullptr";
+        EventReport::SendSupplierFaultEvent(eventInfo);
         return ERR_INVALID_PARAMS;
     }
 
     NETMGR_LOG_I("Update supplier info: supplierId[%{public}d], netSupplierInfo[%{public}s]", supplierId,
                  netSupplierInfo->ToString(" ").c_str());
+    eventInfo.supplierInfo = netSupplierInfo->ToString(" ");
+    EventReport::SendSupplierBehaviorEvent(eventInfo);
 
     // According to supplierId, get the supplier from the list
     auto iterSupplier = netSuppliers_.find(supplierId);
     if ((iterSupplier == netSuppliers_.end()) || (iterSupplier->second == nullptr)) {
         NETMGR_LOG_E("supplier is nullptr, netSuppliers_ size[%{public}zd]", netSuppliers_.size());
+        eventInfo.errorType = static_cast<int32_t>(FAULT_UPDATE_SUPPLIERINFO_INV_PARAM);
+        eventInfo.errorMsg = std::string("Can not find supplier by id:").append(std::to_string(supplierId));
+        EventReport::SendSupplierFaultEvent(eventInfo);
         return ERR_NO_SUPPLIER;
     }
 
@@ -401,19 +432,35 @@ int32_t NetConnService::RestrictBackgroundChanged(bool restrictBackground)
 int32_t NetConnService::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo)
 {
     NETMGR_LOG_D("UpdateNetLinkInfo service in. supplierId[%{public}d]", supplierId);
+    struct EventInfo eventInfo = {
+        .updateNetlinkId = supplierId
+    };
+
     if (netLinkInfo == nullptr) {
         NETMGR_LOG_E("netLinkInfo is nullptr");
+        eventInfo.errorType = static_cast<int32_t>(FAULT_UPDATE_NETLINK_INFO_INV_PARAM);
+        eventInfo.errorMsg = "netLinkInfo is nullptr";
+        EventReport::SendSupplierFaultEvent(eventInfo);
         return ERR_INVALID_PARAMS;
     }
+
+    eventInfo.netlinkInfo = netLinkInfo->ToString(" ");
+    EventReport::SendSupplierBehaviorEvent(eventInfo);
 
     auto iterSupplier = netSuppliers_.find(supplierId);
     if ((iterSupplier == netSuppliers_.end()) || (iterSupplier->second == nullptr)) {
         NETMGR_LOG_E("supplier is nullptr");
+        eventInfo.errorType = static_cast<int32_t>(FAULT_UPDATE_NETLINK_INFO_INV_PARAM);
+        eventInfo.errorMsg = std::string("Can not find supplier by id:").append(std::to_string(supplierId));
+        EventReport::SendSupplierFaultEvent(eventInfo);
         return ERR_NO_SUPPLIER;
     }
     // According to supplier id, get network from the list
     if (iterSupplier->second->UpdateNetLinkInfo(*netLinkInfo) != ERR_SERVICE_UPDATE_NET_LINK_INFO_SUCCES) {
         NETMGR_LOG_E("UpdateNetLinkInfo fail");
+        eventInfo.errorType = static_cast<int32_t>(FAULT_UPDATE_NETLINK_INFO_FAILED);
+        eventInfo.errorMsg = std::string("Update net link info failed");
+        EventReport::SendSupplierFaultEvent(eventInfo);
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
     CallbackForSupplier(iterSupplier->second, CALL_TYPE_UPDATE_LINK);
@@ -537,6 +584,14 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         bestNet->SelectAsBestNetwork(reqId);
         request->SetServiceSupply(bestNet);
         CallbackForAvailable(bestNet, callback);
+        if (bestNet->GetNetSupplierType() == BEARER_CELLULAR ||
+            bestNet->GetNetSupplierType() == BEARER_WIFI) {
+            struct EventInfo eventInfo = {
+                .capabilitie = bestNet->GetNetCapabilities().ToString(" "),
+                .supplierIdent = bestNet->GetNetSupplierIdent()
+            };
+            EventReport::SendRequestBehaviorEvent(eventInfo);
+        }
         return ERR_NONE;
     }
 
@@ -1009,6 +1064,52 @@ int32_t NetConnService::RestoreFactoryData()
     SetAirplaneMode(false);
     NETMGR_LOG_D("Reset NetConnService, turn off airplane mode.");
     return ERR_NONE;
+}
+
+int32_t NetConnService::Dump(int32_t fd, const std::vector<std::u16string> &args)
+{
+    NETMGR_LOG_D("Start Dump, fd: %{public}d", fd);
+    std::string result;
+    GetDumpMessage(result);
+    int32_t ret = dprintf(fd, "%s\n", result.c_str());
+    return ret < 0 ? static_cast<int32_t>(NetConnResultCode::NET_CONN_ERR_INTERNAL_ERROR)
+                   : static_cast<int32_t>(NetConnResultCode::NET_CONN_SUCCESS);
+}
+
+void NetConnService::GetDumpMessage(std::string &message)
+{
+    message.append("Net connect Info:\n");
+    if (defaultNetSupplier_) {
+        message.append("\tSupplierId: " + std::to_string(defaultNetSupplier_->GetSupplierId()) + "\n");
+        sptr<Network> network = defaultNetSupplier_->GetNetwork();
+        if (network) {
+            message.append("\tNetId: " + std::to_string(network->GetNetId()) + "\n");
+        } else {
+            message.append("\tNetId: " + std::to_string(INVALID_NET_ID) + "\n");
+        }
+        message.append("\tConnStat: " + std::to_string(defaultNetSupplier_->IsConnected()) + "\n");
+        message.append("\tIsAvailable: " + std::to_string(defaultNetSupplier_->IfNetValid()) + "\n");
+        message.append("\tIsRoaming: " + std::to_string(defaultNetSupplier_->GetRoaming()) + "\n");
+        message.append("\tStrength: " + std::to_string(defaultNetSupplier_->GetStrength()) + "\n");
+        message.append("\tFrequency: " + std::to_string(defaultNetSupplier_->GetFrequency()) + "\n");
+        message.append("\tLinkUpBandwidthKbps: " +
+                        std::to_string(defaultNetSupplier_->GetNetCapabilities().linkUpBandwidthKbps_) + "\n");
+        message.append("\tLinkDownBandwidthKbps: " +
+                        std::to_string(defaultNetSupplier_->GetNetCapabilities().linkDownBandwidthKbps_) +"\n");
+        message.append("\tUid: " + std::to_string(defaultNetSupplier_->GetSupplierUid()) + "\n");
+    } else {
+        message.append("\tdefaultNetSupplier_ is nullptr\n");
+        message.append("\tSupplierId: \n");
+        message.append("\tNetId: 0\n");
+        message.append("\tConnStat: 0\n");
+        message.append("\tIsAvailable: \n");
+        message.append("\tIsRoaming: 0\n");
+        message.append("\tStrength: 0\n");
+        message.append("\tFrequency: 0\n");
+        message.append("\tLinkUpBandwidthKbps: 0\n");
+        message.append("\tLinkDownBandwidthKbps: 0\n");
+        message.append("\tUid: 0\n");
+    }
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

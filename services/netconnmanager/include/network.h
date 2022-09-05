@@ -16,6 +16,7 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+#include "event_report.h"
 #include "i_net_detection_callback.h"
 #include "inet_addr.h"
 #include "net_conn_types.h"
@@ -59,6 +60,7 @@ private:
     void NotifyNetDetectionResult(NetDetectionResultCode detectionResult, const std::string &urlRedirect);
     int32_t Ipv4PrefixLen(const std::string &ip);
     NetDetectionResultCode NetDetectionResultConvert(int32_t internalRet);
+    void SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const std::string &errMsg);
 
 private:
     int32_t netId_ = 0;

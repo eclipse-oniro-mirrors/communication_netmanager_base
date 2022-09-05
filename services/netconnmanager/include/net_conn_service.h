@@ -206,6 +206,12 @@ public:
      * @return int32_t result
      */
     int32_t RestoreFactoryData() override;
+    /**
+     * @brief Dump
+     *
+     * @return int32_t result
+     */
+    int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
 
 private:
     bool Init();
@@ -229,6 +235,7 @@ private:
     int32_t RegUnRegNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback, bool isReg);
     int32_t GenerateNetId();
     bool FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId);
+    void GetDumpMessage(std::string &message);
 
 private:
     enum ServiceRunningState {
