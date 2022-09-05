@@ -19,6 +19,7 @@
 
 #include "common_event_support.h"
 
+#include "event_report.h"
 #include "net_activate.h"
 #include "net_mgr_log_wrapper.h"
 #include "broadcast_manager.h"
@@ -26,6 +27,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 static std::atomic<uint32_t> g_nextNetSupplierId = 0x03EB;
+constexpr int32_t REG_OK = 0;
 
 NetSupplier::NetSupplier(
     NetBearType bearerType, const std::string &netSupplierIdent, const std::set<NetCap> &netCaps)

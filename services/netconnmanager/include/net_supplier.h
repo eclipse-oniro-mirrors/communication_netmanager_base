@@ -89,8 +89,6 @@ public:
     void RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback);
 
 private:
-    const int32_t REG_OK = 0;
-
     NetBearType netSupplierType_;
     std::string netSupplierIdent_;
     std::set<NetCap> netCaps_;

@@ -44,6 +44,24 @@ enum HiSysEventType {
     BEHAVIOR = 4   // system behavior event
 };
 
+enum NetConnSupplerFault {
+    FAULT_UPDATE_SUPPLIERINFO_INV_PARAM = (-1),
+    FAULT_CREATE_PHYSICAL_NETWORK_FAILED = (-2),
+    FAULT_UPDATE_NETLINK_INFO_INV_PARAM = (-3),
+    FAULT_UPDATE_NETLINK_INFO_FAILED = (-4),
+    FAULT_SET_DEFAULT_NETWORK_FAILED = (-5),
+    FAULT_DELETE_PHYSICAL_NETWORK_FAILED = (-6),
+    FAULT_CLEAR_DEFAULT_NETWORK_FAILED = (-7)
+};
+
+enum NetConnRequestFault {
+    FAULT_INVALID_PARAMETER = (-1)
+};
+
+enum NetConnMonitorFault {
+    FAULT_BIND_SOCKET_FAILED = (-1),
+};
+
 struct EventInfo {
     int32_t updateSupplierId = 0;
     std::string supplierInfo;
@@ -54,10 +72,10 @@ struct EventInfo {
     int32_t socketFd = 0;
     int32_t netId = 0;
     int32_t bearerType = 0;
-    int32_t ident = 0;
+    std::string ident;
     int32_t supplierId = 0;
     std::string callbackAvailable;
-    int32_t supplierIdent = 0;
+    std::string supplierIdent;
     std::string netcaps;
     int32_t monitorStatus = 0;
 

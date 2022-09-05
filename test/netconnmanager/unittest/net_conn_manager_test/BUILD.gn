@@ -19,6 +19,7 @@ ohos_unittest("net_conn_manager_test") {
 
   sources = [
     "net_conn_callback_test.cpp",
+    "net_conn_hievent_test.cpp",
     "net_conn_manager_test.cpp",
     "net_detection_callback_test.cpp",
     "net_handle_test.cpp",
@@ -44,6 +45,7 @@ ohos_unittest("net_conn_manager_test") {
   ]
 
   external_deps = [
+    "hisysevent_native:libhisysevent",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
