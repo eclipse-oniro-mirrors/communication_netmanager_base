@@ -22,6 +22,7 @@
 
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
+#include "net_manager_constants.h"
 #include "system_ability_definition.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
@@ -126,6 +127,7 @@ bool NetsysNativeService::Init()
     }
     dhcpController_ = std::make_unique<OHOS::nmd::DhcpController>();
     fwmarkNetwork_ = std::make_unique<OHOS::nmd::FwmarkNetwork>();
+    sharingManager_ = std::make_unique<SharingManager>();
 
     return true;
 }
@@ -519,6 +521,17 @@ int32_t NetsysNativeService::StopDnsProxyListen()
     }
     netsysService_->StopDnsProxyListen();
     return ERR_NONE;
+}
+
+int32_t NetsysNativeService::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
+    NetworkSharingTraffic &traffic)
+{
+    if (this->sharingManager_ == nullptr) {
+        NETNATIVE_LOGE("NetsysNativeService GetNetworkSharingTraffic sharingManager_ is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    NETNATIVE_LOGI("NetsysNativeService GetNetworkSharingTraffic");
+    return this->sharingManager_->GetNetworkSharingTraffic(downIface, upIface, traffic);
 }
 } // namespace NetsysNative
 } // namespace OHOS

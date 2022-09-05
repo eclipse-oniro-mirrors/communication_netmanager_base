@@ -16,6 +16,7 @@
 #ifndef NETMANAGER_BASE_IPTABLES_WRAPPER_H
 #define NETMANAGER_BASE_IPTABLES_WRAPPER_H
 
+#include <condition_variable>
 #include <cstring>
 #include <iostream>
 #include <mutex>
@@ -42,14 +43,25 @@ public:
      */
     int32_t RunCommand(const IpType &ipType, const std::string &command);
 
+    /**
+     * @brief run iptables exec for result.
+     *
+     * @param ipType ipv4 or ipv6.
+     * @param command iptables command.
+     * @return result.
+     */
+    std::string RunCommandForRes(const IpType &ipType, const std::string &command);
 private:
     static void ThreadStart(IptablesWrapper *wrapper);
     void RunSystemFunc();
 
 private:
     std::mutex iptablesMutex_;
+    std::condition_variable conditionVarLock_;
     bool isRunningFlag_;
     bool isIptablesSystemAccess_;
+    bool forRes_ = false;
+    std::string result_;
     std::thread iptablesWrapperThread_;
     std::queue<std::string> commandsQueue_;
 };

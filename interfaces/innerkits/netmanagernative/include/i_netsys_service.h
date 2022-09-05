@@ -23,6 +23,7 @@
 #include "interface_type.h"
 #include "iremote_broker.h"
 #include "route_type.h"
+#include "network_sharing.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -84,6 +85,7 @@ public:
         NETSYS_TETHER_DNS_SET,
         NETSYS_START_DNS_PROXY_LISTEN,
         NETSYS_STOP_DNS_PROXY_LISTEN,
+        NETSYS_GET_SHARING_NETWORK_TRAFFIC,
     };
 
     virtual int32_t SetResolverConfigParcel(const DnsResolverParamsParcel &resolvParams) = 0;
@@ -153,7 +155,8 @@ public:
     virtual int32_t ShareDnsSet(uint16_t netId) = 0;
     virtual int32_t StartDnsProxyListen() = 0;
     virtual int32_t StopDnsProxyListen() = 0;
-
+    virtual int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
+                                             NetworkSharingTraffic &traffic) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

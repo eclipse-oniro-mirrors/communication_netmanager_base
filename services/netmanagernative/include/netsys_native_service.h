@@ -26,6 +26,7 @@
 #include "netlink_manager.h"
 #include "netsys_native_service_stub.h"
 #include "system_ability.h"
+#include "sharing_manager.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -105,7 +106,8 @@ public:
     int32_t ShareDnsSet(uint16_t netid) override;
     int32_t StartDnsProxyListen() override;
     int32_t StopDnsProxyListen() override;
-
+    int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
+                                     NetworkSharingTraffic &traffic) override;
 private:
     NetsysNativeService();
     bool Init();
@@ -124,6 +126,7 @@ private:
     std::unique_ptr<OHOS::nmd::NetlinkManager> manager_ = nullptr;
     std::unique_ptr<OHOS::nmd::DhcpController> dhcpController_ = nullptr;
     std::unique_ptr<OHOS::nmd::FwmarkNetwork> fwmarkNetwork_ = nullptr;
+    std::unique_ptr<OHOS::nmd::SharingManager> sharingManager_ = nullptr;
 
     sptr<INotifyCallback> notifyCallback_ = nullptr;
 

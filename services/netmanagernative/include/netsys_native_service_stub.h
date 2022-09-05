@@ -91,6 +91,7 @@ private:
     int32_t CmdShareDnsSet(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStartDnsProxyListen(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStopDnsProxyListen(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetNetworkSharingTraffic(MessageParcel &data, MessageParcel &reply);
 };
 } // namespace NetsysNative
 } // namespace OHOS

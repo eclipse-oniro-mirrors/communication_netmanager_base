@@ -23,8 +23,33 @@
 namespace OHOS {
 namespace nmd {
 using namespace NetManagerStandard;
-static constexpr int32_t IPTABLES_THREAD_SLEEP_TIME = 50;
+namespace {
+static constexpr int32_t IPTABLES_THREAD_SLEEP_DURATION_MS = 50;
+static constexpr int32_t IPTABLES_WAIT_FOR_TIME_MS = 1000;
+static constexpr int32_t CHAR_ARRAY_SIZE_MAX = 1024;
 static constexpr const char *IPATBLES_CMD_PATH = "/system/bin/iptables";
+void ExecuteCommand(const std::string &command)
+{
+    int32_t status = system(command.c_str());
+    if (status < 0) {
+        NETNATIVE_LOGE("run system() faild, status=%{public}d, command=%{public}s", status, command.c_str());
+    }
+}
+
+std::string ExecuteCommandForRes(const std::string &command)
+{
+    FILE *fp = popen(command.c_str(), "r");
+    char res[CHAR_ARRAY_SIZE_MAX];
+    std::string result;
+    while (fgets(res, CHAR_ARRAY_SIZE_MAX, fp) != NULL) {
+        result = result + res;
+    }
+    pclose(fp);
+
+    return result;
+}
+} // namespace
+
 IptablesWrapper::IptablesWrapper()
 {
     isRunningFlag_ = true;
@@ -52,7 +77,7 @@ void IptablesWrapper::RunSystemFunc()
     NETNATIVE_LOGI("IptablesWrapper::RunSystemFunc");
     while (isRunningFlag_) {
         if (commandsQueue_.empty()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(IPTABLES_THREAD_SLEEP_TIME));
+            std::this_thread::sleep_for(std::chrono::milliseconds(IPTABLES_THREAD_SLEEP_DURATION_MS));
         } else {
             std::unique_lock<std::mutex> lock(iptablesMutex_);
             std::string cmd = commandsQueue_.front();
@@ -67,9 +92,12 @@ void IptablesWrapper::RunSystemFunc()
                 NETNATIVE_LOG_D("%{public}s", cmd.c_str());
                 continue;
             }
-            int32_t status = system(cmd.c_str());
-            if (status < 0) {
-                NETNATIVE_LOGE("run system() faild, status=%{public}d, cmd=%{public}s", status, cmd.c_str());
+            if (forRes_) {
+                result_ = ExecuteCommandForRes(cmd);
+                forRes_ = false;
+                conditionVarLock_.notify_one();
+            } else {
+                ExecuteCommand(cmd);
             }
         }
     }
@@ -83,6 +111,21 @@ int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &com
     commandsQueue_.push(cmd);
 
     return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::string &command)
+{
+    NETNATIVE_LOGI("IptablesWrapper::RunCommandForRes, ipType:%{public}d, command:%{public}s", ipType, command.c_str());
+    forRes_ = true;
+    std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
+    std::unique_lock<std::mutex> lock(iptablesMutex_);
+    commandsQueue_.push(cmd);
+    conditionVarLock_.wait_for(lock, std::chrono::milliseconds(IPTABLES_WAIT_FOR_TIME_MS));
+    if (forRes_) {
+        NETNATIVE_LOGE("IptablesWrapper::RunCommandForRes is timeout.");
+        return "";
+    }
+    return result_;
 }
 } // namespace nmd
 } // namespace OHOS
