@@ -351,13 +351,11 @@ int32_t SharingManager::GetNetworkSharingTraffic(const std::string &downIface,
                 isFindTx = true;
                 traffic.send = send;
                 traffic.all += send;
-                NETNATIVE_LOGE("GetNetworkSharingTraffic success, send[%{public}lld]", send);
             } else if (matches[i] == upIface && matches[i + 1] == downIface && ((i - 2) >= 0)) {
                 int64_t receive = strtoul(matches[i - 2].str().c_str(), nullptr, 0);
                 isFindRx = true;
                 traffic.receive = receive;
                 traffic.all += receive;
-                NETNATIVE_LOGE("GetNetworkSharingTraffic success, receive[%{public}lld]", receive);
             }
             if (isFindTx && isFindRx) {
                 NETNATIVE_LOGE("GetNetworkSharingTraffic success total");
