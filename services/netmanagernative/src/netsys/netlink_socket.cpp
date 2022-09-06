@@ -50,7 +50,7 @@ int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table)
     (void)memset_s(&msgHeader, sizeof(msgHeader), 0, sizeof(msgHeader));
 
     struct sockaddr_nl kernel;
-    memset_s(&kernel, sizeof(kernel), 0, sizeof(kernel));
+    (void)memset_s(&kernel, sizeof(kernel), 0, sizeof(kernel));
     kernel.nl_family = AF_NETLINK;
     kernel.nl_groups = 0;
 
