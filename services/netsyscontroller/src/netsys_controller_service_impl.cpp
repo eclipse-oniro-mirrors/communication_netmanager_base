@@ -194,15 +194,6 @@ int32_t NetsysControllerServiceImpl::DestroyNetworkCache(uint16_t netId)
     return netsysClient_.DestroyNetworkCache(netId);
 }
 
-int32_t NetsysControllerServiceImpl::FlushNetworkCache(uint16_t netId)
-{
-    NETMGR_LOG_I("Destroy Flush dns cache: netId[%{public}d]", netId);
-    if (mockNetsysClient_.CheckMockApi(MOCK_FLUSHNETWORKCACHE_API)) {
-        return mockNetsysClient_.FlushNetworkCache(netId);
-    }
-    return netsysClient_.FlushNetworkCache(netId);
-}
-
 int32_t NetsysControllerServiceImpl::GetAddrInfo(const std::string &hostName, const std::string &serverName,
     const struct addrinfo &hints, std::unique_ptr<addrinfo> &res, uint16_t netId)
 {

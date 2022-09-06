@@ -21,8 +21,6 @@ NETCONNMANAGER_INNERKITS_SOURCE_DIR =
     "$NETMANAGER_BASE_ROOT/frameworks/native/netconnclient"
 NETPOLICYMANAGER_INNERKITS_SOURCE_DIR =
     "$NETMANAGER_BASE_ROOT/frameworks/native/netpolicyclient"
-DNSRESOLVERMANAGER_INNERKITS_SOURCE_DIR =
-    "$NETMANAGER_BASE_ROOT/frameworks/native/dnsresolverclient"
 NETSTATSMANAGER_INNERKITS_SOURCE_DIR =
     "$NETMANAGER_BASE_ROOT/frameworks/native/netstatsclient"
 NETCONNMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netconnmanager"
@@ -32,8 +30,6 @@ NETCONNMANAGER_COMMON_DIR = "$NETMANAGER_BASE_ROOT/services/common"
 FWMARK_CLIENT_DIR =
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient"
 NETSTATSMANAGER_BPFLIB_DIR = "$NETMANAGER_BASE_ROOT/services/netsys_bpf_stats"
-DNSRESOLVERMANAGER_SOURCE_DIR =
-    "$NETMANAGER_BASE_ROOT/services/dnsresolvermanager"
 NETSYSNATIVE_INNERKITS_SOURCE_DIR =
     "$NETMANAGER_BASE_ROOT/frameworks/native/netmanagernative"
 NETSYSNATIVE_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netmanagernative"

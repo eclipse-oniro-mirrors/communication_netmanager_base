@@ -41,13 +41,11 @@ public:
     void OnStop() override;
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
 
-    int32_t SetResolverConfigParcel(const DnsResolverParamsParcel &resolvParams) override;
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
         const std::vector<std::string> &servers, const std::vector<std::string> &domains) override;
     int32_t GetResolverConfig(const  uint16_t  netid,  std::vector<std::string> &servers,
            std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount) override;
     int32_t CreateNetworkCache(const uint16_t netid) override;
-    int32_t FlushNetworkCache(const uint16_t netid) override;
     int32_t DestroyNetworkCache(const uint16_t netid) override;
     int32_t  Getaddrinfo(const char* node, const char* service, const struct addrinfo* hints,
         struct addrinfo** result, uint16_t netid) override;

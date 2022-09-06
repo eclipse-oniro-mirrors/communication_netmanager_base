@@ -35,11 +35,9 @@ private:
     void InitBandwidthOpToInterfaceMap();
     void InitFirewallOpToInterfaceMap();
     int32_t CmdEchoServer(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdSetResolverConfigParcel(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdCreateNetworkCache(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdFlushNetworkCache(MessageParcel &data, MessageParcel &reply);
     int32_t CmdDestroyNetworkCache(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetaddrinfo(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceSetMtu(MessageParcel &data, MessageParcel &reply);

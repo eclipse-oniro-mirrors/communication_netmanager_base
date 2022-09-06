@@ -59,7 +59,6 @@
                     "//foundation/communication/netmanager_base/frameworks/js/napi/netstats:statistics",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient:net_policy_manager_if",
-                    "//foundation/communication/netmanager_base/interfaces/innerkits/dnsresolverclient:dns_resolver_manager_if",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient:net_stats_manager_if"
                 ],
                 "service_group": [
@@ -69,7 +68,6 @@
                     "//foundation/communication/netmanager_base/services/netsys_bpf_stats:netsys_bpf_stats",
                     "//foundation/communication/netmanager_base/services/netsyscontroller:netsys_controller",
                     "//foundation/communication/netmanager_base/services/netconnmanager:net_conn_manager",
-                    "//foundation/communication/netmanager_base/services/dnsresolvermanager:dns_resolver_manager",
                     "//foundation/communication/netmanager_base/services/netpolicymanager:net_policy_manager",
                     "//foundation/communication/netmanager_base/services/netstatsmanager:net_stats_manager",
                     "//foundation/communication/netmanager_base/services/etc/init:netmanager_base.rc",
@@ -117,7 +115,6 @@
                 }
             ],
             "test": [
-                "//foundation/communication/netmanager_base/test/dnsresolvermanager:unittest",
                 "//foundation/communication/netmanager_base/test/netconnmanager:unittest",
                 "//foundation/communication/netmanager_base/test/netpolicymanager:unittest",
                 "//foundation/communication/netmanager_base/test/netmanagernative:unittest",

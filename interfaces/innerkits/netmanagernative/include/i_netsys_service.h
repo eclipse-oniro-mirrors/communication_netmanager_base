@@ -88,7 +88,6 @@ public:
         NETSYS_GET_SHARING_NETWORK_TRAFFIC,
     };
 
-    virtual int32_t SetResolverConfigParcel(const DnsResolverParamsParcel &resolvParams) = 0;
     virtual int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
                                       const std::vector<std::string> &servers,
                                       const std::vector<std::string> &domains) = 0;
@@ -96,7 +95,6 @@ public:
                                       std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
                                       uint8_t &retryCount) = 0;
     virtual int32_t CreateNetworkCache(uint16_t netid) = 0;
-    virtual int32_t FlushNetworkCache(uint16_t netid) = 0;
     virtual int32_t DestroyNetworkCache(uint16_t netid) = 0;
     virtual int32_t Getaddrinfo(const char *node, const char *service, const struct addrinfo *hints,
                                 struct addrinfo **result, uint16_t netid) = 0;

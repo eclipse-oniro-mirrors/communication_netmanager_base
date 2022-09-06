@@ -132,13 +132,6 @@ bool NetsysNativeService::Init()
     return true;
 }
 
-int32_t NetsysNativeService::SetResolverConfigParcel(const DnsResolverParamsParcel & resolvParams)
-{
-    NETNATIVE_LOG_D("SetResolverConfig retryCount = %{public}d", resolvParams.retryCount_);
-
-    return 0;
-}
-
 int32_t NetsysNativeService::SetResolverConfig(uint16_t netId,
                                                uint16_t baseTimeoutMsec,
                                                uint8_t retryCount,
@@ -165,12 +158,6 @@ int32_t NetsysNativeService::CreateNetworkCache(const uint16_t netid)
     NETNATIVE_LOG_D("CreateNetworkCache Begin");
     netsysService_->DnsCreateNetworkCache(netid);
 
-    return 0;
-}
-
-int32_t NetsysNativeService::FlushNetworkCache(const uint16_t netid)
-{
-    NETNATIVE_LOG_D("FlushNetworkCache Begin");
     return 0;
 }
 

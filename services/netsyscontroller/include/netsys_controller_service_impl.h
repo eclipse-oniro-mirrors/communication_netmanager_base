@@ -198,14 +198,6 @@ public:
     int32_t DestroyNetworkCache(uint16_t netId) override;
 
     /**
-     * Flush dns cache
-     *
-     * @param netId
-     * @return Return the return value of the netsys interface call
-     */
-    int32_t FlushNetworkCache(uint16_t netId) override;
-
-    /**
      * Domain name resolution Obtains the domain name address
      *
      * @param hostName

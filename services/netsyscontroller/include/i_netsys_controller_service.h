@@ -214,14 +214,6 @@ public:
     virtual int32_t DestroyNetworkCache(uint16_t netId) = 0;
 
     /**
-     * Flush dns cache
-     *
-     * @param netId
-     * @return Return the return value of the netsys interface call
-     */
-    virtual int32_t FlushNetworkCache(uint16_t netId) = 0;
-
-    /**
      * Domain name resolution Obtains the domain name address
      *
      * @param hostName
