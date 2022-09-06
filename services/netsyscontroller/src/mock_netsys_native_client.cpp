@@ -211,12 +211,6 @@ int32_t MockNetsysNativeClient::DestroyNetworkCache(uint16_t netId)
     return 0;
 }
 
-int32_t MockNetsysNativeClient::FlushNetworkCache(uint16_t netId)
-{
-    NETMGR_LOG_I("Destroy Flush dns cache: netId[%{public}d]", netId);
-    return 0;
-}
-
 int32_t MockNetsysNativeClient::GetAddrInfo(const std::string &hostName,
     const std::string &serverName, const struct addrinfo &hints, std::unique_ptr<addrinfo> &res, uint16_t netId)
 {

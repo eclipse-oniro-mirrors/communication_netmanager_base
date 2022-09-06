@@ -45,7 +45,6 @@ constexpr const char *MOCK_SETRESOLVERCONFIG_API = "SetResolverConfig";
 constexpr const char *MOCK_GETRESOLVERICONFIG_API = "GetResolverConfig";
 constexpr const char *MOCK_CREATENETWORKCACHE_API = "CreateNetworkCache";
 constexpr const char *MOCK_DESTROYNETWORKCACHE_API = "DestroyNetworkCache";
-constexpr const char *MOCK_FLUSHNETWORKCACHE_API = "FlushNetworkCache";
 constexpr const char *MOCK_GETADDRINFO_API = "GetAddrInfo";
 constexpr const char *MOCK_GETCELLULARRXBYTES_API = "GetCellularRxBytes";
 constexpr const char *MOCK_GETCELLULARTXBYTES_API = "GetCellularTxBytes";
@@ -244,14 +243,6 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t DestroyNetworkCache(uint16_t netId);
-
-    /**
-     * @brief Flush dns cache
-     *
-     * @param netId
-     * @return Return the return value of the netsys interface call
-     */
-    int32_t FlushNetworkCache(uint16_t netId);
 
     /**
      * @brief Domain name resolution Obtains the domain name address

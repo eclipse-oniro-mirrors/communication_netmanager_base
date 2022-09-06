@@ -363,16 +363,6 @@ int32_t NetsysNativeClient::DestroyNetworkCache(uint16_t netId)
     return netsysNativeService_->DestroyNetworkCache(netId);
 }
 
-int32_t NetsysNativeClient::FlushNetworkCache(uint16_t netId)
-{
-    NETMGR_LOG_I("Destroy Flush dns cache: netId[%{public}d]", netId);
-    if (netsysNativeService_ == nullptr) {
-        NETMGR_LOG_E("netsysNativeService_ is null");
-        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
-    }
-    return netsysNativeService_->FlushNetworkCache(netId);
-}
-
 int32_t NetsysNativeClient::GetAddrInfo(const std::string &hostName, const std::string &serverName,
                                         const struct addrinfo &hints, std::unique_ptr<addrinfo> &res, uint16_t netId)
 {

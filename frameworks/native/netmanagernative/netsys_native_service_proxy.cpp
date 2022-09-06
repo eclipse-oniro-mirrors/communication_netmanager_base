@@ -48,24 +48,6 @@ bool NetsysNativeServiceProxy::WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 
-int32_t NetsysNativeServiceProxy::SetResolverConfigParcel(const DnsResolverParamsParcel &resolvParams)
-{
-    NETNATIVE_LOGI("Begin to SetResolverConfig %{public}d", resolvParams.retryCount_);
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteParcelable(&resolvParams)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    Remote()->SendRequest(INetsysService::NETSYS_SET_RESOLVER_CONFIG_PARCEL, data, reply, option);
-
-    return reply.ReadInt32();
-}
-
 int32_t NetsysNativeServiceProxy::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
                                                     const std::vector<std::string> &servers,
                                                     const std::vector<std::string> &domains)
@@ -169,24 +151,6 @@ int32_t NetsysNativeServiceProxy::CreateNetworkCache(const uint16_t netid)
     MessageParcel reply;
     MessageOption option;
     Remote()->SendRequest(INetsysService::NETSYS_CREATE_NETWORK_CACHE, data, reply, option);
-
-    return reply.ReadInt32();
-}
-
-int32_t NetsysNativeServiceProxy::FlushNetworkCache(const uint16_t netid)
-{
-    NETNATIVE_LOGI("Begin to FlushNetworkCache");
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteUint16(netid)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    Remote()->SendRequest(INetsysService::NETSYS_FLUSH_NETWORK_CACHE, data, reply, option);
 
     return reply.ReadInt32();
 }

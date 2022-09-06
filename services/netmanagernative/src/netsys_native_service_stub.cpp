@@ -29,11 +29,9 @@ static constexpr const int32_t MAX_FLAG_NUM = 64;
 
 NetsysNativeServiceStub::NetsysNativeServiceStub()
 {
-    opToInterfaceMap_[NETSYS_SET_RESOLVER_CONFIG_PARCEL] = &NetsysNativeServiceStub::CmdSetResolverConfigParcel;
     opToInterfaceMap_[NETSYS_SET_RESOLVER_CONFIG] = &NetsysNativeServiceStub::CmdSetResolverConfig;
     opToInterfaceMap_[NETSYS_GET_RESOLVER_CONFIG] = &NetsysNativeServiceStub::CmdGetResolverConfig;
     opToInterfaceMap_[NETSYS_CREATE_NETWORK_CACHE] = &NetsysNativeServiceStub::CmdCreateNetworkCache;
-    opToInterfaceMap_[NETSYS_FLUSH_NETWORK_CACHE] = &NetsysNativeServiceStub::CmdFlushNetworkCache;
     opToInterfaceMap_[NETSYS_DESTROY_NETWORK_CACHE] = &NetsysNativeServiceStub::CmdDestroyNetworkCache;
     opToInterfaceMap_[NETSYS_GET_ADDR_INFO] = &NetsysNativeServiceStub::CmdGetaddrinfo;
     opToInterfaceMap_[NETSYS_INTERFACE_SET_MTU] = &NetsysNativeServiceStub::CmdInterfaceSetMtu;
@@ -114,21 +112,6 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
         return IPC_STUB_INVALID_DATA_ERR;
     }
     return (this->*(interfaceIndex->second))(data, reply);
-}
-
-int32_t NetsysNativeServiceStub::CmdSetResolverConfigParcel(MessageParcel &data, MessageParcel &reply)
-{
-    NETNATIVE_LOGI("Begin to dispatch cmd SetResolverConfig");
-    auto resolvParamsParcel = DnsResolverParamsParcel::Unmarshalling(data);
-    if (resolvParamsParcel == nullptr) {
-        return ERR_NO_MEMORY;
-    }
-    NETNATIVE_LOGI("Begin to CmdSetResolverConfig %{public}d", resolvParamsParcel->retryCount_);
-    int32_t result = SetResolverConfigParcel(*resolvParamsParcel);
-    reply.WriteInt32(result);
-    NETNATIVE_LOGI("SetResolverConfig has recved result %{public}d", result);
-
-    return ERR_NONE;
 }
 
 int32_t NetsysNativeServiceStub::CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply)
@@ -216,17 +199,6 @@ int32_t NetsysNativeServiceStub::CmdCreateNetworkCache(MessageParcel &data, Mess
     int32_t result = CreateNetworkCache(netid);
     reply.WriteInt32(result);
     NETNATIVE_LOGI("CreateNetworkCache has recved result %{public}d", result);
-
-    return ERR_NONE;
-}
-
-int32_t NetsysNativeServiceStub::CmdFlushNetworkCache(MessageParcel &data, MessageParcel &reply)
-{
-    NETNATIVE_LOGI("Begin to dispatch cmd FlushNetworkCache");
-    uint16_t netid = data.ReadUint16();
-    int32_t result = FlushNetworkCache(netid);
-    reply.WriteInt32(result);
-    NETNATIVE_LOGI("FlushNetworkCache has recved result %{public}d", result);
 
     return ERR_NONE;
 }
