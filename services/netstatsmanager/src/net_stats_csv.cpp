@@ -29,8 +29,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-const std::string CSV_DIR = "/data/data/";
-const std::string UID_LIST_DIR = "/data/data/uid/";
+const std::string CSV_DIR = "/data/service/el1/public/netmanager/";
+const std::string UID_LIST_DIR = CSV_DIR + "uid/";
 const std::string IFACE_CSV_FILE_NAME = "iface.csv";
 const std::string UID_CSV_FILE_NAME = "uid.csv";
 const std::string IFACE_STATS_CSV_FILE_NAME = "iface_stats.csv";
@@ -348,7 +348,7 @@ bool NetStatsCsv::DeleteUidStatsCsv(uint32_t uid)
 {
     std::string strUid = std::to_string(uid);
     // std::filesystem::remove_all(UID_LIST_DIR + strUid.c_str());
-    NETMGR_LOG_I("Delete mock uid directory: /data/data/uid/[%{public}d]", uid);
+    NETMGR_LOG_I("Delete mock uid : %{public}d", uid);
     UpdateUidCsvInfo();
 
     std::ofstream newUidStatsCsvFile;
@@ -522,10 +522,10 @@ NetStatsResultCode NetStatsCsv::ResetFactory()
         NETMGR_LOG_I("ResetFactory is failed");
         return NetStatsResultCode::ERR_INTERNAL_ERROR;
     }
-    NETMGR_LOG_I("Reset Factory Stats, delete files /data/data/iface.csv");
-    NETMGR_LOG_I("Reset Factory Stats, delete files /data/data/uid.csv");
-    NETMGR_LOG_I("Reset Factory Stats, delete files /data/data/iface_stats.csv");
-    NETMGR_LOG_I("Reset Factory Stats, delete files /data/data/uid_stats.csv");
+    NETMGR_LOG_I("Reset Factory Stats, delete files %{public}s", IFACE_CSV_FILE_NAME.c_str());
+    NETMGR_LOG_I("Reset Factory Stats, delete files %{public}s", UID_CSV_FILE_NAME.c_str());
+    NETMGR_LOG_I("Reset Factory Stats, delete files %{public}s", IFACE_STATS_CSV_FILE_NAME.c_str());
+    NETMGR_LOG_I("Reset Factory Stats, delete files %{public}s", UID_STATS_CSV_FILE_NAME.c_str());
     return NetStatsResultCode::ERR_NONE;
 }
 } // namespace NetManagerStandard
