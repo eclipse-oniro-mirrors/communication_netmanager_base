@@ -48,8 +48,8 @@ ohos_shared_library("napi_utils") {
 
   public_deps = [
     "$SUBSYSTEM_DIR/netmanager_base/utils/:net_manager_common",
+    "//commonlibrary/c_utils/base:utils",
     "//foundation/arkui/napi/:ace_napi",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
