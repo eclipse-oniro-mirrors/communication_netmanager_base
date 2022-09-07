@@ -52,8 +52,8 @@ foundation/communication/netmanager_base/
 | ---- | ---- | ---- |
 | ohos.net.connection | function getDefaultNet(callback: AsyncCallback\<NetHandle>): void; |获取一个含有默认网络的netId的NetHandle对象，使用callback回调 |
 | ohos.net.connection | function getDefaultNet(): Promise\<NetHandle>; |获取一个含有默认网络的netId的NetHandle对象，使用Promise回调 |
-| ohos.net.connection | function getAllNets(callback: AsyncCallback<Array<NetHandle>>): void;| 获取所有注册的网络，使用callback回调 |
-| ohos.net.connection | function getAllNets(): Promise<Array<NetHandle>>;| 获取所有注册的网络，使用Promise回调 |
+| ohos.net.connection | function getAllNets(callback: AsyncCallback\<Array\<NetHandle>>): void;| 获取所有注册的网络，使用callback回调 |
+| ohos.net.connection | function getAllNets(): Promise\<Array\<NetHandle>>;| 获取所有注册的网络，使用Promise回调 |
 | ohos.net.connection | function getConnectionProperties(netHandle: NetHandle, callback: AsyncCallback\<ConnectionProperties>): void; |查询默认网络的链路信息，使用callback回调 |
 | ohos.net.connection | function getConnectionProperties(netHandle: NetHandle): Promise\<ConnectionProperties>; |查询默认网络的链路信息，使用Promise回调 |
 | ohos.net.connection | function getNetCapabilities(netHandle: NetHandle, callback: AsyncCallback\<NetCapabilities>): void; |查询默认网络的能力集信息，使用callback回调 |
@@ -63,16 +63,16 @@ foundation/communication/netmanager_base/
 | ohos.net.connection | function getAddressesByName(host: string, callback: AsyncCallback\<Array\<NetAddress>>): void; |使用对应网络解析域名，获取所有IP，使用callback回调 |
 | ohos.net.connection | function getAddressesByName(host: string): Promise\<Array\<NetAddress>>; |使用默认网络解析域名，获取所有IP，使用Promise回调 |
 | ohos.net.connection | function createNetConnection(netSpecifier?: NetSpecifier, timeout?: number): NetConnection; |返回一个NetConnection对象，netSpecifier指定关注的网络的各项特征，timeout是超时时间，netSpecifier是timeout的必要条件，两者都没有则表示关注默认网络 |
-| ohos.net.connection | function enableAirplaneMode(callback: AsyncCallback<void>): void; | 设置网络为飞行模式，使用callback回调 |
-| ohos.net.connection | function enableAirplaneMode(): Promise<void>;|设置网络为飞行模式，使用Promise回调 |
-| ohos.net.connection | function disableAirplaneMode(callback: AsyncCallback<void>): void;| 关闭网络飞行模式，使用callback回调 |
-| ohos.net.connection | function disableAirplaneMode(): Promise<void>;| 关闭网络飞行模式，使用Promise回调 |
-| ohos.net.connection | function reportNetConnected(netHandle: NetHandle, callback: AsyncCallback<void>): void;| 报告网络处于连接状态，使用callback回调 |
-| ohos.net.connection | function reportNetConnected(netHandle: NetHandle): Promise<void>;| 报告网络处于连接状态，使用Promise回调 |
-| ohos.net.connection | function reportNetDisconnected(netHandle: NetHandle, callback: AsyncCallback<void>): void;| 报告网络处于断开状态，使用callback回调 |
-| ohos.net.connection | function reportNetDisconnected(netHandle: NetHandle): Promise<void>;| 报告网络处于断开状态，使用Promise回调 |
-| ohos.net.connection.NetHandle | bindSocket(socketParam: TCPSocket \| UDPSocket, callback: AsyncCallback<void>): void; | 将TCPSocket或UDPSockett绑定到当前网络，使用callback回调 |
-| ohos.net.connection.NetHandle | bindSocket(socketParam: TCPSocket \| UDPSocket): Promise<void>;| 将TCPSocket或UDPSockett绑定到当前网络，使用Promise回调 |
+| ohos.net.connection | function enableAirplaneMode(callback: AsyncCallback\<void>): void; | 设置网络为飞行模式，使用callback回调 |
+| ohos.net.connection | function enableAirplaneMode(): Promise\<void>;|设置网络为飞行模式，使用Promise回调 |
+| ohos.net.connection | function disableAirplaneMode(callback: AsyncCallback\<void>): void;| 关闭网络飞行模式，使用callback回调 |
+| ohos.net.connection | function disableAirplaneMode(): Promise\<void>;| 关闭网络飞行模式，使用Promise回调 |
+| ohos.net.connection | function reportNetConnected(netHandle: NetHandle, callback: AsyncCallback\<void>): void;| 报告网络处于连接状态，使用callback回调 |
+| ohos.net.connection | function reportNetConnected(netHandle: NetHandle): Promise\<void>;| 报告网络处于连接状态，使用Promise回调 |
+| ohos.net.connection | function reportNetDisconnected(netHandle: NetHandle, callback: AsyncCallback\<void>): void;| 报告网络处于断开状态，使用callback回调 |
+| ohos.net.connection | function reportNetDisconnected(netHandle: NetHandle): Promise\<void>;| 报告网络处于断开状态，使用Promise回调 |
+| ohos.net.connection.NetHandle | bindSocket(socketParam: TCPSocket \| UDPSocket, callback: AsyncCallback\<void>): void; | 将TCPSocket或UDPSockett绑定到当前网络，使用callback回调 |
+| ohos.net.connection.NetHandle | bindSocket(socketParam: TCPSocket \| UDPSocket): Promise\<void>;| 将TCPSocket或UDPSockett绑定到当前网络，使用Promise回调 |
 | ohos.net.connection.NetHandle | getAddressesByName(host: string, callback: AsyncCallback\<Array\<NetAddress>>): void; |使用默认网络解析域名，获取所有IP，使用callback回调 |
 | ohos.net.connection.NetHandle | getAddressesByName(host: string): Promise\<Array\<NetAddress>>; |使用对应网络解析域名，获取所有IP，使用Promise回调 |
 | ohos.net.connection.NetHandle | getAddressByName(host: string, callback: AsyncCallback\<NetAddress>): void; |使用对应网络解析域名，获取一个IP，调用callbac |
@@ -124,22 +124,22 @@ foundation/communication/netmanager_base/
 | @ohos.net.policy | function off(type: "netQuotaPolicyChange", callback: Callback\<void>): void; | 反注册计量网络策略发生改变时的回调 |
 | @ohos.net.policy | function on(type: "netBackgroundPolicyChange", callback: Callback\<boolean>): void; | 注册后台网络策略发生改变时的回调 |
 | @ohos.net.policy | function off(type: "netBackgroundPolicyChange", callback: Callback\<void>): void; | 反注册后台网络策略发生改变时的回调 |
-| ohos.net.statistics | function getIfaceRxBytes(nic: string, callback: AsyncCallback<number>): void; |查询指定网卡的下行流量数据，使用callback回调|
-| ohos.net.statistics | function getIfaceRxBytes(nic: string): Promise<number>; |获取指定网卡的下行流量数据，使用Promise回调 |
-| ohos.net.statistics | function getIfaceTxBytes(nic: string, callback: AsyncCallback<number>): void; |查询指定网卡的上行流量数据，使用callback回调 |
-| ohos.net.statistics | function getIfaceRxBytes(nic: string): Promise<number>; |获取指定网卡的上行流量数据，使用Promise回调 |
-| ohos.net.statistics | function getCellularRxBytes(callback: AsyncCallback<number>): void; |查询指蜂窝网的下行流量数据，使用callback回调 |
-| ohos.net.statistics | function getCellularRxBytes(): Promise<number>; |查询指蜂窝网的下行流量数据，使用Promise回调 |
-| ohos.net.statistics | function getCellularTxBytes(callback: AsyncCallback<number>): void; |查询蜂窝网的上行流量数据，使用callback回调 |
-| ohos.net.statistics | function getCellularTxBytes(): Promise<number>; |查询蜂窝网的上行流量数据，使用Promise回调 |
-| ohos.net.statistics | function getAllRxBytes(callback: AsyncCallback<number>): void; |查询所有网卡的下行流量数据，使用callback回调 |
-| ohos.net.statistics | function getAllRxBytes(): Promise<number>; |查询所有网卡的下行流量数据，使用Promise回调 |
-| ohos.net.statistics | function getAllTxBytes(callback: AsyncCallback<number>): void; |查询所有网卡的上行流量数据，使用callback回调 |
-| ohos.net.statistics | function getAllTxBytes(): Promise<number>; |查询所有网卡的上行流量数据，使用Promise回调 |
-| ohos.net.statistics | function getUidRxBytes(uid: number, callback: AsyncCallback<number>): void; |查询指定应用的下行流量数据，使用callback回调 |
-| ohos.net.statistics | function getUidRxBytes(uid: number): Promise<number>; |查询指定应用的下行流量数据，使用Promise回调 |
-| ohos.net.statistics | function getUidTxBytes(uid: number, callback: AsyncCallback<number>): void; |查询指定应用的上行流量数据，使用callback回调 |
-| ohos.net.statistics | function getUidTxBytes(uid: number): Promise<number>; |查询指定应用的上行流量数据，使用Promise回调 |
+| ohos.net.statistics | function getIfaceRxBytes(nic: string, callback: AsyncCallback\<number>): void; |查询指定网卡的下行流量数据，使用callback回调|
+| ohos.net.statistics | function getIfaceRxBytes(nic: string): Promise\<number>; |获取指定网卡的下行流量数据，使用Promise回调 |
+| ohos.net.statistics | function getIfaceTxBytes(nic: string, callback: AsyncCallback\<number>): void; |查询指定网卡的上行流量数据，使用callback回调 |
+| ohos.net.statistics | function getIfaceRxBytes(nic: string): Promise\<number>; |获取指定网卡的上行流量数据，使用Promise回调 |
+| ohos.net.statistics | function getCellularRxBytes(callback: AsyncCallback\<number>): void; |查询指蜂窝网的下行流量数据，使用callback回调 |
+| ohos.net.statistics | function getCellularRxBytes(): Promise\<number>; |查询指蜂窝网的下行流量数据，使用Promise回调 |
+| ohos.net.statistics | function getCellularTxBytes(callback: AsyncCallback\<number>): void; |查询蜂窝网的上行流量数据，使用callback回调 |
+| ohos.net.statistics | function getCellularTxBytes(): Promise\<number>; |查询蜂窝网的上行流量数据，使用Promise回调 |
+| ohos.net.statistics | function getAllRxBytes(callback: AsyncCallback\<number>): void; |查询所有网卡的下行流量数据，使用callback回调 |
+| ohos.net.statistics | function getAllRxBytes(): Promise\<number>; |查询所有网卡的下行流量数据，使用Promise回调 |
+| ohos.net.statistics | function getAllTxBytes(callback: AsyncCallback\<number>): void; |查询所有网卡的上行流量数据，使用callback回调 |
+| ohos.net.statistics | function getAllTxBytes(): Promise\<number>; |查询所有网卡的上行流量数据，使用Promise回调 |
+| ohos.net.statistics | function getUidRxBytes(uid: number, callback: AsyncCallback\<number>): void; |查询指定应用的下行流量数据，使用callback回调 |
+| ohos.net.statistics | function getUidRxBytes(uid: number): Promise\<number>; |查询指定应用的下行流量数据，使用Promise回调 |
+| ohos.net.statistics | function getUidTxBytes(uid: number, callback: AsyncCallback\<number>): void; |查询指定应用的上行流量数据，使用callback回调 |
+| ohos.net.statistics | function getUidTxBytes(uid: number): Promise\<number>; |查询指定应用的上行流量数据，使用Promise回调 |
 
 完整的JS API说明以及实例代码请参考：[连接管理](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-net-connection.md)。
 
