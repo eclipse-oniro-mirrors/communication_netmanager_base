@@ -34,9 +34,9 @@ void NetsysController::Init()
         NETMGR_LOG_I("netsys initialization is complete");
         return;
     }
-    initFlag_ = true;
     netsysService_ = std::make_unique<NetsysControllerServiceImpl>().release();
     netsysService_->Init();
+    initFlag_ = true;
 }
 
 NetsysController &NetsysController::GetInstance()
