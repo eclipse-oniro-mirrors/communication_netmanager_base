@@ -21,8 +21,8 @@ namespace OHOS {
 namespace NetManagerStandard {
 class NetPolicyBaseService : public virtual RefBase {
 public:
-    virtual int32_t ResetPolicyFactory() = 0;
-    virtual bool IsUidNetAccess(uint32_t uid, bool metered) = 0;
+    virtual int32_t ResetPolicies() = 0;
+    virtual bool IsUidNetAllowed(uint32_t uid, bool metered) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

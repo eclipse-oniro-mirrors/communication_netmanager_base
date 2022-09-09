@@ -16,12 +16,19 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_shared_library("net_policy_manager") {
   sources = [
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_callback.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_file.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_firewall.cpp",
+    "$NETPOLICYMANAGER_SOURCE_DIR/src/common/net_policy_event_handler.cpp",
+    "$NETPOLICYMANAGER_SOURCE_DIR/src/common/net_policy_service_common.cpp",
+    "$NETPOLICYMANAGER_SOURCE_DIR/src/common/netsys_policy_wrapper.cpp",
+    "$NETPOLICYMANAGER_SOURCE_DIR/src/core/net_policy_base.cpp",
+    "$NETPOLICYMANAGER_SOURCE_DIR/src/core/net_policy_callback.cpp",
+    "$NETPOLICYMANAGER_SOURCE_DIR/src/core/net_policy_core.cpp",
+    "$NETPOLICYMANAGER_SOURCE_DIR/src/core/net_policy_file.cpp",
+    "$NETPOLICYMANAGER_SOURCE_DIR/src/core/net_policy_firewall.cpp",
+    "$NETPOLICYMANAGER_SOURCE_DIR/src/core/net_policy_rule.cpp",
+    "$NETPOLICYMANAGER_SOURCE_DIR/src/core/net_policy_traffic.cpp",
+    "$NETPOLICYMANAGER_SOURCE_DIR/src/firewall_rule/device_idle_firewall_rule.cpp",
+    "$NETPOLICYMANAGER_SOURCE_DIR/src/firewall_rule/firewall_rule.cpp",
     "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_service.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_service_common.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_traffic.cpp",
     "$NETPOLICYMANAGER_SOURCE_DIR/src/stub/net_policy_callback_proxy.cpp",
     "$NETPOLICYMANAGER_SOURCE_DIR/src/stub/net_policy_service_stub.cpp",
   ]
@@ -33,18 +40,23 @@ ohos_shared_library("net_policy_manager") {
     "$INNERKITS_ROOT/netpolicyclient/include/proxy",
     "$INNERKITS_ROOT/netconnclient/include",
     "$NETCONNMANAGER_COMMON_DIR/include",
+    "$NETSYSCONTROLLER_ROOT_DIR/include",
   ]
 
   deps = [
     "$INNERKITS_ROOT/netpolicyclient:net_policy_parcel",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
     "//third_party/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
+    "ability_base:want",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
+    "hitrace_native:hitrace_meter",
     "ipc:ipc_core",
     "netmanager_base:net_conn_manager_if",
     "netmanager_base:net_stats_manager_if",
@@ -53,7 +65,7 @@ ohos_shared_library("net_policy_manager") {
   ]
 
   defines = [
-    "NETMGR_LOG_TAG = \"NetConnManager\"",
+    "NETMGR_LOG_TAG = \"NetPolicyService\"",
     "LOG_DOMAIN = 0xD0015B0",
   ]
 

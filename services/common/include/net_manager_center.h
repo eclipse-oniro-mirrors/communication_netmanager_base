@@ -43,6 +43,7 @@ public:
     void RegisterStatsService(const sptr<NetStatsBaseService> &service);
 
     int32_t ResetPolicyFactory();
+    int32_t ResetPolicies();
     void RegisterPolicyService(const sptr<NetPolicyBaseService> &service);
 
     int32_t ResetEthernetFactory();
@@ -53,6 +54,7 @@ public:
 
     int32_t RestrictBackgroundChanged(bool isRestrictBackground);
     bool IsUidNetAccess(uint32_t uid, bool metered);
+    bool IsUidNetAllowed(uint32_t uid, bool metered);
 private:
     sptr<NetConnBaseService> connService_;
     sptr<NetStatsBaseService> statsService_;
