@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,18 +16,52 @@
 #ifndef NET_POLICY_FIREWALL_H
 #define NET_POLICY_FIREWALL_H
 
+#include "firewall_rule.h"
+#include "net_policy_base.h"
 #include "net_policy_file.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-class NetPolicyFirewall : public virtual RefBase {
+class NetPolicyFirewall : public NetPolicyBase {
 public:
-    NetPolicyFirewall(sptr<NetPolicyFile> netPolicyFile);
-    bool GetBackgroundPolicyByUid(uint32_t uid);
-    NetBackgroundPolicy GetCurrentBackgroundPolicy();
+    NetPolicyFirewall() : deviceIdleMode_(false) {}
+    void Init();
+    /**
+     * Set the UID into device idle allow list.
+     *
+     * @param uid The specified UID of application.
+     * @param isAllowed The UID is into allow list or not.
+     */
+    void SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed);
+    /**
+     * Get the allow list of UID in device idle mode.
+     *
+     * @param uids The list of UIDs
+     */
+    const std::vector<uint32_t> &GetDeviceIdleAllowedList();
+    /**
+     * Process network policy in device idle mode.
+     *
+     * @param enable Device idle mode is open or not.
+     */
+    void UpdateDeviceIdlePolicy(bool enable);
+    /**
+     * Reset network firewall rules.
+     *
+     */
+    void ResetPolicies();
+    /**
+     * Handle the event from NetPolicyCore
+     *
+     * @param eventId The event id
+     * @param policyEvent The infomations passed from other core
+     */
+    void HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEvent> &policyEvent);
 
 private:
-    sptr<NetPolicyFile> netPolicyFile_;
+    void DeleteUid(uint32_t uid);
+    std::shared_ptr<FirewallRule> deviceIdleFirewallRule_;
+    bool deviceIdleMode_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

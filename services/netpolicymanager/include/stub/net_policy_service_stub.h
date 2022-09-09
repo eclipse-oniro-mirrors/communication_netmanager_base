@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,40 +21,47 @@
 #include "iremote_stub.h"
 
 #include "i_net_policy_service.h"
+#include "net_policy_event_handler.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+constexpr const char *NET_POLICY_WORK_THREAD = "NET_POLICY_WORK_THREAD";
+
 class NetPolicyServiceStub : public IRemoteStub<INetPolicyService> {
 public:
     NetPolicyServiceStub();
     ~NetPolicyServiceStub();
 
-    int32_t OnRemoteRequest(
-        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+
+protected:
+    bool CheckPermission(const std::string &permission, const std::string &funcName);
+    std::shared_ptr<AppExecFwk::EventRunner> runner_;
+    std::shared_ptr<NetPolicyEventHandler> handler_;
 
 private:
     using NetPolicyServiceFunc = int32_t (NetPolicyServiceStub::*)(MessageParcel &, MessageParcel &);
 
 private:
+    void InitEventHandler();
     int32_t OnSetPolicyByUid(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetPolicyByUid(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetUidsByPolicy(MessageParcel &data, MessageParcel &reply);
-    int32_t OnIsUidNetAccessMetered(MessageParcel &data, MessageParcel &reply);
-    int32_t OnIsUidNetAccessIfaceName(MessageParcel &data, MessageParcel &reply);
+    int32_t OnIsUidNetAllowedMetered(MessageParcel &data, MessageParcel &reply);
+    int32_t OnIsUidNetAllowedIfaceName(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetPolicyCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnregisterNetPolicyCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetNetQuotaPolicies(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetNetQuotaPolicies(MessageParcel &data, MessageParcel &reply);
-    int32_t OnSetCellularPolicies(MessageParcel &data, MessageParcel &reply);
-    int32_t OnGetCellularPolicies(MessageParcel &data, MessageParcel &reply);
-    int32_t OnSetFactoryPolicy(MessageParcel &data, MessageParcel &reply);
+    int32_t OnResetPolicies(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetBackgroundPolicy(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetBackgroundPolicy(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetBackgroundPolicyByUid(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetCurrentBackgroundPolicy(MessageParcel &data, MessageParcel &reply);
     int32_t OnSnoozePolicy(MessageParcel &data, MessageParcel &reply);
-    int32_t OnSetIdleTrustlist(MessageParcel &data, MessageParcel &reply);
-    int32_t OnGetIdleTrustlist(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetDeviceIdleAllowedList(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetDeviceIdleAllowedList(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetDeviceIdlePolicy(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetPolicyServiceFunc> memberFuncMap_;
