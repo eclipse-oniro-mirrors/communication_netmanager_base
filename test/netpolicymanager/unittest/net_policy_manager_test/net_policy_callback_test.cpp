@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,14 +14,15 @@
  */
 
 #include "net_policy_callback_test.h"
-#include "net_policy_constants.h"
+
 #include "net_mgr_log_wrapper.h"
+#include "net_policy_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetPolicyCallbackTest::NetPolicyCallbackTest() {}
+NetPolicyCallbackTest::NetPolicyCallbackTest() = default;
 
-NetPolicyCallbackTest::~NetPolicyCallbackTest() {}
+NetPolicyCallbackTest::~NetPolicyCallbackTest() = default;
 
 void NetPolicyCallbackTest::NotifyAll()
 {
@@ -35,10 +36,10 @@ void NetPolicyCallbackTest::WaitFor(int32_t timeoutSecond)
     cv_.wait_for(callbackLock, std::chrono::seconds(timeoutSecond));
 }
 
-int32_t NetPolicyCallbackTest::NetUidPolicyChanged(uint32_t uid, NetUidPolicy policy)
+int32_t NetPolicyCallbackTest::NetUidPolicyChange(uint32_t uid, uint32_t policy)
 {
-    NETMGR_LOG_D("unittest NetUidPolicyChanged, uid:[%{public}d], policy:[%{public}d]",
-        uid, static_cast<uint32_t>(policy));
+    NETMGR_LOG_D("unittest NetUidPolicyChange, uid:[%{public}u], policy:[%{public}u]", uid,
+                 static_cast<uint32_t>(policy));
 
     uid_ = uid;
     uidPolicy_ = policy;
@@ -47,10 +48,19 @@ int32_t NetPolicyCallbackTest::NetUidPolicyChanged(uint32_t uid, NetUidPolicy po
     return 0;
 }
 
-int32_t NetPolicyCallbackTest::NetBackgroundPolicyChanged(bool isBackgroundPolicyAllow)
+int32_t NetPolicyCallbackTest::NetUidRuleChange(uint32_t uid, uint32_t rule)
 {
-    NETMGR_LOG_D("unittest NetBackgroundPolicyChanged, isBackgroundPolicyAllow:[%{public}d]",
-        isBackgroundPolicyAllow);
+    NETMGR_LOG_D("unittest NetUidRuleChange, uid:[%{public}u], rule:[%{public}u]", uid, rule);
+    uid_ = uid;
+    rule_ = rule;
+    NotifyAll();
+
+    return 0;
+}
+
+int32_t NetPolicyCallbackTest::NetBackgroundPolicyChange(bool isBackgroundPolicyAllow)
+{
+    NETMGR_LOG_D("unittest NetBackgroundPolicyChange, isBackgroundPolicyAllow:[%{public}d]", isBackgroundPolicyAllow);
 
     isBackgroundPolicyAllow_ = isBackgroundPolicyAllow;
     NotifyAll();
@@ -58,19 +68,20 @@ int32_t NetPolicyCallbackTest::NetBackgroundPolicyChanged(bool isBackgroundPolic
     return 0;
 }
 
-int32_t NetPolicyCallbackTest::NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicies)
+int32_t NetPolicyCallbackTest::NetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies)
 {
-    NETMGR_LOG_D("unittest NetCellularPolicyChanged, cellularPolicies.size:[%{public}d]",
-        static_cast<int>(cellularPolicies.size()));
-
+    NETMGR_LOG_D("unittest NetQuotaPolicyChange, quotaPolicies.size:[%{public}zu]", quotaPolicies.size());
+    quotaPoliciesSize_ = quotaPolicies.size();
+    NotifyAll();
     return 0;
 }
 
-int32_t NetPolicyCallbackTest::NetStrategySwitch(const std::string &simId, bool enable)
+int32_t NetPolicyCallbackTest::NetMeteredIfacesChange(std::vector<std::string> &ifaces)
 {
-    NETMGR_LOG_D("unittest NetStrategySwitch, simId:[%{public}s], enable:[%{public}d]",
-        simId.c_str(), static_cast<uint32_t>(enable));
-
+    for (auto &iface : ifaces) {
+        NETMGR_LOG_D("unittest NetMeteredIfacesChange, iface:[%{public}s]", iface.c_str());
+    }
+    NotifyAll();
     return 0;
 }
 } // namespace NetManagerStandard
