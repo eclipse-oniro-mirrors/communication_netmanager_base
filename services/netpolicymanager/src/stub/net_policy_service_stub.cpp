@@ -14,8 +14,7 @@
  */
 #include "net_policy_service_stub.h"
 
-#include "net_policy_cellular_policy.h"
-#include "net_policy_quota_policy.h"
+#include "net_quota_policy.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {

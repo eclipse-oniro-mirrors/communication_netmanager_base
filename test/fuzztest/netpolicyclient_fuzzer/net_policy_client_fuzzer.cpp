@@ -14,7 +14,7 @@
  */
 
 #include <thread>
-#include <net_policy_quota_policy.h>
+#include <net_quota_policy.h>
 #include "net_policy_constants.h"
 #include "net_policy_client.h"
 #include "net_mgr_log_wrapper.h"

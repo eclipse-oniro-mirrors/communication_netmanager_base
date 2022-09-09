@@ -17,10 +17,7 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 ohos_unittest("net_policy_manager_test") {
   module_out_path = "netmanager_base/net_policy_manager_test"
 
-  sources = [
-    "net_policy_callback_test.cpp",
-    "net_policy_manager_test.cpp",
-  ]
+  sources = []
 
   include_dirs = [
     "$INNERKITS_ROOT/netpolicyclient/include",
