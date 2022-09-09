@@ -15,16 +15,7 @@ import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_shared_library("net_policy_manager") {
-  sources = [
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_callback.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_file.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_firewall.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_service.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_service_common.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_traffic.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/stub/net_policy_callback_proxy.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/stub/net_policy_service_stub.cpp",
-  ]
+  sources = []
 
   include_dirs = [
     "$NETPOLICYMANAGER_SOURCE_DIR/include",

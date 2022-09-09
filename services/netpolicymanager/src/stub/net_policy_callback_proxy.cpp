@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,18 +14,18 @@
  */
 #include "net_policy_callback_proxy.h"
 
-#include "net_policy_cellular_policy.h"
 #include "net_mgr_log_wrapper.h"
+#include "net_quota_policy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetPolicyCallbackProxy::NetPolicyCallbackProxy(const sptr<IRemoteObject> &impl)
-    : IRemoteProxy<INetPolicyCallback>(impl)
-{}
+NetPolicyCallbackProxy::NetPolicyCallbackProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<INetPolicyCallback>(impl)
+{
+}
 
-NetPolicyCallbackProxy::~NetPolicyCallbackProxy() {}
+NetPolicyCallbackProxy::~NetPolicyCallbackProxy() = default;
 
-int32_t NetPolicyCallbackProxy::NetUidPolicyChanged(uint32_t uid, NetUidPolicy policy)
+int32_t NetPolicyCallbackProxy::NetUidPolicyChange(uint32_t uid, uint32_t policy)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -49,14 +49,47 @@ int32_t NetPolicyCallbackProxy::NetUidPolicyChanged(uint32_t uid, NetUidPolicy p
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = remote->SendRequest(NET_POLICY_UIDPOLICY_CHANGED, data, reply, option);
+    int32_t ret = remote->SendRequest(NOTIFY_NET_UID_POLICY_CHANGE, data, reply, option);
     if (ret != ERR_NONE) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
     return ret;
 }
 
-int32_t NetPolicyCallbackProxy::NetBackgroundPolicyChanged(bool isBackgroundPolicyAllow)
+int32_t NetPolicyCallbackProxy::NetUidRuleChange(uint32_t uid, uint32_t rule)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint32(uid)) {
+        NETMGR_LOG_E("Write uid failed");
+        return ERR_NULL_OBJECT;
+    }
+
+    if (!data.WriteUint32(rule)) {
+        NETMGR_LOG_E("Write rule failed");
+        return ERR_NULL_OBJECT;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(NOTIFY_NET_UID_RULE_CHANGE, data, reply, option);
+    if (ret != ERR_NONE) {
+        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
+    }
+    return ret;
+}
+
+int32_t NetPolicyCallbackProxy::NetBackgroundPolicyChange(bool isBackgroundPolicyAllow)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -76,17 +109,17 @@ int32_t NetPolicyCallbackProxy::NetBackgroundPolicyChanged(bool isBackgroundPoli
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = remote->SendRequest(NET_POLICY_BACKGROUNDPOLICY_CHANGED, data, reply, option);
+    int32_t ret = remote->SendRequest(NOTIFY_BACKGROUND_POLICY_CHANGE, data, reply, option);
     if (ret != ERR_NONE) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
     return ret;
 }
 
-int32_t NetPolicyCallbackProxy::NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicies)
+int32_t NetPolicyCallbackProxy::NetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies)
 {
-    if (cellularPolicies.empty()) {
-        NETMGR_LOG_E("NetCellularPolicyChanged proxy cellularPolicies empty");
+    if (quotaPolicies.empty()) {
+        NETMGR_LOG_E("NetQuotaPolicyChange proxy quotaPolicies empty");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -96,7 +129,7 @@ int32_t NetPolicyCallbackProxy::NetCellularPolicyChanged(const std::vector<NetPo
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!NetPolicyCellularPolicy::Marshalling(data, cellularPolicies)) {
+    if (!NetQuotaPolicy::Marshalling(data, quotaPolicies)) {
         NETMGR_LOG_E("Marshalling failed.");
         return ERR_FLATTEN_OBJECT;
     }
@@ -109,14 +142,14 @@ int32_t NetPolicyCallbackProxy::NetCellularPolicyChanged(const std::vector<NetPo
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = remote->SendRequest(NET_POLICY_CELLULARPOLICY_CHANGED, data, reply, option);
+    int32_t ret = remote->SendRequest(NOTIFY_NET_QUOTA_POLICY_CHANGE, data, reply, option);
     if (ret != ERR_NONE) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
     return ret;
 }
 
-int32_t NetPolicyCallbackProxy::NetStrategySwitch(const std::string &simId, bool enable)
+int32_t NetPolicyCallbackProxy::NetStrategySwitch(const std::string &iccid, bool enable)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -124,11 +157,13 @@ int32_t NetPolicyCallbackProxy::NetStrategySwitch(const std::string &simId, bool
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!data.WriteString(simId)) {
+    if (!data.WriteString(iccid)) {
+        NETMGR_LOG_E("WriteString iccid failed");
         return ERR_NULL_OBJECT;
     }
 
     if (!data.WriteBool(enable)) {
+        NETMGR_LOG_E("WriteBool enable failed");
         return ERR_NULL_OBJECT;
     }
 
@@ -140,7 +175,42 @@ int32_t NetPolicyCallbackProxy::NetStrategySwitch(const std::string &simId, bool
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = remote->SendRequest(NET_POLICY_STRATEGYSWITCH_CHANGED, data, reply, option);
+    int32_t ret = remote->SendRequest(NET_POLICY_STRATEGYSWITCH_CHANGE, data, reply, option);
+    if (ret != ERR_NONE) {
+        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
+    }
+    return ret;
+}
+
+int32_t NetPolicyCallbackProxy::NetMeteredIfacesChange(std::vector<std::string> &ifaces)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    uint32_t size = static_cast<uint32_t>(ifaces.size());
+    if (!data.WriteUint32(size)) {
+        NETMGR_LOG_E("WriteUInt32 size failed");
+        return ERR_NULL_OBJECT;
+    }
+
+    for (uint32_t i = 0; i < ifaces.size(); ++i) {
+        if (!data.WriteString(ifaces[i])) {
+            NETMGR_LOG_E("WriteString ifaces failed");
+            return ERR_NULL_OBJECT;
+        }
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(NOTIFY_NET_METERED_IFACES_CHANGE, data, reply, option);
     if (ret != ERR_NONE) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
