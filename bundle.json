@@ -55,7 +55,6 @@
                     "//foundation/communication/netmanager_base/utils:net_manager_common",
                     "//foundation/communication/netmanager_base/frameworks/js/napi/connection:connection",
                     "//foundation/communication/netmanager_base/frameworks/js/napi/network:network",
-                    "//foundation/communication/netmanager_base/frameworks/js/napi/netpolicy:policy",
                     "//foundation/communication/netmanager_base/frameworks/js/napi/netstats:statistics",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient:net_policy_manager_if",

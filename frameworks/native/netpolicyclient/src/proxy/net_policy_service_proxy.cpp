@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "net_policy_service_proxy.h"
 
-#include "net_policy_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "net_policy_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -25,7 +26,7 @@ NetPolicyServiceProxy::NetPolicyServiceProxy(const sptr<IRemoteObject> &impl)
 
 NetPolicyServiceProxy::~NetPolicyServiceProxy() {}
 
-NetPolicyResultCode NetPolicyServiceProxy::SetPolicyByUid(uint32_t uid, NetUidPolicy policy)
+int32_t NetPolicyServiceProxy::SetPolicyByUid(uint32_t uid, uint32_t policy)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -48,16 +49,16 @@ NetPolicyResultCode NetPolicyServiceProxy::SetPolicyByUid(uint32_t uid, NetUidPo
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_SET_UID_POLICY, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_SET_POLICY_BY_UID, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return static_cast<NetPolicyResultCode>(reply.ReadInt32());
+    return reply.ReadInt32();
 }
 
-NetUidPolicy NetPolicyServiceProxy::GetPolicyByUid(uint32_t uid)
+uint32_t NetPolicyServiceProxy::GetPolicyByUid(uint32_t uid)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -77,16 +78,16 @@ NetUidPolicy NetPolicyServiceProxy::GetPolicyByUid(uint32_t uid)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_GET_UID_POLICY, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_GET_POLICY_BY_UID, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return NetUidPolicy::NET_POLICY_NONE;
     }
 
-    return static_cast<NetUidPolicy>(reply.ReadInt32());
+    return reply.ReadUint32();
 }
 
-std::vector<uint32_t> NetPolicyServiceProxy::GetUidsByPolicy(NetUidPolicy policy)
+std::vector<uint32_t> NetPolicyServiceProxy::GetUidsByPolicy(uint32_t policy)
 {
     MessageParcel data;
     std::vector<uint32_t> uids;
@@ -108,7 +109,7 @@ std::vector<uint32_t> NetPolicyServiceProxy::GetUidsByPolicy(NetUidPolicy policy
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_GET_UIDS, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_GET_UIDS_BY_UID, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return uids;
@@ -121,7 +122,7 @@ std::vector<uint32_t> NetPolicyServiceProxy::GetUidsByPolicy(NetUidPolicy policy
     return uids;
 }
 
-bool NetPolicyServiceProxy::IsUidNetAccess(uint32_t uid, bool metered)
+bool NetPolicyServiceProxy::IsUidNetAllowed(uint32_t uid, bool metered)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -145,7 +146,7 @@ bool NetPolicyServiceProxy::IsUidNetAccess(uint32_t uid, bool metered)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_IS_NET_ACCESS_METERED, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_IS_NET_ALLOWED_BY_METERED, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return false;
@@ -154,7 +155,7 @@ bool NetPolicyServiceProxy::IsUidNetAccess(uint32_t uid, bool metered)
     return reply.ReadBool();
 }
 
-bool NetPolicyServiceProxy::IsUidNetAccess(uint32_t uid, const std::string &ifaceName)
+bool NetPolicyServiceProxy::IsUidNetAllowed(uint32_t uid, const std::string &ifaceName)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -178,7 +179,7 @@ bool NetPolicyServiceProxy::IsUidNetAccess(uint32_t uid, const std::string &ifac
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_IS_NET_ACCESS_IFACENAME, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_IS_NET_ALLOWED_BY_IFACE, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return false;
@@ -197,7 +198,7 @@ int32_t NetPolicyServiceProxy::RegisterNetPolicyCallback(const sptr<INetPolicyCa
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return static_cast<int32_t>(NetPolicyResultCode::ERR_INTERNAL_ERROR);
+        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
@@ -209,7 +210,7 @@ int32_t NetPolicyServiceProxy::RegisterNetPolicyCallback(const sptr<INetPolicyCa
 
     MessageOption option;
     MessageParcel replyParcel;
-    int32_t retCode = remote->SendRequest(CMD_NSM_REGISTER_NET_POLICY_CALLBACK, dataParcel, replyParcel, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_REGISTER_NET_POLICY_CALLBACK, dataParcel, replyParcel, option);
     if (retCode != ERR_NONE) {
         return retCode;
     }
@@ -226,7 +227,7 @@ int32_t NetPolicyServiceProxy::UnregisterNetPolicyCallback(const sptr<INetPolicy
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return static_cast<int32_t>(NetPolicyResultCode::ERR_INTERNAL_ERROR);
+        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
@@ -238,14 +239,14 @@ int32_t NetPolicyServiceProxy::UnregisterNetPolicyCallback(const sptr<INetPolicy
 
     MessageOption option;
     MessageParcel replyParcel;
-    int32_t retCode = remote->SendRequest(CMD_NSM_UNREGISTER_NET_POLICY_CALLBACK, dataParcel, replyParcel, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK, dataParcel, replyParcel, option);
     if (retCode != ERR_NONE) {
         return retCode;
     }
     return replyParcel.ReadInt32();
 }
 
-NetPolicyResultCode NetPolicyServiceProxy::SetNetQuotaPolicies(const std::vector<NetPolicyQuotaPolicy> &quotaPolicies)
+int32_t NetPolicyServiceProxy::SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     MessageParcel data;
     if (quotaPolicies.empty()) {
@@ -264,23 +265,23 @@ NetPolicyResultCode NetPolicyServiceProxy::SetNetQuotaPolicies(const std::vector
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    if (!NetPolicyQuotaPolicy::Marshalling(data, quotaPolicies)) {
+    if (!NetQuotaPolicy::Marshalling(data, quotaPolicies)) {
         NETMGR_LOG_E("Marshalling failed");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_NET_SET_QUOTA_POLICY, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_SET_NET_QUOTA_POLICIES, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return static_cast<NetPolicyResultCode>(reply.ReadInt32());
+    return reply.ReadInt32();
 }
 
-NetPolicyResultCode NetPolicyServiceProxy::GetNetQuotaPolicies(std::vector<NetPolicyQuotaPolicy> &quotaPolicies)
+int32_t NetPolicyServiceProxy::GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -296,61 +297,29 @@ NetPolicyResultCode NetPolicyServiceProxy::GetNetQuotaPolicies(std::vector<NetPo
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_NET_GET_QUOTA_POLICY, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_GET_NET_QUOTA_POLICIES, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    if (!NetPolicyQuotaPolicy::Unmarshalling(reply, quotaPolicies)) {
+    if (!NetQuotaPolicy::Unmarshalling(reply, quotaPolicies)) {
         NETMGR_LOG_E("Unmarshalling failed.");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return static_cast<NetPolicyResultCode>(reply.ReadInt32());
+    return reply.ReadInt32();
 }
 
-NetPolicyResultCode NetPolicyServiceProxy::SetCellularPolicies(const std::vector<NetPolicyCellularPolicy>
-    &cellularPolicies)
-{
-    MessageParcel data;
-    if (cellularPolicies.empty()) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
-    }
-
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    if (!NetPolicyCellularPolicy::Marshalling(data, cellularPolicies)) {
-        NETMGR_LOG_E("Marshalling failed");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_NET_SET_CELLULAR_POLICY, data, reply, option);
-    if (retCode != ERR_NONE) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    return static_cast<NetPolicyResultCode>(reply.ReadInt32());
-}
-
-NetPolicyResultCode NetPolicyServiceProxy::GetCellularPolicies(std::vector<NetPolicyCellularPolicy> &cellularPolicies)
+int32_t NetPolicyServiceProxy::ResetPolicies(const std::string &iccid)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+    }
+
+    if (!data.WriteString(iccid)) {
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
@@ -362,50 +331,16 @@ NetPolicyResultCode NetPolicyServiceProxy::GetCellularPolicies(std::vector<NetPo
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_NET_GET_CELLULAR_POLICY, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_RESET_POLICIES, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    if (!NetPolicyCellularPolicy::Unmarshalling(reply, cellularPolicies)) {
-        NETMGR_LOG_E("Unmarshalling failed.");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    return static_cast<NetPolicyResultCode>(reply.ReadInt32());
+    return reply.ReadInt32();
 }
 
-NetPolicyResultCode NetPolicyServiceProxy::SetFactoryPolicy(const std::string &simId)
-{
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    if (!data.WriteString(simId)) {
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_FACTORY_RESET, data, reply, option);
-    if (retCode != ERR_NONE) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    return static_cast<NetPolicyResultCode>(reply.ReadInt32());
-}
-
-NetPolicyResultCode NetPolicyServiceProxy::SetBackgroundPolicy(bool isBackgroundPolicyAllow)
+int32_t NetPolicyServiceProxy::SetBackgroundPolicy(bool isBackgroundPolicyAllow)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -425,13 +360,13 @@ NetPolicyResultCode NetPolicyServiceProxy::SetBackgroundPolicy(bool isBackground
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_SET_BACKGROUND_POLICY, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_SET_BACKGROUND_POLICY, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return static_cast<NetPolicyResultCode>(reply.ReadInt32());
+    return reply.ReadInt32();
 }
 
 bool NetPolicyServiceProxy::GetBackgroundPolicy()
@@ -450,7 +385,7 @@ bool NetPolicyServiceProxy::GetBackgroundPolicy()
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_GET_BACKGROUND_POLICY, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_GET_BACKGROUND_POLICY, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return false;
@@ -459,7 +394,7 @@ bool NetPolicyServiceProxy::GetBackgroundPolicy()
     return reply.ReadBool();
 }
 
-bool NetPolicyServiceProxy::GetBackgroundPolicyByUid(uint32_t uid)
+uint32_t NetPolicyServiceProxy::GetBackgroundPolicyByUid(uint32_t uid)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -479,16 +414,16 @@ bool NetPolicyServiceProxy::GetBackgroundPolicyByUid(uint32_t uid)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_GET_BACKGROUND_POLICY_BY_UID, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_GET_BACKGROUND_POLICY_BY_UID, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return false;
     }
 
-    return reply.ReadBool();
+    return reply.ReadUint32();
 }
 
-NetBackgroundPolicy NetPolicyServiceProxy::GetCurrentBackgroundPolicy()
+uint32_t NetPolicyServiceProxy::GetCurrentBackgroundPolicy()
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -504,16 +439,16 @@ NetBackgroundPolicy NetPolicyServiceProxy::GetCurrentBackgroundPolicy()
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_GET_BACKGROUND_POLICY_BY_CURRENT, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_GET_BACKGROUND_POLICY_BY_CURRENT, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return NetBackgroundPolicy::NET_BACKGROUND_POLICY_NONE;
     }
 
-    return static_cast<NetBackgroundPolicy>(reply.ReadInt32());
+    return reply.ReadUint32();
 }
 
-NetPolicyResultCode NetPolicyServiceProxy::SetSnoozePolicy(int8_t netType, const std::string &simId)
+int32_t NetPolicyServiceProxy::UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -527,26 +462,30 @@ NetPolicyResultCode NetPolicyServiceProxy::SetSnoozePolicy(int8_t netType, const
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    if (!data.WriteInt8(netType)) {
+    if (!data.WriteInt32(netType)) {
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    if (!data.WriteString(simId)) {
+    if (!data.WriteString(iccid)) {
+        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+    }
+
+    if (!data.WriteUint32(remindType)) {
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_SNOOZE_POLICY, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_UPDATE_REMIND_POLICY, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return static_cast<NetPolicyResultCode>(reply.ReadInt32());
+    return reply.ReadInt32();
 }
 
-NetPolicyResultCode NetPolicyServiceProxy::SetIdleTrustlist(uint32_t uid, bool isTrustlist)
+int32_t NetPolicyServiceProxy::SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -557,7 +496,7 @@ NetPolicyResultCode NetPolicyServiceProxy::SetIdleTrustlist(uint32_t uid, bool i
     if (!data.WriteUint32(uid)) {
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
-    if (!data.WriteBool(isTrustlist)) {
+    if (!data.WriteBool(isAllowed)) {
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
@@ -569,16 +508,16 @@ NetPolicyResultCode NetPolicyServiceProxy::SetIdleTrustlist(uint32_t uid, bool i
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_SET_IDLE_TRUSTLIST, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_SET_IDLE_ALLOWED_LIST, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
-    return static_cast<NetPolicyResultCode>(reply.ReadInt32());
+    return reply.ReadInt32();
 }
 
-NetPolicyResultCode NetPolicyServiceProxy::GetIdleTrustlist(std::vector<uint32_t> &uids)
+int32_t NetPolicyServiceProxy::GetDeviceIdleAllowedList(std::vector<uint32_t> &uids)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -594,7 +533,7 @@ NetPolicyResultCode NetPolicyServiceProxy::GetIdleTrustlist(std::vector<uint32_t
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NSM_GET_IDLE_TRUSTLIST, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_GET_IDLE_ALLOWED_LIST, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
@@ -606,6 +545,36 @@ NetPolicyResultCode NetPolicyServiceProxy::GetIdleTrustlist(std::vector<uint32_t
     }
 
     return NetPolicyResultCode::ERR_NONE;
+}
+
+int32_t NetPolicyServiceProxy::SetDeviceIdlePolicy(bool enable)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+    }
+
+    if (!data.WriteBool(enable)) {
+        NETMGR_LOG_E("WriteBool enable failed.");
+        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t retCode = remote->SendRequest(CMD_NPS_SET_DEVICE_IDLE_POLICY, data, reply, option);
+    if (retCode != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
+        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+    }
+
+    return reply.ReadInt32();
 }
 
 bool NetPolicyServiceProxy::WriteInterfaceToken(MessageParcel &data)
