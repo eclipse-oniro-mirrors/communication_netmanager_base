@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,36 +16,88 @@
 #ifndef NET_POLICY_CONSTANTS_H
 #define NET_POLICY_CONSTANTS_H
 
+#include <climits>
+
 namespace OHOS {
 namespace NetManagerStandard {
-enum class NetPolicyResultCode {
+const int64_t DATA_USAGE_UNKNOWN = -1;
+const int64_t DATA_USAGE_UNLIMITED = LONG_MAX;
+const int64_t REMIND_NEVER = -1;
+constexpr const char *QUOTA_POLICY_NO_PERIOD = "--";
+
+enum NetPolicyResultCode {
     ERR_NONE = 0,
     ERR_INTERNAL_ERROR = (-1),
     ERR_INVALID_UID = (-10001),
     ERR_INVALID_POLICY = (-10002),
     ERR_INVALID_QUOTA_POLICY = (-10003),
     ERR_QUOTA_POLICY_NOT_EXIST = (-10004),
+    ERR_INVALID_PARAM = (-10005),
+    ERR_PERMISSION_DENIED = (-10006),
 };
 
-enum class NetUidPolicy {
+enum NetUidPolicy {
+    /* Default net policy. */
     NET_POLICY_NONE = 0,
+    /* Reject on metered networks when app in background. */
     NET_POLICY_ALLOW_METERED_BACKGROUND = 1 << 0,
-    NET_POLICY_TEMPORARY_ALLOW_METERED = 1 << 1,
-    NET_POLICY_REJECT_METERED_BACKGROUND = 1 << 2,
-    NET_POLICY_ALLOW_METERED = 1 << 3,
-    NET_POLICY_REJECT_METERED = 1 << 4,
-    NET_POLICY_ALLOW_ALL = 1 << 5,
-    NET_POLICY_REJECT_ALL = 1 << 6,
+    /* Allow on metered networks when app in background. */
+    NET_POLICY_REJECT_METERED_BACKGROUND = 1 << 1,
 };
 
-enum class NetBackgroundPolicy {
+enum NetUidRule {
+    /* Default uid rule */
+    NET_RULE_NONE = 0,
+    /* Allow traffic on metered networks while app is foreground. */
+    NET_RULE_ALLOW_METERED_FOREGROUND = 1 << 0,
+    /* Allow traffic on metered network. */
+    NET_RULE_ALLOW_METERED = 1 << 1,
+    /* Reject traffic on metered network. */
+    NET_RULE_REJECT_METERED = 1 << 2,
+    /* Allow traffic on all network (metered or non-metered). */
+    NET_RULE_ALLOW_ALL = 1 << 5,
+    /* Reject traffic on all network. */
+    NET_RULE_REJECT_ALL = 1 << 6,
+};
+
+enum NetBackgroundPolicy {
+    /* Default value. */
     NET_BACKGROUND_POLICY_NONE = 0,
-    // Indicates that applications can use metered networks.
-    NET_BACKGROUND_POLICY_DISABLE = 1,
-    // Indicates that only applications in the allowlist can use metered networks.
-    NET_BACKGROUND_POLICY_ALLOWLISTED = 2,
-    // Indicates that applications cannot use metered networks.
-    NET_BACKGROUND_POLICY_ENABLED = 3,
+    /* Apps can use metered networks on background. */
+    NET_BACKGROUND_POLICY_ENABLE = 1,
+    /* Apps can't use metered networks on background. */
+    NET_BACKGROUND_POLICY_DISABLE = 2,
+    /* Only apps in allowedlist can use metered networks on background. */
+    NET_BACKGROUND_POLICY_ALLOWEDLIST = 3,
+};
+
+enum PolicyTransCondition {
+    POLICY_TRANS_CONDITION_UID_POLICY_NONE = 1 << 0,
+    POLICY_TRANS_CONDITION_ALLOW_METERED_BACKGROUND = 1 << 1,
+    POLICY_TRANS_CONDITION_REJECT_METERED_BACKGROUND = 1 << 2,
+    POLICY_TRANS_CONDITION_FOREGROUND = 1 << 3,
+    POLICY_TRANS_CONDITION_BACKGROUND_RESTRICT = 1 << 4,
+    POLICY_TRANS_CONDITION_IDLE_ALLOWEDLIST = 1 << 5,
+    POLICY_TRANS_CONDITION_IDLE_MODE = 1 << 6,
+    POLICY_TRANS_CONDITION_POWERSAVE_ALLOWEDLIST = 1 << 7,
+    POLICY_TRANS_CONDITION_POWERSAVE_MODE = 1 << 8,
+    POLICY_TRANS_CONDITION_ADMIN_RESTRICT = 1 << 9,
+};
+
+enum LimitAction {
+    /* Default action, do nothing. */
+    LIMIT_ACTION_NONE = -1,
+    /* Access is disabled, when quota policy hit the limit */
+    LIMIT_ACTION_DISABLE = 0,
+    /* The user is billed automatically, when quota policy hit the limit */
+    LIMIT_ACTION_AUTO_BILL = 1,
+};
+
+enum RemindType {
+    /* Warning remind. */
+    REMIND_TYPE_WARNING = 1,
+    /* Limit remind. */
+    REMIND_TYPE_LIMIT = 2,
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

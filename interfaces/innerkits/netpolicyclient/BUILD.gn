@@ -19,6 +19,7 @@ config("net_policy_manager_if_config") {
   include_dirs = [
     "$INNERKITS_ROOT/netpolicyclient/include",
     "$INNERKITS_ROOT/netpolicyclient/include/proxy",
+    "$INNERKITS_ROOT/netconnclient/include",
   ]
 
   cflags = []
@@ -37,12 +38,13 @@ config("net_policy_manager_if_config") {
 }
 
 ohos_source_set("net_policy_parcel") {
-  sources = [
-    "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/net_policy_cellular_policy.cpp",
-    "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/net_policy_quota_policy.cpp",
-  ]
+  sources =
+      [ "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/net_quota_policy.cpp" ]
 
-  include_dirs = [ "$INNERKITS_ROOT/netpolicyclient/include" ]
+  include_dirs = [
+    "$INNERKITS_ROOT/netpolicyclient/include",
+    "$INNERKITS_ROOT/netconnclient/include",
+  ]
 
   deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
 
