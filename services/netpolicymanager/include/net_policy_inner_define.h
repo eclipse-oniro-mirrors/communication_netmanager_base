@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,19 +16,29 @@
 #ifndef NET_POLICY_DEFINE_H
 #define NET_POLICY_DEFINE_H
 
-#include "net_policy_cellular_policy.h"
+#include "net_quota_policy.h"
+
+#include "common_event_manager.h"
+#include "common_event_support.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+const std::string COMMON_EVENT_NET_QUOTA_LIMIT = "usual.event.NET_QUOTA_LIMIT";
+const std::string COMMON_EVENT_NET_QUOTA_LIMIT_REMINDED = "usual.event.NET_QUOTA_LIMIT_REMINDED";
+const std::string COMMON_EVENT_NET_QUOTA_WARNING = "usual.event.QUOTA_WARNING";
+const std::string COMMON_EVENT_POWER_SAVE_MODE_CHANGED =
+    EventFwk::CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED;
+const std::string COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED =
+    EventFwk::CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED;
+const std::string COMMON_EVENT_UID_REMOVED = EventFwk::CommonEventSupport::COMMON_EVENT_UID_REMOVED;
+
 const mode_t CHOWN_RWX_USR_GRP = 0770;
-constexpr int16_t PERIODDURATION_POS_NUM_ONE  = 1;
-constexpr int16_t DAY_ONE  = 1;
+constexpr int16_t PERIODDURATION_POS_NUM_ONE = 1;
+constexpr int16_t DAY_ONE = 1;
 constexpr int16_t DAY_THIRTY_ONE = 31;
 constexpr int16_t LIMIT_ACTION_ONE = 1;
 constexpr int16_t LIMIT_ACTION_THREE = 3;
 constexpr int16_t LIMIT_CALLBACK_NUM = 200;
-constexpr const char *POLICY_QUOTA_MONTH_U = "M";
-constexpr const char *POLICY_QUOTA_MONTH_L = "m";
 constexpr const char *POLICY_FILE_NAME = "/data/service/el1/public/netmanager/net_policy.json";
 constexpr const char *CONFIG_HOS_VERSION = "hosVersion";
 constexpr const char *CONFIG_UID_POLICY = "uidPolicy";
@@ -39,7 +49,7 @@ constexpr const char *CONFIG_BACKGROUND_POLICY = "backgroundPolicy";
 constexpr const char *CONFIG_BACKGROUND_POLICY_STATUS = "status";
 constexpr const char *CONFIG_QUOTA_POLICY = "quotaPolicy";
 constexpr const char *CONFIG_QUOTA_POLICY_NETTYPE = "netType";
-constexpr const char *CONFIG_QUOTA_POLICY_SUBSCRIBERID = "simId";
+constexpr const char *CONFIG_QUOTA_POLICY_SUBSCRIBERID = "iccid";
 constexpr const char *CONFIG_QUOTA_POLICY_PERIODSTARTTIME = "periodStartTime";
 constexpr const char *CONFIG_QUOTA_POLICY_PERIODDURATION = "periodDuration";
 constexpr const char *CONFIG_QUOTA_POLICY_WARNINGBYTES = "warningBytes";
@@ -48,7 +58,7 @@ constexpr const char *CONFIG_QUOTA_POLICY_LASTLIMITSNOOZE = "lastLimitSnooze";
 constexpr const char *CONFIG_QUOTA_POLICY_METERED = "metered";
 constexpr const char *CONFIG_QUOTA_POLICY_SOURCE = "source";
 constexpr const char *CONFIG_CELLULAR_POLICY = "cellularPolicy";
-constexpr const char *CONFIG_CELLULAR_POLICY_SUBSCRIBERID = "simId";
+constexpr const char *CONFIG_CELLULAR_POLICY_SUBSCRIBERID = "iccid";
 constexpr const char *CONFIG_CELLULAR_POLICY_PERIODSTARTTIME = "periodStartTime";
 constexpr const char *CONFIG_CELLULAR_POLICY_PERIODDURATION = "periodDuration";
 constexpr const char *CONFIG_CELLULAR_POLICY_TITLE = "title";
@@ -60,7 +70,25 @@ constexpr const char *CONFIG_CELLULAR_POLICY_USEDTIMEDURATION = "usedTimeDuratio
 constexpr const char *CONFIG_CELLULAR_POLICY_POSSESSOR = "possessor";
 constexpr const char *BACKGROUND_POLICY_ALLOW = "allow";
 constexpr const char *BACKGROUND_POLICY_REJECT = "reject";
-constexpr const char *IDENT_PREFIX = "usb0";
+constexpr const char *IDENT_PREFIX_CELLULAR = "simId";
+constexpr const char *IDENT_PREFIX_WIFI = "ssId";
+
+constexpr const char *FIREWALL_CHAIN_NAME_DEVICE_IDLE = "deviceidle";
+
+constexpr const char *UNKNOW_IFACE = "";
+
+constexpr const char *NET_POLICY_SERVICE_NAME = "NetPolicyService";
+
+enum {
+    FIREWALL_CHAIN_NONE = 0,         // ChainType::CHAIN_NONE
+    FIREWALL_CHAIN_DEVICE_IDLE = 16, // ChainType::CHAIN_OHFW_DOZABLE
+    FIREWALL_CHAIN_POWER_SAVE = 17,  // ChainType::CHAIN_OHFW_UNDOZABLE
+};
+
+enum {
+    FIREWALL_RULE_ALLOW = 1,
+    FIREWALL_RULE_DENY = 2,
+};
 
 struct UidPolicy {
     std::string uid;
@@ -69,7 +97,7 @@ struct UidPolicy {
 
 struct NetPolicyQuota {
     std::string netType;
-    std::string simId;
+    std::string iccid;
     std::string periodStartTime;
     std::string periodDuration;
     std::string warningBytes;
@@ -80,7 +108,7 @@ struct NetPolicyQuota {
 };
 
 struct NetPolicyCellular {
-    std::string simId;
+    std::string iccid;
     std::string periodStartTime;
     std::string periodDuration;
     std::string title;
@@ -97,7 +125,16 @@ struct NetPolicy {
     std::vector<UidPolicy> uidPolicys;
     std::string backgroundPolicyStatus_;
     std::vector<NetPolicyQuota> netQuotaPolicys;
-    std::vector<NetPolicyCellular> netCellularPolicys;
+};
+
+// link power_mode_module.h
+enum {
+    POWER_MODE_MIN = 600,
+    NORMAL_MODE = POWER_MODE_MIN,
+    SAVE_MODE,
+    EXTREME_MODE,
+    LOWPOWER_MODE,
+    POWER_MODE_MAX = LOWPOWER_MODE
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

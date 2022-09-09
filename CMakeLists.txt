@@ -156,9 +156,8 @@ add_executable(communication_netmanager_base
         frameworks/native/netmanagernative/notify_callback_proxy.h
         frameworks/native/netpolicyclient/src/proxy/net_policy_callback_stub.cpp
         frameworks/native/netpolicyclient/src/proxy/net_policy_service_proxy.cpp
-        frameworks/native/netpolicyclient/src/net_policy_cellular_policy.cpp
         frameworks/native/netpolicyclient/src/net_policy_client.cpp
-        frameworks/native/netpolicyclient/src/net_policy_quota_policy.cpp
+        frameworks/native/netpolicyclient/src/net_quota_policy.cpp
         frameworks/native/netstatsclient/src/proxy/net_stats_callback_stub.cpp
         frameworks/native/netstatsclient/src/proxy/net_stats_service_proxy.cpp
         frameworks/native/netstatsclient/src/data_flow_statistics.cpp
@@ -205,10 +204,9 @@ add_executable(communication_netmanager_base
         interfaces/innerkits/netpolicyclient/include/proxy/i_net_policy_service.h
         interfaces/innerkits/netpolicyclient/include/proxy/net_policy_callback_stub.h
         interfaces/innerkits/netpolicyclient/include/proxy/net_policy_service_proxy.h
-        interfaces/innerkits/netpolicyclient/include/net_policy_cellular_policy.h
         interfaces/innerkits/netpolicyclient/include/net_policy_client.h
         interfaces/innerkits/netpolicyclient/include/net_policy_constants.h
-        interfaces/innerkits/netpolicyclient/include/net_policy_quota_policy.h
+        interfaces/innerkits/netpolicyclient/include/net_quota_policy.h
         interfaces/innerkits/netstatsclient/include/proxy/i_net_stats_callback.h
         interfaces/innerkits/netstatsclient/include/proxy/i_net_stats_service.h
         interfaces/innerkits/netstatsclient/include/proxy/net_stats_callback_stub.h

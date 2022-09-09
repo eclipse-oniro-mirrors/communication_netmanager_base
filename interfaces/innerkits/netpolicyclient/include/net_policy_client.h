@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,8 @@
 #include "singleton.h"
 
 #include "i_net_policy_service.h"
-#include "net_policy_cellular_policy.h"
 #include "net_policy_constants.h"
-#include "net_policy_quota_policy.h"
+#include "net_quota_policy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -30,139 +29,285 @@ class NetPolicyClient {
 
 public:
     /**
-     * @brief The interface is set uid policy
+     * Set the network policy for the specified UID.
      *
-     * @param uid uid
-     * @param policy policy
-     *
-     * @return Returns 0 success, otherwise fail
+     * @param uid The specified UID of app.
+     * @param policy The network policy for application.
+     *      For details, see {@link NetUidPolicy}.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
      */
-    NetPolicyResultCode SetPolicyByUid(uint32_t uid, NetUidPolicy policy);
+    int32_t SetPolicyByUid(uint32_t uid, uint32_t policy);
+
     /**
-     * @brief The interface is get uid policy
+     * Get the network policy of the specified UID.
      *
-     * @param uid uid
-     * @return Returns NetUidPolicy, otherwise fail
+     * @param uid The specified UID of app.
+     * @return Returns the network policy of the specified UID application.
+     *      For details, see {@link NetUidPolicy}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
      */
-    NetUidPolicy GetPolicyByUid(uint32_t uid);
+    uint32_t GetPolicyByUid(uint32_t uid);
+
     /**
-     * @brief The interface is get uids by policy
+     * Get the application UIDs of the specified policy.
      *
-     * @param policy policy
-     * @return uids
+     * @param policy the network policy of the current UID of application.
+     *      For details, see {@link NetUidPolicy}.
+     * @return Returns the UIDs of the specified policy.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
      */
-    std::vector<uint32_t> GetUidsByPolicy(NetUidPolicy policy);
+    std::vector<uint32_t> GetUidsByPolicy(uint32_t policy);
+
     /**
-     * @brief The interface determine whether you have access to the network
+     * Get the status whether the specified uid app can access the metered network or non-metered network.
      *
-     * @param uid uid
-     * @param metered true/false
-     * @return bool
+     * @param uid The specified UID of application.
+     * @param metered Indicates meterd network or non-metered network.
+     * @return Returns it's allowed or not to access the network.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
      */
-    bool IsUidNetAccess(uint32_t uid, bool metered);
+    bool IsUidNetAllowed(uint32_t uid, bool isMetered);
+
     /**
-     * @brief The interface determine whether you have access to the network
+     * Get the status whether the specified uid app can access the specified iface network.
      *
-     * @param uid uid
-     * @param ifaceName , you can get ifacename by GetIfaceNameByType
-     * @return bool
+     * @param uid The specified UID of application.
+     * @param ifaceName Iface name.
+     * @return Returns it's allowed or not to access the network.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    bool IsUidNetAllowed(uint32_t uid, const std::string &ifaceName);
+
+    /**
+     * @deprecated
+     */
+    bool IsUidNetAccess(uint32_t uid, bool isMetered);
+
+    /**
+     * @deprecated
      */
     bool IsUidNetAccess(uint32_t uid, const std::string &ifaceName);
+
     /**
-     * @brief Register net policy callback
+     * Register network policy change callback.
      *
-     * @param callback The callback of INetPolicyCallback interface
-     *
-     * @return Returns 0, successfully register net policy callback, otherwise it will failed
+     * @param callback The callback of INetPolicyCallback interface.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
      */
     int32_t RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
+
     /**
-     * @brief Unregister net policy callback
+     * Unregister network policy change callback.
      *
-     * @return Returns 0, successfully unregister net policy callback, otherwise it will fail
+     * @param callback The callback of INetPolicyCallback interface.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
      */
     int32_t UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
+
     /**
-     * @brief SetNetQuotaPolicies set policys by NetPolicyQuotaPolicy
+     * SetCellularPolicies set policys by NetPolicyCellularPolicy
      *
-     * @return Returns 0, successfully
-     */
-    NetPolicyResultCode SetNetQuotaPolicies(const std::vector<NetPolicyQuotaPolicy> &quotaPolicies);
-    /**
-     * @brief GetNetQuotaPolicies get policys for NetPolicyQuotaPolicy
-     *
-     * @return Returns 0, successfully
-     */
-    NetPolicyResultCode GetNetQuotaPolicies(std::vector<NetPolicyQuotaPolicy> &quotaPolicies);
-    /**
-     * @brief SetCellularPolicies set policys by NetPolicyCellularPolicy
-     *
-     * @return Returns 0, successfully
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     * @deprecated
      */
     NetPolicyResultCode SetCellularPolicies(const std::vector<NetPolicyCellularPolicy> &cellularPolicies);
+
     /**
-     * @brief GetCellularPolicies get policys for NetPolicyCellularPolicy
+     * GetCellularPolicies get policys for NetPolicyCellularPolicy
      *
-     * @return Returns 0, successfully
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     * @deprecated
      */
     NetPolicyResultCode GetCellularPolicies(std::vector<NetPolicyCellularPolicy> &cellularPolicies);
+
     /**
-     * @brief SetFactoryPolicy reset policys for simId
+     * SetNetQuotaPolicies set policys by NetPolicyQuotaPolicy
      *
-     * @param simId ID, get from telephone module
-     * @return Returns 0, successfully
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     * @deprecated
      */
-    NetPolicyResultCode SetFactoryPolicy(const std::string &simId);
+    NetPolicyResultCode SetNetQuotaPolicies(const std::vector<NetPolicyQuotaPolicy> &quotaPolicies);
+
     /**
-     * @brief SetBackgroundPolicy reset backgroundpolicy for all app
+     * Set network policies.
      *
-     * @param backgroundPolicy refuse app visit network
-     * @return Returns 0, successfully
+     * @param quotaPolicies The list of network quota policy, {@link NetQuotaPolicy}.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
      */
-    NetPolicyResultCode SetBackgroundPolicy(bool isBackgroundPolicyAllow);
+    int32_t SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies);
+
     /**
-     * @brief GetBackgroundPolicy get background policy
+     * GetNetQuotaPolicies get policys for NetQuotaPolicy.
      *
-     * @return bool
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     * @deprecated
+     */
+    NetPolicyResultCode GetNetQuotaPolicies(std::vector<NetPolicyQuotaPolicy> &quotaPolicies);
+
+    /**
+     * Get network policies.
+     *
+     * @param quotaPolicies The list of network quota policy, {@link NetQuotaPolicy}.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies);
+
+    /**
+     * SetFactoryPolicy reset policys for iccid.
+     *
+     * @param iccid ID, get from telephone module
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     * @deprecated
+     */
+    NetPolicyResultCode SetFactoryPolicy(const std::string &iccid);
+
+    /**
+     * Reset network policies\rules\quota policies\firewall rules.
+     *
+     * @param iccid Specify the matched iccid of quota policy.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t ResetPolicies(const std::string &iccid);
+
+    /**
+     * Control if apps can use data on background.
+     *
+     * @param isAllowed Allow apps to use data on background.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t SetBackgroundPolicy(bool isAllowed);
+
+    /**
+     * Get the status if apps can use data on background.
+     *
+     * @return It's allowed or not to use data on background.
+     *      For details, see {@link BackgroundPolicy#BACKGROUND_POLICY_DISABLE}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
      */
     bool GetBackgroundPolicy();
+
     /**
-     * @brief GetBackgroundPolicyByUid get background policy by uid
+     * Get the background network restriction policy for the specified uid.
      *
-     * @param uid uid
-     * @return bool
+     * @param uid The specified UID of application.
+     * @return {@link NetBackgroundPolicy}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
      */
-    bool GetBackgroundPolicyByUid(uint32_t uid);
+    uint32_t GetBackgroundPolicyByUid(uint32_t uid);
+
     /**
-     * @brief GetCurrentBackgroundPolicy get background policy by current
-     *
+     * GetCurrentBackgroundPolicy get background policy by current
      * @return Returns NetBackgroundPolicy
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     * @deprecated
      */
-    NetBackgroundPolicy GetCurrentBackgroundPolicy();
+    uint32_t GetCurrentBackgroundPolicy();
+
     /**
-     * @brief SetSnoozePolicy for Hibernate current policy
+     * SetSnoozePolicy for Hibernate current policy
      *
-     * @return Returns 0, successfully
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     * @deprecated
      */
-    NetPolicyResultCode SetSnoozePolicy(int8_t netType, const std::string &simId);
+    NetPolicyResultCode SetSnoozePolicy(int8_t netType, const std::string &iccid);
+
     /**
-     * @brief SetIdleTrustlist for add trust list for Idle status
+     * Update the limit or warning remind time of quota policy.
+     *
+     * @param netType {@link NetBearType}.
+     * @param iccid Specify the matched iccid of quota policy when netType is cellular.
+     * @param remindType {@link RemindType}.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType);
+
+    /**
+     * SetIdleTrustlist for add trust list for Idle status
      *
      * @param uid uid
      * @param isTrustlist true/false
-     *
-     * @return Returns 0, successfully
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     * @deprecated
      */
     NetPolicyResultCode SetIdleTrustlist(uint32_t uid, bool isTrustlist);
+
     /**
-     * @brief GetIdleTrustlist for get trust list for Idle status
+     * Set the UID into device idle allow list.
+     *
+     * @param uid The specified UID of application.
+     * @param isAllowed The UID is into allow list or not.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed);
+
+    /**
+     * GetIdleTrustlist for get trust list for Idle status
      *
      * @param uid uid
      * @param uids
-     *
-     * @return Returns 0, successfully
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @deprecated
      */
     NetPolicyResultCode GetIdleTrustlist(std::vector<uint32_t> &uids);
+
+    /**
+     * Get the allow list of UID in device idle mode.
+     *
+     * @param uids The list of UIDs
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t GetDeviceIdleAllowedList(std::vector<uint32_t> &uids);
+
+    /**
+     * Process network policy in device idle mode.
+     *
+     * @param enable Device idle mode is open or not.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t SetDeviceIdlePolicy(bool enable);
 
 private:
     class NetPolicyDeathRecipient : public IRemoteObject::DeathRecipient {

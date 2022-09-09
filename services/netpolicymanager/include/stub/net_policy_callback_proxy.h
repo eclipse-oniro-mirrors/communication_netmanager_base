@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,8 @@
 #include "iremote_proxy.h"
 
 #include "i_net_policy_callback.h"
-#include "net_policy_cellular_policy.h"
 #include "net_policy_constants.h"
+#include "net_quota_policy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -30,10 +30,12 @@ public:
     virtual ~NetPolicyCallbackProxy();
 
 public:
-    int32_t NetUidPolicyChanged(uint32_t uid, NetUidPolicy policy) override;
-    int32_t NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicies) override;
-    int32_t NetStrategySwitch(const std::string &simId, bool enable) override;
-    int32_t NetBackgroundPolicyChanged(bool isBackgroundPolicyAllow) override;
+    int32_t NetUidPolicyChange(uint32_t uid, uint32_t policy) override;
+    int32_t NetUidRuleChange(uint32_t uid, uint32_t rule) override;
+    int32_t NetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies) override;
+    int32_t NetStrategySwitch(const std::string &iccid, bool enable) override;
+    int32_t NetMeteredIfacesChange(std::vector<std::string> &ifaces) override;
+    int32_t NetBackgroundPolicyChange(bool isBackgroundPolicyAllow) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
