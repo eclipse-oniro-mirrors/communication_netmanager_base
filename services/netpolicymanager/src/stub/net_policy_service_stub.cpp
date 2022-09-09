@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,56 +14,88 @@
  */
 #include "net_policy_service_stub.h"
 
-#include "net_policy_cellular_policy.h"
-#include "net_policy_quota_policy.h"
 #include "net_mgr_log_wrapper.h"
+#include "net_policy_core.h"
+#include "net_quota_policy.h"
+#include "netmanager_base_permission.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 NetPolicyServiceStub::NetPolicyServiceStub()
 {
-    memberFuncMap_[CMD_NSM_SET_UID_POLICY] = &NetPolicyServiceStub::OnSetPolicyByUid;
-    memberFuncMap_[CMD_NSM_GET_UID_POLICY] = &NetPolicyServiceStub::OnGetPolicyByUid;
-    memberFuncMap_[CMD_NSM_GET_UIDS] = &NetPolicyServiceStub::OnGetUidsByPolicy;
-    memberFuncMap_[CMD_NSM_IS_NET_ACCESS_METERED] = &NetPolicyServiceStub::OnIsUidNetAccessMetered;
-    memberFuncMap_[CMD_NSM_IS_NET_ACCESS_IFACENAME] = &NetPolicyServiceStub::OnIsUidNetAccessIfaceName;
-    memberFuncMap_[CMD_NSM_REGISTER_NET_POLICY_CALLBACK] = &NetPolicyServiceStub::OnRegisterNetPolicyCallback;
-    memberFuncMap_[CMD_NSM_UNREGISTER_NET_POLICY_CALLBACK] = &NetPolicyServiceStub::OnUnregisterNetPolicyCallback;
-    memberFuncMap_[CMD_NSM_NET_SET_QUOTA_POLICY] = &NetPolicyServiceStub::OnSetNetQuotaPolicies;
-    memberFuncMap_[CMD_NSM_NET_GET_QUOTA_POLICY] = &NetPolicyServiceStub::OnGetNetQuotaPolicies;
-    memberFuncMap_[CMD_NSM_NET_SET_CELLULAR_POLICY] = &NetPolicyServiceStub::OnSetCellularPolicies;
-    memberFuncMap_[CMD_NSM_NET_GET_CELLULAR_POLICY] = &NetPolicyServiceStub::OnGetCellularPolicies;
-    memberFuncMap_[CMD_NSM_FACTORY_RESET] = &NetPolicyServiceStub::OnSetFactoryPolicy;
-    memberFuncMap_[CMD_NSM_SNOOZE_POLICY] = &NetPolicyServiceStub::OnSnoozePolicy;
-    memberFuncMap_[CMD_NSM_SET_IDLE_TRUSTLIST] = &NetPolicyServiceStub::OnSetIdleTrustlist;
-    memberFuncMap_[CMD_NSM_GET_IDLE_TRUSTLIST] = &NetPolicyServiceStub::OnGetIdleTrustlist;
-    memberFuncMap_[CMD_NSM_SET_BACKGROUND_POLICY] = &NetPolicyServiceStub::OnSetBackgroundPolicy;
-    memberFuncMap_[CMD_NSM_GET_BACKGROUND_POLICY] = &NetPolicyServiceStub::OnGetBackgroundPolicy;
-    memberFuncMap_[CMD_NSM_GET_BACKGROUND_POLICY_BY_UID] = &NetPolicyServiceStub::OnGetBackgroundPolicyByUid;
-    memberFuncMap_[CMD_NSM_GET_BACKGROUND_POLICY_BY_CURRENT] = &NetPolicyServiceStub::OnGetCurrentBackgroundPolicy;
+    memberFuncMap_[CMD_NPS_SET_POLICY_BY_UID] = &NetPolicyServiceStub::OnSetPolicyByUid;
+    memberFuncMap_[CMD_NPS_GET_POLICY_BY_UID] = &NetPolicyServiceStub::OnGetPolicyByUid;
+    memberFuncMap_[CMD_NPS_GET_UIDS_BY_UID] = &NetPolicyServiceStub::OnGetUidsByPolicy;
+    memberFuncMap_[CMD_NPS_IS_NET_ALLOWED_BY_METERED] = &NetPolicyServiceStub::OnIsUidNetAllowedMetered;
+    memberFuncMap_[CMD_NPS_IS_NET_ALLOWED_BY_IFACE] = &NetPolicyServiceStub::OnIsUidNetAllowedIfaceName;
+    memberFuncMap_[CMD_NPS_REGISTER_NET_POLICY_CALLBACK] = &NetPolicyServiceStub::OnRegisterNetPolicyCallback;
+    memberFuncMap_[CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK] = &NetPolicyServiceStub::OnUnregisterNetPolicyCallback;
+    memberFuncMap_[CMD_NPS_SET_NET_QUOTA_POLICIES] = &NetPolicyServiceStub::OnSetNetQuotaPolicies;
+    memberFuncMap_[CMD_NPS_GET_NET_QUOTA_POLICIES] = &NetPolicyServiceStub::OnGetNetQuotaPolicies;
+    memberFuncMap_[CMD_NPS_RESET_POLICIES] = &NetPolicyServiceStub::OnResetPolicies;
+    memberFuncMap_[CMD_NPS_UPDATE_REMIND_POLICY] = &NetPolicyServiceStub::OnSnoozePolicy;
+    memberFuncMap_[CMD_NPS_SET_IDLE_ALLOWED_LIST] = &NetPolicyServiceStub::OnSetDeviceIdleAllowedList;
+    memberFuncMap_[CMD_NPS_GET_IDLE_ALLOWED_LIST] = &NetPolicyServiceStub::OnGetDeviceIdleAllowedList;
+    memberFuncMap_[CMD_NPS_SET_DEVICE_IDLE_POLICY] = &NetPolicyServiceStub::OnSetDeviceIdlePolicy;
+    memberFuncMap_[CMD_NPS_SET_BACKGROUND_POLICY] = &NetPolicyServiceStub::OnSetBackgroundPolicy;
+    memberFuncMap_[CMD_NPS_GET_BACKGROUND_POLICY] = &NetPolicyServiceStub::OnGetBackgroundPolicy;
+    memberFuncMap_[CMD_NPS_GET_BACKGROUND_POLICY_BY_UID] = &NetPolicyServiceStub::OnGetBackgroundPolicyByUid;
+    memberFuncMap_[CMD_NPS_GET_BACKGROUND_POLICY_BY_CURRENT] = &NetPolicyServiceStub::OnGetCurrentBackgroundPolicy;
+    InitEventHandler();
 }
 
-NetPolicyServiceStub::~NetPolicyServiceStub() {}
+NetPolicyServiceStub::~NetPolicyServiceStub() = default;
 
-int32_t NetPolicyServiceStub::OnRemoteRequest(
-    uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+void NetPolicyServiceStub::InitEventHandler()
 {
-    std::u16string myDescripter = NetPolicyServiceStub::GetDescriptor();
-    std::u16string remoteDescripter = data.ReadInterfaceToken();
-    if (myDescripter != remoteDescripter) {
+    runner_ = AppExecFwk::EventRunner::Create(NET_POLICY_WORK_THREAD);
+    if (!runner_) {
+        NETMGR_LOG_E("Create net policy work event runner.");
+        return;
+    }
+    auto core = DelayedSingleton<NetPolicyCore>::GetInstance();
+    handler_ = std::make_shared<NetPolicyEventHandler>(runner_, core);
+    core->Init(handler_);
+}
+
+int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code,
+                                              MessageParcel &data,
+                                              MessageParcel &reply,
+                                              MessageOption &option)
+{
+    std::u16string myDescriptor = NetPolicyServiceStub::GetDescriptor();
+    std::u16string remoteDescriptor = data.ReadInterfaceToken();
+    if (myDescriptor != remoteDescriptor) {
         NETMGR_LOG_E("descriptor checked fail");
         return ERR_FLATTEN_OBJECT;
     }
 
+    if (handler_ == nullptr) {
+        NETMGR_LOG_E("Net policy handler is null, re-create handler.");
+        InitEventHandler();
+    }
+
     auto itFunc = memberFuncMap_.find(code);
+    int32_t result = ERR_NONE;
     if (itFunc != memberFuncMap_.end()) {
         auto requestFunc = itFunc->second;
         if (requestFunc != nullptr) {
-            return (this->*requestFunc)(data, reply);
+            handler_->PostSyncTask(
+                [this, &data, &reply, &requestFunc, &result]() { result = (this->*requestFunc)(data, reply); },
+                AppExecFwk::EventQueue::Priority::HIGH);
+            return result;
         }
     }
-
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+}
+
+bool NetPolicyServiceStub::CheckPermission(const std::string &permission, const std::string &funcName)
+{
+    if (NetManagerPermission::CheckPermission(permission)) {
+        return true;
+    }
+    NETMGR_LOG_E("Permission denied function: %{public}s permission: %{public}s", funcName.c_str(), permission.c_str());
+    return false;
 }
 
 int32_t NetPolicyServiceStub::OnSetPolicyByUid(MessageParcel &data, MessageParcel &reply)
@@ -113,7 +145,7 @@ int32_t NetPolicyServiceStub::OnGetUidsByPolicy(MessageParcel &data, MessageParc
     return ERR_NONE;
 }
 
-int32_t NetPolicyServiceStub::OnIsUidNetAccessMetered(MessageParcel &data, MessageParcel &reply)
+int32_t NetPolicyServiceStub::OnIsUidNetAllowedMetered(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t uid = 0;
     bool metered = false;
@@ -125,7 +157,7 @@ int32_t NetPolicyServiceStub::OnIsUidNetAccessMetered(MessageParcel &data, Messa
         return ERR_FLATTEN_OBJECT;
     }
 
-    bool ret = IsUidNetAccess(uid, metered);
+    bool ret = IsUidNetAllowed(uid, metered);
     if (!reply.WriteBool(ret)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -133,7 +165,7 @@ int32_t NetPolicyServiceStub::OnIsUidNetAccessMetered(MessageParcel &data, Messa
     return ERR_NONE;
 }
 
-int32_t NetPolicyServiceStub::OnIsUidNetAccessIfaceName(MessageParcel &data, MessageParcel &reply)
+int32_t NetPolicyServiceStub::OnIsUidNetAllowedIfaceName(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t uid = 0;
     std::string ifaceName;
@@ -144,7 +176,7 @@ int32_t NetPolicyServiceStub::OnIsUidNetAccessIfaceName(MessageParcel &data, Mes
     if (!data.ReadString(ifaceName)) {
         return ERR_FLATTEN_OBJECT;
     }
-    bool ret = IsUidNetAccess(uid, ifaceName);
+    bool ret = IsUidNetAllowed(uid, ifaceName);
     if (!reply.WriteBool(ret)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -185,8 +217,8 @@ int32_t NetPolicyServiceStub::OnUnregisterNetPolicyCallback(MessageParcel &data,
 
 int32_t NetPolicyServiceStub::OnSetNetQuotaPolicies(MessageParcel &data, MessageParcel &reply)
 {
-    std::vector<NetPolicyQuotaPolicy> quotaPolicies;
-    if (!NetPolicyQuotaPolicy::Unmarshalling(data, quotaPolicies)) {
+    std::vector<NetQuotaPolicy> quotaPolicies;
+    if (!NetQuotaPolicy::Unmarshalling(data, quotaPolicies)) {
         NETMGR_LOG_E("Unmarshalling failed.");
         return ERR_FLATTEN_OBJECT;
     }
@@ -200,14 +232,14 @@ int32_t NetPolicyServiceStub::OnSetNetQuotaPolicies(MessageParcel &data, Message
 
 int32_t NetPolicyServiceStub::OnGetNetQuotaPolicies(MessageParcel &data, MessageParcel &reply)
 {
-    std::vector<NetPolicyQuotaPolicy> quotaPolicies;
+    std::vector<NetQuotaPolicy> quotaPolicies;
 
     if (GetNetQuotaPolicies(quotaPolicies) != NetPolicyResultCode::ERR_NONE) {
         NETMGR_LOG_E("GetNetQuotaPolicies failed.");
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!NetPolicyQuotaPolicy::Marshalling(reply, quotaPolicies)) {
+    if (!NetQuotaPolicy::Marshalling(reply, quotaPolicies)) {
         NETMGR_LOG_E("Marshalling failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -215,47 +247,14 @@ int32_t NetPolicyServiceStub::OnGetNetQuotaPolicies(MessageParcel &data, Message
     return ERR_NONE;
 }
 
-int32_t NetPolicyServiceStub::OnSetCellularPolicies(MessageParcel &data, MessageParcel &reply)
-{
-    std::vector<NetPolicyCellularPolicy> cellularPolicies;
-    if (!NetPolicyCellularPolicy::Unmarshalling(data, cellularPolicies)) {
-        NETMGR_LOG_E("Unmarshalling failed.");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    if (!reply.WriteInt32(static_cast<int32_t>(SetCellularPolicies(cellularPolicies)))) {
-        NETMGR_LOG_E("WriteInt32 SetCellularPolicies return failed.");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    return ERR_NONE;
-}
-
-int32_t NetPolicyServiceStub::OnGetCellularPolicies(MessageParcel &data, MessageParcel &reply)
-{
-    std::vector<NetPolicyCellularPolicy> cellularPolicies;
-
-    if (GetCellularPolicies(cellularPolicies) != NetPolicyResultCode::ERR_NONE) {
-        NETMGR_LOG_E("GetNetQuotaPolicies failed.");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    if (!NetPolicyCellularPolicy::Marshalling(reply, cellularPolicies)) {
-        NETMGR_LOG_E("Marshalling failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    return ERR_NONE;
-}
-
-int32_t NetPolicyServiceStub::OnSetFactoryPolicy(MessageParcel &data, MessageParcel &reply)
+int32_t NetPolicyServiceStub::OnResetPolicies(MessageParcel &data, MessageParcel &reply)
 {
     std::string subscrberId;
     if (!data.ReadString(subscrberId)) {
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!reply.WriteInt32(static_cast<int32_t>(SetFactoryPolicy(subscrberId)))) {
+    if (!reply.WriteInt32(static_cast<int32_t>(ResetPolicies(subscrberId)))) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -293,7 +292,7 @@ int32_t NetPolicyServiceStub::OnGetBackgroundPolicyByUid(MessageParcel &data, Me
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!reply.WriteBool(GetBackgroundPolicyByUid(uid))) {
+    if (!reply.WriteUint32(GetBackgroundPolicyByUid(uid))) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -311,50 +310,69 @@ int32_t NetPolicyServiceStub::OnGetCurrentBackgroundPolicy(MessageParcel &data, 
 
 int32_t NetPolicyServiceStub::OnSnoozePolicy(MessageParcel &data, MessageParcel &reply)
 {
-    int8_t netType = 0;
-    if (!data.ReadInt8(netType)) {
+    int32_t netType = 0;
+    if (!data.ReadInt32(netType)) {
         return ERR_FLATTEN_OBJECT;
     }
 
-    std::string simId;
-    if (!data.ReadString(simId)) {
+    std::string iccid;
+    if (!data.ReadString(iccid)) {
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!reply.WriteInt32(static_cast<int32_t>(SetSnoozePolicy(netType, simId)))) {
+    uint32_t remindType = 0;
+    if (!data.ReadUint32(remindType)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!reply.WriteInt32(static_cast<int32_t>(UpdateRemindPolicy(netType, iccid, remindType)))) {
         return ERR_FLATTEN_OBJECT;
     }
 
     return ERR_NONE;
 }
 
-int32_t NetPolicyServiceStub::OnSetIdleTrustlist(MessageParcel &data, MessageParcel &reply)
+int32_t NetPolicyServiceStub::OnSetDeviceIdleAllowedList(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t uid;
     if (!data.ReadUint32(uid)) {
         return ERR_FLATTEN_OBJECT;
     }
 
-    bool isTrustlist = false;
-    if (!data.ReadBool(isTrustlist)) {
+    bool isAllowed = false;
+    if (!data.ReadBool(isAllowed)) {
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!reply.WriteInt32(static_cast<int32_t>(SetIdleTrustlist(uid, isTrustlist)))) {
+    if (!reply.WriteInt32(static_cast<int32_t>(SetDeviceIdleAllowedList(uid, isAllowed)))) {
         return ERR_FLATTEN_OBJECT;
     }
 
     return ERR_NONE;
 }
 
-int32_t NetPolicyServiceStub::OnGetIdleTrustlist(MessageParcel &data, MessageParcel &reply)
+int32_t NetPolicyServiceStub::OnGetDeviceIdleAllowedList(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<uint32_t> uids;
-    if (GetIdleTrustlist(uids) != NetPolicyResultCode::ERR_NONE) {
+    if (GetDeviceIdleAllowedList(uids) != NetPolicyResultCode::ERR_NONE) {
         return ERR_FLATTEN_OBJECT;
     }
 
     if (!reply.WriteUInt32Vector(uids)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    return ERR_NONE;
+}
+
+int32_t NetPolicyServiceStub::OnSetDeviceIdlePolicy(MessageParcel &data, MessageParcel &reply)
+{
+    bool isAllowed = false;
+    if (!data.ReadBool(isAllowed)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!reply.WriteInt32(SetDeviceIdlePolicy(isAllowed))) {
         return ERR_FLATTEN_OBJECT;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,19 +14,20 @@
  */
 
 #include "net_policy_service_common.h"
+
 #include "net_policy_service.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-int32_t NetPolicyServiceCommon::ResetPolicyFactory()
+int32_t NetPolicyServiceCommon::ResetPolicies()
 {
-    NetPolicyResultCode result = DelayedSingleton<NetPolicyService>::GetInstance()->SetFactoryPolicy("");
+    int32_t result = DelayedSingleton<NetPolicyService>::GetInstance()->ResetPolicies("");
     return static_cast<int32_t>(result);
 }
 
-bool NetPolicyServiceCommon::IsUidNetAccess(uint32_t uid, bool metered)
+bool NetPolicyServiceCommon::IsUidNetAllowed(uint32_t uid, bool metered)
 {
-    return DelayedSingleton<NetPolicyService>::GetInstance()->IsUidNetAccess(uid, metered);
+    return DelayedSingleton<NetPolicyService>::GetInstance()->IsUidNetAllowed(uid, metered);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
