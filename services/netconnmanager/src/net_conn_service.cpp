@@ -555,7 +555,7 @@ sptr<NetSupplier> NetConnService::GetNetSupplierFromList(NetBearType bearerType,
 {
     for (auto &netSupplier : netSuppliers_) {
         if ((bearerType == netSupplier.second->GetNetSupplierType()) &&
-            (ident == netSupplier.second->GetNetSupplierIdent()) && (netCaps == netSupplier.second->GetNetCaps())) {
+            (ident == netSupplier.second->GetNetSupplierIdent()) && netSupplier.second->CompareNetCaps(netCaps)) {
             return netSupplier.second;
         }
     }
@@ -945,8 +945,7 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
                 break;
             }
             case CALL_TYPE_BLOCK_STATUS: {
-                std::set<NetCap> netCaps = supplier->GetNetCaps();
-                bool Metered = (netCaps.find(NET_CAPABILITY_NOT_METERED) != netCaps.end());
+                bool Metered = supplier->HasNetCap(NET_CAPABILITY_NOT_METERED);
                 bool newBlocked = NetManagerCenter::GetInstance().IsUidNetAccess(supplier->GetSupplierUid(), Metered);
                 callback->NetBlockStatusChange(netHandle, newBlocked);
                 break;

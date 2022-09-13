@@ -21,6 +21,7 @@
 #include <vector>
 #include <map>
 #include "network.h"
+#include "net_caps.h"
 #include "net_supplier_info.h"
 #include "net_specifier.h"
 #include "i_net_supplier_callback.h"
@@ -51,8 +52,10 @@ public:
     uint32_t GetSupplierId() const;
     NetBearType GetNetSupplierType() const;
     std::string GetNetSupplierIdent() const;
-    const std::set<NetCap> &GetNetCaps() const;
-    std::set<NetCap> GetNetCaps();
+    bool CompareNetCaps(const std::set<NetCap> caps) const;
+    bool HasNetCap(NetCap cap) const;
+    bool HasNetCaps(const std::set<NetCap> &caps) const;
+    const NetCaps &GetNetCaps() const;
     NetAllCapabilities GetNetCapabilities() const;
     NetLinkInfo GetNetLinkInfo() const;
     bool GetRoaming() const;
@@ -91,7 +94,7 @@ public:
 private:
     NetBearType netSupplierType_;
     std::string netSupplierIdent_;
-    std::set<NetCap> netCaps_;
+    NetCaps netCaps_;
     NetLinkInfo netLinkInfo_;
     NetSupplierInfo netSupplierInfo_;
     NetAllCapabilities netAllCapabilities_;

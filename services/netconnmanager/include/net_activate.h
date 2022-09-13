@@ -49,7 +49,7 @@ public:
 
 private:
     bool CompareByNetworkIdent(const std::string &ident);
-    bool CompareByNetworkCapabilities(const std::set<NetCap> &netCaps);
+    bool CompareByNetworkCapabilities(const NetCaps &netCaps);
     bool CompareByNetworkNetType(NetBearType bearerType);
     bool CompareByNetworkBand(uint32_t netLinkUpBand, uint32_t netLinkDownBand);
     bool HaveCapability(NetCap netCap) const;

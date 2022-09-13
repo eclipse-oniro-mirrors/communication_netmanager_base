@@ -18,6 +18,7 @@ ohos_shared_library("net_conn_manager") {
   sources = [
     "$NETCONNMANAGER_COMMON_DIR/src/route_utils.cpp",
     "$NETCONNMANAGER_SOURCE_DIR/src/net_activate.cpp",
+    "$NETCONNMANAGER_SOURCE_DIR/src/net_caps.cpp",
     "$NETCONNMANAGER_SOURCE_DIR/src/net_conn_service.cpp",
     "$NETCONNMANAGER_SOURCE_DIR/src/net_conn_service_iface.cpp",
     "$NETCONNMANAGER_SOURCE_DIR/src/net_monitor.cpp",
