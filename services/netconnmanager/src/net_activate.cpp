@@ -16,6 +16,7 @@
 
 #include <atomic>
 #include <functional>
+#include "net_caps.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
@@ -60,7 +61,7 @@ void NetActivate::TimeOutNetAvailable()
 
 bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier)
 {
-    NETMGR_LOG_E("MatchRequestAndNetwork Enter");
+    NETMGR_LOG_I("MatchRequestAndNetwork Enter");
     if (supplier == nullptr) {
         NETMGR_LOG_E("supplier is null");
         return false;
@@ -69,8 +70,7 @@ bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier)
         NETMGR_LOG_D("supplier ident is not satisfy");
         return false;
     }
-    NetAllCapabilities netAllCaps = supplier->GetNetCapabilities();
-    if (!CompareByNetworkCapabilities(netAllCaps.netCaps_)) {
+    if (!CompareByNetworkCapabilities(supplier->GetNetCaps())) {
         NETMGR_LOG_D("supplier capa is not satisfy");
         return false;
     }
@@ -78,6 +78,7 @@ bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier)
         NETMGR_LOG_D("supplier net type not satisfy");
         return false;
     }
+    NetAllCapabilities netAllCaps = supplier->GetNetCapabilities();
     if (!CompareByNetworkBand(netAllCaps.linkUpBandwidthKbps_, netAllCaps.linkDownBandwidthKbps_)) {
         NETMGR_LOG_D("supplier net band not satisfy");
         return false;
@@ -97,7 +98,7 @@ bool NetActivate::CompareByNetworkIdent(const std::string &ident)
     return false;
 }
 
-bool NetActivate::CompareByNetworkCapabilities(const std::set<NetCap> &netCaps)
+bool NetActivate::CompareByNetworkCapabilities(const NetCaps &netCaps)
 {
     if (netSpecifier_ == nullptr) {
         return false;
@@ -106,12 +107,7 @@ bool NetActivate::CompareByNetworkCapabilities(const std::set<NetCap> &netCaps)
     if (reqCaps.empty()) {
         return true;
     }
-    for (auto cap : reqCaps) {
-        if (netCaps.find(cap) == netCaps.end()) {
-            return false;
-        }
-    }
-    return true;
+    return netCaps.HasNetCaps(reqCaps);
 }
 
 bool NetActivate::CompareByNetworkNetType(NetBearType bearerType)
