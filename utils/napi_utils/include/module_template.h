@@ -63,6 +63,48 @@ napi_value Interface(napi_env env, napi_callback_info info, const std::string &a
 }
 
 template <class Context>
+napi_value InterfaceSync(napi_env env, napi_callback_info info,
+                         bool (*Work)(napi_env, napi_value, Context *), bool (*executor)(Context *),
+                         napi_value (*callback)(Context *))
+{
+    static_assert(std::is_base_of<BaseContext, Context>::value);
+
+    napi_value thisVal = nullptr;
+    size_t paramsCount = MAX_PARAM_NUM;
+    napi_value params[MAX_PARAM_NUM] = {nullptr};
+    NAPI_CALL(env, napi_get_cb_info(env, info, &paramsCount, params, &thisVal, nullptr));
+
+    auto deleter = [](Context *context) { delete context; };
+    std::unique_ptr<Context, decltype(deleter)> context(new Context(env, nullptr), deleter);
+    if (!context) {
+        return NapiUtils::GetUndefined(context->GetEnv());
+    }
+
+    context->ParseParams(params, paramsCount);
+    if (!context->IsParseOK()) {
+        NETMANAGER_BASE_LOGE("JS param parse error");
+        return NapiUtils::GetUndefined(context->GetEnv());
+    }
+
+    if (Work != nullptr) {
+        if (!Work(env, thisVal, context.get())) {
+            NETMANAGER_BASE_LOGE("work failed error code = %{public}d", context->GetErrorCode());
+            return NapiUtils::GetUndefined(context->GetEnv());
+        }
+    }
+
+    if (!executor || !callback) {
+        NETMANAGER_BASE_LOGE("executor or callback is null");
+        return NapiUtils::GetUndefined(context->GetEnv());
+    }
+
+    if (!executor(context.get())) {
+        return NapiUtils::GetUndefined(context->GetEnv());
+    }
+    return callback(context.get());
+}
+
+template <class Context>
 napi_value InterfaceWithOutAsyncWork(napi_env env, napi_callback_info info,
                                      bool (*Work)(napi_env, napi_value, Context *))
 {

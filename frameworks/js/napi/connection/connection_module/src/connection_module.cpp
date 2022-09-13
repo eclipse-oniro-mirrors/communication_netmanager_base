@@ -17,6 +17,7 @@
 
 #include "bindsocket_context.h"
 #include "connection_async_work.h"
+#include "connection_exec.h"
 #include "constant.h"
 #include "getaddressbyname_context.h"
 #include "getdefaultnet_context.h"
@@ -124,6 +125,7 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
 {
     std::initializer_list<napi_property_descriptor> functions = {
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_NET, GetDefaultNet),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_NET_SYNC, GetDefaultNetSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_CREATE_NET_CONNECTION, CreateNetConnection),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_ADDRESSES_BY_NAME, GetAddressesByName),
         DECLARE_NAPI_FUNCTION(FUNCTION_HAS_DEFAULT_NET, HasDefaultNet),
@@ -219,6 +221,13 @@ napi_value ConnectionModule::GetDefaultNet(napi_env env, napi_callback_info info
     return ModuleTemplate::Interface<GetDefaultNetContext>(env, info, FUNCTION_GET_DEFAULT_NET, nullptr,
                                                            ConnectionAsyncWork::ExecGetDefaultNet,
                                                            ConnectionAsyncWork::GetDefaultNetCallback);
+}
+
+napi_value ConnectionModule::GetDefaultNetSync(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<GetDefaultNetContext>(env, info, nullptr,
+                                                               ConnectionExec::ExecGetDefaultNet,
+                                                               ConnectionExec::GetDefaultNetCallback);
 }
 
 napi_value ConnectionModule::GetAllNets(napi_env env, napi_callback_info info)
