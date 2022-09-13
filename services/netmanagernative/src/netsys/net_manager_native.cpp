@@ -16,6 +16,7 @@
 #include <net/if.h>
 
 #include "interface_manager.h"
+#include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "network_permission.h"
 #include "net_manager_constants.h"
@@ -24,6 +25,7 @@
 
 #include "net_manager_native.h"
 
+using namespace OHOS::NetManagerStandard::CommonUtils;
 std::vector<unsigned int> OHOS::nmd::NetManagerNative::interfaceIdex;
 
 namespace OHOS {
@@ -91,7 +93,7 @@ int NetManagerNative::InterfaceAddAddress(std::string ifName, std::string addrSt
     NETNATIVE_LOGI(
         "NetManagerNative::InterfaceAddAddress, ifName:%{public}s, addrString:%{public}s,"
         "prefixLength:%{public}d",
-        ifName.c_str(), addrString.c_str(), prefixLength);
+        ifName.c_str(), ToAnonymousIp(addrString).c_str(), prefixLength);
 
     return interfaceManager_->AddAddress(ifName.c_str(), addrString.c_str(), prefixLength);
 }
@@ -101,7 +103,7 @@ int NetManagerNative::InterfaceDelAddress(std::string ifName, std::string addrSt
     NETNATIVE_LOGI(
         "NetManagerNative::InterfaceAddAddress, ifName:%{public}s, addrString:%{public}s,"
         "prefixLength:%{public}d",
-        ifName.c_str(), addrString.c_str(), prefixLength);
+        ifName.c_str(), ToAnonymousIp(addrString).c_str(), prefixLength);
 
     return interfaceManager_->DelAddress(ifName.c_str(), addrString.c_str(), prefixLength);
 }
