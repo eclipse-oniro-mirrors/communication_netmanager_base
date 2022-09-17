@@ -30,6 +30,7 @@ ohos_shared_library("net_service_common") {
     "$INNERKITS_ROOT/netstatsclient/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$INNERKITS_ROOT/netmanagernative/include",
+    "$SUBSYSTEM_DIR/ipc/interfaces/innerkits/ipc_core/include",
   ]
 
   deps = [
@@ -42,7 +43,6 @@ ohos_shared_library("net_service_common") {
     "ability_base:want",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "ipc:ipc_core",
   ]
 
   defines = [

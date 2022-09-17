@@ -12,14 +12,15 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_shared_library("netsys_client") {
   sources = [
-    "//foundation/communication/netmanager_base/services/netmanagernative/netsys_client/src/netsys_client.c",
-    "//foundation/communication/netmanager_base/services/netmanagernative/netsys_client/src/netsys_tcp_client.c",
+    "$NETMANAGERNATIVE_ROOT/netsys_client/src/netsys_client.c",
+    "$NETMANAGERNATIVE_ROOT/netsys_client/src/netsys_tcp_client.c",
   ]
 
-  include_dirs = [ "//foundation/communication/netmanager_base/services/netmanagernative/include/netsys" ]
+  include_dirs = [ "$NETMANAGERNATIVE_ROOT/include/netsys" ]
 
   external_deps = [ "c_utils:utils" ]
 

@@ -12,14 +12,15 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 SUBSYSTEM_DIR = "//foundation/communication"
-NETMANAGER_BASE_NAPI_ROOT = "$SUBSYSTEM_DIR/netmanager_base/frameworks/js/napi/"
+NETMANAGER_BASE_NAPI_ROOT = "$NETMANAGER_BASE_ROOT/frameworks/js/napi/"
 
 common_deps = [
-  "$SUBSYSTEM_DIR/netmanager_base/utils/napi_utils:napi_utils",
-  "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
-  "//third_party/libuv:uv",
+  "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+  "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
+  "$THIRD_PARTY_ROOT/libuv:uv",
 ]
 
 common_external_deps = [
@@ -41,6 +42,7 @@ ohos_shared_library("connection") {
     "$NETMANAGER_BASE_NAPI_ROOT/connection/connection_module/include",
     "$NETMANAGER_BASE_NAPI_ROOT/connection/observer/include",
     "$NETMANAGER_BASE_NAPI_ROOT/connection/options/include",
+    "$NETMANAGER_BASE_ROOT/utils/log/include",
   ]
 
   sources = [

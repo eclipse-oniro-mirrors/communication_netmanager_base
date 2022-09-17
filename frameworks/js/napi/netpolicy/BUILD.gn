@@ -14,11 +14,11 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-NETMANAGER_NAPI_ROOT = "$SUBSYSTEM_DIR/netmanager_base/frameworks/js/napi/"
+NETMANAGER_NAPI_ROOT = "$NETMANAGER_BASE_ROOT/frameworks/js/napi/"
 
 ohos_shared_library("policy") {
   include_dirs = [
-    "//third_party/node/src",
+    "$THIRD_PARTY_ROOT/node/src",
     "$NETMANAGER_NAPI_ROOT/netpolicy/include",
     "$NETMANAGER_NAPI_ROOT/common",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
@@ -37,19 +37,14 @@ ohos_shared_library("policy") {
   defines = [ "NETMGR_DEBUG" ]
 
   deps = [
+    "$ARKUI_ROOT/napi/:ace_napi",
     "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if",
-    "//foundation/arkui/napi/:ace_napi",
   ]
 
   external_deps = [
-    "ability_base:want",
     "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
   ]
 
   relative_install_dir = "module/net"

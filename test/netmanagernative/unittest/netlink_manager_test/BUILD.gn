@@ -22,9 +22,9 @@ ohos_unittest("netsys_event_test") {
     "$INNERKITS_ROOT/netmanagernative/include",
     "$INNERKITS_ROOT/dnsresolverclient/include",
     "$INNERKITS_ROOT/dnsresolverclient/include/proxy",
-    "//foundation/communication/wifi/wifi/frameworks/native/c_adapter/inc",
-    "//foundation/communication/wifi/wifi/frameworks/native/include",
-    "//foundation/communication/wifi/wifi/frameworks/native/interfaces",
+    "$WIFI_MANAGER_ROOT/frameworks/native/c_adapter/inc",
+    "$WIFI_MANAGER_ROOT/frameworks/native/include",
+    "$WIFI_MANAGER_ROOT/frameworks/native/interfaces",
   ]
 
   deps = [

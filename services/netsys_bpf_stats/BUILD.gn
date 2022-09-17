@@ -17,7 +17,7 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 config("bpf_public_config") {
   include_dirs = [
     "$NETSYSBPFMAP_SOURCE_DIR/include",
-    "//foundation/communication/netmanager_base/interfaces/innerkits/netmanagernative/include/",
+    "$NETMANAGER_BASE_ROOT/interfaces/innerkits/netmanagernative/include/",
     "$INNERKITS_ROOT/netstatsclient/include",
   ]
 }
@@ -25,16 +25,18 @@ config("bpf_public_config") {
 config("bpf_config") {
   include_dirs = [
     "include",
-    "//commonlibrary/c_utils/base/include",
+    "$C_UTILS_ROOT/base/include",
   ]
 }
 
 ohos_shared_library("netsys_bpf_stats") {
   configs = [ ":bpf_config" ]
   public_configs = [ ":bpf_public_config" ]
-  sources = [ "//foundation/communication/netmanager_base/services/netsys_bpf_stats/src/netsys_bpf_stats.cpp" ]
+  sources = [
+    "$NETMANAGER_BASE_ROOT/services/netsys_bpf_stats/src/netsys_bpf_stats.cpp",
+  ]
 
-  public_deps = [ "//commonlibrary/c_utils/base:utils" ]
+  public_deps = [ "$C_UTILS_ROOT/base:utils" ]
 
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
