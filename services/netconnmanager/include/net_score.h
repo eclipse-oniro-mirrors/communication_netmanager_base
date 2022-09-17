@@ -43,9 +43,6 @@ public:
     bool GetServiceScore(sptr<NetSupplier> &supplier);
 
 private:
-    int32_t CalculateScoreForWifi(sptr<NetSupplier> &supplier);
-    int32_t GetWifiSignalBar(int32_t rssi, int32_t signalBars);
-private:
     NetTypeScore netTypeScore_ = {
         {BEARER_CELLULAR, static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE)},
         {BEARER_WIFI, static_cast<int32_t>(NetTypeScoreValue::WIFI_VALUE)},

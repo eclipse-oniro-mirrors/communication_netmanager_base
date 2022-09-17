@@ -68,6 +68,7 @@ enum NetMonitorResponseCode {
 };
 
 enum NetDetectionStatus {
+    UNKNOWN_STATE,
     INVALID_DETECTION_STATE,
     VERIFICATION_STATE,
     CAPTIVE_PORTAL_STATE
