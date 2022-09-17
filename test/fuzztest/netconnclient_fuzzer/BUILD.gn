@@ -20,7 +20,7 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 ##############################fuzztest##########################################
 ohos_fuzztest("NetConnClientFuzzTest") {
   module_out_path = "netmanager_base/net_conn_client"
-  fuzz_config_file = "//foundation/communication/netmanager_base/test/fuzztest/netconnclient_fuzzer"
+  fuzz_config_file = "$NETMANAGER_BASE_ROOT/test/fuzztest/netconnclient_fuzzer"
 
   include_dirs = [
     "$INNERKITS_ROOT/include",
@@ -28,7 +28,7 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "$INNERKITS_ROOT/netconnclient/include/proxy",
     "$NETCONNMANAGER_SOURCE_DIR/include/stub",
     "$NETCONNMANAGER_SOURCE_DIR/include",
-    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
+    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
     "$NETMANAGERNATIVE_ROOT/net_mgr_native/include",
     "$NETMANAGERNATIVE_ROOT/common/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",

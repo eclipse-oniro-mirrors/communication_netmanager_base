@@ -12,13 +12,12 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-
-SUBSYSTEM_DIR = "//foundation/communication"
+import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 common_deps = [
-  "$SUBSYSTEM_DIR/netmanager_base/utils/napi_utils:napi_utils",
-  "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
-  "//third_party/libuv:uv",
+  "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+  "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
+  "$THIRD_PARTY_ROOT/libuv:uv",
 ]
 
 common_external_deps = [
@@ -40,6 +39,7 @@ ohos_shared_library("network") {
     "network_module/include",
     "observer/include",
     "options/include",
+    "$NETMANAGER_BASE_ROOT/utils/log/include",
   ]
 
   sources = [
@@ -57,8 +57,7 @@ ohos_shared_library("network") {
       defined(global_parts_info.telephony_core_service) &&
       global_parts_info.telephony_core_service) {
     deps += [
-      "//base/telephony/core_service:tel_core_service",
-      "//base/telephony/core_service/interfaces/innerkits:tel_core_service_api",
+      "$TELEPHONY_ROOT/core_service/interfaces/innerkits:tel_core_service_api",
     ]
     defines = [ "HAS_TELEPHONY=1" ]
   }

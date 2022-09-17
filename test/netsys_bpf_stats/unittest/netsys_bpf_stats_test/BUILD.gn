@@ -25,13 +25,13 @@ ohos_unittest("netsys_bpf_stats_test") {
     "$NETSTATSMANAGER_SOURCE_DIR/include",
     "$NETSYSBPFMAP_SOURCE_DIR/include",
     "$NETSYSBPFMAP_SOURCE_DIR/include",
-    "//foundation/communication/netmanager_base/interfaces/innerkits/netmanagernative/include/",
+    "$INNERKITS_ROOT/netmanagernative/include/",
   ]
 
   deps = [
+    "$HILOG_ROOT/interfaces/native/innerkits:libhilog",
+    "$NETMANAGER_BASE_ROOT/services/netsys_bpf_stats:netsys_bpf_stats",
     "$NETSTATSMANAGER_BPFLIB_DIR:netsys_bpf_stats",
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
-    "//foundation/communication/netmanager_base/services/netsys_bpf_stats:netsys_bpf_stats",
   ]
 
   external_deps = [

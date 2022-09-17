@@ -34,12 +34,12 @@ ohos_unittest("net_stats_manager_test") {
   ]
 
   deps = [
+    "$HILOG_ROOT/interfaces/native/innerkits:libhilog",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETMANAGER_BASE_ROOT/services/netstatsmanager:net_stats_manager",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSTATSMANAGER_BPFLIB_DIR:netsys_bpf_stats",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
   ]
 
   external_deps = [

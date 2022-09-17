@@ -643,10 +643,12 @@ sptr<OHOS::NetsysNative::INetsysService> NetsysNativeClient::GetProxy()
 {
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgr == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient samgr null");
         return nullptr;
     }
     auto remote = samgr->GetSystemAbility(OHOS::COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
     if (remote == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient remote null");
         return nullptr;
     }
     auto proxy = iface_cast<NetsysNative::INetsysService>(remote);

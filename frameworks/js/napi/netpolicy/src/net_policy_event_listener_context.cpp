@@ -14,8 +14,6 @@
  */
 
 #include "net_policy_event_listener_context.h"
-#include "iservice_registry.h"
-#include "system_ability_definition.h"
 #include "net_policy_client.h"
 #include "napi_net_policy_observer.h"
 #include "napi_net_policy.h"
