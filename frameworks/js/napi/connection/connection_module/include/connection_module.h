@@ -22,6 +22,7 @@ namespace OHOS::NetManagerStandard {
 class ConnectionModule final {
 public:
     static constexpr const char *FUNCTION_GET_DEFAULT_NET = "getDefaultNet";
+    static constexpr const char *FUNCTION_GET_DEFAULT_NET_SYNC = "getDefaultNetSync";
     static constexpr const char *FUNCTION_HAS_DEFAULT_NET = "hasDefaultNet";
     static constexpr const char *FUNCTION_GET_NET_CAPABILITIES = "getNetCapabilities";
     static constexpr const char *FUNCTION_GET_CONNECTION_PROPERTIES = "getConnectionProperties";
@@ -65,6 +66,7 @@ private:
     static void InitProperties(napi_env env, napi_value exports);
 
     static napi_value GetDefaultNet(napi_env env, napi_callback_info info);
+    static napi_value GetDefaultNetSync(napi_env env, napi_callback_info info);
     static napi_value CreateNetConnection(napi_env env, napi_callback_info info);
     static napi_value GetAddressesByName(napi_env env, napi_callback_info info);
     static napi_value HasDefaultNet(napi_env env, napi_callback_info info);
