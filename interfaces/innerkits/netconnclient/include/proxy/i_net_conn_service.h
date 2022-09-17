@@ -63,6 +63,7 @@ public:
         CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK,
         CMD_NM_SET_AIRPLANE_MODE,
         CMD_NM_RESTORE_FACTORY_DATA,
+        CMD_NM_IS_DDEFAULT_NET_METERED,
         CMD_NM_END,
     };
 
@@ -97,6 +98,7 @@ public:
     virtual int32_t BindSocket(int32_t socket_fd, int32_t netId) =0;
     virtual int32_t SetAirplaneMode(bool state) = 0;
     virtual int32_t RestoreFactoryData() = 0;
+    virtual int32_t IsDefaultNetMetered(bool &isMetered) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

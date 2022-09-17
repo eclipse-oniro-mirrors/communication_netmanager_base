@@ -55,6 +55,7 @@ public:
     int32_t BindSocket(int32_t socket_fd, int32_t netId) override;
     int32_t SetAirplaneMode(bool state) override;
     int32_t RestoreFactoryData() override;
+    int32_t IsDefaultNetMetered(bool &isMetered) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

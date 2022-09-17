@@ -502,5 +502,18 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     std::cout << info.ToString("\n") << std::endl;
 }
+
+/**
+ * @tc.name: NetConnManager015
+ * @tc.desc: Test NetConnManager IsDefaultNetMetered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnManagerTest, NetConnManager015, TestSize.Level1)
+{
+    bool isMetered = false;
+    int32_t result = DelayedSingleton<NetConnClient>::GetInstance()->IsDefaultNetMetered(isMetered);
+    ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
+    std::cout << "isMetered : " << isMetered << std::endl;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

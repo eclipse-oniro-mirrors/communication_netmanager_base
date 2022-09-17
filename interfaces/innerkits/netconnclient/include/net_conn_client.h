@@ -60,6 +60,7 @@ public:
     int32_t NetDetection(const NetHandle &netHandle);
     int32_t SetAirplaneMode(bool state);
     int32_t RestoreFactoryData();
+    int32_t IsDefaultNetMetered(bool &isMetered);
 
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {

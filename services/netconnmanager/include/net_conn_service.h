@@ -49,14 +49,14 @@ public:
     void OnStart() override;
     void OnStop() override;
     /**
-     * @brief The interface in NetConnService can be called when the system is ready
+     * The interface in NetConnService can be called when the system is ready
      *
      * @return Returns 0, the system is ready, otherwise the system is not ready
      */
     int32_t SystemReady() override;
 
     /**
-     * @brief The interface is register the network
+     * The interface is register the network
      *
      * @param bearerType Bearer Network Type
      * @param ident Unique identification of mobile phone card
@@ -69,7 +69,7 @@ public:
         uint32_t &supplierId) override;
 
     /**
-     * @brief The interface is unregister the network
+     * The interface is unregister the network
      *
      * @param supplierId The id of the network supplier
      *
@@ -78,7 +78,7 @@ public:
     int32_t UnregisterNetSupplier(uint32_t supplierId) override;
 
     /**
-     * @brief Register supplier callback
+     * Register supplier callback
      *
      * @param supplierId The id of the network supplier
      * @param callback INetSupplierCallback callback interface
@@ -88,7 +88,7 @@ public:
     int32_t RegisterNetSupplierCallback(uint32_t supplierId, const sptr<INetSupplierCallback> &callback) override;
 
      /**
-     * @brief Register net connection callback
+     * Register net connection callback
      *
      * @param netSpecifier specifier information
      * @param callback The callback of INetConnCallback interface
@@ -98,7 +98,7 @@ public:
     int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
 
     /**
-     * @brief Register net connection callback by NetSpecifier
+     * Register net connection callback by NetSpecifier
      *
      * @param netSpecifier specifier information
      * @param callback The callback of INetConnCallback interface
@@ -110,7 +110,7 @@ public:
         const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS) override;
 
     /**
-     * @brief Unregister net connection callback
+     * Unregister net connection callback
      *
      * @return Returns 0, successfully unregister net connection callback, otherwise it will fail
      */
@@ -118,7 +118,7 @@ public:
 
     int32_t UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState) override;
     /**
-     * @brief The interface is update network connection status information
+     * The interface is update network connection status information
      *
      * @param supplierId The id of the network supplier
      * @param netSupplierInfo network connection status information
@@ -128,7 +128,7 @@ public:
     int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) override;
 
     /**
-     * @brief The interface is update network link attribute information
+     * The interface is update network link attribute information
      *
      * @param supplierId The id of the network supplier
      * @param netLinkInfo network link attribute information
@@ -157,7 +157,7 @@ public:
     int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) override;
 
     /**
-     * @brief register network detection return result method
+     * register network detection return result method
      *
      * @param netId  Network ID
      * @param callback The callback of INetDetectionCallback interface
@@ -166,7 +166,7 @@ public:
     int32_t RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) override;
 
     /**
-     * @brief unregister network detection return result method
+     * unregister network detection return result method
      *
      * @param netId Network ID
      * @param callback  The callback of INetDetectionCallback interface
@@ -175,7 +175,7 @@ public:
     int32_t UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) override;
 
     /**
-     * @brief The interface of network detection called by the application
+     * The interface of network detection called by the application
      *
      * @param netId network ID
      * @return int32_t Whether the network probe is successful
@@ -194,24 +194,31 @@ public:
     void HandleDetectionResult(uint32_t supplierId, bool ifValid);
     int32_t RestrictBackgroundChanged(bool isRestrictBackground);
     /**
-     * @brief Set airplane mode
+     * Set airplane mode
      *
      * @param state airplane state
      * @return int32_t result
      */
     int32_t SetAirplaneMode(bool state) override;
     /**
-     * @brief restore NetConn factory setting
+     * restore NetConn factory setting
      *
      * @return int32_t result
      */
     int32_t RestoreFactoryData() override;
     /**
-     * @brief Dump
+     * Dump
      *
      * @return int32_t result
      */
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
+    /**
+     * Is default network metered
+     *
+     * @param save the metered state
+     * @return int32_t result
+     */
+    int32_t IsDefaultNetMetered(bool &isMetered) override;
 
 private:
     bool Init();
