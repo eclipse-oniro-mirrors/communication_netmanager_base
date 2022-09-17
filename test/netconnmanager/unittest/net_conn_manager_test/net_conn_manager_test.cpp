@@ -15,8 +15,11 @@
 
 #include <gtest/gtest.h>
 
+#include "accesstoken_kit.h"
+#include "nativetoken_kit.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "token_setproc.h"
 
 #include "net_conn_callback_test.h"
 #include "net_conn_client.h"
@@ -26,9 +29,66 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
 constexpr int WAIT_TIME_SECOND_LONG = 5;
 constexpr int WAIT_TIME_SECOND_NET_DETECTION = 2;
 using namespace testing::ext;
+using namespace Security::AccessToken;
+using Security::AccessToken::AccessTokenID;
+
+HapInfoParams testInfoParms = {
+    .bundleName = "net_conn_manager_test",
+    .userID = 1,
+    .instIndex = 0,
+    .appIDDesc = "test"
+};
+
+PermissionDef testPermDef = {
+    .permissionName = "ohos.permission.GET_NETWORK_INFO",
+    .bundleName = "net_conn_manager_test",
+    .grantMode = 1,
+    .label = "label",
+    .labelId = 1,
+    .description = "Test net connect maneger",
+    .descriptionId = 1,
+    .availableLevel = APL_SYSTEM_BASIC
+};
+
+PermissionStateFull testState = {
+    .grantFlags = {2},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
+    .isGeneral = true,
+    .permissionName = "ohos.permission.GET_NETWORK_INFO",
+    .resDeviceID = {"local"}
+};
+
+HapPolicyParams testPolicyPrams = {
+    .apl = APL_SYSTEM_BASIC,
+    .domain = "test.domain",
+    .permList = {testPermDef},
+    .permStateList = {testState}
+};
+} // namespace
+
+class AccessToken {
+public:
+    AccessToken()
+    {
+        currentID_ = GetSelfTokenID();
+        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
+        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
+        SetSelfTokenID(accessID_);
+    }
+    ~AccessToken()
+    {
+        AccessTokenKit::DeleteToken(accessID_);
+        SetSelfTokenID(currentID_);
+    }
+private:
+    AccessTokenID currentID_ = 0;
+    AccessTokenID accessID_ = 0;
+};
+
 class NetConnManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -248,6 +308,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager006, TestSize.Level1)
         bearerType, ident, netCaps, supplierId);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
 
+    AccessToken token;
     sptr<NetSpecifier> netSpecifier = (std::make_unique<NetSpecifier>()).release();
     netSpecifier->ident_ = ident;
     netSpecifier->SetCapabilities(netCaps);
@@ -443,6 +504,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager012, TestSize.Level1)
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     std::cout << "supplierId3 : " << supplierId3 << std::endl;
 
+    AccessToken token;
     std::list<sptr<NetHandle>> netList;
     result = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(netList);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
@@ -468,6 +530,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager013, TestSize.Level1)
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     std::cout << "supplierId : " << supplierId << std::endl;
 
+    AccessToken token;
     std::list<sptr<NetHandle>> netList;
     result = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(netList);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
@@ -495,6 +558,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
     result = DelayedSingleton<NetConnClient>::GetInstance()->UpdateNetLinkInfo(supplierId, netLinkInfo);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
 
+    AccessToken token;
     NetLinkInfo info;
     NetHandle netHandle(100);
     result = DelayedSingleton<NetConnClient>::GetInstance()->GetConnectionProperties(netHandle, info);
