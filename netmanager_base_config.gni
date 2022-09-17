@@ -42,4 +42,5 @@ use_js_debug = false
 declare_args() {
   enable_netmgr_debug = true
   enable_sys_func = true
+  enable_elfio = true
 }
