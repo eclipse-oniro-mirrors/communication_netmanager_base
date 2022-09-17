@@ -74,21 +74,79 @@ public:
 
 private:
     void Detection();
-
     NetDetectionStatus SendParallelHttpProbes();
-
     NetDetectionStatus SendHttpProbe(const std::string &defaultDomain, const std::string &defaultUrl,
                                      const uint16_t defaultPort);
-
     int32_t GetStatusCodeFromResponse(const std::string &strResponse);
-
     int32_t GetUrlRedirectFromResponse(const std::string &strResponse, std::string &urlRedirect);
-
-    NetDetectionStatus dealRecvResult(const std::string &strResponse, int32_t sockFd);
-
+    NetDetectionStatus dealRecvResult(const std::string &strResponse);
     int32_t ParseUrl(const std::string &url, std::string &domain, std::string &urlPath);
+    int32_t GetIpAddr(const char *domain, std::string &ip_addr, int &socketType);
 
-    int32_t GetIpAddr(const char *domain, char *ip_addr, struct hostent &ipHost);
+    /**
+     * Non blocking socket connection
+     *
+     * @param sockFd Socket fd to connect
+     * @param port Transport layer default port
+     * @param ipAddr IP address
+     *
+     * @return Socket connect result
+     */
+    int32_t Connect(int32_t sockFd, int socketType, const uint16_t port, const std::string &ipAddr);
+
+    /**
+     * Connect ipv4 ip address socket
+     *
+     * @param sockFd Socket fd to connect
+     * @param port Transport layer default port
+     * @param ipAddr IP address
+     *
+     * @return Socket connect result
+     */
+    int32_t ConnectIpv4(int32_t sockFd, const uint16_t port, const std::string &ipAddr);
+
+    /**
+     * Connect ipv6 ip address socket
+     *
+     * @param sockFd Socket fd to connect
+     * @param port Transport layer default port
+     * @param ipAddr IP address
+     *
+     * @return Socket connect result
+     */
+    int32_t ConnectIpv6(int32_t sockFd, const uint16_t port, const std::string &ipAddr);
+
+    /**
+     * Ready for socket reading or writing
+     *
+     * @param sockFd Socket fd to connect
+     * @param canRead Store readable status
+     * @param canWrite Store writable status
+     *
+     * @return Socket preparation result
+     */
+    int32_t Wait(int32_t sockFd, uint8_t *canRead, uint8_t *canWrite);
+
+    /**
+     * Send data to socket
+     *
+     * @param sockFd Socket fd to send
+     * @param domain Probe link
+     * @param url Probe url
+     *
+     * @return Result of send data to socket
+     */
+    int32_t Send(int32_t sockFd, const std::string &domain, const std::string &url);
+
+    /**
+     * Receive data from socket
+     *
+     * @param sockFd Socket fd to receive
+     * @param probResult Store received data
+     *
+     * @return Result of receive data from socket
+     */
+    int32_t Receive(int32_t sockFd, std::string &probResult);
 
 private:
     uint32_t netId_;
