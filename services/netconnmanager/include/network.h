@@ -50,6 +50,7 @@ public:
     uint64_t GetNetWorkMonitorResult();
     void SetDefaultNetWork();
     void ClearDefaultNetWorkNetId();
+    bool IsMonitoring() const;
 
 private:
     void StopNetDetection();
@@ -67,6 +68,7 @@ private:
     uint32_t supplierId_ = 0;
     NetLinkInfo netLinkInfo_;
     bool isPhyNetCreated_ = false;
+    bool isMonitoring_ = false;
     std::unique_ptr<NetMonitor> netMonitor_ = nullptr;
     NetDetectionHandler  netCallback_;
     std::vector<sptr<INetDetectionCallback>> netDetectionRetCallback_;

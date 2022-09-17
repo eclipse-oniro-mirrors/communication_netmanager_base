@@ -737,10 +737,13 @@ int32_t NetConnService::GetAllNets(std::list<int32_t> &netIdList)
     if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
         return ERR_PERMISSION_CHECK_FAIL;
     }
-    for (auto &network : networks_) {
-        netIdList.push_back(network.second->GetNetId());
+    for (const auto &p : netSuppliers_) {
+        sptr<Network> network = p.second->GetNetwork();
+        if (network->IsMonitoring()) {
+            netIdList.push_back(p.second->GetNetId());
+        }
     }
-    NETMGR_LOG_D("netSuppliers_ size[%{public}zd] networks_ size[%{public}zd]", netSuppliers_.size(), networks_.size());
+    NETMGR_LOG_D("netSuppliers_ size[%{public}zd] netIdList size[%{public}zd]", netSuppliers_.size(), netIdList.size());
     return ERR_NONE;
 }
 

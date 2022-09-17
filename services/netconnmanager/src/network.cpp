@@ -332,6 +332,7 @@ void Network::StartNetDetection(bool needReport)
     NETMGR_LOG_D("Enter Network::StartNetDetection");
     if (netMonitor_ != nullptr) {
         netMonitor_->Start(needReport);
+        isMonitoring_ = true;
     }
 }
 
@@ -340,6 +341,7 @@ void Network::StopNetDetection()
     NETMGR_LOG_D("Enter Network::StopNetDetection");
     if (netMonitor_ != nullptr) {
         netMonitor_->Stop();
+        isMonitoring_ = false;
     }
 }
 
@@ -417,6 +419,11 @@ void Network::SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const s
         .errorMsg = errMsg
     };
     EventReport::SendSupplierFaultEvent(eventInfo);
+}
+
+bool Network::IsMonitoring() const
+{
+    return isMonitoring_;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
