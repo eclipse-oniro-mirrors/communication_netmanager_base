@@ -340,5 +340,15 @@ void NetConnClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
     local->RemoveDeathRecipient(deathRecipient_);
     NetConnService_ = nullptr;
 }
+
+int32_t NetConnClient::IsDefaultNetMetered(bool &isMetered)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy==nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return IPC_PROXY_ERR;
+    }
+    return proxy->IsDefaultNetMetered(isMetered);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

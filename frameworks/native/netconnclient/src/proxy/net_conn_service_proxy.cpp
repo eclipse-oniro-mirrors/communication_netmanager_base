@@ -1030,5 +1030,39 @@ int32_t NetConnServiceProxy::RestoreFactoryData()
     }
     return ret;
 }
+
+int32_t NetConnServiceProxy::IsDefaultNetMetered(bool &isMetered)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return IPC_PROXY_ERR;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = remote->SendRequest(CMD_NM_IS_DDEFAULT_NET_METERED, data, reply, option);
+    if (error != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        return error;
+    }
+
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        return IPC_PROXY_ERR;
+    }
+    if (ret == ERR_NONE) {
+        if (!reply.ReadBool(isMetered)) {
+            return IPC_PROXY_ERR;
+        }
+    }
+    return ret;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

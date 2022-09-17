@@ -50,8 +50,9 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_GET_ADDRESS_BY_NAME]          = &NetConnServiceStub::OnGetAddressByName;
     memberFuncMap_[CMD_NM_BIND_SOCKET]                  = &NetConnServiceStub::OnBindSocket;
     memberFuncMap_[CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK] = &NetConnServiceStub::OnRegisterNetSupplierCallback;
-    memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE] = &NetConnServiceStub::OnSetAirplaneMode;
-    memberFuncMap_[CMD_NM_RESTORE_FACTORY_DATA] = &NetConnServiceStub::OnRestoreFactoryData;
+    memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE]            = &NetConnServiceStub::OnSetAirplaneMode;
+    memberFuncMap_[CMD_NM_RESTORE_FACTORY_DATA]         = &NetConnServiceStub::OnRestoreFactoryData;
+    memberFuncMap_[CMD_NM_IS_DDEFAULT_NET_METERED]      = &NetConnServiceStub::OnIsDefaultNetMetered;
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -731,6 +732,22 @@ int32_t NetConnServiceStub::OnRestoreFactoryData(MessageParcel &data, MessagePar
         return ERR_FLATTEN_OBJECT;
     }
     return ret;
+}
+
+int32_t NetConnServiceStub::OnIsDefaultNetMetered(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("stub execute IsDefaultNetMetered");
+    bool flag = false;
+    int32_t result = IsDefaultNetMetered(flag);
+    if (!reply.WriteInt32(result)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result == ERR_NONE) {
+        if (!reply.WriteBool(flag)) {
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    return  ERR_NONE;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

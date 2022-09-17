@@ -651,6 +651,19 @@ int32_t NetConnService::HasDefaultNet(bool &flag)
     return ERR_NONE;
 }
 
+int32_t NetConnService::IsDefaultNetMetered(bool &isMetered)
+{
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
+    if (defaultNetSupplier_) {
+        isMetered = !defaultNetSupplier_->HasNetCap(NET_CAPABILITY_NOT_METERED);
+    } else {
+        isMetered = true;
+    }
+    return ERR_NONE;
+}
+
 void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<NetSupplier> &newSupplier)
 {
     NETMGR_LOG_I("MakeDefaultNetWork in, lastSupplier[%{public}d, %{public}s], newSupplier[%{public}d, %{public}s]",
