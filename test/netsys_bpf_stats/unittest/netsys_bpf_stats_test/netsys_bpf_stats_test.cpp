@@ -41,6 +41,7 @@ static constexpr const char *TEST_IFACE_NAME_DUMMY0 = "dummy0";
 static constexpr const char *TEST_IFACENAME_MAP_PATH = "/sys/fs/bpf/test_netsys_iface_name_map";
 static constexpr const char *TEST_IFACESTATS_MAP_PATH = "/sys/fs/bpf/test_netsys_iface_stats_map";
 static constexpr const char *TEST_APP_UID_STATS_MAP_PATH = "/sys/fs/bpf/test_netsys_app_uid_stats_map";
+static constexpr const char *MOUNT_BPF_FS = "mount -t bpf /sys/fs/bpf /sys/fs/bpf";
 using namespace testing::ext;
 
 class NetsysBpfStatsTest : public testing::Test {
@@ -60,7 +61,10 @@ void NetsysBpfStatsTest::SetUpTestCase() {}
 
 void NetsysBpfStatsTest::TearDownTestCase() {}
 
-void NetsysBpfStatsTest::SetUp() {}
+void NetsysBpfStatsTest::SetUp()
+{
+    system(MOUNT_BPF_FS);
+}
 
 void NetsysBpfStatsTest::TearDown() {}
 
