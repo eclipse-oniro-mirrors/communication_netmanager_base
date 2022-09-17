@@ -33,7 +33,7 @@ public:
     {
         int mapFd = BpfWrappers<Key, Value>::GetMap(pathname, flags);
         if (mapFd >= 0) {
-            mapFd_ = UniqueFd(mapFd);
+            mapFd_ = mapFd;
         }
     }
 
@@ -41,7 +41,7 @@ public:
     {
         int mapFd = BpfWrappers<Key, Value>::CreateMap(map_type, sizeof(Key), sizeof(Value), max_entries, map_flags);
         if (IsValid()) {
-            mapFd_ = UniqueFd(mapFd);
+            mapFd_ = mapFd;
         }
     }
 
@@ -156,7 +156,7 @@ public:
     }
 
 private:
-    OHOS::UniqueFd mapFd_;
+    int32_t mapFd_ = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
