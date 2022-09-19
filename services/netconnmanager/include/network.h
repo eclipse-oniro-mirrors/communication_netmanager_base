@@ -23,6 +23,7 @@
 #include "net_link_info.h"
 #include "net_monitor.h"
 #include "route.h"
+#include "net_supplier_info.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -32,7 +33,7 @@ constexpr int32_t MAX_NET_ID = 0xFFFF - 0x400;
 using NetDetectionHandler = std::function<void(uint32_t supplierId, bool ifValid)>;
 class Network : public virtual RefBase {
 public:
-    Network(int32_t netId, uint32_t supplierId, NetDetectionHandler handler);
+    Network(int32_t netId, uint32_t supplierId, NetDetectionHandler handler, NetBearType bearerType);
     ~Network();
     bool operator==(const Network &network) const;
     int32_t GetNetId() const;
@@ -50,7 +51,9 @@ public:
     uint64_t GetNetWorkMonitorResult();
     void SetDefaultNetWork();
     void ClearDefaultNetWorkNetId();
-    bool IsMonitoring() const;
+    bool IsConnecting() const;
+    bool IsConnected() const;
+    void UpdateNetConnState(NetConnState netConnState);
 
 private:
     void StopNetDetection();
@@ -66,9 +69,10 @@ private:
 private:
     int32_t netId_ = 0;
     uint32_t supplierId_ = 0;
+    NetBearType netSupplierType_;
     NetLinkInfo netLinkInfo_;
+    NetConnState state_ = NET_CONN_STATE_UNKNOWN;
     bool isPhyNetCreated_ = false;
-    bool isMonitoring_ = false;
     std::unique_ptr<NetMonitor> netMonitor_ = nullptr;
     NetDetectionHandler  netCallback_;
     std::vector<sptr<INetDetectionCallback>> netDetectionRetCallback_;

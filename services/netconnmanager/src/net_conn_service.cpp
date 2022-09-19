@@ -150,7 +150,7 @@ int32_t NetConnService::RegisterNetSupplier(
     }
     using namespace std::placeholders;
     sptr<Network> network = (std::make_unique<Network>(netId, supplierId,
-        std::bind(&NetConnService::HandleDetectionResult, this, _1, _2))).release();
+        std::bind(&NetConnService::HandleDetectionResult, this, _1, _2), bearerType)).release();
     if (network == nullptr) {
         NETMGR_LOG_E("network is nullptr");
         return ERR_NO_NETWORK;
@@ -633,7 +633,7 @@ int32_t NetConnService::GetDefaultNet(int32_t &netId)
     }
     if (!defaultNetSupplier_) {
         NETMGR_LOG_E("not found the netId");
-        return ERR_NET_DEFAULTNET_NOT_EXIST;
+        return ERR_NONE;
     }
 
     netId = defaultNetSupplier_->GetNetId();
@@ -645,7 +645,7 @@ int32_t NetConnService::HasDefaultNet(bool &flag)
 {
     if (!defaultNetSupplier_) {
         flag = false;
-        return ERR_NET_DEFAULTNET_NOT_EXIST;
+        return ERR_NONE;
     }
     flag = true;
     return ERR_NONE;
@@ -666,7 +666,7 @@ int32_t NetConnService::IsDefaultNetMetered(bool &isMetered)
 
 void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<NetSupplier> &newSupplier)
 {
-    NETMGR_LOG_I("MakeDefaultNetWork in, lastSupplier[%{public}d, %{public}s], newSupplier[%{public}d, %{public}s]",
+    NETMGR_LOG_I("MakeDefaultNetWork in, oldSupplier[%{public}d, %{public}s], newSupplier[%{public}d, %{public}s]",
         oldSupplier ? oldSupplier->GetSupplierId() : 0,
         oldSupplier ? oldSupplier->GetNetSupplierIdent().c_str() : "null",
         newSupplier ? newSupplier->GetSupplierId() : 0,
@@ -676,15 +676,13 @@ void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<Net
         return;
     }
     if (oldSupplier != nullptr) {
-        NETMGR_LOG_D("clear default.");
         oldSupplier->ClearDefault();
     }
     if (newSupplier != nullptr) {
-        NETMGR_LOG_D("set default.");
         newSupplier->SetDefault();
     }
     oldSupplier = newSupplier;
-    NETMGR_LOG_I("default Supplier set to: [%{public}d, %{public}s]",
+    NETMGR_LOG_D("default Supplier set to: [%{public}d, %{public}s]",
         oldSupplier ? oldSupplier->GetSupplierId() : 0,
         oldSupplier ? oldSupplier->GetNetSupplierIdent().c_str() : "null");
 }
@@ -737,10 +735,9 @@ int32_t NetConnService::GetAllNets(std::list<int32_t> &netIdList)
     if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
         return ERR_PERMISSION_CHECK_FAIL;
     }
-    for (const auto &p : netSuppliers_) {
-        sptr<Network> network = p.second->GetNetwork();
-        if (network->IsMonitoring()) {
-            netIdList.push_back(p.second->GetNetId());
+    for (auto &network : networks_) {
+        if (network.second != nullptr && network.second->IsConnected()) {
+            netIdList.push_back(network.second->GetNetId());
         }
     }
     NETMGR_LOG_D("netSuppliers_ size[%{public}zd] netIdList size[%{public}zd]", netSuppliers_.size(), netIdList.size());
