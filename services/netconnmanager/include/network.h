@@ -69,12 +69,12 @@ private:
 private:
     int32_t netId_ = 0;
     uint32_t supplierId_ = 0;
-    NetBearType netSupplierType_;
     NetLinkInfo netLinkInfo_;
     NetConnState state_ = NET_CONN_STATE_UNKNOWN;
     bool isPhyNetCreated_ = false;
     std::unique_ptr<NetMonitor> netMonitor_ = nullptr;
     NetDetectionHandler  netCallback_;
+    NetBearType netSupplierType_;
     std::vector<sptr<INetDetectionCallback>> netDetectionRetCallback_;
 };
 } // namespace NetManagerStandard

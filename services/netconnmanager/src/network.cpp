@@ -21,6 +21,7 @@
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "securec.h"
+#include "broadcast_manager.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -454,8 +455,8 @@ void Network::UpdateNetConnState(NetConnState netConnState)
 void Network::SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const std::string &errMsg)
 {
     struct EventInfo eventInfo = {
-        .supplierId = static_cast<int32_t>(supplierId_),
         .netlinkInfo = netLinkInfo_.ToString(" "),
+        .supplierId = static_cast<int32_t>(supplierId_),
         .errorType = static_cast<int32_t>(errorType),
         .errorMsg = errMsg
     };
