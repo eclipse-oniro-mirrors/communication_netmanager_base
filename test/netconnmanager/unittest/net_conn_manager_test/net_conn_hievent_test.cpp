@@ -21,6 +21,7 @@
 #include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
 #include "net_conn_service.h"
+#include "net_all_capabilities.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 #include "token_setproc.h"
@@ -111,7 +112,10 @@ sptr<Network> NetConnHiEventTest::GetNetwork()
     int32_t netId_ = 100;
     int32_t supplierId_ = 1001;
     sptr<Network> network = (std::make_unique<Network>(netId_, supplierId_,
-        std::bind(&NetConnHiEventTest::HandleDetectionResult, this, std::placeholders::_1, std::placeholders::_2))).release();
+                                                       std::bind(&NetConnHiEventTest::HandleDetectionResult, this,
+                                                                 std::placeholders::_1, std::placeholders::_2),
+                                                       BEARER_CELLULAR))
+                                .release();
     return network;
 }
 
