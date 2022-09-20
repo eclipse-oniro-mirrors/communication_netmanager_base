@@ -97,12 +97,16 @@ bool CreateNetlinkDistributor(int32_t netlinkType, const DistributorParam &param
 }
 } // namespace
 
+std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> NetlinkManager::callbacks_ =
+    std::make_shared<std::vector<sptr<NetsysNative::INotifyCallback>>>();
 NetlinkManager::NetlinkManager()
 {
     for (auto &it : distributorParamList) {
         CreateNetlinkDistributor(it.first, it.second);
     }
-    callbacks_ = std::make_shared<std::vector<sptr<NetsysNative::INotifyCallback>>>();
+    if (callbacks_ == nullptr) {
+        callbacks_ = std::make_shared<std::vector<sptr<NetsysNative::INotifyCallback>>>();
+    }
 }
 
 NetlinkManager::~NetlinkManager()
