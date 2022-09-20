@@ -14,15 +14,19 @@
  */
 
 #include "network.h"
+
+#include "common_event_support.h"
+#include "event_report.h"
 #include "netsys_controller.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "securec.h"
+#include "broadcast_manager.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-Network::Network(int32_t netId, uint32_t supplierId, NetDetectionHandler handler)
-    : netId_(netId), supplierId_(supplierId), netCallback_(handler)
+Network::Network(int32_t netId, uint32_t supplierId, NetDetectionHandler handler, NetBearType bearerType)
+    : netId_(netId), supplierId_(supplierId), netCallback_(handler), netSupplierType_(bearerType)
 {
     InitNetMonitor();
 }
@@ -332,7 +336,6 @@ void Network::StartNetDetection(bool needReport)
     NETMGR_LOG_D("Enter Network::StartNetDetection");
     if (netMonitor_ != nullptr) {
         netMonitor_->Start(needReport);
-        isMonitoring_ = true;
     }
 }
 
@@ -341,7 +344,6 @@ void Network::StopNetDetection()
     NETMGR_LOG_D("Enter Network::StopNetDetection");
     if (netMonitor_ != nullptr) {
         netMonitor_->Stop();
-        isMonitoring_ = false;
     }
 }
 
@@ -410,20 +412,55 @@ void Network::ClearDefaultNetWorkNetId()
     }
 }
 
+bool Network::IsConnecting() const
+{
+    return state_ == NET_CONN_STATE_CONNECTING;
+}
+
+bool Network::IsConnected() const
+{
+    return state_ == NET_CONN_STATE_CONNECTED;
+}
+
+void Network::UpdateNetConnState(NetConnState netConnState)
+{
+    if (state_ == netConnState) {
+        NETMGR_LOG_E("Ignore same network state changed.");
+        return;
+    }
+    NetConnState oldState = state_;
+    switch (netConnState) {
+        case NET_CONN_STATE_IDLE:
+        case NET_CONN_STATE_CONNECTING:
+        case NET_CONN_STATE_CONNECTED:
+        case NET_CONN_STATE_DISCONNECTING:
+        case NET_CONN_STATE_DISCONNECTED:
+            state_ = netConnState;
+            break;
+        default:
+            state_ = NET_CONN_STATE_UNKNOWN;
+            break;
+    }
+
+    BroadcastInfo info;
+    info.action = EventFwk::CommonEventSupport::COMMON_EVENT_CONNECTIVITY_CHANGE;
+    info.data = "Net Manager Connection State Changed";
+    info.code = static_cast<int32_t>(netConnState);
+    info.ordered = true;
+    std::map<std::string, int32_t> param = {{"NetType", static_cast<int32_t>(netSupplierType_)}};
+    DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
+    NETMGR_LOG_D("Network[%{public}d] state changed, from [%{public}d] to [%{public}d]", netId_, oldState, state_);
+}
+
 void Network::SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const std::string &errMsg)
 {
     struct EventInfo eventInfo = {
-        .supplierId = supplierId_,
         .netlinkInfo = netLinkInfo_.ToString(" "),
+        .supplierId = static_cast<int32_t>(supplierId_),
         .errorType = static_cast<int32_t>(errorType),
         .errorMsg = errMsg
     };
     EventReport::SendSupplierFaultEvent(eventInfo);
-}
-
-bool Network::IsMonitoring() const
-{
-    return isMonitoring_;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
