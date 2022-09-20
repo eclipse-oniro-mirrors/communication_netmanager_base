@@ -366,9 +366,9 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager017, TestSize.Level1)
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager018, TestSize.Level1)
 {
     DelayedSingleton<NetPolicyClient>::GetInstance()->SetBackgroundPolicy(true);
-    uint32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetBackgroundPolicyByUid(
+    uint32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetCurrentBackgroundPolicy(
         BACKGROUND_POLICY_TEST_UID);
-    std::cout << "NetPolicyManager017 GetBackgroundPolicyByUid " << result << std::endl;
+    std::cout << "NetPolicyManager0018 GetCurrentBackgroundPolicy " << result << std::endl;
     ASSERT_EQ(result, NET_BACKGROUND_POLICY_ENABLE);
 }
 
