@@ -574,6 +574,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager015, TestSize.Level1)
 {
+    AccessToken token;
     bool isMetered = false;
     int32_t result = DelayedSingleton<NetConnClient>::GetInstance()->IsDefaultNetMetered(isMetered);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
@@ -592,41 +593,51 @@ HWTEST_F(NetConnManagerTest, NetConnManager016, TestSize.Level1)
     if (proxy == nullptr) {
         return;
     }
+    AccessToken token;
+    int32_t result;
 
     std::list<sptr<NetHandle>> netList;
-    client->GetAllNets(netList);
+    result = client->GetAllNets(netList);
     size_t originNetSize = netList.size();
     std::cout << "Origin netIdList size:" << originNetSize << std::endl;
+    ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
 
     // Add one network connections.
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps {NET_CAPABILITY_INTERNET};
-    std::string ident = "ident01";
+    std::string ident = "ident16";
     uint32_t supplierId = 0;
-    int32_t result = client->RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
+    result = client->RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
 
     // Check1: The size of netList remains unchanged when the new network is not connected.
     netList.clear();
-    client->GetAllNets(netList);
+    result = client->GetAllNets(netList);
+    std::cout << "Check1: netIdList size:" << netList.size() << std::endl;
+    ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     ASSERT_TRUE(originNetSize == netList.size());
 
     // Check2: The size of netList increases by 1 when the new network is connected.
+    sptr<NetSupplierInfo> netSupplierInfo = std::make_unique<NetSupplierInfo>().release();
+    netSupplierInfo->isAvailable_ = true;
+    client-> UpdateNetSupplierInfo(supplierId, netSupplierInfo);
     sptr<NetLinkInfo> netLinkInfo = GetUpdateLinkInfoSample();
     client->UpdateNetLinkInfo(supplierId, netLinkInfo);
     netList.clear();
-    client->GetAllNets(netList);
+    result = client->GetAllNets(netList);
     originNetSize++;
+    std::cout << "Check2: netIdList size:" << netList.size() << std::endl;
+    ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     ASSERT_TRUE(originNetSize == netList.size());
 
     // Check3: The size of netList decreases by 1 when the new network is disconnected.
-    sptr<NetSupplierInfo> netSupplierInfo = std::make_unique<NetSupplierInfo>().release();
     netSupplierInfo->isAvailable_ = false;
-    netSupplierInfo->isRoaming_ = true;
     client->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
     originNetSize--;
     netList.clear();
-    client->GetAllNets(netList);
+    result = client->GetAllNets(netList);
+    std::cout << "Check3: netIdList size:" << netList.size() << std::endl;
+    ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     ASSERT_TRUE(originNetSize == netList.size());
 
     // Rollback to check2.
@@ -635,14 +646,17 @@ HWTEST_F(NetConnManagerTest, NetConnManager016, TestSize.Level1)
     client->UpdateNetLinkInfo(supplierId, netLinkInfo);
     originNetSize++;
     netList.clear();
-    client->GetAllNets(netList);
+    result = client->GetAllNets(netList);
+    ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     ASSERT_TRUE(originNetSize == netList.size());
 
     // Check4: The size of netList decreases by 1 when the net supplier is unregistered.
     client->UnregisterNetSupplier(supplierId);
     originNetSize--;
     netList.clear();
-    client->GetAllNets(netList);
+    result = client->GetAllNets(netList);
+    std::cout << "Check4: netIdList size:" << netList.size() << std::endl;
+    ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     ASSERT_TRUE(originNetSize == netList.size());
 }
 } // namespace NetManagerStandard
