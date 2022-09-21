@@ -72,7 +72,6 @@ void NetConnService::CreateDefaultRequest()
         defaultNetActivate_->SetRequestId(DEFAULT_REQUEST_ID);
         netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
     }
-    return;
 }
 
 void NetConnService::OnStop()
