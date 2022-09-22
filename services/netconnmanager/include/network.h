@@ -43,7 +43,7 @@ public:
     void UpdateIpAddrs(const NetLinkInfo &netLinkInfo);
     void UpdateInterfaces(const NetLinkInfo &netLinkInfo);
     void UpdateRoutes(const NetLinkInfo &netLinkInfo);
-    void UpdateDnses(const NetLinkInfo &netLinkInfo);
+    void UpdateDns(const NetLinkInfo &netLinkInfo);
     void UpdateMtu(const NetLinkInfo &netLinkInfo);
     void RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
     int32_t UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
@@ -62,9 +62,10 @@ private:
     void InitNetMonitor();
     void HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect);
     void NotifyNetDetectionResult(NetDetectionResultCode detectionResult, const std::string &urlRedirect);
-    int32_t Ipv4PrefixLen(const std::string &ip);
     NetDetectionResultCode NetDetectionResultConvert(int32_t internalRet);
+    void SendConnectionChangedBroadcast(const NetConnState &netConnState) const;
     void SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const std::string &errMsg);
+    void ResetNetlinkInfo();
 
 private:
     int32_t netId_ = 0;

@@ -57,7 +57,6 @@ public:
     bool HasNetCaps(const std::set<NetCap> &caps) const;
     const NetCaps &GetNetCaps() const;
     NetAllCapabilities GetNetCapabilities() const;
-    NetLinkInfo GetNetLinkInfo() const;
     bool GetRoaming() const;
     int8_t GetStrength() const;
     uint16_t GetFrequency() const;
@@ -69,7 +68,7 @@ public:
     bool IsConnecting() const;
     bool IsConnected() const;
     void SetNetValid(bool ifValid);
-    bool IfNetValid();
+    bool IsNetValidated();
     void SetNetScore(int32_t score);
     int32_t GetNetScore() const;
     void SetRealScore(int32_t score);
@@ -99,7 +98,6 @@ private:
     uint32_t supplierId_ = 0;
     int32_t netScore_ = 0;
     int32_t netRealScore_ = 0;
-    bool ifNetValid_ = false;
     std::set<uint32_t> requestList_;
     std::set<uint32_t> bestReqList_;
     sptr<INetSupplierCallback> netController_ = nullptr;

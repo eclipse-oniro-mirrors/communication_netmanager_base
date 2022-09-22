@@ -219,14 +219,14 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_005, TestSize.Level1)
 
 /**
  * @tc.name: NetConnHiEventTest_006
- * @tc.desc: Test NetConnManager HiSysEvent:UpdateDnses
+ * @tc.desc: Test NetConnManager HiSysEvent:UpdateDns
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_006, TestSize.Level1)
 {
     sptr<Network> network = GetNetwork();
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
-    network->UpdateDnses(*netLinkInfo);
+    network->UpdateDns(*netLinkInfo);
 }
 
 /**

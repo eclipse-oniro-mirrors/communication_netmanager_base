@@ -22,6 +22,9 @@
 #include "net_mgr_log_wrapper.h"
 #include "securec.h"
 #include "broadcast_manager.h"
+#include "netmanager_base_common_utils.h"
+
+using namespace OHOS::NetManagerStandard::CommonUtils;
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -80,8 +83,7 @@ bool Network::ReleaseBasicNetwork()
     if (isPhyNetCreated_) {
         NETMGR_LOG_D("Destroy physical network");
         StopNetDetection();
-        for (auto it = netLinkInfo_.netAddrList_.begin(); it != netLinkInfo_.netAddrList_.end(); ++it) {
-            const struct INetAddr &inetAddr = *it;
+        for (auto & inetAddr : netLinkInfo_.netAddrList_) {
             int32_t prefixLen = inetAddr.prefixlen_;
             if (prefixLen == 0) {
                 prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
@@ -103,7 +105,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateInterfaces(netLinkInfo);
     UpdateIpAddrs(netLinkInfo);
     UpdateRoutes(netLinkInfo);
-    UpdateDnses(netLinkInfo);
+    UpdateDns(netLinkInfo);
     UpdateMtu(netLinkInfo);
     netLinkInfo_ = netLinkInfo;
     StartNetDetection(false);
@@ -143,57 +145,12 @@ void Network::UpdateInterfaces(const NetLinkInfo &netLinkInfo)
     NETMGR_LOG_D("Network UpdateInterfaces out.");
 }
 
-int32_t Network::Ipv4PrefixLen(const std::string &ip)
-{
-    constexpr int32_t BIT32 = 32;
-    constexpr int32_t BIT24 = 24;
-    constexpr int32_t BIT16 = 16;
-    constexpr int32_t BIT8 = 8;
-    if (ip.empty()) {
-        return 0;
-    }
-    int32_t ret = 0;
-    uint32_t ipNum = 0;
-    uint8_t c1 = 0;
-    uint8_t c2 = 0;
-    uint8_t c3 = 0;
-    uint8_t c4 = 0;
-    int32_t cnt = 0;
-    ret = sscanf_s(ip.c_str(), "%hhu.%hhu.%hhu.%hhu", &c1, &c2, &c3, &c4);
-    if (ret != sizeof(int32_t)) {
-        return 0;
-    }
-    ipNum = (c1 << static_cast<uint32_t>(BIT24)) | (c2 << static_cast<uint32_t>(BIT16)) |
-            (c3 << static_cast<uint32_t>(BIT8)) | c4;
-    if (ipNum == 0xFFFFFFFF) {
-        return BIT32;
-    }
-    if (ipNum == 0xFFFFFF00) {
-        return BIT24;
-    }
-    if (ipNum == 0xFFFF0000) {
-        return BIT16;
-    }
-    if (ipNum == 0xFF000000) {
-        return BIT8;
-    }
-    for (int32_t i = 0; i < BIT32; i++) {
-        if ((ipNum << i) & 0x80000000) {
-            cnt++;
-        } else {
-            break;
-        }
-    }
-    return cnt;
-}
-
 void Network::UpdateIpAddrs(const NetLinkInfo &netLinkInfo)
 {
     // netLinkInfo_ represents the old, netLinkInfo represents the new
     // Update: remove old Ips first, then add the new Ips
     NETMGR_LOG_D("UpdateIpAddrs, old ip addrs: ...");
-    for (auto it = netLinkInfo_.netAddrList_.begin(); it != netLinkInfo_.netAddrList_.end(); ++it) {
-        const struct INetAddr &inetAddr = *it;
+    for (auto & inetAddr : netLinkInfo_.netAddrList_) {
         int32_t prefixLen = inetAddr.prefixlen_;
         if (prefixLen == 0) {
             prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
@@ -228,8 +185,7 @@ void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
     // netLinkInfo_ contains the old routes info, netLinkInfo contains the new routes info
     // Update: remove old routes first, then add the new routes
     NETMGR_LOG_D("UpdateRoutes, old routes: [%{public}s]", netLinkInfo_.ToStringRoute("").c_str());
-    for (auto it = netLinkInfo_.routeList_.begin(); it != netLinkInfo_.routeList_.end(); ++it) {
-        const struct Route &route = *it;
+    for (auto & route : netLinkInfo_.routeList_) {
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
         int32_t ret = NetsysController::GetInstance().NetworkRemoveRoute(
             netId_, route.iface_, destAddress, route.gateway_.address_);
@@ -240,8 +196,7 @@ void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
     }
 
     NETMGR_LOG_D("UpdateRoutes, new routes: [%{public}s]", netLinkInfo.ToStringRoute("").c_str());
-    for (auto it = netLinkInfo.routeList_.begin(); it != netLinkInfo.routeList_.end(); ++it) {
-        const struct Route &route = *it;
+    for (const auto & route : netLinkInfo.routeList_) {
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
         int32_t ret = NetsysController::GetInstance().NetworkAddRoute(
             netId_, route.iface_, destAddress, route.gateway_.address_);
@@ -251,15 +206,15 @@ void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
         }
     }
     NETMGR_LOG_D("Network UpdateRoutes out.");
-    if (netLinkInfo.routeList_.size() == 0) {
+    if (netLinkInfo.routeList_.empty()) {
         std::string errMsg = "Update netlink routes failed,routes list is empty";
         SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, errMsg);
     }
 }
 
-void Network::UpdateDnses(const NetLinkInfo &netLinkInfo)
+void Network::UpdateDns(const NetLinkInfo &netLinkInfo)
 {
-    NETMGR_LOG_D("Network UpdateDnses in.");
+    NETMGR_LOG_D("Network UpdateDns in.");
     std::vector<std::string> servers;
     std::vector<std::string> domains;
     for (const auto &dns : netLinkInfo.dnsList_) {
@@ -272,8 +227,8 @@ void Network::UpdateDnses(const NetLinkInfo &netLinkInfo)
         std::string errMsg = "Set network resolver config failed";
         SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, errMsg);
     }
-    NETMGR_LOG_D("Network UpdateDnses out.");
-    if (netLinkInfo.dnsList_.size() == 0) {
+    NETMGR_LOG_D("Network UpdateDns out.");
+    if (netLinkInfo.dnsList_.empty()) {
         std::string errMsg = "Update netlink dns failed,dns list is empty";
         SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, errMsg);
     }
@@ -303,8 +258,8 @@ void Network::RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &ca
         return;
     }
 
-    for (auto iter = netDetectionRetCallback_.begin(); iter != netDetectionRetCallback_.end(); ++iter) {
-        if (callback->AsObject().GetRefPtr() == (*iter)->AsObject().GetRefPtr()) {
+    for (auto &iter : netDetectionRetCallback_) {
+        if (callback->AsObject().GetRefPtr() == iter->AsObject().GetRefPtr()) {
             NETMGR_LOG_D("netDetectionRetCallback_ had this callback");
             return;
         }
@@ -321,11 +276,9 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
         return ERR_SERVICE_NULL_PTR;
     }
 
-    for (auto iter = netDetectionRetCallback_.begin(); iter != netDetectionRetCallback_.end(); ++iter) {
-        if (callback->AsObject().GetRefPtr() == (*iter)->AsObject().GetRefPtr()) {
-            netDetectionRetCallback_.erase(iter);
-            break;
-        }
+    auto iter = std::find(netDetectionRetCallback_.begin(), netDetectionRetCallback_.end(), callback);
+    if (iter != netDetectionRetCallback_.end()) {
+        netDetectionRetCallback_.erase(iter);
     }
 
     return ERR_NONE;
@@ -373,7 +326,7 @@ void Network::HandleNetMonitorResult(NetDetectionStatus netDetectionState, const
 
 void Network::NotifyNetDetectionResult(NetDetectionResultCode detectionResult, const std::string &urlRedirect)
 {
-    for (auto callback : netDetectionRetCallback_) {
+    for (const auto& callback : netDetectionRetCallback_) {
         NETMGR_LOG_D("start callback!");
         callback->OnNetDetectionResultChanged(detectionResult, urlRedirect);
     }
@@ -434,14 +387,23 @@ void Network::UpdateNetConnState(NetConnState netConnState)
         case NET_CONN_STATE_CONNECTING:
         case NET_CONN_STATE_CONNECTED:
         case NET_CONN_STATE_DISCONNECTING:
+            state_ = netConnState;
+            break;
         case NET_CONN_STATE_DISCONNECTED:
             state_ = netConnState;
+            ResetNetlinkInfo();
             break;
         default:
             state_ = NET_CONN_STATE_UNKNOWN;
             break;
     }
 
+    SendConnectionChangedBroadcast(netConnState);
+    NETMGR_LOG_D("Network[%{public}d] state changed, from [%{public}d] to [%{public}d]", netId_, oldState, state_);
+}
+
+void Network::SendConnectionChangedBroadcast(const NetConnState &netConnState) const
+{
     BroadcastInfo info;
     info.action = EventFwk::CommonEventSupport::COMMON_EVENT_CONNECTIVITY_CHANGE;
     info.data = "Net Manager Connection State Changed";
@@ -449,7 +411,6 @@ void Network::UpdateNetConnState(NetConnState netConnState)
     info.ordered = true;
     std::map<std::string, int32_t> param = {{"NetType", static_cast<int32_t>(netSupplierType_)}};
     DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
-    NETMGR_LOG_D("Network[%{public}d] state changed, from [%{public}d] to [%{public}d]", netId_, oldState, state_);
 }
 
 void Network::SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const std::string &errMsg)
@@ -461,6 +422,11 @@ void Network::SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const s
         .errorMsg = errMsg
     };
     EventReport::SendSupplierFaultEvent(eventInfo);
+}
+
+void Network::ResetNetlinkInfo()
+{
+    netLinkInfo_.Initialize();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
