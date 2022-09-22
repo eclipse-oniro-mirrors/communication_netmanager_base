@@ -57,6 +57,7 @@ declare namespace connection {
    * @return Returns the {@link NetHandle} object;
    *      returns {@code null} if the default network is not activated.
    * @permission ohos.permission.GET_NETWORK_INFO
+   * @since 9
    */
   function getDefaultNetSync(): NetHandle;
 
@@ -94,6 +95,17 @@ declare namespace connection {
    */
   function getNetCapabilities(netHandle: NetHandle, callback: AsyncCallback<NetCapabilities>): void;
   function getNetCapabilities(netHandle: NetHandle): Promise<NetCapabilities>;
+
+  /**
+   * Checks whether data traffic usage on the current network is metered.
+   *
+   * @param callback Returns {@code true} if data traffic usage on the current network is metered;
+   *      returns {@code false} otherwise.
+   * @permission ohos.permission.GET_NETWORK_INFO
+   * @since 9
+   */
+  function isDefaultNetMetered(callback: AsyncCallback<boolean>): void;
+  function isDefaultNetMetered(): Promise<boolean>;
 
   /**
    * Checks whether the default data network is activated.
@@ -196,6 +208,7 @@ declare namespace connection {
      *
      * @param host Indicates the host name or the domain.
      * @param callback Returns the NetAddress list.
+     * @permission ohos.permission.GET_NETWORK_INFO
      */
     getAddressesByName(host: string, callback: AsyncCallback<Array<NetAddress>>): void;
     getAddressesByName(host: string): Promise<Array<NetAddress>>;
@@ -205,6 +218,7 @@ declare namespace connection {
      *
      * @param host Indicates the host name or the domain.
      * @return Returns the first NetAddress.
+     * @permission ohos.permission.GET_NETWORK_INFO
      */
     getAddressByName(host: string, callback: AsyncCallback<NetAddress>): void;
     getAddressByName(host: string): Promise<NetAddress>;
@@ -283,9 +297,6 @@ declare namespace connection {
     prefixLength: number;
   }
 
-  /**
-   * @since 7
-   */
   export interface NetAddress {
     address: string;
     family?: number; // IPv4 = 1; IPv6 = 2, default is IPv4
