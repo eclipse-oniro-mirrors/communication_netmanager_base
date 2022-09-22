@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AsyncCallback} from "./basic";
+import {AsyncCallback, Callback} from "./basic";
 
 /**
  * Obtains traffic statistics.
@@ -95,7 +95,7 @@ declare namespace statistics {
   /**
    * Register notifications of network traffic updates, restrictions, and warnings.
    *
-   * @permission ohos.permission.GET_NETSTATS_SUMMARY
+   * @permission ohos.permission.CONNECTIVITY_INTERNAL
    * @systemapi Hide this for inner system use.
    */
   function on(type: 'netStatsChange', callback: Callback<{ iface: string, uid?: number }>): void;
@@ -108,8 +108,8 @@ declare namespace statistics {
   /**
    * Get the traffic usage details of the network interface in the specified time period.
    *
-   * @param IfaceInfo Indicates the handle. See {@link IfaceInfo}.
-   * @permission ohos.permission.GET_NETSTATS_SUMMARY
+   * @param ifaceInfo Indicates the handle. See {@link IfaceInfo}.
+   * @permission ohos.permission.CONNECTIVITY_INTERNAL
    * @systemapi Hide this for inner system use.
    */
   function getIfaceStats(ifaceInfo: IfaceInfo, callback: AsyncCallback<NetStatsInfo>): void;
@@ -118,8 +118,8 @@ declare namespace statistics {
   /**
    * Get the traffic usage details of the specified time period of the application.
    *
-   * @param UidStatsInfo Indicates the handle. See {@link UidStatsInfo}.
-   * @permission ohos.permission.GET_NETSTATS_SUMMARY
+   * @param uidStatsInfo Indicates the handle. See {@link UidStatsInfo}.
+   * @permission ohos.permission.CONNECTIVITY_INTERNAL
    * @systemapi Hide this for inner system use.
    */
   function getIfaceUidStats(uidStatsInfo: UidStatsInfo, callback: AsyncCallback<NetStatsInfo>): void;
