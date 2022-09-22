@@ -24,6 +24,13 @@ enum class NetStatsResultCode {
     ERR_INTERNAL_ERROR = (-1),
     ERR_INVALID_PARAMETER = (-2),
     ERR_INVALID_TIME_PERIOD = (-3),
+    ERR_READ_BPF_FAIL = (-1001),
+    ERR_INVALID_KEY = (-1002),
+    ERR_INVALID_IFACE_STATS_MAP = (-1003),
+    ERR_INVALID_STATS_VALUE = (-1004),
+    ERR_INVALID_STATS_TYPE = (-1005),
+    ERR_INVALID_UID_STATS_MAP = (-1006),
+    ERR_INVALID_IFACE_NAME_MAP = (-1007),
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

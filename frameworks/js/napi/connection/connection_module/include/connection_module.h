@@ -22,12 +22,20 @@ namespace OHOS::NetManagerStandard {
 class ConnectionModule final {
 public:
     static constexpr const char *FUNCTION_GET_DEFAULT_NET = "getDefaultNet";
+    static constexpr const char *FUNCTION_GET_DEFAULT_NET_SYNC = "getDefaultNetSync";
     static constexpr const char *FUNCTION_HAS_DEFAULT_NET = "hasDefaultNet";
     static constexpr const char *FUNCTION_GET_NET_CAPABILITIES = "getNetCapabilities";
     static constexpr const char *FUNCTION_GET_CONNECTION_PROPERTIES = "getConnectionProperties";
     static constexpr const char *FUNCTION_CREATE_NET_CONNECTION = "createNetConnection";
     static constexpr const char *FUNCTION_GET_ADDRESSES_BY_NAME = "getAddressesByName";
+    static constexpr const char *FUNCTION_GET_ALL_NETS = "getAllNets";
+    static constexpr const char *FUNCTION_ENABLE_AIRPLANE_MODE = "enableAirplaneMode";
+    static constexpr const char *FUNCTION_DISABLE_AIRPLANE_MODE = "disableAirplaneMode";
+    static constexpr const char *FUNCTION_REPORT_NET_CONNECTED = "reportNetConnected";
+    static constexpr const char *FUNCTION_REPORT_NET_DISCONNECTED = "reportNetDisconnected";
     static constexpr const char *INTERFACE_NET_CONNECTION = "NetConnection";
+    static constexpr const char *INTERFACE_NET_CAP = "NetCap";
+    static constexpr const char *INTERFACE_NET_BEAR_TYPE = "NetBearType";
 
     static napi_value InitConnectionModule(napi_env env, napi_value exports);
 
@@ -36,9 +44,11 @@ public:
         static constexpr const char *PROPERTY_NET_ID = "netId";
         static constexpr const char *FUNCTION_GET_ADDRESSES_BY_NAME = "getAddressesByName";
         static constexpr const char *FUNCTION_GET_ADDRESS_BY_NAME = "getAddressByName";
+        static constexpr const char *FUNCTION_BIND_SOCKET = "bindSocket";
 
         static napi_value GetAddressesByName(napi_env env, napi_callback_info info);
         static napi_value GetAddressByName(napi_env env, napi_callback_info info);
+        static napi_value BindSocket(napi_env env, napi_callback_info info);
     };
 
     class NetConnectionInterface final {
@@ -53,12 +63,20 @@ public:
     };
 
 private:
+    static void InitProperties(napi_env env, napi_value exports);
+
     static napi_value GetDefaultNet(napi_env env, napi_callback_info info);
+    static napi_value GetDefaultNetSync(napi_env env, napi_callback_info info);
     static napi_value CreateNetConnection(napi_env env, napi_callback_info info);
     static napi_value GetAddressesByName(napi_env env, napi_callback_info info);
     static napi_value HasDefaultNet(napi_env env, napi_callback_info info);
     static napi_value GetNetCapabilities(napi_env env, napi_callback_info info);
     static napi_value GetConnectionProperties(napi_env env, napi_callback_info info);
+    static napi_value GetAllNets(napi_env env, napi_callback_info info);
+    static napi_value EnableAirplaneMode(napi_env env, napi_callback_info info);
+    static napi_value DisableAirplaneMode(napi_env env, napi_callback_info info);
+    static napi_value ReportNetConnected(napi_env env, napi_callback_info info);
+    static napi_value ReportNetDisconnected(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::NetManagerStandard
 

@@ -20,7 +20,7 @@
 #include "net_all_capabilities.h"
 #include "net_handle.h"
 #include "net_link_info.h"
-#include "netmanager_base_base_context.h"
+#include "base_context.h"
 #include "nocopyable.h"
 
 namespace OHOS::NetManagerStandard {
@@ -46,6 +46,8 @@ private:
 
 using GetNetCapabilitiesContext = ParseNetHandleContext;
 using GetConnectionPropertiesContext = ParseNetHandleContext;
+using ReportNetConnectedContext = ParseNetHandleContext;
+using ReportNetDisconnectedContext = ParseNetHandleContext;
 } // namespace OHOS::NetManagerStandard
 
 #endif /* NETMANAGER_BASE_PARSE_NETHANDLE_CONTEXT_H */

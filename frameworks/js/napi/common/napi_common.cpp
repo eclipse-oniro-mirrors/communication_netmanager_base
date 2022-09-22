@@ -21,25 +21,25 @@ namespace NetManagerStandard {
 bool NapiCommon::IsValidEvent(const std::string &eventInfo, int32_t &eventId)
 {
     bool isEvent = true;
-    if (eventInfo == NET_UID_POLICY_CHANGE) {
+    if (!eventInfo.compare(NET_UID_POLICY_CHANGE)) {
         eventId = EVENT_NET_UID_POLICY_CHANGE;
-    } else if (eventInfo == NET_CELLULAR_POLICY_CHANGE) {
+    } else if (!eventInfo.compare(NET_CELLULAR_POLICY_CHANGE)) {
         eventId = EVENT_NET_CELLULAR_POLICY_CHANGE;
-    } else if (eventInfo == NET_STRATEGY_SWITCH_CHANGE) {
+    } else if (!eventInfo.compare(NET_STRATEGY_SWITCH_CHANGE)) {
         eventId = EVENT_NET_STRATEGY_SWITCH_CHANGE;
-    } else if (eventInfo == NET_AVAILABLE_CHANGE) {
+    } else if (!eventInfo.compare(NET_AVAILABLE_CHANGE)) {
         eventId = EVENT_NET_AVAILABLE_CHANGE;
-    } else if (eventInfo == NET_CAPABILITIES_CHANGE) {
+    } else if (!eventInfo.compare(NET_CAPABILITIES_CHANGE)) {
         eventId = EVENT_NET_CAPABILITIES_CHANGE;
-    } else if (eventInfo == NET_CONNECTION_CHANGE) {
+    } else if (!eventInfo.compare(NET_CONNECTION_CHANGE)) {
         eventId = EVENT_NET_CONNECTION_CHANGE;
-    } else if (eventInfo == NET_LOST_CHANGE) {
+    } else if (!eventInfo.compare(NET_LOST_CHANGE)) {
         eventId = EVENT_NET_LOST_CHANGE;
-    } else if (eventInfo == NET_STATS_CHANGE) {
+    } else if (!eventInfo.compare(NET_STATS_CHANGE)) {
         eventId = EVENT_NET_STATS_CHANGE;
-    } else if (eventInfo == NET_BLOCK_STATUS_CHANGE) {
+    } else if (!eventInfo.compare(NET_BLOCK_STATUS_CHANGE)) {
         eventId = EVENT_NET_BLOCK_STATUS_CHANGE;
-    } else if (eventInfo == NET_UNAVAILABLE_CHANGE) {
+    } else if (!eventInfo.compare(NET_UNAVAILABLE_CHANGE)) {
         eventId = EVENT_NET_UNAVAILABLE_CHANGE;
     } else {
         isEvent = false;
@@ -57,6 +57,14 @@ napi_value NapiCommon::CreateCodeMessage(napi_env env, const std::string &msg, i
         env, napi_create_string_utf8(env, std::to_string(code).c_str(), std::to_string(code).length(), &codeInfo));
     NAPI_CALL(env, napi_create_error(env, codeInfo, messageInfo, &messageCodeInfo));
     return messageCodeInfo;
+}
+
+void NapiCommon::SetPropertyBool(
+    napi_env env, napi_value object, const std::string &propertyName, bool property)
+{
+    napi_value propertyDest = nullptr;
+    NAPI_CALL_RETURN_VOID(env, napi_get_boolean(env, property, &propertyDest));
+    NAPI_CALL_RETURN_VOID(env, napi_set_named_property(env, object, propertyName.c_str(), propertyDest));
 }
 
 void NapiCommon::SetPropertyInt32(
@@ -239,6 +247,9 @@ napi_value NapiCommon::HandleAsyncWork(napi_env env, BaseContext *baseContext, c
         std::string errorCode = std::to_string(napi_invalid_arg);
         std::string errorMessage = "error at baseContext is nullptr";
         NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        napi_value res = nullptr;
+        NAPI_CALL(env, napi_get_undefined(env, &res));
+        return res;
     }
     napi_value result = nullptr;
     if (context->callbackRef == nullptr) {
@@ -273,6 +284,7 @@ void NapiCommon::Handle1ValueCallback(napi_env env, BaseContext *baseContext, na
         std::string errorCode = std::to_string(napi_invalid_arg);
         std::string errorMessage = "error at baseContext is nullptr";
         NAPI_CALL_RETURN_VOID(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return;
     }
     if (baseContext->callbackRef != nullptr) {
         NETMGR_LOG_I("Handle1ValueCallback start normal callback");
@@ -298,7 +310,6 @@ void NapiCommon::Handle1ValueCallback(napi_env env, BaseContext *baseContext, na
     }
     napi_delete_async_work(env, baseContext->work);
     delete baseContext;
-    baseContext = nullptr;
     NETMGR_LOG_I("Handle1ValueCallback end");
 }
 
@@ -310,6 +321,7 @@ void NapiCommon::Handle2ValueCallback(napi_env env, BaseContext *baseContext, na
         std::string errorCode = std::to_string(napi_invalid_arg);
         std::string errorMessage = "error at baseContext is nullptr";
         NAPI_CALL_RETURN_VOID(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
+        return;
     }
     if (baseContext->callbackRef != nullptr) {
         NETMGR_LOG_I("Handle2ValueCallback start normal callback");
@@ -335,7 +347,6 @@ void NapiCommon::Handle2ValueCallback(napi_env env, BaseContext *baseContext, na
     }
     napi_delete_async_work(env, baseContext->work);
     delete baseContext;
-    baseContext = nullptr;
     NETMGR_LOG_I("Handle2ValueCallback end");
 }
 
@@ -371,6 +382,16 @@ bool NapiCommon::MatchObjectProperty(
         }
     }
     return true;
+}
+
+napi_value NapiCommon::CreateEnumConstructor(napi_env env, napi_callback_info info)
+{
+    napi_value thisArg = nullptr;
+    void *data = nullptr;
+    napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, &data);
+    napi_value global = nullptr;
+    napi_get_global(env, &global);
+    return thisArg;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

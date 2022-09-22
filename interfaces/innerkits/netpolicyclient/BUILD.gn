@@ -19,6 +19,7 @@ config("net_policy_manager_if_config") {
   include_dirs = [
     "$INNERKITS_ROOT/netpolicyclient/include",
     "$INNERKITS_ROOT/netpolicyclient/include/proxy",
+    "$INNERKITS_ROOT/netconnclient/include",
   ]
 
   cflags = []
@@ -37,27 +38,29 @@ config("net_policy_manager_if_config") {
 }
 
 ohos_source_set("net_policy_parcel") {
-  sources = [
-    "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/net_policy_cellular_policy.cpp",
-    "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/net_policy_quota_policy.cpp",
+  sources =
+      [ "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/net_quota_policy.cpp" ]
+
+  include_dirs = [
+    "$INNERKITS_ROOT/netpolicyclient/include",
+    "$INNERKITS_ROOT/netconnclient/include",
+    "$NETMANAGER_BASE_ROOT/utils/log/include",
   ]
 
-  include_dirs = [ "$INNERKITS_ROOT/netpolicyclient/include" ]
-
-  deps = [
-    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-    "//utils/native/base:utils",
-  ]
-
-  external_deps = []
+  external_deps = [ "c_utils:utils" ]
   if (is_standard_system) {
     external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
   } else {
     external_deps += [ "hilog:libhilog" ]
   }
+
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
 }
 
 ohos_shared_library("net_policy_manager_if") {
+  include_dirs = [ "$NETMANAGER_BASE_ROOT/utils/log/include" ]
+
   sources = [
     "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/net_policy_client.cpp",
     "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_policy_callback_stub.cpp",
@@ -66,15 +69,11 @@ ohos_shared_library("net_policy_manager_if") {
 
   public_configs = [ ":net_policy_manager_if_config" ]
 
-  deps = [
-    ":net_policy_parcel",
-    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-  ]
+  deps = [ ":net_policy_parcel" ]
 
   external_deps = [
     "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 
   defines = [

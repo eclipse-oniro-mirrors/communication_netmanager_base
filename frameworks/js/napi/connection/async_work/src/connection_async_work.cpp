@@ -16,7 +16,7 @@
 #include "connection_async_work.h"
 
 #include "connection_exec.h"
-#include "netmanager_base_base_async_work.h"
+#include "base_async_work.h"
 #include "parse_nethandle_context.h"
 
 namespace OHOS::NetManagerStandard {
@@ -54,7 +54,8 @@ void ConnectionAsyncWork::GetNetCapabilitiesCallback(napi_env env, napi_status s
 
 void ConnectionAsyncWork::ExecGetConnectionProperties(napi_env env, void *data)
 {
-    BaseAsyncWork::ExecAsyncWork<GetConnectionPropertiesContext, ConnectionExec::ExecGetConnectionProperties>(env, data);
+    BaseAsyncWork::ExecAsyncWork<GetConnectionPropertiesContext, ConnectionExec::ExecGetConnectionProperties>(env,
+                                                                                                              data);
 }
 
 void ConnectionAsyncWork::GetConnectionPropertiesCallback(napi_env env, napi_status status, void *data)
@@ -71,6 +72,60 @@ void ConnectionAsyncWork::ExecGetDefaultNet(napi_env env, void *data)
 void ConnectionAsyncWork::GetDefaultNetCallback(napi_env env, napi_status status, void *data)
 {
     BaseAsyncWork::AsyncWorkCallback<GetDefaultNetContext, ConnectionExec::GetDefaultNetCallback>(env, status, data);
+}
+
+void ConnectionAsyncWork::ExecGetAllNets(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetAllNetsContext, ConnectionExec::ExecGetAllNets>(env, data);
+}
+
+void ConnectionAsyncWork::GetAllNetsCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetAllNetsContext, ConnectionExec::GetAllNetsCallback>(env, status, data);
+}
+
+void ConnectionAsyncWork::ExecEnableAirplaneMode(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<EnableAirplaneModeContext, ConnectionExec::ExecEnableAirplaneMode>(env, data);
+}
+
+void ConnectionAsyncWork::EnableAirplaneModeCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<EnableAirplaneModeContext, ConnectionExec::EnableAirplaneModeCallback>(env, status,
+                                                                                                            data);
+}
+
+void ConnectionAsyncWork::ExecDisableAirplaneMode(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<DisableAirplaneModeContext, ConnectionExec::ExecDisableAirplaneMode>(env, data);
+}
+
+void ConnectionAsyncWork::DisableAirplaneModeCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<DisableAirplaneModeContext, ConnectionExec::DisableAirplaneModeCallback>(
+        env, status, data);
+}
+
+void ConnectionAsyncWork::ExecReportNetConnected(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<ReportNetConnectedContext, ConnectionExec::ExecReportNetConnected>(env, data);
+}
+
+void ConnectionAsyncWork::ReportNetConnectedCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<ReportNetConnectedContext, ConnectionExec::ReportNetConnectedCallback>(env, status,
+                                                                                                            data);
+}
+
+void ConnectionAsyncWork::ExecReportNetDisconnected(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<ReportNetDisconnectedContext, ConnectionExec::ExecReportNetDisconnected>(env, data);
+}
+
+void ConnectionAsyncWork::ReportNetDisconnectedCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<ReportNetDisconnectedContext, ConnectionExec::ReportNetDisconnectedCallback>(
+        env, status, data);
 }
 
 void ConnectionAsyncWork::NetHandleAsyncWork::ExecGetAddressesByName(napi_env env, void *data)
@@ -95,6 +150,17 @@ void ConnectionAsyncWork::NetHandleAsyncWork::GetAddressByNameCallback(napi_env 
 {
     BaseAsyncWork::AsyncWorkCallback<GetAddressByNameContext, ConnectionExec::NetHandleExec::GetAddressByNameCallback>(
         env, status, data);
+}
+
+void ConnectionAsyncWork::NetHandleAsyncWork::ExecBindSocket(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<BindSocketContext, ConnectionExec::NetHandleExec::ExecBindSocket>(env, data);
+}
+
+void ConnectionAsyncWork::NetHandleAsyncWork::BindSocketCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<BindSocketContext, ConnectionExec::NetHandleExec::BindSocketCallback>(env, status,
+                                                                                                           data);
 }
 
 void ConnectionAsyncWork::NetConnectionAsyncWork::ExecRegister(napi_env env, void *data)

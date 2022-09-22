@@ -14,18 +14,20 @@
  */
 
 #include "net_stats_listener.h"
+
+#include "common_event_support.h"
+
 #include "net_stats_csv.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-const std::string EVENT_NET_STATE_LIMITED = "usual.event.netmanager.NETMANAGER_NET_STATE_LIMITED";
-const std::string EVENT_DELETE_UID = "usual.event.netmanager.NETMANAGER_DELETE_UID";
 const std::string EVENT_DATA_IFACE_LIMITED = "Net Manager Iface States Limited";
 const std::string EVENT_DATA_UID_LIMITED = "Net Manager Uid States Limited";
 const std::string EVENT_DATA_IFACE_PARAM = "NetStatsIface";
 const std::string EVENT_DATA_UID_PARAM = "NetStatsUid";
 const std::string EVENT_DATA_DELETED_UID_PARAM = "DeletedUid";
+const constexpr int BASE_NUM = 10;
 
 using namespace OHOS::EventFwk;
 
@@ -40,8 +42,8 @@ void NetStatsListener::OnReceiveEvent(const CommonEventData &data)
         data.GetWant().GetAction().c_str(), data.GetData().c_str(), data.GetCode());
 
     auto eventName = data.GetWant().GetAction();
-    if (eventName.compare(EVENT_NET_STATE_LIMITED.c_str()) == 0) {
-        NETMGR_LOG_I("usual.event.netmanager.NETMANAGER_NET_STATE_LIMITED");
+    if (eventName.compare((EventFwk::CommonEventSupport::COMMON_EVENT_NETMANAGER_NETSTATES_LIMITED).c_str()) == 0) {
+        NETMGR_LOG_I("usual.event.netmanager.base.STATES_LIMITED");
         auto eventData = data.GetData();
         if (eventData.compare(EVENT_DATA_IFACE_LIMITED.c_str()) == 0) {
             std::string iface = data.GetWant().GetStringParam(EVENT_DATA_IFACE_PARAM.c_str());
@@ -49,14 +51,16 @@ void NetStatsListener::OnReceiveEvent(const CommonEventData &data)
             NETMGR_LOG_I("Net Manager Iface States Limited, iface:[%{public}s]", iface.c_str());
         } else if (eventData.compare(EVENT_DATA_UID_LIMITED.c_str()) == 0) {
             std::string iface = data.GetWant().GetStringParam(EVENT_DATA_IFACE_PARAM.c_str());
-            uint32_t uid = std::stoi(data.GetWant().GetStringParam(EVENT_DATA_UID_PARAM.c_str()));
+            uint32_t uid = static_cast<uint32_t>(std::strtoul(data.GetWant().GetStringParam(
+                EVENT_DATA_UID_PARAM.c_str()).c_str(), nullptr, BASE_NUM));
             netStatsCallback_->NotifyNetUidStatsChanged(iface, uid);
             NETMGR_LOG_I("Net Manager Uid States Limited, iface:[%{public}s], uid:[%{public}d]", iface.c_str(), uid);
         }
-    } else if (eventName.compare(EVENT_DELETE_UID.c_str()) == 0) {
-        NETMGR_LOG_I("usual.event.netmanager.NETMANAGER_DELETE_UID");
-        uint32_t uid = std::stoi(data.GetWant().GetStringParam(EVENT_DATA_DELETED_UID_PARAM.c_str()));
-        sptr<NetStatsCsv> statsCsv = (std::make_unique<NetStatsCsv>()).release();
+    } else if (eventName.compare((EventFwk::CommonEventSupport::COMMON_EVENT_UID_REMOVED).c_str()) == 0) {
+        NETMGR_LOG_I("usual.event.UID_REMOVED");
+        uint32_t uid = static_cast<uint32_t>(std::strtoul(data.GetWant().GetStringParam(
+            EVENT_DATA_DELETED_UID_PARAM.c_str()).c_str(), nullptr, BASE_NUM));
+        auto statsCsv = std::make_unique<NetStatsCsv>();
         statsCsv->DeleteUidStatsCsv(uid);
         NETMGR_LOG_I("Net Manager delete uid, uid:[%{public}d]", uid);
     }

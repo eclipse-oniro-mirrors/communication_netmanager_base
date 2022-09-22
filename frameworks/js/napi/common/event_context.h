@@ -25,17 +25,17 @@
 namespace OHOS {
 namespace NetManagerStandard {
 // net policy
-const std::string NET_UID_POLICY_CHANGE = "netUidPolicyChange";
-const std::string NET_CELLULAR_POLICY_CHANGE = "netCellularPolicyChange";
-const std::string NET_STRATEGY_SWITCH_CHANGE = "netStrategySwitchChange";
+constexpr const char *NET_UID_POLICY_CHANGE = "netUidPolicyChange";
+constexpr const char *NET_CELLULAR_POLICY_CHANGE = "netCellularPolicyChange";
+constexpr const char *NET_STRATEGY_SWITCH_CHANGE = "netStrategySwitchChange";
 // net status
-const std::string NET_AVAILABLE_CHANGE = "netAvailable";
-const std::string NET_BLOCK_STATUS_CHANGE = "netBlockStatusChange";
-const std::string NET_CAPABILITIES_CHANGE = "netCapabilitiesChange";
-const std::string NET_CONNECTION_CHANGE = "netConnectionPropertiesChange";
-const std::string NET_LOST_CHANGE = "netLost";
-const std::string NET_UNAVAILABLE_CHANGE = "netUnavailable";
-const std::string NET_STATS_CHANGE = "netStatsChange";
+constexpr const char *NET_AVAILABLE_CHANGE = "netAvailable";
+constexpr const char *NET_BLOCK_STATUS_CHANGE = "netBlockStatusChange";
+constexpr const char *NET_CAPABILITIES_CHANGE = "netCapabilitiesChange";
+constexpr const char *NET_CONNECTION_CHANGE = "netConnectionPropertiesChange";
+constexpr const char *NET_LOST_CHANGE = "netLost";
+constexpr const char *NET_UNAVAILABLE_CHANGE = "netUnavailable";
+constexpr const char *NET_STATS_CHANGE = "netStatsChange";
 constexpr int32_t EVENT_CONTENT_MAX_BYTE = 64;
 
 enum {

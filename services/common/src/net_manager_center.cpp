@@ -23,6 +23,14 @@ NetManagerCenter &NetManagerCenter::GetInstance()
     return gInstance;
 }
 
+int32_t NetManagerCenter::GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames)
+{
+    if (connService_ == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return connService_->GetIfaceNames(bearerType, ifaceNames);
+}
+
 int32_t NetManagerCenter::GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName)
 {
     if (connService_ == nullptr) {
@@ -97,7 +105,15 @@ int32_t NetManagerCenter::ResetPolicyFactory()
     if (policyService_ == nullptr) {
         return NETMANAGER_ERROR;
     }
-    return policyService_->ResetPolicyFactory();
+    return ResetPolicies();
+}
+
+int32_t NetManagerCenter::ResetPolicies()
+{
+    if (policyService_ == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return policyService_->ResetPolicies();
 }
 
 void NetManagerCenter::RegisterPolicyService(const sptr<NetPolicyBaseService> &service)
@@ -145,7 +161,15 @@ bool NetManagerCenter::IsUidNetAccess(uint32_t uid, bool metered)
     if (policyService_ == nullptr) {
         return NETMANAGER_ERROR;
     }
-    return policyService_->IsUidNetAccess(uid, metered);
+    return IsUidNetAllowed(uid, metered);
+}
+
+bool NetManagerCenter::IsUidNetAllowed(uint32_t uid, bool metered)
+{
+    if (policyService_ == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return policyService_->IsUidNetAllowed(uid, metered);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

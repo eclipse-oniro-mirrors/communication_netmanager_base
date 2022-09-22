@@ -15,7 +15,10 @@
 
 #include "net_all_capabilities.h"
 
-#include "net_mgr_log_wrapper.h"
+#include "__functional_base"
+#include "__tree"
+
+#include "parcel.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -84,7 +87,7 @@ bool NetAllCapabilities::Unmarshalling(Parcel &parcel)
         if (!parcel.ReadUint32(cap)) {
             return false;
         }
-        if ((cap < 0) || (cap >= NET_CAPABILITY_INTERNAL_DEFAULT)) {
+        if (cap >= NET_CAPABILITY_INTERNAL_DEFAULT) {
             continue;
         }
         netCaps_.insert(static_cast<NetCap>(cap));
@@ -97,7 +100,7 @@ bool NetAllCapabilities::Unmarshalling(Parcel &parcel)
         if (!parcel.ReadUint32(type)) {
             return false;
         }
-        if ((type < 0) || (type >= BEARER_DEFAULT)) {
+        if (type >= BEARER_DEFAULT) {
             continue;
         }
         bearerTypes_.insert(static_cast<NetBearType>(type));
@@ -108,25 +111,20 @@ bool NetAllCapabilities::Unmarshalling(Parcel &parcel)
 std::string NetAllCapabilities::ToString(const std::string &tab) const
 {
     std::string str;
-    str.append("\n");
     str.append(tab);
     str.append("[NetAllCapabilities]");
 
-    str.append("\n");
     str.append(tab);
     str.append("linkUpBandwidthKbps_ = ");
     str.append(std::to_string(linkUpBandwidthKbps_));
 
-    str.append("\n");
     str.append(tab);
     str.append("linkDownBandwidthKbps_ = ");
     str.append(std::to_string(linkDownBandwidthKbps_));
 
-    str.append("\n");
     str.append(tab);
     ToStrNetCaps(netCaps_, str);
 
-    str.append("\n");
     str.append(tab);
     ToStrNetBearTypes(bearerTypes_, str);
 

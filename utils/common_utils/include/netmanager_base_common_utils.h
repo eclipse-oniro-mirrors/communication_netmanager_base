@@ -16,8 +16,9 @@
 #ifndef COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H
 #define COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H
 
-#include <string>
+#include <iosfwd>
 #include <vector>
+#include <sstream>
 
 namespace OHOS::NetManagerStandard::CommonUtils {
 std::vector<std::string> Split(const std::string &str, const std::string &sep);
@@ -25,6 +26,32 @@ std::vector<std::string> Split(const std::string &str, const std::string &sep);
 std::string Strip(const std::string &str, char ch = ' ');
 
 std::string ToLower(const std::string &s);
+
+bool IsValidIPV4(const std::string &ip);
+
+bool IsValidIPV6(const std::string &ip);
+
+int8_t GetAddrFamily(const std::string &ip);
+
+int GetMaskLength(const std::string &mask);
+
+std::string ConvertIpv4Address(uint32_t addressIpv4);
+
+uint32_t ConvertIpv4Address(const std::string &address);
+
+bool ParseInt(const std::string &str, int32_t *value);
+
+int64_t ConvertToInt64(const std::string& str);
+
+std::string ToAnonymousIp(const std::string &input);
+
+int32_t StrToInt(std::string &str);
+
+uint32_t StrToUint(const std::string &str);
+
+bool StrToBool(const std::string &str);
+
+int64_t StrToLong(std::string &str);
 } // namespace OHOS::NetManagerStandard::CommonUtils
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H */

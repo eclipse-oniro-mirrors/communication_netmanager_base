@@ -20,7 +20,7 @@
 
 #include "net_conn_callback_observer.h"
 #include "net_specifier.h"
-#include "netmanager_base_event_manager.h"
+#include "event_manager.h"
 
 namespace OHOS::NetManagerStandard {
 class NetConnection final {

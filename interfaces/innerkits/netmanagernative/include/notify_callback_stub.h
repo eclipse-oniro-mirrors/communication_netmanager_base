@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 #include "i_notify_callback.h"
 
 namespace OHOS {
-namespace NetdNative {
+namespace NetsysNative {
 class NotifyCallbackStub : public IRemoteStub<INotifyCallback> {
 public:
     NotifyCallbackStub();
@@ -42,10 +42,11 @@ private:
     int32_t CmdOnInterfaceLinkStateChanged(MessageParcel &data, MessageParcel &reply);
     int32_t CmdOnRouteChanged(MessageParcel &data, MessageParcel &reply);
     int32_t CmdDhcpSuccess(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdOnBandwidthReachedLimit(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NotifyCallbackFunc> memberFuncMap_;
 };
-} // namespace NetdNative
+} // namespace NetsysNative
 } // namespace OHOS
 #endif

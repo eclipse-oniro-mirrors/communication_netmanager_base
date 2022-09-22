@@ -17,90 +17,150 @@
 #define NET_MONITOR_H
 
 #include <mutex>
+#include <condition_variable>
 #include <thread>
-
-#include "http_request.h"
 #include "net_conn_types.h"
-
+#include "refbase.h"
 namespace OHOS {
 namespace NetManagerStandard {
-const std::string DEFAULT_PORTAL_HTTPS_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
-constexpr int32_t HTTP_DETECTION_WAIT_TIME_MS = 10000;
-const std::string PORTAL_URL_REDIRECT_FIRST_CASE = "Location: ";
-const std::string PORTAL_URL_REDIRECT_SECOND_CASE = "http";
-const std::string CONTENT_STR = "Content-Length:";
-const std::string PORTAL_END_STR = "?";
-constexpr int32_t PORTAL_CONTENT_LENGTH_MIN = 4;
-constexpr int32_t NET_CONTENT_LENGTH = 6;
-
-class NetMonitor {
+class NetMonitor : public virtual RefBase {
 public:
-    NetMonitor(NetDetectionStateHandler handle);
+    /**
+     * Construct a new NetMonitor to detection a network
+     *
+     * @param netId Detection network's id
+     * @param handle NetDetectionState's handle
+     */
+    NetMonitor(uint32_t netId, NetDetectionStateHandler handle);
+
+    /**
+     * Destroy the NetMonitor
+     *
+     */
     virtual ~NetMonitor();
-    /**
-     * @brief : Start NetMonitor thread
-     * @Return success : NET_OPT_SUCCESS  failed : NET_OPT_FAILED
-     */
-    ResultCode InitNetMonitorThread();
 
     /**
-     * @brief : Trigger thread to perform network detection
-     * @param ifaceName
-     */
-    void SignalNetMonitorThread(const std::string &ifaceName);
-
-    /**
-     * @brief : stop the NetMonitor processing thread.
+     * Start detection
      *
      */
-    void StopNetMonitorThread();
+    void Start(bool needReport);
+
+    /**
+     * Stop detecting
+     *
+     */
+    void Stop();
+
+    /**
+     * Determine NetMonitor is detecting or not
+     *
+     * @return bool NetMonitor is detecting or not
+     */
+    bool IsDetecting() const;
+
+    /**
+     * Get current detection result
+     *
+     * @return Current detection result
+     */
+    NetDetectionStatus GetDetectionResult() const;
+
+    /**
+     * Set network socket parameter
+     *
+     * @return Socket parameter setting result
+     */
+    int32_t SetSocketParameter(int32_t sockFd);
 
 private:
-    /**
-     * @brief : Detect Internet ability
-     * @return true http detection success, false http detection failed
-     */
-    bool HttpDetection();
-
-    /**
-     * @brief : NetMonitor thread function
-     */
-    void RunNetMonitorThreadFunc();
-
-    /**
-     * @brief : Exit the NetMonitor thread.
-     *
-     */
-    void ExitNetMonitorThread();
-
-    /**
-     * @brief Get the Status Code From Response object
-     *
-     * @param strResponse
-     * @return int32_t Returns -1, strResponse is invalid; otherwise returns statusCode
-     */
+    void Detection();
+    NetDetectionStatus SendParallelHttpProbes();
+    NetDetectionStatus SendHttpProbe(const std::string &defaultDomain, const std::string &defaultUrl,
+                                     const uint16_t defaultPort);
     int32_t GetStatusCodeFromResponse(const std::string &strResponse);
+    int32_t GetUrlRedirectFromResponse(const std::string &strResponse, std::string &urlRedirect);
+    NetDetectionStatus dealRecvResult(const std::string &strResponse);
+    int32_t ParseUrl(const std::string &url, std::string &domain, std::string &urlPath);
+    int32_t GetIpAddr(const char *domain, std::string &ip_addr, int &socketType);
 
     /**
-     * @brief Get the Url Redirect From Response object
+     * Non blocking socket connection
      *
-     * @param strResponse  Response data obtained from the server
-     * @param urlRedirect    The redirected url obtained from the response data
-     * @return int32_t Returns 0, get urlRedirect; returns -1, urlRedirect is empty
+     * @param sockFd Socket fd to connect
+     * @param port Transport layer default port
+     * @param ipAddr IP address
+     *
+     * @return Socket connect result
      */
-    int32_t GetUrlRedirectFromResponse(const std::string &strResponse, std::string &urlRedirect);
+    int32_t Connect(int32_t sockFd, int socketType, const uint16_t port, const std::string &ipAddr);
+
+    /**
+     * Connect ipv4 ip address socket
+     *
+     * @param sockFd Socket fd to connect
+     * @param port Transport layer default port
+     * @param ipAddr IP address
+     *
+     * @return Socket connect result
+     */
+    int32_t ConnectIpv4(int32_t sockFd, const uint16_t port, const std::string &ipAddr);
+
+    /**
+     * Connect ipv6 ip address socket
+     *
+     * @param sockFd Socket fd to connect
+     * @param port Transport layer default port
+     * @param ipAddr IP address
+     *
+     * @return Socket connect result
+     */
+    int32_t ConnectIpv6(int32_t sockFd, const uint16_t port, const std::string &ipAddr);
+
+    /**
+     * Ready for socket reading or writing
+     *
+     * @param sockFd Socket fd to connect
+     * @param canRead Store readable status
+     * @param canWrite Store writable status
+     *
+     * @return Socket preparation result
+     */
+    int32_t Wait(int32_t sockFd, uint8_t *canRead, uint8_t *canWrite);
+
+    /**
+     * Send data to socket
+     *
+     * @param sockFd Socket fd to send
+     * @param domain Probe link
+     * @param url Probe url
+     *
+     * @return Result of send data to socket
+     */
+    int32_t Send(int32_t sockFd, const std::string &domain, const std::string &url);
+
+    /**
+     * Receive data from socket
+     *
+     * @param sockFd Socket fd to receive
+     * @param probResult Store received data
+     *
+     * @return Result of receive data from socket
+     */
+    int32_t Receive(int32_t sockFd, std::string &probResult);
 
 private:
-    std::mutex mutex_;
-    std::condition_variable condition_;
-    std::condition_variable conditionTimeout_;
-    bool isStopNetMonitor_;
-    bool isExitNetMonitorThread_;
-    std::unique_ptr<std::thread> netMonitorThread_;
+    uint32_t netId_;
+    bool detecting_ = false;
+    std::mutex detectionMtx_;
+    std::condition_variable detectionCond_;
+    std::thread detectionThread_;
+    NetDetectionStatus result_ = INVALID_DETECTION_STATE;
+    uint32_t detectionDelay_ = 0;
+    uint32_t detectionSteps_ = 0;
     NetDetectionStateHandler netDetectionStatus_;
-    NetDetectionStatus lastDetectionState_;
-    std::string ifaceName_;
+    std::string portalUrlRedirect_;
+    bool needReport_ = false;
 };
-}  // namespace NetManagerStandard
-}  // namespace OHOS
+} // namespace NetManagerStandard
+} // namespace OHOS
 #endif // NET_MONITOR_H

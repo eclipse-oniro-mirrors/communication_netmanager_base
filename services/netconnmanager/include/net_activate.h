@@ -37,19 +37,19 @@ public:
 public:
     NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
         TimeOutHandler timeOutHandler, const uint32_t &timeoutMS);
-    ~NetActivate() = default;
+    ~NetActivate();
     bool MatchRequestAndNetwork(sptr<NetSupplier> supplier);
     void SetRequestId(uint32_t reqId);
     uint32_t GetRequestId() const;
     sptr<NetSupplier> GetServiceSupply() const;
     void SetServiceSupply(sptr<NetSupplier> netServiceSupplied);
-    sptr<INetConnCallback>& GetNetCallback();
-    sptr<NetSpecifier>& GetNetSpecifier();
-    std::unique_ptr<Timer>&  GetTimer();
+    sptr<INetConnCallback> GetNetCallback();
+    sptr<NetSpecifier> GetNetSpecifier();
+    std::unique_ptr<Timer> &GetTimer();
 
 private:
     bool CompareByNetworkIdent(const std::string &ident);
-    bool CompareByNetworkCapabilities(const std::set<NetCap> &netCaps);
+    bool CompareByNetworkCapabilities(const NetCaps &netCaps);
     bool CompareByNetworkNetType(NetBearType bearerType);
     bool CompareByNetworkBand(uint32_t netLinkUpBand, uint32_t netLinkDownBand);
     bool HaveCapability(NetCap netCap) const;
@@ -61,9 +61,9 @@ private:
     sptr<NetSpecifier> netSpecifier_ = nullptr;
     sptr<INetConnCallback> netConnCallback_ = nullptr;
     sptr<NetSupplier> netServiceSupplied_ = nullptr;
-    std::unique_ptr<Timer> lpTimer_ = nullptr;
     uint32_t timeoutMS_ = 0;
     TimeOutHandler timeOutHandler_ = nullptr;
+    std::unique_ptr<Timer> lpTimer_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

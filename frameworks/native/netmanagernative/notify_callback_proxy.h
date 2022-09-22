@@ -19,25 +19,27 @@
 #include "i_notify_callback.h"
 
 namespace OHOS {
-namespace NetdNative {
+namespace NetsysNative {
 class NotifyCallbackProxy : public IRemoteProxy<INotifyCallback> {
 public:
     explicit NotifyCallbackProxy(const sptr<IRemoteObject> &impl);
     virtual ~NotifyCallbackProxy();
-
-public:
-    int32_t OnInterfaceAddressUpdated(const std::string &, const std::string &, int, int) override;
-    int32_t OnInterfaceAddressRemoved(const std::string &, const std::string &, int, int) override;
-    int32_t OnInterfaceAdded(const std::string &) override;
-    int32_t OnInterfaceRemoved(const std::string &) override;
-    int32_t OnInterfaceChanged(const std::string &, bool) override;
-    int32_t OnInterfaceLinkStateChanged(const std::string &, bool) override;
-    int32_t OnRouteChanged(bool, const std::string &, const std::string &, const std::string &) override;
+    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
+                                      int scope) override;
+    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags,
+                                      int scope) override;
+    int32_t OnInterfaceAdded(const std::string &ifName) override;
+    int32_t OnInterfaceRemoved(const std::string &ifName) override;
+    int32_t OnInterfaceChanged(const std::string &ifName, bool up) override;
+    int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) override;
+    int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
+                           const std::string &ifName) override;
     int32_t OnDhcpSuccess(sptr<DhcpResultParcel> &dhcpResult) override;
+    int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override;
 
 private:
     static inline BrokerDelegator<NotifyCallbackProxy> delegator_;
 };
-} // namespace NetdNative
+} // namespace NetsysNative
 } // namespace OHOS
 #endif

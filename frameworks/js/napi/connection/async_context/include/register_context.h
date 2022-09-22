@@ -16,12 +16,12 @@
 #ifndef NETMANAGER_BASE_REGISTER_CONTEXT_H
 #define NETMANAGER_BASE_REGISTER_CONTEXT_H
 
+#include <cstddef>
+
 #include "napi/native_api.h"
-#include "net_all_capabilities.h"
-#include "net_handle.h"
-#include "net_link_info.h"
-#include "netmanager_base_base_context.h"
 #include "nocopyable.h"
+
+#include "base_context.h"
 
 namespace OHOS::NetManagerStandard {
 class RegisterContext final : public BaseContext {

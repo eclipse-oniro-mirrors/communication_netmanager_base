@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+ability_runtime_path = "//foundation/ability/ability_runtime"
+ability_runtime_kits_path = "${ability_runtime_path}/frameworks/kits"
 SUBSYSTEM_DIR = "//foundation/communication"
 NETMANAGER_BASE_ROOT = "$SUBSYSTEM_DIR/netmanager_base"
 NETMANAGERNATIVE_ROOT = "$NETMANAGER_BASE_ROOT/services/netmanagernative"
@@ -19,29 +21,32 @@ NETCONNMANAGER_INNERKITS_SOURCE_DIR =
     "$NETMANAGER_BASE_ROOT/frameworks/native/netconnclient"
 NETPOLICYMANAGER_INNERKITS_SOURCE_DIR =
     "$NETMANAGER_BASE_ROOT/frameworks/native/netpolicyclient"
-DNSRESOLVERMANAGER_INNERKITS_SOURCE_DIR =
-    "$NETMANAGER_BASE_ROOT/frameworks/native/dnsresolverclient"
 NETSTATSMANAGER_INNERKITS_SOURCE_DIR =
     "$NETMANAGER_BASE_ROOT/frameworks/native/netstatsclient"
 NETCONNMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netconnmanager"
 NETPOLICYMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netpolicymanager"
 NETSTATSMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netstatsmanager"
 NETCONNMANAGER_COMMON_DIR = "$NETMANAGER_BASE_ROOT/services/common"
-DNSRESOLVERMANAGER_SOURCE_DIR =
-    "$NETMANAGER_BASE_ROOT/services/dnsresolvermanager"
-NETDNATIVE_INNERKITS_SOURCE_DIR =
+FWMARK_CLIENT_DIR = "$NETMANAGERNATIVE_ROOT/fwmarkclient"
+NETSTATSMANAGER_BPFLIB_DIR = "$NETMANAGER_BASE_ROOT/services/netsys_bpf_stats"
+NETSYSNATIVE_INNERKITS_SOURCE_DIR =
     "$NETMANAGER_BASE_ROOT/frameworks/native/netmanagernative"
-NETDNATIVE_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netmanagernative"
-NETMANAGER_PREBUILTS_DIR = "$NETMANAGER_BASE_ROOT/prebuilts"
-NETDCONTROLLER_ROOT_DIR = "$NETMANAGER_BASE_ROOT/services/netdcontroller"
+NETSYSNATIVE_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netmanagernative"
+NETSYSBPFMAP_SOURCE_DIR = "$NETSYSNATIVE_SOURCE_DIR/netsys_bpf_map"
+NETSYSCONTROLLER_ROOT_DIR = "$NETMANAGER_BASE_ROOT/services/netsyscontroller"
+SAMGR_INTERFACE_ROOT_DIR = "//foundation/systemabilitymgr/samgr/interfaces"
+
+THIRD_PARTY_ROOT = "//third_party"
+UTILS_ROOT = "//utils"
+HILOG_ROOT = "//base/hiviewdfx/hilog"
+TELEPHONY_ROOT = "//base/telephony"
+C_UTILS_ROOT = "//commonlibrary/c_utils"
+ARKUI_ROOT = "//foundation/arkui"
+WIFI_MANAGER_ROOT = "//foundation/communication/wifi/wifi"
+DHCP_MANAGER_ROOT = "//foundation/communication/wifi/dhcp"
+SAMGR_MANAGER_ROOT = "//foundation/systemabilitymgr/samgr"
 
 use_js_debug = false
-
-netmanager_native_path =
-    rebase_path("//foundation/communication/netmanager_native")
-cmd = "if [ -f ${netmanager_native_path}/bundle.json ]; then echo false; else echo true; fi"
-enable_libnet_manager_native_prebuilt =
-    exec_script("//build/lite/run_shell_cmd.py", [ cmd ], "value")
 
 declare_args() {
   enable_netmgr_debug = true

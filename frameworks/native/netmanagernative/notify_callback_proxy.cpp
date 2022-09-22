@@ -17,20 +17,78 @@
 #include "netnative_log_wrapper.h"
 
 namespace OHOS {
-namespace NetdNative {
+namespace NetsysNative {
+namespace {
+bool WriteInterfaceStateData(MessageParcel &data, const std::string &ifName)
+{
+    if (!data.WriteInterfaceToken(NotifyCallbackProxy::GetDescriptor())) {
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
+        return false;
+    }
+
+    if (!data.WriteString(ifName)) {
+        return false;
+    }
+    return true;
+}
+
+bool WriteInterfaceAddressData(MessageParcel &data, const std::string &addr, const std::string &ifName, int flags,
+                               int scope)
+{
+    if (!data.WriteInterfaceToken(NotifyCallbackProxy::GetDescriptor())) {
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
+        return false;
+    }
+
+    if (!data.WriteString(addr)) {
+        return false;
+    }
+
+    if (!data.WriteString(ifName)) {
+        return false;
+    }
+
+    if (!data.WriteInt32(flags)) {
+        return false;
+    }
+
+    if (!data.WriteInt32(scope)) {
+        return false;
+    }
+    return true;
+}
+
+bool WriteLinkStateData(MessageParcel &data, const std::string &ifName, bool up)
+{
+    if (!data.WriteInterfaceToken(NotifyCallbackProxy::GetDescriptor())) {
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
+        return false;
+    }
+
+    if (!data.WriteString(ifName)) {
+        return false;
+    }
+
+    if (!data.WriteBool(up)) {
+        return false;
+    }
+    return true;
+}
+}
 NotifyCallbackProxy::NotifyCallbackProxy(const sptr<IRemoteObject> &impl)
     : IRemoteProxy<INotifyCallback>(impl)
 {}
 
 NotifyCallbackProxy::~NotifyCallbackProxy() {}
 
-int32_t NotifyCallbackProxy::OnInterfaceAddressUpdated(const std::string &, const std::string &, int, int)
+int32_t NotifyCallbackProxy::OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
+                                                       int scope)
 {
     NETNATIVE_LOGI("Proxy OnInterfaceAddressUpdated");
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NotifyCallbackProxy::GetDescriptor())) {
-        NETNATIVE_LOGE("WriteInterfaceToken failed");
-        return false;
+    if (!WriteInterfaceAddressData(data, addr, ifName, flags, scope)) {
+        NETNATIVE_LOGE("WriteInterfaceAddressData failed");
+        return ERR_NONE;
     }
 
     sptr<IRemoteObject> remote = Remote();
@@ -48,13 +106,14 @@ int32_t NotifyCallbackProxy::OnInterfaceAddressUpdated(const std::string &, cons
     return ret;
 }
 
-int32_t NotifyCallbackProxy::OnInterfaceAddressRemoved(const std::string &, const std::string &, int, int)
+int32_t NotifyCallbackProxy::OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags,
+                                                       int scope)
 {
     NETNATIVE_LOGI("Proxy OnInterfaceAddressRemoved");
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NotifyCallbackProxy::GetDescriptor())) {
-        NETNATIVE_LOGE("WriteInterfaceToken failed");
-        return false;
+    if (!WriteInterfaceAddressData(data, addr, ifName, flags, scope)) {
+        NETNATIVE_LOGE("WriteInterfaceAddressData failed");
+        return ERR_NONE;
     }
 
     sptr<IRemoteObject> remote = Remote();
@@ -72,12 +131,11 @@ int32_t NotifyCallbackProxy::OnInterfaceAddressRemoved(const std::string &, cons
     return ret;
 }
 
-int32_t NotifyCallbackProxy::OnInterfaceAdded(const std::string &)
+int32_t NotifyCallbackProxy::OnInterfaceAdded(const std::string &ifName)
 {
     NETNATIVE_LOGI("Proxy OnInterfaceAdded");
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NotifyCallbackProxy::GetDescriptor())) {
-        NETNATIVE_LOGE("WriteInterfaceToken failed");
+    if (!WriteInterfaceStateData(data, ifName)) {
         return false;
     }
 
@@ -96,12 +154,11 @@ int32_t NotifyCallbackProxy::OnInterfaceAdded(const std::string &)
     return ret;
 }
 
-int32_t NotifyCallbackProxy::OnInterfaceRemoved(const std::string &)
+int32_t NotifyCallbackProxy::OnInterfaceRemoved(const std::string &ifName)
 {
     NETNATIVE_LOGI("Proxy OnInterfaceRemoved");
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NotifyCallbackProxy::GetDescriptor())) {
-        NETNATIVE_LOGE("WriteInterfaceToken failed");
+    if (!WriteInterfaceStateData(data, ifName)) {
         return false;
     }
 
@@ -120,13 +177,12 @@ int32_t NotifyCallbackProxy::OnInterfaceRemoved(const std::string &)
     return ret;
 }
 
-int32_t NotifyCallbackProxy::OnInterfaceChanged(const std::string &, bool)
+int32_t NotifyCallbackProxy::OnInterfaceChanged(const std::string &ifName, bool up)
 {
     NETNATIVE_LOGI("Proxy OnInterfaceChanged");
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NotifyCallbackProxy::GetDescriptor())) {
-        NETNATIVE_LOGE("WriteInterfaceToken failed");
-        return false;
+    if (!WriteLinkStateData(data, ifName, up)) {
+        return ERR_NONE;
     }
 
     sptr<IRemoteObject> remote = Remote();
@@ -144,13 +200,12 @@ int32_t NotifyCallbackProxy::OnInterfaceChanged(const std::string &, bool)
     return ret;
 }
 
-int32_t NotifyCallbackProxy::OnInterfaceLinkStateChanged(const std::string &, bool)
+int32_t NotifyCallbackProxy::OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
 {
     NETNATIVE_LOGI("Proxy OnInterfaceLinkStateChanged");
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NotifyCallbackProxy::GetDescriptor())) {
-        NETNATIVE_LOGE("WriteInterfaceToken failed");
-        return false;
+    if (!WriteLinkStateData(data, ifName, up)) {
+        return ERR_NONE;
     }
 
     sptr<IRemoteObject> remote = Remote();
@@ -168,12 +223,29 @@ int32_t NotifyCallbackProxy::OnInterfaceLinkStateChanged(const std::string &, bo
     return ret;
 }
 
-int32_t NotifyCallbackProxy::OnRouteChanged(bool, const std::string &, const std::string &, const std::string &)
+int32_t NotifyCallbackProxy::OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
+                                            const std::string &ifName)
 {
     NETNATIVE_LOGI("Proxy OnRouteChanged");
     MessageParcel data;
     if (!data.WriteInterfaceToken(NotifyCallbackProxy::GetDescriptor())) {
         NETNATIVE_LOGE("WriteInterfaceToken failed");
+        return false;
+    }
+
+    if (!data.WriteBool(updated)) {
+        return false;
+    }
+
+    if (!data.WriteString(route)) {
+        return false;
+    }
+
+    if (!data.WriteString(gateway)) {
+        return false;
+    }
+
+    if (!data.WriteString(ifName)) {
         return false;
     }
 
@@ -215,5 +287,36 @@ int32_t NotifyCallbackProxy::OnDhcpSuccess(sptr<DhcpResultParcel> &dhcpResult)
     }
     return ret;
 }
-} // namespace NetdNative
+
+int32_t NotifyCallbackProxy::OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface)
+{
+    NETNATIVE_LOGI("Proxy OnBandwidthReachedLimit");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NotifyCallbackProxy::GetDescriptor())) {
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
+        return false;
+    }
+
+    if (!data.WriteString(limitName)) {
+        return false;
+    }
+    if (!data.WriteString(iface)) {
+        return false;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(ON_BANDWIDTH_REACHED_LIMIT, data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("Proxy SendRequest failed, ret code:[%{public}d]", ret);
+    }
+    return reply.ReadInt32();
+}
+} // namespace NetsysNative
 } // namespace OHOS

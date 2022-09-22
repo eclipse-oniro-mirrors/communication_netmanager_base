@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,12 @@
 #ifndef NET_POLICY_CALLBACK_TEST_H
 #define NET_POLICY_CALLBACK_TEST_H
 
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
 
 #include "net_policy_callback_stub.h"
-#include "net_policy_cellular_policy.h"
 #include "net_policy_constants.h"
+#include "net_quota_policy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -29,13 +29,14 @@ class NetPolicyCallbackTest : public NetPolicyCallbackStub {
 public:
     NetPolicyCallbackTest();
     virtual ~NetPolicyCallbackTest() override;
-    int32_t NetUidPolicyChanged(uint32_t uid, NetUidPolicy policy) override;
-    int32_t NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicies) override;
-    int32_t NetStrategySwitch(const std::string &simId, bool enable) override;
-    int32_t NetBackgroundPolicyChanged(bool isBackgroundPolicyAllow) override;
+    int32_t NetUidPolicyChange(uint32_t uid, uint32_t policy) override;
+    int32_t NetUidRuleChange(uint32_t uid, uint32_t rule) override;
+    int32_t NetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies) override;
+    int32_t NetMeteredIfacesChange(std::vector<std::string> &ifaces) override;
+    int32_t NetBackgroundPolicyChange(bool isBackgroundPolicyAllow) override;
     void WaitFor(int32_t timeoutSecond);
 
-    NetUidPolicy GetPolicy() const
+    uint32_t GetPolicy() const
     {
         return uidPolicy_;
     }
@@ -43,13 +44,32 @@ public:
     {
         return uid_;
     }
+
+    uint32_t GetRule() const
+    {
+        return rule_;
+    }
+
+    bool GetBackgroundPolicy() const
+    {
+        return isBackgroundPolicyAllow_;
+    }
+
+    uint32_t GetQuotaPoliciesSize() const
+    {
+        return quotaPoliciesSize_;
+    }
+
 private:
     void NotifyAll();
-    NetUidPolicy uidPolicy_ = NetUidPolicy::NET_POLICY_NONE;
+    uint32_t uidPolicy_ = 0;
     uint32_t uid_ = 0;
+    uint32_t rule_ = 1 << 7;
     bool isBackgroundPolicyAllow_ = true;
     std::mutex callbackMutex_;
     std::condition_variable cv_;
+
+    uint32_t quotaPoliciesSize_ = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

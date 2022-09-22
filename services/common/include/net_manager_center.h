@@ -29,6 +29,7 @@ namespace NetManagerStandard {
 class NetManagerCenter {
 public:
     static NetManagerCenter &GetInstance();
+    int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames);
     int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName);
     int32_t RegisterNetSupplier(
         NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps, uint32_t &supplierId);
@@ -42,6 +43,7 @@ public:
     void RegisterStatsService(const sptr<NetStatsBaseService> &service);
 
     int32_t ResetPolicyFactory();
+    int32_t ResetPolicies();
     void RegisterPolicyService(const sptr<NetPolicyBaseService> &service);
 
     int32_t ResetEthernetFactory();
@@ -52,6 +54,7 @@ public:
 
     int32_t RestrictBackgroundChanged(bool isRestrictBackground);
     bool IsUidNetAccess(uint32_t uid, bool metered);
+    bool IsUidNetAllowed(uint32_t uid, bool metered);
 private:
     sptr<NetConnBaseService> connService_;
     sptr<NetStatsBaseService> statsService_;

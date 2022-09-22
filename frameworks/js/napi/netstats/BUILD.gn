@@ -14,17 +14,18 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-NETMANAGER_NAPI_ROOT = "$SUBSYSTEM_DIR/netmanager_base/frameworks/js/napi/"
+NETMANAGER_NAPI_ROOT = "$NETMANAGER_BASE_ROOT/frameworks/js/napi/"
 
 ohos_shared_library("statistics") {
   include_dirs = [
-    "//third_party/node/src",
+    "$THIRD_PARTY_ROOT/node/src",
     "$NETMANAGER_NAPI_ROOT/netstats/include",
     "$NETMANAGER_NAPI_ROOT/common",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$NETSTATSMANAGER_SOURCE_DIR/include",
     "$NETSTATSMANAGER_SOURCE_DIR/include/stub",
     "$INNERKITS_ROOT/netstatsclient/include/proxy",
+    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
   ]
 
   sources = [
@@ -37,21 +38,14 @@ ohos_shared_library("statistics") {
   defines = [ "NETMGR_DEBUG" ]
 
   deps = [
-    "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+    "$ARKUI_ROOT/napi/:ace_napi",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
-    "//foundation/aafwk/standard/frameworks/kits/ability/native:abilitykit_native",
-    "//foundation/ace/napi/:ace_napi",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
-    "ability_base:want",
-    "ces_standard:cesfwk_innerkits",
-    "eventhandler:libeventhandler",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
   ]
 
   relative_install_dir = "module/net"

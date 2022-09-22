@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "net_mgr_log_wrapper.h"
 #include "net_supplier_callback_stub.h"
+#include "fwmark_client.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -34,13 +35,13 @@ int32_t NetConnClient::SystemReady()
         NETMGR_LOG_E("proxy is nullptr");
         return IPC_PROXY_ERR;
     }
-
     return proxy->SystemReady();
 }
 
 int32_t NetConnClient::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
     const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {
+    NETMGR_LOG_D("RegisterNetSupplier client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -52,6 +53,7 @@ int32_t NetConnClient::RegisterNetSupplier(NetBearType bearerType, const std::st
 
 int32_t NetConnClient::UnregisterNetSupplier(uint32_t supplierId)
 {
+    NETMGR_LOG_D("UnregisterNetSupplier client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -63,6 +65,7 @@ int32_t NetConnClient::UnregisterNetSupplier(uint32_t supplierId)
 
 int32_t NetConnClient::RegisterNetSupplierCallback(uint32_t supplierId, const sptr<NetSupplierCallbackBase> &callback)
 {
+    NETMGR_LOG_D("RegisterNetSupplierCallback client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -76,6 +79,7 @@ int32_t NetConnClient::RegisterNetSupplierCallback(uint32_t supplierId, const sp
 
 int32_t NetConnClient::RegisterNetConnCallback(const sptr<INetConnCallback> &callback)
 {
+    NETMGR_LOG_D("RegisterNetConnCallback client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("The parameter of proxy is nullptr");
@@ -88,6 +92,7 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<INetConnCallback> &cal
 int32_t NetConnClient::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
     const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
 {
+    NETMGR_LOG_D("RegisterNetConnCallback with timeout client in.");
     if (netSpecifier == nullptr || !netSpecifier->SpecifierIsValid()) {
         NETMGR_LOG_E("The parameter of netSpecifier is invalid");
         return NET_CONN_ERR_INVALID_PARAMETER;
@@ -103,6 +108,7 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpec
 
 int32_t NetConnClient::UnregisterNetConnCallback(const sptr<INetConnCallback> &callback)
 {
+    NETMGR_LOG_D("UnregisterNetConnCallback client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -114,6 +120,7 @@ int32_t NetConnClient::UnregisterNetConnCallback(const sptr<INetConnCallback> &c
 
 int32_t NetConnClient::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo)
 {
+    NETMGR_LOG_D("UpdateNetSupplierInfo client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -125,6 +132,7 @@ int32_t NetConnClient::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<Net
 
 int32_t NetConnClient::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo)
 {
+    NETMGR_LOG_D("UpdateNetLinkInfo client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -136,6 +144,7 @@ int32_t NetConnClient::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLink
 
 int32_t NetConnClient::GetDefaultNet(NetHandle &netHandle)
 {
+    NETMGR_LOG_D("GetDefaultNet client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -145,14 +154,17 @@ int32_t NetConnClient::GetDefaultNet(NetHandle &netHandle)
     int32_t netId = 0;
     int32_t result = proxy->GetDefaultNet(netId);
     if (result != ERR_NONE) {
+        NETMGR_LOG_D("fail to get default net.");
         return result;
     }
     netHandle.SetNetId(netId);
+    NETMGR_LOG_D("GetDefaultNet client out.");
     return ERR_NONE;
 }
 
 int32_t NetConnClient::HasDefaultNet(bool& flag)
 {
+    NETMGR_LOG_D("HasDefaultNet client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy==nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -175,9 +187,11 @@ int32_t NetConnClient::GetAllNets(std::list<sptr<NetHandle>> &netList)
         return result;
     }
     std::list<int32_t>::iterator iter;
-    for (iter = netIdList.begin(); iter != netIdList.end(); iter++) {
+    for (iter = netIdList.begin(); iter != netIdList.end(); ++iter) {
         sptr<NetHandle> netHandle = std::make_unique<NetHandle>(*iter).release();
-        netList.push_back(netHandle);
+        if (netHandle != nullptr) {
+            netList.push_back(netHandle);
+        }
     }
     return ERR_NONE;
 }
@@ -228,13 +242,9 @@ int32_t NetConnClient::GetAddressByName(const std::string &host, int32_t netId, 
 
 int32_t NetConnClient::BindSocket(int32_t socket_fd, int32_t netId)
 {
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
-
-    return proxy->BindSocket(socket_fd, netId);
+    std::shared_ptr<nmd::FwmarkClient> fwmarkClient_= std::make_shared<nmd::FwmarkClient>();
+    fwmarkClient_->BindSocket(socket_fd, netId);
+    return NET_CONN_SUCCESS;
 }
 
 int32_t NetConnClient::NetDetection(const NetHandle &netHandle)
@@ -329,6 +339,16 @@ void NetConnClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 
     local->RemoveDeathRecipient(deathRecipient_);
     NetConnService_ = nullptr;
+}
+
+int32_t NetConnClient::IsDefaultNetMetered(bool &isMetered)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy==nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return IPC_PROXY_ERR;
+    }
+    return proxy->IsDefaultNetMetered(isMetered);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

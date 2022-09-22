@@ -37,6 +37,7 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK] =
         &NetConnServiceStub::OnUnRegisterNetDetectionCallback;
     memberFuncMap_[CMD_NM_NET_DETECTION]                = &NetConnServiceStub::OnNetDetection;
+    memberFuncMap_[CMD_NM_GET_IFACE_NAMES]              = &NetConnServiceStub::OnGetIfaceNames;
     memberFuncMap_[CMD_NM_GET_IFACENAME_BY_TYPE]        = &NetConnServiceStub::OnGetIfaceNameByType;
     memberFuncMap_[CMD_NM_GETDEFAULTNETWORK]            = &NetConnServiceStub::OnGetDefaultNet;
     memberFuncMap_[CMD_NM_HASDEFAULTNET] =                &NetConnServiceStub::OnHasDefaultNet;
@@ -49,11 +50,17 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_GET_ADDRESS_BY_NAME]          = &NetConnServiceStub::OnGetAddressByName;
     memberFuncMap_[CMD_NM_BIND_SOCKET]                  = &NetConnServiceStub::OnBindSocket;
     memberFuncMap_[CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK] = &NetConnServiceStub::OnRegisterNetSupplierCallback;
-    memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE] = &NetConnServiceStub::OnSetAirplaneMode;
-    memberFuncMap_[CMD_NM_RESTORE_FACTORY_DATA] = &NetConnServiceStub::OnRestoreFactoryData;
+    memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE]            = &NetConnServiceStub::OnSetAirplaneMode;
+    memberFuncMap_[CMD_NM_RESTORE_FACTORY_DATA]         = &NetConnServiceStub::OnRestoreFactoryData;
+    memberFuncMap_[CMD_NM_IS_DDEFAULT_NET_METERED]      = &NetConnServiceStub::OnIsDefaultNetMetered;
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
+
+std::string ToUtf8(std::u16string str16)
+{
+    return std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> {}.to_bytes(str16);
+}
 
 int32_t NetConnServiceStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -62,6 +69,8 @@ int32_t NetConnServiceStub::OnRemoteRequest(
 
     std::u16string myDescripter = NetConnServiceStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
+    NETMGR_LOG_D("myDescripter[%{public}s], remoteDescripter[%{public}s]", ToUtf8(myDescripter).c_str(),
+                 ToUtf8(remoteDescripter).c_str());
     if (myDescripter != remoteDescripter) {
         NETMGR_LOG_E("descriptor checked fail");
         return ERR_FLATTEN_OBJECT;
@@ -119,6 +128,7 @@ int32_t NetConnServiceStub::OnRegisterNetSupplier(MessageParcel &data, MessagePa
         return ERR_FLATTEN_OBJECT;
     }
     if (ret == ERR_NONE) {
+        NETMGR_LOG_E("supplierId[%{public}d].", supplierId);
         if (!reply.WriteUint32(supplierId)) {
             return ERR_FLATTEN_OBJECT;
         }
@@ -254,16 +264,21 @@ int32_t NetConnServiceStub::OnUpdateNetStateForTest(MessageParcel &data, Message
 
 int32_t NetConnServiceStub::OnUpdateNetSupplierInfo(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_D("OnUpdateNetSupplierInfo in.");
     uint32_t supplierId;
     if (!data.ReadUint32(supplierId)) {
+        NETMGR_LOG_D("fail to get supplier id.");
         return ERR_FLATTEN_OBJECT;
     }
 
+    NETMGR_LOG_D("OnUpdateNetSupplierInfo supplierId=[%{public}d].", supplierId);
     sptr<NetSupplierInfo> netSupplierInfo = NetSupplierInfo::Unmarshalling(data);
     int32_t ret = UpdateNetSupplierInfo(supplierId, netSupplierInfo);
     if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_D("fail to update net supplier info.");
         return ERR_FLATTEN_OBJECT;
     }
+    NETMGR_LOG_D("OnUpdateNetSupplierInfo out.");
 
     return ERR_NONE;
 }
@@ -361,6 +376,32 @@ int32_t NetConnServiceStub::OnNetDetection(MessageParcel &data, MessageParcel &r
     return ERR_NONE;
 }
 
+int32_t NetConnServiceStub::OnGetIfaceNames(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t netType = 0;
+    if (!data.ReadUint32(netType)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    NetBearType bearerType = static_cast<NetBearType>(netType);
+    std::list<std::string> ifaceNames;
+    int32_t ret = GetIfaceNames(bearerType, ifaceNames);
+    if (!reply.WriteInt32(ret)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret == ERR_NONE) {
+        if (!reply.WriteUint32(ifaceNames.size())) {
+            return ERR_FLATTEN_OBJECT;
+        }
+
+        for (const auto &ifaceName : ifaceNames) {
+            if (!reply.WriteString(ifaceName)) {
+                return ERR_FLATTEN_OBJECT;
+            }
+        }
+    }
+    return ret;
+}
+
 int32_t NetConnServiceStub::OnGetIfaceNameByType(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t netType = 0;
@@ -404,6 +445,16 @@ int32_t NetConnServiceStub::ConvertCode(int32_t internalCode)
             return static_cast<int32_t>(NET_CONN_ERR_NO_REGISTERED);
         case static_cast<int32_t>(ERR_NET_NOT_FIND_NETID):
             return static_cast<int32_t>(NET_CONN_ERR_NETID_NOT_FOUND);
+        case static_cast<int32_t>(ERR_PERMISSION_CHECK_FAIL):
+            return static_cast<int32_t>(NET_CONN_ERR_PERMISSION_CHECK_FAILED);
+        case static_cast<int32_t>(ERR_REGISTER_THE_SAME_CALLBACK):
+            return static_cast<int32_t>(NET_CONN_ERR_SAME_CALLBACK);
+        case static_cast<int32_t>(ERR_UNREGISTER_CALLBACK_NOT_FOUND):
+            return static_cast<int32_t>(NET_CONN_ERR_CALLBACK_NOT_FOUND);
+        case static_cast<int32_t>(ERR_NET_NOT_FIND_REQUEST_ID):
+            return static_cast<int32_t>(NET_CONN_ERR_REQ_ID_NOT_FOUND);
+        case static_cast<int32_t>(ERR_NET_DEFAULTNET_NOT_EXIST):
+            return static_cast<int32_t>(NET_CONN_ERR_NO_DEFAULT_NET);
         default:
             break;
     }
@@ -415,7 +466,7 @@ int32_t NetConnServiceStub::OnGetDefaultNet(MessageParcel& data, MessageParcel& 
 {
     NETMGR_LOG_D("OnGetDefaultNet Begin...");
     int32_t netId;
-    int32_t result = GetDefaultNet(netId);
+    int32_t result = ConvertCode(GetDefaultNet(netId));
     NETMGR_LOG_D("GetDefaultNet result is: [%{public}d]", result);
     if (!reply.WriteInt32(result)) {
         return ERR_FLATTEN_OBJECT;
@@ -432,7 +483,7 @@ int32_t NetConnServiceStub::OnHasDefaultNet(MessageParcel& data, MessageParcel& 
 {
     NETMGR_LOG_D("OnHasDefaultNet Begin...");
     bool flag = false;
-    int32_t result = HasDefaultNet(flag);
+    int32_t result = ConvertCode(HasDefaultNet(flag));
     NETMGR_LOG_D("HasDefaultNet result is: [%{public}d]", result);
     if (!reply.WriteInt32(result)) {
         return ERR_FLATTEN_OBJECT;
@@ -460,7 +511,7 @@ int32_t NetConnServiceStub::OnGetSpecificNet(MessageParcel &data, MessageParcel 
         return ERR_FLATTEN_OBJECT;
     }
     if (ret == ERR_NONE) {
-        int32_t size = netIdList.size();
+        int32_t size = static_cast<int32_t>(netIdList.size());
         if (!reply.WriteInt32(size)) {
             return ERR_FLATTEN_OBJECT;
         }
@@ -483,7 +534,7 @@ int32_t NetConnServiceStub::OnGetAllNets(MessageParcel &data, MessageParcel &rep
         return ERR_FLATTEN_OBJECT;
     }
     if (ret == ERR_NONE) {
-        int32_t size = netIdList.size();
+        int32_t size = static_cast<int32_t>(netIdList.size());
         if (!reply.WriteInt32(size)) {
             return ERR_FLATTEN_OBJECT;
         }
@@ -532,7 +583,7 @@ int32_t NetConnServiceStub::OnGetConnectionProperties(MessageParcel &data, Messa
         return ERR_FLATTEN_OBJECT;
     }
     if (ret == ERR_NONE) {
-        sptr<NetLinkInfo> netLinkInfo_ptr = (std::make_unique<NetLinkInfo>(info)).release();
+        sptr<NetLinkInfo> netLinkInfo_ptr = new (std::nothrow) NetLinkInfo(info);
         if (!NetLinkInfo::Marshalling(reply, netLinkInfo_ptr)) {
             NETMGR_LOG_E("proxy Marshalling failed");
             return ERR_FLATTEN_OBJECT;
@@ -600,7 +651,7 @@ int32_t NetConnServiceStub::OnGetAddressesByName(MessageParcel &data, MessagePar
         return ERR_FLATTEN_OBJECT;
     }
     if (ret == ERR_NONE) {
-        int32_t size = addrList.size();
+        int32_t size = static_cast<int32_t>(addrList.size());
         if (!reply.WriteInt32(size)) {
             return ERR_FLATTEN_OBJECT;
         }
@@ -681,6 +732,22 @@ int32_t NetConnServiceStub::OnRestoreFactoryData(MessageParcel &data, MessagePar
         return ERR_FLATTEN_OBJECT;
     }
     return ret;
+}
+
+int32_t NetConnServiceStub::OnIsDefaultNetMetered(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("stub execute IsDefaultNetMetered");
+    bool flag = false;
+    int32_t result = IsDefaultNetMetered(flag);
+    if (!reply.WriteInt32(result)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result == ERR_NONE) {
+        if (!reply.WriteBool(flag)) {
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    return  ERR_NONE;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

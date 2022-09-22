@@ -28,6 +28,11 @@ enum NetConnResultCode {
     NET_CONN_ERR_NO_ANY_NET_TYPE                    = (-6),
     NET_CONN_ERR_NO_REGISTERED                      = (-7),
     NET_CONN_ERR_NETID_NOT_FOUND                    = (-8),
+    NET_CONN_ERR_PERMISSION_CHECK_FAILED            = (-9),
+    NET_CONN_ERR_SAME_CALLBACK                      = (-10),
+    NET_CONN_ERR_CALLBACK_NOT_FOUND                 = (-11),
+    NET_CONN_ERR_REQ_ID_NOT_FOUND                   = (-12),
+    NET_CONN_ERR_NO_DEFAULT_NET                     = (-13),
     NET_CONN_ERR_INTERNAL_ERROR                     = (-1000)
 };
 

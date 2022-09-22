@@ -16,12 +16,14 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+#include "event_report.h"
 #include "i_net_detection_callback.h"
 #include "inet_addr.h"
 #include "net_conn_types.h"
 #include "net_link_info.h"
 #include "net_monitor.h"
 #include "route.h"
+#include "net_supplier_info.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -31,7 +33,7 @@ constexpr int32_t MAX_NET_ID = 0xFFFF - 0x400;
 using NetDetectionHandler = std::function<void(uint32_t supplierId, bool ifValid)>;
 class Network : public virtual RefBase {
 public:
-    Network(int32_t netId, uint32_t supplierId, NetDetectionHandler handler);
+    Network(int32_t netId, uint32_t supplierId, NetDetectionHandler handler, NetBearType bearerType);
     ~Network();
     bool operator==(const Network &network) const;
     int32_t GetNetId() const;
@@ -45,32 +47,35 @@ public:
     void UpdateMtu(const NetLinkInfo &netLinkInfo);
     void RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
     int32_t UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
-    void StartNetDetection();
+    void StartNetDetection(bool needReport);
     uint64_t GetNetWorkMonitorResult();
     void SetDefaultNetWork();
     void ClearDefaultNetWorkNetId();
-    void SetExternDetection();
+    bool IsConnecting() const;
+    bool IsConnected() const;
+    void UpdateNetConnState(NetConnState netConnState);
 
 private:
     void StopNetDetection();
     bool CreateBasicNetwork();
     bool ReleaseBasicNetwork();
-    void StartDetectionThread();
+    void InitNetMonitor();
     void HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect);
     void NotifyNetDetectionResult(NetDetectionResultCode detectionResult, const std::string &urlRedirect);
+    int32_t Ipv4PrefixLen(const std::string &ip);
     NetDetectionResultCode NetDetectionResultConvert(int32_t internalRet);
+    void SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const std::string &errMsg);
 
 private:
     int32_t netId_ = 0;
     uint32_t supplierId_ = 0;
     NetLinkInfo netLinkInfo_;
+    NetConnState state_ = NET_CONN_STATE_UNKNOWN;
     bool isPhyNetCreated_ = false;
     std::unique_ptr<NetMonitor> netMonitor_ = nullptr;
     NetDetectionHandler  netCallback_;
-    NetDetectionStatus netDetectionState_;
-    std::string urlRedirect_;
+    NetBearType netSupplierType_;
     std::vector<sptr<INetDetectionCallback>> netDetectionRetCallback_;
-    bool isExternDetection_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

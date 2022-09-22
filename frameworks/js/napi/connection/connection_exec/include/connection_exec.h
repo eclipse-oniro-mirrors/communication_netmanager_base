@@ -18,6 +18,7 @@
 
 #include <netdb.h>
 
+#include "bindsocket_context.h"
 #include "getaddressbyname_context.h"
 #include "getdefaultnet_context.h"
 #include "napi/native_api.h"
@@ -33,6 +34,12 @@ public:
     ConnectionExec() = delete;
 
     ~ConnectionExec() = delete;
+
+    static napi_value CreateNetHandle(napi_env env, NetHandle *handle);
+
+    static napi_value CreateNetCapabilities(napi_env env, NetAllCapabilities *capabilities);
+
+    static napi_value CreateConnectionProperties(napi_env env, NetLinkInfo *linkInfo);
 
     static bool ExecGetDefaultNet(GetDefaultNetContext *context);
 
@@ -54,6 +61,26 @@ public:
 
     static napi_value GetAddressByNameCallback(GetAddressByNameContext *context);
 
+    static bool ExecGetAllNets(GetAllNetsContext *context);
+
+    static napi_value GetAllNetsCallback(GetAllNetsContext *context);
+
+    static bool ExecEnableAirplaneMode(EnableAirplaneModeContext *context);
+
+    static napi_value EnableAirplaneModeCallback(EnableAirplaneModeContext *context);
+
+    static bool ExecDisableAirplaneMode(DisableAirplaneModeContext *context);
+
+    static napi_value DisableAirplaneModeCallback(DisableAirplaneModeContext *context);
+
+    static bool ExecReportNetConnected(ReportNetConnectedContext *context);
+
+    static napi_value ReportNetConnectedCallback(ReportNetConnectedContext *context);
+
+    static bool ExecReportNetDisconnected(ReportNetDisconnectedContext *context);
+
+    static napi_value ReportNetDisconnectedCallback(ReportNetDisconnectedContext *context);
+
     class NetHandleExec final {
     public:
         DISALLOW_COPY_AND_MOVE(NetHandleExec);
@@ -69,6 +96,10 @@ public:
         static bool ExecGetAddressesByName(GetAddressByNameContext *context);
 
         static napi_value GetAddressesByNameCallback(GetAddressByNameContext *context);
+
+        static bool ExecBindSocket(BindSocketContext *context);
+
+        static napi_value BindSocketCallback(BindSocketContext *context);
 
     private:
         static napi_value MakeNetAddressJsValue(napi_env env, const NetAddress &address);
@@ -92,6 +123,13 @@ public:
 
         static napi_value UnregisterCallback(UnregisterContext *context);
     };
+
+private:
+    static void FillLinkAddress(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo);
+
+    static void FillRouoteList(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo);
+
+    static void FillDns(napi_env env, napi_value connectionProperties, NetLinkInfo *linkInfo);
 };
 } // namespace OHOS::NetManagerStandard
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,7 @@ private:
     int32_t OnUpdateNetLinkInfo(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetDefaultNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnHasDefaultNet(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetIfaceNames(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetIfaceNameByType(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetDetectionCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnRegisterNetDetectionCallback(MessageParcel &data, MessageParcel &reply);
@@ -62,6 +63,7 @@ private:
     int32_t OnBindSocket(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetAirplaneMode(MessageParcel &data, MessageParcel &reply);
     int32_t OnRestoreFactoryData(MessageParcel &data, MessageParcel &reply);
+    int32_t OnIsDefaultNetMetered(MessageParcel &data, MessageParcel &reply);
 private:
     int32_t ConvertCode(int32_t internalCode);
 

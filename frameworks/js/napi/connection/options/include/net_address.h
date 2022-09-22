@@ -18,6 +18,7 @@
 
 #include <arpa/inet.h>
 #include <string>
+#include <iosfwd>
 
 namespace OHOS::NetManagerStandard {
 class NetAddress final {

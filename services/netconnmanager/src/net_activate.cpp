@@ -16,6 +16,7 @@
 
 #include <atomic>
 #include <functional>
+#include "net_caps.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
@@ -38,6 +39,13 @@ NetActivate::NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetCon
     }
 }
 
+NetActivate::~NetActivate()
+{
+    if (lpTimer_) {
+        lpTimer_->Stop();
+    }
+}
+
 void NetActivate::TimeOutNetAvailable()
 {
     if (netServiceSupplied_) {
@@ -53,7 +61,7 @@ void NetActivate::TimeOutNetAvailable()
 
 bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier)
 {
-    NETMGR_LOG_E("MatchRequestAndNetwork Enter");
+    NETMGR_LOG_I("MatchRequestAndNetwork Enter");
     if (supplier == nullptr) {
         NETMGR_LOG_E("supplier is null");
         return false;
@@ -62,8 +70,7 @@ bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier)
         NETMGR_LOG_D("supplier ident is not satisfy");
         return false;
     }
-    NetAllCapabilities netAllCaps = supplier->GetNetCapabilities();
-    if (!CompareByNetworkCapabilities(netAllCaps.netCaps_)) {
+    if (!CompareByNetworkCapabilities(supplier->GetNetCaps())) {
         NETMGR_LOG_D("supplier capa is not satisfy");
         return false;
     }
@@ -71,6 +78,7 @@ bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier)
         NETMGR_LOG_D("supplier net type not satisfy");
         return false;
     }
+    NetAllCapabilities netAllCaps = supplier->GetNetCapabilities();
     if (!CompareByNetworkBand(netAllCaps.linkUpBandwidthKbps_, netAllCaps.linkDownBandwidthKbps_)) {
         NETMGR_LOG_D("supplier net band not satisfy");
         return false;
@@ -90,7 +98,7 @@ bool NetActivate::CompareByNetworkIdent(const std::string &ident)
     return false;
 }
 
-bool NetActivate::CompareByNetworkCapabilities(const std::set<NetCap> &netCaps)
+bool NetActivate::CompareByNetworkCapabilities(const NetCaps &netCaps)
 {
     if (netSpecifier_ == nullptr) {
         return false;
@@ -99,12 +107,7 @@ bool NetActivate::CompareByNetworkCapabilities(const std::set<NetCap> &netCaps)
     if (reqCaps.empty()) {
         return true;
     }
-    for (auto cap : reqCaps) {
-        if (netCaps.find(cap) == netCaps.end()) {
-            return false;
-        }
-    }
-    return true;
+    return netCaps.HasNetCaps(reqCaps);
 }
 
 bool NetActivate::CompareByNetworkNetType(NetBearType bearerType)
@@ -132,7 +135,7 @@ bool NetActivate::CompareByNetworkBand(uint32_t netLinkUpBand, uint32_t netLinkD
     return false;
 }
 
-sptr<NetSpecifier>& NetActivate::GetNetSpecifier()
+sptr<NetSpecifier> NetActivate::GetNetSpecifier()
 {
     return netSpecifier_;
 }
@@ -157,7 +160,7 @@ void NetActivate::SetServiceSupply(sptr<NetSupplier> netServiceSupplied)
     netServiceSupplied_ = netServiceSupplied;
 }
 
-sptr<INetConnCallback>& NetActivate::GetNetCallback()
+sptr<INetConnCallback> NetActivate::GetNetCallback()
 {
     return netConnCallback_;
 }
@@ -180,7 +183,7 @@ bool NetActivate::HaveTypes(const std::set<NetBearType> &bearerTypes) const
         return false;
     }
     auto &typesRef = netSpecifier_->netCapabilities_.bearerTypes_;
-    bool result = bearerTypes.size() > 0 ? true : false;
+    bool result = bearerTypes.size() > 0;
     for (auto type : bearerTypes) {
         if (typesRef.find(type) == typesRef.end()) {
             result = false;

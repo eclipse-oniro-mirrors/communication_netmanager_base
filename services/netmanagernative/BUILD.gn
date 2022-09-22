@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,55 +14,85 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-ohos_shared_library("netd_native_manager") {
+ohos_shared_library("netsys_native_manager") {
   sources = [
-    "$NETDNATIVE_INNERKITS_SOURCE_DIR/dhcp_result_parcel.cpp",
-    "$NETDNATIVE_INNERKITS_SOURCE_DIR/dnsresolver_params_parcel.cpp",
-    "$NETDNATIVE_INNERKITS_SOURCE_DIR/netd_addr_info_parcel.cpp",
-    "$NETDNATIVE_INNERKITS_SOURCE_DIR/netd_native_service_proxy.cpp",
-    "$NETDNATIVE_INNERKITS_SOURCE_DIR/notify_callback_proxy.cpp",
-    "$NETDNATIVE_SOURCE_DIR/src/dhcp_controller.cpp",
-    "$NETDNATIVE_SOURCE_DIR/src/netd_native_service.cpp",
-    "$NETDNATIVE_SOURCE_DIR/src/netd_native_service_stub.cpp",
-    "$NETDNATIVE_SOURCE_DIR/src/notify_callback_stub.cpp",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/dhcp_result_parcel.cpp",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_addr_info_parcel.cpp",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_native_service_proxy.cpp",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/notify_callback_proxy.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/dhcp_controller.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/manager/bandwidth_manager.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/manager/conn_manager.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/manager/dns_manager.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/manager/firewall_manager.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/manager/interface_manager.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/manager/route_manager.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/manager/sharing_manager.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/manager/traffic_manager.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/dnsresolv/dns_param_cache.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/dnsresolv/dns_proxy_listen.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/dnsresolv/dns_resolv_config.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/dnsresolv/dns_resolv_listen.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/fwmark_network.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/iptables_wrapper.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/local_network.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/net_manager_native.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netlink_msg.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netlink_socket.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netsys_network.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/netsys_udp_transfer.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/physical_network.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/wrapper/data_receiver.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/wrapper/netlink_manager.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/wrapper/netsys_event_message.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/wrapper/wrapper_decoder.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/wrapper/wrapper_distributor.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys/wrapper/wrapper_listener.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys_native_service.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/netsys_native_service_stub.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/notify_callback_stub.cpp",
   ]
 
   include_dirs = [
-    "$NETDNATIVE_INNERKITS_SOURCE_DIR",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
+    "$INNERKITS_ROOT/include",
+    "$NETMANAGER_BASE_ROOT/services/common/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
+    "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netmanagernative/include",
-    "$NETDNATIVE_SOURCE_DIR/include",
-    "$NETMANAGER_PREBUILTS_DIR/librarys/netd/include/net_mgr_native/include",
-    "$NETMANAGER_PREBUILTS_DIR/librarys/netd/include/common/include",
-    "//foundation/communication/wifi/services/wifi_standard/wifi_framework/dhcp_manage/mgr_service/include",
-    "//foundation/communication/wifi/services/wifi_standard/wifi_framework/dhcp_manage/mgr_service/interfaces",
-    "utils/native/base/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/manager",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys/wrapper",
+    "$C_UTILS_ROOT/base/include",
+    "$DHCP_MANAGER_ROOT/interfaces/inner_api/include",
+    "$DHCP_MANAGER_ROOT/interfaces/inner_api/interfaces",
+    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
   ]
 
   deps = [
-    "//foundation/communication/wifi/services/wifi_standard/wifi_framework/dhcp_manage/mgr_service:dhcp_manager_service",
-    "//utils/native/base:utils",
+    "$DHCP_MANAGER_ROOT/services/mgr_service:dhcp_manager_service",
+    "$NETMANAGERNATIVE_ROOT/netsys_client",
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$THIRD_PARTY_ROOT/iptables:iptables",
+    "$THIRD_PARTY_ROOT/iptables:iptables-restore",
+    "$THIRD_PARTY_ROOT/iptables:iptables-save",
   ]
 
-  if (enable_libnet_manager_native_prebuilt) {
-    deps += [ "$NETMANAGER_PREBUILTS_DIR/librarys/netd:libnet_manager_native" ]
-  } else {
-    deps +=
-        [ "//foundation/communication/netmanager_native:net_manager_native" ]
-  }
-
   external_deps = [
-    "ability_base:want",
-    "ces_standard:cesfwk_innerkits",
-    "eventhandler:libeventhandler",
+    "c_utils:utils",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
   ]
 
   defines = [
-    "NETMGRNATIVE_LOG_TAG = \"NetdNativeService\"",
+    "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
     "LOG_DOMAIN = 0xD0015B0",
+    "NETSYS_CONFIG_DEBUG=0",
+    "DNS_CONFIG_DEBUG=0",
   ]
+
+  public_configs = [ "$NETMANAGER_BASE_ROOT/utils:netmgr_common_config" ]
 
   if (enable_sys_func) {
     defines += [ "SYS_FUNC" ]

@@ -16,10 +16,13 @@
 #include "getdefaultnet_context.h"
 
 #include "constant.h"
-#include "netmanager_base_napi_utils.h"
+#include "napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
-GetDefaultNetContext::GetDefaultNetContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+GetDefaultNetContext::GetDefaultNetContext(napi_env env, EventManager *manager)
+    : BaseContext(env, manager), hasDefaultNet(false)
+{
+}
 
 void GetDefaultNetContext::ParseParams(napi_value *params, size_t paramsCount)
 {

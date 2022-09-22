@@ -15,6 +15,12 @@
 
 #include "net_specifier.h"
 
+#include "__functional_base"
+
+#include "parcel.h"
+#include "refbase.h"
+
+#include "net_all_capabilities.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
@@ -59,7 +65,7 @@ bool NetSpecifier::Marshalling(Parcel &parcel) const
 
 sptr<NetSpecifier> NetSpecifier::Unmarshalling(Parcel &parcel)
 {
-    sptr<NetSpecifier> ptr = (std::make_unique<NetSpecifier>()).release();
+    sptr<NetSpecifier> ptr = new (std::nothrow) NetSpecifier();
     if (ptr == nullptr) {
         NETMGR_LOG_E("make_unique<NetSpecifier>() failed");
         return nullptr;
@@ -88,11 +94,8 @@ bool NetSpecifier::Marshalling(Parcel &parcel, const sptr<NetSpecifier> &object)
 std::string NetSpecifier::ToString(const std::string &tab) const
 {
     std::string str;
-    str.append("\n");
     str.append(tab);
     str.append("[NetSpecifier]");
-
-    str.append("\n");
     str.append(tab);
     str.append("ident_ = ");
     str.append(ident_);

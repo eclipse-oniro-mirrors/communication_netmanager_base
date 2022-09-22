@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,27 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef  DSNRESOLVER_PARAMS_PARCEL_H__
-#define  DSNRESOLVER_PARAMS_PARCEL_H__
+#ifndef DSNRESOLVER_PARAMS_PARCEL_H__
+#define DSNRESOLVER_PARAMS_PARCEL_H__
 
 #include "parcel.h"
-#include "dnsresolv.h"
 
 namespace OHOS {
-namespace NetdNative {
-using namespace nmd;
-struct DnsresolverParamsParcel : public Parcelable {
-    DnsresolverParamsParcel();
-    DnsresolverParamsParcel(const dnsresolver_params &resolvParams);
-    ~DnsresolverParamsParcel() {}
+namespace NetsysNative {
+struct DnsResolverParamsParcel : public Parcelable {
+    DnsResolverParamsParcel();
+    ~DnsResolverParamsParcel() override = default;
 
     uint16_t netId_;
     uint16_t baseTimeoutMsec_;
     uint8_t retryCount_;
 
     bool Marshalling(Parcel &parcel) const override;
-    static sptr<DnsresolverParamsParcel> Unmarshalling(Parcel &parcel);
+    static sptr<DnsResolverParamsParcel> Unmarshalling(Parcel &parcel);
 };
-} // namespace NetdNative
+} // namespace NetsysNative
 } // namespace OHOS
 #endif

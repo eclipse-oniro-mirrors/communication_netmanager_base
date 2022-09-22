@@ -17,7 +17,7 @@
 #include "netnative_log_wrapper.h"
 
 namespace OHOS {
-namespace NetdNative {
+namespace NetsysNative {
 NotifyCallbackStub::NotifyCallbackStub()
 {
     memberFuncMap_[ON_INTERFACE_ADDRESS_UPDATED] = &NotifyCallbackStub::CmdOnInterfaceAddressUpdated;
@@ -28,6 +28,7 @@ NotifyCallbackStub::NotifyCallbackStub()
     memberFuncMap_[ON_INTERFACE_LINK_STATE_CHANGED] = &NotifyCallbackStub::CmdOnInterfaceLinkStateChanged;
     memberFuncMap_[ON_ROUTE_CHANGED] = &NotifyCallbackStub::CmdOnRouteChanged;
     memberFuncMap_[ON_DHCP_SUCCESS] = &NotifyCallbackStub::CmdDhcpSuccess;
+    memberFuncMap_[ON_BANDWIDTH_REACHED_LIMIT] = &NotifyCallbackStub::CmdOnBandwidthReachedLimit;
 }
 
 NotifyCallbackStub::~NotifyCallbackStub() {}
@@ -57,10 +58,12 @@ int32_t NotifyCallbackStub::OnRemoteRequest(
 
 int32_t NotifyCallbackStub::CmdOnInterfaceAddressUpdated(MessageParcel &data, MessageParcel &reply)
 {
-    std::string str1 = "";
-    std::string str2 = "";
+    std::string addr = data.ReadString();
+    std::string ifName = data.ReadString();
+    int32_t flags = data.ReadInt32();
+    int32_t scope = data.ReadInt32();
 
-    int32_t result = OnInterfaceAddressUpdated(str1, str2, 0, 0);
+    int32_t result = OnInterfaceAddressUpdated(addr, ifName, flags, scope);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write parcel failed");
         return result;
@@ -71,10 +74,12 @@ int32_t NotifyCallbackStub::CmdOnInterfaceAddressUpdated(MessageParcel &data, Me
 
 int32_t NotifyCallbackStub::CmdOnInterfaceAddressRemoved(MessageParcel &data, MessageParcel &reply)
 {
-    std::string str1 = "";
-    std::string str2 = "";
+    std::string addr = data.ReadString();
+    std::string ifName = data.ReadString();
+    int32_t flags = data.ReadInt32();
+    int32_t scope = data.ReadInt32();
 
-    int32_t result = OnInterfaceAddressRemoved(str1, str2, 0, 0);
+    int32_t result = OnInterfaceAddressRemoved(addr, ifName, flags, scope);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write parcel failed");
         return result;
@@ -85,9 +90,9 @@ int32_t NotifyCallbackStub::CmdOnInterfaceAddressRemoved(MessageParcel &data, Me
 
 int32_t NotifyCallbackStub::CmdOnInterfaceAdded(MessageParcel &data, MessageParcel &reply)
 {
-    std::string str1 = "";
-    
-    int32_t result = OnInterfaceAdded(str1);
+    std::string ifName = data.ReadString();
+
+    int32_t result = OnInterfaceAdded(ifName);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write parcel failed");
         return result;
@@ -97,9 +102,9 @@ int32_t NotifyCallbackStub::CmdOnInterfaceAdded(MessageParcel &data, MessageParc
 }
 int32_t NotifyCallbackStub::CmdOnInterfaceRemoved(MessageParcel &data, MessageParcel &reply)
 {
-    std::string str1 = "";
+    std::string ifName = data.ReadString();
 
-    int32_t result = OnInterfaceRemoved(str1);
+    int32_t result = OnInterfaceRemoved(ifName);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write parcel failed");
         return result;
@@ -110,9 +115,10 @@ int32_t NotifyCallbackStub::CmdOnInterfaceRemoved(MessageParcel &data, MessagePa
 
 int32_t NotifyCallbackStub::CmdOnInterfaceChanged(MessageParcel &data, MessageParcel &reply)
 {
-    std::string str1 = "";
+    std::string ifName = data.ReadString();
+    bool up = data.ReadBool();
 
-    int32_t result = OnInterfaceChanged(str1, true);
+    int32_t result = OnInterfaceChanged(ifName, up);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write parcel failed");
         return result;
@@ -123,9 +129,10 @@ int32_t NotifyCallbackStub::CmdOnInterfaceChanged(MessageParcel &data, MessagePa
 
 int32_t NotifyCallbackStub::CmdOnInterfaceLinkStateChanged(MessageParcel &data, MessageParcel &reply)
 {
-    std::string str1 = "";
+    std::string ifName = data.ReadString();
+    bool up = data.ReadBool();
 
-    int32_t result = OnInterfaceLinkStateChanged(str1, true);
+    int32_t result = OnInterfaceLinkStateChanged(ifName, up);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write parcel failed");
         return result;
@@ -136,11 +143,12 @@ int32_t NotifyCallbackStub::CmdOnInterfaceLinkStateChanged(MessageParcel &data, 
 
 int32_t NotifyCallbackStub::CmdOnRouteChanged(MessageParcel &data, MessageParcel &reply)
 {
-    std::string str1 = "";
-    std::string str2 = "";
-    std::string str3 = "";
+    bool up = data.ReadBool();
+    std::string route = data.ReadString();
+    std::string gateway = data.ReadString();
+    std::string ifName = data.ReadString();
 
-    int32_t result = OnRouteChanged(true, str1, str2, str3);
+    int32_t result = OnRouteChanged(up, route, gateway, ifName);
     if (!reply.WriteInt32(result)) {
         NETNATIVE_LOGE("Write parcel failed");
         return result;
@@ -156,5 +164,19 @@ int32_t NotifyCallbackStub::CmdDhcpSuccess(MessageParcel &data, MessageParcel &r
     OnDhcpSuccess(dhcpResult);
     return ERR_NONE;
 }
-} // namespace NetdNative
+
+int32_t NotifyCallbackStub::CmdOnBandwidthReachedLimit(MessageParcel &data, MessageParcel &reply)
+{
+    std::string limitName = data.ReadString();
+    std::string iface = data.ReadString();
+
+    int32_t result = OnBandwidthReachedLimit(limitName, iface);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return result;
+    }
+
+    return ERR_NONE;
+}
+} // namespace NetsysNative
 } // namespace OHOS

@@ -19,6 +19,7 @@ config("net_stats_manager_if_config") {
   include_dirs = [
     "$INNERKITS_ROOT/netstatsclient/include/proxy",
     "$INNERKITS_ROOT/netstatsclient/include",
+    "$INNERKITS_ROOT/netmanagernative/include",
   ]
 
   cflags = []
@@ -41,17 +42,17 @@ ohos_source_set("net_stats_parcel") {
 
   include_dirs = [ "$INNERKITS_ROOT/netstatsclient/include" ]
 
-  deps = [
-    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
 
-  external_deps = []
+  external_deps = [ "c_utils:utils" ]
   if (is_standard_system) {
     external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
   } else {
     external_deps += [ "hilog:libhilog" ]
   }
+
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
 }
 
 ohos_shared_library("net_stats_manager_if") {
@@ -62,20 +63,21 @@ ohos_shared_library("net_stats_manager_if") {
     "$NETSTATSMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_stats_service_proxy.cpp",
   ]
 
-  include_dirs = [ "$NETDCONTROLLER_ROOT_DIR/include/" ]
+  include_dirs = [
+    "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "$NETSYSCONTROLLER_ROOT_DIR/include/",
+  ]
 
   public_configs = [ ":net_stats_manager_if_config" ]
 
   deps = [
     ":net_stats_parcel",
-    "$NETDCONTROLLER_ROOT_DIR:netd_controller",
-    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]
 
   external_deps = [
     "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
   ]
 
   defines = [

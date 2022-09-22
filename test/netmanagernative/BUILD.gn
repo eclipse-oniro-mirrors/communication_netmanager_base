@@ -11,55 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
-import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
-
-ohos_unittest("netd_native_manager_test") {
-  module_out_path = "netmanager_base/netd_native_manager_test"
-  sources = [
-    "network_route_test.cpp",
-    "resolver_config_test.cpp",
-  ]
-
-  include_dirs = [
-    "$NETDNATIVE_INNERKITS_SOURCE_DIR",
-    "$INNERKITS_ROOT/netmanagernative/include",
-    "$NETDNATIVE_SOURCE_DIR/include",
-    "$NETMANAGER_PREBUILTS_DIR/librarys/netd/include/net_mgr_native/include",
-    "$NETMANAGER_PREBUILTS_DIR/librarys/netd/include/common/include",
-    "$NETDNATIVE_SOURCE_DIR/test",
-  ]
-
-  deps = [
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netd_native_manager",
-    "//utils/native/base:utils",
-  ]
-
-  external_deps = [
-    "ability_base:want",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
-  ]
-
-  defines = [
-    "NETMGRNATIVE_LOG_TAG = \"NetdNativeService\"",
-    "LOG_DOMAIN = 0xD0015B0",
-  ]
-
-  if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-  }
-
-  part_name = "netmanager_base"
-  subsystem_name = "communication"
-}
-
 group("unittest") {
   testonly = true
-  deps = [ ":netd_native_manager_test" ]
+  deps = []
 }

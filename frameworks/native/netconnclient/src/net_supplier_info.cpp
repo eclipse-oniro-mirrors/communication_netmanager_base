@@ -15,8 +15,10 @@
 
 #include "net_supplier_info.h"
 
-#include "net_mgr_log_wrapper.h"
+#include "parcel.h"
+#include "refbase.h"
 
+#include "net_mgr_log_wrapper.h"
 namespace OHOS {
 namespace NetManagerStandard {
 bool NetSupplierInfo::Marshalling(Parcel &parcel) const
@@ -47,7 +49,7 @@ bool NetSupplierInfo::Marshalling(Parcel &parcel) const
 
 sptr<NetSupplierInfo> NetSupplierInfo::Unmarshalling(Parcel &parcel)
 {
-    sptr<NetSupplierInfo> ptr = (std::make_unique<NetSupplierInfo>()).release();
+    sptr<NetSupplierInfo> ptr = new (std::nothrow) NetSupplierInfo();
     if (ptr == nullptr) {
         NETMGR_LOG_E("make_unique<NetSupplierInfo>() failed");
         return nullptr;
@@ -110,41 +112,33 @@ bool NetSupplierInfo::Marshalling(Parcel &parcel, const sptr<NetSupplierInfo> &o
 std::string NetSupplierInfo::ToString(const std::string &tab) const
 {
     std::string str;
-    str.append("\n");
     str.append(tab);
     str.append("[NetSupplierInfo]");
 
-    str.append("\n");
     str.append(tab);
     str.append("isAvailable_ = ");
     str.append(std::to_string(isAvailable_));
 
-    str.append("\n");
     str.append(tab);
     str.append("isRoaming_ = ");
     str.append(std::to_string(isRoaming_));
 
-    str.append("\n");
     str.append(tab);
     str.append("strength_ = ");
     str.append(std::to_string(strength_));
 
-    str.append("\n");
     str.append(tab);
     str.append("frequency_ = ");
     str.append(std::to_string(frequency_));
 
-    str.append("\n");
     str.append(tab);
     str.append("linkUpBandwidthKbps_ = ");
     str.append(std::to_string(linkUpBandwidthKbps_));
 
-    str.append("\n");
     str.append(tab);
     str.append("linkDownBandwidthKbps_ = ");
     str.append(std::to_string(linkDownBandwidthKbps_));
 
-    str.append("\n");
     str.append(tab);
     str.append("uid_ = ");
     str.append(std::to_string(uid_));

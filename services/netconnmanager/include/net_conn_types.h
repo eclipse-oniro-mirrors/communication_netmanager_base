@@ -54,7 +54,8 @@ enum ResultCode {
     ERR_NET_NO_RESTRICT_BACKGROUND                                  = (-30),
     ERR_NET_OVER_MAX_REQUEST_NUM                                    = (-31),
     ERR_REGISTER_THE_SAME_CALLBACK                                  = (-32),
-    ERR_UNREGISTER_CALLBACK_NOT_FOUND                               = (-33)
+    ERR_UNREGISTER_CALLBACK_NOT_FOUND                               = (-33),
+    ERR_PERMISSION_CHECK_FAIL                                       = (-34)
 };
 
 enum NetMonitorResponseCode {
@@ -67,6 +68,7 @@ enum NetMonitorResponseCode {
 };
 
 enum NetDetectionStatus {
+    UNKNOWN_STATE,
     INVALID_DETECTION_STATE,
     VERIFICATION_STATE,
     CAPTIVE_PORTAL_STATE

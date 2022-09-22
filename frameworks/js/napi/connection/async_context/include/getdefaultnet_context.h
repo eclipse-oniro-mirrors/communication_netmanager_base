@@ -16,10 +16,14 @@
 #ifndef COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H
 #define COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H
 
+#include <cstddef>
+#include <list>
+
 #include "napi/native_api.h"
-#include "net_handle.h"
-#include "netmanager_base_base_context.h"
 #include "nocopyable.h"
+#include "refbase.h"
+#include "net_handle.h"
+#include "base_context.h"
 
 namespace OHOS::NetManagerStandard {
 class GetDefaultNetContext final : public BaseContext {
@@ -32,15 +36,23 @@ public:
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
+    // for GetDefaultNet
     NetHandle netHandle;
 
+    // for HasDefaultNet
     bool hasDefaultNet;
+
+    // for GetAllNets
+    std::list<sptr<NetHandle>> netHandleList;
 
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
 };
 
 using HasDefaultNetContext = GetDefaultNetContext;
+using GetAllNetsContext = GetDefaultNetContext;
+using EnableAirplaneModeContext = GetDefaultNetContext;
+using DisableAirplaneModeContext = GetDefaultNetContext;
 } // namespace OHOS::NetManagerStandard
 
 #endif /* COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H */

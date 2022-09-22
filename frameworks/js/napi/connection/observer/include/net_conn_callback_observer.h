@@ -18,8 +18,8 @@
 
 #include "net_all_capabilities.h"
 #include "net_conn_callback_stub.h"
-#include "netmanager_base_event_manager.h"
-#include "netmanager_base_napi_utils.h"
+#include "event_manager.h"
+#include "napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
 class NetConnCallbackObserver : public NetConnCallbackStub {
@@ -36,12 +36,13 @@ public:
 
     int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override;
 
+private:
     static napi_value CreateNetHandle(napi_env env, NetHandle *handle);
 
     static napi_value CreateNetCapabilities(napi_env env, NetAllCapabilities *capabilities);
 
     static napi_value CreateConnectionProperties(napi_env env, NetLinkInfo *linkInfo);
-private:
+
     template <napi_value (*MakeJsValue)(napi_env, void *)> static void CallbackTemplate(uv_work_t *work, int status)
     {
         (void)status;
@@ -53,11 +54,8 @@ private:
 
         napi_value obj = MakeJsValue(env, workWrapper->data);
 
-        napi_value callback = NapiUtils::GetReference(env, workWrapper->callbackRef);
-        napi_value argv[1] = {obj};
-        if (NapiUtils::GetValueType(env, callback) == napi_function) {
-            (void)NapiUtils::CallFunction(env, NapiUtils::GetUndefined(env), callback, 1, argv);
-        }
+        std::pair<napi_value, napi_value> arg = {NapiUtils::GetUndefined(workWrapper->env), obj};
+        workWrapper->manager->Emit(workWrapper->type, arg);
 
         delete workWrapper;
         delete work;

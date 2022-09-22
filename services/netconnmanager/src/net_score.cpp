@@ -19,44 +19,9 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr int32_t WIFI_SIGNAL_BAR   = 5;
-constexpr int32_t WIFI_BASE_SCORE   = static_cast<int32_t>(NetTypeScoreValue::WIFI_VALUE) - NET_TYPE_SCORE_INTERVAL +
-    NET_TYPE_SCORE_INTERVAL / WIFI_SIGNAL_BAR;
-constexpr int32_t WIFI_MIN_RSSI     = -100;
-constexpr int32_t WIFI_MAX_RSSI     = -55;
-
 NetScore::NetScore() {}
 
 NetScore::~NetScore() {}
-
-int32_t NetScore::CalculateScoreForWifi(sptr<NetSupplier> &supplier)
-{
-    if (supplier == nullptr) {
-        NETMGR_LOG_E("the input supplier is nullptr");
-        return 0;
-    }
-    int32_t rssi = static_cast<int32_t>(supplier->GetStrength());
-    int32_t signalScore = GetWifiSignalBar(rssi, WIFI_SIGNAL_BAR);
-    int32_t wifiScore = WIFI_BASE_SCORE + signalScore * (NET_TYPE_SCORE_INTERVAL / WIFI_SIGNAL_BAR);
-    if (wifiScore > static_cast<int32_t>(NetTypeScoreValue::WIFI_VALUE)) {
-        wifiScore = static_cast<int32_t>(NetTypeScoreValue::WIFI_VALUE);
-    }
-    NETMGR_LOG_I("The wifi score is [%{public}d]", wifiScore);
-    return wifiScore;
-}
-
-int32_t NetScore::GetWifiSignalBar(int32_t rssi, int32_t signalBars)
-{
-    if (rssi <= WIFI_MIN_RSSI) {
-        return 0;
-    } else if (rssi >= WIFI_MAX_RSSI) {
-        return signalBars - 1;
-    } else {
-        int32_t inputRange = WIFI_MAX_RSSI - WIFI_MIN_RSSI;
-        int32_t outputRange = signalBars - 1;
-        return static_cast<int32_t>((rssi - WIFI_MIN_RSSI) * outputRange / inputRange);
-    }
-}
 
 bool NetScore::GetServiceScore(sptr<NetSupplier> &supplier)
 {
@@ -67,19 +32,14 @@ bool NetScore::GetServiceScore(sptr<NetSupplier> &supplier)
 
     NetBearType bearerType = supplier->GetNetSupplierType();
     int32_t netScore = 0;
-    if (bearerType == BEARER_WIFI) {
-        netScore = CalculateScoreForWifi(supplier);
-    } else {
-        NetTypeScore::iterator iter = netTypeScore_.find(bearerType);
-        if (iter == netTypeScore_.end()) {
-            NETMGR_LOG_E("can not find net type for this net service");
-            return false;
-        }
-        NETMGR_LOG_I("the net type[%{public}d], score[%{public}d]",
-            static_cast<int32_t>(iter->first), static_cast<int32_t>(iter->second));
-        netScore = static_cast<int32_t>(iter->second);
+    NetTypeScore::iterator iter = netTypeScore_.find(bearerType);
+    if (iter == netTypeScore_.end()) {
+        NETMGR_LOG_E("Can not find net bearer type[%{public}d] for this net service", bearerType);
+        return false;
     }
-
+    NETMGR_LOG_D("Net type[%{public}d],default score[%{public}d]",
+        static_cast<int32_t>(iter->first), static_cast<int32_t>(iter->second));
+    netScore = static_cast<int32_t>(iter->second);
     supplier->SetNetScore(netScore);
     if (!(supplier->IfNetValid())) {
         netScore -= NET_VALID_SCORE;

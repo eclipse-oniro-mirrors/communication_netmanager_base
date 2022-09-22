@@ -16,7 +16,7 @@
 #include "netnative_log_wrapper.h"
 
 namespace OHOS {
-namespace NetdNative {
+namespace NetsysNative {
 DhcpResultParcel::DhcpResultParcel() {}
 
 bool DhcpResultParcel::Marshalling(Parcel &parcel) const
@@ -34,7 +34,7 @@ bool DhcpResultParcel::Marshalling(Parcel &parcel) const
 
 sptr<DhcpResultParcel> DhcpResultParcel::Unmarshalling(Parcel &parcel)
 {
-    sptr<DhcpResultParcel> ptr = (std::make_unique<DhcpResultParcel>()).release();
+    sptr<DhcpResultParcel> ptr = new (std::nothrow) DhcpResultParcel();
     ptr->iface_ = parcel.ReadString();
     ptr->ipAddr_ = parcel.ReadString();
     ptr->gateWay_ = parcel.ReadString();
@@ -45,5 +45,5 @@ sptr<DhcpResultParcel> DhcpResultParcel::Unmarshalling(Parcel &parcel)
     ptr->dns2_ = parcel.ReadString();
     return ptr;
 }
-} // namespace NetdNative
+} // namespace NetsysNative
 } // namespace OHOS

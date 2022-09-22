@@ -17,8 +17,6 @@
 #include <memory>
 #include <cinttypes>
 #include <charconv>
-#include "system_ability_definition.h"
-#include "iservice_registry.h"
 #include "net_mgr_log_wrapper.h"
 #include "i_net_policy_service.h"
 #include "net_policy_client.h"
@@ -333,12 +331,12 @@ NetPolicyQuotaPolicy NapiNetPolicy::ReadQuotaPolicy(napi_env env, napi_value val
 {
     NetPolicyQuotaPolicy data;
     data.netType_ = static_cast<int8_t>(NapiCommon::GetNapiInt32Value(env, value, "netType"));
-    data.simId_ = std::to_string(NapiCommon::GetNapiInt32Value(env, value, "simId"));
-    data.periodStartTime_ = NapiCommon::GetNapiInt32Value(env, value, "periodStartTime");
+    data.simId_ = std::to_string(NapiCommon::GetNapiInt64Value(env, value, "simId"));
+    data.periodStartTime_ = NapiCommon::GetNapiInt64Value(env, value, "periodStartTime");
     data.periodDuration_ = NapiCommon::GetNapiStringValue(env, value, "periodDuration");
     data.warningBytes_ = NapiCommon::GetNapiInt64Value(env, value, "warningBytes");
     data.limitBytes_ = NapiCommon::GetNapiInt64Value(env, value, "limitBytes");
-    data.lastLimitSnooze_ = NapiCommon::GetNapiInt32Value(env, value, "lastLimitSnooze");
+    data.lastLimitSnooze_ = NapiCommon::GetNapiInt64Value(env, value, "lastLimitSnooze");
     data.metered_ = static_cast<int8_t>(NapiCommon::GetNapiInt32Value(env, value, "metered"));
     return data;
 }
@@ -381,9 +379,9 @@ void GetNetQuotaPoliciesCallback(napi_env env, napi_status status, void *data)
                 napi_create_object(env, &elementObject);
                 NetPolicyQuotaPolicy item = context->result[i];
                 NapiCommon::SetPropertyInt32(env, elementObject, "netType", item.netType_);
-                int32_t simIdValue = 0;
+                int64_t simIdValue = 0;
                 std::from_chars(&(*item.simId_.begin()), &(*item.simId_.end()), simIdValue, DECIMAL);
-                NapiCommon::SetPropertyInt32(env, elementObject, "simId", simIdValue);
+                NapiCommon::SetPropertyInt64(env, elementObject, "simId", simIdValue);
                 NapiCommon::SetPropertyInt64(env, elementObject, "periodStartTime", item.periodStartTime_);
                 NapiCommon::SetPropertyString(env, elementObject, "periodDuration", item.periodDuration_);
                 NapiCommon::SetPropertyInt64(env, elementObject, "warningBytes", item.warningBytes_);
@@ -423,106 +421,7 @@ napi_value NapiNetPolicy::GetNetQuotaPolicies(napi_env env, napi_callback_info i
     return result;
 }
 
-napi_value NapiNetPolicy::DeclareNapiNetPolicyData(napi_env env, napi_value exports)
-{
-    napi_property_descriptor desc[] = {
-        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_NONE",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_NONE))),
-        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_ALLOW_METERED_BACKGROUND",
-            NapiCommon::NapiValueByInt32(
-                env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND))),
-        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_TEMPORARY_ALLOW_METERED",
-            NapiCommon::NapiValueByInt32(
-                env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_TEMPORARY_ALLOW_METERED))),
-        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_REJECT_METERED_BACKGROUND",
-            NapiCommon::NapiValueByInt32(
-                env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND))),
-        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_ALLOW_ALL",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_ALLOW_ALL))),
-        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_REJECT_ALL",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_REJECT_ALL))),
-    };
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
-    return exports;
-}
-
-napi_value NapiNetPolicy::DeclareNapiNetPolicyResultData(napi_env env, napi_value exports)
-{
-    napi_property_descriptor desc[] = {
-        DECLARE_NAPI_STATIC_PROPERTY("ERR_NONE",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetPolicyResultCode::ERR_NONE))),
-        DECLARE_NAPI_STATIC_PROPERTY("ERR_INTERNAL_ERROR",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetPolicyResultCode::ERR_INTERNAL_ERROR))),
-        DECLARE_NAPI_STATIC_PROPERTY("ERR_INVALID_UID",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetPolicyResultCode::ERR_INVALID_UID))),
-        DECLARE_NAPI_STATIC_PROPERTY("ERR_INVALID_POLICY",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetPolicyResultCode::ERR_INVALID_POLICY))),
-    };
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
-    return exports;
-}
-
-napi_value NapiNetPolicy::DeclareNetBearTypeData(napi_env env, napi_value exports)
-{
-    napi_property_descriptor desc[] = {
-        DECLARE_NAPI_STATIC_PROPERTY("BEARER_CELLULAR",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetBearType::BEARER_CELLULAR))),
-        DECLARE_NAPI_STATIC_PROPERTY("BEARER_WIFI",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetBearType::BEARER_WIFI))),
-        DECLARE_NAPI_STATIC_PROPERTY("BEARER_BLUETOOTH",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetBearType::BEARER_BLUETOOTH))),
-        DECLARE_NAPI_STATIC_PROPERTY("BEARER_ETHERNET",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetBearType::BEARER_ETHERNET))),
-        DECLARE_NAPI_STATIC_PROPERTY("BEARER_VPN",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetBearType::BEARER_VPN))),
-        DECLARE_NAPI_STATIC_PROPERTY("BEARER_WIFI_AWARE",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetBearType::BEARER_WIFI_AWARE))),
-    };
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
-    return exports;
-}
-
-napi_value NapiNetPolicy::DeclareEnumMeteringMode(napi_env env, napi_value exports)
-{
-    napi_property_descriptor desc[] = {
-        DECLARE_NAPI_STATIC_PROPERTY("UN_METERED",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(MeteringMode::UN_METERED))),
-        DECLARE_NAPI_STATIC_PROPERTY("METERED",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(MeteringMode::METERED))),
-    };
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
-    return exports;
-}
-
-napi_value NapiNetPolicy::DeclareEnumApplicationType(napi_env env, napi_value exports)
-{
-    napi_property_descriptor desc[] = {
-        DECLARE_NAPI_STATIC_PROPERTY("COMMON",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(ApplicationType::COMMON))),
-        DECLARE_NAPI_STATIC_PROPERTY("SYSTEM",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(ApplicationType::SYSTEM))),
-    };
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
-    return exports;
-}
-
-napi_value NapiNetPolicy::DeclareBackgroundPolicyData(napi_env env, napi_value exports)
-{
-        napi_property_descriptor desc[] = {
-        DECLARE_NAPI_STATIC_PROPERTY("NET_BACKGROUND_POLICY_NONE", NapiCommon::NapiValueByInt32(env,
-            static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_NONE))),
-        DECLARE_NAPI_STATIC_PROPERTY("NET_BACKGROUND_POLICY_DISABLE", NapiCommon::NapiValueByInt32(env,
-            static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_DISABLE))),
-        DECLARE_NAPI_STATIC_PROPERTY("NET_BACKGROUND_POLICY_ALLOWLISTED", NapiCommon::NapiValueByInt32(env,
-            static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_ALLOWLISTED))),
-        DECLARE_NAPI_STATIC_PROPERTY("NET_BACKGROUND_POLICY_ENABLED", NapiCommon::NapiValueByInt32(env,
-            static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_ENABLED))),
-    };
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
-    return exports;
-}
-
-bool MatchSetFactoryPolicyParameters(napi_env env, napi_value argv[], size_t argc)
+bool MatchRestoreAllPoliciesParameters(napi_env env, napi_value argv[], size_t argc)
 {
     switch (argc) {
         case ARGV_INDEX_1: {
@@ -537,17 +436,17 @@ bool MatchSetFactoryPolicyParameters(napi_env env, napi_value argv[], size_t arg
     }
 }
 
-void NapiNetPolicy::ExecSetFactoryPolicy(napi_env env, void *data)
+void NapiNetPolicy::ExecRestoreAllPolicies(napi_env env, void *data)
 {
-    auto context = static_cast<SetFactoryPolicyContext *>(data);
+    auto context = static_cast<RestoreAllPoliciesContext *>(data);
     DelayedSingleton<NetPolicyClient>::GetInstance()->SetFactoryPolicy(std::to_string(context->simId));
     context->resolved = true;
 }
 
-void NapiNetPolicy::CompleteSetFactoryPolicy(napi_env env, napi_status status, void *data)
+void NapiNetPolicy::CompleteRestoreAllPolicies(napi_env env, napi_status status, void *data)
 {
-    NETMGR_LOG_I("CompleteSetFactoryPolicy start");
-    auto context = static_cast<SetFactoryPolicyContext *>(data);
+    NETMGR_LOG_I("CompleteRestoreAllPolicies start");
+    auto context = static_cast<RestoreAllPoliciesContext *>(data);
     napi_value callbackValue = nullptr;
     if (status == napi_ok) {
         if (context->resolved) {
@@ -562,22 +461,22 @@ void NapiNetPolicy::CompleteSetFactoryPolicy(napi_env env, napi_status status, v
     NapiCommon::Handle1ValueCallback(env, context, callbackValue);
 }
 
-napi_value NapiNetPolicy::SetFactoryPolicy(napi_env env, napi_callback_info info)
+napi_value NapiNetPolicy::RestoreAllPolicies(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGV_NUM_2;
     napi_value argv[] = {nullptr, nullptr};
     napi_value thisVar = nullptr;
     void *data = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, &data));
-    NAPI_ASSERT(env, MatchSetFactoryPolicyParameters(env, argv, argc), "type mismatch");
-    auto context = std::make_unique<SetFactoryPolicyContext>().release();
-    NETMGR_LOG_I("napi_policy SetFactoryPolicy start.");
+    NAPI_ASSERT(env, MatchRestoreAllPoliciesParameters(env, argv, argc), "type mismatch");
+    auto context = std::make_unique<RestoreAllPoliciesContext>().release();
+    NETMGR_LOG_I("napi_policy RestoreAllPolicies start.");
     napi_get_value_int32(env, argv[0], &context->simId);
     if (argc == ARGV_NUM_2) {
         napi_create_reference(env, argv[1], CALLBACK_REF_CNT, &context->callbackRef);
     }
     napi_value result = NapiCommon::HandleAsyncWork(
-        env, context, "SetFactoryPolicy", ExecSetFactoryPolicy, CompleteSetFactoryPolicy);
+        env, context, "RestoreAllPolicies", ExecRestoreAllPolicies, CompleteRestoreAllPolicies);
     return result;
 }
 
@@ -727,7 +626,7 @@ napi_value NapiNetPolicy::DeclareNapiNetPolicyInterface(napi_env env, napi_value
         DECLARE_NAPI_FUNCTION("getUidsByPolicy", GetUidsByPolicy),
         DECLARE_NAPI_FUNCTION("setNetQuotaPolicies", SetNetQuotaPolicies),
         DECLARE_NAPI_FUNCTION("getNetQuotaPolicies", GetNetQuotaPolicies),
-        DECLARE_NAPI_FUNCTION("setFactoryPolicy", SetFactoryPolicy),
+        DECLARE_NAPI_FUNCTION("restoreAllPolicies", RestoreAllPolicies),
         DECLARE_NAPI_FUNCTION("setSnoozePolicy", SetSnoozePolicy),
         DECLARE_NAPI_FUNCTION("setBackgroundPolicy", SetBackgroundPolicy),
         DECLARE_NAPI_FUNCTION("getBackgroundPolicy", GetBackgroundPolicy),
@@ -995,15 +894,70 @@ napi_value NapiNetPolicy::Off(napi_env env, napi_callback_info info)
     return result;
 }
 
+static napi_value CreateNetUidPolicy(napi_env env, napi_value exports)
+{
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_NONE",
+            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_NONE))),
+        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_ALLOW_METERED_BACKGROUND",
+            NapiCommon::NapiValueByInt32(
+                env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND))),
+        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_TEMPORARY_ALLOW_METERED",
+            NapiCommon::NapiValueByInt32(
+                env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_TEMPORARY_ALLOW_METERED))),
+        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_REJECT_METERED_BACKGROUND",
+            NapiCommon::NapiValueByInt32(
+                env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND))),
+        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_ALLOW_ALL",
+            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_ALLOW_ALL))),
+        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_REJECT_ALL",
+            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_REJECT_ALL))),
+    };
+    napi_value result = nullptr;
+    napi_define_class(env, "NetUidPolicy", NAPI_AUTO_LENGTH, NapiCommon::CreateEnumConstructor, nullptr,
+        sizeof(desc) / sizeof(*desc), desc, &result);
+    napi_set_named_property(env, exports, "NetUidPolicy", result);
+    return exports;
+}
+
+static napi_value CreateBackgroundPolicy(napi_env env, napi_value exports)
+{
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("BACKGROUND_POLICY_DISABLE", NapiCommon::NapiValueByInt32(env,
+            static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_DISABLE))),
+        DECLARE_NAPI_STATIC_PROPERTY("BACKGROUND_POLICY_ALLOWLISTED", NapiCommon::NapiValueByInt32(env,
+            static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_ALLOWLISTED))),
+        DECLARE_NAPI_STATIC_PROPERTY("BACKGROUND_POLICY_ENABLED", NapiCommon::NapiValueByInt32(env,
+            static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_ENABLED))),
+    };
+    napi_value result = nullptr;
+    napi_define_class(env, "BackgroundPolicy", NAPI_AUTO_LENGTH, NapiCommon::CreateEnumConstructor, nullptr,
+        sizeof(desc) / sizeof(*desc), desc, &result);
+    napi_set_named_property(env, exports, "BackgroundPolicy", result);
+    return exports;
+}
+
+static napi_value CreateMeteringMode(napi_env env, napi_value exports)
+{
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("UN_METERED",
+            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(MeteringMode::UN_METERED))),
+        DECLARE_NAPI_STATIC_PROPERTY("METERED",
+            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(MeteringMode::METERED))),
+    };
+    napi_value result = nullptr;
+    napi_define_class(env, "MeteringMode", NAPI_AUTO_LENGTH, NapiCommon::CreateEnumConstructor, nullptr,
+        sizeof(desc) / sizeof(*desc), desc, &result);
+    napi_set_named_property(env, exports, "MeteringMode", result);
+    return exports;
+}
+
 napi_value NapiNetPolicy::RegisterNetPolicyInterface(napi_env env, napi_value exports)
 {
     DeclareNapiNetPolicyInterface(env, exports);
-    DeclareNapiNetPolicyData(env, exports);
-    DeclareNapiNetPolicyResultData(env, exports);
-    DeclareNetBearTypeData(env, exports);
-    DeclareBackgroundPolicyData(env, exports);
-    DeclareEnumMeteringMode(env, exports);
-    DeclareEnumApplicationType(env, exports);
+    CreateNetUidPolicy(env, exports);
+    CreateBackgroundPolicy(env, exports);
+    CreateMeteringMode(env, exports);
     return exports;
 }
 

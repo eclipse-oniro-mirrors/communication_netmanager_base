@@ -51,7 +51,7 @@ AlwaysBreakTemplateDeclarations: false
 # false表示函数实参要么都在同一行，要么都各自一行
 BinPackArguments: true
 # false表示所有形参要么都在同一行，要么都各自一行
-BinPackParameters: false
+BinPackParameters: true
 # 大括号换行，只有当BreakBeforeBraces设置为Custom时才有效
 BraceWrapping:
   AfterClass: false
@@ -144,7 +144,7 @@ PointerAlignment: Right
 # 允许重新排版注释
 ReflowComments: true
 # 允许排序#include
-SortIncludes: true
+SortIncludes: Never
 # 在C风格类型转换后添加空格
 SpaceAfterCStyleCast: false
 # 在赋值运算符之前添加空格

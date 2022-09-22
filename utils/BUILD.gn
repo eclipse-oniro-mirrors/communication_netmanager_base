@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021~2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,22 +12,39 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 group("common_target") {
-  deps = [ ":net_manager_common" ]
+  deps = [
+    ":net_manager_common",
+    "napi_utils:napi_utils",
+  ]
 }
 
 config("netmgr_common_config") {
-  include_dirs = [ "log/include" ]
+  include_dirs = [
+    "common_utils/include",
+    "log/include",
+  ]
 }
 
 ohos_shared_library("net_manager_common") {
-  sources = [ "log/src/net_mgr_log_wrapper.cpp" ]
+  sources = [
+    "common_utils/src/event_report.cpp",
+    "common_utils/src/netmanager_base_common_utils.cpp",
+    "common_utils/src/netmanager_base_permission.cpp",
+    "common_utils/src/netmanager_hitrace.cpp",
+    "log/src/net_mgr_log_wrapper.cpp",
+  ]
 
   defines = [
     "NETMGR_LOG_TAG = \"NetMgrCommon\"",
     "LOG_DOMAIN = 0xD0015B0",
   ]
+
+  if (enable_netmgr_debug) {
+    defines += [ "NETMGR_DEBUG" ]
+  }
 
   if (is_standard_system) {
     defines += [ "STANDARD_SYSTEM_ENABLE" ]
@@ -35,16 +52,23 @@ ohos_shared_library("net_manager_common") {
 
   public_configs = [
     ":netmgr_common_config",
-    "//utils/native/base:utils_config",
+    "$C_UTILS_ROOT/base:utils_config",
   ]
 
-  public_deps = [ "//utils/native/base:utils" ]
+  public_deps = [ "$C_UTILS_ROOT/base:utils" ]
 
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   } else {
     external_deps = [ "hilog:libhilog" ]
   }
+
+  external_deps += [
+    "access_token:libaccesstoken_sdk",
+    "hisysevent_native:libhisysevent",
+    "hitrace_native:hitrace_meter",
+    "ipc:ipc_single",
+  ]
 
   part_name = "netmanager_base"
   subsystem_name = "communication"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@ public:
     int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo) override;
     int32_t  GetDefaultNet(int32_t& netId) override;
     int32_t HasDefaultNet(bool &flag) override;
+    int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames) override;
     int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) override;
     int32_t RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) override;
     int32_t UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback) override;
@@ -54,6 +55,7 @@ public:
     int32_t BindSocket(int32_t socket_fd, int32_t netId) override;
     int32_t SetAirplaneMode(bool state) override;
     int32_t RestoreFactoryData() override;
+    int32_t IsDefaultNetMetered(bool &isMetered) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

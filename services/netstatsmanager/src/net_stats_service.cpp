@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +14,10 @@
  */
 #include "net_stats_service.h"
 
+#include <cinttypes>
+#include <initializer_list>
 #include <sys/time.h>
 #include <unistd.h>
-#include <cinttypes>
 
 #include "broadcast_manager.h"
 #include "system_ability_definition.h"
@@ -28,14 +29,24 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
+constexpr std::initializer_list<NetBearType> BEAR_TYPE_LIST = {
+    NetBearType::BEARER_CELLULAR,
+    NetBearType::BEARER_WIFI,
+    NetBearType::BEARER_BLUETOOTH,
+    NetBearType::BEARER_ETHERNET,
+    NetBearType::BEARER_VPN,
+    NetBearType::BEARER_WIFI_AWARE,
+};
+} // namespace
 const bool REGISTER_LOCAL_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<NetStatsService>::GetInstance().get());
 
 NetStatsService::NetStatsService()
     : SystemAbility(COMM_NET_STATS_MANAGER_SYS_ABILITY_ID, true), registerToService_(false), state_(STATE_STOPPED)
 {
-    netStatsCsv_.reset(std::make_unique<NetStatsCsv>().release());
-    netStatsCallback_ = (std::make_unique<NetStatsCallback>()).release();
+    netStatsCsv_ = std::make_unique<NetStatsCsv>();
+    netStatsCallback_ = new (std::nothrow) NetStatsCallback();
 }
 
 NetStatsService::~NetStatsService() {}
@@ -54,10 +65,10 @@ static void UpdateStatsTimer()
         NETMGR_LOG_E("UpdateUidStats failed");
     }
     BroadcastInfo info;
-    info.action = "usual.event.netmanager.NETMANAGER_NET_STATE_UPDATED";
+    info.action = EventFwk::CommonEventSupport::COMMON_EVENT_NETMANAGER_NETSTATES_UPDATED;
     info.data = "Net Manager Iface and Uid States Updated";
     info.ordered = true;
-    std::map<std::string, std::string> param;
+    std::map<std::string, bool> param = {{"NetStatsUpdated", true}};
     DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
     NETMGR_LOG_D("NetStatsService Update Iface and Uid Stats.");
 }
@@ -76,7 +87,7 @@ void NetStatsService::OnStart()
         return;
     }
 
-    InitListener();
+    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
     updateStatsTimer_.Start(INTERVAL_UPDATE_STATS_TIME_MS, UpdateStatsTimer);
 
     state_ = STATE_RUNNING;
@@ -88,6 +99,43 @@ void NetStatsService::OnStop()
 {
     state_ = STATE_STOPPED;
     registerToService_ = true;
+}
+
+int32_t NetStatsService::Dump(int32_t fd, const std::vector<std::u16string> &args)
+{
+    NETMGR_LOG_D("Start Dump, fd: %{public}d", fd);
+    std::string result;
+    GetDumpMessage(result);
+    int32_t ret = dprintf(fd, "%s\n", result.c_str());
+    return ret < 0 ? static_cast<int32_t>(NetStatsResultCode::ERR_INTERNAL_ERROR)
+                   : static_cast<int32_t>(NetStatsResultCode::ERR_NONE);
+}
+
+void NetStatsService::GetDumpMessage(std::string &message)
+{
+    message.append("Net Stats Info:\n");
+    message.append("\tRxBytes: " +
+                   std::to_string(NetStatsWrapper::GetInstance().GetTotalStats(StatsType::STATS_TYPE_RX_BYTES)) +
+                   "\n");
+    message.append("\tTxBytes: " +
+                   std::to_string(NetStatsWrapper::GetInstance().GetTotalStats(StatsType::STATS_TYPE_TX_BYTES)) +
+                   "\n");
+    message.append("\tRxPackets: " +
+                   std::to_string(NetStatsWrapper::GetInstance().GetTotalStats(StatsType::STATS_TYPE_RX_PACKETS)) +
+                   "\n");
+    message.append("\tTxPackets: " +
+                   std::to_string(NetStatsWrapper::GetInstance().GetTotalStats(StatsType::STATS_TYPE_TX_PACKETS)) +
+                   "\n");
+    std::for_each(BEAR_TYPE_LIST.begin(), BEAR_TYPE_LIST.end(), [&message, this](const auto &bearType) {
+        std::list<std::string> ifaceNames;
+        if (NetManagerCenter::GetInstance().GetIfaceNames(bearType, ifaceNames)) {
+            return;
+        }
+        for (const auto &name : ifaceNames) {
+            message.append("\t" + name + "-TxBytes: " + std::to_string(GetIfaceTxBytes(name)));
+            message.append("\t" + name + "-RxBytes: " + std::to_string(GetIfaceRxBytes(name)));
+        }
+    });
 }
 
 bool NetStatsService::Init()
@@ -120,23 +168,23 @@ bool NetStatsService::Init()
         NETMGR_LOG_E("update uid_stats.csv failed");
         return false;
     }
-    serviceIface_ = (std::make_unique<NetStatsServiceIface>()).release();
+    serviceIface_ = new (std::nothrow) NetStatsServiceIface();
     NetManagerCenter::GetInstance().RegisterStatsService(serviceIface_);
     return true;
 }
 
-void NetStatsService::InitListener()
+void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
     EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent("usual.event.netmanager.NETMANAGER_NET_STATE_LIMITED");
-    matchingSkills.AddEvent("usual.event.netmanager.NETMANAGER_DELETE_UID");
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_NETMANAGER_NETSTATES_LIMITED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_UID_REMOVED);
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscribeInfo.SetPriority(1);
     subscriber_ = std::make_shared<NetStatsListener>(subscribeInfo);
     subscriber_->SetStatsCallback(netStatsCallback_);
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
     NETMGR_LOG_D("NetStatsService SubscribeCommonEvent"
-        " NETMANAGER_NET_STATE_LIMITED and NETMANAGER_DELETE_UID");
+        " COMMON_EVENT_NETMANAGER_NETSTATES_LIMITED and COMMON_EVENT_UID_REMOVED");
 }
 
 int32_t NetStatsService::RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
@@ -250,6 +298,70 @@ NetStatsResultCode NetStatsService::ResetFactory()
 {
     NETMGR_LOG_I("ResetFactory begin");
     return netStatsCsv_->ResetFactory();
+}
+
+int64_t NetStatsService::GetIfaceRxBytes(const std::string &interfaceName)
+{
+    return NetStatsWrapper::GetInstance().GetIfaceStats(StatsType::STATS_TYPE_RX_BYTES, interfaceName);
+}
+
+int64_t NetStatsService::GetIfaceTxBytes(const std::string &interfaceName)
+{
+    return NetStatsWrapper::GetInstance().GetIfaceStats(StatsType::STATS_TYPE_TX_BYTES, interfaceName);
+}
+
+int64_t NetStatsService::GetCellularRxBytes()
+{
+    int64_t err = -1;
+    std::list<std::string> ifaceNames;
+    int64_t totalCellular = 0;
+    int32_t ret = NetManagerCenter::GetInstance().GetIfaceNames(BEARER_CELLULAR, ifaceNames);
+    if (ret != 0 || ifaceNames.empty()) {
+        NETMGR_LOG_E("GetCellularRxBytes iface list is empty, ret = %{public}d", ret);
+        return err;
+    }
+    for (const auto &name : ifaceNames) {
+        totalCellular = totalCellular + NetStatsWrapper::GetInstance().GetIfaceStats(
+            StatsType::STATS_TYPE_RX_BYTES, name);
+    }
+    return totalCellular;
+}
+
+int64_t NetStatsService::GetCellularTxBytes()
+{
+    int64_t err = -1;
+    std::list<std::string> ifaceNames;
+    int64_t totalCellular = 0;
+    int32_t ret = NetManagerCenter::GetInstance().GetIfaceNames(BEARER_CELLULAR, ifaceNames);
+    if (ret != 0 || ifaceNames.empty()) {
+        NETMGR_LOG_E("GetCellularRxBytes iface list is empty, ret = %{public}d", ret);
+        return err;
+    }
+    for (const auto &name : ifaceNames) {
+        totalCellular = totalCellular + NetStatsWrapper::GetInstance().GetIfaceStats(
+            StatsType::STATS_TYPE_TX_BYTES, name);
+    }
+    return totalCellular;
+}
+
+int64_t NetStatsService::GetAllRxBytes()
+{
+    return NetStatsWrapper::GetInstance().GetTotalStats(StatsType::STATS_TYPE_RX_BYTES);
+}
+
+int64_t NetStatsService::GetAllTxBytes()
+{
+    return NetStatsWrapper::GetInstance().GetTotalStats(StatsType::STATS_TYPE_TX_BYTES);
+}
+
+int64_t NetStatsService::GetUidRxBytes(uint32_t uid)
+{
+    return NetStatsWrapper::GetInstance().GetUidStats(StatsType::STATS_TYPE_RX_BYTES, uid);
+}
+
+int64_t NetStatsService::GetUidTxBytes(uint32_t uid)
+{
+    return NetStatsWrapper::GetInstance().GetUidStats(StatsType::STATS_TYPE_TX_BYTES, uid);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

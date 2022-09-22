@@ -16,11 +16,14 @@
 #ifndef COMMUNICATIONNETMANAGERBASE_GETADDRESSBYNAME_CONTEXT_H
 #define COMMUNICATIONNETMANAGERBASE_GETADDRESSBYNAME_CONTEXT_H
 
+#include <iosfwd>
+#include <string>
+#include <cstddef>
 #include <vector>
 
 #include "napi/native_api.h"
 #include "net_address.h"
-#include "netmanager_base_base_context.h"
+#include "base_context.h"
 #include "nocopyable.h"
 
 namespace OHOS::NetManagerStandard {

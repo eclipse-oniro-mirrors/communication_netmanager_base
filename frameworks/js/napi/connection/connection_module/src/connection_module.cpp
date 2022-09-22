@@ -15,18 +15,26 @@
 
 #include "connection_module.h"
 
+#include "bindsocket_context.h"
 #include "connection_async_work.h"
+#include "connection_exec.h"
 #include "constant.h"
 #include "getaddressbyname_context.h"
 #include "getdefaultnet_context.h"
 #include "net_all_capabilities.h"
 #include "netconnection.h"
 #include "netmanager_base_log.h"
-#include "netmanager_base_module_template.h"
+#include "module_template.h"
 #include "parse_nethandle_context.h"
 #include "register_context.h"
 
 static constexpr const char *CONNECTION_MODULE_NAME = "net.connection";
+
+#define DECLARE_NET_CAP(cap) \
+    DECLARE_NAPI_STATIC_PROPERTY(#cap, NapiUtils::CreateUint32(env, static_cast<uint32_t>(NetCap::cap)))
+
+#define DECLARE_NET_BEAR_TYPE(type) \
+    DECLARE_NAPI_STATIC_PROPERTY(#type, NapiUtils::CreateUint32(env, static_cast<uint32_t>(NetBearType::type)))
 
 namespace OHOS::NetManagerStandard {
 
@@ -117,11 +125,17 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
 {
     std::initializer_list<napi_property_descriptor> functions = {
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_NET, GetDefaultNet),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_NET_SYNC, GetDefaultNetSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_CREATE_NET_CONNECTION, CreateNetConnection),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_ADDRESSES_BY_NAME, GetAddressesByName),
         DECLARE_NAPI_FUNCTION(FUNCTION_HAS_DEFAULT_NET, HasDefaultNet),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_NET_CAPABILITIES, GetNetCapabilities),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_CONNECTION_PROPERTIES, GetConnectionProperties),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_ALL_NETS, GetAllNets),
+        DECLARE_NAPI_FUNCTION(FUNCTION_ENABLE_AIRPLANE_MODE, EnableAirplaneMode),
+        DECLARE_NAPI_FUNCTION(FUNCTION_DISABLE_AIRPLANE_MODE, DisableAirplaneMode),
+        DECLARE_NAPI_FUNCTION(FUNCTION_REPORT_NET_CONNECTED, ReportNetConnected),
+        DECLARE_NAPI_FUNCTION(FUNCTION_REPORT_NET_DISCONNECTED, ReportNetDisconnected),
     };
     NapiUtils::DefineProperties(env, exports, functions);
 
@@ -132,7 +146,34 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
     };
     ModuleTemplate::DefineClass(env, exports, netConnectionFunctions, INTERFACE_NET_CONNECTION);
 
+    InitProperties(env, exports);
     return exports;
+}
+
+void ConnectionModule::InitProperties(napi_env env, napi_value exports)
+{
+    std::initializer_list<napi_property_descriptor> netCaps = {
+        DECLARE_NET_CAP(NET_CAPABILITY_MMS),
+        DECLARE_NET_CAP(NET_CAPABILITY_NOT_METERED),
+        DECLARE_NET_CAP(NET_CAPABILITY_INTERNET),
+        DECLARE_NET_CAP(NET_CAPABILITY_NOT_VPN),
+        DECLARE_NET_CAP(NET_CAPABILITY_VALIDATED),
+        DECLARE_NET_CAP(NET_CAPABILITY_CAPTIVE_PORTAL),
+        DECLARE_NET_CAP(NET_CAPABILITY_INTERNAL_DEFAULT),
+    };
+    napi_value caps = NapiUtils::CreateObject(env);
+    NapiUtils::DefineProperties(env, caps, netCaps);
+    NapiUtils::SetNamedProperty(env, exports, INTERFACE_NET_CAP, caps);
+
+    std::initializer_list<napi_property_descriptor> netBearTypes = {
+        DECLARE_NET_BEAR_TYPE(BEARER_CELLULAR),  DECLARE_NET_BEAR_TYPE(BEARER_WIFI),
+        DECLARE_NET_BEAR_TYPE(BEARER_BLUETOOTH), DECLARE_NET_BEAR_TYPE(BEARER_ETHERNET),
+        DECLARE_NET_BEAR_TYPE(BEARER_VPN),       DECLARE_NET_BEAR_TYPE(BEARER_WIFI_AWARE),
+        DECLARE_NET_BEAR_TYPE(BEARER_DEFAULT),
+    };
+    napi_value types = NapiUtils::CreateObject(env);
+    NapiUtils::DefineProperties(env, types, netBearTypes);
+    NapiUtils::SetNamedProperty(env, exports, INTERFACE_NET_BEAR_TYPE, types);
 }
 
 napi_value ConnectionModule::GetAddressesByName(napi_env env, napi_callback_info info)
@@ -182,6 +223,48 @@ napi_value ConnectionModule::GetDefaultNet(napi_env env, napi_callback_info info
                                                            ConnectionAsyncWork::GetDefaultNetCallback);
 }
 
+napi_value ConnectionModule::GetDefaultNetSync(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<GetDefaultNetContext>(env, info, nullptr,
+                                                               ConnectionExec::ExecGetDefaultNet,
+                                                               ConnectionExec::GetDefaultNetCallback);
+}
+
+napi_value ConnectionModule::GetAllNets(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetAllNetsContext>(env, info, FUNCTION_GET_ALL_NETS, nullptr,
+                                                        ConnectionAsyncWork::ExecGetAllNets,
+                                                        ConnectionAsyncWork::GetAllNetsCallback);
+}
+
+napi_value ConnectionModule::EnableAirplaneMode(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<EnableAirplaneModeContext>(env, info, FUNCTION_ENABLE_AIRPLANE_MODE, nullptr,
+                                                                ConnectionAsyncWork::ExecEnableAirplaneMode,
+                                                                ConnectionAsyncWork::EnableAirplaneModeCallback);
+}
+
+napi_value ConnectionModule::DisableAirplaneMode(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<DisableAirplaneModeContext>(env, info, FUNCTION_DISABLE_AIRPLANE_MODE, nullptr,
+                                                                 ConnectionAsyncWork::ExecDisableAirplaneMode,
+                                                                 ConnectionAsyncWork::DisableAirplaneModeCallback);
+}
+
+napi_value ConnectionModule::ReportNetConnected(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<ReportNetConnectedContext>(env, info, FUNCTION_REPORT_NET_CONNECTED, nullptr,
+                                                                ConnectionAsyncWork::ExecReportNetConnected,
+                                                                ConnectionAsyncWork::ReportNetConnectedCallback);
+}
+
+napi_value ConnectionModule::ReportNetDisconnected(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<ReportNetDisconnectedContext>(env, info, FUNCTION_REPORT_NET_DISCONNECTED, nullptr,
+                                                                   ConnectionAsyncWork::ExecReportNetDisconnected,
+                                                                   ConnectionAsyncWork::ReportNetDisconnectedCallback);
+}
+
 napi_value ConnectionModule::NetHandleInterface::GetAddressesByName(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::Interface<GetAddressByNameContext>(
@@ -196,6 +279,18 @@ napi_value ConnectionModule::NetHandleInterface::GetAddressByName(napi_env env, 
         env, info, FUNCTION_GET_ADDRESSES_BY_NAME, nullptr,
         ConnectionAsyncWork::NetHandleAsyncWork::ExecGetAddressByName,
         ConnectionAsyncWork::NetHandleAsyncWork::GetAddressByNameCallback);
+}
+
+napi_value ConnectionModule::NetHandleInterface::BindSocket(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<BindSocketContext>(
+        env, info, FUNCTION_BIND_SOCKET,
+        [](napi_env theEnv, napi_value thisVal, BindSocketContext *context) -> bool {
+            context->netId = NapiUtils::GetInt32Property(theEnv, thisVal, PROPERTY_NET_ID);
+            return true;
+        },
+        ConnectionAsyncWork::NetHandleAsyncWork::ExecBindSocket,
+        ConnectionAsyncWork::NetHandleAsyncWork::BindSocketCallback);
 }
 
 napi_value ConnectionModule::NetConnectionInterface::On(napi_env env, napi_callback_info info)
