@@ -642,6 +642,9 @@ int32_t NetConnService::GetDefaultNet(int32_t &netId)
 
 int32_t NetConnService::HasDefaultNet(bool &flag)
 {
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
     if (!defaultNetSupplier_) {
         flag = false;
         return ERR_NONE;
