@@ -20,6 +20,7 @@
 #include <string>
 #include <ctime>
 #include <vector>
+#include <unistd.h>
 
 #include "net_stats_csv.h"
 
@@ -227,6 +228,7 @@ bool NetStatsCsv::CorrectedIfacesStats(const std::string &iface,
         newIfaceStatsCsvFile << iface << "," << key << "," << val.rxBytes_ << "," << val.txBytes_ << std::endl;
     }
     newIfaceStatsCsvFile.close();
+    sync();
     if (!RenameStatsCsv(newIfaceStatsFileName, IFACE_STATS_CSV_BAK, IFACE_STATS_CSV_FILE_NAME)) {
         return false;
     }
@@ -249,6 +251,7 @@ bool NetStatsCsv::UpdateIfaceCsvInfo()
         }
     }
     ifaceCsvFile.close();
+    sync();
     return true;
 }
 
@@ -266,6 +269,7 @@ bool NetStatsCsv::UpdateUidCsvInfo()
         uidCsvFile << *iter << std::endl;
     }
     uidCsvFile.close();
+    sync();
     return true;
 }
 
@@ -324,6 +328,7 @@ bool NetStatsCsv::UpdateIfaceStatsCsv(const std::string &iface)
         NetsysController::GetInstance().GetIfaceTxBytes(iface) << std::endl;
 
     ifaceStatsCsvFile.close();
+    sync();
     return true;
 }
 
@@ -341,6 +346,7 @@ bool NetStatsCsv::UpdateUidStatsCsv(uint32_t uid, const std::string &iface)
         << NetsysController::GetInstance().GetUidOnIfaceRxBytes(uid, iface) << "," <<
         NetsysController::GetInstance().GetUidOnIfaceTxBytes(uid, iface) << std::endl;
     uidStatsCsvFile.close();
+    sync();
     return true;
 }
 
@@ -372,6 +378,7 @@ bool NetStatsCsv::DeleteUidStatsCsv(uint32_t uid)
             << row[static_cast<uint32_t>(UidStatCsvColumn::TXBYTES)] << std::endl;
     }
     newUidStatsCsvFile.close();
+    sync();
     if (!RenameStatsCsv(newUidStatsFileName, UID_STATS_CSV_BAK, UID_STATS_CSV_FILE_NAME)) {
         return false;
     }
