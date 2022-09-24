@@ -955,7 +955,10 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
             }
             case CALL_TYPE_UPDATE_LINK: {
                 sptr<NetLinkInfo> pInfo = std::make_unique<NetLinkInfo>().release();
-                *pInfo = supplier->GetNetLinkInfo();
+                auto network = supplier->GetNetwork();
+                if (network != nullptr) {
+                    *pInfo = network->GetNetLinkInfo();
+                }
                 callback->NetConnectionPropertiesChange(netHandle, pInfo);
                 break;
             }
@@ -983,7 +986,10 @@ void NetConnService::CallbackForAvailable(sptr<NetSupplier> &supplier, const spt
     *pNetAllCap = supplier->GetNetCapabilities();
     callback->NetCapabilitiesChange(netHandle, pNetAllCap);
     sptr<NetLinkInfo> pInfo = std::make_unique<NetLinkInfo>().release();
-    *pInfo = supplier->GetNetLinkInfo();
+    auto network = supplier->GetNetwork();
+    if (network != nullptr) {
+        *pInfo = network->GetNetLinkInfo();
+    }
     callback->NetConnectionPropertiesChange(netHandle, pInfo);
 }
 
@@ -1099,7 +1105,7 @@ void NetConnService::GetDumpMessage(std::string &message)
             message.append("\tNetId: " + std::to_string(INVALID_NET_ID) + "\n");
         }
         message.append("\tConnStat: " + std::to_string(defaultNetSupplier_->IsConnected()) + "\n");
-        message.append("\tIsAvailable: " + std::to_string(defaultNetSupplier_->IfNetValid()) + "\n");
+        message.append("\tIsAvailable: " + std::to_string(defaultNetSupplier_->IsNetValidated()) + "\n");
         message.append("\tIsRoaming: " + std::to_string(defaultNetSupplier_->GetRoaming()) + "\n");
         message.append("\tStrength: " + std::to_string(defaultNetSupplier_->GetStrength()) + "\n");
         message.append("\tFrequency: " + std::to_string(defaultNetSupplier_->GetFrequency()) + "\n");

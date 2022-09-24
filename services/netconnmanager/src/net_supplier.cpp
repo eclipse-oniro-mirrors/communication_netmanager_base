@@ -34,7 +34,7 @@ NetSupplier::NetSupplier(
     netAllCapabilities_.bearerTypes_.insert(bearerType);
 }
 
-NetSupplier::~NetSupplier() {}
+NetSupplier::~NetSupplier() = default;
 
 void NetSupplier::RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback)
 {
@@ -65,7 +65,6 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
     network_->UpdateBasicNetwork(netSupplierInfo_.isAvailable_);
     if (!netSupplierInfo_.isAvailable_) {
         UpdateNetConnState(NET_CONN_STATE_DISCONNECTED);
-        netLinkInfo_.Initialize();
     }
 }
 
@@ -80,7 +79,6 @@ int32_t NetSupplier::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     if (!network_->UpdateNetLinkInfo(netLinkInfo)) {
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
-    netLinkInfo_ = netLinkInfo;
     UpdateNetConnState(NET_CONN_STATE_CONNECTED);
     return ERR_SERVICE_UPDATE_NET_LINK_INFO_SUCCES;
 }
@@ -120,11 +118,6 @@ const NetCaps &NetSupplier::GetNetCaps() const
 NetAllCapabilities NetSupplier::GetNetCapabilities() const
 {
     return netAllCapabilities_;
-}
-
-NetLinkInfo NetSupplier::GetNetLinkInfo() const
-{
-    return netLinkInfo_;
 }
 
 void NetSupplier::SetNetwork(const sptr<Network> &network)
@@ -287,7 +280,7 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
         SupplierDisconnection(netCaps_.ToSet());
         return;
     }
-    std::set<uint32_t>::iterator iter = requestList_.find(reqId);
+    auto iter = requestList_.find(reqId);
     if (iter == requestList_.end()) {
         NETMGR_LOG_D("NetSupplier::ReceiveBestScore, supplierId[%{public}d], can not find request[%{public}d]",
                      supplierId_, reqId);
@@ -304,7 +297,7 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
 
 int32_t NetSupplier::CancelRequest(uint32_t reqId)
 {
-    std::set<uint32_t>::iterator iter = requestList_.find(reqId);
+    auto iter = requestList_.find(reqId);
     if (iter == requestList_.end()) {
         return ERR_SERVICE_NO_REQUEST;
     }
@@ -324,7 +317,6 @@ void NetSupplier::RemoveBestRequest(uint32_t reqId)
         return;
     }
     bestReqList_.erase(reqId);
-    return;
 }
 
 std::set<uint32_t>& NetSupplier::GetBestRequestList()
@@ -349,12 +341,11 @@ void NetSupplier::SetNetValid(bool ifValid)
             NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_VALIDATED");
         }
     }
-    ifNetValid_ = ifValid;
 }
 
-bool NetSupplier::IfNetValid()
+bool NetSupplier::IsNetValidated()
 {
-    return ifNetValid_;
+    return HasNetCap(NET_CAPABILITY_VALIDATED);
 }
 
 void NetSupplier::SetNetScore(int32_t score)

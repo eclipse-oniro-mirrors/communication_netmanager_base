@@ -41,7 +41,7 @@ bool NetScore::GetServiceScore(sptr<NetSupplier> &supplier)
         static_cast<int32_t>(iter->first), static_cast<int32_t>(iter->second));
     netScore = static_cast<int32_t>(iter->second);
     supplier->SetNetScore(netScore);
-    if (!(supplier->IfNetValid())) {
+    if (!(supplier->IsNetValidated())) {
         netScore -= NET_VALID_SCORE;
     }
     supplier->SetRealScore(netScore);
