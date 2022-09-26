@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <map>
+
 #include "netmanager_base_permission.h"
 
 #include "ipc_skeleton.h"
@@ -53,6 +55,35 @@ bool NetManagerPermission::CheckPermission(const std::string &permissionName)
         return false;
     }
     return true;
+}
+
+bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissionName)
+{
+    if (permissionName.empty()) {
+        NETMGR_LOG_E("permission check failed，permission name is empty.");
+        return false;
+    }
+
+    static std::map<uint32_t, bool> permissionMap;
+
+    auto callerToken = IPCSkeleton::GetCallingTokenID();
+    if (permissionMap.find(callerToken) != permissionMap.end()) {
+        return permissionMap[callerToken];
+    }
+
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        permissionMap[callerToken] = true;
+        return true;
+    }
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
+        bool res = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName) ==
+            Security::AccessToken::PERMISSION_GRANTED;
+        permissionMap[callerToken] = res;
+        return res;
+    }
+    permissionMap[callerToken] = false;
+    return false;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
