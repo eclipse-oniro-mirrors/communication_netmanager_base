@@ -586,7 +586,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         if (bestNet->GetNetSupplierType() == BEARER_CELLULAR ||
             bestNet->GetNetSupplierType() == BEARER_WIFI) {
             struct EventInfo eventInfo = {
-                .capabilitie = bestNet->GetNetCapabilities().ToString(" "),
+                .capabilities = bestNet->GetNetCapabilities().ToString(" "),
                 .supplierIdent = bestNet->GetNetSupplierIdent()
             };
             EventReport::SendRequestBehaviorEvent(eventInfo);
