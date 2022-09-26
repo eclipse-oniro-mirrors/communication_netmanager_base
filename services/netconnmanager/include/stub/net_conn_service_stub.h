@@ -64,6 +64,9 @@ private:
     int32_t OnSetAirplaneMode(MessageParcel &data, MessageParcel &reply);
     int32_t OnRestoreFactoryData(MessageParcel &data, MessageParcel &reply);
     int32_t OnIsDefaultNetMetered(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetHttpProxy(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetHttpProxy(MessageParcel &data, MessageParcel &reply);
+
 private:
     int32_t ConvertCode(int32_t internalCode);
 
