@@ -628,7 +628,7 @@ int32_t NetConnService::DeactivateNetwork(uint32_t reqId)
 
 int32_t NetConnService::GetDefaultNet(int32_t &netId)
 {
-    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+    if (!NetManagerPermission::CheckPermissionWithCache(Permission::GET_NETWORK_INFO)) {
         return ERR_PERMISSION_CHECK_FAIL;
     }
     if (!defaultNetSupplier_) {
