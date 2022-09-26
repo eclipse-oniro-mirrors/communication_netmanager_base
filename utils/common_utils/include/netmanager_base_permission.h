@@ -29,6 +29,7 @@ static const std::string CONNECTIVITY_INTERNAL = "ohos.permission.CONNECTIVITY_I
 class NetManagerPermission {
 public:
     static bool CheckPermission(const std::string &permissionName);
+    static bool CheckPermissionWithCache(const std::string &permissionName);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
