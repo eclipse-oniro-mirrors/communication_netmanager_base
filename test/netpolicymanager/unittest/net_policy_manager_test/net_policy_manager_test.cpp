@@ -88,7 +88,7 @@ void NetPolicyManagerTest::TearDown() {}
 
 sptr<NetPolicyCallbackTest> NetPolicyManagerTest::GetINetPolicyCallbackSample() const
 {
-    sptr<NetPolicyCallbackTest> callback = (std::make_unique<NetPolicyCallbackTest>()).release();
+    sptr<NetPolicyCallbackTest> callback = new (std::nothrow) NetPolicyCallbackTest();
     return callback;
 }
 
@@ -360,14 +360,15 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager017, TestSize.Level1)
 
 /**
  * @tc.name: NetPolicyManager0018
- * @tc.desc: Test NetPolicyManager GetCurrentBackgroundPolicy.
+ * @tc.desc: Test NetPolicyManager GetBackgroundPolicyByUid.
  * @tc.type: FUNC
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager018, TestSize.Level1)
 {
     DelayedSingleton<NetPolicyClient>::GetInstance()->SetBackgroundPolicy(true);
-    uint32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetCurrentBackgroundPolicy();
-    std::cout << "NetPolicyManager0018 GetCurrentBackgroundPolicy " << result << std::endl;
+    uint32_t result =
+        DelayedSingleton<NetPolicyClient>::GetInstance()->GetBackgroundPolicyByUid(BACKGROUND_POLICY_TEST_UID);
+    std::cout << "NetPolicyManager0018 GetBackgroundPolicyByUid " << result << std::endl;
     ASSERT_EQ(result, NET_BACKGROUND_POLICY_ENABLE);
 }
 

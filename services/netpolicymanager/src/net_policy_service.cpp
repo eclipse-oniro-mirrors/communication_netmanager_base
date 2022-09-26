@@ -257,7 +257,7 @@ bool NetPolicyService::GetBackgroundPolicy()
 uint32_t NetPolicyService::GetBackgroundPolicyByUid(uint32_t uid)
 {
     if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
-        return NetBackgroundPolicy::NET_BACKGROUND_POLICY_NONE;
+        return NetPolicyResultCode::ERR_PERMISSION_DENIED;
     }
     NETMGR_LOG_I("GetBackgroundPolicyByUid uid[%{public}d]", uid);
     return netPolicyRule_->GetBackgroundPolicyByUid(uid);
