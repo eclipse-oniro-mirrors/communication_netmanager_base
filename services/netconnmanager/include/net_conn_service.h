@@ -229,7 +229,6 @@ public:
     int32_t SetHttpProxy(const std::string &httpProxy) override;
 
     /**
-     *
      * Get http proxy server
      *
      * @param httpProxy output param, the http proxy server
