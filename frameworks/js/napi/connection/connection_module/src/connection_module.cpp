@@ -225,9 +225,9 @@ napi_value ConnectionModule::GetDefaultNet(napi_env env, napi_callback_info info
 
 napi_value ConnectionModule::GetDefaultNetSync(napi_env env, napi_callback_info info)
 {
-    return ModuleTemplate::InterfaceSync<GetDefaultNetContext>(env, info, nullptr,
-                                                               ConnectionExec::ExecGetDefaultNet,
-                                                               ConnectionExec::GetDefaultNetCallback);
+    GetDefaultNetContext context(env, nullptr);
+    ConnectionExec::ExecGetDefaultNet(&context);
+    return ConnectionExec::GetDefaultNetCallback(&context);
 }
 
 napi_value ConnectionModule::GetAllNets(napi_env env, napi_callback_info info)

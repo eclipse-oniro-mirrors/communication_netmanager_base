@@ -181,6 +181,7 @@ public:
      * @return int32_t Whether the network probe is successful
      */
     int32_t NetDetection(int32_t netId) override;
+    bool CheckGetDefaultNetPermission();
     int32_t GetDefaultNet(int32_t &netId) override;
     int32_t HasDefaultNet(bool &flag) override;
     int32_t GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList) override;
