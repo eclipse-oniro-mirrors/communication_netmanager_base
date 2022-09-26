@@ -79,7 +79,7 @@ void EventReport::SendRequestFaultEvent(const EventInfo &eventInfo)
         HiSysEvent::Domain::NETMANAGER_STANDARD,
         NET_CONN_REQUEST_FAULT,
         HiSysEvent::EventType::FAULT,
-        EVENT_KEY_NET_REQUEST_CAPABILITIE, eventInfo.capabilitie,
+        EVENT_KEY_NET_REQUEST_CAPABILITIE, eventInfo.capabilities,
         EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
         EVENT_KEY_ERROR_MSG, eventInfo.errorMsg);
 }
@@ -90,7 +90,7 @@ void EventReport::SendRequestBehaviorEvent(const EventInfo &eventInfo)
         HiSysEvent::Domain::NETMANAGER_STANDARD,
         NET_CONN_REQUEST_STAT,
         HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_NET_REQUEST_CAPABILITIE, eventInfo.capabilitie,
+        EVENT_KEY_NET_REQUEST_CAPABILITIE, eventInfo.capabilities,
         EVENT_KEY_NET_REQUEST_CALLBACK_AVAILABLE, eventInfo.callbackAvailable,
         EVENT_KEY_NET_REQUEST_SUPPLIERIDENT, eventInfo.supplierIdent,
         EVENT_KEY_NET_REQUEST_NETCAPS, eventInfo.netcaps);

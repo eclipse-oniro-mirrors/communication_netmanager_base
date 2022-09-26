@@ -1122,5 +1122,27 @@ void NetConnService::GetDumpMessage(std::string &message)
         message.append("\tUid: 0\n");
     }
 }
+
+int32_t NetConnService::SetHttpProxy(const std::string &httpProxy)
+{
+    if (httpProxy.empty()) {
+        NETMGR_LOG_E("The httpProxy set to service is null");
+        return ERR_HTTP_PROXY_INVALID;
+    }
+
+    httpProxy_ = httpProxy;
+    return ERR_NONE;
+}
+
+int32_t NetConnService::GetHttpProxy(std::string &httpProxy)
+{
+    if (httpProxy_.empty()) {
+        NETMGR_LOG_E("The httpProxy in service is null");
+        return ERR_NO_HTTP_PROXY;
+    }
+
+    httpProxy = httpProxy_;
+    return ERR_NONE;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

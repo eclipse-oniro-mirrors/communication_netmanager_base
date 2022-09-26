@@ -1047,7 +1047,7 @@ int32_t NetConnServiceProxy::IsDefaultNetMetered(bool &isMetered)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_IS_DDEFAULT_NET_METERED, data, reply, option);
+    int32_t error = remote->SendRequest(CMD_NM_IS_DEFAULT_NET_METERED, data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -1059,6 +1059,74 @@ int32_t NetConnServiceProxy::IsDefaultNetMetered(bool &isMetered)
     }
     if (ret == ERR_NONE) {
         if (!reply.ReadBool(isMetered)) {
+            return IPC_PROXY_ERR;
+        }
+    }
+    return ret;
+}
+
+int32_t NetConnServiceProxy::SetHttpProxy(const std::string &httpProxy)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return IPC_PROXY_ERR;
+    }
+
+    if (!data.WriteString(httpProxy)) {
+        return IPC_PROXY_ERR;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = remote->SendRequest(CMD_NM_SET_HTTP_PROXY, data, reply, option);
+    if (error != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        return error;
+    }
+
+    int32_t ret = ERR_NONE;
+    if (!reply.ReadInt32(ret)) {
+        return IPC_PROXY_ERR;
+    }
+    return ret;
+}
+
+int32_t NetConnServiceProxy::GetHttpProxy(std::string &httpProxy)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return IPC_PROXY_ERR;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = remote->SendRequest(CMD_NM_GET_HTTP_PROXY, data, reply, option);
+    if (error != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        return error;
+    }
+
+    int32_t ret = ERR_NONE;
+    if (!reply.ReadInt32(ret)) {
+        return IPC_PROXY_ERR;
+    }
+
+    if (ret == ERR_NONE) {
+        if (!reply.ReadString(httpProxy)) {
             return IPC_PROXY_ERR;
         }
     }

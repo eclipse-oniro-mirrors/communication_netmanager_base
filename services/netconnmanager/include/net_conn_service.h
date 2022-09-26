@@ -220,6 +220,23 @@ public:
      */
     int32_t IsDefaultNetMetered(bool &isMetered) override;
 
+    /**
+     * Set http proxy server
+     *
+     * @param httpProxy the http proxy server
+     * @return ERR_NONE if OK, ERR_INVALID_PARAMS if httpProxy is null string
+     */
+    int32_t SetHttpProxy(const std::string &httpProxy) override;
+
+    /**
+     *
+     * Get http proxy server
+     *
+     * @param httpProxy output param, the http proxy server
+     * @return ERR_NONE if OK, ERR_INVALID_PARAMS if httpProxy is null string
+     */
+    int32_t GetHttpProxy(std::string &httpProxy) override;
+
 private:
     bool Init();
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
@@ -262,6 +279,7 @@ private:
     std::unique_ptr<NetScore> netScore_ = nullptr;
     sptr<NetConnServiceIface> serviceIface_ = nullptr;
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
+    std::string httpProxy_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
