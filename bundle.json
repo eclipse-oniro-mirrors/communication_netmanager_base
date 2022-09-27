@@ -117,9 +117,7 @@
                 "//foundation/communication/netmanager_base/test/netconnmanager:unittest",
                 "//foundation/communication/netmanager_base/test/netpolicymanager:unittest",
                 "//foundation/communication/netmanager_base/test/netmanagernative:unittest",
-                "//foundation/communication/netmanager_base/test/fuzztest:fuzztest",
-                "//foundation/communication/netmanager_base/test/netsys_bpf_stats:unittest",
-                "//foundation/communication/netmanager_base/test/netstatsmanager:unittest"
+                "//foundation/communication/netmanager_base/test/fuzztest:fuzztest"
             ]
         }
     }
