@@ -16,8 +16,10 @@
 #ifndef NET_MONITOR_H
 #define NET_MONITOR_H
 
-#include <mutex>
+#include <atomic>
 #include <condition_variable>
+#include <mutex>
+#include <future>
 #include <thread>
 #include "net_conn_types.h"
 #include "refbase.h"
@@ -50,13 +52,6 @@ public:
      *
      */
     void Stop();
-
-    /**
-     * Determine NetMonitor is detecting or not
-     *
-     * @return bool NetMonitor is detecting or not
-     */
-    bool IsDetecting() const;
 
     /**
      * Get current detection result
@@ -150,13 +145,13 @@ private:
 
 private:
     uint32_t netId_;
-    bool detecting_ = false;
+    std::atomic<bool> isDetecting_ {false};
+    std::atomic<int32_t> detectionSteps_ {0};
+    std::future<void> detectAsync_;
     std::mutex detectionMtx_;
     std::condition_variable detectionCond_;
-    std::thread detectionThread_;
     NetDetectionStatus result_ = INVALID_DETECTION_STATE;
     uint32_t detectionDelay_ = 0;
-    uint32_t detectionSteps_ = 0;
     NetDetectionStateHandler netDetectionStatus_;
     std::string portalUrlRedirect_;
     bool needReport_ = false;

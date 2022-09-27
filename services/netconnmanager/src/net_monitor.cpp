@@ -72,23 +72,20 @@ NetMonitor::NetMonitor(uint32_t netId, NetDetectionStateHandler handle)
 {
 }
 
-NetMonitor::~NetMonitor()
-{
-    Stop();
-}
+NetMonitor::~NetMonitor(){}
 
 void NetMonitor::Start(bool needReport)
 {
-    NETMGR_LOG_I("Start net[%{public}d] monitor", netId_);
-    needReport_ = needReport;
-    if (IsDetecting()) {
-        NETMGR_LOG_E("Net[%{public}d] monitor is detecting", netId_);
+    NETMGR_LOG_I("Start net[%{public}d] monitor in", netId_);
+    if (isDetecting_) {
+        NETMGR_LOG_W("Net[%{public}d] monitor is detecting, no need to start", netId_);
         return;
     }
-    detecting_ = true;
-    detectionThread_ = std::thread([this]() {
+    needReport_ = needReport;
+    isDetecting_ = true;
+    detectAsync_ = std::async(std::launch::async, [this]() {
         result_ = UNKNOWN_STATE;
-        while (detecting_) {
+        while (isDetecting_) {
             Detection();
         }
     });
@@ -97,21 +94,16 @@ void NetMonitor::Start(bool needReport)
 void NetMonitor::Stop()
 {
     NETMGR_LOG_I("Stop net[%{public}d] monitor in", netId_);
-    {
-        std::unique_lock<std::mutex> locker(detectionMtx_);
-        detecting_ = false;
-        detectionSteps_ = 0;
-        detectionCond_.notify_all();
+    if (!isDetecting_) {
+        NETMGR_LOG_W("Net[%{public}d] monitor thread is stoped, no need to stop", netId_);
+        return;
     }
-    if (detectionThread_.joinable()) {
-        detectionThread_.join();
+    isDetecting_ = false;
+    detectionCond_.notify_all();
+    if (detectAsync_.valid()) {
+        detectAsync_.wait();
     }
     NETMGR_LOG_I("Stop net[%{public}d] monitor out", netId_);
-}
-
-bool NetMonitor::IsDetecting() const
-{
-    return detecting_;
 }
 
 NetDetectionStatus NetMonitor::GetDetectionResult() const
@@ -126,8 +118,7 @@ void NetMonitor::Detection()
         .monitorStatus = static_cast<int32_t>(result)
     };
     EventReport::SendMonitorBehaviorEvent(eventInfo);
-    std::unique_lock<std::mutex> locker(detectionMtx_);
-    if (detecting_) {
+    if (isDetecting_) {
         if (result == CAPTIVE_PORTAL_STATE) {
             NETMGR_LOG_I("currentNetMonitor[%{public}d] need portal", netId_);
             detectionDelay_ = CAPTIVE_PORTAL_DETECTION_DELAY_MS;
@@ -151,7 +142,10 @@ void NetMonitor::Detection()
             result_ = result;
             netDetectionStatus_(result_, portalUrlRedirect_);
         }
-        detectionCond_.wait_for(locker, std::chrono::milliseconds(detectionDelay_));
+        if (isDetecting_) {
+            std::unique_lock<std::mutex> locker(detectionMtx_);
+            detectionCond_.wait_for(locker, std::chrono::milliseconds(detectionDelay_));
+        }
     }
 }
 
