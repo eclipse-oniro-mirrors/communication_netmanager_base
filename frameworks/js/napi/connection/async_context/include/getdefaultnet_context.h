@@ -24,6 +24,7 @@
 #include "refbase.h"
 #include "net_handle.h"
 #include "base_context.h"
+#include "event_manager.h"
 
 namespace OHOS::NetManagerStandard {
 class GetDefaultNetContext final : public BaseContext {

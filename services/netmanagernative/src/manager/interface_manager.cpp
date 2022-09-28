@@ -155,7 +155,7 @@ std::vector<std::string> InterfaceManager::GetInterfaceNames()
 
     de = readdir(dir);
     while (de != nullptr) {
-        if ((de->d_name[0] == '.') &&
+        if ((de->d_name[0] != '.') &&
             ((de->d_type == DT_DIR) || (de->d_type == DT_LNK))) {
             ifaceNames.push_back(std::string(de->d_name));
         }

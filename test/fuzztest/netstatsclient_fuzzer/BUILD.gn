@@ -20,7 +20,7 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 ##############################fuzztest##########################################
 ohos_fuzztest("NetStatsClientFuzzTest") {
   module_out_path = "netmanager_base/net_stats_client"
-  fuzz_config_file = "//foundation/communication/netmanager_base/test/fuzztest/netstatsclient_fuzzer"
+  fuzz_config_file = "$NETMANAGER_BASE_ROOT/test/fuzztest/netstatsclient_fuzzer"
 
   include_dirs = [
     "$INNERKITS_ROOT/netstatsclient/include",
@@ -39,10 +39,10 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
   sources = [ "net_stats_client_fuzzer.cpp" ]
 
   deps = [
+    "$HILOG_ROOT/interfaces/native/innerkits:libhilog",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
   ]
 
   defines = [
@@ -61,7 +61,6 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
     "ipc:ipc_core",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
     "samgr:samgr_proxy",
   ]
 }

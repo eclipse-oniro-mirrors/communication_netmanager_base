@@ -39,6 +39,8 @@ std::string ConvertIpv4Address(uint32_t addressIpv4);
 
 uint32_t ConvertIpv4Address(const std::string &address);
 
+int32_t Ipv4PrefixLen(const std::string &ip);
+
 bool ParseInt(const std::string &str, int32_t *value);
 
 int64_t ConvertToInt64(const std::string& str);

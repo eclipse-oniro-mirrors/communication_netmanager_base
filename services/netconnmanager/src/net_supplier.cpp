@@ -17,10 +17,6 @@
 #include <atomic>
 #include <cinttypes>
 
-#include "common_event_support.h"
-
-#include "event_report.h"
-#include "net_activate.h"
 #include "net_mgr_log_wrapper.h"
 #include "broadcast_manager.h"
 
@@ -38,7 +34,7 @@ NetSupplier::NetSupplier(
     netAllCapabilities_.bearerTypes_.insert(bearerType);
 }
 
-NetSupplier::~NetSupplier() {}
+NetSupplier::~NetSupplier() = default;
 
 void NetSupplier::RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback)
 {
@@ -69,9 +65,7 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
     network_->UpdateBasicNetwork(netSupplierInfo_.isAvailable_);
     if (!netSupplierInfo_.isAvailable_) {
         UpdateNetConnState(NET_CONN_STATE_DISCONNECTED);
-        netLinkInfo_.Initialize();
     }
-    return;
 }
 
 int32_t NetSupplier::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
@@ -85,7 +79,6 @@ int32_t NetSupplier::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     if (!network_->UpdateNetLinkInfo(netLinkInfo)) {
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
-    netLinkInfo_ = netLinkInfo;
     UpdateNetConnState(NET_CONN_STATE_CONNECTED);
     return ERR_SERVICE_UPDATE_NET_LINK_INFO_SUCCES;
 }
@@ -125,11 +118,6 @@ const NetCaps &NetSupplier::GetNetCaps() const
 NetAllCapabilities NetSupplier::GetNetCapabilities() const
 {
     return netAllCapabilities_;
-}
-
-NetLinkInfo NetSupplier::GetNetLinkInfo() const
-{
-    return netLinkInfo_;
 }
 
 void NetSupplier::SetNetwork(const sptr<Network> &network)
@@ -243,87 +231,31 @@ bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
 
 void NetSupplier::UpdateNetConnState(NetConnState netConnState)
 {
-    switch (netConnState) {
-        case NET_CONN_STATE_IDLE:
-        case NET_CONN_STATE_CONNECTING:
-        case NET_CONN_STATE_CONNECTED:
-        case NET_CONN_STATE_DISCONNECTING:
-        case NET_CONN_STATE_DISCONNECTED:
-            state_ = netConnState;
-            break;
-        default:
-            state_ = NET_CONN_STATE_UNKNOWN;
-            break;
+    if (network_) {
+        network_->UpdateNetConnState(netConnState);
     }
-
-    BroadcastInfo info;
-    info.action = EventFwk::CommonEventSupport::COMMON_EVENT_CONNECTIVITY_CHANGE;
-    info.data = "Net Manager Connection State Changed";
-    info.code = static_cast<int32_t>(netConnState);
-    info.ordered = true;
-    std::map<std::string, int32_t> param = {{"NetType", static_cast<int32_t>(netSupplierType_)}};
-    DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
-    NETMGR_LOG_D("supplier[%{public}d, %{public}s], serviceState[%{public}d]", supplierId_, netSupplierIdent_.c_str(),
-                 state_);
-}
-
-NetConnState NetSupplier::GetNetConnState() const
-{
-    return state_;
 }
 
 bool NetSupplier::IsConnecting() const
 {
-    bool isConnecting = false;
-
-    switch (state_) {
-        case NET_CONN_STATE_UNKNOWN:
-        case NET_CONN_STATE_IDLE:
-            break;
-        case NET_CONN_STATE_CONNECTING:
-            isConnecting = true;
-            break;
-        case NET_CONN_STATE_CONNECTED:
-        case NET_CONN_STATE_DISCONNECTING:
-        case NET_CONN_STATE_DISCONNECTED:
-        default:
-            break;
+    if (network_) {
+        return network_->IsConnecting();
     }
-
-    NETMGR_LOG_D("isConnecting is [%{public}d]", isConnecting);
-    return isConnecting;
+    return false;
 }
 
 bool NetSupplier::IsConnected() const
 {
-    bool isConnected = false;
-    switch (state_) {
-        case NET_CONN_STATE_UNKNOWN:
-        case NET_CONN_STATE_IDLE:
-        case NET_CONN_STATE_CONNECTING:
-        case NET_CONN_STATE_DISCONNECTING:
-        case NET_CONN_STATE_DISCONNECTED:
-            break;
-        case NET_CONN_STATE_CONNECTED:
-            isConnected = true;
-            break;
-        default:
-            break;
+    if (network_) {
+        return network_->IsConnected();
     }
-    NETMGR_LOG_D("isConnected is [%{public}d]", isConnected);
-    return isConnected;
+    return false;
 }
 
-void NetSupplier::AddRequsetIdToList(uint32_t requestId)
+void NetSupplier::AddRequestIdToList(uint32_t requestId)
 {
-    NETMGR_LOG_D("AddRequsetIdToList reqId = [%{public}u]", requestId);
+    NETMGR_LOG_D("AddRequestIdToList reqId = [%{public}u]", requestId);
     requestList_.insert(requestId);
-    return;
-}
-
-void NetSupplier::UpdateNetStateForTest(int32_t netState)
-{
-    NETMGR_LOG_I("Test NetSupplier::UpdateNetStateForTest(), begin");
 }
 
 bool NetSupplier::RequestToConnect(uint32_t reqId)
@@ -348,7 +280,7 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
         SupplierDisconnection(netCaps_.ToSet());
         return;
     }
-    std::set<uint32_t>::iterator iter = requestList_.find(reqId);
+    auto iter = requestList_.find(reqId);
     if (iter == requestList_.end()) {
         NETMGR_LOG_D("NetSupplier::ReceiveBestScore, supplierId[%{public}d], can not find request[%{public}d]",
                      supplierId_, reqId);
@@ -365,7 +297,7 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
 
 int32_t NetSupplier::CancelRequest(uint32_t reqId)
 {
-    std::set<uint32_t>::iterator iter = requestList_.find(reqId);
+    auto iter = requestList_.find(reqId);
     if (iter == requestList_.end()) {
         return ERR_SERVICE_NO_REQUEST;
     }
@@ -385,7 +317,6 @@ void NetSupplier::RemoveBestRequest(uint32_t reqId)
         return;
     }
     bestReqList_.erase(reqId);
-    return;
 }
 
 std::set<uint32_t>& NetSupplier::GetBestRequestList()
@@ -410,12 +341,11 @@ void NetSupplier::SetNetValid(bool ifValid)
             NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_VALIDATED");
         }
     }
-    ifNetValid_ = ifValid;
 }
 
-bool NetSupplier::IfNetValid()
+bool NetSupplier::IsNetValidated()
 {
-    return ifNetValid_;
+    return HasNetCap(NET_CAPABILITY_VALIDATED);
 }
 
 void NetSupplier::SetNetScore(int32_t score)

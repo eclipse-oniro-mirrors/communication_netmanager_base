@@ -11,10 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
+import("//build/ohos.gni")
 
-group("unittest") {
-  testonly = true
-  deps = []
-  deps += [ "unittest/netsys_bpf_stats_test:unittest" ]
+ohos_prebuilt_etc("bpf_progs_config") {
+  source = "netsys.o"
+  subsystem_name = "communication"
+  part_name = "netmanager_base"
+  module_install_dir = "etc/bpf"
+  install_images = [ "system" ]
 }
+
+exec_script("elf-compiler.sh")

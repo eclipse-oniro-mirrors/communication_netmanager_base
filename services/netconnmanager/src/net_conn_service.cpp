@@ -72,7 +72,6 @@ void NetConnService::CreateDefaultRequest()
         defaultNetActivate_->SetRequestId(DEFAULT_REQUEST_ID);
         netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
     }
-    return;
 }
 
 void NetConnService::OnStop()
@@ -150,7 +149,7 @@ int32_t NetConnService::RegisterNetSupplier(
     }
     using namespace std::placeholders;
     sptr<Network> network = (std::make_unique<Network>(netId, supplierId,
-        std::bind(&NetConnService::HandleDetectionResult, this, _1, _2))).release();
+        std::bind(&NetConnService::HandleDetectionResult, this, _1, _2), bearerType)).release();
     if (network == nullptr) {
         NETMGR_LOG_E("network is nullptr");
         return ERR_NO_NETWORK;
@@ -587,7 +586,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         if (bestNet->GetNetSupplierType() == BEARER_CELLULAR ||
             bestNet->GetNetSupplierType() == BEARER_WIFI) {
             struct EventInfo eventInfo = {
-                .capabilitie = bestNet->GetNetCapabilities().ToString(" "),
+                .capabilities = bestNet->GetNetCapabilities().ToString(" "),
                 .supplierIdent = bestNet->GetNetSupplierIdent()
             };
             EventReport::SendRequestBehaviorEvent(eventInfo);
@@ -628,12 +627,12 @@ int32_t NetConnService::DeactivateNetwork(uint32_t reqId)
 
 int32_t NetConnService::GetDefaultNet(int32_t &netId)
 {
-    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+    if (!NetManagerPermission::CheckPermissionWithCache(Permission::GET_NETWORK_INFO)) {
         return ERR_PERMISSION_CHECK_FAIL;
     }
     if (!defaultNetSupplier_) {
         NETMGR_LOG_E("not found the netId");
-        return ERR_NET_DEFAULTNET_NOT_EXIST;
+        return ERR_NONE;
     }
 
     netId = defaultNetSupplier_->GetNetId();
@@ -643,17 +642,33 @@ int32_t NetConnService::GetDefaultNet(int32_t &netId)
 
 int32_t NetConnService::HasDefaultNet(bool &flag)
 {
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
     if (!defaultNetSupplier_) {
         flag = false;
-        return ERR_NET_DEFAULTNET_NOT_EXIST;
+        return ERR_NONE;
     }
     flag = true;
     return ERR_NONE;
 }
 
+int32_t NetConnService::IsDefaultNetMetered(bool &isMetered)
+{
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
+    if (defaultNetSupplier_) {
+        isMetered = !defaultNetSupplier_->HasNetCap(NET_CAPABILITY_NOT_METERED);
+    } else {
+        isMetered = true;
+    }
+    return ERR_NONE;
+}
+
 void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<NetSupplier> &newSupplier)
 {
-    NETMGR_LOG_I("MakeDefaultNetWork in, lastSupplier[%{public}d, %{public}s], newSupplier[%{public}d, %{public}s]",
+    NETMGR_LOG_I("MakeDefaultNetWork in, oldSupplier[%{public}d, %{public}s], newSupplier[%{public}d, %{public}s]",
         oldSupplier ? oldSupplier->GetSupplierId() : 0,
         oldSupplier ? oldSupplier->GetNetSupplierIdent().c_str() : "null",
         newSupplier ? newSupplier->GetSupplierId() : 0,
@@ -663,15 +678,13 @@ void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<Net
         return;
     }
     if (oldSupplier != nullptr) {
-        NETMGR_LOG_D("clear default.");
         oldSupplier->ClearDefault();
     }
     if (newSupplier != nullptr) {
-        NETMGR_LOG_D("set default.");
         newSupplier->SetDefault();
     }
     oldSupplier = newSupplier;
-    NETMGR_LOG_I("default Supplier set to: [%{public}d, %{public}s]",
+    NETMGR_LOG_D("default Supplier set to: [%{public}d, %{public}s]",
         oldSupplier ? oldSupplier->GetSupplierId() : 0,
         oldSupplier ? oldSupplier->GetNetSupplierIdent().c_str() : "null");
 }
@@ -725,9 +738,11 @@ int32_t NetConnService::GetAllNets(std::list<int32_t> &netIdList)
         return ERR_PERMISSION_CHECK_FAIL;
     }
     for (auto &network : networks_) {
-        netIdList.push_back(network.second->GetNetId());
+        if (network.second != nullptr && network.second->IsConnected()) {
+            netIdList.push_back(network.second->GetNetId());
+        }
     }
-    NETMGR_LOG_D("netSuppliers_ size[%{public}zd] networks_ size[%{public}zd]", netSuppliers_.size(), networks_.size());
+    NETMGR_LOG_D("netSuppliers_ size[%{public}zd] netIdList size[%{public}zd]", netSuppliers_.size(), netIdList.size());
     return ERR_NONE;
 }
 
@@ -940,7 +955,10 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
             }
             case CALL_TYPE_UPDATE_LINK: {
                 sptr<NetLinkInfo> pInfo = std::make_unique<NetLinkInfo>().release();
-                *pInfo = supplier->GetNetLinkInfo();
+                auto network = supplier->GetNetwork();
+                if (network != nullptr) {
+                    *pInfo = network->GetNetLinkInfo();
+                }
                 callback->NetConnectionPropertiesChange(netHandle, pInfo);
                 break;
             }
@@ -968,7 +986,10 @@ void NetConnService::CallbackForAvailable(sptr<NetSupplier> &supplier, const spt
     *pNetAllCap = supplier->GetNetCapabilities();
     callback->NetCapabilitiesChange(netHandle, pNetAllCap);
     sptr<NetLinkInfo> pInfo = std::make_unique<NetLinkInfo>().release();
-    *pInfo = supplier->GetNetLinkInfo();
+    auto network = supplier->GetNetwork();
+    if (network != nullptr) {
+        *pInfo = network->GetNetLinkInfo();
+    }
     callback->NetConnectionPropertiesChange(netHandle, pInfo);
 }
 
@@ -1084,7 +1105,7 @@ void NetConnService::GetDumpMessage(std::string &message)
             message.append("\tNetId: " + std::to_string(INVALID_NET_ID) + "\n");
         }
         message.append("\tConnStat: " + std::to_string(defaultNetSupplier_->IsConnected()) + "\n");
-        message.append("\tIsAvailable: " + std::to_string(defaultNetSupplier_->IfNetValid()) + "\n");
+        message.append("\tIsAvailable: " + std::to_string(defaultNetSupplier_->IsNetValidated()) + "\n");
         message.append("\tIsRoaming: " + std::to_string(defaultNetSupplier_->GetRoaming()) + "\n");
         message.append("\tStrength: " + std::to_string(defaultNetSupplier_->GetStrength()) + "\n");
         message.append("\tFrequency: " + std::to_string(defaultNetSupplier_->GetFrequency()) + "\n");
@@ -1106,6 +1127,28 @@ void NetConnService::GetDumpMessage(std::string &message)
         message.append("\tLinkDownBandwidthKbps: 0\n");
         message.append("\tUid: 0\n");
     }
+}
+
+int32_t NetConnService::SetHttpProxy(const std::string &httpProxy)
+{
+    if (httpProxy.empty()) {
+        NETMGR_LOG_E("The httpProxy set to service is null");
+        return ERR_HTTP_PROXY_INVALID;
+    }
+
+    httpProxy_ = httpProxy;
+    return ERR_NONE;
+}
+
+int32_t NetConnService::GetHttpProxy(std::string &httpProxy)
+{
+    if (httpProxy_.empty()) {
+        NETMGR_LOG_E("The httpProxy in service is null");
+        return ERR_NO_HTTP_PROXY;
+    }
+
+    httpProxy = httpProxy_;
+    return ERR_NONE;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

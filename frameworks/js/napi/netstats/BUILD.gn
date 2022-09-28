@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,46 +14,55 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-NETMANAGER_NAPI_ROOT = "$SUBSYSTEM_DIR/netmanager_base/frameworks/js/napi/"
+config("statistics_config") {
+  visibility = [ ":statistics" ]
+
+  include_dirs = [
+    "include",
+    "include/context",
+    "$NETMANAGER_BASE_ROOT/utils/log/include",
+  ]
+
+  cflags = [
+    "-Wall",
+    "-Werror",
+    "-g3",
+  ]
+}
 
 ohos_shared_library("statistics") {
-  include_dirs = [
-    "//third_party/node/src",
-    "$NETMANAGER_NAPI_ROOT/netstats/include",
-    "$NETMANAGER_NAPI_ROOT/common",
-    "$NETMANAGER_BASE_ROOT/utils/log/include",
-    "$NETSTATSMANAGER_SOURCE_DIR/include",
-    "$NETSTATSMANAGER_SOURCE_DIR/include/stub",
-    "$INNERKITS_ROOT/netstatsclient/include/proxy",
-  ]
-
   sources = [
-    "$NETMANAGER_NAPI_ROOT/common/napi_common.cpp",
-    "$NETMANAGER_NAPI_ROOT/netstats/src/napi_net_stats.cpp",
-    "$NETMANAGER_NAPI_ROOT/netstats/src/net_stats_callback.cpp",
-    "$NETMANAGER_NAPI_ROOT/netstats/src/net_stats_event_listener_manager.cpp",
+    "src/context/get_cellular_rxbeytes_contex.cpp",
+    "src/context/get_iface_rxbeytes_context.cpp",
+    "src/context/get_iface_stats_context.cpp",
+    "src/context/get_iface_uid_stats_context.cpp",
+    "src/context/get_uid_rxbeytes_context.cpp",
+    "src/context/update_iface_stats_context.cpp",
+    "src/statistics_async_work.cpp",
+    "src/statistics_callback_observer.cpp",
+    "src/statistics_exec.cpp",
+    "src/statistics_module.cpp",
+    "src/statistics_observer_wrapper.cpp",
   ]
 
-  defines = [ "NETMGR_DEBUG" ]
+  configs = [ ":statistics_config" ]
 
   deps = [
-    "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
+    "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
     "//foundation/arkui/napi/:ace_napi",
+    "//third_party/libuv:uv_static",
   ]
 
   external_deps = [
-    "ability_base:want",
     "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
   ]
 
   relative_install_dir = "module/net"
+
   part_name = "netmanager_base"
+
   subsystem_name = "communication"
 }

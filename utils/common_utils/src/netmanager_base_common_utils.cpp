@@ -25,6 +25,7 @@
 #include <vector>
 #include "netinet/in.h"
 #include "sys/socket.h"
+#include "securec.h"
 
 namespace OHOS::NetManagerStandard::CommonUtils {
 constexpr int32_t INET_OPTION_SUC = 1;
@@ -189,6 +190,50 @@ uint32_t ConvertIpv4Address(const std::string &address)
     return addrInt;
 }
 
+int32_t Ipv4PrefixLen(const std::string &ip)
+{
+    constexpr int32_t BIT32 = 32;
+    constexpr int32_t BIT24 = 24;
+    constexpr int32_t BIT16 = 16;
+    constexpr int32_t BIT8 = 8;
+    if (ip.empty()) {
+        return 0;
+    }
+    int32_t ret = 0;
+    uint32_t ipNum = 0;
+    uint8_t c1 = 0;
+    uint8_t c2 = 0;
+    uint8_t c3 = 0;
+    uint8_t c4 = 0;
+    int32_t cnt = 0;
+    ret = sscanf_s(ip.c_str(), "%hhu.%hhu.%hhu.%hhu", &c1, &c2, &c3, &c4);
+    if (ret != sizeof(int32_t)) {
+        return 0;
+    }
+    ipNum = (c1 << static_cast<uint32_t>(BIT24)) | (c2 << static_cast<uint32_t>(BIT16)) |
+            (c3 << static_cast<uint32_t>(BIT8)) | c4;
+    if (ipNum == 0xFFFFFFFF) {
+        return BIT32;
+    }
+    if (ipNum == 0xFFFFFF00) {
+        return BIT24;
+    }
+    if (ipNum == 0xFFFF0000) {
+        return BIT16;
+    }
+    if (ipNum == 0xFF000000) {
+        return BIT8;
+    }
+    for (int32_t i = 0; i < BIT32; i++) {
+        if ((ipNum << i) & 0x80000000) {
+            cnt++;
+        } else {
+            break;
+        }
+    }
+    return cnt;
+}
+
 bool ParseInt(const std::string &str, int32_t *value)
 {
     char *end;
@@ -205,7 +250,7 @@ int64_t ConvertToInt64(const std::string &str)
     return strtoll(str.c_str(), nullptr, 10);
 }
 
-std::string MakIpv4(std::string &maskedResult)
+std::string MaskIpv4(std::string &maskedResult)
 {
     int maxDisplayNum = MAX_DISPLAY_NUM;
     for (char &i : maskedResult) {
@@ -250,7 +295,7 @@ std::string ToAnonymousIp(const std::string &input)
     std::string maskedResult{input};
     // Mask ipv4 address.
     if (std::regex_match(maskedResult, IP_PATTERN) || std::regex_match(maskedResult, IP_MASK_PATTERN)) {
-        return MakIpv4(maskedResult);
+        return MaskIpv4(maskedResult);
     }
     // Mask ipv6 address.
     if (std::regex_match(maskedResult, IPV6_PATTERN) || std::regex_match(maskedResult, IPV6_MASK_PATTERN)) {

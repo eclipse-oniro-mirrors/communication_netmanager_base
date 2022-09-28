@@ -17,8 +17,6 @@
 #include <memory>
 #include <cinttypes>
 #include <charconv>
-#include "system_ability_definition.h"
-#include "iservice_registry.h"
 #include "net_mgr_log_wrapper.h"
 #include "i_net_policy_service.h"
 #include "net_policy_client.h"

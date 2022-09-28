@@ -29,34 +29,33 @@ ohos_shared_library("net_stats_manager") {
   include_dirs = [
     "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netconnclient/include",
+    "$INNERKITS_ROOT/netmanagernative/include",
     "$INNERKITS_ROOT/netstatsclient/include",
     "$INNERKITS_ROOT/netstatsclient/include/proxy",
+    "$NETCONNMANAGER_COMMON_DIR/include",
+    "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$NETSTATSMANAGER_SOURCE_DIR/include",
     "$NETSTATSMANAGER_SOURCE_DIR/include/stub",
-    "$NETCONNMANAGER_COMMON_DIR/include",
-    "$NETSYSCONTROLLER_ROOT_DIR/include",
-    "$INNERKITS_ROOT/netmanagernative/include",
-    "$NETSTATSMANAGER_BPFLIB_DIR/include",
     "$NETSYSBPFMAP_SOURCE_DIR/include",
+    "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETSTATSMANAGER_BPFLIB_DIR/include",
+    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
   ]
 
   deps = [
+    "$HILOG_ROOT/interfaces/native/innerkits:libhilog",
     "$INNERKITS_ROOT/netstatsclient:net_stats_parcel",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
-    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSTATSMANAGER_BPFLIB_DIR:netsys_bpf_stats",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog",
   ]
 
   external_deps = [
     "ability_base:want",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "eventhandler:libeventhandler",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
   ]
 
   defines = [

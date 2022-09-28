@@ -52,10 +52,10 @@ ohos_shared_library("net_manager_common") {
 
   public_configs = [
     ":netmgr_common_config",
-    "//commonlibrary/c_utils/base:utils_config",
+    "$C_UTILS_ROOT/base:utils_config",
   ]
 
-  public_deps = [ "//commonlibrary/c_utils/base:utils" ]
+  public_deps = [ "$C_UTILS_ROOT/base:utils" ]
 
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]

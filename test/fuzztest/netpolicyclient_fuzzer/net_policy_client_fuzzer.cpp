@@ -14,13 +14,105 @@
  */
 
 #include <thread>
+#include <securec.h>
+
+#include "accesstoken_kit.h"
+#include "nativetoken_kit.h"
 #include <net_quota_policy.h>
 #include "net_policy_constants.h"
 #include "net_policy_client.h"
 #include "net_mgr_log_wrapper.h"
+#include "token_setproc.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
+const uint8_t* data_ = nullptr;
+size_t size_ = 0;
+size_t pos;
+constexpr size_t STR_LEN = 10;
+using namespace Security::AccessToken;
+using Security::AccessToken::AccessTokenID;
+HapInfoParams testInfoParms = {
+    .bundleName = "net_policy_client_fuzzer",
+    .userID = 1,
+    .instIndex = 0,
+    .appIDDesc = "test"
+};
+
+PermissionDef testPermDef = {
+    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+    .bundleName = "net_policy_client_fuzzer",
+    .grantMode = 1,
+    .label = "label",
+    .labelId = 1,
+    .description = "Test net policy connectivity internal",
+    .descriptionId = 1,
+    .availableLevel = APL_SYSTEM_BASIC
+};
+
+PermissionStateFull testState = {
+    .grantFlags = {2},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
+    .isGeneral = true,
+    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+    .resDeviceID = {"local"}
+};
+
+HapPolicyParams testPolicyPrams = {
+    .apl = APL_SYSTEM_BASIC,
+    .domain = "test.domain",
+    .permList = {testPermDef},
+    .permStateList = {testState}
+};
+}
+
+template<class T>
+T GetData()
+{
+    T object {};
+    size_t objectSize = sizeof(object);
+    if (data_ == nullptr || objectSize > size_ - pos) {
+        return object;
+    }
+    errno_t ret = memcpy_s(&object, objectSize, data_ + pos, objectSize);
+    if (ret != EOK) {
+        return {};
+    }
+    pos += objectSize;
+    return object;
+}
+
+std::string GetStringFromData(int strlen)
+{
+    char cstr[strlen];
+    cstr[strlen - 1] = '\0';
+    for (int i = 0; i < strlen - 1; i++) {
+        cstr[i] = GetData<char>();
+    }
+    std::string str(cstr);
+    return str;
+}
+
+class AccessToken {
+public:
+    AccessToken()
+    {
+        currentID_ = GetSelfTokenID();
+        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
+        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
+        SetSelfTokenID(accessID_);
+    }
+    ~AccessToken()
+    {
+        AccessTokenKit::DeleteToken(accessID_);
+        SetSelfTokenID(currentID_);
+    }
+private:
+    AccessTokenID currentID_ = 0;
+    AccessTokenID accessID_ = 0;
+};
+
 class INetPolicyCallbackTest : public INetPolicyCallback {
 public:
     INetPolicyCallbackTest() : INetPolicyCallback() {}
@@ -32,8 +124,11 @@ void SetPolicyByUidFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-
-    uint32_t uid = *(reinterpret_cast<const uint32_t*>(data));
+    data_ = data;
+    size_ = size;
+    pos = 0;
+    AccessToken token;
+    uint32_t uid = GetData<uint32_t>();
     NetUidPolicy policy = NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND;
     DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(uid, policy);
 }
@@ -43,7 +138,11 @@ void GetPolicyByUidFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    uint32_t uid = *(reinterpret_cast<const uint32_t*>(data));
+    data_ = data;
+    size_ = size;
+    pos = 0;
+    AccessToken token;
+    uint32_t uid = GetData<uint32_t>();
     DelayedSingleton<NetPolicyClient>::GetInstance()->GetPolicyByUid(uid);
 }
 
@@ -52,6 +151,7 @@ void GetUidsByPolicyFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
+    AccessToken token;
     NetUidPolicy policy = NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND;
     DelayedSingleton<NetPolicyClient>::GetInstance()->GetUidsByPolicy(policy);
 }
@@ -61,9 +161,13 @@ void IsUidNetAccessFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    uint32_t uid = *(reinterpret_cast<const uint32_t*>(data));
-    bool metered = *(reinterpret_cast<const bool*>(data));
-    std::string ifaceName(reinterpret_cast<const char*>(data), size);
+    data_ = data;
+    size_ = size;
+    pos = 0;
+    AccessToken token;
+    uint32_t uid = GetData<uint32_t>();
+    bool metered = GetData<bool>();
+    std::string ifaceName = GetStringFromData(STR_LEN);
     DelayedSingleton<NetPolicyClient>::GetInstance()->IsUidNetAccess(uid, metered);
     DelayedSingleton<NetPolicyClient>::GetInstance()->IsUidNetAccess(uid, ifaceName);
 }
@@ -73,7 +177,11 @@ void SetBackgroundPolicyFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    bool isBackgroundPolicyAllow = *(reinterpret_cast<const bool*>(data));
+    data_ = data;
+    size_ = size;
+    pos = 0;
+    AccessToken token;
+    bool isBackgroundPolicyAllow = GetData<bool>();
     DelayedSingleton<NetPolicyClient>::GetInstance()->SetBackgroundPolicy(isBackgroundPolicyAllow);
 }
 
@@ -82,7 +190,11 @@ void SetFactoryPolicyFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    std::string simId(reinterpret_cast<const char*>(data), size);
+    data_ = data;
+    size_ = size;
+    pos = 0;
+    AccessToken token;
+    std::string simId = GetStringFromData(STR_LEN);
     DelayedSingleton<NetPolicyClient>::GetInstance()->SetFactoryPolicy(simId);
 }
 
@@ -91,7 +203,11 @@ void SetSnoozePolicyFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    int8_t netType = *(reinterpret_cast<const int8_t*>(data));
+    data_ = data;
+    size_ = size;
+    pos = 0;
+    AccessToken token;
+    int8_t netType = GetData<int8_t>();
     std::string simId(reinterpret_cast<const char*>(data), size);
     DelayedSingleton<NetPolicyClient>::GetInstance()->SetSnoozePolicy(netType, simId);
 }
@@ -101,7 +217,11 @@ void GetBackgroundPolicyByUidFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    uint32_t uid = *(reinterpret_cast<const uint32_t*>(data));
+    data_ = data;
+    size_ = size;
+    pos = 0;
+    AccessToken token;
+    uint32_t uid = GetData<uint32_t>();
     DelayedSingleton<NetPolicyClient>::GetInstance()->GetBackgroundPolicyByUid(uid);
 }
 
@@ -110,7 +230,11 @@ void SetIdleTrustlistFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    uint32_t uid = *(reinterpret_cast<const uint32_t*>(data));
+    data_ = data;
+    size_ = size;
+    pos = 0;
+    AccessToken token;
+    uint32_t uid = GetData<uint32_t>();
     bool isTrustlist = *(reinterpret_cast<const bool*>(data));
     DelayedSingleton<NetPolicyClient>::GetInstance()->SetIdleTrustlist(uid, isTrustlist);
 }
@@ -129,6 +253,7 @@ void RegisterNetPolicyCallbackFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
+    AccessToken token;
     sptr<INetPolicyCallbackTest> callback = sptr<INetPolicyCallbackTest>();
     DelayedSingleton<NetPolicyClient>::GetInstance()->RegisterNetPolicyCallback(callback);
 }
@@ -138,6 +263,7 @@ void UnregisterNetPolicyCallbackFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
+    AccessToken token;
     sptr<INetPolicyCallbackTest> callback = sptr<INetPolicyCallbackTest>();
     DelayedSingleton<NetPolicyClient>::GetInstance()->UnregisterNetPolicyCallback(callback);
 }
@@ -147,6 +273,7 @@ void GetIdleTrustlistFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
+    AccessToken token;
     std::vector<uint32_t> uids;
     DelayedSingleton<NetPolicyClient>::GetInstance()->GetIdleTrustlist(uids);
 }
@@ -197,6 +324,5 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::NetManagerStandard::GetNetQuotaPoliciesFuzzTest(data, size);
     OHOS::NetManagerStandard::SetNetQuotaPoliciesFuzzTest(data, size);
     OHOS::NetManagerStandard::GetCellularPoliciesFuzzTest(data, size);
-    
     return 0;
 }

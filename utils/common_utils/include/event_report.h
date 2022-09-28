@@ -54,9 +54,7 @@ enum NetConnSupplerFault {
     FAULT_CLEAR_DEFAULT_NETWORK_FAILED = (-7)
 };
 
-enum NetConnRequestFault {
-    FAULT_INVALID_PARAMETER = (-1)
-};
+enum NetConnRequestFault { FAULT_INVALID_PARAMETER = (-1) };
 
 enum NetConnMonitorFault {
     FAULT_BIND_SOCKET_FAILED = (-1),
@@ -67,8 +65,7 @@ struct EventInfo {
     std::string supplierInfo;
     std::string netlinkInfo;
     int32_t updateNetlinkId = 0;
-    std::string capabilitie;
-    std::string capability;
+    std::string capabilities;
     int32_t socketFd = 0;
     int32_t netId = 0;
     int32_t bearerType = 0;

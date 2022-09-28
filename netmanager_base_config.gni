@@ -27,8 +27,7 @@ NETCONNMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netconnmanager"
 NETPOLICYMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netpolicymanager"
 NETSTATSMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netstatsmanager"
 NETCONNMANAGER_COMMON_DIR = "$NETMANAGER_BASE_ROOT/services/common"
-FWMARK_CLIENT_DIR =
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient"
+FWMARK_CLIENT_DIR = "$NETMANAGERNATIVE_ROOT/fwmarkclient"
 NETSTATSMANAGER_BPFLIB_DIR = "$NETMANAGER_BASE_ROOT/services/netsys_bpf_stats"
 NETSYSNATIVE_INNERKITS_SOURCE_DIR =
     "$NETMANAGER_BASE_ROOT/frameworks/native/netmanagernative"
@@ -36,6 +35,16 @@ NETSYSNATIVE_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netmanagernative"
 NETSYSBPFMAP_SOURCE_DIR = "$NETSYSNATIVE_SOURCE_DIR/netsys_bpf_map"
 NETSYSCONTROLLER_ROOT_DIR = "$NETMANAGER_BASE_ROOT/services/netsyscontroller"
 SAMGR_INTERFACE_ROOT_DIR = "//foundation/systemabilitymgr/samgr/interfaces"
+
+THIRD_PARTY_ROOT = "//third_party"
+UTILS_ROOT = "//utils"
+HILOG_ROOT = "//base/hiviewdfx/hilog"
+TELEPHONY_ROOT = "//base/telephony"
+C_UTILS_ROOT = "//commonlibrary/c_utils"
+ARKUI_ROOT = "//foundation/arkui"
+WIFI_MANAGER_ROOT = "//foundation/communication/wifi/wifi"
+DHCP_MANAGER_ROOT = "//foundation/communication/wifi/dhcp"
+SAMGR_MANAGER_ROOT = "//foundation/systemabilitymgr/samgr"
 
 use_js_debug = false
 

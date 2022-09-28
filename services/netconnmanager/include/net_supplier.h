@@ -57,7 +57,6 @@ public:
     bool HasNetCaps(const std::set<NetCap> &caps) const;
     const NetCaps &GetNetCaps() const;
     NetAllCapabilities GetNetCapabilities() const;
-    NetLinkInfo GetNetLinkInfo() const;
     bool GetRoaming() const;
     int8_t GetStrength() const;
     uint16_t GetFrequency() const;
@@ -66,11 +65,10 @@ public:
     int32_t GetNetId() const;
     sptr<NetHandle> GetNetHandle() const;
     void UpdateNetConnState(NetConnState netConnState);
-    NetConnState GetNetConnState() const;
     bool IsConnecting() const;
     bool IsConnected() const;
     void SetNetValid(bool ifValid);
-    bool IfNetValid();
+    bool IsNetValidated();
     void SetNetScore(int32_t score);
     int32_t GetNetScore() const;
     void SetRealScore(int32_t score);
@@ -80,7 +78,7 @@ public:
     void SetRestrictBackground(bool restrictBackground);
     bool GetRestrictBackground() const;
     bool RequestToConnect(uint32_t reqId);
-    void AddRequsetIdToList(uint32_t requestId);
+    void AddRequestIdToList(uint32_t requestId);
     int32_t SelectAsBestNetwork(uint32_t reqId);
     void ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
     int32_t CancelRequest(uint32_t reqId);
@@ -88,7 +86,6 @@ public:
     std::set<uint32_t>& GetBestRequestList();
     void SetDefault();
     void ClearDefault();
-    void UpdateNetStateForTest(int32_t netState);
     void RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback);
 
 private:
@@ -99,10 +96,8 @@ private:
     NetSupplierInfo netSupplierInfo_;
     NetAllCapabilities netAllCapabilities_;
     uint32_t supplierId_ = 0;
-    NetConnState state_ = NET_CONN_STATE_IDLE;
     int32_t netScore_ = 0;
     int32_t netRealScore_ = 0;
-    bool ifNetValid_ = false;
     std::set<uint32_t> requestList_;
     std::set<uint32_t> bestReqList_;
     sptr<INetSupplierCallback> netController_ = nullptr;

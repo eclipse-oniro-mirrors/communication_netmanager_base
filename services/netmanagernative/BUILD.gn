@@ -24,6 +24,8 @@ ohos_shared_library("netsys_native_manager") {
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/bandwidth_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/bpf/bpf_map_creator.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/bpf/bpf_prog_loader.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/manager/bpf/bpf_loader.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/manager/bpf/bpf_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/conn_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/dns_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/firewall_manager.cpp",
@@ -64,30 +66,30 @@ ohos_shared_library("netsys_native_manager") {
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
+    "$NETSYSNATIVE_SOURCE_DIR/include/manager/bpf",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys/wrapper",
-    "//foundation/communication/wifi/dhcp/interfaces/inner_api/include",
-    "//foundation/communication/wifi/dhcp/interfaces/inner_api/interfaces",
-    "//commonlibrary/c_utils/base/include",
+    "$C_UTILS_ROOT/base/include",
+    "$DHCP_MANAGER_ROOT/interfaces/inner_api/include",
+    "$DHCP_MANAGER_ROOT/interfaces/inner_api/interfaces",
+    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
+    "//third_party/elfio",
+    "//foundation/communication/netmanager_base/services/netmanagernative/netsys_bpf_map/include",
   ]
 
   deps = [
+    "$DHCP_MANAGER_ROOT/services/mgr_service:dhcp_manager_service",
+    "$NETMANAGERNATIVE_ROOT/netsys_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-    "//foundation/communication/netmanager_base/services/netmanagernative/netsys_client",
-    "//foundation/communication/wifi/dhcp/services/mgr_service:dhcp_manager_service",
-    "//third_party/iptables:iptables",
-    "//third_party/iptables:iptables-restore",
-    "//third_party/iptables:iptables-save",
+    "$THIRD_PARTY_ROOT/iptables:iptables",
+    "$THIRD_PARTY_ROOT/iptables:iptables-restore",
+    "$THIRD_PARTY_ROOT/iptables:iptables-save",
   ]
 
   external_deps = [
-    "ability_base:want",
     "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "eventhandler:libeventhandler",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
   ]
 
   defines = [
@@ -107,6 +109,10 @@ ohos_shared_library("netsys_native_manager") {
     external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
   } else {
     external_deps += [ "hilog:libhilog" ]
+  }
+
+  if (defined(enable_elfio)) {
+    defines += [ "ENABLE_ELFIO" ]
   }
 
   part_name = "netmanager_base"

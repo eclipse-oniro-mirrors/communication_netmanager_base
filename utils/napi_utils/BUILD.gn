@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 SUBSYSTEM_DIR = "//foundation/communication"
 
@@ -29,11 +30,13 @@ config("napi_utils_config") {
 config("napi_utils_public_config") {
   include_dirs = [
     "include",
-    "//third_party/node/src",
+    "$THIRD_PARTY_ROOT/node/src",
   ]
 }
 
 ohos_shared_library("napi_utils") {
+  include_dirs = [ "$SUBSYSTEM_DIR/netmanager_base/utils/log/include" ]
+
   sources = [
     "src/base_context.cpp",
     "src/event_listener.cpp",
@@ -47,9 +50,8 @@ ohos_shared_library("napi_utils") {
   public_configs = [ ":napi_utils_public_config" ]
 
   public_deps = [
-    "$SUBSYSTEM_DIR/netmanager_base/utils/:net_manager_common",
-    "//commonlibrary/c_utils/base:utils",
-    "//foundation/arkui/napi/:ace_napi",
+    "$ARKUI_ROOT/napi/:ace_napi",
+    "$C_UTILS_ROOT/base:utils",
   ]
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]

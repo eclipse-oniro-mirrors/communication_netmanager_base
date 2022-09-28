@@ -20,7 +20,8 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 ##############################fuzztest##########################################
 ohos_fuzztest("NetPolicyClientFuzzTest") {
   module_out_path = "netmanager_base/net_policy_client"
-  fuzz_config_file = "//foundation/communication/netmanager_base/test/fuzztest/netpolicyclient_fuzzer"
+  fuzz_config_file =
+      "$NETMANAGER_BASE_ROOT/test/fuzztest/netpolicyclient_fuzzer"
 
   include_dirs = [
     "$INNERKITS_ROOT/netpolicyclient/include",
@@ -49,15 +50,16 @@ ohos_fuzztest("NetPolicyClientFuzzTest") {
   ]
 
   external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
     "samgr:samgr_proxy",
   ]
 }

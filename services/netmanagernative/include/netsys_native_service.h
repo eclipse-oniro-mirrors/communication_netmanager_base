@@ -27,6 +27,7 @@
 #include "netsys_native_service_stub.h"
 #include "system_ability.h"
 #include "sharing_manager.h"
+#include "bpf_manager.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -125,6 +126,7 @@ private:
     std::unique_ptr<OHOS::nmd::DhcpController> dhcpController_ = nullptr;
     std::unique_ptr<OHOS::nmd::FwmarkNetwork> fwmarkNetwork_ = nullptr;
     std::unique_ptr<OHOS::nmd::SharingManager> sharingManager_ = nullptr;
+    std::unique_ptr<OHOS::nmd::BpfManager> bpfManager_ = nullptr;
 
     sptr<INotifyCallback> notifyCallback_ = nullptr;
 
