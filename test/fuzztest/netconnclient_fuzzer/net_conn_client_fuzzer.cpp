@@ -28,9 +28,9 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-const uint8_t *g_base_fuzz_data = nullptr;
-size_t g_base_fuzz_size = 0;
-size_t g_base_fuzz_pos;
+const uint8_t *g_baseFuzzData = nullptr;
+size_t g_baseFuzzSize = 0;
+size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
 
 using namespace Security::AccessToken;
@@ -100,14 +100,14 @@ T GetData()
 {
     T object {};
     size_t objectSize = sizeof(object);
-    if (g_base_fuzz_data == nullptr || objectSize > g_base_fuzz_size - g_base_fuzz_pos) {
+    if (g_baseFuzzData == nullptr || objectSize > g_baseFuzzSize - g_baseFuzzPos) {
         return object;
     }
-    errno_t ret = memcpy_s(&object, objectSize, g_base_fuzz_data + g_base_fuzz_pos, objectSize);
+    errno_t ret = memcpy_s(&object, objectSize, g_baseFuzzData + g_baseFuzzPos, objectSize);
     if (ret != EOK) {
         return {};
     }
-    g_base_fuzz_pos += objectSize;
+    g_baseFuzzPos += objectSize;
     return object;
 }
 
@@ -177,9 +177,9 @@ void RegisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    g_base_fuzz_data = data;
-    g_base_fuzz_size = size;
-    g_base_fuzz_pos = 0;
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
 
     std::string ident = GetStringFromData(STR_LEN);
     std::set<NetCap> netCaps {NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
@@ -193,9 +193,9 @@ void UnregisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    g_base_fuzz_data = data;
-    g_base_fuzz_size = size;
-    g_base_fuzz_pos = 0;
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
 
     uint32_t supplierId = GetData<uint32_t>();
     DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetSupplier(supplierId);
@@ -206,9 +206,9 @@ void HasDefaultNetFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    g_base_fuzz_data = data;
-    g_base_fuzz_size = size;
-    g_base_fuzz_pos = 0;
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
 
     bool flag = GetData<bool>();
     DelayedSingleton<NetConnClient>::GetInstance()->HasDefaultNet(flag);
@@ -229,9 +229,9 @@ void BindSocketFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    g_base_fuzz_data = data;
-    g_base_fuzz_size = size;
-    g_base_fuzz_pos = 0;
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
 
     int32_t socket_fd = GetData<int32_t>();
     int32_t netId = GetData<int32_t>();
@@ -243,9 +243,9 @@ void SetAirplaneModeFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    g_base_fuzz_data = data;
-    g_base_fuzz_size = size;
-    g_base_fuzz_pos = 0;
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
 
     bool state = GetData<bool>();
     DelayedSingleton<NetConnClient>::GetInstance()->SetAirplaneMode(state);
@@ -256,9 +256,9 @@ void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    g_base_fuzz_data = data;
-    g_base_fuzz_size = size;
-    g_base_fuzz_pos = 0;
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
 
     uint32_t supplierId = GetData<uint32_t>();
     sptr<NetSupplierInfo> netSupplierInfo;
@@ -270,9 +270,9 @@ void GetAddressByNameFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    g_base_fuzz_data = data;
-    g_base_fuzz_size = size;
-    g_base_fuzz_pos = 0;
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
 
     AccessToken token;
     std::string host = GetStringFromData(STR_LEN);
@@ -286,9 +286,9 @@ void GetAddressesByNameFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    g_base_fuzz_data = data;
-    g_base_fuzz_size = size;
-    g_base_fuzz_pos = 0;
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
 
     AccessToken token;
     std::string host = GetStringFromData(STR_LEN);
@@ -302,9 +302,9 @@ void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    g_base_fuzz_data = data;
-    g_base_fuzz_size = size;
-    g_base_fuzz_pos = 0;
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
 
     uint32_t supplierId = GetData<uint32_t>();
     sptr<NetLinkInfo> netLinkInfo;
@@ -316,9 +316,9 @@ void RegisterNetSupplierCallbackFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    g_base_fuzz_data = data;
-    g_base_fuzz_size = size;
-    g_base_fuzz_pos = 0;
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
 
     AccessToken token;
     uint32_t supplierId = GetData<uint32_t>();
@@ -331,9 +331,9 @@ void RegisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    g_base_fuzz_data = data;
-    g_base_fuzz_size = size;
-    g_base_fuzz_pos = 0;
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
 
     AccessToken token;
     sptr<NetSpecifier> netSpecifier;
@@ -359,9 +359,9 @@ void GetDefaultNetFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    g_base_fuzz_data = data;
-    g_base_fuzz_size = size;
-    g_base_fuzz_pos = 0;
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
 
     AccessToken token;
     NetHandle netHandle(GetData<int32_t>());
@@ -373,9 +373,9 @@ void GetConnectionPropertiesFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    g_base_fuzz_data = data;
-    g_base_fuzz_size = size;
-    g_base_fuzz_pos = 0;
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
 
     AccessToken token;
     NetLinkInfo info;
@@ -388,9 +388,9 @@ void GetNetCapabilitiesFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    g_base_fuzz_data = data;
-    g_base_fuzz_size = size;
-    g_base_fuzz_pos = 0;
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
 
     AccessToken token;
     NetAllCapabilities netAllCap;
@@ -403,9 +403,9 @@ void NetDetectionFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    g_base_fuzz_data = data;
-    g_base_fuzz_size = size;
-    g_base_fuzz_pos = 0;
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
 
     AccessTokenInternetInfo tokenInternetInfo;
     NetHandle netHandle(GetData<int32_t>());
