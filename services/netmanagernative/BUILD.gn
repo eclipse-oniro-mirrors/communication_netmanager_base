@@ -22,6 +22,8 @@ ohos_shared_library("netsys_native_manager") {
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/notify_callback_proxy.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/dhcp_controller.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/bandwidth_manager.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/manager/bpf/bpf_loader.cpp",
+    "$NETSYSNATIVE_SOURCE_DIR/src/manager/bpf/bpf_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/conn_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/dns_manager.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/manager/firewall_manager.cpp",
@@ -62,12 +64,15 @@ ohos_shared_library("netsys_native_manager") {
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
+    "$NETSYSNATIVE_SOURCE_DIR/include/manager/bpf",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys/wrapper",
     "$C_UTILS_ROOT/base/include",
     "$DHCP_MANAGER_ROOT/interfaces/inner_api/include",
     "$DHCP_MANAGER_ROOT/interfaces/inner_api/interfaces",
     "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
+    "//third_party/elfio",
+    "//foundation/communication/netmanager_base/services/netmanagernative/netsys_bpf_map/include",
   ]
 
   deps = [
@@ -102,6 +107,10 @@ ohos_shared_library("netsys_native_manager") {
     external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
   } else {
     external_deps += [ "hilog:libhilog" ]
+  }
+
+  if (defined(enable_elfio)) {
+    defines += [ "ENABLE_ELFIO" ]
   }
 
   part_name = "netmanager_base"
