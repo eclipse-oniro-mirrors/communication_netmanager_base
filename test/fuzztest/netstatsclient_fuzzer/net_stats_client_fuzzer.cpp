@@ -27,9 +27,9 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-const uint8_t* data_ = nullptr;
-size_t size_ = 0;
-size_t pos;
+const uint8_t *g_base_fuzz_data = nullptr;
+size_t g_base_fuzz_size = 0;
+size_t g_base_fuzz_pos;
 constexpr size_t STR_LEN = 10;
 }
 
@@ -38,14 +38,14 @@ T GetData()
 {
     T object {};
     size_t objectSize = sizeof(object);
-    if (data_ == nullptr || objectSize > size_ - pos) {
+    if (g_base_fuzz_data == nullptr || objectSize > g_base_fuzz_size - g_base_fuzz_pos) {
         return object;
     }
-    errno_t ret = memcpy_s(&object, objectSize, data_ + pos, objectSize);
+    errno_t ret = memcpy_s(&object, objectSize, g_base_fuzz_data + g_base_fuzz_pos, objectSize);
     if (ret != EOK) {
         return {};
     }
-    pos += objectSize;
+    g_base_fuzz_pos += objectSize;
     return object;
 }
 
@@ -66,7 +66,7 @@ public:
     virtual ~INetStatsCallbackTest() {}
 };
 
-void RegisterNetStatsCallbackFuzzTest(const uint8_t* data, size_t size)
+void RegisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size <= 0)) {
         return;
@@ -76,7 +76,7 @@ void RegisterNetStatsCallbackFuzzTest(const uint8_t* data, size_t size)
     DelayedSingleton<NetStatsClient>::GetInstance()->RegisterNetStatsCallback(callback);
 }
 
-void UnregisterNetStatsCallbackFuzzTest(const uint8_t* data, size_t size)
+void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size <= 0)) {
         return;
@@ -86,14 +86,14 @@ void UnregisterNetStatsCallbackFuzzTest(const uint8_t* data, size_t size)
     DelayedSingleton<NetStatsClient>::GetInstance()->UnregisterNetStatsCallback(callback);
 }
 
-void GetIfaceStatsDetailFuzzTest(const uint8_t* data, size_t size)
+void GetIfaceStatsDetailFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    data_ = data;
-    size_ = size;
-    pos = 0;
+    g_base_fuzz_data = data;
+    g_base_fuzz_size = size;
+    g_base_fuzz_pos = 0;
 
     std::string iface = GetStringFromData(STR_LEN);
     uint32_t start = GetData<uint32_t>();
@@ -102,14 +102,14 @@ void GetIfaceStatsDetailFuzzTest(const uint8_t* data, size_t size)
     DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(iface, start, end, statsInfo);
 }
 
-void GetUidStatsDetailFuzzTest(const uint8_t* data, size_t size)
+void GetUidStatsDetailFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    data_ = data;
-    size_ = size;
-    pos = 0;
+    g_base_fuzz_data = data;
+    g_base_fuzz_size = size;
+    g_base_fuzz_pos = 0;
 
     std::string iface = GetStringFromData(STR_LEN);
     uint32_t start = GetData<uint32_t>();
@@ -119,14 +119,14 @@ void GetUidStatsDetailFuzzTest(const uint8_t* data, size_t size)
     DelayedSingleton<NetStatsClient>::GetInstance()->GetUidStatsDetail(iface, uid, start, end, statsInfo);
 }
 
-void UpdateIfacesStatsFuzzTest(const uint8_t* data, size_t size)
+void UpdateIfacesStatsFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    data_ = data;
-    size_ = size;
-    pos = 0;
+    g_base_fuzz_data = data;
+    g_base_fuzz_size = size;
+    g_base_fuzz_pos = 0;
 
     std::string iface = GetStringFromData(STR_LEN);
     uint32_t start = GetData<uint32_t>();
@@ -137,7 +137,7 @@ void UpdateIfacesStatsFuzzTest(const uint8_t* data, size_t size)
 }
 }
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::NetManagerStandard::GetIfaceStatsDetailFuzzTest(data, size);
