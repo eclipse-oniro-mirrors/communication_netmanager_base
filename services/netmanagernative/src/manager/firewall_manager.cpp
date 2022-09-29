@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "firewall_manager.h"
 
 #include <fstream>
@@ -24,6 +25,26 @@
 namespace OHOS {
 namespace nmd {
 using namespace NetManagerStandard;
+namespace {
+bool SetFireWallCommand(std::string chainName,std::string command)
+{
+    bool ret = false;
+    ret =
+        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+
+    command = "-t filter -A " + chainName + " -i lo -j RETURN";
+    ret =
+        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    command = "-t filter -A " + chainName + " -o lo -j RETURN";
+    ret =
+        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    command = "-t filter -A " + chainName + " -p tcp --tcp-flags RST RST -j RETURN";
+    ret =
+        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    return ret;
+}
+} // namespace
+
 static constexpr uint32_t SYSTEM_UID_RANGE = 9999;
 static constexpr uint32_t DEFAULT_MAX_UID_RANGE = UINT_MAX;
 FirewallManager::FirewallManager() : chainInitFlag_(false), firewallType_(FirewallType::TYPE_ALLOWED_LIST)
@@ -256,18 +277,9 @@ int32_t FirewallManager::SetUidsAllowedListChain(ChainType chain, const std::vec
     ret =
         ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     command = "-t filter -A " + chainName + " -m owner ! --uid-owner 0-" + strMaxUid_ + " -j RETURN";
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
 
-    command = "-t filter -A " + chainName + " -i lo -j RETURN";
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
-    command = "-t filter -A " + chainName + " -o lo -j RETURN";
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
-    command = "-t filter -A " + chainName + " -p tcp --tcp-flags RST RST -j RETURN";
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    ret = SetFireWallCommand(chainName, command);
+
     command = "-t filter -A " + chainName + " -j DROP";
     ret =
         ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
@@ -295,18 +307,8 @@ int32_t FirewallManager::SetUidsDeniedListChain(ChainType chain, const std::vect
     const auto &chainName = FetchChainName(chain);
 
     command = "-t filter -F " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
 
-    command = "-t filter -A " + chainName + " -i lo -j RETURN";
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
-    command = "-t filter -A " + chainName + " -o lo -j RETURN";
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
-    command = "-t filter -A " + chainName + " -p tcp --tcp-flags RST RST -j RETURN";
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    ret = SetFireWallCommand(chainName, command);
 
     std::for_each(uids.begin(), uids.end(), [&command, &chainName, &ret](uint32_t uid) {
         std::string strUid = std::to_string(uid);

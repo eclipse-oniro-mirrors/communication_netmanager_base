@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "net_stats_service_proxy.h"
 
 #include "net_mgr_log_wrapper.h"

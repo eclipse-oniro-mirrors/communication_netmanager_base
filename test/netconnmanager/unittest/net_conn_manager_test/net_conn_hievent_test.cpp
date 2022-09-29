@@ -21,6 +21,7 @@
 #include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
 #include "net_conn_service.h"
+#include "net_conn_security.h"
 #include "net_all_capabilities.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
@@ -30,8 +31,6 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
-using namespace Security::AccessToken;
-using Security::AccessToken::AccessTokenID;
 
 HapInfoParams testInfoParms = {
     .bundleName = "net_conn_hievent_test",
@@ -67,25 +66,6 @@ HapPolicyParams testPolicyPrams = {
 };
 } // namespace
 
-class AccessToken {
-public:
-    AccessToken()
-    {
-        currentID_ = GetSelfTokenID();
-        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
-        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(accessID_);
-    }
-    ~AccessToken()
-    {
-        AccessTokenKit::DeleteToken(accessID_);
-        SetSelfTokenID(currentID_);
-    }
-private:
-    AccessTokenID currentID_ = 0;
-    AccessTokenID accessID_ = 0;
-};
-
 class NetConnHiEventTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -109,9 +89,9 @@ void NetConnHiEventTest::TearDown() {}
 
 sptr<Network> NetConnHiEventTest::GetNetwork()
 {
-    int32_t netId_ = 100;
-    int32_t supplierId_ = 1001;
-    sptr<Network> network = (std::make_unique<Network>(netId_, supplierId_,
+    int32_t netId = 100;
+    int32_t supplierId = 1001;
+    sptr<Network> network = (std::make_unique<Network>(netId, supplierId,
                                                        std::bind(&NetConnHiEventTest::HandleDetectionResult, this,
                                                                  std::placeholders::_1, std::placeholders::_2),
                                                        BEARER_CELLULAR))
@@ -164,8 +144,8 @@ void NetConnHiEventTest::HandleDetectionResult(uint32_t supplierId, bool ifValid
  */
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_001, TestSize.Level1)
 {
-    int32_t supplierId_ = 1001;
-    int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->UpdateNetSupplierInfo(supplierId_, nullptr);
+    int32_t supplierId = 1001;
+    int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->UpdateNetSupplierInfo(supplierId, nullptr);
     EXPECT_NE(ret, ERR_NONE);
 }
 
@@ -176,8 +156,8 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_001, TestSize.Level1)
  */
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_002, TestSize.Level1)
 {
-    int32_t supplierId_ = 1001;
-    int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->UpdateNetLinkInfo(supplierId_, nullptr);
+    int32_t supplierId = 1001;
+    int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->UpdateNetLinkInfo(supplierId, nullptr);
     EXPECT_NE(ret, ERR_NONE);
 }
 
@@ -248,9 +228,10 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_007, TestSize.Level1)
  */
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_008, TestSize.Level1)
 {
-    int32_t netId_ = 100;
-    std::unique_ptr<NetMonitor> netMonitor = std::make_unique<NetMonitor>(netId_,
-        std::bind(&NetConnHiEventTest::HandleNetMonitorResult, this, std::placeholders::_1, std::placeholders::_2));
+    int32_t netId = 100;
+    std::unique_ptr<NetMonitor> netMonitor =
+        std::make_unique<NetMonitor>(netId, std::bind(&NetConnHiEventTest::HandleNetMonitorResult, this,
+                                                       std::placeholders::_1, std::placeholders::_2));
     int32_t ret = netMonitor->SetSocketParameter(-1);
     EXPECT_NE(ret, ERR_NONE);
 }
@@ -284,9 +265,9 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_010, TestSize.Level1)
  */
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_011, TestSize.Level1)
 {
-    AccessToken token;
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
     int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->RegisterNetConnCallback(nullptr, nullptr, 0);
     EXPECT_NE(ret, ERR_NONE);
 }
-} // NetManagerStandard
-} // OHOS
+} // namespace NetManagerStandard
+} // namespace OHOS

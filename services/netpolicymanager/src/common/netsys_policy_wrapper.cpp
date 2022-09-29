@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "netsys_policy_wrapper.h"
 
 namespace OHOS {
@@ -36,7 +37,8 @@ int32_t NetsysPolicyWrapper::UnregisterNetsysCallback(sptr<NetsysControllerCallb
 int32_t NetsysPolicyWrapper::BandwidthEnableDataSaver(bool enable)
 {
     auto netsysReturnValue = NetsysController::GetInstance().BandwidthEnableDataSaver(enable);
-    NETMGR_LOG_I("NetsysPolicyWrapper:EnableDataSaver enable[%{public}d] netsys return[%{public}d]", enable, netsysReturnValue);
+    NETMGR_LOG_I("NetsysPolicyWrapper:EnableDataSaver enable[%{public}d] netsys return[%{public}d]", enable,
+                 netsysReturnValue);
     return netsysReturnValue;
 }
 

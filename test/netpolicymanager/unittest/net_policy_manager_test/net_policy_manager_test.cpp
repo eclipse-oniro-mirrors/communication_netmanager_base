@@ -51,8 +51,8 @@ public:
 
 void NetPolicyManagerTest::SetUpTestCase()
 {
-    const std::string TEMP_ICCID = "123";
-    DelayedSingleton<NetPolicyClient>::GetInstance()->ResetPolicies(TEMP_ICCID);
+    const std::string tempIccid = "123";
+    DelayedSingleton<NetPolicyClient>::GetInstance()->ResetPolicies(tempIccid);
 }
 
 void NetPolicyManagerTest::TearDownTestCase()

@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "conn_manager_test.h"
 #include "netsys_native_service_proxy.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
@@ -38,27 +39,9 @@ void NetworkRouteTest::SetUp() {}
 
 void NetworkRouteTest::TearDown() {}
 
-sptr<INetsysService> GetProxyTest()
-{
-    NETNATIVE_LOGE("Get samgr >>>>>>>>>>>>>>>>>>>>>>>>>>");
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    NETNATIVE_LOGI("Get samgr %{public}p", samgr.GetRefPtr());
-    std::cout << "Get samgr  "<< samgr.GetRefPtr() << std::endl;
-
-    auto remote = samgr->GetSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
-    NETNATIVE_LOGI("Get remote %{public}p", remote.GetRefPtr());
-    std::cout << "Get remote "<< remote.GetRefPtr() << std::endl;
-
-    auto proxy = iface_cast<NetsysNative::INetsysService>(remote);
-    NETNATIVE_LOGI("Get proxy %{public}p", proxy.GetRefPtr());
-    std::cout << "Get proxy "<<proxy.GetRefPtr()<<std::endl;
-    
-    return proxy;
-}
-
 HWTEST_F(NetworkRouteTest, NetworkRouteTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxyTest();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -71,7 +54,7 @@ HWTEST_F(NetworkRouteTest, NetworkRouteTest001, TestSize.Level1)
 
 HWTEST_F(NetworkRouteTest, NetworkRouteTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxyTest();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);

@@ -58,18 +58,20 @@ auto netsysServiceK_ = GetProxyK();
 namespace {
 void freeNetsysAddrInfo(struct addrinfo *aihead)
 {
-    struct addrinfo *ai, *ainext ;
-    for (ai = aihead ; ai != nullptr ; ai = ainext) {
-        if (ai->ai_addr != nullptr)
+    struct addrinfo *ai, *ainext;
+    for (ai = aihead; ai != nullptr; ai = ainext) {
+        if (ai->ai_addr != nullptr) {
             free(ai->ai_addr);
+        }
 
-        if (ai->ai_canonname != nullptr)
-            free(ai->ai_canonname) ;
-        ainext = ai->ai_next ;
+        if (ai->ai_canonname != nullptr) {
+            free(ai->ai_canonname);
+        }
+        ainext = ai->ai_next;
         free(ai);
     }
 }
-}
+} // namespace
 
 void TestSetResolverConfig()
 {

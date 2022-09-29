@@ -26,7 +26,7 @@ class DeviceIdleFirewallRule : public FirewallRule {
     DECLARE_DELAYED_SINGLETON(DeviceIdleFirewallRule);
 
 protected:
-    uint32_t chainType_;
+    uint32_t chainType_ = 0;
     std::string chainName_;
 
 private:

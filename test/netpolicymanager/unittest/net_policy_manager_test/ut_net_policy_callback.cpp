@@ -43,15 +43,15 @@ constexpr uint32_t TEST_LAST_LIMIT_REMIND_1 = 87654321;
 constexpr uint32_t TEST_LAST_WARNING_REMIND_2 = 1234567;
 constexpr uint32_t TEST_LAST_LIMIT_REMIND_2 = 12345678;
 
-std::mutex callbackMutex_;
-std::condition_variable cv_;
+std::mutex g_callbackMutex;
+std::condition_variable g_cv;
 
-int32_t callbackUid_ = -1;
-int32_t callbackPolicy_ = -1;
-int32_t callbackRule_ = -1;
-int32_t callbackQuotaPolicySize_ = -1;
-int32_t callbackIfacesSize_ = -1;
-bool callbackBackgroundPolicy_ = false;
+int32_t g_callbackUid = -1;
+int32_t g_callbackPolicy = -1;
+int32_t g_callbackRule = -1;
+int32_t g_callbackQuotaPolicySize = -1;
+int32_t g_callbackIfacesSize = -1;
+bool g_callbackBackgroundPolicy = false;
 
 std::shared_ptr<NetPolicyCallback> netPolicyCallback_ = nullptr;
 std::shared_ptr<NetPolicyRule> netPolicyRuleCb_ = nullptr;
@@ -63,24 +63,24 @@ class INetPolicyCallbackImpl : public IRemoteStub<INetPolicyCallback> {
 public:
     int32_t NetUidPolicyChange(uint32_t uid, uint32_t policy)
     {
-        callbackUid_ = uid;
-        callbackPolicy_ = policy;
-        cv_.notify_all();
+        g_callbackUid = uid;
+        g_callbackPolicy = policy;
+        g_cv.notify_all();
         return 0;
     }
 
     int32_t NetUidRuleChange(uint32_t uid, uint32_t rule)
     {
-        callbackUid_ = uid;
-        callbackRule_ = rule;
-        cv_.notify_all();
+        g_callbackUid = uid;
+        g_callbackRule = rule;
+        g_cv.notify_all();
         return 0;
     }
 
     int32_t NetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies)
     {
-        callbackQuotaPolicySize_ = quotaPolicies.size();
-        cv_.notify_all();
+        g_callbackQuotaPolicySize = quotaPolicies.size();
+        g_cv.notify_all();
         return 0;
     }
 
@@ -91,15 +91,15 @@ public:
 
     int32_t NetMeteredIfacesChange(std::vector<std::string> &ifaces)
     {
-        callbackIfacesSize_ = ifaces.size();
-        cv_.notify_all();
+        g_callbackIfacesSize = ifaces.size();
+        g_cv.notify_all();
         return 0;
     }
 
     int32_t NetBackgroundPolicyChange(bool isBackgroundPolicyAllow)
     {
-        callbackBackgroundPolicy_ = isBackgroundPolicyAllow;
-        cv_.notify_all();
+        g_callbackBackgroundPolicy = isBackgroundPolicyAllow;
+        g_cv.notify_all();
         return 0;
     }
 };
@@ -129,6 +129,36 @@ void NetPolicyCallbackUTest::TearDown()
     netPolicyRuleCb_->TransPolicyToRule(TEST_UID1, NetUidPolicy::NET_POLICY_NONE);
 }
 
+void SetFirstNetQuotaPolicy(std::vector<NetQuotaPolicy> &quotaPolicies)
+{
+    NetQuotaPolicy quotaPolicy1;
+    quotaPolicy1.iccid = ICCID_1;
+    quotaPolicy1.periodDuration = "M1";
+    quotaPolicy1.netType = NetBearType::BEARER_CELLULAR;
+    quotaPolicy1.warningBytes = TEST_WARNING_BYTES_1;
+    quotaPolicy1.limitBytes = TEST_LIMIT_BYTES_1;
+    quotaPolicy1.lastWarningRemind = TEST_LAST_WARNING_REMIND_1;
+    quotaPolicy1.lastLimitRemind = TEST_LAST_LIMIT_REMIND_1;
+    quotaPolicy1.metered = true;
+    quotaPolicy1.limitAction = LimitAction::LIMIT_ACTION_AUTO_BILL;
+    quotaPolicies.push_back(quotaPolicy1);
+}
+
+void SetSecondNetQuotaPolicy(std::vector<NetQuotaPolicy> &quotaPolicies)
+{
+    NetQuotaPolicy quotaPolicy2;
+    quotaPolicy2.iccid = ICCID_2;
+    quotaPolicy2.periodDuration = "Y1";
+    quotaPolicy2.netType = NetBearType::BEARER_CELLULAR;
+    quotaPolicy2.warningBytes = TEST_WARNING_BYTES_2;
+    quotaPolicy2.limitBytes = TEST_LIMIT_BYTES_2;
+    quotaPolicy2.lastWarningRemind = TEST_LAST_WARNING_REMIND_2;
+    quotaPolicy2.lastLimitRemind = TEST_LAST_LIMIT_REMIND_2;
+    quotaPolicy2.metered = true;
+    quotaPolicy2.limitAction = LimitAction::LIMIT_ACTION_DISABLE;
+    quotaPolicies.push_back(quotaPolicy2);
+}
+
 void SetPolicyCallback()
 {
     netPolicyRuleCb_->TransPolicyToRule(TEST_UID1, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
@@ -144,14 +174,14 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback001, TestSize.Level1)
     netPolicyCallback_->RegisterNetPolicyCallback(callback);
     std::thread setPolicyCallback(SetPolicyCallback);
 
-    std::unique_lock<std::mutex> lck(callbackMutex_);
-    cv_.wait_for(lck, std::chrono::seconds(10));
+    std::unique_lock<std::mutex> lck(g_callbackMutex);
+    g_cv.wait_for(lck, std::chrono::seconds(10));
     setPolicyCallback.join();
 
-    std::cout << "callbackUid_:" << callbackUid_ << std::endl;
-    std::cout << "callbackPolicy_:" << callbackPolicy_ << std::endl;
-    ASSERT_EQ(callbackUid_, TEST_UID1);
-    ASSERT_EQ(callbackPolicy_, 1);
+    std::cout << "g_callbackUid:" << g_callbackUid << std::endl;
+    std::cout << "g_callbackPolicy:" << g_callbackPolicy << std::endl;
+    ASSERT_EQ(g_callbackUid, TEST_UID1);
+    ASSERT_EQ(g_callbackPolicy, 1);
     netPolicyCallback_->UnregisterNetPolicyCallback(callback);
 }
 
@@ -171,31 +201,20 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback002, TestSize.Level1)
     netPolicyCallback_->RegisterNetPolicyCallback(callback);
     std::thread setPolicyCallback2(SetPolicyCallback2);
 
-    std::unique_lock<std::mutex> lck(callbackMutex_);
-    cv_.wait_for(lck, std::chrono::seconds(10));
+    std::unique_lock<std::mutex> lck(g_callbackMutex);
+    g_cv.wait_for(lck, std::chrono::seconds(10));
     setPolicyCallback2.join();
 
-    std::cout << "callbackUid_:" << callbackUid_ << std::endl;
-    std::cout << "callbackRule_:" << callbackRule_ << std::endl;
-    ASSERT_EQ(callbackUid_, TEST_UID1);
+    std::cout << "g_callbackUid:" << g_callbackUid << std::endl;
+    std::cout << "g_callbackRule:" << g_callbackRule << std::endl;
+    ASSERT_EQ(g_callbackUid, TEST_UID1);
     netPolicyCallback_->UnregisterNetPolicyCallback(callback);
 }
 
 void SetQuotaPolicy()
 {
-    NetQuotaPolicy quotaPolicy1;
-    quotaPolicy1.iccid = ICCID_1;
-    quotaPolicy1.periodDuration = "M1";
-    quotaPolicy1.netType = NetBearType::BEARER_CELLULAR;
-    quotaPolicy1.warningBytes = TEST_WARNING_BYTES_1;
-    quotaPolicy1.limitBytes = TEST_LIMIT_BYTES_1;
-    quotaPolicy1.lastWarningRemind = TEST_LAST_WARNING_REMIND_1;
-    quotaPolicy1.lastLimitRemind = TEST_LAST_LIMIT_REMIND_1;
-    quotaPolicy1.metered = true;
-    quotaPolicy1.limitAction = LimitAction::LIMIT_ACTION_AUTO_BILL;
-
     std::vector<NetQuotaPolicy> quotaPolicies;
-    quotaPolicies.push_back(quotaPolicy1);
+    SetFirstNetQuotaPolicy(quotaPolicies);
 
     netPolicyTrafficCb_->UpdateQuotaPolicies(quotaPolicies);
 }
@@ -211,43 +230,20 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback003, TestSize.Level1)
     netPolicyCallback_->RegisterNetPolicyCallback(callback);
     std::thread setQuotaPolicy(SetQuotaPolicy);
 
-    std::unique_lock<std::mutex> lck(callbackMutex_);
-    cv_.wait_for(lck, std::chrono::seconds(10));
+    std::unique_lock<std::mutex> lck(g_callbackMutex);
+    g_cv.wait_for(lck, std::chrono::seconds(10));
     setQuotaPolicy.join();
 
-    std::cout << "callbackQuotaPolicySize_:" << callbackQuotaPolicySize_ << std::endl;
-    ASSERT_TRUE(callbackQuotaPolicySize_ > 0);
+    std::cout << "g_callbackQuotaPolicySize:" << g_callbackQuotaPolicySize << std::endl;
+    ASSERT_TRUE(g_callbackQuotaPolicySize > 0);
     netPolicyCallback_->UnregisterNetPolicyCallback(callback);
 }
 
 void SetQuotaPolicy2()
 {
-    NetQuotaPolicy quotaPolicy1;
-    quotaPolicy1.iccid = ICCID_1;
-    quotaPolicy1.periodDuration = "M1";
-    quotaPolicy1.netType = NetBearType::BEARER_CELLULAR;
-    quotaPolicy1.warningBytes = TEST_WARNING_BYTES_1;
-    quotaPolicy1.limitBytes = TEST_LIMIT_BYTES_1;
-    quotaPolicy1.lastWarningRemind = TEST_LAST_WARNING_REMIND_1;
-    quotaPolicy1.lastLimitRemind = TEST_LAST_LIMIT_REMIND_1;
-    quotaPolicy1.metered = true;
-    quotaPolicy1.limitAction = LimitAction::LIMIT_ACTION_AUTO_BILL;
-
-    NetQuotaPolicy quotaPolicy2;
-    quotaPolicy2.iccid = ICCID_2;
-    quotaPolicy2.periodDuration = "Y1";
-    quotaPolicy2.netType = NetBearType::BEARER_CELLULAR;
-    quotaPolicy2.warningBytes = TEST_WARNING_BYTES_2;
-    quotaPolicy2.limitBytes = TEST_LIMIT_BYTES_2;
-    quotaPolicy2.lastWarningRemind = TEST_LAST_WARNING_REMIND_2;
-    quotaPolicy2.lastLimitRemind = TEST_LAST_LIMIT_REMIND_2;
-    quotaPolicy2.metered = true;
-    quotaPolicy2.limitAction = LimitAction::LIMIT_ACTION_DISABLE;
-
     std::vector<NetQuotaPolicy> quotaPolicies;
-    quotaPolicies.push_back(quotaPolicy1);
-    quotaPolicies.push_back(quotaPolicy2);
-
+    SetFirstNetQuotaPolicy(quotaPolicies);
+    SetSecondNetQuotaPolicy(quotaPolicies);
     netPolicyTrafficCb_->UpdateQuotaPolicies(quotaPolicies);
 }
 /**
@@ -261,12 +257,12 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback004, TestSize.Level1)
     netPolicyCallback_->RegisterNetPolicyCallback(callback);
     std::thread setQuotaPolicy2(SetQuotaPolicy2);
 
-    std::unique_lock<std::mutex> lck(callbackMutex_);
-    cv_.wait_for(lck, std::chrono::seconds(10));
+    std::unique_lock<std::mutex> lck(g_callbackMutex);
+    g_cv.wait_for(lck, std::chrono::seconds(10));
     setQuotaPolicy2.join();
 
-    std::cout << "callbackIfacesSize_:" << callbackIfacesSize_ << std::endl;
-    ASSERT_TRUE(callbackIfacesSize_ >= 0);
+    std::cout << "g_callbackIfacesSize:" << g_callbackIfacesSize << std::endl;
+    ASSERT_TRUE(g_callbackIfacesSize >= 0);
     netPolicyCallback_->UnregisterNetPolicyCallback(callback);
 }
 
@@ -285,12 +281,12 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback005, TestSize.Level1)
     netPolicyCallback_->RegisterNetPolicyCallback(callback);
     std::thread setBackgroundPolicy(SetBackgroundPolicy);
 
-    std::unique_lock<std::mutex> lck(callbackMutex_);
-    cv_.wait_for(lck, std::chrono::seconds(10));
+    std::unique_lock<std::mutex> lck(g_callbackMutex);
+    g_cv.wait_for(lck, std::chrono::seconds(10));
     setBackgroundPolicy.join();
 
-    std::cout << "callbackBackgroundPolicy_:" << callbackBackgroundPolicy_ << std::endl;
-    ASSERT_TRUE(callbackBackgroundPolicy_ == true);
+    std::cout << "g_callbackBackgroundPolicy:" << g_callbackBackgroundPolicy << std::endl;
+    ASSERT_TRUE(g_callbackBackgroundPolicy == true);
     netPolicyCallback_->UnregisterNetPolicyCallback(callback);
 }
 } // namespace NetManagerStandard

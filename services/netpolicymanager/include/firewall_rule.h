@@ -122,11 +122,11 @@ public:
 protected:
     FirewallRule(uint32_t chainType);
     virtual ~FirewallRule();
-    uint32_t chainType_;
+    uint32_t chainType_ = 0;
     std::string chainName_;
     std::vector<uint32_t> allowedList_;
     std::vector<uint32_t> deniedList_;
-    bool modeEnable_;
+    bool modeEnable_ = false;
 
 private:
     std::shared_ptr<NetsysPolicyWrapper> netsys_ = nullptr;

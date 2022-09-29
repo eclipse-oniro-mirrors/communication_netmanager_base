@@ -1306,9 +1306,10 @@ int32_t NetsysNativeServiceProxy::StopDnsProxyListen()
 }
 
 int32_t NetsysNativeServiceProxy::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
-    NetworkSharingTraffic &traffic) 
+                                                           NetworkSharingTraffic &traffic)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy GetNetworkSharingTraffic ERR_FLATTEN_OBJECT=%{public}d", ERR_FLATTEN_OBJECT);
+    NETNATIVE_LOGI("NetsysNativeServiceProxy GetNetworkSharingTraffic ERR_FLATTEN_OBJECT=%{public}d",
+                   ERR_FLATTEN_OBJECT);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;

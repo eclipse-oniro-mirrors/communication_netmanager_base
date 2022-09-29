@@ -26,7 +26,7 @@ namespace NetManagerStandard {
 class NetDetectionCallbackTest : public NetDetectionCallbackStub {
 public:
     NetDetectionCallbackTest();
-    virtual ~NetDetectionCallbackTest() override;
+    ~NetDetectionCallbackTest() override;
     int32_t OnNetDetectionResultChanged(
         NetDetectionResultCode detectionResult, const std::string &urlRedirect) override;
 

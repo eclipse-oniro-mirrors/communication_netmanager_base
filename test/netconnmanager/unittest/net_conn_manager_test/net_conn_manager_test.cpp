@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "net_conn_callback_test.h"
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
+#include "net_conn_security.h"
 #include "net_detection_callback_test.h"
 #include "net_mgr_log_wrapper.h"
 
@@ -69,25 +70,6 @@ HapPolicyParams testPolicyPrams = {
     .permStateList = {testState}
 };
 } // namespace
-
-class AccessToken {
-public:
-    AccessToken()
-    {
-        currentID_ = GetSelfTokenID();
-        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
-        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(accessID_);
-    }
-    ~AccessToken()
-    {
-        AccessTokenKit::DeleteToken(accessID_);
-        SetSelfTokenID(currentID_);
-    }
-private:
-    AccessTokenID currentID_ = 0;
-    AccessTokenID accessID_ = 0;
-};
 
 class NetConnManagerTest : public testing::Test {
 public:
@@ -308,7 +290,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager006, TestSize.Level1)
         bearerType, ident, netCaps, supplierId);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
 
-    AccessToken token;
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
     sptr<NetSpecifier> netSpecifier = (std::make_unique<NetSpecifier>()).release();
     netSpecifier->ident_ = ident;
     netSpecifier->SetCapabilities(netCaps);
@@ -504,7 +486,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager012, TestSize.Level1)
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     std::cout << "supplierId3 : " << supplierId3 << std::endl;
 
-    AccessToken token;
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
     std::list<sptr<NetHandle>> netList;
     result = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(netList);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
@@ -530,7 +512,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager013, TestSize.Level1)
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     std::cout << "supplierId : " << supplierId << std::endl;
 
-    AccessToken token;
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
     std::list<sptr<NetHandle>> netList;
     result = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(netList);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
@@ -558,7 +540,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
     result = DelayedSingleton<NetConnClient>::GetInstance()->UpdateNetLinkInfo(supplierId, netLinkInfo);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
 
-    AccessToken token;
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
     NetLinkInfo info;
     NetHandle netHandle(100);
     result = DelayedSingleton<NetConnClient>::GetInstance()->GetConnectionProperties(netHandle, info);
@@ -574,7 +556,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager015, TestSize.Level1)
 {
-    AccessToken token;
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
     bool isMetered = false;
     int32_t result = DelayedSingleton<NetConnClient>::GetInstance()->IsDefaultNetMetered(isMetered);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
@@ -593,9 +575,8 @@ HWTEST_F(NetConnManagerTest, NetConnManager016, TestSize.Level1)
     if (proxy == nullptr) {
         return;
     }
-    AccessToken token;
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
     int32_t result;
-
     std::list<sptr<NetHandle>> netList;
     result = client->GetAllNets(netList);
     size_t originNetSize = netList.size();

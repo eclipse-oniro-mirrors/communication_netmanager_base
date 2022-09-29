@@ -33,6 +33,10 @@ constexpr const char *IPV4_FORWARDING_PROC_FILE = "/proc/sys/net/ipv4/ip_forward
 constexpr const char *IPV6_FORWARDING_PROC_FILE = "/proc/sys/net/ipv6/conf/all/forwarding";
 constexpr const char *IPTABLES_TMP_BAK = "/data/service/el1/public/netmanager/ipfwd.bak";
 
+constexpr const int MAX_MATCH_SIZE = 4;
+constexpr const int TWO_LIST_CORRECT_DATA = 2;
+constexpr const int NEXT_LIST_CORRECT_DATA = 1;
+
 // commands of create tables
 const std::string CREATE_TETHERCTRL_NAT_POSTROUTING = "-t nat -N tetherctrl_nat_POSTROUTING";
 const std::string CREATE_TETHERCTRL_FORWARD = "-t filter -N tetherctrl_FORWARD";
@@ -221,9 +225,7 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
     if (interfaceForwards_.empty()) {
         SetForwardRules(true, FORWARD_JUMP_TETHERCTRL_FORWARD);
     }
-
     int32_t result = 0;
-
     std::string saveBak = "iptables-save -t filter > ";
     saveBak.append(IPTABLES_TMP_BAK);
     system(saveBak.c_str());
@@ -287,7 +289,6 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
         Rollback();
         return result;
     }
-
     interfaceForwards_.insert(fromIface + toIface);
     return 0;
 }
@@ -340,19 +341,20 @@ int32_t SharingManager::GetNetworkSharingTraffic(const std::string &downIface,
     for (auto line : lines) {
         std::smatch matches;
         std::regex_search(line, matches, IP_RE);
-        if (matches.size() < 4) {
+        if (matches.size() < MAX_MATCH_SIZE) {
             continue;
         }
-        for (int i = 0; i < matches.size() - 1; i++) {
+        for (uint32_t i = 0; i < matches.size() - 1; i++) {
             std::string tempMatch = matches[i];
-            NETNATIVE_LOGE("GetNetworkSharingTraffic matche[%{public}s]", tempMatch.c_str());
-            if (matches[i] == downIface && matches[i + 1] == upIface && ((i - 2) >= 0)) {
-                int64_t send = strtoul(matches[i - 2].str().c_str(), nullptr, 0);
+            NETNATIVE_LOG_D("GetNetworkSharingTraffic matche[%{public}s]", tempMatch.c_str());
+            if (matches[i] == downIface && matches[i + NEXT_LIST_CORRECT_DATA] == upIface &&
+                ((i - TWO_LIST_CORRECT_DATA) >= 0)) {
+                int64_t send = strtoul(matches[i - TWO_LIST_CORRECT_DATA].str().c_str(), nullptr, 0);
                 isFindTx = true;
                 traffic.send = send;
                 traffic.all += send;
-            } else if (matches[i] == upIface && matches[i + 1] == downIface && ((i - 2) >= 0)) {
-                int64_t receive = strtoul(matches[i - 2].str().c_str(), nullptr, 0);
+            } else if (matches[i] == upIface && matches[i + NEXT_LIST_CORRECT_DATA] == downIface && ((i - 2) >= 0)) {
+                int64_t receive = strtoul(matches[i - TWO_LIST_CORRECT_DATA].str().c_str(), nullptr, 0);
                 isFindRx = true;
                 traffic.receive = receive;
                 traffic.all += receive;
