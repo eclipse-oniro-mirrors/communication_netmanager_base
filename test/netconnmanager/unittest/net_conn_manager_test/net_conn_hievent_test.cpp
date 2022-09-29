@@ -31,6 +31,8 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
+using namespace Security::AccessToken;
+using Security::AccessToken::AccessTokenID;
 
 HapInfoParams testInfoParms = {
     .bundleName = "net_conn_hievent_test",
