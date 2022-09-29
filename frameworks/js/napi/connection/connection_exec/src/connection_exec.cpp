@@ -17,7 +17,6 @@
 
 #include "connection_module.h"
 #include "constant.h"
-#include "net_conn_callback_observer.h"
 #include "net_conn_client.h"
 #include "netconnection.h"
 #include "netmanager_base_log.h"
@@ -113,7 +112,11 @@ bool ConnectionExec::ExecGetDefaultNet(GetDefaultNetContext *context)
 {
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(context->netHandle);
     NETMANAGER_BASE_LOGI("ExecGetDefaultNet ret %{public}d", ret);
-    return ret == 0 || ret == NET_CONN_ERR_NO_DEFAULT_NET;
+    if (ret != NET_CONN_SUCCESS && ret != NET_CONN_ERR_NO_DEFAULT_NET) {
+        context->SetErrorCode(ret);
+        return false;
+    }
+    return true;
 }
 
 napi_value ConnectionExec::GetDefaultNetCallback(GetDefaultNetContext *context)
@@ -125,7 +128,11 @@ bool ConnectionExec::ExecHasDefaultNet(HasDefaultNetContext *context)
 {
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->HasDefaultNet(context->hasDefaultNet);
     NETMANAGER_BASE_LOGI("ExecHasDefaultNet ret %{public}d", ret);
-    return ret == 0 || ret == NET_CONN_ERR_NO_DEFAULT_NET;
+    if (ret != NET_CONN_SUCCESS && ret != NET_CONN_ERR_NO_DEFAULT_NET) {
+        context->SetErrorCode(ret);
+        return false;
+    }
+    return true;
 }
 
 napi_value ConnectionExec::HasDefaultNetCallback(HasDefaultNetContext *context)
@@ -135,8 +142,13 @@ napi_value ConnectionExec::HasDefaultNetCallback(HasDefaultNetContext *context)
 
 bool ConnectionExec::ExecGetNetCapabilities(GetNetCapabilitiesContext *context)
 {
-    return DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(context->netHandle,
-                                                                              context->capabilities) == 0;
+    auto ret =
+        DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(context->netHandle, context->capabilities);
+    if (ret != NET_CONN_SUCCESS) {
+        context->SetErrorCode(ret);
+        return false;
+    }
+    return true;
 }
 
 napi_value ConnectionExec::GetNetCapabilitiesCallback(GetNetCapabilitiesContext *context)
@@ -146,8 +158,13 @@ napi_value ConnectionExec::GetNetCapabilitiesCallback(GetNetCapabilitiesContext 
 
 bool ConnectionExec::ExecGetConnectionProperties(GetConnectionPropertiesContext *context)
 {
-    return DelayedSingleton<NetConnClient>::GetInstance()->GetConnectionProperties(context->netHandle,
-                                                                                   context->linkInfo) == 0;
+    auto ret =
+        DelayedSingleton<NetConnClient>::GetInstance()->GetConnectionProperties(context->netHandle, context->linkInfo);
+    if (ret != NET_CONN_SUCCESS) {
+        context->SetErrorCode(ret);
+        return false;
+    }
+    return true;
 }
 
 napi_value ConnectionExec::GetConnectionPropertiesCallback(GetConnectionPropertiesContext *context)
@@ -157,13 +174,12 @@ napi_value ConnectionExec::GetConnectionPropertiesCallback(GetConnectionProperti
 
 bool ConnectionExec::ExecGetAllNets(GetAllNetsContext *context)
 {
-    int32_t res = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(context->netHandleList);
-    if (res != 0) {
-        NETMANAGER_BASE_LOGE("ExecGetAllNets failed %{public}d", res);
-        context->SetErrorCode(res);
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(context->netHandleList);
+    if (ret != NET_CONN_SUCCESS) {
+        context->SetErrorCode(ret);
+        return false;
     }
-    NETMANAGER_BASE_LOGE("ExecGetAllNets OK");
-    return res == 0;
+    return true;
 }
 
 napi_value ConnectionExec::GetAllNetsCallback(GetAllNetsContext *context)

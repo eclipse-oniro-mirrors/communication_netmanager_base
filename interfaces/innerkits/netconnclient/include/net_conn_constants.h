@@ -35,6 +35,7 @@ enum NetConnResultCode {
     NET_CONN_ERR_NO_DEFAULT_NET                     = (-13),
     NET_CONN_ERR_HTTP_PROXY_INVALID                 = (-14),
     NET_CONN_ERR_NO_HTTP_PROXY                      = (-15),
+    NET_CONN_ERR_INVALID_NETWORK                    = (-16),
     NET_CONN_ERR_INTERNAL_ERROR                     = (-1000)
 };
 

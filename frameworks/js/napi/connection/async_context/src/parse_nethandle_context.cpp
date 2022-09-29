@@ -28,9 +28,6 @@ void ParseNetHandleContext::ParseParams(napi_value *params, size_t paramsCount)
     }
 
     int32_t netId = NapiUtils::GetInt32Property(GetEnv(), params[0], KEY_NET_ID);
-    if (netId == 0) {
-        return;
-    }
     netHandle.SetNetId(netId);
 
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
