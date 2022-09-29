@@ -129,11 +129,6 @@ bool NetsysNativeService::Init()
     fwmarkNetwork_ = std::make_unique<OHOS::nmd::FwmarkNetwork>();
     sharingManager_ = std::make_unique<SharingManager>();
 
-    bpfManager_ = std::make_unique<OHOS::nmd::BpfManager>();
-    if (!bpfManager_->Init()) {
-        NETNATIVE_LOGE("Failed to init bpfManager_!");
-    }
-
     return true;
 }
 
