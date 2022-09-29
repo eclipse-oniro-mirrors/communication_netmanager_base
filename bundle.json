@@ -83,8 +83,7 @@
                     "//foundation/communication/netmanager_base/services/etc/init:netsysnative.rc",
                     "//foundation/communication/netmanager_base/services/etc/init:resolv.conf",
                     "//foundation/communication/netmanager_base/services/etc/init:xtables.lock",
-                    "//foundation/communication/netmanager_base/sa_profile:net_manager_profile",
-                    "//foundation/communication/netmanager_base/services/netstatsmanager/bpf_progs:bpf_progs_config"
+                    "//foundation/communication/netmanager_base/sa_profile:net_manager_profile"
                 ]
             },
             "inner_kits": [
