@@ -23,18 +23,23 @@ namespace NetManagerStandard {
 namespace ConnGetProxy {
 sptr<INetsysService> ConnManagerGetProxy()
 {
-    NETNATIVE_LOGI("Get samgr >>>>>>>>>>>>>>>>>>>>>>>>>>");
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    NETNATIVE_LOGI("Get samgr %{public}p", samgr.GetRefPtr());
-    std::cout << "Get samgr  " << samgr.GetRefPtr() << std::endl;
+    if (samgr == nullptr) {
+        NETMGR_LOG_E("Get SystemAbilityManager failed");
+        return nullptr;
+    }
 
     auto remote = samgr->GetSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
-    NETNATIVE_LOGI("Get remote %{public}p", remote.GetRefPtr());
-    std::cout << "Get remote " << remote.GetRefPtr() << std::endl;
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Get remote failed");
+        return nullptr;
+    }
 
     auto proxy = iface_cast<NetsysNative::INetsysService>(remote);
-    NETNATIVE_LOGI("Get proxy %{public}p", proxy.GetRefPtr());
-    std::cout << "Get proxy " << proxy.GetRefPtr() << std::endl;
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("Get proxy failed");
+        return nullptr;
+    }
     return proxy;
 }
 } // namespace ConnGetProxy
