@@ -25,6 +25,8 @@
 
 namespace OHOS {
 namespace NetsysNative {
+constexpr uint32_t g_testUid = 20010034;
+
 using namespace testing::ext;
 using namespace NetManagerStandard;
 class FirewallManagerTest : public testing::Test {
@@ -51,7 +53,7 @@ bool PushUid(OHOS::sptr<OHOS::NetsysNative::INetsysService> &netsysNativeService
         return false;
     }
     uids.push_back(0);
-    uids.push_back(20010034);
+    uids.push_back(g_testUid);
     return true;
 }
 
