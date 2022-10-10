@@ -133,7 +133,7 @@ void SetFirstNetQuotaPolicy(std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     NetQuotaPolicy quotaPolicy1;
     quotaPolicy1.iccid = ICCID_1;
-    quotaPolicy1.periodDuration = "M1";
+    quotaPolicy1.periodDuration = "M1"; // M1: First day of the month.
     quotaPolicy1.netType = NetBearType::BEARER_CELLULAR;
     quotaPolicy1.warningBytes = TEST_WARNING_BYTES_1;
     quotaPolicy1.limitBytes = TEST_LIMIT_BYTES_1;
@@ -148,7 +148,7 @@ void SetSecondNetQuotaPolicy(std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     NetQuotaPolicy quotaPolicy2;
     quotaPolicy2.iccid = ICCID_2;
-    quotaPolicy2.periodDuration = "Y1";
+    quotaPolicy2.periodDuration = "Y1";  // y1: First day of the year.
     quotaPolicy2.netType = NetBearType::BEARER_CELLULAR;
     quotaPolicy2.warningBytes = TEST_WARNING_BYTES_2;
     quotaPolicy2.limitBytes = TEST_LIMIT_BYTES_2;
@@ -163,6 +163,7 @@ void SetPolicyCallback()
 {
     netPolicyRuleCb_->TransPolicyToRule(TEST_UID1, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
 }
+
 /**
  * @tc.name: NetPolicyCallback001
  * @tc.desc: Test NetPolicyCallback NetUidPolicyChange.
@@ -190,6 +191,7 @@ void SetPolicyCallback2()
     netPolicyRuleCb_->SetBackgroundPolicy(false);
     netPolicyRuleCb_->TransPolicyToRule(TEST_UID1, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
 }
+
 /**
  * @tc.name: NetPolicyCallback002
  * @tc.desc: Test NetPolicyCallback NetUidRuleChange.
@@ -246,6 +248,7 @@ void SetQuotaPolicy2()
     SetSecondNetQuotaPolicy(quotaPolicies);
     netPolicyTrafficCb_->UpdateQuotaPolicies(quotaPolicies);
 }
+
 /**
  * @tc.name: NetPolicyCallback004
  * @tc.desc: Test NetPolicyCallback NetMeteredIfacesChange.
@@ -270,6 +273,7 @@ void SetBackgroundPolicy()
 {
     netPolicyRuleCb_->SetBackgroundPolicy(true);
 }
+
 /**
  * @tc.name: NetPolicyCallback005
  * @tc.desc: Test NetPolicyCallback NetBackgroundPolicyChange.
