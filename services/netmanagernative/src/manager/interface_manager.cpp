@@ -323,10 +323,6 @@ int InterfaceManager::SetIfaceConfig(const nmd::InterfaceConfigurationParcel &if
         close(fd);
         return 1;
     }
-    uint32_t retry = 0;
-    for (; ioctl(fd, SIOCSIFFLAGS, &ifr) == -1 && errno == ETIMEDOUT && retry < IOCTL_RETRY_TIME; ++retry);
-    NETNATIVE_LOGI("set ifr flags=[%{public}d] strerror=[%{public}s] retry=[%{public}d]", ifr.ifr_flags,
-        strerror(errno), retry);
     close(fd);
     return 1;
 }
