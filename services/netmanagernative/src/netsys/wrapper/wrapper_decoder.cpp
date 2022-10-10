@@ -533,6 +533,6 @@ void WrapperDecoder::SaveOtherMsg(const std::string &info)
             message_->PushMessage(ASCII_PARAM_LIST.at(key), value);
         }
     }
-};
+}
 } // namespace nmd
 } // namespace OHOS
