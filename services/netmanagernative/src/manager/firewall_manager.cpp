@@ -26,7 +26,7 @@ namespace OHOS {
 namespace nmd {
 using namespace NetManagerStandard;
 namespace {
-bool SetFireWallCommand(std::string chainName,std::string command)
+bool SetFireWallCommand(std::string chainName, std::string command)
 {
     bool ret = false;
     ret =
