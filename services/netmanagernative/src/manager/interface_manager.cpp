@@ -36,8 +36,6 @@
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 
-
-
 namespace OHOS {
 namespace nmd {
 using namespace NetManagerStandard::CommonUtils;
