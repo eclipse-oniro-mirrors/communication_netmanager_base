@@ -50,7 +50,6 @@ constexpr uint32_t ARRAY_OFFSET_4_INDEX = 4;
 constexpr uint32_t ARRAY_OFFSET_5_INDEX = 5;
 constexpr uint32_t MOVE_BIT_LEFT31 = 31;
 constexpr uint32_t BIT_MAX = 32;
-constexpr uint32_t IOCTL_RETRY_TIME = 32;
 } // namespace
 
 InterfaceManager::InterfaceManager() {}
