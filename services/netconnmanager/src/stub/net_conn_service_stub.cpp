@@ -454,6 +454,8 @@ int32_t NetConnServiceStub::ConvertCode(int32_t internalCode)
             return static_cast<int32_t>(NET_CONN_ERR_REQ_ID_NOT_FOUND);
         case static_cast<int32_t>(ERR_NET_DEFAULTNET_NOT_EXIST):
             return static_cast<int32_t>(NET_CONN_ERR_NO_DEFAULT_NET);
+        case static_cast<int32_t>(ERR_NO_NETWORK):
+            return static_cast<int32_t>(NET_CONN_ERR_INVALID_NETWORK);
         default:
             break;
     }
@@ -528,7 +530,7 @@ int32_t NetConnServiceStub::OnGetAllNets(MessageParcel &data, MessageParcel &rep
 {
     NETMGR_LOG_D("stub execute GetAllNets");
     std::list<int32_t> netIdList;
-    int32_t ret = GetAllNets(netIdList);
+    int32_t ret = ConvertCode(GetAllNets(netIdList));
     if (!reply.WriteInt32(ret)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -577,7 +579,7 @@ int32_t NetConnServiceStub::OnGetConnectionProperties(MessageParcel &data, Messa
 
     NETMGR_LOG_D("stub execute GetConnectionProperties");
     NetLinkInfo info;
-    int32_t ret = GetConnectionProperties(netId, info);
+    int32_t ret = ConvertCode(GetConnectionProperties(netId, info));
     if (!reply.WriteInt32(ret)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -601,7 +603,7 @@ int32_t NetConnServiceStub::OnGetNetCapabilities(MessageParcel &data, MessagePar
     NETMGR_LOG_D("stub execute GetNetCapabilities");
 
     NetAllCapabilities netAllCap;
-    int32_t ret = GetNetCapabilities(netId, netAllCap);
+    int32_t ret = ConvertCode(GetNetCapabilities(netId, netAllCap));
     if (!reply.WriteInt32(ret)) {
         return ERR_FLATTEN_OBJECT;
     }
