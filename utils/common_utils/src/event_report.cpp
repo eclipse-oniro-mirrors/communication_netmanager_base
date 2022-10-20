@@ -46,7 +46,7 @@ constexpr const char *EVENT_KEY_NET_MONITOR_STATUS = "NET_MONITOR_STATUS";
 
 void EventReport::SendSupplierFaultEvent(const EventInfo &eventInfo)
 {
-    HiSysEvent::Write(
+    HiSysEventWrite(
         HiSysEvent::Domain::NETMANAGER_STANDARD,
         NET_CONN_SUPPLER_FAULT,
         HiSysEvent::EventType::FAULT,
@@ -60,7 +60,7 @@ void EventReport::SendSupplierFaultEvent(const EventInfo &eventInfo)
 
 void EventReport::SendSupplierBehaviorEvent(const EventInfo &eventInfo)
 {
-    HiSysEvent::Write(
+    HiSysEventWrite(
         HiSysEvent::Domain::NETMANAGER_STANDARD,
         NET_CONN_SUPPLER_STAT,
         HiSysEvent::EventType::BEHAVIOR,
@@ -75,7 +75,7 @@ void EventReport::SendSupplierBehaviorEvent(const EventInfo &eventInfo)
 
 void EventReport::SendRequestFaultEvent(const EventInfo &eventInfo)
 {
-    HiSysEvent::Write(
+    HiSysEventWrite(
         HiSysEvent::Domain::NETMANAGER_STANDARD,
         NET_CONN_REQUEST_FAULT,
         HiSysEvent::EventType::FAULT,
@@ -86,7 +86,7 @@ void EventReport::SendRequestFaultEvent(const EventInfo &eventInfo)
 
 void EventReport::SendRequestBehaviorEvent(const EventInfo &eventInfo)
 {
-    HiSysEvent::Write(
+    HiSysEventWrite(
         HiSysEvent::Domain::NETMANAGER_STANDARD,
         NET_CONN_REQUEST_STAT,
         HiSysEvent::EventType::BEHAVIOR,
@@ -98,7 +98,7 @@ void EventReport::SendRequestBehaviorEvent(const EventInfo &eventInfo)
 
 void EventReport::SendMonitorFaultEvent(const EventInfo &eventInfo)
 {
-    HiSysEvent::Write(
+    HiSysEventWrite(
         HiSysEvent::Domain::NETMANAGER_STANDARD,
         NET_CONN_MONITOR_FAULT,
         HiSysEvent::EventType::FAULT,
@@ -110,7 +110,7 @@ void EventReport::SendMonitorFaultEvent(const EventInfo &eventInfo)
 
 void EventReport::SendMonitorBehaviorEvent(const EventInfo &eventInfo)
 {
-    HiSysEvent::Write(
+    HiSysEventWrite(
         HiSysEvent::Domain::NETMANAGER_STANDARD,
         NET_CONN_MONITOR_STAT,
         HiSysEvent::EventType::BEHAVIOR,
