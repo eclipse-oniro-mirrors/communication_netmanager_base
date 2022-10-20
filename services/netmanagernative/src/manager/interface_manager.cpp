@@ -36,22 +36,21 @@
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 
-using namespace OHOS::NetManagerStandard::CommonUtils;
-const char g_sysNetPath[] = "/sys/class/net/";
-
 namespace OHOS {
 namespace nmd {
-static constexpr const int IOCTL_RETRY_TIME = 32;
+using namespace NetManagerStandard::CommonUtils;
+
 namespace {
-    constexpr int32_t FILE_PERMISSION = 0666;
-    constexpr uint32_t ARRAY_OFFSET_1_INDEX = 1;
-    constexpr uint32_t ARRAY_OFFSET_2_INDEX = 2;
-    constexpr uint32_t ARRAY_OFFSET_3_INDEX = 3;
-    constexpr uint32_t ARRAY_OFFSET_4_INDEX = 4;
-    constexpr uint32_t ARRAY_OFFSET_5_INDEX = 5;
-    constexpr uint32_t MOVE_BIT_LEFT31 = 31;
-    constexpr uint32_t BIT_MAX = 32;
-}
+constexpr const char *SYS_NET_PATH = "/sys/class/net/";
+constexpr int32_t FILE_PERMISSION = 0666;
+constexpr uint32_t ARRAY_OFFSET_1_INDEX = 1;
+constexpr uint32_t ARRAY_OFFSET_2_INDEX = 2;
+constexpr uint32_t ARRAY_OFFSET_3_INDEX = 3;
+constexpr uint32_t ARRAY_OFFSET_4_INDEX = 4;
+constexpr uint32_t ARRAY_OFFSET_5_INDEX = 5;
+constexpr uint32_t MOVE_BIT_LEFT31 = 31;
+constexpr uint32_t BIT_MAX = 32;
+} // namespace
 
 InterfaceManager::InterfaceManager() {}
 
@@ -95,7 +94,7 @@ int InterfaceManager::GetMtu(const char *interfaceName)
         return -1;
     }
 
-    std::string setMtuPath = std::string(g_sysNetPath).append(interfaceName).append("/mtu");
+    std::string setMtuPath = std::string(SYS_NET_PATH).append(interfaceName).append("/mtu");
 
     int fd = open(setMtuPath.c_str(), 0, FILE_PERMISSION);
     if (fd == -1) {
@@ -122,7 +121,7 @@ int InterfaceManager::SetMtu(const char *interfaceName, const char *mtuValue)
         return -1;
     }
 
-    std::string setMtuPath = std::string(g_sysNetPath).append(interfaceName).append("/mtu");
+    std::string setMtuPath = std::string(SYS_NET_PATH).append(interfaceName).append("/mtu");
 
     int fd = open(setMtuPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, FILE_PERMISSION);
     if (fd == -1) {
@@ -147,7 +146,7 @@ std::vector<std::string> InterfaceManager::GetInterfaceNames()
     DIR *dir(nullptr);
     struct dirent *de(nullptr);
 
-    dir = opendir(g_sysNetPath);
+    dir = opendir(SYS_NET_PATH);
     if (dir == nullptr) {
         NETNATIVE_LOGE("InterfaceManager::GetInterfaceNames opendir fail %{public}d", errno);
         return ifaceNames;
@@ -323,10 +322,6 @@ int InterfaceManager::SetIfaceConfig(const nmd::InterfaceConfigurationParcel &if
         close(fd);
         return 1;
     }
-    int retry = 0;
-    for (; ioctl(fd, SIOCSIFFLAGS, &ifr) == -1 && errno == ETIMEDOUT && retry < IOCTL_RETRY_TIME; ++retry);
-    NETNATIVE_LOGI("set ifr flags=[%{public}d] strerror=[%{public}s] retry=[%{public}d]", ifr.ifr_flags,
-        strerror(errno), retry);
     close(fd);
     return 1;
 }

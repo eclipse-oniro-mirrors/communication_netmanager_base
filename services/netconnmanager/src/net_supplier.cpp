@@ -326,9 +326,9 @@ std::set<uint32_t>& NetSupplier::GetBestRequestList()
 
 void NetSupplier::SetNetValid(bool ifValid)
 {
-    NETMGR_LOG_I("Enter SetNetValid. supplier[%{public}d, %{public}s], ifValid[%{public}d]",
-        supplierId_, netSupplierIdent_.c_str(), ifValid);
-    if(ifValid) {
+    NETMGR_LOG_I("Enter SetNetValid. supplier[%{public}d, %{public}s], ifValid[%{public}d]", supplierId_,
+                 netSupplierIdent_.c_str(), ifValid);
+    if (ifValid) {
         if (!HasNetCap(NET_CAPABILITY_VALIDATED)) {
             netCaps_.InsertNetCap(NET_CAPABILITY_VALIDATED);
             netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_VALIDATED);

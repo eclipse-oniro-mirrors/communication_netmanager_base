@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "conn_manager_test.h"
 #include "iptables_type.h"
 #include "iservice_registry.h"
 #include "netnative_log_wrapper.h"
@@ -24,6 +25,8 @@
 
 namespace OHOS {
 namespace NetsysNative {
+constexpr uint32_t g_testUid = 20010034;
+
 using namespace testing::ext;
 using namespace NetManagerStandard;
 class FirewallManagerTest : public testing::Test {
@@ -32,6 +35,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    bool PushUid(OHOS::sptr<OHOS::NetsysNative::INetsysService> &netsysNativeService, std::vector<uint32_t> &uids);
 };
 
 void FirewallManagerTest::SetUpTestCase() {}
@@ -42,22 +46,15 @@ void FirewallManagerTest::SetUp() {}
 
 void FirewallManagerTest::TearDown() {}
 
-sptr<INetsysService> GetProxy()
+bool PushUid(OHOS::sptr<OHOS::NetsysNative::INetsysService> &netsysNativeService, std::vector<uint32_t> &uids)
 {
-    NETNATIVE_LOGI("Get samgr >>>>>>>>>>>>>>>>>>>>>>>>>>");
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    NETNATIVE_LOGI("Get samgr %{public}p", samgr.GetRefPtr());
-    std::cout << "Get samgr  "<< samgr.GetRefPtr() << std::endl;
-
-    auto remote = samgr->GetSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
-    NETNATIVE_LOGI("Get remote %{public}p", remote.GetRefPtr());
-    std::cout << "Get remote "<< remote.GetRefPtr() << std::endl;
-
-    auto proxy = iface_cast<NetsysNative::INetsysService>(remote);
-    NETNATIVE_LOGI("Get proxy %{public}p", proxy.GetRefPtr());
-    std::cout << "Get proxy "<<proxy.GetRefPtr()<<std::endl;
-
-    return proxy;
+    if (netsysNativeService == nullptr) {
+        std::cout << "netsysNativeService is nullptr" << std::endl;
+        return false;
+    }
+    uids.push_back(0);
+    uids.push_back(g_testUid);
+    return true;
 }
 
 /**
@@ -67,7 +64,7 @@ sptr<INetsysService> GetProxy()
  */
 HWTEST_F(FirewallManagerTest, FirewallEnableChainTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -87,7 +84,7 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest001, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallEnableChainTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -107,7 +104,7 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest002, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallEnableChainTest003, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -127,7 +124,7 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest003, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallEnableChainTest004, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -147,7 +144,7 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest004, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallEnableChainTest005, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -168,7 +165,7 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest005, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallEnableChainTest006, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -189,7 +186,7 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest006, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -209,7 +206,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest001, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -229,7 +226,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest002, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest003, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -249,7 +246,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest003, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest004, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -269,7 +266,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest004, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest005, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -290,7 +287,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest005, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest006, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -311,7 +308,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest006, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidsAllowedListChainTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -333,7 +330,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidsAllowedListChainTest001, TestSize.L
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidsAllowedListChainTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -356,7 +353,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidsAllowedListChainTest002, TestSize.L
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidsAllowedListChainTest003, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -379,7 +376,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidsAllowedListChainTest003, TestSize.L
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidsDeniedListChainTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -401,7 +398,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidsDeniedListChainTest001, TestSize.Le
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidsDeniedListChainTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);
@@ -424,7 +421,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidsDeniedListChainTest002, TestSize.Le
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidsDeniedListChainTest003, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     if (netsysNativeService == nullptr) {
         std::cout << "netsysNativeService is nullptr" << std::endl;
         EXPECT_FALSE(0);

@@ -64,6 +64,7 @@ private:
     bool SaveRtMsg(std::string dst, const std::string gateWay, const std::string device, int32_t length,
                    int32_t family);
     rtmsg *CheckRtParam(const nlmsghdr *hdrMsg, uint8_t type);
+    void SaveOtherMsg(const std::string &info);
 };
 } // namespace nmd
 } // namespace OHOS

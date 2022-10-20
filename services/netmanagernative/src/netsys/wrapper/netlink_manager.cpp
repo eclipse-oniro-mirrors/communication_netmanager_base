@@ -33,7 +33,6 @@ namespace OHOS {
 namespace nmd {
 using namespace NetlinkDefine;
 namespace {
-std::mutex netlinkManagerLock_;
 constexpr int32_t NFLOG_QUOTA_GROUP = 1;
 constexpr int32_t UEVENT_GROUP = 0xffffffff;
 struct DistributorParam {

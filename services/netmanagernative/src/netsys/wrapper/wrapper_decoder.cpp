@@ -102,7 +102,7 @@ struct ServerInfo {
 
 struct ServerList {
     std::vector<ServerInfo> infos;
-    std::string serialize()
+    std::string Serialize()
     {
         std::string str;
         for (const auto &info : infos) {
@@ -114,7 +114,7 @@ struct ServerList {
         return str;
     }
 
-    void add(const std::string &ipAddr, const std::string &ifName)
+    void Add(const std::string &ipAddr, const std::string &ifName)
     {
         infos.emplace_back(ipAddr, ifName);
     }
@@ -229,14 +229,7 @@ bool WrapperDecoder::PushAsciiMessage(const std::vector<std::string> &recvmsg)
                 message_->SetSubSys(SUB_SYS_LIST.at(subsys[1]));
             }
         } else {
-            auto msgList = Split(i, SYMBOL_EQUAL);
-            if (msgList.size() == SPLIT_SIZE) {
-                const auto key = msgList[0];
-                auto value = msgList[1];
-                if (ASCII_PARAM_LIST.find(key) != ASCII_PARAM_LIST.end()) {
-                    message_->PushMessage(ASCII_PARAM_LIST.at(key), value);
-                }
-            }
+            SaveOtherMsg(i);
         }
     }
     return true;
@@ -528,6 +521,18 @@ bool WrapperDecoder::SaveRtMsg(std::string dst, const std::string gateWay, const
     message_->PushMessage(NetsysEventMessage::Type::GATEWAY, gateWay);
     message_->PushMessage(NetsysEventMessage::Type::INTERFACE, device);
     return true;
+}
+
+void WrapperDecoder::SaveOtherMsg(const std::string &info)
+{
+    auto msgList = Split(info, SYMBOL_EQUAL);
+    if (msgList.size() == SPLIT_SIZE) {
+        const auto key = msgList[0];
+        auto value = msgList[1];
+        if (ASCII_PARAM_LIST.find(key) != ASCII_PARAM_LIST.end()) {
+            message_->PushMessage(ASCII_PARAM_LIST.at(key), value);
+        }
+    }
 }
 } // namespace nmd
 } // namespace OHOS

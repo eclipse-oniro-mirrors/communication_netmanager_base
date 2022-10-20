@@ -38,6 +38,16 @@ constexpr std::initializer_list<NetBearType> BEAR_TYPE_LIST = {
     NetBearType::BEARER_VPN,
     NetBearType::BEARER_WIFI_AWARE,
 };
+
+bool GetIfaceNamesFromManager(std::list<std::string> &ifaceNames)
+{
+    int32_t ret = NetManagerCenter::GetInstance().GetIfaceNames(BEARER_CELLULAR, ifaceNames);
+    if (ret != 0 || ifaceNames.empty()) {
+        NETMGR_LOG_E("Iface list is empty, ret = %{public}d", ret);
+        return false;
+    }
+    return true;
+}
 } // namespace
 const bool REGISTER_LOCAL_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<NetStatsService>::GetInstance().get());
@@ -312,14 +322,12 @@ int64_t NetStatsService::GetIfaceTxBytes(const std::string &interfaceName)
 
 int64_t NetStatsService::GetCellularRxBytes()
 {
-    int64_t err = -1;
     std::list<std::string> ifaceNames;
-    int64_t totalCellular = 0;
-    int32_t ret = NetManagerCenter::GetInstance().GetIfaceNames(BEARER_CELLULAR, ifaceNames);
-    if (ret != 0 || ifaceNames.empty()) {
-        NETMGR_LOG_E("GetCellularRxBytes iface list is empty, ret = %{public}d", ret);
+    int64_t err = -1;
+    if (!GetIfaceNamesFromManager(ifaceNames)) {
         return err;
     }
+    int64_t totalCellular = 0;
     for (const auto &name : ifaceNames) {
         totalCellular = totalCellular + NetStatsWrapper::GetInstance().GetIfaceStats(
             StatsType::STATS_TYPE_RX_BYTES, name);
@@ -329,14 +337,12 @@ int64_t NetStatsService::GetCellularRxBytes()
 
 int64_t NetStatsService::GetCellularTxBytes()
 {
-    int64_t err = -1;
     std::list<std::string> ifaceNames;
-    int64_t totalCellular = 0;
-    int32_t ret = NetManagerCenter::GetInstance().GetIfaceNames(BEARER_CELLULAR, ifaceNames);
-    if (ret != 0 || ifaceNames.empty()) {
-        NETMGR_LOG_E("GetCellularRxBytes iface list is empty, ret = %{public}d", ret);
+    int64_t err = -1;
+    if (!GetIfaceNamesFromManager(ifaceNames)) {
         return err;
     }
+    int64_t totalCellular = 0;
     for (const auto &name : ifaceNames) {
         totalCellular = totalCellular + NetStatsWrapper::GetInstance().GetIfaceStats(
             StatsType::STATS_TYPE_TX_BYTES, name);

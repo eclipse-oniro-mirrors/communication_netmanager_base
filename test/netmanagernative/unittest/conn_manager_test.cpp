@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "conn_manager.h"
+#include "conn_manager_test.h"
 #include "iservice_registry.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_proxy.h"
@@ -25,6 +26,7 @@
 namespace OHOS {
 namespace NetsysNative {
 using namespace testing::ext;
+using namespace ConnGetProxy;
 constexpr int32_t NETID = 101;
 const std::string INTERFACENAME = "wlan0";
 class ConnManagerTest : public testing::Test {
@@ -42,24 +44,6 @@ void ConnManagerTest::TearDownTestCase() {}
 void ConnManagerTest::SetUp() {}
 
 void ConnManagerTest::TearDown() {}
-
-sptr<INetsysService> ConnManagerGetProxy()
-{
-    NETNATIVE_LOGI("Get samgr >>>>>>>>>>>>>>>>>>>>>>>>>>");
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    NETNATIVE_LOGI("Get samgr %{public}p", samgr.GetRefPtr());
-    std::cout << "Get samgr  " << samgr.GetRefPtr() << std::endl;
-
-    auto remote = samgr->GetSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
-    NETNATIVE_LOGI("Get remote %{public}p", remote.GetRefPtr());
-    std::cout << "Get remote " << remote.GetRefPtr() << std::endl;
-
-    auto proxy = iface_cast<NetsysNative::INetsysService>(remote);
-    NETNATIVE_LOGI("Get proxy %{public}p", proxy.GetRefPtr());
-    std::cout << "Get proxy " << proxy.GetRefPtr() << std::endl;
-
-    return proxy;
-}
 
 /**
  * @tc.name: CreatePhysicalNetworkTest001

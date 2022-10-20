@@ -29,6 +29,7 @@
 
 namespace OHOS::NetManagerStandard::CommonUtils {
 constexpr int32_t INET_OPTION_SUC = 1;
+constexpr int32_t DECIMAL_SYSTEM = 10;
 constexpr uint32_t CONST_MASK = 0x80000000;
 constexpr size_t MAX_DISPLAY_NUM = 2;
 constexpr uint32_t IPV4_DOT_NUM = 3;
@@ -247,7 +248,7 @@ bool ParseInt(const std::string &str, int32_t *value)
 
 int64_t ConvertToInt64(const std::string &str)
 {
-    return strtoll(str.c_str(), nullptr, 10);
+    return strtoll(str.c_str(), nullptr, DECIMAL_SYSTEM);
 }
 
 std::string MaskIpv4(std::string &maskedResult)

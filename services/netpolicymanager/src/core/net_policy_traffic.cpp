@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "net_policy_traffic.h"
 
 #include "common_event_data.h"
@@ -217,8 +218,8 @@ int64_t NetPolicyTraffic::GetQuotaRemain(NetQuotaPolicy &quotaPolicy)
 {
     int64_t start = quotaPolicy.GetPeriodStart();
     int64_t totalQuota = GetTotalQuota(quotaPolicy);
-    NETMGR_LOG_D("GetQuotaRemain totalQuota[%{public}s] limit[%{public}s] start[%{public}s]", std::to_string(totalQuota).c_str(),
-                 std::to_string(quotaPolicy.limitBytes).c_str(), ctime(&start));
+    NETMGR_LOG_D("GetQuotaRemain totalQuota[%{public}s] limit[%{public}s] start[%{public}s]",
+                 std::to_string(totalQuota).c_str(), std::to_string(quotaPolicy.limitBytes).c_str(), ctime(&start));
     // calculate the quota for each policy.
     bool hasLimit = quotaPolicy.limitBytes != DATA_USAGE_UNKNOWN;
     int64_t quota = LONG_MAX;
@@ -387,8 +388,8 @@ void NetPolicyTraffic::PublishQuotaEvent(const std::string &action, int64_t quot
 
 bool NetPolicyTraffic::IsValidPeriodDuration(const std::string &periodDuration)
 {
-    if (periodDuration.empty() || periodDuration.size() < 2) {
-        NETMGR_LOG_E("periodDuration is empty");
+    if (periodDuration.empty() || periodDuration.size() < PERIOD_DURATION_SIZE) {
+        NETMGR_LOG_E("periodDuration is illegal");
         return false;
     }
 

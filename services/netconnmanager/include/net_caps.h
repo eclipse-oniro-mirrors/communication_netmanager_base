@@ -77,7 +77,6 @@ public:
 
 private:
     uint32_t caps_{0};
-
 };
 } // NetManagerStandard
 } // OHOS
