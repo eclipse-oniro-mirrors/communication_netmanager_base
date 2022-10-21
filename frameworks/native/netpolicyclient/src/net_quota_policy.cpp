@@ -67,7 +67,7 @@ bool NetQuotaPolicy::Marshalling(Parcel &parcel, const NetQuotaPolicy &quotaPoli
 bool NetQuotaPolicy::Marshalling(Parcel &parcel, const std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     uint32_t vsize = static_cast<uint32_t>(quotaPolicies.size());
-    if (!parcel.WriteInt32(vsize)) {
+    if (!parcel.WriteUint32(vsize)) {
         return false;
     }
 

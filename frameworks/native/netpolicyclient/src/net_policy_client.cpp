@@ -192,6 +192,11 @@ int32_t NetPolicyClient::SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &
         return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
     }
 
+    if (quotaPolicies.size() > QUOTA_POLICY_MAX_SIZE) {
+        NETMGR_LOG_E("quotaPolicies's size is greater than the maximum, size is [%{public}zu]", quotaPolicies.size());
+        return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
+    }
+
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");

@@ -34,6 +34,7 @@ static constexpr int32_t DAY_MAX = 31;
 static constexpr int32_t MONTH_MAX = 12;
 static constexpr int32_t YEAR_MAX = 366;
 static constexpr int32_t PERIOD_DURATION_SIZE = 2;
+static constexpr int32_t QUOTA_POLICY_MAX_SIZE = 100;
 
 struct NetQuotaPolicy : public Parcelable {
     /* See {@link NetBearType} */
