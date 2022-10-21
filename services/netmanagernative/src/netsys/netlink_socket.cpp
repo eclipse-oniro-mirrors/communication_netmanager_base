@@ -136,6 +136,10 @@ int32_t GetInfoFromKernel(int32_t sock, uint16_t clearThing, uint32_t table)
 
 void DealInfoFromKernel(nlmsghdr *nlmsgHeader, uint16_t clearThing, uint32_t table)
 {
+    if (nlmsgHeader == nullptr) {
+        NETNATIVE_LOGE("Nl message head is nullptr");
+        return;
+    }
     struct nlmsghdr *msg = nlmsgHeader;
     msg->nlmsg_flags = NLM_F_REQUEST | NLM_F_ACK;
     if (clearThing == RTM_GETRULE) {
@@ -155,6 +159,10 @@ void DealInfoFromKernel(nlmsghdr *nlmsgHeader, uint16_t clearThing, uint32_t tab
 // It is used to extract the information returned by the kernel and decide whether to delete the configuration.
 uint32_t GetRouteProperty(const nlmsghdr *nlmsgHeader, int32_t property)
 {
+    if (nlmsgHeader == nullptr) {
+        NETNATIVE_LOGE("Nl message head is nullptr");
+        return -1;
+    }
     uint32_t rtaLength = RTM_PAYLOAD(nlmsgHeader);
     rtmsg *infoMsg = reinterpret_cast<rtmsg *>(NLMSG_DATA(nlmsgHeader));
     for (rtattr *infoRta = reinterpret_cast<rtattr *> RTM_RTA(infoMsg);

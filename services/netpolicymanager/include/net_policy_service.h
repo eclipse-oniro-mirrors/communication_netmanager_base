@@ -130,11 +130,6 @@ public:
      */
     uint32_t GetBackgroundPolicyByUid(uint32_t uid) override;
     /**
-     * GetCurrentBackgroundPolicy get background policy by current
-     * @return uint32_t Returns NetBackgroundPolicy
-     */
-    uint32_t GetCurrentBackgroundPolicy() override;
-    /**
      * Update the limit or warning remind time of quota policy.
      * @param netType {@link NetBearType}.
      * @param iccid Specify the matched iccid of quota policy when netType is cellular.

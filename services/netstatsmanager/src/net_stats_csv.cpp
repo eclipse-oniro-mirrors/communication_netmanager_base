@@ -307,7 +307,7 @@ bool NetStatsCsv::UpdateUidStats()
     while (uidCsvFile >> row) {
         uint32_t uid = static_cast<std::uint32_t>(std::stoi(row[static_cast<uint32_t>(UidCsvColumn::UID)]));
         if (!UpdateUidStatsCsv(uid, iface)) {
-            NETMGR_LOG_E("UpdateUidStatsCsv failed, uid[%{public}d], ifaceName[%{public}s]", uid, iface.c_str());
+            NETMGR_LOG_E("UpdateUidStatsCsv failed, uid[%{private}d], ifaceName[%{public}s]", uid, iface.c_str());
             return false;
         }
     }
@@ -354,7 +354,7 @@ bool NetStatsCsv::DeleteUidStatsCsv(uint32_t uid)
 {
     std::string strUid = std::to_string(uid);
     // std::filesystem::remove_all(UID_LIST_DIR + strUid.c_str());
-    NETMGR_LOG_I("Delete mock uid : %{public}d", uid);
+    NETMGR_LOG_D("Delete mock uid : %{public}d", uid);
     UpdateUidCsvInfo();
 
     std::ofstream newUidStatsCsvFile;

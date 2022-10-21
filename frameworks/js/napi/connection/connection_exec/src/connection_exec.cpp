@@ -19,6 +19,7 @@
 #include "constant.h"
 #include "net_conn_client.h"
 #include "netconnection.h"
+#include "netmanager_base_common_utils.h"
 #include "netmanager_base_log.h"
 #include "napi_utils.h"
 #include "securec.h"
@@ -282,7 +283,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
             inet_ntop(AF_INET6, &addr->sin6_addr, ip, sizeof(ip));
             host = ip;
         }
-        NETMANAGER_BASE_LOGI("host ip: %{public}s", host.c_str());
+        NETMANAGER_BASE_LOGI("host ip: %{public}s", CommonUtils::ToAnonymousIp(host).c_str());
 
         NetAddress address;
         SetAddressInfo(host.c_str(), tmp, address);
@@ -326,7 +327,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext
             inet_ntop(AF_INET6, &addr->sin6_addr, ip, sizeof(ip));
             host = ip;
         }
-        NETMANAGER_BASE_LOGI("host ip: %{public}s", host.c_str());
+        NETMANAGER_BASE_LOGI("host ip: %{public}s", CommonUtils::ToAnonymousIp(host).c_str());
 
         NetAddress address;
         SetAddressInfo(host.c_str(), res, address);

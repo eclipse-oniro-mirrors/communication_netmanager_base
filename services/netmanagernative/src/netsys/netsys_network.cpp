@@ -14,7 +14,6 @@
  */
 
 #include "net_manager_constants.h"
-#include "netnative_log_wrapper.h"
 #include "route_manager.h"
 
 #include "netsys_network.h"

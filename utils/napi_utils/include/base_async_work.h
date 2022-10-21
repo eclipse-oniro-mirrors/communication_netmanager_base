@@ -43,6 +43,10 @@ public:
         (void)env;
 
         auto context = static_cast<Context *>(data);
+        if (context == nullptr) {
+            return;
+        }
+
         if (!context->IsParseOK()) {
             context->SetErrorCode(PARSE_PARAM_FAILED);
             return;
@@ -59,7 +63,7 @@ public:
     {
         static_assert(std::is_base_of<BaseContext, Context>::value);
 
-        if (status != napi_ok) {
+        if ((status != napi_ok) || (data == nullptr)) {
             return;
         }
         auto deleter = [](Context *context) { delete context; };
@@ -106,7 +110,7 @@ public:
     {
         static_assert(std::is_base_of<BaseContext, Context>::value);
 
-        if (status != napi_ok) {
+        if ((status != napi_ok) || (data == nullptr)) {
             return;
         }
         auto deleter = [](Context *context) { delete context; };

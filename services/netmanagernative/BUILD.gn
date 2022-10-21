@@ -17,7 +17,6 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 ohos_shared_library("netsys_native_manager") {
   sources = [
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/dhcp_result_parcel.cpp",
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_addr_info_parcel.cpp",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_native_service_proxy.cpp",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/notify_callback_proxy.cpp",
     "$NETSYSNATIVE_SOURCE_DIR/src/dhcp_controller.cpp",

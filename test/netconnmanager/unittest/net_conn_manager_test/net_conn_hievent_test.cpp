@@ -171,7 +171,9 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_002, TestSize.Level1)
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_003, TestSize.Level1)
 {
     sptr<Network> network = GetNetwork();
+    ASSERT_NE(network, nullptr);
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
+    ASSERT_NE(netLinkInfo, nullptr);
     network->UpdateInterfaces(*netLinkInfo);
 }
 
@@ -183,7 +185,9 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_003, TestSize.Level1)
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_004, TestSize.Level1)
 {
     sptr<Network> network = GetNetwork();
+    ASSERT_NE(network, nullptr);
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
+    ASSERT_NE(netLinkInfo, nullptr);
     network->UpdateIpAddrs(*netLinkInfo);
 }
 
@@ -195,7 +199,9 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_004, TestSize.Level1)
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_005, TestSize.Level1)
 {
     sptr<Network> network = GetNetwork();
+    ASSERT_NE(network, nullptr);
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
+    ASSERT_NE(netLinkInfo, nullptr);
     network->UpdateRoutes(*netLinkInfo);
 }
 
@@ -207,7 +213,9 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_005, TestSize.Level1)
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_006, TestSize.Level1)
 {
     sptr<Network> network = GetNetwork();
+    ASSERT_NE(network, nullptr);
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
+    ASSERT_NE(netLinkInfo, nullptr);
     network->UpdateDns(*netLinkInfo);
 }
 
@@ -219,7 +227,9 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_006, TestSize.Level1)
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_007, TestSize.Level1)
 {
     sptr<Network> network = GetNetwork();
+    ASSERT_NE(network, nullptr);
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
+    ASSERT_NE(netLinkInfo, nullptr);
     network->UpdateMtu(*netLinkInfo);
 }
 
@@ -246,6 +256,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_008, TestSize.Level1)
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_009, TestSize.Level1)
 {
     sptr<Network> network = GetNetwork();
+    ASSERT_NE(network, nullptr);
     network->SetDefaultNetWork();
 }
 
@@ -257,6 +268,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_009, TestSize.Level1)
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_010, TestSize.Level1)
 {
     sptr<Network> network = GetNetwork();
+    ASSERT_NE(network, nullptr);
     network->ClearDefaultNetWorkNetId();
 }
 

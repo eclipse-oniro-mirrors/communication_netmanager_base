@@ -97,7 +97,7 @@ bool StatisticsExec::ExecGetIfaceUidStats(GetIfaceUidStatsContext *context)
         context->GetInterfaceName(), context->GetUid(), context->GetStart(), context->GetEnd(), context->GetStatsInfo());
     if (result != NetStatsResultCode::ERR_NONE) {
         NETMANAGER_BASE_LOGE(
-            "ExecGetIfaceUidStats error interfaceName_ is %{public}s, uid_ is %{public}d, start_ is %{public}d, end_ "
+            "ExecGetIfaceUidStats error interfaceName_ is %{public}s, uid_ is %{private}d, start_ is %{public}d, end_ "
             "is %{public}d",
             context->GetInterfaceName().c_str(), context->GetUid(), context->GetStart(), context->GetEnd());
         return false;

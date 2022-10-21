@@ -257,6 +257,10 @@ int32_t RouteManager::DisableSharing(const std::string &inputInterface, const st
 
 int32_t RouteManager::ReadAddrGw(const std::string &addr, InetAddr *res)
 {
+    if (res == nullptr) {
+        return -1;
+    }
+
     std::string addressString(addr.c_str());
     if (strchr(addr.c_str(), ':')) {
         res->family = AF_INET6;
@@ -271,6 +275,10 @@ int32_t RouteManager::ReadAddrGw(const std::string &addr, InetAddr *res)
 
 int32_t RouteManager::ReadAddr(const std::string &addr, InetAddr *res)
 {
+    if (res == nullptr) {
+        return -EINVAL;
+    }
+
     const char *slashStr = strchr(addr.c_str(), '/');
     if (slashStr == nullptr) {
         return -EINVAL;

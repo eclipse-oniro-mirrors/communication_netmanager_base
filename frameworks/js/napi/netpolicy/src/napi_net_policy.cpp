@@ -65,7 +65,7 @@ void NapiNetPolicy::ExecGetPolicyByUid(napi_env env, void *data)
     }
     context->policyResult =
         static_cast<int32_t>(DelayedSingleton<NetPolicyClient>::GetInstance()->GetPolicyByUid(context->uid));
-    NETMGR_LOG_I("ExecGetPolicyByUid, uid = [%{public}d], policyResult = [%{public}d]", context->uid,
+    NETMGR_LOG_D("ExecGetPolicyByUid, uid = [%{public}d], policyResult = [%{public}d]", context->uid,
         context->policyResult);
 }
 
@@ -645,7 +645,7 @@ napi_value NapiNetPolicy::SetPolicyByUid(napi_env env, napi_callback_info info)
     NetPolicyAsyncContext *context = std::make_unique<NetPolicyAsyncContext>().release();
     NAPI_CALL(env, napi_get_value_uint32(env, argv[ARGV_INDEX_0], &context->uid));
     NAPI_CALL(env, napi_get_value_uint32(env, argv[ARGV_INDEX_1], &context->policy));
-    NETMGR_LOG_I(
+    NETMGR_LOG_D(
         "JS agvc count = [%{public}d], argv[ARGV_INDEX_0] = [%{public}d], "
         "argv[ARGV_INDEX_1] = [%{public}d]",
         static_cast<int>(argc), context->uid, static_cast<int>(context->policy));
@@ -680,7 +680,7 @@ napi_value NapiNetPolicy::GetPolicyByUid(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     NetPolicyAsyncContext *context = std::make_unique<NetPolicyAsyncContext>().release();
     NAPI_CALL(env, napi_get_value_uint32(env, argv[ARGV_INDEX_0], &context->uid));
-    NETMGR_LOG_E("JS agvc count = [%{public}d], argv[0] = [%{public}d]", static_cast<int32_t>(argc), context->uid);
+    NETMGR_LOG_D("JS agvc count = [%{public}d], argv[0] = [%{public}d]", static_cast<int32_t>(argc), context->uid);
     // Get and verify parameter[js]
     napi_value result = nullptr;
     if (argc == ARGV_NUM_1) {

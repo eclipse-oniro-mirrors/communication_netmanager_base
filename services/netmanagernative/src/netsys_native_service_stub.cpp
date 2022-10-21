@@ -231,46 +231,6 @@ int32_t NetsysNativeServiceStub::NetsysFreeAddrinfo(struct addrinfo *aihead)
 int32_t NetsysNativeServiceStub::CmdGetaddrinfo(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOGI("Begin to dispatch cmd Getaddrinfo");
-    struct addrinfo hints;
-    struct addrinfo *result = nullptr;
-    uint16_t netid;
-    struct addrinfo *res_p1 = nullptr;
-    int addr_size = 0;
-    bzero(&hints, sizeof(addrinfo));
-    hints.ai_family = data.ReadInt16();
-    hints.ai_socktype = data.ReadInt16();
-    hints.ai_flags = data.ReadInt16();
-    hints.ai_protocol = data.ReadInt16();
-    netid = data.ReadUint16();
-    std::string strNode = data.ReadString();
-    std::string strService = data.ReadString();
-    const char *node = (strNode.length() > 0) ? strNode.c_str() : NULL;
-    const char *service = (strService.length() > 0) ? strService.c_str() : NULL;
-    int32_t ret = Getaddrinfo(node, service, &hints, &result, netid);
-    reply.WriteInt32(ret);
-    for (res_p1 = result; res_p1 != NULL; res_p1 = res_p1->ai_next) {
-        addr_size++;
-    }
-    reply.WriteInt32(addr_size);
-    for (res_p1 = result; res_p1 != NULL; res_p1 = res_p1->ai_next) {
-        reply.WriteInt16(res_p1->ai_flags);
-        reply.WriteInt16(res_p1->ai_family);
-        reply.WriteInt16(res_p1->ai_socktype);
-        reply.WriteInt16(res_p1->ai_protocol);
-        reply.WriteUint32(res_p1->ai_addrlen);
-        int canSize = 0;
-        if (res_p1->ai_canonname != NULL) {
-            canSize = strlen(res_p1->ai_canonname);
-        }
-        reply.WriteInt16(canSize);
-        if (canSize > 0) {
-            reply.WriteBuffer(res_p1->ai_canonname, canSize);
-        }
-        reply.WriteRawData((const void *)res_p1->ai_addr, sizeof(struct sockaddr));
-    }
-    if (result != nullptr) {
-        NetsysFreeAddrinfo(result);
-    }
     return ERR_NONE;
 }
 
@@ -768,8 +728,8 @@ int32_t NetsysNativeServiceStub::CmdFirewallSetUidsAllowedListChain(MessageParce
     NETNATIVE_LOG_D("Begin to dispatch cmd CmdFirewallSetUidsAllowedListChain");
     uint32_t chain = data.ReadUint32();
     std::vector<uint32_t> uids;
-    size_t uid_size = (unsigned)data.ReadInt32();
-    for (uint32_t i = 0; i < uid_size; i++) {
+    uint32_t uidSize = data.ReadUint32();
+    for (uint32_t i = 0; i < uidSize; i++) {
         uint32_t uid = data.ReadUint32();
         uids.push_back(uid);
     }
@@ -783,8 +743,8 @@ int32_t NetsysNativeServiceStub::CmdFirewallSetUidsDeniedListChain(MessageParcel
     NETNATIVE_LOG_D("Begin to dispatch cmd CmdFirewallSetUidsDeniedListChain");
     uint32_t chain = data.ReadUint32();
     std::vector<uint32_t> uids;
-    size_t uid_size = data.ReadUint32();
-    for (uint32_t i = 0; i < uid_size; i++) {
+    uint32_t uidSize = data.ReadUint32();
+    for (uint32_t i = 0; i < uidSize; i++) {
         uint32_t uid = data.ReadUint32();
         uids.push_back(uid);
     }

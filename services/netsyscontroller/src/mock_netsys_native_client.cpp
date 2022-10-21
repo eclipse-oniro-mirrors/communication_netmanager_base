@@ -336,14 +336,14 @@ static long getUidTrafficFromBPF(int uid, int cgroupType)
 
 int64_t MockNetsysNativeClient::GetUidRxBytes(uint32_t uid)
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetUidRxBytes uid is [%{public}u]", uid);
+    NETMGR_LOG_D("MockNetsysNativeClient GetUidRxBytes uid is [%{public}u]", uid);
     long result = getUidTrafficFromBPF(uid, 0);
     return static_cast<int64_t>(result);
 }
 
 int64_t MockNetsysNativeClient::GetUidTxBytes(uint32_t uid)
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetUidTxBytes uid is [%{public}u]", uid);
+    NETMGR_LOG_D("MockNetsysNativeClient GetUidTxBytes uid is [%{public}u]", uid);
     long result = getUidTrafficFromBPF(uid, 1);
     return static_cast<int64_t>(result);
 }
@@ -357,14 +357,14 @@ static int64_t GetUidOnIfaceBytes(uint32_t uid, const std::string &interfaceName
 
 int64_t MockNetsysNativeClient::GetUidOnIfaceRxBytes(uint32_t uid, const std::string &interfaceName)
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetUidOnIfaceRxBytes uid is [%{public}u] "
+    NETMGR_LOG_D("MockNetsysNativeClient GetUidOnIfaceRxBytes uid is [%{public}u] "
         "iface name is [%{public}s]", uid, interfaceName.c_str());
     return GetUidOnIfaceBytes(uid, interfaceName);
 }
 
 int64_t MockNetsysNativeClient::GetUidOnIfaceTxBytes(uint32_t uid, const std::string &interfaceName)
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetUidOnIfaceRxBytes uid is [%{public}u] "
+    NETMGR_LOG_D("MockNetsysNativeClient GetUidOnIfaceRxBytes uid is [%{public}u] "
         "iface name is [%{public}s]", uid, interfaceName.c_str());
     return GetUidOnIfaceBytes(uid, interfaceName);
 }
@@ -470,7 +470,7 @@ int32_t MockNetsysNativeClient::AddRoute(const std::string &ip, const std::strin
     _sin.sin_family = AF_INET;
     _sin.sin_port = 0;
     if (inet_aton(gateWay.c_str(), &(_sin.sin_addr)) < 0) {
-        NETMGR_LOG_E("MockNetsysNativeClient inet_aton gateWay[%{public}s]", gateWay.c_str());
+        NETMGR_LOG_E("MockNetsysNativeClient inet_aton gateWay[%{private}s]", gateWay.c_str());
         return -1;
     }
     int copyRet = memcpy_s(&rt.rt_gateway, sizeof(rt.rt_gateway), &_sin, sizeof(struct sockaddr_in));

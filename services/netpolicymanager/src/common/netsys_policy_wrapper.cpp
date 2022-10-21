@@ -61,14 +61,14 @@ int32_t NetsysPolicyWrapper::BandwidthRemoveIfaceQuota(const std::string &iface)
 int32_t NetsysPolicyWrapper::BandwidthAddDeniedList(uint32_t uid)
 {
     auto netsysReturnValue = NetsysController::GetInstance().BandwidthAddDeniedList(uid);
-    NETMGR_LOG_I("NetsysPolicyWrapper:AddDeniedList uid[%{public}u] netsys return[%{public}d]", uid, netsysReturnValue);
+    NETMGR_LOG_D("NetsysPolicyWrapper:AddDeniedList uid[%{public}u] netsys return[%{public}d]", uid, netsysReturnValue);
     return netsysReturnValue;
 }
 
 int32_t NetsysPolicyWrapper::BandwidthRemoveDeniedList(uint32_t uid)
 {
     auto netsysReturnValue = NetsysController::GetInstance().BandwidthRemoveDeniedList(uid);
-    NETMGR_LOG_I("NetsysPolicyWrapper:RemoveDeniedList uid[%{public}u] netsys return[%{public}d]", uid,
+    NETMGR_LOG_D("NetsysPolicyWrapper:RemoveDeniedList uid[%{public}u] netsys return[%{public}d]", uid,
                  netsysReturnValue);
     return netsysReturnValue;
 }
@@ -76,7 +76,7 @@ int32_t NetsysPolicyWrapper::BandwidthRemoveDeniedList(uint32_t uid)
 int32_t NetsysPolicyWrapper::BandwidthAddAllowedList(uint32_t uid)
 {
     auto netsysReturnValue = NetsysController::GetInstance().BandwidthAddAllowedList(uid);
-    NETMGR_LOG_I("NetsysPolicyWrapper:AddAllowedList uid[%{public}u] netsys return[%{public}d]", uid,
+    NETMGR_LOG_D("NetsysPolicyWrapper:AddAllowedList uid[%{public}u] netsys return[%{public}d]", uid,
                  netsysReturnValue);
     return netsysReturnValue;
 }
@@ -84,7 +84,7 @@ int32_t NetsysPolicyWrapper::BandwidthAddAllowedList(uint32_t uid)
 int32_t NetsysPolicyWrapper::BandwidthRemoveAllowedList(uint32_t uid)
 {
     auto netsysReturnValue = NetsysController::GetInstance().BandwidthRemoveAllowedList(uid);
-    NETMGR_LOG_I("NetsysPolicyWrapper:RemoveAllowedLists uid[%{public}u] netsys return[%{public}d]", uid,
+    NETMGR_LOG_D("NetsysPolicyWrapper:RemoveAllowedLists uid[%{public}u] netsys return[%{public}d]", uid,
                  netsysReturnValue);
     return netsysReturnValue;
 }
@@ -108,7 +108,7 @@ int32_t NetsysPolicyWrapper::FirewallSetUidsDeniedListChain(uint32_t chain, cons
 int32_t NetsysPolicyWrapper::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
 {
     auto netsysReturnValue = NetsysController::GetInstance().FirewallSetUidRule(chain, uid, firewallRule);
-    NETMGR_LOG_I(
+    NETMGR_LOG_D(
         "NetsysPolicyWrapper:FirewallSetUidRule chain[%{public}u] uid[%{public}u] firewallRule[%{public}u] netsys "
         "return[%{public}d]",
         chain, uid, firewallRule, netsysReturnValue);

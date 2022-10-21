@@ -46,6 +46,7 @@ ohos_shared_library("net_stats_manager") {
     "$HILOG_ROOT/interfaces/native/innerkits:libhilog",
     "$INNERKITS_ROOT/netstatsclient:net_stats_parcel",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSTATSMANAGER_BPFLIB_DIR:netsys_bpf_stats",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]

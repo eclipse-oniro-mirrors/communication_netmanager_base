@@ -423,31 +423,6 @@ uint32_t NetPolicyServiceProxy::GetBackgroundPolicyByUid(uint32_t uid)
     return reply.ReadUint32();
 }
 
-uint32_t NetPolicyServiceProxy::GetCurrentBackgroundPolicy()
-{
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NetBackgroundPolicy::NET_BACKGROUND_POLICY_NONE;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NetBackgroundPolicy::NET_BACKGROUND_POLICY_NONE;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NPS_GET_BACKGROUND_POLICY_BY_CURRENT, data, reply, option);
-    if (retCode != ERR_NONE) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NetBackgroundPolicy::NET_BACKGROUND_POLICY_NONE;
-    }
-
-    return reply.ReadUint32();
-}
-
 int32_t NetPolicyServiceProxy::UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType)
 {
     MessageParcel data;

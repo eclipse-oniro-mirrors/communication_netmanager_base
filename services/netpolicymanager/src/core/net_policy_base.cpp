@@ -15,7 +15,6 @@
 
 #include "net_policy_base.h"
 
-#include "net_mgr_log_wrapper.h"
 #include "net_policy_event_handler.h"
 
 namespace OHOS {
