@@ -54,7 +54,7 @@ void NetStatsListener::OnReceiveEvent(const CommonEventData &data)
             uint32_t uid = static_cast<uint32_t>(std::strtoul(data.GetWant().GetStringParam(
                 EVENT_DATA_UID_PARAM.c_str()).c_str(), nullptr, BASE_NUM));
             netStatsCallback_->NotifyNetUidStatsChanged(iface, uid);
-            NETMGR_LOG_I("Net Manager Uid States Limited, iface:[%{public}s], uid:[%{public}d]", iface.c_str(), uid);
+            NETMGR_LOG_D("Net Manager Uid States Limited, iface:[%{public}s], uid:[%{public}d]", iface.c_str(), uid);
         }
     } else if (eventName.compare((EventFwk::CommonEventSupport::COMMON_EVENT_UID_REMOVED).c_str()) == 0) {
         NETMGR_LOG_I("usual.event.UID_REMOVED");
@@ -62,7 +62,7 @@ void NetStatsListener::OnReceiveEvent(const CommonEventData &data)
             EVENT_DATA_DELETED_UID_PARAM.c_str()).c_str(), nullptr, BASE_NUM));
         auto statsCsv = std::make_unique<NetStatsCsv>();
         statsCsv->DeleteUidStatsCsv(uid);
-        NETMGR_LOG_I("Net Manager delete uid, uid:[%{public}d]", uid);
+        NETMGR_LOG_D("Net Manager delete uid, uid:[%{public}d]", uid);
     }
 }
 } // namespace NetManagerStandard

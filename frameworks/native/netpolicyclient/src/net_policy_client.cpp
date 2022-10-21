@@ -271,17 +271,6 @@ uint32_t NetPolicyClient::GetBackgroundPolicyByUid(uint32_t uid)
     return proxy->GetBackgroundPolicyByUid(uid);
 }
 
-uint32_t NetPolicyClient::GetCurrentBackgroundPolicy()
-{
-    sptr<INetPolicyService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NetBackgroundPolicy::NET_BACKGROUND_POLICY_NONE;
-    }
-
-    return proxy->GetCurrentBackgroundPolicy();
-}
-
 NetPolicyResultCode NetPolicyClient::SetSnoozePolicy(int8_t netType, const std::string &iccid)
 {
     return static_cast<NetPolicyResultCode>(UpdateRemindPolicy(netType, iccid, RemindType::REMIND_TYPE_LIMIT));

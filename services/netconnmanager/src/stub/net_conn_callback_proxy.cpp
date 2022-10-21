@@ -26,6 +26,11 @@ NetConnCallbackProxy::~NetConnCallbackProxy() {}
 
 int32_t NetConnCallbackProxy::NetAvailable(sptr<NetHandle> &netHandle)
 {
+    if (netHandle == nullptr) {
+        NETMGR_LOG_E("netHandle is null");
+        return ERR_NULL_OBJECT;
+    }
+
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
@@ -106,6 +111,11 @@ int32_t NetConnCallbackProxy::NetCapabilitiesChange(
 
 int32_t NetConnCallbackProxy::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
 {
+    if (netHandle == nullptr || info == nullptr) {
+        NETMGR_LOG_E("Input parameter is null");
+        return ERR_NULL_OBJECT;
+    }
+
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
@@ -139,6 +149,11 @@ int32_t NetConnCallbackProxy::NetConnectionPropertiesChange(sptr<NetHandle> &net
 
 int32_t NetConnCallbackProxy::NetLost(sptr<NetHandle> &netHandle)
 {
+    if (netHandle == nullptr) {
+        NETMGR_LOG_E("netHandle is null");
+        return ERR_NULL_OBJECT;
+    }
+
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
@@ -191,6 +206,11 @@ int32_t NetConnCallbackProxy::NetUnavailable()
 
 int32_t NetConnCallbackProxy::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
 {
+    if (netHandle == nullptr) {
+        NETMGR_LOG_E("netHandle is null");
+        return ERR_NULL_OBJECT;
+    }
+
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");

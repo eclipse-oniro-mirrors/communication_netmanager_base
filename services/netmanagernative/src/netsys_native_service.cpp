@@ -16,13 +16,13 @@
 #include "netsys_native_service.h"
 
 #include <csignal>
+#include <sys/types.h>
 #include <thread>
 #include <unistd.h>
-#include <sys/types.h>
 
+#include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
-#include "net_manager_constants.h"
 #include "system_ability_definition.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
@@ -31,8 +31,10 @@ namespace NetsysNative {
 REGISTER_SYSTEM_ABILITY_BY_ID(NetsysNativeService, COMM_NETSYS_NATIVE_SYS_ABILITY_ID, true)
 
 NetsysNativeService::NetsysNativeService()
-    : SystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, true), netsysService_(nullptr),
-    manager_(nullptr), notifyCallback_(nullptr)
+    : SystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, true),
+      netsysService_(nullptr),
+      manager_(nullptr),
+      notifyCallback_(nullptr)
 {
 }
 
@@ -132,9 +134,7 @@ bool NetsysNativeService::Init()
     return true;
 }
 
-int32_t NetsysNativeService::SetResolverConfig(uint16_t netId,
-                                               uint16_t baseTimeoutMsec,
-                                               uint8_t retryCount,
+int32_t NetsysNativeService::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
                                                const std::vector<std::string> &servers,
                                                const std::vector<std::string> &domains)
 {
@@ -142,10 +142,8 @@ int32_t NetsysNativeService::SetResolverConfig(uint16_t netId,
     return 0;
 }
 
-int32_t NetsysNativeService::GetResolverConfig(const uint16_t netid,
-                                               std::vector<std::string> &servers,
-                                               std::vector<std::string> &domains,
-                                               uint16_t &baseTimeoutMsec,
+int32_t NetsysNativeService::GetResolverConfig(const uint16_t netid, std::vector<std::string> &servers,
+                                               std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
                                                uint8_t &retryCount)
 {
     NETNATIVE_LOG_D("GetResolverConfig netid = %{public}d", netid);
@@ -167,8 +165,8 @@ int32_t NetsysNativeService::DestroyNetworkCache(const uint16_t netid)
     return 0;
 }
 
-int32_t NetsysNativeService::Getaddrinfo(const char* node, const char* service, const struct addrinfo* hints,
-    struct addrinfo** result, const uint16_t netid)
+int32_t NetsysNativeService::Getaddrinfo(const char *node, const char *service, const struct addrinfo *hints,
+                                         struct addrinfo **result, const uint16_t netid)
 {
     NETNATIVE_LOG_D("Getaddrinfo");
     return 0;
@@ -177,13 +175,13 @@ int32_t NetsysNativeService::Getaddrinfo(const char* node, const char* service, 
 int32_t NetsysNativeService::InterfaceSetMtu(const std::string &interfaceName, int32_t mtu)
 {
     NETNATIVE_LOG_D("InterfaceSetMtu  Begin");
-    return  netsysService_->InterfaceSetMtu(interfaceName, mtu);
+    return netsysService_->InterfaceSetMtu(interfaceName, mtu);
 }
 
 int32_t NetsysNativeService::InterfaceGetMtu(const std::string &interfaceName)
 {
     NETNATIVE_LOG_D("InterfaceSetMtu  Begin");
-    return  netsysService_->InterfaceGetMtu(interfaceName);
+    return netsysService_->InterfaceGetMtu(interfaceName);
 }
 
 int32_t NetsysNativeService::RegisterNotifyCallback(sptr<INotifyCallback> &callback)
@@ -191,7 +189,7 @@ int32_t NetsysNativeService::RegisterNotifyCallback(sptr<INotifyCallback> &callb
     NETNATIVE_LOG_D("RegisterNotifyCallback");
     notifyCallback_ = callback;
     dhcpController_->RegisterNotifyCallback(callback);
-    manager_-> RegisterNetlinkCallback(callback);
+    manager_->RegisterNetlinkCallback(callback);
     return 0;
 }
 
@@ -203,10 +201,10 @@ int32_t NetsysNativeService::UnRegisterNotifyCallback(sptr<INotifyCallback> &cal
 }
 
 int32_t NetsysNativeService::NetworkAddRoute(int32_t netId, const std::string &interfaceName,
-    const std::string &destination, const std::string &nextHop)
+                                             const std::string &destination, const std::string &nextHop)
 {
-    NETNATIVE_LOG_D("NetsysNativeService::NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s",
-        netId, interfaceName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
+    NETNATIVE_LOG_D("NetsysNativeService::NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s", netId,
+                    interfaceName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
 
     int32_t result = netsysService_->NetworkAddRoute(netId, interfaceName, destination, nextHop);
     NETNATIVE_LOG_D("NetworkAddRoute %{public}d", result);
@@ -214,7 +212,7 @@ int32_t NetsysNativeService::NetworkAddRoute(int32_t netId, const std::string &i
 }
 
 int32_t NetsysNativeService::NetworkRemoveRoute(int32_t netId, const std::string &interfaceName,
-    const std::string &destination, const std::string &nextHop)
+                                                const std::string &destination, const std::string &nextHop)
 {
     int32_t result = netsysService_->NetworkRemoveRoute(netId, interfaceName, destination, nextHop);
     NETNATIVE_LOG_D("NetworkRemoveRoute %{public}d", result);
@@ -258,17 +256,17 @@ int32_t NetsysNativeService::NetworkClearDefault()
 }
 
 int32_t NetsysNativeService::GetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
-    const std::string  &parameter, std::string  &value)
+                                           const std::string &parameter, std::string &value)
 {
-    int32_t result = netsysService_->GetProcSysNet(ipversion,  which,  ifname,  parameter, &value);
+    int32_t result = netsysService_->GetProcSysNet(ipversion, which, ifname, parameter, &value);
     NETNATIVE_LOG_D("GetProcSysNet");
     return result;
 }
 
 int32_t NetsysNativeService::SetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
-    const std::string  &parameter, std::string  &value)
+                                           const std::string &parameter, std::string &value)
 {
-    int32_t result = netsysService_->SetProcSysNet(ipversion,  which,  ifname,  parameter, value);
+    int32_t result = netsysService_->SetProcSysNet(ipversion, which, ifname, parameter, value);
     NETNATIVE_LOG_D("SetProcSysNet");
     return result;
 }
@@ -281,7 +279,7 @@ int32_t NetsysNativeService::NetworkCreatePhysical(int32_t netId, int32_t permis
 }
 
 int32_t NetsysNativeService::InterfaceAddAddress(const std::string &interfaceName, const std::string &addrString,
-    int32_t prefixLength)
+                                                 int32_t prefixLength)
 {
     int32_t result = netsysService_->InterfaceAddAddress(interfaceName, addrString, prefixLength);
     NETNATIVE_LOG_D("InterfaceAddAddress");
@@ -289,7 +287,7 @@ int32_t NetsysNativeService::InterfaceAddAddress(const std::string &interfaceNam
 }
 
 int32_t NetsysNativeService::InterfaceDelAddress(const std::string &interfaceName, const std::string &addrString,
-    int32_t prefixLength)
+                                                 int32_t prefixLength)
 {
     int32_t result = netsysService_->InterfaceDelAddress(interfaceName, addrString, prefixLength);
     NETNATIVE_LOG_D("InterfaceDelAddress");
@@ -511,14 +509,13 @@ int32_t NetsysNativeService::StopDnsProxyListen()
 }
 
 int32_t NetsysNativeService::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
-    NetworkSharingTraffic &traffic)
+                                                      NetworkSharingTraffic &traffic)
 {
-    if (this->sharingManager_ == nullptr) {
-        NETNATIVE_LOGE("NetsysNativeService GetNetworkSharingTraffic sharingManager_ is null.");
+    if (sharingManager_ == nullptr) {
+        NETNATIVE_LOGE("manager is null.");
         return NetManagerStandard::NETMANAGER_ERROR;
     }
-    NETNATIVE_LOGI("NetsysNativeService GetNetworkSharingTraffic");
-    return this->sharingManager_->GetNetworkSharingTraffic(downIface, upIface, traffic);
+    return sharingManager_->GetNetworkSharingTraffic(downIface, upIface, traffic);
 }
 } // namespace NetsysNative
 } // namespace OHOS

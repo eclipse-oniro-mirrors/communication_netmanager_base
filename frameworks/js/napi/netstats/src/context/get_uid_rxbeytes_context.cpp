@@ -17,7 +17,6 @@
 
 #include "constant.h"
 #include "napi_utils.h"
-#include "netmanager_base_log.h"
 
 namespace OHOS {
 namespace NetManagerStandard {

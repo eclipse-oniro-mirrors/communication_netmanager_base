@@ -167,6 +167,9 @@ std::vector<std::string> InterfaceManager::GetInterfaceNames()
 
 int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, const char *addr, int prefixLen)
 {
+    if (interfaceName == nullptr) {
+        return -1;
+    }
     uint32_t index = if_nametoindex(interfaceName);
     if (index == 0) {
         NETNATIVE_LOGE("InterfaceManager::ModifyAddress, if_nametoindex error %{public}d", errno);
@@ -232,11 +235,13 @@ int Ipv4NetmaskToPrefixLength(in_addr_t mask)
 std::string HwAddrToStr(char *hwaddr)
 {
     char buf[64] = {'\0'};
-    errno_t result = sprintf_s(buf, sizeof(buf), "%02x:%02x:%02x:%02x:%02x:%02x", hwaddr[0],
-        hwaddr[ARRAY_OFFSET_1_INDEX], hwaddr[ARRAY_OFFSET_2_INDEX], hwaddr[ARRAY_OFFSET_3_INDEX],
-        hwaddr[ARRAY_OFFSET_4_INDEX], hwaddr[ARRAY_OFFSET_5_INDEX]);
-    if (result != 0) {
-        NETNATIVE_LOGE("[hwAddrToStr]: result %{public}d", result);
+    if (hwaddr != nullptr) {
+        errno_t result = sprintf_s(buf, sizeof(buf), "%02x:%02x:%02x:%02x:%02x:%02x", hwaddr[0],
+            hwaddr[ARRAY_OFFSET_1_INDEX], hwaddr[ARRAY_OFFSET_2_INDEX], hwaddr[ARRAY_OFFSET_3_INDEX],
+            hwaddr[ARRAY_OFFSET_4_INDEX], hwaddr[ARRAY_OFFSET_5_INDEX]);
+        if (result != 0) {
+            NETNATIVE_LOGE("[hwAddrToStr]: result %{public}d", result);
+        }
     }
     return std::string(buf);
 }

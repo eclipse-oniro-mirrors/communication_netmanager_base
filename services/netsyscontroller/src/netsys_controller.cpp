@@ -41,15 +41,15 @@ void NetsysController::Init()
 
 NetsysController &NetsysController::GetInstance()
 {
-    static NetsysController g_singleInstance_;
-    static std::mutex g_mutex_;
-    if (!g_singleInstance_.initFlag_) {
-        std::unique_lock<std::mutex> lock(g_mutex_);
-        if (!g_singleInstance_.initFlag_) {
-            g_singleInstance_.Init();
+    static NetsysController singleInstance_;
+    static std::mutex mutex_;
+    if (!singleInstance_.initFlag_) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        if (!singleInstance_.initFlag_) {
+            singleInstance_.Init();
         }
     }
-    return g_singleInstance_;
+    return singleInstance_;
 }
 
 int32_t NetsysController::NetworkCreatePhysical(int32_t netId, int32_t permission)

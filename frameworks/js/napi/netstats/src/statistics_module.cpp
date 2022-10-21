@@ -26,7 +26,6 @@
 #include "get_uid_rxbeytes_context.h"
 #include "module_template.h"
 #include "napi_utils.h"
-#include "netmanager_base_log.h"
 #include "statistics_callback_observer.h"
 #include "statistics_observer_wrapper.h"
 #include "statistics_async_work.h"

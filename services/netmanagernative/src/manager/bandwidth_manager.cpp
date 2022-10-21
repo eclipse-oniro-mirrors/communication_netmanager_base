@@ -200,10 +200,9 @@ int32_t BandwidthManager::InitDefaultRules()
 {
     NETNATIVE_LOG_D("BandwidthManager InitDefaultRules");
     bool ret = false;
-    ret = (InitDefaultBwChainRules() == NETMANAGER_ERROR) ||
-          (InitDefaultListBoxChainRules() == NETMANAGER_ERROR) ||
+    ret = (InitDefaultBwChainRules() == NETMANAGER_ERROR) || (InitDefaultListBoxChainRules() == NETMANAGER_ERROR) ||
           (InitDefaultAlertChainRules() == NETMANAGER_ERROR);
-    
+
     return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
 }
 
@@ -277,7 +276,7 @@ int32_t BandwidthManager::SetGlobalAlert(Operate operate, int64_t bytes)
 int32_t BandwidthManager::SetCostlyAlert(Operate operate, const std::string &iface, int64_t bytes)
 {
     NETNATIVE_LOG_D("BandwidthManager SetCostlyAlert: operate=%{public}d, iface=%{public}s, bytes=%{public}" PRId64,
-                   operate, iface.c_str(), bytes);
+                    operate, iface.c_str(), bytes);
     bool ret = false;
     std::string command;
     std::string chainName = std::string(CHAIN_NAME_COSTLY_PTR) + iface + "alert";
@@ -443,7 +442,7 @@ int32_t BandwidthManager::AddDeniedList(uint32_t uid)
     CheckChainInitialization();
 
     if (std::find(deniedListUids_.begin(), deniedListUids_.end(), uid) != deniedListUids_.end()) {
-        NETNATIVE_LOGE("DeniedList uid %d exist, do not repeat", uid);
+        NETNATIVE_LOGE("DeniedList uid exist, do not repeat");
         return NETMANAGER_ERROR;
     } else {
         deniedListUids_.push_back(uid);
@@ -465,11 +464,10 @@ int32_t BandwidthManager::RemoveDeniedList(uint32_t uid)
 
     std::vector<uint32_t>::iterator iter = std::find(deniedListUids_.begin(), deniedListUids_.end(), uid);
     if (iter == deniedListUids_.end()) {
-        NETNATIVE_LOGE("AllowedList uid %d exist, can not remove", uid);
+        NETNATIVE_LOGE("AllowedList uid is not exist, can not remove");
         return NETMANAGER_ERROR;
-    } else {
-        deniedListUids_.erase(iter);
     }
+    deniedListUids_.erase(iter);
 
     std::string strUid = std::to_string(uid);
     std::string command;
@@ -486,7 +484,7 @@ int32_t BandwidthManager::AddAllowedList(uint32_t uid)
     CheckChainInitialization();
 
     if (std::find(allowedListUids_.begin(), allowedListUids_.end(), uid) != allowedListUids_.end()) {
-        NETNATIVE_LOGE("AllowedList uid %d exist, do not repeat", uid);
+        NETNATIVE_LOGE("AllowedList uid exist, do not repeat");
         return NETMANAGER_ERROR;
     } else {
         allowedListUids_.push_back(uid);
@@ -508,7 +506,7 @@ int32_t BandwidthManager::RemoveAllowedList(uint32_t uid)
 
     std::vector<uint32_t>::iterator iter = std::find(allowedListUids_.begin(), allowedListUids_.end(), uid);
     if (iter == allowedListUids_.end()) {
-        NETNATIVE_LOGE("AllowedList uid %d exist, can not remove", uid);
+        NETNATIVE_LOGE("AllowedList uid exist, can not remove");
         return NETMANAGER_ERROR;
     } else {
         allowedListUids_.erase(iter);

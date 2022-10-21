@@ -75,6 +75,9 @@ void CloseSocket(int32_t *socket, int32_t ret, int32_t errorCode)
 
 int32_t SetMark(int32_t *socketFd, FwmarkCommand *command)
 {
+    if (command == nullptr) {
+        return -1;
+    }
     Fwmark fwmark;
     socklen_t fwmarkLen = sizeof(fwmark.intValue);
     int32_t ret = getsockopt(*socketFd, SOL_SOCKET, SO_MARK, &fwmark.intValue, &fwmarkLen);
@@ -166,7 +169,6 @@ void StartListener()
         NETNATIVE_LOGE("strcpy_s failed, ret: %{public}d", ret);
         return;
     }
-    NETNATIVE_LOGI("FwmarkNetwork: address.sun_path: %{public}s", serverAddr.sun_path);
 
     int32_t result = bind(serverSockfd, reinterpret_cast<struct sockaddr *>(&serverAddr), sizeof(serverAddr));
     if (result < 0) {

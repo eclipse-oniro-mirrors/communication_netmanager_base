@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "net_mgr_log_wrapper.h"
 #include "net_stats_wrapper.h"
 
 // using OHOS::Bpf::NetsysBpfStats;

@@ -20,12 +20,13 @@
 #include <unistd.h>
 
 #include "broadcast_manager.h"
-#include "system_ability_definition.h"
 #include "common_event_support.h"
+#include "netmanager_base_permission.h"
 #include "net_stats_constants.h"
 #include "net_stats_csv.h"
 #include "net_manager_center.h"
 #include "net_mgr_log_wrapper.h"
+#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -224,6 +225,10 @@ int32_t NetStatsService::UnregisterNetStatsCallback(const sptr<INetStatsCallback
 NetStatsResultCode NetStatsService::GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end,
     NetStatsInfo &statsInfo)
 {
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETSTATS_SUMMARY)) {
+        NETMGR_LOG_E("Permission check failed.");
+        return NetStatsResultCode::ERR_INVALID_PARAMETER;
+    }
     if (!netStatsCsv_->ExistsIface(iface)) {
         NETMGR_LOG_E("iface not exist");
         return NetStatsResultCode::ERR_INVALID_PARAMETER;
@@ -244,6 +249,10 @@ NetStatsResultCode NetStatsService::GetIfaceStatsDetail(const std::string &iface
 NetStatsResultCode NetStatsService::GetUidStatsDetail(const std::string &iface, uint32_t uid,
     uint32_t start, uint32_t end, NetStatsInfo &statsInfo)
 {
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETSTATS_SUMMARY)) {
+        NETMGR_LOG_E("Permission check failed.");
+        return NetStatsResultCode::ERR_INVALID_PARAMETER;
+    }
     if (!netStatsCsv_->ExistsIface(iface)) {
         NETMGR_LOG_E("iface not exist");
         return NetStatsResultCode::ERR_INVALID_PARAMETER;
@@ -257,7 +266,7 @@ NetStatsResultCode NetStatsService::GetUidStatsDetail(const std::string &iface, 
         return NetStatsResultCode::ERR_INVALID_PARAMETER;
     }
     NetStatsResultCode result = netStatsCsv_->GetUidBytes(iface, uid, start, end, statsInfo);
-    NETMGR_LOG_I("GetUidStatsDetail iface[%{public}s], uid[%{public}d] statsInfo.rxBytes[%{public}" PRId64 "] "
+    NETMGR_LOG_D("GetUidStatsDetail iface[%{public}s], uid[%{public}d] statsInfo.rxBytes[%{public}" PRId64 "] "
         "statsInfo.txBytes[%{public}" PRId64 "]", iface.c_str(), uid, statsInfo.rxBytes_, statsInfo.txBytes_);
     if (result == NetStatsResultCode::ERR_INVALID_TIME_PERIOD) {
         NETMGR_LOG_E("GetUidBytes is error.");

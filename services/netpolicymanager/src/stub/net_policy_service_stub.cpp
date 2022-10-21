@@ -40,7 +40,6 @@ NetPolicyServiceStub::NetPolicyServiceStub()
     memberFuncMap_[CMD_NPS_SET_BACKGROUND_POLICY] = &NetPolicyServiceStub::OnSetBackgroundPolicy;
     memberFuncMap_[CMD_NPS_GET_BACKGROUND_POLICY] = &NetPolicyServiceStub::OnGetBackgroundPolicy;
     memberFuncMap_[CMD_NPS_GET_BACKGROUND_POLICY_BY_UID] = &NetPolicyServiceStub::OnGetBackgroundPolicyByUid;
-    memberFuncMap_[CMD_NPS_GET_BACKGROUND_POLICY_BY_CURRENT] = &NetPolicyServiceStub::OnGetCurrentBackgroundPolicy;
     InitEventHandler();
 }
 
@@ -194,6 +193,12 @@ int32_t NetPolicyServiceStub::OnRegisterNetPolicyCallback(MessageParcel &data, M
         return result;
     }
 
+    if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
+        NETMGR_LOG_E("Permission check failed.");
+        reply.WriteInt32(result);
+        return result;
+    }
+
     sptr<INetPolicyCallback> callback = iface_cast<INetPolicyCallback>(remote);
     result = RegisterNetPolicyCallback(callback);
     reply.WriteInt32(result);
@@ -293,15 +298,6 @@ int32_t NetPolicyServiceStub::OnGetBackgroundPolicyByUid(MessageParcel &data, Me
     }
 
     if (!reply.WriteUint32(GetBackgroundPolicyByUid(uid))) {
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    return ERR_NONE;
-}
-
-int32_t NetPolicyServiceStub::OnGetCurrentBackgroundPolicy(MessageParcel &data, MessageParcel &reply)
-{
-    if (!reply.WriteInt32(static_cast<int32_t>(GetCurrentBackgroundPolicy()))) {
         return ERR_FLATTEN_OBJECT;
     }
 

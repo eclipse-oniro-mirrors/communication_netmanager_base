@@ -33,7 +33,7 @@ DhcpController::DhcpControllerResultNotify::~DhcpControllerResultNotify() {}
 void DhcpController::DhcpControllerResultNotify::OnSuccess(int status, const std::string &ifname,
                                                            OHOS::Wifi::DhcpResult &result)
 {
-    NETNATIVE_LOGE(
+    NETNATIVE_LOG_D(
         "Enter DhcpController::DhcpControllerResultNotify::OnSuccess "
         "ifname=[%{public}s], iptype=[%{public}d], strYourCli=[%{public}s], "
         "strServer=[%{public}s], strSubnet=[%{public}s], strDns1=[%{public}s], "

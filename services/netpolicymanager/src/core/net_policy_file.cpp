@@ -292,7 +292,7 @@ bool NetPolicyFile::WriteFile(uint32_t netUidPolicyOpType, uint32_t uid, uint32_
     for (const auto &i : netPolicy_.uidPolicys) {
         uint32_t uid = CommonUtils::StrToUint(i.uid.c_str());
         uint32_t policy = CommonUtils::StrToUint(i.policy.c_str());
-        NETMGR_LOG_I("Struct:uid[%{public}u],policy[%{public}u]", uid, policy);
+        NETMGR_LOG_D("Struct:uid[%{public}u],policy[%{public}u]", uid, policy);
     }
 
     if (netUidPolicyOpType == NetUidPolicyOpType::NET_POLICY_UID_OP_TYPE_UPDATE) {

@@ -226,15 +226,6 @@ public:
     uint32_t GetBackgroundPolicyByUid(uint32_t uid);
 
     /**
-     * GetCurrentBackgroundPolicy get background policy by current
-     * @return Returns NetBackgroundPolicy
-     * @permission ohos.permission.CONNECTIVITY_INTERNAL
-     * @systemapi Hide this for inner system use.
-     * @deprecated
-     */
-    uint32_t GetCurrentBackgroundPolicy();
-
-    /**
      * SetSnoozePolicy for Hibernate current policy
      *
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.

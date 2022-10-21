@@ -87,6 +87,10 @@ int32_t NetlinkMsg::AddAttr(uint16_t type, void *data, size_t alen)
 
     struct rtattr *rta =
         (struct rtattr *)(((char *)netlinkMessage_) + NLMSG_ALIGN(netlinkMessage_->nlmsg_len));
+    if (rta == nullptr) {
+        NETNATIVE_LOGE("Pointer rta is nullptr");
+        return -1;
+    }
     rta->rta_type = type;
     rta->rta_len = static_cast<uint16_t>(len);
 

@@ -28,6 +28,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "event_report.h"
+#include "netmanager_base_common_utils.h"
 #include "net_mgr_log_wrapper.h"
 #include "fwmark_client.h"
 #include "netsys_controller.h"
@@ -233,7 +234,7 @@ int32_t NetMonitor::Connect(int32_t sockFd, int socketType, const uint16_t port,
 int32_t NetMonitor::ConnectIpv4(int32_t sockFd, const uint16_t port, const std::string &ipAddr)
 {
     NETMGR_LOG_D("Net[%{public}d] connect ipv4 ip:[%{public}s] socket:%{public}d in",
-        netId_, ipAddr.c_str(), sockFd);
+        netId_, CommonUtils::ToAnonymousIp(ipAddr).c_str(), sockFd);
     struct sockaddr_in serverAddr;
     bzero(&serverAddr, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
@@ -243,7 +244,7 @@ int32_t NetMonitor::ConnectIpv4(int32_t sockFd, const uint16_t port, const std::
     if (ret < 0) {
         if (errno != EINPROGRESS) {
             NETMGR_LOG_E("Connect net[%{public}d] ipv4 ip:%{public}s failed,error[%{public}d]:%{public}s",
-                netId_, ipAddr.c_str(), errno, strerror(errno));
+                netId_, CommonUtils::ToAnonymousIp(ipAddr).c_str(), errno, strerror(errno));
             return -1;
         }
     }
@@ -253,7 +254,7 @@ int32_t NetMonitor::ConnectIpv4(int32_t sockFd, const uint16_t port, const std::
 int32_t NetMonitor::ConnectIpv6(int32_t sockFd, const uint16_t port, const std::string &ipAddr)
 {
     NETMGR_LOG_D("Net[%{public}d] connect ipv6 ip:[%{public}s] socket:%{public}d in",
-        netId_, ipAddr.c_str(), sockFd);
+        netId_, CommonUtils::ToAnonymousIp(ipAddr).c_str(), sockFd);
     struct sockaddr_in6 serverAddr;
     bzero(&serverAddr, sizeof(serverAddr));
     serverAddr.sin6_family = AF_INET6;
@@ -263,7 +264,7 @@ int32_t NetMonitor::ConnectIpv6(int32_t sockFd, const uint16_t port, const std::
     if (ret < 0) {
         if (errno != EINPROGRESS) {
             NETMGR_LOG_E("Connect net[%{public}d] ipv6 ip:%{public}s failed,error[%{public}d]:%{public}s",
-                netId_, ipAddr.c_str(), errno, strerror(errno));
+                netId_, CommonUtils::ToAnonymousIp(ipAddr).c_str(), errno, strerror(errno));
             return -1;
         }
     }
@@ -496,7 +497,7 @@ int32_t NetMonitor::GetIpAddr(const char *domain, std::string &ip_addr, int &soc
         ip_addr = ip;
     }
     socketType = result->ai_family;
-    NETMGR_LOG_D("Get net[%{public}d] monitor ip:%{public}s", netId_, ip_addr.c_str());
+    NETMGR_LOG_D("Get net[%{public}d] monitor ip:%{public}s", netId_, CommonUtils::ToAnonymousIp(ip_addr).c_str());
     freeaddrinfo(result);
     return 0;
 }

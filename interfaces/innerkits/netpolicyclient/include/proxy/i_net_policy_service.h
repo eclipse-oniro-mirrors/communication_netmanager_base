@@ -46,7 +46,6 @@ public:
         CMD_NPS_SET_BACKGROUND_POLICY,
         CMD_NPS_GET_BACKGROUND_POLICY,
         CMD_NPS_GET_BACKGROUND_POLICY_BY_UID,
-        CMD_NPS_GET_BACKGROUND_POLICY_BY_CURRENT, // Ready to remve
         CMD_NPS_END = 100,
     };
 
@@ -60,6 +59,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t SetPolicyByUid(uint32_t uid, uint32_t policy) = 0;
+
     /**
      * Get the network policy of the specified UID.
      *
@@ -68,6 +68,7 @@ public:
      *      For details, see {@link NetUidPolicy}.
      */
     virtual uint32_t GetPolicyByUid(uint32_t uid) = 0;
+
     /**
      * Get the application UIDs of the specified policy.
      *
@@ -76,6 +77,7 @@ public:
      * @return Returns the UIDs of the specified policy.
      */
     virtual std::vector<uint32_t> GetUidsByPolicy(uint32_t policy) = 0;
+
     /**
      * Get the status whether the specified uid app can access the metered network or non-metered network.
      *
@@ -84,6 +86,7 @@ public:
      * @return Returns it's allowed or not to access the network.
      */
     virtual bool IsUidNetAllowed(uint32_t uid, bool metered) = 0;
+
     /**
      * Get the status whether the specified uid app can access the specified iface network.
      *
@@ -92,6 +95,7 @@ public:
      * @return Returns it's allowed or not to access the network.
      */
     virtual bool IsUidNetAllowed(uint32_t uid, const std::string &ifaceName) = 0;
+
     /**
      * Register network policy change callback.
      *
@@ -99,6 +103,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback) = 0;
+
     /**
      * Unregister network policy change callback.
      *
@@ -106,6 +111,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback) = 0;
+
     /**
      * Set network policies.
      *
@@ -113,6 +119,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies) = 0;
+
     /**
      * Get network policies.
      *
@@ -120,6 +127,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies) = 0;
+
     /**
      * Update the limit or warning remind time of quota policy.
      *
@@ -129,6 +137,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType) = 0;
+
     /**
      * Set the UID into device idle allow list.
      *
@@ -137,6 +146,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed) = 0;
+
     /**
      * Get the allow list of UID in device idle mode.
      *
@@ -144,6 +154,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t GetDeviceIdleAllowedList(std::vector<uint32_t> &uids) = 0;
+
     /**
      * Process network policy in device idle mode.
      *
@@ -151,6 +162,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t SetDeviceIdlePolicy(bool enable) = 0;
+
     /**
      * Reset network policies\rules\quota policies\firewall rules.
      *
@@ -158,6 +170,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t ResetPolicies(const std::string &iccid) = 0;
+
     /**
      * Control if apps can use data on background.
      *
@@ -165,6 +178,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t SetBackgroundPolicy(bool isAllowed) = 0;
+
     /**
      * Get the status if apps can use data on background.
      *
@@ -172,6 +186,7 @@ public:
      *      For details, see {@link BackgroundPolicy#BACKGROUND_POLICY_DISABLE}.
      */
     virtual bool GetBackgroundPolicy() = 0;
+
     /**
      * Get the background network restriction policy for the specified uid.
      *
@@ -179,10 +194,6 @@ public:
      * @return {@link NetBackgroundPolicy}.
      */
     virtual uint32_t GetBackgroundPolicyByUid(uint32_t uid) = 0;
-    /**
-     * @deprecated
-     */
-    virtual uint32_t GetCurrentBackgroundPolicy() = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

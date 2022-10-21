@@ -53,14 +53,8 @@ void ConnManagerTest::TearDown() {}
 HWTEST_F(ConnManagerTest, CreatePhysicalNetworkTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    ret = netsysNativeService->NetworkCreatePhysical(NETID, PERMISSION_NONE);
-    NETNATIVE_LOG_D("ConnManagerTest CreatePhysicalNetworkTest001");
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->NetworkCreatePhysical(NETID, PERMISSION_NONE);
     EXPECT_TRUE(ret == 0);
 }
 
@@ -72,16 +66,10 @@ HWTEST_F(ConnManagerTest, CreatePhysicalNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    ret = netsysNativeService->NetworkAddInterface(NETID, INTERFACENAME);
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->NetworkAddInterface(NETID, INTERFACENAME);
     EXPECT_TRUE(ret == 0);
     ret = netsysNativeService->InterfaceAddAddress(INTERFACENAME, "192.168.113.209", 24);
-    NETNATIVE_LOG_D("ConnManagerTest AddInterfaceToNetworkTest001");
     EXPECT_TRUE(ret == 0);
 }
 
@@ -93,16 +81,10 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, AddRouteTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    ret = netsysNativeService->NetworkAddRoute(NETID, INTERFACENAME, "0.0.0.0/0", "192.168.113.222");
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->NetworkAddRoute(NETID, INTERFACENAME, "0.0.0.0/0", "192.168.113.222");
     EXPECT_TRUE(ret == 0);
     ret = netsysNativeService->NetworkAddRoute(NETID, INTERFACENAME, "192.168.113.0/24", "0.0.0.0");
-    NETNATIVE_LOG_D("ConnManagerTest AddRouteTest001");
     EXPECT_TRUE(ret == 0);
 }
 
@@ -114,14 +96,8 @@ HWTEST_F(ConnManagerTest, AddRouteTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, SetDefaultNetworkTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    ret = netsysNativeService->NetworkSetDefault(NETID);
-    NETNATIVE_LOG_D("ConnManagerTest SetDefaultNetworkTest001");
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->NetworkSetDefault(NETID);
     EXPECT_TRUE(ret == 0);
 }
 
@@ -133,14 +109,8 @@ HWTEST_F(ConnManagerTest, SetDefaultNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, GetDefaultNetworkTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    ret = netsysNativeService->NetworkGetDefault();
-    NETNATIVE_LOG_D("ConnManagerTest GetDefaultNetworkTest001");
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->NetworkGetDefault();
     EXPECT_TRUE(ret == NETID);
 }
 
@@ -152,16 +122,10 @@ HWTEST_F(ConnManagerTest, GetDefaultNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, RemoveInterfaceFromNetworkTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    ret = netsysNativeService->InterfaceDelAddress(INTERFACENAME, "192.168.113.209", 24);
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->InterfaceDelAddress(INTERFACENAME, "192.168.113.209", 24);
     EXPECT_TRUE(ret == 0);
     ret = netsysNativeService->NetworkRemoveInterface(NETID, INTERFACENAME);
-    NETNATIVE_LOG_D("ConnManagerTest RemoveInterfaceFromNetworkTest001");
     EXPECT_TRUE(ret == 0);
 }
 
@@ -173,14 +137,8 @@ HWTEST_F(ConnManagerTest, RemoveInterfaceFromNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, DestroyNetworkTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    ret = netsysNativeService->NetworkDestroy(NETID);
-    NETNATIVE_LOG_D("ConnManagerTest DestroyNetworkTest001");
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->NetworkDestroy(NETID);
     EXPECT_TRUE(ret == 0);
 }
 
@@ -192,14 +150,8 @@ HWTEST_F(ConnManagerTest, DestroyNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, ClearDefaultNetwork001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    ret = netsysNativeService->NetworkClearDefault();
-    NETNATIVE_LOG_D("ConnManagerTest ClearDefaultNetwork001");
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->NetworkClearDefault();
     EXPECT_TRUE(ret == 0);
 }
 } // namespace NetsysNative
