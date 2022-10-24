@@ -39,7 +39,7 @@ int32_t NetConnClient::SystemReady()
 }
 
 int32_t NetConnClient::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
-    const std::set<NetCap> &netCaps, uint32_t &supplierId)
+                                           const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {
     NETMGR_LOG_D("RegisterNetSupplier client in.");
     sptr<INetConnService> proxy = GetProxy();
@@ -90,7 +90,7 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<INetConnCallback> &cal
 }
 
 int32_t NetConnClient::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-    const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
+                                               const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
 {
     NETMGR_LOG_D("RegisterNetConnCallback with timeout client in.");
     if (netSpecifier == nullptr || !netSpecifier->SpecifierIsValid()) {
@@ -162,11 +162,11 @@ int32_t NetConnClient::GetDefaultNet(NetHandle &netHandle)
     return ERR_NONE;
 }
 
-int32_t NetConnClient::HasDefaultNet(bool& flag)
+int32_t NetConnClient::HasDefaultNet(bool &flag)
 {
     NETMGR_LOG_D("HasDefaultNet client in.");
     sptr<INetConnService> proxy = GetProxy();
-    if (proxy==nullptr) {
+    if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return IPC_PROXY_ERR;
     }
@@ -242,7 +242,7 @@ int32_t NetConnClient::GetAddressByName(const std::string &host, int32_t netId, 
 
 int32_t NetConnClient::BindSocket(int32_t socket_fd, int32_t netId)
 {
-    std::shared_ptr<nmd::FwmarkClient> fwmarkClient_= std::make_shared<nmd::FwmarkClient>();
+    std::shared_ptr<nmd::FwmarkClient> fwmarkClient_ = std::make_shared<nmd::FwmarkClient>();
     fwmarkClient_->BindSocket(socket_fd, netId);
     return NET_CONN_SUCCESS;
 }
@@ -344,7 +344,7 @@ void NetConnClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 int32_t NetConnClient::IsDefaultNetMetered(bool &isMetered)
 {
     sptr<INetConnService> proxy = GetProxy();
-    if (proxy==nullptr) {
+    if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return IPC_PROXY_ERR;
     }

@@ -58,13 +58,13 @@ int32_t NetPolicyCallback::UnregisterNetPolicyCallback(const sptr<INetPolicyCall
     }
 
     auto it = std::remove_if(callbacks_.begin(), callbacks_.end(),
-        [callback](const sptr<INetPolicyCallback> &tempCallback) -> bool {
-            if (tempCallback == nullptr || tempCallback->AsObject() == nullptr ||
-                tempCallback->AsObject().GetRefPtr() == nullptr) {
-                return true;
-            }
-            return callback->AsObject().GetRefPtr() == tempCallback->AsObject().GetRefPtr();
-        });
+                             [callback](const sptr<INetPolicyCallback> &tempCallback) -> bool {
+                                 if (tempCallback == nullptr || tempCallback->AsObject() == nullptr ||
+                                     tempCallback->AsObject().GetRefPtr() == nullptr) {
+                                     return true;
+                                 }
+                                 return callback->AsObject().GetRefPtr() == tempCallback->AsObject().GetRefPtr();
+                             });
     callbacks_.erase(it, callbacks_.end());
 
     return NetPolicyResultCode::ERR_NONE;

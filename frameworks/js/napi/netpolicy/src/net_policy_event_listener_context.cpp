@@ -48,7 +48,7 @@ int32_t NetPolicyEventListenerContext::RemoveEventListener(EventListener &eventL
     ret = DelayedSingleton<NetPolicyClient>::GetInstance()->UnregisterNetPolicyCallback(callback);
     if (ret == 0) {
         std::map<int32_t, EventListener>::iterator it = listenses.find(eventListener.eventId);
-        if (it !=listenses.end()) {
+        if (it != listenses.end()) {
             napi_delete_reference(it->second.env, it->second.callbackRef);
             listenses.erase(eventListener.eventId);
         }

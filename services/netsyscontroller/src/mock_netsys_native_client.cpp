@@ -308,7 +308,7 @@ static long getUidTrafficFromBPF(int uid, int cgroupType)
         close(sock);
         return -1;
     }
-    if (connect(sock, reinterpret_cast<sockaddr*>(&s_un), sizeof(s_un)) != 0) {
+    if (connect(sock, reinterpret_cast<sockaddr *>(&s_un), sizeof(s_un)) != 0) {
         close(sock);
         return -1;
     }
@@ -475,18 +475,18 @@ int32_t MockNetsysNativeClient::AddRoute(const std::string &ip, const std::strin
     }
     int copyRet = memcpy_s(&rt.rt_gateway, sizeof(rt.rt_gateway), &_sin, sizeof(struct sockaddr_in));
     NETMGR_LOG_I("copyRet = %{public}d", copyRet);
-    (reinterpret_cast<struct sockaddr_in*>(&rt.rt_dst))->sin_family=AF_INET;
-    if (inet_aton(ip.c_str(), &((struct sockaddr_in*)&rt.rt_dst)->sin_addr) < 0) {
+    (reinterpret_cast<struct sockaddr_in *>(&rt.rt_dst))->sin_family = AF_INET;
+    if (inet_aton(ip.c_str(), &((struct sockaddr_in *)&rt.rt_dst)->sin_addr) < 0) {
         NETMGR_LOG_E("MockNetsysNativeClient inet_aton ip[%{public}s]", ToAnonymousIp(ip).c_str());
         return -1;
     }
-    (reinterpret_cast<struct sockaddr_in*>(&rt.rt_genmask))->sin_family=AF_INET;
-    if (inet_aton(mask.c_str(), &(reinterpret_cast<struct sockaddr_in*>(&rt.rt_genmask))->sin_addr) < 0) {
+    (reinterpret_cast<struct sockaddr_in *>(&rt.rt_genmask))->sin_family = AF_INET;
+    if (inet_aton(mask.c_str(), &(reinterpret_cast<struct sockaddr_in *>(&rt.rt_genmask))->sin_addr) < 0) {
         NETMGR_LOG_E("MockNetsysNativeClient inet_aton mask[%{public}s]", mask.c_str());
         return -1;
     }
     if (!devName.empty()) {
-        rt.rt_dev = (char*)devName.c_str();
+        rt.rt_dev = (char *)devName.c_str();
     }
     rt.rt_flags = RTF_GATEWAY;
     int fd = socket(AF_INET, SOCK_DGRAM, 0);

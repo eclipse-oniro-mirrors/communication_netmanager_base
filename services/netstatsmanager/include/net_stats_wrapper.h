@@ -16,17 +16,9 @@
 #ifndef NET_STATS_WRAPPER_H
 #define NET_STATS_WRAPPER_H
 
-#include <fstream>
-#include <iostream>
-#include <map>
 #include <memory>
-#include <sstream>
 #include <string>
-#include <vector>
 
-#include "singleton.h"
-
-#include "net_mgr_log_wrapper.h"
 #include "netsys_bpf_stats.h"
 
 namespace OHOS {
@@ -65,6 +57,7 @@ public:
 
 private:
     NetStatsWrapper();
+
 private:
     std::unique_ptr<NetsysBpfStats> netSysBpf_ = nullptr;
     NetStatsWrapper(const NetStatsWrapper &) = delete;

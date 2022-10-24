@@ -123,8 +123,7 @@ bool StatisticsExec::ExecUpdateStatsData(UpdateStatsDataContext *context)
 {
     NetStatsResultCode result = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateStatsData();
     if (result != NetStatsResultCode::ERR_NONE) {
-        NETMANAGER_BASE_LOGE(
-            "ExecUpdateStatsData error");
+        NETMANAGER_BASE_LOGE("ExecUpdateStatsData error");
         return false;
     }
     return true;

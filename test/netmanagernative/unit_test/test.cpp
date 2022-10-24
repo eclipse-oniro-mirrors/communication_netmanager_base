@@ -159,7 +159,7 @@ void ProcessInput(bool &loopFlag)
     }
     printf("inputCMD is:[%d]\n", inputCMD);
     switch (static_cast<InterfaceMenu>(inputCMD)) {
-        case  InterfaceMenu::INPUT_QUIT: {
+        case InterfaceMenu::INPUT_QUIT: {
             loopFlag = false;
             printf("exit...\n");
             break;
