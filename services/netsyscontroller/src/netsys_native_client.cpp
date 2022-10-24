@@ -154,7 +154,9 @@ void NetsysNativeClient::Init()
                 break;
             }
         }
-        netsysNativeService_->RegisterNotifyCallback(nativeNotifyCallback_);
+        if (netsysNativeService_ != nullptr) {
+            netsysNativeService_->RegisterNotifyCallback(nativeNotifyCallback_);
+        }
     });
     thread.detach();
 }
