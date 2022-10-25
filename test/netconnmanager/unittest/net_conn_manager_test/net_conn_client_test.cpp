@@ -1,0 +1,227 @@
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <gtest/gtest.h>
+
+#include "accesstoken_kit.h"
+#include "message_parcel.h"
+#include "net_conn_client.h"
+#include "net_conn_constants.h"
+#include "net_conn_types.h"
+#include "net_mgr_log_wrapper.h"
+#include "token_setproc.h"
+
+namespace OHOS {
+namespace NetManagerStandard {
+namespace {
+using namespace testing::ext;
+using namespace Security::AccessToken;
+using Security::AccessToken::AccessTokenID;
+
+HapInfoParams testInfoParms = {.bundleName = "net_conn_manager_test", .userID = 1, .instIndex = 0, .appIDDesc = "test"};
+
+PermissionDef testPermDef = {.permissionName = "ohos.permission.GET_NETWORK_INFO",
+                             .bundleName = "net_conn_manager_test",
+                             .grantMode = 1,
+                             .label = "label",
+                             .labelId = 1,
+                             .description = "Test net connect maneger",
+                             .descriptionId = 1,
+                             .availableLevel = APL_SYSTEM_BASIC};
+
+PermissionStateFull testState = {.grantFlags = {2},
+                                 .grantStatus = {PermissionState::PERMISSION_GRANTED},
+                                 .isGeneral = true,
+                                 .permissionName = "ohos.permission.GET_NETWORK_INFO",
+                                 .resDeviceID = {"local"}};
+
+HapPolicyParams testPolicyPrams = {.apl = APL_SYSTEM_BASIC,
+                                   .domain = "test.domain",
+                                   .permList = {testPermDef},
+                                   .permStateList = {testState}};
+} // namespace
+
+class AccessToken {
+public:
+    AccessToken()
+    {
+        currentID_ = GetSelfTokenID();
+        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
+        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
+        SetSelfTokenID(accessID_);
+    }
+    ~AccessToken()
+    {
+        AccessTokenKit::DeleteToken(accessID_);
+        SetSelfTokenID(currentID_);
+    }
+
+private:
+    AccessTokenID currentID_ = 0;
+    AccessTokenID accessID_ = 0;
+};
+
+class NetConnClientTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
+};
+
+void NetConnClientTest::SetUpTestCase() {}
+
+void NetConnClientTest::TearDownTestCase() {}
+
+void NetConnClientTest::SetUp() {}
+
+void NetConnClientTest::TearDown() {}
+
+/**
+ * @tc.name: GetDefaultNetTest001
+ * @tc.desc: Test NetConnClient::GetDefaultNet, not applying for
+ * permission,return NET_CONN_ERR_PERMISSION_CHECK_FAILED
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, GetDefaultNetTest001, TestSize.Level1)
+{
+    NetHandle handle;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
+    ASSERT_TRUE(ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED);
+}
+
+/**
+ * @tc.name: GetDefaultNetTest002
+ * @tc.desc: Test NetConnClient::GetDefaultNet, not applying for
+ * permission,return ERR_NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, GetDefaultNetTest002, TestSize.Level1)
+{
+    AccessToken token;
+    NetHandle handle;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
+    ASSERT_TRUE(ret == ERR_NONE);
+}
+
+/**
+ * @tc.name: HasDefaultNetTest001
+ * @tc.desc: Test NetConnClient::HasDefaultNet,not applying for
+ * permission, return NET_CONN_ERR_PERMISSION_CHECK_FAILED
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, HasDefaultNetTest001, TestSize.Level1)
+{
+    bool bFlag = false;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->HasDefaultNet(bFlag);
+    ASSERT_TRUE(ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED);
+}
+
+/**
+ * @tc.name: HasDefaultNetTest002
+ * @tc.desc: Test NetConnClient::HasDefaultNet, applying for
+ * permission, return ERR_NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, HasDefaultNetTest002, TestSize.Level1)
+{
+    AccessToken token;
+    bool bFlag = false;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->HasDefaultNet(bFlag);
+    ASSERT_TRUE(ret == ERR_NONE);
+}
+
+/**
+ * @tc.name: GetNetCapabilitiesTest001
+ * @tc.desc: Test NetConnClient::GetNetCapabilities, In the absence of
+ * permission, GetDefaultNet return NET_CONN_ERR_PERMISSION_CHECK_FAILED and
+ * GetNetCapabilities return ERR_PERMISSION_CHECK_FAIL
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest001, TestSize.Level1)
+{
+    NETMGR_LOG_D("GetNetCapabilitiesTest001 In");
+    NetHandle handle;
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
+    ASSERT_TRUE(ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED);
+
+    NetAllCapabilities netAllCap;
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(handle, netAllCap);
+    ASSERT_TRUE(ret == ResultCode::ERR_PERMISSION_CHECK_FAIL);
+}
+
+/**
+ * @tc.name: GetNetCapabilitiesTest002
+ * @tc.desc: Test NetConnClient::GetNetCapabilities:In the absence of
+ * permission, GetDefaultNet return NET_CONN_ERR_PERMISSION_CHECK_FAILED, and
+ * after add permission GetNetCapabilities return ERR_NO_NETWORK
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest002, TestSize.Level1)
+{
+    NETMGR_LOG_D("GetNetCapabilitiesTest002 In");
+    NetHandle handle;
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
+    ASSERT_TRUE(ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED);
+
+    AccessToken token;
+    NetAllCapabilities netAllCap;
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(handle, netAllCap);
+    ASSERT_TRUE(ret == ERR_NO_NETWORK);
+}
+
+/**
+ * @tc.name: GetNetCapabilitiesTest003
+ * @tc.desc: Test NetConnClient::GetNetCapabilities:Apply for permission at
+ * first, when net is connected,return ERR_NONE, or net is not connected,return
+ * ERR_NO_NETWORK
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest003, TestSize.Level1)
+{
+    NETMGR_LOG_D("GetNetCapabilitiesTest003 In");
+    AccessToken token;
+    NetHandle handle;
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
+    ASSERT_TRUE(ret == ERR_NONE);
+
+    NetAllCapabilities netAllCap;
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(handle, netAllCap);
+    ASSERT_TRUE(ret == ERR_NONE || ret == ERR_NO_NETWORK);
+}
+
+/**
+ * @tc.name: SetAirplaneModeTest
+ * @tc.desc: Test NetConnClient::SetAirplaneMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, SetAirplaneModeTest, TestSize.Level1)
+{
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAirplaneMode(true);
+    ASSERT_TRUE(ret == ERR_NONE);
+}
+
+/**
+ * @tc.name: RestoreFactoryDataTest
+ * @tc.desc: Test NetConnClient::RestoreFactoryData
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RestoreFactoryDataTest, TestSize.Level1)
+{
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->RestoreFactoryData();
+    ASSERT_TRUE(ret == ERR_NONE);
+}
+} // namespace NetManagerStandard
+} // namespace OHOS
