@@ -75,6 +75,7 @@ private:
     int32_t GetStatusCodeFromResponse(const std::string &strResponse);
     int32_t GetUrlRedirectFromResponse(const std::string &strResponse, std::string &urlRedirect);
     NetDetectionStatus dealRecvResult(const std::string &strResponse);
+    int32_t GetDefaultNetDetectionUrlFromCfg(std::string &strUrl);
     int32_t ParseUrl(const std::string &url, std::string &domain, std::string &urlPath);
     int32_t GetIpAddr(const char *domain, std::string &ip_addr, int &socketType);
 
