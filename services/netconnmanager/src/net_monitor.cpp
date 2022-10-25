@@ -16,6 +16,7 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <fcntl.h>
+#include <fstream>
 #include <future>
 #include <iostream>
 #include <list>
@@ -55,18 +56,9 @@ constexpr const char* PORTAL_URL_REDIRECT_FIRST_CASE = "Location: ";
 constexpr const char* PORTAL_URL_REDIRECT_SECOND_CASE = "http";
 constexpr const char* CONTENT_STR = "Content-Length:";
 constexpr const char* PORTAL_END_STR = ".com";
-
-static std::string MakeDefaultNetDetectionUrl()
-{
-    std::string url = "http";
-    url += "://";
-    url += "connectivitycheck";
-    url += ".platform";
-    url += ".hicloud";
-    url += ".com/";
-    url += "generate_204";
-    return url;
-}
+constexpr const char SPACE_STR = ' ';
+constexpr const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
+constexpr const char *DEF_NETDETECT_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
 
 NetMonitor::NetMonitor(uint32_t netId, NetDetectionStateHandler handle)
     :netId_(netId), netDetectionStatus_(handle)
@@ -152,7 +144,11 @@ void NetMonitor::Detection()
 
 NetDetectionStatus NetMonitor::SendParallelHttpProbes()
 {
-    std::string url = MakeDefaultNetDetectionUrl();
+    std::string url;
+    if (GetDefaultNetDetectionUrlFromCfg(url) != 0) {
+        NETMGR_LOG_I("GetDefaultNetDetectionUrlFromCfg failed, use default url");
+        url = DEF_NETDETECT_URL;
+    }
     std::string domain;
     std::string urlPath;
     if (ParseUrl(url, domain, urlPath)) {
@@ -500,6 +496,31 @@ int32_t NetMonitor::GetIpAddr(const char *domain, std::string &ip_addr, int &soc
     NETMGR_LOG_D("Get net[%{public}d] monitor ip:%{public}s", netId_, CommonUtils::ToAnonymousIp(ip_addr).c_str());
     freeaddrinfo(result);
     return 0;
+}
+
+int32_t NetMonitor::GetDefaultNetDetectionUrlFromCfg(std::string &strUrl)
+{
+    int32_t ret = 0;
+    std::string urlFilePath = URL_CFG_FILE;
+    std::ifstream file(urlFilePath.c_str());
+    if (!file.is_open()) {
+        NETMGR_LOG_E("Open file failed (%{public}s)", strerror(errno));
+        ret = -1;
+        return ret;
+    }
+
+    std::ostringstream oss;
+    oss << file.rdbuf();
+    std::string content = oss.str();
+    int32_t index = content.find_last_of(SPACE_STR);
+    strUrl = content.substr(index + 1);
+
+    if (strUrl.empty()) {
+        NETMGR_LOG_E("get netdetectionurl is empty");
+        ret = -1;
+    }
+    NETMGR_LOG_D("GetDefaultNetDetectionUrl is : %{public}s", strUrl.c_str());
+    return ret;
 }
 
 int32_t NetMonitor::ParseUrl(const std::string &url, std::string &domain, std::string &urlPath)

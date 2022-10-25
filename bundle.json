@@ -79,6 +79,7 @@
                     "//foundation/communication/netmanager_base/services/netconnmanager:net_conn_manager",
                     "//foundation/communication/netmanager_base/services/netpolicymanager:net_policy_manager",
                     "//foundation/communication/netmanager_base/services/netstatsmanager:net_stats_manager",
+                    "//foundation/communication/netmanager_base/services/etc/init:netdetectionurl.conf",
                     "//foundation/communication/netmanager_base/services/etc/init:netmanager_base.rc",
                     "//foundation/communication/netmanager_base/services/etc/init:netsysnative.rc",
                     "//foundation/communication/netmanager_base/services/etc/init:resolv.conf",
