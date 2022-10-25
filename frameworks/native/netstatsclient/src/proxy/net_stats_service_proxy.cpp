@@ -101,8 +101,7 @@ NetStatsResultCode NetStatsServiceProxy::GetIfaceStatsDetail(const std::string &
         NETMGR_LOG_E("WriteInterfaceToken failed");
         return NetStatsResultCode::ERR_INTERNAL_ERROR;
     }
-    NETMGR_LOG_D("proxy iface[%{public}s], start[%{public}d], end[%{public}d]",
-        iface.c_str(), start, end);
+    NETMGR_LOG_D("proxy iface[%{public}s], start[%{public}d], end[%{public}d]", iface.c_str(), start, end);
     if (!data.WriteString(iface)) {
         return NetStatsResultCode::ERR_INTERNAL_ERROR;
     }

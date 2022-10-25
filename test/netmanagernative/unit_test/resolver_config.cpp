@@ -153,8 +153,7 @@ void TestGetaddrinfo()
     if (res1 == nullptr) {
         NETNATIVE_LOGE("res1 res1  is nullptr");
     }
-
-    int  k = 0;
+    int k = 0;
     for (resP1 = res1; resP1 != nullptr; resP1 = resP1->ai_next) {
         char host[1024] = {0};
         NETNATIVE_LOGE("LOOP kkkk  start k=%{public}d \n", k);

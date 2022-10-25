@@ -15,8 +15,6 @@
 
 #include "net_stats_wrapper.h"
 
-// using OHOS::Bpf::NetsysBpfStats;
-
 namespace OHOS {
 namespace NetManagerStandard {
 NetStatsWrapper::NetStatsWrapper()

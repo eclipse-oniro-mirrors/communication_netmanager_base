@@ -12,17 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <vector>
+
+#include <ctime>
 #include <thread>
+#include <vector>
 
 #include <gtest/gtest.h>
-#include <ctime>
 
-#include "net_stats_callback_test.h"
 #include "data_flow_statistics.h"
 #include "net_mgr_log_wrapper.h"
-#include "net_stats_constants.h"
+#include "net_stats_callback_test.h"
 #include "net_stats_client.h"
+#include "net_stats_constants.h"
 #include "net_stats_csv.h"
 
 namespace OHOS {
@@ -52,7 +53,7 @@ void NetStatsManagerTest::TearDown() {}
 
 sptr<NetStatsCallbackTest> NetStatsManagerTest::GetINetStatsCallbackSample() const
 {
-    sptr<NetStatsCallbackTest> callback = std::make_unique<NetStatsCallbackTest>().release();
+    sptr<NetStatsCallbackTest> callback = new (std::nothrow) NetStatsCallbackTest();
     return callback;
 }
 
@@ -188,13 +189,13 @@ HWTEST_F(NetStatsManagerTest, NetStatsManager011, TestSize.Level1)
  */
 HWTEST_F(NetStatsManagerTest, NetStatsManager012, TestSize.Level1)
 {
-    std::string  iface =  ETH_IFACE_NAME;
+    std::string iface = ETH_IFACE_NAME;
     uint32_t start = GetTestTime();
     uint32_t end = GetTestTime();
 
-    NetStatsInfo statsInfo ;
-    NetStatsResultCode result = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(iface,
-        start, end, statsInfo);
+    NetStatsInfo statsInfo;
+    NetStatsResultCode result = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(iface, start,
+                                                                                                     end, statsInfo);
     ASSERT_TRUE(result == NetStatsResultCode::ERR_INVALID_PARAMETER);
 }
 
@@ -205,14 +206,14 @@ HWTEST_F(NetStatsManagerTest, NetStatsManager012, TestSize.Level1)
  */
 HWTEST_F(NetStatsManagerTest, NetStatsManager013, TestSize.Level1)
 {
-    std::string  iface = ETH_IFACE_NAME;
+    std::string iface = ETH_IFACE_NAME;
     uint32_t uid = TEST_UID;
     uint32_t start = GetTestTime();
     uint32_t end = GetTestTime();
 
     NetStatsInfo statsInfo;
-    NetStatsResultCode result = DelayedSingleton<NetStatsClient>::GetInstance()->GetUidStatsDetail(
-        iface, uid, start, end, statsInfo);
+    NetStatsResultCode result = DelayedSingleton<NetStatsClient>::GetInstance()->GetUidStatsDetail(iface, uid, start,
+                                                                                                   end, statsInfo);
     ASSERT_TRUE(result == NetStatsResultCode::ERR_INVALID_PARAMETER);
 }
 
@@ -230,9 +231,10 @@ HWTEST_F(NetStatsManagerTest, NetStatsManager014, TestSize.Level1)
     uint32_t start = GetTestTime();
     uint32_t end = GetTestTime();
     NetStatsResultCode result = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateIfacesStats(iface,
-        start, end, stats);
+                                                                                                   start, end, stats);
     ASSERT_TRUE(result == NetStatsResultCode::ERR_INVALID_PARAMETER);
 }
+
 /**
  * @tc.name: NetStatsManager015
  * @tc.desc: Test NetStatsManagerTest UpdateStatsData.
@@ -241,6 +243,17 @@ HWTEST_F(NetStatsManagerTest, NetStatsManager014, TestSize.Level1)
 HWTEST_F(NetStatsManagerTest, NetStatsManager015, TestSize.Level1)
 {
     NetStatsResultCode result = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateStatsData();
+    ASSERT_TRUE(result == NetStatsResultCode::ERR_NONE);
+}
+
+/**
+ * @tc.name: NetStatsManager016
+ * @tc.desc: Test NetStatsManagerTest ResetFactory.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsManagerTest, NetStatsManager016, TestSize.Level1)
+{
+    NetStatsResultCode result = DelayedSingleton<NetStatsClient>::GetInstance()->ResetFactory();
     ASSERT_TRUE(result == NetStatsResultCode::ERR_NONE);
 }
 } // namespace NetManagerStandard

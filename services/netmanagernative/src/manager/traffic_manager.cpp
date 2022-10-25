@@ -43,7 +43,7 @@ std::vector<std::string> GetInterfaceList()
     }
 
     ptr = readdir(dir);
-    while (ptr!= nullptr) {
+    while (ptr != nullptr) {
         if (strcmp(ptr->d_name, ".") != 0 && strcmp(ptr->d_name, "..") != 0) {
             ifList.push_back(ptr->d_name);
         }

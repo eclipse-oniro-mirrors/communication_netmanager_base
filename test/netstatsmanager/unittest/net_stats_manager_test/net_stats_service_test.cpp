@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-#include <vector>
+#include <ctime>
 #include <thread>
+#include <vector>
 
 #include <gtest/gtest.h>
-#include <ctime>
 
-#include "net_stats_callback_test.h"
 #include "net_mgr_log_wrapper.h"
-#include "net_stats_constants.h"
+#include "net_stats_callback_test.h"
 #include "net_stats_client.h"
+#include "net_stats_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -64,6 +64,7 @@ HWTEST_F(NetStatsServiceTest, NetStatsManager001, TestSize.Level1)
     long ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceRxBytes(ETH_IFACE_NAME);
     ASSERT_TRUE(ret >= 0);
 }
+
 /**
  * @tc.name: NetStatsServiceTest002
  * @tc.desc: Test NetStatsServiceTest GetIfaceTxBytes.
@@ -74,6 +75,7 @@ HWTEST_F(NetStatsServiceTest, NetStatsManager002, TestSize.Level1)
     long ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceTxBytes(ETH_IFACE_NAME);
     ASSERT_TRUE(ret >= 0);
 }
+
 /**
  * @tc.name: NetStatsServiceTest003
  * @tc.desc: Test NetStatsServiceTest GetCellularRxBytes.
@@ -84,6 +86,7 @@ HWTEST_F(NetStatsServiceTest, NetStatsManager003, TestSize.Level1)
     long ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularRxBytes();
     ASSERT_TRUE(ret >= 0);
 }
+
 /**
  * @tc.name: NetStatsServiceTest004
  * @tc.desc: Test NetStatsServiceTest GetCellularTxBytes.
@@ -94,6 +97,7 @@ HWTEST_F(NetStatsServiceTest, NetStatsManager004, TestSize.Level1)
     long ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularTxBytes();
     ASSERT_TRUE(ret >= 0);
 }
+
 /**
  * @tc.name: NetStatsServiceTest005
  * @tc.desc: Test NetStatsServiceTest GetAllRxBytes.
@@ -104,6 +108,7 @@ HWTEST_F(NetStatsServiceTest, NetStatsManager005, TestSize.Level1)
     long ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllRxBytes();
     ASSERT_TRUE(ret >= 0);
 }
+
 /**
  * @tc.name: NetStatsServiceTest006
  * @tc.desc: Test NetStatsServiceTest GetAllTxBytes.
@@ -114,6 +119,7 @@ HWTEST_F(NetStatsServiceTest, NetStatsManager007, TestSize.Level1)
     long ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllTxBytes();
     ASSERT_TRUE(ret >= 0);
 }
+
 /**
  * @tc.name: NetStatsServiceTest008
  * @tc.desc: Test NetStatsServiceTest GetUidRxBytes.
@@ -124,6 +130,7 @@ HWTEST_F(NetStatsServiceTest, NetStatsManager008, TestSize.Level1)
     long ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetUidRxBytes(TEST_UID);
     ASSERT_TRUE(ret >= 0);
 }
+
 /**
  * @tc.name: NetStatsServiceTest009
  * @tc.desc: Test NetStatsServiceTest GetUidTxBytes.
