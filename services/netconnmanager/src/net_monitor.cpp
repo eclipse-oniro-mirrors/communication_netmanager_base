@@ -73,7 +73,7 @@ NetMonitor::NetMonitor(uint32_t netId, NetDetectionStateHandler handle)
 {
 }
 
-NetMonitor::~NetMonitor(){}
+NetMonitor::~NetMonitor() = default;
 
 void NetMonitor::Start(bool needReport)
 {
@@ -516,7 +516,7 @@ int32_t NetMonitor::ParseUrl(const std::string &url, std::string &domain, std::s
             urlPath = *itr;
         }
     }
-    return (domain.empty() || urlPath.empty())?-1:0;
+    return (domain.empty() || urlPath.empty()) ? -1 : 0;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

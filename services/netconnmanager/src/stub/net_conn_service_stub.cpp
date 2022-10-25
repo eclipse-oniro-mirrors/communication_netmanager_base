@@ -301,7 +301,7 @@ int32_t NetConnServiceStub::OnUpdateNetLinkInfo(MessageParcel &data, MessageParc
     return ERR_NONE;
 }
 
-int32_t  NetConnServiceStub::OnRegisterNetDetectionCallback(MessageParcel &data, MessageParcel &reply)
+int32_t NetConnServiceStub::OnRegisterNetDetectionCallback(MessageParcel &data, MessageParcel &reply)
 {
     if (!data.ContainFileDescriptors()) {
         NETMGR_LOG_E("Execute ContainFileDescriptors failed");
@@ -478,7 +478,7 @@ int32_t NetConnServiceStub::OnGetDefaultNet(MessageParcel& data, MessageParcel& 
             return ERR_FLATTEN_OBJECT;
         }
     }
-    return  ERR_NONE;
+    return ERR_NONE;
 }
 
 int32_t NetConnServiceStub::OnHasDefaultNet(MessageParcel& data, MessageParcel& reply)
