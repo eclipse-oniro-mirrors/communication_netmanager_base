@@ -50,6 +50,7 @@ constexpr uint32_t ARRAY_OFFSET_4_INDEX = 4;
 constexpr uint32_t ARRAY_OFFSET_5_INDEX = 5;
 constexpr uint32_t MOVE_BIT_LEFT31 = 31;
 constexpr uint32_t BIT_MAX = 32;
+constexpr uint32_t IOCTL_RETRY_TIME = 32;
 } // namespace
 
 InterfaceManager::InterfaceManager() {}
@@ -327,6 +328,15 @@ int InterfaceManager::SetIfaceConfig(const nmd::InterfaceConfigurationParcel &if
         close(fd);
         return 1;
     }
+    int retry = 0;
+    do {
+        if (ioctl(fd, SIOCSIFFLAGS, &ifr) != -1) {
+            break;
+        }
+        ++retry;
+    } while (errno == ETIMEDOUT && retry < IOCTL_RETRY_TIME);
+    NETNATIVE_LOGI("set ifr flags=[%{public}d] strerror=[%{public}s] retry=[%{public}d]", ifr.ifr_flags,
+        strerror(errno), retry);
     close(fd);
     return 1;
 }
