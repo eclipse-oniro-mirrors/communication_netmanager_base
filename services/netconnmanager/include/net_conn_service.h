@@ -260,6 +260,7 @@ private:
     int32_t GenerateNetId();
     bool FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId);
     void GetDumpMessage(std::string &message);
+    sptr<NetSupplier> FindNetSupplier(uint32_t supplierId);
 
 private:
     enum ServiceRunningState {
@@ -280,6 +281,7 @@ private:
     sptr<NetConnServiceIface> serviceIface_ = nullptr;
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
     std::string httpProxy_;
+    std::mutex netManagerMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
