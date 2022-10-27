@@ -16,14 +16,14 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_shared_library("netsys_controller") {
   sources = [
-    "$NETSYSCONTROLLER_ROOT_DIR/src/mock_netsys_native_client.cpp",
-    "$NETSYSCONTROLLER_ROOT_DIR/src/netsys_controller.cpp",
-    "$NETSYSCONTROLLER_ROOT_DIR/src/netsys_controller_service_impl.cpp",
-    "$NETSYSCONTROLLER_ROOT_DIR/src/netsys_native_client.cpp",
+    "src/mock_netsys_native_client.cpp",
+    "src/netsys_controller.cpp",
+    "src/netsys_controller_service_impl.cpp",
+    "src/netsys_native_client.cpp",
   ]
 
   include_dirs = [
-    "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "include",
     "$NETCONNMANAGER_SOURCE_DIR/include",
     "$NETCONNMANAGER_COMMON_DIR/include",
     "$NETMANAGER_BASE_ROOT/utils/log/include",

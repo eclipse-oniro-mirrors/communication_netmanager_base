@@ -22,12 +22,6 @@ config("statistics_config") {
     "include/context",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
   ]
-
-  cflags = [
-    "-Wall",
-    "-Werror",
-    "-g3",
-  ]
 }
 
 ohos_shared_library("statistics") {
@@ -48,10 +42,10 @@ ohos_shared_library("statistics") {
   configs = [ ":statistics_config" ]
 
   deps = [
+    "$ARKUI_ROOT/napi:ace_napi",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
-    "//foundation/arkui/napi/:ace_napi",
-    "//third_party/libuv:uv_static",
+    "$THIRD_PARTY_ROOT/libuv:uv",
   ]
 
   external_deps = [
@@ -61,8 +55,6 @@ ohos_shared_library("statistics") {
   ]
 
   relative_install_dir = "module/net"
-
   part_name = "netmanager_base"
-
   subsystem_name = "communication"
 }

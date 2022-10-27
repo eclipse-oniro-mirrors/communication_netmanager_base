@@ -14,17 +14,9 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-SUBSYSTEM_DIR = "//foundation/communication"
-
-## Build napi_utils.so {{{
 config("napi_utils_config") {
   visibility = [ ":napi_utils" ]
-
-  cflags = [
-    "-Wall",
-    "-Werror",
-    "-g3",
-  ]
+  include_dirs = [ "$SUBSYSTEM_DIR/netmanager_base/utils/log/include" ]
 }
 
 config("napi_utils_public_config") {
@@ -35,8 +27,6 @@ config("napi_utils_public_config") {
 }
 
 ohos_shared_library("napi_utils") {
-  include_dirs = [ "$SUBSYSTEM_DIR/netmanager_base/utils/log/include" ]
-
   sources = [
     "src/base_context.cpp",
     "src/event_listener.cpp",
@@ -59,4 +49,3 @@ ohos_shared_library("napi_utils") {
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
-## Build napi_utils.so }}}

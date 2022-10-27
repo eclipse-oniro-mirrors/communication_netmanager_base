@@ -16,14 +16,14 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_shared_library("net_stats_manager") {
   sources = [
-    "$NETSTATSMANAGER_SOURCE_DIR/src/net_stats_callback.cpp",
-    "$NETSTATSMANAGER_SOURCE_DIR/src/net_stats_csv.cpp",
-    "$NETSTATSMANAGER_SOURCE_DIR/src/net_stats_listener.cpp",
-    "$NETSTATSMANAGER_SOURCE_DIR/src/net_stats_service.cpp",
-    "$NETSTATSMANAGER_SOURCE_DIR/src/net_stats_service_iface.cpp",
-    "$NETSTATSMANAGER_SOURCE_DIR/src/net_stats_wrapper.cpp",
-    "$NETSTATSMANAGER_SOURCE_DIR/src/stub/net_stats_callback_proxy.cpp",
-    "$NETSTATSMANAGER_SOURCE_DIR/src/stub/net_stats_service_stub.cpp",
+    "src/net_stats_callback.cpp",
+    "src/net_stats_csv.cpp",
+    "src/net_stats_listener.cpp",
+    "src/net_stats_service.cpp",
+    "src/net_stats_service_iface.cpp",
+    "src/net_stats_wrapper.cpp",
+    "src/stub/net_stats_callback_proxy.cpp",
+    "src/stub/net_stats_service_stub.cpp",
   ]
 
   include_dirs = [
@@ -34,8 +34,8 @@ ohos_shared_library("net_stats_manager") {
     "$INNERKITS_ROOT/netstatsclient/include/proxy",
     "$NETCONNMANAGER_COMMON_DIR/include",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
-    "$NETSTATSMANAGER_SOURCE_DIR/include",
-    "$NETSTATSMANAGER_SOURCE_DIR/include/stub",
+    "include",
+    "include/stub",
     "$NETSYSBPFMAP_SOURCE_DIR/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETSTATSMANAGER_BPFLIB_DIR/include",

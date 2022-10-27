@@ -16,8 +16,8 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_shared_library("netsys_client") {
   sources = [
-    "$NETMANAGERNATIVE_ROOT/netsys_client/src/netsys_client.c",
-    "$NETMANAGERNATIVE_ROOT/netsys_client/src/netsys_tcp_client.c",
+    "src/netsys_client.c",
+    "src/netsys_tcp_client.c",
   ]
 
   include_dirs = [ "$NETMANAGERNATIVE_ROOT/include/netsys" ]

@@ -14,22 +14,6 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-common_deps = [
-  "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
-  "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
-  "$THIRD_PARTY_ROOT/libuv:uv",
-]
-
-common_external_deps = [
-  "c_utils:utils",
-  "hiviewdfx_hilog_native:libhilog",
-  "ipc:ipc_core",
-]
-
-common_relative_install_dir = "module"
-common_part_name = "netmanager_base"
-common_subsystem_name = "communication"
-
 ohos_shared_library("network") {
   include_dirs = [
     "async_context/include",
@@ -52,7 +36,11 @@ ohos_shared_library("network") {
     "observer/src/network_observer.cpp",
   ]
 
-  deps = common_deps
+  deps = [
+    "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
+    "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
+    "$THIRD_PARTY_ROOT/libuv:uv",
+  ]
   if (defined(global_parts_info) &&
       defined(global_parts_info.telephony_core_service) &&
       global_parts_info.telephony_core_service) {
@@ -62,9 +50,13 @@ ohos_shared_library("network") {
     defines = [ "HAS_TELEPHONY=1" ]
   }
 
-  external_deps = common_external_deps
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+  ]
 
-  relative_install_dir = common_relative_install_dir
-  part_name = common_part_name
-  subsystem_name = common_subsystem_name
+  relative_install_dir = "module"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
 }

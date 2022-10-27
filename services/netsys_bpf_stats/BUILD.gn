@@ -32,9 +32,7 @@ config("bpf_config") {
 ohos_shared_library("netsys_bpf_stats") {
   configs = [ ":bpf_config" ]
   public_configs = [ ":bpf_public_config" ]
-  sources = [
-    "$NETMANAGER_BASE_ROOT/services/netsys_bpf_stats/src/netsys_bpf_stats.cpp",
-  ]
+  sources = [ "src/netsys_bpf_stats.cpp" ]
 
   public_deps = [ "$C_UTILS_ROOT/base:utils" ]
 
