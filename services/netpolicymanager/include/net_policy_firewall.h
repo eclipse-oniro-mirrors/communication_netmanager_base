@@ -26,6 +26,7 @@ class NetPolicyFirewall : public NetPolicyBase {
 public:
     NetPolicyFirewall() : deviceIdleMode_(false) {}
     void Init();
+
     /**
      * Set the UID into device idle allow list.
      *
@@ -33,28 +34,32 @@ public:
      * @param isAllowed The UID is into allow list or not.
      */
     void SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed);
+
     /**
      * Get the allow list of UID in device idle mode.
      *
      * @param uids The list of UIDs
      */
     const std::vector<uint32_t> &GetDeviceIdleAllowedList();
+
     /**
      * Process network policy in device idle mode.
      *
      * @param enable Device idle mode is open or not.
      */
     void UpdateDeviceIdlePolicy(bool enable);
+
     /**
      * Reset network firewall rules.
      *
      */
     void ResetPolicies();
+
     /**
      * Handle the event from NetPolicyCore
      *
      * @param eventId The event id
-     * @param policyEvent The infomations passed from other core
+     * @param policyEvent The informations passed from other core
      */
     void HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEvent> &policyEvent);
 

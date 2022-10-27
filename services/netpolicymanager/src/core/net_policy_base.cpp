@@ -53,7 +53,7 @@ void NetPolicyBase::SendEvent(int32_t eventId, std::shared_ptr<PolicyEvent> &pol
 {
     policyEvent->eventId = eventId;
     policyEvent->sender = shared_from_this();
-    DelayedSingleton<NetPolicyCore>::GetInstance()->SendEvent(eventId, policyEvent);
+    DelayedSingleton<NetPolicyCore>::GetInstance()->SendEvent(eventId, policyEvent, delayTime);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

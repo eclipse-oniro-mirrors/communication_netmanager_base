@@ -50,6 +50,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t NetUidPolicyChange(uint32_t uid, uint32_t policy) = 0;
+
     /**
      * Notify the net uid rule change
      *
@@ -59,6 +60,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t NetUidRuleChange(uint32_t uid, uint32_t rule) = 0;
+
     /**
      * Notify the quota policy change
      *
@@ -66,6 +68,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t NetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies) = 0;
+
     /**
      * Notify the metered ifaces change
      *
@@ -73,6 +76,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t NetMeteredIfacesChange(std::vector<std::string> &ifaces) = 0;
+
     /**
      * Notify the background policy change
      *
@@ -80,6 +84,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t NetBackgroundPolicyChange(bool isBackgroundPolicyAllow) = 0;
+
     /**
      * @deprecated
      */

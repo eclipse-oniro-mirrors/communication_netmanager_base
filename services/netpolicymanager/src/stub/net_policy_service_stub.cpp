@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "net_policy_service_stub.h"
 
 #include "net_mgr_log_wrapper.h"
@@ -57,9 +58,7 @@ void NetPolicyServiceStub::InitEventHandler()
     core->Init(handler_);
 }
 
-int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code,
-                                              MessageParcel &data,
-                                              MessageParcel &reply,
+int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                               MessageOption &option)
 {
     std::u16string myDescriptor = NetPolicyServiceStub::GetDescriptor();
@@ -109,7 +108,7 @@ int32_t NetPolicyServiceStub::OnSetPolicyByUid(MessageParcel &data, MessageParce
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!reply.WriteInt32(static_cast<int32_t>(SetPolicyByUid(uid, static_cast<NetUidPolicy>(netPolicy))))) {
+    if (!reply.WriteInt32(SetPolicyByUid(uid, netPolicy))) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -123,7 +122,7 @@ int32_t NetPolicyServiceStub::OnGetPolicyByUid(MessageParcel &data, MessageParce
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!reply.WriteInt32(static_cast<int32_t>(GetPolicyByUid(uid)))) {
+    if (!reply.WriteInt32(GetPolicyByUid(uid))) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -137,7 +136,7 @@ int32_t NetPolicyServiceStub::OnGetUidsByPolicy(MessageParcel &data, MessageParc
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!reply.WriteUInt32Vector(GetUidsByPolicy(static_cast<NetUidPolicy>(policy)))) {
+    if (!reply.WriteUInt32Vector(GetUidsByPolicy(policy))) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -228,7 +227,7 @@ int32_t NetPolicyServiceStub::OnSetNetQuotaPolicies(MessageParcel &data, Message
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!reply.WriteInt32(static_cast<int32_t>(SetNetQuotaPolicies(quotaPolicies)))) {
+    if (!reply.WriteInt32(SetNetQuotaPolicies(quotaPolicies))) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -254,12 +253,12 @@ int32_t NetPolicyServiceStub::OnGetNetQuotaPolicies(MessageParcel &data, Message
 
 int32_t NetPolicyServiceStub::OnResetPolicies(MessageParcel &data, MessageParcel &reply)
 {
-    std::string subscrberId;
-    if (!data.ReadString(subscrberId)) {
+    std::string subscriberId;
+    if (!data.ReadString(subscriberId)) {
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!reply.WriteInt32(static_cast<int32_t>(ResetPolicies(subscrberId)))) {
+    if (!reply.WriteInt32(ResetPolicies(subscriberId))) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -273,7 +272,7 @@ int32_t NetPolicyServiceStub::OnSetBackgroundPolicy(MessageParcel &data, Message
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!reply.WriteInt32(static_cast<int32_t>(SetBackgroundPolicy(isBackgroundPolicyAllow)))) {
+    if (!reply.WriteInt32(SetBackgroundPolicy(isBackgroundPolicyAllow))) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -321,7 +320,7 @@ int32_t NetPolicyServiceStub::OnSnoozePolicy(MessageParcel &data, MessageParcel 
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!reply.WriteInt32(static_cast<int32_t>(UpdateRemindPolicy(netType, iccid, remindType)))) {
+    if (!reply.WriteInt32(UpdateRemindPolicy(netType, iccid, remindType))) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -340,7 +339,7 @@ int32_t NetPolicyServiceStub::OnSetDeviceIdleAllowedList(MessageParcel &data, Me
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!reply.WriteInt32(static_cast<int32_t>(SetDeviceIdleAllowedList(uid, isAllowed)))) {
+    if (!reply.WriteInt32(SetDeviceIdleAllowedList(uid, isAllowed))) {
         return ERR_FLATTEN_OBJECT;
     }
 

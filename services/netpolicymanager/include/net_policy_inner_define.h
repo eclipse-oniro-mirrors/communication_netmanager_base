@@ -16,10 +16,10 @@
 #ifndef NET_POLICY_DEFINE_H
 #define NET_POLICY_DEFINE_H
 
-#include "net_quota_policy.h"
-
 #include "common_event_manager.h"
 #include "common_event_support.h"
+
+#include "net_quota_policy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -122,9 +122,9 @@ struct NetPolicyCellular {
 
 struct NetPolicy {
     std::string hosVersion;
-    std::vector<UidPolicy> uidPolicys;
-    std::string backgroundPolicyStatus_;
-    std::vector<NetPolicyQuota> netQuotaPolicys;
+    std::vector<UidPolicy> uidPolicies;
+    std::string backgroundPolicyStatus;
+    std::vector<NetPolicyQuota> netQuotaPolicies;
 };
 
 // link power_mode_module.h

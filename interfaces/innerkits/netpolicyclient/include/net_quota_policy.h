@@ -20,9 +20,8 @@
 
 #include "parcel.h"
 
-#include "net_policy_constants.h"
-
 #include "net_all_capabilities.h"
+#include "net_policy_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -59,7 +58,7 @@ struct NetQuotaPolicy : public Parcelable {
     int64_t lastWarningRemind = REMIND_NEVER;
     /* The updated wall time that last limit remind, default: REMIND_NEVER */
     int64_t lastLimitRemind = REMIND_NEVER;
-    /* Is meterd network or not */
+    /* Is metered network or not */
     bool metered = false;
     // @deprecated
     int32_t source = -1;
@@ -83,6 +82,7 @@ struct NetQuotaPolicy : public Parcelable {
      * @return int64_t The wall time.of the period start.
      */
     int64_t GetPeriodStart();
+
     /**
      * To judge the quota is over the warning threshold.
      *
@@ -91,6 +91,7 @@ struct NetQuotaPolicy : public Parcelable {
      * @return false
      */
     bool IsOverWarning(int64_t totalQuota) const;
+
     /**
      * To judge the quota is over the limit threshold.
      *
@@ -99,22 +100,13 @@ struct NetQuotaPolicy : public Parcelable {
      * @return false Not over.
      */
     bool IsOverLimit(int64_t totalQuota) const;
+
     /**
      * Reset the quota policy to default.
      *
      */
     void Reset();
 };
-
-/**
- * @deprecated
- */
-struct NetPolicyQuotaPolicy : NetQuotaPolicy {};
-
-/**
- * @deprecated
- */
-struct NetPolicyCellularPolicy : NetQuotaPolicy {};
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NET_POLICY_QUOTA_POLICY_H

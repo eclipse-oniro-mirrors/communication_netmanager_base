@@ -17,8 +17,10 @@
 
 #include <ctime>
 
-#include "net_mgr_log_wrapper.h"
 #include "parcel.h"
+
+#include "net_mgr_log_wrapper.h"
+#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -161,18 +163,12 @@ bool NetQuotaPolicy::Unmarshalling(Parcel &parcel, std::vector<NetQuotaPolicy> &
 
 bool NetQuotaPolicy::IsOverWarning(int64_t totalQuota) const
 {
-    if (totalQuota > warningBytes) {
-        return true;
-    }
-    return false;
+    return totalQuota > warningBytes;
 }
 
 bool NetQuotaPolicy::IsOverLimit(int64_t totalQuota) const
 {
-    if (totalQuota > limitBytes) {
-        return true;
-    }
-    return false;
+    return totalQuota > limitBytes;
 }
 
 int64_t NetQuotaPolicy::GetPeriodStart()
@@ -185,8 +181,8 @@ int64_t NetQuotaPolicy::GetPeriodStart()
     struct tm tm;
     localtime_r(&timeNow, &tm);
     std::string cycle = periodDuration.substr(0, 1);
-    int32_t start =
-        static_cast<int32_t>(std::strtol(periodDuration.substr(1, periodDuration.size()).c_str(), nullptr, 10));
+    int32_t start = CommonUtils::StrToInt(periodDuration.substr(1, periodDuration.size()));
+
     if (cycle == PERIOD_DAY) {
         tm.tm_hour = start;
         tm.tm_min = 0;
@@ -196,7 +192,7 @@ int64_t NetQuotaPolicy::GetPeriodStart()
         tm.tm_min = 0;
         tm.tm_sec = 0;
         tm.tm_yday = start - 1;
-    } else { // cycle=="M"
+    } else {
         tm.tm_hour = 0;
         tm.tm_min = 0;
         tm.tm_sec = 0;

@@ -82,7 +82,7 @@ public:
      * Get the status whether the specified uid app can access the metered network or non-metered network.
      *
      * @param uid The specified UID of application.
-     * @param metered Indicates meterd network or non-metered network.
+     * @param metered Indicates metered network or non-metered network.
      * @return Returns it's allowed or not to access the network.
      */
     virtual bool IsUidNetAllowed(uint32_t uid, bool metered) = 0;

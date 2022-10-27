@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,7 @@ public:
     void OnStart() override;
     void OnStop() override;
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
+
     /**
      * Set the network policy for the specified UID.
      * @param uid The specified UID of app.
@@ -52,12 +53,14 @@ public:
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t SetPolicyByUid(uint32_t uid, uint32_t policy) override;
+
     /**
      * Get the network policy of the specified UID.
      * @param uid The specified UID of app.
      * @return uint32_t Return this uid's policy.
      */
     uint32_t GetPolicyByUid(uint32_t uid) override;
+
     /**
      * Get the application UIDs of the specified policy.
      * @param policy the network policy of the current UID of application.
@@ -65,6 +68,7 @@ public:
      * @return std::vector<uint32_t> Returns the UIDs of the specified policy.
      */
     std::vector<uint32_t> GetUidsByPolicy(uint32_t policy) override;
+
     /**
      * Get the status whether the specified uid app can access the metered network or non-metered network.
      * @param uid The specified UID of application.
@@ -73,6 +77,7 @@ public:
      * @return false Return false means it's not allowed to access the network.
      */
     bool IsUidNetAllowed(uint32_t uid, bool metered) override;
+
     /**
      * Get the status whether the specified uid app can access the specified iface network.
      * @param uid The specified UID of application.
@@ -81,54 +86,63 @@ public:
      * @return false Return false means it's not allowed to access the network.
      */
     bool IsUidNetAllowed(uint32_t uid, const std::string &ifaceName) override;
+
     /**
      * Register network policy change callback.
      * @param callback Interface type pointer.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback) override;
+
     /**
      * Unregister network policy change callback.
      * @param callback Interface type pointer.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback) override;
+
     /**
-     * Set policys by NetPolicyQuotaPolicy.
+     * Set policies by NetPolicyQuotaPolicy.
      * @param quotaPolicies The list of network quota policy, {@link NetQuotaPolicy}.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies) override;
+
     /**
      * Get network policies.
      * @param quotaPolicies The list of network quota policy, {@link NetQuotaPolicy}.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies) override;
+
     /**
      * Reset network policies\rules\quota policies\firewall rules.
      * @param iccid Specify the matched iccid of quota policy.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t ResetPolicies(const std::string &iccid) override;
+
     /**
      * Control if apps can use data on background.
      * @param allowBackground Allow apps to use data on background.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t SetBackgroundPolicy(bool allowBackground) override;
+
     /**
      * Get the status if apps can use data on background.
      * @return true It's allowed to use data on background.
      * @return false It's not allowed to use data on background.
      */
     bool GetBackgroundPolicy() override;
+
     /**
      * Get the background network restriction policy for the specified uid.
      * @param uid uid The specified UID of application.
      * @return uint32_t For details, see {@link NetPolicyResultCode}.
      */
     uint32_t GetBackgroundPolicyByUid(uint32_t uid) override;
+
     /**
      * Update the limit or warning remind time of quota policy.
      * @param netType {@link NetBearType}.
@@ -137,6 +151,7 @@ public:
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType) override;
+
     /**
      * Set the UID into device idle allow list.
      * @param uid The specified UID of application.
@@ -144,12 +159,14 @@ public:
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed) override;
+
     /**
      * Get the allow list of UID in device idle mode.
      * @param uids The list of UIDs
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t GetDeviceIdleAllowedList(std::vector<uint32_t> &uids) override;
+
     /**
      * Process network policy in device idle mode.
      * @param enable Device idle mode is open or not.

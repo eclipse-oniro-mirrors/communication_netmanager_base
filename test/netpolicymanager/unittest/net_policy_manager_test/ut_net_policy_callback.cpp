@@ -53,9 +53,9 @@ int32_t g_callbackQuotaPolicySize = -1;
 int32_t g_callbackIfacesSize = -1;
 bool g_callbackBackgroundPolicy = false;
 
-std::shared_ptr<NetPolicyCallback> netPolicyCallback_ = nullptr;
-std::shared_ptr<NetPolicyRule> netPolicyRuleCb_ = nullptr;
-std::shared_ptr<NetPolicyTraffic> netPolicyTrafficCb_ = nullptr;
+std::shared_ptr<NetPolicyCallback> g_netPolicyCallback = nullptr;
+std::shared_ptr<NetPolicyRule> g_netPolicyRuleCb = nullptr;
+std::shared_ptr<NetPolicyTraffic> g_netPolicyTrafficCb = nullptr;
 
 using namespace testing::ext;
 
@@ -115,9 +115,9 @@ public:
 
 void NetPolicyCallbackUTest::SetUpTestCase()
 {
-    netPolicyCallback_ = DelayedSingleton<NetPolicyCallback>::GetInstance();
-    netPolicyRuleCb_ = std::make_shared<NetPolicyRule>();
-    netPolicyTrafficCb_ = std::make_shared<NetPolicyTraffic>();
+    g_netPolicyCallback = DelayedSingleton<NetPolicyCallback>::GetInstance();
+    g_netPolicyRuleCb = std::make_shared<NetPolicyRule>();
+    g_netPolicyTrafficCb = std::make_shared<NetPolicyTraffic>();
 }
 
 void NetPolicyCallbackUTest::TearDownTestCase() {}
@@ -126,7 +126,7 @@ void NetPolicyCallbackUTest::SetUp() {}
 
 void NetPolicyCallbackUTest::TearDown()
 {
-    netPolicyRuleCb_->TransPolicyToRule(TEST_UID1, NetUidPolicy::NET_POLICY_NONE);
+    g_netPolicyRuleCb->TransPolicyToRule(TEST_UID1, NetUidPolicy::NET_POLICY_NONE);
 }
 
 void SetFirstNetQuotaPolicy(std::vector<NetQuotaPolicy> &quotaPolicies)
@@ -148,7 +148,7 @@ void SetSecondNetQuotaPolicy(std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     NetQuotaPolicy quotaPolicy2;
     quotaPolicy2.iccid = ICCID_2;
-    quotaPolicy2.periodDuration = "Y1";  // y1: First day of the year.
+    quotaPolicy2.periodDuration = "Y1"; // y1: First day of the year.
     quotaPolicy2.netType = NetBearType::BEARER_CELLULAR;
     quotaPolicy2.warningBytes = TEST_WARNING_BYTES_2;
     quotaPolicy2.limitBytes = TEST_LIMIT_BYTES_2;
@@ -161,7 +161,7 @@ void SetSecondNetQuotaPolicy(std::vector<NetQuotaPolicy> &quotaPolicies)
 
 void SetPolicyCallback()
 {
-    netPolicyRuleCb_->TransPolicyToRule(TEST_UID1, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
+    g_netPolicyRuleCb->TransPolicyToRule(TEST_UID1, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
 }
 
 /**
@@ -171,8 +171,8 @@ void SetPolicyCallback()
  */
 HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback001, TestSize.Level1)
 {
-    sptr<INetPolicyCallbackImpl> callback = new INetPolicyCallbackImpl();
-    netPolicyCallback_->RegisterNetPolicyCallback(callback);
+    sptr<INetPolicyCallbackImpl> callback = new (std::nothrow) INetPolicyCallbackImpl();
+    g_netPolicyCallback->RegisterNetPolicyCallback(callback);
     std::thread setPolicyCallback(SetPolicyCallback);
 
     std::unique_lock<std::mutex> lck(g_callbackMutex);
@@ -183,13 +183,13 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback001, TestSize.Level1)
     std::cout << "g_callbackPolicy:" << g_callbackPolicy << std::endl;
     ASSERT_EQ(g_callbackUid, TEST_UID1);
     ASSERT_EQ(g_callbackPolicy, 1);
-    netPolicyCallback_->UnregisterNetPolicyCallback(callback);
+    g_netPolicyCallback->UnregisterNetPolicyCallback(callback);
 }
 
 void SetPolicyCallback2()
 {
-    netPolicyRuleCb_->SetBackgroundPolicy(false);
-    netPolicyRuleCb_->TransPolicyToRule(TEST_UID1, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
+    g_netPolicyRuleCb->SetBackgroundPolicy(false);
+    g_netPolicyRuleCb->TransPolicyToRule(TEST_UID1, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
 }
 
 /**
@@ -200,7 +200,7 @@ void SetPolicyCallback2()
 HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback002, TestSize.Level1)
 {
     sptr<INetPolicyCallbackImpl> callback = new INetPolicyCallbackImpl();
-    netPolicyCallback_->RegisterNetPolicyCallback(callback);
+    g_netPolicyCallback->RegisterNetPolicyCallback(callback);
     std::thread setPolicyCallback2(SetPolicyCallback2);
 
     std::unique_lock<std::mutex> lck(g_callbackMutex);
@@ -210,7 +210,7 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback002, TestSize.Level1)
     std::cout << "g_callbackUid:" << g_callbackUid << std::endl;
     std::cout << "g_callbackRule:" << g_callbackRule << std::endl;
     ASSERT_EQ(g_callbackUid, TEST_UID1);
-    netPolicyCallback_->UnregisterNetPolicyCallback(callback);
+    g_netPolicyCallback->UnregisterNetPolicyCallback(callback);
 }
 
 void SetQuotaPolicy()
@@ -218,7 +218,7 @@ void SetQuotaPolicy()
     std::vector<NetQuotaPolicy> quotaPolicies;
     SetFirstNetQuotaPolicy(quotaPolicies);
 
-    netPolicyTrafficCb_->UpdateQuotaPolicies(quotaPolicies);
+    g_netPolicyTrafficCb->UpdateQuotaPolicies(quotaPolicies);
 }
 
 /**
@@ -229,7 +229,7 @@ void SetQuotaPolicy()
 HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback003, TestSize.Level1)
 {
     sptr<INetPolicyCallbackImpl> callback = new INetPolicyCallbackImpl();
-    netPolicyCallback_->RegisterNetPolicyCallback(callback);
+    g_netPolicyCallback->RegisterNetPolicyCallback(callback);
     std::thread setQuotaPolicy(SetQuotaPolicy);
 
     std::unique_lock<std::mutex> lck(g_callbackMutex);
@@ -238,7 +238,7 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback003, TestSize.Level1)
 
     std::cout << "g_callbackQuotaPolicySize:" << g_callbackQuotaPolicySize << std::endl;
     ASSERT_TRUE(g_callbackQuotaPolicySize > 0);
-    netPolicyCallback_->UnregisterNetPolicyCallback(callback);
+    g_netPolicyCallback->UnregisterNetPolicyCallback(callback);
 }
 
 void SetQuotaPolicy2()
@@ -246,7 +246,7 @@ void SetQuotaPolicy2()
     std::vector<NetQuotaPolicy> quotaPolicies;
     SetFirstNetQuotaPolicy(quotaPolicies);
     SetSecondNetQuotaPolicy(quotaPolicies);
-    netPolicyTrafficCb_->UpdateQuotaPolicies(quotaPolicies);
+    g_netPolicyTrafficCb->UpdateQuotaPolicies(quotaPolicies);
 }
 
 /**
@@ -257,7 +257,7 @@ void SetQuotaPolicy2()
 HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback004, TestSize.Level1)
 {
     sptr<INetPolicyCallbackImpl> callback = new INetPolicyCallbackImpl();
-    netPolicyCallback_->RegisterNetPolicyCallback(callback);
+    g_netPolicyCallback->RegisterNetPolicyCallback(callback);
     std::thread setQuotaPolicy2(SetQuotaPolicy2);
 
     std::unique_lock<std::mutex> lck(g_callbackMutex);
@@ -266,12 +266,12 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback004, TestSize.Level1)
 
     std::cout << "g_callbackIfacesSize:" << g_callbackIfacesSize << std::endl;
     ASSERT_TRUE(g_callbackIfacesSize >= 0);
-    netPolicyCallback_->UnregisterNetPolicyCallback(callback);
+    g_netPolicyCallback->UnregisterNetPolicyCallback(callback);
 }
 
 void SetBackgroundPolicy()
 {
-    netPolicyRuleCb_->SetBackgroundPolicy(true);
+    g_netPolicyRuleCb->SetBackgroundPolicy(true);
 }
 
 /**
@@ -282,7 +282,7 @@ void SetBackgroundPolicy()
 HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback005, TestSize.Level1)
 {
     sptr<INetPolicyCallbackImpl> callback = new INetPolicyCallbackImpl();
-    netPolicyCallback_->RegisterNetPolicyCallback(callback);
+    g_netPolicyCallback->RegisterNetPolicyCallback(callback);
     std::thread setBackgroundPolicy(SetBackgroundPolicy);
 
     std::unique_lock<std::mutex> lck(g_callbackMutex);
@@ -291,7 +291,7 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback005, TestSize.Level1)
 
     std::cout << "g_callbackBackgroundPolicy:" << g_callbackBackgroundPolicy << std::endl;
     ASSERT_TRUE(g_callbackBackgroundPolicy == true);
-    netPolicyCallback_->UnregisterNetPolicyCallback(callback);
+    g_netPolicyCallback->UnregisterNetPolicyCallback(callback);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

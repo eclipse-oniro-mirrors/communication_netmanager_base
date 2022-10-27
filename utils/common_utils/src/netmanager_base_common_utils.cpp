@@ -305,7 +305,7 @@ std::string ToAnonymousIp(const std::string &input)
     return input;
 }
 
-int32_t StrToInt(std::string &str)
+int32_t StrToInt(const std::string &str)
 {
     return std::strtol(str.c_str(), nullptr, 0);
 }
@@ -320,7 +320,7 @@ bool StrToBool(const std::string &str)
     return static_cast<bool>(std::strtoul(str.c_str(), nullptr, 0));
 }
 
-int64_t StrToLong(std::string &str)
+int64_t StrToLong(const std::string &str)
 {
     return std::strtol(str.c_str(), nullptr, 0);
 }
