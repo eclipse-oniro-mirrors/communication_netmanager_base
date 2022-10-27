@@ -53,6 +53,8 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE]            = &NetConnServiceStub::OnSetAirplaneMode;
     memberFuncMap_[CMD_NM_RESTORE_FACTORY_DATA]         = &NetConnServiceStub::OnRestoreFactoryData;
     memberFuncMap_[CMD_NM_IS_DEFAULT_NET_METERED]       = &NetConnServiceStub::OnIsDefaultNetMetered;
+    memberFuncMap_[CMD_NM_SET_HTTP_PROXY]               = &NetConnServiceStub::OnSetHttpProxy;
+    memberFuncMap_[CMD_NM_GET_HTTP_PROXY]               = &NetConnServiceStub::OnGetHttpProxy;
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
