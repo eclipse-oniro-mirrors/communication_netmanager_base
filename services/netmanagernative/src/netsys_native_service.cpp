@@ -159,17 +159,10 @@ int32_t NetsysNativeService::CreateNetworkCache(const uint16_t netid)
     return 0;
 }
 
-int32_t NetsysNativeService::DestroyNetworkCache(const uint16_t netid)
+int32_t NetsysNativeService::DestroyNetworkCache(const uint16_t netId)
 {
     NETNATIVE_LOG_D("DestroyNetworkCache");
-    return 0;
-}
-
-int32_t NetsysNativeService::Getaddrinfo(const char *node, const char *service, const struct addrinfo *hints,
-                                         struct addrinfo **result, const uint16_t netid)
-{
-    NETNATIVE_LOG_D("Getaddrinfo");
-    return 0;
+    return netsysService_->DnsDestroyNetworkCache(netId);
 }
 
 int32_t NetsysNativeService::InterfaceSetMtu(const std::string &interfaceName, int32_t mtu)

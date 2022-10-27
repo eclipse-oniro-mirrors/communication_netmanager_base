@@ -94,6 +94,7 @@ public:
     int32_t DnsGetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
                                  uint16_t &baseTimeoutMsec, uint8_t &retryCount);
     int32_t DnsCreateNetworkCache(uint16_t netid);
+    int32_t DnsDestroyNetworkCache(uint16_t netId);
     int32_t BandwidthEnableDataSaver(bool enable);
     int32_t BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes);
     int32_t BandwidthRemoveIfaceQuota(const std::string &ifName);

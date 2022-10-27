@@ -211,16 +211,6 @@ int32_t MockNetsysNativeClient::DestroyNetworkCache(uint16_t netId)
     return 0;
 }
 
-int32_t MockNetsysNativeClient::GetAddrInfo(const std::string &hostName,
-    const std::string &serverName, const struct addrinfo &hints, std::unique_ptr<addrinfo> &res, uint16_t netId)
-{
-    NETMGR_LOG_I("MockNetsysNativeClient GetAddrInfo");
-    struct addrinfo *resAddr = nullptr;
-    int32_t ret = getaddrinfo(hostName.c_str(), nullptr, &hints, &resAddr);
-    res.reset(resAddr);
-    return ret;
-}
-
 static long GetInterfaceTrafficByType(const std::string &path, const std::string &type)
 {
     if (path.empty()) {

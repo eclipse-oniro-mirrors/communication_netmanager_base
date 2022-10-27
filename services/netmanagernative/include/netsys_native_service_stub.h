@@ -39,7 +39,6 @@ private:
     int32_t CmdGetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdCreateNetworkCache(MessageParcel &data, MessageParcel &reply);
     int32_t CmdDestroyNetworkCache(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdGetaddrinfo(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceSetMtu(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceGetMtu(MessageParcel &data, MessageParcel &reply);
 

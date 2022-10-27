@@ -367,12 +367,6 @@ int32_t NetsysNativeClient::DestroyNetworkCache(uint16_t netId)
     return netsysNativeService_->DestroyNetworkCache(netId);
 }
 
-int32_t NetsysNativeClient::GetAddrInfo(const std::string &hostName, const std::string &serverName,
-                                        const struct addrinfo &hints, std::unique_ptr<addrinfo> &res, uint16_t netId)
-{
-    return 0;
-}
-
 int32_t NetsysNativeClient::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
     nmd::NetworkSharingTraffic &traffic)
 {

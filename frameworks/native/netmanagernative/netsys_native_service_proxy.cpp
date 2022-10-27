@@ -100,7 +100,7 @@ int32_t NetsysNativeServiceProxy::SetResolverConfig(uint16_t netId, uint16_t bas
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netid, std::vector<std::string> &servers,
+int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netId, std::vector<std::string> &servers,
                                                     std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
                                                     uint8_t &retryCount)
 {
@@ -108,7 +108,7 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netid, std::v
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteUint16(netid)) {
+    if (!data.WriteUint16(netId)) {
         return ERR_FLATTEN_OBJECT;
     }
     MessageParcel reply;
@@ -137,14 +137,14 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netid, std::v
     return result;
 }
 
-int32_t NetsysNativeServiceProxy::CreateNetworkCache(const uint16_t netid)
+int32_t NetsysNativeServiceProxy::CreateNetworkCache(const uint16_t netId)
 {
     NETNATIVE_LOGI("Begin to CreateNetworkCache");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteUint16(netid)) {
+    if (!data.WriteUint16(netId)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -155,14 +155,14 @@ int32_t NetsysNativeServiceProxy::CreateNetworkCache(const uint16_t netid)
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::DestroyNetworkCache(const uint16_t netid)
+int32_t NetsysNativeServiceProxy::DestroyNetworkCache(const uint16_t netId)
 {
     NETNATIVE_LOGI("Begin to DestroyNetworkCache");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteUint16(netid)) {
+    if (!data.WriteUint16(netId)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -171,12 +171,6 @@ int32_t NetsysNativeServiceProxy::DestroyNetworkCache(const uint16_t netid)
     Remote()->SendRequest(INetsysService::NETSYS_DESTROY_NETWORK_CACHE, data, reply, option);
 
     return reply.ReadInt32();
-}
-
-int32_t NetsysNativeServiceProxy::Getaddrinfo(const char *node, const char *service, const struct addrinfo *hints,
-                                              struct addrinfo **result, const uint16_t netid)
-{
-    return 0;
 }
 
 int32_t NetsysNativeServiceProxy::InterfaceSetMtu(const std::string &interfaceName, int32_t mtu)

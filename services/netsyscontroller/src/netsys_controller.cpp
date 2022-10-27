@@ -242,17 +242,6 @@ int32_t NetsysController::DestroyNetworkCache(uint16_t netId)
     return netsysService_->DestroyNetworkCache(netId);
 }
 
-int32_t NetsysController::GetAddrInfo(const std::string &hostName, const std::string &serverName,
-    const struct addrinfo &hints, std::unique_ptr<addrinfo> &res, uint16_t netId)
-{
-    NETMGR_LOG_I("NetsysController GetAddrInfo");
-    if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("netsysService_ is null");
-        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
-    }
-    return netsysService_->GetAddrInfo(hostName, serverName, hints, res, netId);
-}
-
 int32_t NetsysController::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
     nmd::NetworkSharingTraffic &traffic)
 {

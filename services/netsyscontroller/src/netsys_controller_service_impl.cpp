@@ -187,21 +187,8 @@ int32_t NetsysControllerServiceImpl::CreateNetworkCache(uint16_t netId)
 
 int32_t NetsysControllerServiceImpl::DestroyNetworkCache(uint16_t netId)
 {
-    NETMGR_LOG_I("Destroy dns cache: netId[%{public}d]", netId);
-    if (mockNetsysClient_.CheckMockApi(MOCK_DESTROYNETWORKCACHE_API)) {
-        return mockNetsysClient_.DestroyNetworkCache(netId);
-    }
+    NETMGR_LOG_D("Destroy dns cache: netId[%{public}d]", netId);
     return netsysClient_.DestroyNetworkCache(netId);
-}
-
-int32_t NetsysControllerServiceImpl::GetAddrInfo(const std::string &hostName, const std::string &serverName,
-    const struct addrinfo &hints, std::unique_ptr<addrinfo> &res, uint16_t netId)
-{
-    NETMGR_LOG_I("NetsysControllerServiceImpl GetAddrInfo");
-    if (mockNetsysClient_.CheckMockApi(MOCK_GETADDRINFO_API)) {
-        return mockNetsysClient_.GetAddrInfo(hostName, serverName, hints, res, netId);
-    }
-    return netsysClient_.GetAddrInfo(hostName, serverName, hints, res, netId);
 }
 
 int32_t NetsysControllerServiceImpl::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,

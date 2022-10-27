@@ -18,6 +18,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 enum PollRec {
     POLL_FAILED = (-1),
     POLL_RETRY = 0,
@@ -113,7 +114,7 @@ bool ProcData(int sock, char *data, size_t size, short event, int64_t (*func)(in
         NETSYS_CLIENT_PRINT("proc not complete");
         return false;
     }
-    return leftSize == 0;
+    return true;
 }
 
 bool PollSendData(int sock, const char *data, size_t size)

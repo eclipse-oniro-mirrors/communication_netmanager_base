@@ -15,17 +15,17 @@
 
 #include "netsys_client.h"
 
+#include <errno.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-#include <errno.h>
+
+#include "dns_config_client.h"
+#include "netdb.h"
 #include "securec.h"
 #include "stdbool.h"
 #include "sys/select.h"
 #include "sys/un.h"
-#include "netdb.h"
 #include "unistd.h"
-
-#include "dns_config_client.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,14 +58,14 @@ void MakeDefaultDnsServer(char *server, size_t length)
 {
     int ret = memset_s(server, length, 0, DEFAULT_SERVER_LENTH);
     if (ret < 0) {
-        DNS_CONFIG_PRINT("MakeDefaultDnsServer failed");
+        DNS_CONFIG_PRINT("MakeDefaultDnsServer memset_s failed");
         return;
     }
 
     ret = sprintf_s(server, length, "%d.%d.%d.%d", DEFAULT_SERVER_NAME, DEFAULT_SERVER_NAME, DEFAULT_SERVER_NAME,
                     DEFAULT_SERVER_NAME);
-    if (ret < 0) {
-        DNS_CONFIG_PRINT("MakeDefaultDnsServer failed");
+    if (ret != 0) {
+        DNS_CONFIG_PRINT("MakeDefaultDnsServer sprintf_s failed");
     }
 }
 
@@ -116,14 +116,14 @@ static int CreateConnectionToNetSys(void)
         return -errno;
     }
     if (!MakeNonBlock(sockFd)) {
-        DNS_CONFIG_PRINT("MakeNonBlock");
+        DNS_CONFIG_PRINT("MakeNonBlock failed");
         return CloseSocketReturn(sockFd, -errno);
     }
 
     struct sockaddr_un address = {0};
     address.sun_family = AF_UNIX;
 
-    if (strcpy_s(address.sun_path, sizeof(address.sun_path), DNS_SOCKET_PATH) < 0) {
+    if (strcpy_s(address.sun_path, sizeof(address.sun_path), DNS_SOCKET_PATH) != 0) {
         DNS_CONFIG_PRINT("str copy failed ");
         return CloseSocketReturn(sockFd, -1);
     }
@@ -163,12 +163,12 @@ static void NetsysGetDefaultConfig(struct ResolvConfig *config)
     }
     config->timeoutMs = DEFAULT_TIMEOUT;
     config->retryCount = DEFAULT_RETRY;
-    if (strcpy_s(config->nameservers[0], sizeof(config->nameservers[0]), DEFAULT_SERVER) <= 0) {
+    if (strcpy_s(config->nameservers[0], sizeof(config->nameservers[0]), DEFAULT_SERVER) != 0) {
         DNS_CONFIG_PRINT("NetsysGetDefaultConfig strcpy_s failed");
     }
 }
 
-static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct ResolvConfig *config) //
+static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct ResolvConfig *config)
 {
     struct RequestInfo info = {
         .command = GET_CONFIG,
@@ -197,8 +197,6 @@ static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct Re
 
 int32_t NetSysGetResolvConf(uint16_t netId, struct ResolvConfig *config)
 {
-    DNS_CONFIG_PRINT("NetSysGetResolvConf begin");
-
     if (config == NULL) {
         DNS_CONFIG_PRINT("Invalid Param");
         return -EINVAL;
@@ -218,7 +216,6 @@ int32_t NetSysGetResolvConf(uint16_t netId, struct ResolvConfig *config)
         return 0;
     }
 
-    DNS_CONFIG_PRINT("GetResolvConfFromNetsys end");
     if (strlen(config->nameservers[0]) == 0) {
         NetsysGetDefaultConfig(config);
         return 0;
@@ -287,8 +284,6 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, const st
 int32_t NetSysGetResolvCache(uint16_t netId, const struct ParamWrapper param,
                              struct AddrInfo addrInfo[static MAX_RESULTS], uint32_t *num)
 {
-    DNS_CONFIG_PRINT("NetSysGetResolvCache begin");
-
     char *hostName = param.host;
     if (hostName == NULL || strlen(hostName) == 0 || num == NULL) {
         DNS_CONFIG_PRINT("Invalid Param");
@@ -324,7 +319,7 @@ static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct
         addrInfo[resNum].aiSockType = tmp->ai_socktype;
         addrInfo[resNum].aiProtocol = tmp->ai_protocol;
         addrInfo[resNum].aiAddrLen = tmp->ai_addrlen;
-        if (memcpy_s(&addrInfo[resNum].aiAddr, sizeof(addrInfo[resNum].aiAddr), tmp->ai_addr, tmp->ai_addrlen) < 0) {
+        if (memcpy_s(&addrInfo[resNum].aiAddr, sizeof(addrInfo[resNum].aiAddr), tmp->ai_addr, tmp->ai_addrlen) != 0) {
             DNS_CONFIG_PRINT("memcpy_s failed");
             return -1;
         }
@@ -381,8 +376,6 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const st
 
 int32_t NetSysSetResolvCache(uint16_t netId, const struct ParamWrapper param, struct addrinfo *res)
 {
-    DNS_CONFIG_PRINT("NetSysSetResolvCache begin");
-
     char *hostName = param.host;
     if (hostName == NULL || strlen(hostName) == 0 || res == NULL) {
         DNS_CONFIG_PRINT("Invalid Param");
