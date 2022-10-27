@@ -32,15 +32,18 @@ public:
      *
      */
     void OnListen();
+
     /**
      * Close dns proxy listen
      */
     void OffListen();
+
     /**
      * Dns proxy listen obj
      *
      */
     void StartListen();
+
     /**
      * Set the Parse Net Id objectse
      *
@@ -49,16 +52,16 @@ public:
     void SetParseNetId(uint16_t netId);
 
 private:
-    static constexpr const uint32_t MAX_REQUESDATA_LEN = 512;
+    static constexpr const uint32_t MAX_REQUESTDATA_LEN = 512;
     struct RecvBuff {
-        char questionsBuff[MAX_REQUESDATA_LEN];
+        char questionsBuff[MAX_REQUESTDATA_LEN];
         int32_t questionLen;
     };
     static void DnsProxyGetPacket(int32_t clientSocket, RecvBuff recvBuff, sockaddr_in proxyAddr);
     static void DnsParseBySocket(int32_t clientSocket, std::vector<std::string> servers, RecvBuff recvBuff,
                                  sockaddr_in proxyAddr);
-    static void DnsSendRecvParseData(int32_t clientSocket, char *requesData, int32_t resLen, sockaddr_in proxyAddr);
-    static bool CheckDnsRespone(char* recBuff);
+    static void DnsSendRecvParseData(int32_t clientSocket, char *requestData, int32_t resLen, sockaddr_in proxyAddr);
+    static bool CheckDnsResponse(char* recBuff);
     static bool DnsThreadClose();
     int32_t proxySockFd_;
     static uint16_t netId_;

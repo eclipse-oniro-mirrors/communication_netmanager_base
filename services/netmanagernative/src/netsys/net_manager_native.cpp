@@ -295,9 +295,14 @@ int32_t NetManagerNative::DnsGetResolverConfig(uint16_t netId, std::vector<std::
     return dnsManager_->GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
 }
 
-int32_t NetManagerNative::DnsCreateNetworkCache(uint16_t netid)
+int32_t NetManagerNative::DnsCreateNetworkCache(uint16_t netId)
 {
-    return dnsManager_->CreateNetworkCache(netid);
+    return dnsManager_->CreateNetworkCache(netId);
+}
+
+int32_t NetManagerNative::DnsDestroyNetworkCache(uint16_t netId)
+{
+    return dnsManager_->DestroyNetworkCache(netId);
 }
 
 int32_t NetManagerNative::BandwidthEnableDataSaver(bool enable)

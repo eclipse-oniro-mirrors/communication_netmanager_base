@@ -43,12 +43,10 @@ public:
 
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
         const std::vector<std::string> &servers, const std::vector<std::string> &domains) override;
-    int32_t GetResolverConfig(const  uint16_t  netid,  std::vector<std::string> &servers,
+    int32_t GetResolverConfig(const  uint16_t  netId,  std::vector<std::string> &servers,
            std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount) override;
-    int32_t CreateNetworkCache(const uint16_t netid) override;
-    int32_t DestroyNetworkCache(const uint16_t netid) override;
-    int32_t  Getaddrinfo(const char* node, const char* service, const struct addrinfo* hints,
-        struct addrinfo** result, uint16_t netid) override;
+    int32_t CreateNetworkCache(const uint16_t netId) override;
+    int32_t DestroyNetworkCache(const uint16_t netId) override;
     int32_t InterfaceSetMtu(const std::string &interfaceName, int32_t mtu) override;
     int32_t InterfaceGetMtu(const std::string &interfaceName) override;
 
@@ -101,7 +99,7 @@ public:
     int32_t BandwidthRemoveAllowedList(uint32_t uid) override;
     int32_t BandwidthAddDeniedList(uint32_t uid) override;
     int32_t BandwidthRemoveDeniedList(uint32_t uid) override;
-    int32_t ShareDnsSet(uint16_t netid) override;
+    int32_t ShareDnsSet(uint16_t netId) override;
     int32_t StartDnsProxyListen() override;
     int32_t StopDnsProxyListen() override;
     int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,

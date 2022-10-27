@@ -70,13 +70,13 @@ uint8_t DnsResolvConfig::GetRetryCount() const
 
 void DnsResolvConfig::SetServers(const std::vector<std::string> &servers)
 {
-    nameservers_ = servers;
+    nameServers_ = servers;
     revisionId_++;
 }
 
 std::vector<std::string> DnsResolvConfig::GetServers() const
 {
-    return nameservers_;
+    return nameServers_;
 }
 
 void DnsResolvConfig::SetDomains(const std::vector<std::string> &domains)

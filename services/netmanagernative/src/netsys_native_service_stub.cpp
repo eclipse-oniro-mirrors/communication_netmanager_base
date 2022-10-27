@@ -33,7 +33,6 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_GET_RESOLVER_CONFIG] = &NetsysNativeServiceStub::CmdGetResolverConfig;
     opToInterfaceMap_[NETSYS_CREATE_NETWORK_CACHE] = &NetsysNativeServiceStub::CmdCreateNetworkCache;
     opToInterfaceMap_[NETSYS_DESTROY_NETWORK_CACHE] = &NetsysNativeServiceStub::CmdDestroyNetworkCache;
-    opToInterfaceMap_[NETSYS_GET_ADDR_INFO] = &NetsysNativeServiceStub::CmdGetaddrinfo;
     opToInterfaceMap_[NETSYS_INTERFACE_SET_MTU] = &NetsysNativeServiceStub::CmdInterfaceSetMtu;
     opToInterfaceMap_[NETSYS_INTERFACE_GET_MTU] = &NetsysNativeServiceStub::CmdInterfaceGetMtu;
     opToInterfaceMap_[NETSYS_REGISTER_NOTIFY_CALLBACK] = &NetsysNativeServiceStub::CmdRegisterNotifyCallback;
@@ -205,11 +204,10 @@ int32_t NetsysNativeServiceStub::CmdCreateNetworkCache(MessageParcel &data, Mess
 
 int32_t NetsysNativeServiceStub::CmdDestroyNetworkCache(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd DestroyNetworkCache");
-    uint16_t netid = data.ReadUint16();
-    int32_t result = DestroyNetworkCache(netid);
+    uint16_t netId = data.ReadUint16();
+    int32_t result = DestroyNetworkCache(netId);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("DestroyNetworkCache has recved result %{public}d", result);
+    NETNATIVE_LOG_D("DestroyNetworkCache has recved result %{public}d", result);
 
     return ERR_NONE;
 }
@@ -225,12 +223,6 @@ int32_t NetsysNativeServiceStub::NetsysFreeAddrinfo(struct addrinfo *aihead)
         ainext = ai->ai_next;
         free(ai);
     }
-    return ERR_NONE;
-}
-
-int32_t NetsysNativeServiceStub::CmdGetaddrinfo(MessageParcel &data, MessageParcel &reply)
-{
-    NETNATIVE_LOGI("Begin to dispatch cmd Getaddrinfo");
     return ERR_NONE;
 }
 

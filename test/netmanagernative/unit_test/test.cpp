@@ -66,7 +66,6 @@ void Init()
     g_memberFuncMap[InterfaceMenu::CREATE_NETWORK_CACHE] = TestCreateNetworkCache;
     g_memberFuncMap[InterfaceMenu::FLUSH_NETWORK_CACHE] = TestFlushNetworkCache;
     g_memberFuncMap[InterfaceMenu::DESTROY_NETWORK_CACHE] = TestDestroyNetworkCache;
-    g_memberFuncMap[InterfaceMenu::GET_ADDR_INFO] = TestGetaddrinfo;
     g_memberFuncMap[InterfaceMenu::INTERFACE_SET_MTU] = TestInterfaceSetMtu;
     g_memberFuncMap[InterfaceMenu::INTERFACE_GET_MTU] = TestInterfaceGetMtu;
     g_memberFuncMap[InterfaceMenu::REGISTER_NOTIFY_CALLBACK] = TestRegisterNotifyCallback;
@@ -103,7 +102,6 @@ void Prompt()
         "1 TestCreateNetworkCache\n"
         "2 TestFlushNetworkCache\n"
         "3 TestDestroyNetworkCache\n"
-        "4 TestGetaddrinfo\n"
         "5 TestInterfaceSetMtu\n"
         "6 TestInterfaceGetMtu\n"
         "7 TestRegisterNotifyCallback\n"
