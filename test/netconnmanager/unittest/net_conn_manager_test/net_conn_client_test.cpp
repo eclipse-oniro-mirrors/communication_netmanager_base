@@ -147,7 +147,7 @@ HWTEST_F(NetConnClientTest, HasDefaultNetTest002, TestSize.Level1)
  * @tc.name: GetNetCapabilitiesTest001
  * @tc.desc: Test NetConnClient::GetNetCapabilities, In the absence of
  * permission, GetDefaultNet return NET_CONN_ERR_PERMISSION_CHECK_FAILED and
- * GetNetCapabilities return ERR_PERMISSION_CHECK_FAIL
+ * GetNetCapabilities return NET_CONN_ERR_PERMISSION_CHECK_FAILED
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest001, TestSize.Level1)
@@ -159,14 +159,14 @@ HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest001, TestSize.Level1)
 
     NetAllCapabilities netAllCap;
     ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(handle, netAllCap);
-    ASSERT_TRUE(ret == ResultCode::ERR_PERMISSION_CHECK_FAIL);
+    ASSERT_TRUE(ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED);
 }
 
 /**
  * @tc.name: GetNetCapabilitiesTest002
  * @tc.desc: Test NetConnClient::GetNetCapabilities:In the absence of
  * permission, GetDefaultNet return NET_CONN_ERR_PERMISSION_CHECK_FAILED, and
- * after add permission GetNetCapabilities return ERR_NO_NETWORK
+ * after add permission GetNetCapabilities return NET_CONN_ERR_INVALID_NETWORK
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest002, TestSize.Level1)
@@ -179,14 +179,14 @@ HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest002, TestSize.Level1)
     AccessToken token;
     NetAllCapabilities netAllCap;
     ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(handle, netAllCap);
-    ASSERT_TRUE(ret == ERR_NO_NETWORK);
+    ASSERT_TRUE(ret == NET_CONN_ERR_INVALID_NETWORK);
 }
 
 /**
  * @tc.name: GetNetCapabilitiesTest003
  * @tc.desc: Test NetConnClient::GetNetCapabilities:Apply for permission at
- * first, when net is connected,return ERR_NONE, or net is not connected,return
- * ERR_NO_NETWORK
+ * first, when net is connected,return NET_CONN_SUCCESS, or net is not connected,return
+ * NET_CONN_ERR_INVALID_NETWORK
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest003, TestSize.Level1)
@@ -199,7 +199,7 @@ HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest003, TestSize.Level1)
 
     NetAllCapabilities netAllCap;
     ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(handle, netAllCap);
-    ASSERT_TRUE(ret == ERR_NONE || ret == ERR_NO_NETWORK);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS || ret == NET_CONN_ERR_INVALID_NETWORK);
 }
 
 /**
@@ -222,6 +222,74 @@ HWTEST_F(NetConnClientTest, RestoreFactoryDataTest, TestSize.Level1)
 {
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->RestoreFactoryData();
     ASSERT_TRUE(ret == ERR_NONE);
+}
+
+/**
+ * @tc.name: IsDefaultNetMeteredTest001
+ * @tc.desc: if no permission,NetConnClient::IsDefaultNetMetered return ERR_PERMISSION_CHECK_FAIL
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, IsDefaultNetMeteredTest001, TestSize.Level1)
+{
+    bool bRes = false;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->IsDefaultNetMetered(bRes);
+    ASSERT_TRUE(ret == ERR_PERMISSION_CHECK_FAIL);
+    ASSERT_TRUE(bRes == false);
+}
+
+/**
+ * @tc.name: IsDefaultNetMeteredTest002
+ * @tc.desc: Test NetConnClient::IsDefaultNetMetered
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, IsDefaultNetMeteredTest002, TestSize.Level1)
+{
+    AccessToken token;
+    bool bRes = false;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->IsDefaultNetMetered(bRes);
+    ASSERT_TRUE(ret == ERR_NONE);
+    ASSERT_TRUE(bRes == true);
+}
+
+/**
+ * @tc.name: SetHttpProxyTest001
+ * @tc.desc: Test NetConnClient::SetHttpProxy,if param is not null,SetHttpProxy return NET_CONN_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, SetHttpProxyTest001, TestSize.Level1)
+{
+    std::string httpProxy = "testProxy";
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: SetHttpProxyTest002
+ * @tc.desc: Test NetConnClient::SetHttpProxy.if param is null,SetHttpProxy return NET_CONN_ERR_INTERNAL_ERROR
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, SetHttpProxyTest002, TestSize.Level1)
+{
+    std::string httpProxy;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_ERR_INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: GetHttpProxyTest001
+ * @tc.desc: Test NetConnClient::GetHttpProxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, GetHttpProxyTest001, TestSize.Level1)
+{
+    std::string httpProxy = "testProxy";
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+
+    std::string getHttpProxy;
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetHttpProxy(getHttpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+    ASSERT_TRUE(getHttpProxy == "testProxy");
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
