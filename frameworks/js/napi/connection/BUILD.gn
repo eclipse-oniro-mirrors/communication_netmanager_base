@@ -14,17 +14,15 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-NETMANAGER_BASE_NAPI_ROOT = "$NETMANAGER_BASE_ROOT/frameworks/js/napi/"
-
 ohos_shared_library("connection") {
   include_dirs = [
-    "$NETMANAGER_BASE_NAPI_ROOT/connection/async_context/include",
-    "$NETMANAGER_BASE_NAPI_ROOT/connection/async_work/include",
-    "$NETMANAGER_BASE_NAPI_ROOT/connection/constant/include",
-    "$NETMANAGER_BASE_NAPI_ROOT/connection/connection_exec/include",
-    "$NETMANAGER_BASE_NAPI_ROOT/connection/connection_module/include",
-    "$NETMANAGER_BASE_NAPI_ROOT/connection/observer/include",
-    "$NETMANAGER_BASE_NAPI_ROOT/connection/options/include",
+    "async_context/include",
+    "async_work/include",
+    "constant/include",
+    "connection_exec/include",
+    "connection_module/include",
+    "observer/include",
+    "options/include",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
   ]
 
