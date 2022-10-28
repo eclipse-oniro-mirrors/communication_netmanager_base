@@ -27,33 +27,38 @@
 #include "event_manager.h"
 
 namespace OHOS::NetManagerStandard {
-class GetDefaultNetContext final : public BaseContext {
+class GetConnNapiContext final : public BaseContext {
 public:
-    DISALLOW_COPY_AND_MOVE(GetDefaultNetContext);
+    DISALLOW_COPY_AND_MOVE(GetConnNapiContext);
 
-    GetDefaultNetContext() = delete;
+    GetConnNapiContext() = delete;
 
-    explicit GetDefaultNetContext(napi_env env, EventManager *manager);
+    explicit GetConnNapiContext(napi_env env, EventManager *manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
     // for GetDefaultNet
-    NetHandle netHandle;
+    NetHandle netHandle_;
 
     // for HasDefaultNet
-    bool hasDefaultNet;
+    bool hasDefaultNet_;
 
     // for GetAllNets
-    std::list<sptr<NetHandle>> netHandleList;
+    std::list<sptr<NetHandle>> netHandleList_;
+
+    // for IsDefaultNetMetered
+    bool isMetered_;
 
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
 };
 
-using HasDefaultNetContext = GetDefaultNetContext;
-using GetAllNetsContext = GetDefaultNetContext;
-using EnableAirplaneModeContext = GetDefaultNetContext;
-using DisableAirplaneModeContext = GetDefaultNetContext;
+using GetDefaultNetContext = GetConnNapiContext;
+using HasDefaultNetContext = GetConnNapiContext;
+using GetAllNetsContext = GetConnNapiContext;
+using EnableAirplaneModeContext = GetConnNapiContext;
+using DisableAirplaneModeContext = GetConnNapiContext;
+using IsDefaultNetMeteredContext = GetConnNapiContext;
 } // namespace OHOS::NetManagerStandard
 
 #endif /* COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H */

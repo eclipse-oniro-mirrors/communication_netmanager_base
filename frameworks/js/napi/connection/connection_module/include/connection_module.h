@@ -24,6 +24,7 @@ public:
     static constexpr const char *FUNCTION_GET_DEFAULT_NET = "getDefaultNet";
     static constexpr const char *FUNCTION_GET_DEFAULT_NET_SYNC = "getDefaultNetSync";
     static constexpr const char *FUNCTION_HAS_DEFAULT_NET = "hasDefaultNet";
+    static constexpr const char *FUNCTION_IS_DEFAULT_NET_METERED = "isDefaultNetMetered";
     static constexpr const char *FUNCTION_GET_NET_CAPABILITIES = "getNetCapabilities";
     static constexpr const char *FUNCTION_GET_CONNECTION_PROPERTIES = "getConnectionProperties";
     static constexpr const char *FUNCTION_CREATE_NET_CONNECTION = "createNetConnection";
@@ -70,6 +71,7 @@ private:
     static napi_value CreateNetConnection(napi_env env, napi_callback_info info);
     static napi_value GetAddressesByName(napi_env env, napi_callback_info info);
     static napi_value HasDefaultNet(napi_env env, napi_callback_info info);
+    static napi_value IsDefaultNetMetered(napi_env env, napi_callback_info info);
     static napi_value GetNetCapabilities(napi_env env, napi_callback_info info);
     static napi_value GetConnectionProperties(napi_env env, napi_callback_info info);
     static napi_value GetAllNets(napi_env env, napi_callback_info info);

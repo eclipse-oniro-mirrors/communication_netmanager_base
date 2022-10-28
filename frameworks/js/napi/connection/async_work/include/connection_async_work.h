@@ -37,6 +37,10 @@ public:
 
     static void HasDefaultNetCallback(napi_env env, napi_status status, void *data);
 
+    static void ExecIsDefaultNetMetered(napi_env env, void *data);
+
+    static void IsDefaultNetMeteredCallback(napi_env env, napi_status status, void *data);
+
     static void ExecGetNetCapabilities(napi_env env, void *data);
 
     static void GetNetCapabilitiesCallback(napi_env env, napi_status status, void *data);

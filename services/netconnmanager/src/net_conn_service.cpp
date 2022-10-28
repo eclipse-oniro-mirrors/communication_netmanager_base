@@ -24,6 +24,7 @@
 #include "net_conn_service.h"
 #include "net_conn_types.h"
 #include "net_manager_center.h"
+#include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_supplier.h"
 #include "netmanager_base_permission.h"
@@ -691,14 +692,14 @@ int32_t NetConnService::HasDefaultNet(bool &flag)
 int32_t NetConnService::IsDefaultNetMetered(bool &isMetered)
 {
     if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_INFO)) {
-        return ERR_PERMISSION_CHECK_FAIL;
+        return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     if (defaultNetSupplier_) {
         isMetered = !defaultNetSupplier_->HasNetCap(NET_CAPABILITY_NOT_METERED);
     } else {
         isMetered = true;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<NetSupplier> &newSupplier)
