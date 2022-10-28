@@ -19,12 +19,12 @@
 #include "napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
-GetDefaultNetContext::GetDefaultNetContext(napi_env env, EventManager *manager)
-    : BaseContext(env, manager), hasDefaultNet(false)
+GetConnNapiContext::GetConnNapiContext(napi_env env, EventManager *manager)
+    : BaseContext(env, manager), hasDefaultNet_(false), isMetered_(false)
 {
 }
 
-void GetDefaultNetContext::ParseParams(napi_value *params, size_t paramsCount)
+void GetConnNapiContext::ParseParams(napi_value *params, size_t paramsCount)
 {
     if (!CheckParamsType(params, paramsCount)) {
         return;
@@ -37,7 +37,7 @@ void GetDefaultNetContext::ParseParams(napi_value *params, size_t paramsCount)
     SetParseOK(true);
 }
 
-bool GetDefaultNetContext::CheckParamsType(napi_value *params, size_t paramsCount)
+bool GetConnNapiContext::CheckParamsType(napi_value *params, size_t paramsCount)
 {
     if (paramsCount == PARAM_NONE) {
         return true;

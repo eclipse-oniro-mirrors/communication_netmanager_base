@@ -48,7 +48,13 @@ napi_value Interface(napi_env env, napi_callback_info info, const std::string &a
 
     auto context = new Context(env, manager);
     context->ParseParams(params, paramsCount);
-    NETMANAGER_BASE_LOGE("js params parse OK ? %{public}d", context->IsParseOK());
+    NETMANAGER_BASE_LOGI("js params parse OK ? %{public}d", context->IsParseOK());
+    if (!context->IsParseOK()) {
+        napi_throw_error(env, "-1", "parse param failed");
+        delete context;
+        context = nullptr;
+        return NapiUtils::GetUndefined(env);
+    }
     if (Work != nullptr) {
         if (!Work(env, thisVal, context)) {
             NETMANAGER_BASE_LOGE("work failed error code = %{public}d", context->GetErrorCode());

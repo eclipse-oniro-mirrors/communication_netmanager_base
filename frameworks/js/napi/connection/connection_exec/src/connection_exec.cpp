@@ -15,22 +15,28 @@
 
 #include "connection_exec.h"
 
+#include <cstddef>
+#include <cstdint>
+
 #include "connection_module.h"
 #include "constant.h"
+#include "errorcode_convertor.h"
 #include "net_conn_client.h"
+#include "net_manager_constants.h"
 #include "netconnection.h"
 #include "netmanager_base_common_utils.h"
 #include "netmanager_base_log.h"
 #include "napi_utils.h"
 #include "securec.h"
 
-static constexpr const size_t MAX_ARRAY_LENGTH = 64;
-
-static constexpr const size_t MAX_IPV4_STR_LEN = 16;
-
-static constexpr const size_t MAX_IPV6_STR_LEN = 64;
-
 namespace OHOS::NetManagerStandard {
+namespace {
+constexpr size_t MAX_ARRAY_LENGTH = 64;
+constexpr size_t MAX_IPV4_STR_LEN = 16;
+constexpr size_t MAX_IPV6_STR_LEN = 64;
+constexpr int32_t BASE_COMMON_COMPLETE_CODE = 2100000;
+} // namespace
+
 napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
 {
     napi_value netHandle = NapiUtils::CreateObject(env);
@@ -111,7 +117,7 @@ napi_value ConnectionExec::GetAddressByNameCallback(GetAddressByNameContext *con
 
 bool ConnectionExec::ExecGetDefaultNet(GetDefaultNetContext *context)
 {
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(context->netHandle);
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(context->netHandle_);
     NETMANAGER_BASE_LOGI("ExecGetDefaultNet ret %{public}d", ret);
     if (ret != NET_CONN_SUCCESS && ret != NET_CONN_ERR_NO_DEFAULT_NET) {
         context->SetErrorCode(ret);
@@ -122,12 +128,12 @@ bool ConnectionExec::ExecGetDefaultNet(GetDefaultNetContext *context)
 
 napi_value ConnectionExec::GetDefaultNetCallback(GetDefaultNetContext *context)
 {
-    return CreateNetHandle(context->GetEnv(), &context->netHandle);
+    return CreateNetHandle(context->GetEnv(), &context->netHandle_);
 }
 
 bool ConnectionExec::ExecHasDefaultNet(HasDefaultNetContext *context)
 {
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->HasDefaultNet(context->hasDefaultNet);
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->HasDefaultNet(context->hasDefaultNet_);
     NETMANAGER_BASE_LOGI("ExecHasDefaultNet ret %{public}d", ret);
     if (ret != NET_CONN_SUCCESS && ret != NET_CONN_ERR_NO_DEFAULT_NET) {
         context->SetErrorCode(ret);
@@ -138,18 +144,31 @@ bool ConnectionExec::ExecHasDefaultNet(HasDefaultNetContext *context)
 
 napi_value ConnectionExec::HasDefaultNetCallback(HasDefaultNetContext *context)
 {
-    return NapiUtils::GetBoolean(context->GetEnv(), context->hasDefaultNet);
+    return NapiUtils::GetBoolean(context->GetEnv(), context->hasDefaultNet_);
+}
+
+bool ConnectionExec::ExecIsDefaultNetMetered(IsDefaultNetMeteredContext *context)
+{
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->IsDefaultNetMetered(context->isMetered_);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMANAGER_BASE_LOGE("get net metered status failed %{public}d", BASE_COMMON_COMPLETE_CODE + ret);
+        NetBaseErrorCodeConvertor convertor;
+        std::string errorMessage = convertor.ConvertErrorCode(ret);
+        context->SetError(BASE_COMMON_COMPLETE_CODE + ret, errorMessage);
+    }
+    NETMANAGER_BASE_LOGD("exec is default net metered ret %{public}d", ret);
+    return ret == NETMANAGER_SUCCESS;
+}
+
+napi_value ConnectionExec::IsDefaultNetMeteredCallback(IsDefaultNetMeteredContext *context)
+{
+    return NapiUtils::GetBoolean(context->GetEnv(), context->isMetered_);
 }
 
 bool ConnectionExec::ExecGetNetCapabilities(GetNetCapabilitiesContext *context)
 {
-    auto ret =
-        DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(context->netHandle, context->capabilities);
-    if (ret != NET_CONN_SUCCESS) {
-        context->SetErrorCode(ret);
-        return false;
-    }
-    return true;
+    return DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(context->netHandle,
+                                                                              context->capabilities) == 0;
 }
 
 napi_value ConnectionExec::GetNetCapabilitiesCallback(GetNetCapabilitiesContext *context)
@@ -175,7 +194,7 @@ napi_value ConnectionExec::GetConnectionPropertiesCallback(GetConnectionProperti
 
 bool ConnectionExec::ExecGetAllNets(GetAllNetsContext *context)
 {
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(context->netHandleList);
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(context->netHandleList_);
     if (ret != NET_CONN_SUCCESS) {
         context->SetErrorCode(ret);
         return false;
@@ -185,9 +204,9 @@ bool ConnectionExec::ExecGetAllNets(GetAllNetsContext *context)
 
 napi_value ConnectionExec::GetAllNetsCallback(GetAllNetsContext *context)
 {
-    napi_value array = NapiUtils::CreateArray(context->GetEnv(), context->netHandleList.size());
+    napi_value array = NapiUtils::CreateArray(context->GetEnv(), context->netHandleList_.size());
     uint32_t index = 0;
-    std::for_each(context->netHandleList.begin(), context->netHandleList.end(),
+    std::for_each(context->netHandleList_.begin(), context->netHandleList_.end(),
                   [array, &index, context](const sptr<NetHandle> &handle) {
                       NapiUtils::SetArrayElement(context->GetEnv(), array, index,
                                                  CreateNetHandle(context->GetEnv(), handle.GetRefPtr()));

@@ -43,6 +43,7 @@ public:
     void SetParseOK(bool parseOK);
     void SetExecOK(bool requestOK);
     void SetErrorCode(int32_t errorCode);
+    void SetError(int32_t errorCode, const std::string &errorMessage);
     void DeleteCallback();
     void CreateAsyncWork(const std::string &name, AsyncWorkExecutor executor, AsyncWorkCallback callback);
     void DeleteAsyncWork();
@@ -54,6 +55,7 @@ public:
     [[nodiscard]] bool IsExecOK() const;
     [[nodiscard]] napi_env GetEnv() const;
     [[nodiscard]] int32_t GetErrorCode() const;
+    [[nodiscard]] const std::string &GetErrorMessage() const;
     [[nodiscard]] napi_value GetCallback() const;
     [[nodiscard]] napi_deferred GetDeferred() const;
     [[nodiscard]] const std::string &GetAsyncWorkName() const;
@@ -68,6 +70,7 @@ private:
     bool parseOK_;
     bool requestOK_;
     int32_t errorCode_;
+    std::string errorMessage_;
     napi_ref callback_;
     napi_async_work asyncWork_;
     napi_deferred deferred_;

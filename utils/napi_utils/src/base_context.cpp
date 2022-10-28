@@ -44,14 +44,20 @@ void BaseContext::SetParseOK(bool parseOK)
     parseOK_ = parseOK;
 }
 
+void BaseContext::SetErrorCode(int32_t errorCode)
+{
+    errorCode_ = errorCode;
+}
+
 void BaseContext::SetExecOK(bool requestOK)
 {
     requestOK_ = requestOK;
 }
 
-void BaseContext::SetErrorCode(int32_t errorCode)
+void BaseContext::SetError(int32_t errorCode, const std::string &errorMessage)
 {
     errorCode_ = errorCode;
+    errorMessage_ = errorMessage;
 }
 
 napi_status BaseContext::SetCallback(napi_value callback)
@@ -115,6 +121,11 @@ napi_env BaseContext::GetEnv() const
 int32_t BaseContext::GetErrorCode() const
 {
     return errorCode_;
+}
+
+const std::string &BaseContext::GetErrorMessage() const
+{
+    return errorMessage_;
 }
 
 napi_value BaseContext::GetCallback() const
