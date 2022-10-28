@@ -16,9 +16,9 @@
 #ifndef DEVICE_IDLE_FIREWALL_RULE_H
 #define DEVICE_IDLE_FIREWALL_RULE_H
 
-#include "firewall_rule.h"
-
 #include "singleton.h"
+
+#include "firewall_rule.h"
 
 namespace OHOS {
 namespace NetManagerStandard {

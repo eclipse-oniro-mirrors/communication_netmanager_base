@@ -20,11 +20,9 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetPolicyServiceProxy::NetPolicyServiceProxy(const sptr<IRemoteObject> &impl)
-    : IRemoteProxy<INetPolicyService>(impl)
-{}
+NetPolicyServiceProxy::NetPolicyServiceProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<INetPolicyService>(impl) {}
 
-NetPolicyServiceProxy::~NetPolicyServiceProxy() {}
+NetPolicyServiceProxy::~NetPolicyServiceProxy() = default;
 
 int32_t NetPolicyServiceProxy::SetPolicyByUid(uint32_t uid, uint32_t policy)
 {
@@ -37,7 +35,7 @@ int32_t NetPolicyServiceProxy::SetPolicyByUid(uint32_t uid, uint32_t policy)
     if (!data.WriteUint32(uid)) {
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
-    if (!data.WriteUint32(static_cast<uint32_t>(policy))) {
+    if (!data.WriteUint32(policy)) {
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
@@ -63,17 +61,17 @@ uint32_t NetPolicyServiceProxy::GetPolicyByUid(uint32_t uid)
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NetUidPolicy::NET_POLICY_NONE;
+        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
     if (!data.WriteUint32(uid)) {
-        return NetUidPolicy::NET_POLICY_NONE;
+        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return NetUidPolicy::NET_POLICY_NONE;
+        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
     MessageParcel reply;
@@ -81,7 +79,7 @@ uint32_t NetPolicyServiceProxy::GetPolicyByUid(uint32_t uid)
     int32_t retCode = remote->SendRequest(CMD_NPS_GET_POLICY_BY_UID, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NetUidPolicy::NET_POLICY_NONE;
+        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
     return reply.ReadUint32();
@@ -96,8 +94,8 @@ std::vector<uint32_t> NetPolicyServiceProxy::GetUidsByPolicy(uint32_t policy)
         return uids;
     }
 
-    NETMGR_LOG_D("proxy policy[%{public}d]", static_cast<uint32_t>(policy));
-    if (!data.WriteUint32(static_cast<uint32_t>(policy))) {
+    NETMGR_LOG_D("proxy policy[%{public}d]", policy);
+    if (!data.WriteUint32(policy)) {
         return uids;
     }
 
@@ -131,10 +129,12 @@ bool NetPolicyServiceProxy::IsUidNetAllowed(uint32_t uid, bool metered)
     }
 
     if (!data.WriteUint32(uid)) {
+        NETMGR_LOG_E("Write uint32 failed");
         return false;
     }
 
     if (!data.WriteBool(metered)) {
+        NETMGR_LOG_E("Write Bool failed");
         return false;
     }
 
@@ -164,10 +164,12 @@ bool NetPolicyServiceProxy::IsUidNetAllowed(uint32_t uid, const std::string &ifa
     }
 
     if (!data.WriteUint32(uid)) {
+        NETMGR_LOG_E("Write uint32 failed");
         return false;
     }
 
     if (!data.WriteString(ifaceName)) {
+        NETMGR_LOG_E("Write String failed");
         return false;
     }
 
@@ -349,6 +351,7 @@ int32_t NetPolicyServiceProxy::SetBackgroundPolicy(bool isBackgroundPolicyAllow)
     }
 
     if (!data.WriteBool(isBackgroundPolicyAllow)) {
+        NETMGR_LOG_E("Write Bool failed");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
@@ -403,6 +406,7 @@ uint32_t NetPolicyServiceProxy::GetBackgroundPolicyByUid(uint32_t uid)
     }
 
     if (!data.WriteUint32(uid)) {
+        NETMGR_LOG_E("Write uint32 failed");
         return false;
     }
 
@@ -438,14 +442,17 @@ int32_t NetPolicyServiceProxy::UpdateRemindPolicy(int32_t netType, const std::st
     }
 
     if (!data.WriteInt32(netType)) {
+        NETMGR_LOG_E("Write int32 failed");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
     if (!data.WriteString(iccid)) {
+        NETMGR_LOG_E("Write String failed");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
     if (!data.WriteUint32(remindType)) {
+        NETMGR_LOG_E("Write uint32 failed");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 
@@ -469,9 +476,11 @@ int32_t NetPolicyServiceProxy::SetDeviceIdleAllowedList(uint32_t uid, bool isAll
     }
 
     if (!data.WriteUint32(uid)) {
+        NETMGR_LOG_E("Write uint32 failed");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
     if (!data.WriteBool(isAllowed)) {
+        NETMGR_LOG_E("Write Bool failed");
         return NetPolicyResultCode::ERR_INTERNAL_ERROR;
     }
 

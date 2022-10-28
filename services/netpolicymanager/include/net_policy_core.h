@@ -33,12 +33,12 @@ class NetPolicyEventHandler;
 class NetPolicyBase;
 
 struct PolicyEvent {
-    int32_t eventId;
-    std::shared_ptr<NetPolicyBase> sender;
-    bool deviceIdleMode;
+    int32_t eventId = 0;
+    std::shared_ptr<NetPolicyBase> sender = nullptr;
+    bool deviceIdleMode = false;
     std::vector<uint32_t> deviceIdleList;
-    bool powerSaveMode;
-    uint32_t deletedUid;
+    bool powerSaveMode = false;
+    uint32_t deletedUid = 0;
 };
 
 class NetPolicyCore : public EventFwk::CommonEventSubscriber, public std::enable_shared_from_this<NetPolicyCore> {
@@ -53,6 +53,7 @@ public:
         return core;
     }
     void Init(std::shared_ptr<NetPolicyEventHandler> &handler);
+
     /**
      * Handle the event from NetPolicyCore
      *
@@ -60,6 +61,7 @@ public:
      * @param policyEvent The infomations passed from other core
      */
     void HandleEvent(const AppExecFwk::InnerEvent::Pointer &event);
+
     /**
      * Send events to other policy cores.
      *
@@ -68,9 +70,8 @@ public:
      * @param delayTime The delay time, if need the message send delay
      */
     void SendEvent(int32_t eventId, std::shared_ptr<PolicyEvent> &eventData, int64_t delayTime = 0);
-    virtual void OnReceiveEvent(const EventFwk::CommonEventData &data);
 
-    const uint32_t CORE_EVENT_PRIORITY = 1;
+    virtual void OnReceiveEvent(const EventFwk::CommonEventData &data);
 
 private:
     void SubscribeCommonEvent();

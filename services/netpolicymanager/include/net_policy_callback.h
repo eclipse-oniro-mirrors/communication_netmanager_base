@@ -36,12 +36,14 @@ public:
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
+
     /**
      * Unregister net policy callback.
      * @param callback Interface type pointer.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
+
     /**
      * Notify this uid's policy is changed.
      * @param uid The UID of application.
@@ -49,6 +51,7 @@ public:
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t NotifyNetUidPolicyChange(uint32_t uid, uint32_t policy);
+
     /**
      * Notify this uid's rule is changed.
      * @param uid The UID of application.
@@ -56,18 +59,21 @@ public:
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t NotifyNetUidRuleChange(uint32_t uid, uint32_t rule);
+
     /**
      * Notify the quota policy is changed.
      * @param quotaPolicies The struct vector of quotaPolicies.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t NotifyNetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies);
+
     /**
      * Notify when metered ifaces is changed.
      * @param ifaces The string vector of ifaces.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t NotifyNetMeteredIfacesChange(std::vector<std::string> &ifaces);
+
     /**
      * Notify when background policy is changed.
      * @param isAllow When isAllow is true,it means background policy is true,

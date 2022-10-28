@@ -41,7 +41,6 @@ void NetPolicyRule::TransPolicyToRule()
 {
     // When system status is changed,traverse uidPolicyRules_ to calculate the rule and netsys.
     for (const auto &[uid, policy] : uidPolicyRules_) {
-        NETMGR_LOG_D("TransPolicyToRule without input value:uid[%{public}u] policy[%{public}u]", uid, policy.policy_);
         TransPolicyToRule(uid, policy.policy_);
     }
 }
@@ -85,7 +84,7 @@ uint32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
 uint32_t NetPolicyRule::BuildTransCondition(uint32_t uid, uint32_t policy)
 {
     // Integrate status values, the result of policyCondition will be use in TransConditionToRuleAndNetsys.
-    uint32_t policyCondition = ChangePolicyToPolicytranscondition(policy);
+    uint32_t policyCondition = ChangePolicyToPolicyTransitionCondition(policy);
 
     if (IsIdleMode()) {
         policyCondition |= POLICY_TRANS_CONDITION_IDLE_MODE;
@@ -154,36 +153,27 @@ uint32_t NetPolicyRule::GetMatchTransCondition(uint32_t policyCondition)
 
 void NetPolicyRule::NetsysCtrl(uint32_t uid, uint32_t netsysCtrl)
 {
-    if (netsysCtrl == POLICY_TRANS_CTRL_NONE) {
-        NETMGR_LOG_D("Don't need to do anything,keep now status.uid[%{public}u],netsysCtrl: [%{public}u]", uid,
-                     netsysCtrl);
-        return;
+    switch (netsysCtrl) {
+        case POLICY_TRANS_CTRL_NONE:
+            NETMGR_LOG_D("Don't need to do anything,keep now status.");
+            break;
+        case POLICY_TRANS_CTRL_REMOVE_ALL:
+            GetNetsysInst()->BandwidthRemoveAllowedList(uid);
+            GetNetsysInst()->BandwidthRemoveDeniedList(uid);
+            break;
+        case POLICY_TRANS_CTRL_ADD_DENIEDLIST:
+            GetNetsysInst()->BandwidthAddDeniedList(uid);
+            GetNetsysInst()->BandwidthRemoveAllowedList(uid);
+            break;
+        case POLICY_TRANS_CTRL_ADD_ALLOWEDLIST:
+            GetNetsysInst()->BandwidthRemoveDeniedList(uid);
+            GetNetsysInst()->BandwidthAddAllowedList(uid);
+            break;
+        default:
+            NETMGR_LOG_E("Error netsysCtrl value, need to check");
+            break;
     }
-
-    if (netsysCtrl == POLICY_TRANS_CTRL_REMOVE_ALL) {
-        GetNetsysInst()->BandwidthRemoveAllowedList(uid);
-        GetNetsysInst()->BandwidthRemoveDeniedList(uid);
-        NETMGR_LOG_D("Remove uid:[%{public}u] from black list and white list.netsysCtrl: [%{public}u]", uid,
-                     netsysCtrl);
-        return;
-    }
-
-    if (netsysCtrl == POLICY_TRANS_CTRL_ADD_DENIEDLIST) {
-        GetNetsysInst()->BandwidthAddDeniedList(uid);
-        GetNetsysInst()->BandwidthRemoveAllowedList(uid);
-        NETMGR_LOG_D("Add uid:[%{public}u] into reject list and remove from white list.netsysCtrl: [%{public}u]", uid,
-                     netsysCtrl);
-        return;
-    }
-
-    if (netsysCtrl == POLICY_TRANS_CTRL_ADD_ALLOWEDLIST) {
-        GetNetsysInst()->BandwidthRemoveDeniedList(uid);
-        GetNetsysInst()->BandwidthAddAllowedList(uid);
-        NETMGR_LOG_D("Add uid:[%{public}u] into white list and remove from reject list.netsysCtrl: [%{public}u]", uid,
-                     netsysCtrl);
-        return;
-    }
-    NETMGR_LOG_E("Error netsysCtrl value, need to check.uid:[%{private}u],netsysCtrl: [%{public}u]", uid, netsysCtrl);
+    NETMGR_LOG_D("uid:[%{public}u]   netsysCtrl: [%{public}u]", uid, netsysCtrl);
 }
 
 uint32_t NetPolicyRule::MoveToConditionBit(uint32_t value)
@@ -196,7 +186,7 @@ uint32_t NetPolicyRule::MoveToRuleBit(uint32_t value)
     return value >> RULE_START_BIT;
 }
 
-uint32_t NetPolicyRule::ChangePolicyToPolicytranscondition(uint32_t policy)
+uint32_t NetPolicyRule::ChangePolicyToPolicyTransitionCondition(uint32_t policy)
 {
     if (policy == NET_POLICY_NONE) {
         return POLICY_TRANS_CONDITION_UID_POLICY_NONE;
@@ -314,7 +304,7 @@ bool NetPolicyRule::GetBackgroundPolicy()
 
 bool NetPolicyRule::IsIdleMode()
 {
-    NETMGR_LOG_I("IsIdleMode:deviceIdleMode_[%{public}d", deviceIdleMode_);
+    NETMGR_LOG_D("IsIdleMode:deviceIdleMode_[%{public}d", deviceIdleMode_);
     return deviceIdleMode_;
 }
 
@@ -353,12 +343,13 @@ bool NetPolicyRule::InPowerSaveAllowedList(uint32_t uid)
 void NetPolicyRule::DeleteUid(uint32_t uid)
 {
     NETMGR_LOG_D("DeleteUid:uid[%{public}u]", uid);
-    for (auto iter : uidPolicyRules_) {
-        if (iter.first == uid) {
-            uidPolicyRules_.erase(iter.first);
-            break;
-        }
+
+    const auto &it = std::find_if(uidPolicyRules_.begin(), uidPolicyRules_.end(),
+                                  [&uid](const auto &pair) { return pair.first == uid; });
+    if (it != uidPolicyRules_.end()) {
+        uidPolicyRules_.erase(it);
     }
+
     GetNetsysInst()->BandwidthRemoveDeniedList(uid);
     GetNetsysInst()->BandwidthRemoveAllowedList(uid);
 }

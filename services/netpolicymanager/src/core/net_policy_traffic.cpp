@@ -35,17 +35,17 @@ namespace OHOS {
 namespace NetManagerStandard {
 void NetPolicyTraffic::Init()
 {
-    netsysCallback_ = new NetsysControllerCallbackImpl((
-        std::static_pointer_cast<NetPolicyTraffic>(shared_from_this())));
-    GetNetsysInst()->RegisterNetsysCallback(netsysCallback_);
+    netsysCallback_ = new (std::nothrow)
+        NetsysControllerCallbackImpl((std::static_pointer_cast<NetPolicyTraffic>(shared_from_this())));
+    if (netsysCallback_ != nullptr) {
+        GetNetsysInst()->RegisterNetsysCallback(netsysCallback_);
+    }
+
     ReadQuotaPolicies();
 }
 
 bool NetPolicyTraffic::IsValidQuotaPolicy(const NetQuotaPolicy &quotaPolicy)
 {
-    if (quotaPolicy.netType == -1) {
-        return false;
-    }
     int32_t netType = quotaPolicy.netType;
     if (!IsValidNetType(netType)) {
         NETMGR_LOG_E("NetPolicyType is invalid policy[%{public}d]", netType);
@@ -88,7 +88,6 @@ int32_t NetPolicyTraffic::UpdateQuotaPolicies(const std::vector<NetQuotaPolicy> 
 
 int32_t NetPolicyTraffic::UpdateQuotaPoliciesInner()
 {
-    NETMGR_LOG_I("UpdateQuotaPoliciesInner");
     // calculate the quota remain and get the metered ifaces
     NetmanagerHiTrace::NetmanagerStartSyncTrace("UpdateMeteredIfacesQuota start");
     auto meteredIfaces = UpdateMeteredIfacesQuota();
@@ -145,7 +144,6 @@ const std::vector<std::string> NetPolicyTraffic::UpdateMeteredIfacesQuota()
     for (auto &quotaPolicy : quotaPolicies_) {
         std::string iface = GetMatchIfaces(quotaPolicy);
         // set quota for metered iface.
-        NETMGR_LOG_D("GetMatchIfaces is:[%{public}s] metered is:[%{public}d]", iface.c_str(), quotaPolicy.metered);
         if (iface == UNKNOW_IFACE || !quotaPolicy.metered) {
             continue;
         }
@@ -166,7 +164,7 @@ const std::vector<std::string> NetPolicyTraffic::UpdateMeteredIfacesQuota()
 
 void NetPolicyTraffic::UpdateMeteredIfaces(std::vector<std::string> &newMeteredIfaces)
 {
-    NETMGR_LOG_I("UpdateMeteredIfaces size[%{public}zu]", newMeteredIfaces.size());
+    NETMGR_LOG_D("UpdateMeteredIfaces size[%{public}zu]", newMeteredIfaces.size());
     meteredIfaces_.clear();
     meteredIfaces_.reserve(newMeteredIfaces.size());
     for (auto &iface : newMeteredIfaces) {
@@ -178,7 +176,6 @@ void NetPolicyTraffic::UpdateMeteredIfaces(std::vector<std::string> &newMeteredI
 
 void NetPolicyTraffic::UpdateQuotaNotify()
 {
-    NETMGR_LOG_I("UpdateQuotaNotify");
     NetmanagerHiTrace::NetmanagerStartSyncTrace("Traverse cellular network start");
     for (auto &quotaPolicy : quotaPolicies_) {
         NetmanagerHiTrace::NetmanagerStartSyncTrace("Get the start time of the metering cycle start");
@@ -236,7 +233,7 @@ int64_t NetPolicyTraffic::GetQuotaRemain(NetQuotaPolicy &quotaPolicy)
 
 void NetPolicyTraffic::UpdateNetEnableStatus(const NetQuotaPolicy &quotaPolicy)
 {
-    NETMGR_LOG_I("UpdateNetEnableStatus metered[%{public}d] limitAction[%{public}d]", quotaPolicy.metered,
+    NETMGR_LOG_D("UpdateNetEnableStatus metered[%{public}d] limitAction[%{public}d]", quotaPolicy.metered,
                  quotaPolicy.limitAction);
     if (quotaPolicy.metered || quotaPolicy.limitAction == LIMIT_ACTION_DISABLE) {
         SetNetworkEnableStatus(quotaPolicy, false);
@@ -246,17 +243,14 @@ void NetPolicyTraffic::UpdateNetEnableStatus(const NetQuotaPolicy &quotaPolicy)
 int32_t NetPolicyTraffic::GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     quotaPolicies.clear();
-    quotaPolicies.reserve(quotaPolicies_.size());
-    for (uint32_t i = 0; i < quotaPolicies_.size(); ++i) {
-        quotaPolicies.push_back(quotaPolicies_[i]);
-    }
+    quotaPolicies = quotaPolicies_;
     NETMGR_LOG_D("GetNetQuotaPolicies quotaPolicies end size[%{public}zu]", quotaPolicies.size());
     return ERR_NONE;
 }
 
 int32_t NetPolicyTraffic::UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType)
 {
-    if (!IsValidNetType(static_cast<NetBearType>(netType))) {
+    if (!IsValidNetType(netType)) {
         NETMGR_LOG_E("NetPolicyType is invalid policy[%{public}d]", netType);
         return ERR_INVALID_PARAM;
     }
@@ -277,7 +271,6 @@ int32_t NetPolicyTraffic::UpdateRemindPolicy(int32_t netType, const std::string 
             }
         }
     }
-
     UpdateQuotaPoliciesInner();
 
     return ERR_NONE;
@@ -300,7 +293,7 @@ void NetPolicyTraffic::ResetPolicies(const std::string &iccid)
 
 void NetPolicyTraffic::ReachedLimit(const std::string &iface)
 {
-    NETMGR_LOG_I("ReachedLimit iface:%{public}s.", iface.c_str());
+    NETMGR_LOG_D("ReachedLimit iface:%{public}s.", iface.c_str());
     auto &ifaces = GetMeteredIfaces();
     if (std::find(ifaces.begin(), ifaces.end(), iface) != ifaces.end()) {
         UpdateQuotaPoliciesInner();
@@ -327,10 +320,7 @@ int32_t NetPolicyTraffic::ReadQuotaPolicies()
 
 bool NetPolicyTraffic::WriteQuotaPolicies()
 {
-    if (GetFileInst()->WriteFile(quotaPolicies_)) {
-        return true;
-    }
-    return false;
+    return GetFileInst()->WriteFile(quotaPolicies_);
 }
 
 const std::string NetPolicyTraffic::GetMatchIfaces(const NetQuotaPolicy &quotaPolicy)
@@ -383,7 +373,6 @@ void NetPolicyTraffic::PublishQuotaEvent(const std::string &action, int64_t quot
         NETMGR_LOG_E("Publish %{public}s event fail.", action.c_str());
         return;
     }
-    NETMGR_LOG_I("Publish %{public}s event.", action.c_str());
 }
 
 bool NetPolicyTraffic::IsValidPeriodDuration(const std::string &periodDuration)
@@ -394,9 +383,8 @@ bool NetPolicyTraffic::IsValidPeriodDuration(const std::string &periodDuration)
     }
 
     std::string cycle = periodDuration.substr(0, 1);
-    NETMGR_LOG_E("Invalid periodDuration [%{public}s].", cycle.c_str());
-    int32_t start =
-        static_cast<int32_t>(std::strtol(periodDuration.substr(1, periodDuration.size()).c_str(), nullptr, 10));
+    NETMGR_LOG_D("Invalid periodDuration [%{public}s].", cycle.c_str());
+    int32_t start = CommonUtils::StrToInt(periodDuration.substr(1, periodDuration.size()));
     if (cycle == PERIOD_DAY) {
         if (start < PERIOD_START || start > DAY_MAX) {
             NETMGR_LOG_E("Invalid periodDuration D[%{public}d]", start);

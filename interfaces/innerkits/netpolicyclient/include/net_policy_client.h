@@ -115,36 +115,6 @@ public:
     int32_t UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
 
     /**
-     * SetCellularPolicies set policys by NetPolicyCellularPolicy
-     *
-     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
-     * @permission ohos.permission.CONNECTIVITY_INTERNAL
-     * @systemapi Hide this for inner system use.
-     * @deprecated
-     */
-    NetPolicyResultCode SetCellularPolicies(const std::vector<NetPolicyCellularPolicy> &cellularPolicies);
-
-    /**
-     * GetCellularPolicies get policys for NetPolicyCellularPolicy
-     *
-     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
-     * @permission ohos.permission.CONNECTIVITY_INTERNAL
-     * @systemapi Hide this for inner system use.
-     * @deprecated
-     */
-    NetPolicyResultCode GetCellularPolicies(std::vector<NetPolicyCellularPolicy> &cellularPolicies);
-
-    /**
-     * SetNetQuotaPolicies set policys by NetPolicyQuotaPolicy
-     *
-     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
-     * @permission ohos.permission.CONNECTIVITY_INTERNAL
-     * @systemapi Hide this for inner system use.
-     * @deprecated
-     */
-    NetPolicyResultCode SetNetQuotaPolicies(const std::vector<NetPolicyQuotaPolicy> &quotaPolicies);
-
-    /**
      * Set network policies.
      *
      * @param quotaPolicies The list of network quota policy, {@link NetQuotaPolicy}.
@@ -153,16 +123,6 @@ public:
      * @systemapi Hide this for inner system use.
      */
     int32_t SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies);
-
-    /**
-     * GetNetQuotaPolicies get policys for NetQuotaPolicy.
-     *
-     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
-     * @permission ohos.permission.CONNECTIVITY_INTERNAL
-     * @systemapi Hide this for inner system use.
-     * @deprecated
-     */
-    NetPolicyResultCode GetNetQuotaPolicies(std::vector<NetPolicyQuotaPolicy> &quotaPolicies);
 
     /**
      * Get network policies.
@@ -273,8 +233,7 @@ public:
     /**
      * GetIdleTrustlist for get trust list for Idle status
      *
-     * @param uid uid
-     * @param uids
+     * @param uids The uids are into into allow list
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @deprecated
      */

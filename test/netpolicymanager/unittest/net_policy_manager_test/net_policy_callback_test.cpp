@@ -15,6 +15,8 @@
 
 #include "net_policy_callback_test.h"
 
+#include <iostream>
+
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_constants.h"
 
@@ -38,9 +40,7 @@ void NetPolicyCallbackTest::WaitFor(int32_t timeoutSecond)
 
 int32_t NetPolicyCallbackTest::NetUidPolicyChange(uint32_t uid, uint32_t policy)
 {
-    NETMGR_LOG_D("unittest NetUidPolicyChange, uid:[%{public}u], policy:[%{public}u]", uid,
-                 static_cast<uint32_t>(policy));
-
+    std::cout << "unittest NetUidPolicyChange, uid:" << uid << "policy:" << policy << std::endl;
     uid_ = uid;
     uidPolicy_ = policy;
     NotifyAll();
@@ -50,7 +50,7 @@ int32_t NetPolicyCallbackTest::NetUidPolicyChange(uint32_t uid, uint32_t policy)
 
 int32_t NetPolicyCallbackTest::NetUidRuleChange(uint32_t uid, uint32_t rule)
 {
-    NETMGR_LOG_D("unittest NetUidRuleChange, uid:[%{public}u], rule:[%{public}u]", uid, rule);
+    std::cout << "unittest NetUidRuleChange, uid:" << uid << "rule:" << rule << std::endl;
     uid_ = uid;
     rule_ = rule;
     NotifyAll();
@@ -60,8 +60,7 @@ int32_t NetPolicyCallbackTest::NetUidRuleChange(uint32_t uid, uint32_t rule)
 
 int32_t NetPolicyCallbackTest::NetBackgroundPolicyChange(bool isBackgroundPolicyAllow)
 {
-    NETMGR_LOG_D("unittest NetBackgroundPolicyChange, isBackgroundPolicyAllow:[%{public}d]", isBackgroundPolicyAllow);
-
+    std::cout << "unittest NetBackgroundPolicyChange, isBackgroundPolicyAllow:" << isBackgroundPolicyAllow << std::endl;
     isBackgroundPolicyAllow_ = isBackgroundPolicyAllow;
     NotifyAll();
 
@@ -70,7 +69,7 @@ int32_t NetPolicyCallbackTest::NetBackgroundPolicyChange(bool isBackgroundPolicy
 
 int32_t NetPolicyCallbackTest::NetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies)
 {
-    NETMGR_LOG_D("unittest NetQuotaPolicyChange, quotaPolicies.size:[%{public}zu]", quotaPolicies.size());
+    std::cout << "unittest NetQuotaPolicyChange, quotaPolicies.size:" << quotaPolicies.size() << std::endl;
     quotaPoliciesSize_ = quotaPolicies.size();
     NotifyAll();
     return 0;
@@ -79,7 +78,7 @@ int32_t NetPolicyCallbackTest::NetQuotaPolicyChange(const std::vector<NetQuotaPo
 int32_t NetPolicyCallbackTest::NetMeteredIfacesChange(std::vector<std::string> &ifaces)
 {
     for (auto &iface : ifaces) {
-        NETMGR_LOG_D("unittest NetMeteredIfacesChange, iface:[%{public}s]", iface.c_str());
+        std::cout << "unittest NetMeteredIfacesChange, iface:" << iface.c_str() << std::endl;
     }
     NotifyAll();
     return 0;

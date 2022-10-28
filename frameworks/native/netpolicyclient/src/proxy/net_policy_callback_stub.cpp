@@ -34,9 +34,9 @@ NetPolicyCallbackStub::~NetPolicyCallbackStub() {}
 int32_t NetPolicyCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                                MessageOption &option)
 {
-    std::u16string myDescripter = NetPolicyCallbackStub::GetDescriptor();
-    std::u16string remoteDescripter = data.ReadInterfaceToken();
-    if (myDescripter != remoteDescripter) {
+    std::u16string myDescriptor = NetPolicyCallbackStub::GetDescriptor();
+    std::u16string remoteDescriptor = data.ReadInterfaceToken();
+    if (myDescriptor != remoteDescriptor) {
         NETMGR_LOG_E("Descriptor checked failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -69,7 +69,7 @@ int32_t NetPolicyCallbackStub::OnNetUidPolicyChange(MessageParcel &data, Message
     int32_t result = NetUidPolicyChange(uid, policy);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
-        return result;
+        return ERR_FLATTEN_OBJECT;
     }
 
     return ERR_NONE;
@@ -97,7 +97,7 @@ int32_t NetPolicyCallbackStub::OnNetUidRuleChange(MessageParcel &data, MessagePa
     int32_t result = NetUidRuleChange(uid, rule);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
-        return result;
+        return ERR_FLATTEN_OBJECT;
     }
 
     return ERR_NONE;
@@ -119,7 +119,7 @@ int32_t NetPolicyCallbackStub::OnNetBackgroundPolicyChange(MessageParcel &data, 
     int32_t result = NetBackgroundPolicyChange(isBackgroundPolicyAllow);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
-        return result;
+        return ERR_FLATTEN_OBJECT;
     }
 
     return ERR_NONE;
@@ -141,7 +141,7 @@ int32_t NetPolicyCallbackStub::OnNetQuotaPolicyChange(MessageParcel &data, Messa
     int32_t result = NetQuotaPolicyChange(cellularPolicies);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
-        return result;
+        return ERR_FLATTEN_OBJECT;
     }
 
     return ERR_NONE;
@@ -172,7 +172,7 @@ int32_t NetPolicyCallbackStub::OnNetMeteredIfacesChange(MessageParcel &data, Mes
     int32_t result = NetMeteredIfacesChange(ifaces);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
-        return result;
+        return ERR_FLATTEN_OBJECT;
     }
     return ERR_NONE;
 }
@@ -197,7 +197,7 @@ int32_t NetPolicyCallbackStub::OnNetStrategySwitch(MessageParcel &data, MessageP
     int32_t result = NetStrategySwitch(iccid, enable);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
-        return result;
+        return ERR_FLATTEN_OBJECT;
     }
     return ERR_NONE;
 }

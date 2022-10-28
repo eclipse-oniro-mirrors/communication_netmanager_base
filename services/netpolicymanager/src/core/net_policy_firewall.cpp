@@ -12,10 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "net_policy_firewall.h"
 
-#include "firewall_rule.h"
 #include "ipc_skeleton.h"
+
+#include "firewall_rule.h"
 #include "net_policy_core.h"
 #include "net_policy_event_handler.h"
 #include "net_settings.h"
@@ -45,7 +47,7 @@ const std::vector<uint32_t> &NetPolicyFirewall::GetDeviceIdleAllowedList()
 void NetPolicyFirewall::UpdateDeviceIdlePolicy(bool enable)
 {
     if (deviceIdleMode_ == enable) {
-        NETMGR_LOG_I("Same device idle policy.");
+        NETMGR_LOG_W("Same device idle policy.");
         return;
     }
     if (enable) {

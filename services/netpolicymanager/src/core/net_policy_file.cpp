@@ -16,8 +16,9 @@
 #include "net_policy_file.h"
 
 #include <fcntl.h>
-#include <json/json.h>
 #include <string>
+
+#include <json/json.h>
 
 #include "net_manager_center.h"
 #include "net_mgr_log_wrapper.h"
@@ -57,7 +58,7 @@ bool NetPolicyFile::CreateFile(const std::string &fileName)
 
 const std::vector<UidPolicy> &NetPolicyFile::GetNetPolicies()
 {
-    return netPolicy_.uidPolicys;
+    return netPolicy_.uidPolicies;
 }
 
 void NetPolicyFile::ParseUidPolicy(const Json::Value &root, NetPolicy &netPolicy)
@@ -68,14 +69,14 @@ void NetPolicyFile::ParseUidPolicy(const Json::Value &root, NetPolicy &netPolicy
     for (uint32_t i = 0; i < size; i++) {
         uidPolicy.uid = arrayUidPolicy[i][CONFIG_UID].asString();
         uidPolicy.policy = arrayUidPolicy[i][CONFIG_POLICY].asString();
-        netPolicy.uidPolicys.push_back(uidPolicy);
+        netPolicy.uidPolicies.push_back(uidPolicy);
     }
 }
 
 void NetPolicyFile::ParseBackgroundPolicy(const Json::Value &root, NetPolicy &netPolicy)
 {
     const Json::Value mapBackgroundPolicy = root[CONFIG_BACKGROUND_POLICY];
-    netPolicy.backgroundPolicyStatus_ = mapBackgroundPolicy[CONFIG_BACKGROUND_POLICY_STATUS].asString();
+    netPolicy.backgroundPolicyStatus = mapBackgroundPolicy[CONFIG_BACKGROUND_POLICY_STATUS].asString();
 }
 
 void NetPolicyFile::ParseQuotaPolicy(const Json::Value &root, NetPolicy &netPolicy)
@@ -93,7 +94,7 @@ void NetPolicyFile::ParseQuotaPolicy(const Json::Value &root, NetPolicy &netPoli
         quotaPolicy.lastLimitSnooze = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_LASTLIMITSNOOZE].asString();
         quotaPolicy.metered = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_METERED].asString();
         quotaPolicy.source = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_SOURCE].asString();
-        netPolicy.netQuotaPolicys.push_back(quotaPolicy);
+        netPolicy.netQuotaPolicies.push_back(quotaPolicy);
     }
 }
 
@@ -123,8 +124,8 @@ bool NetPolicyFile::Json2Obj(const std::string &content, NetPolicy &netPolicy)
     }
 
     Json::Value root;
-    Json::CharReaderBuilder buidler;
-    std::unique_ptr<Json::CharReader> reader(buidler.newCharReader());
+    Json::CharReaderBuilder builder;
+    std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
     JSONCPP_STRING errs;
 
     bool isSuccess = reader->parse(content.c_str(), content.c_str() + content.length(), &root, &errs);
@@ -175,29 +176,29 @@ bool NetPolicyFile::ReadFile(const std::string &fileName, std::string &fileConte
 
 void NetPolicyFile::AppendQuotaPolicy(Json::Value &root)
 {
-    uint32_t size = netPolicy_.netQuotaPolicys.size();
+    uint32_t size = netPolicy_.netQuotaPolicies.size();
     for (uint32_t i = 0; i < size; i++) {
         Json::Value quotaPolicy;
-        quotaPolicy[CONFIG_QUOTA_POLICY_NETTYPE] = netPolicy_.netQuotaPolicys[i].netType;
-        quotaPolicy[CONFIG_QUOTA_POLICY_SUBSCRIBERID] = netPolicy_.netQuotaPolicys[i].iccid;
-        quotaPolicy[CONFIG_QUOTA_POLICY_PERIODSTARTTIME] = netPolicy_.netQuotaPolicys[i].periodStartTime;
-        quotaPolicy[CONFIG_QUOTA_POLICY_PERIODDURATION] = netPolicy_.netQuotaPolicys[i].periodDuration;
-        quotaPolicy[CONFIG_QUOTA_POLICY_WARNINGBYTES] = netPolicy_.netQuotaPolicys[i].warningBytes;
-        quotaPolicy[CONFIG_QUOTA_POLICY_LIMITBYTES] = netPolicy_.netQuotaPolicys[i].limitBytes;
-        quotaPolicy[CONFIG_QUOTA_POLICY_LASTLIMITSNOOZE] = netPolicy_.netQuotaPolicys[i].lastLimitSnooze;
-        quotaPolicy[CONFIG_QUOTA_POLICY_METERED] = netPolicy_.netQuotaPolicys[i].metered;
-        quotaPolicy[CONFIG_QUOTA_POLICY_SOURCE] = netPolicy_.netQuotaPolicys[i].source;
+        quotaPolicy[CONFIG_QUOTA_POLICY_NETTYPE] = netPolicy_.netQuotaPolicies[i].netType;
+        quotaPolicy[CONFIG_QUOTA_POLICY_SUBSCRIBERID] = netPolicy_.netQuotaPolicies[i].iccid;
+        quotaPolicy[CONFIG_QUOTA_POLICY_PERIODSTARTTIME] = netPolicy_.netQuotaPolicies[i].periodStartTime;
+        quotaPolicy[CONFIG_QUOTA_POLICY_PERIODDURATION] = netPolicy_.netQuotaPolicies[i].periodDuration;
+        quotaPolicy[CONFIG_QUOTA_POLICY_WARNINGBYTES] = netPolicy_.netQuotaPolicies[i].warningBytes;
+        quotaPolicy[CONFIG_QUOTA_POLICY_LIMITBYTES] = netPolicy_.netQuotaPolicies[i].limitBytes;
+        quotaPolicy[CONFIG_QUOTA_POLICY_LASTLIMITSNOOZE] = netPolicy_.netQuotaPolicies[i].lastLimitSnooze;
+        quotaPolicy[CONFIG_QUOTA_POLICY_METERED] = netPolicy_.netQuotaPolicies[i].metered;
+        quotaPolicy[CONFIG_QUOTA_POLICY_SOURCE] = netPolicy_.netQuotaPolicies[i].source;
         root[CONFIG_QUOTA_POLICY].append(quotaPolicy);
     }
 }
 
 void NetPolicyFile::AppendUidPolicy(Json::Value &root)
 {
-    uint32_t size = netPolicy_.uidPolicys.size();
+    uint32_t size = netPolicy_.uidPolicies.size();
     for (uint32_t i = 0; i < size; i++) {
         Json::Value uidPolicy;
-        uidPolicy[CONFIG_UID] = netPolicy_.uidPolicys[i].uid;
-        uidPolicy[CONFIG_POLICY] = netPolicy_.uidPolicys[i].policy;
+        uidPolicy[CONFIG_UID] = netPolicy_.uidPolicies[i].uid;
+        uidPolicy[CONFIG_POLICY] = netPolicy_.uidPolicies[i].policy;
         root[CONFIG_UID_POLICY].append(uidPolicy);
     }
 }
@@ -205,22 +206,23 @@ void NetPolicyFile::AppendUidPolicy(Json::Value &root)
 void NetPolicyFile::AppendBackgroundPolicy(Json::Value &root)
 {
     Json::Value backgroundPolicy;
-    if (netPolicy_.backgroundPolicyStatus_.empty()) {
-        netPolicy_.backgroundPolicyStatus_ = BACKGROUND_POLICY_ALLOW;
+    if (netPolicy_.backgroundPolicyStatus.empty()) {
+        netPolicy_.backgroundPolicyStatus = BACKGROUND_POLICY_ALLOW;
     }
-    backgroundPolicy[CONFIG_BACKGROUND_POLICY_STATUS] = netPolicy_.backgroundPolicyStatus_;
+    backgroundPolicy[CONFIG_BACKGROUND_POLICY_STATUS] = netPolicy_.backgroundPolicyStatus;
     root[CONFIG_BACKGROUND_POLICY] = backgroundPolicy;
 }
 
 uint32_t NetPolicyFile::ArbitrationWritePolicyToFile(uint32_t uid, uint32_t policy)
 {
-    uint32_t size = netPolicy_.uidPolicys.size();
+    uint32_t size = netPolicy_.uidPolicies.size();
     bool haveUidAndPolicy = false;
     uint32_t oldPolicy;
     for (uint32_t i = 0; i < size; i++) {
-        if (uid == CommonUtils::StrToUint(netPolicy_.uidPolicys[i].uid.c_str())) {
+        auto uidTemp = CommonUtils::StrToUint(netPolicy_.uidPolicies[i].uid.c_str());
+        if (uid == uidTemp) {
             haveUidAndPolicy = true;
-            oldPolicy = CommonUtils::StrToUint(netPolicy_.uidPolicys[i].policy.c_str());
+            oldPolicy = uidTemp;
         }
     }
 
@@ -253,7 +255,7 @@ bool NetPolicyFile::WriteFile(const std::string &fileName)
 {
     std::unique_lock<std::mutex> lock(mutex_);
     if (fileName.empty()) {
-        NETMGR_LOG_D("fileName is empty.");
+        NETMGR_LOG_E("fileName is empty.");
         return false;
     }
 
@@ -287,25 +289,25 @@ bool NetPolicyFile::WriteFile(const std::string &fileName)
 
 bool NetPolicyFile::WriteFile(uint32_t netUidPolicyOpType, uint32_t uid, uint32_t policy)
 {
-    NETMGR_LOG_I("Write File start, model:[%{public}u]", netUidPolicyOpType);
+    NETMGR_LOG_D("Write File start, model:[%{public}u]", netUidPolicyOpType);
 
-    for (const auto &i : netPolicy_.uidPolicys) {
+    for (const auto &i : netPolicy_.uidPolicies) {
         uint32_t uid = CommonUtils::StrToUint(i.uid.c_str());
         uint32_t policy = CommonUtils::StrToUint(i.policy.c_str());
         NETMGR_LOG_D("Struct:uid[%{public}u],policy[%{public}u]", uid, policy);
     }
 
     if (netUidPolicyOpType == NetUidPolicyOpType::NET_POLICY_UID_OP_TYPE_UPDATE) {
-        for (auto &uidPolicy : netPolicy_.uidPolicys) {
+        for (auto &uidPolicy : netPolicy_.uidPolicies) {
             if (uidPolicy.uid == std::to_string(uid)) {
-                uidPolicy.policy = std::to_string(static_cast<uint32_t>(policy));
+                uidPolicy.policy = std::to_string(policy);
                 break;
             }
         }
     } else if (netUidPolicyOpType == NetUidPolicyOpType::NET_POLICY_UID_OP_TYPE_DELETE) {
-        for (auto iter = netPolicy_.uidPolicys.begin(); iter != netPolicy_.uidPolicys.end(); ++iter) {
+        for (auto iter = netPolicy_.uidPolicies.begin(); iter != netPolicy_.uidPolicies.end(); ++iter) {
             if (iter->uid == std::to_string(uid)) {
-                netPolicy_.uidPolicys.erase(iter);
+                netPolicy_.uidPolicies.erase(iter);
                 break;
             }
         }
@@ -313,7 +315,7 @@ bool NetPolicyFile::WriteFile(uint32_t netUidPolicyOpType, uint32_t uid, uint32_
         UidPolicy uidPolicy;
         uidPolicy.uid = std::to_string(uid);
         uidPolicy.policy = std::to_string(static_cast<uint32_t>(policy));
-        netPolicy_.uidPolicys.push_back(uidPolicy);
+        netPolicy_.uidPolicies.push_back(uidPolicy);
     } else {
         NETMGR_LOG_I("Need to do nothing!");
     }
@@ -328,23 +330,23 @@ bool NetPolicyFile::WriteFile(uint32_t netUidPolicyOpType, uint32_t uid, uint32_
 
 bool NetPolicyFile::UpdateQuotaPolicyExist(const NetQuotaPolicy &quotaPolicy)
 {
-    if (netPolicy_.netQuotaPolicys.empty()) {
-        NETMGR_LOG_E("UpdateQuotaPolicyExist NetQuotaPolicys is empty");
+    if (netPolicy_.netQuotaPolicies.empty()) {
+        NETMGR_LOG_E("UpdateQuotaPolicyExist netQuotaPolicies is empty");
         return false;
     }
 
-    for (uint32_t i = 0; i < netPolicy_.netQuotaPolicys.size(); ++i) {
-        if (quotaPolicy.iccid == netPolicy_.netQuotaPolicys[i].iccid &&
-            netPolicy_.netQuotaPolicys[i].netType == std::to_string(quotaPolicy.netType)) {
-            netPolicy_.netQuotaPolicys[i].lastLimitSnooze = std::to_string(quotaPolicy.lastLimitRemind);
-            netPolicy_.netQuotaPolicys[i].limitBytes = std::to_string(quotaPolicy.limitBytes);
-            netPolicy_.netQuotaPolicys[i].metered = std::to_string(quotaPolicy.metered);
-            netPolicy_.netQuotaPolicys[i].netType = std::to_string(quotaPolicy.netType);
-            netPolicy_.netQuotaPolicys[i].periodDuration = quotaPolicy.periodDuration;
-            netPolicy_.netQuotaPolicys[i].periodStartTime = std::to_string(quotaPolicy.periodStartTime);
-            netPolicy_.netQuotaPolicys[i].source = std::to_string(quotaPolicy.source);
-            netPolicy_.netQuotaPolicys[i].iccid = quotaPolicy.iccid;
-            netPolicy_.netQuotaPolicys[i].warningBytes = std::to_string(quotaPolicy.warningBytes);
+    for (uint32_t i = 0; i < netPolicy_.netQuotaPolicies.size(); ++i) {
+        if (quotaPolicy.iccid == netPolicy_.netQuotaPolicies[i].iccid &&
+            netPolicy_.netQuotaPolicies[i].netType == std::to_string(quotaPolicy.netType)) {
+            netPolicy_.netQuotaPolicies[i].lastLimitSnooze = std::to_string(quotaPolicy.lastLimitRemind);
+            netPolicy_.netQuotaPolicies[i].limitBytes = std::to_string(quotaPolicy.limitBytes);
+            netPolicy_.netQuotaPolicies[i].metered = std::to_string(quotaPolicy.metered);
+            netPolicy_.netQuotaPolicies[i].netType = std::to_string(quotaPolicy.netType);
+            netPolicy_.netQuotaPolicies[i].periodDuration = quotaPolicy.periodDuration;
+            netPolicy_.netQuotaPolicies[i].periodStartTime = std::to_string(quotaPolicy.periodStartTime);
+            netPolicy_.netQuotaPolicies[i].source = std::to_string(quotaPolicy.source);
+            netPolicy_.netQuotaPolicies[i].iccid = quotaPolicy.iccid;
+            netPolicy_.netQuotaPolicies[i].warningBytes = std::to_string(quotaPolicy.warningBytes);
             return true;
         }
     }
@@ -354,8 +356,8 @@ bool NetPolicyFile::UpdateQuotaPolicyExist(const NetQuotaPolicy &quotaPolicy)
 
 bool NetPolicyFile::WriteFile(const std::vector<NetQuotaPolicy> &quotaPolicies)
 {
-    netPolicy_.netQuotaPolicys.clear();
-    uint32_t vSize = static_cast<uint32_t>(quotaPolicies.size());
+    netPolicy_.netQuotaPolicies.clear();
+    uint32_t vSize = quotaPolicies.size();
     NetPolicyQuota quotaPolicy;
     for (uint32_t i = 0; i < vSize; i++) {
         if (UpdateQuotaPolicyExist(quotaPolicies[i])) {
@@ -372,7 +374,7 @@ bool NetPolicyFile::WriteFile(const std::vector<NetQuotaPolicy> &quotaPolicies)
         quotaPolicy.source = std::to_string(quotaPolicies[i].source);
         quotaPolicy.iccid = quotaPolicies[i].iccid;
         quotaPolicy.warningBytes = std::to_string(quotaPolicies[i].warningBytes);
-        netPolicy_.netQuotaPolicys.push_back(quotaPolicy);
+        netPolicy_.netQuotaPolicies.push_back(quotaPolicy);
     }
 
     if (!WriteFile(POLICY_FILE_NAME)) {
@@ -385,9 +387,9 @@ bool NetPolicyFile::WriteFile(const std::vector<NetQuotaPolicy> &quotaPolicies)
 
 bool NetPolicyFile::IsUidPolicyExist(uint32_t uid)
 {
-    uint32_t size = netPolicy_.uidPolicys.size();
+    uint32_t size = netPolicy_.uidPolicies.size();
     for (uint32_t i = 0; i < size; i++) {
-        if (CommonUtils::StrToUint(netPolicy_.uidPolicys[i].uid) == uid) {
+        if (CommonUtils::StrToUint(netPolicy_.uidPolicies[i].uid) == uid) {
             return true;
         }
     }
@@ -397,7 +399,7 @@ bool NetPolicyFile::IsUidPolicyExist(uint32_t uid)
 
 NetUidPolicy NetPolicyFile::GetPolicyByUid(uint32_t uid)
 {
-    for (auto &uidPolicy : netPolicy_.uidPolicys) {
+    for (auto &uidPolicy : netPolicy_.uidPolicies) {
         if (uidPolicy.uid == std::to_string(uid)) {
             return static_cast<NetUidPolicy>(CommonUtils::StrToUint(uidPolicy.policy));
         }
@@ -408,8 +410,8 @@ NetUidPolicy NetPolicyFile::GetPolicyByUid(uint32_t uid)
 
 bool NetPolicyFile::GetUidsByPolicy(uint32_t policy, std::vector<uint32_t> &uids)
 {
-    for (auto &uidPolicy : netPolicy_.uidPolicys) {
-        if (uidPolicy.policy == std::to_string(static_cast<uint32_t>(policy))) {
+    for (auto &uidPolicy : netPolicy_.uidPolicies) {
+        if (uidPolicy.policy == std::to_string(policy)) {
             uint32_t uid = CommonUtils::StrToUint(uidPolicy.uid);
             uids.push_back(uid);
         }
@@ -420,7 +422,7 @@ bool NetPolicyFile::GetUidsByPolicy(uint32_t policy, std::vector<uint32_t> &uids
 int32_t NetPolicyFile::ReadQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     NetQuotaPolicy quotaPolicyTmp;
-    for (auto &quotaPolicy : netPolicy_.netQuotaPolicys) {
+    for (auto &quotaPolicy : netPolicy_.netQuotaPolicies) {
         quotaPolicyTmp.lastLimitRemind = CommonUtils::StrToLong(quotaPolicy.lastLimitSnooze);
         quotaPolicyTmp.limitBytes = CommonUtils::StrToLong(quotaPolicy.limitBytes);
         quotaPolicyTmp.metered = CommonUtils::StrToBool(quotaPolicy.metered);
@@ -438,7 +440,7 @@ int32_t NetPolicyFile::ReadQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolic
 
 int32_t NetPolicyFile::GetNetQuotaPolicy(int32_t netType, const std::string &iccid, NetQuotaPolicy &quotaPolicy)
 {
-    for (auto &quotaPolicyTemp : netPolicy_.netQuotaPolicys) {
+    for (const auto &quotaPolicyTemp : netPolicy_.netQuotaPolicies) {
         if (netType == CommonUtils::StrToInt(quotaPolicyTemp.netType) && iccid == quotaPolicyTemp.iccid) {
             quotaPolicy.lastLimitRemind = CommonUtils::StrToLong(quotaPolicyTemp.lastLimitSnooze);
             quotaPolicy.limitBytes = CommonUtils::StrToLong(quotaPolicyTemp.limitBytes);
@@ -458,15 +460,15 @@ int32_t NetPolicyFile::GetNetQuotaPolicy(int32_t netType, const std::string &icc
 
 int32_t NetPolicyFile::ResetPolicies(const std::string &iccid)
 {
-    netPolicy_.uidPolicys.clear();
-    netPolicy_.backgroundPolicyStatus_ = BACKGROUND_POLICY_ALLOW;
+    netPolicy_.uidPolicies.clear();
+    netPolicy_.backgroundPolicyStatus = BACKGROUND_POLICY_ALLOW;
 
     if (iccid.empty()) {
-        netPolicy_.netQuotaPolicys.clear();
+        netPolicy_.netQuotaPolicies.clear();
     } else {
-        for (auto iter = netPolicy_.netQuotaPolicys.begin(); iter != netPolicy_.netQuotaPolicys.end(); ++iter) {
+        for (auto iter = netPolicy_.netQuotaPolicies.begin(); iter != netPolicy_.netQuotaPolicies.end(); ++iter) {
             if (iccid == iter->iccid) {
-                netPolicy_.netQuotaPolicys.erase(iter);
+                netPolicy_.netQuotaPolicies.erase(iter);
                 break;
             }
         }
@@ -483,9 +485,9 @@ int32_t NetPolicyFile::ResetPolicies(const std::string &iccid)
 int32_t NetPolicyFile::SetBackgroundPolicy(bool backgroundPolicy)
 {
     if (backgroundPolicy) {
-        netPolicy_.backgroundPolicyStatus_ = BACKGROUND_POLICY_ALLOW;
+        netPolicy_.backgroundPolicyStatus = BACKGROUND_POLICY_ALLOW;
     } else {
-        netPolicy_.backgroundPolicyStatus_ = BACKGROUND_POLICY_REJECT;
+        netPolicy_.backgroundPolicyStatus = BACKGROUND_POLICY_REJECT;
     }
 
     if (!WriteFile(POLICY_FILE_NAME)) {
@@ -498,7 +500,7 @@ int32_t NetPolicyFile::SetBackgroundPolicy(bool backgroundPolicy)
 
 bool NetPolicyFile::GetBackgroundPolicy()
 {
-    if (netPolicy_.backgroundPolicyStatus_ == BACKGROUND_POLICY_ALLOW) {
+    if (netPolicy_.backgroundPolicyStatus == BACKGROUND_POLICY_ALLOW) {
         return true;
     }
     return false;

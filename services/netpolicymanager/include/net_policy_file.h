@@ -51,11 +51,12 @@ class NetPolicyFile : public std::enable_shared_from_this<NetPolicyFile> {
 
 public:
     /**
-     * Init by reading policy from "/data/system/net_policy.json".
+     * Init by reading policy from file.
      * @return true Return true means init policy successful.
      * @return false Return false means init policy failed.
      */
     bool InitPolicy();
+
     /**
      * Judge if this uid is exist.
      * @param uid The specified UID of application.
@@ -63,25 +64,29 @@ public:
      * @return false Return false means this uid is not exist.
      */
     bool IsUidPolicyExist(uint32_t uid);
+
     /**
-     * Write struct vector of quotaPolicies to file ("/data/system/net_policy.json").
+     * Write struct vector of quotaPolicies to file.
      * @param quotaPolicies The struct vector of quotaPolicies.
      * @return true Return true means write quotaPolicies to file successful.
      * @return false Return false means write quotaPolicies to file failed.
      */
     bool WriteFile(const std::vector<NetQuotaPolicy> &quotaPolicies);
+
     /**
-     * Write uid and policy to file ("/data/system/net_policy.json").
+     * Write uid and policy to file.
      * @param uid The specified UID of application.
      * @param policy See {@link NetUidPolicy}.
      */
     void WriteFile(uint32_t uid, uint32_t policy);
+
     /**
      * Get policy by uid from vector UidPolicy of struct NetPolicy.
      * @param uid The specified UID of application.
      * @return NetUidPolicy See {@link NetUidPolicy}.
      */
     NetUidPolicy GetPolicyByUid(uint32_t uid);
+
     /**
      * Get uids by policy from vector UidPolicy of struct NetPolicy.
      * @param policy See {@link NetUidPolicy}.
@@ -90,12 +95,14 @@ public:
      * @return false Return false means get none uids that policy equal input policy.
      */
     bool GetUidsByPolicy(uint32_t policy, std::vector<uint32_t> &uids);
+
     /**
      * Add quota policies into struct vector quotaPolicies.
      * @param quotaPolicies The struct vector of quotaPolicies.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t ReadQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies);
+
     /**
      * Use netType and iccid to judge if this quota Policy in NetPolicyQuota vector of struct NetPolicy.
      * @param netType For details, see {@link NetBearType}.
@@ -104,15 +111,17 @@ public:
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t GetNetQuotaPolicy(int32_t netType, const std::string &iccid, NetQuotaPolicy &quotaPolicy);
+
     /**
      * Clear the uid and policy in struct NetPolicy's uidPolicy vector,
      * reset the background policy status to default,
      * reset the netQuotaPolicy which IccId equal iccid,
-     * write these changes to file ("/data/system/net_policy.json").
+     * write these changes to file.
      * @param iccid The net quota policy's sim id.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t ResetPolicies(const std::string &iccid);
+
     /**
      * Write the background policy to file.
      * @param allowBackground When the allowBackground is true,it means "allow" background policy,
@@ -120,15 +129,17 @@ public:
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t SetBackgroundPolicy(bool allowBackground);
+
     /**
      * Get background policy from file.
      * @return true True means allow background policy.
      * @return false False means reject background policy.
      */
     bool GetBackgroundPolicy();
+
     /**
      * Get struct vector uid and policy from file.
-     * @return const std::vector<UidPolicy>& Return struct vector netPolicy_.uidPolicys.
+     * @return const std::vector<UidPolicy>& Return struct vector netPolicy_.uidPolicies.
      */
     const std::vector<UidPolicy> &GetNetPolicies();
 

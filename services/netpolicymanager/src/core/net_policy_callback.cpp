@@ -41,7 +41,7 @@ int32_t NetPolicyCallback::RegisterNetPolicyCallback(const sptr<INetPolicyCallba
 
     for (uint32_t i = 0; i < callbackCounts; i++) {
         if (callback->AsObject().GetRefPtr() == callbacks_[i]->AsObject().GetRefPtr()) {
-            NETMGR_LOG_I("netPolicyCallback_ had this callback");
+            NETMGR_LOG_W("netPolicyCallback_ had this callback");
             return NetPolicyResultCode::ERR_INVALID_PARAM;
         }
     }
@@ -115,7 +115,7 @@ int32_t NetPolicyCallback::NotifyNetQuotaPolicyChange(const std::vector<NetQuota
         NETMGR_LOG_E("NotifyNetQuotaPolicyChange quotaPolicies empty");
         return ERR_INTERNAL_ERROR;
     }
-    NETMGR_LOG_I("NotifyNetQuotaPolicyChange quotaPolicies.size[%{public}zd]", quotaPolicies.size());
+    NETMGR_LOG_D("NotifyNetQuotaPolicyChange quotaPolicies.size[%{public}zu]", quotaPolicies.size());
 
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
