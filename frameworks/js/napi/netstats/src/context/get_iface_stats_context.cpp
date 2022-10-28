@@ -93,7 +93,7 @@ std::string GetIfaceStatsContext::GetInterfaceName()
     return interfaceName_;
 }
 
-NetStatsInfo& GetIfaceStatsContext::GetStatsInfo()
+NetStatsInfo &GetIfaceStatsContext::GetStatsInfo()
 {
     return statsInfo_;
 }

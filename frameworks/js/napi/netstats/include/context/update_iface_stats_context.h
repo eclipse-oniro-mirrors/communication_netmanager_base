@@ -47,12 +47,14 @@ public:
     uint32_t GetEnd();
 
     void ParseParams(napi_value *params, size_t paramsCount);
+
 private:
     int32_t uid_ = 0;
     std::string interfaceName_;
     NetStatsInfo statsInfo_;
     uint32_t start_ = 0;
     uint32_t end_ = 0;
+
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
 };
