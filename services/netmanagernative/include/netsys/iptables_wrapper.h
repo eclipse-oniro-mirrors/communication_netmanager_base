@@ -20,8 +20,8 @@
 #include <cstring>
 #include <iostream>
 #include <mutex>
-#include <thread>
 #include <queue>
+#include <thread>
 
 #include "singleton.h"
 
@@ -39,7 +39,7 @@ public:
     /**
      * @param ipType ipv4 or ipv6
      * @param command iptables command
-     * @return .
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     int32_t RunCommand(const IpType &ipType, const std::string &command);
 
@@ -48,9 +48,10 @@ public:
      *
      * @param ipType ipv4 or ipv6.
      * @param command iptables command.
-     * @return result.
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     std::string RunCommandForRes(const IpType &ipType, const std::string &command);
+
 private:
     static void ThreadStart(IptablesWrapper *wrapper);
     void RunSystemFunc();
@@ -58,8 +59,8 @@ private:
 private:
     std::mutex iptablesMutex_;
     std::condition_variable conditionVarLock_;
-    bool isRunningFlag_;
-    bool isIptablesSystemAccess_;
+    bool isRunningFlag_ = false;
+    bool isIptablesSystemAccess_ = false;
     bool forRes_ = false;
     std::string result_;
     std::thread iptablesWrapperThread_;

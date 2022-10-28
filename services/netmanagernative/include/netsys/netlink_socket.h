@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_NETLINK_SOCKET_H__
-#define INCLUDE_NETLINK_SOCKET_H__
+#ifndef INCLUDE_NETLINK_SOCKET_H
+#define INCLUDE_NETLINK_SOCKET_H
 
 #include <functional>
+#include <linux/netlink.h>
+#include <linux/rtnetlink.h>
 #include <memory>
 #include <netinet/in.h>
 #include <sys/epoll.h>
-#include <linux/netlink.h>
-#include <linux/rtnetlink.h>
 
 namespace OHOS {
 namespace nmd {
@@ -45,9 +45,35 @@ int32_t SendNetlinkMsgToKernel(nlmsghdr *msg, uint32_t table = 0);
  * @return Returns 0, clear route or rule configure successfully, otherwise it will fail
  */
 int32_t ClearRouteInfo(uint16_t clearThing, uint32_t table);
+
+/**
+ * Get info from kernel
+ *
+ * @param sock Sock for read
+ * @param clearThing Type for kernel nlmsg_type
+ * @param table Route property for RTA_TABLE
+ * @return Returns 0, get info from kernel successfully, otherwise it will fail
+ */
 int32_t GetInfoFromKernel(int32_t sock, uint16_t clearThing, uint32_t table);
+
+/**
+ * Deal info from kernel
+ *
+ * @param nlmsgHeader nlmsghdr
+ * @param clearThing Type for kernel nlmsg_type
+ * @param table Route property for RTA_TABLE
+ * @return Returns 0, deal info from kernel successfully, otherwise it will fail
+ */
 void DealInfoFromKernel(nlmsghdr *nlmsgHeader, uint16_t clearThing, uint32_t table);
+
+/**
+ * Get route property
+ *
+ * @param nlmsgHeader nlmsghdr
+ * @param property Property for route
+ * @return Returns 0, get route property successfully, otherwise it will fail
+ */
 uint32_t GetRouteProperty(const nlmsghdr *nlmsgHeader, int32_t property);
 } // namespace nmd
 } // namespace OHOS
-#endif // !INCLUDE_NETLINK_SOCKET_H__
+#endif // !INCLUDE_NETLINK_SOCKET_H

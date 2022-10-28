@@ -26,7 +26,7 @@ namespace nmd {
 class PhysicalNetwork : public NetsysNetwork {
 public:
     PhysicalNetwork(uint16_t netId, NetworkPermission permission);
-    virtual ~PhysicalNetwork();
+    virtual ~PhysicalNetwork() = default;
 
     /**
      * Call RouteManager's AddInterfaceToDefaultNetwork
@@ -55,7 +55,7 @@ public:
      *
      * @return Returns permission_
      */
-    NetworkPermission GetPermission()
+    NetworkPermission GetPermission() const
     {
         return permission_;
     }

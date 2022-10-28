@@ -16,23 +16,15 @@
 #ifndef INCLUDE_ROUTE_MANAGER_H
 #define INCLUDE_ROUTE_MANAGER_H
 
+#include <linux/netlink.h>
 #include <map>
 #include <netinet/in.h>
-#include <linux/netlink.h>
+
 #include "netlink_msg.h"
 #include "network_permission.h"
 
 namespace OHOS {
 namespace nmd {
-constexpr int32_t RULE_LEVEL_SYSTEM = 10000;
-constexpr int32_t RULE_LEVEL_EXPLICIT_NETWORK = 11000;
-constexpr int32_t RULE_LEVEL_OUTPUT_INTERFACE = 12000;
-constexpr int32_t RULE_LEVEL_LOCAL_NETWORK = 13000;
-constexpr int32_t RULE_LEVEL_SHARING = 14000;
-constexpr int32_t RULE_LEVEL_IMPLICIT_NETWORK = 15000;
-constexpr int32_t RULE_LEVEL_DEFAULT = 16000;
-constexpr int32_t RULE_LEVEL_UNREACHABLE = 17000;
-
 typedef struct RuleInfo {
     uint32_t ruleTable;
     uint32_t rulePriority;
@@ -59,7 +51,7 @@ typedef struct InetAddr {
 class RouteManager {
 public:
     RouteManager();
-    ~RouteManager();
+    ~RouteManager() = default;
 
     /**
      * Route table type
@@ -81,7 +73,7 @@ public:
      * @return Returns 0, add route table successfully, otherwise it will fail
      */
     static int32_t AddRoute(TableType tableType, const std::string &interfaceName, const std::string &destinationName,
-        const std::string &nextHop);
+                            const std::string &nextHop);
 
     /**
      * The interface is remove route table
@@ -93,7 +85,7 @@ public:
      * @return Returns 0, remove route table successfully, otherwise it will fail
      */
     static int32_t RemoveRoute(TableType tableType, const std::string &interfaceName,
-        const std::string &destinationName, const std::string &nextHop);
+                               const std::string &destinationName, const std::string &nextHop);
 
     /**
      * The interface is update route table
@@ -105,7 +97,7 @@ public:
      * @return Returns 0, update route table successfully, otherwise it will fail
      */
     static int32_t UpdateRoute(TableType tableType, const std::string &interfaceName,
-        const std::string &destinationName, const std::string &nextHop);
+                               const std::string &destinationName, const std::string &nextHop);
 
     /**
      * Add interface to default network
@@ -137,7 +129,7 @@ public:
      * @return Returns 0, add interface to physical network successfully, otherwise it will fail
      */
     static int32_t AddInterfaceToPhysicalNetwork(uint16_t netId, const std::string &interfaceName,
-        NetworkPermission permission);
+                                                 NetworkPermission permission);
 
     /**
      * Remove interface from physical network
@@ -149,7 +141,7 @@ public:
      * @return Returns 0, remove interface from physical network successfully, otherwise it will fail
      */
     static int32_t RemoveInterfaceFromPhysicalNetwork(uint16_t netId, const std::string &interfaceName,
-        NetworkPermission permission);
+                                                      NetworkPermission permission);
 
     /**
      * Modify physical network permission
@@ -163,7 +155,7 @@ public:
      * @return Returns 0, modify physical network permission successfully, otherwise it will fail
      */
     static int32_t ModifyPhysicalNetworkPermission(uint16_t netId, const std::string &interfaceName,
-        NetworkPermission oldPermission, NetworkPermission newPermission);
+                                                   NetworkPermission oldPermission, NetworkPermission newPermission);
 
     /**
      * Add interface to local network
@@ -220,31 +212,31 @@ public:
     static int32_t ReadAddrGw(const std::string &addr, InetAddr *res);
 
 private:
-    static std::mutex m_interfaceToTableLock_;
-    static std::map<std::string, uint32_t> m_interfaceToTable_;
+    static std::mutex interfaceToTableLock_;
+    static std::map<std::string, uint32_t> interfaceToTable_;
     static int32_t Init();
     static int32_t ClearRules();
     static int32_t ClearRoutes(const std::string &interfaceName);
     static int32_t AddLocalNetworkRules();
-    static int32_t UpdatePhysicalNetwork(uint16_t netId, const std::string &interfaceName, NetworkPermission permission,
-        bool add);
+    static int32_t UpdatePhysicalNetwork(uint16_t netId, const std::string &interfaceName,
+                                         NetworkPermission permission, bool add);
     static int32_t UpdateLocalNetwork(uint16_t netId, const std::string &interfaceName, bool add);
     static int32_t UpdateIncomingPacketMark(uint16_t netId, const std::string &interfaceName,
-        NetworkPermission permission, bool add);
+                                            NetworkPermission permission, bool add);
     static int32_t UpdateExplicitNetworkRule(uint16_t netId, uint32_t table, NetworkPermission permission, bool add);
     static int32_t UpdateOutputInterfaceRules(const std::string &interfaceName, uint32_t table,
-        NetworkPermission permission, bool add);
+                                              NetworkPermission permission, bool add);
     static int32_t UpdateSharingNetwork(uint16_t action, const std::string &inputInterface,
-        const std::string &outputInterface);
+                                        const std::string &outputInterface);
     static int32_t ClearSharingRules(const std::string &inputInterface);
     static int32_t UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo);
     static int32_t SendRuleToKernel(uint32_t action, uint16_t ruleFlag, uint8_t ruleType, RuleInfo ruleInfo);
     static int32_t UpdateRouteRule(uint16_t action, uint16_t flags, RouteInfo routeInfo);
     static int32_t SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtmsg msg, RouteInfo routeInfo,
-        uint32_t index);
+                                     uint32_t index);
     static uint32_t FindTableByInterfacename(const std::string &interfaceName);
     static uint32_t GetRouteTableFromType(TableType tableType, const std::string &interfaceName);
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // !INCLUDE_ROUTE_MANAGER_H
+#endif // INCLUDE_ROUTE_MANAGER_H

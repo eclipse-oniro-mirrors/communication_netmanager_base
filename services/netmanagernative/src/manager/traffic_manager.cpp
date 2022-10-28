@@ -14,21 +14,28 @@
  */
 
 #include "traffic_manager.h"
+
 #include <algorithm>
 #include <dirent.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <net/if.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
-#include "securec.h"
+#include <unistd.h>
+
 #include "net_manager_native.h"
 #include "netnative_log_wrapper.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace nmd {
-const std::string interfaceListDir = "/sys/class/net/";
+static constexpr const char *INTERFACE_LIST_DIR = "/sys/class/net/";
+static constexpr const char *STATISTICS = "statistics";
+static constexpr const char *RX_BYTES = "rx_bytes";
+static constexpr const char *TX_BYTES = "tx_bytes";
+static constexpr const char *RX_PACKETS = "rx_packets";
+static constexpr const char *TX_PACKETS = "tx_packets";
 
 std::vector<std::string> GetInterfaceList()
 {
@@ -36,9 +43,9 @@ std::vector<std::string> GetInterfaceList()
     struct dirent *ptr(nullptr);
     std::vector<std::string> ifList;
 
-    dir = opendir(interfaceListDir.c_str());
+    dir = opendir(INTERFACE_LIST_DIR);
     if (dir == nullptr) {
-        NETNATIVE_LOGI("GetInterfaceList open %{public}s failed", interfaceListDir.c_str());
+        NETNATIVE_LOGE("GetInterfaceList open %{private}s failed", INTERFACE_LIST_DIR);
         return ifList;
     }
 
@@ -64,14 +71,14 @@ long GetInterfaceTrafficByType(const std::string &path, const std::string &type)
 
     int fd = open(trafficPath.c_str(), 0, 0666);
     if (fd == -1) {
-        NETNATIVE_LOGI("GetInterfaceTrafficByType open %{public}s failed", interfaceListDir.c_str());
+        NETNATIVE_LOGE("GetInterfaceTrafficByType open %{private}s failed", INTERFACE_LIST_DIR);
         return -1;
     }
 
     char buf[100] = {0};
     int nread = read(fd, buf, sizeof(long));
     if (nread == -1) {
-        NETNATIVE_LOGI("GetInterfaceTrafficByType read %{public}s failed", interfaceListDir.c_str());
+        NETNATIVE_LOGE("GetInterfaceTrafficByType read %{private}s failed", INTERFACE_LIST_DIR);
         close(fd);
         return -1;
     }
@@ -90,8 +97,8 @@ long TrafficManager::GetAllRxTraffic()
     long allRxBytes = 0;
     for (auto iter = ifNameList.begin(); iter != ifNameList.end(); iter++) {
         if (*iter != "lo") {
-            std::string baseTrafficPath = interfaceListDir + (*iter) + "/" + "statistics" + "/";
-            long rxBytes = GetInterfaceTrafficByType(baseTrafficPath, "rx_bytes");
+            std::string baseTrafficPath = INTERFACE_LIST_DIR + (*iter) + "/" + STATISTICS + "/";
+            long rxBytes = GetInterfaceTrafficByType(baseTrafficPath, RX_BYTES);
             allRxBytes += rxBytes;
         }
     }
@@ -108,8 +115,8 @@ long TrafficManager::GetAllTxTraffic()
     long allTxBytes = 0;
     for (auto iter = ifNameList.begin(); iter != ifNameList.end(); iter++) {
         if (*iter != "lo") {
-            std::string baseTrafficPath = interfaceListDir + (*iter) + "/" + "statistics" + "/";
-            long txBytes = GetInterfaceTrafficByType(baseTrafficPath, "tx_bytes");
+            std::string baseTrafficPath = INTERFACE_LIST_DIR + (*iter) + "/" + STATISTICS + "/";
+            long txBytes = GetInterfaceTrafficByType(baseTrafficPath, TX_BYTES);
             allTxBytes = allTxBytes + txBytes;
         }
     }
@@ -127,11 +134,11 @@ TrafficStatsParcel TrafficManager::GetInterfaceTraffic(const std::string &ifName
         if (ifName != *iter) {
             continue;
         }
-        std::string baseTrafficPath = interfaceListDir + (*iter) + "/" + "statistics" + "/";
-        long infRxBytes = GetInterfaceTrafficByType(baseTrafficPath, "rx_bytes");
-        long infRxPackets = GetInterfaceTrafficByType(baseTrafficPath, "rx_packets");
-        long infTxBytes = GetInterfaceTrafficByType(baseTrafficPath, "tx_bytes");
-        long infTxPackets = GetInterfaceTrafficByType(baseTrafficPath, "tx_packets");
+        std::string baseTrafficPath = INTERFACE_LIST_DIR + (*iter) + "/" + STATISTICS + "/";
+        long infRxBytes = GetInterfaceTrafficByType(baseTrafficPath, RX_BYTES);
+        long infRxPackets = GetInterfaceTrafficByType(baseTrafficPath, RX_PACKETS);
+        long infTxBytes = GetInterfaceTrafficByType(baseTrafficPath, TX_BYTES);
+        long infTxPackets = GetInterfaceTrafficByType(baseTrafficPath, TX_PACKETS);
 
         interfaceTrafficBytes.iface = ifName;
         interfaceTrafficBytes.ifIndex = if_nametoindex(ifName.c_str());

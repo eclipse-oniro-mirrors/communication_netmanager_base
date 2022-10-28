@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef __INCLUDE_DHCP_CONTROLLER_H__
-#define __INCLUDE_DHCP_CONTROLLER_H__
+#ifndef INCLUDE_DHCP_CONTROLLER_H
+#define INCLUDE_DHCP_CONTROLLER_H
 
-#include "i_dhcp_result_notify.h"
 #include "dhcp_service_api.h"
+#include "i_dhcp_result_notify.h"
 #include "i_notify_callback.h"
 
 namespace OHOS {
@@ -27,14 +27,15 @@ public:
     class DhcpControllerResultNotify : public OHOS::Wifi::IDhcpResultNotify {
     public:
         explicit DhcpControllerResultNotify(DhcpController &dhcpController);
-        ~DhcpControllerResultNotify() override;
+        virtual ~DhcpControllerResultNotify() override;
         void OnSuccess(int status, const std::string &ifname, OHOS::Wifi::DhcpResult &result) override;
         void OnFailed(int status, const std::string &ifname, const std::string &reason) override;
-        void OnSerExitNotify(const std::string& ifname) override;
+        void OnSerExitNotify(const std::string &ifname) override;
 
     private:
         DhcpController &dhcpController_;
     };
+
 public:
     DhcpController();
     ~DhcpController();
@@ -46,10 +47,11 @@ public:
     bool StopDhcpService(const std::string &iface);
 
     void Process(const std::string &iface, OHOS::Wifi::DhcpResult &result);
+
 private:
     std::unique_ptr<DhcpControllerResultNotify> dhcpResultNotify_ = nullptr;
     sptr<OHOS::NetsysNative::INotifyCallback> callback_ = nullptr;
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // !__INCLUDE_DHCP_CONTROLLER_H__
+#endif // !INCLUDE_DHCP_CONTROLLER_H

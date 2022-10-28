@@ -25,8 +25,8 @@
 #include "net_manager_native.h"
 #include "netlink_manager.h"
 #include "netsys_native_service_stub.h"
-#include "system_ability.h"
 #include "sharing_manager.h"
+#include "system_ability.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -54,27 +54,27 @@ public:
     int32_t UnRegisterNotifyCallback(sptr<INotifyCallback> &callback) override;
 
     int32_t NetworkAddRoute(int32_t netId, const std::string &interfaceName, const std::string &destination,
-        const std::string &nextHop) override;
+                            const std::string &nextHop) override;
     int32_t NetworkRemoveRoute(int32_t netId, const std::string &interfaceName, const std::string &destination,
-        const std::string &nextHop) override;
+                               const std::string &nextHop) override;
     int32_t NetworkAddRouteParcel(int32_t netId, const RouteInfoParcel &routeInfo) override;
     int32_t NetworkRemoveRouteParcel(int32_t netId, const RouteInfoParcel &routeInfo) override;
     int32_t NetworkSetDefault(int32_t netId) override;
     int32_t NetworkGetDefault() override;
     int32_t NetworkClearDefault() override;
-    int32_t GetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
-        const std::string &parameter, std::string  &value) override;
-    int32_t SetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
-        const std::string &parameter, std::string &value) override;
+    int32_t GetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname, const std::string &parameter,
+                          std::string &value) override;
+    int32_t SetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname, const std::string &parameter,
+                          std::string &value) override;
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) override;
     int32_t InterfaceAddAddress(const std::string &interfaceName, const std::string &addrString,
-        int32_t prefixLength) override;
+                                int32_t prefixLength) override;
     int32_t InterfaceDelAddress(const std::string &interfaceName, const std::string &addrString,
-        int32_t prefixLength) override;
+                                int32_t prefixLength) override;
     int32_t NetworkAddInterface(int32_t netId, const std::string &iface) override;
     int32_t NetworkRemoveInterface(int32_t netId, const std::string &iface) override;
     int32_t NetworkDestroy(int32_t netId) override;
-    int32_t GetFwmarkForNetwork(int32_t netId,       MarkMaskParcel &markMaskParcel) override;
+    int32_t GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel) override;
     int32_t InterfaceSetConfig(const InterfaceConfigurationParcel &cfg) override;
     int32_t InterfaceGetConfig(InterfaceConfigurationParcel &cfg) override;
     int32_t InterfaceGetList(std::vector<std::string> &ifaces) override;
@@ -104,6 +104,7 @@ public:
     int32_t StopDnsProxyListen() override;
     int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
                                      NetworkSharingTraffic &traffic) override;
+
 private:
     NetsysNativeService();
     bool Init();
@@ -114,7 +115,7 @@ private:
         STATE_RUNNING,
     };
 
-    ServiceRunningState state_ {ServiceRunningState::STATE_STOPPED};
+    ServiceRunningState state_{ServiceRunningState::STATE_STOPPED};
 
     static sptr<NetsysNativeService> instance_;
 
@@ -127,8 +128,6 @@ private:
     sptr<INotifyCallback> notifyCallback_ = nullptr;
 
     std::mutex instanceLock_;
-    const int32_t startTime_ = 1900;
-    const int32_t extraMonth_ = 1;
 };
 } // namespace NetsysNative
 } // namespace OHOS

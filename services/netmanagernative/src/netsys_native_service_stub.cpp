@@ -17,9 +17,11 @@
 #include <net/route.h>
 #include <netdb.h>
 #include <unistd.h>
-#include "securec.h"
+
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
+#include "securec.h"
+
 #include "netsys_native_service_stub.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
@@ -96,9 +98,9 @@ void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
 }
 
 int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-    MessageOption &option)
+                                                 MessageOption &option)
 {
-    NETNATIVE_LOGI("Begin to call procedure with code %{public}u", code);
+    NETNATIVE_LOG_D("Begin to call procedure with code %{public}u", code);
     auto interfaceIndex = opToInterfaceMap_.find(code);
     if (interfaceIndex == opToInterfaceMap_.end() || !interfaceIndex->second) {
         NETNATIVE_LOGE("Cannot response request %d: unknown tranction", code);
@@ -115,7 +117,6 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
 
 int32_t NetsysNativeServiceStub::CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd SetResolverConfig");
     uint16_t netId = 0;
     uint16_t baseTimeoutMsec = 0;
     uint8_t retryCount = 0;
@@ -156,14 +157,13 @@ int32_t NetsysNativeServiceStub::CmdSetResolverConfig(MessageParcel &data, Messa
 
     int32_t result = SetResolverConfig(netId, baseTimeoutMsec, retryCount, servers, domains);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("SetResolverConfig has received result %{public}d", result);
+    NETNATIVE_LOG_D("SetResolverConfig has received result %{public}d", result);
 
     return ERR_NONE;
 }
 
 int32_t NetsysNativeServiceStub::CmdGetResolverConfig(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd GetResolverConfig");
     uint16_t baseTimeoutMsec;
     uint8_t retryCount;
     uint16_t netId = 0;
@@ -186,18 +186,17 @@ int32_t NetsysNativeServiceStub::CmdGetResolverConfig(MessageParcel &data, Messa
     for (iterDomains = domains.begin(); iterDomains != domains.end(); ++iterDomains) {
         reply.WriteString(*iterDomains);
     }
-    NETNATIVE_LOGI("GetResolverConfig has recved result %{public}d", result);
+    NETNATIVE_LOG_D("GetResolverConfig has recved result %{public}d", result);
     return ERR_NONE;
 }
 
 int32_t NetsysNativeServiceStub::CmdCreateNetworkCache(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd CreateNetworkCache");
     uint16_t netid = data.ReadUint16();
     NETNATIVE_LOGI("CreateNetworkCache  netid %{public}d", netid);
     int32_t result = CreateNetworkCache(netid);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("CreateNetworkCache has recved result %{public}d", result);
+    NETNATIVE_LOG_D("CreateNetworkCache has recved result %{public}d", result);
 
     return ERR_NONE;
 }
@@ -228,34 +227,32 @@ int32_t NetsysNativeServiceStub::NetsysFreeAddrinfo(struct addrinfo *aihead)
 
 int32_t NetsysNativeServiceStub::CmdInterfaceSetMtu(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd InterfaceSetMtu");
     std::string ifName = data.ReadString();
     int32_t mtu = data.ReadInt32();
     int32_t result = InterfaceSetMtu(ifName, mtu);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("InterfaceSetMtu has recved result %{public}d", result);
+    NETNATIVE_LOG_D("InterfaceSetMtu has recved result %{public}d", result);
 
     return ERR_NONE;
 }
 
 int32_t NetsysNativeServiceStub::CmdInterfaceGetMtu(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd InterfaceGetMtu");
     std::string ifName = data.ReadString();
     int32_t result = InterfaceGetMtu(ifName);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("InterfaceGetMtu has recved result %{public}d", result);
+    NETNATIVE_LOG_D("InterfaceGetMtu has recved result %{public}d", result);
 
     return ERR_NONE;
 }
 
 int32_t NetsysNativeServiceStub::CmdRegisterNotifyCallback(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd RegisterNotifyCallback");
+    NETNATIVE_LOG_D("Begin to dispatch cmd RegisterNotifyCallback");
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         NETNATIVE_LOGE("Callback ptr is nullptr.");
-        return 0;
+        return -1;
     }
 
     sptr<INotifyCallback> callback = iface_cast<INotifyCallback>(remote);
@@ -266,11 +263,11 @@ int32_t NetsysNativeServiceStub::CmdRegisterNotifyCallback(MessageParcel &data, 
 
 int32_t NetsysNativeServiceStub::CmdUnRegisterNotifyCallback(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd UnRegisterNotifyCallback");
+    NETNATIVE_LOG_D("Begin to dispatch cmd UnRegisterNotifyCallback");
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         NETNATIVE_LOGE("Callback ptr is nullptr.");
-        return 0;
+        return -1;
     }
 
     sptr<INotifyCallback> callback = iface_cast<INotifyCallback>(remote);
@@ -281,40 +278,37 @@ int32_t NetsysNativeServiceStub::CmdUnRegisterNotifyCallback(MessageParcel &data
 
 int32_t NetsysNativeServiceStub::CmdNetworkAddRoute(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd NetworkAddRoute");
     int32_t netId = data.ReadInt32();
     std::string ifName = data.ReadString();
     std::string destination = data.ReadString();
     std::string nextHop = data.ReadString();
 
-    NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s], destination[%{public}s}, nextHop[%{public}s]",
-                   netId, ifName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
+    NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s], destination[%{public}s}, nextHop[%{public}s]", netId,
+                   ifName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
     int32_t result = NetworkAddRoute(netId, ifName, destination, nextHop);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("NetworkAddRoute has recved result %{public}d", result);
+    NETNATIVE_LOG_D("NetworkAddRoute has recved result %{public}d", result);
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdNetworkRemoveRoute(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd NetworkAddRoute");
     int32_t netId = data.ReadInt32();
     std::string interfaceName = data.ReadString();
     std::string destination = data.ReadString();
     std::string nextHop = data.ReadString();
 
-    NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s], destination[%{public}s}, nextHop[%{public}s]",
-                   netId, interfaceName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
+    NETNATIVE_LOGI("netId[%{public}d}, ifName[%{public}s], destination[%{public}s}, nextHop[%{public}s]", netId,
+                   interfaceName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
     int32_t result = NetworkRemoveRoute(netId, interfaceName, destination, nextHop);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("NetworkRemoveRoute has recved result %{public}d", result);
+    NETNATIVE_LOG_D("NetworkRemoveRoute has recved result %{public}d", result);
 
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdNetworkAddRouteParcel(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd NetworkAddRouteParcel");
     RouteInfoParcel routeInfo = {};
     int32_t netId = data.ReadInt32();
     routeInfo.ifName = data.ReadString();
@@ -322,14 +316,13 @@ int32_t NetsysNativeServiceStub::CmdNetworkAddRouteParcel(MessageParcel &data, M
     routeInfo.nextHop = data.ReadString();
     int32_t result = NetworkAddRouteParcel(netId, routeInfo);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("NetworkAddRouteParcel has recved result %{public}d", result);
+    NETNATIVE_LOG_D("NetworkAddRouteParcel has recved result %{public}d", result);
 
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdNetworkRemoveRouteParcel(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd NetworkRemoveRouteParcel");
     RouteInfoParcel routeInfo = {};
     int32_t netId = data.ReadInt32();
     routeInfo.ifName = data.ReadString();
@@ -338,46 +331,43 @@ int32_t NetsysNativeServiceStub::CmdNetworkRemoveRouteParcel(MessageParcel &data
 
     int32_t result = NetworkRemoveRouteParcel(netId, routeInfo);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("NetworkRemoveRouteParcel has recved result %{public}d", result);
+    NETNATIVE_LOG_D("NetworkRemoveRouteParcel has recved result %{public}d", result);
 
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdNetworkSetDefault(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd NetworkSetDefault");
     int32_t netId = data.ReadInt32();
 
     int32_t result = NetworkSetDefault(netId);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("NetworkSetDefault has recved result %{public}d", result);
+    NETNATIVE_LOG_D("NetworkSetDefault has recved result %{public}d", result);
 
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdNetworkGetDefault(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd NetworkGetDefault");
     int32_t result = NetworkGetDefault();
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("NetworkGetDefault has recved result %{public}d", result);
+    NETNATIVE_LOG_D("NetworkGetDefault has recved result %{public}d", result);
 
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdNetworkClearDefault(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd NetworkClearDefault");
     int32_t result = NetworkClearDefault();
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("NetworkClearDefault has recved result %{public}d", result);
+    NETNATIVE_LOG_D("NetworkClearDefault has recved result %{public}d", result);
 
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdGetProcSysNet(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd GetProcSysNet");
+    NETNATIVE_LOG_D("Begin to dispatch cmd GetProcSysNet");
     int32_t ipversion = data.ReadInt32();
     int32_t which = data.ReadInt32();
     std::string ifname = data.ReadString();
@@ -392,7 +382,6 @@ int32_t NetsysNativeServiceStub::CmdGetProcSysNet(MessageParcel &data, MessagePa
 
 int32_t NetsysNativeServiceStub::CmdSetProcSysNet(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd SetProcSysNet");
     int32_t ipversion = data.ReadInt32();
     int32_t which = data.ReadInt32();
     std::string ifname = data.ReadString();
@@ -400,129 +389,121 @@ int32_t NetsysNativeServiceStub::CmdSetProcSysNet(MessageParcel &data, MessagePa
     std::string value = data.ReadString();
     int32_t result = SetProcSysNet(ipversion, which, ifname, parameter, value);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("SetProcSysNet has recved result %{public}d", result);
+    NETNATIVE_LOG_D("SetProcSysNet has recved result %{public}d", result);
 
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdNetworkCreatePhysical(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd NetworkCreatePhysical");
     int32_t netId = data.ReadInt32();
     int32_t permission = data.ReadInt32();
 
     int32_t result = NetworkCreatePhysical(netId, permission);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("NetworkCreatePhysical has recved result %{public}d", result);
+    NETNATIVE_LOG_D("NetworkCreatePhysical has recved result %{public}d", result);
 
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdInterfaceAddAddress(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd InterfaceAddAddress");
     std::string interfaceName = data.ReadString();
     std::string ipAddr = data.ReadString();
     int32_t prefixLength = data.ReadInt32();
 
     int32_t result = InterfaceAddAddress(interfaceName, ipAddr, prefixLength);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("InterfaceAddAddress has recved result %{public}d", result);
+    NETNATIVE_LOG_D("InterfaceAddAddress has recved result %{public}d", result);
 
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdInterfaceDelAddress(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd InterfaceDelAddress");
     std::string interfaceName = data.ReadString();
     std::string ipAddr = data.ReadString();
     int32_t prefixLength = data.ReadInt32();
 
     int32_t result = InterfaceDelAddress(interfaceName, ipAddr, prefixLength);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("InterfaceDelAddress has recved result %{public}d", result);
+    NETNATIVE_LOG_D("InterfaceDelAddress has recved result %{public}d", result);
 
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdNetworkAddInterface(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd NetworkAddInterface");
     int32_t netId = data.ReadInt32();
     std::string iface = data.ReadString();
 
     int32_t result = NetworkAddInterface(netId, iface);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("NetworkAddInterface has recved result %{public}d", result);
+    NETNATIVE_LOG_D("NetworkAddInterface has recved result %{public}d", result);
 
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdNetworkRemoveInterface(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd NetworkRemoveInterface");
     int32_t netId = data.ReadInt32();
     std::string iface = data.ReadString();
     int32_t result = NetworkRemoveInterface(netId, iface);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("NetworkRemoveRouteParcel has recved result %{public}d", result);
+    NETNATIVE_LOG_D("NetworkRemoveRouteParcel has recved result %{public}d", result);
 
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdNetworkDestroy(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd NetworkDestroy");
     int32_t netId = data.ReadInt32();
     int32_t result = NetworkDestroy(netId);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("NetworkDestroy has recved result %{public}d", result);
+    NETNATIVE_LOG_D("NetworkDestroy has recved result %{public}d", result);
 
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdGetFwmarkForNetwork(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd GetFwmarkForNetwork");
     MarkMaskParcel markMaskParcel = {};
     int32_t netId = data.ReadInt32();
     markMaskParcel.mark = data.ReadInt32();
     markMaskParcel.mask = data.ReadInt32();
     int32_t result = GetFwmarkForNetwork(netId, markMaskParcel);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("GetFwmarkForNetwork has recved result %{public}d", result);
+    NETNATIVE_LOG_D("GetFwmarkForNetwork has recved result %{public}d", result);
 
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdInterfaceSetConfig(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd InterfaceSetConfig");
     InterfaceConfigurationParcel cfg = {};
     cfg.ifName = data.ReadString();
     cfg.hwAddr = data.ReadString();
     cfg.ipv4Addr = data.ReadString();
     cfg.prefixLength = data.ReadInt32();
-    int32_t vsize = data.ReadInt32();
-    vsize = (vsize > MAX_FLAG_NUM) ? MAX_FLAG_NUM : vsize;
+    int32_t vSize = data.ReadInt32();
+    vSize = (vSize > MAX_FLAG_NUM) ? MAX_FLAG_NUM : vSize;
     std::string vString;
-    std::vector<std::string> vCflags;
-    for (int i = 0; i < vsize; i++) {
+    std::vector<std::string> vFlags;
+    for (int i = 0; i < vSize; i++) {
         vString = data.ReadString();
-        vCflags.push_back(vString);
+        vFlags.push_back(vString);
     }
-    cfg.flags.assign(vCflags.begin(), vCflags.end());
+    cfg.flags.assign(vFlags.begin(), vFlags.end());
     int32_t result = InterfaceSetConfig(cfg);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("InterfaceSetConfig has recved result %{public}d", result);
+    NETNATIVE_LOG_D("InterfaceSetConfig has recved result %{public}d", result);
 
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdInterfaceGetConfig(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd InterfaceGetConfig");
+    NETNATIVE_LOG_D("Begin to dispatch cmd InterfaceGetConfig");
     InterfaceConfigurationParcel cfg = {};
     cfg.ifName = data.ReadString();
     int32_t result = InterfaceGetConfig(cfg);
@@ -542,7 +523,7 @@ int32_t NetsysNativeServiceStub::CmdInterfaceGetConfig(MessageParcel &data, Mess
 
 int32_t NetsysNativeServiceStub::CmdInterfaceGetList(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd InterfaceGetList");
+    NETNATIVE_LOG_D("Begin to dispatch cmd InterfaceGetList");
     std::vector<std::string> ifaces;
     int32_t result = InterfaceGetList(ifaces);
     reply.WriteInt32(result);
@@ -557,7 +538,7 @@ int32_t NetsysNativeServiceStub::CmdInterfaceGetList(MessageParcel &data, Messag
 
 int32_t NetsysNativeServiceStub::CmdStartDhcpClient(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd CmdStartDhcpClient");
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdStartDhcpClient");
     std::string iface = data.ReadString();
     bool bIpv6 = data.ReadBool();
     int32_t result = StartDhcpClient(iface, bIpv6);
@@ -567,7 +548,7 @@ int32_t NetsysNativeServiceStub::CmdStartDhcpClient(MessageParcel &data, Message
 
 int32_t NetsysNativeServiceStub::CmdStopDhcpClient(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd CmdStopDhcpClient");
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdStopDhcpClient");
     std::string iface = data.ReadString();
     bool bIpv6 = data.ReadBool();
     int32_t result = StopDhcpClient(iface, bIpv6);
@@ -577,7 +558,7 @@ int32_t NetsysNativeServiceStub::CmdStopDhcpClient(MessageParcel &data, MessageP
 
 int32_t NetsysNativeServiceStub::CmdStartDhcpService(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd CmdStartDhcpService");
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdStartDhcpService");
     std::string iface = data.ReadString();
     std::string ipv4addr = data.ReadString();
     int32_t result = StartDhcpService(iface, ipv4addr);
@@ -587,7 +568,7 @@ int32_t NetsysNativeServiceStub::CmdStartDhcpService(MessageParcel &data, Messag
 
 int32_t NetsysNativeServiceStub::CmdStopDhcpService(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd CmdStopDhcpService");
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdStopDhcpService");
     std::string iface = data.ReadString();
     int32_t result = StopDhcpService(iface);
     reply.WriteInt32(result);
@@ -596,7 +577,7 @@ int32_t NetsysNativeServiceStub::CmdStopDhcpService(MessageParcel &data, Message
 
 int32_t NetsysNativeServiceStub::CmdIpEnableForwarding(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd CmdIpEnableForwarding");
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdIpEnableForwarding");
     const auto &requester = data.ReadString();
     int32_t result = IpEnableForwarding(requester);
     reply.WriteInt32(result);
@@ -605,7 +586,7 @@ int32_t NetsysNativeServiceStub::CmdIpEnableForwarding(MessageParcel &data, Mess
 
 int32_t NetsysNativeServiceStub::CmdIpDisableForwarding(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd CmdIpDisableForwarding");
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdIpDisableForwarding");
     const auto &requester = data.ReadString();
     int32_t result = IpDisableForwarding(requester);
     reply.WriteInt32(result);
@@ -614,7 +595,7 @@ int32_t NetsysNativeServiceStub::CmdIpDisableForwarding(MessageParcel &data, Mes
 
 int32_t NetsysNativeServiceStub::CmdEnableNat(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd CmdEnableNat");
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdEnableNat");
     const auto &downstreamIface = data.ReadString();
     const auto &upstreamIface = data.ReadString();
     int32_t result = EnableNat(downstreamIface, upstreamIface);
@@ -624,7 +605,7 @@ int32_t NetsysNativeServiceStub::CmdEnableNat(MessageParcel &data, MessageParcel
 
 int32_t NetsysNativeServiceStub::CmdDisableNat(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd CmdDisableNat");
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdDisableNat");
     const auto &downstreamIface = data.ReadString();
     const auto &upstreamIface = data.ReadString();
     int32_t result = DisableNat(downstreamIface, upstreamIface);
@@ -634,7 +615,7 @@ int32_t NetsysNativeServiceStub::CmdDisableNat(MessageParcel &data, MessageParce
 
 int32_t NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd CmdIpfwdAddInterfaceForward");
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdIpfwdAddInterfaceForward");
     const auto &fromIface = data.ReadString();
     const auto &toIface = data.ReadString();
     int32_t result = IpfwdAddInterfaceForward(fromIface, toIface);
@@ -644,7 +625,7 @@ int32_t NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward(MessageParcel &data
 
 int32_t NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd CmdIpfwdRemoveInterfaceForward");
+    NETNATIVE_LOG_D("Begin to dispatch cmd CmdIpfwdRemoveInterfaceForward");
     const auto &fromIface = data.ReadString();
     const auto &toIface = data.ReadString();
     int32_t result = IpfwdRemoveInterfaceForward(fromIface, toIface);
@@ -772,7 +753,7 @@ int32_t NetsysNativeServiceStub::CmdShareDnsSet(MessageParcel &data, MessageParc
     data.ReadUint16(netId);
     int32_t result = ShareDnsSet(netId);
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("ShareDnsSet has received result %{public}d", result);
+    NETNATIVE_LOG_D("ShareDnsSet has received result %{public}d", result);
 
     return result;
 }
@@ -781,7 +762,7 @@ int32_t NetsysNativeServiceStub::CmdStartDnsProxyListen(MessageParcel &data, Mes
 {
     int32_t result = StartDnsProxyListen();
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("StartDnsProxyListen has recved result %{public}d", result);
+    NETNATIVE_LOG_D("StartDnsProxyListen has recved result %{public}d", result);
 
     return result;
 }
@@ -790,14 +771,14 @@ int32_t NetsysNativeServiceStub::CmdStopDnsProxyListen(MessageParcel &data, Mess
 {
     int32_t result = StopDnsProxyListen();
     reply.WriteInt32(result);
-    NETNATIVE_LOGI("StopDnsProxyListen has recved result %{public}d", result);
+    NETNATIVE_LOG_D("StopDnsProxyListen has recved result %{public}d", result);
 
     return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdGetNetworkSharingTraffic(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("Begin to dispatch cmd GetNetworkSharingTraffic");
+    NETNATIVE_LOG_D("Begin to dispatch cmd GetNetworkSharingTraffic");
     std::string downIface = data.ReadString();
     std::string upIface = data.ReadString();
     NetworkSharingTraffic traffic;

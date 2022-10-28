@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_NET_MANAGER_NATIVE_H__
-#define INCLUDE_NET_MANAGER_NATIVE_H__
+#ifndef INCLUDE_NET_MANAGER_NATIVE_H
+#define INCLUDE_NET_MANAGER_NATIVE_H
 
 #include <memory>
 #include <string>
 #include <vector>
+
 #include "bandwidth_manager.h"
 #include "conn_manager.h"
 #include "dns_manager.h"
@@ -37,51 +38,49 @@ public:
     ~NetManagerNative() = default;
 
     static void GetOriginInterfaceIndex();
-    static std::vector<unsigned int> GetCurrentInterfaceIndex();
-    static void UpdateInterfaceIndex(unsigned int infIndex);
+    static std::vector<uint32_t> GetCurrentInterfaceIndex();
+    static void UpdateInterfaceIndex(uint32_t infIndex);
 
     void Init();
 
-    int NetworkCreatePhysical(int netId, int permission);
-    int NetworkDestroy(int netId);
-    int NetworkAddInterface(int netId, std::string iface);
-    int NetworkRemoveInterface(int netId, std::string iface);
+    int32_t NetworkCreatePhysical(int32_t netId, int32_t permission);
+    int32_t NetworkDestroy(int32_t netId);
+    int32_t NetworkAddInterface(int32_t netId, std::string iface);
+    int32_t NetworkRemoveInterface(int32_t netId, std::string iface);
 
-    MarkMaskParcel GetFwmarkForNetwork(int netId);
-    int NetworkAddRoute(int netId, std::string ifName, std::string destination, std::string nextHop);
-    int NetworkRemoveRoute(int netId, std::string ifName, std::string destination, std::string nextHop);
-    int NetworkGetDefault();
-    int NetworkSetDefault(int netId);
-    int NetworkClearDefault();
-    int NetworkSetPermissionForNetwork(int netId, NetworkPermission permission);
+    MarkMaskParcel GetFwmarkForNetwork(int32_t netId);
+    int32_t NetworkAddRoute(int32_t netId, std::string ifName, std::string destination, std::string nextHop);
+    int32_t NetworkRemoveRoute(int32_t netId, std::string ifName, std::string destination, std::string nextHop);
+    int32_t NetworkGetDefault();
+    int32_t NetworkSetDefault(int32_t netId);
+    int32_t NetworkClearDefault();
+    int32_t NetworkSetPermissionForNetwork(int32_t netId, NetworkPermission permission);
     std::vector<std::string> InterfaceGetList();
 
-    int SetProcSysNet(int32_t ipversion, int32_t which, const std::string ifname, const std::string parameter,
-                      const std::string value);
-    int GetProcSysNet(int32_t ipversion, int32_t which, const std::string ifname, const std::string parameter,
-                      std::string *value);
+    int32_t SetProcSysNet(int32_t ipversion, int32_t which, const std::string ifname, const std::string parameter,
+                          const std::string value);
+    int32_t GetProcSysNet(int32_t ipversion, int32_t which, const std::string ifname, const std::string parameter,
+                          std::string *value);
 
     nmd::InterfaceConfigurationParcel InterfaceGetConfig(std::string ifName);
     void InterfaceSetConfig(InterfaceConfigurationParcel cfg);
     void InterfaceClearAddrs(const std::string ifName);
-    int InterfaceGetMtu(std::string ifName);
-    int InterfaceSetMtu(std::string ifName, int mtuValue);
-    int InterfaceAddAddress(std::string ifName, std::string addrString, int prefixLength);
-    int InterfaceDelAddress(std::string ifName, std::string addrString, int prefixLength);
+    int32_t InterfaceGetMtu(std::string ifName);
+    int32_t InterfaceSetMtu(std::string ifName, int32_t mtuValue);
+    int32_t InterfaceAddAddress(std::string ifName, std::string addrString, int32_t prefixLength);
+    int32_t InterfaceDelAddress(std::string ifName, std::string addrString, int32_t prefixLength);
 
-    int NetworkAddRouteParcel(int netId, RouteInfoParcel routeInfo);
-    int NetworkRemoveRouteParcel(int netId, RouteInfoParcel routeInfo);
+    int32_t NetworkAddRouteParcel(int32_t netId, RouteInfoParcel routeInfo);
+    int32_t NetworkRemoveRouteParcel(int32_t netId, RouteInfoParcel routeInfo);
 
-    long GetCellularRxBytes();
-    long GetCellularTxBytes();
-    long GetAllRxBytes();
-    long GetAllTxBytes();
-    long GetUidTxBytes(int uid);
-    long GetUidRxBytes(int uid);
-    long GetIfaceRxBytes(std::string interfaceName);
-    long GetIfaceTxBytes(std::string interfaceName);
-    long GetTetherRxBytes();
-    long GetTetherTxBytes();
+    int64_t GetCellularRxBytes();
+    int64_t GetCellularTxBytes();
+    int64_t GetAllRxBytes();
+    int64_t GetAllTxBytes();
+    int64_t GetUidTxBytes(int32_t uid);
+    int64_t GetUidRxBytes(int32_t uid);
+    int64_t GetIfaceRxBytes(std::string interfaceName);
+    int64_t GetIfaceTxBytes(std::string interfaceName);
     int32_t IpEnableForwarding(const std::string &requester);
     int32_t IpDisableForwarding(const std::string &requester);
     int32_t EnableNat(const std::string &downstreamIface, const std::string &upstreamIface);
@@ -113,15 +112,15 @@ public:
     void GetDumpInfo(std::string &infos);
 
 private:
-    std::shared_ptr<BandwidthManager> bandwidthManager_;
-    std::shared_ptr<ConnManager> connManager_;
-    std::shared_ptr<FirewallManager> firewallManager_;
-    std::shared_ptr<RouteManager> routeManager_;
-    std::shared_ptr<InterfaceManager> interfaceManager_;
+    std::shared_ptr<BandwidthManager> bandwidthManager_ = nullptr;
+    std::shared_ptr<ConnManager> connManager_ = nullptr;
+    std::shared_ptr<FirewallManager> firewallManager_ = nullptr;
+    std::shared_ptr<RouteManager> routeManager_ = nullptr;
+    std::shared_ptr<InterfaceManager> interfaceManager_ = nullptr;
     std::shared_ptr<SharingManager> sharingManager_ = nullptr;
-    std::shared_ptr<DnsManager> dnsManager_;
-    static std::vector<unsigned int> interfaceIdex;
+    std::shared_ptr<DnsManager> dnsManager_ = nullptr;
+    static std::vector<uint32_t> interfaceIdex_;
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // !INCLUDE_NET_MANAGER_NATIVE_H__
+#endif // !INCLUDE_NET_MANAGER_NATIVE_H

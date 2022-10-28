@@ -24,8 +24,6 @@ using namespace NetManagerStandard;
 
 NetsysNetwork::NetsysNetwork(uint16_t netId) : netId_(netId) {}
 
-NetsysNetwork::~NetsysNetwork() {}
-
 int32_t NetsysNetwork::ClearInterfaces()
 {
     interfaces_.clear();

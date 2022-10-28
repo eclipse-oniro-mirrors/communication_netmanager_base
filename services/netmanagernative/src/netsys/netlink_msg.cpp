@@ -14,6 +14,7 @@
  */
 
 #include "netlink_msg.h"
+
 #include "netnative_log_wrapper.h"
 #include "securec.h"
 
@@ -27,6 +28,7 @@ NetlinkMsg::NetlinkMsg(uint16_t flags, size_t maxBufLen, int32_t pid)
     errno_t result = memset_s(netlinkMessage_, NLMSG_SPACE(maxBufLen), 0, NLMSG_SPACE(maxBufLen));
     if (result != 0) {
         NETNATIVE_LOGE("[NetlinkMessage]: memset result %{public}d", result);
+        return;
     }
     netlinkMessage_->nlmsg_flags = NLM_F_REQUEST | NLM_F_ACK | flags;
     netlinkMessage_->nlmsg_pid = static_cast<uint32_t>(pid);
@@ -59,23 +61,18 @@ void NetlinkMsg::AddRule(uint16_t action, struct fib_rule_hdr msg)
 void NetlinkMsg::AddAddress(uint16_t action, struct ifaddrmsg msg)
 {
     netlinkMessage_->nlmsg_type = action;
-    int32_t result =
-        memcpy_s(NLMSG_DATA(netlinkMessage_), sizeof(struct ifaddrmsg), &msg, sizeof(struct ifaddrmsg));
+    int32_t result = memcpy_s(NLMSG_DATA(netlinkMessage_), sizeof(struct ifaddrmsg), &msg, sizeof(struct ifaddrmsg));
     if (result != 0) {
         NETNATIVE_LOGE("[AddAddress]: string copy failed result %{public}d", result);
+        return;
     }
     netlinkMessage_->nlmsg_len = NLMSG_LENGTH(sizeof(struct ifaddrmsg));
 }
 
 int32_t NetlinkMsg::AddAttr(uint16_t type, void *data, size_t alen)
 {
-    if (alen == 0) {
-        NETNATIVE_LOGE("[NetlinkMessage]: length  data can not be 0");
-        return -1;
-    }
-
-    if (data == nullptr) {
-        NETNATIVE_LOGE("[NetlinkMessage]: attr data can not be null");
+    if (alen == 0 || data == nullptr) {
+        NETNATIVE_LOGE("[NetlinkMessage]: length data can not be 0 or attr data can not be null");
         return -1;
     }
 
@@ -85,8 +82,7 @@ int32_t NetlinkMsg::AddAttr(uint16_t type, void *data, size_t alen)
         return -1;
     }
 
-    struct rtattr *rta =
-        (struct rtattr *)(((char *)netlinkMessage_) + NLMSG_ALIGN(netlinkMessage_->nlmsg_len));
+    struct rtattr *rta = (struct rtattr *)(((char *)netlinkMessage_) + NLMSG_ALIGN(netlinkMessage_->nlmsg_len));
     if (rta == nullptr) {
         NETNATIVE_LOGE("Pointer rta is nullptr");
         return -1;

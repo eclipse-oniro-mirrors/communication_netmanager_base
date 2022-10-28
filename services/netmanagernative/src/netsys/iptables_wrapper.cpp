@@ -24,10 +24,10 @@ namespace OHOS {
 namespace nmd {
 using namespace NetManagerStandard;
 namespace {
-static constexpr int32_t IPTABLES_THREAD_SLEEP_DURATION_MS = 50;
-static constexpr int32_t IPTABLES_WAIT_FOR_TIME_MS = 1000;
-static constexpr int32_t CHAR_ARRAY_SIZE_MAX = 1024;
-static constexpr const char *IPATBLES_CMD_PATH = "/system/bin/iptables";
+constexpr int32_t IPTABLES_THREAD_SLEEP_DURATION_MS = 50;
+constexpr int32_t IPTABLES_WAIT_FOR_TIME_MS = 1000;
+constexpr int32_t CHAR_ARRAY_SIZE_MAX = 1024;
+constexpr const char *IPATBLES_CMD_PATH = "/system/bin/iptables";
 void ExecuteCommand(const std::string &command)
 {
     int32_t status = system(command.c_str());
@@ -39,7 +39,7 @@ void ExecuteCommand(const std::string &command)
 std::string ExecuteCommandForRes(const std::string &command)
 {
     FILE *fp = popen(command.c_str(), "r");
-    char res[CHAR_ARRAY_SIZE_MAX];
+    char res[CHAR_ARRAY_SIZE_MAX] = {0};
     std::string result;
     while (fgets(res, CHAR_ARRAY_SIZE_MAX, fp) != NULL) {
         result = result + res;
@@ -115,7 +115,8 @@ int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &com
 
 std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::string &command)
 {
-    NETNATIVE_LOGI("IptablesWrapper::RunCommandForRes, ipType:%{public}d, command:%{public}s", ipType, command.c_str());
+    NETNATIVE_LOGI("IptablesWrapper::RunCommandForRes, ipType:%{public}d, command:%{public}s", ipType,
+                   command.c_str());
     forRes_ = true;
     std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
     std::unique_lock<std::mutex> lock(iptablesMutex_);
