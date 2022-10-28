@@ -12,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "net_manager_center.h"
+
 #include "net_manager_constants.h"
 
 namespace OHOS {
@@ -39,8 +41,8 @@ int32_t NetManagerCenter::GetIfaceNameByType(NetBearType bearerType, const std::
     return connService_->GetIfaceNameByType(bearerType, ident, ifaceName);
 }
 
-int32_t NetManagerCenter::RegisterNetSupplier(
-    NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps, uint32_t &supplierId)
+int32_t NetManagerCenter::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
+                                              const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {
     if (connService_ == nullptr) {
         return NETMANAGER_ERROR;
@@ -78,7 +80,7 @@ void NetManagerCenter::RegisterConnService(const sptr<NetConnBaseService> &servi
 }
 
 int32_t NetManagerCenter::GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end,
-    NetStatsInfo &info)
+                                              NetStatsInfo &info)
 {
     if (statsService_ == nullptr) {
         return NETMANAGER_ERROR;
@@ -98,7 +100,6 @@ void NetManagerCenter::RegisterStatsService(const sptr<NetStatsBaseService> &ser
 {
     statsService_ = service;
 }
-
 
 int32_t NetManagerCenter::ResetPolicyFactory()
 {
@@ -135,7 +136,7 @@ void NetManagerCenter::RegisterEthernetService(const sptr<NetEthernetBaseService
 }
 
 int32_t NetManagerCenter::GetAddressesByName(const std::string &hostName, int32_t netId,
-    std::vector<INetAddr> &addrInfo)
+                                             std::vector<INetAddr> &addrInfo)
 {
     if (dnsService_ == nullptr) {
         return NETMANAGER_ERROR;

@@ -16,10 +16,11 @@
 #ifndef NETMANAGER_HITRACE_H
 #define NETMANAGER_HITRACE_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "hitrace_meter.h"
+
 namespace OHOS {
 namespace NetManagerStandard {
 class NetmanagerHiTrace {

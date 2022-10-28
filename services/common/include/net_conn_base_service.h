@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,10 @@
 
 #include <set>
 
-#include "refbase.h"
-
+#include "net_all_capabilities.h"
 #include "net_link_info.h"
 #include "net_supplier_info.h"
-#include "net_all_capabilities.h"
+#include "refbase.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -30,7 +29,7 @@ public:
     virtual int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames) = 0;
     virtual int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) = 0;
     virtual int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
-        const std::set<NetCap> &netCaps, uint32_t &supplierId) = 0;
+                                        const std::set<NetCap> &netCaps, uint32_t &supplierId) = 0;
     virtual int32_t UnregisterNetSupplier(uint32_t supplierId) = 0;
     virtual int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo) = 0;
     virtual int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) = 0;
