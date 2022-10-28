@@ -22,7 +22,6 @@ namespace OHOS {
 namespace nmd {
 using namespace NetManagerStandard::CommonUtils;
 namespace {
-constexpr const char *SYMBOL_ADDRESS_SPLIT = "_";
 }
 WrapperDistributor::WrapperDistributor(int32_t socket, const int32_t format)
 {
@@ -77,9 +76,6 @@ void WrapperDistributor::HandleStateChanged(const std::shared_ptr<NetsysEventMes
         case NetsysEventMessage::SubSys::QLOG:
             HandleSubSysQlog(message);
             break;
-        case NetsysEventMessage::SubSys::STRICT:
-            HandleSubSysStrict(message);
-            break;
         default:
             break;
     }
@@ -110,9 +106,6 @@ void WrapperDistributor::HandleSubSysNet(const std::shared_ptr<NetsysEventMessag
         case NetsysEventMessage::Action::ADDRESSREMOVED:
             HandleAddressChange(message);
             break;
-        case NetsysEventMessage::Action::RDNSS:
-            HandleRndssChange(message);
-            break;
         case NetsysEventMessage::Action::ROUTEUPDATED:
         case NetsysEventMessage::Action::ROUTEREMOVED:
             HandleRouteChange(message);
@@ -140,16 +133,6 @@ void WrapperDistributor::HandleAddressChange(const std::shared_ptr<NetsysEventMe
     }
 }
 
-void WrapperDistributor::HandleRndssChange(const std::shared_ptr<NetsysEventMessage> &message)
-{
-    const std::string &iface = message->GetMessage(NetsysEventMessage::Type::INTERFACE);
-    const std::string &lifetime = message->GetMessage(NetsysEventMessage::Type::LIFETIME);
-    const std::string &servers = message->GetMessage(NetsysEventMessage::Type::SERVERS);
-    if (!lifetime.empty() && !servers.empty()) {
-        NotifyInterfaceDnsServersUpdate(iface, ConvertToInt64(lifetime), Split(servers, SYMBOL_ADDRESS_SPLIT));
-    }
-}
-
 void WrapperDistributor::HandleRouteChange(const std::shared_ptr<NetsysEventMessage> &message)
 {
     NetsysEventMessage::Action action = message->GetAction();
@@ -157,8 +140,7 @@ void WrapperDistributor::HandleRouteChange(const std::shared_ptr<NetsysEventMess
     const std::string &gateway = message->GetMessage(NetsysEventMessage::Type::GATEWAY);
     const std::string &iface = message->GetMessage(NetsysEventMessage::Type::INTERFACE);
     if (!route.empty() && (!gateway.empty() || !iface.empty())) {
-        NotifyRouteChange((action == NetsysEventMessage::Action::ROUTEUPDATED) ? true : false, route,
-                          gateway, iface);
+        NotifyRouteChange((action == NetsysEventMessage::Action::ROUTEUPDATED), route, gateway, iface);
     }
 }
 
@@ -168,15 +150,6 @@ void WrapperDistributor::HandleSubSysQlog(const std::shared_ptr<NetsysEventMessa
     const std::string &iface = message->GetMessage(NetsysEventMessage::Type::INTERFACE);
     if ((!alertName.empty()) && (!iface.empty())) {
         NotifyQuotaLimitReache(alertName, iface);
-    }
-}
-
-void WrapperDistributor::HandleSubSysStrict(const std::shared_ptr<NetsysEventMessage> &message)
-{
-    const std::string &uid = message->GetMessage(NetsysEventMessage::Type::UID);
-    const std::string &hex = message->GetMessage(NetsysEventMessage::Type::HEX);
-    if (!uid.empty() && !hex.empty()) {
-        NotifyStrictCleartext(uid, hex);
     }
 }
 
@@ -240,14 +213,8 @@ void WrapperDistributor::NotifyQuotaLimitReache(const std::string &labelName, co
     }
 }
 
-void WrapperDistributor::NotifyInterfaceClassActivityChange(int32_t label, bool isActive, int64_t timestamp,
-                                                            int32_t uid)
-{
-    NETNATIVE_LOG_D("NotifyInterfaceClassActivityChange: %{public}d, %{public}d, %{public}d", label, isActive, uid);
-}
-
-void WrapperDistributor::NotifyInterfaceAddressUpdate(const std::string &addr, const std::string &ifName, int32_t flags,
-                                                      int32_t scope)
+void WrapperDistributor::NotifyInterfaceAddressUpdate(const std::string &addr, const std::string &ifName,
+                                                      int32_t flags, int32_t scope)
 {
     NETNATIVE_LOG_D("OnInterfaceAddressUpdated: %{public}s, %{public}s, %{public}d, %{public}d",
                     ToAnonymousIp(addr).c_str(), ifName.c_str(), flags, scope);
@@ -260,8 +227,8 @@ void WrapperDistributor::NotifyInterfaceAddressUpdate(const std::string &addr, c
     }
 }
 
-void WrapperDistributor::NotifyInterfaceAddressRemove(const std::string &addr, const std::string &ifName, int32_t flags,
-                                                      int32_t scope)
+void WrapperDistributor::NotifyInterfaceAddressRemove(const std::string &addr, const std::string &ifName,
+                                                      int32_t flags, int32_t scope)
 {
     NETNATIVE_LOG_D("NotifyInterfaceAddressRemove: %{public}s, %{public}s, %{public}d, %{public}d",
                     ToAnonymousIp(addr).c_str(), ifName.c_str(), flags, scope);
@@ -272,12 +239,6 @@ void WrapperDistributor::NotifyInterfaceAddressRemove(const std::string &addr, c
     for (auto &callback : *netlinkCallbacks_) {
         callback->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
     }
-}
-
-void WrapperDistributor::NotifyInterfaceDnsServersUpdate(const std::string &ifName, int64_t lifetime,
-                                                         const std::vector<std::string> &servers)
-{
-    NETNATIVE_LOG_D("NotifyInterfaceDnsServers: %{public}s, %{public}s", ifName.c_str(), servers.data()->c_str());
 }
 
 void WrapperDistributor::NotifyRouteChange(bool updated, const std::string &route, const std::string &gateway,
@@ -293,11 +254,6 @@ void WrapperDistributor::NotifyRouteChange(bool updated, const std::string &rout
     for (auto &callback : *netlinkCallbacks_) {
         callback->OnRouteChanged(updated, route, gateway, ifName);
     }
-}
-
-void WrapperDistributor::NotifyStrictCleartext(const std::string &uid, const std::string &hex)
-{
-    NETNATIVE_LOG_D("NotifyStrictCleartext: %{public}s, %{public}s", uid.c_str(), hex.c_str());
 }
 } // namespace nmd
 } // namespace OHOS

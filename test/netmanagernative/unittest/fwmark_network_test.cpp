@@ -86,31 +86,5 @@ HWTEST_F(UnitTestFwmarkClient, BindSocketTest002, TestSize.Level1)
     tcpSocket = -1;
     EXPECT_TRUE(ret == 0);
 }
-
-/**
- * @tc.name: BindNetworkTest001
- * @tc.desc: Test FwmarkClient BindNetwork.
- * @tc.type: FUNC
- */
-HWTEST_F(UnitTestFwmarkClient, BindNetworkTest001, TestSize.Level1)
-{
-    // Function to be implemented
-    int32_t ret = 0;
-    NETNATIVE_LOGI("UnitTestFwmarkClient BindNetworkTest001 ret=%{public}d", ret);
-    EXPECT_TRUE(ret == 0);
-}
-
-/**
- * @tc.name: BindNetworkTest002
- * @tc.desc: Test FwmarkClient BindNetwork.
- * @tc.type: FUNC
- */
-HWTEST_F(UnitTestFwmarkClient, BindNetworkTest002, TestSize.Level1)
-{
-    // Function to be implemented
-    int32_t ret = 0;
-    NETNATIVE_LOGI("UnitTestFwmarkClient BindNetworkTest002 ret=%{public}d", ret);
-    EXPECT_TRUE(ret == 0);
-}
 } // namespace NetsysNative
 } // namespace OHOS

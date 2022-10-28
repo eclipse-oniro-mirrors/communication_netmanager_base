@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace nmd {
 using namespace NetlinkDefine;
-DataReceiver::DataReceiver(int32_t socketFd, const int32_t format) : socket_(socketFd), format_(format)
+DataReceiver::DataReceiver(int32_t socketFd, int32_t format) : socket_(socketFd), format_(format)
 {
     listener_ = std::make_unique<WrapperListener>(socketFd, [this](int32_t socket) { this->StartReceive(socket); });
 }

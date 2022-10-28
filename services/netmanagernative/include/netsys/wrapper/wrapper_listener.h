@@ -29,11 +29,13 @@ public:
 
     /**
      * Start listen event message
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     int32_t Start();
 
     /**
      * Stop listen event message
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     int32_t Stop();
 

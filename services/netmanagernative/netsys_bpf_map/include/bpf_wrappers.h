@@ -17,18 +17,20 @@
 #define OHOS_NETMANAGERSTANDARD_BPFWRAPPER_H
 
 #include <cerrno>
-#include <stdint.h>
-#include <string>
-
-#include <unistd.h>
 #include <linux/bpf.h>
 #include <linux/unistd.h>
+#include <stdint.h>
+#include <string>
+#include <unistd.h>
 
 #include "netnative_log_wrapper.h"
 #include "securec.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+static constexpr int IFNAMESIZE = 16;
+static constexpr int INVALID = -1;
+
 struct StatsValue {
     uint64_t rxPackets;
     uint64_t rxBytes;
@@ -44,10 +46,6 @@ struct StatsValue {
         return *this;
     }
 };
-
-constexpr int IFNAMESIZE = 16;
-
-constexpr int INVALID = -1;
 
 typedef struct {
     std::string name;
@@ -78,40 +76,40 @@ public:
     /**
      * Create A Bpf Map but for test only
      *
-     * @param map_type map type
-     * @param key_size key size in bytes
-     * @param value_size value size in bytes
-     * @param max_entries maximum number of elements
-     * @param map_flags map flag
+     * @param mapType map type
+     * @param keySize key size in bytes
+     * @param valueSize value size in bytes
+     * @param maxEntries maximum number of elements
+     * @param mapFlags map flag
      * @return int return a map file descriptor
      */
-    static int CreateMap(bpf_map_type map_type, uint32_t key_size, uint32_t value_size, uint32_t max_entries,
-                         uint32_t map_flags)
+    static int CreateMap(bpf_map_type mapType, uint32_t keySize, uint32_t valueSize, uint32_t maxEntries,
+                         uint32_t mapFlags)
     {
         bpf_attr bpfAttr;
         (void)memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr));
-        bpfAttr.map_type = map_type;
-        bpfAttr.key_size = key_size;
-        bpfAttr.value_size = value_size;
-        bpfAttr.max_entries = max_entries;
-        bpfAttr.map_flags = map_flags;
+        bpfAttr.map_type = mapType;
+        bpfAttr.key_size = keySize;
+        bpfAttr.value_size = valueSize;
+        bpfAttr.max_entries = maxEntries;
+        bpfAttr.map_flags = mapFlags;
         return BpfSyscall(BPF_MAP_CREATE, bpfAttr);
     }
 
     /**
      * Write Value To Bpf Map
      *
-     * @param mapfd map fd
+     * @param mapFd map fd
      * @param key the key of Bpf Map
      * @param value the value of Bpf Map
      * @param flags map flag
      * @return int true:write success false:failure
      */
-    static int WriteValueToMap(const int mapfd, const Key &key, const Value &value, uint64_t flags)
+    static int WriteValueToMap(const int mapFd, const Key &key, const Value &value, uint64_t flags)
     {
         bpf_attr bpfAttr;
         (void)memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr));
-        bpfAttr.map_fd = BpfFdToU32(mapfd);
+        bpfAttr.map_fd = BpfFdToU32(mapFd);
         bpfAttr.key = BpfMapKeyToU64(key);
         bpfAttr.value = BpfMapValueToU64(value);
         bpfAttr.flags = flags;
@@ -121,16 +119,16 @@ public:
     /**
      * LookUp Elem From Map
      *
-     * @param mapfd map fd
+     * @param mapFd map fd
      * @param key the key of Bpf Map
      * @param value the value of Bpf Map
      * @return int true:find success false:failure
      */
-    static int LookUpElem(const int mapfd, const Key &key, const Value &value)
+    static int LookUpElem(const int mapFd, const Key &key, const Value &value)
     {
         bpf_attr bpfAttr;
         (void)memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr));
-        bpfAttr.map_fd = BpfFdToU32(mapfd);
+        bpfAttr.map_fd = BpfFdToU32(mapFd);
         bpfAttr.key = BpfMapKeyToU64(key);
         bpfAttr.value = BpfMapValueToU64(value);
         return BpfSyscall(BPF_MAP_LOOKUP_ELEM, bpfAttr);
@@ -139,15 +137,15 @@ public:
     /**
      * Delete Elem From Map
      *
-     * @param mapfd map fd
+     * @param mapFd map fd
      * @param key the key of Bpf Map
      * @return int true:delete success false:failure
      */
-    static int DeleteElem(const int mapfd, const Key &key)
+    static int DeleteElem(const int mapFd, const Key &key)
     {
         bpf_attr bpfAttr;
         (void)memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr));
-        bpfAttr.map_fd = BpfFdToU32(mapfd);
+        bpfAttr.map_fd = BpfFdToU32(mapFd);
         bpfAttr.key = BpfMapKeyToU64(key);
         return BpfSyscall(BPF_MAP_DELETE_ELEM, bpfAttr);
     }
@@ -155,16 +153,16 @@ public:
     /**
      * Get the Next Key From Map
      *
-     * @param mapfd map fd
+     * @param mapFd map fd
      * @param key the key of Bpf Map
      * @param next_key the key of Bpf Map
      * @return int return next key
      */
-    static int GetNextKey(const int mapfd, const Key &key, Key &next_key)
+    static int GetNextKey(const int mapFd, const Key &key, Key &next_key)
     {
         bpf_attr bpfAttr;
         (void)memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr));
-        bpfAttr.map_fd = BpfFdToU32(mapfd);
+        bpfAttr.map_fd = BpfFdToU32(mapFd);
         bpfAttr.key = BpfMapKeyToU64(key);
         bpfAttr.next_key = BpfMapKeyToU64(next_key);
         return BpfSyscall(BPF_MAP_GET_NEXT_KEY, bpfAttr);
@@ -173,29 +171,29 @@ public:
     /**
      * Get the First Key From Map
      *
-     * @param mapfd map fd
+     * @param mapFd map fd
      * @param firstKey the first key of Bpf Map
      * @return int return first key
      */
-    static int GetFirstKey(const int mapfd, Key &key)
+    static int GetFirstKey(const int mapFd, Key &key)
     {
-        return GetNextKey(mapfd, INVALID, key);
+        return GetNextKey(mapFd, INVALID, key);
     }
 
     /**
      * Attach Program To Map
      *
      * @param type bpf attach type
-     * @param prog_fd eBPF program to attach
-     * @param cg_fd container object to attach to
+     * @param progFd eBPF program to attach
+     * @param cgFd container object to attach to
      * @return int true:attach success false:failure
      */
-    static int AttachProgram(bpf_attach_type type, const int prog_fd, const int cg_fd)
+    static int AttachProgram(bpf_attach_type type, const int progFd, const int cgFd)
     {
         bpf_attr bpfAttr;
         (void)memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr));
-        bpfAttr.target_fd = BpfFdToU32(cg_fd);
-        bpfAttr.attach_bpf_fd = BpfFdToU32(prog_fd);
+        bpfAttr.target_fd = BpfFdToU32(cgFd);
+        bpfAttr.attach_bpf_fd = BpfFdToU32(progFd);
         bpfAttr.attach_type = type;
         return BpfSyscall(BPF_PROG_ATTACH, bpfAttr);
     }
@@ -204,14 +202,14 @@ public:
      * Detach Program From Map
      *
      * @param type bpf detach type
-     * @param cg_fd container object to detach to
+     * @param cgFd container object to detach to
      * @return int true:detach success false:failure
      */
-    static int DetachProgram(bpf_attach_type type, const int cg_fd)
+    static int DetachProgram(bpf_attach_type type, const int cgFd)
     {
         bpf_attr bpfAttr;
         (void)memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr));
-        bpfAttr.target_fd = BpfFdToU32(cg_fd);
+        bpfAttr.target_fd = BpfFdToU32(cgFd);
         bpfAttr.attach_type = type;
         return BpfSyscall(BPF_PROG_DETACH, bpfAttr);
     }
@@ -219,89 +217,89 @@ public:
     /**
      * Pin Bpf Object To File node
      *
-     * @param pathname path the bpf map pinned
-     * @param bfd_fd bfd fd
+     * @param pathName path the bpf map pinned
+     * @param bfdFd bfd fd
      * @return int true:pin success false:failure
      */
-    static int BpfObjPin(const std::string &pathname, int bfd_fd)
+    static int BpfObjPin(const std::string &pathName, int bfdFd)
     {
         bpf_attr bpfAttr;
         (void)memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr));
-        bpfAttr.pathname = BpfMapPathNameToU64(pathname);
-        bpfAttr.bpf_fd = BpfFdToU32(bfd_fd);
+        bpfAttr.pathname = BpfMapPathNameToU64(pathName);
+        bpfAttr.bpf_fd = BpfFdToU32(bfdFd);
         return BpfSyscall(BPF_OBJ_PIN, bpfAttr);
     }
 
     /**
      * Get Bpf Object By PathName
      *
-     * @param pathname bpf map path
-     * @param file_flags file flags
+     * @param pathName bpf map path
+     * @param fileFlags file flags
      * @return int return map file descriptor
      */
-    static int BpfObjGet(const std::string &pathname, uint32_t file_flags)
+    static int BpfObjGet(const std::string &pathName, uint32_t fileFlags)
     {
         bpf_attr bpfAttr;
         (void)memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr));
-        bpfAttr.pathname = BpfMapPathNameToU64(pathname);
-        bpfAttr.file_flags = file_flags;
+        bpfAttr.pathname = BpfMapPathNameToU64(pathName);
+        bpfAttr.file_flags = fileFlags;
         return BpfSyscall(BPF_OBJ_GET, bpfAttr);
     }
 
     /**
      * Get the Map Fd
      *
-     * @param pathname bpf map path
-     * @param obj_flags obj flags
+     * @param pathName bpf map path
+     * @param objFlags obj flags
      * @return int return map file descriptor
      */
-    static int GetMap(const std::string &pathname, uint32_t obj_flags)
+    static int GetMap(const std::string &pathName, uint32_t objFlags)
     {
-        return BpfObjGet(pathname, obj_flags);
+        return BpfObjGet(pathName, objFlags);
     }
 
     /**
      * Get the Map Fd
      *
-     * @param pathname bpf map path
+     * @param pathName bpf map path
      * @return int return map file descriptor
      */
-    static int GetRWMap(const std::string &pathname)
+    static int GetRWMap(const std::string &pathName)
     {
-        return GetMap(pathname, 0);
+        return GetMap(pathName, 0);
     }
 
     /**
      * Get the Read—Only Map Fd
      *
-     * @param pathname bpf map path
+     * @param pathName bpf map path
      * @return int return map file descriptor
      */
-    static int GetROMap(const std::string &pathname)
+    static int GetROMap(const std::string &pathName)
     {
-        return GetMap(pathname, BPF_F_RDONLY);
+        return GetMap(pathName, BPF_F_RDONLY);
     }
 
     /**
      * Get the Write—Only Map Fd
      *
-     * @param pathname bpf map path
+     * @param pathName bpf map path
      * @return int return map file descriptor
      */
-    static int GetWOMap(const std::string &pathname)
+    static int GetWOMap(const std::string &pathName)
     {
-        return GetMap(pathname, BPF_F_WRONLY);
+        return GetMap(pathName, BPF_F_WRONLY);
     }
 
 private:
-    static inline __u32 BpfFdToU32(const int mapfd)
+    static inline __u32 BpfFdToU32(const int mapFd)
     {
-        return static_cast<__u32>(mapfd);
+        return static_cast<__u32>(mapFd);
     }
 
-    static inline uint64_t BpfMapPathNameToU64(const std::string &pathname)
+    static inline uint64_t BpfMapPathNameToU64(const std::string &pathName)
     {
-        return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(pathname.c_str()));
+        return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(pathName.c_str()));
     }
 
     static inline uint64_t BpfMapKeyToU64(const Key &key)

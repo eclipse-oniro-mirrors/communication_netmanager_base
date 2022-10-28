@@ -99,10 +99,7 @@ static bool NonBlockConnect(int sock, struct sockaddr *addr, socklen_t addrLen)
     int err = 0;
     socklen_t optLen = sizeof(err);
     ret = getsockopt(sock, SOL_SOCKET, SO_ERROR, (void *)(&err), &optLen);
-    if (ret < 0) {
-        return false;
-    }
-    if (err != 0) {
+    if (ret < 0 || err != 0) {
         return false;
     }
     return true;
@@ -302,13 +299,12 @@ int32_t NetSysGetResolvCache(uint16_t netId, const struct ParamWrapper param,
         return err;
     }
 
-    DNS_CONFIG_PRINT("NetSysGetResolvCache end");
     return 0;
 }
 
 static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct addrinfo *res)
 {
-    if (memset_s(addrInfo, sizeof(struct AddrInfo) * MAX_RESULTS, 0, sizeof(struct AddrInfo) * MAX_RESULTS) < 0) {
+    if (memset_s(addrInfo, sizeof(struct AddrInfo) * MAX_RESULTS, 0, sizeof(struct AddrInfo) * MAX_RESULTS) != 0) {
         return -1;
     }
 
@@ -323,7 +319,7 @@ static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct
             DNS_CONFIG_PRINT("memcpy_s failed");
             return -1;
         }
-        if (strcpy_s(addrInfo[resNum].aiCanonName, sizeof(addrInfo[resNum].aiCanonName), tmp->ai_canonname) < 0) {
+        if (strcpy_s(addrInfo[resNum].aiCanonName, sizeof(addrInfo[resNum].aiCanonName), tmp->ai_canonname) != 0) {
             DNS_CONFIG_PRINT("strcpy_s failed");
             return -1;
         }
@@ -370,7 +366,6 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const st
         return CloseSocketReturn(sockFd, -errno);
     }
 
-    DNS_CONFIG_PRINT("NetSysSetResolvCacheInternal end netid: %d", info.netId);
     return CloseSocketReturn(sockFd, 0);
 }
 
@@ -394,7 +389,6 @@ int32_t NetSysSetResolvCache(uint16_t netId, const struct ParamWrapper param, st
         return err;
     }
 
-    DNS_CONFIG_PRINT("NetSysSetResolvCache end");
     return 0;
 }
 
