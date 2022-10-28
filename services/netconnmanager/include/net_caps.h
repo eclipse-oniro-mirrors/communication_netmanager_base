@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <set>
 #include <string>
+
 #include "net_all_capabilities.h"
 
 namespace OHOS {
@@ -78,6 +79,6 @@ public:
 private:
     uint32_t caps_{0};
 };
-} // NetManagerStandard
-} // OHOS
-#endif  // NET_CAPS_H
+} // namespace NetManagerStandard
+} // namespace OHOS
+#endif // NET_CAPS_H

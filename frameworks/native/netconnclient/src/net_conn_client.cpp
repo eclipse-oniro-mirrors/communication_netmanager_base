@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-#include "net_conn_client.h"
-
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
+#include "fwmark_client.h"
+#include "net_conn_client.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_supplier_callback_stub.h"
-#include "fwmark_client.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -243,6 +242,10 @@ int32_t NetConnClient::GetAddressByName(const std::string &host, int32_t netId, 
 int32_t NetConnClient::BindSocket(int32_t socket_fd, int32_t netId)
 {
     std::shared_ptr<nmd::FwmarkClient> fwmarkClient_ = std::make_shared<nmd::FwmarkClient>();
+    if (fwmarkClient_ == nullptr) {
+        NETMGR_LOG_E("fwmarkClient_ is nullptr");
+        return NET_CONN_ERR_INTERNAL_ERROR;
+    }
     fwmarkClient_->BindSocket(socket_fd, netId);
     return NET_CONN_SUCCESS;
 }

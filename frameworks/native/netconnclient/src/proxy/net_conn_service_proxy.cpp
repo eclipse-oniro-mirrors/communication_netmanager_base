@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include "net_conn_service_proxy.h"
-
 #include "net_conn_constants.h"
+#include "net_conn_service_proxy.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
@@ -481,7 +480,7 @@ int32_t NetConnServiceProxy::GetIfaceNames(NetBearType bearerType, std::list<std
         return error;
     }
 
-    int32_t ret;
+    int32_t ret = ERR_NONE;
     if (!reply.ReadInt32(ret)) {
         return IPC_PROXY_ERR;
     }
