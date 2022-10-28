@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,11 +18,13 @@
 
 #include <atomic>
 #include <condition_variable>
-#include <mutex>
 #include <future>
-#include <thread>
-#include "net_conn_types.h"
+#include <mutex>
+
 #include "refbase.h"
+
+#include "net_conn_types.h"
+
 namespace OHOS {
 namespace NetManagerStandard {
 class NetMonitor : public virtual RefBase {
@@ -39,7 +41,7 @@ public:
      * Destroy the NetMonitor
      *
      */
-    virtual ~NetMonitor();
+    virtual ~NetMonitor() = default;
 
     /**
      * Start detection
@@ -145,9 +147,9 @@ private:
     int32_t Receive(int32_t sockFd, std::string &probResult);
 
 private:
-    uint32_t netId_;
-    std::atomic<bool> isDetecting_ {false};
-    std::atomic<int32_t> detectionSteps_ {0};
+    uint32_t netId_ = 0;
+    std::atomic<bool> isDetecting_ = false;
+    int32_t detectionSteps_ = 0;
     std::future<void> detectAsync_;
     std::mutex detectionMtx_;
     std::condition_variable detectionCond_;

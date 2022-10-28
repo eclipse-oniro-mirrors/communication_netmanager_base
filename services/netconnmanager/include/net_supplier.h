@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +16,17 @@
 #ifndef NET_SUPPLIER_H
 #define NET_SUPPLIER_H
 
-#include <string>
-#include <set>
-#include <vector>
 #include <map>
-#include "network.h"
-#include "net_caps.h"
-#include "net_supplier_info.h"
-#include "net_specifier.h"
+#include <set>
+#include <string>
+#include <vector>
+
 #include "i_net_supplier_callback.h"
 #include "i_net_conn_callback.h"
+#include "network.h"
+#include "net_caps.h"
+#include "net_specifier.h"
+#include "net_supplier_info.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -42,9 +43,8 @@ enum CallbackType {
 
 class NetSupplier : public virtual RefBase {
 public:
-    NetSupplier(NetBearType bearerType, const std::string &netSupplierIdent,
-        const std::set<NetCap> &netCaps);
-    ~NetSupplier();
+    NetSupplier(NetBearType bearerType, const std::string &netSupplierIdent, const std::set<NetCap> &netCaps);
+    ~NetSupplier() = default;
     bool operator==(const NetSupplier &netSupplier) const;
     void SetNetwork(const sptr<Network> &network);
     void UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo);
@@ -83,7 +83,7 @@ public:
     void ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
     int32_t CancelRequest(uint32_t reqId);
     void RemoveBestRequest(uint32_t reqId);
-    std::set<uint32_t>& GetBestRequestList();
+    std::set<uint32_t> &GetBestRequestList();
     void SetDefault();
     void ClearDefault();
     void RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback);
@@ -105,6 +105,6 @@ private:
     sptr<NetHandle> netHandle_ = nullptr;
     bool restrictBackground_ = true;
 };
-}  // namespace NetManagerStandard
-}  // namespace OHOS
-#endif  // NET_SUPPLIER_H
+} // namespace NetManagerStandard
+} // namespace OHOS
+#endif // NET_SUPPLIER_H
