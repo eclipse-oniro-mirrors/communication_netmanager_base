@@ -33,14 +33,6 @@ class NetStatsClient {
 public:
     int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback);
     int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback);
-    NetStatsResultCode GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end,
-        NetStatsInfo &statsInfo);
-    NetStatsResultCode GetUidStatsDetail(const std::string &iface, uint32_t uid,
-        uint32_t start, uint32_t end, NetStatsInfo &statsInfo);
-    NetStatsResultCode UpdateIfacesStats(const std::string &iface,
-        uint32_t start, uint32_t end, const NetStatsInfo &stats);
-    NetStatsResultCode UpdateStatsData();
-    NetStatsResultCode ResetFactory();
     int64_t GetIfaceRxBytes(const std::string &interfaceName);
     int64_t GetIfaceTxBytes(const std::string &interfaceName);
     int64_t GetCellularRxBytes();

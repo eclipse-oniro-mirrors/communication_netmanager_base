@@ -22,7 +22,6 @@
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_constants.h"
 #include "net_stats_client.h"
-#include "net_stats_csv.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -30,7 +29,6 @@ namespace {
 const uint8_t *g_baseFuzzData = nullptr;
 size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
-constexpr size_t STR_LEN = 10;
 }
 
 template<class T>
@@ -85,64 +83,12 @@ void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
     sptr<INetStatsCallbackTest> callback = sptr<INetStatsCallbackTest>();
     DelayedSingleton<NetStatsClient>::GetInstance()->UnregisterNetStatsCallback(callback);
 }
-
-void GetIfaceStatsDetailFuzzTest(const uint8_t *data, size_t size)
-{
-    if ((data == nullptr) || (size <= 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
-    std::string iface = GetStringFromData(STR_LEN);
-    uint32_t start = GetData<uint32_t>();
-    uint32_t end = GetData<uint32_t>();
-    NetStatsInfo statsInfo;
-    DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(iface, start, end, statsInfo);
-}
-
-void GetUidStatsDetailFuzzTest(const uint8_t *data, size_t size)
-{
-    if ((data == nullptr) || (size <= 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
-    std::string iface = GetStringFromData(STR_LEN);
-    uint32_t start = GetData<uint32_t>();
-    uint32_t uid = GetData<uint32_t>();
-    uint32_t end = GetData<uint32_t>();
-    NetStatsInfo statsInfo;
-    DelayedSingleton<NetStatsClient>::GetInstance()->GetUidStatsDetail(iface, uid, start, end, statsInfo);
-}
-
-void UpdateIfacesStatsFuzzTest(const uint8_t *data, size_t size)
-{
-    if ((data == nullptr) || (size <= 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
-    std::string iface = GetStringFromData(STR_LEN);
-    uint32_t start = GetData<uint32_t>();
-    uint32_t end = GetData<uint32_t>();
-    NetStatsInfo stats;
-    DelayedSingleton<NetStatsClient>::GetInstance()->UpdateIfacesStats(iface, start, end, stats);
-}
 }
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
-    OHOS::NetManagerStandard::GetIfaceStatsDetailFuzzTest(data, size);
-    OHOS::NetManagerStandard::GetUidStatsDetailFuzzTest(data, size);
-    OHOS::NetManagerStandard::UpdateIfacesStatsFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterNetStatsCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::UnregisterNetStatsCallbackFuzzTest(data, size);
     return 0;
