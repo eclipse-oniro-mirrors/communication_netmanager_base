@@ -18,7 +18,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr int16_t LIMIT_STATS_CALLBACK_NUM = 200;
+static constexpr int16_t LIMIT_STATS_CALLBACK_NUM = 200;
 enum class NetStatsResultCode {
     ERR_NONE = 0,
     ERR_INTERNAL_ERROR = (-1),

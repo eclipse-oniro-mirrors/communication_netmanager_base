@@ -37,11 +37,6 @@ private:
 private:
     int32_t OnRegisterNetStatsCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnregisterNetStatsCallback(MessageParcel &data, MessageParcel &reply);
-    int32_t OnGetIfaceStatsDetail(MessageParcel &data, MessageParcel &reply);
-    int32_t OnGetUidStatsDetail(MessageParcel &data, MessageParcel &reply);
-    int32_t OnUpdateIfacesStats(MessageParcel &data, MessageParcel &reply);
-    int32_t OnUpdateStatsData(MessageParcel &data, MessageParcel &reply);
-    int32_t OnResetFactory(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetIfaceRxBytes(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetIfaceTxBytes(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetCellularRxBytes(MessageParcel &data, MessageParcel &reply);

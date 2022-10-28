@@ -27,14 +27,6 @@ public:
     virtual ~NetStatsServiceProxy();
     int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;
     int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;
-    NetStatsResultCode GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end,
-        NetStatsInfo &statsInfo) override;
-    NetStatsResultCode GetUidStatsDetail(const std::string &iface, uint32_t uid,
-        uint32_t start, uint32_t end, NetStatsInfo &statsInfo) override;
-    NetStatsResultCode UpdateIfacesStats(const std::string &iface,
-        uint32_t start, uint32_t end, const NetStatsInfo &stats) override;
-    NetStatsResultCode UpdateStatsData() override;
-    NetStatsResultCode ResetFactory() override;
     int64_t GetIfaceRxBytes(const std::string &interfaceName) override;
     int64_t GetIfaceTxBytes(const std::string &interfaceName) override;
     int64_t GetCellularRxBytes() override;

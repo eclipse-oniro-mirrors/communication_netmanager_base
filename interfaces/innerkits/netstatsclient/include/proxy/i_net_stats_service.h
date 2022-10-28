@@ -52,14 +52,6 @@ public:
 public:
     virtual int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback) = 0;
     virtual int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) = 0;
-    virtual NetStatsResultCode GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end,
-        NetStatsInfo &statsInfo)  = 0;
-    virtual NetStatsResultCode GetUidStatsDetail(const std::string &iface, uint32_t uid,
-        uint32_t start, uint32_t end, NetStatsInfo &statsInfo) = 0;
-    virtual NetStatsResultCode UpdateIfacesStats(const std::string &iface,
-        uint32_t start, uint32_t end, const NetStatsInfo &stats) = 0;
-    virtual NetStatsResultCode UpdateStatsData() = 0;
-    virtual NetStatsResultCode ResetFactory() = 0;
     virtual int64_t GetIfaceRxBytes(const std::string &interfaceName) = 0;
     virtual int64_t GetIfaceTxBytes(const std::string &interfaceName) = 0;
     virtual int64_t GetCellularRxBytes() = 0;
