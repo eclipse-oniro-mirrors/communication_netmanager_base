@@ -460,7 +460,7 @@ public:
      *
      * @param iface interface file description
      * @param bIpv6 network blocking
-     * @return.
+     * @return Return the return value of the netsys interface call.
      */
     int32_t StartDhcpClient(const std::string &iface, bool bIpv6) override;
     /**
@@ -468,14 +468,14 @@ public:
      *
      * @param iface interface file description
      * @param bIpv6 network blocking
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t StopDhcpClient(const std::string &iface, bool bIpv6) override;
     /**
     * Register Notify Callback
     *
     * @param callback
-    * @return .
+    * @return Return the return value of the netsys interface call.
     */
     int32_t RegisterCallback(sptr<NetsysControllerCallback> callback) override;
 
@@ -509,7 +509,7 @@ public:
      *
      * @param iface interface name
      * @param bytes
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes) override;
 
@@ -517,7 +517,7 @@ public:
      * Delete quota.
      *
      * @param iface interface name
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t BandwidthRemoveIfaceQuota(const std::string &ifName) override;
 
@@ -525,7 +525,7 @@ public:
      * Add DeniedList.
      *
      * @param uid
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t BandwidthAddDeniedList(uint32_t uid) override;
 
@@ -533,7 +533,7 @@ public:
      * Remove DeniedList.
      *
      * @param uid
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t BandwidthRemoveDeniedList(uint32_t uid) override;
 
@@ -541,7 +541,7 @@ public:
      * Add DeniedList.
      *
      * @param uid
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t BandwidthAddAllowedList(uint32_t uid) override;
 
@@ -549,7 +549,7 @@ public:
      * Remove DeniedList.
      *
      * @param uid
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t BandwidthRemoveAllowedList(uint32_t uid) override;
 
@@ -578,7 +578,7 @@ public:
      *
      * @param chain chain type
      * @param enable enable or disable
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t FirewallEnableChain(uint32_t chain, bool enable) override;
 
@@ -588,7 +588,7 @@ public:
      * @param chain chain type
      * @param uid uid
      * @param firewallRule firewall rule
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) override;
 private:
