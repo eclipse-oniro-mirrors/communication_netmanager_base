@@ -16,7 +16,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr uint32_t DEFAULT_SYSTEM_UID = 456;
+static constexpr uint32_t DEFAULT_SYSTEM_UID = 456;
 NetSettings::NetSettings()
 {
     AddSystemUid(DEFAULT_SYSTEM_UID);
@@ -32,11 +32,7 @@ NetSettings &NetSettings::GetInstance()
 
 bool NetSettings::IsUidForeground(uint32_t uid)
 {
-    if (foregroundUid_ == uid) {
-        return true;
-    }
-
-    return false;
+    return foregroundUid_ == uid;
 }
 
 void NetSettings::SetForegroundUid(uint32_t uid)
@@ -46,11 +42,7 @@ void NetSettings::SetForegroundUid(uint32_t uid)
 
 bool NetSettings::IsSystem(uint32_t uid)
 {
-    if (std::find(systemUids_.begin(), systemUids_.end(), uid) != systemUids_.end()) {
-        return true;
-    }
-
-    return false;
+    return std::find(systemUids_.begin(), systemUids_.end(), uid) != systemUids_.end();
 }
 
 void NetSettings::AddSystemUid(uint32_t uid)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,12 @@
 
 #include <set>
 
-#include "net_conn_base_service.h"
-#include "net_stats_base_service.h"
-#include "net_policy_base_service.h"
-#include "net_ethernet_base_service.h"
 #include "dns_base_service.h"
 #include "net_all_capabilities.h"
+#include "net_conn_base_service.h"
+#include "net_ethernet_base_service.h"
+#include "net_policy_base_service.h"
+#include "net_stats_base_service.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -31,8 +31,8 @@ public:
     static NetManagerCenter &GetInstance();
     int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames);
     int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName);
-    int32_t RegisterNetSupplier(
-        NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps, uint32_t &supplierId);
+    int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
+                                uint32_t &supplierId);
     int32_t UnregisterNetSupplier(uint32_t supplierId);
     int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo);
     int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo);
@@ -55,6 +55,7 @@ public:
     int32_t RestrictBackgroundChanged(bool isRestrictBackground);
     bool IsUidNetAccess(uint32_t uid, bool metered);
     bool IsUidNetAllowed(uint32_t uid, bool metered);
+
 private:
     sptr<NetConnBaseService> connService_;
     sptr<NetStatsBaseService> statsService_;
