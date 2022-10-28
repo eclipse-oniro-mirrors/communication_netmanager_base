@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef __INCLUDE_INTERFACE_MANAGER_H__
-#define __INCLUDE_INTERFACE_MANAGER_H__
+#ifndef INCLUDE_INTERFACE_MANAGER_H
+#define INCLUDE_INTERFACE_MANAGER_H
 
+#include "interface_type.h"
+#include <ostream>
 #include <string>
 #include <vector>
-#include <ostream>
-#include "interface_type.h"
 
 namespace OHOS {
 namespace nmd {
@@ -27,8 +27,8 @@ static const uint32_t INTERFACE_ERR_MAX_LEN = 256;
 
 class InterfaceManager {
 public:
-    InterfaceManager();
-    ~InterfaceManager();
+    InterfaceManager() = default;
+    ~InterfaceManager() = default;
     /**
      * Set network device mtu
      *
@@ -88,9 +88,10 @@ public:
      * @return Returns 1, set network interface config successfully, otherwise it will fail
      */
     static int SetIfaceConfig(const nmd::InterfaceConfigurationParcel &ifaceConfig);
+
 private:
     static int ModifyAddress(uint32_t action, const char *interfaceName, const char *addr, int prefixLen);
 };
 } // namespace nmd
 } // namespace OHOS
-#endif //  !__INCLUDE_INTERFACE_MANAGER_H__
+#endif // INCLUDE_INTERFACE_MANAGER_H

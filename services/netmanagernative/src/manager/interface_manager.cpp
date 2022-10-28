@@ -14,27 +14,28 @@
  */
 
 #include "interface_manager.h"
+
+#include <arpa/inet.h>
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <dirent.h>
 #include <fcntl.h>
-#include <system_error>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
+#include <linux/if_ether.h>
 #include <net/if.h>
+#include <netinet/in.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <linux/if_ether.h>
-#include <linux/if.h>
-#include "securec.h"
-#include "netlink_socket.h"
+#include <system_error>
+#include <unistd.h>
+
 #include "netlink_manager.h"
 #include "netlink_msg.h"
+#include "netlink_socket.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace nmd {
@@ -42,6 +43,7 @@ using namespace NetManagerStandard::CommonUtils;
 
 namespace {
 constexpr const char *SYS_NET_PATH = "/sys/class/net/";
+constexpr const char *MTU_PATH = "/mtu";
 constexpr int32_t FILE_PERMISSION = 0666;
 constexpr uint32_t ARRAY_OFFSET_1_INDEX = 1;
 constexpr uint32_t ARRAY_OFFSET_2_INDEX = 2;
@@ -50,12 +52,9 @@ constexpr uint32_t ARRAY_OFFSET_4_INDEX = 4;
 constexpr uint32_t ARRAY_OFFSET_5_INDEX = 5;
 constexpr uint32_t MOVE_BIT_LEFT31 = 31;
 constexpr uint32_t BIT_MAX = 32;
+constexpr uint32_t INTERFACE_NAME_MIN_SIZE = 16;
 constexpr uint32_t IOCTL_RETRY_TIME = 32;
 } // namespace
-
-InterfaceManager::InterfaceManager() {}
-
-InterfaceManager::~InterfaceManager() {}
 
 bool IfaceNameValidCheck(const std::string &name)
 {
@@ -66,7 +65,7 @@ bool IfaceNameValidCheck(const std::string &name)
     }
 
     int len = static_cast<int>(name.size());
-    if (len > 16) { /* 16: interface name min size. */
+    if (len > INTERFACE_NAME_MIN_SIZE) {
         return false;
     }
 
@@ -75,10 +74,7 @@ bool IfaceNameValidCheck(const std::string &name)
             return false;
         }
 
-        if (!isalnum(name[index]) &&
-            (name[index] != '-') &&
-            (name[index] != '_') &&
-            (name[index] != '.') &&
+        if (!isalnum(name[index]) && (name[index] != '-') && (name[index] != '_') && (name[index] != '.') &&
             (name[index] != ':')) {
             return false;
         }
@@ -95,7 +91,7 @@ int InterfaceManager::GetMtu(const char *interfaceName)
         return -1;
     }
 
-    std::string setMtuPath = std::string(SYS_NET_PATH).append(interfaceName).append("/mtu");
+    std::string setMtuPath = std::string(SYS_NET_PATH).append(interfaceName).append(MTU_PATH);
 
     int fd = open(setMtuPath.c_str(), 0, FILE_PERMISSION);
     if (fd == -1) {
@@ -122,7 +118,7 @@ int InterfaceManager::SetMtu(const char *interfaceName, const char *mtuValue)
         return -1;
     }
 
-    std::string setMtuPath = std::string(SYS_NET_PATH).append(interfaceName).append("/mtu");
+    std::string setMtuPath = std::string(SYS_NET_PATH).append(interfaceName).append(MTU_PATH);
 
     int fd = open(setMtuPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, FILE_PERMISSION);
     if (fd == -1) {
@@ -155,8 +151,7 @@ std::vector<std::string> InterfaceManager::GetInterfaceNames()
 
     de = readdir(dir);
     while (de != nullptr) {
-        if ((de->d_name[0] != '.') &&
-            ((de->d_type == DT_DIR) || (de->d_type == DT_LNK))) {
+        if ((de->d_name[0] != '.') && ((de->d_type == DT_DIR) || (de->d_type == DT_LNK))) {
             ifaceNames.push_back(std::string(de->d_name));
         }
         de = readdir(dir);
@@ -201,8 +196,8 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
         nlmsg.AddAttr(IFA_BROADCAST, &inAddr, sizeof(inAddr));
     }
 
-    NETNATIVE_LOGI("InterfaceManager::ModifyAddress:%{public}u %{public}s %{public}s %{public}d",
-        action, interfaceName, ToAnonymousIp(addr).c_str(), prefixLen);
+    NETNATIVE_LOGI("InterfaceManager::ModifyAddress:%{public}u %{public}s %{public}s %{public}d", action,
+                   interfaceName, ToAnonymousIp(addr).c_str(), prefixLen);
 
     ret = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
     if (ret < 0) {
@@ -237,9 +232,10 @@ std::string HwAddrToStr(char *hwaddr)
 {
     char buf[64] = {'\0'};
     if (hwaddr != nullptr) {
-        errno_t result = sprintf_s(buf, sizeof(buf), "%02x:%02x:%02x:%02x:%02x:%02x", hwaddr[0],
-            hwaddr[ARRAY_OFFSET_1_INDEX], hwaddr[ARRAY_OFFSET_2_INDEX], hwaddr[ARRAY_OFFSET_3_INDEX],
-            hwaddr[ARRAY_OFFSET_4_INDEX], hwaddr[ARRAY_OFFSET_5_INDEX]);
+        errno_t result =
+            sprintf_s(buf, sizeof(buf), "%02x:%02x:%02x:%02x:%02x:%02x", hwaddr[0], hwaddr[ARRAY_OFFSET_1_INDEX],
+                      hwaddr[ARRAY_OFFSET_2_INDEX], hwaddr[ARRAY_OFFSET_3_INDEX], hwaddr[ARRAY_OFFSET_4_INDEX],
+                      hwaddr[ARRAY_OFFSET_5_INDEX]);
         if (result != 0) {
             NETNATIVE_LOGE("[hwAddrToStr]: result %{public}d", result);
         }
@@ -297,15 +293,21 @@ InterfaceConfigurationParcel InterfaceManager::GetIfaceConfig(const std::string 
 
 int InterfaceManager::SetIfaceConfig(const nmd::InterfaceConfigurationParcel &ifaceConfig)
 {
-    NETNATIVE_LOGI("SetIfaceConfig in.");
     struct ifreq ifr = {};
-    strncpy_s(ifr.ifr_name, IFNAMSIZ, ifaceConfig.ifName.c_str(), ifaceConfig.ifName.length());
+    if (strncpy_s(ifr.ifr_name, IFNAMSIZ, ifaceConfig.ifName.c_str(), ifaceConfig.ifName.length()) != 0) {
+        NETNATIVE_LOGE("ifaceConfig strncpy_s error.");
+        return -1;
+    }
 
     if (ifaceConfig.flags.empty()) {
-        NETNATIVE_LOGI("ifaceConfig flags is empty.");
+        NETNATIVE_LOGE("ifaceConfig flags is empty.");
         return -1;
     }
     int fd = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+    if (fd < 0) {
+        NETNATIVE_LOGE("ifaceConfig socket error, errno[%{public}d]", errno);
+        return -1;
+    }
     if (ioctl(fd, SIOCGIFFLAGS, &ifr) == -1) {
         char errmsg[INTERFACE_ERR_MAX_LEN] = {0};
         strerror_r(errno, errmsg, INTERFACE_ERR_MAX_LEN);

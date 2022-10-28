@@ -92,8 +92,7 @@ public:
      * @param traffic
      * @return NETMANAGER_ERROR code
      */
-    int32_t GetNetworkSharingTraffic(const std::string &downIface,
-                                     const std::string &upIface,
+    int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
                                      NetworkSharingTraffic &traffic);
 
 private:
@@ -110,4 +109,4 @@ private:
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // INCLUDE_SHARING_MANAGER_H__
+#endif // INCLUDE_SHARING_MANAGER_H

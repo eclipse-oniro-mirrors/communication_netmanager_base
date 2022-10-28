@@ -28,8 +28,11 @@ namespace OHOS {
 namespace nmd {
 class ConnManager {
 public:
-    static constexpr int32_t LOCAL_NET_ID = 99;
-    enum RouteAction { ROUTE_ADD, ROUTE_REMOVE, ROUTE_UPDATE };
+    enum RouteAction {
+        ROUTE_ADD,
+        ROUTE_REMOVE,
+        ROUTE_UPDATE,
+    };
 
     ConnManager();
     ~ConnManager();
@@ -76,7 +79,7 @@ public:
      *
      * @return NetId of default network
      */
-    int32_t GetDefaultNetwork();
+    int32_t GetDefaultNetwork() const;
 
     /**
      * Add an interface to a network. The interface must not be assigned to any network, including

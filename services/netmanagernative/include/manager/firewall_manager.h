@@ -15,9 +15,10 @@
 
 #ifndef NETMANAGER_BASE_FIREWALL_MANAGER_H
 #define NETMANAGER_BASE_FIREWALL_MANAGER_H
+
+#include <iostream>
 #include <map>
 #include <mutex>
-#include <iostream>
 #include <vector>
 
 #include "iptables_type.h"
@@ -35,28 +36,43 @@ public:
     FirewallManager();
     ~FirewallManager();
     /**
-     * @param chain chain type
-     * @param uids allowed list uids
-     * @return .
+     * Set uids allowed list chain
+     *
+     * @param chain Chain type
+     * @param uids Allowed list uids
+     *
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     int32_t SetUidsAllowedListChain(NetManagerStandard::ChainType chain, const std::vector<uint32_t> &uids);
+
     /**
-     * @param chain chain type
-     * @param uids denied list uids
-     * @return .
+     * Set uids denied list chain
+     *
+     * @param chain Chain type
+     * @param uids Denied list uids
+     *
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     int32_t SetUidsDeniedListChain(NetManagerStandard::ChainType chain, const std::vector<uint32_t> &uids);
+
     /**
-     * @param chain chain type
-     * @param enable enable or disable
-     * @return .
+     * Enable chain
+     *
+     * @param chain Chain type
+     * @param enable Enable or disable
+     *
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     int32_t EnableChain(NetManagerStandard::ChainType chain, bool enable);
+
     /**
-     * @param chain chain type
-     * @param uid uid
-     * @param firewallRule allow or deny
-     * @return .
+     * Set uid rule
+     *
+     * @param chain Chain type
+     * @param uid Uid
+     * @param firewallRule Allow or deny
+     *
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     int32_t SetUidRule(NetManagerStandard::ChainType chain, uint32_t uid,
                        NetManagerStandard::FirewallRule firewallRule);
@@ -70,8 +86,8 @@ private:
     int32_t ClearAllRules();
     int32_t IptablesNewChain(NetManagerStandard::ChainType chain);
     int32_t IptablesDeleteChain(NetManagerStandard::ChainType chain);
-    int32_t IptablesSetRule(const std::string &chainName, const std::string &option,
-                            const std::string &target, uint32_t uid);
+    int32_t IptablesSetRule(const std::string &chainName, const std::string &option, const std::string &target,
+                            uint32_t uid);
     std::string ReadMaxUidConfig();
     int32_t IsFirewallChian(NetManagerStandard::ChainType chain);
     inline void CheckChainInitialization();
@@ -81,7 +97,7 @@ private:
     std::string strMaxUid_;
     std::mutex firewallMutex_;
     NetManagerStandard::FirewallType firewallType_;
-    std::map <NetManagerStandard::ChainType, FirewallChainStatus> firewallChainStatus_;
+    std::map<NetManagerStandard::ChainType, FirewallChainStatus> firewallChainStatus_;
 };
 } // namespace nmd
 } // namespace OHOS

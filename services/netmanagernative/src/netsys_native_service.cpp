@@ -28,6 +28,9 @@
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetsysNative {
+constexpr int32_t START_TIME_MS = 1900;
+constexpr int32_t EXTRA_MONTH = 1;
+
 REGISTER_SYSTEM_ABILITY_BY_ID(NetsysNativeService, COMM_NETSYS_NATIVE_SYS_ABILITY_ID, true)
 
 NetsysNativeService::NetsysNativeService()
@@ -66,7 +69,7 @@ void NetsysNativeService::OnStart()
     if (timeNow != nullptr) {
         NETNATIVE_LOGI(
             "NetsysNativeService start time:%{public}d-%{public}d-%{public}d %{public}d:%{public}d:%{public}d",
-            timeNow->tm_year + startTime_, timeNow->tm_mon + extraMonth_, timeNow->tm_mday, timeNow->tm_hour,
+            timeNow->tm_year + START_TIME_MS, timeNow->tm_mon + EXTRA_MONTH, timeNow->tm_mday, timeNow->tm_hour,
             timeNow->tm_min, timeNow->tm_sec);
     }
     manager_->StartListener();
@@ -84,7 +87,7 @@ void NetsysNativeService::OnStop()
     if (timeNow != nullptr) {
         NETNATIVE_LOGI(
             "NetsysNativeService dump time:%{public}d-%{public}d-%{public}d %{public}d:%{public}d:%{public}d",
-            timeNow->tm_year + startTime_, timeNow->tm_mon + extraMonth_, timeNow->tm_mday, timeNow->tm_hour,
+            timeNow->tm_year + START_TIME_MS, timeNow->tm_mon + EXTRA_MONTH, timeNow->tm_mday, timeNow->tm_hour,
             timeNow->tm_min, timeNow->tm_sec);
     }
     state_ = ServiceRunningState::STATE_STOPPED;
@@ -196,8 +199,8 @@ int32_t NetsysNativeService::UnRegisterNotifyCallback(sptr<INotifyCallback> &cal
 int32_t NetsysNativeService::NetworkAddRoute(int32_t netId, const std::string &interfaceName,
                                              const std::string &destination, const std::string &nextHop)
 {
-    NETNATIVE_LOG_D("NetsysNativeService::NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s", netId,
-                    interfaceName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
+    NETNATIVE_LOG_D("NetsysNativeService::NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s",
+                    netId, interfaceName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
 
     int32_t result = netsysService_->NetworkAddRoute(netId, interfaceName, destination, nextHop);
     NETNATIVE_LOG_D("NetworkAddRoute %{public}d", result);

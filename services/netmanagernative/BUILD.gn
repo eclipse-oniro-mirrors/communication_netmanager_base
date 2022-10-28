@@ -55,7 +55,9 @@ ohos_shared_library("netsys_native_manager") {
   ]
 
   include_dirs = [
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
+    "$C_UTILS_ROOT/base/include",
+    "$DHCP_MANAGER_ROOT/interfaces/inner_api/include",
+    "$DHCP_MANAGER_ROOT/interfaces/inner_api/interfaces",
     "$INNERKITS_ROOT/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",

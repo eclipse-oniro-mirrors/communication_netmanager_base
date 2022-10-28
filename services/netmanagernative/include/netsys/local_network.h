@@ -25,7 +25,7 @@ namespace nmd {
 class LocalNetwork : public NetsysNetwork {
 public:
     explicit LocalNetwork(uint16_t netId);
-    virtual ~LocalNetwork();
+    virtual ~LocalNetwork() = default;
 
 private:
     std::string GetNetworkType() const override
