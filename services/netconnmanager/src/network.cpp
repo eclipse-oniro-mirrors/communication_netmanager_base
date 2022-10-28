@@ -422,12 +422,10 @@ void Network::SendConnectionChangedBroadcast(const NetConnState &netConnState) c
 
 void Network::SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const std::string &errMsg)
 {
-    struct EventInfo eventInfo = {
-        .netlinkInfo = netLinkInfo_.ToString(" "),
-        .supplierId = static_cast<int32_t>(supplierId_),
-        .errorType = static_cast<int32_t>(errorType),
-        .errorMsg = errMsg
-    };
+    struct EventInfo eventInfo = {.netlinkInfo = netLinkInfo_.ToString(" "),
+                                  .supplierId = static_cast<int32_t>(supplierId_),
+                                  .errorType = static_cast<int32_t>(errorType),
+                                  .errorMsg = errMsg};
     EventReport::SendSupplierFaultEvent(eventInfo);
 }
 

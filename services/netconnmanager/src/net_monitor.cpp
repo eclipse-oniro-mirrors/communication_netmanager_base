@@ -275,10 +275,7 @@ int32_t NetMonitor::Wait(int32_t sockFd, uint8_t *canRead, uint8_t *canWrite)
     if (canWrite) {
         FD_SET(sockFd, &writeFds);
     }
-    struct timeval tval = {
-        tval.tv_sec = 8,
-        tval.tv_usec = 0
-    };
+    struct timeval tval = {tval.tv_sec = 8, tval.tv_usec = 0};
     int ret = select((sockFd + 1), &readFds, &writeFds, NULL, &tval);
     if (ret <= 0) {
         NETMGR_LOG_E("Select net[%{public}d] failed,errno[%{public}d]:%{public}s", netId_, errno, strerror(errno));
@@ -355,11 +352,10 @@ int32_t NetMonitor::SetSocketParameter(int32_t sockFd)
     std::unique_ptr<nmd::FwmarkClient> fwmarkClient = std::make_unique<nmd::FwmarkClient>();
     if (fwmarkClient->BindSocket(sockFd, netId_) < 0) {
         NETMGR_LOG_E("Error at bind net[%{public}d] socket", netId_);
-        struct EventInfo eventInfo = {
-            .socketFd = sockFd,
-            .errorType = static_cast<int32_t>(FAULT_BIND_SOCKET_FAILED),
-            .errorMsg = std::string("Bind socket:").append(std::to_string(sockFd)).append(" failed")
-        };
+        struct EventInfo eventInfo = {.socketFd = sockFd,
+                                      .errorType = static_cast<int32_t>(FAULT_BIND_SOCKET_FAILED),
+                                      .errorMsg =
+                                          std::string("Bind socket:").append(std::to_string(sockFd)).append(" failed")};
         EventReport::SendMonitorFaultEvent(eventInfo);
         return -1;
     }
