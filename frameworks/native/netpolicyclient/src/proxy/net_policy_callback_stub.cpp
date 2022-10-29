@@ -20,6 +20,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+static constexpr uint32_t MAX_IFACE_SIZE = 100;
+
 NetPolicyCallbackStub::NetPolicyCallbackStub()
 {
     memberFuncMap_[NOTIFY_NET_UID_POLICY_CHANGE] = &NetPolicyCallbackStub::OnNetUidPolicyChange;
@@ -161,6 +163,7 @@ int32_t NetPolicyCallbackStub::OnNetMeteredIfacesChange(MessageParcel &data, Mes
         NETMGR_LOG_E("ReadUInt32Vector size failed");
         return ERR_FLATTEN_OBJECT;
     }
+    size = size > MAX_IFACE_SIZE ? MAX_IFACE_SIZE : size;
     for (uint32_t i = 0; i < size; ++i) {
         std::string iface;
         if (!data.ReadString(iface)) {

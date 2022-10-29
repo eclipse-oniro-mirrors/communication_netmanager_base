@@ -24,6 +24,9 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+static constexpr uint32_t MAX_ADDR_SIZE = 16;
+static constexpr uint32_t MAX_ROUTE_SIZE = 32;
+
 bool NetLinkInfo::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteString(ifaceName_)) {
@@ -78,6 +81,7 @@ sptr<NetLinkInfo> NetLinkInfo::Unmarshalling(Parcel &parcel)
     if (!parcel.ReadString(ptr->ifaceName_) || !parcel.ReadString(ptr->domain_) || !parcel.ReadUint32(size)) {
         return nullptr;
     }
+    size = size > MAX_ADDR_SIZE ? MAX_ADDR_SIZE : size;
     sptr<INetAddr> netAddr;
     for (uint32_t i = 0; i < size; i++) {
         netAddr = INetAddr::Unmarshalling(parcel);
@@ -90,6 +94,7 @@ sptr<NetLinkInfo> NetLinkInfo::Unmarshalling(Parcel &parcel)
     if (!parcel.ReadUint32(size)) {
         return nullptr;
     }
+    size = size > MAX_ADDR_SIZE ? MAX_ADDR_SIZE : size;
     for (uint32_t i = 0; i < size; i++) {
         netAddr = INetAddr::Unmarshalling(parcel);
         if (netAddr == nullptr) {
@@ -101,6 +106,7 @@ sptr<NetLinkInfo> NetLinkInfo::Unmarshalling(Parcel &parcel)
     if (!parcel.ReadUint32(size)) {
         return nullptr;
     }
+    size = size > MAX_ROUTE_SIZE ? MAX_ROUTE_SIZE : size;
     sptr<Route> route;
     for (uint32_t i = 0; i < size; i++) {
         route = Route::Unmarshalling(parcel);

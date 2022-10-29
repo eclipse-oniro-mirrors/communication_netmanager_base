@@ -21,7 +21,9 @@
 
 namespace OHOS {
 namespace NetsysNative {
-static constexpr const uint32_t UIDS_LIST_MAX_SIZE = 1024;
+static constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
+static constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
+static constexpr int32_t MAX_INTERFACE_CONFIG_SIZE = 16;
 
 namespace {
 bool WriteNatDataToMessage(MessageParcel &data, const std::string &downstreamIface, const std::string &upstreamIface)
@@ -118,6 +120,7 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netId, std::v
     reply.ReadUint16(baseTimeoutMsec);
     reply.ReadUint8(retryCount);
     int32_t vServerSize = reply.ReadInt32();
+    vServerSize = vServerSize > MAX_DNS_CONFIG_SIZE ? MAX_DNS_CONFIG_SIZE : vServerSize;
     std::vector<std::string> vecString;
     for (int i = 0; i < vServerSize; i++) {
         vecString.push_back(reply.ReadString());
@@ -126,6 +129,7 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netId, std::v
         servers.assign(vecString.begin(), vecString.end());
     }
     int32_t vDomainSize = reply.ReadInt32();
+    vDomainSize = vDomainSize > MAX_DNS_CONFIG_SIZE ? MAX_DNS_CONFIG_SIZE : vDomainSize;
     std::vector<std::string> vecDomain;
     for (int i = 0; i < vDomainSize; i++) {
         vecDomain.push_back(reply.ReadString());
@@ -689,6 +693,7 @@ int32_t NetsysNativeServiceProxy::InterfaceGetConfig(InterfaceConfigurationParce
     reply.ReadString(cfg.ipv4Addr);
     reply.ReadInt32(cfg.prefixLength);
     vSize = reply.ReadInt32();
+    vSize = vSize > MAX_INTERFACE_CONFIG_SIZE ? MAX_INTERFACE_CONFIG_SIZE : vSize;
     std::vector<std::string> vecString;
     for (int i = 0; i < vSize; i++) {
         vecString.push_back(reply.ReadString());
@@ -895,7 +900,8 @@ int32_t NetsysNativeServiceProxy::IpfwdAddInterfaceForward(const std::string &fr
     return ret;
 }
 
-int32_t NetsysNativeServiceProxy::IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface)
+int32_t NetsysNativeServiceProxy::IpfwdRemoveInterfaceForward(const std::string &fromIface,
+                                                              const std::string &toIface)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data) || !data.WriteString(fromIface) || !data.WriteString(toIface)) {
@@ -927,7 +933,8 @@ int32_t NetsysNativeServiceProxy::BandwidthEnableDataSaver(bool enable)
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (ERR_NONE != remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_ENABLE_DATA_SAVER, data, reply, option)) {
+        if (ERR_NONE !=
+            remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_ENABLE_DATA_SAVER, data, reply, option)) {
             NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }
@@ -981,7 +988,8 @@ int32_t NetsysNativeServiceProxy::BandwidthRemoveIfaceQuota(const std::string &i
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (ERR_NONE != remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_REMOVE_IFACE_QUOTA, data, reply, option)) {
+        if (ERR_NONE !=
+            remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_REMOVE_IFACE_QUOTA, data, reply, option)) {
             NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }
@@ -1031,7 +1039,8 @@ int32_t NetsysNativeServiceProxy::BandwidthRemoveDeniedList(uint32_t uid)
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (ERR_NONE != remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_REMOVE_DENIED_LIST, data, reply, option)) {
+        if (ERR_NONE !=
+            remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_REMOVE_DENIED_LIST, data, reply, option)) {
             NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }
