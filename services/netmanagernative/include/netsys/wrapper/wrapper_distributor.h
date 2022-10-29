@@ -17,8 +17,8 @@
 #define WRAPPER_DISTRIBUTOR_H
 
 #include "data_receiver.h"
-#include "netsys_event_message.h"
 #include "i_notify_callback.h"
+#include "netsys_event_message.h"
 
 namespace OHOS {
 namespace nmd {
@@ -37,23 +37,19 @@ private:
     void HandleStateChanged(const std::shared_ptr<NetsysEventMessage> &message);
     void HandleAddressChange(const std::shared_ptr<NetsysEventMessage> &message);
     void HandleRouteChange(const std::shared_ptr<NetsysEventMessage> &message);
-    void HandleRndssChange(const std::shared_ptr<NetsysEventMessage> &message);
     void HandleSubSysNet(const std::shared_ptr<NetsysEventMessage> &message);
     void HandleSubSysQlog(const std::shared_ptr<NetsysEventMessage> &message);
-    void HandleSubSysStrict(const std::shared_ptr<NetsysEventMessage> &message);
     void NotifyInterfaceAdd(const std::string &ifName);
     void NotifyInterfaceRemove(const std::string &ifName);
     void NotifyInterfaceChange(const std::string &ifName, bool isUp);
     void NotifyInterfaceLinkStateChange(const std::string &ifName, bool isUp);
     void NotifyQuotaLimitReache(const std::string &labelName, const std::string &ifName);
-    void NotifyInterfaceClassActivityChange(int32_t label, bool isActive, int64_t timestamp, int32_t uid);
-    void NotifyInterfaceAddressUpdate(const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope);
-    void NotifyInterfaceAddressRemove(const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope);
-    void NotifyInterfaceDnsServersUpdate(const std::string &ifName, int64_t lifetime,
-                                         const std::vector<std::string> &servers);
+    void NotifyInterfaceAddressUpdate(const std::string &addr, const std::string &ifName, int32_t flags,
+                                      int32_t scope);
+    void NotifyInterfaceAddressRemove(const std::string &addr, const std::string &ifName, int32_t flags,
+                                      int32_t scope);
     void NotifyRouteChange(bool updated, const std::string &route, const std::string &gateway,
                            const std::string &ifName);
-    void NotifyStrictCleartext(const std::string &uid, const std::string &hex);
 
     std::unique_ptr<DataReceiver> receiver_;
     std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> netlinkCallbacks_;

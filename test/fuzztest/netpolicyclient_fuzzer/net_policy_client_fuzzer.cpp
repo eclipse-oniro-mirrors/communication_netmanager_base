@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-#include <thread>
 #include <securec.h>
+#include <thread>
 
 #include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
-#include <net_quota_policy.h>
-#include "net_policy_constants.h"
-#include "net_policy_client.h"
-#include "net_mgr_log_wrapper.h"
 #include "token_setproc.h"
+
+#include "net_mgr_log_wrapper.h"
+#include "net_policy_client.h"
+#include "net_policy_constants.h"
+#include "net_quota_policy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -33,44 +34,35 @@ size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
 using namespace Security::AccessToken;
 using Security::AccessToken::AccessTokenID;
-HapInfoParams testInfoParms = {
-    .bundleName = "net_policy_client_fuzzer",
-    .userID = 1,
-    .instIndex = 0,
-    .appIDDesc = "test"
-};
+HapInfoParams testInfoParms = {.bundleName = "net_policy_client_fuzzer",
+                               .userID = 1,
+                               .instIndex = 0,
+                               .appIDDesc = "test"};
 
-PermissionDef testPermDef = {
-    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
-    .bundleName = "net_policy_client_fuzzer",
-    .grantMode = 1,
-    .label = "label",
-    .labelId = 1,
-    .description = "Test net policy connectivity internal",
-    .descriptionId = 1,
-    .availableLevel = APL_SYSTEM_BASIC
-};
+PermissionDef testPermDef = {.permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+                             .bundleName = "net_policy_client_fuzzer",
+                             .grantMode = 1,
+                             .label = "label",
+                             .labelId = 1,
+                             .description = "Test net policy connectivity internal",
+                             .descriptionId = 1,
+                             .availableLevel = APL_SYSTEM_BASIC};
 
-PermissionStateFull testState = {
-    .grantFlags = {2},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .isGeneral = true,
-    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
-    .resDeviceID = {"local"}
-};
+PermissionStateFull testState = {.grantFlags = {2},
+                                 .grantStatus = {PermissionState::PERMISSION_GRANTED},
+                                 .isGeneral = true,
+                                 .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+                                 .resDeviceID = {"local"}};
 
-HapPolicyParams testPolicyPrams = {
-    .apl = APL_SYSTEM_BASIC,
-    .domain = "test.domain",
-    .permList = {testPermDef},
-    .permStateList = {testState}
-};
-}
+HapPolicyParams testPolicyPrams = {.apl = APL_SYSTEM_BASIC,
+                                   .domain = "test.domain",
+                                   .permList = {testPermDef},
+                                   .permStateList = {testState}};
+} // namespace
 
-template<class T>
-T GetData()
+template <class T> T GetData()
 {
-    T object {};
+    T object{};
     size_t objectSize = sizeof(object);
     if (g_baseFuzzData == nullptr || objectSize > g_baseFuzzSize - g_baseFuzzPos) {
         return object;
@@ -108,6 +100,7 @@ public:
         AccessTokenKit::DeleteToken(accessID_);
         SetSelfTokenID(currentID_);
     }
+
 private:
     AccessTokenID currentID_ = 0;
     AccessTokenID accessID_ = 0;
@@ -208,7 +201,7 @@ void SetSnoozePolicyFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzPos = 0;
     AccessToken token;
     int8_t netType = GetData<int8_t>();
-    std::string simId(reinterpret_cast<const char*>(data), size);
+    std::string simId(reinterpret_cast<const char *>(data), size);
     DelayedSingleton<NetPolicyClient>::GetInstance()->SetSnoozePolicy(netType, simId);
 }
 
@@ -235,7 +228,7 @@ void SetIdleTrustlistFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzPos = 0;
     AccessToken token;
     uint32_t uid = GetData<uint32_t>();
-    bool isTrustlist = *(reinterpret_cast<const bool*>(data));
+    bool isTrustlist = *(reinterpret_cast<const bool *>(data));
     DelayedSingleton<NetPolicyClient>::GetInstance()->SetIdleTrustlist(uid, isTrustlist);
 }
 
@@ -244,8 +237,8 @@ void SetCellularPoliciesFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    std::vector<NetPolicyCellularPolicy> cellularPolicies;
-    DelayedSingleton<NetPolicyClient>::GetInstance()->SetCellularPolicies(cellularPolicies);
+    std::vector<NetQuotaPolicy> quotaPolicies;
+    DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetQuotaPolicies(quotaPolicies);
 }
 
 void RegisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
@@ -283,7 +276,7 @@ void GetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    std::vector<NetPolicyQuotaPolicy> quotaPolicies;
+    std::vector<NetQuotaPolicy> quotaPolicies;
     DelayedSingleton<NetPolicyClient>::GetInstance()->GetNetQuotaPolicies(quotaPolicies);
 }
 
@@ -292,20 +285,11 @@ void SetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
     if ((data == nullptr) || (size <= 0)) {
         return;
     }
-    std::vector<NetPolicyQuotaPolicy> quotaPolicies;
+    std::vector<NetQuotaPolicy> quotaPolicies;
     DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetQuotaPolicies(quotaPolicies);
 }
-
-void GetCellularPoliciesFuzzTest(const uint8_t *data, size_t size)
-{
-    if ((data == nullptr) || (size <= 0)) {
-        return;
-    }
-    std::vector<NetPolicyCellularPolicy> cellularPolicies;
-    DelayedSingleton<NetPolicyClient>::GetInstance()->GetCellularPolicies(cellularPolicies);
-}
-}
-}
+} // namespace NetManagerStandard
+} // namespace OHOS
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
@@ -323,6 +307,5 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::UnregisterNetPolicyCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetQuotaPoliciesFuzzTest(data, size);
     OHOS::NetManagerStandard::SetNetQuotaPoliciesFuzzTest(data, size);
-    OHOS::NetManagerStandard::GetCellularPoliciesFuzzTest(data, size);
     return 0;
 }

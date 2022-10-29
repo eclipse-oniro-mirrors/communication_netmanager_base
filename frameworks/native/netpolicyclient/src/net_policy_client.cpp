@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "net_policy_client.h"
 
 #include "iservice_registry.h"
@@ -23,7 +24,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 NetPolicyClient::NetPolicyClient() : netPolicyService_(nullptr), deathRecipient_(nullptr) {}
 
-NetPolicyClient::~NetPolicyClient() {}
+NetPolicyClient::~NetPolicyClient() = default;
 
 int32_t NetPolicyClient::SetPolicyByUid(uint32_t uid, uint32_t policy)
 {
@@ -175,20 +176,15 @@ int32_t NetPolicyClient::UnregisterNetPolicyCallback(const sptr<INetPolicyCallba
     return proxy->UnregisterNetPolicyCallback(callback);
 }
 
-NetPolicyResultCode NetPolicyClient::SetCellularPolicies(const std::vector<NetPolicyCellularPolicy> &cellularPolicies)
-{
-    return NetPolicyResultCode::ERR_INVALID_PARAM;
-}
-
-NetPolicyResultCode NetPolicyClient::SetNetQuotaPolicies(const std::vector<NetPolicyQuotaPolicy> &quotaPolicies)
-{
-    return NetPolicyResultCode::ERR_INVALID_PARAM;
-}
-
 int32_t NetPolicyClient::SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     if (quotaPolicies.empty()) {
         NETMGR_LOG_E("quotaPolicies is empty");
+        return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
+    }
+
+    if (quotaPolicies.size() > QUOTA_POLICY_MAX_SIZE) {
+        NETMGR_LOG_E("quotaPolicies's size is greater than the maximum, size is [%{public}zu]", quotaPolicies.size());
         return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
     }
 
@@ -199,16 +195,6 @@ int32_t NetPolicyClient::SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &
     }
 
     return proxy->SetNetQuotaPolicies(quotaPolicies);
-}
-
-NetPolicyResultCode NetPolicyClient::GetCellularPolicies(std::vector<NetPolicyCellularPolicy> &cellularPolicies)
-{
-    return NetPolicyResultCode::ERR_INVALID_PARAM;
-}
-
-NetPolicyResultCode NetPolicyClient::GetNetQuotaPolicies(std::vector<NetPolicyQuotaPolicy> &quotaPolicies)
-{
-    return NetPolicyResultCode::ERR_INVALID_PARAM;
 }
 
 int32_t NetPolicyClient::GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies)
@@ -269,17 +255,6 @@ uint32_t NetPolicyClient::GetBackgroundPolicyByUid(uint32_t uid)
     }
 
     return proxy->GetBackgroundPolicyByUid(uid);
-}
-
-uint32_t NetPolicyClient::GetCurrentBackgroundPolicy()
-{
-    sptr<INetPolicyService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NetBackgroundPolicy::NET_BACKGROUND_POLICY_NONE;
-    }
-
-    return proxy->GetCurrentBackgroundPolicy();
 }
 
 NetPolicyResultCode NetPolicyClient::SetSnoozePolicy(int8_t netType, const std::string &iccid)

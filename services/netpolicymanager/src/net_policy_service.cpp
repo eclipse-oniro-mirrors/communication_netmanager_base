@@ -27,9 +27,9 @@
 #include "net_policy_file.h"
 #include "net_policy_firewall.h"
 #include "net_policy_inner_define.h"
-#include "net_quota_policy.h"
 #include "net_policy_rule.h"
 #include "net_policy_traffic.h"
+#include "net_quota_policy.h"
 #include "net_settings.h"
 #include "netmanager_base_permission.h"
 
@@ -112,32 +112,32 @@ void NetPolicyService::Init()
 
 int32_t NetPolicyService::SetPolicyByUid(uint32_t uid, uint32_t policy)
 {
-    if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
+    if (!CheckPermission(Permission::SET_NETWORK_POLICY, __func__)) {
         return NetPolicyResultCode::ERR_PERMISSION_DENIED;
     }
 
-    NETMGR_LOG_I("SetPolicyByUid uid[%{public}d] policy[%{public}d]", uid, policy);
+    NETMGR_LOG_D("SetPolicyByUid uid[%{public}d] policy[%{public}d]", uid, policy);
     netPolicyRule_->TransPolicyToRule(uid, policy);
     return NetPolicyResultCode::ERR_NONE;
 }
 
 uint32_t NetPolicyService::GetPolicyByUid(uint32_t uid)
 {
-    if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
+    if (!CheckPermission(Permission::GET_NETWORK_POLICY, __func__)) {
         return NetPolicyResultCode::ERR_PERMISSION_DENIED;
     }
 
-    NETMGR_LOG_I("GetPolicyByUid uid[%{public}d]", uid);
+    NETMGR_LOG_D("GetPolicyByUid uid[%{public}d]", uid);
     return netPolicyRule_->GetPolicyByUid(uid);
 }
 
 std::vector<uint32_t> NetPolicyService::GetUidsByPolicy(uint32_t policy)
 {
-    if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
+    if (!CheckPermission(Permission::GET_NETWORK_POLICY, __func__)) {
         return std::vector<uint32_t>(0);
     }
 
-    NETMGR_LOG_I("GetUidsByPolicy policy[%{public}d]", policy);
+    NETMGR_LOG_D("GetUidsByPolicy policy[%{public}d]", policy);
     return netPolicyRule_->GetUidsByPolicy(policy);
 }
 
@@ -147,7 +147,7 @@ bool NetPolicyService::IsUidNetAllowed(uint32_t uid, bool metered)
         return false;
     }
 
-    NETMGR_LOG_I("IsUidNetAllowed uid[%{public}d metered[%{public}d]", uid, metered);
+    NETMGR_LOG_D("IsUidNetAllowed uid[%{public}d metered[%{public}d]", uid, metered);
     if (NetSettings::GetInstance().IsSystem(uid)) {
         return true;
     }
@@ -160,7 +160,7 @@ bool NetPolicyService::IsUidNetAllowed(uint32_t uid, const std::string &ifaceNam
         return false;
     }
 
-    NETMGR_LOG_I("IsUidNetAllowed uid[%{public}d ifaceName[%{public}s]", uid, ifaceName.c_str());
+    NETMGR_LOG_D("IsUidNetAllowed uid[%{public}d ifaceName[%{public}s]", uid, ifaceName.c_str());
     const auto &vec = netPolicyTraffic_->GetMeteredIfaces();
     if (std::find(vec.begin(), vec.end(), ifaceName) != vec.end()) {
         return IsUidNetAllowed(uid, true);
@@ -173,7 +173,7 @@ int32_t NetPolicyService::RegisterNetPolicyCallback(const sptr<INetPolicyCallbac
     if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
         return NetPolicyResultCode::ERR_PERMISSION_DENIED;
     }
-    NETMGR_LOG_I("RegisterNetPolicyCallback");
+    NETMGR_LOG_D("RegisterNetPolicyCallback");
     if (callback == nullptr) {
         NETMGR_LOG_E("RegisterNetPolicyCallback parameter callback is null");
         return NetPolicyResultCode::ERR_INVALID_PARAM;
@@ -189,7 +189,7 @@ int32_t NetPolicyService::UnregisterNetPolicyCallback(const sptr<INetPolicyCallb
     if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
         return NetPolicyResultCode::ERR_PERMISSION_DENIED;
     }
-    NETMGR_LOG_I("UnregisterNetPolicyCallback");
+    NETMGR_LOG_D("UnregisterNetPolicyCallback");
     if (callback == nullptr) {
         NETMGR_LOG_E("UnregisterNetPolicyCallback parameter callback is null");
         return NetPolicyResultCode::ERR_INVALID_PARAM;
@@ -202,11 +202,11 @@ int32_t NetPolicyService::UnregisterNetPolicyCallback(const sptr<INetPolicyCallb
 
 int32_t NetPolicyService::SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies)
 {
-    if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
+    if (!CheckPermission(Permission::SET_NETWORK_POLICY, __func__)) {
         return NetPolicyResultCode::ERR_PERMISSION_DENIED;
     }
 
-    NETMGR_LOG_I("SetNetQuotaPolicies quotaPolicySize[%{public}zd]", quotaPolicies.size());
+    NETMGR_LOG_D("SetNetQuotaPolicies quotaPolicySize[%{public}zd]", quotaPolicies.size());
     if (quotaPolicies.empty()) {
         NETMGR_LOG_E("SetNetQuotaPolicies size is empty");
         return ERR_INVALID_QUOTA_POLICY;
@@ -216,19 +216,19 @@ int32_t NetPolicyService::SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> 
 
 int32_t NetPolicyService::GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies)
 {
-    if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
+    if (!CheckPermission(Permission::GET_NETWORK_POLICY, __func__)) {
         return NetPolicyResultCode::ERR_PERMISSION_DENIED;
     }
-    NETMGR_LOG_I("GetNetQuotaPolicies begin");
+    NETMGR_LOG_D("GetNetQuotaPolicies begin");
     return netPolicyTraffic_->GetNetQuotaPolicies(quotaPolicies);
 }
 
 int32_t NetPolicyService::ResetPolicies(const std::string &iccid)
 {
-    if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
+    if (!CheckPermission(Permission::SET_NETWORK_POLICY, __func__)) {
         return NetPolicyResultCode::ERR_PERMISSION_DENIED;
     }
-    NETMGR_LOG_I("ResetPolicies begin");
+    NETMGR_LOG_D("ResetPolicies begin");
     netPolicyRule_->ResetPolicies();
     netPolicyFirewall_->ResetPolicies();
     netPolicyTraffic_->ResetPolicies(iccid);
@@ -237,20 +237,20 @@ int32_t NetPolicyService::ResetPolicies(const std::string &iccid)
 
 int32_t NetPolicyService::SetBackgroundPolicy(bool allow)
 {
-    if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
+    if (!CheckPermission(Permission::SET_NETWORK_POLICY, __func__)) {
         return NetPolicyResultCode::ERR_PERMISSION_DENIED;
     }
-    NETMGR_LOG_I("SetBackgroundPolicy allow[%{public}d]", allow);
+    NETMGR_LOG_D("SetBackgroundPolicy allow[%{public}d]", allow);
     netPolicyRule_->SetBackgroundPolicy(allow);
     return ERR_NONE;
 }
 
 bool NetPolicyService::GetBackgroundPolicy()
 {
-    if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
+    if (!CheckPermission(Permission::GET_NETWORK_POLICY, __func__)) {
         return false;
     }
-    NETMGR_LOG_I("GetBackgroundPolicy begin");
+    NETMGR_LOG_D("GetBackgroundPolicy begin");
     return netPolicyRule_->GetBackgroundPolicy();
 }
 
@@ -259,29 +259,16 @@ uint32_t NetPolicyService::GetBackgroundPolicyByUid(uint32_t uid)
     if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
         return NetPolicyResultCode::ERR_PERMISSION_DENIED;
     }
-    NETMGR_LOG_I("GetBackgroundPolicyByUid uid[%{public}d]", uid);
+    NETMGR_LOG_D("GetBackgroundPolicyByUid uid[%{public}d]", uid);
     return netPolicyRule_->GetBackgroundPolicyByUid(uid);
-}
-
-// ready to remove.
-uint32_t NetPolicyService::GetCurrentBackgroundPolicy()
-{
-    if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
-        return NetBackgroundPolicy::NET_BACKGROUND_POLICY_NONE;
-    }
-
-    NETMGR_LOG_I("GetCurrentBackgroundPolicy begin");
-    if (netPolicyRule_->GetBackgroundPolicy()) {
-        return NetBackgroundPolicy::NET_BACKGROUND_POLICY_DISABLE;
-    }
-    return NetBackgroundPolicy::NET_BACKGROUND_POLICY_ENABLE;
 }
 
 int32_t NetPolicyService::UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType)
 {
-    if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
+    if (!CheckPermission(Permission::SET_NETWORK_POLICY, __func__)) {
         return NetPolicyResultCode::ERR_PERMISSION_DENIED;
     }
+    NETMGR_LOG_D("UpdateRemindPolicy start");
     return netPolicyTraffic_->UpdateRemindPolicy(netType, iccid, remindType);
 }
 
@@ -291,7 +278,7 @@ int32_t NetPolicyService::SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed)
         return NetPolicyResultCode::ERR_PERMISSION_DENIED;
     }
 
-    NETMGR_LOG_I("SetDeviceIdleAllowedList info: uid[%{public}d] isAllowed[%{public}d]", uid, isAllowed);
+    NETMGR_LOG_D("SetDeviceIdleAllowedList info: uid[%{public}d] isAllowed[%{public}d]", uid, isAllowed);
     netPolicyFirewall_->SetDeviceIdleAllowedList(uid, isAllowed);
     return NetPolicyResultCode::ERR_NONE;
 }
@@ -302,8 +289,8 @@ int32_t NetPolicyService::GetDeviceIdleAllowedList(std::vector<uint32_t> &uids)
         return NetPolicyResultCode::ERR_PERMISSION_DENIED;
     }
     uids = netPolicyFirewall_->GetDeviceIdleAllowedList();
-    NETMGR_LOG_I("GetDeviceIdleAllowedList uids size[%{public}zu]", uids.size());
-    return NetPolicyResultCode::ERR_NONE; // netPolicyTraffic_->GetDeviceIdleAllowedList(uids);
+    NETMGR_LOG_D("GetDeviceIdleAllowedList uids size[%{public}zu]", uids.size());
+    return NetPolicyResultCode::ERR_NONE;
 }
 
 int32_t NetPolicyService::SetDeviceIdlePolicy(bool enable)
@@ -312,7 +299,7 @@ int32_t NetPolicyService::SetDeviceIdlePolicy(bool enable)
         return NetPolicyResultCode::ERR_PERMISSION_DENIED;
     }
 
-    NETMGR_LOG_I("SetDeviceIdlePolicy enable[%{public}d]", enable);
+    NETMGR_LOG_D("SetDeviceIdlePolicy enable[%{public}d]", enable);
     netPolicyFirewall_->UpdateDeviceIdlePolicy(enable);
     return NetPolicyResultCode::ERR_NONE;
 }
@@ -321,7 +308,6 @@ int32_t NetPolicyService::GetDumpMessage(std::string &message)
 {
     netPolicyRule_->GetDumpMessage(message);
     netPolicyTraffic_->GetDumpMessage(message);
-    NETMGR_LOG_I("NetPolicyService Dump");
     return NetPolicyResultCode::ERR_NONE;
 }
 } // namespace NetManagerStandard

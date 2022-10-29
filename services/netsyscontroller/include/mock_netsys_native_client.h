@@ -45,7 +45,6 @@ constexpr const char *MOCK_SETRESOLVERCONFIG_API = "SetResolverConfig";
 constexpr const char *MOCK_GETRESOLVERICONFIG_API = "GetResolverConfig";
 constexpr const char *MOCK_CREATENETWORKCACHE_API = "CreateNetworkCache";
 constexpr const char *MOCK_DESTROYNETWORKCACHE_API = "DestroyNetworkCache";
-constexpr const char *MOCK_GETADDRINFO_API = "GetAddrInfo";
 constexpr const char *MOCK_GETCELLULARRXBYTES_API = "GetCellularRxBytes";
 constexpr const char *MOCK_GETCELLULARTXBYTES_API = "GetCellularTxBytes";
 constexpr const char *MOCK_GETALLRXBYTES_API = "GetAllRxBytes";
@@ -243,18 +242,6 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t DestroyNetworkCache(uint16_t netId);
-
-    /**
-     * @brief Domain name resolution Obtains the domain name address
-     *
-     * @param hostName
-     * @param serverName
-     * @param hints
-     * @param res
-     * @return Return the return value of the netsys interface call
-     */
-    int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName,
-        const struct addrinfo &hints, std::unique_ptr<addrinfo> &res, uint16_t netId);
 
     /**
      * @brief Obtains the bytes received over the cellular network.

@@ -34,7 +34,7 @@ StatisticsObserverWrapper::~StatisticsObserverWrapper()
 }
 
 napi_value StatisticsObserverWrapper::On(napi_env env, napi_callback_info info,
-                                    const std::initializer_list<std::string> &events, bool asyncCallback)
+                                         const std::initializer_list<std::string> &events, bool asyncCallback)
 {
     size_t paramsCount = MAX_PARAM_NUM;
     napi_value params[MAX_PARAM_NUM] = {nullptr};
@@ -68,7 +68,7 @@ bool StatisticsObserverWrapper::Register()
 }
 
 napi_value StatisticsObserverWrapper::Off(napi_env env, napi_callback_info info,
-                                     const std::initializer_list<std::string> &events, bool asyncCallback)
+                                          const std::initializer_list<std::string> &events, bool asyncCallback)
 {
     napi_value thisVal = nullptr;
     size_t paramsCount = MAX_PARAM_NUM;

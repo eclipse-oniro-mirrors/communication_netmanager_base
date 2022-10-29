@@ -25,8 +25,8 @@
 #include "net_policy_callback_test.h"
 #include "net_policy_client.h"
 #include "net_policy_constants.h"
-#include "net_policy_service.h"
 #include "net_policy_inner_define.h"
+#include "net_policy_service.h"
 #include "token_setproc.h"
 
 namespace OHOS {
@@ -42,7 +42,10 @@ constexpr int32_t WAIT_TIME_SECOND_LONG = 10;
 constexpr uint32_t TEST_UID = 10000;
 const std::string TEST_STRING_PERIODDURATION = "M1";
 
-HapInfoParams testInfoParms = {.bundleName = "net_policy_service_test", .userID = 1, .instIndex = 0, .appIDDesc = "test"};
+HapInfoParams testInfoParms = {.bundleName = "net_policy_service_test",
+                               .userID = 1,
+                               .instIndex = 0,
+                               .appIDDesc = "test"};
 
 PermissionDef testPermDef = {.permissionName = "ohos.permission.test",
                              .bundleName = "net_policy_service_test",
@@ -518,7 +521,6 @@ HWTEST_F(UtNetPolicyService, NetPolicyService028, TestSize.Level1)
     std::cout << "NetPolicyService028 GetBackgroundPolicyByUid ret2:" << ret2 << std::endl;
     ASSERT_TRUE(ret == ret2);
 }
-
 
 /**
  * @tc.name: NetPolicyService029

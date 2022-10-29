@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,20 +16,21 @@
 #ifndef NET_CONN_SERVICE_H
 #define NET_CONN_SERVICE_H
 
+#include <functional>
 #include <list>
 #include <mutex>
 #include <string>
 #include <vector>
-#include <functional>
+
 #include "singleton.h"
 #include "system_ability.h"
 
-#include "net_conn_service_stub.h"
-#include "net_conn_service_iface.h"
-#include "net_supplier.h"
-#include "net_activate.h"
 #include "network.h"
+#include "net_activate.h"
+#include "net_conn_service_iface.h"
+#include "net_conn_service_stub.h"
 #include "net_score.h"
+#include "net_supplier.h"
 #include "timer.h"
 
 namespace OHOS {
@@ -198,26 +199,28 @@ public:
      * Set airplane mode
      *
      * @param state airplane state
-     * @return int32_t result
+     * @return Returns 0, successfully set airplane mode, otherwise it will fail
      */
     int32_t SetAirplaneMode(bool state) override;
     /**
      * restore NetConn factory setting
      *
-     * @return int32_t result
+     * @return Returns 0, successfully restore factory data, otherwise it will fail
      */
     int32_t RestoreFactoryData() override;
     /**
      * Dump
      *
-     * @return int32_t result
+     * @param fd file description
+     * @param args unused
+     * @return Returns 0, successfully get dump info, otherwise it will fail
      */
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
     /**
      * Is default network metered
      *
      * @param save the metered state
-     * @return int32_t result
+     * @return Returns 0, Successfully get whether the default network is metered, otherwise it will fail
      */
     int32_t IsDefaultNetMetered(bool &isMetered) override;
 
@@ -260,6 +263,7 @@ private:
     int32_t GenerateNetId();
     bool FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId);
     void GetDumpMessage(std::string &message);
+    sptr<NetSupplier> FindNetSupplier(uint32_t supplierId);
 
 private:
     enum ServiceRunningState {
@@ -280,6 +284,7 @@ private:
     sptr<NetConnServiceIface> serviceIface_ = nullptr;
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
     std::string httpProxy_;
+    std::mutex netManagerMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

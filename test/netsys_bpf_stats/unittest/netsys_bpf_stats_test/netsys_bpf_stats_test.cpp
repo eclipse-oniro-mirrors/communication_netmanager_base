@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <ctime>
 #include <thread>
 #include <vector>
@@ -68,6 +69,22 @@ void NetsysBpfStatsTest::SetUp()
 
 void NetsysBpfStatsTest::TearDown() {}
 
+void SetStatsValue(StatsValue &value1, StatsValue &value2)
+{
+    value1 = {
+        .rxPackets = TEST_PACKET0 * 2,
+        .rxBytes = TEST_BYTES0 * 2,
+        .txPackets = TEST_PACKET1 * 2,
+        .txBytes = TEST_BYTES1 * 2,
+    };
+    value2 = {
+        .rxPackets = TEST_PACKET1,
+        .rxBytes = TEST_BYTES1,
+        .txPackets = TEST_PACKET0,
+        .txBytes = TEST_BYTES0,
+    };
+}
+
 HWTEST_F(NetsysBpfStatsTest, NetsysBpfStats001, TestSize.Level1)
 {
     struct rlimit r = {RLIM_INFINITY, RLIM_INFINITY};
@@ -99,18 +116,9 @@ HWTEST_F(NetsysBpfStatsTest, NetsysBpfStats002, TestSize.Level1)
     ASSERT_TRUE(fakeIfaceNameMap.WriteValue(TEST_IFACE_INDEX_2, ifName2, BPF_ANY));
     ASSERT_TRUE(fakeIfaceNameMap.WriteValue(TEST_IFACE_INDEX_3, ifName3, BPF_ANY));
     ASSERT_TRUE(fakeIfaceNameMap.WriteValue(TEST_IFACE_INDEX_4, ifName4, BPF_ANY));
-    StatsValue value1 = {
-        .rxPackets = TEST_PACKET0 * 2,
-        .rxBytes = TEST_BYTES0 * 2,
-        .txPackets = TEST_PACKET1 * 2,
-        .txBytes = TEST_BYTES1 * 2,
-    };
-    StatsValue value2 = {
-        .rxPackets = TEST_PACKET1,
-        .rxBytes = TEST_BYTES1,
-        .txPackets = TEST_PACKET0,
-        .txBytes = TEST_BYTES0,
-    };
+    StatsValue value1;
+    StatsValue value2;
+    SetStatsValue(value1, value2);
     ASSERT_TRUE(fakeIfaceStatsMap.WriteValue(TEST_IFACE_INDEX_1, value1, BPF_ANY));
     ASSERT_TRUE(fakeIfaceStatsMap.WriteValue(TEST_IFACE_INDEX_2, value2, BPF_ANY));
     ASSERT_TRUE(fakeIfaceStatsMap.WriteValue(TEST_IFACE_INDEX_3, value2, BPF_ANY));
@@ -169,18 +177,9 @@ HWTEST_F(NetsysBpfStatsTest, NetsysBpfStats003, TestSize.Level1)
 HWTEST_F(NetsysBpfStatsTest, NetsysBpfStats004, TestSize.Level1)
 {
     NetsysBpfMap<uint32_t, StatsValue> fakeIfaceStatsMap(BPF_MAP_TYPE_HASH, TEST_MAP_SIZE, 0);
-    StatsValue value1 = {
-        .rxPackets = TEST_PACKET0 * 2,
-        .rxBytes = TEST_BYTES0 * 2,
-        .txPackets = TEST_PACKET1 * 2,
-        .txBytes = TEST_BYTES1 * 2,
-    };
-    StatsValue value2 = {
-        .rxPackets = TEST_PACKET1,
-        .rxBytes = TEST_BYTES1,
-        .txPackets = TEST_PACKET0,
-        .txBytes = TEST_BYTES0,
-    };
+    StatsValue value1;
+    StatsValue value2;
+    SetStatsValue(value1, value2);
     ASSERT_TRUE(fakeIfaceStatsMap.WriteValue(TEST_IFACE_INDEX_1, value1, BPF_ANY));
     ASSERT_TRUE(fakeIfaceStatsMap.WriteValue(TEST_IFACE_INDEX_2, value2, BPF_ANY));
     ASSERT_TRUE(fakeIfaceStatsMap.WriteValue(TEST_IFACE_INDEX_3, value1, BPF_ANY));

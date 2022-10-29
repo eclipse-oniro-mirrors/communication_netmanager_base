@@ -16,14 +16,12 @@
 #include "netlink_manager.h"
 
 #include <cerrno>
-#include <map>
-#include <mutex>
-#include <unistd.h>
-
-#include <sys/socket.h>
-
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
+#include <map>
+#include <mutex>
+#include <sys/socket.h>
+#include <unistd.h>
 
 #include "netlink_define.h"
 #include "netnative_log_wrapper.h"
@@ -33,7 +31,6 @@ namespace OHOS {
 namespace nmd {
 using namespace NetlinkDefine;
 namespace {
-std::mutex netlinkManagerLock_;
 constexpr int32_t NFLOG_QUOTA_GROUP = 1;
 constexpr int32_t UEVENT_GROUP = 0xffffffff;
 struct DistributorParam {
@@ -42,7 +39,7 @@ struct DistributorParam {
     bool flag;
 };
 
-const std::map<int32_t, DistributorParam> distributorParamList = {
+const std::map<int32_t, DistributorParam> distributorParamList_ = {
     {NETLINK_KOBJECT_UEVENT, {UEVENT_GROUP, NETLINK_FORMAT_ASCII, false}},
     {NETLINK_ROUTE,
      {RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV6_IFADDR | RTMGRP_IPV4_ROUTE | RTMGRP_IPV6_ROUTE |
@@ -51,7 +48,7 @@ const std::map<int32_t, DistributorParam> distributorParamList = {
     {NETLINK_NFLOG, {NFLOG_QUOTA_GROUP, NETLINK_FORMAT_BINARY, false}},
     {NETLINK_NETFILTER, {0, NETLINK_FORMAT_BINARY_UNICAST, true}}};
 
-std::map<int32_t, std::unique_ptr<WrapperDistributor>> distributorMap;
+std::map<int32_t, std::unique_ptr<WrapperDistributor>> distributorMap_;
 
 bool CreateNetlinkDistributor(int32_t netlinkType, const DistributorParam &param)
 {
@@ -65,8 +62,8 @@ bool CreateNetlinkDistributor(int32_t netlinkType, const DistributorParam &param
     sockAddr.nl_groups = param.groups;
 
     if ((socketFd = socket(PF_NETLINK, SOCK_DGRAM | SOCK_CLOEXEC, netlinkType)) < 0) {
-        NETNATIVE_LOGE("Creat socket for family failed NetLinkType is %{public}d: %{public}s = %{public}d", netlinkType,
-                       strerror(errno), errno);
+        NETNATIVE_LOGE("Creat socket for family failed NetLinkType is %{public}d: %{public}s = %{public}d",
+                       netlinkType, strerror(errno), errno);
         return false;
     }
 
@@ -92,7 +89,7 @@ bool CreateNetlinkDistributor(int32_t netlinkType, const DistributorParam &param
         return false;
     }
     NETNATIVE_LOGI("CreateNetlinkDistributor netlinkType: %{public}d, socketFd: %{public}d", netlinkType, socketFd);
-    distributorMap[netlinkType] = std::make_unique<WrapperDistributor>(socketFd, param.format);
+    distributorMap_[netlinkType] = std::make_unique<WrapperDistributor>(socketFd, param.format);
     return true;
 }
 } // namespace
@@ -101,7 +98,7 @@ std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> NetlinkManager
     std::make_shared<std::vector<sptr<NetsysNative::INotifyCallback>>>();
 NetlinkManager::NetlinkManager()
 {
-    for (auto &it : distributorParamList) {
+    for (auto &it : distributorParamList_) {
         CreateNetlinkDistributor(it.first, it.second);
     }
     if (callbacks_ == nullptr) {
@@ -117,7 +114,7 @@ NetlinkManager::~NetlinkManager()
 
 int32_t NetlinkManager::StartListener()
 {
-    for (auto &it : distributorMap) {
+    for (auto &it : distributorMap_) {
         if (it.second == nullptr) {
             continue;
         }
@@ -132,7 +129,7 @@ int32_t NetlinkManager::StartListener()
 
 int32_t NetlinkManager::StopListener()
 {
-    for (auto &it : distributorMap) {
+    for (auto &it : distributorMap_) {
         if (it.second == nullptr) {
             continue;
         }
@@ -147,7 +144,7 @@ int32_t NetlinkManager::StopListener()
 int32_t NetlinkManager::RegisterNetlinkCallback(sptr<NetsysNative::INotifyCallback> callback)
 {
     if (callback == nullptr) {
-        NETNATIVE_LOGI("callback is nullptr");
+        NETNATIVE_LOGE("callback is nullptr");
         return NetlinkResult::ERR_NULL_PTR;
     }
     for (auto &cb : *callbacks_) {
@@ -164,7 +161,7 @@ int32_t NetlinkManager::RegisterNetlinkCallback(sptr<NetsysNative::INotifyCallba
 int32_t NetlinkManager::UnregisterNetlinkCallback(sptr<NetsysNative::INotifyCallback> callback)
 {
     if (callback == nullptr) {
-        NETNATIVE_LOGI("callback is nullptr");
+        NETNATIVE_LOGE("callback is nullptr");
         return NetlinkResult::ERR_NULL_PTR;
     }
 

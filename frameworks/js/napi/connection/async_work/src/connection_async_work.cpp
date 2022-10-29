@@ -41,6 +41,17 @@ void ConnectionAsyncWork::HasDefaultNetCallback(napi_env env, napi_status status
     BaseAsyncWork::AsyncWorkCallback<HasDefaultNetContext, ConnectionExec::HasDefaultNetCallback>(env, status, data);
 }
 
+void ConnectionAsyncWork::ExecIsDefaultNetMetered(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<IsDefaultNetMeteredContext, ConnectionExec::ExecIsDefaultNetMetered>(env, data);
+}
+
+void ConnectionAsyncWork::IsDefaultNetMeteredCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<IsDefaultNetMeteredContext, ConnectionExec::IsDefaultNetMeteredCallback>(
+        env, status, data);
+}
+
 void ConnectionAsyncWork::ExecGetNetCapabilities(napi_env env, void *data)
 {
     BaseAsyncWork::ExecAsyncWork<GetNetCapabilitiesContext, ConnectionExec::ExecGetNetCapabilities>(env, data);

@@ -23,7 +23,7 @@ namespace NetsysNative {
 class TestNotifyCallback : public NotifyCallbackStub {
 public:
     TestNotifyCallback();
-    virtual ~TestNotifyCallback() override;
+    ~TestNotifyCallback() override;
     int32_t OnInterfaceAddressUpdated(const std::string &, const std::string &, int, int) override;
     int32_t OnInterfaceAddressRemoved(const std::string &, const std::string &, int, int) override;
     int32_t OnInterfaceAdded(const std::string &) override;

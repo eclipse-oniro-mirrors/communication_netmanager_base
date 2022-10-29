@@ -18,16 +18,18 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <linux/fib_rules.h>
+#include <linux/netlink.h>
+#include <linux/rtnetlink.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
-#include <linux/fib_rules.h>
-#include <linux/netlink.h>
-#include <linux/rtnetlink.h>
+
 #include "netnative_log_wrapper.h"
 #include "securec.h"
+
 #include "netlink_socket.h"
 namespace OHOS {
 namespace nmd {
@@ -69,7 +71,7 @@ int32_t SendNetlinkMsgToKernel(struct nlmsghdr *msg, uint32_t table)
         close(kernelSocket);
         return -1;
     }
-    NETNATIVE_LOGI("msgState=== is %{public}zd", msgState);
+    NETNATIVE_LOG_D("[NetlinkSocket] msgState is %{public}zd", msgState);
     if (msg->nlmsg_flags & NLM_F_DUMP) {
         msgState = GetInfoFromKernel(kernelSocket, msg->nlmsg_type, table);
     }
@@ -99,13 +101,12 @@ int32_t ClearRouteInfo(uint16_t clearThing, uint32_t table)
     msghdr->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
     msghdr->nlmsg_type = clearThing;
     msghdr->nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
-    int32_t ret = SendNetlinkMsgToKernel(msghdr);
-    return ret;
+    return SendNetlinkMsgToKernel(msghdr);
 }
 
 int32_t GetInfoFromKernel(int32_t sock, uint16_t clearThing, uint32_t table)
 {
-    char readBuffer[KERNEL_BUFFER_SIZE];
+    char readBuffer[KERNEL_BUFFER_SIZE] = {0};
     // Read the information returned by the kernel through the socket.
     ssize_t readedInfos = read(sock, readBuffer, sizeof(readBuffer));
     if (readedInfos < 0) {
@@ -115,7 +116,7 @@ int32_t GetInfoFromKernel(int32_t sock, uint16_t clearThing, uint32_t table)
         uint32_t readLength = readedInfos;
         // Traverse and read the information returned by the kernel for item by item processing.
         for (nlmsghdr *nlmsgHeader = reinterpret_cast<nlmsghdr *>(readBuffer); NLMSG_OK(nlmsgHeader, readLength);
-            nlmsgHeader = NLMSG_NEXT(nlmsgHeader, readLength)) {
+             nlmsgHeader = NLMSG_NEXT(nlmsgHeader, readLength)) {
             if (nlmsgHeader->nlmsg_type == NLMSG_ERROR) {
                 nlmsgerr *err = reinterpret_cast<nlmsgerr *>(NLMSG_DATA(nlmsgHeader));
                 NETNATIVE_LOGE("netlink read socket failed error = %{public}d", err->error);
@@ -136,6 +137,10 @@ int32_t GetInfoFromKernel(int32_t sock, uint16_t clearThing, uint32_t table)
 
 void DealInfoFromKernel(nlmsghdr *nlmsgHeader, uint16_t clearThing, uint32_t table)
 {
+    if (nlmsgHeader == nullptr) {
+        NETNATIVE_LOGE("nlmsgHeader is nullptr");
+        return;
+    }
     struct nlmsghdr *msg = nlmsgHeader;
     msg->nlmsg_flags = NLM_F_REQUEST | NLM_F_ACK;
     if (clearThing == RTM_GETRULE) {
@@ -152,13 +157,16 @@ void DealInfoFromKernel(nlmsghdr *nlmsgHeader, uint16_t clearThing, uint32_t tab
     SendNetlinkMsgToKernel(msg);
 }
 
-// It is used to extract the information returned by the kernel and decide whether to delete the configuration.
 uint32_t GetRouteProperty(const nlmsghdr *nlmsgHeader, int32_t property)
 {
+    if (nlmsgHeader == nullptr) {
+        NETNATIVE_LOGE("nlmsgHeader is nullptr");
+        return -1;
+    }
     uint32_t rtaLength = RTM_PAYLOAD(nlmsgHeader);
     rtmsg *infoMsg = reinterpret_cast<rtmsg *>(NLMSG_DATA(nlmsgHeader));
-    for (rtattr *infoRta = reinterpret_cast<rtattr *> RTM_RTA(infoMsg);
-        RTA_OK(infoRta, rtaLength); infoRta = RTA_NEXT(infoRta, rtaLength)) {
+    for (rtattr *infoRta = reinterpret_cast<rtattr *> RTM_RTA(infoMsg); RTA_OK(infoRta, rtaLength);
+         infoRta = RTA_NEXT(infoRta, rtaLength)) {
         if (infoRta->rta_type == property) {
             return *(reinterpret_cast<uint32_t *>(RTA_DATA(infoRta)));
         }

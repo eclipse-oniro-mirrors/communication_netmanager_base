@@ -27,7 +27,7 @@ namespace NetManagerStandard {
 class NetStatsCallbackTest : public NetStatsCallbackStub {
 public:
     NetStatsCallbackTest();
-    virtual ~NetStatsCallbackTest() override;
+    ~NetStatsCallbackTest() override;
     int32_t NetIfaceStatsChanged(const std::string &iface) override;
     int32_t NetUidStatsChanged(const std::string &iface, uint32_t uid) override;
     void WaitFor(int32_t timeoutSecond);

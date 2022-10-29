@@ -52,6 +52,7 @@ void FirewallRule::SetAllowedList(uint32_t uid, uint32_t rule)
         for (auto iter = allowedList_.begin(); iter != allowedList_.end();) {
             if (uid == *iter) {
                 allowedList_.erase(iter);
+                break;
             } else {
                 iter++;
             }
@@ -62,7 +63,12 @@ void FirewallRule::SetAllowedList(uint32_t uid, uint32_t rule)
 
 void FirewallRule::SetAllowedList(const std::vector<uint32_t> &uids)
 {
-    allowedList_.insert(allowedList_.end(), uids.begin(), uids.end());
+    for (const auto &it : uids) {
+        if (std::find(allowedList_.begin(), allowedList_.end(), it) == allowedList_.end()) {
+            allowedList_.push_back(it);
+        }
+    }
+
     SetAllowedList();
 }
 
@@ -102,7 +108,12 @@ void FirewallRule::SetDeniedList(uint32_t uid, uint32_t rule)
 
 void FirewallRule::SetDeniedList(const std::vector<uint32_t> &uids)
 {
-    deniedList_.insert(deniedList_.end(), uids.begin(), uids.end());
+    for (const auto &it : uids) {
+        if (std::find(deniedList_.begin(), deniedList_.end(), it) == deniedList_.end()) {
+            deniedList_.push_back(it);
+        }
+    }
+
     SetDeniedList();
 }
 

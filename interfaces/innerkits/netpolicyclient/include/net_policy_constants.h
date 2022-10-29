@@ -20,9 +20,9 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-const int64_t DATA_USAGE_UNKNOWN = -1;
-const int64_t DATA_USAGE_UNLIMITED = LONG_MAX;
-const int64_t REMIND_NEVER = -1;
+static constexpr int64_t DATA_USAGE_UNKNOWN = -1;
+static constexpr int64_t DATA_USAGE_UNLIMITED = LONG_MAX;
+static constexpr int64_t REMIND_NEVER = -1;
 constexpr const char *QUOTA_POLICY_NO_PERIOD = "--";
 
 enum NetPolicyResultCode {

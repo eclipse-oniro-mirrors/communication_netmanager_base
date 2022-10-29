@@ -15,8 +15,6 @@
 
 #include "unsubscribe_context.h"
 
-#include "netmanager_base_log.h"
-
 static constexpr const int PARAM_NO_OPTIONS = 0;
 
 namespace OHOS::NetManagerStandard {

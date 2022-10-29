@@ -16,10 +16,6 @@
 #ifndef NETSYS_BPF_STATS_H
 #define NETSYS_BPF_STATS_H
 
-#include <cstring>
-#include <string.h>
-#include <string>
-
 #include "bpf_wrappers.h"
 #include "net_stats_constants.h"
 #include "netsys_bpf_map.h"

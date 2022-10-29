@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_NETLINK_MSG_H__
-#define INCLUDE_NETLINK_MSG_H__
+#ifndef INCLUDE_NETLINK_MSG_H
+#define INCLUDE_NETLINK_MSG_H
 
 #include <arpa/inet.h>
 #include <asm/types.h>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <sys/socket.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include <linux/fib_rules.h>
 #include <linux/inet_diag.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 namespace OHOS {
 namespace nmd {
@@ -103,4 +103,4 @@ private:
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // !INCLUDE_NETLINK_MSG_H__
+#endif // !INCLUDE_NETLINK_MSG_H

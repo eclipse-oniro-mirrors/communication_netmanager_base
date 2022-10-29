@@ -27,7 +27,6 @@ void TestSetResolverConfig(void);
 void TestCreateNetworkCache(void);
 void TestFlushNetworkCache(void);
 void TestDestroyNetworkCache(void);
-void TestGetaddrinfo(void);
 void TestInterfaceSetMtu(void);
 void TestInterfaceGetMtu(void);
 void TestRegisterNotifyCallback(void);

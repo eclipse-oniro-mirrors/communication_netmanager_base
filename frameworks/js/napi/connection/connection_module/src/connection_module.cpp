@@ -129,6 +129,7 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
         DECLARE_NAPI_FUNCTION(FUNCTION_CREATE_NET_CONNECTION, CreateNetConnection),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_ADDRESSES_BY_NAME, GetAddressesByName),
         DECLARE_NAPI_FUNCTION(FUNCTION_HAS_DEFAULT_NET, HasDefaultNet),
+        DECLARE_NAPI_FUNCTION(FUNCTION_IS_DEFAULT_NET_METERED, IsDefaultNetMetered),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_NET_CAPABILITIES, GetNetCapabilities),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_CONNECTION_PROPERTIES, GetConnectionProperties),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_ALL_NETS, GetAllNets),
@@ -188,6 +189,13 @@ napi_value ConnectionModule::HasDefaultNet(napi_env env, napi_callback_info info
     return ModuleTemplate::Interface<HasDefaultNetContext>(env, info, FUNCTION_HAS_DEFAULT_NET, nullptr,
                                                            ConnectionAsyncWork::ExecHasDefaultNet,
                                                            ConnectionAsyncWork::HasDefaultNetCallback);
+}
+
+napi_value ConnectionModule::IsDefaultNetMetered(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<IsDefaultNetMeteredContext>(env, info, FUNCTION_IS_DEFAULT_NET_METERED, nullptr,
+                                                                 ConnectionAsyncWork::ExecIsDefaultNetMetered,
+                                                                 ConnectionAsyncWork::IsDefaultNetMeteredCallback);
 }
 
 napi_value ConnectionModule::GetNetCapabilities(napi_env env, napi_callback_info info)

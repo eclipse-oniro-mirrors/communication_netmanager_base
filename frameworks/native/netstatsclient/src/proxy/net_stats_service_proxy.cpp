@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "net_stats_service_proxy.h"
 
 #include "net_mgr_log_wrapper.h"
@@ -19,11 +20,9 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetStatsServiceProxy::NetStatsServiceProxy(const sptr<IRemoteObject> &impl)
-    : IRemoteProxy<INetStatsService>(impl)
-{}
+NetStatsServiceProxy::NetStatsServiceProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<INetStatsService>(impl) {}
 
-NetStatsServiceProxy::~NetStatsServiceProxy() {}
+NetStatsServiceProxy::~NetStatsServiceProxy() = default;
 
 bool NetStatsServiceProxy::WriteInterfaceToken(MessageParcel &data)
 {
@@ -90,167 +89,6 @@ int32_t NetStatsServiceProxy::UnregisterNetStatsCallback(const sptr<INetStatsCal
         return retCode;
     }
     return replyParcel.ReadInt32();
-}
-
-NetStatsResultCode NetStatsServiceProxy::GetIfaceStatsDetail(const std::string &iface, uint32_t start,
-    uint32_t end, NetStatsInfo &statsInfo)
-{
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    NETMGR_LOG_D("proxy iface[%{public}s], start[%{public}d], end[%{public}d]",
-        iface.c_str(), start, end);
-    if (!data.WriteString(iface)) {
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    if (!data.WriteUint32(start)) {
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    if (!data.WriteUint32(end)) {
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int32_t error = remote->SendRequest(CMD_GET_IFACE_STATS_DETAIL, data, reply, option);
-    if (error != ERR_NONE) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    if (!NetStatsInfo::Unmarshalling(reply, statsInfo)) {
-        NETMGR_LOG_E("NetStatsInfo Unmarshalling failed");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    return static_cast<NetStatsResultCode>(reply.ReadInt32());
-}
-
-NetStatsResultCode NetStatsServiceProxy::GetUidStatsDetail(const std::string &iface, uint32_t uid,
-    uint32_t start, uint32_t end, NetStatsInfo &statsInfo)
-{
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    NETMGR_LOG_D("proxy iface[%{public}s], uid[%{public}d],start[%{public}d], end[%{public}d]",
-        iface.c_str(), uid, start, end);
-    if (!data.WriteString(iface)) {
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    if (!data.WriteUint32(uid)) {
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    if (!data.WriteUint32(start)) {
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    if (!data.WriteUint32(end)) {
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int32_t error = remote->SendRequest(CMD_GET_UID_STATS_DETAIL, data, reply, option);
-    if (error != ERR_NONE) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    if (!NetStatsInfo::Unmarshalling(reply, statsInfo)) {
-        NETMGR_LOG_E("NetStatsInfo Unmarshalling failed");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    return static_cast<NetStatsResultCode>(reply.ReadInt32());
-}
-
-NetStatsResultCode NetStatsServiceProxy::UpdateIfacesStats(const std::string &iface,
-    uint32_t start, uint32_t end, const NetStatsInfo &stats)
-{
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    NETMGR_LOG_D("proxy iface[%{public}s]", iface.c_str());
-    if (!data.WriteString(iface) || !data.WriteUint32(start) || !data.WriteUint32(end)) {
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    if (!NetStatsInfo::Marshalling(data, stats)) {
-        NETMGR_LOG_E("Proxy Marshalling failed");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    MessageParcel reply;
-    MessageOption option;
-    int32_t error = remote->SendRequest(CMD_UPDATE_IFACES_STATS, data, reply, option);
-    if (error != ERR_NONE) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    return static_cast<NetStatsResultCode>(reply.ReadInt32());
-}
-
-NetStatsResultCode NetStatsServiceProxy::UpdateStatsData()
-{
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    MessageParcel reply;
-    MessageOption option;
-    int32_t error = remote->SendRequest(CMD_UPDATE_STATS_DATA, data, reply, option);
-    if (error != ERR_NONE) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    return static_cast<NetStatsResultCode>(reply.ReadInt32());
-}
-
-NetStatsResultCode NetStatsServiceProxy::ResetFactory()
-{
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    MessageParcel reply;
-    MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NSM_RESET_FACTORY, data, reply, option);
-    if (error != ERR_NONE) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    return static_cast<NetStatsResultCode>(reply.ReadInt32());
 }
 
 int64_t NetStatsServiceProxy::GetIfaceRxBytes(const std::string &interfaceName)

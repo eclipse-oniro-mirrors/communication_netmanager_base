@@ -14,8 +14,10 @@
  */
 
 #include "dhcp_controller.h"
-#include "netnative_log_wrapper.h"
+
 #include "dhcp_result_parcel.h"
+#include "netnative_log_wrapper.h"
+#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace nmd {
@@ -33,13 +35,18 @@ DhcpController::DhcpControllerResultNotify::~DhcpControllerResultNotify() {}
 void DhcpController::DhcpControllerResultNotify::OnSuccess(int status, const std::string &ifname,
                                                            OHOS::Wifi::DhcpResult &result)
 {
-    NETNATIVE_LOGE(
+    NETNATIVE_LOG_D(
         "Enter DhcpController::DhcpControllerResultNotify::OnSuccess "
         "ifname=[%{public}s], iptype=[%{public}d], strYourCli=[%{public}s], "
         "strServer=[%{public}s], strSubnet=[%{public}s], strDns1=[%{public}s], "
         "strDns2=[%{public}s] strRouter1=[%{public}s] strRouter2=[%{public}s]",
-        ifname.c_str(), result.iptype, result.strYourCli.c_str(), result.strServer.c_str(), result.strSubnet.c_str(),
-        result.strDns1.c_str(), result.strDns2.c_str(), result.strRouter1.c_str(), result.strRouter2.c_str());
+        ifname.c_str(), result.iptype, result.strYourCli.c_str(),
+        NetManagerStandard::CommonUtils::ToAnonymousIp(result.strServer).c_str(),
+        NetManagerStandard::CommonUtils::ToAnonymousIp(result.strSubnet).c_str(),
+        NetManagerStandard::CommonUtils::ToAnonymousIp(result.strDns1).c_str(),
+        NetManagerStandard::CommonUtils::ToAnonymousIp(result.strDns2).c_str(),
+        NetManagerStandard::CommonUtils::ToAnonymousIp(result.strRouter1).c_str(),
+        NetManagerStandard::CommonUtils::ToAnonymousIp(result.strRouter2).c_str());
     dhcpController_.Process(ifname, result);
 }
 
@@ -72,11 +79,12 @@ void DhcpController::StartDhcpClient(const std::string &iface, bool bIpv6)
 {
     NETNATIVE_LOGI("DhcpController StartDhcpClient iface[%{public}s] ipv6[%{public}d]", iface.c_str(), bIpv6);
     if (OHOS::Wifi::DhcpServiceApi::GetInstance() == nullptr) {
+        NETNATIVE_LOGE("OHOS::Wifi::DhcpServiceApi is nullptr");
         return;
     }
     OHOS::Wifi::DhcpServiceApi::GetInstance()->StartDhcpClient(iface, bIpv6);
     if (OHOS::Wifi::DhcpServiceApi::GetInstance()->GetDhcpResult(iface, dhcpResultNotify_.get(), DHCP_TIMEOUT) != 0) {
-        NETNATIVE_LOGE(" Dhcp connection failed.\n");
+        NETNATIVE_LOGE(" Dhcp connection failed");
     }
 }
 
@@ -84,6 +92,7 @@ void DhcpController::StopDhcpClient(const std::string &iface, bool bIpv6)
 {
     NETNATIVE_LOGI("DhcpController StopDhcpClient iface[%{public}s] ipv6[%{public}d]", iface.c_str(), bIpv6);
     if (OHOS::Wifi::DhcpServiceApi::GetInstance() == nullptr) {
+        NETNATIVE_LOGE("OHOS::Wifi::DhcpServiceApi is nullptr");
         return;
     }
     OHOS::Wifi::DhcpServiceApi::GetInstance()->StopDhcpClient(iface, bIpv6);
@@ -108,6 +117,7 @@ bool DhcpController::StartDhcpService(const std::string &iface, const std::strin
 {
     constexpr int32_t IP_V4 = 0;
     if (OHOS::Wifi::DhcpServiceApi::GetInstance() == nullptr) {
+        NETNATIVE_LOGE("OHOS::Wifi::DhcpServiceApi is nullptr");
         return false;
     }
     std::string ipAddr = ipv4addr;
@@ -125,8 +135,11 @@ bool DhcpController::StartDhcpService(const std::string &iface, const std::strin
     if (OHOS::Wifi::DhcpServiceApi::GetInstance()->SetDhcpRange(iface, range) != 0) {
         return false;
     }
-    NETNATIVE_LOGI("Set dhcp range : ifaceName[%{public}s] TagName[%{public}s] start ip[%s] end ip[%s]", iface.c_str(),
-                   range.strTagName.c_str(), range.strStartip.c_str(), range.strEndip.c_str());
+    NETNATIVE_LOGI(
+        "Set dhcp range : ifaceName[%{public}s] TagName[%{public}s] start ip[%{public}s] end ip[%{public}s]",
+        iface.c_str(), range.strTagName.c_str(),
+        NetManagerStandard::CommonUtils::ToAnonymousIp(range.strStartip).c_str(),
+        NetManagerStandard::CommonUtils::ToAnonymousIp(range.strEndip).c_str());
     if (OHOS::Wifi::DhcpServiceApi::GetInstance()->StartDhcpServer(iface) != 0) {
         return false;
     }
@@ -138,6 +151,7 @@ bool DhcpController::StartDhcpService(const std::string &iface, const std::strin
 bool DhcpController::StopDhcpService(const std::string &iface)
 {
     if (OHOS::Wifi::DhcpServiceApi::GetInstance() == nullptr) {
+        NETNATIVE_LOGE("OHOS::Wifi::DhcpServiceApi is nullptr");
         return false;
     }
     if (OHOS::Wifi::DhcpServiceApi::GetInstance()->RemoveAllDhcpRange(iface) != 0) {

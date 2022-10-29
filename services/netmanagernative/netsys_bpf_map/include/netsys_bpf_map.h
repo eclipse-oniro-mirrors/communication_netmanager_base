@@ -19,27 +19,26 @@
 #include <errno.h>
 #include <functional>
 
+#include "bpf_wrappers.h"
 #include "netnative_log_wrapper.h"
 #include "unique_fd.h"
-
-#include "bpf_wrappers.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 template <class Key, class Value> class NetsysBpfMap {
 public:
     NetsysBpfMap<Key, Value>() = default;
-    NetsysBpfMap<Key, Value>(const std::string &pathname, uint32_t flags)
+    NetsysBpfMap<Key, Value>(const std::string &pathName, uint32_t flags)
     {
-        int mapFd = BpfWrappers<Key, Value>::GetMap(pathname, flags);
+        int mapFd = BpfWrappers<Key, Value>::GetMap(pathName, flags);
         if (mapFd >= 0) {
             mapFd_ = mapFd;
         }
     }
 
-    NetsysBpfMap<Key, Value>(bpf_map_type map_type, uint32_t max_entries, uint32_t map_flags)
+    NetsysBpfMap<Key, Value>(bpf_map_type mapType, uint32_t maxEntries, uint32_t mapFlags)
     {
-        int mapFd = BpfWrappers<Key, Value>::CreateMap(map_type, sizeof(Key), sizeof(Value), max_entries, map_flags);
+        int mapFd = BpfWrappers<Key, Value>::CreateMap(mapType, sizeof(Key), sizeof(Value), maxEntries, mapFlags);
         if (IsValid()) {
             mapFd_ = mapFd;
         }

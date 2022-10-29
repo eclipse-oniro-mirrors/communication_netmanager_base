@@ -19,7 +19,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-const std::string ICCID_1 = "sim_abcdefg_1";
+static constexpr const char *ICCID_1 = "sim_abcdefg_1";
 using namespace testing::ext;
 class UtNetQuotaPolicy : public testing::Test {
 public:

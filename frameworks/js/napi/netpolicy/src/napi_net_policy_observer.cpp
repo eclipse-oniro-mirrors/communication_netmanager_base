@@ -14,14 +14,14 @@
  */
 
 #include "napi_net_policy_observer.h"
+
+#include "napi_common.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_event_listener_context.h"
-#include "napi_common.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-static void OnNetUidPolicyEvent(EventListener &eventListener,
-    uint32_t uid, NetUidPolicy policy)
+static void OnNetUidPolicyEvent(EventListener &eventListener, uint32_t uid, NetUidPolicy policy)
 {
     napi_value info = nullptr;
     napi_create_object(eventListener.env, &info);
@@ -43,7 +43,7 @@ static void OnNetUidPolicyEvent(EventListener &eventListener,
 
 int32_t NapiNetPolicyObserver::NetUidPolicyChanged(uint32_t uid, NetUidPolicy policy)
 {
-    NETMGR_LOG_I("NapiNetPolicyObserver NetUidPolicyChanged(), uid = [%{public}d], policy = [%{public}u]", uid, policy);
+    NETMGR_LOG_D("NapiNetPolicyObserver NetUidPolicyChanged(), uid = [%{public}d], policy = [%{public}u]", uid, policy);
     EventListener eventListener;
     eventListener.eventId = EVENT_NET_UID_POLICY_CHANGE;
     if (NetPolicyEventListenerContext::FindEventListense(eventListener) != EVENT_NET_UNKNOW_CHANGE) {
@@ -57,18 +57,17 @@ int32_t NapiNetPolicyObserver::NetBackgroundPolicyChanged(bool isBackgroundPolic
     return 0;
 }
 
-int32_t NapiNetPolicyObserver::NetCellularPolicyChanged(
-    const std::vector<NetPolicyCellularPolicy> &cellularPolicys)
+int32_t NapiNetPolicyObserver::NetCellularPolicyChanged(const std::vector<NetPolicyCellularPolicy> &cellularPolicys)
 {
     NETMGR_LOG_I("NapiNetPolicyObserver NetCellularPolicyChanged(), cellularPolicys.size = [%{public}zd]",
-        cellularPolicys.size());
+                 cellularPolicys.size());
     return 0;
 }
 
 int32_t NapiNetPolicyObserver::NetStrategySwitch(const std::string &simId, bool enable)
 {
-    NETMGR_LOG_I("NapiNetPolicyObserver NetStrategySwitch(), simId = [%{public}s], enable = [%{public}d]",
-        simId.c_str(), enable);
+    NETMGR_LOG_D("NapiNetPolicyObserver NetStrategySwitch(), simId = [%{public}s], enable = [%{public}d]",
+                 simId.c_str(), enable);
     return 0;
 }
 } // namespace NetManagerStandard

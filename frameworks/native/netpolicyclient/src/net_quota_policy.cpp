@@ -17,11 +17,15 @@
 
 #include <ctime>
 
-#include "net_mgr_log_wrapper.h"
 #include "parcel.h"
+
+#include "net_mgr_log_wrapper.h"
+#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+static constexpr uint32_t MAX_POLICY_SIZE = 100;
+
 bool NetQuotaPolicy::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteInt32(netType)) {
@@ -67,7 +71,7 @@ bool NetQuotaPolicy::Marshalling(Parcel &parcel, const NetQuotaPolicy &quotaPoli
 bool NetQuotaPolicy::Marshalling(Parcel &parcel, const std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     uint32_t vsize = static_cast<uint32_t>(quotaPolicies.size());
-    if (!parcel.WriteInt32(vsize)) {
+    if (!parcel.WriteUint32(vsize)) {
         return false;
     }
 
@@ -120,6 +124,7 @@ bool NetQuotaPolicy::Unmarshalling(Parcel &parcel, std::vector<NetQuotaPolicy> &
     if (!parcel.ReadUint32(vSize)) {
         return false;
     }
+    vSize = vSize > MAX_POLICY_SIZE ? MAX_POLICY_SIZE : vSize;
 
     NetQuotaPolicy quotaPolicyTmp;
     for (uint32_t i = 0; i < vSize; i++) {
@@ -161,18 +166,12 @@ bool NetQuotaPolicy::Unmarshalling(Parcel &parcel, std::vector<NetQuotaPolicy> &
 
 bool NetQuotaPolicy::IsOverWarning(int64_t totalQuota) const
 {
-    if (totalQuota > warningBytes) {
-        return true;
-    }
-    return false;
+    return totalQuota > warningBytes;
 }
 
 bool NetQuotaPolicy::IsOverLimit(int64_t totalQuota) const
 {
-    if (totalQuota > limitBytes) {
-        return true;
-    }
-    return false;
+    return totalQuota > limitBytes;
 }
 
 int64_t NetQuotaPolicy::GetPeriodStart()
@@ -185,8 +184,8 @@ int64_t NetQuotaPolicy::GetPeriodStart()
     struct tm tm;
     localtime_r(&timeNow, &tm);
     std::string cycle = periodDuration.substr(0, 1);
-    int32_t start =
-        static_cast<int32_t>(std::strtol(periodDuration.substr(1, periodDuration.size()).c_str(), nullptr, 10));
+    int32_t start = CommonUtils::StrToInt(periodDuration.substr(1, periodDuration.size()));
+
     if (cycle == PERIOD_DAY) {
         tm.tm_hour = start;
         tm.tm_min = 0;
@@ -196,7 +195,7 @@ int64_t NetQuotaPolicy::GetPeriodStart()
         tm.tm_min = 0;
         tm.tm_sec = 0;
         tm.tm_yday = start - 1;
-    } else { // cycle=="M"
+    } else {
         tm.tm_hour = 0;
         tm.tm_min = 0;
         tm.tm_sec = 0;

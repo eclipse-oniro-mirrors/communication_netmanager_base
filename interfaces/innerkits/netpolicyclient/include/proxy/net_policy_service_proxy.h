@@ -41,7 +41,6 @@ public:
     int32_t SetBackgroundPolicy(bool allowBackground) override;
     bool GetBackgroundPolicy() override;
     uint32_t GetBackgroundPolicyByUid(uint32_t uid) override;
-    uint32_t GetCurrentBackgroundPolicy() override;
     int32_t UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType) override;
     int32_t SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed) override;
     int32_t GetDeviceIdleAllowedList(std::vector<uint32_t> &uids) override;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 NetStatsClient::NetStatsClient() : netStatsService_(nullptr), deathRecipient_(nullptr) {}
 
-NetStatsClient::~NetStatsClient() {}
+NetStatsClient::~NetStatsClient() = default;
 
 int32_t NetStatsClient::RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
 {
@@ -46,59 +46,6 @@ int32_t NetStatsClient::UnregisterNetStatsCallback(const sptr<INetStatsCallback>
     }
 
     return proxy->UnregisterNetStatsCallback(callback);
-}
-
-NetStatsResultCode NetStatsClient::GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end,
-    NetStatsInfo &statsInfo)
-{
-    sptr<INetStatsService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    return proxy->GetIfaceStatsDetail(iface, start, end, statsInfo);
-}
-
-NetStatsResultCode NetStatsClient::GetUidStatsDetail(const std::string &iface, uint32_t uid,
-    uint32_t start, uint32_t end, NetStatsInfo &statsInfo)
-{
-    sptr<INetStatsService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    return  proxy->GetUidStatsDetail(iface, uid, start, end, statsInfo);
-}
-
-NetStatsResultCode NetStatsClient::UpdateIfacesStats(const std::string &iface,
-    uint32_t start, uint32_t end, const NetStatsInfo &stats)
-{
-    sptr<INetStatsService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    return proxy->UpdateIfacesStats(iface, start, end, stats);
-}
-
-NetStatsResultCode NetStatsClient::UpdateStatsData()
-{
-    sptr<INetStatsService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    return proxy->UpdateStatsData();
-}
-
-NetStatsResultCode NetStatsClient::ResetFactory()
-{
-    sptr<INetStatsService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NetStatsResultCode::ERR_INTERNAL_ERROR;
-    }
-    return proxy->ResetFactory();
 }
 
 sptr<INetStatsService> NetStatsClient::GetProxy()

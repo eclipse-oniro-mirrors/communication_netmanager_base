@@ -16,7 +16,7 @@
 
 #include "net_mgr_log_wrapper.h"
 
-static constexpr const uint32_t MAX_NET_CAP_NUM = 64;
+static constexpr uint32_t MAX_NET_CAP_NUM = 32;
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -33,8 +33,8 @@ void NetSupplierCallbackStub::RegisterSupplierCallbackImpl(const sptr<NetSupplie
     callback_ = callback;
 }
 
-int32_t NetSupplierCallbackStub::OnRemoteRequest(
-    uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+int32_t NetSupplierCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+                                                 MessageOption &option)
 {
     NETMGR_LOG_I("Net supplier callback stub call start, code:[%{public}d]", code);
     std::u16string myDescripter = NetSupplierCallbackStub::GetDescriptor();
@@ -86,6 +86,7 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
     uint32_t size = 0;
     uint32_t value = 0;
     data.ReadUint32(size);
+    size = (size > MAX_NET_CAP_NUM) ? MAX_NET_CAP_NUM : size;
     for (uint32_t i = 0; i < size; i++) {
         data.ReadUint32(value);
         netCaps.insert(static_cast<NetCap>(value));

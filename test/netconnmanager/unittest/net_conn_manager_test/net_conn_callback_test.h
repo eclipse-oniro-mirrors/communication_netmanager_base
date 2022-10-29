@@ -26,7 +26,7 @@ namespace NetManagerStandard {
 class NetConnCallbackTest : public NetConnCallbackStub {
 public:
     NetConnCallbackTest();
-    virtual ~NetConnCallbackTest() override;
+    ~NetConnCallbackTest() override;
     int32_t NetAvailable(sptr<NetHandle> &netHandle) override;
     int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap) override;
     int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info) override;

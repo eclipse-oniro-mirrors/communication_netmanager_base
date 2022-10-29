@@ -50,12 +50,6 @@ int32_t FwmarkClient::BindSocket(int32_t fd, uint32_t netId)
     return Send(&command, fd);
 }
 
-int32_t FwmarkClient::BindNetwork(uint32_t netId)
-{
-    // In order to implement BindNetwork, need to modify libcsocket
-    return NETMANAGER_ERROR;
-}
-
 int32_t FwmarkClient::Send(FwmarkCommand *data, int32_t fd)
 {
     socketFd_ = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
@@ -96,7 +90,7 @@ int32_t FwmarkClient::Send(FwmarkCommand *data, int32_t fd)
     if (ret < 0) {
         return HandleError(ret, ERROR_CODE_READ_FAILED);
     }
-    NETNATIVE_LOGI("FwmarkClient:end");
+
     close(socketFd_);
     socketFd_ = -1;
     return NETMANAGER_SUCCESS;

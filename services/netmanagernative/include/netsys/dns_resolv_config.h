@@ -24,7 +24,7 @@
 #include "lru_cache.h"
 
 namespace OHOS::nmd {
-static constexpr const size_t DEFAULT_DELAYED_COUNT = 30;
+static constexpr size_t DEFAULT_DELAYED_COUNT = 30;
 
 class DnsResolvConfig {
 public:
@@ -66,7 +66,7 @@ private:
     int32_t revisionId_;
     int32_t timeoutMsec_;
     uint8_t retryCount_;
-    std::vector<std::string> nameservers_;
+    std::vector<std::string> nameServers_;
     std::vector<std::string> searchDomains_;
     NetManagerStandard::LRUCache<AddrInfo> cache_;
     NetManagerStandard::DelayedQueue<DelayedTaskWrapper, NetManagerStandard::DEFAULT_CAPABILITY, DEFAULT_DELAYED_COUNT>

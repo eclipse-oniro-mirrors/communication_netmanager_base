@@ -36,6 +36,7 @@ public:
     NetPolicyBase();
     virtual ~NetPolicyBase();
     virtual void Init() = 0;
+
     /**
      * Handle the event from NetPolicyCore
      *
@@ -43,6 +44,7 @@ public:
      * @param policyEvent The infomations passed from other core
      */
     virtual void HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEvent> &policyEvent) = 0;
+
     /**
      * Send events to other policy cores.
      *
@@ -50,6 +52,7 @@ public:
      * @param delayTime The delay time, if need the message send delay
      */
     void SendEvent(int32_t eventId, int64_t delayTime = 0);
+
     /**
      * Send events to other policy cores.
      *

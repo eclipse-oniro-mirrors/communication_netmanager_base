@@ -56,7 +56,7 @@ int32_t NetDetectionCallbackTest::OnNetDetectionResultChanged(
             break;
     }
     std::cout << "TestNetConnCallback::OnNetDetectionResultChanged detectionResult:" << netDetectionResult_
-        << " urlRedirect:" << urlRedirect_ << std::endl;
+              << " urlRedirect:" << urlRedirect_ << std::endl;
     NotifyAll();
     return 0;
 }

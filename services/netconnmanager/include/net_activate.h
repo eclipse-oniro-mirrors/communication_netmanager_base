@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,10 @@
 #ifndef NET_ACTIVATE_H
 #define NET_ACTIVATE_H
 
+#include <functional>
 #include <string>
 #include <vector>
-#include <functional>
+
 #include "i_net_conn_callback.h"
 #include "net_specifier.h"
 #include "net_supplier.h"
@@ -33,10 +34,11 @@ constexpr uint32_t MIN_REQUEST_ID = DEFAULT_REQUEST_ID + 1;
 constexpr uint32_t MAX_REQUEST_ID = 0x7FFFFFFF;
 class NetActivate : public virtual RefBase {
 public:
-     using TimeOutHandler = std::function<int32_t(uint32_t& reqId)>;
+    using TimeOutHandler = std::function<int32_t(uint32_t &reqId)>;
+
 public:
     NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
-        TimeOutHandler timeOutHandler, const uint32_t &timeoutMS);
+                TimeOutHandler timeOutHandler, const uint32_t &timeoutMS);
     ~NetActivate();
     bool MatchRequestAndNetwork(sptr<NetSupplier> supplier);
     void SetRequestId(uint32_t reqId);

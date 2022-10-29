@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "conn_manager_test.h"
 #include "iptables_type.h"
 #include "iservice_registry.h"
 #include "netnative_log_wrapper.h"
@@ -25,6 +26,7 @@
 namespace OHOS {
 namespace NetsysNative {
 using namespace testing::ext;
+using namespace ConnGetProxy;
 using namespace NetManagerStandard;
 class BandwidthManagerTest : public testing::Test {
 public:
@@ -42,24 +44,6 @@ void BandwidthManagerTest::SetUp() {}
 
 void BandwidthManagerTest::TearDown() {}
 
-sptr<INetsysService> GetProxy()
-{
-    NETNATIVE_LOGI("Get samgr >>>>>>>>>>>>>>>>>>>>>>>>>>");
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    NETNATIVE_LOGI("Get samgr %{public}p", samgr.GetRefPtr());
-    std::cout << "Get samgr  " << samgr.GetRefPtr() << std::endl;
-
-    auto remote = samgr->GetSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
-    NETNATIVE_LOGI("Get remote %{public}p", remote.GetRefPtr());
-    std::cout << "Get remote " << remote.GetRefPtr() << std::endl;
-
-    auto proxy = iface_cast<NetsysNative::INetsysService>(remote);
-    NETNATIVE_LOGI("Get proxy %{public}p", proxy.GetRefPtr());
-    std::cout << "Get proxy " << proxy.GetRefPtr() << std::endl;
-
-    return proxy;
-}
-
 /**
  * @tc.name: BandwidthEnableDataSaverTest001
  * @tc.desc: Test BandwidthManager BandwidthEnableDataSaver.
@@ -67,16 +51,9 @@ sptr<INetsysService> GetProxy()
  */
 HWTEST_F(BandwidthManagerTest, BandwidthEnableDataSaverTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // enable
-    ret = netsysNativeService->BandwidthEnableDataSaver(true);
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthEnableDataSaverTest001");
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthEnableDataSaver(true);
     EXPECT_TRUE(ret == 0);
 }
 
@@ -87,16 +64,9 @@ HWTEST_F(BandwidthManagerTest, BandwidthEnableDataSaverTest001, TestSize.Level1)
  */
 HWTEST_F(BandwidthManagerTest, BandwidthEnableDataSaverTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // disable
-    ret = netsysNativeService->BandwidthEnableDataSaver(false);
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthEnableDataSaverTest002");
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthEnableDataSaver(false);
     EXPECT_TRUE(ret == 0);
 }
 
@@ -107,17 +77,11 @@ HWTEST_F(BandwidthManagerTest, BandwidthEnableDataSaverTest002, TestSize.Level1)
  */
 HWTEST_F(BandwidthManagerTest, BandwidthEnableDataSaverTest003, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // disable
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthEnableDataSaver(true);
+    EXPECT_TRUE(ret == 0);
     ret = netsysNativeService->BandwidthEnableDataSaver(true);
-    ret = netsysNativeService->BandwidthEnableDataSaver(true);
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthEnableDataSaverTest003");
     EXPECT_TRUE(ret == -1);
 }
 
@@ -128,17 +92,11 @@ HWTEST_F(BandwidthManagerTest, BandwidthEnableDataSaverTest003, TestSize.Level1)
  */
 HWTEST_F(BandwidthManagerTest, BandwidthEnableDataSaverTest004, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // disable
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthEnableDataSaver(false);
+    EXPECT_TRUE(ret == 0);
     ret = netsysNativeService->BandwidthEnableDataSaver(false);
-    ret = netsysNativeService->BandwidthEnableDataSaver(false);
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthEnableDataSaverTest004");
     EXPECT_TRUE(ret == -1);
 }
 
@@ -149,16 +107,9 @@ HWTEST_F(BandwidthManagerTest, BandwidthEnableDataSaverTest004, TestSize.Level1)
  */
 HWTEST_F(BandwidthManagerTest, BandwidthSetIfaceQuotaTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // iface0
-    ret = netsysNativeService->BandwidthSetIfaceQuota("iface0", 2097152);
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthSetIfaceQuotaTest001");
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthSetIfaceQuota("iface0", 2097152);
     EXPECT_TRUE(ret == 0);
 }
 
@@ -169,16 +120,9 @@ HWTEST_F(BandwidthManagerTest, BandwidthSetIfaceQuotaTest001, TestSize.Level1)
  */
 HWTEST_F(BandwidthManagerTest, BandwidthSetIfaceQuotaTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // wlan0
-    ret = netsysNativeService->BandwidthSetIfaceQuota("wlan0", 2097152);
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthSetIfaceQuotaTest002");
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthSetIfaceQuota("wlan0", 2097152);
     EXPECT_TRUE(ret == 0);
 }
 
@@ -189,16 +133,9 @@ HWTEST_F(BandwidthManagerTest, BandwidthSetIfaceQuotaTest002, TestSize.Level1)
  */
 HWTEST_F(BandwidthManagerTest, BandwidthSetIfaceQuotaTest003, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // wlan0
-    ret = netsysNativeService->BandwidthSetIfaceQuota("wlan0", 5000000000000000);
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthSetIfaceQuotaTest003");
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthSetIfaceQuota("wlan0", 5000000000000000);
     EXPECT_TRUE(ret == 0);
 }
 
@@ -209,17 +146,11 @@ HWTEST_F(BandwidthManagerTest, BandwidthSetIfaceQuotaTest003, TestSize.Level1)
  */
 HWTEST_F(BandwidthManagerTest, BandwidthSetIfaceQuotaTest004, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // wlan0
-    ret = netsysNativeService->BandwidthSetIfaceQuota("wlan0", 5000000000000);
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthSetIfaceQuota("wlan0", 5000000000000);
+    EXPECT_TRUE(ret == 0);
     ret = netsysNativeService->BandwidthSetIfaceQuota("wlan0", 2097152);
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthSetIfaceQuotaTest004");
     EXPECT_TRUE(ret == 0);
 }
 
@@ -230,16 +161,9 @@ HWTEST_F(BandwidthManagerTest, BandwidthSetIfaceQuotaTest004, TestSize.Level1)
  */
 HWTEST_F(BandwidthManagerTest, BandwidthRemoveIfaceQuotaTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // iface0
-    ret = netsysNativeService->BandwidthRemoveIfaceQuota("iface0");
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthRemoveIfaceQuotaTest001");
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthRemoveIfaceQuota("iface0");
     EXPECT_TRUE(ret == 0);
 }
 
@@ -250,16 +174,9 @@ HWTEST_F(BandwidthManagerTest, BandwidthRemoveIfaceQuotaTest001, TestSize.Level1
  */
 HWTEST_F(BandwidthManagerTest, BandwidthRemoveIfaceQuotaTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // wlan0
-    ret = netsysNativeService->BandwidthRemoveIfaceQuota("wlan0");
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthRemoveIfaceQuotaTest002");
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthRemoveIfaceQuota("wlan0");
     EXPECT_TRUE(ret == 0);
 }
 
@@ -270,16 +187,9 @@ HWTEST_F(BandwidthManagerTest, BandwidthRemoveIfaceQuotaTest002, TestSize.Level1
  */
 HWTEST_F(BandwidthManagerTest, BandwidthAddDeniedListTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // root
-    ret = netsysNativeService->BandwidthAddDeniedList(0);
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthAddDeniedListTest001");
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthAddDeniedList(0);
     EXPECT_TRUE(ret == 0);
 }
 
@@ -290,17 +200,11 @@ HWTEST_F(BandwidthManagerTest, BandwidthAddDeniedListTest001, TestSize.Level1)
  */
 HWTEST_F(BandwidthManagerTest, BandwidthAddDeniedListTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // root
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthAddDeniedList(0);
+    EXPECT_TRUE(ret == 0);
     ret = netsysNativeService->BandwidthAddDeniedList(0);
-    ret = netsysNativeService->BandwidthAddDeniedList(0);
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthAddDeniedListTest002");
     EXPECT_TRUE(ret == -1);
 }
 
@@ -311,16 +215,9 @@ HWTEST_F(BandwidthManagerTest, BandwidthAddDeniedListTest002, TestSize.Level1)
  */
 HWTEST_F(BandwidthManagerTest, BandwidthRemoveDeniedListTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // root
-    ret = netsysNativeService->BandwidthRemoveDeniedList(0);
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthRemoveDeniedListTest001");
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthRemoveDeniedList(0);
     EXPECT_TRUE(ret == 0);
 }
 
@@ -331,17 +228,11 @@ HWTEST_F(BandwidthManagerTest, BandwidthRemoveDeniedListTest001, TestSize.Level1
  */
 HWTEST_F(BandwidthManagerTest, BandwidthRemoveDeniedListTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // root
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthRemoveDeniedList(0);
+    EXPECT_TRUE(ret == 0);
     ret = netsysNativeService->BandwidthRemoveDeniedList(0);
-    ret = netsysNativeService->BandwidthRemoveDeniedList(0);
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthRemoveDeniedListTest002");
     EXPECT_TRUE(ret == -1);
 }
 
@@ -352,16 +243,9 @@ HWTEST_F(BandwidthManagerTest, BandwidthRemoveDeniedListTest002, TestSize.Level1
  */
 HWTEST_F(BandwidthManagerTest, BandwidthAddAllowedListTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // root
-    ret = netsysNativeService->BandwidthAddAllowedList(0);
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthAddAllowedListTest001");
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthAddAllowedList(0);
     EXPECT_TRUE(ret == 0);
 }
 
@@ -372,16 +256,9 @@ HWTEST_F(BandwidthManagerTest, BandwidthAddAllowedListTest001, TestSize.Level1)
  */
 HWTEST_F(BandwidthManagerTest, BandwidthAddAllowedListTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // root
-    ret = netsysNativeService->BandwidthAddAllowedList(0);
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthAddAllowedListTest002");
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthAddAllowedList(0);
     EXPECT_TRUE(ret == -1);
 }
 
@@ -392,16 +269,9 @@ HWTEST_F(BandwidthManagerTest, BandwidthAddAllowedListTest002, TestSize.Level1)
  */
 HWTEST_F(BandwidthManagerTest, BandwidthRemoveAllowedListTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // root
-    ret = netsysNativeService->BandwidthRemoveAllowedList(0);
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthRemoveAllowedListTest001");
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthRemoveAllowedList(0);
     EXPECT_TRUE(ret == 0);
 }
 
@@ -412,17 +282,11 @@ HWTEST_F(BandwidthManagerTest, BandwidthRemoveAllowedListTest001, TestSize.Level
  */
 HWTEST_F(BandwidthManagerTest, BandwidthRemoveAllowedListTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
-
-    int32_t ret = 0;
-    // root
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_TRUE(netsysNativeService != nullptr);
+    int32_t ret = netsysNativeService->BandwidthRemoveAllowedList(0);
+    EXPECT_TRUE(ret == 0);
     ret = netsysNativeService->BandwidthRemoveAllowedList(0);
-    ret = netsysNativeService->BandwidthRemoveAllowedList(0);
-    NETNATIVE_LOG_D("BandwidthManagerTest BandwidthRemoveAllowedListTest002");
     EXPECT_TRUE(ret == -1);
 }
 } // namespace NetsysNative

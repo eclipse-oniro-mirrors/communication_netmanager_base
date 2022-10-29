@@ -60,11 +60,6 @@ void DnsProxyListen::DnsProxyGetPacket(int32_t clientSocket, RecvBuff recvBuff, 
 void DnsProxyListen::DnsParseBySocket(int32_t clientSocket, std::vector<std::string> servers, RecvBuff recvBuff,
                                       sockaddr_in proxyAddr)
 {
-    int32_t resLen;
-    socklen_t addrLen;
-    char requesData[MAX_REQUESDATA_LEN] = {0};
-    struct sockaddr_in addrParse = {0};
-    int16_t serversNum = 0;
     int32_t parseSocketFd = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC | SOCK_NONBLOCK, IPPROTO_UDP);
     if (parseSocketFd < 0) {
         NETNATIVE_LOGE("parseSocketFd create socket failed %{public}d", errno);
@@ -77,6 +72,11 @@ void DnsProxyListen::DnsParseBySocket(int32_t clientSocket, std::vector<std::str
         parseSocketFd = -1;
         return;
     }
+    int32_t resLen;
+    socklen_t addrLen;
+    char requesData[MAX_REQUESTDATA_LEN] = {0};
+    struct sockaddr_in addrParse = {0};
+    uint32_t serversNum = 0;
     while (serversNum < servers.size()) {
         addrParse.sin_family = AF_INET;
         addrParse.sin_addr.s_addr = inet_addr(servers[serversNum].c_str());
@@ -92,12 +92,12 @@ void DnsProxyListen::DnsParseBySocket(int32_t clientSocket, std::vector<std::str
             serversNum++;
             continue;
         }
-        resLen = PollUdpDataTransfer::PollUdpRecvData(parseSocketFd, requesData, MAX_REQUESDATA_LEN, addrParse,
-                                                      addrLen);
+        resLen =
+            PollUdpDataTransfer::PollUdpRecvData(parseSocketFd, requesData, MAX_REQUESTDATA_LEN, addrParse, addrLen);
         if (resLen > 0) {
             break;
         }
-        if (!CheckDnsRespone(requesData)) {
+        if (!CheckDnsResponse(requesData)) {
             NETNATIVE_LOGE("read buff is not dns answer");
             break;
         }
@@ -108,7 +108,9 @@ void DnsProxyListen::DnsParseBySocket(int32_t clientSocket, std::vector<std::str
     }
     close(parseSocketFd);
     parseSocketFd = -1;
-    DnsSendRecvParseData(clientSocket, requesData, resLen, proxyAddr);
+    if (resLen > 0) {
+        DnsSendRecvParseData(clientSocket, requesData, resLen, proxyAddr);
+    }
 }
 
 void DnsProxyListen::DnsSendRecvParseData(int32_t clientSocket, char *requesData, int32_t resLen, sockaddr_in proxyAddr)
@@ -125,10 +127,10 @@ void DnsProxyListen::StartListen()
     NETNATIVE_LOG_D("StartListen proxySockFd_ : %{public}d", proxySockFd_);
     if (proxySockFd_ < 0) {
         proxySockFd_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    }
-    if (proxySockFd_ < 0) {
-        NETNATIVE_LOGE("proxySockFd_ create socket failed %{public}d", errno);
-        return;
+        if (proxySockFd_ < 0) {
+            NETNATIVE_LOGE("proxySockFd_ create socket failed %{public}d", errno);
+            return;
+        }
     }
 
     sockaddr_in proxyAddr;
@@ -147,27 +149,27 @@ void DnsProxyListen::StartListen()
         if (DnsThreadClose()) {
             break;
         }
-        (void)memset_s(recvBuff.questionsBuff, MAX_REQUESDATA_LEN, 0, MAX_REQUESDATA_LEN);
+        (void)memset_s(recvBuff.questionsBuff, MAX_REQUESTDATA_LEN, 0, MAX_REQUESTDATA_LEN);
         socklen_t len;
-        recvBuff.questionLen = recvfrom(proxySockFd_, recvBuff.questionsBuff, MAX_REQUESDATA_LEN, 0,
+        recvBuff.questionLen = recvfrom(proxySockFd_, recvBuff.questionsBuff, MAX_REQUESTDATA_LEN, 0,
                                         reinterpret_cast<sockaddr *>(&proxyAddr), &len);
         if (!(recvBuff.questionLen > 0)) {
             NETNATIVE_LOGE("read errno %{public}d", errno);
             continue;
         }
-        if (CheckDnsRespone(recvBuff.questionsBuff)) {
+        if (CheckDnsResponse(recvBuff.questionsBuff)) {
             NETNATIVE_LOGE("read buff is not dns question");
             continue;
         }
+
         if (DnsThreadClose()) {
             break;
         }
-
         std::thread(DnsProxyListen::DnsProxyGetPacket, proxySockFd_, recvBuff, proxyAddr).detach();
     }
 }
 
-bool DnsProxyListen::CheckDnsRespone(char* recBuff)
+bool DnsProxyListen::CheckDnsResponse(char *recBuff)
 {
     uint8_t flagBuff;
     char *recFlagBuff = recBuff + 2;

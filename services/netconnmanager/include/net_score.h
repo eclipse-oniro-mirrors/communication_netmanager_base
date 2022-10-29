@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #ifndef NET_SCORE_H
 #define NET_SCORE_H
 
-#include <vector>
 #include <unordered_map>
-#include <singleton.h>
+#include <vector>
+
 #include "net_supplier.h"
 
 namespace OHOS {
@@ -38,8 +38,8 @@ enum class NetTypeScoreValue : int32_t {
 
 class NetScore {
 public:
-    NetScore();
-    ~NetScore();
+    NetScore() = default;
+    ~NetScore() = default;
     bool GetServiceScore(sptr<NetSupplier> &supplier);
 
 private:

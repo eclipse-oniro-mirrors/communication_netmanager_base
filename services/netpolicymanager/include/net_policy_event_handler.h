@@ -35,11 +35,12 @@ public:
     NetPolicyEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner,
                           const std::shared_ptr<NetPolicyCore> &core);
     virtual ~NetPolicyEventHandler() override;
+
     /**
      * Process the event from EventHandler
      *
      * @param eventId The event id
-     * @param policyEvent The infomations passed from other core
+     * @param policyEvent The informations passed from other core
      */
     void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
 

@@ -19,9 +19,8 @@
 #include <iostream>
 #include <map>
 
-#include "netnative_log_wrapper.h"
-
 #include "dns_resolv_config.h"
+#include "netnative_log_wrapper.h"
 
 #if DNS_CONFIG_DEBUG
 #ifdef DNS_CONFIG_PRINT
@@ -57,6 +56,8 @@ public:
                               uint16_t &baseTimeoutMsec, uint8_t &retryCount);
 
     void GetDumpInfo(std::string &info);
+
+    int32_t DestroyNetworkCache(uint16_t netId);
 
 private:
     std::mutex cacheMutex_;

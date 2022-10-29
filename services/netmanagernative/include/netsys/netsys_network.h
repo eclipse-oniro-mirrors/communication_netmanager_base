@@ -23,8 +23,8 @@ namespace OHOS {
 namespace nmd {
 class NetsysNetwork {
 public:
-    NetsysNetwork();
-    virtual ~NetsysNetwork();
+    NetsysNetwork() = default;
+    virtual ~NetsysNetwork() = default;
 
     /**
      * Get network type
@@ -92,7 +92,7 @@ public:
      *
      * @return Returns netId_
      */
-    uint16_t GetNetId()
+    uint16_t GetNetId() const
     {
         return netId_;
     }

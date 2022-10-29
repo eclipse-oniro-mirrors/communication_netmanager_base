@@ -41,7 +41,7 @@ int32_t NetPolicyCallback::RegisterNetPolicyCallback(const sptr<INetPolicyCallba
 
     for (uint32_t i = 0; i < callbackCounts; i++) {
         if (callback->AsObject().GetRefPtr() == callbacks_[i]->AsObject().GetRefPtr()) {
-            NETMGR_LOG_I("netPolicyCallback_ had this callback");
+            NETMGR_LOG_W("netPolicyCallback_ had this callback");
             return NetPolicyResultCode::ERR_INVALID_PARAM;
         }
     }
@@ -58,13 +58,13 @@ int32_t NetPolicyCallback::UnregisterNetPolicyCallback(const sptr<INetPolicyCall
     }
 
     auto it = std::remove_if(callbacks_.begin(), callbacks_.end(),
-        [callback](const sptr<INetPolicyCallback> &tempCallback) -> bool {
-            if (tempCallback == nullptr || tempCallback->AsObject() == nullptr ||
-                tempCallback->AsObject().GetRefPtr() == nullptr) {
-                return true;
-            }
-            return callback->AsObject().GetRefPtr() == tempCallback->AsObject().GetRefPtr();
-        });
+                             [callback](const sptr<INetPolicyCallback> &tempCallback) -> bool {
+                                 if (tempCallback == nullptr || tempCallback->AsObject() == nullptr ||
+                                     tempCallback->AsObject().GetRefPtr() == nullptr) {
+                                     return true;
+                                 }
+                                 return callback->AsObject().GetRefPtr() == tempCallback->AsObject().GetRefPtr();
+                             });
     callbacks_.erase(it, callbacks_.end());
 
     return NetPolicyResultCode::ERR_NONE;
@@ -72,7 +72,7 @@ int32_t NetPolicyCallback::UnregisterNetPolicyCallback(const sptr<INetPolicyCall
 
 int32_t NetPolicyCallback::NotifyNetUidPolicyChange(uint32_t uid, uint32_t policy)
 {
-    NETMGR_LOG_I("NotifyNetUidPolicyChange uid[%{public}u] policy[%{public}u]", uid, policy);
+    NETMGR_LOG_D("NotifyNetUidPolicyChange uid[%{public}u] policy[%{public}u]", uid, policy);
 
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
@@ -85,7 +85,7 @@ int32_t NetPolicyCallback::NotifyNetUidPolicyChange(uint32_t uid, uint32_t polic
 
 int32_t NetPolicyCallback::NotifyNetUidRuleChange(uint32_t uid, uint32_t rule)
 {
-    NETMGR_LOG_I("NotifyNetUidRuleChange uid[%{public}u] rule[%{public}u]", uid, rule);
+    NETMGR_LOG_D("NotifyNetUidRuleChange uid[%{public}u] rule[%{public}u]", uid, rule);
 
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
@@ -115,7 +115,7 @@ int32_t NetPolicyCallback::NotifyNetQuotaPolicyChange(const std::vector<NetQuota
         NETMGR_LOG_E("NotifyNetQuotaPolicyChange quotaPolicies empty");
         return ERR_INTERNAL_ERROR;
     }
-    NETMGR_LOG_I("NotifyNetQuotaPolicyChange quotaPolicies.size[%{public}zd]", quotaPolicies.size());
+    NETMGR_LOG_D("NotifyNetQuotaPolicyChange quotaPolicies.size[%{public}zu]", quotaPolicies.size());
 
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {

@@ -18,9 +18,7 @@
 #include "net_policy_inner_define.h"
 namespace OHOS {
 namespace NetManagerStandard {
-DeviceIdleFirewallRule::DeviceIdleFirewallRule() : FirewallRule(FIREWALL_CHAIN_DEVICE_IDLE)
-{
-}
+DeviceIdleFirewallRule::DeviceIdleFirewallRule() : FirewallRule(FIREWALL_CHAIN_DEVICE_IDLE) {}
 
 DeviceIdleFirewallRule::~DeviceIdleFirewallRule() = default;
 } // namespace NetManagerStandard

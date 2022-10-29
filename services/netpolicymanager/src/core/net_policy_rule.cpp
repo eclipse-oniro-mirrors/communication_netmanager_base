@@ -41,7 +41,6 @@ void NetPolicyRule::TransPolicyToRule()
 {
     // When system status is changed,traverse uidPolicyRules_ to calculate the rule and netsys.
     for (const auto &[uid, policy] : uidPolicyRules_) {
-        NETMGR_LOG_I("TransPolicyToRule without input value:uid[%{public}u] policy[%{public}u]", uid, policy.policy_);
         TransPolicyToRule(uid, policy.policy_);
     }
 }
@@ -55,7 +54,7 @@ void NetPolicyRule::TransPolicyToRule(uint32_t uid)
     } else {
         policy = itr->second.policy_;
     }
-    NETMGR_LOG_I("TransPolicyToRule only with uid value: uid[%{public}u] policy[%{public}u]", uid, policy);
+    NETMGR_LOG_D("TransPolicyToRule only with uid value: uid[%{public}u] policy[%{public}u]", uid, policy);
     TransPolicyToRule(uid, policy);
     return;
 }
@@ -65,12 +64,12 @@ uint32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
     NetmanagerHiTrace::NetmanagerStartSyncTrace("TransPolicyToRule start");
     auto policyRule = uidPolicyRules_.find(uid);
     if (policyRule == uidPolicyRules_.end()) {
-        NETMGR_LOG_I("Don't find this uid, need to add uid:[%{public}u] policy[%{public}u].", uid, policy);
+        NETMGR_LOG_D("Don't find this uid, need to add uid:[%{public}u] policy[%{public}u].", uid, policy);
         uidPolicyRules_[uid] = {.policy_ = policy};
         GetCbInst()->NotifyNetUidPolicyChange(uid, policy);
     } else {
         if (policyRule->second.policy_ != policy) {
-            NETMGR_LOG_I("Update policy's value.uid:[%{public}u] policy[%{public}u]", uid, policy);
+            NETMGR_LOG_D("Update policy's value.uid:[%{public}u] policy[%{public}u]", uid, policy);
             policyRule->second.policy_ = policy;
             GetCbInst()->NotifyNetUidPolicyChange(uid, policy);
         }
@@ -85,7 +84,7 @@ uint32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
 uint32_t NetPolicyRule::BuildTransCondition(uint32_t uid, uint32_t policy)
 {
     // Integrate status values, the result of policyCondition will be use in TransConditionToRuleAndNetsys.
-    uint32_t policyCondition = ChangePolicyToPolicytranscondition(policy);
+    uint32_t policyCondition = ChangePolicyToPolicyTransitionCondition(policy);
 
     if (IsIdleMode()) {
         policyCondition |= POLICY_TRANS_CONDITION_IDLE_MODE;
@@ -108,7 +107,7 @@ uint32_t NetPolicyRule::BuildTransCondition(uint32_t uid, uint32_t policy)
     if (IsForeground(uid)) {
         policyCondition |= POLICY_TRANS_CONDITION_FOREGROUND;
     }
-    NETMGR_LOG_I("BuildTransCondition uid[%{public}u] policy[%{public}u]", uid, policy);
+    NETMGR_LOG_D("BuildTransCondition uid[%{public}u] policy[%{public}u]", uid, policy);
     return policyCondition;
 }
 
@@ -117,7 +116,7 @@ void NetPolicyRule::TransConditionToRuleAndNetsys(uint32_t policyCondition, uint
     uint32_t conditionValue = GetMatchTransCondition(policyCondition);
 
     auto rule = MoveToRuleBit(conditionValue & POLICY_TRANS_RULE_MASK);
-    NETMGR_LOG_I("NetPolicyRule->uid:[%{public}u] policy:[%{public}u] rule:[%{public}u] policyCondition[%{public}u]",
+    NETMGR_LOG_D("NetPolicyRule->uid:[%{public}u] policy:[%{public}u] rule:[%{public}u] policyCondition[%{public}u]",
                  uid, policy, rule, policyCondition);
     auto policyRuleNetsys = uidPolicyRules_.find(uid)->second;
     auto netsys = conditionValue & POLICY_TRANS_NET_CTRL_MASK;
@@ -132,7 +131,7 @@ void NetPolicyRule::TransConditionToRuleAndNetsys(uint32_t policyCondition, uint
     GetFileInst()->WriteFile(uid, policy);
 
     if (policyRuleNetsys.rule_ == rule) {
-        NETMGR_LOG_I("Same rule and uid ,don't need to do others.uid is:[%{public}u] rule is:[%{public}u]", uid, rule);
+        NETMGR_LOG_D("Same rule and uid ,don't need to do others.uid is:[%{public}u] rule is:[%{public}u]", uid, rule);
         return;
     }
 
@@ -154,36 +153,27 @@ uint32_t NetPolicyRule::GetMatchTransCondition(uint32_t policyCondition)
 
 void NetPolicyRule::NetsysCtrl(uint32_t uid, uint32_t netsysCtrl)
 {
-    if (netsysCtrl == POLICY_TRANS_CTRL_NONE) {
-        NETMGR_LOG_I("Don't need to do anything,keep now status.uid[%{public}u],netsysCtrl: [%{public}u]", uid,
-                     netsysCtrl);
-        return;
+    switch (netsysCtrl) {
+        case POLICY_TRANS_CTRL_NONE:
+            NETMGR_LOG_D("Don't need to do anything,keep now status.");
+            break;
+        case POLICY_TRANS_CTRL_REMOVE_ALL:
+            GetNetsysInst()->BandwidthRemoveAllowedList(uid);
+            GetNetsysInst()->BandwidthRemoveDeniedList(uid);
+            break;
+        case POLICY_TRANS_CTRL_ADD_DENIEDLIST:
+            GetNetsysInst()->BandwidthAddDeniedList(uid);
+            GetNetsysInst()->BandwidthRemoveAllowedList(uid);
+            break;
+        case POLICY_TRANS_CTRL_ADD_ALLOWEDLIST:
+            GetNetsysInst()->BandwidthRemoveDeniedList(uid);
+            GetNetsysInst()->BandwidthAddAllowedList(uid);
+            break;
+        default:
+            NETMGR_LOG_E("Error netsysCtrl value, need to check");
+            break;
     }
-
-    if (netsysCtrl == POLICY_TRANS_CTRL_REMOVE_ALL) {
-        GetNetsysInst()->BandwidthRemoveAllowedList(uid);
-        GetNetsysInst()->BandwidthRemoveDeniedList(uid);
-        NETMGR_LOG_I("Remove uid:[%{public}u] from black list and white list.netsysCtrl: [%{public}u]", uid,
-                     netsysCtrl);
-        return;
-    }
-
-    if (netsysCtrl == POLICY_TRANS_CTRL_ADD_DENIEDLIST) {
-        GetNetsysInst()->BandwidthAddDeniedList(uid);
-        GetNetsysInst()->BandwidthRemoveAllowedList(uid);
-        NETMGR_LOG_I("Add uid:[%{public}u] into reject list and remove from white list.netsysCtrl: [%{public}u]", uid,
-                     netsysCtrl);
-        return;
-    }
-
-    if (netsysCtrl == POLICY_TRANS_CTRL_ADD_ALLOWEDLIST) {
-        GetNetsysInst()->BandwidthRemoveDeniedList(uid);
-        GetNetsysInst()->BandwidthAddAllowedList(uid);
-        NETMGR_LOG_I("Add uid:[%{public}u] into white list and remove from reject list.netsysCtrl: [%{public}u]", uid,
-                     netsysCtrl);
-        return;
-    }
-    NETMGR_LOG_E("Error netsysCtrl value, need to check.uid:[%{public}u],netsysCtrl: [%{public}u]", uid, netsysCtrl);
+    NETMGR_LOG_D("uid:[%{public}u]   netsysCtrl: [%{public}u]", uid, netsysCtrl);
 }
 
 uint32_t NetPolicyRule::MoveToConditionBit(uint32_t value)
@@ -196,7 +186,7 @@ uint32_t NetPolicyRule::MoveToRuleBit(uint32_t value)
     return value >> RULE_START_BIT;
 }
 
-uint32_t NetPolicyRule::ChangePolicyToPolicytranscondition(uint32_t policy)
+uint32_t NetPolicyRule::ChangePolicyToPolicyTransitionCondition(uint32_t policy)
 {
     if (policy == NET_POLICY_NONE) {
         return POLICY_TRANS_CONDITION_UID_POLICY_NONE;
@@ -208,7 +198,7 @@ uint32_t NetPolicyRule::GetPolicyByUid(uint32_t uid)
 {
     auto policyRule = uidPolicyRules_.find(uid);
     if (policyRule == uidPolicyRules_.end()) {
-        NETMGR_LOG_I("Can't find uid:[%{public}u] and its policy, return default value.", uid);
+        NETMGR_LOG_D("Can't find uid:[%{public}u] and its policy, return default value.", uid);
         return NET_POLICY_NONE;
     }
     return policyRule->second.policy_;
@@ -228,7 +218,7 @@ std::vector<uint32_t> NetPolicyRule::GetUidsByPolicy(uint32_t policy)
 
 bool NetPolicyRule::IsUidNetAllowed(uint32_t uid, bool metered)
 {
-    NETMGR_LOG_I("IsUidNetAllowed:uid[%{public}u] metered:[%{public}d]", uid, metered);
+    NETMGR_LOG_D("IsUidNetAllowed:uid[%{public}u] metered:[%{public}d]", uid, metered);
     uint32_t rule = NetUidRule::NET_RULE_NONE;
     auto iter = uidPolicyRules_.find(uid);
     if (iter != uidPolicyRules_.end()) {
@@ -281,7 +271,7 @@ uint32_t NetPolicyRule::SetBackgroundPolicy(bool allow)
 uint32_t NetPolicyRule::GetBackgroundPolicyByUid(uint32_t uid)
 {
     uint32_t policy = GetPolicyByUid(uid);
-    NETMGR_LOG_I("GetBackgroundPolicyByUid GetPolicyByUid uid: %{public}u policy: %{public}u.", uid, policy);
+    NETMGR_LOG_D("GetBackgroundPolicyByUid GetPolicyByUid uid: %{public}u policy: %{public}u.", uid, policy);
     if ((policy & NET_POLICY_REJECT_METERED_BACKGROUND) != 0) {
         return NET_BACKGROUND_POLICY_DISABLE;
     }
@@ -314,7 +304,7 @@ bool NetPolicyRule::GetBackgroundPolicy()
 
 bool NetPolicyRule::IsIdleMode()
 {
-    NETMGR_LOG_I("IsIdleMode:deviceIdleMode_[%{public}d", deviceIdleMode_);
+    NETMGR_LOG_D("IsIdleMode:deviceIdleMode_[%{public}d", deviceIdleMode_);
     return deviceIdleMode_;
 }
 
@@ -352,13 +342,14 @@ bool NetPolicyRule::InPowerSaveAllowedList(uint32_t uid)
 
 void NetPolicyRule::DeleteUid(uint32_t uid)
 {
-    NETMGR_LOG_I("DeleteUid:uid[%{public}u]", uid);
-    for (auto iter : uidPolicyRules_) {
-        if (iter.first == uid) {
-            uidPolicyRules_.erase(iter.first);
-            break;
-        }
+    NETMGR_LOG_D("DeleteUid:uid[%{public}u]", uid);
+
+    const auto &it = std::find_if(uidPolicyRules_.begin(), uidPolicyRules_.end(),
+                                  [&uid](const auto &pair) { return pair.first == uid; });
+    if (it != uidPolicyRules_.end()) {
+        uidPolicyRules_.erase(it);
     }
+
     GetNetsysInst()->BandwidthRemoveDeniedList(uid);
     GetNetsysInst()->BandwidthRemoveAllowedList(uid);
 }

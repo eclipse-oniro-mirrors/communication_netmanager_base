@@ -29,12 +29,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-const std::string NET_POLICY_WORK_TEST_THREAD = "NET_POLICY_WORK_TEST_THREAD";
+constexpr const char *NET_POLICY_WORK_TEST_THREAD = "NET_POLICY_WORK_TEST_THREAD";
 
-std::shared_ptr<NetPolicyCore> netPolicyCore_;
-std::vector<NetQuotaPolicy> quotaPolicies;
-std::shared_ptr<AppExecFwk::EventRunner> runner_;
-std::shared_ptr<NetPolicyEventHandler> handler_;
+std::shared_ptr<NetPolicyCore> g_netPolicyCore;
+std::shared_ptr<AppExecFwk::EventRunner> g_runner;
+std::shared_ptr<NetPolicyEventHandler> g_handler;
 
 using namespace testing::ext;
 class UtNetPolicyCore : public testing::Test {
@@ -47,15 +46,15 @@ public:
 
 void UtNetPolicyCore::SetUpTestCase()
 {
-    runner_ = AppExecFwk::EventRunner::Create(NET_POLICY_WORK_TEST_THREAD);
-    netPolicyCore_ = DelayedSingleton<NetPolicyCore>::GetInstance();
-    handler_ = std::make_shared<NetPolicyEventHandler>(runner_, netPolicyCore_);
-    netPolicyCore_->Init(handler_);
+    g_runner = AppExecFwk::EventRunner::Create(NET_POLICY_WORK_TEST_THREAD);
+    g_netPolicyCore = DelayedSingleton<NetPolicyCore>::GetInstance();
+    g_handler = std::make_shared<NetPolicyEventHandler>(g_runner, g_netPolicyCore);
+    g_netPolicyCore->Init(g_handler);
 }
 
 void UtNetPolicyCore::TearDownTestCase()
 {
-    netPolicyCore_.reset();
+    g_netPolicyCore.reset();
 }
 
 void UtNetPolicyCore::SetUp() {}
@@ -69,10 +68,10 @@ void UtNetPolicyCore::TearDown() {}
  */
 HWTEST_F(UtNetPolicyCore, NetPolicyCore001, TestSize.Level1)
 {
-    auto netPolicyTraffic_ = netPolicyCore_->CreateCore<NetPolicyTraffic>();
-    auto netPolicyFirewall_ = netPolicyCore_->CreateCore<NetPolicyFirewall>();
-    auto netPolicyRule_ = netPolicyCore_->CreateCore<NetPolicyRule>();
-    ASSERT_TRUE(netPolicyTraffic_ != nullptr && netPolicyFirewall_ != nullptr && netPolicyCore_ != nullptr);
+    auto netPolicyTraffic_ = g_netPolicyCore->CreateCore<NetPolicyTraffic>();
+    auto netPolicyFirewall_ = g_netPolicyCore->CreateCore<NetPolicyFirewall>();
+    auto netPolicyRule_ = g_netPolicyCore->CreateCore<NetPolicyRule>();
+    ASSERT_TRUE(netPolicyTraffic_ != nullptr && netPolicyFirewall_ != nullptr && g_netPolicyCore != nullptr);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

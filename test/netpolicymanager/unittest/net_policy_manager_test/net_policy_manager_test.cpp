@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <gtest/gtest.h>
 #include <thread>
 
@@ -23,10 +24,10 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+const std::string TEST_STRING_PERIODDURATION = "M1";
 constexpr int32_t WAIT_TIME_SECOND_LONG = 10;
 constexpr int32_t TRIGER_DELAY_US = 100000;
 constexpr int32_t TEST_CONSTANT_NUM = 3;
-const std::string TEST_STRING_PERIODDURATION = "M1";
 constexpr int32_t BACKGROUND_POLICY_TEST_UID = 123;
 constexpr uint32_t TEST_UID1 = 10;
 constexpr uint32_t TEST_UID2 = 2;
@@ -51,8 +52,8 @@ public:
 
 void NetPolicyManagerTest::SetUpTestCase()
 {
-    const std::string TEMP_ICCID = "123";
-    DelayedSingleton<NetPolicyClient>::GetInstance()->ResetPolicies(TEMP_ICCID);
+    const std::string tempIccid = "123";
+    DelayedSingleton<NetPolicyClient>::GetInstance()->ResetPolicies(tempIccid);
 }
 
 void NetPolicyManagerTest::TearDownTestCase()
@@ -352,8 +353,8 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager016, TestSize.Level1)
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager017, TestSize.Level1)
 {
     DelayedSingleton<NetPolicyClient>::GetInstance()->SetBackgroundPolicy(false);
-    uint32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetBackgroundPolicyByUid(
-        BACKGROUND_POLICY_TEST_UID);
+    uint32_t result =
+        DelayedSingleton<NetPolicyClient>::GetInstance()->GetBackgroundPolicyByUid(BACKGROUND_POLICY_TEST_UID);
     std::cout << "NetPolicyManager017 GetBackgroundPolicyByUid " << result << std::endl;
     ASSERT_EQ(result, NET_BACKGROUND_POLICY_DISABLE);
 }
@@ -579,4 +580,4 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager025, TestSize.Level1)
     ASSERT_TRUE(result == ERR_NONE);
 }
 } // namespace NetManagerStandard
-}
+} // namespace OHOS

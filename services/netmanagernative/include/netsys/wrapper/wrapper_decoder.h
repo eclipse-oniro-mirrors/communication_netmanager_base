@@ -16,13 +16,11 @@
 #ifndef WRAPPER_DECODER_H
 #define WRAPPER_DECODER_H
 
-#include <functional>
-
-#include <netinet/icmp6.h>
-
-#include <linux/rtnetlink.h>
-
 #include "netsys_event_message.h"
+
+#include <functional>
+#include <linux/rtnetlink.h>
+#include <netinet/icmp6.h>
 
 namespace OHOS {
 namespace nmd {
@@ -59,11 +57,12 @@ private:
     bool InterpreteRtMsg(const nlmsghdr *hdrMsg);
     bool InterpreteIFaceAddr(ifaddrmsg *ifAddr, char *addrStr, socklen_t sockLen, const std::string &msgType,
                              char *ifName, rtattr *rta);
-    bool SaveAddressMsg(const std::string addrstr, const ifaddrmsg *addrMsg, const std::string flags,
-                        const ifa_cacheinfo *cacheinfo, const std::string ifname);
+    bool SaveAddressMsg(const std::string addrStr, const ifaddrmsg *addrMsg, const std::string flags,
+                        const ifa_cacheinfo *cacheInfo, const std::string ifname);
     bool SaveRtMsg(std::string dst, const std::string gateWay, const std::string device, int32_t length,
                    int32_t family);
     rtmsg *CheckRtParam(const nlmsghdr *hdrMsg, uint8_t type);
+    void SaveOtherMsg(const std::string &info);
 };
 } // namespace nmd
 } // namespace OHOS

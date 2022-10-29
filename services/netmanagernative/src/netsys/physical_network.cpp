@@ -28,8 +28,6 @@ PhysicalNetwork::PhysicalNetwork(uint16_t netId, NetworkPermission permission)
 {
 }
 
-PhysicalNetwork::~PhysicalNetwork() {}
-
 void PhysicalNetwork::AddDefault()
 {
     std::set<std::string>::iterator it;

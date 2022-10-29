@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,20 +16,22 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_shared_library("net_service_common") {
   sources = [
-    "$NETCONNMANAGER_COMMON_DIR/src/broadcast_manager.cpp",
-    "$NETCONNMANAGER_COMMON_DIR/src/net_manager_center.cpp",
-    "$NETCONNMANAGER_COMMON_DIR/src/net_settings.cpp",
-    "$NETCONNMANAGER_COMMON_DIR/src/route_utils.cpp",
+    "src/broadcast_manager.cpp",
+    "src/net_manager_center.cpp",
+    "src/net_settings.cpp",
+    "src/route_utils.cpp",
   ]
 
   include_dirs = [
-    "$NETCONNMANAGER_COMMON_DIR/include",
+    "include",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netconnclient/include",
-    "$INNERKITS_ROOT/netstatsclient/include",
-    "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$INNERKITS_ROOT/netmanagernative/include",
+    "$INNERKITS_ROOT/netstatsclient/include",
+    "$NETCONNMANAGER_COMMON_DIR/include",
+    "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$SUBSYSTEM_DIR/ipc/interfaces/innerkits/ipc_core/include",
   ]
 

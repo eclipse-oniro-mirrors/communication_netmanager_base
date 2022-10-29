@@ -37,15 +37,6 @@ public:
      */
     int32_t BindSocket(int32_t fd, uint32_t netId);
 
-    /**
-     * Binds {@code netId} to the network .
-     *
-     * @param netId
-     *
-     * @return Return the return value of the netsys interface call
-     */
-    int32_t BindNetwork(uint32_t netId);
-
 private:
     // Sends |data| to the fwmark network, along with |fd| as ancillary data using cmsg(3).
     int32_t Send(FwmarkCommand *data, int32_t fd);
@@ -54,4 +45,4 @@ private:
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // INCLUDE_FWMARK_CLIENT_H__
+#endif // INCLUDE_FWMARK_CLIENT_H

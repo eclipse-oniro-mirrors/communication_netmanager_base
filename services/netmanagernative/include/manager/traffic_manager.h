@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_TRAFFIC_MANAGER_H__
-#define INCLUDE_TRAFFIC_MANAGER_H__
+#ifndef INCLUDE_TRAFFIC_MANAGER_H
+#define INCLUDE_TRAFFIC_MANAGER_H
 
 #include <ostream>
 #include <string>
@@ -33,8 +33,7 @@ typedef struct TrafficStatsParcel {
     friend std::ostream &operator<<(std::ostream &os, const TrafficStatsParcel &parcel)
     {
         os << "iface: " << parcel.iface << "ifIndex: " << parcel.ifIndex << "rxBytes: " << parcel.rxBytes
-           << "rxPackets: " << parcel.rxPackets << "txBytes: " << parcel.txBytes
-           << "txPackets: " << parcel.txPackets;
+           << "rxPackets: " << parcel.rxPackets << "txBytes: " << parcel.txBytes << "txPackets: " << parcel.txPackets;
         return os;
     }
 } TrafficStatsParcel;
@@ -44,11 +43,11 @@ public:
     TrafficManager();
     ~TrafficManager();
 
-    static nmd::TrafficStatsParcel GetInterfaceTraffic(const std::string &ifName);
+    static TrafficStatsParcel GetInterfaceTraffic(const std::string &ifName);
     static long GetAllRxTraffic();
     static long GetAllTxTraffic();
     static void TrafficManagerLog();
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // !INCLUDE_TRAFFIC_MANAGER_H__
+#endif // INCLUDE_TRAFFIC_MANAGER_H

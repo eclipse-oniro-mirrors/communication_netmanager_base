@@ -211,16 +211,6 @@ int32_t MockNetsysNativeClient::DestroyNetworkCache(uint16_t netId)
     return 0;
 }
 
-int32_t MockNetsysNativeClient::GetAddrInfo(const std::string &hostName,
-    const std::string &serverName, const struct addrinfo &hints, std::unique_ptr<addrinfo> &res, uint16_t netId)
-{
-    NETMGR_LOG_I("MockNetsysNativeClient GetAddrInfo");
-    struct addrinfo *resAddr = nullptr;
-    int32_t ret = getaddrinfo(hostName.c_str(), nullptr, &hints, &resAddr);
-    res.reset(resAddr);
-    return ret;
-}
-
 static long GetInterfaceTrafficByType(const std::string &path, const std::string &type)
 {
     if (path.empty()) {
@@ -308,7 +298,7 @@ static long getUidTrafficFromBPF(int uid, int cgroupType)
         close(sock);
         return -1;
     }
-    if (connect(sock, reinterpret_cast<sockaddr*>(&s_un), sizeof(s_un)) != 0) {
+    if (connect(sock, reinterpret_cast<sockaddr *>(&s_un), sizeof(s_un)) != 0) {
         close(sock);
         return -1;
     }
@@ -336,14 +326,14 @@ static long getUidTrafficFromBPF(int uid, int cgroupType)
 
 int64_t MockNetsysNativeClient::GetUidRxBytes(uint32_t uid)
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetUidRxBytes uid is [%{public}u]", uid);
+    NETMGR_LOG_D("MockNetsysNativeClient GetUidRxBytes uid is [%{public}u]", uid);
     long result = getUidTrafficFromBPF(uid, 0);
     return static_cast<int64_t>(result);
 }
 
 int64_t MockNetsysNativeClient::GetUidTxBytes(uint32_t uid)
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetUidTxBytes uid is [%{public}u]", uid);
+    NETMGR_LOG_D("MockNetsysNativeClient GetUidTxBytes uid is [%{public}u]", uid);
     long result = getUidTrafficFromBPF(uid, 1);
     return static_cast<int64_t>(result);
 }
@@ -357,14 +347,14 @@ static int64_t GetUidOnIfaceBytes(uint32_t uid, const std::string &interfaceName
 
 int64_t MockNetsysNativeClient::GetUidOnIfaceRxBytes(uint32_t uid, const std::string &interfaceName)
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetUidOnIfaceRxBytes uid is [%{public}u] "
+    NETMGR_LOG_D("MockNetsysNativeClient GetUidOnIfaceRxBytes uid is [%{public}u] "
         "iface name is [%{public}s]", uid, interfaceName.c_str());
     return GetUidOnIfaceBytes(uid, interfaceName);
 }
 
 int64_t MockNetsysNativeClient::GetUidOnIfaceTxBytes(uint32_t uid, const std::string &interfaceName)
 {
-    NETMGR_LOG_I("MockNetsysNativeClient GetUidOnIfaceRxBytes uid is [%{public}u] "
+    NETMGR_LOG_D("MockNetsysNativeClient GetUidOnIfaceRxBytes uid is [%{public}u] "
         "iface name is [%{public}s]", uid, interfaceName.c_str());
     return GetUidOnIfaceBytes(uid, interfaceName);
 }
@@ -470,23 +460,23 @@ int32_t MockNetsysNativeClient::AddRoute(const std::string &ip, const std::strin
     _sin.sin_family = AF_INET;
     _sin.sin_port = 0;
     if (inet_aton(gateWay.c_str(), &(_sin.sin_addr)) < 0) {
-        NETMGR_LOG_E("MockNetsysNativeClient inet_aton gateWay[%{public}s]", gateWay.c_str());
+        NETMGR_LOG_E("MockNetsysNativeClient inet_aton gateWay[%{private}s]", gateWay.c_str());
         return -1;
     }
     int copyRet = memcpy_s(&rt.rt_gateway, sizeof(rt.rt_gateway), &_sin, sizeof(struct sockaddr_in));
     NETMGR_LOG_I("copyRet = %{public}d", copyRet);
-    (reinterpret_cast<struct sockaddr_in*>(&rt.rt_dst))->sin_family=AF_INET;
-    if (inet_aton(ip.c_str(), &((struct sockaddr_in*)&rt.rt_dst)->sin_addr) < 0) {
+    (reinterpret_cast<struct sockaddr_in *>(&rt.rt_dst))->sin_family = AF_INET;
+    if (inet_aton(ip.c_str(), &((struct sockaddr_in *)&rt.rt_dst)->sin_addr) < 0) {
         NETMGR_LOG_E("MockNetsysNativeClient inet_aton ip[%{public}s]", ToAnonymousIp(ip).c_str());
         return -1;
     }
-    (reinterpret_cast<struct sockaddr_in*>(&rt.rt_genmask))->sin_family=AF_INET;
-    if (inet_aton(mask.c_str(), &(reinterpret_cast<struct sockaddr_in*>(&rt.rt_genmask))->sin_addr) < 0) {
+    (reinterpret_cast<struct sockaddr_in *>(&rt.rt_genmask))->sin_family = AF_INET;
+    if (inet_aton(mask.c_str(), &(reinterpret_cast<struct sockaddr_in *>(&rt.rt_genmask))->sin_addr) < 0) {
         NETMGR_LOG_E("MockNetsysNativeClient inet_aton mask[%{public}s]", mask.c_str());
         return -1;
     }
     if (!devName.empty()) {
-        rt.rt_dev = (char*)devName.c_str();
+        rt.rt_dev = (char *)devName.c_str();
     }
     rt.rt_flags = RTF_GATEWAY;
     int fd = socket(AF_INET, SOCK_DGRAM, 0);

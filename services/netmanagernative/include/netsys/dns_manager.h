@@ -26,7 +26,7 @@ namespace nmd {
 class DnsManager {
 public:
     DnsManager();
-    ~DnsManager();
+    ~DnsManager() = default;
 
     /**
      * Set the Resolver Config object
@@ -40,6 +40,7 @@ public:
      */
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMillis, uint8_t retryCount,
                               const std::vector<std::string> &servers, const std::vector<std::string> &domains);
+
     /**
      * Get the Resolver Config object
      *
@@ -94,9 +95,15 @@ public:
      */
     void GetDumpInfo(std::string &info);
 
+    /**
+     * destroy this netid's cache
+     * @param netId network's id
+     * @return destroy is success? 0 : -1
+     */
+    int32_t DestroyNetworkCache(uint16_t netId);
 private:
     std::shared_ptr<DnsProxyListen> dnsProxyListen_;
 };
 } // namespace nmd
 } // namespace OHOS
-#endif // !INCLUDE_MANAGER_DNS_MANAGER_H
+#endif // INCLUDE_MANAGER_DNS_MANAGER_H

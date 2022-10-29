@@ -18,7 +18,6 @@
 #include <netdb.h>
 #include <string>
 
-#include "dnsresolver_params_parcel.h"
 #include "i_notify_callback.h"
 #include "interface_type.h"
 #include "iremote_broker.h"
@@ -37,7 +36,6 @@ public:
         NETSYS_CREATE_NETWORK_CACHE,
         NETSYS_FLUSH_NETWORK_CACHE,
         NETSYS_DESTROY_NETWORK_CACHE,
-        NETSYS_GET_ADDR_INFO,
         NETSYS_INTERFACE_SET_MTU,
         NETSYS_INTERFACE_GET_MTU,
         NETSYS_REGISTER_NOTIFY_CALLBACK,
@@ -91,13 +89,11 @@ public:
     virtual int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
                                       const std::vector<std::string> &servers,
                                       const std::vector<std::string> &domains) = 0;
-    virtual int32_t GetResolverConfig(uint16_t netid, std::vector<std::string> &servers,
+    virtual int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
                                       std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
                                       uint8_t &retryCount) = 0;
-    virtual int32_t CreateNetworkCache(uint16_t netid) = 0;
-    virtual int32_t DestroyNetworkCache(uint16_t netid) = 0;
-    virtual int32_t Getaddrinfo(const char *node, const char *service, const struct addrinfo *hints,
-                                struct addrinfo **result, uint16_t netid) = 0;
+    virtual int32_t CreateNetworkCache(uint16_t netId) = 0;
+    virtual int32_t DestroyNetworkCache(uint16_t netId) = 0;
     virtual int32_t InterfaceSetMtu(const std::string &interfaceName, int mtu) = 0;
     virtual int32_t InterfaceGetMtu(const std::string &interfaceName) = 0;
 
@@ -139,13 +135,13 @@ public:
     virtual int32_t DisableNat(const std::string &downstreamIface, const std::string &upstreamIface) = 0;
     virtual int32_t IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface) = 0;
     virtual int32_t IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface) = 0;
-    virtual int32_t BandwidthEnableDataSaver(bool enable) = 0;
-    virtual int32_t BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes) = 0;
-    virtual int32_t BandwidthRemoveIfaceQuota(const std::string &ifName) = 0;
-    virtual int32_t BandwidthAddDeniedList(uint32_t uid) = 0;
-    virtual int32_t BandwidthRemoveDeniedList(uint32_t uid) = 0;
     virtual int32_t BandwidthAddAllowedList(uint32_t uid) = 0;
     virtual int32_t BandwidthRemoveAllowedList(uint32_t uid) = 0;
+    virtual int32_t BandwidthEnableDataSaver(bool enable) = 0;
+    virtual int32_t BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes) = 0;
+    virtual int32_t BandwidthAddDeniedList(uint32_t uid) = 0;
+    virtual int32_t BandwidthRemoveDeniedList(uint32_t uid) = 0;
+    virtual int32_t BandwidthRemoveIfaceQuota(const std::string &ifName) = 0;
     virtual int32_t FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids) = 0;
     virtual int32_t FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids) = 0;
     virtual int32_t FirewallEnableChain(uint32_t chain, bool enable) = 0;

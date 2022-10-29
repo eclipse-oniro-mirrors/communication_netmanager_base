@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "net_stats_callback_stub.h"
-#include "net_stats_constants.h"
 
 #include "net_mgr_log_wrapper.h"
+#include "net_stats_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -25,14 +26,14 @@ NetStatsCallbackStub::NetStatsCallbackStub()
     memberFuncMap_[NET_STATS_UID_CHANGED] = &NetStatsCallbackStub::OnNetUidStatsChanged;
 }
 
-NetStatsCallbackStub::~NetStatsCallbackStub() {}
+NetStatsCallbackStub::~NetStatsCallbackStub() = default;
 
-int32_t NetStatsCallbackStub::OnRemoteRequest(
-    uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+int32_t NetStatsCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+                                              MessageOption &option)
 {
-    std::u16string myDescripter = NetStatsCallbackStub::GetDescriptor();
-    std::u16string remoteDescripter = data.ReadInterfaceToken();
-    if (myDescripter != remoteDescripter) {
+    std::u16string myDescripters = NetStatsCallbackStub::GetDescriptor();
+    std::u16string remoteDescripters = data.ReadInterfaceToken();
+    if (myDescripters != remoteDescripters) {
         NETMGR_LOG_E("Descriptor checked failed");
         return ERR_FLATTEN_OBJECT;
     }
