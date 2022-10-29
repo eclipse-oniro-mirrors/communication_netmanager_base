@@ -22,6 +22,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+static constexpr uint32_t MAX_NET_CAP_NUM = 32;
+
 bool NetAllCapabilities::CapsIsValid() const
 {
     for (auto it = netCaps_.begin(); it != netCaps_.end(); it++) {
@@ -51,18 +53,30 @@ bool NetAllCapabilities::Marshalling(Parcel &parcel) const
     if (!parcel.WriteUint32(linkUpBandwidthKbps_) || !parcel.WriteUint32(linkDownBandwidthKbps_)) {
         return false;
     }
-    if (!parcel.WriteUint32(netCaps_.size())) {
+    uint32_t capSize = netCaps_.size();
+    capSize = capSize > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : capSize;
+    if (!parcel.WriteUint32(capSize)) {
         return false;
     }
+    int32_t index = 0;
     for (auto it = netCaps_.begin(); it != netCaps_.end(); it++) {
+        if (++index > MAX_NET_CAP_NUM) {
+            break;
+        }
         if (!parcel.WriteUint32(static_cast<uint32_t>(*it))) {
             return false;
         }
     }
-    if (!parcel.WriteUint32(bearerTypes_.size())) {
+    uint32_t typeSize = bearerTypes_.size();
+    typeSize = typeSize > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : typeSize;
+    if (!parcel.WriteUint32(typeSize)) {
         return false;
     }
+    index = 0;
     for (auto it = bearerTypes_.begin(); it != bearerTypes_.end(); it++) {
+        if (++index > MAX_NET_CAP_NUM) {
+            break;
+        }
         if (!parcel.WriteUint32(static_cast<uint32_t>(*it))) {
             return false;
         }
@@ -82,6 +96,7 @@ bool NetAllCapabilities::Unmarshalling(Parcel &parcel)
     if (!parcel.ReadUint32(size)) {
         return false;
     }
+    size = size > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : size;
     uint32_t cap = 0;
     for (uint32_t i = 0; i < size; i++) {
         if (!parcel.ReadUint32(cap)) {
@@ -95,6 +110,7 @@ bool NetAllCapabilities::Unmarshalling(Parcel &parcel)
     if (!parcel.ReadUint32(size)) {
         return false;
     }
+    size = size > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : size;
     uint32_t type = 0;
     for (uint32_t i = 0; i < size; i++) {
         if (!parcel.ReadUint32(type)) {

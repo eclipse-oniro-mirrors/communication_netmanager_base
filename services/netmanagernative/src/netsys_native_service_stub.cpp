@@ -27,7 +27,9 @@
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetsysNative {
-static constexpr const int32_t MAX_FLAG_NUM = 64;
+static constexpr int32_t MAX_FLAG_NUM = 64;
+static constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
+static constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
 
 NetsysNativeServiceStub::NetsysNativeServiceStub()
 {
@@ -67,7 +69,8 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_ENABLE_NAT] = &NetsysNativeServiceStub::CmdEnableNat;
     opToInterfaceMap_[NETSYS_DISABLE_NAT] = &NetsysNativeServiceStub::CmdDisableNat;
     opToInterfaceMap_[NETSYS_IPFWD_ADD_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward;
-    opToInterfaceMap_[NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward;
+    opToInterfaceMap_[NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD] =
+        &NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward;
     opToInterfaceMap_[NETSYS_TETHER_DNS_SET] = &NetsysNativeServiceStub::CmdShareDnsSet;
     opToInterfaceMap_[NETSYS_START_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStartDnsProxyListen;
     opToInterfaceMap_[NETSYS_STOP_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStopDnsProxyListen;
@@ -135,6 +138,7 @@ int32_t NetsysNativeServiceStub::CmdSetResolverConfig(MessageParcel &data, Messa
     if (!data.ReadInt32(vServerSize)) {
         return ERR_FLATTEN_OBJECT;
     }
+    vServerSize = (vServerSize > MAX_DNS_CONFIG_SIZE) ? MAX_DNS_CONFIG_SIZE : vServerSize;
     std::string s;
     for (int32_t i = 0; i < vServerSize; ++i) {
         std::string().swap(s);
@@ -147,6 +151,7 @@ int32_t NetsysNativeServiceStub::CmdSetResolverConfig(MessageParcel &data, Messa
     if (!data.ReadInt32(vDomainSize)) {
         return ERR_FLATTEN_OBJECT;
     }
+    vDomainSize = (vDomainSize > MAX_DNS_CONFIG_SIZE) ? MAX_DNS_CONFIG_SIZE : vDomainSize;
     for (int32_t i = 0; i < vDomainSize; ++i) {
         std::string().swap(s);
         if (!data.ReadString(s)) {
@@ -176,14 +181,24 @@ int32_t NetsysNativeServiceStub::CmdGetResolverConfig(MessageParcel &data, Messa
     reply.WriteUint16(baseTimeoutMsec);
     reply.WriteUint8(retryCount);
     auto vServerSize = static_cast<int32_t>(servers.size());
+    vServerSize = (vServerSize > MAX_DNS_CONFIG_SIZE) ? MAX_DNS_CONFIG_SIZE : vServerSize;
     reply.WriteInt32(vServerSize);
+    int32_t index = 0;
     for (auto &server : servers) {
+        if (++index > MAX_DNS_CONFIG_SIZE) {
+            break;
+        }
         reply.WriteString(server);
     }
     auto vDomainsSize = static_cast<int32_t>(domains.size());
+    vDomainsSize = (vDomainsSize > MAX_DNS_CONFIG_SIZE) ? MAX_DNS_CONFIG_SIZE : vDomainsSize;
     reply.WriteInt32(vDomainsSize);
     std::vector<std::string>::iterator iterDomains;
+    index = 0;
     for (iterDomains = domains.begin(); iterDomains != domains.end(); ++iterDomains) {
+        if (++index > MAX_DNS_CONFIG_SIZE) {
+            break;
+        }
         reply.WriteString(*iterDomains);
     }
     NETNATIVE_LOG_D("GetResolverConfig has recved result %{public}d", result);
@@ -513,9 +528,14 @@ int32_t NetsysNativeServiceStub::CmdInterfaceGetConfig(MessageParcel &data, Mess
     reply.WriteString(cfg.ipv4Addr);
     reply.WriteInt32(cfg.prefixLength);
     int32_t vsize = static_cast<int32_t>(cfg.flags.size());
+    vsize = vsize > MAX_DNS_CONFIG_SIZE ? MAX_DNS_CONFIG_SIZE : vsize;
     reply.WriteInt32(vsize);
     std::vector<std::string>::iterator iter;
+    int32_t index = 0;
     for (iter = cfg.flags.begin(); iter != cfg.flags.end(); ++iter) {
+        if (++index > MAX_DNS_CONFIG_SIZE) {
+            break;
+        }
         reply.WriteString(*iter);
     }
     return result;
@@ -702,6 +722,7 @@ int32_t NetsysNativeServiceStub::CmdFirewallSetUidsAllowedListChain(MessageParce
     uint32_t chain = data.ReadUint32();
     std::vector<uint32_t> uids;
     uint32_t uidSize = data.ReadUint32();
+    uidSize = (uidSize > UIDS_LIST_MAX_SIZE) ? UIDS_LIST_MAX_SIZE : uidSize;
     for (uint32_t i = 0; i < uidSize; i++) {
         uint32_t uid = data.ReadUint32();
         uids.push_back(uid);
@@ -717,6 +738,7 @@ int32_t NetsysNativeServiceStub::CmdFirewallSetUidsDeniedListChain(MessageParcel
     uint32_t chain = data.ReadUint32();
     std::vector<uint32_t> uids;
     uint32_t uidSize = data.ReadUint32();
+    uidSize = (uidSize > UIDS_LIST_MAX_SIZE) ? UIDS_LIST_MAX_SIZE : uidSize;
     for (uint32_t i = 0; i < uidSize; i++) {
         uint32_t uid = data.ReadUint32();
         uids.push_back(uid);

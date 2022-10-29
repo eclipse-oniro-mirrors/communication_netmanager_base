@@ -18,6 +18,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+static constexpr uint32_t MAX_NET_CAP_NUM = 32;
+
 NetConnCallbackStub::NetConnCallbackStub()
 {
     memberFuncMap_[NET_AVAILABLE] = &NetConnCallbackStub::OnNetAvailable;
@@ -30,8 +32,8 @@ NetConnCallbackStub::NetConnCallbackStub()
 
 NetConnCallbackStub::~NetConnCallbackStub() {}
 
-int32_t NetConnCallbackStub::OnRemoteRequest(
-    uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+int32_t NetConnCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+                                             MessageOption &option)
 {
     NETMGR_LOG_D("Stub call start, code:[%{public}d]", code);
     std::u16string myDescripter = NetConnCallbackStub::GetDescriptor();
@@ -53,7 +55,7 @@ int32_t NetConnCallbackStub::OnRemoteRequest(
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int32_t NetConnCallbackStub::OnNetAvailable(MessageParcel& data, MessageParcel& reply)
+int32_t NetConnCallbackStub::OnNetAvailable(MessageParcel &data, MessageParcel &reply)
 {
     if (!data.ContainFileDescriptors()) {
         NETMGR_LOG_W("sent raw data is less than 32k");
@@ -72,7 +74,7 @@ int32_t NetConnCallbackStub::OnNetAvailable(MessageParcel& data, MessageParcel& 
     return ERR_NONE;
 }
 
-int32_t NetConnCallbackStub::OnNetCapabilitiesChange(MessageParcel& data, MessageParcel& reply)
+int32_t NetConnCallbackStub::OnNetCapabilitiesChange(MessageParcel &data, MessageParcel &reply)
 {
     if (!data.ContainFileDescriptors()) {
         NETMGR_LOG_W("sent raw data is less than 32k");
@@ -89,6 +91,7 @@ int32_t NetConnCallbackStub::OnNetCapabilitiesChange(MessageParcel& data, Messag
     if (!data.ReadUint32(size)) {
         return IPC_PROXY_ERR;
     }
+    size = size > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : size;
     for (uint32_t i = 0; i < size; i++) {
         if (!data.ReadUint32(value)) {
             return IPC_PROXY_ERR;
@@ -98,6 +101,7 @@ int32_t NetConnCallbackStub::OnNetCapabilitiesChange(MessageParcel& data, Messag
     if (!data.ReadUint32(size)) {
         return IPC_PROXY_ERR;
     }
+    size = size > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : size;
     for (uint32_t i = 0; i < size; i++) {
         if (!data.ReadUint32(value)) {
             return IPC_PROXY_ERR;
@@ -115,7 +119,7 @@ int32_t NetConnCallbackStub::OnNetCapabilitiesChange(MessageParcel& data, Messag
     return ERR_NONE;
 }
 
-int32_t NetConnCallbackStub::OnNetConnectionPropertiesChange(MessageParcel& data, MessageParcel& reply)
+int32_t NetConnCallbackStub::OnNetConnectionPropertiesChange(MessageParcel &data, MessageParcel &reply)
 {
     if (!data.ContainFileDescriptors()) {
         NETMGR_LOG_W("sent raw data is less than 32k");
@@ -136,7 +140,7 @@ int32_t NetConnCallbackStub::OnNetConnectionPropertiesChange(MessageParcel& data
     return ERR_NONE;
 }
 
-int32_t NetConnCallbackStub::OnNetLost(MessageParcel& data, MessageParcel& reply)
+int32_t NetConnCallbackStub::OnNetLost(MessageParcel &data, MessageParcel &reply)
 {
     if (!data.ContainFileDescriptors()) {
         NETMGR_LOG_W("sent raw data is less than 32k");
@@ -156,7 +160,7 @@ int32_t NetConnCallbackStub::OnNetLost(MessageParcel& data, MessageParcel& reply
     return ERR_NONE;
 }
 
-int32_t NetConnCallbackStub::OnNetUnavailable(MessageParcel& data, MessageParcel& reply)
+int32_t NetConnCallbackStub::OnNetUnavailable(MessageParcel &data, MessageParcel &reply)
 {
     if (!data.ContainFileDescriptors()) {
         NETMGR_LOG_W("sent raw data is less than 32k");
@@ -170,7 +174,7 @@ int32_t NetConnCallbackStub::OnNetUnavailable(MessageParcel& data, MessageParcel
     return ERR_NONE;
 }
 
-int32_t NetConnCallbackStub::OnNetBlockStatusChange(MessageParcel& data, MessageParcel& reply)
+int32_t NetConnCallbackStub::OnNetBlockStatusChange(MessageParcel &data, MessageParcel &reply)
 {
     if (!data.ContainFileDescriptors()) {
         NETMGR_LOG_W("sent raw data is less than 32k");
@@ -200,7 +204,7 @@ int32_t NetConnCallbackStub::NetAvailable(sptr<NetHandle> &netHandle)
 }
 
 int32_t NetConnCallbackStub::NetCapabilitiesChange(sptr<NetHandle> &netHandle,
-    const sptr<NetAllCapabilities> &netAllCap)
+                                                   const sptr<NetAllCapabilities> &netAllCap)
 {
     return ERR_NONE;
 }
@@ -224,5 +228,5 @@ int32_t NetConnCallbackStub::NetBlockStatusChange(sptr<NetHandle> &netHandle, bo
 {
     return ERR_NONE;
 }
-}  // namespace NetManagerStandard
-}  // namespace OHOS
+} // namespace NetManagerStandard
+} // namespace OHOS
