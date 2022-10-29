@@ -48,7 +48,7 @@ sptr<INetsysService> GetProxyK()
     } else {
         std::cout << "Get proxy nullptr" << std::endl;
     }
-    
+
     return proxy;
 }
 
@@ -58,18 +58,21 @@ auto netsysServiceK_ = GetProxyK();
 namespace {
 void freeNetsysAddrInfo(struct addrinfo *aihead)
 {
-    struct addrinfo *ai, *ainext ;
-    for (ai = aihead ; ai != nullptr ; ai = ainext) {
-        if (ai->ai_addr != nullptr)
+    struct addrinfo *ai;
+    struct addrinfo *ainext;
+    for (ai = aihead; ai != nullptr; ai = ainext) {
+        if (ai->ai_addr != nullptr) {
             free(ai->ai_addr);
+        }
 
-        if (ai->ai_canonname != nullptr)
-            free(ai->ai_canonname) ;
-        ainext = ai->ai_next ;
+        if (ai->ai_canonname != nullptr) {
+            free(ai->ai_canonname);
+        }
+        ainext = ai->ai_next;
         free(ai);
     }
 }
-}
+} // namespace
 
 void TestSetResolverConfig()
 {
@@ -129,47 +132,6 @@ void TestDestroyNetworkCache()
     int ret = -1;
     ret = netsysServiceK_->DestroyNetworkCache(1);
     NETNATIVE_LOGE("NETSYS: DestroyNetworkCache1   ret=%{public}d", ret);
-}
-
-void TestGetaddrinfo()
-{
-    char  hostName[OHOS::nmd::MAX_NAME_LEN];
-    struct addrinfo hints;
-    struct addrinfo *res1;
-    struct addrinfo *resP1;
-    int ret;
-    bzero(&hints, sizeof(addrinfo));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_flags = AI_PASSIVE;
-    hints.ai_protocol = 0;
-    int copyRet = strncpy_s(hostName, OHOS::nmd::MAX_NAME_LEN, "www.ifeng.com", strlen("www.ifeng.com") + 1);
-    NETNATIVE_LOGI("copyRet = %{public}d", copyRet);
-    ret = netsysServiceK_->Getaddrinfo(hostName, NULL, &hints, &res1, 0);
-    NETNATIVE_LOGE("NETSYS: Getaddrinfo   ret=%{public}d,HostName  %{public}s", ret, hostName);
-    if (res1 == nullptr) {
-        NETNATIVE_LOGE("res1 res1  is nullptr");
-    }
-
-    int  k = 0;
-    for (resP1 = res1; resP1 != nullptr; resP1 = resP1->ai_next) {
-        char host[1024] = {0};
-        NETNATIVE_LOGE("LOOP kkkk  start k=%{public}d \n", k);
-        NETNATIVE_LOGE("LOOP ai_addrlen %{public}d\n", resP1->ai_addrlen);
-        k++ ;
-        ret = getnameinfo(resP1->ai_addr, resP1->ai_addrlen, host, sizeof(host), NULL, 0, NI_NUMERICHOST);
-        if (ret != 0) {
-            NETNATIVE_LOGE("getnameinfo: %{public}s\n", gai_strerror(ret));
-        } else {
-            NETNATIVE_LOGE("IPIP1:  %{public}s,HOSTNAME %{public}s", host, hostName);
-        }
-    }
-
-    printf("overover\n");
-    if (res1 != nullptr) {
-        NETNATIVE_LOGI("TestGetaddrinfo:: end freeNetsysAddrInfo");
-        freeNetsysAddrInfo(res1);
-    }
 }
 
 void TestInterfaceSetMtu()

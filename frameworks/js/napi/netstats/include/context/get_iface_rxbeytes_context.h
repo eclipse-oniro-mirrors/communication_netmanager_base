@@ -41,13 +41,13 @@ public:
     std::string GetNic();
     int64_t GetBytes64();
     std::string GetInterfaceName();
-
-
     void ParseParams(napi_value *params, size_t paramsCount);
+
 private:
     std::string nic_;
     int64_t bytes64_ = 0;
     std::string interfaceName_;
+
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
 };

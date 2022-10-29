@@ -40,16 +40,18 @@ public:
     void SetStart(uint32_t start);
     void SetEnd(uint32_t end);
     std::string GetInterfaceName();
-    NetStatsInfo& GetStatsInfo();
+    NetStatsInfo &GetStatsInfo();
     uint32_t GetStart();
     uint32_t GetEnd();
 
     void ParseParams(napi_value *params, size_t paramsCount);
+
 private:
     std::string interfaceName_;
     NetStatsInfo statsInfo_;
     uint32_t start_ = 0;
     uint32_t end_ = 0;
+
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
 };

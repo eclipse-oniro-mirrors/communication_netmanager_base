@@ -16,9 +16,9 @@
 #ifndef DEVICE_IDLE_FIREWALL_RULE_H
 #define DEVICE_IDLE_FIREWALL_RULE_H
 
-#include "firewall_rule.h"
-
 #include "singleton.h"
+
+#include "firewall_rule.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -26,7 +26,7 @@ class DeviceIdleFirewallRule : public FirewallRule {
     DECLARE_DELAYED_SINGLETON(DeviceIdleFirewallRule);
 
 protected:
-    uint32_t chainType_;
+    uint32_t chainType_ = 0;
     std::string chainName_;
 
 private:

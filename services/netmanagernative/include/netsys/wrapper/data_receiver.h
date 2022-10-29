@@ -18,8 +18,8 @@
 
 #include <netinet/icmp6.h>
 
-#include "netsys_event_message.h"
 #include "netlink_define.h"
+#include "netsys_event_message.h"
 #include "wrapper_listener.h"
 
 namespace OHOS {
@@ -28,7 +28,7 @@ class WrapperListener;
 class DataReceiver {
 public:
     using EventCallback = std::function<void(std::shared_ptr<NetsysEventMessage>)>;
-    DataReceiver(int32_t socketFd, const int32_t format);
+    DataReceiver(int32_t socketFd, int32_t format);
     DataReceiver() = delete;
     ~DataReceiver() = default;
 
@@ -40,11 +40,13 @@ public:
 
     /**
      * Start receive event message
+     * @return success or failed
      */
     int32_t Start();
 
     /**
      * Stop receive event message
+     * @return success or failed
      */
     int32_t Stop();
 

@@ -35,7 +35,7 @@ void NetPolicyEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &
         return;
     }
 
-    if (!core_) {
+    if (core_ == nullptr) {
         NETMGR_LOG_E("Net policy core is null.");
         return;
     }

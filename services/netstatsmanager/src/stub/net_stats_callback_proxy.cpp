@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,16 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "net_stats_callback_proxy.h"
+
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetStatsCallbackProxy::NetStatsCallbackProxy(const sptr<IRemoteObject> &impl)
-    : IRemoteProxy<INetStatsCallback>(impl)
-{}
+NetStatsCallbackProxy::NetStatsCallbackProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<INetStatsCallback>(impl)
+{
+}
 
-NetStatsCallbackProxy::~NetStatsCallbackProxy() {}
+NetStatsCallbackProxy::~NetStatsCallbackProxy() = default;
 
 int32_t NetStatsCallbackProxy::NetIfaceStatsChanged(const std::string &iface)
 {

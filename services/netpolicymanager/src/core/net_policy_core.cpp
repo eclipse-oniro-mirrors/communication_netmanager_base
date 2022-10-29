@@ -22,7 +22,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-const std::string EVENT_PARAM_DELETED_UID = "DeletedUid";
+constexpr const char *EVENT_PARAM_DELETED_UID = "DeletedUid";
+static constexpr uint32_t CORE_EVENT_PRIORITY = 1;
 
 NetPolicyCore::NetPolicyCore() = default;
 
@@ -48,7 +49,6 @@ void NetPolicyCore::HandleEvent(const AppExecFwk::InnerEvent::Pointer &event)
         auto eventId = event->GetInnerEventId();
         auto eventData = event->GetSharedObject<PolicyEvent>();
         if (eventData && core && core != eventData->sender) {
-            NETMGR_LOG_D("HandleEvent  eventId[%{public}d]", eventId);
             core->HandleEvent(eventId, eventData);
         }
     }
@@ -86,16 +86,23 @@ void NetPolicyCore::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
         auto policyEvent = std::make_shared<PolicyEvent>();
         policyEvent->powerSaveMode = isPowerSave;
         SendEvent(NetPolicyEventHandler::MSG_POWER_SAVE_MODE_CHANGED, policyEvent);
-    } else if (action == COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED) {
+        return;
+    }
+
+    if (action == COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED) {
         bool isDeviceIdle = (code == EXTREME_MODE);
         auto policyEvent = std::make_shared<PolicyEvent>();
         policyEvent->deviceIdleMode = isDeviceIdle;
         SendEvent(NetPolicyEventHandler::MSG_DEVICE_IDLE_MODE_CHANGED, policyEvent);
-    } else if (action == COMMON_EVENT_UID_REMOVED) {
+        return;
+    }
+
+    if (action == COMMON_EVENT_UID_REMOVED) {
         uint32_t deletedUid = CommonUtils::StrToUint(eventData.GetWant().GetStringParam(EVENT_PARAM_DELETED_UID));
         auto policyEvent = std::make_shared<PolicyEvent>();
         policyEvent->deletedUid = deletedUid;
         SendEvent(NetPolicyEventHandler::MSG_UID_REMOVED, policyEvent);
+        return;
     }
 }
 } // namespace NetManagerStandard

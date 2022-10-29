@@ -16,18 +16,17 @@
 #ifndef NETSYS_NATIVE_CLIENT_H
 #define NETSYS_NATIVE_CLIENT_H
 
-#include <string>
-#include <vector>
+#include <linux/if.h>
 #include <memory>
 #include <netdb.h>
-#include <linux/if.h>
+#include <string>
+#include <vector>
 
-#include "notify_callback_stub.h"
 #include "i_netsys_service.h"
-
 #include "netsys_controller_callback.h"
 #include "netsys_controller_define.h"
 #include "network_sharing.h"
+#include "notify_callback_stub.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -55,7 +54,7 @@ class NetsysNativeClient {
 
 public:
     NetsysNativeClient();
-    ~NetsysNativeClient();
+    ~NetsysNativeClient() = default;
     void Init();
 
     /**
@@ -227,24 +226,12 @@ public:
     int32_t DestroyNetworkCache(uint16_t netId);
 
     /**
-     * Domain name resolution Obtains the domain name address
-     *
-     * @param hostName
-     * @param serverName
-     * @param hints
-     * @param res
-     * @return Return the return value of the netsys interface call
-     */
-    int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName, const struct addrinfo &hints,
-                        std::unique_ptr<addrinfo> &res, uint16_t netId);
-
-    /**
      * Obtains the bytes of the sharing network.
      *
      * @return Success return 0.
      */
     int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
-        nmd::NetworkSharingTraffic &traffic);
+                                     nmd::NetworkSharingTraffic &traffic);
 
     /**
      * Obtains the bytes received over the cellular network.
@@ -440,14 +427,14 @@ public:
     /**
      * tart dns proxy listen
      *
-     * @return int32_t
+     * @return Return the return value of the netsys interface call.
      */
     virtual int32_t StartDnsProxyListen();
 
     /**
      * stop dns proxy listen
      *
-     * @return int32_t
+     * @return Return the return value of the netsys interface call.
      */
     virtual int32_t StopDnsProxyListen();
 
@@ -500,7 +487,7 @@ public:
      *
      * @param iface interface file description
      * @param bIpv6 network blocking
-     * @return.
+     * @return Return the return value of the netsys interface call.
      */
     int32_t StartDhcpClient(const std::string &iface, bool bIpv6);
     /**
@@ -508,14 +495,14 @@ public:
      *
      * @param iface interface file description
      * @param bIpv6 network blocking
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t StopDhcpClient(const std::string &iface, bool bIpv6);
     /**
      * Register Notify Callback
      *
      * @param callback
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t RegisterCallback(sptr<NetsysControllerCallback> callback);
 
@@ -549,7 +536,7 @@ public:
      *
      * @param iface interface name
      * @param bytes
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes);
 
@@ -557,7 +544,7 @@ public:
      * delete quota.
      *
      * @param iface interface name
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t BandwidthRemoveIfaceQuota(const std::string &ifName);
 
@@ -565,7 +552,7 @@ public:
      * Add DeniedList.
      *
      * @param uid
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t BandwidthAddDeniedList(uint32_t uid);
 
@@ -573,7 +560,7 @@ public:
      * Remove DeniedList.
      *
      * @param uid
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t BandwidthRemoveDeniedList(uint32_t uid);
 
@@ -581,7 +568,7 @@ public:
      * Add DeniedList.
      *
      * @param uid
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t BandwidthAddAllowedList(uint32_t uid);
 
@@ -589,7 +576,7 @@ public:
      * Remove DeniedList.
      *
      * @param uid
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t BandwidthRemoveAllowedList(uint32_t uid);
 
@@ -618,7 +605,7 @@ public:
      *
      * @param chain chain type
      * @param enable enable or disable
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t FirewallEnableChain(uint32_t chain, bool enable);
 
@@ -628,9 +615,10 @@ public:
      * @param chain chain type
      * @param uid uid
      * @param firewallRule firewall rule
-     * @return .
+     * @return Return the return value of the netsys interface call.
      */
     int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule);
+
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);
     void ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface);
@@ -639,7 +627,7 @@ private:
 private:
     sptr<OHOS::NetsysNative::INotifyCallback> nativeNotifyCallback_ = nullptr;
     sptr<OHOS::NetsysNative::INetsysService> netsysNativeService_ = nullptr;
-    std::vector<sptr<NetsysControllerCallback>> cbObjects;
+    std::vector<sptr<NetsysControllerCallback>> cbObjects_;
     bool initFlag_ = false;
 };
 } // namespace NetManagerStandard

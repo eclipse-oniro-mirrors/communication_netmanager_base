@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <fcntl.h>
+#include <fstream>
 #include <future>
 #include <iostream>
 #include <list>
@@ -27,11 +28,14 @@
 #include <securec.h>
 #include <sys/socket.h>
 #include <unistd.h>
+
 #include "event_report.h"
-#include "net_mgr_log_wrapper.h"
 #include "fwmark_client.h"
+#include "netmanager_base_common_utils.h"
 #include "netsys_controller.h"
+#include "net_mgr_log_wrapper.h"
 #include "net_monitor.h"
+
 namespace OHOS {
 namespace NetManagerStandard {
 static constexpr int32_t INIT_DETECTION_DELAY_MS = 8 * 1000;
@@ -50,29 +54,16 @@ static constexpr int32_t SOCKET_TIMEOUT = 2;
 static constexpr int32_t MAX_SEND_RETRY = 4;
 static constexpr uint8_t SOCKET_NOT_READY = 0;
 static constexpr uint8_t SOCKET_READY = 1;
-constexpr const char* PORTAL_URL_REDIRECT_FIRST_CASE = "Location: ";
-constexpr const char* PORTAL_URL_REDIRECT_SECOND_CASE = "http";
-constexpr const char* CONTENT_STR = "Content-Length:";
-constexpr const char* PORTAL_END_STR = ".com";
+constexpr const char *PORTAL_URL_REDIRECT_FIRST_CASE = "Location: ";
+constexpr const char *PORTAL_URL_REDIRECT_SECOND_CASE = "http";
+constexpr const char *CONTENT_STR = "Content-Length:";
+constexpr const char *PORTAL_END_STR = ".com";
+constexpr const char SPACE_STR = ' ';
+constexpr const char NEW_LINE_STR = '\n';
+constexpr const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
+constexpr const char *DEF_NETDETECT_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
 
-static std::string MakeDefaultNetDetectionUrl()
-{
-    std::string url = "http";
-    url += "://";
-    url += "connectivitycheck";
-    url += ".platform";
-    url += ".hicloud";
-    url += ".com/";
-    url += "generate_204";
-    return url;
-}
-
-NetMonitor::NetMonitor(uint32_t netId, NetDetectionStateHandler handle)
-    :netId_(netId), netDetectionStatus_(handle)
-{
-}
-
-NetMonitor::~NetMonitor(){}
+NetMonitor::NetMonitor(uint32_t netId, NetDetectionStateHandler handle) : netId_(netId), netDetectionStatus_(handle) {}
 
 void NetMonitor::Start(bool needReport)
 {
@@ -113,7 +104,7 @@ NetDetectionStatus NetMonitor::GetDetectionResult() const
 
 void NetMonitor::Detection()
 {
-    NetDetectionStatus result  = SendParallelHttpProbes();
+    NetDetectionStatus result = SendParallelHttpProbes();
     struct EventInfo eventInfo = {
         .monitorStatus = static_cast<int32_t>(result)
     };
@@ -151,7 +142,11 @@ void NetMonitor::Detection()
 
 NetDetectionStatus NetMonitor::SendParallelHttpProbes()
 {
-    std::string url = MakeDefaultNetDetectionUrl();
+    std::string url;
+    if (GetDefaultNetDetectionUrlFromCfg(url) != 0) {
+        NETMGR_LOG_I("GetDefaultNetDetectionUrlFromCfg failed, use default url");
+        url = DEF_NETDETECT_URL;
+    }
     std::string domain;
     std::string urlPath;
     if (ParseUrl(url, domain, urlPath)) {
@@ -162,7 +157,7 @@ NetDetectionStatus NetMonitor::SendParallelHttpProbes()
 }
 
 NetDetectionStatus NetMonitor::SendHttpProbe(const std::string &defaultDomain, const std::string &defaultUrl,
-    const uint16_t defaultPort)
+                                             const uint16_t defaultPort)
 {
     int socketType = AF_INET;
     std::string ipAddr;
@@ -171,9 +166,9 @@ NetDetectionStatus NetMonitor::SendHttpProbe(const std::string &defaultDomain, c
         return INVALID_DETECTION_STATE;
     }
     int32_t sockFd = socket(socketType, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP);
-    if (sockFd  < 0) {
-        NETMGR_LOG_E("Create net[%{public}d] socket failed,errno[%{public}d]:%{public}s",
-            netId_, errno, strerror(errno));
+    if (sockFd < 0) {
+        NETMGR_LOG_E("Create net[%{public}d] socket failed,errno[%{public}d]:%{public}s", netId_, errno,
+                     strerror(errno));
         return INVALID_DETECTION_STATE;
     }
     if (SetSocketParameter(sockFd)) {
@@ -187,8 +182,7 @@ NetDetectionStatus NetMonitor::SendHttpProbe(const std::string &defaultDomain, c
         return INVALID_DETECTION_STATE;
     }
     if (Send(sockFd, defaultDomain, defaultUrl) < 0) {
-        NETMGR_LOG_E("Send http probe data to net[%{public}d] socket:%{public}d failed",
-            netId_, sockFd);
+        NETMGR_LOG_E("Send http probe data to net[%{public}d] socket:%{public}d failed", netId_, sockFd);
         close(sockFd);
         return INVALID_DETECTION_STATE;
     }
@@ -208,8 +202,8 @@ int32_t NetMonitor::Connect(int32_t sockFd, int socketType, const uint16_t port,
     if (flags == -1 && errno == EINTR) {
         flags = fcntl(sockFd, F_GETFL, 0);
         if (flags == -1) {
-            NETMGR_LOG_E("Make net[%{public}d] socket:%{public}d non block failed,error[%{public}d]: %s",
-                netId_, sockFd, errno, strerror(errno));
+            NETMGR_LOG_E("Make net[%{public}d] socket:%{public}d non block failed,error[%{public}d]: %s", netId_,
+                         sockFd, errno, strerror(errno));
             return -1;
         }
     }
@@ -218,8 +212,8 @@ int32_t NetMonitor::Connect(int32_t sockFd, int socketType, const uint16_t port,
     if (ret == -1 && errno == EINTR) {
         ret = fcntl(sockFd, F_SETFL, tempFlags);
         if (ret == -1) {
-            NETMGR_LOG_E("Make net[%{public}d] socket:%{public}d non block failed,error[%{public}d]: %s",
-                netId_, sockFd, errno, strerror(errno));
+            NETMGR_LOG_E("Make net[%{public}d] socket:%{public}d non block failed,error[%{public}d]: %s", netId_,
+                         sockFd, errno, strerror(errno));
             return -1;
         }
     }
@@ -232,8 +226,8 @@ int32_t NetMonitor::Connect(int32_t sockFd, int socketType, const uint16_t port,
 
 int32_t NetMonitor::ConnectIpv4(int32_t sockFd, const uint16_t port, const std::string &ipAddr)
 {
-    NETMGR_LOG_D("Net[%{public}d] connect ipv4 ip:[%{public}s] socket:%{public}d in",
-        netId_, ipAddr.c_str(), sockFd);
+    NETMGR_LOG_D("Net[%{public}d] connect ipv4 ip:[%{public}s] socket:%{public}d in", netId_,
+                 CommonUtils::ToAnonymousIp(ipAddr).c_str(), sockFd);
     struct sockaddr_in serverAddr;
     bzero(&serverAddr, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
@@ -242,8 +236,8 @@ int32_t NetMonitor::ConnectIpv4(int32_t sockFd, const uint16_t port, const std::
     int32_t ret = connect(sockFd, (struct sockaddr *)&serverAddr, sizeof(serverAddr));
     if (ret < 0) {
         if (errno != EINPROGRESS) {
-            NETMGR_LOG_E("Connect net[%{public}d] ipv4 ip:%{public}s failed,error[%{public}d]:%{public}s",
-                netId_, ipAddr.c_str(), errno, strerror(errno));
+            NETMGR_LOG_E("Connect net[%{public}d] ipv4 ip:%{public}s failed,error[%{public}d]:%{public}s", netId_,
+                         CommonUtils::ToAnonymousIp(ipAddr).c_str(), errno, strerror(errno));
             return -1;
         }
     }
@@ -252,8 +246,8 @@ int32_t NetMonitor::ConnectIpv4(int32_t sockFd, const uint16_t port, const std::
 
 int32_t NetMonitor::ConnectIpv6(int32_t sockFd, const uint16_t port, const std::string &ipAddr)
 {
-    NETMGR_LOG_D("Net[%{public}d] connect ipv6 ip:[%{public}s] socket:%{public}d in",
-        netId_, ipAddr.c_str(), sockFd);
+    NETMGR_LOG_D("Net[%{public}d] connect ipv6 ip:[%{public}s] socket:%{public}d in", netId_,
+                 CommonUtils::ToAnonymousIp(ipAddr).c_str(), sockFd);
     struct sockaddr_in6 serverAddr;
     bzero(&serverAddr, sizeof(serverAddr));
     serverAddr.sin6_family = AF_INET6;
@@ -262,8 +256,8 @@ int32_t NetMonitor::ConnectIpv6(int32_t sockFd, const uint16_t port, const std::
     int32_t ret = connect(sockFd, (struct sockaddr *)&serverAddr, sizeof(serverAddr));
     if (ret < 0) {
         if (errno != EINPROGRESS) {
-            NETMGR_LOG_E("Connect net[%{public}d] ipv6 ip:%{public}s failed,error[%{public}d]:%{public}s",
-                netId_, ipAddr.c_str(), errno, strerror(errno));
+            NETMGR_LOG_E("Connect net[%{public}d] ipv6 ip:%{public}s failed,error[%{public}d]:%{public}s", netId_,
+                         CommonUtils::ToAnonymousIp(ipAddr).c_str(), errno, strerror(errno));
             return -1;
         }
     }
@@ -281,10 +275,7 @@ int32_t NetMonitor::Wait(int32_t sockFd, uint8_t *canRead, uint8_t *canWrite)
     if (canWrite) {
         FD_SET(sockFd, &writeFds);
     }
-    struct timeval tval = {
-        tval.tv_sec = 8,
-        tval.tv_usec = 0
-    };
+    struct timeval tval = {tval.tv_sec = 8, tval.tv_usec = 0};
     int ret = select((sockFd + 1), &readFds, &writeFds, NULL, &tval);
     if (ret <= 0) {
         NETMGR_LOG_E("Select net[%{public}d] failed,errno[%{public}d]:%{public}s", netId_, errno, strerror(errno));
@@ -304,8 +295,8 @@ int32_t NetMonitor::Send(int32_t sockFd, const std::string &domain, const std::s
     uint8_t canWrite = SOCKET_NOT_READY;
     int32_t ret = Wait(sockFd, nullptr, &canWrite);
     if (ret < 0 || canWrite != SOCKET_READY) {
-        NETMGR_LOG_E("Net[%{public}d] socket not ready to send data,ret:%{public}d, canWrite:%{public}d",
-            netId_, ret, canWrite);
+        NETMGR_LOG_E("Net[%{public}d] socket not ready to send data,ret:%{public}d, canWrite:%{public}d", netId_, ret,
+                     canWrite);
         return -1;
     }
     std::string sendData = "GET /" + url + " HTTP/1.1\r\n";
@@ -320,11 +311,11 @@ int32_t NetMonitor::Send(int32_t sockFd, const std::string &domain, const std::s
             if (errno == EAGAIN && retry < MAX_SEND_RETRY) {
                 ++retry;
                 NETMGR_LOG_W("Net[%{public}d] try to resend the data to sokcet:%{public}d for the :%{public}d times",
-                    netId_, sockFd, retry);
+                             netId_, sockFd, retry);
                 continue;
             }
-            NETMGR_LOG_E("Net[%{public}d] Send data to socket:%{public}d failed, errno[%{public}d]:%{public}s",
-                netId_, sockFd, errno, strerror(errno));
+            NETMGR_LOG_E("Net[%{public}d] Send data to socket:%{public}d failed, errno[%{public}d]:%{public}s", netId_,
+                         sockFd, errno, strerror(errno));
             return -1;
         }
         if (written == 0) {
@@ -341,15 +332,15 @@ int32_t NetMonitor::Receive(int32_t sockFd, std::string &probResult)
     uint8_t canRead = SOCKET_NOT_READY;
     int32_t ret = Wait(sockFd, &canRead, nullptr);
     if (ret < 0 || canRead != SOCKET_READY) {
-        NETMGR_LOG_E("Net[%{public}d] socket not ready to read data, ret:%{public}d, canRead:%{public}d",
-            netId_, ret, canRead);
+        NETMGR_LOG_E("Net[%{public}d] socket not ready to read data, ret:%{public}d, canRead:%{public}d", netId_, ret,
+                     canRead);
         return -1;
     }
     char buff[MAX_RECIVE_SIZE] = {0};
     int32_t recvBytes = recv(sockFd, buff, MAX_RECIVE_SIZE, 0);
     if (recvBytes <= 0) {
-        NETMGR_LOG_E("Receive net[%{public}d] data from socket failed,errno[%{public}d]:%{public}s",
-            netId_, errno, strerror(errno));
+        NETMGR_LOG_E("Receive net[%{public}d] data from socket failed,errno[%{public}d]:%{public}s", netId_, errno,
+                     strerror(errno));
         return -1;
     }
     probResult = std::string(buff, recvBytes);
@@ -361,11 +352,10 @@ int32_t NetMonitor::SetSocketParameter(int32_t sockFd)
     std::unique_ptr<nmd::FwmarkClient> fwmarkClient = std::make_unique<nmd::FwmarkClient>();
     if (fwmarkClient->BindSocket(sockFd, netId_) < 0) {
         NETMGR_LOG_E("Error at bind net[%{public}d] socket", netId_);
-        struct EventInfo eventInfo = {
-            .socketFd = sockFd,
-            .errorType = static_cast<int32_t>(FAULT_BIND_SOCKET_FAILED),
-            .errorMsg = std::string("Bind socket:").append(std::to_string(sockFd)).append(" failed")
-        };
+        struct EventInfo eventInfo = {.socketFd = sockFd,
+                                      .errorType = static_cast<int32_t>(FAULT_BIND_SOCKET_FAILED),
+                                      .errorMsg =
+                                          std::string("Bind socket:").append(std::to_string(sockFd)).append(" failed")};
         EventReport::SendMonitorFaultEvent(eventInfo);
         return -1;
     }
@@ -374,8 +364,8 @@ int32_t NetMonitor::SetSocketParameter(int32_t sockFd)
     timeout.tv_usec = 0;
     if (setsockopt(sockFd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) ||
         setsockopt(sockFd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout))) {
-        NETMGR_LOG_E("Error at set net[%{public}d] socket timeout,error[%{public}d]:%{public}s",
-            netId_, errno, strerror(errno));
+        NETMGR_LOG_E("Error at set net[%{public}d] socket timeout,error[%{public}d]:%{public}s", netId_, errno,
+                     strerror(errno));
         return -1;
     }
     return 0;
@@ -392,20 +382,17 @@ NetDetectionStatus NetMonitor::dealRecvResult(const std::string &strResponse)
         retCode > PORTAL_CONTENT_LENGTH_MIN) {
         if (retCode > -1) {
             return CAPTIVE_PORTAL_STATE;
-        } else {
-            return INVALID_DETECTION_STATE;
         }
+        return INVALID_DETECTION_STATE;
     } else if (statusCode == NO_CONTENT) {
         return VERIFICATION_STATE;
-    } else if (statusCode != NO_CONTENT && statusCode >= CREATED && statusCode <= URL_REDIRECT_MAX) {
+    } else if ((statusCode != NO_CONTENT) && (statusCode >= CREATED) && (statusCode <= URL_REDIRECT_MAX)) {
         if (retCode > -1) {
             return CAPTIVE_PORTAL_STATE;
-        } else {
-            return INVALID_DETECTION_STATE;
         }
-    } else {
         return INVALID_DETECTION_STATE;
     }
+    return INVALID_DETECTION_STATE;
 }
 
 int32_t NetMonitor::GetStatusCodeFromResponse(const std::string &strResponse)
@@ -477,8 +464,8 @@ int32_t NetMonitor::GetIpAddr(const char *domain, std::string &ip_addr, int &soc
     struct addrinfo *result = nullptr;
     int ret = getaddrinfo(domain, nullptr, nullptr, &result);
     if (ret < 0) {
-        NETMGR_LOG_E("Get net[%{public}d] address info failed,errno[%{public}d]:%{public}s",
-            netId_, errno, strerror(errno));
+        NETMGR_LOG_E("Get net[%{public}d] address info failed,errno[%{public}d]:%{public}s", netId_, errno,
+                     strerror(errno));
         return -1;
     }
     if (result == nullptr) {
@@ -496,9 +483,35 @@ int32_t NetMonitor::GetIpAddr(const char *domain, std::string &ip_addr, int &soc
         ip_addr = ip;
     }
     socketType = result->ai_family;
-    NETMGR_LOG_D("Get net[%{public}d] monitor ip:%{public}s", netId_, ip_addr.c_str());
+    NETMGR_LOG_D("Get net[%{public}d] monitor ip:%{public}s", netId_, CommonUtils::ToAnonymousIp(ip_addr).c_str());
     freeaddrinfo(result);
     return 0;
+}
+
+int32_t NetMonitor::GetDefaultNetDetectionUrlFromCfg(std::string &strUrl)
+{
+    int32_t ret = 0;
+    std::string urlFilePath = URL_CFG_FILE;
+    std::ifstream file(urlFilePath.c_str());
+    if (!file.is_open()) {
+        NETMGR_LOG_E("Open file failed (%{public}s)", strerror(errno));
+        ret = -1;
+        return ret;
+    }
+
+    std::ostringstream oss;
+    oss << file.rdbuf();
+    std::string content = oss.str();
+    int32_t index = content.find_last_of(SPACE_STR);
+    strUrl = content.substr(index + 1);
+
+    if (strUrl.empty()) {
+        NETMGR_LOG_E("get netdetectionurl is empty");
+        ret = -1;
+    }
+    strUrl.erase(std::remove(strUrl.begin(), strUrl.end(), NEW_LINE_STR), strUrl.end());
+    NETMGR_LOG_D("GetDefaultNetDetectionUrl is : %{public}s", strUrl.c_str());
+    return ret;
 }
 
 int32_t NetMonitor::ParseUrl(const std::string &url, std::string &domain, std::string &urlPath)
@@ -515,7 +528,7 @@ int32_t NetMonitor::ParseUrl(const std::string &url, std::string &domain, std::s
             urlPath = *itr;
         }
     }
-    return (domain.empty() || urlPath.empty())?-1:0;
+    return (domain.empty() || urlPath.empty()) ? -1 : 0;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

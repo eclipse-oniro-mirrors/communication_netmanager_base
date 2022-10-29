@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,29 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "net_supplier.h"
 
 #include <atomic>
 #include <cinttypes>
 
-#include "net_mgr_log_wrapper.h"
 #include "broadcast_manager.h"
+#include "net_mgr_log_wrapper.h"
+#include "net_supplier.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 static std::atomic<uint32_t> g_nextNetSupplierId = 0x03EB;
-constexpr int32_t REG_OK = 0;
+static constexpr int32_t REG_OK = 0;
 
-NetSupplier::NetSupplier(
-    NetBearType bearerType, const std::string &netSupplierIdent, const std::set<NetCap> &netCaps)
-    : netSupplierType_(bearerType), netSupplierIdent_(netSupplierIdent), netCaps_(netCaps),
-    supplierId_(g_nextNetSupplierId++)
+NetSupplier::NetSupplier(NetBearType bearerType, const std::string &netSupplierIdent, const std::set<NetCap> &netCaps)
+    : netSupplierType_(bearerType),
+      netSupplierIdent_(netSupplierIdent),
+      netCaps_(netCaps),
+      supplierId_(g_nextNetSupplierId++)
 {
     netAllCapabilities_.netCaps_ = netCaps;
     netAllCapabilities_.bearerTypes_.insert(bearerType);
 }
-
-NetSupplier::~NetSupplier() = default;
 
 void NetSupplier::RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback)
 {
@@ -44,7 +43,7 @@ void NetSupplier::RegisterSupplierCallback(const sptr<INetSupplierCallback> &cal
 bool NetSupplier::operator==(const NetSupplier &netSupplier) const
 {
     return supplierId_ == netSupplier.supplierId_ && netSupplierType_ == netSupplier.netSupplierType_ &&
-        netSupplierIdent_ == netSupplier.netSupplierIdent_ && netCaps_ == netSupplier.netCaps_;
+           netSupplierIdent_ == netSupplier.netSupplierIdent_ && netCaps_ == netSupplier.netCaps_;
 }
 
 void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
@@ -319,16 +318,16 @@ void NetSupplier::RemoveBestRequest(uint32_t reqId)
     bestReqList_.erase(reqId);
 }
 
-std::set<uint32_t>& NetSupplier::GetBestRequestList()
+std::set<uint32_t> &NetSupplier::GetBestRequestList()
 {
     return bestReqList_;
 }
 
 void NetSupplier::SetNetValid(bool ifValid)
 {
-    NETMGR_LOG_I("Enter SetNetValid. supplier[%{public}d, %{public}s], ifValid[%{public}d]",
-        supplierId_, netSupplierIdent_.c_str(), ifValid);
-    if(ifValid) {
+    NETMGR_LOG_I("Enter SetNetValid. supplier[%{public}d, %{public}s], ifValid[%{public}d]", supplierId_,
+                 netSupplierIdent_.c_str(), ifValid);
+    if (ifValid) {
         if (!HasNetCap(NET_CAPABILITY_VALIDATED)) {
             netCaps_.InsertNetCap(NET_CAPABILITY_VALIDATED);
             netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_VALIDATED);

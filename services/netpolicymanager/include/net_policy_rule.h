@@ -62,33 +62,28 @@ struct UidPolicyRule {
  *      4. Process the corresponding operations.
  */
 const std::vector<uint32_t> POLICY_TRANS_MAP = {
-    0b00011000000100000000,
-    0b10000000000000100010,
-    0b00010000001000000000,
-    0b00000010100000010100,
-    0b00000011000000001100,
-    0b00000010010000001100,
-    0b01000000001000000000,
-    0b00000100100000010100,
-    0b00000100010000100010,
-    0b00000000010000000001,
-    0b00000001000000100010,
-    0b00000000000000000001,
+    0b00011000000100000000, 0b10000000000000100010, 0b00010000001000000000, 0b00000010100000010100,
+    0b00000011000000001100, 0b00000010010000001100, 0b01000000001000000000, 0b00000100100000010100,
+    0b00000100010000100010, 0b00000000010000000001, 0b00000001000000100010, 0b00000000000000000001,
 };
 
 class NetPolicyRule : public NetPolicyBase {
 public:
     NetPolicyRule();
     void Init();
+    void HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEvent> &policyEvent);
+
     /**
      * Transform policy to rule and netsys-control.
      *
      * @param uid The UID of application.
      * @param policy See {@link NetUidPolicy}.
-     * @return uint32_t
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
      */
     uint32_t TransPolicyToRule(uint32_t uid, uint32_t policy);
-    void HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEvent> &policyEvent);
+
     /**
      * Get the status whether the specified uid app can access the metered network or non-metered network.
      *
@@ -99,6 +94,7 @@ public:
      * @systemapi Hide this for inner system use.
      */
     bool IsUidNetAllowed(uint32_t uid, bool metered);
+
     /**
      * Get the network policy of the specified UID.
      *
@@ -109,6 +105,7 @@ public:
      * @systemapi Hide this for inner system use.
      */
     uint32_t GetPolicyByUid(uint32_t uid);
+
     /**
      * Get the application UIDs of the specified policy.
      *
@@ -119,6 +116,7 @@ public:
      * @systemapi Hide this for inner system use.
      */
     std::vector<uint32_t> GetUidsByPolicy(uint32_t policy);
+
     /**
      * Reset network policies and rules.
      *
@@ -127,6 +125,7 @@ public:
      * @systemapi Hide this for inner system use.
      */
     uint32_t ResetPolicies();
+
     /**
      * Control if apps can use data on background.
      *
@@ -136,6 +135,7 @@ public:
      * @systemapi Hide this for inner system use.
      */
     uint32_t SetBackgroundPolicy(bool allow);
+
     /**
      * Get the background network restriction policy for the specified uid.
      *
@@ -145,6 +145,7 @@ public:
      * @systemapi Hide this for inner system use.
      */
     uint32_t GetBackgroundPolicyByUid(uint32_t uid);
+
     /**
      * Get the status if apps can use data on background.
      *
@@ -154,6 +155,7 @@ public:
      * @systemapi Hide this for inner system use.
      */
     bool GetBackgroundPolicy();
+
     /**
      * Get the Dump Message object.
      */
@@ -164,13 +166,13 @@ private:
     void TransConditionToRuleAndNetsys(uint32_t policyCondition, uint32_t uid, uint32_t policy);
     uint32_t MoveToConditionBit(uint32_t value);
     uint32_t MoveToRuleBit(uint32_t value);
-    uint32_t ChangePolicyToPolicytranscondition(uint32_t policy);
+    uint32_t ChangePolicyToPolicyTransitionCondition(uint32_t policy);
     uint32_t BuildTransCondition(uint32_t uid, uint32_t policy);
     uint32_t GetMatchTransCondition(uint32_t policyCondition);
 
-    // When system's mode status is changed, do this founcation.
+    // When system's mode status is changed, do this function.
     void TransPolicyToRule();
-    // When a uid add into some forbidden list, do this founcation.
+    // When a uid add into some forbidden list, do this function.
     void TransPolicyToRule(uint32_t uid);
     bool IsIdleMode();
     bool InIdleAllowedList(uint32_t uid);

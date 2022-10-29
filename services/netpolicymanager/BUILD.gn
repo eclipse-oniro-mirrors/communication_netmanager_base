@@ -16,21 +16,21 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_shared_library("net_policy_manager") {
   sources = [
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/common/net_policy_event_handler.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/common/net_policy_service_common.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/common/netsys_policy_wrapper.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/core/net_policy_base.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/core/net_policy_callback.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/core/net_policy_core.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/core/net_policy_file.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/core/net_policy_firewall.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/core/net_policy_rule.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/core/net_policy_traffic.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/firewall_rule/device_idle_firewall_rule.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/firewall_rule/firewall_rule.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/net_policy_service.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/stub/net_policy_callback_proxy.cpp",
-    "$NETPOLICYMANAGER_SOURCE_DIR/src/stub/net_policy_service_stub.cpp",
+    "src/common/net_policy_event_handler.cpp",
+    "src/common/net_policy_service_common.cpp",
+    "src/common/netsys_policy_wrapper.cpp",
+    "src/core/net_policy_base.cpp",
+    "src/core/net_policy_callback.cpp",
+    "src/core/net_policy_core.cpp",
+    "src/core/net_policy_file.cpp",
+    "src/core/net_policy_firewall.cpp",
+    "src/core/net_policy_rule.cpp",
+    "src/core/net_policy_traffic.cpp",
+    "src/firewall_rule/device_idle_firewall_rule.cpp",
+    "src/firewall_rule/firewall_rule.cpp",
+    "src/net_policy_service.cpp",
+    "src/stub/net_policy_callback_proxy.cpp",
+    "src/stub/net_policy_service_stub.cpp",
   ]
 
   include_dirs = [
@@ -40,8 +40,8 @@ ohos_shared_library("net_policy_manager") {
     "$INNERKITS_ROOT/netconnclient/include",
     "$NETCONNMANAGER_COMMON_DIR/include",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
-    "$NETPOLICYMANAGER_SOURCE_DIR/include",
-    "$NETPOLICYMANAGER_SOURCE_DIR/include/stub",
+    "include",
+    "include/stub",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
   ]

@@ -11,31 +11,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ability_runtime_path = "//foundation/ability/ability_runtime"
-ability_runtime_kits_path = "${ability_runtime_path}/frameworks/kits"
+# args of this module
 SUBSYSTEM_DIR = "//foundation/communication"
 NETMANAGER_BASE_ROOT = "$SUBSYSTEM_DIR/netmanager_base"
-NETMANAGERNATIVE_ROOT = "$NETMANAGER_BASE_ROOT/services/netmanagernative"
-INNERKITS_ROOT = "$NETMANAGER_BASE_ROOT/interfaces/innerkits"
+
+# args of frameworks
 NETCONNMANAGER_INNERKITS_SOURCE_DIR =
     "$NETMANAGER_BASE_ROOT/frameworks/native/netconnclient"
 NETPOLICYMANAGER_INNERKITS_SOURCE_DIR =
     "$NETMANAGER_BASE_ROOT/frameworks/native/netpolicyclient"
 NETSTATSMANAGER_INNERKITS_SOURCE_DIR =
     "$NETMANAGER_BASE_ROOT/frameworks/native/netstatsclient"
+NETSYSNATIVE_INNERKITS_SOURCE_DIR =
+    "$NETMANAGER_BASE_ROOT/frameworks/native/netmanagernative"
+
+# args of interfaces
+INNERKITS_ROOT = "$NETMANAGER_BASE_ROOT/interfaces/innerkits"
+
+# args of services
+NETMANAGERNATIVE_ROOT = "$NETMANAGER_BASE_ROOT/services/netmanagernative"
 NETCONNMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netconnmanager"
 NETPOLICYMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netpolicymanager"
 NETSTATSMANAGER_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netstatsmanager"
 NETCONNMANAGER_COMMON_DIR = "$NETMANAGER_BASE_ROOT/services/common"
 FWMARK_CLIENT_DIR = "$NETMANAGERNATIVE_ROOT/fwmarkclient"
 NETSTATSMANAGER_BPFLIB_DIR = "$NETMANAGER_BASE_ROOT/services/netsys_bpf_stats"
-NETSYSNATIVE_INNERKITS_SOURCE_DIR =
-    "$NETMANAGER_BASE_ROOT/frameworks/native/netmanagernative"
 NETSYSNATIVE_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netmanagernative"
 NETSYSBPFMAP_SOURCE_DIR = "$NETSYSNATIVE_SOURCE_DIR/netsys_bpf_map"
 NETSYSCONTROLLER_ROOT_DIR = "$NETMANAGER_BASE_ROOT/services/netsyscontroller"
-SAMGR_INTERFACE_ROOT_DIR = "//foundation/systemabilitymgr/samgr/interfaces"
 
+# args of other module
 THIRD_PARTY_ROOT = "//third_party"
 UTILS_ROOT = "//utils"
 HILOG_ROOT = "//base/hiviewdfx/hilog"
@@ -45,9 +50,9 @@ ARKUI_ROOT = "//foundation/arkui"
 WIFI_MANAGER_ROOT = "//foundation/communication/wifi/wifi"
 DHCP_MANAGER_ROOT = "//foundation/communication/wifi/dhcp"
 SAMGR_MANAGER_ROOT = "//foundation/systemabilitymgr/samgr"
+SAMGR_INTERFACE_ROOT_DIR = "//foundation/systemabilitymgr/samgr/interfaces"
 
 use_js_debug = false
-
 declare_args() {
   enable_netmgr_debug = true
   enable_sys_func = true

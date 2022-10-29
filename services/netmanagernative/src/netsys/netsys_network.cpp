@@ -14,7 +14,6 @@
  */
 
 #include "net_manager_constants.h"
-#include "netnative_log_wrapper.h"
 #include "route_manager.h"
 
 #include "netsys_network.h"
@@ -24,8 +23,6 @@ namespace nmd {
 using namespace NetManagerStandard;
 
 NetsysNetwork::NetsysNetwork(uint16_t netId) : netId_(netId) {}
-
-NetsysNetwork::~NetsysNetwork() {}
 
 int32_t NetsysNetwork::ClearInterfaces()
 {

@@ -39,9 +39,11 @@ public:
     int64_t GetBytes64();
 
     void ParseParams(napi_value *params, size_t paramsCount);
+
 private:
     int32_t uid_ = 0;
     int64_t bytes64_ = 0;
+
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
 };

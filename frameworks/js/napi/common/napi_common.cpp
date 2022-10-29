@@ -18,6 +18,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
+constexpr const char *CODE = "code";
+constexpr const char *MSG = "message";
+} // namespace
+
 bool NapiCommon::IsValidEvent(const std::string &eventInfo, int32_t &eventId)
 {
     bool isEvent = true;
@@ -219,18 +224,6 @@ bool NapiCommon::MatchParameters(
     return true;
 }
 
-napi_value NapiCommon::CreateErrorMessage(napi_env env, const std::string &msg, int32_t errorCode)
-{
-    napi_value result = nullptr;
-    napi_value message = nullptr;
-    NAPI_CALL(env, napi_create_string_utf8(env, msg.c_str(), msg.length(), &message));
-    napi_value codeValue = nullptr;
-    std::string errCode = std::to_string(errorCode);
-    NAPI_CALL(env, napi_create_string_utf8(env, errCode.c_str(), errCode.length(), &codeValue));
-    NAPI_CALL(env, napi_create_error(env, codeValue, message, &result));
-    return result;
-}
-
 napi_value NapiCommon::CreateUndefined(napi_env env)
 {
     napi_value result = nullptr;
@@ -392,6 +385,21 @@ napi_value NapiCommon::CreateEnumConstructor(napi_env env, napi_callback_info in
     napi_value global = nullptr;
     napi_get_global(env, &global);
     return thisArg;
+}
+
+napi_value NapiCommon::CreateObject(napi_env env)
+{
+    napi_value object = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &object));
+    return object;
+}
+
+napi_value NapiCommon::CreateErrorMessage(napi_env env, int32_t errorCode, const std::string &errorMessage)
+{
+    napi_value result = CreateObject(env);
+    SetPropertyInt32(env, result, CODE, errorCode);
+    SetPropertyString(env, result, MSG, errorMessage);
+    return result;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

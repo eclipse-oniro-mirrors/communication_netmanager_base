@@ -26,6 +26,8 @@ namespace NetManagerStandard {
 namespace NapiUtils {
 namespace {
 static constexpr const int MAX_STRING_LENGTH = 65536;
+constexpr const char *CODE = "code";
+constexpr const char *MSG = "message";
 } // namespace
 
 napi_valuetype GetValueType(napi_env env, napi_value value)
@@ -56,7 +58,7 @@ napi_value GetNamedProperty(napi_env env, napi_value object, const std::string &
 
 void SetNamedProperty(napi_env env, napi_value object, const std::string &name, napi_value value)
 {
-    (void)napi_set_named_property(env, object, name.c_str(), value);
+    NAPI_CALL_RETURN_VOID(env, napi_set_named_property(env, object, name.c_str(), value));
 }
 
 std::vector<std::string> GetPropertyNames(napi_env env, napi_value object)
@@ -425,6 +427,15 @@ napi_value CreateEnumConstructor(napi_env env, napi_callback_info info)
     napi_value global = nullptr;
     napi_get_global(env, &global);
     return thisArg;
+}
+
+/* error */
+napi_value CreateErrorMessage(napi_env env, int32_t errorCode, const std::string &errorMessage)
+{
+    napi_value result = CreateObject(env);
+    SetNamedProperty(env, result, CODE, CreateInt32(env, errorCode));
+    SetNamedProperty(env, result, MSG, CreateStringUtf8(env, errorMessage));
+    return result;
 }
 } // namespace NapiUtils
 } // namespace NetManagerStandard

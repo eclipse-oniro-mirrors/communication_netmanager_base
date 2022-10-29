@@ -41,3 +41,10 @@ ohos_prebuilt_etc("xtables.lock") {
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
+
+## Install resolv.conf to /system/etc
+ohos_prebuilt_etc("netdetectionurl.conf") {
+  source = "netdetectionurl.conf"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}

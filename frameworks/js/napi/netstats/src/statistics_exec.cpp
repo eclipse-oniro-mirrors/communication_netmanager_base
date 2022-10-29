@@ -78,58 +78,6 @@ bool StatisticsExec::ExecGetIfaceTxBytes(GetIfaceTxBytesContext *context)
     return true;
 }
 
-bool StatisticsExec::ExecGetIfaceStats(GetIfaceStatsContext *context)
-{
-    NetStatsResultCode result = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(
-        context->GetInterfaceName(), context->GetStart(), context->GetEnd(), context->GetStatsInfo());
-    if (result != NetStatsResultCode::ERR_NONE) {
-        NETMANAGER_BASE_LOGE(
-            "ExecGetIfaceStats error interfaceName_ is %{public}s, start_ is %{public}d, end_ is %{public}d",
-            context->GetInterfaceName().c_str(), context->GetStart(), context->GetEnd());
-        return false;
-    }
-    return true;
-}
-
-bool StatisticsExec::ExecGetIfaceUidStats(GetIfaceUidStatsContext *context)
-{
-    NetStatsResultCode result = DelayedSingleton<NetStatsClient>::GetInstance()->GetUidStatsDetail(
-        context->GetInterfaceName(), context->GetUid(), context->GetStart(), context->GetEnd(), context->GetStatsInfo());
-    if (result != NetStatsResultCode::ERR_NONE) {
-        NETMANAGER_BASE_LOGE(
-            "ExecGetIfaceUidStats error interfaceName_ is %{public}s, uid_ is %{public}d, start_ is %{public}d, end_ "
-            "is %{public}d",
-            context->GetInterfaceName().c_str(), context->GetUid(), context->GetStart(), context->GetEnd());
-        return false;
-    }
-    return true;
-}
-
-bool StatisticsExec::ExecUpdateIfacesStats(UpdateIfacesStatsContext *context)
-{
-    NetStatsResultCode result = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateIfacesStats(
-        context->GetInterfaceName(), context->GetStart(), context->GetEnd(), context->GetStatsInfo());
-
-    if (result != NetStatsResultCode::ERR_NONE) {
-        NETMANAGER_BASE_LOGE(
-            "ExecUpdateIfaceUidStats error interfaceName_ is %{public}s, start_ is %{public}d, end_ is %{public}d",
-            context->GetInterfaceName().c_str(), context->GetStart(), context->GetEnd());
-        return false;
-    }
-    return true;
-}
-
-bool StatisticsExec::ExecUpdateStatsData(UpdateStatsDataContext *context)
-{
-    NetStatsResultCode result = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateStatsData();
-    if (result != NetStatsResultCode::ERR_NONE) {
-        NETMANAGER_BASE_LOGE(
-            "ExecUpdateStatsData error");
-        return false;
-    }
-    return true;
-}
-
 napi_value StatisticsExec::GetCellularRxBytesCallback(GetCellularRxBytesContext *context)
 {
     return NapiUtils::CreateInt64(context->GetEnv(), context->GetBytes64());
@@ -168,36 +116,6 @@ napi_value StatisticsExec::GetIfaceRxBytesCallback(GetIfaceRxBytesContext *conte
 napi_value StatisticsExec::GetIfaceTxBytesCallback(GetIfaceTxBytesContext *context)
 {
     return NapiUtils::CreateInt64(context->GetEnv(), context->GetBytes64());
-}
-
-napi_value StatisticsExec::GetIfaceStatsCallback(GetIfaceStatsContext *context)
-{
-    napi_value netStatsInfo = NapiUtils::CreateObject(context->GetEnv());
-    NapiUtils::SetInt32Property(context->GetEnv(), netStatsInfo, RX_BYTES, context->GetStatsInfo().rxBytes_);
-    NapiUtils::SetInt32Property(context->GetEnv(), netStatsInfo, TX_BYTES, context->GetStatsInfo().txBytes_);
-    NapiUtils::SetInt32Property(context->GetEnv(), netStatsInfo, RX_PACKETS, context->GetStatsInfo().rxPackets_);
-    NapiUtils::SetInt32Property(context->GetEnv(), netStatsInfo, TX_PACKETS, context->GetStatsInfo().txPackets_);
-    return netStatsInfo;
-}
-
-napi_value StatisticsExec::GetIfaceUidStatsCallback(GetIfaceUidStatsContext *context)
-{
-    napi_value netStatsInfo = NapiUtils::CreateObject(context->GetEnv());
-    NapiUtils::SetInt32Property(context->GetEnv(), netStatsInfo, RX_BYTES, context->GetStatsInfo().rxBytes_);
-    NapiUtils::SetInt32Property(context->GetEnv(), netStatsInfo, TX_BYTES, context->GetStatsInfo().txBytes_);
-    NapiUtils::SetInt32Property(context->GetEnv(), netStatsInfo, RX_PACKETS, context->GetStatsInfo().rxPackets_);
-    NapiUtils::SetInt32Property(context->GetEnv(), netStatsInfo, TX_PACKETS, context->GetStatsInfo().txPackets_);
-    return netStatsInfo;
-}
-
-napi_value StatisticsExec::UpdateIfacesStatsCallback(UpdateIfacesStatsContext *context)
-{
-    return NapiUtils::GetUndefined(context->GetEnv());
-}
-
-napi_value StatisticsExec::UpdateStatsDataCallback(UpdateStatsDataContext *context)
-{
-    return NapiUtils::GetUndefined(context->GetEnv());
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

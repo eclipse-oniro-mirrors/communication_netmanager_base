@@ -57,7 +57,6 @@ private:
     int32_t OnSetBackgroundPolicy(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetBackgroundPolicy(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetBackgroundPolicyByUid(MessageParcel &data, MessageParcel &reply);
-    int32_t OnGetCurrentBackgroundPolicy(MessageParcel &data, MessageParcel &reply);
     int32_t OnSnoozePolicy(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetDeviceIdleAllowedList(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetDeviceIdleAllowedList(MessageParcel &data, MessageParcel &reply);

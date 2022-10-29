@@ -24,8 +24,6 @@ using namespace NetManagerStandard;
 
 LocalNetwork::LocalNetwork(uint16_t netId) : NetsysNetwork(netId) {}
 
-LocalNetwork::~LocalNetwork() {}
-
 int32_t LocalNetwork::AddInterface(std::string &interfaceName)
 {
     NETNATIVE_LOGI("Entry LocalNetwork::AddInterface %{public}s", interfaceName.c_str());

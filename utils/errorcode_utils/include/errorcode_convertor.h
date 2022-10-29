@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef NET_STATS_LISTENER_H
-#define NET_STATS_LISTENER_H
+#ifndef NETMANAGER_ERRORCODE_CONVERTOR_H
+#define NETMANAGER_ERRORCODE_CONVERTOR_H
 
-#include "common_event_manager.h"
-#include "common_event_support.h"
-
-#include "net_stats_callback.h"
+#include <map>
+#include <string>
 
 namespace OHOS {
 namespace NetManagerStandard {
-class NetStatsListener  : public EventFwk::CommonEventSubscriber {
+class ErrorCodeConvertor {
 public:
-    explicit NetStatsListener(const EventFwk::CommonEventSubscribeInfo &sp) : CommonEventSubscriber(sp) {};
-    NetStatsListener() = default;
-    void SetStatsCallback(const sptr<NetStatsCallback> &callback);
+    ErrorCodeConvertor();
+    virtual ~ErrorCodeConvertor() = default;
+    virtual std::string ConvertErrorCode(int32_t errorCode);
 
-public:
-    virtual void OnReceiveEvent(const EventFwk::CommonEventData &data);
-
-private:
-    sptr<NetStatsCallback> netStatsCallback_;
+protected:
+    std::map<int32_t, std::string> errorMap_;
 };
+
+class NetBaseErrorCodeConvertor : public ErrorCodeConvertor {
+public:
+    NetBaseErrorCodeConvertor();
+    ~NetBaseErrorCodeConvertor() = default;
+    std::string ConvertErrorCode(int32_t errorCode) override;
+};
+
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // NET_STATS_LISTENER_H
+#endif // NETMANAGER_ERRORCODE_CONVERTOR_H

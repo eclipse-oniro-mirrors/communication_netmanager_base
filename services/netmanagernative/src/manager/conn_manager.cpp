@@ -25,7 +25,8 @@ namespace nmd {
 using namespace NetManagerStandard;
 namespace {
 constexpr int32_t INTERFACE_UNSET = -1;
-}
+constexpr int32_t LOCAL_NET_ID = 99;
+} // namespace
 
 ConnManager::ConnManager()
 {
@@ -120,7 +121,7 @@ int32_t ConnManager::ClearDefaultNetwork()
 
 std::tuple<bool, std::shared_ptr<NetsysNetwork>> ConnManager::FindNetworkById(int32_t netId)
 {
-    NETNATIVE_LOGI("Entry ConnManager::FindNetworkById netId:%{public}d", netId);
+    NETNATIVE_LOG_D("Entry ConnManager::FindNetworkById netId:%{public}d", netId);
     std::map<int32_t, std::shared_ptr<NetsysNetwork>>::iterator it;
     for (it = networks_.begin(); it != networks_.end(); ++it) {
         if (netId == it->first) {
@@ -130,14 +131,14 @@ std::tuple<bool, std::shared_ptr<NetsysNetwork>> ConnManager::FindNetworkById(in
     return std::make_tuple<bool, std::shared_ptr<NetsysNetwork>>(false, nullptr);
 }
 
-int32_t ConnManager::GetDefaultNetwork()
+int32_t ConnManager::GetDefaultNetwork() const
 {
     return defaultNetId_;
 }
 
 int32_t ConnManager::GetNetworkForInterface(std::string &interfaceName)
 {
-    NETNATIVE_LOGI("Entry ConnManager::GetNetworkForInterface interfaceName:%{public}s", interfaceName.c_str());
+    NETNATIVE_LOG_D("Entry ConnManager::GetNetworkForInterface interfaceName:%{public}s", interfaceName.c_str());
     std::map<int32_t, std::shared_ptr<NetsysNetwork>>::iterator it;
     for (it = networks_.begin(); it != networks_.end(); ++it) {
         if (it->second->ExistInterface(interfaceName)) {
@@ -149,8 +150,8 @@ int32_t ConnManager::GetNetworkForInterface(std::string &interfaceName)
 
 int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interfaceName)
 {
-    NETNATIVE_LOGI("Entry ConnManager::AddInterfaceToNetwork netId:%{public}d, interfaceName:%{public}s", netId,
-        interfaceName.c_str());
+    NETNATIVE_LOG_D("Entry ConnManager::AddInterfaceToNetwork netId:%{public}d, interfaceName:%{public}s", netId,
+                    interfaceName.c_str());
     int32_t alreadySetNetId = GetNetworkForInterface(interfaceName);
     if ((alreadySetNetId != netId) && (alreadySetNetId != INTERFACE_UNSET)) {
         NETNATIVE_LOGE("AddInterfaceToNetwork failed alreadySetNetId:%{public}d", alreadySetNetId);
@@ -185,12 +186,14 @@ int32_t ConnManager::AddRoute(int32_t netId, std::string interfaceName, std::str
     return RouteManager::AddRoute(GetTableType(netId), interfaceName, destination, nextHop);
 }
 
-int32_t ConnManager::RemoveRoute(int32_t netId, std::string interfaceName, std::string destination, std::string nextHop)
+int32_t ConnManager::RemoveRoute(int32_t netId, std::string interfaceName, std::string destination,
+                                 std::string nextHop)
 {
     return RouteManager::RemoveRoute(GetTableType(netId), interfaceName, destination, nextHop);
 }
 
-int32_t ConnManager::UpdateRoute(int32_t netId, std::string interfaceName, std::string destination, std::string nextHop)
+int32_t ConnManager::UpdateRoute(int32_t netId, std::string interfaceName, std::string destination,
+                                 std::string nextHop)
 {
     return RouteManager::UpdateRoute(GetTableType(netId), interfaceName, destination, nextHop);
 }

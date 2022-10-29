@@ -88,8 +88,6 @@ public:
     static bool MatchValueType(napi_env env, napi_value value, napi_valuetype targetType);
     static bool MatchParameters(
         napi_env env, const napi_value parameters[], std::initializer_list<napi_valuetype> valueTypes);
-    static napi_value CreateErrorMessage(
-        napi_env env, const std::string &message, int32_t errorCode = ERROR_DEFAULT);
     static napi_value CreateUndefined(napi_env env);
     static napi_value HandleAsyncWork(napi_env env, BaseContext *context, const std::string &workName,
         napi_async_execute_callback execute, napi_async_complete_callback complete);
@@ -100,6 +98,8 @@ public:
         napi_env env, napi_value object, std::initializer_list<std::pair<std::string, napi_valuetype>> pairList);
     static bool HasNamedTypeProperty(napi_env env, napi_value object, napi_valuetype type, std::string propertyName);
     static napi_value CreateEnumConstructor(napi_env env, napi_callback_info info);
+    static napi_value CreateObject(napi_env env);
+    static napi_value CreateErrorMessage(napi_env env, int32_t errorCodeconst, const std::string &errorMessage);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

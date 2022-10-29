@@ -26,7 +26,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 class NetsysController {
 public:
-    ~NetsysController();
+    ~NetsysController() = default;
     void Init();
 
     static NetsysController &GetInstance();
@@ -75,7 +75,7 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t NetworkAddRoute(int32_t netId, const std::string &ifName, const std::string &destination,
-        const std::string &nextHop);
+                            const std::string &nextHop);
 
     /**
      * Remove route
@@ -87,7 +87,7 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t NetworkRemoveRoute(int32_t netId, const std::string &ifName, const std::string &destination,
-        const std::string &nextHop);
+                               const std::string &nextHop);
 
     /**
      * @brief Get interface config
@@ -168,7 +168,7 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
-        const std::vector<std::string> &servers, const std::vector<std::string> &domains);
+                              const std::vector<std::string> &servers, const std::vector<std::string> &domains);
     /**
      * Get dns server param info
      *
@@ -179,8 +179,8 @@ public:
      * @param retryCount
      * @return Return the return value of the netsys interface call
      */
-    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
-        std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount);
+    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
+                              uint16_t &baseTimeoutMsec, uint8_t &retryCount);
 
     /**
      * Create dns cache before set dns
@@ -199,24 +199,12 @@ public:
     int32_t DestroyNetworkCache(uint16_t netId);
 
     /**
-     * Domain name resolution Obtains the domain name address
-     *
-     * @param hostName
-     * @param serverName
-     * @param hints
-     * @param res
-     * @return Return the return value of the netsys interface call
-     */
-    int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName,
-        const struct addrinfo &hints, std::unique_ptr<addrinfo> &res, uint16_t netId);
-
-    /**
      * Obtains the bytes of the sharing network.
      *
      * @return Success return 0.
      */
     int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
-        nmd::NetworkSharingTraffic &traffic);
+                                     nmd::NetworkSharingTraffic &traffic);
 
     /**
      * Obtains the bytes received over the cellular network.
@@ -331,14 +319,14 @@ public:
      *
      * @return Return the return value of the netsys interface call
      */
-    int32_t  SetDefaultNetWork(int32_t   netId);
+    int32_t SetDefaultNetWork(int32_t netId);
 
-	 /**
+    /**
      * clear default network netId.
      *
      * @return Return the return value of the netsys interface call
      */
-    int32_t  ClearDefaultNetWorkNetId();
+    int32_t ClearDefaultNetWorkNetId();
 
     /**
      * Obtains the NIC list.
@@ -355,7 +343,7 @@ public:
      * @param requestor the requestor of forwarding
      * @return Return the return value of the netsys interface call.
      */
-    int32_t IpEnableForwarding(const std::string& requestor);
+    int32_t IpEnableForwarding(const std::string &requestor);
 
     /**
      * Disable ip forwarding.
@@ -363,7 +351,7 @@ public:
      * @param requestor the requestor of forwarding
      * @return Return the return value of the netsys interface call.
      */
-    int32_t IpDisableForwarding(const std::string& requestor);
+    int32_t IpDisableForwarding(const std::string &requestor);
 
     /**
      * Enable Nat.
@@ -389,7 +377,7 @@ public:
      * @param toIface the name of outcoming interface
      * @return Return the return value of the netsys interface call.
      */
-    int32_t IpfwdAddInterfaceForward(const std::string& fromIface, const std::string& toIface);
+    int32_t IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface);
 
     /**
      * Remove interface forward.
@@ -398,7 +386,7 @@ public:
      * @param toIface the name of outcoming interface
      * @return Return the return value of the netsys interface call.
      */
-    int32_t IpfwdRemoveInterfaceForward(const std::string& fromIface, const std::string& toIface);
+    int32_t IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface);
 
     /**
      * Set tether dns.
@@ -412,14 +400,14 @@ public:
     /**
      * start dns proxy listen
      *
-     * @return int32_t
+     * @return success or failed
      */
     int32_t StartDnsProxyListen();
 
     /**
      * stop dns proxy listen
      *
-     * @return int32_t
+     * @return success or failed
      */
     int32_t StopDnsProxyListen();
 
@@ -473,7 +461,7 @@ public:
      *
      * @param iface interface file description
      * @param bIpv6 network blocking
-     * @return.
+     * @return success or failed
      */
     int32_t StartDhcpClient(const std::string &iface, bool bIpv6);
     /**
@@ -481,15 +469,15 @@ public:
      *
      * @param iface interface file description
      * @param bIpv6 network blocking
-     * @return .
+     * @return success or failed
      */
     int32_t StopDhcpClient(const std::string &iface, bool bIpv6);
     /**
-    * Register Notify Callback
-    *
-    * @param callback
-    * @return .
-    */
+     * Register Notify Callback
+     *
+     * @param callback
+     * @return success or failed
+     */
     int32_t RegisterCallback(sptr<NetsysControllerCallback> callback);
 
     /**
@@ -522,7 +510,7 @@ public:
      *
      * @param iface interface name
      * @param bytes
-     * @return .
+     * @return success or failed
      */
     int32_t BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes);
 
@@ -530,7 +518,7 @@ public:
      * Delete quota.
      *
      * @param iface interface name
-     * @return .
+     * @return success or failed
      */
     int32_t BandwidthRemoveIfaceQuota(const std::string &ifName);
 
@@ -538,7 +526,7 @@ public:
      * Add DeniedList.
      *
      * @param uid
-     * @return .
+     * @return success or failed
      */
     int32_t BandwidthAddDeniedList(uint32_t uid);
 
@@ -546,7 +534,7 @@ public:
      * Remove DeniedList.
      *
      * @param uid
-     * @return .
+     * @return success or failed
      */
     int32_t BandwidthRemoveDeniedList(uint32_t uid);
 
@@ -554,7 +542,7 @@ public:
      * Add DeniedList.
      *
      * @param uid
-     * @return .
+     * @return success or failed
      */
     int32_t BandwidthAddAllowedList(uint32_t uid);
 
@@ -562,7 +550,7 @@ public:
      * remove DeniedList.
      *
      * @param uid
-     * @return .
+     * @return success or failed
      */
     int32_t BandwidthRemoveAllowedList(uint32_t uid);
 
@@ -591,7 +579,7 @@ public:
      *
      * @param chain chain type
      * @param enable enable or disable
-     * @return .
+     * @return success or failed
      */
     int32_t FirewallEnableChain(uint32_t chain, bool enable);
 
@@ -601,11 +589,12 @@ public:
      * @param chain chain type
      * @param uid uid
      * @param firewallRule firewall rule
-     * @return .
+     * @return success or failed
      */
     int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule);
+
 private:
-    NetsysController();
+    NetsysController() = default;
 
 private:
     bool initFlag_ = false;

@@ -15,63 +15,90 @@
 
 #ifndef NETMANAGER_BASE_BANDWIDTH_MANAGER_H
 #define NETMANAGER_BASE_BANDWIDTH_MANAGER_H
+
+#include <iostream>
 #include <map>
 #include <mutex>
-#include <iostream>
 #include <vector>
 
-#include "iptables_type.h"
 #include "i_notify_callback.h"
+#include "iptables_type.h"
 
 namespace OHOS {
 namespace nmd {
 class BandwidthManager {
-enum Operate {
-    OP_SET = 1,
-    OP_UNSET = 2,
-};
+    enum Operate {
+        OP_SET = 1,
+        OP_UNSET = 2,
+    };
 
 public:
     BandwidthManager();
     ~BandwidthManager();
 
     /**
-     * @param enable enable or disable
-     * @return .
+     * Enable data saver
+     *
+     * @param enable Enable or disable
+     *
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     int32_t EnableDataSaver(bool enable);
+
     /**
-     * @param ifName iface name
-     * @param bytes quota value
-     * @return .
+     * Set iface quota
+     *
+     * @param ifName Iface name
+     * @param bytes Quota value
+     *
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     int32_t SetIfaceQuota(const std::string &ifName, int64_t bytes);
+
     /**
-     * @param ifName iface name
-     * @param bytes quota value
-     * @return .
+     * Remove iface quota
+     *
+     * @param ifName Iface name
+     * @param bytes Quota value
+     *
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     int32_t RemoveIfaceQuota(const std::string &ifName);
+
     /**
-     * @param ifName iface name
-     * @return .
+     * Add denied list
+     * @param ifName Iface name
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     int32_t AddDeniedList(uint32_t uid);
+
     /**
-     * @param uid uid
-     * @return .
+     * Remove denied list
+     *
+     * @param uid Uid
+     *
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     int32_t RemoveDeniedList(uint32_t uid);
+
     /**
-     * @param uid uid
-     * @return .
+     * Add allowed list
+     *
+     * @param uid Uid
+     *
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     int32_t AddAllowedList(uint32_t uid);
+
     /**
-     * @param uid uid
-     * @return .
+     * Remove allowed list
+     *
+     * @param uid Uid
+     *
+     * @return NETMANAGER_SUCCESS suceess or NETMANAGER_ERROR failed
      */
     int32_t RemoveAllowedList(uint32_t uid);
+
 private:
     std::string FetchChainName(NetManagerStandard::ChainType chain);
     int32_t InitChain();
@@ -87,10 +114,11 @@ private:
     int32_t SetGlobalAlert(Operate operate, int64_t bytes);
     int32_t SetCostlyAlert(Operate operate, const std::string &iface, int64_t bytes);
     inline void CheckChainInitialization();
+
 private:
-    bool chainInitFlag_;
-    bool dataSaverEnable_;
-    int64_t globalAlertBytes_;
+    bool chainInitFlag_ = false;
+    bool dataSaverEnable_ = false;
+    int64_t globalAlertBytes_ = 0;
     std::mutex bandwidthMutex_;
     std::map<std::string, int64_t> ifaceAlertBytes_;
     std::map<std::string, int64_t> ifaceQuotaBytes_;

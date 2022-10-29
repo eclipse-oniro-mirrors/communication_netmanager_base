@@ -49,6 +49,10 @@ public:
 
     static napi_value HasDefaultNetCallback(HasDefaultNetContext *context);
 
+    static bool ExecIsDefaultNetMetered(IsDefaultNetMeteredContext *context);
+
+    static napi_value IsDefaultNetMeteredCallback(IsDefaultNetMeteredContext *context);
+
     static bool ExecGetNetCapabilities(GetNetCapabilitiesContext *context);
 
     static napi_value GetNetCapabilitiesCallback(GetNetCapabilitiesContext *context);

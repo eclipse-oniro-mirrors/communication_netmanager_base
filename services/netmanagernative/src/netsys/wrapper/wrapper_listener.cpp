@@ -17,16 +17,15 @@
 
 #include <cerrno>
 #include <cstdlib>
-#include <memory>
-#include <vector>
-
 #include <fcntl.h>
+#include <memory>
 #include <poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <vector>
 
-#include "netnative_log_wrapper.h"
 #include "netlink_define.h"
+#include "netnative_log_wrapper.h"
 
 namespace OHOS::nmd {
 namespace {
@@ -50,9 +49,6 @@ int32_t WrapperListener::Start()
         NETNATIVE_LOGE("listener socket_ < 0 %{public}d", socket_);
         return NetlinkResult::ERROR;
     }
-
-    int ret = listen(socket_, BACK_LOG);
-    NETNATIVE_LOGI("WrapperListener: listen result: %{public}d, Socket: %{public}d", ret, socket_);
 
     int pipeRet = pipe2(pipe_, O_CLOEXEC);
     if (pipeRet != 0) {
@@ -118,7 +114,7 @@ void WrapperListener::Listen()
 
         if (pollFds[0].revents & (POLLIN | POLLERR)) {
             char ctlp = PIPE_SHUTDOWN;
-            TEMP_FAILURE_RETRY(read(pipe_[0], &ctlp, 1));
+            TEMP_FAILURE_RETRY(read(pipe_[0], &ctlp, sizeof(ctlp)));
             if (ctlp == PIPE_SHUTDOWN) {
                 break;
             }

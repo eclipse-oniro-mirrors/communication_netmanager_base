@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,30 +18,26 @@
 
 #include <list>
 #include <string>
-#include "route.h"
+
 #include "net_link_info.h"
+#include "route.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-enum routeOperateType {
-    ROUTE_ADD,
-    ROUTE_REMOVE
-};
+enum routeOperateType { ROUTE_ADD, ROUTE_REMOVE };
 
-enum routeLocalNetId {
-    LOCAL_NET_ID = 99
-};
+enum routeLocalNetId { LOCAL_NET_ID = 99 };
 
-constexpr const char *NEXTHOP_UNREACHABLE = "unreachable";
-constexpr const char *NEXTHOP_THROW = "throw";
+static constexpr const char *NEXTHOP_UNREACHABLE = "unreachable";
+static constexpr const char *NEXTHOP_THROW = "throw";
 
 class RouteUtils {
 public:
-    RouteUtils();
-    ~RouteUtils();
+    RouteUtils() = default;
+    ~RouteUtils() = default;
 
     /**
-     * @brief add route info to table by default netId
+     * Add route info to table by default netId
      *
      * @param iface interface name
      * @param routes the list of route
@@ -51,7 +47,7 @@ public:
     static int32_t AddRoutesToLocal(const std::string &iface, const std::list<Route> &routes);
 
     /**
-     * @brief remove route info from table by default netId
+     * Remove route info from table by default netId
      *
      * @param routes the list of route
      *
@@ -60,7 +56,7 @@ public:
     static int32_t RemoveRoutesFromLocal(const std::list<Route> &routes);
 
     /**
-     * @brief add route info to table by given netId
+     * Add route info to table by given netId
      *
      * @param netId
      * @param route route info will add to route table
@@ -70,7 +66,7 @@ public:
     static int32_t AddRoute(int32_t netId, const Route &route);
 
     /**
-     * @brief remove route info from table by given netId
+     * Remove route info from table by given netId
      *
      * @param netId
      * @param route route info will remove from route table
@@ -80,7 +76,7 @@ public:
     static int32_t RemoveRoute(int32_t netId, const Route &route);
 
     /**
-     * @brief update route from oldnl to newnl
+     * Update route from oldnl to newnl
      *
      * @param netId
      * @param newnl route info will add or update to route table
@@ -97,4 +93,4 @@ private:
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif  // ROUTEUTILS_H
+#endif // ROUTEUTILS_H

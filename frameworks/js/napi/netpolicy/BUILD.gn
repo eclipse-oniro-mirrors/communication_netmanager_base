@@ -14,13 +14,11 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-NETMANAGER_NAPI_ROOT = "$NETMANAGER_BASE_ROOT/frameworks/js/napi/"
-
 ohos_shared_library("policy") {
   include_dirs = [
     "$THIRD_PARTY_ROOT/node/src",
-    "$NETMANAGER_NAPI_ROOT/netpolicy/include",
-    "$NETMANAGER_NAPI_ROOT/common",
+    "include",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/common",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$INNERKITS_ROOT/netpolicyclient/include",
     "$INNERKITS_ROOT/netpolicyclient/include/proxy",
@@ -28,10 +26,10 @@ ohos_shared_library("policy") {
   ]
 
   sources = [
-    "$NETMANAGER_NAPI_ROOT/common/napi_common.cpp",
-    "$NETMANAGER_NAPI_ROOT/netpolicy/src/napi_net_policy.cpp",
-    "$NETMANAGER_NAPI_ROOT/netpolicy/src/napi_net_policy_observer.cpp",
-    "$NETMANAGER_NAPI_ROOT/netpolicy/src/net_policy_event_listener_context.cpp",
+    "$NETMANAGER_BASE_ROOT/frameworks/js/napi/common/napi_common.cpp",
+    "src/napi_net_policy.cpp",
+    "src/napi_net_policy_observer.cpp",
+    "src/net_policy_event_listener_context.cpp",
   ]
 
   defines = [ "NETMGR_DEBUG" ]

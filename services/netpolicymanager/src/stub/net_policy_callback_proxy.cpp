@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "net_policy_callback_proxy.h"
 
 #include "net_mgr_log_wrapper.h"
@@ -34,10 +35,12 @@ int32_t NetPolicyCallbackProxy::NetUidPolicyChange(uint32_t uid, uint32_t policy
     }
 
     if (!data.WriteUint32(uid)) {
+        NETMGR_LOG_E("Write uint32 data failed");
         return ERR_NULL_OBJECT;
     }
 
-    if (!data.WriteUint32(static_cast<uint32_t>(policy))) {
+    if (!data.WriteUint32(policy)) {
+        NETMGR_LOG_E("Write uint32 data failed");
         return ERR_NULL_OBJECT;
     }
 
@@ -65,12 +68,12 @@ int32_t NetPolicyCallbackProxy::NetUidRuleChange(uint32_t uid, uint32_t rule)
     }
 
     if (!data.WriteUint32(uid)) {
-        NETMGR_LOG_E("Write uid failed");
+        NETMGR_LOG_E("Write uint32 data failed");
         return ERR_NULL_OBJECT;
     }
 
     if (!data.WriteUint32(rule)) {
-        NETMGR_LOG_E("Write rule failed");
+        NETMGR_LOG_E("Write uint32 data failed");
         return ERR_NULL_OBJECT;
     }
 
@@ -98,6 +101,7 @@ int32_t NetPolicyCallbackProxy::NetBackgroundPolicyChange(bool isBackgroundPolic
     }
 
     if (!data.WriteBool(isBackgroundPolicyAllow)) {
+        NETMGR_LOG_E("Write Bool data failed");
         return ERR_NULL_OBJECT;
     }
 
@@ -158,12 +162,12 @@ int32_t NetPolicyCallbackProxy::NetStrategySwitch(const std::string &iccid, bool
     }
 
     if (!data.WriteString(iccid)) {
-        NETMGR_LOG_E("WriteString iccid failed");
+        NETMGR_LOG_E("WriteString String data failed");
         return ERR_NULL_OBJECT;
     }
 
     if (!data.WriteBool(enable)) {
-        NETMGR_LOG_E("WriteBool enable failed");
+        NETMGR_LOG_E("WriteBool Bool data failed");
         return ERR_NULL_OBJECT;
     }
 
@@ -191,13 +195,13 @@ int32_t NetPolicyCallbackProxy::NetMeteredIfacesChange(std::vector<std::string> 
     }
     uint32_t size = static_cast<uint32_t>(ifaces.size());
     if (!data.WriteUint32(size)) {
-        NETMGR_LOG_E("WriteUInt32 size failed");
+        NETMGR_LOG_E("Write uint32 data failed");
         return ERR_NULL_OBJECT;
     }
 
     for (uint32_t i = 0; i < ifaces.size(); ++i) {
         if (!data.WriteString(ifaces[i])) {
-            NETMGR_LOG_E("WriteString ifaces failed");
+            NETMGR_LOG_E("Write String data failed");
             return ERR_NULL_OBJECT;
         }
     }

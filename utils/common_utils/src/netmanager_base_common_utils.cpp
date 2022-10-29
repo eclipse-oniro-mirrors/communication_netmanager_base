@@ -17,18 +17,20 @@
 
 #include <algorithm>
 #include <arpa/inet.h>
-#include <regex>
 #include <cstddef>
 #include <cstdlib>
+#include <netinet/in.h>
+#include <regex>
 #include <string>
+#include <sys/socket.h>
 #include <type_traits>
 #include <vector>
-#include "netinet/in.h"
-#include "sys/socket.h"
+
 #include "securec.h"
 
 namespace OHOS::NetManagerStandard::CommonUtils {
 constexpr int32_t INET_OPTION_SUC = 1;
+constexpr int32_t DECIMAL_SYSTEM = 10;
 constexpr uint32_t CONST_MASK = 0x80000000;
 constexpr size_t MAX_DISPLAY_NUM = 2;
 constexpr uint32_t IPV4_DOT_NUM = 3;
@@ -39,21 +41,16 @@ constexpr int32_t BITS_24 = 24;
 constexpr int32_t BITS_16 = 16;
 constexpr int32_t BITS_8 = 8;
 const std::string IPADDR_DELIMITER = ".";
-const std::regex IP_PATTERN {
-    "((2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)\\.){3}(2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)"
-};
+const std::regex IP_PATTERN{
+    "((2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)\\.){3}(2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)"};
 
-const std::regex IP_MASK_PATTERN {
-    "((2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)\\.){3}(2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)/(3[0-2]|[1-2]\\d|\\d)"
-};
+const std::regex IP_MASK_PATTERN{
+    "((2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)\\.){3}(2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)/"
+    "(3[0-2]|[1-2]\\d|\\d)"};
 
-const std::regex IPV6_PATTERN {
-    "([\\da-fA-F]{0,4}:){2,7}([\\da-fA-F]{0,4})"
-};
+const std::regex IPV6_PATTERN{"([\\da-fA-F]{0,4}:){2,7}([\\da-fA-F]{0,4})"};
 
-const std::regex IPV6_MASK_PATTERN {
-    "([\\da-fA-F]{0,4}:){2,7}([\\da-fA-F]{0,4})/(1[0-2][0-8]|[1-9]\\d|[1-9])"
-};
+const std::regex IPV6_MASK_PATTERN{"([\\da-fA-F]{0,4}:){2,7}([\\da-fA-F]{0,4})/(1[0-2][0-8]|[1-9]\\d|[1-9])"};
 
 std::vector<std::string> Split(const std::string &str, const std::string &sep)
 {
@@ -101,11 +98,7 @@ bool IsValidIPV4(const std::string &ip)
         return false;
     }
     struct in_addr s;
-    int32_t result = inet_pton(AF_INET, ip.c_str(), reinterpret_cast<void *>(&s));
-    if (result == INET_OPTION_SUC) {
-        return true;
-    }
-    return false;
+    return INET_OPTION_SUC == inet_pton(AF_INET, ip.c_str(), reinterpret_cast<void *>(&s));
 }
 
 bool IsValidIPV6(const std::string &ip)
@@ -114,11 +107,7 @@ bool IsValidIPV6(const std::string &ip)
         return false;
     }
     struct in6_addr s;
-    int32_t result = inet_pton(AF_INET6, ip.c_str(), reinterpret_cast<void *>(&s));
-    if (result == INET_OPTION_SUC) {
-        return true;
-    }
-    return false;
+    return INET_OPTION_SUC == inet_pton(AF_INET6, ip.c_str(), reinterpret_cast<void *>(&s));
 }
 
 int8_t GetAddrFamily(const std::string &ip)
@@ -150,10 +139,8 @@ std::string ConvertIpv4Address(uint32_t addressIpv4)
     }
 
     std::ostringstream stream;
-    stream << ((addressIpv4 >> BITS_24) & 0xFF) << IPADDR_DELIMITER
-           << ((addressIpv4 >> BITS_16) & 0xFF) << IPADDR_DELIMITER
-           << ((addressIpv4 >> BITS_8) & 0xFF) << IPADDR_DELIMITER
-           << (addressIpv4 & 0xFF);
+    stream << ((addressIpv4 >> BITS_24) & 0xFF) << IPADDR_DELIMITER << ((addressIpv4 >> BITS_16) & 0xFF)
+           << IPADDR_DELIMITER << ((addressIpv4 >> BITS_8) & 0xFF) << IPADDR_DELIMITER << (addressIpv4 & 0xFF);
     return stream.str();
 }
 
@@ -247,7 +234,7 @@ bool ParseInt(const std::string &str, int32_t *value)
 
 int64_t ConvertToInt64(const std::string &str)
 {
-    return strtoll(str.c_str(), nullptr, 10);
+    return strtoll(str.c_str(), nullptr, DECIMAL_SYSTEM);
 }
 
 std::string MaskIpv4(std::string &maskedResult)
@@ -304,7 +291,7 @@ std::string ToAnonymousIp(const std::string &input)
     return input;
 }
 
-int32_t StrToInt(std::string &str)
+int32_t StrToInt(const std::string &str)
 {
     return std::strtol(str.c_str(), nullptr, 0);
 }
@@ -319,7 +306,7 @@ bool StrToBool(const std::string &str)
     return static_cast<bool>(std::strtoul(str.c_str(), nullptr, 0));
 }
 
-int64_t StrToLong(std::string &str)
+int64_t StrToLong(const std::string &str)
 {
     return std::strtol(str.c_str(), nullptr, 0);
 }

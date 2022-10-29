@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +13,7 @@
  * limitations under the License.
  */
 
-#include "net_mgr_log_wrapper.h"
 #include "net_stats_wrapper.h"
-
-// using OHOS::Bpf::NetsysBpfStats;
 
 namespace OHOS {
 namespace NetManagerStandard {

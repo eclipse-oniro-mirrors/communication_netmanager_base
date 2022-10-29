@@ -57,6 +57,11 @@ int32_t DnsManager::CreateNetworkCache(uint16_t netId)
     return DelayedSingleton<DnsParamCache>::GetInstance()->CreateCacheForNet(netId);
 }
 
+int32_t DnsManager::DestroyNetworkCache(uint16_t netId)
+{
+    return DelayedSingleton<DnsParamCache>::GetInstance()->DestroyNetworkCache(netId);
+}
+
 void DnsManager::SetDefaultNetwork(uint16_t netId)
 {
     DelayedSingleton<DnsParamCache>::GetInstance()->SetDefaultNetwork(netId);
@@ -70,7 +75,7 @@ void StartProxyListen()
 
 void DnsManager::ShareDnsSet(uint16_t netId)
 {
-    return dnsProxyListen_->SetParseNetId(netId);
+    dnsProxyListen_->SetParseNetId(netId);
 }
 
 void DnsManager::StartDnsProxyListen()
@@ -89,7 +94,5 @@ void DnsManager::GetDumpInfo(std::string &info)
     NETNATIVE_LOG_D("Get dump info");
     DelayedSingleton<DnsParamCache>::GetInstance()->GetDumpInfo(info);
 }
-
-DnsManager::~DnsManager() = default;
 } // namespace nmd
 } // namespace OHOS

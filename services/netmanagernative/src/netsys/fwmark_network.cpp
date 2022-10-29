@@ -41,6 +41,10 @@ static constexpr const int32_t MAX_CONCURRENT_CONNECTION_REQUESTS = 10;
 
 void CloseSocket(int32_t *socket, int32_t ret, int32_t errorCode)
 {
+    if (socket == nullptr) {
+        NETNATIVE_LOGE("CloseSocket failed, socket is nullptr");
+        return;
+    }
     switch (errorCode) {
         case ERROR_CODE_RECVMSG_FAILED:
             NETNATIVE_LOGE("recvmsg failed, clientSockfd:%{public}d, ret:%{public}d, errno: %{public}d", *socket, ret,
@@ -75,6 +79,10 @@ void CloseSocket(int32_t *socket, int32_t ret, int32_t errorCode)
 
 int32_t SetMark(int32_t *socketFd, FwmarkCommand *command)
 {
+    if (command == nullptr || socketFd == nullptr) {
+        NETNATIVE_LOGE("SetMark failed, command or socketFd is nullptr");
+        return -1;
+    }
     Fwmark fwmark;
     socklen_t fwmarkLen = sizeof(fwmark.intValue);
     int32_t ret = getsockopt(*socketFd, SOL_SOCKET, SO_MARK, &fwmark.intValue, &fwmarkLen);
@@ -102,6 +110,11 @@ int32_t SetMark(int32_t *socketFd, FwmarkCommand *command)
 
 void SendMessage(int32_t *serverSockfd)
 {
+    if (serverSockfd == nullptr) {
+        NETNATIVE_LOGE("SendMessage failed, serverSockfd is nullptr");
+        return;
+    }
+
     int32_t clientSockfd;
     struct sockaddr_un clientAddr;
     socklen_t len = sizeof(clientAddr);
@@ -166,7 +179,6 @@ void StartListener()
         NETNATIVE_LOGE("strcpy_s failed, ret: %{public}d", ret);
         return;
     }
-    NETNATIVE_LOGI("FwmarkNetwork: address.sun_path: %{public}s", serverAddr.sun_path);
 
     int32_t result = bind(serverSockfd, reinterpret_cast<struct sockaddr *>(&serverAddr), sizeof(serverAddr));
     if (result < 0) {

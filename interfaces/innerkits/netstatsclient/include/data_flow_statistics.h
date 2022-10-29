@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,40 +22,39 @@ namespace OHOS {
 namespace NetManagerStandard {
 class DataFlowStatistics {
 public:
-
-    DataFlowStatistics();
-    ~DataFlowStatistics();
+    DataFlowStatistics() = default;
+    ~DataFlowStatistics() = default;
 
     /**
-     * @brief Obtains the bytes received over the cellular network.
+     * Obtains the bytes received over the cellular network.
      *
      * @return The number of received bytes.
      */
     int64_t GetCellularRxBytes();
 
     /**
-     * @brief Obtains the bytes sent over the cellular network.
+     * Obtains the bytes sent over the cellular network.
      *
      * @return The number of sent bytes.
      */
     int64_t GetCellularTxBytes();
 
     /**
-     * @brief Obtains the bytes received through all NICs.
+     * Obtains the bytes received through all NICs.
      *
      * @return The number of received bytes.
      */
     int64_t GetAllRxBytes();
 
     /**
-     * @brief Obtains the bytes sent through all NICs.
+     * Obtains the bytes sent through all NICs.
      *
      * @return The number of sent bytes.
      */
     int64_t GetAllTxBytes();
 
     /**
-     * @brief Obtains the bytes received through a specified UID.
+     * Obtains the bytes received through a specified UID.
      *
      * @param uid
      * @return The number of received bytes.
@@ -63,7 +62,7 @@ public:
     int64_t GetUidRxBytes(uint32_t uid);
 
     /**
-     * @brief Obtains the bytes sent through a specified UID.
+     * Obtains the bytes sent through a specified UID.
      *
      * @param uid
      * @return The number of sent bytes.
@@ -71,7 +70,7 @@ public:
     int64_t GetUidTxBytes(uint32_t uid);
 
     /**
-     * @brief Obtains the bytes received through a specified NIC.
+     * Obtains the bytes received through a specified NIC.
      *
      * @param iface The name of the interface.
      * @return The number of received bytes.
@@ -79,7 +78,7 @@ public:
     int64_t GetIfaceRxBytes(const std::string &interfaceName);
 
     /**
-     * @brief Obtains the bytes sent through a specified NIC.
+     * Obtains the bytes sent through a specified NIC.
      *
      * @param iface The name of the interface.
      * @return The number of sent bytes.
@@ -87,7 +86,7 @@ public:
     int64_t GetIfaceTxBytes(const std::string &interfaceName);
 
     /**
-     * @brief Obtains the packets received through a specified NIC.
+     * Obtains the packets received through a specified NIC.
      *
      * @param iface The name of the interface.
      * @return The number of received packets.
@@ -95,7 +94,7 @@ public:
     int64_t GetIfaceRxPackets(const std::string &interfaceName);
 
     /**
-     * @brief Obtains the packets sent through a specified NIC.
+     * Obtains the packets sent through a specified NIC.
      *
      * @param iface The name of the interface.
      * @return The number of sent packets.
@@ -104,4 +103,4 @@ public:
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif  // DATA_FLOW_STATISTICS_H
+#endif // DATA_FLOW_STATISTICS_H

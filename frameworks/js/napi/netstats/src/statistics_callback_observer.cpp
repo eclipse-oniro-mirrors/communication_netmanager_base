@@ -31,8 +31,8 @@ int32_t StatisticsCallbackObserver::NetIfaceStatsChanged(const std::string &ifac
     auto pair = new std::pair<std::string, uint32_t>;
     pair->first = iface;
     pair->second = KEY_UID_ARG;
-    DelayedSingleton<StatisticsObserverWrapper>::GetInstance()->GetEventManager()->EmitByUv(EVENT_STATS_CHANGE, pair,
-                                                                                       NetIfaceStatsChangedCallback);
+    DelayedSingleton<StatisticsObserverWrapper>::GetInstance()->GetEventManager()->EmitByUv(
+        EVENT_STATS_CHANGE, pair, NetIfaceStatsChangedCallback);
     return 0;
 }
 
@@ -47,7 +47,7 @@ int32_t StatisticsCallbackObserver::NetUidStatsChanged(const std::string &iface,
     pair->first = iface;
     pair->second = uid;
     DelayedSingleton<StatisticsObserverWrapper>::GetInstance()->GetEventManager()->EmitByUv(EVENT_STATS_CHANGE, pair,
-                                                                                       NetUidStatsChangedCallback);
+                                                                                            NetUidStatsChangedCallback);
     return 0;
 }
 

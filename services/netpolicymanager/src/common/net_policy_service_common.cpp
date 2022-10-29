@@ -21,8 +21,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 int32_t NetPolicyServiceCommon::ResetPolicies()
 {
-    int32_t result = DelayedSingleton<NetPolicyService>::GetInstance()->ResetPolicies("");
-    return static_cast<int32_t>(result);
+    return DelayedSingleton<NetPolicyService>::GetInstance()->ResetPolicies("");
 }
 
 bool NetPolicyServiceCommon::IsUidNetAllowed(uint32_t uid, bool metered)

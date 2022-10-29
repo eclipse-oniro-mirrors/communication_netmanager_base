@@ -33,18 +33,20 @@ class StatisticsObserverWrapper {
 
 public:
     napi_value On(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events,
-        bool asyncCallback);
+                  bool asyncCallback);
     napi_value Off(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events,
-        bool asyncCallback);
+                   bool asyncCallback);
 
     EventManager *GetEventManager()
     {
         return manager_;
     }
+
 private:
     sptr<StatisticsCallbackObserver> observer_ = nullptr;
     EventManager *manager_ = nullptr;
     bool registed_ = false;
+
 private:
     bool Register();
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,13 +17,13 @@
 #define NETWORK_H
 
 #include "event_report.h"
-#include "i_net_detection_callback.h"
 #include "inet_addr.h"
+#include "i_net_detection_callback.h"
 #include "net_conn_types.h"
 #include "net_link_info.h"
 #include "net_monitor.h"
-#include "route.h"
 #include "net_supplier_info.h"
+#include "route.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -33,7 +33,7 @@ constexpr int32_t MAX_NET_ID = 0xFFFF - 0x400;
 using NetDetectionHandler = std::function<void(uint32_t supplierId, bool ifValid)>;
 class Network : public virtual RefBase {
 public:
-    Network(int32_t netId, uint32_t supplierId, NetDetectionHandler handler, NetBearType bearerType);
+    Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &handler, NetBearType bearerType);
     ~Network();
     bool operator==(const Network &network) const;
     int32_t GetNetId() const;

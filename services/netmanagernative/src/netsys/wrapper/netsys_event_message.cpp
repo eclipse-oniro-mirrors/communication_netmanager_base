@@ -35,10 +35,10 @@ const std::string NetsysEventMessage::GetMessage(NetsysEventMessage::Type type)
 
 void NetsysEventMessage::DumpMessage()
 {
-    NETNATIVE_LOG_D("DumpMessage:\nAction = %{public}d\nSybSys = %{public}d\nSeqNum = %{public}d\n", action_,
-                    subSys_, seqNum_);
+    NETNATIVE_LOG_D("DumpMessage:\nAction = %{public}d\nSybSys = %{public}d\nSeqNum = %{public}d\n", action_, subSys_,
+                    seqNum_);
     for (auto &item : messageMap_) {
-        NETNATIVE_LOG_D("type: %{public}d, value: %{public}s", item.first, item.second.c_str());
+        NETNATIVE_LOG_D("type: %{public}d", item.first);
     }
 }
 } // namespace nmd

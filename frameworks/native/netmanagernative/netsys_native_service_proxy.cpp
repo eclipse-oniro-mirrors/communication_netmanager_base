@@ -18,10 +18,13 @@
 #include <securec.h>
 
 #include "netnative_log_wrapper.h"
-#include "netsys_addr_info_parcel.h"
 
 namespace OHOS {
 namespace NetsysNative {
+static constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
+static constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
+static constexpr int32_t MAX_INTERFACE_CONFIG_SIZE = 16;
+
 namespace {
 bool WriteNatDataToMessage(MessageParcel &data, const std::string &downstreamIface, const std::string &upstreamIface)
 {
@@ -99,16 +102,15 @@ int32_t NetsysNativeServiceProxy::SetResolverConfig(uint16_t netId, uint16_t bas
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netid, std::vector<std::string> &servers,
+int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netId, std::vector<std::string> &servers,
                                                     std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
                                                     uint8_t &retryCount)
 {
-    NETNATIVE_LOGI("PROXY:Begin to GetResolverConfig %{public}d", netid);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteUint16(netid)) {
+    if (!data.WriteUint16(netId)) {
         return ERR_FLATTEN_OBJECT;
     }
     MessageParcel reply;
@@ -118,6 +120,7 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netid, std::v
     reply.ReadUint16(baseTimeoutMsec);
     reply.ReadUint8(retryCount);
     int32_t vServerSize = reply.ReadInt32();
+    vServerSize = vServerSize > MAX_DNS_CONFIG_SIZE ? MAX_DNS_CONFIG_SIZE : vServerSize;
     std::vector<std::string> vecString;
     for (int i = 0; i < vServerSize; i++) {
         vecString.push_back(reply.ReadString());
@@ -126,6 +129,7 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netid, std::v
         servers.assign(vecString.begin(), vecString.end());
     }
     int32_t vDomainSize = reply.ReadInt32();
+    vDomainSize = vDomainSize > MAX_DNS_CONFIG_SIZE ? MAX_DNS_CONFIG_SIZE : vDomainSize;
     std::vector<std::string> vecDomain;
     for (int i = 0; i < vDomainSize; i++) {
         vecDomain.push_back(reply.ReadString());
@@ -137,14 +141,14 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netid, std::v
     return result;
 }
 
-int32_t NetsysNativeServiceProxy::CreateNetworkCache(const uint16_t netid)
+int32_t NetsysNativeServiceProxy::CreateNetworkCache(const uint16_t netId)
 {
     NETNATIVE_LOGI("Begin to CreateNetworkCache");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteUint16(netid)) {
+    if (!data.WriteUint16(netId)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -155,14 +159,14 @@ int32_t NetsysNativeServiceProxy::CreateNetworkCache(const uint16_t netid)
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::DestroyNetworkCache(const uint16_t netid)
+int32_t NetsysNativeServiceProxy::DestroyNetworkCache(const uint16_t netId)
 {
     NETNATIVE_LOGI("Begin to DestroyNetworkCache");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteUint16(netid)) {
+    if (!data.WriteUint16(netId)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -171,39 +175,6 @@ int32_t NetsysNativeServiceProxy::DestroyNetworkCache(const uint16_t netid)
     Remote()->SendRequest(INetsysService::NETSYS_DESTROY_NETWORK_CACHE, data, reply, option);
 
     return reply.ReadInt32();
-}
-
-int32_t NetsysNativeServiceProxy::Getaddrinfo(const char *node, const char *service, const struct addrinfo *hints,
-                                              struct addrinfo **result, const uint16_t netid)
-{
-    NETNATIVE_LOGI("Begin to Getaddrinfo");
-#ifdef SYS_FUNC
-    NETNATIVE_LOGI("Begin to sys getaddrinfo");
-    return getaddrinfo(node, service, hints, result);
-#else
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    NetsysAddrInfoParcel addrParcel(hints, netid, node, service);
-    if (!addrParcel.Marshalling(data)) {
-        NETNATIVE_LOGI("addrinfo marshing fail");
-    }
-    MessageParcel reply;
-    MessageOption option;
-    Remote()->SendRequest(INetsysService::NETSYS_GET_ADDR_INFO, data, reply, option);
-    int ret;
-    sptr<NetsysAddrInfoParcel> ptr = addrParcel.Unmarshalling(reply);
-    if (ptr == nullptr) {
-        return ERR_NO_MEMORY;
-    }
-    *result = ptr->Head;
-    if (ptr->addrSize == 0) {
-        *result = nullptr;
-    }
-    ret = ptr->ret;
-    return ret;
-#endif
 }
 
 int32_t NetsysNativeServiceProxy::InterfaceSetMtu(const std::string &interfaceName, int32_t mtu)
@@ -722,6 +693,7 @@ int32_t NetsysNativeServiceProxy::InterfaceGetConfig(InterfaceConfigurationParce
     reply.ReadString(cfg.ipv4Addr);
     reply.ReadInt32(cfg.prefixLength);
     vSize = reply.ReadInt32();
+    vSize = vSize > MAX_INTERFACE_CONFIG_SIZE ? MAX_INTERFACE_CONFIG_SIZE : vSize;
     std::vector<std::string> vecString;
     for (int i = 0; i < vSize; i++) {
         vecString.push_back(reply.ReadString());
@@ -928,7 +900,8 @@ int32_t NetsysNativeServiceProxy::IpfwdAddInterfaceForward(const std::string &fr
     return ret;
 }
 
-int32_t NetsysNativeServiceProxy::IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface)
+int32_t NetsysNativeServiceProxy::IpfwdRemoveInterfaceForward(const std::string &fromIface,
+                                                              const std::string &toIface)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data) || !data.WriteString(fromIface) || !data.WriteString(toIface)) {
@@ -948,11 +921,11 @@ int32_t NetsysNativeServiceProxy::BandwidthEnableDataSaver(bool enable)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthEnableDataSaver Write Error");
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteBool(enable)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy Write Error");
+        NETNATIVE_LOGE("WriteBool failed");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -960,8 +933,9 @@ int32_t NetsysNativeServiceProxy::BandwidthEnableDataSaver(bool enable)
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (!remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_ENABLE_DATA_SAVER, data, reply, option)) {
-            NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthEnableDataSaver SendRequest Error");
+        if (ERR_NONE !=
+            remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_ENABLE_DATA_SAVER, data, reply, option)) {
+            NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }
     }
@@ -973,15 +947,15 @@ int32_t NetsysNativeServiceProxy::BandwidthSetIfaceQuota(const std::string &ifNa
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthSetIfaceQuota Write Error");
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteString(ifName)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthSetIfaceQuota Write Error");
+        NETNATIVE_LOGE("WriteString failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteInt64(bytes)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthSetIfaceQuota Write Error");
+        NETNATIVE_LOGE("WriteInt64 failed");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -989,8 +963,8 @@ int32_t NetsysNativeServiceProxy::BandwidthSetIfaceQuota(const std::string &ifNa
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (!remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_SET_IFACE_QUOTA, data, reply, option)) {
-            NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthSetIfaceQuota SendRequest Error");
+        if (ERR_NONE != remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_SET_IFACE_QUOTA, data, reply, option)) {
+            NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }
     }
@@ -1002,11 +976,11 @@ int32_t NetsysNativeServiceProxy::BandwidthRemoveIfaceQuota(const std::string &i
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthRemoveIfaceQuota Write Error");
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteString(ifName)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthRemoveIfaceQuota Write Error");
+        NETNATIVE_LOGE("WriteString failed");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -1014,8 +988,9 @@ int32_t NetsysNativeServiceProxy::BandwidthRemoveIfaceQuota(const std::string &i
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (!remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_REMOVE_IFACE_QUOTA, data, reply, option)) {
-            NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthRemoveIfaceQuota SendRequest Error");
+        if (ERR_NONE !=
+            remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_REMOVE_IFACE_QUOTA, data, reply, option)) {
+            NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }
     }
@@ -1027,11 +1002,11 @@ int32_t NetsysNativeServiceProxy::BandwidthAddDeniedList(uint32_t uid)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthAddDeniedList Write Error");
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteUint32(uid)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthAddDeniedList Write Error");
+        NETNATIVE_LOGE("WriteUint32 failed");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -1039,8 +1014,8 @@ int32_t NetsysNativeServiceProxy::BandwidthAddDeniedList(uint32_t uid)
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (!remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_ADD_DENIED_LIST, data, reply, option)) {
-            NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthAddDeniedList SendRequest Error");
+        if (ERR_NONE != remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_ADD_DENIED_LIST, data, reply, option)) {
+            NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }
     }
@@ -1052,11 +1027,11 @@ int32_t NetsysNativeServiceProxy::BandwidthRemoveDeniedList(uint32_t uid)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthRemoveDeniedList Write Error");
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteUint32(uid)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthRemoveDeniedList Write Error");
+        NETNATIVE_LOGE("WriteUint32 failed");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -1064,8 +1039,9 @@ int32_t NetsysNativeServiceProxy::BandwidthRemoveDeniedList(uint32_t uid)
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (!remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_REMOVE_DENIED_LIST, data, reply, option)) {
-            NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthRemoveDeniedList SendRequest Error");
+        if (ERR_NONE !=
+            remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_REMOVE_DENIED_LIST, data, reply, option)) {
+            NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }
     }
@@ -1077,11 +1053,11 @@ int32_t NetsysNativeServiceProxy::BandwidthAddAllowedList(uint32_t uid)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthAddAllowedList Write Error");
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteUint32(uid)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthAddAllowedList Write Error");
+        NETNATIVE_LOGE("WriteUint32 failed");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -1089,8 +1065,8 @@ int32_t NetsysNativeServiceProxy::BandwidthAddAllowedList(uint32_t uid)
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (!remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_ADD_ALLOWED_LIST, data, reply, option)) {
-            NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthAddAllowedList SendRequest Error");
+        if (ERR_NONE != remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_ADD_ALLOWED_LIST, data, reply, option)) {
+            NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }
     }
@@ -1102,11 +1078,11 @@ int32_t NetsysNativeServiceProxy::BandwidthRemoveAllowedList(uint32_t uid)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthRemoveAllowedList Write Error");
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteUint32(uid)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthRemoveAllowedList Write Error");
+        NETNATIVE_LOGE("WriteUint32 failed");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -1114,8 +1090,9 @@ int32_t NetsysNativeServiceProxy::BandwidthRemoveAllowedList(uint32_t uid)
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (!remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_REMOVE_ALLOWED_LIST, data, reply, option)) {
-            NETNATIVE_LOGE("NetsysNativeServiceProxy BandwidthRemoveAllowedList SendRequest Error");
+        if (ERR_NONE !=
+            remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_REMOVE_ALLOWED_LIST, data, reply, option)) {
+            NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }
     }
@@ -1126,17 +1103,21 @@ int32_t NetsysNativeServiceProxy::BandwidthRemoveAllowedList(uint32_t uid)
 int32_t NetsysNativeServiceProxy::FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
 {
     MessageParcel data;
+    uint32_t uidSize = uids.size();
+    if (uidSize > UIDS_LIST_MAX_SIZE) {
+        NETNATIVE_LOGE("Uids size err [%{public}d]", uidSize);
+        return ERR_INVALID_DATA;
+    }
     if (!WriteInterfaceToken(data)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallSetUidsAllowedListChain Write Error");
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteUint32(chain)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallSetUidsAllowedListChain Write Error");
+        NETNATIVE_LOGE("WriteUint32 failed");
         return ERR_FLATTEN_OBJECT;
     }
-    size_t uid_size = uids.size();
-    if (!data.WriteInt32(uid_size)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallSetUidsAllowedListChain Write Error");
+    if (!data.WriteUint32(uidSize)) {
+        NETNATIVE_LOGE("WriteUint32 failed");
         return ERR_FLATTEN_OBJECT;
     }
     std::vector<uint32_t> vUids;
@@ -1147,8 +1128,9 @@ int32_t NetsysNativeServiceProxy::FirewallSetUidsAllowedListChain(uint32_t chain
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (!remote->SendRequest(INetsysService::NETSYS_FIREWALL_SET_UID_ALLOWED_LIST_CHAIN, data, reply, option)) {
-            NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallSetUidsAllowedListChain SendRequest Error");
+        if (ERR_NONE !=
+            remote->SendRequest(INetsysService::NETSYS_FIREWALL_SET_UID_ALLOWED_LIST_CHAIN, data, reply, option)) {
+            NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }
     }
@@ -1159,17 +1141,21 @@ int32_t NetsysNativeServiceProxy::FirewallSetUidsAllowedListChain(uint32_t chain
 int32_t NetsysNativeServiceProxy::FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
 {
     MessageParcel data;
+    uint32_t uidSize = uids.size();
+    if (uidSize > UIDS_LIST_MAX_SIZE) {
+        NETNATIVE_LOGE("Uids size err [%{public}d]", uidSize);
+        return ERR_INVALID_DATA;
+    }
     if (!WriteInterfaceToken(data)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallSetUidsDeniedListChain Write Error");
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteUint32(chain)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallSetUidsDeniedListChain Write Error");
+        NETNATIVE_LOGE("WriteUint32 Error");
         return ERR_FLATTEN_OBJECT;
     }
-    size_t uid_size = uids.size();
-    if (!data.WriteInt32(uid_size)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallSetUidsDeniedListChain Write Error");
+    if (!data.WriteUint32(uidSize)) {
+        NETNATIVE_LOGE("WriteUint32 Error");
         return ERR_FLATTEN_OBJECT;
     }
     std::vector<uint32_t> vUids;
@@ -1180,8 +1166,9 @@ int32_t NetsysNativeServiceProxy::FirewallSetUidsDeniedListChain(uint32_t chain,
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (!remote->SendRequest(INetsysService::NETSYS_FIREWALL_SET_UID_DENIED_LIST_CHAIN, data, reply, option)) {
-            NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallSetUidsDeniedListChain SendRequest Error");
+        if (ERR_NONE !=
+            remote->SendRequest(INetsysService::NETSYS_FIREWALL_SET_UID_DENIED_LIST_CHAIN, data, reply, option)) {
+            NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }
     }
@@ -1193,15 +1180,15 @@ int32_t NetsysNativeServiceProxy::FirewallEnableChain(uint32_t chain, bool enabl
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallEnableChain Write Error");
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteUint32(chain)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallEnableChain Write Error");
+        NETNATIVE_LOGE("WriteUint32 Error");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteBool(enable)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallEnableChain Write Error");
+        NETNATIVE_LOGE("WriteBool Error");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -1209,8 +1196,8 @@ int32_t NetsysNativeServiceProxy::FirewallEnableChain(uint32_t chain, bool enabl
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (!remote->SendRequest(INetsysService::NETSYS_FIREWALL_ENABLE_CHAIN, data, reply, option)) {
-            NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallEnableChain SendRequest Error");
+        if (ERR_NONE != remote->SendRequest(INetsysService::NETSYS_FIREWALL_ENABLE_CHAIN, data, reply, option)) {
+            NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }
     }
@@ -1222,19 +1209,19 @@ int32_t NetsysNativeServiceProxy::FirewallSetUidRule(uint32_t chain, uint32_t ui
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallSetUidRule Write Error");
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteUint32(chain)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallSetUidRule Write Error");
+        NETNATIVE_LOGE("WriteUint32 failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteUint32(uid)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallSetUidRule Write Error");
+        NETNATIVE_LOGE("WriteUint32 failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteUint32(firewallRule)) {
-        NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallSetUidRule Write Error");
+        NETNATIVE_LOGE("WriteUint32 failed");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -1242,8 +1229,8 @@ int32_t NetsysNativeServiceProxy::FirewallSetUidRule(uint32_t chain, uint32_t ui
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (!remote->SendRequest(INetsysService::NETSYS_FIREWALL_SET_UID_RULE, data, reply, option)) {
-            NETNATIVE_LOGE("NetsysNativeServiceProxy FirewallSetUidRule SendRequest Error");
+        if (ERR_NONE != remote->SendRequest(INetsysService::NETSYS_FIREWALL_SET_UID_RULE, data, reply, option)) {
+            NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }
     }
@@ -1306,9 +1293,8 @@ int32_t NetsysNativeServiceProxy::StopDnsProxyListen()
 }
 
 int32_t NetsysNativeServiceProxy::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
-    NetworkSharingTraffic &traffic) 
+                                                           NetworkSharingTraffic &traffic)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy GetNetworkSharingTraffic ERR_FLATTEN_OBJECT=%{public}d", ERR_FLATTEN_OBJECT);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;

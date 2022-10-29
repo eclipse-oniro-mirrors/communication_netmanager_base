@@ -14,28 +14,22 @@
  */
 
 #include "route_utils.h"
+
 #include <arpa/inet.h>
-#include "netsys_controller.h"
+
 #include "net_mgr_log_wrapper.h"
+#include "netsys_controller.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-const std::string IPV6_DEFAULT_PRIFX = "fe80::";
-const std::string IPV6_DEFAULT_GATEWAY = "::";
-constexpr int32_t IPV6_PRIFX_LEN = 64;
-constexpr int32_t IPV4_PRIFX_LEN = 32;
-constexpr int32_t IPV6_UINT_LEN = 16;
-constexpr int32_t IPV4_UINT_LEN = 4;
-constexpr int32_t IP_PER_UINT_SIZE = 8;
-constexpr int32_t IP_PER_UINT_MASK = 0xFF;
-
-RouteUtils::RouteUtils()
-{
-}
-
-RouteUtils::~RouteUtils()
-{
-}
+static constexpr const char *IPV6_DEFAULT_PRIFX = "fe80::";
+static constexpr const char *IPV6_DEFAULT_GATEWAY = "::";
+static constexpr int32_t IPV6_PRIFX_LEN = 64;
+static constexpr int32_t IPV4_PRIFX_LEN = 32;
+static constexpr int32_t IPV6_UINT_LEN = 16;
+static constexpr int32_t IPV4_UINT_LEN = 4;
+static constexpr int32_t IP_PER_UINT_SIZE = 8;
+static constexpr int32_t IP_PER_UINT_MASK = 0xFF;
 
 int32_t RouteUtils::AddRoutesToLocal(const std::string &iface, const std::list<Route> &routes)
 {
@@ -43,7 +37,7 @@ int32_t RouteUtils::AddRoutesToLocal(const std::string &iface, const std::list<R
     for (iter = routes.begin(); iter != routes.end(); ++iter) {
         if (!(iter->rtnType_ == RTN_UNICAST && iter->destination_.prefixlen_ == 0)) {
             NETMGR_LOG_D("AddRoutesToLocalNetwork: dest addr[%{public}s], gw addr[%{public}s]",
-                iter->destination_.address_.c_str(), iter->gateway_.address_.c_str());
+                         iter->destination_.address_.c_str(), iter->gateway_.address_.c_str());
             AddRoute(LOCAL_NET_ID, *iter);
         }
     }
@@ -125,7 +119,7 @@ int32_t RouteUtils::UpdateRoutes(int32_t netId, const NetLinkInfo &newnl, const 
         RemoveRoute(netId, *itern);
     }
 
-    return (!added.empty() || !updated.empty() || !removed.empty())?1:0;
+    return (!added.empty() || !updated.empty() || !removed.empty()) ? 1 : 0;
 }
 
 int32_t RouteUtils::ModifyRoute(routeOperateType op, int32_t netId, const Route &route)
@@ -135,7 +129,7 @@ int32_t RouteUtils::ModifyRoute(routeOperateType op, int32_t netId, const Route 
     std::string dest;
 
     NETMGR_LOG_D("ModifyRoute: netId[%{public}d], dest addr[%{public}s], gw addr[%{public}s]", netId,
-        route.destination_.address_.c_str(), route.gateway_.address_.c_str());
+                 route.destination_.address_.c_str(), route.gateway_.address_.c_str());
 
     switch (route.rtnType_) {
         case RTN_UNICAST:
@@ -177,7 +171,7 @@ void RouteUtils::ToPrefixString(const std::string &src, int32_t prefixLen, std::
 {
     dest = MaskAddress(src, prefixLen);
     NETMGR_LOG_D("ToPrefixString: src addr[%{public}s], src prefixlen[%{public}d], mask dest addr[%{public}s]",
-        src.c_str(), prefixLen, dest.c_str());
+                 src.c_str(), prefixLen, dest.c_str());
     if (!dest.empty()) {
         dest += "/";
         dest += std::to_string(prefixLen);
@@ -217,5 +211,5 @@ std::string RouteUtils::MaskAddress(const std::string &addr, int32_t prefixLen)
 
     return std::string(str);
 }
-}   // namespace NetManagerStandard
-}   // namespace OHOS
+} // namespace NetManagerStandard
+} // namespace OHOS

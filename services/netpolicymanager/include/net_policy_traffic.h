@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@ constexpr int32_t HUNDRED_PERCENTAGE = 100;
 class NetPolicyTraffic : public NetPolicyBase {
 public:
     void Init();
+
     /**
      * Update quota policies.
      *
@@ -47,6 +48,7 @@ public:
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}
      */
     int32_t UpdateQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies);
+
     /**
      * Get network policies.
      *
@@ -54,6 +56,7 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies);
+
     /**
      * Update the limit or warning remind time of quota policy.
      *
@@ -63,27 +66,32 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType);
+
     /**
      * Handle the event from NetPolicyCore
      *
      * @param eventId The event id
-     * @param policyEvent The infomations passed from other core
+     * @param policyEvent The informations passed from other core
      */
     void HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEvent> &policyEvent);
+
     /**
      * Get the metered ifaces.
      *
      * @return const std::vector<std::string>& The vector of metered ifaces
      */
     const std::vector<std::string> &GetMeteredIfaces();
+
     /**
      * Reset network policies\rules\quota policies\firewall rules.
      *
      * @param iccid Specify the matched iccid of quota policy.
      */
     void ResetPolicies(const std::string &iccid);
+
     void ReachedLimit(const std::string &iface);
     void GetDumpMessage(std::string &message);
+
 private:
     class NetsysControllerCallbackImpl : public NetsysControllerCallback {
     public:

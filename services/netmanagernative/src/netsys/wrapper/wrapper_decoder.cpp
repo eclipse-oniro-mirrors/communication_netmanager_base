@@ -32,8 +32,8 @@
 #include <linux/genetlink.h>
 #include <linux/if_addr.h>
 #include <linux/if_link.h>
-#include <linux/netfilter/nfnetlink_log.h>
 #include <linux/netfilter/nfnetlink.h>
+#include <linux/netfilter/nfnetlink_log.h>
 
 #include "netlink_define.h"
 #include "netmanager_base_common_utils.h"
@@ -102,7 +102,7 @@ struct ServerInfo {
 
 struct ServerList {
     std::vector<ServerInfo> infos;
-    std::string serialize()
+    std::string Serialize()
     {
         std::string str;
         for (const auto &info : infos) {
@@ -114,7 +114,7 @@ struct ServerList {
         return str;
     }
 
-    void add(const std::string &ipAddr, const std::string &ifName)
+    void Add(const std::string &ipAddr, const std::string &ifName)
     {
         infos.emplace_back(ipAddr, ifName);
     }
@@ -142,7 +142,7 @@ bool CheckRtNetlinkLength(const nlmsghdr *hdrMsg, size_t size)
     return ret;
 }
 
-inline bool IsValid(bool isValid, const std::string &attrName, const std::string &msgName)
+inline bool IsDataEmpty(bool isValid, const std::string &attrName, const std::string &msgName)
 {
     if (isValid) {
         NETNATIVE_LOGE("Error Msg Repeated: attrName : %{public}s msgName: %{public}s", attrName.c_str(),
@@ -229,14 +229,7 @@ bool WrapperDecoder::PushAsciiMessage(const std::vector<std::string> &recvmsg)
                 message_->SetSubSys(SUB_SYS_LIST.at(subsys[1]));
             }
         } else {
-            auto msgList = Split(i, SYMBOL_EQUAL);
-            if (msgList.size() == SPLIT_SIZE) {
-                const auto key = msgList[0];
-                auto value = msgList[1];
-                if (ASCII_PARAM_LIST.find(key) != ASCII_PARAM_LIST.end()) {
-                    message_->PushMessage(ASCII_PARAM_LIST.at(key), value);
-                }
-            }
+            SaveOtherMsg(i);
         }
     }
     return true;
@@ -358,7 +351,8 @@ bool WrapperDecoder::InterpreteAddressMsg(const nlmsghdr *hdrMsg)
                 }
                 break;
             case IFA_CACHEINFO:
-                if (IsValid(cacheInfo, "IFA_CACHEINFO", rtMsgType) && !IsPayloadValidated(rtAttr, sizeof(*cacheInfo))) {
+                if (IsDataEmpty(cacheInfo, "IFA_CACHEINFO", rtMsgType) &&
+                    !IsPayloadValidated(rtAttr, sizeof(*cacheInfo))) {
                     break;
                 }
                 cacheInfo = reinterpret_cast<ifa_cacheinfo *>(RTA_DATA(rtAttr));
@@ -416,7 +410,7 @@ bool WrapperDecoder::InterpreteIFaceAddr(ifaddrmsg *ifAddr, char *addrStr, sockl
 }
 
 bool WrapperDecoder::SaveAddressMsg(const std::string addrStr, const ifaddrmsg *addrMsg, const std::string flags,
-                                    const ifa_cacheinfo *cacheinfo, const std::string interfaceName)
+                                    const ifa_cacheinfo *cacheInfo, const std::string interfaceName)
 {
     if (addrStr.empty()) {
         NETNATIVE_LOGE("No IFA_ADDRESS");
@@ -429,11 +423,11 @@ bool WrapperDecoder::SaveAddressMsg(const std::string addrStr, const ifaddrmsg *
     message_->PushMessage(NetsysEventMessage::Type::FLAGS, flags);
     message_->PushMessage(NetsysEventMessage::Type::SCOPE, std::to_string(addrMsg->ifa_scope));
     message_->PushMessage(NetsysEventMessage::Type::IFINDEX, std::to_string(addrMsg->ifa_index));
-    if (cacheinfo != nullptr) {
-        message_->PushMessage(NetsysEventMessage::Type::PREFERRED, std::to_string(cacheinfo->ifa_prefered));
-        message_->PushMessage(NetsysEventMessage::Type::VALID, std::to_string(cacheinfo->ifa_valid));
-        message_->PushMessage(NetsysEventMessage::Type::CSTAMP, std::to_string(cacheinfo->cstamp));
-        message_->PushMessage(NetsysEventMessage::Type::TSTAMP, std::to_string(cacheinfo->tstamp));
+    if (cacheInfo != nullptr) {
+        message_->PushMessage(NetsysEventMessage::Type::PREFERRED, std::to_string(cacheInfo->ifa_prefered));
+        message_->PushMessage(NetsysEventMessage::Type::VALID, std::to_string(cacheInfo->ifa_valid));
+        message_->PushMessage(NetsysEventMessage::Type::CSTAMP, std::to_string(cacheInfo->cstamp));
+        message_->PushMessage(NetsysEventMessage::Type::TSTAMP, std::to_string(cacheInfo->tstamp));
     }
 
     return true;
@@ -457,18 +451,19 @@ bool WrapperDecoder::InterpreteRtMsg(const nlmsghdr *hdrMsg)
     for (rtAttr = RTM_RTA(rtMsg); RTA_OK(rtAttr, (int)size); rtAttr = RTA_NEXT(rtAttr, size)) {
         switch (rtAttr->rta_type) {
             case RTA_GATEWAY:
-                if (IsValid(*gateWay, RTA_GATEWAY_STR, msgName) &&
+                if (IsDataEmpty(*gateWay, RTA_GATEWAY_STR, msgName) &&
                     !inet_ntop(rtmFamily, RTA_DATA(rtAttr), gateWay, sizeof(gateWay))) {
                     return false;
                 }
                 break;
             case RTA_DST:
-                if (IsValid(*dst, RTA_DST_STR, msgName) && !inet_ntop(rtmFamily, RTA_DATA(rtAttr), dst, sizeof(dst))) {
+                if (IsDataEmpty(*dst, RTA_DST_STR, msgName) &&
+                    !inet_ntop(rtmFamily, RTA_DATA(rtAttr), dst, sizeof(dst))) {
                     return false;
                 }
                 break;
             case RTA_OIF:
-                if (IsValid(*device, RTA_OIF_STR, msgName) &&
+                if (IsDataEmpty(*device, RTA_OIF_STR, msgName) &&
                     if_indextoname(*(reinterpret_cast<int32_t *>(RTA_DATA(rtAttr))), device) == nullptr) {
                     return false;
                 }
@@ -528,6 +523,18 @@ bool WrapperDecoder::SaveRtMsg(std::string dst, const std::string gateWay, const
     message_->PushMessage(NetsysEventMessage::Type::GATEWAY, gateWay);
     message_->PushMessage(NetsysEventMessage::Type::INTERFACE, device);
     return true;
+}
+
+void WrapperDecoder::SaveOtherMsg(const std::string &info)
+{
+    auto msgList = Split(info, SYMBOL_EQUAL);
+    if (msgList.size() == SPLIT_SIZE) {
+        const auto key = msgList[0];
+        auto value = msgList[1];
+        if (ASCII_PARAM_LIST.find(key) != ASCII_PARAM_LIST.end()) {
+            message_->PushMessage(ASCII_PARAM_LIST.at(key), value);
+        }
+    }
 }
 } // namespace nmd
 } // namespace OHOS
