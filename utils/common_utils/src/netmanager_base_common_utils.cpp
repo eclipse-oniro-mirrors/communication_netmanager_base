@@ -98,7 +98,7 @@ bool IsValidIPV4(const std::string &ip)
         return false;
     }
     struct in_addr s;
-    return INET_OPTION_SUC == inet_pton(AF_INET, ip.c_str(), reinterpret_cast<void *>(&s));
+    return inet_pton(AF_INET, ip.c_str(), reinterpret_cast<void *>(&s)) == INET_OPTION_SUC;
 }
 
 bool IsValidIPV6(const std::string &ip)
@@ -107,7 +107,7 @@ bool IsValidIPV6(const std::string &ip)
         return false;
     }
     struct in6_addr s;
-    return INET_OPTION_SUC == inet_pton(AF_INET6, ip.c_str(), reinterpret_cast<void *>(&s));
+    return inet_pton(AF_INET6, ip.c_str(), reinterpret_cast<void *>(&s)) == INET_OPTION_SUC;
 }
 
 int8_t GetAddrFamily(const std::string &ip)
@@ -139,8 +139,8 @@ std::string ConvertIpv4Address(uint32_t addressIpv4)
     }
 
     std::ostringstream stream;
-    stream << ((addressIpv4 >> BITS_24) & 0xFF) << IPADDR_DELIMITER << ((addressIpv4 >> BITS_16) & 0xFF)
-           << IPADDR_DELIMITER << ((addressIpv4 >> BITS_8) & 0xFF) << IPADDR_DELIMITER << (addressIpv4 & 0xFF);
+    stream << ((addressIpv4 >> BITS_24) & 0xFF) << IPADDR_DELIMITER << ((addressIpv4 >> BITS_16) & 0xFF) <<
+        IPADDR_DELIMITER << ((addressIpv4 >> BITS_8) & 0xFF) << IPADDR_DELIMITER << (addressIpv4 & 0xFF);
     return stream.str();
 }
 
