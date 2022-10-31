@@ -502,11 +502,9 @@ int32_t NetsysNativeServiceStub::CmdInterfaceSetConfig(MessageParcel &data, Mess
     cfg.prefixLength = data.ReadInt32();
     int32_t vSize = data.ReadInt32();
     vSize = (vSize > MAX_FLAG_NUM) ? MAX_FLAG_NUM : vSize;
-    std::string vString;
     std::vector<std::string> vFlags;
     for (int i = 0; i < vSize; i++) {
-        vString = data.ReadString();
-        vFlags.push_back(vString);
+        vFlags.emplace_back(data.ReadString());
     }
     cfg.flags.assign(vFlags.begin(), vFlags.end());
     int32_t result = InterfaceSetConfig(cfg);

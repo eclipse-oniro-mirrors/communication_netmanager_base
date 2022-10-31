@@ -353,10 +353,9 @@ int64_t NetsysController::GetIfaceTxBytes(const std::string &interfaceName)
 std::vector<std::string> NetsysController::InterfaceGetList()
 {
     NETMGR_LOG_D("NetsysController InterfaceGetList");
-    std::vector<std::string> ret;
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
-        return ret;
+        return {};
     }
     return netsysService_->InterfaceGetList();
 }
@@ -364,10 +363,9 @@ std::vector<std::string> NetsysController::InterfaceGetList()
 std::vector<std::string> NetsysController::UidGetList()
 {
     NETMGR_LOG_D("NetsysController UidGetList");
-    std::vector<std::string> ret;
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
-        return ret;
+        return {};
     }
     return netsysService_->UidGetList();
 }

@@ -15,6 +15,8 @@
 
 #ifdef ENABLE_ELFIO
 #include "bpf_map_creator.h"
+
+#include <algorithm>
 #endif
 
 namespace OHOS {
@@ -23,7 +25,7 @@ namespace Bpf {
 bool BpfMapCreator::CreateMaps(BpfMapData *maps, int32_t nrMaps)
 {
     for (int32_t i = 0; i < nrMaps; i++) {
-        int32_t numaNode = maps[i].def.mapFlags & BPF_F_NUMA_NODE ? maps[i].def.numaNode : -1;
+        int32_t numaNode = (maps[i].def.mapFlags & BPF_F_NUMA_NODE) ? maps[i].def.numaNode : -1;
         mapFd_[i] = BpfCreateMapNode(static_cast<bpf_map_type>(maps[i].def.type), maps[i].name, maps[i].def.keySize,
                                      maps[i].def.valueSize, maps[i].def.maxEntries, maps[i].def.mapFlags, numaNode);
         if (mapFd_[i] < 0) {
@@ -50,18 +52,15 @@ bool BpfMapCreator::CreateMaps(BpfMapData *maps, int32_t nrMaps)
 int32_t BpfMapCreator::LoadElfMapsSection(BpfMapData *maps, const ELFIO::elfio &elfio) const
 {
     ELFIO::section *mapsSection = nullptr;
-    for (const auto &section : elfio.sections) {
-        if (section->get_name() == "maps") {
-            mapsSection = section;
-            break;
-        }
-    }
 
-    if (mapsSection == nullptr) {
+    const auto &it = std::find_if(elfio.sections.begin(), elfio.sections.end(),
+                                  [](const auto &section) { return section->get_name() == "maps"; });
+
+    if (it == elfio.sections.end()) {
         NETNATIVE_LOGE("Failed to get maps section");
         return 0;
     }
-
+    mapsSection = it;
     auto defs = reinterpret_cast<const BpfLoadMapDef *>(mapsSection->get_data());
     auto nrMaps = mapsSection->get_size() / sizeof(BpfLoadMapDef);
     for (int32_t i = 0; i < nrMaps; i++) {
@@ -78,9 +77,9 @@ int32_t BpfMapCreator::LoadElfMapsSection(BpfMapData *maps, const ELFIO::elfio &
                 ELFIO::Elf_Xword size = 0;
                 unsigned char bind = 0;
                 unsigned char type = 0;
-                ELFIO::Elf_Half section = 0;
+                ELFIO::Elf_Half elfSection = 0;
                 unsigned char other = 0;
-                symbols.get_symbol(i, name, value, size, bind, type, section, other);
+                symbols.get_symbol(i, name, value, size, bind, type, elfSection, other);
                 if (type == STT_OBJECT && name.find("_map") != std::string::npos) {
                     maps[mapIndex].name = name;
                     NETNATIVE_LOGI("maps[%{public}d].name = %{public}s", mapIndex, maps[mapIndex].name.c_str());

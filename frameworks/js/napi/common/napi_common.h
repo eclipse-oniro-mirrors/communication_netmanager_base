@@ -93,10 +93,10 @@ public:
         napi_async_execute_callback execute, napi_async_complete_callback complete);
     static void Handle1ValueCallback(napi_env env, BaseContext *context, napi_value callbackValue);
     static void Handle2ValueCallback(napi_env env, BaseContext *context, napi_value callbackValue);
-    static bool HasNamedProperty(napi_env env, napi_value object, std::string propertyName);
+    static bool HasNamedProperty(napi_env env, napi_value object, const std::string &propertyName);
     static bool MatchObjectProperty(
         napi_env env, napi_value object, std::initializer_list<std::pair<std::string, napi_valuetype>> pairList);
-    static bool HasNamedTypeProperty(napi_env env, napi_value object, napi_valuetype type, std::string propertyName);
+    static bool HasNamedTypeProperty(napi_env env, napi_value object, napi_valuetype type, const std::string &propertyName);
     static napi_value CreateEnumConstructor(napi_env env, napi_callback_info info);
     static napi_value CreateObject(napi_env env);
     static napi_value CreateErrorMessage(napi_env env, int32_t errorCodeconst, const std::string &errorMessage);
