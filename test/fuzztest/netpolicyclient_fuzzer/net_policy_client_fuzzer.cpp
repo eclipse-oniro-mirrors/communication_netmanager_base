@@ -34,25 +34,26 @@ size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
 using namespace Security::AccessToken;
 using Security::AccessToken::AccessTokenID;
-HapInfoParams testInfoParms = {.bundleName = "net_policy_client_fuzzer",
-                               .userID = 1,
+HapInfoParams testInfoParms = {.userID = 1,
+                               .bundleName = "net_policy_client_fuzzer",
                                .instIndex = 0,
                                .appIDDesc = "test"};
 
 PermissionDef testPermDef = {.permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
                              .bundleName = "net_policy_client_fuzzer",
                              .grantMode = 1,
+                             .availableLevel = APL_SYSTEM_BASIC,
                              .label = "label",
                              .labelId = 1,
                              .description = "Test net policy connectivity internal",
-                             .descriptionId = 1,
-                             .availableLevel = APL_SYSTEM_BASIC};
+                             .descriptionId = 1};
 
-PermissionStateFull testState = {.grantFlags = {2},
-                                 .grantStatus = {PermissionState::PERMISSION_GRANTED},
+PermissionStateFull testState = {.permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
                                  .isGeneral = true,
-                                 .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
-                                 .resDeviceID = {"local"}};
+                                 .resDeviceID = {"local"},
+                                 .grantStatus = {PermissionState::PERMISSION_GRANTED},
+                                 .grantFlags = {2}
+                                 };
 
 HapPolicyParams testPolicyPrams = {.apl = APL_SYSTEM_BASIC,
                                    .domain = "test.domain",
@@ -288,6 +289,80 @@ void SetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
     std::vector<NetQuotaPolicy> quotaPolicies;
     DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetQuotaPolicies(quotaPolicies);
 }
+
+void IsUidNetAllowedFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+    AccessToken token;
+    uint32_t uid = GetData<uint32_t>();
+    bool isMetered = uid % 2 == 0;
+    std::string ifaceName = GetStringFromData(STR_LEN);
+    DelayedSingleton<NetPolicyClient>::GetInstance()->IsUidNetAllowed(uid, isMetered);
+    DelayedSingleton<NetPolicyClient>::GetInstance()->IsUidNetAllowed(uid, ifaceName);
+}
+
+void ResetPoliciesFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+    AccessToken token;
+    std::string iccid = GetStringFromData(STR_LEN);
+    DelayedSingleton<NetPolicyClient>::GetInstance()->ResetPolicies(iccid);
+    DelayedSingleton<NetPolicyClient>::GetInstance()->GetBackgroundPolicy();
+}
+
+void UpdateRemindPolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+    AccessToken token;
+    int32_t netType = GetData<int32_t>();
+    uint32_t remindType = GetData<uint32_t>();
+    std::string iccid = GetStringFromData(STR_LEN);
+    DelayedSingleton<NetPolicyClient>::GetInstance()->UpdateRemindPolicy(netType, iccid, remindType);
+}
+
+void SetDeviceIdleAllowedListFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+    AccessToken token;
+    bool isAllowed = GetData<int32_t>() % 2 == 0;
+    uint32_t uid = GetData<uint32_t>();
+    DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdleAllowedList(uid, isAllowed);
+    std::vector<uint32_t> uids;
+    DelayedSingleton<NetPolicyClient>::GetInstance()->GetDeviceIdleAllowedList(uids);
+}
+
+void SetDeviceIdlePolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+    AccessToken token;
+    bool enable = GetData<int32_t>() % 2 == 0;
+    DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdlePolicy(enable);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -307,5 +382,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::UnregisterNetPolicyCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetQuotaPoliciesFuzzTest(data, size);
     OHOS::NetManagerStandard::SetNetQuotaPoliciesFuzzTest(data, size);
+    OHOS::NetManagerStandard::IsUidNetAllowedFuzzTest(data, size);
+    OHOS::NetManagerStandard::ResetPoliciesFuzzTest(data, size);
+    OHOS::NetManagerStandard::UpdateRemindPolicyFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetDeviceIdleAllowedListFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetDeviceIdlePolicyFuzzTest(data, size);
     return 0;
 }
