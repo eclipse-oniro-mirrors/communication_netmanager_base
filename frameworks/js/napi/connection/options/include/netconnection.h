@@ -25,14 +25,15 @@
 namespace OHOS::NetManagerStandard {
 class NetConnection final {
 public:
-    bool hasNetSpecifier;
+    bool hasNetSpecifier_;
 
-    bool hasTimeout;
+    bool hasTimeout_;
 
-    NetManagerStandard::NetSpecifier netSpecifier;
+    NetManagerStandard::NetSpecifier netSpecifier_;
 
-    uint32_t timeout;
+    uint32_t timeout_;
 
+public:
     [[nodiscard]] sptr<NetConnCallbackObserver> GetObserver() const;
 
     [[nodiscard]] EventManager *GetEventManager() const;

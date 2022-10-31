@@ -16,6 +16,7 @@
 #include "update_iface_stats_context.h"
 
 #include "constant.h"
+#include "napi_constant.h"
 #include "napi_utils.h"
 
 namespace OHOS {
@@ -36,8 +37,8 @@ void UpdateIfacesStatsContext::ParseParams(napi_value *params, size_t paramsCoun
     }
 
     interfaceName_ = NapiUtils::GetStringFromValueUtf8(GetEnv(), params[ARG_INDEX_0]);
-    start_ = static_cast<uint32_t>(NapiUtils::GetInt32FromValue(GetEnv(), params[ARG_INDEX_1]));
-    end_ = static_cast<uint32_t>(NapiUtils::GetInt32FromValue(GetEnv(), params[ARG_INDEX_2]));
+    start_ = NapiUtils::GetUint32FromValue(GetEnv(), params[ARG_INDEX_1]);
+    end_ = NapiUtils::GetUint32FromValue(GetEnv(), params[ARG_INDEX_2]);
     statsInfo_.rxBytes_ = NapiUtils::GetInt64Property(GetEnv(), params[ARG_INDEX_3], RX_BYTES);
     statsInfo_.txBytes_ = NapiUtils::GetInt64Property(GetEnv(), params[ARG_INDEX_3], TX_BYTES);
     statsInfo_.rxPackets_ = NapiUtils::GetInt64Property(GetEnv(), params[ARG_INDEX_3], RX_PACKETS);
@@ -59,11 +60,11 @@ bool UpdateIfacesStatsContext::CheckParamsType(napi_value *params, size_t params
                NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_3]) == napi_object;
     }
     if (paramsCount == PARAM_FOUR_OPTIONS_AND_CALLBACK) {
-        return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_4]) == napi_function &&
-               NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_string &&
+        return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_string &&
                NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_number &&
                NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_2]) == napi_number &&
-               NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_3]) == napi_object;
+               NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_3]) == napi_object &&
+               NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_4]) == napi_function;
     }
     return false;
 }
@@ -93,26 +94,26 @@ void UpdateIfacesStatsContext::SetEnd(uint32_t end)
     end_ = end;
 }
 
-int32_t UpdateIfacesStatsContext::GetUid()
+int32_t UpdateIfacesStatsContext::GetUid() const
 {
     return uid_;
 }
-std::string UpdateIfacesStatsContext::GetInterfaceName()
+std::string UpdateIfacesStatsContext::GetInterfaceName() const
 {
     return interfaceName_;
 }
 
-NetStatsInfo UpdateIfacesStatsContext::GetStatsInfo()
+NetStatsInfo UpdateIfacesStatsContext::GetStatsInfo() const
 {
     return statsInfo_;
 }
 
-uint32_t UpdateIfacesStatsContext::GetStart()
+uint32_t UpdateIfacesStatsContext::GetStart() const
 {
     return start_;
 }
 
-uint32_t UpdateIfacesStatsContext::GetEnd()
+uint32_t UpdateIfacesStatsContext::GetEnd() const
 {
     return end_;
 }

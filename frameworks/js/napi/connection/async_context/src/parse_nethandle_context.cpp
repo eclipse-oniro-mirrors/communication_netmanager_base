@@ -16,6 +16,7 @@
 #include "parse_nethandle_context.h"
 
 #include "constant.h"
+#include "napi_constant.h"
 #include "napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
@@ -27,11 +28,11 @@ void ParseNetHandleContext::ParseParams(napi_value *params, size_t paramsCount)
         return;
     }
 
-    int32_t netId = NapiUtils::GetInt32Property(GetEnv(), params[0], KEY_NET_ID);
-    netHandle.SetNetId(netId);
+    int32_t netId_ = NapiUtils::GetInt32Property(GetEnv(), params[ARG_INDEX_0], KEY_NET_ID);
+    netHandle_.SetNetId(netId_);
 
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
-        SetParseOK(SetCallback(params[1]) == napi_ok);
+        SetParseOK(SetCallback(params[ARG_INDEX_1]) == napi_ok);
         return;
     }
     SetParseOK(true);
@@ -40,12 +41,12 @@ void ParseNetHandleContext::ParseParams(napi_value *params, size_t paramsCount)
 bool ParseNetHandleContext::CheckParamsType(napi_value *params, size_t paramsCount)
 {
     if (paramsCount == PARAM_JUST_OPTIONS) {
-        return NapiUtils::GetValueType(GetEnv(), params[0]) == napi_object;
+        return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_object;
     }
 
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
-        return NapiUtils::GetValueType(GetEnv(), params[0]) == napi_object &&
-               NapiUtils::GetValueType(GetEnv(), params[1]) == napi_function;
+        return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_object &&
+               NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_function;
     }
     return false;
 }

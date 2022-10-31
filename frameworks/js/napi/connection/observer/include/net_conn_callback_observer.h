@@ -16,10 +16,10 @@
 #ifndef NETMANAGER_BASE_NET_CONN_CALLBACK_OBSERVER_H
 #define NETMANAGER_BASE_NET_CONN_CALLBACK_OBSERVER_H
 
-#include "net_all_capabilities.h"
-#include "net_conn_callback_stub.h"
 #include "event_manager.h"
 #include "napi_utils.h"
+#include "net_all_capabilities.h"
+#include "net_conn_callback_stub.h"
 
 namespace OHOS::NetManagerStandard {
 class NetConnCallbackObserver : public NetConnCallbackStub {
@@ -46,8 +46,14 @@ private:
     template <napi_value (*MakeJsValue)(napi_env, void *)> static void CallbackTemplate(uv_work_t *work, int status)
     {
         (void)status;
-
+        if (work == nullptr) {
+            return;
+        }
         auto workWrapper = static_cast<UvWorkWrapper *>(work->data);
+        if (workWrapper == nullptr) {
+            delete work;
+            return;
+        }
         napi_env env = workWrapper->env;
         auto closeScope = [env](napi_handle_scope scope) { NapiUtils::CloseScope(env, scope); };
         std::unique_ptr<napi_handle_scope__, decltype(closeScope)> scope(NapiUtils::OpenScope(env), closeScope);

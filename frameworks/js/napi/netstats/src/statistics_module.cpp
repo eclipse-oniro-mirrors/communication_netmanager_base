@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <initializer_list>
 #include <string>
 
 #include <napi/native_api.h>
@@ -26,10 +25,10 @@
 #include "get_uid_rxbeytes_context.h"
 #include "module_template.h"
 #include "napi_utils.h"
-#include "statistics_callback_observer.h"
-#include "statistics_observer_wrapper.h"
 #include "statistics_async_work.h"
+#include "statistics_callback_observer.h"
 #include "statistics_exec.h"
+#include "statistics_observer_wrapper.h"
 #include "update_iface_stats_context.h"
 
 namespace OHOS {
@@ -107,31 +106,29 @@ napi_value GetIfaceTxBytes(napi_env env, napi_callback_info info)
 
 napi_value On(napi_env env, napi_callback_info info)
 {
-    std::initializer_list<std::string> events = {EVENT_STATS_CHANGE};
-    return DelayedSingleton<StatisticsObserverWrapper>::GetInstance()->On(env, info, events, false);
+    return DelayedSingleton<StatisticsObserverWrapper>::GetInstance()->On(env, info, {EVENT_STATS_CHANGE}, false);
 }
 
 napi_value Off(napi_env env, napi_callback_info info)
 {
-    std::initializer_list<std::string> events = {EVENT_STATS_CHANGE};
-    return DelayedSingleton<StatisticsObserverWrapper>::GetInstance()->Off(env, info, events, false);
+    return DelayedSingleton<StatisticsObserverWrapper>::GetInstance()->Off(env, info, {EVENT_STATS_CHANGE}, false);
 }
 
 napi_value InitStatisticsModule(napi_env env, napi_value exports)
 {
-    std::initializer_list<napi_property_descriptor> functions = {
-        DECLARE_NAPI_FUNCTION(FUNCTION_GET_CELLULAR_RXBYTES, GetCellularRxBytes),
-        DECLARE_NAPI_FUNCTION(FUNCTION_GET_CELLULAR_TXBYTES, GetCellularTxBytes),
-        DECLARE_NAPI_FUNCTION(FUNCTION_GET_ALL_RXBYTES, GetAllRxBytes),
-        DECLARE_NAPI_FUNCTION(FUNCTION_GET_ALL_TXBYTES, GetAllTxBytes),
-        DECLARE_NAPI_FUNCTION(FUNCTION_GET_UID_RXBYTES, GetUidRxBytes),
-        DECLARE_NAPI_FUNCTION(FUNCTION_GET_UID_TXBYTES, GetUidTxBytes),
-        DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_RXBYTES, GetIfaceRxBytes),
-        DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_TXBYTES, GetIfaceTxBytes),
-        DECLARE_NAPI_FUNCTION(FUNCTION_ON, On),
-        DECLARE_NAPI_FUNCTION(FUNCTION_OFF, Off),
-    };
-    NapiUtils::DefineProperties(env, exports, functions);
+    NapiUtils::DefineProperties(env, exports,
+                                {
+                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_CELLULAR_RXBYTES, GetCellularRxBytes),
+                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_CELLULAR_TXBYTES, GetCellularTxBytes),
+                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_ALL_RXBYTES, GetAllRxBytes),
+                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_ALL_TXBYTES, GetAllTxBytes),
+                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_UID_RXBYTES, GetUidRxBytes),
+                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_UID_TXBYTES, GetUidTxBytes),
+                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_RXBYTES, GetIfaceRxBytes),
+                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_TXBYTES, GetIfaceTxBytes),
+                                    DECLARE_NAPI_FUNCTION(FUNCTION_ON, On),
+                                    DECLARE_NAPI_FUNCTION(FUNCTION_OFF, Off),
+                                });
     return exports;
 }
 

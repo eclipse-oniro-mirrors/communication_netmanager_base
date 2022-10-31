@@ -18,29 +18,26 @@
 
 #include <cstddef>
 #include <cstdint>
-
 #include <string>
 
 #include <napi/native_api.h>
 
 #include "base_context.h"
-#include "nocopyable.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 class GetIfaceRxBytesContext final : public BaseContext {
 public:
-    DISALLOW_COPY_AND_MOVE(GetIfaceRxBytesContext);
-
     GetIfaceRxBytesContext() = delete;
     explicit GetIfaceRxBytesContext(napi_env env, EventManager *manager);
 
     void SetNic(std::string nic);
     void SetBytes64(int64_t bytes64);
     void SetInterfaceName(std::string interfaceName);
-    std::string GetNic();
-    int64_t GetBytes64();
-    std::string GetInterfaceName();
+    std::string GetNic() const;
+    int64_t GetBytes64() const;
+    std::string GetInterfaceName() const;
+
     void ParseParams(napi_value *params, size_t paramsCount);
 
 private:

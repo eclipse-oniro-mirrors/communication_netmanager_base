@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,32 @@
  * limitations under the License.
  */
 
-#ifndef NET_POLICY_EVENT_LISTENER_CONTEXT_H
-#define NET_POLICY_EVENT_LISTENER_CONTEXT_H
+#ifndef COMMUNICATIONNETMANAGERBASE_SETPOLICYBYUID_CONTEXT_H
+#define COMMUNICATIONNETMANAGERBASE_SETPOLICYBYUID_CONTEXT_H
 
-#include <memory>
-#include <map>
-#include "net_mgr_log_wrapper.h"
-#include "napi_common.h"
+#include <cstdint>
+#include <cstddef>
+
+#include <napi/native_api.h>
+
+#include "base_context.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-class NetPolicyEventListenerContext {
+class SetPolicyByUidContext final : public BaseContext {
 public:
-    static NetPolicyEventListenerContext& GetInstance();
-    static int32_t AddEventListener(EventListener &eventListener);
-    static int32_t RemoveEventListener(EventListener &eventListener);
-    static int32_t FindEventListense(EventListener &eventListener);
+    SetPolicyByUidContext() = delete;
+    explicit SetPolicyByUidContext(napi_env env, EventManager *manager);
+
+    void ParseParams(napi_value *params, size_t paramsCount);
+
+public:
+    uint32_t policy_ = 0;
+    uint32_t uid_ = 0;
+
 private:
-    static std::map<int32_t, EventListener> listenses;
+    bool CheckParamsType(napi_value *params, size_t paramsCount);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // NET_POLICY_EVENT_LISTENER_CONTEXT_H
+#endif // COMMUNICATIONNETMANAGERBASE_SETPOLICYBYUID_CONTEXT_H
