@@ -36,8 +36,8 @@ constexpr size_t STR_LEN = 10;
 using namespace Security::AccessToken;
 using Security::AccessToken::AccessTokenID;
 HapInfoParams testInfoParms = {
-    .bundleName = "net_conn_client_fuzzer",
     .userID = 1,
+    .bundleName = "net_conn_client_fuzzer",
     .instIndex = 0,
     .appIDDesc = "test"
 };
@@ -46,38 +46,38 @@ PermissionDef testPermDef = {
     .permissionName = "ohos.permission.GET_NETWORK_INFO",
     .bundleName = "net_conn_client_fuzzer",
     .grantMode = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
     .label = "label",
     .labelId = 1,
     .description = "Test net connect maneger network info",
     .descriptionId = 1,
-    .availableLevel = APL_SYSTEM_BASIC
 };
 
 PermissionDef testInternetPermDef = {
     .permissionName = "ohos.permission.INTERNET",
     .bundleName = "net_conn_client_fuzzer",
     .grantMode = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
     .label = "label",
     .labelId = 1,
     .description = "Test net connect maneger internet",
-    .descriptionId = 1,
-    .availableLevel = APL_SYSTEM_BASIC
+    .descriptionId = 1
 };
 
 PermissionStateFull testState = {
-    .grantFlags = {2},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .isGeneral = true,
     .permissionName = "ohos.permission.GET_NETWORK_INFO",
-    .resDeviceID = {"local"}
+    .isGeneral = true,
+    .resDeviceID = {"local"},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
+    .grantFlags = {2}
 };
 
 PermissionStateFull testInternetState = {
-    .grantFlags = {2},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .isGeneral = true,
     .permissionName = "ohos.permission.INTERNET",
-    .resDeviceID = {"local"}
+    .isGeneral = true,
+    .resDeviceID = {"local"},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
+    .grantFlags = {2}
 };
 
 HapPolicyParams testPolicyPrams = {
@@ -171,6 +171,11 @@ public:
     NetSupplierCallbackBaseTest() : NetSupplierCallbackBase() {}
     virtual ~NetSupplierCallbackBaseTest() {}
 };
+
+void SystemReadyFuzzTest(const uint8_t *data, size_t size)
+{
+    DelayedSingleton<NetConnClient>::GetInstance()->SystemReady();
+}
 
 void RegisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
 {
@@ -410,6 +415,46 @@ void NetDetectionFuzzTest(const uint8_t *data, size_t size)
     AccessTokenInternetInfo tokenInternetInfo;
     NetHandle netHandle(GetData<int32_t>());
     DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(netHandle);
+    DelayedSingleton<NetConnClient>::GetInstance()->RestoreFactoryData();
+}
+
+void IsDefaultNetMeteredFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+    AccessToken token;
+    bool isMetered = GetData<int32_t>() % 2 == 0;
+    DelayedSingleton<NetConnClient>::GetInstance()->IsDefaultNetMetered(isMetered);
+}
+
+void SetHttpProxyFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+    AccessToken token;
+    std::string httpProxy = GetStringFromData(STR_LEN);
+    DelayedSingleton<NetConnClient>::GetInstance()->SetHttpProxy(httpProxy);
+}
+
+void GetHttpProxyFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+    AccessToken token;
+    std::string httpProxy = GetStringFromData(STR_LEN);
+    DelayedSingleton<NetConnClient>::GetInstance()->GetHttpProxy(httpProxy);
 }
 } // NetManagerStandard
 } // OHOS
@@ -418,20 +463,26 @@ void NetDetectionFuzzTest(const uint8_t *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
+    OHOS::NetManagerStandard::SystemReadyFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterNetSupplierFuzzTest(data, size);
     OHOS::NetManagerStandard::UnregisterNetSupplierFuzzTest(data, size);
-    OHOS::NetManagerStandard::HasDefaultNetFuzzTest(data, size);
-    OHOS::NetManagerStandard::GetAllNetsFuzzTest(data, size);
-    OHOS::NetManagerStandard::BindSocketFuzzTest(data, size);
-    OHOS::NetManagerStandard::SetAirplaneModeFuzzTest(data, size);
-    OHOS::NetManagerStandard::GetAddressByNameFuzzTest(data, size);
-    OHOS::NetManagerStandard::GetAddressesByNameFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterNetSupplierCallbackFuzzTest(data, size);
+    OHOS::NetManagerStandard::UpdateNetSupplierInfoFuzzTest(data, size);
+    OHOS::NetManagerStandard::UpdateNetLinkInfoFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterNetConnCallbackFuzzTest(data, size);
-    OHOS::NetManagerStandard::NetDetectionFuzzTest(data, size);
     OHOS::NetManagerStandard::UnregisterNetConnCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::GetDefaultNetFuzzTest(data, size);
+    OHOS::NetManagerStandard::HasDefaultNetFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetAllNetsFuzzTest(data, size);
     OHOS::NetManagerStandard::GetConnectionPropertiesFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetCapabilitiesFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetAddressesByNameFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetAddressByNameFuzzTest(data, size);
+    OHOS::NetManagerStandard::BindSocketFuzzTest(data, size);
+    OHOS::NetManagerStandard::NetDetectionFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetAirplaneModeFuzzTest(data, size);
+    OHOS::NetManagerStandard::IsDefaultNetMeteredFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetHttpProxyFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetHttpProxyFuzzTest(data, size);
     return 0;
 }
