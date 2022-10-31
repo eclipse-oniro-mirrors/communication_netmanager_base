@@ -29,6 +29,7 @@ namespace {
 const uint8_t *g_baseFuzzData = nullptr;
 size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
+constexpr size_t STR_LEN = 10;
 }
 
 template<class T>
@@ -83,6 +84,58 @@ void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
     sptr<INetStatsCallbackTest> callback = sptr<INetStatsCallbackTest>();
     DelayedSingleton<NetStatsClient>::GetInstance()->UnregisterNetStatsCallback(callback);
 }
+
+void GetIfaceRxBytesFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+    std::string interfaceName = GetStringFromData(STR_LEN);
+    DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceRxBytes(interfaceName);
+}
+
+void GetIfaceTxBytesFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+    std::string interfaceName = GetStringFromData(STR_LEN);
+    int64_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceTxBytes(interfaceName);
+    ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularRxBytes();
+    ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularTxBytes();
+    ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllRxBytes();
+    ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllTxBytes();
+}
+
+void GetUidRxBytesFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+    int32_t uid = GetData<int32_t>();
+    DelayedSingleton<NetStatsClient>::GetInstance()->GetUidRxBytes(uid);
+}
+
+void GetUidTxBytesFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+    int32_t uid = GetData<int32_t>();
+    DelayedSingleton<NetStatsClient>::GetInstance()->GetUidTxBytes(uid);
+}
 }
 }
 
@@ -91,5 +144,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     /* Run your code on data */
     OHOS::NetManagerStandard::RegisterNetStatsCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::UnregisterNetStatsCallbackFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetIfaceRxBytesFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetIfaceTxBytesFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetUidRxBytesFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetUidTxBytesFuzzTest(data, size);
     return 0;
 }
