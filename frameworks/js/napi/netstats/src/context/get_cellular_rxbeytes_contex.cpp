@@ -16,11 +16,13 @@
 #include "get_cellular_rxbeytes_contex.h"
 
 #include "constant.h"
+#include "napi_constant.h"
 #include "napi_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 GetCellularRxBytesContext::GetCellularRxBytesContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+
 void GetCellularRxBytesContext::ParseParams(napi_value *params, size_t paramsCount)
 {
     if (!CheckParamsType(params, paramsCount)) {
@@ -49,7 +51,7 @@ void GetCellularRxBytesContext::SetBytes64(int64_t bytes64)
     bytes64_ = bytes64;
 }
 
-int64_t GetCellularRxBytesContext::GetBytes64()
+int64_t GetCellularRxBytesContext::GetBytes64() const
 {
     return bytes64_;
 }

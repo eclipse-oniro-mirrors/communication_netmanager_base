@@ -16,6 +16,7 @@
 #include "get_uid_rxbeytes_context.h"
 
 #include "constant.h"
+#include "napi_constant.h"
 #include "napi_utils.h"
 
 namespace OHOS {
@@ -53,7 +54,7 @@ void GetUidRxBytesContext::SetBytes64(int64_t bytes64)
     bytes64_ = bytes64;
 }
 
-int64_t GetUidRxBytesContext::GetBytes64()
+int64_t GetUidRxBytesContext::GetBytes64() const
 {
     return bytes64_;
 }
@@ -63,7 +64,7 @@ void GetUidRxBytesContext::SetUid(int32_t uid)
     uid_ = uid;
 }
 
-int32_t GetUidRxBytesContext::GetUid()
+int32_t GetUidRxBytesContext::GetUid() const
 {
     return uid_;
 }

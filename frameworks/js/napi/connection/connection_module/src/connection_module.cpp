@@ -21,6 +21,7 @@
 #include "constant.h"
 #include "getaddressbyname_context.h"
 #include "getdefaultnet_context.h"
+#include "napi_constant.h"
 #include "net_all_capabilities.h"
 #include "netconnection.h"
 #include "netmanager_base_log.h"
@@ -43,8 +44,9 @@ template <typename T> static bool ParseTypesArray(napi_env env, napi_value obj, 
     if (!NapiUtils::IsArray(env, obj)) {
         return false;
     }
-
-    for (uint32_t i = 0; i < NapiUtils::GetArrayLength(env, obj); ++i) {
+    uint32_t arrayLenght =
+        NapiUtils::GetArrayLength(env, obj) > MAX_ARRAY_LENGTH ? MAX_ARRAY_LENGTH : NapiUtils::GetArrayLength(env, obj);
+    for (uint32_t i = 0; i < arrayLenght; ++i) {
         napi_value val = NapiUtils::GetArrayElement(env, obj, i);
         if (NapiUtils::GetValueType(env, val) == napi_number) {
             typeArray.insert(static_cast<T>(NapiUtils::GetUint32FromValue(env, val)));
@@ -96,28 +98,28 @@ static void *ParseNetConnectionParams(napi_env env, size_t argc, napi_value *arg
         return netConnection.release();
     }
 
-    if (argc == ARG_NUM_1 && NapiUtils::GetValueType(env, argv[0]) == napi_object) {
-        if (!ParseNetSpecifier(env, argv[0], netConnection->netSpecifier)) {
+    if (argc == ARG_NUM_1 && NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) == napi_object) {
+        if (!ParseNetSpecifier(env, argv[ARG_INDEX_0], netConnection->netSpecifier_)) {
             NETMANAGER_BASE_LOGE("ParseNetSpecifier failed");
             return nullptr;
         }
-        netConnection->hasNetSpecifier = true;
+        netConnection->hasNetSpecifier_ = true;
         return netConnection.release();
     }
 
-    if (argc == ARG_NUM_2 && NapiUtils::GetValueType(env, argv[0]) == napi_object &&
-        NapiUtils::GetValueType(env, argv[1]) == napi_number) {
-        if (!ParseNetSpecifier(env, argv[0], netConnection->netSpecifier)) {
+    if (argc == ARG_NUM_2 && NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) == napi_object &&
+        NapiUtils::GetValueType(env, argv[ARG_INDEX_1]) == napi_number) {
+        if (!ParseNetSpecifier(env, argv[ARG_INDEX_0], netConnection->netSpecifier_)) {
             NETMANAGER_BASE_LOGE("ParseNetSpecifier failed, do not use params");
             return nullptr;
         }
-        netConnection->hasNetSpecifier = true;
-        netConnection->hasTimeout = true;
-        netConnection->timeout = NapiUtils::GetUint32FromValue(env, argv[1]);
+        netConnection->hasNetSpecifier_ = true;
+        netConnection->hasTimeout_ = true;
+        netConnection->timeout_ = NapiUtils::GetUint32FromValue(env, argv[ARG_INDEX_1]);
         return netConnection.release();
     }
 
-    NETMANAGER_BASE_LOGE("constructor params invalid, should be none or specifier or specifier+timeout");
+    NETMANAGER_BASE_LOGE("constructor params invalid, should be none or specifier or specifier+timeout_");
     return nullptr;
 }
 
@@ -294,7 +296,7 @@ napi_value ConnectionModule::NetHandleInterface::BindSocket(napi_env env, napi_c
     return ModuleTemplate::Interface<BindSocketContext>(
         env, info, FUNCTION_BIND_SOCKET,
         [](napi_env theEnv, napi_value thisVal, BindSocketContext *context) -> bool {
-            context->netId = NapiUtils::GetInt32Property(theEnv, thisVal, PROPERTY_NET_ID);
+            context->netId_ = NapiUtils::GetInt32Property(theEnv, thisVal, PROPERTY_NET_ID);
             return true;
         },
         ConnectionAsyncWork::NetHandleAsyncWork::ExecBindSocket,

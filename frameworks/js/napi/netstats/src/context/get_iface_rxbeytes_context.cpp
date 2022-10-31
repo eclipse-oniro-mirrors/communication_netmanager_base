@@ -16,6 +16,7 @@
 #include "get_iface_rxbeytes_context.h"
 
 #include "constant.h"
+#include "napi_constant.h"
 #include "napi_utils.h"
 
 namespace OHOS {
@@ -65,17 +66,17 @@ void GetIfaceRxBytesContext::SetInterfaceName(std::string interfaceName)
     interfaceName_ = interfaceName;
 }
 
-std::string GetIfaceRxBytesContext::GetNic()
+std::string GetIfaceRxBytesContext::GetNic() const
 {
     return nic_;
 }
 
-int64_t GetIfaceRxBytesContext::GetBytes64()
+int64_t GetIfaceRxBytesContext::GetBytes64() const
 {
     return bytes64_;
 }
 
-std::string GetIfaceRxBytesContext::GetInterfaceName()
+std::string GetIfaceRxBytesContext::GetInterfaceName() const
 {
     return interfaceName_;
 }

@@ -16,17 +16,18 @@
 #include "get_iface_uid_stats_context.h"
 
 #include "constant.h"
+#include "napi_constant.h"
 #include "napi_utils.h"
 #include "netmanager_base_log.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-const std::string IFACE_INFO = "ifaceInfo";
-const std::string UID = "uid";
-const std::string IFACE = "iface";
-const std::string START_TIME = "startTime";
-const std::string END_TIME = "endTime";
+constexpr const char *IFACE_INFO = "ifaceInfo";
+constexpr const char *UID = "uid";
+constexpr const char *IFACE = "iface";
+constexpr const char *START_TIME = "startTime";
+constexpr const char *END_TIME = "endTime";
 } // namespace
 
 GetIfaceUidStatsContext::GetIfaceUidStatsContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
@@ -38,7 +39,7 @@ void GetIfaceUidStatsContext::ParseParams(napi_value *params, size_t paramsCount
     }
 
     napi_value ifaceInfo = NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0], IFACE_INFO);
-    bool hasUid = NapiUtils::GetInt32Property(GetEnv(), params[ARG_INDEX_0], UID);
+    bool hasUid = NapiUtils::HasNamedProperty(GetEnv(), params[ARG_INDEX_0], UID);
     bool hasIface = NapiUtils::HasNamedProperty(GetEnv(), ifaceInfo, IFACE);
     bool hasStart = NapiUtils::HasNamedProperty(GetEnv(), ifaceInfo, START_TIME);
     bool hasEnd = NapiUtils::HasNamedProperty(GetEnv(), ifaceInfo, END_TIME);
@@ -51,10 +52,24 @@ void GetIfaceUidStatsContext::ParseParams(napi_value *params, size_t paramsCount
         return;
     }
 
+    bool checkUidType = NapiUtils::GetValueType(
+                            GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0], UID)) == napi_number;
+    bool checkIfaceType =
+        NapiUtils::GetValueType(GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), ifaceInfo, IFACE)) == napi_string;
+    bool checkStartType =
+        NapiUtils::GetValueType(GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), ifaceInfo, START_TIME)) == napi_number;
+    bool checkEndType =
+        NapiUtils::GetValueType(GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), ifaceInfo, END_TIME)) == napi_number;
+
+    if (!(checkUidType && checkIfaceType && checkStartType && checkEndType)) {
+        NETMANAGER_BASE_LOGE("param napi_type error");
+        return;
+    }
+
     uid_ = NapiUtils::GetInt32Property(GetEnv(), ifaceInfo, "uid");
     interfaceName_ = NapiUtils::GetStringPropertyUtf8(GetEnv(), params[ARG_INDEX_0], IFACE);
-    start_ = static_cast<uint32_t>(NapiUtils::GetInt32Property(GetEnv(), ifaceInfo, START_TIME));
-    end_ = static_cast<uint32_t>(NapiUtils::GetInt32Property(GetEnv(), ifaceInfo, END_TIME));
+    start_ = NapiUtils::GetUint32Property(GetEnv(), ifaceInfo, START_TIME);
+    end_ = NapiUtils::GetUint32Property(GetEnv(), ifaceInfo, END_TIME);
 
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
         SetParseOK(SetCallback(params[ARG_INDEX_1]) == napi_ok);
@@ -100,11 +115,11 @@ void GetIfaceUidStatsContext::SetEnd(uint32_t end)
     end_ = end;
 }
 
-int32_t GetIfaceUidStatsContext::GetUid()
+int32_t GetIfaceUidStatsContext::GetUid() const
 {
     return uid_;
 }
-std::string GetIfaceUidStatsContext::GetInterfaceName()
+std::string GetIfaceUidStatsContext::GetInterfaceName() const
 {
     return interfaceName_;
 }
@@ -114,12 +129,12 @@ NetStatsInfo &GetIfaceUidStatsContext::GetStatsInfo()
     return statsInfo_;
 }
 
-uint32_t GetIfaceUidStatsContext::GetStart()
+uint32_t GetIfaceUidStatsContext::GetStart() const
 {
     return start_;
 }
 
-uint32_t GetIfaceUidStatsContext::GetEnd()
+uint32_t GetIfaceUidStatsContext::GetEnd() const
 {
     return end_;
 }

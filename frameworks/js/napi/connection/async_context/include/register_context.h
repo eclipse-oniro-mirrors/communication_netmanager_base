@@ -18,16 +18,13 @@
 
 #include <cstddef>
 
-#include "napi/native_api.h"
-#include "nocopyable.h"
+#include <napi/native_api.h>
 
 #include "base_context.h"
 
 namespace OHOS::NetManagerStandard {
 class RegisterContext final : public BaseContext {
 public:
-    DISALLOW_COPY_AND_MOVE(RegisterContext);
-
     RegisterContext() = delete;
 
     explicit RegisterContext(napi_env env, EventManager *manager);

@@ -16,15 +16,16 @@
 #include "get_iface_stats_context.h"
 
 #include "constant.h"
+#include "napi_constant.h"
 #include "napi_utils.h"
 #include "netmanager_base_log.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-const std::string IFACE = "iface";
-const std::string START_TIME = "startTime";
-const std::string END_TIME = "endTime";
+constexpr const char *IFACE = "iface";
+constexpr const char *START_TIME = "startTime";
+constexpr const char *END_TIME = "endTime";
 } // namespace
 
 GetIfaceStatsContext::GetIfaceStatsContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
@@ -45,9 +46,20 @@ void GetIfaceStatsContext::ParseParams(napi_value *params, size_t paramsCount)
         return;
     }
 
+    bool checkIfaceType = NapiUtils::GetValueType(GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0],
+                                                                                        IFACE)) == napi_string;
+    bool checkStartType = NapiUtils::GetValueType(GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0],
+                                                                                        START_TIME)) == napi_number;
+    bool checkEndType = NapiUtils::GetValueType(GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0],
+                                                                                      END_TIME)) == napi_number;
+    if (!(checkIfaceType && checkStartType && checkEndType)) {
+        NETMANAGER_BASE_LOGE("param napi_type error");
+        return;
+    }
+
     interfaceName_ = NapiUtils::GetStringPropertyUtf8(GetEnv(), params[ARG_INDEX_0], IFACE);
-    start_ = static_cast<uint32_t>(NapiUtils::GetInt32Property(GetEnv(), params[ARG_INDEX_0], START_TIME));
-    end_ = static_cast<uint32_t>(NapiUtils::GetInt32Property(GetEnv(), params[ARG_INDEX_0], END_TIME));
+    start_ = NapiUtils::GetUint32Property(GetEnv(), params[ARG_INDEX_0], START_TIME);
+    end_ = NapiUtils::GetUint32Property(GetEnv(), params[ARG_INDEX_0], END_TIME);
 
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
         SetParseOK(SetCallback(params[ARG_INDEX_1]) == napi_ok);
@@ -88,7 +100,7 @@ void GetIfaceStatsContext::SetEnd(uint32_t end)
     end_ = end;
 }
 
-std::string GetIfaceStatsContext::GetInterfaceName()
+std::string GetIfaceStatsContext::GetInterfaceName() const
 {
     return interfaceName_;
 }
@@ -98,12 +110,12 @@ NetStatsInfo &GetIfaceStatsContext::GetStatsInfo()
     return statsInfo_;
 }
 
-uint32_t GetIfaceStatsContext::GetStart()
+uint32_t GetIfaceStatsContext::GetStart() const
 {
     return start_;
 }
 
-uint32_t GetIfaceStatsContext::GetEnd()
+uint32_t GetIfaceStatsContext::GetEnd() const
 {
     return end_;
 }

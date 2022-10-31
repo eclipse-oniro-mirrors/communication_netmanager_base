@@ -16,15 +16,12 @@
 #ifndef COMMUNICATIONNETMANAGERBASE_CONNECTION_ASYNC_WORK_H
 #define COMMUNICATIONNETMANAGERBASE_CONNECTION_ASYNC_WORK_H
 
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
-#include "nocopyable.h"
+#include <napi/native_api.h>
+#include <napi/native_node_api.h>
 
 namespace OHOS::NetManagerStandard {
 class ConnectionAsyncWork final {
 public:
-    DISALLOW_COPY_AND_MOVE(ConnectionAsyncWork);
-
     ConnectionAsyncWork() = delete;
 
     ~ConnectionAsyncWork() = delete;
@@ -75,8 +72,6 @@ public:
 
     class NetHandleAsyncWork final {
     public:
-        DISALLOW_COPY_AND_MOVE(NetHandleAsyncWork);
-
         NetHandleAsyncWork() = delete;
 
         ~NetHandleAsyncWork() = delete;
@@ -96,8 +91,6 @@ public:
 
     class NetConnectionAsyncWork final {
     public:
-        DISALLOW_COPY_AND_MOVE(NetConnectionAsyncWork);
-
         NetConnectionAsyncWork() = delete;
 
         ~NetConnectionAsyncWork() = delete;

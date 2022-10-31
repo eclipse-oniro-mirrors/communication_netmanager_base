@@ -22,19 +22,16 @@
 #include <napi/native_api.h>
 
 #include "base_context.h"
-#include "nocopyable.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 class GetCellularRxBytesContext final : public BaseContext {
 public:
-    DISALLOW_COPY_AND_MOVE(GetCellularRxBytesContext);
-
     GetCellularRxBytesContext() = delete;
     explicit GetCellularRxBytesContext(napi_env env, EventManager *manager);
 
     void SetBytes64(int64_t bytes64);
-    int64_t GetBytes64();
+    int64_t GetBytes64() const;
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

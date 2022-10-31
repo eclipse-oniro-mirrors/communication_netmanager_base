@@ -35,8 +35,7 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_UNREG_NETWORK] = &NetConnServiceStub::OnUnregisterNetSupplier;
     memberFuncMap_[CMD_NM_SET_NET_SUPPLIER_INFO] = &NetConnServiceStub::OnUpdateNetSupplierInfo;
     memberFuncMap_[CMD_NM_SET_NET_LINK_INFO] = &NetConnServiceStub::OnUpdateNetLinkInfo;
-    memberFuncMap_[CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK] =
-        &NetConnServiceStub::OnRegisterNetDetectionCallback;
+    memberFuncMap_[CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK] = &NetConnServiceStub::OnRegisterNetDetectionCallback;
     memberFuncMap_[CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK] =
         &NetConnServiceStub::OnUnRegisterNetDetectionCallback;
     memberFuncMap_[CMD_NM_NET_DETECTION] = &NetConnServiceStub::OnNetDetection;
