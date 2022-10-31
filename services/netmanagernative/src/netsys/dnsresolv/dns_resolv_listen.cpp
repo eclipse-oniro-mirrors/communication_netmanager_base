@@ -124,8 +124,12 @@ void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint32_t netId)
     }
 
     AddrInfo addrInfo[MAX_RESULTS] = {};
-    std::copy(cacheRes.begin(), cacheRes.end(), addrInfo);
-
+    for (uint32_t i = 0; i < resNum; i++) {
+        if (memcpy_s(reinterpret_cast<char *>(&addrInfo[i]), sizeof(AddrInfo),
+                     reinterpret_cast<char *>(&cacheRes[i]), sizeof(AddrInfo)) != 0) {
+            return;
+        }
+    }
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(addrInfo), sizeof(AddrInfo) * resNum)) {
         DNS_CONFIG_PRINT("send errno %{public}d", errno);
         close(clientSockFd);
