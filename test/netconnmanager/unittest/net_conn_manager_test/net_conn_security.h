@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef NETMANAGER_NET_CONN_SECURITY_H
+#define NETMANAGER_NET_CONN_SECURITY_H
+
 #include "accesstoken_kit.h"
 #include "iservice_registry.h"
 #include "nativetoken_kit.h"
@@ -48,3 +51,4 @@ private:
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
+#endif // NETMANAGER_NET_CONN_SECURITY_H
