@@ -24,7 +24,7 @@ namespace NetManagerStandard {
 int32_t StatisticsCallbackObserver::NetIfaceStatsChanged(const std::string &iface)
 {
     if (!DelayedSingleton<StatisticsObserverWrapper>::GetInstance()->GetEventManager()->HasEventListener(
-            EVENT_STATS_CHANGE)) {
+        EVENT_STATS_CHANGE)) {
         NETMANAGER_BASE_LOGE("no event listener find %{public}s", EVENT_STATS_CHANGE);
         return 0;
     }
@@ -39,7 +39,7 @@ int32_t StatisticsCallbackObserver::NetIfaceStatsChanged(const std::string &ifac
 int32_t StatisticsCallbackObserver::NetUidStatsChanged(const std::string &iface, uint32_t uid)
 {
     if (!DelayedSingleton<StatisticsObserverWrapper>::GetInstance()->GetEventManager()->HasEventListener(
-            EVENT_STATS_CHANGE)) {
+        EVENT_STATS_CHANGE)) {
         NETMANAGER_BASE_LOGE("no event listener find %{public}s", EVENT_STATS_CHANGE);
         return 0;
     }

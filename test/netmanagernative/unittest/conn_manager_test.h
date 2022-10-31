@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef NETMANAGER_CONN_MANAGER_TEST_H
+#define NETMANAGER_CONN_MANAGER_TEST_H
+
 #include "iservice_registry.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_proxy.h"
@@ -45,3 +48,4 @@ sptr<INetsysService> ConnManagerGetProxy()
 } // namespace ConnGetProxy
 } // namespace NetManagerStandard
 } // namespace OHOS
+#endif // NETMANAGER_CONN_MANAGER_TEST_H

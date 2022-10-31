@@ -55,7 +55,6 @@ bool BpfProgLoader::LoadAndAttach(const std::string &event, const bpf_insn *prog
     std::string progName = event;
     replace(progName.begin(), progName.end(), '/', '_');
     std::string progPinLocation = std::string("/sys/fs/bpf/prog_netsys_") + progName;
-
     if (access(progPinLocation.c_str(), F_OK) == 0) {
         NETNATIVE_LOGI("prog: %{public}s has already been pinned", progPinLocation.c_str());
     } else {

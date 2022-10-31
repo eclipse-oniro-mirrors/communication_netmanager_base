@@ -504,7 +504,6 @@ int32_t NetMonitor::GetDefaultNetDetectionUrlFromCfg(std::string &strUrl)
     std::string content = oss.str();
     int32_t index = content.find_last_of(SPACE_STR);
     strUrl = content.substr(index + 1);
-
     if (strUrl.empty()) {
         NETMGR_LOG_E("get netdetectionurl is empty");
         ret = -1;

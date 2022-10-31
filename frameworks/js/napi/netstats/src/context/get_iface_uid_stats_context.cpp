@@ -42,7 +42,6 @@ void GetIfaceUidStatsContext::ParseParams(napi_value *params, size_t paramsCount
     bool hasIface = NapiUtils::HasNamedProperty(GetEnv(), ifaceInfo, IFACE);
     bool hasStart = NapiUtils::HasNamedProperty(GetEnv(), ifaceInfo, START_TIME);
     bool hasEnd = NapiUtils::HasNamedProperty(GetEnv(), ifaceInfo, END_TIME);
-
     if (!(hasUid && hasIface && hasStart && hasEnd)) {
         NETMANAGER_BASE_LOGE(
             "param error hasIface is %{public}d, hasStart is %{public}d, hasEnd is %{public}d"
