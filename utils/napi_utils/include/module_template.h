@@ -17,6 +17,7 @@
 #define COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_MODULE_TEMPLATE_H
 
 #include <initializer_list>
+#include <vector>
 
 #include "base_async_work.h"
 #include "base_context.h"
@@ -27,9 +28,11 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace ModuleTemplate {
-namespace {
 using Finalizer = void (*)(napi_env env, void *data, void *);
-} // namespace
+const std::vector<std::string> g_interfaceWithException = { // throw error for api9 or later.
+    "hasDefaultNet",
+    "isDefaultNetMetered",
+};
 
 template <class Context>
 napi_value Interface(napi_env env, napi_callback_info info, const std::string &asyncWorkName,
@@ -49,8 +52,16 @@ napi_value Interface(napi_env env, napi_callback_info info, const std::string &a
     auto context = new Context(env, manager);
     context->ParseParams(params, paramsCount);
     NETMANAGER_BASE_LOGI("js params parse OK ? %{public}d", context->IsParseOK());
-    if (!context->IsParseOK()) {
-        napi_throw_error(env, "-1", "parse param failed");
+    auto IsNeedParseThrow = [&asyncWorkName]() {
+        for (const auto &name : g_interfaceWithException) {
+            if (name == asyncWorkName) {
+                return true;
+            }
+        }
+        return false;
+    };
+    if (!context->IsParseOK() && IsNeedParseThrow()) {
+        napi_throw_error(env, std::to_string(PARSE_ERROR_CODE).c_str(), PARSE_ERROR_MSG);
         delete context;
         context = nullptr;
         return NapiUtils::GetUndefined(env);
