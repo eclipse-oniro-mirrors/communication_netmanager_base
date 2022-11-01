@@ -18,6 +18,9 @@
 
 #include <mutex>
 
+#include "system_ability.h"
+#include "system_ability_status_change_stub.h"
+
 #include "dhcp_controller.h"
 #include "fwmark_network.h"
 #include "i_netsys_service.h"
@@ -26,7 +29,6 @@
 #include "netlink_manager.h"
 #include "netsys_native_service_stub.h"
 #include "sharing_manager.h"
-#include "system_ability.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -34,7 +36,7 @@ class NetsysNativeService : public SystemAbility, public NetsysNativeServiceStub
     DECLARE_SYSTEM_ABILITY(NetsysNativeService);
 
 public:
-    explicit NetsysNativeService(int32_t saID, bool runOnCreate = true) : SystemAbility(saID, runOnCreate) {};
+    explicit NetsysNativeService(int32_t saID, bool runOnCreate = true) : SystemAbility(saID, runOnCreate){};
     ~NetsysNativeService() = default;
 
     void OnStart() override;
@@ -42,9 +44,11 @@ public:
     int32_t Dump(int32_t fd, const std::vector<std::u16string> &args) override;
 
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
-        const std::vector<std::string> &servers, const std::vector<std::string> &domains) override;
-    int32_t GetResolverConfig(const  uint16_t  netId,  std::vector<std::string> &servers,
-           std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount) override;
+                              const std::vector<std::string> &servers,
+                              const std::vector<std::string> &domains) override;
+    int32_t GetResolverConfig(const uint16_t netId, std::vector<std::string> &servers,
+                              std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
+                              uint8_t &retryCount) override;
     int32_t CreateNetworkCache(const uint16_t netId) override;
     int32_t DestroyNetworkCache(const uint16_t netId) override;
     int32_t InterfaceSetMtu(const std::string &interfaceName, int32_t mtu) override;
@@ -109,7 +113,10 @@ private:
     NetsysNativeService();
     bool Init();
     void GetDumpMessage(std::string &message);
+    void SubscribeSystemAbilityChanged();
+    void OnNetManagerRestart();
 
+private:
     enum ServiceRunningState {
         STATE_STOPPED = 0,
         STATE_RUNNING,
@@ -126,8 +133,22 @@ private:
     std::unique_ptr<OHOS::nmd::SharingManager> sharingManager_ = nullptr;
 
     sptr<INotifyCallback> notifyCallback_ = nullptr;
+    sptr<ISystemAbilityStatusChange> statusChangeListener_ = nullptr;
 
     std::mutex instanceLock_;
+
+private:
+    class SystemAbilityStatusChangeListener : public OHOS::SystemAbilityStatusChangeStub {
+    public:
+        explicit SystemAbilityStatusChangeListener(NetsysNativeService &netsysNativeService);
+        ~SystemAbilityStatusChangeListener() = default;
+        virtual void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
+        virtual void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
+
+    private:
+        NetsysNativeService &netsysNativeService_;
+        bool hasSARemoved_ = false;
+    };
 };
 } // namespace NetsysNative
 } // namespace OHOS

@@ -66,6 +66,11 @@ void NetManagerNative::Init()
     GetOriginInterfaceIndex();
 }
 
+int32_t NetManagerNative::NetworkReinitRoute()
+{
+    return connManager_->ReinitRoute();
+}
+
 int32_t NetManagerNative::NetworkCreatePhysical(int32_t netId, int32_t permission)
 {
     return connManager_->CreatePhysicalNetwork(static_cast<uint16_t>(netId),

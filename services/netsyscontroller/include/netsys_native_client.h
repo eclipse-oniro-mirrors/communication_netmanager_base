@@ -53,9 +53,8 @@ class NetsysNativeClient {
     };
 
 public:
-    NetsysNativeClient();
+    NetsysNativeClient() = default;
     ~NetsysNativeClient() = default;
-    void Init();
 
     /**
      * Create a physical network
@@ -623,12 +622,28 @@ private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);
     void ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface);
     sptr<OHOS::NetsysNative::INetsysService> GetProxy();
+    void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
 private:
     sptr<OHOS::NetsysNative::INotifyCallback> nativeNotifyCallback_ = nullptr;
     sptr<OHOS::NetsysNative::INetsysService> netsysNativeService_ = nullptr;
+    sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
     std::vector<sptr<NetsysControllerCallback>> cbObjects_;
-    bool initFlag_ = false;
+    std::mutex mutex_;
+
+private:
+    class NetNativeConnDeathRecipient : public IRemoteObject::DeathRecipient {
+    public:
+        explicit NetNativeConnDeathRecipient(NetsysNativeClient &client) : client_(client) {}
+        ~NetNativeConnDeathRecipient() override = default;
+        void OnRemoteDied(const wptr<IRemoteObject> &remote) override
+        {
+            client_.OnRemoteDied(remote);
+        }
+
+    private:
+        NetsysNativeClient &client_;
+    };
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
