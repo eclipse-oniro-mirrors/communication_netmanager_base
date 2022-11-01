@@ -22,6 +22,7 @@
 #include "getaddressbyname_context.h"
 #include "getdefaultnet_context.h"
 #include "napi/native_api.h"
+#include "none_params_context.h"
 #include "parse_nethandle_context.h"
 #include "register_context.h"
 
