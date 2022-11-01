@@ -1221,5 +1221,23 @@ int32_t NetConnService::GetHttpProxy(std::string &httpProxy)
     httpProxy = httpProxy_;
     return ERR_NONE;
 }
+
+int32_t NetConnService::GetNetIdByIdentifier(const std::string &ident, int32_t &netId)
+{
+    if (ident.empty()) {
+        NETMGR_LOG_E("The identifier in service is null");
+        return ERR_NO_NET_IDENT;
+    }
+    for (auto iterSupplier : netSuppliers_) {
+        if (iterSupplier.second == nullptr) {
+            continue;
+        }
+        if (iterSupplier.second->GetNetSupplierIdent() == ident) {
+            netId = iterSupplier.second->GetNetId();
+            break;
+        }
+    }
+    return ERR_NONE;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

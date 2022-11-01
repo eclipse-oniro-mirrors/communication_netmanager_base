@@ -58,6 +58,7 @@ public:
     int32_t IsDefaultNetMetered(bool &isMetered) override;
     int32_t SetHttpProxy(const std::string &httpProxy) override;
     int32_t GetHttpProxy(std::string &httpProxy) override;
+    int32_t GetNetIdByIdentifier(const std::string &ident, int32_t &netId) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
