@@ -1146,5 +1146,47 @@ int32_t NetConnServiceProxy::GetHttpProxy(std::string &httpProxy)
     }
     return ret;
 }
+
+int32_t NetConnServiceProxy::GetNetIdByIdentifier(const std::string &ident, int32_t &netId)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return IPC_PROXY_ERR;
+    }
+
+    if (!data.WriteString(ident)) {
+        NETMGR_LOG_E("Write string data failed");
+        return IPC_PROXY_ERR;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = remote->SendRequest(CMD_NM_GET_NET_ID_BY_IDENTIFIER, data, reply, option);
+    if (error != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        return error;
+    }
+
+    int32_t ret = ERR_NONE;
+    if (!reply.ReadInt32(ret)) {
+        NETMGR_LOG_E("Read return code failed");
+        return IPC_PROXY_ERR;
+    }
+
+    if (ret == ERR_NONE) {
+        if (!reply.ReadInt32(netId)) {
+            NETMGR_LOG_E("Read net id failed");
+            return IPC_PROXY_ERR;
+        }
+    }
+    return ret;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

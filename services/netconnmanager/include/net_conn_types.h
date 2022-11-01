@@ -58,6 +58,7 @@ enum ResultCode {
     ERR_PERMISSION_CHECK_FAIL                                       = (-34),
     ERR_HTTP_PROXY_INVALID                                          = (-35),
     ERR_NO_HTTP_PROXY                                               = (-36),
+    ERR_NO_NET_IDENT                                                = (-37),
 };
 
 enum NetMonitorResponseCode {

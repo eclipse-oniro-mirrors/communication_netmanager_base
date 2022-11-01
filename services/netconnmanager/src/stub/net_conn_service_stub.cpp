@@ -57,6 +57,7 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_IS_DEFAULT_NET_METERED] = &NetConnServiceStub::OnIsDefaultNetMetered;
     memberFuncMap_[CMD_NM_SET_HTTP_PROXY] = &NetConnServiceStub::OnSetHttpProxy;
     memberFuncMap_[CMD_NM_GET_HTTP_PROXY] = &NetConnServiceStub::OnGetHttpProxy;
+    memberFuncMap_[CMD_NM_GET_NET_ID_BY_IDENTIFIER] = &NetConnServiceStub::OnGetNetIdByIdentifier;
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -809,6 +810,28 @@ int32_t NetConnServiceStub::OnGetHttpProxy(MessageParcel &data, MessageParcel &r
         return ERR_FLATTEN_OBJECT;
     }
     return ERR_NONE;
+}
+
+int32_t NetConnServiceStub::OnGetNetIdByIdentifier(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("stub execute OnGetNetIdByIdentifier");
+    std::string ident;
+    if (!data.ReadString(ident)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t netId = 0;
+    int32_t ret = GetNetIdByIdentifier(ident, netId);
+    if (!reply.WriteInt32(ret)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (ret == ERR_NONE) {
+        if (!reply.WriteInt32(netId)) {
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    return ret;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

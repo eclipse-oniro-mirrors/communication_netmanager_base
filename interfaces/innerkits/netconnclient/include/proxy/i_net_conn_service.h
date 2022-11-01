@@ -66,6 +66,7 @@ public:
         CMD_NM_IS_DEFAULT_NET_METERED,
         CMD_NM_SET_HTTP_PROXY,
         CMD_NM_GET_HTTP_PROXY,
+        CMD_NM_GET_NET_ID_BY_IDENTIFIER,
         CMD_NM_END,
     };
 
@@ -103,6 +104,7 @@ public:
     virtual int32_t IsDefaultNetMetered(bool &isMetered) = 0;
     virtual int32_t SetHttpProxy(const std::string &httpProxy) = 0;
     virtual int32_t GetHttpProxy(std::string &httpProxy) = 0;
+    virtual int32_t GetNetIdByIdentifier(const std::string &ident, int32_t &netId) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
