@@ -85,6 +85,7 @@ ohos_shared_library("netsys_native_manager") {
     "c_utils:utils",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 
   defines = [

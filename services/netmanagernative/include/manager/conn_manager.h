@@ -103,6 +103,15 @@ public:
     int32_t RemoveInterfaceFromNetwork(int32_t netId, std::string &interafceName);
 
     /**
+     * Reinit route when netmanager restart
+     *
+     * @param
+     *
+     * @return Returns 0, reinit route successfully, otherwise it will fail
+     */
+    int32_t ReinitRoute();
+
+    /**
      * Add a route for specific network
      *
      * @param netId The network to add the route
@@ -169,6 +178,8 @@ public:
 
 private:
     int32_t defaultNetId_;
+    bool needReinitRouteFlag_;
+    std::map<int32_t, std::string> physicalInterfaceName_;
     std::map<int32_t, std::shared_ptr<NetsysNetwork>> networks_;
     std::tuple<bool, std::shared_ptr<NetsysNetwork>> FindNetworkById(int32_t netId);
     int32_t GetNetworkForInterface(std::string &interfaceName);
