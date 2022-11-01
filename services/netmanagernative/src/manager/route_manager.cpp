@@ -594,14 +594,14 @@ int32_t RouteManager::SendRuleToKernel(uint32_t action, uint16_t ruleFlag, uint8
     if (ruleInfo.ruleIif != RULEIIF_NULL) {
         char ruleIifName[IFNAMSIZ] = {0};
         size_t ruleIifLength = strlcpy(ruleIifName, ruleInfo.ruleIif.c_str(), IFNAMSIZ) + 1;
-        if (int32_t ret = nlmsg.AddAttr(FRA_IIFNAME, (void *)ruleIifName, ruleIifLength)) {
+        if (int32_t ret = nlmsg.AddAttr(FRA_IIFNAME, ruleIifName, ruleIifLength)) {
             return ret;
         }
     }
     if (ruleInfo.ruleOif != RULEOIF_NULL) {
         char ruleOifName[IFNAMSIZ] = {0};
         size_t ruleOifLength = strlcpy(ruleOifName, ruleInfo.ruleOif.c_str(), IFNAMSIZ) + 1;
-        if (int32_t ret = nlmsg.AddAttr(FRA_OIFNAME, (void *)ruleOifName, ruleOifLength)) {
+        if (int32_t ret = nlmsg.AddAttr(FRA_OIFNAME, ruleOifName, ruleOifLength)) {
             return ret;
         }
     }
@@ -677,11 +677,11 @@ int32_t RouteManager::SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtm
     if (int32_t ret = nlmsg.AddAttr32(RTA_TABLE, routeInfo.routeTable)) {
         return ret;
     }
-    if (int32_t ret = nlmsg.AddAttr(RTA_DST, (void *)dst.data, dst.bitlen / BYTE_ALIGNMENT)) {
+    if (int32_t ret = nlmsg.AddAttr(RTA_DST, dst.data, dst.bitlen / BYTE_ALIGNMENT)) {
         return ret;
     }
     if (!routeInfo.routeNextHop.empty()) {
-        if (int32_t ret = nlmsg.AddAttr(RTA_GATEWAY, (void *)gw.data, gw.bitlen / BYTE_ALIGNMENT)) {
+        if (int32_t ret = nlmsg.AddAttr(RTA_GATEWAY, gw.data, gw.bitlen / BYTE_ALIGNMENT)) {
             return ret;
         }
     }

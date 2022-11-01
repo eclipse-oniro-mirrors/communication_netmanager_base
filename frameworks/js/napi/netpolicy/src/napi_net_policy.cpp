@@ -595,7 +595,7 @@ napi_value NapiNetPolicy::SetBackgroundPolicy(napi_env env, napi_callback_info i
     NAPI_CALL(env, napi_get_undefined(env, &resource));
     NAPI_CALL(env, napi_create_string_utf8(env, "SetBackgroundPolicy", NAPI_AUTO_LENGTH, &resourceName));
     NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecSetBackgroundPolicy,
-                                          CompleteSetBackgroundPolicy, (void *)context, &context->work));
+                                          CompleteSetBackgroundPolicy, context, &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
 }
@@ -666,7 +666,7 @@ napi_value NapiNetPolicy::SetPolicyByUid(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_undefined(env, &resource));
     NAPI_CALL(env, napi_create_string_utf8(env, "SetPolicyByUid", NAPI_AUTO_LENGTH, &resourceName));
     NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecSetPolicyByUid, CompleteSetPolicyByUid,
-                                          (void *)context, &context->work));
+                                          context, &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
 }
@@ -698,7 +698,7 @@ napi_value NapiNetPolicy::GetPolicyByUid(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_undefined(env, &resource));
     NAPI_CALL(env, napi_create_string_utf8(env, "GetUidsByPolicy", NAPI_AUTO_LENGTH, &resourceName));
     NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecGetPolicyByUid, CompleteGetPolicyByUid,
-                                          (void *)context, &context->work));
+                                          context, &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
 }
@@ -730,7 +730,7 @@ napi_value NapiNetPolicy::GetUidsByPolicy(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_undefined(env, &resource));
     NAPI_CALL(env, napi_create_string_utf8(env, "GetUidsByPolicy", NAPI_AUTO_LENGTH, &resourceName));
     NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecGetUidsByPolicy, CompleteGetUidsByPolicy,
-                                          (void *)context, &context->work));
+                                          context, &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
 }
@@ -778,7 +778,7 @@ napi_value NapiNetPolicy::SetNetQuotaPolicies(napi_env env, napi_callback_info i
     NAPI_CALL(env, napi_get_undefined(env, &resource));
     NAPI_CALL(env, napi_create_string_utf8(env, "SetNetQuotaPolicies", NAPI_AUTO_LENGTH, &resourceName));
     NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecSetNetQuotaPolicies,
-                                          CompleteSetNetQuotaPolicies, (void *)context, &context->work));
+                                          CompleteSetNetQuotaPolicies, context, &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
 }
@@ -813,7 +813,7 @@ napi_value NapiNetPolicy::SetSnoozePolicy(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_undefined(env, &resource));
     NAPI_CALL(env, napi_create_string_utf8(env, "SetSnoozePolicy", NAPI_AUTO_LENGTH, &resourceName));
     NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecSetSnoozePolicy, CompleteSetSnoozePolicy,
-                                          (void *)context, &context->work));
+                                          context, &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
 }
@@ -846,7 +846,7 @@ napi_value NapiNetPolicy::On(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     NAPI_CALL(env, napi_get_undefined(env, &resource));
     NAPI_CALL(env, napi_create_string_utf8(env, "On", NAPI_AUTO_LENGTH, &resourceName));
-    NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecOn, CompleteOn, (void *)context,
+    NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecOn, CompleteOn, context,
                                           &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
@@ -880,7 +880,7 @@ napi_value NapiNetPolicy::Off(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     NAPI_CALL(env, napi_get_undefined(env, &resource));
     NAPI_CALL(env, napi_create_string_utf8(env, "Off", NAPI_AUTO_LENGTH, &resourceName));
-    NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecOff, CompleteOff, (void *)context,
+    NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecOff, CompleteOff, context,
                                           &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;

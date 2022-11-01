@@ -344,7 +344,7 @@ void NapiCommon::Handle2ValueCallback(napi_env env, BaseContext *baseContext, na
 }
 
 bool NapiCommon::HasNamedTypeProperty(
-    napi_env env, napi_value object, napi_valuetype type, std::string propertyName)
+    napi_env env, napi_value object, napi_valuetype type, const std::string &propertyName)
 {
     bool hasProperty = false;
     NAPI_CALL_BASE(env, napi_has_named_property(env, object, propertyName.data(), &hasProperty), false);
@@ -356,7 +356,7 @@ bool NapiCommon::HasNamedTypeProperty(
     return false;
 }
 
-bool NapiCommon::HasNamedProperty(napi_env env, napi_value object, std::string propertyName)
+bool NapiCommon::HasNamedProperty(napi_env env, napi_value object, const std::string &propertyName)
 {
     bool hasProperty = false;
     NAPI_CALL_BASE(env, napi_has_named_property(env, object, propertyName.data(), &hasProperty), false);

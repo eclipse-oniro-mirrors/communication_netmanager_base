@@ -419,7 +419,7 @@ int32_t NetMonitor::GetStatusCodeFromResponse(const std::string &strResponse)
         NETMGR_LOG_E("No other space was found in the response line!");
         return -1;
     }
-    strStatusCode = strStatusCode.substr(0, pos);
+    strStatusCode.resize(pos);
     if (strStatusCode.empty()) {
         NETMGR_LOG_E("String status code is empty!");
         return -1;

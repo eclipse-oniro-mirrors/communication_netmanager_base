@@ -500,10 +500,9 @@ std::vector<std::string> NetsysNativeClient::InterfaceGetList()
 std::vector<std::string> NetsysNativeClient::UidGetList()
 {
     NETMGR_LOG_D("NetsysNativeClient UidGetList");
-    std::vector<std::string> ret;
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
-        return ret;
+        return {};
     }
     return {};
 }

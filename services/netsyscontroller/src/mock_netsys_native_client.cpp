@@ -475,8 +475,12 @@ int32_t MockNetsysNativeClient::AddRoute(const std::string &ip, const std::strin
         NETMGR_LOG_E("MockNetsysNativeClient inet_aton mask[%{public}s]", mask.c_str());
         return -1;
     }
+    auto name = std::make_unique<char[]>(devName.size());
     if (!devName.empty()) {
-        rt.rt_dev = (char *)devName.c_str();
+        if (strcpy_s(name.get(), devName.size(), devName.c_str()) != 0) {
+            return -1;
+        }
+        rt.rt_dev = name.get();
     }
     rt.rt_flags = RTF_GATEWAY;
     int fd = socket(AF_INET, SOCK_DGRAM, 0);

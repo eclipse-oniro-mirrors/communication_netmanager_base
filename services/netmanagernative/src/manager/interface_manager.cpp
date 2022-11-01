@@ -221,9 +221,10 @@ int Ipv4NetmaskToPrefixLength(in_addr_t mask)
 {
     int prefixLength = 0;
     uint32_t m = ntohl(mask);
-    while (m & (1 << MOVE_BIT_LEFT31)) {
+    const uint32_t referenceValue = 1;
+    while (m & (referenceValue << MOVE_BIT_LEFT31)) {
         prefixLength++;
-        m = m << 1;
+        m = m << referenceValue;
     }
     return prefixLength;
 }
