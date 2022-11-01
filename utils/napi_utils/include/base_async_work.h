@@ -28,6 +28,9 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+constexpr size_t PARSE_ERROR_CODE = 401;
+constexpr const char *PARSE_ERROR_MSG = "Parameter error";
+
 class BaseAsyncWork final {
 public:
     DISALLOW_COPY_AND_MOVE(BaseAsyncWork);
@@ -40,8 +43,14 @@ public:
 
         (void)env;
 
-        auto context = static_cast<Context *>(data);
+        auto context = reinterpret_cast<Context *>(data);
         if (context == nullptr || Executor == nullptr) {
+            NETMANAGER_BASE_LOGE("context or Executor is nullptr");
+            return;
+        }
+        if (!context->IsParseOK()) {
+            context->SetError(PARSE_ERROR_CODE, PARSE_ERROR_MSG); // error code is 401, if parse failed.
+            NETMANAGER_BASE_LOGE("parameter error");
             return;
         }
         context->SetExecOK(Executor(context));
