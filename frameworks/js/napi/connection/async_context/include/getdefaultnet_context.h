@@ -40,25 +40,17 @@ public:
     // for GetDefaultNet
     NetHandle netHandle_;
 
-    // for HasDefaultNet
-    bool hasDefaultNet_;
-
     // for GetAllNets
     std::list<sptr<NetHandle>> netHandleList_;
-
-    // for IsDefaultNetMetered
-    bool isMetered_;
 
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
 };
 
 using GetDefaultNetContext = GetConnNapiContext;
-using HasDefaultNetContext = GetConnNapiContext;
 using GetAllNetsContext = GetConnNapiContext;
 using EnableAirplaneModeContext = GetConnNapiContext;
 using DisableAirplaneModeContext = GetConnNapiContext;
-using IsDefaultNetMeteredContext = GetConnNapiContext;
 } // namespace OHOS::NetManagerStandard
 
 #endif /* COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H */
