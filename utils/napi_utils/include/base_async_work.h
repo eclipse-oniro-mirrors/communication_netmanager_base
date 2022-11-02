@@ -16,6 +16,7 @@
 #ifndef COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_BASE_ASYNC_WORK_H
 #define COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_BASE_ASYNC_WORK_H
 
+#include <limits>
 #include <memory>
 
 #include <napi/native_api.h>
@@ -23,6 +24,7 @@
 
 #include "netmanager_base_log.h"
 #include "base_context.h"
+#include "napi_constant.h"
 #include "napi_utils.h"
 #include "nocopyable.h"
 
@@ -40,8 +42,17 @@ public:
 
         (void)env;
 
-        auto context = static_cast<Context *>(data);
+        auto context = reinterpret_cast<Context *>(data);
         if (context == nullptr || Executor == nullptr) {
+            NETMANAGER_BASE_LOGE("context or Executor is nullptr");
+            return;
+        }
+        if (!context->IsParseOK()) {
+            if (context->GetErrorCode() ==
+                std::numeric_limits<int32_t>::max()) {                // api9 or before not set error in context.
+                context->SetError(PARSE_ERROR_CODE, PARSE_ERROR_MSG); // if developer not set error, there will set.
+            }
+            NETMANAGER_BASE_LOGE("parameter error");
             return;
         }
         context->SetExecOK(Executor(context));

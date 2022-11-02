@@ -18,18 +18,19 @@
 
 #include <initializer_list>
 
-#include "base_async_work.h"
+#include <napi/native_api.h>
+#include <napi/native_common.h>
+
 #include "base_context.h"
 #include "netmanager_base_log.h"
+#include "napi_utils.h"
 
 #define MAX_PARAM_NUM 64
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace ModuleTemplate {
-namespace {
 using Finalizer = void (*)(napi_env env, void *data, void *);
-} // namespace
 
 template <class Context>
 napi_value Interface(napi_env env, napi_callback_info info, const std::string &asyncWorkName,
@@ -49,8 +50,8 @@ napi_value Interface(napi_env env, napi_callback_info info, const std::string &a
     auto context = new Context(env, manager);
     context->ParseParams(params, paramsCount);
     NETMANAGER_BASE_LOGI("js params parse OK ? %{public}d", context->IsParseOK());
-    if (!context->IsParseOK()) {
-        napi_throw_error(env, "-1", "parse param failed");
+    if (context->IsNeedThrowException()) { // only api9 or later need throw exception.
+        napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
         delete context;
         context = nullptr;
         return NapiUtils::GetUndefined(env);

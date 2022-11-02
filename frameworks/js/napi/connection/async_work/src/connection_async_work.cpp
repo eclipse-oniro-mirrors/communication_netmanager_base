@@ -17,6 +17,7 @@
 
 #include "connection_exec.h"
 #include "base_async_work.h"
+#include "none_params_context.h"
 #include "parse_nethandle_context.h"
 
 namespace OHOS::NetManagerStandard {
