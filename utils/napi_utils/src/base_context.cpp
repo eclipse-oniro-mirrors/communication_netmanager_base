@@ -15,6 +15,8 @@
 
 #include "base_context.h"
 
+#include <limits>
+
 #include "napi_utils.h"
 #include "node_api.h"
 
@@ -25,11 +27,12 @@ BaseContext::BaseContext(napi_env env, EventManager *manager)
       env_(env),
       parseOK_(false),
       requestOK_(false),
-      errorCode_(0),
+      errorCode_(std::numeric_limits<int32_t>::max()),
       callback_(nullptr),
       asyncWork_(nullptr),
       deferred_(nullptr),
-      needPromise_(true)
+      needPromise_(true),
+      needThrowException_(false)
 {
 }
 
@@ -168,6 +171,16 @@ void BaseContext::SetNeedPromise(bool needPromise)
 bool BaseContext::IsNeedPromise() const
 {
     return needPromise_;
+}
+
+void BaseContext::SetNeedThrowException(bool needThrowException)
+{
+    needThrowException_ = needThrowException;
+}
+
+bool BaseContext::IsNeedThrowException() const
+{
+    return needThrowException_;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

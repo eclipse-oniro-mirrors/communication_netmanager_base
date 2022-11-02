@@ -16,6 +16,8 @@
 #ifndef COMMUNICATIONNETMANAGERBASE_NAPI_CONSTANT_H
 #define COMMUNICATIONNETMANAGERBASE_NAPI_CONSTANT_H
 
+#include <cstddef>
+
 namespace OHOS {
 namespace NetManagerStandard {
 constexpr int PARAM_NONE = 0;
@@ -28,6 +30,9 @@ constexpr int PARAM_OPTIONS_AND_CALLBACK = 2;
 constexpr int PARAM_DOUBLE_OPTIONS_AND_CALLBACK = 3;
 constexpr int PARAM_TRIPLE_OPTIONS_AND_CALLBACK = 4;
 constexpr int PARAM_FOUR_OPTIONS_AND_CALLBACK = 5;
+
+constexpr size_t PARSE_ERROR_CODE = 401;
+constexpr const char *PARSE_ERROR_MSG = "Parameter error";
 
 enum {
     ARG_NUM_0 = 0,

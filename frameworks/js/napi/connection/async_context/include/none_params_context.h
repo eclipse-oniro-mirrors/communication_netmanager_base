@@ -13,42 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H
-#define COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H
+#ifndef NONE_PARAMS_CONTEXT_H
+#define NONE_PARAMS_CONTEXT_H
 
 #include <cstddef>
-#include <list>
+
+#include <napi/native_api.h>
 
 #include "base_context.h"
 #include "event_manager.h"
-#include "napi/native_api.h"
-#include "net_handle.h"
-#include "refbase.h"
 
 namespace OHOS::NetManagerStandard {
-class GetConnNapiContext final : public BaseContext {
+class NoneParamsContext final : public BaseContext {
 public:
-    GetConnNapiContext() = delete;
+    NoneParamsContext() = delete;
+    explicit NoneParamsContext(napi_env env, EventManager *manager);
 
-    explicit GetConnNapiContext(napi_env env, EventManager *manager);
-
+public:
     void ParseParams(napi_value *params, size_t paramsCount);
 
 public:
-    // for GetDefaultNet
-    NetHandle netHandle_;
-
-    // for GetAllNets
-    std::list<sptr<NetHandle>> netHandleList_;
-
-private:
-    bool CheckParamsType(napi_value *params, size_t paramsCount);
+    bool hasDefaultNet_ = false;
+    bool isMetered_ = false;
 };
 
-using GetDefaultNetContext = GetConnNapiContext;
-using GetAllNetsContext = GetConnNapiContext;
-using EnableAirplaneModeContext = GetConnNapiContext;
-using DisableAirplaneModeContext = GetConnNapiContext;
+using HasDefaultNetContext = NoneParamsContext;
+using IsDefaultNetMeteredContext = NoneParamsContext;
 } // namespace OHOS::NetManagerStandard
-
-#endif /* COMMUNICATIONNETMANAGERBASE_GETDEFAULTNET_CONTEXT_H */
+#endif // NONE_PARAMS_CONTEXT_H

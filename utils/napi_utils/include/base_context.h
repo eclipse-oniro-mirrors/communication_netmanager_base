@@ -27,10 +27,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-namespace {
 using AsyncWorkExecutor = void (*)(napi_env env, void *data);
 using AsyncWorkCallback = void (*)(napi_env env, napi_status status, void *data);
-} // namespace
 
 class BaseContext {
 public:
@@ -49,6 +47,7 @@ public:
     void DeleteAsyncWork();
     void Emit(const std::string &type, const std::pair<napi_value, napi_value> &argv);
     void SetNeedPromise(bool needPromise);
+    void SetNeedThrowException(bool needThrowException);
     napi_status SetCallback(napi_value callback);
     napi_value CreatePromise();
     [[nodiscard]] bool IsParseOK() const;
@@ -61,6 +60,7 @@ public:
     [[nodiscard]] const std::string &GetAsyncWorkName() const;
     [[nodiscard]] EventManager *GetManager() const;
     [[nodiscard]] bool IsNeedPromise() const;
+    [[nodiscard]] bool IsNeedThrowException() const;
 
 protected:
     EventManager *manager_;
@@ -76,6 +76,7 @@ private:
     napi_deferred deferred_;
     std::string asyncWorkName_;
     bool needPromise_;
+    bool needThrowException_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

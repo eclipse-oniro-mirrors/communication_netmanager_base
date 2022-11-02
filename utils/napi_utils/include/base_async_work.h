@@ -16,6 +16,7 @@
 #ifndef COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_BASE_ASYNC_WORK_H
 #define COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_BASE_ASYNC_WORK_H
 
+#include <limits>
 #include <memory>
 
 #include <napi/native_api.h>
@@ -23,14 +24,12 @@
 
 #include "netmanager_base_log.h"
 #include "base_context.h"
+#include "napi_constant.h"
 #include "napi_utils.h"
 #include "nocopyable.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr size_t PARSE_ERROR_CODE = 401;
-constexpr const char *PARSE_ERROR_MSG = "Parameter error";
-
 class BaseAsyncWork final {
 public:
     DISALLOW_COPY_AND_MOVE(BaseAsyncWork);
@@ -49,7 +48,10 @@ public:
             return;
         }
         if (!context->IsParseOK()) {
-            context->SetError(PARSE_ERROR_CODE, PARSE_ERROR_MSG); // error code is 401, if parse failed.
+            // api9 or before not set error in context.
+            if (context->GetErrorCode() == std::numeric_limits<int32_t>::max()) {
+                context->SetError(PARSE_ERROR_CODE, PARSE_ERROR_MSG); // if developer not set error, there will set.
+            }
             NETMANAGER_BASE_LOGE("parameter error");
             return;
         }
