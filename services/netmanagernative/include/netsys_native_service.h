@@ -109,11 +109,14 @@ public:
     int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
                                      NetworkSharingTraffic &traffic) override;
 
+protected:
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
+    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
+
 private:
     NetsysNativeService();
     bool Init();
     void GetDumpMessage(std::string &message);
-    void SubscribeSystemAbilityChanged();
     void OnNetManagerRestart();
 
 private:
@@ -133,22 +136,9 @@ private:
     std::unique_ptr<OHOS::nmd::SharingManager> sharingManager_ = nullptr;
 
     sptr<INotifyCallback> notifyCallback_ = nullptr;
-    sptr<ISystemAbilityStatusChange> statusChangeListener_ = nullptr;
 
     std::mutex instanceLock_;
-
-private:
-    class SystemAbilityStatusChangeListener : public OHOS::SystemAbilityStatusChangeStub {
-    public:
-        explicit SystemAbilityStatusChangeListener(NetsysNativeService &netsysNativeService);
-        ~SystemAbilityStatusChangeListener() = default;
-        virtual void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
-        virtual void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
-
-    private:
-        NetsysNativeService &netsysNativeService_;
-        bool hasSARemoved_ = false;
-    };
+    bool hasSARemoved_ = false;
 };
 } // namespace NetsysNative
 } // namespace OHOS
