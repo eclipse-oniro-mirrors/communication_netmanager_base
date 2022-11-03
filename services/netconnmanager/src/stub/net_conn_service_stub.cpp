@@ -16,6 +16,7 @@
 #include "net_conn_constants.h"
 #include "net_conn_service_stub.h"
 #include "net_conn_types.h"
+#include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
@@ -35,8 +36,7 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_UNREG_NETWORK] = &NetConnServiceStub::OnUnregisterNetSupplier;
     memberFuncMap_[CMD_NM_SET_NET_SUPPLIER_INFO] = &NetConnServiceStub::OnUpdateNetSupplierInfo;
     memberFuncMap_[CMD_NM_SET_NET_LINK_INFO] = &NetConnServiceStub::OnUpdateNetLinkInfo;
-    memberFuncMap_[CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK] =
-        &NetConnServiceStub::OnRegisterNetDetectionCallback;
+    memberFuncMap_[CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK] = &NetConnServiceStub::OnRegisterNetDetectionCallback;
     memberFuncMap_[CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK] =
         &NetConnServiceStub::OnUnRegisterNetDetectionCallback;
     memberFuncMap_[CMD_NM_NET_DETECTION] = &NetConnServiceStub::OnNetDetection;
@@ -58,6 +58,7 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_IS_DEFAULT_NET_METERED] = &NetConnServiceStub::OnIsDefaultNetMetered;
     memberFuncMap_[CMD_NM_SET_HTTP_PROXY] = &NetConnServiceStub::OnSetHttpProxy;
     memberFuncMap_[CMD_NM_GET_HTTP_PROXY] = &NetConnServiceStub::OnGetHttpProxy;
+    memberFuncMap_[CMD_NM_GET_NET_ID_BY_IDENTIFIER] = &NetConnServiceStub::OnGetNetIdByIdentifier;
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -474,17 +475,17 @@ int32_t NetConnServiceStub::OnGetDefaultNet(MessageParcel &data, MessageParcel &
 {
     NETMGR_LOG_D("OnGetDefaultNet Begin...");
     int32_t netId;
-    int32_t result = ConvertCode(GetDefaultNet(netId));
+    int32_t result = GetDefaultNet(netId);
     NETMGR_LOG_D("GetDefaultNet result is: [%{public}d]", result);
     if (!reply.WriteInt32(result)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    if (result == ERR_NONE) {
+    if (result == NETMANAGER_SUCCESS) {
         if (!reply.WriteUint32(netId)) {
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnHasDefaultNet(MessageParcel &data, MessageParcel &reply)
@@ -768,11 +769,11 @@ int32_t NetConnServiceStub::OnIsDefaultNetMetered(MessageParcel &data, MessagePa
     bool flag = false;
     int32_t result = IsDefaultNetMetered(flag);
     if (!reply.WriteInt32(result)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (result == ERR_NONE) {
         if (!reply.WriteBool(flag)) {
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
     return ERR_NONE;
@@ -810,6 +811,28 @@ int32_t NetConnServiceStub::OnGetHttpProxy(MessageParcel &data, MessageParcel &r
         return ERR_FLATTEN_OBJECT;
     }
     return ERR_NONE;
+}
+
+int32_t NetConnServiceStub::OnGetNetIdByIdentifier(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_D("stub execute OnGetNetIdByIdentifier");
+    std::string ident;
+    if (!data.ReadString(ident)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t netId = 0;
+    int32_t ret = GetNetIdByIdentifier(ident, netId);
+    if (!reply.WriteInt32(ret)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (ret == ERR_NONE) {
+        if (!reply.WriteInt32(netId)) {
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    return ret;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

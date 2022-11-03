@@ -36,6 +36,7 @@ constexpr const char *IPTABLES_TMP_BAK = "/data/service/el1/public/netmanager/ip
 constexpr const int MAX_MATCH_SIZE = 4;
 constexpr const int TWO_LIST_CORRECT_DATA = 2;
 constexpr const int NEXT_LIST_CORRECT_DATA = 1;
+constexpr uint32_t NET_TRAFFIC_RESULT_INDEX_OFFSET = 2;
 
 // commands of create tables
 constexpr const char *CREATE_TETHERCTRL_NAT_POSTROUTING = "-t nat -N tetherctrl_nat_POSTROUTING";
@@ -353,7 +354,8 @@ int32_t SharingManager::GetNetworkSharingTraffic(const std::string &downIface, c
                 isFindTx = true;
                 traffic.send = send;
                 traffic.all += send;
-            } else if (matches[i] == upIface && matches[i + NEXT_LIST_CORRECT_DATA] == downIface && ((i - 2) >= 0)) {
+            } else if (matches[i] == upIface && matches[i + NEXT_LIST_CORRECT_DATA] == downIface &&
+                       ((i - NET_TRAFFIC_RESULT_INDEX_OFFSET) >= 0)) {
                 int64_t receive = strtoul(matches[i - TWO_LIST_CORRECT_DATA].str().c_str(), nullptr, 0);
                 isFindRx = true;
                 traffic.receive = receive;

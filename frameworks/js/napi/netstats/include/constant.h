@@ -18,37 +18,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr int PARAM_NONE = 0;
-constexpr int PARAM_JUST_OPTIONS = 1;
-constexpr int PARAM_JUST_CALLBACK = 1;
-constexpr int PARAM_DOUBLE_OPTIONS = 2;
-constexpr int PARAM_TRIPLE_OPTIONS = 3;
-constexpr int PARAM_FOUR_OPTIONS = 4;
-constexpr int PARAM_OPTIONS_AND_CALLBACK = 2;
-constexpr int PARAM_DOUBLE_OPTIONS_AND_CALLBACK = 3;
-constexpr int PARAM_TRIPLE_OPTIONS_AND_CALLBACK = 4;
-constexpr int PARAM_FOUR_OPTIONS_AND_CALLBACK = 5;
-
 constexpr const char *EVENT_STATS_CHANGE = "netStatsChange";
-
 constexpr const char *KEY_IFACE = "iface";
 constexpr const char *KEY_UID = "uid";
 constexpr const char *KEY_RULE = "rule";
 constexpr int KEY_UID_ARG = -1;
-
-enum {
-    ARG_NUM_0 = 0,
-    ARG_NUM_1,
-    ARG_NUM_2,
-};
-
-enum {
-    ARG_INDEX_0 = 0,
-    ARG_INDEX_1,
-    ARG_INDEX_2,
-    ARG_INDEX_3,
-    ARG_INDEX_4,
-};
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // COMMUNICATIONNETMANAGERBASE_STATS_CONSTANT_H

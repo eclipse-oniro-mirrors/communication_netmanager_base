@@ -16,6 +16,7 @@
 #include "statistics_callback_observer.h"
 
 #include "constant.h"
+#include "napi_constant.h"
 #include "netmanager_base_log.h"
 #include "statistics_observer_wrapper.h"
 
@@ -53,18 +54,20 @@ int32_t StatisticsCallbackObserver::NetUidStatsChanged(const std::string &iface,
 
 napi_value StatisticsCallbackObserver::CreateNetIfaceStatsChangedParam(napi_env env, void *data)
 {
-    std::unique_ptr<std::pair<std::string, uint32_t>> pair(static_cast<std::pair<std::string, uint32_t> *>(data));
+    auto pair(reinterpret_cast<std::pair<std::string, uint32_t> *>(data));
     napi_value obj = NapiUtils::CreateObject(env);
     NapiUtils::SetStringPropertyUtf8(env, obj, KEY_IFACE, pair->first);
+    delete pair;
     return obj;
 }
 
 napi_value StatisticsCallbackObserver::CreateNetUidStatsChangedParam(napi_env env, void *data)
 {
-    std::unique_ptr<std::pair<std::string, uint32_t>> pair(static_cast<std::pair<std::string, uint32_t> *>(data));
+    auto pair(reinterpret_cast<std::pair<std::string, uint32_t> *>(data));
     napi_value obj = NapiUtils::CreateObject(env);
     NapiUtils::SetStringPropertyUtf8(env, obj, KEY_IFACE, pair->first);
     NapiUtils::SetUint32Property(env, obj, KEY_UID, pair->second);
+    delete pair;
     return obj;
 }
 

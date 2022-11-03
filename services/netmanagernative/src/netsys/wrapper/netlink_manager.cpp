@@ -98,7 +98,7 @@ std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> NetlinkManager
     std::make_shared<std::vector<sptr<NetsysNative::INotifyCallback>>>();
 NetlinkManager::NetlinkManager()
 {
-    for (auto &it : distributorParamList_) {
+    for (const auto &it : distributorParamList_) {
         CreateNetlinkDistributor(it.first, it.second);
     }
     if (callbacks_ == nullptr) {
@@ -147,7 +147,7 @@ int32_t NetlinkManager::RegisterNetlinkCallback(sptr<NetsysNative::INotifyCallba
         NETNATIVE_LOGE("callback is nullptr");
         return NetlinkResult::ERR_NULL_PTR;
     }
-    for (auto &cb : *callbacks_) {
+    for (const auto &cb : *callbacks_) {
         if (cb == callback) {
             NETNATIVE_LOGI("callback is already registered");
             return NetlinkResult::OK;

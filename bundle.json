@@ -59,13 +59,13 @@
         },
         "build": {
             "group_type": {
-                "base_group": [
-                ],
+                "base_group": [],
                 "fwk_group": [
                     "//foundation/communication/netmanager_base/utils:net_manager_common",
                     "//foundation/communication/netmanager_base/frameworks/js/napi/connection:connection",
                     "//foundation/communication/netmanager_base/frameworks/js/napi/network:network",
                     "//foundation/communication/netmanager_base/frameworks/js/napi/netstats:statistics",
+                    "//foundation/communication/netmanager_base/frameworks/js/napi/netpolicy:policy",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient:net_policy_manager_if",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient:net_stats_manager_if"
@@ -99,7 +99,7 @@
                             "net_specifier.h",
                             "route.h"
                         ],
-                    "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient/include"
+                        "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient/include"
                     }
                 },
                 {
@@ -109,7 +109,7 @@
                         "header_files": [
                             "net_policy_client.h"
                         ],
-                    "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient/include"
+                        "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient/include"
                     }
                 },
                 {
@@ -120,7 +120,7 @@
                             "net_stats_info.h",
                             "net_stats_client.h"
                         ],
-                    "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient/include"
+                        "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient/include"
                     }
                 }
             ],

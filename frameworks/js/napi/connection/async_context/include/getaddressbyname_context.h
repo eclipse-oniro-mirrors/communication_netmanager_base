@@ -16,30 +16,29 @@
 #ifndef COMMUNICATIONNETMANAGERBASE_GETADDRESSBYNAME_CONTEXT_H
 #define COMMUNICATIONNETMANAGERBASE_GETADDRESSBYNAME_CONTEXT_H
 
+#include <cstddef>
 #include <iosfwd>
 #include <string>
-#include <cstddef>
 #include <vector>
 
-#include "napi/native_api.h"
-#include "net_address.h"
+#include <napi/native_api.h>
+
 #include "base_context.h"
-#include "nocopyable.h"
+#include "net_address.h"
 
 namespace OHOS::NetManagerStandard {
 class GetAddressByNameContext final : public BaseContext {
 public:
-    DISALLOW_COPY_AND_MOVE(GetAddressByNameContext);
-
     GetAddressByNameContext() = delete;
 
     explicit GetAddressByNameContext(napi_env env, EventManager *manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
-    std::string host;
+public:
+    std::string host_;
 
-    std::vector<NetAddress> addresses;
+    std::vector<NetAddress> addresses_;
 
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);

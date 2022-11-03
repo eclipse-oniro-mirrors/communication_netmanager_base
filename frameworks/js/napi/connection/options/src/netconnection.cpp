@@ -22,9 +22,9 @@ std::map<NetConnCallbackObserver *, NetConnection *> NET_CONNECTIONS;
 std::mutex NET_CONNECTIONS_MUTEX;
 
 NetConnection::NetConnection(EventManager *eventManager)
-    : hasNetSpecifier(false),
-      hasTimeout(false),
-      timeout(0),
+    : hasNetSpecifier_(false),
+      hasTimeout_(false),
+      timeout_(0),
       observer_(new NetConnCallbackObserver),
       manager_(eventManager)
 {

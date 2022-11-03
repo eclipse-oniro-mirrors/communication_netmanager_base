@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NAPI_CONSTANT_H
-#define NAPI_CONSTANT_H
+#ifndef COMMUNICATIONNETMANAGERBASE_NAPI_CONSTANT_H
+#define COMMUNICATIONNETMANAGERBASE_NAPI_CONSTANT_H
 
 #include <cstddef>
 
@@ -49,4 +49,4 @@ enum {
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // NAPI_CONSTANT_H
+#endif // COMMUNICATIONNETMANAGERBASE_NAPI_CONSTANT_H

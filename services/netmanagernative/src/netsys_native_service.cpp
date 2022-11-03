@@ -13,17 +13,18 @@
  * limitations under the License.
  */
 
-#include "netsys_native_service.h"
-
 #include <csignal>
 #include <sys/types.h>
 #include <thread>
 #include <unistd.h>
 
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
+
 #include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
-#include "system_ability_definition.h"
+#include "netsys_native_service.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
@@ -134,7 +135,31 @@ bool NetsysNativeService::Init()
     fwmarkNetwork_ = std::make_unique<OHOS::nmd::FwmarkNetwork>();
     sharingManager_ = std::make_unique<SharingManager>();
 
+    SubscribeSystemAbilityChanged();
     return true;
+}
+
+void NetsysNativeService::SubscribeSystemAbilityChanged()
+{
+    auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    statusChangeListener_ = new (std::nothrow) SystemAbilityStatusChangeListener(*this);
+    if (samgrProxy == nullptr || statusChangeListener_ == nullptr) {
+        NETNATIVE_LOGE("samgrProxy or statusChangeListener_ is nullptr");
+        return;
+    }
+    int32_t ret = samgrProxy->SubscribeSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, statusChangeListener_);
+    NETNATIVE_LOG_D("SubscribeSystemAbility COMM_NET_CONN_MANAGER_SYS_ABILITY_ID result:%{public}d", ret);
+}
+
+void NetsysNativeService::OnNetManagerRestart()
+{
+    NETNATIVE_LOGI("NetsysNativeClient::OnNetManagerRestart");
+    if (netsysService_ != nullptr) {
+        netsysService_->NetworkReinitRoute();
+    }
+    if (manager_ != nullptr && notifyCallback_ != nullptr) {
+        manager_->UnregisterNetlinkCallback(notifyCallback_);
+    }
 }
 
 int32_t NetsysNativeService::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
@@ -512,6 +537,35 @@ int32_t NetsysNativeService::GetNetworkSharingTraffic(const std::string &downIfa
         return NetManagerStandard::NETMANAGER_ERROR;
     }
     return sharingManager_->GetNetworkSharingTraffic(downIface, upIface, traffic);
+}
+
+NetsysNativeService::SystemAbilityStatusChangeListener::SystemAbilityStatusChangeListener(
+    NetsysNativeService &netsysNativeService)
+    : netsysNativeService_(netsysNativeService)
+{
+}
+
+void NetsysNativeService::SystemAbilityStatusChangeListener::OnAddSystemAbility(int32_t systemAbilityId,
+                                                                                const std::string &deviceId)
+{
+    NETNATIVE_LOGI("NetsysNativeService::OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
+        if (!hasSARemoved_) {
+            hasSARemoved_ = true;
+            return;
+        }
+        netsysNativeService_.OnNetManagerRestart();
+    }
+}
+
+void NetsysNativeService::SystemAbilityStatusChangeListener::OnRemoveSystemAbility(int32_t systemAbilityId,
+                                                                                   const std::string &deviceId)
+{
+    NETNATIVE_LOGI("NetsysNativeService::OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
+        netsysNativeService_.OnNetManagerRestart();
+        hasSARemoved_ = true;
+    }
 }
 } // namespace NetsysNative
 } // namespace OHOS

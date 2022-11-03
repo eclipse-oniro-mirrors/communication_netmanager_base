@@ -32,6 +32,7 @@ ConnManager::ConnManager()
 {
     networks_[LOCAL_NET_ID] = std::make_shared<LocalNetwork>(LOCAL_NET_ID);
     defaultNetId_ = 0;
+    needReinitRouteFlag_ = false;
 }
 
 ConnManager::~ConnManager()
@@ -41,8 +42,22 @@ ConnManager::~ConnManager()
 
 int32_t ConnManager::CreatePhysicalNetwork(uint16_t netId, NetworkPermission permission)
 {
-    std::shared_ptr<NetsysNetwork> nw = std::make_shared<PhysicalNetwork>(netId, permission);
-    networks_[netId] = nw;
+    if (needReinitRouteFlag_) {
+        std::set<int32_t> netIds;
+        for (const auto &iter : networks_) {
+            if (iter.first == LOCAL_NET_ID || iter.second == nullptr) {
+                continue;
+            }
+            netIds.insert(iter.second->GetNetId());
+        }
+        for (auto netId : netIds) {
+            RemoveInterfaceFromNetwork(netId, physicalInterfaceName_[netId]);
+            DestroyNetwork(netId);
+        }
+        needReinitRouteFlag_ = false;
+    }
+    std::shared_ptr<NetsysNetwork> network = std::make_shared<PhysicalNetwork>(netId, permission);
+    networks_[netId] = network;
     return NETMANAGER_SUCCESS;
 }
 
@@ -53,20 +68,17 @@ int32_t ConnManager::DestroyNetwork(int32_t netId)
         return NETMANAGER_ERROR;
     }
     const auto &net = FindNetworkById(netId);
-    std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
-
-    if (defaultNetId_ == netId) {
-        if (nw->IsPhysical()) {
-            static_cast<PhysicalNetwork *>(nw.get())->RemoveDefault();
-        }
-        defaultNetId_ = 0;
-    }
-
     if (std::get<0>(net)) {
+        std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
+        if (defaultNetId_ == netId) {
+            if (nw->IsPhysical()) {
+                static_cast<PhysicalNetwork *>(nw.get())->RemoveDefault();
+            }
+            defaultNetId_ = 0;
+        }
         nw->ClearInterfaces();
     }
     networks_.erase(netId);
-    nw.reset();
     return NETMANAGER_SUCCESS;
 }
 
@@ -161,6 +173,7 @@ int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interface
     const auto &net = FindNetworkById(netId);
     if (std::get<0>(net)) {
         std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
+        physicalInterfaceName_[netId] = interfaceName;
         return nw->AddInterface(interfaceName);
     }
     return NETMANAGER_ERROR;
@@ -175,9 +188,17 @@ int32_t ConnManager::RemoveInterfaceFromNetwork(int32_t netId, std::string &inte
         const auto &net = FindNetworkById(netId);
         if (std::get<0>(net)) {
             std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
+            physicalInterfaceName_.erase(netId);
             return nw->RemoveInterface(interfaceName);
         }
     }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t ConnManager::ReinitRoute()
+{
+    NETNATIVE_LOG_D("ConnManager::ReInitRoute");
+    needReinitRouteFlag_ = true;
     return NETMANAGER_SUCCESS;
 }
 
@@ -186,14 +207,12 @@ int32_t ConnManager::AddRoute(int32_t netId, std::string interfaceName, std::str
     return RouteManager::AddRoute(GetTableType(netId), interfaceName, destination, nextHop);
 }
 
-int32_t ConnManager::RemoveRoute(int32_t netId, std::string interfaceName, std::string destination,
-                                 std::string nextHop)
+int32_t ConnManager::RemoveRoute(int32_t netId, std::string interfaceName, std::string destination, std::string nextHop)
 {
     return RouteManager::RemoveRoute(GetTableType(netId), interfaceName, destination, nextHop);
 }
 
-int32_t ConnManager::UpdateRoute(int32_t netId, std::string interfaceName, std::string destination,
-                                 std::string nextHop)
+int32_t ConnManager::UpdateRoute(int32_t netId, std::string interfaceName, std::string destination, std::string nextHop)
 {
     return RouteManager::UpdateRoute(GetTableType(netId), interfaceName, destination, nextHop);
 }

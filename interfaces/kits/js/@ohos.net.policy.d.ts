@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AsyncCallback, Callback} from "./basic";
+import { AsyncCallback, Callback } from "./basic";
 import connection from "./@ohos.net.connection";
 
 /**
@@ -32,8 +32,8 @@ declare namespace policy {
    * @permission ohos.permission.CONNECTIVITY_INTERNAL
    * @systemapi Hide this for inner system use.
    */
-  function setBackgroundPolicy(isAllowed: boolean, callback: AsyncCallback<void>): void;
-  function setBackgroundPolicy(isAllowed: boolean): Promise<void>;
+  function setBackgroundAllowed(isAllowed: boolean, callback: AsyncCallback<void>): void;
+  function setBackgroundAllowed(isAllowed: boolean): Promise<void>;
 
   /**
    * Get the status if applications can use data on background.
@@ -42,8 +42,8 @@ declare namespace policy {
    * @permission ohos.permission.CONNECTIVITY_INTERNAL
    * @systemapi Hide this for inner system use.
    */
-  function getBackgroundPolicy(callback: AsyncCallback<boolean>): void;
-  function getBackgroundPolicy(): Promise<boolean>;
+  function isBackgroundAllowed(callback: AsyncCallback<boolean>): void;
+  function isBackgroundAllowed(): Promise<boolean>;
 
   /**
    * Set the policy for the specified UID.

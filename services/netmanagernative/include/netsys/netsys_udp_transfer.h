@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace nmd {
 namespace PollUdpDataTransfer {
-int32_t PollUdpSendData(int32_t sock, const char *data, size_t size, sockaddr_in addr, socklen_t &lenAddr);
+int32_t PollUdpSendData(int32_t sock, char *data, size_t size, sockaddr_in addr, socklen_t &lenAddr);
 int32_t PollUdpRecvData(int32_t sock, char *data, size_t size, sockaddr_in addr, socklen_t &lenAddr);
 bool MakeUdpNonBlock(int32_t sock);
 }

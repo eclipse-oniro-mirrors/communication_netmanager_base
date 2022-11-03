@@ -240,6 +240,15 @@ public:
      */
     int32_t GetHttpProxy(std::string &httpProxy) override;
 
+    /**
+     * Get net id by identifier
+     *
+     * @param ident Net identifier
+     * @param netId output param, the net id
+     * @return ERR_NONE if OK, ERR_NO_NET_IDENT if ident is null string
+     */
+    int32_t GetNetIdByIdentifier(const std::string &ident, int32_t &netId) override;
+
 private:
     bool Init();
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");

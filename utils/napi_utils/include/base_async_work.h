@@ -48,8 +48,8 @@ public:
             return;
         }
         if (!context->IsParseOK()) {
-            if (context->GetErrorCode() ==
-                std::numeric_limits<int32_t>::max()) {                // api9 or before not set error in context.
+            // api9 or before not set error in context.
+            if (context->GetErrorCode() == std::numeric_limits<int32_t>::max()) {
                 context->SetError(PARSE_ERROR_CODE, PARSE_ERROR_MSG); // if developer not set error, there will set.
             }
             NETMANAGER_BASE_LOGE("parameter error");

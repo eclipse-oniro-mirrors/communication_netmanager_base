@@ -16,7 +16,7 @@
 #ifndef COMMUNICATIONNETMANAGERBASE_CONNECTION_MODULE_H
 #define COMMUNICATIONNETMANAGERBASE_CONNECTION_MODULE_H
 
-#include "napi/native_api.h"
+#include <napi/native_api.h>
 
 namespace OHOS::NetManagerStandard {
 class ConnectionModule final {

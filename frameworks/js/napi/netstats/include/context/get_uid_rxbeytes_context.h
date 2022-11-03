@@ -22,21 +22,18 @@
 #include <napi/native_api.h>
 
 #include "base_context.h"
-#include "nocopyable.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 class GetUidRxBytesContext final : public BaseContext {
 public:
-    DISALLOW_COPY_AND_MOVE(GetUidRxBytesContext);
-
     GetUidRxBytesContext() = delete;
     explicit GetUidRxBytesContext(napi_env env, EventManager *manager);
 
     void SetUid(int32_t uid);
     void SetBytes64(int64_t bytes64);
-    int32_t GetUid();
-    int64_t GetBytes64();
+    int32_t GetUid() const;
+    int64_t GetBytes64() const;
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
