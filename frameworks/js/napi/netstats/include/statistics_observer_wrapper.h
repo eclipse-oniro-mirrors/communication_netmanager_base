@@ -22,9 +22,9 @@
 #include <napi/native_api.h>
 
 #include "event_manager.h"
+#include "refbase.h"
 #include "statistics_callback_observer.h"
 #include "singleton.h"
-#include "refbase.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -37,7 +37,7 @@ public:
     napi_value Off(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events,
                    bool asyncCallback);
 
-    EventManager *GetEventManager()
+    EventManager *GetEventManager() const
     {
         return manager_;
     }

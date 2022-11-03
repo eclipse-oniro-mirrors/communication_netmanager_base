@@ -16,7 +16,7 @@
 #include "net_address.h"
 
 #include <string>
-#include "sys/socket.h"
+#include <sys/socket.h>
 
 namespace OHOS::NetManagerStandard {
 NetAddress::NetAddress() : family_(Family::IPv4), port_(0) {}

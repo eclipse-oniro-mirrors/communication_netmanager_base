@@ -196,8 +196,8 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
         nlmsg.AddAttr(IFA_BROADCAST, &inAddr, sizeof(inAddr));
     }
 
-    NETNATIVE_LOGI("InterfaceManager::ModifyAddress:%{public}u %{public}s %{public}s %{public}d", action,
-                   interfaceName, ToAnonymousIp(addr).c_str(), prefixLen);
+    NETNATIVE_LOGI("InterfaceManager::ModifyAddress:%{public}u %{public}s %{public}s %{public}d", action, interfaceName,
+                   ToAnonymousIp(addr).c_str(), prefixLen);
 
     ret = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
     if (ret < 0) {
@@ -221,9 +221,10 @@ int Ipv4NetmaskToPrefixLength(in_addr_t mask)
 {
     int prefixLength = 0;
     uint32_t m = ntohl(mask);
-    while (m & (1 << MOVE_BIT_LEFT31)) {
+    const uint32_t referenceValue = 1;
+    while (m & (referenceValue << MOVE_BIT_LEFT31)) {
         prefixLength++;
-        m = m << 1;
+        m = m << referenceValue;
     }
     return prefixLength;
 }
@@ -338,7 +339,7 @@ int InterfaceManager::SetIfaceConfig(const nmd::InterfaceConfigurationParcel &if
         ++retry;
     } while (errno == ETIMEDOUT && retry < IOCTL_RETRY_TIME);
     NETNATIVE_LOGI("set ifr flags=[%{public}d] strerror=[%{public}s] retry=[%{public}d]", ifr.ifr_flags,
-        strerror(errno), retry);
+                   strerror(errno), retry);
     close(fd);
     return 1;
 }

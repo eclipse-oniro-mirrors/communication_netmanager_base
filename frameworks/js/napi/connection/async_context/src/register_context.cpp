@@ -16,6 +16,7 @@
 #include "register_context.h"
 
 #include "constant.h"
+#include "napi_constant.h"
 #include "napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
@@ -28,7 +29,7 @@ void RegisterContext::ParseParams(napi_value *params, size_t paramsCount)
     }
 
     if (paramsCount == PARAM_JUST_CALLBACK) {
-        SetParseOK(SetCallback(params[0]) == napi_ok);
+        SetParseOK(SetCallback(params[ARG_INDEX_0]) == napi_ok);
         return;
     }
     SetParseOK(true);
@@ -41,7 +42,7 @@ bool RegisterContext::CheckParamsType(napi_value *params, size_t paramsCount)
     }
 
     if (paramsCount == PARAM_JUST_CALLBACK) {
-        return NapiUtils::GetValueType(GetEnv(), params[0]) == napi_function;
+        return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_function;
     }
     return false;
 }

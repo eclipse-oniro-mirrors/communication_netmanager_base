@@ -16,6 +16,7 @@
 #include "getaddressbyname_context.h"
 
 #include "constant.h"
+#include "napi_constant.h"
 #include "napi_utils.h"
 
 namespace OHOS::NetManagerStandard {
@@ -27,10 +28,10 @@ void GetAddressByNameContext::ParseParams(napi_value *params, size_t paramsCount
         return;
     }
 
-    host = NapiUtils::GetStringFromValueUtf8(GetEnv(), params[0]);
+    host_ = NapiUtils::GetStringFromValueUtf8(GetEnv(), params[ARG_INDEX_0]);
 
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
-        SetParseOK(SetCallback(params[1]) == napi_ok);
+        SetParseOK(SetCallback(params[ARG_INDEX_1]) == napi_ok);
         return;
     }
     SetParseOK(true);
@@ -39,12 +40,12 @@ void GetAddressByNameContext::ParseParams(napi_value *params, size_t paramsCount
 bool GetAddressByNameContext::CheckParamsType(napi_value *params, size_t paramsCount)
 {
     if (paramsCount == PARAM_JUST_OPTIONS) {
-        return NapiUtils::GetValueType(GetEnv(), params[0]) == napi_string;
+        return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_string;
     }
 
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
-        return NapiUtils::GetValueType(GetEnv(), params[0]) == napi_string &&
-               NapiUtils::GetValueType(GetEnv(), params[1]) == napi_function;
+        return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_string &&
+               NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_function;
     }
     return false;
 }

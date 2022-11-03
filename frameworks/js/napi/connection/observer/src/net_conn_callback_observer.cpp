@@ -14,6 +14,7 @@
  */
 
 #include "net_conn_callback_observer.h"
+
 #include "connection_exec.h"
 #include "constant.h"
 #include "netconnection.h"
@@ -22,7 +23,9 @@
 namespace OHOS::NetManagerStandard {
 int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetAvailable");
+    if (netHandle == nullptr) {
+        return 0;
+    }
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
@@ -39,7 +42,9 @@ int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
 int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandle,
                                                        const sptr<NetAllCapabilities> &netAllCap)
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetCapabilitiesChange");
+    if (netHandle == nullptr) {
+        return 0;
+    }
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
@@ -59,7 +64,9 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
 int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle,
                                                                const sptr<NetLinkInfo> &info)
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetConnectionPropertiesChange");
+    if (netHandle == nullptr) {
+        return 0;
+    }
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
@@ -79,7 +86,9 @@ int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &
 
 int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetLost");
+    if (netHandle == nullptr) {
+        return 0;
+    }
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
@@ -95,7 +104,6 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
 
 int32_t NetConnCallbackObserver::NetUnavailable()
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetUnavailable");
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
@@ -111,7 +119,6 @@ int32_t NetConnCallbackObserver::NetUnavailable()
 
 int32_t NetConnCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetBlockStatusChange");
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
@@ -203,43 +210,31 @@ napi_value NetConnCallbackObserver::CreateNetBlockStatusChangeParam(napi_env env
 
 void NetConnCallbackObserver::NetAvailableCallback(uv_work_t *work, int status)
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetAvailableCallback");
-
     CallbackTemplate<CreateNetAvailableParam>(work, status);
 }
 
 void NetConnCallbackObserver::NetCapabilitiesChangeCallback(uv_work_t *work, int status)
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetCapabilitiesChangeCallback");
-
     CallbackTemplate<CreateNetCapabilitiesChangeParam>(work, status);
 }
 
 void NetConnCallbackObserver::NetConnectionPropertiesChangeCallback(uv_work_t *work, int status)
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetConnectionPropertiesChangeCallback");
-
     CallbackTemplate<CreateNetConnectionPropertiesChangeParam>(work, status);
 }
 
 void NetConnCallbackObserver::NetLostCallback(uv_work_t *work, int status)
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetLostCallback");
-
     CallbackTemplate<CreateNetLostParam>(work, status);
 }
 
 void NetConnCallbackObserver::NetUnavailableCallback(uv_work_t *work, int status)
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetUnavailableCallback");
-
     CallbackTemplate<CreateNetUnavailableParam>(work, status);
 }
 
 void NetConnCallbackObserver::NetBlockStatusChangeCallback(uv_work_t *work, int status)
 {
-    NETMANAGER_BASE_LOGI("NetConnCallbackObserver::NetBlockStatusChangeCallback");
-
     CallbackTemplate<CreateNetBlockStatusChangeParam>(work, status);
 }
 } // namespace OHOS::NetManagerStandard

@@ -22,14 +22,11 @@
 
 #include "base_context.h"
 #include "net_stats_info.h"
-#include "nocopyable.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 class GetIfaceUidStatsContext final : public BaseContext {
 public:
-    DISALLOW_COPY_AND_MOVE(GetIfaceUidStatsContext);
-
     GetIfaceUidStatsContext() = delete;
     explicit GetIfaceUidStatsContext(napi_env env, EventManager *manager);
 
@@ -38,11 +35,11 @@ public:
     void SetStatsInfo(NetStatsInfo statsInfo);
     void SetStart(uint32_t start);
     void SetEnd(uint32_t end);
-    int32_t GetUid();
-    std::string GetInterfaceName();
+    int32_t GetUid() const;
+    std::string GetInterfaceName() const;
     NetStatsInfo &GetStatsInfo();
-    uint32_t GetStart();
-    uint32_t GetEnd();
+    uint32_t GetStart() const;
+    uint32_t GetEnd() const;
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

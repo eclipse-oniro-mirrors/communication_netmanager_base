@@ -19,14 +19,10 @@
 #include <napi/native_api.h>
 #include <napi/native_node_api.h>
 
-#include "nocopyable.h"
-
 namespace OHOS {
 namespace NetManagerStandard {
 class StatisticsAsyncWork final {
 public:
-    DISALLOW_COPY_AND_MOVE(StatisticsAsyncWork);
-
     StatisticsAsyncWork() = delete;
     ~StatisticsAsyncWork() = delete;
 

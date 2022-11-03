@@ -20,6 +20,7 @@
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
 #include "net_conn_types.h"
+#include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "token_setproc.h"
 
@@ -233,7 +234,7 @@ HWTEST_F(NetConnClientTest, IsDefaultNetMeteredTest001, TestSize.Level1)
 {
     bool bRes = false;
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->IsDefaultNetMetered(bRes);
-    ASSERT_TRUE(ret == ERR_PERMISSION_CHECK_FAIL);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_PERMISSION_DENIED);
     ASSERT_TRUE(bRes == false);
 }
 

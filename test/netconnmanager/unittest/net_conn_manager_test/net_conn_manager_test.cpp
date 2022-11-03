@@ -627,5 +627,23 @@ HWTEST_F(NetConnManagerTest, NetConnManager016, TestSize.Level1)
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     ASSERT_TRUE(originNetSize == netList.size());
 }
+
+/**
+ * @tc.name: NetConnManager017
+ * @tc.desc: Test NetConnManager GetNetIdByIdentifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnManagerTest, NetConnManager017, TestSize.Level1)
+{
+    int32_t netId;
+    int32_t result;
+    std::set<std::string> idents = {"eth0", "eth1", "slotId0", "slotId1", "wifi"};
+    for (auto ident : idents) {
+        netId = 0;
+        result = DelayedSingleton<NetConnClient>::GetInstance()->GetNetIdByIdentifier(ident, netId);
+        std::cout << "Get net id:" << netId << " through ident:" << ident << std::endl;
+        ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
+    }
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

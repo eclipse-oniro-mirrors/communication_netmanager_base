@@ -75,7 +75,7 @@ bool PollUdpDataTransfer::MakeUdpNonBlock(int32_t sock)
     return MakeNonBlock(sock);
 }
 
-int32_t PollUdpDataTransfer::PollUdpSendData(int32_t sock, const char *data, size_t size, sockaddr_in addr,
+int32_t PollUdpDataTransfer::PollUdpSendData(int32_t sock, char *data, size_t size, sockaddr_in addr,
                                              socklen_t &lenAddr)
 {
     struct UdpBuffer udpBuffer;
@@ -83,7 +83,7 @@ int32_t PollUdpDataTransfer::PollUdpSendData(int32_t sock, const char *data, siz
     udpBuffer.sock = sock;
     udpBuffer.event = POLLOUT;
     udpBuffer.addr = addr;
-    return ProcUdpData(udpBuffer, (char *)data, lenAddr, SendUdpWrapper);
+    return ProcUdpData(udpBuffer, data, lenAddr, SendUdpWrapper);
 }
 
 int32_t PollUdpDataTransfer::PollUdpRecvData(int32_t sock, char *data, size_t size, sockaddr_in addr,

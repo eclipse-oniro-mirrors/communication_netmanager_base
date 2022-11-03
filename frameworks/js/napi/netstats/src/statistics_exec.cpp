@@ -17,8 +17,8 @@
 
 #include "napi_utils.h"
 #include "netmanager_base_log.h"
-#include "net_stats_constants.h"
 #include "net_stats_client.h"
+#include "net_stats_constants.h"
 #include "statistics_observer_wrapper.h"
 
 namespace OHOS {

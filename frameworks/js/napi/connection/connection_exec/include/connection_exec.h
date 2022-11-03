@@ -23,15 +23,15 @@
 #include "getdefaultnet_context.h"
 #include "napi/native_api.h"
 #include "none_params_context.h"
-#include "nocopyable.h"
 #include "parse_nethandle_context.h"
 #include "register_context.h"
 
 namespace OHOS::NetManagerStandard {
+static constexpr size_t MAX_ARRAY_LENGTH = 64;
+static constexpr size_t MAX_IPV4_STR_LEN = 16;
+static constexpr size_t MAX_IPV6_STR_LEN = 64;
 class ConnectionExec final {
 public:
-    DISALLOW_COPY_AND_MOVE(ConnectionExec);
-
     ConnectionExec() = delete;
 
     ~ConnectionExec() = delete;
@@ -88,8 +88,6 @@ public:
 
     class NetHandleExec final {
     public:
-        DISALLOW_COPY_AND_MOVE(NetHandleExec);
-
         NetHandleExec() = delete;
 
         ~NetHandleExec() = delete;
@@ -114,8 +112,6 @@ public:
 
     class NetConnectionExec final {
     public:
-        DISALLOW_COPY_AND_MOVE(NetConnectionExec);
-
         NetConnectionExec() = delete;
 
         ~NetConnectionExec() = delete;

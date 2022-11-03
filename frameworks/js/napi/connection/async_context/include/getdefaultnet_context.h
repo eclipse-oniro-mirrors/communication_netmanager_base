@@ -19,24 +19,22 @@
 #include <cstddef>
 #include <list>
 
-#include "napi/native_api.h"
-#include "nocopyable.h"
-#include "refbase.h"
-#include "net_handle.h"
 #include "base_context.h"
 #include "event_manager.h"
+#include "napi/native_api.h"
+#include "net_handle.h"
+#include "refbase.h"
 
 namespace OHOS::NetManagerStandard {
 class GetConnNapiContext final : public BaseContext {
 public:
-    DISALLOW_COPY_AND_MOVE(GetConnNapiContext);
-
     GetConnNapiContext() = delete;
 
     explicit GetConnNapiContext(napi_env env, EventManager *manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
+public:
     // for GetDefaultNet
     NetHandle netHandle_;
 

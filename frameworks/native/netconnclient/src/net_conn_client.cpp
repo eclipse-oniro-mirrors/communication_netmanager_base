@@ -373,5 +373,15 @@ int32_t NetConnClient::GetHttpProxy(std::string &httpProxy)
     }
     return proxy->GetHttpProxy(httpProxy);
 }
+
+int32_t NetConnClient::GetNetIdByIdentifier(const std::string &ident, int32_t &netId)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return IPC_PROXY_ERR;
+    }
+    return proxy->GetNetIdByIdentifier(ident, netId);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

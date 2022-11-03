@@ -26,15 +26,12 @@
 #include "get_iface_stats_context.h"
 #include "get_iface_uid_stats_context.h"
 #include "get_uid_rxbeytes_context.h"
-#include "nocopyable.h"
 #include "update_iface_stats_context.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 class StatisticsExec final {
 public:
-    DISALLOW_COPY_AND_MOVE(StatisticsExec);
-
     StatisticsExec() = delete;
     ~StatisticsExec() = delete;
 

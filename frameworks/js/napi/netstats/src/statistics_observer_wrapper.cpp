@@ -17,6 +17,7 @@
 
 #include "constant.h"
 #include "module_template.h"
+#include "napi_constant.h"
 #include "netmanager_base_log.h"
 #include "net_stats_client.h"
 #include "net_stats_constants.h"
@@ -39,20 +40,18 @@ napi_value StatisticsObserverWrapper::On(napi_env env, napi_callback_info info,
     size_t paramsCount = MAX_PARAM_NUM;
     napi_value params[MAX_PARAM_NUM] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &paramsCount, params, nullptr, nullptr));
-    if (paramsCount != PARAM_OPTIONS_AND_CALLBACK || NapiUtils::GetValueType(env, params[0]) != napi_string ||
-        NapiUtils::GetValueType(env, params[1]) != napi_function) {
+    if (paramsCount != PARAM_OPTIONS_AND_CALLBACK || NapiUtils::GetValueType(env, params[ARG_INDEX_0]) != napi_string ||
+        NapiUtils::GetValueType(env, params[ARG_INDEX_1]) != napi_function) {
         NETMANAGER_BASE_LOGE("on off once interface para: [string, function]");
         return NapiUtils::GetUndefined(env);
     }
 
-    const auto &event = NapiUtils::GetStringFromValueUtf8(env, params[0]);
+    const auto event = NapiUtils::GetStringFromValueUtf8(env, params[ARG_INDEX_0]);
     if (std::find(events.begin(), events.end(), event) == events.end()) {
         return NapiUtils::GetUndefined(env);
     }
     if (Register()) {
-        manager_->AddListener(env, event, params[1], false, asyncCallback);
-    } else {
-        NETMANAGER_BASE_LOGE("unregister callback or manager is nullptr");
+        manager_->AddListener(env, event, params[ARG_INDEX_1], false, asyncCallback);
     }
     return NapiUtils::GetUndefined(env);
 }
@@ -75,34 +74,35 @@ napi_value StatisticsObserverWrapper::Off(napi_env env, napi_callback_info info,
     napi_value params[MAX_PARAM_NUM] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &paramsCount, params, &thisVal, nullptr));
 
-    if ((paramsCount != 1 && paramsCount != PARAM_OPTIONS_AND_CALLBACK) ||
-        NapiUtils::GetValueType(env, params[0]) != napi_string) {
+    if (!(paramsCount == PARAM_JUST_OPTIONS || paramsCount == PARAM_OPTIONS_AND_CALLBACK) ||
+        NapiUtils::GetValueType(env, params[ARG_INDEX_0]) != napi_string) {
         NETMANAGER_BASE_LOGE("on off once interface para: [string, function?]");
         return NapiUtils::GetUndefined(env);
     }
 
-    if (paramsCount == PARAM_OPTIONS_AND_CALLBACK && NapiUtils::GetValueType(env, params[1]) != napi_function) {
+    if (paramsCount == PARAM_OPTIONS_AND_CALLBACK &&
+        NapiUtils::GetValueType(env, params[ARG_INDEX_1]) != napi_function) {
         NETMANAGER_BASE_LOGE("on off once interface para: [string, function]");
         return NapiUtils::GetUndefined(env);
     }
 
-    std::string event = NapiUtils::GetStringFromValueUtf8(env, params[0]);
+    std::string event = NapiUtils::GetStringFromValueUtf8(env, params[ARG_INDEX_0]);
     if (std::find(events.begin(), events.end(), event) == events.end()) {
         return NapiUtils::GetUndefined(env);
     }
 
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
-        manager_->DeleteListener(event, params[1]);
+        manager_->DeleteListener(event, params[ARG_INDEX_1]);
     } else {
         manager_->DeleteListener(event);
     }
 
     if (manager_->IsListenerListEmpty()) {
-        registed_ = false;
         auto ret = DelayedSingleton<NetStatsClient>::GetInstance()->UnregisterNetStatsCallback(observer_);
-        if (ret != 0) {
+        if (ret != static_cast<int32_t>(NetStatsResultCode::ERR_NONE)) {
             NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
         }
+        registed_ = false;
     }
     return NapiUtils::GetUndefined(env);
 }

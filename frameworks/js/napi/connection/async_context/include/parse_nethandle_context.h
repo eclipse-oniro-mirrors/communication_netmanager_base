@@ -16,29 +16,27 @@
 #ifndef NETMANAGER_BASE_PARSE_NETHANDLE_CONTEXT_H
 #define NETMANAGER_BASE_PARSE_NETHANDLE_CONTEXT_H
 
+#include "base_context.h"
 #include "napi/native_api.h"
 #include "net_all_capabilities.h"
 #include "net_handle.h"
 #include "net_link_info.h"
-#include "base_context.h"
-#include "nocopyable.h"
 
 namespace OHOS::NetManagerStandard {
 class ParseNetHandleContext final : public BaseContext {
 public:
-    DISALLOW_COPY_AND_MOVE(ParseNetHandleContext);
-
     ParseNetHandleContext() = delete;
 
     explicit ParseNetHandleContext(napi_env env, EventManager *manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
-    NetHandle netHandle;
+public:
+    NetHandle netHandle_;
 
-    NetAllCapabilities capabilities;
+    NetAllCapabilities capabilities_;
 
-    NetLinkInfo linkInfo;
+    NetLinkInfo linkInfo_;
 
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
