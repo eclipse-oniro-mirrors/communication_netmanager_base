@@ -32,7 +32,10 @@
 namespace OHOS::NetManagerStandard {
 namespace {
 constexpr int32_t BASE_COMMON_COMPLETE_CODE = 2100000;
+constexpr int32_t CONVERTE_MIN_ERROR_CODE = 200;
+NetBaseErrorCodeConvertor convertor;
 } // namespace
+
 napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
 {
     napi_value netHandle = NapiUtils::CreateObject(env);
@@ -112,12 +115,16 @@ napi_value ConnectionExec::GetAddressByNameCallback(GetAddressByNameContext *con
 bool ConnectionExec::ExecGetDefaultNet(GetDefaultNetContext *context)
 {
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(context->netHandle_);
-    NETMANAGER_BASE_LOGI("ExecGetDefaultNet ret %{public}d", ret);
-    if (ret != NET_CONN_SUCCESS && ret != NET_CONN_ERR_NO_DEFAULT_NET) {
-        context->SetErrorCode(ret);
-        return false;
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMANAGER_BASE_LOGE("get default net failed %{public}d", BASE_COMMON_COMPLETE_CODE + ret);
+        std::string errorMessage = convertor.ConvertErrorCode(ret);
+        if (ret > CONVERTE_MIN_ERROR_CODE) {
+            context->SetError(ret, errorMessage);
+        } else {
+            context->SetError(BASE_COMMON_COMPLETE_CODE + ret, errorMessage);
+        }
     }
-    return true;
+    return ret == NETMANAGER_SUCCESS;
 }
 
 napi_value ConnectionExec::GetDefaultNetCallback(GetDefaultNetContext *context)
@@ -146,9 +153,12 @@ bool ConnectionExec::ExecIsDefaultNetMetered(IsDefaultNetMeteredContext *context
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->IsDefaultNetMetered(context->isMetered_);
     if (ret != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("get net metered status failed %{public}d", BASE_COMMON_COMPLETE_CODE + ret);
-        NetBaseErrorCodeConvertor convertor;
         std::string errorMessage = convertor.ConvertErrorCode(ret);
-        context->SetError(BASE_COMMON_COMPLETE_CODE + ret, errorMessage);
+        if (ret > CONVERTE_MIN_ERROR_CODE) {
+            context->SetError(ret, errorMessage);
+        } else {
+            context->SetError(BASE_COMMON_COMPLETE_CODE + ret, errorMessage);
+        }
     }
     NETMANAGER_BASE_LOGD("exec is default net metered ret %{public}d", ret);
     return ret == NETMANAGER_SUCCESS;

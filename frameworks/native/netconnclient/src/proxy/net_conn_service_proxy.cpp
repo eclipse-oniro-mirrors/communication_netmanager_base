@@ -12,9 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "net_conn_service_proxy.h"
 
 #include "net_conn_constants.h"
-#include "net_conn_service_proxy.h"
+#include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
@@ -191,8 +192,7 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<INetConnCallback
 }
 
 int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-                                                     const sptr<INetConnCallback> &callback,
-                                                     const uint32_t &timeoutMS)
+                                                     const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
 {
     if (netSpecifier == nullptr || callback == nullptr) {
         NETMGR_LOG_E("The parameter of netSpecifier or callback is nullptr");
@@ -400,8 +400,7 @@ int32_t NetConnServiceProxy::RegisterNetDetectionCallback(int32_t netId, const s
     return replyParcel.ReadInt32();
 }
 
-int32_t NetConnServiceProxy::UnRegisterNetDetectionCallback(int32_t netId,
-                                                            const sptr<INetDetectionCallback> &callback)
+int32_t NetConnServiceProxy::UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback)
 {
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter of callback is nullptr");
@@ -425,8 +424,7 @@ int32_t NetConnServiceProxy::UnRegisterNetDetectionCallback(int32_t netId,
     }
     MessageParcel replyParcel;
     MessageOption option;
-    int32_t error =
-        remote->SendRequest(CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK, dataParcel, replyParcel, option);
+    int32_t error = remote->SendRequest(CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK, dataParcel, replyParcel, option);
     if (error != NET_CONN_SUCCESS) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -564,7 +562,7 @@ int32_t NetConnServiceProxy::GetDefaultNet(int32_t &netId)
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NET_CONN_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
     MessageOption option;
@@ -572,21 +570,21 @@ int32_t NetConnServiceProxy::GetDefaultNet(int32_t &netId)
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     int32_t errCode = remote->SendRequest(CMD_NM_GETDEFAULTNETWORK, dataParcel, replyParcel, option);
     NETMGR_LOG_D("SendRequest errcode:[%{public}d]", errCode);
-    if (errCode != ERR_NONE) {
+    if (errCode != NETMANAGER_SUCCESS) {
         return errCode;
     }
     int32_t ret = 0;
     if (!replyParcel.ReadInt32(ret)) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
     if (ret == ERR_NONE) {
         if (!replyParcel.ReadInt32(netId)) {
-            return IPC_PROXY_ERR;
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
     }
     return ret;
@@ -859,8 +857,7 @@ int32_t NetConnServiceProxy::GetNetCapData(MessageParcel &reply, NetAllCapabilit
     return ERR_NONE;
 }
 
-int32_t NetConnServiceProxy::GetAddressesByName(const std::string &host, int32_t netId,
-                                                std::vector<INetAddr> &addrList)
+int32_t NetConnServiceProxy::GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -1050,30 +1047,30 @@ int32_t NetConnServiceProxy::IsDefaultNetMetered(bool &isMetered)
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     MessageParcel reply;
     MessageOption option;
     int32_t error = remote->SendRequest(CMD_NM_IS_DEFAULT_NET_METERED, data, reply, option);
-    if (error != ERR_NONE) {
+    if (error != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
     }
 
     int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
-    if (ret == ERR_NONE) {
+    if (ret == NETMANAGER_SUCCESS) {
         if (!reply.ReadBool(isMetered)) {
-            return IPC_PROXY_ERR;
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
     }
     return ret;
