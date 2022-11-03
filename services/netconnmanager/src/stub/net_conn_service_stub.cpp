@@ -16,6 +16,7 @@
 #include "net_conn_constants.h"
 #include "net_conn_service_stub.h"
 #include "net_conn_types.h"
+#include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
@@ -474,17 +475,17 @@ int32_t NetConnServiceStub::OnGetDefaultNet(MessageParcel &data, MessageParcel &
 {
     NETMGR_LOG_D("OnGetDefaultNet Begin...");
     int32_t netId;
-    int32_t result = ConvertCode(GetDefaultNet(netId));
+    int32_t result = GetDefaultNet(netId);
     NETMGR_LOG_D("GetDefaultNet result is: [%{public}d]", result);
     if (!reply.WriteInt32(result)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    if (result == ERR_NONE) {
+    if (result == NETMANAGER_SUCCESS) {
         if (!reply.WriteUint32(netId)) {
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnHasDefaultNet(MessageParcel &data, MessageParcel &reply)
@@ -768,11 +769,11 @@ int32_t NetConnServiceStub::OnIsDefaultNetMetered(MessageParcel &data, MessagePa
     bool flag = false;
     int32_t result = IsDefaultNetMetered(flag);
     if (!reply.WriteInt32(result)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (result == ERR_NONE) {
         if (!reply.WriteBool(flag)) {
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
     return ERR_NONE;

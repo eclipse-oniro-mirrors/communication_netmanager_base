@@ -664,16 +664,16 @@ int32_t NetConnService::DeactivateNetwork(uint32_t reqId)
 int32_t NetConnService::GetDefaultNet(int32_t &netId)
 {
     if (!NetManagerPermission::CheckPermissionWithCache(Permission::GET_NETWORK_INFO)) {
-        return ERR_PERMISSION_CHECK_FAIL;
+        return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     if (!defaultNetSupplier_) {
         NETMGR_LOG_E("not found the netId");
-        return ERR_NONE;
+        return NETMANAGER_SUCCESS;
     }
 
     netId = defaultNetSupplier_->GetNetId();
     NETMGR_LOG_D("GetDefaultNet found the netId: [%{public}d]", netId);
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnService::HasDefaultNet(bool &flag)

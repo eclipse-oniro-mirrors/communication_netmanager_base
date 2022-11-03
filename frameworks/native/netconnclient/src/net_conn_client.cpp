@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
+#include "net_conn_client.h"
+
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
 #include "fwmark_client.h"
-#include "net_conn_client.h"
+#include "net_conn_service_proxy.h"
+#include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_supplier_callback_stub.h"
 
@@ -147,18 +150,18 @@ int32_t NetConnClient::GetDefaultNet(NetHandle &netHandle)
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
     int32_t netId = 0;
     int32_t result = proxy->GetDefaultNet(netId);
-    if (result != ERR_NONE) {
+    if (result != NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("fail to get default net.");
         return result;
     }
     netHandle.SetNetId(netId);
     NETMGR_LOG_D("GetDefaultNet client out.");
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnClient::HasDefaultNet(bool &flag)
@@ -349,7 +352,7 @@ int32_t NetConnClient::IsDefaultNetMetered(bool &isMetered)
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
     return proxy->IsDefaultNetMetered(isMetered);
 }
