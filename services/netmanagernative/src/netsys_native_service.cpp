@@ -135,20 +135,8 @@ bool NetsysNativeService::Init()
     fwmarkNetwork_ = std::make_unique<OHOS::nmd::FwmarkNetwork>();
     sharingManager_ = std::make_unique<SharingManager>();
 
-    SubscribeSystemAbilityChanged();
+    AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     return true;
-}
-
-void NetsysNativeService::SubscribeSystemAbilityChanged()
-{
-    auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    statusChangeListener_ = new (std::nothrow) SystemAbilityStatusChangeListener(*this);
-    if (samgrProxy == nullptr || statusChangeListener_ == nullptr) {
-        NETNATIVE_LOGE("samgrProxy or statusChangeListener_ is nullptr");
-        return;
-    }
-    int32_t ret = samgrProxy->SubscribeSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, statusChangeListener_);
-    NETNATIVE_LOG_D("SubscribeSystemAbility COMM_NET_CONN_MANAGER_SYS_ABILITY_ID result:%{public}d", ret);
 }
 
 void NetsysNativeService::OnNetManagerRestart()
@@ -539,14 +527,7 @@ int32_t NetsysNativeService::GetNetworkSharingTraffic(const std::string &downIfa
     return sharingManager_->GetNetworkSharingTraffic(downIface, upIface, traffic);
 }
 
-NetsysNativeService::SystemAbilityStatusChangeListener::SystemAbilityStatusChangeListener(
-    NetsysNativeService &netsysNativeService)
-    : netsysNativeService_(netsysNativeService)
-{
-}
-
-void NetsysNativeService::SystemAbilityStatusChangeListener::OnAddSystemAbility(int32_t systemAbilityId,
-                                                                                const std::string &deviceId)
+void NetsysNativeService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
     NETNATIVE_LOGI("NetsysNativeService::OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
@@ -554,16 +535,15 @@ void NetsysNativeService::SystemAbilityStatusChangeListener::OnAddSystemAbility(
             hasSARemoved_ = true;
             return;
         }
-        netsysNativeService_.OnNetManagerRestart();
+        OnNetManagerRestart();
     }
 }
 
-void NetsysNativeService::SystemAbilityStatusChangeListener::OnRemoveSystemAbility(int32_t systemAbilityId,
-                                                                                   const std::string &deviceId)
+void NetsysNativeService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
     NETNATIVE_LOGI("NetsysNativeService::OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
-        netsysNativeService_.OnNetManagerRestart();
+        OnNetManagerRestart();
         hasSARemoved_ = true;
     }
 }
