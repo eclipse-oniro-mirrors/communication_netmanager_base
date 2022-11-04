@@ -312,17 +312,6 @@ int32_t NetConnClient::SetAirplaneMode(bool state)
     return proxy->SetAirplaneMode(state);
 }
 
-int32_t NetConnClient::RestoreFactoryData()
-{
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
-
-    return proxy->RestoreFactoryData();
-}
-
 void NetConnClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     NETMGR_LOG_D("on remote died");

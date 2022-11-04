@@ -100,7 +100,7 @@ HWTEST_F(NetConnClientTest, GetDefaultNetTest001, TestSize.Level1)
 {
     NetHandle handle;
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
-    ASSERT_TRUE(ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -156,7 +156,7 @@ HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest001, TestSize.Level1)
     NETMGR_LOG_D("GetNetCapabilitiesTest001 In");
     NetHandle handle;
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
-    ASSERT_TRUE(ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_PERMISSION_DENIED);
 
     NetAllCapabilities netAllCap;
     ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(handle, netAllCap);
@@ -175,7 +175,7 @@ HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest002, TestSize.Level1)
     NETMGR_LOG_D("GetNetCapabilitiesTest002 In");
     NetHandle handle;
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
-    ASSERT_TRUE(ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_PERMISSION_DENIED);
 
     AccessToken token;
     NetAllCapabilities netAllCap;
@@ -211,17 +211,6 @@ HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest003, TestSize.Level1)
 HWTEST_F(NetConnClientTest, SetAirplaneModeTest, TestSize.Level1)
 {
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAirplaneMode(true);
-    ASSERT_TRUE(ret == ERR_NONE);
-}
-
-/**
- * @tc.name: RestoreFactoryDataTest
- * @tc.desc: Test NetConnClient::RestoreFactoryData
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnClientTest, RestoreFactoryDataTest, TestSize.Level1)
-{
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->RestoreFactoryData();
     ASSERT_TRUE(ret == ERR_NONE);
 }
 

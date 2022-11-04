@@ -415,7 +415,6 @@ void NetDetectionFuzzTest(const uint8_t *data, size_t size)
     AccessTokenInternetInfo tokenInternetInfo;
     NetHandle netHandle(GetData<int32_t>());
     DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(netHandle);
-    DelayedSingleton<NetConnClient>::GetInstance()->RestoreFactoryData();
 }
 
 void IsDefaultNetMeteredFuzzTest(const uint8_t *data, size_t size)
