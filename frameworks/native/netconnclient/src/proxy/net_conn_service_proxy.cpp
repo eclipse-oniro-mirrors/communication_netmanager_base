@@ -1013,35 +1013,6 @@ int32_t NetConnServiceProxy::SetAirplaneMode(bool state)
     return ret;
 }
 
-int32_t NetConnServiceProxy::RestoreFactoryData()
-{
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return IPC_PROXY_ERR;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_RESTORE_FACTORY_DATA, data, reply, option);
-    if (error != ERR_NONE) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return error;
-    }
-
-    int32_t ret = 0;
-    if (!reply.ReadInt32(ret)) {
-        return IPC_PROXY_ERR;
-    }
-    return ret;
-}
-
 int32_t NetConnServiceProxy::IsDefaultNetMetered(bool &isMetered)
 {
     MessageParcel data;

@@ -59,7 +59,6 @@ public:
     int32_t BindSocket(int32_t socket_fd, int32_t netId);
     int32_t NetDetection(const NetHandle &netHandle);
     int32_t SetAirplaneMode(bool state);
-    int32_t RestoreFactoryData();
     int32_t IsDefaultNetMetered(bool &isMetered);
     int32_t SetHttpProxy(const std::string &httpProxy);
     int32_t GetHttpProxy(std::string &httpProxy);

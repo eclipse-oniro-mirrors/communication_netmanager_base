@@ -54,7 +54,6 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_BIND_SOCKET] = &NetConnServiceStub::OnBindSocket;
     memberFuncMap_[CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK] = &NetConnServiceStub::OnRegisterNetSupplierCallback;
     memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE] = &NetConnServiceStub::OnSetAirplaneMode;
-    memberFuncMap_[CMD_NM_RESTORE_FACTORY_DATA] = &NetConnServiceStub::OnRestoreFactoryData;
     memberFuncMap_[CMD_NM_IS_DEFAULT_NET_METERED] = &NetConnServiceStub::OnIsDefaultNetMetered;
     memberFuncMap_[CMD_NM_SET_HTTP_PROXY] = &NetConnServiceStub::OnSetHttpProxy;
     memberFuncMap_[CMD_NM_GET_HTTP_PROXY] = &NetConnServiceStub::OnGetHttpProxy;
@@ -747,16 +746,6 @@ int32_t NetConnServiceStub::OnSetAirplaneMode(MessageParcel &data, MessageParcel
         return ERR_FLATTEN_OBJECT;
     }
     int32_t ret = SetAirplaneMode(state);
-    if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    return ret;
-}
-
-int32_t NetConnServiceStub::OnRestoreFactoryData(MessageParcel &data, MessageParcel &reply)
-{
-    NETMGR_LOG_D("stub execute RestoreFactoryData");
-    int32_t ret = RestoreFactoryData();
     if (!reply.WriteInt32(ret)) {
         return ERR_FLATTEN_OBJECT;
     }
