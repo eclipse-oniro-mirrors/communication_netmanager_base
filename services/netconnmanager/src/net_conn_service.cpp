@@ -1133,27 +1133,6 @@ int32_t NetConnService::SetAirplaneMode(bool state)
     return 0;
 }
 
-int32_t NetConnService::RestoreFactoryData()
-{
-    NetManagerCenter::GetInstance().ResetEthernetFactory();
-    NetManagerCenter::GetInstance().ResetPolicyFactory();
-    NetManagerCenter::GetInstance().ResetStatsFactory();
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
-    defaultNetSupplier_ = nullptr;
-    netActivates_.clear();
-    NETMGR_LOG_D("Reset NetConnService, clear network request complete.");
-    netSuppliers_.clear();
-    networks_.clear();
-    NETMGR_LOG_D("Reset NetConnService, clear registered network complete.");
-    defaultNetSpecifier_ = nullptr;
-    defaultNetActivate_ = nullptr;
-    CreateDefaultRequest();
-    NETMGR_LOG_D("Reset NetConnService, default network complete.");
-    SetAirplaneMode(false);
-    NETMGR_LOG_D("Reset NetConnService, turn off airplane mode.");
-    return ERR_NONE;
-}
-
 int32_t NetConnService::Dump(int32_t fd, const std::vector<std::u16string> &args)
 {
     NETMGR_LOG_D("Start Dump, fd: %{public}d", fd);
