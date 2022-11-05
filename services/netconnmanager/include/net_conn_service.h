@@ -203,12 +203,6 @@ public:
      */
     int32_t SetAirplaneMode(bool state) override;
     /**
-     * restore NetConn factory setting
-     *
-     * @return Returns 0, successfully restore factory data, otherwise it will fail
-     */
-    int32_t RestoreFactoryData() override;
-    /**
      * Dump
      *
      * @param fd file description
