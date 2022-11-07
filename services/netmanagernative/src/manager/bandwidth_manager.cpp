@@ -79,38 +79,38 @@ std::string BandwidthManager::FetchChainName(ChainType chain)
 int32_t BandwidthManager::InitChain()
 {
     NETNATIVE_LOG_D("BandwidthManager InitChain");
-    bool ret = false;
-    ret = (IptablesNewChain(ChainType::CHAIN_OHBW_INPUT) == NETMANAGER_ERROR) ||
-          (IptablesNewChain(ChainType::CHAIN_OHBW_OUTPUT) == NETMANAGER_ERROR) ||
-          (IptablesNewChain(ChainType::CHAIN_OHBW_FORWARD) == NETMANAGER_ERROR) ||
-          (IptablesNewChain(ChainType::CHAIN_OHBW_DENIED_LIST_BOX) == NETMANAGER_ERROR) ||
-          (IptablesNewChain(ChainType::CHAIN_OHBW_ALLOWED_LIST_BOX) == NETMANAGER_ERROR) ||
-          (IptablesNewChain(ChainType::CHAIN_OHBW_GLOBAL_ALERT) == NETMANAGER_ERROR) ||
-          (IptablesNewChain(ChainType::CHAIN_OHBW_COSTLY_SHARED) == NETMANAGER_ERROR) ||
-          (IptablesNewChain(ChainType::CHAIN_OHBW_DATA_SAVER) == NETMANAGER_ERROR);
+    bool hasError = false;
+    hasError = (IptablesNewChain(ChainType::CHAIN_OHBW_INPUT) == NETMANAGER_ERROR) ||
+               (IptablesNewChain(ChainType::CHAIN_OHBW_OUTPUT) == NETMANAGER_ERROR) ||
+               (IptablesNewChain(ChainType::CHAIN_OHBW_FORWARD) == NETMANAGER_ERROR) ||
+               (IptablesNewChain(ChainType::CHAIN_OHBW_DENIED_LIST_BOX) == NETMANAGER_ERROR) ||
+               (IptablesNewChain(ChainType::CHAIN_OHBW_ALLOWED_LIST_BOX) == NETMANAGER_ERROR) ||
+               (IptablesNewChain(ChainType::CHAIN_OHBW_GLOBAL_ALERT) == NETMANAGER_ERROR) ||
+               (IptablesNewChain(ChainType::CHAIN_OHBW_COSTLY_SHARED) == NETMANAGER_ERROR) ||
+               (IptablesNewChain(ChainType::CHAIN_OHBW_DATA_SAVER) == NETMANAGER_ERROR);
     chainInitFlag_ = true;
-    return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    return hasError ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
 int32_t BandwidthManager::DeInitChain()
 {
     NETNATIVE_LOG_D("BandwidthManager DeInitChain");
-    bool ret = false;
-    ret = (IptablesDeleteChain(ChainType::CHAIN_OHBW_INPUT) == NETMANAGER_ERROR) ||
-          (IptablesDeleteChain(ChainType::CHAIN_OHBW_OUTPUT) == NETMANAGER_ERROR) ||
-          (IptablesDeleteChain(ChainType::CHAIN_OHBW_FORWARD) == NETMANAGER_ERROR) ||
-          (IptablesDeleteChain(ChainType::CHAIN_OHBW_DENIED_LIST_BOX) == NETMANAGER_ERROR) ||
-          (IptablesDeleteChain(ChainType::CHAIN_OHBW_ALLOWED_LIST_BOX) == NETMANAGER_ERROR) ||
-          (IptablesDeleteChain(ChainType::CHAIN_OHBW_GLOBAL_ALERT) == NETMANAGER_ERROR) ||
-          (IptablesDeleteChain(ChainType::CHAIN_OHBW_COSTLY_SHARED) == NETMANAGER_ERROR) ||
-          (IptablesDeleteChain(ChainType::CHAIN_OHBW_DATA_SAVER) == NETMANAGER_ERROR);
+    bool hasError = false;
+    hasError = (IptablesDeleteChain(ChainType::CHAIN_OHBW_INPUT) == NETMANAGER_ERROR) ||
+               (IptablesDeleteChain(ChainType::CHAIN_OHBW_OUTPUT) == NETMANAGER_ERROR) ||
+               (IptablesDeleteChain(ChainType::CHAIN_OHBW_FORWARD) == NETMANAGER_ERROR) ||
+               (IptablesDeleteChain(ChainType::CHAIN_OHBW_DENIED_LIST_BOX) == NETMANAGER_ERROR) ||
+               (IptablesDeleteChain(ChainType::CHAIN_OHBW_ALLOWED_LIST_BOX) == NETMANAGER_ERROR) ||
+               (IptablesDeleteChain(ChainType::CHAIN_OHBW_GLOBAL_ALERT) == NETMANAGER_ERROR) ||
+               (IptablesDeleteChain(ChainType::CHAIN_OHBW_COSTLY_SHARED) == NETMANAGER_ERROR) ||
+               (IptablesDeleteChain(ChainType::CHAIN_OHBW_DATA_SAVER) == NETMANAGER_ERROR);
     chainInitFlag_ = false;
-    return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    return hasError ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
 int32_t BandwidthManager::InitDefaultBwChainRules()
 {
-    bool ret = false;
+    bool hasError = false;
     std::string command;
     std::string chainName;
     std::string fChainName;
@@ -119,29 +119,29 @@ int32_t BandwidthManager::InitDefaultBwChainRules()
     // -A OUTPUT -j ohbw_OUTPUT
     chainName = FetchChainName(ChainType::CHAIN_OHBW_INPUT);
     command = "-t filter -A INPUT -j " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     chainName = FetchChainName(ChainType::CHAIN_OHBW_OUTPUT);
     command = "-t filter -A OUTPUT -j " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     // -A ohbw_INPUT -p esp -j RETURN
     // -A ohbw_INPUT -m mark --mark 0x100000/0x100000 -j RETURN
     chainName = FetchChainName(ChainType::CHAIN_OHBW_INPUT);
     command = "-t filter -A " + chainName + " -p esp -j RETURN";
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     command =
         "-t filter -A " + FetchChainName(ChainType::CHAIN_OHBW_INPUT) + " -m mark --mark 0x100000/0x100000 -j RETURN";
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
 
-    return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    return hasError ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
 int32_t BandwidthManager::InitDefaultListBoxChainRules()
 {
-    bool ret = false;
+    bool hasError = false;
     std::string command;
     std::string chainName;
     std::string fChainName;
@@ -150,32 +150,27 @@ int32_t BandwidthManager::InitDefaultListBoxChainRules()
     // -A ohbw_denied_list_box -j ohbw_allowed_list_box
     // -A ohbw_allowed_list_box -j ohbw_data_saver
     // -A ohbw_data_saver -j RETURN
-    fChainName = FetchChainName(ChainType::CHAIN_OHBW_OUTPUT);
-    chainName = FetchChainName(ChainType::CHAIN_OHBW_DENIED_LIST_BOX);
-    command = "-t filter -A " + fChainName + " -j " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     fChainName = FetchChainName(ChainType::CHAIN_OHBW_DENIED_LIST_BOX);
     chainName = FetchChainName(ChainType::CHAIN_OHBW_ALLOWED_LIST_BOX);
     command = "-t filter -A " + fChainName + " -j " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     fChainName = FetchChainName(ChainType::CHAIN_OHBW_ALLOWED_LIST_BOX);
     chainName = FetchChainName(ChainType::CHAIN_OHBW_DATA_SAVER);
     command = "-t filter -A " + fChainName + " -j " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     chainName = FetchChainName(ChainType::CHAIN_OHBW_DATA_SAVER);
     command = "-t filter -A " + chainName + " -j RETURN";
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
 
-    return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    return hasError ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
 int32_t BandwidthManager::InitDefaultAlertChainRules()
 {
-    bool ret = false;
+    bool hasError = false;
     std::string command;
     std::string chainName;
     std::string fChainName;
@@ -185,25 +180,26 @@ int32_t BandwidthManager::InitDefaultAlertChainRules()
     fChainName = FetchChainName(ChainType::CHAIN_OHBW_INPUT);
     chainName = FetchChainName(ChainType::CHAIN_OHBW_GLOBAL_ALERT);
     command = "-t filter -A " + fChainName + " -j " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     fChainName = FetchChainName(ChainType::CHAIN_OHBW_OUTPUT);
     chainName = FetchChainName(ChainType::CHAIN_OHBW_GLOBAL_ALERT);
     command = "-t filter -A " + fChainName + " -j " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
 
-    return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    return hasError ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
 int32_t BandwidthManager::InitDefaultRules()
 {
     NETNATIVE_LOG_D("BandwidthManager InitDefaultRules");
-    bool ret = false;
-    ret = (InitDefaultBwChainRules() == NETMANAGER_ERROR) || (InitDefaultListBoxChainRules() == NETMANAGER_ERROR) ||
-          (InitDefaultAlertChainRules() == NETMANAGER_ERROR);
+    bool hasError = false;
+    hasError = (InitDefaultBwChainRules() == NETMANAGER_ERROR) ||
+               (InitDefaultListBoxChainRules() == NETMANAGER_ERROR) ||
+               (InitDefaultAlertChainRules() == NETMANAGER_ERROR);
 
-    return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    return hasError ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
 int32_t BandwidthManager::IptablesNewChain(ChainType chain)
@@ -223,46 +219,46 @@ int32_t BandwidthManager::IptablesNewChain(const std::string &chainName)
 int32_t BandwidthManager::IptablesDeleteChain(ChainType chain)
 {
     NETNATIVE_LOG_D("BandwidthManager DeleteChain: chain=%{public}d", chain);
-    bool ret = false;
+    bool hasError = false;
     std::string command = "-t filter -F " + FetchChainName(chain);
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     command = "-t filter -X " + FetchChainName(chain);
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
-    return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    return hasError ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
 int32_t BandwidthManager::IptablesDeleteChain(const std::string &chainName)
 {
     NETNATIVE_LOG_D("BandwidthManager DeleteChain: chain=%{public}s", chainName.c_str());
-    bool ret = false;
+    bool hasError = false;
     std::string command = "-t filter -F " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     command = "-t filter -X " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
-    return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    return hasError ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
 int32_t BandwidthManager::SetGlobalAlert(Operate operate, int64_t bytes)
 {
     NETNATIVE_LOG_D("BandwidthManager SetGlobalAlert: operate=%{public}d, bytes=%{public}" PRId64, operate, bytes);
-    bool ret = false;
+    bool hasError = false;
     std::string command;
     std::string chainName = FetchChainName(ChainType::CHAIN_OHBW_GLOBAL_ALERT);
     if (operate == OP_SET) {
         globalAlertBytes_ = bytes;
         command = "-t filter -A " + chainName + " -m quota2 --quota " + std::to_string(bytes) + " --name globalAlert";
-        ret = ret ||
-              (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+        hasError = hasError || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
+                                NETMANAGER_ERROR);
     } else {
         if (bytes == globalAlertBytes_) {
             command =
                 "-t filter -D " + chainName + " -m quota --quota " + std::to_string(bytes) + " --name globalAlert";
-            ret = ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
-                          NETMANAGER_ERROR);
+            hasError = hasError || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(
+                                        IPTYPE_IPV4, command) == NETMANAGER_ERROR);
             globalAlertBytes_ = 0;
         } else {
             NETNATIVE_LOGE("not match bytes, cannot remove global alert");
@@ -270,28 +266,28 @@ int32_t BandwidthManager::SetGlobalAlert(Operate operate, int64_t bytes)
         }
     }
 
-    return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    return hasError ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
 int32_t BandwidthManager::SetCostlyAlert(Operate operate, const std::string &iface, int64_t bytes)
 {
     NETNATIVE_LOG_D("BandwidthManager SetCostlyAlert: operate=%{public}d, iface=%{public}s, bytes=%{public}" PRId64,
                     operate, iface.c_str(), bytes);
-    bool ret = false;
+    bool hasError = false;
     std::string command;
     std::string chainName = std::string(CHAIN_NAME_COSTLY_PTR) + iface + "alert";
     if (operate == OP_SET) {
         ifaceAlertBytes_[iface] = bytes;
         command =
             "-t filter -A " + chainName + " -m quota2 --quota " + std::to_string(bytes) + " --name " + iface + "Alert";
-        ret = ret ||
-              (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+        hasError = hasError || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
+                                NETMANAGER_ERROR);
     } else {
         if (bytes == ifaceAlertBytes_[iface]) {
             command = "-t filter -D " + chainName + " -m quota2 --quota " + std::to_string(bytes) + " --name " + iface +
                       "Alert";
-            ret = ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
-                          NETMANAGER_ERROR);
+            hasError = hasError || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(
+                                        IPTYPE_IPV4, command) == NETMANAGER_ERROR);
             ifaceAlertBytes_[iface] = 0;
         } else {
             NETNATIVE_LOGE("not match bytes, cannot remove global alert");
@@ -299,13 +295,13 @@ int32_t BandwidthManager::SetCostlyAlert(Operate operate, const std::string &ifa
         }
     }
 
-    return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    return hasError ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
 int32_t BandwidthManager::EnableDataSaver(bool enable)
 {
     NETNATIVE_LOG_D("BandwidthManager EnableDataSaver: enable=%{public}d", enable);
-    bool ret = false;
+    bool hasError = false;
     std::unique_lock<std::mutex> lock(bandwidthMutex_);
     CheckChainInitialization();
 
@@ -314,31 +310,31 @@ int32_t BandwidthManager::EnableDataSaver(bool enable)
     if (enable == true && dataSaverEnable_ == false) {
         dataSaverEnable_ = true;
         command = "-t filter -R " + chainName + " 1 -j REJECT";
-        ret = ret ||
-              (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+        hasError = hasError || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
+                                NETMANAGER_ERROR);
         command = "-t filter -I " + chainName + " -m owner --uid-owner 0-9999 -j RETURN";
-        ret = ret ||
-              (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+        hasError = hasError || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
+                                NETMANAGER_ERROR);
     } else if (enable == false && dataSaverEnable_ == true) {
         dataSaverEnable_ = false;
         command = "-t filter -D " + chainName + " -m owner --uid-owner 0-9999 -j RETURN";
-        ret = ret ||
-              (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+        hasError = hasError || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
+                                NETMANAGER_ERROR);
         command = "-t filter -R " + chainName + " 1 -j RETURN";
-        ret = ret ||
-              (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+        hasError = hasError || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
+                                NETMANAGER_ERROR);
     } else {
         NETNATIVE_LOGE("DataSaver is already %{public}s, do not repeat", enable == true ? "true" : "false");
         return NETMANAGER_ERROR;
     }
 
-    return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    return hasError ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
 int32_t BandwidthManager::SetIfaceQuota(const std::string &ifName, int64_t bytes)
 {
     NETNATIVE_LOG_D("BandwidthManager SetIfaceQuota: ifName=%{public}s, bytes=%{public}" PRId64, ifName.c_str(), bytes);
-    bool ret = false;
+    bool hasError = false;
     std::unique_lock<std::mutex> lock(bandwidthMutex_);
     CheckChainInitialization();
 
@@ -351,50 +347,56 @@ int32_t BandwidthManager::SetIfaceQuota(const std::string &ifName, int64_t bytes
         // -R ohbw_costly_iface 1 -m quota2 ! --quota 12345 --name iface -j REJECT
         command = "-t filter -D " + chainName + " -m quota2 ! --quota " + std::to_string(ifaceQuotaBytes_[ifName]) +
                   " --name " + ifName + " --jump REJECT";
-        ret = ret ||
-              (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+        hasError = hasError || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
+                                NETMANAGER_ERROR);
         command = "-t filter -A " + chainName + " -m quota2 ! --quota " + strMaxBytes + " --name " + ifName +
                   " --jump REJECT";
-        ret = ret ||
-              (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+        hasError = hasError || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
+                                NETMANAGER_ERROR);
         ifaceQuotaBytes_[ifName] = bytes;
         return NETMANAGER_SUCCESS;
     }
-    ret = ret || (IptablesNewChain(chainName) == NETMANAGER_ERROR);
+    hasError = hasError || (IptablesNewChain(chainName) == NETMANAGER_ERROR);
     ifaceQuotaBytes_[ifName] = bytes;
+
+    fChainName = FetchChainName(ChainType::CHAIN_OHBW_OUTPUT);
+    std::string cChainName = FetchChainName(ChainType::CHAIN_OHBW_DENIED_LIST_BOX);
+    command = "-t filter -A " + fChainName + " -o " + ifName + " -j " + cChainName;
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
 
     // -I ohbw_INPUT -i iface -j ohbw_costly_iface
     fChainName = FetchChainName(ChainType::CHAIN_OHBW_INPUT);
     command = "-t filter -I " + fChainName + " -i " + ifName + " --jump " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     // -I ohbw_OUTPUT -o iface -j ohbw_costly_iface
     fChainName = FetchChainName(ChainType::CHAIN_OHBW_OUTPUT);
     command = "-t filter -I " + fChainName + " -o " + ifName + " --jump " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     // -A ohbw_FORWARD -i iface -j ohbw_costly_iface
     // -A ohbw_FORWARD -o iface -j ohbw_costly_iface
     fChainName = FetchChainName(ChainType::CHAIN_OHBW_FORWARD);
     command = "-t filter -A " + fChainName + " -i " + ifName + " --jump " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     command = "-t filter -A " + fChainName + " -o " + ifName + " --jump " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     // -A ohbw_costly_iface -m quota2 ! --quota 12345 --name iface -j REJECT
     command =
         "-t filter -A " + chainName + " -m quota2 ! --quota " + strMaxBytes + " --name " + ifName + " --jump REJECT";
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
 
-    return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    return hasError ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
 int32_t BandwidthManager::RemoveIfaceQuota(const std::string &ifName)
 {
     NETNATIVE_LOG_D("BandwidthManager RemoveIfaceQuota: ifName=%{public}s", ifName.c_str());
-    bool ret = false;
+    bool hasError = false;
     std::unique_lock<std::mutex> lock(bandwidthMutex_);
     CheckChainInitialization();
 
@@ -409,30 +411,36 @@ int32_t BandwidthManager::RemoveIfaceQuota(const std::string &ifName)
         ifaceQuotaBytes_.erase(ifName);
     }
 
+    fChainName = FetchChainName(ChainType::CHAIN_OHBW_OUTPUT);
+    std::string cChainName = FetchChainName(ChainType::CHAIN_OHBW_DENIED_LIST_BOX);
+    command = "-t filter -D " + fChainName + " -o " + ifName + " -j " + cChainName;
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+
     // -D ohbw_INPUT -i iface -j ohbw_costly_iface
     fChainName = FetchChainName(ChainType::CHAIN_OHBW_INPUT);
     command = "-t filter -D " + fChainName + " -i " + ifName + " --jump " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     // -D ohbw_OUTPUT -o iface -j ohbw_costly_iface
     fChainName = FetchChainName(ChainType::CHAIN_OHBW_OUTPUT);
     command = "-t filter -D " + fChainName + " -o " + ifName + " --jump " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     // -D ohbw_FORWARD -i iface -j ohbw_costly_iface
     // -D ohbw_FORWARD -o iface -j ohbw_costly_iface
     fChainName = FetchChainName(ChainType::CHAIN_OHBW_FORWARD);
     command = "-t filter -D " + fChainName + " -i " + ifName + " --jump " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     command = "-t filter -D " + fChainName + " -o " + ifName + " --jump " + chainName;
-    ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+    hasError = hasError ||
+               (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     // -F ohbw_costly_iface
     // -X ohbw_costly_iface
-    ret = ret || (IptablesDeleteChain(chainName) == NETMANAGER_ERROR);
+    hasError = hasError || (IptablesDeleteChain(chainName) == NETMANAGER_ERROR);
 
-    return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
+    return hasError ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
 int32_t BandwidthManager::AddDeniedList(uint32_t uid)
