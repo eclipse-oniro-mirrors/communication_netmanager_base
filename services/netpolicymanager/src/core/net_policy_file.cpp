@@ -29,7 +29,10 @@ namespace OHOS {
 namespace NetManagerStandard {
 const std::string MONTH_DEFAULT = "M1";
 
-NetPolicyFile::NetPolicyFile() = default;
+NetPolicyFile::NetPolicyFile()
+{
+    InitPolicy();
+}
 
 NetPolicyFile::~NetPolicyFile() = default;
 
