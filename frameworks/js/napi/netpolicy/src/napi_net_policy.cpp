@@ -31,6 +31,8 @@ namespace OHOS {
 namespace NetManagerStandard {
 const int32_t DEFAULT_REF_COUNT = 1;
 const int32_t DECIMAL = 10;
+static constexpr uint32_t MAX_POLICY_LEN = 100;
+
 void NapiNetPolicy::ExecSetPolicyByUid(napi_env env, void *data)
 {
     NetPolicyAsyncContext *context = static_cast<NetPolicyAsyncContext *>(data);
@@ -39,10 +41,10 @@ void NapiNetPolicy::ExecSetPolicyByUid(napi_env env, void *data)
         return;
     }
     NetUidPolicy policy = static_cast<NetUidPolicy>(context->policy);
-    context->policyResult = static_cast<int32_t>(
-        DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(context->uid, policy));
+    context->policyResult =
+        static_cast<int32_t>(DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(context->uid, policy));
     NETMGR_LOG_I("ExecSetPolicyByUid, policy = [%{public}d], policyResult = [%{public}d]", context->policy,
-        context->policyResult);
+                 context->policyResult);
 }
 
 void NapiNetPolicy::ExecGetUidsByPolicy(napi_env env, void *data)
@@ -55,7 +57,7 @@ void NapiNetPolicy::ExecGetUidsByPolicy(napi_env env, void *data)
     NetUidPolicy policy = static_cast<NetUidPolicy>(context->policy);
     context->uidTogether = DelayedSingleton<NetPolicyClient>::GetInstance()->GetUidsByPolicy(policy);
     NETMGR_LOG_I("ExecGetUidsByPolicy, policy = [%{public}d], res.length = [%{public}d]", context->policy,
-        static_cast<int32_t>(context->uidTogether.size()));
+                 static_cast<int32_t>(context->uidTogether.size()));
 }
 
 void NapiNetPolicy::ExecGetPolicyByUid(napi_env env, void *data)
@@ -89,8 +91,8 @@ void NapiNetPolicy::ExecSetSnoozePolicy(napi_env env, void *data)
         NETMGR_LOG_E("context == nullptr");
         return;
     }
-    context->resultCode = DelayedSingleton<NetPolicyClient>::GetInstance()->SetSnoozePolicy(context->netType,
-        std::to_string(context->simId));
+    context->resultCode = DelayedSingleton<NetPolicyClient>::GetInstance()->SetSnoozePolicy(
+        context->netType, std::to_string(context->simId));
 }
 
 void NapiNetPolicy::ExecOn(napi_env env, void *data)
@@ -393,12 +395,12 @@ void GetNetQuotaPoliciesCallback(napi_env env, napi_status status, void *data)
                 napi_set_element(env, callbackValue, i, elementObject);
             }
         } else {
-            callbackValue = NapiCommon::CreateCodeMessage(
-                env, "Failed to GetNetQuotaPolicies", static_cast<int32_t>(context->errorCode));
+            callbackValue = NapiCommon::CreateCodeMessage(env, "Failed to GetNetQuotaPolicies",
+                                                          static_cast<int32_t>(context->errorCode));
         }
     } else {
-        callbackValue = NapiCommon::CreateErrorMessage(
-            env, "GetNetQuotaPolicies error,napi_status = " + std::to_string(status));
+        callbackValue =
+            NapiCommon::CreateErrorMessage(env, "GetNetQuotaPolicies error,napi_status = " + std::to_string(status));
     }
     NapiCommon::Handle2ValueCallback(env, context, callbackValue);
 }
@@ -412,14 +414,14 @@ napi_value NapiNetPolicy::GetNetQuotaPolicies(napi_env env, napi_callback_info i
     napi_get_cb_info(env, info, &paramsCount, params, &arg, &data);
 
     NAPI_ASSERT(env, MatchGetNetQuotaPoliciesInputParam(env, params, paramsCount),
-        "GetNetQuotaPolicies input param type mismatch");
+                "GetNetQuotaPolicies input param type mismatch");
 
     auto context = std::make_unique<GetNetPolicyContext>().release();
     if (paramsCount == ARGV_NUM_1) {
         napi_create_reference(env, params[0], DEFAULT_REF_COUNT, &context->callbackRef);
     }
-    napi_value result = NapiCommon::HandleAsyncWork(
-        env, context, "GetNetQuotaPolicies", NativeGetNetQuotaPolicies, GetNetQuotaPoliciesCallback);
+    napi_value result = NapiCommon::HandleAsyncWork(env, context, "GetNetQuotaPolicies", NativeGetNetQuotaPolicies,
+                                                    GetNetQuotaPoliciesCallback);
     return result;
 }
 
@@ -457,8 +459,8 @@ void NapiNetPolicy::CompleteRestoreAllPolicies(napi_env env, napi_status status,
             callbackValue = NapiCommon::CreateErrorMessage(env, "policy reset factory error");
         }
     } else {
-        callbackValue = NapiCommon::CreateErrorMessage(
-            env, "reset factory error cause napi_status = " + std::to_string(status));
+        callbackValue =
+            NapiCommon::CreateErrorMessage(env, "reset factory error cause napi_status = " + std::to_string(status));
     }
     NapiCommon::Handle1ValueCallback(env, context, callbackValue);
 }
@@ -477,8 +479,8 @@ napi_value NapiNetPolicy::RestoreAllPolicies(napi_env env, napi_callback_info in
     if (argc == ARGV_NUM_2) {
         napi_create_reference(env, argv[1], CALLBACK_REF_CNT, &context->callbackRef);
     }
-    napi_value result = NapiCommon::HandleAsyncWork(
-        env, context, "RestoreAllPolicies", ExecRestoreAllPolicies, CompleteRestoreAllPolicies);
+    napi_value result = NapiCommon::HandleAsyncWork(env, context, "RestoreAllPolicies", ExecRestoreAllPolicies,
+                                                    CompleteRestoreAllPolicies);
     return result;
 }
 
@@ -501,8 +503,7 @@ void NapiNetPolicy::ExecSetBackgroundPolicy(napi_env env, void *data)
         NETMGR_LOG_E("context == nullptr");
         return;
     }
-    context->resultCode =
-        DelayedSingleton<NetPolicyClient>::GetInstance()->SetBackgroundPolicy(context->allow);
+    context->resultCode = DelayedSingleton<NetPolicyClient>::GetInstance()->SetBackgroundPolicy(context->allow);
 }
 
 void NapiNetPolicy::ExecGetBackgroundPolicy(napi_env env, void *data)
@@ -563,8 +564,8 @@ void NapiNetPolicy::CompleteGetBackgroundPolicy(napi_env env, napi_status status
             callbackValue = NapiCommon::CreateErrorMessage(env, "set background error");
         }
     } else {
-        callbackValue = NapiCommon::CreateErrorMessage(
-            env, "set background error cause napi_status = " + std::to_string(status));
+        callbackValue =
+            NapiCommon::CreateErrorMessage(env, "set background error cause napi_status = " + std::to_string(status));
     }
     NapiCommon::Handle2ValueCallback(env, context, callbackValue);
 }
@@ -576,9 +577,8 @@ napi_value NapiNetPolicy::SetBackgroundPolicy(napi_env env, napi_callback_info i
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     NetPolicyAsyncContext *context = std::make_unique<NetPolicyAsyncContext>().release();
     NAPI_CALL(env, napi_get_value_bool(env, argv[ARGV_INDEX_0], &context->allow));
-    NETMGR_LOG_I(
-        "JS agvc count = [%{public}d], argv[ARGV_INDEX_0] = [%{public}d], ",
-        static_cast<int>(argc), static_cast<int>(context->allow));
+    NETMGR_LOG_I("JS agvc count = [%{public}d], argv[ARGV_INDEX_0] = [%{public}d], ", static_cast<int>(argc),
+                 static_cast<int>(context->allow));
     napi_value result = nullptr;
     if (argc == ARGV_NUM_1) {
         if (context->callbackRef == nullptr) {
@@ -596,9 +596,8 @@ napi_value NapiNetPolicy::SetBackgroundPolicy(napi_env env, napi_callback_info i
     napi_value resourceName = nullptr;
     NAPI_CALL(env, napi_get_undefined(env, &resource));
     NAPI_CALL(env, napi_create_string_utf8(env, "SetBackgroundPolicy", NAPI_AUTO_LENGTH, &resourceName));
-    NAPI_CALL(env,
-        napi_create_async_work(env, resource, resourceName, ExecSetBackgroundPolicy, CompleteSetBackgroundPolicy,
-            (void *)context, &context->work));
+    NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecSetBackgroundPolicy,
+                                          CompleteSetBackgroundPolicy, (void *)context, &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
 }
@@ -615,8 +614,8 @@ napi_value NapiNetPolicy::GetBackgroundPolicy(napi_env env, napi_callback_info i
     if (argc == 1) {
         napi_create_reference(env, argv[0], CALLBACK_REF_CNT, &context->callbackRef);
     }
-    napi_value result = NapiCommon::HandleAsyncWork(
-        env, context, "GetBackgroundPolicy", ExecGetBackgroundPolicy, CompleteGetBackgroundPolicy);
+    napi_value result = NapiCommon::HandleAsyncWork(env, context, "GetBackgroundPolicy", ExecGetBackgroundPolicy,
+                                                    CompleteGetBackgroundPolicy);
     return result;
 }
 
@@ -668,9 +667,8 @@ napi_value NapiNetPolicy::SetPolicyByUid(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     NAPI_CALL(env, napi_get_undefined(env, &resource));
     NAPI_CALL(env, napi_create_string_utf8(env, "SetPolicyByUid", NAPI_AUTO_LENGTH, &resourceName));
-    NAPI_CALL(env,
-        napi_create_async_work(env, resource, resourceName, ExecSetPolicyByUid, CompleteSetPolicyByUid,
-            (void *)context, &context->work));
+    NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecSetPolicyByUid, CompleteSetPolicyByUid,
+                                          (void *)context, &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
 }
@@ -701,9 +699,8 @@ napi_value NapiNetPolicy::GetPolicyByUid(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     NAPI_CALL(env, napi_get_undefined(env, &resource));
     NAPI_CALL(env, napi_create_string_utf8(env, "GetUidsByPolicy", NAPI_AUTO_LENGTH, &resourceName));
-    NAPI_CALL(env,
-        napi_create_async_work(env, resource, resourceName, ExecGetPolicyByUid, CompleteGetPolicyByUid,
-            (void *)context, &context->work));
+    NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecGetPolicyByUid, CompleteGetPolicyByUid,
+                                          (void *)context, &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
 }
@@ -715,8 +712,7 @@ napi_value NapiNetPolicy::GetUidsByPolicy(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     NetPolicyAsyncContext *context = std::make_unique<NetPolicyAsyncContext>().release();
     NAPI_CALL(env, napi_get_value_uint32(env, argv[ARGV_INDEX_0], &context->policy));
-    NETMGR_LOG_E(
-        "JS agvc count = [%{public}d], argv[0] = [%{public}d]", static_cast<int32_t>(argc), context->policy);
+    NETMGR_LOG_E("JS agvc count = [%{public}d], argv[0] = [%{public}d]", static_cast<int32_t>(argc), context->policy);
     // Get and verify parameter[js]
     napi_value result = nullptr;
     if (argc == ARGV_NUM_1) {
@@ -735,9 +731,8 @@ napi_value NapiNetPolicy::GetUidsByPolicy(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     NAPI_CALL(env, napi_get_undefined(env, &resource));
     NAPI_CALL(env, napi_create_string_utf8(env, "GetUidsByPolicy", NAPI_AUTO_LENGTH, &resourceName));
-    NAPI_CALL(env,
-        napi_create_async_work(env, resource, resourceName, ExecGetUidsByPolicy, CompleteGetUidsByPolicy,
-            (void *)context, &context->work));
+    NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecGetUidsByPolicy, CompleteGetUidsByPolicy,
+                                          (void *)context, &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
 }
@@ -758,6 +753,7 @@ napi_value NapiNetPolicy::SetNetQuotaPolicies(napi_env env, napi_callback_info i
     }
     uint32_t arrayLength = 0;
     napi_get_array_length(env, argv[0], &arrayLength);
+    arrayLength = arrayLength > MAX_POLICY_LEN ? MAX_POLICY_LEN : arrayLength;
     napi_value elementValue = nullptr;
     for (uint32_t i = 0; i < arrayLength; i++) {
         napi_get_element(env, argv[0], i, &elementValue);
@@ -783,9 +779,8 @@ napi_value NapiNetPolicy::SetNetQuotaPolicies(napi_env env, napi_callback_info i
     napi_value resourceName = nullptr;
     NAPI_CALL(env, napi_get_undefined(env, &resource));
     NAPI_CALL(env, napi_create_string_utf8(env, "SetNetQuotaPolicies", NAPI_AUTO_LENGTH, &resourceName));
-    NAPI_CALL(env,
-        napi_create_async_work(env, resource, resourceName, ExecSetNetQuotaPolicies, CompleteSetNetQuotaPolicies,
-            (void *)context, &context->work));
+    NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecSetNetQuotaPolicies,
+                                          CompleteSetNetQuotaPolicies, (void *)context, &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
 }
@@ -819,9 +814,8 @@ napi_value NapiNetPolicy::SetSnoozePolicy(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     NAPI_CALL(env, napi_get_undefined(env, &resource));
     NAPI_CALL(env, napi_create_string_utf8(env, "SetSnoozePolicy", NAPI_AUTO_LENGTH, &resourceName));
-    NAPI_CALL(env,
-        napi_create_async_work(env, resource, resourceName, ExecSetSnoozePolicy, CompleteSetSnoozePolicy,
-            (void *)context, &context->work));
+    NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecSetSnoozePolicy, CompleteSetSnoozePolicy,
+                                          (void *)context, &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
 }
@@ -834,9 +828,8 @@ napi_value NapiNetPolicy::On(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     NETMGR_LOG_D("On agvc = %{public}d", static_cast<int32_t>(argc));
     NetPolicyAsyncContext *context = std::make_unique<NetPolicyAsyncContext>().release();
-    NAPI_CALL(env,
-        napi_get_value_string_utf8(env, argv[ARGV_INDEX_0], context->eventContent, EVENT_CONTENT_MAX_BYTE,
-            &(context->eventContentRealBytes)));
+    NAPI_CALL(env, napi_get_value_string_utf8(env, argv[ARGV_INDEX_0], context->eventContent, EVENT_CONTENT_MAX_BYTE,
+                                              &(context->eventContentRealBytes)));
     NETMGR_LOG_D("On eventContent = [%{public}s]", context->eventContent);
     std::string content = context->eventContent;
     napi_value result = nullptr;
@@ -855,8 +848,8 @@ napi_value NapiNetPolicy::On(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     NAPI_CALL(env, napi_get_undefined(env, &resource));
     NAPI_CALL(env, napi_create_string_utf8(env, "On", NAPI_AUTO_LENGTH, &resourceName));
-    NAPI_CALL(env,
-        napi_create_async_work(env, resource, resourceName, ExecOn, CompleteOn, (void *)context, &context->work));
+    NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecOn, CompleteOn, (void *)context,
+                                          &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
 }
@@ -869,9 +862,8 @@ napi_value NapiNetPolicy::Off(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     NETMGR_LOG_D("Off agvc = %{public}d", static_cast<int32_t>(argc));
     NetPolicyAsyncContext *context = std::make_unique<NetPolicyAsyncContext>().release();
-    NAPI_CALL(env,
-        napi_get_value_string_utf8(env, argv[ARGV_INDEX_0], context->eventContent, EVENT_CONTENT_MAX_BYTE,
-            &(context->eventContentRealBytes)));
+    NAPI_CALL(env, napi_get_value_string_utf8(env, argv[ARGV_INDEX_0], context->eventContent, EVENT_CONTENT_MAX_BYTE,
+                                              &(context->eventContentRealBytes)));
     NETMGR_LOG_D("Off eventContent = [%{public}s]", context->eventContent);
     std::string content = context->eventContent;
     napi_value result = nullptr;
@@ -890,8 +882,8 @@ napi_value NapiNetPolicy::Off(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     NAPI_CALL(env, napi_get_undefined(env, &resource));
     NAPI_CALL(env, napi_create_string_utf8(env, "Off", NAPI_AUTO_LENGTH, &resourceName));
-    NAPI_CALL(env,
-        napi_create_async_work(env, resource, resourceName, ExecOff, CompleteOff, (void *)context, &context->work));
+    NAPI_CALL(env, napi_create_async_work(env, resource, resourceName, ExecOff, CompleteOff, (void *)context,
+                                          &context->work));
     NAPI_CALL(env, napi_queue_async_work(env, context->work));
     return result;
 }
@@ -899,25 +891,31 @@ napi_value NapiNetPolicy::Off(napi_env env, napi_callback_info info)
 static napi_value CreateNetUidPolicy(napi_env env, napi_value exports)
 {
     napi_property_descriptor desc[] = {
-        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_NONE",
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "NET_POLICY_NONE",
             NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_NONE))),
-        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_ALLOW_METERED_BACKGROUND",
-            NapiCommon::NapiValueByInt32(
-                env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND))),
-        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_TEMPORARY_ALLOW_METERED",
-            NapiCommon::NapiValueByInt32(
-                env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_TEMPORARY_ALLOW_METERED))),
-        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_REJECT_METERED_BACKGROUND",
-            NapiCommon::NapiValueByInt32(
-                env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND))),
-        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_ALLOW_ALL",
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "NET_POLICY_ALLOW_METERED_BACKGROUND",
+            NapiCommon::NapiValueByInt32(env,
+                                         static_cast<int32_t>(NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND))),
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "NET_POLICY_TEMPORARY_ALLOW_METERED",
+            NapiCommon::NapiValueByInt32(env,
+                                         static_cast<int32_t>(NetUidPolicy::NET_POLICY_TEMPORARY_ALLOW_METERED))),
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "NET_POLICY_REJECT_METERED_BACKGROUND",
+            NapiCommon::NapiValueByInt32(env,
+                                         static_cast<int32_t>(NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND))),
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "NET_POLICY_ALLOW_ALL",
             NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_ALLOW_ALL))),
-        DECLARE_NAPI_STATIC_PROPERTY("NET_POLICY_REJECT_ALL",
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "NET_POLICY_REJECT_ALL",
             NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(NetUidPolicy::NET_POLICY_REJECT_ALL))),
     };
     napi_value result = nullptr;
     napi_define_class(env, "NetUidPolicy", NAPI_AUTO_LENGTH, NapiCommon::CreateEnumConstructor, nullptr,
-        sizeof(desc) / sizeof(*desc), desc, &result);
+                      sizeof(desc) / sizeof(*desc), desc, &result);
     napi_set_named_property(env, exports, "NetUidPolicy", result);
     return exports;
 }
@@ -925,16 +923,22 @@ static napi_value CreateNetUidPolicy(napi_env env, napi_value exports)
 static napi_value CreateBackgroundPolicy(napi_env env, napi_value exports)
 {
     napi_property_descriptor desc[] = {
-        DECLARE_NAPI_STATIC_PROPERTY("BACKGROUND_POLICY_DISABLE", NapiCommon::NapiValueByInt32(env,
-            static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_DISABLE))),
-        DECLARE_NAPI_STATIC_PROPERTY("BACKGROUND_POLICY_ALLOWLISTED", NapiCommon::NapiValueByInt32(env,
-            static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_ALLOWLISTED))),
-        DECLARE_NAPI_STATIC_PROPERTY("BACKGROUND_POLICY_ENABLED", NapiCommon::NapiValueByInt32(env,
-            static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_ENABLED))),
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "BACKGROUND_POLICY_DISABLE",
+            NapiCommon::NapiValueByInt32(env,
+                                         static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_DISABLE))),
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "BACKGROUND_POLICY_ALLOWLISTED",
+            NapiCommon::NapiValueByInt32(
+                env, static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_ALLOWLISTED))),
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "BACKGROUND_POLICY_ENABLED",
+            NapiCommon::NapiValueByInt32(env,
+                                         static_cast<int32_t>(NetBackgroundPolicy::NET_BACKGROUND_POLICY_ENABLED))),
     };
     napi_value result = nullptr;
     napi_define_class(env, "BackgroundPolicy", NAPI_AUTO_LENGTH, NapiCommon::CreateEnumConstructor, nullptr,
-        sizeof(desc) / sizeof(*desc), desc, &result);
+                      sizeof(desc) / sizeof(*desc), desc, &result);
     napi_set_named_property(env, exports, "BackgroundPolicy", result);
     return exports;
 }
@@ -942,14 +946,14 @@ static napi_value CreateBackgroundPolicy(napi_env env, napi_value exports)
 static napi_value CreateMeteringMode(napi_env env, napi_value exports)
 {
     napi_property_descriptor desc[] = {
-        DECLARE_NAPI_STATIC_PROPERTY("UN_METERED",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(MeteringMode::UN_METERED))),
+        DECLARE_NAPI_STATIC_PROPERTY(
+            "UN_METERED", NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(MeteringMode::UN_METERED))),
         DECLARE_NAPI_STATIC_PROPERTY("METERED",
-            NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(MeteringMode::METERED))),
+                                     NapiCommon::NapiValueByInt32(env, static_cast<int32_t>(MeteringMode::METERED))),
     };
     napi_value result = nullptr;
     napi_define_class(env, "MeteringMode", NAPI_AUTO_LENGTH, NapiCommon::CreateEnumConstructor, nullptr,
-        sizeof(desc) / sizeof(*desc), desc, &result);
+                      sizeof(desc) / sizeof(*desc), desc, &result);
     napi_set_named_property(env, exports, "MeteringMode", result);
     return exports;
 }

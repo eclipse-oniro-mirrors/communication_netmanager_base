@@ -20,6 +20,8 @@
 namespace OHOS {
 namespace NetsysNative {
 using namespace std;
+static constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
+static constexpr int32_t MAX_INTERFACE_CONFIG_SIZE = 16;
 
 bool NetsysNativeServiceProxy::WriteInterfaceToken(MessageParcel &data)
 {
@@ -115,7 +117,8 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netid, std::v
     reply.ReadUint16(param.baseTimeoutMsec);
     reply.ReadUint8(param.retryCount);
     int32_t vServerSize = reply.ReadInt32();
-    std::vector<std::string>  vecString;
+    vServerSize = vServerSize > MAX_DNS_CONFIG_SIZE ? MAX_DNS_CONFIG_SIZE : vServerSize;
+    std::vector<std::string> vecString;
     for (int i = 0; i < vServerSize; i++) {
         vecString.push_back(reply.ReadString());
     }
@@ -123,7 +126,8 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netid, std::v
         servers.assign(vecString.begin(), vecString.end());
     }
     int32_t vDomainSize = reply.ReadInt32();
-    std::vector<std::string>  vecDomain;
+    vDomainSize = vDomainSize > MAX_DNS_CONFIG_SIZE ? MAX_DNS_CONFIG_SIZE : vDomainSize;
+    std::vector<std::string> vecDomain;
     for (int i = 0; i < vDomainSize; i++) {
         vecDomain.push_back(reply.ReadString());
     }
@@ -713,8 +717,9 @@ int32_t NetsysNativeServiceProxy::InterfaceGetConfig(InterfaceConfigurationParce
     reply.ReadString(cfg.hwAddr);
     reply.ReadString(cfg.ipv4Addr);
     reply.ReadInt32(cfg.prefixLength);
-    vSize =  reply.ReadInt32();
-    std::vector<std::string>  vecString;
+    vSize = reply.ReadInt32();
+    vSize = vSize > MAX_INTERFACE_CONFIG_SIZE ? MAX_INTERFACE_CONFIG_SIZE : vSize;
+    std::vector<std::string> vecString;
     for (int i = 0; i < vSize; i++) {
             vecString.push_back(reply.ReadString());
     }

@@ -28,7 +28,8 @@ namespace OHOS {
 namespace NetsysNative {
 using namespace std;
 
-static constexpr const int32_t MAX_FLAG_NUM = 64;
+static constexpr int32_t MAX_FLAG_NUM = 64;
+static constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
 
 NetsysNativeServiceStub::NetsysNativeServiceStub()
 {
@@ -122,6 +123,7 @@ int32_t NetsysNativeServiceStub::CmdSetResolverConfig(MessageParcel &data, Messa
     if (!data.ReadInt32(vServerSize)) {
         return ERR_FLATTEN_OBJECT;
     }
+    vServerSize = (vServerSize > MAX_DNS_CONFIG_SIZE) ? MAX_DNS_CONFIG_SIZE : vServerSize;
     std::string s;
     for (int32_t i = 0; i < vServerSize; ++i) {
         std::string().swap(s);
@@ -134,6 +136,7 @@ int32_t NetsysNativeServiceStub::CmdSetResolverConfig(MessageParcel &data, Messa
     if (!data.ReadInt32(vDomainSize)) {
         return ERR_FLATTEN_OBJECT;
     }
+    vDomainSize = (vDomainSize > MAX_DNS_CONFIG_SIZE) ? MAX_DNS_CONFIG_SIZE : vDomainSize;
     for (int32_t i = 0; i < vDomainSize; ++i) {
         std::string().swap(s);
         if (!data.ReadString(s)) {
@@ -167,15 +170,25 @@ int32_t NetsysNativeServiceStub::CmdGetResolverConfig(MessageParcel &data, Messa
     reply.WriteUint16(resParams.baseTimeoutMsec);
     reply.WriteUint8(resParams.retryCount);
     int32_t vServerSize = static_cast<int32_t>(servers.size());
+    vServerSize = (vServerSize > MAX_DNS_CONFIG_SIZE) ? MAX_DNS_CONFIG_SIZE : vServerSize;
     reply.WriteInt32(vServerSize);
+    int32_t index = 0;
     std::vector<std::string>::iterator iterServers;
     for (iterServers = servers.begin(); iterServers != servers.end(); ++iterServers) {
+        if (++index > MAX_DNS_CONFIG_SIZE) {
+            break;
+        }
         reply.WriteString(*iterServers);
     }
     int32_t vDomainsSize = static_cast<int32_t>(domains.size());
+    vDomainsSize = (vDomainsSize > MAX_DNS_CONFIG_SIZE) ? MAX_DNS_CONFIG_SIZE : vDomainsSize;
     reply.WriteInt32(vDomainsSize);
     std::vector<std::string>::iterator iterDomains;
+    index = 0;
     for (iterDomains = domains.begin(); iterDomains != domains.end(); ++iterDomains) {
+        if (++index > MAX_DNS_CONFIG_SIZE) {
+            break;
+        }
         reply.WriteString(*iterDomains);
     }
     NETNATIVE_LOGI("GetResolverConfig has recved result %{public}d", result);
@@ -565,9 +578,14 @@ int32_t NetsysNativeServiceStub::CmdInterfaceGetConfig(MessageParcel &data, Mess
     reply.WriteString(cfg.ipv4Addr);
     reply.WriteInt32(cfg.prefixLength);
     int32_t vsize = static_cast<int32_t>(cfg.flags.size());
+    vsize = vsize > MAX_DNS_CONFIG_SIZE ? MAX_DNS_CONFIG_SIZE : vsize;
     reply.WriteInt32(vsize);
     std::vector<std::string>::iterator iter;
+    int32_t index = 0;
     for (iter = cfg.flags.begin(); iter != cfg.flags.end(); ++iter) {
+        if (++index > MAX_DNS_CONFIG_SIZE) {
+            break;
+        }
         reply.WriteString(*iter);
     }
     return result;

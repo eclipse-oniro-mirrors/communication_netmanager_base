@@ -19,9 +19,10 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetConnServiceProxy::NetConnServiceProxy(const sptr<IRemoteObject> &impl)
-    : IRemoteProxy<INetConnService>(impl)
-{}
+static constexpr uint32_t MAX_IFACE_NUM = 16;
+static constexpr uint32_t MAX_NET_CAP_NUM = 32;
+
+NetConnServiceProxy::NetConnServiceProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<INetConnService>(impl) {}
 
 NetConnServiceProxy::~NetConnServiceProxy() {}
 
@@ -190,7 +191,8 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<INetConnCallback
 }
 
 int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-    const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
+                                                     const sptr<INetConnCallback> &callback,
+                                                     const uint32_t &timeoutMS)
 {
     if (netSpecifier == nullptr || callback == nullptr) {
         NETMGR_LOG_E("The parameter of netSpecifier or callback is nullptr");
@@ -391,8 +393,8 @@ int32_t NetConnServiceProxy::RegisterNetDetectionCallback(
     return replyParcel.ReadInt32();
 }
 
-int32_t NetConnServiceProxy::UnRegisterNetDetectionCallback(
-    int32_t netId, const sptr<INetDetectionCallback> &callback)
+int32_t NetConnServiceProxy::UnRegisterNetDetectionCallback(int32_t netId,
+                                                            const sptr<INetDetectionCallback> &callback)
 {
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter of callback is nullptr");
@@ -416,8 +418,8 @@ int32_t NetConnServiceProxy::UnRegisterNetDetectionCallback(
     }
     MessageParcel replyParcel;
     MessageOption option;
-    int32_t error = remote->SendRequest(
-        CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK, dataParcel, replyParcel, option);
+    int32_t error =
+        remote->SendRequest(CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK, dataParcel, replyParcel, option);
     if (error != NET_CONN_SUCCESS) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -607,6 +609,7 @@ int32_t NetConnServiceProxy::GetSpecificNet(NetBearType bearerType, std::list<in
         if (!reply.ReadInt32(size)) {
             return IPC_PROXY_ERR;
         }
+        size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
         for (int32_t i = 0; i < size; ++i) {
             uint32_t value ;
             if (!reply.ReadUint32(value)) {
@@ -649,6 +652,7 @@ int32_t NetConnServiceProxy::GetAllNets(std::list<int32_t> &netIdList)
         if (!reply.ReadInt32(size)) {
             return IPC_PROXY_ERR;
         }
+        size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
         for (int32_t i = 0; i < size; ++i) {
             uint32_t value ;
             if (!reply.ReadUint32(value)) {
@@ -782,6 +786,7 @@ int32_t NetConnServiceProxy::GetNetCapData(MessageParcel &reply, NetAllCapabilit
     if (!reply.ReadUint32(size)) {
         return IPC_PROXY_ERR;
     }
+    size = size > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : size;
     uint32_t value = 0;
     for (uint32_t i = 0; i < size; ++i) {
         if (!reply.ReadUint32(value)) {
@@ -792,6 +797,7 @@ int32_t NetConnServiceProxy::GetNetCapData(MessageParcel &reply, NetAllCapabilit
     if (!reply.ReadUint32(size)) {
         return IPC_PROXY_ERR;
     }
+    size = size > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : size;
     for (uint32_t i = 0; i < size; ++i) {
         if (!reply.ReadUint32(value)) {
             return IPC_PROXY_ERR;
@@ -801,7 +807,8 @@ int32_t NetConnServiceProxy::GetNetCapData(MessageParcel &reply, NetAllCapabilit
     return ERR_NONE;
 }
 
-int32_t NetConnServiceProxy::GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList)
+int32_t NetConnServiceProxy::GetAddressesByName(const std::string &host, int32_t netId,
+                                                std::vector<INetAddr> &addrList)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -838,6 +845,7 @@ int32_t NetConnServiceProxy::GetAddressesByName(const std::string &host, int32_t
         if (!reply.ReadInt32(size)) {
             return IPC_PROXY_ERR;
         }
+        size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
         for (int32_t i = 0; i < size; ++i) {
             sptr<INetAddr> netaddr_ptr = INetAddr::Unmarshalling(reply);
             if (netaddr_ptr != nullptr) {

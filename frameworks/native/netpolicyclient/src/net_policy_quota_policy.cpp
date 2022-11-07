@@ -17,6 +17,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+static constexpr uint32_t MAX_POLICY_SIZE = 100;
+
 bool NetPolicyQuotaPolicy::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteInt8(netType_)) {
@@ -109,6 +111,7 @@ bool NetPolicyQuotaPolicy::Unmarshalling(Parcel &parcel, std::vector<NetPolicyQu
     if (!parcel.ReadUint32(vSize)) {
         return false;
     }
+    vSize = vSize > MAX_POLICY_SIZE ? MAX_POLICY_SIZE : vSize;
 
     NetPolicyQuotaPolicy quotaPolicyTmp;
     for (uint32_t i = 0; i < vSize; i++) {
