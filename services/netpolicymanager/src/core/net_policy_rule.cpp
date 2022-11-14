@@ -25,7 +25,6 @@ void NetPolicyRule::Init()
 {
     // Init uid、policy and background allow status from file,and save uid、policy into uidPolicyRules_.
     NETMGR_LOG_I("Start init uid and policy.");
-    GetFileInst()->InitPolicy();
     const auto &uidsPolicies = GetFileInst()->GetNetPolicies();
     backgroundAllow_ = GetFileInst()->GetBackgroundPolicy();
 
