@@ -26,22 +26,21 @@ constexpr const char *NET_CONN_SUPPLER_STAT = "NET_CONN_SUPPLER_STAT";
 constexpr const char *NET_CONN_REQUEST_STAT = "NET_CONN_REQUEST_STAT";
 constexpr const char *NET_CONN_MONITOR_STAT = "NET_CONN_MONITOR_STAT";
 // event params
-constexpr const char *EVENT_KEY_NET_SUPPLIER_UPDATE_SUPPLIERID = "NET_SUPPLIER_UPDATE_SUPPLIERID";
-constexpr const char *EVENT_KEY_NET_SUPPLIER_UPDATE_SUPPLIERINFO = "NET_SUPPLIER_UPDATE_SUPPLIERINFO";
-constexpr const char *EVENT_KEY_NET_SUPPLIER_UPDATE_NETLINKID = "NET_SUPPLIER_UPDATE_NETLINKID";
-constexpr const char *EVENT_KEY_NET_SUPPLIER_UPDATE_NETLINKINFO = "NET_SUPPLIER_UPDATE_NETLINKINFO";
+constexpr const char *EVENT_KEY_NET_SUPPLIER_UPDATE_SUPPLIERID = "UPDATE_SUPPLIERID";
+constexpr const char *EVENT_KEY_NET_SUPPLIER_UPDATE_SUPPLIERINFO = "UPDATE_SUPPLIERINFO";
+constexpr const char *EVENT_KEY_NET_SUPPLIER_UPDATE_NETLINKID = "UPDATE_NETLINKID";
+constexpr const char *EVENT_KEY_NET_SUPPLIER_UPDATE_NETLINKINFO = "UPDATE_NETLINKINFO";
 constexpr const char *EVENT_KEY_ERROR_TYPE = "ERROR_TYPE";
 constexpr const char *EVENT_KEY_ERROR_MSG = "ERROR_MSG";
-constexpr const char *EVENT_KEY_NET_REQUEST_CAPABILITIE = "NET_REQUEST_CAPABILITIE";
-constexpr const char *EVENT_KEY_NET_MONITOR_SOCKETFD = "NET_MONITOR_SOCKETFD";
-constexpr const char *EVENT_KEY_NET_MONITOR_NETID = "NET_MONITOR_NETID";
-constexpr const char *EVENT_KEY_NET_SUPPLIER_REGISTER_BEARERTYPE = "NET_SUPPLIER_REGISTER_BEARERTYPE";
-constexpr const char *EVENT_KEY_NET_SUPPLIER_REGISTER_IDENT = "NET_SUPPLIER_REGISTER_IDENT";
-constexpr const char *EVENT_KEY_NET_SUPPLIER_REGISTER_SUPPLIERID = "NET_SUPPLIER_REGISTER_SUPPLIERID";
-constexpr const char *EVENT_KEY_NET_REQUEST_CALLBACK_AVAILABLE = "NET_REQUEST_CALLBACK_AVAILABLE";
-constexpr const char *EVENT_KEY_NET_REQUEST_SUPPLIERIDENT = "NET_REQUEST_SUPPLIERIDENT";
-constexpr const char *EVENT_KEY_NET_REQUEST_NETCAPS = "NET_REQUEST_NETCAPS";
-constexpr const char *EVENT_KEY_NET_MONITOR_STATUS = "NET_MONITOR_STATUS";
+constexpr const char *EVENT_KEY_NET_REQUEST_CAPABILITY = "CAPABILITIES";
+constexpr const char *EVENT_KEY_NET_MONITOR_SOCKETFD = "SOCKETFD";
+constexpr const char *EVENT_KEY_NET_MONITOR_NETID = "NETID";
+constexpr const char *EVENT_KEY_NET_SUPPLIER_REGISTER_BEARERTYPE = "REGISTER_BEARERTYPE";
+constexpr const char *EVENT_KEY_NET_SUPPLIER_REGISTER_IDENT = "REGISTER_IDENT";
+constexpr const char *EVENT_KEY_NET_SUPPLIER_REGISTER_SUPPLIERID = "REGISTER_SUPPLIERID";
+constexpr const char *EVENT_KEY_NET_REQUEST_CALLBACK_AVAILABLE = "CALLBACK_AVAILABLE";
+constexpr const char *EVENT_KEY_NET_REQUEST_SUPPLIERIDENT = "SUPPLIERIDENT";
+constexpr const char *EVENT_KEY_NET_MONITOR_STATUS = "STATUS";
 } // namespace
 
 void EventReport::SendSupplierFaultEvent(const EventInfo &eventInfo)
@@ -79,7 +78,8 @@ void EventReport::SendRequestFaultEvent(const EventInfo &eventInfo)
         HiSysEvent::Domain::NETMANAGER_STANDARD,
         NET_CONN_REQUEST_FAULT,
         HiSysEvent::EventType::FAULT,
-        EVENT_KEY_NET_REQUEST_CAPABILITIE, eventInfo.capabilities,
+        EVENT_KEY_NET_REQUEST_CAPABILITY, eventInfo.capabilities,
+        EVENT_KEY_NET_REQUEST_SUPPLIERIDENT, eventInfo.supplierIdent,
         EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
         EVENT_KEY_ERROR_MSG, eventInfo.errorMsg);
 }
@@ -90,10 +90,9 @@ void EventReport::SendRequestBehaviorEvent(const EventInfo &eventInfo)
         HiSysEvent::Domain::NETMANAGER_STANDARD,
         NET_CONN_REQUEST_STAT,
         HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_NET_REQUEST_CAPABILITIE, eventInfo.capabilities,
-        EVENT_KEY_NET_REQUEST_CALLBACK_AVAILABLE, eventInfo.callbackAvailable,
+        EVENT_KEY_NET_REQUEST_CAPABILITY, eventInfo.capabilities,
         EVENT_KEY_NET_REQUEST_SUPPLIERIDENT, eventInfo.supplierIdent,
-        EVENT_KEY_NET_REQUEST_NETCAPS, eventInfo.netcaps);
+        EVENT_KEY_NET_REQUEST_CALLBACK_AVAILABLE, eventInfo.callbackAvailable);
 }
 
 void EventReport::SendMonitorFaultEvent(const EventInfo &eventInfo)
