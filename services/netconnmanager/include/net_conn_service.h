@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <list>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -27,6 +28,7 @@
 
 #include "network.h"
 #include "net_activate.h"
+#include "net_conn_event_handler.h"
 #include "net_conn_service_iface.h"
 #include "net_conn_service_stub.h"
 #include "net_score.h"
@@ -43,7 +45,7 @@ class NetConnService : public SystemAbility,
     DECLARE_SYSTEM_ABILITY(NetConnService)
 
     using NET_SUPPLIER_MAP = std::map<uint32_t, sptr<NetSupplier>>;
-    using NET_NETWORK_MAP = std::map<int32_t, sptr<Network>>;
+    using NET_NETWORK_MAP = std::map<int32_t, std::shared_ptr<Network>>;
     using NET_ACTIVATE_MAP = std::map<uint32_t, sptr<NetActivate>>;
 
 public:
@@ -288,6 +290,8 @@ private:
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
     std::string httpProxy_;
     std::mutex netManagerMutex_;
+    std::shared_ptr<AppExecFwk::EventRunner> eventRunner_ = nullptr;
+    std::shared_ptr<NetConnEventHandler> netConnEventHandler_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

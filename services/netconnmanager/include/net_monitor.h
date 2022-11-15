@@ -18,11 +18,12 @@
 
 #include <atomic>
 #include <condition_variable>
-#include <future>
+#include <memory>
 #include <mutex>
 
 #include "refbase.h"
 
+#include "i_net_monitor_callback.h"
 #include "net_conn_types.h"
 
 namespace OHOS {
@@ -33,9 +34,9 @@ public:
      * Construct a new NetMonitor to detection a network
      *
      * @param netId Detection network's id
-     * @param handle NetDetectionState's handle
+     * @param callback Network monitor callback weak reference
      */
-    NetMonitor(uint32_t netId, NetDetectionStateHandler handle);
+    NetMonitor(uint32_t netId, const std::weak_ptr<INetMonitorCallback> &callback);
 
     /**
      * Destroy the NetMonitor
@@ -47,7 +48,7 @@ public:
      * Start detection
      *
      */
-    void Start(bool needReport);
+    void Start();
 
     /**
      * Stop detecting
@@ -56,21 +57,26 @@ public:
     void Stop();
 
     /**
-     * Get current detection result
-     *
-     * @return Current detection result
-     */
-    NetDetectionStatus GetDetectionResult() const;
-
-    /**
      * Set network socket parameter
      *
      * @return Socket parameter setting result
      */
     int32_t SetSocketParameter(int32_t sockFd);
 
-private:
+    /**
+     * Is network monitor detecting
+     *
+     * @return Status value of whether the network is detecting
+     */
+    bool IsDetecting();
+
+    /**
+     * Network monitor detection
+     *
+     */
     void Detection();
+
+private:
     NetDetectionStatus SendParallelHttpProbes();
     NetDetectionStatus SendHttpProbe(const std::string &defaultDomain, const std::string &defaultUrl,
                                      const uint16_t defaultPort);
@@ -150,14 +156,11 @@ private:
     uint32_t netId_ = 0;
     std::atomic<bool> isDetecting_ = false;
     int32_t detectionSteps_ = 0;
-    std::future<void> detectAsync_;
     std::mutex detectionMtx_;
     std::condition_variable detectionCond_;
-    NetDetectionStatus result_ = INVALID_DETECTION_STATE;
     uint32_t detectionDelay_ = 0;
-    NetDetectionStateHandler netDetectionStatus_;
     std::string portalUrlRedirect_;
-    bool needReport_ = false;
+    std::weak_ptr<INetMonitorCallback> netMonitorCallback_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

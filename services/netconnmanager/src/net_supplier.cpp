@@ -119,7 +119,7 @@ NetAllCapabilities NetSupplier::GetNetCapabilities() const
     return netAllCapabilities_;
 }
 
-void NetSupplier::SetNetwork(const sptr<Network> &network)
+void NetSupplier::SetNetwork(const std::shared_ptr<Network> &network)
 {
     network_ = network;
     if (network_ != nullptr) {
@@ -127,7 +127,7 @@ void NetSupplier::SetNetwork(const sptr<Network> &network)
     }
 }
 
-sptr<Network> NetSupplier::GetNetwork() const
+std::shared_ptr<Network> NetSupplier::GetNetwork() const
 {
     return network_;
 }
