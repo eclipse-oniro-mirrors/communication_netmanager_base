@@ -17,8 +17,8 @@
 
 #include "netmanager_base_permission.h"
 
-#include "ipc_skeleton.h"
 #include "accesstoken_kit.h"
+#include "ipc_skeleton.h"
 
 #include "net_mgr_log_wrapper.h"
 
@@ -44,14 +44,15 @@ bool NetManagerPermission::CheckPermission(const std::string &permissionName)
         result = Security::AccessToken::PERMISSION_GRANTED;
     } else if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
         result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
+    } else if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+        result = Security::AccessToken::PERMISSION_GRANTED;
     } else {
-        NETMGR_LOG_E("permission check failed, callerToken:%{public}u, tokenType:%{public}d",
-            callerToken, tokenType);
+        NETMGR_LOG_E("permission check failed, callerToken:%{public}u, tokenType:%{public}d", callerToken, tokenType);
     }
 
     if (result != Security::AccessToken::PERMISSION_GRANTED) {
         NETMGR_LOG_E("permission check failed, permission:%{public}s, callerToken:%{public}u, tokenType:%{public}d",
-            permissionName.c_str(), callerToken, tokenType);
+                     permissionName.c_str(), callerToken, tokenType);
         return false;
     }
     return true;
@@ -78,7 +79,7 @@ bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissio
     }
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
         bool res = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName) ==
-            Security::AccessToken::PERMISSION_GRANTED;
+                   Security::AccessToken::PERMISSION_GRANTED;
         permissionMap[callerToken] = res;
         return res;
     }

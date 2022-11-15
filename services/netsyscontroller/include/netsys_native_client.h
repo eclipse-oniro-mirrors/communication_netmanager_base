@@ -195,6 +195,7 @@ public:
      */
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
                               const std::vector<std::string> &servers, const std::vector<std::string> &domains);
+
     /**
      * Get dns server param info
      *
@@ -481,6 +482,7 @@ public:
      * @return Return the return value of the netsys interface call.
      */
     int32_t SetBlocking(int32_t ifaceFd, bool isBlock);
+
     /**
      * Start Dhcp Client.
      *
@@ -489,6 +491,7 @@ public:
      * @return Return the return value of the netsys interface call.
      */
     int32_t StartDhcpClient(const std::string &iface, bool bIpv6);
+
     /**
      * Stop Dhcp Client.
      *
@@ -497,6 +500,7 @@ public:
      * @return Return the return value of the netsys interface call.
      */
     int32_t StopDhcpClient(const std::string &iface, bool bIpv6);
+
     /**
      * Register Notify Callback
      *

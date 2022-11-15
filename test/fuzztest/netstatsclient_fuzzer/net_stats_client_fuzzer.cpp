@@ -13,15 +13,20 @@
  * limitations under the License.
  */
 
-#include <vector>
-#include <thread>
 #include <ctime>
+#include <thread>
+#include <vector>
+
 #include <securec.h>
 
 #include "data_flow_statistics.h"
+#include "i_net_stats_service.h"
 #include "net_mgr_log_wrapper.h"
-#include "net_stats_constants.h"
 #include "net_stats_client.h"
+#include "net_stats_constants.h"
+#define private public
+#include "net_stats_service.h"
+#include "net_stats_service_stub.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -30,12 +35,11 @@ const uint8_t *g_baseFuzzData = nullptr;
 size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
-}
+} // namespace
 
-template<class T>
-T GetData()
+template <class T> T GetData()
 {
-    T object {};
+    T object{};
     size_t objectSize = sizeof(object);
     if (g_baseFuzzData == nullptr || objectSize > g_baseFuzzSize - g_baseFuzzPos) {
         return object;
@@ -59,11 +63,51 @@ std::string GetStringFromData(int strlen)
     return str;
 }
 
-class INetStatsCallbackTest : public INetStatsCallback {
+class INetStatsCallbackTest : public IRemoteStub<INetStatsCallback> {
 public:
-    INetStatsCallbackTest() : INetStatsCallback() {}
-    virtual ~INetStatsCallbackTest() {}
+    int32_t NetIfaceStatsChanged(const std::string &iface)
+    {
+        return 0;
+    }
+
+    int32_t NetUidStatsChanged(const std::string &iface, uint32_t uid)
+    {
+        return 0;
+    }
 };
+
+static bool g_isInited = false;
+
+void Init()
+{
+    if (!g_isInited) {
+        DelayedSingleton<NetStatsService>::GetInstance()->Init();
+        g_isInited = false;
+    } else {
+        g_isInited = true;
+    }
+}
+
+int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
+{
+    if (!g_isInited) {
+        Init();
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+
+    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->OnRemoteRequest(code, data, reply, option);
+    return ret;
+}
+
+bool WriteInterfaceToken(MessageParcel &data)
+{
+    if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
+        return false;
+    }
+    return true;
+}
 
 void RegisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
 {
@@ -71,8 +115,15 @@ void RegisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    sptr<INetStatsCallbackTest> callback = sptr<INetStatsCallbackTest>();
-    DelayedSingleton<NetStatsClient>::GetInstance()->RegisterNetStatsCallback(callback);
+    sptr<INetStatsCallbackTest> callback = new (std::nothrow) INetStatsCallbackTest();
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+
+    OnRemoteRequest(INetStatsService::CMD_NSM_REGISTER_NET_STATS_CALLBACK, dataParcel);
 }
 
 void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
@@ -81,8 +132,15 @@ void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    sptr<INetStatsCallbackTest> callback = sptr<INetStatsCallbackTest>();
-    DelayedSingleton<NetStatsClient>::GetInstance()->UnregisterNetStatsCallback(callback);
+    sptr<INetStatsCallbackTest> callback = new (std::nothrow) INetStatsCallbackTest();
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+
+    OnRemoteRequest(INetStatsService::CMD_NSM_UNREGISTER_NET_STATS_CALLBACK, dataParcel);
 }
 
 void GetIfaceRxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -93,8 +151,15 @@ void GetIfaceRxBytesFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
+
     std::string interfaceName = GetStringFromData(STR_LEN);
-    DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceRxBytes(interfaceName);
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    dataParcel.WriteString(interfaceName);
+
+    OnRemoteRequest(INetStatsService::CMD_NSM_UNREGISTER_NET_STATS_CALLBACK, dataParcel);
 }
 
 void GetIfaceTxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -105,12 +170,15 @@ void GetIfaceTxBytesFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
+
     std::string interfaceName = GetStringFromData(STR_LEN);
-    int64_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceTxBytes(interfaceName);
-    ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularRxBytes();
-    ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularTxBytes();
-    ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllRxBytes();
-    ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllTxBytes();
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    dataParcel.WriteString(interfaceName);
+
+    OnRemoteRequest(INetStatsService::CMD_GET_IFACE_TXBYTES, dataParcel);
 }
 
 void GetUidRxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -121,8 +189,15 @@ void GetUidRxBytesFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
-    int32_t uid = GetData<int32_t>();
-    DelayedSingleton<NetStatsClient>::GetInstance()->GetUidRxBytes(uid);
+
+    uint32_t uid = GetData<uint32_t>();
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    dataParcel.WriteUint32(uid);
+
+    OnRemoteRequest(INetStatsService::CMD_GET_UID_RXBYTES, dataParcel);
 }
 
 void GetUidTxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -133,11 +208,86 @@ void GetUidTxBytesFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
-    int32_t uid = GetData<int32_t>();
-    DelayedSingleton<NetStatsClient>::GetInstance()->GetUidTxBytes(uid);
+
+    uint32_t uid = GetData<uint32_t>();
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    dataParcel.WriteUint32(uid);
+
+    OnRemoteRequest(INetStatsService::CMD_GET_UID_TXBYTES, dataParcel);
 }
+
+void GetCellularRxBytesFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    OnRemoteRequest(INetStatsService::CMD_GET_CELLULAR_RXBYTES, dataParcel);
 }
+
+void GetCellularTxBytesFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    OnRemoteRequest(INetStatsService::CMD_GET_CELLULAR_TXBYTES, dataParcel);
 }
+
+void GetAllRxBytesFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    OnRemoteRequest(INetStatsService::CMD_GET_ALL_RXBYTES, dataParcel);
+}
+
+void GetAllTxBytesFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size <= 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    OnRemoteRequest(INetStatsService::CMD_GET_ALL_TXBYTES, dataParcel);
+}
+} // namespace NetManagerStandard
+} // namespace OHOS
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
@@ -148,5 +298,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetIfaceTxBytesFuzzTest(data, size);
     OHOS::NetManagerStandard::GetUidRxBytesFuzzTest(data, size);
     OHOS::NetManagerStandard::GetUidTxBytesFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetCellularRxBytesFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetCellularTxBytesFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetAllRxBytesFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetAllTxBytesFuzzTest(data, size);
     return 0;
 }
