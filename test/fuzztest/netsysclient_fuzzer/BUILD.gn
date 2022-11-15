@@ -18,22 +18,23 @@ import("//build/test.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ##############################fuzztest##########################################
-ohos_fuzztest("NetPolicyClientFuzzTest") {
-  module_out_path = "netmanager_base/net_policy_client"
-  fuzz_config_file =
-      "$NETMANAGER_BASE_ROOT/test/fuzztest/netpolicyclient_fuzzer"
+ohos_fuzztest("NetSysClientFuzzTest") {
+  module_out_path = "netmanager_base/net_sys_client"
+  fuzz_config_file = "$NETMANAGER_BASE_ROOT/test/fuzztest/netsysclient_fuzzer"
 
   include_dirs = [
-    "$INNERKITS_ROOT/include",
-    "$INNERKITS_ROOT/netmanagernative/include",
-    "$INNERKITS_ROOT/netpolicyclient/include",
-    "$INNERKITS_ROOT/netpolicyclient/include/proxy",
-    "$INNERKITS_ROOT/netstatsclient/include",
-    "$NETMANAGER_BASE_ROOT/services/common/include",
-    "$NETPOLICYMANAGER_SOURCE_DIR/include",
-    "$NETPOLICYMANAGER_SOURCE_DIR/include/stub",
-    "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETCONNMANAGER_SOURCE_DIR/include",
+    "$NETCONNMANAGER_COMMON_DIR/include",
+    "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
+    "$INNERKITS_ROOT/netmanagernative/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys/wrapper",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
+    "$NETSYSNATIVE_SOURCE_DIR/include/manager",
+    "$NETSYSNATIVE_SOURCE_DIR/include",
+    "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$DHCP_MANAGER_ROOT/interfaces/inner_api/include",
+    "$DHCP_MANAGER_ROOT/interfaces/inner_api/interfaces",
   ]
 
   cflags = [
@@ -42,19 +43,17 @@ ohos_fuzztest("NetPolicyClientFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "net_policy_client_fuzzer.cpp" ]
+  sources = [ "net_sys_client_fuzzer.cpp" ]
 
   deps = [
-    "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if",
-    "$NETCONNMANAGER_COMMON_DIR:net_service_common",
-    "$NETMANAGER_BASE_ROOT/services/netpolicymanager:net_policy_manager",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-    "$THIRD_PARTY_ROOT/jsoncpp:jsoncpp",
+    "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]
 
   defines = [
     "HI_LOG_ENABLE",
-    "DH_LOG_TAG=\"NetPolicyClientFuzzTest\"",
+    "DH_LOG_TAG=\"NetSysClientFuzzTest\"",
     "LOG_DOMAIN=0xD004100",
   ]
 
@@ -64,9 +63,7 @@ ohos_fuzztest("NetPolicyClientFuzzTest") {
     "access_token:libtoken_setproc",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
-    "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
@@ -79,7 +76,7 @@ ohos_fuzztest("NetPolicyClientFuzzTest") {
 group("fuzztest") {
   testonly = true
 
-  deps = [ ":NetPolicyClientFuzzTest" ]
+  deps = [ ":NetSysClientFuzzTest" ]
 }
 
 ###############################################################################
