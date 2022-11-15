@@ -14,66 +14,66 @@
 domain: NETMANAGER
 
 NET_CONN_SUPPLER_FAULT:
-  __BASE: {type: FAULT, level: CRITICAL, tag: NetManager, desc: send supplier fault event}
-  NET_SUPPLIER_UPDATE_SUPPLIERID: {type: INT32, desc: supplier id}
-  NET_SUPPLIER_UPDATE_SUPPLIERINFO: {type: STRING, desc: supplier info}
-  NET_SUPPLIER_UPDATE_NETLINKID: {type: INT32, desc: netlink id}
-  NET_SUPPLIER_UPDATE_NETLINKINFO: {type: STRING, desc: netlink info}
+  __BASE: {type: FAULT, level: CRITICAL, desc: send supplier fault event}
+  UPDATE_SUPPLIERID: {type: INT32, desc: update supplier id}
+  UPDATE_SUPPLIERINFO: {type: STRING, desc: update supplier info}
+  UPDATE_NETLINKID: {type: INT32, desc: update netlink id}
+  UPDATE_NETLINKINFO: {type: STRING, desc: update netlink info}
   ERROR_TYPE: {type: INT32, desc: the error code}
   ERROR_MSG: {type: STRING, desc: the error message}
 
 NET_CONN_SUPPLER_STAT:
-  __BASE: {type: BEHAVIOR, level: CRITICAL, tag: NetManager, desc: send supplier behavior event}
-  NET_SUPPLIER_REGISTER_BEARERTYPE: {type: INT32, desc: bearer type code}
-  NET_SUPPLIER_REGISTER_IDENT: {type: STRING, desc: ident code}
-  NET_SUPPLIER_REGISTER_SUPPLIERID: {type: INT32, desc: supplier id}
-  NET_SUPPLIER_UPDATE_SUPPLIERID: {type: INT32, desc: supplier info}
-  NET_SUPPLIER_UPDATE_SUPPLIERINFO: {type: STRING, desc: supplier info}
-  NET_SUPPLIER_UPDATE_NETLINKID: {type: INT32, desc: netlink id}
-  NET_SUPPLIER_UPDATE_NETLINKINFO: {type: STRING, desc: netlink info}
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: send supplier behavior event}
+  REGISTER_BEARERTYPE: {type: INT32, desc: register bearer type code}
+  REGISTER_IDENT: {type: STRING, desc: register ident code}
+  REGISTER_SUPPLIERID: {type: INT32, desc: register supplier id}
+  UPDATE_SUPPLIERID: {type: INT32, desc: update supplier info}
+  UPDATE_SUPPLIERINFO: {type: STRING, desc: update supplier info}
+  UPDATE_NETLINKID: {type: INT32, desc: update netlink id}
+  UPDATE_NETLINKINFO: {type: STRING, desc: update netlink info}
   ERROR_TYPE: {type: INT32, desc: the error code}
   ERROR_MSG: {type: STRING, desc: the error message}
 
 NET_CONN_REQUEST_FAULT:
-  __BASE: {type: FAULT, level: CRITICAL, tag: NetManager, desc: send request fault event}
-  NET_REQUEST_CAPABILITIE: {type: STRING, desc: cap abilities info}
+  __BASE: {type: FAULT, level: CRITICAL, desc: send request fault event}
+  CAPABILITIES: {type: STRING, desc: capabilities info}
+  SUPPLIERIDENT: {type: STRING, desc: request supplier ident}
   ERROR_TYPE: {type: INT32, desc: the error code}
   ERROR_MSG: {type: STRING, desc: the error message}
 
 NET_CONN_REQUEST_STAT:
-  __BASE: {type: BEHAVIOR, level: CRITICAL, tag: NetManager, desc: send request behavior event}
-  NET_REQUEST_CAPABILITIE: {type: STRING, desc: cap abilities info}
-  NET_REQUEST_CALLBACK_AVAILABLE: {type: STRING, desc: the callback available}
-  NET_REQUEST_SUPPLIERIDENT: {type: STRING, desc: supplier ident}
-  NET_REQUEST_NETCAPS: {type: STRING, desc: net caps}
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: send request behavior event}
+  CAPABILITIES: {type: STRING, desc: capabilities info}
+  SUPPLIERIDENT: {type: STRING, desc: request supplier ident}
+  CALLBACK_AVAILABLE: {type: STRING, desc: the callback available}
 
 NET_CONN_MONITOR_FAULT:
-  __BASE: {type: FAULT, level: CRITICAL, tag: NetManager, desc: send monitor fault event}
-  NET_MONITOR_SOCKETFD: {type: INT32, desc: monitor socket fd}
-  NET_MONITOR_NETID: {type: INT32, desc: monitor network id}
+  __BASE: {type: FAULT, level: CRITICAL, desc: send monitor fault event}
+  SOCKETFD: {type: INT32, desc: monitor socket fd}
+  NETID: {type: INT32, desc: monitor network id}
   ERROR_TYPE: {type: INT32, desc: the error code}
   ERROR_MSG: {type: STRING, desc: the error message}
 
 NET_CONN_MONITOR_STAT:
-  __BASE: {type: BEHAVIOR, level: CRITICAL, tag: NetManager, desc: send monitor behavior event}
-  NET_MONITOR_STATUS: {type: INT32, desc: monitor status}
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: send monitor behavior event}
+  STATUS: {type: INT32, desc: monitor status}
 
 NET_SHARING_SETUP_FAULT:
-  __BASE: {type: FAULT, level: CRITICAL, tag: NetManager, desc: send setup fault event}
-  SHARING_TYPE: {type: INT32, desc: if the sharing or not}
-  OPERATION_TYPE: {type: INT32, desc: the operator type}
+  __BASE: {type: FAULT, level: CRITICAL, desc: send setup fault event}
+  SHARING_TYPE: {type: INT32, desc: the type of sharing}
+  OPERATION_TYPE: {type: INT32, desc: the operation type}
   ERROR_TYPE: {type: INT32, desc: the error code}
   ERROR_MSG: {type: STRING, desc: the error message}
 
-NET_SHARING_CANCLE_FAULT:
-  __BASE: {type: FAULT, level: CRITICAL, tag: NetManager, desc: send cancle fault event}
-  SHARING_TYPE: {type: INT32, desc: if the sharing or not}
-  OPERATION_TYPE: {type: INT32, desc: the operator type}
+NET_SHARING_CANCEL_FAULT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: send cancel fault event}
+  SHARING_TYPE: {type: INT32, desc: the type of sharing}
+  OPERATION_TYPE: {type: INT32, desc: the operation type}
   ERROR_TYPE: {type: INT32, desc: the error code}
   ERROR_MSG: {type: STRING, desc: the error message}
 
 NET_SHARING_TIME_STAT:
-  __BASE: {type: BEHAVIOR, level: MINOR, tag: NetManager, desc: sharing state message}
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: sharing state message}
   SHARING_COUNT: {type: INT32, desc: the number of sharing}
-  SHARING_TYPE: {type: INT32, desc: type code of sharing}
+  SHARING_TYPE: {type: INT32, desc: the type of sharing}
  
