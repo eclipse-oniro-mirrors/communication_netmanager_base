@@ -64,15 +64,15 @@ constexpr const char NEW_LINE_STR = '\n';
 constexpr const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char *DEF_NETDETECT_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
 
-static void NetDetectThread(void *arg)
+static void NetDetectThread(NetMonitor *monitor)
 {
-    sptr<NetMonitor> monitor(static_cast<NetMonitor *>(arg));
-    if (monitor == nullptr) {
+    sptr<NetMonitor> netMonitor(monitor);
+    if (netMonitor == nullptr) {
         NETMGR_LOG_E("netMonitor is nullptr");
         return;
     }
-    while (monitor->IsDetecting()) {
-        monitor->Detection();
+    while (netMonitor->IsDetecting()) {
+        netMonitor->Detection();
     }
 }
 
