@@ -27,6 +27,7 @@
 #include <resolv.h>
 #include <securec.h>
 #include <sys/socket.h>
+#include <thread>
 #include <unistd.h>
 
 #include "event_report.h"
@@ -63,43 +64,45 @@ constexpr const char NEW_LINE_STR = '\n';
 constexpr const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char *DEF_NETDETECT_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
 
-NetMonitor::NetMonitor(uint32_t netId, NetDetectionStateHandler handle) : netId_(netId), netDetectionStatus_(handle) {}
+static void NetDetectThread(void *arg)
+{
+    sptr<NetMonitor> monitor(static_cast<NetMonitor *>(arg));
+    if (monitor == nullptr) {
+        NETMGR_LOG_E("netMonitor is nullptr");
+        return;
+    }
+    while (monitor->IsDetecting()) {
+        monitor->Detection();
+    }
+}
 
-void NetMonitor::Start(bool needReport)
+NetMonitor::NetMonitor(uint32_t netId, const std::weak_ptr<INetMonitorCallback> &callback)
+    : netId_(netId), netMonitorCallback_(callback)
+{
+}
+
+void NetMonitor::Start()
 {
     NETMGR_LOG_I("Start net[%{public}d] monitor in", netId_);
     if (isDetecting_) {
         NETMGR_LOG_W("Net[%{public}d] monitor is detecting, no need to start", netId_);
         return;
     }
-    needReport_ = needReport;
     isDetecting_ = true;
-    detectAsync_ = std::async(std::launch::async, [this]() {
-        result_ = UNKNOWN_STATE;
-        while (isDetecting_) {
-            Detection();
-        }
-    });
+    std::thread(std::bind(NetDetectThread, this)).detach();
 }
 
 void NetMonitor::Stop()
 {
     NETMGR_LOG_I("Stop net[%{public}d] monitor in", netId_);
-    if (!isDetecting_) {
-        NETMGR_LOG_W("Net[%{public}d] monitor thread is stoped, no need to stop", netId_);
-        return;
-    }
     isDetecting_ = false;
     detectionCond_.notify_all();
-    if (detectAsync_.valid()) {
-        detectAsync_.wait();
-    }
     NETMGR_LOG_I("Stop net[%{public}d] monitor out", netId_);
 }
 
-NetDetectionStatus NetMonitor::GetDetectionResult() const
+bool NetMonitor::IsDetecting()
 {
-    return result_;
+    return isDetecting_.load();
 }
 
 void NetMonitor::Detection()
@@ -127,11 +130,9 @@ void NetMonitor::Detection()
             }
             detectionSteps_++;
         }
-        if (result != result_ || needReport_) {
-            NETMGR_LOG_I("Net[%{public}d] monitor need report,result:%{public}d", netId_, result);
-            needReport_ = false;
-            result_ = result;
-            netDetectionStatus_(result_, portalUrlRedirect_);
+        auto monitorCallback = netMonitorCallback_.lock();
+        if (monitorCallback) {
+            monitorCallback->OnHandleNetMonitorResult(result, portalUrlRedirect_);
         }
         if (isDetecting_) {
             std::unique_lock<std::mutex> locker(detectionMtx_);
