@@ -109,6 +109,13 @@ bool NetConnService::Init()
         NETMGR_LOG_E("Make NetScore failed");
         return false;
     }
+
+    eventRunner_ = AppExecFwk::EventRunner::Create(true);
+    if (eventRunner_ == nullptr) {
+        NETMGR_LOG_E("Create event runner failed.");
+        return false;
+    }
+    netConnEventHandler_ = std::make_shared<NetConnEventHandler>(eventRunner_);
     return true;
 }
 
@@ -155,10 +162,9 @@ int32_t NetConnService::RegisterNetSupplier(NetBearType bearerType, const std::s
         return ERR_NO_NETWORK;
     }
     using namespace std::placeholders;
-    sptr<Network> network =
-        (std::make_unique<Network>(netId, supplierId, std::bind(&NetConnService::HandleDetectionResult, this, _1, _2),
-                                   bearerType))
-            .release();
+    std::shared_ptr<Network> network =
+        std::make_shared<Network>(netId, supplierId, std::bind(&NetConnService::HandleDetectionResult, this, _1, _2),
+                                  bearerType, netConnEventHandler_);
     if (network == nullptr) {
         NETMGR_LOG_E("network is nullptr");
         return ERR_NO_NETWORK;
@@ -516,7 +522,7 @@ int32_t NetConnService::NetDetection(int32_t netId)
         return ERR_PERMISSION_CHECK_FAIL;
     }
     std::lock_guard<std::mutex> locker(netManagerMutex_);
-    sptr<Network> detectionNetwork = nullptr;
+    std::shared_ptr<Network> detectionNetwork = nullptr;
     auto iterNetwork = networks_.find(netId);
     if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
         NETMGR_LOG_E("Could not find the corresponding network.");
@@ -541,7 +547,7 @@ int32_t NetConnService::RegUnRegNetDetectionCallback(int32_t netId, const sptr<I
     }
 
     std::lock_guard<std::mutex> locker(netManagerMutex_);
-    sptr<Network> detectionNetwork = nullptr;
+    std::shared_ptr<Network> detectionNetwork = nullptr;
     auto iterNetwork = networks_.find(netId);
     if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
         NETMGR_LOG_E("Could not find the corresponding network.");
@@ -1068,7 +1074,7 @@ int32_t NetConnService::GetIfaceNames(NetBearType bearerType, std::list<std::str
         if (supplier == nullptr) {
             continue;
         }
-        sptr<Network> network = supplier->GetNetwork();
+        std::shared_ptr<Network> network = supplier->GetNetwork();
         if (network == nullptr) {
             continue;
         }
@@ -1093,7 +1099,7 @@ int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::st
         return ERR_NO_SUPPLIER;
     }
     auto supplier = suppliers.front();
-    sptr<Network> network = supplier->GetNetwork();
+    std::shared_ptr<Network> network = supplier->GetNetwork();
     if (network == nullptr) {
         NETMGR_LOG_E("network is nullptr");
         return ERR_NO_NETWORK;
@@ -1148,7 +1154,7 @@ void NetConnService::GetDumpMessage(std::string &message)
     message.append("Net connect Info:\n");
     if (defaultNetSupplier_) {
         message.append("\tSupplierId: " + std::to_string(defaultNetSupplier_->GetSupplierId()) + "\n");
-        sptr<Network> network = defaultNetSupplier_->GetNetwork();
+        std::shared_ptr<Network> network = defaultNetSupplier_->GetNetwork();
         if (network) {
             message.append("\tNetId: " + std::to_string(network->GetNetId()) + "\n");
         } else {

@@ -24,6 +24,7 @@
 #include "net_conn_security.h"
 #include "net_all_capabilities.h"
 #include "iservice_registry.h"
+#include "i_net_monitor_callback.h"
 #include "system_ability_definition.h"
 #include "token_setproc.h"
 
@@ -96,7 +97,7 @@ sptr<Network> NetConnHiEventTest::GetNetwork()
     sptr<Network> network = (std::make_unique<Network>(netId, supplierId,
                                                        std::bind(&NetConnHiEventTest::HandleDetectionResult, this,
                                                                  std::placeholders::_1, std::placeholders::_2),
-                                                       BEARER_CELLULAR))
+                                                       BEARER_CELLULAR, nullptr))
                                 .release();
     return network;
 }
@@ -240,10 +241,10 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_007, TestSize.Level1)
  */
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_008, TestSize.Level1)
 {
-    int32_t netId = 100;
-    std::unique_ptr<NetMonitor> netMonitor =
-        std::make_unique<NetMonitor>(netId, std::bind(&NetConnHiEventTest::HandleNetMonitorResult, this,
-                                                       std::placeholders::_1, std::placeholders::_2));
+    int32_t netId = 1000;
+    std::weak_ptr<INetMonitorCallback> callback;
+    callback.reset();
+    sptr<NetMonitor> netMonitor = new (std::nothrow) NetMonitor(netId, callback);
     int32_t ret = netMonitor->SetSocketParameter(-1);
     EXPECT_NE(ret, ERR_NONE);
 }

@@ -45,10 +45,14 @@ constexpr const char *ERROR_MSG_SET_DEFAULT_NETWORK_FAILED = "Set default networ
 constexpr const char *ERROR_MSG_CLEAR_DEFAULT_NETWORK_FAILED = "Clear default network failed";
 } // namespace
 
-Network::Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &handler, NetBearType bearerType)
-    : netId_(netId), supplierId_(supplierId), netCallback_(handler), netSupplierType_(bearerType)
+Network::Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &handler, NetBearType bearerType,
+                 const std::shared_ptr<NetConnEventHandler> &eventHandler)
+    : netId_(netId),
+      supplierId_(supplierId),
+      netCallback_(handler),
+      netSupplierType_(bearerType),
+      eventHandler_(eventHandler)
 {
-    InitNetMonitor();
 }
 
 Network::~Network()
@@ -99,7 +103,9 @@ bool Network::ReleaseBasicNetwork()
     NETMGR_LOG_D("Enter ReleaseBasicNetwork");
     if (isPhyNetCreated_) {
         NETMGR_LOG_D("Destroy physical network");
-        StopNetDetection();
+        if (eventHandler_) {
+            eventHandler_->PostAsyncTask([this]() { this->StopNetDetection(); }, 0);
+        }
         for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
             int32_t prefixLen = inetAddr.prefixlen_;
             if (prefixLen == 0) {
@@ -294,8 +300,15 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
 void Network::StartNetDetection(bool needReport)
 {
     NETMGR_LOG_D("Enter Network::StartNetDetection");
-    if (netMonitor_ != nullptr) {
-        netMonitor_->Start(needReport);
+    if (eventHandler_) {
+        eventHandler_->PostAsyncTask(
+            [report = needReport, this]() {
+                if (report) {
+                    this->StopNetDetection();
+                }
+                this->InitNetMonitor();
+            },
+            0);
     }
 }
 
@@ -304,29 +317,29 @@ void Network::StopNetDetection()
     NETMGR_LOG_D("Enter Network::StopNetDetection");
     if (netMonitor_ != nullptr) {
         netMonitor_->Stop();
+        netMonitor_ = nullptr;
     }
 }
 
 void Network::InitNetMonitor()
 {
-    netMonitor_ = std::make_unique<NetMonitor>(
-        netId_, std::bind(&Network::HandleNetMonitorResult, this, std::placeholders::_1, std::placeholders::_2));
     if (netMonitor_ == nullptr) {
-        NETMGR_LOG_E("make_unique NetMonitor failed,netMonitor_ is null!");
-        return;
+        std::weak_ptr<INetMonitorCallback> monitorCallback = shared_from_this();
+        netMonitor_ = new (std::nothrow) NetMonitor(netId_, monitorCallback);
+        if (netMonitor_ == nullptr) {
+            NETMGR_LOG_E("new NetMonitor failed,netMonitor_ is null!");
+            return;
+        }
     }
-}
-
-uint64_t Network::GetNetWorkMonitorResult()
-{
-    return netMonitor_->GetDetectionResult();
+    netMonitor_->Start();
 }
 
 void Network::HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
 {
     NETMGR_LOG_D("HandleNetMonitorResult, netDetectionState[%{public}d]", netDetectionState);
     NotifyNetDetectionResult(NetDetectionResultConvert(static_cast<int32_t>(netDetectionState)), urlRedirect);
-    if (netCallback_) {
+    if (netCallback_ && (detectResult_ != netDetectionState)) {
+        detectResult_ = netDetectionState;
         netCallback_(supplierId_, netDetectionState == VERIFICATION_STATE);
     }
 }
@@ -432,6 +445,15 @@ void Network::SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const s
 void Network::ResetNetlinkInfo()
 {
     netLinkInfo_.Initialize();
+}
+
+void Network::OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
+{
+    if (eventHandler_) {
+        eventHandler_->PostAsyncTask(
+            [netDetectionState, &urlRedirect, this]() { this->HandleNetMonitorResult(netDetectionState, urlRedirect); },
+            0);
+    }
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
