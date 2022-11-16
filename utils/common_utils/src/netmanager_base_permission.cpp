@@ -44,8 +44,6 @@ bool NetManagerPermission::CheckPermission(const std::string &permissionName)
         result = Security::AccessToken::PERMISSION_GRANTED;
     } else if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
         result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
-    } else if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
-        result = Security::AccessToken::PERMISSION_GRANTED;
     } else {
         NETMGR_LOG_E("permission check failed, callerToken:%{public}u, tokenType:%{public}d", callerToken, tokenType);
     }
