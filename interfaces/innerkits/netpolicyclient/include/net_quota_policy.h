@@ -44,7 +44,7 @@ struct NetQuotaPolicy : public Parcelable {
     std::string ident;
     // @deprecated
     int64_t periodStartTime = -1;
-    /* The period and the start time for quota policy, defalt: "M1" */
+    /* The period and the start time for quota policy, default: "M1" */
     std::string periodDuration = (PERIOD_MONTH + std::to_string(PERIOD_START));
     // @deprecated
     std::string title;
