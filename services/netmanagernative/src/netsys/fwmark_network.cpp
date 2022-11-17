@@ -172,7 +172,6 @@ void StartListener()
 {
     unlink(FWMARK_SERVER_PATH.sun_path);
     int32_t serverSockfd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
-
     if (serverSockfd < 0) {
         NETNATIVE_LOGE("socketFd error %{public}d, errno: %{public}d, errormsg%{public}s", serverSockfd, errno,
                        strerror(errno));
