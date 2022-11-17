@@ -17,6 +17,7 @@
 
 #include "accesstoken_kit.h"
 #include "message_parcel.h"
+#include "network.h"
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
 #include "net_conn_types.h"
@@ -113,8 +114,18 @@ HWTEST_F(NetConnClientTest, GetDefaultNetTest002, TestSize.Level1)
 {
     AccessToken token;
     NetHandle handle;
+    int32_t netId = 0;
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
-    ASSERT_TRUE(ret == ERR_NONE);
+    netId = handle.GetNetId();
+    if (netId == 0) {
+        std::cout << "No network" << std::endl;
+        ASSERT_TRUE(ret == ERR_NONE);
+    } else if (netId >= 100 && netId <= MAX_NET_ID) {
+        std::cout << "Get default network id:" << netId << std::endl;
+        ASSERT_TRUE(ret == ERR_NONE);
+    } else {
+        ASSERT_FALSE(ret == ERR_NONE);
+    }
 }
 
 /**
