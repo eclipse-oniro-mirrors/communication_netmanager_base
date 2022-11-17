@@ -17,6 +17,7 @@
 #define NET_SUPPLIER_H
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -46,7 +47,7 @@ public:
     NetSupplier(NetBearType bearerType, const std::string &netSupplierIdent, const std::set<NetCap> &netCaps);
     ~NetSupplier() = default;
     bool operator==(const NetSupplier &netSupplier) const;
-    void SetNetwork(const sptr<Network> &network);
+    void SetNetwork(const std::shared_ptr<Network> &network);
     void UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo);
     int32_t UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo);
     uint32_t GetSupplierId() const;
@@ -61,7 +62,7 @@ public:
     int8_t GetStrength() const;
     uint16_t GetFrequency() const;
     int32_t GetSupplierUid() const;
-    sptr<Network> GetNetwork() const;
+    std::shared_ptr<Network> GetNetwork() const;
     int32_t GetNetId() const;
     sptr<NetHandle> GetNetHandle() const;
     void UpdateNetConnState(NetConnState netConnState);
@@ -101,7 +102,7 @@ private:
     std::set<uint32_t> requestList_;
     std::set<uint32_t> bestReqList_;
     sptr<INetSupplierCallback> netController_ = nullptr;
-    sptr<Network> network_ = nullptr;
+    std::shared_ptr<Network> network_ = nullptr;
     sptr<NetHandle> netHandle_ = nullptr;
     bool restrictBackground_ = true;
 };

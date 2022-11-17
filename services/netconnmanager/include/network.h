@@ -19,6 +19,8 @@
 #include "event_report.h"
 #include "inet_addr.h"
 #include "i_net_detection_callback.h"
+#include "i_net_monitor_callback.h"
+#include "net_conn_event_handler.h"
 #include "net_conn_types.h"
 #include "net_link_info.h"
 #include "net_monitor.h"
@@ -31,9 +33,10 @@ constexpr uint32_t INVALID_NET_ID = 0;
 constexpr int32_t MIN_NET_ID = 100;
 constexpr int32_t MAX_NET_ID = 0xFFFF - 0x400;
 using NetDetectionHandler = std::function<void(uint32_t supplierId, bool ifValid)>;
-class Network : public virtual RefBase {
+class Network : public virtual RefBase, public INetMonitorCallback, public std::enable_shared_from_this<Network> {
 public:
-    Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &handler, NetBearType bearerType);
+    Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &handler, NetBearType bearerType,
+            const std::shared_ptr<NetConnEventHandler> &eventHandler);
     ~Network();
     bool operator==(const Network &network) const;
     int32_t GetNetId() const;
@@ -48,12 +51,13 @@ public:
     void RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
     int32_t UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
     void StartNetDetection(bool needReport);
-    uint64_t GetNetWorkMonitorResult();
     void SetDefaultNetWork();
     void ClearDefaultNetWorkNetId();
     bool IsConnecting() const;
     bool IsConnected() const;
     void UpdateNetConnState(NetConnState netConnState);
+
+    void OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect) override;
 
 private:
     void StopNetDetection();
@@ -72,11 +76,13 @@ private:
     uint32_t supplierId_ = 0;
     NetLinkInfo netLinkInfo_;
     NetConnState state_ = NET_CONN_STATE_UNKNOWN;
+    NetDetectionStatus detectResult_ = UNKNOWN_STATE;
     bool isPhyNetCreated_ = false;
-    std::unique_ptr<NetMonitor> netMonitor_ = nullptr;
-    NetDetectionHandler  netCallback_;
+    sptr<NetMonitor> netMonitor_ = nullptr;
+    NetDetectionHandler netCallback_;
     NetBearType netSupplierType_;
     std::vector<sptr<INetDetectionCallback>> netDetectionRetCallback_;
+    std::shared_ptr<NetConnEventHandler> eventHandler_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
