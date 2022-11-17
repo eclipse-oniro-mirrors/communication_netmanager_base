@@ -29,7 +29,7 @@ void GetUidsByPolicyContext::ParseParams(napi_value *params, size_t paramsCount)
     if (!CheckParamsType(params, paramsCount)) {
         return;
     }
-    policy_ = NapiUtils::GetInt32FromValue(GetEnv(), params[ARG_INDEX_0]);
+    policy_ = NapiUtils::GetUint32FromValue(GetEnv(), params[ARG_INDEX_0]);
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
         SetParseOK(SetCallback(params[ARG_INDEX_1]) == napi_ok);
         return;

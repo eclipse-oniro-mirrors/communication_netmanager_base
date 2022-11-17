@@ -84,19 +84,15 @@ constexpr const char *NET_LIMIT_ACTION = "LimitAction";
 constexpr const char *NET_BACKGROUND_POLICY = "NetBackgroundPolicy";
 
 enum MeteringMode {
-
     /* non metering */
     UN_METERED = 0,
-
     /* metering */
     METERED,
 };
 
 enum ApplicationType {
-
     /* common application */
     COMMON = 0,
-
     /* system application */
     SYSTEM,
 };
