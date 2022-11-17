@@ -27,6 +27,12 @@ bool NetStatsInfo::Marshalling(Parcel &parcel) const
     if (!parcel.WriteInt64(txBytes_)) {
         return false;
     }
+    if (!parcel.WriteInt64(rxPackets_)) {
+        return false;
+    }
+    if (!parcel.WriteInt64(txPackets_)) {
+        return false;
+    }
     return true;
 }
 
@@ -38,6 +44,12 @@ bool NetStatsInfo::Marshalling(Parcel &parcel, const NetStatsInfo &stats)
     if (!parcel.WriteInt64(stats.txBytes_)) {
         return false;
     }
+    if (!parcel.WriteInt64(stats.rxPackets_)) {
+        return false;
+    }
+    if (!parcel.WriteInt64(stats.txPackets_)) {
+        return false;
+    }
     return true;
 }
 
@@ -47,6 +59,12 @@ bool NetStatsInfo::Unmarshalling(Parcel &parcel, NetStatsInfo &stats)
         return false;
     }
     if (!parcel.ReadInt64(stats.txBytes_)) {
+        return false;
+    }
+    if (!parcel.ReadInt64(stats.rxPackets_)) {
+        return false;
+    }
+    if (!parcel.ReadInt64(stats.txPackets_)) {
         return false;
     }
     return true;
