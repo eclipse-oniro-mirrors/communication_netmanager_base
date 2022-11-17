@@ -34,7 +34,7 @@ public:
     void ParseParams(napi_value *params, size_t paramsCount);
 
 public:
-    int32_t policy_ = 0;
+    uint32_t policy_ = 0;
     int32_t uid_ = 0;
     bool backgroundPolicy_ = false;
 
