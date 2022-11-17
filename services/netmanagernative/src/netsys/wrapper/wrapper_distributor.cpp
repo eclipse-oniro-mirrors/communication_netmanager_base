@@ -148,9 +148,11 @@ void WrapperDistributor::HandleSubSysQlog(const std::shared_ptr<NetsysEventMessa
 {
     const std::string &alertName = message->GetMessage(NetsysEventMessage::Type::ALERT_NAME);
     const std::string &iface = message->GetMessage(NetsysEventMessage::Type::INTERFACE);
-    if ((!alertName.empty()) && (!iface.empty())) {
-        NotifyQuotaLimitReache(alertName, iface);
+    if (iface.empty()) {
+        NETNATIVE_LOGW("No interface name in event message");
+        return;
     }
+    NotifyQuotaLimitReache(alertName, iface);
 }
 
 void WrapperDistributor::NotifyInterfaceAdd(const std::string &ifName)
