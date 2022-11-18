@@ -14,6 +14,7 @@
 # args of this module
 SUBSYSTEM_DIR = "//foundation/communication"
 NETMANAGER_BASE_ROOT = "$SUBSYSTEM_DIR/netmanager_base"
+NETMANAGER_EXT_ROOT = "$SUBSYSTEM_DIR/netmanager_ext"
 
 # args of frameworks
 NETCONNMANAGER_INNERKITS_SOURCE_DIR =
@@ -39,6 +40,7 @@ NETSTATSMANAGER_BPFLIB_DIR = "$NETMANAGER_BASE_ROOT/services/netsys_bpf_stats"
 NETSYSNATIVE_SOURCE_DIR = "$NETMANAGER_BASE_ROOT/services/netmanagernative"
 NETSYSBPFMAP_SOURCE_DIR = "$NETSYSNATIVE_SOURCE_DIR/netsys_bpf_map"
 NETSYSCONTROLLER_ROOT_DIR = "$NETMANAGER_BASE_ROOT/services/netsyscontroller"
+ETHERNETMANAGER_SOURCE_DIR = "$NETMANAGER_EXT_ROOT/services/ethernetmanager"
 
 # args of other module
 THIRD_PARTY_ROOT = "//third_party"
