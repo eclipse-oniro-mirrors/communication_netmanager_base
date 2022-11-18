@@ -55,6 +55,20 @@ HapPolicyParams testPolicyPrams = {.apl = APL_SYSTEM_BASIC,
                                    .permStateList = {testState}};
 } // namespace
 
+class NetSupplierCallbackBaseTest : public NetSupplierCallbackBase {
+public:
+    virtual ~NetSupplierCallbackBaseTest() = default;
+
+    int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
+    {
+        return ERR_NONE;
+    };
+
+    int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
+    {
+        return ERR_NONE;
+    };
+};
 class AccessToken {
 public:
     AccessToken()
@@ -291,6 +305,40 @@ HWTEST_F(NetConnClientTest, GetHttpProxyTest001, TestSize.Level1)
     ret = DelayedSingleton<NetConnClient>::GetInstance()->GetHttpProxy(getHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
     ASSERT_TRUE(getHttpProxy == "testProxy");
+}
+
+/**
+ * @tc.name: RegisterNetSupplierCallbackTest001
+ * @tc.desc: Test NetConnClient::RegisterNetSupplierCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest001, TestSize.Level1)
+{
+    uint32_t supplierId = 100;
+    sptr<NetSupplierCallbackBase> callback = new (std::nothrow) NetSupplierCallbackBaseTest();
+    ASSERT_NE(callback, nullptr);
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplierCallback(supplierId, callback);
+    EXPECT_EQ(ret, NET_CONN_ERR_INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: RegisterNetSupplierCallbackTest002
+ * @tc.desc: Test NetConnClient::RegisterNetSupplierCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest002, TestSize.Level1)
+{
+    NetBearType bearerType = BEARER_CELLULAR;
+    std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET};
+    std::string ident = "ident";
+    uint32_t supplierId = 0;
+    int32_t result =
+        DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
+    ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
+    sptr<NetSupplierCallbackBase> callback = new (std::nothrow) NetSupplierCallbackBaseTest();
+    ASSERT_NE(callback, nullptr);
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplierCallback(supplierId, callback);
+    EXPECT_EQ(ret, ERR_NONE);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
