@@ -14,11 +14,12 @@
  */
 
 #include "netconnection.h"
+#include "net_conn_client.h"
 
 #include <mutex>
 
 namespace OHOS::NetManagerStandard {
-std::map<NetConnCallbackObserver *, NetConnection *> NET_CONNECTIONS;
+std::map<sptr<NetConnCallbackObserver>, NetConnection *> NET_CONNECTIONS;
 std::mutex NET_CONNECTIONS_MUTEX;
 
 NetConnection::NetConnection(EventManager *eventManager)
@@ -33,15 +34,18 @@ NetConnection::NetConnection(EventManager *eventManager)
 NetConnection *NetConnection::MakeNetConnection(EventManager *eventManager)
 {
     std::lock_guard<std::mutex> lock(NET_CONNECTIONS_MUTEX);
+    NETMANAGER_BASE_LOGE("MakeNetConnection eventManager addr=%{public}p", eventManager);
     auto netConnection = new NetConnection(eventManager);
-    NET_CONNECTIONS[netConnection->observer_.GetRefPtr()] = netConnection;
+    NET_CONNECTIONS[netConnection->observer_] = netConnection;
     return netConnection;
 }
 
 void NetConnection::DeleteNetConnection(NetConnection *netConnection)
 {
     std::lock_guard<std::mutex> lock(NET_CONNECTIONS_MUTEX);
-    NET_CONNECTIONS.erase(netConnection->observer_.GetRefPtr());
+    NETMANAGER_BASE_LOGE("DeleteNetConnection netConnection addr=%{public}p", netConnection);
+    DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(netConnection->observer_);
+    NET_CONNECTIONS.erase(netConnection->observer_);
     delete netConnection;
 }
 

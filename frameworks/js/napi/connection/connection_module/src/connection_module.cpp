@@ -15,6 +15,8 @@
 
 #include "connection_module.h"
 
+#include <unistd.h>
+
 #include "bindsocket_context.h"
 #include "connection_async_work.h"
 #include "constant.h"
@@ -207,10 +209,11 @@ napi_value ConnectionModule::CreateNetConnection(napi_env env, napi_callback_inf
     return ModuleTemplate::NewInstance(env, info, INTERFACE_NET_CONNECTION, ParseNetConnectionParams,
                                        [](napi_env, void *data, void *) {
                                            NETMANAGER_BASE_LOGI("finalize netConnection");
+                                           sleep(1);
                                            auto manager = static_cast<EventManager *>(data);
                                            auto netConnection = static_cast<NetConnection *>(manager->GetData());
-                                           delete manager;
                                            NetConnection::DeleteNetConnection(netConnection);
+                                           delete manager;
                                        });
 }
 

@@ -18,9 +18,11 @@
 
 #include <map>
 
+#include "netmanager_base_log.h"
 #include "net_conn_callback_observer.h"
 #include "net_specifier.h"
 #include "netmanager_base_event_manager.h"
+#include "refbase.h"
 
 namespace OHOS::NetManagerStandard {
 class NetConnection final {
@@ -51,7 +53,7 @@ private:
     ~NetConnection() = default;
 };
 
-extern std::map<NetConnCallbackObserver *, NetConnection *> NET_CONNECTIONS;
+extern std::map<sptr<NetConnCallbackObserver>, NetConnection *> NET_CONNECTIONS;
 } // namespace OHOS::NetManagerStandard
 
 #endif /* NETMANAGER_BASE_NETCONNECTION_H */
