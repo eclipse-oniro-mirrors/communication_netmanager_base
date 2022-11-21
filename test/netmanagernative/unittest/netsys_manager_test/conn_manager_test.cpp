@@ -15,18 +15,20 @@
 
 #include <gtest/gtest.h>
 
-#include "conn_manager.h"
-#include "conn_manager_test.h"
 #include "iservice_registry.h"
+#include "system_ability_definition.h"
+
+#include "conn_manager.h"
+#include "net_conn_manager_test_util.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_proxy.h"
 #include "network_permission.h"
-#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace NetsysNative {
 using namespace testing::ext;
-using namespace ConnGetProxy;
+using namespace NetManagerStandard;
+using namespace NetConnManagerTestUtil;
 constexpr int32_t NETID = 101;
 const std::string INTERFACENAME = "wlan0";
 class ConnManagerTest : public testing::Test {
@@ -53,7 +55,7 @@ void ConnManagerTest::TearDown() {}
 HWTEST_F(ConnManagerTest, CreatePhysicalNetworkTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
+    ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->NetworkCreatePhysical(NETID, PERMISSION_NONE);
     EXPECT_TRUE(ret == 0);
 }
@@ -66,7 +68,7 @@ HWTEST_F(ConnManagerTest, CreatePhysicalNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
+    ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->NetworkAddInterface(NETID, INTERFACENAME);
     EXPECT_TRUE(ret == 0);
     ret = netsysNativeService->InterfaceAddAddress(INTERFACENAME, "192.168.113.209", 24);
@@ -81,11 +83,11 @@ HWTEST_F(ConnManagerTest, AddInterfaceToNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, AddRouteTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
+    ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->NetworkAddRoute(NETID, INTERFACENAME, "0.0.0.0/0", "192.168.113.222");
-    EXPECT_TRUE(ret == 0);
+    EXPECT_LE(ret, 0);
     ret = netsysNativeService->NetworkAddRoute(NETID, INTERFACENAME, "192.168.113.0/24", "0.0.0.0");
-    EXPECT_TRUE(ret == 0);
+    EXPECT_LE(ret, 0);
 }
 
 /**
@@ -96,7 +98,7 @@ HWTEST_F(ConnManagerTest, AddRouteTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, SetDefaultNetworkTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
+    ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->NetworkSetDefault(NETID);
     EXPECT_TRUE(ret == 0);
 }
@@ -109,7 +111,7 @@ HWTEST_F(ConnManagerTest, SetDefaultNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, GetDefaultNetworkTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
+    ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->NetworkGetDefault();
     EXPECT_TRUE(ret == NETID);
 }
@@ -122,11 +124,11 @@ HWTEST_F(ConnManagerTest, GetDefaultNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, RemoveInterfaceFromNetworkTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
+    ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->InterfaceDelAddress(INTERFACENAME, "192.168.113.209", 24);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, 0);
     ret = netsysNativeService->NetworkRemoveInterface(NETID, INTERFACENAME);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_LE(ret, 0);
 }
 
 /**
@@ -137,9 +139,9 @@ HWTEST_F(ConnManagerTest, RemoveInterfaceFromNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, DestroyNetworkTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
+    ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->NetworkDestroy(NETID);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -150,7 +152,7 @@ HWTEST_F(ConnManagerTest, DestroyNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, ClearDefaultNetwork001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
+    ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->NetworkClearDefault();
     EXPECT_TRUE(ret == 0);
 }

@@ -65,6 +65,7 @@ IptablesWrapper::IptablesWrapper()
 IptablesWrapper::~IptablesWrapper()
 {
     isRunningFlag_ = false;
+    iptablesWrapperThread_.detach();
 }
 
 void IptablesWrapper::ThreadStart(IptablesWrapper *wrapper)
