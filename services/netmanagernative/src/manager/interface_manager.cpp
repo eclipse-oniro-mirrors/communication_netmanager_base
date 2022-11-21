@@ -52,41 +52,12 @@ constexpr uint32_t ARRAY_OFFSET_4_INDEX = 4;
 constexpr uint32_t ARRAY_OFFSET_5_INDEX = 5;
 constexpr uint32_t MOVE_BIT_LEFT31 = 31;
 constexpr uint32_t BIT_MAX = 32;
-constexpr uint32_t INTERFACE_NAME_MIN_SIZE = 16;
 constexpr uint32_t IOCTL_RETRY_TIME = 32;
 } // namespace
 
-bool IfaceNameValidCheck(const std::string &name)
-{
-    int index = 0;
-
-    if (name.empty()) {
-        return false;
-    }
-
-    int len = static_cast<int>(name.size());
-    if (len > INTERFACE_NAME_MIN_SIZE) {
-        return false;
-    }
-
-    while (index < len) {
-        if ((index == 0) && !isalnum(name[index])) {
-            return false;
-        }
-
-        if (!isalnum(name[index]) && (name[index] != '-') && (name[index] != '_') && (name[index] != '.') &&
-            (name[index] != ':')) {
-            return false;
-        }
-        index++;
-    }
-
-    return true;
-}
-
 int InterfaceManager::GetMtu(const char *interfaceName)
 {
-    if (!IfaceNameValidCheck(interfaceName)) {
+    if (!CheckIfaceName(interfaceName)) {
         NETNATIVE_LOGE("InterfaceManager::GetMtu isIfaceName fail %{public}d", errno);
         return -1;
     }
@@ -113,7 +84,7 @@ int InterfaceManager::GetMtu(const char *interfaceName)
 
 int InterfaceManager::SetMtu(const char *interfaceName, const char *mtuValue)
 {
-    if (!IfaceNameValidCheck(interfaceName)) {
+    if (!CheckIfaceName(interfaceName)) {
         NETNATIVE_LOGE("InterfaceManager::SetMtu isIfaceName fail %{public}d", errno);
         return -1;
     }

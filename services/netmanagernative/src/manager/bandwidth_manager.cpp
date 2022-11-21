@@ -19,6 +19,7 @@
 
 #include "iptables_wrapper.h"
 #include "net_manager_constants.h"
+#include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 
 namespace OHOS {
@@ -333,6 +334,10 @@ int32_t BandwidthManager::EnableDataSaver(bool enable)
 
 int32_t BandwidthManager::SetIfaceQuota(const std::string &ifName, int64_t bytes)
 {
+    if (!CommonUtils::CheckIfaceName(ifName)) {
+        NETNATIVE_LOGE("iface name valid check fail: %{public}s", ifName.c_str());
+        return NETMANAGER_ERROR;
+    }
     NETNATIVE_LOG_D("BandwidthManager SetIfaceQuota: ifName=%{public}s, bytes=%{public}" PRId64, ifName.c_str(), bytes);
     bool hasError = false;
     std::unique_lock<std::mutex> lock(bandwidthMutex_);
@@ -395,6 +400,10 @@ int32_t BandwidthManager::SetIfaceQuota(const std::string &ifName, int64_t bytes
 
 int32_t BandwidthManager::RemoveIfaceQuota(const std::string &ifName)
 {
+    if (!CommonUtils::CheckIfaceName(ifName)) {
+        NETNATIVE_LOGE("iface name valid check fail: %{public}s", ifName.c_str());
+        return NETMANAGER_ERROR;
+    }
     NETNATIVE_LOG_D("BandwidthManager RemoveIfaceQuota: ifName=%{public}s", ifName.c_str());
     bool hasError = false;
     std::unique_lock<std::mutex> lock(bandwidthMutex_);
