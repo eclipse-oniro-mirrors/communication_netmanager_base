@@ -34,72 +34,47 @@ const std::string GetResult(const std::string &cmd, int size)
     pclose(fp);
     return result;
 }
-
-class ManagerNative {
-public:
-    static ManagerNative *GetInstance()
-    {
-        if (instance_ == nullptr) {
-            instance_ = new ManagerNative();
-        }
-        return instance_;
-    }
-
-    static void DeleteInstance()
-    {
-        delete instance_;
-        if (instance_ != nullptr) {
-            instance_ = nullptr;
-        }
-    }
-
-    std::shared_ptr<SharingManager> GetSharingManager()
-    {
-        return sharingManager;
-    }
-
-private:
-    static inline ManagerNative *instance_ = nullptr;
-
-    ManagerNative()
-    {
-        sharingManager = std::make_shared<SharingManager>();
-    }
-
-    ~ManagerNative() = default;
-
-    std::shared_ptr<SharingManager> sharingManager = nullptr;
-};
 } // namespace
 
-class UnitTestSharingManager : public testing::Test {
+class SharingManagerTest : public testing::Test {
 public:
-    std::shared_ptr<SharingManager> sharingManager = ManagerNative::GetInstance()->GetSharingManager();
-    static void TearDownTestCase()
-    {
-        ManagerNative::DeleteInstance();
-    }
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
+    static inline std::shared_ptr<SharingManager> sharingManager = nullptr;
 };
 
-HWTEST_F(UnitTestSharingManager, IpEnableForwarding, TestSize.Level1)
+void SharingManagerTest::SetUpTestCase()
+{
+    sharingManager = std::make_shared<SharingManager>();
+}
+
+void SharingManagerTest::TearDownTestCase() {}
+
+void SharingManagerTest::SetUp() {}
+
+void SharingManagerTest::TearDown() {}
+
+HWTEST_F(SharingManagerTest, IpEnableForwardingTest, TestSize.Level1)
 {
     sharingManager->IpEnableForwarding("aTestName");
 
     const std::string cmd = "/bin/cat /proc/sys/net/ipv4/ip_forward";
-    const char *result = GetResult(cmd, 2);
+    const std::string result = GetResult(cmd, 2);
     ASSERT_EQ(result, "1");
 }
 
-HWTEST_F(UnitTestSharingManager, IpDisableForwarding, TestSize.Level1)
+HWTEST_F(SharingManagerTest, IpDisableForwarding, TestSize.Level1)
 {
     sharingManager->IpDisableForwarding("aTestName");
 
     const std::string cmd = "/bin/cat /proc/sys/net/ipv4/ip_forward";
-    const char *result = GetResult(cmd, 2);
+    const std::string result = GetResult(cmd, 2);
     ASSERT_EQ(result, "0");
 }
 
-HWTEST_F(UnitTestSharingManager, EnableNat, TestSize.Level1)
+HWTEST_F(SharingManagerTest, EnableNat, TestSize.Level1)
 {
     sharingManager->EnableNat("down", "up");
 
@@ -108,7 +83,7 @@ HWTEST_F(UnitTestSharingManager, EnableNat, TestSize.Level1)
     ASSERT_STREQ("0", "0");
 }
 
-HWTEST_F(UnitTestSharingManager, DisableNat, TestSize.Level1)
+HWTEST_F(SharingManagerTest, DisableNat, TestSize.Level1)
 {
     sharingManager->DisableNat("down", "up");
 
@@ -117,14 +92,14 @@ HWTEST_F(UnitTestSharingManager, DisableNat, TestSize.Level1)
     ASSERT_STREQ("0", "0");
 }
 
-HWTEST_F(UnitTestSharingManager, IpFwdAddInterfaceForward, TestSize.Level1)
+HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward, TestSize.Level1)
 {
     sharingManager->IpfwdAddInterfaceForward("down", "up");
     system("/system/bin/iptables -t filter -L -nvx > IpFwdAddInterfaceForward_result");
     ASSERT_STREQ("0", "0");
 }
 
-HWTEST_F(UnitTestSharingManager, IpFwdRemoveInterfaceForward, TestSize.Level1)
+HWTEST_F(SharingManagerTest, IpFwdRemoveInterfaceForward, TestSize.Level1)
 {
     sharingManager->IpfwdRemoveInterfaceForward("down", "up");
     system("/system/bin/iptables -t filter -L -nvx > IpFwdRemoveInterfaceForward_result");
