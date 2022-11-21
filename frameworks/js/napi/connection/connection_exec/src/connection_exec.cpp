@@ -171,8 +171,12 @@ napi_value ConnectionExec::IsDefaultNetMeteredCallback(IsDefaultNetMeteredContex
 
 bool ConnectionExec::ExecGetNetCapabilities(GetNetCapabilitiesContext *context)
 {
-    return DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(context->netHandle_,
-                                                                              context->capabilities_) == 0;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(context->netHandle_,
+                                                                                  context->capabilities_);
+    if (ret != NET_CONN_SUCCESS) {
+        context->SetErrorCode(ret);
+    }
+    return ret == NET_CONN_SUCCESS;
 }
 
 napi_value ConnectionExec::GetNetCapabilitiesCallback(GetNetCapabilitiesContext *context)
