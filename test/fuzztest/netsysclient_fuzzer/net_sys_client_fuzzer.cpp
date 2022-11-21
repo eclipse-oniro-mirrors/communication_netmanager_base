@@ -145,7 +145,7 @@ static NetsysNative::NetsysNativeService g_netSysNativeClient;
 
 void NetworkCreatePhysicalFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -166,7 +166,7 @@ void NetworkCreatePhysicalFuzzTest(const uint8_t *data, size_t size)
 
 void NetworkDestroyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -184,7 +184,7 @@ void NetworkDestroyFuzzTest(const uint8_t *data, size_t size)
 
 void NetworkAddInterfaceFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -205,7 +205,7 @@ void NetworkAddInterfaceFuzzTest(const uint8_t *data, size_t size)
 
 void NetworkRemoveInterfaceFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -226,7 +226,7 @@ void NetworkRemoveInterfaceFuzzTest(const uint8_t *data, size_t size)
 
 void NetworkAddRouteFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -251,7 +251,7 @@ void NetworkAddRouteFuzzTest(const uint8_t *data, size_t size)
 
 void NetworkRemoveRouteFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -276,7 +276,7 @@ void NetworkRemoveRouteFuzzTest(const uint8_t *data, size_t size)
 
 void InterfaceGetConfigFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -296,7 +296,7 @@ void InterfaceGetConfigFuzzTest(const uint8_t *data, size_t size)
 
 void InterfaceGetMtuFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -315,7 +315,7 @@ void InterfaceGetMtuFuzzTest(const uint8_t *data, size_t size)
 
 void InterfaceSetMtuFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -336,7 +336,7 @@ void InterfaceSetMtuFuzzTest(const uint8_t *data, size_t size)
 
 void InterfaceAddAddressFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -359,7 +359,7 @@ void InterfaceAddAddressFuzzTest(const uint8_t *data, size_t size)
 
 void InterfaceDelAddressFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -382,7 +382,7 @@ void InterfaceDelAddressFuzzTest(const uint8_t *data, size_t size)
 
 void SetResolverConfigFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -390,7 +390,6 @@ void SetResolverConfigFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzPos = 0;
 
     std::string ifName = GetStringFromData(STR_LEN);
-    std::string ipAddr = GetStringFromData(STR_LEN);
     uint16_t netId = GetData<uint16_t>();
     uint16_t baseTimeoutMsec = GetData<uint16_t>();
     uint8_t retryCount = GetData<uint8_t>();
@@ -411,7 +410,6 @@ void SetResolverConfigFuzzTest(const uint8_t *data, size_t size)
 
     uint32_t vectorLength2 = GetData<uint32_t>() % VECTOR_MAX_SIZE;
     dataParcel.WriteInt32(static_cast<int32_t>(vectorLength2));
-    std::vector<std::string> domains;
     for (uint32_t i = 0; i <= vectorLength2; i++) {
         dataParcel.WriteString(GetStringFromData(STR_LEN));
     }
@@ -420,7 +418,7 @@ void SetResolverConfigFuzzTest(const uint8_t *data, size_t size)
 
 void GetResolverConfigFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -438,7 +436,7 @@ void GetResolverConfigFuzzTest(const uint8_t *data, size_t size)
 
 void CreateNetworkCacheFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -457,7 +455,7 @@ void CreateNetworkCacheFuzzTest(const uint8_t *data, size_t size)
 
 void DestroyNetworkCacheFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -475,7 +473,7 @@ void DestroyNetworkCacheFuzzTest(const uint8_t *data, size_t size)
 
 void InterfaceGetListFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -491,7 +489,7 @@ void InterfaceGetListFuzzTest(const uint8_t *data, size_t size)
 
 void ShareDnsSetFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -509,7 +507,7 @@ void ShareDnsSetFuzzTest(const uint8_t *data, size_t size)
 
 void StartDnsProxyListenFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -525,7 +523,7 @@ void StartDnsProxyListenFuzzTest(const uint8_t *data, size_t size)
 
 void StopDnsProxyListenFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -541,7 +539,7 @@ void StopDnsProxyListenFuzzTest(const uint8_t *data, size_t size)
 
 void StartDhcpClientFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -561,7 +559,7 @@ void StartDhcpClientFuzzTest(const uint8_t *data, size_t size)
 
 void StopDhcpClientFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -582,7 +580,7 @@ void StopDhcpClientFuzzTest(const uint8_t *data, size_t size)
 
 void StartDhcpServiceFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -602,7 +600,7 @@ void StartDhcpServiceFuzzTest(const uint8_t *data, size_t size)
 
 void StopDhcpServiceFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
