@@ -13,39 +13,35 @@
  * limitations under the License.
  */
 
-#ifndef NETMANAGER_CONN_MANAGER_TEST_H
-#define NETMANAGER_CONN_MANAGER_TEST_H
+#include "net_conn_manager_test_util.h"
 
 #include "iservice_registry.h"
-#include "netnative_log_wrapper.h"
-#include "netsys_native_service_proxy.h"
 #include "system_ability_definition.h"
+
+#include "net_mgr_log_wrapper.h"
+#include "netsys_native_service_proxy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-namespace ConnGetProxy {
-sptr<INetsysService> ConnManagerGetProxy()
+namespace NetConnManagerTestUtil {
+sptr<NetsysNative::INetsysService> ConnManagerGetProxy()
 {
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgr == nullptr) {
-        NETMGR_LOG_E("Get SystemAbilityManager failed");
         return nullptr;
     }
 
     auto remote = samgr->GetSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
     if (remote == nullptr) {
-        NETMGR_LOG_E("Get remote failed");
         return nullptr;
     }
 
     auto proxy = iface_cast<NetsysNative::INetsysService>(remote);
     if (proxy == nullptr) {
-        NETMGR_LOG_E("Get proxy failed");
         return nullptr;
     }
     return proxy;
 }
-} // namespace ConnGetProxy
+} // namespace NetConnManagerTestUtil
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // NETMANAGER_CONN_MANAGER_TEST_H

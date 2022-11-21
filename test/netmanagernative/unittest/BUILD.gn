@@ -14,51 +14,7 @@
 import("//build/test.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-ohos_unittest("netsys_native_manager_test") {
-  module_out_path = "netmanager_base/netsys_native_manager_test"
-  sources = [
-    "conn_manager_test.cpp",
-    "fwmark_network_test.cpp",
-    "network_route_test.cpp",
-    "resolver_config_test.cpp",
-    "sharing_manager_test.cpp",
-  ]
-
-  include_dirs = [
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR",
-    "$INNERKITS_ROOT/netmanagernative/include",
-    "$NETSYSNATIVE_SOURCE_DIR/include/manager",
-    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
-    "$FWMARK_CLIENT_DIR/include",
-  ]
-
-  deps = [
-    "$FWMARK_CLIENT_DIR:fwmark_client",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
-  ]
-
-  external_deps = [
-    "ability_base:want",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "c_utils:utils",
-    "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
-  ]
-
-  defines = [
-    "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
-    "LOG_DOMAIN = 0xD0015B0",
-    "SHARING_MANAGER_DEPS",
-  ]
-
-  if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-  }
-
-  part_name = "netmanager_base"
-  subsystem_name = "communication"
+group("unittest") {
+  testonly = true
+  deps = [ "netsys_manager_test:netsys_native_manager_test" ]
 }
