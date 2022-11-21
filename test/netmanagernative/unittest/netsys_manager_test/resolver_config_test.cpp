@@ -14,9 +14,11 @@
  */
 
 #include <gtest/gtest.h>
-#include "iservice_registry.h"
+
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_proxy.h"
+
+#include "iservice_registry.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {

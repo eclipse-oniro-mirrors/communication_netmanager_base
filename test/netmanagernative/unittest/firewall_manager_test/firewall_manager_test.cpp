@@ -15,9 +15,9 @@
 
 #include <gtest/gtest.h>
 
-#include "conn_manager_test.h"
 #include "iptables_type.h"
 #include "iservice_registry.h"
+#include "net_conn_manager_test_util.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_proxy.h"
 

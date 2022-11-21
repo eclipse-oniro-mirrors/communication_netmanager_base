@@ -14,9 +14,9 @@
 import("//build/test.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-ohos_unittest("netsys_event_test") {
+ohos_unittest("netsys_wrapper_test") {
   module_out_path = "netmanager_base/manager_test"
-  sources = [ "netlink_manager_test.cpp" ]
+  sources = [ "netsys_wrapper_test.cpp" ]
 
   include_dirs = [
     "$INNERKITS_ROOT/netmanagernative/include",
@@ -55,9 +55,4 @@ ohos_unittest("netsys_event_test") {
 
   part_name = "netmanager_base"
   subsystem_name = "communication"
-}
-
-group("unittest") {
-  testonly = true
-  deps = [ ":netsys_event_test" ]
 }
