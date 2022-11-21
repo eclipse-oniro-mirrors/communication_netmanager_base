@@ -23,9 +23,13 @@
 #include <regex>
 #include <string>
 #include <sys/socket.h>
+#include <sys/wait.h>
 #include <type_traits>
+#include <unistd.h>
 #include <vector>
 
+#include "net_manager_constants.h"
+#include "net_mgr_log_wrapper.h"
 #include "securec.h"
 
 namespace OHOS::NetManagerStandard::CommonUtils {
@@ -40,7 +44,13 @@ constexpr uint32_t BIT_NUM_BYTE = 8;
 constexpr int32_t BITS_24 = 24;
 constexpr int32_t BITS_16 = 16;
 constexpr int32_t BITS_8 = 8;
+constexpr uint32_t INTERFACE_NAME_MAX_SIZE = 16;
+constexpr int32_t CHAR_ARRAY_SIZE_MAX = 1024;
+constexpr int32_t PIPE_FD_NUM = 2;
+constexpr int32_t PIPE_OUT = 0;
+constexpr int32_t PIPE_IN = 1;
 const std::string IPADDR_DELIMITER = ".";
+constexpr const char *CMD_SEP = " ";
 const std::regex IP_PATTERN{
     "((2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)\\.){3}(2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)"};
 
@@ -139,8 +149,8 @@ std::string ConvertIpv4Address(uint32_t addressIpv4)
     }
 
     std::ostringstream stream;
-    stream << ((addressIpv4 >> BITS_24) & 0xFF) << IPADDR_DELIMITER << ((addressIpv4 >> BITS_16) & 0xFF) <<
-        IPADDR_DELIMITER << ((addressIpv4 >> BITS_8) & 0xFF) << IPADDR_DELIMITER << (addressIpv4 & 0xFF);
+    stream << ((addressIpv4 >> BITS_24) & 0xFF) << IPADDR_DELIMITER << ((addressIpv4 >> BITS_16) & 0xFF)
+           << IPADDR_DELIMITER << ((addressIpv4 >> BITS_8) & 0xFF) << IPADDR_DELIMITER << (addressIpv4 & 0xFF);
     return stream.str();
 }
 
@@ -309,5 +319,107 @@ bool StrToBool(const std::string &str)
 int64_t StrToLong(const std::string &str)
 {
     return std::strtol(str.c_str(), nullptr, 0);
+}
+
+bool CheckIfaceName(const std::string &name)
+{
+    uint32_t index = 0;
+    if (name.empty()) {
+        return false;
+    }
+    size_t len = name.size();
+    if (len > INTERFACE_NAME_MAX_SIZE) {
+        return false;
+    }
+    while (index < len) {
+        if ((index == 0) && !isalnum(name[index])) {
+            return false;
+        }
+        if (!isalnum(name[index]) && (name[index] != '-') && (name[index] != '_') && (name[index] != '.') &&
+            (name[index] != ':')) {
+            return false;
+        }
+        index++;
+    }
+    return true;
+}
+
+std::vector<const char *> FormatCmd(const std::vector<std::string> &cmd)
+{
+    std::vector<const char *> res;
+    res.reserve(cmd.size() + 1);
+
+    for (auto &line : cmd) {
+        res.emplace_back(line.c_str());
+    }
+    res.emplace_back(nullptr);
+    return res;
+}
+
+int32_t ForkExecChildProcess(const int32_t *pipeFd, int32_t count, const std::vector<const char *> &args)
+{
+    if (count != PIPE_FD_NUM) {
+        NETMGR_LOG_E("fork exec parent process failed");
+        _exit(-1);
+    }
+    if (close(pipeFd[PIPE_OUT]) != 0) {
+        NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
+        _exit(-1);
+    }
+    if (dup2(pipeFd[PIPE_IN], STDOUT_FILENO) == -1) {
+        NETMGR_LOG_E("dup2 failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
+        _exit(-1);
+    }
+    if (execv(args[0], const_cast<char *const *>(&args[0])) == -1) {
+        NETMGR_LOG_E("execv command failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
+    }
+    _exit(-1);
+}
+
+int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childPid, std::string *out)
+{
+    if (count != PIPE_FD_NUM) {
+        NETMGR_LOG_E("fork exec parent process failed");
+        return NETMANAGER_ERROR;
+    }
+    if (out != nullptr) {
+        char buf[CHAR_ARRAY_SIZE_MAX] = {0};
+        out->clear();
+        if (close(pipeFd[PIPE_IN]) != 0) {
+            NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
+        }
+        while (read(pipeFd[PIPE_OUT], buf, CHAR_ARRAY_SIZE_MAX - 1) > 0) {
+            out->append(buf);
+        }
+        return NETMANAGER_SUCCESS;
+    }
+    pid_t pidRet = waitpid(childPid, nullptr, 0);
+    if (pidRet != childPid) {
+        NETMGR_LOG_E("waitpid[%{public}d] failed, pidRet:%{public}d", childPid, pidRet);
+        return NETMANAGER_ERROR;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t ForkExec(const std::string &command, std::string *out)
+{
+    const std::vector<std::string> cmd = Split(command, CMD_SEP);
+    std::vector<const char *> args = FormatCmd(cmd);
+    int32_t pipeFd[PIPE_FD_NUM] = {0};
+    if (pipe(pipeFd) < 0) {
+        NETMGR_LOG_E("creat pipe failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
+        return NETMANAGER_ERROR;
+    }
+    pid_t pid = fork();
+    if (pid < 0) {
+        NETMGR_LOG_E("fork failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
+        return NETMANAGER_ERROR;
+    }
+    if (pid == 0) {
+        ForkExecChildProcess(pipeFd, PIPE_FD_NUM, args);
+        return NETMANAGER_SUCCESS;
+    } else {
+        return ForkExecParentProcess(pipeFd, PIPE_FD_NUM, pid, out);
+    }
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils
