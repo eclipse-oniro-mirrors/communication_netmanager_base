@@ -165,10 +165,6 @@ int32_t NetConnService::RegisterNetSupplier(NetBearType bearerType, const std::s
     std::shared_ptr<Network> network =
         std::make_shared<Network>(netId, supplierId, std::bind(&NetConnService::HandleDetectionResult, this, _1, _2),
                                   bearerType, netConnEventHandler_);
-    if (network == nullptr) {
-        NETMGR_LOG_E("network is nullptr");
-        return ERR_NO_NETWORK;
-    }
     NETMGR_LOG_D("netId is: [%{public}d], supplierId is: [%{public}d]", network->GetNetId(), supplier->GetSupplierId());
     supplier->SetNetwork(network);
     supplier->SetNetValid(true);

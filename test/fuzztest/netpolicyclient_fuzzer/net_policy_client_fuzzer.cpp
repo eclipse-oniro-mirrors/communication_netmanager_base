@@ -228,7 +228,7 @@ bool WriteInterfaceToken(MessageParcel &data)
 
 void SetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -251,7 +251,7 @@ void SetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 
 void GetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -271,7 +271,7 @@ void GetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 
 void GetUidsByPolicyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     AccessToken token(testInfoParms3, testPolicyPrams3);
@@ -288,7 +288,7 @@ void GetUidsByPolicyFuzzTest(const uint8_t *data, size_t size)
 
 void SetBackgroundPolicyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -308,7 +308,7 @@ void SetBackgroundPolicyFuzzTest(const uint8_t *data, size_t size)
 
 void GetBackgroundPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -327,7 +327,7 @@ void GetBackgroundPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 
 void SetCellularPoliciesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     AccessToken token(testInfoParms2, testPolicyPrams2);
@@ -363,7 +363,7 @@ void SetCellularPoliciesFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     AccessToken token(testInfoParms1, testPolicyPrams1);
@@ -381,7 +381,7 @@ void RegisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void UnregisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     AccessToken token(testInfoParms1, testPolicyPrams1);
@@ -399,7 +399,7 @@ void UnregisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void GetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     AccessToken token(testInfoParms3, testPolicyPrams3);
@@ -415,7 +415,7 @@ void GetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
 
 void SetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     AccessToken token(testInfoParms2, testPolicyPrams2);
@@ -450,7 +450,7 @@ void SetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
 
 void IsUidNetAllowedFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -484,7 +484,7 @@ void IsUidNetAllowedFuzzTest(const uint8_t *data, size_t size)
 
 void ResetPoliciesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -505,7 +505,7 @@ void ResetPoliciesFuzzTest(const uint8_t *data, size_t size)
 
 void UpdateRemindPolicyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -531,7 +531,7 @@ void UpdateRemindPolicyFuzzTest(const uint8_t *data, size_t size)
 
 void SetDeviceIdleAllowedListFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -555,7 +555,7 @@ void SetDeviceIdleAllowedListFuzzTest(const uint8_t *data, size_t size)
 
 void SetDeviceIdlePolicyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
