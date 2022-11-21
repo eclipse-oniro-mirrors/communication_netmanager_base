@@ -237,7 +237,7 @@ void SystemReadyFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -265,7 +265,7 @@ void RegisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
 
 void UnregisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -284,7 +284,7 @@ void UnregisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
 
 void HasDefaultNetFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -303,7 +303,7 @@ void HasDefaultNetFuzzTest(const uint8_t *data, size_t size)
 
 void GetAllNetsFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     AccessToken token;
@@ -318,7 +318,7 @@ void GetAllNetsFuzzTest(const uint8_t *data, size_t size)
 
 void BindSocketFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -339,7 +339,7 @@ void BindSocketFuzzTest(const uint8_t *data, size_t size)
 
 void SetAirplaneModeFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -359,7 +359,7 @@ void SetAirplaneModeFuzzTest(const uint8_t *data, size_t size)
 
 void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -381,7 +381,7 @@ void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
 
 void GetAddressByNameFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -404,7 +404,7 @@ void GetAddressByNameFuzzTest(const uint8_t *data, size_t size)
 
 void GetAddressesByNameFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -427,7 +427,7 @@ void GetAddressesByNameFuzzTest(const uint8_t *data, size_t size)
 
 void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -449,7 +449,7 @@ void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterNetSupplierCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -472,7 +472,7 @@ void RegisterNetSupplierCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -497,7 +497,7 @@ void RegisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void UnregisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
 
@@ -515,7 +515,7 @@ void UnregisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void GetDefaultNetFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -533,7 +533,7 @@ void GetDefaultNetFuzzTest(const uint8_t *data, size_t size)
 
 void GetConnectionPropertiesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -553,7 +553,7 @@ void GetConnectionPropertiesFuzzTest(const uint8_t *data, size_t size)
 
 void GetNetCapabilitiesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -573,7 +573,7 @@ void GetNetCapabilitiesFuzzTest(const uint8_t *data, size_t size)
 
 void NetDetectionFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -593,7 +593,7 @@ void NetDetectionFuzzTest(const uint8_t *data, size_t size)
 
 void IsDefaultNetMeteredFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -610,7 +610,7 @@ void IsDefaultNetMeteredFuzzTest(const uint8_t *data, size_t size)
 
 void SetHttpProxyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -629,7 +629,7 @@ void SetHttpProxyFuzzTest(const uint8_t *data, size_t size)
 
 void GetHttpProxyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -646,7 +646,7 @@ void GetHttpProxyFuzzTest(const uint8_t *data, size_t size)
 
 void GetNetIdByIdentifierFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;

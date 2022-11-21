@@ -111,7 +111,7 @@ bool WriteInterfaceToken(MessageParcel &data)
 
 void RegisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
 
@@ -128,7 +128,7 @@ void RegisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
 
@@ -145,7 +145,7 @@ void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void GetIfaceRxBytesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -164,7 +164,7 @@ void GetIfaceRxBytesFuzzTest(const uint8_t *data, size_t size)
 
 void GetIfaceTxBytesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -183,7 +183,7 @@ void GetIfaceTxBytesFuzzTest(const uint8_t *data, size_t size)
 
 void GetUidRxBytesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -202,7 +202,7 @@ void GetUidRxBytesFuzzTest(const uint8_t *data, size_t size)
 
 void GetUidTxBytesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -221,7 +221,7 @@ void GetUidTxBytesFuzzTest(const uint8_t *data, size_t size)
 
 void GetCellularRxBytesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -238,7 +238,7 @@ void GetCellularRxBytesFuzzTest(const uint8_t *data, size_t size)
 
 void GetCellularTxBytesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -255,7 +255,7 @@ void GetCellularTxBytesFuzzTest(const uint8_t *data, size_t size)
 
 void GetAllRxBytesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -272,7 +272,7 @@ void GetAllRxBytesFuzzTest(const uint8_t *data, size_t size)
 
 void GetAllTxBytesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;

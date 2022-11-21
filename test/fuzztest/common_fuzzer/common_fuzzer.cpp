@@ -69,7 +69,7 @@ static auto g_netManagerCenter = DelayedSingleton<NetManagerCenter>::GetInstance
 
 void GetIfaceNamesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -84,7 +84,7 @@ void GetIfaceNamesFuzzTest(const uint8_t *data, size_t size)
 
 void GetIfaceNameByTypeFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -99,7 +99,7 @@ void GetIfaceNameByTypeFuzzTest(const uint8_t *data, size_t size)
 
 void UnregisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -111,7 +111,7 @@ void UnregisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
 
 void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -124,7 +124,7 @@ void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
 
 void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -137,7 +137,7 @@ void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterConnServiceFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -149,7 +149,7 @@ void RegisterConnServiceFuzzTest(const uint8_t *data, size_t size)
 
 void GetIfaceStatsDetailFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -165,7 +165,7 @@ void GetIfaceStatsDetailFuzzTest(const uint8_t *data, size_t size)
 
 void ResetStatsFactoryFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -177,7 +177,7 @@ void ResetStatsFactoryFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterStatsServiceFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -190,7 +190,7 @@ void RegisterStatsServiceFuzzTest(const uint8_t *data, size_t size)
 
 void ResetPolicyFactoryFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -202,7 +202,7 @@ void ResetPolicyFactoryFuzzTest(const uint8_t *data, size_t size)
 
 void ResetPoliciesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -213,7 +213,7 @@ void ResetPoliciesFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterPolicyServiceFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -226,7 +226,7 @@ void RegisterPolicyServiceFuzzTest(const uint8_t *data, size_t size)
 
 void ResetEthernetFactoryFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -238,7 +238,7 @@ void ResetEthernetFactoryFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterEthernetServiceFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -250,7 +250,7 @@ void RegisterEthernetServiceFuzzTest(const uint8_t *data, size_t size)
 
 void GetAddressesByNameFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -264,7 +264,7 @@ void GetAddressesByNameFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterDnsServiceFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -276,7 +276,7 @@ void RegisterDnsServiceFuzzTest(const uint8_t *data, size_t size)
 
 void RestrictBackgroundChangedFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
     g_baseFuzzData = data;
@@ -288,7 +288,7 @@ void RestrictBackgroundChangedFuzzTest(const uint8_t *data, size_t size)
 
 void IsUidNetAccessFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
 
@@ -302,7 +302,7 @@ void IsUidNetAccessFuzzTest(const uint8_t *data, size_t size)
 
 void IsUidNetAllowedFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
+    if ((data == nullptr) || (size == 0)) {
         return;
     }
 
