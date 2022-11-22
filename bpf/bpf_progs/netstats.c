@@ -18,12 +18,6 @@
 
 #define SEC(NAME) __attribute__((section(NAME), used))
 
-static void *(*bpf_map_lookup_elem)(void *map, const void *key) = (void *)BPF_FUNC_map_lookup_elem;
-static long (*bpf_map_update_elem)(void *map, const void *key, const void *value,
-                                   __u64 flags) = (void *)BPF_FUNC_map_update_elem;
-static long (*bpf_trace_printk)(const char *fmt, __u32 fmt_size, ...) = (void *)BPF_FUNC_trace_printk;
-static __u32 (*bpf_get_socket_uid)(struct __sk_buff *skb) = (void *)BPF_FUNC_get_socket_uid;
-
 static const int APP_STATS_MAP_SIZE = 5000;
 static const int IFACE_STATS_MAP_SIZE = 1000;
 static const int IFACE_NAM_MAP_SIZE = 1000;
@@ -80,8 +74,7 @@ bpf_map_def SEC("maps") app_uid_stats_map = {
     .numa_node = 0,
 };
 
-SEC("cgroup_skb/uid/ingress")
-int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
+static SEC("cgroup_skb/uid/ingress") int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
 {
     uint32_t sock_uid = bpf_get_socket_uid(skb);
 
@@ -102,8 +95,7 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
     return 1;
 }
 
-SEC("cgroup_skb/uid/egress")
-int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
+static SEC("cgroup_skb/uid/egress") int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
 {
     uint32_t sock_uid = bpf_get_socket_uid(skb);
 
@@ -124,8 +116,7 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
     return 1;
 }
 
-SEC("socket/iface/ingress")
-void bpf_socket_iface_ingress(struct __sk_buff *skb)
+static SEC("socket/iface/ingress") void bpf_socket_iface_ingress(struct __sk_buff *skb)
 {
     uint32_t key = skb->ifindex;
 
@@ -145,8 +136,7 @@ void bpf_socket_iface_ingress(struct __sk_buff *skb)
     }
 }
 
-SEC("socket/iface/egress")
-void bpf_socket_iface_egress(struct __sk_buff *skb)
+static SEC("socket/iface/egress") void bpf_socket_iface_egress(struct __sk_buff *skb)
 {
     uint32_t key = skb->ifindex;
 
