@@ -658,8 +658,6 @@ int32_t NetConnService::DeactivateNetwork(uint32_t reqId)
         }
         iterSupplier->second->CancelRequest(reqId);
     }
-    deleteNetActivates_[reqId] = pNetActivate;
-    netActivates_.erase(iterActivate);
     return ERR_NONE;
 }
 
