@@ -38,6 +38,8 @@ int32_t StrToInt(const std::string &str);
 uint32_t StrToUint(const std::string &str);
 bool StrToBool(const std::string &str);
 int64_t StrToLong(const std::string &str);
+bool CheckIfaceName(const std::string &name);
+int32_t ForkExec(const std::string &command, std::string *out = nullptr);
 } // namespace OHOS::NetManagerStandard::CommonUtils
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H */
