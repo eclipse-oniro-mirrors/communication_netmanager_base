@@ -55,6 +55,9 @@ constexpr const char *CLEAR_TETHERCTRL_MANGLE_FORWARD = "-t mangle -F tetherctrl
 constexpr const char *DELETE_TETHERCTRL_NAT_POSTROUTING = "-t nat -D POSTROUTING -j tetherctrl_nat_POSTROUTING";
 constexpr const char *DELETE_TETHERCTRL_MANGLE_FORWARD = "-t mangle -D FORWARD -j tetherctrl_mangle_FORWARD";
 
+constexpr const char *IPATBLES_RESTORE_CMD_PATH = "/system/bin/iptables-restore";
+constexpr const char *IPATBLES_SAVE_CMD_PATH = "/system/bin/iptables-save";
+
 const std::string EnableNatCmd(const std::string &down)
 {
     return "-t nat -A tetherctrl_nat_POSTROUTING -o " + down + " -j MASQUERADE";
@@ -115,9 +118,9 @@ bool WriteToFile(const char *fileName, const char *value)
 void Rollback()
 {
     NETNATIVE_LOGE("iptables rollback");
-    std::string rollBak = "iptables-restore -T filter < ";
+    std::string rollBak = std::string(IPATBLES_RESTORE_CMD_PATH)  + " -T filter < ";
     rollBak.append(IPTABLES_TMP_BAK);
-    system(rollBak.c_str());
+    CommonUtils::ForkExec(rollBak);
 }
 } // namespace
 
@@ -157,6 +160,10 @@ int32_t SharingManager::EnableNat(const std::string &downstreamIface, const std:
                        upstreamIface.c_str());
         return -1;
     }
+    if (!CommonUtils::CheckIfaceName(upstreamIface)) {
+        NETNATIVE_LOGE("iface name valid check fail: %{public}s", upstreamIface.c_str());
+        return -1;
+    }
     int32_t result = 0;
     iptablesWrapper_->RunCommand(IPTYPE_IPV4, APPEND_NAT_POSTROUTING);
     iptablesWrapper_->RunCommand(IPTYPE_IPV4, APPEND_MANGLE_FORWARD);
@@ -183,6 +190,10 @@ int32_t SharingManager::DisableNat(const std::string &downstreamIface, const std
     if (downstreamIface == upstreamIface) {
         NETNATIVE_LOGE("Duplicate interface specified: %{public}s %s", downstreamIface.c_str(),
                        upstreamIface.c_str());
+        return -1;
+    }
+    if (!CommonUtils::CheckIfaceName(upstreamIface)) {
+        NETNATIVE_LOGE("iface name valid check fail: %{public}s", upstreamIface.c_str());
         return -1;
     }
     int32_t result = 0;
@@ -221,6 +232,10 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
         NETNATIVE_LOGE("Duplicate interface specified: %{public}s %{public}s", fromIface.c_str(), toIface.c_str());
         return -1;
     }
+    if (!(CommonUtils::CheckIfaceName(fromIface)) || !(CommonUtils::CheckIfaceName(toIface))) {
+        NETNATIVE_LOGE("iface name valid check fail: %{public}s %{public}s", fromIface.c_str(), toIface.c_str());
+        return -1;
+    }
     NETNATIVE_LOGI("IpfwdAddInterfaceForward fromIface: %{public}s, toIface: %{public}s", fromIface.c_str(),
                    toIface.c_str());
 
@@ -228,9 +243,9 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
         SetForwardRules(true, FORWARD_JUMP_TETHERCTRL_FORWARD);
     }
     int32_t result = 0;
-    std::string saveBak = "iptables-save -t filter > ";
+    std::string saveBak = std::string(IPATBLES_SAVE_CMD_PATH)  + " -t filter > ";
     saveBak.append(IPTABLES_TMP_BAK);
-    system(saveBak.c_str());
+    CommonUtils::ForkExec(saveBak);
 
     /*
      * Add a forward rule, when the status of packets is RELATED,
@@ -302,7 +317,10 @@ int32_t SharingManager::IpfwdRemoveInterfaceForward(const std::string &fromIface
         NETNATIVE_LOGE("Duplicate interface specified: %{public}s %{public}s", fromIface.c_str(), toIface.c_str());
         return -1;
     }
-
+    if (!(CommonUtils::CheckIfaceName(fromIface)) || !(CommonUtils::CheckIfaceName(toIface))) {
+        NETNATIVE_LOGE("iface name valid check fail: %{public}s %{public}s", fromIface.c_str(), toIface.c_str());
+        return -1;
+    }
     NETNATIVE_LOGI("IpfwdRemoveInterfaceForward fromIface: %{public}s, toIface: %{public}s", fromIface.c_str(),
                    toIface.c_str());
 

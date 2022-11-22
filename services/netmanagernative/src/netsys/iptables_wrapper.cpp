@@ -18,6 +18,7 @@
 #include <unistd.h>
 
 #include "net_manager_constants.h"
+#include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 
 namespace OHOS {
@@ -26,26 +27,20 @@ using namespace NetManagerStandard;
 namespace {
 constexpr int32_t IPTABLES_THREAD_SLEEP_DURATION_MS = 50;
 constexpr int32_t IPTABLES_WAIT_FOR_TIME_MS = 1000;
-constexpr int32_t CHAR_ARRAY_SIZE_MAX = 1024;
 constexpr const char *IPATBLES_CMD_PATH = "/system/bin/iptables";
 void ExecuteCommand(const std::string &command)
 {
-    int32_t status = system(command.c_str());
-    if (status < 0) {
-        NETNATIVE_LOGE("run system() faild, status=%{public}d, command=%{public}s", status, command.c_str());
+    if (CommonUtils::ForkExec(command) == NETMANAGER_ERROR) {
+        NETNATIVE_LOGE("run exec faild, command=%{public}s", command.c_str());
     }
 }
 
 std::string ExecuteCommandForRes(const std::string &command)
 {
-    FILE *fp = popen(command.c_str(), "r");
-    char res[CHAR_ARRAY_SIZE_MAX] = {0};
     std::string result;
-    while (fgets(res, CHAR_ARRAY_SIZE_MAX, fp) != NULL) {
-        result = result + res;
+    if (CommonUtils::ForkExec(command, &result) == NETMANAGER_ERROR) {
+        NETNATIVE_LOGE("run exec faild, command=%{public}s", command.c_str());
     }
-    pclose(fp);
-
     return result;
 }
 } // namespace
