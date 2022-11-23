@@ -80,8 +80,3 @@ ohos_unittest("net_policy_manager_test") {
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
-
-group("unittest") {
-  testonly = true
-  deps = [ ":net_policy_manager_test" ]
-}
