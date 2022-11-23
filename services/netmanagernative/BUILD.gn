@@ -70,6 +70,7 @@ ohos_shared_library("netsys_native_manager") {
     "$DHCP_MANAGER_ROOT/interfaces/inner_api/include",
     "$DHCP_MANAGER_ROOT/interfaces/inner_api/interfaces",
     "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
+    "$THIRD_PARTY_ROOT/selinux/libselinux/include/selinux",
   ]
 
   deps = [
@@ -79,6 +80,7 @@ ohos_shared_library("netsys_native_manager") {
     "$THIRD_PARTY_ROOT/iptables:iptables",
     "$THIRD_PARTY_ROOT/iptables:iptables-restore",
     "$THIRD_PARTY_ROOT/iptables:iptables-save",
+    "$THIRD_PARTY_ROOT/selinux:libselinux",
   ]
 
   external_deps = [
