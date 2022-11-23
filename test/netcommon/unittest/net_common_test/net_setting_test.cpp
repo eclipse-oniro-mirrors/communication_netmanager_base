@@ -22,7 +22,7 @@ namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
 constexpr uint32_t TEST_UID = 1001;
-constexpr uint32_t UID_MAX = 666;
+constexpr uint32_t TEST_UID_MAX = 666;
 } // namespace
 
 class NetSettingsTest : public testing::Test {
@@ -36,7 +36,7 @@ public:
 
 void NetSettingsTest::SetUpTestCase()
 {
-    for (uint32_t i = 0; i < UID_MAX; i++) {
+    for (uint32_t i = 0; i < TEST_UID_MAX; i++) {
         instance_.AddSystemUid(i);
     }
 }
