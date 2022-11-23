@@ -19,7 +19,7 @@
 #include "iservice_registry.h"
 #include "net_conn_manager_test_util.h"
 #include "netnative_log_wrapper.h"
-#include "netsys_native_service_proxy.h"
+#include "netsys_controller.h"
 
 #include "system_ability_definition.h"
 
@@ -35,7 +35,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    bool PushUid(OHOS::sptr<OHOS::NetsysNative::INetsysService> &netsysNativeService, std::vector<uint32_t> &uids);
+    bool PushUid(std::vector<uint32_t> &uids);
 };
 
 void FirewallManagerTest::SetUpTestCase() {}
@@ -46,12 +46,8 @@ void FirewallManagerTest::SetUp() {}
 
 void FirewallManagerTest::TearDown() {}
 
-bool PushUid(OHOS::sptr<OHOS::NetsysNative::INetsysService> &netsysNativeService, std::vector<uint32_t> &uids)
+bool PushUid(std::vector<uint32_t> &uids)
 {
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        return false;
-    }
     uids.push_back(0);
     uids.push_back(g_testUid);
     return true;
@@ -64,12 +60,9 @@ bool PushUid(OHOS::sptr<OHOS::NetsysNative::INetsysService> &netsysNativeService
  */
 HWTEST_F(FirewallManagerTest, FirewallEnableChainTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
-
     // CHAIN_OHFW_DOZABLE, enable
-    int32_t ret = netsysNativeService->FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, true);
-    EXPECT_TRUE(ret == 0);
+    int32_t ret = NetsysController::GetInstance().FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, true);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -79,12 +72,9 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest001, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallEnableChainTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
-
     // CHAIN_OHFW_DOZABLE, disable
-    int32_t ret = netsysNativeService->FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, false);
-    EXPECT_TRUE(ret == 0);
+    int32_t ret = NetsysController::GetInstance().FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, false);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -94,11 +84,9 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest002, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallEnableChainTest003, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
     // CHAIN_OHFW_UNDOZABLE, enable
-    int32_t ret = netsysNativeService->FirewallEnableChain(ChainType::CHAIN_OHFW_UNDOZABLE, true);
-    EXPECT_TRUE(ret == 0);
+    int32_t ret = NetsysController::GetInstance().FirewallEnableChain(ChainType::CHAIN_OHFW_UNDOZABLE, true);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -108,11 +96,9 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest003, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallEnableChainTest004, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
     // CHAIN_OHFW_UNDOZABLE, disable
-    int32_t ret = netsysNativeService->FirewallEnableChain(ChainType::CHAIN_OHFW_UNDOZABLE, false);
-    EXPECT_TRUE(ret == 0);
+    int32_t ret = NetsysController::GetInstance().FirewallEnableChain(ChainType::CHAIN_OHFW_UNDOZABLE, false);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -122,12 +108,10 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest004, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallEnableChainTest005, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
     // CHAIN_OHFW_UNDOZABLE, disable
-    int32_t ret = netsysNativeService->FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, true);
-    ret = netsysNativeService->FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, true);
-    EXPECT_TRUE(ret == -1);
+    int32_t ret = NetsysController::GetInstance().FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, true);
+    ret = NetsysController::GetInstance().FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, true);
+    EXPECT_EQ(ret, -1);
 }
 
 /**
@@ -137,12 +121,10 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest005, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallEnableChainTest006, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
     // CHAIN_OHFW_UNDOZABLE, disable
-    int32_t ret = netsysNativeService->FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, false);
-    ret = netsysNativeService->FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, false);
-    EXPECT_TRUE(ret == -1);
+    int32_t ret = NetsysController::GetInstance().FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, false);
+    ret = NetsysController::GetInstance().FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, false);
+    EXPECT_EQ(ret, -1);
 }
 
 /**
@@ -152,11 +134,10 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest006, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
     // CHAIN_OHFW_DOZABLE, root, RULE_ALLOW
-    int32_t ret = netsysNativeService->FirewallSetUidRule(ChainType::CHAIN_OHFW_DOZABLE, 0, FirewallRule::RULE_ALLOW);
-    EXPECT_TRUE(ret == 0);
+    int32_t ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_DOZABLE, 0,
+                                                                     FirewallRule::RULE_ALLOW);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -166,11 +147,10 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest001, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
     // CHAIN_OHFW_DOZABLE, root, RULE_DENY
-    int32_t ret = netsysNativeService->FirewallSetUidRule(ChainType::CHAIN_OHFW_DOZABLE, 0, FirewallRule::RULE_DENY);
-    EXPECT_TRUE(ret == 0);
+    int32_t ret =
+        NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_DOZABLE, 0, FirewallRule::RULE_DENY);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -180,11 +160,10 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest002, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest003, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
     // CHAIN_OHFW_UNDOZABLE, root, RULE_ALLOW
-    int32_t ret = netsysNativeService->FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, 0, FirewallRule::RULE_DENY);
-    EXPECT_TRUE(ret == 0);
+    int32_t ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, 0,
+                                                                     FirewallRule::RULE_DENY);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -194,11 +173,10 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest003, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest004, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
     // CHAIN_OHFW_UNDOZABLE, root, RULE_DENY
-    int32_t ret = netsysNativeService->FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, 0, FirewallRule::RULE_ALLOW);
-    EXPECT_TRUE(ret == 0);
+    int32_t ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, 0,
+                                                                     FirewallRule::RULE_ALLOW);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -208,12 +186,12 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest004, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest005, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
     // CHAIN_OHFW_UNDOZABLE, root, RULE_DENY
-    int32_t ret = netsysNativeService->FirewallSetUidRule(ChainType::CHAIN_OHFW_DOZABLE, 0, FirewallRule::RULE_ALLOW);
-    ret = netsysNativeService->FirewallSetUidRule(ChainType::CHAIN_OHFW_DOZABLE, 0, FirewallRule::RULE_ALLOW);
-    EXPECT_TRUE(ret == -1);
+    int32_t ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_DOZABLE, 0,
+                                                                     FirewallRule::RULE_ALLOW);
+    ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_DOZABLE, 0,
+                                                             FirewallRule::RULE_ALLOW);
+    EXPECT_EQ(ret, -1);
 }
 
 /**
@@ -223,12 +201,15 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest005, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest006, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
     // CHAIN_OHFW_UNDOZABLE, root, RULE_DENY
-    int32_t ret = netsysNativeService->FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, 0, FirewallRule::RULE_DENY);
-    ret = netsysNativeService->FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, 0, FirewallRule::RULE_DENY);
-    EXPECT_TRUE(ret == -1);
+    int32_t ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, 0,
+                                                                     FirewallRule::RULE_DENY);
+    ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, 0,
+                                                             FirewallRule::RULE_DENY);
+    EXPECT_EQ(ret, -1);
+    ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, 0,
+                                                             FirewallRule::RULE_ALLOW);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -238,13 +219,12 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest006, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidsAllowedListChainTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
     // CHAIN_OHFW_DOZABLE, <root>
     std::vector<uint32_t> uids;
     uids.push_back(0);
-    int32_t ret = netsysNativeService->FirewallSetUidsAllowedListChain(ChainType::CHAIN_OHFW_DOZABLE, uids);
-    EXPECT_TRUE(ret == 0);
+    int32_t ret =
+        NetsysController::GetInstance().FirewallSetUidsAllowedListChain(ChainType::CHAIN_OHFW_DOZABLE, uids);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -254,14 +234,13 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidsAllowedListChainTest001, TestSize.L
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidsAllowedListChainTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
     // CHAIN_OHFW_UNDOZABLE, <root, system>
     std::vector<uint32_t> uids;
     uids.push_back(0);
     uids.push_back(20010034);
-    int32_t ret = netsysNativeService->FirewallSetUidsAllowedListChain(ChainType::CHAIN_OHFW_DOZABLE, uids);
-    EXPECT_TRUE(ret == 0);
+    int32_t ret =
+        NetsysController::GetInstance().FirewallSetUidsAllowedListChain(ChainType::CHAIN_OHFW_DOZABLE, uids);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -271,14 +250,13 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidsAllowedListChainTest002, TestSize.L
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidsAllowedListChainTest003, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
     // CHAIN_OHFW_UNDOZABLE, <root, system>
     std::vector<uint32_t> uids;
     uids.push_back(0);
     uids.push_back(20010034);
-    int32_t ret = netsysNativeService->FirewallSetUidsAllowedListChain(ChainType::CHAIN_OHFW_UNDOZABLE, uids);
-    EXPECT_TRUE(ret == -1);
+    int32_t ret =
+        NetsysController::GetInstance().FirewallSetUidsAllowedListChain(ChainType::CHAIN_OHFW_UNDOZABLE, uids);
+    EXPECT_EQ(ret, -1);
 }
 
 /**
@@ -288,13 +266,12 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidsAllowedListChainTest003, TestSize.L
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidsDeniedListChainTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
     // CHAIN_OHFW_DOZABLE, <root>
     std::vector<uint32_t> uids;
     uids.push_back(0);
-    int32_t ret = netsysNativeService->FirewallSetUidsDeniedListChain(ChainType::CHAIN_OHFW_UNDOZABLE, uids);
-    EXPECT_TRUE(ret == 0);
+    int32_t ret =
+        NetsysController::GetInstance().FirewallSetUidsDeniedListChain(ChainType::CHAIN_OHFW_UNDOZABLE, uids);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -304,14 +281,13 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidsDeniedListChainTest001, TestSize.Le
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidsDeniedListChainTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
     // CHAIN_OHFW_UNDOZABLE, <root, system>
     std::vector<uint32_t> uids;
     uids.push_back(0);
     uids.push_back(20010034);
-    int32_t ret = netsysNativeService->FirewallSetUidsDeniedListChain(ChainType::CHAIN_OHFW_UNDOZABLE, uids);
-    EXPECT_TRUE(ret == 0);
+    int32_t ret =
+        NetsysController::GetInstance().FirewallSetUidsDeniedListChain(ChainType::CHAIN_OHFW_UNDOZABLE, uids);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -321,14 +297,12 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidsDeniedListChainTest002, TestSize.Le
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidsDeniedListChainTest003, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
-    ASSERT_TRUE(netsysNativeService != nullptr);
     // CHAIN_OHFW_UNDOZABLE, <root, system>
     std::vector<uint32_t> uids;
     uids.push_back(0);
     uids.push_back(20010034);
-    int32_t ret = netsysNativeService->FirewallSetUidsDeniedListChain(ChainType::CHAIN_OHFW_DOZABLE, uids);
-    EXPECT_TRUE(ret == -1);
+    int32_t ret = NetsysController::GetInstance().FirewallSetUidsDeniedListChain(ChainType::CHAIN_OHFW_DOZABLE, uids);
+    EXPECT_EQ(ret, -1);
 }
 } // namespace NetsysNative
 } // namespace OHOS
