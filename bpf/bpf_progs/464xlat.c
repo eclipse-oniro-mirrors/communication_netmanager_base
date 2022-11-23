@@ -18,12 +18,10 @@
 
 #define SEC(NAME) __attribute__((section(NAME), used))
 
-static SEC("xdp/tether_downstream_ether") int bpf_xdp_tether_downstream_ether(struct xdp_md *ctx) {}
+static SEC("xlat/egress4/raw") int bpf_xlat_egress4_raw(struct __sk_buff *skb) {}
 
-static SEC("xdp/tether_upstream_ether") int bpf_xdp_tether_upstream_ether(struct xdp_md *ctx) {}
+static SEC("xlat/ingress6/ether") int bpf_xlat_ingress4_ether(struct __sk_buff *skb) {}
 
-static SEC("xdp/tether_downstream_raw") int bpf_xdp_tether_downstream_raw(struct xdp_md *ctx) {}
-
-static SEC("xdp/tether_upstream_raw") int bpf_xdp_tether_upstream_raw(struct xdp_md *ctx) {}
+static SEC("xlat/ingress6/raw") int bpf_xlat_ingress4_raw(struct __sk_buff *skb) {}
 
 char _license[] SEC("license") = "GPL";
