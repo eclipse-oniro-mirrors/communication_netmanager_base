@@ -29,6 +29,7 @@ namespace NetManagerStandard {
 namespace {
 constexpr const char *ETH_IFACE_NAME = "lo";
 constexpr int64_t TEST_UID = 1010;
+constexpr int32_t TEST_FD = 2;
 void GetIfaceNamesFromManager(std::list<std::string> &ifaceNames)
 {
     NetManagerCenter::GetInstance().GetIfaceNames(BEARER_CELLULAR, ifaceNames);
@@ -49,13 +50,28 @@ public:
 void NetStatsServiceTest::SetUpTestCase()
 {
     callback_ = new (std::nothrow) NetStatsCallbackTest();
+    DelayedSingleton<NetStatsService>::GetInstance()->OnStart();
 }
 
-void NetStatsServiceTest::TearDownTestCase() {}
+void NetStatsServiceTest::TearDownTestCase()
+{
+    DelayedSingleton<NetStatsService>::GetInstance()->OnStop();
+}
 
 void NetStatsServiceTest::SetUp() {}
 
 void NetStatsServiceTest::TearDown() {}
+
+/**
+ * @tc.name: DumpTest001
+ * @tc.desc: Test NetStatsService RegisterNetStatsCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceTest, DumpTest001, TestSize.Level1)
+{
+    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->Dump(TEST_FD, {});
+    EXPECT_GE(ret, -1);
+}
 
 /**
  * @tc.name: RegisterNetStatsCallbackTest001
@@ -65,7 +81,18 @@ void NetStatsServiceTest::TearDown() {}
 HWTEST_F(NetStatsServiceTest, RegisterNetStatsCallbackTest001, TestSize.Level1)
 {
     int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->RegisterNetStatsCallback(callback_);
-    EXPECT_GE(ret, 0);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: RegisterNetStatsCallbackTest002
+ * @tc.desc: Test NetStatsService RegisterNetStatsCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceTest, RegisterNetStatsCallbackTest002, TestSize.Level1)
+{
+    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->RegisterNetStatsCallback(nullptr);
+    EXPECT_NE(ret, 0);
 }
 
 /**
@@ -76,7 +103,18 @@ HWTEST_F(NetStatsServiceTest, RegisterNetStatsCallbackTest001, TestSize.Level1)
 HWTEST_F(NetStatsServiceTest, UnregisterNetStatsCallbackTest001, TestSize.Level1)
 {
     int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->UnregisterNetStatsCallback(callback_);
-    EXPECT_GE(ret, 0);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: UnregisterNetStatsCallbackTest002
+ * @tc.desc: Test NetStatsService UnregisterNetStatsCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceTest, UnregisterNetStatsCallbackTest002, TestSize.Level1)
+{
+    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->UnregisterNetStatsCallback(nullptr);
+    EXPECT_NE(ret, 0);
 }
 
 /**

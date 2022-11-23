@@ -28,151 +28,145 @@
 namespace OHOS {
 namespace NetManagerStandard {
 constexpr uint32_t TEST_UID = 1001;
-constexpr int64_t TEST_BYTES = 4096;
 const std::string ETH_IFACE_NAME = "eth0";
 
 using namespace testing::ext;
-class NetStatsManagerTest : public testing::Test {
+class DataFlowStatisticsTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
     sptr<NetStatsCallbackTest> GetINetStatsCallbackSample() const;
-    uint32_t GetTestTime();
 };
 
-void NetStatsManagerTest::SetUpTestCase() {}
+void DataFlowStatisticsTest::SetUpTestCase() {}
 
-void NetStatsManagerTest::TearDownTestCase() {}
+void DataFlowStatisticsTest::TearDownTestCase() {}
 
-void NetStatsManagerTest::SetUp() {}
+void DataFlowStatisticsTest::SetUp() {}
 
-void NetStatsManagerTest::TearDown() {}
+void DataFlowStatisticsTest::TearDown() {}
 
-sptr<NetStatsCallbackTest> NetStatsManagerTest::GetINetStatsCallbackSample() const
+sptr<NetStatsCallbackTest> DataFlowStatisticsTest::GetINetStatsCallbackSample() const
 {
     sptr<NetStatsCallbackTest> callback = new (std::nothrow) NetStatsCallbackTest();
     return callback;
 }
 
-uint32_t NetStatsManagerTest::GetTestTime()
-{
-    std::time_t now = std::time(nullptr);
-    if (now < 0) {
-        std::cout << ("NetStatsManagerTest GetTestTime failed") << std::endl;
-    }
-    std::stringstream ss;
-    ss << now;
-    return static_cast<uint32_t>(std::stoi(ss.str()));
-}
-
 /**
  * @tc.name: NetStatsManager001
- * @tc.desc: Test NetStatsManagerTest GetCellularRxBytes.
+ * @tc.desc: Test DataFlowStatisticsTest GetCellularRxBytes.
  * @tc.type: FUNC
  */
-HWTEST_F(NetStatsManagerTest, NetStatsManager001, TestSize.Level1)
+HWTEST_F(DataFlowStatisticsTest, NetStatsManager001, TestSize.Level1)
 {
     std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
-    long ret = flow->GetCellularRxBytes();
-    ASSERT_TRUE(ret >= 0);
+    int64_t ret = flow->GetCellularRxBytes();
+    ASSERT_GE(ret, 0);
 }
 
 /**
  * @tc.name: NetStatsManager002
- * @tc.desc: Test NetStatsManagerTest GetCellularTxBytes.
+ * @tc.desc: Test DataFlowStatisticsTest GetCellularTxBytes.
  * @tc.type: FUNC
  */
-HWTEST_F(NetStatsManagerTest, NetStatsManager002, TestSize.Level1)
+HWTEST_F(DataFlowStatisticsTest, NetStatsManager002, TestSize.Level1)
 {
     std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
-    long ret = flow->GetCellularTxBytes();
-    ASSERT_TRUE(ret >= 0);
+    int64_t ret = flow->GetCellularTxBytes();
+    ASSERT_GE(ret, 0);
 }
 
 /**
  * @tc.name: NetStatsManager003
- * @tc.desc: Test NetStatsManagerTest GetAllRxBytes.
+ * @tc.desc: Test DataFlowStatisticsTest GetAllRxBytes.
  * @tc.type: FUNC
  */
-HWTEST_F(NetStatsManagerTest, NetStatsManager003, TestSize.Level1)
+HWTEST_F(DataFlowStatisticsTest, NetStatsManager003, TestSize.Level1)
 {
     std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
-    long ret = flow->GetAllRxBytes();
-    ASSERT_TRUE(ret >= 0);
+    int64_t ret = flow->GetAllRxBytes();
+    ASSERT_GE(ret, 0);
 }
 
 /**
  * @tc.name: NetStatsManager004
- * @tc.desc: Test NetStatsManagerTest GetAllTxBytes.
+ * @tc.desc: Test DataFlowStatisticsTest GetAllTxBytes.
  * @tc.type: FUNC
  */
-HWTEST_F(NetStatsManagerTest, NetStatsManager004, TestSize.Level1)
+HWTEST_F(DataFlowStatisticsTest, NetStatsManager004, TestSize.Level1)
 {
     std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
-    long ret = flow->GetAllTxBytes();
-    ASSERT_TRUE(ret >= 0);
+    int64_t ret = flow->GetAllTxBytes();
+    ASSERT_GE(ret, 0);
+}
+
+HWTEST_F(DataFlowStatisticsTest, NetStatsManager005, TestSize.Level1)
+{
+    std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
+    int64_t ret = flow->GetUidTxBytes(TEST_UID);
+    ASSERT_GE(ret, -1);
 }
 
 /**
  * @tc.name: NetStatsManager007
- * @tc.desc: Test NetStatsManagerTest GetIfaceRxBytes.
+ * @tc.desc: Test DataFlowStatisticsTest GetIfaceRxBytes.
  * @tc.type: FUNC
  */
-HWTEST_F(NetStatsManagerTest, NetStatsManager007, TestSize.Level1)
+HWTEST_F(DataFlowStatisticsTest, NetStatsManager007, TestSize.Level1)
 {
     std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
     std::string iface = ETH_IFACE_NAME;
-    long ret = flow->GetIfaceRxBytes(iface);
-    ASSERT_TRUE(ret >= 0);
+    int64_t ret = flow->GetIfaceRxBytes(iface);
+    ASSERT_GE(ret, 0);
 }
 
 /**
  * @tc.name: NetStatsManager008
- * @tc.desc: Test NetStatsManagerTest GetIfaceTxBytes.
+ * @tc.desc: Test DataFlowStatisticsTest GetIfaceTxBytes.
  * @tc.type: FUNC
  */
-HWTEST_F(NetStatsManagerTest, NetStatsManager008, TestSize.Level1)
+HWTEST_F(DataFlowStatisticsTest, NetStatsManager008, TestSize.Level1)
 {
     std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
     std::string iface = ETH_IFACE_NAME;
-    long ret = flow->GetIfaceTxBytes(iface);
-    ASSERT_TRUE(ret >= 0);
+    int64_t ret = flow->GetIfaceTxBytes(iface);
+    ASSERT_GE(ret, 0);
 }
 
 /**
  * @tc.name: NetStatsManager009
- * @tc.desc: Test NetStatsManagerTest GetIfaceRxPackets.
+ * @tc.desc: Test DataFlowStatisticsTest GetIfaceRxPackets.
  * @tc.type: FUNC
  */
-HWTEST_F(NetStatsManagerTest, NetStatsManager009, TestSize.Level1)
+HWTEST_F(DataFlowStatisticsTest, NetStatsManager009, TestSize.Level1)
 {
     std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
     std::string iface = ETH_IFACE_NAME;
-    long ret = flow->GetIfaceRxPackets(iface);
-    ASSERT_TRUE(ret >= 0);
+    int64_t ret = flow->GetIfaceRxPackets(iface);
+    ASSERT_GE(ret, 0);
 }
 
 /**
  * @tc.name: NetStatsManager010
- * @tc.desc: Test NetStatsManagerTest GetIfaceTxPackets.
+ * @tc.desc: Test DataFlowStatisticsTest GetIfaceTxPackets.
  * @tc.type: FUNC
  */
-HWTEST_F(NetStatsManagerTest, NetStatsManager010, TestSize.Level1)
+HWTEST_F(DataFlowStatisticsTest, NetStatsManager010, TestSize.Level1)
 {
     std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
     std::string iface = ETH_IFACE_NAME;
-    long ret = flow->GetIfaceTxPackets(iface);
-    ASSERT_TRUE(ret >= 0);
+    int64_t ret = flow->GetIfaceTxPackets(iface);
+    ASSERT_GE(ret, 0);
 }
 
 /**
  * @tc.name: NetStatsManager011
- * @tc.desc: Test NetStatsManagerTest RegisterNetStatsCallback.
+ * @tc.desc: Test DataFlowStatisticsTest RegisterNetStatsCallback.
  * @tc.type: FUNC
  */
-HWTEST_F(NetStatsManagerTest, NetStatsManager011, TestSize.Level1)
+HWTEST_F(DataFlowStatisticsTest, NetStatsManager011, TestSize.Level1)
 {
     sptr<NetStatsCallbackTest> callback = GetINetStatsCallbackSample();
     int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->RegisterNetStatsCallback(callback);
