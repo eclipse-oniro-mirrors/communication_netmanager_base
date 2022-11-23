@@ -17,6 +17,7 @@
 #define NET_ACTIVATE_H
 
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -32,13 +33,21 @@ namespace NetManagerStandard {
 constexpr uint32_t DEFAULT_REQUEST_ID = 0;
 constexpr uint32_t MIN_REQUEST_ID = DEFAULT_REQUEST_ID + 1;
 constexpr uint32_t MAX_REQUEST_ID = 0x7FFFFFFF;
+class INetActivateCallback {
+public:
+    virtual ~INetActivateCallback() = default;
+
+public:
+    virtual void OnNetActivateTimeOut(uint32_t reqId) = 0;
+};
+
 class NetActivate : public virtual RefBase {
 public:
     using TimeOutHandler = std::function<int32_t(uint32_t &reqId)>;
 
 public:
     NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
-                TimeOutHandler timeOutHandler, const uint32_t &timeoutMS);
+                std::weak_ptr<INetActivateCallback> timeoutCallback, const uint32_t &timeoutMS);
     ~NetActivate();
     bool MatchRequestAndNetwork(sptr<NetSupplier> supplier);
     void SetRequestId(uint32_t reqId);
@@ -64,7 +73,7 @@ private:
     sptr<INetConnCallback> netConnCallback_ = nullptr;
     sptr<NetSupplier> netServiceSupplied_ = nullptr;
     uint32_t timeoutMS_ = 0;
-    TimeOutHandler timeOutHandler_ = nullptr;
+    std::weak_ptr<INetActivateCallback> timeoutCallback_;
     std::unique_ptr<Timer> lpTimer_ = nullptr;
 };
 } // namespace NetManagerStandard
