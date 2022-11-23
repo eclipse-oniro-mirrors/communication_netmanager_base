@@ -18,10 +18,13 @@ ohos_unittest("net_stats_manager_test") {
   module_out_path = "netmanager_base/net_stats_manager_test"
 
   sources = [
+    "data_flow_statistics_test.cpp",
+    "net_stats_callback_ipc_test.cpp",
     "net_stats_callback_test.cpp",
     "net_stats_client_test.cpp",
     "net_stats_info_test.cpp",
     "net_stats_service_test.cpp",
+    "net_stats_wrapper_test.cpp",
   ]
 
   include_dirs = [
