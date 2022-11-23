@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <memory>
 
 #include "net_activate.h"
 #include "net_conn_callback_stub.h"
@@ -53,6 +54,13 @@ class ConnCallbackTest : public NetConnCallbackStub {
         return NETMANAGER_SUCCESS;
     }
 };
+
+class NetActivateCallbackTest : public INetActivateCallback {
+    void OnNetActivateTimeOut(uint32_t reqId) override
+    {
+        std::cout << "Activate network request " << reqId << " timeout." << std::endl;
+    }
+};
 } // namespace
 
 class NetActivateTest : public testing::Test {
@@ -65,18 +73,15 @@ public:
     static inline std::unique_ptr<NetActivate> instance_ = nullptr;
     static inline sptr<INetConnCallback> callback_ = nullptr;
     static inline sptr<NetSpecifier> specifier_ = nullptr;
+    static inline std::shared_ptr<INetActivateCallback> timeoutCallback_ = nullptr;
 };
 
 void NetActivateTest::SetUpTestCase()
 {
     callback_ = new (std::nothrow) ConnCallbackTest();
     specifier_ = new (std::nothrow) NetSpecifier();
-    NetActivate::TimeOutHandler handler = [](uint32_t &reqId) {
-        std::cout << "Handler end" << std::endl;
-        return 0;
-    };
-
-    instance_ = std::make_unique<NetActivate>(specifier_, callback_, handler, TEST_TIMEOUT_MS);
+    timeoutCallback_ = std::make_shared<NetActivateCallbackTest>();
+    instance_ = std::make_unique<NetActivate>(specifier_, callback_, timeoutCallback_, TEST_TIMEOUT_MS);
 }
 
 void NetActivateTest::TearDownTestCase() {}
