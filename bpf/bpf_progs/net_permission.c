@@ -18,6 +18,6 @@
 
 #define SEC(NAME) __attribute__((section(NAME), used))
 
-static SEC("cgroup/inet/create") int bpf_inet_create(struct bpf_sock *sock) {}
+static SEC("cgroup/socket/create") int bpf_socekt_create(struct bpf_sock *sock) {}
 
 char _license[] SEC("license") = "GPL";

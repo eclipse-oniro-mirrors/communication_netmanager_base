@@ -18,10 +18,10 @@
 
 #define SEC(NAME) __attribute__((section(NAME), used))
 
-static SEC("xlat/egress4/raw") int bpf_xlat_egress4_raw(struct __sk_buff *skb) {}
+static SEC("xlat/egress/ipv4/raw") int bpf_xlat_egress_ipv4_raw(struct __sk_buff *skb) {}
 
-static SEC("xlat/ingress6/ether") int bpf_xlat_ingress6_ether(struct __sk_buff *skb) {}
+static SEC("xlat/ingress/ipv6/ether") int bpf_xlat_ingress_ipv6_ether(struct __sk_buff *skb) {}
 
-static SEC("xlat/ingress6/raw") int bpf_xlat_ingress6_raw(struct __sk_buff *skb) {}
+static SEC("xlat/ingress/ipv6/raw") int bpf_xlat_ingress_ipv6_raw(struct __sk_buff *skb) {}
 
 char _license[] SEC("license") = "GPL";
