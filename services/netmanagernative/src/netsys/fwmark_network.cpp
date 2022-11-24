@@ -25,7 +25,9 @@
 #include "fwmark.h"
 #include "fwmark_command.h"
 #include "netnative_log_wrapper.h"
+#ifdef USE_SELINUX
 #include "selinux.h"
+#endif
 #include "securec.h"
 
 namespace OHOS {
@@ -39,7 +41,9 @@ static constexpr const int32_t ERROR_CODE_GETSOCKOPT_FAILED = -4;
 static constexpr const int32_t ERROR_CODE_SETSOCKOPT_FAILED = -5;
 static constexpr const int32_t ERROR_CODE_SET_MARK = -6;
 static constexpr const int32_t MAX_CONCURRENT_CONNECTION_REQUESTS = 10;
+#ifdef USE_SELINUX
 static constexpr const char *FEMARK_SELABEL = "u:object_r:fwmark_service:s0";
+#endif
 
 void CloseSocket(int32_t *socket, int32_t ret, int32_t errorCode)
 {
@@ -189,21 +193,27 @@ void StartListener()
         return;
     }
 
+#ifdef USE_SELINUX
     if (setfscreatecon(FEMARK_SELABEL) == -1) {
         NETNATIVE_LOGE("FwmarkNetwork: setfscreatecon error[%{public}d]", errno);
         close(serverSockfd);
         serverSockfd = -1;
         return;
     }
+#endif
     int32_t result = bind(serverSockfd, reinterpret_cast<struct sockaddr *>(&serverAddr), sizeof(serverAddr));
     if (result < 0) {
         NETNATIVE_LOGE("FwmarkNetwork: bind failed result %{public}d, errno: %{public}d", result, errno);
+#ifdef USE_SELINUX
         setfscreatecon(nullptr);
+#endif
         close(serverSockfd);
         serverSockfd = -1;
         return;
     }
+#ifdef USE_SELINUX
     setfscreatecon(nullptr);
+#endif
 
     if (chmod(FWMARK_SERVER_PATH.sun_path, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH) < 0) {
         NETNATIVE_LOGE("FwmarkNetwork: chmod errno %{public}d", errno);
