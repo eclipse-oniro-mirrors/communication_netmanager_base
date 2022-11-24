@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "net_activate.h"
 
 #include <atomic>
 #include <functional>
+
+#include "net_activate.h"
 #include "net_caps.h"
 #include "net_mgr_log_wrapper.h"
 
@@ -25,8 +26,8 @@ static std::atomic<uint32_t> g_nextRequestId = MIN_REQUEST_ID;
 using TimeOutCallback = std::function<void()>;
 
 NetActivate::NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
-    TimeOutHandler timeOutHandler, const uint32_t &timeoutMS)
-    : netSpecifier_(specifier), netConnCallback_(callback), timeoutMS_(timeoutMS), timeOutHandler_(timeOutHandler)
+                         std::weak_ptr<INetActivateCallback> timeoutCallback, const uint32_t &timeoutMS)
+    : netSpecifier_(specifier), netConnCallback_(callback), timeoutMS_(timeoutMS), timeoutCallback_(timeoutCallback)
 {
     requestId_ = g_nextRequestId++;
     if (g_nextRequestId > MAX_REQUEST_ID) {
@@ -54,8 +55,10 @@ void NetActivate::TimeOutNetAvailable()
     if (netConnCallback_) {
         netConnCallback_->NetUnavailable();
     }
-    if (timeOutHandler_) {
-        timeOutHandler_(requestId_);
+
+    auto timeoutCb = timeoutCallback_.lock();
+    if (timeoutCb) {
+        timeoutCb->OnNetActivateTimeOut(requestId_);
     }
 }
 
