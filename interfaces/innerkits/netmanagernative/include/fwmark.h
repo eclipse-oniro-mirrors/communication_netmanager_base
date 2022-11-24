@@ -40,7 +40,7 @@ union Fwmark {
     }
 };
 static constexpr uint32_t FWMARK_NET_ID_MASK = 0xffff;
-static const struct sockaddr_un FWMARK_SERVER_PATH = {AF_UNIX, "/dev/fwmarkd"};
+static const struct sockaddr_un FWMARK_SERVER_PATH = {AF_UNIX, "/data/fwmarkd"};
 } // namespace nmd
 } // namespace OHOS
 #endif // INCLUDE_FWMARK_H
