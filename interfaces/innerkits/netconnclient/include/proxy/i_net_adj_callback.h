@@ -17,9 +17,7 @@
 
 #include "iremote_broker.h"
 
-#include "net_specifier.h"
-#include "net_link_info.h"
-#include "net_handle.h"
+#include "net_adj_info.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -33,8 +31,8 @@ public:
         ADJ_REMOVE,
     };
 
-    virtual int32_t NetAdjAdd(const std::string &iface) = 0;
-    virtual int32_t NetAdjRemove(const std::string &iface) = 0;
+    virtual int32_t NetAdjAdd(const sptr<NetAjInfo> &adjInfo) = 0;
+    virtual int32_t NetAdjRemove(const sptr<NetAjInfo> &adjInfo) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
