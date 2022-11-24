@@ -53,6 +53,7 @@ constexpr uint32_t ARRAY_OFFSET_5_INDEX = 5;
 constexpr uint32_t MOVE_BIT_LEFT31 = 31;
 constexpr uint32_t BIT_MAX = 32;
 constexpr uint32_t IOCTL_RETRY_TIME = 32;
+constexpr int32_t MAX_MTU_LEN = 11;
 } // namespace
 
 int InterfaceManager::GetMtu(const char *interfaceName)
@@ -70,16 +71,18 @@ int InterfaceManager::GetMtu(const char *interfaceName)
         return -1;
     }
 
-    int originMtuValue = 0;
-    int nread = read(fd, &originMtuValue, sizeof(originMtuValue));
-    if (nread == -1) {
+    char originMtuValue[MAX_MTU_LEN] = {0};
+    int nread = read(fd, originMtuValue, (sizeof(char) * (MAX_MTU_LEN - 1)));
+    if (nread == -1 || nread == 0) {
         NETNATIVE_LOGE("InterfaceManager::GetMtu read fail %{public}d", errno);
         close(fd);
         return -1;
     }
     close(fd);
 
-    return atoi((char *)&originMtuValue);
+    int32_t mtu = -1;
+    (void)NetManagerStandard::CommonUtils::ParseInt(originMtuValue, &mtu);
+    return mtu;
 }
 
 int InterfaceManager::SetMtu(const char *interfaceName, const char *mtuValue)

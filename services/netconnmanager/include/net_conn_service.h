@@ -39,8 +39,9 @@ namespace OHOS {
 namespace NetManagerStandard {
 constexpr uint32_t MAX_REQUEST_NUM = 200;
 class NetConnService : public SystemAbility,
-    public NetConnServiceStub,
-    public std::enable_shared_from_this<NetConnService> {
+                       public INetActivateCallback,
+                       public NetConnServiceStub,
+                       public std::enable_shared_from_this<NetConnService> {
     DECLARE_DELAYED_SINGLETON(NetConnService)
     DECLARE_SYSTEM_ABILITY(NetConnService)
 
@@ -245,6 +246,13 @@ public:
      */
     int32_t GetNetIdByIdentifier(const std::string &ident, int32_t &netId) override;
 
+    /**
+     * Activate network timeout
+     *
+     * @param reqId Net request id
+     */
+    void OnNetActivateTimeOut(uint32_t reqId) override;
+
 private:
     bool Init();
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
@@ -252,7 +260,6 @@ private:
         NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps);
     int32_t ActivateNetwork(const sptr<NetSpecifier> &netSpecifier,
         const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS);
-    int32_t DeactivateNetwork(uint32_t reqId);
     void CallbackForSupplier(sptr<NetSupplier>& supplier, CallbackType type);
     void CallbackForAvailable(sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
     uint32_t FindBestNetworkForRequest(sptr<NetSupplier>& supplier, sptr<NetActivate>& netActivateNetwork);

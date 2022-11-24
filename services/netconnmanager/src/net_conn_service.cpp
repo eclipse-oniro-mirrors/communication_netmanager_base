@@ -75,8 +75,8 @@ void NetConnService::CreateDefaultRequest()
     if (!defaultNetActivate_) {
         defaultNetSpecifier_ = (std::make_unique<NetSpecifier>()).release();
         defaultNetSpecifier_->SetCapability(NET_CAPABILITY_INTERNET);
-        defaultNetActivate_ = std::make_unique<NetActivate>(defaultNetSpecifier_, nullptr,
-            std::bind(&NetConnService::DeactivateNetwork, this, std::placeholders::_1), 0).release();
+        std::weak_ptr<INetActivateCallback> timeoutCb;
+        defaultNetActivate_ = new (std::nothrow) NetActivate(defaultNetSpecifier_, nullptr, timeoutCb, 0);
         defaultNetActivate_->SetRequestId(DEFAULT_REQUEST_ID);
         netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
     }
@@ -605,8 +605,8 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         NETMGR_LOG_E("The parameter of netSpecifier or callback is null");
         return ERR_INVALID_PARAMS;
     }
-    sptr<NetActivate> request = (std::make_unique<NetActivate>(netSpecifier, callback,
-        std::bind(&NetConnService::DeactivateNetwork, this, std::placeholders::_1), timeoutMS)).release();
+    std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
+    sptr<NetActivate> request = new (std::nothrow) NetActivate(netSpecifier, callback, timeoutCb, timeoutMS);
     uint32_t reqId = request->GetRequestId();
     NETMGR_LOG_D("ActivateNetwork  reqId is [%{public}d]", reqId);
     netActivates_[reqId] = request;
@@ -634,14 +634,14 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     return ERR_NONE;
 }
 
-int32_t NetConnService::DeactivateNetwork(uint32_t reqId)
+void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
 {
-    NETMGR_LOG_D("DeactivateNetwork Enter, reqId is [%{public}d]", reqId);
+    NETMGR_LOG_D("OnNetActivateTimeOut Enter, reqId is [%{public}d]", reqId);
     std::lock_guard<std::mutex> locker(netManagerMutex_);
     auto iterActivate = netActivates_.find(reqId);
     if (iterActivate == netActivates_.end()) {
         NETMGR_LOG_E("not found the reqId: [%{public}d]", reqId);
-        return ERR_NET_NOT_FIND_REQUEST_ID;
+        return;
     }
     sptr<NetActivate> pNetActivate = iterActivate->second;
     if (pNetActivate) {
@@ -658,7 +658,6 @@ int32_t NetConnService::DeactivateNetwork(uint32_t reqId)
         }
         iterSupplier->second->CancelRequest(reqId);
     }
-    return ERR_NONE;
 }
 
 int32_t NetConnService::GetDefaultNet(int32_t &netId)
