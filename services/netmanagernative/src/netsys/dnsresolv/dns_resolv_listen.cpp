@@ -20,12 +20,18 @@
 #include "dns_config_client.h"
 #include "dns_param_cache.h"
 #include "netsys_client.h"
+#ifdef USE_SELINUX
+#include "selinux.h"
+#endif
 #include "singleton.h"
 
 #include "dns_resolv_listen.h"
 
 namespace OHOS::nmd {
 static constexpr const uint32_t MAX_LISTEN_NUM = 1024;
+#ifdef USE_SELINUX
+static constexpr const char *DNSPROXY_SELABEL = "u:object_r:dnsproxy_service:s0";
+#endif
 
 DnsResolvListen::DnsResolvListen() : serverSockFd_(-1)
 {
@@ -215,25 +221,7 @@ void DnsResolvListen::StartListen()
         return;
     }
 
-    sockaddr_un server_addr = {0};
-    server_addr.sun_family = AF_UNIX;
-
-    if (strcpy_s(server_addr.sun_path, sizeof(server_addr.sun_path), DNS_SOCKET_PATH) < 0) {
-        NETNATIVE_LOGE("str copy failed ");
-        close(serverSockFd_);
-        return;
-    }
-
-    uint32_t addrLen = offsetof(sockaddr_un, sun_path) + strlen(server_addr.sun_path) + 1;
-    if (bind(serverSockFd_, (sockaddr *)&server_addr, addrLen) < 0) {
-        NETNATIVE_LOGE("bind errno %{public}d", errno);
-        close(serverSockFd_);
-        return;
-    }
-
-    if (chmod(DNS_SOCKET_PATH, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH) < 0) {
-        NETNATIVE_LOGE("chmod errno %{public}d", errno);
-        close(serverSockFd_);
+    if (!SetServerSock()) {
         return;
     }
 
@@ -263,5 +251,45 @@ void DnsResolvListen::StartListen()
 
         std::thread(DnsResolvListen::ProcCommand, clientSockFd).detach();
     }
+}
+
+bool DnsResolvListen::SetServerSock()
+{
+    sockaddr_un server_addr = {0};
+    server_addr.sun_family = AF_UNIX;
+
+    if (strcpy_s(server_addr.sun_path, sizeof(server_addr.sun_path), DNS_SOCKET_PATH) < 0) {
+        NETNATIVE_LOGE("str copy failed ");
+        close(serverSockFd_);
+        return false;
+    }
+
+    uint32_t addrLen = offsetof(sockaddr_un, sun_path) + strlen(server_addr.sun_path) + 1;
+#ifdef USE_SELINUX
+    if (setfscreatecon(DNSPROXY_SELABEL) == -1) {
+        NETNATIVE_LOGE("DnsResolvListen: setfscreatecon error[%{public}d]", errno);
+        close(serverSockFd_);
+        return false;
+    }
+#endif
+    if (bind(serverSockFd_, (sockaddr *)&server_addr, addrLen) < 0) {
+        NETNATIVE_LOGE("bind errno %{public}d", errno);
+#ifdef USE_SELINUX
+        setfscreatecon(nullptr);
+#endif
+        close(serverSockFd_);
+        return false;
+    }
+#ifdef USE_SELINUX
+    setfscreatecon(nullptr);
+#endif
+
+    if (chmod(DNS_SOCKET_PATH, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH) < 0) {
+        NETNATIVE_LOGE("chmod errno %{public}d", errno);
+        close(serverSockFd_);
+        return false;
+    }
+
+    return true;
 }
 } // namespace OHOS::nmd

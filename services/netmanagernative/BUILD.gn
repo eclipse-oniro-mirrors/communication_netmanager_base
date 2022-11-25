@@ -72,6 +72,10 @@ ohos_shared_library("netsys_native_manager") {
     "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
   ]
 
+  if (build_selinux) {
+    include_dirs += [ "$THIRD_PARTY_ROOT/selinux/libselinux/include/selinux" ]
+  }
+
   deps = [
     "$DHCP_MANAGER_ROOT/services/mgr_service:dhcp_manager_service",
     "$NETMANAGERNATIVE_ROOT/netsys_client",
@@ -80,6 +84,10 @@ ohos_shared_library("netsys_native_manager") {
     "$THIRD_PARTY_ROOT/iptables:iptables-restore",
     "$THIRD_PARTY_ROOT/iptables:iptables-save",
   ]
+
+  if (build_selinux) {
+    deps += [ "$THIRD_PARTY_ROOT/selinux:libselinux" ]
+  }
 
   external_deps = [
     "c_utils:utils",
@@ -94,6 +102,10 @@ ohos_shared_library("netsys_native_manager") {
     "NETSYS_CONFIG_DEBUG=0",
     "DNS_CONFIG_DEBUG=0",
   ]
+
+  if (build_selinux) {
+    defines += [ "USE_SELINUX" ]
+  }
 
   public_configs = [ "$NETMANAGER_BASE_ROOT/utils:netmgr_common_config" ]
 
