@@ -23,8 +23,8 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
-constexpr uint32_t TEST_NETID = 121;
-constexpr int32_t TEST_SOCKETFD = 11;
+constexpr uint32_t TEST_NETID = 999;
+constexpr int32_t TEST_SOCKETFD = -1;
 class TestMonitorCallback : public INetMonitorCallback {
 public:
     inline void OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect) override
@@ -42,7 +42,7 @@ public:
     void SetUp();
     void TearDown();
     static inline std::shared_ptr<INetMonitorCallback> callback_ = std::make_shared<TestMonitorCallback>();
-    static inline std::unique_ptr<NetMonitor> instance_ = std::make_unique<NetMonitor>(TEST_NETID, callback_);
+    static inline sptr<NetMonitor> instance_ = new (std::nothrow) NetMonitor(TEST_NETID, callback_);
 };
 
 void NetMonitorTest::SetUpTestCase()
@@ -62,7 +62,7 @@ void NetMonitorTest::TearDown() {}
 HWTEST_F(NetMonitorTest, SetSocketParameterTest001, TestSize.Level1)
 {
     int32_t ret = instance_->SetSocketParameter(TEST_SOCKETFD);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetMonitorTest, IsDetectingTest001, TestSize.Level1)
