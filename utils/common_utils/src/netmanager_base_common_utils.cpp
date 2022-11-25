@@ -62,6 +62,9 @@ const std::regex IPV6_PATTERN{"([\\da-fA-F]{0,4}:){2,7}([\\da-fA-F]{0,4})"};
 
 const std::regex IPV6_MASK_PATTERN{"([\\da-fA-F]{0,4}:){2,7}([\\da-fA-F]{0,4})/(1[0-2][0-8]|[1-9]\\d|[1-9])"};
 
+constexpr int32_t NET_MASK_MAX_LENGTH = 32;
+constexpr int32_t NET_MASK_GROUP_COUNT = 4;
+
 std::vector<std::string> Split(const std::string &str, const std::string &sep)
 {
     std::string s = str;
@@ -140,6 +143,22 @@ int GetMaskLength(const std::string &mask)
         maskTmp = (maskTmp << 1);
     }
     return netMask;
+}
+
+std::string GetMaskByLength(uint32_t length)
+{
+    const auto mask = -1 << (NET_MASK_MAX_LENGTH - length);
+    auto maskGroup = new int[NET_MASK_GROUP_COUNT];
+    for (int i = 0; i < NET_MASK_GROUP_COUNT; i++) {
+        int pos = NET_MASK_GROUP_COUNT - 1 - i;
+        maskGroup[pos] = (mask >> (i * BIT_NUM_BYTE)) & 0x000000ff;
+    }
+    std::string sMask = "" + std::to_string(maskGroup[0]);
+    for (int i = 1; i < NET_MASK_GROUP_COUNT; i++) {
+        sMask = sMask + "." + std::to_string(maskGroup[i]);
+    }
+    delete[] maskGroup;
+    return sMask;
 }
 
 std::string ConvertIpv4Address(uint32_t addressIpv4)
