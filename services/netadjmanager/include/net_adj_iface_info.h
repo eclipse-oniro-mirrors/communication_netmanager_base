@@ -25,39 +25,28 @@
 #include "parcel.h"
 #include "inet_addr.h"
 #include "route.h"
+#include "net_adj_info.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 struct NetAdjIfaceInfo : public Parcelable {
-    enum {
-        // Wi-Fi Station and AP.
-        TYPE_WIFI = 0,
-        // Wi-Fi direct.
-        TYPE_WIFI_P2P = 1,
-        // Bluetooth.
-        TYPE_BLUETOOTH = 2,
-        // Bluetooth low energy.
-        TYPE_BLE = 3,
-        // USB.
-        TYPE_USB = 4,
-        // Ethernet.
-        TYPE_ETHERNET = 5,
-        // Spark link.
-        TYPE_SPARK_LINK = 6,
-        // Remote connection.
-        TYPE_REMOTE = 7,
-    };
-
+    // Type from {@code NetAjInfo::NetAdjType}.
     uint32_t type_;
+
+    // Interface name.
     std::string ifaceName_;
+
+    // Network addresses.
     std::list<INetAddr> netAddrList_;
+
+    // Routes.
     std::list<Route> routeList_;
     bool Marshalling(Parcel &parcel) const override;
     static sptr<NetAdjIfaceInfo> Unmarshalling(Parcel &parcel);
     bool operator==(const NetAdjIfaceInfo &rhs) const;
     bool operator!=(const NetAdjIfaceInfo &rhs) const;
 };
-}
-}
+} // namespace NetManagerStandard
+} // namespace OHOS
 
 #endif // COMMUNICATION_NET_ADJ_IFACE_INFO_H
