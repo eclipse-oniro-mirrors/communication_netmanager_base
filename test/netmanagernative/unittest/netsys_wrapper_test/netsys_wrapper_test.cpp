@@ -23,17 +23,12 @@
 #include "notify_callback_stub.h"
 #include "system_ability_definition.h"
 
-#include "wifi_ap_msg.h"
-#include "wifi_hotspot.h"
-
 namespace OHOS::nmd {
 using namespace testing::ext;
 constexpr const char *IFACENAME = "wlan0";
 bool g_flag = true;
 sptr<OHOS::NetsysNative::INotifyCallback> nativeNotifyCallback_ = nullptr;
 sptr<OHOS::NetsysNative::INetsysService> netsysNativeService_ = nullptr;
-
-std::unique_ptr<Wifi::WifiHotspot> wifiHotspot_ = nullptr;
 class NetlinkNativeNotifyCallBack : public OHOS::NetsysNative::NotifyCallbackStub {
 public:
     int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
@@ -65,13 +60,11 @@ public:
         nativeNotifyCallback_ = new NetlinkNativeNotifyCallBack();
         auto proxy = iface_cast<NetsysNative::INetsysService>(remote);
         netsysNativeService_ = proxy;
-        wifiHotspot_ = Wifi::WifiHotspot::GetInstance(WIFI_HOTSPOT_ABILITY_ID);
     }
     static void TearDownTestCase()
     {
         nativeNotifyCallback_ = nullptr;
         netsysNativeService_ = nullptr;
-        wifiHotspot_ = nullptr;
     }
 };
 
@@ -167,43 +160,9 @@ HWTEST_F(NetsysWrapperTest, RegisterCallbackTest001, TestSize.Level1)
     EXPECT_EQ(result, 0);
 }
 
-HWTEST_F(NetsysWrapperTest, NotifyAll001, TestSize.Level1)
-{
-    g_flag = true;
-    wifiHotspot_->EnableHotspot(Wifi::ServiceType::DEFAULT);
-    // Wait for the callback to be called.
-    sleep(10);
-}
-
-HWTEST_F(NetsysWrapperTest, NotifyAll002, TestSize.Level1)
-{
-    g_flag = false;
-    wifiHotspot_->DisableHotspot(Wifi::ServiceType::DEFAULT);
-    // Wait for the callback to be called.
-    sleep(10);
-}
-
 HWTEST_F(NetsysWrapperTest, UnRegisterCallbackTest001, TestSize.Level1)
 {
     auto result = netsysNativeService_->UnRegisterNotifyCallback(nativeNotifyCallback_);
     EXPECT_EQ(result, 0);
-}
-
-// For this it will not recview the interface status change event.
-HWTEST_F(NetsysWrapperTest, NotNotifyAnymore001, TestSize.Level1)
-{
-    g_flag = true;
-    wifiHotspot_->EnableHotspot(Wifi::ServiceType::DEFAULT);
-    // Wait for the callback to be called.
-    sleep(10);
-}
-
-// For this it will not recview the interface status change event.
-HWTEST_F(NetsysWrapperTest, NotNotifyAnymore002, TestSize.Level1)
-{
-    g_flag = false;
-    wifiHotspot_->DisableHotspot(Wifi::ServiceType::DEFAULT);
-    // Wait for the callback to be called.
-    sleep(10);
 }
 } // namespace OHOS::nmd

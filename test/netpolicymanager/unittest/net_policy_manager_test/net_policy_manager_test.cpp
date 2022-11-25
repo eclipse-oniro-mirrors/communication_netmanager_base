@@ -81,6 +81,7 @@ void NetPolicyManagerTest::TearDownTestCase()
 
     DelayedSingleton<NetPolicyClient>::GetInstance()->ResetPolicies("sim_abcdefg_1");
     DelayedSingleton<NetPolicyClient>::GetInstance()->ResetPolicies("100000");
+    DelayedSingleton<NetPolicyClient>::GetInstance()->SetBackgroundPolicy(true);
 }
 
 void NetPolicyManagerTest::SetUp() {}

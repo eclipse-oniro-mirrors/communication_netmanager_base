@@ -23,12 +23,15 @@ ohos_unittest("net_common_test") {
     "$NETCONNMANAGER_SOURCE_DIR/include",
     "$INNERKITS_ROOT/netconnclient/include",
     "$INNERKITS_ROOT/netstatsclient/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]
 
   sources = [
     "broadcast_manager_test.cpp",
     "net_manager_center_test.cpp",
     "net_setting_test.cpp",
+    "netmanager_base_permission_test.cpp",
+    "netmanager_hitrace_test.cpp",
     "route_utils_test.cpp",
   ]
 
@@ -37,6 +40,7 @@ ohos_unittest("net_common_test") {
     "$INNERKITS_ROOT/netstatsclient:net_stats_parcel",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager",
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   ]
 
   external_deps = [
@@ -44,6 +48,7 @@ ohos_unittest("net_common_test") {
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "hisysevent_native:libhisysevent",
+    "hitrace_native:hitrace_meter",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",

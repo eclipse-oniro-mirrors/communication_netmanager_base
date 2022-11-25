@@ -19,5 +19,6 @@ group("unittest") {
   deps = [
     "bandwidth_manager_test:bandwidth_manager_test",
     "netsys_manager_test:netsys_native_manager_test",
+    "netsys_wrapper_test:netsys_wrapper_test",
   ]
 }
