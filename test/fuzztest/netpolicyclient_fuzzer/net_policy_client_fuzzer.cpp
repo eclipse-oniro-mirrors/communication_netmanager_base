@@ -214,8 +214,7 @@ int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
     MessageParcel reply;
     MessageOption option;
 
-    int32_t ret = DelayedSingleton<NetPolicyService>::GetInstance()->OnRemoteRequest(code, data, reply, option);
-    return ret;
+    return DelayedSingleton<NetPolicyService>::GetInstance()->OnRemoteRequest(code, data, reply, option);
 }
 
 bool WriteInterfaceToken(MessageParcel &data)
@@ -403,8 +402,6 @@ void GetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     AccessToken token(testInfoParms3, testPolicyPrams3);
-    std::vector<NetQuotaPolicy> quotaPolicies;
-
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
         return;
