@@ -19,8 +19,18 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
 static constexpr const char *ICCID_1 = "sim_abcdefg_1";
 using namespace testing::ext;
+NetQuotaPolicy GetQuota()
+{
+    NetQuotaPolicy policy;
+    policy.iccid = "testIccid";
+    policy.ident = "testIdent";
+    policy.title = "testTitle";
+    return policy;
+}
+} // namespace
 class UtNetQuotaPolicy : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -38,11 +48,11 @@ void UtNetQuotaPolicy::SetUp() {}
 void UtNetQuotaPolicy::TearDown() {}
 
 /**
- * @tc.name: NetPolicyQuota001
+ * @tc.name: GetPeriodStart001
  * @tc.desc: Test NetPolicyQuota GetPeriodStart.
  * @tc.type: FUNC
  */
-HWTEST_F(UtNetQuotaPolicy, NetPolicyQuota001, TestSize.Level1)
+HWTEST_F(UtNetQuotaPolicy, GetPeriodStart001, TestSize.Level1)
 {
     NetQuotaPolicy netQuotaPolicy1;
     netQuotaPolicy1.iccid = ICCID_1;
@@ -65,6 +75,67 @@ HWTEST_F(UtNetQuotaPolicy, NetPolicyQuota001, TestSize.Level1)
     ASSERT_TRUE(result > 0);
     ASSERT_TRUE(result2 > 0);
     ASSERT_TRUE(result3 > 0);
+}
+
+/**
+ * @tc.name: Marshalling001
+ * @tc.desc: Test NetPolicyQuota Marshalling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetQuotaPolicy, Marshalling001, TestSize.Level1)
+{
+    Parcel parcel;
+    NetQuotaPolicy netQuotaPolicy = GetQuota();
+    bool ret = netQuotaPolicy.Marshalling(parcel);
+    ASSERT_TRUE(ret);
+    NetQuotaPolicy recv1;
+    ret = NetQuotaPolicy::Unmarshalling(parcel, recv1);
+    ASSERT_TRUE(ret);
+    EXPECT_EQ(recv1.iccid, netQuotaPolicy.iccid);
+    EXPECT_EQ(recv1.ident, netQuotaPolicy.ident);
+}
+
+/**
+ * @tc.name: Marshalling002
+ * @tc.desc: Test NetPolicyQuota Marshalling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetQuotaPolicy, Marshalling002, TestSize.Level1)
+
+{
+    Parcel parcel;
+    NetQuotaPolicy data = GetQuota();
+    bool ret = NetQuotaPolicy::Marshalling(parcel, data);
+    ASSERT_TRUE(ret);
+    NetQuotaPolicy recv;
+    ret = NetQuotaPolicy::Unmarshalling(parcel, recv);
+    ASSERT_TRUE(ret);
+    EXPECT_EQ(recv.iccid, data.iccid);
+    EXPECT_EQ(recv.ident, data.ident);
+}
+
+/**
+ * @tc.name: Marshalling003
+ * @tc.desc: Test NetPolicyQuota Marshalling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetQuotaPolicy, Marshalling003, TestSize.Level1)
+{
+    Parcel parcel;
+    std::vector<NetQuotaPolicy> data;
+    const uint32_t dataSize = 12;
+    for (uint32_t i = 0; i < dataSize; i++) {
+        data.push_back(GetQuota());
+    }
+    bool ret = NetQuotaPolicy::Marshalling(parcel, data);
+    ASSERT_TRUE(ret);
+    std::vector<NetQuotaPolicy> recv;
+    ret = NetQuotaPolicy::Unmarshalling(parcel, recv);
+    ASSERT_TRUE(ret);
+    std::for_each(recv.begin(), recv.end(), [this](const auto &cv) {
+        EXPECT_EQ(cv.iccid, GetQuota().iccid);
+        EXPECT_EQ(cv.ident, GetQuota().ident);
+    });
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
