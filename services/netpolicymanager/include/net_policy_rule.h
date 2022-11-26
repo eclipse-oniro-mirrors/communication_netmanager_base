@@ -42,31 +42,6 @@ struct UidPolicyRule {
     uint32_t netsys_ = 7;
 };
 
-/**
- * The map for transforming conditions to net rule and netsys control.
- *
- * Example:
- *  bit 11~20       bit 4~10      bit 1~3
- *  0000001100      0010000       110
- *  Condition       Rule          Netsys control
- *
- * Condition: see {@link enum PolicyTransCondition}
- * Rule: see {@link enum NetUidRule}
- * Netsys control: see {@link enum NetsysOperation}
- *
- * Transform Flow:
- *      1. According to the status of system(such as device idle mode or power save mode)
- *          and the net policy of uid, construct the Condition by bit operations.
- *      2. Find the matched Condition in this map.
- *      3. Get the rule bits and netsys-control bits from the matched Condition.
- *      4. Process the corresponding operations.
- */
-const std::vector<uint32_t> POLICY_TRANS_MAP = {
-    0b00011000000100000000, 0b10000000000000100010, 0b00010000001000000000, 0b00000010100000010100,
-    0b00000011000000001100, 0b00000010010000001100, 0b01000000001000000000, 0b00000100100000010100,
-    0b00000100010000100010, 0b00000000010000000001, 0b00000001000000100010, 0b00000000000000000001,
-};
-
 class NetPolicyRule : public NetPolicyBase {
 public:
     NetPolicyRule();
@@ -182,10 +157,37 @@ private:
     bool InPowerSaveAllowedList(uint32_t uid);
     void DeleteUid(uint32_t uid);
 
+private:
     std::map<uint32_t, UidPolicyRule> uidPolicyRules_;
     bool backgroundAllow_ = true;
     bool deviceIdleMode_ = false;
     std::vector<uint32_t> deviceIdleAllowedList_;
+
+private:
+    /**
+     * The map for transforming conditions to net rule and netsys control.
+     *
+     * Example:
+     *  bit 11~20       bit 4~10      bit 1~3
+     *  0000001100      0010000       110
+     *  Condition       Rule          Netsys control
+     *
+     * Condition: see {@link enum PolicyTransCondition}
+     * Rule: see {@link enum NetUidRule}
+     * Netsys control: see {@link enum NetsysOperation}
+     *
+     * Transform Flow:
+     *      1. According to the status of system(such as device idle mode or power save mode)
+     *          and the net policy of uid, construct the Condition by bit operations.
+     *      2. Find the matched Condition in this map.
+     *      3. Get the rule bits and netsys-control bits from the matched Condition.
+     *      4. Process the corresponding operations.
+     */
+    static inline const std::vector<uint32_t> POLICY_TRANS_MAP = {
+        0b00011000000100000000, 0b10000000000000100010, 0b00010000001000000000, 0b00000010100000010100,
+        0b00000011000000001100, 0b00000010010000001100, 0b01000000001000000000, 0b00000100100000010100,
+        0b00000100010000100010, 0b00000000010000000001, 0b00000001000000100010, 0b00000000000000000001,
+    };
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
