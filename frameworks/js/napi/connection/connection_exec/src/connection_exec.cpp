@@ -340,6 +340,7 @@ bool ConnectionExec::NetConnectionExec::ExecRegister(RegisterContext *context)
 
     EventManager *manager = context->GetManager();
     auto conn = static_cast<NetConnection *>(manager->GetData());
+    NETMANAGER_BASE_LOGE("Register manager addr=%{public}p conn addr=%{public}p",manager, conn);
     sptr<INetConnCallback> callback = conn->GetObserver();
 
     if (conn->hasNetSpecifier && conn->hasTimeout) {
@@ -376,6 +377,7 @@ bool ConnectionExec::NetConnectionExec::ExecUnregister(UnregisterContext *contex
 
     EventManager *manager = context->GetManager();
     auto conn = static_cast<NetConnection *>(manager->GetData());
+    NETMANAGER_BASE_LOGE("Unregister manager addr=%{public}p conn addr=%{public}p", manager, conn);
     sptr<INetConnCallback> callback = conn->GetObserver();
 
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
