@@ -389,7 +389,6 @@ void SetResolverConfigFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
 
-    std::string ifName = GetStringFromData(STR_LEN);
     uint16_t netId = GetData<uint16_t>();
     uint16_t baseTimeoutMsec = GetData<uint16_t>();
     uint8_t retryCount = GetData<uint8_t>();
