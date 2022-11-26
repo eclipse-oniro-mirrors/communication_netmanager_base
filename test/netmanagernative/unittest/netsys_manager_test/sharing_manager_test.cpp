@@ -21,19 +21,9 @@
 
 namespace OHOS {
 namespace NetsysNative {
+namespace {
 using namespace testing::ext;
 using namespace nmd;
-constexpr int RES_LEN = 2;
-
-namespace {
-const std::string GetResult(const std::string &cmd, int size)
-{
-    char res[RES_LEN];
-    FILE *fp = popen(cmd.c_str(), "r");
-    char *result = fgets(res, size, fp);
-    pclose(fp);
-    return result;
-}
 } // namespace
 
 class SharingManagerTest : public testing::Test {
@@ -58,52 +48,66 @@ void SharingManagerTest::TearDown() {}
 
 HWTEST_F(SharingManagerTest, IpEnableForwardingTest, TestSize.Level1)
 {
-    sharingManager->IpEnableForwarding("aTestName");
-
-    const std::string cmd = "/bin/cat /proc/sys/net/ipv4/ip_forward";
-    const std::string result = GetResult(cmd, 2);
-    ASSERT_EQ(result, "1");
+    auto result = sharingManager->IpEnableForwarding("aTestName");
+    ASSERT_EQ(result, 0);
 }
 
 HWTEST_F(SharingManagerTest, IpDisableForwarding, TestSize.Level1)
 {
-    sharingManager->IpDisableForwarding("aTestName");
-
-    const std::string cmd = "/bin/cat /proc/sys/net/ipv4/ip_forward";
-    const std::string result = GetResult(cmd, 2);
-    ASSERT_EQ(result, "0");
+    auto result = sharingManager->IpDisableForwarding("aTestName");
+    ASSERT_EQ(result, 0);
 }
 
-HWTEST_F(SharingManagerTest, EnableNat, TestSize.Level1)
+HWTEST_F(SharingManagerTest, EnableNat001, TestSize.Level1)
 {
-    sharingManager->EnableNat("down", "up");
-
-    system("/system/bin/iptables -t nat -L tetherctrl_nat_POSTROUTING -nvx > EnableNat_result");
-    system("/system/bin/iptables -t mangle -L tetherctrl_mangle_FORWARD -nvx >> EnableNat_result");
-    ASSERT_STREQ("0", "0");
+    auto result = sharingManager->EnableNat("down", "up");
+    ASSERT_EQ(result, 0);
 }
 
-HWTEST_F(SharingManagerTest, DisableNat, TestSize.Level1)
+HWTEST_F(SharingManagerTest, EnableNat002, TestSize.Level1)
+{
+    const std::string enableAction = "down";
+    int32_t ret = sharingManager->EnableNat(enableAction, enableAction);
+    ASSERT_EQ(ret, -1);
+}
+
+HWTEST_F(SharingManagerTest, DisableNat001, TestSize.Level1)
 {
     sharingManager->DisableNat("down", "up");
-
-    system("/system/bin/iptables -t nat -L tetherctrl_nat_POSTROUTING -nvx > DisableNat_result");
-    system("/system/bin/iptables -t mangle -L tetherctrl_mangle_FORWARD -nvx >> DisableNat_result");
     ASSERT_STREQ("0", "0");
 }
 
-HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward, TestSize.Level1)
+HWTEST_F(SharingManagerTest, DisableNat002, TestSize.Level1)
+{
+    const std::string enableAction = "down";
+    int32_t ret = sharingManager->DisableNat(enableAction, enableAction);
+    ASSERT_EQ(ret, -1);
+}
+
+HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward001, TestSize.Level1)
 {
     sharingManager->IpfwdAddInterfaceForward("down", "up");
-    system("/system/bin/iptables -t filter -L -nvx > IpFwdAddInterfaceForward_result");
     ASSERT_STREQ("0", "0");
 }
 
-HWTEST_F(SharingManagerTest, IpFwdRemoveInterfaceForward, TestSize.Level1)
+HWTEST_F(SharingManagerTest, IpFwdAddInterfaceForward002, TestSize.Level1)
+{
+    const std::string enableAction = "down";
+    int32_t ret = sharingManager->IpfwdAddInterfaceForward(enableAction, enableAction);
+    ASSERT_EQ(ret, -1);
+}
+
+HWTEST_F(SharingManagerTest, IpFwdRemoveInterfaceForward001, TestSize.Level1)
 {
     sharingManager->IpfwdRemoveInterfaceForward("down", "up");
-    system("/system/bin/iptables -t filter -L -nvx > IpFwdRemoveInterfaceForward_result");
     ASSERT_STREQ("0", "0");
+}
+
+HWTEST_F(SharingManagerTest, IpFwdRemoveInterfaceForward002, TestSize.Level1)
+{
+    const std::string enableAction = "down";
+    int32_t ret = sharingManager->IpfwdRemoveInterfaceForward(enableAction, enableAction);
+    ASSERT_EQ(ret, -1);
 }
 } // namespace NetsysNative
 } // namespace OHOS

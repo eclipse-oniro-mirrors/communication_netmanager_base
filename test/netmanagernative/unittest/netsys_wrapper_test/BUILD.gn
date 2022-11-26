@@ -16,15 +16,18 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_unittest("netsys_wrapper_test") {
   module_out_path = "netmanager_base/manager_test"
-  sources = [ "netsys_wrapper_test.cpp" ]
+  sources = [
+    "data_receiver_test.cpp",
+    "netsys_event_message_test.cpp",
+    "netsys_wrapper_test.cpp",
+    "wrapper_distributor_test.cpp",
+  ]
 
   include_dirs = [
     "$INNERKITS_ROOT/netmanagernative/include",
     "$INNERKITS_ROOT/dnsresolverclient/include",
     "$INNERKITS_ROOT/dnsresolverclient/include/proxy",
-    "$WIFI_MANAGER_ROOT/frameworks/native/c_adapter/inc",
-    "$WIFI_MANAGER_ROOT/frameworks/native/include",
-    "$WIFI_MANAGER_ROOT/frameworks/native/interfaces",
+    "$NETMANAGERNATIVE_ROOT/include/netsys/wrapper",
   ]
 
   deps = [

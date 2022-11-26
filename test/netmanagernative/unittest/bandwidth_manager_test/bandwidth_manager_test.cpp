@@ -36,7 +36,10 @@ public:
     void TearDown();
 };
 
-void BandwidthManagerTest::SetUpTestCase() {}
+void BandwidthManagerTest::SetUpTestCase()
+{
+    NetsysController::GetInstance().BandwidthEnableDataSaver(false);
+}
 
 void BandwidthManagerTest::TearDownTestCase() {}
 
