@@ -419,11 +419,13 @@ int32_t NetConnService::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<Ne
 
     supplier->UpdateNetSupplierInfo(*netSupplierInfo);
 
+    std::unique_lock<std::mutex> locker(netManagerMutex_);
     if (!netSupplierInfo->isAvailable_) {
         CallbackForSupplier(supplier, CALL_TYPE_LOST);
     } else {
         CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     }
+    locker.unlock();
     if (!netScore_->GetServiceScore(supplier)) {
         NETMGR_LOG_E("GetServiceScore fail.");
     }
@@ -489,7 +491,9 @@ int32_t NetConnService::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLin
         EventReport::SendSupplierFaultEvent(eventInfo);
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
+    std::unique_lock<std::mutex> locker(netManagerMutex_);
     CallbackForSupplier(supplier, CALL_TYPE_UPDATE_LINK);
+    locker.unlock();
     if (!netScore_->GetServiceScore(supplier)) {
         NETMGR_LOG_E("GetServiceScore fail.");
     }
@@ -1112,7 +1116,9 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, bool ifValid)
         return;
     }
     supplier->SetNetValid(ifValid);
+    std::unique_lock<std::mutex> locker(netManagerMutex_);
     CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
+    locker.unlock();
     if (!netScore_->GetServiceScore(supplier)) {
         NETMGR_LOG_E("GetServiceScore fail.");
         return;
