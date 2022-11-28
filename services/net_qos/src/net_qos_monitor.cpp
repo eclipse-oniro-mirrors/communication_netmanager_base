@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,28 +12,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef COMMUNICATION_I_NET_ADJ_CALLBACK_H
-#define COMMUNICATION_I_NET_ADJ_CALLBACK_H
 
-#include "iremote_broker.h"
+#include "net_qos_monitor.h"
 
-#include "net_adj_info.h"
+#include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-class INetAdjCallback : public IRemoteBroker {
-public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetManagerStandard.INetAdjCallback");
-    ~INetAdjCallback() override = default;
+NetQosMonitor::NetQosMonitor() = default;
 
-    enum {
-        ADJ_ADD,
-        ADJ_REMOVE,
-    };
+sptr<NetQosInfo> NetQosMonitor::GetQosInfo(const sptr<NetHandle> &netHandle)
+{
+    if (netHandle == nullptr) {
+        return nullptr;
+    }
+    NETMGR_LOG_I("GetQosInfo of net handle %{public}d", netHandle->GetNetId());
+    return {};
+}
 
-    virtual int32_t NetAdjAdd(const sptr<NetAdjInfo> &adjInfo) = 0;
-    virtual int32_t NetAdjRemove(const sptr<NetAdjInfo> &adjInfo) = 0;
-};
+void NetQosMonitor::StartQosMonitor(const sptr<NetHandle> &netHandle)
+{
+    (void)netHandle;
+}
+
+void NetQosMonitor::StopQosMonitor(const sptr<NetHandle> &netHandle)
+{
+    (void)netHandle;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // COMMUNICATION_I_NET_ADJ_CALLBACK_H

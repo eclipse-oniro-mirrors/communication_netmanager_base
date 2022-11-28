@@ -30,7 +30,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 struct NetAdjIfaceInfo : public Parcelable {
-    // Type from {@code NetAjInfo::NetAdjType}.
+    // Type from {@code NetAdjInfo::NetAdjType}.
     uint32_t type_;
 
     // Interface name.
@@ -42,7 +42,7 @@ struct NetAdjIfaceInfo : public Parcelable {
     // Routes.
     std::list<Route> routeList_;
     bool Marshalling(Parcel &parcel) const override;
-    static sptr<NetAdjIfaceInfo> Unmarshalling(Parcel &parcel);
+    sptr<NetAdjIfaceInfo> Unmarshalling(Parcel &parcel);
     bool operator==(const NetAdjIfaceInfo &rhs) const;
     bool operator!=(const NetAdjIfaceInfo &rhs) const;
 };

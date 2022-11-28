@@ -46,7 +46,10 @@ struct NetAdjInfo : public Parcelable {
     // Type from {@code net_adj_info::NetAdjType}.
     uint32_t type_;
 
-    // THe interface where adjacency came from.
+    // Identity of network adjacency.
+    std::string identity_;
+
+    // The interface where adjacency came from.
     std::string fromIface_;
 
     // Quality of experience of adjacency.
@@ -56,9 +59,9 @@ struct NetAdjInfo : public Parcelable {
     std::list<INetAddr> netAddrList_;
 
     bool Marshalling(Parcel &parcel) const override;
-    static sptr<NetAjInfo> Unmarshalling(Parcel &parcel);
-    bool operator==(const NetAjInfo &rhs) const;
-    bool operator!=(const NetAjInfo &rhs) const;
+    static sptr<NetAdjInfo> Unmarshalling(Parcel &parcel);
+    bool operator==(const NetAdjInfo &rhs) const;
+    bool operator!=(const NetAdjInfo &rhs) const;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
