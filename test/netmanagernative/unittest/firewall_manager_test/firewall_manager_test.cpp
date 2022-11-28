@@ -15,18 +15,15 @@
 
 #include <gtest/gtest.h>
 
-#include "iptables_type.h"
 #include "iservice_registry.h"
-#include "net_conn_manager_test_util.h"
+#include "system_ability_definition.h"
+
+#include "iptables_type.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_controller.h"
 
-#include "system_ability_definition.h"
-
 namespace OHOS {
 namespace NetsysNative {
-constexpr uint32_t g_testUid = 20010034;
-
 using namespace testing::ext;
 using namespace NetManagerStandard;
 class FirewallManagerTest : public testing::Test {
@@ -35,7 +32,6 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    bool PushUid(std::vector<uint32_t> &uids);
 };
 
 void FirewallManagerTest::SetUpTestCase() {}
@@ -44,13 +40,9 @@ void FirewallManagerTest::TearDownTestCase() {}
 
 void FirewallManagerTest::SetUp() {}
 
-void FirewallManagerTest::TearDown() {}
-
-bool PushUid(std::vector<uint32_t> &uids)
+void FirewallManagerTest::TearDown()
 {
-    uids.push_back(0);
-    uids.push_back(g_testUid);
-    return true;
+    NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, 0, FirewallRule::RULE_DENY);
 }
 
 /**
@@ -134,6 +126,7 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest006, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest001, TestSize.Level1)
 {
+    NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_DOZABLE, 0, FirewallRule::RULE_DENY);
     // CHAIN_OHFW_DOZABLE, root, RULE_ALLOW
     int32_t ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_DOZABLE, 0,
                                                                      FirewallRule::RULE_ALLOW);
@@ -160,6 +153,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest002, TestSize.Level1)
  */
 HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest003, TestSize.Level1)
 {
+    NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, 0, FirewallRule::RULE_ALLOW);
     // CHAIN_OHFW_UNDOZABLE, root, RULE_ALLOW
     int32_t ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, 0,
                                                                      FirewallRule::RULE_DENY);
