@@ -25,6 +25,11 @@ bool NetAdjInfo::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    // WRite identity_
+    if (!parcel.WriteString(identity_)) {
+        return false;
+    }
+
     // Write fromIface_
     if (!parcel.WriteString(fromIface_)) {
         return false;
@@ -53,8 +58,8 @@ sptr<NetAdjInfo> NetAdjInfo::Unmarshalling(Parcel &parcel)
     sptr<NetAdjInfo> info = new (std::nothrow) NetAdjInfo();
     if (info != nullptr) {
         uint32_t size = 0;
-        if (!parcel.ReadUint32(info->type_) || !parcel.ReadString(info->fromIface_) ||
-            !parcel.ReadUint32(info->adjQoeLevel_)) {
+        if (!parcel.ReadUint32(info->type_) || !parcel.ReadString(info->identity_) ||
+            !parcel.ReadString(info->fromIface_) || !parcel.ReadUint32(info->adjQoeLevel_)) {
             return nullptr;
         }
         // Read netAddrList_
@@ -79,8 +84,8 @@ bool NetAdjInfo::operator==(const NetAdjInfo &rhs) const
     if (this == &rhs) {
         return true;
     }
-    return type_ == rhs.type_ && fromIface_ == rhs.fromIface_ && adjQoeLevel_ == rhs.adjQoeLevel_ &&
-           netAddrList_ == rhs.netAddrList_;
+    return type_ == rhs.type_ && identity_ == rhs.identity_ && fromIface_ == rhs.fromIface_ &&
+           adjQoeLevel_ == rhs.adjQoeLevel_ && netAddrList_ == rhs.netAddrList_;
 }
 
 bool NetAdjInfo::operator!=(const NetAdjInfo &rhs) const
