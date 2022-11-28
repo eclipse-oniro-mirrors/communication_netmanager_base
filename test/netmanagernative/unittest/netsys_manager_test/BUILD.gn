@@ -18,10 +18,11 @@ ohos_unittest("netsys_native_manager_test") {
   module_out_path = "netmanager_base/netsys_native_manager_test"
   sources = [
     "conn_manager_test.cpp",
-    "fwmark_network_test.cpp",
+    "dhcp_controller_test.cpp",
     "interface_manager_test.cpp",
     "net_conn_manager_test_util.cpp",
     "netsys_native_service_proxy_test.cpp",
+    "netsys_native_service_test.cpp",
     "resolver_config_test.cpp",
     "route_manager_test.cpp",
     "sharing_manager_test.cpp",
@@ -33,9 +34,14 @@ ohos_unittest("netsys_native_manager_test") {
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$FWMARK_CLIENT_DIR/include",
+    "$DHCP_MANAGER_ROOT/interfaces/inner_api/include",
+    "$DHCP_MANAGER_ROOT/interfaces/inner_api/interfaces",
+    "$NETMANAGERNATIVE_ROOT/include",
+    "$NETMANAGERNATIVE_ROOT/include/netsys/wrapper",
   ]
 
   deps = [
+    "$DHCP_MANAGER_ROOT/services/mgr_service:dhcp_manager_service",
     "$FWMARK_CLIENT_DIR:fwmark_client",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
   ]
