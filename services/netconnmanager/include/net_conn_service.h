@@ -185,7 +185,6 @@ public:
      * @return int32_t Whether the network probe is successful
      */
     int32_t NetDetection(int32_t netId) override;
-    bool CheckGetDefaultNetPermission();
     int32_t GetDefaultNet(int32_t &netId) override;
     int32_t HasDefaultNet(bool &flag) override;
     int32_t GetAddressesByName(const std::string &host, int32_t netId, std::vector<INetAddr> &addrList) override;
@@ -256,26 +255,40 @@ public:
 private:
     bool Init();
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
-    sptr<NetSupplier> GetNetSupplierFromList(
-        NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps);
-    int32_t ActivateNetwork(const sptr<NetSpecifier> &netSpecifier,
-        const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS);
-    void CallbackForSupplier(sptr<NetSupplier>& supplier, CallbackType type);
+    sptr<NetSupplier> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident,
+                                             const std::set<NetCap> &netCaps);
+    int32_t ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
+                            const uint32_t &timeoutMS);
+    void CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackType type);
     void CallbackForAvailable(sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
-    uint32_t FindBestNetworkForRequest(sptr<NetSupplier>& supplier, sptr<NetActivate>& netActivateNetwork);
+    uint32_t FindBestNetworkForRequest(sptr<NetSupplier> &supplier, sptr<NetActivate> &netActivateNetwork);
     void SendRequestToAllNetwork(sptr<NetActivate> request);
     void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
     void SendAllRequestToNetwork(sptr<NetSupplier> supplier);
     void FindBestNetworkForAllRequest();
-    void MakeDefaultNetWork(sptr<NetSupplier>& oldService, sptr<NetSupplier>& newService);
-    void NotFindBestSupplier(uint32_t reqId, const sptr<NetActivate> &active,
-        const sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
+    void MakeDefaultNetWork(sptr<NetSupplier> &oldService, sptr<NetSupplier> &newService);
+    void NotFindBestSupplier(uint32_t reqId, const sptr<NetActivate> &active, const sptr<NetSupplier> &supplier,
+                             const sptr<INetConnCallback> &callback);
     void CreateDefaultRequest();
     int32_t RegUnRegNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback, bool isReg);
     int32_t GenerateNetId();
     bool FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId);
     void GetDumpMessage(std::string &message);
     sptr<NetSupplier> FindNetSupplier(uint32_t supplierId);
+    int32_t RegisterNetSupplierAsync(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
+                                     uint32_t &supplierId);
+    int32_t UnregisterNetSupplierAsync(uint32_t supplierId);
+    int32_t RegisterNetSupplierCallbackAsync(uint32_t supplierId, const sptr<INetSupplierCallback> &callback);
+    int32_t RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
+                                         const uint32_t &timeoutMS);
+    int32_t UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback);
+    int32_t RegUnRegNetDetectionCallbackAsync(int32_t netId, const sptr<INetDetectionCallback> &callback, bool isReg);
+    int32_t UpdateNetStateForTestAsync(const sptr<NetSpecifier> &netSpecifier, int32_t netState);
+    int32_t UpdateNetSupplierInfoAsync(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo);
+    int32_t UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo);
+    int32_t NetDetectionAsync(int32_t netId);
+    int32_t RestrictBackgroundChangedAsync(bool restrictBackground);
+    int32_t SetHttpProxyAsync(const std::string &httpProxy);
 
 private:
     enum ServiceRunningState {
@@ -297,7 +310,7 @@ private:
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
     std::string httpProxy_;
     std::mutex netManagerMutex_;
-    std::shared_ptr<AppExecFwk::EventRunner> eventRunner_ = nullptr;
+    std::shared_ptr<AppExecFwk::EventRunner> netConnEventRunner_ = nullptr;
     std::shared_ptr<NetConnEventHandler> netConnEventHandler_ = nullptr;
 };
 } // namespace NetManagerStandard

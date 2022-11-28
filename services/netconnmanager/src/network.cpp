@@ -55,13 +55,6 @@ Network::Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &
 {
 }
 
-Network::~Network()
-{
-    if (!ReleaseBasicNetwork()) {
-        NETMGR_LOG_E("ReleaseBasicNetwork fail.");
-    }
-}
-
 int32_t Network::GetNetId() const
 {
     return netId_;
@@ -103,9 +96,7 @@ bool Network::ReleaseBasicNetwork()
     NETMGR_LOG_D("Enter ReleaseBasicNetwork");
     if (isPhyNetCreated_) {
         NETMGR_LOG_D("Destroy physical network");
-        if (eventHandler_) {
-            eventHandler_->PostAsyncTask([this]() { this->StopNetDetection(); }, 0);
-        }
+        StopNetDetection();
         for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
             int32_t prefixLen = inetAddr.prefixlen_;
             if (prefixLen == 0) {
@@ -289,9 +280,11 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
         return ERR_SERVICE_NULL_PTR;
     }
 
-    auto iter = std::find(netDetectionRetCallback_.begin(), netDetectionRetCallback_.end(), callback);
-    if (iter != netDetectionRetCallback_.end()) {
-        netDetectionRetCallback_.erase(iter);
+    for (auto iter = netDetectionRetCallback_.begin(); iter != netDetectionRetCallback_.end(); ++iter) {
+        if (callback->AsObject().GetRefPtr() == (*iter)->AsObject().GetRefPtr()) {
+            netDetectionRetCallback_.erase(iter);
+            return ERR_NONE;
+        }
     }
 
     return ERR_NONE;
@@ -300,16 +293,10 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
 void Network::StartNetDetection(bool needReport)
 {
     NETMGR_LOG_D("Enter Network::StartNetDetection");
-    if (eventHandler_) {
-        eventHandler_->PostAsyncTask(
-            [report = needReport, this]() {
-                if (report) {
-                    this->StopNetDetection();
-                }
-                this->InitNetMonitor();
-            },
-            0);
+    if (needReport) {
+        StopNetDetection();
     }
+    InitNetMonitor();
 }
 
 void Network::StopNetDetection()

@@ -39,25 +39,45 @@ using Security::AccessToken::AccessTokenID;
 
 HapInfoParams testInfoParms = {.bundleName = "net_conn_manager_test", .userID = 1, .instIndex = 0, .appIDDesc = "test"};
 
-PermissionDef testPermDef = {.permissionName = "ohos.permission.GET_NETWORK_INFO",
-                             .bundleName = "net_conn_manager_test",
-                             .grantMode = 1,
-                             .label = "label",
-                             .labelId = 1,
-                             .description = "Test net connect maneger",
-                             .descriptionId = 1,
-                             .availableLevel = APL_SYSTEM_BASIC};
+PermissionDef testNetInfoPermDef = {.permissionName = "ohos.permission.GET_NETWORK_INFO",
+                                    .bundleName = "net_conn_manager_test",
+                                    .grantMode = 1,
+                                    .label = "label",
+                                    .labelId = 1,
+                                    .description = "Test net connect maneger",
+                                    .descriptionId = 1,
+                                    .availableLevel = APL_SYSTEM_BASIC};
 
-PermissionStateFull testState = {.grantFlags = {2},
-                                 .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                 .isGeneral = true,
-                                 .permissionName = "ohos.permission.GET_NETWORK_INFO",
-                                 .resDeviceID = {"local"}};
+PermissionDef testInternetPermDef = {.permissionName = "ohos.permission.INTERNET",
+                                     .bundleName = "net_conn_client_fuzzer",
+                                     .grantMode = 1,
+                                     .availableLevel = APL_SYSTEM_BASIC,
+                                     .label = "label",
+                                     .labelId = 1,
+                                     .description = "Test net connect maneger internet",
+                                     .descriptionId = 1};
 
-HapPolicyParams testPolicyPrams = {.apl = APL_SYSTEM_BASIC,
-                                   .domain = "test.domain",
-                                   .permList = {testPermDef},
-                                   .permStateList = {testState}};
+PermissionStateFull testNetInfoState = {.grantFlags = {2},
+                                        .grantStatus = {PermissionState::PERMISSION_GRANTED},
+                                        .isGeneral = true,
+                                        .permissionName = "ohos.permission.GET_NETWORK_INFO",
+                                        .resDeviceID = {"local"}};
+
+PermissionStateFull testInternetState = {.permissionName = "ohos.permission.INTERNET",
+                                         .isGeneral = true,
+                                         .resDeviceID = {"local"},
+                                         .grantStatus = {PermissionState::PERMISSION_GRANTED},
+                                         .grantFlags = {2}};
+
+HapPolicyParams testNetInfoPolicyPrams = {.apl = APL_SYSTEM_BASIC,
+                                          .domain = "test.domain",
+                                          .permList = {testNetInfoPermDef},
+                                          .permStateList = {testNetInfoState}};
+
+HapPolicyParams testInternetPolicyPrams = {.apl = APL_SYSTEM_BASIC,
+                                           .domain = "test.domain",
+                                           .permList = {testNetInfoPermDef, testInternetPermDef},
+                                           .permStateList = {testNetInfoState, testInternetState}};
 } // namespace
 
 class NetConnManagerTest : public testing::Test {
@@ -278,7 +298,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager006, TestSize.Level1)
         DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
 
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testNetInfoPolicyPrams);
     sptr<NetSpecifier> netSpecifier = (std::make_unique<NetSpecifier>()).release();
     netSpecifier->ident_ = ident;
     netSpecifier->SetCapabilities(netCaps);
@@ -313,17 +333,15 @@ HWTEST_F(NetConnManagerTest, NetConnManager008, TestSize.Level1)
     if (proxy == nullptr) {
         return;
     }
-
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternetPolicyPrams);
     std::list<sptr<NetHandle>> netList;
-    client->GetAllNets(netList);
+    int32_t result = client->GetAllNets(netList);
+    std::cout << "netIdList size:" << netList.size() << std::endl;
+    ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     sptr<NetDetectionCallbackTest> detectionCallback = GetINetDetectionCallbackSample();
     if (detectionCallback == nullptr) {
         return;
     }
-
-    std::cout << "netIdList size:" << netList.size() << std::endl;
-    int32_t result = 0;
-    int32_t netId = 0;
     for (sptr<NetHandle> netHandle : netList) {
         NetAllCapabilities netAllCap;
         client->GetNetCapabilities(*netHandle, netAllCap);
@@ -331,7 +349,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager008, TestSize.Level1)
         if (netAllCap.bearerTypes_.find(BEARER_WIFI) == netAllCap.bearerTypes_.end()) {
             continue;
         }
-        netId = netHandle->GetNetId();
+        int32_t netId = netHandle->GetNetId();
         result = proxy->RegisterNetDetectionCallback(netId, detectionCallback);
         ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
         std::cout << "TestRegisterNetDetectionCallback netId:" << netId << " result:" << result << std::endl;
@@ -473,7 +491,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager012, TestSize.Level1)
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     std::cout << "supplierId3 : " << supplierId3 << std::endl;
 
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testNetInfoPolicyPrams);
     std::list<sptr<NetHandle>> netList;
     result = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(netList);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
@@ -499,7 +517,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager013, TestSize.Level1)
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     std::cout << "supplierId : " << supplierId << std::endl;
 
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testNetInfoPolicyPrams);
     std::list<sptr<NetHandle>> netList;
     result = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(netList);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
@@ -527,9 +545,13 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
     result = DelayedSingleton<NetConnClient>::GetInstance()->UpdateNetLinkInfo(supplierId, netLinkInfo);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
 
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testNetInfoPolicyPrams);
+    int32_t netId = 0;
+    result = DelayedSingleton<NetConnClient>::GetInstance()->GetNetIdByIdentifier(ident, netId);
+    std::cout << "Identifier:" << ident << ", net id:" << netId << std::endl;
+    ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     NetLinkInfo info;
-    NetHandle netHandle(100);
+    NetHandle netHandle(netId);
     result = DelayedSingleton<NetConnClient>::GetInstance()->GetConnectionProperties(netHandle, info);
     std::cout << "result = " << result << std::endl;
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
@@ -543,7 +565,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager015, TestSize.Level1)
 {
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testNetInfoPolicyPrams);
     bool isMetered = false;
     int32_t result = DelayedSingleton<NetConnClient>::GetInstance()->IsDefaultNetMetered(isMetered);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
@@ -562,7 +584,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager016, TestSize.Level1)
     if (proxy == nullptr) {
         return;
     }
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testNetInfoPolicyPrams);
     int32_t result;
     std::list<sptr<NetHandle>> netList;
     result = client->GetAllNets(netList);
