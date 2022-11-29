@@ -108,7 +108,7 @@ void NetConnClientTest::TearDown() {}
 /**
  * @tc.name: GetDefaultNetTest001
  * @tc.desc: Test NetConnClient::GetDefaultNet, not applying for
- * permission,return NET_CONN_ERR_PERMISSION_CHECK_FAILED
+ * permission,return NETMANAGER_ERR_PERMISSION_DENIED
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnClientTest, GetDefaultNetTest001, TestSize.Level1)
@@ -145,14 +145,14 @@ HWTEST_F(NetConnClientTest, GetDefaultNetTest002, TestSize.Level1)
 /**
  * @tc.name: HasDefaultNetTest001
  * @tc.desc: Test NetConnClient::HasDefaultNet,not applying for
- * permission, return NET_CONN_ERR_PERMISSION_CHECK_FAILED
+ * permission, return NETMANAGER_ERR_PERMISSION_DENIED
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnClientTest, HasDefaultNetTest001, TestSize.Level1)
 {
     bool bFlag = false;
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->HasDefaultNet(bFlag);
-    ASSERT_TRUE(ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -172,8 +172,8 @@ HWTEST_F(NetConnClientTest, HasDefaultNetTest002, TestSize.Level1)
 /**
  * @tc.name: GetNetCapabilitiesTest001
  * @tc.desc: Test NetConnClient::GetNetCapabilities, In the absence of
- * permission, GetDefaultNet return NET_CONN_ERR_PERMISSION_CHECK_FAILED and
- * GetNetCapabilities return NET_CONN_ERR_PERMISSION_CHECK_FAILED
+ * permission, GetDefaultNet return NETMANAGER_ERR_PERMISSION_DENIED and
+ * GetNetCapabilities return NETMANAGER_ERR_PERMISSION_DENIED
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest001, TestSize.Level1)
@@ -185,13 +185,13 @@ HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest001, TestSize.Level1)
 
     NetAllCapabilities netAllCap;
     ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(handle, netAllCap);
-    ASSERT_TRUE(ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
  * @tc.name: GetNetCapabilitiesTest002
  * @tc.desc: Test NetConnClient::GetNetCapabilities:In the absence of
- * permission, GetDefaultNet return NET_CONN_ERR_PERMISSION_CHECK_FAILED, and
+ * permission, GetDefaultNet return NETMANAGER_ERR_PERMISSION_DENIED, and
  * after add permission GetNetCapabilities return NET_CONN_ERR_INVALID_NETWORK
  * @tc.type: FUNC
  */

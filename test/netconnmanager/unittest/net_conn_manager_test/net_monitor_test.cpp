@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#include <netdb.h>
 #include <gtest/gtest.h>
+#include <sys/socket.h>
 
 #include "i_net_monitor_callback.h"
 #include "net_manager_constants.h"
@@ -70,6 +72,7 @@ HWTEST_F(NetMonitorTest, IsDetectingTest001, TestSize.Level1)
     bool ret = instance_->IsDetecting();
     EXPECT_TRUE(ret);
     instance_->Detection();
+    instance_->Stop();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "net_conn_service_iface.h"
 #include "net_conn_service.h"
 
@@ -22,17 +23,16 @@ int32_t NetConnServiceIface::GetIfaceNames(NetBearType bearerType, std::list<std
     return DelayedSingleton<NetConnService>::GetInstance()->GetIfaceNames(bearerType, ifaceNames);
 }
 
-int32_t NetConnServiceIface::GetIfaceNameByType(
-    NetBearType bearerType, const std::string &ident, std::string &ifaceName)
+int32_t NetConnServiceIface::GetIfaceNameByType(NetBearType bearerType, const std::string &ident,
+                                                std::string &ifaceName)
 {
     return DelayedSingleton<NetConnService>::GetInstance()->GetIfaceNameByType(bearerType, ident, ifaceName);
 }
 
-int32_t NetConnServiceIface::RegisterNetSupplier(NetBearType bearerType,
-    const std::string &ident, const std::set<NetCap> &netCaps, uint32_t &supplierId)
+int32_t NetConnServiceIface::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
+                                                 const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {
-    return DelayedSingleton<NetConnService>::GetInstance()->RegisterNetSupplier(
-        bearerType, ident, netCaps, supplierId);
+    return DelayedSingleton<NetConnService>::GetInstance()->RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
 }
 
 int32_t NetConnServiceIface::UnregisterNetSupplier(uint32_t supplierId)

@@ -29,13 +29,14 @@ public:
     NetConnServiceStub();
     ~NetConnServiceStub();
 
-    int32_t OnRemoteRequest(
-        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
     using NetConnServiceFunc = int32_t (NetConnServiceStub::*)(MessageParcel &, MessageParcel &);
+    using NetConnServiceFuncPer = std::pair<NetConnServiceFunc, std::set<std::string>>;
 
 private:
+    bool CheckPermission(const std::set<std::string> &permissions);
     int32_t OnSystemReady(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetSupplier(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnregisterNetSupplier(MessageParcel &data, MessageParcel &reply);
@@ -71,7 +72,7 @@ private:
     int32_t ConvertCode(int32_t internalCode);
 
 private:
-    std::map<uint32_t, NetConnServiceFunc> memberFuncMap_;
+    std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
