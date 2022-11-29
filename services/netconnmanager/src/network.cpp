@@ -22,6 +22,7 @@
 #include "netsys_controller.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "route_utils.h"
 #include "securec.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
@@ -43,6 +44,7 @@ constexpr const char *ERROR_MSG_UPDATE_NET_DNSES_FAILED = "Update netlink dns fa
 constexpr const char *ERROR_MSG_SET_NET_MTU_FAILED = "Set netlink interface mtu failed";
 constexpr const char *ERROR_MSG_SET_DEFAULT_NETWORK_FAILED = "Set default network failed";
 constexpr const char *ERROR_MSG_CLEAR_DEFAULT_NETWORK_FAILED = "Clear default network failed";
+constexpr const char *LOCAL_ROUTE_NEXT_HOP = "0.0.0.0";
 } // namespace
 
 Network::Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &handler, NetBearType bearerType,
@@ -208,6 +210,10 @@ void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
         int32_t ret = NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, destAddress,
                                                                          route.gateway_.address_);
+        if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP) {
+            ret |= NetsysController::GetInstance().NetworkRemoveRoute(LOCAL_NET_ID, route.iface_, destAddress,
+                                                                      LOCAL_ROUTE_NEXT_HOP);
+        }
         if (ret != NETMANAGER_SUCCESS) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_REMOVE_NET_ROUTES_FAILED);
         }
@@ -218,6 +224,10 @@ void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
         int32_t ret =
             NetsysController::GetInstance().NetworkAddRoute(netId_, route.iface_, destAddress, route.gateway_.address_);
+        if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP) {
+            ret |= NetsysController::GetInstance().NetworkAddRoute(LOCAL_NET_ID, route.iface_, destAddress,
+                                                                   LOCAL_ROUTE_NEXT_HOP);
+        }
         if (ret != NETMANAGER_SUCCESS) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_ROUTES_FAILED);
         }
