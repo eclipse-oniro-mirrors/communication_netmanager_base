@@ -36,6 +36,11 @@ bool BroadcastManager::SendBroadcast(const BroadcastInfo &info, const std::map<s
     return SendBroadcastEx(info, param);
 }
 
+bool BroadcastManager::SendBroadcast(const BroadcastInfo &info, const std::map<std::string, int64_t> &param)
+{
+    return SendBroadcastEx(info, param);
+}
+
 bool BroadcastManager::SendBroadcast(const BroadcastInfo &info, const std::map<std::string, std::string> &param)
 {
     return SendBroadcastEx(info, param);
@@ -61,6 +66,9 @@ bool BroadcastManager::SendBroadcastEx(const BroadcastInfo &info, const std::map
     eventData.SetData(info.data);
     EventFwk::CommonEventPublishInfo publishInfo;
     publishInfo.SetOrdered(info.ordered);
+    if (!info.permission.empty()) {
+        publishInfo.SetSubscriberPermissions({info.permission});
+    }
 
     bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(eventData, publishInfo, nullptr);
     if (publishResult) {
