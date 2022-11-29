@@ -155,7 +155,7 @@ private:
     void NotifyQuotaWarning(int64_t totalQuota);
     void NotifyQuotaLimit(int64_t totalQuota);
     void NotifyQuotaLimitReminded(int64_t totalQuota);
-    void PublishQuotaEvent(const std::string &action, int64_t quota);
+    void PublishQuotaEvent(const std::string &action, const std::string &describe, int64_t quota);
     int32_t ReadQuotaPolicies();
     bool WriteQuotaPolicies();
     const std::string GetMatchIfaces(const NetQuotaPolicy &quotaPolicy);

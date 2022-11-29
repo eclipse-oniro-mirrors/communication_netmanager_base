@@ -26,6 +26,7 @@ namespace NetManagerStandard {
 struct BroadcastInfo {
     std::string     action;
     std::string     data;
+    std::string     permission;
     int32_t         code;
     bool            ordered;
     BroadcastInfo() : code(0), ordered(true) {}
@@ -37,6 +38,8 @@ public:
     bool SendBroadcast(const BroadcastInfo &info, const std::map<std::string, bool> &param);
 
     bool SendBroadcast(const BroadcastInfo &info, const std::map<std::string, int32_t> &param);
+
+    bool SendBroadcast(const BroadcastInfo &info, const std::map<std::string, int64_t> &param);
 
     bool SendBroadcast(const BroadcastInfo &info, const std::map<std::string, std::string> &param);
 
