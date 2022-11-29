@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021- 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,27 @@
 
 #include <gtest/gtest.h>
 
+#include <dlfcn.h>
+
+#include "dns_config_client.h"
+#include "net_conn_manager_test_util.h"
 #include "netnative_log_wrapper.h"
+#include "netsys_client.h"
 #include "netsys_native_service_proxy.h"
 
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
+using SetCache = int32_t (*)(uint16_t netId, struct ParamWrapper param, struct AddrInfo *res);
+using GetCache = int32_t (*)(uint16_t netId, struct ParamWrapper param,
+							struct AddrInfo addr_info[MAX_RESULTS],
+							uint32_t *num);
+using GetConfig = int32_t (*)(uint16_t netId, struct ResolvConfig *config);
+
 namespace OHOS {
 namespace NetsysNative {
 using namespace testing::ext;
+using namespace NetManagerStandard::NetConnManagerTestUtil;
 class ResolverConfigTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -40,63 +52,74 @@ void ResolverConfigTest::SetUp() {}
 
 void ResolverConfigTest::TearDown() {}
 
-sptr<INetsysService> GetProxy()
-{
-    NETNATIVE_LOGE("Get samgr >>>>>>>>>>>>>>>>>>>>>>>>>>");
-    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    NETNATIVE_LOGI("Get samgr %{public}p", samgr.GetRefPtr());
-    std::cout << "Get samgr  "<< samgr.GetRefPtr() << std::endl;
-
-    auto remote = samgr->GetSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
-    NETNATIVE_LOGI("Get remote %{public}p", remote.GetRefPtr());
-    std::cout << "Get remote "<< remote.GetRefPtr() << std::endl;
-
-    auto proxy = iface_cast<NetsysNative::INetsysService>(remote);
-    NETNATIVE_LOGI("Get proxy %{public}p", proxy.GetRefPtr());
-    std::cout << "Get proxy "<< proxy.GetRefPtr()<< std::endl;
-    return proxy;
-}
-
 HWTEST_F(ResolverConfigTest, ResolverConfigTest001, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+
     int32_t ret = 0;
     ret = netsysNativeService->CreateNetworkCache(0);
     NETNATIVE_LOGE("NETSYS: CreateNetworkCache0   ret=%{public}d", ret);
     NETNATIVE_LOGE("NETSYS: SetResolverConfig0   ret=%{public}d", ret);
     NETNATIVE_LOGE("ResolverConfigTest001 ResolverConfigTest001 ResolverConfigTest001");
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, 0);
 }
 
 
 HWTEST_F(ResolverConfigTest, ResolverConfigTest002, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
 
     int32_t ret = 0;
     NETNATIVE_LOGE("ResolverConfigTest002 ResolverConfigTest002 ResolverConfigTest002");
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(ResolverConfigTest, ResolverConfigTest003, TestSize.Level1)
 {
-    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = GetProxy();
-    if (netsysNativeService == nullptr) {
-        std::cout << "netsysNativeService is nullptr" << std::endl;
-        EXPECT_FALSE(0);
-    }
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
 
     int32_t ret = 0;
     NETNATIVE_LOGE("ResolverConfigTest003 ResolverConfigTest003 ResolverConfigTest003");
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(ResolverConfigTest, ResolverConfigTest004, TestSize.Level1)
+{
+    NETNATIVE_LOGI("ResolverConfigTest004 enter");
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+
+    uint16_t netId = 1;
+    uint16_t baseTimeoutMsec = 5000;
+    uint8_t retryCount = 3;
+    std::vector<std::string> servers = {"114.114.114.114", "8.8.8.8"};
+    std::vector<std::string> domains = {"yahoo.com", "baidu.com"};
+
+    uint16_t getBaseTimeoutMsec;
+    uint8_t getRetryCount;
+    std::vector<std::string> getServers;
+    std::vector<std::string> getDomains;
+
+    int res = netsysNativeService->CreateNetworkCache(netId);
+
+    res = netsysNativeService->SetResolverConfig(netId, baseTimeoutMsec, retryCount, servers, domains);
+
+    res = netsysNativeService->GetResolverConfig(netId, getServers, getDomains, getBaseTimeoutMsec,
+                                                 getRetryCount);
+    EXPECT_EQ(getBaseTimeoutMsec, baseTimeoutMsec);
+    EXPECT_EQ(getRetryCount, retryCount);
+    int serversNum = getServers.size() < servers.size() ? getServers.size() : servers.size();
+    for (int i = 0; i < serversNum; i++) {
+        EXPECT_EQ(servers[i], getServers[i]);
+    }
+    int domainsNum = getDomains.size() < domains.size() ? getDomains.size() : domains.size();
+    for (int i = 0; i < domainsNum; i++) {
+        EXPECT_EQ(domains[i], getDomains[i]);
+    }
+    res = netsysNativeService->DestroyNetworkCache(netId);
 }
 } // namespace NetsysNative
 } // namespace OHOS
