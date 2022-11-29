@@ -19,8 +19,15 @@ ohos_unittest("netsys_native_manager_test") {
   sources = [
     "conn_manager_test.cpp",
     "dhcp_controller_test.cpp",
+    "dns_param_cache_test.cpp",
+    "dns_proxy_listen_test.cpp",
+    "dns_resolv_listen_test.cpp",
+    "fwmark_network_test.cpp",
     "interface_manager_test.cpp",
+    "iptables_wrapper_test.cpp",
+    "local_network_test.cpp",
     "net_conn_manager_test_util.cpp",
+    "netlink_msg_test.cpp",
     "netsys_native_service_proxy_test.cpp",
     "netsys_native_service_test.cpp",
     "resolver_config_test.cpp",
@@ -43,6 +50,7 @@ ohos_unittest("netsys_native_manager_test") {
   deps = [
     "$DHCP_MANAGER_ROOT/services/mgr_service:dhcp_manager_service",
     "$FWMARK_CLIENT_DIR:fwmark_client",
+    "$NETMANAGERNATIVE_ROOT/netsys_client:netsys_client",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
   ]
 
