@@ -15,6 +15,7 @@
 
 #include "net_policy_traffic.h"
 
+#include "broadcast_manager.h"
 #include "common_event_data.h"
 #include "common_event_manager.h"
 #include "common_event_publish_info.h"
@@ -30,9 +31,16 @@
 #include "net_specifier.h"
 #include "net_stats_info.h"
 #include "netmanager_base_common_utils.h"
+#include "netmanager_base_permission.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
+constexpr const char *BROADCAST_QUOTA_WARNING = "Net Policy Quota Warning";
+constexpr const char *BROADCAST_QUOTA_LIMIT_REMIND = "Net Policy Quota Limit Remind";
+constexpr const char *BROADCAST_QUOTA_LIMIT = "Net Policy Quota Limit";
+} // namespace
+
 void NetPolicyTraffic::Init()
 {
     netsysCallback_ = new (std::nothrow)
@@ -347,32 +355,27 @@ void NetPolicyTraffic::SetNetworkEnableStatus(const NetQuotaPolicy &quotaPolicy,
 
 void NetPolicyTraffic::NotifyQuotaWarning(int64_t totalQuota)
 {
-    PublishQuotaEvent(COMMON_EVENT_NET_QUOTA_WARNING, totalQuota);
+    PublishQuotaEvent(COMMON_EVENT_NET_QUOTA_WARNING, BROADCAST_QUOTA_WARNING, totalQuota);
 }
 
 void NetPolicyTraffic::NotifyQuotaLimitReminded(int64_t totalQuota)
 {
-    PublishQuotaEvent(COMMON_EVENT_NET_QUOTA_LIMIT_REMINDED, totalQuota);
+    PublishQuotaEvent(COMMON_EVENT_NET_QUOTA_LIMIT_REMINDED, BROADCAST_QUOTA_LIMIT_REMIND, totalQuota);
 }
 
 void NetPolicyTraffic::NotifyQuotaLimit(int64_t totalQuota)
 {
-    PublishQuotaEvent(COMMON_EVENT_NET_QUOTA_LIMIT, totalQuota);
+    PublishQuotaEvent(COMMON_EVENT_NET_QUOTA_LIMIT, BROADCAST_QUOTA_LIMIT, totalQuota);
 }
 
-void NetPolicyTraffic::PublishQuotaEvent(const std::string &action, int64_t quota)
+void NetPolicyTraffic::PublishQuotaEvent(const std::string &action, const std::string &describe, int64_t quota)
 {
-    EventFwk::CommonEventData data;
-    AAFwk::Want want;
-    want.SetParam("totalQuota", quota);
-    want.SetAction(action);
-    data.SetWant(want);
-    EventFwk::CommonEventPublishInfo publishInfo;
-    publishInfo.SetOrdered(false);
-    if (!EventFwk::CommonEventManager::PublishCommonEvent(data, publishInfo, nullptr)) {
-        NETMGR_LOG_E("Publish %{public}s event fail.", action.c_str());
-        return;
-    }
+    BroadcastInfo info;
+    info.action = action;
+    info.data = describe;
+    info.permission = Permission::CONNECTIVITY_INTERNAL;
+    std::map<std::string, int64_t> param = {{"totalQuota", quota}};
+    DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
 }
 
 bool NetPolicyTraffic::IsValidPeriodDuration(const std::string &periodDuration)
