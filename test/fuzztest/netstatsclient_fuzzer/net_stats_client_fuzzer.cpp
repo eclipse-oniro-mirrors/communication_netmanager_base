@@ -116,6 +116,9 @@ void RegisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
     }
 
     sptr<INetStatsCallbackTest> callback = new (std::nothrow) INetStatsCallbackTest();
+    if (callback == nullptr) {
+        return;
+    }
 
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
@@ -133,6 +136,9 @@ void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
     }
 
     sptr<INetStatsCallbackTest> callback = new (std::nothrow) INetStatsCallbackTest();
+    if (callback == nullptr) {
+        return;
+    }
 
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {

@@ -367,7 +367,10 @@ void RegisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
     }
     AccessToken token(testInfoParms1, testPolicyPrams1);
     sptr<INetPolicyCallbackTest> callback = new (std::nothrow) INetPolicyCallbackTest();
-
+    if (callback == nullptr) {
+        return;
+    }
+ 
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
         return;
@@ -385,6 +388,9 @@ void UnregisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
     }
     AccessToken token(testInfoParms1, testPolicyPrams1);
     sptr<INetPolicyCallbackTest> callback = new (std::nothrow) INetPolicyCallbackTest();
+    if (callback == nullptr) {
+        return;
+    }
 
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {

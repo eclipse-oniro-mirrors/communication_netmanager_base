@@ -102,6 +102,10 @@ void DhcpController::Process(const std::string &iface, OHOS::Wifi::DhcpResult &r
 {
     NETNATIVE_LOGI("DhcpController Process");
     sptr<OHOS::NetsysNative::DhcpResultParcel> ptr = new (std::nothrow) OHOS::NetsysNative::DhcpResultParcel();
+    if (ptr == nullptr) {
+        return;
+    }
+    
     ptr->iface_ = iface;
     ptr->ipAddr_ = result.strYourCli;
     ptr->gateWay_ = result.strServer;

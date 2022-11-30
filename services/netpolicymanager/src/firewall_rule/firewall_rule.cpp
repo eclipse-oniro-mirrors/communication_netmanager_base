@@ -95,9 +95,9 @@ void FirewallRule::SetDeniedList(uint32_t uid, uint32_t rule)
     if (rule == FIREWALL_RULE_DENY) {
         deniedList_.emplace_back(uid);
     } else {
-        for (auto iter = deniedList_.begin(); iter != deniedList_.end(); ++iter) {
+        for (auto iter = deniedList_.begin(); iter != deniedList_.end();) {
             if (uid == *iter) {
-                deniedList_.erase(iter);
+                iter = deniedList_.erase(iter);
             } else {
                 iter++;
             }
