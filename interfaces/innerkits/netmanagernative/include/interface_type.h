@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_INTERFACE_TYPE_H__
-#define INCLUDE_INTERFACE_TYPE_H__
+#ifndef INCLUDE_INTERFACE_TYPE_H
+#define INCLUDE_INTERFACE_TYPE_H
 
 #include <string>
 #include <vector>
@@ -46,4 +46,4 @@ typedef struct InterfaceConfigurationParcel {
 } InterfaceConfigurationParcel;
 } // namespace nmd
 } // namespace OHOS
-#endif // !INCLUDE_INTERFACE_TYPE_H__
+#endif // INCLUDE_INTERFACE_TYPE_H

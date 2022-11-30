@@ -61,7 +61,7 @@ private:
     static void DnsParseBySocket(int32_t clientSocket, std::vector<std::string> servers, RecvBuff recvBuff,
                                  sockaddr_in proxyAddr);
     static void DnsSendRecvParseData(int32_t clientSocket, char *requestData, int32_t resLen, sockaddr_in proxyAddr);
-    static bool CheckDnsResponse(char* recBuff);
+    static bool CheckDnsResponse(char* recBuff, size_t recLen);
     static bool DnsThreadClose();
     int32_t proxySockFd_;
     static uint16_t netId_;

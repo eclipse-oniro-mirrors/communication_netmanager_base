@@ -33,7 +33,7 @@ public:
     ~EventListener();
 
     void Emit(const std::string &eventType, size_t argc, napi_value *argv) const;
-    void EmitByUv(const std::string &type, void *data, void(Handler)(uv_work_t *, int status)) const;
+    void EmitByUv(const std::string &type, void *data, void(handler)(uv_work_t *, int status)) const;
     [[nodiscard]] bool Match(const std::string &type, napi_value callback) const;
     [[nodiscard]] bool MatchOnce(const std::string &type) const;
     [[nodiscard]] bool MatchType(const std::string &type) const;

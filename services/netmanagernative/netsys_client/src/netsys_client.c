@@ -136,12 +136,12 @@ static bool MakeKey(const char *hostName, const char *serv, const struct addrinf
                     char key[static MAX_KEY_LENGTH])
 {
     if (serv && hints) {
-        return sprintf_s(key, MAX_KEY_LENGTH, "%s %s %u %u %u %u", hostName, serv, hints->ai_family, hints->ai_flags,
+        return sprintf_s(key, MAX_KEY_LENGTH, "%s %s %d %d %d %d", hostName, serv, hints->ai_family, hints->ai_flags,
                          hints->ai_protocol, hints->ai_socktype) > 0;
     }
 
     if (hints) {
-        return sprintf_s(key, MAX_KEY_LENGTH, "%s %u %u %u %u", hostName, hints->ai_family, hints->ai_flags,
+        return sprintf_s(key, MAX_KEY_LENGTH, "%s %d %d %d %d", hostName, hints->ai_family, hints->ai_flags,
                          hints->ai_protocol, hints->ai_socktype) > 0;
     }
 

@@ -80,13 +80,13 @@ void *EventManager::GetData()
     return data_;
 }
 
-void EventManager::EmitByUv(const std::string &type, void *data, void(Handler)(uv_work_t *, int status))
+void EventManager::EmitByUv(const std::string &type, void *data, void(handler)(uv_work_t *, int status))
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    std::for_each(listeners_.begin(), listeners_.end(), [type, data, Handler, this](const EventListener &listener) {
+    std::for_each(listeners_.begin(), listeners_.end(), [type, data, handler, this](const EventListener &listener) {
         auto workWrapper = new UvWorkWrapper(data, listener.GetEnv(), type, this);
-        listener.EmitByUv(type, workWrapper, Handler);
+        listener.EmitByUv(type, workWrapper, handler);
     });
 }
 
