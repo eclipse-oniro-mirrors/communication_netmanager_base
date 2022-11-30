@@ -36,36 +36,36 @@ using namespace Security::AccessToken;
 using Security::AccessToken::AccessTokenID;
 
 HapInfoParams testInfoParms = {
-    .bundleName = "net_conn_hievent_test",
     .userID = 1,
+    .bundleName = "net_conn_hievent_test",
     .instIndex = 0,
-    .appIDDesc = "test"
+    .appIDDesc = "test",
 };
 
 PermissionDef testPermDef = {
     .permissionName = "ohos.permission.GET_NETWORK_INFO",
     .bundleName = "net_conn_hievent_test",
     .grantMode = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
     .label = "label",
     .labelId = 1,
     .description = "Test net connect maneger HiSysEvent",
     .descriptionId = 1,
-    .availableLevel = APL_SYSTEM_BASIC
 };
 
 PermissionStateFull testState = {
-    .grantFlags = {2},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .isGeneral = true,
     .permissionName = "ohos.permission.GET_NETWORK_INFO",
-    .resDeviceID = {"local"}
+    .isGeneral = true,
+    .resDeviceID = {"local"},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
+    .grantFlags = {2},
 };
 
 HapPolicyParams testPolicyPrams = {
     .apl = APL_SYSTEM_BASIC,
     .domain = "test.domain",
     .permList = {testPermDef},
-    .permStateList = {testState}
+    .permStateList = {testState},
 };
 } // namespace
 

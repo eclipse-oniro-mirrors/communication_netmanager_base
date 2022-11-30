@@ -37,47 +37,64 @@ using namespace testing::ext;
 using namespace Security::AccessToken;
 using Security::AccessToken::AccessTokenID;
 
-HapInfoParams testInfoParms = {.bundleName = "net_conn_manager_test", .userID = 1, .instIndex = 0, .appIDDesc = "test"};
+HapInfoParams testInfoParms = {
+    .userID = 1,
+    .bundleName = "net_conn_manager_test",
+    .instIndex = 0,
+    .appIDDesc = "test",
+};
 
-PermissionDef testNetInfoPermDef = {.permissionName = "ohos.permission.GET_NETWORK_INFO",
-                                    .bundleName = "net_conn_manager_test",
-                                    .grantMode = 1,
-                                    .label = "label",
-                                    .labelId = 1,
-                                    .description = "Test net connect maneger",
-                                    .descriptionId = 1,
-                                    .availableLevel = APL_SYSTEM_BASIC};
+PermissionDef testNetInfoPermDef = {
+    .permissionName = "ohos.permission.GET_NETWORK_INFO",
+    .bundleName = "net_conn_manager_test",
+    .grantMode = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+    .label = "label",
+    .labelId = 1,
+    .description = "Test net connect manager",
+    .descriptionId = 1,
+};
 
-PermissionDef testInternetPermDef = {.permissionName = "ohos.permission.INTERNET",
-                                     .bundleName = "net_conn_client_fuzzer",
-                                     .grantMode = 1,
-                                     .availableLevel = APL_SYSTEM_BASIC,
-                                     .label = "label",
-                                     .labelId = 1,
-                                     .description = "Test net connect maneger internet",
-                                     .descriptionId = 1};
+PermissionDef testInternetPermDef = {
+    .permissionName = "ohos.permission.INTERNET",
+    .bundleName = "net_conn_client_fuzzer",
+    .grantMode = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+    .label = "label",
+    .labelId = 1,
+    .description = "Test net connect manager internet",
+    .descriptionId = 1,
+};
 
-PermissionStateFull testNetInfoState = {.grantFlags = {2},
-                                        .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                        .isGeneral = true,
-                                        .permissionName = "ohos.permission.GET_NETWORK_INFO",
-                                        .resDeviceID = {"local"}};
+PermissionStateFull testNetInfoState = {
+    .permissionName = "ohos.permission.GET_NETWORK_INFO",
+    .isGeneral = true,
+    .resDeviceID = {"local"},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
+    .grantFlags = {2},
+};
 
-PermissionStateFull testInternetState = {.permissionName = "ohos.permission.INTERNET",
-                                         .isGeneral = true,
-                                         .resDeviceID = {"local"},
-                                         .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                         .grantFlags = {2}};
+PermissionStateFull testInternetState = {
+    .permissionName = "ohos.permission.INTERNET",
+    .isGeneral = true,
+    .resDeviceID = {"local"},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
+    .grantFlags = {2},
+};
 
-HapPolicyParams testNetInfoPolicyPrams = {.apl = APL_SYSTEM_BASIC,
-                                          .domain = "test.domain",
-                                          .permList = {testNetInfoPermDef},
-                                          .permStateList = {testNetInfoState}};
+HapPolicyParams testNetInfoPolicyPrams = {
+    .apl = APL_SYSTEM_BASIC,
+    .domain = "test.domain",
+    .permList = {testNetInfoPermDef},
+    .permStateList = {testNetInfoState},
+};
 
-HapPolicyParams testInternetPolicyPrams = {.apl = APL_SYSTEM_BASIC,
-                                           .domain = "test.domain",
-                                           .permList = {testNetInfoPermDef, testInternetPermDef},
-                                           .permStateList = {testNetInfoState, testInternetState}};
+HapPolicyParams testInternetPolicyPrams = {
+    .apl = APL_SYSTEM_BASIC,
+    .domain = "test.domain",
+    .permList = {testNetInfoPermDef, testInternetPermDef},
+    .permStateList = {testNetInfoState, testInternetState},
+};
 } // namespace
 
 class NetConnManagerTest : public testing::Test {

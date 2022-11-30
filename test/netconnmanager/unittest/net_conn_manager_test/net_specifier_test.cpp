@@ -40,18 +40,49 @@ void NetSpecifierTest::SetUp() {}
 void NetSpecifierTest::TearDown() {}
 
 /**
- * @tc.name: SpecifierIsValidTest
+ * @tc.name: SpecifierIsValidTest001
  * @tc.desc: Test NetSpecifier::SpecifierIsValid
  * @tc.type: FUNC
  */
-HWTEST_F(NetSpecifierTest, SpecifierIsValidTest, TestSize.Level1)
+HWTEST_F(NetSpecifierTest, SpecifierIsValidTest001, TestSize.Level1)
+{
+    sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier();
+    ASSERT_NE(specifier, nullptr);
+    specifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
+    specifier->netCapabilities_.bearerTypes_.insert(BEARER_CELLULAR);
+    bool bValid = specifier->SpecifierIsValid();
+    ASSERT_TRUE(bValid);
+}
+
+/**
+ * @tc.name: SpecifierIsValidTest002
+ * @tc.desc: Test NetSpecifier::SpecifierIsValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetSpecifierTest, SpecifierIsValidTest002, TestSize.Level1)
 {
     sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier;
-    ASSERT_TRUE(specifier != nullptr);
+    ASSERT_NE(specifier, nullptr);
+    bool ret = specifier->SpecifierIsValid();
+    ASSERT_FALSE(ret);
+}
 
-    specifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
-    bool bValid = specifier->SpecifierIsValid();
-    ASSERT_TRUE(bValid == true);
+/**
+ * @tc.name: SpecifierIsValidTest003
+ * @tc.desc: Test NetSpecifier::SpecifierIsValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetSpecifierTest, SpecifierIsValidTest003, TestSize.Level1)
+{
+    std::set<NetCap> caps;
+    sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier;
+    ASSERT_NE(specifier, nullptr);
+    specifier->ident_ = "testIdent";
+    bool ret = specifier->SpecifierIsValid();
+    ASSERT_TRUE(ret);
+    specifier->SetCapabilities(caps);
+    NetCap cap = NET_CAPABILITY_NOT_METERED;
+    specifier->SetCapability(cap);
 }
 
 /**
@@ -62,8 +93,7 @@ HWTEST_F(NetSpecifierTest, SpecifierIsValidTest, TestSize.Level1)
 HWTEST_F(NetSpecifierTest, SetTypesTest, TestSize.Level1)
 {
     sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier;
-    ASSERT_TRUE(specifier != nullptr);
-
+    ASSERT_NE(specifier, nullptr);
     std::set<NetBearType> bearerTypes;
     NetBearType bearerType = NetBearType::BEARER_WIFI;
     bearerTypes.insert(bearerType);
@@ -78,8 +108,7 @@ HWTEST_F(NetSpecifierTest, SetTypesTest, TestSize.Level1)
 HWTEST_F(NetSpecifierTest, SetTypeTest, TestSize.Level1)
 {
     sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier;
-    ASSERT_TRUE(specifier != nullptr);
-
+    ASSERT_NE(specifier, nullptr);
     NetBearType bearerType = NetBearType::BEARER_WIFI;
     specifier->SetType(bearerType);
 }
@@ -93,10 +122,9 @@ HWTEST_F(NetSpecifierTest, MarshallingTest01, TestSize.Level1)
 {
     MessageParcel dataParcel;
     sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier;
-    ASSERT_TRUE(specifier != nullptr);
-
+    ASSERT_NE(specifier, nullptr);
     bool bRet = specifier->Marshalling(dataParcel);
-    ASSERT_TRUE(bRet == true);
+    ASSERT_TRUE(bRet);
 }
 
 /**
@@ -108,10 +136,23 @@ HWTEST_F(NetSpecifierTest, MarshallingTest02, TestSize.Level1)
 {
     MessageParcel dataParcel;
     sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier;
-    ASSERT_TRUE(specifier != nullptr);
-
+    ASSERT_NE(specifier, nullptr);
     bool bRet = NetSpecifier::Marshalling(dataParcel, specifier);
-    ASSERT_TRUE(bRet == true);
+    ASSERT_TRUE(bRet);
+}
+
+/**
+ * @tc.name: MarshallingTest03
+ * @tc.desc: Test static NetSpecifier::Marshalling
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetSpecifierTest, MarshallingTest03, TestSize.Level1)
+{
+    MessageParcel dataParcel;
+    sptr<NetSpecifier> specifier = nullptr;
+    ASSERT_EQ(specifier, nullptr);
+    bool bRet = NetSpecifier::Marshalling(dataParcel, specifier);
+    ASSERT_FALSE(bRet);
 }
 
 /**
@@ -124,10 +165,9 @@ HWTEST_F(NetSpecifierTest, UnmarshallingTest, TestSize.Level1)
     MessageParcel dataParcel;
     sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier;
     bool bRet = NetSpecifier::Marshalling(dataParcel, specifier);
-    ASSERT_TRUE(bRet == true);
-
+    ASSERT_TRUE(bRet);
     sptr<NetSpecifier> specifierUnMarshalling = NetSpecifier::Unmarshalling(dataParcel);
-    ASSERT_TRUE(specifierUnMarshalling != nullptr);
+    ASSERT_NE(specifierUnMarshalling, nullptr);
 }
 
 /**
@@ -138,8 +178,7 @@ HWTEST_F(NetSpecifierTest, UnmarshallingTest, TestSize.Level1)
 HWTEST_F(NetSpecifierTest, ToStringTest, TestSize.Level1)
 {
     sptr<NetSpecifier> specifier = new (std::nothrow) NetSpecifier;
-    ASSERT_TRUE(specifier != nullptr);
-
+    ASSERT_NE(specifier, nullptr);
     std::string str = specifier->ToString("testTab");
     NETMGR_LOG_D("netLinkInfo.ToString string is : [%{public}s]", str.c_str());
 }
