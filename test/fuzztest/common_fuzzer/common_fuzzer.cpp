@@ -119,6 +119,10 @@ void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzPos = 0;
     uint32_t supplierId = GetData<uint32_t>();
     sptr<NetLinkInfo> netLinkInfo = new (std::nothrow) NetLinkInfo();
+    if (netLinkInfo == nullptr) {
+        return;
+    }
+    
     g_netManagerCenter->UpdateNetLinkInfo(supplierId, netLinkInfo);
 }
 
@@ -132,6 +136,9 @@ void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzPos = 0;
     uint32_t supplierId = GetData<uint32_t>();
     sptr<NetSupplierInfo> netSupplierInfo = new (std::nothrow) NetSupplierInfo();
+    if (netSupplierInfo == nullptr) {
+        return;
+    }
     g_netManagerCenter->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
 }
 
@@ -144,6 +151,9 @@ void RegisterConnServiceFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
     sptr<NetConnServiceIface> serviceIface = new (std::nothrow) NetConnServiceIface();
+    if (serviceIface == nullptr) {
+        return;
+    }
     g_netManagerCenter->RegisterConnService(serviceIface);
 }
 
@@ -220,6 +230,9 @@ void RegisterPolicyServiceFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
     sptr<NetPolicyBaseService> service = new (std::nothrow) NetPolicyServiceCommon();
+    if (service == nullptr) {
+        return;
+    }
 
     g_netManagerCenter->RegisterPolicyService(service);
 }
