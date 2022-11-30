@@ -28,6 +28,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+static constexpr const int TIMER_MAX_INTERVAL_MS = 50;
 class Timer {
 public:
     Timer() : stopStatus_(true), tryStopFlag_(false) {}
@@ -52,7 +53,7 @@ public:
         stopStatus_ = false;
         std::thread([this, interval, taskFun]() {
             while (!tryStopFlag_) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+                OneTiming(interval);
                 if (!tryStopFlag_) {
                     taskFun();
                 }
@@ -72,11 +73,9 @@ public:
         NETMGR_LOG_D("start once thread...");
         stopStatus_ = false;
         std::thread([this, interval, taskFun]() {
+            OneTiming(interval);
             if (!tryStopFlag_) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(interval));
-                if (!tryStopFlag_) {
-                    taskFun();
-                }
+                taskFun();
             }
             std::lock_guard<std::mutex> locker(mutex_);
             stopStatus_ = true;
@@ -96,6 +95,25 @@ public:
 
         if (stopStatus_ == true) {
             tryStopFlag_ = false;
+        }
+    }
+
+private:
+    void OneTiming(int time)
+    {
+        int repeatCount = (time > TIMER_MAX_INTERVAL_MS) ? (time / TIMER_MAX_INTERVAL_MS) : 0;
+        int remainTime = (time > TIMER_MAX_INTERVAL_MS) ? (time % TIMER_MAX_INTERVAL_MS) : time;
+        while (!tryStopFlag_) {
+            if (repeatCount > 0) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(TIMER_MAX_INTERVAL_MS));
+            } else {
+                if (remainTime) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(remainTime));
+                    remainTime = 0;
+                }
+                break;
+            }
+            repeatCount--;
         }
     }
 
