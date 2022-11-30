@@ -20,6 +20,7 @@ ohos_unittest("net_policy_manager_test") {
   sources = [
     "net_policy_callback_test.cpp",
     "net_policy_manager_test.cpp",
+    "ut_firewall_rule.cpp",
     "ut_net_policy_callback.cpp",
     "ut_net_policy_callback_ipc.cpp",
     "ut_net_policy_client.cpp",

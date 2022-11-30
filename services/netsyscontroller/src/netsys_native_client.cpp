@@ -672,6 +672,11 @@ sptr<OHOS::NetsysNative::INetsysService> NetsysNativeClient::GetProxy()
     }
 
     deathRecipient_ = new (std::nothrow) NetNativeConnDeathRecipient(*this);
+    if (deathRecipient_ == nullptr) {
+        NETMGR_LOG_E("Recipient new failed!");
+        return nullptr;
+    }
+    
     if ((remote->IsProxyObject()) && (!remote->AddDeathRecipient(deathRecipient_))) {
         NETMGR_LOG_E("add death recipient failed");
         return nullptr;
