@@ -85,10 +85,10 @@ HWTEST_F(UtFirewallRule, SetAllowedList, TestSize.Level1)
     NETMGR_LOG_E("SetAllowedList enter");
     FirewallRule rule(FIREWALL_CHAIN_DEVICE_IDLE);
     rule.ClearAllowedList();
-    EXPECT_EQ(rule.GetAllowedList().size(), 0);
+    EXPECT_EQ(rule.GetAllowedList().size(), static_cast<uint32_t>(0));
     uint32_t uid = 1;
     rule.SetAllowedList(uid, FIREWALL_RULE_ALLOW);
-    EXPECT_EQ(rule.GetAllowedList().size(), 1);
+    EXPECT_EQ(rule.GetAllowedList().size(), static_cast<uint32_t>(1));
     EXPECT_EQ(rule.GetAllowedList()[0], uid);
     uint32_t uidCount = 5;
     std::vector<uint32_t> uids;
@@ -118,22 +118,21 @@ HWTEST_F(UtFirewallRule, SetAllowedList, TestSize.Level1)
  */
 HWTEST_F(UtFirewallRule, SetDeniedList, TestSize.Level1)
 {
-    NETMGR_LOG_E("wuwu11");
     FirewallRule rule(FIREWALL_CHAIN_DEVICE_IDLE);
     rule.ClearDeniedList();
-    EXPECT_EQ(rule.GetDeniedList().size(), 0);
+    EXPECT_EQ(rule.GetDeniedList().size(), static_cast<uint32_t>(0));
     uint32_t uid = 1;
     rule.SetDeniedList(uid, FIREWALL_RULE_DENY);
-    EXPECT_EQ(rule.GetDeniedList().size(), 1);
-    NETMGR_LOG_E("wuwu22");
+    EXPECT_EQ(rule.GetDeniedList().size(), static_cast<uint32_t>(1));
     EXPECT_EQ(rule.GetDeniedList()[0], uid);
+    rule.ClearDeniedList();
     uint32_t uidCount = 5;
     std::vector<uint32_t> uids;
     for (size_t i = 0; i < uidCount; i++) {
         uids.emplace_back(i);
     }
+    rule.ClearDeniedList();
     rule.SetDeniedList(uids);
-    NETMGR_LOG_E("wuwu33");
     EXPECT_EQ(rule.GetDeniedList().size(), uidCount);
     rule.SetDeniedList(uid, FIREWALL_RULE_ALLOW);
     uint32_t expectCount = uidCount - 1;
@@ -141,7 +140,6 @@ HWTEST_F(UtFirewallRule, SetDeniedList, TestSize.Level1)
     uid = 5;
     rule.SetDeniedList(uid, FIREWALL_RULE_ALLOW);
     EXPECT_EQ(rule.GetDeniedList().size(), expectCount);
-    NETMGR_LOG_E("wuwu44");
     uid = 2;
     rule.RemoveFromDeniedList(uid);
     EXPECT_EQ(rule.GetDeniedList().size(), --expectCount);
