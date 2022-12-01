@@ -436,6 +436,9 @@ void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
 
     uint32_t supplierId = GetData<uint32_t>();
     sptr<NetLinkInfo> netLinkInfo = new (std::nothrow) NetLinkInfo();
+    if (netLinkInfo == nullptr) {
+        return;
+    }
 
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
@@ -459,6 +462,9 @@ void RegisterNetSupplierCallbackFuzzTest(const uint8_t *data, size_t size)
     AccessToken token;
     uint32_t supplierId = GetData<uint32_t>();
     sptr<NetSupplierCallbackBaseTest> callback = new (std::nothrow) NetSupplierCallbackBaseTest();
+    if (callback == nullptr) {
+        return;
+    }
 
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
@@ -482,6 +488,9 @@ void RegisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
     AccessToken token;
     sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
+    if (netSpecifier == nullptr || callback == nullptr) {
+        return;
+    }
     uint32_t timeoutMS = GetData<uint32_t>();
 
     MessageParcel dataParcel;
@@ -503,6 +512,9 @@ void UnregisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
 
     AccessToken token;
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
+    if (callback == nullptr) {
+        return;
+    }
 
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {

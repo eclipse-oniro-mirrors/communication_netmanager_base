@@ -26,10 +26,10 @@
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
-using SetCache = int32_t (*)(uint16_t netId, struct ParamWrapper param, struct AddrInfo *res);
+using SetCache = int32_t (*)(uint16_t netId, struct ParamWrapper param, struct addrinfo *res);
 using GetCache = int32_t (*)(uint16_t netId, struct ParamWrapper param,
-							struct AddrInfo addr_info[MAX_RESULTS],
-							uint32_t *num);
+                            struct AddrInfo addr_info[MAX_RESULTS],
+                            uint32_t *num);
 using GetConfig = int32_t (*)(uint16_t netId, struct ResolvConfig *config);
 
 namespace OHOS {
@@ -104,9 +104,7 @@ HWTEST_F(ResolverConfigTest, ResolverConfigTest004, TestSize.Level1)
     std::vector<std::string> getDomains;
 
     int res = netsysNativeService->CreateNetworkCache(netId);
-
     res = netsysNativeService->SetResolverConfig(netId, baseTimeoutMsec, retryCount, servers, domains);
-
     res = netsysNativeService->GetResolverConfig(netId, getServers, getDomains, getBaseTimeoutMsec,
                                                  getRetryCount);
     EXPECT_EQ(getBaseTimeoutMsec, baseTimeoutMsec);
@@ -120,6 +118,50 @@ HWTEST_F(ResolverConfigTest, ResolverConfigTest004, TestSize.Level1)
         EXPECT_EQ(domains[i], getDomains[i]);
     }
     res = netsysNativeService->DestroyNetworkCache(netId);
+}
+
+HWTEST_F(ResolverConfigTest, ResolverConfigTest005, TestSize.Level1)
+{
+    NETNATIVE_LOGI("ResolverConfigTest005 enter");
+    void *handle = dlopen("libnetsys_client.z.so", RTLD_LAZY);
+    if (handle == nullptr) {
+        NETNATIVE_LOGE("dlopen failed errmsg: %{piblic}d, %{public}s", errno, strerror(errno));
+        return;
+    }
+    SetCache funSetCache = reinterpret_cast<SetCache>(dlsym(handle, "NetSysSetResolvCache"));
+    if (funSetCache == nullptr) {
+        NETNATIVE_LOGE("dlsym failed errmsg: %{piblic}d, %{public}s", errno, strerror(errno));
+        dlclose(handle);
+        return;
+    }
+    uint16_t netId = 202;
+    ParamWrapper paramWrapper;
+    char hostName[10] = "localhost";
+    paramWrapper.host = hostName;
+    addrinfo info;
+    int32_t ret = funSetCache(netId, paramWrapper, &info);
+    GetCache funGetCache = reinterpret_cast<GetCache>(dlsym(handle, "NetSysGetResolvCache"));
+    if (funGetCache == nullptr) {
+        NETNATIVE_LOGE("dlsym failed errmsg: %{piblic}d, %{public}s", errno, strerror(errno));
+        dlclose(handle);
+        return;
+    }
+    uint32_t num = 0;
+    AddrInfo addrInfo[MAX_RESULTS] = {};
+    NETNATIVE_LOGI("ResolverConfigTest005 enter0");
+    ret = funGetCache(netId, paramWrapper, addrInfo, &num);
+    EXPECT_EQ(ret, 0);
+    GetConfig func = reinterpret_cast<GetConfig>(dlsym(handle, "NetSysGetResolvConf"));
+    if (func == nullptr) {
+        NETNATIVE_LOGE("dlsym failed errmsg: %{piblic}d, %{public}s", errno, strerror(errno));
+        dlclose(handle);
+        return;
+    }
+    struct ResolvConfig config = {0};
+    NETNATIVE_LOGI("ResolverConfigTest005 enter1");
+    ret = func(0, &config);
+    EXPECT_EQ(ret, 0);
+    dlclose(handle);
 }
 } // namespace NetsysNative
 } // namespace OHOS
