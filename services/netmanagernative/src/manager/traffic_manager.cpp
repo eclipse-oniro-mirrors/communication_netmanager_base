@@ -30,12 +30,14 @@
 
 namespace OHOS {
 namespace nmd {
-static constexpr const char *INTERFACE_LIST_DIR = "/sys/class/net/";
-static constexpr const char *STATISTICS = "statistics";
-static constexpr const char *RX_BYTES = "rx_bytes";
-static constexpr const char *TX_BYTES = "tx_bytes";
-static constexpr const char *RX_PACKETS = "rx_packets";
-static constexpr const char *TX_PACKETS = "tx_packets";
+namespace {
+constexpr const char *INTERFACE_LIST_DIR = "/sys/class/net/";
+constexpr const char *STATISTICS = "statistics";
+constexpr const char *RX_BYTES = "rx_bytes";
+constexpr const char *TX_BYTES = "tx_bytes";
+constexpr const char *RX_PACKETS = "rx_packets";
+constexpr const char *TX_PACKETS = "tx_packets";
+} // namespace
 
 std::vector<std::string> GetInterfaceList()
 {
@@ -69,7 +71,13 @@ long GetInterfaceTrafficByType(const std::string &path, const std::string &type)
 
     std::string trafficPath = path + type;
 
-    int fd = open(trafficPath.c_str(), 0, 0666);
+    char tmpPath[PATH_MAX] = {0};
+    if (!realpath(trafficPath.c_str(), tmpPath)) {
+        NETNATIVE_LOGE("file name is illegal");
+        return -1;
+    }
+
+    int fd = open(tmpPath, 0, 0666);
     if (fd == -1) {
         NETNATIVE_LOGE("GetInterfaceTrafficByType open %{private}s failed", INTERFACE_LIST_DIR);
         return -1;

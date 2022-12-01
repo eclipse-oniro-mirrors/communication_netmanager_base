@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef  NOTIFY_CALLBACK_PROXY_H__
-#define  NOTIFY_CALLBACK_PROXY_H__
+#ifndef  NOTIFY_CALLBACK_PROXY_H
+#define  NOTIFY_CALLBACK_PROXY_H
 #include "iremote_proxy.h"
 
 #include "i_notify_callback.h"
@@ -42,4 +42,4 @@ private:
 };
 } // namespace NetsysNative
 } // namespace OHOS
-#endif
+#endif // NOTIFY_CALLBACK_PROXY_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NETSYS_NATIVE_SERVICE_PROXY_H__
-#define NETSYS_NATIVE_SERVICE_PROXY_H__
+#ifndef NETSYS_NATIVE_SERVICE_PROXY_H
+#define NETSYS_NATIVE_SERVICE_PROXY_H
 
 #include "i_netsys_service.h"
 #include "iremote_proxy.h"
@@ -96,4 +96,4 @@ private:
 };
 } // namespace NetsysNative
 } // namespace OHOS
-#endif
+#endif // NETSYS_NATIVE_SERVICE_PROXY_H

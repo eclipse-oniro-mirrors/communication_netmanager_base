@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_ROUTE_TYPE_H__
-#define INCLUDE_ROUTE_TYPE_H__
+#ifndef INCLUDE_ROUTE_TYPE_H
+#define INCLUDE_ROUTE_TYPE_H
 
 #include <string>
 
@@ -35,4 +35,4 @@ typedef struct MarkMaskParcel {
 } MarkMaskParcel;
 } // namespace nmd
 } // namespace OHOS
-#endif // !INCLUDE_ROUTE_TYPE_H__
+#endif // INCLUDE_ROUTE_TYPE_H

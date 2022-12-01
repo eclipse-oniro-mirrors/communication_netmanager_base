@@ -27,6 +27,22 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
+bool CheckFilePath(const std::string &fileName, std::string &realPath)
+{
+    char tmpPath[PATH_MAX] = {0};
+    if (!realpath(fileName.c_str(), tmpPath)) {
+        NETMGR_LOG_E("file name is illegal");
+        return false;
+    }
+    if (strcmp(tmpPath, POLICY_FILE_NAME) != 0) {
+        NETMGR_LOG_E("file path is illegal");
+        return false;
+    }
+    realPath = tmpPath;
+    return true;
+}
+} // namespace
 const std::string MONTH_DEFAULT = "M1";
 
 NetPolicyFile::NetPolicyFile()
@@ -45,10 +61,9 @@ bool NetPolicyFile::FileExists(const std::string &fileName)
 bool NetPolicyFile::CreateFile(const std::string &fileName)
 {
     if (fileName.empty() || FileExists(fileName)) {
-        NETMGR_LOG_E("fileName empty or file not exists.");
+        NETMGR_LOG_E("fileName empty or file exists.");
         return false;
     }
-
     int32_t fd = open(fileName.c_str(), O_CREAT | O_WRONLY, CHOWN_RWX_USR_GRP);
     if (fd < 0) {
         NETMGR_LOG_E("open file error.");
@@ -162,8 +177,12 @@ bool NetPolicyFile::ReadFile(const std::string &fileName, std::string &fileConte
         NETMGR_LOG_E("[%{public}s] not exist.", fileName.c_str());
         return false;
     }
-
-    std::fstream file(fileName.c_str(), std::fstream::in);
+    std::string realPath;
+    if (!CheckFilePath(fileName, realPath)) {
+        NETMGR_LOG_E("file does not exist! ");
+        return false;
+    }
+    std::fstream file(realPath.c_str(), std::fstream::in);
     if (file.is_open() == false) {
         NETMGR_LOG_E("fstream failed.");
         return false;
@@ -261,7 +280,6 @@ bool NetPolicyFile::WriteFile(const std::string &fileName)
         NETMGR_LOG_E("fileName is empty.");
         return false;
     }
-
     Json::Value root;
     Json::StreamWriterBuilder builder;
     std::unique_ptr<Json::StreamWriter> streamWriter(builder.newStreamWriter());

@@ -54,6 +54,17 @@ constexpr uint32_t MOVE_BIT_LEFT31 = 31;
 constexpr uint32_t BIT_MAX = 32;
 constexpr uint32_t IOCTL_RETRY_TIME = 32;
 constexpr int32_t MAX_MTU_LEN = 11;
+
+bool CheckFilePath(const std::string &fileName, std::string &realPath)
+{
+    char tmpPath[PATH_MAX] = {0};
+    if (!realpath(fileName.c_str(), tmpPath)) {
+        NETNATIVE_LOGE("file name is illegal");
+        return false;
+    }
+    realPath = tmpPath;
+    return true;
+}
 } // namespace
 
 int InterfaceManager::GetMtu(const char *interfaceName)
@@ -62,10 +73,13 @@ int InterfaceManager::GetMtu(const char *interfaceName)
         NETNATIVE_LOGE("InterfaceManager::GetMtu isIfaceName fail %{public}d", errno);
         return -1;
     }
-
-    std::string setMtuPath = std::string(SYS_NET_PATH).append(interfaceName).append(MTU_PATH);
-
-    int fd = open(setMtuPath.c_str(), 0, FILE_PERMISSION);
+    std::string mtuPath = std::string(SYS_NET_PATH).append(interfaceName).append(MTU_PATH);
+    std::string realPath;
+    if (!CheckFilePath(mtuPath, realPath)) {
+        NETNATIVE_LOGE("file does not exist! ");
+        return -1;
+    }
+    int fd = open(realPath.c_str(), 0, FILE_PERMISSION);
     if (fd == -1) {
         NETNATIVE_LOGE("InterfaceManager::GetMtu open fail %{public}d", errno);
         return -1;
@@ -91,15 +105,12 @@ int InterfaceManager::SetMtu(const char *interfaceName, const char *mtuValue)
         NETNATIVE_LOGE("InterfaceManager::SetMtu isIfaceName fail %{public}d", errno);
         return -1;
     }
-
-    std::string setMtuPath = std::string(SYS_NET_PATH).append(interfaceName).append(MTU_PATH);
-
-    int fd = open(setMtuPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, FILE_PERMISSION);
+    std::string mtuPath = std::string(SYS_NET_PATH).append(interfaceName).append(MTU_PATH);
+    int fd = open(mtuPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, FILE_PERMISSION);
     if (fd == -1) {
         NETNATIVE_LOGE("InterfaceManager::SetMtu open fail %{public}d", errno);
         return -1;
     }
-
     int nwrite = write(fd, mtuValue, strlen(mtuValue));
     if (nwrite == -1) {
         NETNATIVE_LOGE("InterfaceManager::SetMtu write fail %{public}d", errno);

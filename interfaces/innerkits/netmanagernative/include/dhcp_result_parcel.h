@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef  DHCP_RESULT_PARCEL_H__
-#define  DHCP_RESULT_PARCEL_H__
+#ifndef  DHCP_RESULT_PARCEL_H
+#define  DHCP_RESULT_PARCEL_H
 
 #include <string>
 #include "parcel.h"
@@ -37,4 +37,4 @@ struct DhcpResultParcel : public Parcelable {
 };
 } // namespace NetsysNative
 } // namespace OHOS
-#endif
+#endif // DHCP_RESULT_PARCEL_H

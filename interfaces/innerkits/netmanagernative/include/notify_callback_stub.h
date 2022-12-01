@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef  NOTIFY_CALLBACK_STUB_H__
-#define  NOTIFY_CALLBACK_STUB_H__
+#ifndef NOTIFY_CALLBACK_STUB_H
+#define NOTIFY_CALLBACK_STUB_H
 #include <map>
 
 #include "iremote_stub.h"
@@ -27,8 +27,7 @@ public:
     NotifyCallbackStub();
     virtual ~NotifyCallbackStub();
 
-    int32_t OnRemoteRequest(
-        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
     using NotifyCallbackFunc = int32_t (NotifyCallbackStub::*)(MessageParcel &, MessageParcel &);
@@ -49,4 +48,4 @@ private:
 };
 } // namespace NetsysNative
 } // namespace OHOS
-#endif
+#endif // NOTIFY_CALLBACK_STUB_H
