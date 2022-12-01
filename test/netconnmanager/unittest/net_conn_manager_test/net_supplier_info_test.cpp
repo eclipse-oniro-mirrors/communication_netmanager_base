@@ -39,6 +39,37 @@ void NetSupplierInfoTest::SetUp() {}
 void NetSupplierInfoTest::TearDown() {}
 
 /**
+ * @tc.name: MarshallingTest001
+ * @tc.desc: Test NetSupplierInfo::Marshalling
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetSupplierInfoTest, MarshallingTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    sptr<NetSupplierInfo> info = nullptr;
+    bool bRet = NetSupplierInfo::Marshalling(data, info);
+    ASSERT_FALSE(bRet);
+    sptr<NetSupplierInfo> retInf = NetSupplierInfo::Unmarshalling(data);
+    ASSERT_EQ(retInf, nullptr);
+}
+
+/**
+ * @tc.name: MarshallingTest002
+ * @tc.desc: Test NetSupplierInfo::Marshalling
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetSupplierInfoTest, MarshallingTest002, TestSize.Level1)
+{
+    MessageParcel data;
+    sptr<NetSupplierInfo> info = new (std::nothrow) NetSupplierInfo();
+    ASSERT_NE(info, nullptr);
+    bool bRet = info->Marshalling(data);
+    ASSERT_TRUE(bRet);
+    sptr<NetSupplierInfo> retInf = NetSupplierInfo::Unmarshalling(data);
+    ASSERT_NE(retInf, nullptr);
+}
+
+/**
  * @tc.name: UnmarshallingTest
  * @tc.desc: Test NetSupplierInfo::Marshalling
  * @tc.type: FUNC
@@ -47,11 +78,11 @@ HWTEST_F(NetSupplierInfoTest, UnmarshallingTest, TestSize.Level1)
 {
     MessageParcel data;
     sptr<NetSupplierInfo> info = new (std::nothrow) NetSupplierInfo();
+    ASSERT_NE(info, nullptr);
     bool bRet = NetSupplierInfo::Marshalling(data, info);
-    ASSERT_TRUE(bRet == true);
-
+    ASSERT_TRUE(bRet);
     sptr<NetSupplierInfo> retInf = NetSupplierInfo::Unmarshalling(data);
-    ASSERT_TRUE(retInf != nullptr);
+    ASSERT_NE(retInf, nullptr);
 }
 
 /**
@@ -62,6 +93,7 @@ HWTEST_F(NetSupplierInfoTest, UnmarshallingTest, TestSize.Level1)
 HWTEST_F(NetSupplierInfoTest, ToStringTest, TestSize.Level1)
 {
     sptr<NetSupplierInfo> info = new (std::nothrow) NetSupplierInfo();
+    ASSERT_NE(info, nullptr);
     std::string str = info->ToString("testTab");
     NETMGR_LOG_D("NetSupplierInfoTest.ToString string is : [%{public}s]", str.c_str());
 }
