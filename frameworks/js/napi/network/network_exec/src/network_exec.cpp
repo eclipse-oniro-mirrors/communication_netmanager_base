@@ -17,6 +17,7 @@
 
 #include "network_constant.h"
 #include "net_conn_client.h"
+#include "net_manager_constants.h"
 #include "network_observer.h"
 #include "netmanager_base_log.h"
 #include "napi_utils.h"
@@ -49,7 +50,7 @@ bool NetworkExec::ExecGetType(GetTypeContext *context)
         ret = 0;
     }
     NETMANAGER_BASE_LOGI("ExecGetType result %{public}d", ret);
-    if (ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED) {
+    if (ret == NETMANAGER_ERR_PERMISSION_DENIED) {
         ret = NETWORK_NO_PERMISSION;
     }
     context->SetErrorCode(ret);
@@ -104,7 +105,7 @@ bool NetworkExec::ExecSubscribe(SubscribeContext *context)
         ret = 0;
     }
     NETMANAGER_BASE_LOGI("ExecSubscribe result %{public}d", ret);
-    if (ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED) {
+    if (ret == NETMANAGER_ERR_PERMISSION_DENIED) {
         ret = NETWORK_NO_PERMISSION;
     }
     context->SetErrorCode(ret);
@@ -141,7 +142,7 @@ bool NetworkExec::ExecUnsubscribe(UnsubscribeContext *context)
         ret = 0;
     }
     NETMANAGER_BASE_LOGI("ExecUnsubscribe result %{public}d", ret);
-    if (ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED) {
+    if (ret == NETMANAGER_ERR_PERMISSION_DENIED) {
         ret = NETWORK_NO_PERMISSION;
     }
     context->SetErrorCode(ret);
