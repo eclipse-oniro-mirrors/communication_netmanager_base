@@ -86,7 +86,7 @@ std::string FirewallManager::ReadMaxUidConfig()
     std::ostringstream oss;
     oss << file.rdbuf();
     content = oss.str();
-    int32_t index = content.find_last_of(' ');
+    auto index = content.find_last_of(' ');
     maxUid = content.substr(index + 1);
     // if unavailable value use default value
     if (maxUid.size() == 0) {

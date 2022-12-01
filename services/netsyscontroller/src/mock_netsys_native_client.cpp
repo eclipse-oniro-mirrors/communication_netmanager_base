@@ -38,6 +38,7 @@
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
 const std::string INTERFACE_LIST_DIR = "/sys/class/net/";
 const std::string UID_LIST_DIR = "/data/data/uid/";
 const std::string UID_TRAFFIC_BPF_PATH = "/dev/socket/traffic";
@@ -54,6 +55,18 @@ const std::string NET_STATS_FILE_TX_BYTES = "tx_bytes";
 const std::string NET_STATS_FILE_RX_PACKETS = "rx_packets";
 const std::string NET_STATS_FILE_TX_PACKETS = "tx_packets";
 constexpr int32_t MOCK_MODULO_LAST_SIX_DIGITS = 100000;
+
+bool CheckFilePath(const std::string &fileName, std::string &realPath)
+{
+    char tmpPath[PATH_MAX] = {0};
+    if (!realpath(fileName.c_str(), tmpPath)) {
+        NETMGR_LOG_E("file name is illegal");
+        return false;
+    }
+    realPath = tmpPath;
+    return true;
+}
+} // namespace
 
 MockNetsysNativeClient::MockNetsysNativeClient()
 {
@@ -217,7 +230,12 @@ static long GetInterfaceTrafficByType(const std::string &path, const std::string
         return -1;
     }
     std::string trafficPath = path + type;
-    int fd = open(trafficPath.c_str(), 0, 0666);
+    std::string realPath;
+    if (!CheckFilePath(trafficPath, realPath)) {
+        NETMGR_LOG_E("file does not exist! ");
+        return -1;
+    }
+    int fd = open(realPath.c_str(), 0, 0666);
     if (fd == -1) {
         return -1;
     }
@@ -285,7 +303,7 @@ int64_t MockNetsysNativeClient::GetAllTxBytes()
     return GetAllBytes(NET_STATS_FILE_TX_BYTES.c_str());
 }
 
-static long getUidTrafficFromBPF(int uid, int cgroupType)
+static long GetUidTrafficFromBpf(int uid, int cgroupType)
 {
     int sock = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sock < 0) {
@@ -327,14 +345,14 @@ static long getUidTrafficFromBPF(int uid, int cgroupType)
 int64_t MockNetsysNativeClient::GetUidRxBytes(uint32_t uid)
 {
     NETMGR_LOG_D("MockNetsysNativeClient GetUidRxBytes uid is [%{public}u]", uid);
-    long result = getUidTrafficFromBPF(uid, 0);
+    long result = GetUidTrafficFromBpf(uid, 0);
     return static_cast<int64_t>(result);
 }
 
 int64_t MockNetsysNativeClient::GetUidTxBytes(uint32_t uid)
 {
     NETMGR_LOG_D("MockNetsysNativeClient GetUidTxBytes uid is [%{public}u]", uid);
-    long result = getUidTrafficFromBPF(uid, 1);
+    long result = GetUidTrafficFromBpf(uid, 1);
     return static_cast<int64_t>(result);
 }
 

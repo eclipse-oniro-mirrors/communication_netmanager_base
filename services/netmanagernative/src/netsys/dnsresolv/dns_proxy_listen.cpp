@@ -30,9 +30,11 @@ namespace OHOS {
 namespace nmd {
 uint16_t DnsProxyListen::netId_ = 0;
 bool DnsProxyListen::proxyListenSwitch_ = false;
-constexpr const uint16_t DNS_PROXY_PORT = 53;
-constexpr const uint8_t RESPONSE_FLAG = 0x80;
-constexpr const uint8_t RESPONSE_FLAG_USED = 80;
+constexpr uint16_t DNS_PROXY_PORT = 53;
+constexpr uint8_t RESPONSE_FLAG = 0x80;
+constexpr uint8_t RESPONSE_FLAG_USED = 80;
+constexpr size_t FLAG_BUFF_LEN = 1;
+constexpr size_t FLAG_BUFF_OFFSET = 2;
 DnsProxyListen::DnsProxyListen() : proxySockFd_(-1) {}
 DnsProxyListen::~DnsProxyListen()
 {
@@ -97,7 +99,7 @@ void DnsProxyListen::DnsParseBySocket(int32_t clientSocket, std::vector<std::str
         if (resLen > 0) {
             break;
         }
-        if (!CheckDnsResponse(requesData)) {
+        if (!CheckDnsResponse(requesData, MAX_REQUESTDATA_LEN)) {
             NETNATIVE_LOGE("read buff is not dns answer");
             break;
         }
@@ -157,7 +159,7 @@ void DnsProxyListen::StartListen()
             NETNATIVE_LOGE("read errno %{public}d", errno);
             continue;
         }
-        if (CheckDnsResponse(recvBuff.questionsBuff)) {
+        if (CheckDnsResponse(recvBuff.questionsBuff, MAX_REQUESTDATA_LEN)) {
             NETNATIVE_LOGE("read buff is not dns question");
             continue;
         }
@@ -169,12 +171,14 @@ void DnsProxyListen::StartListen()
     }
 }
 
-bool DnsProxyListen::CheckDnsResponse(char *recBuff)
+bool DnsProxyListen::CheckDnsResponse(char *recBuff, size_t recLen)
 {
+    if (recLen < FLAG_BUFF_LEN + FLAG_BUFF_OFFSET) {
+        return false;
+    }
     uint8_t flagBuff;
-    char *recFlagBuff = recBuff + 2;
-    unsigned int count = 1;
-    if (memcpy_s(reinterpret_cast<char *>(&flagBuff), count, recFlagBuff, count) != 0) {
+    char *recFlagBuff = recBuff + FLAG_BUFF_OFFSET;
+    if (memcpy_s(reinterpret_cast<char *>(&flagBuff), FLAG_BUFF_LEN, recFlagBuff, FLAG_BUFF_LEN) != 0) {
         return false;
     }
     int reqFlag = (flagBuff & RESPONSE_FLAG) / RESPONSE_FLAG_USED;
