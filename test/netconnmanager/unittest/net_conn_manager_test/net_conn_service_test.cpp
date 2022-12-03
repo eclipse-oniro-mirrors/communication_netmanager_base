@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "accesstoken_kit.h"
+#include "net_all_capabilities.h"
 #include "net_conn_service.h"
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
@@ -75,6 +76,8 @@ constexpr uint32_t TEST_TIMEOUTMS = 1000;
 constexpr const char *TEST_HOST = "testHost";
 constexpr int32_t TEST_NETID = 3;
 constexpr int32_t TEST_SOCKETFD = 2;
+const int32_t NET_ID = 2;
+const int32_t SOCKET_FD = 5;
 
 class NetSupplierTestCallback : public NetSupplierCallbackStub {
 public:
@@ -459,6 +462,23 @@ HWTEST_F(NetConnServiceTest, GetHttpProxyTest001, TestSize.Level1)
     ret = DelayedSingleton<NetConnService>::GetInstance()->GetHttpProxy(getHttpProxy);
     ASSERT_EQ(ret, NET_CONN_SUCCESS);
     ASSERT_EQ(getHttpProxy, "testProxy");
+}
+
+HWTEST_F(NetConnServiceTest, GetTest001, TestSize.Level1)
+{
+    std::list<int32_t> netIdList;
+    netIdList.push_back(NET_ID);
+    int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->GetSpecificNet(BEARER_CELLULAR, netIdList);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = DelayedSingleton<NetConnService>::GetInstance()->RestrictBackgroundChanged(true);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    std::vector<std::u16string> args;
+    args.emplace_back(u"dummy data");
+    ret = DelayedSingleton<NetConnService>::GetInstance()->Dump(SOCKET_FD, args);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    DelayedSingleton<NetConnService>::GetInstance()->OnNetActivateTimeOut(NET_ID);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
