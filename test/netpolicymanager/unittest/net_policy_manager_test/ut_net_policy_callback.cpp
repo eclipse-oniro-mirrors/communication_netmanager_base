@@ -181,7 +181,7 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback001, TestSize.Level1)
 
     std::cout << "g_callbackUid:" << g_callbackUid << std::endl;
     std::cout << "g_callbackPolicy:" << g_callbackPolicy << std::endl;
-    ASSERT_EQ(g_callbackUid, TEST_UID1);
+    ASSERT_EQ(g_callbackUid, static_cast<int32_t>(TEST_UID1));
     ASSERT_EQ(g_callbackPolicy, 1);
     g_netPolicyCallback->UnregisterNetPolicyCallback(callback);
 }
@@ -209,7 +209,7 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback002, TestSize.Level1)
 
     std::cout << "g_callbackUid:" << g_callbackUid << std::endl;
     std::cout << "g_callbackRule:" << g_callbackRule << std::endl;
-    ASSERT_EQ(g_callbackUid, TEST_UID1);
+    ASSERT_EQ(g_callbackUid, static_cast<uint32_t>(TEST_UID1));
     g_netPolicyCallback->UnregisterNetPolicyCallback(callback);
 }
 

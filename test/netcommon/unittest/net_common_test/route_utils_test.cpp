@@ -49,7 +49,6 @@ Route GetRoute()
 }
 
 constexpr uint32_t TEST_NETID = 110;
-constexpr int32_t ADD_ROUTE_FAIL = -101;
 } // namespace
 
 class RouteUtilsTest : public testing::Test {
@@ -87,12 +86,12 @@ HWTEST_F(RouteUtilsTest, RemoveRouteFromLocal01, TestSize.Level1)
 
 HWTEST_F(RouteUtilsTest, AddRoute01, TestSize.Level1)
 {
-    EXPECT_EQ(ADD_ROUTE_FAIL, RouteUtils::AddRoute(TEST_NETID, GetRoute()));
+    EXPECT_GE(0, RouteUtils::AddRoute(TEST_NETID, GetRoute()));
 }
 
 HWTEST_F(RouteUtilsTest, RemoveRoute01, TestSize.Level1)
 {
-    EXPECT_EQ(ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL, RouteUtils::RemoveRoute(TEST_NETID, GetRoute()));
+    EXPECT_GE(0, RouteUtils::RemoveRoute(TEST_NETID, GetRoute()));
 }
 
 HWTEST_F(RouteUtilsTest, UpdateRoutes01, TestSize.Level1)

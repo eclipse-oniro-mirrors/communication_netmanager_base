@@ -40,37 +40,44 @@ constexpr int32_t TRIGER_DELAY_US = 100000;
 constexpr uint32_t TEST_UID = 10000;
 const std::string TEST_STRING_PERIODDURATION = "M1";
 
-HapInfoParams testInfoParms = {.bundleName = "net_policy_service_test",
-                               .userID = 1,
-                               .instIndex = 0,
-                               .appIDDesc = "test"};
+HapInfoParams testInfoParms = {
+    .userID = 1,
+    .bundleName = "net_policy_service_test",
+    .instIndex = 0,
+    .appIDDesc = "test",
+};
 
-PermissionDef testPermDef = {.permissionName = "ohos.permission.test",
-                             .bundleName = "net_policy_service_test",
-                             .grantMode = 1,
-                             .label = "label",
-                             .labelId = 1,
-                             .description = "Test net policy service",
-                             .descriptionId = 1,
-                             .availableLevel = APL_SYSTEM_BASIC};
+PermissionDef testPermDef = {
+    .permissionName = "ohos.permission.test",
+    .bundleName = "net_policy_service_test",
+    .grantMode = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+    .label = "label",
+    .labelId = 1,
+    .description = "Test net policy service",
+    .descriptionId = 1,
+};
 
-PermissionStateFull testState = {.grantFlags = {2},
-                                 .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                 .isGeneral = true,
-                                 .permissionName = "ohos.permission.test",
-                                 .resDeviceID = {"local"}};
+PermissionStateFull testState = {
+    .permissionName = "ohos.permission.test",
+    .isGeneral = true,
+    .resDeviceID = {"local"},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
+    .grantFlags = {2},
+};
 
-HapPolicyParams testPolicyPrams = {.apl = APL_SYSTEM_BASIC,
-                                   .domain = "test.domain",
-                                   .permList = {testPermDef},
-                                   .permStateList = {testState}};
+HapPolicyParams testPolicyPrams = {
+    .apl = APL_SYSTEM_BASIC,
+    .domain = "test.domain",
+    .permList = {testPermDef},
+    .permStateList = {testState},
+};
 } // namespace
 
 class AccessToken {
 public:
-    AccessToken()
+    AccessToken() : currentID_(GetSelfTokenID())
     {
-        currentID_ = GetSelfTokenID();
         AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
         accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
         SetSelfTokenID(accessID_);
@@ -82,7 +89,7 @@ public:
     }
 
 private:
-    AccessTokenID currentID_ = 0;
+    AccessTokenID currentID_;
     AccessTokenID accessID_ = 0;
 };
 
