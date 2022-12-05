@@ -435,11 +435,11 @@ std::vector<std::string> MockNetsysNativeClient::InterfaceGetList()
     NETMGR_LOG_I("MockNetsysNativeClient InterfaceGetList");
     DIR *dir(nullptr);
     std::vector<std::string> ifList;
-    if ((dir = opendir(INTERFACE_LIST_DIR.c_str())) == NULL) {
+    if ((dir = opendir(INTERFACE_LIST_DIR.c_str())) == nullptr) {
         return ifList;
     }
     struct dirent *ptr(nullptr);
-    while ((ptr = readdir(dir)) != NULL) {
+    while ((ptr = readdir(dir)) != nullptr) {
         if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) {
             continue;
         }
@@ -454,11 +454,11 @@ std::vector<std::string> MockNetsysNativeClient::UidGetList()
     NETMGR_LOG_I("MockNetsysNativeClient UidGetList");
     DIR *dir(nullptr);
     std::vector<std::string> uidList;
-    if ((dir = opendir(UID_LIST_DIR.c_str())) == NULL) {
+    if ((dir = opendir(UID_LIST_DIR.c_str())) == nullptr) {
         return uidList;
     }
     struct dirent *ptr(nullptr);
-    while ((ptr = readdir(dir)) != NULL) {
+    while ((ptr = readdir(dir)) != nullptr) {
         if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) {
             continue;
         }

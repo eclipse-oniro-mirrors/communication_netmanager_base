@@ -229,10 +229,10 @@ int32_t NetsysNativeServiceStub::CmdDestroyNetworkCache(MessageParcel &data, Mes
 int32_t NetsysNativeServiceStub::NetsysFreeAddrinfo(struct addrinfo *aihead)
 {
     struct addrinfo *ai, *ainext;
-    for (ai = aihead; ai != NULL; ai = ainext) {
-        if (ai->ai_addr != NULL)
+    for (ai = aihead; ai != nullptr; ai = ainext) {
+        if (ai->ai_addr != nullptr)
             free(ai->ai_addr);
-        if (ai->ai_canonname != NULL)
+        if (ai->ai_canonname != nullptr)
             free(ai->ai_canonname);
         ainext = ai->ai_next;
         free(ai);
