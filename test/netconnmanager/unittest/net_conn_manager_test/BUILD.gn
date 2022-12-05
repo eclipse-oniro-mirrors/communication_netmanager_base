@@ -18,6 +18,7 @@ ohos_unittest("net_conn_manager_test") {
   module_out_path = "netmanager_base/net_conn_manager_test"
 
   sources = [
+    "inet_addr_test.cpp",
     "net_activate_test.cpp",
     "net_caps_test.cpp",
     "net_conn_callback_test.cpp",
