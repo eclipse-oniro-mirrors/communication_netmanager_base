@@ -19,7 +19,9 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+#define private public
 #include "fwmark_client.h"
+#undef private
 #include "netnative_log_wrapper.h"
 #include "singleton.h"
 
@@ -30,6 +32,10 @@ using namespace nmd;
 namespace {
 constexpr int32_t NETID_FIRST = 101;
 constexpr int32_t NETID_SECOND = 102;
+static constexpr const int32_t ERROR_CODE_SOCKETFD_INVALID = -1;
+static constexpr const int32_t ERROR_CODE_CONNECT_FAILED = -2;
+static constexpr const int32_t ERROR_CODE_SENDMSG_FAILED = -3;
+static constexpr const int32_t ERROR_CODE_READ_FAILED = -4;
 class ManagerNative : public std::enable_shared_from_this<ManagerNative> {
     DECLARE_DELAYED_SINGLETON(ManagerNative);
 
@@ -85,6 +91,50 @@ HWTEST_F(UnitTestFwmarkClient, BindSocketTest002, TestSize.Level1)
     close(tcpSocket);
     tcpSocket = -1;
     EXPECT_TRUE(ret == 0);
+}
+
+/**
+ * @tc.name: BindSocketTest003
+ * @tc.desc: Test FwmarkClient BindSocket.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UnitTestFwmarkClient, BindSocketTest003, TestSize.Level1)
+{
+    int32_t tcpSocket = -1;
+    int32_t ret = fwmarkClient->BindSocket(tcpSocket, NETID_SECOND);
+    NETNATIVE_LOGI("UnitTestFwmarkClient BindSocketTest002 ret=%{public}d", ret);
+    close(tcpSocket);
+    tcpSocket = -1;
+    EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: HandleErrorTest
+ * @tc.desc: Test FwmarkClient BindSocket.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UnitTestFwmarkClient, HandleErrorTest, TestSize.Level1)
+{
+    int32_t ret = -1;
+    int32_t errorCode = ERROR_CODE_SOCKETFD_INVALID;
+    ret = fwmarkClient->HandleError(ret, errorCode);
+    EXPECT_EQ(ret, -1);
+
+    errorCode = ERROR_CODE_CONNECT_FAILED;
+    ret = fwmarkClient->HandleError(ret, errorCode);
+    EXPECT_EQ(ret, -1);
+
+    errorCode = ERROR_CODE_SENDMSG_FAILED;
+    ret = fwmarkClient->HandleError(ret, errorCode);
+    EXPECT_EQ(ret, -1);
+
+    errorCode = ERROR_CODE_READ_FAILED;
+    ret = fwmarkClient->HandleError(ret, errorCode);
+    EXPECT_EQ(ret, -1);
+
+    errorCode = 100;
+    ret = fwmarkClient->HandleError(ret, errorCode);
+    EXPECT_EQ(ret, -1);
 }
 } // namespace NetsysNative
 } // namespace OHOS
