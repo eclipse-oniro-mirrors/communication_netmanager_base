@@ -60,11 +60,14 @@ HWTEST_F(RouteTest, UnmarshallingTest, TestSize.Level1)
 {
     MessageParcel data;
     sptr<Route> route = new (std::nothrow) Route();
+    ASSERT_TRUE(route != nullptr);
     bool bRet = Route::Marshalling(data, route);
     ASSERT_TRUE(bRet == true);
 
     sptr<Route> retRoute = Route::Unmarshalling(data);
     ASSERT_TRUE(retRoute != nullptr);
+    bRet = route->Marshalling(data);
+    ASSERT_TRUE(bRet == true);
 }
 
 /**
