@@ -70,19 +70,22 @@ HWTEST_F(NetSupplierInfoTest, MarshallingTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: UnmarshallingTest
- * @tc.desc: Test NetSupplierInfo::Marshalling
+ * @tc.name: UnmarshallingTest001
+ * @tc.desc: Test NetSupplierInfo::UnmarshallingTest
  * @tc.type: FUNC
  */
-HWTEST_F(NetSupplierInfoTest, UnmarshallingTest, TestSize.Level1)
+HWTEST_F(NetSupplierInfoTest, UnmarshallingTest001, TestSize.Level1)
 {
     MessageParcel data;
     sptr<NetSupplierInfo> info = new (std::nothrow) NetSupplierInfo();
     ASSERT_NE(info, nullptr);
     bool bRet = NetSupplierInfo::Marshalling(data, info);
-    ASSERT_TRUE(bRet);
+    ASSERT_TRUE(bRet == true);
     sptr<NetSupplierInfo> retInf = NetSupplierInfo::Unmarshalling(data);
-    ASSERT_NE(retInf, nullptr);
+    ASSERT_TRUE(retInf != nullptr);
+
+    bRet = info->Marshalling(data);
+    ASSERT_TRUE(bRet == true);
 }
 
 /**
