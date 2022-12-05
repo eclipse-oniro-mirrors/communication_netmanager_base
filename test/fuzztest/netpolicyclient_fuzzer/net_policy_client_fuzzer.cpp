@@ -370,7 +370,7 @@ void RegisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
     if (callback == nullptr) {
         return;
     }
- 
+
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
         return;
@@ -589,7 +589,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetBackgroundPolicyByUidFuzzTest(data, size);
     OHOS::NetManagerStandard::SetCellularPoliciesFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterNetPolicyCallbackFuzzTest(data, size);
-    OHOS::NetManagerStandard::UnregisterNetPolicyCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetQuotaPoliciesFuzzTest(data, size);
     OHOS::NetManagerStandard::SetNetQuotaPoliciesFuzzTest(data, size);
     OHOS::NetManagerStandard::IsUidNetAllowedFuzzTest(data, size);
@@ -597,5 +596,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::UpdateRemindPolicyFuzzTest(data, size);
     OHOS::NetManagerStandard::SetDeviceIdleAllowedListFuzzTest(data, size);
     OHOS::NetManagerStandard::SetDeviceIdlePolicyFuzzTest(data, size);
+    OHOS::NetManagerStandard::UnregisterNetPolicyCallbackFuzzTest(data, size);
     return 0;
 }
