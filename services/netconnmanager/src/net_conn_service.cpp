@@ -522,19 +522,12 @@ int32_t NetConnService::NetDetection(int32_t netId)
         return ERR_PERMISSION_CHECK_FAIL;
     }
     std::lock_guard<std::mutex> locker(netManagerMutex_);
-    std::shared_ptr<Network> detectionNetwork = nullptr;
     auto iterNetwork = networks_.find(netId);
     if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
         NETMGR_LOG_E("Could not find the corresponding network.");
-    } else {
-        detectionNetwork = iterNetwork->second;
-    }
-
-    if (detectionNetwork == nullptr) {
-        NETMGR_LOG_E("Network is not find, need register!");
         return ERR_NET_NOT_FIND_NETID;
     }
-    detectionNetwork->StartNetDetection(true);
+    iterNetwork->second->StartNetDetection(true);
     return ERR_NONE;
 }
 
@@ -547,23 +540,16 @@ int32_t NetConnService::RegUnRegNetDetectionCallback(int32_t netId, const sptr<I
     }
 
     std::lock_guard<std::mutex> locker(netManagerMutex_);
-    std::shared_ptr<Network> detectionNetwork = nullptr;
     auto iterNetwork = networks_.find(netId);
     if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
         NETMGR_LOG_E("Could not find the corresponding network.");
-    } else {
-        detectionNetwork = iterNetwork->second;
-    }
-
-    if (detectionNetwork == nullptr) {
-        NETMGR_LOG_E("Network is not find, need register!");
         return ERR_NET_NOT_FIND_NETID;
     }
     if (isReg) {
-        detectionNetwork->RegisterNetDetectionCallback(callback);
+        iterNetwork->second->RegisterNetDetectionCallback(callback);
         return ERR_NONE;
     }
-    return detectionNetwork->UnRegisterNetDetectionCallback(callback);
+    return iterNetwork->second->UnRegisterNetDetectionCallback(callback);
 }
 
 std::list<sptr<NetSupplier>> NetConnService::GetNetSupplierFromList(NetBearType bearerType, const std::string &ident)
@@ -631,6 +617,9 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         }
         return ERR_NONE;
     }
+    if (timeoutMS == 0) {
+        callback->NetUnavailable();
+    }
 
     NETMGR_LOG_I("ActivateNetwork: can't found best network, send request to all networks.");
     SendRequestToAllNetwork(request);
@@ -647,9 +636,8 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
         NETMGR_LOG_E("not found the reqId: [%{public}d]", reqId);
         return;
     }
-    sptr<NetActivate> pNetActivate = iterActivate->second;
-    if (pNetActivate) {
-        sptr<NetSupplier> pNetService = pNetActivate->GetServiceSupply();
+    if (iterActivate->second != nullptr) {
+        sptr<NetSupplier> pNetService = iterActivate->second->GetServiceSupply();
         if (pNetService) {
             pNetService->CancelRequest(reqId);
         }
@@ -998,7 +986,7 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
     NETMGR_LOG_D("bestReqList size = %{public}zd", bestReqList.size());
     for (auto it : bestReqList) {
         auto reqIt = netActivates_.find(it);
-        if ((reqIt == netActivates_.end()) || (!reqIt->second)) {
+        if ((reqIt == netActivates_.end()) || (reqIt->second == nullptr)) {
             NETMGR_LOG_D("netActivates_ not find reqId : %{public}d", it);
             continue;
         }

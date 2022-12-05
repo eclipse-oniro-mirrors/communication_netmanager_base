@@ -69,7 +69,6 @@ void DnsProxyListen::DnsParseBySocket(int32_t clientSocket, std::vector<std::str
     if (!PollUdpDataTransfer::MakeUdpNonBlock(parseSocketFd)) {
         NETNATIVE_LOGE("MakeNonBlock error  %{public}d: %{public}s", errno, strerror(errno));
         close(parseSocketFd);
-        parseSocketFd = -1;
         return;
     }
     int32_t resLen;
@@ -107,7 +106,6 @@ void DnsProxyListen::DnsParseBySocket(int32_t clientSocket, std::vector<std::str
         serversNum++;
     }
     close(parseSocketFd);
-    parseSocketFd = -1;
     if (resLen > 0) {
         DnsSendRecvParseData(clientSocket, requesData, resLen, proxyAddr);
     }

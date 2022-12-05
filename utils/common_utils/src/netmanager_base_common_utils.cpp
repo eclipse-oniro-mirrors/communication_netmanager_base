@@ -349,9 +349,10 @@ std::vector<const char *> FormatCmd(const std::vector<std::string> &cmd)
     std::vector<const char *> res;
     res.reserve(cmd.size() + 1);
 
-    for (auto &line : cmd) {
-        res.emplace_back(line.c_str());
-    }
+    // string is converted to char * and the result is saved in res
+    std::transform(cmd.begin(), cmd.end(), std::back_inserter(res), [](const std::string &str) {
+        return str.c_str();
+    });
     res.emplace_back(nullptr);
     return res;
 }

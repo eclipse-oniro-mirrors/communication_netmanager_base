@@ -81,7 +81,7 @@ HWTEST_F(DnsProxyListenTest, DnsProxyTest001, TestSize.Level1)
         return;
     }
     int flags = fcntl(proxySockFd, F_GETFL, 0);
-    uint32_t tempFlags = (uint32_t)flags | O_NONBLOCK;
+    uint32_t tempFlags = static_cast<uint32_t>(flags) | O_NONBLOCK;
     fcntl(proxySockFd, F_SETFL, tempFlags);
     struct pollfd pfd;
     pfd.fd = proxySockFd;

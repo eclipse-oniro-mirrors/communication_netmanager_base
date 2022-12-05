@@ -255,7 +255,7 @@ napi_value NapiCommon::HandleAsyncWork(napi_env env, BaseContext *baseContext, c
     NAPI_CALL(env, napi_create_string_utf8(env, workName.data(), NAPI_AUTO_LENGTH, &resourceName));
     NAPI_CALL(env,
         napi_create_async_work(
-            env, resource, resourceName, execute, complete, (void *)context.get(), &context->work));
+            env, resource, resourceName, execute, complete, static_cast<void *>(context.get()), &context->work));
     napi_status queueWorkStatus = napi_queue_async_work(env, context->work);
     if (queueWorkStatus == napi_ok) {
         context.release();
