@@ -19,7 +19,9 @@
 
 #include "i_net_monitor_callback.h"
 #include "net_manager_constants.h"
+#define private public
 #include "net_monitor.h"
+#undef private
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -73,6 +75,28 @@ HWTEST_F(NetMonitorTest, IsDetectingTest001, TestSize.Level1)
     EXPECT_TRUE(ret);
     instance_->Detection();
     instance_->Stop();
+}
+
+HWTEST_F(NetMonitorTest, GetStatusCodeFromResponse001, TestSize.Level1)
+{
+    std::string str;
+    int32_t ret = instance_->GetStatusCodeFromResponse(str);
+    EXPECT_EQ(ret, -1);
+    str = "12 34";
+    ret = instance_->GetStatusCodeFromResponse(str);
+    EXPECT_EQ(ret, -1);
+    str = "12 \r\n";
+    ret = instance_->GetStatusCodeFromResponse(str);
+    EXPECT_EQ(ret, -1);
+    str = "12 34 \r\n";
+    ret = instance_->GetStatusCodeFromResponse(str);
+    EXPECT_EQ(ret, 34);
+    str = "12 34\r\n";
+    ret = instance_->GetStatusCodeFromResponse(str);
+    EXPECT_EQ(ret, -1);
+    str = "12 34 56 \r\n";
+    ret = instance_->GetStatusCodeFromResponse(str);
+    EXPECT_EQ(ret, 34);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

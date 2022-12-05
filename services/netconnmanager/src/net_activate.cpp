@@ -119,9 +119,6 @@ bool NetActivate::CompareByNetworkNetType(NetBearType bearerType)
         return false;
     }
     std::set<NetBearType> &reqTypes = netSpecifier_->netCapabilities_.bearerTypes_;
-    if (reqTypes.empty()) {
-        return true;
-    }
     if (reqTypes.find(bearerType) == reqTypes.end()) {
         return false;
     }
