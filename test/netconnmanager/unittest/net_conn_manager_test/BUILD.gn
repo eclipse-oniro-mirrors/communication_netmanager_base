@@ -20,7 +20,7 @@ ohos_unittest("net_conn_manager_test") {
   sources = [
     "inet_addr_test.cpp",
     "net_activate_test.cpp",
-	"net_all_capabilities_test.cpp",
+    "net_all_capabilities_test.cpp",
     "net_caps_test.cpp",
     "net_conn_callback_test.cpp",
     "net_conn_client_test.cpp",
