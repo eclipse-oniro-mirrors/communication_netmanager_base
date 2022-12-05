@@ -464,23 +464,16 @@ int32_t NetConnService::RegUnRegNetDetectionCallbackAsync(int32_t netId, const s
         return ERR_SERVICE_NULL_PTR;
     }
 
-    std::shared_ptr<Network> detectionNetwork = nullptr;
     auto iterNetwork = networks_.find(netId);
     if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
         NETMGR_LOG_E("Could not find the corresponding network.");
-    } else {
-        detectionNetwork = iterNetwork->second;
-    }
-
-    if (detectionNetwork == nullptr) {
-        NETMGR_LOG_E("Network is not find, need register!");
         return ERR_NET_NOT_FIND_NETID;
     }
     if (isReg) {
-        detectionNetwork->RegisterNetDetectionCallback(callback);
+        iterNetwork->second->RegisterNetDetectionCallback(callback);
         return NETMANAGER_SUCCESS;
     }
-    return detectionNetwork->UnRegisterNetDetectionCallback(callback);
+    return iterNetwork->second->UnRegisterNetDetectionCallback(callback);
 }
 
 int32_t NetConnService::UpdateNetStateForTestAsync(const sptr<NetSpecifier> &netSpecifier, int32_t netState)
@@ -576,19 +569,12 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
 int32_t NetConnService::NetDetectionAsync(int32_t netId)
 {
     NETMGR_LOG_D("Enter NetConnService::NetDetection");
-    std::shared_ptr<Network> detectionNetwork = nullptr;
     auto iterNetwork = networks_.find(netId);
     if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
         NETMGR_LOG_E("Could not find the corresponding network.");
-    } else {
-        detectionNetwork = iterNetwork->second;
-    }
-
-    if (detectionNetwork == nullptr) {
-        NETMGR_LOG_E("Network is not find, need register!");
         return ERR_NET_NOT_FIND_NETID;
     }
-    detectionNetwork->StartNetDetection(true);
+    iterNetwork->second->StartNetDetection(true);
     return NETMANAGER_SUCCESS;
 }
 
@@ -672,9 +658,8 @@ void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
                 NETMGR_LOG_E("not found the reqId: [%{public}d]", reqId);
                 return;
             }
-            sptr<NetActivate> pNetActivate = iterActivate->second;
-            if (pNetActivate) {
-                sptr<NetSupplier> pNetService = pNetActivate->GetServiceSupply();
+            if (iterActivate->second != nullptr) {
+                sptr<NetSupplier> pNetService = iterActivate->second->GetServiceSupply();
                 if (pNetService) {
                     pNetService->CancelRequest(reqId);
                 }
@@ -891,7 +876,7 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
     NETMGR_LOG_D("bestReqList size = %{public}zd", bestReqList.size());
     for (auto it : bestReqList) {
         auto reqIt = netActivates_.find(it);
-        if ((reqIt == netActivates_.end()) || (!reqIt->second)) {
+        if ((reqIt == netActivates_.end()) || (reqIt->second == nullptr)) {
             NETMGR_LOG_D("netActivates_ not find reqId : %{public}d", it);
             continue;
         }
