@@ -277,7 +277,7 @@ int32_t NetMonitor::Wait(int32_t sockFd, uint8_t *canRead, uint8_t *canWrite)
         FD_SET(sockFd, &writeFds);
     }
     struct timeval tval = {tval.tv_sec = 8, tval.tv_usec = 0};
-    int ret = select((sockFd + 1), &readFds, &writeFds, NULL, &tval);
+    int ret = select((sockFd + 1), &readFds, &writeFds, nullptr, &tval);
     if (ret <= 0) {
         NETMGR_LOG_E("Select net[%{public}d] failed,errno[%{public}d]:%{public}s", netId_, errno, strerror(errno));
         return -1;

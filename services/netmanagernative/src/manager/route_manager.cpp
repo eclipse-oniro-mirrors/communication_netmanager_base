@@ -652,7 +652,7 @@ int32_t RouteManager::SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtm
         msg.rtm_scope = RT_SCOPE_UNIVERSE;
     }
 
-    InetAddr gw;
+    InetAddr gw = {0};
     if (!routeInfo.routeNextHop.empty() && ReadAddrGw(routeInfo.routeNextHop, &gw) <= 0) {
         NETNATIVE_LOGE("gw parse failed:%{public}d", readAddrResult);
         return -1;
@@ -661,7 +661,6 @@ int32_t RouteManager::SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtm
         msg.rtm_scope = RT_SCOPE_UNIVERSE;
         msg.rtm_family = static_cast<uint8_t>(gw.family);
     }
-
     NetlinkMsg nlmsg(routeFlag, NETLINK_MAX_LEN, getpid());
     nlmsg.AddRoute(action, msg);
     if (int32_t ret = nlmsg.AddAttr32(RTA_TABLE, routeInfo.routeTable)) {
