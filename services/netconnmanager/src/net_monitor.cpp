@@ -122,7 +122,7 @@ void NetMonitor::Detection()
             detectionSteps_ = 0;
         } else {
             NETMGR_LOG_I("currentNetMonitor[%{public}d] evaluation failed", netId_);
-            detectionDelay_ = INIT_DETECTION_DELAY_MS * DOUBLE * detectionSteps_;
+            detectionDelay_ = static_cast<uint32_t>(INIT_DETECTION_DELAY_MS * DOUBLE * detectionSteps_);
             if (detectionDelay_ == 0) {
                 detectionDelay_ = INIT_DETECTION_DELAY_MS;
             } else if (detectionDelay_ >= MAX_FAILED_DETECTION_DELAY_MS) {
@@ -492,8 +492,7 @@ int32_t NetMonitor::GetIpAddr(const char *domain, std::string &ip_addr, int &soc
 int32_t NetMonitor::GetDefaultNetDetectionUrlFromCfg(std::string &strUrl)
 {
     int32_t ret = 0;
-    std::string urlFilePath = URL_CFG_FILE;
-    std::ifstream file(urlFilePath.c_str());
+    std::ifstream file(URL_CFG_FILE);
     if (!file.is_open()) {
         NETMGR_LOG_E("Open file failed (%{public}s)", strerror(errno));
         ret = -1;
@@ -503,7 +502,7 @@ int32_t NetMonitor::GetDefaultNetDetectionUrlFromCfg(std::string &strUrl)
     std::ostringstream oss;
     oss << file.rdbuf();
     std::string content = oss.str();
-    int32_t index = content.find_last_of(SPACE_STR);
+    auto index = content.find_last_of(SPACE_STR);
     strUrl = content.substr(index + 1);
     if (strUrl.empty()) {
         NETMGR_LOG_E("get netdetectionurl is empty");

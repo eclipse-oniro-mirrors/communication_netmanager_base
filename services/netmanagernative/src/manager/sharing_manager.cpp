@@ -214,15 +214,11 @@ int32_t SharingManager::DisableNat(const std::string &downstreamIface, const std
 
 int32_t SharingManager::SetIpFwdEnable()
 {
-    bool success = true;
     bool disable = forwardingRequests_.empty();
     const char *value = disable ? "0" : "1";
-    success &= WriteToFile(IPV4_FORWARDING_PROC_FILE, value);
-    success &= WriteToFile(IPV6_FORWARDING_PROC_FILE, value);
-    if (success) {
-        return 0;
-    }
-    return -1;
+    bool ipv4Success = WriteToFile(IPV4_FORWARDING_PROC_FILE, value);
+    bool ipv6Success = WriteToFile(IPV6_FORWARDING_PROC_FILE, value);
+    return (ipv4Success && ipv6Success) ? 0 : -1;
 }
 
 int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface)
@@ -368,13 +364,15 @@ int32_t SharingManager::GetNetworkSharingTraffic(const std::string &downIface, c
             NETNATIVE_LOG_D("GetNetworkSharingTraffic matche[%{public}s]", tempMatch.c_str());
             if (matches[i] == downIface && matches[i + NEXT_LIST_CORRECT_DATA] == upIface &&
                 ((i - TWO_LIST_CORRECT_DATA) >= 0)) {
-                int64_t send = strtoul(matches[i - TWO_LIST_CORRECT_DATA].str().c_str(), nullptr, 0);
+                int64_t send =
+                    static_cast<int64_t>(strtoul(matches[i - TWO_LIST_CORRECT_DATA].str().c_str(), nullptr, 0));
                 isFindTx = true;
                 traffic.send = send;
                 traffic.all += send;
             } else if (matches[i] == upIface && matches[i + NEXT_LIST_CORRECT_DATA] == downIface &&
                        ((i - NET_TRAFFIC_RESULT_INDEX_OFFSET) >= 0)) {
-                int64_t receive = strtoul(matches[i - TWO_LIST_CORRECT_DATA].str().c_str(), nullptr, 0);
+                int64_t receive =
+                    static_cast<int64_t>(strtoul(matches[i - TWO_LIST_CORRECT_DATA].str().c_str(), nullptr, 0));
                 isFindRx = true;
                 traffic.receive = receive;
                 traffic.all += receive;

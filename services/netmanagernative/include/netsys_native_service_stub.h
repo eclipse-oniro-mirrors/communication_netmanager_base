@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NETSYS_NATIVE_SERVICE_STUB_H__
-#define NETSYS_NATIVE_SERVICE_STUB_H__
+#ifndef NETSYS_NATIVE_SERVICE_STUB_H
+#define NETSYS_NATIVE_SERVICE_STUB_H
 
 #include <map>
 
@@ -92,4 +92,4 @@ private:
 };
 } // namespace NetsysNative
 } // namespace OHOS
-#endif // NETSYS_NATIVE_SERVICE_STUB_H__
+#endif // NETSYS_NATIVE_SERVICE_STUB_H

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef I_NETSYS_SERVICE_H__
-#define I_NETSYS_SERVICE_H__
+#ifndef I_NETSYS_SERVICE_H
+#define I_NETSYS_SERVICE_H
 
 #include <netdb.h>
 #include <string>
@@ -155,4 +155,4 @@ public:
 };
 } // namespace NetsysNative
 } // namespace OHOS
-#endif
+#endif // I_NETSYS_SERVICE_H

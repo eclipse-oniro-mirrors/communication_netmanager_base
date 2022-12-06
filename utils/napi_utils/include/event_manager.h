@@ -33,7 +33,7 @@ public:
     void DeleteListener(const std::string &type, napi_value callback);
     void Emit(const std::string &type, const std::pair<napi_value, napi_value> &argv);
     void SetData(void *data);
-    void EmitByUv(const std::string &type, void *data, void(Handler)(uv_work_t *, int status));
+    void EmitByUv(const std::string &type, void *data, void(handler)(uv_work_t *, int status));
     bool HasEventListener(const std::string &type);
     void DeleteListener(const std::string &type);
     [[nodiscard]] void *GetData();

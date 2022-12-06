@@ -109,7 +109,7 @@ bool EventListener::IsAsyncCallback() const
     return asyncCallback_;
 }
 
-void EventListener::EmitByUv(const std::string &type, void *data, void(Handler)(uv_work_t *, int status)) const
+void EventListener::EmitByUv(const std::string &type, void *data, void(handler)(uv_work_t *, int status)) const
 {
     NETMANAGER_BASE_LOGI("EventListener::EmitByUv() is called, to EmitByUv");
 
@@ -117,7 +117,7 @@ void EventListener::EmitByUv(const std::string &type, void *data, void(Handler)(
         return;
     }
 
-    NapiUtils::CreateUvQueueWork(env_, data, Handler);
+    NapiUtils::CreateUvQueueWork(env_, data, handler);
 }
 
 napi_env EventListener::GetEnv() const

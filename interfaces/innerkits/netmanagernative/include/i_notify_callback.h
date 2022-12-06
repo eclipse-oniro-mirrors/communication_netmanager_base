@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef I_NOTIFY_CALLBACK_H__
-#define I_NOTIFY_CALLBACK_H__
+#ifndef I_NOTIFY_CALLBACK_H
+#define I_NOTIFY_CALLBACK_H
 
 #include <string>
 
-#include "iremote_broker.h"
 #include "dhcp_result_parcel.h"
+#include "iremote_broker.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -56,4 +56,4 @@ public:
 };
 } // namespace NetsysNative
 } // namespace OHOS
-#endif
+#endif // I_NOTIFY_CALLBACK_H
