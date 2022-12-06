@@ -58,6 +58,11 @@ void NetPolicyCore::SendEvent(int32_t eventId, std::shared_ptr<PolicyEvent> &eve
 {
     NETMGR_LOG_D("NetPolicyCore SendEvent: eventId[%{public}d]", eventId);
     auto event = AppExecFwk::InnerEvent::Get(eventId, eventData);
+    if (handler_ == nullptr) {
+        NETMGR_LOG_E("handler is null");
+        return;
+    }
+    
     handler_->SendEvent(event, delayTime);
 }
 
