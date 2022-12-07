@@ -25,7 +25,17 @@ static constexpr const int CALLBACK_PARAM_NUM = 1;
 static constexpr const int ASYNC_CALLBACK_PARAM_NUM = 2;
 } // namespace
 
-EventManager::EventManager() : data_(nullptr) {}
+EventManager::EventManager() : data_(nullptr), isValid_(true) {}
+
+void EventManager::SetInvalid()
+{
+    isValid_ = false;
+}
+
+bool EventManager::IsValid() const
+{
+    return isValid_;
+}
 
 void EventManager::AddListener(napi_env env, const std::string &type, napi_value callback, bool once,
                                bool asyncCallback)
@@ -82,6 +92,9 @@ void *EventManager::GetData()
 
 void EventManager::EmitByUv(const std::string &type, void *data, void(handler)(uv_work_t *, int status))
 {
+    if (!IsValid()) {
+        return;
+    }
     std::lock_guard<std::mutex> lock(mutex_);
 
     std::for_each(listeners_.begin(), listeners_.end(), [type, data, handler, this](const EventListener &listener) {

@@ -18,6 +18,7 @@
 
 #include <list>
 #include <mutex>
+#include <atomic>
 
 #include <uv.h>
 
@@ -43,10 +44,14 @@ public:
         return listeners_.empty();
     }
 
+    bool IsValid() const;
+    void SetInvalid();
+
 private:
     std::mutex mutex_;
     std::list<EventListener> listeners_;
     void *data_;
+    std::atomic_bool isValid_;
 };
 
 struct UvWorkWrapper {
