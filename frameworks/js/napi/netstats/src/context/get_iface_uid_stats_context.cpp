@@ -51,7 +51,7 @@ void GetIfaceUidStatsContext::ParseParams(napi_value *params, size_t paramsCount
         return;
     }
     bool checkUidType = NapiUtils::GetValueType(
-                            GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0], UID)) == napi_number;
+        GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0], UID)) == napi_number;
     bool checkIfaceType =
         NapiUtils::GetValueType(GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), ifaceInfo, IFACE)) == napi_string;
     bool checkStartType =
