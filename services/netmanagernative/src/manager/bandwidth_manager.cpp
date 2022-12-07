@@ -259,7 +259,7 @@ int32_t BandwidthManager::SetGlobalAlert(Operate operate, int64_t bytes)
             command =
                 "-t filter -D " + chainName + " -m quota --quota " + std::to_string(bytes) + " --name globalAlert";
             hasError = hasError || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(
-                                        IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+                IPTYPE_IPV4, command) == NETMANAGER_ERROR);
             globalAlertBytes_ = 0;
         } else {
             NETNATIVE_LOGE("not match bytes, cannot remove global alert");
@@ -288,7 +288,7 @@ int32_t BandwidthManager::SetCostlyAlert(Operate operate, const std::string &ifa
             command = "-t filter -D " + chainName + " -m quota2 --quota " + std::to_string(bytes) + " --name " + iface +
                       "Alert";
             hasError = hasError || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(
-                                        IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+                IPTYPE_IPV4, command) == NETMANAGER_ERROR);
             ifaceAlertBytes_[iface] = 0;
         } else {
             NETNATIVE_LOGE("not match bytes, cannot remove global alert");
