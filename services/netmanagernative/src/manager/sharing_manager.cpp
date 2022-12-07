@@ -218,7 +218,7 @@ int32_t SharingManager::SetIpFwdEnable()
     const char *value = disable ? "0" : "1";
     bool ipv4Success = WriteToFile(IPV4_FORWARDING_PROC_FILE, value);
     bool ipv6Success = WriteToFile(IPV6_FORWARDING_PROC_FILE, value);
-    return (ipv4Success && ipv6Success) ? 0 : 1;
+    return (ipv4Success && ipv6Success) ? 0 : -1;
 }
 
 int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface)
