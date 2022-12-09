@@ -28,6 +28,7 @@ bool IsValidIPV4(const std::string &ip);
 bool IsValidIPV6(const std::string &ip);
 int8_t GetAddrFamily(const std::string &ip);
 int GetMaskLength(const std::string &mask);
+std::string GetMaskByLength(uint32_t length);
 std::string ConvertIpv4Address(uint32_t addressIpv4);
 uint32_t ConvertIpv4Address(const std::string &address);
 int32_t Ipv4PrefixLen(const std::string &ip);
