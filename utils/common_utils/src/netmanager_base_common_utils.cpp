@@ -147,7 +147,7 @@ int GetMaskLength(const std::string &mask)
 
 std::string GetMaskByLength(uint32_t length)
 {
-    const auto mask = -1 << (NET_MASK_MAX_LENGTH - length);
+    const auto mask = length == 0 ? 0 : -1 << (NET_MASK_MAX_LENGTH - length);
     auto maskGroup = new int[NET_MASK_GROUP_COUNT];
     for (int i = 0; i < NET_MASK_GROUP_COUNT; i++) {
         int pos = NET_MASK_GROUP_COUNT - 1 - i;
