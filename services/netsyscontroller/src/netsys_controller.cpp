@@ -239,6 +239,16 @@ int32_t NetsysController::DestroyNetworkCache(uint16_t netId)
     return netsysService_->DestroyNetworkCache(netId);
 }
 
+int32_t NetsysController::GetAddrInfo(const std::string hostName, const std::string serverName, const addrinfo *hints,
+                                      uint16_t netId, addrinfo **res)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+    }
+    return netsysService_->GetAddrInfo(hostName, serverName, hints, netId, res);
+}
+
 int32_t NetsysController::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
                                                    nmd::NetworkSharingTraffic &traffic)
 {
@@ -736,6 +746,19 @@ int32_t NetsysController::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint3
         return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
     return netsysService_->FirewallSetUidRule(chain, uid, firewallRule);
+}
+
+void NetsysController::FreeAddrInfo(addrinfo *aihead)
+{
+    for (addrinfo *tmp = aihead; tmp != nullptr; tmp = tmp->ai_next) {
+        if (tmp->ai_addr != nullptr) {
+            free(tmp->ai_addr);
+        }
+        if (tmp->ai_canonname != nullptr) {
+            free(tmp->ai_canonname);
+        }
+        free(tmp);
+    }
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

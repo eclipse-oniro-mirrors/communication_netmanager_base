@@ -36,6 +36,7 @@ public:
         NETSYS_CREATE_NETWORK_CACHE,
         NETSYS_FLUSH_NETWORK_CACHE,
         NETSYS_DESTROY_NETWORK_CACHE,
+        NETSYS_GET_ADDR_INFO,
         NETSYS_INTERFACE_SET_MTU,
         NETSYS_INTERFACE_GET_MTU,
         NETSYS_REGISTER_NOTIFY_CALLBACK,
@@ -94,6 +95,8 @@ public:
                                       uint8_t &retryCount) = 0;
     virtual int32_t CreateNetworkCache(uint16_t netId) = 0;
     virtual int32_t DestroyNetworkCache(uint16_t netId) = 0;
+    virtual int32_t GetAddrInfo(const std::string hostName, const std::string serverName,
+                                const struct addrinfo *hints, uint16_t netId, addrinfo **res) = 0;
     virtual int32_t InterfaceSetMtu(const std::string &interfaceName, int mtu) = 0;
     virtual int32_t InterfaceGetMtu(const std::string &interfaceName) = 0;
 
@@ -102,8 +105,8 @@ public:
 
     virtual int32_t NetworkAddRoute(int32_t netId, const std::string &interfaceName, const std::string &destination,
                                     const std::string &nextHop) = 0;
-    virtual int32_t NetworkRemoveRoute(int32_t netId, const std::string &interfaceName, const std::string &destination,
-                                       const std::string &nextHop) = 0;
+    virtual int32_t NetworkRemoveRoute(int32_t netId, const std::string &interfaceName,
+                                       const std::string &destination, const std::string &nextHop) = 0;
     virtual int32_t NetworkAddRouteParcel(int32_t netId, const RouteInfoParcel &routeInfo) = 0;
     virtual int32_t NetworkRemoveRouteParcel(int32_t netId, const RouteInfoParcel &routeInfo) = 0;
     virtual int32_t NetworkSetDefault(int32_t netId) = 0;

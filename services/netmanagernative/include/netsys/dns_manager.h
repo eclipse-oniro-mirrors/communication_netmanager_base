@@ -96,11 +96,25 @@ public:
     void GetDumpInfo(std::string &info);
 
     /**
+     * dns resolution object
+     *
+     * @param node hostname
+     * @param service service name
+     * @param hints limit
+     * @param result return value
+     * @param netId network id
+     * @return int32_t  0 is success -1 is failed
+     */
+    int32_t GetAddrInfo(const std::string node, const std::string service, const addrinfo *hints, uint16_t netId,
+                        addrinfo **result);
+
+    /**
      * destroy this netid's cache
      * @param netId network's id
      * @return destroy is success? 0 : -1
      */
     int32_t DestroyNetworkCache(uint16_t netId);
+
 private:
     std::shared_ptr<DnsProxyListen> dnsProxyListen_;
 };

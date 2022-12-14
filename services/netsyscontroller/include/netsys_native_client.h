@@ -226,6 +226,19 @@ public:
     int32_t DestroyNetworkCache(uint16_t netId);
 
     /**
+     * Domain name resolution Obtains the domain name address
+     *
+     * @param hostName Domain name to be resolved
+     * @param serverName Server name used for query
+     * @param hints Limit parameters when querying
+     * @param netId Network id
+     * @param res return addrinfo
+     * @return Return the return value of the netsys interface call
+     */
+    int32_t GetAddrInfo(const std::string hostName, const std::string serverName, const addrinfo *hints,
+                        uint16_t netId, addrinfo **res);
+
+    /**
      * Obtains the bytes of the sharing network.
      *
      * @return Success return 0.
