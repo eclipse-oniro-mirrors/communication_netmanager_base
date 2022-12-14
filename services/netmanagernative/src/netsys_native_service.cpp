@@ -181,6 +181,12 @@ int32_t NetsysNativeService::DestroyNetworkCache(const uint16_t netId)
     return netsysService_->DnsDestroyNetworkCache(netId);
 }
 
+int32_t NetsysNativeService::GetAddrInfo(const std::string hostName, const std::string serverName,
+                                         const addrinfo *hints, uint16_t netId, addrinfo **res)
+{
+    return netsysService_->DnsGetAddrInfo(hostName, serverName, hints, netId, res);
+}
+
 int32_t NetsysNativeService::InterfaceSetMtu(const std::string &interfaceName, int32_t mtu)
 {
     NETNATIVE_LOG_D("InterfaceSetMtu  Begin");
