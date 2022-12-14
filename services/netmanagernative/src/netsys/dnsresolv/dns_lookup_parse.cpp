@@ -584,7 +584,7 @@ int32_t DnsLookUpParse::ResMkQuery(int32_t op, const std::string dName, int32_t 
     }
 
     uint8_t snapName[BUFF_MAX_LEN];
-    if (memset_s(snapName, nameNum, 0, nameNum) != 0) {
+    if (memset_s(snapName, BUFF_MAX_LEN, 0, BUFF_MAX_LEN) != 0) {
         return EAI_AGAIN;
     }
     snapName[ARG_INDEX_2] = op * HOSTNAME_BUFF_COMPUTE + 1;
