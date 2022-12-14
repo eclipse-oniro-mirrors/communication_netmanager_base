@@ -195,8 +195,15 @@ int32_t NetsysControllerServiceImpl::DestroyNetworkCache(uint16_t netId)
     return netsysClient_.DestroyNetworkCache(netId);
 }
 
-int32_t NetsysControllerServiceImpl::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
-    nmd::NetworkSharingTraffic &traffic)
+int32_t NetsysControllerServiceImpl::GetAddrInfo(const std::string hostName, const std::string serverName,
+                                                 const addrinfo *hints, uint16_t netId, addrinfo **res)
+{
+    return netsysClient_.GetAddrInfo(hostName, serverName, hints, netId, res);
+}
+
+int32_t NetsysControllerServiceImpl::GetNetworkSharingTraffic(const std::string &downIface,
+                                                              const std::string &upIface,
+                                                              nmd::NetworkSharingTraffic &traffic)
 {
     NETMGR_LOG_I("NetsysControllerServiceImpl GetNetworkSharingTraffic");
     return netsysClient_.GetNetworkSharingTraffic(downIface, upIface, traffic);
