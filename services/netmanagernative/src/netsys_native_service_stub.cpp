@@ -37,6 +37,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_GET_RESOLVER_CONFIG] = &NetsysNativeServiceStub::CmdGetResolverConfig;
     opToInterfaceMap_[NETSYS_CREATE_NETWORK_CACHE] = &NetsysNativeServiceStub::CmdCreateNetworkCache;
     opToInterfaceMap_[NETSYS_DESTROY_NETWORK_CACHE] = &NetsysNativeServiceStub::CmdDestroyNetworkCache;
+    opToInterfaceMap_[NETSYS_GET_ADDR_INFO] = &NetsysNativeServiceStub::CmdGetAddrInfo;
     opToInterfaceMap_[NETSYS_INTERFACE_SET_MTU] = &NetsysNativeServiceStub::CmdInterfaceSetMtu;
     opToInterfaceMap_[NETSYS_INTERFACE_GET_MTU] = &NetsysNativeServiceStub::CmdInterfaceGetMtu;
     opToInterfaceMap_[NETSYS_REGISTER_NOTIFY_CALLBACK] = &NetsysNativeServiceStub::CmdRegisterNotifyCallback;
@@ -236,6 +237,50 @@ int32_t NetsysNativeServiceStub::NetsysFreeAddrinfo(struct addrinfo *aihead)
             free(ai->ai_canonname);
         ainext = ai->ai_next;
         free(ai);
+    }
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceStub::CmdGetAddrInfo(MessageParcel &data, MessageParcel &reply)
+{
+    addrinfo hints;
+    bzero(&hints, sizeof(addrinfo));
+    if (!data.ReadInt16()) { // if read is 0,hints have data
+        hints.ai_family = data.ReadInt16();
+        hints.ai_socktype = data.ReadInt16();
+        hints.ai_flags = data.ReadInt16();
+        hints.ai_protocol = data.ReadInt16();
+    } else {
+        (void)memset_s((void *)&hints, sizeof(addrinfo), 0, sizeof(addrinfo));
+        hints.ai_family = -1;
+    }
+    uint16_t netId = data.ReadUint16();
+    std::string strNode = data.ReadString();
+    std::string strService = data.ReadString();
+    addrinfo *result = nullptr;
+    int32_t ret = GetAddrInfo(strNode, strService, &hints, netId, &result);
+    reply.WriteInt32(ret);
+    int32_t addr_size = 0;
+    addrinfo *res_p1 = nullptr;
+    for (res_p1 = result; res_p1 != nullptr; res_p1 = res_p1->ai_next) {
+        addr_size++;
+    }
+    reply.WriteInt32(addr_size);
+    for (res_p1 = result; res_p1 != nullptr; res_p1 = res_p1->ai_next) {
+        reply.WriteInt16(res_p1->ai_flags);
+        reply.WriteInt16(res_p1->ai_family);
+        reply.WriteInt16(res_p1->ai_socktype);
+        reply.WriteInt16(res_p1->ai_protocol);
+        reply.WriteUint32(res_p1->ai_addrlen);
+        int canSize = 0;
+        if (res_p1->ai_canonname != nullptr) {
+            canSize = strlen(res_p1->ai_canonname);
+        }
+        reply.WriteInt16(canSize);
+        if (canSize > 0) {
+            reply.WriteRawData(res_p1->ai_canonname, canSize);
+        }
+        reply.WriteRawData((char *)res_p1->ai_addr, res_p1->ai_addrlen);
     }
     return ERR_NONE;
 }

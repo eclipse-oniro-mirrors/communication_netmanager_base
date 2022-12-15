@@ -354,6 +354,16 @@ int32_t NetsysNativeClient::DestroyNetworkCache(uint16_t netId)
     return proxy->DestroyNetworkCache(netId);
 }
 
+int32_t NetsysNativeClient::GetAddrInfo(const std::string hostName, const std::string serverName, const addrinfo *hints,
+                                        uint16_t netId, addrinfo **res)
+{
+    if (netsysNativeService_ == nullptr) {
+        NETMGR_LOG_E("GetAddrInfo netsysNativeService_ is null");
+        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+    }
+    return netsysNativeService_->GetAddrInfo(hostName, serverName, hints, netId, res);
+}
+
 int32_t NetsysNativeClient::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
                                                      nmd::NetworkSharingTraffic &traffic)
 {
@@ -676,7 +686,7 @@ sptr<OHOS::NetsysNative::INetsysService> NetsysNativeClient::GetProxy()
         NETMGR_LOG_E("Recipient new failed!");
         return nullptr;
     }
-    
+
     if ((remote->IsProxyObject()) && (!remote->AddDeathRecipient(deathRecipient_))) {
         NETMGR_LOG_E("add death recipient failed");
         return nullptr;

@@ -73,7 +73,7 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t NetworkAddRoute(int32_t netId, const std::string &ifName, const std::string &destination,
-        const std::string &nextHop) override;
+                            const std::string &nextHop) override;
 
     /**
      * Remove route
@@ -85,7 +85,7 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t NetworkRemoveRoute(int32_t netId, const std::string &ifName, const std::string &destination,
-        const std::string &nextHop) override;
+                               const std::string &nextHop) override;
 
     /**
      * @brief Get interface config
@@ -166,7 +166,8 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
-        const std::vector<std::string> &servers, const std::vector<std::string> &domains) override;
+                              const std::vector<std::string> &servers,
+                              const std::vector<std::string> &domains) override;
 
     /**
      * Get dns server param info
@@ -178,8 +179,8 @@ public:
      * @param retryCount
      * @return Return the return value of the netsys interface call
      */
-    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
-        std::vector<std::string> &domains, uint16_t &baseTimeoutMsec, uint8_t &retryCount) override;
+    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
+                              uint16_t &baseTimeoutMsec, uint8_t &retryCount) override;
 
     /**
      * Create dns cache before set dns
@@ -198,12 +199,25 @@ public:
     int32_t DestroyNetworkCache(uint16_t netId) override;
 
     /**
+     * Domain name resolution Obtains the domain name address
+     *
+     * @param hostName Domain name to be resolved
+     * @param serverName Server name used for query
+     * @param hints Limit parameters when querying
+     * @param netId Network id
+     * @param res return addrinfo
+     * @return Return the return value of the netsys interface call
+     */
+    int32_t GetAddrInfo(const std::string hostName, const std::string serverName, const addrinfo *hints,
+                        uint16_t netId, addrinfo **res) override;
+
+    /**
      * Obtains the bytes of the sharing network.
      *
      * @return Success return 0.
      */
     int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
-        nmd::NetworkSharingTraffic &traffic) override;
+                                     nmd::NetworkSharingTraffic &traffic) override;
 
     /**
      * Obtains the bytes received over the cellular network.
@@ -318,14 +332,14 @@ public:
      *
      * @return Return the return value of the netsys interface call
      */
-    int32_t  SetDefaultNetWork(int32_t netId) override;
+    int32_t SetDefaultNetWork(int32_t netId) override;
 
     /**
      * clear default network netId.
      *
      * @return Return the return value of the netsys interface call
      */
-    int32_t  ClearDefaultNetWorkNetId() override;
+    int32_t ClearDefaultNetWorkNetId() override;
 
     /**
      * Obtains the NIC list.
@@ -342,7 +356,7 @@ public:
      * @param requestor the requestor of forwarding
      * @return Return the return value of the netsys interface call.
      */
-    int32_t IpEnableForwarding(const std::string& requestor) override;
+    int32_t IpEnableForwarding(const std::string &requestor) override;
 
     /**
      * Disable ip forwarding.
@@ -350,7 +364,7 @@ public:
      * @param requestor the requestor of forwarding
      * @return Return the return value of the netsys interface call.
      */
-    int32_t IpDisableForwarding(const std::string& requestor) override;
+    int32_t IpDisableForwarding(const std::string &requestor) override;
 
     /**
      * Enable Nat.
@@ -376,7 +390,7 @@ public:
      * @param toIface the name of outcoming interface
      * @return Return the return value of the netsys interface call.
      */
-    int32_t IpfwdAddInterfaceForward(const std::string& fromIface, const std::string& toIface) override;
+    int32_t IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface) override;
 
     /**
      * Remove interface forward.
@@ -385,7 +399,7 @@ public:
      * @param toIface the name of outcoming interface
      * @return Return the return value of the netsys interface call.
      */
-    int32_t IpfwdRemoveInterfaceForward(const std::string& fromIface, const std::string& toIface) override;
+    int32_t IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface) override;
 
     /**
      * Set tether dns.
@@ -445,7 +459,7 @@ public:
      * @return Return the return value of the netsys interface call.
      */
     int32_t SetIpAddress(int32_t socketFd, const std::string &ipAddress, int32_t prefixLen,
-        struct ifreq &ifRequest) override;
+                         struct ifreq &ifRequest) override;
 
     /**
      * Set network blocking.
@@ -455,7 +469,7 @@ public:
      * @return Return the return value of the netsys interface call.
      */
     int32_t SetBlocking(int32_t ifaceFd, bool isBlock) override;
-     /**
+    /**
      * Start Dhcp Client.
      *
      * @param iface interface file description
@@ -472,11 +486,11 @@ public:
      */
     int32_t StopDhcpClient(const std::string &iface, bool bIpv6) override;
     /**
-    * Register Notify Callback
-    *
-    * @param callback
-    * @return Return the return value of the netsys interface call.
-    */
+     * Register Notify Callback
+     *
+     * @param callback
+     * @return Return the return value of the netsys interface call.
+     */
     int32_t RegisterCallback(sptr<NetsysControllerCallback> callback) override;
 
     /**
@@ -591,6 +605,7 @@ public:
      * @return Return the return value of the netsys interface call.
      */
     int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) override;
+
 private:
     MockNetsysNativeClient mockNetsysClient_;
     NetsysNativeClient netsysClient_;

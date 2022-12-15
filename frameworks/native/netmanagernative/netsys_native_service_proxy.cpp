@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "netnative_log_wrapper.h"
+#include "netsys_addr_info_parcel.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -175,6 +176,34 @@ int32_t NetsysNativeServiceProxy::DestroyNetworkCache(const uint16_t netId)
     Remote()->SendRequest(INetsysService::NETSYS_DESTROY_NETWORK_CACHE, data, reply, option);
 
     return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::GetAddrInfo(const std::string hostName, const std::string serverName,
+                                              const addrinfo *hints, uint16_t netId, addrinfo **res)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    NetsysAddrInfoParcel addrParcel(hints, netId, hostName, serverName);
+    if (!addrParcel.Marshalling(data)) {
+        NETNATIVE_LOG_D("addrinfo marshing fail");
+    }
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetsysService::NETSYS_GET_ADDR_INFO, data, reply, option);
+
+    sptr<NetsysAddrInfoParcel> ptr = addrParcel.Unmarshalling(reply);
+    if (ptr == nullptr) {
+        NETNATIVE_LOGE("after IPC service recive Unmarshalling is failed");
+        return -1;
+    }
+    NETNATIVE_LOGI("NetsysNativeServiceProxy ret %{public}d addrSize: %{public}d", ptr->ret, ptr->addrSize);
+    if (ptr->addrSize != 0) {
+        *res = ptr->addrHead;
+    }
+
+    return ptr->ret;
 }
 
 int32_t NetsysNativeServiceProxy::InterfaceSetMtu(const std::string &interfaceName, int32_t mtu)
@@ -900,8 +929,7 @@ int32_t NetsysNativeServiceProxy::IpfwdAddInterfaceForward(const std::string &fr
     return ret;
 }
 
-int32_t NetsysNativeServiceProxy::IpfwdRemoveInterfaceForward(const std::string &fromIface,
-                                                              const std::string &toIface)
+int32_t NetsysNativeServiceProxy::IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data) || !data.WriteString(fromIface) || !data.WriteString(toIface)) {
@@ -933,8 +961,7 @@ int32_t NetsysNativeServiceProxy::BandwidthEnableDataSaver(bool enable)
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (ERR_NONE !=
-            remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_ENABLE_DATA_SAVER, data, reply, option)) {
+        if (ERR_NONE != remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_ENABLE_DATA_SAVER, data, reply, option)) {
             NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }
@@ -988,8 +1015,7 @@ int32_t NetsysNativeServiceProxy::BandwidthRemoveIfaceQuota(const std::string &i
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (ERR_NONE !=
-            remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_REMOVE_IFACE_QUOTA, data, reply, option)) {
+        if (ERR_NONE != remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_REMOVE_IFACE_QUOTA, data, reply, option)) {
             NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }
@@ -1039,8 +1065,7 @@ int32_t NetsysNativeServiceProxy::BandwidthRemoveDeniedList(uint32_t uid)
     MessageOption option;
     auto remote = Remote();
     if (remote) {
-        if (ERR_NONE !=
-            remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_REMOVE_DENIED_LIST, data, reply, option)) {
+        if (ERR_NONE != remote->SendRequest(INetsysService::NETSYS_BANDWIDTH_REMOVE_DENIED_LIST, data, reply, option)) {
             NETNATIVE_LOGE("proxy SendRequest failed");
             return ERR_FLATTEN_OBJECT;
         }

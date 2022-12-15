@@ -364,6 +364,12 @@ void NetManagerNative::StopDnsProxyListen()
     dnsManager_->StopDnsProxyListen();
 }
 
+int32_t NetManagerNative::DnsGetAddrInfo(const std::string hostName, const std::string serverName,
+                                         const addrinfo *hints, uint16_t netId, addrinfo **res)
+{
+    return dnsManager_->GetAddrInfo(hostName, serverName, hints, netId, res);
+}
+
 void NetManagerNative::GetDumpInfo(std::string &infos)
 {
     connManager_->GetDumpInfos(infos);
