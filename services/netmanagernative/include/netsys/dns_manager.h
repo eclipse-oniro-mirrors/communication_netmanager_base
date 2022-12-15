@@ -18,6 +18,7 @@
 
 #include <vector>
 
+#include "dns_getaddrinfo.h"
 #include "dns_param_cache.h"
 #include "dns_proxy_listen.h"
 
@@ -117,6 +118,7 @@ public:
 
 private:
     std::shared_ptr<DnsProxyListen> dnsProxyListen_;
+    std::shared_ptr<DnsGetAddrInfo> dnsGetAddrInfo_;
 };
 } // namespace nmd
 } // namespace OHOS
