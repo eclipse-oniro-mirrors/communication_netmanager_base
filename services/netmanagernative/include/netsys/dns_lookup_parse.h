@@ -24,7 +24,6 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <poll.h>
-#include <pthread.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -144,7 +143,6 @@ public:
     static int32_t DnsParseCallback(void *c, int32_t rr, const void *data, int32_t len, const void *packet);
 
 private:
-    static void cleanUp(void *p);
     static uint64_t mTime();
     static void GetNsFromConf(const ResolvConf *conf, uint32_t &nns, int32_t &family, socklen_t &saLen);
     void SetSocAddr(int32_t fd, uint32_t &nns);

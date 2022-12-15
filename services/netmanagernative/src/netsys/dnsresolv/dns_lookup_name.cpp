@@ -364,7 +364,7 @@ int32_t DnsLookUpName::FindName(AddrData *buf, char *canon, const std::string na
     return cnt;
 }
 
-void DnsLookUpName::LookUpNameParam(AddrData *buf, int32_t cnt, int32_t cs, int32_t netId)
+void DnsLookUpName::LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId)
 {
     for (int i = 0; i < cnt; i++) {
         int32_t family = buf[i].family;
@@ -441,13 +441,9 @@ int32_t DnsLookUpName::LookUpName(AddrData buf[MAXADDRS], char canon[CANON_LINE]
         return cnt;
     }
 
-    int32_t cs = 0;
-    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
-
-    LookUpNameParam(buf, cnt, cs, netId);
+    LookUpNameParam(buf, cnt, netId);
     qsort(buf, cnt, sizeof(*buf), AddrCmp);
 
-    pthread_setcancelstate(cs, 0);
     return cnt;
 }
 

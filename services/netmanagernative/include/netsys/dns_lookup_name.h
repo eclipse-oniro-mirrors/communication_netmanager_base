@@ -23,7 +23,6 @@
 #include <features.h>
 #include <netdb.h>
 #include <netinet/in.h>
-#include <pthread.h>
 #include <resolv.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -118,7 +117,7 @@ private:
     void SockAddrCopy(ScokAddrCopy addrBuff, void *da, void *sa, int32_t &dScope, int32_t &preFixLen, int32_t &key);
     static int32_t FindName(AddrData *buf, char *canon, const std::string name, int32_t family, int32_t flags,
                             uint16_t netId);
-    void LookUpNameParam(AddrData *buf, int32_t cnt, int32_t cs, int32_t netId);
+    void LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId);
 };
 } // namespace nmd
 } // namespace OHOS

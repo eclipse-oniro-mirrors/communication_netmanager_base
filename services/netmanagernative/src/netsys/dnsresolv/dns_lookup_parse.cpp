@@ -185,11 +185,6 @@ int32_t DnsLookUpParse::GetResolvConf(struct ResolvConf *conf, char *search, siz
     return DNS_ERR_NONE;
 }
 
-void DnsLookUpParse::cleanUp(void *p)
-{
-    syscall(SYS_close, p);
-}
-
 uint64_t DnsLookUpParse::mTime()
 {
     timespec ts{};
@@ -352,9 +347,6 @@ int32_t DnsLookUpParse::ResMSendRc(int32_t queriesNum, const uint8_t *const *que
         (void)memset_s(static_cast<void *>(&i), sizeof(sockaddr_in6), 0x00, sizeof(sockaddr_in6));
     }
 
-    int32_t cs = 0;
-    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
-
     int32_t timeOut = TIMEMSTOS * conf->timeOut;
     int32_t attempts = conf->attempts;
     socklen_t saLen = sizeof(sockAddr.sin);
@@ -382,12 +374,8 @@ int32_t DnsLookUpParse::ResMSendRc(int32_t queriesNum, const uint8_t *const *que
         if (fd >= 0) {
             close(fd);
         }
-        pthread_setcancelstate(cs, 0);
         return -1;
     }
-
-    pthread_cleanup_push(cleanUp, reinterpret_cast<void *>(static_cast<intptr_t>(fd)));
-    pthread_setcancelstate(cs, 0);
 
     if (family == AF_INET6) {
         SetSocAddr(fd, nns);
@@ -406,8 +394,7 @@ int32_t DnsLookUpParse::ResMSendRc(int32_t queriesNum, const uint8_t *const *que
         .saLen = saLen,
     };
     DnsSendQueries(getAnswers, queries, queriesLens, answers, answersLens);
-
-    pthread_cleanup_pop(1);
+    (void)close(fd);
 
     return DNS_ERR_NONE;
 }

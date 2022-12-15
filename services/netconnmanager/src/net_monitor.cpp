@@ -162,7 +162,7 @@ NetDetectionStatus NetMonitor::SendHttpProbe(const std::string &defaultDomain, c
 {
     int socketType = AF_INET;
     std::string ipAddr;
-    if (GetIpAddr(defaultDomain.c_str(), ipAddr, socketType)) {
+    if (GetIpAddr(defaultDomain, ipAddr, socketType)) {
         NETMGR_LOG_E("NetMonitor::Error at GetIpAddr");
         return INVALID_DETECTION_STATE;
     }
@@ -460,11 +460,11 @@ int32_t NetMonitor::GetUrlRedirectFromResponse(const std::string &strResponse, s
     return -1;
 }
 
-int32_t NetMonitor::GetIpAddr(const char *domain, std::string &ip_addr, int &socketType)
+int32_t NetMonitor::GetIpAddr(const std::string domain, std::string &ip_addr, int &socketType)
 {
     struct addrinfo *result = nullptr;
-    int ret = getaddrinfo(domain, nullptr, nullptr, &result);
-    if (ret < 0) {
+    std::string serverName = "";
+    if (NetsysController::GetInstance().GetAddrInfo(domain, serverName, nullptr, netId_, &result) < 0) {
         NETMGR_LOG_E("Get net[%{public}d] address info failed,errno[%{public}d]:%{public}s", netId_, errno,
                      strerror(errno));
         return -1;
@@ -485,7 +485,7 @@ int32_t NetMonitor::GetIpAddr(const char *domain, std::string &ip_addr, int &soc
     }
     socketType = result->ai_family;
     NETMGR_LOG_D("Get net[%{public}d] monitor ip:%{public}s", netId_, CommonUtils::ToAnonymousIp(ip_addr).c_str());
-    freeaddrinfo(result);
+    NetsysController::GetInstance().FreeAddrInfo(result);
     return 0;
 }
 
