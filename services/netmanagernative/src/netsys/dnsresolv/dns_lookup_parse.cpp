@@ -35,7 +35,6 @@ static constexpr uint32_t OP_MAX = 15;
 static constexpr uint32_t MINE_CLASS_MAX = 255;
 static constexpr uint32_t TYPE_MAX = 255;
 static constexpr uint64_t MAX_BIT = 65536;
-
 static constexpr int32_t NAME_MAX_BIT = 256;
 
 static constexpr int32_t TIMEMSTOS = 1000;
@@ -45,11 +44,9 @@ static constexpr int32_t DEFAULT_DOTS = 1;
 static constexpr int32_t DEFAULT_ATTEMPTS = 2;
 static constexpr int32_t DEFAULT_MAX_ATTEMPTS = 10;
 static constexpr int32_t ONE_MINUTE = 60;
-static constexpr int32_t HOSTNAME_NOTES_LEN = 10;
 static constexpr int32_t HOSTNAME_LEN_DIFFER = 17;
 static constexpr int32_t HOSTNAME_SIZE_DIFFER = 13;
 static constexpr int32_t HOSTNAME_BUFF_COMPUTE = 8;
-
 static constexpr int32_t TMP_LINE = 256;
 
 static constexpr int32_t RR_CNAME = 5;
@@ -59,9 +56,6 @@ static constexpr int32_t ANSWERS_OPERATION = 15;
 static constexpr int32_t DEFAULT_PORT = 53;
 
 static constexpr int32_t ADDR_A6_NOTES_LEN = 12;
-
-static constexpr int32_t NAME_MAX_LEN = 64;
-
 static constexpr int32_t RLEN_MAXNS = 12;
 
 static constexpr int32_t COUNT_CONVERT = 256;
@@ -75,7 +69,12 @@ static constexpr int32_t ANSWER_STR = 5;
 static constexpr int32_t NAME_IS_IPV4 = 1;
 
 static constexpr int32_t MAX_FOR_KEY = 0x10000000;
+
+#ifdef SERVER_SUPPORT_IPV6
+static constexpr int32_t HOSTNAME_NOTES_LEN = 10;
+static constexpr int32_t NAME_MAX_LEN = 64;
 constexpr char SEP = '%';
+#endif
 
 int32_t DnsLookUpParse::LookupIpLiteral(struct AddrData buf[ARG_INDEX_1], const std::string name, int32_t family)
 {
@@ -94,6 +93,9 @@ int32_t DnsLookUpParse::LookupIpLiteral(struct AddrData buf[ARG_INDEX_1], const 
         return NAME_IS_IPV4;
     }
 
+    return DNS_ERR_NONE;
+
+#ifdef SERVER_SUPPORT_IPV6
     char tmp[NAME_MAX_LEN] = {0};
     char *p = const_cast<char *>(strchr(hostName, SEP));
     if (p && (p - hostName < NAME_MAX_LEN)) {
@@ -136,7 +138,9 @@ int32_t DnsLookUpParse::LookupIpLiteral(struct AddrData buf[ARG_INDEX_1], const 
         }
     }
     buf[ARG_INDEX_0].scopeid = scopeid;
+
     return NAME_IS_IPV4;
+#endif
 }
 
 int32_t DnsLookUpParse::GetResolvConf(struct ResolvConf *conf, char *search, size_t search_sz, uint16_t netId)
@@ -177,7 +181,6 @@ int32_t DnsLookUpParse::GetResolvConf(struct ResolvConf *conf, char *search, siz
     int32_t nns = 0;
     for (auto &nameServer : nameServers) {
         if (LookupIpLiteral(conf->ns + nns, nameServer, AF_UNSPEC) > 0) {
-            conf->ns->family = AF_INET;
             nns++;
         }
     }
@@ -342,9 +345,9 @@ int32_t DnsLookUpParse::ResMSendRc(int32_t queriesNum, const uint8_t *const *que
                                    uint8_t *const *answers, int32_t *answersLens, int32_t answersSize,
                                    const struct ResolvConf *conf, uint16_t netId)
 {
-    (void)memset_s(static_cast<void *>(&sockAddr), sizeof(sockaddr_in6), 0x00, sizeof(sockaddr_in6));
+    (void)memset_s(static_cast<void *>(&sockAddr), sizeof(sockAddr), 0x00, sizeof(sockAddr));
     for (auto &i : nSockAddr) {
-        (void)memset_s(static_cast<void *>(&i), sizeof(sockaddr_in6), 0x00, sizeof(sockaddr_in6));
+        (void)memset_s(static_cast<void *>(&i), sizeof(sockAddr), 0x00, sizeof(sockAddr));
     }
 
     int32_t timeOut = TIMEMSTOS * conf->timeOut;
