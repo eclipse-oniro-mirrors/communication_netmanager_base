@@ -119,6 +119,10 @@ ohos_shared_library("netsys_native_manager") {
     defines += [ "SYS_FUNC" ]
   }
 
+  if (enable_server_support_ipv6) {
+    defines += [ "SERVER_SUPPORT_IPV6" ]
+  }
+
   if (is_standard_system) {
     external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
   } else {

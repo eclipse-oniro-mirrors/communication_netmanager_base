@@ -151,6 +151,8 @@ int32_t DnsGetAddrInfo::GetAddrInfo(const std::string host, const std::string se
         flags = hint->ai_flags;
         proto = hint->ai_protocol;
         socktype = hint->ai_socktype;
+    } else {
+        family = AF_INET;
     }
 
     if (flags & AI_ADDRCONFIG) {
@@ -189,7 +191,6 @@ int32_t DnsGetAddrInfo::GetAddrInfo(const std::string host, const std::string se
 
     out[0].ref = nais;
     *res = &out->ai;
-
     return 0;
 }
 } // namespace nmd
