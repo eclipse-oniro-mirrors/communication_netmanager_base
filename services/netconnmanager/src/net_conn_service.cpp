@@ -718,8 +718,10 @@ void NetConnService::FindBestNetworkForAllRequest()
             continue;
         }
         int score = static_cast<int>(FindBestNetworkForRequest(bestSupplier, iterActive->second));
-        NETMGR_LOG_D("bestSupplier is: [%{public}d, %{public}s]", bestSupplier ? bestSupplier->GetSupplierId() : 0,
-                     bestSupplier ? bestSupplier->GetNetSupplierIdent().c_str() : "null");
+        NETMGR_LOG_D("Find best supplier[%{public}d, %{public}s]for request[%{public}d]",
+                     bestSupplier ? bestSupplier->GetSupplierId() : 0,
+                     bestSupplier ? bestSupplier->GetNetSupplierIdent().c_str() : "null",
+                     iterActive->second->GetRequestId());
         if (iterActive->second == defaultNetActivate_) {
             MakeDefaultNetWork(defaultNetSupplier_, bestSupplier);
         }
@@ -730,7 +732,6 @@ void NetConnService::FindBestNetworkForAllRequest()
             NotFindBestSupplier(iterActive->first, iterActive->second, oldSupplier, callback);
             continue;
         }
-
         SendBestScoreAllNetwork(iterActive->first, score, bestSupplier->GetSupplierId());
         if (bestSupplier == oldSupplier) {
             continue;
@@ -742,6 +743,7 @@ void NetConnService::FindBestNetworkForAllRequest()
         CallbackForAvailable(bestSupplier, callback);
         bestSupplier->SelectAsBestNetwork(iterActive->first);
     }
+    RequestAllNetworkExceptDefaut();
 }
 
 uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier, sptr<NetActivate> &netActivateNetwork)
@@ -762,8 +764,8 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier, 
         NETMGR_LOG_D("supplier info, supplier[%{public}d, %{public}s], realScore[%{public}d], isConnected[%{public}d]",
                      iter->second->GetSupplierId(), iter->second->GetNetSupplierIdent().c_str(),
                      iter->second->GetRealScore(), iter->second->IsConnected());
-        if ((!netActivateNetwork->MatchRequestAndNetwork(iter->second)) || (!iter->second->IsConnected())) {
-            NETMGR_LOG_D("supplier[%{public}d] is not connected or not match request.", iter->second->GetSupplierId());
+        if ((!iter->second->IsConnected()) || (!netActivateNetwork->MatchRequestAndNetwork(iter->second))) {
+            NETMGR_LOG_D("Supplier[%{public}d] is not connected or not match request.", iter->second->GetSupplierId());
             continue;
         }
         int score = iter->second->GetRealScore();
@@ -776,6 +778,32 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier, 
                  bestScore, supplier ? supplier->GetSupplierId() : 0,
                  supplier ? supplier->GetNetSupplierIdent().c_str() : "null");
     return bestScore;
+}
+
+void NetConnService::RequestAllNetworkExceptDefaut()
+{
+    if ((defaultNetSupplier_ == nullptr) || (defaultNetSupplier_->IsNetValidated())) {
+        return;
+    }
+    NETMGR_LOG_I("Default supplier[%{public}d, %{public}s] is not valid,request to activate another network",
+                 defaultNetSupplier_->GetSupplierId(), defaultNetSupplier_->GetNetSupplierIdent().c_str());
+    if (defaultNetActivate_ == nullptr) {
+        NETMGR_LOG_E("Default net request is null");
+        return;
+    }
+    // Request activation of all networks except the default network
+    uint32_t reqId = defaultNetActivate_->GetRequestId();
+    for (const auto &netSupplier : netSuppliers_) {
+        if (netSupplier.second == nullptr || netSupplier.second == defaultNetSupplier_) {
+            continue;
+        }
+        if (!defaultNetActivate_->MatchRequestAndNetwork(netSupplier.second)) {
+            continue;
+        }
+        if (!netSupplier.second->RequestToConnect(reqId)) {
+            NETMGR_LOG_E("Request to connect failed");
+        }
+    }
 }
 
 int32_t NetConnService::GenerateNetId()
