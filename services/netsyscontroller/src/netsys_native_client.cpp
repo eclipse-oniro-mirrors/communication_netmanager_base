@@ -869,6 +869,11 @@ int32_t NetsysNativeClient::RegisterCallback(sptr<NetsysControllerCallback> call
         NETMGR_LOG_E("Callback is nullptr");
         return ERR_INVALID_PARAMS;
     }
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return IPC_PROXY_ERR;
+    }
     cbObjects_.push_back(callback);
     return ERR_NONE;
 }
