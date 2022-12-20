@@ -472,7 +472,7 @@ HWTEST_F(NetConnServiceTest, GetTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     ret = DelayedSingleton<NetConnService>::GetInstance()->RestrictBackgroundChanged(true);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     std::vector<std::u16string> args;
     args.emplace_back(u"dummy data");

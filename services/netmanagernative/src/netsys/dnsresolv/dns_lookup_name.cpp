@@ -108,7 +108,6 @@ int32_t DnsLookUpName::NameFromDns(AddrData buf[MAXADDRS], char canon[CANON_LINE
     uint8_t queriesBuf[ARG_INDEX_2][BUFF_MAX_LEN], answersBuf[ARG_INDEX_2][PACKET_LINE];
     int32_t queriesLens[ARG_INDEX_2], answersLens[ARG_INDEX_2];
     int32_t queriesNum = 0;
-    family = (family == AF_UNSPEC ? conf->ns->family : family);
     for (int32_t i = 0; i < BUFF_NUM; i++) {
         if (family != afrr[i].af) {
             queriesLens[queriesNum] = DnsLookUpParse().ResMkQuery(0, name, 1, afrr[i].rr, nullptr, 0, nullptr,
@@ -364,7 +363,7 @@ int32_t DnsLookUpName::FindName(AddrData *buf, char *canon, const std::string na
     return cnt;
 }
 
-void DnsLookUpName::LookUpNameParam(AddrData *buf, int32_t cnt, int32_t cs, int32_t netId)
+void DnsLookUpName::LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId)
 {
     for (int i = 0; i < cnt; i++) {
         int32_t family = buf[i].family;
@@ -441,13 +440,9 @@ int32_t DnsLookUpName::LookUpName(AddrData buf[MAXADDRS], char canon[CANON_LINE]
         return cnt;
     }
 
-    int32_t cs = 0;
-    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
-
-    LookUpNameParam(buf, cnt, cs, netId);
+    LookUpNameParam(buf, cnt, netId);
     qsort(buf, cnt, sizeof(*buf), AddrCmp);
 
-    pthread_setcancelstate(cs, 0);
     return cnt;
 }
 

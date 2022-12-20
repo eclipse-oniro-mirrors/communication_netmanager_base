@@ -98,7 +98,11 @@ void DnsManager::GetDumpInfo(std::string &info)
 int32_t DnsManager::GetAddrInfo(const std::string node, const std::string service, const addrinfo *hints,
                                 uint16_t netId, addrinfo **result)
 {
-    return 0;
+    if (netId == 0) {
+        netId = DelayedSingleton<DnsParamCache>::GetInstance()->GetDefaultNetwork();
+        NETNATIVE_LOG_D("DnsManager DnsGetaddrinfo netId == 0 defaultNetId_ : %{public}d", netId);
+    }
+    return dnsGetAddrInfo_->GetAddrInfo(node, service, hints, netId, result);
 }
 } // namespace nmd
 } // namespace OHOS

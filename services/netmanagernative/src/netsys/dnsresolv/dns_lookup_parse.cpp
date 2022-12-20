@@ -35,7 +35,6 @@ static constexpr uint32_t OP_MAX = 15;
 static constexpr uint32_t MINE_CLASS_MAX = 255;
 static constexpr uint32_t TYPE_MAX = 255;
 static constexpr uint64_t MAX_BIT = 65536;
-
 static constexpr int32_t NAME_MAX_BIT = 256;
 
 static constexpr int32_t TIMEMSTOS = 1000;
@@ -45,11 +44,9 @@ static constexpr int32_t DEFAULT_DOTS = 1;
 static constexpr int32_t DEFAULT_ATTEMPTS = 2;
 static constexpr int32_t DEFAULT_MAX_ATTEMPTS = 10;
 static constexpr int32_t ONE_MINUTE = 60;
-static constexpr int32_t HOSTNAME_NOTES_LEN = 10;
 static constexpr int32_t HOSTNAME_LEN_DIFFER = 17;
 static constexpr int32_t HOSTNAME_SIZE_DIFFER = 13;
 static constexpr int32_t HOSTNAME_BUFF_COMPUTE = 8;
-
 static constexpr int32_t TMP_LINE = 256;
 
 static constexpr int32_t RR_CNAME = 5;
@@ -59,9 +56,6 @@ static constexpr int32_t ANSWERS_OPERATION = 15;
 static constexpr int32_t DEFAULT_PORT = 53;
 
 static constexpr int32_t ADDR_A6_NOTES_LEN = 12;
-
-static constexpr int32_t NAME_MAX_LEN = 64;
-
 static constexpr int32_t RLEN_MAXNS = 12;
 
 static constexpr int32_t COUNT_CONVERT = 256;
@@ -75,7 +69,12 @@ static constexpr int32_t ANSWER_STR = 5;
 static constexpr int32_t NAME_IS_IPV4 = 1;
 
 static constexpr int32_t MAX_FOR_KEY = 0x10000000;
+
+#ifdef SERVER_SUPPORT_IPV6
+static constexpr int32_t HOSTNAME_NOTES_LEN = 10;
+static constexpr int32_t NAME_MAX_LEN = 64;
 constexpr char SEP = '%';
+#endif
 
 int32_t DnsLookUpParse::LookupIpLiteral(struct AddrData buf[ARG_INDEX_1], const std::string name, int32_t family)
 {
@@ -94,6 +93,9 @@ int32_t DnsLookUpParse::LookupIpLiteral(struct AddrData buf[ARG_INDEX_1], const 
         return NAME_IS_IPV4;
     }
 
+    return DNS_ERR_NONE;
+
+#ifdef SERVER_SUPPORT_IPV6
     char tmp[NAME_MAX_LEN] = {0};
     char *p = const_cast<char *>(strchr(hostName, SEP));
     if (p && (p - hostName < NAME_MAX_LEN)) {
@@ -136,7 +138,9 @@ int32_t DnsLookUpParse::LookupIpLiteral(struct AddrData buf[ARG_INDEX_1], const 
         }
     }
     buf[ARG_INDEX_0].scopeid = scopeid;
+
     return NAME_IS_IPV4;
+#endif
 }
 
 int32_t DnsLookUpParse::GetResolvConf(struct ResolvConf *conf, char *search, size_t search_sz, uint16_t netId)
@@ -177,17 +181,11 @@ int32_t DnsLookUpParse::GetResolvConf(struct ResolvConf *conf, char *search, siz
     int32_t nns = 0;
     for (auto &nameServer : nameServers) {
         if (LookupIpLiteral(conf->ns + nns, nameServer, AF_UNSPEC) > 0) {
-            conf->ns->family = AF_INET;
             nns++;
         }
     }
     conf->nns = nns;
     return DNS_ERR_NONE;
-}
-
-void DnsLookUpParse::cleanUp(void *p)
-{
-    syscall(SYS_close, p);
 }
 
 uint64_t DnsLookUpParse::mTime()
@@ -239,10 +237,13 @@ void DnsLookUpParse::SearchNameServer(GetAnswers *getAnswers, int32_t *answersLe
                                       const int32_t *queriesLens)
 {
     for (int32_t i = 0; i < getAnswers->queriesNum; i++) {
-        if (!answersLens[i]) {
-            for (int j = 0; j < getAnswers->nns; j++) {
-                (void)sendto(getAnswers->fd, queries[i], queriesLens[i], MSG_NOSIGNAL,
-                             reinterpret_cast<sockaddr *>(&nSockAddr[j]), getAnswers->saLen);
+        if (answersLens[i]) {
+            break;
+        }
+        for (int j = 0; j < getAnswers->nns; j++) {
+            if (sendto(getAnswers->fd, queries[i], queriesLens[i], MSG_NOSIGNAL,
+                       reinterpret_cast<sockaddr *>(&nSockAddr[j]), getAnswers->saLen) > 0) {
+                break;
             }
         }
     }
@@ -328,32 +329,14 @@ int32_t DnsLookUpParse::DnsSendQueries(GetAnswers getAnswers, const uint8_t *con
     return DNS_ERR_NONE;
 }
 
-void DnsLookUpParse::SetnSockAddr(const struct AddrData *ipLit, uint32_t nns, socklen_t &saLen, int &family)
-{
-    if (ipLit->family == AF_INET) {
-        (void)memcpy_s(&nSockAddr[nns].sin.sin_addr, ADDR_A4_LEN, ipLit->addr, ADDR_A4_LEN);
-        nSockAddr[nns].sin.sin_port = htons(DEFAULT_PORT);
-        nSockAddr[nns].sin.sin_family = AF_INET;
-    } else {
-        saLen = sizeof sockAddr.sin6;
-        (void)memcpy_s(&nSockAddr[nns].sin6.sin6_addr, ADDR_A6_LEN, ipLit->addr, ADDR_A6_LEN);
-        nSockAddr[nns].sin6.sin6_port = htons(DEFAULT_PORT);
-        nSockAddr[nns].sin6.sin6_scope_id = ipLit->scopeid;
-        nSockAddr[nns].sin6.sin6_family = family = AF_INET6;
-    }
-}
-
 int32_t DnsLookUpParse::ResMSendRc(int32_t queriesNum, const uint8_t *const *queries, const int32_t *queriesLens,
                                    uint8_t *const *answers, int32_t *answersLens, int32_t answersSize,
                                    const struct ResolvConf *conf, uint16_t netId)
 {
-    (void)memset_s(static_cast<void *>(&sockAddr), sizeof(sockaddr_in6), 0x00, sizeof(sockaddr_in6));
+    (void)memset_s(static_cast<void *>(&sockAddr), sizeof(sockAddr), 0x00, sizeof(sockAddr));
     for (auto &i : nSockAddr) {
-        (void)memset_s(static_cast<void *>(&i), sizeof(sockaddr_in6), 0x00, sizeof(sockaddr_in6));
+        (void)memset_s(static_cast<void *>(&i), sizeof(sockAddr), 0x00, sizeof(sockAddr));
     }
-
-    int32_t cs = 0;
-    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
 
     int32_t timeOut = TIMEMSTOS * conf->timeOut;
     int32_t attempts = conf->attempts;
@@ -361,10 +344,6 @@ int32_t DnsLookUpParse::ResMSendRc(int32_t queriesNum, const uint8_t *const *que
     uint32_t nns = 0;
     int32_t family = AF_INET;
     GetNsFromConf(conf, nns, family, saLen);
-    for (nns = 0; nns < conf->nns; nns++) {
-        const struct AddrData *ipLit = &conf->ns[nns];
-        SetnSockAddr(ipLit, nns, saLen, family);
-    }
     sockAddr.sin.sin_family = family;
     int32_t fd = socket(family, SOCK_DGRAM | SOCK_CLOEXEC | SOCK_NONBLOCK, 0);
     if (fd < 0 && family == AF_INET6 && errno == EAFNOSUPPORT) {
@@ -382,12 +361,8 @@ int32_t DnsLookUpParse::ResMSendRc(int32_t queriesNum, const uint8_t *const *que
         if (fd >= 0) {
             close(fd);
         }
-        pthread_setcancelstate(cs, 0);
         return -1;
     }
-
-    pthread_cleanup_push(cleanUp, reinterpret_cast<void *>(static_cast<intptr_t>(fd)));
-    pthread_setcancelstate(cs, 0);
 
     if (family == AF_INET6) {
         SetSocAddr(fd, nns);
@@ -406,8 +381,7 @@ int32_t DnsLookUpParse::ResMSendRc(int32_t queriesNum, const uint8_t *const *que
         .saLen = saLen,
     };
     DnsSendQueries(getAnswers, queries, queriesLens, answers, answersLens);
-
-    pthread_cleanup_pop(1);
+    (void)close(fd);
 
     return DNS_ERR_NONE;
 }

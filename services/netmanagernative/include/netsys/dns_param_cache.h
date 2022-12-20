@@ -55,6 +55,8 @@ public:
     int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
                               uint16_t &baseTimeoutMsec, uint8_t &retryCount);
 
+    int32_t GetDefaultNetwork() const;
+
     void GetDumpInfo(std::string &info);
 
     int32_t DestroyNetworkCache(uint16_t netId);
