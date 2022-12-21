@@ -201,16 +201,18 @@ HWTEST_F(UtNetPolicyRule, NetPolicyRule007, TestSize.Level1)
 
 void SetPolicyUid()
 {
-    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(
-        TEST_UID1, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
+    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdlePolicy(false);
     ASSERT_TRUE(result == NetPolicyResultCode::ERR_NONE);
+    int32_t result1 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(
+        TEST_UID1, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
+    ASSERT_TRUE(result1 == NetPolicyResultCode::ERR_NONE);
 }
 
 void SendMessage()
 {
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdlePolicy(true);
     ASSERT_TRUE(result == NetPolicyResultCode::ERR_NONE);
-    int32_t result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdleAllowedList(TEST_UID1, false);
+    int32_t result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdleAllowedList(TEST_UID1, true);
     ASSERT_TRUE(result2 == NetPolicyResultCode::ERR_NONE);
 }
 
