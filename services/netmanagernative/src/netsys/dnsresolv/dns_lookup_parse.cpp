@@ -237,10 +237,13 @@ void DnsLookUpParse::SearchNameServer(GetAnswers *getAnswers, int32_t *answersLe
                                       const int32_t *queriesLens)
 {
     for (int32_t i = 0; i < getAnswers->queriesNum; i++) {
-        if (!answersLens[i]) {
-            for (int j = 0; j < getAnswers->nns; j++) {
-                (void)sendto(getAnswers->fd, queries[i], queriesLens[i], MSG_NOSIGNAL,
-                             reinterpret_cast<sockaddr *>(&nSockAddr[j]), getAnswers->saLen);
+        if (answersLens[i]) {
+            break;
+        }
+        for (int j = 0; j < getAnswers->nns; j++) {
+            if (sendto(getAnswers->fd, queries[i], queriesLens[i], MSG_NOSIGNAL,
+                       reinterpret_cast<sockaddr *>(&nSockAddr[j]), getAnswers->saLen) > 0) {
+                break;
             }
         }
     }
@@ -326,21 +329,6 @@ int32_t DnsLookUpParse::DnsSendQueries(GetAnswers getAnswers, const uint8_t *con
     return DNS_ERR_NONE;
 }
 
-void DnsLookUpParse::SetnSockAddr(const struct AddrData *ipLit, uint32_t nns, socklen_t &saLen, int &family)
-{
-    if (ipLit->family == AF_INET) {
-        (void)memcpy_s(&nSockAddr[nns].sin.sin_addr, ADDR_A4_LEN, ipLit->addr, ADDR_A4_LEN);
-        nSockAddr[nns].sin.sin_port = htons(DEFAULT_PORT);
-        nSockAddr[nns].sin.sin_family = AF_INET;
-    } else {
-        saLen = sizeof sockAddr.sin6;
-        (void)memcpy_s(&nSockAddr[nns].sin6.sin6_addr, ADDR_A6_LEN, ipLit->addr, ADDR_A6_LEN);
-        nSockAddr[nns].sin6.sin6_port = htons(DEFAULT_PORT);
-        nSockAddr[nns].sin6.sin6_scope_id = ipLit->scopeid;
-        nSockAddr[nns].sin6.sin6_family = family = AF_INET6;
-    }
-}
-
 int32_t DnsLookUpParse::ResMSendRc(int32_t queriesNum, const uint8_t *const *queries, const int32_t *queriesLens,
                                    uint8_t *const *answers, int32_t *answersLens, int32_t answersSize,
                                    const struct ResolvConf *conf, uint16_t netId)
@@ -356,10 +344,6 @@ int32_t DnsLookUpParse::ResMSendRc(int32_t queriesNum, const uint8_t *const *que
     uint32_t nns = 0;
     int32_t family = AF_INET;
     GetNsFromConf(conf, nns, family, saLen);
-    for (nns = 0; nns < conf->nns; nns++) {
-        const struct AddrData *ipLit = &conf->ns[nns];
-        SetnSockAddr(ipLit, nns, saLen, family);
-    }
     sockAddr.sin.sin_family = family;
     int32_t fd = socket(family, SOCK_DGRAM | SOCK_CLOEXEC | SOCK_NONBLOCK, 0);
     if (fd < 0 && family == AF_INET6 && errno == EAFNOSUPPORT) {
