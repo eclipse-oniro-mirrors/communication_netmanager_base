@@ -54,9 +54,9 @@ HWTEST_F(UtNetPolicyFile, NetPolicyFileTest001, TestSize.Level1)
     std::string fileContent;
     EXPECT_FALSE(policyFile->CreateFile(fileName));
     EXPECT_FALSE(policyFile->ReadFile(fileName, fileContent));
-    fileName = "system";
-    EXPECT_FALSE(policyFile->CreateFile(fileName));
-    EXPECT_FALSE(policyFile->ReadFile(fileName, fileContent));
+    std::remove(POLICY_FILE_NAME);
+    EXPECT_TRUE(policyFile->CreateFile(POLICY_FILE_NAME));
+    EXPECT_TRUE(policyFile->ReadFile(POLICY_FILE_NAME, fileContent));
     policyFile->GetNetPolicies();
     std::string content;
     NetPolicy netPolicy;

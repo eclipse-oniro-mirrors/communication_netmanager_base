@@ -20,6 +20,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
+constexpr const char *POLICY_FILE_NAME = "/data/service/el1/public/netmanager/net_policy.json";
 using namespace testing::ext;
 } // namespace
 
@@ -126,6 +127,7 @@ HWTEST_F(NetsysPolicyWrapperTest, FirewallEnableChainTest001, TestSize.Level1)
     uint32_t chain = 2;
     auto ret = instance_->FirewallEnableChain(chain, false);
     EXPECT_LE(ret, 0);
+    std::remove(POLICY_FILE_NAME);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
