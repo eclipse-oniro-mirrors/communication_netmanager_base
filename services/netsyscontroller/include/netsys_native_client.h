@@ -53,7 +53,7 @@ class NetsysNativeClient {
     };
 
 public:
-    NetsysNativeClient() = default;
+    NetsysNativeClient();
     ~NetsysNativeClient() = default;
 
     /**

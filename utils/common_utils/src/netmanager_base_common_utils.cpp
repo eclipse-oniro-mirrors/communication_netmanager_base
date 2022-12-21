@@ -64,6 +64,8 @@ const std::regex IPV6_MASK_PATTERN{"([\\da-fA-F]{0,4}:){2,7}([\\da-fA-F]{0,4})/(
 
 constexpr int32_t NET_MASK_MAX_LENGTH = 32;
 constexpr int32_t NET_MASK_GROUP_COUNT = 4;
+std::mutex g_commonUtilsMutex;
+std::mutex g_forkExecMutex;
 
 std::vector<std::string> Split(const std::string &str, const std::string &sep)
 {
@@ -308,6 +310,7 @@ std::string MaskIpv6(std::string &maskedResult)
 
 std::string ToAnonymousIp(const std::string &input)
 {
+    std::lock_guard<std::mutex> lock(g_commonUtilsMutex);
     std::string maskedResult{input};
     // Mask ipv4 address.
     if (std::regex_match(maskedResult, IP_PATTERN) || std::regex_match(maskedResult, IP_MASK_PATTERN)) {
@@ -423,6 +426,7 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
 
 int32_t ForkExec(const std::string &command, std::string *out)
 {
+    std::unique_lock<std::mutex> lock(g_forkExecMutex);
     const std::vector<std::string> cmd = Split(command, CMD_SEP);
     std::vector<const char *> args = FormatCmd(cmd);
     int32_t pipeFd[PIPE_FD_NUM] = {0};
