@@ -92,10 +92,11 @@ void *EventManager::GetData()
 
 void EventManager::EmitByUv(const std::string &type, void *data, void(handler)(uv_work_t *, int status))
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+
     if (!IsValid()) {
         return;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
 
     std::for_each(listeners_.begin(), listeners_.end(), [type, data, handler, this](const EventListener &listener) {
         auto workWrapper = new UvWorkWrapper(data, listener.GetEnv(), type, this);
