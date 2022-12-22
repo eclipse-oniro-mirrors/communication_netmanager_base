@@ -135,6 +135,11 @@ int32_t DnsParamCache::GetResolverConfig(uint16_t netId, std::vector<std::string
     return 0;
 }
 
+int32_t DnsParamCache::GetDefaultNetwork() const
+{
+    return defaultNetId_;
+}
+
 void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, const AddrInfo &addrInfo)
 {
     if (netId == 0) {

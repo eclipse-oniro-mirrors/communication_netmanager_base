@@ -59,4 +59,5 @@ declare_args() {
   enable_netmgr_debug = true
   enable_sys_func = true
   enable_elfio = true
+  enable_server_support_ipv6 = false
 }

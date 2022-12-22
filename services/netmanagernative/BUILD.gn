@@ -31,6 +31,9 @@ ohos_shared_library("netsys_native_manager") {
     "src/manager/route_manager.cpp",
     "src/manager/sharing_manager.cpp",
     "src/manager/traffic_manager.cpp",
+    "src/netsys/dnsresolv/dns_getaddrinfo.cpp",
+    "src/netsys/dnsresolv/dns_lookup_name.cpp",
+    "src/netsys/dnsresolv/dns_lookup_parse.cpp",
     "src/netsys/dnsresolv/dns_param_cache.cpp",
     "src/netsys/dnsresolv/dns_proxy_listen.cpp",
     "src/netsys/dnsresolv/dns_resolv_config.cpp",
@@ -71,6 +74,7 @@ ohos_shared_library("netsys_native_manager") {
     "$DHCP_MANAGER_ROOT/interfaces/inner_api/include",
     "$DHCP_MANAGER_ROOT/interfaces/inner_api/interfaces",
     "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
+    "$FWMARK_CLIENT_DIR/include",
   ]
 
   if (build_selinux) {
@@ -79,6 +83,7 @@ ohos_shared_library("netsys_native_manager") {
 
   deps = [
     "$DHCP_MANAGER_ROOT/services/mgr_service:dhcp_manager_service",
+    "$FWMARK_CLIENT_DIR:fwmark_client",
     "$NETMANAGERNATIVE_ROOT/netsys_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$THIRD_PARTY_ROOT/iptables:iptables",
@@ -112,6 +117,10 @@ ohos_shared_library("netsys_native_manager") {
 
   if (enable_sys_func) {
     defines += [ "SYS_FUNC" ]
+  }
+
+  if (enable_server_support_ipv6) {
+    defines += [ "SERVER_SUPPORT_IPV6" ]
   }
 
   if (is_standard_system) {

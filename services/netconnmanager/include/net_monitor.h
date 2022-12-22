@@ -85,7 +85,7 @@ private:
     NetDetectionStatus dealRecvResult(const std::string &strResponse);
     int32_t GetDefaultNetDetectionUrlFromCfg(std::string &strUrl);
     int32_t ParseUrl(const std::string &url, std::string &domain, std::string &urlPath);
-    int32_t GetIpAddr(const char *domain, std::string &ip_addr, int &socketType);
+    int32_t GetIpAddr(const std::string &domain, std::string &ip_addr, int &socketType);
 
     /**
      * Non blocking socket connection

@@ -830,6 +830,32 @@ int32_t NetConnService::BindSocket(int32_t socket_fd, int32_t netId)
     return NetsysController::GetInstance().BindSocket(socket_fd, netId);
 }
 
+void NetConnService::RequestAllNetworkExceptDefaut()
+{
+    if ((defaultNetSupplier_ == nullptr) || (defaultNetSupplier_->IsNetValidated())) {
+        return;
+    }
+    NETMGR_LOG_I("Default supplier[%{public}d, %{public}s] is not valid,request to activate another network",
+                 defaultNetSupplier_->GetSupplierId(), defaultNetSupplier_->GetNetSupplierIdent().c_str());
+    if (defaultNetActivate_ == nullptr) {
+        NETMGR_LOG_E("Default net request is null");
+        return;
+    }
+    // Request activation of all networks except the default network
+    uint32_t reqId = defaultNetActivate_->GetRequestId();
+    for (const auto &netSupplier : netSuppliers_) {
+        if (netSupplier.second == nullptr || netSupplier.second == defaultNetSupplier_) {
+            continue;
+        }
+        if (!defaultNetActivate_->MatchRequestAndNetwork(netSupplier.second)) {
+            continue;
+        }
+        if (!netSupplier.second->RequestToConnect(reqId)) {
+            NETMGR_LOG_E("Request to connect failed");
+        }
+    }
+}
+
 void NetConnService::NotFindBestSupplier(uint32_t reqId, const sptr<NetActivate> &active,
                                          const sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback)
 {
@@ -881,6 +907,7 @@ void NetConnService::FindBestNetworkForAllRequest()
         CallbackForAvailable(bestSupplier, callback);
         bestSupplier->SelectAsBestNetwork(iterActive->first);
     }
+    RequestAllNetworkExceptDefaut();
 }
 
 uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier, sptr<NetActivate> &netActivateNetwork)
