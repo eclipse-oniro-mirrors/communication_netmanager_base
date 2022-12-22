@@ -44,6 +44,8 @@ static constexpr const char *DEV_NET_TUN_PATH = "/dev/net/tun";
 static constexpr const char *IF_CFG_UP = "up";
 static constexpr const char *IF_CFG_DOWN = "down";
 static constexpr const char *NETSYS_ROUTE_INIT_DIR_PATH = "/data/service/el1/public/netmanager/route";
+static constexpr uint32_t WAIT_FOR_SERVICE_TIME_S = 1;
+static constexpr uint32_t MAX_GET_SERVICE_COUNT = 30;
 
 NetsysNativeClient::NativeNotifyCallback::NativeNotifyCallback(NetsysNativeClient &netsysNativeClient)
     : netsysNativeClient_(netsysNativeClient)
@@ -126,6 +128,17 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit(const 
     NETMGR_LOG_I("NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit");
     netsysNativeClient_.ProcessBandwidthReachedLimit(limitName, iface);
     return ERR_NONE;
+}
+
+NetsysNativeClient::NetsysNativeClient()
+{
+    std::thread([this]() {
+        uint32_t count = 0;
+        while (GetProxy() == nullptr && count++ < MAX_GET_SERVICE_COUNT) {
+            std::this_thread::sleep_for(std::chrono::seconds(WAIT_FOR_SERVICE_TIME_S));
+        }
+        NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", GetProxy() == nullptr ? "failed" : "success", count);
+    }).detach();
 }
 
 int32_t NetsysNativeClient::NetworkCreatePhysical(int32_t netId, int32_t permission)
@@ -868,6 +881,11 @@ int32_t NetsysNativeClient::RegisterCallback(sptr<NetsysControllerCallback> call
     if (callback == nullptr) {
         NETMGR_LOG_E("Callback is nullptr");
         return ERR_INVALID_PARAMS;
+    }
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return IPC_PROXY_ERR;
     }
     cbObjects_.push_back(callback);
     return ERR_NONE;
