@@ -164,7 +164,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest011, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 
     ret = NetsysController::GetInstance().GetAllRxBytes();
-    EXPECT_EQ(ret, 0);
+    EXPECT_GE(ret, 0);
 
     ret = NetsysController::GetInstance().GetUidRxBytes(TEST_UID);
     EXPECT_EQ(ret, -1);
@@ -280,7 +280,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest014, TestSize.Level1)
 HWTEST_F(NetsysControllerTest, NetsysControllerTest015, TestSize.Level1)
 {
     int32_t ret = NetsysController::GetInstance().BandwidthEnableDataSaver(true);
-    EXPECT_NE(ret, 0);
+    EXPECT_EQ(ret, 0);
 
     ret = NetsysController::GetInstance().BandwidthSetIfaceQuota(IF_NAME, BYTES);
     EXPECT_EQ(ret, 0);
