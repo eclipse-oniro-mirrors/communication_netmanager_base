@@ -74,16 +74,16 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest001, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 
     ret = nativeClient.NetworkAddInterface(NET_ID, IF_NAME);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
 
     ret = nativeClient.NetworkRemoveInterface(NET_ID, IF_NAME);
     EXPECT_EQ(ret, 0);
 
     ret = nativeClient.NetworkAddRoute(NET_ID, IF_NAME, DESTINATION, NEXT_HOP);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
 
     ret = nativeClient.NetworkRemoveRoute(NET_ID, IF_NAME, DESTINATION, NEXT_HOP);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
 
     OHOS::nmd::InterfaceConfigurationParcel parcel;
     ret = nativeClient.InterfaceGetConfig(parcel);
@@ -98,20 +98,20 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest001, TestSize.Level1)
     nativeClient.InterfaceClearAddrs(IF_NAME);
 
     ret = nativeClient.InterfaceGetMtu(IF_NAME);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
 
     ret = nativeClient.InterfaceSetMtu(IF_NAME, MTU);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest002, TestSize.Level1)
 {
     NetsysNativeClient nativeClient;
     int32_t ret = nativeClient.InterfaceAddAddress(IF_NAME, IP_ADDR, PREFIX_LENGTH);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -19);
 
     ret = nativeClient.InterfaceDelAddress(IF_NAME, IP_ADDR, PREFIX_LENGTH);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -19);
 
     ret = nativeClient.SetResolverConfig(NET_ID, BASE_TIMEOUT_MSEC, RETRY_COUNT, {}, {});
     EXPECT_EQ(ret, 0);
@@ -169,7 +169,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest003, TestSize.Level1)
     EXPECT_NE(interFaceGetList.size(), 0);
 
     std::vector<std::string> uidGetList = nativeClient.UidGetList();
-    EXPECT_NE(uidGetList.size(), 0);
+    EXPECT_EQ(uidGetList.size(), 0);
 
     ret = nativeClient.GetIfaceRxPackets(INTERFACE_NAME);
     EXPECT_EQ(ret, 0);
@@ -180,9 +180,9 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest003, TestSize.Level1)
     std::vector<uint32_t> uids;
     uids.push_back(UID);
     ret = nativeClient.FirewallSetUidsAllowedListChain(CHAIN, uids);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
     ret = nativeClient.FirewallSetUidsDeniedListChain(CHAIN, uids);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest004, TestSize.Level1)
@@ -204,16 +204,16 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest004, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 
     ret = nativeClient.EnableNat(ETH0, ETH0);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
 
     ret = nativeClient.DisableNat(ETH0, ETH0);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
 
     ret = nativeClient.IpfwdAddInterfaceForward(ETH0, ETH0);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
 
     ret = nativeClient.IpfwdRemoveInterfaceForward(ETH0, ETH0);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
 
     ret = nativeClient.ShareDnsSet(NET_ID);
     EXPECT_EQ(ret, 0);
@@ -225,26 +225,26 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest004, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 
     ret = nativeClient.FirewallEnableChain(CHAIN, true);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
     ret = nativeClient.FirewallSetUidRule(CHAIN, NET_ID, FIREWALL_RULE);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest005, TestSize.Level1)
 {
     NetsysNativeClient nativeClient;
     int32_t ret = nativeClient.BindNetworkServiceVpn(SOCKET_FD);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -28);
 
     struct ifreq ifrequest;
     ret = nativeClient.EnableVirtualNetIfaceCard(SOCKET_FD, ifrequest, g_ifaceFd);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -28);
 
     ret = nativeClient.SetIpAddress(SOCKET_FD, IP_ADDR, PREFIX_LENGTH, ifrequest);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -28);
 
     ret = nativeClient.SetBlocking(g_ifaceFd, true);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -28);
 
     ret = nativeClient.StartDhcpClient(INTERFACE_NAME, false);
     EXPECT_EQ(ret, 0);
@@ -259,7 +259,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest005, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 
     ret = nativeClient.BandwidthEnableDataSaver(true);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
 
     ret = nativeClient.BandwidthSetIfaceQuota(INTERFACE_NAME, BYTES);
     EXPECT_EQ(ret, 0);
