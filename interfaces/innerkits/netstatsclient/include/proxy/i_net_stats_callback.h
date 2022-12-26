@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,15 +25,13 @@ namespace OHOS {
 namespace NetManagerStandard {
 class INetStatsCallback : public IRemoteBroker {
 public:
-    virtual ~INetStatsCallback() = default;
-public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetManagerStandard.INetStatsCallback");
+    virtual ~INetStatsCallback() = default;
     enum {
         NET_STATS_IFACE_CHANGED = 0,
         NET_STATS_UID_CHANGED = 1,
     };
 
-public:
     virtual int32_t NetIfaceStatsChanged(const std::string &iface) = 0;
     virtual int32_t NetUidStatsChanged(const std::string &iface, uint32_t uid) = 0;
 };

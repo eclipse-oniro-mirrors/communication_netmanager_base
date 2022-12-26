@@ -22,7 +22,12 @@ namespace OHOS {
 namespace nmd {
 using namespace NetManagerStandard::CommonUtils;
 namespace {
+bool IsValidMessage(const std::shared_ptr<NetsysEventMessage> &message)
+{
+    return message->GetAction() != NetsysEventMessage::Action::UNKNOWN &&
+           message->GetSubSys() != NetsysEventMessage::SubSys::UNKNOWN;
 }
+} // namespace
 WrapperDistributor::WrapperDistributor(int32_t socket, const int32_t format)
 {
     NETNATIVE_LOG_D("WrapperDistributor::WrapperDistributor: Socket: %{public}d, Format: %{public}d", socket, format);
@@ -60,6 +65,9 @@ void WrapperDistributor::HandleDecodeSuccess(const std::shared_ptr<NetsysEventMe
     }
     if (netlinkCallbacks_ == nullptr) {
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
+        return;
+    }
+    if (!IsValidMessage(message)) {
         return;
     }
     HandleStateChanged(message);

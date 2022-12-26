@@ -21,10 +21,11 @@
 
 #include <napi/native_api.h>
 
-#include "event_manager.h"
 #include "refbase.h"
-#include "statistics_callback_observer.h"
 #include "singleton.h"
+
+#include "event_manager.h"
+#include "statistics_callback_observer.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -45,7 +46,7 @@ public:
 private:
     sptr<StatisticsCallbackObserver> observer_ = nullptr;
     EventManager *manager_ = nullptr;
-    bool registed_ = false;
+    bool registered_ = false;
 
 private:
     bool Register();

@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef NETMANAGER_BASE_TSTATSGETIFACERXBYTESE_CONTEXT_H
-#define NETMANAGER_BASE_TSTATSGETIFACERXBYTESE_CONTEXT_H
+#ifndef NETMANAGER_BASE_TSTATSGETCELLULARRXBYTES_CONTEXT_H
+#define NETMANAGER_BASE_TSTATSGETCELLULARRXBYTES_CONTEXT_H
 
 #include <cstddef>
 #include <cstdint>
-#include <string>
 
 #include <napi/native_api.h>
 
@@ -26,30 +25,21 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class GetIfaceRxBytesContext final : public BaseContext {
+class GetCellularRxBytesContext final : public BaseContext {
 public:
-    GetIfaceRxBytesContext() = delete;
-    explicit GetIfaceRxBytesContext(napi_env env, EventManager *manager);
-
-    void SetNic(std::string nic);
-    void SetBytes64(int64_t bytes64);
-    void SetInterfaceName(std::string interfaceName);
-    std::string GetNic() const;
-    int64_t GetBytes64() const;
-    std::string GetInterfaceName() const;
-
+    GetCellularRxBytesContext() = delete;
+    explicit GetCellularRxBytesContext(napi_env env, EventManager *manager);
     void ParseParams(napi_value *params, size_t paramsCount);
-
-private:
-    std::string nic_;
-    int64_t bytes64_ = 0;
-    std::string interfaceName_;
+    uint64_t bytes64_ = 0;
 
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
 };
 
-using GetIfaceTxBytesContext = GetIfaceRxBytesContext;
+using GetCellularTxBytesContext = GetCellularRxBytesContext;
+using GetAllTxBytesContext = GetCellularRxBytesContext;
+using GetAllRxBytesContext = GetCellularRxBytesContext;
+using UpdateStatsDataContext = GetCellularRxBytesContext;
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // NETMANAGER_BASE_TSTATSGETIFACERXBYTESE_CONTEXT_H
+#endif // NETMANAGER_BASE_TSTATSGETCELLULARRXBYTES_CONTEXT_H

@@ -35,7 +35,7 @@ int32_t NetStatsCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data
     std::u16string remoteDescripters = data.ReadInterfaceToken();
     if (myDescripters != remoteDescripters) {
         NETMGR_LOG_E("Descriptor checked failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
     }
 
     auto itFunc = memberFuncMap_.find(code);
@@ -53,38 +53,38 @@ int32_t NetStatsCallbackStub::OnNetIfaceStatsChanged(MessageParcel &data, Messag
 {
     std::string iface;
     if (!data.ReadString(iface)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     int32_t result = NetIfaceStatsChanged(iface);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
-        return result;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsCallbackStub::OnNetUidStatsChanged(MessageParcel &data, MessageParcel &reply)
 {
     std::string iface;
     if (!data.ReadString(iface)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     uint32_t uid = 0;
     if (!data.ReadUint32(uid)) {
         NETMGR_LOG_E("ReadUint32 uid failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     int32_t result = NetUidStatsChanged(iface, uid);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
-        return result;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

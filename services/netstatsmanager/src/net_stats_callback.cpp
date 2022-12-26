@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "net_stats_callback.h"
-#include "net_stats_constants.h"
 
 #include "net_mgr_log_wrapper.h"
+#include "net_stats_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -68,7 +69,7 @@ int32_t NetStatsCallback::NotifyNetIfaceStatsChanged(const std::string &iface)
         }
     }
 
-    return static_cast<int32_t>(NetStatsResultCode::ERR_NONE);
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsCallback::NotifyNetUidStatsChanged(const std::string &iface, uint32_t uid)
@@ -81,7 +82,7 @@ int32_t NetStatsCallback::NotifyNetUidStatsChanged(const std::string &iface, uin
         }
     }
 
-    return static_cast<int32_t>(NetStatsResultCode::ERR_NONE);
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

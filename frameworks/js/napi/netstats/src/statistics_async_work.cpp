@@ -16,11 +16,11 @@
 #include "statistics_async_work.h"
 
 #include "base_async_work.h"
-#include "get_cellular_rxbeytes_contex.h"
-#include "get_iface_rxbeytes_context.h"
+#include "get_cellular_rxbytes_context.h"
+#include "get_iface_rxbytes_context.h"
 #include "get_iface_stats_context.h"
 #include "get_iface_uid_stats_context.h"
-#include "get_uid_rxbeytes_context.h"
+#include "get_uid_rxbytes_context.h"
 #include "statistics_exec.h"
 #include "update_iface_stats_context.h"
 
@@ -68,14 +68,14 @@ void StatisticsAsyncWork::ExecGetIfaceTxBytes(napi_env env, void *data)
 
 void StatisticsAsyncWork::GetCellularRxBytesCallback(napi_env env, napi_status status, void *data)
 {
-    BaseAsyncWork::AsyncWorkCallback<GetCellularRxBytesContext, StatisticsExec::GetCellularRxBytesCallback>(env, status,
-                                                                                                            data);
+    BaseAsyncWork::AsyncWorkCallback<GetCellularRxBytesContext, StatisticsExec::GetCellularRxBytesCallback>(
+        env, status, data);
 }
 
 void StatisticsAsyncWork::GetCellularTxBytesCallback(napi_env env, napi_status status, void *data)
 {
-    BaseAsyncWork::AsyncWorkCallback<GetCellularTxBytesContext, StatisticsExec::GetCellularTxBytesCallback>(env, status,
-                                                                                                            data);
+    BaseAsyncWork::AsyncWorkCallback<GetCellularTxBytesContext, StatisticsExec::GetCellularTxBytesCallback>(
+        env, status, data);
 }
 
 void StatisticsAsyncWork::GetAllRxBytesCallback(napi_env env, napi_status status, void *data)

@@ -60,7 +60,7 @@ int32_t BpfMapCreator::LoadElfMapsSection(BpfMapData *maps, const ELFIO::elfio &
         NETNATIVE_LOGE("Failed to get maps section");
         return 0;
     }
-    mapsSection = it;
+    mapsSection = *it;
     auto defs = reinterpret_cast<const BpfLoadMapDef *>(mapsSection->get_data());
     auto nrMaps = mapsSection->get_size() / sizeof(BpfLoadMapDef);
     for (int32_t i = 0; i < nrMaps; i++) {

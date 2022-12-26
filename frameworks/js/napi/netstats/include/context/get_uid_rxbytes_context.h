@@ -29,17 +29,10 @@ class GetUidRxBytesContext final : public BaseContext {
 public:
     GetUidRxBytesContext() = delete;
     explicit GetUidRxBytesContext(napi_env env, EventManager *manager);
-
-    void SetUid(int32_t uid);
-    void SetBytes64(int64_t bytes64);
-    int32_t GetUid() const;
-    int64_t GetBytes64() const;
-
     void ParseParams(napi_value *params, size_t paramsCount);
 
-private:
-    int32_t uid_ = 0;
-    int64_t bytes64_ = 0;
+    uint32_t uid_ = 0;
+    uint64_t bytes64_ = 0;
 
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
