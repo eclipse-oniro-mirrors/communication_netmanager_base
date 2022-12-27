@@ -463,7 +463,7 @@ int32_t NetMonitor::GetUrlRedirectFromResponse(const std::string &strResponse, s
 int32_t NetMonitor::GetIpAddr(const std::string domain, std::string &ip_addr, int &socketType)
 {
     struct addrinfo *result = nullptr;
-    std::string serverName = "";
+    std::string serverName;
     if (NetsysController::GetInstance().GetAddrInfo(domain, serverName, nullptr, netId_, &result) < 0) {
         NETMGR_LOG_E("Get net[%{public}d] address info failed,errno[%{public}d]:%{public}s", netId_, errno,
                      strerror(errno));
@@ -492,7 +492,7 @@ int32_t NetMonitor::GetIpAddr(const std::string domain, std::string &ip_addr, in
         auto addr = reinterpret_cast<sockaddr_in6 *>(result->ai_addr);
         inet_ntop(AF_INET6, &addr->sin6_addr, ip, sizeof(ip));
         ip_addr = ip;
-        socketType = result->ai_family;
+        socketType = AF_INET6;
     }
     NetsysController::GetInstance().FreeAddrInfo(result);
     NETMGR_LOG_D("Get net[%{public}d] monitor ip:%{public}s", netId_, CommonUtils::ToAnonymousIp(ip_addr).c_str());

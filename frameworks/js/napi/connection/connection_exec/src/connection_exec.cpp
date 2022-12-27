@@ -32,6 +32,7 @@
 namespace OHOS::NetManagerStandard {
 namespace {
 constexpr int32_t BASE_COMMON_COMPLETE_CODE = 2100000;
+constexpr int32_t CONN_COMMON_COMPLETE_CODE = 2109000;
 constexpr int32_t CONVERTE_MIN_ERROR_CODE = 200;
 NetBaseErrorCodeConvertor convertor;
 } // namespace
@@ -171,8 +172,8 @@ napi_value ConnectionExec::IsDefaultNetMeteredCallback(IsDefaultNetMeteredContex
 
 bool ConnectionExec::ExecGetNetCapabilities(GetNetCapabilitiesContext *context)
 {
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(context->netHandle_,
-                                                                                  context->capabilities_);
+    auto ret =
+        DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(context->netHandle_, context->capabilities_);
     if (ret != NET_CONN_SUCCESS) {
         context->SetErrorCode(ret);
     }
@@ -289,7 +290,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
     int status = getaddrinfo(context->host_.c_str(), nullptr, nullptr, &res);
     if (status < 0) {
         NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s", errno, strerror(errno));
-        context->SetErrorCode(errno);
+        context->SetErrorCode(CONN_COMMON_COMPLETE_CODE + errno);
         return false;
     }
 
@@ -332,7 +333,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext
     int status = getaddrinfo(context->host_.c_str(), nullptr, nullptr, &res);
     if (status < 0) {
         NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s", errno, strerror(errno));
-        context->SetErrorCode(errno);
+        context->SetErrorCode(CONN_COMMON_COMPLETE_CODE + errno);
         return false;
     }
 
