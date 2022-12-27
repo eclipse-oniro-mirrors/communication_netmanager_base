@@ -18,11 +18,11 @@
 #include <napi/native_api.h>
 
 #include "constant.h"
-#include "get_cellular_rxbeytes_contex.h"
-#include "get_iface_rxbeytes_context.h"
+#include "get_cellular_rxbytes_context.h"
+#include "get_iface_rxbytes_context.h"
 #include "get_iface_stats_context.h"
 #include "get_iface_uid_stats_context.h"
-#include "get_uid_rxbeytes_context.h"
+#include "get_uid_rxbytes_context.h"
 #include "module_template.h"
 #include "napi_utils.h"
 #include "statistics_async_work.h"
@@ -34,7 +34,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-constexpr const char *STATISTCS_MODULE_NAME = "net.statistics";
+constexpr const char *STATISTICS_MODULE_NAME = "net.statistics";
 
 constexpr const char *FUNCTION_GET_CELLULAR_RXBYTES = "getCellularRxBytes";
 constexpr const char *FUNCTION_GET_CELLULAR_TXBYTES = "getCellularTxBytes";
@@ -137,7 +137,7 @@ static napi_module g_statisticsModule = {
     .nm_flags = 0,
     .nm_filename = nullptr,
     .nm_register_func = InitStatisticsModule,
-    .nm_modname = STATISTCS_MODULE_NAME,
+    .nm_modname = STATISTICS_MODULE_NAME,
     .nm_priv = nullptr,
     .reserved = {nullptr},
 };

@@ -17,7 +17,6 @@
 #define NETSYS_BPF_STATS_H
 
 #include "bpf_wrappers.h"
-#include "net_stats_constants.h"
 #include "netsys_bpf_map.h"
 
 namespace OHOS {
@@ -31,71 +30,50 @@ enum class StatsType {
 
 class NetsysBpfStats {
 public:
-    NetsysBpfStats();
-    ~NetsysBpfStats();
+    NetsysBpfStats() = default;
+    ~NetsysBpfStats() = default;
 
     /**
      * Get the Total Stats
      *
+     * @param stats Output traffic data
      * @param type StatsType traffic data type
      * @return returns total stats
      */
-    int64_t GetTotalStats(StatsType type);
+    int32_t GetTotalStats(uint64_t &stats, StatsType type);
 
     /**
      * Get the Uid Stats
      *
+     * @param stats Output traffic data
      * @param type StatsType traffic data type
      * @param uid app uid
      * @return returns uid stats
      */
-    int64_t GetUidStats(StatsType type, uint32_t uid);
+    int32_t GetUidStats(uint64_t &stats, StatsType type, uint32_t uid);
 
     /**
      * Get the Iface Stats
      *
+     * @param stats Output traffic data
      * @param type StatsType traffic data type
      * @param interfaceName iface name
      * @return returns iface stats.
      */
-    int64_t GetIfaceStats(StatsType type, const std::string &interfaceName);
-
-    /**
-     * Get the Iface Stats but for test only
-     *
-     * @param statsType traffic data type
-     * @param interfaceName iface name
-     * @param ifaceNameMap map storing relationship between ifacename and index
-     * @param ifaceStatsMap map storing index ifacename and stats
-     * @return returns iface stats
-     */
-    int64_t BpfGetIfaceStats(const StatsType statsType, const std::string &interfaceName,
-                             const NetsysBpfMap<uint32_t, IfaceName> &ifaceNameMap,
-                             const NetsysBpfMap<uint32_t, StatsValue> &ifaceStatsMap);
-    /**
-     * Get the Uid Stat but for test only
-     *
-     * @param statsType traffic data type
-     * @param uid app uid
-     * @param appUidStatsMap map storing uid and stats
-     * @return returns uid stats
-     */
-    int64_t BpfGetUidStats(StatsType statsType, uint32_t uid, const NetsysBpfMap<uint32_t, StatsValue> &appUidStatsMap);
-
-    /**
-     * For test only
-     *
-     * @param statsType traffic data type
-     * @param ifaceStatsMap map storing index ifacename and stats
-     * @return returns uid stats
-     */
-    int64_t BpfGetTotalStats(StatsType statsType, const NetsysBpfMap<uint32_t, StatsValue> &ifaceStatsMap);
+    int32_t GetIfaceStats(uint64_t &stats, StatsType type, const std::string &interfaceName);
 
 private:
+    int32_t BpfGetIfaceStats(uint64_t &stats, const StatsType statsType, const std::string &interfaceName,
+                             const NetsysBpfMap<uint32_t, IfaceName> &ifaceNameMap,
+                             const NetsysBpfMap<uint32_t, StatsValue> &ifaceStatsMap);
+    int32_t BpfGetUidStats(uint64_t &stats, StatsType statsType, uint32_t uid,
+                           const NetsysBpfMap<uint32_t, StatsValue> &appUidStatsMap);
+    int32_t BpfGetTotalStats(uint64_t &stats, StatsType statsType,
+                             const NetsysBpfMap<uint32_t, StatsValue> &ifaceStatsMap);
     bool IsStatsValueValid(StatsValue value);
     bool GetIfaceName(const NetsysBpfMap<uint32_t, IfaceName> &ifaceNameMap, uint32_t ifaceIndex,
                       std::string &ifaceName);
-    int64_t CastResult(const NetStatsResultCode &code);
+    int32_t DumpError(int32_t errorCode);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -21,11 +21,11 @@
 
 #include <napi/native_api.h>
 
-#include "get_cellular_rxbeytes_contex.h"
-#include "get_iface_rxbeytes_context.h"
+#include "get_cellular_rxbytes_context.h"
+#include "get_iface_rxbytes_context.h"
 #include "get_iface_stats_context.h"
 #include "get_iface_uid_stats_context.h"
-#include "get_uid_rxbeytes_context.h"
+#include "get_uid_rxbytes_context.h"
 #include "update_iface_stats_context.h"
 
 namespace OHOS {

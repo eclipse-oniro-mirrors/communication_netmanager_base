@@ -19,14 +19,15 @@
 
 #include <gtest/gtest.h>
 
+#include "net_manager_center.h"
 #include "net_stats_callback_test.h"
 #include "net_stats_client.h"
 #include "net_stats_constants.h"
-#include "net_manager_center.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
+#define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 constexpr const char *ETH_IFACE_NAME = "lo";
 constexpr int64_t TEST_UID = 1010;
 void GetIfaceNamesFromManager(std::list<std::string> &ifaceNames)
@@ -86,8 +87,10 @@ HWTEST_F(NetStatsClientTest, UnregisterNetStatsCallbackTest001, TestSize.Level1)
  */
 HWTEST_F(NetStatsClientTest, GetIfaceRxBytesTest001, TestSize.Level1)
 {
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceRxBytes(ETH_IFACE_NAME);
-    EXPECT_GE(ret, 0);
+    uint64_t stats = 0;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceRxBytes(stats, ETH_IFACE_NAME);
+    EXPECT_GE(stats, static_cast<uint64_t>(0));
+    DTEST_LOG << "Ret" << ret << std::endl;
 }
 
 /**
@@ -97,8 +100,10 @@ HWTEST_F(NetStatsClientTest, GetIfaceRxBytesTest001, TestSize.Level1)
  */
 HWTEST_F(NetStatsClientTest, GetIfaceTxBytesTest001, TestSize.Level1)
 {
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceTxBytes(ETH_IFACE_NAME);
-    EXPECT_GE(ret, 0);
+    uint64_t stats = 0;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceTxBytes(stats, ETH_IFACE_NAME);
+    EXPECT_GE(stats, static_cast<uint64_t>(0));
+    DTEST_LOG << "Ret" << ret << std::endl;
 }
 
 /**
@@ -109,13 +114,14 @@ HWTEST_F(NetStatsClientTest, GetIfaceTxBytesTest001, TestSize.Level1)
 HWTEST_F(NetStatsClientTest, GetCellularRxBytesTest001, TestSize.Level1)
 {
     std::list<std::string> ifaceNames;
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularRxBytes();
+    uint64_t stats = 0;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularRxBytes(stats);
     GetIfaceNamesFromManager(ifaceNames);
     if (ifaceNames.empty()) {
         EXPECT_GE(ret, -1);
         return;
     }
-    EXPECT_GE(ret, 0);
+    EXPECT_GE(stats, static_cast<uint64_t>(0));
 }
 
 /**
@@ -126,13 +132,14 @@ HWTEST_F(NetStatsClientTest, GetCellularRxBytesTest001, TestSize.Level1)
 HWTEST_F(NetStatsClientTest, GetCellularTxBytesTest001, TestSize.Level1)
 {
     std::list<std::string> ifaceNames;
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularTxBytes();
+    uint64_t stats = 0;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularTxBytes(stats);
     GetIfaceNamesFromManager(ifaceNames);
     if (ifaceNames.empty()) {
         EXPECT_GE(ret, -1);
         return;
     }
-    EXPECT_GE(ret, 0);
+    EXPECT_GE(stats, static_cast<uint64_t>(0));
 }
 
 /**
@@ -142,8 +149,10 @@ HWTEST_F(NetStatsClientTest, GetCellularTxBytesTest001, TestSize.Level1)
  */
 HWTEST_F(NetStatsClientTest, GetAllRxBytesTest001, TestSize.Level1)
 {
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllRxBytes();
-    EXPECT_GE(ret, 0);
+    uint64_t stats = 0;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllRxBytes(stats);
+    EXPECT_GE(stats, static_cast<uint64_t>(0));
+    DTEST_LOG << "Ret" << ret << std::endl;
 }
 
 /**
@@ -153,8 +162,10 @@ HWTEST_F(NetStatsClientTest, GetAllRxBytesTest001, TestSize.Level1)
  */
 HWTEST_F(NetStatsClientTest, GetAllTxBytesTest001, TestSize.Level1)
 {
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllTxBytes();
-    EXPECT_GE(ret, 0);
+    uint64_t stats = 0;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllTxBytes(stats);
+    EXPECT_GE(stats, static_cast<uint64_t>(0));
+    DTEST_LOG << "Ret" << ret << std::endl;
 }
 
 /**
@@ -164,8 +175,10 @@ HWTEST_F(NetStatsClientTest, GetAllTxBytesTest001, TestSize.Level1)
  */
 HWTEST_F(NetStatsClientTest, GetUidRxBytesTest001, TestSize.Level1)
 {
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetUidRxBytes(TEST_UID);
-    EXPECT_GE(ret, 0);
+    uint64_t stats = 0;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetUidRxBytes(stats, TEST_UID);
+    EXPECT_GE(stats, static_cast<uint64_t>(0));
+    DTEST_LOG << "Ret" << ret << std::endl;
 }
 
 /**
@@ -175,8 +188,10 @@ HWTEST_F(NetStatsClientTest, GetUidRxBytesTest001, TestSize.Level1)
  */
 HWTEST_F(NetStatsClientTest, GetUidTxBytesTest001, TestSize.Level1)
 {
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetUidTxBytes(TEST_UID);
-    EXPECT_GE(ret, 0);
+    uint64_t stats = 0;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetUidTxBytes(stats, TEST_UID);
+    EXPECT_GE(stats, static_cast<uint64_t>(0));
+    DTEST_LOG << "Ret" << ret << std::endl;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

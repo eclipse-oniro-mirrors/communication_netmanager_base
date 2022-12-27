@@ -18,14 +18,14 @@
 #include "constant.h"
 #include "module_template.h"
 #include "napi_constant.h"
-#include "netmanager_base_log.h"
 #include "net_stats_client.h"
 #include "net_stats_constants.h"
+#include "netmanager_base_log.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 StatisticsObserverWrapper::StatisticsObserverWrapper()
-    : observer_(new StatisticsCallbackObserver()), manager_(new EventManager()), registed_(false)
+    : observer_(new StatisticsCallbackObserver()), manager_(new EventManager()), registered_(false)
 {
 }
 
@@ -40,7 +40,8 @@ napi_value StatisticsObserverWrapper::On(napi_env env, napi_callback_info info,
     size_t paramsCount = MAX_PARAM_NUM;
     napi_value params[MAX_PARAM_NUM] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &paramsCount, params, nullptr, nullptr));
-    if (paramsCount != PARAM_OPTIONS_AND_CALLBACK || NapiUtils::GetValueType(env, params[ARG_INDEX_0]) != napi_string ||
+    if (paramsCount != PARAM_OPTIONS_AND_CALLBACK ||
+        NapiUtils::GetValueType(env, params[ARG_INDEX_0]) != napi_string ||
         NapiUtils::GetValueType(env, params[ARG_INDEX_1]) != napi_function) {
         NETMANAGER_BASE_LOGE("on off once interface para: [string, function]");
         return NapiUtils::GetUndefined(env);
@@ -58,12 +59,12 @@ napi_value StatisticsObserverWrapper::On(napi_env env, napi_callback_info info,
 
 bool StatisticsObserverWrapper::Register()
 {
-    if (!registed_) {
+    if (!registered_) {
         int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->RegisterNetStatsCallback(observer_);
         NETMANAGER_BASE_LOGI("ret = [%{public}d]", ret);
-        registed_ = (ret == static_cast<int32_t>(NetStatsResultCode::ERR_NONE));
+        registered_ = ret == NETMANAGER_SUCCESS;
     }
-    return registed_;
+    return registered_;
 }
 
 napi_value StatisticsObserverWrapper::Off(napi_env env, napi_callback_info info,
@@ -99,10 +100,10 @@ napi_value StatisticsObserverWrapper::Off(napi_env env, napi_callback_info info,
 
     if (manager_->IsListenerListEmpty()) {
         auto ret = DelayedSingleton<NetStatsClient>::GetInstance()->UnregisterNetStatsCallback(observer_);
-        if (ret != static_cast<int32_t>(NetStatsResultCode::ERR_NONE)) {
+        if (ret != NETMANAGER_SUCCESS) {
             NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
         }
-        registed_ = false;
+        registered_ = false;
     }
     return NapiUtils::GetUndefined(env);
 }

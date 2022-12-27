@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,8 @@ namespace OHOS {
 namespace NetManagerStandard {
 class NetStatsBaseService : public virtual RefBase {
 public:
-    virtual int32_t GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end, NetStatsInfo &info) = 0;
+    virtual int32_t GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end,
+                                        NetStatsInfo &info) = 0;
     virtual int32_t ResetStatsFactory() = 0;
 };
 } // namespace NetManagerStandard

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "get_iface_rxbeytes_context.h"
+#include "get_iface_rxbytes_context.h"
 
 #include "constant.h"
 #include "napi_constant.h"
@@ -29,7 +29,7 @@ void GetIfaceRxBytesContext::ParseParams(napi_value *params, size_t paramsCount)
         return;
     }
 
-    nic_ = NapiUtils::GetStringFromValueUtf8(GetEnv(), params[ARG_INDEX_0]);
+    interfaceName_ = NapiUtils::GetStringFromValueUtf8(GetEnv(), params[ARG_INDEX_0]);
 
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
         SetParseOK(SetCallback(params[ARG_INDEX_1]) == napi_ok);
@@ -49,36 +49,6 @@ bool GetIfaceRxBytesContext::CheckParamsType(napi_value *params, size_t paramsCo
                NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_string;
     }
     return false;
-}
-
-void GetIfaceRxBytesContext::SetNic(std::string nic)
-{
-    nic_ = nic;
-}
-
-void GetIfaceRxBytesContext::SetBytes64(int64_t bytes64)
-{
-    bytes64_ = bytes64;
-}
-
-void GetIfaceRxBytesContext::SetInterfaceName(std::string interfaceName)
-{
-    interfaceName_ = interfaceName;
-}
-
-std::string GetIfaceRxBytesContext::GetNic() const
-{
-    return nic_;
-}
-
-int64_t GetIfaceRxBytesContext::GetBytes64() const
-{
-    return bytes64_;
-}
-
-std::string GetIfaceRxBytesContext::GetInterfaceName() const
-{
-    return interfaceName_;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

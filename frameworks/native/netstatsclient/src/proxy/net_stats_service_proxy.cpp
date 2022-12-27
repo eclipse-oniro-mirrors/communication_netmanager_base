@@ -37,27 +37,27 @@ int32_t NetStatsServiceProxy::RegisterNetStatsCallback(const sptr<INetStatsCallb
 {
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter of callback is nullptr");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return static_cast<int32_t>(NetStatsResultCode::ERR_INTERNAL_ERROR);
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
     MessageOption option;
     MessageParcel replyParcel;
     int32_t retCode = remote->SendRequest(CMD_NSM_REGISTER_NET_STATS_CALLBACK, dataParcel, replyParcel, option);
-    if (retCode != ERR_NONE) {
-        return retCode;
+    if (retCode != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
     return replyParcel.ReadInt32();
 }
@@ -66,237 +66,237 @@ int32_t NetStatsServiceProxy::UnregisterNetStatsCallback(const sptr<INetStatsCal
 {
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter of callback is nullptr");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return static_cast<int32_t>(NetStatsResultCode::ERR_INTERNAL_ERROR);
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
     MessageOption option;
     MessageParcel replyParcel;
     int32_t retCode = remote->SendRequest(CMD_NSM_UNREGISTER_NET_STATS_CALLBACK, dataParcel, replyParcel, option);
-    if (retCode != ERR_NONE) {
-        return retCode;
+    if (retCode != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
     return replyParcel.ReadInt32();
 }
 
-int64_t NetStatsServiceProxy::GetIfaceRxBytes(const std::string &interfaceName)
+int32_t NetStatsServiceProxy::GetIfaceRxBytes(uint64_t &stats, const std::string &interfaceName)
 {
-    int64_t err = -1;
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return err;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     if (!data.WriteString(interfaceName)) {
         NETMGR_LOG_E("WriteString failed");
-        return err;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return err;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
     MessageParcel reply;
     MessageOption option;
     int32_t error = remote->SendRequest(CMD_GET_IFACE_RXBYTES, data, reply, option);
-    if (error != ERR_NONE) {
+    if (error != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return err;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    return reply.ReadInt64();
+    stats = reply.ReadUint64();
+    return reply.ReadInt32();
 }
 
-int64_t NetStatsServiceProxy::GetIfaceTxBytes(const std::string &interfaceName)
+int32_t NetStatsServiceProxy::GetIfaceTxBytes(uint64_t &stats, const std::string &interfaceName)
 {
-    int64_t err = -1;
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return err;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     if (!data.WriteString(interfaceName)) {
         NETMGR_LOG_E("WriteString failed");
-        return err;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return err;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
     MessageParcel reply;
     MessageOption option;
     int32_t error = remote->SendRequest(CMD_GET_IFACE_TXBYTES, data, reply, option);
-    if (error != ERR_NONE) {
+    if (error != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return err;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    return reply.ReadInt64();
+    stats = reply.ReadUint64();
+    return reply.ReadInt32();
 }
 
-int64_t NetStatsServiceProxy::GetCellularRxBytes()
+int32_t NetStatsServiceProxy::GetCellularRxBytes(uint64_t &stats)
 {
-    int64_t err = -1;
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return err;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return err;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     MessageParcel reply;
     MessageOption option;
-    int error = remote->SendRequest(CMD_GET_CELLULAR_RXBYTES, data, reply, option);
-    if (error != ERR_NONE) {
+    int32_t error = remote->SendRequest(CMD_GET_CELLULAR_RXBYTES, data, reply, option);
+    if (error != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return err;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    return reply.ReadInt64();
+    stats = reply.ReadUint64();
+    return reply.ReadInt32();
 }
 
-int64_t NetStatsServiceProxy::GetCellularTxBytes()
+int32_t NetStatsServiceProxy::GetCellularTxBytes(uint64_t &stats)
 {
-    int64_t err = -1;
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return err;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return err;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     MessageParcel reply;
     MessageOption option;
-    int error = remote->SendRequest(CMD_GET_CELLULAR_TXBYTES, data, reply, option);
-    if (error != ERR_NONE) {
+    int32_t error = remote->SendRequest(CMD_GET_CELLULAR_TXBYTES, data, reply, option);
+    if (error != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return err;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    return reply.ReadInt64();
+    stats = reply.ReadUint64();
+    return reply.ReadInt32();
 }
 
-int64_t NetStatsServiceProxy::GetAllRxBytes()
+int32_t NetStatsServiceProxy::GetAllRxBytes(uint64_t &stats)
 {
-    int64_t err = -1;
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return err;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return err;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     MessageParcel reply;
     MessageOption option;
-    int error = remote->SendRequest(CMD_GET_ALL_RXBYTES, data, reply, option);
-    if (error != ERR_NONE) {
+    int32_t error = remote->SendRequest(CMD_GET_ALL_RXBYTES, data, reply, option);
+    if (error != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return err;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    return reply.ReadInt64();
+    stats = reply.ReadUint64();
+    return reply.ReadInt32();
 }
 
-int64_t NetStatsServiceProxy::GetAllTxBytes()
+int32_t NetStatsServiceProxy::GetAllTxBytes(uint64_t &stats)
 {
-    int64_t err = -1;
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return err;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return err;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     MessageParcel reply;
     MessageOption option;
-    int error = remote->SendRequest(CMD_GET_ALL_TXBYTES, data, reply, option);
-    if (error != ERR_NONE) {
+    int32_t error = remote->SendRequest(CMD_GET_ALL_TXBYTES, data, reply, option);
+    if (error != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return err;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    return reply.ReadInt64();
+    stats = reply.ReadUint64();
+    return reply.ReadInt32();
 }
 
-int64_t NetStatsServiceProxy::GetUidRxBytes(uint32_t uid)
+int32_t NetStatsServiceProxy::GetUidRxBytes(uint64_t &stats, uint32_t uid)
 {
-    int64_t err = -1;
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return err;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     if (!data.WriteUint32(uid)) {
         NETMGR_LOG_E("proxy uid%{public}d", uid);
-        return err;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return err;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
     MessageParcel reply;
     MessageOption option;
-    int error = remote->SendRequest(CMD_GET_UID_RXBYTES, data, reply, option);
-    if (error != ERR_NONE) {
+    int32_t error = remote->SendRequest(CMD_GET_UID_RXBYTES, data, reply, option);
+    if (error != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return err;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    return reply.ReadInt64();
+    stats = reply.ReadUint64();
+    return reply.ReadInt32();
 }
 
-int64_t NetStatsServiceProxy::GetUidTxBytes(uint32_t uid)
+int32_t NetStatsServiceProxy::GetUidTxBytes(uint64_t &stats, uint32_t uid)
 {
-    int64_t err = -1;
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return err;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     if (!data.WriteUint32(uid)) {
         NETMGR_LOG_E("proxy uid%{public}d", uid);
-        return err;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return err;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
     MessageParcel reply;
     MessageOption option;
-    int error = remote->SendRequest(CMD_GET_UID_TXBYTES, data, reply, option);
-    if (error != ERR_NONE) {
+    int32_t error = remote->SendRequest(CMD_GET_UID_TXBYTES, data, reply, option);
+    if (error != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return err;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    return reply.ReadInt64();
+    stats = reply.ReadUint64();
+    return reply.ReadInt32();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

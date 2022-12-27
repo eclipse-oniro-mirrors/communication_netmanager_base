@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,14 +52,14 @@ public:
 public:
     virtual int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback) = 0;
     virtual int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) = 0;
-    virtual int64_t GetIfaceRxBytes(const std::string &interfaceName) = 0;
-    virtual int64_t GetIfaceTxBytes(const std::string &interfaceName) = 0;
-    virtual int64_t GetCellularRxBytes() = 0;
-    virtual int64_t GetCellularTxBytes() = 0;
-    virtual int64_t GetAllRxBytes() = 0;
-    virtual int64_t GetAllTxBytes() = 0;
-    virtual int64_t GetUidRxBytes(uint32_t uid) = 0;
-    virtual int64_t GetUidTxBytes(uint32_t uid) = 0;
+    virtual int32_t GetIfaceRxBytes(uint64_t &stats, const std::string &interfaceName) = 0;
+    virtual int32_t GetIfaceTxBytes(uint64_t &stats, const std::string &interfaceName) = 0;
+    virtual int32_t GetCellularRxBytes(uint64_t &stats) = 0;
+    virtual int32_t GetCellularTxBytes(uint64_t &stats) = 0;
+    virtual int32_t GetAllRxBytes(uint64_t &stats) = 0;
+    virtual int32_t GetAllTxBytes(uint64_t &stats) = 0;
+    virtual int32_t GetUidRxBytes(uint64_t &stats, uint32_t uid) = 0;
+    virtual int32_t GetUidTxBytes(uint64_t &stats, uint32_t uid) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

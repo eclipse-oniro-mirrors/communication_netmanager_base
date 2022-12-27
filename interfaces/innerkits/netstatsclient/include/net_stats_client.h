@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NET_STATS_MANAGER_H
-#define NET_STATS_MANAGER_H
+#ifndef NET_STATS_CLIENT_H
+#define NET_STATS_CLIENT_H
 
 #include <string>
 
@@ -33,14 +33,14 @@ class NetStatsClient {
 public:
     int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback);
     int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback);
-    int64_t GetIfaceRxBytes(const std::string &interfaceName);
-    int64_t GetIfaceTxBytes(const std::string &interfaceName);
-    int64_t GetCellularRxBytes();
-    int64_t GetCellularTxBytes();
-    int64_t GetAllRxBytes();
-    int64_t GetAllTxBytes();
-    int64_t GetUidRxBytes(uint32_t uid);
-    int64_t GetUidTxBytes(uint32_t uid);
+    int32_t GetIfaceRxBytes(uint64_t &stats, const std::string &interfaceName);
+    int32_t GetIfaceTxBytes(uint64_t &stats, const std::string &interfaceName);
+    int32_t GetCellularRxBytes(uint64_t &stats);
+    int32_t GetCellularTxBytes(uint64_t &stats);
+    int32_t GetAllRxBytes(uint64_t &stats);
+    int32_t GetAllTxBytes(uint64_t &stats);
+    int32_t GetUidRxBytes(uint64_t &stats, uint32_t uid);
+    int32_t GetUidTxBytes(uint64_t &stats, uint32_t uid);
 
 private:
     class NetStatsDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -67,4 +67,4 @@ private:
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // NET_STATS_MANAGER_H
+#endif // NET_STATS_CLIENT_H

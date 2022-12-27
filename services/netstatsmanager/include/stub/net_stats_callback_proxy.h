@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,6 @@
 #include "iremote_proxy.h"
 
 #include "i_net_stats_callback.h"
-#include "net_stats_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -27,15 +26,11 @@ class NetStatsCallbackProxy : public IRemoteProxy<INetStatsCallback> {
 public:
     explicit NetStatsCallbackProxy(const sptr<IRemoteObject> &impl);
     virtual ~NetStatsCallbackProxy();
-
-public:
     int32_t NetIfaceStatsChanged(const std::string &iface) override;
     int32_t NetUidStatsChanged(const std::string &iface, uint32_t uid) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
-
-private:
     static inline BrokerDelegator<NetStatsCallbackProxy> delegator_;
 };
 } // namespace NetManagerStandard

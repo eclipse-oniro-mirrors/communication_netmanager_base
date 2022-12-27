@@ -15,10 +15,11 @@
 
 #include "statistics_exec.h"
 
+#include "errorcode_convertor.h"
 #include "napi_utils.h"
-#include "netmanager_base_log.h"
 #include "net_stats_client.h"
 #include "net_stats_constants.h"
+#include "netmanager_base_log.h"
 #include "statistics_observer_wrapper.h"
 
 namespace OHOS {
@@ -28,94 +29,111 @@ const std::string RX_BYTES = "rxBytes";
 const std::string TX_BYTES = "txBytes";
 const std::string RX_PACKETS = "rxPackets";
 const std::string TX_PACKETS = "txPackets";
+
+std::unique_ptr<ErrorCodeConvertor> g_covert = std::make_unique<NetBaseErrorCodeConvertor>();
+
+std::string ConvertErrorCode(int32_t code)
+{
+    return g_covert->ConvertErrorCode(code);
+}
 } // namespace
 
 bool StatisticsExec::ExecGetCellularRxBytes(GetCellularRxBytesContext *context)
 {
-    context->SetBytes64(DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularRxBytes());
-    return true;
+    int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularRxBytes(context->bytes64_);
+    context->SetError(result, ConvertErrorCode(result));
+    return result == NETMANAGER_SUCCESS;
 }
 
 bool StatisticsExec::ExecGetCellularTxBytes(GetCellularTxBytesContext *context)
 {
-    context->SetBytes64(DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularTxBytes());
-    return true;
+    int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularTxBytes(context->bytes64_);
+    context->SetError(result, ConvertErrorCode(result));
+    return result == NETMANAGER_SUCCESS;
 }
 
 bool StatisticsExec::ExecGetAllRxBytes(GetAllRxBytesContext *context)
 {
-    context->SetBytes64(DelayedSingleton<NetStatsClient>::GetInstance()->GetAllRxBytes());
-    return true;
+    int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllRxBytes(context->bytes64_);
+    context->SetError(result, ConvertErrorCode(result));
+    return result == NETMANAGER_SUCCESS;
 }
 
 bool StatisticsExec::ExecGetAllTxBytes(GetAllTxBytesContext *context)
 {
-    context->SetBytes64(DelayedSingleton<NetStatsClient>::GetInstance()->GetAllTxBytes());
-    return true;
+    int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllTxBytes(context->bytes64_);
+    context->SetError(result, ConvertErrorCode(result));
+    return result == NETMANAGER_SUCCESS;
 }
 
 bool StatisticsExec::ExecGetUidRxBytes(GetUidRxBytesContext *context)
 {
-    context->SetBytes64(DelayedSingleton<NetStatsClient>::GetInstance()->GetUidRxBytes(context->GetUid()));
-    return true;
+    int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->GetUidRxBytes(context->bytes64_, context->uid_);
+    context->SetError(result, ConvertErrorCode(result));
+    return result == NETMANAGER_SUCCESS;
 }
 
 bool StatisticsExec::ExecGetUidTxBytes(GetUidTxBytesContext *context)
 {
-    context->SetBytes64(DelayedSingleton<NetStatsClient>::GetInstance()->GetUidTxBytes(context->GetUid()));
-    return true;
+    int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->GetUidTxBytes(context->bytes64_, context->uid_);
+    context->SetError(result, ConvertErrorCode(result));
+    return result == NETMANAGER_SUCCESS;
 }
 
 bool StatisticsExec::ExecGetIfaceRxBytes(GetIfaceRxBytesContext *context)
 {
-    context->SetBytes64(DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceRxBytes(context->GetNic()));
-    return true;
+    int32_t result =
+        DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceRxBytes(context->bytes64_, context->interfaceName_);
+    context->SetError(result, ConvertErrorCode(result));
+    return result == NETMANAGER_SUCCESS;
 }
 
 bool StatisticsExec::ExecGetIfaceTxBytes(GetIfaceTxBytesContext *context)
 {
-    context->SetBytes64(DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceTxBytes(context->GetNic()));
-    return true;
+    auto instance = DelayedSingleton<NetStatsClient>::GetInstance();
+    int32_t result = instance->GetIfaceTxBytes(context->bytes64_, context->interfaceName_);
+    context->SetError(result, ConvertErrorCode(result));
+    return result == NETMANAGER_SUCCESS;
 }
 
 napi_value StatisticsExec::GetCellularRxBytesCallback(GetCellularRxBytesContext *context)
 {
-    return NapiUtils::CreateInt64(context->GetEnv(), context->GetBytes64());
+    return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::GetCellularTxBytesCallback(GetCellularTxBytesContext *context)
 {
-    return NapiUtils::CreateInt64(context->GetEnv(), context->GetBytes64());
+    return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::GetAllRxBytesCallback(GetAllRxBytesContext *context)
 {
-    return NapiUtils::CreateInt64(context->GetEnv(), context->GetBytes64());
+    return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::GetAllTxBytesCallback(GetAllTxBytesContext *context)
 {
-    return NapiUtils::CreateInt64(context->GetEnv(), context->GetBytes64());
+    return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::GetUidRxBytesCallback(GetUidRxBytesContext *context)
 {
-    return NapiUtils::CreateInt64(context->GetEnv(), context->GetBytes64());
+    return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::GetUidTxBytesCallback(GetUidTxBytesContext *context)
 {
-    return NapiUtils::CreateInt64(context->GetEnv(), context->GetBytes64());
+    return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::GetIfaceRxBytesCallback(GetIfaceRxBytesContext *context)
 {
-    return NapiUtils::CreateInt64(context->GetEnv(), context->GetBytes64());
+    return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 
 napi_value StatisticsExec::GetIfaceTxBytesCallback(GetIfaceTxBytesContext *context)
 {
-    return NapiUtils::CreateInt64(context->GetEnv(), context->GetBytes64());
+    return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

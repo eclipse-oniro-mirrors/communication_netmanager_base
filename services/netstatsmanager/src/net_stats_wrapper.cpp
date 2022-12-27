@@ -30,19 +30,19 @@ NetStatsWrapper &NetStatsWrapper::GetInstance()
     return g_singleInstance_;
 }
 
-int64_t NetStatsWrapper::GetTotalStats(StatsType type)
+int32_t NetStatsWrapper::GetTotalStats(uint64_t &stats, StatsType type)
 {
-    return netSysBpf_->GetTotalStats(type);
+    return netSysBpf_->GetTotalStats(stats, type);
 }
 
-int64_t NetStatsWrapper::GetUidStats(StatsType type, uint32_t uid)
+int32_t NetStatsWrapper::GetUidStats(uint64_t &stats, StatsType type, uint32_t uid)
 {
-    return netSysBpf_->GetUidStats(type, uid);
+    return netSysBpf_->GetUidStats(stats, type, uid);
 }
 
-int64_t NetStatsWrapper::GetIfaceStats(StatsType type, const std::string &interfaceName)
+int32_t NetStatsWrapper::GetIfaceStats(uint64_t &stats, StatsType type, const std::string &interfaceName)
 {
-    return netSysBpf_->GetIfaceStats(type, interfaceName);
+    return netSysBpf_->GetIfaceStats(stats, type, interfaceName);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

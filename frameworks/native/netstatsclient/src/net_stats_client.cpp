@@ -31,7 +31,7 @@ int32_t NetStatsClient::RegisterNetStatsCallback(const sptr<INetStatsCallback> &
     sptr<INetStatsService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return static_cast<int32_t>(NetStatsResultCode::ERR_INTERNAL_ERROR);
+        return NETMANAGER_ERR_IPC_GET_PROXY_FAIL;
     }
 
     return proxy->RegisterNetStatsCallback(callback);
@@ -42,7 +42,7 @@ int32_t NetStatsClient::UnregisterNetStatsCallback(const sptr<INetStatsCallback>
     sptr<INetStatsService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return static_cast<int32_t>(NetStatsResultCode::ERR_INTERNAL_ERROR);
+        return NETMANAGER_ERR_IPC_GET_PROXY_FAIL;
     }
 
     return proxy->UnregisterNetStatsCallback(callback);
@@ -70,7 +70,11 @@ sptr<INetStatsService> NetStatsClient::GetProxy()
         return nullptr;
     }
 
-    deathRecipient_ = (std::make_unique<NetStatsDeathRecipient>(*this)).release();
+    deathRecipient_ = new (std::nothrow) NetStatsDeathRecipient(*this);
+    if (deathRecipient_ == nullptr) {
+        NETMGR_LOG_E("get deathRecipient_ failed");
+        return nullptr;
+    }
     if ((remote->IsProxyObject()) && (!remote->AddDeathRecipient(deathRecipient_))) {
         NETMGR_LOG_E("add death recipient failed");
         return nullptr;
@@ -108,92 +112,84 @@ void NetStatsClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
     netStatsService_ = nullptr;
 }
 
-int64_t NetStatsClient::GetIfaceRxBytes(const std::string &interfaceName)
+int32_t NetStatsClient::GetIfaceRxBytes(uint64_t &stats, const std::string &interfaceName)
 {
-    int64_t err = -1;
     sptr<INetStatsService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return err;
+        return NETMANAGER_ERR_IPC_GET_PROXY_FAIL;
     }
-    return proxy->GetIfaceRxBytes(interfaceName);
+    return proxy->GetIfaceRxBytes(stats, interfaceName);
 }
 
-int64_t NetStatsClient::GetIfaceTxBytes(const std::string &interfaceName)
+int32_t NetStatsClient::GetIfaceTxBytes(uint64_t &stats, const std::string &interfaceName)
 {
-    int64_t err = -1;
     sptr<INetStatsService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return err;
+        return NETMANAGER_ERR_IPC_GET_PROXY_FAIL;
     }
-    return proxy->GetIfaceTxBytes(interfaceName);
+    return proxy->GetIfaceTxBytes(stats, interfaceName);
 }
 
-int64_t NetStatsClient::GetCellularRxBytes()
+int32_t NetStatsClient::GetCellularRxBytes(uint64_t &stats)
 {
-    int64_t err = -1;
     sptr<INetStatsService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return err;
+        return NETMANAGER_ERR_IPC_GET_PROXY_FAIL;
     }
-    return proxy->GetCellularRxBytes();
+    return proxy->GetCellularRxBytes(stats);
 }
 
-int64_t NetStatsClient::GetCellularTxBytes()
+int32_t NetStatsClient::GetCellularTxBytes(uint64_t &stats)
 {
-    int64_t err = -1;
     sptr<INetStatsService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return err;
+        return NETMANAGER_ERR_IPC_GET_PROXY_FAIL;
     }
-    return proxy->GetCellularTxBytes();
+    return proxy->GetCellularTxBytes(stats);
 }
 
-int64_t NetStatsClient::GetAllRxBytes()
+int32_t NetStatsClient::GetAllRxBytes(uint64_t &stats)
 {
-    int64_t err = -1;
     sptr<INetStatsService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return err;
+        return NETMANAGER_ERR_IPC_GET_PROXY_FAIL;
     }
-    return proxy->GetAllRxBytes();
+    return proxy->GetAllRxBytes(stats);
 }
 
-int64_t NetStatsClient::GetAllTxBytes()
+int32_t NetStatsClient::GetAllTxBytes(uint64_t &stats)
 {
-    int64_t err = -1;
     sptr<INetStatsService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return err;
+        return NETMANAGER_ERR_IPC_GET_PROXY_FAIL;
     }
-    return proxy->GetAllTxBytes();
+    return proxy->GetAllTxBytes(stats);
 }
 
-int64_t NetStatsClient::GetUidRxBytes(uint32_t uid)
+int32_t NetStatsClient::GetUidRxBytes(uint64_t &stats, uint32_t uid)
 {
-    int64_t err = -1;
     sptr<INetStatsService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return err;
+        return NETMANAGER_ERR_IPC_GET_PROXY_FAIL;
     }
-    return proxy->GetUidRxBytes(uid);
+    return proxy->GetUidRxBytes(stats, uid);
 }
 
-int64_t NetStatsClient::GetUidTxBytes(uint32_t uid)
+int32_t NetStatsClient::GetUidTxBytes(uint64_t &stats, uint32_t uid)
 {
-    int64_t err = -1;
     sptr<INetStatsService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return err;
+        return NETMANAGER_ERR_IPC_GET_PROXY_FAIL;
     }
-    return proxy->GetUidTxBytes(uid);
+    return proxy->GetUidTxBytes(stats, uid);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

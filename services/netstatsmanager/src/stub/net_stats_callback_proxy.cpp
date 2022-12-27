@@ -16,6 +16,7 @@
 #include "net_stats_callback_proxy.h"
 
 #include "net_mgr_log_wrapper.h"
+#include "net_stats_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -30,23 +31,23 @@ int32_t NetStatsCallbackProxy::NetIfaceStatsChanged(const std::string &iface)
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     NETMGR_LOG_D("proxy iface[%{public}s]", iface.c_str());
     if (!data.WriteString(iface)) {
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(NET_STATS_IFACE_CHANGED, data, reply, option);
-    if (ret != ERR_NONE) {
+    if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
     return ret;
@@ -57,27 +58,27 @@ int32_t NetStatsCallbackProxy::NetUidStatsChanged(const std::string &iface, uint
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     NETMGR_LOG_D("proxy iface[%{public}s], uid[%{public}d]", iface.c_str(), uid);
     if (!data.WriteString(iface)) {
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
     if (!data.WriteUint32(uid)) {
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(NET_STATS_UID_CHANGED, data, reply, option);
-    if (ret != ERR_NONE) {
+    if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
     return ret;

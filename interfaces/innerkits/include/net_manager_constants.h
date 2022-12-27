@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,7 @@ enum {
     NETMANAGER_ERR_READ_DATA_FAIL = 106,
     NETMANAGER_ERR_READ_REPLY_FAIL = 107,
     NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL = 108,
+    NETMANAGER_ERR_IPC_GET_PROXY_FAIL = 109,
     NETMANAGER_ERR_PERMISSION_DENIED = 201,
     NETMANAGER_ERR_PARAMETER_ERROR = 401,
     NETMANAGER_ERR_ADD_DEATH_RECIPIENT_FAIL = 502,

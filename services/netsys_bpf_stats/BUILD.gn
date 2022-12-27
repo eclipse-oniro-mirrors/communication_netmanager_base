@@ -19,6 +19,7 @@ config("bpf_public_config") {
     "$NETSYSBPFMAP_SOURCE_DIR/include",
     "$NETMANAGER_BASE_ROOT/interfaces/innerkits/netmanagernative/include/",
     "$INNERKITS_ROOT/netstatsclient/include",
+    "$INNERKITS_ROOT/include",
   ]
 }
 

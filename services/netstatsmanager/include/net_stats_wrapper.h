@@ -32,28 +32,31 @@ public:
     /**
      * Get the Total Stats object
      *
+     * @param stats Output data
      * @param type stats type
      * @return int64_t Total traffic bytes
      */
-    int64_t GetTotalStats(StatsType type);
+    int32_t GetTotalStats(uint64_t &stats, StatsType type);
 
     /**
      * Get the Uid Stat object
      *
+     * @param stats Output data
      * @param type stats type
      * @param uid  uid
      * @return int64_t traffic bytes for uid
      */
-    int64_t GetUidStats(StatsType type, uint32_t uid);
+    int32_t GetUidStats(uint64_t &stats, StatsType type, uint32_t uid);
 
     /**
      * Get the Iface Stat object
      *
+     * @param stats Output data
      * @param type stats type
      * @param interfaceName iface name
      * @return int64_t traffic bytes for iface
      */
-    int64_t GetIfaceStats(StatsType type, const std::string &interfaceName);
+    int32_t GetIfaceStats(uint64_t &stats, StatsType type, const std::string &interfaceName);
 
 private:
     NetStatsWrapper();

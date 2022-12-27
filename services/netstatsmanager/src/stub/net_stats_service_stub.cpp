@@ -40,11 +40,11 @@ int32_t NetStatsServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
 {
     NETMGR_LOG_D("stub call start, code = [%{public}d]", code);
 
-    std::u16string myDescriptor = NetStatsServiceStub::GetDescriptor();
-    std::u16string remoteDescriptor = data.ReadInterfaceToken();
-    if (myDescriptor != remoteDescriptor) {
+    std::u16string myDescripters = NetStatsServiceStub::GetDescriptor();
+    std::u16string remoteDescripters = data.ReadInterfaceToken();
+    if (myDescripters != remoteDescripters) {
         NETMGR_LOG_D("descriptor checked fail");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
     }
 
     auto itFunc = memberFuncMap_.find(code);
@@ -59,7 +59,7 @@ int32_t NetStatsServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
 
 int32_t NetStatsServiceStub::OnRegisterNetStatsCallback(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t result = ERR_FLATTEN_OBJECT;
+    int32_t result = NETMANAGER_ERR_LOCAL_PTR_NULL;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         NETMGR_LOG_E("Callback ptr is nullptr.");
@@ -69,13 +69,15 @@ int32_t NetStatsServiceStub::OnRegisterNetStatsCallback(MessageParcel &data, Mes
 
     sptr<INetStatsCallback> callback = iface_cast<INetStatsCallback>(remote);
     result = RegisterNetStatsCallback(callback);
-    reply.WriteInt32(result);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
     return result;
 }
 
 int32_t NetStatsServiceStub::OnUnregisterNetStatsCallback(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t result = ERR_FLATTEN_OBJECT;
+    int32_t result = NETMANAGER_ERR_LOCAL_PTR_NULL;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         NETMGR_LOG_E("callback ptr is nullptr.");
@@ -84,98 +86,166 @@ int32_t NetStatsServiceStub::OnUnregisterNetStatsCallback(MessageParcel &data, M
     }
     sptr<INetStatsCallback> callback = iface_cast<INetStatsCallback>(remote);
     result = UnregisterNetStatsCallback(callback);
-    reply.WriteInt32(result);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
     return result;
 }
 
 int32_t NetStatsServiceStub::OnGetIfaceRxBytes(MessageParcel &data, MessageParcel &reply)
 {
+    uint64_t stats = 0;
     std::string iface;
     if (!data.ReadString(iface)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read string failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
-    int64_t result = GetIfaceRxBytes(iface);
-    if (!reply.WriteInt64(result)) {
-        return ERR_FLATTEN_OBJECT;
+    int32_t result = GetIfaceRxBytes(stats, iface);
+    if (!reply.WriteUint64(stats)) {
+        NETMGR_LOG_E("WriteUint64 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ERR_NONE;
+
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("WriteInt32 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsServiceStub::OnGetIfaceTxBytes(MessageParcel &data, MessageParcel &reply)
 {
+    uint64_t stats = 0;
     std::string iface;
     if (!data.ReadString(iface)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read string failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
-    int64_t result = GetIfaceTxBytes(iface);
-    if (!reply.WriteInt64(result)) {
-        return ERR_FLATTEN_OBJECT;
+
+    int32_t result = GetIfaceTxBytes(stats, iface);
+    if (!reply.WriteUint64(stats)) {
+        NETMGR_LOG_E("WriteUint64 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ERR_NONE;
+
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("WriteInt32 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsServiceStub::OnGetCellularRxBytes(MessageParcel &data, MessageParcel &reply)
 {
-    if (!reply.WriteInt64(GetCellularRxBytes())) {
-        NETMGR_LOG_E("WriteInt64 failed");
-        return ERR_FLATTEN_OBJECT;
+    uint64_t stats = 0;
+    int32_t ret = GetCellularRxBytes(stats);
+    if (!reply.WriteUint64(stats)) {
+        NETMGR_LOG_E("WriteUint64 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ERR_NONE;
+
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("WriteInt32 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsServiceStub::OnGetCellularTxBytes(MessageParcel &data, MessageParcel &reply)
 {
-    if (!reply.WriteInt64(GetCellularTxBytes())) {
-        NETMGR_LOG_E("WriteInt64 failed");
-        return ERR_FLATTEN_OBJECT;
+    uint64_t stats = 0;
+    int32_t ret = GetCellularTxBytes(stats);
+    if (!reply.WriteUint64(stats)) {
+        NETMGR_LOG_E("WriteUint64 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ERR_NONE;
+
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("WriteInt32 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsServiceStub::OnGetAllRxBytes(MessageParcel &data, MessageParcel &reply)
 {
-    if (!reply.WriteInt64(GetAllRxBytes())) {
-        NETMGR_LOG_E("WriteInt64 failed");
-        return ERR_FLATTEN_OBJECT;
+    uint64_t stats = 0;
+    int32_t ret = GetAllRxBytes(stats);
+    if (!reply.WriteUint64(stats)) {
+        NETMGR_LOG_E("WriteUint64 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ERR_NONE;
+
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("WriteInt32 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsServiceStub::OnGetAllTxBytes(MessageParcel &data, MessageParcel &reply)
 {
-    if (!reply.WriteInt64(GetAllTxBytes())) {
-        NETMGR_LOG_E("WriteInt64 failed");
-        return ERR_FLATTEN_OBJECT;
+    uint64_t stats = 0;
+    int32_t ret = GetAllTxBytes(stats);
+    if (!reply.WriteUint64(stats)) {
+        NETMGR_LOG_E("WriteUint64 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ERR_NONE;
+
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("WriteInt32 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsServiceStub::OnGetUidRxBytes(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t uid;
+    uint64_t stats = 0;
     if (!data.ReadUint32(uid)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("ReadInt32 failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int64_t result = GetUidRxBytes(uid);
-    if (!reply.WriteInt64(result)) {
-        return ERR_FLATTEN_OBJECT;
+    int32_t result = GetUidRxBytes(stats, uid);
+    if (!reply.WriteUint64(stats)) {
+        NETMGR_LOG_E("WriteUint64 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ERR_NONE;
+
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("WriteInt32 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsServiceStub::OnGetUidTxBytes(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t uid;
+    uint64_t stats = 0;
     if (!data.ReadUint32(uid)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("ReadInt32 failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int64_t result = GetUidTxBytes(uid);
-    if (!reply.WriteInt64(result)) {
-        return ERR_FLATTEN_OBJECT;
+    int32_t result = GetUidTxBytes(stats, uid);
+    if (!reply.WriteUint64(stats)) {
+        NETMGR_LOG_E("WriteUint64 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ERR_NONE;
+
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("WriteInt32 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
