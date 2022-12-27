@@ -743,7 +743,6 @@ void NetConnService::FindBestNetworkForAllRequest()
         CallbackForAvailable(bestSupplier, callback);
         bestSupplier->SelectAsBestNetwork(iterActive->first);
     }
-    RequestAllNetworkExceptDefaut();
 }
 
 uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier, sptr<NetActivate> &netActivateNetwork)
@@ -780,7 +779,7 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier, 
     return bestScore;
 }
 
-void NetConnService::RequestAllNetworkExceptDefaut()
+void NetConnService::RequestAllNetworkExceptDefault()
 {
     if ((defaultNetSupplier_ == nullptr) || (defaultNetSupplier_->IsNetValidated())) {
         return;
@@ -795,6 +794,9 @@ void NetConnService::RequestAllNetworkExceptDefaut()
     uint32_t reqId = defaultNetActivate_->GetRequestId();
     for (const auto &netSupplier : netSuppliers_) {
         if (netSupplier.second == nullptr || netSupplier.second == defaultNetSupplier_) {
+            continue;
+        }
+        if (netSupplier.second->GetNetScore() >= defaultNetSupplier_->GetNetScore()) {
             continue;
         }
         if (!defaultNetActivate_->MatchRequestAndNetwork(netSupplier.second)) {
@@ -1004,6 +1006,9 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, bool ifValid)
         return;
     }
     FindBestNetworkForAllRequest();
+    if (!ifValid && defaultNetSupplier_ && defaultNetSupplier_->GetSupplierId() == supplierId) {
+        RequestAllNetworkExceptDefault();
+    }
 }
 
 std::list<sptr<NetSupplier>> NetConnService::GetNetSupplierFromList(NetBearType bearerType, const std::string &ident)

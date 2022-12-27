@@ -289,7 +289,7 @@ private:
     int32_t NetDetectionAsync(int32_t netId);
     int32_t RestrictBackgroundChangedAsync(bool restrictBackground);
     int32_t SetHttpProxyAsync(const std::string &httpProxy);
-    void RequestAllNetworkExceptDefaut();
+    void RequestAllNetworkExceptDefault();
 
 private:
     enum ServiceRunningState {
