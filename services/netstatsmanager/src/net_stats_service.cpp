@@ -21,16 +21,21 @@
 #include <unistd.h>
 
 #include "broadcast_manager.h"
+#include "common_event_manager.h"
 #include "common_event_support.h"
 #include "system_ability_definition.h"
 
 #include "net_manager_center.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_constants.h"
+#include "net_stats_database_defines.h"
+#include "net_stats_history.h"
+#include "net_stats_service_common.h"
 #include "netmanager_base_permission.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+using namespace NetStatsDatabaseDefines;
 namespace {
 constexpr std::initializer_list<NetBearType> BEAR_TYPE_LIST = {
     NetBearType::BEARER_CELLULAR, NetBearType::BEARER_WIFI, NetBearType::BEARER_BLUETOOTH,
@@ -54,13 +59,16 @@ NetStatsService::NetStatsService()
     : SystemAbility(COMM_NET_STATS_MANAGER_SYS_ABILITY_ID, true), registerToService_(false), state_(STATE_STOPPED)
 {
     netStatsCallback_ = new (std::nothrow) NetStatsCallback();
+    if (netStatsCallback_ == nullptr) {
+        NETMGR_LOG_E("Create callback failed");
+    }
+    netStatsCached_ = std::make_unique<NetStatsCached>();
 }
 
 NetStatsService::~NetStatsService() = default;
 
 void NetStatsService::OnStart()
 {
-    NETMGR_LOG_D("NetStatsService::OnStart begin");
     if (state_ == STATE_RUNNING) {
         NETMGR_LOG_D("the state is already running");
         return;
@@ -71,7 +79,12 @@ void NetStatsService::OnStart()
     }
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
     state_ = STATE_RUNNING;
-    NETMGR_LOG_D("NetStatsService::OnStart end");
+    sptr<NetStatsBaseService> baseService = new (std::nothrow) NetStatsServiceCommon();
+    if (baseService == nullptr) {
+        NETMGR_LOG_E("Net stats base service instance create failed");
+        return;
+    }
+    NetManagerCenter::GetInstance().RegisterStatsService(baseService);
 }
 
 void NetStatsService::OnStop()
@@ -87,6 +100,19 @@ int32_t NetStatsService::Dump(int32_t fd, const std::vector<std::u16string> &arg
     GetDumpMessage(result);
     int32_t ret = dprintf(fd, "%s\n", result.c_str());
     return ret < 0 ? STATS_DUMP_MESSAGE_FAIL : NETMANAGER_SUCCESS;
+}
+
+void NetStatsService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
+{
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_UID_REMOVED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SHUTDOWN);
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    subscribeInfo.SetPriority(1);
+    subscriber_ = std::make_shared<NetStatsListener>(subscribeInfo);
+    subscriber_->RegisterStatsCallback(EventFwk::CommonEventSupport::COMMON_EVENT_SHUTDOWN,
+                                       [this](const EventFwk::Want &want) { return UpdateStatsData(); });
+    EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
 }
 
 void NetStatsService::GetDumpMessage(std::string &message)
@@ -134,6 +160,11 @@ bool NetStatsService::Init()
             return false;
         }
         registerToService_ = true;
+    }
+    auto ret = netStatsCached_->StartCached();
+    if (ret != 0) {
+        NETMGR_LOG_E("Start cached failed");
+        return false;
     }
     return true;
 }
@@ -224,6 +255,68 @@ int32_t NetStatsService::GetUidRxBytes(uint64_t &stats, uint32_t uid)
 int32_t NetStatsService::GetUidTxBytes(uint64_t &stats, uint32_t uid)
 {
     return NetStatsWrapper::GetInstance().GetUidStats(stats, StatsType::STATS_TYPE_TX_BYTES, uid);
+}
+
+int32_t NetStatsService::GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,
+                                             NetStatsInfo &statsInfo)
+{
+    std::vector<NetStatsInfo> allInfo;
+    auto history = std::make_unique<NetStatsHistory>();
+    int32_t ret = history->GetHistory(allInfo, iface, start, end);
+    netStatsCached_->GetIfaceStatsCached(allInfo);
+    if (ret != 0) {
+        NETMGR_LOG_E("Get traffic stats data failed");
+        return ret;
+    }
+    std::for_each(allInfo.begin(), allInfo.end(), [&statsInfo](const auto &info) { statsInfo += info; });
+    statsInfo.iface_ = iface;
+    statsInfo.date_ = end;
+    return ret == 0 ? NETMANAGER_SUCCESS : STATS_ERR_READ_DATA_FAIL;
+}
+
+int32_t NetStatsService::GetUidStatsDetail(const std::string &iface, uint32_t uid, int64_t start, int64_t end,
+                                           NetStatsInfo &statsInfo)
+{
+    std::vector<NetStatsInfo> allInfo;
+    auto history = std::make_unique<NetStatsHistory>();
+    int32_t ret = history->GetHistory(allInfo, iface, uid, start, end);
+    netStatsCached_->GetUidStatsCached(allInfo);
+    if (ret != 0) {
+        NETMGR_LOG_E("Get traffic stats data failed");
+        return ret;
+    }
+    std::for_each(allInfo.begin(), allInfo.end(), [&statsInfo](const auto &info) { statsInfo += info; });
+    statsInfo.uid_ = uid;
+    statsInfo.iface_ = iface;
+    statsInfo.date_ = end;
+    return ret == 0 ? NETMANAGER_SUCCESS : STATS_ERR_READ_DATA_FAIL;
+}
+
+int32_t NetStatsService::UpdateIfacesStats(const std::string &iface, uint64_t start, uint64_t end,
+                                           const NetStatsInfo &stats)
+{
+    std::vector<NetStatsInfo> infos;
+    infos.push_back(stats);
+    auto handler = std::make_unique<NetStatsDataHandler>();
+    auto ret = handler->DeleteByDate(IFACE_TABLE, start, end);
+    ret += handler->WriteStatsData(infos, IFACE_TABLE);
+    return ret == 0 ? NETMANAGER_SUCCESS : STATS_ERR_WRITE_DATA_FAIL;
+}
+
+int32_t NetStatsService::UpdateStatsData()
+{
+    if (netStatsCached_ == nullptr) {
+        NETMGR_LOG_E("Cached is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    netStatsCached_->ForceUpdateStats();
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsService::ResetFactory()
+{
+    auto handler = std::make_unique<NetStatsDataHandler>();
+    return handler->ClearData() == 0 ? NETMANAGER_SUCCESS : STATS_ERR_CLEAR_STATS_DATA_FAIL;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

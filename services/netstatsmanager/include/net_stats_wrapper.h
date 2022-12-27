@@ -19,6 +19,7 @@
 #include <memory>
 #include <string>
 
+#include "net_stats_info.h"
 #include "netsys_bpf_stats.h"
 
 namespace OHOS {
@@ -57,6 +58,8 @@ public:
      * @return int64_t traffic bytes for iface
      */
     int32_t GetIfaceStats(uint64_t &stats, StatsType type, const std::string &interfaceName);
+
+    int32_t GetAllStatsInfo(std::vector<NetStatsInfo> &stats);
 
 private:
     NetStatsWrapper();

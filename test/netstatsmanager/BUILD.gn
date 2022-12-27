@@ -15,5 +15,8 @@ import("//build/test.gni")
 
 group("unittest") {
   testonly = true
-  deps = [ "unittest/net_stats_manager_test:net_stats_manager_test" ]
+  deps = [
+    "unittest/net_stats_manager_test:net_stats_manager_test",
+    "unittest/net_stats_manager_test:net_stats_mock_data",
+  ]
 }

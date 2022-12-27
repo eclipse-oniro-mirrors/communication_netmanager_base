@@ -66,6 +66,26 @@ void StatisticsAsyncWork::ExecGetIfaceTxBytes(napi_env env, void *data)
     BaseAsyncWork::ExecAsyncWork<GetIfaceTxBytesContext, StatisticsExec::ExecGetIfaceTxBytes>(env, data);
 }
 
+void StatisticsAsyncWork::ExecGetIfaceStats(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetIfaceStatsContext, StatisticsExec::ExecGetIfaceStats>(env, data);
+}
+
+void StatisticsAsyncWork::ExecGetIfaceUidStats(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetIfaceUidStatsContext, StatisticsExec::ExecGetIfaceUidStats>(env, data);
+}
+
+void StatisticsAsyncWork::ExecUpdateIfacesStats(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<UpdateIfacesStatsContext, StatisticsExec::ExecUpdateIfacesStats>(env, data);
+}
+
+void StatisticsAsyncWork::ExecUpdateStatsData(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<UpdateStatsDataContext, StatisticsExec::ExecUpdateStatsData>(env, data);
+}
+
 void StatisticsAsyncWork::GetCellularRxBytesCallback(napi_env env, napi_status status, void *data)
 {
     BaseAsyncWork::AsyncWorkCallback<GetCellularRxBytesContext, StatisticsExec::GetCellularRxBytesCallback>(
@@ -106,6 +126,29 @@ void StatisticsAsyncWork::GetIfaceRxBytesCallback(napi_env env, napi_status stat
 void StatisticsAsyncWork::GetIfaceTxBytesCallback(napi_env env, napi_status status, void *data)
 {
     BaseAsyncWork::AsyncWorkCallback<GetIfaceTxBytesContext, StatisticsExec::GetIfaceTxBytesCallback>(env, status,
+                                                                                                      data);
+}
+
+void StatisticsAsyncWork::GetIfaceStatsCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetIfaceStatsContext, StatisticsExec::GetIfaceStatsCallback>(env, status, data);
+}
+
+void StatisticsAsyncWork::GetIfaceUidStatsCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetIfaceUidStatsContext, StatisticsExec::GetIfaceUidStatsCallback>(env, status,
+                                                                                                        data);
+}
+
+void StatisticsAsyncWork::UpdateIfacesStatsCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<UpdateIfacesStatsContext, StatisticsExec::UpdateIfacesStatsCallback>(env, status,
+                                                                                                          data);
+}
+
+void StatisticsAsyncWork::UpdateStatsDataCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<UpdateStatsDataContext, StatisticsExec::UpdateStatsDataCallback>(env, status,
                                                                                                       data);
 }
 } // namespace NetManagerStandard

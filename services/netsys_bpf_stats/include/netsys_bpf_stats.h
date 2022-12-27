@@ -62,6 +62,14 @@ public:
      */
     int32_t GetIfaceStats(uint64_t &stats, StatsType type, const std::string &interfaceName);
 
+    /**
+     * Get the Iface with uid Stats
+     *
+     * @param stats Stats data.
+     * @return returns 0 for success other as failed.
+     */
+    int32_t GetAllStatsInfo(std::vector<StatsValue> &stats);
+
 private:
     int32_t BpfGetIfaceStats(uint64_t &stats, const StatsType statsType, const std::string &interfaceName,
                              const NetsysBpfMap<uint32_t, IfaceName> &ifaceNameMap,

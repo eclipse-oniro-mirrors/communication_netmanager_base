@@ -96,6 +96,38 @@ bool StatisticsExec::ExecGetIfaceTxBytes(GetIfaceTxBytesContext *context)
     return result == NETMANAGER_SUCCESS;
 }
 
+bool StatisticsExec::ExecGetIfaceStats(GetIfaceStatsContext *context)
+{
+    int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(
+        context->GetInterfaceName(), context->GetStart(), context->GetEnd(), context->GetStatsInfo());
+    context->SetErrorCode(result);
+    return result == NETMANAGER_SUCCESS;
+}
+
+bool StatisticsExec::ExecGetIfaceUidStats(GetIfaceUidStatsContext *context)
+{
+    int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->GetUidStatsDetail(
+        context->GetInterfaceName(), context->GetUid(), context->GetStart(), context->GetEnd(),
+        context->GetStatsInfo());
+    context->SetErrorCode(result);
+    return result == NETMANAGER_SUCCESS;
+}
+
+bool StatisticsExec::ExecUpdateIfacesStats(UpdateIfacesStatsContext *context)
+{
+    int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateIfacesStats(
+        context->GetInterfaceName(), context->GetStart(), context->GetEnd(), context->GetStatsInfo());
+    context->SetErrorCode(result);
+    return result == NETMANAGER_SUCCESS;
+}
+
+bool StatisticsExec::ExecUpdateStatsData(UpdateStatsDataContext *context)
+{
+    int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateStatsData();
+    context->SetErrorCode(result);
+    return result == NETMANAGER_SUCCESS;
+}
+
 napi_value StatisticsExec::GetCellularRxBytesCallback(GetCellularRxBytesContext *context)
 {
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
@@ -134,6 +166,36 @@ napi_value StatisticsExec::GetIfaceRxBytesCallback(GetIfaceRxBytesContext *conte
 napi_value StatisticsExec::GetIfaceTxBytesCallback(GetIfaceTxBytesContext *context)
 {
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
+}
+
+napi_value StatisticsExec::GetIfaceStatsCallback(GetIfaceStatsContext *context)
+{
+    napi_value netStatsInfo = NapiUtils::CreateObject(context->GetEnv());
+    NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, RX_BYTES, context->GetStatsInfo().rxBytes_);
+    NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, TX_BYTES, context->GetStatsInfo().txBytes_);
+    NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, RX_PACKETS, context->GetStatsInfo().rxPackets_);
+    NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, TX_PACKETS, context->GetStatsInfo().txPackets_);
+    return netStatsInfo;
+}
+
+napi_value StatisticsExec::GetIfaceUidStatsCallback(GetIfaceUidStatsContext *context)
+{
+    napi_value netStatsInfo = NapiUtils::CreateObject(context->GetEnv());
+    NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, RX_BYTES, context->GetStatsInfo().rxBytes_);
+    NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, TX_BYTES, context->GetStatsInfo().txBytes_);
+    NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, RX_PACKETS, context->GetStatsInfo().rxPackets_);
+    NapiUtils::SetInt64Property(context->GetEnv(), netStatsInfo, TX_PACKETS, context->GetStatsInfo().txPackets_);
+    return netStatsInfo;
+}
+
+napi_value StatisticsExec::UpdateIfacesStatsCallback(UpdateIfacesStatsContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+napi_value StatisticsExec::UpdateStatsDataCallback(UpdateStatsDataContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

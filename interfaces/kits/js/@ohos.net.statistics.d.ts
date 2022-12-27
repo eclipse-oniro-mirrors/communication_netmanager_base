@@ -106,6 +106,26 @@ declare namespace statistics {
   function off(type: 'netStatsChange', callback?: Callback<{ iface: string, uid?: number }>): void;
 
   /**
+   * Get the traffic usage details of the network interface in the specified time period.
+   *
+   * @param ifaceInfo Indicates the handle. See {@link IfaceInfo}.
+   * @permission ohos.permission.CONNECTIVITY_INTERNAL
+   * @systemapi Hide this for inner system use.
+   */
+  function getIfaceStats(ifaceInfo: IfaceInfo, callback: AsyncCallback<NetStatsInfo>): void;
+  function getIfaceStats(ifaceInfo: IfaceInfo): Promise<NetStatsInfo>;
+
+  /**
+   * Get the traffic usage details of the specified time period of the application.
+   *
+   * @param uidStatsInfo Indicates the handle. See {@link UidStatsInfo}.
+   * @permission ohos.permission.CONNECTIVITY_INTERNAL
+   * @systemapi Hide this for inner system use.
+   */
+  function getIfaceUidStats(uidStatsInfo: UidStatsInfo, callback: AsyncCallback<NetStatsInfo>): void;
+  function getIfaceUidStats(uidStatsInfo: UidStatsInfo): Promise<NetStatsInfo>;
+
+  /**
    * @systemapi Hide this for inner system use.
    */
   export interface IfaceInfo {

@@ -44,6 +44,10 @@ constexpr const char *FUNCTION_GET_UID_RXBYTES = "getUidRxBytes";
 constexpr const char *FUNCTION_GET_UID_TXBYTES = "getUidTxBytes";
 constexpr const char *FUNCTION_GET_IFACE_RXBYTES = "getIfaceRxBytes";
 constexpr const char *FUNCTION_GET_IFACE_TXBYTES = "getIfaceTxBytes";
+constexpr const char *FUNCTION_GET_IFACE_STATS = "getIfaceStats";
+constexpr const char *FUNCTION_GET_IFACE_UID_STATS = "getIfaceUidStats";
+constexpr const char *FUNCTION_UPDATE_IFACE_STATS = "updateIfacesStats";
+constexpr const char *FUNCTION_UPDATE_STATS_DATA = "updateStatsData";
 constexpr const char *FUNCTION_ON = "on";
 constexpr const char *FUNCTION_OFF = "off";
 } // namespace
@@ -104,6 +108,34 @@ napi_value GetIfaceTxBytes(napi_env env, napi_callback_info info)
                                                              StatisticsAsyncWork::GetIfaceTxBytesCallback);
 }
 
+napi_value GetIfaceStats(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetIfaceStatsContext>(env, info, FUNCTION_GET_IFACE_STATS, nullptr,
+                                                           StatisticsAsyncWork::ExecGetIfaceStats,
+                                                           StatisticsAsyncWork::GetIfaceStatsCallback);
+}
+
+napi_value GetIfaceUidStats(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetIfaceUidStatsContext>(env, info, FUNCTION_GET_IFACE_UID_STATS, nullptr,
+                                                              StatisticsAsyncWork::ExecGetIfaceUidStats,
+                                                              StatisticsAsyncWork::GetIfaceUidStatsCallback);
+}
+
+napi_value UpdateIfacesStats(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<UpdateIfacesStatsContext>(env, info, FUNCTION_UPDATE_IFACE_STATS, nullptr,
+                                                               StatisticsAsyncWork::ExecUpdateIfacesStats,
+                                                               StatisticsAsyncWork::UpdateIfacesStatsCallback);
+}
+
+napi_value UpdateStatsData(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<UpdateStatsDataContext>(env, info, FUNCTION_UPDATE_STATS_DATA, nullptr,
+                                                             StatisticsAsyncWork::ExecUpdateStatsData,
+                                                             StatisticsAsyncWork::UpdateStatsDataCallback);
+}
+
 napi_value On(napi_env env, napi_callback_info info)
 {
     return DelayedSingleton<StatisticsObserverWrapper>::GetInstance()->On(env, info, {EVENT_STATS_CHANGE}, false);
@@ -126,6 +158,10 @@ napi_value InitStatisticsModule(napi_env env, napi_value exports)
                                     DECLARE_NAPI_FUNCTION(FUNCTION_GET_UID_TXBYTES, GetUidTxBytes),
                                     DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_RXBYTES, GetIfaceRxBytes),
                                     DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_TXBYTES, GetIfaceTxBytes),
+                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_STATS, GetIfaceStats),
+                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_UID_STATS, GetIfaceUidStats),
+                                    DECLARE_NAPI_FUNCTION(FUNCTION_UPDATE_IFACE_STATS, UpdateIfacesStats),
+                                    DECLARE_NAPI_FUNCTION(FUNCTION_UPDATE_STATS_DATA, UpdateStatsData),
                                     DECLARE_NAPI_FUNCTION(FUNCTION_ON, On),
                                     DECLARE_NAPI_FUNCTION(FUNCTION_OFF, Off),
                                 });

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,27 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef I_NET_STATS_CALLBACK_H
-#define I_NET_STATS_CALLBACK_H
+#ifndef NET_STATS_LISTENER_H
+#define NET_STATS_LISTENER_H
 
-#include <string>
-
-#include "iremote_broker.h"
+#include "common_event_subscriber.h"
+#include "common_event_support.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-class INetStatsCallback : public IRemoteBroker {
+class NetStatsListener : public EventFwk::CommonEventSubscriber {
 public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetManagerStandard.INetStatsCallback");
-    virtual ~INetStatsCallback() = default;
-    enum {
-        NET_STATS_IFACE_CHANGED = 0,
-        NET_STATS_UID_CHANGED = 1,
-    };
+    using StatsCallback = std::function<int32_t(const EventFwk::Want &want)>;
+    explicit NetStatsListener(const EventFwk::CommonEventSubscribeInfo &sp);
 
-    virtual int32_t NetIfaceStatsChanged(const std::string &iface) = 0;
-    virtual int32_t NetUidStatsChanged(const std::string &iface, uint32_t uid) = 0;
+    void RegisterStatsCallback(const std::string &event, StatsCallback callback);
+
+    void OnReceiveEvent(const EventFwk::CommonEventData &data) override;
+
+private:
+    std::map<std::string, StatsCallback> callbackMap_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // I_NET_STATS_CALLBACK_H
+#endif // NET_STATS_LISTENER_H

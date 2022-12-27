@@ -35,6 +35,14 @@ public:
     int32_t GetAllTxBytes(uint64_t &stats) override;
     int32_t GetUidRxBytes(uint64_t &stats, uint32_t uid) override;
     int32_t GetUidTxBytes(uint64_t &stats, uint32_t uid) override;
+    int32_t GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,
+                                NetStatsInfo &statsInfo) override;
+    int32_t GetUidStatsDetail(const std::string &iface, uint32_t uid, int64_t start, int64_t end,
+                              NetStatsInfo &statsInfo) override;
+    int32_t UpdateIfacesStats(const std::string &iface, uint64_t start, uint64_t end,
+                              const NetStatsInfo &stats) override;
+    int32_t UpdateStatsData() override;
+    int32_t ResetFactory() override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

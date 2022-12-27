@@ -15,6 +15,7 @@
 
 #include "net_stats_service_stub.h"
 
+#include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
@@ -31,6 +32,11 @@ NetStatsServiceStub::NetStatsServiceStub()
     memberFuncMap_[CMD_GET_ALL_TXBYTES] = &NetStatsServiceStub::OnGetAllTxBytes;
     memberFuncMap_[CMD_GET_UID_RXBYTES] = &NetStatsServiceStub::OnGetUidRxBytes;
     memberFuncMap_[CMD_GET_UID_TXBYTES] = &NetStatsServiceStub::OnGetUidTxBytes;
+    memberFuncMap_[CMD_GET_IFACE_STATS_DETAIL] = &NetStatsServiceStub::OnGetIfaceStatsDetail;
+    memberFuncMap_[CMD_GET_UID_STATS_DETAIL] = &NetStatsServiceStub::OnGetUidStatsDetail;
+    memberFuncMap_[CMD_UPDATE_IFACES_STATS] = &NetStatsServiceStub::OnUpdateIfacesStats;
+    memberFuncMap_[CMD_UPDATE_STATS_DATA] = &NetStatsServiceStub::OnUpdateStatsData;
+    memberFuncMap_[CMD_NSM_RESET_FACTORY] = &NetStatsServiceStub::OnResetFactory;
 }
 
 NetStatsServiceStub::~NetStatsServiceStub() = default;
@@ -243,6 +249,86 @@ int32_t NetStatsServiceStub::OnGetUidTxBytes(MessageParcel &data, MessageParcel 
 
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("WriteInt32 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsServiceStub::OnGetIfaceStatsDetail(MessageParcel &data, MessageParcel &reply)
+{
+    std::string iface;
+    uint64_t start = 0;
+    uint64_t end = 0;
+    if (!(data.ReadString(iface) && data.ReadUint64(start) && data.ReadUint64(end))) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    NetStatsInfo info;
+    int32_t ret = GetIfaceStatsDetail(iface, start, end, info);
+    if (!info.Marshalling(reply)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsServiceStub::OnGetUidStatsDetail(MessageParcel &data, MessageParcel &reply)
+{
+    std::string iface;
+    uint32_t uid = 0;
+    uint64_t start = 0;
+    uint64_t end = 0;
+    if (!(data.ReadString(iface) && data.ReadUint32(uid) && data.ReadUint64(start) && data.ReadUint64(end))) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    NetStatsInfo info;
+    int32_t ret = GetUidStatsDetail(iface, uid, start, end, info);
+    if (!info.Marshalling(reply)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsServiceStub::OnUpdateIfacesStats(MessageParcel &data, MessageParcel &reply)
+{
+    std::string iface;
+    uint64_t start = 0;
+    uint64_t end = 0;
+    if (!(data.ReadString(iface) && data.ReadUint64(start) && data.ReadUint64(end))) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    NetStatsInfo infos;
+    if (!NetStatsInfo::Unmarshalling(data, infos)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = UpdateIfacesStats(iface, start, end, infos);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsServiceStub::OnUpdateStatsData(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = UpdateStatsData();
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsServiceStub::OnResetFactory(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = ResetFactory();
+    if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return NETMANAGER_SUCCESS;

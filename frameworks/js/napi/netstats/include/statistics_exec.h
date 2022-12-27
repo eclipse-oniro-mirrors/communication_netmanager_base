@@ -43,6 +43,10 @@ public:
     static bool ExecGetUidTxBytes(GetUidTxBytesContext *context);
     static bool ExecGetIfaceRxBytes(GetIfaceRxBytesContext *context);
     static bool ExecGetIfaceTxBytes(GetIfaceTxBytesContext *context);
+    static bool ExecGetIfaceStats(GetIfaceStatsContext *context);
+    static bool ExecGetIfaceUidStats(GetIfaceUidStatsContext *context);
+    static bool ExecUpdateIfacesStats(UpdateIfacesStatsContext *context);
+    static bool ExecUpdateStatsData(UpdateStatsDataContext *context);
 
     static napi_value GetCellularRxBytesCallback(GetCellularRxBytesContext *context);
     static napi_value GetCellularTxBytesCallback(GetCellularTxBytesContext *context);
@@ -52,6 +56,10 @@ public:
     static napi_value GetUidTxBytesCallback(GetUidTxBytesContext *context);
     static napi_value GetIfaceRxBytesCallback(GetIfaceRxBytesContext *context);
     static napi_value GetIfaceTxBytesCallback(GetIfaceTxBytesContext *context);
+    static napi_value GetIfaceStatsCallback(GetIfaceStatsContext *context);
+    static napi_value GetIfaceUidStatsCallback(GetIfaceUidStatsContext *context);
+    static napi_value UpdateIfacesStatsCallback(UpdateIfacesStatsContext *context);
+    static napi_value UpdateStatsDataCallback(UpdateStatsDataContext *context);
 
     static napi_value CreateCodeMessage(napi_env env, const std::string &msg, int32_t code);
 };

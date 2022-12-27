@@ -50,8 +50,6 @@ public:
     };
 
 public:
-    virtual int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback) = 0;
-    virtual int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) = 0;
     virtual int32_t GetIfaceRxBytes(uint64_t &stats, const std::string &interfaceName) = 0;
     virtual int32_t GetIfaceTxBytes(uint64_t &stats, const std::string &interfaceName) = 0;
     virtual int32_t GetCellularRxBytes(uint64_t &stats) = 0;
@@ -60,6 +58,16 @@ public:
     virtual int32_t GetAllTxBytes(uint64_t &stats) = 0;
     virtual int32_t GetUidRxBytes(uint64_t &stats, uint32_t uid) = 0;
     virtual int32_t GetUidTxBytes(uint64_t &stats, uint32_t uid) = 0;
+    virtual int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback) = 0;
+    virtual int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) = 0;
+    virtual int32_t GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,
+                                        NetStatsInfo &statsInfo) = 0;
+    virtual int32_t GetUidStatsDetail(const std::string &iface, uint32_t uid, int64_t start, int64_t end,
+                                      NetStatsInfo &statsInfo) = 0;
+    virtual int32_t UpdateIfacesStats(const std::string &iface, uint64_t start, uint64_t end,
+                                      const NetStatsInfo &stats) = 0;
+    virtual int32_t UpdateStatsData() = 0;
+    virtual int32_t ResetFactory() = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

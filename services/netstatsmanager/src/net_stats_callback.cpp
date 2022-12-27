@@ -15,11 +15,22 @@
 
 #include "net_stats_callback.h"
 
+#include "netsys_controller.h"
+#include "net_stats_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+NetStatsCallback::NetStatsCallback()
+{
+    sptr<NetsysControllerCallback> callback = new (std::nothrow) NetQuotaLimitCallback(this);
+    if (callback == nullptr) {
+        NETMGR_LOG_E("Create callback failed callback is nullptr");
+    }
+    NetsysController::GetInstance().RegisterCallback(callback);
+}
+
 void NetStatsCallback::RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
 {
     if (callback == nullptr) {

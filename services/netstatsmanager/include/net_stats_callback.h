@@ -20,17 +20,65 @@
 #include <vector>
 
 #include "i_net_stats_callback.h"
+#include "netsys_controller_callback.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 class NetStatsCallback : public virtual RefBase {
 public:
+    NetStatsCallback();
+    ~NetStatsCallback() = default;
     void RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback);
     void UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback);
     int32_t NotifyNetIfaceStatsChanged(const std::string &iface);
     int32_t NotifyNetUidStatsChanged(const std::string &iface, uint32_t uid);
 
 private:
+    class NetQuotaLimitCallback : public NetsysControllerCallback {
+    public:
+        explicit NetQuotaLimitCallback(NetStatsCallback *base) : base_(base) {}
+
+        inline int32_t OnInterfaceAddressUpdated(const std::string &, const std::string &, int, int) override
+        {
+            return 0;
+        }
+        inline int32_t OnInterfaceAddressRemoved(const std::string &, const std::string &, int, int) override
+        {
+            return 0;
+        }
+        inline int32_t OnInterfaceAdded(const std::string &) override
+        {
+            return 0;
+        }
+        inline int32_t OnInterfaceRemoved(const std::string &) override
+        {
+            return 0;
+        }
+        inline int32_t OnInterfaceChanged(const std::string &, bool) override
+        {
+            return 0;
+        }
+        inline int32_t OnInterfaceLinkStateChanged(const std::string &, bool) override
+        {
+            return 0;
+        }
+        inline int32_t OnRouteChanged(bool, const std::string &, const std::string &, const std::string &) override
+        {
+            return 0;
+        }
+        inline int32_t OnDhcpSuccess(NetsysControllerCallback::DhcpResult &dhcpResult) override
+        {
+            return 0;
+        }
+        inline int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override
+        {
+            return base_->NotifyNetIfaceStatsChanged(iface);
+        }
+
+    private:
+        NetStatsCallback *base_ = nullptr;
+    };
+
     std::vector<sptr<INetStatsCallback>> netStatsCallback_;
 };
 } // namespace NetManagerStandard
