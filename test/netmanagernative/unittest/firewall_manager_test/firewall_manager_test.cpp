@@ -34,7 +34,10 @@ public:
     void TearDown();
 };
 
-void FirewallManagerTest::SetUpTestCase() {}
+void FirewallManagerTest::SetUpTestCase()
+{
+    NetsysController::GetInstance().FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, false);
+}
 
 void FirewallManagerTest::TearDownTestCase() {}
 
