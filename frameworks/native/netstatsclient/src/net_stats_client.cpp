@@ -18,6 +18,7 @@
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
+#include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
@@ -190,6 +191,59 @@ int32_t NetStatsClient::GetUidTxBytes(uint64_t &stats, uint32_t uid)
         return NETMANAGER_ERR_IPC_GET_PROXY_FAIL;
     }
     return proxy->GetUidTxBytes(stats, uid);
+}
+
+int32_t NetStatsClient::GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end,
+                                            NetStatsInfo &statsInfo)
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_IPC_GET_PROXY_FAIL;
+    }
+    return proxy->GetIfaceStatsDetail(iface, start, end, statsInfo);
+}
+
+int32_t NetStatsClient::GetUidStatsDetail(const std::string &iface, uint32_t uid, uint32_t start, uint32_t end,
+                                          NetStatsInfo &statsInfo)
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_IPC_GET_PROXY_FAIL;
+    }
+    return proxy->GetUidStatsDetail(iface, uid, start, end, statsInfo);
+}
+
+int32_t NetStatsClient::UpdateIfacesStats(const std::string &iface, uint32_t start, uint32_t end,
+                                          const NetStatsInfo &stats)
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_IPC_GET_PROXY_FAIL;
+    }
+    return proxy->UpdateIfacesStats(iface, start, end, stats);
+}
+
+int32_t NetStatsClient::UpdateStatsData()
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_IPC_GET_PROXY_FAIL;
+    }
+    return proxy->UpdateStatsData();
+}
+
+int32_t NetStatsClient::ResetFactory()
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_IPC_GET_PROXY_FAIL;
+    }
+    return proxy->ResetFactory();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

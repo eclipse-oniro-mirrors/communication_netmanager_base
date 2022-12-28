@@ -21,16 +21,25 @@ namespace OHOS {
 namespace NetManagerStandard {
 bool NetStatsInfo::Marshalling(Parcel &parcel) const
 {
-    if (!parcel.WriteInt64(rxBytes_)) {
+    if (!parcel.WriteUint32(uid_)) {
         return false;
     }
-    if (!parcel.WriteInt64(txBytes_)) {
+    if (!parcel.WriteString(iface_)) {
         return false;
     }
-    if (!parcel.WriteInt64(rxPackets_)) {
+    if (!parcel.WriteUint64(date_)) {
         return false;
     }
-    if (!parcel.WriteInt64(txPackets_)) {
+    if (!parcel.WriteUint64(rxBytes_)) {
+        return false;
+    }
+    if (!parcel.WriteUint64(txBytes_)) {
+        return false;
+    }
+    if (!parcel.WriteUint64(rxPackets_)) {
+        return false;
+    }
+    if (!parcel.WriteUint64(txPackets_)) {
         return false;
     }
     return true;
@@ -38,33 +47,76 @@ bool NetStatsInfo::Marshalling(Parcel &parcel) const
 
 bool NetStatsInfo::Marshalling(Parcel &parcel, const NetStatsInfo &stats)
 {
-    if (!parcel.WriteInt64(stats.rxBytes_)) {
+    if (!parcel.WriteUint32(stats.uid_)) {
         return false;
     }
-    if (!parcel.WriteInt64(stats.txBytes_)) {
+    if (!parcel.WriteString(stats.iface_)) {
         return false;
     }
-    if (!parcel.WriteInt64(stats.rxPackets_)) {
+    if (!parcel.WriteUint64(stats.date_)) {
         return false;
     }
-    if (!parcel.WriteInt64(stats.txPackets_)) {
+    if (!parcel.WriteUint64(stats.rxBytes_)) {
+        return false;
+    }
+    if (!parcel.WriteUint64(stats.txBytes_)) {
+        return false;
+    }
+    if (!parcel.WriteUint64(stats.rxPackets_)) {
+        return false;
+    }
+    if (!parcel.WriteUint64(stats.txPackets_)) {
         return false;
     }
     return true;
 }
 
+bool NetStatsInfo::Marshalling(Parcel &parcel, const std::vector<NetStatsInfo> &statsInfos)
+{
+    uint32_t vsize = statsInfos.size();
+    if (!parcel.WriteUint32(vsize)) {
+        return false;
+    }
+    std::for_each(statsInfos.begin(), statsInfos.end(), [&parcel](const auto &info) { info.Marshalling(parcel); });
+    return true;
+}
+
+bool NetStatsInfo::Unmarshalling(Parcel &parcel, std::vector<NetStatsInfo> &statsInfos)
+{
+    uint32_t vSize = 0;
+    if (!parcel.ReadUint32(vSize)) {
+        return false;
+    }
+
+    statsInfos.reserve(vSize);
+    for (uint32_t i = 0; i < vSize; i++) {
+        NetStatsInfo::Unmarshalling(parcel, statsInfos[i]);
+    }
+
+    return true;
+}
+
 bool NetStatsInfo::Unmarshalling(Parcel &parcel, NetStatsInfo &stats)
 {
-    if (!parcel.ReadInt64(stats.rxBytes_)) {
+    if (!parcel.ReadUint32(stats.uid_)) {
         return false;
     }
-    if (!parcel.ReadInt64(stats.txBytes_)) {
+    if (!parcel.ReadString(stats.iface_)) {
         return false;
     }
-    if (!parcel.ReadInt64(stats.rxPackets_)) {
+    if (!parcel.ReadUint64(stats.date_)) {
         return false;
     }
-    if (!parcel.ReadInt64(stats.txPackets_)) {
+    if (!parcel.ReadUint64(stats.rxBytes_)) {
+        return false;
+    }
+    if (!parcel.ReadUint64(stats.txBytes_)) {
+        return false;
+    }
+    if (!parcel.ReadUint64(stats.rxPackets_)) {
+        return false;
+    }
+    if (!parcel.ReadUint64(stats.txPackets_)) {
         return false;
     }
     return true;

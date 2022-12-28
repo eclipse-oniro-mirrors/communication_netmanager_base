@@ -36,6 +36,8 @@ struct StatsValue {
     uint64_t rxBytes;
     uint64_t txPackets;
     uint64_t txBytes;
+    uint32_t uid;
+    std::string iface;
 
     StatsValue &operator+=(const StatsValue &other)
     {
@@ -45,6 +47,12 @@ struct StatsValue {
         txBytes += other.txBytes;
         return *this;
     }
+};
+
+struct StatsInfo {
+    uint32_t uid;
+    std::string iface;
+    StatsValue stats;
 };
 
 typedef struct {

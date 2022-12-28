@@ -63,10 +63,10 @@ void GetIfaceUidStatsContext::ParseParams(napi_value *params, size_t paramsCount
         NETMANAGER_BASE_LOGE("param napi_type error");
         return;
     }
-    uid_ = NapiUtils::GetInt32Property(GetEnv(), ifaceInfo, "uid");
-    interfaceName_ = NapiUtils::GetStringPropertyUtf8(GetEnv(), params[ARG_INDEX_0], IFACE);
+    interfaceName_ = NapiUtils::GetStringPropertyUtf8(GetEnv(), ifaceInfo, IFACE);
     start_ = NapiUtils::GetUint32Property(GetEnv(), ifaceInfo, START_TIME);
     end_ = NapiUtils::GetUint32Property(GetEnv(), ifaceInfo, END_TIME);
+    uid_ = NapiUtils::GetInt32Property(GetEnv(), params[ARG_INDEX_0], UID);
 
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
         SetParseOK(SetCallback(params[ARG_INDEX_1]) == napi_ok);

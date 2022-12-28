@@ -41,6 +41,12 @@ public:
     int32_t GetAllTxBytes(uint64_t &stats);
     int32_t GetUidRxBytes(uint64_t &stats, uint32_t uid);
     int32_t GetUidTxBytes(uint64_t &stats, uint32_t uid);
+    int32_t GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end, NetStatsInfo &statsInfo);
+    int32_t GetUidStatsDetail(const std::string &iface, uint32_t uid, uint32_t start, uint32_t end,
+                              NetStatsInfo &statsInfo);
+    int32_t UpdateIfacesStats(const std::string &iface, uint32_t start, uint32_t end, const NetStatsInfo &stats);
+    int32_t UpdateStatsData();
+    int32_t ResetFactory();
 
 private:
     class NetStatsDeathRecipient : public IRemoteObject::DeathRecipient {

@@ -15,6 +15,8 @@
 
 #include "netsys_bpf_stats.h"
 
+#include <vector>
+
 #include <sys/resource.h>
 
 #include <linux/bpf.h>
@@ -123,6 +125,12 @@ int32_t NetsysBpfStats::GetUidStats(uint64_t &stats, StatsType type, uint32_t ui
         return DumpError(STATS_ERR_INVALID_UID_STATS_MAP);
     }
     return BpfGetUidStats(stats, type, uid, appUidStatsMap);
+}
+
+int32_t NetsysBpfStats::GetAllStatsInfo(std::vector<StatsValue> &stats)
+{
+    stats = {};
+    return 0;
 }
 
 int32_t NetsysBpfStats::BpfGetIfaceStats(uint64_t &stats, const StatsType statsType, const std::string &interfaceName,

@@ -44,5 +44,10 @@ int32_t NetStatsWrapper::GetIfaceStats(uint64_t &stats, StatsType type, const st
 {
     return netSysBpf_->GetIfaceStats(stats, type, interfaceName);
 }
+
+int32_t NetStatsWrapper::GetAllStatsInfo(std::vector<NetStatsInfo> &stats)
+{
+    return 0;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

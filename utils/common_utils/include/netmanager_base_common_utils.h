@@ -41,6 +41,12 @@ bool StrToBool(const std::string &str);
 int64_t StrToLong(const std::string &str);
 bool CheckIfaceName(const std::string &name);
 int32_t ForkExec(const std::string &command, std::string *out = nullptr);
+
+inline uint64_t GetCurrentSecond()
+{
+    return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch())
+        .count();
+}
 } // namespace OHOS::NetManagerStandard::CommonUtils
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H */

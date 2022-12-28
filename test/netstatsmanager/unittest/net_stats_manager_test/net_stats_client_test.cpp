@@ -28,15 +28,21 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
+using namespace testing::ext;
 constexpr const char *ETH_IFACE_NAME = "lo";
 constexpr int64_t TEST_UID = 1010;
 void GetIfaceNamesFromManager(std::list<std::string> &ifaceNames)
 {
     NetManagerCenter::GetInstance().GetIfaceNames(BEARER_CELLULAR, ifaceNames);
 }
+constexpr const char *MOCK_IFACE = "wlan0";
+constexpr uint32_t MOCK_UID = 1234;
+constexpr uint64_t MOCK_DATE = 115200;
+constexpr uint64_t MOCK_RXBYTES = 10000;
+constexpr uint64_t MOCK_TXBYTES = 11000;
+constexpr uint64_t MOCK_RXPACKETS = 1000;
+constexpr uint64_t MOCK_TXPACKETS = 1100;
 } // namespace
-
-using namespace testing::ext;
 class NetStatsClientTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -192,6 +198,58 @@ HWTEST_F(NetStatsClientTest, GetUidTxBytesTest001, TestSize.Level1)
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetUidTxBytes(stats, TEST_UID);
     EXPECT_GE(stats, static_cast<uint64_t>(0));
     DTEST_LOG << "Ret" << ret << std::endl;
+}
+
+HWTEST_F(NetStatsClientTest, NetStatsClient001, TestSize.Level1)
+{
+    NetStatsInfo info;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(MOCK_IFACE, 0, LONG_MAX, info);
+    EXPECT_EQ(ret, 0);
+    std::cout << info.IfaceData() << std::endl;
+}
+
+HWTEST_F(NetStatsClientTest, NetStatsClient002, TestSize.Level1)
+{
+    NetStatsInfo info;
+    int32_t ret =
+        DelayedSingleton<NetStatsClient>::GetInstance()->GetUidStatsDetail(MOCK_IFACE, MOCK_UID, 0, LONG_MAX, info);
+    EXPECT_EQ(ret, 0);
+    std::cout << info.UidData() << std::endl;
+}
+
+HWTEST_F(NetStatsClientTest, NetStatsClient003, TestSize.Level1)
+{
+    NetStatsInfo info;
+    info.iface_ = MOCK_IFACE;
+    info.date_ = MOCK_DATE;
+    info.rxBytes_ = MOCK_RXBYTES;
+    info.txBytes_ = MOCK_TXBYTES;
+    info.rxPackets_ = MOCK_RXPACKETS;
+    info.txPackets_ = MOCK_TXPACKETS;
+
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateIfacesStats(MOCK_IFACE, 0, LONG_MAX, info);
+    EXPECT_EQ(ret, 0);
+    DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(MOCK_IFACE, 0, LONG_MAX, info);
+    EXPECT_EQ(info.iface_, MOCK_IFACE);
+    EXPECT_EQ(info.date_, static_cast<uint64_t>(LONG_MAX));
+    EXPECT_EQ(info.rxBytes_, MOCK_RXBYTES);
+    EXPECT_EQ(info.txBytes_, MOCK_TXBYTES);
+    EXPECT_EQ(info.rxPackets_, MOCK_RXPACKETS);
+    EXPECT_EQ(info.txPackets_, MOCK_TXPACKETS);
+}
+
+HWTEST_F(NetStatsClientTest, NetStatsClient004, TestSize.Level1)
+{
+    NetStatsInfo info;
+    info.iface_ = MOCK_IFACE;
+    info.date_ = MOCK_DATE;
+    info.rxBytes_ = MOCK_RXBYTES;
+    info.txBytes_ = MOCK_TXBYTES;
+    info.rxPackets_ = MOCK_RXPACKETS;
+    info.txPackets_ = MOCK_TXPACKETS;
+
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->ResetFactory();
+    EXPECT_EQ(ret, 0);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
