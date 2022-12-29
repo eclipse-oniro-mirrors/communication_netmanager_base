@@ -29,14 +29,14 @@ using namespace NetStatsDatabaseDefines;
 
 using namespace testing::ext;
 namespace {
-constexpr uint32_t UID_MAX = 200;
+constexpr uint32_t UID_MAX_TEST = 200;
 constexpr uint32_t MAX_TEST_DATA = 100;
 const std::vector<std::string> MOCK_IFACE = {"wlan0", "eth0", "eth1", "usb0", "wlan1", "usb1"};
 std::random_device g_rd;
 std::mt19937 g_regn(g_rd());
 uint32_t GetUint32()
 {
-    return static_cast<uint32_t>(g_regn()) % UID_MAX;
+    return static_cast<uint32_t>(g_regn()) % UID_MAX_TEST;
 }
 
 uint64_t GetUint64()

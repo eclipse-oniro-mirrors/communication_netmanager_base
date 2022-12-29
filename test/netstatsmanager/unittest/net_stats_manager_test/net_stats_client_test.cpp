@@ -203,7 +203,7 @@ HWTEST_F(NetStatsClientTest, GetUidTxBytesTest001, TestSize.Level1)
 HWTEST_F(NetStatsClientTest, NetStatsClient001, TestSize.Level1)
 {
     NetStatsInfo info;
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(MOCK_IFACE, 0, LONG_MAX, info);
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(MOCK_IFACE, 0, UINT32_MAX, info);
     EXPECT_EQ(ret, 0);
     std::cout << info.IfaceData() << std::endl;
 }
@@ -212,7 +212,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient002, TestSize.Level1)
 {
     NetStatsInfo info;
     int32_t ret =
-        DelayedSingleton<NetStatsClient>::GetInstance()->GetUidStatsDetail(MOCK_IFACE, MOCK_UID, 0, LONG_MAX, info);
+        DelayedSingleton<NetStatsClient>::GetInstance()->GetUidStatsDetail(MOCK_IFACE, MOCK_UID, 0, UINT32_MAX, info);
     EXPECT_EQ(ret, 0);
     std::cout << info.UidData() << std::endl;
 }
@@ -227,9 +227,9 @@ HWTEST_F(NetStatsClientTest, NetStatsClient003, TestSize.Level1)
     info.rxPackets_ = MOCK_RXPACKETS;
     info.txPackets_ = MOCK_TXPACKETS;
 
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateIfacesStats(MOCK_IFACE, 0, LONG_MAX, info);
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateIfacesStats(MOCK_IFACE, 0, UINT32_MAX, info);
     EXPECT_EQ(ret, 0);
-    DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(MOCK_IFACE, 0, LONG_MAX, info);
+    DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(MOCK_IFACE, 0, UINT32_MAX, info);
     EXPECT_EQ(info.iface_, MOCK_IFACE);
     EXPECT_EQ(info.date_, static_cast<uint64_t>(LONG_MAX));
     EXPECT_EQ(info.rxBytes_, MOCK_RXBYTES);
