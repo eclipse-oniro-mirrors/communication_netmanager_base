@@ -38,13 +38,13 @@ NetStatsDatabaseHelper::SqlCallback sqlCallback = [](void *notUsed, int argc, ch
 bool CheckFilePath(const std::string &fileName)
 {
     char tmpPath[PATH_MAX] = {0};
-    std::filesystem::path file = fileName;
-    auto dir = file.parent_path();
-    if (!realpath(dir.string().c_str(), tmpPath)) {
+    const auto pos = fileName.find_last_of('/');
+    const auto dir = fileName.substr(pos + 1);
+    if (!realpath(dir.c_str(), tmpPath)) {
         NETMGR_LOG_E("Get realPath failed error: %{public}d, %{public}s", errno, strerror(errno));
         return false;
     }
-    if (strcmp(tmpPath, dir.string().c_str()) != 0) {
+    if (strcmp(tmpPath, dir.c_str()) != 0) {
         NETMGR_LOG_E("file name is illegal fileName: %{public}s, tmpPath: %{public}s", fileName.c_str(), tmpPath);
         return false;
     }
