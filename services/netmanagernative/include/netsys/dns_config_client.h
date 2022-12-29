@@ -36,7 +36,7 @@ extern "C" {
 
 #define MAX_SERVER_NUM 4
 #define MAX_SERVER_LENGTH 50
-#define DNS_SOCKET_PATH "/data/service/el1/public/netmanager/dnsproxyd"
+#define DNS_SOCKET_PATH "/data/dnsproxyd"
 #define MAX_RESULTS 32
 #define MAX_CANON_NAME 256
 #define MAX_HOST_NAME_LEN 256
