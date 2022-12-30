@@ -137,7 +137,12 @@ NetsysNativeClient::NetsysNativeClient()
         while (GetProxy() == nullptr && count++ < MAX_GET_SERVICE_COUNT) {
             std::this_thread::sleep_for(std::chrono::seconds(WAIT_FOR_SERVICE_TIME_S));
         }
-        NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", GetProxy() == nullptr ? "failed" : "success", count);
+        auto proxy = GetProxy();
+        NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
+        if (proxy != nullptr) {
+            nativeNotifyCallback_ = new (std::nothrow) NativeNotifyCallback(*this);
+            proxy->RegisterNotifyCallback(nativeNotifyCallback_);
+        }
     }).detach();
 }
 
@@ -710,9 +715,6 @@ sptr<OHOS::NetsysNative::INetsysService> NetsysNativeClient::GetProxy()
         NETMGR_LOG_E("Get remote service proxy failed");
         return nullptr;
     }
-
-    nativeNotifyCallback_ = new (std::nothrow) NativeNotifyCallback(*this);
-    netsysNativeService_->RegisterNotifyCallback(nativeNotifyCallback_);
 
     return netsysNativeService_;
 }
