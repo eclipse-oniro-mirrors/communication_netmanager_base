@@ -193,7 +193,7 @@ int32_t NetStatsClient::GetUidTxBytes(uint64_t &stats, uint32_t uid)
     return proxy->GetUidTxBytes(stats, uid);
 }
 
-int32_t NetStatsClient::GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end,
+int32_t NetStatsClient::GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,
                                             NetStatsInfo &statsInfo)
 {
     sptr<INetStatsService> proxy = GetProxy();
@@ -204,7 +204,7 @@ int32_t NetStatsClient::GetIfaceStatsDetail(const std::string &iface, uint32_t s
     return proxy->GetIfaceStatsDetail(iface, start, end, statsInfo);
 }
 
-int32_t NetStatsClient::GetUidStatsDetail(const std::string &iface, uint32_t uid, uint32_t start, uint32_t end,
+int32_t NetStatsClient::GetUidStatsDetail(const std::string &iface, uint32_t uid, uint64_t start, uint64_t end,
                                           NetStatsInfo &statsInfo)
 {
     sptr<INetStatsService> proxy = GetProxy();
@@ -215,7 +215,7 @@ int32_t NetStatsClient::GetUidStatsDetail(const std::string &iface, uint32_t uid
     return proxy->GetUidStatsDetail(iface, uid, start, end, statsInfo);
 }
 
-int32_t NetStatsClient::UpdateIfacesStats(const std::string &iface, uint32_t start, uint32_t end,
+int32_t NetStatsClient::UpdateIfacesStats(const std::string &iface, uint64_t start, uint64_t end,
                                           const NetStatsInfo &stats)
 {
     sptr<INetStatsService> proxy = GetProxy();

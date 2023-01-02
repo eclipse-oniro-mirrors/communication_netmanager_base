@@ -50,7 +50,7 @@ public:
     int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;
     int32_t GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,
                                 NetStatsInfo &statsInfo) override;
-    int32_t GetUidStatsDetail(const std::string &iface, uint32_t uid, int64_t start, int64_t end,
+    int32_t GetUidStatsDetail(const std::string &iface, uint32_t uid, uint64_t start, uint64_t end,
                               NetStatsInfo &statsInfo) override;
     int32_t UpdateIfacesStats(const std::string &iface, uint64_t start, uint64_t end,
                               const NetStatsInfo &stats) override;
@@ -69,7 +69,7 @@ private:
 
     bool registerToService_;
     ServiceRunningState state_;
-    sptr<NetStatsCallback> netStatsCallback_;
+    std::shared_ptr<NetStatsCallback> netStatsCallback_ = nullptr;
     std::shared_ptr<NetStatsListener> subscriber_ = nullptr;
     std::unique_ptr<NetStatsWrapper> netStatsWrapper_ = nullptr;
     std::unique_ptr<NetStatsCached> netStatsCached_ = nullptr;

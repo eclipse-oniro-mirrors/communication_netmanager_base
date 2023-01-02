@@ -62,7 +62,7 @@ public:
     virtual int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) = 0;
     virtual int32_t GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,
                                         NetStatsInfo &statsInfo) = 0;
-    virtual int32_t GetUidStatsDetail(const std::string &iface, uint32_t uid, int64_t start, int64_t end,
+    virtual int32_t GetUidStatsDetail(const std::string &iface, uint32_t uid, uint64_t start, uint64_t end,
                                       NetStatsInfo &statsInfo) = 0;
     virtual int32_t UpdateIfacesStats(const std::string &iface, uint64_t start, uint64_t end,
                                       const NetStatsInfo &stats) = 0;

@@ -20,6 +20,7 @@
 #include <mutex>
 #include <vector>
 
+#include "net_stats_callback.h"
 #include "net_stats_info.h"
 #include "netmanager_base_common_utils.h"
 
@@ -50,6 +51,12 @@ public:
     {
         cycleThreshold_ = threshold;
     }
+
+    inline void SetCallbackManager(const std::shared_ptr<NetStatsCallback> &callbackManager)
+    {
+        stats_.SetNotifier(callbackManager);
+    }
+
     void Reset();
 
 private:
@@ -63,6 +70,9 @@ private:
             info.date_ = CommonUtils::GetCurrentSecond();
             uidStatsInfo_.push_back(info);
             currentUidStats_ += info.GetStats();
+            if (netStatsCallbackManager_ != nullptr) {
+                netStatsCallbackManager_->NotifyNetUidStatsChanged(info.iface_, info.uid_);
+            }
         }
 
         void PushIfaceStats(NetStatsInfo &info)
@@ -73,6 +83,9 @@ private:
             info.date_ = CommonUtils::GetCurrentSecond();
             ifaceStatsInfo_.push_back(info);
             currentIfaceStats_ += info.GetStats();
+            if (netStatsCallbackManager_ != nullptr) {
+                netStatsCallbackManager_->NotifyNetIfaceStatsChanged(info.iface_);
+            }
         }
 
         inline std::vector<NetStatsInfo> &GetUidStatsInfo()
@@ -107,11 +120,17 @@ private:
             currentIfaceStats_ = 0;
         }
 
+        inline void SetNotifier(const std::shared_ptr<NetStatsCallback> &callbackManager)
+        {
+            netStatsCallbackManager_ = callbackManager;
+        }
+
     private:
         uint64_t currentUidStats_ = 0;
         uint64_t currentIfaceStats_ = 0;
         std::vector<NetStatsInfo> uidStatsInfo_;
         std::vector<NetStatsInfo> ifaceStatsInfo_;
+        std::shared_ptr<NetStatsCallback> netStatsCallbackManager_ = nullptr;
     };
 
     static constexpr uint32_t DEFAULT_CACHE_CYCLE_MS = 30 * 60 * 1000;

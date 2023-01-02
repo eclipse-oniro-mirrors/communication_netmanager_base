@@ -19,6 +19,10 @@
 
 #include <gtest/gtest.h>
 
+#include "accesstoken_kit.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
+
 #include "net_manager_center.h"
 #include "net_stats_callback_test.h"
 #include "net_stats_client.h"
@@ -29,6 +33,8 @@ namespace NetManagerStandard {
 namespace {
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 using namespace testing::ext;
+using namespace Security::AccessToken;
+using Security::AccessToken::AccessTokenID;
 constexpr const char *ETH_IFACE_NAME = "lo";
 constexpr int64_t TEST_UID = 1010;
 void GetIfaceNamesFromManager(std::list<std::string> &ifaceNames)
@@ -42,7 +48,61 @@ constexpr uint64_t MOCK_RXBYTES = 10000;
 constexpr uint64_t MOCK_TXBYTES = 11000;
 constexpr uint64_t MOCK_RXPACKETS = 1000;
 constexpr uint64_t MOCK_TXPACKETS = 1100;
+
+HapInfoParams testInfoParms = {
+    .userID = 1,
+    .bundleName = "net_stats_manager_test",
+    .instIndex = 0,
+    .appIDDesc = "test",
+    .isSystemApp = true,
+};
+
+PermissionDef testPermDef = {
+    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+    .bundleName = "net_stats_manager_test",
+    .grantMode = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+    .label = "label",
+    .labelId = 1,
+    .description = "Test net stats connectivity internal",
+    .descriptionId = 1,
+};
+
+PermissionStateFull testState = {
+    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+    .isGeneral = true,
+    .resDeviceID = {"local"},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
+    .grantFlags = {2},
+};
+
+HapPolicyParams testPolicyPrams = {
+    .apl = APL_SYSTEM_BASIC,
+    .domain = "test.domain",
+    .permList = {testPermDef},
+    .permStateList = {testState},
+};
+
+class AccessToken {
+public:
+    AccessToken() : currentID_(GetSelfTokenID())
+    {
+        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
+        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
+        SetSelfTokenID(tokenIdEx.tokenIDEx);
+    }
+    ~AccessToken()
+    {
+        AccessTokenKit::DeleteToken(accessID_);
+        SetSelfTokenID(currentID_);
+    }
+
+private:
+    AccessTokenID currentID_;
+    AccessTokenID accessID_ = 0;
+};
 } // namespace
+
 class NetStatsClientTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -202,6 +262,7 @@ HWTEST_F(NetStatsClientTest, GetUidTxBytesTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsClientTest, NetStatsClient001, TestSize.Level1)
 {
+    AccessToken token;
     NetStatsInfo info;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(MOCK_IFACE, 0, UINT32_MAX, info);
     EXPECT_EQ(ret, 0);
@@ -210,6 +271,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient001, TestSize.Level1)
 
 HWTEST_F(NetStatsClientTest, NetStatsClient002, TestSize.Level1)
 {
+    AccessToken token;
     NetStatsInfo info;
     int32_t ret =
         DelayedSingleton<NetStatsClient>::GetInstance()->GetUidStatsDetail(MOCK_IFACE, MOCK_UID, 0, UINT32_MAX, info);
@@ -219,6 +281,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient002, TestSize.Level1)
 
 HWTEST_F(NetStatsClientTest, NetStatsClient003, TestSize.Level1)
 {
+    AccessToken token;
     NetStatsInfo info;
     info.iface_ = MOCK_IFACE;
     info.date_ = MOCK_DATE;
@@ -231,7 +294,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient003, TestSize.Level1)
     EXPECT_EQ(ret, 0);
     DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(MOCK_IFACE, 0, UINT32_MAX, info);
     EXPECT_EQ(info.iface_, MOCK_IFACE);
-    EXPECT_EQ(info.date_, static_cast<uint64_t>(LONG_MAX));
+    EXPECT_EQ(info.date_, UINT32_MAX);
     EXPECT_EQ(info.rxBytes_, MOCK_RXBYTES);
     EXPECT_EQ(info.txBytes_, MOCK_TXBYTES);
     EXPECT_EQ(info.rxPackets_, MOCK_RXPACKETS);

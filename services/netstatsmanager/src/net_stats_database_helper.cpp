@@ -39,7 +39,7 @@ bool CheckFilePath(const std::string &fileName)
 {
     char tmpPath[PATH_MAX] = {0};
     const auto pos = fileName.find_last_of('/');
-    const auto dir = fileName.substr(pos + 1);
+    const auto dir = fileName.substr(0, pos);
     if (!realpath(dir.c_str(), tmpPath)) {
         NETMGR_LOG_E("Get realPath failed error: %{public}d, %{public}s", errno, strerror(errno));
         return false;

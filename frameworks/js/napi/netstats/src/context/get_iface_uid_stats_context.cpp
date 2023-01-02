@@ -18,6 +18,7 @@
 #include "constant.h"
 #include "napi_constant.h"
 #include "napi_utils.h"
+#include "net_manager_constants.h"
 #include "netmanager_base_log.h"
 
 namespace OHOS {
@@ -35,6 +36,8 @@ GetIfaceUidStatsContext::GetIfaceUidStatsContext(napi_env env, EventManager *man
 void GetIfaceUidStatsContext::ParseParams(napi_value *params, size_t paramsCount)
 {
     if (!CheckParamsType(params, paramsCount)) {
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        SetNeedThrowException(true);
         return;
     }
 

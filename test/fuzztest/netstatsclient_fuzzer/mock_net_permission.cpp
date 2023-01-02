@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,21 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef NET_STATS_BASE_SERVICE_H
-#define NET_STATS_BASE_SERVICE_H
 
-#include "refbase.h"
-
-#include "net_stats_info.h"
+#include "netmanager_base_permission.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-class NetStatsBaseService : public virtual RefBase {
-public:
-    virtual int32_t GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,
-                                        NetStatsInfo &info) = 0;
-    virtual int32_t ResetStatsFactory() = 0;
-};
+bool NetManagerPermission::CheckPermission(const std::string &permissionName)
+{
+    return true;
+}
+
+bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissionName)
+{
+    return true;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // NET_STATS_BASE_SERVICE_H

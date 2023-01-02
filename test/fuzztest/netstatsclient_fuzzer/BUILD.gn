@@ -38,7 +38,10 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "net_stats_client_fuzzer.cpp" ]
+  sources = [
+    "mock_net_permission.cpp",
+    "net_stats_client_fuzzer.cpp",
+  ]
 
   deps = [
     "$HILOG_ROOT/interfaces/native/innerkits:libhilog",

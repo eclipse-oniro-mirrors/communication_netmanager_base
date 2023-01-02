@@ -18,6 +18,7 @@
 #include "constant.h"
 #include "napi_constant.h"
 #include "napi_utils.h"
+#include "net_manager_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -26,6 +27,8 @@ GetIfaceRxBytesContext::GetIfaceRxBytesContext(napi_env env, EventManager *manag
 void GetIfaceRxBytesContext::ParseParams(napi_value *params, size_t paramsCount)
 {
     if (!CheckParamsType(params, paramsCount)) {
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        SetNeedThrowException(true);
         return;
     }
 
