@@ -19,7 +19,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-int32_t NetStatsServiceCommon::GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end,
+int32_t NetStatsServiceCommon::GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,
                                                    NetStatsInfo &info)
 {
     return DelayedSingleton<NetStatsService>::GetInstance()->GetIfaceStatsDetail(iface, start, end, info);

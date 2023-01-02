@@ -18,7 +18,7 @@ import {AsyncCallback, Callback} from "./basic";
 /**
  * Obtains traffic statistics.
  *
- * @since 9
+ * @since 10
  * @syscap SystemCapability.Communication.NetManager.Core
  */
 declare namespace statistics {
@@ -93,7 +93,7 @@ declare namespace statistics {
   function getUidTxBytes(uid: number): Promise<number>;
 
   /**
-   * Register notifications of network traffic updates, restrictions, and warnings.
+   * Register notifications of network traffic updates.
    *
    * @permission ohos.permission.CONNECTIVITY_INTERNAL
    * @systemapi Hide this for inner system use.

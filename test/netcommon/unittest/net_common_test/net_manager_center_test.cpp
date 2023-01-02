@@ -98,7 +98,7 @@ public:
 
 class TestNetStatsService : public NetStatsBaseService {
 public:
-    inline int32_t GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end,
+    inline int32_t GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,
                                        NetStatsInfo &info) override
     {
         return NETMANAGER_SUCCESS;

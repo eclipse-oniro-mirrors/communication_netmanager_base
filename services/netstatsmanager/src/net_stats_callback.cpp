@@ -22,15 +22,6 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetStatsCallback::NetStatsCallback()
-{
-    sptr<NetsysControllerCallback> callback = new (std::nothrow) NetQuotaLimitCallback(this);
-    if (callback == nullptr) {
-        NETMGR_LOG_E("Create callback failed callback is nullptr");
-    }
-    NetsysController::GetInstance().RegisterCallback(callback);
-}
-
 void NetStatsCallback::RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
 {
     if (callback == nullptr) {
@@ -74,25 +65,26 @@ int32_t NetStatsCallback::NotifyNetIfaceStatsChanged(const std::string &iface)
 {
     NETMGR_LOG_D("NotifyNetIfaceStatsChanged info: iface[%{public}s]", iface.c_str());
 
-    for (const auto &callback : netStatsCallback_) {
-        if (callback != nullptr) {
-            callback->NetIfaceStatsChanged(iface);
+    for (auto it = netStatsCallback_.begin(); it < netStatsCallback_.end();) {
+        if ((*it) == nullptr || (*it)->NetIfaceStatsChanged(iface) == NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL) {
+            netStatsCallback_.erase(it);
+        } else {
+            ++it;
         }
     }
-
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsCallback::NotifyNetUidStatsChanged(const std::string &iface, uint32_t uid)
 {
     NETMGR_LOG_D("UpdateIfacesStats info: iface[%{public}s] uid[%{public}d]", iface.c_str(), uid);
-
-    for (const auto &callback : netStatsCallback_) {
-        if (callback != nullptr) {
-            callback->NetUidStatsChanged(iface, uid);
+    for (auto it = netStatsCallback_.begin(); it < netStatsCallback_.end();) {
+        if ((*it) == nullptr || (*it)->NetUidStatsChanged(iface, uid) == NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL) {
+            netStatsCallback_.erase(it);
+        } else {
+            ++it;
         }
     }
-
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard

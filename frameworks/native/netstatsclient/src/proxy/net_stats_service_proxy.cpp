@@ -330,7 +330,7 @@ int32_t NetStatsServiceProxy::GetIfaceStatsDetail(const std::string &iface, uint
     return reply.ReadInt32();
 }
 
-int32_t NetStatsServiceProxy::GetUidStatsDetail(const std::string &iface, uint32_t uid, int64_t start, int64_t end,
+int32_t NetStatsServiceProxy::GetUidStatsDetail(const std::string &iface, uint32_t uid, uint64_t start, uint64_t end,
                                                 NetStatsInfo &statsInfo)
 {
     MessageParcel data;

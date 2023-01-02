@@ -44,6 +44,7 @@ napi_value StatisticsObserverWrapper::On(napi_env env, napi_callback_info info,
         NapiUtils::GetValueType(env, params[ARG_INDEX_0]) != napi_string ||
         NapiUtils::GetValueType(env, params[ARG_INDEX_1]) != napi_function) {
         NETMANAGER_BASE_LOGE("on off once interface para: [string, function]");
+        napi_throw_error(env, std::to_string(NETMANAGER_ERR_PARAMETER_ERROR).c_str(), "Parameter error");
         return NapiUtils::GetUndefined(env);
     }
 
@@ -78,6 +79,7 @@ napi_value StatisticsObserverWrapper::Off(napi_env env, napi_callback_info info,
     if (!(paramsCount == PARAM_JUST_OPTIONS || paramsCount == PARAM_OPTIONS_AND_CALLBACK) ||
         NapiUtils::GetValueType(env, params[ARG_INDEX_0]) != napi_string) {
         NETMANAGER_BASE_LOGE("on off once interface para: [string, function?]");
+        napi_throw_error(env, std::to_string(NETMANAGER_ERR_PARAMETER_ERROR).c_str(), "Parameter error");
         return NapiUtils::GetUndefined(env);
     }
 

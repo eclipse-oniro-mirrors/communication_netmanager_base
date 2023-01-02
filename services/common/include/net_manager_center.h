@@ -39,7 +39,7 @@ public:
     int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo);
     void RegisterConnService(const sptr<NetConnBaseService> &service);
 
-    int32_t GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end, NetStatsInfo &info);
+    int32_t GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end, NetStatsInfo &info);
     int32_t ResetStatsFactory();
     void RegisterStatsService(const sptr<NetStatsBaseService> &service);
 

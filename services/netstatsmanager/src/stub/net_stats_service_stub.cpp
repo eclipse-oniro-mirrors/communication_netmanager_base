@@ -17,6 +17,7 @@
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "netmanager_base_permission.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -65,6 +66,9 @@ int32_t NetStatsServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
 
 int32_t NetStatsServiceStub::OnRegisterNetStatsCallback(MessageParcel &data, MessageParcel &reply)
 {
+    if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
     int32_t result = NETMANAGER_ERR_LOCAL_PTR_NULL;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
@@ -83,6 +87,9 @@ int32_t NetStatsServiceStub::OnRegisterNetStatsCallback(MessageParcel &data, Mes
 
 int32_t NetStatsServiceStub::OnUnregisterNetStatsCallback(MessageParcel &data, MessageParcel &reply)
 {
+    if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
     int32_t result = NETMANAGER_ERR_LOCAL_PTR_NULL;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
@@ -256,6 +263,9 @@ int32_t NetStatsServiceStub::OnGetUidTxBytes(MessageParcel &data, MessageParcel 
 
 int32_t NetStatsServiceStub::OnGetIfaceStatsDetail(MessageParcel &data, MessageParcel &reply)
 {
+    if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
     std::string iface;
     uint64_t start = 0;
     uint64_t end = 0;
@@ -276,6 +286,9 @@ int32_t NetStatsServiceStub::OnGetIfaceStatsDetail(MessageParcel &data, MessageP
 
 int32_t NetStatsServiceStub::OnGetUidStatsDetail(MessageParcel &data, MessageParcel &reply)
 {
+    if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
     std::string iface;
     uint32_t uid = 0;
     uint64_t start = 0;

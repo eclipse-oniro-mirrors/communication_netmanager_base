@@ -79,7 +79,7 @@ void NetManagerCenter::RegisterConnService(const sptr<NetConnBaseService> &servi
     connService_ = service;
 }
 
-int32_t NetManagerCenter::GetIfaceStatsDetail(const std::string &iface, uint32_t start, uint32_t end,
+int32_t NetManagerCenter::GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,
                                               NetStatsInfo &info)
 {
     if (statsService_ == nullptr) {
