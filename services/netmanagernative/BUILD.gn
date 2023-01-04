@@ -97,6 +97,7 @@ ohos_shared_library("netsys_native_manager") {
 
   external_deps = [
     "c_utils:utils",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
