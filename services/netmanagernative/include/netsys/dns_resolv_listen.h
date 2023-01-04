@@ -28,7 +28,6 @@ public:
     void StartListen();
 
 private:
-    bool SetServerSock();
     static void ProcGetConfigCommand(int clientSockFd, uint32_t netId);
     static void ProcSetCacheCommand(int clientSockFd, uint32_t netId);
     static void ProcGetCacheCommand(int clientSockFd, uint32_t netId);
