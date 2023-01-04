@@ -70,6 +70,14 @@ public:
 
     static void ReportNetDisconnectedCallback(napi_env env, napi_status status, void *data);
 
+    static void ExecGetAppNet(napi_env env, void *data);
+
+    static void GetAppNetCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecSetAppNet(napi_env env, void *data);
+
+    static void SetAppNetCallback(napi_env env, napi_status status, void *data);
+
     class NetHandleAsyncWork final {
     public:
         NetHandleAsyncWork() = delete;

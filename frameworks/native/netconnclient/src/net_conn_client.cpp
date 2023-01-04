@@ -19,6 +19,7 @@
 #include "system_ability_definition.h"
 
 #include "fwmark_client.h"
+#include "netsys_sock_client.h"
 #include "net_conn_service_proxy.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
@@ -374,6 +375,18 @@ int32_t NetConnClient::GetNetIdByIdentifier(const std::string &ident, int32_t &n
         return IPC_PROXY_ERR;
     }
     return proxy->GetNetIdByIdentifier(ident, netId);
+}
+
+int32_t NetConnClient::SetAppNet(int32_t netId)
+{
+    SetNetForApp(netId);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnClient::GetAppNet(int32_t &netId)
+{
+    netId = GetNetForApp();
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

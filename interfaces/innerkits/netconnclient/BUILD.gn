@@ -81,6 +81,7 @@ ohos_shared_library("net_conn_manager_if") {
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETMANAGERNATIVE_ROOT/fwmarkclient/include",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "//third_party/musl/porting/linux/user/src/hook",
   ]
 
   public_configs = [ ":net_conn_manager_if_config" ]
