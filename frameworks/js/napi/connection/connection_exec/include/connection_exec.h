@@ -18,6 +18,7 @@
 
 #include <netdb.h>
 
+#include "app_net_context.h"
 #include "bindsocket_context.h"
 #include "getaddressbyname_context.h"
 #include "getdefaultnet_context.h"
@@ -85,6 +86,14 @@ public:
     static bool ExecReportNetDisconnected(ReportNetDisconnectedContext *context);
 
     static napi_value ReportNetDisconnectedCallback(ReportNetDisconnectedContext *context);
+
+    static bool ExecGetAppNet(AppNetContext *context);
+
+    static napi_value GetAppNetCallback(AppNetContext *context);
+
+    static bool ExecSetAppNet(AppNetContext *context);
+
+    static napi_value SetAppNetCallback(AppNetContext *context);
 
     class NetHandleExec final {
     public:

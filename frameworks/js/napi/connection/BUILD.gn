@@ -28,6 +28,7 @@ ohos_shared_library("connection") {
   ]
 
   sources = [
+    "async_context/src/app_net_context.cpp",
     "async_context/src/bindsocket_context.cpp",
     "async_context/src/getaddressbyname_context.cpp",
     "async_context/src/getdefaultnet_context.cpp",
