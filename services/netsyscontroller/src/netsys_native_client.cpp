@@ -31,11 +31,13 @@
 #include "securec.h"
 #include "system_ability_definition.h"
 
+#include "net_conn_constants.h"
+#include "net_conn_types.h"
+#include "net_manager_constants.h"
+#include "net_mgr_log_wrapper.h"
 #include "netmanager_base_common_utils.h"
 #include "netsys_native_client.h"
 #include "netsys_native_service_proxy.h"
-#include "net_conn_types.h"
-#include "net_mgr_log_wrapper.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
@@ -61,7 +63,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressUpdated(cons
     for (auto &cb : netsysNativeClient_.cbObjects_) {
         cb->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(const std::string &addr,
@@ -71,7 +73,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(cons
     for (auto &cb : netsysNativeClient_.cbObjects_) {
         cb->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::string &ifName)
@@ -79,7 +81,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::st
     for (auto &cb : netsysNativeClient_.cbObjects_) {
         cb->OnInterfaceAdded(ifName);
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::string &ifName)
@@ -87,7 +89,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::
     for (auto &cb : netsysNativeClient_.cbObjects_) {
         cb->OnInterfaceRemoved(ifName);
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::string &ifName, bool up)
@@ -95,7 +97,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::
     for (auto &cb : netsysNativeClient_.cbObjects_) {
         cb->OnInterfaceChanged(ifName, up);
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
@@ -103,7 +105,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceLinkStateChanged(co
     for (auto &cb : netsysNativeClient_.cbObjects_) {
         cb->OnInterfaceLinkStateChanged(ifName, up);
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnRouteChanged(bool updated, const std::string &route,
@@ -112,14 +114,14 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnRouteChanged(bool updated, c
     for (auto &cb : netsysNativeClient_.cbObjects_) {
         cb->OnRouteChanged(updated, route, gateway, ifName);
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnDhcpSuccess(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult)
 {
     NETMGR_LOG_I("NetsysNativeClient::NativeNotifyCallback::OnDhcpSuccess");
     netsysNativeClient_.ProcessDhcpResult(dhcpResult);
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit(const std::string &limitName,
@@ -127,7 +129,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit(const 
 {
     NETMGR_LOG_I("NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit");
     netsysNativeClient_.ProcessBandwidthReachedLimit(limitName, iface);
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 NetsysNativeClient::NetsysNativeClient()
@@ -152,7 +154,7 @@ int32_t NetsysNativeClient::NetworkCreatePhysical(int32_t netId, int32_t permiss
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->NetworkCreatePhysical(netId, permission);
 }
@@ -163,7 +165,7 @@ int32_t NetsysNativeClient::NetworkDestroy(int32_t netId)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->NetworkDestroy(netId);
 }
@@ -174,7 +176,7 @@ int32_t NetsysNativeClient::NetworkAddInterface(int32_t netId, const std::string
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->NetworkAddInterface(netId, iface);
 }
@@ -185,7 +187,7 @@ int32_t NetsysNativeClient::NetworkRemoveInterface(int32_t netId, const std::str
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->NetworkRemoveInterface(netId, iface);
 }
@@ -198,7 +200,7 @@ int32_t NetsysNativeClient::NetworkAddRoute(int32_t netId, const std::string &if
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->NetworkAddRoute(netId, ifName, destination, nextHop);
 }
@@ -211,7 +213,7 @@ int32_t NetsysNativeClient::NetworkRemoveRoute(int32_t netId, const std::string 
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->NetworkRemoveRoute(netId, ifName, destination, nextHop);
 }
@@ -222,7 +224,7 @@ int32_t NetsysNativeClient::InterfaceGetConfig(OHOS::nmd::InterfaceConfiguration
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->InterfaceGetConfig(cfg);
 }
@@ -233,7 +235,7 @@ int32_t NetsysNativeClient::SetInterfaceDown(const std::string &iface)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     OHOS::nmd::InterfaceConfigurationParcel ifCfg;
     ifCfg.ifName = iface;
@@ -252,7 +254,7 @@ int32_t NetsysNativeClient::SetInterfaceUp(const std::string &iface)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     OHOS::nmd::InterfaceConfigurationParcel ifCfg;
     ifCfg.ifName = iface;
@@ -282,7 +284,7 @@ int32_t NetsysNativeClient::InterfaceGetMtu(const std::string &ifName)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->InterfaceGetMtu(ifName);
 }
@@ -293,7 +295,7 @@ int32_t NetsysNativeClient::InterfaceSetMtu(const std::string &ifName, int32_t m
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->InterfaceSetMtu(ifName, mtu);
 }
@@ -306,7 +308,7 @@ int32_t NetsysNativeClient::InterfaceAddAddress(const std::string &ifName, const
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->InterfaceAddAddress(ifName, ipAddr, prefixLength);
 }
@@ -319,7 +321,7 @@ int32_t NetsysNativeClient::InterfaceDelAddress(const std::string &ifName, const
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->InterfaceDelAddress(ifName, ipAddr, prefixLength);
 }
@@ -332,7 +334,7 @@ int32_t NetsysNativeClient::SetResolverConfig(uint16_t netId, uint16_t baseTimeo
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->SetResolverConfig(netId, baseTimeoutMsec, retryCount, servers, domains);
 }
@@ -345,7 +347,7 @@ int32_t NetsysNativeClient::GetResolverConfig(uint16_t netId, std::vector<std::s
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->GetResolverConfig(netId, servers, domains, baseTimeoutMsec, retryCount);
 }
@@ -356,7 +358,7 @@ int32_t NetsysNativeClient::CreateNetworkCache(uint16_t netId)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->CreateNetworkCache(netId);
 }
@@ -367,7 +369,7 @@ int32_t NetsysNativeClient::DestroyNetworkCache(uint16_t netId)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->DestroyNetworkCache(netId);
 }
@@ -377,7 +379,7 @@ int32_t NetsysNativeClient::GetAddrInfo(const std::string hostName, const std::s
 {
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("GetAddrInfo netsysNativeService_ is null");
-        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+        return NET_CONN_ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
     return netsysNativeService_->GetAddrInfo(hostName, serverName, hints, netId, res);
 }
@@ -389,7 +391,7 @@ int32_t NetsysNativeClient::GetNetworkSharingTraffic(const std::string &downIfac
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->GetNetworkSharingTraffic(downIface, upIface, traffic);
 }
@@ -400,9 +402,9 @@ int64_t NetsysNativeClient::GetCellularRxBytes()
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int64_t NetsysNativeClient::GetCellularTxBytes()
@@ -411,9 +413,9 @@ int64_t NetsysNativeClient::GetCellularTxBytes()
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int64_t NetsysNativeClient::GetAllRxBytes()
@@ -422,9 +424,9 @@ int64_t NetsysNativeClient::GetAllRxBytes()
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int64_t NetsysNativeClient::GetAllTxBytes()
@@ -433,9 +435,9 @@ int64_t NetsysNativeClient::GetAllTxBytes()
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int64_t NetsysNativeClient::GetUidRxBytes(uint32_t uid)
@@ -444,9 +446,9 @@ int64_t NetsysNativeClient::GetUidRxBytes(uint32_t uid)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int64_t NetsysNativeClient::GetUidTxBytes(uint32_t uid)
@@ -455,9 +457,9 @@ int64_t NetsysNativeClient::GetUidTxBytes(uint32_t uid)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int64_t NetsysNativeClient::GetUidOnIfaceRxBytes(uint32_t uid, const std::string &interfaceName)
@@ -467,9 +469,9 @@ int64_t NetsysNativeClient::GetUidOnIfaceRxBytes(uint32_t uid, const std::string
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int64_t NetsysNativeClient::GetUidOnIfaceTxBytes(uint32_t uid, const std::string &interfaceName)
@@ -479,9 +481,9 @@ int64_t NetsysNativeClient::GetUidOnIfaceTxBytes(uint32_t uid, const std::string
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int64_t NetsysNativeClient::GetIfaceRxBytes(const std::string &interfaceName)
@@ -490,9 +492,9 @@ int64_t NetsysNativeClient::GetIfaceRxBytes(const std::string &interfaceName)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int64_t NetsysNativeClient::GetIfaceTxBytes(const std::string &interfaceName)
@@ -501,9 +503,9 @@ int64_t NetsysNativeClient::GetIfaceTxBytes(const std::string &interfaceName)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 std::vector<std::string> NetsysNativeClient::InterfaceGetList()
@@ -533,13 +535,13 @@ std::vector<std::string> NetsysNativeClient::UidGetList()
 int64_t NetsysNativeClient::GetIfaceRxPackets(const std::string &interfaceName)
 {
     NETMGR_LOG_D("NetsysNativeClient GetIfaceRxPackets iface name is [%{public}s]", interfaceName.c_str());
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int64_t NetsysNativeClient::GetIfaceTxPackets(const std::string &interfaceName)
 {
     NETMGR_LOG_D("NetsysNativeClient GetIfaceTxPackets iface name is [%{public}s]", interfaceName.c_str());
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeClient::SetDefaultNetWork(int32_t netId)
@@ -548,7 +550,7 @@ int32_t NetsysNativeClient::SetDefaultNetWork(int32_t netId)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->NetworkSetDefault(netId);
 }
@@ -559,9 +561,9 @@ int32_t NetsysNativeClient::ClearDefaultNetWorkNetId()
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeClient::BindSocket(int32_t socket_fd, uint32_t netId)
@@ -570,9 +572,9 @@ int32_t NetsysNativeClient::BindSocket(int32_t socket_fd, uint32_t netId)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeClient::IpEnableForwarding(const std::string &requestor)
@@ -581,7 +583,7 @@ int32_t NetsysNativeClient::IpEnableForwarding(const std::string &requestor)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->IpEnableForwarding(requestor);
 }
@@ -592,7 +594,7 @@ int32_t NetsysNativeClient::IpDisableForwarding(const std::string &requestor)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->IpDisableForwarding(requestor);
 }
@@ -604,7 +606,7 @@ int32_t NetsysNativeClient::EnableNat(const std::string &downstreamIface, const 
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->EnableNat(downstreamIface, upstreamIface);
 }
@@ -616,7 +618,7 @@ int32_t NetsysNativeClient::DisableNat(const std::string &downstreamIface, const
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->DisableNat(downstreamIface, upstreamIface);
 }
@@ -626,7 +628,7 @@ int32_t NetsysNativeClient::IpfwdAddInterfaceForward(const std::string &fromIfac
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->IpfwdAddInterfaceForward(fromIface, toIface);
 }
@@ -638,7 +640,7 @@ int32_t NetsysNativeClient::IpfwdRemoveInterfaceForward(const std::string &fromI
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->IpfwdRemoveInterfaceForward(fromIface, toIface);
 }
@@ -648,7 +650,7 @@ int32_t NetsysNativeClient::ShareDnsSet(uint16_t netId)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->ShareDnsSet(netId);
 }
@@ -658,7 +660,7 @@ int32_t NetsysNativeClient::StartDnsProxyListen()
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->StartDnsProxyListen();
 }
@@ -668,7 +670,7 @@ int32_t NetsysNativeClient::StopDnsProxyListen()
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->StopDnsProxyListen();
 }
@@ -676,7 +678,7 @@ int32_t NetsysNativeClient::StopDnsProxyListen()
 int32_t NetsysNativeClient::RegisterNetsysNotifyCallback(const NetsysNotifyCallback &callback)
 {
     NETMGR_LOG_D("NetsysNativeClient RegisterNetsysNotifyCallback");
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 sptr<OHOS::NetsysNative::INetsysService> NetsysNativeClient::GetProxy()
@@ -758,9 +760,9 @@ int32_t NetsysNativeClient::BindNetworkServiceVpn(int32_t socketFd)
     int32_t ret = setsockopt(socketFd, SOL_SOCKET, SO_MARK, defaultNetName, defaultNetNameLen);
     if (ret < 0) {
         NETMGR_LOG_E("The SO_BINDTODEVICE of setsockopt failed.");
-        return ERR_VPN;
+        return NETSYS_ERR_VPN;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeClient::EnableVirtualNetIfaceCard(int32_t socketFd, struct ifreq &ifRequest, int32_t &ifaceFd)
@@ -769,7 +771,7 @@ int32_t NetsysNativeClient::EnableVirtualNetIfaceCard(int32_t socketFd, struct i
     int32_t ifaceFdTemp = 0;
     if ((ifaceFdTemp = open(DEV_NET_TUN_PATH, O_RDWR)) < 0) {
         NETMGR_LOG_E("VPN tunnel device open was failed.");
-        return ERR_VPN;
+        return NETSYS_ERR_VPN;
     }
 
     /*
@@ -786,18 +788,18 @@ int32_t NetsysNativeClient::EnableVirtualNetIfaceCard(int32_t socketFd, struct i
      **/
     if (ioctl(ifaceFdTemp, TUNSETIFF, &ifRequest) < 0) {
         NETMGR_LOG_E("The TUNSETIFF of ioctl failed, ifRequest.ifr_name[%{public}s]", ifRequest.ifr_name);
-        return ERR_VPN;
+        return NETSYS_ERR_VPN;
     }
 
     /* Activate the device */
     ifRequest.ifr_flags = IFF_UP;
     if (ioctl(socketFd, SIOCSIFFLAGS, &ifRequest) < 0) {
         NETMGR_LOG_E("The SIOCSIFFLAGS of ioctl failed.");
-        return ERR_VPN;
+        return NETSYS_ERR_VPN;
     }
 
     ifaceFd = ifaceFdTemp;
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 static inline in_addr_t *AsInAddr(sockaddr *sa)
@@ -816,20 +818,20 @@ int32_t NetsysNativeClient::SetIpAddress(int32_t socketFd, const std::string &ip
     /* inet_pton is IP ipAddress translation to binary network byte order. */
     if (inet_pton(AF_INET, ipAddress.c_str(), AsInAddr(&ifRequest.ifr_addr)) != 1) {
         NETMGR_LOG_E("inet_pton failed.");
-        return ERR_VPN;
+        return NETSYS_ERR_VPN;
     }
     if (ioctl(socketFd, SIOCSIFADDR, &ifRequest) < 0) {
         NETMGR_LOG_E("The SIOCSIFADDR of ioctl failed.");
-        return ERR_VPN;
+        return NETSYS_ERR_VPN;
     }
     in_addr_t addressPrefixLength = prefixLen ? (~0 << (MAX_IPV4_ADDRESS_LEN - prefixLen)) : 0;
     *AsInAddr(&ifRequest.ifr_netmask) = htonl(addressPrefixLength);
     if (ioctl(socketFd, SIOCSIFNETMASK, &ifRequest)) {
         NETMGR_LOG_E("The SIOCSIFNETMASK of ioctl failed.");
-        return ERR_VPN;
+        return NETSYS_ERR_VPN;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeClient::SetBlocking(int32_t ifaceFd, bool isBlock)
@@ -839,7 +841,7 @@ int32_t NetsysNativeClient::SetBlocking(int32_t ifaceFd, bool isBlock)
     blockingFlag = fcntl(ifaceFd, F_GETFL);
     if (blockingFlag < 0) {
         NETMGR_LOG_E("The blockingFlag of fcntl failed.");
-        return ERR_VPN;
+        return NETSYS_ERR_VPN;
     }
 
     if (!isBlock) {
@@ -850,9 +852,9 @@ int32_t NetsysNativeClient::SetBlocking(int32_t ifaceFd, bool isBlock)
 
     if (fcntl(ifaceFd, F_SETFL, blockingFlag) < 0) {
         NETMGR_LOG_E("The F_SETFL of fcntl failed.");
-        return ERR_VPN;
+        return NETSYS_ERR_VPN;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeClient::StartDhcpClient(const std::string &iface, bool bIpv6)
@@ -861,7 +863,7 @@ int32_t NetsysNativeClient::StartDhcpClient(const std::string &iface, bool bIpv6
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->StartDhcpClient(iface, bIpv6);
 }
@@ -872,7 +874,7 @@ int32_t NetsysNativeClient::StopDhcpClient(const std::string &iface, bool bIpv6)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->StopDhcpClient(iface, bIpv6);
 }
@@ -882,7 +884,7 @@ int32_t NetsysNativeClient::RegisterCallback(sptr<NetsysControllerCallback> call
     NETMGR_LOG_D("NetsysNativeClient::RegisterCallback");
     if (callback == nullptr) {
         NETMGR_LOG_E("Callback is nullptr");
-        return ERR_INVALID_PARAMS;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     auto proxy = GetProxy();
     if (proxy == nullptr) {
@@ -890,7 +892,7 @@ int32_t NetsysNativeClient::RegisterCallback(sptr<NetsysControllerCallback> call
         return IPC_PROXY_ERR;
     }
     cbObjects_.push_back(callback);
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 void NetsysNativeClient::ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult)
@@ -916,7 +918,7 @@ int32_t NetsysNativeClient::StartDhcpService(const std::string &iface, const std
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->StartDhcpService(iface, ipv4addr);
 }
@@ -927,7 +929,7 @@ int32_t NetsysNativeClient::StopDhcpService(const std::string &iface)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->StopDhcpService(iface);
 }
@@ -947,7 +949,7 @@ int32_t NetsysNativeClient::BandwidthEnableDataSaver(bool enable)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->BandwidthEnableDataSaver(enable);
 }
@@ -957,7 +959,7 @@ int32_t NetsysNativeClient::BandwidthSetIfaceQuota(const std::string &ifName, in
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->BandwidthSetIfaceQuota(ifName, bytes);
 }
@@ -967,7 +969,7 @@ int32_t NetsysNativeClient::BandwidthRemoveIfaceQuota(const std::string &ifName)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->BandwidthRemoveIfaceQuota(ifName);
 }
@@ -977,7 +979,7 @@ int32_t NetsysNativeClient::BandwidthAddDeniedList(uint32_t uid)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->BandwidthAddDeniedList(uid);
 }
@@ -987,7 +989,7 @@ int32_t NetsysNativeClient::BandwidthRemoveDeniedList(uint32_t uid)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->BandwidthRemoveDeniedList(uid);
 }
@@ -997,7 +999,7 @@ int32_t NetsysNativeClient::BandwidthAddAllowedList(uint32_t uid)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->BandwidthAddAllowedList(uid);
 }
@@ -1007,7 +1009,7 @@ int32_t NetsysNativeClient::BandwidthRemoveAllowedList(uint32_t uid)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->BandwidthRemoveAllowedList(uid);
 }
@@ -1017,7 +1019,7 @@ int32_t NetsysNativeClient::FirewallSetUidsAllowedListChain(uint32_t chain, cons
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->FirewallSetUidsAllowedListChain(chain, uids);
 }
@@ -1027,7 +1029,7 @@ int32_t NetsysNativeClient::FirewallSetUidsDeniedListChain(uint32_t chain, const
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->FirewallSetUidsDeniedListChain(chain, uids);
 }
@@ -1037,7 +1039,7 @@ int32_t NetsysNativeClient::FirewallEnableChain(uint32_t chain, bool enable)
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->FirewallEnableChain(chain, enable);
 }
@@ -1047,7 +1049,7 @@ int32_t NetsysNativeClient::FirewallSetUidRule(uint32_t chain, uint32_t uid, uin
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->FirewallSetUidRule(chain, uid, firewallRule);
 }

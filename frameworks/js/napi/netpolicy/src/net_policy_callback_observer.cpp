@@ -121,7 +121,7 @@ napi_value NetPolicyCallbackObserver::CreateNetQuotaPolicyChangeParam(napi_env e
         napi_value elementObject = NetPolicyExec::CreateNetQuotaPolicy(env, item);
         NapiUtils::SetArrayElement(env, callbackValue, i, elementObject);
     }
-    delete[] quotaPolicies;
+    delete quotaPolicies;
     return callbackValue;
 }
 
@@ -135,7 +135,7 @@ napi_value NetPolicyCallbackObserver::CreateMeteredIfacesChangeParam(napi_env en
         napi_value elementObject = NapiUtils::CreateStringUtf8(env, item);
         NapiUtils::SetArrayElement(env, callbackValue, i, elementObject);
     }
-    delete[] ifaces;
+    delete ifaces;
     return callbackValue;
 }
 

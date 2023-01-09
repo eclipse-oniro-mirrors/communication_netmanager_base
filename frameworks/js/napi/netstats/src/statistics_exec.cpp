@@ -29,54 +29,47 @@ const std::string RX_BYTES = "rxBytes";
 const std::string TX_BYTES = "txBytes";
 const std::string RX_PACKETS = "rxPackets";
 const std::string TX_PACKETS = "txPackets";
-
-std::unique_ptr<ErrorCodeConvertor> g_covert = std::make_unique<NetBaseErrorCodeConvertor>();
-
-std::string ConvertErrorCode(int32_t code)
-{
-    return g_covert->ConvertErrorCode(code);
-}
 } // namespace
 
 bool StatisticsExec::ExecGetCellularRxBytes(GetCellularRxBytesContext *context)
 {
     int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularRxBytes(context->bytes64_);
-    context->SetError(result, ConvertErrorCode(result));
+    context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
 }
 
 bool StatisticsExec::ExecGetCellularTxBytes(GetCellularTxBytesContext *context)
 {
     int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->GetCellularTxBytes(context->bytes64_);
-    context->SetError(result, ConvertErrorCode(result));
+    context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
 }
 
 bool StatisticsExec::ExecGetAllRxBytes(GetAllRxBytesContext *context)
 {
     int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllRxBytes(context->bytes64_);
-    context->SetError(result, ConvertErrorCode(result));
+    context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
 }
 
 bool StatisticsExec::ExecGetAllTxBytes(GetAllTxBytesContext *context)
 {
     int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllTxBytes(context->bytes64_);
-    context->SetError(result, ConvertErrorCode(result));
+    context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
 }
 
 bool StatisticsExec::ExecGetUidRxBytes(GetUidRxBytesContext *context)
 {
     int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->GetUidRxBytes(context->bytes64_, context->uid_);
-    context->SetError(result, ConvertErrorCode(result));
+    context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
 }
 
 bool StatisticsExec::ExecGetUidTxBytes(GetUidTxBytesContext *context)
 {
     int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->GetUidTxBytes(context->bytes64_, context->uid_);
-    context->SetError(result, ConvertErrorCode(result));
+    context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
 }
 
@@ -84,7 +77,7 @@ bool StatisticsExec::ExecGetIfaceRxBytes(GetIfaceRxBytesContext *context)
 {
     int32_t result =
         DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceRxBytes(context->bytes64_, context->interfaceName_);
-    context->SetError(result, ConvertErrorCode(result));
+    context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
 }
 
@@ -92,7 +85,7 @@ bool StatisticsExec::ExecGetIfaceTxBytes(GetIfaceTxBytesContext *context)
 {
     auto instance = DelayedSingleton<NetStatsClient>::GetInstance();
     int32_t result = instance->GetIfaceTxBytes(context->bytes64_, context->interfaceName_);
-    context->SetError(result, ConvertErrorCode(result));
+    context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
 }
 

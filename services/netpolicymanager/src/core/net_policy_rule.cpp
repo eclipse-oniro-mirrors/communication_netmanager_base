@@ -58,8 +58,11 @@ void NetPolicyRule::TransPolicyToRule(uint32_t uid)
     return;
 }
 
-uint32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
+int32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
 {
+    if (!IsValidNetPolicy(policy)) {
+        return POLICY_ERR_INVALID_POLICY;
+    }
     NetmanagerHiTrace::NetmanagerStartSyncTrace("TransPolicyToRule start");
     auto policyRule = uidPolicyRules_.find(uid);
     if (policyRule == uidPolicyRules_.end()) {
@@ -77,7 +80,7 @@ uint32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
     auto policyCondition = BuildTransCondition(uid, policy);
     TransConditionToRuleAndNetsys(policyCondition, uid, policy);
     NetmanagerHiTrace::NetmanagerFinishSyncTrace("TransPolicyToRule end");
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 uint32_t NetPolicyRule::BuildTransCondition(uint32_t uid, uint32_t policy)
@@ -100,7 +103,7 @@ uint32_t NetPolicyRule::BuildTransCondition(uint32_t uid, uint32_t policy)
     if (InPowerSaveAllowedList(uid)) {
         policyCondition |= POLICY_TRANS_CONDITION_POWERSAVE_ALLOWEDLIST;
     }
-    if (!GetBackgroundPolicy()) {
+    if (IsLimitedBackground()) {
         policyCondition |= POLICY_TRANS_CONDITION_BACKGROUND_RESTRICT;
     }
     if (IsForeground(uid)) {
@@ -193,29 +196,32 @@ uint32_t NetPolicyRule::ChangePolicyToPolicyTransitionCondition(uint32_t policy)
     return policy << 1;
 }
 
-uint32_t NetPolicyRule::GetPolicyByUid(uint32_t uid)
+int32_t NetPolicyRule::GetPolicyByUid(uint32_t uid, uint32_t &policy)
 {
     auto policyRule = uidPolicyRules_.find(uid);
     if (policyRule == uidPolicyRules_.end()) {
         NETMGR_LOG_D("Can't find uid:[%{public}u] and its policy, return default value.", uid);
-        return NET_POLICY_NONE;
+        policy = NET_POLICY_NONE;
     }
-    return policyRule->second.policy_;
+    policy = policyRule->second.policy_;
+    return NETMANAGER_SUCCESS;
 }
 
-std::vector<uint32_t> NetPolicyRule::GetUidsByPolicy(uint32_t policy)
+int32_t NetPolicyRule::GetUidsByPolicy(uint32_t policy, std::vector<uint32_t> &uids)
 {
+    if (!IsValidNetPolicy(policy)) {
+        return POLICY_ERR_INVALID_POLICY;
+    }
     NETMGR_LOG_I("GetUidsByPolicy:policy:[%{public}u]", policy);
-    std::vector<uint32_t> uids;
     for (auto &iter : uidPolicyRules_) {
         if (iter.second.policy_ == policy) {
             uids.push_back(iter.first);
         }
     }
-    return uids;
+    return NETMANAGER_SUCCESS;
 }
 
-bool NetPolicyRule::IsUidNetAllowed(uint32_t uid, bool metered)
+int32_t NetPolicyRule::IsUidNetAllowed(uint32_t uid, bool metered, bool &isAllowed)
 {
     NETMGR_LOG_D("IsUidNetAllowed:uid[%{public}u] metered:[%{public}d]", uid, metered);
     uint32_t rule = NetUidRule::NET_RULE_NONE;
@@ -225,33 +231,40 @@ bool NetPolicyRule::IsUidNetAllowed(uint32_t uid, bool metered)
     }
 
     if (rule == NetUidRule::NET_RULE_REJECT_ALL) {
-        return false;
+        isAllowed = false;
+        return NETMANAGER_SUCCESS;
     }
 
     if (!metered) {
-        return true;
+        isAllowed = true;
+        return NETMANAGER_SUCCESS;
     }
 
     if (rule == NetUidRule::NET_RULE_REJECT_METERED) {
-        return false;
+        isAllowed = false;
+        return NETMANAGER_SUCCESS;
     }
 
     if (rule == NetUidRule::NET_RULE_ALLOW_METERED) {
-        return true;
+        isAllowed = true;
+        return NETMANAGER_SUCCESS;
     }
 
     if (rule == NetUidRule::NET_RULE_ALLOW_METERED_FOREGROUND) {
-        return true;
+        isAllowed = true;
+        return NETMANAGER_SUCCESS;
     }
 
     if (!backgroundAllow_) {
-        return false;
+        isAllowed = false;
+        return NETMANAGER_SUCCESS;
     }
 
-    return true;
+    isAllowed = true;
+    return NETMANAGER_SUCCESS;
 }
 
-uint32_t NetPolicyRule::SetBackgroundPolicy(bool allow)
+int32_t NetPolicyRule::SetBackgroundPolicy(bool allow)
 {
     if (backgroundAllow_ != allow) {
         GetCbInst()->NotifyNetBackgroundPolicyChange(allow);
@@ -261,44 +274,49 @@ uint32_t NetPolicyRule::SetBackgroundPolicy(bool allow)
         NetmanagerHiTrace::NetmanagerStartSyncTrace("SetBackgroundPolicy policy start");
         GetNetsysInst()->BandwidthEnableDataSaver(!allow);
         NetmanagerHiTrace::NetmanagerFinishSyncTrace("SetBackgroundPolicy policy end");
-    } else {
-        NETMGR_LOG_I("Same background policy,don't need to repeat set. now background policy is:[%{public}d]", allow);
+        return NETMANAGER_SUCCESS;
     }
-    return ERR_NONE;
+    NETMGR_LOG_I("Same background policy,don't need to repeat set. now background policy is:[%{public}d]", allow);
+    return NETMANAGER_ERR_PARAMETER_ERROR;
 }
 
-uint32_t NetPolicyRule::GetBackgroundPolicyByUid(uint32_t uid)
+int32_t NetPolicyRule::GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backgroundPolicyOfUid)
 {
-    uint32_t policy = GetPolicyByUid(uid);
+    uint32_t policy;
+    GetPolicyByUid(uid, policy);
     NETMGR_LOG_D("GetBackgroundPolicyByUid GetPolicyByUid uid: %{public}u policy: %{public}u.", uid, policy);
     if ((policy & NET_POLICY_REJECT_METERED_BACKGROUND) != 0) {
-        return NET_BACKGROUND_POLICY_DISABLE;
+        backgroundPolicyOfUid = NET_BACKGROUND_POLICY_DISABLE;
+        return NETMANAGER_SUCCESS;
     }
 
     if (backgroundAllow_) {
-        return NET_BACKGROUND_POLICY_ENABLE;
+        backgroundPolicyOfUid = NET_BACKGROUND_POLICY_ENABLE;
+        return NETMANAGER_SUCCESS;
     }
 
     if ((policy & NET_POLICY_ALLOW_METERED_BACKGROUND) != 0) {
-        return NET_BACKGROUND_POLICY_ALLOWEDLIST;
+        backgroundPolicyOfUid = NET_BACKGROUND_POLICY_ALLOWEDLIST;
+        return NETMANAGER_SUCCESS;
     }
-    return NET_BACKGROUND_POLICY_DISABLE;
+    backgroundPolicyOfUid = NET_BACKGROUND_POLICY_DISABLE;
+    return NETMANAGER_SUCCESS;
 }
 
-uint32_t NetPolicyRule::ResetPolicies()
+int32_t NetPolicyRule::ResetPolicies()
 {
     NETMGR_LOG_I("Reset uids-policies and backgroundpolicy");
     for (auto iter : uidPolicyRules_) {
         TransPolicyToRule(iter.first, NetUidPolicy::NET_POLICY_NONE);
     }
-    SetBackgroundPolicy(true);
-    return ERR_NONE;
+    return SetBackgroundPolicy(true);
 }
 
-bool NetPolicyRule::GetBackgroundPolicy()
+int32_t NetPolicyRule::GetBackgroundPolicy(bool &backgroundPolicy)
 {
     NETMGR_LOG_I("GetBackgroundPolicy:backgroundAllow_[%{public}d", backgroundAllow_);
-    return backgroundAllow_;
+    backgroundPolicy = backgroundAllow_;
+    return NETMANAGER_SUCCESS;
 }
 
 bool NetPolicyRule::IsIdleMode()
@@ -339,6 +357,11 @@ bool NetPolicyRule::InPowerSaveAllowedList(uint32_t uid)
     return false;
 }
 
+bool NetPolicyRule::IsLimitedBackground()
+{
+    return !backgroundAllow_;
+}
+
 void NetPolicyRule::DeleteUid(uint32_t uid)
 {
     NETMGR_LOG_D("DeleteUid:uid[%{public}u]", uid);
@@ -368,6 +391,21 @@ void NetPolicyRule::HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEve
             break;
         default:
             break;
+    }
+}
+
+bool NetPolicyRule::IsValidNetPolicy(uint32_t policy)
+{
+    switch (policy) {
+        case NetUidPolicy::NET_POLICY_NONE:
+        case NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND:
+        case NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND: {
+            return true;
+        }
+        default: {
+            NETMGR_LOG_E("Invalid policy [%{public}d]", policy);
+            return false;
+        }
     }
 }
 

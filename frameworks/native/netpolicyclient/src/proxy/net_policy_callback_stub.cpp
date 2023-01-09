@@ -58,78 +58,78 @@ int32_t NetPolicyCallbackStub::OnNetUidPolicyChange(MessageParcel &data, Message
 {
     uint32_t uid = 0;
     if (!data.ReadUint32(uid)) {
-        NETMGR_LOG_E("ReadUint32 uid failed");
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read Uint32 data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     uint32_t policy = 0;
     if (!data.ReadUint32(policy)) {
-        NETMGR_LOG_E("ReadUint32 policy failed");
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read Uint32 data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     int32_t result = NetUidPolicyChange(uid, policy);
     if (!reply.WriteInt32(result)) {
-        NETMGR_LOG_E("Write parcel failed");
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Write Int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallbackStub::NetUidRuleChange(uint32_t uid, uint32_t rule)
 {
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallbackStub::OnNetUidRuleChange(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t uid = 0;
     if (!data.ReadUint32(uid)) {
-        NETMGR_LOG_E("ReadUint32 uid failed");
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read Uint32 data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     uint32_t rule = 0;
     if (!data.ReadUint32(rule)) {
-        NETMGR_LOG_E("ReadUint32 rule failed");
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read Uint32 data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     int32_t result = NetUidRuleChange(uid, rule);
     if (!reply.WriteInt32(result)) {
-        NETMGR_LOG_E("Write parcel failed");
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Write Int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallbackStub::NetUidPolicyChange(uint32_t uid, uint32_t policy)
 {
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallbackStub::OnNetBackgroundPolicyChange(MessageParcel &data, MessageParcel &reply)
 {
     bool isBackgroundPolicyAllow = false;
     if (!data.ReadBool(isBackgroundPolicyAllow)) {
-        NETMGR_LOG_E("ReadBool isBackgroundPolicyAllow failed");
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read Bool data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     int32_t result = NetBackgroundPolicyChange(isBackgroundPolicyAllow);
     if (!reply.WriteInt32(result)) {
-        NETMGR_LOG_E("Write parcel failed");
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Write Int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallbackStub::NetBackgroundPolicyChange(bool isBackgroundPolicyAllow)
 {
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallbackStub::OnNetQuotaPolicyChange(MessageParcel &data, MessageParcel &reply)
@@ -137,21 +137,21 @@ int32_t NetPolicyCallbackStub::OnNetQuotaPolicyChange(MessageParcel &data, Messa
     std::vector<NetQuotaPolicy> cellularPolicies;
     if (!NetQuotaPolicy::Unmarshalling(data, cellularPolicies)) {
         NETMGR_LOG_E("Unmarshalling failed.");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     int32_t result = NetQuotaPolicyChange(cellularPolicies);
     if (!reply.WriteInt32(result)) {
-        NETMGR_LOG_E("Write parcel failed");
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Write Int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallbackStub::NetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &cellularPolicies)
 {
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallbackStub::OnNetMeteredIfacesChange(MessageParcel &data, MessageParcel &reply)
@@ -160,54 +160,56 @@ int32_t NetPolicyCallbackStub::OnNetMeteredIfacesChange(MessageParcel &data, Mes
     std::vector<std::string> ifaces;
 
     if (!data.ReadUint32(size)) {
-        NETMGR_LOG_E("ReadUInt32Vector size failed");
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read UInt32 data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     size = size > MAX_IFACE_SIZE ? MAX_IFACE_SIZE : size;
     for (uint32_t i = 0; i < size; ++i) {
         std::string iface;
         if (!data.ReadString(iface)) {
-            NETMGR_LOG_E("ReadString ifaces failed");
-            return ERR_FLATTEN_OBJECT;
+            NETMGR_LOG_E("Read String data failed");
+            return NETMANAGER_ERR_READ_DATA_FAIL;
         }
         ifaces.push_back(iface);
     }
     int32_t result = NetMeteredIfacesChange(ifaces);
     if (!reply.WriteInt32(result)) {
-        NETMGR_LOG_E("Write parcel failed");
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Write Int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallbackStub::NetMeteredIfacesChange(std::vector<std::string> &ifaces)
 {
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallbackStub::OnNetStrategySwitch(MessageParcel &data, MessageParcel &reply)
 {
     std::string iccid;
     if (!data.ReadString(iccid)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read String data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     bool enable = false;
     if (!data.ReadBool(enable)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read Bool data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     int32_t result = NetStrategySwitch(iccid, enable);
     if (!reply.WriteInt32(result)) {
-        NETMGR_LOG_E("Write parcel failed");
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Write Int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallbackStub::NetStrategySwitch(const std::string &iccid, bool enable)
 {
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

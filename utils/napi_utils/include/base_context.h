@@ -21,6 +21,7 @@
 #include <napi/native_api.h>
 #include <napi/native_common.h>
 
+#include "errorcode_convertor.h"
 #include "event_manager.h"
 #include "node_api_types.h"
 #include "nocopyable.h"
@@ -77,6 +78,7 @@ private:
     std::string asyncWorkName_;
     bool needPromise_;
     bool needThrowException_;
+    NetBaseErrorCodeConvertor convertor_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

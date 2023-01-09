@@ -224,7 +224,7 @@ public:
      * Set http proxy server
      *
      * @param httpProxy the http proxy server
-     * @return ERR_NONE if OK, ERR_INVALID_PARAMS if httpProxy is null string
+     * @return NETMANAGER_SUCCESS if OK, NET_CONN_ERR_HTTP_PROXY_INVALID if httpProxy is null string
      */
     int32_t SetHttpProxy(const std::string &httpProxy) override;
 
@@ -232,7 +232,7 @@ public:
      * Get http proxy server
      *
      * @param httpProxy output param, the http proxy server
-     * @return ERR_NONE if OK, ERR_INVALID_PARAMS if httpProxy is null string
+     * @return NETMANAGER_SUCCESS if OK, NET_CONN_ERR_NO_HTTP_PROXY if httpProxy is null string
      */
     int32_t GetHttpProxy(std::string &httpProxy) override;
 
@@ -241,7 +241,7 @@ public:
      *
      * @param ident Net identifier
      * @param netId output param, the net id
-     * @return ERR_NONE if OK, ERR_NO_NET_IDENT if ident is null string
+     * @return NETMANAGER_SUCCESS if OK, ERR_NO_NET_IDENT if ident is null string
      */
     int32_t GetNetIdByIdentifier(const std::string &ident, int32_t &netId) override;
 

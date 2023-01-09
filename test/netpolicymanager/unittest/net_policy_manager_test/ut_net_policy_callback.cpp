@@ -15,9 +15,10 @@
 
 #include <chrono>
 #include <condition_variable>
-#include <gtest/gtest.h>
 #include <mutex>
 #include <thread>
+
+#include <gtest/gtest.h>
 
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_callback.h"
@@ -209,7 +210,7 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback002, TestSize.Level1)
 
     std::cout << "g_callbackUid:" << g_callbackUid << std::endl;
     std::cout << "g_callbackRule:" << g_callbackRule << std::endl;
-    ASSERT_EQ(g_callbackUid, static_cast<uint32_t>(TEST_UID1));
+    ASSERT_EQ(g_callbackUid, static_cast<int32_t>(TEST_UID1));
     g_netPolicyCallback->UnregisterNetPolicyCallback(callback);
 }
 
