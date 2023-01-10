@@ -69,9 +69,6 @@ private:
     int32_t OnGetNetIdByIdentifier(MessageParcel &data, MessageParcel &reply);
 
 private:
-    int32_t ConvertCode(int32_t internalCode);
-
-private:
     std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;
 };
 } // namespace NetManagerStandard

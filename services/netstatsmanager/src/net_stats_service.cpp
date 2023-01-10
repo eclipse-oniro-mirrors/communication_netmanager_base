@@ -26,6 +26,7 @@
 #include "system_ability_definition.h"
 
 #include "net_manager_center.h"
+#include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_constants.h"
 #include "net_stats_database_defines.h"
@@ -46,7 +47,7 @@ constexpr std::initializer_list<NetBearType> BEAR_TYPE_LIST = {
 bool GetIfaceNamesFromManager(std::list<std::string> &ifaceNames)
 {
     int32_t ret = NetManagerCenter::GetInstance().GetIfaceNames(BEARER_CELLULAR, ifaceNames);
-    if (ret != 0 || ifaceNames.empty()) {
+    if (ret != NETMANAGER_SUCCESS || ifaceNames.empty()) {
         NETMGR_LOG_E("Iface list is empty, ret = %{public}d", ret);
         return false;
     }

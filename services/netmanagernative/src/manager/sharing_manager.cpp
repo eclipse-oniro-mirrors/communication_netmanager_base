@@ -118,7 +118,7 @@ bool WriteToFile(const char *fileName, const char *value)
 void Rollback()
 {
     NETNATIVE_LOGE("iptables rollback");
-    std::string rollBak = std::string(IPATBLES_RESTORE_CMD_PATH)  + " -T filter < ";
+    std::string rollBak = std::string(IPATBLES_RESTORE_CMD_PATH) + " -T filter < ";
     rollBak.append(IPTABLES_TMP_BAK);
     CommonUtils::ForkExec(rollBak);
 }
@@ -164,24 +164,24 @@ int32_t SharingManager::EnableNat(const std::string &downstreamIface, const std:
         NETNATIVE_LOGE("iface name valid check fail: %{public}s", upstreamIface.c_str());
         return -1;
     }
-    int32_t result = 0;
     iptablesWrapper_->RunCommand(IPTYPE_IPV4, APPEND_NAT_POSTROUTING);
     iptablesWrapper_->RunCommand(IPTYPE_IPV4, APPEND_MANGLE_FORWARD);
 
     NETNATIVE_LOGI("EnableNat downstreamIface: %{public}s, upstreamIface: %{public}s", downstreamIface.c_str(),
                    upstreamIface.c_str());
 
-    result = iptablesWrapper_->RunCommand(IPTYPE_IPV4, EnableNatCmd(upstreamIface));
-    if (result) {
-        return result;
+    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4, EnableNatCmd(upstreamIface)) !=
+        NetManagerStandard::NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("IptablesWrapper run command failed");
+        return -1;
     }
 
-    result = iptablesWrapper_->RunCommand(IPTYPE_IPV4, APPEND_TETHERCTRL_MANGLE_FORWARD);
-    if (result) {
-        return result;
+    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4, APPEND_TETHERCTRL_MANGLE_FORWARD) !=
+        NetManagerStandard::NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("IptablesWrapper run command failed");
+        return -1;
     }
-
-    return result;
+    return 0;
 }
 
 int32_t SharingManager::DisableNat(const std::string &downstreamIface, const std::string &upstreamIface)
@@ -196,20 +196,24 @@ int32_t SharingManager::DisableNat(const std::string &downstreamIface, const std
         NETNATIVE_LOGE("iface name valid check fail: %{public}s", upstreamIface.c_str());
         return -1;
     }
-    int32_t result = 0;
 
     NETNATIVE_LOGI("DisableNat downstreamIface: %{public}s, upstreamIface: %{public}s", downstreamIface.c_str(),
                    upstreamIface.c_str());
 
-    result = iptablesWrapper_->RunCommand(IPTYPE_IPV4, CLEAR_TETHERCTRL_NAT_POSTROUTING);
-    if (result) {
-        return result;
+    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4, CLEAR_TETHERCTRL_NAT_POSTROUTING) !=
+        NetManagerStandard::NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("IptablesWrapper run command failed");
+        return -1;
     }
-    result = iptablesWrapper_->RunCommand(IPTYPE_IPV4, CLEAR_TETHERCTRL_MANGLE_FORWARD);
+    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4, CLEAR_TETHERCTRL_MANGLE_FORWARD) !=
+        NetManagerStandard::NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("IptablesWrapper run command failed");
+        return -1;
+    }
 
     iptablesWrapper_->RunCommand(IPTYPE_IPV4, DELETE_TETHERCTRL_NAT_POSTROUTING);
     iptablesWrapper_->RunCommand(IPTYPE_IPV4, DELETE_TETHERCTRL_MANGLE_FORWARD);
-    return result;
+    return 0;
 }
 
 int32_t SharingManager::SetIpFwdEnable()
@@ -239,7 +243,7 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
         SetForwardRules(true, FORWARD_JUMP_TETHERCTRL_FORWARD);
     }
     int32_t result = 0;
-    std::string saveBak = std::string(IPATBLES_SAVE_CMD_PATH)  + " -t filter > ";
+    std::string saveBak = std::string(IPATBLES_SAVE_CMD_PATH) + " -t filter > ";
     saveBak.append(IPTABLES_TMP_BAK);
     CommonUtils::ForkExec(saveBak);
 
@@ -399,7 +403,12 @@ void SharingManager::CheckInited()
 int32_t SharingManager::SetForwardRules(bool set, const std::string &cmds)
 {
     const std::string op = set ? "-A" : "-D";
-    return iptablesWrapper_->RunCommand(IPTYPE_IPV4, "-t filter " + op + cmds);
+
+    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4, "-t filter " + op + cmds) !=
+        NetManagerStandard::NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("IptablesWrapper run command failed");
+        return -1;
+    }
     return 0;
 }
 } // namespace nmd

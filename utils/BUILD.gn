@@ -28,6 +28,8 @@ config("netmgr_common_config") {
     "errorcode_utils/include",
     "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netconnclient/include",
+    "$INNERKITS_ROOT/netpolicyclient/include",
+    "$INNERKITS_ROOT/netstatsclient/include",
   ]
 }
 

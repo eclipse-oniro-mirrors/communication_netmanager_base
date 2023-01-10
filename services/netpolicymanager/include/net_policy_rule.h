@@ -57,40 +57,44 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    uint32_t TransPolicyToRule(uint32_t uid, uint32_t policy);
+    int32_t TransPolicyToRule(uint32_t uid, uint32_t policy);
 
     /**
      * Get the status whether the specified uid app can access the metered network or non-metered network.
      *
      * @param uid The specified UID of application.
      * @param metered Indicates meterd network or non-metered network.
-     * @return Returns it's allowed or not to access the network.
+     * @param isAllowed Return true means it's allowed to access the network.
+     *      Return false means it's not allowed to access the network.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    bool IsUidNetAllowed(uint32_t uid, bool metered);
+    int32_t IsUidNetAllowed(uint32_t uid, bool metered, bool &isAllowed);
 
     /**
      * Get the network policy of the specified UID.
      *
      * @param uid The specified UID of app.
-     * @return Returns the network policy of the specified UID application.
+     * @param policy Return this uid's policy.
      *      For details, see {@link NetUidPolicy}.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    uint32_t GetPolicyByUid(uint32_t uid);
+    int32_t GetPolicyByUid(uint32_t uid, uint32_t &policy);
 
     /**
      * Get the application UIDs of the specified policy.
      *
      * @param policy the network policy of the current UID of application.
+     * @param uids The list of UIDs.
      *      For details, see {@link NetUidPolicy}.
-     * @return Returns the UIDs of the specified policy.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    std::vector<uint32_t> GetUidsByPolicy(uint32_t policy);
+    int32_t GetUidsByPolicy(uint32_t policy, std::vector<uint32_t> &uids);
 
     /**
      * Reset network policies and rules.
@@ -99,7 +103,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    uint32_t ResetPolicies();
+    int32_t ResetPolicies();
 
     /**
      * Control if apps can use data on background.
@@ -109,27 +113,29 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    uint32_t SetBackgroundPolicy(bool allow);
+    int32_t SetBackgroundPolicy(bool allow);
 
     /**
      * Get the background network restriction policy for the specified uid.
      *
      * @param uid The specified UID of application.
-     * @return {@link NetBackgroundPolicy}.
+     * @param backgroundPolicyOfUid The specified UID of backgroundPolicy.
+     *      For details, see {@link NetBackgroundPolicy}.
+     * @return uint32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    uint32_t GetBackgroundPolicyByUid(uint32_t uid);
+    int32_t GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backgroundPolicyOfUid);
 
     /**
      * Get the status if apps can use data on background.
-     *
-     * @return It's allowed or not to use data on background.
-     *      For details, see {@link BackgroundPolicy#BACKGROUND_POLICY_DISABLE}.
+     * @param backgroundPolicy True is allowed to use data on background.
+     *      False is not allowed to use data on background.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    bool GetBackgroundPolicy();
+    int32_t GetBackgroundPolicy(bool &backgroundPolicy);
 
     /**
      * Get the Dump Message object.
@@ -155,7 +161,9 @@ private:
     bool IsForeground(uint32_t uid);
     bool IsPowerSave();
     bool InPowerSaveAllowedList(uint32_t uid);
+    bool IsLimitedBackground();
     void DeleteUid(uint32_t uid);
+    bool IsValidNetPolicy(uint32_t policy);
 
 private:
     std::map<uint32_t, UidPolicyRule> uidPolicyRules_;

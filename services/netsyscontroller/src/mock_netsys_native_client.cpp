@@ -32,6 +32,7 @@
 
 #include "securec.h"
 
+#include "net_conn_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "netmanager_base_common_utils.h"
 
@@ -530,7 +531,7 @@ int32_t MockNetsysNativeClient::ClearDefaultNetWorkNetId()
 int32_t MockNetsysNativeClient::BindSocket(int32_t socket_fd, uint32_t netId)
 {
     NETMGR_LOG_D("MockNetsysNativeClient::BindSocket: netId = [%{public}u]", netId);
-    return 0;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t MockNetsysNativeClient::ShareDnsSet(uint16_t netId)

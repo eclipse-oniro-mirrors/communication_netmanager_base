@@ -55,7 +55,7 @@ NetPolicyFile::~NetPolicyFile() = default;
 bool NetPolicyFile::FileExists(const std::string &fileName)
 {
     struct stat buffer;
-    return (stat(fileName.c_str(), &buffer) == ERR_NONE);
+    return (stat(fileName.c_str(), &buffer) == NETMANAGER_SUCCESS);
 }
 
 bool NetPolicyFile::CreateFile(const std::string &fileName)
@@ -392,7 +392,6 @@ bool NetPolicyFile::WriteFile(const std::vector<NetQuotaPolicy> &quotaPolicies)
         quotaPolicy.netType = std::to_string(quotaPolicies[i].netType);
         quotaPolicy.periodDuration = quotaPolicies[i].periodDuration;
         quotaPolicy.periodStartTime = std::to_string(quotaPolicies[i].periodStartTime);
-        quotaPolicy.source = std::to_string(quotaPolicies[i].source);
         quotaPolicy.iccid = quotaPolicies[i].iccid;
         quotaPolicy.warningBytes = std::to_string(quotaPolicies[i].warningBytes);
         netPolicy_.netQuotaPolicies.push_back(quotaPolicy);
@@ -456,7 +455,7 @@ int32_t NetPolicyFile::ReadQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolic
         quotaPolicies.push_back(quotaPolicyTmp);
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyFile::GetNetQuotaPolicy(int32_t netType, const std::string &iccid, NetQuotaPolicy &quotaPolicy)
@@ -472,11 +471,11 @@ int32_t NetPolicyFile::GetNetQuotaPolicy(int32_t netType, const std::string &icc
             quotaPolicy.source = CommonUtils::StrToInt(quotaPolicyTemp.source);
             quotaPolicy.iccid = quotaPolicyTemp.iccid;
             quotaPolicy.warningBytes = CommonUtils::StrToLong(quotaPolicyTemp.warningBytes);
-            return ERR_NONE;
+            return NETMANAGER_SUCCESS;
         }
     }
 
-    return ERR_QUOTA_POLICY_NOT_EXIST;
+    return POLICY_ERR_QUOTA_POLICY_NOT_EXIST;
 }
 
 int32_t NetPolicyFile::ResetPolicies(const std::string &iccid)
@@ -497,10 +496,10 @@ int32_t NetPolicyFile::ResetPolicies(const std::string &iccid)
 
     if (!WriteFile(POLICY_FILE_NAME)) {
         NETMGR_LOG_E("WriteFile failed");
-        return ERR_INTERNAL_ERROR;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyFile::SetBackgroundPolicy(bool backgroundPolicy)
@@ -513,10 +512,10 @@ int32_t NetPolicyFile::SetBackgroundPolicy(bool backgroundPolicy)
 
     if (!WriteFile(POLICY_FILE_NAME)) {
         NETMGR_LOG_E("WriteFile failed");
-        return ERR_INTERNAL_ERROR;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 bool NetPolicyFile::GetBackgroundPolicy()

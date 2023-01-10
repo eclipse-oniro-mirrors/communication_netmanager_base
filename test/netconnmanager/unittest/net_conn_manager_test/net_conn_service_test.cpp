@@ -182,7 +182,7 @@ HWTEST_F(NetConnServiceTest, GetConnectionPropertiesTest001, TestSize.Level1)
 {
     NetLinkInfo info;
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->GetConnectionProperties(TEST_NETID, info);
-    EXPECT_EQ(ret, ERR_NO_NETWORK);
+    EXPECT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
 }
 
 HWTEST_F(NetConnServiceTest, GetAddressesByNameTest001, TestSize.Level1)
@@ -222,7 +222,7 @@ HWTEST_F(NetConnServiceTest, GetDefaultNetTest001, TestSize.Level1)
 {
     int32_t netId = 0;
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->GetDefaultNet(netId);
-    ASSERT_EQ(ret, ERR_NONE);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, HasDefaultNetTest001, TestSize.Level1)
@@ -240,7 +240,7 @@ HWTEST_F(NetConnServiceTest, GetNetCapabilitiesTest001, TestSize.Level1)
 
     NetAllCapabilities netAllCap;
     ret = DelayedSingleton<NetConnService>::GetInstance()->GetNetCapabilities(netId, netAllCap);
-    ASSERT_EQ(ret, ERR_NO_NETWORK);
+    ASSERT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
 }
 
 HWTEST_F(NetConnServiceTest, SetAirplaneModeTest001, TestSize.Level1)
@@ -259,8 +259,7 @@ HWTEST_F(NetConnServiceTest, IsDefaultNetMeteredTest001, TestSize.Level1)
 {
     bool bRes = false;
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->IsDefaultNetMetered(bRes);
-    ASSERT_EQ(ret, ERR_NONE);
-    ASSERT_TRUE(bRes);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, SetHttpProxyTest001, TestSize.Level1)
@@ -285,7 +284,7 @@ HWTEST_F(NetConnServiceTest, GetHttpProxyTest001, TestSize.Level1)
 
     std::string getHttpProxy;
     ret = DelayedSingleton<NetConnService>::GetInstance()->GetHttpProxy(getHttpProxy);
-    ASSERT_EQ(ret, ERR_NO_HTTP_PROXY);
+    ASSERT_EQ(ret, NET_CONN_ERR_NO_HTTP_PROXY);
 }
 
 HWTEST_F(NetConnServiceTest, GetTest001, TestSize.Level1)

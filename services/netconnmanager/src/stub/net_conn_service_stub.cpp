@@ -88,18 +88,25 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                  ToUtf8(remoteDescripter).c_str());
     if (myDescripter != remoteDescripter) {
         NETMGR_LOG_E("descriptor checked fail");
-        return ERR_FLATTEN_OBJECT;
+        if (!reply.WriteInt32(NETMANAGER_ERR_DESCRIPTOR_MISMATCH)) {
+            return IPC_STUB_WRITE_PARCEL_ERR;
+        }
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
 
     auto itFunc = memberFuncMap_.find(code);
-    if (itFunc != memberFuncMap_.end()) {
-        auto requestFunc = itFunc->second.first;
-        if (requestFunc != nullptr) {
-            if (!CheckPermission(itFunc->second.second)) {
-                return NETMANAGER_ERR_PERMISSION_DENIED;
-            }
-            return (this->*requestFunc)(data, reply);
-        }
+    if (itFunc == memberFuncMap_.end()) {
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+    auto requestFunc = itFunc->second.first;
+    if (requestFunc == nullptr) {
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+    if (CheckPermission(itFunc->second.second)) {
+        return (this->*requestFunc)(data, reply);
+    }
+    if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
+        return IPC_STUB_WRITE_PARCEL_ERR;
     }
 
     NETMGR_LOG_D("stub default case, need check");
@@ -119,7 +126,7 @@ bool NetConnServiceStub::CheckPermission(const std::set<std::string> &permission
 int32_t NetConnServiceStub::OnSystemReady(MessageParcel &data, MessageParcel &reply)
 {
     SystemReady();
-    return NETMANAGER_SUCCESS;
+    return 0;
 }
 
 int32_t NetConnServiceStub::OnRegisterNetSupplier(MessageParcel &data, MessageParcel &reply)
@@ -131,22 +138,22 @@ int32_t NetConnServiceStub::OnRegisterNetSupplier(MessageParcel &data, MessagePa
 
     uint32_t type = 0;
     if (!data.ReadUint32(type)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     bearerType = static_cast<NetBearType>(type);
 
     if (!data.ReadString(ident)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     uint32_t size = 0;
     uint32_t value = 0;
     if (!data.ReadUint32(size)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     size = size > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : size;
     for (uint32_t i = 0; i < size; ++i) {
         if (!data.ReadUint32(value)) {
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_READ_DATA_FAIL;
         }
         netCaps.insert(static_cast<NetCap>(value));
     }
@@ -154,12 +161,12 @@ int32_t NetConnServiceStub::OnRegisterNetSupplier(MessageParcel &data, MessagePa
     uint32_t supplierId = 0;
     int32_t ret = RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("supplierId[%{public}d].", supplierId);
         if (!reply.WriteUint32(supplierId)) {
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
     return NETMANAGER_SUCCESS;
@@ -169,12 +176,12 @@ int32_t NetConnServiceStub::OnUnregisterNetSupplier(MessageParcel &data, Message
 {
     uint32_t supplierId;
     if (!data.ReadUint32(supplierId)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     int32_t ret = UnregisterNetSupplier(supplierId);
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
     return NETMANAGER_SUCCESS;
@@ -182,48 +189,48 @@ int32_t NetConnServiceStub::OnUnregisterNetSupplier(MessageParcel &data, Message
 
 int32_t NetConnServiceStub::OnRegisterNetSupplierCallback(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t result = NET_CONN_SUCCESS;
+    int32_t result = NETMANAGER_SUCCESS;
     uint32_t supplierId;
     data.ReadUint32(supplierId);
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         NETMGR_LOG_E("Callback ptr is nullptr.");
-        result = NET_CONN_ERR_GET_REMOTE_OBJECT_FAILED;
+        result = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
         reply.WriteInt32(result);
         return result;
     }
 
     sptr<INetSupplierCallback> callback = iface_cast<INetSupplierCallback>(remote);
     if (callback == nullptr) {
-        result = NET_CONN_ERR_INPUT_NULL_PTR;
+        result = NETMANAGER_ERR_LOCAL_PTR_NULL;
         reply.WriteInt32(result);
         return result;
     }
 
-    result = ConvertCode(RegisterNetSupplierCallback(supplierId, callback));
+    result = RegisterNetSupplierCallback(supplierId, callback);
     reply.WriteInt32(result);
     return result;
 }
 
 int32_t NetConnServiceStub::OnRegisterNetConnCallback(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t result = NET_CONN_SUCCESS;
+    int32_t result = NETMANAGER_SUCCESS;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         NETMGR_LOG_E("Callback ptr is nullptr.");
-        result = NET_CONN_ERR_GET_REMOTE_OBJECT_FAILED;
+        result = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
         reply.WriteInt32(result);
         return result;
     }
 
     sptr<INetConnCallback> callback = iface_cast<INetConnCallback>(remote);
     if (callback == nullptr) {
-        result = NET_CONN_ERR_INPUT_NULL_PTR;
+        result = NETMANAGER_ERR_LOCAL_PTR_NULL;
         reply.WriteInt32(result);
         return result;
     }
 
-    result = ConvertCode(RegisterNetConnCallback(callback));
+    result = RegisterNetConnCallback(callback);
     reply.WriteInt32(result);
     return result;
 }
@@ -232,7 +239,7 @@ int32_t NetConnServiceStub::OnRegisterNetConnCallbackBySpecifier(MessageParcel &
 {
     sptr<NetSpecifier> netSpecifier = NetSpecifier::Unmarshalling(data);
     uint32_t timeoutMS = data.ReadUint32();
-    int32_t result = ERR_FLATTEN_OBJECT;
+    int32_t result = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         NETMGR_LOG_E("callback ptr is nullptr.");
@@ -242,19 +249,19 @@ int32_t NetConnServiceStub::OnRegisterNetConnCallbackBySpecifier(MessageParcel &
 
     sptr<INetConnCallback> callback = iface_cast<INetConnCallback>(remote);
     if (callback == nullptr) {
-        result = NET_CONN_ERR_INPUT_NULL_PTR;
+        result = NETMANAGER_ERR_LOCAL_PTR_NULL;
         reply.WriteInt32(result);
         return result;
     }
 
-    result = ConvertCode(RegisterNetConnCallback(netSpecifier, callback, timeoutMS));
+    result = RegisterNetConnCallback(netSpecifier, callback, timeoutMS);
     reply.WriteInt32(result);
     return result;
 }
 
 int32_t NetConnServiceStub::OnUnregisterNetConnCallback(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t result = ERR_FLATTEN_OBJECT;
+    int32_t result = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         NETMGR_LOG_E("callback ptr is nullptr.");
@@ -264,12 +271,12 @@ int32_t NetConnServiceStub::OnUnregisterNetConnCallback(MessageParcel &data, Mes
 
     sptr<INetConnCallback> callback = iface_cast<INetConnCallback>(remote);
     if (callback == nullptr) {
-        result = NET_CONN_ERR_INPUT_NULL_PTR;
+        result = NETMANAGER_ERR_LOCAL_PTR_NULL;
         reply.WriteInt32(result);
         return result;
     }
 
-    result = ConvertCode(UnregisterNetConnCallback(callback));
+    result = UnregisterNetConnCallback(callback);
     reply.WriteInt32(result);
     return result;
 }
@@ -281,11 +288,11 @@ int32_t NetConnServiceStub::OnUpdateNetStateForTest(MessageParcel &data, Message
 
     int32_t netState;
     if (!data.ReadInt32(netState)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     NETMGR_LOG_I("Test NetConnServiceStub::OnUpdateNetStateForTest(), netState[%{public}d]", netState);
-    int32_t result = ConvertCode(UpdateNetStateForTest(netSpecifier, netState));
+    int32_t result = UpdateNetStateForTest(netSpecifier, netState);
     NETMGR_LOG_I("Test NetConnServiceStub::OnUpdateNetStateForTest(), result[%{public}d]", result);
     reply.WriteInt32(result);
     return result;
@@ -297,7 +304,7 @@ int32_t NetConnServiceStub::OnUpdateNetSupplierInfo(MessageParcel &data, Message
     uint32_t supplierId;
     if (!data.ReadUint32(supplierId)) {
         NETMGR_LOG_D("fail to get supplier id.");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     NETMGR_LOG_D("OnUpdateNetSupplierInfo supplierId=[%{public}d].", supplierId);
@@ -305,7 +312,7 @@ int32_t NetConnServiceStub::OnUpdateNetSupplierInfo(MessageParcel &data, Message
     int32_t ret = UpdateNetSupplierInfo(supplierId, netSupplierInfo);
     if (!reply.WriteInt32(ret)) {
         NETMGR_LOG_D("fail to update net supplier info.");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     NETMGR_LOG_D("OnUpdateNetSupplierInfo out.");
 
@@ -317,14 +324,14 @@ int32_t NetConnServiceStub::OnUpdateNetLinkInfo(MessageParcel &data, MessageParc
     uint32_t supplierId;
 
     if (!data.ReadUint32(supplierId)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     sptr<NetLinkInfo> netLinkInfo = NetLinkInfo::Unmarshalling(data);
 
     int32_t ret = UpdateNetLinkInfo(supplierId, netLinkInfo);
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
     return NETMANAGER_SUCCESS;
@@ -337,26 +344,26 @@ int32_t NetConnServiceStub::OnRegisterNetDetectionCallback(MessageParcel &data, 
     }
     int32_t netId = 0;
     if (!data.ReadInt32(netId)) {
-        return NET_CONN_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int32_t result = NET_CONN_SUCCESS;
+    int32_t result = NETMANAGER_SUCCESS;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         NETMGR_LOG_E("Callback ptr is nullptr.");
-        result = NET_CONN_ERR_GET_REMOTE_OBJECT_FAILED;
+        result = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
         reply.WriteInt32(result);
         return result;
     }
 
     sptr<INetDetectionCallback> callback = iface_cast<INetDetectionCallback>(remote);
     if (callback == nullptr) {
-        result = NET_CONN_ERR_INPUT_NULL_PTR;
+        result = NETMANAGER_ERR_LOCAL_PTR_NULL;
         reply.WriteInt32(result);
         return result;
     }
 
-    result = ConvertCode(RegisterNetDetectionCallback(netId, callback));
+    result = RegisterNetDetectionCallback(netId, callback);
     reply.WriteInt32(result);
     return result;
 }
@@ -368,26 +375,26 @@ int32_t NetConnServiceStub::OnUnRegisterNetDetectionCallback(MessageParcel &data
     }
     int32_t netId = 0;
     if (!data.ReadInt32(netId)) {
-        return NET_CONN_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int32_t result = NET_CONN_SUCCESS;
+    int32_t result = NETMANAGER_SUCCESS;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         NETMGR_LOG_E("Callback ptr is nullptr.");
-        result = NET_CONN_ERR_GET_REMOTE_OBJECT_FAILED;
+        result = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
         reply.WriteInt32(result);
         return result;
     }
 
     sptr<INetDetectionCallback> callback = iface_cast<INetDetectionCallback>(remote);
     if (callback == nullptr) {
-        result = NET_CONN_ERR_INPUT_NULL_PTR;
+        result = NETMANAGER_ERR_LOCAL_PTR_NULL;
         reply.WriteInt32(result);
         return result;
     }
 
-    result = ConvertCode(UnRegisterNetDetectionCallback(netId, callback));
+    result = UnRegisterNetDetectionCallback(netId, callback);
     reply.WriteInt32(result);
     return result;
 }
@@ -396,11 +403,11 @@ int32_t NetConnServiceStub::OnNetDetection(MessageParcel &data, MessageParcel &r
 {
     int32_t netId = 0;
     if (!data.ReadInt32(netId)) {
-        return NET_CONN_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
-    int32_t ret = ConvertCode(NetDetection(netId));
+    int32_t ret = NetDetection(netId);
     if (!reply.WriteInt32(ret)) {
-        return NET_CONN_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return NETMANAGER_SUCCESS;
 }
@@ -409,22 +416,22 @@ int32_t NetConnServiceStub::OnGetIfaceNames(MessageParcel &data, MessageParcel &
 {
     uint32_t netType = 0;
     if (!data.ReadUint32(netType)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     NetBearType bearerType = static_cast<NetBearType>(netType);
     std::list<std::string> ifaceNames;
     int32_t ret = GetIfaceNames(bearerType, ifaceNames);
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
         if (!reply.WriteUint32(ifaceNames.size())) {
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
 
         for (const auto &ifaceName : ifaceNames) {
             if (!reply.WriteString(ifaceName)) {
-                return ERR_FLATTEN_OBJECT;
+                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
             }
         }
     }
@@ -435,62 +442,26 @@ int32_t NetConnServiceStub::OnGetIfaceNameByType(MessageParcel &data, MessagePar
 {
     uint32_t netType = 0;
     if (!data.ReadUint32(netType)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     NetBearType bearerType = static_cast<NetBearType>(netType);
 
     std::string ident;
     if (!data.ReadString(ident)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     std::string ifaceName;
     int32_t ret = GetIfaceNameByType(bearerType, ident, ifaceName);
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
         if (!reply.WriteString(ifaceName)) {
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
     return ret;
-}
-
-int32_t NetConnServiceStub::ConvertCode(int32_t internalCode)
-{
-    switch (internalCode) {
-        case static_cast<int32_t>(NETMANAGER_SUCCESS):
-            return static_cast<int32_t>(NET_CONN_SUCCESS);
-        case static_cast<int32_t>(ERR_INVALID_PARAMS):
-            return static_cast<int32_t>(NET_CONN_ERR_INVALID_PARAMETER);
-        case static_cast<int32_t>(ERR_SERVICE_NULL_PTR):
-            return static_cast<int32_t>(NET_CONN_ERR_INPUT_NULL_PTR);
-        case static_cast<int32_t>(ERR_NET_TYPE_NOT_FOUND):
-            return static_cast<int32_t>(NET_CONN_ERR_NET_TYPE_NOT_FOUND);
-        case static_cast<int32_t>(ERR_NO_ANY_NET_TYPE):
-            return static_cast<int32_t>(NET_CONN_ERR_NO_ANY_NET_TYPE);
-        case static_cast<int32_t>(ERR_NO_REGISTERED):
-            return static_cast<int32_t>(NET_CONN_ERR_NO_REGISTERED);
-        case static_cast<int32_t>(ERR_NET_NOT_FIND_NETID):
-            return static_cast<int32_t>(NET_CONN_ERR_NETID_NOT_FOUND);
-        case static_cast<int32_t>(ERR_PERMISSION_CHECK_FAIL):
-            return static_cast<int32_t>(NET_CONN_ERR_PERMISSION_CHECK_FAILED);
-        case static_cast<int32_t>(ERR_REGISTER_THE_SAME_CALLBACK):
-            return static_cast<int32_t>(NET_CONN_ERR_SAME_CALLBACK);
-        case static_cast<int32_t>(ERR_UNREGISTER_CALLBACK_NOT_FOUND):
-            return static_cast<int32_t>(NET_CONN_ERR_CALLBACK_NOT_FOUND);
-        case static_cast<int32_t>(ERR_NET_NOT_FIND_REQUEST_ID):
-            return static_cast<int32_t>(NET_CONN_ERR_REQ_ID_NOT_FOUND);
-        case static_cast<int32_t>(ERR_NET_DEFAULTNET_NOT_EXIST):
-            return static_cast<int32_t>(NET_CONN_ERR_NO_DEFAULT_NET);
-        case static_cast<int32_t>(ERR_NO_NETWORK):
-            return static_cast<int32_t>(NET_CONN_ERR_INVALID_NETWORK);
-        default:
-            break;
-    }
-
-    return static_cast<int32_t>(NET_CONN_ERR_INTERNAL_ERROR);
 }
 
 int32_t NetConnServiceStub::OnGetDefaultNet(MessageParcel &data, MessageParcel &reply)
@@ -514,14 +485,14 @@ int32_t NetConnServiceStub::OnHasDefaultNet(MessageParcel &data, MessageParcel &
 {
     NETMGR_LOG_D("OnHasDefaultNet Begin...");
     bool flag = false;
-    int32_t result = ConvertCode(HasDefaultNet(flag));
+    int32_t result = HasDefaultNet(flag);
     NETMGR_LOG_D("HasDefaultNet result is: [%{public}d]", result);
     if (!reply.WriteInt32(result)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (result == NETMANAGER_SUCCESS) {
         if (!reply.WriteBool(flag)) {
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
     return NETMANAGER_SUCCESS;
@@ -531,7 +502,7 @@ int32_t NetConnServiceStub::OnGetSpecificNet(MessageParcel &data, MessageParcel 
 {
     uint32_t type;
     if (!data.ReadUint32(type)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     NetBearType bearerType = static_cast<NetBearType>(type);
 
@@ -539,13 +510,13 @@ int32_t NetConnServiceStub::OnGetSpecificNet(MessageParcel &data, MessageParcel 
     std::list<int32_t> netIdList;
     int32_t ret = GetSpecificNet(bearerType, netIdList);
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
         uint32_t size = static_cast<uint32_t>(netIdList.size());
         size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
         if (!reply.WriteInt32(size)) {
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
 
         uint32_t index = 0;
@@ -554,7 +525,7 @@ int32_t NetConnServiceStub::OnGetSpecificNet(MessageParcel &data, MessageParcel 
                 break;
             }
             if (!reply.WriteInt32(*p)) {
-                return ERR_FLATTEN_OBJECT;
+                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
             }
         }
     }
@@ -565,19 +536,19 @@ int32_t NetConnServiceStub::OnGetAllNets(MessageParcel &data, MessageParcel &rep
 {
     NETMGR_LOG_D("stub execute GetAllNets");
     std::list<int32_t> netIdList;
-    int32_t ret = ConvertCode(GetAllNets(netIdList));
+    int32_t ret = GetAllNets(netIdList);
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
         int32_t size = static_cast<int32_t>(netIdList.size());
         if (!reply.WriteInt32(size)) {
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
 
         for (auto p = netIdList.begin(); p != netIdList.end(); ++p) {
             if (!reply.WriteInt32(*p)) {
-                return ERR_FLATTEN_OBJECT;
+                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
             }
         }
     }
@@ -588,18 +559,18 @@ int32_t NetConnServiceStub::OnGetSpecificUidNet(MessageParcel &data, MessageParc
 {
     int32_t uid = 0;
     if (!data.ReadInt32(uid)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     NETMGR_LOG_D("stub execute GetSpecificUidNet");
 
     int32_t netId = 0;
     int32_t ret = GetSpecificUidNet(uid, netId);
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
         if (!reply.WriteInt32(netId)) {
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
     return ret;
@@ -609,20 +580,20 @@ int32_t NetConnServiceStub::OnGetConnectionProperties(MessageParcel &data, Messa
 {
     int32_t netId = 0;
     if (!data.ReadInt32(netId)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     NETMGR_LOG_D("stub execute GetConnectionProperties");
     NetLinkInfo info;
-    int32_t ret = ConvertCode(GetConnectionProperties(netId, info));
+    int32_t ret = GetConnectionProperties(netId, info);
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
         sptr<NetLinkInfo> netLinkInfo_ptr = new (std::nothrow) NetLinkInfo(info);
         if (!NetLinkInfo::Marshalling(reply, netLinkInfo_ptr)) {
             NETMGR_LOG_E("proxy Marshalling failed");
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
     return ret;
@@ -632,25 +603,25 @@ int32_t NetConnServiceStub::OnGetNetCapabilities(MessageParcel &data, MessagePar
 {
     int32_t netId = 0;
     if (!data.ReadInt32(netId)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     NETMGR_LOG_D("stub execute GetNetCapabilities");
 
     NetAllCapabilities netAllCap;
-    int32_t ret = ConvertCode(GetNetCapabilities(netId, netAllCap));
+    int32_t ret = GetNetCapabilities(netId, netAllCap);
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
         if (!reply.WriteUint32(netAllCap.linkUpBandwidthKbps_) ||
             !reply.WriteUint32(netAllCap.linkDownBandwidthKbps_)) {
-            return IPC_PROXY_ERR;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
         uint32_t size = netAllCap.netCaps_.size();
         size = size > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : size;
         if (!reply.WriteUint32(size)) {
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
         uint32_t index = 0;
         for (auto netCap : netAllCap.netCaps_) {
@@ -658,14 +629,14 @@ int32_t NetConnServiceStub::OnGetNetCapabilities(MessageParcel &data, MessagePar
                 break;
             }
             if (!reply.WriteUint32(static_cast<uint32_t>(netCap))) {
-                return ERR_FLATTEN_OBJECT;
+                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
             }
         }
 
         size = netAllCap.bearerTypes_.size();
         size = size > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : size;
         if (!reply.WriteUint32(size)) {
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
         index = 0;
         for (auto bearerType : netAllCap.bearerTypes_) {
@@ -673,7 +644,7 @@ int32_t NetConnServiceStub::OnGetNetCapabilities(MessageParcel &data, MessagePar
                 break;
             }
             if (!reply.WriteUint32(static_cast<uint32_t>(bearerType))) {
-                return ERR_FLATTEN_OBJECT;
+                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
             }
         }
     }
@@ -684,23 +655,23 @@ int32_t NetConnServiceStub::OnGetAddressesByName(MessageParcel &data, MessagePar
 {
     std::string host;
     if (!data.ReadString(host)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     int32_t netId;
     if (!data.ReadInt32(netId)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     NETMGR_LOG_D("stub execute GetAddressesByName");
     std::vector<INetAddr> addrList;
     int32_t ret = GetAddressesByName(host, netId, addrList);
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
         uint32_t size = static_cast<uint32_t>(addrList.size());
         size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
         if (!reply.WriteInt32(size)) {
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
         uint32_t index = 0;
         for (auto p = addrList.begin(); p != addrList.end(); ++p) {
@@ -710,7 +681,7 @@ int32_t NetConnServiceStub::OnGetAddressesByName(MessageParcel &data, MessagePar
             sptr<INetAddr> netaddr_ptr = (std::make_unique<INetAddr>(*p)).release();
             if (!INetAddr::Marshalling(reply, netaddr_ptr)) {
                 NETMGR_LOG_E("proxy Marshalling failed");
-                return ERR_FLATTEN_OBJECT;
+                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
             }
         }
     }
@@ -721,23 +692,23 @@ int32_t NetConnServiceStub::OnGetAddressByName(MessageParcel &data, MessageParce
 {
     std::string host;
     if (!data.ReadString(host)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     int32_t netId;
     if (!data.ReadInt32(netId)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     NETMGR_LOG_D("stub execute GetAddressByName");
     INetAddr addr;
     int32_t ret = GetAddressByName(host, netId, addr);
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
         sptr<INetAddr> netaddr_ptr = (std::make_unique<INetAddr>(addr)).release();
         if (!INetAddr::Marshalling(reply, netaddr_ptr)) {
             NETMGR_LOG_E("proxy Marshalling failed");
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
     return ret;
@@ -747,17 +718,17 @@ int32_t NetConnServiceStub::OnBindSocket(MessageParcel &data, MessageParcel &rep
 {
     int32_t socket_fd;
     if (!data.ReadInt32(socket_fd)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     int32_t netId;
     if (!data.ReadInt32(netId)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     NETMGR_LOG_D("stub execute BindSocket");
 
     int32_t ret = BindSocket(socket_fd, netId);
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return ret;
 }
@@ -766,11 +737,11 @@ int32_t NetConnServiceStub::OnSetAirplaneMode(MessageParcel &data, MessageParcel
 {
     bool state = false;
     if (!data.ReadBool(state)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     int32_t ret = SetAirplaneMode(state);
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return ret;
 }
@@ -797,12 +768,12 @@ int32_t NetConnServiceStub::OnSetHttpProxy(MessageParcel &data, MessageParcel &r
 
     std::string httpProxy;
     if (!data.ReadString(httpProxy)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int32_t ret = ConvertCode(SetHttpProxy(httpProxy));
+    int32_t ret = SetHttpProxy(httpProxy);
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return ret;
 }
@@ -810,9 +781,9 @@ int32_t NetConnServiceStub::OnSetHttpProxy(MessageParcel &data, MessageParcel &r
 int32_t NetConnServiceStub::OnGetHttpProxy(MessageParcel &data, MessageParcel &reply)
 {
     std::string httpProxy;
-    int32_t result = ConvertCode(GetHttpProxy(httpProxy));
+    int32_t result = GetHttpProxy(httpProxy);
     if (!reply.WriteInt32(result)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
     if (result != NETMANAGER_SUCCESS) {
@@ -820,7 +791,7 @@ int32_t NetConnServiceStub::OnGetHttpProxy(MessageParcel &data, MessageParcel &r
     }
 
     if (!reply.WriteString(httpProxy)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return NETMANAGER_SUCCESS;
 }
@@ -830,18 +801,18 @@ int32_t NetConnServiceStub::OnGetNetIdByIdentifier(MessageParcel &data, MessageP
     NETMGR_LOG_D("stub execute OnGetNetIdByIdentifier");
     std::string ident;
     if (!data.ReadString(ident)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     int32_t netId = 0;
     int32_t ret = GetNetIdByIdentifier(ident, netId);
     if (!reply.WriteInt32(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
     if (ret == NETMANAGER_SUCCESS) {
         if (!reply.WriteInt32(netId)) {
-            return ERR_FLATTEN_OBJECT;
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
     }
     return ret;

@@ -57,35 +57,40 @@ public:
     /**
      * Get the network policy of the specified UID.
      * @param uid The specified UID of app.
-     * @return uint32_t Return this uid's policy.
+     * @param policy Return this uid's policy.
+     *      For details, see {@link NetUidPolicy}.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    uint32_t GetPolicyByUid(uint32_t uid) override;
+    int32_t GetPolicyByUid(uint32_t uid, uint32_t &policy) override;
 
     /**
      * Get the application UIDs of the specified policy.
      * @param policy the network policy of the current UID of application.
      *      For details, see {@link NetUidPolicy}.
-     * @return std::vector<uint32_t> Returns the UIDs of the specified policy.
+     * @param uids The list of UIDs
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    std::vector<uint32_t> GetUidsByPolicy(uint32_t policy) override;
+    int32_t GetUidsByPolicy(uint32_t policy, std::vector<uint32_t> &uids) override;
 
     /**
      * Get the status whether the specified uid app can access the metered network or non-metered network.
      * @param uid The specified UID of application.
-     * @param metered Indicates meterd network or non-metered network.
-     * @return true Return true means it's allowed to access the network.
-     * @return false Return false means it's not allowed to access the network.
+     * @param metered Indicates metered network or non-metered network.
+     * @param isAllowed Return true means it's allowed to access the network.
+     *      Return false means it's not allowed to access the network.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    bool IsUidNetAllowed(uint32_t uid, bool metered) override;
+    int32_t IsUidNetAllowed(uint32_t uid, bool metered, bool &isAllowed) override;
 
     /**
      * Get the status whether the specified uid app can access the specified iface network.
      * @param uid The specified UID of application.
      * @param ifaceName Iface name.
-     * @return true Return true means it's allowed to access the network.
-     * @return false Return false means it's not allowed to access the network.
+     * @param isAllowed Return true means it's allowed to access the network.
+     *      Return false means it's not allowed to access the network.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    bool IsUidNetAllowed(uint32_t uid, const std::string &ifaceName) override;
+    int32_t IsUidNetAllowed(uint32_t uid, const std::string &ifaceName, bool &isAllowed) override;
 
     /**
      * Register network policy change callback.
@@ -131,17 +136,20 @@ public:
 
     /**
      * Get the status if apps can use data on background.
-     * @return true It's allowed to use data on background.
-     * @return false It's not allowed to use data on background.
+     * @param backgroundPolicy True is allowed to use data on background.
+     *      False is not allowed to use data on background.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    bool GetBackgroundPolicy() override;
+    int32_t GetBackgroundPolicy(bool &backgroundPolicy) override;
 
     /**
      * Get the background network restriction policy for the specified uid.
      * @param uid uid The specified UID of application.
-     * @return uint32_t For details, see {@link NetPolicyResultCode}.
+     * @param backgroundPolicyOfUid The specified UID of backgroundPolicy.
+     *      For details, see {@link NetBackgroundPolicy}.
+     * @return uint32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    uint32_t GetBackgroundPolicyByUid(uint32_t uid) override;
+    int32_t GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backgroundPolicyOfUid) override;
 
     /**
      * Update the limit or warning remind time of quota policy.

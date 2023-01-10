@@ -31,10 +31,7 @@
 
 namespace OHOS::NetManagerStandard {
 namespace {
-constexpr int32_t BASE_COMMON_COMPLETE_CODE = 2100000;
 constexpr int32_t CONN_COMMON_COMPLETE_CODE = 2109000;
-constexpr int32_t CONVERTE_MIN_ERROR_CODE = 200;
-NetBaseErrorCodeConvertor convertor;
 } // namespace
 
 napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
@@ -65,11 +62,13 @@ napi_value ConnectionExec::CreateNetCapabilities(napi_env env, NetAllCapabilitie
         return NapiUtils::GetUndefined(env);
     }
 
-    NapiUtils::SetUint32Property(env, netCapabilities, KEY_LINK_UP_BAND_WIDTH_KPS, capabilities->linkUpBandwidthKbps_);
+    NapiUtils::SetUint32Property(env, netCapabilities, KEY_LINK_UP_BAND_WIDTH_KPS,
+                                 capabilities->linkUpBandwidthKbps_);
     NapiUtils::SetUint32Property(env, netCapabilities, KEY_LINK_DOWN_BAND_WIDTH_KPS,
                                  capabilities->linkDownBandwidthKbps_);
     if (!capabilities->netCaps_.empty() && capabilities->netCaps_.size() <= MAX_ARRAY_LENGTH) {
-        napi_value networkCap = NapiUtils::CreateArray(env, std::min(capabilities->netCaps_.size(), MAX_ARRAY_LENGTH));
+        napi_value networkCap =
+            NapiUtils::CreateArray(env, std::min(capabilities->netCaps_.size(), MAX_ARRAY_LENGTH));
         auto it = capabilities->netCaps_.begin();
         for (uint32_t index = 0; index < MAX_ARRAY_LENGTH && it != capabilities->netCaps_.end(); ++index, ++it) {
             NapiUtils::SetArrayElement(env, networkCap, index, NapiUtils::CreateUint32(env, *it));
@@ -117,13 +116,8 @@ bool ConnectionExec::ExecGetDefaultNet(GetDefaultNetContext *context)
 {
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(context->netHandle_);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMANAGER_BASE_LOGE("get default net failed %{public}d", BASE_COMMON_COMPLETE_CODE + ret);
-        std::string errorMessage = convertor.ConvertErrorCode(ret);
-        if (ret > CONVERTE_MIN_ERROR_CODE) {
-            context->SetError(ret, errorMessage);
-        } else {
-            context->SetError(BASE_COMMON_COMPLETE_CODE + ret, errorMessage);
-        }
+        NETMANAGER_BASE_LOGE("get default net failed %{public}d", ret);
+        context->SetErrorCode(ret);
     }
     return ret == NETMANAGER_SUCCESS;
 }
@@ -137,7 +131,7 @@ bool ConnectionExec::ExecHasDefaultNet(HasDefaultNetContext *context)
 {
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->HasDefaultNet(context->hasDefaultNet_);
     NETMANAGER_BASE_LOGI("ExecHasDefaultNet ret %{public}d", ret);
-    if (ret != NET_CONN_SUCCESS && ret != NET_CONN_ERR_NO_DEFAULT_NET) {
+    if (ret != NETMANAGER_SUCCESS && ret != NET_CONN_ERR_NO_DEFAULT_NET) {
         context->SetErrorCode(ret);
         return false;
     }
@@ -153,13 +147,8 @@ bool ConnectionExec::ExecIsDefaultNetMetered(IsDefaultNetMeteredContext *context
 {
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->IsDefaultNetMetered(context->isMetered_);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMANAGER_BASE_LOGE("get net metered status failed %{public}d", BASE_COMMON_COMPLETE_CODE + ret);
-        std::string errorMessage = convertor.ConvertErrorCode(ret);
-        if (ret > CONVERTE_MIN_ERROR_CODE) {
-            context->SetError(ret, errorMessage);
-        } else {
-            context->SetError(BASE_COMMON_COMPLETE_CODE + ret, errorMessage);
-        }
+        NETMANAGER_BASE_LOGE("get net metered status failed %{public}d", ret);
+        context->SetErrorCode(ret);
     }
     NETMANAGER_BASE_LOGD("exec is default net metered ret %{public}d", ret);
     return ret == NETMANAGER_SUCCESS;
@@ -172,12 +161,10 @@ napi_value ConnectionExec::IsDefaultNetMeteredCallback(IsDefaultNetMeteredContex
 
 bool ConnectionExec::ExecGetNetCapabilities(GetNetCapabilitiesContext *context)
 {
-    auto ret =
-        DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(context->netHandle_, context->capabilities_);
-    if (ret != NET_CONN_SUCCESS) {
-        context->SetErrorCode(ret);
-    }
-    return ret == NET_CONN_SUCCESS;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(context->netHandle_,
+                                                                                  context->capabilities_);
+    context->SetErrorCode(ret);
+    return ret == NETMANAGER_SUCCESS;
 }
 
 napi_value ConnectionExec::GetNetCapabilitiesCallback(GetNetCapabilitiesContext *context)
@@ -189,11 +176,8 @@ bool ConnectionExec::ExecGetConnectionProperties(GetConnectionPropertiesContext 
 {
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetConnectionProperties(context->netHandle_,
                                                                                        context->linkInfo_);
-    if (ret != NET_CONN_SUCCESS) {
-        context->SetErrorCode(ret);
-        return false;
-    }
-    return true;
+    context->SetErrorCode(ret);
+    return ret == NETMANAGER_SUCCESS;
 }
 
 napi_value ConnectionExec::GetConnectionPropertiesCallback(GetConnectionPropertiesContext *context)
@@ -204,11 +188,8 @@ napi_value ConnectionExec::GetConnectionPropertiesCallback(GetConnectionProperti
 bool ConnectionExec::ExecGetAllNets(GetAllNetsContext *context)
 {
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(context->netHandleList_);
-    if (ret != NET_CONN_SUCCESS) {
-        context->SetErrorCode(ret);
-        return false;
-    }
-    return true;
+    context->SetErrorCode(ret);
+    return ret == NETMANAGER_SUCCESS;
 }
 
 napi_value ConnectionExec::GetAllNetsCallback(GetAllNetsContext *context)
@@ -227,11 +208,11 @@ napi_value ConnectionExec::GetAllNetsCallback(GetAllNetsContext *context)
 bool ConnectionExec::ExecEnableAirplaneMode(EnableAirplaneModeContext *context)
 {
     int32_t res = DelayedSingleton<NetConnClient>::GetInstance()->SetAirplaneMode(true);
-    if (res != 0) {
+    if (res != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecEnableAirplaneMode failed %{public}d", res);
         context->SetErrorCode(res);
     }
-    return res == 0;
+    return res == NETMANAGER_SUCCESS;
 }
 
 napi_value ConnectionExec::EnableAirplaneModeCallback(EnableAirplaneModeContext *context)
@@ -242,11 +223,11 @@ napi_value ConnectionExec::EnableAirplaneModeCallback(EnableAirplaneModeContext 
 bool ConnectionExec::ExecDisableAirplaneMode(DisableAirplaneModeContext *context)
 {
     int32_t res = DelayedSingleton<NetConnClient>::GetInstance()->SetAirplaneMode(false);
-    if (res != 0) {
+    if (res != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecDisableAirplaneMode failed %{public}d", res);
         context->SetErrorCode(res);
     }
-    return res == 0;
+    return res == NETMANAGER_SUCCESS;
 }
 
 napi_value ConnectionExec::DisableAirplaneModeCallback(DisableAirplaneModeContext *context)
@@ -257,11 +238,11 @@ napi_value ConnectionExec::DisableAirplaneModeCallback(DisableAirplaneModeContex
 bool ConnectionExec::ExecReportNetConnected(ReportNetConnectedContext *context)
 {
     int32_t res = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(context->netHandle_);
-    if (res != 0) {
+    if (res != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecReportNetConnected failed %{public}d", res);
         context->SetErrorCode(res);
     }
-    return res == 0;
+    return res == NETMANAGER_SUCCESS;
 }
 
 napi_value ConnectionExec::ReportNetConnectedCallback(ReportNetConnectedContext *context)
@@ -272,11 +253,11 @@ napi_value ConnectionExec::ReportNetConnectedCallback(ReportNetConnectedContext 
 bool ConnectionExec::ExecReportNetDisconnected(ReportNetConnectedContext *context)
 {
     int32_t res = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(context->netHandle_);
-    if (res != 0) {
+    if (res != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecReportNetDisconnected failed %{public}d", res);
         context->SetErrorCode(res);
     }
-    return res == 0;
+    return res == NETMANAGER_SUCCESS;
 }
 
 napi_value ConnectionExec::ReportNetDisconnectedCallback(ReportNetConnectedContext *context)
@@ -423,11 +404,11 @@ bool ConnectionExec::NetHandleExec::ExecBindSocket(BindSocketContext *context)
 {
     NetHandle handle(context->netId_);
     int32_t res = handle.BindSocket(context->socketFd_);
-    if (res != 0) {
+    if (res != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecBindSocket failed %{public}d", res);
         context->SetErrorCode(res);
     }
-    return res == 0;
+    return res == NETMANAGER_SUCCESS;
 }
 
 napi_value ConnectionExec::NetHandleExec::BindSocketCallback(BindSocketContext *context)
@@ -460,7 +441,7 @@ bool ConnectionExec::NetConnectionExec::ExecRegister(RegisterContext *context)
                                                                                               conn->timeout_);
         NETMANAGER_BASE_LOGI("Register result hasNetSpecifier_ and hasTimeout_ %{public}d", ret);
         context->SetErrorCode(ret);
-        return ret == 0;
+        return ret == NETMANAGER_SUCCESS;
     }
 
     if (conn->hasNetSpecifier_) {
@@ -468,13 +449,13 @@ bool ConnectionExec::NetConnectionExec::ExecRegister(RegisterContext *context)
         int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback, 0);
         NETMANAGER_BASE_LOGI("Register result hasNetSpecifier_ %{public}d", ret);
         context->SetErrorCode(ret);
-        return ret == 0;
+        return ret == NETMANAGER_SUCCESS;
     }
 
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(callback);
     NETMANAGER_BASE_LOGI("Register result %{public}d", ret);
     context->SetErrorCode(ret);
-    return ret == 0;
+    return ret == NETMANAGER_SUCCESS;
 }
 
 napi_value ConnectionExec::NetConnectionExec::RegisterCallback(RegisterContext *context)
@@ -491,7 +472,7 @@ bool ConnectionExec::NetConnectionExec::ExecUnregister(UnregisterContext *contex
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
     NETMANAGER_BASE_LOGI("Unregister result %{public}d", ret);
     context->SetErrorCode(ret);
-    return ret == 0;
+    return ret == NETMANAGER_SUCCESS;
 }
 
 napi_value ConnectionExec::NetConnectionExec::UnregisterCallback(RegisterContext *context)
