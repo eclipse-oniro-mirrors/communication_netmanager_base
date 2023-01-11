@@ -21,7 +21,21 @@
 #include <vector>
 
 namespace OHOS::NetManagerStandard::CommonUtils {
-std::vector<std::string> Split(const std::string &str, const std::string &sep);
+inline std::vector<std::string> Split(const std::string &str, const std::string &sep)
+{
+    std::string s = str;
+    std::vector<std::string> res;
+    while (!s.empty()) {
+        size_t pos = s.find(sep);
+        if (pos == std::string::npos) {
+            res.emplace_back(s);
+            break;
+        }
+        res.emplace_back(s.substr(0, pos));
+        s = s.substr(pos + sep.size());
+    }
+    return res;
+}
 std::string Strip(const std::string &str, char ch = ' ');
 std::string ToLower(const std::string &s);
 bool IsValidIPV4(const std::string &ip);

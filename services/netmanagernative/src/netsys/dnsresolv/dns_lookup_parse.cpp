@@ -18,9 +18,11 @@
 #include <net/if.h>
 
 #include "fwmark_client.h"
+#include "net_manager_constants.h"
 
 namespace OHOS {
 namespace nmd {
+using namespace NetManagerStandard;
 static constexpr int32_t HOST_BIT_SIZE = 0x80;
 
 static constexpr int32_t MAX_SPACE_SIZE = 254;
@@ -87,7 +89,10 @@ int32_t DnsLookUpParse::LookupIpLiteral(struct AddrData buf[ARG_INDEX_1], const 
         if (family == AF_INET6) {
             return EAI_NONAME;
         }
-        (void)memcpy_s(&buf[ARG_INDEX_0].addr, sizeof(a4), &a4, sizeof(a4));
+        if (memcpy_s(&buf[ARG_INDEX_0].addr, sizeof(a4), &a4, sizeof(a4)) != 0) {
+            NETNATIVE_LOGE("memcpy_s faild");
+            return NETMANAGER_ERR_MEMCPY_FAIL;
+        }
         buf[ARG_INDEX_0].family = AF_INET;
         buf[ARG_INDEX_0].scopeid = 0;
         return NAME_IS_IPV4;
@@ -114,7 +119,10 @@ int32_t DnsLookUpParse::LookupIpLiteral(struct AddrData buf[ARG_INDEX_1], const 
         return EAI_NONAME;
     }
 
-    (void)memcpy_s(&buf[ARG_INDEX_0].addr, sizeof(a6), &a6, sizeof(a6));
+    if (memcpy_s(&buf[ARG_INDEX_0].addr, sizeof(a6), &a6, sizeof(a6)) != 0) {
+        NETNATIVE_LOGE("memcpy_s faild");
+        return NETMANAGER_ERR_MEMCPY_FAIL;
+    }
     buf[ARG_INDEX_0].family = AF_INET6;
     uint64_t scopeid = 0;
     if (p) {
@@ -168,7 +176,7 @@ int32_t DnsLookUpParse::GetResolvConf(struct ResolvConf *conf, char *search, siz
         if (timeOutSecond >= ONE_MINUTE) {
             conf->timeOut = ONE_MINUTE;
         } else {
-            conf->timeOut = timeOutSecond;
+            conf->timeOut = static_cast<uint32_t>(timeOutSecond);
         }
     }
     if (retry > 0) {
@@ -178,7 +186,7 @@ int32_t DnsLookUpParse::GetResolvConf(struct ResolvConf *conf, char *search, siz
             conf->attempts = retry;
         }
     }
-    int32_t nns = 0;
+    uint32_t nns = 0;
     for (auto &nameServer : nameServers) {
         if (LookupIpLiteral(conf->ns + nns, nameServer, AF_UNSPEC) > 0) {
             nns++;
@@ -192,7 +200,7 @@ uint64_t DnsLookUpParse::mTime()
 {
     timespec ts{};
     clock_gettime(CLOCK_REALTIME, &ts);
-    return static_cast<uint64_t>(ts.tv_sec) * TIMEMSTOS + ts.tv_nsec / TIMEUSTOS;
+    return static_cast<uint64_t>(ts.tv_sec) * TIMEMSTOS + static_cast<uint64_t>(ts.tv_nsec) / TIMEUSTOS;
 }
 
 void DnsLookUpParse::GetNsFromConf(const ResolvConf *conf, uint32_t &nns, int32_t &family, socklen_t &saLen)
@@ -200,12 +208,18 @@ void DnsLookUpParse::GetNsFromConf(const ResolvConf *conf, uint32_t &nns, int32_
     for (nns = 0; nns < conf->nns; nns++) {
         const AddrData *ipLit = &conf->ns[nns];
         if (ipLit->family == AF_INET) {
-            (void)memcpy_s(&nSockAddr[nns].sin.sin_addr, ADDR_A4_LEN, ipLit->addr, ADDR_A4_LEN);
+            if (memcpy_s(&nSockAddr[nns].sin.sin_addr, ADDR_A4_LEN, ipLit->addr, ADDR_A4_LEN)) {
+                NETNATIVE_LOGE("memcpy_s faild");
+                return;
+            }
             nSockAddr[nns].sin.sin_port = htons(DEFAULT_PORT);
             nSockAddr[nns].sin.sin_family = AF_INET;
         } else {
             saLen = sizeof(sockAddr.sin6);
-            (void)memcpy_s(&nSockAddr[nns].sin6.sin6_addr, ADDR_A6_LEN, ipLit->addr, ADDR_A6_LEN);
+            if (memcpy_s(&nSockAddr[nns].sin6.sin6_addr, ADDR_A6_LEN, ipLit->addr, ADDR_A6_LEN) != 0) {
+                NETNATIVE_LOGE("memcpy_s faild");
+                return;
+            }
             nSockAddr[nns].sin6.sin6_port = htons(DEFAULT_PORT);
             nSockAddr[nns].sin6.sin6_scope_id = ipLit->scopeid;
             nSockAddr[nns].sin6.sin6_family = family = AF_INET6;
@@ -220,13 +234,17 @@ void DnsLookUpParse::SetSocAddr(int32_t fd, uint32_t &nns)
         NETNATIVE_LOGE("setsockopt failed error: [%{public}d]", errno);
         return;
     }
-    for (int32_t i = 0; i < nns; i++) {
+    for (uint32_t i = 0; i < nns; i++) {
         if (nSockAddr[i].sin.sin_family != AF_INET) {
             continue;
         }
-        (void)memcpy_s(nSockAddr[i].sin6.sin6_addr.s6_addr + ADDR_A6_NOTES_LEN, ADDR_A4_LEN, &nSockAddr[i].sin.sin_addr,
-                       ADDR_A4_LEN);
-        (void)memcpy_s(nSockAddr[i].sin6.sin6_addr.s6_addr, ADDR_A6_NOTES_LEN, ADDR_BUF, ADDR_A6_NOTES_LEN);
+        uint32_t ret = memcpy_s(nSockAddr[i].sin6.sin6_addr.s6_addr + ADDR_A6_NOTES_LEN, ADDR_A4_LEN,
+                                &nSockAddr[i].sin.sin_addr, ADDR_A4_LEN);
+        ret += memcpy_s(nSockAddr[i].sin6.sin6_addr.s6_addr, ADDR_A6_NOTES_LEN, ADDR_BUF, ADDR_A6_NOTES_LEN);
+        if (ret != 0) {
+            NETNATIVE_LOGE("memcpy_s faild");
+            return;
+        }
         nSockAddr[i].sin6.sin6_family = AF_INET6;
         nSockAddr[i].sin6.sin6_flowinfo = 0;
         nSockAddr[i].sin6.sin6_scope_id = 0;
@@ -240,7 +258,7 @@ void DnsLookUpParse::SearchNameServer(GetAnswers *getAnswers, int32_t *answersLe
         if (answersLens[i]) {
             break;
         }
-        for (int j = 0; j < getAnswers->nns; j++) {
+        for (uint32_t j = 0; j < getAnswers->nns; j++) {
             if (sendto(getAnswers->fd, queries[i], queriesLens[i], MSG_NOSIGNAL,
                        reinterpret_cast<sockaddr *>(&nSockAddr[j]), getAnswers->saLen) > 0) {
                 break;
@@ -248,28 +266,26 @@ void DnsLookUpParse::SearchNameServer(GetAnswers *getAnswers, int32_t *answersLe
         }
     }
 }
+
 void DnsLookUpParse::DnsGetAnswers(GetAnswers getAnswers, const uint8_t *const *queries, const int32_t *queriesLens,
                                    uint8_t *const *answers, int32_t *answersLens, int32_t servFailRetry)
 {
     socklen_t psl[1] = {getAnswers.saLen};
     int32_t recvLen = 0;
-    int32_t next = 0;
+    uint32_t next = 0;
     while ((recvLen = recvfrom(getAnswers.fd, answers[next], getAnswers.answersSize, 0,
                                reinterpret_cast<sockaddr *>(&sockAddr), psl)) >= 0) {
-        int32_t i, j;
         psl[0] = getAnswers.saLen;
 
-        if (recvLen < ARG_INDEX_4) {
-            continue;
-        }
-
-        for (j = 0; j < getAnswers.nns && memcmp(nSockAddr + j, &sockAddr, getAnswers.saLen); j++)
+        uint32_t j = 0;
+        for (; j < getAnswers.nns && memcmp(nSockAddr + j, &sockAddr, getAnswers.saLen); j++)
             ;
         if (j == getAnswers.nns) {
             continue;
         }
-        for (i = next;
-             i < getAnswers.queriesNum && (answers[next][0] != queries[i][0] || answers[next][1] != queries[i][1]); i++)
+        uint32_t i = next;
+        for (; i < getAnswers.queriesNum && (answers[next][0] != queries[i][0] || answers[next][1] != queries[i][1]);
+             i++)
             ;
         if (i == getAnswers.queriesNum || answersLens[i]) {
             continue;
@@ -294,7 +310,10 @@ void DnsLookUpParse::DnsGetAnswers(GetAnswers getAnswers, const uint8_t *const *
             for (; next < getAnswers.queriesNum && answersLens[next]; next++)
                 ;
         } else {
-            (void)memcpy_s(answers[i], recvLen, answers[next], recvLen);
+            if (memcpy_s(answers[i], recvLen, answers[next], recvLen) != 0) {
+                NETNATIVE_LOGE("memcpy_s faild");
+                return;
+            }
         }
 
         if (next == getAnswers.queriesNum) {
@@ -312,10 +331,10 @@ int32_t DnsLookUpParse::DnsSendQueries(GetAnswers getAnswers, const uint8_t *con
     int32_t retryInterval = getAnswers.timeOut / getAnswers.attempts;
     uint64_t time0 = mTime();
     uint64_t time2 = mTime();
-    uint64_t time1 = time2 - retryInterval;
+    uint64_t time1 = time2 - static_cast<uint64_t>(retryInterval);
     int32_t servFailRetry = 0;
-    for (; time2 - time0 < getAnswers.timeOut; time2 = mTime()) {
-        if (time2 - time1 >= retryInterval) {
+    for (; time2 - time0 < static_cast<uint64_t>(getAnswers.timeOut); time2 = mTime()) {
+        if (time2 - time1 >= static_cast<uint64_t>(retryInterval)) {
             SearchNameServer(&getAnswers, answersLens, queries, queriesLens);
             time1 = time2;
             servFailRetry = ARG_INDEX_2 * getAnswers.queriesNum;
@@ -413,7 +432,10 @@ int32_t DnsLookUpParse::DnsParseCallback(void *c, int32_t rr, const void *data, 
             }
             ctx->addrs[ctx->cnt].family = AF_INET;
             ctx->addrs[ctx->cnt].scopeid = CTX_DEFAULT_SCOPEID;
-            (void)memcpy_s(ctx->addrs[ctx->cnt++].addr, ADDR_A4_LEN, data, ADDR_A4_LEN);
+            if (memcpy_s(ctx->addrs[ctx->cnt++].addr, ADDR_A4_LEN, data, ADDR_A4_LEN) != 0) {
+                NETNATIVE_LOGE("memcpy_s faild");
+                return NETMANAGER_ERR_MEMCPY_FAIL;
+            }
             break;
         case RR_AAAA:
             if (len != ADDR_A6_LEN) {
@@ -421,7 +443,10 @@ int32_t DnsLookUpParse::DnsParseCallback(void *c, int32_t rr, const void *data, 
             }
             ctx->addrs[ctx->cnt].family = AF_INET6;
             ctx->addrs[ctx->cnt].scopeid = CTX_DEFAULT_SCOPEID;
-            (void)memcpy_s(ctx->addrs[ctx->cnt++].addr, ADDR_A6_LEN, data, ADDR_A6_LEN);
+            if (memcpy_s(ctx->addrs[ctx->cnt++].addr, ADDR_A6_LEN, data, ADDR_A6_LEN) != 0) {
+                NETNATIVE_LOGE("memcpy_s faild");
+                return NETMANAGER_ERR_MEMCPY_FAIL;
+            }
             break;
         case RR_CNAME:
             if (DnsLookUpParse().DnsExpand(static_cast<uint8_t *>(const_cast<void *>(packet)),
@@ -550,7 +575,7 @@ int32_t DnsLookUpParse::ResMkQuery(int32_t op, const std::string dName, int32_t 
     if (nameLen && dName[nameLen - 1] == DOT) {
         nameLen--;
     }
-    int32_t nameNum = HOSTNAME_LEN_DIFFER + nameLen + !!nameLen;
+    int32_t nameNum = HOSTNAME_LEN_DIFFER + static_cast<int32_t>(nameLen) + !!nameLen;
     if (nameLen > HOST_MAX_LEN_MINUS_TWO || bufLen < nameNum || op > OP_MAX || mineClass > MINE_CLASS_MAX ||
         type > TYPE_MAX) {
         NETNATIVE_LOGE("make query failed");
@@ -563,9 +588,12 @@ int32_t DnsLookUpParse::ResMkQuery(int32_t op, const std::string dName, int32_t 
     }
     snapName[ARG_INDEX_2] = op * HOSTNAME_BUFF_COMPUTE + 1;
     snapName[ARG_INDEX_5] = 1;
-    (void)memcpy_s(reinterpret_cast<char *>(snapName) + HOSTNAME_SIZE_DIFFER, nameLen, dName.c_str(), nameLen);
-    int32_t i = 0;
-    int32_t j = 0;
+    if (memcpy_s(reinterpret_cast<char *>(snapName) + HOSTNAME_SIZE_DIFFER, nameLen, dName.c_str(), nameLen) != 0) {
+        NETNATIVE_LOGE("memcpy_s faild");
+        return NETMANAGER_ERR_MEMCPY_FAIL;
+    }
+    uint32_t i = 0;
+    uint32_t j = 0;
     for (i = HOSTNAME_SIZE_DIFFER; snapName[i]; i = j + 1) {
         for (j = i; snapName[j] && snapName[j] != DOT; j++) {
         };
@@ -580,11 +608,14 @@ int32_t DnsLookUpParse::ResMkQuery(int32_t op, const std::string dName, int32_t 
 
     timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
-    int32_t id = ts.tv_nsec + ((ts.tv_nsec / MAX_BIT) & MAX_FOR_KEY);
+    int32_t id = ts.tv_nsec + (static_cast<uint64_t>(ts.tv_nsec / MAX_BIT) & MAX_FOR_KEY);
     snapName[ARG_INDEX_0] = id / NAME_MAX_BIT;
     snapName[ARG_INDEX_1] = id;
 
-    (void)memcpy_s(buf, nameNum, snapName, nameNum);
+    if (memcpy_s(buf, nameNum, snapName, nameNum) != 0) {
+        NETNATIVE_LOGE("memcpy_s faild");
+        return NETMANAGER_ERR_MEMCPY_FAIL;
+    }
     return nameNum;
 }
 } // namespace nmd

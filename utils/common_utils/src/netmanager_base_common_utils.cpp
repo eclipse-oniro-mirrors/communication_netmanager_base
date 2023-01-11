@@ -67,22 +67,6 @@ constexpr int32_t NET_MASK_GROUP_COUNT = 4;
 std::mutex g_commonUtilsMutex;
 std::mutex g_forkExecMutex;
 
-std::vector<std::string> Split(const std::string &str, const std::string &sep)
-{
-    std::string s = str;
-    std::vector<std::string> res;
-    while (!s.empty()) {
-        size_t pos = s.find(sep);
-        if (pos == std::string::npos) {
-            res.emplace_back(s);
-            break;
-        }
-        res.emplace_back(s.substr(0, pos));
-        s = s.substr(pos + sep.size());
-    }
-    return res;
-}
-
 std::string Strip(const std::string &str, char ch)
 {
     auto size = static_cast<int64_t>(str.size());
@@ -153,7 +137,7 @@ std::string GetMaskByLength(uint32_t length)
     auto maskGroup = new int[NET_MASK_GROUP_COUNT];
     for (int i = 0; i < NET_MASK_GROUP_COUNT; i++) {
         int pos = NET_MASK_GROUP_COUNT - 1 - i;
-        maskGroup[pos] = (mask >> (i * BIT_NUM_BYTE)) & 0x000000ff;
+        maskGroup[pos] = (static_cast<uint32_t>(mask) >> (i * BIT_NUM_BYTE)) & 0x000000ff;
     }
     std::string sMask = "" + std::to_string(maskGroup[0]);
     for (int i = 1; i < NET_MASK_GROUP_COUNT; i++) {
@@ -370,11 +354,9 @@ std::vector<const char *> FormatCmd(const std::vector<std::string> &cmd)
 {
     std::vector<const char *> res;
     res.reserve(cmd.size() + 1);
-    
+
     // string is converted to char * and the result is saved in res
-    std::transform(cmd.begin(), cmd.end(), std::back_inserter(res), [](const std::string &str) {
-        return str.c_str();
-    });
+    std::transform(cmd.begin(), cmd.end(), std::back_inserter(res), [](const std::string &str) { return str.c_str(); });
     res.emplace_back(nullptr);
     return res;
 }
