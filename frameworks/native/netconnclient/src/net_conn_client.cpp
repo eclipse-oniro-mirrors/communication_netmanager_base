@@ -367,14 +367,14 @@ int32_t NetConnClient::GetHttpProxy(std::string &httpProxy)
     return proxy->GetHttpProxy(httpProxy);
 }
 
-int32_t NetConnClient::GetNetIdByIdentifier(const std::string &ident, int32_t &netId)
+int32_t NetConnClient::GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList)
 {
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->GetNetIdByIdentifier(ident, netId);
+    return proxy->GetNetIdByIdentifier(ident, netIdList);
 }
 
 int32_t NetConnClient::SetAppNet(int32_t netId)

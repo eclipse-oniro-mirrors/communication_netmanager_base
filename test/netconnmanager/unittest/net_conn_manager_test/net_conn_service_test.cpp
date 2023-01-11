@@ -213,8 +213,8 @@ HWTEST_F(NetConnServiceTest, NetDetectionTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceTest, GetNetIdByIdentifierTest001, TestSize.Level1)
 {
-    int32_t netId = 0;
-    auto ret = DelayedSingleton<NetConnService>::GetInstance()->GetNetIdByIdentifier(TEST_IDENT, netId);
+    std::list<int32_t> netIdList;
+    auto ret = DelayedSingleton<NetConnService>::GetInstance()->GetNetIdByIdentifier(TEST_IDENT, netIdList);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

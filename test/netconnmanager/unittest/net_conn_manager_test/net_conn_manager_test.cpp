@@ -564,12 +564,11 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 
     OHOS::NetManagerStandard::AccessToken token(testInfoParms, testNetInfoPolicyPrams);
-    int32_t netId = 0;
-    result = DelayedSingleton<NetConnClient>::GetInstance()->GetNetIdByIdentifier(ident, netId);
-    std::cout << "Identifier:" << ident << ", net id:" << netId << std::endl;
+    std::list<int32_t> netIdList;
+    result = DelayedSingleton<NetConnClient>::GetInstance()->GetNetIdByIdentifier(ident, netIdList);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     NetLinkInfo info;
-    NetHandle netHandle(netId);
+    NetHandle netHandle(netIdList.front());
     result = DelayedSingleton<NetConnClient>::GetInstance()->GetConnectionProperties(netHandle, info);
     std::cout << "result = " << result << std::endl;
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
@@ -675,13 +674,15 @@ HWTEST_F(NetConnManagerTest, NetConnManager016, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager017, TestSize.Level1)
 {
-    int32_t netId;
+    std::list<int32_t> netIdList;
     int32_t result;
-    std::set<std::string> idents = {"eth0", "eth1", "slotId0", "slotId1", "wifi"};
+    std::set<std::string> idents = {"eth0", "eth1", "simId1", "wifi"};
     for (auto ident : idents) {
-        netId = 0;
-        result = DelayedSingleton<NetConnClient>::GetInstance()->GetNetIdByIdentifier(ident, netId);
-        std::cout << "Get net id:" << netId << " through ident:" << ident << std::endl;
+        netIdList.clear();
+        result = DelayedSingleton<NetConnClient>::GetInstance()->GetNetIdByIdentifier(ident, netIdList);
+        for (auto netId : netIdList) {
+            std::cout << "Get net id:" << netId << " through ident:" << ident << std::endl;
+        }
         ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     }
 }

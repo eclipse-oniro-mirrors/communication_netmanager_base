@@ -1211,7 +1211,7 @@ int32_t NetConnService::GetHttpProxy(std::string &httpProxy)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::GetNetIdByIdentifier(const std::string &ident, int32_t &netId)
+int32_t NetConnService::GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList)
 {
     if (ident.empty()) {
         NETMGR_LOG_E("The identifier in service is null");
@@ -1223,8 +1223,8 @@ int32_t NetConnService::GetNetIdByIdentifier(const std::string &ident, int32_t &
             continue;
         }
         if (iterSupplier.second->GetNetSupplierIdent() == ident) {
-            netId = iterSupplier.second->GetNetId();
-            break;
+            int32_t netId = iterSupplier.second->GetNetId();
+            netIdList.push_back(netId);
         }
     }
     return NETMANAGER_SUCCESS;

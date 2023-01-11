@@ -1116,7 +1116,7 @@ int32_t NetConnServiceProxy::GetHttpProxy(std::string &httpProxy)
     return ret;
 }
 
-int32_t NetConnServiceProxy::GetNetIdByIdentifier(const std::string &ident, int32_t &netId)
+int32_t NetConnServiceProxy::GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -1150,9 +1150,17 @@ int32_t NetConnServiceProxy::GetNetIdByIdentifier(const std::string &ident, int3
     }
 
     if (ret == NETMANAGER_SUCCESS) {
-        if (!reply.ReadInt32(netId)) {
-            NETMGR_LOG_E("Read net id failed");
+        int32_t size = 0;
+        if (!reply.ReadInt32(size)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+        size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
+        int32_t value = 0;
+        for (int32_t i = 0; i < size; ++i) {
+            if (!reply.ReadInt32(value)) {
+                return NETMANAGER_ERR_READ_REPLY_FAIL;
+            }
+            netIdList.push_back(value);
         }
     }
     return ret;

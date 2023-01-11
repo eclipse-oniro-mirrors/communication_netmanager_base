@@ -62,9 +62,9 @@ public:
     int32_t IsDefaultNetMetered(bool &isMetered);
     int32_t SetHttpProxy(const std::string &httpProxy);
     int32_t GetHttpProxy(std::string &httpProxy);
-    int32_t GetNetIdByIdentifier(const std::string &ident, int32_t &netId);
     int32_t SetAppNet(int32_t netId);
     int32_t GetAppNet(int32_t &netId);
+    int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList);
 
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {

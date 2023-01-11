@@ -102,7 +102,10 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
     if (requestFunc == nullptr) {
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-    if (CheckPermission(itFunc->second.second)) {
+    if (code != CMD_NM_GETDEFAULTNETWORK && CheckPermission(itFunc->second.second)) {
+        return (this->*requestFunc)(data, reply);
+    }
+    if (code == CMD_NM_GETDEFAULTNETWORK && CheckPermissionWithCache(itFunc->second.second)) {
         return (this->*requestFunc)(data, reply);
     }
     if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
@@ -117,6 +120,16 @@ bool NetConnServiceStub::CheckPermission(const std::set<std::string> &permission
 {
     for (const auto &permission : permissions) {
         if (!NetManagerPermission::CheckPermission(permission)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool NetConnServiceStub::CheckPermissionWithCache(const std::set<std::string> &permissions)
+{
+    for (const auto &permission : permissions) {
+        if (!NetManagerPermission::CheckPermissionWithCache(permission)) {
             return false;
         }
     }
@@ -804,15 +817,21 @@ int32_t NetConnServiceStub::OnGetNetIdByIdentifier(MessageParcel &data, MessageP
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int32_t netId = 0;
-    int32_t ret = GetNetIdByIdentifier(ident, netId);
+    std::list<int32_t> netIdList;
+    int32_t ret = GetNetIdByIdentifier(ident, netIdList);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
     if (ret == NETMANAGER_SUCCESS) {
-        if (!reply.WriteInt32(netId)) {
+        int32_t size = static_cast<int32_t>(netIdList.size());
+        if (!reply.WriteInt32(size)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        for (auto p = netIdList.begin(); p != netIdList.end(); ++p) {
+            if (!reply.WriteInt32(*p)) {
+                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+            }
         }
     }
     return ret;

@@ -240,10 +240,10 @@ public:
      * Get net id by identifier
      *
      * @param ident Net identifier
-     * @param netId output param, the net id
+     * @param netIdList output param, the net id list
      * @return NETMANAGER_SUCCESS if OK, ERR_NO_NET_IDENT if ident is null string
      */
-    int32_t GetNetIdByIdentifier(const std::string &ident, int32_t &netId) override;
+    int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList) override;
 
     /**
      * Activate network timeout
