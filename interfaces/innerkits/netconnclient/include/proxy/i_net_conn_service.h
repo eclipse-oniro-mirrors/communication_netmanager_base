@@ -102,7 +102,7 @@ public:
     virtual int32_t IsDefaultNetMetered(bool &isMetered) = 0;
     virtual int32_t SetHttpProxy(const std::string &httpProxy) = 0;
     virtual int32_t GetHttpProxy(std::string &httpProxy) = 0;
-    virtual int32_t GetNetIdByIdentifier(const std::string &ident, int32_t &netId) = 0;
+    virtual int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
