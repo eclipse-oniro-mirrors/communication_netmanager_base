@@ -16,14 +16,16 @@
 #include "dns_lookup_name.h"
 
 #include "fwmark_client.h"
+#include "net_manager_constants.h"
 
 namespace OHOS {
 namespace nmd {
+using namespace NetManagerStandard;
 static constexpr int32_t HOST_NAME_LEN = 10;
 static constexpr int32_t TEMPORARY_FAILURE = 2;
 static constexpr int32_t NO_ERROR = 3;
 
-static constexpr int32_t ADDR_SECOND_LAST_BIT = 15;
+static constexpr uint32_t ADDR_SECOND_LAST_BIT = 15;
 static constexpr int32_t PREFIX_SIZE = 128;
 static constexpr int32_t PREFIX_LEN = 8;
 static constexpr int32_t BUFF_NUM = 2;
@@ -69,7 +71,7 @@ int32_t DnsLookUpName::NameFromNull(AddrData buf[SECOND_ADDR_IN_BUFF], const std
         return DNS_ERR_NONE;
     }
     int32_t cnt = 0;
-    if (flags & AI_PASSIVE) {
+    if (static_cast<uint32_t>(flags) & AI_PASSIVE) {
         if (family != AF_INET6) {
             buf[cnt++] = (AddrData){.family = AF_INET};
         }
@@ -195,7 +197,10 @@ int32_t DnsLookUpName::NameFromDnsSearch(AddrData buf[MAXADDRS], char canon[CANO
         if (temp - pos < SEARCH_MAX_LEN - nameLen - LOOKUP_NAME_ONE) {
             uint32_t cannonAddLen = nameLen + LOOKUP_NAME_ONE;
             uint32_t posLen = temp - pos;
-            (void)memcpy_s(canon + cannonAddLen, posLen, pos, posLen);
+            if (memcpy_s(canon + cannonAddLen, posLen, pos, posLen) != 0) {
+                NETNATIVE_LOGE("memcpy_s faild");
+                return NETMANAGER_ERR_MEMCPY_FAIL;
+            }
             canon[temp - pos + LOOKUP_NAME_ONE + nameLen] = LOOKUP_NAME_ZERO;
             int32_t cnt = NameFromDns(buf, canon, canon, family, &conf, netId);
             if (cnt) {
@@ -272,7 +277,7 @@ int32_t DnsLookUpName::CheckNameParam(const std::string name, int32_t &flags, in
         canon = const_cast<char *>(name.c_str());
     }
 
-    if (flags & AI_V4MAPPED) {
+    if (static_cast<uint32_t>(flags) & AI_V4MAPPED) {
         if (family == AF_INET6) {
             family = AF_UNSPEC;
         } else {
@@ -295,10 +300,10 @@ void DnsLookUpName::RefreshBuf(AddrData *buf, int32_t num, int32_t &cnt)
 
 bool DnsLookUpName::UpdateBuf(int32_t flags, int32_t family, AddrData *buf, int32_t &cnt)
 {
-    if ((flags & AI_V4MAPPED)) {
-        int32_t i;
-        if (!(flags & AI_ALL)) {
-            for (i = 0; i < cnt && buf[i].family != AF_INET6; i++) {
+    if ((static_cast<uint32_t>(flags) & AI_V4MAPPED)) {
+        uint32_t i = 0;
+        if (!(static_cast<uint32_t>(flags) & AI_ALL)) {
+            for (; i < cnt && buf[i].family != AF_INET6; i++) {
             };
             if (i < cnt) {
                 RefreshBuf(buf, i, cnt);
@@ -308,8 +313,12 @@ bool DnsLookUpName::UpdateBuf(int32_t flags, int32_t family, AddrData *buf, int3
             if (buf[i].family != AF_INET) {
                 continue;
             }
-            (void)memcpy_s(buf[i].addr + NAMESERVICES_LEN, ADDR_LEN, buf[i].addr, ADDR_LEN);
-            (void)memcpy_s(buf[i].addr, NAMESERVICES_LEN, ADDR_BUF, NAMESERVICES_LEN);
+            uint32_t ret = memcpy_s(buf[i].addr + NAMESERVICES_LEN, ADDR_LEN, buf[i].addr, ADDR_LEN);
+            ret += memcpy_s(buf[i].addr, NAMESERVICES_LEN, ADDR_BUF, NAMESERVICES_LEN);
+            if (ret != 0) {
+                NETNATIVE_LOGE("memcpy_s faild");
+                return false;
+            }
             buf[i].family = AF_INET6;
         }
     }
@@ -330,21 +339,26 @@ void DnsLookUpName::SockAddrCopy(ScokAddrCopy addrBuff, void *da, void *sa, int3
                                  int32_t &key)
 {
     if (!connect(addrBuff.lookUpNameFd, (sockaddr *)da, addrBuff.daLen)) {
-        key |= DAS_USABLE;
+        key = static_cast<uint32_t>(key) | DAS_USABLE;
         int32_t res = getsockname(addrBuff.lookUpNameFd, (sockaddr *)sa, &addrBuff.saLen);
-        if (!res) {
-            if (addrBuff.family == AF_INET) {
-                (void)memcpy_s(addrBuff.sa6.sin6_addr.s6_addr + NAMESERVICES_LEN, ADDR_A4_LEN, &addrBuff.sa4.sin_addr,
-                               ADDR_A4_LEN);
-            }
-            if (dScope == ScopeOf(&addrBuff.sa6.sin6_addr)) {
-                key |= DAS_MATCHINGSCOPE;
-            }
-            if (addrBuff.dLabel == LabelOf(&addrBuff.sa6.sin6_addr)) {
-                key |= DAS_MATCHINGLABEL;
-            }
-            preFixLen = PreFixMatch(&addrBuff.sa6.sin6_addr, &addrBuff.da6.sin6_addr);
+        if (res) {
+            (void)close(addrBuff.lookUpNameFd);
+            return;
         }
+        if (addrBuff.family == AF_INET) {
+            if (memcpy_s(addrBuff.sa6.sin6_addr.s6_addr + NAMESERVICES_LEN, ADDR_A4_LEN, &addrBuff.sa4.sin_addr,
+                         ADDR_A4_LEN) != 0) {
+                NETNATIVE_LOGE("memcpy_s faild");
+                return;
+            }
+        }
+        if (dScope == ScopeOf(&addrBuff.sa6.sin6_addr)) {
+            key = static_cast<uint32_t>(key) | DAS_MATCHINGSCOPE;
+        }
+        if (addrBuff.dLabel == LabelOf(&addrBuff.sa6.sin6_addr)) {
+            key = static_cast<uint32_t>(key) | DAS_MATCHINGLABEL;
+        }
+        preFixLen = PreFixMatch(&addrBuff.sa6.sin6_addr, &addrBuff.da6.sin6_addr);
     }
     (void)close(addrBuff.lookUpNameFd);
 }
@@ -356,16 +370,31 @@ int32_t DnsLookUpName::FindName(AddrData *buf, char *canon, const std::string na
     if (!cnt) {
         cnt = NameFromNumeric(buf, name, family);
     }
-    if (!cnt && !(flags & AI_NUMERICHOST)) {
+    if (!cnt && !(static_cast<uint32_t>(flags) & AI_NUMERICHOST)) {
         cnt = NameFromDnsSearch(buf, canon, name.c_str(), family, netId);
     }
     NETNATIVE_LOG_D("FindName cnt : %{public}d", cnt);
     return cnt;
 }
 
+int32_t DnsLookUpName::MemcpySockaddr(sockaddr_in6 &sa6, sockaddr_in6 &da6, sockaddr_in &da4, AddrData *buf,
+                                      uint32_t cnt)
+{
+    uint32_t ret = memcpy_s(sa6.sin6_addr.s6_addr, NAMESERVICES_LEN, ADDR_BUF, NAMESERVICES_LEN);
+    ret += memcpy_s(da6.sin6_addr.s6_addr + NAMESERVICES_LEN, ADDR_A4_LEN, buf[cnt].addr, ADDR_A4_LEN);
+    ret += memcpy_s(da6.sin6_addr.s6_addr, NAMESERVICES_LEN, ADDR_BUF, NAMESERVICES_LEN);
+    ret += memcpy_s(da6.sin6_addr.s6_addr + NAMESERVICES_LEN, ADDR_A4_LEN, buf[cnt].addr, ADDR_A4_LEN);
+    ret += memcpy_s(&da4.sin_addr, ADDR_A4_LEN, buf[cnt].addr, ADDR_A4_LEN);
+    if (ret != 0) {
+        NETNATIVE_LOGE("memcpy_s faild");
+        return -1;
+    }
+    return 0;
+}
+
 void DnsLookUpName::LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId)
 {
-    for (int i = 0; i < cnt; i++) {
+    for (uint32_t i = 0; i < cnt; i++) {
         int32_t family = buf[i].family;
         int32_t key = 0;
         sockaddr_in6 sa6 = {0};
@@ -379,17 +408,18 @@ void DnsLookUpName::LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId)
         void *sa, *da;
         socklen_t saLen, daLen;
         if (family == AF_INET6) {
-            (void)memcpy_s(da6.sin6_addr.s6_addr, ADDR_A6_LEN, buf[i].addr, ADDR_A6_LEN);
+            if (memcpy_s(da6.sin6_addr.s6_addr, ADDR_A6_LEN, buf[i].addr, ADDR_A6_LEN) != 0) {
+                NETNATIVE_LOGE("memcpy_s faild");
+                return;
+            }
             da = &da6;
             daLen = sizeof(da6);
             sa = &sa6;
             saLen = sizeof(da6);
         } else {
-            (void)memcpy_s(sa6.sin6_addr.s6_addr, NAMESERVICES_LEN, ADDR_BUF, NAMESERVICES_LEN);
-            (void)memcpy_s(da6.sin6_addr.s6_addr + NAMESERVICES_LEN, ADDR_A4_LEN, buf[i].addr, ADDR_A4_LEN);
-            (void)memcpy_s(da6.sin6_addr.s6_addr, NAMESERVICES_LEN, ADDR_BUF, NAMESERVICES_LEN);
-            (void)memcpy_s(da6.sin6_addr.s6_addr + NAMESERVICES_LEN, ADDR_A4_LEN, buf[i].addr, ADDR_A4_LEN);
-            (void)memcpy_s(&da4.sin_addr, ADDR_A4_LEN, buf[i].addr, ADDR_A4_LEN);
+            if (MemcpySockaddr(sa6, da6, da4, buf, i) < 0) {
+                return;
+            }
             da = &da4;
             daLen = sizeof(da4);
             sa = &sa4;
@@ -398,7 +428,7 @@ void DnsLookUpName::LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId)
         const policy *dPolicy = PolicyOf(&da6.sin6_addr);
         int32_t dScope = ScopeOf(&da6.sin6_addr);
         int32_t dLabel = dPolicy->label;
-        int32_t dPrec = dPolicy->prec;
+        uint32_t dPrec = dPolicy->prec;
         int32_t preFixLen = 0;
         int32_t lookUpNameFd = socket(family, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
         if (lookUpNameFd >= 0) {
@@ -415,9 +445,9 @@ void DnsLookUpName::LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId)
             SockAddrCopy(addrBuff, da, sa, dScope, preFixLen, key);
         }
         key |= dPrec << DAS_PREC_SHIFT;
-        key |= (DSCOPE_MAX_LEN - dScope) << DAS_SCOPE_SHIFT;
-        key |= preFixLen << DAS_PREFIX_SHIFT;
-        key |= (MAXADDRS - i) << DAS_ORDER_SHIFT;
+        key |= static_cast<uint32_t>(DSCOPE_MAX_LEN - dScope) << DAS_SCOPE_SHIFT;
+        key |= static_cast<uint32_t>(preFixLen) << DAS_PREFIX_SHIFT;
+        key |= static_cast<uint32_t>(MAXADDRS - i) << DAS_ORDER_SHIFT;
         buf[i].sortKey = key;
     }
 }
@@ -516,7 +546,7 @@ int32_t DnsLookUpName::LookUpServer(ServData buf[MAXSERVS], const std::string na
         return cnt;
     }
 
-    if (flags & AI_NUMERICSERV) {
+    if (static_cast<uint32_t>(flags) & AI_NUMERICSERV) {
         return EAI_NONAME;
     }
     return EAI_SERVICE;

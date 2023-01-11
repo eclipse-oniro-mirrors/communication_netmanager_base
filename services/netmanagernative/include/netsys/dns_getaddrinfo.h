@@ -42,9 +42,11 @@ public:
 
 private:
     static void ParseAddr(int32_t nAddrs, int32_t nServs, ServData (&ports)[MAXSERVS], AddrData (&addrs)[MAXADDRS],
-                          char *outCanon, AddrInfoBuf *out);
+                          char *outCanon, addrinfo **out);
     static int32_t CheckHints(const addrinfo *hint);
     static int32_t GetFamily(int32_t &family, uint16_t netId);
+    static void SwitchFamilyInet(addrinfo *node, sockaddr_in *sin, AddrData addrs, uint16_t port);
+    static void SwitchFamilyInet6(addrinfo *node, sockaddr_in6 *sin6, AddrData addrs, uint16_t port);
 };
 } // namespace nmd
 } // namespace OHOS

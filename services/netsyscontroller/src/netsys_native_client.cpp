@@ -136,8 +136,9 @@ NetsysNativeClient::NetsysNativeClient()
 {
     std::thread([this]() {
         uint32_t count = 0;
-        while (GetProxy() == nullptr && count++ < MAX_GET_SERVICE_COUNT) {
+        while (GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
             std::this_thread::sleep_for(std::chrono::seconds(WAIT_FOR_SERVICE_TIME_S));
+            count++;
         }
         auto proxy = GetProxy();
         NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
