@@ -281,6 +281,7 @@ int32_t NetsysNativeServiceStub::CmdGetAddrInfo(MessageParcel &data, MessageParc
         }
         reply.WriteRawData((char *)res_p1->ai_addr, res_p1->ai_addrlen);
     }
+    NetsysFreeAddrinfo(result);
     return ERR_NONE;
 }
 
