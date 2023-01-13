@@ -86,14 +86,20 @@ sptr<NetsysAddrInfoParcel> NetsysAddrInfoParcel::Unmarshalling(MessageParcel &pa
         const uint8_t *buffer = canSize > 0 ? (uint8_t *)parcelMsg.ReadRawData(canSize) : nullptr;
         if (buffer != nullptr) {
             node->ai_canonname = static_cast<char *>(calloc(sizeof(char), (canSize + 1)));
-            (void)memcpy_s(node->ai_canonname, canSize, buffer, canSize);
+            if (memcpy_s(node->ai_canonname, canSize, buffer, canSize) != 0) {
+                NETNATIVE_LOGE("memcpy_s faild");
+                return nullptr;
+            }
         }
         node->ai_addr = nullptr;
         const sockaddr *aiAddr = static_cast<sockaddr *>(const_cast<void *>(parcelMsg.ReadRawData(node->ai_addrlen)));
 
         if (aiAddr) {
             node->ai_addr = static_cast<sockaddr *>(calloc(1, node->ai_addrlen + 1));
-            (void)memcpy_s(node->ai_addr, node->ai_addrlen, aiAddr, node->ai_addrlen);
+            if (memcpy_s(node->ai_addr, node->ai_addrlen, aiAddr, node->ai_addrlen) != 0) {
+                NETNATIVE_LOGE("memcpy_s faild");
+                return nullptr;
+            }
         }
         node->ai_next = nullptr;
         if (count == 0) {

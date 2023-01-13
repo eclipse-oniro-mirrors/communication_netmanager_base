@@ -118,6 +118,7 @@ private:
     static int32_t FindName(AddrData *buf, char *canon, const std::string name, int32_t family, int32_t flags,
                             uint16_t netId);
     void LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId);
+    int32_t MemcpySockaddr(sockaddr_in6 &sa6, sockaddr_in6 &da6, sockaddr_in &da4, AddrData *buf, uint32_t cnt);
 };
 } // namespace nmd
 } // namespace OHOS
