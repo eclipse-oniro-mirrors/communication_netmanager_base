@@ -37,7 +37,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr uint32_t MAX_REQUEST_NUM = 200;
+constexpr uint32_t MAX_REQUEST_NUM = 2000;
 class NetConnService : public SystemAbility,
                        public INetActivateCallback,
                        public NetConnServiceStub,

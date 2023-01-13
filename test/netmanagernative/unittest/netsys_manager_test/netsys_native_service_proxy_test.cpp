@@ -56,10 +56,11 @@ HWTEST_F(NetsysNativeServiceProxyTest, AddInterfaceToNetworkTest001, TestSize.Le
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
+    netsysNativeService->NetworkCreatePhysical(NETID, nmd::NetworkPermission::PERMISSION_NONE);
     int32_t ret = netsysNativeService->NetworkAddInterface(NETID, INTERFACENAME);
     EXPECT_TRUE(ret == 0);
     ret = netsysNativeService->InterfaceAddAddress(INTERFACENAME, "192.168.113.209", 24);
-    EXPECT_TRUE(ret != 0);
+    EXPECT_TRUE(ret == 0);
 }
 
 /**
@@ -87,7 +88,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, SetDefaultNetworkTest001, TestSize.Level1
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->NetworkSetDefault(NETID);
-    EXPECT_TRUE(ret != 0);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -100,7 +101,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetDefaultNetworkTest001, TestSize.Level1
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->NetworkGetDefault();
-    EXPECT_LE(ret, 0);
+    EXPECT_EQ(ret, NETID);
 }
 
 /**
