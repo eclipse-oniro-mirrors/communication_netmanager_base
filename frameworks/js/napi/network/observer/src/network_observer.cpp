@@ -65,7 +65,8 @@ static napi_value MakeNetworkResponse(napi_env env, NetworkType *data)
 
 #if HAS_TELEPHONY
     if (netType->bearerTypes.find(BEARER_CELLULAR) != netType->bearerTypes.end()) {
-        auto vec = DelayedRefSingleton<Telephony::CoreServiceClient>::GetInstance().GetSignalInfoList(0);
+        std::vector<sptr<Telephony::SignalInformation>> vec;
+        DelayedRefSingleton<Telephony::CoreServiceClient>::GetInstance().GetSignalInfoList(0, vec);
         if (vec.empty()) {
             NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, NETWORK_NONE);
             NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, false);
