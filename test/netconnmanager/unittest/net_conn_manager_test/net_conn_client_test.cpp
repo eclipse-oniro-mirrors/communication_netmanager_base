@@ -342,5 +342,53 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest002, TestSize.Level1)
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplierCallback(supplierId, callback);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.name: SetAppNetTest001
+ * @tc.desc: Test NetConnClient::SetAppNet, if param is invalid, SetAppNet return NET_CONN_ERR_INVALID_NETWORK
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, SetAppNetTest001, TestSize.Level1)
+{
+    int32_t netId = 99;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(netId);
+    EXPECT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
+}
+
+/**
+ * @tc.name: SetAppNetTest002
+ * @tc.desc: Test NetConnClient::SetAppNet, if param is valid, SetAppNet return NETMANAGER_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, SetAppNetTest002, TestSize.Level1)
+{
+    int32_t netId = 101;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(netId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    int32_t cancelNetId = 0;
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(cancelNetId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: GetAppNetTest001
+ * @tc.desc: Test NetConnClient::GetAppNet, return NetId set by SetAppNet
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, GetAppNetTest001, TestSize.Level1)
+{
+    int32_t netId = 102;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(netId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    int32_t getNetId = 0;
+    DelayedSingleton<NetConnClient>::GetInstance()->GetAppNet(getNetId);
+    EXPECT_EQ(getNetId, netId);
+
+    int32_t cancelNetId = 0;
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(cancelNetId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

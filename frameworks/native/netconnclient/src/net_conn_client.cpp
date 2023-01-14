@@ -25,6 +25,8 @@
 #include "net_mgr_log_wrapper.h"
 #include "net_supplier_callback_stub.h"
 
+static constexpr const int32_t MIN_VALID_NETID = 100;
+
 namespace OHOS {
 namespace NetManagerStandard {
 NetConnClient::NetConnClient() : NetConnService_(nullptr), deathRecipient_(nullptr) {}
@@ -379,6 +381,9 @@ int32_t NetConnClient::GetNetIdByIdentifier(const std::string &ident, std::list<
 
 int32_t NetConnClient::SetAppNet(int32_t netId)
 {
+    if (netId < MIN_VALID_NETID && netId != 0) {
+        return NET_CONN_ERR_INVALID_NETWORK;
+    }
     SetNetForApp(netId);
     return NETMANAGER_SUCCESS;
 }
