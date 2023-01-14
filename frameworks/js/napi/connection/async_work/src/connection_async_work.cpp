@@ -15,6 +15,7 @@
 
 #include "connection_async_work.h"
 
+#include "app_net_context.h"
 #include "connection_exec.h"
 #include "base_async_work.h"
 #include "none_params_context.h"
@@ -138,6 +139,26 @@ void ConnectionAsyncWork::ReportNetDisconnectedCallback(napi_env env, napi_statu
 {
     BaseAsyncWork::AsyncWorkCallback<ReportNetDisconnectedContext, ConnectionExec::ReportNetDisconnectedCallback>(
         env, status, data);
+}
+
+void ConnectionAsyncWork::ExecGetAppNet(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<AppNetContext, ConnectionExec::ExecGetAppNet>(env, data);
+}
+
+void ConnectionAsyncWork::GetAppNetCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<AppNetContext, ConnectionExec::GetAppNetCallback>(env, status, data);
+}
+
+void ConnectionAsyncWork::ExecSetAppNet(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<AppNetContext, ConnectionExec::ExecSetAppNet>(env, data);
+}
+
+void ConnectionAsyncWork::SetAppNetCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<AppNetContext, ConnectionExec::SetAppNetCallback>(env, status, data);
 }
 
 void ConnectionAsyncWork::NetHandleAsyncWork::ExecGetAddressesByName(napi_env env, void *data)
