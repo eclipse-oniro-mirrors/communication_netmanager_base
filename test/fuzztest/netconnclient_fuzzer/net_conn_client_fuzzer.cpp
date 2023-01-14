@@ -30,6 +30,7 @@
 #define private public
 #include "net_conn_service.h"
 #include "net_conn_service_stub.h"
+#include "net_conn_client.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -674,6 +675,19 @@ void GetNetIdByIdentifierFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(ident);
     OnRemoteRequest(INetConnService::CMD_NM_GET_NET_ID_BY_IDENTIFIER, dataParcel);
 }
+
+void SetAppNetFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    int32_t netId = GetData<int32_t>();
+    DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(netId);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -703,5 +717,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::SetHttpProxyFuzzTest(data, size);
     OHOS::NetManagerStandard::GetHttpProxyFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetIdByIdentifierFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetAppNetFuzzTest(data, size);
     return 0;
 }
