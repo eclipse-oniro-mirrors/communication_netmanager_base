@@ -15,13 +15,17 @@ import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_shared_library("fwmark_client") {
-  sources = [ "src/fwmark_client.cpp" ]
+  sources = [
+    "src/fwmark_client.cpp",
+    "src/netsys_sock_client.cpp",
+  ]
 
   include_dirs = [
     "$INNERKITS_ROOT/netmanagernative/include",
     "$INNERKITS_ROOT/include",
     "include",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "//third_party/musl/porting/linux/user/src/hook",
   ]
 
   external_deps = [ "c_utils:utils" ]

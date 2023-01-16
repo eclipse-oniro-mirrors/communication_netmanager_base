@@ -283,6 +283,44 @@ napi_value ConnectionExec::ReportNetDisconnectedCallback(ReportNetConnectedConte
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
+bool ConnectionExec::ExecGetAppNet(AppNetContext *context)
+{
+    NETMANAGER_BASE_LOGI("into");
+    int32_t netId = 0;
+    int32_t errorCode = DelayedSingleton<NetConnClient>::GetInstance()->GetAppNet(netId);
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec getAppNet failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    context->netHandle_.SetNetId(netId);
+    return true;
+}
+
+napi_value ConnectionExec::GetAppNetCallback(AppNetContext *context)
+{
+    NETMANAGER_BASE_LOGI("into");
+    return CreateNetHandle(context->GetEnv(), &context->netHandle_);
+}
+
+bool ConnectionExec::ExecSetAppNet(AppNetContext *context)
+{
+    NETMANAGER_BASE_LOGI("into");
+    int32_t errorCode = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(context->netHandle_.GetNetId());
+    if (errorCode != NET_CONN_SUCCESS) {
+        NETMANAGER_BASE_LOGE("exec setAppNet failed errorCode: %{public}d", errorCode);
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::SetAppNetCallback(AppNetContext *context)
+{
+    NETMANAGER_BASE_LOGI("into");
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
 bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameContext *context)
 {
     addrinfo *res = nullptr;
