@@ -28,7 +28,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-static constexpr const int TIMER_MAX_INTERVAL_MS = 50;
+static constexpr const int TIMER_MAX_INTERVAL_MS = 200;
 class Timer {
 public:
     Timer() : stopStatus_(true), tryStopFlag_(false) {}
