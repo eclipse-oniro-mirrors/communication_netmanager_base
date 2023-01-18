@@ -748,6 +748,7 @@ void NetConnService::FindBestNetworkForAllRequest()
 uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier, sptr<NetActivate> &netActivateNetwork)
 {
     int bestScore = 0;
+    supplier = nullptr;
     if (netActivateNetwork == nullptr) {
         NETMGR_LOG_E("netActivateNetwork is null");
         return bestScore;
