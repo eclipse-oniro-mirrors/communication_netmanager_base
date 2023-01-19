@@ -240,7 +240,7 @@ int32_t NetsysController::DestroyNetworkCache(uint16_t netId)
     return netsysService_->DestroyNetworkCache(netId);
 }
 
-int32_t NetsysController::GetAddrInfo(const std::string hostName, const std::string serverName, const addrinfo *hints,
+int32_t NetsysController::GetAddrInfo(const std::string &hostName, const std::string &serverName, const addrinfo *hints,
                                       uint16_t netId, addrinfo **res)
 {
     if (netsysService_ == nullptr) {

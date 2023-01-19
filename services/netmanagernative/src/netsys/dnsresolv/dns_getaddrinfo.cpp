@@ -25,7 +25,7 @@ namespace OHOS {
 namespace nmd {
 static constexpr int32_t CANNO_LEN = 256;
 static constexpr uint32_t LOCAL_ADDR = 0x7f000001;
-static constexpr uint32_t ERROR_ADDR = 0x7f000001;
+static constexpr uint32_t ERROR_ADDR = 0x0100007f;
 int32_t DnsGetAddrInfo::GetFamily(int32_t &family, uint16_t netId)
 {
     static sockaddr_in lo4 = {0};
@@ -49,7 +49,7 @@ int32_t DnsGetAddrInfo::GetFamily(int32_t &family, uint16_t netId)
         }
         int32_t socketFd = socket(testFamilys[i], SOCK_CLOEXEC | SOCK_DGRAM, IPPROTO_UDP);
         if (socketFd >= 0) {
-            int32_t ret = connect(socketFd, (sockaddr *)testAddrs[i], testAddrLens[i]);
+            int32_t ret = connect(socketFd, static_cast<const sockaddr *>(testAddrs[i]), testAddrLens[i]);
             close(socketFd);
             if (!ret) {
                 continue;
@@ -119,7 +119,7 @@ void DnsGetAddrInfo::SwitchFamilyInet6(addrinfo *node, sockaddr_in6 *sin6, AddrD
 }
 
 void DnsGetAddrInfo::ParseAddr(int32_t nAddrs, int32_t nServs, ServData (&ports)[MAXSERVS], AddrData (&addrs)[MAXADDRS],
-                               char *outCanon, addrinfo **out)
+                               char *outCanon, int32_t canonLen, addrinfo **out)
 {
     int16_t k = 0;
     addrinfo *headNode = nullptr;
@@ -136,10 +136,10 @@ void DnsGetAddrInfo::ParseAddr(int32_t nAddrs, int32_t nServs, ServData (&ports)
             node->ai_family = addrs[i].family;
             node->ai_socktype = ports[j].sockType;
             node->ai_protocol = ports[j].proto;
-            node->ai_canonname = static_cast<char *>(calloc(sizeof(char), (sizeof(outCanon))));
+            node->ai_canonname = static_cast<char *>(calloc(sizeof(char), (canonLen + 1)));
             node->ai_addrlen = addrs[i].family == AF_INET ? static_cast<socklen_t>(sizeof(sockaddr_in))
                                                           : static_cast<socklen_t>(sizeof(sockaddr_in6));
-            if (memcpy_s(node->ai_canonname, sizeof(outCanon), outCanon, sizeof(outCanon)) != 0) {
+            if (memcpy_s(node->ai_canonname, (sizeof(char) * (canonLen + 1)), outCanon, canonLen) != 0) {
                 return;
             }
             switch (addrs[i].family) {
@@ -165,7 +165,7 @@ void DnsGetAddrInfo::ParseAddr(int32_t nAddrs, int32_t nServs, ServData (&ports)
     *out = headNode;
 }
 
-int32_t DnsGetAddrInfo::GetAddrInfo(const std::string host, const std::string serv, const addrinfo *hint,
+int32_t DnsGetAddrInfo::GetAddrInfo(const std::string &host, const std::string &serv, const addrinfo *hint,
                                     uint16_t netId, addrinfo **res)
 {
     if (host.empty() && serv.empty()) {
@@ -209,7 +209,8 @@ int32_t DnsGetAddrInfo::GetAddrInfo(const std::string host, const std::string se
     }
 
     char *outCanon = canon;
-    ParseAddr(nAddrs, nServs, servBuf, addrs, outCanon, res);
+    int32_t canonLen = strlen(canon);
+    ParseAddr(nAddrs, nServs, servBuf, addrs, outCanon, canonLen, res);
     return 0;
 }
 } // namespace nmd

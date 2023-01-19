@@ -88,10 +88,10 @@ int32_t NetConnCallbackTest::NetUnavailable()
     return 0;
 }
 
-int32_t NetConnCallbackTest::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool isBlocked)
+int32_t NetConnCallbackTest::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
 {
     NETMGR_LOG_D("NetConnCallbackTest::NetLost: netId = %{public}d bolcked = %{public}s",
-        netHandle->GetNetId(), isBlocked ? "true" : "false");
+        netHandle->GetNetId(), blocked ? "true" : "false");
     NotifyAll();
     return 0;
 }

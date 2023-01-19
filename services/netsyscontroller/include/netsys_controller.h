@@ -208,7 +208,7 @@ public:
      * @param res return addrinfo
      * @return Return the return value of the netsys interface call
      */
-    int32_t GetAddrInfo(const std::string hostName, const std::string serverName, const addrinfo *hints,
+    int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName, const addrinfo *hints,
                         uint16_t netId, addrinfo **res);
 
     /**

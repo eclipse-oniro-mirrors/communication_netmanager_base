@@ -114,7 +114,7 @@ private:
     static int32_t CheckNameParam(const std::string name, int32_t &flags, int32_t &family, char *canon);
     static bool UpdateBuf(int32_t flags, int32_t family, AddrData *buf, int32_t &cnt);
     static void RefreshBuf(AddrData *buf, int32_t num, int32_t &cnt);
-    void SockAddrCopy(ScokAddrCopy addrBuff, void *da, void *sa, int32_t &dScope, int32_t &preFixLen, int32_t &key);
+    void SockAddrCopy(ScokAddrCopy addrBuff, void *da, void *sa, int32_t &dScope, int32_t &preFixLen, uint32_t &key);
     static int32_t FindName(AddrData *buf, char *canon, const std::string name, int32_t family, int32_t flags,
                             uint16_t netId);
     void LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId);

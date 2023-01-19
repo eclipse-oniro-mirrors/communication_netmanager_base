@@ -375,8 +375,8 @@ int32_t NetsysNativeClient::DestroyNetworkCache(uint16_t netId)
     return proxy->DestroyNetworkCache(netId);
 }
 
-int32_t NetsysNativeClient::GetAddrInfo(const std::string hostName, const std::string serverName, const addrinfo *hints,
-                                        uint16_t netId, addrinfo **res)
+int32_t NetsysNativeClient::GetAddrInfo(const std::string &hostName, const std::string &serverName,
+                                        const addrinfo *hints, uint16_t netId, addrinfo **res)
 {
     if (netsysNativeService_ == nullptr) {
         NETMGR_LOG_E("GetAddrInfo netsysNativeService_ is null");

@@ -114,7 +114,6 @@ int32_t BandwidthManager::InitDefaultBwChainRules()
     bool hasError = false;
     std::string command;
     std::string chainName;
-    std::string fChainName;
 
     // -A INPUT -j ohbw_INPUT
     // -A OUTPUT -j ohbw_OUTPUT

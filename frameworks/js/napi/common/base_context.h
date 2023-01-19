@@ -34,10 +34,6 @@ struct BooleanValueContext : BaseContext {
     bool value;
 };
 
-struct RestoreFactoryDataContext : BaseContext {
-    int32_t errorCode = 0;
-};
-
 struct CallbackContext {
     napi_env env = nullptr;
     napi_ref callbackRef = nullptr;

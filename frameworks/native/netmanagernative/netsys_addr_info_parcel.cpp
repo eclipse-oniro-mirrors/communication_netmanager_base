@@ -83,7 +83,7 @@ sptr<NetsysAddrInfoParcel> NetsysAddrInfoParcel::Unmarshalling(MessageParcel &pa
         node->ai_addrlen = static_cast<socklen_t>(parcelMsg.ReadUint32());
         int16_t canSize = parcelMsg.ReadInt16();
         node->ai_canonname = nullptr;
-        const uint8_t *buffer = canSize > 0 ? (uint8_t *)parcelMsg.ReadRawData(canSize) : nullptr;
+        const uint8_t *buffer = canSize > 0 ? static_cast<const uint8_t *>(parcelMsg.ReadRawData(canSize)) : nullptr;
         if (buffer != nullptr) {
             node->ai_canonname = static_cast<char *>(calloc(sizeof(char), (canSize + 1)));
             if (memcpy_s(node->ai_canonname, canSize, buffer, canSize) != 0) {

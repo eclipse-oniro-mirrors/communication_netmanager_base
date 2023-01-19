@@ -69,8 +69,12 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
     }
 
     if (handler_ == nullptr) {
-        NETMGR_LOG_E("Net policy handler is null, re-create handler.");
+        NETMGR_LOG_E("Net policy handler is null, recreate handler.");
         InitEventHandler();
+        if (handler_ == nullptr) {
+            NETMGR_LOG_E("recreate net policy handler failed.");
+            return NETMANAGER_ERR_INTERNAL;
+        }
     }
 
     auto itFunc = memberFuncMap_.find(code);
