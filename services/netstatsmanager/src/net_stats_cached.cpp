@@ -36,7 +36,7 @@ int32_t NetStatsCached::StartCached()
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
     auto ret = helper->CreateTable(UID_TABLE, UID_TABLE_CREATE_PARAM);
-    if (ret != 0) {
+    if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Create uid table failed");
         return STATS_ERR_CREATE_TABLE_FAIL;
     }

@@ -26,6 +26,9 @@
 #include "sqlite3sym.h"
 #endif
 
+#include "net_stats_sqlite_statement.h"
+#include "net_stats_info.h"
+
 namespace OHOS {
 namespace NetManagerStandard {
 class NetStatsDatabaseHelper {
@@ -36,21 +39,24 @@ public:
     ~NetStatsDatabaseHelper();
 
     int32_t CreateTable(const std::string &tableName, const std::string &tableInfo);
-    int32_t InsertData(const std::string &tableName, const std::string &paramList, const std::string &params);
-    int32_t SelectData(const std::string &tableName, void *recv, SqlCallback callback, uint64_t start, uint64_t end);
-    int32_t SelectData(void *recv, SqlCallback callback, const uint32_t uid, uint64_t start, uint64_t end);
-    int32_t SelectData(void *recv, SqlCallback callback, const std::string &iface, uint64_t start, uint64_t end);
-    int32_t SelectData(void *recv, SqlCallback callback, const std::string &iface, const uint32_t uid, uint64_t start,
-                       uint64_t end);
+    int32_t InsertData(const std::string &tableName, const std::string &paramList,
+                       const NetStatsInfo &info);
+    int32_t SelectData(std::vector<NetStatsInfo> &infos, const std::string &tableName, uint64_t start, uint64_t end);
+    int32_t SelectData(const uint32_t uid, uint64_t start, uint64_t end, std::vector<NetStatsInfo> &infos);
+    int32_t SelectData(const std::string &iface, uint64_t start, uint64_t end, std::vector<NetStatsInfo> &infos);
+    int32_t SelectData(const std::string &iface, const uint32_t uid, uint64_t start, uint64_t end,
+                       std::vector<NetStatsInfo> &infos);
     int32_t DeleteData(const std::string &tableName, uint64_t start, uint64_t end);
     int32_t DeleteData(const std::string &tableName, uint64_t uid);
     int32_t ClearData(const std::string &tableName);
+    int32_t Step(std::vector<NetStatsInfo> &infos);
     int32_t ExecSql(const std::string &sql, void *recv, SqlCallback callback);
 
 private:
     int32_t Open(const std::string &path);
     int32_t Close();
     sqlite3 *sqlite_ = nullptr;
+    NetStatsSqliteStatement statement_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

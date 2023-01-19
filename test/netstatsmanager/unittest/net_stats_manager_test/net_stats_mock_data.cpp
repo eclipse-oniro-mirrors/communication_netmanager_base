@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 
+#include "net_manager_constants.h"
 #include "net_stats_database_helper.h"
 #include "net_stats_data_handler.h"
 #include "net_stats_database_defines.h"
@@ -86,9 +87,9 @@ HWTEST_F(NetStatsMockData, CreateTableTest001, TestSize.Level1)
         statsData.push_back(info);
     }
     int32_t ret = handler->WriteStatsData(statsData, UID_TABLE);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = handler->WriteStatsData(statsData, IFACE_TABLE);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

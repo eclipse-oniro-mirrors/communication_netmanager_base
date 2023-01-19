@@ -50,36 +50,6 @@ enum class DataType {
     UID,
     IFACE,
 };
-
-class StatsDataBuilder {
-public:
-    StatsDataBuilder() = default;
-    ~StatsDataBuilder() = default;
-
-    NetStatsInfo Build(DataType type)
-    {
-        NetStatsInfo info;
-        uint32_t index = 0;
-        if (type == DataType::UID) {
-            info.uid_ = strtoull(dataMap_[index++].c_str(), nullptr, 0);
-        }
-        info.iface_ = dataMap_[index++];
-        info.date_ = strtoull(dataMap_[index++].c_str(), nullptr, 0);
-        info.rxBytes_ = strtoull(dataMap_[index++].c_str(), nullptr, 0);
-        info.rxPackets_ = strtoull(dataMap_[index++].c_str(), nullptr, 0);
-        info.txBytes_ = strtoull(dataMap_[index++].c_str(), nullptr, 0);
-        info.txPackets_ = strtoull(dataMap_[index++].c_str(), nullptr, 0);
-        return info;
-    }
-
-    inline std::string &operator[](uint32_t i)
-    {
-        return dataMap_[i];
-    }
-
-private:
-    std::map<uint32_t, std::string> dataMap_;
-};
 } // namespace NetStatsDatabaseDefines
 } // namespace NetManagerStandard
 } // namespace OHOS
