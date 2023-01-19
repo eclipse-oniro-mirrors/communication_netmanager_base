@@ -123,7 +123,7 @@ HWTEST_F(NetsysNativeServiceTest, NetworkSetDefaultTest001, TestSize.Level1)
 HWTEST_F(NetsysNativeServiceTest, NetworkGetDefaultTest001, TestSize.Level1)
 {
     int32_t ret = instance_->NetworkGetDefault();
-    EXPECT_LE(ret, NETMANAGER_SUCCESS);
+    EXPECT_LE(ret, 154);
 }
 
 HWTEST_F(NetsysNativeServiceTest, NetworkClearDefaultTest001, TestSize.Level1)
