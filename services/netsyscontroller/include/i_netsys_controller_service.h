@@ -222,7 +222,7 @@ public:
      * @param res return addrinfo
      * @return Return the return value of the netsys interface call
      */
-    virtual int32_t GetAddrInfo(const std::string hostName, std::string serverName, const addrinfo *hints,
+    virtual int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName, const addrinfo *hints,
                                 uint16_t netId, addrinfo **res) = 0;
 
     /**

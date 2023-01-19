@@ -111,7 +111,7 @@ public:
     void StartDnsProxyListen();
     void StopDnsProxyListen();
     void GetDumpInfo(std::string &infos);
-    int32_t DnsGetAddrInfo(const std::string hostName, const std::string serverName, const addrinfo *hints,
+    int32_t DnsGetAddrInfo(const std::string &hostName, const std::string &serverName, const addrinfo *hints,
                            uint16_t netId, addrinfo **res);
 
 private:

@@ -95,7 +95,7 @@ public:
                                       uint8_t &retryCount) = 0;
     virtual int32_t CreateNetworkCache(uint16_t netId) = 0;
     virtual int32_t DestroyNetworkCache(uint16_t netId) = 0;
-    virtual int32_t GetAddrInfo(const std::string hostName, const std::string serverName,
+    virtual int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName,
                                 const struct addrinfo *hints, uint16_t netId, addrinfo **res) = 0;
     virtual int32_t InterfaceSetMtu(const std::string &interfaceName, int mtu) = 0;
     virtual int32_t InterfaceGetMtu(const std::string &interfaceName) = 0;

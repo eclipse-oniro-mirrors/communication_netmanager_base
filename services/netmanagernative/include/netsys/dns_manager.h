@@ -106,7 +106,7 @@ public:
      * @param netId network id
      * @return int32_t  0 is success -1 is failed
      */
-    int32_t GetAddrInfo(const std::string node, const std::string service, const addrinfo *hints, uint16_t netId,
+    int32_t GetAddrInfo(const std::string &node, const std::string &service, const addrinfo *hints, uint16_t netId,
                         addrinfo **result);
 
     /**

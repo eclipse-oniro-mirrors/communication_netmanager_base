@@ -95,7 +95,7 @@ void DnsManager::GetDumpInfo(std::string &info)
     DelayedSingleton<DnsParamCache>::GetInstance()->GetDumpInfo(info);
 }
 
-int32_t DnsManager::GetAddrInfo(const std::string node, const std::string service, const addrinfo *hints,
+int32_t DnsManager::GetAddrInfo(const std::string &node, const std::string &service, const addrinfo *hints,
                                 uint16_t netId, addrinfo **result)
 {
     if (netId == 0) {

@@ -37,12 +37,12 @@ public:
      * @param netId designated network
      * @return int 0-success, <0-failed
      */
-    int32_t GetAddrInfo(const std::string host, const std::string serv, const struct addrinfo *hint, uint16_t netId,
+    int32_t GetAddrInfo(const std::string &host, const std::string &serv, const addrinfo *hint, uint16_t netId,
                         addrinfo **res);
 
 private:
     static void ParseAddr(int32_t nAddrs, int32_t nServs, ServData (&ports)[MAXSERVS], AddrData (&addrs)[MAXADDRS],
-                          char *outCanon, addrinfo **out);
+                          char *outCanon, int32_t canonLen, addrinfo **out);
     static int32_t CheckHints(const addrinfo *hint);
     static int32_t GetFamily(int32_t &family, uint16_t netId);
     static void SwitchFamilyInet(addrinfo *node, sockaddr_in *sin, AddrData addrs, uint16_t port);

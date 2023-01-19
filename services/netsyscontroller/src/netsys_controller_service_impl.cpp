@@ -195,7 +195,7 @@ int32_t NetsysControllerServiceImpl::DestroyNetworkCache(uint16_t netId)
     return netsysClient_.DestroyNetworkCache(netId);
 }
 
-int32_t NetsysControllerServiceImpl::GetAddrInfo(const std::string hostName, const std::string serverName,
+int32_t NetsysControllerServiceImpl::GetAddrInfo(const std::string &hostName, const std::string &serverName,
                                                  const addrinfo *hints, uint16_t netId, addrinfo **res)
 {
     return netsysClient_.GetAddrInfo(hostName, serverName, hints, netId, res);
