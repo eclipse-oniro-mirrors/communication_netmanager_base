@@ -25,7 +25,7 @@ namespace OHOS {
 namespace nmd {
 static constexpr int32_t CANNO_LEN = 256;
 static constexpr uint32_t LOCAL_ADDR = 0x7f000001;
-static constexpr uint32_t ERROR_ADDR = 0x7f000001;
+static constexpr uint32_t ERROR_ADDR = 0x0100007f;
 int32_t DnsGetAddrInfo::GetFamily(int32_t &family, uint16_t netId)
 {
     static sockaddr_in lo4 = {0};
@@ -49,7 +49,7 @@ int32_t DnsGetAddrInfo::GetFamily(int32_t &family, uint16_t netId)
         }
         int32_t socketFd = socket(testFamilys[i], SOCK_CLOEXEC | SOCK_DGRAM, IPPROTO_UDP);
         if (socketFd >= 0) {
-            int32_t ret = connect(socketFd, (sockaddr *)testAddrs[i], testAddrLens[i]);
+            int32_t ret = connect(socketFd, static_cast<const sockaddr *>(testAddrs[i]), testAddrLens[i]);
             close(socketFd);
             if (!ret) {
                 continue;
