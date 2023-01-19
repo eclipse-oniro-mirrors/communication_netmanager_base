@@ -17,9 +17,11 @@
 
 #include <gtest/gtest.h>
 
+#include "net_manager_constants.h"
+#include "net_mgr_log_wrapper.h"
+#include "netmanager_base_common_utils.h"
 #include "net_stats_database_defines.h"
 #include "net_stats_history.h"
-#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -51,8 +53,7 @@ HWTEST_F(NetStatsHistoryTest, HistoryTest001, TestSize.Level1)
     std::vector<NetStatsInfo> infos;
     int32_t ret = history->GetHistory(infos);
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
-
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsHistoryTest, HistoryTest002, TestSize.Level1)
@@ -62,7 +63,7 @@ HWTEST_F(NetStatsHistoryTest, HistoryTest002, TestSize.Level1)
     uint64_t currentTime = CommonUtils::GetCurrentSecond();
     int32_t ret = history->GetHistory(infos, currentTime - TIME_CYCLE, currentTime + TIME_CYCLE);
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsHistoryTest, HistoryTest003, TestSize.Level1)
@@ -71,7 +72,7 @@ HWTEST_F(NetStatsHistoryTest, HistoryTest003, TestSize.Level1)
     std::vector<NetStatsInfo> infos;
     int32_t ret = history->GetHistory(infos, 1152, 0, LONG_MAX);
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsHistoryTest, HistoryTest004, TestSize.Level1)
@@ -81,7 +82,7 @@ HWTEST_F(NetStatsHistoryTest, HistoryTest004, TestSize.Level1)
     uint64_t currentTime = CommonUtils::GetCurrentSecond();
     int32_t ret = history->GetHistory(infos, 1152, currentTime - TIME_CYCLE, currentTime + TIME_CYCLE);
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsHistoryTest, HistoryTest005, TestSize.Level1)
@@ -90,7 +91,7 @@ HWTEST_F(NetStatsHistoryTest, HistoryTest005, TestSize.Level1)
     std::vector<NetStatsInfo> infos;
     int32_t ret = history->GetHistory(infos, "wlan0");
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsHistoryTest, HistoryTest006, TestSize.Level1)
@@ -100,7 +101,7 @@ HWTEST_F(NetStatsHistoryTest, HistoryTest006, TestSize.Level1)
     uint64_t currentTime = CommonUtils::GetCurrentSecond();
     int32_t ret = history->GetHistory(infos, "wlan0", currentTime - TIME_CYCLE, currentTime + TIME_CYCLE);
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsHistoryTest, HistoryTest007, TestSize.Level1)
@@ -109,7 +110,7 @@ HWTEST_F(NetStatsHistoryTest, HistoryTest007, TestSize.Level1)
     std::vector<NetStatsInfo> infos;
     int32_t ret = history->GetHistory(infos, "wlan0", 1152, 0, LONG_MAX);
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsHistoryTest, HistoryTest008, TestSize.Level1)
@@ -119,7 +120,7 @@ HWTEST_F(NetStatsHistoryTest, HistoryTest008, TestSize.Level1)
     uint64_t currentTime = CommonUtils::GetCurrentSecond();
     int32_t ret = history->GetHistory(infos, "wlan0", 1152, currentTime - TIME_CYCLE, currentTime + TIME_CYCLE);
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

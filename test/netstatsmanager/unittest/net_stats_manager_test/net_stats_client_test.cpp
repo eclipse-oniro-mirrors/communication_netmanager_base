@@ -24,6 +24,7 @@
 #include "token_setproc.h"
 
 #include "net_manager_center.h"
+#include "net_mgr_log_wrapper.h"
 #include "net_stats_callback_test.h"
 #include "net_stats_client.h"
 #include "net_stats_constants.h"
@@ -265,7 +266,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient001, TestSize.Level1)
     AccessToken token;
     NetStatsInfo info;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(MOCK_IFACE, 0, UINT32_MAX, info);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     std::cout << info.IfaceData() << std::endl;
 }
 
@@ -275,12 +276,13 @@ HWTEST_F(NetStatsClientTest, NetStatsClient002, TestSize.Level1)
     NetStatsInfo info;
     int32_t ret =
         DelayedSingleton<NetStatsClient>::GetInstance()->GetUidStatsDetail(MOCK_IFACE, MOCK_UID, 0, UINT32_MAX, info);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     std::cout << info.UidData() << std::endl;
 }
 
 HWTEST_F(NetStatsClientTest, NetStatsClient003, TestSize.Level1)
 {
+    NETMGR_LOG_I("NetStatsClientTest::NetStatsClient003 enter");
     AccessToken token;
     NetStatsInfo info;
     info.iface_ = MOCK_IFACE;
@@ -289,9 +291,10 @@ HWTEST_F(NetStatsClientTest, NetStatsClient003, TestSize.Level1)
     info.txBytes_ = MOCK_TXBYTES;
     info.rxPackets_ = MOCK_RXPACKETS;
     info.txPackets_ = MOCK_TXPACKETS;
-
+    NETMGR_LOG_I("UpdateIfacesStats enter");
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateIfacesStats(MOCK_IFACE, 0, UINT32_MAX, info);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    NETMGR_LOG_I("GetIfaceStatsDetail enter");
     DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(MOCK_IFACE, 0, UINT32_MAX, info);
     EXPECT_EQ(info.iface_, MOCK_IFACE);
     EXPECT_EQ(info.date_, UINT32_MAX);
@@ -312,7 +315,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient004, TestSize.Level1)
     info.txPackets_ = MOCK_TXPACKETS;
 
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->ResetFactory();
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

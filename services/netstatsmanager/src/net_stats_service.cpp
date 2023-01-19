@@ -162,7 +162,7 @@ bool NetStatsService::Init()
     }
     netStatsCached_->SetCallbackManager(netStatsCallback_);
     auto ret = netStatsCached_->StartCached();
-    if (ret != 0) {
+    if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Start cached failed");
         return false;
     }
@@ -266,7 +266,7 @@ int32_t NetStatsService::GetIfaceStatsDetail(const std::string &iface, uint64_t 
     auto history = std::make_unique<NetStatsHistory>();
     int32_t ret = history->GetHistory(allInfo, iface, start, end);
     netStatsCached_->GetIfaceStatsCached(allInfo);
-    if (ret != 0) {
+    if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Get traffic stats data failed");
         return ret;
     }
@@ -279,7 +279,7 @@ int32_t NetStatsService::GetIfaceStatsDetail(const std::string &iface, uint64_t 
     statsInfo.date_ = end;
     // End of get traffic data by interface name.
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetIfaceStatsDetail end");
-    return ret == 0 ? NETMANAGER_SUCCESS : STATS_ERR_READ_DATA_FAIL;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsService::GetUidStatsDetail(const std::string &iface, uint32_t uid, uint64_t start, uint64_t end,
@@ -291,7 +291,7 @@ int32_t NetStatsService::GetUidStatsDetail(const std::string &iface, uint32_t ui
     auto history = std::make_unique<NetStatsHistory>();
     int32_t ret = history->GetHistory(allInfo, iface, uid, start, end);
     netStatsCached_->GetUidStatsCached(allInfo);
-    if (ret != 0) {
+    if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Get traffic stats data failed");
         return ret;
     }
@@ -305,7 +305,7 @@ int32_t NetStatsService::GetUidStatsDetail(const std::string &iface, uint32_t ui
     statsInfo.date_ = end;
     // End of get traffic data by usr id.
     NetmanagerHiTrace::NetmanagerFinishSyncTrace("NetStatsService GetUidStatsDetail end");
-    return ret == 0 ? NETMANAGER_SUCCESS : STATS_ERR_READ_DATA_FAIL;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsService::UpdateIfacesStats(const std::string &iface, uint64_t start, uint64_t end,
@@ -317,10 +317,17 @@ int32_t NetStatsService::UpdateIfacesStats(const std::string &iface, uint64_t st
     infos.push_back(stats);
     auto handler = std::make_unique<NetStatsDataHandler>();
     auto ret = handler->DeleteByDate(IFACE_TABLE, start, end);
-    ret += handler->WriteStatsData(infos, IFACE_TABLE);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Update ifaces stats failed");
+    }
+    ret = handler->WriteStatsData(infos, IFACE_TABLE);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Update ifaces stats failed");
+        return STATS_ERR_WRITE_DATA_FAIL;
+    }
     // End of update traffic data by date.
     NetmanagerHiTrace::NetmanagerFinishSyncTrace("NetStatsService UpdateIfacesStats end");
-    return ret == 0 ? NETMANAGER_SUCCESS : STATS_ERR_WRITE_DATA_FAIL;
+    return ret;
 }
 
 int32_t NetStatsService::UpdateStatsData()
@@ -336,7 +343,7 @@ int32_t NetStatsService::UpdateStatsData()
 int32_t NetStatsService::ResetFactory()
 {
     auto handler = std::make_unique<NetStatsDataHandler>();
-    return handler->ClearData() == 0 ? NETMANAGER_SUCCESS : STATS_ERR_CLEAR_STATS_DATA_FAIL;
+    return handler->ClearData();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

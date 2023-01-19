@@ -24,8 +24,8 @@ namespace NetManagerStandard {
 
 class NetStatsDataHandler {
 public:
-    NetStatsDataHandler();
-    ~NetStatsDataHandler();
+    NetStatsDataHandler() = default;
+    ~NetStatsDataHandler() = default;
     int32_t WriteStatsData(const std::vector<NetStatsInfo> &infos, const std::string &tableName);
     int32_t ReadStatsData(std::vector<NetStatsInfo> &infos, uint64_t start, uint64_t end);
     int32_t ReadStatsData(std::vector<NetStatsInfo> &infos, uint64_t uid, uint64_t start, uint64_t end);

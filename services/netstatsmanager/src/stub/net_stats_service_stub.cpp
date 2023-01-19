@@ -76,13 +76,12 @@ int32_t NetStatsServiceStub::OnRegisterNetStatsCallback(MessageParcel &data, Mes
         reply.WriteInt32(result);
         return result;
     }
-
     sptr<INetStatsCallback> callback = iface_cast<INetStatsCallback>(remote);
     result = RegisterNetStatsCallback(callback);
     if (!reply.WriteInt32(result)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return result;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsServiceStub::OnUnregisterNetStatsCallback(MessageParcel &data, MessageParcel &reply)

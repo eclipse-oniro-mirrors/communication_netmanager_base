@@ -24,6 +24,7 @@ ohos_shared_library("net_stats_manager") {
     "src/net_stats_history.cpp",
     "src/net_stats_listener.cpp",
     "src/net_stats_service.cpp",
+    "src/net_stats_sqlite_statement.cpp",
     "src/net_stats_wrapper.cpp",
     "src/stub/net_stats_callback_proxy.cpp",
     "src/stub/net_stats_service_stub.cpp",

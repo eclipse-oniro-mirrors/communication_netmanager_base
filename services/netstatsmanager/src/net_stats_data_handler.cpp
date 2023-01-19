@@ -25,37 +25,17 @@
 namespace OHOS {
 namespace NetManagerStandard {
 using namespace NetStatsDatabaseDefines;
-namespace {
-NetStatsDatabaseHelper::SqlCallback dataHandler = [](void *recv, int argc, char **argv, char **colName) {
-    if (recv == nullptr) {
-        NETMGR_LOG_E("Unable to save data");
-        return static_cast<int32_t>(STATS_ERR_DATABASE_RECV_NO_DATA);
-    }
-    StatsDataBuilder builder;
-    for (int i = 0; i < argc; i++) {
-        builder[i] = argv[i];
-    }
-    auto data = static_cast<std::vector<NetStatsInfo> *>(recv);
-    data->emplace_back(builder.Build(argc == UID_PARAM_NUM ? DataType::UID : DataType::IFACE));
-    NETMGR_LOG_D("INFO: %{public}s", data->back().IfaceData().c_str());
-    return static_cast<int32_t>(NETMANAGER_SUCCESS);
-};
-} // namespace
-
-NetStatsDataHandler::NetStatsDataHandler() = default;
-
-NetStatsDataHandler::~NetStatsDataHandler() = default;
 
 int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uint64_t start, uint64_t end)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
-    return helper->SelectData(UID_TABLE, &infos, dataHandler, start, end);
+    return helper->SelectData(infos, UID_TABLE, start, end);
 }
 
 int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uint64_t uid, uint64_t start, uint64_t end)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
-    return helper->SelectData(&infos, dataHandler, uid, start, end);
+    return helper->SelectData(uid, start, end, infos);
 }
 
 int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, const std::string &iface, uint64_t start,
@@ -66,7 +46,7 @@ int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, con
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
-    return helper->SelectData(&infos, dataHandler, iface, start, end);
+    return helper->SelectData(iface, start, end, infos);
 }
 
 int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, const std::string &iface,
@@ -77,26 +57,25 @@ int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, con
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
-    return helper->SelectData(&infos, dataHandler, iface, uid, start, end);
+    return helper->SelectData(iface, uid, start, end, infos);
 }
 
 int32_t NetStatsDataHandler::WriteStatsData(const std::vector<NetStatsInfo> &infos, const std::string &tableName)
 {
+    NETMGR_LOG_I("WriteStatsData enter tableName:%{public}s", tableName.c_str());
     if (infos.empty() || tableName.empty()) {
         NETMGR_LOG_E("Param wrong, info: %{public}zu, tableName: %{public}zu", infos.size(), tableName.size());
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
     if (tableName == UID_TABLE) {
-        std::for_each(infos.begin(), infos.end(), [&helper](const auto &info) {
-            helper->InsertData(UID_TABLE, UID_TABLE_PARAM_LIST, info.UidData());
-        });
+        std::for_each(infos.begin(), infos.end(),
+                      [&helper](const auto &info) { helper->InsertData(UID_TABLE, UID_TABLE_PARAM_LIST, info); });
         return NETMANAGER_SUCCESS;
     }
     if (tableName == IFACE_TABLE) {
-        std::for_each(infos.begin(), infos.end(), [&helper](const auto &info) {
-            helper->InsertData(IFACE_TABLE, IFACE_TABLE_PARAM_LIST, info.IfaceData());
-        });
+        std::for_each(infos.begin(), infos.end(),
+                      [&helper](const auto &info) { helper->InsertData(IFACE_TABLE, IFACE_TABLE_PARAM_LIST, info); });
         return NETMANAGER_SUCCESS;
     }
     return NETMANAGER_ERR_PARAMETER_ERROR;
@@ -119,7 +98,10 @@ int32_t NetStatsDataHandler::ClearData()
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
     int32_t ifaceDataRet = helper->ClearData(IFACE_TABLE);
     int32_t uidDataRet = helper->ClearData(UID_TABLE);
-    return ifaceDataRet + uidDataRet;
+    if (ifaceDataRet != NETMANAGER_SUCCESS || uidDataRet != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERROR;
+    }
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

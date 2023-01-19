@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 
+#include "net_mgr_log_wrapper.h"
 #include "net_stats_constants.h"
 #include "net_stats_data_handler.h"
 #include "net_stats_database_defines.h"
@@ -100,7 +101,7 @@ HWTEST_F(NetStatsDataHandlerTest, WriteStatsDataTest001, TestSize.Level1)
     CreateMockStatsData();
     int32_t ret = handler.WriteStatsData(g_statsData, UID_TABLE);
     ClearMockStatsData();
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsDataHandlerTest, WriteStatsDataTest002, TestSize.Level1)
@@ -127,17 +128,18 @@ HWTEST_F(NetStatsDataHandlerTest, WriteStatsDataTest004, TestSize.Level1)
     CreateMockStatsData();
     int32_t ret = handler.WriteStatsData(g_statsData, IFACE_TABLE);
     ClearMockStatsData();
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest001, TestSize.Level1)
 {
+    NETMGR_LOG_E("NetStatsDataHandlerTest ReadStatsDataTest001 enter");
     NetStatsDataHandler handler;
     std::vector<NetStatsInfo> infos;
     int32_t ret = handler.ReadStatsData(infos, 0, LONG_MAX);
     std::cout << "Data size: " << infos.size() << std::endl;
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest002, TestSize.Level1)
