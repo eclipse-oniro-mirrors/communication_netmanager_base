@@ -178,7 +178,7 @@ int32_t NetsysNativeServiceProxy::DestroyNetworkCache(const uint16_t netId)
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::GetAddrInfo(const std::string hostName, const std::string serverName,
+int32_t NetsysNativeServiceProxy::GetAddrInfo(const std::string &hostName, const std::string &serverName,
                                               const addrinfo *hints, uint16_t netId, addrinfo **res)
 {
     MessageParcel data;
