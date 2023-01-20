@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "net_manager_constants.h"
 #include "netsys_policy_wrapper.h"
 
 namespace OHOS {
@@ -45,7 +46,7 @@ HWTEST_F(NetsysPolicyWrapperTest, RegisterNetsysCallbackTest001, TestSize.Level1
 {
     sptr<NetsysControllerCallback> callback = nullptr;
     auto ret = instance_->RegisterNetsysCallback(callback);
-    EXPECT_LE(ret, 0);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysPolicyWrapperTest, BandwidthEnableDataSaverTest001, TestSize.Level1)
@@ -59,42 +60,42 @@ HWTEST_F(NetsysPolicyWrapperTest, BandwidthSetIfaceQuotaTest001, TestSize.Level1
     std::string iface = "testIface";
     int64_t bytes = 666;
     auto ret = instance_->BandwidthSetIfaceQuota(iface, bytes);
-    EXPECT_LE(ret, 0);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysPolicyWrapperTest, BandwidthRemoveIfaceQuotaTest001, TestSize.Level1)
 {
     std::string iface = "testIface";
     auto ret = instance_->BandwidthRemoveIfaceQuota(iface);
-    EXPECT_LE(ret, 0);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysPolicyWrapperTest, BandwidthAddDeniedListTest001, TestSize.Level1)
 {
     uint32_t uid = 666;
     auto ret = instance_->BandwidthAddDeniedList(uid);
-    EXPECT_LE(ret, 0);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysPolicyWrapperTest, BandwidthRemoveDeniedListTest001, TestSize.Level1)
 {
     uint32_t uid = 666;
     auto ret = instance_->BandwidthRemoveDeniedList(uid);
-    EXPECT_LE(ret, 0);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysPolicyWrapperTest, BandwidthAddAllowedListTest001, TestSize.Level1)
 {
     uint32_t uid = 666;
     auto ret = instance_->BandwidthAddAllowedList(uid);
-    EXPECT_LE(ret, 0);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysPolicyWrapperTest, BandwidthRemoveAllowedListTest001, TestSize.Level1)
 {
     uint32_t uid = 666;
     auto ret = instance_->BandwidthRemoveAllowedList(uid);
-    EXPECT_LE(ret, 0);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysPolicyWrapperTest, FirewallSetUidsAllowedListChainTest001, TestSize.Level1)
