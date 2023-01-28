@@ -20,6 +20,7 @@
 
 #include "conn_manager.h"
 #include "net_conn_manager_test_util.h"
+#include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_proxy.h"
 #include "network_permission.h"
@@ -56,11 +57,12 @@ HWTEST_F(NetsysNativeServiceProxyTest, AddInterfaceToNetworkTest001, TestSize.Le
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
-    netsysNativeService->NetworkCreatePhysical(NETID, nmd::NetworkPermission::PERMISSION_NONE);
-    int32_t ret = netsysNativeService->NetworkAddInterface(NETID, INTERFACENAME);
-    EXPECT_TRUE(ret == 0);
+    int32_t ret = netsysNativeService->NetworkCreatePhysical(NETID, nmd::NetworkPermission::PERMISSION_NONE);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = netsysNativeService->NetworkAddInterface(NETID, INTERFACENAME);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     ret = netsysNativeService->InterfaceAddAddress(INTERFACENAME, "192.168.113.209", 24);
-    EXPECT_TRUE(ret == 0);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -88,7 +90,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, SetDefaultNetworkTest001, TestSize.Level1
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->NetworkSetDefault(NETID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -114,9 +116,9 @@ HWTEST_F(NetsysNativeServiceProxyTest, RemoveInterfaceFromNetworkTest001, TestSi
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->InterfaceDelAddress(INTERFACENAME, "192.168.113.209", 24);
-    EXPECT_LE(ret, 0);
+    EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     ret = netsysNativeService->NetworkRemoveInterface(NETID, INTERFACENAME);
-    EXPECT_LE(ret, 0);
+    EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -129,7 +131,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, DestroyNetworkTest001, TestSize.Level1)
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->NetworkDestroy(NETID);
-    EXPECT_LE(ret, 0);
+    EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative
 } // namespace OHOS

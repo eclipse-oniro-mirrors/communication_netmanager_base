@@ -19,6 +19,7 @@
 #include "system_ability_definition.h"
 
 #include "iptables_type.h"
+#include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_controller.h"
 
@@ -57,7 +58,7 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest001, TestSize.Level1)
 {
     // CHAIN_OHFW_DOZABLE, enable
     int32_t ret = NetsysController::GetInstance().FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, true);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -69,7 +70,7 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest002, TestSize.Level1)
 {
     // CHAIN_OHFW_DOZABLE, disable
     int32_t ret = NetsysController::GetInstance().FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, false);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -81,7 +82,7 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest003, TestSize.Level1)
 {
     // CHAIN_OHFW_UNDOZABLE, enable
     int32_t ret = NetsysController::GetInstance().FirewallEnableChain(ChainType::CHAIN_OHFW_UNDOZABLE, true);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -93,7 +94,7 @@ HWTEST_F(FirewallManagerTest, FirewallEnableChainTest004, TestSize.Level1)
 {
     // CHAIN_OHFW_UNDOZABLE, disable
     int32_t ret = NetsysController::GetInstance().FirewallEnableChain(ChainType::CHAIN_OHFW_UNDOZABLE, false);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -133,7 +134,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest001, TestSize.Level1)
     // CHAIN_OHFW_DOZABLE, root, RULE_ALLOW
     int32_t ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_DOZABLE, 0,
                                                                      FirewallRule::RULE_ALLOW);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -146,7 +147,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest002, TestSize.Level1)
     // CHAIN_OHFW_DOZABLE, root, RULE_DENY
     int32_t ret =
         NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_DOZABLE, 0, FirewallRule::RULE_DENY);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -160,7 +161,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest003, TestSize.Level1)
     // CHAIN_OHFW_UNDOZABLE, root, RULE_ALLOW
     int32_t ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, 0,
                                                                      FirewallRule::RULE_DENY);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -173,7 +174,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest004, TestSize.Level1)
     // CHAIN_OHFW_UNDOZABLE, root, RULE_DENY
     int32_t ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, 0,
                                                                      FirewallRule::RULE_ALLOW);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -206,7 +207,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidRuleTest006, TestSize.Level1)
     EXPECT_EQ(ret, -1);
     ret = NetsysController::GetInstance().FirewallSetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, 0,
                                                              FirewallRule::RULE_ALLOW);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -221,7 +222,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidsAllowedListChainTest001, TestSize.L
     uids.push_back(0);
     int32_t ret =
         NetsysController::GetInstance().FirewallSetUidsAllowedListChain(ChainType::CHAIN_OHFW_DOZABLE, uids);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -237,7 +238,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidsAllowedListChainTest002, TestSize.L
     uids.push_back(20010034);
     int32_t ret =
         NetsysController::GetInstance().FirewallSetUidsAllowedListChain(ChainType::CHAIN_OHFW_DOZABLE, uids);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -268,7 +269,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidsDeniedListChainTest001, TestSize.Le
     uids.push_back(0);
     int32_t ret =
         NetsysController::GetInstance().FirewallSetUidsDeniedListChain(ChainType::CHAIN_OHFW_UNDOZABLE, uids);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -284,7 +285,7 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidsDeniedListChainTest002, TestSize.Le
     uids.push_back(20010034);
     int32_t ret =
         NetsysController::GetInstance().FirewallSetUidsDeniedListChain(ChainType::CHAIN_OHFW_UNDOZABLE, uids);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**

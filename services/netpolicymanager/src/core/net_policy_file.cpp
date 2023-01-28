@@ -55,7 +55,7 @@ NetPolicyFile::~NetPolicyFile() = default;
 bool NetPolicyFile::FileExists(const std::string &fileName)
 {
     struct stat buffer;
-    return (stat(fileName.c_str(), &buffer) == NETMANAGER_SUCCESS);
+    return (stat(fileName.c_str(), &buffer) == 0);
 }
 
 bool NetPolicyFile::CreateFile(const std::string &fileName)

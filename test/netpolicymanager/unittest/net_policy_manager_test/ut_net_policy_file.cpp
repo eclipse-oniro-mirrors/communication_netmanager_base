@@ -95,7 +95,7 @@ HWTEST_F(UtNetPolicyFile, ResetPoliciesTest, TestSize.Level1)
     auto policyFile = DelayedSingleton<NetPolicyFile>::GetInstance();
     std::string iccid;
     int32_t ret = policyFile->ResetPolicies(iccid);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
