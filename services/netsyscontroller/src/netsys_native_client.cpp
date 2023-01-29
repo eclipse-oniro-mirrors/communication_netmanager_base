@@ -60,6 +60,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressUpdated(cons
                                                                             const std::string &ifName, int flags,
                                                                             int scope)
 {
+    std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
     for (auto &cb : netsysNativeClient_.cbObjects_) {
         cb->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
     }
@@ -70,6 +71,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(cons
                                                                             const std::string &ifName, int flags,
                                                                             int scope)
 {
+    std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
     for (auto &cb : netsysNativeClient_.cbObjects_) {
         cb->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
     }
@@ -78,6 +80,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(cons
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::string &ifName)
 {
+    std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
     for (auto &cb : netsysNativeClient_.cbObjects_) {
         cb->OnInterfaceAdded(ifName);
     }
@@ -86,6 +89,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::st
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::string &ifName)
 {
+    std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
     for (auto &cb : netsysNativeClient_.cbObjects_) {
         cb->OnInterfaceRemoved(ifName);
     }
@@ -94,6 +98,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::string &ifName, bool up)
 {
+    std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
     for (auto &cb : netsysNativeClient_.cbObjects_) {
         cb->OnInterfaceChanged(ifName, up);
     }
@@ -102,6 +107,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
 {
+    std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
     for (auto &cb : netsysNativeClient_.cbObjects_) {
         cb->OnInterfaceLinkStateChanged(ifName, up);
     }
@@ -111,6 +117,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceLinkStateChanged(co
 int32_t NetsysNativeClient::NativeNotifyCallback::OnRouteChanged(bool updated, const std::string &route,
                                                                  const std::string &gateway, const std::string &ifName)
 {
+    std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
     for (auto &cb : netsysNativeClient_.cbObjects_) {
         cb->OnRouteChanged(updated, route, gateway, ifName);
     }
@@ -892,6 +899,7 @@ int32_t NetsysNativeClient::RegisterCallback(sptr<NetsysControllerCallback> call
         NETMGR_LOG_E("proxy is nullptr");
         return IPC_PROXY_ERR;
     }
+	std::lock_guard lock(cbObjMutex_);
     cbObjects_.push_back(callback);
     return NETMANAGER_SUCCESS;
 }
@@ -899,6 +907,7 @@ int32_t NetsysNativeClient::RegisterCallback(sptr<NetsysControllerCallback> call
 void NetsysNativeClient::ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult)
 {
     NETMGR_LOG_I("NetsysNativeClient::ProcessDhcpResult");
+    std::lock_guard lock(cbObjMutex_);
     NetsysControllerCallback::DhcpResult result;
     for (std::vector<sptr<NetsysControllerCallback>>::iterator it = cbObjects_.begin(); it != cbObjects_.end(); ++it) {
         result.iface_ = dhcpResult->iface_;
@@ -939,6 +948,7 @@ void NetsysNativeClient::ProcessBandwidthReachedLimit(const std::string &limitNa
 {
     NETMGR_LOG_D("NetsysNativeClient ProcessBandwidthReachedLimit, limitName=%{public}s, iface=%{public}s",
                  limitName.c_str(), iface.c_str());
+    std::lock_guard lock(cbObjMutex_);
     std::for_each(cbObjects_.begin(), cbObjects_.end(),
                   [limitName, iface](const sptr<NetsysControllerCallback> &callback) {
                       callback->OnBandwidthReachedLimit(limitName, iface);
