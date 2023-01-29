@@ -62,7 +62,8 @@ NetConnServiceStub::NetConnServiceStub()
                                                   {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[CMD_NM_BIND_SOCKET] = {&NetConnServiceStub::OnBindSocket, {}};
     memberFuncMap_[CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK] = {&NetConnServiceStub::OnRegisterNetSupplierCallback, {}};
-    memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE] = {&NetConnServiceStub::OnSetAirplaneMode, {}};
+    memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE] = {&NetConnServiceStub::OnSetAirplaneMode,
+                                                {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[CMD_NM_IS_DEFAULT_NET_METERED] = {&NetConnServiceStub::OnIsDefaultNetMetered,
                                                      {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[CMD_NM_SET_HTTP_PROXY] = {&NetConnServiceStub::OnSetHttpProxy, {}};
