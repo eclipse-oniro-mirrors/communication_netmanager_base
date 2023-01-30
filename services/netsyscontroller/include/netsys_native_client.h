@@ -647,6 +647,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
     std::vector<sptr<NetsysControllerCallback>> cbObjects_;
     std::mutex mutex_;
+    std::mutex cbObjMutex_;
 
 private:
     class NetNativeConnDeathRecipient : public IRemoteObject::DeathRecipient {
