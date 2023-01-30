@@ -1144,6 +1144,9 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, bool ifValid)
 
 int32_t NetConnService::SetAirplaneMode(bool state)
 {
+    if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
+        return ERR_PERMISSION_CHECK_FAIL;
+    }
     BroadcastInfo info;
     info.action = EventFwk::CommonEventSupport::COMMON_EVENT_AIRPLANE_MODE_CHANGED;
     info.data = "Net Manager Airplane Mode Changed";
