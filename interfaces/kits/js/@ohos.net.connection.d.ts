@@ -159,6 +159,23 @@ declare namespace connection {
   function getAddressesByName(host: string, callback: AsyncCallback<Array<NetAddress>>): void;
   function getAddressesByName(host: string): Promise<Array<NetAddress>>;
 
+  /**
+   * Obtains http proxy configuration
+   *
+   * @param callback Returns the {@link HttpProxy} object.
+   */
+  function getGlobalHttpProxy(callback:AsyncCallback<HttpProxy>):void;
+  function getGlobalHttpProxy():Promise<HttpProxy>;
+
+  /**
+   * Set http proxy information
+   *
+   * @param httpProxy Indicates the http proxy configuration.
+   * @permission ohos.permission.CONNECTIVITY_INTERNAL
+   */
+  function setGlobalHttpProxy(httpProxy: HttpProxy, callback:AsyncCallback<void>):void;
+  function setGlobalHttpProxy(httpProxy: HttpProxy):Promise<void>;
+
   export interface NetConnection {
     on(type: 'netAvailable', callback: Callback<NetHandle>): void;
 
@@ -301,6 +318,12 @@ declare namespace connection {
     address: string;
     family?: number; // IPv4 = 1; IPv6 = 2, default is IPv4
     port?: number; // [0, 65535]
+  }
+
+  export interface HttpProxy {
+    host:string;
+    port:number;
+    parsedExclusionList:Array<string>
   }
 }
 

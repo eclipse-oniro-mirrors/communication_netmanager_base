@@ -33,6 +33,7 @@
 #include "net_conn_service_stub.h"
 #include "net_score.h"
 #include "net_supplier.h"
+#include "http_proxy.h"
 #include "timer.h"
 
 namespace OHOS {
@@ -70,7 +71,7 @@ public:
      * @return function result
      */
     int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
-        uint32_t &supplierId) override;
+                                uint32_t &supplierId) override;
 
     /**
      * The interface is unregister the network
@@ -91,7 +92,7 @@ public:
      */
     int32_t RegisterNetSupplierCallback(uint32_t supplierId, const sptr<INetSupplierCallback> &callback) override;
 
-     /**
+    /**
      * Register net connection callback
      *
      * @param netSpecifier specifier information
@@ -110,8 +111,8 @@ public:
      *
      * @return Returns 0, successfully register net connection callback, otherwise it will failed
      */
-    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-        const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS) override;
+    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
+                                    const uint32_t &timeoutMS) override;
 
     /**
      * Unregister net connection callback
@@ -226,7 +227,7 @@ public:
      * @param httpProxy the http proxy server
      * @return NETMANAGER_SUCCESS if OK, NET_CONN_ERR_HTTP_PROXY_INVALID if httpProxy is null string
      */
-    int32_t SetHttpProxy(const std::string &httpProxy) override;
+    int32_t SetGlobalHttpProxy(const HttpProxy &httpProxy) override;
 
     /**
      * Get http proxy server
@@ -234,7 +235,7 @@ public:
      * @param httpProxy output param, the http proxy server
      * @return NETMANAGER_SUCCESS if OK, NET_CONN_ERR_NO_HTTP_PROXY if httpProxy is null string
      */
-    int32_t GetHttpProxy(std::string &httpProxy) override;
+    int32_t GetGlobalHttpProxy(HttpProxy &httpProxy) override;
 
     /**
      * Get net id by identifier
@@ -288,7 +289,8 @@ private:
     int32_t UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo);
     int32_t NetDetectionAsync(int32_t netId);
     int32_t RestrictBackgroundChangedAsync(bool restrictBackground);
-    int32_t SetHttpProxyAsync(const std::string &httpProxy);
+    int32_t SetGlobalHttpProxyAsync(const HttpProxy &httpProxy);
+    void SendGlobalHttpProxyChangeBroadcast();
     void RequestAllNetworkExceptDefault();
 
 private:
@@ -309,7 +311,7 @@ private:
     std::unique_ptr<NetScore> netScore_ = nullptr;
     sptr<NetConnServiceIface> serviceIface_ = nullptr;
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
-    std::string httpProxy_;
+    HttpProxy httpProxy_;
     std::mutex netManagerMutex_;
     std::shared_ptr<AppExecFwk::EventRunner> netConnEventRunner_ = nullptr;
     std::shared_ptr<NetConnEventHandler> netConnEventHandler_ = nullptr;

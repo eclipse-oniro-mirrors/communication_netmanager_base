@@ -28,10 +28,11 @@
 #include "net_link_info.h"
 #include "net_specifier.h"
 #include "net_handle.h"
+#include "http_proxy.h"
 
 namespace OHOS {
 namespace nmd {
-    class FwmarkClient;
+class FwmarkClient;
 }
 namespace NetManagerStandard {
 class NetConnClient {
@@ -39,15 +40,15 @@ class NetConnClient {
 
 public:
     int32_t SystemReady();
-    int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
-        const std::set<NetCap> &netCaps, uint32_t &supplierId);
+    int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
+                                uint32_t &supplierId);
     int32_t UnregisterNetSupplier(uint32_t supplierId);
     int32_t RegisterNetSupplierCallback(uint32_t supplierId, const sptr<NetSupplierCallbackBase> &callback);
     int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo);
     int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo);
     int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback);
-    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-        const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS);
+    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
+                                    const uint32_t &timeoutMS);
     int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback);
     int32_t GetDefaultNet(NetHandle &netHandle);
     int32_t HasDefaultNet(bool &flag);
@@ -60,8 +61,8 @@ public:
     int32_t NetDetection(const NetHandle &netHandle);
     int32_t SetAirplaneMode(bool state);
     int32_t IsDefaultNetMetered(bool &isMetered);
-    int32_t SetHttpProxy(const std::string &httpProxy);
-    int32_t GetHttpProxy(std::string &httpProxy);
+    int32_t SetGlobalHttpProxy(const HttpProxy &httpProxy);
+    int32_t GetGlobalHttpProxy(HttpProxy &httpProxy);
     int32_t SetAppNet(int32_t netId);
     int32_t GetAppNet(int32_t &netId);
     int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList);

@@ -37,25 +37,50 @@ HapInfoParams testInfoParms = {.bundleName = "net_conn_manager_test",
                                .instIndex = 0,
                                .appIDDesc = "test"};
 
-PermissionDef testPermDef = {.permissionName = "ohos.permission.GET_NETWORK_INFO",
-                             .bundleName = "net_conn_manager_test",
-                             .grantMode = 1,
-                             .label = "label",
-                             .labelId = 1,
-                             .description = "Test net connect maneger",
-                             .descriptionId = 1,
-                             .availableLevel = APL_SYSTEM_BASIC};
+PermissionDef testPermDef = {
+    .permissionName = "ohos.permission.GET_NETWORK_INFO",
+    .bundleName = "net_conn_manager_test",
+    .grantMode = 1,
+    .label = "label",
+    .labelId = 1,
+    .description = "Test net connect maneger",
+    .descriptionId = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+};
 
-PermissionStateFull testState = {.grantFlags = {2},
-                                 .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                 .isGeneral = true,
-                                 .permissionName = "ohos.permission.GET_NETWORK_INFO",
-                                 .resDeviceID = {"local"}};
+PermissionDef testInternalPermDef = {
+    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+    .bundleName = "net_conn_manager_test",
+    .grantMode = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+    .label = "label",
+    .labelId = 1,
+    .description = "Test net connect manager internet",
+    .descriptionId = 1,
+};
 
-HapPolicyParams testPolicyPrams = {.apl = APL_SYSTEM_BASIC,
-                                   .domain = "test.domain",
-                                   .permList = {testPermDef},
-                                   .permStateList = {testState}};
+PermissionStateFull testState = {
+    .grantFlags = {2},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
+    .isGeneral = true,
+    .permissionName = "ohos.permission.GET_NETWORK_INFO",
+    .resDeviceID = {"local"},
+};
+
+PermissionStateFull testInternalState = {
+    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+    .isGeneral = true,
+    .resDeviceID = {"local"},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
+    .grantFlags = {2},
+};
+
+HapPolicyParams testPolicyPrams = {
+    .apl = APL_SYSTEM_BASIC,
+    .domain = "test.domain",
+    .permList = {testPermDef, testInternalPermDef},
+    .permStateList = {testState, testInternalState},
+};
 } // namespace
 
 class NetSupplierCallbackBaseTest : public NetSupplierCallbackBase {
@@ -269,44 +294,47 @@ HWTEST_F(NetConnClientTest, IsDefaultNetMeteredTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetHttpProxyTest001
- * @tc.desc: Test NetConnClient::SetHttpProxy,if param is not null,SetHttpProxy return NET_CONN_SUCCESS
+ * @tc.name: SetGlobalHttpProxyTest001
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy,if param is not null,SetGlobalHttpProxy return NET_CONN_SUCCESS
  * @tc.type: FUNC
  */
-HWTEST_F(NetConnClientTest, SetHttpProxyTest001, TestSize.Level1)
+HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest001, TestSize.Level1)
 {
-    std::string httpProxy = "testProxy";
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
+    AccessToken token;
+    HttpProxy httpProxy = {"testHttpProxy", 0, {}};
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
 /**
- * @tc.name: SetHttpProxyTest002
- * @tc.desc: Test NetConnClient::SetHttpProxy.if param is null,SetHttpProxy return NET_CONN_ERR_INTERNAL_ERROR
+ * @tc.name: SetGlobalHttpProxyTest002
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.if param is null, return NET_CONN_ERR_INTERNAL_ERROR
  * @tc.type: FUNC
  */
-HWTEST_F(NetConnClientTest, SetHttpProxyTest002, TestSize.Level1)
+HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest002, TestSize.Level1)
 {
-    std::string httpProxy;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NET_CONN_ERR_HTTP_PROXY_INVALID);
+    AccessToken token;
+    HttpProxy httpProxy;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
 /**
- * @tc.name: GetHttpProxyTest001
- * @tc.desc: Test NetConnClient::GetHttpProxy
+ * @tc.name: GetGlobalHttpProxyTest001
+ * @tc.desc: Test NetConnClient::GetGlobalHttpProxy
  * @tc.type: FUNC
  */
-HWTEST_F(NetConnClientTest, GetHttpProxyTest001, TestSize.Level1)
+HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest001, TestSize.Level1)
 {
-    std::string httpProxy = "testProxy";
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
+    AccessToken token;
+    HttpProxy httpProxy = {"testHttpProxy", 0, {}};
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 
-    std::string getHttpProxy;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetHttpProxy(getHttpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
-    ASSERT_EQ(getHttpProxy, "testProxy");
+    HttpProxy getGlobalHttpProxy;
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetGlobalHttpProxy(getGlobalHttpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+    ASSERT_TRUE(getGlobalHttpProxy.GetHost() == "testHttpProxy");
 }
 
 /**

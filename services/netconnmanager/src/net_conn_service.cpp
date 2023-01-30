@@ -29,6 +29,7 @@
 #include "net_supplier.h"
 #include "netmanager_base_permission.h"
 #include "netsys_controller.h"
+#include "net_http_proxy_tracker.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -125,6 +126,11 @@ bool NetConnService::Init()
         NETMGR_LOG_E("Make NetScore failed");
         return false;
     }
+    NetHttpProxyTracker httpProxyTracker;
+    if (!httpProxyTracker.ReadFromSystemParameter(httpProxy_)) {
+        NETMGR_LOG_E("NetConnService Init: read http proxy failed");
+    }
+    SendGlobalHttpProxyChangeBroadcast();
     return true;
 }
 
@@ -599,14 +605,28 @@ int32_t NetConnService::RestrictBackgroundChangedAsync(bool restrictBackground)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::SetHttpProxyAsync(const std::string &httpProxy)
+void NetConnService::SendGlobalHttpProxyChangeBroadcast()
 {
-    if (httpProxy.empty()) {
-        NETMGR_LOG_E("The httpProxy set to service is null");
-        return NET_CONN_ERR_HTTP_PROXY_INVALID;
-    }
+    BroadcastInfo info;
+    info.action = EventFwk::CommonEventSupport::COMMON_EVENT_HTTP_PROXY_CHANGE;
+    info.data = "Global HttpProxy Changed";
+    info.ordered = true;
+    std::map<std::string, std::string> param = {{"HttpProxy", httpProxy_.ToString()}};
+    DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
+}
 
-    httpProxy_ = httpProxy;
+int32_t NetConnService::SetGlobalHttpProxyAsync(const HttpProxy &httpProxy)
+{
+    if (httpProxy_.GetHost() != httpProxy.GetHost() || httpProxy_.GetPort() != httpProxy.GetPort() ||
+        httpProxy_.GetExclusionList() != httpProxy.GetExclusionList()) {
+        httpProxy_ = httpProxy;
+        SendGlobalHttpProxyChangeBroadcast();
+        std::lock_guard<std::mutex> locker(netManagerMutex_);
+        NetHttpProxyTracker httpProxyTracker;
+        if (!httpProxyTracker.WriteToSystemParameter(httpProxy_)) {
+            NETMGR_LOG_E("Write http proxy to system parameter failed");
+        }
+    }
     return NETMANAGER_SUCCESS;
 }
 
@@ -1200,13 +1220,14 @@ int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::st
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::GetHttpProxy(std::string &httpProxy)
+int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
-    if (httpProxy_.empty()) {
-        NETMGR_LOG_E("The httpProxy in service is null");
-        return NET_CONN_ERR_NO_HTTP_PROXY;
+    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    if (httpProxy_.GetHost().empty()) {
+        httpProxy.SetPort(0);
+        NETMGR_LOG_E("The http proxy host is empty");
+        return NETMANAGER_SUCCESS;
     }
-
     httpProxy = httpProxy_;
     return NETMANAGER_SUCCESS;
 }
@@ -1317,12 +1338,12 @@ int32_t NetConnService::SetAirplaneMode(bool state)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::SetHttpProxy(const std::string &httpProxy)
+int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask(
-            [this, &httpProxy, &result]() { result = this->SetHttpProxyAsync(httpProxy); });
+            [this, &httpProxy, &result]() { result = this->SetGlobalHttpProxyAsync(httpProxy); });
     }
     return result;
 }

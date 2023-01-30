@@ -23,16 +23,19 @@
 #include <queue>
 #include <thread>
 
+#include "event_runner.h"
+#include "event_handler.h"
 #include "singleton.h"
 
 namespace OHOS {
 namespace nmd {
+using EventRunner = OHOS::AppExecFwk::EventRunner;
+using EventHandler = OHOS::AppExecFwk::EventHandler;
 enum IpType {
     IPTYPE_IPV4 = 1,
     IPTYPE_IPV6 = 2,
     IPTYPE_IPV4V6 = 3,
 };
-
 class IptablesWrapper : public std::enable_shared_from_this<IptablesWrapper> {
     DECLARE_DELAYED_SINGLETON(IptablesWrapper)
 public:
@@ -53,8 +56,8 @@ public:
     std::string RunCommandForRes(const IpType &ipType, const std::string &command);
 
 private:
-    static void ThreadStart(IptablesWrapper *wrapper);
-    void RunSystemFunc();
+    void ExecuteCommand(const std::string &command);
+    void ExecuteCommandForRes(const std::string &command);
 
 private:
     std::mutex iptablesMutex_;
@@ -65,6 +68,7 @@ private:
     std::string result_;
     std::thread iptablesWrapperThread_;
     std::queue<std::string> commandsQueue_;
+    std::shared_ptr<EventHandler> handler_ = nullptr;
 };
 } // namespace nmd
 } // namespace OHOS

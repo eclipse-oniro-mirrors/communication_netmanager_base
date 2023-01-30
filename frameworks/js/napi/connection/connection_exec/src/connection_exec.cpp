@@ -265,6 +265,49 @@ napi_value ConnectionExec::ReportNetDisconnectedCallback(ReportNetConnectedConte
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
+bool ConnectionExec::ExecGetGlobalHttpProxy(GlobalHttpProxyContext *context)
+{
+    int32_t errorCode = DelayedSingleton<NetConnClient>::GetInstance()->GetGlobalHttpProxy(context->httpProxy_);
+    if (errorCode != NET_CONN_SUCCESS) {
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::GetGlobalHttpProxyCallback(GlobalHttpProxyContext *context)
+{
+    napi_value host = NapiUtils::CreateStringUtf8(context->GetEnv(), context->httpProxy_.GetHost());
+    napi_value port = NapiUtils::CreateInt32(context->GetEnv(), context->httpProxy_.GetPort());
+    auto lists = context->httpProxy_.GetExclusionList();
+    napi_value parsedExclusionList = NapiUtils::CreateArray(context->GetEnv(), lists.size());
+    size_t index = 0;
+    for (auto list : lists) {
+        napi_value jsList = NapiUtils::CreateStringUtf8(context->GetEnv(), list);
+        NapiUtils::SetArrayElement(context->GetEnv(), parsedExclusionList, index++, jsList);
+    }
+    napi_value httpProxy = NapiUtils::CreateObject(context->GetEnv());
+    NapiUtils::SetNamedProperty(context->GetEnv(), httpProxy, "host", host);
+    NapiUtils::SetNamedProperty(context->GetEnv(), httpProxy, "port", port);
+    NapiUtils::SetNamedProperty(context->GetEnv(), httpProxy, "parsedExclusionList", parsedExclusionList);
+    return httpProxy;
+}
+
+bool ConnectionExec::ExecSetGlobalHttpProxy(GlobalHttpProxyContext *context)
+{
+    int32_t errorCode = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(context->httpProxy_);
+    if (errorCode != NET_CONN_SUCCESS) {
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::SetGlobalHttpProxyCallback(GlobalHttpProxyContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
 bool ConnectionExec::ExecGetAppNet(AppNetContext *context)
 {
     NETMANAGER_BASE_LOGI("into");

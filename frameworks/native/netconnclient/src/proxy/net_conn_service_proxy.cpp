@@ -1048,7 +1048,7 @@ int32_t NetConnServiceProxy::IsDefaultNetMetered(bool &isMetered)
     return ret;
 }
 
-int32_t NetConnServiceProxy::SetHttpProxy(const std::string &httpProxy)
+int32_t NetConnServiceProxy::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -1056,7 +1056,7 @@ int32_t NetConnServiceProxy::SetHttpProxy(const std::string &httpProxy)
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
-    if (!data.WriteString(httpProxy)) {
+    if (!httpProxy.Marshalling(data)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
@@ -1081,7 +1081,7 @@ int32_t NetConnServiceProxy::SetHttpProxy(const std::string &httpProxy)
     return ret;
 }
 
-int32_t NetConnServiceProxy::GetHttpProxy(std::string &httpProxy)
+int32_t NetConnServiceProxy::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -1109,7 +1109,7 @@ int32_t NetConnServiceProxy::GetHttpProxy(std::string &httpProxy)
     }
 
     if (ret == NETMANAGER_SUCCESS) {
-        if (!reply.ReadString(httpProxy)) {
+        if (!HttpProxy::Unmarshalling(reply, httpProxy)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
     }

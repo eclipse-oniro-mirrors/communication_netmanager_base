@@ -65,8 +65,9 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE] = {&NetConnServiceStub::OnSetAirplaneMode, {}};
     memberFuncMap_[CMD_NM_IS_DEFAULT_NET_METERED] = {&NetConnServiceStub::OnIsDefaultNetMetered,
                                                      {Permission::GET_NETWORK_INFO}};
-    memberFuncMap_[CMD_NM_SET_HTTP_PROXY] = {&NetConnServiceStub::OnSetHttpProxy, {}};
-    memberFuncMap_[CMD_NM_GET_HTTP_PROXY] = {&NetConnServiceStub::OnGetHttpProxy, {}};
+    memberFuncMap_[CMD_NM_SET_HTTP_PROXY] = {&NetConnServiceStub::OnSetGlobalHttpProxy,
+                                             {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_GET_HTTP_PROXY] = {&NetConnServiceStub::OnGetGlobalHttpProxy, {}};
     memberFuncMap_[CMD_NM_GET_NET_ID_BY_IDENTIFIER] = {&NetConnServiceStub::OnGetNetIdByIdentifier, {}};
 }
 
@@ -775,26 +776,26 @@ int32_t NetConnServiceStub::OnIsDefaultNetMetered(MessageParcel &data, MessagePa
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnServiceStub::OnSetHttpProxy(MessageParcel &data, MessageParcel &reply)
+int32_t NetConnServiceStub::OnSetGlobalHttpProxy(MessageParcel &data, MessageParcel &reply)
 {
-    NETMGR_LOG_D("stub execute SetHttpProxy");
+    NETMGR_LOG_D("stub execute SetGlobalHttpProxy");
 
-    std::string httpProxy;
-    if (!data.ReadString(httpProxy)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
+    HttpProxy httpProxy;
+    if (!HttpProxy::Unmarshalling(data, httpProxy)) {
+        return ERR_FLATTEN_OBJECT;
     }
 
-    int32_t ret = SetHttpProxy(httpProxy);
+    int32_t ret = SetGlobalHttpProxy(httpProxy);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return ret;
 }
 
-int32_t NetConnServiceStub::OnGetHttpProxy(MessageParcel &data, MessageParcel &reply)
+int32_t NetConnServiceStub::OnGetGlobalHttpProxy(MessageParcel &data, MessageParcel &reply)
 {
-    std::string httpProxy;
-    int32_t result = GetHttpProxy(httpProxy);
+    HttpProxy httpProxy;
+    int32_t result = GetGlobalHttpProxy(httpProxy);
     if (!reply.WriteInt32(result)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
@@ -803,8 +804,8 @@ int32_t NetConnServiceStub::OnGetHttpProxy(MessageParcel &data, MessageParcel &r
         return result;
     }
 
-    if (!reply.WriteString(httpProxy)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    if (!httpProxy.Marshalling(reply)) {
+        return ERR_FLATTEN_OBJECT;
     }
     return NETMANAGER_SUCCESS;
 }
