@@ -276,7 +276,7 @@ private:
     bool FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId);
     void GetDumpMessage(std::string &message);
     sptr<NetSupplier> FindNetSupplier(uint32_t supplierId);
-    void RequestAllNetworkExceptDefaut();
+    void RequestAllNetworkExceptDefault();
 
 private:
     enum ServiceRunningState {

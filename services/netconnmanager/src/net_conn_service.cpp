@@ -830,7 +830,7 @@ int32_t NetConnService::BindSocket(int32_t socket_fd, int32_t netId)
     return NetsysController::GetInstance().BindSocket(socket_fd, netId);
 }
 
-void NetConnService::RequestAllNetworkExceptDefaut()
+void NetConnService::RequestAllNetworkExceptDefault()
 {
     if ((defaultNetSupplier_ == nullptr) || (defaultNetSupplier_->IsNetValidated())) {
         return;
@@ -845,6 +845,9 @@ void NetConnService::RequestAllNetworkExceptDefaut()
     uint32_t reqId = defaultNetActivate_->GetRequestId();
     for (const auto &netSupplier : netSuppliers_) {
         if (netSupplier.second == nullptr || netSupplier.second == defaultNetSupplier_) {
+            continue;
+        }
+        if (netSupplier.second->GetNetScore() >= defaultNetSupplier_->GetNetScore()) {
             continue;
         }
         if (!defaultNetActivate_->MatchRequestAndNetwork(netSupplier.second)) {
@@ -907,7 +910,6 @@ void NetConnService::FindBestNetworkForAllRequest()
         CallbackForAvailable(bestSupplier, callback);
         bestSupplier->SelectAsBestNetwork(iterActive->first);
     }
-    RequestAllNetworkExceptDefaut();
 }
 
 uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier, sptr<NetActivate> &netActivateNetwork)
@@ -1140,6 +1142,9 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, bool ifValid)
         return;
     }
     FindBestNetworkForAllRequest();
+    if (!ifValid && defaultNetSupplier_ && defaultNetSupplier_->GetSupplierId() == supplierId) {
+        RequestAllNetworkExceptDefault();
+    }
 }
 
 int32_t NetConnService::SetAirplaneMode(bool state)
