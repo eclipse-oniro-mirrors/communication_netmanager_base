@@ -98,8 +98,6 @@ int32_t DnsLookUpParse::LookupIpLiteral(struct AddrData buf[ARG_INDEX_1], const 
         return NAME_IS_IPV4;
     }
 
-    return DNS_ERR_NONE;
-
 #ifdef SERVER_SUPPORT_IPV6
     char tmp[NAME_MAX_LEN] = {0};
     char *p = const_cast<char *>(strchr(hostName, SEP));
@@ -146,9 +144,8 @@ int32_t DnsLookUpParse::LookupIpLiteral(struct AddrData buf[ARG_INDEX_1], const 
         }
     }
     buf[ARG_INDEX_0].scopeid = scopeid;
-
-    return NAME_IS_IPV4;
 #endif
+    return DNS_ERR_NONE;
 }
 
 int32_t DnsLookUpParse::GetResolvConf(struct ResolvConf *conf, char *search, size_t search_sz, uint16_t netId)
