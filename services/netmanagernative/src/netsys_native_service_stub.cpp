@@ -279,7 +279,7 @@ int32_t NetsysNativeServiceStub::CmdGetAddrInfo(MessageParcel &data, MessageParc
         if (canSize > 0) {
             reply.WriteRawData(res_p1->ai_canonname, canSize);
         }
-        reply.WriteRawData((char *)res_p1->ai_addr, res_p1->ai_addrlen);
+        reply.WriteRawData(reinterpret_cast<char *>(res_p1->ai_addr), res_p1->ai_addrlen);
     }
     NetsysFreeAddrinfo(result);
     return ERR_NONE;

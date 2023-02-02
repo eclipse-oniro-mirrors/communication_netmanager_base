@@ -338,9 +338,9 @@ bool DnsLookUpName::UpdateBuf(int32_t flags, int32_t family, AddrData *buf, int3
 void DnsLookUpName::SockAddrCopy(ScokAddrCopy addrBuff, void *da, void *sa, int32_t &dScope, int32_t &preFixLen,
                                  int32_t &key)
 {
-    if (!connect(addrBuff.lookUpNameFd, (sockaddr *)da, addrBuff.daLen)) {
+    if (!connect(addrBuff.lookUpNameFd, static_cast<sockaddr *>(da), addrBuff.daLen)) {
         key = static_cast<uint32_t>(key) | DAS_USABLE;
-        int32_t res = getsockname(addrBuff.lookUpNameFd, (sockaddr *)sa, &addrBuff.saLen);
+        int32_t res = getsockname(addrBuff.lookUpNameFd, static_cast<sockaddr *>(sa), &addrBuff.saLen);
         if (res) {
             (void)close(addrBuff.lookUpNameFd);
             return;
