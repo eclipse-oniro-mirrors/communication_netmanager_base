@@ -301,7 +301,7 @@ void DnsLookUpName::RefreshBuf(AddrData *buf, int32_t num, int32_t &cnt)
 bool DnsLookUpName::UpdateBuf(int32_t flags, int32_t family, AddrData *buf, int32_t &cnt)
 {
     if ((static_cast<uint32_t>(flags) & AI_V4MAPPED)) {
-        uint32_t i = 0;
+        int32_t i = 0;
         if (!(static_cast<uint32_t>(flags) & AI_ALL)) {
             for (; i < cnt && buf[i].family != AF_INET6; i++) {
             };
@@ -313,7 +313,7 @@ bool DnsLookUpName::UpdateBuf(int32_t flags, int32_t family, AddrData *buf, int3
             if (buf[i].family != AF_INET) {
                 continue;
             }
-            uint32_t ret = memcpy_s(buf[i].addr + NAMESERVICES_LEN, ADDR_LEN, buf[i].addr, ADDR_LEN);
+            int32_t ret = memcpy_s(buf[i].addr + NAMESERVICES_LEN, ADDR_LEN, buf[i].addr, ADDR_LEN);
             ret += memcpy_s(buf[i].addr, NAMESERVICES_LEN, ADDR_BUF, NAMESERVICES_LEN);
             if (ret != 0) {
                 NETNATIVE_LOGE("memcpy_s faild");
@@ -336,10 +336,10 @@ bool DnsLookUpName::UpdateBuf(int32_t flags, int32_t family, AddrData *buf, int3
 }
 
 void DnsLookUpName::SockAddrCopy(ScokAddrCopy addrBuff, void *da, void *sa, int32_t &dScope, int32_t &preFixLen,
-                                 int32_t &key)
+                                 uint32_t &key)
 {
     if (!connect(addrBuff.lookUpNameFd, static_cast<sockaddr *>(da), addrBuff.daLen)) {
-        key = static_cast<uint32_t>(key) | DAS_USABLE;
+        key = key | DAS_USABLE;
         int32_t res = getsockname(addrBuff.lookUpNameFd, static_cast<sockaddr *>(sa), &addrBuff.saLen);
         if (res) {
             (void)close(addrBuff.lookUpNameFd);
@@ -353,10 +353,10 @@ void DnsLookUpName::SockAddrCopy(ScokAddrCopy addrBuff, void *da, void *sa, int3
             }
         }
         if (dScope == ScopeOf(&addrBuff.sa6.sin6_addr)) {
-            key = static_cast<uint32_t>(key) | DAS_MATCHINGSCOPE;
+            key = key | DAS_MATCHINGSCOPE;
         }
         if (addrBuff.dLabel == LabelOf(&addrBuff.sa6.sin6_addr)) {
-            key = static_cast<uint32_t>(key) | DAS_MATCHINGLABEL;
+            key = key | DAS_MATCHINGLABEL;
         }
         preFixLen = PreFixMatch(&addrBuff.sa6.sin6_addr, &addrBuff.da6.sin6_addr);
     }
@@ -380,7 +380,7 @@ int32_t DnsLookUpName::FindName(AddrData *buf, char *canon, const std::string na
 int32_t DnsLookUpName::MemcpySockaddr(sockaddr_in6 &sa6, sockaddr_in6 &da6, sockaddr_in &da4, AddrData *buf,
                                       uint32_t cnt)
 {
-    uint32_t ret = memcpy_s(sa6.sin6_addr.s6_addr, NAMESERVICES_LEN, ADDR_BUF, NAMESERVICES_LEN);
+    int32_t ret = memcpy_s(sa6.sin6_addr.s6_addr, NAMESERVICES_LEN, ADDR_BUF, NAMESERVICES_LEN);
     ret += memcpy_s(da6.sin6_addr.s6_addr + NAMESERVICES_LEN, ADDR_A4_LEN, buf[cnt].addr, ADDR_A4_LEN);
     ret += memcpy_s(da6.sin6_addr.s6_addr, NAMESERVICES_LEN, ADDR_BUF, NAMESERVICES_LEN);
     ret += memcpy_s(da6.sin6_addr.s6_addr + NAMESERVICES_LEN, ADDR_A4_LEN, buf[cnt].addr, ADDR_A4_LEN);
@@ -394,9 +394,9 @@ int32_t DnsLookUpName::MemcpySockaddr(sockaddr_in6 &sa6, sockaddr_in6 &da6, sock
 
 void DnsLookUpName::LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId)
 {
-    for (uint32_t i = 0; i < cnt; i++) {
+    for (int32_t i = 0; i < cnt; i++) {
         int32_t family = buf[i].family;
-        int32_t key = 0;
+        uint32_t key = 0;
         sockaddr_in6 sa6 = {0};
         sockaddr_in6 da6 = {
             .sin6_family = AF_INET6,
@@ -448,7 +448,7 @@ void DnsLookUpName::LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId)
         key |= static_cast<uint32_t>(DSCOPE_MAX_LEN - dScope) << DAS_SCOPE_SHIFT;
         key |= static_cast<uint32_t>(preFixLen) << DAS_PREFIX_SHIFT;
         key |= static_cast<uint32_t>(MAXADDRS - i) << DAS_ORDER_SHIFT;
-        buf[i].sortKey = key;
+        buf[i].sortKey = static_cast<int32_t>(key);
     }
 }
 

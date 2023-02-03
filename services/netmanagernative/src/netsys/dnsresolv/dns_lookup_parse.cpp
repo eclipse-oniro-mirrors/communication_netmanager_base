@@ -235,7 +235,7 @@ void DnsLookUpParse::SetSocAddr(int32_t fd, uint32_t &nns)
         if (nSockAddr[i].sin.sin_family != AF_INET) {
             continue;
         }
-        uint32_t ret = memcpy_s(nSockAddr[i].sin6.sin6_addr.s6_addr + ADDR_A6_NOTES_LEN, ADDR_A4_LEN,
+        int32_t ret = memcpy_s(nSockAddr[i].sin6.sin6_addr.s6_addr + ADDR_A6_NOTES_LEN, ADDR_A4_LEN,
                                 &nSockAddr[i].sin.sin_addr, ADDR_A4_LEN);
         ret += memcpy_s(nSockAddr[i].sin6.sin6_addr.s6_addr, ADDR_A6_NOTES_LEN, ADDR_BUF, ADDR_A6_NOTES_LEN);
         if (ret != 0) {
@@ -269,7 +269,7 @@ void DnsLookUpParse::DnsGetAnswers(GetAnswers getAnswers, const uint8_t *const *
 {
     socklen_t psl[1] = {getAnswers.saLen};
     int32_t recvLen = 0;
-    uint32_t next = 0;
+    int32_t next = 0;
     while ((recvLen = recvfrom(getAnswers.fd, answers[next], getAnswers.answersSize, 0,
                                reinterpret_cast<sockaddr *>(&sockAddr), psl)) >= 0) {
         psl[0] = getAnswers.saLen;
@@ -280,7 +280,7 @@ void DnsLookUpParse::DnsGetAnswers(GetAnswers getAnswers, const uint8_t *const *
         if (j == getAnswers.nns) {
             continue;
         }
-        uint32_t i = next;
+        int32_t i = next;
         for (; i < getAnswers.queriesNum && (answers[next][0] != queries[i][0] || answers[next][1] != queries[i][1]);
              i++)
             ;
