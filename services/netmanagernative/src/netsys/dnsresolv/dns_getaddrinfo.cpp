@@ -119,7 +119,7 @@ void DnsGetAddrInfo::SwitchFamilyInet6(addrinfo *node, sockaddr_in6 *sin6, AddrD
 }
 
 void DnsGetAddrInfo::ParseAddr(int32_t nAddrs, int32_t nServs, ServData (&ports)[MAXSERVS], AddrData (&addrs)[MAXADDRS],
-                               char *outCanon, addrinfo **out)
+                               char *outCanon, int32_t canonLen, addrinfo **out)
 {
     int16_t k = 0;
     addrinfo *headNode = nullptr;
@@ -136,10 +136,10 @@ void DnsGetAddrInfo::ParseAddr(int32_t nAddrs, int32_t nServs, ServData (&ports)
             node->ai_family = addrs[i].family;
             node->ai_socktype = ports[j].sockType;
             node->ai_protocol = ports[j].proto;
-            node->ai_canonname = static_cast<char *>(calloc(sizeof(char), (sizeof(outCanon))));
+            node->ai_canonname = static_cast<char *>(calloc(sizeof(char), (canonLen + 1)));
             node->ai_addrlen = addrs[i].family == AF_INET ? static_cast<socklen_t>(sizeof(sockaddr_in))
                                                           : static_cast<socklen_t>(sizeof(sockaddr_in6));
-            if (memcpy_s(node->ai_canonname, sizeof(outCanon), outCanon, sizeof(outCanon)) != 0) {
+            if (memcpy_s(node->ai_canonname, (sizeof(char) * (canonLen + 1)), outCanon, canonLen) != 0) {
                 return;
             }
             switch (addrs[i].family) {
@@ -209,7 +209,8 @@ int32_t DnsGetAddrInfo::GetAddrInfo(const std::string host, const std::string se
     }
 
     char *outCanon = canon;
-    ParseAddr(nAddrs, nServs, servBuf, addrs, outCanon, res);
+    int32_t canonLen = strlen(canon);
+    ParseAddr(nAddrs, nServs, servBuf, addrs, outCanon, canonLen, res);
     return 0;
 }
 } // namespace nmd
