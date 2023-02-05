@@ -98,6 +98,7 @@ std::map<int32_t, const char *> g_errStringMap = {
     {NETWORKSHARE_ERROR_UNAVAIL_IFACE, "Try to share an unavailable iface"},
     {NETWORKSHARE_ERROR_WIFI_SHARING, "WiFi sharing failed"},
     {NETWORKSHARE_ERROR_BT_SHARING, "Bluetooth sharing failed"},
+    {NETWORKSHARE_ERROR_USB_SHARING, "Usb sharing failed"},
     {NETWORKSHARE_ERROR_SHARING_IFACE_ERROR, "Sharing iface failed"},
     {NETWORKSHARE_ERROR_ENABLE_FORWARDING_ERROR, "Network share enable forwarding error"},
     {NETWORKSHARE_ERROR_INTERNAL_ERROR, "Network share internal error"},

@@ -309,6 +309,18 @@ int32_t NetsysNativeService::InterfaceDelAddress(const std::string &interfaceNam
     return result;
 }
 
+int32_t NetsysNativeService::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)
+{
+    NETNATIVE_LOG_D("InterfaceSetIpAddress");
+    return netsysService_->InterfaceSetIpAddress(ifaceName, ipAddress);
+}
+
+int32_t NetsysNativeService::InterfaceSetIffUp(const std::string &ifaceName)
+{
+    NETNATIVE_LOG_D("InterfaceSetIffUp");
+    return netsysService_->InterfaceSetIffUp(ifaceName);
+}
+
 int32_t NetsysNativeService::NetworkAddInterface(int32_t netId, const std::string &iface)
 {
     NETNATIVE_LOG_D("NetworkAddInterface");

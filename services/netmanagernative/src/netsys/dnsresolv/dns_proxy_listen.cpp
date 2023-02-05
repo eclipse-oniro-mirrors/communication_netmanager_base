@@ -93,6 +93,7 @@ void DnsProxyListen::DnsParseBySocket(int32_t clientSocket, std::vector<std::str
             serversNum++;
             continue;
         }
+        addrLen = sizeof(addrParse);
         resLen =
             PollUdpDataTransfer::PollUdpRecvData(parseSocketFd, requesData, MAX_REQUESTDATA_LEN, addrParse, addrLen);
         if (resLen > 0) {
@@ -115,7 +116,7 @@ void DnsProxyListen::DnsParseBySocket(int32_t clientSocket, std::vector<std::str
 
 void DnsProxyListen::DnsSendRecvParseData(int32_t clientSocket, char *requesData, int32_t resLen, sockaddr_in proxyAddr)
 {
-    socklen_t addrLen;
+    socklen_t addrLen = sizeof(proxyAddr);
     if (PollUdpDataTransfer::PollUdpSendData(clientSocket, requesData, resLen, proxyAddr, addrLen) < 0) {
         NETNATIVE_LOGE("send failed %{public}d: %{public}s", errno, strerror(errno));
     }
@@ -150,7 +151,7 @@ void DnsProxyListen::StartListen()
             break;
         }
         (void)memset_s(recvBuff.questionsBuff, MAX_REQUESTDATA_LEN, 0, MAX_REQUESTDATA_LEN);
-        socklen_t len;
+        socklen_t len = sizeof(proxyAddr);
         recvBuff.questionLen = recvfrom(proxySockFd_, recvBuff.questionsBuff, MAX_REQUESTDATA_LEN, 0,
                                         reinterpret_cast<sockaddr *>(&proxyAddr), &len);
         if (!(recvBuff.questionLen > 0)) {

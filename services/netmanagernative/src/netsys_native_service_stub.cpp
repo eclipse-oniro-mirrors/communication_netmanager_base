@@ -54,6 +54,8 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_NETWORK_CREATE_PHYSICAL] = &NetsysNativeServiceStub::CmdNetworkCreatePhysical;
     opToInterfaceMap_[NETSYS_INTERFACE_ADD_ADDRESS] = &NetsysNativeServiceStub::CmdInterfaceAddAddress;
     opToInterfaceMap_[NETSYS_INTERFACE_DEL_ADDRESS] = &NetsysNativeServiceStub::CmdInterfaceDelAddress;
+    opToInterfaceMap_[NETSYS_INTERFACE_SET_IP_ADDRESS] = &NetsysNativeServiceStub::CmdInterfaceSetIpAddress;
+    opToInterfaceMap_[NETSYS_INTERFACE_SET_IFF_UP] = &NetsysNativeServiceStub::CmdInterfaceSetIffUp;
     opToInterfaceMap_[NETSYS_NETWORK_ADD_INTERFACE] = &NetsysNativeServiceStub::CmdNetworkAddInterface;
     opToInterfaceMap_[NETSYS_NETWORK_REMOVE_INTERFACE] = &NetsysNativeServiceStub::CmdNetworkRemoveInterface;
     opToInterfaceMap_[NETSYS_NETWORK_DESTROY] = &NetsysNativeServiceStub::CmdNetworkDestroy;
@@ -488,6 +490,29 @@ int32_t NetsysNativeServiceStub::CmdInterfaceDelAddress(MessageParcel &data, Mes
     int32_t result = InterfaceDelAddress(interfaceName, ipAddr, prefixLength);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("InterfaceDelAddress has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdInterfaceSetIpAddress(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ifaceName = data.ReadString();
+    std::string ipAddress = data.ReadString();
+
+    int32_t result = InterfaceSetIpAddress(ifaceName, ipAddress);
+    reply.WriteInt32(result);
+    NETNATIVE_LOG_D("InterfaceSetIpAddress has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdInterfaceSetIffUp(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ifaceName = data.ReadString();
+
+    int32_t result = InterfaceSetIffUp(ifaceName);
+    reply.WriteInt32(result);
+    NETNATIVE_LOG_D("InterfaceSetIffUp has recved result %{public}d", result);
 
     return result;
 }

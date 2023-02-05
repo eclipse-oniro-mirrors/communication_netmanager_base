@@ -89,6 +89,23 @@ public:
      */
     static int SetIfaceConfig(const nmd::InterfaceConfigurationParcel &ifaceConfig);
 
+    /**
+     * Set network interface ip address
+     *
+     * @param ifaceName Network port device name
+     * @param ipAddress Ip address
+     * @return Returns 0, set IP address to network successfully, otherwise it will fail
+     */
+    static int SetIpAddress(const std::string &ifaceName, const std::string &ipAddress);
+
+    /**
+     * Set iface up
+     *
+     * @param ifaceName Network port device name
+     * @return Returns 0, set up to network successfully, otherwise it will fail
+     */
+    static int SetIffUp(const std::string &ifaceName);
+
 private:
     static int ModifyAddress(uint32_t action, const char *interfaceName, const char *addr, int prefixLen);
 };
