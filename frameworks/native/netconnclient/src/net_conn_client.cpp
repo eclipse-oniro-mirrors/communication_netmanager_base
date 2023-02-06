@@ -349,24 +349,24 @@ int32_t NetConnClient::IsDefaultNetMetered(bool &isMetered)
     return proxy->IsDefaultNetMetered(isMetered);
 }
 
-int32_t NetConnClient::SetHttpProxy(const std::string &httpProxy)
+int32_t NetConnClient::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->SetHttpProxy(httpProxy);
+    return proxy->SetGlobalHttpProxy(httpProxy);
 }
 
-int32_t NetConnClient::GetHttpProxy(std::string &httpProxy)
+int32_t NetConnClient::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->GetHttpProxy(httpProxy);
+    return proxy->GetGlobalHttpProxy(httpProxy);
 }
 
 int32_t NetConnClient::GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList)

@@ -21,6 +21,7 @@
 #include "system_ability_definition.h"
 #include "token_setproc.h"
 
+#include "net_common_event_test.h"
 #include "net_conn_callback_test.h"
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
@@ -28,6 +29,7 @@
 #include "net_detection_callback_test.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "http_proxy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -58,7 +60,18 @@ PermissionDef testNetInfoPermDef = {
 
 PermissionDef testInternetPermDef = {
     .permissionName = "ohos.permission.INTERNET",
-    .bundleName = "net_conn_client_fuzzer",
+    .bundleName = "net_conn_manager_test",
+    .grantMode = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+    .label = "label",
+    .labelId = 1,
+    .description = "Test net connect manager internet",
+    .descriptionId = 1,
+};
+
+PermissionDef testInternalPermDef = {
+    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+    .bundleName = "net_conn_manager_test",
     .grantMode = 1,
     .availableLevel = APL_SYSTEM_BASIC,
     .label = "label",
@@ -83,11 +96,26 @@ PermissionStateFull testInternetState = {
     .grantFlags = {2},
 };
 
+PermissionStateFull testInternalState = {
+    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+    .isGeneral = true,
+    .resDeviceID = {"local"},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
+    .grantFlags = {2},
+};
+
 HapPolicyParams testNetInfoPolicyPrams = {
     .apl = APL_SYSTEM_BASIC,
     .domain = "test.domain",
     .permList = {testNetInfoPermDef},
     .permStateList = {testNetInfoState},
+};
+
+HapPolicyParams testInternalPolicyPrams = {
+    .apl = APL_SYSTEM_BASIC,
+    .domain = "test.domain",
+    .permList = {testInternalPermDef},
+    .permStateList = {testInternalState},
 };
 
 HapPolicyParams testInternetPolicyPrams = {
@@ -98,6 +126,7 @@ HapPolicyParams testInternetPolicyPrams = {
 };
 } // namespace
 
+std::shared_ptr<NetCommonEventTest> netCommonEventTest_ = nullptr;
 class NetConnManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -114,9 +143,21 @@ public:
     static sptr<INetConnService> GetProxy();
 };
 
-void NetConnManagerTest::SetUpTestCase() {}
+void NetConnManagerTest::SetUpTestCase()
+{
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_HTTP_PROXY_CHANGE);
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    subscribeInfo.SetPriority(1);
+    netCommonEventTest_ = std::make_shared<NetCommonEventTest>(subscribeInfo);
+    EventFwk::CommonEventManager::SubscribeCommonEvent(netCommonEventTest_);
+}
 
-void NetConnManagerTest::TearDownTestCase() {}
+void NetConnManagerTest::TearDownTestCase()
+{
+    EventFwk::CommonEventManager::UnSubscribeCommonEvent(netCommonEventTest_);
+    netCommonEventTest_.reset();
+}
 
 void NetConnManagerTest::SetUp() {}
 
@@ -685,6 +726,71 @@ HWTEST_F(NetConnManagerTest, NetConnManager017, TestSize.Level1)
         }
         ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     }
+}
+
+/**
+ * @tc.name: NetConnManager018
+ * @tc.desc: Test NetConnManager GetGlobalHttpProxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnManagerTest, NetConnManager018, TestSize.Level1)
+{
+    HttpProxy httpProxy;
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetGlobalHttpProxy(httpProxy);
+    std::set<std::string> exclusionList = httpProxy.GetExclusionList();
+    std::cout << "Get global http host:" << httpProxy.GetHost() << " ,port:" << httpProxy.GetPort() << std::endl;
+    for (auto exclusion : exclusionList) {
+        std::cout << "Get global http exclusion:" << exclusion << std::endl;
+    }
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: NetConnManager019
+ * @tc.desc: Test NetConnManager SetGlobalHttpProxy & GetGlobalHttpProxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnManagerTest, NetConnManager019, TestSize.Level1)
+{
+    std::string host = "178.169.139.180";
+    uint16_t port = 8080;
+    std::set<std::string> exclusionList = {"example.com", "::1", "localhost"};
+    HttpProxy httpProxy = {host, port, exclusionList};
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetGlobalHttpProxy(httpProxy);
+    exclusionList = httpProxy.GetExclusionList();
+    std::cout << "Get global http host:" << httpProxy.GetHost() << " ,port:" << httpProxy.GetPort() << std::endl;
+    for (auto exclusion : exclusionList) {
+        std::cout << "Get global http exclusion:" << exclusion << std::endl;
+    }
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: NetConnManager019
+ * @tc.desc: Test NetConnManager SetGlobalHttpProxy & GetGlobalHttpProxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnManagerTest, NetConnManager020, TestSize.Level1)
+{
+    std::string host = "";
+    uint16_t port = 0;
+    std::set<std::string> exclusionList = {};
+    HttpProxy httpProxy = {host, port, exclusionList};
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetGlobalHttpProxy(httpProxy);
+    exclusionList = httpProxy.GetExclusionList();
+    std::cout << "Get global http host:" << httpProxy.GetHost() << " ,port:" << httpProxy.GetPort() << std::endl;
+    for (auto exclusion : exclusionList) {
+        std::cout << "Get global http exclusion:" << exclusion << std::endl;
+    }
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

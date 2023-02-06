@@ -85,6 +85,8 @@
                     "//foundation/communication/netmanager_base/services/etc/init:netsysnative.rc",
                     "//foundation/communication/netmanager_base/services/etc/init:resolv.conf",
                     "//foundation/communication/netmanager_base/services/etc/init:xtables.lock",
+                    "//foundation/communication/netmanager_base/services/etc/param:netmanager_base.para",
+                    "//foundation/communication/netmanager_base/services/etc/param:netmanager_base.para.dac",
                     "//foundation/communication/netmanager_base/sa_profile:net_manager_profile"
                 ]
             },

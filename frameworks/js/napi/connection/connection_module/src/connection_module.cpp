@@ -22,6 +22,7 @@
 #include "constant.h"
 #include "getaddressbyname_context.h"
 #include "getdefaultnet_context.h"
+#include "global_http_proxy_context.h"
 #include "napi_constant.h"
 #include "net_all_capabilities.h"
 #include "netconnection.h"
@@ -141,6 +142,8 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
         DECLARE_NAPI_FUNCTION(FUNCTION_DISABLE_AIRPLANE_MODE, DisableAirplaneMode),
         DECLARE_NAPI_FUNCTION(FUNCTION_REPORT_NET_CONNECTED, ReportNetConnected),
         DECLARE_NAPI_FUNCTION(FUNCTION_REPORT_NET_DISCONNECTED, ReportNetDisconnected),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_GLOBAL_HTTP_PROXY, GetGlobalHttpProxy),
+        DECLARE_NAPI_FUNCTION(FUNCTION_SET_GLOBAL_HTTP_PROXY, SetGlobalHttpProxy),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_APP_NET, GetAppNet),
         DECLARE_NAPI_FUNCTION(FUNCTION_SET_APP_NET, SetAppNet),
     };
@@ -281,18 +284,32 @@ napi_value ConnectionModule::ReportNetDisconnected(napi_env env, napi_callback_i
                                                                    ConnectionAsyncWork::ReportNetDisconnectedCallback);
 }
 
+napi_value ConnectionModule::GetGlobalHttpProxy(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GlobalHttpProxyContext>(env, info, FUNCTION_GET_GLOBAL_HTTP_PROXY, nullptr,
+                                                             ConnectionAsyncWork::ExecGetGlobalHttpProxy,
+                                                             ConnectionAsyncWork::GetGlobalHttpProxyCallback);
+}
+
+napi_value ConnectionModule::SetGlobalHttpProxy(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GlobalHttpProxyContext>(env, info, FUNCTION_SET_GLOBAL_HTTP_PROXY, nullptr,
+                                                             ConnectionAsyncWork::ExecSetGlobalHttpProxy,
+                                                             ConnectionAsyncWork::SetGlobalHttpProxyCallback);
+}
+
 napi_value ConnectionModule::GetAppNet(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::Interface<AppNetContext>(env, info, FUNCTION_GET_APP_NET, nullptr,
-        ConnectionAsyncWork::ExecGetAppNet,
-        ConnectionAsyncWork::GetAppNetCallback);
+                                                    ConnectionAsyncWork::ExecGetAppNet,
+                                                    ConnectionAsyncWork::GetAppNetCallback);
 }
 
 napi_value ConnectionModule::SetAppNet(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::Interface<AppNetContext>(env, info, FUNCTION_SET_APP_NET, nullptr,
-        ConnectionAsyncWork::ExecSetAppNet,
-        ConnectionAsyncWork::SetAppNetCallback);
+                                                    ConnectionAsyncWork::ExecSetAppNet,
+                                                    ConnectionAsyncWork::SetAppNetCallback);
 }
 
 napi_value ConnectionModule::NetHandleInterface::GetAddressesByName(napi_env env, napi_callback_info info)

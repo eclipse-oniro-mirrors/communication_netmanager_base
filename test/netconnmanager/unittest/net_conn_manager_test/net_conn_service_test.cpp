@@ -26,6 +26,7 @@
 #include "token_setproc.h"
 #include "net_supplier_callback_stub.h"
 #include "net_conn_callback_stub.h"
+#include "http_proxy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -262,29 +263,29 @@ HWTEST_F(NetConnServiceTest, IsDefaultNetMeteredTest001, TestSize.Level1)
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, SetHttpProxyTest001, TestSize.Level1)
+HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest001, TestSize.Level1)
 {
-    std::string httpProxy = "testProxy";
-    auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetHttpProxy(httpProxy);
+    HttpProxy httpProxy = {"testHttpProxy", 0, {}};
+    auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
     ASSERT_EQ(ret, NETMANAGER_ERROR);
 }
 
-HWTEST_F(NetConnServiceTest, SetHttpProxyTest002, TestSize.Level1)
+HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest002, TestSize.Level1)
 {
-    std::string httpProxy;
-    auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetHttpProxy(httpProxy);
+    HttpProxy httpProxy;
+    auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
     ASSERT_EQ(ret, NETMANAGER_ERROR);
 }
 
-HWTEST_F(NetConnServiceTest, GetHttpProxyTest001, TestSize.Level1)
+HWTEST_F(NetConnServiceTest, GetGlobalHttpProxyTest001, TestSize.Level1)
 {
-    std::string httpProxy = "testProxy";
-    int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->SetHttpProxy(httpProxy);
+    HttpProxy httpProxy = {"testHttpProxy", 0, {}};
+    int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
     ASSERT_EQ(ret, NETMANAGER_ERROR);
 
-    std::string getHttpProxy;
-    ret = DelayedSingleton<NetConnService>::GetInstance()->GetHttpProxy(getHttpProxy);
-    ASSERT_EQ(ret, NET_CONN_ERR_NO_HTTP_PROXY);
+    HttpProxy getGlobalHttpProxy;
+    ret = DelayedSingleton<NetConnService>::GetInstance()->GetGlobalHttpProxy(getGlobalHttpProxy);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, GetTest001, TestSize.Level1)
