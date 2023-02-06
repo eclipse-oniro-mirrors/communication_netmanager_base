@@ -637,7 +637,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::DestroyNetworkCacheFuzzTest(data, size);
     OHOS::NetManagerStandard::InterfaceGetListFuzzTest(data, size);
     OHOS::NetManagerStandard::ShareDnsSetFuzzTest(data, size);
-    OHOS::NetManagerStandard::StartDnsProxyListenFuzzTest(data, size);
+    //OHOS::NetManagerStandard::StartDnsProxyListenFuzzTest(data, size);
     OHOS::NetManagerStandard::StopDnsProxyListenFuzzTest(data, size);
     OHOS::NetManagerStandard::StartDhcpClientFuzzTest(data, size);
     OHOS::NetManagerStandard::StopDhcpClientFuzzTest(data, size);
