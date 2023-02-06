@@ -32,9 +32,18 @@ public:
     [[nodiscard]] uint16_t GetPort() const;
     [[nodiscard]] std::set<std::string> GetExclusionList() const;
     [[nodiscard]] std::string ToString() const;
-    void inline SetHost(std::string &&host) { host_ = host; }
-    void inline SetPort(uint16_t port) { port_ = port; }
-    void inline SetExclusionList(std::set<std::string> &list) { exclusionList_ = list; }
+    void inline SetHost(std::string &&host)
+    {
+        host_ = host;
+    }
+    void inline SetPort(uint16_t port)
+    {
+        port_ = port;
+    }
+    void inline SetExclusionList(std::set<std::string> &list)
+    {
+        exclusionList_ = list;
+    }
 
     bool Marshalling(Parcel &parcel) const override;
     static bool Unmarshalling(Parcel &parcel, HttpProxy &httpProxy);
