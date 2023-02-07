@@ -24,7 +24,6 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 constexpr int32_t ERROR_DIVISOR = 1000;
-constexpr int32_t ERROR_RANGE = 100;
 std::map<int32_t, int32_t> g_errNumMap = {
     {NETMANAGER_ERR_MEMCPY_FAIL, NETMANAGER_ERR_INTERNAL},
     {NETMANAGER_ERR_MEMSET_FAIL, NETMANAGER_ERR_INTERNAL},
@@ -39,6 +38,10 @@ std::map<int32_t, int32_t> g_errNumMap = {
     {NETMANAGER_ERR_READ_REPLY_FAIL, NETMANAGER_ERR_OPERATION_FAILED},
     {NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL, NETMANAGER_ERR_OPERATION_FAILED},
     {NETMANAGER_ERR_GET_PROXY_FAIL, NETMANAGER_ERR_OPERATION_FAILED},
+    {POLICY_ERR_INVALID_UID, NETMANAGER_ERR_INVALID_PARAMETER},
+    {POLICY_ERR_INVALID_POLICY, NETMANAGER_ERR_INVALID_PARAMETER},
+    {POLICY_ERR_INVALID_QUOTA_POLICY, NETMANAGER_ERR_INVALID_PARAMETER},
+    {NET_CONN_ERR_INVALID_NETWORK, NETMANAGER_ERR_INVALID_PARAMETER},
     {NETMANAGER_EXT_ERR_MEMCPY_FAIL, NETMANAGER_EXT_ERR_INTERNAL},
     {NETMANAGER_EXT_ERR_MEMSET_FAIL, NETMANAGER_EXT_ERR_INTERNAL},
     {NETMANAGER_EXT_ERR_STRCPY_FAIL, NETMANAGER_EXT_ERR_INTERNAL},
@@ -95,9 +98,9 @@ std::map<int32_t, const char *> g_errStringMap = {
     {NETWORKSHARE_ERROR_SHARING_IFACE_ERROR, "Sharing iface failed"},
     {NETWORKSHARE_ERROR_ENABLE_FORWARDING_ERROR, "Network share enable forwarding error"},
     {NETWORKSHARE_ERROR_INTERNAL_ERROR, "Network share internal error"},
-    {NETWORKSHARE_ERROR_IFACE_CFG_ERROR, "Get network card configuration is null"},
+    {NETWORKSHARE_ERROR_IFACE_CFG_ERROR, "Network card configuration doesnot exist"},
     {NETWORKSHARE_ERROR_DHCPSERVER_ERROR, "DHCP server failed"},
-    {NETWORKSHARE_ERROR_ISSHARING_CALLBACK_ERROR, "Issharing callback is null"},
+    {NETWORKSHARE_ERROR_ISSHARING_CALLBACK_ERROR, "Issharing callback doesnot exist"},
     /* Net Stats Manager */
     {STATS_DUMP_MESSAGE_FAIL, "Dump message failed"},
     {STATS_REMOVE_FILE_FAIL, "Remove file failed "},
@@ -112,7 +115,7 @@ std::map<int32_t, const char *> g_errStringMap = {
     {STATS_ERR_GET_IFACE_NAME_FAILED, "Get iface name failed"},
     {STATS_ERR_CLEAR_STATS_DATA_FAIL, "Clear stats data failed"},
     {STATS_ERR_CREATE_TABLE_FAIL, "Create stats table failed"},
-    {STATS_ERR_DATABASE_RECV_NO_DATA, "The data got from database is null"},
+    {STATS_ERR_DATABASE_RECV_NO_DATA, "The data got from database doesnot exist"},
     {STATS_ERR_WRITE_DATA_FAIL, "Write data into database failed"},
     {STATS_ERR_READ_DATA_FAIL, "Read data from database failed"},
     /* Net connection Manager */
@@ -126,14 +129,14 @@ std::map<int32_t, const char *> g_errStringMap = {
     {NET_CONN_ERR_REQ_ID_NOT_FOUND, "the request id is not found"},
     {NET_CONN_ERR_NO_DEFAULT_NET, "the net is not defualt"},
     {NET_CONN_ERR_HTTP_PROXY_INVALID, "the http proxy is invalid"},
-    {NET_CONN_ERR_NO_HTTP_PROXY, "the httpProxy in service is null"},
-    {NET_CONN_ERR_INVALID_NETWORK, "the network is nullptr"},
+    {NET_CONN_ERR_NO_HTTP_PROXY, "the httpProxy in service doesnot exist"},
+    {NET_CONN_ERR_INVALID_NETWORK, "the network doesnot exist"},
     {NET_CONN_ERR_SERVICE_REQUEST_CONNECT_FAIL, "the service request connection failed "},
     {NET_CONN_ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL, "the service update net link infomation failed"},
     {NET_CONN_ERR_NO_SUPPLIER, "supplier doesn't exist"},
     {NET_CONN_ERR_NET_MONITOR_OPT_FAILED, "net monitor failed"},
     {NET_CONN_ERR_SERVICE_NO_REQUEST, "no service request"},
-    {NET_CONN_ERR_NO_ADDRESS, "address list is null"},
+    {NET_CONN_ERR_NO_ADDRESS, "address list doesnot exist"},
     {NET_CONN_ERR_NET_NOT_FIND_BESTNETWORK_FOR_REQUEST, "the bestnetwork request was not found"},
     {NET_CONN_ERR_NET_NO_RESTRICT_BACKGROUND, "no restrict background "},
     {NET_CONN_ERR_NET_OVER_MAX_REQUEST_NUM, "the number of requests exceeded the maximum"},
@@ -142,15 +145,19 @@ std::map<int32_t, const char *> g_errStringMap = {
 } // namespace
 std::string NetBaseErrorCodeConvertor::ConvertErrorCode(int32_t &errorCode)
 {
-    if (errorCode > ERROR_DIVISOR && (errorCode % ERROR_DIVISOR) >= ERROR_RANGE) {
+    std::string errmsg;
+    if (g_errStringMap.find(errorCode) != g_errStringMap.end()) {
+        errmsg = g_errStringMap.at(errorCode);
+    }
+    if (errorCode > ERROR_DIVISOR) {
         if (g_errNumMap.find(errorCode) != g_errNumMap.end()) {
             errorCode = g_errNumMap.at(errorCode);
         }
     }
-    if (g_errStringMap.find(errorCode) == g_errStringMap.end()) {
-        return {};
+    if (errmsg.empty() && g_errStringMap.find(errorCode) != g_errStringMap.end()) {
+        errmsg = g_errStringMap.at(errorCode);
     }
-    return g_errStringMap.at(errorCode);
+    return errmsg;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

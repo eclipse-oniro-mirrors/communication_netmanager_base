@@ -22,7 +22,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 constexpr int16_t LIMIT_STATS_CALLBACK_NUM = 200;
 enum NetStatsResultCode {
-    STATS_DUMP_MESSAGE_FAIL = 3002,
+    STATS_DUMP_MESSAGE_FAIL = 2103002,
     STATS_REMOVE_FILE_FAIL,
     STATS_ERR_INVALID_TIME_PERIOD,
     STATS_ERR_READ_BPF_FAIL,
