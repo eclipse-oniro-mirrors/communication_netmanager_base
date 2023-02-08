@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <string>
 
 #include "system_ability_definition.h"
 
@@ -51,6 +52,29 @@ HWTEST_F(NetsysNativeServiceTest, DumpTest001, TestSize.Level1)
     int32_t testFd = 11;
     int32_t ret = instance_->Dump(testFd, {});
     EXPECT_LE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetAddrInfoTest001, TestSize.Level1)
+{
+    int32_t netId = instance_->NetworkGetDefault();
+    addrinfo hint = {0};
+    addrinfo *res = nullptr;
+    std::string webAddress = "www.baidu.com";
+    std::string webIpAddress = "223.5.5.5";
+    int32_t ret = instance_->GetAddrInfo(webAddress, webIpAddress, &hint, netId, &res);
+    EXPECT_NE(ret, 0);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetAddrInfoTest002, TestSize.Level1)
+{
+    int32_t netId = instance_->NetworkGetDefault();
+    addrinfo hint = {0};
+    addrinfo *res = nullptr;
+    hint.ai_family = AF_INET6;
+    std::string webAddress = "www.baidu.com";
+    std::string webIpAddress = "223.5.5.5";
+    int32_t ret = instance_->GetAddrInfo(webAddress, webIpAddress, &hint, netId, &res);
+    EXPECT_NE(ret, 0);
 }
 
 HWTEST_F(NetsysNativeServiceTest, SetResolverConfigTest001, TestSize.Level1)
