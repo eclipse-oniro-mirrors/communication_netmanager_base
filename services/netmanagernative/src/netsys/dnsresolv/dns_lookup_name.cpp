@@ -194,7 +194,7 @@ int32_t DnsLookUpName::NameFromDnsSearch(AddrData buf[MAXADDRS], char canon[CANO
         if (temp == pos) {
             break;
         }
-        if (temp - pos < SEARCH_MAX_LEN - nameLen - LOOKUP_NAME_ONE) {
+        if (temp - pos < static_cast<long>(SEARCH_MAX_LEN - LOOKUP_NAME_ONE) - static_cast<long>(nameLen)) {
             uint32_t cannonAddLen = nameLen + LOOKUP_NAME_ONE;
             uint32_t posLen = temp - pos;
             if (memcpy_s(canon + cannonAddLen, posLen, pos, posLen) != 0) {
@@ -483,6 +483,7 @@ int32_t DnsLookUpName::SwitchSocketType(int32_t sockType, const std::string name
             switch (proto) {
                 case 0:
                     proto = IPPROTO_TCP;
+                    [[fallthrough]];
                 case IPPROTO_TCP:
                     break;
                 default:
@@ -493,11 +494,13 @@ int32_t DnsLookUpName::SwitchSocketType(int32_t sockType, const std::string name
             switch (proto) {
                 case 0:
                     proto = IPPROTO_UDP;
+                    [[fallthrough]];
                 case IPPROTO_UDP:
                     break;
                 default:
                     return EAI_SERVICE;
             }
+            [[fallthrough]];
         case 0:
             break;
         default:
