@@ -33,9 +33,6 @@ static constexpr uint8_t MASK_LOW_SIX_BITS = 0x3f;
 static constexpr uint8_t BIT_NUM_OF_BYTE = 8;
 static constexpr uint32_t HOST_NAME_LEN = 1;
 static constexpr uint32_t HOST_NAME_LEN_MAX = 62;
-static constexpr uint32_t OP_MAX = 15;
-static constexpr uint32_t MINE_CLASS_MAX = 255;
-static constexpr uint32_t TYPE_MAX = 255;
 static constexpr uint64_t MAX_BIT = 65536;
 static constexpr int32_t NAME_MAX_BIT = 256;
 
@@ -45,11 +42,14 @@ static constexpr int32_t DEFAULT_TIME_OUT = 5;
 static constexpr int32_t DEFAULT_DOTS = 1;
 static constexpr int32_t DEFAULT_ATTEMPTS = 2;
 static constexpr int32_t DEFAULT_MAX_ATTEMPTS = 10;
+static constexpr int32_t MINE_CLASS_MAX = 255;
 static constexpr int32_t ONE_MINUTE = 60;
 static constexpr int32_t HOSTNAME_LEN_DIFFER = 17;
 static constexpr int32_t HOSTNAME_SIZE_DIFFER = 13;
 static constexpr int32_t HOSTNAME_BUFF_COMPUTE = 8;
+static constexpr int32_t OP_MAX = 15;
 static constexpr int32_t TMP_LINE = 256;
+static constexpr int32_t TYPE_MAX = 255;
 
 static constexpr int32_t RR_CNAME = 5;
 static constexpr int32_t CTX_DEFAULT_SCOPEID = 0;
@@ -298,6 +298,7 @@ void DnsLookUpParse::DnsGetAnswers(GetAnswers getAnswers, const uint8_t *const *
                                  reinterpret_cast<sockaddr *>(&nSockAddr[j]), getAnswers.saLen);
                     servFailRetry--;
                 }
+                [[fallthrough]];
             default:
                 continue;
         }
@@ -405,7 +406,7 @@ int32_t DnsLookUpParse::ResMSendRc(int32_t queriesNum, const uint8_t *const *que
 int32_t DnsLookUpParse::IsValidHostname(const std::string host)
 {
     if (strnlen(host.c_str(), HOST_MAX_LEN) - LOOKUP_NAME_ONE >= HOST_MAX_LEN_MINUS_ONE ||
-        mbstowcs(0, host.c_str(), 0) == -1) {
+        static_cast<int>(mbstowcs(0, host.c_str(), 0)) == -1) {
         return DNS_ERR_NONE;
     }
     uint8_t *hostBit = reinterpret_cast<uint8_t *>(const_cast<char *>(host.c_str()));
