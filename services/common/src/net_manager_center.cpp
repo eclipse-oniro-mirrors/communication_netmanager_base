@@ -74,6 +74,14 @@ int32_t NetManagerCenter::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<
     return connService_->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
 }
 
+int32_t NetManagerCenter::RegisterNetConnCallback(const sptr<INetConnCallback> &callback)
+{
+    if (connService_ == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return connService_->RegisterNetConnCallback(callback);
+}
+
 void NetManagerCenter::RegisterConnService(const sptr<NetConnBaseService> &service)
 {
     connService_ = service;

@@ -16,6 +16,7 @@
 #ifndef FIREWALL_RULE_H
 #define FIREWALL_RULE_H
 
+#include <set>
 #include <string>
 #include <vector>
 
@@ -54,9 +55,9 @@ public:
     /**
      * Set the firewall allow list
      *
-     * @param uids The vector of UID
+     * @param uids The aggregate of UID
      */
-    virtual void SetAllowedList(const std::vector<uint32_t> &uids);
+    virtual void SetAllowedList(const std::set<uint32_t> &uids);
 
     /**
      * Set the firewall allow list

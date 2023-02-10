@@ -267,7 +267,7 @@ HWTEST_F(UtNetPolicyTraffic, ResetPolicies001, TestSize.Level1)
         if (quotaPolicy.iccid == ICCID_1) {
             if (quotaPolicy.periodDuration == "M1" && quotaPolicy.warningBytes == DATA_USAGE_UNKNOWN &&
                 quotaPolicy.limitBytes == DATA_USAGE_UNKNOWN && quotaPolicy.lastWarningRemind == REMIND_NEVER &&
-                quotaPolicy.lastLimitRemind == REMIND_NEVER && quotaPolicy.metered == false) {
+                quotaPolicy.lastLimitRemind == REMIND_NEVER && quotaPolicy.metered) {
                 SUCCEED();
                 return;
             }
@@ -544,7 +544,7 @@ HWTEST_F(UtNetPolicyTraffic, PublishQuotaEvent001, TestSize.Level1)
 HWTEST_F(UtNetPolicyTraffic, ReadQuotaPolicies001, TestSize.Level1)
 {
     auto ret = g_netPolicyTraffic->ReadQuotaPolicies();
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**

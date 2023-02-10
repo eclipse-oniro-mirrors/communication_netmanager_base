@@ -34,6 +34,7 @@
 #include "singleton.h"
 
 #include "net_policy_constants.h"
+#include "net_policy_file_event_handler.h"
 #include "net_policy_inner_define.h"
 #include "net_quota_policy.h"
 
@@ -58,109 +59,109 @@ public:
     bool InitPolicy();
 
     /**
-     * Judge if this uid is exist.
-     * @param uid The specified UID of application.
-     * @return true Return true means this uid is exist.
-     * @return false Return false means this uid is not exist.
+     * Reset policy to default.
      */
-    bool IsUidPolicyExist(uint32_t uid);
+    int32_t ResetPolicies();
 
     /**
-     * Write struct vector of quotaPolicies to file.
-     * @param quotaPolicies The struct vector of quotaPolicies.
-     * @return true Return true means write quotaPolicies to file successful.
-     * @return false Return false means write quotaPolicies to file failed.
+     * Used by net_policy_rule.cpp to get policy from file.
+     *
+     * @return const std::vector<UidPolicy>&
      */
-    bool WriteFile(const std::vector<NetQuotaPolicy> &quotaPolicies);
+    const std::vector<UidPolicy> &ReadUidPolicies();
 
     /**
-     * Write uid and policy to file.
-     * @param uid The specified UID of application.
-     * @param policy See {@link NetUidPolicy}.
+     * Used by net_policy_rule.cpp to write policy to file.
+     *
+     * @param uid The specified UID of app.
+     * @param policy The network policy for application.
+     *      For details, see {@link NetUidPolicy}.
      */
-    void WriteFile(uint32_t uid, uint32_t policy);
+    void WriteUidPolicy(uint32_t uid, uint32_t policy);
 
     /**
-     * Get policy by uid from vector UidPolicy of struct NetPolicy.
-     * @param uid The specified UID of application.
-     * @return NetUidPolicy See {@link NetUidPolicy}.
-     */
-    NetUidPolicy GetPolicyByUid(uint32_t uid);
-
-    /**
-     * Get uids by policy from vector UidPolicy of struct NetPolicy.
-     * @param policy See {@link NetUidPolicy}.
-     * @param uids The specified UIDS of application.
-     * @return true Return true means get uids that policy equal input policy.
-     * @return false Return false means get none uids that policy equal input policy.
-     */
-    bool GetUidsByPolicy(uint32_t policy, std::vector<uint32_t> &uids);
-
-    /**
-     * Add quota policies into struct vector quotaPolicies.
-     * @param quotaPolicies The struct vector of quotaPolicies.
-     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * Used by net_policy_traffic.cpp to get quota policy from file.
+     *
+     * @param quotaPolicies The list of network quota policy, {@link NetQuotaPolicy}.
      */
     int32_t ReadQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies);
 
     /**
-     * Use netType and iccid to judge if this quota Policy in NetPolicyQuota vector of struct NetPolicy.
-     * @param netType For details, see {@link NetBearType}.
-     * @param iccid The string type of iccid.
-     * @param quotaPolicy The struct vector of quotaPolicies.
-     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * Used by net_policy_rule.cpp to write quota policy to file.
+     *
+     * @param quotaPolicies  The list of network quota policy, {@link NetQuotaPolicy}.
+     * @return true Return true means successful.
+     * @return false Return false means failed.
      */
-    int32_t GetNetQuotaPolicy(int32_t netType, const std::string &iccid, NetQuotaPolicy &quotaPolicy);
+    bool WriteQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies);
 
     /**
-     * Clear the uid and policy in struct NetPolicy's uidPolicy vector,
-     * reset the background policy status to default,
-     * reset the netQuotaPolicy which IccId equal iccid,
-     * write these changes to file.
-     * @param iccid The net quota policy's sim id.
-     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * Used by net_policy_rule.cpp to get background policy from file.
+     *
+     * @return true Return true means allow access net on background.
+     * @return false Return false means reject access net on background.
      */
-    int32_t ResetPolicies(const std::string &iccid);
+    bool ReadBackgroundPolicy();
 
     /**
-     * Write the background policy to file.
-     * @param allowBackground When the allowBackground is true,it means "allow" background policy,
-     * when the allowBackground is false,if means "reject" background policy.
-     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * Used by net_policy_rule.cpp to write background policy to file.
+     *
+     * @param allowBackground Allow or Reject access net on background.
      */
-    int32_t SetBackgroundPolicy(bool allowBackground);
+    void WriteBackgroundPolicy(bool allowBackground);
 
     /**
-     * Get background policy from file.
-     * @return true True means allow background policy.
-     * @return false False means reject background policy.
+     * Used by net_policy_firewall.cpp to get firewall policy from file.
+     *
+     * @param chainType The firewall's type.Include "Powersave" or "DeviceIdle".
+     * @param allowedList Firewall's allowed list.
+     * @param deniedList Firewall's denied list.
      */
-    bool GetBackgroundPolicy();
+    int32_t ReadFirewallRules(uint32_t chainType, std::set<uint32_t> &allowedList, std::set<uint32_t> &deniedList);
 
     /**
-     * Get struct vector uid and policy from file.
-     * @return const std::vector<UidPolicy>& Return struct vector netPolicy_.uidPolicies.
+     * Used by net_policy_firewall.cpp to write firewall policy from file.
+     *
+     * @param chainType The firewall's type.Include "Powersave" or "DeviceIdle".
+     * @param allowedList Firewall's allowed list.
+     * @param deniedList Firewall's denied list.
      */
-    const std::vector<UidPolicy> &GetNetPolicies();
+    void WriteFirewallRules(uint32_t chainType, const std::set<uint32_t> &allowedList,
+                            const std::set<uint32_t> &deniedList);
+
+    /**
+     * Used by net_policy_rule.cpp, when an app is removed from system,
+     * this uid will be also remove from file.
+     *
+     * @param uid The specified UID of app that removed.
+     */
+    void RemoveInexistentUid(uint32_t uid);
 
 private:
-    bool FileExists(const std::string &fileName);
-    bool CreateFile(const std::string &fileName);
-    bool WriteFile(const std::string &fileName);
-    bool WriteFile(uint32_t netUidPolicyOpType, uint32_t uid, uint32_t policy);
-    bool ReadFile(const std::string &fileName, std::string &content);
     bool Json2Obj(const std::string &content, NetPolicy &netPolicy);
+    bool Obj2Json(const NetPolicy &netPolicy, std::string &content);
+
+    bool ReadFile(const std::string &filePath);
+    bool ReadFile();
+    bool WriteFile();
+
     void AppendUidPolicy(Json::Value &root);
     void AppendBackgroundPolicy(Json::Value &root);
     void AppendQuotaPolicy(Json::Value &root);
+    void AppendFirewallRule(Json::Value &root);
+
     void ParseUidPolicy(const Json::Value &root, NetPolicy &netPolicy);
     void ParseBackgroundPolicy(const Json::Value &root, NetPolicy &netPolicy);
     void ParseQuotaPolicy(const Json::Value &root, NetPolicy &netPolicy);
-    void ParseCellularPolicy(const Json::Value &root, NetPolicy &netPolicy);
+    void ParseFirewallRule(const Json::Value &root, NetPolicy &netPolicy);
+
     bool UpdateQuotaPolicyExist(const NetQuotaPolicy &quotaPolicy);
     uint32_t ArbitrationWritePolicyToFile(uint32_t uid, uint32_t policy);
+    void WriteUidPolicy(uint32_t netUidPolicyOpType, uint32_t uid, uint32_t policy);
 
-private:
+    std::shared_ptr<NetPolicyFileEventHandler> GetHandler();
+
+public:
     NetPolicy netPolicy_;
     std::mutex mutex_;
 };

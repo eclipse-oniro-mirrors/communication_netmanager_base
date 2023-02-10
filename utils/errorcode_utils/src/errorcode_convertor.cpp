@@ -16,6 +16,7 @@
 #include "errorcode_convertor.h"
 
 #include "net_conn_constants.h"
+#include "net_policy_constants.h"
 #include "net_manager_constants.h"
 #include "net_policy_constants.h"
 #include "net_stats_constants.h"

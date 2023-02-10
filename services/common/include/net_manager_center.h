@@ -37,6 +37,7 @@ public:
     int32_t UnregisterNetSupplier(uint32_t supplierId);
     int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo);
     int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo);
+    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback);
     void RegisterConnService(const sptr<NetConnBaseService> &service);
 
     int32_t GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end, NetStatsInfo &info);

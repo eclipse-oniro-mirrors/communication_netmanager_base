@@ -310,5 +310,38 @@ int32_t NetPolicyClient::SetDeviceIdlePolicy(bool enable)
 
     return proxy->SetDeviceIdlePolicy(enable);
 }
+
+int32_t NetPolicyClient::SetPowerSavePolicy(bool enable)
+{
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->SetPowerSavePolicy(enable);
+}
+
+int32_t NetPolicyClient::GetPowerSaveAllowedList(std::vector<uint32_t> &uids)
+{
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->GetPowerSaveAllowedList(uids);
+}
+
+int32_t NetPolicyClient::SetPowerSaveAllowedList(uint32_t uid, bool isAllowed)
+{
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->SetPowerSaveAllowedList(uid, isAllowed);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

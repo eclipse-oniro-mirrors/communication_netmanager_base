@@ -13,41 +13,32 @@
  * limitations under the License.
  */
 
-#ifndef COMMUNICATIONNETMANAGERBASE_GETNETQUOTAPOLICIES_CONTEXT_H
-#define COMMUNICATIONNETMANAGERBASE_GETNETQUOTAPOLICIES_CONTEXT_H
+#ifndef COMMUNICATIONNETMANAGERBASE_SETPOWERSAVEALLOWLIST_CONTEXT_H
+#define COMMUNICATIONNETMANAGERBASE_SETPOWERSAVEALLOWLIST_CONTEXT_H
 
 #include <cstddef>
 #include <cstdint>
-#include <vector>
 
 #include <napi/native_api.h>
 
 #include "base_context.h"
-#include "net_policy_constants.h"
-#include "net_quota_policy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-class GetNetQuotaPoliciesContext final : public BaseContext {
+class SetPowerSaveAllowListContext final : public BaseContext {
 public:
-    GetNetQuotaPoliciesContext() = delete;
-    explicit GetNetQuotaPoliciesContext(napi_env env, EventManager *manager);
+    SetPowerSaveAllowListContext() = delete;
+    explicit SetPowerSaveAllowListContext(napi_env env, EventManager *manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
 public:
-    std::vector<NetQuotaPolicy> quotaPolicys_;
-    std::vector<uint32_t> uids_;
-    NetQuotaPolicy quotaPolicy_;
-    bool backgroundPolicy_ = false;
+    int32_t uid_ = 0;
+    bool isAllow_ = false;
 
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);
 };
-
-using GetBackgroundPolicyContext = GetNetQuotaPoliciesContext;
-using GetDeviceIdleAllowListContext = GetNetQuotaPoliciesContext;
-using GetPowerSaveAllowListContext = GetNetQuotaPoliciesContext;
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // COMMUNICATIONNETMANAGERBASE_GETNETQUOTAPOLICIES_CONTEXT_H
+#endif // COMMUNICATIONNETMANAGERBASE_SETPOWERSAVEALLOWLIST_CONTEXT_H

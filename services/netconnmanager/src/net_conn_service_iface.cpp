@@ -54,5 +54,10 @@ int32_t NetConnServiceIface::RestrictBackgroundChanged(bool isRestrictBackground
 {
     return DelayedSingleton<NetConnService>::GetInstance()->RestrictBackgroundChanged(isRestrictBackground);
 }
+
+int32_t NetConnServiceIface::RegisterNetConnCallback(const sptr<INetConnCallback> &callback)
+{
+    return DelayedSingleton<NetConnService>::GetInstance()->RegisterNetConnCallback(callback);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

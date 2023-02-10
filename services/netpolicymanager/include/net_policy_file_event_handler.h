@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NET_POLICY_EVENT_HANDLER_H
-#define NET_POLICY_EVENT_HANDLER_H
+#ifndef NET_POLICY_FILE_EVENT_HANDLER_H
+#define NET_POLICY_FILE_EVENT_HANDLER_H
 
 #include <iostream>
 
@@ -22,33 +22,31 @@
 #include "event_runner.h"
 #include "singleton.h"
 
+struct PolicyFileEvent {
+    std::string json;
+};
+
 namespace OHOS {
 namespace NetManagerStandard {
 class NetPolicyCore;
-class NetPolicyEventHandler : public AppExecFwk::EventHandler {
+class NetPolicyFileEventHandler : public AppExecFwk::EventHandler {
 public:
-    static constexpr int32_t MSG_DEVICE_IDLE_LIST_UPDATED = 1;
-    static constexpr int32_t MSG_DEVICE_IDLE_MODE_CHANGED = 2;
-    static constexpr int32_t MSG_POWER_SAVE_MODE_CHANGED = 3;
-    static constexpr int32_t MSG_UID_REMOVED = 4;
-    static constexpr int32_t MSG_POWER_SAVE_LIST_UPDATED = 5;
-    static constexpr int32_t MSG_UID_STATE_FOREGROUND = 6;
-    static constexpr int32_t MSG_UID_STATE_BACKGROUND = 7;
+    static constexpr uint32_t MSG_POLICY_FILE_WRITE = 2;
+    static constexpr uint32_t MSG_POLICY_FILE_DELETE = 3;
+    static constexpr uint32_t MSG_POLICY_FILE_COMMIT = 4;
 
-    NetPolicyEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner,
-                          const std::shared_ptr<NetPolicyCore> &core);
-    virtual ~NetPolicyEventHandler() override;
-
-    /**
-     * Process the event from EventHandler
-     *
-     * @param eventId The event id
-     * @param policyEvent The informations passed from other core
-     */
+    explicit NetPolicyFileEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
+    virtual ~NetPolicyFileEventHandler();
     void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
+    void SendWriteEvent(AppExecFwk::InnerEvent::Pointer &event);
 
 private:
-    std::shared_ptr<NetPolicyCore> core_;
+    bool Write();
+    bool DeleteBak();
+
+    std::atomic<long long> timeStamp_ = 0;
+    std::atomic<bool> commitWait_ = false;
+    std::string fileContent_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

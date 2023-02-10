@@ -223,8 +223,8 @@ void WrapperDistributor::NotifyQuotaLimitReache(const std::string &labelName, co
     }
 }
 
-void WrapperDistributor::NotifyInterfaceAddressUpdate(const std::string &addr, const std::string &ifName,
-                                                      int32_t flags, int32_t scope)
+void WrapperDistributor::NotifyInterfaceAddressUpdate(const std::string &addr, const std::string &ifName, int32_t flags,
+                                                      int32_t scope)
 {
     NETNATIVE_LOG_D("OnInterfaceAddressUpdated: %{public}s, %{public}s, %{public}d, %{public}d",
                     ToAnonymousIp(addr).c_str(), ifName.c_str(), flags, scope);
@@ -237,8 +237,8 @@ void WrapperDistributor::NotifyInterfaceAddressUpdate(const std::string &addr, c
     }
 }
 
-void WrapperDistributor::NotifyInterfaceAddressRemove(const std::string &addr, const std::string &ifName,
-                                                      int32_t flags, int32_t scope)
+void WrapperDistributor::NotifyInterfaceAddressRemove(const std::string &addr, const std::string &ifName, int32_t flags,
+                                                      int32_t scope)
 {
     NETNATIVE_LOG_D("NotifyInterfaceAddressRemove: %{public}s, %{public}s, %{public}d, %{public}d",
                     ToAnonymousIp(addr).c_str(), ifName.c_str(), flags, scope);

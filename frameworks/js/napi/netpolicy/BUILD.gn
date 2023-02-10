@@ -42,6 +42,7 @@ ohos_shared_library("policy") {
     "src/context/set_device_idle_allow_list_context.cpp",
     "src/context/set_net_quota_policies_context.cpp",
     "src/context/set_policy_by_uid_context.cpp",
+    "src/context/set_power_save_allow_list_context.cpp",
     "src/context/update_remind_policy_context.cpp",
     "src/net_policy_callback_observer.cpp",
     "src/netpolicy_async_work.cpp",

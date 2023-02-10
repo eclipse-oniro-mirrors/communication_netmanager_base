@@ -46,6 +46,7 @@ void UtNetPolicyRule::SetUpTestCase()
     g_netPolicyRule = std::make_shared<NetPolicyRule>();
     g_netPolicyFirewallR = std::make_shared<NetPolicyFirewall>();
     g_netPolicyRule->Init();
+    g_netPolicyRule->ResetPolicies();
 }
 
 void UtNetPolicyRule::TearDownTestCase()

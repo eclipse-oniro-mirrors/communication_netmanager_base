@@ -17,6 +17,7 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 ohos_shared_library("net_policy_manager") {
   sources = [
     "src/common/net_policy_event_handler.cpp",
+    "src/common/net_policy_file_event_handler.cpp",
     "src/common/net_policy_service_common.cpp",
     "src/common/netsys_policy_wrapper.cpp",
     "src/core/net_policy_base.cpp",
@@ -28,6 +29,7 @@ ohos_shared_library("net_policy_manager") {
     "src/core/net_policy_traffic.cpp",
     "src/firewall_rule/device_idle_firewall_rule.cpp",
     "src/firewall_rule/firewall_rule.cpp",
+    "src/firewall_rule/power_save_firewall_rule.cpp",
     "src/net_policy_service.cpp",
     "src/stub/net_policy_callback_proxy.cpp",
     "src/stub/net_policy_service_stub.cpp",
@@ -56,6 +58,7 @@ ohos_shared_library("net_policy_manager") {
 
   external_deps = [
     "ability_base:want",
+    "ability_runtime:app_manager",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",

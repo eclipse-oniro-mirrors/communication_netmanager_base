@@ -90,6 +90,7 @@ public:
     int32_t ResetPolicies(const std::string &iccid);
 
     void ReachedLimit(const std::string &iface);
+    void UpdateNetPolicy();
     void GetDumpMessage(std::string &message);
 
 private:
@@ -99,11 +100,11 @@ private:
         {
             traffic_ = traffic;
         }
-        virtual int32_t OnInterfaceAddressUpdated(const std::string &, const std::string &, int, int)
+        virtual int32_t OnInterfaceAddressUpdated(const std::string &, const std::string &, int32_t, int32_t)
         {
             return 0;
         }
-        virtual int32_t OnInterfaceAddressRemoved(const std::string &, const std::string &, int, int)
+        virtual int32_t OnInterfaceAddressRemoved(const std::string &, const std::string &, int32_t, int32_t)
         {
             return 0;
         }
@@ -141,6 +142,49 @@ private:
         std::shared_ptr<NetPolicyTraffic> traffic_ = nullptr;
     };
 
+    class ConnCallBack : public IRemoteStub<INetConnCallback> {
+    public:
+        ConnCallBack(std::shared_ptr<NetPolicyTraffic> connCallBack)
+        {
+            connCallBack_ = connCallBack;
+        }
+
+        virtual int32_t NetAvailable(sptr<NetHandle> &netHandle)
+        {
+            connCallBack_->UpdateNetPolicy();
+            return 0;
+        }
+
+        virtual int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap)
+        {
+            return 0;
+        }
+
+        virtual int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
+        {
+            return 0;
+        }
+
+        virtual int32_t NetLost(sptr<NetHandle> &netHandle)
+        {
+            return 0;
+        }
+
+        virtual int32_t NetUnavailable()
+        {
+            return 0;
+        }
+
+        virtual int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
+        {
+            return 0;
+        }
+
+    private:
+        std::shared_ptr<NetPolicyTraffic> connCallBack_ = nullptr;
+    };
+
+private:
     int32_t UpdateQuotaPoliciesInner();
     int64_t GetQuotaRemain(NetQuotaPolicy &quotaPolicy);
     void UpdateQuotaNotify();
@@ -170,6 +214,7 @@ private:
     std::vector<NetQuotaPolicy> quotaPolicies_;
     std::vector<std::string> meteredIfaces_;
     sptr<NetsysControllerCallback> netsysCallback_ = nullptr;
+    sptr<INetConnCallback> netConnCallback_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

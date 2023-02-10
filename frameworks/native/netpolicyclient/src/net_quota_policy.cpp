@@ -212,7 +212,6 @@ void NetQuotaPolicy::Reset()
     limitBytes = DATA_USAGE_UNKNOWN;
     lastWarningRemind = REMIND_NEVER;
     lastLimitRemind = REMIND_NEVER;
-    metered = false;
     limitAction = LimitAction::LIMIT_ACTION_NONE;
 }
 } // namespace NetManagerStandard

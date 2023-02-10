@@ -15,6 +15,8 @@
 
 #include "net_policy_core.h"
 
+#include <thread>
+
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_base.h"
 #include "net_policy_event_handler.h"
@@ -22,8 +24,13 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr const char *EVENT_PARAM_DELETED_UID = "DeletedUid";
-static constexpr uint32_t CORE_EVENT_PRIORITY = 1;
+using namespace AppExecFwk;
+namespace {
+constexpr const char *DEVICE_IDLE_MODE_KEY = "0";
+constexpr uint32_t AGAIN_REGISTER_CALLBACK_INTERVAL = 500;
+constexpr uint32_t CORE_EVENT_PRIORITY = 1;
+constexpr uint32_t MAX_RETRY_TIMES = 10;
+} // namespace
 
 NetPolicyCore::NetPolicyCore() = default;
 
@@ -36,6 +43,25 @@ void NetPolicyCore::Init(std::shared_ptr<NetPolicyEventHandler> &handler)
 {
     handler_ = handler;
     SubscribeCommonEvent();
+
+    netAppStatusCallback_ = new (std::nothrow) AppStatus((std::static_pointer_cast<NetPolicyCore>(shared_from_this())));
+    if (netAppStatusCallback_ != nullptr) {
+        std::thread([this]() {
+            auto appManager = std::make_unique<AppMgrClient>();
+            uint32_t count = 0;
+            int32_t connectResult = AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+            while (connectResult != AppMgrResultCode::RESULT_OK && count <= MAX_RETRY_TIMES) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(AGAIN_REGISTER_CALLBACK_INTERVAL));
+                connectResult = appManager->ConnectAppMgrService();
+                count++;
+            }
+            if (count > MAX_RETRY_TIMES && connectResult != AppMgrResultCode::RESULT_OK) {
+                NETMGR_LOG_E("Connect AppMgrService fail.");
+            } else {
+                appManager->RegisterAppStateCallback(netAppStatusCallback_);
+            }
+        }).detach();
+    }
 }
 
 void NetPolicyCore::HandleEvent(const AppExecFwk::InnerEvent::Pointer &event)
@@ -62,24 +88,38 @@ void NetPolicyCore::SendEvent(int32_t eventId, std::shared_ptr<PolicyEvent> &eve
         NETMGR_LOG_E("handler is null");
         return;
     }
-    
+
     handler_->SendEvent(event, delayTime);
 }
 
 void NetPolicyCore::SubscribeCommonEvent()
 {
     NETMGR_LOG_D("SubscribeCommonEvent");
-    EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
-    matchingSkills.AddEvent(COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);
-    matchingSkills.AddEvent(COMMON_EVENT_UID_REMOVED);
-    matchingSkills.AddEvent(COMMON_EVENT_NET_QUOTA_WARNING);
-    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
-    subscribeInfo.SetPriority(CORE_EVENT_PRIORITY);
-    EventFwk::CommonEventManager::SubscribeCommonEvent(shared_from_this());
+    std::thread([this]() {
+        EventFwk::MatchingSkills matchingSkills;
+        matchingSkills.AddEvent(COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
+        matchingSkills.AddEvent(COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);
+        matchingSkills.AddEvent(COMMON_EVENT_PACKAGE_REMOVED);
+        matchingSkills.AddEvent(COMMON_EVENT_NET_QUOTA_WARNING);
+        EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+        subscribeInfo.SetPriority(CORE_EVENT_PRIORITY);
+        subscriber_ = std::make_shared<ReceiveMessage>(subscribeInfo, shared_from_this());
+        uint32_t count = 0;
+        bool result = false;
+        while (!result && count <= MAX_RETRY_TIMES) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(AGAIN_REGISTER_CALLBACK_INTERVAL));
+            result = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+            count++;
+        }
+        if (count > MAX_RETRY_TIMES && !result) {
+            NETMGR_LOG_E("SubscribeCommonEvent fail.");
+        } else {
+            NETMGR_LOG_D("SubscribeCommonEvent successful");
+        }
+    }).detach();
 }
 
-void NetPolicyCore::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
+void NetPolicyCore::ReceiveMessage::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
 {
     const auto &action = eventData.GetWant().GetAction();
     const auto &data = eventData.GetData();
@@ -90,25 +130,58 @@ void NetPolicyCore::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
         bool isPowerSave = (code == SAVE_MODE || code == LOWPOWER_MODE);
         auto policyEvent = std::make_shared<PolicyEvent>();
         policyEvent->powerSaveMode = isPowerSave;
-        SendEvent(NetPolicyEventHandler::MSG_POWER_SAVE_MODE_CHANGED, policyEvent);
-        return;
+        if (receiveMessage_ != nullptr) {
+            receiveMessage_->SendEvent(NetPolicyEventHandler::MSG_POWER_SAVE_MODE_CHANGED, policyEvent);
+            return;
+        }
+        NETMGR_LOG_E("receive message is nullptr");
     }
 
     if (action == COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED) {
-        bool isDeviceIdle = (code == EXTREME_MODE);
+        bool isDeviceIdle = static_cast<bool>(eventData.GetWant().GetRemoteObject(DEVICE_IDLE_MODE_KEY));
         auto policyEvent = std::make_shared<PolicyEvent>();
         policyEvent->deviceIdleMode = isDeviceIdle;
-        SendEvent(NetPolicyEventHandler::MSG_DEVICE_IDLE_MODE_CHANGED, policyEvent);
-        return;
+        if (receiveMessage_ != nullptr) {
+            receiveMessage_->SendEvent(NetPolicyEventHandler::MSG_DEVICE_IDLE_MODE_CHANGED, policyEvent);
+            return;
+        }
+        NETMGR_LOG_E("receive message is nullptr");
     }
 
-    if (action == COMMON_EVENT_UID_REMOVED) {
-        uint32_t deletedUid = CommonUtils::StrToUint(eventData.GetWant().GetStringParam(EVENT_PARAM_DELETED_UID));
+    if (action == COMMON_EVENT_PACKAGE_REMOVED) {
+        uint32_t deletedUid = eventData.GetWant().GetIntParam(AppExecFwk::Constants::UID, 0);
         auto policyEvent = std::make_shared<PolicyEvent>();
         policyEvent->deletedUid = deletedUid;
-        SendEvent(NetPolicyEventHandler::MSG_UID_REMOVED, policyEvent);
-        return;
+        if (receiveMessage_ != nullptr) {
+            receiveMessage_->SendEvent(NetPolicyEventHandler::MSG_UID_REMOVED, policyEvent);
+            return;
+        }
+        NETMGR_LOG_E("receive message is nullptr");
     }
+}
+
+void NetPolicyCore::SendAppStatusMessage(const AppProcessData &appProcessData)
+{
+    for (const auto &appdata : appProcessData.appDatas) {
+        auto policyEvent = std::make_shared<PolicyEvent>();
+        NETMGR_LOG_D(
+            "SendAppStatusMessage : appProcessData.appState[%{public}d] appProcessName[%{public}s] uid[%{public}d]",
+            appProcessData.appState, appProcessData.processName.c_str(), appdata.uid);
+        policyEvent->uid = appdata.uid;
+        if (appProcessData.appState == ApplicationState::APP_STATE_FOREGROUND) {
+            SendEvent(NetPolicyEventHandler::MSG_UID_STATE_FOREGROUND, policyEvent);
+        }
+
+        if (appProcessData.appState == ApplicationState::APP_STATE_BACKGROUND) {
+            SendEvent(NetPolicyEventHandler::MSG_UID_STATE_BACKGROUND, policyEvent);
+        }
+    }
+}
+
+NetPolicyCore::ReceiveMessage::ReceiveMessage(const EventFwk::CommonEventSubscribeInfo &subscriberInfo,
+                                              std::shared_ptr<NetPolicyCore> core)
+    : EventFwk::CommonEventSubscriber(subscriberInfo), receiveMessage_(core)
+{
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

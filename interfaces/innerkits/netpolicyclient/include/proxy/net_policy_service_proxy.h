@@ -45,6 +45,9 @@ public:
     int32_t SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed) override;
     int32_t GetDeviceIdleAllowedList(std::vector<uint32_t> &uids) override;
     int32_t SetDeviceIdlePolicy(bool enable) override;
+    int32_t SetPowerSavePolicy(bool enable) override;
+    int32_t GetPowerSaveAllowedList(std::vector<uint32_t> &uids) override;
+    int32_t SetPowerSaveAllowedList(uint32_t uid, bool isAllowed) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

@@ -14,6 +14,11 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
+config("net_service_common_config") {
+  # header file path
+  include_dirs = [ "$INNERKITS_ROOT/netconnclient/include/proxy" ]
+}
+
 ohos_shared_library("net_service_common") {
   sources = [
     "src/broadcast_manager.cpp",
@@ -24,7 +29,6 @@ ohos_shared_library("net_service_common") {
 
   include_dirs = [
     "include",
-    "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netconnclient/include",
     "$INNERKITS_ROOT/netmanagernative/include",
@@ -34,6 +38,8 @@ ohos_shared_library("net_service_common") {
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$SUBSYSTEM_DIR/ipc/interfaces/innerkits/ipc_core/include",
   ]
+
+  public_configs = [ ":net_service_common_config" ]
 
   deps = [
     "$INNERKITS_ROOT/netconnclient:net_conn_parcel",

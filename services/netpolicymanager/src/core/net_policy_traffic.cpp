@@ -49,6 +49,12 @@ void NetPolicyTraffic::Init()
         GetNetsysInst()->RegisterNetsysCallback(netsysCallback_);
     }
 
+    netConnCallback_ =
+        new (std::nothrow) ConnCallBack((std::static_pointer_cast<NetPolicyTraffic>(shared_from_this())));
+    if (netConnCallback_ != nullptr) {
+        GetNetCenterInst().RegisterNetConnCallback(netConnCallback_);
+    }
+
     ReadQuotaPolicies();
 }
 
@@ -331,13 +337,19 @@ void NetPolicyTraffic::ReachedLimit(const std::string &iface)
     }
 }
 
+void NetPolicyTraffic::UpdateNetPolicy()
+{
+    UpdateQuotaPoliciesInner();
+}
+
 int64_t NetPolicyTraffic::GetTotalQuota(NetQuotaPolicy &quotaPolicy)
 {
     std::string iface = GetMatchIfaces(quotaPolicy);
     NetStatsInfo info;
     int64_t start = quotaPolicy.GetPeriodStart();
     int64_t end = static_cast<int64_t>(time(nullptr));
-    int64_t quota = GetNetCenterInst().GetIfaceStatsDetail(iface, start, end, info);
+    GetNetCenterInst().GetIfaceStatsDetail(iface, start, end, info);
+    int64_t quota = info.rxBytes_ + info.txBytes_;
 
     return quota < 0 ? 0 : quota;
 }
@@ -346,12 +358,12 @@ int32_t NetPolicyTraffic::ReadQuotaPolicies()
 {
     GetFileInst()->ReadQuotaPolicies(quotaPolicies_);
     UpdateQuotaPoliciesInner();
-    return 0;
+    return NETMANAGER_SUCCESS;
 }
 
 bool NetPolicyTraffic::WriteQuotaPolicies()
 {
-    return GetFileInst()->WriteFile(quotaPolicies_);
+    return GetFileInst()->WriteQuotaPolicies(quotaPolicies_);
 }
 
 const std::string NetPolicyTraffic::GetMatchIfaces(const NetQuotaPolicy &quotaPolicy)

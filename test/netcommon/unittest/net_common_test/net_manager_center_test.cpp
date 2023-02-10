@@ -74,6 +74,10 @@ public:
     {
         return NETMANAGER_SUCCESS;
     }
+    inline int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) override
+    {
+        return NETMANAGER_SUCCESS;
+    }
 };
 
 class TestNetEthernetService : public NetEthernetBaseService {

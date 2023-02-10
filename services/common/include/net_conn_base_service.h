@@ -17,10 +17,12 @@
 
 #include <set>
 
+#include "refbase.h"
+
 #include "net_all_capabilities.h"
+#include "net_conn_callback_stub.h"
 #include "net_link_info.h"
 #include "net_supplier_info.h"
-#include "refbase.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -34,6 +36,7 @@ public:
     virtual int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo) = 0;
     virtual int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) = 0;
     virtual int32_t RestrictBackgroundChanged(bool isRestrictBackground) = 0;
+    virtual int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -25,9 +25,8 @@ void NetPolicyRule::Init()
 {
     // Init uid、policy and background allow status from file,and save uid、policy into uidPolicyRules_.
     NETMGR_LOG_I("Start init uid and policy.");
-    const auto &uidsPolicies = GetFileInst()->GetNetPolicies();
-    backgroundAllow_ = GetFileInst()->GetBackgroundPolicy();
-
+    const auto &uidsPolicies = GetFileInst()->ReadUidPolicies();
+    backgroundAllow_ = GetFileInst()->ReadBackgroundPolicy();
     for (const auto &i : uidsPolicies) {
         auto uid = CommonUtils::StrToUint(i.uid.c_str());
         auto policy = CommonUtils::StrToUint(i.policy.c_str());
@@ -46,7 +45,7 @@ void NetPolicyRule::TransPolicyToRule()
 
 void NetPolicyRule::TransPolicyToRule(uint32_t uid)
 {
-    uint32_t policy;
+    uint32_t policy = 0;
     const auto &itr = uidPolicyRules_.find(uid);
     if (itr == uidPolicyRules_.end()) {
         policy = NET_POLICY_NONE;
@@ -130,7 +129,7 @@ void NetPolicyRule::TransConditionToRuleAndNetsys(uint32_t policyCondition, uint
         NETMGR_LOG_I("Same netsys and uid ,don't need to do others.now netsys is: [%{public}u]", netsys);
     }
 
-    GetFileInst()->WriteFile(uid, policy);
+    GetFileInst()->WriteUidPolicy(uid, policy);
 
     if (policyRuleNetsys.rule_ == rule) {
         NETMGR_LOG_D("Same rule and uid ,don't need to do others.uid is:[%{public}u] rule is:[%{public}u]", uid, rule);
@@ -270,7 +269,7 @@ int32_t NetPolicyRule::SetBackgroundPolicy(bool allow)
         GetCbInst()->NotifyNetBackgroundPolicyChange(allow);
         backgroundAllow_ = allow;
         TransPolicyToRule();
-        GetFileInst()->SetBackgroundPolicy(allow);
+        GetFileInst()->WriteBackgroundPolicy(allow);
         NetmanagerHiTrace::NetmanagerStartSyncTrace("SetBackgroundPolicy policy start");
         GetNetsysInst()->BandwidthEnableDataSaver(!allow);
         NetmanagerHiTrace::NetmanagerFinishSyncTrace("SetBackgroundPolicy policy end");
@@ -282,7 +281,7 @@ int32_t NetPolicyRule::SetBackgroundPolicy(bool allow)
 
 int32_t NetPolicyRule::GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backgroundPolicyOfUid)
 {
-    uint32_t policy;
+    uint32_t policy = 0;
     GetPolicyByUid(uid, policy);
     NETMGR_LOG_D("GetBackgroundPolicyByUid GetPolicyByUid uid: %{public}u policy: %{public}u.", uid, policy);
     if ((policy & NET_POLICY_REJECT_METERED_BACKGROUND) != 0) {
@@ -341,20 +340,17 @@ bool NetPolicyRule::IsLimitByAdmin()
 
 bool NetPolicyRule::IsForeground(uint32_t uid)
 {
-    // to judge if this uid is foreground.
-    return false;
+    return std::find(foregroundUidList_.begin(), foregroundUidList_.end(), uid) != foregroundUidList_.end();
 }
 
 bool NetPolicyRule::IsPowerSave()
 {
-    // to judge if in power save mode.
-    return false;
+    return powerSaveMode_;
 }
 
 bool NetPolicyRule::InPowerSaveAllowedList(uint32_t uid)
 {
-    // to judge this uid if in power save allow list.
-    return false;
+    return std::find(powerSaveAllowedList_.begin(), powerSaveAllowedList_.end(), uid) != powerSaveAllowedList_.end();
 }
 
 bool NetPolicyRule::IsLimitedBackground()
@@ -371,7 +367,7 @@ void NetPolicyRule::DeleteUid(uint32_t uid)
     if (it != uidPolicyRules_.end()) {
         uidPolicyRules_.erase(it);
     }
-
+    GetFileInst()->RemoveInexistentUid(uid);
     GetNetsysInst()->BandwidthRemoveDeniedList(uid);
     GetNetsysInst()->BandwidthRemoveAllowedList(uid);
 }
@@ -386,12 +382,36 @@ void NetPolicyRule::HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEve
             deviceIdleMode_ = policyEvent->deviceIdleMode;
             TransPolicyToRule();
             break;
+        case NetPolicyEventHandler::MSG_POWER_SAVE_MODE_CHANGED:
+            powerSaveMode_ = policyEvent->powerSaveMode;
+            TransPolicyToRule();
+            break;
+        case NetPolicyEventHandler::MSG_POWER_SAVE_LIST_UPDATED:
+            powerSaveAllowedList_ = policyEvent->powerSaveList;
+            break;
         case NetPolicyEventHandler::MSG_UID_REMOVED:
             DeleteUid(policyEvent->deletedUid);
+            break;
+        case NetPolicyEventHandler::MSG_UID_STATE_FOREGROUND:
+            UpdateForegroundUidList(policyEvent->uid, true);
+            TransPolicyToRule(policyEvent->uid);
+            break;
+        case NetPolicyEventHandler::MSG_UID_STATE_BACKGROUND:
+            UpdateForegroundUidList(policyEvent->uid, false);
+            TransPolicyToRule(policyEvent->uid);
             break;
         default:
             break;
     }
+}
+
+void NetPolicyRule::UpdateForegroundUidList(uint32_t uid, bool isForeground)
+{
+    if (isForeground) {
+        foregroundUidList_.insert(uid);
+        return;
+    }
+    foregroundUidList_.erase(uid);
 }
 
 bool NetPolicyRule::IsValidNetPolicy(uint32_t policy)
@@ -418,11 +438,15 @@ void NetPolicyRule::GetDumpMessage(std::string &message)
                        std::to_string(pair.second.rule_) + TAB + "Policy:" + std::to_string(pair.second.policy_) + TAB +
                        "NetSys: " + std::to_string(pair.second.netsys_) + "\n");
     });
-    message.append(TAB + "DeviceIdleAllowList: {");
+    message.append(TAB + "DeviceIdleAllowedList: {");
     std::for_each(deviceIdleAllowedList_.begin(), deviceIdleAllowedList_.end(),
                   [&message](const auto &item) { message.append(std::to_string(item) + ", "); });
     message.append("}\n");
     message.append(TAB + "DeviceIdleMode: " + std::to_string(deviceIdleMode_) + "\n");
+    message.append(TAB + "PowerSaveAllowedList: {");
+    std::for_each(powerSaveAllowedList_.begin(), powerSaveAllowedList_.end(),
+                  [&message](const auto &item) { message.append(std::to_string(item) + ", "); });
+    message.append(TAB + "PowerSaveMode: " + std::to_string(powerSaveMode_) + "\n");
     message.append(TAB + "BackgroundPolicy: " + std::to_string(backgroundAllow_) + "\n");
 }
 } // namespace NetManagerStandard

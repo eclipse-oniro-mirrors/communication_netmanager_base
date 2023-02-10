@@ -38,6 +38,9 @@ NetPolicyServiceStub::NetPolicyServiceStub()
     memberFuncMap_[CMD_NPS_SET_IDLE_ALLOWED_LIST] = &NetPolicyServiceStub::OnSetDeviceIdleAllowedList;
     memberFuncMap_[CMD_NPS_GET_IDLE_ALLOWED_LIST] = &NetPolicyServiceStub::OnGetDeviceIdleAllowedList;
     memberFuncMap_[CMD_NPS_SET_DEVICE_IDLE_POLICY] = &NetPolicyServiceStub::OnSetDeviceIdlePolicy;
+    memberFuncMap_[CMD_NPS_SET_POWER_SAVE_POLICY] = &NetPolicyServiceStub::OnSetPowerSavePolicy;
+    memberFuncMap_[CMD_NPS_GET_POWER_SAVE_ALLOWED_LIST] = &NetPolicyServiceStub::OnGetPowerSaveAllowedList;
+    memberFuncMap_[CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST] = &NetPolicyServiceStub::OnSetPowerSaveAllowedList;
     memberFuncMap_[CMD_NPS_SET_BACKGROUND_POLICY] = &NetPolicyServiceStub::OnSetBackgroundPolicy;
     memberFuncMap_[CMD_NPS_GET_BACKGROUND_POLICY] = &NetPolicyServiceStub::OnGetBackgroundPolicy;
     memberFuncMap_[CMD_NPS_GET_BACKGROUND_POLICY_BY_UID] = &NetPolicyServiceStub::OnGetBackgroundPolicyByUid;
@@ -102,13 +105,13 @@ bool NetPolicyServiceStub::CheckPermission(const std::string &permission, const 
 
 int32_t NetPolicyServiceStub::OnSetPolicyByUid(MessageParcel &data, MessageParcel &reply)
 {
-    uint32_t uid;
+    uint32_t uid = 0;
     if (!data.ReadUint32(uid)) {
         NETMGR_LOG_E("Read Uint32 data failed.");
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    uint32_t netPolicy;
+    uint32_t netPolicy = 0;
     if (!data.ReadUint32(netPolicy)) {
         NETMGR_LOG_E("Read Uint32 data failed.");
         return NETMANAGER_ERR_READ_DATA_FAIL;
@@ -147,7 +150,7 @@ int32_t NetPolicyServiceStub::OnGetPolicyByUid(MessageParcel &data, MessageParce
 
 int32_t NetPolicyServiceStub::OnGetUidsByPolicy(MessageParcel &data, MessageParcel &reply)
 {
-    uint32_t policy;
+    uint32_t policy = 0;
     if (!data.ReadUint32(policy)) {
         NETMGR_LOG_E("Read uint32 data failed");
         return NETMANAGER_ERR_READ_DATA_FAIL;
@@ -212,7 +215,6 @@ int32_t NetPolicyServiceStub::OnIsUidNetAllowedIfaceName(MessageParcel &data, Me
 
     bool isAllowed = false;
     int32_t result = IsUidNetAllowed(uid, ifaceName, isAllowed);
-
     if (!reply.WriteBool(isAllowed)) {
         NETMGR_LOG_E("Write Bool reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -342,7 +344,6 @@ int32_t NetPolicyServiceStub::OnGetBackgroundPolicy(MessageParcel &data, Message
 {
     bool backgroundPolicy = false;
     int32_t result = GetBackgroundPolicy(backgroundPolicy);
-
     if (!reply.WriteBool(backgroundPolicy)) {
         NETMGR_LOG_E("Write Bool reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -366,7 +367,6 @@ int32_t NetPolicyServiceStub::OnGetBackgroundPolicyByUid(MessageParcel &data, Me
 
     uint32_t backgroundPolicyOfUid = 0;
     int32_t result = GetBackgroundPolicyByUid(uid, backgroundPolicyOfUid);
-
     if (!reply.WriteUint32(backgroundPolicyOfUid)) {
         NETMGR_LOG_E("Write uint32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -436,7 +436,6 @@ int32_t NetPolicyServiceStub::OnGetDeviceIdleAllowedList(MessageParcel &data, Me
 {
     std::vector<uint32_t> uids;
     int32_t result = GetDeviceIdleAllowedList(uids);
-
     if (!reply.WriteUInt32Vector(uids)) {
         NETMGR_LOG_E("Write uint32 vector reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -459,6 +458,62 @@ int32_t NetPolicyServiceStub::OnSetDeviceIdlePolicy(MessageParcel &data, Message
     }
 
     int32_t result = SetDeviceIdlePolicy(isAllowed);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyServiceStub::OnSetPowerSavePolicy(MessageParcel &data, MessageParcel &reply)
+{
+    bool isAllowed = false;
+    if (!data.ReadBool(isAllowed)) {
+        NETMGR_LOG_E("Read Bool data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t result = SetPowerSavePolicy(isAllowed);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyServiceStub::OnGetPowerSaveAllowedList(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<uint32_t> uids;
+    int32_t result = GetPowerSaveAllowedList(uids);
+    if (!reply.WriteUInt32Vector(uids)) {
+        NETMGR_LOG_E("Write uint32 Vector reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyServiceStub::OnSetPowerSaveAllowedList(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = 0;
+    if (!data.ReadUint32(uid)) {
+        NETMGR_LOG_E("Read uint32 data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    bool isAllowed = false;
+    if (!data.ReadBool(isAllowed)) {
+        NETMGR_LOG_E("Read Bool data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t result = SetPowerSaveAllowedList(uid, isAllowed);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;

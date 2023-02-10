@@ -453,8 +453,8 @@ int32_t NetsysController::IpDisableForwarding(const std::string &requestor)
 
 int32_t NetsysController::EnableNat(const std::string &downstreamIface, const std::string &upstreamIface)
 {
-    NETMGR_LOG_D("MockNetsysNativeClient EnableNat: intIface[%{public}s] intIface[%{public}s]",
-                 downstreamIface.c_str(), upstreamIface.c_str());
+    NETMGR_LOG_D("MockNetsysNativeClient EnableNat: intIface[%{public}s] intIface[%{public}s]", downstreamIface.c_str(),
+                 upstreamIface.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
@@ -740,8 +740,8 @@ int32_t NetsysController::FirewallEnableChain(uint32_t chain, bool enable)
 
 int32_t NetsysController::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
 {
-    NETMGR_LOG_D("NetsysController::FirewallSetUidRule: chain=%{public}d,uid=%{public}d,firewallRule=%{public}d",
-                 chain, uid, firewallRule);
+    NETMGR_LOG_D("NetsysController::FirewallSetUidRule: chain=%{public}d,uid=%{public}d,firewallRule=%{public}d", chain,
+                 uid, firewallRule);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
