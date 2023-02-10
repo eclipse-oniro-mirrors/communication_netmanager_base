@@ -102,7 +102,6 @@ void DnsGetAddrInfo::SwitchFamilyInet(addrinfo *node, sockaddr_in *sin, AddrData
     if (memcpy_s(&sin->sin_addr, ADDR_A4_LEN, &addrs.addr, ADDR_A4_LEN) != 0) {
         return;
     }
-    node->ai_addr = static_cast<sockaddr *>(calloc(1, sizeof(sockaddr_in) + 1));
     node->ai_addr = reinterpret_cast<sockaddr *>(sin);
 }
 
@@ -114,7 +113,6 @@ void DnsGetAddrInfo::SwitchFamilyInet6(addrinfo *node, sockaddr_in6 *sin6, AddrD
     if (memcpy_s(&sin6->sin6_addr, ADDR_A6_LEN, &addrs.addr, ADDR_A6_LEN) != 0) {
         return;
     }
-    node->ai_addr = static_cast<sockaddr *>(calloc(1, sizeof(sockaddr_in6) + 1));
     node->ai_addr = reinterpret_cast<sockaddr *>(sin6);
 }
 
