@@ -53,6 +53,8 @@ public:
         NETSYS_NETWORK_CREATE_PHYSICAL,
         NETSYS_INTERFACE_ADD_ADDRESS,
         NETSYS_INTERFACE_DEL_ADDRESS,
+        NETSYS_INTERFACE_SET_IP_ADDRESS,
+        NETSYS_INTERFACE_SET_IFF_UP,
         NETSYS_NETWORK_ADD_INTERFACE,
         NETSYS_NETWORK_REMOVE_INTERFACE,
         NETSYS_NETWORK_DESTROY,
@@ -121,6 +123,8 @@ public:
                                         int32_t prefixLength) = 0;
     virtual int32_t InterfaceDelAddress(const std::string &interfaceName, const std::string &addrString,
                                         int32_t prefixLength) = 0;
+    virtual int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress) = 0;
+    virtual int32_t InterfaceSetIffUp(const std::string &ifaceName) = 0;
     virtual int32_t NetworkAddInterface(int32_t netId, const std::string &iface) = 0;
     virtual int32_t NetworkRemoveInterface(int32_t netId, const std::string &iface) = 0;
     virtual int32_t NetworkDestroy(int32_t netId) = 0;

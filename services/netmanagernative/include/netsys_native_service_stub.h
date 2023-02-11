@@ -58,6 +58,8 @@ private:
     int32_t CmdNetworkCreatePhysical(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceAddAddress(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceDelAddress(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdInterfaceSetIpAddress(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdInterfaceSetIffUp(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkAddInterface(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkRemoveInterface(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkDestroy(MessageParcel &data, MessageParcel &reply);

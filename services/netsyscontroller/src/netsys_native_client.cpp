@@ -334,6 +334,29 @@ int32_t NetsysNativeClient::InterfaceDelAddress(const std::string &ifName, const
     return proxy->InterfaceDelAddress(ifName, ipAddr, prefixLength);
 }
 
+int32_t NetsysNativeClient::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)
+{
+    NETMGR_LOG_D("Set Ip Address: ifaceName[%{public}s], ipAddr[%{public}s]", ifaceName.c_str(),
+                 ToAnonymousIp(ipAddress).c_str());
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return IPC_PROXY_ERR;
+    }
+    return proxy->InterfaceSetIpAddress(ifaceName, ipAddress);
+}
+
+int32_t NetsysNativeClient::InterfaceSetIffUp(const std::string &ifaceName)
+{
+    NETMGR_LOG_D("Set Iff Up: ifaceName[%{public}s]", ifaceName.c_str());
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return IPC_PROXY_ERR;
+    }
+    return proxy->InterfaceSetIffUp(ifaceName);
+}
+
 int32_t NetsysNativeClient::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
                                               const std::vector<std::string> &servers,
                                               const std::vector<std::string> &domains)

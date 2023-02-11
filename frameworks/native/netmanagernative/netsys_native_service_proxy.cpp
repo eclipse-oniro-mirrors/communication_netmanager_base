@@ -579,6 +579,40 @@ int32_t NetsysNativeServiceProxy::InterfaceDelAddress(const std::string &interfa
     return reply.ReadInt32();
 }
 
+int32_t NetsysNativeServiceProxy::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)
+{
+    NETNATIVE_LOGI("Begin to InterfaceSetIpAddress");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(ifaceName) || !data.WriteString(ipAddress)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetsysService::NETSYS_INTERFACE_SET_IP_ADDRESS, data, reply, option);
+
+    return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::InterfaceSetIffUp(const std::string &ifaceName)
+{
+    NETNATIVE_LOGI("Begin to InterfaceSetIffUp");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(ifaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetsysService::NETSYS_INTERFACE_SET_IFF_UP, data, reply, option);
+
+    return reply.ReadInt32();
+}
+
 int32_t NetsysNativeServiceProxy::NetworkAddInterface(int32_t netId, const std::string &iface)
 {
     NETNATIVE_LOGI("Begin to NetworkAddInterface");

@@ -163,6 +163,16 @@ int32_t NetManagerNative::InterfaceSetMtu(std::string ifName, int32_t mtuValue)
     return InterfaceManager::SetMtu(ifName.c_str(), mtu.c_str());
 }
 
+int32_t NetManagerNative::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)
+{
+    return InterfaceManager::SetIpAddress(ifaceName.c_str(), ipAddress.c_str());
+}
+
+int32_t NetManagerNative::InterfaceSetIffUp(std::string ifaceName)
+{
+    return InterfaceManager::SetIffUp(ifaceName.c_str());
+}
+
 nmd::MarkMaskParcel NetManagerNative::GetFwmarkForNetwork(int32_t netId)
 {
     nmd::MarkMaskParcel mark;

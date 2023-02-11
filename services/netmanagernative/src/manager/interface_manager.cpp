@@ -328,5 +328,57 @@ int InterfaceManager::SetIfaceConfig(const nmd::InterfaceConfigurationParcel &if
     close(fd);
     return 1;
 }
+
+int InterfaceManager::SetIpAddress(const std::string &ifaceName, const std::string &ipAddress)
+{
+    struct ifreq ifr;
+    struct in_addr ipv4Addr = {INADDR_ANY};
+
+    if (memset_s(&ifr, sizeof(ifr), 0, sizeof(ifr)) != EOK) {
+        NETNATIVE_LOGE("memset is false");
+        return -1;
+    }
+    if (strncpy_s(ifr.ifr_name, IFNAMSIZ, ifaceName.c_str(), strlen(ifaceName.c_str())) != EOK) {
+        NETNATIVE_LOGE("strncpy is false");
+        return -1;
+    }
+    if (inet_aton(ipAddress.c_str(), &ipv4Addr) == 0) {
+        NETNATIVE_LOGE("set net ip is false");
+        return -1;
+    }
+    sockaddr_in *sin = reinterpret_cast<struct sockaddr_in *>(&ifr.ifr_addr);
+    sin->sin_family = AF_INET;
+    sin->sin_port = 0;
+    sin->sin_addr = ipv4Addr;
+    int32_t inetSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    if (ioctl(inetSocket, SIOCSIFADDR, &ifr) < 0) {
+        NETNATIVE_LOGE("set ip address ioctl SIOCSIFADDR error: %{public}s", strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+
+int InterfaceManager::SetIffUp(const std::string &ifaceName)
+{
+    struct ifreq ifr;
+
+    if (memset_s(&ifr, sizeof(ifr), 0, sizeof(ifr)) != EOK) {
+        NETNATIVE_LOGE("memset is false");
+        return -1;
+    }
+    if (strncpy_s(ifr.ifr_name, IFNAMSIZ, ifaceName.c_str(), strlen(ifaceName.c_str())) != EOK) {
+        NETNATIVE_LOGE("strncpy is false");
+        return -1;
+    }
+    ifr.ifr_flags |= IFF_UP;
+    ifr.ifr_flags |= IFF_MULTICAST;
+
+    int32_t inetSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    if (ioctl(inetSocket, SIOCSIFFLAGS, &ifr) < 0) {
+        NETNATIVE_LOGE("set iface up ioctl SIOCSIFFLAGS error: %{public}s", strerror(errno));
+        return -1;
+    }
+    return 0;
+}
 } // namespace nmd
 } // namespace OHOS
