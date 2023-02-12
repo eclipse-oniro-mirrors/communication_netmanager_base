@@ -30,36 +30,36 @@ export interface NetworkResponse {
      * @since 3
      */
     metered: boolean;
-}
+  }
 
-/**
- * @import import network from '@system.network';
- * @since 3
- * @syscap SystemCapability.Communication.NetManager.Core
- */
-export default class Network {
+  /**
+   * @import import network from '@system.network';
+   * @since 3
+   * @syscap SystemCapability.Communication.NetManager.Core
+   */
+  export default class Network {
     /**
      * Obtains the network type.
      * @param options
      */
     static getType(options?: {
-        /**
-         * Called when the network type is obtained.
-         * @since 3
-         */
-        success?: (data: NetworkResponse) => void;
+      /**
+       * Called when the network type is obtained.
+       * @since 3
+       */
+      success?: (data: NetworkResponse) => void;
 
-        /**
-         * Called when the network type fails to be obtained.
-         * @since 3
-         */
-        fail?: (data: any, code: number) => void;
+      /**
+       * Called when the network type fails to be obtained.
+       * @since 3
+       */
+      fail?: (data: any, code: number) => void;
 
-        /**
-         * Called when the execution is completed.
-         * @since 3
-         */
-        complete?: () => void;
+      /**
+       * Called when the execution is completed.
+       * @since 3
+       */
+      complete?: () => void;
     }): void;
 
     /**
@@ -67,17 +67,17 @@ export default class Network {
      * @param options
      */
     static subscribe(options?: {
-        /**
-         * Called when the network connection state changes.
-         * @since 3
-         */
-        success?: (data: NetworkResponse) => void;
+      /**
+       * Called when the network connection state changes.
+       * @since 3
+       */
+      success?: (data: NetworkResponse) => void;
 
-        /**
-         * Called when the listening fails.
-         * @since 3
-         */
-        fail?: (data: any, code: number) => void;
+      /**
+       * Called when the listening fails.
+       * @since 3
+       */
+      fail?: (data: any, code: number) => void;
     }): void;
 
     /**
@@ -85,4 +85,4 @@ export default class Network {
      * @param options
      */
     static unsubscribe(): void;
-}
+  }
