@@ -33,6 +33,10 @@ struct NetLinkInfo : public Parcelable {
     uint16_t mtu_ = 0;
     std::string tcpBufferSizes_;
 
+    NetLinkInfo() = default;
+    NetLinkInfo(const NetLinkInfo &cap);
+    NetLinkInfo &operator=(const NetLinkInfo &cap);
+
     bool Marshalling(Parcel &parcel) const override;
     static sptr<NetLinkInfo> Unmarshalling(Parcel &parcel);
     static bool Marshalling(Parcel &parcel, const sptr<NetLinkInfo> &object);

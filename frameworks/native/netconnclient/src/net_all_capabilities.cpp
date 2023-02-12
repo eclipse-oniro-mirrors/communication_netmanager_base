@@ -24,6 +24,23 @@ namespace OHOS {
 namespace NetManagerStandard {
 static constexpr uint32_t MAX_NET_CAP_NUM = 32;
 
+NetAllCapabilities::NetAllCapabilities(const NetAllCapabilities &cap)
+{
+    linkUpBandwidthKbps_ = cap.linkUpBandwidthKbps_;
+    linkDownBandwidthKbps_ = cap.linkDownBandwidthKbps_;
+    netCaps_ = cap.netCaps_;
+    bearerTypes_ = cap.bearerTypes_;
+}
+
+NetAllCapabilities &NetAllCapabilities::operator=(const NetAllCapabilities &cap)
+{
+    linkUpBandwidthKbps_ = cap.linkUpBandwidthKbps_;
+    linkDownBandwidthKbps_ = cap.linkDownBandwidthKbps_;
+    netCaps_ = cap.netCaps_;
+    bearerTypes_ = cap.bearerTypes_;
+    return *this;
+}
+
 bool NetAllCapabilities::CapsIsValid() const
 {
     for (auto it = netCaps_.begin(); it != netCaps_.end(); it++) {
