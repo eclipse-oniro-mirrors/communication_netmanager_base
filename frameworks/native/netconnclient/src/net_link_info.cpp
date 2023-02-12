@@ -27,6 +27,29 @@ namespace NetManagerStandard {
 static constexpr uint32_t MAX_ADDR_SIZE = 16;
 static constexpr uint32_t MAX_ROUTE_SIZE = 32;
 
+NetLinkInfo::NetLinkInfo(const NetLinkInfo &linkInfo)
+{
+    ifaceName_ = linkInfo.ifaceName_;
+    domain_ = linkInfo.domain_;
+    netAddrList_.assign(linkInfo.netAddrList_.begin(), linkInfo.netAddrList_.end());
+    dnsList_.assign(linkInfo.dnsList_.begin(), linkInfo.dnsList_.end());
+    routeList_.assign(linkInfo.routeList_.begin(), linkInfo.routeList_.end());
+    mtu_ = linkInfo.mtu_;
+    tcpBufferSizes_ = linkInfo.tcpBufferSizes_;
+}
+
+NetLinkInfo &NetLinkInfo::operator=(const NetLinkInfo &linkInfo)
+{
+    ifaceName_ = linkInfo.ifaceName_;
+    domain_ = linkInfo.domain_;
+    netAddrList_.assign(linkInfo.netAddrList_.begin(), linkInfo.netAddrList_.end());
+    dnsList_.assign(linkInfo.dnsList_.begin(), linkInfo.dnsList_.end());
+    routeList_.assign(linkInfo.routeList_.begin(), linkInfo.routeList_.end());
+    mtu_ = linkInfo.mtu_;
+    tcpBufferSizes_ = linkInfo.tcpBufferSizes_;
+    return *this;
+}
+
 bool NetLinkInfo::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteString(ifaceName_)) {
