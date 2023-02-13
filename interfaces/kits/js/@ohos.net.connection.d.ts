@@ -29,7 +29,7 @@ declare namespace connection {
   type UDPSocket = socket.UDPSocket;
 
   /**
-   * Create a network connection with optional netSpefifier and timeout.
+   * Create a network connection with optional netSpecifier and timeout.
    *
    * @param netSpecifier Indicates the network specifier. See {@link NetSpecifier}.
    * @param timeout The time in milliseconds to attempt looking for a suitable network before
@@ -58,6 +58,7 @@ declare namespace connection {
    *      returns {@code null} if the default network is not activated.
    * @permission ohos.permission.GET_NETWORK_INFO
    * @since 9
+   * @throws {BusinessError} 201 - Permission denied.
    */
   function getDefaultNetSync(): NetHandle;
 
@@ -103,6 +104,7 @@ declare namespace connection {
    *      returns {@code false} otherwise.
    * @permission ohos.permission.GET_NETWORK_INFO
    * @since 9
+   * @throws {BusinessError} 201 - Permission denied.
    */
   function isDefaultNetMetered(callback: AsyncCallback<boolean>): void;
   function isDefaultNetMetered(): Promise<boolean>;
@@ -111,12 +113,15 @@ declare namespace connection {
    * Checks whether the default data network is activated.
    *
    * @param callback Returns {@code true} if the default data network is activated; returns {@code false} otherwise.
+   * @permission ohos.permission.GET_NETWORK_INFO
    */
   function hasDefaultNet(callback: AsyncCallback<boolean>): void;
   function hasDefaultNet(): Promise<boolean>;
 
   /**
    * Enables the airplane mode for a device.
+   *
+   * <p>To invoke this method, you must have the {@code ohos.permission.CONNECTIVITY_INTERNAL} permission.
    *
    * @systemapi Hide this for inner system use. Only used for system app.
    */
@@ -125,6 +130,8 @@ declare namespace connection {
 
   /**
    * Disables the airplane mode for a device.
+   *
+   * <p>To invoke this method, you must have the {@code ohos.permission.CONNECTIVITY_INTERNAL} permission.
    *
    * @systemapi Hide this for inner system use. Only used for system app.
    */
@@ -216,6 +223,7 @@ declare namespace connection {
      * Before using this method, ensure that the socket is disconnected.
      *
      * @param socketParam Indicates the TCPSocket or UDPSocket object.
+     * @since 9
      */
     bindSocket(socketParam: TCPSocket | UDPSocket, callback: AsyncCallback<void>): void;
     bindSocket(socketParam: TCPSocket | UDPSocket): Promise<void>;
