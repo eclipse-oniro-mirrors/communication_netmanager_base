@@ -48,6 +48,10 @@ struct NetAllCapabilities : public Parcelable {
     std::set<NetCap> netCaps_;
     std::set<NetBearType> bearerTypes_;
 
+    NetAllCapabilities() = default;
+    NetAllCapabilities(const NetAllCapabilities &cap);
+    NetAllCapabilities &operator=(const NetAllCapabilities &cap);
+
     bool CapsIsValid() const;
     bool CapsIsNull() const;
     virtual bool Marshalling(Parcel &parcel) const override;
