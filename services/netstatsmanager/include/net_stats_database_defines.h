@@ -18,6 +18,7 @@
 
 #include <map>
 
+#include "netmanager_base_common_utils.h"
 #include "net_stats_info.h"
 
 namespace OHOS {

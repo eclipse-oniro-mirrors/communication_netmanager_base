@@ -23,7 +23,6 @@
 #include "net_manager_center.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_inner_define.h"
-#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -442,16 +441,8 @@ bool NetPolicyFile::GetUidsByPolicy(uint32_t policy, std::vector<uint32_t> &uids
 int32_t NetPolicyFile::ReadQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     NetQuotaPolicy quotaPolicyTmp;
-    for (auto &quotaPolicy : netPolicy_.netQuotaPolicies) {
-        quotaPolicyTmp.lastLimitRemind = CommonUtils::StrToLong(quotaPolicy.lastLimitSnooze);
-        quotaPolicyTmp.limitBytes = CommonUtils::StrToLong(quotaPolicy.limitBytes);
-        quotaPolicyTmp.metered = CommonUtils::StrToBool(quotaPolicy.metered);
-        quotaPolicyTmp.netType = CommonUtils::StrToInt(quotaPolicy.netType);
-        quotaPolicyTmp.periodDuration = quotaPolicy.periodDuration;
-        quotaPolicyTmp.periodStartTime = CommonUtils::StrToLong(quotaPolicy.periodStartTime);
-        quotaPolicyTmp.source = CommonUtils::StrToInt(quotaPolicy.source);
-        quotaPolicyTmp.iccid = quotaPolicy.iccid;
-        quotaPolicyTmp.warningBytes = CommonUtils::StrToLong(quotaPolicy.warningBytes);
+    for (const auto &quotaPolicy : netPolicy_.netQuotaPolicies) {
+        ToQuotaPolicy(quotaPolicy, quotaPolicyTmp);
         quotaPolicies.push_back(quotaPolicyTmp);
     }
 
@@ -461,16 +452,9 @@ int32_t NetPolicyFile::ReadQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolic
 int32_t NetPolicyFile::GetNetQuotaPolicy(int32_t netType, const std::string &iccid, NetQuotaPolicy &quotaPolicy)
 {
     for (const auto &quotaPolicyTemp : netPolicy_.netQuotaPolicies) {
-        if (netType == CommonUtils::StrToInt(quotaPolicyTemp.netType) && iccid == quotaPolicyTemp.iccid) {
-            quotaPolicy.lastLimitRemind = CommonUtils::StrToLong(quotaPolicyTemp.lastLimitSnooze);
-            quotaPolicy.limitBytes = CommonUtils::StrToLong(quotaPolicyTemp.limitBytes);
-            quotaPolicy.metered = CommonUtils::StrToBool(quotaPolicyTemp.metered);
-            quotaPolicy.netType = CommonUtils::StrToInt(quotaPolicyTemp.netType);
-            quotaPolicy.periodDuration = quotaPolicyTemp.periodDuration;
-            quotaPolicy.periodStartTime = CommonUtils::StrToLong(quotaPolicyTemp.periodStartTime);
-            quotaPolicy.source = CommonUtils::StrToInt(quotaPolicyTemp.source);
-            quotaPolicy.iccid = quotaPolicyTemp.iccid;
-            quotaPolicy.warningBytes = CommonUtils::StrToLong(quotaPolicyTemp.warningBytes);
+        if (netType == CommonUtils::StrToInt(quotaPolicyTemp.netType, NET_CAPABILITY_INTERNAL_DEFAULT)
+            && iccid == quotaPolicyTemp.iccid) {
+            ToQuotaPolicy(quotaPolicyTemp, quotaPolicy);
             return NETMANAGER_SUCCESS;
         }
     }

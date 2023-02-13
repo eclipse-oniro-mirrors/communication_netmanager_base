@@ -33,6 +33,7 @@
 
 #include "singleton.h"
 
+#include "netmanager_base_common_utils.h"
 #include "net_policy_constants.h"
 #include "net_policy_inner_define.h"
 #include "net_quota_policy.h"
@@ -159,6 +160,18 @@ private:
     void ParseCellularPolicy(const Json::Value &root, NetPolicy &netPolicy);
     bool UpdateQuotaPolicyExist(const NetQuotaPolicy &quotaPolicy);
     uint32_t ArbitrationWritePolicyToFile(uint32_t uid, uint32_t policy);
+    inline void ToQuotaPolicy(const NetPolicyQuota& netPolicyQuota, NetQuotaPolicy &quotaPolicy)
+    {
+        quotaPolicy.lastLimitRemind = CommonUtils::StrToLong(netPolicyQuota.lastLimitSnooze, REMIND_NEVER);
+        quotaPolicy.limitBytes = CommonUtils::StrToLong(netPolicyQuota.limitBytes, DATA_USAGE_UNKNOWN);
+        quotaPolicy.metered = CommonUtils::StrToBool(netPolicyQuota.metered, false);
+        quotaPolicy.netType = CommonUtils::StrToInt(netPolicyQuota.netType, NET_CAPABILITY_INTERNAL_DEFAULT);
+        quotaPolicy.periodDuration = netPolicyQuota.periodDuration;
+        quotaPolicy.periodStartTime = CommonUtils::StrToLong(netPolicyQuota.periodStartTime);
+        quotaPolicy.source = CommonUtils::StrToInt(netPolicyQuota.source);
+        quotaPolicy.iccid = netPolicyQuota.iccid;
+        quotaPolicy.warningBytes = CommonUtils::StrToLong(netPolicyQuota.warningBytes, DATA_USAGE_UNKNOWN);
+    }
 
 private:
     NetPolicy netPolicy_;
