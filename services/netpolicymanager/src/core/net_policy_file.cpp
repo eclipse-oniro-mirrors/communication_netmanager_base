@@ -452,7 +452,7 @@ int32_t NetPolicyFile::ReadQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolic
 int32_t NetPolicyFile::GetNetQuotaPolicy(int32_t netType, const std::string &iccid, NetQuotaPolicy &quotaPolicy)
 {
     for (const auto &quotaPolicyTemp : netPolicy_.netQuotaPolicies) {
-        if (netType == CommonUtils::StrToInt(quotaPolicyTemp.netType, NET_CAPABILITY_INTERNAL_DEFAULT)
+        if (netType == CommonUtils::StrToInt(quotaPolicyTemp.netType, BEARER_DEFAULT)
             && iccid == quotaPolicyTemp.iccid) {
             ToQuotaPolicy(quotaPolicyTemp, quotaPolicy);
             return NETMANAGER_SUCCESS;
