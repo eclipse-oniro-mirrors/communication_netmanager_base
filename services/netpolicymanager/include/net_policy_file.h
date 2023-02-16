@@ -165,7 +165,7 @@ private:
         quotaPolicy.lastLimitRemind = CommonUtils::StrToLong(netPolicyQuota.lastLimitSnooze, REMIND_NEVER);
         quotaPolicy.limitBytes = CommonUtils::StrToLong(netPolicyQuota.limitBytes, DATA_USAGE_UNKNOWN);
         quotaPolicy.metered = CommonUtils::StrToBool(netPolicyQuota.metered, false);
-        quotaPolicy.netType = CommonUtils::StrToInt(netPolicyQuota.netType, NET_CAPABILITY_INTERNAL_DEFAULT);
+        quotaPolicy.netType = CommonUtils::StrToInt(netPolicyQuota.netType, BEARER_DEFAULT);
         quotaPolicy.periodDuration = netPolicyQuota.periodDuration;
         quotaPolicy.periodStartTime = CommonUtils::StrToLong(netPolicyQuota.periodStartTime);
         quotaPolicy.source = CommonUtils::StrToInt(netPolicyQuota.source);
