@@ -25,6 +25,9 @@
 #include "net_mgr_log_wrapper.h"
 #include "token_setproc.h"
 
+#include "i_net_conn_callback.h"
+#include "iremote_stub.h"
+
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
@@ -132,6 +135,39 @@ void NetConnClientTest::TearDownTestCase() {}
 void NetConnClientTest::SetUp() {}
 
 void NetConnClientTest::TearDown() {}
+
+class INetConnCallbackTest : public IRemoteStub<INetConnCallback> {
+public:
+    int32_t NetAvailable(sptr<NetHandle> &netHandle)
+    {
+        return 0;
+    }
+
+    int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap)
+    {
+        return 0;
+    }
+
+    int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
+    {
+        return 0;
+    }
+
+    int32_t NetLost(sptr<NetHandle> &netHandle)
+    {
+        return 0;
+    }
+
+    int32_t NetUnavailable()
+    {
+        return 0;
+    }
+
+    int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
+    {
+        return 0;
+    }
+};
 
 /**
  * @tc.name: GetDefaultNetTest001
@@ -417,6 +453,21 @@ HWTEST_F(NetConnClientTest, GetAppNetTest001, TestSize.Level1)
 
     int32_t cancelNetId = 0;
     ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(cancelNetId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: RegisterNetConnCallback001
+ * @tc.desc: Test NetConnClient::RegisterNetConnCallback, not applying for
+ * permission,return NETMANAGER_ERR_PERMISSION_DENIED
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RegisterNetConnCallback001, TestSize.Level1)
+{
+    AccessToken token;
+    sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(callback);
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

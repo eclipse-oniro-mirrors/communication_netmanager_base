@@ -18,6 +18,9 @@
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
+#define private public
+#include "firewall_manager.h"
+#undef private
 #include "iptables_type.h"
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
@@ -301,6 +304,39 @@ HWTEST_F(FirewallManagerTest, FirewallSetUidsDeniedListChainTest003, TestSize.Le
     uids.push_back(20010034);
     int32_t ret = NetsysController::GetInstance().FirewallSetUidsDeniedListChain(ChainType::CHAIN_OHFW_DOZABLE, uids);
     EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: FirewallManagerInnerFunctionTest
+ * @tc.desc: Test FirewallManager FirewallManagerInnerFunctionTest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, FirewallManagerInnerFunctionTest, TestSize.Level1)
+{
+    std::shared_ptr<OHOS::nmd::FirewallManager> firewallManager = std::make_shared<OHOS::nmd::FirewallManager>();
+    if (firewallManager == nullptr) {
+        return;
+    }
+    if (firewallManager->chainInitFlag_ == false) {
+        int32_t ret = firewallManager->InitChain();
+        EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+        ret = firewallManager->InitDefaultRules();
+        EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    }
+    ChainType chain = ChainType::CHAIN_OHFW_DOZABLE;
+    FirewallType fwType = firewallManager->FetchChainType(chain);
+    EXPECT_EQ((fwType == FirewallType::TYPE_ALLOWED_LIST), true);
+
+    chain = ChainType::CHAIN_OHFW_UNDOZABLE;
+    fwType = firewallManager->FetchChainType(chain);
+    EXPECT_EQ((fwType == FirewallType::TYPE_DENIDE_LIST), true);
+
+    chain = ChainType::CHAIN_NONE;
+    fwType = firewallManager->FetchChainType(chain);
+    EXPECT_EQ((fwType == FirewallType::TYPE_ALLOWED_LIST), true);
+
+    int32_t ret = firewallManager->DeInitChain();
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative
 } // namespace OHOS
