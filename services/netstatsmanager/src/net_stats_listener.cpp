@@ -59,6 +59,7 @@ void NetStatsListener::OnReceiveEvent(const CommonEventData &data)
     }
     if (callback->second == nullptr) {
         callbackMap_.erase(want.GetAction());
+        return;
     }
     auto ret = callback->second(want);
     if (ret != 0) {

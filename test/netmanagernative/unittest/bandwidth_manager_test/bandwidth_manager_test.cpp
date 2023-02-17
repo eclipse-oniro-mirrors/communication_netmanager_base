@@ -15,6 +15,9 @@
 
 #include <gtest/gtest.h>
 
+#define private public
+#include "bandwidth_manager.h"
+#undef private
 #include "iptables_type.h"
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
@@ -101,6 +104,17 @@ HWTEST_F(BandwidthManagerTest, BandwidthEnableDataSaverTest004, TestSize.Level1)
  * @tc.desc: Test BandwidthManager BandwidthSetIfaceQuota.
  * @tc.type: FUNC
  */
+HWTEST_F(BandwidthManagerTest, BandwidthSetIfaceQuotaTest000, TestSize.Level1)
+{
+    int32_t ret = NetsysController::GetInstance().BandwidthSetIfaceQuota("_0iface", 2097152);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+/**
+ * @tc.name: BandwidthSetIfaceQuotaTest001
+ * @tc.desc: Test BandwidthManager BandwidthSetIfaceQuota.
+ * @tc.type: FUNC
+ */
 HWTEST_F(BandwidthManagerTest, BandwidthSetIfaceQuotaTest001, TestSize.Level1)
 {
     int32_t ret = NetsysController::GetInstance().BandwidthSetIfaceQuota("iface0", 2097152);
@@ -140,6 +154,17 @@ HWTEST_F(BandwidthManagerTest, BandwidthSetIfaceQuotaTest004, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = NetsysController::GetInstance().BandwidthSetIfaceQuota("wlan0", 2097152);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: BandwidthRemoveIfaceQuotaTest000
+ * @tc.desc: Test BandwidthManager BandwidthRemoveIfaceQuota.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BandwidthManagerTest, BandwidthRemoveIfaceQuotaTest000, TestSize.Level1)
+{
+    int32_t ret = NetsysController::GetInstance().BandwidthRemoveIfaceQuota("_iface0");
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 /**
@@ -262,6 +287,58 @@ HWTEST_F(BandwidthManagerTest, BandwidthRemoveAllowedListTest002, TestSize.Level
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = NetsysController::GetInstance().BandwidthRemoveAllowedList(TEST_UID);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+/**
+ * @tc.name: BandwidthInnerFuctionTest
+ * @tc.desc: Test BandwidthManager BandwidthInnerFuctionTest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BandwidthManagerTest, BandwidthInnerFuctionTest, TestSize.Level1)
+{
+    std::shared_ptr<OHOS::nmd::BandwidthManager> bandwidthManager = std::make_shared<OHOS::nmd::BandwidthManager>();
+    if (bandwidthManager->chainInitFlag_ == false) {
+        int32_t ret = bandwidthManager->InitChain();
+        EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+        ret = bandwidthManager->InitDefaultRules();
+        EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    }
+    ChainType chain = ChainType::CHAIN_OHBW_INPUT;
+    std::string resultStr = bandwidthManager->FetchChainName(chain);
+    EXPECT_EQ((resultStr == "ohbw_INPUT"), true);
+
+    chain = ChainType::CHAIN_OHBW_OUTPUT;
+    resultStr = bandwidthManager->FetchChainName(chain);
+    EXPECT_EQ((resultStr == "ohbw_OUTPUT"), true);
+
+    chain = ChainType::CHAIN_OHBW_FORWARD;
+    resultStr = bandwidthManager->FetchChainName(chain);
+    EXPECT_EQ((resultStr == "ohbw_FORWARD"), true);
+
+    chain = ChainType::CHAIN_OHBW_DENIED_LIST_BOX;
+    resultStr = bandwidthManager->FetchChainName(chain);
+    EXPECT_EQ((resultStr == "ohbw_denied_list_box"), true);
+
+    chain = ChainType::CHAIN_OHBW_ALLOWED_LIST_BOX;
+    resultStr = bandwidthManager->FetchChainName(chain);
+    EXPECT_EQ((resultStr == "ohbw_allowed_list_box"), true);
+
+    chain = ChainType::CHAIN_OHBW_GLOBAL_ALERT;
+    resultStr = bandwidthManager->FetchChainName(chain);
+    EXPECT_EQ((resultStr == "ohbw_global_alert"), true);
+
+    chain = ChainType::CHAIN_OHBW_COSTLY_SHARED;
+    resultStr = bandwidthManager->FetchChainName(chain);
+    EXPECT_EQ((resultStr == "ohbw_costly_shared"), true);
+
+    chain = ChainType::CHAIN_OHBW_DATA_SAVER;
+    resultStr = bandwidthManager->FetchChainName(chain);
+    EXPECT_EQ((resultStr == "ohbw_data_saver"), true);
+
+    chain = ChainType::CHAIN_OHFW_UNDOZABLE;
+    resultStr = bandwidthManager->FetchChainName(chain);
+    EXPECT_EQ((resultStr == "oh_unusable"), true);
+    bandwidthManager->DeInitChain();
 }
 } // namespace NetsysNative
 } // namespace OHOS

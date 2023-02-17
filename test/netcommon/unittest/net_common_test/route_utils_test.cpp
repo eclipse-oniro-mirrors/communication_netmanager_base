@@ -17,9 +17,9 @@
 
 #include <gtest/gtest.h>
 
+#include "net_conn_types.h"
 #include "net_manager_constants.h"
 #include "route_utils.h"
-#include "net_conn_types.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -82,6 +82,72 @@ HWTEST_F(RouteUtilsTest, RemoveRouteFromLocal01, TestSize.Level1)
     rList.push_back(GetRoute());
 
     EXPECT_EQ(0, RouteUtils::RemoveRoutesFromLocal(rList));
+}
+
+HWTEST_F(RouteUtilsTest, AddRouteToLocal02, TestSize.Level1)
+{
+    std::list<Route> rList;
+    std::string iface("eth0");
+    Route route;
+    route.iface_ = iface;
+    route.rtnType_ = RTN_UNICAST;
+    route.hasGateway_ = true;
+    route.isDefaultRoute_ = false;
+    route.destination_.type_ = INetAddr::IPV4;
+    route.destination_.family_ = AF_INET;
+    route.destination_.prefixlen_ = 0;
+    route.destination_.address_ = "192.168.2.10";
+    route.destination_.netMask_ = "255.255.255.0";
+    route.destination_.hostName_ = "netAddr";
+    route.gateway_.type_ = INetAddr::IPV4;
+    route.gateway_.family_ = AF_INET;
+    route.gateway_.prefixlen_ = 0x18;
+    route.gateway_.address_ = "192.168.2.1";
+    route.gateway_.netMask_ = "255.255.255.0";
+    route.gateway_.hostName_ = "netAddr";
+    rList.push_back(route);
+    int32_t ret = RouteUtils::AddRoutesToLocal(iface, rList);
+    EXPECT_NE(ret, 0);
+}
+
+HWTEST_F(RouteUtilsTest, AddRouteToLocal03, TestSize.Level1)
+{
+    std::list<Route> rList;
+    std::string iface("eth0");
+    Route route;
+    route.iface_ = iface;
+    route.rtnType_ = RTN_UNREACHABLE;
+    route.hasGateway_ = false;
+    route.isDefaultRoute_ = false;
+    route.destination_.type_ = INetAddr::IPV4;
+    route.destination_.family_ = AF_INET;
+    route.destination_.prefixlen_ = 0x18;
+    route.destination_.address_ = "192.168.2.10";
+    route.destination_.netMask_ = "255.255.255.0";
+    route.destination_.hostName_ = "netAddr";
+    rList.push_back(route);
+    int32_t ret = RouteUtils::AddRoutesToLocal(iface, rList);
+    EXPECT_NE(ret, 0);
+}
+
+HWTEST_F(RouteUtilsTest, AddRouteToLocal04, TestSize.Level1)
+{
+    std::list<Route> rList;
+    std::string iface("eth0");
+    Route route;
+    route.iface_ = iface;
+    route.rtnType_ = RTN_THROW;
+    route.hasGateway_ = false;
+    route.isDefaultRoute_ = false;
+    route.destination_.type_ = INetAddr::IPV4;
+    route.destination_.family_ = AF_INET;
+    route.destination_.prefixlen_ = 0x18;
+    route.destination_.address_ = "192.168.2.10";
+    route.destination_.netMask_ = "255.255.255.0";
+    route.destination_.hostName_ = "netAddr";
+    rList.push_back(route);
+    int32_t ret = RouteUtils::AddRoutesToLocal(iface, rList);
+    EXPECT_NE(ret, 0);
 }
 
 HWTEST_F(RouteUtilsTest, AddRoute01, TestSize.Level1)

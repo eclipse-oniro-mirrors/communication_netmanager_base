@@ -616,12 +616,12 @@ int32_t RouteManager::UpdateRouteRule(uint16_t action, uint16_t flags, RouteInfo
     uint32_t index = 0;
     if (!routeInfo.routeNextHop.empty() && !strcmp(routeInfo.routeNextHop.c_str(), "unreachable")) {
         msg.rtm_type = RTN_UNREACHABLE;
-        routeInfoModify.routeInterfaceName = nullptr;
-        routeInfoModify.routeNextHop = nullptr;
+        routeInfoModify.routeInterfaceName = "";
+        routeInfoModify.routeNextHop = "";
     } else if (!routeInfo.routeNextHop.empty() && !strcmp(routeInfo.routeNextHop.c_str(), "throw")) {
         msg.rtm_type = RTN_THROW;
-        routeInfoModify.routeInterfaceName = nullptr;
-        routeInfoModify.routeNextHop = nullptr;
+        routeInfoModify.routeInterfaceName = "";
+        routeInfoModify.routeNextHop = "";
     } else {
         index = if_nametoindex(routeInfo.routeInterfaceName.c_str());
     }
