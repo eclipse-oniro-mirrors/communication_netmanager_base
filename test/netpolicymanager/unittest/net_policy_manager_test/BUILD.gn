@@ -24,6 +24,7 @@ ohos_unittest("net_policy_manager_test") {
     "ut_net_policy_base.cpp",
     "ut_net_policy_callback.cpp",
     "ut_net_policy_callback_ipc.cpp",
+    "ut_net_policy_callback_stub.cpp",
     "ut_net_policy_client.cpp",
     "ut_net_policy_core.cpp",
     "ut_net_policy_event_handler.cpp",
