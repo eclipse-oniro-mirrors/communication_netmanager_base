@@ -88,5 +88,19 @@ HWTEST_F(NetStatsInfoTest, MarshallingUnmarshallingTest002, TestSize.Level1)
     EXPECT_EQ(result.rxPackets_, info.rxPackets_);
     EXPECT_EQ(result.txPackets_, info.txPackets_);
 }
+
+HWTEST_F(NetStatsInfoTest, MarshallingUnmarshallingTest003, TestSize.Level1)
+{
+    Parcel parcel;
+    std::vector<NetStatsInfo> statsInfos;
+    NetStatsInfo infoa = GetNetStatsInfoData();
+    statsInfos.push_back(infoa);
+    NetStatsInfo infob = GetNetStatsInfoData();
+    statsInfos.push_back(infob);
+
+    EXPECT_TRUE(NetStatsInfo::Marshalling(parcel, statsInfos));
+    std::vector<NetStatsInfo> results;
+    EXPECT_TRUE(NetStatsInfo::Unmarshalling(parcel, results));
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

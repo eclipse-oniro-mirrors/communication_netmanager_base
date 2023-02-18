@@ -90,7 +90,9 @@ bool NetStatsInfo::Unmarshalling(Parcel &parcel, std::vector<NetStatsInfo> &stat
 
     statsInfos.reserve(vSize);
     for (uint32_t i = 0; i < vSize; i++) {
-        NetStatsInfo::Unmarshalling(parcel, statsInfos[i]);
+        NetStatsInfo tmpData;
+        NetStatsInfo::Unmarshalling(parcel, tmpData);
+        statsInfos.push_back(tmpData);
     }
 
     return true;

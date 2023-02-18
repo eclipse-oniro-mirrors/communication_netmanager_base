@@ -1,0 +1,315 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <gtest/gtest.h>
+
+#include "notify_callback_stub.h"
+
+namespace OHOS {
+namespace NetsysNative {
+namespace {
+using namespace testing::ext;
+class NotifyCallbackStubTestCb : public NotifyCallbackStub {
+public:
+    NotifyCallbackStubTestCb() = default;
+    ~NotifyCallbackStubTestCb() {}
+
+    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags, int scope) override
+    {
+        return 0;
+    }
+
+    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags, int scope) override
+    {
+        return 0;
+    }
+
+    int32_t OnInterfaceAdded(const std::string &ifName) override
+    {
+        return 0;
+    }
+
+    int32_t OnInterfaceRemoved(const std::string &ifName) override
+    {
+        return 0;
+    }
+
+    int32_t OnInterfaceChanged(const std::string &ifName, bool up) override
+    {
+        return 0;
+    }
+
+    int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) override
+    {
+        return 0;
+    }
+
+    int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
+                           const std::string &ifName) override
+    {
+        return 0;
+    }
+
+    int32_t OnDhcpSuccess(sptr<DhcpResultParcel> &dhcpResult) override
+    {
+        return 0;
+    }
+
+    int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override
+    {
+        return 0;
+    }
+};
+} // namespace
+
+class NotifyCallbackStubTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
+
+    static inline std::shared_ptr<NotifyCallbackStubTestCb> notifyStub_ = nullptr;
+};
+
+void NotifyCallbackStubTest::SetUpTestCase()
+{
+    notifyStub_ = std::make_shared<NotifyCallbackStubTestCb>();
+}
+
+void NotifyCallbackStubTest::TearDownTestCase() {}
+
+void NotifyCallbackStubTest::SetUp() {}
+
+void NotifyCallbackStubTest::TearDown() {}
+
+HWTEST_F(NotifyCallbackStubTest, OnInterfaceAddressUpdated001, TestSize.Level1)
+{
+    std::string addr = "192.161.0.5";
+    std::string ifName = "test0";
+    int32_t flags = 2;
+    int32_t scope = 0;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteString(addr)) {
+        return;
+    }
+    if (!data.WriteString(ifName)) {
+        return;
+    }
+    if (!data.WriteUint32(flags)) {
+        return;
+    }
+    if (!data.WriteUint32(scope)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = notifyStub_->OnRemoteRequest(100, data, reply, option);
+    EXPECT_NE(ret, 0);
+
+    ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_INTERFACE_ADDRESS_UPDATED, data, reply, option);
+    EXPECT_NE(ret, 0);
+
+    MessageParcel dataOk;
+    if (!dataOk.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
+        return;
+    }
+    if (!dataOk.WriteString(addr)) {
+        return;
+    }
+    if (!dataOk.WriteString(ifName)) {
+        return;
+    }
+    if (!dataOk.WriteUint32(flags)) {
+        return;
+    }
+    if (!dataOk.WriteUint32(scope)) {
+        return;
+    }
+    ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_INTERFACE_ADDRESS_UPDATED, dataOk, reply, option);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NotifyCallbackStubTest, OnInterfaceAddressRemoved001, TestSize.Level1)
+{
+    std::string addr = "192.161.0.5";
+    std::string ifName = "test0";
+    int32_t flags = 2;
+    int32_t scope = 0;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteString(addr)) {
+        return;
+    }
+    if (!data.WriteString(ifName)) {
+        return;
+    }
+    if (!data.WriteUint32(flags)) {
+        return;
+    }
+    if (!data.WriteUint32(scope)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_INTERFACE_ADDRESS_REMOVED, data, reply, option);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NotifyCallbackStubTest, OnInterfaceAdded001, TestSize.Level1)
+{
+    std::string ifName = "test0";
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteString(ifName)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_INTERFACE_ADDED, data, reply, option);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NotifyCallbackStubTest, OnInterfaceRemoved001, TestSize.Level1)
+{
+    std::string ifName = "test0";
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteString(ifName)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_INTERFACE_REMOVED, data, reply, option);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NotifyCallbackStubTest, OnInterfaceChanged001, TestSize.Level1)
+{
+    std::string ifName = "test0";
+    bool isUp = false;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteString(ifName)) {
+        return;
+    }
+    if (!data.WriteBool(isUp)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_INTERFACE_CHANGED, data, reply, option);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NotifyCallbackStubTest, OnInterfaceLinkStateChanged001, TestSize.Level1)
+{
+    std::string ifName = "test0";
+    bool isUp = false;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteString(ifName)) {
+        return;
+    }
+    if (!data.WriteBool(isUp)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_INTERFACE_LINK_STATE_CHANGED, data, reply, option);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NotifyCallbackStubTest, OnRouteChanged001, TestSize.Level1)
+{
+    bool updated = false;
+    std::string route = "192.168.0.1";
+    std::string gateway = "192.168.0.1";
+    std::string ifName = "test0";
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteBool(updated)) {
+        return;
+    }
+    if (!data.WriteString(route)) {
+        return;
+    }
+    if (!data.WriteString(gateway)) {
+        return;
+    }
+    if (!data.WriteString(ifName)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_ROUTE_CHANGED, data, reply, option);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NotifyCallbackStubTest, OnDhcpSuccess001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
+        return;
+    }
+    sptr<DhcpResultParcel> dhcpResult = new (std::nothrow) DhcpResultParcel;
+    dhcpResult->iface_ = "test0";
+    dhcpResult->ipAddr_ = "192.168.11.55";
+    dhcpResult->gateWay_ = "192.168.10.1";
+    dhcpResult->subNet_ = "255.255.255.0";
+    dhcpResult->Marshalling(data);
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_DHCP_SUCCESS, data, reply, option);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NotifyCallbackStubTest, OnBandwidthReachedLimit001, TestSize.Level1)
+{
+    std::string limitName = "limit";
+    std::string iface = "test0";
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NotifyCallbackStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteString(limitName)) {
+        return;
+    }
+    if (!data.WriteString(iface)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_BANDWIDTH_REACHED_LIMIT, data, reply, option);
+    EXPECT_EQ(ret, 0);
+}
+} // namespace nmd
+} // namespace OHOS
