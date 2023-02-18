@@ -35,10 +35,13 @@ ohos_unittest("netsys_native_manager_test") {
     "netsys_native_service_proxy_test.cpp",
     "netsys_native_service_test.cpp",
     "netsys_network_test.cpp",
+    "netsys_udp_transfer_test.cpp",
+    "notify_callback_proxy_test.cpp",
     "notify_callback_stub_test.cpp",
     "resolver_config_test.cpp",
     "route_manager_test.cpp",
     "sharing_manager_test.cpp",
+    "traffic_manager_test.cpp",
   ]
 
   include_dirs = [
