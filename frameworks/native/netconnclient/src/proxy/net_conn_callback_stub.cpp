@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "net_conn_callback_stub.h"
-
+#include "net_conn_constants.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
@@ -40,7 +40,7 @@ int32_t NetConnCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (myDescripter != remoteDescripter) {
         NETMGR_LOG_E("Descriptor checked failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
     }
 
     auto itFunc = memberFuncMap_.find(code);
@@ -62,16 +62,16 @@ int32_t NetConnCallbackStub::OnNetAvailable(MessageParcel &data, MessageParcel &
     }
     int32_t netId = 0;
     if (!data.ReadInt32(netId)) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     sptr<NetHandle> netHandle = std::make_unique<NetHandle>(netId).release();
     int32_t result = NetAvailable(netHandle);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
-        return result;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnCallbackStub::OnNetCapabilitiesChange(MessageParcel &data, MessageParcel &reply)
@@ -84,27 +84,27 @@ int32_t NetConnCallbackStub::OnNetCapabilitiesChange(MessageParcel &data, Messag
     sptr<NetAllCapabilities> netAllCap = std::make_unique<NetAllCapabilities>().release();
     if (!data.ReadInt32(netId) || !data.ReadUint32(netAllCap->linkUpBandwidthKbps_) ||
         !data.ReadUint32(netAllCap->linkDownBandwidthKbps_)) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     uint32_t size = 0;
     uint32_t value = 0;
     if (!data.ReadUint32(size)) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     size = size > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : size;
     for (uint32_t i = 0; i < size; i++) {
         if (!data.ReadUint32(value)) {
-            return IPC_PROXY_ERR;
+            return NETMANAGER_ERR_READ_DATA_FAIL;
         }
         netAllCap->netCaps_.insert(static_cast<NetCap>(value));
     }
     if (!data.ReadUint32(size)) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     size = size > MAX_NET_CAP_NUM ? MAX_NET_CAP_NUM : size;
     for (uint32_t i = 0; i < size; i++) {
         if (!data.ReadUint32(value)) {
-            return IPC_PROXY_ERR;
+            return NETMANAGER_ERR_READ_DATA_FAIL;
         }
         netAllCap->bearerTypes_.insert(static_cast<NetBearType>(value));
     }
@@ -113,10 +113,10 @@ int32_t NetConnCallbackStub::OnNetCapabilitiesChange(MessageParcel &data, Messag
     int32_t result = NetCapabilitiesChange(netHandle, netAllCap);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
-        return result;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnCallbackStub::OnNetConnectionPropertiesChange(MessageParcel &data, MessageParcel &reply)
@@ -127,17 +127,17 @@ int32_t NetConnCallbackStub::OnNetConnectionPropertiesChange(MessageParcel &data
 
     int32_t netId;
     if (!data.ReadInt32(netId)) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     sptr<NetLinkInfo> info = NetLinkInfo::Unmarshalling(data);
     sptr<NetHandle> netHandle = std::make_unique<NetHandle>(netId).release();
     int32_t result = NetConnectionPropertiesChange(netHandle, info);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
-        return result;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnCallbackStub::OnNetLost(MessageParcel &data, MessageParcel &reply)
@@ -148,16 +148,16 @@ int32_t NetConnCallbackStub::OnNetLost(MessageParcel &data, MessageParcel &reply
 
     int32_t netId;
     if (!data.ReadInt32(netId)) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     sptr<NetHandle> netHandle = std::make_unique<NetHandle>(netId).release();
     int32_t result = NetLost(netHandle);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
-        return result;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnCallbackStub::OnNetUnavailable(MessageParcel &data, MessageParcel &reply)
@@ -169,9 +169,9 @@ int32_t NetConnCallbackStub::OnNetUnavailable(MessageParcel &data, MessageParcel
     int32_t result = NetUnavailable();
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
-        return result;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnCallbackStub::OnNetBlockStatusChange(MessageParcel &data, MessageParcel &reply)
@@ -182,51 +182,51 @@ int32_t NetConnCallbackStub::OnNetBlockStatusChange(MessageParcel &data, Message
 
     int32_t netId;
     if (!data.ReadInt32(netId)) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     bool blocked;
     if (!data.ReadBool(blocked)) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     sptr<NetHandle> netHandle = std::make_unique<NetHandle>(netId).release();
     int32_t result = NetBlockStatusChange(netHandle, blocked);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write parcel failed");
-        return result;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnCallbackStub::NetAvailable(sptr<NetHandle> &netHandle)
 {
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnCallbackStub::NetCapabilitiesChange(sptr<NetHandle> &netHandle,
                                                    const sptr<NetAllCapabilities> &netAllCap)
 {
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnCallbackStub::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
 {
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnCallbackStub::NetLost(sptr<NetHandle> &netHandle)
 {
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnCallbackStub::NetUnavailable()
 {
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnCallbackStub::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
 {
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

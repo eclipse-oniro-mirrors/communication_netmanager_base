@@ -15,7 +15,7 @@
 
 #include "net_mgr_log_wrapper.h"
 #include "net_supplier_callback_proxy.h"
-
+#include "net_manager_constants.h"
 namespace OHOS {
 namespace NetManagerStandard {
 NetSupplierCallbackProxy::NetSupplierCallbackProxy(const sptr<IRemoteObject> &impl)
@@ -29,7 +29,7 @@ int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, const
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     data.WriteString(ident);
     uint32_t size = static_cast<uint32_t>(netCaps.size());
@@ -41,7 +41,7 @@ int32_t NetSupplierCallbackProxy::RequestNetwork(const std::string &ident, const
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     MessageParcel reply;
@@ -58,7 +58,7 @@ int32_t NetSupplierCallbackProxy::ReleaseNetwork(const std::string &ident, const
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     data.WriteString(ident);
     uint32_t size = static_cast<uint32_t>(netCaps.size());
@@ -70,7 +70,7 @@ int32_t NetSupplierCallbackProxy::ReleaseNetwork(const std::string &ident, const
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     MessageParcel reply;

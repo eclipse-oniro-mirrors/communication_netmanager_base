@@ -15,6 +15,7 @@
 #include "net_supplier_callback_stub.h"
 
 #include "net_mgr_log_wrapper.h"
+#include "net_manager_constants.h"
 
 static constexpr uint32_t MAX_NET_CAP_NUM = 32;
 
@@ -41,7 +42,7 @@ int32_t NetSupplierCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &d
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (myDescripter != remoteDescripter) {
         NETMGR_LOG_I("Descriptor checked failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
     }
 
     auto itFunc = memberFuncMap_.find(code);
@@ -74,7 +75,7 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
     RequestNetwork(ident, netCaps);
 
     reply.WriteInt32(0);
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessageParcel &reply)
@@ -95,7 +96,7 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
     ReleaseNetwork(ident, netCaps);
 
     reply.WriteInt32(0);
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps)

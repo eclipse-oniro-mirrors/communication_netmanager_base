@@ -22,10 +22,10 @@
 #include <napi/native_api.h>
 #include <napi/native_common.h>
 
-#include "netmanager_base_log.h"
 #include "base_context.h"
 #include "napi_constant.h"
 #include "napi_utils.h"
+#include "netmanager_base_log.h"
 #include "nocopyable.h"
 
 namespace OHOS {
@@ -45,14 +45,6 @@ public:
         auto context = reinterpret_cast<Context *>(data);
         if (context == nullptr || Executor == nullptr) {
             NETMANAGER_BASE_LOGE("context or Executor is nullptr");
-            return;
-        }
-        if (!context->IsParseOK()) {
-            // api9 or before not set error in context.
-            if (context->GetErrorCode() == std::numeric_limits<int32_t>::max()) {
-                context->SetError(PARSE_ERROR_CODE, PARSE_ERROR_MSG); // if developer not set error, there will set.
-            }
-            NETMANAGER_BASE_LOGE("parameter error");
             return;
         }
         context->SetExecOK(Executor(context));

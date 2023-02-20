@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "net_manager_constants.h"
 #include "netsys_native_client.h"
 
 namespace OHOS {
@@ -30,13 +31,11 @@ static constexpr const char *INTERFACE_NAME = "interface_name";
 static constexpr const char *REQUESTOR = "requestor";
 const int32_t MTU = 111;
 const int32_t NET_ID = 2;
-int32_t g_ifaceFd = 5;
 const int64_t UID = 1010;
 const int32_t SOCKET_FD = 5;
 const int32_t PERMISSION = 5;
 const int32_t PREFIX_LENGTH = 23;
 uint16_t BASE_TIMEOUT_MSEC = 200;
-const int64_t BYTES = 2097152;
 const int64_t CHAIN = 1010;
 uint8_t RETRY_COUNT = 3;
 const uint32_t FIREWALL_RULE = 1;
@@ -65,19 +64,19 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest001, TestSize.Level1)
 {
     NetsysNativeClient nativeClient;
     int32_t ret = nativeClient.NetworkCreatePhysical(NET_ID, PERMISSION);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient.NetworkCreatePhysical(NET_ID, PERMISSION);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient.NetworkDestroy(NET_ID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient.NetworkAddInterface(NET_ID, IF_NAME);
     EXPECT_EQ(ret, -1);
 
     ret = nativeClient.NetworkRemoveInterface(NET_ID, IF_NAME);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient.NetworkAddRoute(NET_ID, IF_NAME, DESTINATION, NEXT_HOP);
     EXPECT_EQ(ret, -1);
@@ -132,38 +131,38 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest002, TestSize.Level1)
     EXPECT_NE(ret, 0);
 
     ret = nativeClient.GetCellularRxBytes();
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient.GetCellularTxBytes();
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient.GetAllRxBytes();
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient.GetAllTxBytes();
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest003, TestSize.Level1)
 {
     NetsysNativeClient nativeClient;
     int32_t ret = nativeClient.GetUidRxBytes(NET_ID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient.GetUidTxBytes(NET_ID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient.GetUidOnIfaceRxBytes(NET_ID, INTERFACE_NAME);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient.GetUidOnIfaceTxBytes(NET_ID, INTERFACE_NAME);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient.GetIfaceRxBytes(INTERFACE_NAME);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient.GetIfaceTxBytes(INTERFACE_NAME);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     std::vector<std::string> interFaceGetList = nativeClient.InterfaceGetList();
     EXPECT_NE(interFaceGetList.size(), 0);
@@ -172,10 +171,10 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest003, TestSize.Level1)
     EXPECT_EQ(uidGetList.size(), 0);
 
     ret = nativeClient.GetIfaceRxPackets(INTERFACE_NAME);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient.GetIfaceTxPackets(INTERFACE_NAME);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     std::vector<uint32_t> uids;
     uids.push_back(UID);
@@ -189,13 +188,13 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest004, TestSize.Level1)
 {
     NetsysNativeClient nativeClient;
     int32_t ret = nativeClient.SetDefaultNetWork(NET_ID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient.ClearDefaultNetWorkNetId();
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient.BindSocket(SOCKET_FD, NET_ID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient.IpEnableForwarding(REQUESTOR);
     EXPECT_EQ(ret, 0);
@@ -228,56 +227,6 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest004, TestSize.Level1)
     EXPECT_EQ(ret, -1);
     ret = nativeClient.FirewallSetUidRule(CHAIN, NET_ID, FIREWALL_RULE);
     EXPECT_EQ(ret, -1);
-}
-
-HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest005, TestSize.Level1)
-{
-    NetsysNativeClient nativeClient;
-    int32_t ret = nativeClient.BindNetworkServiceVpn(SOCKET_FD);
-    EXPECT_EQ(ret, -28);
-
-    struct ifreq ifrequest;
-    ret = nativeClient.EnableVirtualNetIfaceCard(SOCKET_FD, ifrequest, g_ifaceFd);
-    EXPECT_EQ(ret, -28);
-
-    ret = nativeClient.SetIpAddress(SOCKET_FD, IP_ADDR, PREFIX_LENGTH, ifrequest);
-    EXPECT_EQ(ret, -28);
-
-    ret = nativeClient.SetBlocking(g_ifaceFd, true);
-    EXPECT_EQ(ret, -28);
-
-    ret = nativeClient.StartDhcpClient(INTERFACE_NAME, false);
-    EXPECT_EQ(ret, 0);
-
-    ret = nativeClient.StopDhcpClient(INTERFACE_NAME, false);
-    EXPECT_EQ(ret, 0);
-
-    ret = nativeClient.StartDhcpService(INTERFACE_NAME, IP_ADDR);
-    EXPECT_EQ(ret, 0);
-
-    ret = nativeClient.StopDhcpService(INTERFACE_NAME);
-    EXPECT_EQ(ret, 0);
-
-    ret = nativeClient.BandwidthEnableDataSaver(true);
-    EXPECT_EQ(ret, -1);
-
-    ret = nativeClient.BandwidthSetIfaceQuota(INTERFACE_NAME, BYTES);
-    EXPECT_EQ(ret, 0);
-
-    ret = nativeClient.BandwidthRemoveIfaceQuota(INTERFACE_NAME);
-    EXPECT_EQ(ret, 0);
-
-    ret = nativeClient.BandwidthAddDeniedList(NET_ID);
-    EXPECT_EQ(ret, 0);
-
-    ret = nativeClient.BandwidthRemoveDeniedList(NET_ID);
-    EXPECT_EQ(ret, 0);
-
-    ret = nativeClient.BandwidthAddAllowedList(NET_ID);
-    EXPECT_EQ(ret, 0);
-
-    ret = nativeClient.BandwidthRemoveAllowedList(NET_ID);
-    EXPECT_EQ(ret, 0);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

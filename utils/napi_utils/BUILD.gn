@@ -16,7 +16,7 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 config("napi_utils_config") {
   visibility = [ ":napi_utils" ]
-  include_dirs = [ "$SUBSYSTEM_DIR/netmanager_base/utils/log/include" ]
+  include_dirs = [ "$INNERKITS_ROOT/include" ]
 }
 
 config("napi_utils_public_config") {
@@ -42,6 +42,7 @@ ohos_shared_library("napi_utils") {
   public_deps = [
     "$ARKUI_ROOT/napi/:ace_napi",
     "$C_UTILS_ROOT/base:utils",
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   ]
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]

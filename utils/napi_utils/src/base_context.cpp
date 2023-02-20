@@ -50,6 +50,7 @@ void BaseContext::SetParseOK(bool parseOK)
 void BaseContext::SetErrorCode(int32_t errorCode)
 {
     errorCode_ = errorCode;
+    errorMessage_ = convertor_.ConvertErrorCode(errorCode_);
 }
 
 void BaseContext::SetExecOK(bool requestOK)

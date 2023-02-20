@@ -18,6 +18,8 @@
 
 #include <climits>
 
+#include "net_manager_constants.h"
+
 namespace OHOS {
 namespace NetManagerStandard {
 static constexpr int64_t DATA_USAGE_UNKNOWN = -1;
@@ -26,14 +28,10 @@ static constexpr int64_t REMIND_NEVER = -1;
 constexpr const char *QUOTA_POLICY_NO_PERIOD = "--";
 
 enum NetPolicyResultCode {
-    ERR_NONE = 0,
-    ERR_INTERNAL_ERROR = (-1),
-    ERR_INVALID_UID = (-10001),
-    ERR_INVALID_POLICY = (-10002),
-    ERR_INVALID_QUOTA_POLICY = (-10003),
-    ERR_QUOTA_POLICY_NOT_EXIST = (-10004),
-    ERR_INVALID_PARAM = (-10005),
-    ERR_PERMISSION_DENIED = (-10006),
+    POLICY_ERR_INVALID_UID = 2104002,
+    POLICY_ERR_INVALID_POLICY = 2104003,
+    POLICY_ERR_INVALID_QUOTA_POLICY = 2104004,
+    POLICY_ERR_QUOTA_POLICY_NOT_EXIST = 2104005,
 };
 
 enum NetUidPolicy {

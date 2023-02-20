@@ -30,25 +30,25 @@ int32_t NetPolicyCallback::RegisterNetPolicyCallback(const sptr<INetPolicyCallba
     std::unique_lock<std::mutex> lock(callbackMutex_);
     if (callback == nullptr || callback->AsObject() == nullptr || callback->AsObject().GetRefPtr() == nullptr) {
         NETMGR_LOG_E("The parameter callback is null");
-        return NetPolicyResultCode::ERR_INVALID_PARAM;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
     uint32_t callbackCounts = callbacks_.size();
     NETMGR_LOG_D("callback counts [%{public}u]", callbackCounts);
     if (callbackCounts >= LIMIT_CALLBACK_NUM) {
         NETMGR_LOG_E("callback counts cannot more than [%{public}u]", LIMIT_CALLBACK_NUM);
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
     for (uint32_t i = 0; i < callbackCounts; i++) {
         if (callback->AsObject().GetRefPtr() == callbacks_[i]->AsObject().GetRefPtr()) {
             NETMGR_LOG_W("netPolicyCallback_ had this callback");
-            return NetPolicyResultCode::ERR_INVALID_PARAM;
+            return NETMANAGER_ERR_PARAMETER_ERROR;
         }
     }
 
     callbacks_.emplace_back(callback);
-    return NetPolicyResultCode::ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallback::UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback)
@@ -56,7 +56,7 @@ int32_t NetPolicyCallback::UnregisterNetPolicyCallback(const sptr<INetPolicyCall
     std::unique_lock<std::mutex> lock(callbackMutex_);
     if (callback == nullptr || callback->AsObject() == nullptr || callback->AsObject().GetRefPtr() == nullptr) {
         NETMGR_LOG_E("The parameter of callback is null");
-        return NetPolicyResultCode::ERR_INVALID_PARAM;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
     auto it = std::remove_if(callbacks_.begin(), callbacks_.end(),
@@ -69,7 +69,7 @@ int32_t NetPolicyCallback::UnregisterNetPolicyCallback(const sptr<INetPolicyCall
                              });
     callbacks_.erase(it, callbacks_.end());
 
-    return NetPolicyResultCode::ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallback::NotifyNetUidPolicyChange(uint32_t uid, uint32_t policy)
@@ -82,7 +82,7 @@ int32_t NetPolicyCallback::NotifyNetUidPolicyChange(uint32_t uid, uint32_t polic
         }
     }
 
-    return NetPolicyResultCode::ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallback::NotifyNetUidRuleChange(uint32_t uid, uint32_t rule)
@@ -95,12 +95,12 @@ int32_t NetPolicyCallback::NotifyNetUidRuleChange(uint32_t uid, uint32_t rule)
         }
     }
 
-    return NetPolicyResultCode::ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallback::NotifyNetBackgroundPolicyChange(bool isAllowed)
 {
-    NETMGR_LOG_I("NotifyNetBackgroundPolicyChange  isAllowed[%{public}d]", isAllowed);
+    NETMGR_LOG_D("NotifyNetBackgroundPolicyChange  isAllowed[%{public}d]", isAllowed);
 
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
@@ -108,14 +108,14 @@ int32_t NetPolicyCallback::NotifyNetBackgroundPolicyChange(bool isAllowed)
         }
     }
 
-    return NetPolicyResultCode::ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallback::NotifyNetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     if (quotaPolicies.empty()) {
         NETMGR_LOG_E("NotifyNetQuotaPolicyChange quotaPolicies empty");
-        return ERR_INTERNAL_ERROR;
+        return POLICY_ERR_QUOTA_POLICY_NOT_EXIST;
     }
     NETMGR_LOG_D("NotifyNetQuotaPolicyChange quotaPolicies.size[%{public}zu]", quotaPolicies.size());
 
@@ -125,12 +125,12 @@ int32_t NetPolicyCallback::NotifyNetQuotaPolicyChange(const std::vector<NetQuota
         }
     }
 
-    return NetPolicyResultCode::ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallback::NotifyNetMeteredIfacesChange(std::vector<std::string> &ifaces)
 {
-    NETMGR_LOG_I("NotifyNetMeteredIfacesChange iface size[%{public}zu]", ifaces.size());
+    NETMGR_LOG_D("NotifyNetMeteredIfacesChange iface size[%{public}zu]", ifaces.size());
 
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
@@ -138,7 +138,7 @@ int32_t NetPolicyCallback::NotifyNetMeteredIfacesChange(std::vector<std::string>
         }
     }
 
-    return NetPolicyResultCode::ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

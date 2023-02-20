@@ -66,13 +66,13 @@ HWTEST_F(NetStatsCallbackIpcTest, RegisterNetStatsCallbackTest001, TestSize.Leve
 HWTEST_F(NetStatsCallbackIpcTest, NotifyNetIfaceStatsChangedTest001, TestSize.Level1)
 {
     int32_t ret = instance_->NotifyNetIfaceStatsChanged(TEST_IFACE);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(NetStatsCallbackIpcTest, NotifyNetUidStatsChangedTest001, TestSize.Level1)
 {
     int32_t ret = instance_->NotifyNetUidStatsChanged(TEST_IFACE, TEST_UID);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, 0);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -22,6 +22,7 @@ ohos_shared_library("net_conn_manager") {
     "src/net_conn_event_handler.cpp",
     "src/net_conn_service.cpp",
     "src/net_conn_service_iface.cpp",
+    "src/net_http_proxy_tracker.cpp",
     "src/net_monitor.cpp",
     "src/net_score.cpp",
     "src/net_supplier.cpp",
@@ -51,6 +52,7 @@ ohos_shared_library("net_conn_manager") {
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
+    "$THIRD_PARTY_ROOT/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
@@ -58,6 +60,7 @@ ohos_shared_library("net_conn_manager") {
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "hisysevent_native:libhisysevent",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
   ]

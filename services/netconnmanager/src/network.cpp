@@ -296,7 +296,7 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
     NETMGR_LOG_D("Enter UnRegisterNetDetectionCallback");
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter of callback is null");
-        return ERR_SERVICE_NULL_PTR;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
     auto iter = std::find(netDetectionRetCallback_.begin(), netDetectionRetCallback_.end(), callback);
@@ -304,7 +304,7 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
         netDetectionRetCallback_.erase(iter);
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 void Network::StartNetDetection(bool needReport)

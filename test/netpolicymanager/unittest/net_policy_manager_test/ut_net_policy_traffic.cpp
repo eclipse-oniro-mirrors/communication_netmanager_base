@@ -135,7 +135,7 @@ HWTEST_F(UtNetPolicyTraffic, UpdateQuotaPolicies001, TestSize.Level1)
     quotaPolicies.push_back(quotaPolicy1);
     quotaPolicies.push_back(quotaPolicy2);
     int32_t result = g_netPolicyTraffic->UpdateQuotaPolicies(quotaPolicies);
-    ASSERT_EQ(result, NetPolicyResultCode::ERR_NONE);
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -147,7 +147,7 @@ HWTEST_F(UtNetPolicyTraffic, GetNetQuotaPolicies001, TestSize.Level1)
 {
     std::vector<NetQuotaPolicy> quotaPolicies;
     int32_t result = g_netPolicyTraffic->GetNetQuotaPolicies(quotaPolicies);
-    ASSERT_EQ(result, NetPolicyResultCode::ERR_NONE);
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
     ASSERT_GT(quotaPolicies.size(), NO_DATA_SIZE);
 }
 
@@ -160,10 +160,10 @@ HWTEST_F(UtNetPolicyTraffic, UpdateRemindPolicy001, TestSize.Level1)
 {
     int32_t result =
         g_netPolicyTraffic->UpdateRemindPolicy(NetBearType::BEARER_CELLULAR, ICCID_1, RemindType::REMIND_TYPE_LIMIT);
-    ASSERT_EQ(result, NetPolicyResultCode::ERR_NONE);
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
     std::vector<NetQuotaPolicy> quotaPolicies;
     result = g_netPolicyTraffic->GetNetQuotaPolicies(quotaPolicies);
-    ASSERT_EQ(result, NetPolicyResultCode::ERR_NONE);
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
     for (auto &quotaPolicy : quotaPolicies) {
         if (quotaPolicy.netType == NetBearType::BEARER_CELLULAR && quotaPolicy.iccid == ICCID_1) {
             if (quotaPolicy.lastLimitRemind < 0) {
@@ -186,10 +186,10 @@ HWTEST_F(UtNetPolicyTraffic, UpdateRemindPolicy002, TestSize.Level1)
 {
     int32_t result =
         g_netPolicyTraffic->UpdateRemindPolicy(NetBearType::BEARER_CELLULAR, ICCID_2, RemindType::REMIND_TYPE_WARNING);
-    ASSERT_EQ(result, NetPolicyResultCode::ERR_NONE);
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
     std::vector<NetQuotaPolicy> quotaPolicies;
     result = g_netPolicyTraffic->GetNetQuotaPolicies(quotaPolicies);
-    ASSERT_EQ(result, NetPolicyResultCode::ERR_NONE);
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
     for (auto &quotaPolicy : quotaPolicies) {
         if (quotaPolicy.netType == NetBearType::BEARER_CELLULAR && quotaPolicy.iccid == ICCID_2) {
             if (quotaPolicy.lastWarningRemind < 0) {
@@ -212,10 +212,10 @@ HWTEST_F(UtNetPolicyTraffic, UpdateRemindPolicy003, TestSize.Level1)
 {
     uint32_t errorRemindType = 3;
     int32_t result = g_netPolicyTraffic->UpdateRemindPolicy(NetBearType::BEARER_CELLULAR, ICCID_2, errorRemindType);
-    ASSERT_EQ(result, ERR_INVALID_PARAM);
+    ASSERT_EQ(result, NETMANAGER_ERR_PARAMETER_ERROR);
     std::vector<NetQuotaPolicy> quotaPolicies;
     result = g_netPolicyTraffic->GetNetQuotaPolicies(quotaPolicies);
-    ASSERT_EQ(result, NetPolicyResultCode::ERR_NONE);
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
     for (auto &quotaPolicy : quotaPolicies) {
         if (quotaPolicy.netType == NetBearType::BEARER_CELLULAR && quotaPolicy.iccid == ICCID_2) {
             if (quotaPolicy.lastWarningRemind < 0) {
@@ -755,7 +755,7 @@ HWTEST_F(UtNetPolicyTraffic, IsValidPeriodDuration012, TestSize.Level1)
 {
     const std::string periodDuration = "S1";
     auto ret = g_netPolicyTraffic->IsValidPeriodDuration(periodDuration);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 
 #define private public
@@ -49,15 +50,15 @@ HWTEST_F(LocalNetworkTest, AddInterfaceTest001, TestSize.Level1)
     LocalNetwork localNetwork(1);
     std::string interfaceName = "waln0";
     int32_t ret = localNetwork.AddInterface(interfaceName);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     localNetwork.interfaces_.insert(interfaceName);
     ret = localNetwork.AddInterface(interfaceName);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     ret = localNetwork.RemoveInterface(interfaceName);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     localNetwork.interfaces_.clear();
     ret = localNetwork.RemoveInterface(interfaceName);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative
 } // namespace OHOS
