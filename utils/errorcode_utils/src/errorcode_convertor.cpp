@@ -52,6 +52,20 @@ NetBaseErrorCodeConvertor::NetBaseErrorCodeConvertor()
 {
     errorMap_[NET_CONN_ERR_INVALID_SUPPLIER_ID] = "invalid supplier id";
 }
+std::map<int32_t, const char *> g_errStringMap = {
+
+    /* Net mDNS Manager */
+    {NET_MDNS_ERR_UNKNOWN, "Unknown error"},
+    {NET_MDNS_ERR_CALLBACK_NOT_FOUND, "Callback not found"},
+    {NET_MDNS_ERR_CALLBACK_DUPLICATED, "Callback duplicated"},
+    {NET_MDNS_ERR_PAYLOAD_PARSER_FAIL, "Payload parser failed"},
+    {NET_MDNS_ERR_EMPTY_PAYLOAD, "Empty payload"},
+    {NET_MDNS_ERR_TIMEOUT, "Request timeout"},
+    {NET_MDNS_ERR_ILLEGAL_ARGUMENT, "Illegal argument"},
+    {NET_MDNS_ERR_SERVICE_INSTANCE_DUPLICATE, "Service instance duplicated"},
+    {NET_MDNS_ERR_SERVICE_INSTANCE_NOT_FOUND, "Service instance not found"},
+    {NET_MDNS_ERR_SEND, "Send packet failed"}
+};
 
 std::string NetBaseErrorCodeConvertor::ConvertErrorCode(int32_t errorCode)
 {

@@ -76,4 +76,14 @@ NET_SHARING_TIME_STAT:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: NetManager, desc: sharing state message}
   SHARING_COUNT: {type: INT32, desc: the number of sharing}
   SHARING_TYPE: {type: INT32, desc: type code of sharing}
+  
+  NET_MDNS_REQUEST_FAULT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: send request fault event}
+  INFO: {type: STRING, desc: mDNS info}
+  ERROR_TYPE: {type: INT32, desc: the error code}
+  ERROR_MSG: {type: STRING, desc: the error message}
+
+NET_MDNS_REQUEST_BEHAVIOR:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: send request behavior event}
+  INFO: {type: STRING, desc: mDNS info}
  
