@@ -262,7 +262,7 @@ HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest003, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetAirplaneModeTest, TestSize.Level1)
 {
-    AccessToken token(testInfoParms, testPolicyPrams1);
+    AccessToken token;
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAirplaneMode(true);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
