@@ -95,7 +95,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest004, TestSize.Level1)
     OHOS::nmd::InterfaceConfigurationParcel parcel;
     parcel.ifName = ETH0;
     parcel.ipv4Addr = PARCEL_IPV4_ADDR;
-    int32_t ret = NetsysController::GetInstance().InterfaceGetConfig(parcel);
+    int32_t ret = NetsysController::GetInstance().GetInterfaceConfig(parcel);
     EXPECT_EQ(ret, 0);
 }
 
@@ -107,15 +107,15 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest005, TestSize.Level1)
     ret = NetsysController::GetInstance().SetInterfaceUp(ETH0);
     EXPECT_EQ(ret, 0);
 
-    NetsysController::GetInstance().InterfaceClearAddrs(ETH0);
+    NetsysController::GetInstance().ClearInterfaceAddrs(ETH0);
 }
 
 HWTEST_F(NetsysControllerTest, NetsysControllerTest006, TestSize.Level1)
 {
-    int32_t ret = NetsysController::GetInstance().InterfaceSetMtu(ETH0, TEST_MTU);
+    int32_t ret = NetsysController::GetInstance().SetInterfaceMtu(ETH0, TEST_MTU);
     EXPECT_EQ(ret, -1);
 
-    ret = NetsysController::GetInstance().InterfaceGetMtu(ETH0);
+    ret = NetsysController::GetInstance().GetInterfaceMtu(ETH0);
     EXPECT_EQ(ret, -1);
 }
 
@@ -127,10 +127,10 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest007, TestSize.Level1)
         return;
     }
 
-    int32_t ret = NetsysController::GetInstance().InterfaceAddAddress(ETH0, IP_ADDR, PREFIX_LENGTH);
+    int32_t ret = NetsysController::GetInstance().AddInterfaceAddress(ETH0, IP_ADDR, PREFIX_LENGTH);
     EXPECT_EQ(ret, 0);
 
-    ret = NetsysController::GetInstance().InterfaceDelAddress(ETH0, IP_ADDR, PREFIX_LENGTH);
+    ret = NetsysController::GetInstance().DelInterfaceAddress(ETH0, IP_ADDR, PREFIX_LENGTH);
     EXPECT_EQ(ret, 0);
 }
 

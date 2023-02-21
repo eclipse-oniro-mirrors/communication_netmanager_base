@@ -38,8 +38,8 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_CREATE_NETWORK_CACHE] = &NetsysNativeServiceStub::CmdCreateNetworkCache;
     opToInterfaceMap_[NETSYS_DESTROY_NETWORK_CACHE] = &NetsysNativeServiceStub::CmdDestroyNetworkCache;
     opToInterfaceMap_[NETSYS_GET_ADDR_INFO] = &NetsysNativeServiceStub::CmdGetAddrInfo;
-    opToInterfaceMap_[NETSYS_INTERFACE_SET_MTU] = &NetsysNativeServiceStub::CmdInterfaceSetMtu;
-    opToInterfaceMap_[NETSYS_INTERFACE_GET_MTU] = &NetsysNativeServiceStub::CmdInterfaceGetMtu;
+    opToInterfaceMap_[NETSYS_INTERFACE_SET_MTU] = &NetsysNativeServiceStub::CmdSetInterfaceMtu;
+    opToInterfaceMap_[NETSYS_INTERFACE_GET_MTU] = &NetsysNativeServiceStub::CmdGetInterfaceMtu;
     opToInterfaceMap_[NETSYS_REGISTER_NOTIFY_CALLBACK] = &NetsysNativeServiceStub::CmdRegisterNotifyCallback;
     opToInterfaceMap_[NETSYS_UNREGISTER_NOTIFY_CALLBACK] = &NetsysNativeServiceStub::CmdUnRegisterNotifyCallback;
     opToInterfaceMap_[NETSYS_NETWORK_ADD_ROUTE] = &NetsysNativeServiceStub::CmdNetworkAddRoute;
@@ -52,16 +52,16 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_GET_PROC_SYS_NET] = &NetsysNativeServiceStub::CmdGetProcSysNet;
     opToInterfaceMap_[NETSYS_SET_PROC_SYS_NET] = &NetsysNativeServiceStub::CmdSetProcSysNet;
     opToInterfaceMap_[NETSYS_NETWORK_CREATE_PHYSICAL] = &NetsysNativeServiceStub::CmdNetworkCreatePhysical;
-    opToInterfaceMap_[NETSYS_INTERFACE_ADD_ADDRESS] = &NetsysNativeServiceStub::CmdInterfaceAddAddress;
-    opToInterfaceMap_[NETSYS_INTERFACE_DEL_ADDRESS] = &NetsysNativeServiceStub::CmdInterfaceDelAddress;
+    opToInterfaceMap_[NETSYS_INTERFACE_ADD_ADDRESS] = &NetsysNativeServiceStub::CmdAddInterfaceAddress;
+    opToInterfaceMap_[NETSYS_INTERFACE_DEL_ADDRESS] = &NetsysNativeServiceStub::CmdDelInterfaceAddress;
     opToInterfaceMap_[NETSYS_INTERFACE_SET_IP_ADDRESS] = &NetsysNativeServiceStub::CmdInterfaceSetIpAddress;
     opToInterfaceMap_[NETSYS_INTERFACE_SET_IFF_UP] = &NetsysNativeServiceStub::CmdInterfaceSetIffUp;
     opToInterfaceMap_[NETSYS_NETWORK_ADD_INTERFACE] = &NetsysNativeServiceStub::CmdNetworkAddInterface;
     opToInterfaceMap_[NETSYS_NETWORK_REMOVE_INTERFACE] = &NetsysNativeServiceStub::CmdNetworkRemoveInterface;
     opToInterfaceMap_[NETSYS_NETWORK_DESTROY] = &NetsysNativeServiceStub::CmdNetworkDestroy;
     opToInterfaceMap_[NETSYS_GET_FWMARK_FOR_NETWORK] = &NetsysNativeServiceStub::CmdGetFwmarkForNetwork;
-    opToInterfaceMap_[NETSYS_INTERFACE_SET_CONFIG] = &NetsysNativeServiceStub::CmdInterfaceSetConfig;
-    opToInterfaceMap_[NETSYS_INTERFACE_GET_CONFIG] = &NetsysNativeServiceStub::CmdInterfaceGetConfig;
+    opToInterfaceMap_[NETSYS_INTERFACE_SET_CONFIG] = &NetsysNativeServiceStub::CmdSetInterfaceConfig;
+    opToInterfaceMap_[NETSYS_INTERFACE_GET_CONFIG] = &NetsysNativeServiceStub::CmdGetInterfaceConfig;
     opToInterfaceMap_[NETSYS_INTERFACE_GET_LIST] = &NetsysNativeServiceStub::CmdInterfaceGetList;
     opToInterfaceMap_[NETSYS_START_DHCP_CLIENT] = &NetsysNativeServiceStub::CmdStartDhcpClient;
     opToInterfaceMap_[NETSYS_STOP_DHCP_CLIENT] = &NetsysNativeServiceStub::CmdStopDhcpClient;
@@ -287,23 +287,23 @@ int32_t NetsysNativeServiceStub::CmdGetAddrInfo(MessageParcel &data, MessageParc
     return ERR_NONE;
 }
 
-int32_t NetsysNativeServiceStub::CmdInterfaceSetMtu(MessageParcel &data, MessageParcel &reply)
+int32_t NetsysNativeServiceStub::CmdSetInterfaceMtu(MessageParcel &data, MessageParcel &reply)
 {
     std::string ifName = data.ReadString();
     int32_t mtu = data.ReadInt32();
-    int32_t result = InterfaceSetMtu(ifName, mtu);
+    int32_t result = SetInterfaceMtu(ifName, mtu);
     reply.WriteInt32(result);
-    NETNATIVE_LOG_D("InterfaceSetMtu has recved result %{public}d", result);
+    NETNATIVE_LOG_D("SetInterfaceMtu has recved result %{public}d", result);
 
     return ERR_NONE;
 }
 
-int32_t NetsysNativeServiceStub::CmdInterfaceGetMtu(MessageParcel &data, MessageParcel &reply)
+int32_t NetsysNativeServiceStub::CmdGetInterfaceMtu(MessageParcel &data, MessageParcel &reply)
 {
     std::string ifName = data.ReadString();
-    int32_t result = InterfaceGetMtu(ifName);
+    int32_t result = GetInterfaceMtu(ifName);
     reply.WriteInt32(result);
-    NETNATIVE_LOG_D("InterfaceGetMtu has recved result %{public}d", result);
+    NETNATIVE_LOG_D("GetInterfaceMtu has recved result %{public}d", result);
 
     return ERR_NONE;
 }
@@ -468,28 +468,28 @@ int32_t NetsysNativeServiceStub::CmdNetworkCreatePhysical(MessageParcel &data, M
     return result;
 }
 
-int32_t NetsysNativeServiceStub::CmdInterfaceAddAddress(MessageParcel &data, MessageParcel &reply)
+int32_t NetsysNativeServiceStub::CmdAddInterfaceAddress(MessageParcel &data, MessageParcel &reply)
 {
     std::string interfaceName = data.ReadString();
     std::string ipAddr = data.ReadString();
     int32_t prefixLength = data.ReadInt32();
 
-    int32_t result = InterfaceAddAddress(interfaceName, ipAddr, prefixLength);
+    int32_t result = AddInterfaceAddress(interfaceName, ipAddr, prefixLength);
     reply.WriteInt32(result);
-    NETNATIVE_LOG_D("InterfaceAddAddress has recved result %{public}d", result);
+    NETNATIVE_LOG_D("AddInterfaceAddress has recved result %{public}d", result);
 
     return result;
 }
 
-int32_t NetsysNativeServiceStub::CmdInterfaceDelAddress(MessageParcel &data, MessageParcel &reply)
+int32_t NetsysNativeServiceStub::CmdDelInterfaceAddress(MessageParcel &data, MessageParcel &reply)
 {
     std::string interfaceName = data.ReadString();
     std::string ipAddr = data.ReadString();
     int32_t prefixLength = data.ReadInt32();
 
-    int32_t result = InterfaceDelAddress(interfaceName, ipAddr, prefixLength);
+    int32_t result = DelInterfaceAddress(interfaceName, ipAddr, prefixLength);
     reply.WriteInt32(result);
-    NETNATIVE_LOG_D("InterfaceDelAddress has recved result %{public}d", result);
+    NETNATIVE_LOG_D("DelInterfaceAddress has recved result %{public}d", result);
 
     return result;
 }
@@ -563,7 +563,7 @@ int32_t NetsysNativeServiceStub::CmdGetFwmarkForNetwork(MessageParcel &data, Mes
     return result;
 }
 
-int32_t NetsysNativeServiceStub::CmdInterfaceSetConfig(MessageParcel &data, MessageParcel &reply)
+int32_t NetsysNativeServiceStub::CmdSetInterfaceConfig(MessageParcel &data, MessageParcel &reply)
 {
     InterfaceConfigurationParcel cfg = {};
     cfg.ifName = data.ReadString();
@@ -577,19 +577,19 @@ int32_t NetsysNativeServiceStub::CmdInterfaceSetConfig(MessageParcel &data, Mess
         vFlags.emplace_back(data.ReadString());
     }
     cfg.flags.assign(vFlags.begin(), vFlags.end());
-    int32_t result = InterfaceSetConfig(cfg);
+    int32_t result = SetInterfaceConfig(cfg);
     reply.WriteInt32(result);
-    NETNATIVE_LOG_D("InterfaceSetConfig has recved result %{public}d", result);
+    NETNATIVE_LOG_D("SetInterfaceConfig has recved result %{public}d", result);
 
     return result;
 }
 
-int32_t NetsysNativeServiceStub::CmdInterfaceGetConfig(MessageParcel &data, MessageParcel &reply)
+int32_t NetsysNativeServiceStub::CmdGetInterfaceConfig(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOG_D("Begin to dispatch cmd InterfaceGetConfig");
+    NETNATIVE_LOG_D("Begin to dispatch cmd GetInterfaceConfig");
     InterfaceConfigurationParcel cfg = {};
     cfg.ifName = data.ReadString();
-    int32_t result = InterfaceGetConfig(cfg);
+    int32_t result = GetInterfaceConfig(cfg);
     reply.WriteInt32(result);
     reply.WriteString(cfg.ifName);
     reply.WriteString(cfg.hwAddr);

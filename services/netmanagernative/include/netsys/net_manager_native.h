@@ -63,13 +63,13 @@ public:
     int32_t GetProcSysNet(int32_t ipversion, int32_t which, const std::string ifname, const std::string parameter,
                           std::string *value);
 
-    nmd::InterfaceConfigurationParcel InterfaceGetConfig(std::string ifName);
-    void InterfaceSetConfig(InterfaceConfigurationParcel cfg);
-    void InterfaceClearAddrs(const std::string ifName);
-    int32_t InterfaceGetMtu(std::string ifName);
-    int32_t InterfaceSetMtu(std::string ifName, int32_t mtuValue);
-    int32_t InterfaceAddAddress(std::string ifName, std::string addrString, int32_t prefixLength);
-    int32_t InterfaceDelAddress(std::string ifName, std::string addrString, int32_t prefixLength);
+    nmd::InterfaceConfigurationParcel GetInterfaceConfig(std::string ifName);
+    void SetInterfaceConfig(InterfaceConfigurationParcel cfg);
+    void ClearInterfaceAddrs(const std::string ifName);
+    int32_t GetInterfaceMtu(std::string ifName);
+    int32_t SetInterfaceMtu(std::string ifName, int32_t mtuValue);
+    int32_t AddInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength);
+    int32_t DelInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength);
     int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress);
     int32_t InterfaceSetIffUp(std::string ifaceName);
     int32_t NetworkAddRouteParcel(int32_t netId, RouteInfoParcel routeInfo);

@@ -92,12 +92,12 @@ int32_t NetManagerNative::NetworkRemoveInterface(int32_t netId, std::string inte
     return connManager_->RemoveInterfaceFromNetwork(netId, interfaceName);
 }
 
-int32_t NetManagerNative::InterfaceAddAddress(std::string ifName, std::string addrString, int32_t prefixLength)
+int32_t NetManagerNative::AddInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength)
 {
     return interfaceManager_->AddAddress(ifName.c_str(), addrString.c_str(), prefixLength);
 }
 
-int32_t NetManagerNative::InterfaceDelAddress(std::string ifName, std::string addrString, int32_t prefixLength)
+int32_t NetManagerNative::DelInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength)
 {
     return interfaceManager_->DelAddress(ifName.c_str(), addrString.c_str(), prefixLength);
 }
@@ -140,24 +140,24 @@ std::vector<std::string> NetManagerNative::InterfaceGetList()
     return InterfaceManager::GetInterfaceNames();
 }
 
-nmd::InterfaceConfigurationParcel NetManagerNative::InterfaceGetConfig(std::string interfaceName)
+nmd::InterfaceConfigurationParcel NetManagerNative::GetInterfaceConfig(std::string interfaceName)
 {
     return InterfaceManager::GetIfaceConfig(interfaceName.c_str());
 }
 
-void NetManagerNative::InterfaceSetConfig(nmd::InterfaceConfigurationParcel parcel)
+void NetManagerNative::SetInterfaceConfig(nmd::InterfaceConfigurationParcel parcel)
 {
     InterfaceManager::SetIfaceConfig(parcel);
 }
 
-void NetManagerNative::InterfaceClearAddrs(const std::string ifName) {}
+void NetManagerNative::ClearInterfaceAddrs(const std::string ifName) {}
 
-int32_t NetManagerNative::InterfaceGetMtu(std::string ifName)
+int32_t NetManagerNative::GetInterfaceMtu(std::string ifName)
 {
     return InterfaceManager::GetMtu(ifName.c_str());
 }
 
-int32_t NetManagerNative::InterfaceSetMtu(std::string ifName, int32_t mtuValue)
+int32_t NetManagerNative::SetInterfaceMtu(std::string ifName, int32_t mtuValue)
 {
     std::string mtu = std::to_string(mtuValue);
     return InterfaceManager::SetMtu(ifName.c_str(), mtu.c_str());

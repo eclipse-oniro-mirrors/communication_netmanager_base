@@ -91,9 +91,17 @@ public:
      * @brief Get interface config
      *
      * @param iface Network port device name
-     * @return Return the result of this action
+     * @return Return the result of this action， ERR_NONE is success.
      */
-    int32_t InterfaceGetConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg) override;
+    int32_t GetInterfaceConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg) override;
+
+    /**
+     * @brief Set interface config
+     *
+     * @param cfg Network port info
+     * @return Return the result of this action， ERR_NONE is success.
+     */
+    int32_t SetInterfaceConfig(const OHOS::nmd::InterfaceConfigurationParcel &cfg) override;
 
     /**
      * Turn off the device
@@ -116,7 +124,7 @@ public:
      *
      * @param ifName Network port device name
      */
-    void InterfaceClearAddrs(const std::string &ifName) override;
+    void ClearInterfaceAddrs(const std::string &ifName) override;
 
     /**
      * Obtain mtu from the network interface device
@@ -124,7 +132,7 @@ public:
      * @param ifName Network port device name
      * @return Return the return value of the netsys interface call
      */
-    int32_t InterfaceGetMtu(const std::string &ifName) override;
+    int32_t GetInterfaceMtu(const std::string &ifName) override;
 
     /**
      * Set mtu to network interface device
@@ -133,7 +141,7 @@ public:
      * @param mtu
      * @return Return the return value of the netsys interface call
      */
-    int32_t InterfaceSetMtu(const std::string &ifName, int32_t mtu) override;
+    int32_t SetInterfaceMtu(const std::string &ifName, int32_t mtu) override;
 
     /**
      * Add ip address
@@ -143,7 +151,7 @@ public:
      * @param prefixLength  subnet mask
      * @return Return the return value of the netsys interface call
      */
-    int32_t InterfaceAddAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength) override;
+    int32_t AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength) override;
 
     /**
      * Delete ip address
@@ -153,7 +161,7 @@ public:
      * @param prefixLength subnet mask
      * @return Return the return value of the netsys interface call
      */
-    int32_t InterfaceDelAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength) override;
+    int32_t DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength) override;
 
     /**
      * Set iface ip address

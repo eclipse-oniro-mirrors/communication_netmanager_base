@@ -191,24 +191,24 @@ void TestNetworkCreatePhysical()
     std::cout << "  TestNetworkCreatePhysical   ret ="<<ret<<std::endl;
 }
 
-void TestInterfaceAddAddress()
+void TestAddInterfaceAddress()
 {
     if (netsysServiceR_ == nullptr) {
-        std::cout << "  TestInterfaceAddAddress netsysServiceR_ is nullptr" << std::endl;
+        std::cout << "  TestAddInterfaceAddress netsysServiceR_ is nullptr" << std::endl;
         return;
     }
-    int ret = netsysServiceR_->InterfaceAddAddress("eth0", "172.17.5.245", 23);
-    std::cout << "  TestInterfaceAddAddress    ret ="<<ret<<std::endl;
+    int ret = netsysServiceR_->AddInterfaceAddress("eth0", "172.17.5.245", 23);
+    std::cout << "  TestAddInterfaceAddress    ret ="<<ret<<std::endl;
 }
 
-void TestInterfaceDelAddress()
+void TestDelInterfaceAddress()
 {
     if (netsysServiceR_ == nullptr) {
-        std::cout << "  TestInterfaceDelAddress netsysServiceR_ is nullptr"<<std::endl;
+        std::cout << "  TestDelInterfaceAddress netsysServiceR_ is nullptr"<<std::endl;
         return;
     }
-    int ret = netsysServiceR_->InterfaceDelAddress("eth0", "172.17.5.245", 23);
-    std::cout << "  TestInterfaceDelAddress    ret ="<<ret<<std::endl;
+    int ret = netsysServiceR_->DelInterfaceAddress("eth0", "172.17.5.245", 23);
+    std::cout << "  TestDelInterfaceAddress    ret ="<<ret<<std::endl;
 }
 
 void TestNetworkAddInterface()
@@ -278,12 +278,12 @@ void TestInterfaceSetCfg()
     OHOS::nmd::InterfaceConfigurationParcel parcel;
     parcel.ifName = "eth0";
     NETNATIVE_LOGE("ZZZZ:TestInterfaceSetCfg");
-    int ret = netsysServiceR_->InterfaceGetConfig(parcel);
+    int ret = netsysServiceR_->GetInterfaceConfig(parcel);
     NETNATIVE_LOGE("before: parcel get ipv4Addr = %{public}s", parcel.ipv4Addr.c_str());
     parcel.ipv4Addr = std::string("192.168.55.121");
-    ret = netsysServiceR_->InterfaceSetConfig(parcel);
-    NETNATIVE_LOGE("InterfaceSetConfig  ret  %{public}d", ret);
-    ret = netsysServiceR_->InterfaceGetConfig(parcel);
+    ret = netsysServiceR_->SetInterfaceConfig(parcel);
+    NETNATIVE_LOGE("SetInterfaceConfig  ret  %{public}d", ret);
+    ret = netsysServiceR_->GetInterfaceConfig(parcel);
     NETNATIVE_LOGE("after: parcel get ipv4Addr = %{public}s", parcel.ipv4Addr.c_str());
 }
 
