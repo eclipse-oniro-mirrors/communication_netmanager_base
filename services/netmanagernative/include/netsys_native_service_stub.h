@@ -40,8 +40,8 @@ private:
     int32_t CmdCreateNetworkCache(MessageParcel &data, MessageParcel &reply);
     int32_t CmdDestroyNetworkCache(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetAddrInfo(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdInterfaceSetMtu(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdInterfaceGetMtu(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetInterfaceMtu(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetInterfaceMtu(MessageParcel &data, MessageParcel &reply);
 
     int32_t CmdRegisterNotifyCallback(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUnRegisterNotifyCallback(MessageParcel &data, MessageParcel &reply);
@@ -56,16 +56,16 @@ private:
     int32_t CmdGetProcSysNet(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetProcSysNet(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkCreatePhysical(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdInterfaceAddAddress(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdInterfaceDelAddress(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdAddInterfaceAddress(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDelInterfaceAddress(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceSetIpAddress(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceSetIffUp(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkAddInterface(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkRemoveInterface(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkDestroy(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetFwmarkForNetwork(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdInterfaceSetConfig(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdInterfaceGetConfig(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetInterfaceConfig(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetInterfaceConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceGetList(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStartDhcpClient(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStopDhcpClient(MessageParcel &data, MessageParcel &reply);

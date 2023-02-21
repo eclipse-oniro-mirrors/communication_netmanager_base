@@ -165,25 +165,25 @@ int32_t MockNetsysNativeClient::SetInterfaceUp(const std::string &iface)
     return 0;
 }
 
-void MockNetsysNativeClient::InterfaceClearAddrs(const std::string &ifName)
+void MockNetsysNativeClient::ClearInterfaceAddrs(const std::string &ifName)
 {
     NETMGR_LOG_I("Clear addrs: ifName[%{public}s]", ifName.c_str());
     return;
 }
 
-int32_t MockNetsysNativeClient::InterfaceGetMtu(const std::string &ifName)
+int32_t MockNetsysNativeClient::GetInterfaceMtu(const std::string &ifName)
 {
     NETMGR_LOG_I("Get mtu: ifName[%{public}s]", ifName.c_str());
     return 0;
 }
 
-int32_t MockNetsysNativeClient::InterfaceSetMtu(const std::string &ifName, int32_t mtu)
+int32_t MockNetsysNativeClient::SetInterfaceMtu(const std::string &ifName, int32_t mtu)
 {
     NETMGR_LOG_I("Set mtu: ifName[%{public}s], mtu[%{public}d]", ifName.c_str(), mtu);
     return 0;
 }
 
-int32_t MockNetsysNativeClient::InterfaceAddAddress(const std::string &ifName, const std::string &ipAddr,
+int32_t MockNetsysNativeClient::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
     int32_t prefixLength)
 {
     NETMGR_LOG_I("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",
@@ -191,7 +191,7 @@ int32_t MockNetsysNativeClient::InterfaceAddAddress(const std::string &ifName, c
     return 0;
 }
 
-int32_t MockNetsysNativeClient::InterfaceDelAddress(const std::string &ifName, const std::string &ipAddr,
+int32_t MockNetsysNativeClient::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
     int32_t prefixLength)
 {
     NETMGR_LOG_I("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]",

@@ -104,7 +104,7 @@ bool Network::ReleaseBasicNetwork()
             if (prefixLen == 0) {
                 prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
             }
-            NetsysController::GetInstance().InterfaceDelAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
+            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
         }
         NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
         NetsysController::GetInstance().NetworkDestroy(netId_);
@@ -170,7 +170,7 @@ void Network::UpdateIpAddrs(const NetLinkInfo &netLinkInfo)
             prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
         }
         int32_t ret =
-            NetsysController::GetInstance().InterfaceDelAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
+            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
         if (ret != NETMANAGER_SUCCESS) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_DELETE_NET_IP_ADDR_FAILED);
         }
@@ -184,7 +184,7 @@ void Network::UpdateIpAddrs(const NetLinkInfo &netLinkInfo)
             prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
         }
         int32_t ret =
-            NetsysController::GetInstance().InterfaceAddAddress(netLinkInfo.ifaceName_, inetAddr.address_, prefixLen);
+            NetsysController::GetInstance().AddInterfaceAddress(netLinkInfo.ifaceName_, inetAddr.address_, prefixLen);
         if (ret != NETMANAGER_SUCCESS) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_IP_ADDR_FAILED);
         }
@@ -257,7 +257,7 @@ void Network::UpdateMtu(const NetLinkInfo &netLinkInfo)
         return;
     }
 
-    int32_t ret = NetsysController::GetInstance().InterfaceSetMtu(netLinkInfo.ifaceName_, netLinkInfo.mtu_);
+    int32_t ret = NetsysController::GetInstance().SetInterfaceMtu(netLinkInfo.ifaceName_, netLinkInfo.mtu_);
     if (ret != NETMANAGER_SUCCESS) {
         SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_SET_NET_MTU_FAILED);
     }

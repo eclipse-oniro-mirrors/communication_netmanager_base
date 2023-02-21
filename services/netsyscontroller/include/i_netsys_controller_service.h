@@ -102,9 +102,17 @@ public:
      * Get interface config
      *
      * @param iface Network port device name
-     * @return Return the result of this action
+     * @return Return the result of this action， ERR_NONE is success.
      */
-    virtual int32_t InterfaceGetConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg) = 0;
+    virtual int32_t GetInterfaceConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg) = 0;
+
+    /**
+     * Set interface config
+     *
+     * @param cfg Network port info
+     * @return Return the result of this action， ERR_NONE is success.
+     */
+    virtual int32_t SetInterfaceConfig(const OHOS::nmd::InterfaceConfigurationParcel &cfg) = 0;
 
     /**
      * Turn off the device
@@ -127,7 +135,7 @@ public:
      *
      * @param ifName Network port device name
      */
-    virtual void InterfaceClearAddrs(const std::string &ifName) = 0;
+    virtual void ClearInterfaceAddrs(const std::string &ifName) = 0;
 
     /**
      * Obtain mtu from the network interface device
@@ -135,7 +143,7 @@ public:
      * @param ifName Network port device name
      * @return Return the return value of the netsys interface call
      */
-    virtual int32_t InterfaceGetMtu(const std::string &ifName) = 0;
+    virtual int32_t GetInterfaceMtu(const std::string &ifName) = 0;
 
     /**
      * Set mtu to network interface device
@@ -144,7 +152,7 @@ public:
      * @param mtu
      * @return Return the return value of the netsys interface call
      */
-    virtual int32_t InterfaceSetMtu(const std::string &ifName, int32_t mtu) = 0;
+    virtual int32_t SetInterfaceMtu(const std::string &ifName, int32_t mtu) = 0;
 
     /**
      * Add ip address
@@ -154,7 +162,7 @@ public:
      * @param prefixLength  subnet mask
      * @return Return the return value of the netsys interface call
      */
-    virtual int32_t InterfaceAddAddress(const std::string &ifName, const std::string &ipAddr,
+    virtual int32_t AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                         int32_t prefixLength) = 0;
 
     /**
@@ -165,7 +173,7 @@ public:
      * @param prefixLength subnet mask
      * @return Return the return value of the netsys interface call
      */
-    virtual int32_t InterfaceDelAddress(const std::string &ifName, const std::string &ipAddr,
+    virtual int32_t DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                         int32_t prefixLength) = 0;
     /**
      * Set iface ip address

@@ -112,14 +112,24 @@ int32_t NetsysController::NetworkRemoveRoute(int32_t netId, const std::string &i
     return netsysService_->NetworkRemoveRoute(netId, ifName, destination, nextHop);
 }
 
-int32_t NetsysController::InterfaceGetConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg)
+int32_t NetsysController::GetInterfaceConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg)
 {
     NETMGR_LOG_D("get interface config");
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->InterfaceGetConfig(cfg);
+    return netsysService_->GetInterfaceConfig(cfg);
+}
+
+int32_t NetsysController::SetInterfaceConfig(const OHOS::nmd::InterfaceConfigurationParcel &cfg)
+{
+    NETMGR_LOG_D("set interface config");
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetInterfaceConfig(cfg);
 }
 
 int32_t NetsysController::SetInterfaceDown(const std::string &iface)
@@ -142,37 +152,37 @@ int32_t NetsysController::SetInterfaceUp(const std::string &iface)
     return netsysService_->SetInterfaceUp(iface);
 }
 
-void NetsysController::InterfaceClearAddrs(const std::string &ifName)
+void NetsysController::ClearInterfaceAddrs(const std::string &ifName)
 {
     NETMGR_LOG_D("Clear addrs: ifName[%{public}s]", ifName.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return;
     }
-    return netsysService_->InterfaceClearAddrs(ifName);
+    return netsysService_->ClearInterfaceAddrs(ifName);
 }
 
-int32_t NetsysController::InterfaceGetMtu(const std::string &ifName)
+int32_t NetsysController::GetInterfaceMtu(const std::string &ifName)
 {
     NETMGR_LOG_D("Get mtu: ifName[%{public}s]", ifName.c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->InterfaceGetMtu(ifName);
+    return netsysService_->GetInterfaceMtu(ifName);
 }
 
-int32_t NetsysController::InterfaceSetMtu(const std::string &ifName, int32_t mtu)
+int32_t NetsysController::SetInterfaceMtu(const std::string &ifName, int32_t mtu)
 {
     NETMGR_LOG_D("Set mtu: ifName[%{public}s], mtu[%{public}d]", ifName.c_str(), mtu);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->InterfaceSetMtu(ifName, mtu);
+    return netsysService_->SetInterfaceMtu(ifName, mtu);
 }
 
-int32_t NetsysController::InterfaceAddAddress(const std::string &ifName, const std::string &ipAddr,
+int32_t NetsysController::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                               int32_t prefixLength)
 {
     NETMGR_LOG_D("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
@@ -181,10 +191,10 @@ int32_t NetsysController::InterfaceAddAddress(const std::string &ifName, const s
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->InterfaceAddAddress(ifName, ipAddr, prefixLength);
+    return netsysService_->AddInterfaceAddress(ifName, ipAddr, prefixLength);
 }
 
-int32_t NetsysController::InterfaceDelAddress(const std::string &ifName, const std::string &ipAddr,
+int32_t NetsysController::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                               int32_t prefixLength)
 {
     NETMGR_LOG_D("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
@@ -193,7 +203,7 @@ int32_t NetsysController::InterfaceDelAddress(const std::string &ifName, const s
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->InterfaceDelAddress(ifName, ipAddr, prefixLength);
+    return netsysService_->DelInterfaceAddress(ifName, ipAddr, prefixLength);
 }
 
 int32_t NetsysController::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)

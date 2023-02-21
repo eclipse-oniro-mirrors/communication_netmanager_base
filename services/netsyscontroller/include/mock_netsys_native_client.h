@@ -36,11 +36,11 @@ constexpr const char *MOCK_NETWORKADDROUTE_API = "NetworkAddRoute";
 constexpr const char *MOCK_NETWORKREMOVEROUTE_API = "NetworkRemoveRoute";
 constexpr const char *MOCK_SETINTERFACEDOWN_API = "SetInterfaceDown";
 constexpr const char *MOCK_SETINTERFACEUP_API = "SetInterfaceUp";
-constexpr const char *MOCK_INTERFACECLEARADDRS_API = "InterfaceClearAddrs";
-constexpr const char *MOCK_INTERFACEGETMTU_API = "InterfaceGetMtu";
-constexpr const char *MOCK_INTERFACESETMTU_API = "InterfaceSetMtu";
-constexpr const char *MOCK_INTERFACEADDADDRESS_API = "InterfaceAddAddress";
-constexpr const char *MOCK_INTERFACEDELADDRESS_API = "InterfaceDelAddress";
+constexpr const char *MOCK_INTERFACECLEARADDRS_API = "ClearInterfaceAddrs";
+constexpr const char *MOCK_INTERFACEGETMTU_API = "GetInterfaceMtu";
+constexpr const char *MOCK_INTERFACESETMTU_API = "SetInterfaceMtu";
+constexpr const char *MOCK_INTERFACEADDADDRESS_API = "AddInterfaceAddress";
+constexpr const char *MOCK_INTERFACEDELADDRESS_API = "DelInterfaceAddress";
 constexpr const char *MOCK_SETRESOLVERCONFIG_API = "SetResolverConfig";
 constexpr const char *MOCK_GETRESOLVERICONFIG_API = "GetResolverConfig";
 constexpr const char *MOCK_CREATENETWORKCACHE_API = "CreateNetworkCache";
@@ -163,7 +163,7 @@ public:
      *
      * @param ifName Network port device name
      */
-    void InterfaceClearAddrs(const std::string &ifName);
+    void ClearInterfaceAddrs(const std::string &ifName);
 
     /**
      * @brief Obtain mtu from the network interface device
@@ -171,7 +171,7 @@ public:
      * @param ifName Network port device name
      * @return Return the return value of the netsys interface call
      */
-    int32_t InterfaceGetMtu(const std::string &ifName);
+    int32_t GetInterfaceMtu(const std::string &ifName);
 
     /**
      * @brief Set mtu to network interface device
@@ -180,7 +180,7 @@ public:
      * @param mtu
      * @return Return the return value of the netsys interface call
      */
-    int32_t InterfaceSetMtu(const std::string &ifName, int32_t mtu);
+    int32_t SetInterfaceMtu(const std::string &ifName, int32_t mtu);
 
     /**
      * @brief Add ip address
@@ -190,7 +190,7 @@ public:
      * @param prefixLength  subnet mask
      * @return Return the return value of the netsys interface call
      */
-    int32_t InterfaceAddAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength);
+    int32_t AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength);
 
     /**
      * @brief Delete ip address
@@ -200,7 +200,7 @@ public:
      * @param prefixLength subnet mask
      * @return Return the return value of the netsys interface call
      */
-    int32_t InterfaceDelAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength);
+    int32_t DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength);
 
     /**
      * @brief Set dns

@@ -90,7 +90,7 @@ int32_t NetsysNativeServiceProxy::SetResolverConfig(uint16_t netId, uint16_t bas
 
     std::vector<std::string> vDomains;
     vDomains.assign(domains.begin(), domains.end());
-    NETNATIVE_LOGI("PROXY: InterfaceSetConfig Write Domains String_SIZE: %{public}d",
+    NETNATIVE_LOGI("PROXY: SetResolverConfig Write Domains String_SIZE: %{public}d",
                    static_cast<int32_t>(vDomains.size()));
     for (auto &vDomain : vDomains) {
         data.WriteString(vDomain);
@@ -206,9 +206,9 @@ int32_t NetsysNativeServiceProxy::GetAddrInfo(const std::string &hostName, const
     return ptr->ret;
 }
 
-int32_t NetsysNativeServiceProxy::InterfaceSetMtu(const std::string &interfaceName, int32_t mtu)
+int32_t NetsysNativeServiceProxy::SetInterfaceMtu(const std::string &interfaceName, int32_t mtu)
 {
-    NETNATIVE_LOGI("Begin to InterfaceSetMtu");
+    NETNATIVE_LOGI("Begin to SetInterfaceMtu");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -227,9 +227,9 @@ int32_t NetsysNativeServiceProxy::InterfaceSetMtu(const std::string &interfaceNa
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::InterfaceGetMtu(const std::string &interfaceName)
+int32_t NetsysNativeServiceProxy::GetInterfaceMtu(const std::string &interfaceName)
 {
-    NETNATIVE_LOGI("Begin to InterfaceGetMtu");
+    NETNATIVE_LOGI("Begin to GetInterfaceMtu");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -529,10 +529,10 @@ int32_t NetsysNativeServiceProxy::NetworkCreatePhysical(int32_t netId, int32_t p
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::InterfaceAddAddress(const std::string &interfaceName, const std::string &addrString,
+int32_t NetsysNativeServiceProxy::AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                                       int32_t prefixLength)
 {
-    NETNATIVE_LOGI("Begin to InterfaceAddAddress");
+    NETNATIVE_LOGI("Begin to AddInterfaceAddress");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -554,10 +554,10 @@ int32_t NetsysNativeServiceProxy::InterfaceAddAddress(const std::string &interfa
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::InterfaceDelAddress(const std::string &interfaceName, const std::string &addrString,
+int32_t NetsysNativeServiceProxy::DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                                       int32_t prefixLength)
 {
-    NETNATIVE_LOGI("Begin to InterfaceDelAddress");
+    NETNATIVE_LOGI("Begin to DelInterfaceAddress");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -697,9 +697,9 @@ int32_t NetsysNativeServiceProxy::GetFwmarkForNetwork(int32_t netId, MarkMaskPar
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::InterfaceSetConfig(const InterfaceConfigurationParcel &cfg)
+int32_t NetsysNativeServiceProxy::SetInterfaceConfig(const InterfaceConfigurationParcel &cfg)
 {
-    NETNATIVE_LOGI("Begin to InterfaceSetConfig");
+    NETNATIVE_LOGI("Begin to SetInterfaceConfig");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -722,7 +722,7 @@ int32_t NetsysNativeServiceProxy::InterfaceSetConfig(const InterfaceConfiguratio
     }
     std::vector<std::string> vCflags;
     vCflags.assign(cfg.flags.begin(), cfg.flags.end());
-    NETNATIVE_LOGI("PROXY: InterfaceSetConfig Write flags String_SIZE: %{public}d",
+    NETNATIVE_LOGI("PROXY: SetInterfaceConfig Write flags String_SIZE: %{public}d",
                    static_cast<int32_t>(vCflags.size()));
     for (std::vector<std::string>::iterator it = vCflags.begin(); it != vCflags.end(); ++it) {
         data.WriteString(*it);
@@ -734,9 +734,9 @@ int32_t NetsysNativeServiceProxy::InterfaceSetConfig(const InterfaceConfiguratio
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::InterfaceGetConfig(InterfaceConfigurationParcel &cfg)
+int32_t NetsysNativeServiceProxy::GetInterfaceConfig(InterfaceConfigurationParcel &cfg)
 {
-    NETNATIVE_LOGI("Begin to InterfaceGetConfig");
+    NETNATIVE_LOGI("Begin to GetInterfaceConfig");
     MessageParcel data;
     int32_t ret;
     int32_t vSize;
@@ -764,7 +764,7 @@ int32_t NetsysNativeServiceProxy::InterfaceGetConfig(InterfaceConfigurationParce
     if (vSize > 0) {
         cfg.flags.assign(vecString.begin(), vecString.end());
     }
-    NETNATIVE_LOGI("End to InterfaceGetConfig, ret =%{public}d", ret);
+    NETNATIVE_LOGI("End to GetInterfaceConfig, ret =%{public}d", ret);
     return ret;
 }
 

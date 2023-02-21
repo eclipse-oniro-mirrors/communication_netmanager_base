@@ -226,7 +226,7 @@ int32_t NetsysNativeClient::NetworkRemoveRoute(int32_t netId, const std::string 
     return proxy->NetworkRemoveRoute(netId, ifName, destination, nextHop);
 }
 
-int32_t NetsysNativeClient::InterfaceGetConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg)
+int32_t NetsysNativeClient::GetInterfaceConfig(OHOS::nmd::InterfaceConfigurationParcel &cfg)
 {
     NETMGR_LOG_D("Get interface config: ifName[%{public}s]", cfg.ifName.c_str());
     auto proxy = GetProxy();
@@ -234,7 +234,18 @@ int32_t NetsysNativeClient::InterfaceGetConfig(OHOS::nmd::InterfaceConfiguration
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->InterfaceGetConfig(cfg);
+    return proxy->GetInterfaceConfig(cfg);
+}
+
+int32_t NetsysNativeClient::SetInterfaceConfig(const OHOS::nmd::InterfaceConfigurationParcel &cfg)
+{
+    NETMGR_LOG_D("Set interface config: ifName[%{public}s]", cfg.ifName.c_str());
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetInterfaceConfig(cfg);
 }
 
 int32_t NetsysNativeClient::SetInterfaceDown(const std::string &iface)
@@ -247,13 +258,13 @@ int32_t NetsysNativeClient::SetInterfaceDown(const std::string &iface)
     }
     OHOS::nmd::InterfaceConfigurationParcel ifCfg;
     ifCfg.ifName = iface;
-    proxy->InterfaceGetConfig(ifCfg);
+    proxy->GetInterfaceConfig(ifCfg);
     auto fit = std::find(ifCfg.flags.begin(), ifCfg.flags.end(), IF_CFG_UP);
     if (fit != ifCfg.flags.end()) {
         ifCfg.flags.erase(fit);
     }
     ifCfg.flags.push_back(IF_CFG_DOWN);
-    return proxy->InterfaceSetConfig(ifCfg);
+    return proxy->SetInterfaceConfig(ifCfg);
 }
 
 int32_t NetsysNativeClient::SetInterfaceUp(const std::string &iface)
@@ -266,16 +277,16 @@ int32_t NetsysNativeClient::SetInterfaceUp(const std::string &iface)
     }
     OHOS::nmd::InterfaceConfigurationParcel ifCfg;
     ifCfg.ifName = iface;
-    proxy->InterfaceGetConfig(ifCfg);
+    proxy->GetInterfaceConfig(ifCfg);
     auto fit = std::find(ifCfg.flags.begin(), ifCfg.flags.end(), IF_CFG_DOWN);
     if (fit != ifCfg.flags.end()) {
         ifCfg.flags.erase(fit);
     }
     ifCfg.flags.push_back(IF_CFG_UP);
-    return proxy->InterfaceSetConfig(ifCfg);
+    return proxy->SetInterfaceConfig(ifCfg);
 }
 
-void NetsysNativeClient::InterfaceClearAddrs(const std::string &ifName)
+void NetsysNativeClient::ClearInterfaceAddrs(const std::string &ifName)
 {
     NETMGR_LOG_D("Clear addrs: ifName[%{public}s]", ifName.c_str());
     auto proxy = GetProxy();
@@ -286,7 +297,7 @@ void NetsysNativeClient::InterfaceClearAddrs(const std::string &ifName)
     return;
 }
 
-int32_t NetsysNativeClient::InterfaceGetMtu(const std::string &ifName)
+int32_t NetsysNativeClient::GetInterfaceMtu(const std::string &ifName)
 {
     NETMGR_LOG_D("Get mtu: ifName[%{public}s]", ifName.c_str());
     auto proxy = GetProxy();
@@ -294,10 +305,10 @@ int32_t NetsysNativeClient::InterfaceGetMtu(const std::string &ifName)
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->InterfaceGetMtu(ifName);
+    return proxy->GetInterfaceMtu(ifName);
 }
 
-int32_t NetsysNativeClient::InterfaceSetMtu(const std::string &ifName, int32_t mtu)
+int32_t NetsysNativeClient::SetInterfaceMtu(const std::string &ifName, int32_t mtu)
 {
     NETMGR_LOG_D("Set mtu: ifName[%{public}s], mtu[%{public}d]", ifName.c_str(), mtu);
     auto proxy = GetProxy();
@@ -305,10 +316,10 @@ int32_t NetsysNativeClient::InterfaceSetMtu(const std::string &ifName, int32_t m
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->InterfaceSetMtu(ifName, mtu);
+    return proxy->SetInterfaceMtu(ifName, mtu);
 }
 
-int32_t NetsysNativeClient::InterfaceAddAddress(const std::string &ifName, const std::string &ipAddr,
+int32_t NetsysNativeClient::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                 int32_t prefixLength)
 {
     NETMGR_LOG_D("Add address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
@@ -318,10 +329,10 @@ int32_t NetsysNativeClient::InterfaceAddAddress(const std::string &ifName, const
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->InterfaceAddAddress(ifName, ipAddr, prefixLength);
+    return proxy->AddInterfaceAddress(ifName, ipAddr, prefixLength);
 }
 
-int32_t NetsysNativeClient::InterfaceDelAddress(const std::string &ifName, const std::string &ipAddr,
+int32_t NetsysNativeClient::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                 int32_t prefixLength)
 {
     NETMGR_LOG_D("Delete address: ifName[%{public}s], ipAddr[%{public}s], prefixLength[%{public}d]", ifName.c_str(),
@@ -331,7 +342,7 @@ int32_t NetsysNativeClient::InterfaceDelAddress(const std::string &ifName, const
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->InterfaceDelAddress(ifName, ipAddr, prefixLength);
+    return proxy->DelInterfaceAddress(ifName, ipAddr, prefixLength);
 }
 
 int32_t NetsysNativeClient::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)

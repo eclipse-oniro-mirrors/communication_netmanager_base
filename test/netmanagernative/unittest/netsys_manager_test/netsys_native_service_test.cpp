@@ -232,24 +232,24 @@ HWTEST_F(NetsysNativeServiceTest, SetProcSysNetTest001, TestSize.Level1)
     EXPECT_LE(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysNativeServiceTest, InterfaceSetMtu001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceTest, SetInterfaceMtu001, TestSize.Level1)
 {
     std::string testName = "test0";
     int32_t mtu = 1500;
-    int32_t ret = instance_->InterfaceSetMtu(testName, mtu);
+    int32_t ret = instance_->SetInterfaceMtu(testName, mtu);
     EXPECT_NE(ret, 0);
     std::string eth0Name = "eth0";
-    ret = instance_->InterfaceSetMtu(eth0Name, mtu);
+    ret = instance_->SetInterfaceMtu(eth0Name, mtu);
     EXPECT_EQ(ret, 0);
 }
 
-HWTEST_F(NetsysNativeServiceTest, InterfaceGetMtu001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceTest, GetInterfaceMtu001, TestSize.Level1)
 {
     std::string testName = "test0";
-    int32_t ret = instance_->InterfaceGetMtu(testName);
+    int32_t ret = instance_->GetInterfaceMtu(testName);
     EXPECT_NE(ret, 0);
     std::string eth0Name = "eth0";
-    ret = instance_->InterfaceGetMtu(eth0Name);
+    ret = instance_->GetInterfaceMtu(eth0Name);
     EXPECT_NE(ret, 0);
 }
 
@@ -281,21 +281,21 @@ HWTEST_F(NetsysNativeServiceTest, NetworkCreatePhysicalTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysNativeServiceTest, InterfaceAddAddressTest001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceTest, AddInterfaceAddressTest001, TestSize.Level1)
 {
     std::string iFName = "test0";
     std::string addrStr = "192.168.22.33";
     int32_t prefixLength = 24;
-    int32_t ret = instance_->InterfaceAddAddress(iFName, addrStr, prefixLength);
+    int32_t ret = instance_->AddInterfaceAddress(iFName, addrStr, prefixLength);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysNativeServiceTest, InterfaceDelAddressTest001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceTest, DelInterfaceAddressTest001, TestSize.Level1)
 {
     std::string iFName = "test0";
     std::string addrStr = "192.168.22.33";
     int32_t prefixLength = 24;
-    int32_t ret = instance_->InterfaceDelAddress(iFName, addrStr, prefixLength);
+    int32_t ret = instance_->DelInterfaceAddress(iFName, addrStr, prefixLength);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
@@ -345,7 +345,7 @@ HWTEST_F(NetsysNativeServiceTest, GetFwmarkForNetworkTest001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_NONE);
 }
 
-HWTEST_F(NetsysNativeServiceTest, InterfaceSetConfigTest001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceTest, SetInterfaceConfigTest001, TestSize.Level1)
 {
     InterfaceConfigurationParcel cfg;
     cfg.ifName = "test0";
@@ -353,15 +353,15 @@ HWTEST_F(NetsysNativeServiceTest, InterfaceSetConfigTest001, TestSize.Level1)
     cfg.ipv4Addr = "192.168.133.12";
     cfg.prefixLength = 24;
     cfg.flags.push_back("up");
-    int32_t ret = instance_->InterfaceSetConfig(cfg);
+    int32_t ret = instance_->SetInterfaceConfig(cfg);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
-HWTEST_F(NetsysNativeServiceTest, InterfaceGetConfigTest001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceTest, GetInterfaceConfigTest001, TestSize.Level1)
 {
     InterfaceConfigurationParcel cfg;
     cfg.ifName = "eth0";
-    int32_t ret = instance_->InterfaceGetConfig(cfg);
+    int32_t ret = instance_->GetInterfaceConfig(cfg);
     EXPECT_EQ(ret, ERR_NONE);
 }
 

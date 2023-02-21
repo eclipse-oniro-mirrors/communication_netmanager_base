@@ -85,7 +85,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest001, TestSize.Level1)
     EXPECT_EQ(ret, -1);
 
     OHOS::nmd::InterfaceConfigurationParcel parcel;
-    ret = nativeClient_.InterfaceGetConfig(parcel);
+    ret = nativeClient_.GetInterfaceConfig(parcel);
     EXPECT_EQ(ret, 0);
 
     ret = nativeClient_.SetInterfaceDown(IF_NAME);
@@ -94,21 +94,21 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest001, TestSize.Level1)
     ret = nativeClient_.SetInterfaceUp(IF_NAME);
     EXPECT_EQ(ret, 0);
 
-    nativeClient_.InterfaceClearAddrs(IF_NAME);
+    nativeClient_.ClearInterfaceAddrs(IF_NAME);
 
-    ret = nativeClient_.InterfaceGetMtu(IF_NAME);
+    ret = nativeClient_.GetInterfaceMtu(IF_NAME);
     EXPECT_EQ(ret, -1);
 
-    ret = nativeClient_.InterfaceSetMtu(IF_NAME, MTU);
+    ret = nativeClient_.SetInterfaceMtu(IF_NAME, MTU);
     EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest002, TestSize.Level1)
 {
-    int32_t ret = nativeClient_.InterfaceAddAddress(IF_NAME, IP_ADDR, PREFIX_LENGTH);
+    int32_t ret = nativeClient_.AddInterfaceAddress(IF_NAME, IP_ADDR, PREFIX_LENGTH);
     EXPECT_EQ(ret, -19);
 
-    ret = nativeClient_.InterfaceDelAddress(IF_NAME, IP_ADDR, PREFIX_LENGTH);
+    ret = nativeClient_.DelInterfaceAddress(IF_NAME, IP_ADDR, PREFIX_LENGTH);
     EXPECT_EQ(ret, -19);
 
     ret = nativeClient_.SetResolverConfig(NET_ID, BASE_TIMEOUT_MSEC, RETRY_COUNT, {}, {});

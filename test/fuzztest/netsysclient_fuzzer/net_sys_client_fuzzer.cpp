@@ -274,7 +274,7 @@ void NetworkRemoveRouteFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(NetsysNative::INetsysService::NETSYS_NETWORK_REMOVE_ROUTE, dataParcel);
 }
 
-void InterfaceGetConfigFuzzTest(const uint8_t *data, size_t size)
+void GetInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
         return;
@@ -294,7 +294,7 @@ void InterfaceGetConfigFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(NetsysNative::INetsysService::NETSYS_INTERFACE_GET_CONFIG, dataParcel);
 }
 
-void InterfaceGetMtuFuzzTest(const uint8_t *data, size_t size)
+void GetInterfaceMtuFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
         return;
@@ -313,7 +313,7 @@ void InterfaceGetMtuFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(NetsysNative::INetsysService::NETSYS_INTERFACE_GET_MTU, dataParcel);
 }
 
-void InterfaceSetMtuFuzzTest(const uint8_t *data, size_t size)
+void SetInterfaceMtuFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
         return;
@@ -334,7 +334,7 @@ void InterfaceSetMtuFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(NetsysNative::INetsysService::NETSYS_INTERFACE_SET_MTU, dataParcel);
 }
 
-void InterfaceAddAddressFuzzTest(const uint8_t *data, size_t size)
+void AddInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
         return;
@@ -357,7 +357,7 @@ void InterfaceAddAddressFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(NetsysNative::INetsysService::NETSYS_INTERFACE_ADD_ADDRESS, dataParcel);
 }
 
-void InterfaceDelAddressFuzzTest(const uint8_t *data, size_t size)
+void DelInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
         return;
@@ -627,11 +627,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::NetworkRemoveInterfaceFuzzTest(data, size);
     OHOS::NetManagerStandard::NetworkAddRouteFuzzTest(data, size);
     OHOS::NetManagerStandard::NetworkRemoveRouteFuzzTest(data, size);
-    OHOS::NetManagerStandard::InterfaceGetConfigFuzzTest(data, size);
-    OHOS::NetManagerStandard::InterfaceGetMtuFuzzTest(data, size);
-    OHOS::NetManagerStandard::InterfaceSetMtuFuzzTest(data, size);
-    OHOS::NetManagerStandard::InterfaceAddAddressFuzzTest(data, size);
-    OHOS::NetManagerStandard::InterfaceDelAddressFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetInterfaceConfigFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetInterfaceMtuFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetInterfaceMtuFuzzTest(data, size);
+    OHOS::NetManagerStandard::AddInterfaceAddressFuzzTest(data, size);
+    OHOS::NetManagerStandard::DelInterfaceAddressFuzzTest(data, size);
     OHOS::NetManagerStandard::SetResolverConfigFuzzTest(data, size);
     OHOS::NetManagerStandard::GetResolverConfigFuzzTest(data, size);
     OHOS::NetManagerStandard::DestroyNetworkCacheFuzzTest(data, size);

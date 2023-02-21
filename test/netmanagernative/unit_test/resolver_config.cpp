@@ -134,35 +134,35 @@ void TestDestroyNetworkCache()
     NETNATIVE_LOGE("NETSYS: DestroyNetworkCache1   ret=%{public}d", ret);
 }
 
-void TestInterfaceSetMtu()
+void TestSetInterfaceMtu()
 {
     int ret = -1;
     std::string  ifName = "eth0";
     int mtu = 1200;
     std::cout<<"begin to GetMtu"<<std::endl;
-    ret = netsysServiceK_->InterfaceGetMtu(ifName);
+    ret = netsysServiceK_->GetInterfaceMtu(ifName);
     NETNATIVE_LOGE("NETSYS: GetMtu   ago  ret=%{public}d", ret);
     std::cout<<"begin to SetMtu"<<std::endl;
-    ret = netsysServiceK_->InterfaceSetMtu(ifName, mtu);
+    ret = netsysServiceK_->SetInterfaceMtu(ifName, mtu);
     NETNATIVE_LOGE("NETSYS: SetMtu   ret=%{public}d", ret);
     std::cout<<"begin22 to GetMtu"<<std::endl;
-    ret =  netsysServiceK_->InterfaceGetMtu(ifName);
+    ret =  netsysServiceK_->GetInterfaceMtu(ifName);
     NETNATIVE_LOGE("NETSYS: GetMtu   ret=%{public}d", ret);
 }
 
-void TestInterfaceGetMtu()
+void TestGetInterfaceMtu()
 {
     int ret = -1;
     std::string  ifName = "eth0";
     int  mtu = 1200;
     std::cout<<"begin to GetMtu"<<std::endl;
-    ret = netsysServiceK_->InterfaceGetMtu(ifName);
+    ret = netsysServiceK_->GetInterfaceMtu(ifName);
     NETNATIVE_LOGE("NETSYS: GetMtu   ago  ret=%{public}d", ret);
     std::cout<<"begin to SetMtu"<<std::endl;
-    ret = netsysServiceK_->InterfaceSetMtu(ifName, mtu);
+    ret = netsysServiceK_->SetInterfaceMtu(ifName, mtu);
     NETNATIVE_LOGE("NETSYS: SetMtu   ret=%{public}d", ret);
     std::cout<<"begin22 to GetMtu"<<std::endl;
-    ret = netsysServiceK_->InterfaceGetMtu(ifName);
+    ret = netsysServiceK_->GetInterfaceMtu(ifName);
     NETNATIVE_LOGE("NETSYS: GetMtu   ret=%{public}d", ret);
 }
 

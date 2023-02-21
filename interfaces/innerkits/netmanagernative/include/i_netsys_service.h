@@ -99,8 +99,8 @@ public:
     virtual int32_t DestroyNetworkCache(uint16_t netId) = 0;
     virtual int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName,
                                 const struct addrinfo *hints, uint16_t netId, addrinfo **res) = 0;
-    virtual int32_t InterfaceSetMtu(const std::string &interfaceName, int mtu) = 0;
-    virtual int32_t InterfaceGetMtu(const std::string &interfaceName) = 0;
+    virtual int32_t SetInterfaceMtu(const std::string &interfaceName, int mtu) = 0;
+    virtual int32_t GetInterfaceMtu(const std::string &interfaceName) = 0;
 
     virtual int32_t RegisterNotifyCallback(sptr<INotifyCallback> &callback) = 0;
     virtual int32_t UnRegisterNotifyCallback(sptr<INotifyCallback> &callback) = 0;
@@ -119,9 +119,9 @@ public:
     virtual int32_t SetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
                                   const std::string &parameter, std::string &value) = 0;
     virtual int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) = 0;
-    virtual int32_t InterfaceAddAddress(const std::string &interfaceName, const std::string &addrString,
+    virtual int32_t AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                         int32_t prefixLength) = 0;
-    virtual int32_t InterfaceDelAddress(const std::string &interfaceName, const std::string &addrString,
+    virtual int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                         int32_t prefixLength) = 0;
     virtual int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress) = 0;
     virtual int32_t InterfaceSetIffUp(const std::string &ifaceName) = 0;
@@ -129,8 +129,8 @@ public:
     virtual int32_t NetworkRemoveInterface(int32_t netId, const std::string &iface) = 0;
     virtual int32_t NetworkDestroy(int32_t netId) = 0;
     virtual int32_t GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel) = 0;
-    virtual int32_t InterfaceSetConfig(const InterfaceConfigurationParcel &cfg) = 0;
-    virtual int32_t InterfaceGetConfig(InterfaceConfigurationParcel &cfg) = 0;
+    virtual int32_t SetInterfaceConfig(const InterfaceConfigurationParcel &cfg) = 0;
+    virtual int32_t GetInterfaceConfig(InterfaceConfigurationParcel &cfg) = 0;
     virtual int32_t InterfaceGetList(std::vector<std::string> &ifaces) = 0;
     virtual int32_t StartDhcpClient(const std::string &iface, bool bIpv6) = 0;
     virtual int32_t StopDhcpClient(const std::string &iface, bool bIpv6) = 0;

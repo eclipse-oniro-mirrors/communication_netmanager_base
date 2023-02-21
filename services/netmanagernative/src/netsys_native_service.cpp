@@ -187,16 +187,16 @@ int32_t NetsysNativeService::GetAddrInfo(const std::string &hostName, const std:
     return netsysService_->DnsGetAddrInfo(hostName, serverName, hints, netId, res);
 }
 
-int32_t NetsysNativeService::InterfaceSetMtu(const std::string &interfaceName, int32_t mtu)
+int32_t NetsysNativeService::SetInterfaceMtu(const std::string &interfaceName, int32_t mtu)
 {
-    NETNATIVE_LOG_D("InterfaceSetMtu  Begin");
-    return netsysService_->InterfaceSetMtu(interfaceName, mtu);
+    NETNATIVE_LOG_D("SetInterfaceMtu  Begin");
+    return netsysService_->SetInterfaceMtu(interfaceName, mtu);
 }
 
-int32_t NetsysNativeService::InterfaceGetMtu(const std::string &interfaceName)
+int32_t NetsysNativeService::GetInterfaceMtu(const std::string &interfaceName)
 {
-    NETNATIVE_LOG_D("InterfaceSetMtu  Begin");
-    return netsysService_->InterfaceGetMtu(interfaceName);
+    NETNATIVE_LOG_D("SetInterfaceMtu  Begin");
+    return netsysService_->GetInterfaceMtu(interfaceName);
 }
 
 int32_t NetsysNativeService::RegisterNotifyCallback(sptr<INotifyCallback> &callback)
@@ -293,19 +293,19 @@ int32_t NetsysNativeService::NetworkCreatePhysical(int32_t netId, int32_t permis
     return result;
 }
 
-int32_t NetsysNativeService::InterfaceAddAddress(const std::string &interfaceName, const std::string &addrString,
+int32_t NetsysNativeService::AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                                  int32_t prefixLength)
 {
-    int32_t result = netsysService_->InterfaceAddAddress(interfaceName, addrString, prefixLength);
-    NETNATIVE_LOG_D("InterfaceAddAddress");
+    int32_t result = netsysService_->AddInterfaceAddress(interfaceName, addrString, prefixLength);
+    NETNATIVE_LOG_D("AddInterfaceAddress");
     return result;
 }
 
-int32_t NetsysNativeService::InterfaceDelAddress(const std::string &interfaceName, const std::string &addrString,
+int32_t NetsysNativeService::DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                                  int32_t prefixLength)
 {
-    int32_t result = netsysService_->InterfaceDelAddress(interfaceName, addrString, prefixLength);
-    NETNATIVE_LOG_D("InterfaceDelAddress");
+    int32_t result = netsysService_->DelInterfaceAddress(interfaceName, addrString, prefixLength);
+    NETNATIVE_LOG_D("DelInterfaceAddress");
     return result;
 }
 
@@ -349,19 +349,19 @@ int32_t NetsysNativeService::GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &
     return ERR_NONE;
 }
 
-int32_t NetsysNativeService::InterfaceSetConfig(const InterfaceConfigurationParcel &cfg)
+int32_t NetsysNativeService::SetInterfaceConfig(const InterfaceConfigurationParcel &cfg)
 {
-    NETNATIVE_LOG_D("InterfaceSetConfig");
-    netsysService_->InterfaceSetConfig(cfg);
+    NETNATIVE_LOG_D("SetInterfaceConfig");
+    netsysService_->SetInterfaceConfig(cfg);
     return ERR_NONE;
 }
 
-int32_t NetsysNativeService::InterfaceGetConfig(InterfaceConfigurationParcel &cfg)
+int32_t NetsysNativeService::GetInterfaceConfig(InterfaceConfigurationParcel &cfg)
 {
-    NETNATIVE_LOG_D("InterfaceGetConfig");
+    NETNATIVE_LOG_D("GetInterfaceConfig");
     std::string ifName = cfg.ifName;
-    cfg = netsysService_->InterfaceGetConfig(ifName);
-    NETNATIVE_LOG_D("InterfaceGetConfig end");
+    cfg = netsysService_->GetInterfaceConfig(ifName);
+    NETNATIVE_LOG_D("GetInterfaceConfig end");
     return ERR_NONE;
 }
 
