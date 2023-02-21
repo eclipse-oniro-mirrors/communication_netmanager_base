@@ -129,7 +129,7 @@ HWTEST_F(UtNetPolicyService, SetPolicyByUid001, TestSize.Level1)
     AccessToken token;
     int32_t ret = g_NetPolicyService->SetPolicyByUid(TEST_UID, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
     std::cout << "NetPolicyService023 SetPolicyByUid ret:" << ret << std::endl;
-    ASSERT_TRUE(ret == NetPolicyResultCode::ERR_PERMISSION_DENIED);
+    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -140,9 +140,10 @@ HWTEST_F(UtNetPolicyService, SetPolicyByUid001, TestSize.Level1)
 HWTEST_F(UtNetPolicyService, GetPolicyByUid001, TestSize.Level1)
 {
     AccessToken token;
-    int32_t ret = g_NetPolicyService->GetPolicyByUid(TEST_UID);
+    uint32_t policy = 0;
+    int32_t ret = g_NetPolicyService->GetPolicyByUid(TEST_UID, policy);
     std::cout << "NetPolicyService024 GetPolicyByUid ret:" << ret << std::endl;
-    ASSERT_TRUE(ret == NetPolicyResultCode::ERR_PERMISSION_DENIED);
+    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -153,8 +154,9 @@ HWTEST_F(UtNetPolicyService, GetPolicyByUid001, TestSize.Level1)
 HWTEST_F(UtNetPolicyService, GetUidsByPolicy001, TestSize.Level1)
 {
     AccessToken token;
-    std::vector<uint32_t> ret = g_NetPolicyService->GetUidsByPolicy(NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
-    ASSERT_TRUE(ret == std::vector<uint32_t>(0));
+    std::vector<uint32_t> uids;
+    int32_t ret = g_NetPolicyService->GetUidsByPolicy(NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND, uids);
+    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -165,9 +167,10 @@ HWTEST_F(UtNetPolicyService, GetUidsByPolicy001, TestSize.Level1)
 HWTEST_F(UtNetPolicyService, IsUidNetAllowed001, TestSize.Level1)
 {
     AccessToken token;
-    bool ret = g_NetPolicyService->IsUidNetAllowed(TEST_UID, false);
+    bool isAllowed = false;
+    int32_t ret = g_NetPolicyService->IsUidNetAllowed(TEST_UID, false, isAllowed);
     std::cout << "NetPolicyService026 IsUidNetAllowed ret:" << ret << std::endl;
-    ASSERT_TRUE(ret == false);
+    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -179,9 +182,10 @@ HWTEST_F(UtNetPolicyService, IsUidNetAllowed002, TestSize.Level1)
 {
     AccessToken token;
     const std::string ifaceName = "iface";
-    bool ret = g_NetPolicyService->IsUidNetAllowed(TEST_UID, ifaceName);
+    bool isAllowed = false;
+    int32_t ret = g_NetPolicyService->IsUidNetAllowed(TEST_UID, ifaceName, isAllowed);
     std::cout << "NetPolicyService027 IsUidNetAllowed ret:" << ret << std::endl;
-    ASSERT_TRUE(ret == false);
+    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -207,7 +211,7 @@ HWTEST_F(UtNetPolicyService, SetNetQuotaPolicies001, TestSize.Level1)
     quotaPolicies.push_back(quotaPolicy);
     int32_t ret = g_NetPolicyService->SetNetQuotaPolicies(quotaPolicies);
     std::cout << "NetPolicyService028 SetNetQuotaPolicies ret:" << ret << std::endl;
-    ASSERT_TRUE(ret == NetPolicyResultCode::ERR_PERMISSION_DENIED);
+    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -221,7 +225,7 @@ HWTEST_F(UtNetPolicyService, GetNetQuotaPolicies001, TestSize.Level1)
     std::vector<NetQuotaPolicy> quotaPolicies;
     int32_t ret = g_NetPolicyService->GetNetQuotaPolicies(quotaPolicies);
     std::cout << "NetPolicyService029 GetNetQuotaPolicies ret:" << ret << std::endl;
-    ASSERT_TRUE(ret == NetPolicyResultCode::ERR_PERMISSION_DENIED);
+    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -235,7 +239,7 @@ HWTEST_F(UtNetPolicyService, ResetPolicies001, TestSize.Level1)
     std::string iccid = "0";
 
     int32_t ret = g_NetPolicyService->ResetPolicies(iccid);
-    ASSERT_TRUE(ret == NetPolicyResultCode::ERR_PERMISSION_DENIED);
+    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -248,7 +252,7 @@ HWTEST_F(UtNetPolicyService, SetBackgroundPolicy001, TestSize.Level1)
     AccessToken token;
     int32_t ret = g_NetPolicyService->SetBackgroundPolicy(true);
     std::cout << "NetPolicyService031 SetBackgroundPolicy ret:" << ret << std::endl;
-    ASSERT_TRUE(ret == NetPolicyResultCode::ERR_PERMISSION_DENIED);
+    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -259,9 +263,10 @@ HWTEST_F(UtNetPolicyService, SetBackgroundPolicy001, TestSize.Level1)
 HWTEST_F(UtNetPolicyService, GetBackgroundPolicy001, TestSize.Level1)
 {
     AccessToken token;
-    bool ret = g_NetPolicyService->GetBackgroundPolicy();
+    bool backgroundPolicy = false;
+    int32_t ret = g_NetPolicyService->GetBackgroundPolicy(backgroundPolicy);
     std::cout << "NetPolicyService032 GetBackgroundPolicy ret:" << ret << std::endl;
-    ASSERT_TRUE(ret == false);
+    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -275,7 +280,7 @@ HWTEST_F(UtNetPolicyService, UpdateRemindPolicy001, TestSize.Level1)
     int32_t ret =
         g_NetPolicyService->UpdateRemindPolicy(0, std::to_string(TRIGER_DELAY_US), RemindType::REMIND_TYPE_LIMIT);
     std::cout << "NetPolicyService033 UpdateRemindPolicy ret:" << ret << std::endl;
-    ASSERT_TRUE(ret == NetPolicyResultCode::ERR_PERMISSION_DENIED);
+    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -286,11 +291,12 @@ HWTEST_F(UtNetPolicyService, UpdateRemindPolicy001, TestSize.Level1)
 HWTEST_F(UtNetPolicyService, GetBackgroundPolicyByUid001, TestSize.Level1)
 {
     AccessToken token;
-    uint32_t ret = g_NetPolicyService->GetBackgroundPolicyByUid(TEST_UID);
+    uint32_t backgroundPolicyOfUid = 0;
+    int32_t ret = g_NetPolicyService->GetBackgroundPolicyByUid(TEST_UID, backgroundPolicyOfUid);
     std::cout << "NetPolicyService034 GetBackgroundPolicyByUid ret:" << ret << std::endl;
-    uint32_t ret2 = static_cast<uint32_t>(NetPolicyResultCode::ERR_PERMISSION_DENIED);
+    int32_t ret2 = static_cast<uint32_t>(NETMANAGER_ERR_PERMISSION_DENIED);
     std::cout << "NetPolicyService034 GetBackgroundPolicyByUid ret2:" << ret2 << std::endl;
-    ASSERT_TRUE(ret == ret2);
+    ASSERT_EQ(ret, ret2);
 }
 
 /**
@@ -303,7 +309,7 @@ HWTEST_F(UtNetPolicyService, SetDeviceIdleAllowedList001, TestSize.Level1)
     AccessToken token;
     int32_t ret = g_NetPolicyService->SetDeviceIdleAllowedList(TEST_UID, true);
     std::cout << "NetPolicyService035 SetDeviceIdleAllowedList ret:" << ret << std::endl;
-    ASSERT_TRUE(ret == NetPolicyResultCode::ERR_PERMISSION_DENIED);
+    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -317,7 +323,7 @@ HWTEST_F(UtNetPolicyService, GetDeviceIdleAllowedList001, TestSize.Level1)
     std::vector<uint32_t> uids;
     int32_t ret = g_NetPolicyService->GetDeviceIdleAllowedList(uids);
     std::cout << "NetPolicyService036 GetDeviceIdleAllowedList ret:" << ret << std::endl;
-    ASSERT_TRUE(ret == NetPolicyResultCode::ERR_PERMISSION_DENIED);
+    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -330,7 +336,7 @@ HWTEST_F(UtNetPolicyService, SetDeviceIdlePolicy001, TestSize.Level1)
     AccessToken token;
     int32_t ret = g_NetPolicyService->SetDeviceIdlePolicy(true);
     std::cout << "NetPolicyService037 SetDeviceIdlePolicy ret:" << ret << std::endl;
-    ASSERT_TRUE(ret == NetPolicyResultCode::ERR_PERMISSION_DENIED);
+    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -343,10 +349,10 @@ HWTEST_F(UtNetPolicyService, RegisterNetPolicyCallback001, TestSize.Level1)
     AccessToken token;
     sptr<NetPolicyCallbackTest> callback = GetINetPolicyCallbackSample();
     int32_t ret1 = g_NetPolicyService->RegisterNetPolicyCallback(callback);
-    ASSERT_TRUE(ret1 == NetPolicyResultCode::ERR_PERMISSION_DENIED);
+    ASSERT_EQ(ret1, NETMANAGER_ERR_PERMISSION_DENIED);
 
     int32_t ret2 = g_NetPolicyService->UnregisterNetPolicyCallback(callback);
-    ASSERT_TRUE(ret2 == NetPolicyResultCode::ERR_PERMISSION_DENIED);
+    ASSERT_EQ(ret2, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

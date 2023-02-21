@@ -27,6 +27,9 @@ GetUidsByPolicyContext::GetUidsByPolicyContext(napi_env env, EventManager *manag
 void GetUidsByPolicyContext::ParseParams(napi_value *params, size_t paramsCount)
 {
     if (!CheckParamsType(params, paramsCount)) {
+        NETMANAGER_BASE_LOGE("Check params failed");
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        SetNeedThrowException(true);
         return;
     }
     policy_ = NapiUtils::GetUint32FromValue(GetEnv(), params[ARG_INDEX_0]);

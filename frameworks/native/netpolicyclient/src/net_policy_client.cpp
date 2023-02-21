@@ -31,66 +31,62 @@ int32_t NetPolicyClient::SetPolicyByUid(uint32_t uid, uint32_t policy)
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
     return proxy->SetPolicyByUid(uid, policy);
 }
 
-uint32_t NetPolicyClient::GetPolicyByUid(uint32_t uid)
+int32_t NetPolicyClient::GetPolicyByUid(uint32_t uid, uint32_t &policy)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return NetUidPolicy::NET_POLICY_NONE;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-
-    return proxy->GetPolicyByUid(uid);
+    return proxy->GetPolicyByUid(uid, policy);
 }
 
-std::vector<uint32_t> NetPolicyClient::GetUidsByPolicy(uint32_t policy)
-{
-    std::vector<uint32_t> uids;
-    sptr<INetPolicyService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return uids;
-    }
-
-    uids = proxy->GetUidsByPolicy(policy);
-    return uids;
-}
-
-bool NetPolicyClient::IsUidNetAllowed(uint32_t uid, bool metered)
+int32_t NetPolicyClient::GetUidsByPolicy(uint32_t policy, std::vector<uint32_t> &uids)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return false;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
-    return proxy->IsUidNetAllowed(uid, metered);
+    return proxy->GetUidsByPolicy(policy, uids);
 }
 
-bool NetPolicyClient::IsUidNetAllowed(uint32_t uid, const std::string &ifaceName)
+int32_t NetPolicyClient::IsUidNetAllowed(uint32_t uid, bool metered, bool &isAllowed)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return false;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->IsUidNetAllowed(uid, metered, isAllowed);
+}
+
+int32_t NetPolicyClient::IsUidNetAllowed(uint32_t uid, const std::string &ifaceName, bool &isAllowed)
+{
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
-    return proxy->IsUidNetAllowed(uid, ifaceName);
+    return proxy->IsUidNetAllowed(uid, ifaceName, isAllowed);
 }
 
-bool NetPolicyClient::IsUidNetAccess(uint32_t uid, bool isMetered)
+int32_t NetPolicyClient::IsUidNetAccess(uint32_t uid, bool isMetered, bool &isAllowed)
 {
-    return IsUidNetAllowed(uid, isMetered);
+    return IsUidNetAllowed(uid, isMetered, isAllowed);
 }
 
-bool NetPolicyClient::IsUidNetAccess(uint32_t uid, const std::string &ifaceName)
+int32_t NetPolicyClient::IsUidNetAccess(uint32_t uid, const std::string &ifaceName, bool &isAllowed)
 {
-    return IsUidNetAllowed(uid, ifaceName);
+    return IsUidNetAllowed(uid, ifaceName, isAllowed);
 }
 
 sptr<INetPolicyService> NetPolicyClient::GetProxy()
@@ -159,7 +155,7 @@ int32_t NetPolicyClient::RegisterNetPolicyCallback(const sptr<INetPolicyCallback
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return static_cast<int32_t>(NetPolicyResultCode::ERR_INTERNAL_ERROR);
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
     return proxy->RegisterNetPolicyCallback(callback);
@@ -170,7 +166,7 @@ int32_t NetPolicyClient::UnregisterNetPolicyCallback(const sptr<INetPolicyCallba
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return static_cast<int32_t>(NetPolicyResultCode::ERR_INTERNAL_ERROR);
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
     return proxy->UnregisterNetPolicyCallback(callback);
@@ -180,18 +176,18 @@ int32_t NetPolicyClient::SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &
 {
     if (quotaPolicies.empty()) {
         NETMGR_LOG_E("quotaPolicies is empty");
-        return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
+        return NetPolicyResultCode::POLICY_ERR_INVALID_QUOTA_POLICY;
     }
 
     if (quotaPolicies.size() > QUOTA_POLICY_MAX_SIZE) {
         NETMGR_LOG_E("quotaPolicies's size is greater than the maximum, size is [%{public}zu]", quotaPolicies.size());
-        return NetPolicyResultCode::ERR_INVALID_QUOTA_POLICY;
+        return NetPolicyResultCode::POLICY_ERR_INVALID_QUOTA_POLICY;
     }
 
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
     return proxy->SetNetQuotaPolicies(quotaPolicies);
@@ -202,7 +198,7 @@ int32_t NetPolicyClient::GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quotaP
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
     return proxy->GetNetQuotaPolicies(quotaPolicies);
@@ -218,7 +214,7 @@ int32_t NetPolicyClient::ResetPolicies(const std::string &iccid)
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
     return proxy->ResetPolicies(iccid);
@@ -229,32 +225,31 @@ int32_t NetPolicyClient::SetBackgroundPolicy(bool isBackgroundPolicyAllow)
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
     return proxy->SetBackgroundPolicy(isBackgroundPolicyAllow);
 }
 
-bool NetPolicyClient::GetBackgroundPolicy()
+int32_t NetPolicyClient::GetBackgroundPolicy(bool &backgroundPolicy)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return false;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
-    return proxy->GetBackgroundPolicy();
+    return proxy->GetBackgroundPolicy(backgroundPolicy);
 }
 
-uint32_t NetPolicyClient::GetBackgroundPolicyByUid(uint32_t uid)
+int32_t NetPolicyClient::GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backgroundPolicyOfUid)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return false;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-
-    return proxy->GetBackgroundPolicyByUid(uid);
+    return proxy->GetBackgroundPolicyByUid(uid, backgroundPolicyOfUid);
 }
 
 NetPolicyResultCode NetPolicyClient::SetSnoozePolicy(int8_t netType, const std::string &iccid)
@@ -267,7 +262,7 @@ int32_t NetPolicyClient::UpdateRemindPolicy(int32_t netType, const std::string &
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
     return proxy->UpdateRemindPolicy(netType, iccid, remindType);
@@ -283,7 +278,7 @@ int32_t NetPolicyClient::SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed)
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
     return proxy->SetDeviceIdleAllowedList(uid, isAllowed);
@@ -299,7 +294,7 @@ int32_t NetPolicyClient::GetDeviceIdleAllowedList(std::vector<uint32_t> &uids)
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
     return proxy->GetDeviceIdleAllowedList(uids);
@@ -310,7 +305,7 @@ int32_t NetPolicyClient::SetDeviceIdlePolicy(bool enable)
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
-        return NetPolicyResultCode::ERR_INTERNAL_ERROR;
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
     return proxy->SetDeviceIdlePolicy(enable);

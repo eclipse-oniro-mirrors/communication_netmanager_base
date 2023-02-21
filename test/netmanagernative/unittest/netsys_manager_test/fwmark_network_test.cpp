@@ -22,6 +22,7 @@
 #define private public
 #include "fwmark_client.h"
 #undef private
+#include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "singleton.h"
 
@@ -75,7 +76,7 @@ HWTEST_F(UnitTestFwmarkClient, BindSocketTest001, TestSize.Level1)
     NETNATIVE_LOGI("UnitTestFwmarkClient BindSocketTest001 ret=%{public}d", ret);
     close(udpSocket);
     udpSocket = -1;
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**
@@ -90,7 +91,7 @@ HWTEST_F(UnitTestFwmarkClient, BindSocketTest002, TestSize.Level1)
     NETNATIVE_LOGI("UnitTestFwmarkClient BindSocketTest002 ret=%{public}d", ret);
     close(tcpSocket);
     tcpSocket = -1;
-    EXPECT_TRUE(ret == 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 /**

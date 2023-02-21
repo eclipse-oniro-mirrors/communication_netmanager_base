@@ -18,6 +18,7 @@
 #include "app_net_context.h"
 #include "connection_exec.h"
 #include "base_async_work.h"
+#include "global_http_proxy_context.h"
 #include "none_params_context.h"
 #include "parse_nethandle_context.h"
 
@@ -139,6 +140,28 @@ void ConnectionAsyncWork::ReportNetDisconnectedCallback(napi_env env, napi_statu
 {
     BaseAsyncWork::AsyncWorkCallback<ReportNetDisconnectedContext, ConnectionExec::ReportNetDisconnectedCallback>(
         env, status, data);
+}
+
+void ConnectionAsyncWork::ExecGetGlobalHttpProxy(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GlobalHttpProxyContext, ConnectionExec::ExecGetGlobalHttpProxy>(env, data);
+}
+
+void ConnectionAsyncWork::GetGlobalHttpProxyCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GlobalHttpProxyContext, ConnectionExec::GetGlobalHttpProxyCallback>(env, status,
+                                                                                                         data);
+}
+
+void ConnectionAsyncWork::ExecSetGlobalHttpProxy(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GlobalHttpProxyContext, ConnectionExec::ExecSetGlobalHttpProxy>(env, data);
+}
+
+void ConnectionAsyncWork::SetGlobalHttpProxyCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GlobalHttpProxyContext, ConnectionExec::SetGlobalHttpProxyCallback>(env, status,
+                                                                                                         data);
 }
 
 void ConnectionAsyncWork::ExecGetAppNet(napi_env env, void *data)

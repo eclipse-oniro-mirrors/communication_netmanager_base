@@ -17,6 +17,7 @@
 #include <thread>
 
 #include "iptables_wrapper.h"
+#include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 
 namespace OHOS {
@@ -49,7 +50,7 @@ HWTEST_F(IptablesWrapperTest, RunCommandTest001, TestSize.Level1)
     std::this_thread::sleep_for(std::chrono::milliseconds(waiteMS1));
     std::cout << str << std::endl;
     int32_t ret = wrapper->RunCommand(IpType::IPTYPE_IPV4, comdLine);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     const uint32_t waiteMS2 = 100;
     std::this_thread::sleep_for(std::chrono::milliseconds(waiteMS2));
 }

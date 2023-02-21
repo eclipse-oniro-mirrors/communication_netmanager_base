@@ -22,6 +22,7 @@
 #include "bindsocket_context.h"
 #include "getaddressbyname_context.h"
 #include "getdefaultnet_context.h"
+#include "global_http_proxy_context.h"
 #include "napi/native_api.h"
 #include "none_params_context.h"
 #include "parse_nethandle_context.h"
@@ -86,6 +87,14 @@ public:
     static bool ExecReportNetDisconnected(ReportNetDisconnectedContext *context);
 
     static napi_value ReportNetDisconnectedCallback(ReportNetDisconnectedContext *context);
+
+    static bool ExecGetGlobalHttpProxy(GlobalHttpProxyContext *context);
+
+    static napi_value GetGlobalHttpProxyCallback(GlobalHttpProxyContext *context);
+
+    static bool ExecSetGlobalHttpProxy(GlobalHttpProxyContext *context);
+
+    static napi_value SetGlobalHttpProxyCallback(GlobalHttpProxyContext *context);
 
     static bool ExecGetAppNet(AppNetContext *context);
 

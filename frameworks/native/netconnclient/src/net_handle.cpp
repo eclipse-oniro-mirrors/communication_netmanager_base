@@ -16,6 +16,7 @@
 #include "net_handle.h"
 
 #include "net_conn_constants.h"
+#include "net_manager_constants.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
@@ -28,7 +29,7 @@ int32_t NetHandle::GetAddressesByName(const std::string& host, std::vector<INetA
 {
     if (host.empty()) {
         NETMGR_LOG_E("host is empty");
-        return NET_CONN_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     return DelayedSingleton<NetConnClient>::GetInstance()->GetAddressesByName(host, netId_, addrList);
 }
@@ -37,7 +38,7 @@ int32_t NetHandle::GetAddressByName(const std::string &host, INetAddr &addr)
 {
     if (host.empty()) {
         NETMGR_LOG_E("host is empty");
-        return NET_CONN_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     return DelayedSingleton<NetConnClient>::GetInstance()->GetAddressByName(host, netId_, addr);
 }
@@ -46,7 +47,7 @@ int32_t NetHandle::BindSocket(int32_t socket_fd)
 {
     if (socket_fd < 0) {
         NETMGR_LOG_E("socket_fd is invalid");
-        return NET_CONN_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     return DelayedSingleton<NetConnClient>::GetInstance()->BindSocket(socket_fd, netId_);
 }

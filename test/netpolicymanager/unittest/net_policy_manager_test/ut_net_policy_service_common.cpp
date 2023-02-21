@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "net_manager_constants.h"
 #include "net_policy_service_common.h"
 
 namespace OHOS {
@@ -43,7 +44,7 @@ void UtNetPolicyServiceCommonTest::TearDown() {}
 HWTEST_F(UtNetPolicyServiceCommonTest, ResetPoliciesTest001, TestSize.Level1)
 {
     auto ret = instance_->ResetPolicies();
-    EXPECT_LE(ret, 0);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(UtNetPolicyServiceCommonTest, IsUidNetAllowedTest001, TestSize.Level1)

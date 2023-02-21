@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include <securec.h>
 #include <thread>
+
+#include <securec.h>
 
 #include "accesstoken_kit.h"
 #include "nativetoken_kit.h"

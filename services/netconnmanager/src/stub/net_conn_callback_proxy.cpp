@@ -14,6 +14,7 @@
  */
 
 #include "net_conn_callback_proxy.h"
+#include "net_conn_constants.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
@@ -28,23 +29,23 @@ int32_t NetConnCallbackProxy::NetAvailable(sptr<NetHandle> &netHandle)
 {
     if (netHandle == nullptr) {
         NETMGR_LOG_E("netHandle is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
     if (!data.WriteInt32(netHandle->GetNetId())) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     MessageParcel reply;
@@ -63,40 +64,40 @@ int32_t NetConnCallbackProxy::NetCapabilitiesChange(
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
     if (netHandle == nullptr || netAllCap == nullptr) {
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
     if (!data.WriteInt32(netHandle->GetNetId()) || !data.WriteUint32(netAllCap->linkUpBandwidthKbps_) ||
         !data.WriteUint32(netAllCap->linkDownBandwidthKbps_)) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     uint32_t size = static_cast<uint32_t>(netAllCap->netCaps_.size());
     if (!data.WriteUint32(size)) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     for (auto netCap : netAllCap->netCaps_) {
         if (!data.WriteUint32(static_cast<uint32_t>(netCap))) {
-            return IPC_PROXY_ERR;
+            return NETMANAGER_ERR_WRITE_DATA_FAIL;
         }
     }
     size = static_cast<uint32_t>(netAllCap->bearerTypes_.size());
     if (!data.WriteUint32(size)) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     for (auto bearerType : netAllCap->bearerTypes_) {
         if (!data.WriteUint32(static_cast<uint32_t>(bearerType))) {
-            return IPC_PROXY_ERR;
+            return NETMANAGER_ERR_WRITE_DATA_FAIL;
         }
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     MessageParcel reply;
@@ -113,28 +114,28 @@ int32_t NetConnCallbackProxy::NetConnectionPropertiesChange(sptr<NetHandle> &net
 {
     if (netHandle == nullptr || info == nullptr) {
         NETMGR_LOG_E("Input parameter is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
     if (!data.WriteInt32(netHandle->GetNetId())) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
     if (!info->Marshalling(data)) {
         NETMGR_LOG_E("proxy Marshalling failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     MessageParcel reply;
@@ -151,23 +152,23 @@ int32_t NetConnCallbackProxy::NetLost(sptr<NetHandle> &netHandle)
 {
     if (netHandle == nullptr) {
         NETMGR_LOG_E("netHandle is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
     if (!data.WriteInt32(netHandle->GetNetId())) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     MessageParcel reply;
@@ -185,13 +186,13 @@ int32_t NetConnCallbackProxy::NetUnavailable()
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     MessageParcel reply;
@@ -208,26 +209,26 @@ int32_t NetConnCallbackProxy::NetBlockStatusChange(sptr<NetHandle> &netHandle, b
 {
     if (netHandle == nullptr) {
         NETMGR_LOG_E("netHandle is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
     if (!data.WriteInt32(netHandle->GetNetId())) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     if (!data.WriteBool(blocked)) {
-        return IPC_PROXY_ERR;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
     MessageParcel reply;
     MessageOption option;

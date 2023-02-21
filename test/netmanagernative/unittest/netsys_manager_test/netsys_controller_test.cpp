@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "net_manager_constants.h"
 #include "netsys_controller.h"
 
 namespace OHOS {
@@ -64,10 +65,10 @@ void NetsysControllerTest::TearDown() {}
 HWTEST_F(NetsysControllerTest, NetsysControllerTest001, TestSize.Level1)
 {
     int32_t ret = NetsysController::GetInstance().NetworkCreatePhysical(NET_ID, PERMISSION);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = NetsysController::GetInstance().NetworkDestroy(NET_ID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerTest, NetsysControllerTest002, TestSize.Level1)
@@ -76,7 +77,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest002, TestSize.Level1)
     EXPECT_EQ(ret, -1);
 
     ret = NetsysController::GetInstance().NetworkRemoveInterface(NET_ID, WLAN);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerTest, NetsysControllerTest003, TestSize.Level1)
@@ -119,6 +120,12 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest006, TestSize.Level1)
 
 HWTEST_F(NetsysControllerTest, NetsysControllerTest007, TestSize.Level1)
 {
+    auto ifaceList = NetsysController::GetInstance().InterfaceGetList();
+    bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), std::string(ETH0)) == ifaceList.end();
+    if (eth0NotExist) {
+        return;
+    }
+
     int32_t ret = NetsysController::GetInstance().InterfaceAddAddress(ETH0, IP_ADDR, PREFIX_LENGTH);
     EXPECT_EQ(ret, 0);
 
@@ -201,16 +208,15 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest012, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 
     ret = NetsysController::GetInstance().SetDefaultNetWork(NET_ID);
-    EXPECT_EQ(ret, 0);
-
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     ret = NetsysController::GetInstance().ClearDefaultNetWorkNetId();
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerTest, NetsysControllerTest013, TestSize.Level1)
 {
     int32_t ret = NetsysController::GetInstance().BindSocket(SOCKET_FD, NET_ID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = NetsysController::GetInstance().IpEnableForwarding(INTERFACE_NAME);
     EXPECT_EQ(ret, 0);
@@ -280,31 +286,31 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest014, TestSize.Level1)
 HWTEST_F(NetsysControllerTest, NetsysControllerTest015, TestSize.Level1)
 {
     int32_t ret = NetsysController::GetInstance().BandwidthEnableDataSaver(true);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = NetsysController::GetInstance().BandwidthSetIfaceQuota(IF_NAME, BYTES);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = NetsysController::GetInstance().BandwidthSetIfaceQuota(WLAN, BYTES);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = NetsysController::GetInstance().BandwidthRemoveIfaceQuota(IF_NAME);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = NetsysController::GetInstance().BandwidthRemoveIfaceQuota(WLAN);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = NetsysController::GetInstance().BandwidthAddDeniedList(TEST_UID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = NetsysController::GetInstance().BandwidthAddAllowedList(TEST_UID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = NetsysController::GetInstance().BandwidthRemoveDeniedList(TEST_UID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = NetsysController::GetInstance().BandwidthRemoveAllowedList(TEST_UID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     std::vector<uint32_t> uids;
     uids.push_back(TEST_UID);
