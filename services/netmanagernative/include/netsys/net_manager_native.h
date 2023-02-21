@@ -70,7 +70,8 @@ public:
     int32_t InterfaceSetMtu(std::string ifName, int32_t mtuValue);
     int32_t InterfaceAddAddress(std::string ifName, std::string addrString, int32_t prefixLength);
     int32_t InterfaceDelAddress(std::string ifName, std::string addrString, int32_t prefixLength);
-
+    int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress);
+    int32_t InterfaceSetIffUp(std::string ifaceName);
     int32_t NetworkAddRouteParcel(int32_t netId, RouteInfoParcel routeInfo);
     int32_t NetworkRemoveRouteParcel(int32_t netId, RouteInfoParcel routeInfo);
 
