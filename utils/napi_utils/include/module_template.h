@@ -22,8 +22,8 @@
 #include <napi/native_common.h>
 
 #include "base_context.h"
-#include "netmanager_base_log.h"
 #include "napi_utils.h"
+#include "netmanager_base_log.h"
 
 #define MAX_PARAM_NUM 64
 

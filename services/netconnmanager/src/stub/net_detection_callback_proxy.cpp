@@ -14,6 +14,7 @@
  */
 
 #include "net_detection_callback_proxy.h"
+#include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
@@ -30,20 +31,20 @@ int32_t NetDetectionCallbackProxy::OnNetDetectionResultChanged(NetDetectionResul
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NET_CONN_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
     if (!dataParcel.WriteString(urlRedirect)) {
-        return NET_CONN_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     if (!dataParcel.WriteInt32(static_cast<int32_t>(detectionResult))) {
-        return NET_CONN_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
-        return NET_CONN_ERR_GET_REMOTE_OBJECT_FAILED;
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
     MessageParcel replyParcel;
     MessageOption option;

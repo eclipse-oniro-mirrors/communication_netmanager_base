@@ -18,6 +18,7 @@
 #include "constant.h"
 #include "napi_constant.h"
 #include "napi_utils.h"
+#include "net_policy_constants.h"
 #include "netmanager_base_log.h"
 
 namespace OHOS {
@@ -27,10 +28,20 @@ GetPolicyByUidContext::GetPolicyByUidContext(napi_env env, EventManager *manager
 void GetPolicyByUidContext::ParseParams(napi_value *params, size_t paramsCount)
 {
     if (!CheckParamsType(params, paramsCount)) {
+        NETMANAGER_BASE_LOGE("Check params failed");
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        SetNeedThrowException(true);
         return;
     }
 
     uid_ = NapiUtils::GetInt32FromValue(GetEnv(), params[ARG_INDEX_0]);
+    if (uid_ < 0) {
+        NETMANAGER_BASE_LOGE("Check params failed");
+        SetErrorCode(POLICY_ERR_INVALID_UID);
+        SetNeedThrowException(true);
+        return;
+    }
+
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
         SetParseOK(SetCallback(params[ARG_INDEX_1]) == napi_ok);
         return;

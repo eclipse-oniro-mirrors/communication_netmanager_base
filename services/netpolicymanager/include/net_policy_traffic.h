@@ -87,7 +87,7 @@ public:
      *
      * @param iccid Specify the matched iccid of quota policy.
      */
-    void ResetPolicies(const std::string &iccid);
+    int32_t ResetPolicies(const std::string &iccid);
 
     void ReachedLimit(const std::string &iface);
     void GetDumpMessage(std::string &message);
@@ -163,6 +163,7 @@ private:
     bool IsValidNetType(int32_t netType);
     bool IsValidPeriodDuration(const std::string &periodDuration);
     bool IsQuotaPolicyExist(int32_t netType, const std::string &iccid);
+    bool IsValidNetRemindType(uint32_t remindType);
 
 private:
     std::vector<uint32_t> idleAllowedList_;

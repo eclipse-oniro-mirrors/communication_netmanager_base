@@ -31,6 +31,8 @@ enum NetsysContrlResultCode {
     ERR_NATIVESERVICE_NOTFIND = (-1),
     ERR_START_DHCPSERVICE_FAILED = (-2),
     ERR_STOP_DHCPSERVICE_FAILED = (-3),
+    NETSYS_NETSYSSERVICE_NULL = 2105001,
+    NETSYS_ERR_VPN = 2105005,
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

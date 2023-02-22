@@ -59,7 +59,7 @@ HWTEST_F(NetsysNativeServiceTest, SetResolverConfigTest001, TestSize.Level1)
     uint16_t baseTimeoutMsec = 200;
     uint8_t retryCount = 3;
     int32_t ret = instance_->SetResolverConfig(testNetId, baseTimeoutMsec, retryCount, {}, {});
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(NetsysNativeServiceTest, GetResolverConfigTest001, TestSize.Level1)
@@ -70,14 +70,14 @@ HWTEST_F(NetsysNativeServiceTest, GetResolverConfigTest001, TestSize.Level1)
     std::vector<std::string> servers;
     std::vector<std::string> domains;
     int32_t ret = instance_->GetResolverConfig(testNetId, servers, domains, baseTimeoutMsec, retryCount);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(NetsysNativeServiceTest, CreateNetworkCacheTest001, TestSize.Level1)
 {
     uint16_t testNetId = 154;
     int32_t ret = instance_->CreateNetworkCache(testNetId);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(NetsysNativeServiceTest, DestroyNetworkCacheTest001, TestSize.Level1)

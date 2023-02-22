@@ -18,6 +18,7 @@
 #include "constant.h"
 #include "module_template.h"
 #include "napi_constant.h"
+#include "net_manager_constants.h"
 #include "net_policy_client.h"
 #include "net_policy_constants.h"
 
@@ -44,6 +45,7 @@ napi_value PolicyObserverWrapper::On(napi_env env, napi_callback_info info,
     if (paramsCount != PARAM_OPTIONS_AND_CALLBACK || NapiUtils::GetValueType(env, params[ARG_INDEX_0]) != napi_string ||
         NapiUtils::GetValueType(env, params[ARG_INDEX_1]) != napi_function) {
         NETMANAGER_BASE_LOGE("on off once interface para: [string, function]");
+        napi_throw_error(env, std::to_string(NETMANAGER_ERR_PARAMETER_ERROR).c_str(), "Parameter error");
         return NapiUtils::GetUndefined(env);
     }
 
@@ -67,7 +69,7 @@ bool PolicyObserverWrapper::Register()
     if (!registed_) {
         int32_t ret = DelayedSingleton<NetPolicyClient>::GetInstance()->RegisterNetPolicyCallback(observer_);
         NETMANAGER_BASE_LOGI("ret = [%{public}d]", ret);
-        registed_ = (ret == static_cast<int32_t>(NetPolicyResultCode::ERR_NONE));
+        registed_ = (ret == NETMANAGER_SUCCESS);
     }
     return registed_;
 }
@@ -83,6 +85,7 @@ napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,
     if (!(paramsCount != PARAM_JUST_OPTIONS || paramsCount != PARAM_OPTIONS_AND_CALLBACK) ||
         NapiUtils::GetValueType(env, params[ARG_INDEX_0]) != napi_string) {
         NETMANAGER_BASE_LOGE("on off once interface para: [string, function?]");
+        napi_throw_error(env, std::to_string(NETMANAGER_ERR_PARAMETER_ERROR).c_str(), "Parameter error");
         return NapiUtils::GetUndefined(env);
     }
 
@@ -104,7 +107,7 @@ napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,
 
     if (manager_->IsListenerListEmpty()) {
         auto ret = DelayedSingleton<NetPolicyClient>::GetInstance()->UnregisterNetPolicyCallback(observer_);
-        if (ret != 0) {
+        if (ret != NETMANAGER_SUCCESS) {
             NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
             return NapiUtils::GetUndefined(env);
         }

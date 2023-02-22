@@ -48,6 +48,9 @@ SetNetQuotaPoliciesContext::SetNetQuotaPoliciesContext(napi_env env, EventManage
 void SetNetQuotaPoliciesContext::ParseParams(napi_value *params, size_t paramsCount)
 {
     if (!CheckParamsType(params, paramsCount)) {
+        NETMANAGER_BASE_LOGE("Check params failed");
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        SetNeedThrowException(true);
         return;
     }
 

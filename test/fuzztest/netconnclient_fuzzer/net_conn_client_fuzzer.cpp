@@ -620,7 +620,7 @@ void IsDefaultNetMeteredFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(INetConnService::CMD_NM_IS_DEFAULT_NET_METERED, dataParcel);
 }
 
-void SetHttpProxyFuzzTest(const uint8_t *data, size_t size)
+void SetGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
         return;
@@ -629,17 +629,17 @@ void SetHttpProxyFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
     AccessToken token;
-    std::string httpProxy = GetStringFromData(STR_LEN);
+    HttpProxy httpProxy = {GetStringFromData(STR_LEN), 0, {}};
 
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
-    dataParcel.WriteString(httpProxy);
+    httpProxy.Marshalling(dataParcel);
     OnRemoteRequest(INetConnService::CMD_NM_SET_HTTP_PROXY, dataParcel);
 }
 
-void GetHttpProxyFuzzTest(const uint8_t *data, size_t size)
+void GetGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
         return;
@@ -700,8 +700,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::NetDetectionFuzzTest(data, size);
     OHOS::NetManagerStandard::SetAirplaneModeFuzzTest(data, size);
     OHOS::NetManagerStandard::IsDefaultNetMeteredFuzzTest(data, size);
-    OHOS::NetManagerStandard::SetHttpProxyFuzzTest(data, size);
-    OHOS::NetManagerStandard::GetHttpProxyFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetGlobalHttpProxyFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetGlobalHttpProxyFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetIdByIdentifierFuzzTest(data, size);
     return 0;
 }

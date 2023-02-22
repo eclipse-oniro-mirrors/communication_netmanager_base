@@ -81,7 +81,7 @@ HWTEST_F(RouteUtilsTest, RemoveRouteFromLocal01, TestSize.Level1)
     std::list<Route> rList;
     rList.push_back(GetRoute());
 
-    EXPECT_EQ(NETMANAGER_SUCCESS, RouteUtils::RemoveRoutesFromLocal(rList));
+    EXPECT_EQ(0, RouteUtils::RemoveRoutesFromLocal(rList));
 }
 
 HWTEST_F(RouteUtilsTest, AddRoute01, TestSize.Level1)

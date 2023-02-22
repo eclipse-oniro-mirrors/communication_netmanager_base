@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <map>
 
 #include "errorcode_convertor.h"
 #include "net_manager_constants.h"
@@ -42,17 +43,10 @@ void ErrorCodeConvertorTest::TearDown() {}
 
 HWTEST_F(ErrorCodeConvertorTest, ConvertErrorCodeTest001, TestSize.Level1)
 {
-    auto instance = std::make_unique<ErrorCodeConvertor>();
-    int32_t errorCode = 11;
-    auto ret = instance->ConvertErrorCode(errorCode);
-    ASSERT_TRUE(ret.empty());
-}
-
-HWTEST_F(ErrorCodeConvertorTest, ConvertErrorCodeTest002, TestSize.Level1)
-{
     int32_t testErrorCode = 5445645;
-    std::unique_ptr<ErrorCodeConvertor> instance = std::make_unique<NetBaseErrorCodeConvertor>();
-    auto ret = instance->ConvertErrorCode(NETMANAGER_ERR_ADD_DEATH_RECIPIENT_FAIL);
+    auto instance = std::make_unique<NetBaseErrorCodeConvertor>();
+    int32_t errorCode = NETMANAGER_ERR_INTERNAL;
+    auto ret = instance->ConvertErrorCode(errorCode);
     ASSERT_FALSE(ret.empty());
     ret = instance->ConvertErrorCode(testErrorCode);
     ASSERT_TRUE(ret.empty());

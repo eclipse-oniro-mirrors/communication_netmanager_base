@@ -16,6 +16,8 @@
 #ifndef NET_POLICY_CLIENT_H
 #define NET_POLICY_CLIENT_H
 
+#include <map>
+
 #include "singleton.h"
 
 #include "i_net_policy_service.h"
@@ -38,61 +40,64 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t SetPolicyByUid(uint32_t uid, uint32_t policy);
+    [[nodiscard]] int32_t SetPolicyByUid(uint32_t uid, uint32_t policy);
 
     /**
      * Get the network policy of the specified UID.
      *
      * @param uid The specified UID of app.
-     * @return Returns the network policy of the specified UID application.
-     *      For details, see {@link NetUidPolicy}.
+     * @param policy The network policy of the specified UID application, for details, see {@link NetUidPolicy}.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    uint32_t GetPolicyByUid(uint32_t uid);
+    [[nodiscard]] int32_t GetPolicyByUid(uint32_t uid, uint32_t &policy);
 
     /**
      * Get the application UIDs of the specified policy.
      *
      * @param policy the network policy of the current UID of application.
      *      For details, see {@link NetUidPolicy}.
-     * @return Returns the UIDs of the specified policy.
+     * @param uids put the result into uids
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    std::vector<uint32_t> GetUidsByPolicy(uint32_t policy);
+    [[nodiscard]] int32_t GetUidsByPolicy(uint32_t policy, std::vector<uint32_t> &uids);
 
     /**
      * Get the status whether the specified uid app can access the metered network or non-metered network.
      *
      * @param uid The specified UID of application.
      * @param metered Indicates meterd network or non-metered network.
-     * @return Returns it's allowed or not to access the network.
+     * @param isAllowed Put the result into "isAllowed".
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    bool IsUidNetAllowed(uint32_t uid, bool isMetered);
+    [[nodiscard]] int32_t IsUidNetAllowed(uint32_t uid, bool metered, bool &isAllowed);
 
     /**
      * Get the status whether the specified uid app can access the specified iface network.
      *
      * @param uid The specified UID of application.
      * @param ifaceName Iface name.
-     * @return Returns it's allowed or not to access the network.
+     * @param isAllowed Put the result into "isAllowed".
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    bool IsUidNetAllowed(uint32_t uid, const std::string &ifaceName);
+    [[nodiscard]] int32_t IsUidNetAllowed(uint32_t uid, const std::string &ifaceName, bool &isAllowed);
 
     /**
      * @deprecated
      */
-    bool IsUidNetAccess(uint32_t uid, bool isMetered);
+    [[nodiscard]] int32_t IsUidNetAccess(uint32_t uid, bool isMetered, bool &isAllowed);
 
     /**
      * @deprecated
      */
-    bool IsUidNetAccess(uint32_t uid, const std::string &ifaceName);
+    [[nodiscard]] int32_t IsUidNetAccess(uint32_t uid, const std::string &ifaceName, bool &isAllowed);
 
     /**
      * Register network policy change callback.
@@ -102,7 +107,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
+    [[nodiscard]] int32_t RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
 
     /**
      * Unregister network policy change callback.
@@ -112,7 +117,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
+    [[nodiscard]] int32_t UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
 
     /**
      * Set network policies.
@@ -122,7 +127,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies);
+    [[nodiscard]] int32_t SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies);
 
     /**
      * Get network policies.
@@ -132,7 +137,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies);
+    [[nodiscard]] int32_t GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies);
 
     /**
      * SetFactoryPolicy reset policys for iccid.
@@ -153,7 +158,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t ResetPolicies(const std::string &iccid);
+    [[nodiscard]] int32_t ResetPolicies(const std::string &iccid);
 
     /**
      * Control if apps can use data on background.
@@ -163,27 +168,28 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t SetBackgroundPolicy(bool isAllowed);
+    [[nodiscard]] int32_t SetBackgroundPolicy(bool isAllowed);
 
     /**
      * Get the status if apps can use data on background.
      *
-     * @return It's allowed or not to use data on background.
-     *      For details, see {@link BackgroundPolicy#BACKGROUND_POLICY_DISABLE}.
+     * @param backgroundPolicy Put the background policy's value
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    bool GetBackgroundPolicy();
+    [[nodiscard]] int32_t GetBackgroundPolicy(bool &backgroundPolicy);
 
     /**
      * Get the background network restriction policy for the specified uid.
      *
      * @param uid The specified UID of application.
-     * @return {@link NetBackgroundPolicy}.
+     * @param backgroundPolicyOfUid The result of this uid's background policy,{@link NetBackgroundPolicy}
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    uint32_t GetBackgroundPolicyByUid(uint32_t uid);
+    [[nodiscard]] int32_t GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backgroundPolicyOfUid);
 
     /**
      * SetSnoozePolicy for Hibernate current policy
@@ -205,7 +211,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType);
+    [[nodiscard]] int32_t UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType);
 
     /**
      * SetIdleTrustlist for add trust list for Idle status
@@ -228,7 +234,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed);
+    [[nodiscard]] int32_t SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed);
 
     /**
      * GetIdleTrustlist for get trust list for Idle status
@@ -247,7 +253,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t GetDeviceIdleAllowedList(std::vector<uint32_t> &uids);
+    [[nodiscard]] int32_t GetDeviceIdleAllowedList(std::vector<uint32_t> &uids);
 
     /**
      * Process network policy in device idle mode.

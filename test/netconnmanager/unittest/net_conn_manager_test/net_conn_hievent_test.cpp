@@ -149,7 +149,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_001, TestSize.Level1)
 {
     int32_t supplierId = 1001;
     int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->UpdateNetSupplierInfo(supplierId, nullptr);
-    EXPECT_NE(ret, ERR_NONE);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -161,7 +161,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_002, TestSize.Level1)
 {
     int32_t supplierId = 1001;
     int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->UpdateNetLinkInfo(supplierId, nullptr);
-    EXPECT_NE(ret, ERR_NONE);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -246,7 +246,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_008, TestSize.Level1)
     callback.reset();
     sptr<NetMonitor> netMonitor = new (std::nothrow) NetMonitor(netId, callback);
     int32_t ret = netMonitor->SetSocketParameter(-1);
-    EXPECT_NE(ret, ERR_NONE);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -282,7 +282,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_011, TestSize.Level1)
 {
     OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
     int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->RegisterNetConnCallback(nullptr, nullptr, 0);
-    EXPECT_NE(ret, ERR_NONE);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

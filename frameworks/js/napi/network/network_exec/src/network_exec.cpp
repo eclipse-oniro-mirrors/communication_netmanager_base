@@ -28,8 +28,6 @@ static constexpr const char *ERROR_MSG = "failed";
 
 static constexpr const uint32_t DEFAULT_TIMEOUT_MS = 1000;
 
-static constexpr const int32_t NETWORK_NO_PERMISSION = 602;
-
 namespace OHOS::NetManagerStandard {
 bool NetworkExec::ExecGetType(GetTypeContext *context)
 {
@@ -45,15 +43,8 @@ bool NetworkExec::ExecGetType(GetTypeContext *context)
     DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback,
                                                                                           DEFAULT_TIMEOUT_MS);
-    if (ret == NET_CONN_ERR_SAME_CALLBACK) {
-        ret = 0;
-    }
-    NETMANAGER_BASE_LOGI("ExecGetType result %{public}d", ret);
-    if (ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED) {
-        ret = NETWORK_NO_PERMISSION;
-    }
     context->SetErrorCode(ret);
-    return ret == 0;
+    return ret == NETMANAGER_SUCCESS;
 }
 
 napi_value NetworkExec::GetTypeCallback(GetTypeContext *context)
@@ -100,15 +91,8 @@ bool NetworkExec::ExecSubscribe(SubscribeContext *context)
     DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback,
                                                                                           DEFAULT_TIMEOUT_MS);
-    if (ret == NET_CONN_ERR_SAME_CALLBACK) {
-        ret = 0;
-    }
-    NETMANAGER_BASE_LOGI("ExecSubscribe result %{public}d", ret);
-    if (ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED) {
-        ret = NETWORK_NO_PERMISSION;
-    }
     context->SetErrorCode(ret);
-    return ret == 0;
+    return ret == NETMANAGER_SUCCESS;
 }
 
 napi_value NetworkExec::SubscribeCallback(SubscribeContext *context)
@@ -137,15 +121,8 @@ bool NetworkExec::ExecUnsubscribe(UnsubscribeContext *context)
     }
 
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
-    if (ret == NET_CONN_ERR_CALLBACK_NOT_FOUND || ret == NET_CONN_ERR_REQ_ID_NOT_FOUND) {
-        ret = 0;
-    }
-    NETMANAGER_BASE_LOGI("ExecUnsubscribe result %{public}d", ret);
-    if (ret == NET_CONN_ERR_PERMISSION_CHECK_FAILED) {
-        ret = NETWORK_NO_PERMISSION;
-    }
     context->SetErrorCode(ret);
-    return ret == 0;
+    return ret == NETMANAGER_SUCCESS;
 }
 
 napi_value NetworkExec::UnsubscribeCallback(UnsubscribeContext *context)

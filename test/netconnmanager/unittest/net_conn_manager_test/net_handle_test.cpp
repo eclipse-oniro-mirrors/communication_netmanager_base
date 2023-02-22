@@ -18,6 +18,7 @@
 #include "net_mgr_log_wrapper.h"
 #include "net_handle.h"
 #include "net_conn_types.h"
+#include "net_conn_constants.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -45,7 +46,7 @@ HWTEST_F(NetHandleTest, BindSocket, TestSize.Level1)
     auto handler = DelayedSingleton<NetHandle>::GetInstance();
     handler->SetNetId(netId);
     int32_t result = handler->BindSocket(socket_fd);
-    ASSERT_TRUE(result == 0);
+    ASSERT_TRUE(result == NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetHandleTest, GetAddressesByName, TestSize.Level1)

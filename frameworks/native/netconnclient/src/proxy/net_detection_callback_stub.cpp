@@ -33,7 +33,7 @@ int32_t NetDetectionCallbackStub::OnRemoteRequest(
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (myDescripter != remoteDescripter) {
         NETMGR_LOG_E("Descriptor checked failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
     }
 
     auto itFunc = memberFuncMap_.find(code);
@@ -54,12 +54,12 @@ int32_t NetDetectionCallbackStub::OnNetDetectionResult(MessageParcel &data, Mess
     }
     std::string urlRedirect;
     if (!data.ReadString(urlRedirect)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     int32_t netDetectionResult = 0;
     if (!data.ReadInt32(netDetectionResult)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     int32_t ret = OnNetDetectionResultChanged(static_cast<NetDetectionResultCode>(netDetectionResult), urlRedirect);
@@ -68,7 +68,7 @@ int32_t NetDetectionCallbackStub::OnNetDetectionResult(MessageParcel &data, Mess
         return ret;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

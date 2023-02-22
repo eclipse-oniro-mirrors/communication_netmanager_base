@@ -21,23 +21,13 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class ErrorCodeConvertor {
-public:
-    ErrorCodeConvertor();
-    virtual ~ErrorCodeConvertor() = default;
-    virtual std::string ConvertErrorCode(int32_t errorCode);
 
-protected:
-    std::map<int32_t, std::string> errorMap_;
-};
-
-class NetBaseErrorCodeConvertor : public ErrorCodeConvertor {
+class NetBaseErrorCodeConvertor {
 public:
-    NetBaseErrorCodeConvertor();
+    NetBaseErrorCodeConvertor() = default;
     ~NetBaseErrorCodeConvertor() = default;
-    std::string ConvertErrorCode(int32_t errorCode) override;
+    std::string ConvertErrorCode(int32_t &errorCode);
 };
-
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NETMANAGER_ERRORCODE_CONVERTOR_H

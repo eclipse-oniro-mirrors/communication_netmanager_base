@@ -70,6 +70,14 @@ public:
 
     static void ReportNetDisconnectedCallback(napi_env env, napi_status status, void *data);
 
+    static void ExecGetGlobalHttpProxy(napi_env env, void *data);
+
+    static void GetGlobalHttpProxyCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecSetGlobalHttpProxy(napi_env env, void *data);
+
+    static void SetGlobalHttpProxyCallback(napi_env env, napi_status status, void *data);
+
     static void ExecGetAppNet(napi_env env, void *data);
 
     static void GetAppNetCallback(napi_env env, napi_status status, void *data);

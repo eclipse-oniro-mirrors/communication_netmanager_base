@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "net_conn_service_iface.h"
-#include "net_conn_types.h"
+#include "net_conn_constants.h"
 #include "net_manager_constants.h"
 
 namespace OHOS {
@@ -55,14 +55,14 @@ HWTEST_F(NetConnServiceIfaceTest, GetIfaceNameByTypeTest001, TestSize.Level1)
 {
     std::string ifaceName;
     int32_t ret = instance_.GetIfaceNameByType(NetBearType::BEARER_ETHERNET, TEST_IDENT, ifaceName);
-    EXPECT_EQ(ret, ERR_NO_SUPPLIER);
+    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
 }
 
 HWTEST_F(NetConnServiceIfaceTest, RegisterNetSupplierTest001, TestSize.Level1)
 {
     uint32_t supplierId = 0;
     int32_t ret = instance_.UnregisterNetSupplier(supplierId);
-    EXPECT_EQ(ret, ERR_NO_SUPPLIER);
+    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
 }
 
 HWTEST_F(NetConnServiceIfaceTest, UpdateNetLinkInfoTest001, TestSize.Level1)
@@ -70,7 +70,7 @@ HWTEST_F(NetConnServiceIfaceTest, UpdateNetLinkInfoTest001, TestSize.Level1)
     sptr<NetLinkInfo> netLinkInfo = new (std::nothrow) NetLinkInfo();
     ASSERT_NE(netLinkInfo, nullptr);
     auto ret = instance_.UpdateNetLinkInfo(g_supplierId, netLinkInfo);
-    EXPECT_EQ(ret, ERR_NO_SUPPLIER);
+    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
 }
 
 HWTEST_F(NetConnServiceIfaceTest, UpdateNetSupplierInfoTest001, TestSize.Level1)
@@ -78,7 +78,7 @@ HWTEST_F(NetConnServiceIfaceTest, UpdateNetSupplierInfoTest001, TestSize.Level1)
     sptr<NetSupplierInfo> netSupplierInfo = new (std::nothrow) NetSupplierInfo();
     ASSERT_NE(netSupplierInfo, nullptr);
     auto ret = instance_.UpdateNetSupplierInfo(g_supplierId, netSupplierInfo);
-    EXPECT_EQ(ret, ERR_NO_SUPPLIER);
+    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
 }
 
 HWTEST_F(NetConnServiceIfaceTest, RestrictBackgroundChangedTest001, TestSize.Level1)

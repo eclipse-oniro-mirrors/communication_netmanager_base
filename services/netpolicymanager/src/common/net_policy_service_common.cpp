@@ -26,7 +26,9 @@ int32_t NetPolicyServiceCommon::ResetPolicies()
 
 bool NetPolicyServiceCommon::IsUidNetAllowed(uint32_t uid, bool metered)
 {
-    return DelayedSingleton<NetPolicyService>::GetInstance()->IsUidNetAllowed(uid, metered);
+    bool isAllowed = false;
+    DelayedSingleton<NetPolicyService>::GetInstance()->IsUidNetAllowed(uid, metered, isAllowed);
+    return isAllowed;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
