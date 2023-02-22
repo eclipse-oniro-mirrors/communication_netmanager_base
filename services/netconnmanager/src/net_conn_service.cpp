@@ -1146,7 +1146,11 @@ int32_t NetConnService::GetSpecificUidNet(int32_t uid, int32_t &netId)
             return NETMANAGER_SUCCESS;
         }
     }
-    return GetDefaultNet(netId);
+    if (defaultNetSupplier_ != nullptr) {
+        netId = defaultNetSupplier_->GetNetId();
+    }
+    NETMGR_LOG_D("GetDefaultNet found the netId: [%{public}d]", netId);
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnService::GetConnectionProperties(int32_t netId, NetLinkInfo &info)
