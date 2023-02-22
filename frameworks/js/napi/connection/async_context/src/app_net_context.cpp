@@ -58,7 +58,7 @@ void AppNetContext::ParseParams(napi_value *params, size_t paramsCount)
     if (!CheckParamsType(GetEnv(), params, paramsCount, type)) {
         NETMANAGER_BASE_LOGE("check params type failed");
         SetNeedThrowException(true);
-        SetError(PARSE_ERROR_CODE, PARSE_ERROR_MSG);
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
         return;
     }
     if (type == GET) {

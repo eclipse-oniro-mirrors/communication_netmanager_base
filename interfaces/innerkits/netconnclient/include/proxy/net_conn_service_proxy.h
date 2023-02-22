@@ -55,8 +55,8 @@ public:
     int32_t BindSocket(int32_t socket_fd, int32_t netId) override;
     int32_t SetAirplaneMode(bool state) override;
     int32_t IsDefaultNetMetered(bool &isMetered) override;
-    int32_t SetHttpProxy(const std::string &httpProxy) override;
-    int32_t GetHttpProxy(std::string &httpProxy) override;
+    int32_t SetGlobalHttpProxy(const HttpProxy &httpProxy) override;
+    int32_t GetGlobalHttpProxy(HttpProxy &httpProxy) override;
     int32_t GetNetIdByIdentifier(const std::string &ident, int32_t &netId) override;
 
 private:

@@ -39,6 +39,6 @@ void NoneParamsContext::ParseParams(napi_value *params, size_t paramsCount)
         return;
     }
     SetParseOK(false);
-    SetError(PARSE_ERROR_CODE, "number of parameters is wrong");
+    SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
 }
 } // namespace OHOS::NetManagerStandard

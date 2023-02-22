@@ -29,7 +29,7 @@ void NetPolicyFirewall::Init()
     deviceIdleFirewallRule_ = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_DEVICE_IDLE);
 }
 
-void NetPolicyFirewall::SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed)
+int32_t NetPolicyFirewall::SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed)
 {
     deviceIdleFirewallRule_->SetAllowedList(uid, isAllowed ? FIREWALL_RULE_ALLOW : FIREWALL_RULE_DENY);
 
@@ -37,18 +37,20 @@ void NetPolicyFirewall::SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed)
     eventData->eventId = NetPolicyEventHandler::MSG_DEVICE_IDLE_LIST_UPDATED;
     eventData->deviceIdleList = deviceIdleFirewallRule_->GetAllowedList();
     SendEvent(NetPolicyEventHandler::MSG_DEVICE_IDLE_LIST_UPDATED, eventData);
+    return NETMANAGER_SUCCESS;
 }
 
-const std::vector<uint32_t> &NetPolicyFirewall::GetDeviceIdleAllowedList()
+int32_t NetPolicyFirewall::GetDeviceIdleAllowedList(std::vector<uint32_t> &uids)
 {
-    return deviceIdleFirewallRule_->GetAllowedList();
+    uids = deviceIdleFirewallRule_->GetAllowedList();
+    return NETMANAGER_SUCCESS;
 }
 
-void NetPolicyFirewall::UpdateDeviceIdlePolicy(bool enable)
+int32_t NetPolicyFirewall::UpdateDeviceIdlePolicy(bool enable)
 {
     if (deviceIdleMode_ == enable) {
         NETMGR_LOG_W("Same device idle policy.");
-        return;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     if (enable) {
         deviceIdleFirewallRule_->SetAllowedList();
@@ -63,6 +65,7 @@ void NetPolicyFirewall::UpdateDeviceIdlePolicy(bool enable)
     NetmanagerHiTrace::NetmanagerStartSyncTrace("Notify other policy class status start");
     SendEvent(NetPolicyEventHandler::MSG_DEVICE_IDLE_MODE_CHANGED, policyEvent);
     NetmanagerHiTrace::NetmanagerFinishSyncTrace("Notify other policy class status end");
+    return NETMANAGER_SUCCESS;
 }
 
 void NetPolicyFirewall::ResetPolicies()

@@ -32,22 +32,25 @@ public:
      *
      * @param uid The specified UID of application.
      * @param isAllowed The UID is into allow list or not.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    void SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed);
+    int32_t SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed);
 
     /**
      * Get the allow list of UID in device idle mode.
      *
      * @param uids The list of UIDs
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    const std::vector<uint32_t> &GetDeviceIdleAllowedList();
+    int32_t GetDeviceIdleAllowedList(std::vector<uint32_t> &uids);
 
     /**
      * Process network policy in device idle mode.
      *
      * @param enable Device idle mode is open or not.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    void UpdateDeviceIdlePolicy(bool enable);
+    int32_t UpdateDeviceIdlePolicy(bool enable);
 
     /**
      * Reset network firewall rules.

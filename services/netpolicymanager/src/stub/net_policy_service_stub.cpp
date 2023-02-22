@@ -65,7 +65,7 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (myDescriptor != remoteDescriptor) {
         NETMGR_LOG_E("descriptor checked fail");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
     }
 
     if (handler_ == nullptr) {
@@ -74,7 +74,7 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
     }
 
     auto itFunc = memberFuncMap_.find(code);
-    int32_t result = ERR_NONE;
+    int32_t result = NETMANAGER_SUCCESS;
     if (itFunc != memberFuncMap_.end()) {
         auto requestFunc = itFunc->second;
         if (requestFunc != nullptr) {
@@ -100,47 +100,68 @@ int32_t NetPolicyServiceStub::OnSetPolicyByUid(MessageParcel &data, MessageParce
 {
     uint32_t uid;
     if (!data.ReadUint32(uid)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read Uint32 data failed.");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     uint32_t netPolicy;
     if (!data.ReadUint32(netPolicy)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read Uint32 data failed.");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    if (!reply.WriteInt32(SetPolicyByUid(uid, netPolicy))) {
-        return ERR_FLATTEN_OBJECT;
+    int32_t result = SetPolicyByUid(uid, netPolicy);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed.");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnGetPolicyByUid(MessageParcel &data, MessageParcel &reply)
 {
-    uint32_t uid;
+    uint32_t uid = 0;
     if (!data.ReadUint32(uid)) {
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    if (!reply.WriteInt32(GetPolicyByUid(uid))) {
-        return ERR_FLATTEN_OBJECT;
+    uint32_t policy = 0;
+    int32_t result = GetPolicyByUid(uid, policy);
+    if (!reply.WriteInt32(policy)) {
+        NETMGR_LOG_E("Write int32 reply failed.");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed.");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnGetUidsByPolicy(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t policy;
     if (!data.ReadUint32(policy)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read uint32 data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    if (!reply.WriteUInt32Vector(GetUidsByPolicy(policy))) {
-        return ERR_FLATTEN_OBJECT;
+    std::vector<uint32_t> uids;
+    int32_t result = GetUidsByPolicy(policy, uids);
+    if (!reply.WriteUInt32Vector(uids)) {
+        NETMGR_LOG_E("Write uint32 vector reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnIsUidNetAllowedMetered(MessageParcel &data, MessageParcel &reply)
@@ -148,19 +169,27 @@ int32_t NetPolicyServiceStub::OnIsUidNetAllowedMetered(MessageParcel &data, Mess
     uint32_t uid = 0;
     bool metered = false;
     if (!data.ReadUint32(uid)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read uint32 data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     if (!data.ReadBool(metered)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read Bool data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    bool ret = IsUidNetAllowed(uid, metered);
-    if (!reply.WriteBool(ret)) {
-        return ERR_FLATTEN_OBJECT;
+    bool isAllowed = false;
+    int32_t result = IsUidNetAllowed(uid, metered, isAllowed);
+    if (!reply.WriteBool(isAllowed)) {
+        NETMGR_LOG_E("Write Bool reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnIsUidNetAllowedIfaceName(MessageParcel &data, MessageParcel &reply)
@@ -168,55 +197,71 @@ int32_t NetPolicyServiceStub::OnIsUidNetAllowedIfaceName(MessageParcel &data, Me
     uint32_t uid = 0;
     std::string ifaceName;
     if (!data.ReadUint32(uid)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read uint32 data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     if (!data.ReadString(ifaceName)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    bool ret = IsUidNetAllowed(uid, ifaceName);
-    if (!reply.WriteBool(ret)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read String data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    return ERR_NONE;
+    bool isAllowed = false;
+    int32_t result = IsUidNetAllowed(uid, ifaceName, isAllowed);
+
+    if (!reply.WriteBool(isAllowed)) {
+        NETMGR_LOG_E("Write Bool reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnRegisterNetPolicyCallback(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t result = ERR_FLATTEN_OBJECT;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         NETMGR_LOG_E("Callback ptr is nullptr.");
-        reply.WriteInt32(result);
-        return result;
+        reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
     if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
         NETMGR_LOG_E("Permission check failed.");
-        reply.WriteInt32(result);
-        return result;
+        reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED);
+        return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
     sptr<INetPolicyCallback> callback = iface_cast<INetPolicyCallback>(remote);
-    result = RegisterNetPolicyCallback(callback);
-    reply.WriteInt32(result);
-    return result;
+    int32_t result = RegisterNetPolicyCallback(callback);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnUnregisterNetPolicyCallback(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t result = ERR_FLATTEN_OBJECT;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
         NETMGR_LOG_E("callback ptr is nullptr.");
-        reply.WriteInt32(result);
-        return result;
+        reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
     sptr<INetPolicyCallback> callback = iface_cast<INetPolicyCallback>(remote);
-    result = UnregisterNetPolicyCallback(callback);
-    reply.WriteInt32(result);
-    return result;
+    int32_t result = UnregisterNetPolicyCallback(callback);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnSetNetQuotaPolicies(MessageParcel &data, MessageParcel &reply)
@@ -224,154 +269,198 @@ int32_t NetPolicyServiceStub::OnSetNetQuotaPolicies(MessageParcel &data, Message
     std::vector<NetQuotaPolicy> quotaPolicies;
     if (!NetQuotaPolicy::Unmarshalling(data, quotaPolicies)) {
         NETMGR_LOG_E("Unmarshalling failed.");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    if (!reply.WriteInt32(SetNetQuotaPolicies(quotaPolicies))) {
-        return ERR_FLATTEN_OBJECT;
+    int32_t result = SetNetQuotaPolicies(quotaPolicies);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnGetNetQuotaPolicies(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<NetQuotaPolicy> quotaPolicies;
 
-    if (GetNetQuotaPolicies(quotaPolicies) != NetPolicyResultCode::ERR_NONE) {
-        NETMGR_LOG_E("GetNetQuotaPolicies failed.");
-        return ERR_FLATTEN_OBJECT;
-    }
+    int32_t result = GetNetQuotaPolicies(quotaPolicies);
 
     if (!NetQuotaPolicy::Marshalling(reply, quotaPolicies)) {
         NETMGR_LOG_E("Marshalling failed");
-        return ERR_FLATTEN_OBJECT;
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnResetPolicies(MessageParcel &data, MessageParcel &reply)
 {
     std::string subscriberId;
     if (!data.ReadString(subscriberId)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read String data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    if (!reply.WriteInt32(ResetPolicies(subscriberId))) {
-        return ERR_FLATTEN_OBJECT;
+    int32_t result = ResetPolicies(subscriberId);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnSetBackgroundPolicy(MessageParcel &data, MessageParcel &reply)
 {
     bool isBackgroundPolicyAllow = false;
     if (!data.ReadBool(isBackgroundPolicyAllow)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read Bool data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    if (!reply.WriteInt32(SetBackgroundPolicy(isBackgroundPolicyAllow))) {
-        return ERR_FLATTEN_OBJECT;
+    int32_t result = SetBackgroundPolicy(isBackgroundPolicyAllow);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnGetBackgroundPolicy(MessageParcel &data, MessageParcel &reply)
 {
-    bool ret = GetBackgroundPolicy();
-    if (!reply.WriteBool(ret)) {
-        return ERR_FLATTEN_OBJECT;
+    bool backgroundPolicy = false;
+    int32_t result = GetBackgroundPolicy(backgroundPolicy);
+
+    if (!reply.WriteBool(backgroundPolicy)) {
+        NETMGR_LOG_E("Write Bool reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnGetBackgroundPolicyByUid(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t uid = 0;
     if (!data.ReadUint32(uid)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read uint32 data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    if (!reply.WriteUint32(GetBackgroundPolicyByUid(uid))) {
-        return ERR_FLATTEN_OBJECT;
+    uint32_t backgroundPolicyOfUid = 0;
+    int32_t result = GetBackgroundPolicyByUid(uid, backgroundPolicyOfUid);
+
+    if (!reply.WriteUint32(backgroundPolicyOfUid)) {
+        NETMGR_LOG_E("Write uint32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnSnoozePolicy(MessageParcel &data, MessageParcel &reply)
 {
     int32_t netType = 0;
     if (!data.ReadInt32(netType)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read int32 data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     std::string iccid;
     if (!data.ReadString(iccid)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read String data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     uint32_t remindType = 0;
     if (!data.ReadUint32(remindType)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read uint32 data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    if (!reply.WriteInt32(UpdateRemindPolicy(netType, iccid, remindType))) {
-        return ERR_FLATTEN_OBJECT;
+    int32_t result = UpdateRemindPolicy(netType, iccid, remindType);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnSetDeviceIdleAllowedList(MessageParcel &data, MessageParcel &reply)
 {
     uint32_t uid;
     if (!data.ReadUint32(uid)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read uint32 data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
     bool isAllowed = false;
     if (!data.ReadBool(isAllowed)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read Bool data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    if (!reply.WriteInt32(SetDeviceIdleAllowedList(uid, isAllowed))) {
-        return ERR_FLATTEN_OBJECT;
+    int32_t result = SetDeviceIdleAllowedList(uid, isAllowed);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnGetDeviceIdleAllowedList(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<uint32_t> uids;
-    if (GetDeviceIdleAllowedList(uids) != NetPolicyResultCode::ERR_NONE) {
-        return ERR_FLATTEN_OBJECT;
-    }
+    int32_t result = GetDeviceIdleAllowedList(uids);
 
     if (!reply.WriteUInt32Vector(uids)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Write uint32 vector reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyServiceStub::OnSetDeviceIdlePolicy(MessageParcel &data, MessageParcel &reply)
 {
     bool isAllowed = false;
     if (!data.ReadBool(isAllowed)) {
-        return ERR_FLATTEN_OBJECT;
+        NETMGR_LOG_E("Read Bool data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    if (!reply.WriteInt32(SetDeviceIdlePolicy(isAllowed))) {
-        return ERR_FLATTEN_OBJECT;
+    int32_t result = SetDeviceIdlePolicy(isAllowed);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

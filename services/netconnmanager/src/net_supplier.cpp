@@ -17,6 +17,7 @@
 #include <cinttypes>
 
 #include "broadcast_manager.h"
+#include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_supplier.h"
 
@@ -72,14 +73,14 @@ int32_t NetSupplier::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     NETMGR_LOG_D("Update netlink info: netLinkInfo[%{public}s]", netLinkInfo.ToString(" ").c_str());
     if (network_ == nullptr) {
         NETMGR_LOG_E("network_ is nullptr!");
-        return ERR_NO_NETWORK;
+        return NET_CONN_ERR_INVALID_NETWORK;
     }
 
     if (!network_->UpdateNetLinkInfo(netLinkInfo)) {
-        return ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
+        return NET_CONN_ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
     UpdateNetConnState(NET_CONN_STATE_CONNECTED);
-    return ERR_SERVICE_UPDATE_NET_LINK_INFO_SUCCES;
+    return NETMANAGER_SUCCESS;
 }
 
 NetBearType NetSupplier::GetNetSupplierType() const
@@ -268,7 +269,7 @@ int32_t NetSupplier::SelectAsBestNetwork(uint32_t reqId)
     NETMGR_LOG_D("NetSupplier::SelectAsBestNetwork");
     requestList_.insert(reqId);
     bestReqList_.insert(reqId);
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t supplierId)
@@ -298,14 +299,14 @@ int32_t NetSupplier::CancelRequest(uint32_t reqId)
 {
     auto iter = requestList_.find(reqId);
     if (iter == requestList_.end()) {
-        return ERR_SERVICE_NO_REQUEST;
+        return NET_CONN_ERR_SERVICE_NO_REQUEST;
     }
     requestList_.erase(reqId);
     if (requestList_.empty()) {
         SupplierDisconnection(netCaps_.ToSet());
     }
     bestReqList_.erase(reqId);
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 void NetSupplier::RemoveBestRequest(uint32_t reqId)

@@ -16,8 +16,8 @@
 #include <gtest/gtest.h>
 
 #include "net_manager_constants.h"
-#include "net_policy_callback_test.h"
 #include "net_policy_callback.h"
+#include "net_policy_callback_test.h"
 #include "net_policy_inner_define.h"
 
 namespace OHOS {
@@ -60,19 +60,19 @@ void UtNetPolicyCallbackIpcTest::TearDown() {}
 HWTEST_F(UtNetPolicyCallbackIpcTest, RegisterNetStatsCallbackTest001, TestSize.Level1)
 {
     int32_t ret = instance_->RegisterNetPolicyCallback(callback_);
-    EXPECT_EQ(ret, ERR_NONE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = instance_->RegisterNetPolicyCallback(callback_);
-    EXPECT_EQ(ret, ERR_INVALID_PARAM);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
     ret = instance_->RegisterNetPolicyCallback(nullptr);
-    EXPECT_EQ(ret, ERR_INVALID_PARAM);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
     ret = instance_->UnregisterNetPolicyCallback(callback_);
-    EXPECT_EQ(ret, ERR_NONE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = instance_->UnregisterNetPolicyCallback(nullptr);
-    EXPECT_EQ(ret, ERR_INVALID_PARAM);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
     std::for_each(g_callbackMap.begin(), g_callbackMap.end(),
                   [this](const auto &pair) { instance_->RegisterNetPolicyCallback(pair.second); });
     ret = instance_->RegisterNetPolicyCallback(callback_);
-    EXPECT_EQ(ret, ERR_INTERNAL_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
     std::for_each(g_callbackMap.begin(), g_callbackMap.end(),
                   [this](const auto &pair) { instance_->UnregisterNetPolicyCallback(pair.second); });
     instance_->RegisterNetPolicyCallback(callback_);
@@ -94,7 +94,7 @@ HWTEST_F(UtNetPolicyCallbackIpcTest, NotifyNetQuotaPolicyChangeTest001, TestSize
 {
     std::vector<NetQuotaPolicy> quotaPolicies;
     int32_t ret = instance_->NotifyNetQuotaPolicyChange(quotaPolicies);
-    EXPECT_EQ(ret, ERR_INTERNAL_ERROR);
+    EXPECT_EQ(ret, POLICY_ERR_QUOTA_POLICY_NOT_EXIST);
 }
 
 HWTEST_F(UtNetPolicyCallbackIpcTest, NotifyNetQuotaPolicyChangeTest002, TestSize.Level1)

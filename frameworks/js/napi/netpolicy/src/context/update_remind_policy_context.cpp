@@ -27,6 +27,9 @@ UpdateRemindPolicyContext::UpdateRemindPolicyContext(napi_env env, EventManager 
 void UpdateRemindPolicyContext::ParseParams(napi_value *params, size_t paramsCount)
 {
     if (!CheckParamsType(params, paramsCount)) {
+        NETMANAGER_BASE_LOGE("Check params failed");
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        SetNeedThrowException(true);
         return;
     }
     netType_ = NapiUtils::GetInt32FromValue(GetEnv(), params[ARG_INDEX_0]);

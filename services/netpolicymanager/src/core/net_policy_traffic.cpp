@@ -85,8 +85,26 @@ bool NetPolicyTraffic::IsValidNetType(int32_t netType)
     }
 }
 
+bool NetPolicyTraffic::IsValidNetRemindType(uint32_t remindType)
+{
+    switch (remindType) {
+        case RemindType::REMIND_TYPE_WARNING:
+        case RemindType::REMIND_TYPE_LIMIT: {
+            return true;
+        }
+        default: {
+            NETMGR_LOG_E("Invalid remindType [%{public}d]", remindType);
+            return false;
+        }
+    }
+}
+
 int32_t NetPolicyTraffic::UpdateQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies)
 {
+    if (quotaPolicies.empty()) {
+        NETMGR_LOG_E("SetNetQuotaPolicies size is empty");
+        return POLICY_ERR_INVALID_QUOTA_POLICY;
+    }
     // formalize the quota policy
     NetmanagerHiTrace::NetmanagerStartSyncTrace("FormalizeQuotaPolicies quotaPolicies start");
     FormalizeQuotaPolicies(quotaPolicies);
@@ -113,11 +131,11 @@ int32_t NetPolicyTraffic::UpdateQuotaPoliciesInner()
     // write quota policies to file.
     if (!WriteQuotaPolicies()) {
         NETMGR_LOG_E("UpdateQuotaPolicies WriteFile failed");
-        return ERR_INTERNAL_ERROR;
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     // notify the the quota policy change.
     GetCbInst()->NotifyNetQuotaPolicyChange(quotaPolicies_);
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 void NetPolicyTraffic::FormalizeQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies)
@@ -253,15 +271,20 @@ int32_t NetPolicyTraffic::GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quota
     quotaPolicies.clear();
     quotaPolicies = quotaPolicies_;
     NETMGR_LOG_D("GetNetQuotaPolicies quotaPolicies end size[%{public}zu]", quotaPolicies.size());
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyTraffic::UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType)
 {
     if (!IsValidNetType(netType)) {
         NETMGR_LOG_E("NetPolicyType is invalid policy[%{public}d]", netType);
-        return ERR_INVALID_PARAM;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
+
+    if (!IsValidNetRemindType(remindType)) {
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
     for (uint32_t i = 0; i < quotaPolicies_.size(); ++i) {
         NetQuotaPolicy &quotaPolicy = quotaPolicies_[i];
         int32_t netTypeTemp = quotaPolicy.netType;
@@ -275,13 +298,13 @@ int32_t NetPolicyTraffic::UpdateRemindPolicy(int32_t netType, const std::string 
                     quotaPolicy.lastLimitRemind = time(nullptr);
                     break;
                 default:
-                    return ERR_INVALID_PARAM;
+                    return NETMANAGER_ERR_PARAMETER_ERROR;
             }
         }
     }
     UpdateQuotaPoliciesInner();
 
-    return ERR_NONE;
+    return NETMANAGER_SUCCESS;
 }
 
 const std::vector<std::string> &NetPolicyTraffic::GetMeteredIfaces()
@@ -289,14 +312,14 @@ const std::vector<std::string> &NetPolicyTraffic::GetMeteredIfaces()
     return meteredIfaces_;
 }
 
-void NetPolicyTraffic::ResetPolicies(const std::string &iccid)
+int32_t NetPolicyTraffic::ResetPolicies(const std::string &iccid)
 {
     for (auto &quotaPolicy : quotaPolicies_) {
         if (quotaPolicy.iccid == iccid) {
             quotaPolicy.Reset();
         }
     }
-    UpdateQuotaPoliciesInner();
+    return UpdateQuotaPoliciesInner();
 }
 
 void NetPolicyTraffic::ReachedLimit(const std::string &iface)
@@ -386,36 +409,35 @@ bool NetPolicyTraffic::IsValidPeriodDuration(const std::string &periodDuration)
     }
 
     std::string cycle = periodDuration.substr(0, 1);
-    NETMGR_LOG_D("Invalid periodDuration [%{public}s].", cycle.c_str());
+    NETMGR_LOG_D("PeriodDuration [%{public}s].", periodDuration.c_str());
     int32_t start = CommonUtils::StrToInt(periodDuration.substr(1, periodDuration.size()));
+
     if (cycle == PERIOD_DAY) {
-        if (start < PERIOD_START || start > DAY_MAX) {
-            NETMGR_LOG_E("Invalid periodDuration D[%{public}d]", start);
-            return false;
+        if (start >= PERIOD_START && start <= DAY_MAX) {
+            return true;
         }
     }
 
     if (cycle == PERIOD_MONTH) {
-        if (start < PERIOD_START || start > MONTH_MAX) {
-            NETMGR_LOG_E("Invalid periodDuration M[%{public}d]", start);
-            return false;
+        if (start >= PERIOD_START && start <= MONTH_MAX) {
+            return true;
         }
     }
 
     if (cycle == PERIOD_YEAR) {
-        if (start < PERIOD_START || start > YEAR_MAX) {
-            NETMGR_LOG_E("Invalid periodDuration Y[%{public}d]", start);
-            return false;
+        if (start >= PERIOD_START && start <= YEAR_MAX) {
+            return true;
         }
     }
-
-    return true;
+    NETMGR_LOG_E("Invalid periodDuration start [%{public}d],Invalid periodDuration cycle [%{public}s]", start,
+                 cycle.c_str());
+    return false;
 }
 
 bool NetPolicyTraffic::IsQuotaPolicyExist(int32_t netType, const std::string &iccid)
 {
     std::vector<NetQuotaPolicy> quotaPolicies;
-    if (GetFileInst()->ReadQuotaPolicies(quotaPolicies) != ERR_NONE) {
+    if (GetFileInst()->ReadQuotaPolicies(quotaPolicies) != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("GetNetQuotaPolicies failed");
         return false;
     }
@@ -427,7 +449,6 @@ bool NetPolicyTraffic::IsQuotaPolicyExist(int32_t netType, const std::string &ic
 
     for (uint32_t i = 0; i < quotaPolicies.size(); i++) {
         if (netType == quotaPolicies[i].netType && iccid == quotaPolicies[i].iccid) {
-            NETMGR_LOG_D("netQuotaPolicy exist");
             return true;
         }
     }

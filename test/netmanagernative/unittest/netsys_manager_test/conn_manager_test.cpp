@@ -65,7 +65,7 @@ HWTEST_F(ConnManagerTest, CreatePhysicalNetworkTest001, TestSize.Level1)
 {
     ASSERT_NE(instance_, nullptr);
     int32_t ret = instance_->CreatePhysicalNetwork(NETID, PERMISSION_NONE);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -77,9 +77,9 @@ HWTEST_F(ConnManagerTest, CreatePhysicalNetworkTest002, TestSize.Level1)
 {
     ASSERT_NE(instance_, nullptr);
     int32_t ret = instance_->ReinitRoute();
-    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
     ret = instance_->CreatePhysicalNetwork(NETID, PERMISSION_NONE);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -101,9 +101,9 @@ HWTEST_F(ConnManagerTest, DestroyNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, DestroyNetworkTest002, TestSize.Level1)
 {
     int32_t ret = instance_->DestroyNetwork(NETID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = instance_->DestroyNetwork(NETID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -115,9 +115,9 @@ HWTEST_F(ConnManagerTest, SetDefaultNetworkTest001, TestSize.Level1)
 {
     ASSERT_NE(instance_, nullptr);
     int32_t ret = instance_->SetDefaultNetwork(NETID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = instance_->SetDefaultNetwork(NETID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -129,11 +129,11 @@ HWTEST_F(ConnManagerTest, SetDefaultNetworkTest002, TestSize.Level1)
 {
     ASSERT_NE(instance_, nullptr);
     int32_t ret = instance_->SetDefaultNetwork(0);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = instance_->SetDefaultNetwork(0);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = instance_->SetDefaultNetwork(NETID);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -145,9 +145,9 @@ HWTEST_F(ConnManagerTest, ClearDefaultNetwork001, TestSize.Level1)
 {
     ASSERT_NE(instance_, nullptr);
     int32_t ret = instance_->ClearDefaultNetwork();
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = instance_->ClearDefaultNetwork();
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -159,7 +159,7 @@ HWTEST_F(ConnManagerTest, GetDefaultNetworkTest001, TestSize.Level1)
 {
     ASSERT_NE(instance_, nullptr);
     int32_t ret = instance_->SetDefaultNetwork(NETID);
-    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
     ret = instance_->GetDefaultNetwork();
     EXPECT_EQ(ret, NETID);
 }
@@ -200,7 +200,7 @@ HWTEST_F(ConnManagerTest, RemoveInterfaceFromNetworkTest001, TestSize.Level1)
     ASSERT_NE(instance_, nullptr);
     std::string iface = INTERFACENAME;
     int32_t ret = instance_->RemoveInterfaceFromNetwork(NETID, iface);
-    EXPECT_LE(ret, 0);
+    EXPECT_LE(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -213,7 +213,7 @@ HWTEST_F(ConnManagerTest, RemoveInterfaceFromNetworkTest002, TestSize.Level1)
     ASSERT_NE(instance_, nullptr);
     std::string testInterfaceName = "testName";
     auto ret = instance_->RemoveInterfaceFromNetwork(NETID, testInterfaceName);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
