@@ -121,12 +121,7 @@ std::map<int32_t, const char *> g_errStringMap = {
     {NET_CONN_ERR_NET_NO_RESTRICT_BACKGROUND, "no restrict background "},
     {NET_CONN_ERR_NET_OVER_MAX_REQUEST_NUM, "the number of requests exceeded the maximum"},
     {NET_CONN_ERR_CREATE_DUMP_FAILED, "create dump failed"},
-};
-} // namespace
-
-std::map<int32_t, const char *> g_errStringMap = {
-
-    /* Net mDNS Manager */
+        /* Net mDNS Manager */
     {NET_MDNS_ERR_UNKNOWN, "Unknown error"},
     {NET_MDNS_ERR_CALLBACK_NOT_FOUND, "Callback not found"},
     {NET_MDNS_ERR_CALLBACK_DUPLICATED, "Callback duplicated"},
@@ -136,8 +131,9 @@ std::map<int32_t, const char *> g_errStringMap = {
     {NET_MDNS_ERR_ILLEGAL_ARGUMENT, "Illegal argument"},
     {NET_MDNS_ERR_SERVICE_INSTANCE_DUPLICATE, "Service instance duplicated"},
     {NET_MDNS_ERR_SERVICE_INSTANCE_NOT_FOUND, "Service instance not found"},
-    {NET_MDNS_ERR_SEND, "Send packet failed"}
+    {NET_MDNS_ERR_SEND, "Send packet failed"},
 };
+} // namespace
 
 std::string NetBaseErrorCodeConvertor::ConvertErrorCode(int32_t &errorCode)
 {
