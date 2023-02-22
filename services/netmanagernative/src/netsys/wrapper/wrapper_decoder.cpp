@@ -221,7 +221,7 @@ bool WrapperDecoder::PushAsciiMessage(const std::vector<std::string> &recvmsg)
         } else if (i.compare(0, strlen(KEY_SEQNUM), KEY_SEQNUM) == 0) {
             const auto seq = Split(i, SYMBOL_EQUAL);
             if (seq.size() == SPLIT_SIZE) {
-                message_->SetSeq(std::strtol(seq[1].c_str(), nullptr, DECIMALISM));
+                message_->SetSeq(StrToInt(seq[1]));
             }
         } else if (i.compare(0, strlen(KEY_SUBSYSTEM), KEY_SUBSYSTEM) == 0) {
             const auto subsys = Split(i, SYMBOL_EQUAL);

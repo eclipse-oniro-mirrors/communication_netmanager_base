@@ -307,24 +307,60 @@ std::string ToAnonymousIp(const std::string &input)
     return input;
 }
 
-int32_t StrToInt(const std::string &str)
+int32_t StrToInt(const std::string& value, int32_t defaultErr)
 {
-    return std::strtol(str.c_str(), nullptr, 0);
+    errno = 0;
+    char* pEnd = nullptr;
+    int64_t result = std::strtol(value.c_str(), &pEnd, 0);
+    if (pEnd == value.c_str() || (result < INT_MIN || result > LONG_MAX) || errno == ERANGE) {
+        return defaultErr;
+    }
+    return result;
 }
 
-uint32_t StrToUint(const std::string &str)
+
+uint32_t StrToUint(const std::string& value, uint32_t defaultErr)
 {
-    return std::strtoul(str.c_str(), nullptr, 0);
+    errno = 0;
+    char* pEnd = nullptr;
+    uint64_t result = std::strtoul(value.c_str(), &pEnd, 0);
+    if (pEnd == value.c_str() || result > UINT32_MAX || errno == ERANGE) {
+        return defaultErr;
+    }
+    return result;
 }
 
-bool StrToBool(const std::string &str)
+bool StrToBool(const std::string &value, bool defaultErr)
 {
-    return static_cast<bool>(std::strtoul(str.c_str(), nullptr, 0));
+    errno = 0;
+    char* pEnd = nullptr;
+    uint64_t result = std::strtoul(value.c_str(), &pEnd, 0);
+    if (pEnd == value.c_str() || result > UINT32_MAX || errno == ERANGE) {
+        return defaultErr;
+    }
+    return static_cast<bool>(result);
 }
 
-int64_t StrToLong(const std::string &str)
+int64_t StrToLong(const std::string& value, int64_t defaultErr)
 {
-    return std::strtol(str.c_str(), nullptr, 0);
+    errno = 0;
+    char* pEnd = nullptr;
+    int64_t result = std::strtoll(value.c_str(), &pEnd, 0);
+    if (pEnd == value.c_str() || errno == ERANGE) {
+        return defaultErr;
+    }
+    return result;
+}
+
+uint64_t StrToUint64(const std::string& value, uint64_t defaultErr)
+{
+    errno = 0;
+    char* pEnd = nullptr;
+    uint64_t result = std::strtoull(value.c_str(), &pEnd, 0);
+    if (pEnd == value.c_str() || errno == ERANGE) {
+        return defaultErr;
+    }
+    return result;
 }
 
 bool CheckIfaceName(const std::string &name)

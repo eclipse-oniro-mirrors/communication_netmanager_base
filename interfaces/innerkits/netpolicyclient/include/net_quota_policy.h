@@ -37,7 +37,7 @@ static constexpr int32_t QUOTA_POLICY_MAX_SIZE = 100;
 
 struct NetQuotaPolicy : public Parcelable {
     /* See {@link NetBearType} */
-    int32_t netType = NET_CAPABILITY_INTERNAL_DEFAULT;
+    int32_t netType = BEARER_DEFAULT;
     /* The ID of the target card, valid when netType is BEARER_CELLULAR */
     std::string iccid;
     /* To specify the identity of network, such as different WLAN */
