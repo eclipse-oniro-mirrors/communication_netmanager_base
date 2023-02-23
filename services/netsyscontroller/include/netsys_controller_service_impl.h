@@ -156,6 +156,23 @@ public:
     int32_t InterfaceDelAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength) override;
 
     /**
+     * Set iface ip address
+     *
+     * @param ifaceName Network port device name
+     * @param ipAddress Ip address
+     * @return Return the return value of the netsys interface call
+     */
+    int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress) override;
+
+    /**
+     * Set iface up
+     *
+     * @param ifaceName Network port device name
+     * @return Return the return value of the netsys interface call
+     */
+    int32_t InterfaceSetIffUp(const std::string &ifaceName) override;
+
+    /**
      * Set dns
      *
      * @param netId

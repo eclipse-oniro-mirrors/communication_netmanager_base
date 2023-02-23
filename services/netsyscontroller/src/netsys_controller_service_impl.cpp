@@ -158,6 +158,19 @@ int32_t NetsysControllerServiceImpl::InterfaceDelAddress(const std::string &ifNa
     return netsysClient_.InterfaceDelAddress(ifName, ipAddr, prefixLength);
 }
 
+int32_t NetsysControllerServiceImpl::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)
+{
+    NETMGR_LOG_I("set ip address: ifName[%{public}s], ipAddr[%{public}s]", ifaceName.c_str(),
+                 ToAnonymousIp(ipAddress).c_str());
+    return netsysClient_.InterfaceSetIpAddress(ifaceName, ipAddress);
+}
+
+int32_t NetsysControllerServiceImpl::InterfaceSetIffUp(const std::string &ifaceName)
+{
+    NETMGR_LOG_I("set iff up: ifName[%{public}s]", ifaceName.c_str());
+    return netsysClient_.InterfaceSetIffUp(ifaceName);
+}
+
 int32_t NetsysControllerServiceImpl::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
                                                        const std::vector<std::string> &servers,
                                                        const std::vector<std::string> &domains)
