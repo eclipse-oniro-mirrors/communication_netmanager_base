@@ -14,6 +14,7 @@
  */
 
 #include <array>
+#include <numeric>
 
 #include "base64_utils.h"
 
@@ -108,9 +109,10 @@ std::string Encode(const std::string &source)
             continue;
         }
         MakeCharFour(charArrayThree, charArrayFour);
-        for (auto idx : charArrayFour) {
-            ret += BASE64_CHARS[idx];
-        }
+        ret = std::accumulate(charArrayFour.begin(), charArrayFour.end(), std::string(),
+                              [](std::string str_append, uint8_t const &idx)
+                              { return str_append + BASE64_CHARS[idx]; });
+
         index = 0;
     }
     if (index == 0) {
@@ -152,9 +154,9 @@ std::string Decode(const std::string &encoded)
             charArrayFour[index] = BASE64_CHARS.find(static_cast<char>(charArrayFour[index]));
         }
         MakeCharTree(charArrayFour, charArrayThree);
-        for (auto idx : charArrayThree) {
-            ret += static_cast<char>(idx);
-        }
+        ret = std::accumulate(charArrayThree.begin(), charArrayThree.end(), std::string(),
+                              [](std::string str_append, uint8_t const &iter)
+                              { return str_append + static_cast<char>(iter); });
         index = 0;
     }
     if (index == 0) {
@@ -165,7 +167,10 @@ std::string Decode(const std::string &encoded)
         charArrayFour[i] = 0;
     }
     for (unsigned char &i : charArrayFour) {
-        i = BASE64_CHARS.find(static_cast<char>(i));
+        std::string::size_type idx = BASE64_CHARS.find(static_cast<char>(i));
+        if (idx != std::string::npos) {
+            i = static_cast<unsigned char>(idx);
+        }
     }
     MakeCharTree(charArrayFour, charArrayThree);
 
