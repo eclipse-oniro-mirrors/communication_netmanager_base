@@ -110,8 +110,9 @@ std::string Encode(const std::string &source)
         }
         MakeCharFour(charArrayThree, charArrayFour);
         ret = std::accumulate(charArrayFour.begin(), charArrayFour.end(), std::string(),
-                              [](std::string str_append, uint8_t const &idx)
-                              { return str_append + BASE64_CHARS[idx]; });
+                              [](std::string str_append, uint8_t const &idx) {
+                                  return str_append + BASE64_CHARS[idx];
+                              });
 
         index = 0;
     }
@@ -155,8 +156,9 @@ std::string Decode(const std::string &encoded)
         }
         MakeCharTree(charArrayFour, charArrayThree);
         ret = std::accumulate(charArrayThree.begin(), charArrayThree.end(), std::string(),
-                              [](std::string str_append, uint8_t const &iter)
-                              { return str_append + static_cast<char>(iter); });
+                              [](std::string str_append, uint8_t const &iter) {
+                                  return str_append + static_cast<char>(iter);
+                              });
         index = 0;
     }
     if (index == 0) {
