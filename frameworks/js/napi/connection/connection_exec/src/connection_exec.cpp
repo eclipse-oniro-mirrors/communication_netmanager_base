@@ -161,6 +161,9 @@ napi_value ConnectionExec::IsDefaultNetMeteredCallback(IsDefaultNetMeteredContex
 
 bool ConnectionExec::ExecGetNetCapabilities(GetNetCapabilitiesContext *context)
 {
+    if (!context->IsParseOK()) {
+        return false;
+    }
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(context->netHandle_,
                                                                                   context->capabilities_);
     context->SetErrorCode(ret);
@@ -174,6 +177,9 @@ napi_value ConnectionExec::GetNetCapabilitiesCallback(GetNetCapabilitiesContext 
 
 bool ConnectionExec::ExecGetConnectionProperties(GetConnectionPropertiesContext *context)
 {
+    if (!context->IsParseOK()) {
+        return false;
+    }
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetConnectionProperties(context->netHandle_,
                                                                                        context->linkInfo_);
     context->SetErrorCode(ret);
@@ -237,6 +243,9 @@ napi_value ConnectionExec::DisableAirplaneModeCallback(DisableAirplaneModeContex
 
 bool ConnectionExec::ExecReportNetConnected(ReportNetConnectedContext *context)
 {
+    if (!context->IsParseOK()) {
+        return false;
+    }
     int32_t res = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(context->netHandle_);
     if (res != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecReportNetConnected failed %{public}d", res);
@@ -252,6 +261,9 @@ napi_value ConnectionExec::ReportNetConnectedCallback(ReportNetConnectedContext 
 
 bool ConnectionExec::ExecReportNetDisconnected(ReportNetConnectedContext *context)
 {
+    if (!context->IsParseOK()) {
+        return false;
+    }
     int32_t res = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(context->netHandle_);
     if (res != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecReportNetDisconnected failed %{public}d", res);
