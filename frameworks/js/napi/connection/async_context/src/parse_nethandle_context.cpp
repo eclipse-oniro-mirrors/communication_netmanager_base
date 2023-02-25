@@ -25,6 +25,7 @@ ParseNetHandleContext::ParseNetHandleContext(napi_env env, EventManager *manager
 void ParseNetHandleContext::ParseParams(napi_value *params, size_t paramsCount)
 {
     if (!CheckParamsType(params, paramsCount)) {
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
         return;
     }
 
@@ -41,12 +42,22 @@ void ParseNetHandleContext::ParseParams(napi_value *params, size_t paramsCount)
 bool ParseNetHandleContext::CheckParamsType(napi_value *params, size_t paramsCount)
 {
     if (paramsCount == PARAM_JUST_OPTIONS) {
-        return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_object;
+        if (NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_object) {
+            return true;
+        }
+        if (NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_function) {
+            SetCallback(params[paramsCount - 1]);
+        }
     }
 
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
-        return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_object &&
-               NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_function;
+        if (NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_object &&
+               NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_function) {
+            return true;
+        }
+        if (NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_function) {
+            SetCallback(params[paramsCount - 1]);
+        }
     }
     return false;
 }
