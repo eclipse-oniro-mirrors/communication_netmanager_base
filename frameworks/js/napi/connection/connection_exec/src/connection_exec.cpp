@@ -401,13 +401,30 @@ napi_value ConnectionExec::NetHandleExec::GetAddressesByNameCallback(GetAddressB
     return addresses;
 }
 
+int32_t TransErrorCode(int32_t error)
+{
+    switch (error) {
+        case NO_PERMISSION_CODE:
+            return NETMANAGER_ERR_PERMISSION_DENIED;
+        case RESOURCE_UNAVALIEBLE_CODE:
+            return NETMANAGER_ERR_INVALID_PARAMETER;
+        case NET_UNREACHABLE_CODE:
+            return NETMANAGER_ERR_INTERNAL;
+    }
+    return NETMANAGER_ERR_OPERATION_FAILED;
+}
+
 bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext *context)
 {
+    if (!context->IsParseOK()) {
+        return false;
+    }
     addrinfo *res = nullptr;
     int status = getaddrinfo(context->host_.c_str(), nullptr, nullptr, &res);
     if (status < 0) {
         NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s", errno, strerror(errno));
-        context->SetErrorCode(CONN_COMMON_COMPLETE_CODE + errno);
+        int32_t temp = TransErrorCode(errno);
+        context->SetErrorCode(temp);
         return false;
     }
 

@@ -25,6 +25,10 @@ static constexpr const int PARAM_JUST_OPTIONS = 1;
 static constexpr const int PARAM_JUST_CALLBACK = 1;
 static constexpr const int PARAM_OPTIONS_AND_CALLBACK = 2;
 
+static constexpr const int NO_PERMISSION_CODE = 1;
+static constexpr const int RESOURCE_UNAVALIEBLE_CODE = 11;
+static constexpr const int NET_UNREACHABLE_CODE = 101;
+
 static constexpr const char *EVENT_NET_AVAILABLE = "netAvailable";
 static constexpr const char *EVENT_NET_BLOCK_STATUS_CHANGE = "netBlockStatusChange";
 static constexpr const char *EVENT_NET_CAPABILITIES_CHANGE = "netCapabilitiesChange";
