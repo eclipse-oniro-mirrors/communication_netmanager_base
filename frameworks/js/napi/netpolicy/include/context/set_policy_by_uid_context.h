@@ -34,7 +34,7 @@ public:
 
 public:
     uint32_t policy_ = 0;
-    uint32_t uid_ = 0;
+    int32_t uid_ = 0;
 
 private:
     bool CheckParamsType(napi_value *params, size_t paramsCount);

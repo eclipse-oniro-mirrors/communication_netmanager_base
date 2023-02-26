@@ -481,6 +481,9 @@ napi_value ConnectionExec::NetHandleExec::MakeNetAddressJsValue(napi_env env, co
 
 bool ConnectionExec::NetHandleExec::ExecBindSocket(BindSocketContext *context)
 {
+    if (!context->IsParseOK()) {
+        return false;
+    }
     NetHandle handle(context->netId_);
     int32_t res = handle.BindSocket(context->socketFd_);
     if (res != NETMANAGER_SUCCESS) {

@@ -34,7 +34,7 @@ void SetPolicyByUidContext::ParseParams(napi_value *params, size_t paramsCount)
         return;
     }
 
-    uid_ = NapiUtils::GetUint32FromValue(GetEnv(), params[ARG_INDEX_0]);
+    uid_ = NapiUtils::GetInt32FromValue(GetEnv(), params[ARG_INDEX_0]);
     if (uid_ < 0) {
         NETMANAGER_BASE_LOGE("Check params failed");
         SetErrorCode(POLICY_ERR_INVALID_UID);
