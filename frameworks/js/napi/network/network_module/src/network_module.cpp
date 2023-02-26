@@ -35,7 +35,10 @@ napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
     observer->SetManager(manager);
     g_observerMap[manager] = observer;
 
-    auto finalizer = [](napi_env, void *data, void *) {};
+    auto finalizer = [](napi_env, void *data, void *) {
+        auto manager = reinterpret_cast<EventManager *>(data);
+        manager->SetInvalid();
+    };
     napi_wrap(env, exports, reinterpret_cast<void *>(manager), finalizer, nullptr, nullptr);
 
     return exports;
