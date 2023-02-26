@@ -369,8 +369,9 @@ int32_t TransErrorCode(int32_t error)
             return NETMANAGER_ERR_INVALID_PARAMETER;
         case NET_UNREACHABLE_CODE:
             return NETMANAGER_ERR_INTERNAL;
+        default:
+            return NETMANAGER_ERR_OPERATION_FAILED;
     }
-    return NETMANAGER_ERR_OPERATION_FAILED;
 }
 
 bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameContext *context)
