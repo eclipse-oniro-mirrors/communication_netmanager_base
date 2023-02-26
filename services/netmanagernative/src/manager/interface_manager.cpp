@@ -370,8 +370,8 @@ int InterfaceManager::SetIffUp(const std::string &ifaceName)
         NETNATIVE_LOGE("strncpy is false");
         return -1;
     }
-    ifr.ifr_flags |= IFF_UP;
-    ifr.ifr_flags |= IFF_MULTICAST;
+    uint32_t flagVal = (IFF_UP | IFF_MULTICAST);
+    ifr.ifr_flags = static_cast<short int>(flagVal);
 
     int32_t inetSocket = socket(AF_INET, SOCK_DGRAM, 0);
     if (ioctl(inetSocket, SIOCSIFFLAGS, &ifr) < 0) {

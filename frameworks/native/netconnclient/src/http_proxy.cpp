@@ -24,7 +24,7 @@ static const size_t MAX_URL_SIZE = 2048;
 
 HttpProxy::HttpProxy() : port_(0) {}
 
-HttpProxy::HttpProxy(std::string host, uint16_t port, const std::set<std::string> &exclusionList)
+HttpProxy::HttpProxy(std::string host, uint16_t port, const std::set<std::string> &exclusionList) : port_(0)
 {
     if (host.size() <= MAX_URL_SIZE) {
         host_ = std::move(host);

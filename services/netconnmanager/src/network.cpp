@@ -224,11 +224,12 @@ void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
         int32_t ret =
             NetsysController::GetInstance().NetworkAddRoute(netId_, route.iface_, destAddress, route.gateway_.address_);
+        int32_t result = 0;
         if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP) {
-            ret |= NetsysController::GetInstance().NetworkAddRoute(LOCAL_NET_ID, route.iface_, destAddress,
-                                                                   LOCAL_ROUTE_NEXT_HOP);
+            result = NetsysController::GetInstance().NetworkAddRoute(LOCAL_NET_ID, route.iface_, destAddress,
+                                                                     LOCAL_ROUTE_NEXT_HOP);
         }
-        if (ret != NETMANAGER_SUCCESS) {
+        if (ret != NETMANAGER_SUCCESS || result != NETMANAGER_SUCCESS) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_ROUTES_FAILED);
         }
     }

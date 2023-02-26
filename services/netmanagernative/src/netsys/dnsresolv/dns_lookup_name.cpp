@@ -162,6 +162,10 @@ int32_t DnsLookUpName::NameFromDnsSearch(AddrData buf[MAXADDRS], char canon[CANO
         NETNATIVE_LOGE("Get resolv from conf failed");
         return EAI_NONAME;
     }
+    if (name.empty()) {
+        NETNATIVE_LOGE("the param name is empty.");
+        return EAI_NONAME;
+    }
 
     size_t nameLen;
     size_t dots;
