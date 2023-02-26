@@ -202,6 +202,7 @@ int32_t NetPolicyRule::GetPolicyByUid(uint32_t uid, uint32_t &policy)
     if (policyRule == uidPolicyRules_.end()) {
         NETMGR_LOG_D("Can't find uid:[%{public}u] and its policy, return default value.", uid);
         policy = NET_POLICY_NONE;
+        return POLICY_ERR_QUOTA_POLICY_NOT_EXIST;
     }
     policy = policyRule->second.policy_;
     return NETMANAGER_SUCCESS;
