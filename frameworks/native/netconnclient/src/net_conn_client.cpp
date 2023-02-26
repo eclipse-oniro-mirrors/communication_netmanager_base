@@ -247,7 +247,7 @@ int32_t NetConnClient::GetAddressByName(const std::string &host, int32_t netId, 
 
 int32_t NetConnClient::BindSocket(int32_t socket_fd, int32_t netId)
 {
-    if (netId < 100) {
+    if (netId < MIN_VALID_NETID) {
         return NET_CONN_ERR_INVALID_NETWORK;
     }
     std::shared_ptr<nmd::FwmarkClient> fwmarkClient_ = std::make_shared<nmd::FwmarkClient>();
