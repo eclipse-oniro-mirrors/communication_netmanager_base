@@ -15,7 +15,7 @@
 
 #include "net_all_capabilities.h"
 
-#include "__functional_base"
+#include <functional>
 #include "__tree"
 
 #include "parcel.h"
