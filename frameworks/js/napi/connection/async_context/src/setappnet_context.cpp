@@ -48,7 +48,7 @@ void SetAppNetContext::ParseParams(napi_value *params, size_t paramsCount)
         return;
     }
 
-    netHandle_.SetNetId(PARAM_OPTIONS_AND_CALLBACK::GetInt32Property(GetEnv(), params[0], "netId"));
+    netHandle_.SetNetId(NapiUtils::GetInt32Property(GetEnv(), params[0], "netId"));
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
         SetParseOK(SetCallback(params[ARG_INDEX_1]) == napi_ok);
         return;

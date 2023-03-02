@@ -394,10 +394,9 @@ int32_t NetConnClient::SetAppNet(int32_t netId)
     }
     int32_t ret = proxy->SetAppNet(netId);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("liyufan proxy is nullptr %{public}d",ret);
         return ret;
     }
-    NETMGR_LOG_E("liyufan proxy is nullptr");
+
     SetNetForApp(netId);
     return NETMANAGER_SUCCESS;
 }
