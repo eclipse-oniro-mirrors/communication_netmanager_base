@@ -415,6 +415,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetAppNetTest001, TestSize.Level1)
 {
+    AccessToken token;
     int32_t netId = 99;
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(netId);
     EXPECT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
@@ -427,6 +428,7 @@ HWTEST_F(NetConnClientTest, SetAppNetTest001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetAppNetTest002, TestSize.Level1)
 {
+    AccessToken token;
     int32_t netId = 101;
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(netId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -443,6 +445,7 @@ HWTEST_F(NetConnClientTest, SetAppNetTest002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, GetAppNetTest001, TestSize.Level1)
 {
+    AccessToken token;
     int32_t netId = 102;
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(netId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);

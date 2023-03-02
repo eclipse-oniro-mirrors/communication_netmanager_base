@@ -1352,5 +1352,10 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
     }
     return result;
 }
+
+int32_t NetConnService::SetAppNet(int32_t netId)
+{
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

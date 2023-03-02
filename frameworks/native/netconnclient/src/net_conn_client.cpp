@@ -387,6 +387,17 @@ int32_t NetConnClient::SetAppNet(int32_t netId)
     if (netId < MIN_VALID_NETID && netId != 0) {
         return NET_CONN_ERR_INVALID_NETWORK;
     }
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    int32_t ret = proxy->SetAppNet(netId);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("liyufan proxy is nullptr %{public}d",ret);
+        return ret;
+    }
+    NETMGR_LOG_E("liyufan proxy is nullptr");
     SetNetForApp(netId);
     return NETMANAGER_SUCCESS;
 }

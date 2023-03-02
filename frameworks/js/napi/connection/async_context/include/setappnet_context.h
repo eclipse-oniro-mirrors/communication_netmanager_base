@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NETMANAGER_BASE_NAPI_APP_NET_CONTEXT_H
-#define NETMANAGER_BASE_NAPI_APP_NET_CONTEXT_H
+#ifndef NETMANAGER_BASE_NAPI_SET_APP_NET_CONTEXT_H
+#define NETMANAGER_BASE_NAPI_SET_APP_NET_CONTEXT_H
 
 #include <cstddef>
 #include <napi/native_api.h>
@@ -25,10 +25,10 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class AppNetContext : public BaseContext {
+class SetAppNetContext : public BaseContext {
 public:
-    AppNetContext() = delete;
-    AppNetContext(napi_env env, EventManager *manager);
+    SetAppNetContext() = delete;
+    SetAppNetContext(napi_env env, EventManager *manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
@@ -38,4 +38,4 @@ public:
 } // namespace NetManagerStandard
 } // namespace OHOS
 
-#endif // NETMANAGER_BASE_NAPI_APP_NET_CONTEXT_H
+#endif // NETMANAGER_BASE_NAPI_SET_APP_NET_CONTEXT_H

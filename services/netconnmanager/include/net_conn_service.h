@@ -253,6 +253,8 @@ public:
      */
     void OnNetActivateTimeOut(uint32_t reqId) override;
 
+    int32_t SetAppNet(int32_t netId) override;
+
 private:
     bool Init();
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
