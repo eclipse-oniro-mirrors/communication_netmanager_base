@@ -64,7 +64,7 @@ static inline bool IsBase64Char(const char c)
 static inline void MakeCharFour(const std::array<uint8_t, CHAR_ARRAY_LENGTH_THREE> &charArrayThree,
                                 std::array<uint8_t, CHAR_ARRAY_LENGTH_FOUR> &charArrayFour)
 {
-    uint8_t table[CHAR_ARRAY_LENGTH_FOUR] = {
+    const uint8_t table[CHAR_ARRAY_LENGTH_FOUR] = {
         static_cast<uint8_t>((charArrayThree[BASE64_ENCODE_INDEX0] & BASE64_ENCODE_MASK1) >> BASE64_ENCODE_OFFSET2),
         static_cast<uint8_t>(((charArrayThree[BASE64_ENCODE_INDEX0] & BASE64_ENCODE_MASK2) << BASE64_ENCODE_OFFSET4) +
                              ((charArrayThree[BASE64_ENCODE_INDEX1] & BASE64_ENCODE_MASK5) >> BASE64_ENCODE_OFFSET4)),
@@ -80,7 +80,7 @@ static inline void MakeCharFour(const std::array<uint8_t, CHAR_ARRAY_LENGTH_THRE
 static inline void MakeCharTree(const std::array<uint8_t, CHAR_ARRAY_LENGTH_FOUR> &charArrayFour,
                                 std::array<uint8_t, CHAR_ARRAY_LENGTH_THREE> &charArrayThree)
 {
-    uint8_t table[CHAR_ARRAY_LENGTH_THREE] = {
+    const uint8_t table[CHAR_ARRAY_LENGTH_THREE] = {
         static_cast<uint8_t>((charArrayFour[BASE64_DECODE_INDEX0] << BASE64_DECODE_OFFSET2) +
                              ((charArrayFour[BASE64_DECODE_INDEX1] & BASE64_DECODE_MASK1) >> BASE64_DECODE_OFFSET4)),
         static_cast<uint8_t>(((charArrayFour[BASE64_DECODE_INDEX1] & BASE64_DECODE_MASK2) << BASE64_DECODE_OFFSET4) +
@@ -110,7 +110,7 @@ std::string Encode(const std::string &source)
         }
         MakeCharFour(charArrayThree, charArrayFour);
         ret = std::accumulate(charArrayFour.begin(), charArrayFour.end(), std::string(),
-                              [](std::string str_append, uint8_t const &idx) {
+                              [](std::string &str_append, uint8_t const &idx) {
                                   return str_append + BASE64_CHARS[idx];
                               });
 
@@ -156,7 +156,7 @@ std::string Decode(const std::string &encoded)
         }
         MakeCharTree(charArrayFour, charArrayThree);
         ret = std::accumulate(charArrayThree.begin(), charArrayThree.end(), std::string(),
-                              [](std::string str_append, uint8_t const &iter) {
+                              [](std::string &str_append, uint8_t const &iter) {
                                   return str_append + static_cast<char>(iter);
                               });
         index = 0;

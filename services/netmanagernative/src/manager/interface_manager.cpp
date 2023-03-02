@@ -353,8 +353,10 @@ int InterfaceManager::SetIpAddress(const std::string &ifaceName, const std::stri
     int32_t inetSocket = socket(AF_INET, SOCK_DGRAM, 0);
     if (ioctl(inetSocket, SIOCSIFADDR, &ifr) < 0) {
         NETNATIVE_LOGE("set ip address ioctl SIOCSIFADDR error: %{public}s", strerror(errno));
+        close(inetSocket);
         return -1;
     }
+    close(inetSocket);
     return 0;
 }
 
@@ -376,8 +378,10 @@ int InterfaceManager::SetIffUp(const std::string &ifaceName)
     int32_t inetSocket = socket(AF_INET, SOCK_DGRAM, 0);
     if (ioctl(inetSocket, SIOCSIFFLAGS, &ifr) < 0) {
         NETNATIVE_LOGE("set iface up ioctl SIOCSIFFLAGS error: %{public}s", strerror(errno));
+        close(inetSocket);
         return -1;
     }
+    close(inetSocket);
     return 0;
 }
 } // namespace nmd
