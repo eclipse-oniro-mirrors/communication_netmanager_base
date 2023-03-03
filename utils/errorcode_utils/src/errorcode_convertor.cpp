@@ -24,7 +24,6 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 constexpr int32_t ERROR_DIVISOR = 1000;
-constexpr int32_t ERROR_RANGE = 100;
 std::map<int32_t, int32_t> g_errNumMap = {
     {NETMANAGER_ERR_MEMCPY_FAIL, NETMANAGER_ERR_INTERNAL},
     {NETMANAGER_ERR_MEMSET_FAIL, NETMANAGER_ERR_INTERNAL},
