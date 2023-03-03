@@ -48,7 +48,7 @@ void GetAppNetContext::ParseParams(napi_value *params, size_t paramsCount)
     }
 
     if (paramsCount == PARAM_JUST_CALLBACK) {
-        SetParseOK(SetCallback(params[0]) == napi_ok);
+        SetParseOK(SetCallback(params[ARG_INDEX_0]) == napi_ok);
         return;
     }
     SetParseOK(true);
