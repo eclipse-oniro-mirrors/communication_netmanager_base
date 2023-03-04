@@ -50,20 +50,22 @@ napi_value StatisticsObserverWrapper::On(napi_env env, napi_callback_info info,
     if (std::find(events.begin(), events.end(), event) == events.end()) {
         return NapiUtils::GetUndefined(env);
     }
-    if (Register()) {
-        manager_->AddListener(env, event, params[ARG_INDEX_1], false, asyncCallback);
-    }
-    return NapiUtils::GetUndefined(env);
-}
 
-bool StatisticsObserverWrapper::Register()
-{
     if (!registed_) {
         int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->RegisterNetStatsCallback(observer_);
         NETMANAGER_BASE_LOGI("ret = [%{public}d]", ret);
-        registed_ = (ret == static_cast<int32_t>(NetStatsResultCode::ERR_NONE));
+        registed_ = (ret == NETMANAGER_SUCCESS);
+        if (!registed_) {
+            NETMANAGER_BASE_LOGE("register callback error");
+            NetBaseErrorCodeConvertor convertor;
+            std::string errorMsg = convertor.ConvertErrorCode(ret);
+            napi_throw_error(env, std::to_string(ret).c_str(), errorMsg.c_str());
+        }
     }
-    return registed_;
+    if (registed_) {
+        manager_->AddListener(env, event, params[ARG_INDEX_1], false, asyncCallback);
+    }
+    return NapiUtils::GetUndefined(env);
 }
 
 napi_value StatisticsObserverWrapper::Off(napi_env env, napi_callback_info info,

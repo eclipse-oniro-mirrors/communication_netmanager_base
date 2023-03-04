@@ -52,7 +52,7 @@ int32_t NetPolicyServiceProxy::SetPolicyByUid(uint32_t uid, uint32_t policy)
     int32_t retCode = remote->SendRequest(CMD_NPS_SET_POLICY_BY_UID, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     int32_t result = 0;
@@ -87,7 +87,7 @@ int32_t NetPolicyServiceProxy::GetPolicyByUid(uint32_t uid, uint32_t &policy)
     int32_t retCode = remote->SendRequest(CMD_NPS_GET_POLICY_BY_UID, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     if (!reply.ReadUint32(policy)) {
@@ -124,10 +124,10 @@ int32_t NetPolicyServiceProxy::GetUidsByPolicy(uint32_t policy, std::vector<uint
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NPS_GET_UIDS_BY_UID, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_GET_UIDS_BY_POLICY, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     if (!reply.ReadUInt32Vector(&uids)) {
@@ -172,7 +172,7 @@ int32_t NetPolicyServiceProxy::IsUidNetAllowed(uint32_t uid, bool metered, bool 
     int32_t retCode = remote->SendRequest(CMD_NPS_IS_NET_ALLOWED_BY_METERED, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     if (!reply.ReadBool(isAllowed)) {
@@ -217,7 +217,7 @@ int32_t NetPolicyServiceProxy::IsUidNetAllowed(uint32_t uid, const std::string &
     int32_t retCode = remote->SendRequest(CMD_NPS_IS_NET_ALLOWED_BY_IFACE, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     if (!reply.ReadBool(isAllowed)) {
@@ -258,7 +258,7 @@ int32_t NetPolicyServiceProxy::RegisterNetPolicyCallback(const sptr<INetPolicyCa
     int32_t retCode = remote->SendRequest(CMD_NPS_REGISTER_NET_POLICY_CALLBACK, dataParcel, replyParcel, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     int32_t result = 0;
@@ -294,7 +294,7 @@ int32_t NetPolicyServiceProxy::UnregisterNetPolicyCallback(const sptr<INetPolicy
     int32_t retCode = remote->SendRequest(CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK, dataParcel, replyParcel, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     int32_t result = 0;
@@ -334,7 +334,7 @@ int32_t NetPolicyServiceProxy::SetNetQuotaPolicies(const std::vector<NetQuotaPol
     int32_t retCode = remote->SendRequest(CMD_NPS_SET_NET_QUOTA_POLICIES, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     int32_t result = 0;
@@ -364,7 +364,7 @@ int32_t NetPolicyServiceProxy::GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &
     int32_t retCode = remote->SendRequest(CMD_NPS_GET_NET_QUOTA_POLICIES, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     if (!NetQuotaPolicy::Unmarshalling(reply, quotaPolicies)) {
@@ -404,7 +404,7 @@ int32_t NetPolicyServiceProxy::ResetPolicies(const std::string &iccid)
     int32_t retCode = remote->SendRequest(CMD_NPS_RESET_POLICIES, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     int32_t result = 0;
@@ -439,7 +439,7 @@ int32_t NetPolicyServiceProxy::SetBackgroundPolicy(bool isBackgroundPolicyAllow)
     int32_t retCode = remote->SendRequest(CMD_NPS_SET_BACKGROUND_POLICY, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     int32_t result = 0;
@@ -469,7 +469,7 @@ int32_t NetPolicyServiceProxy::GetBackgroundPolicy(bool &backgroundPolicy)
     int32_t retCode = remote->SendRequest(CMD_NPS_GET_BACKGROUND_POLICY, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     if (!reply.ReadBool(backgroundPolicy)) {
@@ -509,7 +509,7 @@ int32_t NetPolicyServiceProxy::GetBackgroundPolicyByUid(uint32_t uid, uint32_t &
     int32_t retCode = remote->SendRequest(CMD_NPS_GET_BACKGROUND_POLICY_BY_UID, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     if (!reply.ReadUint32(backgroundPolicyOfUid)) {
@@ -559,7 +559,7 @@ int32_t NetPolicyServiceProxy::UpdateRemindPolicy(int32_t netType, const std::st
     int32_t retCode = remote->SendRequest(CMD_NPS_UPDATE_REMIND_POLICY, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     int32_t result = 0;
@@ -598,7 +598,7 @@ int32_t NetPolicyServiceProxy::SetDeviceIdleAllowedList(uint32_t uid, bool isAll
     int32_t retCode = remote->SendRequest(CMD_NPS_SET_IDLE_ALLOWED_LIST, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     int32_t result = 0;
@@ -628,7 +628,7 @@ int32_t NetPolicyServiceProxy::GetDeviceIdleAllowedList(std::vector<uint32_t> &u
     int32_t retCode = remote->SendRequest(CMD_NPS_GET_IDLE_ALLOWED_LIST, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     if (!reply.ReadUInt32Vector(&uids)) {
@@ -668,7 +668,7 @@ int32_t NetPolicyServiceProxy::SetDeviceIdlePolicy(bool enable)
     int32_t retCode = remote->SendRequest(CMD_NPS_SET_DEVICE_IDLE_POLICY, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     int32_t result = 0;

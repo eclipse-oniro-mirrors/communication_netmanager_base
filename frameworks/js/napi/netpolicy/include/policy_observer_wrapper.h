@@ -44,10 +44,6 @@ public:
     {
         return manager_;
     }
-
-private:
-    bool Register();
-
 private:
     sptr<NetPolicyCallbackObserver> observer_;
     EventManager *manager_;

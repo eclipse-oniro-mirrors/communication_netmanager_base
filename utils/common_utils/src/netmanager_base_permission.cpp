@@ -32,14 +32,13 @@ namespace NetManagerStandard {
 bool NetManagerPermission::CheckPermission(const std::string &permissionName)
 {
     if (permissionName.empty()) {
-        NETMGR_LOG_E("permission check failed，permission name is empty.");
+        NETMGR_LOG_E("permission check failed,permission name is empty.");
         return false;
     }
 
     auto callerToken = IPCSkeleton::GetCallingTokenID();
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
     int result = Security::AccessToken::PERMISSION_DENIED;
-
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
         result = Security::AccessToken::PERMISSION_GRANTED;
     } else if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
@@ -59,7 +58,7 @@ bool NetManagerPermission::CheckPermission(const std::string &permissionName)
 bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissionName)
 {
     if (permissionName.empty()) {
-        NETMGR_LOG_E("permission check failed，permission name is empty.");
+        NETMGR_LOG_E("permission check failed,permission name is empty.");
         return false;
     }
 

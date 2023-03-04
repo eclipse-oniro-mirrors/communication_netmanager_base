@@ -48,6 +48,8 @@ void GetIfaceUidStatsContext::ParseParams(napi_value *params, size_t paramsCount
             "param error hasIface is %{public}d, hasStart is %{public}d, hasEnd is %{public}d"
             "hasUid is %{public}d",
             hasIface, hasStart, hasEnd, hasUid);
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        SetNeedThrowException(true);
         return;
     }
     bool checkUidType = NapiUtils::GetValueType(
@@ -61,6 +63,8 @@ void GetIfaceUidStatsContext::ParseParams(napi_value *params, size_t paramsCount
 
     if (!(checkUidType && checkIfaceType && checkStartType && checkEndType)) {
         NETMANAGER_BASE_LOGE("param napi_type error");
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        SetNeedThrowException(true);
         return;
     }
     uid_ = NapiUtils::GetInt32Property(GetEnv(), ifaceInfo, "uid");
