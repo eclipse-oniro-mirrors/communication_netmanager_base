@@ -38,7 +38,8 @@ using Security::AccessToken::AccessTokenID;
 HapInfoParams testInfoParms = {.bundleName = "net_conn_manager_test",
                                .userID = 1,
                                .instIndex = 0,
-                               .appIDDesc = "test"};
+                               .appIDDesc = "test",
+                               .isSystemApp = true};
 
 PermissionDef testPermDef = {
     .permissionName = "ohos.permission.GET_NETWORK_INFO",
@@ -102,12 +103,11 @@ public:
 };
 class AccessToken {
 public:
-    AccessToken()
+    AccessToken() : currentID_(GetSelfTokenID())
     {
-        currentID_ = GetSelfTokenID();
         AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
         accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(accessID_);
+        SetSelfTokenID(tokenIdEx.tokenIDEx);
     }
     ~AccessToken()
     {
@@ -116,7 +116,7 @@ public:
     }
 
 private:
-    AccessTokenID currentID_ = 0;
+    AccessTokenID currentID_;
     AccessTokenID accessID_ = 0;
 };
 
@@ -300,7 +300,7 @@ HWTEST_F(NetConnClientTest, SetAirplaneModeTest, TestSize.Level1)
 {
     AccessToken token;
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAirplaneMode(true);
-    ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**

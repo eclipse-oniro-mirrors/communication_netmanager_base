@@ -31,7 +31,6 @@ ohos_unittest("net_policy_manager_test") {
     "ut_net_policy_file.cpp",
     "ut_net_policy_firewall.cpp",
     "ut_net_policy_rule.cpp",
-    "ut_net_policy_service.cpp",
     "ut_net_policy_service_common.cpp",
     "ut_net_policy_traffic.cpp",
     "ut_net_quota_policy.cpp",

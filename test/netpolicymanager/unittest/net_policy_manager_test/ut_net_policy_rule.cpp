@@ -17,6 +17,10 @@
 
 #include <gtest/gtest.h>
 
+#include "accesstoken_kit.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
+
 #include "net_policy_callback_test.h"
 #include "net_policy_client.h"
 #include "net_policy_firewall.h"
@@ -24,14 +28,88 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
+using namespace testing::ext;
+using namespace Security::AccessToken;
+using Security::AccessToken::AccessTokenID;
 constexpr int32_t WAIT_TIME_SECOND_LONG = 10;
 constexpr int32_t WAIT_TIME_THIRTY_SECOND_LONG = 30;
 constexpr uint32_t TEST_UID1 = 200;
 constexpr uint32_t TEST_UID2 = 13000;
 std::shared_ptr<NetPolicyRule> g_netPolicyRule = nullptr;
 std::shared_ptr<NetPolicyFirewall> g_netPolicyFirewallR = nullptr;
+HapInfoParams testInfoParms = {.userID = 1,
+                               .bundleName = "net_policy_manager_test",
+                               .instIndex = 0,
+                               .appIDDesc = "test",
+                               .isSystemApp = true};
 
-using namespace testing::ext;
+PermissionDef testPermDef = {.permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+                             .bundleName = "net_policy_manager_test",
+                             .grantMode = 1,
+                             .availableLevel = APL_SYSTEM_BASIC,
+                             .label = "label",
+                             .labelId = 1,
+                             .description = "Test net policy connectivity internal",
+                             .descriptionId = 1};
+
+PermissionStateFull testState = {.permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+                                 .isGeneral = true,
+                                 .resDeviceID = {"local"},
+                                 .grantStatus = {PermissionState::PERMISSION_GRANTED},
+                                 .grantFlags = {2}};
+
+HapPolicyParams testPolicyPrams = {.apl = APL_SYSTEM_BASIC,
+                                   .domain = "test.domain",
+                                   .permList = {testPermDef},
+                                   .permStateList = {testState}};
+
+HapInfoParams testInfoParms2 = {.userID = 1,
+                                .bundleName = "net_policy_manager_test",
+                                .instIndex = 0,
+                                .appIDDesc = "test",
+                                .isSystemApp = true};
+
+PermissionDef testPermDef2 = {.permissionName = "ohos.permission.SET_NETWORK_POLICY",
+                              .bundleName = "net_policy_manager_test",
+                              .grantMode = 1,
+                              .availableLevel = APL_SYSTEM_BASIC,
+                              .label = "label",
+                              .labelId = 1,
+                              .description = "Test net policy connectivity internal",
+                              .descriptionId = 1};
+
+PermissionStateFull testState2 = {.permissionName = "ohos.permission.SET_NETWORK_POLICY",
+                                  .isGeneral = true,
+                                  .resDeviceID = {"local"},
+                                  .grantStatus = {PermissionState::PERMISSION_GRANTED},
+                                  .grantFlags = {2}};
+
+HapPolicyParams testPolicyPrams2 = {.apl = APL_SYSTEM_BASIC,
+                                    .domain = "test.domain",
+                                    .permList = {testPermDef2},
+                                    .permStateList = {testState2}};
+} // namespace
+
+class AccessToken {
+public:
+    AccessToken(HapInfoParams &testInfoParms, HapPolicyParams &testPolicyPrams) : currentID_(GetSelfTokenID())
+    {
+        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
+        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
+        SetSelfTokenID(tokenIdEx.tokenIDEx);
+    }
+    ~AccessToken()
+    {
+        AccessTokenKit::DeleteToken(accessID_);
+        SetSelfTokenID(currentID_);
+    }
+
+private:
+    AccessTokenID currentID_;
+    AccessTokenID accessID_ = 0;
+};
+
 class UtNetPolicyRule : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -209,6 +287,7 @@ HWTEST_F(UtNetPolicyRule, NetPolicyRule007, TestSize.Level1)
 
 void SetPolicyUid()
 {
+    AccessToken token2(testInfoParms2, testPolicyPrams2);
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(
         TEST_UID1, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
@@ -216,6 +295,7 @@ void SetPolicyUid()
 
 void SendMessage()
 {
+    AccessToken token(testInfoParms, testPolicyPrams);
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdlePolicy(true);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
     int32_t result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdleAllowedList(TEST_UID1, true);
@@ -229,6 +309,7 @@ void SendMessage()
  */
 HWTEST_F(UtNetPolicyRule, NetPolicyRule008, TestSize.Level1)
 {
+    AccessToken token(testInfoParms, testPolicyPrams);
     DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdlePolicy(false);
     sptr<NetPolicyCallbackTest> callback = GetINetPolicyCallbackSample();
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->RegisterNetPolicyCallback(callback);
@@ -243,10 +324,12 @@ HWTEST_F(UtNetPolicyRule, NetPolicyRule008, TestSize.Level1)
     } else {
         std::cout << "RegisterNetPolicyCallback failed!" << std::endl;
     }
+    AccessToken token2(testInfoParms, testPolicyPrams);
     int32_t result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->UnregisterNetPolicyCallback(callback);
     ASSERT_EQ(result2, NETMANAGER_SUCCESS);
 
     sptr<NetPolicyCallbackTest> callbackR = GetINetPolicyCallbackSample();
+    AccessToken token3(testInfoParms, testPolicyPrams);
     int32_t result3 = DelayedSingleton<NetPolicyClient>::GetInstance()->RegisterNetPolicyCallback(callbackR);
     if (result3 == NETMANAGER_SUCCESS) {
         std::thread sendMessage(SendMessage);
@@ -258,6 +341,7 @@ HWTEST_F(UtNetPolicyRule, NetPolicyRule008, TestSize.Level1)
     } else {
         std::cout << "RegisterNetPolicyCallbackR failed!" << std::endl;
     }
+    AccessToken token4(testInfoParms, testPolicyPrams);
     int32_t result4 = DelayedSingleton<NetPolicyClient>::GetInstance()->UnregisterNetPolicyCallback(callbackR);
     ASSERT_EQ(result4, NETMANAGER_SUCCESS);
 }

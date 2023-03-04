@@ -1333,6 +1333,10 @@ int32_t NetConnService::Dump(int32_t fd, const std::vector<std::u16string> &args
 
 int32_t NetConnService::SetAirplaneMode(bool state)
 {
+    if (!NetManagerPermission::IsSystemCaller()) {
+        NETMGR_LOG_E("Permission check failed.");
+        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
+    }
     BroadcastInfo info;
     info.action = EventFwk::CommonEventSupport::COMMON_EVENT_AIRPLANE_MODE_CHANGED;
     info.data = "Net Manager Airplane Mode Changed";

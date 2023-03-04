@@ -66,6 +66,10 @@ int32_t NetStatsServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
 
 int32_t NetStatsServiceStub::OnRegisterNetStatsCallback(MessageParcel &data, MessageParcel &reply)
 {
+    if (!NetManagerPermission::IsSystemCaller()) {
+        NETMGR_LOG_E("Permission check failed.");
+        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
+    }
     if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
@@ -76,6 +80,7 @@ int32_t NetStatsServiceStub::OnRegisterNetStatsCallback(MessageParcel &data, Mes
         reply.WriteInt32(result);
         return result;
     }
+
     sptr<INetStatsCallback> callback = iface_cast<INetStatsCallback>(remote);
     result = RegisterNetStatsCallback(callback);
     if (!reply.WriteInt32(result)) {
@@ -86,6 +91,10 @@ int32_t NetStatsServiceStub::OnRegisterNetStatsCallback(MessageParcel &data, Mes
 
 int32_t NetStatsServiceStub::OnUnregisterNetStatsCallback(MessageParcel &data, MessageParcel &reply)
 {
+    if (!NetManagerPermission::IsSystemCaller()) {
+        NETMGR_LOG_E("Permission check failed.");
+        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
+    }
     if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
@@ -262,6 +271,10 @@ int32_t NetStatsServiceStub::OnGetUidTxBytes(MessageParcel &data, MessageParcel 
 
 int32_t NetStatsServiceStub::OnGetIfaceStatsDetail(MessageParcel &data, MessageParcel &reply)
 {
+    if (!NetManagerPermission::IsSystemCaller()) {
+        NETMGR_LOG_E("Permission check failed.");
+        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
+    }
     if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
@@ -285,6 +298,10 @@ int32_t NetStatsServiceStub::OnGetIfaceStatsDetail(MessageParcel &data, MessageP
 
 int32_t NetStatsServiceStub::OnGetUidStatsDetail(MessageParcel &data, MessageParcel &reply)
 {
+    if (!NetManagerPermission::IsSystemCaller()) {
+        NETMGR_LOG_E("Permission check failed.");
+        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
+    }
     if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }

@@ -46,7 +46,8 @@ using Security::AccessToken::AccessTokenID;
 HapInfoParams testInfoParms = {.userID = 1,
                                .bundleName = "net_conn_client_fuzzer",
                                .instIndex = 0,
-                               .appIDDesc = "test"};
+                               .appIDDesc = "test",
+                               .isSystemApp = true};
 
 PermissionDef testPermDef = {
     .permissionName = "ohos.permission.GET_NETWORK_INFO",
@@ -143,7 +144,7 @@ public:
         currentID_ = GetSelfTokenID();
         AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testInternetPolicyPrams);
         accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(accessID_);
+        SetSelfTokenID(tokenIdEx.tokenIDEx);
     }
     ~AccessTokenInternetInfo()
     {

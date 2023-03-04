@@ -33,6 +33,7 @@ class NetManagerPermission {
 public:
     static bool CheckPermission(const std::string &permissionName);
     static bool CheckPermissionWithCache(const std::string &permissionName);
+    static bool IsSystemCaller();
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

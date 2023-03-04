@@ -17,6 +17,7 @@
 
 #include "net_manager_constants.h"
 #include "net_policy_service_common.h"
+#include "net_settings.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -44,15 +45,16 @@ void UtNetPolicyServiceCommonTest::TearDown() {}
 HWTEST_F(UtNetPolicyServiceCommonTest, ResetPoliciesTest001, TestSize.Level1)
 {
     auto ret = instance_->ResetPolicies();
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
 HWTEST_F(UtNetPolicyServiceCommonTest, IsUidNetAllowedTest001, TestSize.Level1)
 {
     uint32_t uid = 1251;
     bool metered = true;
+    NetSettings::GetInstance().AddSystemUid(uid);
     auto ret = instance_->IsUidNetAllowed(uid, metered);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
