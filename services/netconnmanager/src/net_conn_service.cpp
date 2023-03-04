@@ -1271,7 +1271,7 @@ int32_t NetConnService::GetNetIdByIdentifier(const std::string &ident, int32_t &
 
 int32_t NetConnService::SetAppNet(int32_t netId)
 {
-    if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
+    if (!NetManagerPermission::CheckPermission(Permission::INTERNET)) {
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
