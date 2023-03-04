@@ -18,15 +18,16 @@
 
 #include <netdb.h>
 
-#include "app_net_context.h"
 #include "bindsocket_context.h"
 #include "getaddressbyname_context.h"
+#include "getappnet_context.h"
 #include "getdefaultnet_context.h"
 #include "global_http_proxy_context.h"
 #include "napi/native_api.h"
 #include "none_params_context.h"
 #include "parse_nethandle_context.h"
 #include "register_context.h"
+#include "setappnet_context.h"
 
 namespace OHOS::NetManagerStandard {
 static constexpr size_t MAX_ARRAY_LENGTH = 64;
@@ -96,13 +97,13 @@ public:
 
     static napi_value SetGlobalHttpProxyCallback(GlobalHttpProxyContext *context);
 
-    static bool ExecGetAppNet(AppNetContext *context);
+    static bool ExecGetAppNet(GetAppNetContext *context);
 
-    static napi_value GetAppNetCallback(AppNetContext *context);
+    static napi_value GetAppNetCallback(GetAppNetContext *context);
 
-    static bool ExecSetAppNet(AppNetContext *context);
+    static bool ExecSetAppNet(SetAppNetContext *context);
 
-    static napi_value SetAppNetCallback(AppNetContext *context);
+    static napi_value SetAppNetCallback(SetAppNetContext *context);
 
     class NetHandleExec final {
     public:

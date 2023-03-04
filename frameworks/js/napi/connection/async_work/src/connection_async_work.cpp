@@ -15,12 +15,13 @@
 
 #include "connection_async_work.h"
 
-#include "app_net_context.h"
 #include "connection_exec.h"
 #include "base_async_work.h"
+#include "getappnet_context.h"
 #include "global_http_proxy_context.h"
 #include "none_params_context.h"
 #include "parse_nethandle_context.h"
+#include "setappnet_context.h"
 
 namespace OHOS::NetManagerStandard {
 void ConnectionAsyncWork::ExecGetAddressesByName(napi_env env, void *data)
@@ -166,22 +167,22 @@ void ConnectionAsyncWork::SetGlobalHttpProxyCallback(napi_env env, napi_status s
 
 void ConnectionAsyncWork::ExecGetAppNet(napi_env env, void *data)
 {
-    BaseAsyncWork::ExecAsyncWork<AppNetContext, ConnectionExec::ExecGetAppNet>(env, data);
+    BaseAsyncWork::ExecAsyncWork<GetAppNetContext, ConnectionExec::ExecGetAppNet>(env, data);
 }
 
 void ConnectionAsyncWork::GetAppNetCallback(napi_env env, napi_status status, void *data)
 {
-    BaseAsyncWork::AsyncWorkCallback<AppNetContext, ConnectionExec::GetAppNetCallback>(env, status, data);
+    BaseAsyncWork::AsyncWorkCallback<GetAppNetContext, ConnectionExec::GetAppNetCallback>(env, status, data);
 }
 
 void ConnectionAsyncWork::ExecSetAppNet(napi_env env, void *data)
 {
-    BaseAsyncWork::ExecAsyncWork<AppNetContext, ConnectionExec::ExecSetAppNet>(env, data);
+    BaseAsyncWork::ExecAsyncWork<SetAppNetContext, ConnectionExec::ExecSetAppNet>(env, data);
 }
 
 void ConnectionAsyncWork::SetAppNetCallback(napi_env env, napi_status status, void *data)
 {
-    BaseAsyncWork::AsyncWorkCallback<AppNetContext, ConnectionExec::SetAppNetCallback>(env, status, data);
+    BaseAsyncWork::AsyncWorkCallback<SetAppNetContext, ConnectionExec::SetAppNetCallback>(env, status, data);
 }
 
 void ConnectionAsyncWork::NetHandleAsyncWork::ExecGetAddressesByName(napi_env env, void *data)

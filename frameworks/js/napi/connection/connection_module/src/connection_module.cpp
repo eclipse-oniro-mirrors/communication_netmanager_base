@@ -15,12 +15,12 @@
 
 #include "connection_module.h"
 
-#include "app_net_context.h"
 #include "bindsocket_context.h"
 #include "connection_async_work.h"
 #include "connection_exec.h"
 #include "constant.h"
 #include "getaddressbyname_context.h"
+#include "getappnet_context.h"
 #include "getdefaultnet_context.h"
 #include "global_http_proxy_context.h"
 #include "napi_constant.h"
@@ -31,6 +31,7 @@
 #include "module_template.h"
 #include "parse_nethandle_context.h"
 #include "register_context.h"
+#include "setappnet_context.h"
 
 static constexpr const char *CONNECTION_MODULE_NAME = "net.connection";
 
@@ -300,14 +301,14 @@ napi_value ConnectionModule::SetGlobalHttpProxy(napi_env env, napi_callback_info
 
 napi_value ConnectionModule::GetAppNet(napi_env env, napi_callback_info info)
 {
-    return ModuleTemplate::Interface<AppNetContext>(env, info, FUNCTION_GET_APP_NET, nullptr,
+    return ModuleTemplate::Interface<GetAppNetContext>(env, info, FUNCTION_GET_APP_NET, nullptr,
                                                     ConnectionAsyncWork::ExecGetAppNet,
                                                     ConnectionAsyncWork::GetAppNetCallback);
 }
 
 napi_value ConnectionModule::SetAppNet(napi_env env, napi_callback_info info)
 {
-    return ModuleTemplate::Interface<AppNetContext>(env, info, FUNCTION_SET_APP_NET, nullptr,
+    return ModuleTemplate::Interface<SetAppNetContext>(env, info, FUNCTION_SET_APP_NET, nullptr,
                                                     ConnectionAsyncWork::ExecSetAppNet,
                                                     ConnectionAsyncWork::SetAppNetCallback);
 }

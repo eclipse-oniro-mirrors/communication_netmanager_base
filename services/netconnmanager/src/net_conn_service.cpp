@@ -1268,5 +1268,14 @@ int32_t NetConnService::GetNetIdByIdentifier(const std::string &ident, int32_t &
     }
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetConnService::SetAppNet(int32_t netId)
+{
+    if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
