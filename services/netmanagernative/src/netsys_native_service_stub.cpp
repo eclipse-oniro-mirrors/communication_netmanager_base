@@ -18,6 +18,7 @@
 #include <netdb.h>
 #include <unistd.h>
 
+#include "ipc_skeleton.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "securec.h"
@@ -29,6 +30,7 @@ namespace OHOS {
 namespace NetsysNative {
 static constexpr int32_t MAX_FLAG_NUM = 64;
 static constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
+static constexpr int32_t NETMANAGER_ERR_PERMISSION_DENIED = 201;
 static constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
 
 NetsysNativeServiceStub::NetsysNativeServiceStub()
@@ -111,6 +113,15 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
         NETNATIVE_LOGE("Cannot response request %d: unknown tranction", code);
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (uid != UID_ROOT && uid != UID_SHELL && uid != UID_NET_MANAGER) {
+        NETNATIVE_LOGE("this uid connot use netsys");
+        if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
+            return IPC_STUB_WRITE_PARCEL_ERR;
+        }
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+
     const std::u16string descriptor = NetsysNativeServiceStub::GetDescriptor();
     const std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {

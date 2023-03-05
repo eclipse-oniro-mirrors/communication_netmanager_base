@@ -22,6 +22,12 @@
 
 namespace OHOS {
 namespace NetsysNative {
+enum {
+    UID_ROOT = 0,
+    UID_SHELL = 2000,
+    UID_NET_MANAGER = 1099,
+};
+
 class NetsysNativeServiceStub : public IRemoteStub<INetsysService> {
 public:
     NetsysNativeServiceStub();
