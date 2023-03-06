@@ -67,6 +67,7 @@ public:
         CMD_NM_SET_HTTP_PROXY,
         CMD_NM_GET_HTTP_PROXY,
         CMD_NM_GET_NET_ID_BY_IDENTIFIER,
+        CMD_NM_SET_APP_NET,
         CMD_NM_END,
     };
 
@@ -103,6 +104,7 @@ public:
     virtual int32_t SetGlobalHttpProxy(const HttpProxy &httpProxy) = 0;
     virtual int32_t GetGlobalHttpProxy(HttpProxy &httpProxy) = 0;
     virtual int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList) = 0;
+    virtual int32_t SetAppNet(int32_t netId) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

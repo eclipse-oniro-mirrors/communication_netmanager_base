@@ -68,6 +68,7 @@ private:
     int32_t OnSetGlobalHttpProxy(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetGlobalHttpProxy(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetNetIdByIdentifier(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetAppNet(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;

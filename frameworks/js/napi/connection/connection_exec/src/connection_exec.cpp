@@ -322,7 +322,7 @@ napi_value ConnectionExec::SetGlobalHttpProxyCallback(GlobalHttpProxyContext *co
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
-bool ConnectionExec::ExecGetAppNet(AppNetContext *context)
+bool ConnectionExec::ExecGetAppNet(GetAppNetContext *context)
 {
     NETMANAGER_BASE_LOGI("into");
     int32_t netId = 0;
@@ -336,13 +336,13 @@ bool ConnectionExec::ExecGetAppNet(AppNetContext *context)
     return true;
 }
 
-napi_value ConnectionExec::GetAppNetCallback(AppNetContext *context)
+napi_value ConnectionExec::GetAppNetCallback(GetAppNetContext *context)
 {
     NETMANAGER_BASE_LOGI("into");
     return CreateNetHandle(context->GetEnv(), &context->netHandle_);
 }
 
-bool ConnectionExec::ExecSetAppNet(AppNetContext *context)
+bool ConnectionExec::ExecSetAppNet(SetAppNetContext *context)
 {
     NETMANAGER_BASE_LOGI("into");
     int32_t errorCode = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(context->netHandle_.GetNetId());
@@ -354,7 +354,7 @@ bool ConnectionExec::ExecSetAppNet(AppNetContext *context)
     return true;
 }
 
-napi_value ConnectionExec::SetAppNetCallback(AppNetContext *context)
+napi_value ConnectionExec::SetAppNetCallback(SetAppNetContext *context)
 {
     NETMANAGER_BASE_LOGI("into");
     return NapiUtils::GetUndefined(context->GetEnv());
