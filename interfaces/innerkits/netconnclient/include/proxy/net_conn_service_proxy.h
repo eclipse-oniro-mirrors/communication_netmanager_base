@@ -58,6 +58,7 @@ public:
     int32_t SetGlobalHttpProxy(const HttpProxy &httpProxy) override;
     int32_t GetGlobalHttpProxy(HttpProxy &httpProxy) override;
     int32_t GetNetIdByIdentifier(const std::string &ident, int32_t &netId) override;
+    int32_t SetAppNet(int32_t netId) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
