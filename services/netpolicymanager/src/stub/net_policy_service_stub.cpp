@@ -22,11 +22,35 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
+std::map<uint32_t, const char *> g_codeNPS = {
+    {INetPolicyService::CMD_NPS_SET_POLICY_BY_UID, Permission::SET_NETWORK_POLICY},
+    {INetPolicyService::CMD_NPS_SET_NET_QUOTA_POLICIES, Permission::SET_NETWORK_POLICY},
+    {INetPolicyService::CMD_NPS_RESET_POLICIES, Permission::SET_NETWORK_POLICY},
+    {INetPolicyService::CMD_NPS_SET_BACKGROUND_POLICY, Permission::SET_NETWORK_POLICY},
+    {INetPolicyService::CMD_NPS_UPDATE_REMIND_POLICY, Permission::SET_NETWORK_POLICY},
+
+    {INetPolicyService::CMD_NPS_GET_POLICY_BY_UID, Permission::GET_NETWORK_POLICY},
+    {INetPolicyService::CMD_NPS_GET_UIDS_BY_POLICY, Permission::GET_NETWORK_POLICY},
+    {INetPolicyService::CMD_NPS_GET_NET_QUOTA_POLICIES, Permission::GET_NETWORK_POLICY},
+    {INetPolicyService::CMD_NPS_GET_BACKGROUND_POLICY, Permission::GET_NETWORK_POLICY},
+
+    {INetPolicyService::CMD_NPS_IS_NET_ALLOWED_BY_METERED, Permission::CONNECTIVITY_INTERNAL},
+    {INetPolicyService::CMD_NPS_IS_NET_ALLOWED_BY_IFACE, Permission::CONNECTIVITY_INTERNAL},
+    {INetPolicyService::CMD_NPS_REGISTER_NET_POLICY_CALLBACK, Permission::CONNECTIVITY_INTERNAL},
+    {INetPolicyService::CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK, Permission::CONNECTIVITY_INTERNAL},
+    {INetPolicyService::CMD_NPS_GET_BACKGROUND_POLICY_BY_UID, Permission::CONNECTIVITY_INTERNAL},
+    {INetPolicyService::CMD_NPS_SET_IDLE_ALLOWED_LIST, Permission::CONNECTIVITY_INTERNAL},
+    {INetPolicyService::CMD_NPS_GET_IDLE_ALLOWED_LIST, Permission::CONNECTIVITY_INTERNAL},
+    {INetPolicyService::CMD_NPS_SET_DEVICE_IDLE_POLICY, Permission::CONNECTIVITY_INTERNAL},
+};
+} // namespace
+
 NetPolicyServiceStub::NetPolicyServiceStub()
 {
     memberFuncMap_[CMD_NPS_SET_POLICY_BY_UID] = &NetPolicyServiceStub::OnSetPolicyByUid;
     memberFuncMap_[CMD_NPS_GET_POLICY_BY_UID] = &NetPolicyServiceStub::OnGetPolicyByUid;
-    memberFuncMap_[CMD_NPS_GET_UIDS_BY_UID] = &NetPolicyServiceStub::OnGetUidsByPolicy;
+    memberFuncMap_[CMD_NPS_GET_UIDS_BY_POLICY] = &NetPolicyServiceStub::OnGetUidsByPolicy;
     memberFuncMap_[CMD_NPS_IS_NET_ALLOWED_BY_METERED] = &NetPolicyServiceStub::OnIsUidNetAllowedMetered;
     memberFuncMap_[CMD_NPS_IS_NET_ALLOWED_BY_IFACE] = &NetPolicyServiceStub::OnIsUidNetAllowedIfaceName;
     memberFuncMap_[CMD_NPS_REGISTER_NET_POLICY_CALLBACK] = &NetPolicyServiceStub::OnRegisterNetPolicyCallback;
@@ -76,7 +100,10 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
             return NETMANAGER_ERR_INTERNAL;
         }
     }
-
+    int32_t checkPermissionResult = CheckPolicyPermission(code);
+    if (checkPermissionResult != NETMANAGER_SUCCESS) {
+        return checkPermissionResult;
+    }
     auto itFunc = memberFuncMap_.find(code);
     int32_t result = NETMANAGER_SUCCESS;
     if (itFunc != memberFuncMap_.end()) {
@@ -91,13 +118,30 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-bool NetPolicyServiceStub::CheckPermission(const std::string &permission, const std::string &funcName)
+bool NetPolicyServiceStub::CheckPermission(const std::string &permission, uint32_t funcCode)
 {
     if (NetManagerPermission::CheckPermission(permission)) {
         return true;
     }
-    NETMGR_LOG_E("Permission denied function: %{public}s permission: %{public}s", funcName.c_str(), permission.c_str());
+    NETMGR_LOG_E("Permission denied funcCode: %{public}d permission: %{public}s", funcCode, permission.c_str());
     return false;
+}
+
+int32_t NetPolicyServiceStub::CheckPolicyPermission(uint32_t code)
+{
+    bool result = NetManagerPermission::IsSystemCaller();
+    if (!result) {
+        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
+    }
+    if (g_codeNPS.find(code) != g_codeNPS.end()) {
+        result = CheckPermission(g_codeNPS[code], code);
+        if (!result) {
+            return NETMANAGER_ERR_PERMISSION_DENIED;
+        }
+        return NETMANAGER_SUCCESS;
+    }
+    NETMGR_LOG_E("Error funcCode, need check");
+    return NETMANAGER_ERR_PERMISSION_DENIED;
 }
 
 int32_t NetPolicyServiceStub::OnSetPolicyByUid(MessageParcel &data, MessageParcel &reply)
@@ -232,12 +276,6 @@ int32_t NetPolicyServiceStub::OnRegisterNetPolicyCallback(MessageParcel &data, M
         NETMGR_LOG_E("Callback ptr is nullptr.");
         reply.WriteInt32(NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-    }
-
-    if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, __func__)) {
-        NETMGR_LOG_E("Permission check failed.");
-        reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED);
-        return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
     sptr<INetPolicyCallback> callback = iface_cast<INetPolicyCallback>(remote);

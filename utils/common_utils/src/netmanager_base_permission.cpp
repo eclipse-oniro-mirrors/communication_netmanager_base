@@ -17,8 +17,9 @@
 
 #include "netmanager_base_permission.h"
 
-#include "accesstoken_kit.h"
-#include "ipc_skeleton.h"
+#include <accesstoken_kit.h>
+#include <ipc_skeleton.h>
+#include <tokenid_kit.h>
 
 #include "net_mgr_log_wrapper.h"
 
@@ -32,14 +33,13 @@ namespace NetManagerStandard {
 bool NetManagerPermission::CheckPermission(const std::string &permissionName)
 {
     if (permissionName.empty()) {
-        NETMGR_LOG_E("permission check failed，permission name is empty.");
+        NETMGR_LOG_E("permission check failed,permission name is empty.");
         return false;
     }
 
     auto callerToken = IPCSkeleton::GetCallingTokenID();
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
     int result = Security::AccessToken::PERMISSION_DENIED;
-
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
         result = Security::AccessToken::PERMISSION_GRANTED;
     } else if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
@@ -59,7 +59,7 @@ bool NetManagerPermission::CheckPermission(const std::string &permissionName)
 bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissionName)
 {
     if (permissionName.empty()) {
-        NETMGR_LOG_E("permission check failed，permission name is empty.");
+        NETMGR_LOG_E("permission check failed,permission name is empty.");
         return false;
     }
 
@@ -83,6 +83,20 @@ bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissio
     }
     permissionMap[callerToken] = false;
     return false;
+}
+
+bool NetManagerPermission::IsSystemCaller()
+{
+    if (Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(IPCSkeleton::GetCallingTokenID()) !=
+        Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
+        return true;
+    }
+    bool checkResult =
+        Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetCallingFullTokenID());
+    if (!checkResult) {
+        NETMGR_LOG_E("Caller is not allowed, need sys permissive");
+    }
+    return checkResult;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

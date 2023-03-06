@@ -58,7 +58,7 @@ int32_t NetStatsServiceProxy::RegisterNetStatsCallback(const sptr<INetStatsCallb
     MessageParcel replyParcel;
     int32_t retCode = remote->SendRequest(CMD_NSM_REGISTER_NET_STATS_CALLBACK, dataParcel, replyParcel, option);
     if (retCode != 0) {
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
     return replyParcel.ReadInt32();
 }
@@ -87,7 +87,7 @@ int32_t NetStatsServiceProxy::UnregisterNetStatsCallback(const sptr<INetStatsCal
     MessageParcel replyParcel;
     int32_t retCode = remote->SendRequest(CMD_NSM_UNREGISTER_NET_STATS_CALLBACK, dataParcel, replyParcel, option);
     if (retCode != 0) {
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
     return replyParcel.ReadInt32();
 }
@@ -114,7 +114,7 @@ int32_t NetStatsServiceProxy::GetIfaceRxBytes(uint64_t &stats, const std::string
     int32_t error = remote->SendRequest(CMD_GET_IFACE_RXBYTES, data, reply, option);
     if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return error;
     }
     stats = reply.ReadUint64();
     return reply.ReadInt32();
@@ -142,7 +142,7 @@ int32_t NetStatsServiceProxy::GetIfaceTxBytes(uint64_t &stats, const std::string
     int32_t error = remote->SendRequest(CMD_GET_IFACE_TXBYTES, data, reply, option);
     if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return error;
     }
     stats = reply.ReadUint64();
     return reply.ReadInt32();
@@ -166,7 +166,7 @@ int32_t NetStatsServiceProxy::GetCellularRxBytes(uint64_t &stats)
     int32_t error = remote->SendRequest(CMD_GET_CELLULAR_RXBYTES, data, reply, option);
     if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return error;
     }
     stats = reply.ReadUint64();
     return reply.ReadInt32();
@@ -190,7 +190,7 @@ int32_t NetStatsServiceProxy::GetCellularTxBytes(uint64_t &stats)
     int32_t error = remote->SendRequest(CMD_GET_CELLULAR_TXBYTES, data, reply, option);
     if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return error;
     }
     stats = reply.ReadUint64();
     return reply.ReadInt32();
@@ -214,7 +214,7 @@ int32_t NetStatsServiceProxy::GetAllRxBytes(uint64_t &stats)
     int32_t error = remote->SendRequest(CMD_GET_ALL_RXBYTES, data, reply, option);
     if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return error;
     }
     stats = reply.ReadUint64();
     return reply.ReadInt32();
@@ -238,7 +238,7 @@ int32_t NetStatsServiceProxy::GetAllTxBytes(uint64_t &stats)
     int32_t error = remote->SendRequest(CMD_GET_ALL_TXBYTES, data, reply, option);
     if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return error;
     }
     stats = reply.ReadUint64();
     return reply.ReadInt32();
@@ -266,7 +266,7 @@ int32_t NetStatsServiceProxy::GetUidRxBytes(uint64_t &stats, uint32_t uid)
     int32_t error = remote->SendRequest(CMD_GET_UID_RXBYTES, data, reply, option);
     if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return error;
     }
     stats = reply.ReadUint64();
     return reply.ReadInt32();
@@ -294,7 +294,7 @@ int32_t NetStatsServiceProxy::GetUidTxBytes(uint64_t &stats, uint32_t uid)
     int32_t error = remote->SendRequest(CMD_GET_UID_TXBYTES, data, reply, option);
     if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return error;
     }
     stats = reply.ReadUint64();
     return reply.ReadInt32();

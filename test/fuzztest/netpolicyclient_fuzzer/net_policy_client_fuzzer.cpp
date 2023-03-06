@@ -283,7 +283,7 @@ void GetUidsByPolicyFuzzTest(const uint8_t *data, size_t size)
     uint32_t policy = GetData<uint32_t>() % 3;
     dataParcel.WriteUint32(policy);
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_GET_UIDS_BY_UID, dataParcel);
+    OnRemoteRequest(INetPolicyService::CMD_NPS_GET_UIDS_BY_POLICY, dataParcel);
 }
 
 void SetBackgroundPolicyFuzzTest(const uint8_t *data, size_t size)

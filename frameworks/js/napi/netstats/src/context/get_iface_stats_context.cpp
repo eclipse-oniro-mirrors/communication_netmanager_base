@@ -45,6 +45,8 @@ void GetIfaceStatsContext::ParseParams(napi_value *params, size_t paramsCount)
     if (!(hasIface && hasStart && hasEnd)) {
         NETMANAGER_BASE_LOGE("param error hasIface is %{public}d, hasStart is %{public}d, hasEnd is %{public}d",
                              hasIface, hasStart, hasEnd);
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        SetNeedThrowException(true);
         return;
     }
 
@@ -56,6 +58,8 @@ void GetIfaceStatsContext::ParseParams(napi_value *params, size_t paramsCount)
                                                                                       END_TIME)) == napi_number;
     if (!(checkIfaceType && checkStartType && checkEndType)) {
         NETMANAGER_BASE_LOGE("param napi_type error");
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        SetNeedThrowException(true);
         return;
     }
 

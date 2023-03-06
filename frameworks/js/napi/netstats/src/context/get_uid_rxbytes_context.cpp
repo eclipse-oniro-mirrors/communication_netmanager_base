@@ -31,9 +31,7 @@ void GetUidRxBytesContext::ParseParams(napi_value *params, size_t paramsCount)
         SetNeedThrowException(true);
         return;
     }
-
-    uid_ = NapiUtils::GetUint32FromValue(GetEnv(), params[ARG_INDEX_0]);
-
+    uid_ = NapiUtils::GetInt32FromValue(GetEnv(), params[ARG_INDEX_0]);
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
         SetParseOK(SetCallback(params[ARG_INDEX_1]) == napi_ok);
         return;
@@ -44,10 +42,11 @@ void GetUidRxBytesContext::ParseParams(napi_value *params, size_t paramsCount)
 bool GetUidRxBytesContext::CheckParamsType(napi_value *params, size_t paramsCount)
 {
     if (paramsCount == PARAM_JUST_OPTIONS) {
-        return true;
+        return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_number;
     }
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
-        return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_function;
+        return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_function &&
+               NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_number;
     }
     return false;
 }

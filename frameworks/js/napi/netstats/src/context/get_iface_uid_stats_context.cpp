@@ -51,10 +51,12 @@ void GetIfaceUidStatsContext::ParseParams(napi_value *params, size_t paramsCount
             "param error hasIface is %{public}d, hasStart is %{public}d, hasEnd is %{public}d"
             "hasUid is %{public}d",
             hasIface, hasStart, hasEnd, hasUid);
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        SetNeedThrowException(true);
         return;
     }
     bool checkUidType = NapiUtils::GetValueType(
-        GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0], UID)) == napi_number;
+                            GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0], UID)) == napi_number;
     bool checkIfaceType =
         NapiUtils::GetValueType(GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), ifaceInfo, IFACE)) == napi_string;
     bool checkStartType =
@@ -64,6 +66,8 @@ void GetIfaceUidStatsContext::ParseParams(napi_value *params, size_t paramsCount
 
     if (!(checkUidType && checkIfaceType && checkStartType && checkEndType)) {
         NETMANAGER_BASE_LOGE("param napi_type error");
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        SetNeedThrowException(true);
         return;
     }
     interfaceName_ = NapiUtils::GetStringPropertyUtf8(GetEnv(), ifaceInfo, IFACE);
