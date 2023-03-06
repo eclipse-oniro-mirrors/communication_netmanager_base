@@ -1216,6 +1216,9 @@ void NetConnService::GetDumpMessage(std::string &message)
 
 int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
+    if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
     if (httpProxy_.GetHost() != httpProxy.GetHost() || httpProxy_.GetPort() != httpProxy.GetPort() ||
         httpProxy_.GetExclusionList() != httpProxy.GetExclusionList()) {
         httpProxy_ = httpProxy;

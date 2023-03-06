@@ -31,7 +31,9 @@
 
 namespace OHOS::NetManagerStandard {
 namespace {
-constexpr int32_t CONN_COMMON_COMPLETE_CODE = 2109000;
+constexpr int32_t NO_PERMISSION_CODE = 1;
+constexpr int32_t RESOURCE_UNAVALIEBLE_CODE = 11;
+constexpr int32_t NET_UNREACHABLE_CODE = 101;
 } // namespace
 
 napi_value ConnectionExec::CreateNetHandle(napi_env env, NetHandle *handle)
@@ -161,6 +163,9 @@ napi_value ConnectionExec::IsDefaultNetMeteredCallback(IsDefaultNetMeteredContex
 
 bool ConnectionExec::ExecGetNetCapabilities(GetNetCapabilitiesContext *context)
 {
+    if (!context->IsParseOK()) {
+        return false;
+    }
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(context->netHandle_,
                                                                                   context->capabilities_);
     context->SetErrorCode(ret);
@@ -174,6 +179,9 @@ napi_value ConnectionExec::GetNetCapabilitiesCallback(GetNetCapabilitiesContext 
 
 bool ConnectionExec::ExecGetConnectionProperties(GetConnectionPropertiesContext *context)
 {
+    if (!context->IsParseOK()) {
+        return false;
+    }
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetConnectionProperties(context->netHandle_,
                                                                                        context->linkInfo_);
     context->SetErrorCode(ret);
@@ -237,6 +245,9 @@ napi_value ConnectionExec::DisableAirplaneModeCallback(DisableAirplaneModeContex
 
 bool ConnectionExec::ExecReportNetConnected(ReportNetConnectedContext *context)
 {
+    if (!context->IsParseOK()) {
+        return false;
+    }
     int32_t res = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(context->netHandle_);
     if (res != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecReportNetConnected failed %{public}d", res);
@@ -252,6 +263,9 @@ napi_value ConnectionExec::ReportNetConnectedCallback(ReportNetConnectedContext 
 
 bool ConnectionExec::ExecReportNetDisconnected(ReportNetConnectedContext *context)
 {
+    if (!context->IsParseOK()) {
+        return false;
+    }
     int32_t res = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(context->netHandle_);
     if (res != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecReportNetDisconnected failed %{public}d", res);
@@ -346,13 +360,31 @@ napi_value ConnectionExec::SetAppNetCallback(AppNetContext *context)
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
+int32_t TransErrorCode(int32_t error)
+{
+    switch (error) {
+        case NO_PERMISSION_CODE:
+            return NETMANAGER_ERR_PERMISSION_DENIED;
+        case RESOURCE_UNAVALIEBLE_CODE:
+            return NETMANAGER_ERR_INVALID_PARAMETER;
+        case NET_UNREACHABLE_CODE:
+            return NETMANAGER_ERR_INTERNAL;
+        default:
+            return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+}
+
 bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameContext *context)
 {
+    if (!context->IsParseOK()) {
+        return false;
+    }
     addrinfo *res = nullptr;
     int status = getaddrinfo(context->host_.c_str(), nullptr, nullptr, &res);
     if (status < 0) {
         NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s", errno, strerror(errno));
-        context->SetErrorCode(CONN_COMMON_COMPLETE_CODE + errno);
+        int32_t temp = TransErrorCode(errno);
+        context->SetErrorCode(temp);
         return false;
     }
 
@@ -391,11 +423,15 @@ napi_value ConnectionExec::NetHandleExec::GetAddressesByNameCallback(GetAddressB
 
 bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext *context)
 {
+    if (!context->IsParseOK()) {
+        return false;
+    }
     addrinfo *res = nullptr;
     int status = getaddrinfo(context->host_.c_str(), nullptr, nullptr, &res);
     if (status < 0) {
         NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s", errno, strerror(errno));
-        context->SetErrorCode(CONN_COMMON_COMPLETE_CODE + errno);
+        int32_t temp = TransErrorCode(errno);
+        context->SetErrorCode(temp);
         return false;
     }
 
@@ -445,6 +481,9 @@ napi_value ConnectionExec::NetHandleExec::MakeNetAddressJsValue(napi_env env, co
 
 bool ConnectionExec::NetHandleExec::ExecBindSocket(BindSocketContext *context)
 {
+    if (!context->IsParseOK()) {
+        return false;
+    }
     NetHandle handle(context->netId_);
     int32_t res = handle.BindSocket(context->socketFd_);
     if (res != NETMANAGER_SUCCESS) {
