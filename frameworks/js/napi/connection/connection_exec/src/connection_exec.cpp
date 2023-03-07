@@ -279,7 +279,7 @@ napi_value ConnectionExec::ReportNetDisconnectedCallback(ReportNetConnectedConte
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
-bool ConnectionExec::ExecGetGlobalHttpProxy(GlobalHttpProxyContext *context)
+bool ConnectionExec::ExecGetGlobalHttpProxy(GetGlobalHttpProxyContext *context)
 {
     int32_t errorCode = DelayedSingleton<NetConnClient>::GetInstance()->GetGlobalHttpProxy(context->httpProxy_);
     if (errorCode != NET_CONN_SUCCESS) {
@@ -289,7 +289,7 @@ bool ConnectionExec::ExecGetGlobalHttpProxy(GlobalHttpProxyContext *context)
     return true;
 }
 
-napi_value ConnectionExec::GetGlobalHttpProxyCallback(GlobalHttpProxyContext *context)
+napi_value ConnectionExec::GetGlobalHttpProxyCallback(GetGlobalHttpProxyContext *context)
 {
     napi_value host = NapiUtils::CreateStringUtf8(context->GetEnv(), context->httpProxy_.GetHost());
     napi_value port = NapiUtils::CreateInt32(context->GetEnv(), context->httpProxy_.GetPort());
@@ -307,7 +307,7 @@ napi_value ConnectionExec::GetGlobalHttpProxyCallback(GlobalHttpProxyContext *co
     return httpProxy;
 }
 
-bool ConnectionExec::ExecSetGlobalHttpProxy(GlobalHttpProxyContext *context)
+bool ConnectionExec::ExecSetGlobalHttpProxy(SetGlobalHttpProxyContext *context)
 {
     int32_t errorCode = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(context->httpProxy_);
     if (errorCode != NET_CONN_SUCCESS) {
@@ -317,7 +317,7 @@ bool ConnectionExec::ExecSetGlobalHttpProxy(GlobalHttpProxyContext *context)
     return true;
 }
 
-napi_value ConnectionExec::SetGlobalHttpProxyCallback(GlobalHttpProxyContext *context)
+napi_value ConnectionExec::SetGlobalHttpProxyCallback(SetGlobalHttpProxyContext *context)
 {
     return NapiUtils::GetUndefined(context->GetEnv());
 }

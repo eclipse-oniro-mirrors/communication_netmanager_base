@@ -18,10 +18,11 @@
 #include "connection_exec.h"
 #include "base_async_work.h"
 #include "getappnet_context.h"
-#include "global_http_proxy_context.h"
+#include "getglobalhttpproxy_context.h"
 #include "none_params_context.h"
 #include "parse_nethandle_context.h"
 #include "setappnet_context.h"
+#include "setglobalhttpproxy_context.h"
 
 namespace OHOS::NetManagerStandard {
 void ConnectionAsyncWork::ExecGetAddressesByName(napi_env env, void *data)
@@ -145,24 +146,24 @@ void ConnectionAsyncWork::ReportNetDisconnectedCallback(napi_env env, napi_statu
 
 void ConnectionAsyncWork::ExecGetGlobalHttpProxy(napi_env env, void *data)
 {
-    BaseAsyncWork::ExecAsyncWork<GlobalHttpProxyContext, ConnectionExec::ExecGetGlobalHttpProxy>(env, data);
+    BaseAsyncWork::ExecAsyncWork<GetGlobalHttpProxyContext, ConnectionExec::ExecGetGlobalHttpProxy>(env, data);
 }
 
 void ConnectionAsyncWork::GetGlobalHttpProxyCallback(napi_env env, napi_status status, void *data)
 {
-    BaseAsyncWork::AsyncWorkCallback<GlobalHttpProxyContext, ConnectionExec::GetGlobalHttpProxyCallback>(env, status,
-                                                                                                         data);
+    BaseAsyncWork::AsyncWorkCallback<GetGlobalHttpProxyContext, ConnectionExec::GetGlobalHttpProxyCallback>(
+        env, status, data);
 }
 
 void ConnectionAsyncWork::ExecSetGlobalHttpProxy(napi_env env, void *data)
 {
-    BaseAsyncWork::ExecAsyncWork<GlobalHttpProxyContext, ConnectionExec::ExecSetGlobalHttpProxy>(env, data);
+    BaseAsyncWork::ExecAsyncWork<SetGlobalHttpProxyContext, ConnectionExec::ExecSetGlobalHttpProxy>(env, data);
 }
 
 void ConnectionAsyncWork::SetGlobalHttpProxyCallback(napi_env env, napi_status status, void *data)
 {
-    BaseAsyncWork::AsyncWorkCallback<GlobalHttpProxyContext, ConnectionExec::SetGlobalHttpProxyCallback>(env, status,
-                                                                                                         data);
+    BaseAsyncWork::AsyncWorkCallback<SetGlobalHttpProxyContext, ConnectionExec::SetGlobalHttpProxyCallback>(
+        env, status, data);
 }
 
 void ConnectionAsyncWork::ExecGetAppNet(napi_env env, void *data)
