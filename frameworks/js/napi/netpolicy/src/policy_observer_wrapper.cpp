@@ -54,24 +54,21 @@ napi_value PolicyObserverWrapper::On(napi_env env, napi_callback_info info,
         NETMANAGER_BASE_LOGE("no find event");
         return NapiUtils::GetUndefined(env);
     }
-
-    if (Register()) {
-        manager_->AddListener(env, event, params[ARG_INDEX_1], false, asyncCallback);
-    } else {
-        NETMANAGER_BASE_LOGE("unregister callback or manager is nullptr");
-    }
-
-    return NapiUtils::GetUndefined(env);
-}
-
-bool PolicyObserverWrapper::Register()
-{
     if (!registed_) {
         int32_t ret = DelayedSingleton<NetPolicyClient>::GetInstance()->RegisterNetPolicyCallback(observer_);
         NETMANAGER_BASE_LOGI("ret = [%{public}d]", ret);
         registed_ = (ret == NETMANAGER_SUCCESS);
+        if (!registed_) {
+            NETMANAGER_BASE_LOGE("register callback error");
+            NetBaseErrorCodeConvertor convertor;
+            std::string errorMsg = convertor.ConvertErrorCode(ret);
+            napi_throw_error(env, std::to_string(ret).c_str(), errorMsg.c_str());
+        }
     }
-    return registed_;
+    if (registed_) {
+        manager_->AddListener(env, event, params[ARG_INDEX_1], false, asyncCallback);
+    }
+    return NapiUtils::GetUndefined(env);
 }
 
 napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,

@@ -35,7 +35,8 @@ public:
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 protected:
-    bool CheckPermission(const std::string &permission, const std::string &funcName);
+    bool CheckPermission(const std::string &permission, uint32_t funcCode);
+    int32_t CheckPolicyPermission(uint32_t funcCode);
     std::shared_ptr<AppExecFwk::EventRunner> runner_;
     std::shared_ptr<NetPolicyEventHandler> handler_;
 

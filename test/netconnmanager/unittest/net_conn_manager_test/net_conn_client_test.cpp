@@ -99,9 +99,8 @@ public:
 };
 class AccessToken {
 public:
-    AccessToken()
+    AccessToken() : currentID_(GetSelfTokenID())
     {
-        currentID_ = GetSelfTokenID();
         AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
         accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
         SetSelfTokenID(accessID_);

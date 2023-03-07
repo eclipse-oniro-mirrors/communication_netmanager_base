@@ -14,6 +14,7 @@
  */
 
 #include "errorcode_convertor.h"
+#include "ipc_types.h"
 
 #include "net_conn_constants.h"
 #include "net_manager_constants.h"
@@ -47,6 +48,7 @@ std::map<int32_t, int32_t> g_errNumMap = {
     {NETMANAGER_EXT_ERR_STRCPY_FAIL, NETMANAGER_EXT_ERR_INTERNAL},
     {NETMANAGER_EXT_ERR_STRING_EMPTY, NETMANAGER_EXT_ERR_INTERNAL},
     {NETMANAGER_EXT_ERR_LOCAL_PTR_NULL, NETMANAGER_EXT_ERR_INTERNAL},
+    {IPC_PROXY_ERR, NETMANAGER_EXT_ERR_OPERATION_FAILED},
     {NETMANAGER_EXT_ERR_DESCRIPTOR_MISMATCH, NETMANAGER_EXT_ERR_OPERATION_FAILED},
     {NETMANAGER_EXT_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL, NETMANAGER_EXT_ERR_OPERATION_FAILED},
     {NETMANAGER_EXT_ERR_WRITE_DATA_FAIL, NETMANAGER_EXT_ERR_OPERATION_FAILED},
@@ -144,7 +146,7 @@ std::string NetBaseErrorCodeConvertor::ConvertErrorCode(int32_t &errorCode)
     if (g_errStringMap.find(errorCode) != g_errStringMap.end()) {
         errmsg = g_errStringMap.at(errorCode);
     }
-    if (errorCode > ERROR_DIVISOR) {
+    if (errorCode > ERROR_DIVISOR || errorCode == IPC_PROXY_ERR) {
         if (g_errNumMap.find(errorCode) != g_errNumMap.end()) {
             errorCode = g_errNumMap.at(errorCode);
         }

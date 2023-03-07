@@ -46,9 +46,6 @@ private:
     sptr<StatisticsCallbackObserver> observer_ = nullptr;
     EventManager *manager_ = nullptr;
     bool registed_ = false;
-
-private:
-    bool Register();
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
