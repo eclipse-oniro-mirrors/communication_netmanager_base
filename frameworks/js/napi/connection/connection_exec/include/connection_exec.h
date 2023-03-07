@@ -22,12 +22,13 @@
 #include "getaddressbyname_context.h"
 #include "getappnet_context.h"
 #include "getdefaultnet_context.h"
-#include "global_http_proxy_context.h"
+#include "getglobalhttpproxy_context.h"
 #include "napi/native_api.h"
 #include "none_params_context.h"
 #include "parse_nethandle_context.h"
 #include "register_context.h"
 #include "setappnet_context.h"
+#include "setglobalhttpproxy_context.h"
 
 namespace OHOS::NetManagerStandard {
 static constexpr size_t MAX_ARRAY_LENGTH = 64;
@@ -89,13 +90,13 @@ public:
 
     static napi_value ReportNetDisconnectedCallback(ReportNetDisconnectedContext *context);
 
-    static bool ExecGetGlobalHttpProxy(GlobalHttpProxyContext *context);
+    static bool ExecGetGlobalHttpProxy(GetGlobalHttpProxyContext *context);
 
-    static napi_value GetGlobalHttpProxyCallback(GlobalHttpProxyContext *context);
+    static napi_value GetGlobalHttpProxyCallback(GetGlobalHttpProxyContext *context);
 
-    static bool ExecSetGlobalHttpProxy(GlobalHttpProxyContext *context);
+    static bool ExecSetGlobalHttpProxy(SetGlobalHttpProxyContext *context);
 
-    static napi_value SetGlobalHttpProxyCallback(GlobalHttpProxyContext *context);
+    static napi_value SetGlobalHttpProxyCallback(SetGlobalHttpProxyContext *context);
 
     static bool ExecGetAppNet(GetAppNetContext *context);
 
