@@ -25,7 +25,6 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 constexpr int32_t ERROR_DIVISOR = 1000;
-constexpr int32_t ERROR_RANGE = 100;
 std::map<int32_t, int32_t> g_errNumMap = {
     {NETMANAGER_ERR_MEMCPY_FAIL, NETMANAGER_ERR_INTERNAL},
     {NETMANAGER_ERR_MEMSET_FAIL, NETMANAGER_ERR_INTERNAL},
@@ -40,6 +39,10 @@ std::map<int32_t, int32_t> g_errNumMap = {
     {NETMANAGER_ERR_READ_REPLY_FAIL, NETMANAGER_ERR_OPERATION_FAILED},
     {NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL, NETMANAGER_ERR_OPERATION_FAILED},
     {NETMANAGER_ERR_GET_PROXY_FAIL, NETMANAGER_ERR_OPERATION_FAILED},
+    {POLICY_ERR_INVALID_UID, NETMANAGER_ERR_INVALID_PARAMETER},
+    {POLICY_ERR_INVALID_POLICY, NETMANAGER_ERR_INVALID_PARAMETER},
+    {POLICY_ERR_INVALID_QUOTA_POLICY, NETMANAGER_ERR_INVALID_PARAMETER},
+    {NET_CONN_ERR_INVALID_NETWORK, NETMANAGER_ERR_INVALID_PARAMETER},
     {NETMANAGER_EXT_ERR_MEMCPY_FAIL, NETMANAGER_EXT_ERR_INTERNAL},
     {NETMANAGER_EXT_ERR_MEMSET_FAIL, NETMANAGER_EXT_ERR_INTERNAL},
     {NETMANAGER_EXT_ERR_STRCPY_FAIL, NETMANAGER_EXT_ERR_INTERNAL},
@@ -139,15 +142,19 @@ std::map<int32_t, const char *> g_errStringMap = {
 
 std::string NetBaseErrorCodeConvertor::ConvertErrorCode(int32_t &errorCode)
 {
-    if ((errorCode > ERROR_DIVISOR || errorCode == IPC_PROXY_ERR) && (errorCode % ERROR_DIVISOR) >= ERROR_RANGE) {
+    std::string errmsg;
+    if (g_errStringMap.find(errorCode) != g_errStringMap.end()) {
+        errmsg = g_errStringMap.at(errorCode);
+    }
+    if (errorCode > ERROR_DIVISOR || errorCode == IPC_PROXY_ERR) {
         if (g_errNumMap.find(errorCode) != g_errNumMap.end()) {
             errorCode = g_errNumMap.at(errorCode);
         }
     }
-    if (g_errStringMap.find(errorCode) == g_errStringMap.end()) {
-        return {};
+    if (errmsg.empty() && g_errStringMap.find(errorCode) != g_errStringMap.end()) {
+        errmsg = g_errStringMap.at(errorCode);
     }
-    return g_errStringMap.at(errorCode);
+    return errmsg;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

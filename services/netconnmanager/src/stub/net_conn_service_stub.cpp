@@ -58,6 +58,7 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_SET_HTTP_PROXY] = &NetConnServiceStub::OnSetGlobalHttpProxy;
     memberFuncMap_[CMD_NM_GET_HTTP_PROXY] = &NetConnServiceStub::OnGetGlobalHttpProxy;
     memberFuncMap_[CMD_NM_GET_NET_ID_BY_IDENTIFIER] = &NetConnServiceStub::OnGetNetIdByIdentifier;
+    memberFuncMap_[CMD_NM_SET_APP_NET] = &NetConnServiceStub::OnSetAppNet;
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -786,6 +787,19 @@ int32_t NetConnServiceStub::OnGetNetIdByIdentifier(MessageParcel &data, MessageP
         if (!reply.WriteInt32(netId)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
+    }
+    return ret;
+}
+
+int32_t NetConnServiceStub::OnSetAppNet(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t netId = 0;
+    if (!data.ReadInt32(netId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int ret = SetAppNet(netId);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return ret;
 }

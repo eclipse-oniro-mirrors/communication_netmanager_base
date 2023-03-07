@@ -247,6 +247,9 @@ int32_t NetConnClient::GetAddressByName(const std::string &host, int32_t netId, 
 
 int32_t NetConnClient::BindSocket(int32_t socket_fd, int32_t netId)
 {
+    if (netId < MIN_VALID_NETID) {
+        return NET_CONN_ERR_INVALID_NETWORK;
+    }
     std::shared_ptr<nmd::FwmarkClient> fwmarkClient_ = std::make_shared<nmd::FwmarkClient>();
     if (fwmarkClient_ == nullptr) {
         NETMGR_LOG_E("fwmarkClient_ is nullptr");
@@ -384,6 +387,16 @@ int32_t NetConnClient::SetAppNet(int32_t netId)
     if (netId < MIN_VALID_NETID && netId != 0) {
         return NET_CONN_ERR_INVALID_NETWORK;
     }
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    int32_t ret = proxy->SetAppNet(netId);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+
     SetNetForApp(netId);
     return NETMANAGER_SUCCESS;
 }
