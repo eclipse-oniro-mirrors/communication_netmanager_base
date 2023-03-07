@@ -26,13 +26,13 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 
-bool CheckParamsType(napi_env env, napi_value *params, size_t paramsCount, InterfaceType &type)
+bool CheckParamsType(napi_env env, napi_value *params, size_t paramsCount)
 {
     if (paramsCount == PARAM_JUST_OPTIONS) {
         return NapiUtils::GetValueType(env, params[ARG_INDEX_0]) == napi_object;
     }
 
-    if (paramsCount == PARAM_DOUBLE_OPTIONS_AND_CALLBACK) {
+    if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
         return NapiUtils::GetValueType(env, params[ARG_INDEX_0]) == napi_object &&
                NapiUtils::GetValueType(env, params[ARG_INDEX_1]) == napi_function;
     }
@@ -63,7 +63,7 @@ void SetGlobalHttpProxyContext::ParseParams(napi_value *params, size_t paramsCou
     }
     httpProxy_.SetExclusionList(list);
 
-    if (paramsCount == PARAM_DOUBLE_OPTIONS_AND_CALLBACK) {
+    if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
         SetParseOK(SetCallback(params[ARG_INDEX_1]) == napi_ok);
         return;
     }
