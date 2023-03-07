@@ -22,7 +22,7 @@
 #include "getaddressbyname_context.h"
 #include "getappnet_context.h"
 #include "getdefaultnet_context.h"
-#include "global_http_proxy_context.h"
+#include "getglobalhttpproxy_context.h"
 #include "napi_constant.h"
 #include "net_all_capabilities.h"
 #include "netconnection.h"
@@ -32,6 +32,7 @@
 #include "parse_nethandle_context.h"
 #include "register_context.h"
 #include "setappnet_context.h"
+#include "setglobalhttpproxy_context.h"
 
 static constexpr const char *CONNECTION_MODULE_NAME = "net.connection";
 
@@ -287,14 +288,14 @@ napi_value ConnectionModule::ReportNetDisconnected(napi_env env, napi_callback_i
 
 napi_value ConnectionModule::GetGlobalHttpProxy(napi_env env, napi_callback_info info)
 {
-    return ModuleTemplate::Interface<GlobalHttpProxyContext>(env, info, FUNCTION_GET_GLOBAL_HTTP_PROXY, nullptr,
+    return ModuleTemplate::Interface<GetGlobalHttpProxyContext>(env, info, FUNCTION_GET_GLOBAL_HTTP_PROXY, nullptr,
                                                              ConnectionAsyncWork::ExecGetGlobalHttpProxy,
                                                              ConnectionAsyncWork::GetGlobalHttpProxyCallback);
 }
 
 napi_value ConnectionModule::SetGlobalHttpProxy(napi_env env, napi_callback_info info)
 {
-    return ModuleTemplate::Interface<GlobalHttpProxyContext>(env, info, FUNCTION_SET_GLOBAL_HTTP_PROXY, nullptr,
+    return ModuleTemplate::Interface<SetGlobalHttpProxyContext>(env, info, FUNCTION_SET_GLOBAL_HTTP_PROXY, nullptr,
                                                              ConnectionAsyncWork::ExecSetGlobalHttpProxy,
                                                              ConnectionAsyncWork::SetGlobalHttpProxyCallback);
 }
