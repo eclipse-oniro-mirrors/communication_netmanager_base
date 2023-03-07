@@ -26,6 +26,7 @@ enum {
     UID_ROOT = 0,
     UID_SHELL = 2000,
     UID_NET_MANAGER = 1099,
+    UID_WIFI = 1010,
 };
 
 class NetsysNativeServiceStub : public IRemoteStub<INetsysService> {
@@ -98,6 +99,9 @@ private:
     int32_t CmdStartDnsProxyListen(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStopDnsProxyListen(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetNetworkSharingTraffic(MessageParcel &data, MessageParcel &reply);
+
+private:
+    std::vector<int32_t> uids_;
 };
 } // namespace NetsysNative
 } // namespace OHOS

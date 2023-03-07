@@ -81,6 +81,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_GET_SHARING_NETWORK_TRAFFIC] = &NetsysNativeServiceStub::CmdGetNetworkSharingTraffic;
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
+    uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI};
 }
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
@@ -114,8 +115,8 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
     auto uid = IPCSkeleton::GetCallingUid();
-    if (uid != UID_ROOT && uid != UID_SHELL && uid != UID_NET_MANAGER) {
-        NETNATIVE_LOGE("this uid connot use netsys");
+    if (std::find(uids_.begin(), uids_.end(), uid) == uids_.end()) {
+        NETNATIVE_LOGE("This uid connot use netsys");
         if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
             return IPC_STUB_WRITE_PARCEL_ERR;
         }
