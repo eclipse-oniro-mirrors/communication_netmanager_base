@@ -24,7 +24,6 @@
 #include "i_net_conn_callback.h"
 #include "net_specifier.h"
 #include "net_supplier.h"
-#include "timer.h"
 
 class NetSupplier;
 
@@ -56,7 +55,6 @@ public:
     void SetServiceSupply(sptr<NetSupplier> netServiceSupplied);
     sptr<INetConnCallback> GetNetCallback();
     sptr<NetSpecifier> GetNetSpecifier();
-    std::unique_ptr<Timer> &GetTimer();
 
 private:
     bool CompareByNetworkIdent(const std::string &ident);
@@ -74,7 +72,7 @@ private:
     sptr<NetSupplier> netServiceSupplied_ = nullptr;
     uint32_t timeoutMS_ = 0;
     std::weak_ptr<INetActivateCallback> timeoutCallback_;
-    std::unique_ptr<Timer> lpTimer_ = nullptr;
+    std::string activateName_ = "";
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

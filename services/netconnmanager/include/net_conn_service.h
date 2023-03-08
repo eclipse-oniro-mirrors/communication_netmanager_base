@@ -34,7 +34,6 @@
 #include "net_score.h"
 #include "net_supplier.h"
 #include "http_proxy.h"
-#include "timer.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
