@@ -45,9 +45,12 @@ NetActivate::NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetCon
     }
     activateName_ = "NetActivate" + std::to_string(requestId_);
     if (timeoutMS_ > 0) {
-        netActEventHandler_->PostTask([this](){
-            this->TimeOutNetAvailable();
-        }, activateName_, timeoutMS_);
+        netActEventHandler_->PostTask(
+            [this]() {
+                this->TimeOutNetAvailable();
+            },
+            activateName_,
+            timeoutMS_);
     }
 }
 
