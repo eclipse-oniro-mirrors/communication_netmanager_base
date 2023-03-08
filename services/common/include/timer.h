@@ -65,24 +65,6 @@ public:
         }).detach();
     }
 
-    void StartOnce(int interval, std::function<void()> taskFun)
-    {
-        if (stopStatus_ == false) {
-            return;
-        }
-        NETMGR_LOG_D("start once thread...");
-        stopStatus_ = false;
-        std::thread([this, interval, taskFun]() {
-            OneTiming(interval);
-            if (!tryStopFlag_) {
-                taskFun();
-            }
-            std::lock_guard<std::mutex> locker(mutex_);
-            stopStatus_ = true;
-            timerCond_.notify_one();
-        }).detach();
-    }
-
     void Stop()
     {
         if (stopStatus_ || tryStopFlag_) {
