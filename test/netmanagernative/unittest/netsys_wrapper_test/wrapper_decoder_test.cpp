@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <linux/genetlink.h>
 
 #include "netlink_define.h"
 #include "wrapper_decoder.h"
@@ -22,6 +23,7 @@ namespace OHOS {
 namespace nmd {
 namespace {
 using namespace testing::ext;
+constexpr int16_t LOCAL_QLOG_NL_EVENT = 112;
 } // namespace
 
 class WrapperDecoderTest : public testing::Test {
@@ -83,6 +85,46 @@ HWTEST_F(WrapperDecoderTest, DecodeBinaryTest001, TestSize.Level1)
     auto msg = std::make_shared<NetsysEventMessage>();
     std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
     auto ret = decoder->DecodeBinary(nullptr, 0);
+    EXPECT_FALSE(ret);
+    nlmsghdr msghdrVec;
+    msghdrVec.nlmsg_len = 12;
+    msghdrVec.nlmsg_type = RTM_NEWLINK;
+    msghdrVec.nlmsg_flags = 0;
+    msghdrVec.nlmsg_seq = 0;
+    msghdrVec.nlmsg_pid = 5555;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&msghdrVec), sizeof(msghdrVec));
+    EXPECT_FALSE(ret);
+
+    msghdrVec.nlmsg_len = 1;
+    msghdrVec.nlmsg_type = LOCAL_QLOG_NL_EVENT;
+    msghdrVec.nlmsg_flags = 0;
+    msghdrVec.nlmsg_seq = 0;
+    msghdrVec.nlmsg_pid = 5555;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&msghdrVec), sizeof(msghdrVec));
+    EXPECT_FALSE(ret);
+
+    msghdrVec.nlmsg_len = 1;
+    msghdrVec.nlmsg_type = RTM_NEWADDR;
+    msghdrVec.nlmsg_flags = 0;
+    msghdrVec.nlmsg_seq = 0;
+    msghdrVec.nlmsg_pid = 5555;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&msghdrVec), sizeof(msghdrVec));
+    EXPECT_FALSE(ret);
+
+    msghdrVec.nlmsg_len = 1;
+    msghdrVec.nlmsg_type = RTM_NEWROUTE;
+    msghdrVec.nlmsg_flags = 0;
+    msghdrVec.nlmsg_seq = 0;
+    msghdrVec.nlmsg_pid = 5555;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&msghdrVec), sizeof(msghdrVec));
+    EXPECT_FALSE(ret);
+
+    msghdrVec.nlmsg_len = 1;
+    msghdrVec.nlmsg_type = __RTM_MAX;
+    msghdrVec.nlmsg_flags = 0;
+    msghdrVec.nlmsg_seq = 0;
+    msghdrVec.nlmsg_pid = 5555;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&msghdrVec), sizeof(msghdrVec));
     EXPECT_FALSE(ret);
 }
 } // namespace nmd

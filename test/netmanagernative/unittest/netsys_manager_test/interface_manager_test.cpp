@@ -44,6 +44,10 @@ HWTEST_F(InterfaceManagerTest, GetMtuTest001, TestSize.Level1)
     std::string interfaceName;
     auto ret = InterfaceManager::GetMtu(interfaceName.data());
     EXPECT_EQ(ret, -1);
+
+    interfaceName = "IfaceNameIsExtMax16";
+    ret = InterfaceManager::GetMtu(interfaceName.data());
+    EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(InterfaceManagerTest, GetMtuTest002, TestSize.Level1)
@@ -75,6 +79,10 @@ HWTEST_F(InterfaceManagerTest, SetMtuTest003, TestSize.Level1)
     std::string mtuValue;
     auto ret = InterfaceManager::SetMtu(interfaceName.data(), mtuValue.data());
     EXPECT_LE(ret, 0);
+
+    std::string mtu = "1500";
+    ret = InterfaceManager::SetMtu(interfaceName.data(), mtu.data());
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(InterfaceManagerTest, AddAddressTest001, TestSize.Level1)
@@ -151,11 +159,39 @@ HWTEST_F(InterfaceManagerTest, GetIfaceConfigTest002, TestSize.Level1)
 
 HWTEST_F(InterfaceManagerTest, SetIfaceConfigTest001, TestSize.Level1)
 {
+    nmd::InterfaceConfigurationParcel ifaceConfig;
+    ifaceConfig.ifName = "test0";
+    int32_t ret = InterfaceManager::SetIfaceConfig(ifaceConfig);
+    EXPECT_LE(ret, 0);
+
+    ifaceConfig.flags.push_back("up");
+    ret = InterfaceManager::SetIfaceConfig(ifaceConfig);
+    EXPECT_LE(ret, 0);
+
     std::string ifaceName = "eth0";
     auto config = InterfaceManager::GetIfaceConfig(ifaceName);
     EXPECT_FALSE(config.ifName.empty());
-    auto ret = InterfaceManager::SetIfaceConfig(config);
+    ret = InterfaceManager::SetIfaceConfig(config);
     EXPECT_LE(ret, 1);
+}
+
+HWTEST_F(InterfaceManagerTest, SetIpAddressTest002, TestSize.Level1)
+{
+    std::string errName = "test0";
+    std::string ipAddr = "172.17.5.245";
+    auto ret = InterfaceManager::SetIpAddress(errName, ipAddr);
+    EXPECT_LE(ret, 0);
+}
+
+HWTEST_F(InterfaceManagerTest, SetIffUpTest002, TestSize.Level1)
+{
+    std::string errName = "test0";
+    auto ret = InterfaceManager::SetIffUp(errName);
+    EXPECT_LE(ret, 0);
+
+    std::string ifaceName = "eth1";
+    ret = InterfaceManager::SetIffUp(ifaceName);
+    EXPECT_LE(ret, 0);
 }
 } // namespace nmd
 } // namespace OHOS

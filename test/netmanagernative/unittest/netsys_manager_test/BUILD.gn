@@ -30,6 +30,7 @@ ohos_unittest("netsys_native_manager_test") {
     "local_network_test.cpp",
     "net_conn_manager_test_util.cpp",
     "netlink_msg_test.cpp",
+    "netsys_addr_info_parcel_test.cpp",
     "netsys_controller_test.cpp",
     "netsys_native_client_test.cpp",
     "netsys_native_service_proxy_test.cpp",
