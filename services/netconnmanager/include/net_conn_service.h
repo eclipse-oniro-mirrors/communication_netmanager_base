@@ -307,7 +307,6 @@ private:
     sptr<NetSupplier> defaultNetSupplier_ = nullptr;
     NET_SUPPLIER_MAP netSuppliers_;
     NET_ACTIVATE_MAP netActivates_;
-    NET_ACTIVATE_MAP deleteNetActivates_;
     NET_NETWORK_MAP networks_;
     std::unique_ptr<NetScore> netScore_ = nullptr;
     sptr<NetConnServiceIface> serviceIface_ = nullptr;
