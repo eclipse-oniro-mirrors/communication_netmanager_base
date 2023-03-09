@@ -425,7 +425,6 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
         NETMGR_LOG_D("UnregisterNetConnCallback can not find same callback");
         return NET_CONN_ERR_SAME_CALLBACK;
     }
-    deleteNetActivates_.clear();
     NET_ACTIVATE_MAP::iterator iterActive;
     for (iterActive = netActivates_.begin(); iterActive != netActivates_.end();) {
         if (!iterActive->second) {
@@ -455,7 +454,6 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
                 iterSupplier->second->CancelRequest(reqId);
             }
         }
-        deleteNetActivates_[reqId] = netActivate;
         iterActive = netActivates_.erase(iterActive);
     }
     return NETMANAGER_SUCCESS;
@@ -664,7 +662,6 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
 
     NETMGR_LOG_I("ActivateNetwork: can't found best network, send request to all networks.");
     SendRequestToAllNetwork(request);
-    deleteNetActivates_.clear();
     return NETMANAGER_SUCCESS;
 }
 
