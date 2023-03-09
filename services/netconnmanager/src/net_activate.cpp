@@ -23,27 +23,41 @@
 namespace OHOS {
 namespace NetManagerStandard {
 static std::atomic<uint32_t> g_nextRequestId = MIN_REQUEST_ID;
+std::shared_ptr<AppExecFwk::EventRunner> netActEventRunner_ = nullptr;
+std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_ = nullptr;
+constexpr const char *NET_ACTIVATE_WORK_THREAD = "NET_ACTIVATE_WORK_THREAD";
 using TimeOutCallback = std::function<void()>;
 
 NetActivate::NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
                          std::weak_ptr<INetActivateCallback> timeoutCallback, const uint32_t &timeoutMS)
     : netSpecifier_(specifier), netConnCallback_(callback), timeoutMS_(timeoutMS), timeoutCallback_(timeoutCallback)
 {
+    if (netActEventRunner_ == nullptr) {
+        netActEventRunner_ = AppExecFwk::EventRunner::Create(NET_ACTIVATE_WORK_THREAD);
+    }
+    if (netActEventHandler_ == nullptr) {
+        netActEventHandler_ = std::make_shared<AppExecFwk::EventHandler>(netActEventRunner_);
+    }
+
     requestId_ = g_nextRequestId++;
     if (g_nextRequestId > MAX_REQUEST_ID) {
         g_nextRequestId = MIN_REQUEST_ID;
     }
-    if (timeoutMS > 0) {
-        lpTimer_ = std::make_unique<Timer>();
-        TimeOutCallback timeOutcallback = std::bind(&NetActivate::TimeOutNetAvailable, this);
-        lpTimer_->StartOnce(timeoutMS, timeOutcallback);
+    activateName_ = "NetActivate" + std::to_string(requestId_);
+    if (timeoutMS_ > 0) {
+        netActEventHandler_->PostTask(
+            [this]() {
+                this->TimeOutNetAvailable();
+            },
+            activateName_,
+            timeoutMS_);
     }
 }
 
 NetActivate::~NetActivate()
 {
-    if (lpTimer_) {
-        lpTimer_->Stop();
+    if (netActEventHandler_ != nullptr) {
+        netActEventHandler_->RemoveTask(activateName_);
     }
 }
 
