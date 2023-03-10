@@ -50,7 +50,7 @@ TELEPHONY_ROOT = "//base/telephony"
 C_UTILS_ROOT = "//commonlibrary/c_utils"
 ARKUI_ROOT = "//foundation/arkui"
 WIFI_MANAGER_ROOT = "//foundation/communication/wifi/wifi"
-DHCP_MANAGER_ROOT = "//foundation/communication/wifi/dhcp"
+DHCP_MANAGER_ROOT = "//foundation/communication/dhcp"
 SAMGR_MANAGER_ROOT = "//foundation/systemabilitymgr/samgr"
 SAMGR_INTERFACE_ROOT_DIR = "//foundation/systemabilitymgr/samgr/interfaces"
 
