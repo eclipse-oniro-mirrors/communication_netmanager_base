@@ -294,16 +294,16 @@ napi_value ConnectionExec::GetGlobalHttpProxyCallback(GetGlobalHttpProxyContext 
     napi_value host = NapiUtils::CreateStringUtf8(context->GetEnv(), context->httpProxy_.GetHost());
     napi_value port = NapiUtils::CreateInt32(context->GetEnv(), context->httpProxy_.GetPort());
     auto lists = context->httpProxy_.GetExclusionList();
-    napi_value parsedExclusionList = NapiUtils::CreateArray(context->GetEnv(), lists.size());
+    napi_value exclusionList = NapiUtils::CreateArray(context->GetEnv(), lists.size());
     size_t index = 0;
     for (auto list : lists) {
         napi_value jsList = NapiUtils::CreateStringUtf8(context->GetEnv(), list);
-        NapiUtils::SetArrayElement(context->GetEnv(), parsedExclusionList, index++, jsList);
+        NapiUtils::SetArrayElement(context->GetEnv(), exclusionList, index++, jsList);
     }
     napi_value httpProxy = NapiUtils::CreateObject(context->GetEnv());
     NapiUtils::SetNamedProperty(context->GetEnv(), httpProxy, "host", host);
     NapiUtils::SetNamedProperty(context->GetEnv(), httpProxy, "port", port);
-    NapiUtils::SetNamedProperty(context->GetEnv(), httpProxy, "parsedExclusionList", parsedExclusionList);
+    NapiUtils::SetNamedProperty(context->GetEnv(), httpProxy, "exclusionList", exclusionList);
     return httpProxy;
 }
 
