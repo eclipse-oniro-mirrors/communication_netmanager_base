@@ -143,7 +143,8 @@ void NetPolicyTraffic::FormalizeQuotaPolicies(const std::vector<NetQuotaPolicy> 
     quotaPolicies_.clear();
     for (auto quotaPolicy : quotaPolicies) {
         if (!IsValidQuotaPolicy(quotaPolicy)) {
-            NETMGR_LOG_E("UpdateQuotaPolicies invalid quota policy[%{public}p]", &quotaPolicy);
+            NETMGR_LOG_E("UpdateQuotaPolicies invalid quota policy netType[%{public}d], periodDuration[%{public}s]",
+                         quotaPolicy.netType, quotaPolicy.periodDuration.c_str());
             continue;
         }
         if (quotaPolicy.limitBytes == DATA_USAGE_UNKNOWN) {
