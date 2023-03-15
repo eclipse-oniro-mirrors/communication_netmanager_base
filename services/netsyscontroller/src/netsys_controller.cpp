@@ -771,14 +771,17 @@ int32_t NetsysController::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint3
 
 void NetsysController::FreeAddrInfo(addrinfo *aihead)
 {
-    for (addrinfo *tmp = aihead; tmp != nullptr; tmp = tmp->ai_next) {
+    addrinfo *tmpNext = nullptr;
+    for (addrinfo *tmp = aihead; tmp != nullptr;) {
         if (tmp->ai_addr != nullptr) {
             free(tmp->ai_addr);
         }
         if (tmp->ai_canonname != nullptr) {
             free(tmp->ai_canonname);
         }
+        tmpNext = tmp->ai_next;
         free(tmp);
+        tmp = tmpNext;
     }
 }
 } // namespace NetManagerStandard

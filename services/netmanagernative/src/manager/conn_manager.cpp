@@ -188,8 +188,9 @@ int32_t ConnManager::RemoveInterfaceFromNetwork(int32_t netId, std::string &inte
         const auto &net = FindNetworkById(netId);
         if (std::get<0>(net)) {
             std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
+            int32_t ret = nw->RemoveInterface(interfaceName);
             physicalInterfaceName_.erase(netId);
-            return nw->RemoveInterface(interfaceName);
+            return ret;
         }
     }
     return NETMANAGER_SUCCESS;
