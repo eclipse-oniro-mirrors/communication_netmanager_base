@@ -57,9 +57,9 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_GET_NET_CAPABILITIES] = {&NetConnServiceStub::OnGetNetCapabilities,
                                                    {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[CMD_NM_GET_ADDRESSES_BY_NAME] = {&NetConnServiceStub::OnGetAddressesByName,
-                                                    {Permission::GET_NETWORK_INFO}};
+                                                    {Permission::INTERNET}};
     memberFuncMap_[CMD_NM_GET_ADDRESS_BY_NAME] = {&NetConnServiceStub::OnGetAddressByName,
-                                                  {Permission::GET_NETWORK_INFO}};
+                                                  {Permission::INTERNET}};
     memberFuncMap_[CMD_NM_BIND_SOCKET] = {&NetConnServiceStub::OnBindSocket, {}};
     memberFuncMap_[CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK] = {&NetConnServiceStub::OnRegisterNetSupplierCallback, {}};
     memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE] = {&NetConnServiceStub::OnSetAirplaneMode,
