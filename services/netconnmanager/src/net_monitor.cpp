@@ -18,13 +18,10 @@
 #include <fcntl.h>
 #include <fstream>
 #include <future>
-#include <iostream>
 #include <list>
 #include <memory>
 #include <netdb.h>
-#include <netinet/tcp.h>
 #include <regex>
-#include <resolv.h>
 #include <securec.h>
 #include <sys/socket.h>
 #include <thread>
@@ -32,7 +29,6 @@
 
 #include "event_report.h"
 #include "fwmark_client.h"
-#include "netmanager_base_common_utils.h"
 #include "netsys_controller.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_monitor.h"
@@ -229,7 +225,7 @@ int32_t NetMonitor::ConnectIpv4(int32_t sockFd, const uint16_t port, const std::
 {
     NETMGR_LOG_D("Net[%{public}d] connect ipv4 ip:[%{public}s] socket:%{public}d in", netId_,
                  CommonUtils::ToAnonymousIp(ipAddr).c_str(), sockFd);
-    struct sockaddr_in serverAddr;
+    sockaddr_in serverAddr;
     bzero(&serverAddr, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(port);
@@ -249,7 +245,7 @@ int32_t NetMonitor::ConnectIpv6(int32_t sockFd, const uint16_t port, const std::
 {
     NETMGR_LOG_D("Net[%{public}d] connect ipv6 ip:[%{public}s] socket:%{public}d in", netId_,
                  CommonUtils::ToAnonymousIp(ipAddr).c_str(), sockFd);
-    struct sockaddr_in6 serverAddr;
+    sockaddr_in6 serverAddr;
     bzero(&serverAddr, sizeof(serverAddr));
     serverAddr.sin6_family = AF_INET6;
     serverAddr.sin6_port = htons(port);
