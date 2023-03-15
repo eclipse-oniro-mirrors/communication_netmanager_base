@@ -76,7 +76,7 @@ void DnsProxyListen::DnsParseBySocket(int32_t clientSocket, std::vector<std::str
     int32_t resLen;
     socklen_t addrLen;
     char requesData[MAX_REQUESTDATA_LEN] = {0};
-    struct sockaddr_in addrParse = {0};
+    sockaddr_in addrParse = {0};
     uint32_t serversNum = 0;
     while (serversNum < servers.size()) {
         addrParse.sin_family = AF_INET;

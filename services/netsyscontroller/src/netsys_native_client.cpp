@@ -797,7 +797,7 @@ int32_t NetsysNativeClient::BindNetworkServiceVpn(int32_t socketFd)
     NETMGR_LOG_D("NetsysNativeClient::BindNetworkServiceVpn: socketFd[%{public}d]", socketFd);
     /* netsys provide default interface name */
     const char *defaultNetName = "wlan0";
-    int defaultNetNameLen = strlen(defaultNetName);
+    socklen_t defaultNetNameLen = strlen(defaultNetName);
     /* set socket by option. */
     int32_t ret = setsockopt(socketFd, SOL_SOCKET, SO_MARK, defaultNetName, defaultNetNameLen);
     if (ret < 0) {
