@@ -29,6 +29,7 @@
 
 #include "event_report.h"
 #include "fwmark_client.h"
+#include "netmanager_base_common_utils.h"
 #include "netsys_controller.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_monitor.h"
