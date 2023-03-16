@@ -459,7 +459,7 @@ public:
     /**
      * Set net callbackfuction.
      *
-     * @param callback callbackfuction class
+     * @param callback callback function class
      * @return Return the return value of the netsys interface call.
      */
     int32_t RegisterNetsysNotifyCallback(const NetsysNotifyCallback &callback);
@@ -473,11 +473,11 @@ public:
     int32_t BindNetworkServiceVpn(int32_t socketFd);
 
     /**
-     * Enable virtual network iterface card.
+     * Enable virtual network interface card.
      *
      * @param socketFd socket file description
      * @param ifRequest interface request
-     * @param ifaceFd interface file description at output paramenter
+     * @param ifaceFd interface file description at output parameter
      * @return Return the return value of the netsys interface call.
      */
     int32_t EnableVirtualNetIfaceCard(int32_t socketFd, struct ifreq &ifRequest, int32_t &ifaceFd);

@@ -58,9 +58,9 @@ public:
     int32_t NetworkSetPermissionForNetwork(int32_t netId, NetworkPermission permission);
     std::vector<std::string> InterfaceGetList();
 
-    int32_t SetProcSysNet(int32_t ipversion, int32_t which, const std::string ifname, const std::string parameter,
+    int32_t SetProcSysNet(int32_t family, int32_t which, const std::string ifname, const std::string parameter,
                           const std::string value);
-    int32_t GetProcSysNet(int32_t ipversion, int32_t which, const std::string ifname, const std::string parameter,
+    int32_t GetProcSysNet(int32_t family, int32_t which, const std::string ifname, const std::string parameter,
                           std::string *value);
 
     nmd::InterfaceConfigurationParcel GetInterfaceConfig(std::string ifName);

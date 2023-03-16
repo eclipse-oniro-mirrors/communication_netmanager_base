@@ -24,7 +24,6 @@ namespace NetManagerStandard {
 void NetsysControllerServiceImpl::Init()
 {
     mockNetsysClient_.RegisterMockApi();
-    return;
 }
 
 int32_t NetsysControllerServiceImpl::NetworkCreatePhysical(int32_t netId, int32_t permission)

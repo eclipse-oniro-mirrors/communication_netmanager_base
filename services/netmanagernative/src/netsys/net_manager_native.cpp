@@ -191,13 +191,13 @@ int32_t NetManagerNative::NetworkRemoveRouteParcel(int32_t netId, RouteInfoParce
     return connManager_->RemoveRoute(netId, parcel.ifName, parcel.destination, parcel.nextHop);
 }
 
-int32_t NetManagerNative::SetProcSysNet(int32_t ipversion, int32_t which, const std::string ifname,
+int32_t NetManagerNative::SetProcSysNet(int32_t family, int32_t which, const std::string ifname,
                                         const std::string parameter, const std::string value)
 {
     return 0;
 }
 
-int32_t NetManagerNative::GetProcSysNet(int32_t ipversion, int32_t which, const std::string ifname,
+int32_t NetManagerNative::GetProcSysNet(int32_t family, int32_t which, const std::string ifname,
                                         const std::string parameter, std::string *value)
 {
     return 0;

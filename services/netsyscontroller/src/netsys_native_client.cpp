@@ -14,21 +14,17 @@
  */
 
 #include <arpa/inet.h>
-#include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
 #include <linux/if_tun.h>
-#include <net/route.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
-#include <sys/stat.h>
 #include <sys/types.h>
 #include <thread>
 #include <unistd.h>
 
 #include "iservice_registry.h"
-#include "securec.h"
 #include "system_ability_definition.h"
 
 #include "net_conn_constants.h"
@@ -53,8 +49,6 @@ NetsysNativeClient::NativeNotifyCallback::NativeNotifyCallback(NetsysNativeClien
     : netsysNativeClient_(netsysNativeClient)
 {
 }
-
-NetsysNativeClient::NativeNotifyCallback::~NativeNotifyCallback() {}
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressUpdated(const std::string &addr,
                                                                             const std::string &ifName, int flags,
@@ -263,7 +257,7 @@ int32_t NetsysNativeClient::SetInterfaceDown(const std::string &iface)
     if (fit != ifCfg.flags.end()) {
         ifCfg.flags.erase(fit);
     }
-    ifCfg.flags.push_back(IF_CFG_DOWN);
+    ifCfg.flags.emplace_back(IF_CFG_DOWN);
     return proxy->SetInterfaceConfig(ifCfg);
 }
 
@@ -282,7 +276,7 @@ int32_t NetsysNativeClient::SetInterfaceUp(const std::string &iface)
     if (fit != ifCfg.flags.end()) {
         ifCfg.flags.erase(fit);
     }
-    ifCfg.flags.push_back(IF_CFG_UP);
+    ifCfg.flags.emplace_back(IF_CFG_UP);
     return proxy->SetInterfaceConfig(ifCfg);
 }
 
@@ -294,7 +288,6 @@ void NetsysNativeClient::ClearInterfaceAddrs(const std::string &ifName)
         NETMGR_LOG_E("proxy is nullptr");
         return;
     }
-    return;
 }
 
 int32_t NetsysNativeClient::GetInterfaceMtu(const std::string &ifName)
