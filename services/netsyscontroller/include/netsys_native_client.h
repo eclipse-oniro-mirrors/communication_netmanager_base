@@ -34,7 +34,7 @@ class NetsysNativeClient {
     class NativeNotifyCallback : public OHOS::NetsysNative::NotifyCallbackStub {
     public:
         NativeNotifyCallback(NetsysNativeClient &netsysNativeClient);
-        virtual ~NativeNotifyCallback() override;
+        ~NativeNotifyCallback() override = default;
         int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
                                           int scope) override;
         int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags,
@@ -477,9 +477,9 @@ public:
     virtual int32_t StopDnsProxyListen();
 
     /**
-     * Set net callbackfuction.
+     * Set net callback function.
      *
-     * @param callback callbackfuction class
+     * @param callback callback function class
      * @return Return the return value of the netsys interface call.
      */
     int32_t RegisterNetsysNotifyCallback(const NetsysNotifyCallback &callback);
@@ -493,7 +493,7 @@ public:
     int32_t BindNetworkServiceVpn(int32_t socketFd);
 
     /**
-     * enable virtual network iterface card.
+     * enable virtual network interface card.
      *
      * @param socketFd socket file description
      * @param ifRequest interface request

@@ -159,7 +159,7 @@ int32_t NetsysNativeService::SetResolverConfig(uint16_t netId, uint16_t baseTime
     return 0;
 }
 
-int32_t NetsysNativeService::GetResolverConfig(const uint16_t netid, std::vector<std::string> &servers,
+int32_t NetsysNativeService::GetResolverConfig(uint16_t netid, std::vector<std::string> &servers,
                                                std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
                                                uint8_t &retryCount)
 {
@@ -168,7 +168,7 @@ int32_t NetsysNativeService::GetResolverConfig(const uint16_t netid, std::vector
     return 0;
 }
 
-int32_t NetsysNativeService::CreateNetworkCache(const uint16_t netid)
+int32_t NetsysNativeService::CreateNetworkCache(uint16_t netid)
 {
     NETNATIVE_LOG_D("CreateNetworkCache Begin");
     netsysService_->DnsCreateNetworkCache(netid);
@@ -176,7 +176,7 @@ int32_t NetsysNativeService::CreateNetworkCache(const uint16_t netid)
     return 0;
 }
 
-int32_t NetsysNativeService::DestroyNetworkCache(const uint16_t netId)
+int32_t NetsysNativeService::DestroyNetworkCache(uint16_t netId)
 {
     NETNATIVE_LOG_D("DestroyNetworkCache");
     return netsysService_->DnsDestroyNetworkCache(netId);
@@ -271,18 +271,18 @@ int32_t NetsysNativeService::NetworkClearDefault()
     return result;
 }
 
-int32_t NetsysNativeService::GetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
+int32_t NetsysNativeService::GetProcSysNet(int32_t family, int32_t which, const std::string &ifname,
                                            const std::string &parameter, std::string &value)
 {
-    int32_t result = netsysService_->GetProcSysNet(ipversion, which, ifname, parameter, &value);
+    int32_t result = netsysService_->GetProcSysNet(family, which, ifname, parameter, &value);
     NETNATIVE_LOG_D("GetProcSysNet");
     return result;
 }
 
-int32_t NetsysNativeService::SetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
+int32_t NetsysNativeService::SetProcSysNet(int32_t family, int32_t which, const std::string &ifname,
                                            const std::string &parameter, std::string &value)
 {
-    int32_t result = netsysService_->SetProcSysNet(ipversion, which, ifname, parameter, value);
+    int32_t result = netsysService_->SetProcSysNet(family, which, ifname, parameter, value);
     NETNATIVE_LOG_D("SetProcSysNet");
     return result;
 }

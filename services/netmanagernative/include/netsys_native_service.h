@@ -46,11 +46,11 @@ public:
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
                               const std::vector<std::string> &servers,
                               const std::vector<std::string> &domains) override;
-    int32_t GetResolverConfig(const uint16_t netId, std::vector<std::string> &servers,
+    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
                               std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
                               uint8_t &retryCount) override;
-    int32_t CreateNetworkCache(const uint16_t netId) override;
-    int32_t DestroyNetworkCache(const uint16_t netId) override;
+    int32_t CreateNetworkCache(uint16_t netId) override;
+    int32_t DestroyNetworkCache(uint16_t netId) override;
     int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName, const addrinfo *hints,
                         uint16_t netId, addrinfo **result) override;
     int32_t SetInterfaceMtu(const std::string &interfaceName, int32_t mtu) override;
@@ -68,9 +68,9 @@ public:
     int32_t NetworkSetDefault(int32_t netId) override;
     int32_t NetworkGetDefault() override;
     int32_t NetworkClearDefault() override;
-    int32_t GetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname, const std::string &parameter,
+    int32_t GetProcSysNet(int32_t family, int32_t which, const std::string &ifname, const std::string &parameter,
                           std::string &value) override;
-    int32_t SetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname, const std::string &parameter,
+    int32_t SetProcSysNet(int32_t family, int32_t which, const std::string &ifname, const std::string &parameter,
                           std::string &value) override;
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) override;
     int32_t AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,

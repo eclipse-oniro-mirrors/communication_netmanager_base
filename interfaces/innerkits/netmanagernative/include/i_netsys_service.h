@@ -114,9 +114,9 @@ public:
     virtual int32_t NetworkSetDefault(int32_t netId) = 0;
     virtual int32_t NetworkGetDefault() = 0;
     virtual int32_t NetworkClearDefault() = 0;
-    virtual int32_t GetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
+    virtual int32_t GetProcSysNet(int32_t family, int32_t which, const std::string &ifname,
                                   const std::string &parameter, std::string &value) = 0;
-    virtual int32_t SetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
+    virtual int32_t SetProcSysNet(int32_t family, int32_t which, const std::string &ifname,
                                   const std::string &parameter, std::string &value) = 0;
     virtual int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) = 0;
     virtual int32_t AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,

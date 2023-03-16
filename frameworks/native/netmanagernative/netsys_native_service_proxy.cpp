@@ -103,7 +103,7 @@ int32_t NetsysNativeServiceProxy::SetResolverConfig(uint16_t netId, uint16_t bas
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netId, std::vector<std::string> &servers,
+int32_t NetsysNativeServiceProxy::GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
                                                     std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
                                                     uint8_t &retryCount)
 {
@@ -142,7 +142,7 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(const uint16_t netId, std::v
     return result;
 }
 
-int32_t NetsysNativeServiceProxy::CreateNetworkCache(const uint16_t netId)
+int32_t NetsysNativeServiceProxy::CreateNetworkCache(uint16_t netId)
 {
     NETNATIVE_LOGI("Begin to CreateNetworkCache");
     MessageParcel data;
@@ -160,7 +160,7 @@ int32_t NetsysNativeServiceProxy::CreateNetworkCache(const uint16_t netId)
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::DestroyNetworkCache(const uint16_t netId)
+int32_t NetsysNativeServiceProxy::DestroyNetworkCache(uint16_t netId)
 {
     NETNATIVE_LOGI("Begin to DestroyNetworkCache");
     MessageParcel data;
@@ -478,7 +478,7 @@ int32_t NetsysNativeServiceProxy::GetProcSysNet(int32_t ipversion, int32_t which
     return ret;
 }
 
-int32_t NetsysNativeServiceProxy::SetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
+int32_t NetsysNativeServiceProxy::SetProcSysNet(int32_t family, int32_t which, const std::string &ifname,
                                                 const std::string &parameter, std::string &value)
 {
     NETNATIVE_LOGI("Begin to SetSysProcNet");
@@ -486,7 +486,7 @@ int32_t NetsysNativeServiceProxy::SetProcSysNet(int32_t ipversion, int32_t which
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteInt32(ipversion)) {
+    if (!data.WriteInt32(family)) {
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteInt32(which)) {
