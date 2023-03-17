@@ -86,7 +86,7 @@ void NetMonitor::Start()
         return;
     }
     isDetecting_ = true;
-    std::thread(std::bind(NetDetectThread, this)).detach();
+    std::thread([this] { return NetDetectThread(this); }).detach();
 }
 
 void NetMonitor::Stop()

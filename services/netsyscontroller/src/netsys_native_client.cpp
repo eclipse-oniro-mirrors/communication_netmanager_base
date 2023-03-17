@@ -712,6 +712,7 @@ int32_t NetsysNativeClient::StopDnsProxyListen()
 
 int32_t NetsysNativeClient::RegisterNetsysNotifyCallback(const NetsysNotifyCallback &callback)
 {
+    (void)callback;
     NETMGR_LOG_D("NetsysNativeClient RegisterNetsysNotifyCallback");
     return NETMANAGER_SUCCESS;
 }
@@ -914,7 +915,7 @@ int32_t NetsysNativeClient::StopDhcpClient(const std::string &iface, bool bIpv6)
     return proxy->StopDhcpClient(iface, bIpv6);
 }
 
-int32_t NetsysNativeClient::RegisterCallback(sptr<NetsysControllerCallback> callback)
+int32_t NetsysNativeClient::RegisterCallback(const sptr<NetsysControllerCallback>& callback)
 {
     NETMGR_LOG_D("NetsysNativeClient::RegisterCallback");
     if (callback == nullptr) {
@@ -926,7 +927,7 @@ int32_t NetsysNativeClient::RegisterCallback(sptr<NetsysControllerCallback> call
         NETMGR_LOG_E("proxy is nullptr");
         return IPC_PROXY_ERR;
     }
-	std::lock_guard lock(cbObjMutex_);
+    std::lock_guard lock(cbObjMutex_);
     cbObjects_.push_back(callback);
     return NETMANAGER_SUCCESS;
 }
@@ -936,7 +937,7 @@ void NetsysNativeClient::ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultPa
     NETMGR_LOG_I("NetsysNativeClient::ProcessDhcpResult");
     std::lock_guard lock(cbObjMutex_);
     NetsysControllerCallback::DhcpResult result;
-    for (std::vector<sptr<NetsysControllerCallback>>::iterator it = cbObjects_.begin(); it != cbObjects_.end(); ++it) {
+    for (auto &cbObject : cbObjects_) {
         result.iface_ = dhcpResult->iface_;
         result.ipAddr_ = dhcpResult->ipAddr_;
         result.gateWay_ = dhcpResult->gateWay_;
@@ -945,7 +946,7 @@ void NetsysNativeClient::ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultPa
         result.route2_ = dhcpResult->route2_;
         result.dns1_ = dhcpResult->dns1_;
         result.dns2_ = dhcpResult->dns2_;
-        (*it)->OnDhcpSuccess(result);
+        cbObject->OnDhcpSuccess(result);
     }
 }
 
