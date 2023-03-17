@@ -55,12 +55,7 @@ bool NetCaps::HasNetCap(NetCap cap) const
 
 bool NetCaps::HasNetCaps(const std::set<NetCap> &caps) const
 {
-    for (auto cap : caps) {
-        if (!HasNetCap(cap)) {
-            return false;
-        }
-    }
-    return true;
+    return std::all_of(caps.cbegin(), caps.cend(), [this] (const NetCap &cap) { return HasNetCap(cap); });
 }
 
 std::set<NetCap> NetCaps::ToSet() const
