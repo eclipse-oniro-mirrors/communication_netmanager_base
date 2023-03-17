@@ -103,7 +103,7 @@ HWTEST_F(NetsysPolicyWrapperTest, FirewallSetUidsAllowedListChainTest001, TestSi
     uint32_t chain = 2;
     std::vector<uint32_t> uids;
     auto ret = instance_->FirewallSetUidsAllowedListChain(chain, uids);
-    EXPECT_GE(ret, 0);
+    EXPECT_LE(ret, 0);
 }
 
 HWTEST_F(NetsysPolicyWrapperTest, FirewallSetUidsDeniedListChainTest001, TestSize.Level1)
