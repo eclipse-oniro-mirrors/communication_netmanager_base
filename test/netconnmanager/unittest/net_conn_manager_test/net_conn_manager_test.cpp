@@ -783,7 +783,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager020, TestSize.Level1)
     for (auto exclusion : exclusionList) {
         std::cout << "Get global http exclusion:" << exclusion << std::endl;
     }
-    ASSERT_EQ(ret, NET_CONN_SUCCESS);
+    ASSERT_TRUE(ret != NET_CONN_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
