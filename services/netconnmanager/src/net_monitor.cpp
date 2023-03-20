@@ -63,7 +63,7 @@ constexpr const char *DEF_NETDETECT_URL = "http://connectivitycheck.platform.hic
 
 static void NetDetectThread(NetMonitor *monitor)
 {
-    sptr<NetMonitor> netMonitor(monitor);
+    std::shared_ptr<NetMonitor> netMonitor = monitor->shared_from_this();
     if (netMonitor == nullptr) {
         NETMGR_LOG_E("netMonitor is nullptr");
         return;

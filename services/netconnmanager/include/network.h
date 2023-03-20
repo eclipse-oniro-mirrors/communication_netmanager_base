@@ -78,7 +78,7 @@ private:
     NetConnState state_ = NET_CONN_STATE_UNKNOWN;
     NetDetectionStatus detectResult_ = UNKNOWN_STATE;
     bool isPhyNetCreated_ = false;
-    sptr<NetMonitor> netMonitor_ = nullptr;
+    std::shared_ptr<NetMonitor> netMonitor_ = nullptr;
     NetDetectionHandler netCallback_;
     NetBearType netSupplierType_;
     std::vector<sptr<INetDetectionCallback>> netDetectionRetCallback_;

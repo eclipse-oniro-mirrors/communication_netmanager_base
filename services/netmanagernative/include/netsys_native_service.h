@@ -37,7 +37,7 @@ class NetsysNativeService : public SystemAbility, public NetsysNativeServiceStub
 
 public:
     explicit NetsysNativeService(int32_t saID, bool runOnCreate = true) : SystemAbility(saID, runOnCreate){};
-    ~NetsysNativeService() = default;
+    ~NetsysNativeService() override = default;
 
     void OnStart() override;
     void OnStop() override;
