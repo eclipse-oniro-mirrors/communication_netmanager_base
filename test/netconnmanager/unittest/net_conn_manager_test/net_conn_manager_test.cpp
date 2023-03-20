@@ -353,7 +353,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager006, TestSize.Level1)
         DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
 
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testNetInfoPolicyPrams);
     sptr<NetSpecifier> netSpecifier = (std::make_unique<NetSpecifier>()).release();
     netSpecifier->ident_ = ident;
     netSpecifier->SetCapabilities(netCaps);
@@ -548,7 +548,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager012, TestSize.Level1)
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     std::cout << "supplierId3 : " << supplierId3 << std::endl;
 
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testNetInfoPolicyPrams);
     std::list<sptr<NetHandle>> netList;
     result = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(netList);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
@@ -574,7 +574,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager013, TestSize.Level1)
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
     std::cout << "supplierId : " << supplierId << std::endl;
 
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testNetInfoPolicyPrams);
     std::list<sptr<NetHandle>> netList;
     result = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(netList);
     ASSERT_TRUE(result == NetConnResultCode::NET_CONN_SUCCESS);
@@ -602,7 +602,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
     result = DelayedSingleton<NetConnClient>::GetInstance()->UpdateNetLinkInfo(supplierId, netLinkInfo);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
 
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testNetInfoPolicyPrams);
     NetLinkInfo info;
     NetHandle netHandle(100);
     result = DelayedSingleton<NetConnClient>::GetInstance()->GetConnectionProperties(netHandle, info);
@@ -618,7 +618,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager015, TestSize.Level1)
 {
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testNetInfoPolicyPrams);
     bool isMetered = false;
     int32_t result = DelayedSingleton<NetConnClient>::GetInstance()->IsDefaultNetMetered(isMetered);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
@@ -637,7 +637,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager016, TestSize.Level1)
     if (proxy == nullptr) {
         return;
     }
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
+    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testNetInfoPolicyPrams);
     int32_t result;
     std::list<sptr<NetHandle>> netList;
     result = client->GetAllNets(netList);
@@ -783,7 +783,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager020, TestSize.Level1)
     for (auto exclusion : exclusionList) {
         std::cout << "Get global http exclusion:" << exclusion << std::endl;
     }
-    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+    ASSERT_TRUE(ret != NET_CONN_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

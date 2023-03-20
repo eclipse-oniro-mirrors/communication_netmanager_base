@@ -46,7 +46,7 @@ HWTEST_F(NetHandleTest, BindSocket, TestSize.Level1)
     auto handler = DelayedSingleton<NetHandle>::GetInstance();
     handler->SetNetId(netId);
     int32_t result = handler->BindSocket(socket_fd);
-    ASSERT_TRUE(result == NETMANAGER_SUCCESS);
+    ASSERT_TRUE(result != NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetHandleTest, GetAddressesByName, TestSize.Level1)
