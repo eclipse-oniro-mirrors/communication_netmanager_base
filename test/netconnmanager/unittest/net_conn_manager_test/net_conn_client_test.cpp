@@ -59,6 +59,17 @@ PermissionDef testInternalPermDef = {
     .availableLevel = APL_SYSTEM_BASIC,
     .label = "label",
     .labelId = 1,
+    .description = "Test net connect manager internal",
+    .descriptionId = 1,
+};
+
+PermissionDef testInternetPermDef = {
+    .permissionName = "ohos.permission.INTERNET",
+    .bundleName = "net_conn_manager_test",
+    .grantMode = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+    .label = "label",
+    .labelId = 1,
     .description = "Test net connect manager internet",
     .descriptionId = 1,
 };
@@ -79,11 +90,19 @@ PermissionStateFull testInternalState = {
     .grantFlags = {2},
 };
 
+PermissionStateFull testInternetState = {
+    .permissionName = "ohos.permission.INTERNET",
+    .isGeneral = true,
+    .resDeviceID = {"local"},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
+    .grantFlags = {2},
+};
+
 HapPolicyParams testPolicyPrams = {
     .apl = APL_SYSTEM_BASIC,
     .domain = "test.domain",
-    .permList = {testPermDef, testInternalPermDef},
-    .permStateList = {testState, testInternalState},
+    .permList = {testPermDef, testInternalPermDef, testInternetPermDef},
+    .permStateList = {testState, testInternalState, testInternetState},
 };
 } // namespace
 

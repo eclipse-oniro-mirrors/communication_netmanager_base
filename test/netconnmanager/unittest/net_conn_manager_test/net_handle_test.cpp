@@ -42,7 +42,7 @@ void NetHandleTest::TearDown() {}
 HWTEST_F(NetHandleTest, BindSocket, TestSize.Level1)
 {
     int32_t socket_fd = 1;
-    int32_t netId = 5;
+    int32_t netId = 101;
     auto handler = DelayedSingleton<NetHandle>::GetInstance();
     handler->SetNetId(netId);
     int32_t result = handler->BindSocket(socket_fd);
