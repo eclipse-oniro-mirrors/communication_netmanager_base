@@ -81,7 +81,8 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_GET_SHARING_NETWORK_TRAFFIC] = &NetsysNativeServiceStub::CmdGetNetworkSharingTraffic;
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
-    uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI};
+    uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
+             UID_SAMGR, UID_PARAM_WATCHER};
 }
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()

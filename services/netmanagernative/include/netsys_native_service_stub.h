@@ -27,6 +27,10 @@ enum {
     UID_SHELL = 2000,
     UID_NET_MANAGER = 1099,
     UID_WIFI = 1010,
+    UID_RADIO = 1001,
+    UID_HIDUMPER_SERVICE = 1212,
+    UID_SAMGR = 5555,
+    UID_PARAM_WATCHER = 1101,
 };
 
 class NetsysNativeServiceStub : public IRemoteStub<INetsysService> {
