@@ -28,7 +28,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class NetMonitor : public virtual RefBase {
+class NetMonitor : public virtual RefBase, public std::enable_shared_from_this<NetMonitor> {
 public:
     /**
      * Construct a new NetMonitor to detection a network
