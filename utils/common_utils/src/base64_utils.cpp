@@ -110,7 +110,7 @@ std::string Encode(const std::string &source)
         }
         MakeCharFour(charArrayThree, charArrayFour);
         ret = std::accumulate(charArrayFour.begin(), charArrayFour.end(), std::string(),
-                              [](std::string &str_append, uint8_t const &idx) {
+                              [](const std::string &str_append, uint8_t const &idx) {
                                   return str_append + BASE64_CHARS[idx];
                               });
 
