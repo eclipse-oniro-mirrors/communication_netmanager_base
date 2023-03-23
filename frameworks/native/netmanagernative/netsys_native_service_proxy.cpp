@@ -447,7 +447,7 @@ int32_t NetsysNativeServiceProxy::NetworkClearDefault()
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::GetProcSysNet(int32_t ipversion, int32_t which, const std::string &ifname,
+int32_t NetsysNativeServiceProxy::GetProcSysNet(int32_t family, int32_t which, const std::string &ifname,
                                                 const std::string &parameter, std::string &value)
 {
     NETNATIVE_LOGI("Begin to GetSysProcNet");
@@ -456,7 +456,7 @@ int32_t NetsysNativeServiceProxy::GetProcSysNet(int32_t ipversion, int32_t which
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!data.WriteInt32(ipversion)) {
+    if (!data.WriteInt32(family)) {
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteInt32(which)) {
