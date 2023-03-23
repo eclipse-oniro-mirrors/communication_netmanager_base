@@ -39,12 +39,10 @@ void UpdateIfacesStatsContext::ParseParams(napi_value *params, size_t paramsCoun
     interfaceName_ = NapiUtils::GetStringFromValueUtf8(GetEnv(), params[ARG_INDEX_0]);
     start_ = NapiUtils::GetUint32FromValue(GetEnv(), params[ARG_INDEX_1]);
     end_ = NapiUtils::GetUint32FromValue(GetEnv(), params[ARG_INDEX_2]);
-    statsInfo_.rxBytes_ = static_cast<uint64_t>(NapiUtils::GetInt64Property(GetEnv(), params[ARG_INDEX_3], RX_BYTES));
-    statsInfo_.txBytes_ = static_cast<uint64_t>(NapiUtils::GetInt64Property(GetEnv(), params[ARG_INDEX_3], TX_BYTES));
-    statsInfo_.rxPackets_ = static_cast<uint64_t>(NapiUtils::GetInt64Property(GetEnv(),
-                                                                              params[ARG_INDEX_3], RX_PACKETS));
-    statsInfo_.txPackets_ = static_cast<uint64_t>(NapiUtils::GetInt64Property(GetEnv(),
-                                                                              params[ARG_INDEX_3], TX_PACKETS));
+    statsInfo_.rxBytes_ = NapiUtils::GetInt64Property(GetEnv(), params[ARG_INDEX_3], RX_BYTES);
+    statsInfo_.txBytes_ = NapiUtils::GetInt64Property(GetEnv(), params[ARG_INDEX_3], TX_BYTES);
+    statsInfo_.rxPackets_ = NapiUtils::GetInt64Property(GetEnv(), params[ARG_INDEX_3], RX_PACKETS);
+    statsInfo_.txPackets_ = NapiUtils::GetInt64Property(GetEnv(), params[ARG_INDEX_3], TX_PACKETS);
 
     if (paramsCount == PARAM_FOUR_OPTIONS_AND_CALLBACK) {
         SetParseOK(SetCallback(params[ARG_INDEX_4]) == napi_ok);
