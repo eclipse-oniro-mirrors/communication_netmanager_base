@@ -336,7 +336,7 @@ void Network::InitNetMonitor()
 {
     if (netMonitor_ == nullptr) {
         std::weak_ptr<INetMonitorCallback> monitorCallback = shared_from_this();
-        netMonitor_ = new (std::nothrow) NetMonitor(netId_, monitorCallback);
+        netMonitor_ = std::make_shared<NetMonitor>(netId_, monitorCallback);
         if (netMonitor_ == nullptr) {
             NETMGR_LOG_E("new NetMonitor failed,netMonitor_ is null!");
             return;

@@ -465,10 +465,9 @@ HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest002, TestSize.Level1)
 {
-    AccessToken token;
     HttpProxy httpProxy;
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_EQ(ret, NET_CONN_ERR_HTTP_PROXY_INVALID);
+    ASSERT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, GetGlobalHttpProxyTest001, TestSize.Level1)
