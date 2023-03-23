@@ -15,7 +15,7 @@
 
 #include "net_specifier.h"
 
-#include "__functional_base"
+#include <functional>
 
 #include "parcel.h"
 #include "refbase.h"
