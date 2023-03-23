@@ -430,12 +430,12 @@ int32_t NetsysNativeServiceStub::CmdNetworkClearDefault(MessageParcel &data, Mes
 int32_t NetsysNativeServiceStub::CmdGetProcSysNet(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOG_D("Begin to dispatch cmd GetProcSysNet");
-    int32_t ipversion = data.ReadInt32();
+    int32_t family = data.ReadInt32();
     int32_t which = data.ReadInt32();
     std::string ifname = data.ReadString();
     std::string parameter = data.ReadString();
     std::string value;
-    int32_t result = GetProcSysNet(ipversion, which, ifname, parameter, value);
+    int32_t result = GetProcSysNet(family, which, ifname, parameter, value);
     reply.WriteInt32(result);
     std::string valueRsl = value;
     reply.WriteString(valueRsl);
@@ -444,12 +444,12 @@ int32_t NetsysNativeServiceStub::CmdGetProcSysNet(MessageParcel &data, MessagePa
 
 int32_t NetsysNativeServiceStub::CmdSetProcSysNet(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t ipversion = data.ReadInt32();
+    int32_t family = data.ReadInt32();
     int32_t which = data.ReadInt32();
     std::string ifname = data.ReadString();
     std::string parameter = data.ReadString();
     std::string value = data.ReadString();
-    int32_t result = SetProcSysNet(ipversion, which, ifname, parameter, value);
+    int32_t result = SetProcSysNet(family, which, ifname, parameter, value);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("SetProcSysNet has recved result %{public}d", result);
 

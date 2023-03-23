@@ -156,7 +156,7 @@ std::string Decode(const std::string &encoded)
         }
         MakeCharTree(charArrayFour, charArrayThree);
         ret = std::accumulate(charArrayThree.begin(), charArrayThree.end(), std::string(),
-                              [](std::string &str_append, uint8_t const &iter) {
+                              [](const std::string &str_append, uint8_t const &iter) {
                                   return str_append + static_cast<char>(iter);
                               });
         index = 0;
