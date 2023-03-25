@@ -118,6 +118,11 @@ int32_t NetsysNativeServiceProxy::GetResolverConfig(uint16_t netId, std::vector<
     MessageOption option;
     Remote()->SendRequest(INetsysService::NETSYS_GET_RESOLVER_CONFIG, data, reply, option);
     int result = reply.ReadInt32();
+    if (result != ERR_NONE) {
+        NETNATIVE_LOGE("Fail to GetResolverConfig ret= %{public}d", result);
+        return result;
+    }
+
     reply.ReadUint16(baseTimeoutMsec);
     reply.ReadUint8(retryCount);
     int32_t vServerSize = reply.ReadInt32();
@@ -472,6 +477,10 @@ int32_t NetsysNativeServiceProxy::GetProcSysNet(int32_t family, int32_t which, c
     MessageOption option;
     Remote()->SendRequest(INetsysService::NETSYS_GET_PROC_SYS_NET, data, reply, option);
     int32_t ret = reply.ReadInt32();
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("Fail to GetProcSysNet ret= %{public}d", ret);
+        return ret;
+    }
     std::string valueRsl = reply.ReadString();
     NETNATIVE_LOGE("NETSYS_GET_PROC_SYS_NET value %{public}s", valueRsl.c_str());
     value = valueRsl;
@@ -751,6 +760,10 @@ int32_t NetsysNativeServiceProxy::GetInterfaceConfig(InterfaceConfigurationParce
     MessageOption option;
     Remote()->SendRequest(INetsysService::NETSYS_INTERFACE_GET_CONFIG, data, reply, option);
     ret = reply.ReadInt32();
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("Fail to GetInterfaceConfig ret= %{public}d", ret);
+        return ret;
+    }
     reply.ReadString(cfg.ifName);
     reply.ReadString(cfg.hwAddr);
     reply.ReadString(cfg.ipv4Addr);
@@ -781,6 +794,10 @@ int32_t NetsysNativeServiceProxy::InterfaceGetList(std::vector<std::string> &ifa
     MessageOption option;
     Remote()->SendRequest(INetsysService::NETSYS_INTERFACE_GET_LIST, data, reply, option);
     ret = reply.ReadInt32();
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("Fail to InterfaceGetList ret= %{public}d", ret);
+        return ret;
+    }
     vSize = reply.ReadInt32();
     std::vector<std::string> vecString;
     for (int i = 0; i < vSize; i++) {
@@ -1370,6 +1387,11 @@ int32_t NetsysNativeServiceProxy::GetNetworkSharingTraffic(const std::string &do
     Remote()->SendRequest(INetsysService::NETSYS_GET_SHARING_NETWORK_TRAFFIC, data, reply, option);
 
     int32_t ret = reply.ReadInt32();
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("Fail to GetNetworkSharingTraffic ret= %{public}d", ret);
+        return ret;
+    }
+
     traffic.receive = reply.ReadInt64();
     traffic.send = reply.ReadInt64();
     traffic.all = reply.ReadInt64();

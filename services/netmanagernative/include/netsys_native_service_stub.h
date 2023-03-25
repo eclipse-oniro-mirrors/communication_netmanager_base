@@ -22,6 +22,17 @@
 
 namespace OHOS {
 namespace NetsysNative {
+enum {
+    UID_ROOT = 0,
+    UID_SHELL = 2000,
+    UID_NET_MANAGER = 1099,
+    UID_WIFI = 1010,
+    UID_RADIO = 1001,
+    UID_HIDUMPER_SERVICE = 1212,
+    UID_SAMGR = 5555,
+    UID_PARAM_WATCHER = 1101,
+};
+
 class NetsysNativeServiceStub : public IRemoteStub<INetsysService> {
 public:
     NetsysNativeServiceStub();
@@ -92,6 +103,9 @@ private:
     int32_t CmdStartDnsProxyListen(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStopDnsProxyListen(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetNetworkSharingTraffic(MessageParcel &data, MessageParcel &reply);
+
+private:
+    std::vector<int32_t> uids_;
 };
 } // namespace NetsysNative
 } // namespace OHOS
