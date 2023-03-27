@@ -38,7 +38,7 @@ constexpr const char *TEST_HOST = "testHost";
 constexpr int32_t TEST_NETID = 3;
 constexpr int32_t TEST_SOCKETFD = 2;
 const int32_t NET_ID = 2;
-const int32_t SOCKET_FD = 5;
+const int32_t SOCKET_FD = 2;
 
 class NetSupplierTestCallback : public NetSupplierCallbackStub {
 public:
