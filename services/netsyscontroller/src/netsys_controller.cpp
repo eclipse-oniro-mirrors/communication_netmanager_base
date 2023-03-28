@@ -103,8 +103,6 @@ int32_t NetsysController::NetworkAddRoute(int32_t netId, const std::string &ifNa
 int32_t NetsysController::NetworkRemoveRoute(int32_t netId, const std::string &ifName, const std::string &destination,
                                              const std::string &nextHop)
 {
-    NETMGR_LOG_D("Remove Route: netId[%{public}d], ifName[%{public}s], destination[%{public}s], nextHop[%{public}s]",
-                 netId, ifName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
