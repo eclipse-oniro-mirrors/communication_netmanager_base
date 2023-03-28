@@ -33,6 +33,7 @@ ohos_shared_library("net_service_common") {
     "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$SUBSYSTEM_DIR/ipc/interfaces/innerkits/ipc_core/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
   ]
 
   deps = [

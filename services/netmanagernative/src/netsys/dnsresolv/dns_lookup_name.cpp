@@ -456,7 +456,7 @@ void DnsLookUpName::LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId)
     }
 }
 
-int32_t DnsLookUpName::LookUpName(AddrData buf[MAXADDRS], char canon[CANON_LINE], const std::string name,
+int32_t DnsLookUpName::LookUpName(AddrData buf[MAXADDRS], char canon[CANON_LINE], const std::string &name,
                                   int32_t family, int32_t flags, uint16_t netId)
 {
     *canon = 0;

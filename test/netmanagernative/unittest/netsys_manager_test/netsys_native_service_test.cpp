@@ -18,6 +18,7 @@
 
 #include "system_ability_definition.h"
 
+#include "dns_config_client.h"
 #include "net_manager_constants.h"
 #define private public
 #include "netsys_native_service.h"
@@ -32,15 +33,13 @@ using namespace testing::ext;
 class TestNotifyCallback : public NotifyCallbackStub {
 public:
     TestNotifyCallback() = default;
-    ~TestNotifyCallback() override {};
-    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
-                                      int scope) override
+    ~TestNotifyCallback() override{};
+    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags, int scope) override
     {
         return 0;
     }
 
-    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags,
-                                      int scope) override
+    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags, int scope) override
     {
         return 0;
     }
@@ -111,23 +110,23 @@ HWTEST_F(NetsysNativeServiceTest, DumpTest001, TestSize.Level1)
 HWTEST_F(NetsysNativeServiceTest, GetAddrInfoTest001, TestSize.Level1)
 {
     int32_t netId = instance_->NetworkGetDefault();
-    addrinfo hint = {0};
-    addrinfo *res = nullptr;
+    AddrInfo hint = {0};
+    std::vector<AddrInfo> res;
     std::string webAddress = "www.baidu.com";
     std::string webIpAddress = "223.5.5.5";
-    int32_t ret = instance_->GetAddrInfo(webAddress, webIpAddress, &hint, netId, &res);
+    int32_t ret = instance_->GetAddrInfo(webAddress, webIpAddress, hint, netId, res);
     EXPECT_NE(ret, 0);
 }
 
 HWTEST_F(NetsysNativeServiceTest, GetAddrInfoTest002, TestSize.Level1)
 {
     int32_t netId = instance_->NetworkGetDefault();
-    addrinfo hint = {0};
-    addrinfo *res = nullptr;
-    hint.ai_family = AF_INET6;
+    AddrInfo hint = {0};
+    std::vector<AddrInfo> res;
+    hint.aiFamily = AF_INET6;
     std::string webAddress = "www.baidu.com";
     std::string webIpAddress = "223.5.5.5";
-    int32_t ret = instance_->GetAddrInfo(webAddress, webIpAddress, &hint, netId, &res);
+    int32_t ret = instance_->GetAddrInfo(webAddress, webIpAddress, hint, netId, res);
     EXPECT_NE(ret, 0);
 }
 
