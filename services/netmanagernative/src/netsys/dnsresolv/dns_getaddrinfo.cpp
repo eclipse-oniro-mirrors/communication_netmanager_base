@@ -125,6 +125,7 @@ int32_t DnsGetAddrInfo::GetAddrInfo(const std::string &hostName, const std::stri
     if (nServ < 0) {
         NETNATIVE_LOGE("failed to LookupServ %{public}d", nServ);
         return nServ;
+    }
     AddrData addrs[MAXADDRS] = {{0}};
     char canon[CANNO_LEN] = {0};
     int32_t nAddrs = DnsLookUpName().LookUpName(addrs, canon, hostName, static_cast<int32_t>(family),

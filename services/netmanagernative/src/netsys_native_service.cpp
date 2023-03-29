@@ -183,7 +183,7 @@ int32_t NetsysNativeService::DestroyNetworkCache(const uint16_t netId)
 }
 
 int32_t NetsysNativeService::GetAddrInfo(const std::string &hostName, const std::string &serverName,
-                                         const addrinfo *hints, uint16_t netId, addrinfo **res)
+                                         const AddrInfo &hints, uint16_t netId, std::vector<AddrInfo> &res)
 {
     return netsysService_->DnsGetAddrInfo(hostName, serverName, hints, netId, res);
 }
