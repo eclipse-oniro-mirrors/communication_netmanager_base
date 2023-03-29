@@ -179,31 +179,68 @@ int32_t NetsysNativeServiceProxy::DestroyNetworkCache(const uint16_t netId)
 }
 
 int32_t NetsysNativeServiceProxy::GetAddrInfo(const std::string &hostName, const std::string &serverName,
-                                              const addrinfo *hints, uint16_t netId, addrinfo **res)
+                                              const AddrInfo &hints, uint16_t netId, std::vector<AddrInfo> &res)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
     }
-    NetsysAddrInfoParcel addrParcel(hints, netId, hostName, serverName);
-    if (!addrParcel.Marshalling(data)) {
-        NETNATIVE_LOG_D("addrinfo marshing fail");
+
+    if (!data.WriteString(hostName)) {
+        return ERR_FLATTEN_OBJECT;
     }
+
+    if (!data.WriteString(serverName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteRawData(&hints, sizeof(AddrInfo))) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint16(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
     MessageParcel reply;
     MessageOption option;
     Remote()->SendRequest(INetsysService::NETSYS_GET_ADDR_INFO, data, reply, option);
 
-    sptr<NetsysAddrInfoParcel> ptr = addrParcel.Unmarshalling(reply);
-    if (ptr == nullptr) {
-        NETNATIVE_LOGE("after IPC service recive Unmarshalling is failed");
-        return -1;
-    }
-    NETNATIVE_LOGI("NetsysNativeServiceProxy ret %{public}d addrSize: %{public}d", ptr->ret, ptr->addrSize);
-    if (ptr->addrSize != 0) {
-        *res = ptr->addrHead;
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        return ERR_INVALID_DATA;
     }
 
-    return ptr->ret;
+    if (ret != ERR_NONE) {
+        return ERR_INVALID_DATA;
+    }
+
+    uint32_t addrSize;
+    if (!reply.ReadUint32(addrSize)) {
+        return ERR_INVALID_DATA;
+    }
+
+    if (addrSize > MAX_RESULTS) {
+        return ERR_INVALID_DATA;
+    }
+
+    std::vector<AddrInfo> infos;
+    for (uint32_t i = 0; i < addrSize; ++i) {
+        auto p = reply.ReadRawData(sizeof(AddrInfo));
+        if (p == nullptr) {
+            return ERR_INVALID_DATA;
+        }
+
+        AddrInfo info = {};
+        if (memcpy_s(&info, sizeof(AddrInfo), p, sizeof(AddrInfo)) != EOK) {
+            return ERR_INVALID_DATA;
+        }
+
+        infos.emplace_back(info);
+    }
+
+    res = infos;
+    return ret;
 }
 
 int32_t NetsysNativeServiceProxy::InterfaceSetMtu(const std::string &interfaceName, int32_t mtu)

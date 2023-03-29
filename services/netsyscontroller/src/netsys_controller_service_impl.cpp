@@ -208,14 +208,13 @@ int32_t NetsysControllerServiceImpl::DestroyNetworkCache(uint16_t netId)
     return netsysClient_.DestroyNetworkCache(netId);
 }
 
-int32_t NetsysControllerServiceImpl::GetAddrInfo(const std::string hostName, const std::string serverName,
-                                                 const addrinfo *hints, uint16_t netId, addrinfo **res)
+int32_t NetsysControllerServiceImpl::GetAddrInfo(const std::string &hostName, const std::string &serverName,
+                                                 const AddrInfo &hints, uint16_t netId, std::vector<AddrInfo> &res)
 {
     return netsysClient_.GetAddrInfo(hostName, serverName, hints, netId, res);
 }
 
-int32_t NetsysControllerServiceImpl::GetNetworkSharingTraffic(const std::string &downIface,
-                                                              const std::string &upIface,
+int32_t NetsysControllerServiceImpl::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
                                                               nmd::NetworkSharingTraffic &traffic)
 {
     NETMGR_LOG_I("NetsysControllerServiceImpl GetNetworkSharingTraffic");
@@ -456,20 +455,16 @@ int32_t NetsysControllerServiceImpl::EnableVirtualNetIfaceCard(int32_t socketFd,
                                                                int32_t &ifaceFd)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::EnableVirtualNetIfaceCard");
-    if (mockNetsysClient_.CheckMockApi(MOCK_ENABLEVIRTUALNETIFACECARD_API)) {
-        return mockNetsysClient_.EnableVirtualNetIfaceCard(socketFd, ifRequest, ifaceFd);
-    }
-    return netsysClient_.EnableVirtualNetIfaceCard(socketFd, ifRequest, ifaceFd);
+    // to be done: netsysClient_.EnableVirtualNetIfaceCard
+    return 0;
 }
 
 int32_t NetsysControllerServiceImpl::SetIpAddress(int32_t socketFd, const std::string &ipAddress, int32_t prefixLen,
                                                   struct ifreq &ifRequest)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::SetIpAddress");
-    if (mockNetsysClient_.CheckMockApi(MOCK_SETIPADDRESS_API)) {
-        return mockNetsysClient_.SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
-    }
-    return netsysClient_.SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
+    // to be done: netsysClient_.SetIpAddress
+    return 0;
 }
 
 int32_t NetsysControllerServiceImpl::SetBlocking(int32_t ifaceFd, bool isBlock)

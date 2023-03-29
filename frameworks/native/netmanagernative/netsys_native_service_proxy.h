@@ -34,8 +34,8 @@ public:
                               uint8_t &retryCount) override;
     int32_t CreateNetworkCache(const uint16_t netId) override;
     int32_t DestroyNetworkCache(const uint16_t netId) override;
-    int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName, const addrinfo *hints, uint16_t netId,
-                        addrinfo **res) override;
+    int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName, const AddrInfo &hints,
+                        uint16_t netId, std::vector<AddrInfo> &res) override;
     int32_t InterfaceSetMtu(const std::string &interfaceName, int32_t mtu) override;
     int32_t InterfaceGetMtu(const std::string &interfaceName) override;
 

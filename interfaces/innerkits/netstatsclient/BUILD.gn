@@ -20,6 +20,7 @@ config("net_stats_manager_if_config") {
     "$INNERKITS_ROOT/netstatsclient/include/proxy",
     "$INNERKITS_ROOT/netstatsclient/include",
     "$INNERKITS_ROOT/netmanagernative/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
   ]
 
   cflags = []

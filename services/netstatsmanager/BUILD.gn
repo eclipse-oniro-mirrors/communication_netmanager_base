@@ -36,6 +36,7 @@ ohos_shared_library("net_stats_manager") {
     "$NETSYSBPFMAP_SOURCE_DIR/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETSTATSMANAGER_BPFLIB_DIR/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
   ]
 

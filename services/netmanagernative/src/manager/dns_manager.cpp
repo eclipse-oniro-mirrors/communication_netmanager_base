@@ -95,14 +95,15 @@ void DnsManager::GetDumpInfo(std::string &info)
     DelayedSingleton<DnsParamCache>::GetInstance()->GetDumpInfo(info);
 }
 
-int32_t DnsManager::GetAddrInfo(const std::string node, const std::string service, const addrinfo *hints,
-                                uint16_t netId, addrinfo **result)
+
+int32_t DnsManager::GetAddrInfo(const std::string &hostName, const std::string &serverName, const AddrInfo &hints,
+                                uint16_t netId, std::vector<AddrInfo> &res)
 {
     if (netId == 0) {
         netId = DelayedSingleton<DnsParamCache>::GetInstance()->GetDefaultNetwork();
         NETNATIVE_LOG_D("DnsManager DnsGetaddrinfo netId == 0 defaultNetId_ : %{public}d", netId);
     }
-    return dnsGetAddrInfo_->GetAddrInfo(node, service, hints, netId, result);
+    return dnsGetAddrInfo_->GetAddrInfo(hostName, serverName, hints, netId, res);
 }
 } // namespace nmd
 } // namespace OHOS

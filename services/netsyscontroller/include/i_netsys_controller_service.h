@@ -16,12 +16,12 @@
 #ifndef I_NETSYSCONTROLLER_SERVICE_H
 #define I_NETSYSCONTROLLER_SERVICE_H
 
-#include <linux/if.h>
 #include <memory>
 #include <netdb.h>
 #include <string>
 #include <vector>
 
+#include "dns_config_client.h"
 #include "interface_type.h"
 #include "netsys_controller_callback.h"
 #include "netsys_controller_define.h"
@@ -156,7 +156,6 @@ public:
      */
     virtual int32_t InterfaceAddAddress(const std::string &ifName, const std::string &ipAddr,
                                         int32_t prefixLength) = 0;
-
     /**
      * Delete ip address
      *
@@ -238,8 +237,8 @@ public:
      * @param res return addrinfo
      * @return Return the return value of the netsys interface call
      */
-    virtual int32_t GetAddrInfo(const std::string hostName, std::string serverName, const addrinfo *hints,
-                                uint16_t netId, addrinfo **res) = 0;
+    virtual int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName, const AddrInfo &hints,
+                                uint16_t netId, std::vector<AddrInfo> &res) = 0;
 
     /**
      * Obtains the bytes of the sharing network.

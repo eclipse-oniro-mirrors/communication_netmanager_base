@@ -18,6 +18,7 @@
 #include <netdb.h>
 #include <string>
 
+#include "dns_config_client.h"
 #include "i_notify_callback.h"
 #include "interface_type.h"
 #include "iremote_broker.h"
@@ -97,8 +98,9 @@ public:
                                       uint8_t &retryCount) = 0;
     virtual int32_t CreateNetworkCache(uint16_t netId) = 0;
     virtual int32_t DestroyNetworkCache(uint16_t netId) = 0;
-    virtual int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName,
-                                const addrinfo *hints, uint16_t netId, addrinfo **res) = 0;
+
+    virtual int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName, const AddrInfo &hints,
+                                uint16_t netId, std::vector<AddrInfo> &res) = 0;
     virtual int32_t InterfaceSetMtu(const std::string &interfaceName, int mtu) = 0;
     virtual int32_t InterfaceGetMtu(const std::string &interfaceName) = 0;
 
@@ -107,8 +109,8 @@ public:
 
     virtual int32_t NetworkAddRoute(int32_t netId, const std::string &interfaceName, const std::string &destination,
                                     const std::string &nextHop) = 0;
-    virtual int32_t NetworkRemoveRoute(int32_t netId, const std::string &interfaceName,
-                                       const std::string &destination, const std::string &nextHop) = 0;
+    virtual int32_t NetworkRemoveRoute(int32_t netId, const std::string &interfaceName, const std::string &destination,
+                                       const std::string &nextHop) = 0;
     virtual int32_t NetworkAddRouteParcel(int32_t netId, const RouteInfoParcel &routeInfo) = 0;
     virtual int32_t NetworkRemoveRouteParcel(int32_t netId, const RouteInfoParcel &routeInfo) = 0;
     virtual int32_t NetworkSetDefault(int32_t netId) = 0;
