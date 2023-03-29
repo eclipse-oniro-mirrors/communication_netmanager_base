@@ -31,7 +31,6 @@ ohos_shared_library("netsys_controller") {
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
-    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
   ]
 
   deps = [
