@@ -26,6 +26,7 @@
 #include "net_manager_native.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
+
 std::vector<uint32_t> OHOS::nmd::NetManagerNative::interfaceIdex_;
 
 namespace OHOS {
