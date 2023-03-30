@@ -16,6 +16,7 @@
 #ifndef I_NETSYSCONTROLLER_SERVICE_H
 #define I_NETSYSCONTROLLER_SERVICE_H
 
+#include <linux/if.h>
 #include <memory>
 #include <netdb.h>
 #include <string>
