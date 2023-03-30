@@ -187,23 +187,8 @@ int32_t NetsysNativeServiceProxy::GetAddrInfo(const std::string &hostName, const
                                               const AddrInfo &hints, uint16_t netId, std::vector<AddrInfo> &res)
 {
     MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    if (!data.WriteString(hostName)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    if (!data.WriteString(serverName)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    if (!data.WriteRawData(&hints, sizeof(AddrInfo))) {
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    if (!data.WriteUint16(netId)) {
+    if (!WriteInterfaceToken(data) || !data.WriteString(hostName) || !data.WriteString(serverName) ||
+        !data.WriteRawData(&hints, sizeof(AddrInfo)) || !data.WriteUint16(netId)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -212,20 +197,8 @@ int32_t NetsysNativeServiceProxy::GetAddrInfo(const std::string &hostName, const
     Remote()->SendRequest(INetsysService::NETSYS_GET_ADDR_INFO, data, reply, option);
 
     int32_t ret;
-    if (!reply.ReadInt32(ret)) {
-        return ERR_INVALID_DATA;
-    }
-
-    if (ret != ERR_NONE) {
-        return ERR_INVALID_DATA;
-    }
-
     uint32_t addrSize;
-    if (!reply.ReadUint32(addrSize)) {
-        return ERR_INVALID_DATA;
-    }
-
-    if (addrSize > MAX_RESULTS) {
+    if (!reply.ReadInt32(ret) || ret != ERR_NONE || !reply.ReadUint32(addrSize) || addrSize > MAX_RESULTS) {
         return ERR_INVALID_DATA;
     }
 
