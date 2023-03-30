@@ -30,6 +30,7 @@ ohos_unittest("netsys_wrapper_test") {
     "$INNERKITS_ROOT/dnsresolverclient/include",
     "$INNERKITS_ROOT/dnsresolverclient/include/proxy",
     "$NETMANAGERNATIVE_ROOT/include/netsys/wrapper",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
   ]
 
   deps = [
