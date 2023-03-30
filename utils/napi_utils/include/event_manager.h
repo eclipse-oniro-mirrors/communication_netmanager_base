@@ -37,6 +37,7 @@ public:
     void EmitByUv(const std::string &type, void *data, void(handler)(uv_work_t *, int status));
     bool HasEventListener(const std::string &type);
     void DeleteListener(const std::string &type);
+    void DeleteAllListener();
     [[nodiscard]] void *GetData();
 
     bool IsListenerListEmpty() const
