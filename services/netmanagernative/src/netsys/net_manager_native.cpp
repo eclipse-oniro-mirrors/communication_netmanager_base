@@ -26,7 +26,6 @@
 #include "net_manager_native.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
-
 std::vector<uint32_t> OHOS::nmd::NetManagerNative::interfaceIdex_;
 
 namespace OHOS {
@@ -376,7 +375,7 @@ void NetManagerNative::StopDnsProxyListen()
 }
 
 int32_t NetManagerNative::DnsGetAddrInfo(const std::string &hostName, const std::string &serverName,
-                                         const AddrInfo &hints, uint16_t netId, std::vector<AddrInfo> &res)
+                                         const addrinfo *hints, uint16_t netId, addrinfo **res)
 {
     return dnsManager_->GetAddrInfo(hostName, serverName, hints, netId, res);
 }
