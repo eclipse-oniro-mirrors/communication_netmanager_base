@@ -214,13 +214,12 @@ int32_t NetsysControllerServiceImpl::DestroyNetworkCache(uint16_t netId)
 }
 
 int32_t NetsysControllerServiceImpl::GetAddrInfo(const std::string &hostName, const std::string &serverName,
-                                                 const addrinfo *hints, uint16_t netId, addrinfo **res)
+                                                 const AddrInfo &hints, uint16_t netId, std::vector<AddrInfo> &res)
 {
     return netsysClient_.GetAddrInfo(hostName, serverName, hints, netId, res);
 }
 
-int32_t NetsysControllerServiceImpl::GetNetworkSharingTraffic(const std::string &downIface,
-                                                              const std::string &upIface,
+int32_t NetsysControllerServiceImpl::GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
                                                               nmd::NetworkSharingTraffic &traffic)
 {
     NETMGR_LOG_I("NetsysControllerServiceImpl GetNetworkSharingTraffic");
@@ -404,8 +403,7 @@ int32_t NetsysControllerServiceImpl::DisableNat(const std::string &downstreamIfa
     return netsysClient_.DisableNat(downstreamIface, upstreamIface);
 }
 
-int32_t NetsysControllerServiceImpl::IpfwdAddInterfaceForward(const std::string &fromIface,
-                                                              const std::string &toIface)
+int32_t NetsysControllerServiceImpl::IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl IpfwdAddInterfaceForward");
     return netsysClient_.IpfwdAddInterfaceForward(fromIface, toIface);
@@ -573,8 +571,7 @@ int32_t NetsysControllerServiceImpl::BandwidthRemoveAllowedList(uint32_t uid)
     return netsysClient_.BandwidthRemoveAllowedList(uid);
 }
 
-int32_t NetsysControllerServiceImpl::FirewallSetUidsAllowedListChain(uint32_t chain,
-                                                                     const std::vector<uint32_t> &uids)
+int32_t NetsysControllerServiceImpl::FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::FirewallSetUidsAllowedListChain: chain=%{public}d", chain);
     return netsysClient_.FirewallSetUidsAllowedListChain(chain, uids);

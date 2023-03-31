@@ -38,7 +38,7 @@ public:
     NetsysNativeServiceStub();
     ~NetsysNativeServiceStub() = default;
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
-    int32_t NetsysFreeAddrinfo(struct addrinfo *aihead) ;
+    int32_t NetsysFreeAddrinfo(struct addrinfo *aihead);
 
 private:
     using ServiceInterface = int32_t (NetsysNativeServiceStub::*)(MessageParcel &data, MessageParcel &reply);
