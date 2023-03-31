@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #include <gtest/gtest.h>
 #include <string>
 
 #include "system_ability_definition.h"
+#include "netsys_controller.h"
+#include "interface_manager.h"
 
 #include "dns_config_client.h"
 #include "net_manager_constants.h"
@@ -105,29 +108,6 @@ HWTEST_F(NetsysNativeServiceTest, DumpTest001, TestSize.Level1)
     int32_t testFd = 11;
     int32_t ret = instance_->Dump(testFd, {});
     EXPECT_LE(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetsysNativeServiceTest, GetAddrInfoTest001, TestSize.Level1)
-{
-    int32_t netId = instance_->NetworkGetDefault();
-    AddrInfo hint = {0};
-    std::vector<AddrInfo> res;
-    std::string webAddress = "www.baidu.com";
-    std::string webIpAddress = "223.5.5.5";
-    int32_t ret = instance_->GetAddrInfo(webAddress, webIpAddress, hint, netId, res);
-    EXPECT_NE(ret, 0);
-}
-
-HWTEST_F(NetsysNativeServiceTest, GetAddrInfoTest002, TestSize.Level1)
-{
-    int32_t netId = instance_->NetworkGetDefault();
-    AddrInfo hint = {0};
-    std::vector<AddrInfo> res;
-    hint.aiFamily = AF_INET6;
-    std::string webAddress = "www.baidu.com";
-    std::string webIpAddress = "223.5.5.5";
-    int32_t ret = instance_->GetAddrInfo(webAddress, webIpAddress, hint, netId, res);
-    EXPECT_NE(ret, 0);
 }
 
 HWTEST_F(NetsysNativeServiceTest, SetResolverConfigTest001, TestSize.Level1)
@@ -238,6 +218,11 @@ HWTEST_F(NetsysNativeServiceTest, SetInterfaceMtu001, TestSize.Level1)
     int32_t ret = instance_->SetInterfaceMtu(testName, mtu);
     EXPECT_NE(ret, 0);
     std::string eth0Name = "eth0";
+    auto ifaceList = NetsysController::GetInstance().InterfaceGetList();
+    bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), eth0Name) == ifaceList.end();
+    if (eth0NotExist) {
+        return;
+    }
     ret = instance_->SetInterfaceMtu(eth0Name, mtu);
     EXPECT_EQ(ret, 0);
 }

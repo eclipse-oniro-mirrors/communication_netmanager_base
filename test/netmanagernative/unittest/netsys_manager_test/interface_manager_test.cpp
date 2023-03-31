@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #include <gtest/gtest.h>
 
 #include "interface_manager.h"
+#include "netsys_controller.h"
 
 namespace OHOS {
 namespace nmd {
@@ -76,6 +78,11 @@ HWTEST_F(InterfaceManagerTest, SetMtuTest002, TestSize.Level1)
 HWTEST_F(InterfaceManagerTest, SetMtuTest003, TestSize.Level1)
 {
     std::string interfaceName = "eth0";
+    auto ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
+    bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) == ifaceList.end();
+    if (eth0NotExist) {
+        return;
+    }
     std::string mtuValue;
     auto ret = InterfaceManager::SetMtu(interfaceName.data(), mtuValue.data());
     EXPECT_LE(ret, 0);
