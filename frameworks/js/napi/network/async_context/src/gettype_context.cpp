@@ -29,19 +29,6 @@ GetTypeContext::GetTypeContext(napi_env env, EventManager *manager)
 {
 }
 
-GetTypeContext::~GetTypeContext()
-{
-    if (successCallback_ != nullptr) {
-        (void)napi_delete_reference(GetEnv(), successCallback_);
-    }
-    if (failCallback_ != nullptr) {
-        (void)napi_delete_reference(GetEnv(), failCallback_);
-    }
-    if (completeCallback_ != nullptr) {
-        (void)napi_delete_reference(GetEnv(), completeCallback_);
-    }
-}
-
 void GetTypeContext::ParseParams(napi_value *params, size_t paramsCount)
 {
     if (!CheckParamsType(params, paramsCount)) {
@@ -84,6 +71,7 @@ bool GetTypeContext::SetSuccessCallback(napi_value options)
     if (successCallback_ != nullptr) {
         (void)napi_delete_reference(GetEnv(), successCallback_);
     }
+    GetManager()->AddListener(GetEnv(), EVENT_GET_TYPE, callback, true, false);
     return napi_create_reference(GetEnv(), callback, 1, &successCallback_) == napi_ok;
 }
 
@@ -149,15 +137,5 @@ napi_value GetTypeContext::GetCompleteCallback() const
     napi_value callback = nullptr;
     NAPI_CALL(GetEnv(), napi_get_reference_value(GetEnv(), completeCallback_, &callback));
     return callback;
-}
-
-void GetTypeContext::SetCap(const NetAllCapabilities &cap)
-{
-    cap_ = cap;
-}
-
-NetAllCapabilities GetTypeContext::GetCap()
-{
-    return cap_;
 }
 } // namespace OHOS::NetManagerStandard

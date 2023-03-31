@@ -30,30 +30,41 @@ napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION(FUNCTION_UNSUBSCRIBE, Unsubscribe),
     };
     NapiUtils::DefineProperties(env, exports, properties);
+    auto manager = new EventManager;
+    auto observer = new NetworkObserver;
+    observer->SetManager(manager);
+    g_observerMap[manager] = observer;
+
+    auto finalizer = [](napi_env, void *data, void *) {
+        auto manager = reinterpret_cast<EventManager *>(data);
+        manager->SetInvalid();
+    };
+    napi_wrap(env, exports, reinterpret_cast<void *>(manager), finalizer, nullptr, nullptr);
+
     return exports;
 }
 
 napi_value NetworkModule::GetType(napi_env env, napi_callback_info info)
 {
     NETMANAGER_BASE_LOGI("NetworkModule::GetType is called");
-    return ModuleTemplate::InterfaceWithoutManager<GetTypeContext>(
-        env, info, "SystemNetworkGetType", nullptr, NetworkAsyncWork::ExecGetType, NetworkAsyncWork::GetTypeCallback);
+    return ModuleTemplate::Interface<GetTypeContext>(env, info, "SystemNetworkGetType", nullptr,
+                                                     NetworkAsyncWork::ExecGetType, NetworkAsyncWork::GetTypeCallback);
 }
 
 napi_value NetworkModule::Subscribe(napi_env env, napi_callback_info info)
 {
     NETMANAGER_BASE_LOGI("NetworkModule::Subscribe is called");
-    return ModuleTemplate::InterfaceWithoutManager<SubscribeContext>(env, info, "SystemNetworkSubscribe", nullptr,
-                                                                     NetworkAsyncWork::ExecSubscribe,
-                                                                     NetworkAsyncWork::SubscribeCallback);
+    return ModuleTemplate::Interface<SubscribeContext>(env, info, "SystemNetworkSubscribe", nullptr,
+                                                       NetworkAsyncWork::ExecSubscribe,
+                                                       NetworkAsyncWork::SubscribeCallback);
 }
 
 napi_value NetworkModule::Unsubscribe(napi_env env, napi_callback_info info)
 {
     NETMANAGER_BASE_LOGI("NetworkModule::Unsubscribe is called");
-    return ModuleTemplate::InterfaceWithoutManager<UnsubscribeContext>(env, info, "SystemNetworkUnsubscribe", nullptr,
-                                                                       NetworkAsyncWork::ExecUnsubscribe,
-                                                                       NetworkAsyncWork::UnsubscribeCallback);
+    return ModuleTemplate::Interface<UnsubscribeContext>(env, info, "SystemNetworkUnsubscribe", nullptr,
+                                                         NetworkAsyncWork::ExecUnsubscribe,
+                                                         NetworkAsyncWork::UnsubscribeCallback);
 }
 
 NAPI_MODULE(network, NetworkModule::InitNetworkModule)
