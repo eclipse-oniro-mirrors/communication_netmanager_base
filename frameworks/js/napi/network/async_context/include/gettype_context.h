@@ -19,6 +19,7 @@
 #include "napi/native_api.h"
 #include "base_context.h"
 #include "nocopyable.h"
+#include "net_all_capabilities.h"
 
 namespace OHOS::NetManagerStandard {
 class GetTypeContext final : public BaseContext {
@@ -26,6 +27,8 @@ public:
     DISALLOW_COPY_AND_MOVE(GetTypeContext);
 
     GetTypeContext() = delete;
+
+    ~GetTypeContext() override;
 
     explicit GetTypeContext(napi_env env, EventManager *manager);
 
@@ -37,6 +40,10 @@ public:
 
     [[nodiscard]] napi_value GetCompleteCallback() const;
 
+    void SetCap(const NetAllCapabilities &cap_);
+
+    NetAllCapabilities GetCap();
+
 private:
     bool SetSuccessCallback(napi_value options);
 
@@ -45,6 +52,8 @@ private:
     bool SetCompleteCallback(napi_value options);
 
     bool CheckParamsType(napi_value *params, size_t paramsCount);
+
+    NetAllCapabilities cap_;
 
     napi_ref successCallback_;
 
