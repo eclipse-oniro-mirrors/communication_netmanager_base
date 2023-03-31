@@ -18,32 +18,92 @@
 #include "network_constant.h"
 #include "net_conn_client.h"
 #include "net_manager_constants.h"
-#include "network_observer.h"
+#if HAS_TELEPHONY
+#include "core_service_client.h"
+#endif
 #include "netmanager_base_log.h"
 #include "napi_utils.h"
 #include "securec.h"
 
-static constexpr const int ERROR_PARAM_NUM = 2;
-
-static constexpr const char *ERROR_MSG = "failed";
-
-static constexpr const uint32_t DEFAULT_TIMEOUT_MS = 1000;
-
 namespace OHOS::NetManagerStandard {
+static constexpr const int ERROR_PARAM_NUM = 2;
+static constexpr const char *ERROR_MSG = "failed";
+static constexpr const char *NETWORK_NONE = "none";
+static constexpr const char *NETWORK_WIFI = "WiFi";
+
+#if HAS_TELEPHONY
+static std::string CellularTypeToString(Telephony::SignalInformation::NetworkType type)
+{
+    switch (type) {
+        case Telephony::SignalInformation::NetworkType::GSM:
+            return "2g";
+        case Telephony::SignalInformation::NetworkType::CDMA:
+        case Telephony::SignalInformation::NetworkType::WCDMA:
+        case Telephony::SignalInformation::NetworkType::TDSCDMA:
+            return "3g";
+        case Telephony::SignalInformation::NetworkType::LTE:
+            return "4g";
+        default:
+            break;
+    }
+    return "5g";
+}
+#endif
+
+static napi_value MakeNetworkResponse(napi_env env, const std::set<NetBearType> &bearerTypes)
+{
+    napi_value obj = NapiUtils::CreateObject(env);
+    if (bearerTypes.find(BEARER_WIFI) != bearerTypes.end()) {
+        NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, NETWORK_WIFI);
+        NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, false);
+        return obj;
+    }
+
+#if HAS_TELEPHONY
+    if (bearerTypes.find(BEARER_CELLULAR) != bearerTypes.end()) {
+        std::vector<sptr<Telephony::SignalInformation>> vec;
+        DelayedRefSingleton<Telephony::CoreServiceClient>::GetInstance().GetSignalInfoList(0, vec);
+        if (vec.empty()) {
+            NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, NETWORK_NONE);
+            NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, false);
+            return obj;
+        }
+
+        std::sort(vec.begin(), vec.end(),
+                  [](const sptr<Telephony::SignalInformation> &info1, const sptr<Telephony::SignalInformation> &info2)
+                      -> bool { return info1->GetSignalLevel() > info2->GetSignalLevel(); });
+        NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, CellularTypeToString(vec[0]->GetNetworkType()));
+        NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, true);
+        return obj;
+    }
+#endif
+
+    NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, NETWORK_NONE);
+    NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, false);
+    return obj;
+}
+
 bool NetworkExec::ExecGetType(GetTypeContext *context)
 {
     NETMANAGER_BASE_LOGI("NetworkExec::ExecGetType");
-    EventManager *manager = context->GetManager();
-    sptr<INetConnCallback> callback = g_observerMap[manager];
-    if (callback == nullptr) {
+    NetHandle handle;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
+    if (ret != NETMANAGER_SUCCESS) {
+        context->SetErrorCode(ret);
+        return ret == NETMANAGER_SUCCESS;
+    }
+
+    if (handle.GetNetId() == 0) {
+        context->SetErrorCode(NETMANAGER_ERR_INTERNAL);
         return false;
     }
 
-    sptr<NetSpecifier> specifier = new NetSpecifier;
-    specifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
-    DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback,
-                                                                                          DEFAULT_TIMEOUT_MS);
+    NetAllCapabilities cap;
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(handle, cap);
+    if (ret == NETMANAGER_SUCCESS) {
+        context->SetCap(cap);
+    }
+
     context->SetErrorCode(ret);
     return ret == NETMANAGER_SUCCESS;
 }
@@ -67,11 +127,12 @@ napi_value NetworkExec::GetTypeCallback(GetTypeContext *context)
             NapiUtils::CallFunction(context->GetEnv(), NapiUtils::GetUndefined(context->GetEnv()), complete, 0,
                                     nullptr);
         }
-
-        auto manager = context->GetManager();
+    } else {
         napi_value success = context->GetSuccessCallback();
         if (NapiUtils::GetValueType(context->GetEnv(), success) == napi_function) {
-            manager->DeleteListener(EVENT_GET_TYPE, success);
+            auto cap = context->GetCap();
+            auto obj = MakeNetworkResponse(context->GetEnv(), cap.bearerTypes_);
+            NapiUtils::CallFunction(context->GetEnv(), NapiUtils::GetUndefined(context->GetEnv()), success, 1, &obj);
         }
     }
 
@@ -81,17 +142,24 @@ napi_value NetworkExec::GetTypeCallback(GetTypeContext *context)
 bool NetworkExec::ExecSubscribe(SubscribeContext *context)
 {
     NETMANAGER_BASE_LOGI("NetworkExec::ExecSubscribe");
-    EventManager *manager = context->GetManager();
-    sptr<INetConnCallback> callback = g_observerMap[manager];
-    if (callback == nullptr) {
+    NetHandle handle;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
+    if (ret != NETMANAGER_SUCCESS) {
+        context->SetErrorCode(ret);
+        return ret == NETMANAGER_SUCCESS;
+    }
+
+    if (handle.GetNetId() == 0) {
+        context->SetErrorCode(NETMANAGER_ERR_INTERNAL);
         return false;
     }
 
-    sptr<NetSpecifier> specifier = new NetSpecifier;
-    specifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
-    DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback,
-                                                                                          DEFAULT_TIMEOUT_MS);
+    NetAllCapabilities cap;
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(handle, cap);
+    if (ret == NETMANAGER_SUCCESS) {
+        context->SetCap(cap);
+    }
+
     context->SetErrorCode(ret);
     return ret == NETMANAGER_SUCCESS;
 }
@@ -108,6 +176,13 @@ napi_value NetworkExec::SubscribeCallback(SubscribeContext *context)
             NapiUtils::CallFunction(context->GetEnv(), NapiUtils::GetUndefined(context->GetEnv()), fail,
                                     ERROR_PARAM_NUM, argv);
         }
+    } else {
+        napi_value success = context->GetSuccessCallback();
+        if (NapiUtils::GetValueType(context->GetEnv(), success) == napi_function) {
+            auto cap = context->GetCap();
+            auto obj = MakeNetworkResponse(context->GetEnv(), cap.bearerTypes_);
+            NapiUtils::CallFunction(context->GetEnv(), NapiUtils::GetUndefined(context->GetEnv()), success, 1, &obj);
+        }
     }
 
     return NapiUtils::GetUndefined(context->GetEnv());
@@ -115,21 +190,11 @@ napi_value NetworkExec::SubscribeCallback(SubscribeContext *context)
 
 bool NetworkExec::ExecUnsubscribe(UnsubscribeContext *context)
 {
-    EventManager *manager = context->GetManager();
-    sptr<INetConnCallback> callback = g_observerMap[manager];
-    if (callback == nullptr) {
-        return false;
-    }
-
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
-    context->SetErrorCode(ret);
-    return ret == NETMANAGER_SUCCESS;
+    return true;
 }
 
 napi_value NetworkExec::UnsubscribeCallback(UnsubscribeContext *context)
 {
-    context->GetManager()->DeleteListener(EVENT_GET_TYPE);
-    context->GetManager()->DeleteListener(EVENT_SUBSCRIBE);
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 } // namespace OHOS::NetManagerStandard
