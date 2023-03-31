@@ -29,4 +29,9 @@ static constexpr const char *KEY_CODE = "code";
 static constexpr const char *KEY_TYPE = "type";
 
 static constexpr const char *KEY_METERED = "metered";
+
+static constexpr const char *EVENT_GET_TYPE = "getType";
+
+static constexpr const char *EVENT_SUBSCRIBE = "subscribe";
+
 #endif /* NETMANAGER_BASE_CONSTANT_H */
