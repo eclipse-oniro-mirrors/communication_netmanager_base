@@ -363,7 +363,13 @@ napi_value ConnectionModule::NetConnectionInterface::Register(napi_env env, napi
 napi_value ConnectionModule::NetConnectionInterface::Unregister(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::Interface<UnregisterContext>(
-        env, info, FUNCTION_UNREGISTER, nullptr, ConnectionAsyncWork::NetConnectionAsyncWork::ExecUnregister,
+        env, info, FUNCTION_UNREGISTER,
+        [](napi_env theEnv, napi_value thisVal, UnregisterContext *context) -> bool {
+            if (context && context->GetManager()) {
+                context->GetManager()->DeleteAllListener();
+            }
+            return true;
+        }, ConnectionAsyncWork::NetConnectionAsyncWork::ExecUnregister,
         ConnectionAsyncWork::NetConnectionAsyncWork::UnregisterCallback);
 }
 

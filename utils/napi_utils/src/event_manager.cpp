@@ -119,6 +119,12 @@ void EventManager::DeleteListener(const std::string &type)
     listeners_.erase(it, listeners_.end());
 }
 
+void EventManager::DeleteAllListener()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    listeners_.clear();
+}
+
 UvWorkWrapper::UvWorkWrapper(void *theData, napi_env theEnv, std::string eventType, EventManager *eventManager)
     : data(theData), env(theEnv), type(std::move(eventType)), manager(eventManager)
 {
