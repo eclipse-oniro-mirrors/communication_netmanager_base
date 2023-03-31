@@ -20,7 +20,6 @@
 
 #include "event_manager.h"
 #include "napi_utils.h"
-#include "network_observer.h"
 
 namespace OHOS::NetManagerStandard {
 class NetworkModule {

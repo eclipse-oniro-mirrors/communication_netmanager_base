@@ -33,7 +33,6 @@ ohos_shared_library("network") {
     "async_work/src/network_async_work.cpp",
     "network_exec/src/network_exec.cpp",
     "network_module/src/network_module.cpp",
-    "observer/src/network_observer.cpp",
   ]
 
   deps = [
