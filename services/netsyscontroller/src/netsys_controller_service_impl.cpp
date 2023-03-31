@@ -455,16 +455,20 @@ int32_t NetsysControllerServiceImpl::EnableVirtualNetIfaceCard(int32_t socketFd,
                                                                int32_t &ifaceFd)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::EnableVirtualNetIfaceCard");
-    // to be done: netsysClient_.EnableVirtualNetIfaceCard
-    return 0;
+    if (mockNetsysClient_.CheckMockApi(MOCK_ENABLEVIRTUALNETIFACECARD_API)) {
+        return mockNetsysClient_.EnableVirtualNetIfaceCard(socketFd, ifRequest, ifaceFd);
+    }
+    return netsysClient_.EnableVirtualNetIfaceCard(socketFd, ifRequest, ifaceFd);
 }
 
 int32_t NetsysControllerServiceImpl::SetIpAddress(int32_t socketFd, const std::string &ipAddress, int32_t prefixLen,
                                                   struct ifreq &ifRequest)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::SetIpAddress");
-    // to be done: netsysClient_.SetIpAddress
-    return 0;
+    if (mockNetsysClient_.CheckMockApi(MOCK_SETIPADDRESS_API)) {
+        return mockNetsysClient_.SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
+    }
+    return netsysClient_.SetIpAddress(socketFd, ipAddress, prefixLen, ifRequest);
 }
 
 int32_t NetsysControllerServiceImpl::SetBlocking(int32_t ifaceFd, bool isBlock)
