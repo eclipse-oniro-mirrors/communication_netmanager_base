@@ -98,5 +98,25 @@ HWTEST_F(NetMonitorTest, GetStatusCodeFromResponse001, TestSize.Level1)
     ret = instance_->GetStatusCodeFromResponse(str);
     EXPECT_EQ(ret, 34);
 }
+
+HWTEST_F(NetMonitorTest, SendParallelHttpProbes001, TestSize.Level1)
+{
+    instance_->SendParallelHttpProbes();
+    SUCCEED();
+}
+
+HWTEST_F(NetMonitorTest, GetUrlRedirectFromResponse001, TestSize.Level1)
+{
+    std::string tmp;
+    std::string empty;
+    std::string redirFirst = "Location: baidu.com";
+    std::string redirSecond = "http baidu.com";
+    int ret = instance_->GetUrlRedirectFromResponse(empty, tmp);
+    EXPECT_EQ(ret, -1);
+    ret = instance_->GetUrlRedirectFromResponse(redirFirst, tmp);
+    EXPECT_NE(ret, -1);
+    ret = instance_->GetUrlRedirectFromResponse(redirSecond, tmp);
+    EXPECT_NE(ret, -1);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
