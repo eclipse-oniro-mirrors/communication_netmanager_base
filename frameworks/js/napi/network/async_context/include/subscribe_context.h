@@ -19,6 +19,7 @@
 #include "napi/native_api.h"
 #include "base_context.h"
 #include "nocopyable.h"
+#include "net_all_capabilities.h"
 
 namespace OHOS::NetManagerStandard {
 class SubscribeContext final : public BaseContext {
@@ -27,11 +28,19 @@ public:
 
     SubscribeContext() = delete;
 
+    ~SubscribeContext() override;
+
     explicit SubscribeContext(napi_env env, EventManager *manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
+    [[nodiscard]] napi_value GetSuccessCallback() const;
+
     [[nodiscard]] napi_value GetFailCallback() const;
+
+    void SetCap(const NetAllCapabilities &cap_);
+
+    NetAllCapabilities GetCap();
 
 private:
     bool SetSuccessCallback(napi_value options);
@@ -39,6 +48,10 @@ private:
     bool SetFailCallback(napi_value options);
 
     bool CheckParamsType(napi_value *params, size_t paramsCount);
+
+    NetAllCapabilities cap_;
+
+    napi_ref successCallback_;
 
     napi_ref failCallback_;
 };
