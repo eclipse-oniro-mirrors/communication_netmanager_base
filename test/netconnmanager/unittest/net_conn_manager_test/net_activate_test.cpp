@@ -15,10 +15,11 @@
 
 #include <gtest/gtest.h>
 #include <memory>
-
-#include "net_activate.h"
 #include "net_conn_callback_stub.h"
 #include "net_manager_constants.h"
+#define private public
+#include "net_activate.h"
+#undef private
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -93,8 +94,35 @@ void NetActivateTest::TearDown() {}
 HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest001, TestSize.Level1)
 {
     std::set<NetCap> netCaps;
+    netCaps.insert(NET_CAPABILITY_NOT_METERED);
     sptr<NetSupplier> supplier = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps);
     bool ret = instance_->MatchRequestAndNetwork(supplier);
+    EXPECT_TRUE(ret);
+    sptr<NetSupplier> supplier001 = nullptr;
+    ret = instance_->MatchRequestAndNetwork(supplier001);
+    EXPECT_FALSE(ret);
+    std::string test;
+    sptr<NetSupplier> supplier002 = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, test, netCaps);;
+    ret = instance_->MatchRequestAndNetwork(supplier002);
+    EXPECT_TRUE(ret);
+    std::set<NetCap> netCaps1;
+    netCaps1.insert(NET_CAPABILITY_MMS);
+    sptr<NetSupplier> supplier003 = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps1);
+    ret = instance_->MatchRequestAndNetwork(supplier003);
+    EXPECT_TRUE(ret);
+    sptr<NetSupplier> supplier004 = new (std::nothrow) NetSupplier(NetBearType::BEARER_CELLULAR, TEST_IDENT, netCaps);;
+    ret = instance_->MatchRequestAndNetwork(supplier004);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest002, TestSize.Level1)
+{
+    std::set<NetCap> netCaps;
+    sptr<NetSupplier> supplier = nullptr;
+    bool ret = instance_->MatchRequestAndNetwork(supplier);
+    EXPECT_EQ(ret, false);
+    supplier = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps);
+    ret = instance_->MatchRequestAndNetwork(supplier);
     EXPECT_TRUE(ret);
 }
 
@@ -124,6 +152,136 @@ HWTEST_F(NetActivateTest, GetNetSpecifierTest001, TestSize.Level1)
 {
     auto result = instance_->GetNetSpecifier();
     EXPECT_EQ(result, specifier_);
+}
+
+HWTEST_F(NetActivateTest, CompareByNetworkIdentTest001, TestSize.Level1)
+{
+    auto result = instance_->GetNetSpecifier();
+    EXPECT_EQ(result, specifier_);
+}
+
+HWTEST_F(NetActivateTest, CompareByNetworkIdent001, TestSize.Level1)
+{
+    std::string ident;
+    bool ret = instance_->CompareByNetworkIdent(ident);
+    EXPECT_EQ(ret, true);
+
+    ident = "test1234";
+    ret = instance_->CompareByNetworkIdent(ident);
+    EXPECT_EQ(ret, true);
+
+    instance_->netSpecifier_->ident_ = "test1234";
+    ret = instance_->CompareByNetworkIdent(ident);
+    EXPECT_EQ(ret, true);
+
+    ident = "test5678";
+    ret = instance_->CompareByNetworkIdent(ident);
+    EXPECT_EQ(ret, false);
+}
+
+HWTEST_F(NetActivateTest, CompareByNetworkCapabilities001, TestSize.Level1)
+{
+    NetCaps netCaps;
+    netCaps.InsertNetCap(NetCap::NET_CAPABILITY_NOT_VPN);
+    bool ret = instance_->CompareByNetworkCapabilities(netCaps);
+    EXPECT_EQ(ret, true);
+
+    sptr<INetConnCallback> callback = new (std::nothrow) ConnCallbackTest();
+    sptr<NetSpecifier> specifier = nullptr;
+    std::weak_ptr<INetActivateCallback> timeoutCallback = std::make_shared<NetActivateCallbackTest>();
+    std::unique_ptr<NetActivate> testNetActivate = std::make_unique<NetActivate>(specifier, callback, timeoutCallback,
+                                                                                 TEST_TIMEOUT_MS);
+
+    ret = testNetActivate->CompareByNetworkCapabilities(netCaps);
+    EXPECT_EQ(ret, false);
+}
+
+HWTEST_F(NetActivateTest, CompareByNetworkNetType001, TestSize.Level1)
+{
+    NetBearType bearerType = BEARER_WIFI;
+    bool ret = instance_->CompareByNetworkNetType(bearerType);
+    EXPECT_EQ(ret, true);
+
+    instance_->netSpecifier_->SetType(BEARER_WIFI);
+    ret = instance_->CompareByNetworkNetType(bearerType);
+    EXPECT_EQ(ret, true);
+
+    bearerType = BEARER_ETHERNET;
+    ret = instance_->CompareByNetworkNetType(bearerType);
+    EXPECT_EQ(ret, false);
+
+    instance_->netSpecifier_->netCapabilities_.bearerTypes_.clear();
+    ret = instance_->CompareByNetworkNetType(bearerType);
+    EXPECT_EQ(ret, true);
+
+    sptr<INetConnCallback> callback = new (std::nothrow) ConnCallbackTest();
+    sptr<NetSpecifier> specifier = nullptr;
+    std::weak_ptr<INetActivateCallback> timeoutCallback = std::make_shared<NetActivateCallbackTest>();
+    std::unique_ptr<NetActivate> testNetActivate = std::make_unique<NetActivate>(specifier, callback, timeoutCallback,
+                                                                                 TEST_TIMEOUT_MS);
+    ret = testNetActivate->CompareByNetworkNetType(bearerType);
+    EXPECT_EQ(ret, false);
+}
+
+HWTEST_F(NetActivateTest, CompareByNetworkBand001, TestSize.Level1)
+{
+    uint32_t netLinkUpBand = 100;
+    uint32_t netLinkDownBand = 100;
+    instance_->netSpecifier_->netCapabilities_.linkUpBandwidthKbps_ = 100;
+    instance_->netSpecifier_->netCapabilities_.linkDownBandwidthKbps_ = 100;
+    bool ret = instance_->CompareByNetworkBand(netLinkUpBand, netLinkDownBand);
+    EXPECT_EQ(ret, true);
+
+    netLinkUpBand = 50;
+    ret = instance_->CompareByNetworkBand(netLinkUpBand, netLinkDownBand);
+    EXPECT_EQ(ret, false);
+}
+
+HWTEST_F(NetActivateTest, HaveCapability001, TestSize.Level1)
+{
+    instance_->netSpecifier_->netCapabilities_.netCaps_.clear();
+    instance_->netSpecifier_->netCapabilities_.netCaps_.insert(NET_CAPABILITY_NOT_VPN);
+    NetCap netCap = NET_CAPABILITY_NOT_VPN;
+    bool ret = instance_->HaveCapability(netCap);
+    EXPECT_EQ(ret, true);
+
+    netCap = NET_CAPABILITY_INTERNET;
+    ret = instance_->HaveCapability(netCap);
+    EXPECT_EQ(ret, false);
+
+    sptr<INetConnCallback> callback = new (std::nothrow) ConnCallbackTest();
+    sptr<NetSpecifier> specifier = nullptr;
+    std::weak_ptr<INetActivateCallback> timeoutCallback = std::make_shared<NetActivateCallbackTest>();
+    std::unique_ptr<NetActivate> testNetActivate = std::make_unique<NetActivate>(specifier, callback, timeoutCallback,
+                                                                                 TEST_TIMEOUT_MS);
+
+    ret = testNetActivate->HaveCapability(netCap);
+    EXPECT_EQ(ret, false);
+}
+
+HWTEST_F(NetActivateTest, HaveTypes001, TestSize.Level1)
+{
+    std::set<NetBearType> bearerTypes;
+    bool ret = instance_->HaveTypes(bearerTypes);
+    EXPECT_EQ(ret, false);
+
+    bearerTypes.insert(BEARER_WIFI);
+    instance_->netSpecifier_->netCapabilities_.bearerTypes_.insert(BEARER_VPN);
+    ret = instance_->HaveTypes(bearerTypes);
+    EXPECT_EQ(ret, false);
+
+    instance_->netSpecifier_->netCapabilities_.bearerTypes_.insert(BEARER_WIFI);
+    ret = instance_->HaveTypes(bearerTypes);
+    EXPECT_EQ(ret, true);
+
+    sptr<INetConnCallback> callback = new (std::nothrow) ConnCallbackTest();
+    sptr<NetSpecifier> specifier = nullptr;
+    std::weak_ptr<INetActivateCallback> timeoutCallback = std::make_shared<NetActivateCallbackTest>();
+    std::unique_ptr<NetActivate> testNetActivate = std::make_unique<NetActivate>(specifier, callback, timeoutCallback,
+                                                                                 TEST_TIMEOUT_MS);
+
+    ret = testNetActivate->HaveTypes(bearerTypes);
+    EXPECT_EQ(ret, false);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

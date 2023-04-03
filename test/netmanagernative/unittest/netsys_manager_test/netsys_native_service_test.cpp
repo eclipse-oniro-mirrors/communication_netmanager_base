@@ -36,13 +36,15 @@ using namespace testing::ext;
 class TestNotifyCallback : public NotifyCallbackStub {
 public:
     TestNotifyCallback() = default;
-    ~TestNotifyCallback() override{};
-    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags, int scope) override
+    ~TestNotifyCallback() override {};
+    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
+                                      int scope) override
     {
         return 0;
     }
 
-    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags, int scope) override
+    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags,
+                                      int scope) override
     {
         return 0;
     }
@@ -109,6 +111,7 @@ HWTEST_F(NetsysNativeServiceTest, DumpTest001, TestSize.Level1)
     int32_t ret = instance_->Dump(testFd, {});
     EXPECT_LE(ret, NETMANAGER_SUCCESS);
 }
+
 
 HWTEST_F(NetsysNativeServiceTest, SetResolverConfigTest001, TestSize.Level1)
 {

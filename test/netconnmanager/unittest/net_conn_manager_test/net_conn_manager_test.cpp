@@ -127,6 +127,7 @@ HapPolicyParams testInternetPolicyPrams = {
 } // namespace
 
 std::shared_ptr<NetCommonEventTest> netCommonEventTest_ = nullptr;
+
 class NetConnManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -791,6 +792,42 @@ HWTEST_F(NetConnManagerTest, NetConnManager020, TestSize.Level1)
         std::cout << "Get global http exclusion:" << exclusion << std::endl;
     }
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+HWTEST_F(NetConnManagerTest, NetConnManager021, TestSize.Level1)
+{
+    sptr<INetConnService> proxy = NetConnManagerTest::GetProxy();
+    if (proxy == nullptr) {
+        std::cout << "-------NetConnManager021 GetProxy failed." << std::endl;
+        return;
+    }
+    int32_t netId = 110;
+    int32_t result = proxy->NetDetection(netId);
+    EXPECT_NE(result, NETMANAGER_SUCCESS);
+
+    NetBearType bearerType = BEARER_ETHERNET;
+    std::list<std::string> ifaceNames;
+    result = proxy->GetIfaceNames(bearerType, ifaceNames);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+
+    std::string ident = "test111";
+    std::string ifaceName;
+    result = proxy->GetIfaceNameByType(bearerType, ident, ifaceName);
+    EXPECT_NE(result, NETMANAGER_SUCCESS);
+    
+    int32_t uid = 1000;
+    result = proxy->GetSpecificUidNet(uid, netId);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+
+    std::string host = "test";
+    netId = 100;
+    std::vector<INetAddr> addrList;
+    result = proxy->GetAddressesByName(host, netId, addrList);
+    EXPECT_NE(result, NETMANAGER_SUCCESS);
+
+    INetAddr addr;
+    result = proxy->GetAddressByName(host, netId, addr);
+    EXPECT_NE(result, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

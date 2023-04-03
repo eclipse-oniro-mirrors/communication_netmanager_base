@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,9 @@
 namespace OHOS {
 namespace NetsysNative {
 using namespace testing::ext;
+using namespace nmd;
 using namespace NetManagerStandard;
+std::shared_ptr<FirewallManager> g_firewallManager = nullptr;
 class FirewallManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -41,6 +43,7 @@ public:
 void FirewallManagerTest::SetUpTestCase()
 {
     NetsysController::GetInstance().FirewallEnableChain(ChainType::CHAIN_OHFW_DOZABLE, false);
+    g_firewallManager = std::make_shared<FirewallManager>();
 }
 
 void FirewallManagerTest::TearDownTestCase() {}
@@ -337,6 +340,222 @@ HWTEST_F(FirewallManagerTest, FirewallManagerInnerFunctionTest, TestSize.Level1)
 
     int32_t ret = firewallManager->DeInitChain();
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: IsFirewallChian1
+ * @tc.desc: Test FirewallManager IsFirewallChian1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, IsFirewallChian1, TestSize.Level1)
+{
+    int32_t ret = g_firewallManager->IsFirewallChian(ChainType::CHAIN_OHFW_DOZABLE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: IsFirewallChian2
+ * @tc.desc: Test FirewallManager IsFirewallChian2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, IsFirewallChian2, TestSize.Level1)
+{
+    int32_t ret = g_firewallManager->IsFirewallChian(ChainType::CHAIN_OHFW_FORWARD);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+/**
+ * @tc.name: FetchChainName
+ * @tc.desc: Test FirewallManager FetchChainName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, FetchChainName, TestSize.Level1)
+{
+    std::string ret = g_firewallManager->FetchChainName(ChainType::CHAIN_OHBW_DATA_SAVER);
+    EXPECT_EQ(ret, "oh_unusable");
+}
+
+/**
+ * @tc.name: IptablesSetRule
+ * @tc.desc: Test FirewallManager IptablesSetRule.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, IptablesSetRule, TestSize.Level1)
+{
+    std::string chainName = g_firewallManager->FetchChainName(ChainType::CHAIN_OHFW_INPUT);
+    std::string option = "-A";
+    std::string target = "DROP";
+    uint32_t uid = 150000;
+    int32_t ret = g_firewallManager->IptablesSetRule(chainName, option, target, uid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetUidsAllowedListChain1
+ * @tc.desc: Test FirewallManager SetUidsAllowedListChain1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, SetUidsAllowedListChain1, TestSize.Level1)
+{
+    std::vector<uint32_t> uids;
+    uids.push_back(150000);
+    int32_t ret = g_firewallManager->SetUidsAllowedListChain(ChainType::CHAIN_OHBW_DATA_SAVER, uids);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+/**
+ * @tc.name: SetUidsAllowedListChain2
+ * @tc.desc: Test FirewallManager SetUidsAllowedListChain2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, SetUidsAllowedListChain2, TestSize.Level1)
+{
+    std::vector<uint32_t> uids;
+    uids.push_back(150000);
+    int32_t ret = g_firewallManager->SetUidsAllowedListChain(ChainType::CHAIN_OHFW_DOZABLE, uids);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetUidsDeniedListChain1
+ * @tc.desc: Test FirewallManager SetUidsDeniedListChain1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, SetUidsDeniedListChain1, TestSize.Level1)
+{
+    std::vector<uint32_t> uids;
+    uids.push_back(150000);
+    int32_t ret = g_firewallManager->SetUidsDeniedListChain(ChainType::CHAIN_OHBW_DATA_SAVER, uids);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+/**
+ * @tc.name: SetUidsDeniedListChain2
+ * @tc.desc: Test FirewallManager SetUidsDeniedListChain2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, SetUidsDeniedListChain2, TestSize.Level1)
+{
+    std::vector<uint32_t> uids;
+    uids.push_back(150000);
+    int32_t ret = g_firewallManager->SetUidsDeniedListChain(ChainType::CHAIN_OHFW_UNDOZABLE, uids);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: EnableChain1
+ * @tc.desc: Test FirewallManager EnableChain1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, EnableChain1, TestSize.Level1)
+{
+    int32_t ret = g_firewallManager->EnableChain(ChainType::CHAIN_OHFW_FORWARD, false);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+/**
+ * @tc.name: EnableChain2
+ * @tc.desc: Test FirewallManager EnableChain2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, EnableChain2, TestSize.Level1)
+{
+    g_firewallManager->EnableChain(ChainType::CHAIN_OHFW_UNDOZABLE, false);
+    int32_t ret = g_firewallManager->EnableChain(ChainType::CHAIN_OHFW_UNDOZABLE, true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: EnableChain3
+ * @tc.desc: Test FirewallManager EnableChain3.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, EnableChain3, TestSize.Level1)
+{
+    int32_t ret = g_firewallManager->EnableChain(ChainType::CHAIN_OHFW_UNDOZABLE, false);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: EnableChain4
+ * @tc.desc: Test FirewallManager EnableChain4.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, EnableChain4, TestSize.Level1)
+{
+    int32_t ret = g_firewallManager->EnableChain(ChainType::CHAIN_OHFW_UNDOZABLE, false);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+/**
+ * @tc.name: SetUidRule1
+ * @tc.desc: Test FirewallManager SetUidRule1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, SetUidRule1, TestSize.Level1)
+{
+    uint32_t uid = 150000;
+    int32_t ret = g_firewallManager->SetUidRule(ChainType::CHAIN_FORWARD, uid, FirewallRule::RULE_DENY);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+/**
+ * @tc.name: SetUidRule2
+ * @tc.desc: Test FirewallManager SetUidRule2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, SetUidRule2, TestSize.Level1)
+{
+    uint32_t uid = 150000;
+    int32_t ret = g_firewallManager->SetUidRule(ChainType::CHAIN_OHFW_DOZABLE, uid, FirewallRule::RULE_DENY);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetUidRule3
+ * @tc.desc: Test FirewallManager SetUidRule3.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, SetUidRule3, TestSize.Level1)
+{
+    uint32_t uid = 150000;
+    int32_t ret = g_firewallManager->SetUidRule(ChainType::CHAIN_OHFW_DOZABLE, uid, FirewallRule::RULE_ALLOW);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetUidRule4
+ * @tc.desc: Test FirewallManager SetUidRule4.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, SetUidRule4, TestSize.Level1)
+{
+    uint32_t uid = 160000;
+    int32_t ret = g_firewallManager->SetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, uid, FirewallRule::RULE_DENY);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetUidRule5
+ * @tc.desc: Test FirewallManager SetUidRule5.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, SetUidRule5, TestSize.Level1)
+{
+    uint32_t uid = 160000;
+    int32_t ret = g_firewallManager->SetUidRule(ChainType::CHAIN_OHFW_UNDOZABLE, uid, FirewallRule::RULE_ALLOW);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: ClearAllRules
+ * @tc.desc: Test FirewallManager ClearAllRules.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, ClearAllRules, TestSize.Level1)
+{
+    int32_t ret = g_firewallManager->ClearAllRules();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative
 } // namespace OHOS
