@@ -21,7 +21,7 @@
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_database_helper.h"
 #include "net_stats_database_defines.h"
-
+#include "net_stats_constants.h"
 namespace OHOS {
 namespace NetManagerStandard {
 using namespace NetStatsDatabaseDefines;
@@ -97,6 +97,8 @@ HWTEST_F(NetStatsDatabaseHelperTest, InsertDataHelperTest001, TestSize.Level1)
     info.txPackets_ = 144215;
     int32_t ret = helper->InsertData(UID_TABLE, UID_TABLE_PARAM_LIST, info);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = helper->InsertData("", UID_TABLE_PARAM_LIST, info);
+    EXPECT_EQ(ret, NetStatsResultCode::STATS_ERR_WRITE_DATA_FAIL);
 }
 
 HWTEST_F(NetStatsDatabaseHelperTest, SelectDataHelperTest001, TestSize.Level1)
@@ -114,6 +116,8 @@ HWTEST_F(NetStatsDatabaseHelperTest, SelectDataHelperTest001, TestSize.Level1)
     uint64_t date = 15254400;
     ret = helper->SelectData(infos, UID_TABLE, date, LONG_MAX);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = helper->SelectData(infos, "", date, LONG_MAX);
+    EXPECT_EQ(ret, NetStatsResultCode::STATS_ERR_READ_DATA_FAIL);
 }
 
 HWTEST_F(NetStatsDatabaseHelperTest, DeleteDataHelperTest001, TestSize.Level1)

@@ -401,7 +401,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest001, TestSize.Level1)
 HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest001, TestSize.Level1)
 {
     uint32_t supplierId = 100;
-    sptr<NetSupplierCallbackBase> callback = new (std::nothrow) NetSupplierCallbackBaseTest();
+    sptr<NetSupplierCallbackBase> callback = new (std::nothrow) NetSupplierCallbackBase();
     ASSERT_NE(callback, nullptr);
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplierCallback(supplierId, callback);
     EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
@@ -421,7 +421,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest002, TestSize.Level1)
     int32_t result =
         DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
-    sptr<NetSupplierCallbackBase> callback = new (std::nothrow) NetSupplierCallbackBaseTest();
+    sptr<NetSupplierCallbackBase> callback = new (std::nothrow) NetSupplierCallbackBase();
     ASSERT_NE(callback, nullptr);
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplierCallback(supplierId, callback);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);

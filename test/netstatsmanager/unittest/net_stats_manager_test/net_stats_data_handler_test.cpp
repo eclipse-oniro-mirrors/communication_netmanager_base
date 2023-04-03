@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,19 @@ std::string GetMockIface()
     return MOCK_IFACE.at(g_regn() % MOCK_IFACE.size());
 }
 std::vector<NetStatsInfo> g_statsData;
+
+NetStatsInfo CreateMockStatsInfo()
+{
+    NetStatsInfo info;
+    info.uid_ = GetUint32();
+    info.date_ = GetUint64();
+    info.iface_ = GetMockIface();
+    info.rxBytes_ = GetUint64();
+    info.rxPackets_ = GetUint64();
+    info.txBytes_ = GetUint64();
+    info.txPackets_ = GetUint64();
+    return info;
+}
 
 void CreateMockStatsData()
 {
@@ -107,18 +120,18 @@ HWTEST_F(NetStatsDataHandlerTest, WriteStatsDataTest001, TestSize.Level1)
 HWTEST_F(NetStatsDataHandlerTest, WriteStatsDataTest002, TestSize.Level1)
 {
     NetStatsDataHandler handler;
-    CreateMockStatsData();
-    int32_t ret = handler.WriteStatsData({}, UID_TABLE);
-    ClearMockStatsData();
+    std::vector<NetStatsInfo> mockEmptyStatsData;
+    int32_t ret = handler.WriteStatsData(mockEmptyStatsData, UID_TABLE);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
 HWTEST_F(NetStatsDataHandlerTest, WriteStatsDataTest003, TestSize.Level1)
 {
     NetStatsDataHandler handler;
-    CreateMockStatsData();
-    int32_t ret = handler.WriteStatsData(g_statsData, {});
-    ClearMockStatsData();
+    std::vector<NetStatsInfo> mockStatsData;
+    mockStatsData.push_back(CreateMockStatsInfo());
+    std::string mockEmptyIfaceName;
+    int32_t ret = handler.WriteStatsData(mockStatsData, mockEmptyIfaceName);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
@@ -157,11 +170,34 @@ HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest003, TestSize.Level1)
 {
     NetStatsDataHandler handler;
     std::vector<NetStatsInfo> infos;
+    std::string iface = "testIface";
+    int32_t ret = handler.ReadStatsData(infos, iface, 0, LONG_MAX);
+    std::cout << "Data size: " << infos.size() << std::endl;
+    std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest004, TestSize.Level1)
+{
+    NetStatsDataHandler handler;
+    std::vector<NetStatsInfo> infos;
     uint32_t testUid = 122;
     int32_t ret = handler.ReadStatsData(infos, {}, 0, testUid, LONG_MAX);
     std::cout << "Data size: " << infos.size() << std::endl;
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest005, TestSize.Level1)
+{
+    NetStatsDataHandler handler;
+    std::vector<NetStatsInfo> infos;
+    uint32_t testUid = 122;
+    std::string iface = "testIface";
+    int32_t ret = handler.ReadStatsData(infos, iface, 0, testUid, LONG_MAX);
+    std::cout << "Data size: " << infos.size() << std::endl;
+    std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

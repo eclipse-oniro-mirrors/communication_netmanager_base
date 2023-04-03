@@ -107,6 +107,28 @@ HWTEST_F(DhcpControllerTest, StartDhcpTest001, TestSize.Level1)
     ASSERT_FALSE(ret);
     ret = instance_->StopDhcpService(testInterfaceName);
     ASSERT_TRUE(ret);
+
+    OHOS::Wifi::DhcpResult dhcpRet;
+    instance_->Process(testInterfaceName, dhcpRet);
 }
+
+HWTEST_F(DhcpControllerTest, TestErr, TestSize.Level1)
+{
+    std::string testInterfaceName = "dfsgagr";
+    std::string testIpv4Addr = "asgesag";
+    instance_->StartDhcpClient(testInterfaceName, false);
+    instance_->StopDhcpClient(testInterfaceName, false);
+    instance_->StartDhcpClient(testInterfaceName, true);
+    instance_->StopDhcpClient(testInterfaceName, true);
+    auto ret = instance_->StartDhcpService(testInterfaceName, testIpv4Addr);
+    ASSERT_FALSE(ret);
+    ret = instance_->StopDhcpService(testInterfaceName);
+    ASSERT_TRUE(ret);
+    ret = instance_->StartDhcpService(testInterfaceName, {});
+    ASSERT_FALSE(ret);
+    ret = instance_->StopDhcpService(testInterfaceName);
+    ASSERT_TRUE(ret);
+}
+
 } // namespace nmd
 } // namespace OHOS

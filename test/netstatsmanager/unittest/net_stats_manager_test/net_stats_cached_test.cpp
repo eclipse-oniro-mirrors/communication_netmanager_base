@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,15 +19,17 @@
 #define private public
 #define protected public
 #endif
-
+#include "net_stats_database_defines.h"
 #include "net_manager_constants.h"
 #include "net_stats_cached.h"
 #include "net_stats_history.h"
-
+#include "net_stats_constants.h"
+#include "net_stats_database_helper.h"
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
+#define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 } // namespace
 
 class NetStatsCachedTest : public testing::Test {
@@ -83,10 +85,41 @@ HWTEST_F(NetStatsCachedTest, StartCachedTest001, TestSize.Level1)
     instance_->GetUidStatsCached(allInfo);
     instance_->GetIfaceStatsCached(allInfo);
     instance_->CacheIfaceStats();
+    instance_->WriteStats();
     uint32_t threshold = 100;
     instance_->SetCycleThreshold(threshold);
     instance_->ForceUpdateStats();
     instance_->Reset();
+}
+
+HWTEST_F(NetStatsCachedTest, WriteIfaceStatsTest001, TestSize.Level1)
+{
+    instance_->isForce_ = true;
+    instance_->stats_.currentIfaceStats_ = 0;
+    instance_->WriteIfaceStats();
+    instance_->stats_.currentIfaceStats_ = NetStatsCached::DEFAULT_TRAFFIC_STATISTICS_THRESHOLD_BYTES + 1;
+    instance_->WriteIfaceStats();
+    instance_->isForce_ = false;
+    instance_->stats_.currentIfaceStats_ = 0;
+    instance_->WriteIfaceStats();
+    instance_->stats_.currentIfaceStats_ = NetStatsCached::DEFAULT_TRAFFIC_STATISTICS_THRESHOLD_BYTES + 1;
+    instance_->WriteIfaceStats();
+    EXPECT_FALSE(instance_->CheckIfaceStor());
+}
+
+HWTEST_F(NetStatsCachedTest, WriteUidStatsTest001, TestSize.Level1)
+{
+    instance_->isForce_ = true;
+    instance_->stats_.currentUidStats_ = 0;
+    instance_->WriteUidStats();
+    instance_->stats_.currentUidStats_ = NetStatsCached::DEFAULT_TRAFFIC_STATISTICS_THRESHOLD_BYTES + 1;
+    instance_->WriteUidStats();
+    instance_->isForce_ = false;
+    instance_->stats_.currentUidStats_ = 0;
+    instance_->WriteUidStats();
+    instance_->stats_.currentUidStats_ = NetStatsCached::DEFAULT_TRAFFIC_STATISTICS_THRESHOLD_BYTES + 1;
+    instance_->WriteUidStats();
+    EXPECT_FALSE(instance_->CheckUidStor());
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
