@@ -41,6 +41,7 @@ ohos_shared_library("net_conn_manager") {
     "$INNERKITS_ROOT/netconnclient/include/proxy",
     "$INNERKITS_ROOT/netstatsclient/include",
     "$NETCONNMANAGER_COMMON_DIR/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient/include",
     "$INNERKITS_ROOT/netmanagernative/include",

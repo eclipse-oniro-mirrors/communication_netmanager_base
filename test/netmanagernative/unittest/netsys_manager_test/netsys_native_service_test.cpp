@@ -17,6 +17,7 @@
 
 #include "system_ability_definition.h"
 
+#include "dns_config_client.h"
 #include "net_manager_constants.h"
 #define private public
 #include "netsys_native_service.h"

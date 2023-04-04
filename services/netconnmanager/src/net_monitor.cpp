@@ -26,6 +26,7 @@
 #include <sys/socket.h>
 #include <thread>
 #include <unistd.h>
+#include "dns_config_client.h"
 
 #include "event_report.h"
 #include "fwmark_client.h"
@@ -105,9 +106,7 @@ bool NetMonitor::IsDetecting()
 void NetMonitor::Detection()
 {
     NetDetectionStatus result = SendParallelHttpProbes();
-    struct EventInfo eventInfo = {
-        .monitorStatus = static_cast<int32_t>(result)
-    };
+    struct EventInfo eventInfo = {.monitorStatus = static_cast<int32_t>(result)};
     EventReport::SendMonitorBehaviorEvent(eventInfo);
     if (isDetecting_) {
         if (result == CAPTIVE_PORTAL_STATE) {
@@ -459,39 +458,36 @@ int32_t NetMonitor::GetUrlRedirectFromResponse(const std::string &strResponse, s
 
 int32_t NetMonitor::GetIpAddr(const std::string &domain, std::string &ip_addr, int &socketType)
 {
-    struct addrinfo *result = nullptr;
+    std::vector<AddrInfo> result;
+    AddrInfo hints = {};
     std::string serverName;
-    if (NetsysController::GetInstance().GetAddrInfo(domain, serverName, nullptr, netId_, &result) < 0) {
+    if (NetsysController::GetInstance().GetAddrInfo(domain, serverName, hints, netId_, result) < 0) {
         NETMGR_LOG_E("Get net[%{public}d] address info failed,errno[%{public}d]:%{public}s", netId_, errno,
                      strerror(errno));
         return -1;
     }
-    if (result == nullptr) {
+    if (result.empty()) {
         NETMGR_LOG_E("Get net[%{public}d] address info return nullptr result", netId_);
         return -1;
     }
     char ip[DOMAINIPADDR] = {0};
-    for (addrinfo *node = result; node != nullptr; node = node->ai_next) {
-        if (node->ai_family != AF_INET) {
+    for (auto &node : result) {
+        if (node.aiFamily != AF_INET) {
             continue;
         }
-        auto addr = reinterpret_cast<sockaddr_in *>(node->ai_addr);
-        if (!inet_ntop(AF_INET, &addr->sin_addr, ip, sizeof(ip))) {
+        if (!inet_ntop(AF_INET, &node.aiAddr.sin.sin_addr, ip, sizeof(ip))) {
             continue;
         }
         ip_addr = ip;
         socketType = AF_INET;
-        NetsysController::GetInstance().FreeAddrInfo(result);
         NETMGR_LOG_D("Get net[%{public}d] monitor ip:%{public}s", netId_, CommonUtils::ToAnonymousIp(ip_addr).c_str());
         return 0;
     }
-    if (result->ai_family == AF_INET6) {
-        auto addr = reinterpret_cast<sockaddr_in6 *>(result->ai_addr);
-        inet_ntop(AF_INET6, &addr->sin6_addr, ip, sizeof(ip));
+    if (result[0].aiFamily == AF_INET6) {
+        inet_ntop(AF_INET6, &result[0].aiAddr.sin6.sin6_addr, ip, sizeof(ip));
         ip_addr = ip;
         socketType = AF_INET6;
     }
-    NetsysController::GetInstance().FreeAddrInfo(result);
     NETMGR_LOG_D("Get net[%{public}d] monitor ip:%{public}s", netId_, CommonUtils::ToAnonymousIp(ip_addr).c_str());
     return 0;
 }

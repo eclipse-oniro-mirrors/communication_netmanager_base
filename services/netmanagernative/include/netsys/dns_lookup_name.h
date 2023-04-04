@@ -94,7 +94,7 @@ public:
      * @param netId network ID
      * @return int 0-success <0-failed
      */
-    int32_t LookUpName(AddrData buf[MAXADDRS], char canon[CANON_LINE], const std::string name, int32_t family,
+    int32_t LookUpName(AddrData buf[MAXADDRS], char canon[CANON_LINE], const std::string &name, int32_t family,
                        int32_t flags, uint16_t netId);
 
 private:

@@ -225,8 +225,8 @@ public:
      * @param res return addrinfo
      * @return Return the return value of the netsys interface call
      */
-    int32_t GetAddrInfo(const std::string hostName, const std::string serverName, const addrinfo *hints,
-                        uint16_t netId, addrinfo **res) override;
+    int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName, const AddrInfo &hints,
+                        uint16_t netId, std::vector<AddrInfo> &res) override;
 
     /**
      * Obtains the bytes of the sharing network.

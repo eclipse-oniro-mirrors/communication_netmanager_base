@@ -43,6 +43,7 @@ ohos_shared_library("net_policy_manager") {
     "include",
     "include/stub",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
   ]
 

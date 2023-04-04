@@ -183,7 +183,7 @@ int32_t NetsysNativeService::DestroyNetworkCache(const uint16_t netId)
 }
 
 int32_t NetsysNativeService::GetAddrInfo(const std::string &hostName, const std::string &serverName,
-                                         const addrinfo *hints, uint16_t netId, addrinfo **res)
+                                         const AddrInfo &hints, uint16_t netId, std::vector<AddrInfo> &res)
 {
     return netsysService_->DnsGetAddrInfo(hostName, serverName, hints, netId, res);
 }
@@ -219,8 +219,8 @@ int32_t NetsysNativeService::UnRegisterNotifyCallback(sptr<INotifyCallback> &cal
 int32_t NetsysNativeService::NetworkAddRoute(int32_t netId, const std::string &interfaceName,
                                              const std::string &destination, const std::string &nextHop)
 {
-    NETNATIVE_LOG_D("NetsysNativeService::NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s",
-                    netId, interfaceName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
+    NETNATIVE_LOG_D("NetsysNativeService::NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s", netId,
+                    interfaceName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
 
     int32_t result = netsysService_->NetworkAddRoute(netId, interfaceName, destination, nextHop);
     NETNATIVE_LOG_D("NetworkAddRoute %{public}d", result);
