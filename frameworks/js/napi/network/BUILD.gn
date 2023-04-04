@@ -47,6 +47,8 @@ ohos_shared_library("network") {
       "$TELEPHONY_ROOT/core_service/interfaces/innerkits:tel_core_service_api",
     ]
     defines = [ "HAS_TELEPHONY=1" ]
+  } else {
+    defines = [ "HAS_TELEPHONY=0" ]
   }
 
   external_deps = [

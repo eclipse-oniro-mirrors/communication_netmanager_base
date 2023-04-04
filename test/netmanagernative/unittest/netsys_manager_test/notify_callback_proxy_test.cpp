@@ -182,5 +182,21 @@ HWTEST_F(NotifyCallbackProxyTest, OnBandwidthReachedLimit001, TestSize.Level1)
     int32_t ret = notifyProxy->OnBandwidthReachedLimit(limitName, iface);
     EXPECT_EQ(ret, 0);
 }
+
+HWTEST_F(NotifyCallbackProxyTest, OnBandwidthReachedLimit002, TestSize.Level1)
+{
+    std::string limitName1 = "limit";
+    std::string iface1;
+    int32_t ret = notifyProxy->OnBandwidthReachedLimit(limitName1, iface1);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NotifyCallbackProxyTest, OnBandwidthReachedLimit003, TestSize.Level1)
+{
+    std::string limitName1;
+    std::string iface1;
+    int32_t ret = notifyProxy->OnBandwidthReachedLimit(limitName1, iface1);
+    EXPECT_EQ(ret, 0);
+}
 } // namespace nmd
 } // namespace OHOS
