@@ -27,6 +27,7 @@
 namespace OHOS {
 namespace nmd {
 class BandwidthManager {
+private:
     enum Operate {
         OP_SET = 1,
         OP_UNSET = 2,

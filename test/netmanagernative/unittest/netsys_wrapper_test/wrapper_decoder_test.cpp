@@ -17,7 +17,11 @@
 #include <linux/genetlink.h>
 
 #include "netlink_define.h"
+#define private public
 #include "wrapper_decoder.h"
+#undef private
+
+#include <cstring>
 
 namespace OHOS {
 namespace nmd {
@@ -120,12 +124,51 @@ HWTEST_F(WrapperDecoderTest, DecodeBinaryTest001, TestSize.Level1)
     EXPECT_FALSE(ret);
 
     msghdrVec.nlmsg_len = 1;
+    msghdrVec.nlmsg_type = RTM_DELADDR;
+    msghdrVec.nlmsg_flags = 0;
+    msghdrVec.nlmsg_seq = 0;
+    msghdrVec.nlmsg_pid = 5555;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&msghdrVec), sizeof(msghdrVec));
+    EXPECT_FALSE(ret);
+
+    msghdrVec.nlmsg_len = 1;
+    msghdrVec.nlmsg_type = RTM_DELROUTE;
+    msghdrVec.nlmsg_flags = 0;
+    msghdrVec.nlmsg_seq = 0;
+    msghdrVec.nlmsg_pid = 5555;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&msghdrVec), sizeof(msghdrVec));
+    EXPECT_FALSE(ret);
+
+    msghdrVec.nlmsg_len = 1;
     msghdrVec.nlmsg_type = __RTM_MAX;
     msghdrVec.nlmsg_flags = 0;
     msghdrVec.nlmsg_seq = 0;
     msghdrVec.nlmsg_pid = 5555;
     ret = decoder->DecodeBinary(reinterpret_cast<char *>(&msghdrVec), sizeof(msghdrVec));
     EXPECT_FALSE(ret);
+}
+
+HWTEST_F(WrapperDecoderTest, PushAsciiMessageTest001, TestSize.Level1)
+{
+    const char *buffer =
+        "action@msg\0ACTION=add\0ACTION=remove\0ACTION=change\0SEQNUM=111\0SEQNUM=\0SUBSYSTEM=net\0SUBSYSTEM="
+        "\0SUBSYSTEM=test\0dfdfcc=ttt\0";
+
+    const char *start = buffer;
+    const char *end = start + sizeof(buffer);
+    std::vector<std::string> recvmsg;
+    start += strlen(start) + 1;
+    while (start < end) {
+        if (start != nullptr) {
+            recvmsg.emplace_back(start);
+        }
+        start += strlen(start) + 1;
+    }
+
+    auto msg = std::make_shared<NetsysEventMessage>();
+    std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
+    auto ret = decoder->PushAsciiMessage(recvmsg);
+    EXPECT_TRUE(ret);
 }
 } // namespace nmd
 } // namespace OHOS

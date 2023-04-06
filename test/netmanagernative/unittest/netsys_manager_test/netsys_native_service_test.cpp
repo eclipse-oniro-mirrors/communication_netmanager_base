@@ -401,5 +401,14 @@ HWTEST_F(NetsysNativeServiceTest, IpEnableForwardingTest001, TestSize.Level1)
     EXPECT_NE(ret, 0);
     instance_->OnNetManagerRestart();
 }
+
+HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceTest002, TestSize.Level1)
+{
+    const std::string downIface = "testdownIface";
+    const std::string upIface = "testupIface";
+    NetworkSharingTraffic traffic;
+    int ret = instance_->GetNetworkSharingTraffic(downIface, upIface, traffic);
+    EXPECT_NE(ret, 0);
+}
 } // namespace NetsysNative
 } // namespace OHOS

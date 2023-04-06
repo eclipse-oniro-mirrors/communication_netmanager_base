@@ -44,6 +44,46 @@ const int64_t BYTES = 2097152;
 const uint32_t FIREWALL_RULE = 1;
 } // namespace
 
+class NetsysControllerCallbackTest : public NetsysControllerCallback {
+public:
+    virtual int32_t OnInterfaceAddressUpdated(const std::string &, const std::string &, int, int)
+    {
+        return 0;
+    }
+    virtual int32_t OnInterfaceAddressRemoved(const std::string &, const std::string &, int, int)
+    {
+        return 0;
+    }
+    virtual int32_t OnInterfaceAdded(const std::string &)
+    {
+        return 0;
+    }
+    virtual int32_t OnInterfaceRemoved(const std::string &)
+    {
+        return 0;
+    }
+    virtual int32_t OnInterfaceChanged(const std::string &, bool)
+    {
+        return 0;
+    }
+    virtual int32_t OnInterfaceLinkStateChanged(const std::string &, bool)
+    {
+        return 0;
+    }
+    virtual int32_t OnRouteChanged(bool, const std::string &, const std::string &, const std::string &)
+    {
+        return 0;
+    }
+    virtual int32_t OnDhcpSuccess(NetsysControllerCallback::DhcpResult &dhcpResult)
+    {
+        return 0;
+    }
+    virtual int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface)
+    {
+        return 0;
+    }
+};
+
 class NetsysControllerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -95,7 +135,10 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest004, TestSize.Level1)
     OHOS::nmd::InterfaceConfigurationParcel parcel;
     parcel.ifName = ETH0;
     parcel.ipv4Addr = PARCEL_IPV4_ADDR;
-    int32_t ret = NetsysController::GetInstance().GetInterfaceConfig(parcel);
+    int32_t ret = NetsysController::GetInstance().SetInterfaceConfig(parcel);
+    EXPECT_EQ(ret, 0);
+
+    ret = NetsysController::GetInstance().GetInterfaceConfig(parcel);
     EXPECT_EQ(ret, 0);
 }
 
@@ -172,6 +215,9 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest011, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 
     ret = NetsysController::GetInstance().GetAllRxBytes();
+    EXPECT_GE(ret, 0);
+
+    ret = NetsysController::GetInstance().GetAllTxBytes();
     EXPECT_GE(ret, 0);
 
     ret = NetsysController::GetInstance().GetUidRxBytes(TEST_UID);
@@ -325,6 +371,34 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest015, TestSize.Level1)
 
     ret = NetsysController::GetInstance().FirewallSetUidRule(TEST_UID, TEST_UID, FIREWALL_RULE);
     EXPECT_NE(ret, 0);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerTest016, TestSize.Level1)
+{
+    int32_t ret = NetsysController::GetInstance().InterfaceSetIpAddress("ifaceName", "192.168.x.x");
+    EXPECT_NE(ret, 0);
+
+    ret = NetsysController::GetInstance().InterfaceSetIpAddress("ifaceName", "192.168.2.0");
+    EXPECT_EQ(ret, -1);
+
+    ret = NetsysController::GetInstance().InterfaceSetIffUp("");
+    EXPECT_NE(ret, 0);
+
+    ret = NetsysController::GetInstance().InterfaceSetIffUp("ifaceName");
+    EXPECT_EQ(ret, -1);
+
+    std::string hostName = "";
+    std::string serverName = "";
+    AddrInfo hints;
+    uint16_t netId = 0;
+    std::vector<AddrInfo> res;
+
+    ret = NetsysController::GetInstance().GetAddrInfo(hostName, serverName, hints, netId, res);
+    EXPECT_NE(ret, 0);
+
+    auto callback = new NetsysControllerCallbackTest();
+    ret = NetsysController::GetInstance().RegisterCallback(callback);
+    EXPECT_EQ(ret, 0);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
