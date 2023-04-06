@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #include <gtest/gtest.h>
 
 #include "netnative_log_wrapper.h"
+#include "netsys_controller.h"
 #define private public
 #define protected public
 #include "physical_network.h"
@@ -47,6 +49,11 @@ HWTEST_F(PhysicalNetworkTest, AddInterfaceTest001, TestSize.Level1)
     NETNATIVE_LOGI("AddInterfaceTest001 enter");
     PhysicalNetwork physicNetwork(2, NetworkPermission::PERMISSION_NETWORK);
     std::string interfaceName1 = "eth0";
+    auto ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
+    bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName1) == ifaceList.end();
+    if (eth0NotExist) {
+        return;
+    }
     int32_t ret = physicNetwork.AddInterface(interfaceName1);
     EXPECT_EQ(ret, 0);
     physicNetwork.AddDefault();
