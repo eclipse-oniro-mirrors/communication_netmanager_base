@@ -62,9 +62,8 @@ constexpr const char NEW_LINE_STR = '\n';
 constexpr const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char *DEF_NETDETECT_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
 
-static void NetDetectThread(NetMonitor *monitor)
+static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 {
-    std::shared_ptr<NetMonitor> netMonitor = monitor->shared_from_this();
     if (netMonitor == nullptr) {
         NETMGR_LOG_E("netMonitor is nullptr");
         return;
@@ -87,7 +86,8 @@ void NetMonitor::Start()
         return;
     }
     isDetecting_ = true;
-    std::thread([this] { return NetDetectThread(this); }).detach();
+    std::shared_ptr<NetMonitor> netMonitor = shared_from_this();
+    std::thread([netMonitor] { return NetDetectThread(netMonitor); }).detach();
 }
 
 void NetMonitor::Stop()
