@@ -84,7 +84,6 @@ public:
 
 private:
     std::vector<sptr<INetPolicyCallback>> callbacks_;
-    std::mutex callbackMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

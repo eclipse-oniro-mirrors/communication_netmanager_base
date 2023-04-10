@@ -27,7 +27,6 @@ NetPolicyCallback::~NetPolicyCallback() = default;
 
 int32_t NetPolicyCallback::RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback)
 {
-    std::unique_lock<std::mutex> lock(callbackMutex_);
     if (callback == nullptr || callback->AsObject() == nullptr || callback->AsObject().GetRefPtr() == nullptr) {
         NETMGR_LOG_E("The parameter callback is null");
         return NETMANAGER_ERR_PARAMETER_ERROR;
@@ -53,7 +52,6 @@ int32_t NetPolicyCallback::RegisterNetPolicyCallback(const sptr<INetPolicyCallba
 
 int32_t NetPolicyCallback::UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback)
 {
-    std::unique_lock<std::mutex> lock(callbackMutex_);
     if (callback == nullptr || callback->AsObject() == nullptr || callback->AsObject().GetRefPtr() == nullptr) {
         NETMGR_LOG_E("The parameter of callback is null");
         return NETMANAGER_ERR_PARAMETER_ERROR;
