@@ -86,7 +86,7 @@ HWTEST_F(NetStatsCachedTest, StartCachedTest001, TestSize.Level1)
     instance_->GetIfaceStatsCached(allInfo);
     instance_->CacheIfaceStats();
     instance_->WriteStats();
-    uint32_t threshold = 100;
+    uint32_t threshold = 1000;
     instance_->SetCycleThreshold(threshold);
     instance_->ForceUpdateStats();
     instance_->Reset();

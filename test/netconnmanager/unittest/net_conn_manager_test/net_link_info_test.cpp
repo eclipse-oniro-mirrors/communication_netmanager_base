@@ -113,7 +113,12 @@ HWTEST_F(NetLinkInfoTest, ToStringTest, TestSize.Level1)
 {
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
     std::string str = netLinkInfo->ToString("testTab");
+    int32_t ret = 0;
     NETMGR_LOG_D("netLinkInfo.ToString string is : [%{public}s]", str.c_str());
+    if (str.c_str() != nullptr) {
+        ret = 1;
+    }
+    EXPECT_EQ(ret, 1);
 }
 
 /**
@@ -125,7 +130,12 @@ HWTEST_F(NetLinkInfoTest, ToStringAddrTest, TestSize.Level1)
 {
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
     std::string str = netLinkInfo->ToStringAddr("testAddrTab");
+    int32_t ret = 0;
     NETMGR_LOG_D("netLinkInfo.ToString string is : [%{public}s]", str.c_str());
+    if (str.c_str() != nullptr) {
+        ret = 1;
+    }
+    EXPECT_EQ(ret, 1);
 }
 
 /**
@@ -137,7 +147,12 @@ HWTEST_F(NetLinkInfoTest, ToStringDnsTest, TestSize.Level1)
 {
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
     std::string str = netLinkInfo->ToStringDns("testDnsTab");
+    int32_t ret = 0;
     NETMGR_LOG_D("netLinkInfo.ToString string is : [%{public}s]", str.c_str());
+    if (str.c_str() != nullptr) {
+        ret = 1;
+    }
+    EXPECT_EQ(ret, 1);
 }
 
 /**
@@ -149,7 +164,12 @@ HWTEST_F(NetLinkInfoTest, ToStringRouteTest, TestSize.Level1)
 {
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
     std::string str = netLinkInfo->ToStringRoute("testRouteTab");
+    int32_t ret = 0;
     NETMGR_LOG_D("netLinkInfo.ToString string is : [%{public}s]", str.c_str());
+    if (str.c_str() != nullptr){
+        ret = 1;
+    }
+    EXPECT_EQ(ret, 1);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
