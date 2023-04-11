@@ -166,7 +166,7 @@ HWTEST_F(NetLinkInfoTest, ToStringRouteTest, TestSize.Level1)
     std::string str = netLinkInfo->ToStringRoute("testRouteTab");
     int32_t ret = 0;
     NETMGR_LOG_D("netLinkInfo.ToString string is : [%{public}s]", str.c_str());
-    if (str.c_str() != nullptr){
+    if (str.c_str() != nullptr) {
         ret = 1;
     }
     EXPECT_EQ(ret, 1);
