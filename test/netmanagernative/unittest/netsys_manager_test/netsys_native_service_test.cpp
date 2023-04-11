@@ -402,6 +402,62 @@ HWTEST_F(NetsysNativeServiceTest, IpEnableForwardingTest001, TestSize.Level1)
     instance_->OnNetManagerRestart();
 }
 
+HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceTest001, TestSize.Level1)
+{
+    std::string fromIface = "";
+    std::string toIface = "";
+
+    int32_t ret = instance_->IpfwdRemoveInterfaceForward(fromIface, toIface);
+    EXPECT_NE(ret, 0);
+
+    ret = instance_->BandwidthEnableDataSaver(true);
+    EXPECT_EQ(ret, 0);
+
+    ret = instance_->BandwidthSetIfaceQuota("testifname", 32);
+    EXPECT_EQ(ret, 0);
+
+    ret = instance_->BandwidthRemoveIfaceQuota("testifname");
+    EXPECT_EQ(ret, 0);
+
+    uint32_t uid = 1001;
+    ret = instance_->BandwidthAddDeniedList(uid);
+    EXPECT_EQ(ret, 0);
+
+    ret = instance_->BandwidthRemoveDeniedList(uid);
+    EXPECT_EQ(ret, 0);
+
+    ret = instance_->BandwidthAddAllowedList(uid);
+    EXPECT_EQ(ret, 0);
+
+    ret = instance_->BandwidthRemoveAllowedList(uid);
+    EXPECT_EQ(ret, 0);
+
+    uint32_t chain = 0;
+    std::vector<uint32_t> uids = {1001};
+    ret = instance_->FirewallSetUidsAllowedListChain(chain, uids);
+    EXPECT_NE(ret, 0);
+
+    ret = instance_->FirewallSetUidsDeniedListChain(chain, uids);
+    EXPECT_NE(ret, 0);
+
+    ret = instance_->FirewallEnableChain(chain, false);
+    EXPECT_NE(ret, 0);
+
+    uint32_t firewallRule = 0;
+    ret = instance_->FirewallSetUidRule(chain, uid, firewallRule);
+    EXPECT_NE(ret, 0);
+
+    uint16_t netid = 1000;
+    ret = instance_->ShareDnsSet(netid);
+    EXPECT_EQ(ret, 0);
+
+    ret = instance_->StartDnsProxyListen();
+    EXPECT_EQ(ret, 0);
+
+    ret = instance_->StopDnsProxyListen();
+    EXPECT_EQ(ret, 0);
+}
+
 HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceTest002, TestSize.Level1)
 {
     const std::string downIface = "testdownIface";

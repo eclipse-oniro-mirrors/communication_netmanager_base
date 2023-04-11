@@ -261,7 +261,8 @@ HWTEST_F(UtNetPolicyTraffic, GetMeteredIfaces001, TestSize.Level1)
 HWTEST_F(UtNetPolicyTraffic, ResetPolicies001, TestSize.Level1)
 {
     std::vector<NetQuotaPolicy> quotaPolicies;
-    g_netPolicyTraffic->ResetPolicies(ICCID_1);
+    int32_t ret = g_netPolicyTraffic->ResetPolicies(ICCID_1);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     g_netPolicyTraffic->GetNetQuotaPolicies(quotaPolicies);
     for (auto quotaPolicy : quotaPolicies) {
         if (quotaPolicy.iccid == ICCID_1) {

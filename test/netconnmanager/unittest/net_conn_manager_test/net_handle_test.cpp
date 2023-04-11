@@ -56,7 +56,8 @@ HWTEST_F(NetHandleTest, GetAddressesByName, TestSize.Level1)
     int32_t netId = 5;
     auto handler = DelayedSingleton<NetHandle>::GetInstance();
     handler->SetNetId(netId);
-    handler->GetAddressesByName(host, addrList);
+    int32_t ret = handler->GetAddressesByName(host, addrList);
+    EXPECT_EQ(ret, NETMANAGER_ERR_NOT_SYSTEM_CALL);
 }
 
 HWTEST_F(NetHandleTest, GetAddressByName, TestSize.Level1)
@@ -66,7 +67,8 @@ HWTEST_F(NetHandleTest, GetAddressByName, TestSize.Level1)
     int32_t netId = 5;
     auto handler = DelayedSingleton<NetHandle>::GetInstance();
     handler->SetNetId(netId);
-    handler->GetAddressByName(host, addr);
+    int32_t ret = handler->GetAddressByName(host, addr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_NOT_SYSTEM_CALL);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

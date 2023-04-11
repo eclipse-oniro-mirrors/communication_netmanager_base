@@ -72,6 +72,7 @@ HWTEST_F(ResolverConfigTest, ResolverConfigTest002, TestSize.Level1)
     ASSERT_NE(netsysNativeService, nullptr);
 
     int32_t ret = 0;
+    ret = netsysNativeService->CreateNetworkCache(0);
     NETNATIVE_LOGE("ResolverConfigTest002 ResolverConfigTest002 ResolverConfigTest002");
     EXPECT_EQ(ret, 0);
 }
@@ -82,6 +83,7 @@ HWTEST_F(ResolverConfigTest, ResolverConfigTest003, TestSize.Level1)
     ASSERT_NE(netsysNativeService, nullptr);
 
     int32_t ret = 0;
+    ret = netsysNativeService->CreateNetworkCache(0);
     NETNATIVE_LOGE("ResolverConfigTest003 ResolverConfigTest003 ResolverConfigTest003");
     EXPECT_EQ(ret, 0);
 }
