@@ -37,6 +37,7 @@ namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ": "
+constexpr int32_t SQLITE_ERRORNUM = 21;
 } // namespace
 
 
@@ -141,6 +142,74 @@ HWTEST_F(NetStatsSqliteStatementTest, GetColumnLongTest003, TestSize.Level1)
     instance_->columnCount_ = 100;
     auto result = instance_->GetColumnLong(instance_->columnCount_ - 1, emptyValue);
     EXPECT_EQ(result, SQLITE_ERROR);
+}
+
+HWTEST_F(NetStatsSqliteStatementTest, GetColumnIntTest001, TestSize.Level1)
+{
+    instance_->stmtHandle_ = nullptr;
+    uint32_t emptyValue;
+    auto result = instance_->GetColumnInt(-1, emptyValue);
+    EXPECT_EQ(result, SQLITE_ERROR);
+}
+
+HWTEST_F(NetStatsSqliteStatementTest, GetColumnIntTest002, TestSize.Level1)
+{
+    instance_->stmtHandle_ = nullptr;
+    uint32_t emptyValue;
+    instance_->columnCount_ = 100;
+    auto result = instance_->GetColumnInt(instance_->columnCount_ + 1, emptyValue);
+    EXPECT_EQ(result, SQLITE_ERROR);
+}
+
+HWTEST_F(NetStatsSqliteStatementTest, GetColumnIntTest003, TestSize.Level1)
+{
+    instance_->stmtHandle_ = nullptr;
+    uint32_t emptyValue;
+    instance_->columnCount_ = 100;
+    auto result = instance_->GetColumnInt(instance_->columnCount_ - 1, emptyValue);
+    EXPECT_EQ(result, SQLITE_ERROR);
+}
+
+HWTEST_F(NetStatsSqliteStatementTest, BindInt32001, TestSize.Level1)
+{
+    instance_->stmtHandle_ = nullptr;
+    int32_t emptyValue = 0;
+    auto result = instance_->BindInt32(-1, emptyValue);
+    EXPECT_EQ(result, SQLITE_ERRORNUM);
+}
+
+HWTEST_F(NetStatsSqliteStatementTest, BindInt64001, TestSize.Level1)
+{
+    instance_->stmtHandle_ = nullptr;
+    int64_t emptyValue = 0;
+    instance_->columnCount_ = 100;
+    auto result = instance_->BindInt64(-1, emptyValue);
+    EXPECT_EQ(result, SQLITE_ERRORNUM);
+}
+
+HWTEST_F(NetStatsSqliteStatementTest, BindText001, TestSize.Level1)
+{
+    instance_->stmtHandle_ = nullptr;
+    std::string emptyValue;
+    instance_->columnCount_ = 100;
+    auto result = instance_->BindText(-1, emptyValue);
+    EXPECT_EQ(result, SQLITE_ERRORNUM);
+}
+
+HWTEST_F(NetStatsSqliteStatementTest, Step001, TestSize.Level1)
+{
+    instance_->stmtHandle_ = nullptr;
+    instance_->columnCount_ = 100;
+    auto result = instance_->Step();
+    EXPECT_EQ(result, SQLITE_ERRORNUM);
+}
+
+HWTEST_F(NetStatsSqliteStatementTest, GetColumnCount001, TestSize.Level1)
+{
+    instance_->stmtHandle_ = nullptr;
+    instance_->columnCount_ = 100;
+    auto result = instance_->GetColumnCount();
+    EXPECT_EQ(result, 100);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

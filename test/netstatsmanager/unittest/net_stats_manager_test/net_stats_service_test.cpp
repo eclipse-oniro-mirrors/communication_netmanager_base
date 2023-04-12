@@ -231,5 +231,84 @@ HWTEST_F(NetStatsServiceTest, GetUidTxBytesTest001, TestSize.Level1)
     EXPECT_GE(stats, static_cast<uint64_t>(0));
     DTEST_LOG << "Ret" << ret << std::endl;
 }
+
+/**
+ * @tc.name: GetIfaceStatsDetail001
+ * @tc.desc: Test NetStatsService GetIfaceStatsDetail.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceTest, GetIfaceStatsDetail001, TestSize.Level1)
+{
+    NetStatsInfo info;
+    std::string iface = "wlan0";
+    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetIfaceStatsDetail(iface, 0, UINT32_MAX, info);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: GetUidStatsDetail001
+ * @tc.desc: Test NetStatsService GetUidStatsDetail.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceTest, GetUidStatsDetail001, TestSize.Level1)
+{
+    NetStatsInfo info;
+    std::string iface = "wlan0";
+    uint32_t uid = 1234;
+    int32_t ret =
+        DelayedSingleton<NetStatsService>::GetInstance()->GetUidStatsDetail(iface, uid, 0, UINT32_MAX, info);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: UpdateIfacesStats
+ * @tc.desc: Test NetStatsService UpdateIfacesStats.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceTest, UpdateIfacesStats, TestSize.Level1)
+{
+    NetStatsInfo info;
+    std::string iface = "wlan0";
+    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->UpdateIfacesStats(iface, 0, UINT32_MAX, info);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: ResetFactory001
+ * @tc.desc: Test NetStatsService ResetFactory.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceTest, ResetFactory001, TestSize.Level1)
+{
+    NetStatsInfo info;
+    info.iface_ = "wlan0";
+    info.date_ = 115200;
+    info.rxBytes_ = 10000;
+    info.txBytes_ = 11000;
+    info.rxPackets_ = 1000;
+    info.txPackets_ = 1100;
+
+    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->ResetFactory();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: UpdateStatsData001
+ * @tc.desc: Test NetStatsService UpdateStatsData.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceTest, UpdateStatsData001, TestSize.Level1)
+{
+    NetStatsInfo info;
+    info.iface_ = "wlan0";
+    info.date_ = 115200;
+    info.rxBytes_ = 10000;
+    info.txBytes_ = 11000;
+    info.rxPackets_ = 1000;
+    info.txPackets_ = 1100;
+
+    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->UpdateStatsData();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
