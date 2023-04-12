@@ -73,7 +73,7 @@ void DnsProxyListen::DnsParseBySocket(int32_t clientSocket, std::vector<std::str
         close(parseSocketFd);
         return;
     }
-    int32_t resLen;
+    int32_t resLen = 0;
     socklen_t addrLen;
     char requesData[MAX_REQUESTDATA_LEN] = {0};
     sockaddr_in addrParse = {0};
