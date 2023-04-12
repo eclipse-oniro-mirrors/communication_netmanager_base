@@ -121,7 +121,7 @@ HWTEST_F(DNSGetaddrinNewTest, GetAddrInfoNewTest001, TestSize.Level1)
     std::string host = "";
     std::string server = "";
     struct AddrInfo addrInfo = {};
-    uint16_t netId = 101;
+    uint16_t netId = 103;
     std::vector<AddrInfo> out;
     int32_t ret = getInfo.GetAddrInfo(host, server, addrInfo, netId, out);
     EXPECT_EQ(ret, EAI_NONAME);
@@ -151,7 +151,7 @@ HWTEST_F(DNSGetaddrinNewTest, GetAddrInfoNewTest003, TestSize.Level1)
     std::string host = "www.baidu.com";
     std::string server;
     struct AddrInfo addrInfo = {};
-    uint16_t netId = 101;
+    uint16_t netId = 103;
     std::vector<AddrInfo> out;
     getInfo.GetAddrInfo(host, server, addrInfo, netId, out);
 }

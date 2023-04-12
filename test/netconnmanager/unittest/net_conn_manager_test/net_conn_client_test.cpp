@@ -448,7 +448,7 @@ HWTEST_F(NetConnClientTest, SetAppNetTest001, TestSize.Level1)
 HWTEST_F(NetConnClientTest, SetAppNetTest002, TestSize.Level1)
 {
     AccessToken token;
-    int32_t netId = 101;
+    int32_t netId = 102;
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(netId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
