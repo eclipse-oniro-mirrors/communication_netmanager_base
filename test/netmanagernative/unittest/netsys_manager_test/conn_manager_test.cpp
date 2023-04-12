@@ -30,7 +30,7 @@ namespace NetsysNative {
 using namespace testing::ext;
 using namespace NetManagerStandard;
 using namespace NetConnManagerTestUtil;
-constexpr int32_t NETID = 101;
+constexpr int32_t NETID = 103;
 const std::string INTERFACENAME = "wlan0";
 constexpr int32_t LOCAL_NET_ID = 99;
 class ConnManagerTest : public testing::Test {

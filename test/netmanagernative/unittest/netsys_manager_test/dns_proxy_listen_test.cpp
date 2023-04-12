@@ -72,11 +72,12 @@ HWTEST_F(DnsProxyListenTest, DnsProxyTest001, TestSize.Level1)
     proxyAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     proxyAddr.sin_port = htons(53);
 
-    unsigned char dnsSendData[] = { "\x58\x40\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00\x03\x77\x77\x77" \
+    unsigned char dnsSendData[] = {
+        "\x58\x40\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00\x03\x77\x77\x77"
         "\x05\x62\x61\x69\x64\x75\x03\x63\x6f\x6d\x00\x00\x01\x00\x01"};
 
-    if (sendto(proxySockFd, dnsSendData, sizeof(dnsSendData), 0,
-                reinterpret_cast<sockaddr *>(&proxyAddr), sizeof(proxyAddr)) < 0) {
+    if (sendto(proxySockFd, dnsSendData, sizeof(dnsSendData), 0, reinterpret_cast<sockaddr *>(&proxyAddr),
+               sizeof(proxyAddr)) < 0) {
         close(proxySockFd);
         return;
     }
@@ -90,6 +91,8 @@ HWTEST_F(DnsProxyListenTest, DnsProxyTest001, TestSize.Level1)
     len = sizeof(proxyAddr);
     recvfrom(proxySockFd, rsp, resSize, 0, reinterpret_cast<sockaddr *>(&proxyAddr), &len);
     close(proxySockFd);
+    netsysNativeService->StopDnsProxyListen();
+    NETNATIVE_LOGI("DnsProxyTest001 end");
 }
 
 HWTEST_F(DnsProxyListenTest, StartListenTest, TestSize.Level1)

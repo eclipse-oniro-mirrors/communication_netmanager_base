@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "dns_manager.h"
+#include "dns_config_client.h"
 
 namespace OHOS {
 namespace nmd {
@@ -49,8 +50,7 @@ HWTEST_F(DnsManagerTest, InterfaceTest001, TestSize.Level1)
     DnsManager dnsManager;
     std::vector<std::string> servers;
     std::vector<std::string> domains;
-    int32_t ret = dnsManager.SetResolverConfig(NET_ID, BASE_TIMEOUT_MILLIS,
-                                                RETRY_COUNT, servers, domains);
+    int32_t ret = dnsManager.SetResolverConfig(NET_ID, BASE_TIMEOUT_MILLIS, RETRY_COUNT, servers, domains);
     EXPECT_NE(ret, 0);
 
     ret = dnsManager.GetResolverConfig(NET_ID, servers, domains, BASE_TIMEOUT_MILLIS, RETRY_COUNT);
@@ -71,6 +71,12 @@ HWTEST_F(DnsManagerTest, InterfaceTest001, TestSize.Level1)
 
     ret = dnsManager.DestroyNetworkCache(NET_ID);
     EXPECT_EQ(ret, 0);
+
+    std::string hostName = "www.baidu.com";
+    std::string serverName;
+    AddrInfo hints;
+    std::vector<AddrInfo> res;
+    dnsManager.GetAddrInfo(hostName, serverName, hints, NET_ID, res);
 }
 } // namespace nmd
 } // namespace OHOS

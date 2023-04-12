@@ -94,7 +94,7 @@ HWTEST_F(DNSLookupParserTest, GetNsFromConfTest001, TestSize.Level1)
     resolvConf.ns[0].family = AF_INET;
     int32_t family = 0;
     socklen_t saLen = 0;
-    uint32_t nns = 0;
+    uint32_t nns = 1;
     DnsLookUpParse::GetNsFromConf(&resolvConf, nns, family, saLen);
 }
 
@@ -105,7 +105,7 @@ HWTEST_F(DNSLookupParserTest, GetNsFromConfTest002, TestSize.Level1)
     resolvConf.ns[0].family = AF_INET6;
     int32_t family = 0;
     socklen_t saLen = 0;
-    uint32_t nns = 0;
+    uint32_t nns = 1;
     DnsLookUpParse::GetNsFromConf(&resolvConf, nns, family, saLen);
 }
 

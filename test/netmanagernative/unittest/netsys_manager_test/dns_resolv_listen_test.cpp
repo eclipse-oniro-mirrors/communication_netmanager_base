@@ -144,7 +144,7 @@ HWTEST_F(DnsResolvListenTest, ProcSetCacheCommandTest001, TestSize.Level1)
         NETNATIVE_LOGI("ProcSetCacheCommandTest001 dlopen err %{public}s", dlerror());
         return;
     }
-    SetCache func = (SetCache)dlsym(handle, "NetSysGetResolvCache");
+    SetCache func = (SetCache)dlsym(handle, "NetSysSetResolvCache");
     if (func == NULL) {
         NETNATIVE_LOGI("ProcSetCacheCommandTest001 dlsym err %{public}s\n", dlerror());
         return;
@@ -167,7 +167,7 @@ HWTEST_F(DnsResolvListenTest, ProcGetCacheCommandTest001, TestSize.Level1)
         NETNATIVE_LOGI("ProcGetCacheCommandTest001 dlopen err %{public}s", dlerror());
         return;
     }
-    GetCache func = (GetCache)dlsym(handle, "NetSysSetResolvCache");
+    GetCache func = (GetCache)dlsym(handle, "NetSysGetResolvCache");
     if (func == NULL) {
         NETNATIVE_LOGI("ProcGetCacheCommandTest001 dlsym err %{public}s\n", dlerror());
         return;

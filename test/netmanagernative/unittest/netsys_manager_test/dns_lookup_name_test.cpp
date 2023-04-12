@@ -17,13 +17,18 @@
 
 #define private public
 #include "dns_lookup_name.h"
+#include "dns_manager.h"
 #undef private
 
 namespace OHOS {
 namespace NetsysNative {
 using namespace testing::ext;
 using namespace OHOS::nmd;
-
+namespace {
+const uint16_t NET_ID = 3;
+uint16_t BASE_TIMEOUT_MILLIS = 2000;
+uint8_t RETRY_COUNT = 3;
+} // namespace
 class DNSLookupNameTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -114,9 +119,9 @@ HWTEST_F(DNSLookupNameTest, NameFromDnsTest001, TestSize.Level1)
     EXPECT_EQ(ret, EAI_AGAIN);
 }
 
-HWTEST_F(DNSLookupNameTest, NameFromDnsSearchTest001, TestSize.Level1)
+HWTEST_F(DNSLookupNameTest, NameFromDnsTest002, TestSize.Level1)
 {
-    NETNATIVE_LOGI("NameFromDnsSearchTest invalid host name enter");
+    NETNATIVE_LOGI("NameFromDnsTest invalid host name enter");
     DnsLookUpName name;
     struct AddrData addrData[48] = {};
     char canon[256] = {0};
@@ -128,9 +133,9 @@ HWTEST_F(DNSLookupNameTest, NameFromDnsSearchTest001, TestSize.Level1)
     EXPECT_EQ(ret, EAI_AGAIN);
 }
 
-HWTEST_F(DNSLookupNameTest, NameFromDnsSearchTest002, TestSize.Level1)
+HWTEST_F(DNSLookupNameTest, NameFromDnsTest003, TestSize.Level1)
 {
-    NETNATIVE_LOGI("NameFromDnsSearchTest enter");
+    NETNATIVE_LOGI("NameFromDnsTest enter");
     DnsLookUpName name;
     struct AddrData addrData[48] = {};
     char canon[256] = {0};
@@ -140,6 +145,73 @@ HWTEST_F(DNSLookupNameTest, NameFromDnsSearchTest002, TestSize.Level1)
     int32_t netId = 101;
     int32_t ret = name.NameFromDns(addrData, canon, host, family, &resolvConf, netId);
     EXPECT_EQ(ret, EAI_AGAIN);
+}
+
+HWTEST_F(DNSLookupNameTest, NameFromDnsTest004, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NameFromDnsTest enter");
+    DnsLookUpName name;
+    struct AddrData addrData[48] = {};
+    char canon[256] = {0};
+    std::string host = "abcd";
+    int32_t family = 266;
+    struct ResolvConf resolvConf = {};
+    int32_t netId = 101;
+    name.NameFromDns(addrData, canon, host, family, &resolvConf, netId);
+}
+
+HWTEST_F(DNSLookupNameTest, NameFromDnsSearchTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NameFromDnsSearchTest001 host is null enter");
+    DnsManager dnsManager;
+    std::vector<std::string> servers;
+    std::vector<std::string> domains;
+    dnsManager.SetResolverConfig(NET_ID, BASE_TIMEOUT_MILLIS, RETRY_COUNT, servers, domains);
+    DnsLookUpName name;
+    struct AddrData addrData[48] = {};
+    char canon[256] = {0};
+    std::string host = "";
+    int32_t family = AF_INET;
+    name.NameFromDnsSearch(addrData, canon, host, family, NET_ID);
+}
+
+HWTEST_F(DNSLookupNameTest, NameFromDnsSearchTest002, TestSize.Level1)
+{
+    NETNATIVE_LOGI("NameFromDnsSearchTest001 host is baidu enter");
+    DnsManager dnsManager;
+    std::vector<std::string> servers;
+    std::vector<std::string> domains;
+    dnsManager.SetResolverConfig(NET_ID, BASE_TIMEOUT_MILLIS, RETRY_COUNT, servers, domains);
+    DnsLookUpName name;
+    struct AddrData addrData[48] = {};
+    char canon[256] = {0};
+    std::string host = "www.baidu.com";
+    int32_t family = AF_INET;
+    name.NameFromDnsSearch(addrData, canon, host, family, NET_ID);
+}
+
+HWTEST_F(DNSLookupNameTest, LabelOfTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("LabelOfTest001 enter");
+    DnsLookUpName name;
+    sockaddr_in6 da6 = {
+        .sin6_family = AF_INET6,
+        .sin6_port = PORT_NUM,
+        .sin6_scope_id = 1,
+    };
+    name.LabelOf(&da6.sin6_addr);
+}
+
+HWTEST_F(DNSLookupNameTest, PreFixMatchTest001, TestSize.Level1)
+{
+    NETNATIVE_LOGI("PreFixMatchTest001 enter");
+    DnsLookUpName name;
+    sockaddr_in6 da6 = {
+        .sin6_family = AF_INET6,
+        .sin6_port = PORT_NUM,
+        .sin6_scope_id = 1,
+    };
+    name.PreFixMatch(&da6.sin6_addr, &da6.sin6_addr);
 }
 
 HWTEST_F(DNSLookupNameTest, CheckNameParamTest001, TestSize.Level1)
