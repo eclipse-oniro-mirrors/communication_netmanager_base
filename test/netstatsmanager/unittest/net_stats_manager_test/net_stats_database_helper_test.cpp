@@ -120,6 +120,49 @@ HWTEST_F(NetStatsDatabaseHelperTest, SelectDataHelperTest001, TestSize.Level1)
     EXPECT_EQ(ret, NetStatsResultCode::STATS_ERR_READ_DATA_FAIL);
 }
 
+HWTEST_F(NetStatsDatabaseHelperTest, SelectDataHelperTest002, TestSize.Level1)
+{
+    NETMGR_LOG_I("SelectDataHelperTest002");
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    std::vector<NetStatsInfo> infos;
+    uint32_t uid = 100;
+    int32_t ret = helper->SelectData(uid, 0, LONG_MAX, infos);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    infos.clear();
+    uint64_t date = 15254400;
+    ret = helper->SelectData(uid, date, LONG_MAX, infos);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsDatabaseHelperTest, SelectDataHelperTest003, TestSize.Level1)
+{
+    NETMGR_LOG_I("SelectDataHelperTest003");
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    std::vector<NetStatsInfo> infos;
+    std::string iface = "wlan0";
+    int32_t ret = helper->SelectData(iface, 0, LONG_MAX, infos);
+    EXPECT_EQ(ret, STATS_ERR_READ_DATA_FAIL);
+    infos.clear();
+    uint64_t date = 15254400;
+    ret = helper->SelectData(iface, date, LONG_MAX, infos);
+    EXPECT_EQ(ret, STATS_ERR_READ_DATA_FAIL);
+}
+
+HWTEST_F(NetStatsDatabaseHelperTest, SelectDataHelperTest004, TestSize.Level1)
+{
+    NETMGR_LOG_I("SelectDataHelperTest004");
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    std::vector<NetStatsInfo> infos;
+    std::string iface = "wlan0";
+    uint32_t uid = 100;
+    int32_t ret = helper->SelectData(iface, uid, 0, LONG_MAX, infos);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    infos.clear();
+    uint64_t date = 15254400;
+    ret = helper->SelectData(iface, uid, date, LONG_MAX, infos);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetStatsDatabaseHelperTest, DeleteDataHelperTest001, TestSize.Level1)
 {
     NETMGR_LOG_I("DeleteDataHelperTest001");
@@ -128,6 +171,27 @@ HWTEST_F(NetStatsDatabaseHelperTest, DeleteDataHelperTest001, TestSize.Level1)
     int32_t ret = helper->DeleteData(UID_TABLE, date, 15254560);
     std::vector<NetStatsInfo> infos;
     helper->SelectData(infos, UID_TABLE, 0, LONG_MAX);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsDatabaseHelperTest, DeleteDataHelperTest002, TestSize.Level1)
+{
+    NETMGR_LOG_I("DeleteDataHelperTest002");
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    uint32_t uid = 100;
+    int32_t ret = helper->DeleteData(UID_TABLE, uid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsDatabaseHelperTest, ClearDataHelperTest001, TestSize.Level1)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    std::vector<NetStatsInfo> infos;
+    std::string iface = "wlan0";
+    uint32_t uid = 100;
+    int32_t ret = helper->SelectData(iface, uid, 0, LONG_MAX, infos);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = helper->ClearData(UID_TABLE);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
