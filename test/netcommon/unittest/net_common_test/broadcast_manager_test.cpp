@@ -64,5 +64,13 @@ HWTEST_F(BroadcastManagerTest, SendBroadcastTest003, TestSize.Level1)
     bool ret = DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(g_testInfo, params);
     EXPECT_TRUE(ret);
 }
+
+HWTEST_F(BroadcastManagerTest, SendBroadcastTest004, TestSize.Level1)
+{
+    std::map<std::string, std::string> params = {{"test1", "testMsg1"}, {"test2", "testMsg2"}, {"test3", "testMsg3"}};
+    BroadcastInfo testInfo;
+    bool ret = DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(testInfo, params);
+    EXPECT_FALSE(ret);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
