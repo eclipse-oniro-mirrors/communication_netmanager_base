@@ -48,6 +48,75 @@ Route GetRoute()
     return route;
 }
 
+Route GetRoute2()
+{
+    std::string iface("eth0");
+    Route route;
+    route.iface_ = iface;
+    route.rtnType_ = RTN_UNICAST;
+    route.hasGateway_ = false;
+    route.isDefaultRoute_ = false;
+    route.destination_.type_ = INetAddr::IPV4;
+    route.destination_.family_ = AF_INET;
+    route.destination_.prefixlen_ = 0x18;
+    route.destination_.address_ = "192.168.2.10";
+    route.destination_.netMask_ = "255.255.255.0";
+    route.destination_.hostName_ = "netAddr";
+    route.gateway_.type_ = INetAddr::IPV4;
+    route.gateway_.family_ = AF_INET;
+    route.gateway_.prefixlen_ = 0x18;
+    route.gateway_.address_ = "192.168.2.1";
+    route.gateway_.netMask_ = "255.255.255.0";
+    route.gateway_.hostName_ = "netAddr";
+    return route;
+}
+
+Route GetRoute3()
+{
+    std::string iface("eth0");
+    Route route;
+    route.iface_ = iface;
+    route.rtnType_ = RTN_UNICAST;
+    route.hasGateway_ = false;
+    route.isDefaultRoute_ = false;
+    route.destination_.type_ = INetAddr::IPV4;
+    route.destination_.family_ = AF_INET;
+    route.destination_.prefixlen_ = 0x18;
+    route.destination_.address_ = "192.168.2.10";
+    route.destination_.netMask_ = "255.255.255.0";
+    route.destination_.hostName_ = "netAddr";
+    route.gateway_.type_ = INetAddr::IPV4;
+    route.gateway_.family_ = AF_INET;
+    route.gateway_.prefixlen_ = 0x18;
+    route.gateway_.address_ = "192.168.2.1";
+    route.gateway_.netMask_ = "255.255.255.0";
+    route.gateway_.hostName_ = "netAddr";
+    return route;
+}
+
+Route GetRoute4()
+{
+    std::string iface("eth0");
+    Route route;
+    route.iface_ = iface;
+    route.rtnType_ = RTN_UNICAST;
+    route.hasGateway_ = false;
+    route.isDefaultRoute_ = false;
+    route.destination_.type_ = INetAddr::IPV4;
+    route.destination_.family_ = AF_INET;
+    route.destination_.prefixlen_ = 0x18;
+    route.destination_.address_ = "192168210";
+    route.destination_.netMask_ = "255.255.255.0";
+    route.destination_.hostName_ = "netAddr";
+    route.gateway_.type_ = INetAddr::IPV4;
+    route.gateway_.family_ = AF_INET;
+    route.gateway_.prefixlen_ = 0x18;
+    route.gateway_.address_ = "192.168.2.1";
+    route.gateway_.netMask_ = "255.255.255.0";
+    route.gateway_.hostName_ = "netAddr";
+    return route;
+}
+
 constexpr uint32_t TEST_NETID = 110;
 } // namespace
 
@@ -152,6 +221,16 @@ HWTEST_F(RouteUtilsTest, AddRouteToLocal04, TestSize.Level1)
 
 HWTEST_F(RouteUtilsTest, AddRoute01, TestSize.Level1)
 {
+    EXPECT_GE(0, RouteUtils::AddRoute(TEST_NETID, GetRoute3()));
+}
+
+HWTEST_F(RouteUtilsTest, AddRoute02, TestSize.Level1)
+{
+    EXPECT_GE(0, RouteUtils::AddRoute(TEST_NETID, GetRoute4()));
+}
+
+HWTEST_F(RouteUtilsTest, AddRoute03, TestSize.Level1)
+{
     EXPECT_GE(0, RouteUtils::AddRoute(TEST_NETID, GetRoute()));
 }
 
@@ -165,8 +244,19 @@ HWTEST_F(RouteUtilsTest, UpdateRoutes01, TestSize.Level1)
     NetLinkInfo nlio;
     NetLinkInfo nlin;
     nlio.routeList_.push_back(GetRoute());
+    nlin.routeList_.push_back(GetRoute2());
 
     EXPECT_TRUE(RouteUtils::UpdateRoutes(TEST_NETID, nlin, nlio));
 }
+
+HWTEST_F(RouteUtilsTest, UpdateRoutes02, TestSize.Level1)
+{
+    NetLinkInfo nlio;
+    NetLinkInfo nlin;
+    nlio.routeList_.push_back(GetRoute());
+
+    EXPECT_TRUE(RouteUtils::UpdateRoutes(TEST_NETID, nlin, nlio));
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
