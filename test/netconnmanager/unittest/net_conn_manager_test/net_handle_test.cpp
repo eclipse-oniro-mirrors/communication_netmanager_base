@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,10 @@
 
 #include <gtest/gtest.h>
 
-#include "net_mgr_log_wrapper.h"
-#include "net_handle.h"
-#include "net_conn_types.h"
 #include "net_conn_constants.h"
+#include "net_conn_types.h"
+#include "net_handle.h"
+#include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -39,7 +39,7 @@ void NetHandleTest::SetUp() {}
 
 void NetHandleTest::TearDown() {}
 
-HWTEST_F(NetHandleTest, BindSocket, TestSize.Level1)
+HWTEST_F(NetHandleTest, BindSocket001, TestSize.Level1)
 {
     int32_t socket_fd = 1;
     int32_t netId = 101;
@@ -49,7 +49,17 @@ HWTEST_F(NetHandleTest, BindSocket, TestSize.Level1)
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetHandleTest, GetAddressesByName, TestSize.Level1)
+HWTEST_F(NetHandleTest, BindSocket002, TestSize.Level1)
+{
+    int32_t socket_fd = -1;
+    int32_t netId = 101;
+    auto handler = DelayedSingleton<NetHandle>::GetInstance();
+    handler->SetNetId(netId);
+    int32_t result = handler->BindSocket(socket_fd);
+    ASSERT_TRUE(result == NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetHandleTest, GetAddressesByName001, TestSize.Level1)
 {
     std::string host = "www.baidu.com";
     std::vector<INetAddr> addrList;
@@ -60,7 +70,18 @@ HWTEST_F(NetHandleTest, GetAddressesByName, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_NOT_SYSTEM_CALL);
 }
 
-HWTEST_F(NetHandleTest, GetAddressByName, TestSize.Level1)
+HWTEST_F(NetHandleTest, GetAddressesByName002, TestSize.Level1)
+{
+    std::string host;
+    std::vector<INetAddr> addrList;
+    int32_t netId = 5;
+    auto handler = DelayedSingleton<NetHandle>::GetInstance();
+    handler->SetNetId(netId);
+    int32_t ret = handler->GetAddressesByName(host, addrList);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetHandleTest, GetAddressByName001, TestSize.Level1)
 {
     std::string host = "www.baidu.com";
     INetAddr addr;
@@ -69,6 +90,17 @@ HWTEST_F(NetHandleTest, GetAddressByName, TestSize.Level1)
     handler->SetNetId(netId);
     int32_t ret = handler->GetAddressByName(host, addr);
     EXPECT_EQ(ret, NETMANAGER_ERR_NOT_SYSTEM_CALL);
+}
+
+HWTEST_F(NetHandleTest, GetAddressByName002, TestSize.Level1)
+{
+    std::string host;
+    INetAddr addr;
+    int32_t netId = 5;
+    auto handler = DelayedSingleton<NetHandle>::GetInstance();
+    handler->SetNetId(netId);
+    int32_t ret = handler->GetAddressByName(host, addr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
