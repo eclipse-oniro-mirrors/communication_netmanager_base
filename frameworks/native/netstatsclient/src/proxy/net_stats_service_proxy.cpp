@@ -435,5 +435,10 @@ int32_t NetStatsServiceProxy::ResetFactory()
     }
     return reply.ReadInt32();
 }
+
+int32_t NetStatsServiceProxy::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
+{
+    return 0;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

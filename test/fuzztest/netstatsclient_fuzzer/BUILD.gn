@@ -29,6 +29,8 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
     "$NETSTATSMANAGER_SOURCE_DIR/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETSTATSMANAGER_BPFLIB_DIR/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/manager",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys/wrapper",
     "$NETMANAGERNATIVE_ROOT/netsys_bpf_map/include",
   ]
 

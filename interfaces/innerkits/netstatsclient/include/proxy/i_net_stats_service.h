@@ -46,6 +46,7 @@ public:
         CMD_GET_ALL_TXBYTES = 14,
         CMD_GET_UID_RXBYTES = 15,
         CMD_GET_UID_TXBYTES = 16,
+        CMD_GET_ALL_STATS_INFO = 17,
         CMD_END = 100,
     };
 
@@ -58,6 +59,7 @@ public:
     virtual int32_t GetAllTxBytes(uint64_t &stats) = 0;
     virtual int32_t GetUidRxBytes(uint64_t &stats, uint32_t uid) = 0;
     virtual int32_t GetUidTxBytes(uint64_t &stats, uint32_t uid) = 0;
+    virtual int32_t GetAllStatsInfo(std::vector<NetStatsInfo> &info) = 0;
     virtual int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback) = 0;
     virtual int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) = 0;
     virtual int32_t GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,

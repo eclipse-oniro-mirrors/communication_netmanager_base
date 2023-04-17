@@ -245,5 +245,10 @@ int32_t NetStatsClient::ResetFactory()
     }
     return proxy->ResetFactory();
 }
+
+int32_t NetStatsClient::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
+{
+    return 0;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

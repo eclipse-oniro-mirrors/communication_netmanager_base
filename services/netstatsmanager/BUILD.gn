@@ -44,6 +44,8 @@ ohos_shared_library("net_stats_manager") {
     "$NETSYSBPFMAP_SOURCE_DIR/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETSTATSMANAGER_BPFLIB_DIR/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/manager",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys/wrapper",
     "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
@@ -56,6 +58,7 @@ ohos_shared_library("net_stats_manager") {
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSTATSMANAGER_BPFLIB_DIR:netsys_bpf_stats",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
+    "$NETSYSNATIVE_SOURCE_DIR:netsys_native_manager",
     "$THIRD_PARTY_ROOT/sqlite:sqlite",
   ]
 
