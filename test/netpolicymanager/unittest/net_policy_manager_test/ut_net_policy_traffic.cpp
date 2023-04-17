@@ -382,7 +382,7 @@ HWTEST_F(UtNetPolicyTraffic, FormalizeQuotaPolicies001, TestSize.Level1)
     quotaPolicy.warningBytes = DATA_USAGE_UNLIMITED;
     quotaPolicies.push_back(quotaPolicy);
     g_netPolicyTraffic->FormalizeQuotaPolicies(quotaPolicies);
-    EXPECT_EQ(quotaPolicy.limitAction,-LIMIT_ACTION_AUTO_BILL);
+    EXPECT_EQ(quotaPolicy.limitAction, -LIMIT_ACTION_AUTO_BILL);
 }
 
 /**
