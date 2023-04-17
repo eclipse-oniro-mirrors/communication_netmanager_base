@@ -78,14 +78,6 @@ HWTEST_F(WrapperDistributorTest, RegisterNetlinkCallbacksTest001, TestSize.Level
 
 HWTEST_F(WrapperDistributorTest, RegisterNetlinkCallbacksTest002, TestSize.Level1)
 {
-    auto callbacks_ = std::make_shared<std::vector<sptr<NetsysNative::INotifyCallback>>>();
-    int32_t ret = instance_->RegisterNetlinkCallbacks(callbacks_);
-    EXPECT_EQ(ret, NetlinkResult::OK);
-}
-
-HWTEST_F(WrapperDistributorTest, WrapperDistributorTest001, TestSize.Level1)
-{
-    // Since the method returns void, you can't tell by the return value, so you can trace the execution against the log
     std::shared_ptr<NetsysEventMessage> message =  nullptr;
     instance_->HandleDecodeSuccess(message);
 
@@ -95,6 +87,10 @@ HWTEST_F(WrapperDistributorTest, WrapperDistributorTest001, TestSize.Level1)
     instance_->HandleDecodeSuccess(message);
     message->SetSubSys(NetsysEventMessage::SubSys::QLOG);
     instance_->HandleDecodeSuccess(message);
+
+    auto callbacks_ = std::make_shared<std::vector<sptr<NetsysNative::INotifyCallback>>>();
+    int32_t ret = instance_->RegisterNetlinkCallbacks(callbacks_);
+    EXPECT_EQ(ret, NetlinkResult::OK);
 }
 } // namespace nmd
 } // namespace OHOS

@@ -90,13 +90,6 @@ HWTEST_F(DnsResolvListenTest, SetResolverConfigTest001, TestSize.Level1)
     EXPECT_EQ(ret, -ENOENT);
 }
 
-HWTEST_F(DnsResolvListenTest, StartListenTest001, TestSize.Level1)
-{
-    NETNATIVE_LOGI("StartListenTest001 enter");
-    DnsResolvListen dnsResolvListen;
-    dnsResolvListen.StartListen();
-}
-
 HWTEST_F(DnsResolvListenTest, NetSysGetResolvConfTest001, TestSize.Level1)
 {
     NETNATIVE_LOGI("NetSysGetResolvConf001 enter");
@@ -112,12 +105,17 @@ HWTEST_F(DnsResolvListenTest, NetSysGetResolvConfTest001, TestSize.Level1)
     }
 
     resolv_config config = {0};
-    func(0, &config);
+    int ret = func(0, &config);
     dlclose(handle);
+    EXPECT_EQ(ret, -ENOENT);
 }
 
 HWTEST_F(DnsResolvListenTest, NetSysGetResolvConfTest002, TestSize.Level1)
 {
+    NETNATIVE_LOGI("StartListen enter");
+    DnsResolvListen dnsResolvListen;
+    dnsResolvListen.StartListen();
+
     NETNATIVE_LOGI("NetSysGetResolvConf002 enter");
     void *handle = dlopen(DNS_SO_PATH, RTLD_LAZY);
     if (handle == NULL) {
@@ -155,7 +153,8 @@ HWTEST_F(DnsResolvListenTest, ProcSetCacheCommandTest001, TestSize.Level1)
     struct addrinfo *res = nullptr;
     struct ParamWrapper param = {const_cast<char *>(host.c_str()), const_cast<char *>(serv.c_str()),
                                  (struct addrinfo *)hint};
-    func(0, param, res);
+    int32_t ret = func(0, param, res);
+    EXPECT_NE(ret, 0);
     dlclose(handle);
 }
 
@@ -179,7 +178,8 @@ HWTEST_F(DnsResolvListenTest, ProcGetCacheCommandTest001, TestSize.Level1)
                                  (struct addrinfo *)hint};
     uint32_t num = 0;
     struct addr_info_wrapper addr_info[MAX_RESULTS] = {{0}};
-    func(0, param, addr_info, &num);
+    int32_t ret = func(0, param, addr_info, &num);
+    EXPECT_EQ(ret, -ENOENT);
     dlclose(handle);
 }
 } // namespace NetsysNative

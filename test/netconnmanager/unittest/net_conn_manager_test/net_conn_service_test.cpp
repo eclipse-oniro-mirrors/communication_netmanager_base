@@ -104,18 +104,10 @@ void NetConnServiceTest::SetUp() {}
 
 void NetConnServiceTest::TearDown() {}
 
-HWTEST_F(NetConnServiceTest, OnStopTest001, TestSize.Level1)
-{
-    DelayedSingleton<NetConnService>::GetInstance()->OnStop();
-}
-
-HWTEST_F(NetConnServiceTest, OnStartTest001, TestSize.Level1)
-{
-    DelayedSingleton<NetConnService>::GetInstance()->OnStart();
-}
-
 HWTEST_F(NetConnServiceTest, SystemReadyTest001, TestSize.Level1)
 {
+    DelayedSingleton<NetConnService>::GetInstance()->OnStop();
+    DelayedSingleton<NetConnService>::GetInstance()->OnStart();
     int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->SystemReady();
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }

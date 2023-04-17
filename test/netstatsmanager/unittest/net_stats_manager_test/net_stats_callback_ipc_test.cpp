@@ -48,7 +48,7 @@ void NetStatsCallbackIpcTest::SetUp() {}
 
 void NetStatsCallbackIpcTest::TearDown() {}
 
-HWTEST_F(NetStatsCallbackIpcTest, RegisterNetStatsCallbackTest001, TestSize.Level1)
+HWTEST_F(NetStatsCallbackIpcTest, NotifyNetIfaceStatsChangedTest001, TestSize.Level1)
 {
     instance_->RegisterNetStatsCallback(callback_);
     instance_->RegisterNetStatsCallback(callback_);
@@ -61,10 +61,7 @@ HWTEST_F(NetStatsCallbackIpcTest, RegisterNetStatsCallbackTest001, TestSize.Leve
         instance_->RegisterNetStatsCallback(callback);
     }
     instance_->RegisterNetStatsCallback(callback_);
-}
 
-HWTEST_F(NetStatsCallbackIpcTest, NotifyNetIfaceStatsChangedTest001, TestSize.Level1)
-{
     int32_t ret = instance_->NotifyNetIfaceStatsChanged(TEST_IFACE);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }

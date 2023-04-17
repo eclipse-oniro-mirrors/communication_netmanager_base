@@ -57,14 +57,11 @@ HWTEST_F(DataReceiverTest, FormatErrorTest002, TestSize.Level1)
     ASSERT_NE(receiver, nullptr);
 }
 
-HWTEST_F(DataReceiverTest, RegisterCallbackTest001, TestSize.Level1)
+HWTEST_F(DataReceiverTest, StartTest001, TestSize.Level1)
 {
     DataReceiver::EventCallback callback = [](std::shared_ptr<NetsysEventMessage> msg) { (void)msg; };
     instance_->RegisterCallback(callback);
-}
 
-HWTEST_F(DataReceiverTest, StartTest001, TestSize.Level1)
-{
     int32_t ret = instance_->Start();
     EXPECT_EQ(ret, NetlinkResult::OK);
 }

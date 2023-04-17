@@ -52,13 +52,10 @@ HWTEST_F(NetsysEventMessageTest, GetMessageTest001, TestSize.Level1)
 
 HWTEST_F(NetsysEventMessageTest, GetMessageTest002, TestSize.Level1)
 {
+    instance_->DumpMessage();
+
     std::string result = instance_->GetMessage(NetsysEventMessage::Type::GATEWAY);
     ASSERT_TRUE(result.empty());
-}
-
-HWTEST_F(NetsysEventMessageTest, DumpMessageTest001, TestSize.Level1)
-{
-    instance_->DumpMessage();
 }
 } // namespace nmd
 } // namespace OHOS
