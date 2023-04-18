@@ -40,6 +40,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 using namespace NetStatsDatabaseDefines;
 namespace {
+constexpr const char *IFACE_NAME_MAP_PATH = "/sys/fs/bpf/netsys_iface_name_map";
 constexpr std::initializer_list<NetBearType> BEAR_TYPE_LIST = {
     NetBearType::BEARER_CELLULAR, NetBearType::BEARER_WIFI, NetBearType::BEARER_BLUETOOTH,
     NetBearType::BEARER_ETHERNET, NetBearType::BEARER_VPN,  NetBearType::BEARER_WIFI_AWARE,
@@ -79,12 +80,40 @@ int32_t NetStatsService::IfacelistNotifyCallback::OnInterfaceAddressRemoved(cons
 
 int32_t NetStatsService::IfacelistNotifyCallback::OnInterfaceAdded(const std::string &ifName)
 {
-    return 0;
+    NetManagerStandard::NetsysBpfMap<uint64_t, std::string> ifaceNameMap(IFACE_NAME_MAP_PATH, 0);
+    uint32_t ifaceIndex = if_nametoindex(ifName.c_str());
+    NETNATIVE_LOGI("ifaceIndex = %{public}u, ifaceName = %{public}s", ifaceIndex, ifName.c_str());
+
+    if (ifaceIndex == 0) {
+        NETMGR_LOG_E("Unknown interface %{public}s (%{public}u)", ifName.c_str(), ifaceIndex);
+        return -1;
+    }
+
+    if (!ifaceNameMap.WriteValue(ifaceIndex, ifName, BPF_ANY)) {
+        NETMGR_LOG_E("Failed to add iface %{public}s (%{public}u): errno = %{public}d", ifName.c_str(), ifaceIndex,
+                     errno);
+        return -1;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsService::IfacelistNotifyCallback::OnInterfaceRemoved(const std::string &ifName)
 {
-    return 0;
+    NetManagerStandard::NetsysBpfMap<uint64_t, std::string> ifaceNameMap(IFACE_NAME_MAP_PATH, 0);
+    uint32_t ifaceIndex = if_nametoindex(ifName.c_str());
+    NETNATIVE_LOGI("ifaceIndex = %{public}u, ifaceName = %{public}s", ifaceIndex, ifName.c_str());
+
+    if (ifaceIndex == 0) {
+        NETMGR_LOG_E("Unknown interface %{public}s (%{public}u)", ifName.c_str(), ifaceIndex);
+        return -1;
+    }
+
+    if (!ifaceNameMap.DeleteEntryFromMap(ifaceIndex)) {
+        NETMGR_LOG_E("Failed to remove iface %{public}s (%{public}u): errno = %{public}d", ifName.c_str(), ifaceIndex,
+                     errno);
+        return -1;
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsService::IfacelistNotifyCallback::OnInterfaceChanged(const std::string &ifName, bool up)
@@ -338,7 +367,7 @@ int32_t NetStatsService::ResetFactory()
 
 int32_t NetStatsService::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
 {
-    return NETMANAGER_SUCCESS;
+    return NetStatsWrapper::GetInstance().GetAllStatsInfo(infos);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

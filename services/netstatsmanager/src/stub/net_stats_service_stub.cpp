@@ -38,6 +38,7 @@ NetStatsServiceStub::NetStatsServiceStub()
     memberFuncMap_[CMD_UPDATE_IFACES_STATS] = &NetStatsServiceStub::OnUpdateIfacesStats;
     memberFuncMap_[CMD_UPDATE_STATS_DATA] = &NetStatsServiceStub::OnUpdateStatsData;
     memberFuncMap_[CMD_NSM_RESET_FACTORY] = &NetStatsServiceStub::OnResetFactory;
+    memberFuncMap_[CMD_GET_ALL_STATS_INFO] = &NetStatsServiceStub::OnGetAllStatsInfo;
 }
 
 NetStatsServiceStub::~NetStatsServiceStub() = default;
@@ -358,6 +359,19 @@ int32_t NetStatsServiceStub::OnResetFactory(MessageParcel &data, MessageParcel &
 {
     int32_t ret = ResetFactory();
     if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsServiceStub::OnGetAllStatsInfo(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<NetStatsInfo> infos;
+    int32_t result = GetAllStatsInfo(infos);
+    if (!NetStatsInfo::Marshalling(reply, infos)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (!reply.WriteInt32(result)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return NETMANAGER_SUCCESS;

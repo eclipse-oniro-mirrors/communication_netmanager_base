@@ -248,7 +248,12 @@ int32_t NetStatsClient::ResetFactory()
 
 int32_t NetStatsClient::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
 {
-    return 0;
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetAllStatsInfo(infos);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -438,7 +438,28 @@ int32_t NetStatsServiceProxy::ResetFactory()
 
 int32_t NetStatsServiceProxy::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
 {
-    return 0;
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t result = remote->SendRequest(CMD_GET_ALL_STATS_INFO, data, reply, option);
+    if (result != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", result);
+        return result;
+    }
+    if (!NetStatsInfo::Unmarshalling(reply, infos)) {
+        NETMGR_LOG_E("Read stats info failed");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return reply.ReadInt32();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
