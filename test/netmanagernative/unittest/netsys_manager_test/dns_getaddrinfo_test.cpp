@@ -74,6 +74,8 @@ HWTEST_F(DNSGetaddrinfoTest, ParseAddrTest001, TestSize.Level1)
     int32_t len = 16;
     std::vector<AddrInfo> out;
     getInfo.ParseAddr(addrNum, servNum, servData, addrData, canon, len, out);
+    int32_t res = out.empty();
+    EXPECT_EQ(res, true);
 }
 
 HWTEST_F(DNSGetaddrinfoTest, ParseAddrTest002, TestSize.Level1)
@@ -88,6 +90,8 @@ HWTEST_F(DNSGetaddrinfoTest, ParseAddrTest002, TestSize.Level1)
     int32_t len = 16;
     std::vector<AddrInfo> out;
     getInfo.ParseAddr(addrNum, servNum, servData, addrData, canon, len, out);
+    int32_t res = out.empty();
+    EXPECT_EQ(res, true);
 }
 
 HWTEST_F(DNSGetaddrinfoTest, ParseAddrTest003, TestSize.Level1)
@@ -102,6 +106,8 @@ HWTEST_F(DNSGetaddrinfoTest, ParseAddrTest003, TestSize.Level1)
     int32_t len = 0;
     std::vector<AddrInfo> out;
     getInfo.ParseAddr(addrNum, servNum, servData, addrData, canon, len, out);
+    int32_t res = out.empty();
+    EXPECT_EQ(res, false);
 }
 
 HWTEST_F(DNSGetaddrinfoTest, ParseAddrTest004, TestSize.Level1)
@@ -117,6 +123,8 @@ HWTEST_F(DNSGetaddrinfoTest, ParseAddrTest004, TestSize.Level1)
     int32_t len = 16;
     std::vector<AddrInfo> out;
     getInfo.ParseAddr(addrNum, servNum, servData, addrData, canon, len, out);
+    int32_t res = out.empty();
+    EXPECT_EQ(res, false);
 }
 
 HWTEST_F(DNSGetaddrinfoTest, ParseAddrTest005, TestSize.Level1)
@@ -132,6 +140,8 @@ HWTEST_F(DNSGetaddrinfoTest, ParseAddrTest005, TestSize.Level1)
     int32_t len = 16;
     std::vector<AddrInfo> out;
     getInfo.ParseAddr(addrNum, servNum, servData, addrData, canon, len, out);
+    int32_t res = out.empty();
+    EXPECT_EQ(res, false);
 }
 
 HWTEST_F(DNSGetaddrinfoTest, ParseAddrTest006, TestSize.Level1)
@@ -147,6 +157,8 @@ HWTEST_F(DNSGetaddrinfoTest, ParseAddrTest006, TestSize.Level1)
     int32_t len = 16;
     std::vector<AddrInfo> out;
     getInfo.ParseAddr(addrNum, servNum, servData, addrData, canon, len, out);
+    int32_t res = out.empty();
+    EXPECT_EQ(res, false);
 }
 
 HWTEST_F(DNSGetaddrinfoTest, GetAddrInfoTest001, TestSize.Level1)

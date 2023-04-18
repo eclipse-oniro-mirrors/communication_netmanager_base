@@ -53,7 +53,7 @@ Route GetRoute2()
     std::string iface("eth0");
     Route route;
     route.iface_ = iface;
-    route.rtnType_ = RTN_UNICAST;
+    route.rtnType_ = RTN_UNREACHABLE;
     route.hasGateway_ = false;
     route.isDefaultRoute_ = false;
     route.destination_.type_ = INetAddr::IPV4;

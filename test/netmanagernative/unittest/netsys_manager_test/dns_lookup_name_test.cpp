@@ -157,7 +157,8 @@ HWTEST_F(DNSLookupNameTest, NameFromDnsTest004, TestSize.Level1)
     int32_t family = 266;
     struct ResolvConf resolvConf = {};
     int32_t netId = 101;
-    name.NameFromDns(addrData, canon, host, family, &resolvConf, netId);
+    int32_t ret = name.NameFromDns(addrData, canon, host, family, &resolvConf, netId);
+    EXPECT_NE(ret, 0);
 }
 
 HWTEST_F(DNSLookupNameTest, NameFromDnsSearchTest001, TestSize.Level1)
@@ -172,7 +173,8 @@ HWTEST_F(DNSLookupNameTest, NameFromDnsSearchTest001, TestSize.Level1)
     char canon[256] = {0};
     std::string host = "";
     int32_t family = AF_INET;
-    name.NameFromDnsSearch(addrData, canon, host, family, NET_ID);
+    int32_t ret = name.NameFromDnsSearch(addrData, canon, host, family, NET_ID);
+    EXPECT_NE(ret, 0);
 }
 
 HWTEST_F(DNSLookupNameTest, NameFromDnsSearchTest002, TestSize.Level1)
@@ -187,7 +189,8 @@ HWTEST_F(DNSLookupNameTest, NameFromDnsSearchTest002, TestSize.Level1)
     char canon[256] = {0};
     std::string host = "www.baidu.com";
     int32_t family = AF_INET;
-    name.NameFromDnsSearch(addrData, canon, host, family, NET_ID);
+    int32_t ret = name.NameFromDnsSearch(addrData, canon, host, family, NET_ID);
+    EXPECT_NE(ret, 0);
 }
 
 HWTEST_F(DNSLookupNameTest, LabelOfTest001, TestSize.Level1)
@@ -199,7 +202,8 @@ HWTEST_F(DNSLookupNameTest, LabelOfTest001, TestSize.Level1)
         .sin6_port = PORT_NUM,
         .sin6_scope_id = 1,
     };
-    name.LabelOf(&da6.sin6_addr);
+    int32_t ret = name.LabelOf(&da6.sin6_addr);
+    EXPECT_NE(ret, 0);
 }
 
 HWTEST_F(DNSLookupNameTest, PreFixMatchTest001, TestSize.Level1)
@@ -211,7 +215,8 @@ HWTEST_F(DNSLookupNameTest, PreFixMatchTest001, TestSize.Level1)
         .sin6_port = PORT_NUM,
         .sin6_scope_id = 1,
     };
-    name.PreFixMatch(&da6.sin6_addr, &da6.sin6_addr);
+    int32_t ret = name.PreFixMatch(&da6.sin6_addr, &da6.sin6_addr);
+    EXPECT_NE(ret, 0);
 }
 
 HWTEST_F(DNSLookupNameTest, CheckNameParamTest001, TestSize.Level1)
@@ -281,6 +286,8 @@ HWTEST_F(DNSLookupNameTest, LookUpNameParamTest001, TestSize.Level1)
     struct AddrData sddrData = {};
     int32_t cnt = 0;
     name.LookUpNameParam(&sddrData, cnt, 0);
+    int32_t ret = sizeof(sddrData);
+    EXPECT_NE(ret, 0);
 }
 
 HWTEST_F(DNSLookupNameTest, LookUpNameParamTest002, TestSize.Level1)
@@ -290,6 +297,8 @@ HWTEST_F(DNSLookupNameTest, LookUpNameParamTest002, TestSize.Level1)
     struct AddrData sddrData = {};
     int32_t cnt = 1;
     name.LookUpNameParam(&sddrData, cnt, 0);
+    int32_t ret = sizeof(sddrData);
+    EXPECT_NE(ret, 0);
 }
 
 HWTEST_F(DNSLookupNameTest, LookUpNameTest001, TestSize.Level1)

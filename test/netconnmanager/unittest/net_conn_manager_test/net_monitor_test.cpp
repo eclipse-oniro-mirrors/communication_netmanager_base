@@ -104,8 +104,8 @@ HWTEST_F(NetMonitorTest, GetStatusCodeFromResponse001, TestSize.Level1)
 
 HWTEST_F(NetMonitorTest, SendParallelHttpProbes001, TestSize.Level1)
 {
-    instance_->SendParallelHttpProbes();
-    SUCCEED();
+    int32_t ret = instance_->SendParallelHttpProbes();
+    EXPECT_EQ(ret, INVALID_DETECTION_STATE);
 }
 
 HWTEST_F(NetMonitorTest, SendHttpProbe001, TestSize.Level1)

@@ -97,6 +97,8 @@ HWTEST_F(DNSGetaddrinNewTest, ParseAddrNewTest001, TestSize.Level1)
     int32_t len = 16;
     std::vector<AddrInfo> out;
     getInfo.ParseAddr(addrNum, servNum, servData, addrData, canon, len, out);
+    int32_t res = out.empty();
+    EXPECT_EQ(res, false);
 }
 
 HWTEST_F(DNSGetaddrinNewTest, ParseAddrNewTest002, TestSize.Level1)
@@ -112,6 +114,8 @@ HWTEST_F(DNSGetaddrinNewTest, ParseAddrNewTest002, TestSize.Level1)
     int32_t len = 0;
     std::vector<AddrInfo> out;
     getInfo.ParseAddr(addrNum, servNum, servData, addrData, canon, len, out);
+    int32_t res = out.empty();
+    EXPECT_EQ(res, false);
 }
 
 HWTEST_F(DNSGetaddrinNewTest, GetAddrInfoNewTest001, TestSize.Level1)
@@ -141,7 +145,8 @@ HWTEST_F(DNSGetaddrinNewTest, GetAddrInfoNewTest002, TestSize.Level1)
     std::string server;
     uint16_t netId = 0;
     std::vector<AddrInfo> out;
-    getInfo.GetAddrInfo(host, server, hints, netId, out);
+    int32_t ret = getInfo.GetAddrInfo(host, server, hints, netId, out);
+    EXPECT_EQ(ret, EAI_NONAME);
 }
 
 HWTEST_F(DNSGetaddrinNewTest, GetAddrInfoNewTest003, TestSize.Level1)
@@ -151,9 +156,10 @@ HWTEST_F(DNSGetaddrinNewTest, GetAddrInfoNewTest003, TestSize.Level1)
     std::string host = "www.baidu.com";
     std::string server;
     struct AddrInfo addrInfo = {};
-    uint16_t netId = 103;
+    uint16_t netId = 101;
     std::vector<AddrInfo> out;
-    getInfo.GetAddrInfo(host, server, addrInfo, netId, out);
+    int32_t ret = getInfo.GetAddrInfo(host, server, addrInfo, netId, out);
+    EXPECT_EQ(ret, EAI_NONAME);
 }
 
 } // namespace NetsysNative
