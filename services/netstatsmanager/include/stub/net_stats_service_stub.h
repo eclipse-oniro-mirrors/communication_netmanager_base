@@ -42,6 +42,7 @@ private:
     int32_t OnGetAllTxBytes(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetUidRxBytes(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetUidTxBytes(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetAllStatsInfo(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetIfaceStatsDetail(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetUidStatsDetail(MessageParcel &data, MessageParcel &reply);
     int32_t OnUpdateIfacesStats(MessageParcel &data, MessageParcel &reply);
