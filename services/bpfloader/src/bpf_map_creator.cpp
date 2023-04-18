@@ -114,7 +114,7 @@ int32_t BpfMapCreator::BpfCreateMapXattr(const BpfCreateMapAttr *createAttr) con
 {
     bpf_attr attr;
 
-    errno_t result = memset_s(&attr, sizeof(attr), '\0', sizeof(attr));
+    errno_t result = memset_s(&attr, sizeof(attr), 0, sizeof(attr));
     if (result != EOK) {
         return SYS_RET_ERR;
     }

@@ -25,10 +25,11 @@
 
 #define SEC(NAME) __attribute__((section(NAME), used))
 
-static void *(*BpfMapLookupElem)(void *map, const void *key) = (void *)1;
-static long (*BpfMapUpdateElem)(void *map, const void *key, const void *value, __u64 flags) = (void *)2;
-static long (*BpfTracePrintk)(const char *fmt, __u32 fmt_size, ...) = (void *)6;
-static __u32 (*BpfGetSocketUid)(struct __sk_buff *skb) = (void *)47;
+static void *(*BpfMapLookupElem)(void *map, const void *key) = (void *)BPF_FUNC_map_lookup_elem;
+static long (*BpfMapUpdateElem)(void *map, const void *key, const void *value, __u64 flags) =
+    (void *)BPF_FUNC_map_update_elem;
+static long (*BpfTracePrintk)(const char *fmt, __u32 fmt_size, ...) = (void *)BPF_FUNC_trace_printk;
+static __u32 (*BpfGetSocketUid)(struct __sk_buff *skb) = (void *)BPF_FUNC_get_socket_uid;
 
 static const int APP_STATS_MAP_SIZE = 5000;
 static const int IFACE_STATS_MAP_SIZE = 1000;
