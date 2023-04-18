@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,7 @@
 #ifndef BPF_PROG_LOADER_H
 #define BPF_PROG_LOADER_H
 
-#ifdef ENABLE_ELFIO
 #include "bpf_utils.h"
-#endif
 
 namespace OHOS {
 namespace Bpf {
@@ -30,7 +28,6 @@ public:
      */
     BpfProgLoader() = default;
 
-#ifdef ENABLE_ELFIO
     /**
      * Load the bpf progs and pin them to file system.
      *
@@ -43,13 +40,10 @@ public:
 
 private:
     int32_t BpfLoadProg(bpf_prog_type type, const bpf_insn *insns, size_t insnsCnt, std::string &license,
-                        uint32_t kernVersion, std::string &logBuf, size_t logBufSz) const;
-    void InitProgAttr(const BpfLoadProgAttr *loadAttr, bpf_attr &attr, const std::string &logBuf,
-                      size_t logBufSz) const;
-    int32_t BpfLoadProgXattr(const BpfLoadProgAttr *loadAttr, std::string &logBuf, size_t logBufSz) const;
-
-    std::string bpfLogBuf_ = {};
-#endif
+                        uint32_t kernVersion) const;
+    bool AttachProg(int32_t progFd, const std::string &event) const;
+    void InitProgAttr(const BpfLoadProgAttr *loadAttr, bpf_attr &attr) const;
+    int32_t BpfLoadProgXattr(const BpfLoadProgAttr *loadAttr) const;
 };
 } // namespace Bpf
 } // namespace OHOS
