@@ -62,7 +62,7 @@ bool BpfProgLoader::AttachProg(int32_t progFd, const std::string &event) const
     std::string progPinLocation = std::string("/sys/fs/bpf/prog_netsys_") + progName;
     if (access(progPinLocation.c_str(), F_OK) == 0) {
         NETNATIVE_LOGI("prog: %{public}s has already been pinned", progPinLocation.c_str());
-    } else if (SysBpfObjPin(progFd, progPinLocation)) {
+    } else if (SysBpfObjPin(progFd, progPinLocation) != SYS_RET_SUCCESS) {
         NETNATIVE_LOGE("Failed to pin prog: %{public}s, errno = %{public}d", progPinLocation.c_str(), errno);
         return false;
     }
