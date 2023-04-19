@@ -35,8 +35,8 @@
 
 namespace OHOS {
 namespace Bpf {
-constexpr const int SYS_RET_ERR = -1;
-constexpr const int SYS_RET_SUCCESS = 0;
+constexpr const uint32_t SYS_RET_ERR = -1;
+constexpr const uint32_t SYS_RET_SUCCESS = 0;
 struct BpfLoadMapDef {
     uint32_t type;
     uint32_t keySize;
