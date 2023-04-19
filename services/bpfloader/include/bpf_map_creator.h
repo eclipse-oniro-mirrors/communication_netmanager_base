@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,8 @@
 #ifndef BPF_MAP_CREATOR_H
 #define BPF_MAP_CREATOR_H
 
-#ifdef ENABLE_ELFIO
 #include "bpf_utils.h"
 #include "elfio/elfio.hpp"
-#endif
 
 namespace OHOS {
 namespace Bpf {
@@ -33,7 +31,6 @@ public:
      */
     BpfMapCreator() = default;
 
-#ifdef ENABLE_ELFIO
     /**
      * Create Map nodes and pin them to the file system.
      *
@@ -75,9 +72,8 @@ private:
      * @return Returns fd of the Map that was created successfully.
      */
     int32_t BpfCreateMapXattr(const BpfCreateMapAttr *createAttr) const;
-#endif
 
-    int32_t mapFd_[MAX_MAP_COUNT] = {};
+    int32_t mapFd_[MAX_MAP_COUNT] = {-1};
 };
 } // namespace Bpf
 } // namespace OHOS
