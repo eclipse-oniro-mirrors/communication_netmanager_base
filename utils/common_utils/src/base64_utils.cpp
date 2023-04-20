@@ -14,7 +14,7 @@
  */
 
 #include <array>
-#include <numeric>
+#include <algorithm>
 
 #include "base64_utils.h"
 
@@ -109,11 +109,9 @@ std::string Encode(const std::string &source)
             continue;
         }
         MakeCharFour(charArrayThree, charArrayFour);
-        ret = std::accumulate(charArrayFour.begin(), charArrayFour.end(), std::string(),
-                              [](std::string &str_append, uint8_t const &idx) {
-                                  return str_append + BASE64_CHARS[idx];
-                              });
-
+        std::for_each(charArrayFour.begin(), charArrayFour.end(), [&ret](uint8_t idx) {
+            ret += BASE64_CHARS[idx];
+        });
         index = 0;
     }
     if (index == 0) {
@@ -155,10 +153,9 @@ std::string Decode(const std::string &encoded)
             charArrayFour[index] = BASE64_CHARS.find(static_cast<char>(charArrayFour[index]));
         }
         MakeCharTree(charArrayFour, charArrayThree);
-        ret = std::accumulate(charArrayThree.begin(), charArrayThree.end(), std::string(),
-                              [](const std::string &str_append, uint8_t const &iter) {
-                                  return str_append + static_cast<char>(iter);
-                              });
+        std::for_each(charArrayThree.begin(), charArrayThree.end(), [&ret](uint8_t idx) {
+            ret += static_cast<char>(idx);
+        });
         index = 0;
     }
     if (index == 0) {
