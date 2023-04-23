@@ -18,6 +18,7 @@
 
 #include <string>
 #include <vector>
+#include <mutex>
 
 #include "i_net_stats_callback.h"
 
@@ -32,6 +33,7 @@ public:
 
 private:
     std::vector<sptr<INetStatsCallback>> netStatsCallback_;
+    std::mutex statsCallbackMetux_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
