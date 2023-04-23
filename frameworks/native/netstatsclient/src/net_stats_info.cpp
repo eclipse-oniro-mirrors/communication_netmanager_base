@@ -14,11 +14,13 @@
  */
 
 #include "net_stats_info.h"
-
+#include "net_mgr_log_wrapper.h"
 #include "parcel.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+static constexpr uint32_t STATS_INFO_MAX_SIZE = 5000;
+
 bool NetStatsInfo::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteUint32(uid_)) {
@@ -88,6 +90,10 @@ bool NetStatsInfo::Unmarshalling(Parcel &parcel, std::vector<NetStatsInfo> &stat
         return false;
     }
 
+    if (vSize > STATS_INFO_MAX_SIZE) {
+        NETMGR_LOG_E("Size of the statsInfos exceeds maximum.");
+        return false;
+    }
     statsInfos.reserve(vSize);
     for (uint32_t i = 0; i < vSize; i++) {
         NetStatsInfo tmpData;

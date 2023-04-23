@@ -35,7 +35,7 @@ constexpr int32_t EXTRA_MONTH = 1;
 REGISTER_SYSTEM_ABILITY_BY_ID(NetsysNativeService, COMM_NETSYS_NATIVE_SYS_ABILITY_ID, true)
 
 NetsysNativeService::NetsysNativeService()
-    : SystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, true),
+    : SystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID, true),
       netsysService_(nullptr),
       manager_(nullptr),
       notifyCallback_(nullptr)
