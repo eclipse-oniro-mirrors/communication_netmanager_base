@@ -103,6 +103,12 @@ private:
     int32_t CmdStartDnsProxyListen(MessageParcel &data, MessageParcel &reply);
     int32_t CmdStopDnsProxyListen(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetNetworkSharingTraffic(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetTotalStats(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetUidStats(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetIfaceStats(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetAllStatsInfo(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdAddIfName(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdRemoveIfName(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::vector<int32_t> uids_;

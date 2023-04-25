@@ -566,5 +566,36 @@ void NetsysNativeService::OnRemoveSystemAbility(int32_t systemAbilityId, const s
         hasSARemoved_ = true;
     }
 }
+
+int32_t NetsysNativeService::GetTotalStats(uint64_t &stats, uint32_t type)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeService::GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeService::GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeService::AddIfName(const std::string &ifName)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeService::RemoveIfName(const std::string &ifName)
+{
+    return ERR_NONE;
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

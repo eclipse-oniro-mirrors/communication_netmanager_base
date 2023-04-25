@@ -660,6 +660,59 @@ public:
      */
     int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule);
 
+    /**
+     * Get total traffic
+     *
+     * @param stats stats
+     * @param type type
+     * @return returns the total traffic of the specified type
+     */
+    int32_t GetTotalStats(uint64_t &stats, uint32_t type);
+
+    /**
+     * Get uid traffic
+     *
+     * @param stats stats
+     * @param type type
+     * @param uid uid
+     * @return returns the traffic of the uid
+     */
+    int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid);
+
+    /**
+     * Get Iface traffic
+     *
+     * @param stats stats
+     * @param type type
+     * @param interfaceName interfaceName
+     * @return returns the traffic of the Iface
+     */
+    int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName);
+
+    /**
+     * Get all stats info
+     *
+     * @param stats stats
+     * @return returns the all info of the stats
+     */
+    int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
+
+    /**
+     * Add IfName info
+     *
+     * @param ifName ifName
+     * @return value the return value of the netsys interface call
+     */
+    int32_t AddIfName(const std::string &ifName);
+
+    /**
+     * Removed IfName info
+     *
+     * @param ifName ifName
+     * @return value the return value of the netsys interface call
+     */
+    int32_t RemoveIfName(const std::string &ifName);
+
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);
     void ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface);
