@@ -93,8 +93,8 @@ public:
         NETSYS_GET_UID_STATS,
         NETSYS_GET_IFACE_STATS,
         NETSYS_GET_ALL_STATS_INFO,
-        NETSYS_GET_NAME_ADDED,
-        NETSYS_GET_NAME_REMOVED,
+        NETSYS_ADD_IF_NAME,
+        NETSYS_REMOVED_IF_NAME,
     };
 
     virtual int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,

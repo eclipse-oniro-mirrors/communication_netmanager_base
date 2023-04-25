@@ -83,8 +83,8 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_GET_UID_STATS] = &NetsysNativeServiceStub::CmdGetUidStats;
     opToInterfaceMap_[NETSYS_GET_IFACE_STATS] = &NetsysNativeServiceStub::CmdGetIfaceStats;
     opToInterfaceMap_[NETSYS_GET_ALL_STATS_INFO] = &NetsysNativeServiceStub::CmdGetAllStatsInfo;
-    opToInterfaceMap_[NETSYS_GET_NAME_ADDED] = &NetsysNativeServiceStub::CmdAddIfName;
-    opToInterfaceMap_[NETSYS_GET_NAME_REMOVED] = &NetsysNativeServiceStub::CmdRemoveIfName;
+    opToInterfaceMap_[NETSYS_ADD_IF_NAME] = &NetsysNativeServiceStub::CmdAddIfName;
+    opToInterfaceMap_[NETSYS_REMOVED_IF_NAME] = &NetsysNativeServiceStub::CmdRemoveIfName;
 
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
