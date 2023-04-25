@@ -1408,5 +1408,36 @@ int32_t NetsysNativeServiceProxy::GetNetworkSharingTraffic(const std::string &do
     NETNATIVE_LOGI("NetsysNativeServiceProxy GetNetworkSharingTraffic ret=%{public}d", ret);
     return ret;
 }
+
+int32_t NetsysNativeServiceProxy::GetTotalStats(uint64_t &stats, uint32_t type)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceProxy::GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceProxy::GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceProxy::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceProxy::AddIfName(const std::string &ifName)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceProxy::RemoveIfName(const std::string &ifName)
+{
+    return ERR_NONE;
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

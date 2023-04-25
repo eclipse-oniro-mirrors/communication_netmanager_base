@@ -24,6 +24,7 @@
 #include "iremote_broker.h"
 #include "route_type.h"
 #include "network_sharing.h"
+#include "net_stats_info.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -88,6 +89,12 @@ public:
         NETSYS_START_DNS_PROXY_LISTEN,
         NETSYS_STOP_DNS_PROXY_LISTEN,
         NETSYS_GET_SHARING_NETWORK_TRAFFIC,
+        NETSYS_GET_TOTAL_STATS,
+        NETSYS_GET_UID_STATS,
+        NETSYS_GET_IFACE_STATS,
+        NETSYS_GET_ALL_STATS_INFO,
+        NETSYS_GET_NAME_ADDED,
+        NETSYS_GET_NAME_REMOVED,
     };
 
     virtual int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
@@ -159,6 +166,12 @@ public:
     virtual int32_t StopDnsProxyListen() = 0;
     virtual int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
                                              NetworkSharingTraffic &traffic) = 0;
+    virtual int32_t GetTotalStats(uint64_t &stats, uint32_t type) = 0;
+    virtual int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) = 0;
+    virtual int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) = 0;
+    virtual int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
+    virtual int32_t AddIfName(const std::string &ifName) = 0;
+    virtual int32_t RemoveIfName(const std::string &ifName) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

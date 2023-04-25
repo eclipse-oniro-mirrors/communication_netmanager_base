@@ -595,5 +595,37 @@ int32_t NetsysControllerServiceImpl::FirewallSetUidRule(uint32_t chain, uint32_t
                  chain, uid, firewallRule);
     return netsysClient_.FirewallSetUidRule(chain, uid, firewallRule);
 }
+
+
+int32_t NetsysControllerServiceImpl::GetTotalStats(uint64_t &stats, uint32_t type)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysControllerServiceImpl::GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysControllerServiceImpl::GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysControllerServiceImpl::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysControllerServiceImpl::AddIfName(const std::string &ifName)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysControllerServiceImpl::RemoveIfName(const std::string &ifName)
+{
+    return ERR_NONE;
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

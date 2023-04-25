@@ -27,6 +27,7 @@
 #include "netsys_controller_callback.h"
 #include "netsys_controller_define.h"
 #include "network_sharing.h"
+#include "net_stats_info.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -644,6 +645,59 @@ public:
      * @return Return the return value of the netsys interface call.
      */
     virtual int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) = 0;
+
+    /**
+     * Get total traffic
+     *
+     * @param stats stats
+     * @param type type
+     * @return returns the total traffic of the specified type
+     */
+    virtual int32_t GetTotalStats(uint64_t &stats, uint32_t type) = 0;
+
+    /**
+     * Get uid traffic
+     *
+     * @param stats stats
+     * @param type type
+     * @param uid uid
+     * @return returns the traffic of the uid
+     */
+    virtual int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) = 0;
+
+    /**
+     * Get Iface traffic
+     *
+     * @param stats stats
+     * @param type type
+     * @param interfaceName interfaceName
+     * @return returns the traffic of the Iface
+     */
+    virtual int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) = 0;
+
+    /**
+     * Get all stats info
+     *
+     * @param stats stats
+     * @return returns the all info of the stats
+     */
+    virtual int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
+
+    /**
+     * Add IfName info
+     *
+     * @param ifName ifName
+     * @return value the return value of the netsys interface call
+     */
+    virtual int32_t AddIfName(const std::string &ifName) = 0;
+
+    /**
+     * Removed IfName info
+     *
+     * @param ifName ifName
+     * @return value the return value of the netsys interface call
+     */
+    virtual int32_t RemoveIfName(const std::string &ifName) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

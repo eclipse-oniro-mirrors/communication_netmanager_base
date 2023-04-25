@@ -79,6 +79,13 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_START_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStartDnsProxyListen;
     opToInterfaceMap_[NETSYS_STOP_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStopDnsProxyListen;
     opToInterfaceMap_[NETSYS_GET_SHARING_NETWORK_TRAFFIC] = &NetsysNativeServiceStub::CmdGetNetworkSharingTraffic;
+    opToInterfaceMap_[NETSYS_GET_TOTAL_STATS] = &NetsysNativeServiceStub::CmdGetTotalStats;
+    opToInterfaceMap_[NETSYS_GET_UID_STATS] = &NetsysNativeServiceStub::CmdGetUidStats;
+    opToInterfaceMap_[NETSYS_GET_IFACE_STATS] = &NetsysNativeServiceStub::CmdGetIfaceStats;
+    opToInterfaceMap_[NETSYS_GET_ALL_STATS_INFO] = &NetsysNativeServiceStub::CmdGetAllStatsInfo;
+    opToInterfaceMap_[NETSYS_GET_NAME_ADDED] = &NetsysNativeServiceStub::CmdAddIfName;
+    opToInterfaceMap_[NETSYS_GET_NAME_REMOVED] = &NetsysNativeServiceStub::CmdRemoveIfName;
+
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
     uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
@@ -900,5 +907,36 @@ int32_t NetsysNativeServiceStub::CmdGetNetworkSharingTraffic(MessageParcel &data
 
     return result;
 }
+
+int32_t NetsysNativeServiceStub::CmdGetTotalStats(MessageParcel &data, MessageParcel &reply)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceStub::CmdGetUidStats(MessageParcel &data, MessageParcel &reply)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceStub::CmdGetIfaceStats(MessageParcel &data, MessageParcel &reply)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, MessageParcel &reply)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceStub::CmdAddIfName(MessageParcel &data, MessageParcel &reply)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceStub::CmdRemoveIfName(MessageParcel &data, MessageParcel &reply)
+{
+    return ERR_NONE;
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

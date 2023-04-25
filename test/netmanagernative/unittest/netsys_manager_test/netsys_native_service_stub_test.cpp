@@ -368,6 +368,36 @@ public:
     {
         return 0;
     }
+
+    int32_t GetTotalStats(uint64_t &stats, uint32_t type) override
+    {
+        return 0;
+    }
+
+    int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) override
+    {
+        return 0;
+    }
+
+    int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) override
+    {
+        return 0;
+    }
+
+    int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override
+    {
+        return 0;
+    }
+
+    int32_t AddIfName(const std::string &ifName) override
+    {
+        return 0;
+    }
+
+    int32_t RemoveIfName(const std::string &ifName) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {

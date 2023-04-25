@@ -1092,5 +1092,36 @@ int32_t NetsysNativeClient::FirewallSetUidRule(uint32_t chain, uint32_t uid, uin
     }
     return proxy->FirewallSetUidRule(chain, uid, firewallRule);
 }
+
+int32_t NetsysNativeClient::GetTotalStats(uint64_t &stats, uint32_t type)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeClient::GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeClient::GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeClient::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeClient::AddIfName(const std::string &ifName)
+{
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeClient::RemoveIfName(const std::string &ifName)
+{
+    return ERR_NONE;
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
