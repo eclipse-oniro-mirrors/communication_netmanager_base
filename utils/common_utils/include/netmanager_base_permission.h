@@ -21,12 +21,12 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace Permission {
-static const std::string GET_NETWORK_INFO = "ohos.permission.GET_NETWORK_INFO";
-static const std::string INTERNET = "ohos.permission.INTERNET";
-static const std::string CONNECTIVITY_INTERNAL = "ohos.permission.CONNECTIVITY_INTERNAL";
-static const std::string GET_NETWORK_POLICY = "ohos.permission.GET_NETWORK_POLICY";
-static const std::string SET_NETWORK_POLICY = "ohos.permission.SET_NETWORK_POLICY";
-static const std::string GET_NETSTATS_SUMMARY = "ohos.permission.GET_NETSTATS_SUMMARY";
+static constexpr const char *GET_NETWORK_INFO = "ohos.permission.GET_NETWORK_INFO";
+static constexpr const char *INTERNET = "ohos.permission.INTERNET";
+static constexpr const char *CONNECTIVITY_INTERNAL = "ohos.permission.CONNECTIVITY_INTERNAL";
+static constexpr const char *GET_NETWORK_POLICY = "ohos.permission.GET_NETWORK_POLICY";
+static constexpr const char *SET_NETWORK_POLICY = "ohos.permission.SET_NETWORK_POLICY";
+static constexpr const char *GET_NETSTATS_SUMMARY = "ohos.permission.GET_NETSTATS_SUMMARY";
 } // namespace Permission
 
 class NetManagerPermission {

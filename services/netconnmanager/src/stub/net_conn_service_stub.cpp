@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "netmanager_base_permission.h"
 #include "net_conn_constants.h"
 #include "net_conn_service_stub.h"
 #include "net_conn_types.h"
@@ -26,39 +27,50 @@ static constexpr uint32_t MAX_NET_CAP_NUM = 32;
 
 NetConnServiceStub::NetConnServiceStub()
 {
-    memberFuncMap_[CMD_NM_SYSTEM_READY] = &NetConnServiceStub::OnSystemReady;
-    memberFuncMap_[CMD_NM_REGISTER_NET_CONN_CALLBACK] = &NetConnServiceStub::OnRegisterNetConnCallback;
-    memberFuncMap_[CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER] =
-        &NetConnServiceStub::OnRegisterNetConnCallbackBySpecifier;
-    memberFuncMap_[CMD_NM_UNREGISTER_NET_CONN_CALLBACK] = &NetConnServiceStub::OnUnregisterNetConnCallback;
-    memberFuncMap_[CMD_NM_UPDATE_NET_STATE_FOR_TEST] = &NetConnServiceStub::OnUpdateNetStateForTest;
-    memberFuncMap_[CMD_NM_REG_NET_SUPPLIER] = &NetConnServiceStub::OnRegisterNetSupplier;
-    memberFuncMap_[CMD_NM_UNREG_NETWORK] = &NetConnServiceStub::OnUnregisterNetSupplier;
-    memberFuncMap_[CMD_NM_SET_NET_SUPPLIER_INFO] = &NetConnServiceStub::OnUpdateNetSupplierInfo;
-    memberFuncMap_[CMD_NM_SET_NET_LINK_INFO] = &NetConnServiceStub::OnUpdateNetLinkInfo;
-    memberFuncMap_[CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK] = &NetConnServiceStub::OnRegisterNetDetectionCallback;
-    memberFuncMap_[CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK] =
-        &NetConnServiceStub::OnUnRegisterNetDetectionCallback;
-    memberFuncMap_[CMD_NM_NET_DETECTION] = &NetConnServiceStub::OnNetDetection;
-    memberFuncMap_[CMD_NM_GET_IFACE_NAMES] = &NetConnServiceStub::OnGetIfaceNames;
-    memberFuncMap_[CMD_NM_GET_IFACENAME_BY_TYPE] = &NetConnServiceStub::OnGetIfaceNameByType;
-    memberFuncMap_[CMD_NM_GETDEFAULTNETWORK] = &NetConnServiceStub::OnGetDefaultNet;
-    memberFuncMap_[CMD_NM_HASDEFAULTNET] = &NetConnServiceStub::OnHasDefaultNet;
-    memberFuncMap_[CMD_NM_GET_SPECIFIC_NET] = &NetConnServiceStub::OnGetSpecificNet;
-    memberFuncMap_[CMD_NM_GET_ALL_NETS] = &NetConnServiceStub::OnGetAllNets;
-    memberFuncMap_[CMD_NM_GET_SPECIFIC_UID_NET] = &NetConnServiceStub::OnGetSpecificUidNet;
-    memberFuncMap_[CMD_NM_GET_CONNECTION_PROPERTIES] = &NetConnServiceStub::OnGetConnectionProperties;
-    memberFuncMap_[CMD_NM_GET_NET_CAPABILITIES] = &NetConnServiceStub::OnGetNetCapabilities;
-    memberFuncMap_[CMD_NM_GET_ADDRESSES_BY_NAME] = &NetConnServiceStub::OnGetAddressesByName;
-    memberFuncMap_[CMD_NM_GET_ADDRESS_BY_NAME] = &NetConnServiceStub::OnGetAddressByName;
-    memberFuncMap_[CMD_NM_BIND_SOCKET] = &NetConnServiceStub::OnBindSocket;
-    memberFuncMap_[CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK] = &NetConnServiceStub::OnRegisterNetSupplierCallback;
-    memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE] = &NetConnServiceStub::OnSetAirplaneMode;
-    memberFuncMap_[CMD_NM_IS_DEFAULT_NET_METERED] = &NetConnServiceStub::OnIsDefaultNetMetered;
-    memberFuncMap_[CMD_NM_SET_HTTP_PROXY] = &NetConnServiceStub::OnSetGlobalHttpProxy;
-    memberFuncMap_[CMD_NM_GET_HTTP_PROXY] = &NetConnServiceStub::OnGetGlobalHttpProxy;
-    memberFuncMap_[CMD_NM_GET_NET_ID_BY_IDENTIFIER] = &NetConnServiceStub::OnGetNetIdByIdentifier;
-    memberFuncMap_[CMD_NM_SET_APP_NET] = &NetConnServiceStub::OnSetAppNet;
+    memberFuncMap_[CMD_NM_SYSTEM_READY] = {&NetConnServiceStub::OnSystemReady, {}};
+    memberFuncMap_[CMD_NM_REGISTER_NET_CONN_CALLBACK] = {&NetConnServiceStub::OnRegisterNetConnCallback,
+                                                         {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER] = {
+        &NetConnServiceStub::OnRegisterNetConnCallbackBySpecifier, {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[CMD_NM_UNREGISTER_NET_CONN_CALLBACK] = {&NetConnServiceStub::OnUnregisterNetConnCallback,
+                                                           {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[CMD_NM_UPDATE_NET_STATE_FOR_TEST] = {&NetConnServiceStub::OnUpdateNetStateForTest, {}};
+    memberFuncMap_[CMD_NM_REG_NET_SUPPLIER] = {&NetConnServiceStub::OnRegisterNetSupplier, {}};
+    memberFuncMap_[CMD_NM_UNREG_NETWORK] = {&NetConnServiceStub::OnUnregisterNetSupplier, {}};
+    memberFuncMap_[CMD_NM_SET_NET_SUPPLIER_INFO] = {&NetConnServiceStub::OnUpdateNetSupplierInfo, {}};
+    memberFuncMap_[CMD_NM_SET_NET_LINK_INFO] = {&NetConnServiceStub::OnUpdateNetLinkInfo, {}};
+    memberFuncMap_[CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK] = {&NetConnServiceStub::OnRegisterNetDetectionCallback,
+                                                                  {}};
+    memberFuncMap_[CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK] = {
+        &NetConnServiceStub::OnUnRegisterNetDetectionCallback, {}};
+    memberFuncMap_[CMD_NM_NET_DETECTION] = {&NetConnServiceStub::OnNetDetection,
+                                            {Permission::GET_NETWORK_INFO, Permission::INTERNET}};
+    memberFuncMap_[CMD_NM_GET_IFACE_NAMES] = {&NetConnServiceStub::OnGetIfaceNames, {}};
+    memberFuncMap_[CMD_NM_GET_IFACENAME_BY_TYPE] = {&NetConnServiceStub::OnGetIfaceNameByType, {}};
+    memberFuncMap_[CMD_NM_GETDEFAULTNETWORK] = {&NetConnServiceStub::OnGetDefaultNet, {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[CMD_NM_HASDEFAULTNET] = {&NetConnServiceStub::OnHasDefaultNet, {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[CMD_NM_GET_SPECIFIC_NET] = {&NetConnServiceStub::OnGetSpecificNet, {}};
+    memberFuncMap_[CMD_NM_GET_ALL_NETS] = {&NetConnServiceStub::OnGetAllNets, {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[CMD_NM_GET_SPECIFIC_UID_NET] = {&NetConnServiceStub::OnGetSpecificUidNet, {}};
+    memberFuncMap_[CMD_NM_GET_CONNECTION_PROPERTIES] = {&NetConnServiceStub::OnGetConnectionProperties,
+                                                        {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[CMD_NM_GET_NET_CAPABILITIES] = {&NetConnServiceStub::OnGetNetCapabilities,
+                                                   {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[CMD_NM_GET_ADDRESSES_BY_NAME] = {&NetConnServiceStub::OnGetAddressesByName,
+                                                    {Permission::INTERNET}};
+    memberFuncMap_[CMD_NM_GET_ADDRESS_BY_NAME] = {&NetConnServiceStub::OnGetAddressByName,
+                                                  {Permission::INTERNET}};
+    memberFuncMap_[CMD_NM_BIND_SOCKET] = {&NetConnServiceStub::OnBindSocket, {}};
+    memberFuncMap_[CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK] = {&NetConnServiceStub::OnRegisterNetSupplierCallback, {}};
+    memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE] = {&NetConnServiceStub::OnSetAirplaneMode,
+                                                {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_IS_DEFAULT_NET_METERED] = {&NetConnServiceStub::OnIsDefaultNetMetered,
+                                                     {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[CMD_NM_SET_HTTP_PROXY] = {&NetConnServiceStub::OnSetGlobalHttpProxy,
+                                             {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_GET_HTTP_PROXY] = {&NetConnServiceStub::OnGetGlobalHttpProxy, {}};
+    memberFuncMap_[CMD_NM_GET_NET_ID_BY_IDENTIFIER] = {&NetConnServiceStub::OnGetNetIdByIdentifier, {}};
+    memberFuncMap_[CMD_NM_SET_APP_NET] = {&NetConnServiceStub::OnSetAppNet, {Permission::INTERNET}};
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -86,15 +98,47 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
     }
 
     auto itFunc = memberFuncMap_.find(code);
-    if (itFunc != memberFuncMap_.end()) {
-        auto requestFunc = itFunc->second;
-        if (requestFunc != nullptr) {
-            return (this->*requestFunc)(data, reply);
-        }
+    if (itFunc == memberFuncMap_.end()) {
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+    auto requestFunc = itFunc->second.first;
+    if (requestFunc == nullptr) {
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
 
+    if (code != CMD_NM_GETDEFAULTNETWORK && CheckPermission(itFunc->second.second)) {
+        return (this->*requestFunc)(data, reply);
+    }
+    if (code == CMD_NM_GETDEFAULTNETWORK && CheckPermissionWithCache(itFunc->second.second)) {
+        return (this->*requestFunc)(data, reply);
+    }
+
+    if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
+        return IPC_STUB_WRITE_PARCEL_ERR;
+    }
     NETMGR_LOG_D("stub default case, need check");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+}
+
+bool NetConnServiceStub::CheckPermission(const std::set<std::string> &permissions)
+{
+    for (const auto &permission : permissions) {
+        NETMGR_LOG_I("liyufan stub default permission, need check %{public}s",permission.c_str());
+        if (!NetManagerPermission::CheckPermission(permission)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool NetConnServiceStub::CheckPermissionWithCache(const std::set<std::string> &permissions)
+{
+    for (const auto &permission : permissions) {
+        if (!NetManagerPermission::CheckPermissionWithCache(permission)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 int32_t NetConnServiceStub::OnSystemReady(MessageParcel &data, MessageParcel &reply)

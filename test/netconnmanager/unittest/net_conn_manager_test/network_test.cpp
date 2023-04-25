@@ -25,7 +25,6 @@ namespace {
 using namespace testing::ext;
 constexpr int32_t TEST_NETID = 12;
 constexpr uint32_t TEST_SUPPLIERID = 214;
-constexpr const char *TEST_RUNNER_CREATE = "RUNNER_CREATE";
 class NetDetectionCallbackTest : public NetDetectionCallbackStub {
 public:
     inline int32_t OnNetDetectionResultChanged(NetDetectionResultCode detectionResult,
@@ -52,10 +51,8 @@ void NetworkTest::SetUpTestCase()
         std::cout << "supplierId:" << supplierId;
         std::cout << "IfValid:" << ifValid << std::endl;
     };
-    auto runner = AppExecFwk::EventRunner::Create(TEST_RUNNER_CREATE);
-    auto eventHandler = std::make_shared<NetConnEventHandler>(runner);
     instance_ = std::make_shared<Network>(TEST_NETID, TEST_SUPPLIERID, detectionHandler, NetBearType::BEARER_ETHERNET,
-                                          eventHandler);
+                                          nullptr);
 }
 
 void NetworkTest::TearDownTestCase() {}
