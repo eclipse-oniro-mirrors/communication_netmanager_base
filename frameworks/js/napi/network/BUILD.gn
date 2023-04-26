@@ -51,11 +51,7 @@ ohos_shared_library("network") {
     defines = [ "HAS_TELEPHONY=0" ]
   }
 
-  external_deps = [
-    "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
-  ]
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 
   relative_install_dir = "module"
   part_name = "netmanager_base"
