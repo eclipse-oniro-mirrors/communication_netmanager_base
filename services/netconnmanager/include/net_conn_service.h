@@ -240,7 +240,7 @@ public:
      * Get net id by identifier
      *
      * @param ident Net identifier
-     * @param netIdList output param, the net id list
+     * @param netId output param, the net id
      * @return NETMANAGER_SUCCESS if OK, ERR_NO_NET_IDENT if ident is null string
      */
     int32_t GetNetIdByIdentifier(const std::string &ident, int32_t &netId) override;
