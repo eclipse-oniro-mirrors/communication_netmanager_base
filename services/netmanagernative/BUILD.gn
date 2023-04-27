@@ -84,9 +84,6 @@ ohos_shared_library("netsys_native_manager") {
     "$FWMARK_CLIENT_DIR:fwmark_client",
     "$NETMANAGERNATIVE_ROOT/netsys_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-    "$THIRD_PARTY_ROOT/iptables:iptables",
-    "$THIRD_PARTY_ROOT/iptables:iptables-restore",
-    "$THIRD_PARTY_ROOT/iptables:iptables-save",
   ]
 
   if (build_selinux) {
@@ -94,12 +91,10 @@ ohos_shared_library("netsys_native_manager") {
   }
 
   external_deps = [
-    "c_utils:utils",
     "eventhandler:libeventhandler",
     "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
   ]
 
   defines = [

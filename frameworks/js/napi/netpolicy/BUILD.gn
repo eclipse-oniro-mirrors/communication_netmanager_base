@@ -55,12 +55,9 @@ ohos_shared_library("policy") {
   deps = [
     "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if",
     "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
-    "//foundation/arkui/napi/:ace_napi",
-    "//third_party/libuv:uv",
   ]
 
   external_deps = [
-    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]
