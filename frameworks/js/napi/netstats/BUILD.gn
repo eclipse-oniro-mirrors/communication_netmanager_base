@@ -42,15 +42,12 @@ ohos_shared_library("statistics") {
   configs = [ ":statistics_config" ]
 
   deps = [
-    "$ARKUI_ROOT/napi:ace_napi",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
-    "$THIRD_PARTY_ROOT/libuv:uv",
   ]
 
   external_deps = [
-    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]

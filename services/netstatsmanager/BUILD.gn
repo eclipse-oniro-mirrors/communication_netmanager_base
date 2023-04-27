@@ -51,19 +51,15 @@ ohos_shared_library("net_stats_manager") {
   ]
 
   deps = [
-    "$HILOG_ROOT/interfaces/native/innerkits:libhilog",
     "$INNERKITS_ROOT/netstatsclient:net_stats_parcel",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$NETSYSNATIVE_SOURCE_DIR:netsys_native_manager",
     "$THIRD_PARTY_ROOT/sqlite:sqlite",
   ]
 
   external_deps = [
     "ability_base:want",
-    "c_utils:utils",
-    "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
     "hitrace_native:hitrace_meter",
     "ipc:ipc_core",
