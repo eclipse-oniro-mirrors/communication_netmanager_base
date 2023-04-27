@@ -60,15 +60,15 @@ bpf_map_def SEC("maps") app_uid_if_stats_map = {
 };
 
 SEC("cgroup_skb/uid/ingress")
-int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
+void bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
 {
-    return 1;
+    return;
 }
 
 SEC("cgroup_skb/uid/egress")
-int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
+void bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
 {
-    return 1;
+    return;
 }
 
 char g_license[] SEC("license") = "GPL";
