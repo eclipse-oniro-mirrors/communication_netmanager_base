@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -696,22 +696,6 @@ public:
      * @return returns the all info of the stats
      */
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
-
-    /**
-     * Add IfName info
-     *
-     * @param ifName ifName
-     * @return value the return value of the netsys interface call
-     */
-    int32_t AddIfName(const std::string &ifName);
-
-    /**
-     * Removed IfName info
-     *
-     * @param ifName ifName
-     * @return value the return value of the netsys interface call
-     */
-    int32_t RemoveIfName(const std::string &ifName);
 
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);

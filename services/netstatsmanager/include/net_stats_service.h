@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@
 #include "net_stats_callback.h"
 #include "net_stats_listener.h"
 #include "net_stats_service_stub.h"
-#include "net_stats_wrapper.h"
 #include "netlink_manager.h"
 
 namespace OHOS {
@@ -32,24 +31,6 @@ class NetStatsService : public SystemAbility,
                         public std::enable_shared_from_this<NetStatsService> {
     DECLARE_DELAYED_SINGLETON(NetStatsService)
     DECLARE_SYSTEM_ABILITY(NetStatsService)
-
-    class IfacelistNotifyCallback : public NetsysNative::INotifyCallback {
-    public:
-        IfacelistNotifyCallback() = default;
-        sptr<IRemoteObject> AsObject() override;
-        int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
-                                          int scope) override;
-        int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags,
-                                          int scope) override;
-        int32_t OnInterfaceAdded(const std::string &ifName) override;
-        int32_t OnInterfaceRemoved(const std::string &ifName) override;
-        int32_t OnInterfaceChanged(const std::string &ifName, bool up) override;
-        int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) override;
-        int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
-                               const std::string &ifName) override;
-        int32_t OnDhcpSuccess(sptr<NetsysNative::DhcpResultParcel> &dhcpResult) override;
-        int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override;
-    };
 
 public:
     void OnStart() override;
@@ -90,7 +71,6 @@ private:
     ServiceRunningState state_;
     std::shared_ptr<NetStatsCallback> netStatsCallback_ = nullptr;
     std::shared_ptr<NetStatsListener> subscriber_ = nullptr;
-    std::unique_ptr<NetStatsWrapper> netStatsWrapper_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

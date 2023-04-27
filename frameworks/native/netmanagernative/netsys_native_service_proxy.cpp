@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1411,31 +1411,134 @@ int32_t NetsysNativeServiceProxy::GetNetworkSharingTraffic(const std::string &do
 
 int32_t NetsysNativeServiceProxy::GetTotalStats(uint64_t &stats, uint32_t type)
 {
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint8(type)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (ERR_NONE != Remote()->SendRequest(INetsysService::NETSYS_GET_TOTAL_STATS, data, reply, option)) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("fail to GetTotalStats ret= %{public}d", ret);
+        return ret;
+    }
+    if (!reply.ReadUint64(stats)) {
+        NETNATIVE_LOGE("get stats falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+
     return ERR_NONE;
 }
 
 int32_t NetsysNativeServiceProxy::GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid)
 {
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(type)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(uid)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (ERR_NONE != Remote()->SendRequest(INetsysService::NETSYS_GET_UID_STATS, data, reply, option)) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("fail to GetUidStats ret= %{public}d", ret);
+        return ret;
+    }
+    if (!reply.ReadUint64(stats)) {
+        NETNATIVE_LOGE("get stats falil");
+        return ERR_FLATTEN_OBJECT;
+    }
     return ERR_NONE;
 }
 
 int32_t NetsysNativeServiceProxy::GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName)
 {
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(type)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (ERR_NONE != Remote()->SendRequest(INetsysService::NETSYS_GET_IFACE_STATS, data, reply, option)) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("fail to GetIfaceStats ret= %{public}d", ret);
+        return ret;
+    }
+    if (!reply.ReadUint64(stats)) {
+        NETNATIVE_LOGE("get stats falil");
+        return ERR_FLATTEN_OBJECT;
+    }
     return ERR_NONE;
 }
 
 int32_t NetsysNativeServiceProxy::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
-    return ERR_NONE;
-}
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (ERR_NONE != Remote()->SendRequest(INetsysService::NETSYS_GET_ALL_STATS_INFO, data, reply, option)) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
 
-int32_t NetsysNativeServiceProxy::AddIfName(const std::string &ifName)
-{
-    return ERR_NONE;
-}
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("fail to GetIfaceStats ret= %{public}d", ret);
+        return ret;
+    }
+    if (!OHOS::NetManagerStandard::NetStatsInfo::Unmarshalling(reply, stats)) {
+        NETNATIVE_LOGE("Read stats info failed");
+        return ERR_FLATTEN_OBJECT;
+    }
 
-int32_t NetsysNativeServiceProxy::RemoveIfName(const std::string &ifName)
-{
     return ERR_NONE;
 }
 

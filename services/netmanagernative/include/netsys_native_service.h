@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@
 #include "netlink_manager.h"
 #include "netsys_native_service_stub.h"
 #include "sharing_manager.h"
+#include "bpf_stats.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -116,8 +117,6 @@ public:
     int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) override;
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) override;
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
-    int32_t AddIfName(const std::string &ifName) override;
-    int32_t RemoveIfName(const std::string &ifName) override;
 
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
@@ -144,6 +143,7 @@ private:
     std::unique_ptr<OHOS::nmd::DhcpController> dhcpController_ = nullptr;
     std::unique_ptr<OHOS::nmd::FwmarkNetwork> fwmarkNetwork_ = nullptr;
     std::unique_ptr<OHOS::nmd::SharingManager> sharingManager_ = nullptr;
+    std::unique_ptr<OHOS::NetManagerStandard::NetsysBpfStats> bpfStats_ = nullptr;
 
     sptr<INotifyCallback> notifyCallback_ = nullptr;
 

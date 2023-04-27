@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,8 @@
 #include "net_stats_data_handler.h"
 #include "net_stats_database_defines.h"
 #include "net_stats_database_helper.h"
-#include "net_stats_wrapper.h"
 #include "netsys_controller.h"
+#include "bpf_stats.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -65,7 +65,7 @@ void NetStatsCached::GetIfaceStatsCached(std::vector<NetStatsInfo> &ifaceStatsIn
 void NetStatsCached::CacheUidStats()
 {
     std::vector<NetStatsInfo> statsInfos;
-    NetStatsWrapper::GetInstance().GetAllStatsInfo(statsInfos);
+    NetsysController::GetInstance().GetAllStatsInfo(statsInfos);
     if (statsInfos.empty()) {
         NETMGR_LOG_W("No stats need to save");
         return;
@@ -97,10 +97,14 @@ void NetStatsCached::CacheIfaceStats()
         }
         NetStatsInfo statsInfo;
         statsInfo.iface_ = ifName;
-        NetStatsWrapper::GetInstance().GetIfaceStats(statsInfo.rxBytes_, StatsType::STATS_TYPE_RX_BYTES, ifName);
-        NetStatsWrapper::GetInstance().GetIfaceStats(statsInfo.rxPackets_, StatsType::STATS_TYPE_RX_PACKETS, ifName);
-        NetStatsWrapper::GetInstance().GetIfaceStats(statsInfo.txBytes_, StatsType::STATS_TYPE_TX_BYTES, ifName);
-        NetStatsWrapper::GetInstance().GetIfaceStats(statsInfo.txPackets_, StatsType::STATS_TYPE_TX_PACKETS, ifName);
+        NetsysController::GetInstance().GetIfaceStats(statsInfo.rxBytes_,
+                                                      static_cast<uint32_t>(StatsType::STATS_TYPE_RX_BYTES), ifName);
+        NetsysController::GetInstance().GetIfaceStats(statsInfo.rxPackets_,
+                                                      static_cast<uint32_t>(StatsType::STATS_TYPE_RX_PACKETS), ifName);
+        NetsysController::GetInstance().GetIfaceStats(statsInfo.txBytes_,
+                                                      static_cast<uint32_t>(StatsType::STATS_TYPE_TX_BYTES), ifName);
+        NetsysController::GetInstance().GetIfaceStats(statsInfo.txPackets_,
+                                                      static_cast<uint32_t>(StatsType::STATS_TYPE_TX_PACKETS), ifName);
         auto findRet = lastIfaceStatsMap_.find(ifName);
         if (findRet == lastIfaceStatsMap_.end()) {
             stats_.PushIfaceStats(statsInfo);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -596,35 +596,28 @@ int32_t NetsysControllerServiceImpl::FirewallSetUidRule(uint32_t chain, uint32_t
     return netsysClient_.FirewallSetUidRule(chain, uid, firewallRule);
 }
 
-
 int32_t NetsysControllerServiceImpl::GetTotalStats(uint64_t &stats, uint32_t type)
 {
-    return ERR_NONE;
+    NETMGR_LOG_D("NetsysControllerServiceImpl::GetTotalStats: type=%{public}d", type);
+    return netsysClient_.GetTotalStats(stats, type);
 }
 
 int32_t NetsysControllerServiceImpl::GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid)
 {
-    return ERR_NONE;
+    NETMGR_LOG_D("NetsysControllerServiceImpl::GetUidStats: type=%{public}d uid=%{public}d", type, uid);
+    return netsysClient_.GetUidStats(stats, type, uid);
 }
 
 int32_t NetsysControllerServiceImpl::GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName)
 {
-    return ERR_NONE;
+    NETMGR_LOG_D("NetsysControllerServiceImpl::GetIfaceStats: type=%{public}d", type);
+    return netsysClient_.GetIfaceStats(stats, type, interfaceName);
 }
 
 int32_t NetsysControllerServiceImpl::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
-    return ERR_NONE;
-}
-
-int32_t NetsysControllerServiceImpl::AddIfName(const std::string &ifName)
-{
-    return ERR_NONE;
-}
-
-int32_t NetsysControllerServiceImpl::RemoveIfName(const std::string &ifName)
-{
-    return ERR_NONE;
+    NETMGR_LOG_D("NetsysControllerServiceImpl::GetAllStatsInfo");
+    return netsysClient_.GetAllStatsInfo(stats);
 }
 
 } // namespace NetManagerStandard

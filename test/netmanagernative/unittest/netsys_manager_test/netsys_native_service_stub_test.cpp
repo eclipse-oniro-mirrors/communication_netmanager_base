@@ -388,16 +388,6 @@ public:
     {
         return 0;
     }
-
-    int32_t AddIfName(const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t RemoveIfName(const std::string &ifName) override
-    {
-        return 0;
-    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {

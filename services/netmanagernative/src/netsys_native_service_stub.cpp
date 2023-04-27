@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,8 +83,6 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_GET_UID_STATS] = &NetsysNativeServiceStub::CmdGetUidStats;
     opToInterfaceMap_[NETSYS_GET_IFACE_STATS] = &NetsysNativeServiceStub::CmdGetIfaceStats;
     opToInterfaceMap_[NETSYS_GET_ALL_STATS_INFO] = &NetsysNativeServiceStub::CmdGetAllStatsInfo;
-    opToInterfaceMap_[NETSYS_ADD_IF_NAME] = &NetsysNativeServiceStub::CmdAddIfName;
-    opToInterfaceMap_[NETSYS_REMOVED_IF_NAME] = &NetsysNativeServiceStub::CmdRemoveIfName;
 
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
@@ -910,32 +908,67 @@ int32_t NetsysNativeServiceStub::CmdGetNetworkSharingTraffic(MessageParcel &data
 
 int32_t NetsysNativeServiceStub::CmdGetTotalStats(MessageParcel &data, MessageParcel &reply)
 {
-    return ERR_NONE;
+    uint32_t type = data.ReadUint32();
+    uint64_t stats = 0;
+    int32_t result = GetTotalStats(stats, type);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteUint64(stats)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdGetUidStats(MessageParcel &data, MessageParcel &reply)
 {
-    return ERR_NONE;
+    uint32_t type = data.ReadUint32();
+    uint32_t uId = data.ReadUint32();
+    uint64_t stats = 0;
+    int32_t result = GetUidStats(stats, type, uId);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteUint64(stats)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdGetIfaceStats(MessageParcel &data, MessageParcel &reply)
 {
-    return ERR_NONE;
+    uint32_t type = data.ReadUint32();
+    std::string interfaceName = data.ReadString();
+    uint64_t stats = 0;
+    int32_t result = GetIfaceStats(stats, type, interfaceName);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteUint64(stats)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
 }
 
 int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, MessageParcel &reply)
 {
-    return ERR_NONE;
-}
-
-int32_t NetsysNativeServiceStub::CmdAddIfName(MessageParcel &data, MessageParcel &reply)
-{
-    return ERR_NONE;
-}
-
-int32_t NetsysNativeServiceStub::CmdRemoveIfName(MessageParcel &data, MessageParcel &reply)
-{
-    return ERR_NONE;
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
+    int32_t result = GetAllStatsInfo(stats);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!OHOS::NetManagerStandard::NetStatsInfo::Marshalling(reply, stats)) {
+        NETNATIVE_LOGE("Read stats info failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
 }
 
 } // namespace NetsysNative
