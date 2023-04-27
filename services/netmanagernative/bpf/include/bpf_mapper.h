@@ -40,7 +40,14 @@ public:
 
     static int GetFirstKey(const int mapFd, Key &key)
     {
-        return 0;
+        bpf_attr bpfAttr{};
+        if (memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr)) != EOK) {
+            return -1;
+        }
+        bpfAttr.map_fd = BpfFdToU32(mapFd);
+        bpfAttr.key = 0;
+        bpfAttr.next_key = BpfMapKeyToU64(key);
+        return BpfSyscall(BPF_MAP_GET_NEXT_KEY, bpfAttr);
     }
 
     /**
@@ -53,7 +60,14 @@ public:
      */
     static int GetNextKey(const int mapFd, const Key &key, Key &nextKey)
     {
-        return 0;
+        bpf_attr bpfAttr{};
+        if (memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr)) != EOK) {
+            return -1;
+        }
+        bpfAttr.map_fd = BpfFdToU32(mapFd);
+        bpfAttr.key = BpfMapKeyToU64(key);
+        bpfAttr.next_key = BpfMapKeyToU64(nextKey);
+        return BpfSyscall(BPF_MAP_GET_NEXT_KEY, bpfAttr);
     }
 
     /**
@@ -65,7 +79,7 @@ public:
      */
     static int BpfSyscall(int cmd, const bpf_attr &attr)
     {
-        return 0;
+        return static_cast<int>(syscall(__NR_bpf, cmd, &attr, sizeof(attr)));
     }
 
     /**
@@ -79,7 +93,15 @@ public:
      */
     static int UpdateElem(const int mapFd, const Key &key, const Value &value, uint64_t flags)
     {
-        return 0;
+        bpf_attr bpfAttr{};
+        if (memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr)) != EOK) {
+            return -1;
+        }
+        bpfAttr.map_fd = BpfFdToU32(mapFd);
+        bpfAttr.key = BpfMapKeyToU64(key);
+        bpfAttr.value = BpfMapValueToU64(value);
+        bpfAttr.flags = flags;
+        return BpfSyscall(BPF_MAP_UPDATE_ELEM, bpfAttr);
     }
 
     /**
@@ -92,7 +114,14 @@ public:
      */
     static int LookUpElem(const int mapFd, const Key &key, const Value &value)
     {
-        return 0;
+        bpf_attr bpfAttr{};
+        if (memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr)) != EOK) {
+            return -1;
+        }
+        bpfAttr.map_fd = BpfFdToU32(mapFd);
+        bpfAttr.key = BpfMapKeyToU64(key);
+        bpfAttr.value = BpfMapValueToU64(value);
+        return BpfSyscall(BPF_MAP_LOOKUP_ELEM, bpfAttr);
     }
 
     /**
@@ -104,7 +133,13 @@ public:
      */
     static int DeleteElem(const int mapFd, const Key &key)
     {
-        return 0;
+        bpf_attr bpfAttr{};
+        if (memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr)) != EOK) {
+            return -1;
+        }
+        bpfAttr.map_fd = BpfFdToU32(mapFd);
+        bpfAttr.key = BpfMapKeyToU64(key);
+        return BpfSyscall(BPF_MAP_DELETE_ELEM, bpfAttr);
     }
 
     /**
@@ -116,8 +151,15 @@ public:
      */
     static int BpfObjGet(const std::string &pathName, uint32_t fileFlags)
     {
-        return 0;
+        bpf_attr bpfAttr{};
+        if (memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr)) != EOK) {
+            return -1;
+        }
+        bpfAttr.pathname = BpfMapPathNameToU64(pathName);
+        bpfAttr.file_flags = fileFlags;
+        return BpfSyscall(BPF_OBJ_GET, bpfAttr);
     }
+
     /**
      * Get the Map Fd
      *
@@ -127,28 +169,28 @@ public:
      */
     static int GetMap(const std::string &pathName, uint32_t objFlags)
     {
-        return 0;
+        return BpfObjGet(pathName, objFlags);
     }
 
 private:
     static uint32_t BpfFdToU32(const int mapFd)
     {
-        return 0;
+        return static_cast<uint32_t>(mapFd);
     }
 
     static uint64_t BpfMapPathNameToU64(const std::string &pathName)
     {
-        return 0;
+        return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(pathName.c_str()));
     }
 
     static uint64_t BpfMapKeyToU64(const Key &key)
     {
-        return 0;
+        return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(&key));
     }
 
     static uint64_t BpfMapValueToU64(const Value &value)
     {
-        return 0;
+        return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(&value));
     }
 };
 
@@ -167,16 +209,6 @@ public:
         }
     }
 
-    int GetNextKeyFromStatsMap(const Key &curkey, Key &nextKey) const
-    {
-        return 0;
-    }
-
-    Value ReadValueFromMap(const Key key) const
-    {
-        return 0;
-    }
-
     /**
      * Is has map fd
      *
@@ -184,7 +216,7 @@ public:
      */
     [[nodiscard]] bool IsValid() const
     {
-        return 0;
+        return mapFd_ >= 0;
     }
 
     /**
@@ -195,6 +227,11 @@ public:
      */
     [[nodiscard]] int Read(const Key &key, Value &val) const
     {
+        Value value{};
+        if (BpfMapperImplement<Key, Value>::LookUpElem(mapFd_, key, value) < 0) {
+            return -1;
+        }
+        val = value;
         return 0;
     }
 
@@ -208,21 +245,33 @@ public:
      */
     [[nodiscard]] int Write(const Key &key, const Value &value, uint64_t flags) const
     {
-        return 0;
+        return BpfMapperImplement<Key, Value>::UpdateElem(mapFd_, key, value, flags);
     }
 
-    /**
-     * Get all keys
-     *
-     * @return key of list
-     */
     [[nodiscard]] std::vector<Key> GetAllKeys() const
     {
-        return 0;
+        Key key{};
+        if (BpfMapperImplement<Key, Value>::GetFirstKey(mapFd_, key) < 0) {
+            return {};
+        }
+        std::vector<Key> keys;
+        keys.emplace_back(key);
+
+        Key nextKey{};
+        while (BpfMapperImplement<Key, Value>::GetNextKey(mapFd_, key, nextKey) >= 0) {
+            key = nextKey;
+            keys.emplace_back(key);
+        }
+        return keys;
     }
 
     [[nodiscard]] int Clear(const std::vector<Key> &keys) const
     {
+        for (const auto &k : keys) {
+            if (Delete(k) < 0) {
+                return -1;
+            }
+        }
         return 0;
     }
 
@@ -234,7 +283,7 @@ public:
      */
     [[nodiscard]] int Delete(const Key &deleteKey) const
     {
-        return 0;
+        return BpfMapperImplement<Key, Value>::DeleteElem(mapFd_, deleteKey);
     }
 
 private:
