@@ -17,6 +17,7 @@
 #define INCLUDE_CONN_MANAGER_H
 
 #include <map>
+#include <mutex>
 #include <set>
 #include <vector>
 
@@ -181,6 +182,7 @@ private:
     bool needReinitRouteFlag_;
     std::map<int32_t, std::string> physicalInterfaceName_;
     std::map<int32_t, std::shared_ptr<NetsysNetwork>> networks_;
+    std::mutex interfaceNameMutex_;
     std::tuple<bool, std::shared_ptr<NetsysNetwork>> FindNetworkById(int32_t netId);
     int32_t GetNetworkForInterface(std::string &interfaceName);
     RouteManager::TableType GetTableType(int32_t netId);

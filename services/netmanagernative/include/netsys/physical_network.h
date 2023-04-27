@@ -16,6 +16,7 @@
 #ifndef INCLUDE_PHYSICAL_NETWORK_H
 #define INCLUDE_PHYSICAL_NETWORK_H
 
+#include <mutex>
 #include <string>
 
 #include "netsys_network.h"
@@ -69,6 +70,7 @@ private:
     int32_t RemoveInterface(std::string &interfaceName) override;
     bool isDefault_ = false;
     NetworkPermission permission_;
+    std::mutex physicalNetMutex_;
 };
 } // namespace nmd
 } // namespace OHOS
