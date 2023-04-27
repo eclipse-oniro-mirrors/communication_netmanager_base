@@ -99,8 +99,6 @@ public:
     int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) override;
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) override;
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
-    int32_t AddIfName(const std::string &ifName) override;
-    int32_t RemoveIfName(const std::string &ifName) override;
 
 private:
     static inline BrokerDelegator<NetsysNativeServiceProxy> delegator_;

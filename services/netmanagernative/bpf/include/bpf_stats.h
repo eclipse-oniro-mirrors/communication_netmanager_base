@@ -74,22 +74,6 @@ public:
      */
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
 
-    /**
-     * Add IfName info
-     *
-     * @param ifName ifName
-     * @return returns 0 for success other as failed.
-     */
-    int32_t AddIfName(const std::string &ifName);
-
-    /**
-     * Removed IfName info
-     *
-     * @param ifName ifName
-     * @return returns 0 for success other as failed.
-     */
-    int32_t RemoveIfName(const std::string &ifName);
-
 private:
     int32_t BpfGetAllStatsInfo(const BpfMapper<uint64_t, iface_name> &ifaceNameMap,
         const BpfMapper<stats_key, stats_value> &uidIfaceStatsMap, std::vector<NetStatsInfo> &stats);

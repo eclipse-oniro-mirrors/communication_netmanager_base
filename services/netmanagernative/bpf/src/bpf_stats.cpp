@@ -59,13 +59,4 @@ int32_t NetsysBpfStats::GetIfaceStats(uint64_t &stats, const StatsType statsType
     return 0;
 }
 
-int32_t NetsysBpfStats::AddIfName(const std::string &ifName)
-{
-    return 0;
-}
-int32_t NetsysBpfStats::RemoveIfName(const std::string &ifName)
-{
-    return 0;
-}
-
 } // namespace OHOS::NetManagerStandard

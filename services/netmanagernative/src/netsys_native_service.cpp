@@ -608,25 +608,5 @@ int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandar
     return bpfStats_->GetAllStatsInfo(stats);
 }
 
-int32_t NetsysNativeService::AddIfName(const std::string &ifName)
-{
-    if (bpfStats_ == nullptr) {
-        NETNATIVE_LOGE("bpfStats is null.");
-        return NetManagerStandard::NETMANAGER_ERROR;
-    }
-
-    return bpfStats_->AddIfName(ifName);
-}
-
-int32_t NetsysNativeService::RemoveIfName(const std::string &ifName)
-{
-    if (bpfStats_ == nullptr) {
-        NETNATIVE_LOGE("bpfStats is null.");
-        return NetManagerStandard::NETMANAGER_ERROR;
-    }
-
-    return bpfStats_->RemoveIfName(ifName);
-}
-
 } // namespace NetsysNative
 } // namespace OHOS

@@ -831,23 +831,5 @@ int32_t NetsysController::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::
     return netsysService_->GetAllStatsInfo(stats);
 }
 
-int32_t NetsysController::AddIfName(const std::string &ifName)
-{
-    if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("netsysService is null");
-        return NETSYS_NETSYSSERVICE_NULL;
-    }
-    return netsysService_->AddIfName(ifName);
-}
-
-int32_t NetsysController::RemoveIfName(const std::string &ifName)
-{
-    if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("netsysService is null");
-        return NETSYS_NETSYSSERVICE_NULL;
-    }
-    return netsysService_->RemoveIfName(ifName);
-}
-
 } // namespace NetManagerStandard
 } // namespace OHOS

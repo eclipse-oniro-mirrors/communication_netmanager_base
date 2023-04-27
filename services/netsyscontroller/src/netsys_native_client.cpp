@@ -1133,25 +1133,5 @@ int32_t NetsysNativeClient::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard
     return proxy->GetAllStatsInfo(stats);
 }
 
-int32_t NetsysNativeClient::AddIfName(const std::string &ifName)
-{
-    auto proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NETMANAGER_ERR_GET_PROXY_FAIL;
-    }
-    return proxy->AddIfName(ifName);
-}
-
-int32_t NetsysNativeClient::RemoveIfName(const std::string &ifName)
-{
-    auto proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NETMANAGER_ERR_GET_PROXY_FAIL;
-    }
-    return proxy->RemoveIfName(ifName);
-}
-
 } // namespace NetManagerStandard
 } // namespace OHOS

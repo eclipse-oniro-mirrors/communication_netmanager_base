@@ -668,22 +668,6 @@ public:
      */
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
 
-    /**
-     * Add IfName info
-     *
-     * @param ifName ifName
-     * @return value the return value of the netsys interface call
-     */
-    int32_t AddIfName(const std::string &ifName) override;
-
-    /**
-     * Removed IfName info
-     *
-     * @param ifName ifName
-     * @return value the return value of the netsys interface call
-     */
-    int32_t RemoveIfName(const std::string &ifName) override;
-
 private:
     MockNetsysNativeClient mockNetsysClient_;
     NetsysNativeClient netsysClient_;

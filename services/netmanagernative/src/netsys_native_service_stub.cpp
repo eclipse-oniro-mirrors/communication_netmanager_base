@@ -83,8 +83,6 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_GET_UID_STATS] = &NetsysNativeServiceStub::CmdGetUidStats;
     opToInterfaceMap_[NETSYS_GET_IFACE_STATS] = &NetsysNativeServiceStub::CmdGetIfaceStats;
     opToInterfaceMap_[NETSYS_GET_ALL_STATS_INFO] = &NetsysNativeServiceStub::CmdGetAllStatsInfo;
-    opToInterfaceMap_[NETSYS_ADD_IF_NAME] = &NetsysNativeServiceStub::CmdAddIfName;
-    opToInterfaceMap_[NETSYS_REMOVED_IF_NAME] = &NetsysNativeServiceStub::CmdRemoveIfName;
 
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
@@ -968,28 +966,6 @@ int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, Message
     }
     if (!OHOS::NetManagerStandard::NetStatsInfo::Marshalling(reply, stats)) {
         NETNATIVE_LOGE("Read stats info failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-    return result;
-}
-
-int32_t NetsysNativeServiceStub::CmdAddIfName(MessageParcel &data, MessageParcel &reply)
-{
-    std::string interfaceName = data.ReadString();
-    int32_t result = AddIfName(interfaceName);
-    if (!reply.WriteInt32(result)) {
-        NETNATIVE_LOGE("Write parcel failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-    return result;
-}
-
-int32_t NetsysNativeServiceStub::CmdRemoveIfName(MessageParcel &data, MessageParcel &reply)
-{
-    std::string interfaceName = data.ReadString();
-    int32_t result = RemoveIfName(interfaceName);
-    if (!reply.WriteInt32(result)) {
-        NETNATIVE_LOGE("Write parcel failed");
         return ERR_FLATTEN_OBJECT;
     }
     return result;

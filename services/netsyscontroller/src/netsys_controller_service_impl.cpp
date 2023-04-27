@@ -620,17 +620,5 @@ int32_t NetsysControllerServiceImpl::GetAllStatsInfo(std::vector<OHOS::NetManage
     return netsysClient_.GetAllStatsInfo(stats);
 }
 
-int32_t NetsysControllerServiceImpl::AddIfName(const std::string &ifName)
-{
-    NETMGR_LOG_D("NetsysControllerServiceImpl::AddIfName");
-    return netsysClient_.AddIfName(ifName);
-}
-
-int32_t NetsysControllerServiceImpl::RemoveIfName(const std::string &ifName)
-{
-    NETMGR_LOG_D("NetsysControllerServiceImpl::RemoveIfName");
-    return netsysClient_.RemoveIfName(ifName);
-}
-
 } // namespace NetManagerStandard
 } // namespace OHOS

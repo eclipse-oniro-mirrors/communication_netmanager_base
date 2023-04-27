@@ -682,22 +682,6 @@ public:
      * @return returns the all info of the stats
      */
     virtual int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
-
-    /**
-     * Add IfName info
-     *
-     * @param ifName ifName
-     * @return value the return value of the netsys interface call
-     */
-    virtual int32_t AddIfName(const std::string &ifName) = 0;
-
-    /**
-     * Removed IfName info
-     *
-     * @param ifName ifName
-     * @return value the return value of the netsys interface call
-     */
-    virtual int32_t RemoveIfName(const std::string &ifName) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

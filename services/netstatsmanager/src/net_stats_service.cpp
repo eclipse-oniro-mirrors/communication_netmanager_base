@@ -60,62 +60,6 @@ bool GetIfaceNamesFromManager(std::list<std::string> &ifaceNames)
 const bool REGISTER_LOCAL_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<NetStatsService>::GetInstance().get());
 
-sptr<IRemoteObject> NetStatsService::IfacelistNotifyCallback::AsObject()
-{
-    return nullptr;
-}
-
-int32_t NetStatsService::IfacelistNotifyCallback::OnInterfaceAddressUpdated(const std::string &addr,
-                                                                            const std::string &ifName, int flags,
-                                                                            int scope)
-{
-    return 0;
-}
-
-int32_t NetStatsService::IfacelistNotifyCallback::OnInterfaceAddressRemoved(const std::string &addr,
-                                                                            const std::string &ifName, int flags,
-                                                                            int scope)
-{
-    return 0;
-}
-
-int32_t NetStatsService::IfacelistNotifyCallback::OnInterfaceAdded(const std::string &ifName)
-{
-    return NetsysController::GetInstance().RemoveIfName(ifName);
-}
-
-int32_t NetStatsService::IfacelistNotifyCallback::OnInterfaceRemoved(const std::string &ifName)
-{
-    return NetsysController::GetInstance().AddIfName(ifName);
-}
-
-int32_t NetStatsService::IfacelistNotifyCallback::OnInterfaceChanged(const std::string &ifName, bool up)
-{
-    return 0;
-}
-
-int32_t NetStatsService::IfacelistNotifyCallback::OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
-{
-    return 0;
-}
-
-int32_t NetStatsService::IfacelistNotifyCallback::OnRouteChanged(bool updated, const std::string &route,
-                                                                 const std::string &gateway, const std::string &ifName)
-{
-    return 0;
-}
-
-int32_t NetStatsService::IfacelistNotifyCallback::OnDhcpSuccess(sptr<NetsysNative::DhcpResultParcel> &dhcpResult)
-{
-    return 0;
-}
-
-int32_t NetStatsService::IfacelistNotifyCallback::OnBandwidthReachedLimit(const std::string &limitName,
-                                                                          const std::string &iface)
-{
-    return 0;
-}
-
 NetStatsService::NetStatsService()
     : SystemAbility(COMM_NET_STATS_MANAGER_SYS_ABILITY_ID, true), registerToService_(false), state_(STATE_STOPPED)
 {
