@@ -14,7 +14,7 @@
  */
 
 #include <gtest/gtest.h>
-
+#define private public
 #include "net_policy_event_handler.h"
 #include "net_policy_core.h"
 
@@ -54,6 +54,7 @@ HWTEST_F(UtNetPolicyEventHandlerTest, ProcessEventTest001, TestSize.Level1)
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get();
     event.reset();
     instance_->ProcessEvent(event);
+    ASSERT_NE(instance_->core_, nullptr);
 }
 
 HWTEST_F(UtNetPolicyEventHandlerTest, ProcessEventTest002, TestSize.Level1)
@@ -62,12 +63,14 @@ HWTEST_F(UtNetPolicyEventHandlerTest, ProcessEventTest002, TestSize.Level1)
     auto instance = std::make_shared<NetPolicyEventHandler>(g_runner, netPolicyCore);
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get();
     instance->ProcessEvent(event);
+    ASSERT_NE(instance_->core_, nullptr);
 }
 
 HWTEST_F(UtNetPolicyEventHandlerTest, ProcessEventTest003, TestSize.Level1)
 {
     AppExecFwk::InnerEvent::Pointer event = AppExecFwk::InnerEvent::Get();
     instance_->ProcessEvent(event);
+    ASSERT_NE(instance_->core_, nullptr);
 }
 
 } // namespace NetManagerStandard

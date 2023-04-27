@@ -69,17 +69,20 @@ void NetStatsServiceProxyTest::TearDown() {}
 
 HWTEST_F(NetStatsServiceProxyTest, RegisterNetStatsCallback, TestSize.Level1)
 {
+    int32_t ret;
     instance_->RegisterNetStatsCallback(callback_);
     instance_->RegisterNetStatsCallback(callback_);
     instance_->RegisterNetStatsCallback(nullptr);
     instance_->UnregisterNetStatsCallback(callback_);
     instance_->UnregisterNetStatsCallback(callback_);
-    instance_->UnregisterNetStatsCallback(nullptr);
+    ret = instance_->UnregisterNetStatsCallback(nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
     for (int16_t i = 0; i < LIMIT_STATS_CALLBACK_NUM; i++) {
         sptr<INetStatsCallback> callback = new (std::nothrow) NetStatsCallbackTest();
         instance_->RegisterNetStatsCallback(callback);
     }
-    instance_->RegisterNetStatsCallback(callback_);
+    ret = instance_->RegisterNetStatsCallback(callback_);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsServiceProxyTest, GetIfaceRxBytesTest001, TestSize.Level1)

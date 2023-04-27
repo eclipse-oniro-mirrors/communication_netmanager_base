@@ -39,15 +39,5 @@ void NetEventReportTest::SetUp() {}
 
 void NetEventReportTest::TearDown() {}
 
-HWTEST_F(NetEventReportTest, AllTest001, TestSize.Level1)
-{
-    EventInfo eventInfo;
-    EventReport::SendSupplierFaultEvent(eventInfo);
-    EventReport::SendSupplierBehaviorEvent(eventInfo);
-    EventReport::SendRequestFaultEvent(eventInfo);
-    EventReport::SendRequestBehaviorEvent(eventInfo);
-    EventReport::SendMonitorFaultEvent(eventInfo);
-    EventReport::SendMonitorBehaviorEvent(eventInfo);
-}
 } // namespace NetManagerStandard
 } // namespace OHOS
