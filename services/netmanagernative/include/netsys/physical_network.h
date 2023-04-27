@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef INCLUDE_PHYSICAL_NETWORK_H
 #define INCLUDE_PHYSICAL_NETWORK_H
 
+#include <mutex>
 #include <string>
 
 #include "netsys_network.h"
@@ -69,6 +70,7 @@ private:
     int32_t RemoveInterface(std::string &interfaceName) override;
     bool isDefault_ = false;
     NetworkPermission permission_;
+    std::mutex physicalNetMutex_;
 };
 } // namespace nmd
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1228,7 +1228,7 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
     if (httpProxy_.GetHost().empty()) {
         httpProxy.SetPort(0);
         NETMGR_LOG_E("The http proxy host is empty");
-        return NETMANAGER_SUCCESS;
+        return NET_CONN_ERR_NO_HTTP_PROXY;
     }
     httpProxy = httpProxy_;
     return NETMANAGER_SUCCESS;

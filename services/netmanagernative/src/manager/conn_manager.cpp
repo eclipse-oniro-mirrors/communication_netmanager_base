@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,12 @@ int32_t ConnManager::CreatePhysicalNetwork(uint16_t netId, NetworkPermission per
             netIds.insert(iter.second->GetNetId());
         }
         for (auto netId : netIds) {
-            RemoveInterfaceFromNetwork(netId, physicalInterfaceName_[netId]);
+            std::string interfaceName;
+            {
+                std::lock_guard<std::mutex> lock(interfaceNameMutex_);
+                interfaceName = physicalInterfaceName_[netId];
+            }
+            RemoveInterfaceFromNetwork(netId, interfaceName);
             DestroyNetwork(netId);
         }
         needReinitRouteFlag_ = false;
@@ -173,7 +178,10 @@ int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interface
     const auto &net = FindNetworkById(netId);
     if (std::get<0>(net)) {
         std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
-        physicalInterfaceName_[netId] = interfaceName;
+        {
+            std::lock_guard<std::mutex> lock(interfaceNameMutex_);
+            physicalInterfaceName_[netId] = interfaceName;
+        }
         return nw->AddInterface(interfaceName);
     }
     return NETMANAGER_ERROR;
@@ -189,7 +197,10 @@ int32_t ConnManager::RemoveInterfaceFromNetwork(int32_t netId, std::string &inte
         if (std::get<0>(net)) {
             std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
             int32_t ret = nw->RemoveInterface(interfaceName);
-            physicalInterfaceName_.erase(netId);
+            {
+                std::lock_guard<std::mutex> lock(interfaceNameMutex_);
+                physicalInterfaceName_.erase(netId);
+            }
             return ret;
         }
     }
