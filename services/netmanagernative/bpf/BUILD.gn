@@ -17,6 +17,7 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 ohos_shared_library("netsys_bpf_utils") {
   sources = [
     "$NETSTATSMANAGER_INNERKITS_SOURCE_DIR/src/net_stats_info.cpp",
+    "src/bpf_loader.cpp",
     "src/bpf_stats.cpp",
   ]
 

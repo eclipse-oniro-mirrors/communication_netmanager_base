@@ -18,7 +18,10 @@
 
 #include <linux/bpf.h>
 
-static const int IFNAM_SIZE = 32;
+static const int APP_STATS_MAP_SIZE = 5000;
+static const int IFACE_STATS_MAP_SIZE = 1000;
+static const int IFACE_NAME_MAP_SIZE = 1000;
+static const int IFNAME_SIZE = 32;
 
 typedef struct {
     enum bpf_map_type type;
@@ -43,7 +46,7 @@ typedef struct {
 } stats_value;
 
 typedef struct {
-    char name[IFNAM_SIZE];
+    char name[IFNAME_SIZE];
 } iface_name;
 
 typedef __u64 iface_stats_key;
