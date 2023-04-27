@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,10 +75,15 @@ bool NetStatsInfo::Marshalling(Parcel &parcel, const NetStatsInfo &stats)
 
 bool NetStatsInfo::Marshalling(Parcel &parcel, const std::vector<NetStatsInfo> &statsInfos)
 {
-    uint32_t vsize = statsInfos.size();
-    if (!parcel.WriteUint32(vsize)) {
+    uint32_t vSize = statsInfos.size();
+    if (!parcel.WriteUint32(vSize)) {
         return false;
     }
+    if (vSize > STATS_INFO_MAX_SIZE) {
+        NETMGR_LOG_E("Size of the statsInfos exceeds maximum.");
+        return false;
+    }
+
     std::for_each(statsInfos.begin(), statsInfos.end(), [&parcel](const auto &info) { info.Marshalling(parcel); });
     return true;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define INCLUDE_CONN_MANAGER_H
 
 #include <map>
+#include <mutex>
 #include <set>
 #include <vector>
 
@@ -181,6 +182,7 @@ private:
     bool needReinitRouteFlag_;
     std::map<int32_t, std::string> physicalInterfaceName_;
     std::map<int32_t, std::shared_ptr<NetsysNetwork>> networks_;
+    std::mutex interfaceNameMutex_;
     std::tuple<bool, std::shared_ptr<NetsysNetwork>> FindNetworkById(int32_t netId);
     int32_t GetNetworkForInterface(std::string &interfaceName);
     RouteManager::TableType GetTableType(int32_t netId);
