@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef NETSYS_BPF_STATS_H
-#define NETSYS_BPF_STATS_H
+#ifndef BPF_STATS_H
+#define BPF_STATS_H
 
-#include "bpf_wrappers.h"
-#include "netsys_bpf_map.h"
+#include <vector>
+#include <cstdint>
+#include <string>
 
-namespace OHOS {
-namespace NetManagerStandard {
+#include "bpf_mapper.h"
+#include "bpf_def.h"
+#include "net_stats_info.h"
+
+namespace OHOS::NetManagerStandard {
 enum class StatsType {
     STATS_TYPE_RX_BYTES = 0,
     STATS_TYPE_RX_PACKETS = 1,
@@ -68,21 +72,29 @@ public:
      * @param stats Stats data.
      * @return returns 0 for success other as failed.
      */
-    int32_t GetAllStatsInfo(std::vector<StatsValue> &stats);
+    int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
+
+    /**
+     * Add IfName info
+     *
+     * @param ifName ifName
+     * @return returns 0 for success other as failed.
+     */
+    int32_t AddIfName(const std::string &ifName);
+
+    /**
+     * Removed IfName info
+     *
+     * @param ifName ifName
+     * @return returns 0 for success other as failed.
+     */
+    int32_t RemoveIfName(const std::string &ifName);
 
 private:
-    int32_t BpfGetIfaceStats(uint64_t &stats, const StatsType statsType, const std::string &interfaceName,
-                             const NetsysBpfMap<uint32_t, IfaceName> &ifaceNameMap,
-                             const NetsysBpfMap<uint32_t, StatsValue> &ifaceStatsMap);
-    int32_t BpfGetUidStats(uint64_t &stats, StatsType statsType, uint32_t uid,
-                           const NetsysBpfMap<uint32_t, StatsValue> &appUidStatsMap);
-    int32_t BpfGetTotalStats(uint64_t &stats, StatsType statsType,
-                             const NetsysBpfMap<uint32_t, StatsValue> &ifaceStatsMap);
-    bool IsStatsValueValid(StatsValue value);
-    bool GetIfaceName(const NetsysBpfMap<uint32_t, IfaceName> &ifaceNameMap, uint32_t ifaceIndex,
-                      std::string &ifaceName);
-    int32_t DumpError(int32_t errorCode);
+    int32_t BpfGetAllStatsInfo(const BpfMapper<uint64_t, iface_name> &ifaceNameMap,
+        const BpfMapper<stats_key, stats_value> &uidIfaceStatsMap, std::vector<NetStatsInfo> &stats);
+    static int32_t GetNumberFromStatsValue(uint64_t &stats, StatsType statsType, stats_value value);
+    bool IsStatsValueValid(stats_value value);
 };
-} // namespace NetManagerStandard
-} // namespace OHOS
-#endif // NETSYS_BPF_STATS_H
+} // namespace OHOS::NetManagerStandard
+#endif // BPF_STATS_H

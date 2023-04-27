@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@
 #include "net_stats_callback.h"
 #include "net_stats_listener.h"
 #include "net_stats_service_stub.h"
-#include "net_stats_wrapper.h"
 #include "netlink_manager.h"
 
 namespace OHOS {
@@ -90,7 +89,6 @@ private:
     ServiceRunningState state_;
     std::shared_ptr<NetStatsCallback> netStatsCallback_ = nullptr;
     std::shared_ptr<NetStatsListener> subscriber_ = nullptr;
-    std::unique_ptr<NetStatsWrapper> netStatsWrapper_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

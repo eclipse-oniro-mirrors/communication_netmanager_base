@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,12 +35,13 @@
 #include "netmanager_base_permission.h"
 #include "netmanager_hitrace.h"
 #include "system_ability_definition.h"
+#include "netsys_controller.h"
+#include "bpf_stats.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 using namespace NetStatsDatabaseDefines;
 namespace {
-constexpr const char *IFACE_NAME_MAP_PATH = "/sys/fs/bpf/netsys_iface_name_map";
 constexpr std::initializer_list<NetBearType> BEAR_TYPE_LIST = {
     NetBearType::BEARER_CELLULAR, NetBearType::BEARER_WIFI, NetBearType::BEARER_BLUETOOTH,
     NetBearType::BEARER_ETHERNET, NetBearType::BEARER_VPN,  NetBearType::BEARER_WIFI_AWARE,
@@ -80,40 +81,12 @@ int32_t NetStatsService::IfacelistNotifyCallback::OnInterfaceAddressRemoved(cons
 
 int32_t NetStatsService::IfacelistNotifyCallback::OnInterfaceAdded(const std::string &ifName)
 {
-    NetManagerStandard::NetsysBpfMap<uint64_t, std::string> ifaceNameMap(IFACE_NAME_MAP_PATH, 0);
-    uint32_t ifaceIndex = if_nametoindex(ifName.c_str());
-    NETNATIVE_LOGI("ifaceIndex = %{public}u, ifaceName = %{public}s", ifaceIndex, ifName.c_str());
-
-    if (ifaceIndex == 0) {
-        NETMGR_LOG_E("Unknown interface %{public}s (%{public}u)", ifName.c_str(), ifaceIndex);
-        return -1;
-    }
-
-    if (!ifaceNameMap.WriteValue(ifaceIndex, ifName, BPF_ANY)) {
-        NETMGR_LOG_E("Failed to add iface %{public}s (%{public}u): errno = %{public}d", ifName.c_str(), ifaceIndex,
-                     errno);
-        return -1;
-    }
-    return NETMANAGER_SUCCESS;
+    return NetsysController::GetInstance().RemoveIfName(ifName);
 }
 
 int32_t NetStatsService::IfacelistNotifyCallback::OnInterfaceRemoved(const std::string &ifName)
 {
-    NetManagerStandard::NetsysBpfMap<uint64_t, std::string> ifaceNameMap(IFACE_NAME_MAP_PATH, 0);
-    uint32_t ifaceIndex = if_nametoindex(ifName.c_str());
-    NETNATIVE_LOGI("ifaceIndex = %{public}u, ifaceName = %{public}s", ifaceIndex, ifName.c_str());
-
-    if (ifaceIndex == 0) {
-        NETMGR_LOG_E("Unknown interface %{public}s (%{public}u)", ifName.c_str(), ifaceIndex);
-        return -1;
-    }
-
-    if (!ifaceNameMap.DeleteEntryFromMap(ifaceIndex)) {
-        NETMGR_LOG_E("Failed to remove iface %{public}s (%{public}u): errno = %{public}d", ifName.c_str(), ifaceIndex,
-                     errno);
-        return -1;
-    }
-    return NETMANAGER_SUCCESS;
+    return NetsysController::GetInstance().AddIfName(ifName);
 }
 
 int32_t NetStatsService::IfacelistNotifyCallback::OnInterfaceChanged(const std::string &ifName, bool up)
@@ -206,10 +179,10 @@ void NetStatsService::GetDumpMessage(std::string &message)
     uint64_t txBytes = 0;
     uint64_t rxPackets = 0;
     uint64_t txPackets = 0;
-    NetStatsWrapper::GetInstance().GetTotalStats(rxBytes, StatsType::STATS_TYPE_RX_BYTES);
-    NetStatsWrapper::GetInstance().GetTotalStats(txBytes, StatsType::STATS_TYPE_TX_BYTES);
-    NetStatsWrapper::GetInstance().GetTotalStats(rxPackets, StatsType::STATS_TYPE_RX_PACKETS);
-    NetStatsWrapper::GetInstance().GetTotalStats(txPackets, StatsType::STATS_TYPE_TX_PACKETS);
+    NetsysController::GetInstance().GetTotalStats(rxBytes, static_cast<uint32_t>(StatsType::STATS_TYPE_RX_BYTES));
+    NetsysController::GetInstance().GetTotalStats(txBytes, static_cast<uint32_t>(StatsType::STATS_TYPE_TX_BYTES));
+    NetsysController::GetInstance().GetTotalStats(rxPackets, static_cast<uint32_t>(StatsType::STATS_TYPE_RX_PACKETS));
+    NetsysController::GetInstance().GetTotalStats(txPackets, static_cast<uint32_t>(StatsType::STATS_TYPE_TX_PACKETS));
 
     message.append("\tRxBytes: " + std::to_string(rxBytes) + "\n");
     message.append("\tTxBytes: " + std::to_string(txBytes) + "\n");
@@ -271,12 +244,14 @@ int32_t NetStatsService::UnregisterNetStatsCallback(const sptr<INetStatsCallback
 
 int32_t NetStatsService::GetIfaceRxBytes(uint64_t &stats, const std::string &interfaceName)
 {
-    return NetStatsWrapper::GetInstance().GetIfaceStats(stats, StatsType::STATS_TYPE_RX_BYTES, interfaceName);
+    return NetsysController::GetInstance().GetIfaceStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_RX_BYTES),
+                                                         interfaceName);
 }
 
 int32_t NetStatsService::GetIfaceTxBytes(uint64_t &stats, const std::string &interfaceName)
 {
-    return NetStatsWrapper::GetInstance().GetIfaceStats(stats, StatsType::STATS_TYPE_TX_BYTES, interfaceName);
+    return NetsysController::GetInstance().GetIfaceStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_TX_BYTES),
+                                                         interfaceName);
 }
 
 int32_t NetStatsService::GetCellularRxBytes(uint64_t &stats)
@@ -288,7 +263,8 @@ int32_t NetStatsService::GetCellularRxBytes(uint64_t &stats)
 
     for (const auto &name : ifaceNames) {
         uint64_t totalCellular = 0;
-        auto ret = NetStatsWrapper::GetInstance().GetIfaceStats(totalCellular, StatsType::STATS_TYPE_RX_BYTES, name);
+        auto ret = NetsysController::GetInstance().GetIfaceStats(
+            totalCellular, static_cast<uint32_t>(StatsType::STATS_TYPE_RX_BYTES), name);
         if (ret != NETMANAGER_SUCCESS) {
             NETMGR_LOG_E("Get iface stats failed result: %{public}d", ret);
             return ret;
@@ -307,7 +283,8 @@ int32_t NetStatsService::GetCellularTxBytes(uint64_t &stats)
 
     uint64_t totalCellular = 0;
     for (const auto &name : ifaceNames) {
-        auto ret = NetStatsWrapper::GetInstance().GetIfaceStats(totalCellular, StatsType::STATS_TYPE_TX_BYTES, name);
+        auto ret = NetsysController::GetInstance().GetIfaceStats(
+            totalCellular, static_cast<uint32_t>(StatsType::STATS_TYPE_TX_BYTES), name);
         if (ret != NETMANAGER_SUCCESS) {
             NETMGR_LOG_E("Get iface stats failed result: %{public}d", ret);
             return ret;
@@ -319,22 +296,24 @@ int32_t NetStatsService::GetCellularTxBytes(uint64_t &stats)
 
 int32_t NetStatsService::GetAllRxBytes(uint64_t &stats)
 {
-    return NetStatsWrapper::GetInstance().GetTotalStats(stats, StatsType::STATS_TYPE_RX_BYTES);
+    return NetsysController::GetInstance().GetTotalStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_RX_BYTES));
 }
 
 int32_t NetStatsService::GetAllTxBytes(uint64_t &stats)
 {
-    return NetStatsWrapper::GetInstance().GetTotalStats(stats, StatsType::STATS_TYPE_TX_BYTES);
+    return NetsysController::GetInstance().GetTotalStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_TX_BYTES));
 }
 
 int32_t NetStatsService::GetUidRxBytes(uint64_t &stats, uint32_t uid)
 {
-    return NetStatsWrapper::GetInstance().GetUidStats(stats, StatsType::STATS_TYPE_RX_BYTES, uid);
+    return NetsysController::GetInstance().GetUidStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_RX_BYTES),
+                                                       uid);
 }
 
 int32_t NetStatsService::GetUidTxBytes(uint64_t &stats, uint32_t uid)
 {
-    return NetStatsWrapper::GetInstance().GetUidStats(stats, StatsType::STATS_TYPE_TX_BYTES, uid);
+    return NetsysController::GetInstance().GetUidStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_TX_BYTES),
+                                                       uid);
 }
 
 int32_t NetStatsService::GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,
@@ -367,7 +346,8 @@ int32_t NetStatsService::ResetFactory()
 
 int32_t NetStatsService::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
 {
-    return NetStatsWrapper::GetInstance().GetAllStatsInfo(infos);
+    return NetsysController::GetInstance().GetAllStatsInfo(infos);
 }
+
 } // namespace NetManagerStandard
 } // namespace OHOS

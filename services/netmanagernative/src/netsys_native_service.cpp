@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -132,6 +132,7 @@ bool NetsysNativeService::Init()
         NETNATIVE_LOGE("manager_ is nullptr!");
         return false;
     }
+    bpfStats_ = std::make_unique<OHOS::NetManagerStandard::NetsysBpfStats>();
     dhcpController_ = std::make_unique<OHOS::nmd::DhcpController>();
     fwmarkNetwork_ = std::make_unique<OHOS::nmd::FwmarkNetwork>();
     sharingManager_ = std::make_unique<SharingManager>();
@@ -569,32 +570,62 @@ void NetsysNativeService::OnRemoveSystemAbility(int32_t systemAbilityId, const s
 
 int32_t NetsysNativeService::GetTotalStats(uint64_t &stats, uint32_t type)
 {
-    return ERR_NONE;
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+
+    return bpfStats_->GetTotalStats(stats, static_cast<OHOS::NetManagerStandard::StatsType>(type));
 }
 
 int32_t NetsysNativeService::GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid)
 {
-    return ERR_NONE;
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+
+    return bpfStats_->GetUidStats(stats, static_cast<OHOS::NetManagerStandard::StatsType>(type), uid);
 }
 
 int32_t NetsysNativeService::GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName)
 {
-    return ERR_NONE;
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+
+    return bpfStats_->GetIfaceStats(stats, static_cast<OHOS::NetManagerStandard::StatsType>(type), interfaceName);
 }
 
 int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
-    return ERR_NONE;
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+
+    return bpfStats_->GetAllStatsInfo(stats);
 }
 
 int32_t NetsysNativeService::AddIfName(const std::string &ifName)
 {
-    return ERR_NONE;
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+
+    return bpfStats_->AddIfName(ifName);
 }
 
 int32_t NetsysNativeService::RemoveIfName(const std::string &ifName)
 {
-    return ERR_NONE;
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+
+    return bpfStats_->RemoveIfName(ifName);
 }
 
 } // namespace NetsysNative

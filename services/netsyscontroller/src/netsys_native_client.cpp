@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1095,32 +1095,62 @@ int32_t NetsysNativeClient::FirewallSetUidRule(uint32_t chain, uint32_t uid, uin
 
 int32_t NetsysNativeClient::GetTotalStats(uint64_t &stats, uint32_t type)
 {
-    return ERR_NONE;
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetTotalStats(stats, type);
 }
 
 int32_t NetsysNativeClient::GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid)
 {
-    return ERR_NONE;
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetUidStats(stats, type, uid);
 }
 
 int32_t NetsysNativeClient::GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName)
 {
-    return ERR_NONE;
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetIfaceStats(stats, type, interfaceName);
 }
 
 int32_t NetsysNativeClient::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
-    return ERR_NONE;
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetAllStatsInfo(stats);
 }
 
 int32_t NetsysNativeClient::AddIfName(const std::string &ifName)
 {
-    return ERR_NONE;
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->AddIfName(ifName);
 }
 
 int32_t NetsysNativeClient::RemoveIfName(const std::string &ifName)
 {
-    return ERR_NONE;
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->RemoveIfName(ifName);
 }
 
 } // namespace NetManagerStandard
