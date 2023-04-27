@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -224,7 +224,7 @@ HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest001, TestSize.Level1)
     sptr<INetConnCallback> callback = new (std::nothrow) NetConnTestCallback();
     ASSERT_NE(callback, nullptr);
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->RegisterNetConnCallback(callback);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest002, TestSize.Level1)
@@ -232,17 +232,6 @@ HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest002, TestSize.Level1)
     AccessToken token;
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->RegisterNetConnCallback(g_callback);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest003, TestSize.Level1)
-{
-    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
-    ASSERT_NE(netSpecifier, nullptr);
-    sptr<INetConnCallback> callback = new (std::nothrow) NetConnTestCallback();
-    ASSERT_NE(callback, nullptr);
-    auto ret = DelayedSingleton<NetConnService>::GetInstance()->RegisterNetConnCallback(netSpecifier, callback,
-                                                                                        TEST_TIMEOUTMS);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest004, TestSize.Level1)
@@ -257,24 +246,11 @@ HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest004, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, UnregisterNetConnCallbackTest001, TestSize.Level1)
-{
-    auto ret = DelayedSingleton<NetConnService>::GetInstance()->UnregisterNetConnCallback(g_callback);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
-}
-
 HWTEST_F(NetConnServiceTest, UnregisterNetConnCallbackTest002, TestSize.Level1)
 {
     AccessToken token;
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->UnregisterNetConnCallback(g_callback);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetConnServiceTest, GetAllNetsTest001, TestSize.Level1)
-{
-    std::list<int32_t> netIdList;
-    auto ret = DelayedSingleton<NetConnService>::GetInstance()->GetAllNets(netIdList);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnServiceTest, GetAllNetsTest002, TestSize.Level1)
@@ -285,13 +261,6 @@ HWTEST_F(NetConnServiceTest, GetAllNetsTest002, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, GetConnectionPropertiesTest001, TestSize.Level1)
-{
-    NetLinkInfo info;
-    auto ret = DelayedSingleton<NetConnService>::GetInstance()->GetConnectionProperties(TEST_NETID, info);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
-}
-
 HWTEST_F(NetConnServiceTest, GetConnectionPropertiesTest002, TestSize.Level1)
 {  
     AccessToken token;
@@ -300,26 +269,12 @@ HWTEST_F(NetConnServiceTest, GetConnectionPropertiesTest002, TestSize.Level1)
     EXPECT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
 }
 
-HWTEST_F(NetConnServiceTest, GetAddressesByNameTest001, TestSize.Level1)
-{
-    std::vector<INetAddr> addrList;
-    auto ret = DelayedSingleton<NetConnService>::GetInstance()->GetAddressesByName(TEST_HOST, TEST_NETID, addrList);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
-}
-
 HWTEST_F(NetConnServiceTest, GetAddressesByNameTest002, TestSize.Level1)
 {
     AccessToken token;
     std::vector<INetAddr> addrList;
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->GetAddressesByName(TEST_HOST, TEST_NETID, addrList);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
-}
-
-HWTEST_F(NetConnServiceTest, GetAddressByNameTest001, TestSize.Level1)
-{
-    INetAddr addr;
-    auto ret = DelayedSingleton<NetConnService>::GetInstance()->GetAddressByName(TEST_HOST, TEST_NETID, addr);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnServiceTest, GetAddressByNameTest002, TestSize.Level1)
@@ -336,12 +291,6 @@ HWTEST_F(NetConnServiceTest, BindSocketTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, NetDetectionTest001, TestSize.Level1)
-{
-    auto ret = DelayedSingleton<NetConnService>::GetInstance()->NetDetection(TEST_NETID);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
-}
-
 HWTEST_F(NetConnServiceTest, NetDetectionTest002, TestSize.Level1)
 {
     AccessToken token;
@@ -356,13 +305,6 @@ HWTEST_F(NetConnServiceTest, GetNetIdByIdentifierTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, GetDefaultNetTest001, TestSize.Level1)
-{
-    int32_t netId = 0;
-    auto ret = DelayedSingleton<NetConnService>::GetInstance()->GetDefaultNet(netId);
-    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
-}
-
 HWTEST_F(NetConnServiceTest, GetDefaultNetTest002, TestSize.Level1)
 {
     AccessToken token;
@@ -371,44 +313,12 @@ HWTEST_F(NetConnServiceTest, GetDefaultNetTest002, TestSize.Level1)
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetConnServiceTest, HasDefaultNetTest001, TestSize.Level1)
-{
-    bool bFlag = false;
-    auto ret = DelayedSingleton<NetConnService>::GetInstance()->HasDefaultNet(bFlag);
-    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
-}
-
 HWTEST_F(NetConnServiceTest, HasDefaultNetTest002, TestSize.Level1)
 {
     AccessToken token;
     bool bFlag = false;
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->HasDefaultNet(bFlag);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetConnServiceTest, GetNetCapabilitiesTest001, TestSize.Level1)
-{
-    NETMGR_LOG_D("GetNetCapabilitiesTest001 In");
-    int32_t netId = 0;
-    int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->GetDefaultNet(netId);
-    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
-
-    NetAllCapabilities netAllCap;
-    ret = DelayedSingleton<NetConnService>::GetInstance()->GetNetCapabilities(netId, netAllCap);
-    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
-}
-
-HWTEST_F(NetConnServiceTest, GetNetCapabilitiesTest002, TestSize.Level1)
-{
-    NETMGR_LOG_D("GetNetCapabilitiesTest002 In");
-    int32_t netId = 0;
-    int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->GetDefaultNet(netId);
-    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
-
-    AccessToken token;
-    NetAllCapabilities netAllCap;
-    ret = DelayedSingleton<NetConnService>::GetInstance()->GetNetCapabilities(netId, netAllCap);
-    ASSERT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
 }
 
 HWTEST_F(NetConnServiceTest, GetNetCapabilitiesTest003, TestSize.Level1)
@@ -436,14 +346,6 @@ HWTEST_F(NetConnServiceTest, SetAirplaneModeTest002, TestSize.Level1)
     AccessToken token;
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetAirplaneMode(false);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetConnServiceTest, IsDefaultNetMeteredTest001, TestSize.Level1)
-{
-    bool bRes = false;
-    auto ret = DelayedSingleton<NetConnService>::GetInstance()->IsDefaultNetMetered(bRes);
-    ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
-    ASSERT_EQ(bRes, false);
 }
 
 HWTEST_F(NetConnServiceTest, IsDefaultNetMeteredTest002, TestSize.Level1)

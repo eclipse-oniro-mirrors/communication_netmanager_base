@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,9 +105,7 @@ bool Network::ReleaseBasicNetwork()
     NETMGR_LOG_D("Enter ReleaseBasicNetwork");
     if (isPhyNetCreated_) {
         NETMGR_LOG_D("Destroy physical network");
-        if (eventHandler_) {
-            eventHandler_->PostAsyncTask([this]() { this->StopNetDetection(); }, 0);
-        }
+        StopNetDetection();
         for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
             int32_t prefixLen = inetAddr.prefixlen_;
             if (prefixLen == 0) {
@@ -299,10 +297,11 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
         NETMGR_LOG_E("The parameter of callback is null");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-
-    auto iter = std::find(netDetectionRetCallback_.begin(), netDetectionRetCallback_.end(), callback);
-    if (iter != netDetectionRetCallback_.end()) {
-        netDetectionRetCallback_.erase(iter);
+    for (auto iter = netDetectionRetCallback_.begin(); iter != netDetectionRetCallback_.end(); ++iter) {
+        if (callback->AsObject().GetRefPtr() == (*iter)->AsObject().GetRefPtr()) {
+            netDetectionRetCallback_.erase(iter);
+            return ERR_NONE;
+        }
     }
 
     return NETMANAGER_SUCCESS;
@@ -311,16 +310,10 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
 void Network::StartNetDetection(bool needReport)
 {
     NETMGR_LOG_D("Enter Network::StartNetDetection");
-    if (eventHandler_) {
-        eventHandler_->PostAsyncTask(
-            [report = needReport, this]() {
-                if (report) {
-                    this->StopNetDetection();
-                }
-                this->InitNetMonitor();
-            },
-            0);
+    if (needReport) {
+        StopNetDetection();
     }
+    InitNetMonitor();
 }
 
 void Network::StopNetDetection()
