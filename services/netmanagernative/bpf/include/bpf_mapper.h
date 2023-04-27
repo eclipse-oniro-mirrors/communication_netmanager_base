@@ -248,6 +248,11 @@ public:
         return BpfMapperImplement<Key, Value>::UpdateElem(mapFd_, key, value, flags);
     }
 
+    /**
+     * Get all keys
+     *
+     * @return key of list
+     */
     [[nodiscard]] std::vector<Key> GetAllKeys() const
     {
         Key key{};
