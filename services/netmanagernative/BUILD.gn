@@ -88,6 +88,7 @@ ohos_shared_library("netsys_native_manager") {
     "$THIRD_PARTY_ROOT/iptables:iptables",
     "$THIRD_PARTY_ROOT/iptables:iptables-restore",
     "$THIRD_PARTY_ROOT/iptables:iptables-save",
+    "bpf:netsys",
     "bpf:netsys_bpf_utils",
   ]
 

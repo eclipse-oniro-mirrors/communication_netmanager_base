@@ -20,7 +20,7 @@
 
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
-
+#include "bpf_loader.h"
 #include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
@@ -31,6 +31,7 @@ namespace OHOS {
 namespace NetsysNative {
 constexpr int32_t START_TIME_MS = 1900;
 constexpr int32_t EXTRA_MONTH = 1;
+static constexpr const char *BFP_NAME_NETSYS_PATH = "/system/etc/bpf/netsys.o";
 
 REGISTER_SYSTEM_ABILITY_BY_ID(NetsysNativeService, COMM_NETSYS_NATIVE_SYS_ABILITY_ID, true)
 
@@ -137,6 +138,8 @@ bool NetsysNativeService::Init()
     fwmarkNetwork_ = std::make_unique<OHOS::nmd::FwmarkNetwork>();
     sharingManager_ = std::make_unique<SharingManager>();
 
+    auto ret = OHOS::NetManagerStandard::LoadElf(BFP_NAME_NETSYS_PATH);
+    NETNATIVE_LOGI("LoadElf is %{public}d", ret);
     AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     return true;
 }

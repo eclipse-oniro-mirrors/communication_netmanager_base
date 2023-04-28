@@ -75,10 +75,7 @@ public:
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
 
 private:
-    int32_t BpfGetAllStatsInfo(const BpfMapper<uint64_t, iface_name> &ifaceNameMap,
-        const BpfMapper<stats_key, stats_value> &uidIfaceStatsMap, std::vector<NetStatsInfo> &stats);
     static int32_t GetNumberFromStatsValue(uint64_t &stats, StatsType statsType, stats_value value);
-    bool IsStatsValueValid(stats_value value);
 };
 } // namespace OHOS::NetManagerStandard
 #endif // BPF_STATS_H

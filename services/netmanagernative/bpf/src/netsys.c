@@ -60,15 +60,99 @@ bpf_map_def SEC("maps") app_uid_if_stats_map = {
 };
 
 SEC("cgroup_skb/uid/ingress")
-void bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
+int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
 {
-    return;
+    uint64_t sock_uid = bpf_get_socket_uid(skb);
+    stats_value *value = bpf_map_lookup_elem(&app_uid_stats_map, &sock_uid);
+    if (!value) {
+        stats_value newValue = {};
+        bpf_map_update_elem(&app_uid_stats_map, &sock_uid, &newValue, BPF_NOEXIST);
+        value = bpf_map_lookup_elem(&app_uid_stats_map, &sock_uid);
+    }
+    if (value) {
+        __sync_fetch_and_add(&value->rxPackets, 1);
+        __sync_fetch_and_add(&value->rxBytes, skb->len);
+
+        const char log[] = "[Uid ingress] sock_uid = %d, rxPackets = %d, rxBytes = %d";
+        bpf_trace_printk(log, sizeof(log), sock_uid, value->rxPackets, value->rxBytes);
+    }
+    stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
+    stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+    if (!value_uid_if) {
+        stats_value newValue = {};
+        bpf_map_update_elem(&app_uid_if_stats_map, &key, &newValue, BPF_NOEXIST);
+        value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+    }
+    if (value_uid_if) {
+        __sync_fetch_and_add(&value_uid_if->rxPackets, 1);
+        __sync_fetch_and_add(&value_uid_if->rxBytes, skb->len);
+
+        const char log[] = "[Uid ifindex ingress] ifIndex = %d, rxPackets = %d, rxBytes = %d";
+        bpf_trace_printk(log, sizeof(log), key.ifIndex, value_uid_if->rxPackets, value_uid_if->rxBytes);
+    }
+    uint64_t ifindex = skb->ifindex;
+    stats_value *value_if = bpf_map_lookup_elem(&iface_stats_map, &ifindex);
+    if (!value_if) {
+        stats_value newValue = {};
+        bpf_map_update_elem(&iface_stats_map, &ifindex, &newValue, BPF_NOEXIST);
+        value_if = bpf_map_lookup_elem(&iface_stats_map, &ifindex);
+    }
+    if (value_if) {
+        __sync_fetch_and_add(&value_if->rxPackets, 1);
+        __sync_fetch_and_add(&value_if->rxBytes, skb->len);
+
+        const char log[] = "[ifindex ingress] ifIndex = %d, rx_packets = %d, rxBytes = %d";
+        bpf_trace_printk(log, sizeof(log), ifindex, value_if->rxPackets, value_if->rxBytes);
+    }
+    return 1;
 }
 
 SEC("cgroup_skb/uid/egress")
-void bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
+int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
 {
-    return;
+    uint64_t sock_uid = bpf_get_socket_uid(skb);
+    stats_value *value = bpf_map_lookup_elem(&app_uid_stats_map, &sock_uid);
+    if (!value) {
+        stats_value newValue = {};
+        bpf_map_update_elem(&app_uid_stats_map, &sock_uid, &newValue, BPF_NOEXIST);
+        value = bpf_map_lookup_elem(&app_uid_stats_map, &sock_uid);
+    }
+    if (value) {
+        __sync_fetch_and_add(&value->txPackets, 1);
+        __sync_fetch_and_add(&value->txBytes, skb->len);
+
+        const char log[] = "[Uid egress] sock_uid = %d, txPackets = %d, txBytes = %d";
+        bpf_trace_printk(log, sizeof(log), sock_uid, value->txPackets, value->txBytes);
+    }
+    stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
+    stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+    if (!value_uid_if) {
+        stats_value newValue = {};
+        bpf_map_update_elem(&app_uid_if_stats_map, &key, &newValue, BPF_NOEXIST);
+        value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+    }
+    if (value_uid_if) {
+        __sync_fetch_and_add(&value_uid_if->txPackets, 1);
+        __sync_fetch_and_add(&value_uid_if->txBytes, skb->len);
+
+        const char log[] = "[Uid ifindex egress] ifIndex = %d, txPackets = %d, txBytes = %d";
+        bpf_trace_printk(log, sizeof(log), key.ifIndex, value_uid_if->txPackets, value_uid_if->txBytes);
+    }
+    uint64_t ifindex = skb->ifindex;
+    stats_value *value_if = bpf_map_lookup_elem(&iface_stats_map, &ifindex);
+    if (!value_if) {
+        stats_value newValue = {};
+        bpf_map_update_elem(&iface_stats_map, &ifindex, &newValue, BPF_NOEXIST);
+        value_if = bpf_map_lookup_elem(&iface_stats_map, &ifindex);
+    }
+    if (value_if) {
+        __sync_fetch_and_add(&value_if->txPackets, 1);
+        __sync_fetch_and_add(&value_if->txBytes, skb->len);
+
+        const char log[] = "[ifindex egress] ifIndex = %d, txPackets = %d, txBytes = %d";
+        bpf_trace_printk(log, sizeof(log), ifindex, value_if->txPackets, value_if->txBytes);
+    }
+    return 1;
 }
 
 char g_license[] SEC("license") = "GPL";

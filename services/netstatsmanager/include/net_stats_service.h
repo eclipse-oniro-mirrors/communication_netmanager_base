@@ -19,7 +19,9 @@
 #include "singleton.h"
 #include "system_ability.h"
 
+#include "net_stats_cached.h"
 #include "net_stats_callback.h"
+#include "net_stats_history.h"
 #include "net_stats_listener.h"
 #include "net_stats_service_stub.h"
 #include "netlink_manager.h"
@@ -71,6 +73,7 @@ private:
     ServiceRunningState state_;
     std::shared_ptr<NetStatsCallback> netStatsCallback_ = nullptr;
     std::shared_ptr<NetStatsListener> subscriber_ = nullptr;
+    std::shared_ptr<NetStatsCached> netStatsCached_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
