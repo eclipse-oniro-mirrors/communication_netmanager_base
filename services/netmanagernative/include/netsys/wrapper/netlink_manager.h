@@ -17,6 +17,7 @@
 #define NETLINK_MANAGER_H
 
 #include <memory>
+#include <mutex>
 #include <vector>
 
 #include "i_notify_callback.h"
@@ -40,6 +41,7 @@ public:
 
 private:
     static std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> callbacks_;
+    static std::mutex linkCallbackMutex_;
 };
 } // namespace nmd
 } // namespace OHOS

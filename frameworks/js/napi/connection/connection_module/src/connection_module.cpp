@@ -98,12 +98,16 @@ static void *ParseNetConnectionParams(napi_env env, size_t argc, napi_value *arg
     std::unique_ptr<NetConnection, decltype(&NetConnection::DeleteNetConnection)> netConnection(
         NetConnection::MakeNetConnection(manager), NetConnection::DeleteNetConnection);
 
-    if (argc == ARG_NUM_0) {
+    if (argc == ARG_NUM_0 || (argc == ARG_NUM_1 && NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) ==
+        napi_undefined) || (argc == ARG_NUM_2 && NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) == napi_undefined &&
+            NapiUtils::GetValueType(env, argv[ARG_INDEX_1]) == napi_undefined)) {
         NETMANAGER_BASE_LOGI("ParseNetConnectionParams no params");
         return netConnection.release();
     }
 
-    if (argc == ARG_NUM_1 && NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) == napi_object) {
+    if ((argc == ARG_NUM_1 && NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) == napi_object) || (argc ==
+        ARG_NUM_2 && NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) == napi_object &&
+            NapiUtils::GetValueType(env, argv[ARG_INDEX_1]) == napi_undefined)) {
         if (!ParseNetSpecifier(env, argv[ARG_INDEX_0], netConnection->netSpecifier_)) {
             NETMANAGER_BASE_LOGE("ParseNetSpecifier failed");
             return nullptr;

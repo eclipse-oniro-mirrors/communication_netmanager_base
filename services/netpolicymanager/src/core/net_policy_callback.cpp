@@ -31,7 +31,7 @@ int32_t NetPolicyCallback::RegisterNetPolicyCallback(const sptr<INetPolicyCallba
         NETMGR_LOG_E("The parameter callback is null");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-
+    std::lock_guard<std::mutex> lock(policyCallbackMutex_);
     uint32_t callbackCounts = callbacks_.size();
     NETMGR_LOG_D("callback counts [%{public}u]", callbackCounts);
     if (callbackCounts >= LIMIT_CALLBACK_NUM) {
@@ -56,7 +56,7 @@ int32_t NetPolicyCallback::UnregisterNetPolicyCallback(const sptr<INetPolicyCall
         NETMGR_LOG_E("The parameter of callback is null");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-
+    std::lock_guard<std::mutex> lock(policyCallbackMutex_);
     auto it = std::remove_if(callbacks_.begin(), callbacks_.end(),
                              [callback](const sptr<INetPolicyCallback> &tempCallback) -> bool {
                                  if (tempCallback == nullptr || tempCallback->AsObject() == nullptr ||
@@ -73,7 +73,7 @@ int32_t NetPolicyCallback::UnregisterNetPolicyCallback(const sptr<INetPolicyCall
 int32_t NetPolicyCallback::NotifyNetUidPolicyChange(uint32_t uid, uint32_t policy)
 {
     NETMGR_LOG_D("NotifyNetUidPolicyChange uid[%{public}u] policy[%{public}u]", uid, policy);
-
+    std::lock_guard<std::mutex> lock(policyCallbackMutex_);
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
             callback->NetUidPolicyChange(uid, policy);
@@ -86,7 +86,7 @@ int32_t NetPolicyCallback::NotifyNetUidPolicyChange(uint32_t uid, uint32_t polic
 int32_t NetPolicyCallback::NotifyNetUidRuleChange(uint32_t uid, uint32_t rule)
 {
     NETMGR_LOG_D("NotifyNetUidRuleChange uid[%{public}u] rule[%{public}u]", uid, rule);
-
+    std::lock_guard<std::mutex> lock(policyCallbackMutex_);
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
             callback->NetUidRuleChange(uid, rule);
@@ -99,7 +99,7 @@ int32_t NetPolicyCallback::NotifyNetUidRuleChange(uint32_t uid, uint32_t rule)
 int32_t NetPolicyCallback::NotifyNetBackgroundPolicyChange(bool isAllowed)
 {
     NETMGR_LOG_D("NotifyNetBackgroundPolicyChange  isAllowed[%{public}d]", isAllowed);
-
+    std::lock_guard<std::mutex> lock(policyCallbackMutex_);
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
             callback->NetBackgroundPolicyChange(isAllowed);
@@ -116,7 +116,7 @@ int32_t NetPolicyCallback::NotifyNetQuotaPolicyChange(const std::vector<NetQuota
         return POLICY_ERR_QUOTA_POLICY_NOT_EXIST;
     }
     NETMGR_LOG_D("NotifyNetQuotaPolicyChange quotaPolicies.size[%{public}zu]", quotaPolicies.size());
-
+    std::lock_guard<std::mutex> lock(policyCallbackMutex_);
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
             callback->NetQuotaPolicyChange(quotaPolicies);
@@ -129,7 +129,7 @@ int32_t NetPolicyCallback::NotifyNetQuotaPolicyChange(const std::vector<NetQuota
 int32_t NetPolicyCallback::NotifyNetMeteredIfacesChange(std::vector<std::string> &ifaces)
 {
     NETMGR_LOG_D("NotifyNetMeteredIfacesChange iface size[%{public}zu]", ifaces.size());
-
+    std::lock_guard<std::mutex> lock(policyCallbackMutex_);
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
             callback->NetMeteredIfacesChange(ifaces);
