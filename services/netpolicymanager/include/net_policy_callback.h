@@ -16,6 +16,7 @@
 #ifndef NET_POLICY_CALLBACK_H
 #define NET_POLICY_CALLBACK_H
 
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -84,6 +85,7 @@ public:
 
 private:
     std::vector<sptr<INetPolicyCallback>> callbacks_;
+    std::mutex policyCallbackMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
