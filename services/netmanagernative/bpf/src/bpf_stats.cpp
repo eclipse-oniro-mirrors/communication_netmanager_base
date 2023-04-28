@@ -109,7 +109,7 @@ int32_t NetsysBpfStats::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::Ne
         }
 
         char *pName = if_indextoname(k.ifIndex, if_name);
-        if (pName != nullptr){
+        if (pName != nullptr) {
             tempStats.iface_ = pName;
         }
         tempStats.rxBytes_ = v.rxBytes;
