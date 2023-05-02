@@ -51,7 +51,7 @@ int32_t NetPolicyCallback::RegisterNetPolicyCallback(const sptr<INetPolicyCallba
     }
     int32_t ret = NETMANAGER_SUCCESS;
     if (policyCallHandler_) {
-        policyCallHandler_->PostSyncTask([this,&callback,&ret](){
+        policyCallHandler_->PostSyncTask([this, &callback, &ret]() {
             ret = this->RegisterNetPolicyCallbackAsync(callback);
         });
     }
@@ -88,7 +88,7 @@ int32_t NetPolicyCallback::UnregisterNetPolicyCallback(const sptr<INetPolicyCall
 
     int32_t ret = NETMANAGER_SUCCESS;
     if (policyCallHandler_) {
-        policyCallHandler_->PostSyncTask([this,&callback,&ret](){
+        policyCallHandler_->PostSyncTask([this, &callback, &ret]() {
             ret = this->UnregisterNetPolicyCallbackAsync(callback);
         });
     }
@@ -110,13 +110,14 @@ int32_t NetPolicyCallback::UnregisterNetPolicyCallbackAsync(const sptr<INetPolic
 
     return NETMANAGER_SUCCESS;
 }
+
 int32_t NetPolicyCallback::NotifyNetUidPolicyChange(uint32_t uid, uint32_t policy)
 {
     NETMGR_LOG_D("NotifyNetUidPolicyChange uid[%{public}u] policy[%{public}u]", uid, policy);
     int32_t ret = NETMANAGER_SUCCESS;
     if (policyCallHandler_) {
-        policyCallHandler_->PostSyncTask([this,uid,policy,&ret](){
-            ret = this->NotifyNetUidPolicyChangeAsync(uid,policy);
+        policyCallHandler_->PostSyncTask([this, uid, policy, &ret]() {
+            ret = this->NotifyNetUidPolicyChangeAsync(uid, policy);
         });
     }
 
@@ -140,8 +141,8 @@ int32_t NetPolicyCallback::NotifyNetUidRuleChange(uint32_t uid, uint32_t rule)
 
     int32_t ret = NETMANAGER_SUCCESS;
     if (policyCallHandler_) {
-        policyCallHandler_->PostSyncTask([this,uid,rule,&ret](){
-            ret = this->NotifyNetUidRuleChangeAsync(uid,rule);
+        policyCallHandler_->PostSyncTask([this, uid, rule, &ret]() {
+            ret = this->NotifyNetUidRuleChangeAsync(uid, rule);
         });
     }
     return ret;
@@ -163,7 +164,7 @@ int32_t NetPolicyCallback::NotifyNetBackgroundPolicyChange(bool isAllowed)
     NETMGR_LOG_D("NotifyNetBackgroundPolicyChange  isAllowed[%{public}d]", isAllowed);
     int32_t ret = NETMANAGER_SUCCESS;
     if (policyCallHandler_) {
-        policyCallHandler_->PostSyncTask([this,isAllowed,&ret](){
+        policyCallHandler_->PostSyncTask([this, isAllowed, &ret]() {
             ret = this->NotifyNetBackgroundPolicyChangeAsync(isAllowed);
         });
     }
@@ -180,6 +181,7 @@ int32_t NetPolicyCallback::NotifyNetBackgroundPolicyChangeAsync(bool isAllowed)
 
     return NETMANAGER_SUCCESS;
 }
+
 int32_t NetPolicyCallback::NotifyNetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     if (quotaPolicies.empty()) {
@@ -190,7 +192,7 @@ int32_t NetPolicyCallback::NotifyNetQuotaPolicyChange(const std::vector<NetQuota
 
     int32_t ret = NETMANAGER_SUCCESS;
     if (policyCallHandler_) {
-        policyCallHandler_->PostSyncTask([this,&quotaPolicies,&ret](){
+        policyCallHandler_->PostSyncTask([this, &quotaPolicies, &ret]() {
             ret = this->NotifyNetQuotaPolicyChangeAsync(quotaPolicies);
         });
     }
@@ -213,7 +215,7 @@ int32_t NetPolicyCallback::NotifyNetMeteredIfacesChange(std::vector<std::string>
     NETMGR_LOG_D("NotifyNetMeteredIfacesChange iface size[%{public}zu]", ifaces.size());
     int32_t ret = NETMANAGER_SUCCESS;
     if (policyCallHandler_) {
-        policyCallHandler_->PostSyncTask([this,&ifaces,&ret](){
+        policyCallHandler_->PostSyncTask([this, &ifaces, &ret]() {
             ret = this->NotifyNetMeteredIfacesChangeAsync(ifaces);
         });
     }
