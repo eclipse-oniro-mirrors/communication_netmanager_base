@@ -19,6 +19,12 @@
 #include <napi/native_api.h>
 
 namespace OHOS::NetManagerStandard {
+enum NetConnectionType {
+    PARAMETER_ZERO = 0,
+    PARAMETER_SPECIFIER,
+    PARAMETER_TIMEOUT,
+    PARAMETER_ERROR,
+};
 class ConnectionModule final {
 public:
     static constexpr const char *FUNCTION_GET_DEFAULT_NET = "getDefaultNet";

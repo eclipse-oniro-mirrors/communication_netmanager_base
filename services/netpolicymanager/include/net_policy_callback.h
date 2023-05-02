@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 
 #include "singleton.h"
 
+#include "event_handler.h"
 #include "i_net_policy_callback.h"
 #include "net_quota_policy.h"
 
@@ -38,12 +39,16 @@ public:
      */
     int32_t RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
 
+    int32_t RegisterNetPolicyCallbackAsync(const sptr<INetPolicyCallback> &callback);
+
     /**
      * Unregister net policy callback.
      * @param callback Interface type pointer.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback);
+
+    int32_t UnregisterNetPolicyCallbackAsync(const sptr<INetPolicyCallback> &callback);
 
     /**
      * Notify this uid's policy is changed.
@@ -53,6 +58,8 @@ public:
      */
     int32_t NotifyNetUidPolicyChange(uint32_t uid, uint32_t policy);
 
+    int32_t NotifyNetUidPolicyChangeAsync(uint32_t uid, uint32_t policy);
+
     /**
      * Notify this uid's rule is changed.
      * @param uid The UID of application.
@@ -61,6 +68,8 @@ public:
      */
     int32_t NotifyNetUidRuleChange(uint32_t uid, uint32_t rule);
 
+    int32_t NotifyNetUidRuleChangeAsync(uint32_t uid, uint32_t rule);
+
     /**
      * Notify the quota policy is changed.
      * @param quotaPolicies The struct vector of quotaPolicies.
@@ -68,12 +77,16 @@ public:
      */
     int32_t NotifyNetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies);
 
+    int32_t NotifyNetQuotaPolicyChangeAsync(const std::vector<NetQuotaPolicy> &quotaPolicies);
+
     /**
      * Notify when metered ifaces is changed.
      * @param ifaces The string vector of ifaces.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t NotifyNetMeteredIfacesChange(std::vector<std::string> &ifaces);
+
+    int32_t NotifyNetMeteredIfacesChangeAsync(std::vector<std::string> &ifaces);
 
     /**
      * Notify when background policy is changed.
@@ -83,9 +96,12 @@ public:
      */
     int32_t NotifyNetBackgroundPolicyChange(bool isAllowed);
 
+    int32_t NotifyNetBackgroundPolicyChangeAsync(bool isAllowed);
+
 private:
     std::vector<sptr<INetPolicyCallback>> callbacks_;
-    std::mutex policyCallbackMutex_;
+    std::shared_ptr<AppExecFwk::EventRunner> policyCallRunner_ = nullptr;
+    std::shared_ptr<AppExecFwk::EventHandler> policyCallHandler_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
