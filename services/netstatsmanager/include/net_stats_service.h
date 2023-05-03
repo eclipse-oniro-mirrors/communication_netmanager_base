@@ -73,7 +73,7 @@ private:
     ServiceRunningState state_;
     std::shared_ptr<NetStatsCallback> netStatsCallback_ = nullptr;
     std::shared_ptr<NetStatsListener> subscriber_ = nullptr;
-    std::shared_ptr<NetStatsCached> netStatsCached_ = nullptr;
+    std::unique_ptr<NetStatsCached> netStatsCached_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

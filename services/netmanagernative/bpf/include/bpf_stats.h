@@ -20,8 +20,9 @@
 #include <cstdint>
 #include <string>
 
-#include "bpf_mapper.h"
 #include "bpf_def.h"
+#include "bpf_mapper.h"
+#include "net_manager_constants.h"
 #include "net_stats_info.h"
 
 namespace OHOS::NetManagerStandard {
@@ -75,7 +76,7 @@ public:
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
 
 private:
-    static int32_t GetNumberFromStatsValue(uint64_t &stats, StatsType statsType, stats_value value);
+    static int32_t GetNumberFromStatsValue(uint64_t &stats, StatsType statsType, const stats_value &value);
 };
 } // namespace OHOS::NetManagerStandard
 #endif // BPF_STATS_H

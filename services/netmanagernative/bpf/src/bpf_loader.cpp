@@ -33,6 +33,7 @@
 #include "elfio/elf_types.hpp"
 #include "elfio/elfio.hpp"
 #include "elfio/elfio_relocation.hpp"
+#include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "securec.h"
 
@@ -99,7 +100,9 @@ static const constexpr struct {
 struct BpfMapData {
     BpfMapData() : fd(0)
     {
-        (void)memset_s(&def, sizeof(def), 0, sizeof(def));
+        if (memset_s(&def, sizeof(def), 0, sizeof(def)) != EOK) {
+            NETNATIVE_LOGE("memset_s error");
+        }
     }
 
     int32_t fd;
@@ -131,7 +134,7 @@ inline int32_t SysBpfObjGet(const std::string &pathName, uint32_t fileFlags)
 {
     bpf_attr attr = {};
     if (memset_s(&attr, sizeof(attr), 0, sizeof(attr)) != EOK) {
-        return -1;
+        return NETMANAGER_ERROR;
     }
     attr.pathname = PtrToU64(pathName.c_str());
     attr.file_flags = fileFlags;
@@ -143,7 +146,7 @@ inline int32_t SysBpfObjPin(int32_t fd, const std::string &pathName)
     bpf_attr attr = {};
 
     if (memset_s(&attr, sizeof(attr), 0, sizeof(attr)) != EOK) {
-        return -1;
+        return NETMANAGER_ERROR;
     }
     attr.pathname = PtrToU64(pathName.c_str());
     attr.bpf_fd = fd;
@@ -166,7 +169,7 @@ inline int32_t SysBpfObjDetach(bpf_attach_type type, const int progFd, const int
     bpf_attr attr = {};
 
     if (memset_s(&attr, sizeof(attr), 0, sizeof(attr)) != EOK) {
-        return -1;
+        return NETMANAGER_ERROR;
     }
     attr.target_fd = cgFd;
     attr.attach_bpf_fd = progFd;
@@ -180,7 +183,7 @@ inline int32_t SysBpfObjAttach(bpf_attach_type type, const int progFd, const int
     bpf_attr attr = {};
 
     if (memset_s(&attr, sizeof(attr), 0, sizeof(attr)) != EOK) {
-        return -1;
+        return NETMANAGER_ERROR;
     }
     attr.target_fd = cgFd;
     attr.attach_bpf_fd = progFd;
@@ -271,12 +274,10 @@ public:
 private:
     bool CheckPath()
     {
-        if (!std::filesystem::exists(path_) || std::filesystem::is_directory(path_)) {
+        if (path_.empty() || !std::filesystem::exists(path_) || std::filesystem::is_directory(path_)) {
             return false;
         }
-        if (path_.empty()) {
-            return false;
-        }
+
         return true;
     }
 
@@ -463,7 +464,9 @@ private:
     static int32_t BpfCreateMapNode(const BpfMapData &map)
     {
         bpf_attr attr = {};
-        (void)memset_s(&attr, sizeof(attr), 0, sizeof(attr));
+        if (memset_s(&attr, sizeof(attr), 0, sizeof(attr)) != EOK) {
+            return NETMANAGER_ERROR;
+        }
         attr.map_type = map.def.type;
         attr.key_size = map.def.key_size;
         attr.value_size = map.def.value_size;
@@ -473,7 +476,7 @@ private:
             if (memcpy_s(attr.map_name, sizeof(attr.map_name) - 1, map.name.c_str(),
                          std::min<size_t>(map.name.size(), sizeof(attr.map_name) - 1)) != EOK) {
                 NETNATIVE_LOGE("Failed copy map name %{public}s", map.name.c_str());
-                return -1;
+                return NETMANAGER_ERROR;
             }
         }
         attr.numa_node = (map.def.map_flags & static_cast<unsigned int>(BPF_F_NUMA_NODE)) ? map.def.numa_node : 0;
@@ -515,10 +518,7 @@ private:
             std::string mapPinLocation = std::string(MAPS_DIR) + "/" + map.name;
             if (access(mapPinLocation.c_str(), F_OK) == 0) {
                 auto ret = UnPin(mapPinLocation);
-                if (ret < 0) {
-                    return false;
-                }
-                return true;
+                return ret < 0 ? false : true;
             }
             return true;
         });
@@ -526,7 +526,7 @@ private:
 
     bool ApplyRelocation(bpf_insn *insn, ELFIO::section *section) const
     {
-        if (insn == nullptr || section == nullptr) {
+        if (insn == nullptr || section == nullptr || section->get_entry_size() == 0) {
             return false;
         }
 
@@ -535,12 +535,12 @@ private:
             return false;
         }
 
-        ELFIO::Elf64_Addr offset;
-        ELFIO::Elf64_Addr symbolValue;
+        ELFIO::Elf64_Addr offset = 0;
+        ELFIO::Elf64_Addr symbolValue = 0;
         std::string symbolName;
-        ELFIO::Elf_Word type;
-        ELFIO::Elf_Sxword addend;
-        ELFIO::Elf_Sxword calcValue;
+        ELFIO::Elf_Word type = 0;
+        ELFIO::Elf_Sxword addend = 0;
+        ELFIO::Elf_Sxword calcValue = 0;
         ELFIO::relocation_section_accessor relocation(elfIo_, section);
         for (size_t i = 0; i < size; i++) {
             relocation.get_entry(i, offset, symbolValue, symbolName, type, addend, calcValue);
@@ -572,9 +572,13 @@ private:
 
     int32_t BpfLoadProgram(bpf_prog_type type, const bpf_insn *insns, size_t insnsCnt)
     {
+        if (insns == nullptr) {
+            return NETMANAGER_ERROR;
+        }
+
         bpf_attr attr = {};
         if (memset_s(&attr, sizeof(attr), 0, sizeof(attr)) != EOK) {
-            return -1;
+            return NETMANAGER_ERROR;
         }
         attr.prog_type = type;
         attr.kern_version = kernVersion_;
@@ -595,22 +599,26 @@ private:
                 return prog.progType;
             }
         }
-        return static_cast<bpf_prog_type>(-1);
+        return static_cast<bpf_prog_type>(NETMANAGER_ERROR);
     }
 
     bool DoAttach(int32_t progFd, const std::string &progName)
     {
+        if (progName.size() < 1) {
+            NETNATIVE_LOGE("progName is null");
+            return false;
+        }
         NETNATIVE_LOG_D("The progName = %{public}s", progName.c_str());
 
         for (const auto &prog : PROG_ATTACH_TYPES) {
-            if (progName == prog.progName) {
+            if (prog.progName != nullptr && progName == prog.progName) {
                 int cgroupFd = open(CGROUP_DIR, O_DIRECTORY | O_RDONLY | O_CLOEXEC);
                 if (cgroupFd < 0) {
                     NETNATIVE_LOGE("open CGROUP_DIR failed: errno = %{public}d", errno);
                     return false;
                 }
 
-                if (SysBpfObjAttach(prog.attachType, progFd, cgroupFd) < 0) {
+                if (SysBpfObjAttach(prog.attachType, progFd, cgroupFd) < NETSYS_SUCCESS) {
                     NETNATIVE_LOGE("attach %{pubic}s failed: errno = %{public}d", progName.c_str(), errno);
                     close(cgroupFd);
                     return false;
@@ -626,23 +634,27 @@ private:
 
     void DoDetach(const std::string &progPinLocation, const std::string &progName)
     {
+        if (progName.size() < 1) {
+            NETNATIVE_LOGE("progName is null");
+            return;
+        }
         NETNATIVE_LOG_D("The progName = %{public}s", progName.c_str());
 
         for (const auto &prog : PROG_ATTACH_TYPES) {
-            if (progName == prog.progName) {
+            if (prog.progName != nullptr && progName == prog.progName) {
                 int cgroupFd = open(CGROUP_DIR, O_DIRECTORY | O_RDONLY | O_CLOEXEC);
-                if (cgroupFd < 0) {
+                if (cgroupFd < NETSYS_SUCCESS) {
                     NETNATIVE_LOGE("open CGROUP_DIR failed: errno = %{public}d", errno);
                     return;
                 }
 
                 auto progFd = SysBpfObjGet(progPinLocation, 0);
-                if (progFd < 0) {
+                if (progFd < NETSYS_SUCCESS) {
                     close(cgroupFd);
                     return;
                 }
 
-                if (SysBpfObjDetach(prog.attachType, progFd, cgroupFd) < 0) {
+                if (SysBpfObjDetach(prog.attachType, progFd, cgroupFd) < NETSYS_SUCCESS) {
                     NETNATIVE_LOGE("detach %{pubic}s failed: errno = %{public}d", progName.c_str(), errno);
                     close(cgroupFd);
                     return;
@@ -657,13 +669,18 @@ private:
     bool LoadProg(const std::string &event, const bpf_insn *insn, size_t insnCnt)
     {
         auto progType = ConvertEventToProgType(event);
-        if (progType < 0) {
+        if (progType < NETSYS_SUCCESS) {
             NETNATIVE_LOGE("unsupported program type: %{public}s", event.c_str());
             return false;
         }
 
+        if (insn == nullptr) {
+            NETNATIVE_LOGE("insn is null");
+            return false;
+        }
+
         int32_t progFd = BpfLoadProgram(progType, insn, insnCnt);
-        if (progFd < 0) {
+        if (progFd < NETSYS_SUCCESS) {
             NETNATIVE_LOGE("Failed to load bpf prog, error = %{public}d", errno);
             return false;
         }
@@ -673,7 +690,7 @@ private:
         if (access(progPinLocation.c_str(), F_OK) == 0) {
             NETNATIVE_LOGI("prog: %{public}s has already been pinned", progPinLocation.c_str());
         } else {
-            if (SysBpfObjPin(progFd, progPinLocation) < 0) {
+            if (SysBpfObjPin(progFd, progPinLocation) < NETSYS_SUCCESS) {
                 NETNATIVE_LOGE("Failed to pin prog: %{public}s, errno = %{public}d", progPinLocation.c_str(), errno);
                 return false;
             }
@@ -700,6 +717,9 @@ private:
             }
 
             auto insn = reinterpret_cast<bpf_insn *>(const_cast<char *>(progSec->get_data()));
+            if (insn == nullptr) {
+                return false;
+            }
             if (!ApplyRelocation(insn, section)) {
                 return false;
             }
@@ -720,11 +740,7 @@ private:
             if (access(progPinLocation.c_str(), F_OK) == 0) {
                 DoDetach(progPinLocation, progName);
 
-                auto ret = UnPin(progPinLocation);
-                if (ret < 0) {
-                    return false;
-                }
-                return true;
+                return UnPin(progPinLocation) < NETSYS_SUCCESS ? false : true;
             }
             return true;
         });
