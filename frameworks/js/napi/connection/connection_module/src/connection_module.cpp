@@ -93,7 +93,7 @@ static bool ParseNetSpecifier(napi_env env, napi_value obj, NetSpecifier &specif
     return true;
 }
 
-static NetConnectionType JudgeNetConnection(napi_env env, size_t argc, napi_value *argv)
+static NetConnectionType GetNetConnectionType(napi_env env, size_t argc, napi_value *argv)
 {
     if (argc == ARG_NUM_0) {
         return NetConnectionType::PARAMETER_ZERO;
@@ -129,7 +129,7 @@ static void *ParseNetConnectionParams(napi_env env, size_t argc, napi_value *arg
     std::unique_ptr<NetConnection, decltype(&NetConnection::DeleteNetConnection)> netConnection(
         NetConnection::MakeNetConnection(manager), NetConnection::DeleteNetConnection);
 
-    auto netConnType = JudgeNetConnection(env, argc, argv);
+    auto netConnType = GetNetConnectionType(env, argc, argv);
 
     switch (netConnType) {
         case NetConnectionType::PARAMETER_ZERO: {

@@ -134,7 +134,7 @@ int32_t NetPolicyTraffic::UpdateQuotaPoliciesInner()
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     // notify the the quota policy change.
-    GetCbInst()->NotifyNetQuotaPolicyChange(quotaPolicies_);
+    GetCbInst()->NotifyNetQuotaPolicyChangeAsync(quotaPolicies_);
     return NETMANAGER_SUCCESS;
 }
 
@@ -198,7 +198,7 @@ void NetPolicyTraffic::UpdateMeteredIfaces(std::vector<std::string> &newMeteredI
         meteredIfaces_.push_back(iface);
     }
     // notify the callback of metered ifaces changed.
-    GetCbInst()->NotifyNetMeteredIfacesChange(meteredIfaces_);
+    GetCbInst()->NotifyNetMeteredIfacesChangeAsync(meteredIfaces_);
 }
 
 void NetPolicyTraffic::UpdateQuotaNotify()

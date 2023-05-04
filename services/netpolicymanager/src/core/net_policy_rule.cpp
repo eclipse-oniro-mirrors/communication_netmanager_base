@@ -68,12 +68,12 @@ int32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
     if (policyRule == uidPolicyRules_.end()) {
         NETMGR_LOG_D("Don't find this uid, need to add uid:[%{public}u] policy[%{public}u].", uid, policy);
         uidPolicyRules_[uid] = {.policy_ = policy};
-        GetCbInst()->NotifyNetUidPolicyChange(uid, policy);
+        GetCbInst()->NotifyNetUidPolicyChangeAsync(uid, policy);
     } else {
         if (policyRule->second.policy_ != policy) {
             NETMGR_LOG_D("Update policy's value.uid:[%{public}u] policy[%{public}u]", uid, policy);
             policyRule->second.policy_ = policy;
-            GetCbInst()->NotifyNetUidPolicyChange(uid, policy);
+            GetCbInst()->NotifyNetUidPolicyChangeAsync(uid, policy);
         }
     }
 
@@ -138,7 +138,7 @@ void NetPolicyRule::TransConditionToRuleAndNetsys(uint32_t policyCondition, uint
     }
 
     policyRuleNetsys.rule_ = rule;
-    GetCbInst()->NotifyNetUidRuleChange(uid, rule);
+    GetCbInst()->NotifyNetUidRuleChangeAsync(uid, rule);
 }
 
 uint32_t NetPolicyRule::GetMatchTransCondition(uint32_t policyCondition)
@@ -268,7 +268,7 @@ int32_t NetPolicyRule::IsUidNetAllowed(uint32_t uid, bool metered, bool &isAllow
 int32_t NetPolicyRule::SetBackgroundPolicy(bool allow)
 {
     if (backgroundAllow_ != allow) {
-        GetCbInst()->NotifyNetBackgroundPolicyChange(allow);
+        GetCbInst()->NotifyNetBackgroundPolicyChangeAsync(allow);
         backgroundAllow_ = allow;
         TransPolicyToRule();
         GetFileInst()->SetBackgroundPolicy(allow);

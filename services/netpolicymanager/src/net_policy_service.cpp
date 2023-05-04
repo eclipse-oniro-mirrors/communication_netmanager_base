@@ -155,7 +155,7 @@ int32_t NetPolicyService::RegisterNetPolicyCallback(const sptr<INetPolicyCallbac
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
-    return netPolicyCallback_->RegisterNetPolicyCallback(callback);
+    return netPolicyCallback_->RegisterNetPolicyCallbackAsync(callback);
 }
 
 int32_t NetPolicyService::UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback)
@@ -166,7 +166,7 @@ int32_t NetPolicyService::UnregisterNetPolicyCallback(const sptr<INetPolicyCallb
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
-    return netPolicyCallback_->UnregisterNetPolicyCallback(callback);
+    return netPolicyCallback_->UnregisterNetPolicyCallbackAsync(callback);
 }
 
 int32_t NetPolicyService::SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies)
