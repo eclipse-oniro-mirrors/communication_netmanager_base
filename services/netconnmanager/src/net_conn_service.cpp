@@ -1228,9 +1228,9 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
     if (httpProxy_.GetHost().empty()) {
         httpProxy.SetPort(0);
         NETMGR_LOG_E("The http proxy host is empty");
-        return NETMANAGER_SUCCESS;
+    } else {
+        httpProxy = httpProxy_;
     }
-    httpProxy = httpProxy_;
     return NETMANAGER_SUCCESS;
 }
 
