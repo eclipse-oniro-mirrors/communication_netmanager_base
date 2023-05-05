@@ -33,7 +33,7 @@
 bpf_map_def SEC("maps") iface_stats_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(uint64_t),
-    .value_size = sizeof(stats_value),
+    .value_size = sizeof(iface_stats_value),
     .max_entries = IFACE_STATS_MAP_SIZE,
     .map_flags = 0,
     .inner_map_idx = 0,
@@ -43,7 +43,7 @@ bpf_map_def SEC("maps") iface_stats_map = {
 bpf_map_def SEC("maps") app_uid_stats_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(uint64_t),
-    .value_size = sizeof(stats_value),
+    .value_size = sizeof(app_uid_stats_value),
     .max_entries = APP_STATS_MAP_SIZE,
     .map_flags = 0,
     .inner_map_idx = 0,
@@ -52,8 +52,8 @@ bpf_map_def SEC("maps") app_uid_stats_map = {
 
 bpf_map_def SEC("maps") app_uid_if_stats_map = {
     .type = BPF_MAP_TYPE_HASH,
-    .key_size = sizeof(stats_key),
-    .value_size = sizeof(stats_value),
+    .key_size = sizeof(app_uid_if_stats_key),
+    .value_size = sizeof(app_uid_if_stats_value),
     .max_entries = IFACE_NAME_MAP_SIZE,
     .map_flags = 0,
     .inner_map_idx = 0,
@@ -66,9 +66,9 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb) {
         return 1;
     }
     uint64_t sock_uid = bpf_get_socket_uid(skb);
-    stats_value *value = bpf_map_lookup_elem(&app_uid_stats_map, &sock_uid);
+    app_uid_stats_value *value = bpf_map_lookup_elem(&app_uid_stats_map, &sock_uid);
     if (value == NULL) {
-        stats_value newValue = {};
+        app_uid_stats_value newValue = {};
         bpf_map_update_elem(&app_uid_stats_map, &sock_uid, &newValue, BPF_NOEXIST);
         value = bpf_map_lookup_elem(&app_uid_stats_map, &sock_uid);
     }
@@ -76,10 +76,10 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb) {
         __sync_fetch_and_add(&value->rxPackets, 1);
         __sync_fetch_and_add(&value->rxBytes, skb->len);
     }
-    stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
-    stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+    app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
+    app_uid_if_stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
     if (value_uid_if == NULL) {
-        stats_value newValue = {};
+        app_uid_if_stats_value newValue = {};
         bpf_map_update_elem(&app_uid_if_stats_map, &key, &newValue, BPF_NOEXIST);
         value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
     }
@@ -88,9 +88,9 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb) {
         __sync_fetch_and_add(&value_uid_if->rxBytes, skb->len);
     }
     uint64_t ifindex = skb->ifindex;
-    stats_value *value_if = bpf_map_lookup_elem(&iface_stats_map, &ifindex);
+    iface_stats_value *value_if = bpf_map_lookup_elem(&iface_stats_map, &ifindex);
     if (value_if == NULL) {
-        stats_value newValue = {};
+        iface_stats_value newValue = {};
         bpf_map_update_elem(&iface_stats_map, &ifindex, &newValue, BPF_NOEXIST);
         value_if = bpf_map_lookup_elem(&iface_stats_map, &ifindex);
     }
@@ -107,9 +107,9 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb) {
         return 1;
     }
     uint64_t sock_uid = bpf_get_socket_uid(skb);
-    stats_value *value = bpf_map_lookup_elem(&app_uid_stats_map, &sock_uid);
+    app_uid_stats_value *value = bpf_map_lookup_elem(&app_uid_stats_map, &sock_uid);
     if (value == NULL) {
-        stats_value newValue = {};
+        app_uid_stats_value newValue = {};
         bpf_map_update_elem(&app_uid_stats_map, &sock_uid, &newValue, BPF_NOEXIST);
         value = bpf_map_lookup_elem(&app_uid_stats_map, &sock_uid);
     }
@@ -117,10 +117,10 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb) {
         __sync_fetch_and_add(&value->txPackets, 1);
         __sync_fetch_and_add(&value->txBytes, skb->len);
     }
-    stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
-    stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+    app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
+    app_uid_if_stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
     if (value_uid_if == NULL) {
-        stats_value newValue = {};
+        app_uid_if_stats_value newValue = {};
         bpf_map_update_elem(&app_uid_if_stats_map, &key, &newValue, BPF_NOEXIST);
         value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
     }
@@ -129,9 +129,9 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb) {
         __sync_fetch_and_add(&value_uid_if->txBytes, skb->len);
     }
     uint64_t ifindex = skb->ifindex;
-    stats_value *value_if = bpf_map_lookup_elem(&iface_stats_map, &ifindex);
+    iface_stats_value *value_if = bpf_map_lookup_elem(&iface_stats_map, &ifindex);
     if (value_if == NULL) {
-        stats_value newValue = {};
+        iface_stats_value newValue = {};
         bpf_map_update_elem(&iface_stats_map, &ifindex, &newValue, BPF_NOEXIST);
         value_if = bpf_map_lookup_elem(&iface_stats_map, &ifindex);
     }
