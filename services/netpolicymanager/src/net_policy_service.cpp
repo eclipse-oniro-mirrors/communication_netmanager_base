@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -155,7 +155,7 @@ int32_t NetPolicyService::RegisterNetPolicyCallback(const sptr<INetPolicyCallbac
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
-    return netPolicyCallback_->RegisterNetPolicyCallback(callback);
+    return netPolicyCallback_->RegisterNetPolicyCallbackAsync(callback);
 }
 
 int32_t NetPolicyService::UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback)
@@ -166,7 +166,7 @@ int32_t NetPolicyService::UnregisterNetPolicyCallback(const sptr<INetPolicyCallb
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
-    return netPolicyCallback_->UnregisterNetPolicyCallback(callback);
+    return netPolicyCallback_->UnregisterNetPolicyCallbackAsync(callback);
 }
 
 int32_t NetPolicyService::SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies)

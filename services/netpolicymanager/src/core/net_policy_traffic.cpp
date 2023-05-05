@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -134,7 +134,7 @@ int32_t NetPolicyTraffic::UpdateQuotaPoliciesInner()
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     // notify the the quota policy change.
-    GetCbInst()->NotifyNetQuotaPolicyChange(quotaPolicies_);
+    GetCbInst()->NotifyNetQuotaPolicyChangeAsync(quotaPolicies_);
     return NETMANAGER_SUCCESS;
 }
 
@@ -198,7 +198,7 @@ void NetPolicyTraffic::UpdateMeteredIfaces(std::vector<std::string> &newMeteredI
         meteredIfaces_.push_back(iface);
     }
     // notify the callback of metered ifaces changed.
-    GetCbInst()->NotifyNetMeteredIfacesChange(meteredIfaces_);
+    GetCbInst()->NotifyNetMeteredIfacesChangeAsync(meteredIfaces_);
 }
 
 void NetPolicyTraffic::UpdateQuotaNotify()

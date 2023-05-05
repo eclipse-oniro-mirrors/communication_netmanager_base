@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -173,7 +173,7 @@ void SetPolicyCallback()
 HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback001, TestSize.Level1)
 {
     sptr<INetPolicyCallbackImpl> callback = new (std::nothrow) INetPolicyCallbackImpl();
-    g_netPolicyCallback->RegisterNetPolicyCallback(callback);
+    g_netPolicyCallback->RegisterNetPolicyCallbackAsync(callback);
     std::thread setPolicyCallback(SetPolicyCallback);
 
     std::unique_lock<std::mutex> lck(g_callbackMutex);
@@ -184,7 +184,7 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback001, TestSize.Level1)
     std::cout << "g_callbackPolicy:" << g_callbackPolicy << std::endl;
     ASSERT_EQ(g_callbackUid, static_cast<int32_t>(TEST_UID1));
     ASSERT_EQ(g_callbackPolicy, 1);
-    g_netPolicyCallback->UnregisterNetPolicyCallback(callback);
+    g_netPolicyCallback->UnregisterNetPolicyCallbackAsync(callback);
 }
 
 void SetPolicyCallback2()
@@ -201,7 +201,7 @@ void SetPolicyCallback2()
 HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback002, TestSize.Level1)
 {
     sptr<INetPolicyCallbackImpl> callback = new INetPolicyCallbackImpl();
-    g_netPolicyCallback->RegisterNetPolicyCallback(callback);
+    g_netPolicyCallback->RegisterNetPolicyCallbackAsync(callback);
     std::thread setPolicyCallback2(SetPolicyCallback2);
 
     std::unique_lock<std::mutex> lck(g_callbackMutex);
@@ -211,7 +211,7 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback002, TestSize.Level1)
     std::cout << "g_callbackUid:" << g_callbackUid << std::endl;
     std::cout << "g_callbackRule:" << g_callbackRule << std::endl;
     ASSERT_EQ(g_callbackUid, static_cast<int32_t>(TEST_UID1));
-    g_netPolicyCallback->UnregisterNetPolicyCallback(callback);
+    g_netPolicyCallback->UnregisterNetPolicyCallbackAsync(callback);
 }
 
 void SetQuotaPolicy()
@@ -230,7 +230,7 @@ void SetQuotaPolicy()
 HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback003, TestSize.Level1)
 {
     sptr<INetPolicyCallbackImpl> callback = new INetPolicyCallbackImpl();
-    g_netPolicyCallback->RegisterNetPolicyCallback(callback);
+    g_netPolicyCallback->RegisterNetPolicyCallbackAsync(callback);
     std::thread setQuotaPolicy(SetQuotaPolicy);
 
     std::unique_lock<std::mutex> lck(g_callbackMutex);
@@ -239,7 +239,7 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback003, TestSize.Level1)
 
     std::cout << "g_callbackQuotaPolicySize:" << g_callbackQuotaPolicySize << std::endl;
     ASSERT_TRUE(g_callbackQuotaPolicySize > 0);
-    g_netPolicyCallback->UnregisterNetPolicyCallback(callback);
+    g_netPolicyCallback->UnregisterNetPolicyCallbackAsync(callback);
 }
 
 void SetQuotaPolicy2()
@@ -258,7 +258,7 @@ void SetQuotaPolicy2()
 HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback004, TestSize.Level1)
 {
     sptr<INetPolicyCallbackImpl> callback = new INetPolicyCallbackImpl();
-    g_netPolicyCallback->RegisterNetPolicyCallback(callback);
+    g_netPolicyCallback->RegisterNetPolicyCallbackAsync(callback);
     std::thread setQuotaPolicy2(SetQuotaPolicy2);
 
     std::unique_lock<std::mutex> lck(g_callbackMutex);
@@ -267,7 +267,7 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback004, TestSize.Level1)
 
     std::cout << "g_callbackIfacesSize:" << g_callbackIfacesSize << std::endl;
     ASSERT_TRUE(g_callbackIfacesSize >= 0);
-    g_netPolicyCallback->UnregisterNetPolicyCallback(callback);
+    g_netPolicyCallback->UnregisterNetPolicyCallbackAsync(callback);
 }
 
 void SetBackgroundPolicy()
@@ -283,7 +283,7 @@ void SetBackgroundPolicy()
 HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback005, TestSize.Level1)
 {
     sptr<INetPolicyCallbackImpl> callback = new INetPolicyCallbackImpl();
-    g_netPolicyCallback->RegisterNetPolicyCallback(callback);
+    g_netPolicyCallback->RegisterNetPolicyCallbackAsync(callback);
     std::thread setBackgroundPolicy(SetBackgroundPolicy);
 
     std::unique_lock<std::mutex> lck(g_callbackMutex);
@@ -292,7 +292,7 @@ HWTEST_F(NetPolicyCallbackUTest, NetPolicyCallback005, TestSize.Level1)
 
     std::cout << "g_callbackBackgroundPolicy:" << g_callbackBackgroundPolicy << std::endl;
     ASSERT_TRUE(g_callbackBackgroundPolicy == true);
-    g_netPolicyCallback->UnregisterNetPolicyCallback(callback);
+    g_netPolicyCallback->UnregisterNetPolicyCallbackAsync(callback);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

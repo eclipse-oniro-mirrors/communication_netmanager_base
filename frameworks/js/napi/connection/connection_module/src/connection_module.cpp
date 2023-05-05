@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,43 +93,71 @@ static bool ParseNetSpecifier(napi_env env, napi_value obj, NetSpecifier &specif
     return true;
 }
 
+static NetConnectionType GetNetConnectionType(napi_env env, size_t argc, napi_value *argv)
+{
+    if (argc == ARG_NUM_0) {
+        return NetConnectionType::PARAMETER_ZERO;
+    }
+    if (argc == ARG_NUM_1) {
+        if (NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) == napi_undefined) {
+            return NetConnectionType::PARAMETER_ZERO;
+        }
+        if (NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) == napi_object) {
+            return NetConnectionType::PARAMETER_SPECIFIER;
+        }
+        return NetConnectionType::PARAMETER_ERROR;
+    }
+    if (argc == ARG_NUM_2) {
+        if (NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) == napi_object &&
+            NapiUtils::GetValueType(env, argv[ARG_INDEX_1]) == napi_number) {
+            return NetConnectionType::PARAMETER_TIMEOUT;
+        }
+        if (NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) == napi_undefined &&
+            NapiUtils::GetValueType(env, argv[ARG_INDEX_1]) == napi_undefined) {
+            return NetConnectionType::PARAMETER_ZERO;
+        }
+        if (NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) == napi_object &&
+            NapiUtils::GetValueType(env, argv[ARG_INDEX_1]) == napi_undefined) {
+            return NetConnectionType::PARAMETER_SPECIFIER;
+        }
+    }
+    return NetConnectionType::PARAMETER_ERROR;
+}
+
 static void *ParseNetConnectionParams(napi_env env, size_t argc, napi_value *argv, EventManager *manager)
 {
     std::unique_ptr<NetConnection, decltype(&NetConnection::DeleteNetConnection)> netConnection(
         NetConnection::MakeNetConnection(manager), NetConnection::DeleteNetConnection);
 
-    if (argc == ARG_NUM_0 || (argc == ARG_NUM_1 && NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) ==
-        napi_undefined) || (argc == ARG_NUM_2 && NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) == napi_undefined &&
-        NapiUtils::GetValueType(env, argv[ARG_INDEX_1]) == napi_undefined)) {
-        NETMANAGER_BASE_LOGI("ParseNetConnectionParams no params");
-        return netConnection.release();
-    }
+    auto netConnType = GetNetConnectionType(env, argc, argv);
 
-    if ((argc == ARG_NUM_1 && NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) == napi_object) || (argc ==
-        ARG_NUM_2 && NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) == napi_object &&
-        NapiUtils::GetValueType(env, argv[ARG_INDEX_1]) == napi_undefined)) {
-        if (!ParseNetSpecifier(env, argv[ARG_INDEX_0], netConnection->netSpecifier_)) {
-            NETMANAGER_BASE_LOGE("ParseNetSpecifier failed");
-            return nullptr;
+    switch (netConnType) {
+        case NetConnectionType::PARAMETER_ZERO: {
+            NETMANAGER_BASE_LOGI("ParseNetConnectionParams no params");
+            return netConnection.release();
         }
-        netConnection->hasNetSpecifier_ = true;
-        return netConnection.release();
-    }
-
-    if (argc == ARG_NUM_2 && NapiUtils::GetValueType(env, argv[ARG_INDEX_0]) == napi_object &&
-        NapiUtils::GetValueType(env, argv[ARG_INDEX_1]) == napi_number) {
-        if (!ParseNetSpecifier(env, argv[ARG_INDEX_0], netConnection->netSpecifier_)) {
-            NETMANAGER_BASE_LOGE("ParseNetSpecifier failed, do not use params");
-            return nullptr;
+        case NetConnectionType::PARAMETER_SPECIFIER: {
+            if (!ParseNetSpecifier(env, argv[ARG_INDEX_0], netConnection->netSpecifier_)) {
+                NETMANAGER_BASE_LOGE("ParseNetSpecifier failed");
+                return nullptr;
+            }
+            netConnection->hasNetSpecifier_ = true;
+            return netConnection.release();
         }
-        netConnection->hasNetSpecifier_ = true;
-        netConnection->hasTimeout_ = true;
-        netConnection->timeout_ = NapiUtils::GetUint32FromValue(env, argv[ARG_INDEX_1]);
-        return netConnection.release();
+        case NetConnectionType::PARAMETER_TIMEOUT: {
+            if (!ParseNetSpecifier(env, argv[ARG_INDEX_0], netConnection->netSpecifier_)) {
+                NETMANAGER_BASE_LOGE("ParseNetSpecifier failed, do not use params");
+                return nullptr;
+            }
+            netConnection->hasNetSpecifier_ = true;
+            netConnection->hasTimeout_ = true;
+            netConnection->timeout_ = NapiUtils::GetUint32FromValue(env, argv[ARG_INDEX_1]);
+            return netConnection.release();
+        }
+        default:
+            NETMANAGER_BASE_LOGE("constructor params invalid, should be none or specifier or specifier+timeout_");
+            return nullptr;
     }
-
-    NETMANAGER_BASE_LOGE("constructor params invalid, should be none or specifier or specifier+timeout_");
-    return nullptr;
 }
 
 napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value exports)
