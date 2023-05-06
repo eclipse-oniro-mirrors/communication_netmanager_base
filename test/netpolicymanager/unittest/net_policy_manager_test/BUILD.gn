@@ -51,7 +51,7 @@ ohos_unittest("net_policy_manager_test") {
   deps = [
     "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
-    "$NETMANAGER_BASE_ROOT/services/netpolicymanager:net_policy_manager",
+    "$NETMANAGER_BASE_ROOT/services/netpolicymanager:net_policy_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   ]
 
