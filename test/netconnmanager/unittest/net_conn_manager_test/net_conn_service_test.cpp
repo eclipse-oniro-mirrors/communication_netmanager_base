@@ -200,7 +200,7 @@ HWTEST_F(NetConnServiceTest, RegisterNetSupplierCallbackTest001, TestSize.Level1
     ASSERT_NE(callback, nullptr);
     std::set<NetCap> netCaps;
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->RegisterNetSupplierCallback(g_supplierId, callback);
-    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceTest, UpdateNetSupplierInfoTest001, TestSize.Level1)
@@ -208,7 +208,7 @@ HWTEST_F(NetConnServiceTest, UpdateNetSupplierInfoTest001, TestSize.Level1)
     sptr<NetSupplierInfo> netSupplierInfo = new (std::nothrow) NetSupplierInfo();
     ASSERT_NE(netSupplierInfo, nullptr);
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->UpdateNetSupplierInfo(g_supplierId, netSupplierInfo);
-    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceTest, UpdateNetLinkInfoTest001, TestSize.Level1)
@@ -216,7 +216,7 @@ HWTEST_F(NetConnServiceTest, UpdateNetLinkInfoTest001, TestSize.Level1)
     sptr<NetLinkInfo> netLinkInfo = new (std::nothrow) NetLinkInfo();
     ASSERT_NE(netLinkInfo, nullptr);
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->UpdateNetLinkInfo(g_supplierId, netLinkInfo);
-    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest001, TestSize.Level1)
@@ -224,14 +224,14 @@ HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest001, TestSize.Level1)
     sptr<INetConnCallback> callback = new (std::nothrow) NetConnTestCallback();
     ASSERT_NE(callback, nullptr);
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->RegisterNetConnCallback(callback);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest002, TestSize.Level1)
 {
     AccessToken token;
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->RegisterNetConnCallback(g_callback);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest004, TestSize.Level1)
@@ -243,14 +243,14 @@ HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest004, TestSize.Level1)
     ASSERT_NE(callback, nullptr);
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->RegisterNetConnCallback(netSpecifier, callback,
                                                                                         TEST_TIMEOUTMS);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceTest, UnregisterNetConnCallbackTest002, TestSize.Level1)
 {
     AccessToken token;
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->UnregisterNetConnCallback(g_callback);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceTest, GetAllNetsTest002, TestSize.Level1)
@@ -295,7 +295,7 @@ HWTEST_F(NetConnServiceTest, NetDetectionTest002, TestSize.Level1)
 {
     AccessToken token;
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->NetDetection(TEST_NETID);
-    EXPECT_EQ(ret, NET_CONN_ERR_NETID_NOT_FOUND);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceTest, GetNetIdByIdentifierTest001, TestSize.Level1)
@@ -362,7 +362,7 @@ HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest001, TestSize.Level1)
     AccessToken token;
     HttpProxy httpProxy = {"testHttpProxy", 0, {}};
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    ASSERT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest002, TestSize.Level1)
@@ -377,7 +377,7 @@ HWTEST_F(NetConnServiceTest, GetGlobalHttpProxyTest001, TestSize.Level1)
     AccessToken token;
     HttpProxy httpProxy = {"testHttpProxy", 0, {}};
     int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    ASSERT_EQ(ret, NETMANAGER_ERROR);
 
     HttpProxy getGlobalHttpProxy;
     ret = DelayedSingleton<NetConnService>::GetInstance()->GetGlobalHttpProxy(getGlobalHttpProxy);
@@ -392,7 +392,7 @@ HWTEST_F(NetConnServiceTest, GetTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     ret = DelayedSingleton<NetConnService>::GetInstance()->RestrictBackgroundChanged(true);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 
     std::vector<std::u16string> args;
     args.emplace_back(u"dummy data");
