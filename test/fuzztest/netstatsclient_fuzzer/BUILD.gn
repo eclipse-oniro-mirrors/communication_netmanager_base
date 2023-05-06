@@ -47,7 +47,7 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
   deps = [
     "$HILOG_ROOT/interfaces/native/innerkits:libhilog",
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
-    "$NETMANAGER_BASE_ROOT/services/netstatsmanager:net_stats_manager_static",
+    "$NETMANAGER_BASE_ROOT/services/netstatsmanager:net_stats_manager",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]

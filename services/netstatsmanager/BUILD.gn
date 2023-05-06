@@ -14,7 +14,21 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-config("net_stats_manager_config") {
+ohos_shared_library("net_stats_manager") {
+  sources = [
+    "src/common/net_stats_service_common.cpp",
+    "src/net_stats_cached.cpp",
+    "src/net_stats_callback.cpp",
+    "src/net_stats_data_handler.cpp",
+    "src/net_stats_database_helper.cpp",
+    "src/net_stats_history.cpp",
+    "src/net_stats_listener.cpp",
+    "src/net_stats_service.cpp",
+    "src/net_stats_sqlite_statement.cpp",
+    "src/stub/net_stats_callback_proxy.cpp",
+    "src/stub/net_stats_service_stub.cpp",
+  ]
+
   include_dirs = [
     "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netconnclient/include",
@@ -35,95 +49,6 @@ config("net_stats_manager_config") {
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
   ]
-}
-
-ohos_shared_library("net_stats_manager") {
-  sources = [
-    "src/common/net_stats_service_common.cpp",
-    "src/net_stats_cached.cpp",
-    "src/net_stats_callback.cpp",
-    "src/net_stats_data_handler.cpp",
-    "src/net_stats_database_helper.cpp",
-    "src/net_stats_history.cpp",
-    "src/net_stats_listener.cpp",
-    "src/net_stats_service.cpp",
-    "src/net_stats_sqlite_statement.cpp",
-    "src/stub/net_stats_callback_proxy.cpp",
-    "src/stub/net_stats_service_stub.cpp",
-  ]
-
-  configs = [ ":net_stats_manager_config" ]
-
-  deps = [
-    "$INNERKITS_ROOT/netstatsclient:net_stats_parcel",
-    "$NETCONNMANAGER_COMMON_DIR:net_service_common",
-    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-    "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/sqlite:sqlite",
-  ]
-
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Os",
-  ]
-
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Os",
-  ]
-
-  ldflags = [
-    "-Wl,--exclude-libs=ALL",
-    "-Wl,--gc-sections",
-  ]
-
-  external_deps = [
-    "ability_base:want",
-    "common_event_service:cesfwk_innerkits",
-    "hitrace_native:hitrace_meter",
-    "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-  ]
-
-  defines = [
-    "USE_SQLITE_SYMBOLS",
-    "NETMGR_LOG_TAG = \"NetStatsClient\"",
-    "LOG_DOMAIN = 0xD0015B0",
-  ]
-
-  if (enable_netmgr_debug) {
-    defines += [ "NETMGR_DEBUG" ]
-  }
-
-  if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-  }
-
-  part_name = "netmanager_base"
-  subsystem_name = "communication"
-}
-
-ohos_static_library("net_stats_manager_static") {
-  testonly = true
-  sources = [
-    "src/common/net_stats_service_common.cpp",
-    "src/net_stats_cached.cpp",
-    "src/net_stats_callback.cpp",
-    "src/net_stats_data_handler.cpp",
-    "src/net_stats_database_helper.cpp",
-    "src/net_stats_history.cpp",
-    "src/net_stats_listener.cpp",
-    "src/net_stats_service.cpp",
-    "src/net_stats_sqlite_statement.cpp",
-    "src/stub/net_stats_callback_proxy.cpp",
-    "src/stub/net_stats_service_stub.cpp",
-  ]
-
-  configs = [ ":net_stats_manager_config" ]
 
   deps = [
     "$INNERKITS_ROOT/netstatsclient:net_stats_parcel",

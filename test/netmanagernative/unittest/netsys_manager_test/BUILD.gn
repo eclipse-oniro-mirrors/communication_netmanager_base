@@ -69,7 +69,7 @@ ohos_unittest("netsys_native_manager_test") {
     "$DHCP_MANAGER_ROOT/services/mgr_service:dhcp_manager_service",
     "$FWMARK_CLIENT_DIR:fwmark_client",
     "$NETMANAGERNATIVE_ROOT/netsys_client:netsys_client",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils",
     "$NETMANAGER_BASE_ROOT/services/netsyscontroller:netsys_controller",
   ]

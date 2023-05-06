@@ -19,10 +19,9 @@
 #include "i_netsys_service.h"
 #include "iremote_proxy.h"
 
-#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 namespace OHOS {
 namespace NetsysNative {
-class NET_SYMBOL_VISIBLE NetsysNativeServiceProxy : public IRemoteProxy<INetsysService> {
+class NetsysNativeServiceProxy : public IRemoteProxy<INetsysService> {
 public:
     explicit NetsysNativeServiceProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<INetsysService>(impl) {}
     ~NetsysNativeServiceProxy() override {}
