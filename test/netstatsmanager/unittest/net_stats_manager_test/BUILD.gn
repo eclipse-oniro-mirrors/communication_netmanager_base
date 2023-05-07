@@ -30,7 +30,7 @@ ohos_unittest("net_stats_mock_data") {
 
   deps = [
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
-    "$NETMANAGER_BASE_ROOT/services/netstatsmanager:net_stats_manager",
+    "$NETMANAGER_BASE_ROOT/services/netstatsmanager:net_stats_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
     "$THIRD_PARTY_ROOT/sqlite:sqlite",
@@ -103,7 +103,7 @@ ohos_unittest("net_stats_manager_test") {
   deps = [
     "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
-    "$NETMANAGER_BASE_ROOT/services/netstatsmanager:net_stats_manager",
+    "$NETMANAGER_BASE_ROOT/services/netstatsmanager:net_stats_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
     "$THIRD_PARTY_ROOT/sqlite:sqlite",

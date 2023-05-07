@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,6 +13,23 @@
 
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
+
+config("net_conn_manager_config") {
+  include_dirs = [
+    "include",
+    "include/stub",
+    "$INNERKITS_ROOT/include",
+    "$INNERKITS_ROOT/netconnclient/include",
+    "$INNERKITS_ROOT/netconnclient/include/proxy",
+    "$INNERKITS_ROOT/netstatsclient/include",
+    "$NETCONNMANAGER_COMMON_DIR/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
+    "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient/include",
+    "$INNERKITS_ROOT/netmanagernative/include",
+    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
+  ]
+}
 
 ohos_shared_library("net_conn_manager") {
   sources = [
@@ -33,20 +50,84 @@ ohos_shared_library("net_conn_manager") {
     "src/stub/net_supplier_callback_proxy.cpp",
   ]
 
-  include_dirs = [
-    "include",
-    "include/stub",
-    "$INNERKITS_ROOT/include",
-    "$INNERKITS_ROOT/netconnclient/include",
-    "$INNERKITS_ROOT/netconnclient/include/proxy",
-    "$INNERKITS_ROOT/netstatsclient/include",
-    "$NETCONNMANAGER_COMMON_DIR/include",
-    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
-    "$NETSYSCONTROLLER_ROOT_DIR/include",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient/include",
-    "$INNERKITS_ROOT/netmanagernative/include",
-    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
+  configs = [ ":net_conn_manager_config" ]
+
+  deps = [
+    "$NETCONNMANAGER_COMMON_DIR:net_service_common",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]
+
+  cflags = [
+    "-fvisibility=hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-Os",
+  ]
+
+  cflags_cc = [
+    "-fvisibility-inlines-hidden",
+    "-Os",
+  ]
+
+  ldflags = [
+    "-Wl,--exclude-libs=ALL",
+    "-Wl,--gc-sections",
+  ]
+
+  external_deps = [
+    "common_event_service:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+  ]
+
+  defines = [
+    "NETMGR_LOG_TAG = \"NetConnManager\"",
+    "LOG_DOMAIN = 0xD0015B0",
+  ]
+
+  if (enable_netmgr_debug) {
+    defines += [ "NETMGR_DEBUG" ]
+  }
+
+  if (enable_sys_func) {
+    defines += [ "SYS_FUNC" ]
+  }
+
+  if (is_standard_system) {
+    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps += [ "hilog:libhilog" ]
+  }
+
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+ohos_static_library("net_conn_manager_static") {
+  testonly = true
+  sources = [
+    "$NETCONNMANAGER_COMMON_DIR/src/route_utils.cpp",
+    "src/net_activate.cpp",
+    "src/net_caps.cpp",
+    "src/net_conn_event_handler.cpp",
+    "src/net_conn_service.cpp",
+    "src/net_conn_service_iface.cpp",
+    "src/net_http_proxy_tracker.cpp",
+    "src/net_monitor.cpp",
+    "src/net_score.cpp",
+    "src/net_supplier.cpp",
+    "src/network.cpp",
+    "src/stub/net_conn_callback_proxy.cpp",
+    "src/stub/net_conn_service_stub.cpp",
+    "src/stub/net_detection_callback_proxy.cpp",
+    "src/stub/net_supplier_callback_proxy.cpp",
+  ]
+
+  configs = [ ":net_conn_manager_config" ]
 
   deps = [
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
