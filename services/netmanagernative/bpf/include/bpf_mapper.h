@@ -208,6 +208,7 @@ public:
     }
     BpfMapper<Key, Value>(const std::string &pathName, uint32_t flags)
     {
+        mapFd_ = NETMANAGER_ERROR;
         int32_t mapFd = BpfMapperImplement<Key, Value>::GetMap(pathName, flags);
         if (mapFd >= 0) {
             mapFd_ = mapFd;
@@ -297,7 +298,7 @@ public:
     }
 
 private:
-    int32_t mapFd_ = 0;
+    int32_t mapFd_ = NETMANAGER_ERROR;
 };
 } // namespace OHOS::NetManagerStandard
 #endif /* CONNECTIVITY_EXT_BPF_MAPPER_H */
