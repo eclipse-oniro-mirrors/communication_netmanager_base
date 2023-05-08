@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,7 @@ enum {
 
 enum {
     NETMANAGER_EXT_ERR_PERMISSION_DENIED = 201,
-    NETMANAGER_EXT_ERR_NOT_SYSTEM_CALL = 201,
+    NETMANAGER_EXT_ERR_NOT_SYSTEM_CALL = 202,
     NETMANAGER_EXT_ERR_PARAMETER_ERROR = 401,
     NETMANAGER_EXT_ERR_CAPABILITY_NOT_SUPPORTED = 801,
     NETMANAGER_EXT_SUCCESS = 0,
