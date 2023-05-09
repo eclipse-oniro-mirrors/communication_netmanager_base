@@ -25,24 +25,29 @@
 #include <string>
 #include <unistd.h>
 #include <functional>
-#include <memory>
+#include <linux/bpf.h>
 #include <linux/if_ether.h>
-#include <atomic>
+#include <linux/unistd.h>
+#include <memory>
+#include <string>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <vector>
 
-#include "securec.h"
+#include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
+#include "securec.h"
 
 namespace OHOS::NetManagerStandard {
 template <class Key, class Value> class BpfMapperImplement {
 public:
     BpfMapperImplement<Key, Value>() = default;
 
-    static int GetFirstKey(const int mapFd, Key &key)
+    static int32_t GetFirstKey(const int32_t mapFd, Key &key)
     {
         bpf_attr bpfAttr{};
         if (memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr)) != EOK) {
-            return -1;
+            return NETMANAGER_ERROR;
         }
         bpfAttr.map_fd = BpfFdToU32(mapFd);
         bpfAttr.key = 0;
@@ -56,13 +61,13 @@ public:
      * @param mapFd map fd
      * @param key the key of Bpf Map
      * @param next_key the key of Bpf Map
-     * @return int return next key
+     * @return int32_t return next key
      */
-    static int GetNextKey(const int mapFd, const Key &key, Key &nextKey)
+    static int32_t GetNextKey(const int32_t mapFd, const Key &key, Key &nextKey)
     {
         bpf_attr bpfAttr{};
         if (memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr)) != EOK) {
-            return -1;
+            return NETMANAGER_ERROR;
         }
         bpfAttr.map_fd = BpfFdToU32(mapFd);
         bpfAttr.key = BpfMapKeyToU64(key);
@@ -75,11 +80,11 @@ public:
      *
      * @param cmd which command need to execute
      * @param attr union consists of various anonymous structures
-     * @return int return the result of executing the command
+     * @return int32_t return the result of executing the command
      */
-    static int BpfSyscall(int cmd, const bpf_attr &attr)
+    static int32_t BpfSyscall(int32_t cmd, const bpf_attr &attr)
     {
-        return static_cast<int>(syscall(__NR_bpf, cmd, &attr, sizeof(attr)));
+        return static_cast<int32_t>(syscall(__NR_bpf, cmd, &attr, sizeof(attr)));
     }
 
     /**
@@ -89,13 +94,13 @@ public:
      * @param key the key of Bpf Map
      * @param value the value of Bpf Map
      * @param flags map flag
-     * @return int true:write success false:failure
+     * @return int32_t 0:write success -1:failure
      */
-    static int UpdateElem(const int mapFd, const Key &key, const Value &value, uint64_t flags)
+    static int32_t UpdateElem(const int32_t mapFd, const Key &key, const Value &value, uint64_t flags)
     {
         bpf_attr bpfAttr{};
         if (memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr)) != EOK) {
-            return -1;
+            return NETMANAGER_ERROR;
         }
         bpfAttr.map_fd = BpfFdToU32(mapFd);
         bpfAttr.key = BpfMapKeyToU64(key);
@@ -110,13 +115,13 @@ public:
      * @param mapFd map fd
      * @param key the key of Bpf Map
      * @param value the value of Bpf Map
-     * @return int true:find success false:failure
+     * @return int32_t 0:find success -1:failure
      */
-    static int LookUpElem(const int mapFd, const Key &key, const Value &value)
+    static int32_t LookUpElem(const int32_t mapFd, const Key &key, const Value &value)
     {
         bpf_attr bpfAttr{};
         if (memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr)) != EOK) {
-            return -1;
+            return NETMANAGER_ERROR;
         }
         bpfAttr.map_fd = BpfFdToU32(mapFd);
         bpfAttr.key = BpfMapKeyToU64(key);
@@ -129,13 +134,13 @@ public:
      *
      * @param mapFd map fd
      * @param key the key of Bpf Map
-     * @return int true:delete success false:failure
+     * @return int32_t 0:delete success -1:failure
      */
-    static int DeleteElem(const int mapFd, const Key &key)
+    static int32_t DeleteElem(const int32_t mapFd, const Key &key)
     {
         bpf_attr bpfAttr{};
         if (memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr)) != EOK) {
-            return -1;
+            return NETMANAGER_ERROR;
         }
         bpfAttr.map_fd = BpfFdToU32(mapFd);
         bpfAttr.key = BpfMapKeyToU64(key);
@@ -147,13 +152,13 @@ public:
      *
      * @param pathName bpf map path
      * @param fileFlags file flags
-     * @return int return map file descriptor
+     * @return int32_t return map file descriptor
      */
-    static int BpfObjGet(const std::string &pathName, uint32_t fileFlags)
+    static int32_t BpfObjGet(const std::string &pathName, uint32_t fileFlags)
     {
         bpf_attr bpfAttr{};
         if (memset_s(&bpfAttr, sizeof(bpfAttr), 0, sizeof(bpfAttr)) != EOK) {
-            return -1;
+            return NETMANAGER_ERROR;
         }
         bpfAttr.pathname = BpfMapPathNameToU64(pathName);
         bpfAttr.file_flags = fileFlags;
@@ -165,15 +170,15 @@ public:
      *
      * @param pathName bpf map path
      * @param objFlags obj flags
-     * @return int return map file descriptor
+     * @return int32_t return map file descriptor
      */
-    static int GetMap(const std::string &pathName, uint32_t objFlags)
+    static int32_t GetMap(const std::string &pathName, uint32_t objFlags)
     {
         return BpfObjGet(pathName, objFlags);
     }
 
 private:
-    static uint32_t BpfFdToU32(const int mapFd)
+    static uint32_t BpfFdToU32(const int32_t mapFd)
     {
         return static_cast<uint32_t>(mapFd);
     }
@@ -199,11 +204,12 @@ public:
     BpfMapper<Key, Value>() = default;
     ~BpfMapper<Key, Value>()
     {
-        mapFd_ = -1;
+        mapFd_ = NETMANAGER_ERROR;
     }
     BpfMapper<Key, Value>(const std::string &pathName, uint32_t flags)
     {
-        int mapFd = BpfMapperImplement<Key, Value>::GetMap(pathName, flags);
+        mapFd_ = NETMANAGER_ERROR;
+        int32_t mapFd = BpfMapperImplement<Key, Value>::GetMap(pathName, flags);
         if (mapFd >= 0) {
             mapFd_ = mapFd;
         }
@@ -225,11 +231,11 @@ public:
      * @param key the key of map
      * @return Value value corresponding to key
      */
-    [[nodiscard]] int Read(const Key &key, Value &val) const
+    [[nodiscard]] int32_t Read(const Key &key, Value &val) const
     {
         Value value{};
         if (BpfMapperImplement<Key, Value>::LookUpElem(mapFd_, key, value) < 0) {
-            return -1;
+            return NETMANAGER_ERROR;
         }
         val = value;
         return 0;
@@ -241,9 +247,9 @@ public:
      * @param key the key want to write
      * @param value the value want to write
      * @param flags map flag
-     * @return int 0 if OK
+     * @return int32_t 0 if OK
      */
-    [[nodiscard]] int Write(const Key &key, const Value &value, uint64_t flags) const
+    [[nodiscard]] int32_t Write(const Key &key, const Value &value, uint64_t flags) const
     {
         return BpfMapperImplement<Key, Value>::UpdateElem(mapFd_, key, value, flags);
     }
@@ -270,11 +276,11 @@ public:
         return keys;
     }
 
-    [[nodiscard]] int Clear(const std::vector<Key> &keys) const
+    [[nodiscard]] int32_t Clear(const std::vector<Key> &keys) const
     {
         for (const auto &k : keys) {
-            if (Delete(k) < 0) {
-                return -1;
+            if (Delete(k) < NETSYS_SUCCESS) {
+                return NETMANAGER_ERROR;
             }
         }
         return 0;
@@ -284,15 +290,15 @@ public:
      * DeleteEntryFromMap
      *
      * @param deleteKey the key need to delete
-     * @return int 0 if OK
+     * @return int32_t 0 if OK
      */
-    [[nodiscard]] int Delete(const Key &deleteKey) const
+    [[nodiscard]] int32_t Delete(const Key &deleteKey) const
     {
         return BpfMapperImplement<Key, Value>::DeleteElem(mapFd_, deleteKey);
     }
 
 private:
-    int32_t mapFd_ = 0;
+    int32_t mapFd_ = NETMANAGER_ERROR;
 };
 } // namespace OHOS::NetManagerStandard
 #endif /* CONNECTIVITY_EXT_BPF_MAPPER_H */

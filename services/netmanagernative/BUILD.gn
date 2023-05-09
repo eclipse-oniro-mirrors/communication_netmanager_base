@@ -207,6 +207,7 @@ ohos_static_library("netsys_native_manager_static") {
     "$THIRD_PARTY_ROOT/iptables:iptables",
     "$THIRD_PARTY_ROOT/iptables:iptables-restore",
     "$THIRD_PARTY_ROOT/iptables:iptables-save",
+    "bpf:netsys",
     "bpf:netsys_bpf_utils",
   ]
 
