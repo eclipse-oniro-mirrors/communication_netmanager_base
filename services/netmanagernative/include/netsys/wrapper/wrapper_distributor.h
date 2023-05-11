@@ -20,9 +20,10 @@
 #include "i_notify_callback.h"
 #include "netsys_event_message.h"
 
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 namespace OHOS {
 namespace nmd {
-class WrapperDistributor {
+class NET_SYMBOL_VISIBLE WrapperDistributor {
 public:
     WrapperDistributor(int32_t socket, const int32_t format);
     ~WrapperDistributor() = default;

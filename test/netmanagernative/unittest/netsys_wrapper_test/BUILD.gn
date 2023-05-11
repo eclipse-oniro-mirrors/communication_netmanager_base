@@ -34,7 +34,7 @@ ohos_unittest("netsys_wrapper_test") {
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
   ]
 
-  deps = [ "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager_static" ]
+  deps = [ "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager" ]
 
   external_deps = [
     "ability_base:want",

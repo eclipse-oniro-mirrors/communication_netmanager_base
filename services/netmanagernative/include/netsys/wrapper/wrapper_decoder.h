@@ -22,9 +22,10 @@
 #include <linux/rtnetlink.h>
 #include <netinet/icmp6.h>
 
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 namespace OHOS {
 namespace nmd {
-class WrapperDecoder {
+class NET_SYMBOL_VISIBLE WrapperDecoder {
 public:
     WrapperDecoder(std::shared_ptr<NetsysEventMessage> message);
     WrapperDecoder() = delete;

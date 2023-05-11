@@ -22,10 +22,11 @@
 #include "netsys_event_message.h"
 #include "wrapper_listener.h"
 
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 namespace OHOS {
 namespace nmd {
 class WrapperListener;
-class DataReceiver {
+class NET_SYMBOL_VISIBLE DataReceiver {
 public:
     using EventCallback = std::function<void(std::shared_ptr<NetsysEventMessage>)>;
     DataReceiver(int32_t socketFd, int32_t format);

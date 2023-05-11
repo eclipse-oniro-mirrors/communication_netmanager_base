@@ -19,9 +19,10 @@
 #include <map>
 #include <string>
 
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 namespace OHOS {
 namespace nmd {
-class NetsysEventMessage {
+class NET_SYMBOL_VISIBLE NetsysEventMessage {
 public:
     NetsysEventMessage() = default;
     ~NetsysEventMessage() = default;
