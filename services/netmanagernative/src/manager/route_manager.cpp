@@ -428,7 +428,6 @@ int32_t RouteManager::UpdateIncomingPacketMark(uint16_t netId, const std::string
     fwmark.protectedFromVpn = true;
     fwmark.permission = permission;
     const uint32_t mask = ~Fwmark::GetUidBillingMask();
-    std::string command = "";
     std::string action = "";
     if (add) {
         action = " -A ";
@@ -438,7 +437,6 @@ int32_t RouteManager::UpdateIncomingPacketMark(uint16_t netId, const std::string
     std::stringstream ss;
     ss << action << LOCAL_MANGLE_INPUT << " -i " << interfaceName << " -j MARK --set-mark 0x" << std::nouppercase
        << std::hex << fwmark.intValue << "/0x" << std::nouppercase << std::hex << mask;
-    command = ss.str();
     // need to call IptablesWrapper's RunCommand function.
 
     return 0;

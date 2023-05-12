@@ -300,7 +300,7 @@ int32_t NetMonitor::Send(int32_t sockFd, const std::string &domain, const std::s
     sendData.append("Host: " + domain + "\r\n\r\n");
     const char *writeBuf = sendData.c_str();
     int32_t bufSize = static_cast<int32_t>(sendData.size());
-    int32_t written = 0;
+    int32_t written = -1;
     int32_t retry = 0;
     while (bufSize > 0) {
         written = send(sockFd, writeBuf, bufSize, 0);
@@ -377,10 +377,7 @@ NetDetectionStatus NetMonitor::dealRecvResult(const std::string &strResponse)
     NETMGR_LOG_D("statusCode[%{public}d], retCode[%{public}d]", statusCode, retCode);
     if ((statusCode == OK || (statusCode >= BAD_REQUEST && statusCode <= CLIENT_ERROR_MAX)) &&
         retCode > PORTAL_CONTENT_LENGTH_MIN) {
-        if (retCode > -1) {
-            return CAPTIVE_PORTAL_STATE;
-        }
-        return INVALID_DETECTION_STATE;
+        return CAPTIVE_PORTAL_STATE;
     } else if (statusCode == NO_CONTENT) {
         return VERIFICATION_STATE;
     } else if ((statusCode != NO_CONTENT) && (statusCode >= CREATED) && (statusCode <= URL_REDIRECT_MAX)) {
