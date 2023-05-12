@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ struct PolicyEvent {
     int32_t eventId = 0;
     std::shared_ptr<NetPolicyBase> sender = nullptr;
     bool deviceIdleMode = false;
-    std::vector<uint32_t> deviceIdleList;
+    std::set<uint32_t> deviceIdleList;
     bool powerSaveMode = false;
     uint32_t deletedUid = 0;
 };

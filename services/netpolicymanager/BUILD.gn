@@ -33,6 +33,7 @@ config("net_policy_manager_config") {
 ohos_shared_library("net_policy_manager") {
   sources = [
     "src/common/net_policy_event_handler.cpp",
+    "src/common/net_policy_file_event_handler.cpp",
     "src/common/net_policy_service_common.cpp",
     "src/common/netsys_policy_wrapper.cpp",
     "src/core/net_policy_base.cpp",
@@ -109,6 +110,7 @@ ohos_static_library("net_policy_manager_static") {
   testonly = true
   sources = [
     "src/common/net_policy_event_handler.cpp",
+    "src/common/net_policy_file_event_handler.cpp",
     "src/common/net_policy_service_common.cpp",
     "src/common/netsys_policy_wrapper.cpp",
     "src/core/net_policy_base.cpp",
@@ -137,6 +139,7 @@ ohos_static_library("net_policy_manager_static") {
 
   external_deps = [
     "ability_base:want",
+    "ability_runtime:app_manager",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
