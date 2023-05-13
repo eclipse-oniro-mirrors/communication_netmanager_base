@@ -100,39 +100,39 @@ private:
         {
             traffic_ = traffic;
         }
-        virtual int32_t OnInterfaceAddressUpdated(const std::string &, const std::string &, int32_t, int32_t)
+        int32_t OnInterfaceAddressUpdated(const std::string &, const std::string &, int32_t, int32_t)
         {
             return 0;
         }
-        virtual int32_t OnInterfaceAddressRemoved(const std::string &, const std::string &, int32_t, int32_t)
+        int32_t OnInterfaceAddressRemoved(const std::string &, const std::string &, int32_t, int32_t)
         {
             return 0;
         }
-        virtual int32_t OnInterfaceAdded(const std::string &)
+        int32_t OnInterfaceAdded(const std::string &)
         {
             return 0;
         }
-        virtual int32_t OnInterfaceRemoved(const std::string &)
+        int32_t OnInterfaceRemoved(const std::string &)
         {
             return 0;
         }
-        virtual int32_t OnInterfaceChanged(const std::string &, bool)
+        int32_t OnInterfaceChanged(const std::string &, bool)
         {
             return 0;
         }
-        virtual int32_t OnInterfaceLinkStateChanged(const std::string &, bool)
+        int32_t OnInterfaceLinkStateChanged(const std::string &, bool)
         {
             return 0;
         }
-        virtual int32_t OnRouteChanged(bool, const std::string &, const std::string &, const std::string &)
+        int32_t OnRouteChanged(bool, const std::string &, const std::string &, const std::string &)
         {
             return 0;
         }
-        virtual int32_t OnDhcpSuccess(NetsysControllerCallback::DhcpResult &dhcpResult)
+        int32_t OnDhcpSuccess(NetsysControllerCallback::DhcpResult &dhcpResult)
         {
             return 0;
         }
-        virtual int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface)
+        int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface)
         {
             traffic_->ReachedLimit(iface);
             return 0;
@@ -149,7 +149,7 @@ private:
             connCallBack_ = connCallBack;
         }
 
-        virtual int32_t NetAvailable(sptr<NetHandle> &netHandle)
+        int32_t NetAvailable(sptr<NetHandle> &netHandle)
         {
             if (connCallBack_ != nullptr) {
                 connCallBack_->UpdateNetPolicy();
@@ -157,27 +157,27 @@ private:
             }
             return -1;
         }
-        virtual int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap)
+        int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap)
         {
             return 0;
         }
 
-        virtual int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
+        int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
         {
             return 0;
         }
 
-        virtual int32_t NetLost(sptr<NetHandle> &netHandle)
+        int32_t NetLost(sptr<NetHandle> &netHandle)
         {
             return 0;
         }
 
-        virtual int32_t NetUnavailable()
+        int32_t NetUnavailable()
         {
             return 0;
         }
 
-        virtual int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
+        int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
         {
             return 0;
         }
