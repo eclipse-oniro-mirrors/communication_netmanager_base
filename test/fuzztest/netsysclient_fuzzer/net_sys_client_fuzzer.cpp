@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -613,6 +613,84 @@ void StopDhcpServiceFuzzTest(const uint8_t *data, size_t size)
     }
     dataParcel.WriteString(iface);
     OnRemoteRequest(NetsysNative::INetsysService::NETSYS_STOP_DHCP_SERVICE, dataParcel);
+}
+
+void GetTotalStatsFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    uint32_t type = GetData<uint32_t>();
+    dataParcel.WriteUint32(type);
+    OnRemoteRequest(NetsysNative::INetsysService::NETSYS_GET_TOTAL_STATS, dataParcel);
+}
+
+void GetUidStatsFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    uint32_t type = GetData<uint32_t>();
+    uint32_t uid = GetData<uint32_t>();
+
+    dataParcel.WriteUint32(type);
+    dataParcel.WriteUint32(uid);
+    OnRemoteRequest(NetsysNative::INetsysService::NETSYS_GET_UID_STATS, dataParcel);
+}
+
+void GetIfaceStatsFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    uint32_t type = GetData<uint32_t>();
+    std::string iface = GetStringFromData(STR_LEN);
+
+    dataParcel.WriteUint32(type);
+    dataParcel.WriteString(iface);
+    OnRemoteRequest(NetsysNative::INetsysService::NETSYS_GET_IFACE_STATS, dataParcel);
+}
+
+void GetAllStatsInfoFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    OnRemoteRequest(NetsysNative::INetsysService::NETSYS_GET_ALL_STATS_INFO, dataParcel);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -465,6 +465,26 @@ HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceTest002, TestSize.Level1)
     NetworkSharingTraffic traffic;
     int ret = instance_->GetNetworkSharingTraffic(downIface, upIface, traffic);
     EXPECT_NE(ret, 0);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceState001, TestSize.Level1)
+{
+    const std::string iface = "wlan0";
+    const uint32_t appID = 303030;
+
+    uint64_t stats = 0;
+    int ret = instance_->GetTotalStats(stats, 0);
+    EXPECT_EQ(ret, 0);
+
+    ret = instance_->GetUidStats(stats, 0, appID);
+    EXPECT_NE(ret, 0);
+
+    ret = instance_->GetIfaceStats(stats, 0, iface);
+    EXPECT_EQ(ret, 0);
+
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
+    ret = instance_->GetAllStatsInfo(statsInfo);
+    EXPECT_EQ(ret, 0);
 }
 } // namespace NetsysNative
 } // namespace OHOS
