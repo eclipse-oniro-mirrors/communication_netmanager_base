@@ -89,7 +89,6 @@ private:
 
 private:
     std::shared_ptr<FirewallRule> deviceIdleFirewallRule_;
-<<<<<<< HEAD
     std::shared_ptr<FirewallRule> powerSaveFirewallRule_;
     bool deviceIdleMode_ = false;
     bool powerSaveMode_ = false;
@@ -97,11 +96,6 @@ private:
     std::set<uint32_t> deviceIdleDeniedList_;
     std::set<uint32_t> powerSaveAllowedList_;
     std::set<uint32_t> powerSaveDeniedList_;
-=======
-    bool deviceIdleMode_ = false;
-    std::set<uint32_t> deviceIdleAllowedList_;
-    std::set<uint32_t> deviceIdleDeniedList_;
->>>>>>> origin/pr2event
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
