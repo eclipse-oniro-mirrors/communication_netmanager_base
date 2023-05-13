@@ -78,7 +78,7 @@ public:
      * @param policy The network policy for application.
      *      For details, see {@link NetUidPolicy}.
      */
-    void WriteUidPolicy(uint32_t uid, uint32_t policy);
+    void WriteUidByPolicy(uint32_t uid, uint32_t policy);
 
     /**
      * Used by net_policy_traffic.cpp to get quota policy from file.
@@ -158,7 +158,7 @@ private:
 
     bool UpdateQuotaPolicyExist(const NetQuotaPolicy &quotaPolicy);
     uint32_t ArbitrationWritePolicyToFile(uint32_t uid, uint32_t policy);
-    void WriteUidPolicy(uint32_t netUidPolicyOpType, uint32_t uid, uint32_t policy);
+    void WriteUidByPolicy(uint32_t netUidPolicyOpType, uint32_t uid, uint32_t policy);
 
     inline void ToQuotaPolicy(const NetPolicyQuota& netPolicyQuota, NetQuotaPolicy &quotaPolicy)
     {

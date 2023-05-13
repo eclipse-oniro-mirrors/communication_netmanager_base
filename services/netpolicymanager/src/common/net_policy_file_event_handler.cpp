@@ -98,6 +98,10 @@ bool NetPolicyFileEventHandler::Write()
     if (stat(POLICY_FILE_NAME, &buffer) == 0) {
         std::ifstream oldFile(POLICY_FILE_NAME, std::ios::binary);
         std::ofstream newFile(POLICY_FILE_BAK_NAME, std::ios::binary);
+        if (!oldFile.is_open() && !newFile.is_open()) {
+            NETMGR_LOG_E("File backup failed.");
+            return false;
+        }
         newFile << oldFile.rdbuf();
         oldFile.close();
         newFile.close();
@@ -109,7 +113,6 @@ bool NetPolicyFileEventHandler::Write()
     }
     file << fileContent_;
     file.close();
-    sync();
     return true;
 }
 

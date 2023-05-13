@@ -129,7 +129,7 @@ void NetPolicyRule::TransConditionToRuleAndNetsys(uint32_t policyCondition, uint
         NETMGR_LOG_I("Same netsys and uid ,don't need to do others.now netsys is: [%{public}u]", netsys);
     }
 
-    GetFileInst()->WriteUidPolicy(uid, policy);
+    GetFileInst()->WriteUidByPolicy(uid, policy);
 
     if (policyRuleNetsys.rule_ == rule) {
         NETMGR_LOG_D("Same rule and uid ,don't need to do others.uid is:[%{public}u] rule is:[%{public}u]", uid, rule);
