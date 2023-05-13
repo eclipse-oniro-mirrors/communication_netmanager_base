@@ -18,6 +18,8 @@
 
 #include <cstdint>
 
+#include "event_handler.h"
+
 namespace OHOS {
 namespace nmd {
 class DnsResolvListen {
@@ -35,6 +37,8 @@ private:
     static int32_t ProcGetKeyForCache(int clientSockFd, char *name);
 
     int32_t serverSockFd_;
+    std::shared_ptr<AppExecFwk::EventRunner> dnsResolvRunner_ = nullptr;
+    std::shared_ptr<AppExecFwk::EventHandler> dnsResolvHandler_ = nullptr;
 };
 } // namespace nmd
 } // namespace OHOS
