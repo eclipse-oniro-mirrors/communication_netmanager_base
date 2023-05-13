@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,11 @@ int32_t NetConnServiceIface::UpdateNetSupplierInfo(uint32_t supplierId, const sp
 int32_t NetConnServiceIface::RestrictBackgroundChanged(bool isRestrictBackground)
 {
     return DelayedSingleton<NetConnService>::GetInstance()->RestrictBackgroundChanged(isRestrictBackground);
+}
+
+int32_t NetConnServiceIface::RegisterNetConnCallback(const sptr<INetConnCallback> &callback)
+{
+    return DelayedSingleton<NetConnService>::GetInstance()->RegisterNetConnCallback(callback);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

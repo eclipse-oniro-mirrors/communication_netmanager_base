@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -124,6 +124,7 @@ void UtNetPolicyRule::SetUpTestCase()
     g_netPolicyRule = std::make_shared<NetPolicyRule>();
     g_netPolicyFirewallR = std::make_shared<NetPolicyFirewall>();
     g_netPolicyRule->Init();
+    g_netPolicyRule->ResetPolicies();
 }
 
 void UtNetPolicyRule::TearDownTestCase()

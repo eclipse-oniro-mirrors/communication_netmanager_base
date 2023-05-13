@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,17 +27,32 @@ namespace NetManagerStandard {
 void NetPolicyFirewall::Init()
 {
     deviceIdleFirewallRule_ = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_DEVICE_IDLE);
+    GetFileInst()->ReadFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, deviceIdleAllowedList_, deviceIdleDeniedList_);
+    deviceIdleFirewallRule_->SetAllowedList(deviceIdleAllowedList_);
 }
 
 int32_t NetPolicyFirewall::SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed)
 {
+    UpdateFirewallPolicyList(FIREWALL_CHAIN_DEVICE_IDLE, uid, isAllowed);
+    GetFileInst()->WriteFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, deviceIdleAllowedList_, deviceIdleDeniedList_);
     deviceIdleFirewallRule_->SetAllowedList(uid, isAllowed ? FIREWALL_RULE_ALLOW : FIREWALL_RULE_DENY);
 
     std::shared_ptr<PolicyEvent> eventData = std::make_shared<PolicyEvent>();
     eventData->eventId = NetPolicyEventHandler::MSG_DEVICE_IDLE_LIST_UPDATED;
-    eventData->deviceIdleList = deviceIdleFirewallRule_->GetAllowedList();
+    eventData->deviceIdleList = deviceIdleAllowedList_;
     SendEvent(NetPolicyEventHandler::MSG_DEVICE_IDLE_LIST_UPDATED, eventData);
     return NETMANAGER_SUCCESS;
+}
+
+void NetPolicyFirewall::UpdateFirewallPolicyList(uint32_t chainType, uint32_t uid, bool isAllowed)
+{
+    if (chainType == FIREWALL_CHAIN_DEVICE_IDLE) {
+        if (isAllowed) {
+            deviceIdleAllowedList_.emplace(uid);
+        } else {
+            deviceIdleAllowedList_.erase(uid);
+        }
+    }
 }
 
 int32_t NetPolicyFirewall::GetDeviceIdleAllowedList(std::vector<uint32_t> &uids)
@@ -49,22 +64,22 @@ int32_t NetPolicyFirewall::GetDeviceIdleAllowedList(std::vector<uint32_t> &uids)
 int32_t NetPolicyFirewall::UpdateDeviceIdlePolicy(bool enable)
 {
     if (deviceIdleMode_ == enable) {
-        NETMGR_LOG_W("Same device idle policy.");
+        NETMGR_LOG_E("Same device idle policy.");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     if (enable) {
         deviceIdleFirewallRule_->SetAllowedList();
     }
-    NetmanagerHiTrace::NetmanagerStartSyncTrace("Update firewall status start");
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("Update device idle firewall status start");
     deviceIdleFirewallRule_->EnableFirewall(enable);
-    NetmanagerHiTrace::NetmanagerFinishSyncTrace("Update firewall status end");
+    NetmanagerHiTrace::NetmanagerFinishSyncTrace("Update device idle firewall status end");
     deviceIdleMode_ = enable;
     // notify to other core.
     auto policyEvent = std::make_shared<PolicyEvent>();
     policyEvent->deviceIdleMode = enable;
-    NetmanagerHiTrace::NetmanagerStartSyncTrace("Notify other policy class status start");
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("Notify other policy class device idle status start");
     SendEvent(NetPolicyEventHandler::MSG_DEVICE_IDLE_MODE_CHANGED, policyEvent);
-    NetmanagerHiTrace::NetmanagerFinishSyncTrace("Notify other policy class status end");
+    NetmanagerHiTrace::NetmanagerFinishSyncTrace("Notify other policy class device idle status end");
     return NETMANAGER_SUCCESS;
 }
 
@@ -72,11 +87,15 @@ void NetPolicyFirewall::ResetPolicies()
 {
     deviceIdleFirewallRule_->ClearAllowedList();
     deviceIdleFirewallRule_->ClearDeniedList();
+    deviceIdleAllowedList_.clear();
+    deviceIdleDeniedList_.clear();
+    GetFileInst()->WriteFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, deviceIdleAllowedList_, deviceIdleDeniedList_);
     UpdateDeviceIdlePolicy(false);
 }
 
 void NetPolicyFirewall::DeleteUid(uint32_t uid)
 {
+    SetDeviceIdleAllowedList(uid, false);
     deviceIdleFirewallRule_->RemoveFromAllowedList(uid);
 }
 

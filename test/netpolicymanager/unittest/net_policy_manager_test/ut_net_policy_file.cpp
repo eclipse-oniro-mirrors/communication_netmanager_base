@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,89 +13,100 @@
  * limitations under the License.
  */
 
+#include <random>
+#include <thread>
+#include <unistd.h>
+
 #include <gtest/gtest.h>
 
-#define private public
 #include "net_policy_file.h"
-#undef private
-#include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-using namespace testing::ext;
+constexpr uint32_t MAX_LIST_SIZE = 10;
+constexpr uint32_t SLEEP_SECOND_TIME = 5;
 } // namespace
+std::shared_ptr<NetPolicyFile> netPolicyFile_ = nullptr;
 
+using namespace testing::ext;
 class UtNetPolicyFile : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    std::set<uint32_t> white_;
+    std::set<uint32_t> black_;
 };
 
-void UtNetPolicyFile::SetUpTestCase() {}
-
-void UtNetPolicyFile::TearDownTestCase() {}
-
-void UtNetPolicyFile::SetUp() {}
-
-void UtNetPolicyFile::TearDown() {}
-
-/**
- * @tc.name: NetPolicyFileTest001
- * @tc.desc: Test NetPolicyFile NetpolicyFile->
- * @tc.type: FUNC
- */
-HWTEST_F(UtNetPolicyFile, NetPolicyFileTest001, TestSize.Level1)
+void UtNetPolicyFile::SetUpTestCase()
 {
-    auto policyFile = DelayedSingleton<NetPolicyFile>::GetInstance();
-    std::string fileName;
-    std::string fileContent;
-    EXPECT_FALSE(policyFile->CreateFile(fileName));
-    EXPECT_FALSE(policyFile->ReadFile(fileName, fileContent));
-    std::remove(POLICY_FILE_NAME);
-    EXPECT_TRUE(policyFile->CreateFile(POLICY_FILE_NAME));
-    EXPECT_TRUE(policyFile->ReadFile(POLICY_FILE_NAME, fileContent));
-    policyFile->GetNetPolicies();
-    std::string content;
-    NetPolicy netPolicy;
-    EXPECT_FALSE(policyFile->Json2Obj(content, netPolicy));
+    netPolicyFile_ = DelayedSingleton<NetPolicyFile>::GetInstance();
+    ASSERT_TRUE(DelayedSingleton<NetPolicyFile>::GetInstance());
+    netPolicyFile_->InitPolicy();
+}
+
+void UtNetPolicyFile::TearDownTestCase()
+{
+    sleep(SLEEP_SECOND_TIME);
+    netPolicyFile_.reset();
+}
+
+void UtNetPolicyFile::SetUp()
+{
+    netPolicyFile_->ReadFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, white_, black_);
+}
+
+void UtNetPolicyFile::TearDown()
+{
+    netPolicyFile_->WriteFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, white_, black_);
 }
 
 /**
- * @tc.name: WriteFileTest
- * @tc.desc: Test NetPolicyFile WriteFile.
+ * @tc.name: NetPolicyFile001
+ * @tc.desc: Test NetPolicyFile ReadFirewallRules.
  * @tc.type: FUNC
  */
-HWTEST_F(UtNetPolicyFile, WriteFileTest, TestSize.Level1)
+HWTEST_F(UtNetPolicyFile, NetPolicyFile001, TestSize.Level1)
 {
-    auto policyFile = DelayedSingleton<NetPolicyFile>::GetInstance();
-    uint32_t netUidPolicyOpType = NetUidPolicyOpType::NET_POLICY_UID_OP_TYPE_UPDATE;
-    uint32_t uid = 100;
-    uint32_t policy = 1;
-    bool ret = policyFile->WriteFile(netUidPolicyOpType, uid, policy);
-    netUidPolicyOpType = NetUidPolicyOpType::NET_POLICY_UID_OP_TYPE_DELETE;
-    ret = policyFile->WriteFile(netUidPolicyOpType, uid, policy);
-    netUidPolicyOpType = NetUidPolicyOpType::NET_POLICY_UID_OP_TYPE_ADD;
-    ret = policyFile->WriteFile(netUidPolicyOpType, uid, policy);
-    policyFile->netPolicy_.netQuotaPolicies.clear();
-    NetQuotaPolicy quotaPolicy;
-    ret = policyFile->UpdateQuotaPolicyExist(quotaPolicy);
-    EXPECT_FALSE(ret);
+    std::set<uint32_t> allowedList;
+    std::set<uint32_t> deniedList;
+    for (uint32_t i = 0; i <= MAX_LIST_SIZE; i++) {
+        allowedList.insert(i);
+        deniedList.insert(i);
+    }
+
+    netPolicyFile_->WriteFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, allowedList, deniedList);
+    std::set<uint32_t> allowedList1;
+    std::set<uint32_t> deniedList1;
+    netPolicyFile_->ReadFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, allowedList1, deniedList1);
+    ASSERT_TRUE(allowedList == allowedList1);
+    ASSERT_TRUE(deniedList == deniedList1);
 }
 
 /**
- * @tc.name: ResetPoliciesTest
- * @tc.desc: Test NetPolicyFile ResetPolicies.
+ * @tc.name: NetPolicyFile002
+ * @tc.desc: Test NetPolicyFile WriteFirewallRules.
  * @tc.type: FUNC
  */
-HWTEST_F(UtNetPolicyFile, ResetPoliciesTest, TestSize.Level1)
+HWTEST_F(UtNetPolicyFile, NetPolicyFile002, TestSize.Level1)
 {
-    auto policyFile = DelayedSingleton<NetPolicyFile>::GetInstance();
-    std::string iccid;
-    int32_t ret = policyFile->ResetPolicies(iccid);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    std::set<uint32_t> allowedList;
+    std::set<uint32_t> deniedList;
+    for (uint32_t i = 0; i <= MAX_LIST_SIZE; i++) {
+        allowedList.insert(i);
+        deniedList.insert(i);
+    }
+    netPolicyFile_->WriteFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, allowedList, deniedList);
+    sleep(SLEEP_SECOND_TIME);
+    netPolicyFile_->InitPolicy();
+    std::set<uint32_t> allowedList1;
+    std::set<uint32_t> deniedList1;
+    netPolicyFile_->ReadFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, allowedList1, deniedList1);
+    ASSERT_TRUE(allowedList == allowedList1);
+    ASSERT_TRUE(deniedList == deniedList1);
 }
+
 } // namespace NetManagerStandard
 } // namespace OHOS

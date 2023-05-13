@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -146,13 +146,13 @@ int32_t NetPolicyServiceStub::CheckPolicyPermission(uint32_t code)
 
 int32_t NetPolicyServiceStub::OnSetPolicyByUid(MessageParcel &data, MessageParcel &reply)
 {
-    uint32_t uid;
+    uint32_t uid = 0;
     if (!data.ReadUint32(uid)) {
         NETMGR_LOG_E("Read Uint32 data failed.");
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    uint32_t netPolicy;
+    uint32_t netPolicy = 0;
     if (!data.ReadUint32(netPolicy)) {
         NETMGR_LOG_E("Read Uint32 data failed.");
         return NETMANAGER_ERR_READ_DATA_FAIL;
@@ -191,7 +191,7 @@ int32_t NetPolicyServiceStub::OnGetPolicyByUid(MessageParcel &data, MessageParce
 
 int32_t NetPolicyServiceStub::OnGetUidsByPolicy(MessageParcel &data, MessageParcel &reply)
 {
-    uint32_t policy;
+    uint32_t policy = 0;
     if (!data.ReadUint32(policy)) {
         NETMGR_LOG_E("Read uint32 data failed");
         return NETMANAGER_ERR_READ_DATA_FAIL;

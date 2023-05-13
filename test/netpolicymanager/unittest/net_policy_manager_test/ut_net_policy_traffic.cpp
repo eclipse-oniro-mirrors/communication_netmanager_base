@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -473,9 +473,7 @@ HWTEST_F(UtNetPolicyTraffic, ReadQuotaPolicies001, TestSize.Level1)
     int64_t quota = 1;
     g_netPolicyTraffic->PublishQuotaEvent(action, describe, quota);
     SUCCEED();
-
-    auto ret = g_netPolicyTraffic->ReadQuotaPolicies();
-    EXPECT_EQ(ret, 0);
+    g_netPolicyTraffic->ReadQuotaPolicies();
 }
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "net_policy_callback_test.h"
 #include "net_policy_client.h"
 #include "net_policy_constants.h"
+#define private public
 #include "net_policy_core.h"
 #include "net_policy_firewall.h"
 #include "net_policy_inner_define.h"
@@ -129,7 +130,7 @@ HWTEST_F(UtNetPolicyCore, OnReceiveEvent001, TestSize.Level1)
     want.SetAction(COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
     eventData.SetWant(want);
     ASSERT_NE(g_netPolicyCore, nullptr);
-    g_netPolicyCore->OnReceiveEvent(eventData);
+    g_netPolicyCore->subscriber_->OnReceiveEvent(eventData);
 }
 
 /**
@@ -145,7 +146,7 @@ HWTEST_F(UtNetPolicyCore, OnReceiveEvent002, TestSize.Level1)
     want.SetAction(COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
     eventData.SetWant(want);
     ASSERT_NE(g_netPolicyCore, nullptr);
-    g_netPolicyCore->OnReceiveEvent(eventData);
+    g_netPolicyCore->subscriber_->OnReceiveEvent(eventData);
 }
 
 /**
@@ -161,7 +162,7 @@ HWTEST_F(UtNetPolicyCore, OnReceiveEvent003, TestSize.Level1)
     want.SetAction(COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
     eventData.SetWant(want);
     ASSERT_NE(g_netPolicyCore, nullptr);
-    g_netPolicyCore->OnReceiveEvent(eventData);
+    g_netPolicyCore->subscriber_->OnReceiveEvent(eventData);
 }
 
 /**
@@ -177,7 +178,7 @@ HWTEST_F(UtNetPolicyCore, OnReceiveEvent004, TestSize.Level1)
     want.SetAction(COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);
     eventData.SetWant(want);
     ASSERT_NE(g_netPolicyCore, nullptr);
-    g_netPolicyCore->OnReceiveEvent(eventData);
+    g_netPolicyCore->subscriber_->OnReceiveEvent(eventData);
 }
 
 /**
@@ -193,7 +194,7 @@ HWTEST_F(UtNetPolicyCore, OnReceiveEvent005, TestSize.Level1)
     want.SetAction(COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);
     eventData.SetWant(want);
     ASSERT_NE(g_netPolicyCore, nullptr);
-    g_netPolicyCore->OnReceiveEvent(eventData);
+    g_netPolicyCore->subscriber_->OnReceiveEvent(eventData);
 }
 
 /**
@@ -208,10 +209,10 @@ HWTEST_F(UtNetPolicyCore, OnReceiveEvent006, TestSize.Level1)
     eventData.SetCode(NORMAL_MODE);
     EventFwk::Want want;
     want.SetParam(EVENT_PARAM_DELETED_UID, testUid);
-    want.SetAction(COMMON_EVENT_UID_REMOVED);
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_UID_REMOVED);
     eventData.SetWant(want);
     ASSERT_NE(g_netPolicyCore, nullptr);
-    g_netPolicyCore->OnReceiveEvent(eventData);
+    g_netPolicyCore->subscriber_->OnReceiveEvent(eventData);
 }
 
 /**
@@ -227,7 +228,7 @@ HWTEST_F(UtNetPolicyCore, OnReceiveEvent007, TestSize.Level1)
     want.SetAction(TEST_EVENT_ACTION);
     eventData.SetWant(want);
     ASSERT_NE(g_netPolicyCore, nullptr);
-    g_netPolicyCore->OnReceiveEvent(eventData);
+    g_netPolicyCore->subscriber_->OnReceiveEvent(eventData);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
