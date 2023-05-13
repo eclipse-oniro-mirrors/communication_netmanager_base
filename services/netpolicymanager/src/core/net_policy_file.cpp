@@ -305,13 +305,13 @@ uint32_t NetPolicyFile::ArbitrationWritePolicyToFile(uint32_t uid, uint32_t poli
     return NET_POLICY_UID_OP_TYPE_ADD;
 }
 
-void NetPolicyFile::WriteUidByPolicy(uint32_t uid, uint32_t policy)
+void NetPolicyFile::WritePolicyByUid(uint32_t uid, uint32_t policy)
 {
     uint32_t netUidPolicyOpType = ArbitrationWritePolicyToFile(uid, policy);
-    WriteUidByPolicy(netUidPolicyOpType, uid, policy);
+    WritePolicyByUid(netUidPolicyOpType, uid, policy);
 }
 
-void NetPolicyFile::WriteUidByPolicy(uint32_t netUidPolicyOpType, uint32_t uid, uint32_t policy)
+void NetPolicyFile::WritePolicyByUid(uint32_t netUidPolicyOpType, uint32_t uid, uint32_t policy)
 {
     NETMGR_LOG_D("Write File start, model:[%{public}u]", netUidPolicyOpType);
     if (netUidPolicyOpType == NetUidPolicyOpType::NET_POLICY_UID_OP_TYPE_UPDATE) {
@@ -469,7 +469,7 @@ bool NetPolicyFile::InitPolicy()
 
 void NetPolicyFile::RemoveInexistentUid(uint32_t uid)
 {
-    WriteUidByPolicy(NetUidPolicyOpType::NET_POLICY_UID_OP_TYPE_DELETE, uid, 0);
+    WritePolicyByUid(NetUidPolicyOpType::NET_POLICY_UID_OP_TYPE_DELETE, uid, 0);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
