@@ -100,39 +100,39 @@ private:
         {
             traffic_ = traffic;
         }
-        virtual int32_t OnInterfaceAddressUpdated(const std::string &, const std::string &, int32_t, int32_t)
+        int32_t OnInterfaceAddressUpdated(const std::string &, const std::string &, int32_t, int32_t)
         {
             return 0;
         }
-        virtual int32_t OnInterfaceAddressRemoved(const std::string &, const std::string &, int32_t, int32_t)
+        int32_t OnInterfaceAddressRemoved(const std::string &, const std::string &, int32_t, int32_t)
         {
             return 0;
         }
-        virtual int32_t OnInterfaceAdded(const std::string &)
+        int32_t OnInterfaceAdded(const std::string &)
         {
             return 0;
         }
-        virtual int32_t OnInterfaceRemoved(const std::string &)
+        int32_t OnInterfaceRemoved(const std::string &)
         {
             return 0;
         }
-        virtual int32_t OnInterfaceChanged(const std::string &, bool)
+        int32_t OnInterfaceChanged(const std::string &, bool)
         {
             return 0;
         }
-        virtual int32_t OnInterfaceLinkStateChanged(const std::string &, bool)
+        int32_t OnInterfaceLinkStateChanged(const std::string &, bool)
         {
             return 0;
         }
-        virtual int32_t OnRouteChanged(bool, const std::string &, const std::string &, const std::string &)
+        int32_t OnRouteChanged(bool, const std::string &, const std::string &, const std::string &)
         {
             return 0;
         }
-        virtual int32_t OnDhcpSuccess(NetsysControllerCallback::DhcpResult &dhcpResult)
+        int32_t OnDhcpSuccess(NetsysControllerCallback::DhcpResult &dhcpResult)
         {
             return 0;
         }
-        virtual int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface)
+        int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface)
         {
             traffic_->ReachedLimit(iface);
             return 0;
