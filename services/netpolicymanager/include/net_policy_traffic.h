@@ -149,7 +149,7 @@ private:
             connCallBack_ = connCallBack;
         }
 
-        virtual int32_t NetAvailable(sptr<NetHandle> &netHandle)
+        int32_t NetAvailable(sptr<NetHandle> &netHandle)
         {
             if (connCallBack_ != nullptr) {
                 connCallBack_->UpdateNetPolicy();
@@ -157,27 +157,27 @@ private:
             }
             return -1;
         }
-        virtual int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap)
+        int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap)
         {
             return 0;
         }
 
-        virtual int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
+        int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
         {
             return 0;
         }
 
-        virtual int32_t NetLost(sptr<NetHandle> &netHandle)
+        int32_t NetLost(sptr<NetHandle> &netHandle)
         {
             return 0;
         }
 
-        virtual int32_t NetUnavailable()
+        int32_t NetUnavailable()
         {
             return 0;
         }
 
-        virtual int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
+        int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
         {
             return 0;
         }
