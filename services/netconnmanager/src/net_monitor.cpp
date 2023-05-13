@@ -300,7 +300,7 @@ int32_t NetMonitor::Send(int32_t sockFd, const std::string &domain, const std::s
     sendData.append("Host: " + domain + "\r\n\r\n");
     const char *writeBuf = sendData.c_str();
     int32_t bufSize = static_cast<int32_t>(sendData.size());
-    int32_t written = -1;
+    ssize_t written = 0;
     int32_t retry = 0;
     while (bufSize > 0) {
         written = send(sockFd, writeBuf, bufSize, 0);
