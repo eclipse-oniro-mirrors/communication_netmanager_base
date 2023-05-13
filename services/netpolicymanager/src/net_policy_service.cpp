@@ -87,7 +87,7 @@ int32_t NetPolicyService::Dump(int32_t fd, const std::vector<std::u16string> &ar
     std::string result;
     GetDumpMessage(result);
     int32_t ret = dprintf(fd, "%s\n", result.c_str());
-    return ret < 0 ? static_cast<int32_t>(NETMANAGER_ERR_PARAMETER_ERROR) : NETMANAGER_SUCCESS;
+    return ret < 0 ? NETMANAGER_ERR_PARAMETER_ERROR : NETMANAGER_SUCCESS;
 }
 
 void NetPolicyService::Init()
@@ -233,6 +233,25 @@ int32_t NetPolicyService::SetDeviceIdlePolicy(bool enable)
 {
     NETMGR_LOG_D("SetDeviceIdlePolicy enable[%{public}d]", enable);
     return netPolicyFirewall_->UpdateDeviceIdlePolicy(enable);
+}
+
+int32_t NetPolicyService::GetPowerSaveAllowedList(std::vector<uint32_t> &uids)
+{
+    if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, CMD_NPS_GET_POWER_SAVE_ALLOWED_LIST)) {
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+    NETMGR_LOG_D("GetPowerSaveAllowedList start");
+    return netPolicyFirewall_->GetPowerSaveAllowedList(uids);
+}
+
+int32_t NetPolicyService::SetPowerSaveAllowedList(uint32_t uid, bool isAllowed)
+{
+    if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST)) {
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
+
+    NETMGR_LOG_D("SetPowerSaveAllowedList info: uid[%{public}d] isAllowed[%{public}d]", uid, isAllowed);
+    return netPolicyFirewall_->SetPowerSaveAllowedList(uid, isAllowed);
 }
 
 int32_t NetPolicyService::GetDumpMessage(std::string &message)

@@ -489,7 +489,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager015, TestSize.Level1)
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager016, TestSize.Level1)
 {
     AccessToken token(testInfoParms3, testPolicyPrams3);
-    bool backgroundPolicy;
+    bool backgroundPolicy = false;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetBackgroundPolicy(backgroundPolicy);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
@@ -750,6 +750,37 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager025, TestSize.Level1)
     }
     AccessToken token2(testInfoParms1, testPolicyPrams1);
     result = DelayedSingleton<NetPolicyClient>::GetInstance()->UnregisterNetPolicyCallback(callback);
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: NetPolicyManager027
+ * @tc.desc: Test NetPolicyManager SetPowerSaveAllowedList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyManagerTest, NetPolicyManager027, TestSize.Level1)
+{
+    AccessToken token(testInfoParms1, testPolicyPrams1);
+    int32_t result1 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList(10, true);
+    ASSERT_EQ(result1, NETMANAGER_SUCCESS);
+    int32_t result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList(TEST_UID6, true);
+    ASSERT_EQ(result2, NETMANAGER_SUCCESS);
+    int32_t result3 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList(99, true);
+    ASSERT_EQ(result3, NETMANAGER_SUCCESS);
+    int32_t result4 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList(16, true);
+    ASSERT_EQ(result4, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: NetPolicyManager028
+ * @tc.desc: Test NetPolicyManager GetPowerSaveAllowedList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyManagerTest, NetPolicyManager028, TestSize.Level1)
+{
+    std::vector<uint32_t> uids;
+    AccessToken token(testInfoParms1, testPolicyPrams1);
+    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetPowerSaveAllowedList(uids);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

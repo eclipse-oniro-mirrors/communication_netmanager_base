@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FIREWALL_RULE_H
 #define FIREWALL_RULE_H
 
+#include <set>
 #include <string>
 #include <vector>
 
@@ -54,9 +55,9 @@ public:
     /**
      * Set the firewall allow list
      *
-     * @param uids The vector of UID
+     * @param uids The aggregate of UID
      */
-    virtual void SetAllowedList(const std::vector<uint32_t> &uids);
+    virtual void SetAllowedList(const std::set<uint32_t> &uids);
 
     /**
      * Set the firewall allow list

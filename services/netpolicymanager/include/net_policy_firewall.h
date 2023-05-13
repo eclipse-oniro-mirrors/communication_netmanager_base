@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,6 +59,31 @@ public:
     void ResetPolicies();
 
     /**
+     * Set the Power Save Allowed List object.
+     *
+     * @param uid The specified UID of application.
+     * @param isAllowed The UID is into allow list or not.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t SetPowerSaveAllowedList(uint32_t uid, bool isAllowed);
+
+    /**
+     * Get the Power Save Allowed List object.
+     *
+     * @param uids The list of UIDs.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t GetPowerSaveAllowedList(std::vector<uint32_t> &uids);
+
+    /**
+     * Process network policy in device idle mode.
+     *
+     * @param enable Power save mode is open or not.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t UpdatePowerSavePolicy(bool enable);
+
+    /**
      * Handle the event from NetPolicyCore
      *
      * @param eventId The event id
@@ -67,9 +92,18 @@ public:
     void HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEvent> &policyEvent);
 
 private:
+    void UpdateFirewallPolicyList(uint32_t chainType, uint32_t uid, bool isAllowed);
     void DeleteUid(uint32_t uid);
+
+private:
     std::shared_ptr<FirewallRule> deviceIdleFirewallRule_;
-    bool deviceIdleMode_;
+    std::shared_ptr<FirewallRule> powerSaveFirewallRule_;
+    bool deviceIdleMode_ = false;
+    bool powerSaveMode_ = false;
+    std::set<uint32_t> deviceIdleAllowedList_;
+    std::set<uint32_t> deviceIdleDeniedList_;
+    std::set<uint32_t> powerSaveAllowedList_;
+    std::set<uint32_t> powerSaveDeniedList_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

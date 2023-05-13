@@ -166,6 +166,33 @@ bool NetPolicyExec::ExecGetDeviceIdleAllowList(GetDeviceIdleAllowListContext *co
     return true;
 }
 
+bool NetPolicyExec::ExecSetPowerSaveAllowList(SetPowerSaveAllowListContext *context)
+{
+    int32_t result =
+        DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList(context->uid_, context->isAllow_);
+    if (result != NETMANAGER_SUCCESS) {
+        NETMANAGER_BASE_LOGE("ExecSetPowerSaveAllowList error: uid = %{public}d, result = %{public}d",
+                             context->uid_, result);
+        context->SetErrorCode(result);
+        return false;
+    }
+    context->SetErrorCode(result);
+    return true;
+}
+
+bool NetPolicyExec::ExecGetPowerSaveAllowList(GetPowerSaveAllowListContext *context)
+{
+    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetPowerSaveAllowedList(context->uids_);
+    if (result != NETMANAGER_SUCCESS) {
+        NETMANAGER_BASE_LOGE("ExecGetPowerSaveAllowList error: result = %{public}d, arr size = %{public}zu", result,
+                             context->uids_.size());
+        context->SetErrorCode(result);
+        return false;
+    }
+    context->SetErrorCode(result);
+    return true;
+}
+
 bool NetPolicyExec::ExecGetBackgroundPolicyByUid(GetBackgroundPolicyByUidContext *context)
 {
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetBackgroundPolicyByUid(
@@ -283,6 +310,22 @@ napi_value NetPolicyExec::SetDeviceIdleAllowListCallback(SetDeviceIdleAllowListC
 }
 
 napi_value NetPolicyExec::GetDeviceIdleAllowListCallback(GetDeviceIdleAllowListContext *context)
+{
+    napi_value list = NapiUtils::CreateArray(context->GetEnv(), context->uids_.size());
+    uint32_t index = 0;
+    for (const auto &uid : context->uids_) {
+        napi_value element = NapiUtils::CreateUint32(context->GetEnv(), uid);
+        NapiUtils::SetArrayElement(context->GetEnv(), list, index++, element);
+    }
+    return list;
+}
+
+napi_value NetPolicyExec::SetPowerSaveAllowListCallback(SetPowerSaveAllowListContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+napi_value NetPolicyExec::GetPowerSaveAllowListCallback(GetPowerSaveAllowListContext *context)
 {
     napi_value list = NapiUtils::CreateArray(context->GetEnv(), context->uids_.size());
     uint32_t index = 0;

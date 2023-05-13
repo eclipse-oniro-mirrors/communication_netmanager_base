@@ -679,6 +679,81 @@ int32_t NetPolicyServiceProxy::SetDeviceIdlePolicy(bool enable)
     return result;
 }
 
+int32_t NetPolicyServiceProxy::GetPowerSaveAllowedList(std::vector<uint32_t> &uids)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t retCode = remote->SendRequest(CMD_NPS_GET_POWER_SAVE_ALLOWED_LIST, data, reply, option);
+    if (retCode != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    if (!reply.ReadUInt32Vector(&uids)) {
+        NETMGR_LOG_E("proxy SendRequest Readuint32Vector failed");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+
+    int32_t result = 0;
+    if (!reply.ReadInt32(result)) {
+        NETMGR_LOG_E("Read int32 reply failed.");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return result;
+}
+
+int32_t NetPolicyServiceProxy::SetPowerSaveAllowedList(uint32_t uid, bool isAllowed)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    if (!data.WriteUint32(uid)) {
+        NETMGR_LOG_E("Write uint32 data failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!data.WriteBool(isAllowed)) {
+        NETMGR_LOG_E("Write Bool data failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t retCode = remote->SendRequest(CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST, data, reply, option);
+    if (retCode != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    int32_t result = 0;
+    if (!reply.ReadInt32(result)) {
+        NETMGR_LOG_E("Read int32 reply failed.");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return result;
+}
+
 bool NetPolicyServiceProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(NetPolicyServiceProxy::GetDescriptor())) {

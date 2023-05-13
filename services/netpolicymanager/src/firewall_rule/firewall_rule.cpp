@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "device_idle_firewall_rule.h"
 #include "net_policy_inner_define.h"
+#include "power_save_firewall_rule.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -25,6 +26,8 @@ std::shared_ptr<FirewallRule> FirewallRule::CreateFirewallRule(uint32_t chain)
     switch (chain) {
         case FIREWALL_CHAIN_DEVICE_IDLE:
             return DelayedSingleton<DeviceIdleFirewallRule>::GetInstance();
+        case FIREWALL_CHAIN_POWER_SAVE:
+            return DelayedSingleton<PowerSaveFirewallRule>::GetInstance();
         default:
             break;
     }
@@ -61,7 +64,7 @@ void FirewallRule::SetAllowedList(uint32_t uid, uint32_t rule)
     netsys_->FirewallSetUidRule(chainType_, uid, rule);
 }
 
-void FirewallRule::SetAllowedList(const std::vector<uint32_t> &uids)
+void FirewallRule::SetAllowedList(const std::set<uint32_t> &uids)
 {
     for (const auto &it : uids) {
         if (std::find(allowedList_.begin(), allowedList_.end(), it) == allowedList_.end()) {

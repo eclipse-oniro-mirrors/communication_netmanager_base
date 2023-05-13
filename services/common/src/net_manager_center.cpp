@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,14 @@ int32_t NetManagerCenter::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<
         return NETMANAGER_ERROR;
     }
     return connService_->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
+}
+
+int32_t NetManagerCenter::RegisterNetConnCallback(const sptr<INetConnCallback> &callback)
+{
+    if (connService_ == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    return connService_->RegisterNetConnCallback(callback);
 }
 
 void NetManagerCenter::RegisterConnService(const sptr<NetConnBaseService> &service)

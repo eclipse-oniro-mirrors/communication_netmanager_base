@@ -55,6 +55,7 @@ FirewallManager::FirewallManager() : chainInitFlag_(false), firewallType_(Firewa
     status.enable = false;
     status.type = FirewallType::TYPE_ALLOWED_LIST;
     firewallChainStatus_[ChainType::CHAIN_OHFW_DOZABLE] = status;
+    firewallChainStatus_[ChainType::CHAIN_OHFW_POWERSAVING] = status;
     firewallChainStatus_[ChainType::CHAIN_OHFW_UNDOZABLE] = status;
 }
 
@@ -98,7 +99,8 @@ std::string FirewallManager::ReadMaxUidConfig()
 
 int32_t FirewallManager::IsFirewallChian(ChainType chain)
 {
-    if (chain != ChainType::CHAIN_OHFW_DOZABLE && chain != ChainType::CHAIN_OHFW_UNDOZABLE) {
+    if (chain != ChainType::CHAIN_OHFW_DOZABLE && chain != ChainType::CHAIN_OHFW_POWERSAVING
+        && chain != ChainType::CHAIN_OHFW_UNDOZABLE) {
         return NETMANAGER_ERROR;
     }
     return NETMANAGER_SUCCESS;
@@ -121,6 +123,9 @@ std::string FirewallManager::FetchChainName(ChainType chain)
         case ChainType::CHAIN_OHFW_DOZABLE:
             chainName = "ohfw_dozable";
             break;
+        case ChainType::CHAIN_OHFW_POWERSAVING:
+            chainName = "ohfw_powersaving";
+            break;
         case ChainType::CHAIN_OHFW_UNDOZABLE:
             chainName = "ohfw_undozable";
             break;
@@ -136,6 +141,9 @@ FirewallType FirewallManager::FetchChainType(ChainType chain)
     FirewallType firewallType;
     switch (chain) {
         case ChainType::CHAIN_OHFW_DOZABLE:
+            firewallType = FirewallType::TYPE_ALLOWED_LIST;
+            break;
+        case ChainType::CHAIN_OHFW_POWERSAVING:
             firewallType = FirewallType::TYPE_ALLOWED_LIST;
             break;
         case ChainType::CHAIN_OHFW_UNDOZABLE:
@@ -156,6 +164,7 @@ int32_t FirewallManager::InitChain()
           (IptablesNewChain(ChainType::CHAIN_OHFW_OUTPUT) == NETMANAGER_ERROR) ||
           (IptablesNewChain(ChainType::CHAIN_OHFW_FORWARD) == NETMANAGER_ERROR) ||
           (IptablesNewChain(ChainType::CHAIN_OHFW_DOZABLE) == NETMANAGER_ERROR) ||
+          (IptablesNewChain(ChainType::CHAIN_OHFW_POWERSAVING) == NETMANAGER_ERROR) ||
           (IptablesNewChain(ChainType::CHAIN_OHFW_UNDOZABLE) == NETMANAGER_ERROR);
     chainInitFlag_ = true;
     return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
@@ -169,6 +178,7 @@ int32_t FirewallManager::DeInitChain()
           (IptablesDeleteChain(ChainType::CHAIN_OHFW_OUTPUT) == NETMANAGER_ERROR) ||
           (IptablesDeleteChain(ChainType::CHAIN_OHFW_FORWARD) == NETMANAGER_ERROR) ||
           (IptablesDeleteChain(ChainType::CHAIN_OHFW_DOZABLE) == NETMANAGER_ERROR) ||
+          (IptablesDeleteChain(ChainType::CHAIN_OHFW_POWERSAVING) == NETMANAGER_ERROR) ||
           (IptablesDeleteChain(ChainType::CHAIN_OHFW_UNDOZABLE) == NETMANAGER_ERROR);
     chainInitFlag_ = false;
     return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
@@ -193,23 +203,32 @@ int32_t FirewallManager::ClearAllRules()
 {
     NETNATIVE_LOG_D("FirewallManager ClearAllRules");
     bool ret = false;
-    std::string chainName = FetchChainName(ChainType::CHAIN_OHFW_INPUT);
+
+    std::string chainName = FetchChainName(ChainType::CHAIN_OHFW_DOZABLE);
     std::string command = "-t filter -F " + chainName;
     ret = ret ||
           (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+
+    chainName = FetchChainName(ChainType::CHAIN_OHFW_POWERSAVING);
+    command = "-t filter -F " + chainName;
+    ret =
+        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+
+    chainName = FetchChainName(ChainType::CHAIN_OHFW_UNDOZABLE);
+    command = "-t filter -F " + chainName;
+    ret =
+        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+
+    chainName = FetchChainName(ChainType::CHAIN_OHFW_INPUT);
+    command = "-t filter -F " + chainName;
+    ret =
+        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+
     chainName = FetchChainName(ChainType::CHAIN_OHFW_OUTPUT);
     command = "-t filter -F " + chainName;
     ret = ret ||
           (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     chainName = FetchChainName(ChainType::CHAIN_OHFW_FORWARD);
-    command = "-t filter -F " + chainName;
-    ret = ret ||
-          (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
-    chainName = FetchChainName(ChainType::CHAIN_OHFW_DOZABLE);
-    command = "-t filter -F " + chainName;
-    ret = ret ||
-          (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
-    chainName = FetchChainName(ChainType::CHAIN_OHFW_DOZABLE);
     command = "-t filter -F " + chainName;
     ret = ret ||
           (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
@@ -248,7 +267,7 @@ int32_t FirewallManager::IptablesSetRule(const std::string &chainName, const std
 int32_t FirewallManager::SetUidsAllowedListChain(ChainType chain, const std::vector<uint32_t> &uids)
 {
     NETNATIVE_LOG_D("FirewallManager SetUidsAllowedListChain: chain=%{public}d", chain);
-    if (chain != ChainType::CHAIN_OHFW_DOZABLE) {
+    if (chain != ChainType::CHAIN_OHFW_DOZABLE && chain != ChainType::CHAIN_OHFW_POWERSAVING) {
         return NETMANAGER_ERROR;
     }
 
