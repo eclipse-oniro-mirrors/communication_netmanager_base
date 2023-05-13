@@ -40,6 +40,7 @@ public:
     static void ExecGetBackgroundPolicyByUid(napi_env env, void *data);
     static void ExecResetPolicies(napi_env env, void *data);
     static void ExecUpdateRemindPolicy(napi_env env, void *data);
+    static void ExecSetPowerSaveAllowList(napi_env env, void *data);
 
     static void SetPolicyByUidCallback(napi_env env, napi_status status, void *data);
     static void GetPolicyByUidCallback(napi_env env, napi_status status, void *data);
@@ -55,6 +56,7 @@ public:
     static void GetBackgroundPolicyByUidCallback(napi_env env, napi_status status, void *data);
     static void ResetPoliciesCallback(napi_env env, napi_status status, void *data);
     static void UpdateRemindPolicyCallback(napi_env env, napi_status status, void *data);
+    static void SetPowerSaveAllowListCallback(napi_env env, napi_status status, void *data);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

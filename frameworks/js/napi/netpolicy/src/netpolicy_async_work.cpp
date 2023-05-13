@@ -26,6 +26,7 @@
 #include "set_device_idle_allow_list_context.h"
 #include "set_net_quota_policies_context.h"
 #include "set_policy_by_uid_context.h"
+#include "set_power_save_allow_list_context.h"
 #include "update_remind_policy_context.h"
 
 namespace OHOS {
@@ -83,6 +84,11 @@ void NetPolicyAsyncWork::ExecSetDeviceIdleAllowList(napi_env env, void *data)
 void NetPolicyAsyncWork::ExecGetDeviceIdleAllowList(napi_env env, void *data)
 {
     BaseAsyncWork::ExecAsyncWork<GetDeviceIdleAllowListContext, NetPolicyExec::ExecGetDeviceIdleAllowList>(env, data);
+}
+
+void NetPolicyAsyncWork::ExecSetPowerSaveAllowList(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<SetPowerSaveAllowListContext, NetPolicyExec::ExecSetPowerSaveAllowList>(env, data);
 }
 
 void NetPolicyAsyncWork::ExecGetBackgroundPolicyByUid(napi_env env, void *data)
@@ -177,6 +183,12 @@ void NetPolicyAsyncWork::UpdateRemindPolicyCallback(napi_env env, napi_status st
 {
     BaseAsyncWork::AsyncWorkCallback<UpdateRemindPolicyContext, NetPolicyExec::UpdateRemindPolicyCallback>(env, status,
                                                                                                            data);
+}
+
+void NetPolicyAsyncWork::SetPowerSaveAllowListCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<SetPowerSaveAllowListContext, NetPolicyExec::SetPowerSaveAllowListCallback>(
+        env, status, data);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

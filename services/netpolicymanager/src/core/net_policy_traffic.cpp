@@ -49,6 +49,11 @@ void NetPolicyTraffic::Init()
         GetNetsysInst()->RegisterNetsysCallback(netsysCallback_);
     }
 
+    netConnCallback_ =
+        new (std::nothrow) ConnCallBack((std::static_pointer_cast<NetPolicyTraffic>(shared_from_this())));
+    if (netConnCallback_ != nullptr) {
+        GetNetCenterInst().RegisterNetConnCallback(netConnCallback_);
+    }
     ReadQuotaPolicies();
 }
 
@@ -332,27 +337,32 @@ void NetPolicyTraffic::ReachedLimit(const std::string &iface)
     }
 }
 
+void NetPolicyTraffic::UpdateNetPolicy()
+{
+    UpdateQuotaPoliciesInner();
+}
+
 int64_t NetPolicyTraffic::GetTotalQuota(NetQuotaPolicy &quotaPolicy)
 {
     std::string iface = GetMatchIfaces(quotaPolicy);
     NetStatsInfo info;
     int64_t start = quotaPolicy.GetPeriodStart();
     int64_t end = static_cast<int64_t>(time(nullptr));
-    int64_t quota = GetNetCenterInst().GetIfaceStatsDetail(iface, start, end, info);
+    GetNetCenterInst().GetIfaceStatsDetail(iface, start, end, info);
+    int64_t quota = info.rxBytes_ + info.txBytes_;
 
     return quota < 0 ? 0 : quota;
 }
 
-int32_t NetPolicyTraffic::ReadQuotaPolicies()
+void NetPolicyTraffic::ReadQuotaPolicies()
 {
     GetFileInst()->ReadQuotaPolicies(quotaPolicies_);
     UpdateQuotaPoliciesInner();
-    return 0;
 }
 
 bool NetPolicyTraffic::WriteQuotaPolicies()
 {
-    return GetFileInst()->WriteFile(quotaPolicies_);
+    return GetFileInst()->WriteQuotaPolicies(quotaPolicies_);
 }
 
 const std::string NetPolicyTraffic::GetMatchIfaces(const NetQuotaPolicy &quotaPolicy)
@@ -438,10 +448,7 @@ bool NetPolicyTraffic::IsValidPeriodDuration(const std::string &periodDuration)
 bool NetPolicyTraffic::IsQuotaPolicyExist(int32_t netType, const std::string &iccid)
 {
     std::vector<NetQuotaPolicy> quotaPolicies;
-    if (GetFileInst()->ReadQuotaPolicies(quotaPolicies) != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("GetNetQuotaPolicies failed");
-        return false;
-    }
+    GetFileInst()->ReadQuotaPolicies(quotaPolicies);
 
     if (quotaPolicies.empty()) {
         NETMGR_LOG_E("quotaPolicies is empty");
@@ -481,7 +488,7 @@ void NetPolicyTraffic::GetDumpMessage(std::string &message)
         message.append(TAB + TAB + "LastWarningRemind: " + std::to_string(item.lastWarningRemind) + "\n");
         message.append(TAB + TAB + "LastLimitRemind: " + std::to_string(item.lastLimitRemind) + "\n");
         message.append(TAB + TAB + "Metered: " + std::to_string(item.metered) + "\n" + TAB + TAB +
-                       "Source: " + std::to_string(item.source) + "\n");
+                       "Ident: " + item.ident + "\n");
         message.append(TAB + TAB + "LimitAction: " + std::to_string(item.limitAction) + "\n" + TAB + TAB +
                        "UsedBytes: " + std::to_string(item.usedBytes) + "\n");
         message.append(TAB + TAB + "UsedTimeDuration: " + std::to_string(item.usedTimeDuration) + "\n");

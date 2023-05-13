@@ -27,6 +27,7 @@
 #include "set_bg_policy_context.h"
 #include "set_net_quota_policies_context.h"
 #include "set_policy_by_uid_context.h"
+#include "set_power_save_allow_list_context.h"
 #include "set_device_idle_allow_list_context.h"
 #include "update_remind_policy_context.h"
 
@@ -51,6 +52,7 @@ public:
     static bool ExecGetBackgroundPolicyByUid(GetBackgroundPolicyByUidContext *context);
     static bool ExecResetPolicies(ResetPoliciesContext *context);
     static bool ExecUpdateRemindPolicy(UpdateRemindPolicyContext *context);
+    static bool ExecSetPowerSaveAllowList(SetPowerSaveAllowListContext *context);
 
     static napi_value SetPolicyByUidCallback(SetPolicyByUidContext *context);
     static napi_value GetPolicyByUidCallback(GetPolicyByUidContext *context);
@@ -66,6 +68,7 @@ public:
     static napi_value GetBackgroundPolicyByUidCallback(GetBackgroundPolicyByUidContext *context);
     static napi_value ResetPoliciesCallback(ResetPoliciesContext *context);
     static napi_value UpdateRemindPolicyCallback(UpdateRemindPolicyContext *context);
+    static napi_value SetPowerSaveAllowListCallback(SetPowerSaveAllowListContext *context);
 
     static napi_value CreateNetQuotaPolicy(napi_env env, const NetQuotaPolicy &netQuotaPolicy);
 };

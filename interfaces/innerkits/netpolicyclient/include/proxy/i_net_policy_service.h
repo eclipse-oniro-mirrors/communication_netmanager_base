@@ -42,6 +42,7 @@ public:
         CMD_NPS_SET_IDLE_ALLOWED_LIST,
         CMD_NPS_GET_IDLE_ALLOWED_LIST,
         CMD_NPS_SET_DEVICE_IDLE_POLICY,
+        CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST,
         CMD_NPS_RESET_POLICIES,
         CMD_NPS_SET_BACKGROUND_POLICY,
         CMD_NPS_GET_BACKGROUND_POLICY,
@@ -203,6 +204,15 @@ public:
      * @return uint32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backgroundPolicyOfUid) = 0;
+
+    /**
+     * Set the Power Save Allowed List object
+     *
+     * @param uid The specified UID of application.
+     * @param isAllowed The UID is into allow list or not.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    virtual int32_t SetPowerSaveAllowedList(uint32_t uid, bool isAllowed) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

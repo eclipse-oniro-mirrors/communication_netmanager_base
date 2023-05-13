@@ -33,6 +33,7 @@
 #include "set_device_idle_allow_list_context.h"
 #include "set_net_quota_policies_context.h"
 #include "set_policy_by_uid_context.h"
+#include "set_power_save_allow_list_context.h"
 #include "update_remind_policy_context.h"
 
 #define DEFINE_REMIND(REMIND) \
@@ -74,6 +75,7 @@ constexpr const char *FUNCTION_GET_DEVICE_IDLE_ALLOWLIST = "getDeviceIdleAllowLi
 constexpr const char *FUNCTION_GET_BACKGROUND_POLICY_BY_UID = "getBackgroundPolicyByUid";
 constexpr const char *FUNCTION_RESET_POLICIES = "resetPolicies";
 constexpr const char *FUNCTION_UPDATE_REMIND_POLICY = "updateRemindPolicy";
+constexpr const char *FUNCTION_SET_POWER_SAVE_ALLOWLIST = "setPowerSaveAllowList";
 constexpr const char *FUNCTION_ON = "on";
 constexpr const char *FUNCTION_OFF = "off";
 constexpr const char *REMIND_TYPE = "RemindType";
@@ -196,6 +198,13 @@ napi_value UpdateRemindPolicy(napi_env env, napi_callback_info info)
                                                                 NetPolicyAsyncWork::UpdateRemindPolicyCallback);
 }
 
+napi_value SetPowerSaveAllowList(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<SetPowerSaveAllowListContext>(
+        env, info, FUNCTION_SET_POWER_SAVE_ALLOWLIST, nullptr, NetPolicyAsyncWork::ExecSetPowerSaveAllowList,
+        NetPolicyAsyncWork::SetPowerSaveAllowListCallback);
+}
+
 napi_value On(napi_env env, napi_callback_info info)
 {
     return DelayedSingleton<PolicyObserverWrapper>::GetInstance()->On(
@@ -309,6 +318,7 @@ napi_value InitPolicyModule(napi_env env, napi_value exports)
             DECLARE_NAPI_FUNCTION(FUNCTION_UPDATE_REMIND_POLICY, UpdateRemindPolicy),
             DECLARE_NAPI_FUNCTION(FUNCTION_RESET_POLICIES, ResetPolicies),
             DECLARE_NAPI_FUNCTION(FUNCTION_UPDATE_REMIND_POLICY, UpdateRemindPolicy),
+            DECLARE_NAPI_FUNCTION(FUNCTION_SET_POWER_SAVE_ALLOWLIST, SetPowerSaveAllowList),
             DECLARE_NAPI_FUNCTION(FUNCTION_ON, On),
             DECLARE_NAPI_FUNCTION(FUNCTION_OFF, Off),
         });

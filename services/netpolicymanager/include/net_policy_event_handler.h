@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,9 @@ public:
     static constexpr int32_t MSG_DEVICE_IDLE_MODE_CHANGED = 2;
     static constexpr int32_t MSG_POWER_SAVE_MODE_CHANGED = 3;
     static constexpr int32_t MSG_UID_REMOVED = 4;
+    static constexpr int32_t MSG_POWER_SAVE_LIST_UPDATED = 5;
+    static constexpr int32_t MSG_UID_STATE_FOREGROUND = 6;
+    static constexpr int32_t MSG_UID_STATE_BACKGROUND = 7;
 
     NetPolicyEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner,
                           const std::shared_ptr<NetPolicyCore> &core);
