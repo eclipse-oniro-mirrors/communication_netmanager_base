@@ -27,7 +27,8 @@ ohos_unittest("netsys_bpf_stats_test") {
     "$INNERKITS_ROOT/netstatsclient/include",
   ]
 
-  deps = [ "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils" ]
+  deps =
+      [ "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf:netsys_bpf_utils" ]
 
   external_deps = [
     "ability_base:want",
