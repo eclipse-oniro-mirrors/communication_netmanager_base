@@ -146,10 +146,10 @@ private:
     bool ReadFile();
     bool WriteFile();
 
-    void AppendUidPolicy(Json::Value &root);
-    void AppendBackgroundPolicy(Json::Value &root);
-    void AppendQuotaPolicy(Json::Value &root);
-    void AppendFirewallRule(Json::Value &root);
+    void AddUidPolicy(Json::Value &root);
+    void AddBackgroundPolicy(Json::Value &root);
+    void AddQuotaPolicy(Json::Value &root);
+    void AddFirewallRule(Json::Value &root);
 
     void ParseUidPolicy(const Json::Value &root, NetPolicy &netPolicy);
     void ParseBackgroundPolicy(const Json::Value &root, NetPolicy &netPolicy);
