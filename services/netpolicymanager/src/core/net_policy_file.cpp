@@ -203,14 +203,10 @@ bool NetPolicyFile::Obj2Json(const NetPolicy &netPolicy, std::string &content)
         netPolicy_.hosVersion = HOS_VERSION;
     }
     root[CONFIG_HOS_VERSION] = Json::Value(netPolicy_.hosVersion);
-    // uid policy
-    AppendUidPolicy(root);
-    // background policy
-    AppendBackgroundPolicy(root);
-    // quota policy
-    AppendQuotaPolicy(root);
-    // firewall rule
-    AppendFirewallRule(root);
+    AddUidPolicy(root);
+    AddBackgroundPolicy(root);
+    AddQuotaPolicy(root);
+    AddFirewallRule(root);
 
     std::ostringstream out;
     streamWriter->write(root, &out);
@@ -218,7 +214,7 @@ bool NetPolicyFile::Obj2Json(const NetPolicy &netPolicy, std::string &content)
     return true;
 }
 
-void NetPolicyFile::AppendQuotaPolicy(Json::Value &root)
+void NetPolicyFile::AddQuotaPolicy(Json::Value &root)
 {
     uint32_t size = netPolicy_.netQuotaPolicies.size();
     for (uint32_t i = 0; i < size; i++) {
@@ -236,7 +232,7 @@ void NetPolicyFile::AppendQuotaPolicy(Json::Value &root)
     }
 }
 
-void NetPolicyFile::AppendUidPolicy(Json::Value &root)
+void NetPolicyFile::AddUidPolicy(Json::Value &root)
 {
     uint32_t size = netPolicy_.uidPolicies.size();
     for (uint32_t i = 0; i < size; i++) {
@@ -247,7 +243,7 @@ void NetPolicyFile::AppendUidPolicy(Json::Value &root)
     }
 }
 
-void NetPolicyFile::AppendBackgroundPolicy(Json::Value &root)
+void NetPolicyFile::AddBackgroundPolicy(Json::Value &root)
 {
     Json::Value backgroundPolicy;
     if (netPolicy_.backgroundPolicyStatus.empty()) {
@@ -257,7 +253,7 @@ void NetPolicyFile::AppendBackgroundPolicy(Json::Value &root)
     root[CONFIG_BACKGROUND_POLICY] = backgroundPolicy;
 }
 
-void NetPolicyFile::AppendFirewallRule(Json::Value &root)
+void NetPolicyFile::AddFirewallRule(Json::Value &root)
 {
     Json::Value mapFirewallList(Json::objectValue);
     for (auto &&[k, v] : netPolicy_.netFirewallRules) {
