@@ -62,9 +62,9 @@ void TestNetworkAddRoute()
         std::cout << "TestNetworkAddRoute netsysServiceR_ is nullptr" << std::endl;
         return;
     }
-    int ret = netsysServiceR_->NetworkCreatePhysical(NETID, nmd::NetworkPermission::PERMISSION_NONE);
+    netsysServiceR_->NetworkCreatePhysical(NETID, nmd::NetworkPermission::PERMISSION_NONE);
     NETNATIVE_LOGI("NetworkAddInterface, net");
-    ret = netsysServiceR_->NetworkAddInterface(NETID, "eth0");
+    int ret = netsysServiceR_->NetworkAddInterface(NETID, "eth0");
     NETNATIVE_LOGE("result %{public}d", ret);
     ret = netsysServiceR_->NetworkAddRoute(NETID, "eth0", "192.168.1.3/24", "192.168.1.1");
     NETNATIVE_LOGE("ret=%{public}d", ret);

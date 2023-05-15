@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,9 +22,10 @@
 
 #include "i_notify_callback.h"
 
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 namespace OHOS {
 namespace nmd {
-class NetlinkManager {
+class NET_SYMBOL_VISIBLE NetlinkManager {
 public:
     static constexpr uint32_t NFLOG_QUOTA_GROUP = 1;
     static constexpr uint32_t NETFILTER_STRICT_GROUP = 2;

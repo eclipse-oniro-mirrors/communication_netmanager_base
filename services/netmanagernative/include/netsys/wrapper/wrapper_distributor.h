@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,10 @@
 #include "i_notify_callback.h"
 #include "netsys_event_message.h"
 
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 namespace OHOS {
 namespace nmd {
-class WrapperDistributor {
+class NET_SYMBOL_VISIBLE WrapperDistributor {
 public:
     WrapperDistributor(int32_t socket, const int32_t format);
     ~WrapperDistributor() = default;
