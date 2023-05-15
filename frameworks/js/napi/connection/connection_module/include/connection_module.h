@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,13 @@
 #include <napi/native_api.h>
 
 namespace OHOS::NetManagerStandard {
+enum NetConnectionType {
+    PARAMETER_ZERO = 0,
+    PARAMETER_SPECIFIER,
+    PARAMETER_TIMEOUT,
+    PARAMETER_ERROR,
+};
+
 class ConnectionModule final {
 public:
     static constexpr const char *FUNCTION_GET_DEFAULT_NET = "getDefaultNet";

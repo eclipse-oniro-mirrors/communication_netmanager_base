@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,9 +91,9 @@ HWTEST_F(UtFirewallRule, SetAllowedList, TestSize.Level1)
     EXPECT_EQ(rule.GetAllowedList().size(), static_cast<uint32_t>(1));
     EXPECT_EQ(rule.GetAllowedList()[0], uid);
     uint32_t uidCount = 5;
-    std::vector<uint32_t> uids;
+    std::set<uint32_t> uids;
     for (size_t i = 0; i < uidCount; i++) {
-        uids.emplace_back(i);
+        uids.insert(i);
     }
     rule.SetAllowedList(uids);
     EXPECT_EQ(rule.GetAllowedList().size(), uidCount);

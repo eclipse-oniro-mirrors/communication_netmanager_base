@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,9 +25,8 @@ void NetPolicyRule::Init()
 {
     // Init uid、policy and background allow status from file,and save uid、policy into uidPolicyRules_.
     NETMGR_LOG_I("Start init uid and policy.");
-    const auto &uidsPolicies = GetFileInst()->GetNetPolicies();
-    backgroundAllow_ = GetFileInst()->GetBackgroundPolicy();
-
+    const auto &uidsPolicies = GetFileInst()->ReadUidPolicies();
+    backgroundAllow_ = GetFileInst()->ReadBackgroundPolicy();
     for (const auto &i : uidsPolicies) {
         auto uid = CommonUtils::StrToUint(i.uid.c_str());
         auto policy = CommonUtils::StrToUint(i.policy.c_str());
@@ -46,7 +45,7 @@ void NetPolicyRule::TransPolicyToRule()
 
 void NetPolicyRule::TransPolicyToRule(uint32_t uid)
 {
-    uint32_t policy;
+    uint32_t policy = 0;
     const auto &itr = uidPolicyRules_.find(uid);
     if (itr == uidPolicyRules_.end()) {
         policy = NET_POLICY_NONE;
@@ -68,12 +67,12 @@ int32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
     if (policyRule == uidPolicyRules_.end()) {
         NETMGR_LOG_D("Don't find this uid, need to add uid:[%{public}u] policy[%{public}u].", uid, policy);
         uidPolicyRules_[uid] = {.policy_ = policy};
-        GetCbInst()->NotifyNetUidPolicyChange(uid, policy);
+        GetCbInst()->NotifyNetUidPolicyChangeAsync(uid, policy);
     } else {
         if (policyRule->second.policy_ != policy) {
             NETMGR_LOG_D("Update policy's value.uid:[%{public}u] policy[%{public}u]", uid, policy);
             policyRule->second.policy_ = policy;
-            GetCbInst()->NotifyNetUidPolicyChange(uid, policy);
+            GetCbInst()->NotifyNetUidPolicyChangeAsync(uid, policy);
         }
     }
 
@@ -130,7 +129,7 @@ void NetPolicyRule::TransConditionToRuleAndNetsys(uint32_t policyCondition, uint
         NETMGR_LOG_I("Same netsys and uid ,don't need to do others.now netsys is: [%{public}u]", netsys);
     }
 
-    GetFileInst()->WriteFile(uid, policy);
+    GetFileInst()->WritePolicyByUid(uid, policy);
 
     if (policyRuleNetsys.rule_ == rule) {
         NETMGR_LOG_D("Same rule and uid ,don't need to do others.uid is:[%{public}u] rule is:[%{public}u]", uid, rule);
@@ -138,7 +137,7 @@ void NetPolicyRule::TransConditionToRuleAndNetsys(uint32_t policyCondition, uint
     }
 
     policyRuleNetsys.rule_ = rule;
-    GetCbInst()->NotifyNetUidRuleChange(uid, rule);
+    GetCbInst()->NotifyNetUidRuleChangeAsync(uid, rule);
 }
 
 uint32_t NetPolicyRule::GetMatchTransCondition(uint32_t policyCondition)
@@ -268,10 +267,10 @@ int32_t NetPolicyRule::IsUidNetAllowed(uint32_t uid, bool metered, bool &isAllow
 int32_t NetPolicyRule::SetBackgroundPolicy(bool allow)
 {
     if (backgroundAllow_ != allow) {
-        GetCbInst()->NotifyNetBackgroundPolicyChange(allow);
+        GetCbInst()->NotifyNetBackgroundPolicyChangeAsync(allow);
         backgroundAllow_ = allow;
         TransPolicyToRule();
-        GetFileInst()->SetBackgroundPolicy(allow);
+        GetFileInst()->WriteBackgroundPolicy(allow);
         NetmanagerHiTrace::NetmanagerStartSyncTrace("SetBackgroundPolicy policy start");
         GetNetsysInst()->BandwidthEnableDataSaver(!allow);
         NetmanagerHiTrace::NetmanagerFinishSyncTrace("SetBackgroundPolicy policy end");
@@ -283,7 +282,7 @@ int32_t NetPolicyRule::SetBackgroundPolicy(bool allow)
 
 int32_t NetPolicyRule::GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backgroundPolicyOfUid)
 {
-    uint32_t policy;
+    uint32_t policy = 0;
     GetPolicyByUid(uid, policy);
     NETMGR_LOG_D("GetBackgroundPolicyByUid GetPolicyByUid uid: %{public}u policy: %{public}u.", uid, policy);
     if ((policy & NET_POLICY_REJECT_METERED_BACKGROUND) != 0) {
@@ -342,8 +341,7 @@ bool NetPolicyRule::IsLimitByAdmin()
 
 bool NetPolicyRule::IsForeground(uint32_t uid)
 {
-    // to judge if this uid is foreground.
-    return false;
+    return std::find(foregroundUidList_.begin(), foregroundUidList_.end(), uid) != foregroundUidList_.end();
 }
 
 bool NetPolicyRule::IsPowerSave()
@@ -372,7 +370,7 @@ void NetPolicyRule::DeleteUid(uint32_t uid)
     if (it != uidPolicyRules_.end()) {
         uidPolicyRules_.erase(it);
     }
-
+    GetFileInst()->RemoveInexistentUid(uid);
     GetNetsysInst()->BandwidthRemoveDeniedList(uid);
     GetNetsysInst()->BandwidthRemoveAllowedList(uid);
 }
@@ -390,9 +388,26 @@ void NetPolicyRule::HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEve
         case NetPolicyEventHandler::MSG_UID_REMOVED:
             DeleteUid(policyEvent->deletedUid);
             break;
+        case NetPolicyEventHandler::MSG_UID_STATE_FOREGROUND:
+            UpdateForegroundUidList(policyEvent->uid, true);
+            TransPolicyToRule(policyEvent->uid);
+            break;
+        case NetPolicyEventHandler::MSG_UID_STATE_BACKGROUND:
+            UpdateForegroundUidList(policyEvent->uid, false);
+            TransPolicyToRule(policyEvent->uid);
+            break;
         default:
             break;
     }
+}
+
+void NetPolicyRule::UpdateForegroundUidList(uint32_t uid, bool isForeground)
+{
+    if (isForeground) {
+        foregroundUidList_.insert(uid);
+        return;
+    }
+    foregroundUidList_.erase(uid);
 }
 
 bool NetPolicyRule::IsValidNetPolicy(uint32_t policy)
@@ -419,7 +434,7 @@ void NetPolicyRule::GetDumpMessage(std::string &message)
                        std::to_string(pair.second.rule_) + TAB + "Policy:" + std::to_string(pair.second.policy_) + TAB +
                        "NetSys: " + std::to_string(pair.second.netsys_) + "\n");
     });
-    message.append(TAB + "DeviceIdleAllowList: {");
+    message.append(TAB + "DeviceIdleAllowedList: {");
     std::for_each(deviceIdleAllowedList_.begin(), deviceIdleAllowedList_.end(),
                   [&message](const auto &item) { message.append(std::to_string(item) + ", "); });
     message.append("}\n");
