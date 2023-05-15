@@ -121,6 +121,7 @@ bool NetPolicyFileEventHandler::DeleteBak()
     struct stat buffer;
     if (stat(POLICY_FILE_BAK_NAME, &buffer) == 0) {
         int32_t err = remove(POLICY_FILE_BAK_NAME);
+        sync();
         if (err != 0) {
             NETMGR_LOG_E("remove file error.");
             return false;
