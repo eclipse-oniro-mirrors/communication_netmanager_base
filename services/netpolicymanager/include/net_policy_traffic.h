@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,6 +90,7 @@ public:
     int32_t ResetPolicies(const std::string &iccid);
 
     void ReachedLimit(const std::string &iface);
+    void UpdateNetPolicy();
     void GetDumpMessage(std::string &message);
 
 private:
@@ -156,7 +157,7 @@ private:
     void NotifyQuotaLimit(int64_t totalQuota);
     void NotifyQuotaLimitReminded(int64_t totalQuota);
     void PublishQuotaEvent(const std::string &action, const std::string &describe, int64_t quota);
-    int32_t ReadQuotaPolicies();
+    void ReadQuotaPolicies();
     bool WriteQuotaPolicies();
     const std::string GetMatchIfaces(const NetQuotaPolicy &quotaPolicy);
 
