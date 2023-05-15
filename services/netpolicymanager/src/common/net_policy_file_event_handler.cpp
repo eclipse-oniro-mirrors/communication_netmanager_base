@@ -59,7 +59,7 @@ void NetPolicyFileEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Point
     auto eventId = event->GetInnerEventId();
     auto eventData = event->GetSharedObject<PolicyFileEvent>();
 
-    if (MSG_POLICY_FILE_WRITE == eventId) {
+    if (eventId == MSG_POLICY_FILE_WRITE) {
         fileContent_ = eventData->json;
         if (commitWait_) {
             return;
@@ -74,7 +74,7 @@ void NetPolicyFileEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Point
         return;
     }
 
-    if (MSG_POLICY_FILE_COMMIT == eventId) {
+    if (eventId == MSG_POLICY_FILE_COMMIT) {
         commitWait_ = !Write();
         timeStamp_ = GetNowMilliSeconds();
         if (commitWait_) {
@@ -107,7 +107,7 @@ bool NetPolicyFileEventHandler::Write()
         newFile.close();
     }
     std::fstream file(POLICY_FILE_NAME, std::fstream::out | std::fstream::trunc);
-    if (file.is_open() == false) {
+    if (!file.is_open()) {
         NETMGR_LOG_E("open file error.");
         return false;
     }
