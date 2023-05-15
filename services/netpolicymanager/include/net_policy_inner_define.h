@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@ constexpr int16_t LIMIT_ACTION_ONE = 1;
 constexpr int16_t LIMIT_ACTION_THREE = 3;
 constexpr int16_t LIMIT_CALLBACK_NUM = 200;
 constexpr const char *POLICY_FILE_NAME = "/data/service/el1/public/netmanager/net_policy.json";
+constexpr const char *POLICY_FILE_BAK_NAME = "/data/service/el1/public/netmanager/net_policy.bak";
 constexpr const char *CONFIG_HOS_VERSION = "hosVersion";
 constexpr const char *CONFIG_UID_POLICY = "uidPolicy";
 constexpr const char *CONFIG_UID = "uid";
@@ -56,28 +57,15 @@ constexpr const char *CONFIG_QUOTA_POLICY_WARNINGBYTES = "warningBytes";
 constexpr const char *CONFIG_QUOTA_POLICY_LIMITBYTES = "limitBytes";
 constexpr const char *CONFIG_QUOTA_POLICY_LASTLIMITSNOOZE = "lastLimitSnooze";
 constexpr const char *CONFIG_QUOTA_POLICY_METERED = "metered";
-constexpr const char *CONFIG_QUOTA_POLICY_SOURCE = "source";
-constexpr const char *CONFIG_CELLULAR_POLICY = "cellularPolicy";
-constexpr const char *CONFIG_CELLULAR_POLICY_SUBSCRIBERID = "iccid";
-constexpr const char *CONFIG_CELLULAR_POLICY_PERIODSTARTTIME = "periodStartTime";
-constexpr const char *CONFIG_CELLULAR_POLICY_PERIODDURATION = "periodDuration";
-constexpr const char *CONFIG_CELLULAR_POLICY_TITLE = "title";
-constexpr const char *CONFIG_CELLULAR_POLICY_SUMMARY = "summary";
-constexpr const char *CONFIG_CELLULAR_POLICY_LIMITBYTES = "limitBytes";
-constexpr const char *CONFIG_CELLULAR_POLICY_LIMITACTION = "limitAction";
-constexpr const char *CONFIG_CELLULAR_POLICY_USEDBYTES = "usedBytes";
-constexpr const char *CONFIG_CELLULAR_POLICY_USEDTIMEDURATION = "usedTimeDuration";
-constexpr const char *CONFIG_CELLULAR_POLICY_POSSESSOR = "possessor";
+constexpr const char *CONFIG_QUOTA_POLICY_IDENT = "ident";
+constexpr const char *CONFIG_FIREWALL_RULE = "firewallList";
+constexpr const char *CONFIG_FIREWALL_RULE_DENIEDLIST = "deniedList";
+constexpr const char *CONFIG_FIREWALL_RULE_ALLOWEDLIST = "allowedList";
 constexpr const char *BACKGROUND_POLICY_ALLOW = "allow";
 constexpr const char *BACKGROUND_POLICY_REJECT = "reject";
 constexpr const char *IDENT_PREFIX_CELLULAR = "simId";
 constexpr const char *IDENT_PREFIX_WIFI = "ssId";
-
-constexpr const char *FIREWALL_CHAIN_NAME_DEVICE_IDLE = "deviceidle";
-
 constexpr const char *UNKNOW_IFACE = "";
-
-constexpr const char *NET_POLICY_SERVICE_NAME = "NetPolicyService";
 
 enum {
     FIREWALL_CHAIN_NONE = 0,         // ChainType::CHAIN_NONE
@@ -104,7 +92,7 @@ struct NetPolicyQuota {
     std::string limitBytes;
     std::string lastLimitSnooze;
     std::string metered;
-    std::string source;
+    std::string ident;
 };
 
 struct NetPolicyCellular {
@@ -120,11 +108,17 @@ struct NetPolicyCellular {
     std::string possessor;
 };
 
+struct NetFirewallRule {
+    std::set<uint32_t> deniedList;
+    std::set<uint32_t> allowedList;
+};
+
 struct NetPolicy {
     std::string hosVersion;
     std::vector<UidPolicy> uidPolicies;
     std::string backgroundPolicyStatus;
     std::vector<NetPolicyQuota> netQuotaPolicies;
+    std::map<uint32_t, NetFirewallRule> netFirewallRules;
 };
 
 // link power_mode_module.h

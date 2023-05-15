@@ -25,9 +25,8 @@ void NetPolicyRule::Init()
 {
     // Init uid、policy and background allow status from file,and save uid、policy into uidPolicyRules_.
     NETMGR_LOG_I("Start init uid and policy.");
-    const auto &uidsPolicies = GetFileInst()->GetNetPolicies();
-    backgroundAllow_ = GetFileInst()->GetBackgroundPolicy();
-
+    const auto &uidsPolicies = GetFileInst()->ReadUidPolicies();
+    backgroundAllow_ = GetFileInst()->ReadBackgroundPolicy();
     for (const auto &i : uidsPolicies) {
         auto uid = CommonUtils::StrToUint(i.uid.c_str());
         auto policy = CommonUtils::StrToUint(i.policy.c_str());
@@ -130,7 +129,7 @@ void NetPolicyRule::TransConditionToRuleAndNetsys(uint32_t policyCondition, uint
         NETMGR_LOG_I("Same netsys and uid ,don't need to do others.now netsys is: [%{public}u]", netsys);
     }
 
-    GetFileInst()->WriteFile(uid, policy);
+    GetFileInst()->WritePolicyByUid(uid, policy);
 
     if (policyRuleNetsys.rule_ == rule) {
         NETMGR_LOG_D("Same rule and uid ,don't need to do others.uid is:[%{public}u] rule is:[%{public}u]", uid, rule);
@@ -271,7 +270,7 @@ int32_t NetPolicyRule::SetBackgroundPolicy(bool allow)
         GetCbInst()->NotifyNetBackgroundPolicyChangeAsync(allow);
         backgroundAllow_ = allow;
         TransPolicyToRule();
-        GetFileInst()->SetBackgroundPolicy(allow);
+        GetFileInst()->WriteBackgroundPolicy(allow);
         NetmanagerHiTrace::NetmanagerStartSyncTrace("SetBackgroundPolicy policy start");
         GetNetsysInst()->BandwidthEnableDataSaver(!allow);
         NetmanagerHiTrace::NetmanagerFinishSyncTrace("SetBackgroundPolicy policy end");
@@ -372,7 +371,7 @@ void NetPolicyRule::DeleteUid(uint32_t uid)
     if (it != uidPolicyRules_.end()) {
         uidPolicyRules_.erase(it);
     }
-
+    GetFileInst()->RemoveInexistentUid(uid);
     GetNetsysInst()->BandwidthRemoveDeniedList(uid);
     GetNetsysInst()->BandwidthRemoveAllowedList(uid);
 }
@@ -419,7 +418,7 @@ void NetPolicyRule::GetDumpMessage(std::string &message)
                        std::to_string(pair.second.rule_) + TAB + "Policy:" + std::to_string(pair.second.policy_) + TAB +
                        "NetSys: " + std::to_string(pair.second.netsys_) + "\n");
     });
-    message.append(TAB + "DeviceIdleAllowList: {");
+    message.append(TAB + "DeviceIdleAllowedList: {");
     std::for_each(deviceIdleAllowedList_.begin(), deviceIdleAllowedList_.end(),
                   [&message](const auto &item) { message.append(std::to_string(item) + ", "); });
     message.append("}\n");
