@@ -85,7 +85,6 @@ HWTEST_F(NetsysBpfStatsTest, GetTotalStats, TestSize.Level1)
 
 HWTEST_F(NetsysBpfStatsTest, GetUidStats, TestSize.Level1)
 {
-
     std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
     uint64_t stats = 0;
 
