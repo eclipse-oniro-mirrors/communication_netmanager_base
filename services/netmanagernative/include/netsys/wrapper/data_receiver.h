@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,10 +22,11 @@
 #include "netsys_event_message.h"
 #include "wrapper_listener.h"
 
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 namespace OHOS {
 namespace nmd {
 class WrapperListener;
-class DataReceiver {
+class NET_SYMBOL_VISIBLE DataReceiver {
 public:
     using EventCallback = std::function<void(std::shared_ptr<NetsysEventMessage>)>;
     DataReceiver(int32_t socketFd, int32_t format);
