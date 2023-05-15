@@ -90,7 +90,7 @@ void NetPolicyCore::SendEvent(int32_t eventId, std::shared_ptr<PolicyEvent> &eve
         NETMGR_LOG_E("handler is null");
         return;
     }
-    
+
     handler_->SendEvent(event, delayTime);
 }
 
@@ -123,7 +123,7 @@ void NetPolicyCore::SubscribeCommonEvent()
 
 void NetPolicyCore::ReceiveMessage::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
 {
-    if(receiveMessage_ == nullptr) {
+    if (receiveMessage_ == nullptr) {
         NETMGR_LOG_E("receive message is nullptr");
         return;
     }
@@ -153,8 +153,8 @@ void NetPolicyCore::ReceiveMessage::OnReceiveEvent(const EventFwk::CommonEventDa
         receiveMessage_->SendEvent(NetPolicyEventHandler::MSG_UID_REMOVED, policyEvent);
         return;
     }
-    NETMGR_LOG_E("Unknow action:[%{public}s], data:[%{public}s], code:[%{public}d]", action.c_str(),
-                 data.c_str(), code);
+    NETMGR_LOG_E("Unknow action:[%{public}s], data:[%{public}s], code:[%{public}d]", action.c_str(), data.c_str(),
+                 code);
 }
 
 void NetPolicyCore::SendAppStatusMessage(const AppProcessData &appProcessData)
