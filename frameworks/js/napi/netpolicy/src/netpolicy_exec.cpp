@@ -168,11 +168,11 @@ bool NetPolicyExec::ExecGetDeviceIdleAllowList(GetDeviceIdleAllowListContext *co
 
 bool NetPolicyExec::ExecSetPowerSaveAllowList(SetPowerSaveAllowListContext *context)
 {
-    int32_t result =
-        DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList(static_cast<uint32_t>(context->uid_), context->isAllow_);
+    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList(
+        static_cast<uint32_t>(context->uid_), context->isAllow_);
     if (result != NETMANAGER_SUCCESS) {
-        NETMANAGER_BASE_LOGE("ExecSetPowerSaveAllowList error: uid = %{public}d, result = %{public}d",
-                             context->uid_, result);
+        NETMANAGER_BASE_LOGE("ExecSetPowerSaveAllowList error: uid = %{public}d, result = %{public}d", context->uid_,
+                             result);
         context->SetErrorCode(result);
         return false;
     }
