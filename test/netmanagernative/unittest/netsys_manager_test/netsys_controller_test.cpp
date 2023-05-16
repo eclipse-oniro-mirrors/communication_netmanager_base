@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
+static constexpr const char *IFACE = "test0";
 static constexpr const char *WLAN = "wlan0";
 static constexpr const char *ETH0 = "eth0";
 static constexpr const char *DESTINATION = "192.168.1.3/24";
@@ -39,6 +40,7 @@ uint16_t BASE_TIMEOUT_MSEC = 200;
 uint8_t RETRY_COUNT = 3;
 const int64_t TEST_UID = 1010;
 const int32_t SOCKET_FD = 5;
+const int32_t TEST_STATS_UID = 11111;
 int g_ifaceFd = 5;
 const int64_t BYTES = 2097152;
 const uint32_t FIREWALL_RULE = 1;
@@ -399,6 +401,26 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest016, TestSize.Level1)
     auto callback = new NetsysControllerCallbackTest();
     ret = NetsysController::GetInstance().RegisterCallback(callback);
     EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerTest017, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    int32_t ret = NetsysController::GetInstance().GetTotalStats(stats, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    stats = 0;
+    ret = NetsysController::GetInstance().GetUidStats(stats, 0, TEST_STATS_UID);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+
+    stats = 0;
+    ret = NetsysController::GetInstance().GetIfaceStats(stats, 0, IFACE);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+
+    stats = 0;
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
+    ret = NetsysController::GetInstance().GetAllStatsInfo(statsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

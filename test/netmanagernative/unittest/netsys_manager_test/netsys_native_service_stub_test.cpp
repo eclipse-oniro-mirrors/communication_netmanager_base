@@ -1192,5 +1192,75 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetNetworkSharingTraffic001, TestSize.L
     bool ret = notifyStub_->CmdGetNetworkSharingTraffic(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetTotalStats001, TestSize.Level1)
+{
+    uint32_t type = 0;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteInt32(type)) {
+        return;
+    }
+
+    MessageParcel reply;
+    bool ret = notifyStub_->CmdGetTotalStats(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetUidStats001, TestSize.Level1)
+{
+    uint32_t type = 0;
+    uint32_t uId = 2020;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteInt32(type)) {
+        return;
+    }
+    if (!data.WriteInt32(uId)) {
+        return;
+    }
+
+    MessageParcel reply;
+    bool ret = notifyStub_->CmdGetUidStats(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetIfaceStats001, TestSize.Level1)
+{
+    uint32_t type = 0;
+    std::string Iface = "wlan0";
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteInt32(type)) {
+        return;
+    }
+    if (!data.WriteString(Iface)) {
+        return;
+    }
+
+    MessageParcel reply;
+    bool ret = notifyStub_->CmdGetIfaceStats(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetAllStatsInfo001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+
+    MessageParcel reply;
+    bool ret = notifyStub_->CmdGetAllStatsInfo(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
 } // namespace nmd
 } // namespace OHOS
