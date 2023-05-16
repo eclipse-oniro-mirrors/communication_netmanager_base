@@ -17,6 +17,7 @@
 #include <linux/if.h>
 #include <linux/if_ether.h>
 #include <linux/if_tunnel.h>
+#include <linux/if_packet.h>
 #include <linux/in.h>
 #include <linux/ip.h>
 #include <linux/ipv6.h>
@@ -65,6 +66,9 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb) {
     if (skb == NULL) {
         return 1;
     }
+    if(skb->pkt_type == PACKET_LOOPBACK) {
+        return 1;
+    }
     uint64_t sock_uid = bpf_get_socket_uid(skb);
     app_uid_stats_value *value = bpf_map_lookup_elem(&app_uid_stats_map, &sock_uid);
     if (value == NULL) {
@@ -104,6 +108,9 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb) {
 SEC("cgroup_skb/uid/egress")
 int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb) {
     if (skb == NULL) {
+        return 1;
+    }
+    if(skb->pkt_type == PACKET_LOOPBACK) {
         return 1;
     }
     uint64_t sock_uid = bpf_get_socket_uid(skb);
