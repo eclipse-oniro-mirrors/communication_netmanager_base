@@ -164,12 +164,14 @@ private:
     bool IsLimitedBackground();
     void DeleteUid(uint32_t uid);
     bool IsValidNetPolicy(uint32_t policy);
+    void UpdateForegroundUidList(uint32_t uid, bool isForeground);
 
 private:
     std::map<uint32_t, UidPolicyRule> uidPolicyRules_;
     bool backgroundAllow_ = true;
     bool deviceIdleMode_ = false;
     std::set<uint32_t> deviceIdleAllowedList_;
+    std::set<uint32_t> foregroundUidList_;
 
 private:
     /**

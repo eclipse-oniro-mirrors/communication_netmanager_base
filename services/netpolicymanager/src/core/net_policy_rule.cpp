@@ -45,7 +45,7 @@ void NetPolicyRule::TransPolicyToRule()
 
 void NetPolicyRule::TransPolicyToRule(uint32_t uid)
 {
-    uint32_t policy;
+    uint32_t policy = 0;
     const auto &itr = uidPolicyRules_.find(uid);
     if (itr == uidPolicyRules_.end()) {
         policy = NET_POLICY_NONE;
@@ -282,7 +282,7 @@ int32_t NetPolicyRule::SetBackgroundPolicy(bool allow)
 
 int32_t NetPolicyRule::GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backgroundPolicyOfUid)
 {
-    uint32_t policy;
+    uint32_t policy = 0;
     GetPolicyByUid(uid, policy);
     NETMGR_LOG_D("GetBackgroundPolicyByUid GetPolicyByUid uid: %{public}u policy: %{public}u.", uid, policy);
     if ((policy & NET_POLICY_REJECT_METERED_BACKGROUND) != 0) {
@@ -341,8 +341,7 @@ bool NetPolicyRule::IsLimitByAdmin()
 
 bool NetPolicyRule::IsForeground(uint32_t uid)
 {
-    // to judge if this uid is foreground.
-    return false;
+    return std::find(foregroundUidList_.begin(), foregroundUidList_.end(), uid) != foregroundUidList_.end();
 }
 
 bool NetPolicyRule::IsPowerSave()
@@ -389,9 +388,26 @@ void NetPolicyRule::HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEve
         case NetPolicyEventHandler::MSG_UID_REMOVED:
             DeleteUid(policyEvent->deletedUid);
             break;
+        case NetPolicyEventHandler::MSG_UID_STATE_FOREGROUND:
+            UpdateForegroundUidList(policyEvent->uid, true);
+            TransPolicyToRule(policyEvent->uid);
+            break;
+        case NetPolicyEventHandler::MSG_UID_STATE_BACKGROUND:
+            UpdateForegroundUidList(policyEvent->uid, false);
+            TransPolicyToRule(policyEvent->uid);
+            break;
         default:
             break;
     }
+}
+
+void NetPolicyRule::UpdateForegroundUidList(uint32_t uid, bool isForeground)
+{
+    if (isForeground) {
+        foregroundUidList_.insert(uid);
+        return;
+    }
+    foregroundUidList_.erase(uid);
 }
 
 bool NetPolicyRule::IsValidNetPolicy(uint32_t policy)

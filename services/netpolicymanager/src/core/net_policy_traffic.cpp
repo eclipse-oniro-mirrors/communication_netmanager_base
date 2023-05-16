@@ -48,6 +48,12 @@ void NetPolicyTraffic::Init()
     if (netsysCallback_ != nullptr) {
         GetNetsysInst()->RegisterNetsysCallback(netsysCallback_);
     }
+
+    netConnCallback_ =
+        new (std::nothrow) ConnCallBack((std::static_pointer_cast<NetPolicyTraffic>(shared_from_this())));
+    if (netConnCallback_ != nullptr) {
+        GetNetCenterInst().RegisterNetConnCallback(netConnCallback_);
+    }
     ReadQuotaPolicies();
 }
 

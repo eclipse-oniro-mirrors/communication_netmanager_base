@@ -87,7 +87,7 @@ int32_t NetPolicyService::Dump(int32_t fd, const std::vector<std::u16string> &ar
     std::string result;
     GetDumpMessage(result);
     int32_t ret = dprintf(fd, "%s\n", result.c_str());
-    return ret < 0 ? static_cast<int32_t>(NETMANAGER_ERR_PARAMETER_ERROR) : NETMANAGER_SUCCESS;
+    return ret < 0 ? NETMANAGER_ERR_PARAMETER_ERROR : NETMANAGER_SUCCESS;
 }
 
 void NetPolicyService::Init()

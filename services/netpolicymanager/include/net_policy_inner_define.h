@@ -30,7 +30,7 @@ const std::string COMMON_EVENT_POWER_SAVE_MODE_CHANGED =
     EventFwk::CommonEventSupport::COMMON_EVENT_POWER_SAVE_MODE_CHANGED;
 const std::string COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED =
     EventFwk::CommonEventSupport::COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED;
-const std::string COMMON_EVENT_UID_REMOVED = EventFwk::CommonEventSupport::COMMON_EVENT_UID_REMOVED;
+const std::string COMMON_EVENT_PACKAGE_REMOVED = EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED;
 
 const mode_t CHOWN_RWX_USR_GRP = 0770;
 constexpr int16_t PERIODDURATION_POS_NUM_ONE = 1;

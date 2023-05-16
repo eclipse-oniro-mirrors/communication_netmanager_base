@@ -19,6 +19,9 @@
 #include <string>
 #include <vector>
 
+#include "app_mgr_client.h"
+#include "app_state_callback_host.h"
+#include "application_state_observer_stub.h"
 #include "event_handler.h"
 
 #include "net_manager_center.h"
@@ -39,9 +42,10 @@ struct PolicyEvent {
     std::set<uint32_t> deviceIdleList;
     bool powerSaveMode = false;
     uint32_t deletedUid = 0;
+    uint32_t uid = 0;
 };
 
-class NetPolicyCore : public EventFwk::CommonEventSubscriber, public std::enable_shared_from_this<NetPolicyCore> {
+class NetPolicyCore : public std::enable_shared_from_this<NetPolicyCore> {
     DECLARE_DELAYED_SINGLETON(NetPolicyCore);
 
 public:
@@ -71,13 +75,51 @@ public:
      */
     void SendEvent(int32_t eventId, std::shared_ptr<PolicyEvent> &eventData, int64_t delayTime = 0);
 
-    virtual void OnReceiveEvent(const EventFwk::CommonEventData &data);
-
 private:
     void SubscribeCommonEvent();
+    void SendAppStatusMessage(const AppExecFwk::AppProcessData &appProcessData);
+
+private:
+    class AppStatus : public AppExecFwk::AppStateCallbackHost {
+    public:
+        AppStatus(std::shared_ptr<NetPolicyCore> core)
+        {
+            appStatus_ = core;
+        }
+
+        inline void OnAppStateChanged(const AppExecFwk::AppProcessData &appProcessData) override
+        {
+            if (appStatus_ != nullptr) {
+                appStatus_->SendAppStatusMessage(appProcessData);
+            }
+        }
+
+        inline void OnAbilityRequestDone(const sptr<IRemoteObject> &token,
+                                         const AppExecFwk::AbilityState state) override
+        {
+            return;
+        }
+
+    private:
+        std::shared_ptr<NetPolicyCore> appStatus_ = nullptr;
+    };
+
+    class ReceiveMessage : public EventFwk::CommonEventSubscriber {
+    public:
+        ReceiveMessage(const EventFwk::CommonEventSubscribeInfo &subscriberInfo, std::shared_ptr<NetPolicyCore> core);
+
+        virtual void OnReceiveEvent(const EventFwk::CommonEventData &eventData) override;
+
+    private:
+        std::shared_ptr<NetPolicyCore> receiveMessage_ = nullptr;
+    };
+
+private:
     std::vector<std::shared_ptr<NetPolicyBase>> cores_;
     std::shared_ptr<AppExecFwk::EventRunner> runner_;
     std::shared_ptr<NetPolicyEventHandler> handler_;
+    sptr<AppExecFwk::IAppStateCallback> netAppStatusCallback_ = nullptr;
+    std::shared_ptr<ReceiveMessage> subscriber_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

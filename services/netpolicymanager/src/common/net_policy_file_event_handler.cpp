@@ -65,7 +65,7 @@ void NetPolicyFileEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Point
             return;
         }
         int64_t timeDelta = GetNowMilliSeconds() - timeStamp_;
-        uint32_t delay = timeDelta >= MAX_TIME_MS_DELTA ? 0 : (MAX_TIME_MS_DELTA - timeDelta);
+        uint32_t delay = timeDelta >= MAX_TIME_MS_DELTA ? 0 : static_cast<uint32_t>(MAX_TIME_MS_DELTA - timeDelta);
         commitWait_ = true;
         NETMGR_LOG_D("SendEvent MSG_POLICY_FILE_COMMIT[delay=%{public}d, now=%{public}s]", delay,
                      std::to_string(GetNowMilliSeconds()).c_str());
