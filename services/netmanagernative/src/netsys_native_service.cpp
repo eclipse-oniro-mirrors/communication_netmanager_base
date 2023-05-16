@@ -15,6 +15,7 @@
 
 #include <csignal>
 #include <sys/types.h>
+#include <regex>
 #include <thread>
 #include <unistd.h>
 
@@ -32,6 +33,7 @@ namespace NetsysNative {
 constexpr int32_t START_TIME_MS = 1900;
 constexpr int32_t EXTRA_MONTH = 1;
 static constexpr const char *BFP_NAME_NETSYS_PATH = "/system/etc/bpf/netsys.o";
+std::regex REGEX_CMD_IPTABLES(std::string(R"(^-[\S]*[\s\S]*)"));
 
 REGISTER_SYSTEM_ABILITY_BY_ID(NetsysNativeService, COMM_NETSYS_NATIVE_SYS_ABILITY_ID, true)
 
@@ -137,6 +139,7 @@ bool NetsysNativeService::Init()
     dhcpController_ = std::make_unique<OHOS::nmd::DhcpController>();
     fwmarkNetwork_ = std::make_unique<OHOS::nmd::FwmarkNetwork>();
     sharingManager_ = std::make_unique<SharingManager>();
+    iptablesWrapper_ = DelayedSingleton<IptablesWrapper>::GetInstance();
 
     auto ret = OHOS::NetManagerStandard::LoadElf(BFP_NAME_NETSYS_PATH);
     NETNATIVE_LOGI("LoadElf is %{public}d", ret);
@@ -609,6 +612,20 @@ int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandar
     }
 
     return bpfStats_->GetAllStatsInfo(stats);
+}
+
+int32_t NetsysNativeService::SetIpTablesForRes(const std::string &cmd, std::string &respond)
+{
+    if (!regex_match(cmd, REGEX_CMD_IPTABLES)) {
+        NETNATIVE_LOGE("IptablesWrapper invalid command format cmd:[%{public}s]", cmd.c_str());
+        return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (iptablesWrapper_ == nullptr) {
+        NETNATIVE_LOGE("SetIpTablesForRes iptablesWrapper_ is null");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    respond = iptablesWrapper_->RunCommandForRes(IPTYPE_IPV4, cmd);
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
 } // namespace NetsysNative

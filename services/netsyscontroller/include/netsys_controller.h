@@ -673,6 +673,15 @@ public:
      */
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
 
+    /**
+     * Set iptables for result
+     *
+     * @param cmd iptables command
+     * @param respond The respond of execute iptables command
+     * @return value the return value of the netsys interface call
+     */
+    int32_t SetIpTablesForRes(const std::string &cmd, std::string &respond);
+
 private:
     NetsysController() = default;
 

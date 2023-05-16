@@ -1542,5 +1542,36 @@ int32_t NetsysNativeServiceProxy::GetAllStatsInfo(std::vector<OHOS::NetManagerSt
     return ERR_NONE;
 }
 
+int32_t NetsysNativeServiceProxy::SetIpTablesForRes(const std::string &cmd, std::string &respond)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(cmd)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("SetIpTablesForRes Remote pointer is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ERR_NONE != Remote()->SendRequest(INetsysService::NETSYS_SET_IP_TABLES_FOR_RES, data, reply, option)) {
+        NETNATIVE_LOGE("SetIpTablesForRes proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("SetIpTablesForRes proxy read ret failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.ReadString(respond)) {
+        NETNATIVE_LOGE("SetIpTablesForRes proxy read respond failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    NETNATIVE_LOGI("SetIpTablesForRes respond %{public}s", respond.c_str());
+    return ret;
+}
 } // namespace NetsysNative
 } // namespace OHOS

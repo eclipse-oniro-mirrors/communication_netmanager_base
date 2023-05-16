@@ -620,5 +620,10 @@ int32_t NetsysControllerServiceImpl::GetAllStatsInfo(std::vector<OHOS::NetManage
     return netsysClient_.GetAllStatsInfo(stats);
 }
 
+int32_t NetsysControllerServiceImpl::SetIpTablesForRes(const std::string &cmd, std::string &respond)
+{
+    return netsysClient_.SetIpTablesForRes(cmd, respond);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

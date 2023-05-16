@@ -388,6 +388,11 @@ public:
     {
         return 0;
     }
+
+    int32_t SetIpTablesForRes(const std::string &cmd, std::string &respond) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
