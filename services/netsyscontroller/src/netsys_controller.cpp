@@ -838,7 +838,7 @@ int32_t NetsysController::SetIpTablesForRes(const std::string &cmd, std::string 
         return ERR_INVALID_DATA;
     }
     if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("SetIpTablesForRes netsysService_ is null");
+        NETMGR_LOG_E("SetIpTablesForRes netsysService is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
     return netsysService_->SetIpTablesForRes(cmd, respond);

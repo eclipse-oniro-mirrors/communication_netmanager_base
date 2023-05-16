@@ -88,12 +88,10 @@ std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::s
         return result_;
     }
     std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
-    NETNATIVE_LOGE("RunCommandForRes iptables cmd size %{public}u", cmd.size());
     std::unique_lock<std::mutex> lock(iptablesMutex_);
     std::function<void()> executeCommandForRes = std::bind(&IptablesWrapper::ExecuteCommandForRes, this, cmd);
     handler_->PostTask(executeCommandForRes);
-    auto status = conditionVarLock_.wait_for(lock, std::chrono::milliseconds(IPTABLES_WAIT_FOR_TIME_MS + 2000));
-    NETNATIVE_LOGE("RunCommandForRes iptables rsp size %{public}u", result_.size());
+    auto status = conditionVarLock_.wait_for(lock, std::chrono::milliseconds(IPTABLES_WAIT_FOR_TIME_MS));
     if (status == std::cv_status::timeout) {
         NETNATIVE_LOGI("ExecuteCommandForRes timeout!");
     }

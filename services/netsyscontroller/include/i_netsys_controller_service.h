@@ -686,9 +686,9 @@ public:
     /**
      * Set iptables for result
      *
-     * @param cmd iptables command
+     * @param cmd Iptables command
      * @param respond The respond of execute iptables command
-     * @return value the return value of the netsys interface call
+     * @return Value the return value of the netsys interface call
      */
     virtual int32_t SetIpTablesForRes(const std::string &cmd, std::string &respond) = 0;
 };
