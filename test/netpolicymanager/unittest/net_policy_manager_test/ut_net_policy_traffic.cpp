@@ -268,7 +268,7 @@ HWTEST_F(UtNetPolicyTraffic, ResetPolicies001, TestSize.Level1)
         if (quotaPolicy.iccid == ICCID_1) {
             if (quotaPolicy.periodDuration == "M1" && quotaPolicy.warningBytes == DATA_USAGE_UNKNOWN &&
                 quotaPolicy.limitBytes == DATA_USAGE_UNKNOWN && quotaPolicy.lastWarningRemind == REMIND_NEVER &&
-                quotaPolicy.lastLimitRemind == REMIND_NEVER && quotaPolicy.metered) {
+                quotaPolicy.lastLimitRemind == REMIND_NEVER && !quotaPolicy.metered) {
                 SUCCEED();
                 return;
             }
