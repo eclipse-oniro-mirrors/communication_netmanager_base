@@ -188,18 +188,6 @@ declare namespace policy {
   function updateRemindPolicy(netType: NetBearType, iccid: string, remindType: RemindType): Promise<void>;
 
   /**
-   * Set the UID into power save allow list.
-   *
-   * @param uid The specified UID of application.
-   * @param isAllowed The UID is into allow list or not.
-   * @param callback
-   * @permission ohos.permission.CONNECTIVITY_INTERNAL
-   * @systemapi Hide this for inner system use.
-   */
-  function setPowerSaveAllowList(uid: number, isAllowed: boolean, callback: AsyncCallback<void>): void;
-  function setPowerSaveAllowList(uid: number, isAllowed: boolean): Promise<void>;
-
-  /**
    * Register uid policy change listener.
    *
    * @permission ohos.permission.CONNECTIVITY_INTERNAL

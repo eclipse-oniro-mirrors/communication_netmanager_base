@@ -237,10 +237,6 @@ int32_t NetPolicyService::SetDeviceIdlePolicy(bool enable)
 
 int32_t NetPolicyService::SetPowerSaveAllowedList(uint32_t uid, bool isAllowed)
 {
-    if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST)) {
-        return NETMANAGER_ERR_PERMISSION_DENIED;
-    }
-
     NETMGR_LOG_D("SetPowerSaveAllowedList info: uid[%{public}d] isAllowed[%{public}d]", uid, isAllowed);
     return netPolicyFirewall_->SetPowerSaveAllowedList(uid, isAllowed);
 }
