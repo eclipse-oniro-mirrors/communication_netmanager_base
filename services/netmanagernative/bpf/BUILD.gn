@@ -17,7 +17,10 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 ohos_bpf("netsys") {
   sources = [ "src/netsys.c" ]
 
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "//third_party/libbpf/src",
+  ]
 
   subsystem_name = "communication"
   part_name = "netmanager_base"

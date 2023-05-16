@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,12 +26,14 @@ static constexpr const char *DESTINATION = "192.168.1.3/24";
 static constexpr const char *NEXT_HOP = "192.168.1.1";
 static constexpr const char *IF_NAME = "iface0";
 static constexpr const char *ETH0 = "eth0";
+static constexpr const char *IFACE = "test0";
 static constexpr const char *IP_ADDR = "172.17.5.245";
 static constexpr const char *INTERFACE_NAME = "interface_name";
 static constexpr const char *REQUESTOR = "requestor";
 const int32_t MTU = 111;
 const int32_t NET_ID = 2;
 const int64_t UID = 1010;
+const int32_t APP_ID = 101010;
 const int32_t SOCKET_FD = 5;
 const int32_t PERMISSION = 5;
 const int32_t PREFIX_LENGTH = 23;
@@ -224,6 +226,23 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest004, TestSize.Level1)
     EXPECT_EQ(ret, -1);
     ret = nativeClient_.FirewallSetUidRule(CHAIN, NET_ID, FIREWALL_RULE);
     EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest005, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    int32_t ret = nativeClient_.GetTotalStats(stats, 0);
+    EXPECT_EQ(ret, 0);
+
+    ret = nativeClient_.GetUidStats(stats, 0, APP_ID);
+    EXPECT_EQ(ret, -1);
+
+    ret = nativeClient_.GetIfaceStats(stats, 0, IFACE);
+    EXPECT_EQ(ret, -1);
+
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
+    ret = nativeClient_.GetAllStatsInfo(statsInfo);
+    EXPECT_EQ(ret, 0);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -68,7 +68,7 @@ bool NetPolicyFile::ReadFile(const std::string &fileName)
     }
 
     std::fstream file(realPath.c_str(), std::fstream::in);
-    if (file.is_open() == false) {
+    if (!file.is_open()) {
         NETMGR_LOG_E("file open fail");
         return false;
     }

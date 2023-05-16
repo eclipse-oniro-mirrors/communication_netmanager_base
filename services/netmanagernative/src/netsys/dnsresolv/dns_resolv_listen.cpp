@@ -30,10 +30,14 @@
 
 namespace OHOS::nmd {
 static constexpr const uint32_t MAX_LISTEN_NUM = 1024;
-
+namespace {
+constexpr const char *DNS_RESOLV_THREAD = "DNS_RESOLV_THREAD";
+} // namespace
 DnsResolvListen::DnsResolvListen() : serverSockFd_(-1)
 {
     NETNATIVE_LOGE("DnsResolvListen start");
+    dnsResolvRunner_ = AppExecFwk::EventRunner::Create(DNS_RESOLV_THREAD);
+    dnsResolvHandler_ = std::make_shared<AppExecFwk::EventHandler>(dnsResolvRunner_);
 }
 
 DnsResolvListen::~DnsResolvListen()
@@ -238,8 +242,11 @@ void DnsResolvListen::StartListen()
             close(clientSockFd);
             continue;
         }
-
-        std::thread(DnsResolvListen::ProcCommand, clientSockFd).detach();
+        if (dnsResolvHandler_ != nullptr) {
+            dnsResolvHandler_->PostSyncTask([this, &clientSockFd]() {
+                this->ProcCommand(clientSockFd);
+            });
+        }
     }
 }
 } // namespace OHOS::nmd

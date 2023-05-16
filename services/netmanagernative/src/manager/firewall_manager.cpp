@@ -27,7 +27,7 @@ namespace nmd {
 using namespace NetManagerStandard;
 namespace {
 static constexpr const char *CONFIG_FILE_PATH = "/proc/self/uid_map";
-bool SetFireWallCommand(std::string chainName, std::string command)
+bool SetFireWallCommand(const std::string &chainName, std::string command)
 {
     bool ret = false;
     ret = ret ||

@@ -40,7 +40,6 @@ void SetPowerSaveAllowListContext::ParseParams(napi_value *params, size_t params
     if (uid_ < 0) {
         NETMANAGER_BASE_LOGE("Check params failed");
         SetErrorCode(POLICY_ERR_INVALID_UID);
-        SetNeedThrowException(true);
         return;
     }
     isAllow_ = NapiUtils::GetBooleanValue(GetEnv(), params[ARG_INDEX_1]);
