@@ -49,6 +49,7 @@ typedef struct {
     char name[IFNAME_SIZE];
 } iface_name;
 
+// network stats begin
 typedef __u64 iface_stats_key;
 typedef stats_value iface_stats_value;
 
@@ -57,4 +58,10 @@ typedef stats_value app_uid_stats_value;
 
 typedef stats_key app_uid_if_stats_key;
 typedef stats_value app_uid_if_stats_value;
+// network stats end
+
+// internet permission begin
+typedef __u32 sock_permission_key;
+typedef __u8 sock_permission_value;
+// internet permission end
 #endif /* NETMANAGER_BASE_BPF_DEF_H */

@@ -44,6 +44,7 @@ public:
     void Init();
 
     int32_t NetworkReinitRoute();
+    int32_t DisallowInternet(uint32_t uid);
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission);
     int32_t NetworkDestroy(int32_t netId);
     int32_t NetworkAddInterface(int32_t netId, std::string iface);

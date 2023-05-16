@@ -99,6 +99,7 @@ void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
     opToInterfaceMap_[NETSYS_BANDWIDTH_REMOVE_DENIED_LIST] = &NetsysNativeServiceStub::CmdBandwidthRemoveDeniedList;
     opToInterfaceMap_[NETSYS_BANDWIDTH_ADD_ALLOWED_LIST] = &NetsysNativeServiceStub::CmdBandwidthAddAllowedList;
     opToInterfaceMap_[NETSYS_BANDWIDTH_REMOVE_ALLOWED_LIST] = &NetsysNativeServiceStub::CmdBandwidthRemoveAllowedList;
+    opToInterfaceMap_[NETSYS_DISALLOW_INTERNET] = &NetsysNativeServiceStub::CmdDisallowInternet;
 }
 
 void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
@@ -478,6 +479,15 @@ int32_t NetsysNativeServiceStub::CmdSetProcSysNet(MessageParcel &data, MessagePa
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("SetProcSysNet has recved result %{public}d", result);
 
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdDisallowInternet(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = data.ReadUint32();
+    int32_t result = DisallowInternet(uid);
+    reply.WriteInt32(result);
+    NETNATIVE_LOG_D("DisallowInternet has recved result %{public}d", result);
     return result;
 }
 

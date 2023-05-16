@@ -17,6 +17,7 @@
 #define INCLUDE_CONN_MANAGER_H
 
 #include <map>
+#include <memory>
 #include <mutex>
 #include <set>
 #include <vector>
@@ -37,6 +38,14 @@ public:
 
     ConnManager();
     ~ConnManager();
+
+    /**
+     * Disallow a app to create AF_INET or AF_INET6 socket
+     *
+     * @param uid App's uid which need to be abandoned to create AF_INET or AF_INET6 socket
+     * @return return 0 if OK, return error number if not OK
+     */
+    int32_t DisallowInternet(uint32_t uid);
 
     /**
      * Creates a physical network

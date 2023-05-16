@@ -19,6 +19,9 @@
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "physical_network.h"
+#include "bpf_def.h"
+#include "bpf_path.h"
+#include "bpf_mapper.h"
 
 namespace OHOS {
 namespace nmd {
@@ -38,6 +41,21 @@ ConnManager::ConnManager()
 ConnManager::~ConnManager()
 {
     networks_.clear();
+}
+
+int32_t ConnManager::DisallowInternet(uint32_t uid)
+{
+    BpfMapper<sock_permission_key, sock_permission_value> permissionMap(SOCKET_PERMISSION_MAP_PATH, BPF_F_WRONLY);
+    if (!permissionMap.IsValid()) {
+        return NETMANAGER_ERROR;
+    }
+
+    // 0 means no permission
+    if (permissionMap.Write(uid, 0, 0) != 0) {
+        return NETMANAGER_ERROR;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t ConnManager::CreatePhysicalNetwork(uint16_t netId, NetworkPermission permission)
