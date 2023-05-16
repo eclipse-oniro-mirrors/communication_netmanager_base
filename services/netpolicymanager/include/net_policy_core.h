@@ -41,6 +41,7 @@ struct PolicyEvent {
     bool deviceIdleMode = false;
     std::set<uint32_t> deviceIdleList;
     bool powerSaveMode = false;
+    std::set<uint32_t> powerSaveList;
     uint32_t deletedUid = 0;
     uint32_t uid = 0;
 };

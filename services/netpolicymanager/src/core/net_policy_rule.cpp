@@ -346,14 +346,12 @@ bool NetPolicyRule::IsForeground(uint32_t uid)
 
 bool NetPolicyRule::IsPowerSave()
 {
-    // to judge if in power save mode.
-    return false;
+    return powerSaveMode_;
 }
 
 bool NetPolicyRule::InPowerSaveAllowedList(uint32_t uid)
 {
-    // to judge this uid if in power save allow list.
-    return false;
+    return std::find(powerSaveAllowedList_.begin(), powerSaveAllowedList_.end(), uid) != powerSaveAllowedList_.end();
 }
 
 bool NetPolicyRule::IsLimitedBackground()
@@ -384,6 +382,13 @@ void NetPolicyRule::HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEve
         case NetPolicyEventHandler::MSG_DEVICE_IDLE_MODE_CHANGED:
             deviceIdleMode_ = policyEvent->deviceIdleMode;
             TransPolicyToRule();
+            break;
+        case NetPolicyEventHandler::MSG_POWER_SAVE_MODE_CHANGED:
+            powerSaveMode_ = policyEvent->powerSaveMode;
+            TransPolicyToRule();
+            break;
+        case NetPolicyEventHandler::MSG_POWER_SAVE_LIST_UPDATED:
+            powerSaveAllowedList_ = policyEvent->powerSaveList;
             break;
         case NetPolicyEventHandler::MSG_UID_REMOVED:
             DeleteUid(policyEvent->deletedUid);
@@ -439,6 +444,10 @@ void NetPolicyRule::GetDumpMessage(std::string &message)
                   [&message](const auto &item) { message.append(std::to_string(item) + ", "); });
     message.append("}\n");
     message.append(TAB + "DeviceIdleMode: " + std::to_string(deviceIdleMode_) + "\n");
+    message.append(TAB + "PowerSaveAllowedList: {");
+    std::for_each(powerSaveAllowedList_.begin(), powerSaveAllowedList_.end(),
+                  [&message](const auto &item) { message.append(std::to_string(item) + ", "); });
+    message.append(TAB + "PowerSaveMode: " + std::to_string(powerSaveMode_) + "\n");
     message.append(TAB + "BackgroundPolicy: " + std::to_string(backgroundAllow_) + "\n");
 }
 } // namespace NetManagerStandard

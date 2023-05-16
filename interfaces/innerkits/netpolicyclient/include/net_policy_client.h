@@ -265,6 +265,16 @@ public:
      */
     int32_t SetDeviceIdlePolicy(bool enable);
 
+    /**
+     * Get the allow list of UID in power save mode.
+     *
+     * @param uids The list of UIDs
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    [[nodiscard]] int32_t SetPowerSaveAllowedList(uint32_t uid, bool isAllowed);
+
 private:
     class NetPolicyDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

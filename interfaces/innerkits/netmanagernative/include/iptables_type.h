@@ -46,6 +46,7 @@ enum ChainType {
     CHAIN_OHBW_ALLOWED_LIST_BOX,
     CHAIN_OHBW_DATA_SAVER,
     CHAIN_OHFW_DOZABLE,
+    CHAIN_OHFW_POWERSAVING,
     CHAIN_OHFW_UNDOZABLE,
 };
 } // namespace NetManagerStandard

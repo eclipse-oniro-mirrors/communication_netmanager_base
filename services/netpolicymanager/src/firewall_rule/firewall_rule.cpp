@@ -17,6 +17,7 @@
 
 #include "device_idle_firewall_rule.h"
 #include "net_policy_inner_define.h"
+#include "power_save_firewall_rule.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -25,6 +26,8 @@ std::shared_ptr<FirewallRule> FirewallRule::CreateFirewallRule(uint32_t chain)
     switch (chain) {
         case FIREWALL_CHAIN_DEVICE_IDLE:
             return DelayedSingleton<DeviceIdleFirewallRule>::GetInstance();
+        case FIREWALL_CHAIN_POWER_SAVE:
+            return DelayedSingleton<PowerSaveFirewallRule>::GetInstance();
         default:
             break;
     }

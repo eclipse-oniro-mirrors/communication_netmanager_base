@@ -182,6 +182,14 @@ public:
      */
     int32_t SetDeviceIdlePolicy(bool enable) override;
 
+    /**
+     * Set the UID into power save allow list.
+     * @param uid The specified UID of application.
+     * @param isAllowed The UID is into allowed list or not.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t SetPowerSaveAllowedList(uint32_t uid, bool isAllowed) override;
+
 private:
     void Init();
     int32_t GetDumpMessage(std::string &message);

@@ -127,7 +127,7 @@ int32_t NetPolicyCallbackProxy::NetQuotaPolicyChange(const std::vector<NetQuotaP
 {
     if (quotaPolicies.empty()) {
         NETMGR_LOG_E("NetQuotaPolicyChange proxy quotaPolicies empty");
-        return NetPolicyResultCode::POLICY_ERR_QUOTA_POLICY_NOT_EXIST;
+        return POLICY_ERR_QUOTA_POLICY_NOT_EXIST;
     }
 
     MessageParcel data;

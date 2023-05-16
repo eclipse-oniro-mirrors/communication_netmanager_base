@@ -166,6 +166,20 @@ bool NetPolicyExec::ExecGetDeviceIdleAllowList(GetDeviceIdleAllowListContext *co
     return true;
 }
 
+bool NetPolicyExec::ExecSetPowerSaveAllowList(SetPowerSaveAllowListContext *context)
+{
+    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList(
+        static_cast<uint32_t>(context->uid_), context->isAllow_);
+    if (result != NETMANAGER_SUCCESS) {
+        NETMANAGER_BASE_LOGE("ExecSetPowerSaveAllowList error: uid = %{public}d, result = %{public}d", context->uid_,
+                             result);
+        context->SetErrorCode(result);
+        return false;
+    }
+    context->SetErrorCode(result);
+    return true;
+}
+
 bool NetPolicyExec::ExecGetBackgroundPolicyByUid(GetBackgroundPolicyByUidContext *context)
 {
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetBackgroundPolicyByUid(
@@ -291,6 +305,11 @@ napi_value NetPolicyExec::GetDeviceIdleAllowListCallback(GetDeviceIdleAllowListC
         NapiUtils::SetArrayElement(context->GetEnv(), list, index++, element);
     }
     return list;
+}
+
+napi_value NetPolicyExec::SetPowerSaveAllowListCallback(SetPowerSaveAllowListContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
 }
 
 napi_value NetPolicyExec::GetBackgroundPolicyByUidCallback(GetBackgroundPolicyByUidContext *context)

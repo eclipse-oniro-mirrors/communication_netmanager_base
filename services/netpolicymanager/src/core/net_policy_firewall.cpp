@@ -24,15 +24,25 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+constexpr uint32_t MAX_LIST_SIZE = 1000;
 void NetPolicyFirewall::Init()
 {
     deviceIdleFirewallRule_ = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_DEVICE_IDLE);
+    powerSaveFirewallRule_ = FirewallRule::CreateFirewallRule(FIREWALL_CHAIN_POWER_SAVE);
+
     GetFileInst()->ReadFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, deviceIdleAllowedList_, deviceIdleDeniedList_);
+    GetFileInst()->ReadFirewallRules(FIREWALL_CHAIN_POWER_SAVE, powerSaveAllowedList_, powerSaveDeniedList_);
+
     deviceIdleFirewallRule_->SetAllowedList(deviceIdleAllowedList_);
+    powerSaveFirewallRule_->SetAllowedList(powerSaveAllowedList_);
 }
 
 int32_t NetPolicyFirewall::SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed)
 {
+    if (powerSaveAllowedList_.size() > MAX_LIST_SIZE) {
+        NETMGR_LOG_E("Device idle allowed list's size is over the max size.");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
     UpdateFirewallPolicyList(FIREWALL_CHAIN_DEVICE_IDLE, uid, isAllowed);
     GetFileInst()->WriteFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, deviceIdleAllowedList_, deviceIdleDeniedList_);
     deviceIdleFirewallRule_->SetAllowedList(uid, isAllowed ? FIREWALL_RULE_ALLOW : FIREWALL_RULE_DENY);
@@ -44,6 +54,23 @@ int32_t NetPolicyFirewall::SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetPolicyFirewall::SetPowerSaveAllowedList(uint32_t uid, bool isAllowed)
+{
+    if (powerSaveAllowedList_.size() > MAX_LIST_SIZE) {
+        NETMGR_LOG_E("Power save allowed list's size is over the max size.");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    UpdateFirewallPolicyList(FIREWALL_CHAIN_POWER_SAVE, uid, isAllowed);
+    GetFileInst()->WriteFirewallRules(FIREWALL_CHAIN_POWER_SAVE, powerSaveAllowedList_, powerSaveDeniedList_);
+    powerSaveFirewallRule_->SetAllowedList(uid, isAllowed ? FIREWALL_RULE_ALLOW : FIREWALL_RULE_DENY);
+
+    std::shared_ptr<PolicyEvent> eventData = std::make_shared<PolicyEvent>();
+    eventData->eventId = NetPolicyEventHandler::MSG_POWER_SAVE_LIST_UPDATED;
+    eventData->powerSaveList = powerSaveAllowedList_;
+    SendEvent(NetPolicyEventHandler::MSG_POWER_SAVE_LIST_UPDATED, eventData);
+    return NETMANAGER_SUCCESS;
+}
+
 void NetPolicyFirewall::UpdateFirewallPolicyList(uint32_t chainType, uint32_t uid, bool isAllowed)
 {
     if (chainType == FIREWALL_CHAIN_DEVICE_IDLE) {
@@ -51,6 +78,14 @@ void NetPolicyFirewall::UpdateFirewallPolicyList(uint32_t chainType, uint32_t ui
             deviceIdleAllowedList_.emplace(uid);
         } else {
             deviceIdleAllowedList_.erase(uid);
+        }
+    }
+
+    if (chainType == FIREWALL_CHAIN_POWER_SAVE) {
+        if (isAllowed) {
+            powerSaveAllowedList_.emplace(uid);
+        } else {
+            powerSaveAllowedList_.erase(uid);
         }
     }
 }
@@ -83,20 +118,55 @@ int32_t NetPolicyFirewall::UpdateDeviceIdlePolicy(bool enable)
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetPolicyFirewall::UpdatePowerSavePolicy(bool enable)
+{
+    if (powerSaveMode_ == enable) {
+        NETMGR_LOG_E("Same power save policy.");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    if (enable) {
+        powerSaveFirewallRule_->SetAllowedList();
+    }
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("Update power save firewall status start");
+    powerSaveFirewallRule_->EnableFirewall(enable);
+    NetmanagerHiTrace::NetmanagerFinishSyncTrace("Update power save firewall status end");
+    powerSaveMode_ = enable;
+    // notify to other core.
+    auto policyEvent = std::make_shared<PolicyEvent>();
+    policyEvent->powerSaveMode = enable;
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("Notify other policy class power save status start");
+    SendEvent(NetPolicyEventHandler::MSG_DEVICE_IDLE_MODE_CHANGED, policyEvent);
+    NetmanagerHiTrace::NetmanagerFinishSyncTrace("Notify other policy class power save status end");
+    return NETMANAGER_SUCCESS;
+}
+
 void NetPolicyFirewall::ResetPolicies()
 {
     deviceIdleFirewallRule_->ClearAllowedList();
     deviceIdleFirewallRule_->ClearDeniedList();
+
+    powerSaveFirewallRule_->ClearAllowedList();
+    powerSaveFirewallRule_->ClearDeniedList();
+
     deviceIdleAllowedList_.clear();
     deviceIdleDeniedList_.clear();
     GetFileInst()->WriteFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, deviceIdleAllowedList_, deviceIdleDeniedList_);
+
+    powerSaveAllowedList_.clear();
+    powerSaveDeniedList_.clear();
+    GetFileInst()->WriteFirewallRules(FIREWALL_CHAIN_POWER_SAVE, powerSaveAllowedList_, powerSaveDeniedList_);
+
     UpdateDeviceIdlePolicy(false);
+    UpdatePowerSavePolicy(false);
 }
 
 void NetPolicyFirewall::DeleteUid(uint32_t uid)
 {
     SetDeviceIdleAllowedList(uid, false);
+    SetPowerSaveAllowedList(uid, false);
+
     deviceIdleFirewallRule_->RemoveFromAllowedList(uid);
+    powerSaveFirewallRule_->RemoveFromAllowedList(uid);
 }
 
 void NetPolicyFirewall::HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEvent> &policyEvent)

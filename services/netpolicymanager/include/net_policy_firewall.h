@@ -59,6 +59,23 @@ public:
     void ResetPolicies();
 
     /**
+     * Set the Power Save Allowed List object.
+     *
+     * @param uid The specified UID of application.
+     * @param isAllowed The UID is into allow list or not.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t SetPowerSaveAllowedList(uint32_t uid, bool isAllowed);
+
+    /**
+     * Process network policy in device idle mode.
+     *
+     * @param enable Power save mode is open or not.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t UpdatePowerSavePolicy(bool enable);
+
+    /**
      * Handle the event from NetPolicyCore
      *
      * @param eventId The event id
@@ -72,9 +89,13 @@ private:
 
 private:
     std::shared_ptr<FirewallRule> deviceIdleFirewallRule_;
+    std::shared_ptr<FirewallRule> powerSaveFirewallRule_;
     bool deviceIdleMode_ = false;
+    bool powerSaveMode_ = false;
     std::set<uint32_t> deviceIdleAllowedList_;
     std::set<uint32_t> deviceIdleDeniedList_;
+    std::set<uint32_t> powerSaveAllowedList_;
+    std::set<uint32_t> powerSaveDeniedList_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
