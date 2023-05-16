@@ -1267,5 +1267,5 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetAllStatsInfo001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_NONE);
 }
 
-} // namespace nmd
+} // namespace NetsysNative
 } // namespace OHOS

@@ -915,7 +915,7 @@ int32_t NetsysNativeClient::StopDhcpClient(const std::string &iface, bool bIpv6)
     return proxy->StopDhcpClient(iface, bIpv6);
 }
 
-int32_t NetsysNativeClient::RegisterCallback(const sptr<NetsysControllerCallback>& callback)
+int32_t NetsysNativeClient::RegisterCallback(const sptr<NetsysControllerCallback> &callback)
 {
     NETMGR_LOG_D("NetsysNativeClient::RegisterCallback");
     if (callback == nullptr) {

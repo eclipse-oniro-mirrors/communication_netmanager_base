@@ -627,6 +627,5 @@ int32_t NetsysNativeService::SetIpTablesForRes(const std::string &cmd, std::stri
     respond = iptablesWrapper_->RunCommandForRes(IPTYPE_IPV4, cmd);
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
-
 } // namespace NetsysNative
 } // namespace OHOS

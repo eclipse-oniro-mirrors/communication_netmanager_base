@@ -545,7 +545,7 @@ public:
      * @param callback
      * @return Return the return value of the netsys interface call.
      */
-    int32_t RegisterCallback(const sptr<NetsysControllerCallback>& callback);
+    int32_t RegisterCallback(const sptr<NetsysControllerCallback> &callback);
 
     /**
      * start dhcpservice.
