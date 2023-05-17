@@ -67,6 +67,9 @@ private:
     int32_t CmdGetProcSysNet(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetProcSysNet(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkCreatePhysical(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNetworkCreateVirtual(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNetworkAddUids(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNetworkDelUids(MessageParcel &data, MessageParcel &reply);
     int32_t CmdAddInterfaceAddress(MessageParcel &data, MessageParcel &reply);
     int32_t CmdDelInterfaceAddress(MessageParcel &data, MessageParcel &reply);
     int32_t CmdInterfaceSetIpAddress(MessageParcel &data, MessageParcel &reply);

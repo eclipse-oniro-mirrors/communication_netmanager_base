@@ -37,6 +37,13 @@ public:
      */
     int32_t BindSocket(int32_t fd, uint32_t netId);
 
+    /**
+     * Protect {@code socketFd} to the network bypass VPN.
+     *
+     * @param socket_fd
+     */
+    int32_t ProtectFromVpn(int32_t socketFd);
+
 private:
     // Sends |data| to the fwmark network, along with |fd| as ancillary data using cmsg(3).
     int32_t Send(FwmarkCommand *data, int32_t fd);

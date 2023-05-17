@@ -186,6 +186,21 @@ public:
         return 0;
     }
 
+    int32_t NetworkCreateVirtual(int32_t netId, bool hasDns) override
+    {
+        return 0;
+    }
+
+    int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) override
+    {
+        return 0;
+    }
+
+    int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges) override
+    {
+        return 0;
+    }
+
     int32_t AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                         int32_t prefixLength) override
     {

@@ -35,6 +35,12 @@ int32_t NetsysControllerServiceImpl::NetworkCreatePhysical(int32_t netId, int32_
     return netsysClient_.NetworkCreatePhysical(netId, permission);
 }
 
+int32_t NetsysControllerServiceImpl::NetworkCreateVirtual(int32_t netId, bool hasDns)
+{
+    NETMGR_LOG_I("Create Virtual network: netId[%{public}d], hasDns[%{public}d]", netId, hasDns);
+    return netsysClient_.NetworkCreateVirtual(netId, hasDns);
+}
+
 int32_t NetsysControllerServiceImpl::NetworkDestroy(int32_t netId)
 {
     NETMGR_LOG_I("Destroy network: netId[%{public}d]", netId);
@@ -42,6 +48,18 @@ int32_t NetsysControllerServiceImpl::NetworkDestroy(int32_t netId)
         return mockNetsysClient_.NetworkDestroy(netId);
     }
     return netsysClient_.NetworkDestroy(netId);
+}
+
+int32_t NetsysControllerServiceImpl::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    NETMGR_LOG_I("Add uids to vpn network: netId[%{public}d]", netId);
+    return netsysClient_.NetworkAddUids(netId, uidRanges);
+}
+
+int32_t NetsysControllerServiceImpl::NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    NETMGR_LOG_I("Remove uids from vpn network: netId[%{public}d]", netId);
+    return netsysClient_.NetworkDelUids(netId, uidRanges);
 }
 
 int32_t NetsysControllerServiceImpl::NetworkAddInterface(int32_t netId, const std::string &iface)

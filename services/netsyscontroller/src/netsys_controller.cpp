@@ -58,6 +58,16 @@ int32_t NetsysController::NetworkCreatePhysical(int32_t netId, int32_t permissio
     return netsysService_->NetworkCreatePhysical(netId, permission);
 }
 
+int32_t NetsysController::NetworkCreateVirtual(int32_t netId, bool hasDns)
+{
+    NETMGR_LOG_D("Create Virtual network: netId[%{public}d], hasDns[%{public}d]", netId, hasDns);
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NetworkCreateVirtual(netId, hasDns);
+}
+
 int32_t NetsysController::NetworkDestroy(int32_t netId)
 {
     NETMGR_LOG_D("Destroy network: netId[%{public}d]", netId);
@@ -66,6 +76,26 @@ int32_t NetsysController::NetworkDestroy(int32_t netId)
         return NETSYS_NETSYSSERVICE_NULL;
     }
     return netsysService_->NetworkDestroy(netId);
+}
+
+int32_t NetsysController::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    NETMGR_LOG_D("Destroy network: netId[%{public}d]", netId);
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NetworkAddUids(netId, uidRanges);
+}
+
+int32_t NetsysController::NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    NETMGR_LOG_D("Destroy network: netId[%{public}d]", netId);
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NetworkDelUids(netId, uidRanges);
 }
 
 int32_t NetsysController::NetworkAddInterface(int32_t netId, const std::string &iface)

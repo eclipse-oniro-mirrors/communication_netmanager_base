@@ -50,6 +50,15 @@ int32_t FwmarkClient::BindSocket(int32_t fd, uint32_t netId)
     return Send(&command, fd);
 }
 
+int32_t FwmarkClient::ProtectFromVpn(int32_t socketFd)
+{
+    if (socketFd < 0) {
+        return HandleError(-1, ERROR_CODE_SOCKETFD_INVALID);
+    }
+    FwmarkCommand command = {FwmarkCommand::PROTECT_FROM_VPN, 0};
+    return Send(&command, socketFd);
+}
+
 int32_t FwmarkClient::Send(FwmarkCommand *data, int32_t fd)
 {
     socketFd_ = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);

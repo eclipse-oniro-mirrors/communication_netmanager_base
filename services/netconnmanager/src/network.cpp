@@ -17,11 +17,11 @@
 
 #include "broadcast_manager.h"
 #include "event_report.h"
-#include "netmanager_base_common_utils.h"
-#include "network.h"
-#include "netsys_controller.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "netmanager_base_common_utils.h"
+#include "netsys_controller.h"
+#include "network.h"
 #include "route_utils.h"
 #include "securec.h"
 
@@ -71,8 +71,14 @@ bool Network::UpdateBasicNetwork(bool isAvailable_)
 {
     NETMGR_LOG_D("Enter UpdateBasicNetwork");
     if (isAvailable_) {
+        if (netSupplierType_ == BEARER_VPN) {
+            return CreateVirtualNetwork();
+        }
         return CreateBasicNetwork();
     } else {
+        if (netSupplierType_ == BEARER_VPN) {
+            return ReleaseVirtualNetwork();
+        }
         return ReleaseBasicNetwork();
     }
 }
@@ -90,6 +96,11 @@ bool Network::CreateBasicNetwork()
         NetsysController::GetInstance().CreateNetworkCache(netId_);
         isPhyNetCreated_ = true;
     }
+    return true;
+}
+
+bool Network::CreateVirtualNetwork()
+{
     return true;
 }
 
@@ -115,6 +126,11 @@ bool Network::ReleaseBasicNetwork()
     return true;
 }
 
+bool Network::ReleaseVirtualNetwork()
+{
+    return true;
+}
+
 bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
 {
     NETMGR_LOG_D("update net link information process");
@@ -124,7 +140,9 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateDns(netLinkInfo);
     UpdateMtu(netLinkInfo);
     netLinkInfo_ = netLinkInfo;
-    StartNetDetection(false);
+    if (netSupplierType_ != BEARER_VPN) {
+        StartNetDetection(false);
+    }
     return true;
 }
 

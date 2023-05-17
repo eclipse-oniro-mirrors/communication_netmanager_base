@@ -54,6 +54,9 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_GET_PROC_SYS_NET] = &NetsysNativeServiceStub::CmdGetProcSysNet;
     opToInterfaceMap_[NETSYS_SET_PROC_SYS_NET] = &NetsysNativeServiceStub::CmdSetProcSysNet;
     opToInterfaceMap_[NETSYS_NETWORK_CREATE_PHYSICAL] = &NetsysNativeServiceStub::CmdNetworkCreatePhysical;
+    opToInterfaceMap_[NETSYS_NETWORK_CREATE_VIRTUAL] = &NetsysNativeServiceStub::CmdNetworkCreateVirtual;
+    opToInterfaceMap_[NETSYS_NETWORK_ADD_UIDS] = &NetsysNativeServiceStub::CmdNetworkAddUids;
+    opToInterfaceMap_[NETSYS_NETWORK_DEL_UIDS] = &NetsysNativeServiceStub::CmdNetworkDelUids;
     opToInterfaceMap_[NETSYS_INTERFACE_ADD_ADDRESS] = &NetsysNativeServiceStub::CmdAddInterfaceAddress;
     opToInterfaceMap_[NETSYS_INTERFACE_DEL_ADDRESS] = &NetsysNativeServiceStub::CmdDelInterfaceAddress;
     opToInterfaceMap_[NETSYS_INTERFACE_SET_IP_ADDRESS] = &NetsysNativeServiceStub::CmdInterfaceSetIpAddress;
@@ -491,6 +494,21 @@ int32_t NetsysNativeServiceStub::CmdNetworkCreatePhysical(MessageParcel &data, M
     NETNATIVE_LOG_D("NetworkCreatePhysical has recved result %{public}d", result);
 
     return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdNetworkCreateVirtual(MessageParcel &data, MessageParcel &reply)
+{
+    return 0;
+}
+
+int32_t NetsysNativeServiceStub::CmdNetworkAddUids(MessageParcel &data, MessageParcel &reply)
+{
+    return 0;
+}
+
+int32_t NetsysNativeServiceStub::CmdNetworkDelUids(MessageParcel &data, MessageParcel &reply)
+{
+    return 0;
 }
 
 int32_t NetsysNativeServiceStub::CmdAddInterfaceAddress(MessageParcel &data, MessageParcel &reply)

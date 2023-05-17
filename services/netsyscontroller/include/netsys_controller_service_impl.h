@@ -37,6 +37,8 @@ public:
      */
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) override;
 
+    int32_t NetworkCreateVirtual(int32_t netId, bool hasDns) override;
+
     /**
      * Destroy the network
      *
@@ -44,6 +46,9 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t NetworkDestroy(int32_t netId) override;
+
+    int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) override;
+    int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges) override;
 
     /**
      * Add network port device

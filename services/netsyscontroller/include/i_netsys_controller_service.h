@@ -24,10 +24,11 @@
 
 #include "dns_config_client.h"
 #include "interface_type.h"
+#include "net_stats_info.h"
 #include "netsys_controller_callback.h"
 #include "netsys_controller_define.h"
 #include "network_sharing.h"
-#include "net_stats_info.h"
+#include "uid_range.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -50,6 +51,8 @@ public:
      */
     virtual int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) = 0;
 
+    virtual int32_t NetworkCreateVirtual(int32_t netId, bool hasDns) = 0;
+
     /**
      * Destroy the network
      *
@@ -57,6 +60,9 @@ public:
      * @return Return the return value of the netsys interface call
      */
     virtual int32_t NetworkDestroy(int32_t netId) = 0;
+
+    virtual int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) = 0;
+    virtual int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges) = 0;
 
     /**
      * Add network port device

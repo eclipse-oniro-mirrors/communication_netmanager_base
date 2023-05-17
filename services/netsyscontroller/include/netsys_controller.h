@@ -16,9 +16,8 @@
 #ifndef NETSYS_CONTROLLER_H
 #define NETSYS_CONTROLLER_H
 
-
-#include "refbase.h"
 #include "i_netsys_controller_service.h"
+#include "refbase.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -38,12 +37,24 @@ public:
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission);
 
     /**
+     * Create a virtual network
+     *
+     * @param netId
+     * @param hasDns
+     * @return Return the return value of the netsys interface call
+     */
+    int32_t NetworkCreateVirtual(int32_t netId, bool hasDns);
+
+    /**
      * Destroy the network
      *
      * @param netId
      * @return Return the return value of the netsys interface call
      */
     int32_t NetworkDestroy(int32_t netId);
+
+    int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges);
+    int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges);
 
     /**
      * Add network port device

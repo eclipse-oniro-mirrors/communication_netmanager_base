@@ -40,61 +40,63 @@ config("netsys_native_manager_config") {
   }
 }
 
+netsys_native_manager_sources = [
+  "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/dhcp_result_parcel.cpp",
+  "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_addr_info_parcel.cpp",
+  "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_native_service_proxy.cpp",
+  "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/notify_callback_proxy.cpp",
+  "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/uid_range.cpp",
+  "src/dhcp_controller.cpp",
+  "src/manager/bandwidth_manager.cpp",
+  "src/manager/conn_manager.cpp",
+  "src/manager/dns_manager.cpp",
+  "src/manager/firewall_manager.cpp",
+  "src/manager/interface_manager.cpp",
+  "src/manager/route_manager.cpp",
+  "src/manager/sharing_manager.cpp",
+  "src/manager/traffic_manager.cpp",
+  "src/netsys/dnsresolv/dns_getaddrinfo.cpp",
+  "src/netsys/dnsresolv/dns_lookup_name.cpp",
+  "src/netsys/dnsresolv/dns_lookup_parse.cpp",
+  "src/netsys/dnsresolv/dns_param_cache.cpp",
+  "src/netsys/dnsresolv/dns_proxy_listen.cpp",
+  "src/netsys/dnsresolv/dns_resolv_config.cpp",
+  "src/netsys/dnsresolv/dns_resolv_listen.cpp",
+  "src/netsys/fwmark_network.cpp",
+  "src/netsys/iptables_wrapper.cpp",
+  "src/netsys/local_network.cpp",
+  "src/netsys/net_manager_native.cpp",
+  "src/netsys/netlink_msg.cpp",
+  "src/netsys/netlink_socket.cpp",
+  "src/netsys/netsys_network.cpp",
+  "src/netsys/netsys_udp_transfer.cpp",
+  "src/netsys/physical_network.cpp",
+  "src/netsys/virtual_network.cpp",
+  "src/netsys/wrapper/data_receiver.cpp",
+  "src/netsys/wrapper/netlink_manager.cpp",
+  "src/netsys/wrapper/netsys_event_message.cpp",
+  "src/netsys/wrapper/wrapper_decoder.cpp",
+  "src/netsys/wrapper/wrapper_distributor.cpp",
+  "src/netsys/wrapper/wrapper_listener.cpp",
+  "src/netsys_native_service.cpp",
+  "src/netsys_native_service_stub.cpp",
+  "src/notify_callback_stub.cpp",
+]
+
+netsys_native_manager_deps = [
+  "$DHCP_MANAGER_ROOT/services/mgr_service:dhcp_manager_service",
+  "$FWMARK_CLIENT_DIR:fwmark_client",
+  "$NETMANAGERNATIVE_ROOT/netsys_client",
+  "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+  "$THIRD_PARTY_ROOT/iptables:iptables",
+  "$THIRD_PARTY_ROOT/iptables:iptables-restore",
+  "$THIRD_PARTY_ROOT/iptables:iptables-save",
+  "bpf:netsys",
+  "bpf:netsys_bpf_utils",
+]
+
 ohos_shared_library("netsys_native_manager") {
-  sources = [
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/dhcp_result_parcel.cpp",
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_addr_info_parcel.cpp",
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_native_service_proxy.cpp",
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/notify_callback_proxy.cpp",
-    "src/dhcp_controller.cpp",
-    "src/manager/bandwidth_manager.cpp",
-    "src/manager/conn_manager.cpp",
-    "src/manager/dns_manager.cpp",
-    "src/manager/firewall_manager.cpp",
-    "src/manager/interface_manager.cpp",
-    "src/manager/route_manager.cpp",
-    "src/manager/sharing_manager.cpp",
-    "src/manager/traffic_manager.cpp",
-    "src/netsys/dnsresolv/dns_getaddrinfo.cpp",
-    "src/netsys/dnsresolv/dns_lookup_name.cpp",
-    "src/netsys/dnsresolv/dns_lookup_parse.cpp",
-    "src/netsys/dnsresolv/dns_param_cache.cpp",
-    "src/netsys/dnsresolv/dns_proxy_listen.cpp",
-    "src/netsys/dnsresolv/dns_resolv_config.cpp",
-    "src/netsys/dnsresolv/dns_resolv_listen.cpp",
-    "src/netsys/fwmark_network.cpp",
-    "src/netsys/iptables_wrapper.cpp",
-    "src/netsys/local_network.cpp",
-    "src/netsys/net_manager_native.cpp",
-    "src/netsys/netlink_msg.cpp",
-    "src/netsys/netlink_socket.cpp",
-    "src/netsys/netsys_network.cpp",
-    "src/netsys/netsys_udp_transfer.cpp",
-    "src/netsys/physical_network.cpp",
-    "src/netsys/wrapper/data_receiver.cpp",
-    "src/netsys/wrapper/netlink_manager.cpp",
-    "src/netsys/wrapper/netsys_event_message.cpp",
-    "src/netsys/wrapper/wrapper_decoder.cpp",
-    "src/netsys/wrapper/wrapper_distributor.cpp",
-    "src/netsys/wrapper/wrapper_listener.cpp",
-    "src/netsys_native_service.cpp",
-    "src/netsys_native_service_stub.cpp",
-    "src/notify_callback_stub.cpp",
-  ]
-
   configs = [ ":netsys_native_manager_config" ]
-
-  deps = [
-    "$DHCP_MANAGER_ROOT/services/mgr_service:dhcp_manager_service",
-    "$FWMARK_CLIENT_DIR:fwmark_client",
-    "$NETMANAGERNATIVE_ROOT/netsys_client",
-    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-    "$THIRD_PARTY_ROOT/iptables:iptables",
-    "$THIRD_PARTY_ROOT/iptables:iptables-restore",
-    "$THIRD_PARTY_ROOT/iptables:iptables-save",
-    "bpf:netsys",
-    "bpf:netsys_bpf_utils",
-  ]
 
   cflags = [
     "-fvisibility=hidden",
@@ -113,16 +115,9 @@ ohos_shared_library("netsys_native_manager") {
     "-Wl,--gc-sections",
   ]
 
-  if (build_selinux) {
-    deps += [ "$THIRD_PARTY_ROOT/selinux:libselinux" ]
-  }
+  sources = netsys_native_manager_sources
 
-  external_deps = [
-    "eventhandler:libeventhandler",
-    "init:libbegetutil",
-    "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-  ]
+  deps = netsys_native_manager_deps
 
   defines = [
     "NETMGRNATIVE_LOG_TAG = \"NetsysNativeService\"",
@@ -132,8 +127,16 @@ ohos_shared_library("netsys_native_manager") {
   ]
 
   if (build_selinux) {
+    deps += [ "$THIRD_PARTY_ROOT/selinux:libselinux" ]
     defines += [ "USE_SELINUX" ]
   }
+
+  external_deps = [
+    "eventhandler:libeventhandler",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+  ]
 
   public_configs = [ "$NETMANAGER_BASE_ROOT/utils:netmgr_common_config" ]
 
@@ -157,64 +160,11 @@ ohos_shared_library("netsys_native_manager") {
 
 ohos_static_library("netsys_native_manager_static") {
   testonly = true
-  sources = [
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/dhcp_result_parcel.cpp",
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_addr_info_parcel.cpp",
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_native_service_proxy.cpp",
-    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/notify_callback_proxy.cpp",
-    "src/dhcp_controller.cpp",
-    "src/manager/bandwidth_manager.cpp",
-    "src/manager/conn_manager.cpp",
-    "src/manager/dns_manager.cpp",
-    "src/manager/firewall_manager.cpp",
-    "src/manager/interface_manager.cpp",
-    "src/manager/route_manager.cpp",
-    "src/manager/sharing_manager.cpp",
-    "src/manager/traffic_manager.cpp",
-    "src/netsys/dnsresolv/dns_getaddrinfo.cpp",
-    "src/netsys/dnsresolv/dns_lookup_name.cpp",
-    "src/netsys/dnsresolv/dns_lookup_parse.cpp",
-    "src/netsys/dnsresolv/dns_param_cache.cpp",
-    "src/netsys/dnsresolv/dns_proxy_listen.cpp",
-    "src/netsys/dnsresolv/dns_resolv_config.cpp",
-    "src/netsys/dnsresolv/dns_resolv_listen.cpp",
-    "src/netsys/fwmark_network.cpp",
-    "src/netsys/iptables_wrapper.cpp",
-    "src/netsys/local_network.cpp",
-    "src/netsys/net_manager_native.cpp",
-    "src/netsys/netlink_msg.cpp",
-    "src/netsys/netlink_socket.cpp",
-    "src/netsys/netsys_network.cpp",
-    "src/netsys/netsys_udp_transfer.cpp",
-    "src/netsys/physical_network.cpp",
-    "src/netsys/wrapper/data_receiver.cpp",
-    "src/netsys/wrapper/netlink_manager.cpp",
-    "src/netsys/wrapper/netsys_event_message.cpp",
-    "src/netsys/wrapper/wrapper_decoder.cpp",
-    "src/netsys/wrapper/wrapper_distributor.cpp",
-    "src/netsys/wrapper/wrapper_listener.cpp",
-    "src/netsys_native_service.cpp",
-    "src/netsys_native_service_stub.cpp",
-    "src/notify_callback_stub.cpp",
-  ]
+  sources = netsys_native_manager_sources
 
   configs = [ ":netsys_native_manager_config" ]
 
-  deps = [
-    "$DHCP_MANAGER_ROOT/services/mgr_service:dhcp_manager_service",
-    "$FWMARK_CLIENT_DIR:fwmark_client",
-    "$NETMANAGERNATIVE_ROOT/netsys_client",
-    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-    "$THIRD_PARTY_ROOT/iptables:iptables",
-    "$THIRD_PARTY_ROOT/iptables:iptables-restore",
-    "$THIRD_PARTY_ROOT/iptables:iptables-save",
-    "bpf:netsys",
-    "bpf:netsys_bpf_utils",
-  ]
-
-  if (build_selinux) {
-    deps += [ "$THIRD_PARTY_ROOT/selinux:libselinux" ]
-  }
+  deps = netsys_native_manager_deps
 
   external_deps = [
     "eventhandler:libeventhandler",
@@ -231,6 +181,7 @@ ohos_static_library("netsys_native_manager_static") {
   ]
 
   if (build_selinux) {
+    deps += [ "$THIRD_PARTY_ROOT/selinux:libselinux" ]
     defines += [ "USE_SELINUX" ]
   }
 

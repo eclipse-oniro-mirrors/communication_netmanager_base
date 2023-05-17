@@ -23,13 +23,13 @@
 #include "net_activate.h"
 #include "net_conn_service.h"
 #include "net_conn_types.h"
+#include "net_http_proxy_tracker.h"
 #include "net_manager_center.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_supplier.h"
 #include "netmanager_base_permission.h"
 #include "netsys_controller.h"
-#include "net_http_proxy_tracker.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -1324,8 +1324,7 @@ int32_t NetConnService::Dump(int32_t fd, const std::vector<std::u16string> &args
     std::string result;
     GetDumpMessage(result);
     int32_t ret = dprintf(fd, "%s\n", result.c_str());
-    return ret < 0 ? static_cast<int32_t>(NET_CONN_ERR_CREATE_DUMP_FAILED)
-                   : static_cast<int32_t>(NETMANAGER_SUCCESS);
+    return ret < 0 ? static_cast<int32_t>(NET_CONN_ERR_CREATE_DUMP_FAILED) : static_cast<int32_t>(NETMANAGER_SUCCESS);
 }
 
 int32_t NetConnService::SetAirplaneMode(bool state)
