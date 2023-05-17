@@ -66,7 +66,7 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb) {
     if (skb == NULL) {
         return 1;
     }
-    if(skb->pkt_type == PACKET_LOOPBACK) {
+    if (skb->pkt_type == PACKET_LOOPBACK) {
         return 1;
     }
     uint64_t sock_uid = bpf_get_socket_uid(skb);
@@ -110,7 +110,7 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb) {
     if (skb == NULL) {
         return 1;
     }
-    if(skb->pkt_type == PACKET_LOOPBACK) {
+    if (skb->pkt_type == PACKET_LOOPBACK) {
         return 1;
     }
     uint64_t sock_uid = bpf_get_socket_uid(skb);
