@@ -29,6 +29,7 @@ ohos_shared_library("netsys_client") {
     "NETSYS_CLIENT_DEBUG=0",
   ]
 
+  innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

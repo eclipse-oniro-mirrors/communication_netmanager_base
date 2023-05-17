@@ -96,6 +96,7 @@ ohos_shared_library("net_policy_manager_if") {
     external_deps += [ "hilog:libhilog" ]
   }
 
+  innerapi_tags = [ "platformsdk" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
