@@ -976,7 +976,6 @@ int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, Message
 
 int32_t NetsysNativeServiceStub::CmdSetIpTablesForRes(MessageParcel &data, MessageParcel &reply)
 {
-    NETNATIVE_LOGI("CmdSetIpTablesForRes: %{public}s", cmd.c_str());
     std::string cmd = data.ReadString();
     std::string respond;
     int32_t result = SetIpTablesForRes(cmd, respond);

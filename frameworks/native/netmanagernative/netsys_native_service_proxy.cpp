@@ -1570,7 +1570,6 @@ int32_t NetsysNativeServiceProxy::SetIpTablesForRes(const std::string &cmd, std:
         NETNATIVE_LOGE("SetIpTablesForRes proxy read respond failed");
         return ERR_FLATTEN_OBJECT;
     }
-    NETNATIVE_LOGI("SetIpTablesForRes respond %{public}s", respond.c_str());
     return ret;
 }
 } // namespace NetsysNative
