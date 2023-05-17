@@ -311,14 +311,26 @@ HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetAirplaneModeTest
+ * @tc.name: SetAirplaneModeTest001
  * @tc.desc: Test NetConnClient::SetAirplaneMode
  * @tc.type: FUNC
  */
-HWTEST_F(NetConnClientTest, SetAirplaneModeTest, TestSize.Level1)
+HWTEST_F(NetConnClientTest, SetAirplaneModeTest001, TestSize.Level1)
 {
     AccessToken token;
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAirplaneMode(true);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetAirplaneModeTest002
+ * @tc.desc: Test NetConnClient::SetAirplaneMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, SetAirplaneModeTest002, TestSize.Level1)
+{
+    AccessToken token;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAirplaneMode(false);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
