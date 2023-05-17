@@ -237,9 +237,6 @@ int32_t NetPolicyService::SetDeviceIdlePolicy(bool enable)
 
 int32_t NetPolicyService::GetPowerSaveAllowedList(std::vector<uint32_t> &uids)
 {
-    if (!CheckPermission(Permission::CONNECTIVITY_INTERNAL, CMD_NPS_GET_POWER_SAVE_ALLOWED_LIST)) {
-        return NETMANAGER_ERR_PERMISSION_DENIED;
-    }
     NETMGR_LOG_D("GetPowerSaveAllowedList start");
     return netPolicyFirewall_->GetPowerSaveAllowedList(uids);
 }
