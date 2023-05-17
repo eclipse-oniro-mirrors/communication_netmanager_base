@@ -166,7 +166,7 @@ public:
      * @param interfaceName Output network device name of the route item
      * @return Returns 0, add interface to virtual network successfully, otherwise it will fail
      */
-    static int32_t AddInterfaceToVirtualNetwork(uint16_t netId, const std::string &interfaceName);
+    static int32_t AddInterfaceToVirtualNetwork(int32_t netId, const std::string &interfaceName);
 
     /**
      * Remove interface from virtual network
@@ -175,12 +175,12 @@ public:
      * @param interfaceName Output network device name of the route item
      * @return Returns 0, remove interface from virtual network successfully, otherwise it will fail
      */
-    static int32_t RemoveInterfaceFromVirtualNetwork(uint16_t netId, const std::string &interfaceName);
+    static int32_t RemoveInterfaceFromVirtualNetwork(int32_t netId, const std::string &interfaceName);
 
-    static int32_t AddUsersToVirtualNetwork(uint16_t netId, const std::string &interfaceName,
+    static int32_t AddUsersToVirtualNetwork(int32_t netId, const std::string &interfaceName,
                                             const std::vector<NetManagerStandard::UidRange> &uidRanges);
 
-    static int32_t RemoveUsersFromVirtualNetwork(uint16_t netId, const std::string &interfaceName,
+    static int32_t RemoveUsersFromVirtualNetwork(int32_t netId, const std::string &interfaceName,
                                                  const std::vector<NetManagerStandard::UidRange> &uidRanges);
 
     /**
@@ -246,9 +246,9 @@ private:
     static int32_t AddLocalNetworkRules();
     static int32_t UpdatePhysicalNetwork(uint16_t netId, const std::string &interfaceName, NetworkPermission permission,
                                          bool add);
-    static int32_t UpdateVirtualNetwork(uint16_t netId, const std::string &interfaceName,
+    static int32_t UpdateVirtualNetwork(int32_t netId, const std::string &interfaceName,
                                         const std::vector<NetManagerStandard::UidRange> &uidRanges, bool add);
-    static int32_t ModifyVirtualNetBasedRules(uint16_t netId, const std::string &ifaceName, bool add);
+    static int32_t ModifyVirtualNetBasedRules(int32_t netId, const std::string &ifaceName, bool add);
 
     static int32_t UpdateLocalNetwork(uint16_t netId, const std::string &interfaceName, bool add);
     static int32_t UpdateIncomingPacketMark(uint16_t netId, const std::string &interfaceName,
@@ -260,10 +260,10 @@ private:
                                         const std::string &outputInterface);
 
     static int32_t UpdateVpnOutputToLocalRule(const std::string &interfaceName, bool add);
-    static int32_t UpdateVpnSystemPermissionRule(uint16_t netId, uint32_t table, bool add);
+    static int32_t UpdateVpnSystemPermissionRule(int32_t netId, uint32_t table, bool add);
 
     static int32_t UpdateVpnUidRangeRule(uint32_t table, uid_t uidStart, uid_t uidEnd, bool add);
-    static int32_t UpdateExplicitNetworkRuleWithUid(uint16_t netId, uint32_t table, NetworkPermission permission,
+    static int32_t UpdateExplicitNetworkRuleWithUid(int32_t netId, uint32_t table, NetworkPermission permission,
                                                     uid_t uidStart, uid_t uidEnd, bool add);
     static int32_t UpdateOutputInterfaceRulesWithUid(const std::string &interface, uint32_t table,
                                                      NetworkPermission permission, uid_t uidStart, uid_t uidEnd,
