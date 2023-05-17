@@ -437,6 +437,7 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
             out->append(buf);
             if (memset_s(buf, sizeof(buf), 0, sizeof(buf)) != 0) {
                 NETMGR_LOG_E("memset is false");
+                close(pipeFd[PIPE_OUT]);
                 return NETMANAGER_ERROR;
             }
         }
