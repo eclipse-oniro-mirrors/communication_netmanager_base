@@ -13,12 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef NETMANAGER_BASE_BPF_PATH_H
-#define NETMANAGER_BASE_BPF_PATH_H
-namespace OHOS::NetManagerStandard {
-static constexpr const char *IFACE_STATS_MAP_PATH = "/sys/fs/bpf/netsys/maps/iface_stats_map";
-static constexpr const char *APP_UID_STATS_MAP_PATH = "/sys/fs/bpf/netsys/maps/app_uid_stats_map";
-static constexpr const char *APP_UID_IF_STATS_MAP_PATH = "/sys/fs/bpf/netsys/maps/app_uid_if_stats_map";
-static constexpr const char *SOCKET_PERMISSION_MAP_PATH = "/sys/fs/bpf/netsys/maps/sock_permission_map";
-} // namespace OHOS::NetManagerStandard
-#endif /* NETMANAGER_BASE_BPF_PATH_H */
+#include <string>
+#include "netsys_controller.h"
+
+extern "C" int32_t NetsysDisallowInternet(uint32_t uid)
+{
+    return OHOS::NetManagerStandard::NetsysController::GetInstance().DisallowInternet(uid);
+}

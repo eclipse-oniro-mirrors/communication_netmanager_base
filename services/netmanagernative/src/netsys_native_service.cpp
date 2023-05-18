@@ -294,6 +294,13 @@ int32_t NetsysNativeService::SetProcSysNet(int32_t family, int32_t which, const 
     return result;
 }
 
+int32_t NetsysNativeService::DisallowInternet(uint32_t uid)
+{
+    int32_t result = netsysService_->DisallowInternet(uid);
+    NETNATIVE_LOG_D("DisallowInternet out.");
+    return result;
+}
+
 int32_t NetsysNativeService::NetworkCreatePhysical(int32_t netId, int32_t permission)
 {
     int32_t result = netsysService_->NetworkCreatePhysical(netId, permission);

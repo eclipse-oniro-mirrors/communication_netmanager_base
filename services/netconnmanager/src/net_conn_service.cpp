@@ -23,6 +23,7 @@
 #include "net_activate.h"
 #include "net_conn_service.h"
 #include "net_conn_types.h"
+#include "net_datashare_utils.h"
 #include "net_manager_center.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
@@ -1324,8 +1325,7 @@ int32_t NetConnService::Dump(int32_t fd, const std::vector<std::u16string> &args
     std::string result;
     GetDumpMessage(result);
     int32_t ret = dprintf(fd, "%s\n", result.c_str());
-    return ret < 0 ? static_cast<int32_t>(NET_CONN_ERR_CREATE_DUMP_FAILED)
-                   : static_cast<int32_t>(NETMANAGER_SUCCESS);
+    return (ret < 0) ? static_cast<int32_t>(NET_CONN_ERR_CREATE_DUMP_FAILED) : static_cast<int32_t>(NETMANAGER_SUCCESS);
 }
 
 int32_t NetConnService::SetAirplaneMode(bool state)
@@ -1334,6 +1334,15 @@ int32_t NetConnService::SetAirplaneMode(bool state)
         NETMGR_LOG_E("Permission check failed.");
         return NETMANAGER_ERR_NOT_SYSTEM_CALL;
     }
+
+    auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
+    std::string airplaneMode = std::to_string(state);
+    Uri uri(SETTINGS_DATASHARE_URL_AIRPLANE_MODE);
+    int32_t ret = dataShareHelperUtils->Update(uri, SETTINGS_DATASHARE_KEY_AIRPLANE_MODE, airplaneMode);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Update airplane mode:%{public}d to datashare failed.", state);
+    }
+
     BroadcastInfo info;
     info.action = EventFwk::CommonEventSupport::COMMON_EVENT_AIRPLANE_MODE_CHANGED;
     info.data = "Net Manager Airplane Mode Changed";
