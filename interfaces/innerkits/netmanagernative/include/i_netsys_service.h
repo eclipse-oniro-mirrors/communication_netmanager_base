@@ -95,11 +95,11 @@ public:
         NETSYS_GET_UID_STATS,
         NETSYS_GET_IFACE_STATS,
         NETSYS_GET_ALL_STATS_INFO,
+        NETSYS_DISALLOW_INTERNET,
+        NETSYS_SET_IP_TABLES_FOR_RES,
         NETSYS_NETWORK_CREATE_VIRTUAL,
         NETSYS_NETWORK_ADD_UIDS,
         NETSYS_NETWORK_DEL_UIDS,
-        NETSYS_DISALLOW_INTERNET,
-        NETSYS_SET_IP_TABLES_FOR_RES,
     };
 
     virtual int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,

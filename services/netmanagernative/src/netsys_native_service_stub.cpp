@@ -78,7 +78,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_IPFWD_ADD_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward;
     opToInterfaceMap_[NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward;
     opToInterfaceMap_[NETSYS_SET_IP_TABLES_FOR_RES] = &NetsysNativeServiceStub::CmdSetIpTablesForRes;
-    
+
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
     InitOpToInterfaceMapExt();
