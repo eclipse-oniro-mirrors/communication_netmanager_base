@@ -408,6 +408,11 @@ public:
     {
         return 0;
     }
+
+    int32_t SetIpTablesForRes(const std::string &cmd, std::string &respond) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
@@ -1282,5 +1287,5 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetAllStatsInfo001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_NONE);
 }
 
-} // namespace nmd
+} // namespace NetsysNative
 } // namespace OHOS

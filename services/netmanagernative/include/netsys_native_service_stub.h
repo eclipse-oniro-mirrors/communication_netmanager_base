@@ -112,6 +112,7 @@ private:
     int32_t CmdGetUidStats(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetIfaceStats(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetAllStatsInfo(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetIpTablesForRes(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::vector<int32_t> uids_;

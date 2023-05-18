@@ -20,6 +20,8 @@
 
 #include "ipc_skeleton.h"
 #include "netmanager_base_common_utils.h"
+#include "netmanager_base_permission.h"
+#include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "securec.h"
 
@@ -75,7 +77,8 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_DISABLE_NAT] = &NetsysNativeServiceStub::CmdDisableNat;
     opToInterfaceMap_[NETSYS_IPFWD_ADD_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward;
     opToInterfaceMap_[NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward;
-
+    opToInterfaceMap_[NETSYS_SET_IP_TABLES_FOR_RES] = &NetsysNativeServiceStub::CmdSetIpTablesForRes;
+    
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
     InitOpToInterfaceMapExt();
@@ -999,6 +1002,22 @@ int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, Message
     }
     if (!OHOS::NetManagerStandard::NetStatsInfo::Marshalling(reply, stats)) {
         NETNATIVE_LOGE("Read stats info failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetIpTablesForRes(MessageParcel &data, MessageParcel &reply)
+{
+    std::string cmd = data.ReadString();
+    std::string respond;
+    int32_t result = SetIpTablesForRes(cmd, respond);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write SetIpTablesForRes result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteString(respond)) {
+        NETNATIVE_LOGE("Write SetIpTablesForRes respond failed");
         return ERR_FLATTEN_OBJECT;
     }
     return result;

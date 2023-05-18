@@ -709,6 +709,15 @@ public:
      */
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
 
+    /**
+     * Set iptables for result
+     *
+     * @param cmd Iptables command
+     * @param respond The respond of execute iptables command
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t SetIpTablesForRes(const std::string &cmd, std::string &respond);
+
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);
     void ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface);

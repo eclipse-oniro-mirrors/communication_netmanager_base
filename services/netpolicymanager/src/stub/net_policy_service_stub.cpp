@@ -43,6 +43,7 @@ std::map<uint32_t, const char *> g_codeNPS = {
     {INetPolicyService::CMD_NPS_SET_IDLE_ALLOWED_LIST, Permission::CONNECTIVITY_INTERNAL},
     {INetPolicyService::CMD_NPS_GET_IDLE_ALLOWED_LIST, Permission::CONNECTIVITY_INTERNAL},
     {INetPolicyService::CMD_NPS_SET_DEVICE_IDLE_POLICY, Permission::CONNECTIVITY_INTERNAL},
+    {INetPolicyService::CMD_NPS_GET_POWER_SAVE_ALLOWED_LIST, Permission::CONNECTIVITY_INTERNAL},
     {INetPolicyService::CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST, Permission::CONNECTIVITY_INTERNAL},
 
 };
@@ -64,6 +65,7 @@ NetPolicyServiceStub::NetPolicyServiceStub()
     memberFuncMap_[CMD_NPS_SET_IDLE_ALLOWED_LIST] = &NetPolicyServiceStub::OnSetDeviceIdleAllowedList;
     memberFuncMap_[CMD_NPS_GET_IDLE_ALLOWED_LIST] = &NetPolicyServiceStub::OnGetDeviceIdleAllowedList;
     memberFuncMap_[CMD_NPS_SET_DEVICE_IDLE_POLICY] = &NetPolicyServiceStub::OnSetDeviceIdlePolicy;
+    memberFuncMap_[CMD_NPS_GET_POWER_SAVE_ALLOWED_LIST] = &NetPolicyServiceStub::OnGetPowerSaveAllowedList;
     memberFuncMap_[CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST] = &NetPolicyServiceStub::OnSetPowerSaveAllowedList;
     memberFuncMap_[CMD_NPS_SET_BACKGROUND_POLICY] = &NetPolicyServiceStub::OnSetBackgroundPolicy;
     memberFuncMap_[CMD_NPS_GET_BACKGROUND_POLICY] = &NetPolicyServiceStub::OnGetBackgroundPolicy;
@@ -504,6 +506,23 @@ int32_t NetPolicyServiceStub::OnSetDeviceIdlePolicy(MessageParcel &data, Message
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyServiceStub::OnGetPowerSaveAllowedList(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<uint32_t> uids;
+    int32_t result = GetPowerSaveAllowedList(uids);
+    if (!reply.WriteUInt32Vector(uids)) {
+        NETMGR_LOG_E("Write uint32 Vector reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
     return NETMANAGER_SUCCESS;
 }
 

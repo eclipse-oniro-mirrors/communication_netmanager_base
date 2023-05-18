@@ -311,6 +311,17 @@ int32_t NetPolicyClient::SetDeviceIdlePolicy(bool enable)
     return proxy->SetDeviceIdlePolicy(enable);
 }
 
+int32_t NetPolicyClient::GetPowerSaveAllowedList(std::vector<uint32_t> &uids)
+{
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->GetPowerSaveAllowedList(uids);
+}
+
 int32_t NetPolicyClient::SetPowerSaveAllowedList(uint32_t uid, bool isAllowed)
 {
     sptr<INetPolicyService> proxy = GetProxy();

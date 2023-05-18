@@ -148,7 +148,6 @@ private:
         {
             connCallBack_ = connCallBack;
         }
-
         int32_t NetAvailable(sptr<NetHandle> &netHandle)
         {
             if (connCallBack_ != nullptr) {

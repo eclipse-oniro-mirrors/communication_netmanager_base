@@ -16,7 +16,7 @@
 #include <string>
 #include "netsys_controller.h"
 
-extern "C" int32_t NetsysDisallowInternet(uint32_t uid)
+int32_t NetsysDisallowInternet(uint32_t uid)
 {
     return OHOS::NetManagerStandard::NetsysController::GetInstance().DisallowInternet(uid);
 }
