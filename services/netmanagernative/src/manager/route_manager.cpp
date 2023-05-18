@@ -251,7 +251,7 @@ int32_t RouteManager::UpdateVpnOutputToLocalRule(const std::string &interfaceNam
 }
 
 int32_t RouteManager::UpdateVpnSystemPermissionRule(int32_t netId, uint32_t table, bool add)
-{   
+{
     return 0;
 }
 
@@ -299,7 +299,7 @@ int32_t RouteManager::UpdateVpnRuleInfo(uint32_t action, uint8_t ruleType, RuleI
 
 int32_t RouteManager::SendRuleToKernelWithUid(uint32_t action, uint16_t ruleFlag, uint8_t ruleType, RuleInfo ruleInfo,
                                               uid_t uidStart, uid_t uidEnd)
-{  
+{
     return 0;
 }
 
