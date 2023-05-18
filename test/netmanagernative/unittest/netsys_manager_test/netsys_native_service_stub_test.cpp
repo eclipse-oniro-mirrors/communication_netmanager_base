@@ -82,6 +82,11 @@ public:
     TestNetsysNativeServiceStub() = default;
     ~TestNetsysNativeServiceStub() override {};
 
+    int32_t DisallowInternet(uint32_t uid) override
+    {
+        return 0;
+    }
+
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
                                       const std::vector<std::string> &servers,
                                       const std::vector<std::string> &domains) override

@@ -72,6 +72,7 @@ public:
                           std::string &value) override;
     int32_t SetProcSysNet(int32_t family, int32_t which, const std::string &ifname, const std::string &parameter,
                           std::string &value) override;
+    int32_t DisallowInternet(uint32_t uid) override;
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) override;
     int32_t NetworkCreateVirtual(int32_t netId, bool hasDns) override;
     int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) override;

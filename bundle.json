@@ -72,6 +72,7 @@
                 ],
                 "service_group": [
                     "//foundation/communication/netmanager_base/services/netmanagernative:netsys_native_manager",
+                    "//foundation/communication/netmanager_base/frameworks/native/netmanagernative:socket_permission",
                     "//foundation/communication/netmanager_base/services/netmanagernative/fwmarkclient:fwmark_client",
                     "//foundation/communication/netmanager_base/services/netmanagernative/netsys_client:netsys_client",
                     "//foundation/communication/netmanager_base/services/netsyscontroller:netsys_controller",
