@@ -18,5 +18,5 @@
 
 #include <stdint.h>
 
-int32_t NetsysDisallowInternet(uint32_t uid);
+int32_t SetInternetPermission(uint32_t uid, uint8_t allow);
 #endif /* NETMANAGER_BASE_SOCKET_PERMISSION_H */

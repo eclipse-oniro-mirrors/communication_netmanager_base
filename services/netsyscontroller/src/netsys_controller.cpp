@@ -48,13 +48,13 @@ NetsysController &NetsysController::GetInstance()
     return singleInstance_;
 }
 
-int32_t NetsysController::DisallowInternet(uint32_t uid)
+int32_t NetsysController::SetInternetPermission(uint32_t uid, uint8_t allow)
 {
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->DisallowInternet(uid);
+    return netsysService_->SetInternetPermission(uid, allow);
 }
 
 int32_t NetsysController::NetworkCreatePhysical(int32_t netId, int32_t permission)

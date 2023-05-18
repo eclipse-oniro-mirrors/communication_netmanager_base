@@ -1,4 +1,4 @@
-/*
+AA/*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,7 @@ public:
         NETSYS_GET_ALL_STATS_INFO,
         NETSYS_DISALLOW_INTERNET,
         NETSYS_SET_IP_TABLES_FOR_RES,
+        NETSYS_SET_INTERNET_PERMISSION,
         NETSYS_NETWORK_CREATE_VIRTUAL,
         NETSYS_NETWORK_ADD_UIDS,
         NETSYS_NETWORK_DEL_UIDS,
@@ -131,7 +132,7 @@ public:
                                   const std::string &parameter, std::string &value) = 0;
     virtual int32_t SetProcSysNet(int32_t family, int32_t which, const std::string &ifname,
                                   const std::string &parameter, std::string &value) = 0;
-    virtual int32_t DisallowInternet(uint32_t uid) = 0;
+    virtual int32_t SetInternetPermission(uint32_t uid, uint8_t allow) = 0;
     virtual int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) = 0;
     virtual int32_t NetworkCreateVirtual(int32_t netId, bool hasDns) = 0;
     virtual int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) = 0;

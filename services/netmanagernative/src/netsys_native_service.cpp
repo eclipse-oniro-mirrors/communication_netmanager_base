@@ -294,10 +294,10 @@ int32_t NetsysNativeService::SetProcSysNet(int32_t family, int32_t which, const 
     return result;
 }
 
-int32_t NetsysNativeService::DisallowInternet(uint32_t uid)
+int32_t NetsysNativeService::SetInternetPermission(uint32_t uid, uint8_t allow)
 {
-    int32_t result = netsysService_->DisallowInternet(uid);
-    NETNATIVE_LOG_D("DisallowInternet out.");
+    int32_t result = netsysService_->SetInternetPermission(uid, allow);
+    NETNATIVE_LOG_D("SetInternetPermission out.");
     return result;
 }
 

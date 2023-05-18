@@ -71,9 +71,9 @@ int32_t NetManagerNative::NetworkReinitRoute()
     return connManager_->ReinitRoute();
 }
 
-int32_t NetManagerNative::DisallowInternet(uint32_t uid)
+int32_t NetManagerNative::SetInternetPermission(uint32_t uid, uint8_t allow)
 {
-    return connManager_->DisallowInternet(uid);
+    return connManager_->SetInternetPermission(uid, allow);
 }
 
 int32_t NetManagerNative::NetworkCreatePhysical(int32_t netId, int32_t permission)

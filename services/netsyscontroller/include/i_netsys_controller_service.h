@@ -43,12 +43,13 @@ public:
     virtual void Init() = 0;
 
     /**
-     * Disallow a app to create AF_INET or AF_INET6 socket
+     * Disallow or allow a app to create AF_INET or AF_INET6 socket
      *
-     * @param uid App's uid which need to be abandoned to create AF_INET or AF_INET6 socket
+     * @param uid App's uid which need to be disallowed ot allowed to create AF_INET or AF_INET6 socket
+     * @param allow 0 means disallow, 1 means allow
      * @return return 0 if OK, return error number if not OK
      */
-    virtual int32_t DisallowInternet(uint32_t uid) = 0;
+    virtual int32_t SetInternetPermission(uint32_t uid, uint8_t allow) = 0;
 
     /**
      * Create a physical network
