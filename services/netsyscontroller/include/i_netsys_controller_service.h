@@ -690,6 +690,15 @@ public:
      * @return returns the all info of the stats
      */
     virtual int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
+
+    /**
+     * Set iptables for result
+     *
+     * @param cmd Iptables command
+     * @param respond The respond of execute iptables command
+     * @return Value the return value of the netsys interface call
+     */
+    virtual int32_t SetIpTablesForRes(const std::string &cmd, std::string &respond) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

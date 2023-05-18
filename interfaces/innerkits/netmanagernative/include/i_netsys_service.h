@@ -94,6 +94,7 @@ public:
         NETSYS_GET_IFACE_STATS,
         NETSYS_GET_ALL_STATS_INFO,
         NETSYS_DISALLOW_INTERNET,
+        NETSYS_SET_IP_TABLES_FOR_RES,
     };
 
     virtual int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
@@ -170,6 +171,7 @@ public:
     virtual int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) = 0;
     virtual int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) = 0;
     virtual int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
+    virtual int32_t SetIpTablesForRes(const std::string &cmd, std::string &respond) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

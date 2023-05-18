@@ -414,6 +414,10 @@ int32_t ForkExecChildProcess(const int32_t *pipeFd, int32_t count, const std::ve
     if (execv(args[0], const_cast<char *const *>(&args[0])) == -1) {
         NETMGR_LOG_E("execv command failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
     }
+    if (close(pipeFd[PIPE_IN]) != 0) {
+        NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
+        _exit(-1);
+    }
     _exit(-1);
 }
 
@@ -431,6 +435,15 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
         }
         while (read(pipeFd[PIPE_OUT], buf, CHAR_ARRAY_SIZE_MAX - 1) > 0) {
             out->append(buf);
+            if (memset_s(buf, sizeof(buf), 0, sizeof(buf)) != 0) {
+                NETMGR_LOG_E("memset is false");
+                close(pipeFd[PIPE_OUT]);
+                return NETMANAGER_ERROR;
+            }
+        }
+        if (close(pipeFd[PIPE_OUT]) != 0) {
+            NETMGR_LOG_E("close failed, errorno:%{public}d, errormsg:%{public}s", errno, strerror(errno));
+            _exit(-1);
         }
         return NETMANAGER_SUCCESS;
     }

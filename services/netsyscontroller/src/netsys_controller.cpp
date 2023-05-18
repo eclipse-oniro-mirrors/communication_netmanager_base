@@ -840,5 +840,18 @@ int32_t NetsysController::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::
     return netsysService_->GetAllStatsInfo(stats);
 }
 
+int32_t NetsysController::SetIpTablesForRes(const std::string &cmd, std::string &respond)
+{
+    if (cmd.empty()) {
+        NETMGR_LOG_E("SetIpTablesForRes cmd is empty");
+        return ERR_INVALID_DATA;
+    }
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetIpTablesForRes netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetIpTablesForRes(cmd, respond);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
