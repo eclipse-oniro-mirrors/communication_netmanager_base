@@ -45,6 +45,7 @@ private:
     std::map<uint32_t, ServiceInterface> opToInterfaceMap_;
     void InitBandwidthOpToInterfaceMap();
     void InitFirewallOpToInterfaceMap();
+    void InitOpToInterfaceMapExt();
     int32_t CmdEchoServer(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetResolverConfig(MessageParcel &data, MessageParcel &reply);
