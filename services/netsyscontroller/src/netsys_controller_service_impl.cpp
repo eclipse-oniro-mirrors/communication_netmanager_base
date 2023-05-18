@@ -26,9 +26,9 @@ void NetsysControllerServiceImpl::Init()
     mockNetsysClient_.RegisterMockApi();
 }
 
-int32_t NetsysControllerServiceImpl::DisallowInternet(uint32_t uid)
+int32_t NetsysControllerServiceImpl::SetInternetPermission(uint32_t uid, uint8_t allow)
 {
-    return netsysClient_.DisallowInternet(uid);
+    return netsysClient_.SetInternetPermission(uid, allow);
 }
 
 int32_t NetsysControllerServiceImpl::NetworkCreatePhysical(int32_t netId, int32_t permission)

@@ -527,7 +527,7 @@ int32_t NetsysNativeServiceProxy::SetProcSysNet(int32_t family, int32_t which, c
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::DisallowInternet(uint32_t uid)
+int32_t NetsysNativeServiceProxy::SetInternetPermission(uint32_t uid, uint8_t allow)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -538,9 +538,13 @@ int32_t NetsysNativeServiceProxy::DisallowInternet(uint32_t uid)
         return ERR_FLATTEN_OBJECT;
     }
 
+    if (!data.WriteUint8(allow)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
     MessageParcel reply;
     MessageOption option;
-    Remote()->SendRequest(INetsysService::NETSYS_DISALLOW_INTERNET, data, reply, option);
+    Remote()->SendRequest(INetsysService::NETSYS_SET_INTERNET_PERMISSION, data, reply, option);
 
     return reply.ReadInt32();
 }
