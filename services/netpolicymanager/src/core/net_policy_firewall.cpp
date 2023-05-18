@@ -96,6 +96,12 @@ int32_t NetPolicyFirewall::GetDeviceIdleAllowedList(std::vector<uint32_t> &uids)
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetPolicyFirewall::GetPowerSaveAllowedList(std::vector<uint32_t> &uids)
+{
+    uids = powerSaveFirewallRule_->GetAllowedList();
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetPolicyFirewall::UpdateDeviceIdlePolicy(bool enable)
 {
     if (deviceIdleMode_ == enable) {

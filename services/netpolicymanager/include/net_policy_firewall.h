@@ -68,6 +68,14 @@ public:
     int32_t SetPowerSaveAllowedList(uint32_t uid, bool isAllowed);
 
     /**
+     * Get the Power Save Allowed List object.
+     *
+     * @param uids The list of UIDs.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t GetPowerSaveAllowedList(std::vector<uint32_t> &uids);
+
+    /**
      * Process network policy in device idle mode.
      *
      * @param enable Power save mode is open or not.

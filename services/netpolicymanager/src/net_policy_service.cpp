@@ -235,6 +235,12 @@ int32_t NetPolicyService::SetDeviceIdlePolicy(bool enable)
     return netPolicyFirewall_->UpdateDeviceIdlePolicy(enable);
 }
 
+int32_t NetPolicyService::GetPowerSaveAllowedList(std::vector<uint32_t> &uids)
+{
+    NETMGR_LOG_D("GetPowerSaveAllowedList start");
+    return netPolicyFirewall_->GetPowerSaveAllowedList(uids);
+}
+
 int32_t NetPolicyService::SetPowerSaveAllowedList(uint32_t uid, bool isAllowed)
 {
     NETMGR_LOG_D("SetPowerSaveAllowedList info: uid[%{public}d] isAllowed[%{public}d]", uid, isAllowed);

@@ -183,6 +183,14 @@ public:
     int32_t SetDeviceIdlePolicy(bool enable) override;
 
     /**
+     * Get the allow list of UID in power save mode.
+     *
+     * @param uids The list of UIDs.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t GetPowerSaveAllowedList(std::vector<uint32_t> &uids) override;
+
+    /**
      * Set the UID into power save allow list.
      * @param uid The specified UID of application.
      * @param isAllowed The UID is into allowed list or not.
