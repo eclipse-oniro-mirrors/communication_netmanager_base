@@ -150,14 +150,14 @@ NetsysNativeClient::NetsysNativeClient()
     }).detach();
 }
 
-int32_t NetsysNativeClient::DisallowInternet(uint32_t uid)
+int32_t NetsysNativeClient::SetInternetPermission(uint32_t uid, uint8_t allow)
 {
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->DisallowInternet(uid);
+    return proxy->SetInternetPermission(uid, allow);
 }
 
 int32_t NetsysNativeClient::NetworkCreatePhysical(int32_t netId, int32_t permission)

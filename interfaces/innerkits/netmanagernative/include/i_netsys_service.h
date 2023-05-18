@@ -95,6 +95,7 @@ public:
         NETSYS_GET_ALL_STATS_INFO,
         NETSYS_DISALLOW_INTERNET,
         NETSYS_SET_IP_TABLES_FOR_RES,
+        NETSYS_SET_INTERNET_PERMISSION,
     };
 
     virtual int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
@@ -126,7 +127,7 @@ public:
                                   const std::string &parameter, std::string &value) = 0;
     virtual int32_t SetProcSysNet(int32_t family, int32_t which, const std::string &ifname,
                                   const std::string &parameter, std::string &value) = 0;
-    virtual int32_t DisallowInternet(uint32_t uid) = 0;
+    virtual int32_t SetInternetPermission(uint32_t uid, uint8_t allow) = 0;
     virtual int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) = 0;
     virtual int32_t AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                         int32_t prefixLength) = 0;

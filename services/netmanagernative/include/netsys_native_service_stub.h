@@ -66,7 +66,7 @@ private:
     int32_t CmdNetworkClearDefault(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetProcSysNet(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetProcSysNet(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdDisallowInternet(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetInternetPermission(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetworkCreatePhysical(MessageParcel &data, MessageParcel &reply);
     int32_t CmdAddInterfaceAddress(MessageParcel &data, MessageParcel &reply);
     int32_t CmdDelInterfaceAddress(MessageParcel &data, MessageParcel &reply);
