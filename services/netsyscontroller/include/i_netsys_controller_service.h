@@ -43,6 +43,14 @@ public:
     virtual void Init() = 0;
 
     /**
+     * Disallow a app to create AF_INET or AF_INET6 socket
+     *
+     * @param uid App's uid which need to be abandoned to create AF_INET or AF_INET6 socket
+     * @return return 0 if OK, return error number if not OK
+     */
+    virtual int32_t DisallowInternet(uint32_t uid) = 0;
+
+    /**
      * Create a physical network
      *
      * @param netId Net Id

@@ -14,23 +14,16 @@
  */
 
 #include <linux/bpf.h>
-#include <linux/if.h>
-#include <linux/if_ether.h>
-#include <linux/if_tunnel.h>
 #include <linux/if_packet.h>
-#include <linux/in.h>
-#include <linux/ip.h>
-#include <linux/ipv6.h>
-#include <linux/mpls.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include "bpf/bpf_endian.h"
 #include "bpf/bpf_helpers.h"
 #include "bpf_def.h"
 
 #define SEC(NAME) __attribute__((section(NAME), used))
 
+// network stats begin
 bpf_map_def SEC("maps") iface_stats_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(uint64_t),
@@ -62,7 +55,8 @@ bpf_map_def SEC("maps") app_uid_if_stats_map = {
 };
 
 SEC("cgroup_skb/uid/ingress")
-int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb) {
+int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
+{
     if (skb == NULL) {
         return 1;
     }
@@ -106,7 +100,8 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb) {
 }
 
 SEC("cgroup_skb/uid/egress")
-int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb) {
+int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
+{
     if (skb == NULL) {
         return 1;
     }
@@ -148,5 +143,32 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb) {
     }
     return 1;
 }
+// network stats end
 
+// internet permission begin
+bpf_map_def SEC("maps") sock_permission_map = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(sock_permission_key),
+    .value_size = sizeof(sock_permission_value),
+    .max_entries = 65536,
+};
+
+SEC("cgroup_sock/inet_create_socket")
+int inet_create_socket(struct bpf_sock *sk)
+{
+    __u64 gid_uid = bpf_get_current_uid_gid();
+    __u32 uid = (__u32)(gid_uid & 0x00000000FFFFFFFF);
+    sock_permission_value *value = bpf_map_lookup_elem(&sock_permission_map, &uid);
+    // value == NULL means that the process attached to this uid is not a hap process which started by appspawn
+    // it is a native process, native process should have this permission
+    if (value == NULL) {
+        return 1;
+    }
+    // *value == 0 means no permission
+    if (*value == 0) {
+        return 0;
+    }
+    return 1;
+}
+// internet permission end
 char g_license[] SEC("license") = "GPL";

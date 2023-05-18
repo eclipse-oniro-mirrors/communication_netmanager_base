@@ -518,7 +518,7 @@ private:
             std::string mapPinLocation = std::string(MAPS_DIR) + "/" + map.name;
             if (access(mapPinLocation.c_str(), F_OK) == 0) {
                 auto ret = UnPin(mapPinLocation);
-                return ret < 0 ? false : true;
+                return ret >= 0;
             }
             return true;
         });
