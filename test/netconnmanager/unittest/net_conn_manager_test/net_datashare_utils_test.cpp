@@ -164,8 +164,8 @@ HWTEST_F(NetDataShareHelperUtilsTest, QueryTest001, TestSize.Level1)
     std::string airplaneMode;
     Uri uri(SETTINGS_DATASHARE_URL_AIRPLANE_MODE);
     int32_t ret = netDataShareHelperUtils_->Query(uri, SETTINGS_DATASHARE_KEY_AIRPLANE_MODE, airplaneMode);
+    ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
     std::cout << "QueryTest result:" << airplaneMode << std::endl;
-    ASSERT_TRUE(ret == NETMANAGER_ERROR);
 }
 
 /**
@@ -179,8 +179,8 @@ HWTEST_F(NetDataShareHelperUtilsTest, QueryTest002, TestSize.Level1)
     std::string airplaneMode;
     Uri uri(SETTINGS_DATASHARE_URL_AIRPLANE_MODE);
     int32_t ret = netDataShareHelperUtils_->Query(uri, SETTINGS_DATASHARE_KEY_AIRPLANE_MODE, airplaneMode);
-    std::cout << "QueryTest result:" << airplaneMode << std::endl;
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
+    std::cout << "QueryTest result:" << airplaneMode << std::endl;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

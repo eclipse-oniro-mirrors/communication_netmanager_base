@@ -57,6 +57,16 @@ std::set<std::string> HttpProxy::GetExclusionList() const
     return exclusionList_;
 }
 
+bool HttpProxy::operator==(const HttpProxy &httpProxy) const
+{
+    return (host_ == httpProxy.host_ && port_ == httpProxy.port_ && exclusionList_ == httpProxy.exclusionList_);
+}
+
+bool HttpProxy::operator!=(const HttpProxy &httpProxy) const
+{
+    return !(httpProxy == *this);
+}
+
 bool HttpProxy::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteString(host_)) {
