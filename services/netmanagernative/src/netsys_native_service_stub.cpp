@@ -77,7 +77,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_DISABLE_NAT] = &NetsysNativeServiceStub::CmdDisableNat;
     opToInterfaceMap_[NETSYS_IPFWD_ADD_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward;
     opToInterfaceMap_[NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward;
-    opToInterfaceMap_[NETSYS_SET_IP_TABLES_FOR_RES] = &NetsysNativeServiceStub::CmdSetIpTablesForRes;
+    opToInterfaceMap_[NETSYS_SET_IP_TABLES_CMD_FOR_RES] = &NetsysNativeServiceStub::CmdSetIpTablesCommandForRes;
 
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
@@ -1008,17 +1008,22 @@ int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, Message
     return result;
 }
 
-int32_t NetsysNativeServiceStub::CmdSetIpTablesForRes(MessageParcel &data, MessageParcel &reply)
+int32_t NetsysNativeServiceStub::CmdSetIpTablesCommandForRes(MessageParcel &data, MessageParcel &reply)
 {
+    if (!NetManagerStandard::NetManagerPermission::CheckPermission(
+            NetManagerStandard::Permission::SET_IP_TABLES_COMMAND)) {
+        NETNATIVE_LOGE("CmdSetIpTablesCommandForRes CheckPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
     std::string cmd = data.ReadString();
     std::string respond;
-    int32_t result = SetIpTablesForRes(cmd, respond);
+    int32_t result = SetIpTablesCommandForRes(cmd, respond);
     if (!reply.WriteInt32(result)) {
-        NETNATIVE_LOGE("Write SetIpTablesForRes result failed");
+        NETNATIVE_LOGE("Write SetIpTablesCommandForRes result failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!reply.WriteString(respond)) {
-        NETNATIVE_LOGE("Write SetIpTablesForRes respond failed");
+        NETNATIVE_LOGE("Write SetIpTablesCommandForRes respond failed");
         return ERR_FLATTEN_OBJECT;
     }
     return result;

@@ -692,6 +692,26 @@ void GetAllStatsInfoFuzzTest(const uint8_t *data, size_t size)
 
     OnRemoteRequest(NetsysNative::INetsysService::NETSYS_GET_ALL_STATS_INFO, dataParcel);
 }
+
+void SetIpTablesCommandForResTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    if (!dataParcel.WriteString("-L -n")) {
+        return;
+    }
+
+    OnRemoteRequest(NetsysNative::INetsysService::NETSYS_SET_IP_TABLES_CMD_FOR_RES, dataParcel);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -721,5 +741,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::StopDhcpClientFuzzTest(data, size);
     OHOS::NetManagerStandard::StartDhcpServiceFuzzTest(data, size);
     OHOS::NetManagerStandard::StopDhcpServiceFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetIpTablesCommandForResTest(data, size);
     return 0;
 }
