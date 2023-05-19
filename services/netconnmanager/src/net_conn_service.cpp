@@ -23,6 +23,7 @@
 #include "net_activate.h"
 #include "net_conn_service.h"
 #include "net_conn_types.h"
+#include "net_http_proxy_tracker.h"
 #include "net_datashare_utils.h"
 #include "net_manager_center.h"
 #include "net_manager_constants.h"
@@ -30,7 +31,6 @@
 #include "net_supplier.h"
 #include "netmanager_base_permission.h"
 #include "netsys_controller.h"
-#include "net_http_proxy_tracker.h"
 
 namespace OHOS {
 namespace NetManagerStandard {

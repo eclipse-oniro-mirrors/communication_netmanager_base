@@ -82,9 +82,24 @@ int32_t NetManagerNative::NetworkCreatePhysical(int32_t netId, int32_t permissio
                                                static_cast<NetworkPermission>(permission));
 }
 
+int32_t NetManagerNative::NetworkCreateVirtual(int32_t netId, bool hasDns)
+{
+    return connManager_->CreateVirtualNetwork(netId, hasDns);
+}
+
 int32_t NetManagerNative::NetworkDestroy(int32_t netId)
 {
     return connManager_->DestroyNetwork(netId);
+}
+
+int32_t NetManagerNative::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    return connManager_->AddUidsToNetwork(netId, uidRanges);
+}
+
+int32_t NetManagerNative::NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    return connManager_->RemoveUidsFromNetwork(netId, uidRanges);
 }
 
 int32_t NetManagerNative::NetworkAddInterface(int32_t netId, std::string interfaceName)

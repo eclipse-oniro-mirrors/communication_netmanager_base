@@ -94,14 +94,26 @@ int32_t SetMark(int32_t *socketFd, FwmarkCommand *command)
         CloseSocket(socketFd, ret, ERROR_CODE_GETSOCKOPT_FAILED);
         return ret;
     }
-    fwmark.netId = command->netId;
-    NETNATIVE_LOGI("FwmarkNetwork: SetMark netId: %{public}d, socketFd:%{public}d", command->netId, *socketFd);
-    if (command->netId == NETID_UNSET) {
-        fwmark.explicitlySelected = false;
-        fwmark.protectedFromVpn = false;
-        fwmark.permission = PERMISSION_NONE;
-    } else {
-        fwmark.explicitlySelected = true;
+    NETNATIVE_LOGI("FwmarkNetwork: SetMark netId: %{public}d, socketFd:%{public}d, cmd:%{public}d", command->netId,
+                   *socketFd, command->cmdId);
+    switch (command->cmdId) {
+        case FwmarkCommand::SELECT_NETWORK: {
+            fwmark.netId = command->netId;
+            if (command->netId == NETID_UNSET) {
+                fwmark.explicitlySelected = false;
+                fwmark.protectedFromVpn = false;
+                fwmark.permission = PERMISSION_NONE;
+            } else {
+                fwmark.explicitlySelected = true;
+            }
+            break;
+        }
+        case FwmarkCommand::PROTECT_FROM_VPN: {
+            fwmark.protectedFromVpn = true;
+            break;
+        }
+        default:
+            break;
     }
     ret = setsockopt(*socketFd, SOL_SOCKET, SO_MARK, &fwmark.intValue, sizeof(fwmark.intValue));
     if (ret != 0) {

@@ -570,6 +570,21 @@ int32_t NetsysNativeServiceProxy::NetworkCreatePhysical(int32_t netId, int32_t p
     return reply.ReadInt32();
 }
 
+int32_t NetsysNativeServiceProxy::NetworkCreateVirtual(int32_t netId, bool hasDns)
+{
+    return 0;
+}
+
+int32_t NetsysNativeServiceProxy::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    return 0;
+}
+
+int32_t NetsysNativeServiceProxy::NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    return 0;
+}
+
 int32_t NetsysNativeServiceProxy::AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                                       int32_t prefixLength)
 {

@@ -17,9 +17,9 @@
 #define NETWORK_H
 
 #include "event_report.h"
-#include "inet_addr.h"
 #include "i_net_detection_callback.h"
 #include "i_net_monitor_callback.h"
+#include "inet_addr.h"
 #include "net_conn_event_handler.h"
 #include "net_conn_types.h"
 #include "net_link_info.h"
@@ -62,7 +62,9 @@ public:
 private:
     void StopNetDetection();
     bool CreateBasicNetwork();
+    bool CreateVirtualNetwork();
     bool ReleaseBasicNetwork();
+    bool ReleaseVirtualNetwork();
     void InitNetMonitor();
     void HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect);
     void NotifyNetDetectionResult(NetDetectionResultCode detectionResult, const std::string &urlRedirect);

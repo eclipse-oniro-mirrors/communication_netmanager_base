@@ -77,18 +77,11 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_DISABLE_NAT] = &NetsysNativeServiceStub::CmdDisableNat;
     opToInterfaceMap_[NETSYS_IPFWD_ADD_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward;
     opToInterfaceMap_[NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward;
-    opToInterfaceMap_[NETSYS_TETHER_DNS_SET] = &NetsysNativeServiceStub::CmdShareDnsSet;
-    opToInterfaceMap_[NETSYS_START_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStartDnsProxyListen;
-    opToInterfaceMap_[NETSYS_STOP_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStopDnsProxyListen;
-    opToInterfaceMap_[NETSYS_GET_SHARING_NETWORK_TRAFFIC] = &NetsysNativeServiceStub::CmdGetNetworkSharingTraffic;
-    opToInterfaceMap_[NETSYS_GET_TOTAL_STATS] = &NetsysNativeServiceStub::CmdGetTotalStats;
-    opToInterfaceMap_[NETSYS_GET_UID_STATS] = &NetsysNativeServiceStub::CmdGetUidStats;
-    opToInterfaceMap_[NETSYS_GET_IFACE_STATS] = &NetsysNativeServiceStub::CmdGetIfaceStats;
-    opToInterfaceMap_[NETSYS_GET_ALL_STATS_INFO] = &NetsysNativeServiceStub::CmdGetAllStatsInfo;
     opToInterfaceMap_[NETSYS_SET_IP_TABLES_FOR_RES] = &NetsysNativeServiceStub::CmdSetIpTablesForRes;
 
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
+    InitOpToInterfaceMapExt();
     uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
              UID_SAMGR, UID_PARAM_WATCHER};
 }
@@ -113,6 +106,21 @@ void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdFirewallSetUidsDeniedListChain;
     opToInterfaceMap_[NETSYS_FIREWALL_ENABLE_CHAIN] = &NetsysNativeServiceStub::CmdFirewallEnableChain;
     opToInterfaceMap_[NETSYS_FIREWALL_SET_UID_RULE] = &NetsysNativeServiceStub::CmdFirewallSetUidRule;
+}
+
+void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
+{
+    opToInterfaceMap_[NETSYS_TETHER_DNS_SET] = &NetsysNativeServiceStub::CmdShareDnsSet;
+    opToInterfaceMap_[NETSYS_START_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStartDnsProxyListen;
+    opToInterfaceMap_[NETSYS_STOP_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStopDnsProxyListen;
+    opToInterfaceMap_[NETSYS_GET_SHARING_NETWORK_TRAFFIC] = &NetsysNativeServiceStub::CmdGetNetworkSharingTraffic;
+    opToInterfaceMap_[NETSYS_GET_TOTAL_STATS] = &NetsysNativeServiceStub::CmdGetTotalStats;
+    opToInterfaceMap_[NETSYS_GET_UID_STATS] = &NetsysNativeServiceStub::CmdGetUidStats;
+    opToInterfaceMap_[NETSYS_GET_IFACE_STATS] = &NetsysNativeServiceStub::CmdGetIfaceStats;
+    opToInterfaceMap_[NETSYS_GET_ALL_STATS_INFO] = &NetsysNativeServiceStub::CmdGetAllStatsInfo;
+    opToInterfaceMap_[NETSYS_NETWORK_CREATE_VIRTUAL] = &NetsysNativeServiceStub::CmdNetworkCreateVirtual;
+    opToInterfaceMap_[NETSYS_NETWORK_ADD_UIDS] = &NetsysNativeServiceStub::CmdNetworkAddUids;
+    opToInterfaceMap_[NETSYS_NETWORK_DEL_UIDS] = &NetsysNativeServiceStub::CmdNetworkDelUids;
 }
 
 int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -505,6 +513,21 @@ int32_t NetsysNativeServiceStub::CmdNetworkCreatePhysical(MessageParcel &data, M
     NETNATIVE_LOG_D("NetworkCreatePhysical has recved result %{public}d", result);
 
     return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdNetworkCreateVirtual(MessageParcel &data, MessageParcel &reply)
+{
+    return 0;
+}
+
+int32_t NetsysNativeServiceStub::CmdNetworkAddUids(MessageParcel &data, MessageParcel &reply)
+{
+    return 0;
+}
+
+int32_t NetsysNativeServiceStub::CmdNetworkDelUids(MessageParcel &data, MessageParcel &reply)
+{
+    return 0;
 }
 
 int32_t NetsysNativeServiceStub::CmdAddInterfaceAddress(MessageParcel &data, MessageParcel &reply)

@@ -308,6 +308,27 @@ int32_t NetsysNativeService::NetworkCreatePhysical(int32_t netId, int32_t permis
     return result;
 }
 
+int32_t NetsysNativeService::NetworkCreateVirtual(int32_t netId, bool hasDns)
+{
+    int32_t result = netsysService_->NetworkCreateVirtual(netId, hasDns);
+    NETNATIVE_LOG_D("NetworkCreateVirtual out.");
+    return result;
+}
+
+int32_t NetsysNativeService::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    int32_t result = netsysService_->NetworkAddUids(netId, uidRanges);
+    NETNATIVE_LOG_D("NetworkAddUids out.");
+    return result;
+}
+
+int32_t NetsysNativeService::NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    int32_t result = netsysService_->NetworkDelUids(netId, uidRanges);
+    NETNATIVE_LOG_D("NetworkDelUids out.");
+    return result;
+}
+
 int32_t NetsysNativeService::AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                                  int32_t prefixLength)
 {

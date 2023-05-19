@@ -74,6 +74,10 @@ public:
      */
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission);
 
+    int32_t NetworkCreateVirtual(int32_t netId, bool hasDns);
+    int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges);
+    int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges);
+
     /**
      * Destroy the network
      *

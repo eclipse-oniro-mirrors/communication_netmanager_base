@@ -86,3 +86,10 @@ NET_MDNS_REQUEST_FAULT:
 NET_MDNS_REQUEST_BEHAVIOR:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: send request behavior event}
   INFO: {type: STRING, desc: mDNS info}
+
+NET_VPN_CONNECT_FAULT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: send setup fault event}
+  VPN_LEGACY: {type: INT32, desc: the type of vpn}
+  OPERATION_TYPE: {type: INT32, desc: the operation type}
+  VPN_ERROR_TYPE: {type: INT32, desc: the error code}
+  VPN_ERROR_MSG: {type: STRING, desc: the error message}

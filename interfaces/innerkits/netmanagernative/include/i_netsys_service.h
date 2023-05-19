@@ -22,13 +22,15 @@
 #include "i_notify_callback.h"
 #include "interface_type.h"
 #include "iremote_broker.h"
-#include "route_type.h"
-#include "network_sharing.h"
 #include "net_stats_info.h"
+#include "network_sharing.h"
+#include "route_type.h"
+#include "uid_range.h"
 
 namespace OHOS {
 namespace NetsysNative {
 using namespace nmd;
+using namespace OHOS::NetManagerStandard;
 class INetsysService : public IRemoteBroker {
 public:
     enum {
@@ -96,6 +98,9 @@ public:
         NETSYS_DISALLOW_INTERNET,
         NETSYS_SET_IP_TABLES_FOR_RES,
         NETSYS_SET_INTERNET_PERMISSION,
+        NETSYS_NETWORK_CREATE_VIRTUAL,
+        NETSYS_NETWORK_ADD_UIDS,
+        NETSYS_NETWORK_DEL_UIDS,
     };
 
     virtual int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
@@ -129,6 +134,9 @@ public:
                                   const std::string &parameter, std::string &value) = 0;
     virtual int32_t SetInternetPermission(uint32_t uid, uint8_t allow) = 0;
     virtual int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) = 0;
+    virtual int32_t NetworkCreateVirtual(int32_t netId, bool hasDns) = 0;
+    virtual int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) = 0;
+    virtual int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges) = 0;
     virtual int32_t AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                         int32_t prefixLength) = 0;
     virtual int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,

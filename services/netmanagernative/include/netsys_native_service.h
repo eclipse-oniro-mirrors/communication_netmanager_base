@@ -21,6 +21,7 @@
 #include "system_ability.h"
 #include "system_ability_status_change_stub.h"
 
+#include "bpf_stats.h"
 #include "dhcp_controller.h"
 #include "fwmark_network.h"
 #include "i_netsys_service.h"
@@ -29,7 +30,6 @@
 #include "netlink_manager.h"
 #include "netsys_native_service_stub.h"
 #include "sharing_manager.h"
-#include "bpf_stats.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -47,9 +47,8 @@ public:
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
                               const std::vector<std::string> &servers,
                               const std::vector<std::string> &domains) override;
-    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
-                              std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
-                              uint8_t &retryCount) override;
+    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
+                              uint16_t &baseTimeoutMsec, uint8_t &retryCount) override;
     int32_t CreateNetworkCache(uint16_t netId) override;
     int32_t DestroyNetworkCache(uint16_t netId) override;
     int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName, const AddrInfo &hints,
@@ -75,6 +74,9 @@ public:
                           std::string &value) override;
     int32_t SetInternetPermission(uint32_t uid, uint8_t allow) override;
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) override;
+    int32_t NetworkCreateVirtual(int32_t netId, bool hasDns) override;
+    int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) override;
+    int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges) override;
     int32_t AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                 int32_t prefixLength) override;
     int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,

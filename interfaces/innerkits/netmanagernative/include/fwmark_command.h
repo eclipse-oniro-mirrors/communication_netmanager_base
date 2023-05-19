@@ -21,6 +21,7 @@ namespace nmd {
 struct FwmarkCommand {
     enum CmdId {
         SELECT_NETWORK,
+        PROTECT_FROM_VPN,
     } cmdId;
     uint32_t netId;
 };
