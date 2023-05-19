@@ -141,6 +141,12 @@ int32_t NetConnService::SystemReady()
     return NETMANAGER_SUCCESS;
 }
 
+// Do not post into event handler, because this interface should have good performance
+int32_t NetConnService::SetInternetPermission(uint32_t uid, uint8_t allow)
+{
+    return NetsysController::GetInstance().SetInternetPermission(uid, allow);
+}
+
 int32_t NetConnService::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
                                             const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {
