@@ -25,12 +25,12 @@ public:
     NetHttpProxyTracker() = default;
     ~NetHttpProxyTracker() = default;
 
-    bool ReadFromSystemParameter(HttpProxy &httpProxy);
-    bool WriteToSystemParameter(const HttpProxy &httpProxy);
+    void ReadFromSystemParameter(HttpProxy &httpProxy);
+    bool WriteToSystemParameter(HttpProxy &httpProxy);
 
 private:
     std::set<std::string> ParseExclusionList(const std::string &exclusions) const;
-    std::string GetExclusionsAsAstring(const std::set<std::string> &exculisonList) const;
+    std::string GetExclusionsAsString(const std::set<std::string> &exclusionList) const;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

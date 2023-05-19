@@ -128,9 +128,7 @@ bool NetConnService::Init()
         return false;
     }
     NetHttpProxyTracker httpProxyTracker;
-    if (!httpProxyTracker.ReadFromSystemParameter(httpProxy_)) {
-        NETMGR_LOG_E("NetConnService Init: read http proxy failed");
-    }
+    httpProxyTracker.ReadFromSystemParameter(globalHttpProxy_);
     SendGlobalHttpProxyChangeBroadcast();
     return true;
 }
@@ -610,20 +608,19 @@ void NetConnService::SendGlobalHttpProxyChangeBroadcast()
     info.action = EventFwk::CommonEventSupport::COMMON_EVENT_HTTP_PROXY_CHANGE;
     info.data = "Global HttpProxy Changed";
     info.ordered = true;
-    std::map<std::string, std::string> param = {{"HttpProxy", httpProxy_.ToString()}};
+    std::map<std::string, std::string> param = {{"HttpProxy", globalHttpProxy_.ToString()}};
     DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
 }
 
 int32_t NetConnService::SetGlobalHttpProxyAsync(const HttpProxy &httpProxy)
 {
-    if (httpProxy_.GetHost() != httpProxy.GetHost() || httpProxy_.GetPort() != httpProxy.GetPort() ||
-        httpProxy_.GetExclusionList() != httpProxy.GetExclusionList()) {
-        httpProxy_ = httpProxy;
+    if (globalHttpProxy_ != httpProxy) {
+        globalHttpProxy_ = httpProxy;
         SendGlobalHttpProxyChangeBroadcast();
         std::lock_guard<std::mutex> locker(netManagerMutex_);
         NetHttpProxyTracker httpProxyTracker;
-        if (!httpProxyTracker.WriteToSystemParameter(httpProxy_)) {
-            NETMGR_LOG_E("Write http proxy to system parameter failed");
+        if (!httpProxyTracker.WriteToSystemParameter(globalHttpProxy_)) {
+            return NET_CONN_ERR_HTTP_PROXY_INVALID;
         }
     }
     return NETMANAGER_SUCCESS;
@@ -1226,12 +1223,12 @@ int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::st
 int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
     std::lock_guard<std::mutex> locker(netManagerMutex_);
-    if (httpProxy_.GetHost().empty()) {
+    if (globalHttpProxy_.GetHost().empty()) {
         httpProxy.SetPort(0);
         NETMGR_LOG_E("The http proxy host is empty");
         return NETMANAGER_SUCCESS;
     }
-    httpProxy = httpProxy_;
+    httpProxy = globalHttpProxy_;
     return NETMANAGER_SUCCESS;
 }
 
