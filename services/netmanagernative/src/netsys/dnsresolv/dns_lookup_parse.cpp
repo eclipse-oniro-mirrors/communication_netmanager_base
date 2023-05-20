@@ -19,6 +19,7 @@
 
 #include "fwmark_client.h"
 #include "net_manager_constants.h"
+#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace nmd {
@@ -256,10 +257,10 @@ void DnsLookUpParse::SearchNameServer(GetAnswers *getAnswers, int32_t *answersLe
             break;
         }
         for (uint32_t j = 0; j < getAnswers->nns; j++) {
-            if (sendto(getAnswers->fd, queries[i], queriesLens[i], MSG_NOSIGNAL,
-                       reinterpret_cast<sockaddr *>(&nSockAddr[j]), getAnswers->saLen) > 0) {
-                break;
-            }
+            std::string dnsServerIp = std::string(inet_ntoa(nSockAddr[j].sin.sin_addr));
+            NETNATIVE_LOGI("DNS send to server is %{public}s", CommonUtils::ToAnonymousIp(dnsServerIp).c_str());
+            sendto(getAnswers->fd, queries[i], queriesLens[i], MSG_NOSIGNAL,
+                   reinterpret_cast<sockaddr *>(&nSockAddr[j]), getAnswers->saLen);
         }
     }
 }
