@@ -254,6 +254,15 @@ public:
 
     int32_t SetAppNet(int32_t netId) override;
 
+    /**
+     * Set iptables for result
+     *
+     * @param cmd Iptables command
+     * @param respond The respond of execute iptables command
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t SetIpTablesCommandForRes(const std::string &cmd, std::string &respond) override;
+
 private:
     bool Init();
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
