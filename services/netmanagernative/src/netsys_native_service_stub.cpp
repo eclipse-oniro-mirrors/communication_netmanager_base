@@ -1010,11 +1010,6 @@ int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, Message
 
 int32_t NetsysNativeServiceStub::CmdSetIpTablesCommandForRes(MessageParcel &data, MessageParcel &reply)
 {
-    if (!NetManagerStandard::NetManagerPermission::CheckPermission(
-        NetManagerStandard::Permission::SET_IP_TABLES_COMMAND)) {
-        NETNATIVE_LOGE("CmdSetIpTablesCommandForRes CheckPermission failed");
-        return NETMANAGER_ERR_PERMISSION_DENIED;
-    }
     std::string cmd = data.ReadString();
     std::string respond;
     int32_t result = SetIpTablesCommandForRes(cmd, respond);
