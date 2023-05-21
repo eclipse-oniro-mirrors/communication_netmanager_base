@@ -270,7 +270,7 @@ int32_t NetPolicyClient::UpdateRemindPolicy(int32_t netType, const std::string &
 
 NetPolicyResultCode NetPolicyClient::SetIdleTrustlist(uint32_t uid, bool isTrustlist)
 {
-    return static_cast<NetPolicyResultCode>(SetDeviceIdleAllowedList({uids}, isTrustlist));
+    return static_cast<NetPolicyResultCode>(SetDeviceIdleAllowedList({uid}, isTrustlist));
 }
 
 int32_t NetPolicyClient::SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
