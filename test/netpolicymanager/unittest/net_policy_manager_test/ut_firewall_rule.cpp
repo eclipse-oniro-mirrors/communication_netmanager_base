@@ -87,7 +87,7 @@ HWTEST_F(UtFirewallRule, SetAllowedList, TestSize.Level1)
     rule.ClearAllowedList();
     EXPECT_EQ(rule.GetAllowedList().size(), static_cast<uint32_t>(0));
     uint32_t uid = 1;
-    rule.SetAllowedList({uid}, FIREWALL_RULE_ALLOW);
+    rule.SetAllowedList(static_cast<std::vector<uint32_t>>(uid), FIREWALL_RULE_ALLOW);
     EXPECT_EQ(rule.GetAllowedList().size(), static_cast<uint32_t>(1));
     EXPECT_EQ(rule.GetAllowedList()[0], uid);
     uint32_t uidCount = 5;
@@ -97,11 +97,11 @@ HWTEST_F(UtFirewallRule, SetAllowedList, TestSize.Level1)
     }
     rule.SetAllowedList(uids);
     EXPECT_EQ(rule.GetAllowedList().size(), uidCount);
-    rule.SetAllowedList({uid}, FIREWALL_RULE_DENY);
+    rule.SetAllowedList(static_cast<std::vector<uint32_t>>(uid), FIREWALL_RULE_DENY);
     uint32_t expectCount = uidCount - 1;
     EXPECT_EQ(rule.GetAllowedList().size(), expectCount);
     uid = 5;
-    rule.SetAllowedList({uid}, FIREWALL_RULE_DENY);
+    rule.SetAllowedList(static_cast<std::vector<uint32_t>>(uid), FIREWALL_RULE_DENY);
     EXPECT_EQ(rule.GetAllowedList().size(), expectCount);
     uid = 2;
     rule.RemoveFromAllowedList(uid);
