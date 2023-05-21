@@ -42,8 +42,8 @@ void SetPowerSaveAllowListContext::ParseParams(napi_value *params, size_t params
     napi_value elementValue = nullptr;
     for (uint32_t i = 0; i < arrayLength; i++) {
         elementValue = NapiUtils::GetArrayElement(GetEnv(), params[ARG_INDEX_0], i);
-        auto test = NapiUtils::GetInt32FromValue(GetEnv(), elementValue);
-        uids_.push_back(static_cast<uint32_t>(test));
+        auto uid = NapiUtils::GetInt32FromValue(GetEnv(), elementValue);
+        uids_.push_back(static_cast<uint32_t>(uid));
     }
     isAllow_ = NapiUtils::GetBooleanValue(GetEnv(), params[ARG_INDEX_1]);
     if (paramsCount == PARAM_DOUBLE_OPTIONS_AND_CALLBACK) {

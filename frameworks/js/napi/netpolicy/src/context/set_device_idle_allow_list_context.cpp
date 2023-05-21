@@ -30,20 +30,20 @@ SetDeviceIdleAllowListContext::SetDeviceIdleAllowListContext(napi_env env, Event
 
 void SetDeviceIdleAllowListContext::ParseParams(napi_value *params, size_t paramsCount)
 {
-    NETMANAGER_BASE_LOGE("ParseParams ParseParams ParseParams start");
     if (!CheckParamsType(params, paramsCount)) {
         NETMANAGER_BASE_LOGE("Check params failed");
         SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
         SetNeedThrowException(true);
         return;
     }
+
     uint32_t arrayLength = NapiUtils::GetArrayLength(GetEnv(), params[ARG_INDEX_0]);
     arrayLength = arrayLength > ARRAY_LIMIT ? ARRAY_LIMIT : arrayLength;
     napi_value elementValue = nullptr;
     for (uint32_t i = 0; i < arrayLength; i++) {
         elementValue = NapiUtils::GetArrayElement(GetEnv(), params[ARG_INDEX_0], i);
-        auto test = NapiUtils::GetInt32FromValue(GetEnv(), elementValue);
-        uids_.push_back(static_cast<uint32_t>(test));
+        auto uid = NapiUtils::GetInt32FromValue(GetEnv(), elementValue);
+        uids_.push_back(static_cast<uint32_t>(uid));
     }
 
     isAllow_ = NapiUtils::GetBooleanValue(GetEnv(), params[ARG_INDEX_1]);
