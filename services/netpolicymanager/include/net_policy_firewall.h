@@ -92,7 +92,7 @@ public:
     void HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEvent> &policyEvent);
 
 private:
-    void UpdateFirewallPolicyList(uint32_t chainType,const std::vector<uint32_t> &uids, bool isAllowed);
+    void UpdateFirewallPolicyList(uint32_t chainType, const std::vector<uint32_t> &uids, bool isAllowed);
     void DeleteUid(uint32_t uid);
 
 private:

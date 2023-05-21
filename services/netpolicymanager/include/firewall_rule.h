@@ -146,6 +146,7 @@ protected:
     bool modeEnable_ = false;
 
 private:
+    void SetAllowedList(uint32_t uid, uint32_t rule);
     std::shared_ptr<NetsysPolicyWrapper> netsys_ = nullptr;
 };
 } // namespace NetManagerStandard

@@ -50,20 +50,25 @@ const std::vector<uint32_t> &FirewallRule::GetAllowedList() const
 void FirewallRule::SetAllowedList(const std::vector<uint32_t> &uids, uint32_t rule)
 {
     for (auto &uid : uids) {
-        if (rule == FIREWALL_RULE_ALLOW) {
-            allowedList_.emplace_back(uid);
-        } else {
-            for (auto iter = allowedList_.begin(); iter != allowedList_.end();) {
-                if (uid == *iter) {
-                    allowedList_.erase(iter);
-                    break;
-                } else {
-                    iter++;
-                }
+        SetAllowedList(uid, rule);
+    }
+    netsys_->FirewallSetUidRule(chainType_, uids, rule);
+}
+
+void FirewallRule::SetAllowedList(uint32_t uid, uint32_t rule)
+{
+    if (rule == FIREWALL_RULE_ALLOW) {
+        allowedList_.emplace_back(uid);
+    } else {
+        for (auto iter = allowedList_.begin(); iter != allowedList_.end();) {
+            if (uid == *iter) {
+                allowedList_.erase(iter);
+                break;
+            } else {
+                iter++;
             }
         }
     }
-    netsys_->FirewallSetUidRule(chainType_, uids, rule);
 }
 
 void FirewallRule::SetAllowedList(const std::set<uint32_t> &uids)
