@@ -452,7 +452,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager012, TestSize.Level1)
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager013, TestSize.Level1)
 {
     AccessToken token(testInfoParms1, testPolicyPrams1);
-    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdleAllowedList(TEST_UID7, true);
+    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdleAllowedList({TEST_UID7}, true);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
 
@@ -540,7 +540,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager018, TestSize.Level1)
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager019, TestSize.Level1)
 {
     AccessToken token(testInfoParms1, testPolicyPrams1);
-    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdleAllowedList(16, true);
+    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdleAllowedList({16}, true);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
 
@@ -553,9 +553,9 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager020, TestSize.Level1)
 {
     AccessToken token(testInfoParms1, testPolicyPrams1);
     auto client = DelayedSingleton<NetPolicyClient>::GetInstance();
-    int32_t ret1 = client->SetDeviceIdleAllowedList(10, true);
-    int32_t ret2 = client->SetDeviceIdleAllowedList(TEST_UID6, true);
-    int32_t ret3 = client->SetDeviceIdleAllowedList(99, true);
+    int32_t ret1 = client->SetDeviceIdleAllowedList({10}, true);
+    int32_t ret2 = client->SetDeviceIdleAllowedList({TEST_UID6}, true);
+    int32_t ret3 = client->SetDeviceIdleAllowedList({99}, true);
     int32_t result = client->SetDeviceIdlePolicy(true);
     ASSERT_EQ(ret1, NETMANAGER_SUCCESS);
     ASSERT_EQ(ret2, NETMANAGER_SUCCESS);
@@ -572,10 +572,10 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager021, TestSize.Level1)
 {
     AccessToken token(testInfoParms1, testPolicyPrams1);
     auto client = DelayedSingleton<NetPolicyClient>::GetInstance();
-    int32_t ret1 = client->SetDeviceIdleAllowedList(10, false);
-    int32_t ret2 = client->SetDeviceIdleAllowedList(TEST_UID6, false);
-    int32_t ret3 = client->SetDeviceIdleAllowedList(99, false);
-    int32_t ret4 = client->SetDeviceIdleAllowedList(16, false);
+    int32_t ret1 = client->SetDeviceIdleAllowedList({10}, false);
+    int32_t ret2 = client->SetDeviceIdleAllowedList({TEST_UID6}, false);
+    int32_t ret3 = client->SetDeviceIdleAllowedList({99}, false);
+    int32_t ret4 = client->SetDeviceIdleAllowedList({16}, false);
     int32_t result = client->SetDeviceIdlePolicy(false);
     ASSERT_EQ(ret1, NETMANAGER_SUCCESS);
     ASSERT_EQ(ret2, NETMANAGER_SUCCESS);
@@ -761,13 +761,13 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager025, TestSize.Level1)
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager027, TestSize.Level1)
 {
     AccessToken token(testInfoParms1, testPolicyPrams1);
-    int32_t result1 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList(10, true);
+    int32_t result1 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList({10}, true);
     ASSERT_EQ(result1, NETMANAGER_SUCCESS);
-    int32_t result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList(TEST_UID6, true);
+    int32_t result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList({TEST_UID6}, true);
     ASSERT_EQ(result2, NETMANAGER_SUCCESS);
-    int32_t result3 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList(99, true);
+    int32_t result3 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList({99}, true);
     ASSERT_EQ(result3, NETMANAGER_SUCCESS);
-    int32_t result4 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList(16, true);
+    int32_t result4 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList({16}, true);
     ASSERT_EQ(result4, NETMANAGER_SUCCESS);
 }
 

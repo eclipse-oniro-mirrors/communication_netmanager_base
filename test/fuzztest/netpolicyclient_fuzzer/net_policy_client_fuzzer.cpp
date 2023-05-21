@@ -544,14 +544,14 @@ void SetDeviceIdleAllowedListFuzzTest(const uint8_t *data, size_t size)
 
     AccessToken token(testInfoParms1, testPolicyPrams1);
     bool isAllowed = GetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-    uint32_t uid = GetData<uint32_t>();
+    std::vector<uint32_t> uids = GetData<std::vector<uint32_t>>();
 
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
 
-    dataParcel.WriteUint32(uid);
+    dataParcel.WriteUInt32Vector(uids);
     dataParcel.WriteBool(isAllowed);
 
     OnRemoteRequest(INetPolicyService::CMD_NPS_SET_IDLE_ALLOWED_LIST, dataParcel);
@@ -596,9 +596,9 @@ void SetPowerSaveAllowedListFuzzTest(const uint8_t *data, size_t size)
     }
 
     bool isAllowed = GetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-    uint32_t uid = GetData<uint32_t>();
+    std::vector<uint32_t> uids = GetData<std::vector<uint32_t>>();
     dataParcel.WriteBool(isAllowed);
-    dataParcel.WriteUint32(uid);
+    dataParcel.WriteUInt32Vector(uids);
 
     OnRemoteRequest(INetPolicyService::CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST, dataParcel);
 }
