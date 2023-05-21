@@ -43,7 +43,11 @@ void SetPowerSaveAllowListContext::ParseParams(napi_value *params, size_t params
     for (uint32_t i = 0; i < arrayLength; i++) {
         elementValue = NapiUtils::GetArrayElement(GetEnv(), params[ARG_INDEX_0], i);
         auto uid = NapiUtils::GetInt32FromValue(GetEnv(), elementValue);
-        uids_.push_back(static_cast<uint32_t>(uid));
+        if (uid > 0) {
+            uids_.push_back(static_cast<uint32_t>(uid));
+        } else {
+            NETMANAGER_BASE_LOGE("uid : %{public}d Setting error !!!", uid);
+        }
     }
     isAllow_ = NapiUtils::GetBooleanValue(GetEnv(), params[ARG_INDEX_1]);
     if (paramsCount == PARAM_DOUBLE_OPTIONS_AND_CALLBACK) {

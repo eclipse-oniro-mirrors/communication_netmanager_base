@@ -169,6 +169,8 @@ bool NetPolicyExec::ExecSetPowerSaveAllowList(SetPowerSaveAllowListContext *cont
     int32_t result =
         DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList(context->uids_, context->isAllow_);
     if (result != NETMANAGER_SUCCESS) {
+        NETMANAGER_BASE_LOGE("ExecSetPowerSaveAllowList error: result = %{public}d, arr size = %{public}zu", result,
+                             context->uids_.size());
         context->SetErrorCode(result);
         return false;
     }
