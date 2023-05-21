@@ -22,7 +22,7 @@
 #include "network_permission.h"
 #include "route_manager.h"
 #include "traffic_manager.h"
-
+#include "net_manager_constants.h"
 #include "net_manager_native.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
@@ -372,11 +372,17 @@ int32_t NetManagerNative::FirewallEnableChain(uint32_t chain, bool enable)
     return firewallManager_->EnableChain(chainType, enable);
 }
 
-int32_t NetManagerNative::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
+int32_t NetManagerNative::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule)
 {
     auto chainType = static_cast<NetManagerStandard::ChainType>(chain);
     auto rule = static_cast<NetManagerStandard::FirewallRule>(firewallRule);
-    return firewallManager_->SetUidRule(chainType, uid, rule);
+    for (auto &uid : uids) {
+        auto ret = firewallManager_->SetUidRule(chainType, uid, rule);
+        if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
+            return ret;
+        }
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
 void NetManagerNative::ShareDnsSet(uint16_t netId)

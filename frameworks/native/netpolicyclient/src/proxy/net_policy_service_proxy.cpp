@@ -570,7 +570,7 @@ int32_t NetPolicyServiceProxy::UpdateRemindPolicy(int32_t netType, const std::st
     return result;
 }
 
-int32_t NetPolicyServiceProxy::SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed)
+int32_t NetPolicyServiceProxy::SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -578,7 +578,7 @@ int32_t NetPolicyServiceProxy::SetDeviceIdleAllowedList(uint32_t uid, bool isAll
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
-    if (!data.WriteUint32(uid)) {
+    if (!data.WriteUInt32Vector(uids)) {
         NETMGR_LOG_E("Write uint32 data failed");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
@@ -714,7 +714,7 @@ int32_t NetPolicyServiceProxy::GetPowerSaveAllowedList(std::vector<uint32_t> &ui
     return result;
 }
 
-int32_t NetPolicyServiceProxy::SetPowerSaveAllowedList(uint32_t uid, bool isAllowed)
+int32_t NetPolicyServiceProxy::SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -728,7 +728,7 @@ int32_t NetPolicyServiceProxy::SetPowerSaveAllowedList(uint32_t uid, bool isAllo
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
-    if (!data.WriteUint32(uid)) {
+    if (!data.WriteUInt32Vector(uids)) {
         NETMGR_LOG_E("Write uint32 data failed");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }

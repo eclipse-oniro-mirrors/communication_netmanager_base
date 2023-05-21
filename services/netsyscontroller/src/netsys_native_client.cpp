@@ -1126,14 +1126,14 @@ int32_t NetsysNativeClient::FirewallEnableChain(uint32_t chain, bool enable)
     return proxy->FirewallEnableChain(chain, enable);
 }
 
-int32_t NetsysNativeClient::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
+int32_t NetsysNativeClient::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule)
 {
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->FirewallSetUidRule(chain, uid, firewallRule);
+    return proxy->FirewallSetUidRule(chain, uids, firewallRule);
 }
 
 int32_t NetsysNativeClient::GetTotalStats(uint64_t &stats, uint32_t type)

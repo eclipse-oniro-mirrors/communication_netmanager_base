@@ -655,7 +655,7 @@ public:
      * @param firewallRule firewall rule
      * @return success or failed
      */
-    int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule);
+    int32_t FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule);
 
     /**
      * Get total traffic
