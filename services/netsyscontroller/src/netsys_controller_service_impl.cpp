@@ -612,11 +612,10 @@ int32_t NetsysControllerServiceImpl::FirewallEnableChain(uint32_t chain, bool en
     return netsysClient_.FirewallEnableChain(chain, enable);
 }
 
-int32_t NetsysControllerServiceImpl::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
+int32_t NetsysControllerServiceImpl::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids,
+                                                        uint32_t firewallRule)
 {
-    NETMGR_LOG_D("NetsysController::FirewallSetUidRule: chain=%{public}d, uid=%{public}d, firewallRule=%{public}d",
-                 chain, uid, firewallRule);
-    return netsysClient_.FirewallSetUidRule(chain, uid, firewallRule);
+    return netsysClient_.FirewallSetUidRule(chain, uids, firewallRule);
 }
 
 int32_t NetsysControllerServiceImpl::GetTotalStats(uint64_t &stats, uint32_t type)

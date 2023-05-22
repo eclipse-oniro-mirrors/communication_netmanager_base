@@ -892,9 +892,10 @@ int32_t NetsysNativeServiceStub::CmdFirewallSetUidRule(MessageParcel &data, Mess
 {
     NETNATIVE_LOG_D("Begin to dispatch cmd CmdFirewallSetUidRule");
     uint32_t chain = (unsigned)data.ReadUint32();
-    uint32_t uid = (unsigned)data.ReadInt32();
+    std::vector<uint32_t> uids;
+    data.ReadUInt32Vector(&uids);
     uint32_t firewallRule = (unsigned)data.ReadInt32();
-    int32_t result = FirewallSetUidRule(chain, uid, firewallRule);
+    int32_t result = FirewallSetUidRule(chain, uids, firewallRule);
     reply.WriteInt32(result);
     return result;
 }

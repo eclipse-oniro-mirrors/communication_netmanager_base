@@ -42,11 +42,11 @@ public:
     int32_t GetBackgroundPolicy(bool &backgroundPolicy) override;
     int32_t GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backgroundPolicyOfUid) override;
     int32_t UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType) override;
-    int32_t SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed) override;
+    int32_t SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed) override;
     int32_t GetDeviceIdleAllowedList(std::vector<uint32_t> &uids) override;
     int32_t SetDeviceIdlePolicy(bool enable) override;
     int32_t GetPowerSaveAllowedList(std::vector<uint32_t> &uids) override;
-    int32_t SetPowerSaveAllowedList(uint32_t uid, bool isAllowed) override;
+    int32_t SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

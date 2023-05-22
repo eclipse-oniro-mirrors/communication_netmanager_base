@@ -99,13 +99,10 @@ int32_t NetsysPolicyWrapper::FirewallSetUidsDeniedListChain(uint32_t chain, cons
     return netsysReturnValue;
 }
 
-int32_t NetsysPolicyWrapper::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
+int32_t NetsysPolicyWrapper::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids,
+                                                uint32_t firewallRule)
 {
-    auto netsysReturnValue = NetsysController::GetInstance().FirewallSetUidRule(chain, uid, firewallRule);
-    NETMGR_LOG_D(
-        "NetsysPolicyWrapper:FirewallSetUidRule chain[%{public}u] uid[%{public}u] firewallRule[%{public}u] netsys "
-        "return[%{public}d]",
-        chain, uid, firewallRule, netsysReturnValue);
+    auto netsysReturnValue = NetsysController::GetInstance().FirewallSetUidRule(chain, uids, firewallRule);
     return netsysReturnValue;
 }
 

@@ -466,7 +466,7 @@ HWTEST_F(UtNetPolicyClient, SetIdleTrustlist001, TestSize.Level1)
 HWTEST_F(UtNetPolicyClient, SetDeviceIdleAllowedList001, TestSize.Level1)
 {
     AccessToken token(testInfoParms1, testPolicyPrams1);
-    int32_t ret = g_netPolicyClient->SetDeviceIdleAllowedList(TEST_UID, true);
+    int32_t ret = g_netPolicyClient->SetDeviceIdleAllowedList({TEST_UID}, true);
     std::cout << "NetPolicyClient018 SetDeviceIdleAllowedList ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }

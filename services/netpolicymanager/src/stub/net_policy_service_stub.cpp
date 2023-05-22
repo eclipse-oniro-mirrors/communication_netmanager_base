@@ -454,8 +454,8 @@ int32_t NetPolicyServiceStub::OnSnoozePolicy(MessageParcel &data, MessageParcel 
 
 int32_t NetPolicyServiceStub::OnSetDeviceIdleAllowedList(MessageParcel &data, MessageParcel &reply)
 {
-    uint32_t uid;
-    if (!data.ReadUint32(uid)) {
+    std::vector<uint32_t> uids;
+    if (!data.ReadUInt32Vector(&uids)) {
         NETMGR_LOG_E("Read uint32 data failed");
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
@@ -466,7 +466,7 @@ int32_t NetPolicyServiceStub::OnSetDeviceIdleAllowedList(MessageParcel &data, Me
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int32_t result = SetDeviceIdleAllowedList(uid, isAllowed);
+    int32_t result = SetDeviceIdleAllowedList(uids, isAllowed);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -528,8 +528,8 @@ int32_t NetPolicyServiceStub::OnGetPowerSaveAllowedList(MessageParcel &data, Mes
 
 int32_t NetPolicyServiceStub::OnSetPowerSaveAllowedList(MessageParcel &data, MessageParcel &reply)
 {
-    uint32_t uid = 0;
-    if (!data.ReadUint32(uid)) {
+    std::vector<uint32_t> uids;
+    if (!data.ReadUInt32Vector(&uids)) {
         NETMGR_LOG_E("Read uint32 data failed");
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
@@ -540,7 +540,7 @@ int32_t NetPolicyServiceStub::OnSetPowerSaveAllowedList(MessageParcel &data, Mes
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int32_t result = SetPowerSaveAllowedList(uid, isAllowed);
+    int32_t result = SetPowerSaveAllowedList(uids, isAllowed);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;

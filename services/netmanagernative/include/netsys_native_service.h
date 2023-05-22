@@ -102,7 +102,7 @@ public:
     int32_t IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toiIface) override;
     int32_t FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids) override;
     int32_t FirewallEnableChain(uint32_t chain, bool enable) override;
-    int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) override;
+    int32_t FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule) override;
     int32_t BandwidthEnableDataSaver(bool enable) override;
     int32_t BandwidthSetIfaceQuota(const std::string &ifName, int64_t bytes) override;
     int32_t BandwidthRemoveIfaceQuota(const std::string &ifName) override;
