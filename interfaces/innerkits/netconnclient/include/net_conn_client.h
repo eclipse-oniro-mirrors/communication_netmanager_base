@@ -40,6 +40,7 @@ class NetConnClient {
 
 public:
     int32_t SystemReady();
+    int32_t SetInternetPermission(uint32_t uid, uint8_t allow);
     int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
                                 uint32_t &supplierId);
     int32_t UnregisterNetSupplier(uint32_t supplierId);

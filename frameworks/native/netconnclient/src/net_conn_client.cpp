@@ -43,6 +43,17 @@ int32_t NetConnClient::SystemReady()
     return proxy->SystemReady();
 }
 
+int32_t NetConnClient::SetInternetPermission(uint32_t uid, uint8_t allow)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->SetInternetPermission(uid, allow);
+}
+
 int32_t NetConnClient::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
                                            const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {
