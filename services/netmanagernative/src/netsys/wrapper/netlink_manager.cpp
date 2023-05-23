@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,6 +96,7 @@ bool CreateNetlinkDistributor(int32_t netlinkType, const DistributorParam &param
 
 std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> NetlinkManager::callbacks_ =
     std::make_shared<std::vector<sptr<NetsysNative::INotifyCallback>>>();
+std::mutex NetlinkManager::linkCallbackMutex_;
 NetlinkManager::NetlinkManager()
 {
     for (const auto &it : distributorParamList_) {
@@ -147,6 +148,7 @@ int32_t NetlinkManager::RegisterNetlinkCallback(sptr<NetsysNative::INotifyCallba
         NETNATIVE_LOGE("callback is nullptr");
         return NetlinkResult::ERR_NULL_PTR;
     }
+    std::lock_guard<std::mutex> lock(linkCallbackMutex_);
     for (const auto &cb : *callbacks_) {
         if (cb == callback) {
             NETNATIVE_LOGI("callback is already registered");
@@ -164,7 +166,7 @@ int32_t NetlinkManager::UnregisterNetlinkCallback(sptr<NetsysNative::INotifyCall
         NETNATIVE_LOGE("callback is nullptr");
         return NetlinkResult::ERR_NULL_PTR;
     }
-
+    std::lock_guard<std::mutex> lock(linkCallbackMutex_);
     for (auto it = callbacks_->begin(); it != callbacks_->end(); ++it) {
         if (*it == callback) {
             callbacks_->erase(it);
