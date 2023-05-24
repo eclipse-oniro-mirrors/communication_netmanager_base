@@ -1,0 +1,12 @@
+{
+    "process": "netmanager",
+    "systemability": [
+        {
+            "name": 1156,
+            "libpath": "libdns_resolver_manager.z.so",
+            "run-on-create": true,
+            "distributed": false,
+            "dump_level": 1
+        }
+    ]
+}

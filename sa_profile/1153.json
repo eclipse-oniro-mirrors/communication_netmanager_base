@@ -1,0 +1,12 @@
+{
+    "process": "netmanager",
+    "systemability": [
+        {
+            "name": 1153,
+            "libpath": "libnet_stats_manager.z.so",
+            "run-on-create": true,
+            "distributed": false,
+            "dump_level": 1
+        }
+    ]
+}

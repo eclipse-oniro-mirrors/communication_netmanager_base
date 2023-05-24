@@ -13,7 +13,7 @@
 on boot
     start netsys
 
-service netsys /system/bin/sa_main /system/profile/netsysnative.xml
+service netsys /system/bin/sa_main /system/profile/1158.json
     user system
     group system shell
     seclabel u:r:telephony:s0
