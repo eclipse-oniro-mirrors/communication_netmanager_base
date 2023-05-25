@@ -36,7 +36,7 @@ namespace {
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 constexpr const char *ETH_IFACE_NAME = "lo";
 constexpr int64_t TEST_UID = 1010;
-
+constexpr uint64_t STATS_CODE = 100;
 class MockNetIRemoteObject : public IRemoteObject {
 public:
     MockNetIRemoteObject() : IRemoteObject(u"mock_i_remote_object") {}
@@ -49,54 +49,41 @@ public:
 
     int SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
     {
-        if(code >= INetStatsService::CMD_GET_IFACE_RXBYTES &&
-            code <= INetStatsService::CMD_GET_UID_TXBYTES)
-        {
-            if(!reply.WriteInt64(100))
-            {
+        if (code >= INetStatsService::CMD_GET_IFACE_RXBYTES &&
+            code <= INetStatsService::CMD_GET_UID_TXBYTES) {
+            if (!reply.WriteInt64(STATS_CODE)) {
                 return NETMANAGER_ERROR;
             }
-        }
-        else if(code == INetStatsService::CMD_GET_IFACE_STATS_DETAIL ||
-                code == INetStatsService::CMD_GET_UID_STATS_DETAIL)
-        {
-            if(eCode == NETMANAGER_ERR_READ_REPLY_FAIL)
-            {
+        } else if (code == INetStatsService::CMD_GET_IFACE_STATS_DETAIL ||
+                code == INetStatsService::CMD_GET_UID_STATS_DETAIL) {
+            if (eCode == NETMANAGER_ERR_READ_REPLY_FAIL) {
                 return NETSYS_SUCCESS;
             }
             
-            if(!reply.WriteUint32(TEST_UID))
-            {
+            if (!reply.WriteUint32(TEST_UID)) {
                 return NETMANAGER_ERROR;
             }
-            if(!reply.WriteString("wlan0"))
-            {
+            if (!reply.WriteString("wlan0")) {
                 return NETMANAGER_ERROR;
             }
-            if(!reply.WriteUint64(TEST_UID))
-            {
+            if (!reply.WriteUint64(TEST_UID)) {
                 return NETMANAGER_ERROR;
             }
-            if(!reply.WriteUint64(TEST_UID))
-            {
+            if (!reply.WriteUint64(TEST_UID)) {
                 return NETMANAGER_ERROR;
             }
-            if(!reply.WriteUint64(TEST_UID))
-            {
+            if (!reply.WriteUint64(TEST_UID)) {
                 return NETMANAGER_ERROR;
             }
-            if(!reply.WriteUint64(TEST_UID))
-            {
+            if (!reply.WriteUint64(TEST_UID)) {
                 return NETMANAGER_ERROR;
             }
-            if(!reply.WriteUint64(TEST_UID))
-            {
+            if (!reply.WriteUint64(TEST_UID)) {
                 return NETMANAGER_ERROR;
             }
         }
 
-        if(!reply.WriteInt32(NETSYS_SUCCESS))
-        {
+        if (!reply.WriteInt32(NETSYS_SUCCESS)) {
             return NETMANAGER_ERROR;
         }
 
@@ -312,7 +299,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetIfaceRxBytesTest003, TestSize.Level1)
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
     NetStatsServiceProxy instance_(remoteObj_);
     EXPECT_EQ(instance_.GetIfaceRxBytes(stats, ETH_IFACE_NAME), NETMANAGER_SUCCESS);
-    EXPECT_EQ(stats, 100);
+    EXPECT_EQ(stats, STATS_CODE);
 }
 
 /**
@@ -351,7 +338,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetIfaceTxBytesTest003, TestSize.Level1)
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
     NetStatsServiceProxy instance_(remoteObj_);
     EXPECT_EQ(instance_.GetIfaceTxBytes(stats, ETH_IFACE_NAME), NETMANAGER_SUCCESS);
-    EXPECT_EQ(stats, 100);
+    EXPECT_EQ(stats, STATS_CODE);
 }
 
 /**
@@ -390,7 +377,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetCellularRxBytesTest003, TestSize.Level1)
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
     NetStatsServiceProxy instance_(remoteObj_);
     EXPECT_EQ(instance_.GetCellularRxBytes(stats), NETMANAGER_SUCCESS);
-    EXPECT_EQ(stats, 100);
+    EXPECT_EQ(stats, STATS_CODE);
 }
 
 /**
@@ -429,7 +416,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetCellularTxBytesTest003, TestSize.Level1)
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
     NetStatsServiceProxy instance_(remoteObj_);
     EXPECT_EQ(instance_.GetCellularTxBytes(stats), NETMANAGER_SUCCESS);
-    EXPECT_EQ(stats, 100);
+    EXPECT_EQ(stats, STATS_CODE);
 }
 
 /**
@@ -468,7 +455,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetAllRxBytesTest003, TestSize.Level1)
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
     NetStatsServiceProxy instance_(remoteObj_);
     EXPECT_EQ(instance_.GetAllRxBytes(stats), NETMANAGER_SUCCESS);
-    EXPECT_EQ(stats, 100);
+    EXPECT_EQ(stats, STATS_CODE);
 }
 
 /**
@@ -507,7 +494,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetAllTxBytesTest003, TestSize.Level1)
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
     NetStatsServiceProxy instance_(remoteObj_);
     EXPECT_EQ(instance_.GetAllTxBytes(stats), NETMANAGER_SUCCESS);
-    EXPECT_EQ(stats, 100);
+    EXPECT_EQ(stats, STATS_CODE);
 }
 
 /**
@@ -546,7 +533,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetUidRxBytesTest003, TestSize.Level1)
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
     NetStatsServiceProxy instance_(remoteObj_);
     EXPECT_EQ(instance_.GetUidRxBytes(stats, TEST_UID), NETMANAGER_SUCCESS);
-    EXPECT_EQ(stats, 100);
+    EXPECT_EQ(stats, STATS_CODE);
 }
 
 /**
@@ -585,7 +572,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetUidTxBytesTest003, TestSize.Level1)
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
     NetStatsServiceProxy instance_(remoteObj_);
     EXPECT_EQ(instance_.GetUidTxBytes(stats, TEST_UID), NETMANAGER_SUCCESS);
-    EXPECT_EQ(stats, 100);
+    EXPECT_EQ(stats, STATS_CODE);
 }
 
 /**

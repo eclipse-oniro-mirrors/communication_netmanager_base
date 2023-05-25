@@ -26,6 +26,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
+constexpr uint64_t OUTOFFRANGECODE = 100;
 class MockNetStatsCallbackStubTest : public NetStatsCallbackStub {
 public:
     MockNetStatsCallbackStubTest() = default;
@@ -73,7 +74,7 @@ HWTEST_F(NetStatsCallbackStubTest, OnRemoteRequestTest001, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(100, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(OUTOFFRANGECODE, data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_ERR_DESCRIPTOR_MISMATCH);
 }
 
@@ -90,7 +91,7 @@ HWTEST_F(NetStatsCallbackStubTest, OnRemoteRequestTest002, TestSize.Level1)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(100, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(OUTOFFRANGECODE, data, reply, option);
     EXPECT_EQ(ret, IPC_STUB_UNKNOW_TRANS_ERR);
 }
 
@@ -105,7 +106,7 @@ HWTEST_F(NetStatsCallbackStubTest, OnRemoteRequestTest003, TestSize.Level1)
     if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
         return;
     }
-    if(!data.WriteString("test")) {
+    if (!data.WriteString("test")) {
         return;
     }
     MessageParcel reply;
@@ -142,7 +143,7 @@ HWTEST_F(NetStatsCallbackStubTest, OnNetIfaceStatsChangedTest002, TestSize.Level
     if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
         return;
     }
-    if(!data.WriteString("test")) {
+    if (!data.WriteString("test")) {
         return;
     }
     MessageParcel reply;
@@ -179,7 +180,7 @@ HWTEST_F(NetStatsCallbackStubTest, OnNetUidStatsChangedTest002, TestSize.Level1)
     if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
         return;
     }
-    if(!data.WriteString("test")) {
+    if (!data.WriteString("test")) {
         return;
     }
     MessageParcel reply;
@@ -199,10 +200,10 @@ HWTEST_F(NetStatsCallbackStubTest, OnNetUidStatsChangedTest003, TestSize.Level1)
     if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
         return;
     }
-    if(!data.WriteString("test")) {
+    if (!data.WriteString("test")) {
         return;
     }
-    if(!data.WriteUint32(1)) {
+    if (!data.WriteUint32(1)) {
         return;
     }
     MessageParcel reply;
