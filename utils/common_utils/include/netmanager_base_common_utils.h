@@ -53,9 +53,10 @@ int32_t StrToInt(const std::string &value, int32_t defaultErr = -1);
 uint32_t StrToUint(const std::string &value, uint32_t defaultErr = 0);
 bool StrToBool(const std::string &value, bool defaultErr = false);
 int64_t StrToLong(const std::string &value, int64_t defaultErr = -1);
-uint64_t StrToUint64(const std::string& value, uint64_t defaultErr = 0);
+uint64_t StrToUint64(const std::string &value, uint64_t defaultErr = 0);
 bool CheckIfaceName(const std::string &name);
 int32_t ForkExec(const std::string &command, std::string *out = nullptr);
+bool IsValidDomain(const std::string &domain);
 
 inline uint64_t GetCurrentSecond()
 {
