@@ -63,49 +63,152 @@ void NetStatsCallbackStubTest::SetUp() {}
 
 void NetStatsCallbackStubTest::TearDown() {}
 
-HWTEST_F(NetStatsCallbackStubTest, OnRemoteRequest001, TestSize.Level1)
+/**
+ * @tc.name: OnRemoteRequestTest001
+ * @tc.desc: Test NetStatsCallbackStub OnRemoteRequest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsCallbackStubTest, OnRemoteRequestTest001, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(100, data, reply, option);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_DESCRIPTOR_MISMATCH);
 }
 
-HWTEST_F(NetStatsCallbackStubTest, OnRemoteRequest002, TestSize.Level1)
+/**
+ * @tc.name: OnRemoteRequestTest002
+ * @tc.desc: Test NetStatsCallbackStub OnRemoteRequest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsCallbackStubTest, OnRemoteRequestTest002, TestSize.Level1)
 {
     MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
+        return;
+    }
     MessageParcel reply;
     MessageOption option;
-
-    int32_t ret = instance_->OnRemoteRequest(0, data, reply, option);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    int32_t ret = instance_->OnRemoteRequest(100, data, reply, option);
+    EXPECT_EQ(ret, IPC_STUB_UNKNOW_TRANS_ERR);
 }
 
-HWTEST_F(NetStatsCallbackStubTest, OnRemoteRequest003, TestSize.Level1)
+/**
+ * @tc.name: OnRemoteRequestTest003
+ * @tc.desc: Test NetStatsCallbackStub OnRemoteRequest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsCallbackStubTest, OnRemoteRequestTest003, TestSize.Level1)
 {
     MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
+        return;
+    }
+    if(!data.WriteString("test")) {
+        return;
+    }
     MessageParcel reply;
     MessageOption option;
-
-    int32_t ret = instance_->OnRemoteRequest(1, data, reply, option);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    int32_t ret = instance_->OnRemoteRequest(INetStatsCallback::NET_STATS_IFACE_CHANGED, data, reply, option);
+    EXPECT_EQ(ret, 0);
 }
 
-HWTEST_F(NetStatsCallbackStubTest, OnNetIfaceStatsChanged001, TestSize.Level1)
+/**
+ * @tc.name: OnNetIfaceStatsChangedTest001
+ * @tc.desc: Test NetStatsCallbackStub OnNetIfaceStatsChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsCallbackStubTest, OnNetIfaceStatsChangedTest001, TestSize.Level1)
 {
     MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
+        return;
+    }
     MessageParcel reply;
-    int32_t ret = instance_->OnNetIfaceStatsChanged(data, reply);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(INetStatsCallback::NET_STATS_IFACE_CHANGED, data, reply, option);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
 }
 
-HWTEST_F(NetStatsCallbackStubTest, OnNetUidStatsChanged001, TestSize.Level1)
+/**
+ * @tc.name: OnNetIfaceStatsChangedTest002
+ * @tc.desc: Test NetStatsCallbackStub OnNetIfaceStatsChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsCallbackStubTest, OnNetIfaceStatsChangedTest002, TestSize.Level1)
 {
     MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
+        return;
+    }
+    if(!data.WriteString("test")) {
+        return;
+    }
     MessageParcel reply;
-    int32_t ret = instance_->OnNetUidStatsChanged(data, reply);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(INetStatsCallback::NET_STATS_IFACE_CHANGED, data, reply, option);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnNetUidStatsChangedTest001
+ * @tc.desc: Test NetStatsCallbackStub OnNetUidStatsChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsCallbackStubTest, OnNetUidStatsChangedTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(INetStatsCallback::NET_STATS_UID_CHANGED, data, reply, option);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnNetUidStatsChangedTest002
+ * @tc.desc: Test NetStatsCallbackStub OnNetUidStatsChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsCallbackStubTest, OnNetUidStatsChangedTest002, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
+        return;
+    }
+    if(!data.WriteString("test")) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(INetStatsCallback::NET_STATS_UID_CHANGED, data, reply, option);
+    EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
+}
+
+/**
+ * @tc.name: OnNetUidStatsChangedTest003
+ * @tc.desc: Test NetStatsCallbackStub OnNetUidStatsChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsCallbackStubTest, OnNetUidStatsChangedTest003, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetStatsCallbackStub::GetDescriptor())) {
+        return;
+    }
+    if(!data.WriteString("test")) {
+        return;
+    }
+    if(!data.WriteUint32(1)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(INetStatsCallback::NET_STATS_UID_CHANGED, data, reply, option);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
