@@ -65,7 +65,7 @@ void UtNetPolicyFirewall::TearDown() {}
 HWTEST_F(UtNetPolicyFirewall, NetPolicyFirewall001, TestSize.Level1)
 {
     const uint32_t uid = 123;
-    netPolicyFirewall_->SetDeviceIdleAllowedList(uid, false);
+    netPolicyFirewall_->SetDeviceIdleAllowedList({uid}, false);
     std::vector<uint32_t> allowedList;
     netPolicyFirewall_->GetDeviceIdleAllowedList(allowedList);
     ASSERT_TRUE(std::find(allowedList.begin(), allowedList.end(), uid) == allowedList.end());
@@ -79,7 +79,7 @@ HWTEST_F(UtNetPolicyFirewall, NetPolicyFirewall001, TestSize.Level1)
 HWTEST_F(UtNetPolicyFirewall, NetPolicyFirewall002, TestSize.Level1)
 {
     const uint32_t uid = 456;
-    netPolicyFirewall_->SetDeviceIdleAllowedList(uid, true);
+    netPolicyFirewall_->SetDeviceIdleAllowedList({uid}, true);
     std::vector<uint32_t> allowedList;
     netPolicyFirewall_->GetDeviceIdleAllowedList(allowedList);
     ASSERT_TRUE(std::find(allowedList.begin(), allowedList.end(), uid) != allowedList.end());
@@ -93,7 +93,7 @@ HWTEST_F(UtNetPolicyFirewall, NetPolicyFirewall002, TestSize.Level1)
 HWTEST_F(UtNetPolicyFirewall, NetPolicyFirewall003, TestSize.Level1)
 {
     const uint32_t uid = 789;
-    netPolicyFirewall_->SetDeviceIdleAllowedList(uid, true);
+    netPolicyFirewall_->SetDeviceIdleAllowedList({uid}, true);
     netPolicyFirewall_->UpdateDeviceIdlePolicy(true);
     std::vector<uint32_t> allowedList;
     netPolicyFirewall_->GetDeviceIdleAllowedList(allowedList);
@@ -121,7 +121,7 @@ HWTEST_F(UtNetPolicyFirewall, NetPolicyFirewall004, TestSize.Level1)
 HWTEST_F(UtNetPolicyFirewall, NetPolicyFirewall005, TestSize.Level1)
 {
     const uint32_t uid = 101;
-    netPolicyFirewall_->SetDeviceIdleAllowedList(uid, true);
+    netPolicyFirewall_->SetDeviceIdleAllowedList({uid}, true);
     std::vector<uint32_t> allowedList;
     netPolicyFirewall_->GetDeviceIdleAllowedList(allowedList);
     ASSERT_TRUE(std::find(allowedList.begin(), allowedList.end(), uid) != allowedList.end());

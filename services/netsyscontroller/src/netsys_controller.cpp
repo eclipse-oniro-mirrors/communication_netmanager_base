@@ -807,15 +807,14 @@ int32_t NetsysController::FirewallEnableChain(uint32_t chain, bool enable)
     return netsysService_->FirewallEnableChain(chain, enable);
 }
 
-int32_t NetsysController::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
+int32_t NetsysController::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule)
 {
-    NETMGR_LOG_D("NetsysController::FirewallSetUidRule: chain=%{public}d,uid=%{public}d,firewallRule=%{public}d", chain,
-                 uid, firewallRule);
+    NETMGR_LOG_D("NetsysController::FirewallSetUidRule Start");
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->FirewallSetUidRule(chain, uid, firewallRule);
+    return netsysService_->FirewallSetUidRule(chain, uids, firewallRule);
 }
 
 void NetsysController::FreeAddrInfo(addrinfo *aihead)

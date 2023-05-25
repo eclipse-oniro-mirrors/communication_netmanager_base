@@ -14,9 +14,10 @@
  */
 
 #include <string>
-#include "netsys_controller.h"
+#include "net_conn_client.h"
 
 int32_t SetInternetPermission(uint32_t uid, uint8_t allow)
 {
-    return OHOS::NetManagerStandard::NetsysController::GetInstance().SetInternetPermission(uid, allow);
+    auto netConn = OHOS::DelayedSingleton<OHOS::NetManagerStandard::NetConnClient>::GetInstance();
+    return netConn->SetInternetPermission(uid, allow);
 }

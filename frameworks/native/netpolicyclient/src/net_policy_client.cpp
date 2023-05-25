@@ -270,10 +270,10 @@ int32_t NetPolicyClient::UpdateRemindPolicy(int32_t netType, const std::string &
 
 NetPolicyResultCode NetPolicyClient::SetIdleTrustlist(uint32_t uid, bool isTrustlist)
 {
-    return static_cast<NetPolicyResultCode>(SetDeviceIdleAllowedList(uid, isTrustlist));
+    return static_cast<NetPolicyResultCode>(SetDeviceIdleAllowedList({uid}, isTrustlist));
 }
 
-int32_t NetPolicyClient::SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed)
+int32_t NetPolicyClient::SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -281,7 +281,7 @@ int32_t NetPolicyClient::SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed)
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
-    return proxy->SetDeviceIdleAllowedList(uid, isAllowed);
+    return proxy->SetDeviceIdleAllowedList(uids, isAllowed);
 }
 
 NetPolicyResultCode NetPolicyClient::GetIdleTrustlist(std::vector<uint32_t> &uids)
@@ -322,7 +322,7 @@ int32_t NetPolicyClient::GetPowerSaveAllowedList(std::vector<uint32_t> &uids)
     return proxy->GetPowerSaveAllowedList(uids);
 }
 
-int32_t NetPolicyClient::SetPowerSaveAllowedList(uint32_t uid, bool isAllowed)
+int32_t NetPolicyClient::SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -330,7 +330,7 @@ int32_t NetPolicyClient::SetPowerSaveAllowedList(uint32_t uid, bool isAllowed)
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
-    return proxy->SetPowerSaveAllowedList(uid, isAllowed);
+    return proxy->SetPowerSaveAllowedList(uids, isAllowed);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

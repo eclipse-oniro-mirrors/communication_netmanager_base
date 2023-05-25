@@ -170,7 +170,7 @@ public:
     virtual int32_t FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids) = 0;
     virtual int32_t FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids) = 0;
     virtual int32_t FirewallEnableChain(uint32_t chain, bool enable) = 0;
-    virtual int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) = 0;
+    virtual int32_t FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule) = 0;
     virtual int32_t ShareDnsSet(uint16_t netId) = 0;
     virtual int32_t StartDnsProxyListen() = 0;
     virtual int32_t StopDnsProxyListen() = 0;

@@ -153,7 +153,7 @@ public:
      * @param isAllowed The UID is into allow list or not.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    virtual int32_t SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed) = 0;
+    virtual int32_t SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed) = 0;
 
     /**
      * Get the allow list of UID in device idle mode.
@@ -221,7 +221,7 @@ public:
      * @param isAllowed The UID is into allow list or not.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    virtual int32_t SetPowerSaveAllowedList(uint32_t uid, bool isAllowed) = 0;
+    virtual int32_t SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

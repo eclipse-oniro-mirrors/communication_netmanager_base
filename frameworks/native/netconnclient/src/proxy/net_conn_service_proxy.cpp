@@ -50,6 +50,37 @@ int32_t NetConnServiceProxy::SystemReady()
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetConnServiceProxy::SetInternetPermission(uint32_t uid, uint8_t allow)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    NETMGR_LOG_D("proxy SetInternetPermission [%{public}u %{public}hhu]", uid, allow);
+    if (!data.WriteUint32(uid)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteUint8(allow)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+    int32_t error = remote->SendRequest(CMD_NM_SET_INTERNET_PERMISSION, data, reply, option);
+    if (error != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    return reply.ReadInt32();
+}
+
 int32_t NetConnServiceProxy::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
                                                  const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {

@@ -19,11 +19,13 @@
 #include "net_conn_types.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 static constexpr uint32_t MAX_IFACE_NUM = 16;
 static constexpr uint32_t MAX_NET_CAP_NUM = 32;
+static constexpr uint32_t UID_FOUNDATION = 5523;
 
 NetConnServiceStub::NetConnServiceStub()
 {
@@ -73,6 +75,7 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_SET_APP_NET] = {&NetConnServiceStub::OnSetAppNet, {Permission::INTERNET}};
     memberFuncMap_[CMD_NM_SET_IP_TABLES_CMD_FOR_RES] = {&NetConnServiceStub::OnSetIpTablesCommandForRes,
                                                         {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_SET_INTERNET_PERMISSION] = {&NetConnServiceStub::OnSetInternetPermission, {}};
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -106,6 +109,16 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
     auto requestFunc = itFunc->second.first;
     if (requestFunc == nullptr) {
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+    if (code == CMD_NM_SET_INTERNET_PERMISSION) {
+        // get uid should be called in this function
+        auto uid = IPCSkeleton::GetCallingUid();
+        if (uid != UID_FOUNDATION) {
+            if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
+                return IPC_STUB_WRITE_PARCEL_ERR;
+            }
+            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+        }
     }
     if (code != CMD_NM_GETDEFAULTNETWORK && CheckPermission(itFunc->second.second)) {
         return (this->*requestFunc)(data, reply);
@@ -145,6 +158,26 @@ int32_t NetConnServiceStub::OnSystemReady(MessageParcel &data, MessageParcel &re
 {
     SystemReady();
     return 0;
+}
+
+int32_t NetConnServiceStub::OnSetInternetPermission(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid;
+    if (!data.ReadUint32(uid)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    uint8_t allow;
+    if (!data.ReadUint8(allow)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = SetInternetPermission(uid, allow);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceStub::OnRegisterNetSupplier(MessageParcel &data, MessageParcel &reply)

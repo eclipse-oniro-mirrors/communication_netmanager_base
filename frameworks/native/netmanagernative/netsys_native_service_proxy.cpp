@@ -1328,7 +1328,8 @@ int32_t NetsysNativeServiceProxy::FirewallEnableChain(uint32_t chain, bool enabl
     return ret;
 }
 
-int32_t NetsysNativeServiceProxy::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
+int32_t NetsysNativeServiceProxy::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids,
+                                                     uint32_t firewallRule)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -1339,7 +1340,7 @@ int32_t NetsysNativeServiceProxy::FirewallSetUidRule(uint32_t chain, uint32_t ui
         NETNATIVE_LOGE("WriteUint32 failed");
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteUint32(uid)) {
+    if (!data.WriteUInt32Vector(uids)) {
         NETNATIVE_LOGE("WriteUint32 failed");
         return ERR_FLATTEN_OBJECT;
     }

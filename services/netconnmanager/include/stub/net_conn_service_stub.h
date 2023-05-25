@@ -39,6 +39,7 @@ private:
     bool CheckPermission(const std::set<std::string> &permissions);
     bool CheckPermissionWithCache(const std::set<std::string> &permissions);
     int32_t OnSystemReady(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetInternetPermission(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetSupplier(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnregisterNetSupplier(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetSupplierCallback(MessageParcel &data, MessageParcel &reply);

@@ -166,7 +166,7 @@ public:
      * @param isAllowed The UID is into allowed list or not.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    int32_t SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed) override;
+    int32_t SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed) override;
 
     /**
      * Get the allow list of UID in device idle mode.
@@ -196,7 +196,7 @@ public:
      * @param isAllowed The UID is into allowed list or not.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    int32_t SetPowerSaveAllowedList(uint32_t uid, bool isAllowed) override;
+    int32_t SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed) override;
 
 private:
     void Init();

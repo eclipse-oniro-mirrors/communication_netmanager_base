@@ -530,10 +530,11 @@ int32_t NetsysNativeService::FirewallEnableChain(uint32_t chain, bool enable)
     return netsysService_->FirewallEnableChain(chain, enable);
 }
 
-int32_t NetsysNativeService::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
+int32_t NetsysNativeService::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids,
+                                                uint32_t firewallRule)
 {
     NETNATIVE_LOG_D("firewallSetUidRule");
-    return netsysService_->FirewallSetUidRule(chain, uid, firewallRule);
+    return netsysService_->FirewallSetUidRule(chain, uids, firewallRule);
 }
 
 int32_t NetsysNativeService::ShareDnsSet(uint16_t netid)

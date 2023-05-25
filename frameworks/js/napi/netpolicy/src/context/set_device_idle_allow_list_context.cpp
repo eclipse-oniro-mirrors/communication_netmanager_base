@@ -36,12 +36,18 @@ void SetDeviceIdleAllowListContext::ParseParams(napi_value *params, size_t param
         SetNeedThrowException(true);
         return;
     }
-    uid_ = NapiUtils::GetInt32FromValue(GetEnv(), params[ARG_INDEX_0]);
-    if (uid_ < 0) {
-        NETMANAGER_BASE_LOGE("Check params failed");
-        SetErrorCode(POLICY_ERR_INVALID_UID);
-        SetNeedThrowException(true);
-        return;
+
+    uint32_t arrayLength = NapiUtils::GetArrayLength(GetEnv(), params[ARG_INDEX_0]);
+    arrayLength = arrayLength > ARRAY_LIMIT ? ARRAY_LIMIT : arrayLength;
+    napi_value elementValue = nullptr;
+    for (uint32_t i = 0; i < arrayLength; i++) {
+        elementValue = NapiUtils::GetArrayElement(GetEnv(), params[ARG_INDEX_0], i);
+        auto uid = NapiUtils::GetInt32FromValue(GetEnv(), elementValue);
+        if (uid > 0) {
+            uids_.push_back(static_cast<uint32_t>(uid));
+        } else {
+            NETMANAGER_BASE_LOGE("uid : %{public}d Setting error !!!", uid);
+        }
     }
 
     isAllow_ = NapiUtils::GetBooleanValue(GetEnv(), params[ARG_INDEX_1]);
@@ -55,12 +61,12 @@ void SetDeviceIdleAllowListContext::ParseParams(napi_value *params, size_t param
 bool SetDeviceIdleAllowListContext::CheckParamsType(napi_value *params, size_t paramsCount)
 {
     if (paramsCount == PARAM_DOUBLE_OPTIONS) {
-        return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_number &&
-               NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_boolean;
+        return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_object
+               && NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_boolean;
     }
 
     if (paramsCount == PARAM_DOUBLE_OPTIONS_AND_CALLBACK) {
-        return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_number &&
+        return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_object &&
                NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_boolean &&
                NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_2]) == napi_function;
     }
