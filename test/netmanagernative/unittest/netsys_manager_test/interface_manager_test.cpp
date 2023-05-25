@@ -118,6 +118,15 @@ HWTEST_F(InterfaceManagerTest, AddAddressTest003, TestSize.Level1)
     EXPECT_LE(ret, 0);
 }
 
+HWTEST_F(InterfaceManagerTest, AddAddressTest004, TestSize.Level1)
+{
+    std::string interfaceName = "eth";
+    std::string addr;
+    int32_t prefixLength = 45;
+    auto ret = InterfaceManager::AddAddress(interfaceName.c_str(), addr.data(), prefixLength);
+    EXPECT_EQ(ret, -errno);
+}
+
 HWTEST_F(InterfaceManagerTest, DelAddressTest001, TestSize.Level1)
 {
     std::string interfaceName = "eth0";

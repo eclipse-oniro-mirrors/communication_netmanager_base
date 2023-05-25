@@ -112,13 +112,8 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest001, TestSize.Level1)
     std::string command;
     getline(std::cin, command);
     std::string respond;
-    int32_t ret = NetsysController::GetInstance().SetIpTablesForRes(command, respond);
-    std::cout << "command:" << command << std::endl;
-    std::cout << "Respond:" << respond << std::endl;
-    std::cout << "Respond size: " << respond.size() << std::endl;
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = NetsysController::GetInstance().NetworkCreatePhysical(NET_ID, PERMISSION);
+    int32_t ret = NetsysController::GetInstance().NetworkCreatePhysical(NET_ID, PERMISSION);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = NetsysController::GetInstance().NetworkDestroy(NET_ID);

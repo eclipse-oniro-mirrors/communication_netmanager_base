@@ -376,6 +376,90 @@ HWTEST_F(FirewallManagerTest, FetchChainName, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FetchChainType
+ * @tc.desc: Test FirewallManager FetchChainType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, FetchChainType1, TestSize.Level1)
+{
+    FirewallType type = g_firewallManager->FetchChainType(ChainType::CHAIN_OHFW_DOZABLE);
+    EXPECT_EQ(type, FirewallType::TYPE_ALLOWED_LIST);
+}
+
+/**
+ * @tc.name: FetchChainType
+ * @tc.desc: Test FirewallManager FetchChainType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, FetchChainType2, TestSize.Level1)
+{
+    FirewallType type = g_firewallManager->FetchChainType(ChainType::CHAIN_OHFW_POWERSAVING);
+    EXPECT_EQ(type, FirewallType::TYPE_ALLOWED_LIST);
+}
+
+/**
+ * @tc.name: FetchChainType
+ * @tc.desc: Test FirewallManager FetchChainType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, FetchChainType3, TestSize.Level1)
+{
+    FirewallType type = g_firewallManager->FetchChainType(ChainType::CHAIN_OHFW_UNDOZABLE);
+    EXPECT_EQ(type, FirewallType::TYPE_DENIDE_LIST);
+}
+
+/**
+ * @tc.name: FetchChainType
+ * @tc.desc: Test FirewallManager FetchChainType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, FetchChainType4, TestSize.Level1)
+{
+    FirewallType type = g_firewallManager->FetchChainType(ChainType::CHAIN_OHBW_DATA_SAVER);
+    EXPECT_EQ(type, FirewallType::TYPE_ALLOWED_LIST);
+}
+
+/**
+ * @tc.name: InitChain
+ * @tc.desc: Test FirewallManager InitChain.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, InitChain, TestSize.Level1)
+{
+    int32_t ret = g_firewallManager->InitChain();
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    int32_t ret2 = g_firewallManager->DeInitChain();
+    EXPECT_EQ(ret2, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: InitDefaultRules
+ * @tc.desc: Test FirewallManager InitDefaultRules.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, InitDefaultRules, TestSize.Level1)
+{
+    int32_t ret = g_firewallManager->InitDefaultRules();
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    int32_t ret2 = g_firewallManager->ClearAllRules();
+    EXPECT_EQ(ret2, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: InitDefaultRules
+ * @tc.desc: Test FirewallManager InitDefaultRules.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, IptablesNewChain, TestSize.Level1)
+{
+    ChainType type = ChainType::CHAIN_OHFW_UNDOZABLE;
+    int32_t ret = g_firewallManager->IptablesNewChain(type);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: IptablesSetRule
  * @tc.desc: Test FirewallManager IptablesSetRule.
  * @tc.type: FUNC
