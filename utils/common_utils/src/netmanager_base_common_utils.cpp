@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <netinet/in.h>
 #include <regex>
+#include <set>
 #include <string>
 #include <sys/socket.h>
 #include <sys/wait.h>
@@ -49,8 +50,16 @@ constexpr int32_t CHAR_ARRAY_SIZE_MAX = 1024;
 constexpr int32_t PIPE_FD_NUM = 2;
 constexpr int32_t PIPE_OUT = 0;
 constexpr int32_t PIPE_IN = 1;
+constexpr int32_t DOMAIN_VALID_MIN_PART_SIZE = 2;
+constexpr int32_t DOMAIN_VALID_MAX_PART_SIZE = 5;
+constexpr int32_t NET_MASK_MAX_LENGTH = 32;
+constexpr int32_t NET_MASK_GROUP_COUNT = 4;
 const std::string IPADDR_DELIMITER = ".";
 constexpr const char *CMD_SEP = " ";
+constexpr const char *DOMAIN_DELIMITER = ".";
+constexpr const char *TLDS_SPLIT_SYMBOL = "|";
+constexpr const char *HOST_DOMAIN_PATTERN_HEADER = "^[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*\\.(";
+constexpr const char *HOST_DOMAIN_PATTERN_TAIL = ")$";
 const std::regex IP_PATTERN{
     "((2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)\\.){3}(2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)"};
 
@@ -62,8 +71,10 @@ const std::regex IPV6_PATTERN{"([\\da-fA-F]{0,4}:){2,7}([\\da-fA-F]{0,4})"};
 
 const std::regex IPV6_MASK_PATTERN{"([\\da-fA-F]{0,4}:){2,7}([\\da-fA-F]{0,4})/(1[0-2][0-8]|[1-9]\\d|[1-9])"};
 
-constexpr int32_t NET_MASK_MAX_LENGTH = 32;
-constexpr int32_t NET_MASK_GROUP_COUNT = 4;
+std::vector<std::string> HOST_DOMAIN_TLDS{"com",  "net",     "org",    "edu",  "gov", "mil",  "cn",   "hk",  "tw",
+                                          "jp",   "de",      "uk",     "fr",   "au",  "ca",   "br",   "ru",  "it",
+                                          "es",   "in",      "online", "shop", "vip", "club", "xyz",  "top", "icu",
+                                          "work", "website", "tech",   "asia", "xin", "co",   "mobi", "info"};
 std::mutex g_commonUtilsMutex;
 std::mutex g_forkExecMutex;
 
@@ -307,10 +318,10 @@ std::string ToAnonymousIp(const std::string &input)
     return input;
 }
 
-int32_t StrToInt(const std::string& value, int32_t defaultErr)
+int32_t StrToInt(const std::string &value, int32_t defaultErr)
 {
     errno = 0;
-    char* pEnd = nullptr;
+    char *pEnd = nullptr;
     int64_t result = std::strtol(value.c_str(), &pEnd, 0);
     if (pEnd == value.c_str() || (result < INT_MIN || result > LONG_MAX) || errno == ERANGE) {
         return defaultErr;
@@ -318,11 +329,10 @@ int32_t StrToInt(const std::string& value, int32_t defaultErr)
     return result;
 }
 
-
-uint32_t StrToUint(const std::string& value, uint32_t defaultErr)
+uint32_t StrToUint(const std::string &value, uint32_t defaultErr)
 {
     errno = 0;
-    char* pEnd = nullptr;
+    char *pEnd = nullptr;
     uint64_t result = std::strtoul(value.c_str(), &pEnd, 0);
     if (pEnd == value.c_str() || result > UINT32_MAX || errno == ERANGE) {
         return defaultErr;
@@ -333,7 +343,7 @@ uint32_t StrToUint(const std::string& value, uint32_t defaultErr)
 bool StrToBool(const std::string &value, bool defaultErr)
 {
     errno = 0;
-    char* pEnd = nullptr;
+    char *pEnd = nullptr;
     uint64_t result = std::strtoul(value.c_str(), &pEnd, 0);
     if (pEnd == value.c_str() || result > UINT32_MAX || errno == ERANGE) {
         return defaultErr;
@@ -341,10 +351,10 @@ bool StrToBool(const std::string &value, bool defaultErr)
     return static_cast<bool>(result);
 }
 
-int64_t StrToLong(const std::string& value, int64_t defaultErr)
+int64_t StrToLong(const std::string &value, int64_t defaultErr)
 {
     errno = 0;
-    char* pEnd = nullptr;
+    char *pEnd = nullptr;
     int64_t result = std::strtoll(value.c_str(), &pEnd, 0);
     if (pEnd == value.c_str() || errno == ERANGE) {
         return defaultErr;
@@ -352,10 +362,10 @@ int64_t StrToLong(const std::string& value, int64_t defaultErr)
     return result;
 }
 
-uint64_t StrToUint64(const std::string& value, uint64_t defaultErr)
+uint64_t StrToUint64(const std::string &value, uint64_t defaultErr)
 {
     errno = 0;
-    char* pEnd = nullptr;
+    char *pEnd = nullptr;
     uint64_t result = std::strtoull(value.c_str(), &pEnd, 0);
     if (pEnd == value.c_str() || errno == ERANGE) {
         return defaultErr;
@@ -476,5 +486,42 @@ int32_t ForkExec(const std::string &command, std::string *out)
     } else {
         return ForkExecParentProcess(pipeFd, PIPE_FD_NUM, pid, out);
     }
+}
+
+bool IsValidDomain(const std::string &domain)
+{
+    if (domain.empty()) {
+        return false;
+    }
+
+    std::string pattern = HOST_DOMAIN_PATTERN_HEADER;
+    for (const std::string &tlds : HOST_DOMAIN_TLDS) {
+        pattern += (tlds + TLDS_SPLIT_SYMBOL);
+    }
+    pattern = pattern.substr(0, pattern.size() - 1) + HOST_DOMAIN_PATTERN_TAIL;
+    std::regex reg(pattern);
+    if (!std::regex_match(domain, reg)) {
+        NETMGR_LOG_E("Domain:%{public}s regex match failed.", domain.c_str());
+        return false;
+    }
+
+    std::vector<std::string> parts = Split(domain, DOMAIN_DELIMITER);
+    if (parts.size() < DOMAIN_VALID_MIN_PART_SIZE || parts.size() > DOMAIN_VALID_MAX_PART_SIZE) {
+        NETMGR_LOG_E("The domain:[%{public}s] parts size:[%{public}d] is invalid", domain.c_str(), parts.size());
+        return false;
+    }
+
+    std::set<std::string> tldsList;
+    for (const auto &item : parts) {
+        if (std::find(HOST_DOMAIN_TLDS.begin(), HOST_DOMAIN_TLDS.end(), item) == HOST_DOMAIN_TLDS.end()) {
+            continue;
+        }
+        if (tldsList.find(item) != tldsList.end()) {
+            NETMGR_LOG_E("Domain:%{public}s has duplicate tlds:%{public}s", domain.c_str(), item.c_str());
+            return false;
+        }
+        tldsList.insert(item);
+    }
+    return true;
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils

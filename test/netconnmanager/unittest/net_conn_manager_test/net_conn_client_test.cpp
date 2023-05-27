@@ -37,6 +37,13 @@ using Security::AccessToken::AccessTokenID;
 
 constexpr const char *TEST_IPV4_ADDR = "127.0.0.1";
 constexpr const char *TEST_IPV6_ADDR = "240C:1:1:1::1";
+constexpr const char *TEST_DOMAIN1 = ".com";
+constexpr const char *TEST_DOMAIN2 = "test.com";
+constexpr const char *TEST_DOMAIN3 = "testcom";
+constexpr const char *TEST_DOMAIN4 = "com.test";
+constexpr const char *TEST_DOMAIN5 = "test.co.uk";
+constexpr const char *TEST_DOMAIN6 = "test.com.com";
+constexpr const char *TEST_DOMAIN7 = "test1.test2.test3.test4.test5.com";
 
 HapInfoParams testInfoParms = {.bundleName = "net_conn_manager_test",
                                .userID = 1,
@@ -366,8 +373,8 @@ HWTEST_F(NetConnClientTest, IsDefaultNetMeteredTest002, TestSize.Level1)
 
 /**
  * @tc.name: SetGlobalHttpProxyTest001
- * @tc.desc: Test NetConnClient::SetGlobalHttpProxy,if param is invalid,SetGlobalHttpProxy return
- * NET_CONN_ERR_HTTP_PROXY_INVALID
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.Test NetConnClient::SetGlobalHttpProxy,if host is invalid
+ * domain or ip address,return NET_CONN_ERR_HTTP_PROXY_INVALID
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest001, TestSize.Level1)
@@ -380,10 +387,105 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest001, TestSize.Level1)
 
 /**
  * @tc.name: SetGlobalHttpProxyTest002
- * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.if param is valid, return NET_CONN_SUCCESS
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.Test NetConnClient::SetGlobalHttpProxy,if host is invalid
+ * domain,return NET_CONN_ERR_HTTP_PROXY_INVALID
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest002, TestSize.Level1)
+{
+    AccessToken token;
+    HttpProxy httpProxy = {TEST_DOMAIN1, 8080, {}};
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_ERR_HTTP_PROXY_INVALID);
+}
+
+/**
+ * @tc.name: SetGlobalHttpProxyTest003
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.if host is valid domain, return NET_CONN_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest003, TestSize.Level1)
+{
+    AccessToken token;
+    HttpProxy httpProxy = {TEST_DOMAIN2, 8080, {}};
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: SetGlobalHttpProxyTest004
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.Test NetConnClient::SetGlobalHttpProxy,if host is invalid
+ * domain,return NET_CONN_ERR_HTTP_PROXY_INVALID
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest004, TestSize.Level1)
+{
+    AccessToken token;
+    HttpProxy httpProxy = {TEST_DOMAIN3, 8080, {}};
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_ERR_HTTP_PROXY_INVALID);
+}
+
+/**
+ * @tc.name: SetGlobalHttpProxyTest005
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.if host is invalid domain, return NET_CONN_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest005, TestSize.Level1)
+{
+    AccessToken token;
+    HttpProxy httpProxy = {TEST_DOMAIN4, 8080, {}};
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_ERR_HTTP_PROXY_INVALID);
+}
+
+/**
+ * @tc.name: SetGlobalHttpProxyTest006
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.if host is valid domain, return NET_CONN_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest006, TestSize.Level1)
+{
+    AccessToken token;
+    HttpProxy httpProxy = {TEST_DOMAIN5, 8080, {}};
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: SetGlobalHttpProxyTest007
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.Test NetConnClient::SetGlobalHttpProxy,if host is invalid
+ * domain,return NET_CONN_ERR_HTTP_PROXY_INVALID
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest007, TestSize.Level1)
+{
+    AccessToken token;
+    HttpProxy httpProxy = {TEST_DOMAIN6, 8080, {}};
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_ERR_HTTP_PROXY_INVALID);
+}
+
+/**
+ * @tc.name: SetGlobalHttpProxyTest008
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.Test NetConnClient::SetGlobalHttpProxy,if host is invalid
+ * domain,return NET_CONN_ERR_HTTP_PROXY_INVALID
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest008, TestSize.Level1)
+{
+    AccessToken token;
+    HttpProxy httpProxy = {TEST_DOMAIN7, 8080, {}};
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_ERR_HTTP_PROXY_INVALID);
+}
+
+/**
+ * @tc.name: SetGlobalHttpProxyTest009
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.if host is valid ipv4 address, return NET_CONN_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest009, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_IPV4_ADDR, 8080, {}};
@@ -392,11 +494,11 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetGlobalHttpProxyTest003
- * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.if param is valid, return NET_CONN_SUCCESS
+ * @tc.name: SetGlobalHttpProxyTest010
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.if host is valid ipv6 address, return NET_CONN_SUCCESS
  * @tc.type: FUNC
  */
-HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest003, TestSize.Level1)
+HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest010, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_IPV6_ADDR, 8080, {}};
@@ -405,16 +507,28 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetGlobalHttpProxyTest004
+ * @tc.name: SetGlobalHttpProxyTest011
  * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.if param is null, return NET_CONN_SUCCESS
  * @tc.type: FUNC
  */
-HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest004, TestSize.Level1)
+HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest011, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy;
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+/**
+ * @tc.name: SetGlobalHttpProxyTest012
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.not applying for permission,return NETMANAGER_ERR_PERMISSION_DENIED
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest012, TestSize.Level1)
+{
+    HttpProxy httpProxy = {TEST_IPV4_ADDR, 8080, {}};
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -461,6 +575,24 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest002, TestSize.Level1)
 HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest003, TestSize.Level1)
 {
     AccessToken token;
+    HttpProxy httpProxy = {TEST_DOMAIN2, 8080, {}};
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+
+    HttpProxy getGlobalHttpProxy;
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetGlobalHttpProxy(getGlobalHttpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+    ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_DOMAIN2);
+}
+
+/**
+ * @tc.name: GetGlobalHttpProxyTest004
+ * @tc.desc: Test NetConnClient::GetGlobalHttpProxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest004, TestSize.Level1)
+{
+    AccessToken token;
     HttpProxy validHttpProxy = {TEST_IPV4_ADDR, 8080, {}};
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(validHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -476,11 +608,11 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetGlobalHttpProxyTest004
+ * @tc.name: GetGlobalHttpProxyTest005
  * @tc.desc: Test NetConnClient::GetGlobalHttpProxy
  * @tc.type: FUNC
  */
-HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest004, TestSize.Level1)
+HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest005, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy;
