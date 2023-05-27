@@ -27,8 +27,6 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
-constexpr const char *ETH_IFACE_NAME = "lo";
-constexpr int32_t TEST_UID = 1010;
 class MockNetPolicyServiceStubTest : public NetPolicyServiceStub {
 public:
     MockNetPolicyServiceStubTest() = default;
