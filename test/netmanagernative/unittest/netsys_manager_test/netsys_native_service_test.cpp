@@ -113,7 +113,6 @@ HWTEST_F(NetsysNativeServiceTest, DumpTest001, TestSize.Level1)
     NetsysNativeService service;
     service.state_ = NetsysNativeService::ServiceRunningState::STATE_RUNNING;
     service.OnStart();
-
     instance_->Init();
     int32_t testFd = 11;
     int32_t ret = instance_->Dump(testFd, {});
@@ -574,7 +573,6 @@ HWTEST_F(NetsysNativeServiceTest, GetTotalStatsTest001, TestSize.Level1)
     uint32_t type = 1;
     auto ret = instance_->GetTotalStats(stats, type);
     EXPECT_EQ(stats, 0);
-
     auto backup = std::move(instance_->bpfStats_);
     ret = instance_->GetTotalStats(stats, type);
     instance_->bpfStats_ = std::move(backup);
@@ -588,7 +586,6 @@ HWTEST_F(NetsysNativeServiceTest, GetUidStatsTest001, TestSize.Level1)
     uint32_t type = 1;
     auto ret = instance_->GetUidStats(stats, uid, type);
     EXPECT_EQ(stats, 0);
-
     auto backup = std::move(instance_->bpfStats_);
     ret = instance_->GetUidStats(stats, uid, type);
     instance_->bpfStats_ = std::move(backup);
@@ -602,7 +599,6 @@ HWTEST_F(NetsysNativeServiceTest, GetIfaceStatsTest002, TestSize.Level1)
     const std::string &iface = "eth0";
     auto ret = instance_->GetIfaceStats(stats, type, iface);
     EXPECT_EQ(stats, 0);
-
     auto backup = std::move(instance_->bpfStats_);
     ret = instance_->GetIfaceStats(stats, type, iface);
     instance_->bpfStats_ = std::move(backup);
@@ -614,7 +610,6 @@ HWTEST_F(NetsysNativeServiceTest, GetAllStatsInfoTest001, TestSize.Level1)
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
     auto ret = instance_->GetAllStatsInfo(stats);
     EXPECT_GE(stats.size(), 0);
-
     auto backup = std::move(instance_->bpfStats_);
     ret = instance_->GetAllStatsInfo(stats);
     instance_->bpfStats_ = std::move(backup);
@@ -645,7 +640,6 @@ HWTEST_F(NetsysNativeServiceTest, SetIpTablesForResTest003, TestSize.Level1)
     instance_->OnNetManagerRestart();
     instance_->netsysService_ = nullptr;
     instance_->OnNetManagerRestart();
-
     std::string iptableCmd = "-Sabbbb";
     std::string iptableOutput = "";
     auto backup = std::move(instance_->iptablesWrapper_);

@@ -432,7 +432,7 @@ public:
 
 void NetsysNativeServiceStubTest::SetUpTestCase()
 {
-    notifyStub_ =  std::make_shared<TestNetsysNativeServiceStub>();
+    notifyStub_ = std::make_shared<TestNetsysNativeServiceStub>();
 }
 
 void NetsysNativeServiceStubTest::TearDownTestCase() {}
@@ -453,27 +453,13 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetResolverConfig001, TestSize.Level1)
     std::string strDomain = "TestDomain";
 
     MessageParcel data;
-    if (!data.WriteUint16(netId)) {
-        return;
-    }
-    if (!data.WriteUint16(baseTimeoutMsec)) {
-        return;
-    }
-    if (!data.WriteUint16(retryCount)) {
-        return;
-    }
-    if (!data.WriteUint32(vServerSize)) {
-        return;
-    }
-    if (!data.WriteString(strServer)) {
-        return;
-    }
-    if (!data.WriteUint32(vDomainSize)) {
-        return;
-    }
-    if (!data.WriteString(strDomain)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteUint16(netId));
+    EXPECT_TRUE(data.WriteUint16(baseTimeoutMsec));
+    EXPECT_TRUE(data.WriteUint16(retryCount));
+    EXPECT_TRUE(data.WriteUint32(vServerSize));
+    EXPECT_TRUE(data.WriteString(strServer));
+    EXPECT_TRUE(data.WriteUint32(vDomainSize));
+    EXPECT_TRUE(data.WriteString(strDomain));
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdSetResolverConfig(data, reply);
     EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
@@ -487,21 +473,11 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetResolverConfig002, TestSize.Level1)
     int32_t vServerSize = 0;
     int32_t vDomainSize = 0;
     MessageParcel data;
-    if (!data.WriteUint16(netId)) {
-        return;
-    }
-    if (!data.WriteUint16(baseTimeoutMsec)) {
-        return;
-    }
-    if (!data.WriteUint8(retryCount)) {
-        return;
-    }
-    if (!data.WriteUint32(vServerSize)) {
-        return;
-    }
-    if (!data.WriteUint32(vDomainSize)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteUint16(netId));
+    EXPECT_TRUE(data.WriteUint16(baseTimeoutMsec));
+    EXPECT_TRUE(data.WriteUint8(retryCount));
+    EXPECT_TRUE(data.WriteUint32(vServerSize));
+    EXPECT_TRUE(data.WriteUint32(vDomainSize));
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdSetResolverConfig(data, reply);
     DTEST_LOG << "CmdSetResolverConfig002" << ret << std::endl;
@@ -518,32 +494,17 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetResolverConfig003, TestSize.Level1)
     int32_t vDomainSize = 2;
     std::string domain = "testdomain";
     MessageParcel data;
-    if (!data.WriteUint16(netId)) {
-        return;
-    }
-    if (!data.WriteUint16(baseTimeoutMsec)) {
-        return;
-    }
-    if (!data.WriteUint8(retryCount)) {
-        return;
-    }
-    if (!data.WriteUint32(vServerSize)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteUint16(netId));
+    EXPECT_TRUE(data.WriteUint16(baseTimeoutMsec));
+    EXPECT_TRUE(data.WriteUint8(retryCount));
+    EXPECT_TRUE(data.WriteUint32(vServerSize));
     for (int32_t i = 0; i < vServerSize; i++) {
-        if (!data.WriteString(server)) {
-            return;
-        }
+        EXPECT_TRUE(data.WriteString(server));
     }
 
-    if (!data.WriteUint32(vDomainSize)) {
-        return;
-    }
-
+    EXPECT_TRUE(data.WriteUint32(vDomainSize));
     for (int32_t i = 0; i < vDomainSize; i++) {
-        if (!data.WriteString(domain)) {
-            return;
-        }
+        EXPECT_TRUE(data.WriteString(domain));
     }
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdSetResolverConfig(data, reply);
@@ -614,18 +575,10 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetAddrInfo001, TestSize.Level1)
     uint16_t netId = 1001;
 
     MessageParcel data;
-    if (!data.WriteString(hostName)) {
-        return;
-    }
-    if (!data.WriteString(serverName)) {
-        return;
-    }
-    if (!data.WriteRawData(&addrInfo, sizeof(AddrInfo))) {
-        return;
-    }
-    if (!data.WriteUint16(netId)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteString(hostName));
+    EXPECT_TRUE(data.WriteString(serverName));
+    EXPECT_TRUE(data.WriteRawData(&addrInfo, sizeof(AddrInfo)));
+    EXPECT_TRUE(data.WriteUint16(netId));
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdGetAddrInfo(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
@@ -714,12 +667,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterNotifyCallback001, TestSize.Lev
     int32_t ret = notifyStub_->CmdRegisterNotifyCallback(data, reply);
     EXPECT_EQ(ret, -1);
     MessageParcel data2;
-    if (!data2.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-    return;
-}
-    if (!data2.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
-        return;
-    }
+    EXPECT_TRUE(data2.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data2.WriteRemoteObject(callback->AsObject().GetRefPtr()));
     ret = notifyStub_->CmdUnRegisterNotifyCallback(data2, reply);
     EXPECT_EQ(ret, -1);
 }
@@ -729,17 +678,13 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterNotifyCallback002, TestSize.Lev
     std::string ifName = "ifName";
     sptr<INotifyCallback> callback = new (std::nothrow) TestNotifyCallback();
     MessageParcel data;
-    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteRemoteObject(callback->AsObject().GetRefPtr()));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdRegisterNotifyCallback(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
     MessageParcel data2;
-    if (!data2.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
-        return;
-    }
+    EXPECT_TRUE(data2.WriteRemoteObject(callback->AsObject().GetRefPtr()));
     ret = notifyStub_->CmdUnRegisterNotifyCallback(data2, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
@@ -997,24 +942,12 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdInterfaceConfig001, TestSize.Level1)
     std::string flag = "testFlag";
 
     MessageParcel data;
-    if (!data.WriteString(ifName)) {
-        return;
-    }
-    if (!data.WriteString(hwAddr)) {
-        return;
-    }
-    if (!data.WriteString(ipv4Addr)) {
-        return;
-    }
-    if (!data.WriteUint32(prefixLength)) {
-        return;
-    }
-    if (!data.WriteUint32(vServerSize)) {
-        return;
-    }
-    if (!data.WriteString(flag)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteString(ifName));
+    EXPECT_TRUE(data.WriteString(hwAddr));
+    EXPECT_TRUE(data.WriteString(ipv4Addr));
+    EXPECT_TRUE(data.WriteUint32(prefixLength));
+    EXPECT_TRUE(data.WriteUint32(vServerSize));
+    EXPECT_TRUE(data.WriteString(flag));
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdSetInterfaceConfig(data, reply);
@@ -1467,5 +1400,5 @@ HWTEST_F(NetsysNativeServiceStubTest, OnRemoteRequestTest001, TestSize.Level1)
     result = notifyStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, ERR_NONE);
 }
-} // namespace
 } // namespace NetsysNative
+} // namespace OHOS

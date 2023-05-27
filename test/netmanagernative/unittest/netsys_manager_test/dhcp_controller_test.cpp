@@ -118,6 +118,15 @@ HWTEST_F(DhcpControllerTest, StartDhcpTest001, TestSize.Level1)
 
 HWTEST_F(DhcpControllerTest, TestErr, TestSize.Level1)
 {
+    std::unique_ptr<DhcpController::DhcpControllerResultNotify> notifier =
+        std::make_unique<DhcpController::DhcpControllerResultNotify>(*instance_);
+    int status = 0;
+    std::string ifname = "testIfaceName";
+    OHOS::Wifi::DhcpResult result;
+    notifier->OnSuccess(status, ifname, result);
+    std::string reason = "for test";
+    notifier->OnFailed(status, ifname, reason);
+    notifier->OnSerExitNotify(ifname);
     std::string testInterfaceName = "dfsgagr";
     std::string testIpv4Addr = "asgesag";
     instance_->StartDhcpClient(testInterfaceName, false);
@@ -132,19 +141,6 @@ HWTEST_F(DhcpControllerTest, TestErr, TestSize.Level1)
     ASSERT_FALSE(ret);
     ret = instance_->StopDhcpService(testInterfaceName);
     ASSERT_TRUE(ret);
-}
-
-HWTEST_F(DhcpControllerTest, DhcpControllerResultNotifyTest, TestSize.Level1)
-{
-    std::unique_ptr<DhcpController::DhcpControllerResultNotify> notifier =
-        std::make_unique<DhcpController::DhcpControllerResultNotify>(*instance_);
-    int status = 0;
-    std::string ifname = "testIfaceName";
-    OHOS::Wifi::DhcpResult result;
-    notifier->OnSuccess(status, ifname, result);
-    std::string reason = "for test";
-    notifier->OnFailed(status, ifname, reason);
-    notifier->OnSerExitNotify(ifname);
 }
 
 } // namespace nmd
