@@ -15,6 +15,10 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
 #include "dhcp_controller.h"
 #include "notify_callback_stub.h"
 
@@ -128,6 +132,19 @@ HWTEST_F(DhcpControllerTest, TestErr, TestSize.Level1)
     ASSERT_FALSE(ret);
     ret = instance_->StopDhcpService(testInterfaceName);
     ASSERT_TRUE(ret);
+}
+
+HWTEST_F(DhcpControllerTest, DhcpControllerResultNotifyTest, TestSize.Level1)
+{
+    std::unique_ptr<DhcpController::DhcpControllerResultNotify> notifier =
+        std::make_unique<DhcpController::DhcpControllerResultNotify>(*instance_);
+    int status = 0;
+    std::string ifname = "testIfaceName";
+    OHOS::Wifi::DhcpResult result;
+    notifier->OnSuccess(status, ifname, result);
+    std::string reason = "for test";
+    notifier->OnFailed(status, ifname, reason);
+    notifier->OnSerExitNotify(ifname);
 }
 
 } // namespace nmd
