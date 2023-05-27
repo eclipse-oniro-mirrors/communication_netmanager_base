@@ -117,22 +117,12 @@ void NetPolicyCallbackProxyTest::SetUp() {}
 
 void NetPolicyCallbackProxyTest::TearDown() {}
 
-/**
- * @tc.name: NetUidPolicyChangeTest001
- * @tc.desc: Test NetPolicyCallbackProxy NetUidPolicyChange.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetUidPolicyChangeTest001, TestSize.Level1)
 {
     NetPolicyCallbackProxy instance_(nullptr);
     EXPECT_EQ(instance_.NetUidPolicyChange(TEST_UID, 0), NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
-/**
- * @tc.name: NetUidPolicyChangeTest002
- * @tc.desc: Test NetPolicyCallbackProxy NetUidPolicyChange.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetUidPolicyChangeTest002, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_ERROR);
@@ -140,11 +130,6 @@ HWTEST_F(NetPolicyCallbackProxyTest, NetUidPolicyChangeTest002, TestSize.Level1)
     EXPECT_EQ(instance_.NetUidPolicyChange(TEST_UID, 0), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
 }
 
-/**
- * @tc.name: NetUidPolicyChangeTest003
- * @tc.desc: Test NetPolicyCallbackProxy NetUidPolicyChange.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetUidPolicyChangeTest003, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
@@ -152,22 +137,12 @@ HWTEST_F(NetPolicyCallbackProxyTest, NetUidPolicyChangeTest003, TestSize.Level1)
     EXPECT_EQ(instance_.NetUidPolicyChange(TEST_UID, 0), NETMANAGER_SUCCESS);
 }
 
-/**
- * @tc.name: NetUidRuleChangeTest001
- * @tc.desc: Test NetPolicyCallbackProxy NetUidRuleChange.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetUidRuleChangeTest001, TestSize.Level1)
 {
     NetPolicyCallbackProxy instance_(nullptr);
     EXPECT_EQ(instance_.NetUidRuleChange(TEST_UID, 0), NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
-/**
- * @tc.name: NetUidRuleChangeTest002
- * @tc.desc: Test NetPolicyCallbackProxy NetUidRuleChange.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetUidRuleChangeTest002, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_ERROR);
@@ -175,11 +150,6 @@ HWTEST_F(NetPolicyCallbackProxyTest, NetUidRuleChangeTest002, TestSize.Level1)
     EXPECT_EQ(instance_.NetUidRuleChange(TEST_UID, 0), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
 }
 
-/**
- * @tc.name: NetUidRuleChangeTest003
- * @tc.desc: Test NetPolicyCallbackProxy NetUidRuleChange.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetUidRuleChangeTest003, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
@@ -187,22 +157,12 @@ HWTEST_F(NetPolicyCallbackProxyTest, NetUidRuleChangeTest003, TestSize.Level1)
     EXPECT_EQ(instance_.NetUidRuleChange(TEST_UID, 0), NETMANAGER_SUCCESS);
 }
 
-/**
- * @tc.name: NetBackgroundPolicyChangeTest001
- * @tc.desc: Test NetPolicyCallbackProxy NetBackgroundPolicyChange.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetBackgroundPolicyChangeTest001, TestSize.Level1)
 {
     NetPolicyCallbackProxy instance_(nullptr);
     EXPECT_EQ(instance_.NetBackgroundPolicyChange(true), NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
-/**
- * @tc.name: NetBackgroundPolicyChangeTest002
- * @tc.desc: Test NetPolicyCallbackProxy NetBackgroundPolicyChange.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetBackgroundPolicyChangeTest002, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_ERROR);
@@ -210,11 +170,6 @@ HWTEST_F(NetPolicyCallbackProxyTest, NetBackgroundPolicyChangeTest002, TestSize.
     EXPECT_EQ(instance_.NetBackgroundPolicyChange(true), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
 }
 
-/**
- * @tc.name: NetBackgroundPolicyChangeTest003
- * @tc.desc: Test NetPolicyCallbackProxy NetBackgroundPolicyChange.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetBackgroundPolicyChangeTest003, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
@@ -222,11 +177,6 @@ HWTEST_F(NetPolicyCallbackProxyTest, NetBackgroundPolicyChangeTest003, TestSize.
     EXPECT_EQ(instance_.NetBackgroundPolicyChange(true), NETMANAGER_SUCCESS);
 }
 
-/**
- * @tc.name: NetQuotaPolicyChangeTest001
- * @tc.desc: Test NetPolicyCallbackProxy NetQuotaPolicyChange.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetQuotaPolicyChangeTest001, TestSize.Level1)
 {
     NetPolicyCallbackProxy instance_(nullptr);
@@ -234,11 +184,6 @@ HWTEST_F(NetPolicyCallbackProxyTest, NetQuotaPolicyChangeTest001, TestSize.Level
     EXPECT_EQ(instance_.NetQuotaPolicyChange(netQuotaPolicys), POLICY_ERR_QUOTA_POLICY_NOT_EXIST);
 }
 
-/**
- * @tc.name: NetQuotaPolicyChangeTest002
- * @tc.desc: Test NetPolicyCallbackProxy NetQuotaPolicyChange.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetQuotaPolicyChangeTest002, TestSize.Level1)
 {
     NetPolicyCallbackProxy instance_(nullptr);
@@ -248,11 +193,6 @@ HWTEST_F(NetPolicyCallbackProxyTest, NetQuotaPolicyChangeTest002, TestSize.Level
     EXPECT_EQ(instance_.NetQuotaPolicyChange(netQuotaPolicys), NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
-/**
- * @tc.name: NetQuotaPolicyChangeTest003
- * @tc.desc: Test NetPolicyCallbackProxy NetQuotaPolicyChange.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetQuotaPolicyChangeTest003, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_ERROR);
@@ -263,11 +203,6 @@ HWTEST_F(NetPolicyCallbackProxyTest, NetQuotaPolicyChangeTest003, TestSize.Level
     EXPECT_EQ(instance_.NetQuotaPolicyChange(netQuotaPolicys), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
 }
 
-/**
- * @tc.name: NetQuotaPolicyChangeTest004
- * @tc.desc: Test NetPolicyCallbackProxy NetQuotaPolicyChange.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetQuotaPolicyChangeTest004, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
@@ -278,11 +213,6 @@ HWTEST_F(NetPolicyCallbackProxyTest, NetQuotaPolicyChangeTest004, TestSize.Level
     EXPECT_EQ(instance_.NetQuotaPolicyChange(netQuotaPolicys), NETMANAGER_SUCCESS);
 }
 
-/**
- * @tc.name: NetStrategySwitchTest001
- * @tc.desc: Test NetPolicyCallbackProxy NetStrategySwitch.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetStrategySwitchTest001, TestSize.Level1)
 {
     NetPolicyCallbackProxy instance_(nullptr);
@@ -290,11 +220,6 @@ HWTEST_F(NetPolicyCallbackProxyTest, NetStrategySwitchTest001, TestSize.Level1)
     EXPECT_EQ(instance_.NetStrategySwitch(iccid, true), NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
-/**
- * @tc.name: NetStrategySwitchTest002
- * @tc.desc: Test NetPolicyCallbackProxy NetStrategySwitch.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetStrategySwitchTest002, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_ERROR);
@@ -303,11 +228,6 @@ HWTEST_F(NetPolicyCallbackProxyTest, NetStrategySwitchTest002, TestSize.Level1)
     EXPECT_EQ(instance_.NetStrategySwitch(iccid, true), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
 }
 
-/**
- * @tc.name: NetStrategySwitchTest003
- * @tc.desc: Test NetPolicyCallbackProxy NetStrategySwitch.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetStrategySwitchTest003, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
@@ -316,11 +236,6 @@ HWTEST_F(NetPolicyCallbackProxyTest, NetStrategySwitchTest003, TestSize.Level1)
     EXPECT_EQ(instance_.NetStrategySwitch(iccid, true), NETMANAGER_SUCCESS);
 }
 
-/**
- * @tc.name: NetMeteredIfacesChangeTest001
- * @tc.desc: Test NetPolicyCallbackProxy NetMeteredIfacesChange.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetMeteredIfacesChangeTest001, TestSize.Level1)
 {
     NetPolicyCallbackProxy instance_(nullptr);
@@ -328,11 +243,6 @@ HWTEST_F(NetPolicyCallbackProxyTest, NetMeteredIfacesChangeTest001, TestSize.Lev
     EXPECT_EQ(instance_.NetMeteredIfacesChange(ifaces), NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
-/**
- * @tc.name: NetMeteredIfacesChangeTest002
- * @tc.desc: Test NetPolicyCallbackProxy NetMeteredIfacesChange.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetMeteredIfacesChangeTest002, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_ERROR);
@@ -341,11 +251,6 @@ HWTEST_F(NetPolicyCallbackProxyTest, NetMeteredIfacesChangeTest002, TestSize.Lev
     EXPECT_EQ(instance_.NetMeteredIfacesChange(ifaces), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
 }
 
-/**
- * @tc.name: NetMeteredIfacesChangeTest003
- * @tc.desc: Test NetPolicyCallbackProxy NetMeteredIfacesChange.
- * @tc.type: FUNC
- */
 HWTEST_F(NetPolicyCallbackProxyTest, NetMeteredIfacesChangeTest003, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);

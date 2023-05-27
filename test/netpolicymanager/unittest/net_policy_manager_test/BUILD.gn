@@ -22,6 +22,7 @@ ohos_unittest("net_policy_manager_test") {
     "net_policy_callback_test.cpp",
     "net_policy_exception_service_test.cpp",
     "net_policy_manager_test.cpp",
+    "net_policy_service_stub_test.cpp",
     "ut_firewall_rule.cpp",
     "ut_net_policy_base.cpp",
     "ut_net_policy_callback.cpp",
