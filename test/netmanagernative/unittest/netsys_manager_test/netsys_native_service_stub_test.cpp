@@ -639,7 +639,6 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetAddrInfo002, TestSize.Level1)
     struct AddrInfo addrInfo;
     addrInfo.aiFlags = 0;
     addrInfo.aiFamily = 9999;
-
     uint16_t netId = 1001;
 
     MessageParcel data;
