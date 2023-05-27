@@ -652,8 +652,6 @@ HWTEST_F(NetsysNativeServiceTest, SetIpTablesForResTest003, TestSize.Level1)
     auto ret = instance_->SetIpTablesForRes(iptableCmd, iptableOutput);
     instance_->iptablesWrapper_ = std::move(backup);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
-
-    printf("SetIpTablesForResTest003=============88888888888888888\n");
 }
 } // namespace NetsysNative
 } // namespace OHOS
