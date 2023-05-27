@@ -511,8 +511,7 @@ HWTEST_F(NetsysNativeServiceTest, SetInternetPermissionTest001, TestSize.Level1)
     uint32_t uid = 0;
     uint8_t allow = 1;
     int32_t ret = instance_->SetInternetPermission(uid, allow);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
-    DTEST_LOG << ret << std::endl;
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetsysNativeServiceTest, ShareDnsSetTest001, TestSize.Level1)
@@ -522,7 +521,7 @@ HWTEST_F(NetsysNativeServiceTest, ShareDnsSetTest001, TestSize.Level1)
     instance_->netsysService_ = nullptr;
     auto ret = instance_->ShareDnsSet(netid);
     instance_->netsysService_ = std::move(backup);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetsysNativeServiceTest, StartDnsProxyListenTest001, TestSize.Level1)
@@ -531,7 +530,7 @@ HWTEST_F(NetsysNativeServiceTest, StartDnsProxyListenTest001, TestSize.Level1)
     instance_->netsysService_ = nullptr;
     auto ret = instance_->StartDnsProxyListen();
     instance_->netsysService_ = std::move(backup);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetsysNativeServiceTest, StopDnsProxyListenTest001, TestSize.Level1)
@@ -540,7 +539,7 @@ HWTEST_F(NetsysNativeServiceTest, StopDnsProxyListenTest001, TestSize.Level1)
     instance_->netsysService_ = nullptr;
     auto ret = instance_->StopDnsProxyListen();
     instance_->netsysService_ = std::move(backup);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetsysNativeServiceTest, GetNetworkSharingTrafficTest001, TestSize.Level1)
