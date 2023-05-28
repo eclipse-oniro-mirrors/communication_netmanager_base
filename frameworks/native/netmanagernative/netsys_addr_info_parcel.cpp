@@ -67,10 +67,19 @@ sptr<NetsysAddrInfoParcel> NetsysAddrInfoParcel::Unmarshalling(MessageParcel &pa
     }
     ptr->ret = parcelMsg.ReadInt32();
     ptr->addrSize = parcelMsg.ReadInt32();
-    addrinfo *headNode = nullptr;
-    addrinfo *nextNode = nullptr;
-    int count = 0;
     int size = ptr->addrSize;
+    addrinfo *headNode = nullptr;
+    ptr->addrHead = headNode;
+    if (!UnmarshallingAddrinfo(parcelMsg, size, headNode)) {
+        return nullptr;
+    }
+    return ptr;
+}
+
+bool NetsysAddrInfoParcel::UnmarshallingAddrinfo(MessageParcel &parcelMsg, int size, addrinfo *headNode)
+{
+    int count = 0;
+    addrinfo *nextNode = nullptr;
     while (size--) {
         addrinfo *node = static_cast<addrinfo *>(malloc(sizeof(addrinfo)));
         if (node == nullptr) {
@@ -88,7 +97,7 @@ sptr<NetsysAddrInfoParcel> NetsysAddrInfoParcel::Unmarshalling(MessageParcel &pa
             node->ai_canonname = static_cast<char *>(calloc(sizeof(char), (canSize + 1)));
             if (memcpy_s(node->ai_canonname, canSize, buffer, canSize) != 0) {
                 NETNATIVE_LOGE("memcpy_s faild");
-                return nullptr;
+                return false;
             }
         }
         node->ai_addr = nullptr;
@@ -98,7 +107,7 @@ sptr<NetsysAddrInfoParcel> NetsysAddrInfoParcel::Unmarshalling(MessageParcel &pa
             node->ai_addr = static_cast<sockaddr *>(calloc(1, node->ai_addrlen + 1));
             if (memcpy_s(node->ai_addr, node->ai_addrlen, aiAddr, node->ai_addrlen) != 0) {
                 NETNATIVE_LOGE("memcpy_s faild");
-                return nullptr;
+                return false;
             }
         }
         node->ai_next = nullptr;
@@ -111,8 +120,8 @@ sptr<NetsysAddrInfoParcel> NetsysAddrInfoParcel::Unmarshalling(MessageParcel &pa
         }
         count++;
     }
-    ptr->addrHead = headNode;
-    return ptr;
+    return true;
 }
+
 } // namespace NetsysNative
 } // namespace OHOS

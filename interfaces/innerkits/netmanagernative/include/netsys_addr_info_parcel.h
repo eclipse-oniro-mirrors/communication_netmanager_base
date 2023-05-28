@@ -33,6 +33,7 @@ public:
     ~NetsysAddrInfoParcel() = default;
     virtual bool Marshalling(Parcel &parcel) const override;
     static sptr<NetsysAddrInfoParcel> Unmarshalling(MessageParcel &parcel);
+    static bool UnmarshallingAddrinfo(MessageParcel &parcelMsg, int size, addrinfo *headNode);
 
     addrinfo *addrHead;
     int32_t aiFamily;

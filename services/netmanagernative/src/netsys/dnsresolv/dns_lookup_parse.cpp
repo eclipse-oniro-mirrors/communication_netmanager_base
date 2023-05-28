@@ -79,26 +79,8 @@ static constexpr int32_t NAME_MAX_LEN = 64;
 constexpr char SEP = '%';
 #endif
 
-int32_t DnsLookUpParse::LookupIpLiteral(struct AddrData buf[ARG_INDEX_1], const std::string name, int32_t family)
+int32_t DnsLookUpParse::LookupIpLiteralForIPV6(const char *hostName, int32_t &family, struct AddrData buf[ARG_INDEX_1])
 {
-    if (name[0] == 0) {
-        return DNS_ERR_NONE;
-    }
-    const char *hostName = const_cast<char *>(name.c_str());
-    in_addr a4{};
-    if (inet_aton(hostName, &a4) > 0) {
-        if (family == AF_INET6) {
-            return EAI_NONAME;
-        }
-        if (memcpy_s(&buf[ARG_INDEX_0].addr, sizeof(a4), &a4, sizeof(a4)) != 0) {
-            NETNATIVE_LOGE("memcpy_s faild");
-            return NETMANAGER_ERR_MEMCPY_FAIL;
-        }
-        buf[ARG_INDEX_0].family = AF_INET;
-        buf[ARG_INDEX_0].scopeid = 0;
-        return NAME_IS_IPV4;
-    }
-
 #ifdef SERVER_SUPPORT_IPV6
     char tmp[NAME_MAX_LEN] = {0};
     char *p = const_cast<char *>(strchr(hostName, SEP));
@@ -145,8 +127,31 @@ int32_t DnsLookUpParse::LookupIpLiteral(struct AddrData buf[ARG_INDEX_1], const 
         }
     }
     buf[ARG_INDEX_0].scopeid = scopeid;
-#endif
+#endif    
     return DNS_ERR_NONE;
+}
+
+int32_t DnsLookUpParse::LookupIpLiteral(struct AddrData buf[ARG_INDEX_1], const std::string name, int32_t family)
+{
+    if (name[0] == 0) {
+        return DNS_ERR_NONE;
+    }
+    const char *hostName = const_cast<char *>(name.c_str());
+    in_addr a4{};
+    if (inet_aton(hostName, &a4) > 0) {
+        if (family == AF_INET6) {
+            return EAI_NONAME;
+        }
+        if (memcpy_s(&buf[ARG_INDEX_0].addr, sizeof(a4), &a4, sizeof(a4)) != 0) {
+            NETNATIVE_LOGE("memcpy_s faild");
+            return NETMANAGER_ERR_MEMCPY_FAIL;
+        }
+        buf[ARG_INDEX_0].family = AF_INET;
+        buf[ARG_INDEX_0].scopeid = 0;
+        return NAME_IS_IPV4;
+    }
+
+    return LookupIpLiteralForIPV6(hostName, family, buf);
 }
 
 int32_t DnsLookUpParse::GetResolvConf(struct ResolvConf *conf, char *search, size_t search_sz, uint16_t netId)
@@ -530,9 +535,7 @@ int32_t DnsLookUpParse::DnsExpand(const uint8_t *base, const uint8_t *end, const
                 return INVALID_LENGTH;
             }
             int32_t j = ((snapSrc[ARG_INDEX_0] & MASK_LOW_SIX_BITS) << BIT_NUM_OF_BYTE) | snapSrc[1];
-            if (len < 0) {
-                len = static_cast<int>(snapSrc + STEP_SIZE - src);
-            }
+            len = (len < 0) ? static_cast<int>(snapSrc + STEP_SIZE - src) : len;
             if (j >= end - base) {
                 NETNATIVE_LOGE("space length error");
                 return INVALID_LENGTH;
@@ -557,9 +560,7 @@ int32_t DnsLookUpParse::DnsExpand(const uint8_t *base, const uint8_t *end, const
             }
         } else {
             *dest = 0;
-            if (len < 0) {
-                len = static_cast<int>(snapSrc + 1 - src);
-            }
+            len = (len < 0) ? static_cast<int>(snapSrc + 1 - src) : len;
             return len;
         }
     }

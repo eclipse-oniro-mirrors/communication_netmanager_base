@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -103,6 +103,8 @@ private:
     static int32_t NameFromNumeric(AddrData buf[ADDR_FIRST_BIT], const std::string name, int32_t family);
     static int32_t NameFromDnsSearch(AddrData buf[MAXADDRS], char canon[CANON_LINE], const std::string name,
                                      int32_t family, uint16_t netId);
+    static int32_t NameFromDnsSearch(size_t &nameLen, const std::string name, ResolvConf conf,
+                                                    char *search, char *canon);
     static int32_t NameFromDns(AddrData buf[MAXADDRS], char canon[CANON_LINE], const std::string name, int32_t family,
                                const ResolvConf *conf, uint16_t netId);
     static const struct policy *PolicyOf(const in6_addr *in6Addr);
@@ -119,6 +121,7 @@ private:
                             uint16_t netId);
     void LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId);
     int32_t MemcpySockaddr(sockaddr_in6 &sa6, sockaddr_in6 &da6, sockaddr_in &da4, AddrData *buf, uint32_t cnt);
+    static int32_t ProcessMdnsFailed(int32_t answersLens[], uint8_t answersBuf[][PACKET_LINE]);
 };
 } // namespace nmd
 } // namespace OHOS
