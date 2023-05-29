@@ -631,7 +631,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager015, TestSize.Level1)
     std::cout << "isMetered : " << isMetered << std::endl;
 }
 
-void Check1ForNetConnManager(std::list<sptr<NetHandle>> &netList)
+int32_t CheckNetListRemainWhenConnected(std::list<sptr<NetHandle>> &netList)
 {
     netList.clear();
     int32_t result = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(netList);
@@ -639,8 +639,8 @@ void Check1ForNetConnManager(std::list<sptr<NetHandle>> &netList)
     return result;
 }
 
-void Check2ForNetConnManager(sptr<NetLinkInfo> &netLinkInfo, std::list<sptr<NetHandle>> &netList, uint32_t &supplierId,
-                             size_t &originNetSize)
+int32_t CheckNetListIncreaseWhenConnected(sptr<NetLinkInfo> &netLinkInfo, std::list<sptr<NetHandle>> &netList,
+                                          uint32_t &supplierId, size_t &originNetSize)
 {
     DelayedSingleton<NetConnClient>::GetInstance()->UpdateNetLinkInfo(supplierId, netLinkInfo);
     netList.clear();
@@ -650,8 +650,8 @@ void Check2ForNetConnManager(sptr<NetLinkInfo> &netLinkInfo, std::list<sptr<NetH
     return result;
 }
 
-void Check3ForNetConnManager(sptr<NetSupplierInfo> &netSupplierInfo, std::list<sptr<NetHandle>> &netList,
-                             uint32_t &supplierId, size_t &originNetSize)
+int32_t CheckNetListWhenDisconnected(sptr<NetSupplierInfo> &netSupplierInfo, std::list<sptr<NetHandle>> &netList,
+                                     uint32_t &supplierId, size_t &originNetSize)
 {
     netSupplierInfo->isAvailable_ = false;
     DelayedSingleton<NetConnClient>::GetInstance()->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
@@ -662,8 +662,8 @@ void Check3ForNetConnManager(sptr<NetSupplierInfo> &netSupplierInfo, std::list<s
     return result;
 }
 
-void RollbackForNetConnManager(sptr<NetSupplierInfo> &netSupplierInfo, sptr<NetLinkInfo> &netLinkInfo,
-                               std::list<sptr<NetHandle>> &netList, uint32_t &supplierId, size_t &originNetSize)
+int32_t RollbackForNetConnManager(sptr<NetSupplierInfo> &netSupplierInfo, sptr<NetLinkInfo> &netLinkInfo,
+                                  std::list<sptr<NetHandle>> &netList, uint32_t &supplierId, size_t &originNetSize)
 {
     netSupplierInfo->isAvailable_ = true;
     DelayedSingleton<NetConnClient>::GetInstance()->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
@@ -673,12 +673,12 @@ void RollbackForNetConnManager(sptr<NetSupplierInfo> &netSupplierInfo, sptr<NetL
     return DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(netList);
 }
 
-void Check4ForNetConnManager(std::list<sptr<NetHandle>> &netList, uint32_t &supplierId, size_t &originNetSize)
+int32_t CheckNetListWhenUnregistered(std::list<sptr<NetHandle>> &netList, uint32_t &supplierId, size_t &originNetSize)
 {
     DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetSupplier(supplierId);
     originNetSize--;
     netList.clear();
-    result = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(netList);
+    int32_t result = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(netList);
     std::cout << "Check4: netIdList size:" << netList.size() << std::endl;
     return result;
 }
@@ -712,7 +712,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager016, TestSize.Level1)
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
 
     // Check1: The size of netList remains unchanged when the new network is not connected.
-    result = Check1ForNetConnManager(netList);
+    result = CheckNetListRemainWhenConnected(netList);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     ASSERT_TRUE(originNetSize == netList.size());
 
@@ -721,12 +721,12 @@ HWTEST_F(NetConnManagerTest, NetConnManager016, TestSize.Level1)
     netSupplierInfo->isAvailable_ = true;
     client->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
     sptr<NetLinkInfo> netLinkInfo = GetUpdateLinkInfoSample();
-    result = Check2ForNetConnManager(netLinkInfo, netList, supplierId, originNetSize);
+    result = CheckNetListIncreaseWhenConnected(netLinkInfo, netList, supplierId, originNetSize);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     ASSERT_EQ(originNetSize, netList.size());
 
     // Check3: The size of netList decreases by 1 when the new network is disconnected.
-    result = Check3ForNetConnManager(netSupplierInfo, netList, supplierId, originNetSize);
+    result = CheckNetListWhenDisconnected(netSupplierInfo, netList, supplierId, originNetSize);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     ASSERT_TRUE(originNetSize == netList.size());
 
@@ -736,7 +736,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager016, TestSize.Level1)
     ASSERT_TRUE(originNetSize == netList.size());
 
     // Check4: The size of netList decreases by 1 when the net supplier is unregistered.
-    result = Check4ForNetConnManager(netList, supplierId, originNetSize);
+    result = CheckNetListWhenUnregistered(netList, supplierId, originNetSize);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     ASSERT_TRUE(originNetSize == netList.size());
 }
