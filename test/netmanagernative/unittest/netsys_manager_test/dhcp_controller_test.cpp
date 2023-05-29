@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,10 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
 #include "dhcp_controller.h"
 #include "notify_callback_stub.h"
 
@@ -114,6 +118,15 @@ HWTEST_F(DhcpControllerTest, StartDhcpTest001, TestSize.Level1)
 
 HWTEST_F(DhcpControllerTest, TestErr, TestSize.Level1)
 {
+    std::unique_ptr<DhcpController::DhcpControllerResultNotify> notifier =
+        std::make_unique<DhcpController::DhcpControllerResultNotify>(*instance_);
+    int status = 0;
+    std::string ifname = "testIfaceName";
+    OHOS::Wifi::DhcpResult result;
+    notifier->OnSuccess(status, ifname, result);
+    std::string reason = "for test";
+    notifier->OnFailed(status, ifname, reason);
+    notifier->OnSerExitNotify(ifname);
     std::string testInterfaceName = "dfsgagr";
     std::string testIpv4Addr = "asgesag";
     instance_->StartDhcpClient(testInterfaceName, false);
