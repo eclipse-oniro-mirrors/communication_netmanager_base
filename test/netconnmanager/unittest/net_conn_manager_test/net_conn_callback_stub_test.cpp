@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
+#include "i_net_conn_callback.h"
+#include "net_all_capabilities.h"
+#include "net_conn_callback_stub.h"
+#include "net_manager_constants.h"
+#include <fcntl.h>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <memory>
-#include <fcntl.h>
-#include "net_manager_constants.h"
-#include "net_conn_callback_stub.h"
-#include "net_all_capabilities.h"
-#include "i_net_conn_callback.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -38,11 +38,9 @@ public:
     static inline std::shared_ptr<NetConnCallbackStub> instance_ = std::make_shared<NetConnCallbackStub>();
 };
 
-void TestNetConnCallbackStub::SetUpTestCase() {
-}
+void TestNetConnCallbackStub::SetUpTestCase() {}
 
-void TestNetConnCallbackStub::TearDownTestCase() {
-}
+void TestNetConnCallbackStub::TearDownTestCase() {}
 
 void TestNetConnCallbackStub::SetUp() {}
 
@@ -146,7 +144,7 @@ HWTEST_F(TestNetConnCallbackStub, OnNetConnectionPropertiesChangeTest001, TestSi
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(INetConnCallback::NET_CONNECTION_PROPERTIES_CHANGE, data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
-    
+
     MessageParcel dataSuccess;
     dataSuccess.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor());
     dataSuccess.WriteInt32(TEST_NETID);
@@ -206,6 +204,6 @@ HWTEST_F(TestNetConnCallbackStub, OnNetBlockStatusChangeTest001, TestSize.Level1
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-}
+} // namespace
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
+#include "i_net_conn_service.h"
+#include "i_net_detection_callback.h"
+#include "net_all_capabilities.h"
+#include "net_conn_callback_stub.h"
+#include "net_conn_service_proxy.h"
+#include "net_manager_constants.h"
+#include "net_supplier_callback_stub.h"
 #include <gtest/gtest.h>
 #include <iostream>
 #include <memory>
-#include "net_manager_constants.h"
-#include "net_conn_service_proxy.h"
-#include "net_all_capabilities.h"
-#include "net_supplier_callback_stub.h"
-#include "net_conn_callback_stub.h"
-#include "i_net_detection_callback.h"
-#include "i_net_conn_service.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -57,28 +57,27 @@ public:
             case INetConnService::CMD_NM_GET_ALL_NETS:
             case INetConnService::CMD_NM_GET_ADDRESSES_BY_NAME:
             case INetConnService::CMD_NM_GET_NET_ID_BY_IDENTIFIER:
-            reply.WriteUint32(NETMANAGER_SUCCESS);
-            break;
+                reply.WriteUint32(NETMANAGER_SUCCESS);
+                break;
 
             case INetConnService::CMD_NM_GET_IFACENAME_BY_TYPE:
-            reply.WriteString(TEST_HOST);
-            break;
+                reply.WriteString(TEST_HOST);
+                break;
 
             case INetConnService::CMD_NM_GETDEFAULTNETWORK:
-            reply.WriteInt32(TEST_NETID);
-            break;
+                reply.WriteInt32(TEST_NETID);
+                break;
 
             case INetConnService::CMD_NM_HASDEFAULTNET:
             case INetConnService::CMD_NM_IS_DEFAULT_NET_METERED:
-            reply.WriteBool(true);
-            break;
+                reply.WriteBool(true);
+                break;
 
             case INetConnService::CMD_NM_GET_CONNECTION_PROPERTIES: {
                 NetLinkInfo linkInfo;
                 linkInfo.ifaceName_ = "ifacename_test";
                 linkInfo.Marshalling(reply);
-            }
-            break;
+            } break;
 
             case INetConnService::CMD_NM_GET_NET_CAPABILITIES: {
                 NetAllCapabilities netCap;
@@ -96,10 +95,10 @@ public:
             }
 
             default:
-            reply.WriteUint32(TEST_SUPPLIERID);
-            break;
+                reply.WriteUint32(TEST_SUPPLIERID);
+                break;
         }
-        
+
         return eCode;
     }
 
@@ -149,7 +148,7 @@ public:
         eCode = errorCode;
     }
 
-    private:
+private:
     int eCode = NETMANAGER_SUCCESS;
 };
 
@@ -255,6 +254,6 @@ HWTEST_F(NetConnServiceProxyTest, UnregisterNetSupplierTest001, TestSize.Level1)
     int32_t ret = instance_->UnregisterNetSupplier(g_supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
-}
+} // namespace
 } // namespace NetManagerStandard
 } // namespace OHOS
