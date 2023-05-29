@@ -70,9 +70,7 @@ HWTEST_F(TestNetConnCallbackStub, OnRemoteRequestTest001, TestSize.Level1)
 HWTEST_F(TestNetConnCallbackStub, OnRemoteRequestTest002, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor())) {
-        return;
-    }
+    data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor());
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(OUTOFFRANGECODE, data, reply, option);
@@ -87,9 +85,7 @@ HWTEST_F(TestNetConnCallbackStub, OnRemoteRequestTest002, TestSize.Level1)
 HWTEST_F(TestNetConnCallbackStub, OnNetAvailableTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor())) {
-        return;
-    }
+    data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor());
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(INetConnCallback::NET_AVAILABLE, data, reply, option);
@@ -104,9 +100,7 @@ HWTEST_F(TestNetConnCallbackStub, OnNetAvailableTest001, TestSize.Level1)
 HWTEST_F(TestNetConnCallbackStub, OnNetAvailableTest002, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor())) {
-        return;
-    }
+    data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor());
     data.WriteInt32(TEST_NETID);
     MessageParcel reply;
     MessageOption option;
@@ -122,9 +116,7 @@ HWTEST_F(TestNetConnCallbackStub, OnNetAvailableTest002, TestSize.Level1)
 HWTEST_F(TestNetConnCallbackStub, OnNetCapabilitiesChangeTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor())) {
-        return;
-    }
+    data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor());
     MessageParcel reply;
     MessageOption option;
     NetAllCapabilities netCaps;
@@ -149,18 +141,14 @@ HWTEST_F(TestNetConnCallbackStub, OnNetCapabilitiesChangeTest001, TestSize.Level
 HWTEST_F(TestNetConnCallbackStub, OnNetConnectionPropertiesChangeTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor())) {
-        return;
-    }
+    data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor());
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(INetConnCallback::NET_CONNECTION_PROPERTIES_CHANGE, data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
     
     MessageParcel dataSuccess;
-    if (!dataSuccess.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor())) {
-        return;
-    }
+    dataSuccess.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor());
     dataSuccess.WriteInt32(TEST_NETID);
     NetLinkInfo linkInfo;
     linkInfo.ifaceName_ = "ifacename";
@@ -178,9 +166,7 @@ HWTEST_F(TestNetConnCallbackStub, OnNetConnectionPropertiesChangeTest001, TestSi
 HWTEST_F(TestNetConnCallbackStub, OnNetLostTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor())) {
-        return;
-    }
+    data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor());
     data.WriteInt32(TEST_NETID);
     MessageParcel reply;
     MessageOption option;
@@ -196,9 +182,7 @@ HWTEST_F(TestNetConnCallbackStub, OnNetLostTest001, TestSize.Level1)
 HWTEST_F(TestNetConnCallbackStub, OnNetUnavailableTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor())) {
-        return;
-    }
+    data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor());
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(INetConnCallback::NET_UNAVAILABLE, data, reply, option);
@@ -213,9 +197,7 @@ HWTEST_F(TestNetConnCallbackStub, OnNetUnavailableTest001, TestSize.Level1)
 HWTEST_F(TestNetConnCallbackStub, OnNetBlockStatusChangeTest001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor())) {
-        return;
-    }
+    data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor());
     data.WriteInt32(TEST_NETID);
     data.WriteBool(false);
     MessageParcel reply;

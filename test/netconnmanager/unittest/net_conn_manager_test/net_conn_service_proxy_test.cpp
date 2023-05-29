@@ -159,7 +159,7 @@ public:
     {
         return 0;
     }
-    inline int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap) override
+    inline int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netCap) override
     {
         return 0;
     }
@@ -183,7 +183,7 @@ public:
 
 class NetDetectionTestCallback : public IRemoteStub<INetDetectionCallback> {
 public:
-    int32_t OnNetDetectionResultChanged(NetDetectionResultCode detectionResult, const std::string &urlRedirect) override
+    int32_t OnNetDetectionResultChanged(NetDetectionResultCode resultCode, const std::string &urlRedirect) override
     {
         return 0;
     }
