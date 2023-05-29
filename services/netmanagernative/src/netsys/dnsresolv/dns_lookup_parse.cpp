@@ -127,7 +127,7 @@ int32_t DnsLookUpParse::LookupIpLiteralForIPV6(const char *hostName, int32_t &fa
         }
     }
     buf[ARG_INDEX_0].scopeid = scopeid;
-#endif    
+#endif
     return DNS_ERR_NONE;
 }
 

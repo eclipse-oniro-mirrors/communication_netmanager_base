@@ -104,7 +104,7 @@ private:
     static int32_t NameFromDnsSearch(AddrData buf[MAXADDRS], char canon[CANON_LINE], const std::string name,
                                      int32_t family, uint16_t netId);
     static int32_t NameFromDnsSearch(size_t &nameLen, const std::string name, ResolvConf conf,
-                                                    char *search, char *canon);
+                                                    char search[], char canon[]);
     static int32_t NameFromDns(AddrData buf[MAXADDRS], char canon[CANON_LINE], const std::string name, int32_t family,
                                const ResolvConf *conf, uint16_t netId);
     static const struct policy *PolicyOf(const in6_addr *in6Addr);

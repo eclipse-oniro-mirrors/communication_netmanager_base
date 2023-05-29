@@ -201,10 +201,9 @@ int32_t DnsLookUpName::NameFromDnsSearch(AddrData buf[MAXADDRS], char canon[CANO
     return NameFromDns(buf, canon, name, family, &conf, netId);
 }
 
-int32_t DnsLookUpName::NameFromDnsSearch(size_t &nameLen, const std::string name, ResolvConf conf, char *search,
-                                         char *canon)
+int32_t DnsLookUpName::NameFromDnsSearch(size_t &nameLen, const std::string name, ResolvConf conf, char search[],
+                                         char canon[])
 {
-
     size_t dots;
     for (dots = nameLen = 0; name[nameLen]; nameLen++) {
         if (name[nameLen] == DOT) {
