@@ -77,22 +77,26 @@ public:
                 NetLinkInfo linkInfo;
                 linkInfo.ifaceName_ = "ifacename_test";
                 linkInfo.Marshalling(reply);
-            } break;
+            }
+            break;
 
             case INetConnService::CMD_NM_GET_NET_CAPABILITIES: {
                 NetAllCapabilities netCap;
                 netCap.Marshalling(reply);
-            } break;
+            }
+            break;
 
             case INetConnService::CMD_NM_GET_ADDRESS_BY_NAME: {
                 INetAddr addr;
                 addr.Marshalling(reply);
-            } break;
+            }
+            break;
 
             case INetConnService::CMD_NM_GET_HTTP_PROXY: {
                 HttpProxy httpProxy;
                 httpProxy.Marshalling(reply);
-            } break;
+            }
+            break;
 
             default:
                 reply.WriteUint32(TEST_SUPPLIERID);
