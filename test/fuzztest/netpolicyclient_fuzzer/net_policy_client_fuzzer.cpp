@@ -47,7 +47,7 @@ HapInfoParams testInfoParms1 = {.userID = 1,
                                 .instIndex = 0,
                                 .appIDDesc = "test"};
 
-PermissionDef testPermDef1 = {.permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+PermissionDef testPermDef1 = {.permissionName = "ohos.permission.MANAGE_NET_STRATEGY",
                               .bundleName = "net_policy_client_fuzzer",
                               .grantMode = 1,
                               .availableLevel = APL_SYSTEM_BASIC,
@@ -56,7 +56,7 @@ PermissionDef testPermDef1 = {.permissionName = "ohos.permission.CONNECTIVITY_IN
                               .description = "Test net policy connectivity internal",
                               .descriptionId = 1};
 
-PermissionStateFull testState1 = {.permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+PermissionStateFull testState1 = {.permissionName = "ohos.permission.MANAGE_NET_STRATEGY",
                                   .isGeneral = true,
                                   .resDeviceID = {"local"},
                                   .grantStatus = {PermissionState::PERMISSION_GRANTED},
