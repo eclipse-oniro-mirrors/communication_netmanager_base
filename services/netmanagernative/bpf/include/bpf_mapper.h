@@ -205,7 +205,7 @@ public:
     ~BpfMapper<Key, Value>()
     {
         if (mapFd_ != NETMANAGER_ERROR) {
-            close(mapFd);
+            close(mapFd_);
             mapFd_ = NETMANAGER_ERROR;
         }
     }
