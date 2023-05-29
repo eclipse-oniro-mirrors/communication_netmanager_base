@@ -203,7 +203,6 @@ HWTEST_F(TestNetConnCallbackStub, OnNetBlockStatusChangeTest001, TestSize.Level1
     int32_t ret = instance_->OnRemoteRequest(INetConnCallback::NET_BLOCK_STATUS_CHANGE, data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
-
 } // namespace
 } // namespace NetManagerStandard
 } // namespace OHOS
