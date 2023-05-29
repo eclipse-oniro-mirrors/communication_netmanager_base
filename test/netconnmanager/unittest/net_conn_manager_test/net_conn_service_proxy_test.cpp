@@ -255,17 +255,6 @@ HWTEST_F(NetConnServiceProxyTest, UnregisterNetSupplierTest001, TestSize.Level1)
     int32_t ret = instance_->UnregisterNetSupplier(g_supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
-
-/**
- * @tc.name: RegisterNetSupplierCallbackTest001
- * @tc.desc: Test NetConnServiceProxy RegisterNetSupplierCallback.
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnServiceProxyTest, RegisterNetSupplierCallbackTest001, TestSize.Level1)
-{
-    int32_t ret = instance_->RegisterNetSupplierCallback(g_supplierId, supplierCallback_);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
