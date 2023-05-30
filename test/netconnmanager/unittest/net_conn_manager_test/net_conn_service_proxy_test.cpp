@@ -28,13 +28,10 @@ namespace OHOS {
 namespace NetManagerStandard {
 using namespace testing::ext;
 namespace {
-constexpr uint64_t OUTOFFRANGECODE = 100;
 constexpr int32_t TEST_UID = 1010;
 constexpr const char *TEST_IDENT = "testIdent";
-constexpr uint32_t TEST_TIMEOUTMS = 1000;
 constexpr const char *TEST_HOST = "testHost";
 constexpr int32_t TEST_NETID = 3;
-constexpr int32_t TEST_SOCKETFD = 2;
 constexpr int32_t TEST_SUPPLIERID = 1021;
 
 uint32_t g_supplierId = 0;
