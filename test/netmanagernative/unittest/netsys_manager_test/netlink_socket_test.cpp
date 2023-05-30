@@ -27,6 +27,21 @@ namespace OHOS {
 namespace nmd {
 namespace {
 using namespace testing::ext;
+
+void DealInfoFromKernelTest001()
+{
+    uint16_t clearThing = RTM_DELROUTE;
+    uint32_t table = 0;
+    DealInfoFromKernel(nullptr, clearThing, table);
+}
+
+void DealInfoFromKernelTest002()
+{
+    uint16_t clearThing = 0;
+    uint32_t table = 0;
+    struct nlmsghdr hdr = {0};
+    DealInfoFromKernel(&hdr, clearThing, table);
+}
 } // namespace
 class NetlinkSocketTest : public testing::Test {
 public:
@@ -48,9 +63,11 @@ void NetlinkSocketTest::TearDown() {}
 
 HWTEST_F(NetlinkSocketTest, SendNetlinkMsgToKernelTest001, TestSize.Level1)
 {
+    DealInfoFromKernelTest001();
+    DealInfoFromKernelTest002();
     uint32_t table = 0;
     auto ret = SendNetlinkMsgToKernel(nullptr, table);
-    EXPECT_EQ(-1, ret);
+    EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(NetlinkSocketTest, ClearRouteInfoTest001, TestSize.Level1)
@@ -58,7 +75,7 @@ HWTEST_F(NetlinkSocketTest, ClearRouteInfoTest001, TestSize.Level1)
     uint16_t clearThing = RTM_GETROUTE;
     uint32_t table = 0;
     auto ret = ClearRouteInfo(clearThing, table);
-    EXPECT_EQ(-1, ret);
+    EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(NetlinkSocketTest, ClearRouteInfoTest002, TestSize.Level1)
@@ -66,7 +83,7 @@ HWTEST_F(NetlinkSocketTest, ClearRouteInfoTest002, TestSize.Level1)
     uint16_t clearThing = RTM_GETRULE;
     uint32_t table = 0;
     auto ret = ClearRouteInfo(clearThing, table);
-    EXPECT_EQ(-1, ret);
+    EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(NetlinkSocketTest, ClearRouteInfoTest003, TestSize.Level1)
@@ -74,29 +91,14 @@ HWTEST_F(NetlinkSocketTest, ClearRouteInfoTest003, TestSize.Level1)
     uint16_t clearThing = RTM_DELROUTE;
     uint32_t table = 0;
     auto ret = ClearRouteInfo(clearThing, table);
-    EXPECT_EQ(-1, ret);
-}
-
-HWTEST_F(NetlinkSocketTest, DealInfoFromKernelTest001, TestSize.Level1)
-{
-    uint16_t clearThing = RTM_DELROUTE;
-    uint32_t table = 0;
-    DealInfoFromKernel(nullptr, clearThing, table);
-}
-
-HWTEST_F(NetlinkSocketTest, DealInfoFromKernelTest002, TestSize.Level1)
-{
-    uint16_t clearThing = 0;
-    uint32_t table = 0;
-    struct nlmsghdr hdr = {0};
-    DealInfoFromKernel(&hdr, clearThing, table);
+    EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(NetlinkSocketTest, GetRoutePropertyTest001, TestSize.Level1)
 {
     int32_t property = 0;
     auto ret = GetRouteProperty(nullptr, property);
-    EXPECT_EQ(-1, ret);
+    EXPECT_EQ(ret, -1);
 }
 } // namespace nmd
 } // namespace OHOS
