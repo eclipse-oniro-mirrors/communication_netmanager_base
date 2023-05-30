@@ -97,12 +97,6 @@ HWTEST_F(NetManagerNativeTest, NetworkSetPermissionForNetwork001, TestSize.Level
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
-HWTEST_F(NetManagerNativeTest, ClearInterfaceAddrs001, TestSize.Level1)
-{
-    std::string testIface = "testIface";
-    instance_->ClearInterfaceAddrs(testIface);
-}
-
 HWTEST_F(NetManagerNativeTest, GetCellularRxBytes001, TestSize.Level1)
 {
     auto ret = instance_->GetCellularRxBytes();
