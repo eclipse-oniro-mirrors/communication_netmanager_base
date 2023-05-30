@@ -507,7 +507,8 @@ bool IsValidDomain(const std::string &domain)
 
     std::vector<std::string> parts = Split(domain, DOMAIN_DELIMITER);
     if (parts.size() < DOMAIN_VALID_MIN_PART_SIZE || parts.size() > DOMAIN_VALID_MAX_PART_SIZE) {
-        NETMGR_LOG_E("The domain:[%{public}s] parts size:[%{public}d] is invalid", domain.c_str(), parts.size());
+        NETMGR_LOG_E("The domain:[%{public}s] parts size:[%{public}d] is invalid", domain.c_str(),
+                     static_cast<int>(parts.size()));
         return false;
     }
 
