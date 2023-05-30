@@ -456,6 +456,10 @@ int32_t ForkExecParentProcess(const int32_t *pipeFd, int32_t count, pid_t childP
             _exit(-1);
         }
         return NETMANAGER_SUCCESS;
+    } else {
+        NETMGR_LOG_D("there is no need to return execution results");
+        close(pipeFd[PIPE_IN]);
+        close(pipeFd[PIPE_OUT]);
     }
     pid_t pidRet = waitpid(childPid, nullptr, 0);
     if (pidRet != childPid) {
