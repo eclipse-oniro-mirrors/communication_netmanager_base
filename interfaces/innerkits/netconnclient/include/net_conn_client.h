@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,29 +16,30 @@
 #ifndef NET_CONN_MANAGER_H
 #define NET_CONN_MANAGER_H
 
-#include <string>
 #include <map>
+#include <string>
 
 #include "parcel.h"
 #include "singleton.h"
 
+#include "http_proxy.h"
 #include "i_net_conn_service.h"
 #include "i_net_supplier_callback.h"
-#include "net_supplier_callback_base.h"
+#include "net_handle.h"
 #include "net_link_info.h"
 #include "net_specifier.h"
-#include "net_handle.h"
-#include "http_proxy.h"
+#include "net_supplier_callback_base.h"
 
 namespace OHOS {
 namespace nmd {
 class FwmarkClient;
 }
 namespace NetManagerStandard {
-class NetConnClient {
-    DECLARE_DELAYED_SINGLETON(NetConnClient)
-
+class NetConnClient : public Singleton<NetConnClient> {
 public:
+    NetConnClient();
+    ~NetConnClient();
+
     int32_t SystemReady();
     int32_t SetInternetPermission(uint32_t uid, uint8_t allow);
     int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,

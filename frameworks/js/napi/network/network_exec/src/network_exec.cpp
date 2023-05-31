@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,14 @@
 
 #include "network_exec.h"
 
-#include "network_constant.h"
 #include "net_conn_client.h"
 #include "net_manager_constants.h"
+#include "network_constant.h"
 #if HAS_TELEPHONY
 #include "core_service_client.h"
 #endif
-#include "netmanager_base_log.h"
 #include "napi_utils.h"
+#include "netmanager_base_log.h"
 #include "securec.h"
 
 namespace OHOS::NetManagerStandard {
@@ -87,7 +87,7 @@ bool NetworkExec::ExecGetType(GetTypeContext *context)
 {
     NETMANAGER_BASE_LOGI("NetworkExec::ExecGetType");
     NetHandle handle;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
+    auto ret = NetConnClient::GetInstance().GetDefaultNet(handle);
     if (ret != NETMANAGER_SUCCESS) {
         context->SetErrorCode(ret);
         return ret == NETMANAGER_SUCCESS;
@@ -99,7 +99,7 @@ bool NetworkExec::ExecGetType(GetTypeContext *context)
     }
 
     NetAllCapabilities cap;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(handle, cap);
+    ret = NetConnClient::GetInstance().GetNetCapabilities(handle, cap);
     if (ret == NETMANAGER_SUCCESS) {
         context->SetCap(cap);
     }
@@ -143,7 +143,7 @@ bool NetworkExec::ExecSubscribe(SubscribeContext *context)
 {
     NETMANAGER_BASE_LOGI("NetworkExec::ExecSubscribe");
     NetHandle handle;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
+    auto ret = NetConnClient::GetInstance().GetDefaultNet(handle);
     if (ret != NETMANAGER_SUCCESS) {
         context->SetErrorCode(ret);
         return ret == NETMANAGER_SUCCESS;
@@ -155,7 +155,7 @@ bool NetworkExec::ExecSubscribe(SubscribeContext *context)
     }
 
     NetAllCapabilities cap;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(handle, cap);
+    ret = NetConnClient::GetInstance().GetNetCapabilities(handle, cap);
     if (ret == NETMANAGER_SUCCESS) {
         context->SetCap(cap);
     }

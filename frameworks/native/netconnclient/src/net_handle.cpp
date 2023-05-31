@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,23 +15,23 @@
 
 #include "net_handle.h"
 
+#include "iservice_registry.h"
 #include "net_conn_constants.h"
 #include "net_manager_constants.h"
-#include "iservice_registry.h"
 #include "system_ability_definition.h"
 
-#include "net_mgr_log_wrapper.h"
 #include "net_conn_client.h"
+#include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-int32_t NetHandle::GetAddressesByName(const std::string& host, std::vector<INetAddr>& addrList)
+int32_t NetHandle::GetAddressesByName(const std::string &host, std::vector<INetAddr> &addrList)
 {
     if (host.empty()) {
         NETMGR_LOG_E("host is empty");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    return DelayedSingleton<NetConnClient>::GetInstance()->GetAddressesByName(host, netId_, addrList);
+    return NetConnClient::GetInstance().GetAddressesByName(host, netId_, addrList);
 }
 
 int32_t NetHandle::GetAddressByName(const std::string &host, INetAddr &addr)
@@ -40,7 +40,7 @@ int32_t NetHandle::GetAddressByName(const std::string &host, INetAddr &addr)
         NETMGR_LOG_E("host is empty");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    return DelayedSingleton<NetConnClient>::GetInstance()->GetAddressByName(host, netId_, addr);
+    return NetConnClient::GetInstance().GetAddressByName(host, netId_, addr);
 }
 
 int32_t NetHandle::BindSocket(int32_t socket_fd)
@@ -49,7 +49,7 @@ int32_t NetHandle::BindSocket(int32_t socket_fd)
         NETMGR_LOG_E("socket_fd is invalid");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    return DelayedSingleton<NetConnClient>::GetInstance()->BindSocket(socket_fd, netId_);
+    return NetConnClient::GetInstance().BindSocket(socket_fd, netId_);
 }
-} // namespace OHOS
 } // namespace NetManagerStandard
+} // namespace OHOS

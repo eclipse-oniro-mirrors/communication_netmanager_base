@@ -27,10 +27,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class NetStatsClient {
-    DECLARE_DELAYED_SINGLETON(NetStatsClient)
-
+class NetStatsClient : public Singleton<NetStatsClient> {
 public:
+    NetStatsClient();
+    ~NetStatsClient();
+
     int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback);
     int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback);
     int32_t GetIfaceRxBytes(uint64_t &stats, const std::string &interfaceName);
