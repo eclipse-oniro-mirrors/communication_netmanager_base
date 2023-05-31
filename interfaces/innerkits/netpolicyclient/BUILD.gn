@@ -72,12 +72,14 @@ ohos_shared_library("net_policy_manager_if") {
     "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_policy_service_proxy.cpp",
   ]
 
+  version_script = "libnetpolicy_kits.map"
+
   public_configs = [ ":net_policy_manager_if_config" ]
 
   deps = [ ":net_policy_parcel" ]
 
   external_deps = [
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
 
@@ -96,6 +98,7 @@ ohos_shared_library("net_policy_manager_if") {
     external_deps += [ "hilog:libhilog" ]
   }
 
+  innerapi_tags = [ "platformsdk" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

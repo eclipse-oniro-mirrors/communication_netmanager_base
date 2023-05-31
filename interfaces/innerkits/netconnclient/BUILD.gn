@@ -86,6 +86,8 @@ ohos_shared_library("net_conn_manager_if") {
     "//third_party/musl/porting/linux/user/src/hook",
   ]
 
+  version_script = "libnetconn_kits.map"
+
   public_configs = [ ":net_conn_manager_if_config" ]
 
   deps = [
@@ -94,7 +96,7 @@ ohos_shared_library("net_conn_manager_if") {
   ]
 
   external_deps = [
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
 
@@ -113,18 +115,7 @@ ohos_shared_library("net_conn_manager_if") {
     external_deps += [ "hilog:libhilog" ]
   }
 
-  part_name = "netmanager_base"
-  subsystem_name = "communication"
-}
-
-config("socket_permission_config") {
-  include_dirs = [ "$INNERKITS_ROOT/netconnclient/include" ]
-}
-
-ohos_shared_library("socket_permission") {
-  sources = [ "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/socket_permission.cpp" ]
-  deps = [ "$INNERKITS_ROOT/netconnclient:net_conn_manager_if" ]
-  public_configs = [ ":socket_permission_config" ]
+  innerapi_tags = [ "platformsdk" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
