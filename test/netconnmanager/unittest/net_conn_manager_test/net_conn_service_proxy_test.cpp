@@ -590,7 +590,6 @@ HWTEST_F(NetConnServiceProxyTest, SetAppNetTest001, TestSize.Level1)
     int32_t ret = instance_->SetAppNet(TEST_NETID);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
-
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

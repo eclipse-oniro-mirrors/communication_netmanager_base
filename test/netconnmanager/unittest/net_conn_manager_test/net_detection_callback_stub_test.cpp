@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 #include <iostream>
-#include <fcntl.h>
 #include <memory>
 #define private public
 #include "net_detection_callback_stub.h"
