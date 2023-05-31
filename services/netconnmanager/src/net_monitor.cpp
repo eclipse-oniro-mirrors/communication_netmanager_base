@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include <securec.h>
 #include <sys/socket.h>
 #include <thread>
+#include <pthread.h>
 #include <unistd.h>
 #include "dns_config_client.h"
 
@@ -87,7 +88,10 @@ void NetMonitor::Start()
     }
     isDetecting_ = true;
     std::shared_ptr<NetMonitor> netMonitor = shared_from_this();
-    std::thread([netMonitor] { return NetDetectThread(netMonitor); }).detach();
+    std::thread([netMonitor] {
+        std::string threadName = "netDetect";
+        pthread_setname_np(pthread_self(), threadName.c_str());
+        return NetDetectThread(netMonitor); }).detach();
 }
 
 void NetMonitor::Stop()

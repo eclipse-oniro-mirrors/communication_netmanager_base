@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <sys/un.h>
 #include <thread>
+#include <pthread.h>
 #include <unistd.h>
 
 #include "fwmark.h"
@@ -186,6 +187,8 @@ void SendMessage(int32_t *serverSockfd)
 
 void StartListener()
 {
+    std::string threadName = "FwmarkNetworkListener";
+    pthread_setname_np(pthread_self(), threadName.c_str());
     int32_t serverSockfd = GetControlSocket("fwmarkd");
 
     int32_t result = listen(serverSockfd, MAX_CONCURRENT_CONNECTION_REQUESTS);

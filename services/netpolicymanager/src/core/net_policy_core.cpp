@@ -16,6 +16,7 @@
 #include "net_policy_core.h"
 
 #include <thread>
+#include <pthread.h>
 
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_base.h"
@@ -50,6 +51,8 @@ void NetPolicyCore::Init(std::shared_ptr<NetPolicyEventHandler> &handler)
         return;
     }
     std::thread([this]() {
+        std::string threadName = "NetPolicyCoreInit";
+        pthread_setname_np(pthread_self(), threadName.c_str());
         auto appManager = std::make_unique<AppMgrClient>();
         uint32_t count = 0;
         int32_t connectResult = AppMgrResultCode::ERROR_SERVICE_NOT_READY;
@@ -98,6 +101,8 @@ void NetPolicyCore::SubscribeCommonEvent()
 {
     NETMGR_LOG_D("SubscribeCommonEvent");
     std::thread([this]() {
+        std::string threadName = "NetPolicyCoreSubEvent";
+        pthread_setname_np(pthread_self(), threadName.c_str());
         EventFwk::MatchingSkills matchingSkills;
         matchingSkills.AddEvent(COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
         matchingSkills.AddEvent(COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);

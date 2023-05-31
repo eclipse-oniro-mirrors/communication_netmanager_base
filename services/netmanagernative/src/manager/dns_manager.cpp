@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include <thread>
+#include <pthread.h>
 
 #include "dns_resolv_listen.h"
 #include "netnative_log_wrapper.h"
@@ -26,6 +27,8 @@ namespace nmd {
 void StartListen()
 {
     NETNATIVE_LOG_D("Enter threadStart");
+    std::string threadName = "DnsManagerListen";
+    pthread_setname_np(pthread_self(), threadName.c_str());
     DnsResolvListen().StartListen();
 }
 
@@ -70,6 +73,8 @@ void DnsManager::SetDefaultNetwork(uint16_t netId)
 void StartProxyListen()
 {
     NETNATIVE_LOG_D("begin StartProxyListen");
+    std::string threadName = "DnsManagerProxyListen";
+    pthread_setname_np(pthread_self(), threadName.c_str());
     DnsProxyListen().StartListen();
 }
 

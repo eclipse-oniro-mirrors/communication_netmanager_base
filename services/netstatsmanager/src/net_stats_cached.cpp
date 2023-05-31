@@ -17,6 +17,7 @@
 
 #include <initializer_list>
 #include <list>
+#include <pthread.h>
 
 #include "net_stats_constants.h"
 #include "net_stats_data_handler.h"
@@ -164,6 +165,8 @@ void NetStatsCached::ForceUpdateStats()
 {
     isForce_ = true;
     std::thread([this]() {
+        std::string threadName = "NetStatsCachedUpdateStats";
+        pthread_setname_np(pthread_self(), threadName.c_str());
         CacheStats();
         WriteStats();
         isForce_ = false;
