@@ -646,7 +646,7 @@ int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandar
 int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)
 {
     if (!regex_match(cmd, REGEX_CMD_IPTABLES)) {
-        NETNATIVE_LOGE("IptablesWrapper invalid command format is invilid");
+        NETNATIVE_LOGE("IptablesWrapper command format is invalid");
         return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
     }
     if (iptablesWrapper_ == nullptr) {
