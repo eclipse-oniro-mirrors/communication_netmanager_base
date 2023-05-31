@@ -78,8 +78,8 @@ PermissionDef testInternetPermDef = {
 };
 
 PermissionStateFull testState = {
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
     .grantFlags = {2},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
     .isGeneral = true,
     .permissionName = "ohos.permission.GET_NETWORK_INFO",
     .resDeviceID = {"local"},
