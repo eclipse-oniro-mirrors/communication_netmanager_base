@@ -68,12 +68,14 @@ public:
         CMD_NM_GET_HTTP_PROXY,
         CMD_NM_GET_NET_ID_BY_IDENTIFIER,
         CMD_NM_SET_APP_NET,
+        CMD_NM_SET_INTERNET_PERMISSION,
         CMD_NM_END,
         CMD_NM_SET_IP_TABLES_CMD_FOR_RES,
     };
 
 public:
     virtual int32_t SystemReady() = 0;
+    virtual int32_t SetInternetPermission(uint32_t uid, uint8_t allow) = 0;
     virtual int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
                                         const std::set<NetCap> &netCaps, uint32_t &supplierId) = 0;
     virtual int32_t UnregisterNetSupplier(uint32_t supplierId) = 0;

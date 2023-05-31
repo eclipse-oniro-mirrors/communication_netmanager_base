@@ -27,6 +27,7 @@ public:
     explicit NetConnServiceProxy(const sptr<IRemoteObject> &impl);
     virtual ~NetConnServiceProxy();
     int32_t SystemReady() override;
+    int32_t SetInternetPermission(uint32_t uid, uint8_t allow) override;
     int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
         uint32_t &supplierId) override;
     int32_t UnregisterNetSupplier(uint32_t supplierId) override;

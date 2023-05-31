@@ -113,7 +113,7 @@ public:
     int32_t FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids);
     int32_t FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids);
     int32_t FirewallEnableChain(uint32_t chain, bool enable);
-    int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule);
+    int32_t FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule);
     void ShareDnsSet(uint16_t netId);
     void StartDnsProxyListen();
     void StopDnsProxyListen();
