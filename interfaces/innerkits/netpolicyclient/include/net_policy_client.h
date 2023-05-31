@@ -34,8 +34,7 @@ public:
      * Set the network policy for the specified UID.
      *
      * @param uid The specified UID of app.
-     * @param policy The network policy for application.
-     *      For details, see {@link NetUidPolicy}.
+     * @param policy The network policy for application, for details, see {@link NetUidPolicy}.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
@@ -56,8 +55,7 @@ public:
     /**
      * Get the application UIDs of the specified policy.
      *
-     * @param policy the network policy of the current UID of application.
-     *      For details, see {@link NetUidPolicy}.
+     * @param policy the network policy of the current UID of application, for details, see {@link NetUidPolicy}.
      * @param uids put the result into uids
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
@@ -163,7 +161,7 @@ public:
     /**
      * Control if apps can use data on background.
      *
-     * @param isAllowed Allow apps to use data on background.
+     * @param isAllowed Allow apps to use data on background or not.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
@@ -194,6 +192,8 @@ public:
     /**
      * SetSnoozePolicy for Hibernate current policy
      *
+     * @param netType {@link NetBearType}.
+     * @param iccid Specify the matched iccid of quota policy when netType is cellular.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
@@ -241,6 +241,8 @@ public:
      *
      * @param uids The uids are into into allow list
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
      * @deprecated
      */
     NetPolicyResultCode GetIdleTrustlist(std::vector<uint32_t> &uids);
@@ -278,7 +280,8 @@ public:
     /**
      * Get the allow list of UID in power save mode.
      *
-     * @param uids The list of UIDs
+     * @param uid The list of UIDs
+     * @param isAllowed The UID is into allow list or not.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
