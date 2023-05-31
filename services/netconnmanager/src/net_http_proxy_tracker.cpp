@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,7 +57,8 @@ bool NetHttpProxyTracker::WriteToSystemParameter(HttpProxy &httpProxy)
     ReadFromSystemParameter(persistHttpProxy);
 
     int8_t family = CommonUtils::GetAddrFamily(httpProxy.GetHost());
-    if (!httpProxy.GetHost().empty() && family != AF_INET && family != AF_INET6) {
+    if (!httpProxy.GetHost().empty() && family != AF_INET && family != AF_INET6 &&
+        !CommonUtils::IsValidDomain(httpProxy.GetHost())) {
         NETMGR_LOG_E("Invalid http proxy host address:%{public}s", httpProxy.GetHost().c_str());
         std::string host = persistHttpProxy.GetHost();
         httpProxy.SetHost(std::move(host));

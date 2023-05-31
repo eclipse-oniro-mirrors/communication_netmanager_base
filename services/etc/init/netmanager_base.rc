@@ -13,7 +13,7 @@
 on boot
     start netmanager
 
-service netmanager /system/bin/sa_main /system/profile/netmanager.xml
+service netmanager /system/bin/sa_main /system/profile/netmanager.json
     user system
     group system shell
     seclabel u:r:telephony:s0

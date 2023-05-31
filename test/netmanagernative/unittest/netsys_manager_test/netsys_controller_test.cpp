@@ -158,10 +158,6 @@ void NetsysControllerTest::TearDown() {}
 
 HWTEST_F(NetsysControllerTest, NetsysControllerTest001, TestSize.Level1)
 {
-    std::string command;
-    getline(std::cin, command);
-    std::string respond;
-
     int32_t ret = NetsysController::GetInstance().NetworkCreatePhysical(NET_ID, PERMISSION);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
