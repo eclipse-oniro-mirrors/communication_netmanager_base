@@ -94,7 +94,7 @@ ohos_shared_library("net_conn_manager_if") {
   ]
 
   external_deps = [
-    "ipc:ipc_single",
+    "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
 
