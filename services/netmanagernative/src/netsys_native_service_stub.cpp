@@ -77,7 +77,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_DISABLE_NAT] = &NetsysNativeServiceStub::CmdDisableNat;
     opToInterfaceMap_[NETSYS_IPFWD_ADD_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward;
     opToInterfaceMap_[NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward;
-    opToInterfaceMap_[NETSYS_SET_IP_TABLES_CMD_FOR_RES] = &NetsysNativeServiceStub::CmdSetIpTablesCommandForRes;
+    opToInterfaceMap_[NETSYS_SET_IPTABLES_CMD_FOR_RES] = &NetsysNativeServiceStub::CmdSetIptablesCommandForRes;
 
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
@@ -1009,22 +1009,22 @@ int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, Message
     return result;
 }
 
-int32_t NetsysNativeServiceStub::CmdSetIpTablesCommandForRes(MessageParcel &data, MessageParcel &reply)
+int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply)
 {
     if (!NetManagerStandard::NetManagerPermission::CheckPermission(
         NetManagerStandard::Permission::NETSYS_INTERNAL)) {
-        NETNATIVE_LOGE("CmdSetIpTablesCommandForRes CheckPermission failed");
+        NETNATIVE_LOGE("CmdSetIptablesCommandForRes CheckPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     std::string cmd = data.ReadString();
     std::string respond;
-    int32_t result = SetIpTablesCommandForRes(cmd, respond);
+    int32_t result = SetIptablesCommandForRes(cmd, respond);
     if (!reply.WriteInt32(result)) {
-        NETNATIVE_LOGE("Write SetIpTablesCommandForRes result failed");
+        NETNATIVE_LOGE("Write CmdSetIptablesCommandForRes result failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!reply.WriteString(respond)) {
-        NETNATIVE_LOGE("Write SetIpTablesCommandForRes respond failed");
+        NETNATIVE_LOGE("Write CmdSetIptablesCommandForRes respond failed");
         return ERR_FLATTEN_OBJECT;
     }
     return result;

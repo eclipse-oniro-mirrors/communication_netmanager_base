@@ -487,7 +487,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest018, TestSize.Level1)
     if (command.empty()) {
         command = "-L";
     }
-    int32_t ret = NetsysController::GetInstance().SetIpTablesCommandForRes(command, respond);
+    int32_t ret = NetsysController::GetInstance().SetIptablesCommandForRes(command, respond);
     std::cout << "command:" << command << std::endl;
     std::cout << "Respond:" << respond << std::endl;
     std::cout << "Respond size: " << respond.size() << std::endl;

@@ -73,8 +73,6 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_GET_HTTP_PROXY] = {&NetConnServiceStub::OnGetGlobalHttpProxy, {}};
     memberFuncMap_[CMD_NM_GET_NET_ID_BY_IDENTIFIER] = {&NetConnServiceStub::OnGetNetIdByIdentifier, {}};
     memberFuncMap_[CMD_NM_SET_APP_NET] = {&NetConnServiceStub::OnSetAppNet, {Permission::INTERNET}};
-    memberFuncMap_[CMD_NM_SET_IP_TABLES_CMD_FOR_RES] = {&NetConnServiceStub::OnSetIpTablesCommandForRes,
-                                                        {Permission::NETSYS_INTERNAL}};
     memberFuncMap_[CMD_NM_SET_INTERNET_PERMISSION] = {&NetConnServiceStub::OnSetInternetPermission, {}};
 }
 

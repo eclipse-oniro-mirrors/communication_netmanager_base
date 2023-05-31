@@ -642,9 +642,9 @@ int32_t NetsysControllerServiceImpl::GetAllStatsInfo(std::vector<OHOS::NetManage
     return netsysClient_.GetAllStatsInfo(stats);
 }
 
-int32_t NetsysControllerServiceImpl::SetIpTablesCommandForRes(const std::string &cmd, std::string &respond)
+int32_t NetsysControllerServiceImpl::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)
 {
-    return netsysClient_.SetIpTablesCommandForRes(cmd, respond);
+    return netsysClient_.SetIptablesCommandForRes(cmd, respond);
 }
 
 } // namespace NetManagerStandard

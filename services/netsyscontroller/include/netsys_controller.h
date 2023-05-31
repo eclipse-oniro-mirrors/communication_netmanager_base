@@ -701,7 +701,7 @@ public:
      * @param respond The respond of execute iptables command
      * @return Value the return value of the netsys interface call
      */
-    int32_t SetIpTablesCommandForRes(const std::string &cmd, std::string &respond);
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond);
 
 private:
     NetsysController() = default;

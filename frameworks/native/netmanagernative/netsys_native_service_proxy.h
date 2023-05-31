@@ -103,7 +103,7 @@ public:
     int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) override;
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) override;
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
-    int32_t SetIpTablesCommandForRes(const std::string &cmd, std::string &respond) override;
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override;
 
 private:
     static inline BrokerDelegator<NetsysNativeServiceProxy> delegator_;

@@ -409,7 +409,7 @@ public:
         return 0;
     }
 
-    int32_t SetIpTablesCommandForRes(const std::string &cmd, std::string &respond) override
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override
     {
         return 0;
     }
