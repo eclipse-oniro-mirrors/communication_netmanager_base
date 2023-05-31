@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <regex>
-
 #include "net_conn_client.h"
 
 #include "iservice_registry.h"
@@ -28,7 +26,6 @@
 #include "net_supplier_callback_stub.h"
 
 static constexpr const int32_t MIN_VALID_NETID = 100;
-const std::regex REGEX_CMD_IPTABLES(std::string(R"(^-[\S]*[\s\S]*)"));
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -419,20 +416,6 @@ int32_t NetConnClient::GetAppNet(int32_t &netId)
 {
     netId = GetNetForApp();
     return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnClient::SetIpTablesCommandForRes(const std::string &cmd, std::string &respond)
-{
-    if (!regex_match(cmd, REGEX_CMD_IPTABLES)) {
-        NETMGR_LOG_E("Iptables command format is invilid");
-        return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
-    }
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NETMANAGER_ERR_GET_PROXY_FAIL;
-    }
-    return proxy->SetIpTablesCommandForRes(cmd, respond);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

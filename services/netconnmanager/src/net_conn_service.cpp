@@ -1370,15 +1370,5 @@ int32_t NetConnService::SetAppNet(int32_t netId)
 {
     return NETMANAGER_SUCCESS;
 }
-
-int32_t NetConnService::SetIpTablesCommandForRes(const std::string &cmd, std::string &respond)
-{
-    if (!NetManagerStandard::NetManagerPermission::CheckPermission(
-        NetManagerStandard::Permission::CONNECTIVITY_INTERNAL)) {
-        NETMGR_LOG_E("SetIpTablesCommandForRes CheckPermission failed");
-        return NETMANAGER_ERR_PERMISSION_DENIED;
-    }
-    return NetsysController::GetInstance().SetIpTablesCommandForRes(cmd, respond);
-}
 } // namespace NetManagerStandard
 } // namespace OHOS

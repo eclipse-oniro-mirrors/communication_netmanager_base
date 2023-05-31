@@ -643,11 +643,15 @@ int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandar
 
 int32_t NetsysNativeService::SetIpTablesCommandForRes(const std::string &cmd, std::string &respond)
 {
+    if (!regex_match(cmd, REGEX_CMD_IPTABLES)) {
+        NETNATIVE_LOGE("IptablesWrapper invalid command format is invilid");
+        return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     if (iptablesWrapper_ == nullptr) {
         NETNATIVE_LOGE("SetIpTablesCommandForRes iptablesWrapper_ is null");
         return NetManagerStandard::NETMANAGER_ERROR;
     }
-    respond = iptablesWrapper_->RunCommandForRes(IPTYPE_IPV4, cmd);
+    respond = iptablesWrapper_->RunCommandForRes(IPTYPE_IPV4V6, cmd);
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 } // namespace NetsysNative

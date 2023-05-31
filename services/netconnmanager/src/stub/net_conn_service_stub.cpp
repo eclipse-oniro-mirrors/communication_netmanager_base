@@ -74,7 +74,7 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_GET_NET_ID_BY_IDENTIFIER] = {&NetConnServiceStub::OnGetNetIdByIdentifier, {}};
     memberFuncMap_[CMD_NM_SET_APP_NET] = {&NetConnServiceStub::OnSetAppNet, {Permission::INTERNET}};
     memberFuncMap_[CMD_NM_SET_IP_TABLES_CMD_FOR_RES] = {&NetConnServiceStub::OnSetIpTablesCommandForRes,
-                                                        {Permission::CONNECTIVITY_INTERNAL}};
+                                                        {Permission::NETSYS_INTERNAL}};
     memberFuncMap_[CMD_NM_SET_INTERNET_PERMISSION] = {&NetConnServiceStub::OnSetInternetPermission, {}};
 }
 
@@ -886,22 +886,6 @@ int32_t NetConnServiceStub::OnSetAppNet(MessageParcel &data, MessageParcel &repl
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return ret;
-}
-
-int32_t NetConnServiceStub::OnSetIpTablesCommandForRes(MessageParcel &data, MessageParcel &reply)
-{
-    std::string cmd;
-    if (!data.ReadString(cmd)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-    std::string respond;
-    int32_t result = SetIpTablesCommandForRes(cmd, respond);
-    if (!reply.WriteInt32(result)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-    if (!reply.WriteString(respond)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -70,7 +70,6 @@ public:
         CMD_NM_SET_APP_NET,
         CMD_NM_SET_INTERNET_PERMISSION,
         CMD_NM_END,
-        CMD_NM_SET_IP_TABLES_CMD_FOR_RES,
     };
 
 public:
@@ -108,7 +107,6 @@ public:
     virtual int32_t GetGlobalHttpProxy(HttpProxy &httpProxy) = 0;
     virtual int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList) = 0;
     virtual int32_t SetAppNet(int32_t netId) = 0;
-    virtual int32_t SetIpTablesCommandForRes(const std::string &cmd, std::string &respond) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

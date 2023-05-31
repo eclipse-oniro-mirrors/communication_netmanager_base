@@ -60,7 +60,6 @@ public:
     int32_t GetGlobalHttpProxy(HttpProxy &httpProxy) override;
     int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList) override;
     int32_t SetAppNet(int32_t netId) override;
-    int32_t SetIpTablesCommandForRes(const std::string &cmd, std::string &respond) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

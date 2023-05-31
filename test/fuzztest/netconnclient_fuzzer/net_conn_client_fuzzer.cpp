@@ -90,30 +90,6 @@ HapPolicyParams testInternetPolicyPrams = {.apl = APL_SYSTEM_BASIC,
                                            .domain = "test.domain",
                                            .permList = {testPermDef, testInternetPermDef},
                                            .permStateList = {testState, testInternetState}};
-
-HapInfoParams testInfoParms1 = {.userID = 1,
-                                .bundleName = "net_conn_manager_test",
-                                .instIndex = 0,
-                                .appIDDesc = "test"};
-PermissionDef testPermDef1 = {.permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
-                              .bundleName = "net_conn_manager_test",
-                              .grantMode = 1,
-                              .availableLevel = APL_SYSTEM_BASIC,
-                              .label = "label",
-                              .labelId = 1,
-                              .description = "Test netsys_native_manager_test",
-                              .descriptionId = 1};
-
-PermissionStateFull testState1 = {.permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
-                                  .isGeneral = true,
-                                  .resDeviceID = {"local"},
-                                  .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                  .grantFlags = {2}};
-
-HapPolicyParams testPolicyPrams1 = {.apl = APL_SYSTEM_BASIC,
-                                    .domain = "test.domain",
-                                    .permList = {testPermDef1},
-                                    .permStateList = {testState1}};
 } // namespace
 
 template <class T> T GetData()
@@ -178,25 +154,6 @@ public:
 
 private:
     AccessTokenID currentID_ = 0;
-    AccessTokenID accessID_ = 0;
-};
-
-class AccessTokenSetIptables {
-public:
-    AccessTokenSetIptables(HapInfoParams &testInfoParms, HapPolicyParams &testPolicyPrams) : currentID_(GetSelfTokenID())
-    {
-        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
-        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(tokenIdEx.tokenIDEx);
-    }
-    ~AccessTokenSetIptables()
-    {
-        AccessTokenKit::DeleteToken(accessID_);
-        SetSelfTokenID(currentID_);
-    }
-
-private:
-    AccessTokenID currentID_;
     AccessTokenID accessID_ = 0;
 };
 
@@ -732,20 +689,6 @@ void SetAppNetFuzzTest(const uint8_t *data, size_t size)
     int32_t netId = GetData<int32_t>();
     DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(netId);
 }
-
-void SetIpTablesCommandForResTest(const uint8_t *data, size_t size)
-{
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
-    AccessTokenSetIptables token(testInfoParms1, testPolicyPrams1);
-    std::string respond;
-    DelayedSingleton<NetConnClient>::GetInstance()->SetIpTablesCommandForRes("-L", respond);
-}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -776,6 +719,5 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetGlobalHttpProxyFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetIdByIdentifierFuzzTest(data, size);
     OHOS::NetManagerStandard::SetAppNetFuzzTest(data, size);
-    OHOS::NetManagerStandard::SetIpTablesCommandForResTest(data, size);
     return 0;
 }
