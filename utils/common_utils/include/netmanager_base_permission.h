@@ -27,7 +27,6 @@ static constexpr const char *CONNECTIVITY_INTERNAL = "ohos.permission.CONNECTIVI
 static constexpr const char *GET_NETWORK_POLICY = "ohos.permission.GET_NETWORK_POLICY";
 static constexpr const char *SET_NETWORK_POLICY = "ohos.permission.SET_NETWORK_POLICY";
 static constexpr const char *GET_NETSTATS_SUMMARY = "ohos.permission.GET_NETSTATS_SUMMARY";
-static constexpr const char *NETSYS_INTERNAL = "ohos.permission.NETSYS_INTERNAL";
 } // namespace Permission
 
 class NetManagerPermission {
