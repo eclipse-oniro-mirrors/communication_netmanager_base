@@ -1,0 +1,112 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+{
+  global:
+    extern "C++" {
+      VTT?for?OHOS::NetManagerStandard::NetAllCapabilities;
+      vtable?for?OHOS::NetManagerStandard::NetAllCapabilities;
+      "OHOS::NetManagerStandard::NetAllCapabilities::operator=(OHOS::NetManagerStandard::NetAllCapabilities const&)";
+      "OHOS::NetManagerStandard::NetAllCapabilities::NetAllCapabilities(OHOS::NetManagerStandard::NetAllCapabilities const&)";
+      "OHOS::NetManagerStandard::NetConnClient::GetDefaultNet(OHOS::NetManagerStandard::NetHandle&)";
+      "OHOS::NetManagerStandard::NetConnClient::GetNetCapabilities(OHOS::NetManagerStandard::NetHandle const&, OHOS::NetManagerStandard::NetAllCapabilities&)";
+      "OHOS::NetManagerStandard::NetConnClient::NetConnClient()";
+      "OHOS::NetManagerStandard::NetConnClient::~NetConnClient()";
+      VTT?for?OHOS::NetManagerStandard::HttpProxy;
+      "OHOS::NetManagerStandard::HttpProxy::HttpProxy()";
+      VTT?for?OHOS::NetManagerStandard::NetLinkInfo;
+      vtable?for?OHOS::NetManagerStandard::NetLinkInfo;
+      "OHOS::NetManagerStandard::NetConnClient::HasDefaultNet(bool&)";
+      "OHOS::NetManagerStandard::NetConnClient::IsDefaultNetMetered(bool&)";
+      "OHOS::NetManagerStandard::NetConnClient::GetConnectionProperties(OHOS::NetManagerStandard::NetHandle const&, OHOS::NetManagerStandard::NetLinkInfo&)";
+      "OHOS::NetManagerStandard::NetConnClient::GetAllNets(std::__h::list<OHOS::sptr<OHOS::NetManagerStandard::NetHandle>, std::__h::allocator<OHOS::sptr<OHOS::NetManagerStandard::NetHandle>>>&)";
+      "OHOS::NetManagerStandard::NetConnClient::SetAirplaneMode(bool)";
+      "OHOS::NetManagerStandard::NetConnClient::NetDetection(OHOS::NetManagerStandard::NetHandle const&)";
+      "OHOS::NetManagerStandard::NetConnClient::GetGlobalHttpProxy(OHOS::NetManagerStandard::HttpProxy&)";
+      "OHOS::NetManagerStandard::HttpProxy::GetHost() const";
+      "OHOS::NetManagerStandard::HttpProxy::GetPort() const";
+      "OHOS::NetManagerStandard::HttpProxy::GetExclusionList() const";
+      "OHOS::NetManagerStandard::NetConnClient::SetGlobalHttpProxy(OHOS::NetManagerStandard::HttpProxy const&)";
+      "OHOS::NetManagerStandard::NetConnClient::GetAppNet(int&)";
+      "OHOS::NetManagerStandard::NetConnClient::SetAppNet(int)";
+      "OHOS::NetManagerStandard::NetHandle::BindSocket(int)";
+      "OHOS::NetManagerStandard::NetConnClient::RegisterNetConnCallback(OHOS::sptr<OHOS::NetManagerStandard::NetSpecifier> const&, OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback> const&, unsigned int const&)";
+      "OHOS::NetManagerStandard::NetConnClient::RegisterNetConnCallback(OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback> const&)";
+      VTT?for?OHOS::NetManagerStandard::NetSpecifier;
+      vtable?for?OHOS::NetManagerStandard::NetSpecifier;
+      "OHOS::NetManagerStandard::NetConnClient::UnregisterNetConnCallback(OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback> const&)";
+      "OHOS::NetManagerStandard::NetLinkInfo::NetLinkInfo(OHOS::NetManagerStandard::NetLinkInfo const&)";
+      "OHOS::NetManagerStandard::NetConnCallbackStub::~NetConnCallbackStub()";
+      "OHOS::NetManagerStandard::NetConnCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
+      "OHOS::NetManagerStandard::NetConnCallbackStub::~NetConnCallbackStub()";
+      "OHOS::NetManagerStandard::NetConnCallbackStub::NetAvailable(OHOS::sptr<OHOS::NetManagerStandard::NetHandle>&)";
+      "OHOS::NetManagerStandard::NetConnCallbackStub::NetCapabilitiesChange(OHOS::sptr<OHOS::NetManagerStandard::NetHandle>&, OHOS::sptr<OHOS::NetManagerStandard::NetAllCapabilities> const&)";
+      "OHOS::NetManagerStandard::NetConnCallbackStub::NetConnectionPropertiesChange(OHOS::sptr<OHOS::NetManagerStandard::NetHandle>&, OHOS::sptr<OHOS::NetManagerStandard::NetLinkInfo> const&)";
+      "OHOS::NetManagerStandard::NetConnCallbackStub::NetLost(OHOS::sptr<OHOS::NetManagerStandard::NetHandle>&)";
+      "OHOS::NetManagerStandard::NetConnCallbackStub::NetUnavailable()";
+      "OHOS::NetManagerStandard::NetConnCallbackStub::NetBlockStatusChange(OHOS::sptr<OHOS::NetManagerStandard::NetHandle>&, bool)";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetConnCallbackStub::~NetConnCallbackStub()";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetConnCallbackStub::NetAvailable(OHOS::sptr<OHOS::NetManagerStandard::NetHandle>&)";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetConnCallbackStub::NetCapabilitiesChange(OHOS::sptr<OHOS::NetManagerStandard::NetHandle>&, OHOS::sptr<OHOS::NetManagerStandard::NetAllCapabilities> const&)";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetConnCallbackStub::NetConnectionPropertiesChange(OHOS::sptr<OHOS::NetManagerStandard::NetHandle>&, OHOS::sptr<OHOS::NetManagerStandard::NetLinkInfo> const&)";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetConnCallbackStub::NetLost(OHOS::sptr<OHOS::NetManagerStandard::NetHandle>&)";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetConnCallbackStub::NetUnavailable()";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetConnCallbackStub::NetBlockStatusChange(OHOS::sptr<OHOS::NetManagerStandard::NetHandle>&, bool)";
+      "virtual thunk to OHOS::NetManagerStandard::NetConnCallbackStub::~NetConnCallbackStub()";
+      "OHOS::NetManagerStandard::NetConnCallbackStub::NetConnCallbackStub()";
+      "OHOS::NetManagerStandard::NetAllCapabilities::ToString(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&) const";
+      "OHOS::NetManagerStandard::NetLinkInfo::ToString(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&) const";
+      VTT?for?OHOS::NetManagerStandard::INetAddr;
+      vtable?for?OHOS::NetManagerStandard::INetAddr;
+      VTT?for?OHOS::NetManagerStandard::NetSupplierInfo;
+      vtable?for?OHOS::NetManagerStandard::NetSupplierInfo;
+      VTT?for?OHOS::NetManagerStandard::Route;
+      vtable?for?OHOS::NetManagerStandard::Route;
+      "OHOS::NetManagerStandard::DataFlowStatistics::GetIfaceTxPackets(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::DataFlowStatistics::GetIfaceRxPackets(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetConnClient::RegisterNetSupplier(OHOS::NetManagerStandard::NetBearType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&, unsigned int&)";
+      "OHOS::NetManagerStandard::NetConnClient::RegisterNetSupplierCallback(unsigned int, OHOS::sptr<OHOS::NetManagerStandard::NetSupplierCallbackBase> const&)";
+      "OHOS::NetManagerStandard::NetConnClient::UnregisterNetSupplier(unsigned int)";
+      "OHOS::NetManagerStandard::NetConnClient::UpdateNetSupplierInfo(unsigned int, OHOS::sptr<OHOS::NetManagerStandard::NetSupplierInfo> const&)";
+      "OHOS::NetManagerStandard::NetConnClient::UpdateNetLinkInfo(unsigned int, OHOS::sptr<OHOS::NetManagerStandard::NetLinkInfo> const&)";
+      "OHOS::NetManagerStandard::NetSupplierCallbackBase::RequestNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&)";
+      "OHOS::NetManagerStandard::NetSupplierCallbackBase::ReleaseNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&)";
+      "OHOS::NetManagerStandard::NetSupplierCallbackStub::NetSupplierCallbackStub()";
+      "OHOS::NetManagerStandard::NetSupplierCallbackStub::~NetSupplierCallbackStub()";
+      "OHOS::NetManagerStandard::NetSupplierCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
+      "OHOS::NetManagerStandard::NetSupplierCallbackStub::RequestNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&)";
+      "OHOS::NetManagerStandard::NetSupplierCallbackStub::ReleaseNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&)";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::RequestNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&)";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::ReleaseNetwork(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&)";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::~NetSupplierCallbackStub()";
+      "virtual thunk to OHOS::NetManagerStandard::NetSupplierCallbackStub::~NetSupplierCallbackStub()";
+      "OHOS::NetManagerStandard::NetConnCallbackStub::OnNetLost(OHOS::MessageParcel&, OHOS::MessageParcel&)";
+      "OHOS::NetManagerStandard::NetConnCallbackStub::OnNetBlockStatusChange(OHOS::MessageParcel&, OHOS::MessageParcel&)";
+      vtable?for?OHOS::NetManagerStandard::NetSupplierCallbackBase;
+      "OHOS::NetManagerStandard::NetConnClient::SystemReady()";
+      "OHOS::NetManagerStandard::NetConnClient::GetNetIdByIdentifier(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::list<int, std::__h::allocator<int>>&)";
+      "OHOS::NetManagerStandard::NetDetectionCallbackStub::NetDetectionCallbackStub()";
+      "OHOS::NetManagerStandard::NetDetectionCallbackStub::OnNetDetectionResult(OHOS::MessageParcel&, OHOS::MessageParcel&)";
+      "OHOS::NetManagerStandard::NetDetectionCallbackStub::~NetDetectionCallbackStub()";
+      "OHOS::NetManagerStandard::NetDetectionCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetDetectionCallbackStub::~NetDetectionCallbackStub()";
+      "virtual thunk to OHOS::NetManagerStandard::NetDetectionCallbackStub::~NetDetectionCallbackStub()";
+      "OHOS::NetManagerStandard::NetHandle::GetAddressesByName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::vector<OHOS::NetManagerStandard::INetAddr, std::__h::allocator<OHOS::NetManagerStandard::INetAddr>>&)";
+      "OHOS::NetManagerStandard::NetHandle::GetAddressByName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::NetManagerStandard::INetAddr&)";
+      "OHOS::NetManagerStandard::NetSupplierCallbackStub::RegisterSupplierCallbackImpl(OHOS::sptr<OHOS::NetManagerStandard::NetSupplierCallbackBase> const&)";
+      "OHOS::NetManagerStandard::NetConnClient::SetInternetPermission(unsigned int, unsigned char)";
+      "OHOS::NetManagerStandard::NetConnServiceProxy::NetConnServiceProxy(OHOS::sptr<OHOS::IRemoteObject> const&)";
+    };
+  local:
+   *;
+};

@@ -1,0 +1,56 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+{
+  global:
+    extern "C++" {
+      VTT?for?OHOS::NetManagerStandard::NetStatsInfo;
+      vtable?for?OHOS::NetManagerStandard::NetStatsInfo;
+      "OHOS::NetManagerStandard::NetStatsCallbackStub::~NetStatsCallbackStub()";
+      "OHOS::NetManagerStandard::NetStatsCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetStatsCallbackStub::~NetStatsCallbackStub()";
+      "virtual thunk to OHOS::NetManagerStandard::NetStatsCallbackStub::~NetStatsCallbackStub()";
+      "OHOS::NetManagerStandard::NetStatsClient::GetCellularRxBytes(unsigned long long&)";
+      "OHOS::NetManagerStandard::NetStatsClient::NetStatsClient()";
+      "OHOS::NetManagerStandard::NetStatsClient::GetCellularTxBytes(unsigned long long&)";
+      "OHOS::NetManagerStandard::NetStatsClient::GetAllRxBytes(unsigned long long&)";
+      "OHOS::NetManagerStandard::NetStatsClient::GetAllTxBytes(unsigned long long&)";
+      "OHOS::NetManagerStandard::NetStatsClient::GetUidRxBytes(unsigned long long&, unsigned int)";
+      "OHOS::NetManagerStandard::NetStatsClient::GetUidTxBytes(unsigned long long&, unsigned int)";
+      "OHOS::NetManagerStandard::NetStatsClient::GetIfaceRxBytes(unsigned long long&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetStatsClient::GetIfaceTxBytes(unsigned long long&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetStatsClient::GetIfaceStatsDetail(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned long long, unsigned long long, OHOS::NetManagerStandard::NetStatsInfo&)";
+      "OHOS::NetManagerStandard::NetStatsClient::GetUidStatsDetail(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int, unsigned long long, unsigned long long, OHOS::NetManagerStandard::NetStatsInfo&)";
+      "OHOS::NetManagerStandard::NetStatsClient::UpdateIfacesStats(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned long long, unsigned long long, OHOS::NetManagerStandard::NetStatsInfo const&)";
+      "OHOS::NetManagerStandard::NetStatsClient::UpdateStatsData()";
+      "OHOS::NetManagerStandard::NetStatsClient::~NetStatsClient()";
+      "OHOS::NetManagerStandard::NetStatsCallbackStub::NetStatsCallbackStub()";
+      "OHOS::NetManagerStandard::NetStatsClient::RegisterNetStatsCallback(OHOS::sptr<OHOS::NetManagerStandard::INetStatsCallback> const&)";
+      "OHOS::NetManagerStandard::NetStatsClient::UnregisterNetStatsCallback(OHOS::sptr<OHOS::NetManagerStandard::INetStatsCallback> const&)";
+      "OHOS::NetManagerStandard::DataFlowStatistics::GetIfaceTxPackets(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::DataFlowStatistics::GetIfaceRxPackets(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::DataFlowStatistics::GetCellularRxBytes()";
+      "OHOS::NetManagerStandard::DataFlowStatistics::GetCellularTxBytes()";
+      "OHOS::NetManagerStandard::DataFlowStatistics::GetAllRxBytes()";
+      "OHOS::NetManagerStandard::DataFlowStatistics::GetAllTxBytes()";
+      "OHOS::NetManagerStandard::DataFlowStatistics::GetUidTxBytes(unsigned int)";
+      "OHOS::NetManagerStandard::DataFlowStatistics::GetIfaceRxBytes(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::DataFlowStatistics::GetIfaceTxBytes(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::NetManagerStandard::NetStatsCallbackStub::OnNetIfaceStatsChanged(OHOS::MessageParcel&, OHOS::MessageParcel&)";
+      "OHOS::NetManagerStandard::NetStatsCallbackStub::OnNetUidStatsChanged(OHOS::MessageParcel&, OHOS::MessageParcel&)";
+      "OHOS::NetManagerStandard::NetStatsClient::ResetFactory()";
+      "OHOS::NetManagerStandard::NetStatsServiceProxy::NetStatsServiceProxy(OHOS::sptr<OHOS::IRemoteObject> const&)";
+    };
+  local:
+   *;
+};
