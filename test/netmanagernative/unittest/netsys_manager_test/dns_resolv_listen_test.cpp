@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,15 @@
 #include <dlfcn.h>
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
+
 #include "dns_config_client.h"
 #include "dns_param_cache.h"
 #include "dns_resolv_listen.h"
+#include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 
 namespace OHOS {
@@ -26,6 +32,9 @@ namespace NetsysNative {
 using namespace testing::ext;
 using namespace OHOS::nmd;
 constexpr const char *DNS_SO_PATH = "libnetsys_client.z.so";
+static constexpr const int32_t CLIENT_SOCK_FD = 99999;
+static constexpr const uint32_t NET_ID = 99999;
+std::shared_ptr<DnsResolvListen> instance_ = nullptr;
 struct resolv_config {
     int32_t error;
     int32_t timeout_ms;
@@ -72,7 +81,10 @@ void DnsResolvListenTest::SetUpTestCase() {}
 
 void DnsResolvListenTest::TearDownTestCase() {}
 
-void DnsResolvListenTest::SetUp() {}
+void DnsResolvListenTest::SetUp()
+{
+    instance_ = std::make_shared<DnsResolvListen>();
+}
 
 void DnsResolvListenTest::TearDown() {}
 
@@ -181,6 +193,31 @@ HWTEST_F(DnsResolvListenTest, ProcGetCacheCommandTest001, TestSize.Level1)
     int32_t ret = func(0, param, addr_info, &num);
     EXPECT_EQ(ret, -ENOENT);
     dlclose(handle);
+}
+
+HWTEST_F(DnsResolvListenTest, ConstructorTest001, TestSize.Level1)
+{
+    DnsResolvListen dnsResolvListen;
+    ASSERT_EQ(dnsResolvListen.serverSockFd_, -1);
+    dnsResolvListen.serverSockFd_ = CLIENT_SOCK_FD;
+    ASSERT_NE(dnsResolvListen.dnsResolvRunner_, nullptr);
+    ASSERT_NE(dnsResolvListen.dnsResolvHandler_, nullptr);
+}
+
+HWTEST_F(DnsResolvListenTest, ProcGetConfigCommand001, TestSize.Level1)
+{
+    instance_->ProcGetConfigCommand(CLIENT_SOCK_FD, NET_ID);
+    ASSERT_EQ(instance_->serverSockFd_, -1);
+}
+
+HWTEST_F(DnsResolvListenTest, ProcGetKeyForCache001, TestSize.Level1)
+{
+    char name[MAX_HOST_NAME_LEN] = {0};
+    auto ret = instance_->ProcGetKeyForCache(CLIENT_SOCK_FD, name);
+    instance_->ProcSetCacheCommand(CLIENT_SOCK_FD, NET_ID);
+    instance_->ProcGetCacheCommand(CLIENT_SOCK_FD, NET_ID);
+    instance_->ProcCommand(CLIENT_SOCK_FD);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 } // namespace NetsysNative
 } // namespace OHOS

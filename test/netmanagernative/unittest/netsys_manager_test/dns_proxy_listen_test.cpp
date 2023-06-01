@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,19 +37,26 @@ namespace NetsysNative {
 using namespace testing::ext;
 using namespace OHOS::nmd;
 using namespace NetManagerStandard::NetConnManagerTestUtil;
+constexpr uint8_t RESPONSE_FLAG = 0x80;
+static constexpr const int32_t CLIENT_SOCKET = 99999;
+static constexpr const uint32_t MAX_REQUESTDATA_LEN = 512;
 class DnsProxyListenTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    static inline std::shared_ptr<DnsProxyListen> instance_ = nullptr;
 };
 
 void DnsProxyListenTest::SetUpTestCase() {}
 
 void DnsProxyListenTest::TearDownTestCase() {}
 
-void DnsProxyListenTest::SetUp() {}
+void DnsProxyListenTest::SetUp()
+{
+    instance_ = std::make_shared<DnsProxyListen>();
+}
 
 void DnsProxyListenTest::TearDown() {}
 
@@ -104,6 +111,38 @@ HWTEST_F(DnsProxyListenTest, StartListenTest, TestSize.Level1)
     listener.SetParseNetId(0);
     listener.StartListen();
     EXPECT_EQ(listener.netId_, 0);
+}
+
+HWTEST_F(DnsProxyListenTest, OffListenTest, TestSize.Level1)
+{
+    DnsProxyListen listener;
+    listener.proxySockFd_ = CLIENT_SOCKET;
+    listener.OffListen();
+    EXPECT_EQ(listener.proxySockFd_, -1);
+    EXPECT_FALSE(listener.proxyListenSwitch_);
+}
+
+HWTEST_F(DnsProxyListenTest, DnsProxyGetPacket, TestSize.Level1)
+{
+    char requesData[MAX_REQUESTDATA_LEN] = {0};
+    char recBuff[MAX_REQUESTDATA_LEN] = {0};
+    nmd::DnsProxyListen::RecvBuff recvBuff;
+    std::vector<std::string> servers;
+    sockaddr_in proxyAddr;
+    int32_t resLen = 0;
+    instance_->netId_ = 0;
+    instance_->DnsProxyGetPacket(CLIENT_SOCKET, recvBuff, proxyAddr);
+    instance_->DnsParseBySocket(CLIENT_SOCKET, servers, recvBuff, proxyAddr);
+    instance_->DnsSendRecvParseData(CLIENT_SOCKET, requesData, resLen, proxyAddr);
+    bool ret = instance_->CheckDnsResponse(recBuff, resLen);
+    EXPECT_FALSE(ret);
+    char checkBuff[] = "test in response";
+    resLen = 5;
+    ret = instance_->CheckDnsResponse(checkBuff, resLen);
+    EXPECT_FALSE(ret);
+    checkBuff[2] = checkBuff[2] | RESPONSE_FLAG;
+    ret = instance_->CheckDnsResponse(checkBuff, resLen);
+    EXPECT_TRUE(ret);
 }
 } // namespace NetsysNative
 } // namespace OHOS

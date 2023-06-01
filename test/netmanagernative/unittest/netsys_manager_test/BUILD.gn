@@ -63,6 +63,7 @@ ohos_unittest("netsys_native_manager_test") {
     "$NETMANAGERNATIVE_ROOT/include/netsys/wrapper",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv",
   ]
 
   deps = [
