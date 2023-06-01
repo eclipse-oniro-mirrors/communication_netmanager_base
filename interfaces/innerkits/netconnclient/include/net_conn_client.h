@@ -38,7 +38,7 @@ namespace NetManagerStandard {
 class NetConnClient : public Singleton<NetConnClient> {
 public:
     NetConnClient();
-    ~NetConnClient();
+    virtual ~NetConnClient();
 
     int32_t SystemReady();
     int32_t SetInternetPermission(uint32_t uid, uint8_t allow);

@@ -29,7 +29,7 @@ namespace NetManagerStandard {
 class NetPolicyClient : public Singleton<NetPolicyClient> {
 public:
     NetPolicyClient();
-    ~NetPolicyClient();
+    virtual ~NetPolicyClient();
 
     /**
      * Set the network policy for the specified UID.

@@ -31,10 +31,10 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class PolicyObserverWrapper : public Singleton<PolicyObserverWrapper>{
+class PolicyObserverWrapper : public Singleton<PolicyObserverWrapper> {
 public:
     PolicyObserverWrapper();
-    ~PolicyObserverWrapper();
+    virtual ~PolicyObserverWrapper();
 
     napi_value On(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events,
                   bool asyncCallback);

@@ -30,7 +30,7 @@ namespace NetManagerStandard {
 class NetStatsClient : public Singleton<NetStatsClient> {
 public:
     NetStatsClient();
-    ~NetStatsClient();
+    virtual ~NetStatsClient();
 
     int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback);
     int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback);
