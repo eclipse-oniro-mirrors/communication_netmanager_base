@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,11 @@
 
 #include <gtest/gtest.h>
 #include <thread>
+
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
 
 #include "iptables_wrapper.h"
 #include "net_manager_constants.h"
@@ -48,11 +53,30 @@ HWTEST_F(IptablesWrapperTest, RunCommandTest001, TestSize.Level1)
     std::string str = wrapper->RunCommandForRes(IpType::IPTYPE_IPV4, comdLine);
     const uint32_t waiteMS1 = 500;
     std::this_thread::sleep_for(std::chrono::milliseconds(waiteMS1));
-    std::cout << str << std::endl;
     int32_t ret = wrapper->RunCommand(IpType::IPTYPE_IPV4, comdLine);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     const uint32_t waiteMS2 = 100;
     std::this_thread::sleep_for(std::chrono::milliseconds(waiteMS2));
+}
+
+HWTEST_F(IptablesWrapperTest, RunCommandTest002, TestSize.Level1)
+{
+    IptablesWrapper wrapper;
+    wrapper.handler_ = nullptr;
+    IpType ipType = IpType::IPTYPE_IPV4;
+    std::string comdLine = "-A INPUT -j LOG";
+    auto ret = wrapper.RunCommand(ipType, comdLine);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+}
+
+HWTEST_F(IptablesWrapperTest, RunCommandForResTest001, TestSize.Level1)
+{
+    IptablesWrapper wrapper;
+    wrapper.handler_ = nullptr;
+    IpType ipType = IpType::IPTYPE_IPV4;
+    std::string comdLine = "-A INPUT -j LOG";
+    auto ret = wrapper.RunCommandForRes(ipType, comdLine);
+    EXPECT_EQ(ret, wrapper.result_);
 }
 } // namespace NetsysNative
 } // namespace OHOS
