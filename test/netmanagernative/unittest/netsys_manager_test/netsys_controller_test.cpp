@@ -183,14 +183,12 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest007, TestSize.Level1)
 
 HWTEST_F(NetsysControllerTest, NetsysControllerTest008, TestSize.Level1)
 {
-    int32_t ret = NetsysController::GetInstance().SetResolverConfig(
-            NET_ID, g_baseTimeoutMsec, g_retryCount, {}, {});
+    int32_t ret = NetsysController::GetInstance().SetResolverConfig(NET_ID, g_baseTimeoutMsec, g_retryCount, {}, {});
     EXPECT_EQ(ret, 0);
 
     std::vector<std::string> servers;
     std::vector<std::string> domains;
-    ret = NetsysController::GetInstance().GetResolverConfig(
-            NET_ID, servers, domains, g_baseTimeoutMsec, g_retryCount);
+    ret = NetsysController::GetInstance().GetResolverConfig(NET_ID, servers, domains, g_baseTimeoutMsec, g_retryCount);
     EXPECT_EQ(ret, 0);
 }
 
@@ -422,6 +420,16 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest017, TestSize.Level1)
     stats = 0;
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
     ret = NetsysController::GetInstance().GetAllStatsInfo(statsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerTest018, TestSize.Level1)
+{
+    std::string respond;
+    int32_t ret = NetsysController::GetInstance().SetIptablesCommandForRes("abc", respond);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER);
+
+    ret = NetsysController::GetInstance().SetIptablesCommandForRes("-L", respond);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

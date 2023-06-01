@@ -1176,14 +1176,14 @@ int32_t NetsysNativeClient::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard
     return proxy->GetAllStatsInfo(stats);
 }
 
-int32_t NetsysNativeClient::SetIpTablesForRes(const std::string &cmd, std::string &respond)
+int32_t NetsysNativeClient::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)
 {
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("NetsysNativeClient proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->SetIpTablesForRes(cmd, respond);
+    return proxy->SetIptablesCommandForRes(cmd, respond);
 }
 
 } // namespace NetManagerStandard
