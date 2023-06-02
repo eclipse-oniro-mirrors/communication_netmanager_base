@@ -22,13 +22,15 @@
 #include "i_notify_callback.h"
 #include "interface_type.h"
 #include "iremote_broker.h"
-#include "route_type.h"
-#include "network_sharing.h"
 #include "net_stats_info.h"
+#include "network_sharing.h"
+#include "route_type.h"
+#include "uid_range.h"
 
 namespace OHOS {
 namespace NetsysNative {
 using namespace nmd;
+using namespace OHOS::NetManagerStandard;
 class INetsysService : public IRemoteBroker {
 public:
     enum {
@@ -93,6 +95,12 @@ public:
         NETSYS_GET_UID_STATS,
         NETSYS_GET_IFACE_STATS,
         NETSYS_GET_ALL_STATS_INFO,
+        NETSYS_DISALLOW_INTERNET,
+        NETSYS_SET_IPTABLES_CMD_FOR_RES,
+        NETSYS_SET_INTERNET_PERMISSION,
+        NETSYS_NETWORK_CREATE_VIRTUAL,
+        NETSYS_NETWORK_ADD_UIDS,
+        NETSYS_NETWORK_DEL_UIDS,
     };
 
     virtual int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
@@ -124,7 +132,11 @@ public:
                                   const std::string &parameter, std::string &value) = 0;
     virtual int32_t SetProcSysNet(int32_t family, int32_t which, const std::string &ifname,
                                   const std::string &parameter, std::string &value) = 0;
+    virtual int32_t SetInternetPermission(uint32_t uid, uint8_t allow) = 0;
     virtual int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) = 0;
+    virtual int32_t NetworkCreateVirtual(int32_t netId, bool hasDns) = 0;
+    virtual int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) = 0;
+    virtual int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges) = 0;
     virtual int32_t AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                         int32_t prefixLength) = 0;
     virtual int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
@@ -158,7 +170,7 @@ public:
     virtual int32_t FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids) = 0;
     virtual int32_t FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids) = 0;
     virtual int32_t FirewallEnableChain(uint32_t chain, bool enable) = 0;
-    virtual int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) = 0;
+    virtual int32_t FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule) = 0;
     virtual int32_t ShareDnsSet(uint16_t netId) = 0;
     virtual int32_t StartDnsProxyListen() = 0;
     virtual int32_t StopDnsProxyListen() = 0;
@@ -168,6 +180,7 @@ public:
     virtual int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) = 0;
     virtual int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) = 0;
     virtual int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
+    virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

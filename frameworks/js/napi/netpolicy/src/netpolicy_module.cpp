@@ -76,6 +76,7 @@ constexpr const char *FUNCTION_GET_BACKGROUND_POLICY_BY_UID = "getBackgroundPoli
 constexpr const char *FUNCTION_RESET_POLICIES = "resetPolicies";
 constexpr const char *FUNCTION_UPDATE_REMIND_POLICY = "updateRemindPolicy";
 constexpr const char *FUNCTION_SET_POWER_SAVE_ALLOWLIST = "setPowerSaveAllowList";
+constexpr const char *FUNCTION_GET_POWER_SAVE_ALLOWLIST = "getPowerSaveAllowList";
 constexpr const char *FUNCTION_ON = "on";
 constexpr const char *FUNCTION_OFF = "off";
 constexpr const char *REMIND_TYPE = "RemindType";
@@ -205,6 +206,13 @@ napi_value SetPowerSaveAllowList(napi_env env, napi_callback_info info)
         NetPolicyAsyncWork::SetPowerSaveAllowListCallback);
 }
 
+napi_value GetPowerSaveAllowList(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetPowerSaveAllowListContext>(
+        env, info, FUNCTION_GET_POWER_SAVE_ALLOWLIST, nullptr, NetPolicyAsyncWork::ExecGetPowerSaveAllowList,
+        NetPolicyAsyncWork::GetPowerSaveAllowListCallback);
+}
+
 napi_value On(napi_env env, napi_callback_info info)
 {
     return DelayedSingleton<PolicyObserverWrapper>::GetInstance()->On(
@@ -319,6 +327,7 @@ napi_value InitPolicyModule(napi_env env, napi_value exports)
             DECLARE_NAPI_FUNCTION(FUNCTION_RESET_POLICIES, ResetPolicies),
             DECLARE_NAPI_FUNCTION(FUNCTION_UPDATE_REMIND_POLICY, UpdateRemindPolicy),
             DECLARE_NAPI_FUNCTION(FUNCTION_SET_POWER_SAVE_ALLOWLIST, SetPowerSaveAllowList),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_POWER_SAVE_ALLOWLIST, GetPowerSaveAllowList),
             DECLARE_NAPI_FUNCTION(FUNCTION_ON, On),
             DECLARE_NAPI_FUNCTION(FUNCTION_OFF, Off),
         });

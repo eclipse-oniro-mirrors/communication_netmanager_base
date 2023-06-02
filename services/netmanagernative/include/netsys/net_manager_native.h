@@ -29,9 +29,11 @@
 #include "route_manager.h"
 #include "route_type.h"
 #include "sharing_manager.h"
+#include "uid_range.h"
 
 namespace OHOS {
 namespace nmd {
+using namespace OHOS::NetManagerStandard;
 class NetManagerNative {
 public:
     NetManagerNative();
@@ -44,8 +46,12 @@ public:
     void Init();
 
     int32_t NetworkReinitRoute();
+    int32_t SetInternetPermission(uint32_t uid, uint8_t allow);
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission);
+    int32_t NetworkCreateVirtual(int32_t netId, bool hasDns);
     int32_t NetworkDestroy(int32_t netId);
+    int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges);
+    int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges);
     int32_t NetworkAddInterface(int32_t netId, std::string iface);
     int32_t NetworkRemoveInterface(int32_t netId, std::string iface);
 
@@ -107,7 +113,7 @@ public:
     int32_t FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids);
     int32_t FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids);
     int32_t FirewallEnableChain(uint32_t chain, bool enable);
-    int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule);
+    int32_t FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule);
     void ShareDnsSet(uint16_t netId);
     void StartDnsProxyListen();
     void StopDnsProxyListen();

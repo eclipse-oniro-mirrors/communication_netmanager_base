@@ -30,9 +30,8 @@ public:
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
                               const std::vector<std::string> &servers,
                               const std::vector<std::string> &domains) override;
-    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
-                              std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
-                              uint8_t &retryCount) override;
+    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
+                              uint16_t &baseTimeoutMsec, uint8_t &retryCount) override;
     int32_t CreateNetworkCache(uint16_t netId) override;
     int32_t DestroyNetworkCache(uint16_t netId) override;
     int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName, const AddrInfo &hints,
@@ -56,7 +55,11 @@ public:
                           std::string &value) override;
     int32_t SetProcSysNet(int32_t family, int32_t which, const std::string &ifname, const std::string &parameter,
                           std::string &value) override;
+    int32_t SetInternetPermission(uint32_t uid, uint8_t allow) override;
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) override;
+    int32_t NetworkCreateVirtual(int32_t netId, bool hasDns) override;
+    int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) override;
+    int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges) override;
     int32_t AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
                                 int32_t prefixLength) override;
     int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
@@ -81,7 +84,7 @@ public:
     int32_t IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface) override;
     int32_t IpfwdRemoveInterfaceForward(const std::string &fromIface, const std::string &toIface) override;
     int32_t FirewallEnableChain(uint32_t chain, bool enable) override;
-    int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) override;
+    int32_t FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule) override;
     int32_t BandwidthRemoveAllowedList(uint32_t uid) override;
     int32_t FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids) override;
     int32_t FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids) override;
@@ -100,6 +103,7 @@ public:
     int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) override;
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) override;
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override;
 
 private:
     static inline BrokerDelegator<NetsysNativeServiceProxy> delegator_;

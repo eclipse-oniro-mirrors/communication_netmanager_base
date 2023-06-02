@@ -47,6 +47,7 @@ public:
         CMD_NPS_GET_BACKGROUND_POLICY,
         CMD_NPS_GET_BACKGROUND_POLICY_BY_UID,
         CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST,
+        CMD_NPS_GET_POWER_SAVE_ALLOWED_LIST,
         CMD_NPS_END = 100,
     };
 
@@ -152,7 +153,7 @@ public:
      * @param isAllowed The UID is into allow list or not.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    virtual int32_t SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed) = 0;
+    virtual int32_t SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed) = 0;
 
     /**
      * Get the allow list of UID in device idle mode.
@@ -206,13 +207,21 @@ public:
     virtual int32_t GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backgroundPolicyOfUid) = 0;
 
     /**
+     * Get the Power Save Allowed List object
+     *
+     * @param uids The list of UIDs
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    virtual int32_t GetPowerSaveAllowedList(std::vector<uint32_t> &uids) = 0;
+
+    /**
      * Set the Power Save Allowed List object
      *
      * @param uid The specified UID of application.
      * @param isAllowed The UID is into allow list or not.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    virtual int32_t SetPowerSaveAllowedList(uint32_t uid, bool isAllowed) = 0;
+    virtual int32_t SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

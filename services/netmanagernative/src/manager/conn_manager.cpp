@@ -19,6 +19,10 @@
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "physical_network.h"
+#include "virtual_network.h"
+#include "bpf_def.h"
+#include "bpf_path.h"
+#include "bpf_mapper.h"
 
 namespace OHOS {
 namespace nmd {
@@ -38,6 +42,26 @@ ConnManager::ConnManager()
 ConnManager::~ConnManager()
 {
     networks_.clear();
+}
+
+int32_t ConnManager::SetInternetPermission(uint32_t uid, uint8_t allow)
+{
+    // 0 means root
+    if (uid == 0) {
+        return NETMANAGER_ERROR;
+    }
+
+    BpfMapper<sock_permission_key, sock_permission_value> permissionMap(SOCKET_PERMISSION_MAP_PATH, BPF_F_WRONLY);
+    if (!permissionMap.IsValid()) {
+        return NETMANAGER_ERROR;
+    }
+
+    // 0 means no permission
+    if (permissionMap.Write(uid, allow, 0) != 0) {
+        return NETMANAGER_ERROR;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t ConnManager::CreatePhysicalNetwork(uint16_t netId, NetworkPermission permission)
@@ -63,6 +87,12 @@ int32_t ConnManager::CreatePhysicalNetwork(uint16_t netId, NetworkPermission per
     }
     std::shared_ptr<NetsysNetwork> network = std::make_shared<PhysicalNetwork>(netId, permission);
     networks_[netId] = network;
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t ConnManager::CreateVirtualNetwork(uint16_t netId, bool hasDns)
+{
+    networks_[netId] = std::make_shared<VirtualNetwork>(netId, hasDns);
     return NETMANAGER_SUCCESS;
 }
 
@@ -234,6 +264,8 @@ RouteManager::TableType ConnManager::GetTableType(int32_t netId)
     RouteManager::TableType tableType;
     if (netId == LOCAL_NET_ID) {
         tableType = RouteManager::LOCAL_NETWORK;
+    } else if (IsVirtualNetwork(netId)) {
+        tableType = RouteManager::VPN_NETWORK;
     } else {
         tableType = RouteManager::INTERFACE;
     }
@@ -248,6 +280,26 @@ int32_t ConnManager::GetFwmarkForNetwork(int32_t netId)
 int32_t ConnManager::SetPermissionForNetwork(int32_t netId, NetworkPermission permission)
 {
     return NETMANAGER_ERROR;
+}
+
+bool ConnManager::IsVirtualNetwork(int32_t netId)
+{
+    std::map<int32_t, std::shared_ptr<NetsysNetwork>>::iterator iter = networks_.find(netId);
+    if (iter != networks_.end() && iter->second != nullptr) {
+        return !(iter->second->IsPhysical());
+    }
+    NETNATIVE_LOGW("ConnManager::IsVirtualNetwork netId:%{public}d is not exist.", netId);
+    return false;
+}
+
+int32_t ConnManager::AddUidsToNetwork(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges)
+{
+    return 0;
+}
+
+int32_t ConnManager::RemoveUidsFromNetwork(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges)
+{
+    return 0;
 }
 
 void ConnManager::GetDumpInfos(std::string &infos)

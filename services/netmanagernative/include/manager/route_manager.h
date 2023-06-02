@@ -22,9 +22,11 @@
 
 #include "netlink_msg.h"
 #include "network_permission.h"
+#include "uid_range.h"
 
 namespace OHOS {
 namespace nmd {
+constexpr uid_t INVALID_UID = static_cast<uid_t>(-1);
 typedef struct RuleInfo {
     uint32_t ruleTable;
     uint32_t rulePriority;
@@ -158,6 +160,30 @@ public:
                                                    NetworkPermission oldPermission, NetworkPermission newPermission);
 
     /**
+     * Add interface to virtual network
+     *
+     * @param netId Network number
+     * @param interfaceName Output network device name of the route item
+     * @return Returns 0, add interface to virtual network successfully, otherwise it will fail
+     */
+    static int32_t AddInterfaceToVirtualNetwork(int32_t netId, const std::string &interfaceName);
+
+    /**
+     * Remove interface from virtual network
+     *
+     * @param netId Network number
+     * @param interfaceName Output network device name of the route item
+     * @return Returns 0, remove interface from virtual network successfully, otherwise it will fail
+     */
+    static int32_t RemoveInterfaceFromVirtualNetwork(int32_t netId, const std::string &interfaceName);
+
+    static int32_t AddUsersToVirtualNetwork(int32_t netId, const std::string &interfaceName,
+                                            const std::vector<NetManagerStandard::UidRange> &uidRanges);
+
+    static int32_t RemoveUsersFromVirtualNetwork(int32_t netId, const std::string &interfaceName,
+                                                 const std::vector<NetManagerStandard::UidRange> &uidRanges);
+
+    /**
      * Add interface to local network
      *
      * @param netId Network number
@@ -218,8 +244,12 @@ private:
     static int32_t ClearRules();
     static int32_t ClearRoutes(const std::string &interfaceName);
     static int32_t AddLocalNetworkRules();
-    static int32_t UpdatePhysicalNetwork(uint16_t netId, const std::string &interfaceName,
-                                         NetworkPermission permission, bool add);
+    static int32_t UpdatePhysicalNetwork(uint16_t netId, const std::string &interfaceName, NetworkPermission permission,
+                                         bool add);
+    static int32_t UpdateVirtualNetwork(int32_t netId, const std::string &interfaceName,
+                                        const std::vector<NetManagerStandard::UidRange> &uidRanges, bool add);
+    static int32_t ModifyVirtualNetBasedRules(int32_t netId, const std::string &ifaceName, bool add);
+
     static int32_t UpdateLocalNetwork(uint16_t netId, const std::string &interfaceName, bool add);
     static int32_t UpdateIncomingPacketMark(uint16_t netId, const std::string &interfaceName,
                                             NetworkPermission permission, bool add);
@@ -228,6 +258,21 @@ private:
                                               NetworkPermission permission, bool add);
     static int32_t UpdateSharingNetwork(uint16_t action, const std::string &inputInterface,
                                         const std::string &outputInterface);
+
+    static int32_t UpdateVpnOutputToLocalRule(const std::string &interfaceName, bool add);
+    static int32_t UpdateVpnSystemPermissionRule(int32_t netId, uint32_t table, bool add);
+
+    static int32_t UpdateVpnUidRangeRule(uint32_t table, uid_t uidStart, uid_t uidEnd, bool add);
+    static int32_t UpdateExplicitNetworkRuleWithUid(int32_t netId, uint32_t table, NetworkPermission permission,
+                                                    uid_t uidStart, uid_t uidEnd, bool add);
+    static int32_t UpdateOutputInterfaceRulesWithUid(const std::string &interface, uint32_t table,
+                                                     NetworkPermission permission, uid_t uidStart, uid_t uidEnd,
+                                                     bool add);
+    static int32_t UpdateVpnRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo, uid_t uidStart,
+                                     uid_t uidEnd);
+    static int32_t SendRuleToKernelWithUid(uint32_t action, uint16_t ruleFlag, uint8_t ruleType, RuleInfo ruleInfo,
+                                           uid_t uidStart, uid_t uidEnd);
+
     static int32_t ClearSharingRules(const std::string &inputInterface);
     static int32_t UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo);
     static int32_t SendRuleToKernel(uint32_t action, uint16_t ruleFlag, uint8_t ruleType, RuleInfo ruleInfo);

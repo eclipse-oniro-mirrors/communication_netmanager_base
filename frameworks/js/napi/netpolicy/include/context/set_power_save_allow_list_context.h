@@ -33,7 +33,7 @@ public:
     void ParseParams(napi_value *params, size_t paramsCount);
 
 public:
-    int32_t uid_ = 0;
+    std::vector<uint32_t> uids_;
     bool isAllow_ = false;
 
 private:

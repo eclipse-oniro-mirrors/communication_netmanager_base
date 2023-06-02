@@ -17,8 +17,10 @@
 #define INCLUDE_CONN_MANAGER_H
 
 #include <map>
+#include <memory>
 #include <mutex>
 #include <set>
+#include <sys/types.h>
 #include <vector>
 
 #include "netsys_network.h"
@@ -39,6 +41,15 @@ public:
     ~ConnManager();
 
     /**
+     * Disallow or allow a app to create AF_INET or AF_INET6 socket
+     *
+     * @param uid App's uid which need to be disallowed ot allowed to create AF_INET or AF_INET6 socket
+     * @param allow 0 means disallow, 1 means allow
+     * @return return 0 if OK, return error number if not OK
+     */
+    int32_t SetInternetPermission(uint32_t uid, uint8_t allow);
+
+    /**
      * Creates a physical network
      *
      * @param netId The network Id to create
@@ -48,6 +59,17 @@ public:
      * @return Returns 0, successfully create the physical network, otherwise it will fail
      */
     int32_t CreatePhysicalNetwork(uint16_t netId, NetworkPermission permission);
+
+    /**
+     * Creates a virtual network
+     *
+     * @param netId The network Id to create
+     * @param hasDns true if this network set dns
+     * @param secure true if set bypass=false
+     *
+     * @return Returns 0, successfully create the physical network, otherwise it will fail
+     */
+    int32_t CreateVirtualNetwork(uint16_t netId, bool hasDns);
 
     /**
      * Destroy a network. Any interfaces added to the network are removed, and the network ceases
@@ -169,6 +191,34 @@ public:
      * @return Returns 0, successfully set the permission for specific network, otherwise it will fail
      */
     int32_t SetPermissionForNetwork(int32_t netId, NetworkPermission permission);
+
+    /**
+     * Set the permission required to access a specific network
+     *
+     * @param netId The network id
+     * @return Returns true, netId is vpn network
+     */
+    bool IsVirtualNetwork(int32_t netId);
+
+    /**
+     * Set the permission required to access a specific network
+     *
+     * @param netId The network id
+     * @param uidRanges App uids to set
+     *
+     * @return Returns 0, successfully set the uids for specific network, otherwise it will fail
+     */
+    int32_t AddUidsToNetwork(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);
+
+    /**
+     * Set the permission required to access a specific network
+     *
+     * @param netId The network id
+     * @param uidRanges App uids to set
+     *
+     * @return Returns 0, successfully set the uids for specific network, otherwise it will fail
+     */
+    int32_t RemoveUidsFromNetwork(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);
 
     /**
      * Get the Dump Infos object

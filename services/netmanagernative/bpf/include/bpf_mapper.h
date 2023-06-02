@@ -204,7 +204,10 @@ public:
     BpfMapper<Key, Value>() = default;
     ~BpfMapper<Key, Value>()
     {
-        mapFd_ = NETMANAGER_ERROR;
+        if (mapFd_ != NETMANAGER_ERROR) {
+            close(mapFd_);
+            mapFd_ = NETMANAGER_ERROR;
+        }
     }
     BpfMapper<Key, Value>(const std::string &pathName, uint32_t flags)
     {

@@ -57,6 +57,15 @@ public:
     ~NetsysNativeClient() = default;
 
     /**
+     * Disallow or allow a app to create AF_INET or AF_INET6 socket
+     *
+     * @param uid App's uid which need to be disallowed ot allowed to create AF_INET or AF_INET6 socket
+     * @param allow 0 means disallow, 1 means allow
+     * @return return 0 if OK, return error number if not OK
+     */
+    int32_t SetInternetPermission(uint32_t uid, uint8_t allow);
+
+    /**
      * Create a physical network
      *
      * @param netId
@@ -64,6 +73,10 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission);
+
+    int32_t NetworkCreateVirtual(int32_t netId, bool hasDns);
+    int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges);
+    int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges);
 
     /**
      * Destroy the network
@@ -545,7 +558,7 @@ public:
      * @param callback
      * @return Return the return value of the netsys interface call.
      */
-    int32_t RegisterCallback(const sptr<NetsysControllerCallback>& callback);
+    int32_t RegisterCallback(const sptr<NetsysControllerCallback> &callback);
 
     /**
      * start dhcpservice.
@@ -658,7 +671,7 @@ public:
      * @param firewallRule firewall rule
      * @return Return the return value of the netsys interface call.
      */
-    int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule);
+    int32_t FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule);
 
     /**
      * Get total traffic
@@ -696,6 +709,15 @@ public:
      * @return returns the all info of the stats
      */
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
+
+    /**
+     * Set iptables for result
+     *
+     * @param cmd Iptables command
+     * @param respond The respond of execute iptables command
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond);
 
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);

@@ -16,13 +16,18 @@
 #include <gtest/gtest.h>
 
 #define private public
+#include "i_netsys_service.h"
+#include "net_manager_constants.h"
 #include "netsys_native_service_stub.h"
 #undef private
 #include "notify_callback_stub.h"
 
 namespace OHOS {
 namespace NetsysNative {
+namespace {
 using namespace testing::ext;
+#define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
+}
 
 class TestNotifyCallback : public NotifyCallbackStub {
 public:
@@ -81,6 +86,11 @@ class TestNetsysNativeServiceStub : public NetsysNativeServiceStub {
 public:
     TestNetsysNativeServiceStub() = default;
     ~TestNetsysNativeServiceStub() override {};
+
+    int32_t SetInternetPermission(uint32_t uid, uint8_t allow) override
+    {
+        return 0;
+    }
 
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
                                       const std::vector<std::string> &servers,
@@ -182,6 +192,21 @@ public:
     }
 
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) override
+    {
+        return 0;
+    }
+
+    int32_t NetworkCreateVirtual(int32_t netId, bool hasDns) override
+    {
+        return 0;
+    }
+
+    int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) override
+    {
+        return 0;
+    }
+
+    int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges) override
     {
         return 0;
     }
@@ -343,7 +368,7 @@ public:
         return 0;
     }
 
-    int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) override
+    int32_t FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule) override
     {
         return 0;
     }
@@ -388,6 +413,11 @@ public:
     {
         return 0;
     }
+
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
@@ -402,7 +432,7 @@ public:
 
 void NetsysNativeServiceStubTest::SetUpTestCase()
 {
-    notifyStub_ =  std::make_shared<TestNetsysNativeServiceStub>();
+    notifyStub_ = std::make_shared<TestNetsysNativeServiceStub>();
 }
 
 void NetsysNativeServiceStubTest::TearDownTestCase() {}
@@ -416,40 +446,70 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetResolverConfig001, TestSize.Level1)
     uint16_t netId = 1001;
     uint16_t baseTimeoutMsec = 0;
     uint8_t retryCount = 0;
-    int32_t vServerSize = 1;
+    int32_t vServerSize = 2;
     std::string strServer = "TestServer";
 
     int32_t vDomainSize = 1;
     std::string strDomain = "TestDomain";
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
+    EXPECT_TRUE(data.WriteUint16(netId));
+    EXPECT_TRUE(data.WriteUint16(baseTimeoutMsec));
+    EXPECT_TRUE(data.WriteUint16(retryCount));
+    EXPECT_TRUE(data.WriteUint32(vServerSize));
+    EXPECT_TRUE(data.WriteString(strServer));
+    EXPECT_TRUE(data.WriteUint32(vDomainSize));
+    EXPECT_TRUE(data.WriteString(strDomain));
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetResolverConfig(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetResolverConfig002, TestSize.Level1)
+{
+    uint16_t netId = 1001;
+    uint16_t baseTimeoutMsec = 0;
+    uint8_t retryCount = 0;
+    int32_t vServerSize = 0;
+    int32_t vDomainSize = 0;
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteUint16(netId));
+    EXPECT_TRUE(data.WriteUint16(baseTimeoutMsec));
+    EXPECT_TRUE(data.WriteUint8(retryCount));
+    EXPECT_TRUE(data.WriteUint32(vServerSize));
+    EXPECT_TRUE(data.WriteUint32(vDomainSize));
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetResolverConfig(data, reply);
+    DTEST_LOG << "CmdSetResolverConfig002" << ret << std::endl;
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetResolverConfig003, TestSize.Level1)
+{
+    uint16_t netId = 1001;
+    uint16_t baseTimeoutMsec = 0;
+    uint8_t retryCount = 0;
+    int32_t vServerSize = 2;
+    std::string server = "testserver";
+    int32_t vDomainSize = 2;
+    std::string domain = "testdomain";
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteUint16(netId));
+    EXPECT_TRUE(data.WriteUint16(baseTimeoutMsec));
+    EXPECT_TRUE(data.WriteUint8(retryCount));
+    EXPECT_TRUE(data.WriteUint32(vServerSize));
+    for (int32_t i = 0; i < vServerSize; i++) {
+        EXPECT_TRUE(data.WriteString(server));
     }
-    if (!data.WriteUint16(netId)) {
-        return;
-    }
-    if (!data.WriteUint16(baseTimeoutMsec)) {
-        return;
-    }
-    if (!data.WriteUint16(retryCount)) {
-        return;
-    }
-    if (!data.WriteUint32(vServerSize)) {
-        return;
-    }
-    if (!data.WriteString(strServer)) {
-        return;
-    }
-    if (!data.WriteUint32(vDomainSize)) {
-        return;
-    }
-    if (!data.WriteString(strDomain)) {
-        return;
+
+    EXPECT_TRUE(data.WriteUint32(vDomainSize));
+    for (int32_t i = 0; i < vDomainSize; i++) {
+        EXPECT_TRUE(data.WriteString(domain));
     }
     MessageParcel reply;
-    bool ret = notifyStub_->CmdSetResolverConfig(data, reply);
-    EXPECT_NE(ret, ERR_FLATTEN_OBJECT);
+    int32_t ret = notifyStub_->CmdSetResolverConfig(data, reply);
+    DTEST_LOG << "CmdSetResolverConfig003" << ret << std::endl;
+    EXPECT_EQ(ret, ERR_NONE);
 }
 
 HWTEST_F(NetsysNativeServiceStubTest, CmdGetResolverConfig001, TestSize.Level1)
@@ -465,7 +525,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetResolverConfig001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdGetResolverConfig(data, reply);
+    int32_t ret = notifyStub_->CmdGetResolverConfig(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -482,7 +542,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdCreateNetworkCache001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdCreateNetworkCache(data, reply);
+    int32_t ret = notifyStub_->CmdCreateNetworkCache(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -499,7 +559,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDestroyNetworkCache001, TestSize.Level1
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdDestroyNetworkCache(data, reply);
+    int32_t ret = notifyStub_->CmdDestroyNetworkCache(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -510,14 +570,31 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetAddrInfo001, TestSize.Level1)
 
     struct AddrInfo addrInfo;
     addrInfo.aiFlags = 0;
-    addrInfo.aiFamily = 88;
+    addrInfo.aiFamily = AF_INET;
 
     uint16_t netId = 1001;
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteString(hostName));
+    EXPECT_TRUE(data.WriteString(serverName));
+    EXPECT_TRUE(data.WriteRawData(&addrInfo, sizeof(AddrInfo)));
+    EXPECT_TRUE(data.WriteUint16(netId));
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdGetAddrInfo(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetAddrInfo002, TestSize.Level1)
+{
+    std::string hostName = "TestHostName";
+    std::string serverName = "TestServerName";
+
+    struct AddrInfo addrInfo;
+    addrInfo.aiFlags = 0;
+    addrInfo.aiFamily = 9999;
+    uint16_t netId = 1001;
+
+    MessageParcel data;
     if (!data.WriteString(hostName)) {
         return;
     }
@@ -531,8 +608,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetAddrInfo001, TestSize.Level1)
         return;
     }
     MessageParcel reply;
-    bool ret = notifyStub_->CmdGetAddrInfo(data, reply);
-    EXPECT_NE(ret, IPC_STUB_INVALID_DATA_ERR);
+    int32_t ret = notifyStub_->CmdGetAddrInfo(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
 }
 
 HWTEST_F(NetsysNativeServiceStubTest, CmdSetInterfaceMtu001, TestSize.Level1)
@@ -552,7 +629,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetInterfaceMtu001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdSetInterfaceMtu(data, reply);
+    int32_t ret = notifyStub_->CmdSetInterfaceMtu(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -569,7 +646,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetInterfaceMtu001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdGetInterfaceMtu(data, reply);
+    int32_t ret = notifyStub_->CmdGetInterfaceMtu(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -586,11 +663,29 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterNotifyCallback001, TestSize.Lev
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdRegisterNotifyCallback(data, reply);
-    EXPECT_TRUE(ret);
+    int32_t ret = notifyStub_->CmdRegisterNotifyCallback(data, reply);
+    EXPECT_EQ(ret, -1);
+    MessageParcel data2;
+    EXPECT_TRUE(data2.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor()));
+    EXPECT_TRUE(data2.WriteRemoteObject(callback->AsObject().GetRefPtr()));
+    ret = notifyStub_->CmdUnRegisterNotifyCallback(data2, reply);
+    EXPECT_EQ(ret, -1);
+}
 
-    ret = notifyStub_->CmdUnRegisterNotifyCallback(data, reply);
-    EXPECT_TRUE(ret);
+HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterNotifyCallback002, TestSize.Level1)
+{
+    std::string ifName = "ifName";
+    sptr<INotifyCallback> callback = new (std::nothrow) TestNotifyCallback();
+    MessageParcel data;
+    EXPECT_TRUE(data.WriteRemoteObject(callback->AsObject().GetRefPtr()));
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdRegisterNotifyCallback(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+    MessageParcel data2;
+    EXPECT_TRUE(data2.WriteRemoteObject(callback->AsObject().GetRefPtr()));
+    ret = notifyStub_->CmdUnRegisterNotifyCallback(data2, reply);
+    EXPECT_EQ(ret, ERR_NONE);
 }
 
 HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkRouteParcel001, TestSize.Level1)
@@ -618,7 +713,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkRouteParcel001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdNetworkAddRouteParcel(data, reply);
+    int32_t ret = notifyStub_->CmdNetworkAddRouteParcel(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     ret = notifyStub_->CmdNetworkRemoveRouteParcel(data, reply);
@@ -637,7 +732,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkDefault001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdNetworkSetDefault(data, reply);
+    int32_t ret = notifyStub_->CmdNetworkSetDefault(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     ret = notifyStub_->CmdNetworkGetDefault(data, reply);
@@ -672,7 +767,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdProcSysNet001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdGetProcSysNet(data, reply);
+    int32_t ret = notifyStub_->CmdGetProcSysNet(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     std::string value = "TestValue";
@@ -701,7 +796,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkCreatePhysical001, TestSize.Leve
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdNetworkCreatePhysical(data, reply);
+    int32_t ret = notifyStub_->CmdNetworkCreatePhysical(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -726,7 +821,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdInterfaceAddress001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdAddInterfaceAddress(data, reply);
+    int32_t ret = notifyStub_->CmdAddInterfaceAddress(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     ret = notifyStub_->CmdDelInterfaceAddress(data, reply);
@@ -750,7 +845,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdInterfaceSetIpAddress001, TestSize.Leve
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdInterfaceSetIpAddress(data, reply);
+    int32_t ret = notifyStub_->CmdInterfaceSetIpAddress(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -767,7 +862,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdInterfaceSetIffUp001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdInterfaceSetIffUp(data, reply);
+    int32_t ret = notifyStub_->CmdInterfaceSetIffUp(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -788,7 +883,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkInterface001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdNetworkAddInterface(data, reply);
+    int32_t ret = notifyStub_->CmdNetworkAddInterface(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     notifyStub_->CmdNetworkRemoveInterface(data, reply);
@@ -808,7 +903,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkDestroy001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdNetworkDestroy(data, reply);
+    int32_t ret = notifyStub_->CmdNetworkDestroy(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -832,7 +927,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetFwmarkForNetwork001, TestSize.Level1
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdGetFwmarkForNetwork(data, reply);
+    int32_t ret = notifyStub_->CmdGetFwmarkForNetwork(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -846,30 +941,15 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdInterfaceConfig001, TestSize.Level1)
     std::string flag = "testFlag";
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(ifName)) {
-        return;
-    }
-    if (!data.WriteString(hwAddr)) {
-        return;
-    }
-    if (!data.WriteString(ipv4Addr)) {
-        return;
-    }
-    if (!data.WriteUint32(prefixLength)) {
-        return;
-    }
-    if (!data.WriteUint32(vServerSize)) {
-        return;
-    }
-    if (!data.WriteString(flag)) {
-        return;
-    }
+    EXPECT_TRUE(data.WriteString(ifName));
+    EXPECT_TRUE(data.WriteString(hwAddr));
+    EXPECT_TRUE(data.WriteString(ipv4Addr));
+    EXPECT_TRUE(data.WriteUint32(prefixLength));
+    EXPECT_TRUE(data.WriteUint32(vServerSize));
+    EXPECT_TRUE(data.WriteString(flag));
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdSetInterfaceConfig(data, reply);
+    int32_t ret = notifyStub_->CmdSetInterfaceConfig(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     ret = notifyStub_->CmdGetInterfaceConfig(data, reply);
@@ -879,12 +959,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdInterfaceConfig001, TestSize.Level1)
 HWTEST_F(NetsysNativeServiceStubTest, CmdInterfaceGetList001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-
     MessageParcel reply;
-    bool ret = notifyStub_->CmdInterfaceGetList(data, reply);
+    int32_t ret = notifyStub_->CmdInterfaceGetList(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -904,7 +980,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDhcpClient001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdStartDhcpClient(data, reply);
+    int32_t ret = notifyStub_->CmdStartDhcpClient(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     ret = notifyStub_->CmdStopDhcpClient(data, reply);
@@ -928,7 +1004,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDhcpService001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdStartDhcpService(data, reply);
+    int32_t ret = notifyStub_->CmdStartDhcpService(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     ret = notifyStub_->CmdStopDhcpService(data, reply);
@@ -948,7 +1024,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdIpForwarding001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdIpEnableForwarding(data, reply);
+    int32_t ret = notifyStub_->CmdIpEnableForwarding(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     ret = notifyStub_->CmdIpDisableForwarding(data, reply);
@@ -972,7 +1048,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNat001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdEnableNat(data, reply);
+    int32_t ret = notifyStub_->CmdEnableNat(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     ret = notifyStub_->CmdDisableNat(data, reply);
@@ -996,7 +1072,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdIpfwdInterfaceForward001, TestSize.Leve
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdIpfwdAddInterfaceForward(data, reply);
+    int32_t ret = notifyStub_->CmdIpfwdAddInterfaceForward(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     ret = notifyStub_->CmdIpfwdRemoveInterfaceForward(data, reply);
@@ -1016,7 +1092,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdBandwidthEnableDataSaver001, TestSize.L
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdBandwidthEnableDataSaver(data, reply);
+    int32_t ret = notifyStub_->CmdBandwidthEnableDataSaver(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -1033,7 +1109,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdBandwidthIfaceQuota001, TestSize.Level1
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdBandwidthSetIfaceQuota(data, reply);
+    int32_t ret = notifyStub_->CmdBandwidthSetIfaceQuota(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     ret = notifyStub_->CmdBandwidthRemoveIfaceQuota(data, reply);
@@ -1053,7 +1129,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdBandwidthList001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdBandwidthAddDeniedList(data, reply);
+    int32_t ret = notifyStub_->CmdBandwidthAddDeniedList(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     ret = notifyStub_->CmdBandwidthRemoveDeniedList(data, reply);
@@ -1073,9 +1149,6 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdFirewallSetUidsListChain001, TestSize.L
     uint32_t uid = 1001;
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
     if (!data.WriteUint32(chain)) {
         return;
     }
@@ -1087,7 +1160,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdFirewallSetUidsListChain001, TestSize.L
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdFirewallSetUidsAllowedListChain(data, reply);
+    int32_t ret = notifyStub_->CmdFirewallSetUidsAllowedListChain(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     ret = notifyStub_->CmdFirewallSetUidsDeniedListChain(data, reply);
@@ -1111,7 +1184,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdFirewallEnableChain001, TestSize.Level1
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdFirewallEnableChain(data, reply);
+    int32_t ret = notifyStub_->CmdFirewallEnableChain(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -1136,7 +1209,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdFirewallSetUidRule001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdFirewallSetUidRule(data, reply);
+    int32_t ret = notifyStub_->CmdFirewallSetUidRule(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -1153,7 +1226,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdShareDnsSet001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdShareDnsSet(data, reply);
+    int32_t ret = notifyStub_->CmdShareDnsSet(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -1165,7 +1238,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdDnsProxyListen001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdStartDnsProxyListen(data, reply);
+    int32_t ret = notifyStub_->CmdStartDnsProxyListen(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 
     ret = notifyStub_->CmdStopDnsProxyListen(data, reply);
@@ -1189,7 +1262,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetNetworkSharingTraffic001, TestSize.L
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdGetNetworkSharingTraffic(data, reply);
+    int32_t ret = notifyStub_->CmdGetNetworkSharingTraffic(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -1205,7 +1278,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetTotalStats001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdGetTotalStats(data, reply);
+    int32_t ret = notifyStub_->CmdGetTotalStats(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -1225,7 +1298,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetUidStats001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdGetUidStats(data, reply);
+    int32_t ret = notifyStub_->CmdGetUidStats(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
@@ -1246,21 +1319,85 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetIfaceStats001, TestSize.Level1)
     }
 
     MessageParcel reply;
-    bool ret = notifyStub_->CmdGetIfaceStats(data, reply);
+    int32_t ret = notifyStub_->CmdGetIfaceStats(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
 HWTEST_F(NetsysNativeServiceStubTest, CmdGetAllStatsInfo001, TestSize.Level1)
 {
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-
     MessageParcel reply;
-    bool ret = notifyStub_->CmdGetAllStatsInfo(data, reply);
+    int32_t ret = notifyStub_->CmdGetAllStatsInfo(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
-} // namespace nmd
+HWTEST_F(NetsysNativeServiceStubTest, NetsysFreeAddrinfoTest001, TestSize.Level1)
+{
+    addrinfo *ai = nullptr;
+    int32_t ret = notifyStub_->NetsysFreeAddrinfo(ai);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetInternetPermissionTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    uint32_t uid = 0;
+    uint8_t allow = 1;
+    ASSERT_TRUE(data.WriteUint32(uid));
+    ASSERT_TRUE(data.WriteUint8(allow));
+    int32_t ret = notifyStub_->CmdSetInternetPermission(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkCreateVirtualTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNetworkCreateVirtual(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkAddUidsTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNetworkAddUids(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkDelUidsTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNetworkDelUids(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetIptablesCommandForResTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetIptablesCommandForRes(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, OnRemoteRequestTest001, TestSize.Level1)
+{
+    uint32_t errcode = 9999;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    auto result = notifyStub_->OnRemoteRequest(errcode, data, reply, option);
+    EXPECT_EQ(result, IPC_STUB_UNKNOW_TRANS_ERR);
+    uint32_t code = 10;
+    result = notifyStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(result, IPC_STUB_INVALID_DATA_ERR);
+    auto descriptor = NetsysNativeServiceStub::GetDescriptor();
+    data.WriteInterfaceToken(descriptor);
+    code = 8;
+    result = notifyStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(result, ERR_NONE);
+}
+} // namespace NetsysNative
 } // namespace OHOS

@@ -40,11 +40,13 @@ public:
     {
         port_ = port;
     }
-    void inline SetExclusionList(std::set<std::string> &list)
+    void inline SetExclusionList(const std::set<std::string> &list)
     {
         exclusionList_ = list;
     }
 
+    bool operator==(const HttpProxy &httpProxy) const;
+    bool operator!=(const HttpProxy &httpProxy) const;
     bool Marshalling(Parcel &parcel) const override;
     static bool Unmarshalling(Parcel &parcel, HttpProxy &httpProxy);
 

@@ -48,6 +48,15 @@ NetsysController &NetsysController::GetInstance()
     return singleInstance_;
 }
 
+int32_t NetsysController::SetInternetPermission(uint32_t uid, uint8_t allow)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetInternetPermission(uid, allow);
+}
+
 int32_t NetsysController::NetworkCreatePhysical(int32_t netId, int32_t permission)
 {
     NETMGR_LOG_D("Create Physical network: netId[%{public}d], permission[%{public}d]", netId, permission);
@@ -58,6 +67,16 @@ int32_t NetsysController::NetworkCreatePhysical(int32_t netId, int32_t permissio
     return netsysService_->NetworkCreatePhysical(netId, permission);
 }
 
+int32_t NetsysController::NetworkCreateVirtual(int32_t netId, bool hasDns)
+{
+    NETMGR_LOG_D("Create Virtual network: netId[%{public}d], hasDns[%{public}d]", netId, hasDns);
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NetworkCreateVirtual(netId, hasDns);
+}
+
 int32_t NetsysController::NetworkDestroy(int32_t netId)
 {
     NETMGR_LOG_D("Destroy network: netId[%{public}d]", netId);
@@ -66,6 +85,26 @@ int32_t NetsysController::NetworkDestroy(int32_t netId)
         return NETSYS_NETSYSSERVICE_NULL;
     }
     return netsysService_->NetworkDestroy(netId);
+}
+
+int32_t NetsysController::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    NETMGR_LOG_D("Destroy network: netId[%{public}d]", netId);
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NetworkAddUids(netId, uidRanges);
+}
+
+int32_t NetsysController::NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    NETMGR_LOG_D("Destroy network: netId[%{public}d]", netId);
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NetworkDelUids(netId, uidRanges);
 }
 
 int32_t NetsysController::NetworkAddInterface(int32_t netId, const std::string &iface)
@@ -768,15 +807,14 @@ int32_t NetsysController::FirewallEnableChain(uint32_t chain, bool enable)
     return netsysService_->FirewallEnableChain(chain, enable);
 }
 
-int32_t NetsysController::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
+int32_t NetsysController::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule)
 {
-    NETMGR_LOG_D("NetsysController::FirewallSetUidRule: chain=%{public}d,uid=%{public}d,firewallRule=%{public}d", chain,
-                 uid, firewallRule);
+    NETMGR_LOG_D("NetsysController::FirewallSetUidRule Start");
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->FirewallSetUidRule(chain, uid, firewallRule);
+    return netsysService_->FirewallSetUidRule(chain, uids, firewallRule);
 }
 
 void NetsysController::FreeAddrInfo(addrinfo *aihead)
@@ -829,6 +867,19 @@ int32_t NetsysController::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::
         return NETSYS_NETSYSSERVICE_NULL;
     }
     return netsysService_->GetAllStatsInfo(stats);
+}
+
+int32_t NetsysController::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)
+{
+    if (cmd.empty()) {
+        NETMGR_LOG_E("SetIptablesCommandForRes cmd is empty");
+        return ERR_INVALID_DATA;
+    }
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetIptablesCommandForRes netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetIptablesCommandForRes(cmd, respond);
 }
 
 } // namespace NetManagerStandard

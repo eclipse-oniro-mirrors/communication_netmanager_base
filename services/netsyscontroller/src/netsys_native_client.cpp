@@ -150,6 +150,16 @@ NetsysNativeClient::NetsysNativeClient()
     }).detach();
 }
 
+int32_t NetsysNativeClient::SetInternetPermission(uint32_t uid, uint8_t allow)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetInternetPermission(uid, allow);
+}
+
 int32_t NetsysNativeClient::NetworkCreatePhysical(int32_t netId, int32_t permission)
 {
     NETMGR_LOG_I("Create Physical network: netId[%{public}d], permission[%{public}d]", netId, permission);
@@ -161,6 +171,17 @@ int32_t NetsysNativeClient::NetworkCreatePhysical(int32_t netId, int32_t permiss
     return proxy->NetworkCreatePhysical(netId, permission);
 }
 
+int32_t NetsysNativeClient::NetworkCreateVirtual(int32_t netId, bool hasDns)
+{
+    NETMGR_LOG_I("Create Virtual network: netId[%{public}d], hasDns[%{public}d]", netId, hasDns);
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->NetworkCreateVirtual(netId, hasDns);
+}
+
 int32_t NetsysNativeClient::NetworkDestroy(int32_t netId)
 {
     NETMGR_LOG_I("Destroy network: netId[%{public}d]", netId);
@@ -170,6 +191,28 @@ int32_t NetsysNativeClient::NetworkDestroy(int32_t netId)
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->NetworkDestroy(netId);
+}
+
+int32_t NetsysNativeClient::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    NETMGR_LOG_I("Add uids to vpn network: netId[%{public}d]", netId);
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->NetworkAddUids(netId, uidRanges);
+}
+
+int32_t NetsysNativeClient::NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    NETMGR_LOG_I("Remove uids from vpn network: netId[%{public}d]", netId);
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->NetworkDelUids(netId, uidRanges);
 }
 
 int32_t NetsysNativeClient::NetworkAddInterface(int32_t netId, const std::string &iface)
@@ -915,7 +958,7 @@ int32_t NetsysNativeClient::StopDhcpClient(const std::string &iface, bool bIpv6)
     return proxy->StopDhcpClient(iface, bIpv6);
 }
 
-int32_t NetsysNativeClient::RegisterCallback(const sptr<NetsysControllerCallback>& callback)
+int32_t NetsysNativeClient::RegisterCallback(const sptr<NetsysControllerCallback> &callback)
 {
     NETMGR_LOG_D("NetsysNativeClient::RegisterCallback");
     if (callback == nullptr) {
@@ -1083,14 +1126,14 @@ int32_t NetsysNativeClient::FirewallEnableChain(uint32_t chain, bool enable)
     return proxy->FirewallEnableChain(chain, enable);
 }
 
-int32_t NetsysNativeClient::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
+int32_t NetsysNativeClient::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule)
 {
     auto proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->FirewallSetUidRule(chain, uid, firewallRule);
+    return proxy->FirewallSetUidRule(chain, uids, firewallRule);
 }
 
 int32_t NetsysNativeClient::GetTotalStats(uint64_t &stats, uint32_t type)
@@ -1131,6 +1174,16 @@ int32_t NetsysNativeClient::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->GetAllStatsInfo(stats);
+}
+
+int32_t NetsysNativeClient::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetIptablesCommandForRes(cmd, respond);
 }
 
 } // namespace NetManagerStandard

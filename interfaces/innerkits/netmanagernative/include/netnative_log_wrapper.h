@@ -17,6 +17,7 @@
 #define NETNATIVE_LOG_WRAPPER_H
 
 #include <string>
+#include <memory>
 #include "hilog/log.h"
 
 #ifndef NETMGRNATIVE_LOG_TAG

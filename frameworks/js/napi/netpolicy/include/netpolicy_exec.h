@@ -53,6 +53,7 @@ public:
     static bool ExecResetPolicies(ResetPoliciesContext *context);
     static bool ExecUpdateRemindPolicy(UpdateRemindPolicyContext *context);
     static bool ExecSetPowerSaveAllowList(SetPowerSaveAllowListContext *context);
+    static bool ExecGetPowerSaveAllowList(GetPowerSaveAllowListContext *context);
 
     static napi_value SetPolicyByUidCallback(SetPolicyByUidContext *context);
     static napi_value GetPolicyByUidCallback(GetPolicyByUidContext *context);
@@ -69,6 +70,7 @@ public:
     static napi_value ResetPoliciesCallback(ResetPoliciesContext *context);
     static napi_value UpdateRemindPolicyCallback(UpdateRemindPolicyContext *context);
     static napi_value SetPowerSaveAllowListCallback(SetPowerSaveAllowListContext *context);
+    static napi_value GetPowerSaveAllowListCallback(GetPowerSaveAllowListContext *context);
 
     static napi_value CreateNetQuotaPolicy(napi_env env, const NetQuotaPolicy &netQuotaPolicy);
 };

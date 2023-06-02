@@ -29,6 +29,15 @@ public:
     void Init() override;
 
     /**
+     * Disallow or allow a app to create AF_INET or AF_INET6 socket
+     *
+     * @param uid App's uid which need to be disallowed ot allowed to create AF_INET or AF_INET6 socket
+     * @param allow 0 means disallow, 1 means allow
+     * @return return 0 if OK, return error number if not OK
+     */
+    int32_t SetInternetPermission(uint32_t uid, uint8_t allow) override;
+
+    /**
      * Create a physical network
      *
      * @param netId
@@ -37,6 +46,8 @@ public:
      */
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) override;
 
+    int32_t NetworkCreateVirtual(int32_t netId, bool hasDns) override;
+
     /**
      * Destroy the network
      *
@@ -44,6 +55,9 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t NetworkDestroy(int32_t netId) override;
+
+    int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) override;
+    int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges) override;
 
     /**
      * Add network port device
@@ -629,7 +643,7 @@ public:
      * @param firewallRule firewall rule
      * @return Return the return value of the netsys interface call.
      */
-    int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) override;
+    int32_t FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule) override;
 
     /**
      * Get total traffic
@@ -667,6 +681,15 @@ public:
      * @return returns the all info of the stats
      */
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
+
+    /**
+     * Set iptables for result
+     *
+     * @param cmd Iptables command
+     * @param respond The respond of execute iptables command
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override;
 
 private:
     MockNetsysNativeClient mockNetsysClient_;

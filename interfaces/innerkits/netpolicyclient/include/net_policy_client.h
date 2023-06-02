@@ -234,7 +234,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    [[nodiscard]] int32_t SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed);
+    [[nodiscard]] int32_t SetDeviceIdleAllowedList(const std::vector<uint32_t> &uid, bool isAllowed);
 
     /**
      * GetIdleTrustlist for get trust list for Idle status
@@ -273,7 +273,17 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    [[nodiscard]] int32_t SetPowerSaveAllowedList(uint32_t uid, bool isAllowed);
+    [[nodiscard]] int32_t GetPowerSaveAllowedList(std::vector<uint32_t> &uids);
+
+    /**
+     * Get the allow list of UID in power save mode.
+     *
+     * @param uids The list of UIDs
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    [[nodiscard]] int32_t SetPowerSaveAllowedList(const std::vector<uint32_t> &uid, bool isAllowed);
 
 private:
     class NetPolicyDeathRecipient : public IRemoteObject::DeathRecipient {

@@ -24,10 +24,11 @@
 
 #include "dns_config_client.h"
 #include "interface_type.h"
+#include "net_stats_info.h"
 #include "netsys_controller_callback.h"
 #include "netsys_controller_define.h"
 #include "network_sharing.h"
-#include "net_stats_info.h"
+#include "uid_range.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -42,6 +43,15 @@ public:
     virtual void Init() = 0;
 
     /**
+     * Disallow or allow a app to create AF_INET or AF_INET6 socket
+     *
+     * @param uid App's uid which need to be disallowed ot allowed to create AF_INET or AF_INET6 socket
+     * @param allow 0 means disallow, 1 means allow
+     * @return return 0 if OK, return error number if not OK
+     */
+    virtual int32_t SetInternetPermission(uint32_t uid, uint8_t allow) = 0;
+
+    /**
      * Create a physical network
      *
      * @param netId Net Id
@@ -50,6 +60,8 @@ public:
      */
     virtual int32_t NetworkCreatePhysical(int32_t netId, int32_t permission) = 0;
 
+    virtual int32_t NetworkCreateVirtual(int32_t netId, bool hasDns) = 0;
+
     /**
      * Destroy the network
      *
@@ -57,6 +69,9 @@ public:
      * @return Return the return value of the netsys interface call
      */
     virtual int32_t NetworkDestroy(int32_t netId) = 0;
+
+    virtual int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) = 0;
+    virtual int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges) = 0;
 
     /**
      * Add network port device
@@ -644,7 +659,7 @@ public:
      * @param firewallRule firewall rule
      * @return Return the return value of the netsys interface call.
      */
-    virtual int32_t FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule) = 0;
+    virtual int32_t FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule) = 0;
 
     /**
      * Get total traffic
@@ -682,6 +697,15 @@ public:
      * @return returns the all info of the stats
      */
     virtual int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
+
+    /**
+     * Set iptables for result
+     *
+     * @param cmd Iptables command
+     * @param respond The respond of execute iptables command
+     * @return Value the return value of the netsys interface call
+     */
+    virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

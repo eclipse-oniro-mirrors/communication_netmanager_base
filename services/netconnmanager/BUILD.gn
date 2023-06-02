@@ -39,6 +39,7 @@ ohos_shared_library("net_conn_manager") {
     "src/net_conn_event_handler.cpp",
     "src/net_conn_service.cpp",
     "src/net_conn_service_iface.cpp",
+    "src/net_datashare_utils.cpp",
     "src/net_http_proxy_tracker.cpp",
     "src/net_monitor.cpp",
     "src/net_score.cpp",
@@ -77,11 +78,16 @@ ohos_shared_library("net_conn_manager") {
   ]
 
   external_deps = [
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
     "common_event_service:cesfwk_innerkits",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
     "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 
   defines = [
@@ -116,6 +122,7 @@ ohos_static_library("net_conn_manager_static") {
     "src/net_conn_event_handler.cpp",
     "src/net_conn_service.cpp",
     "src/net_conn_service_iface.cpp",
+    "src/net_datashare_utils.cpp",
     "src/net_http_proxy_tracker.cpp",
     "src/net_monitor.cpp",
     "src/net_score.cpp",
@@ -137,11 +144,16 @@ ohos_static_library("net_conn_manager_static") {
   ]
 
   external_deps = [
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
     "common_event_service:cesfwk_innerkits",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
     "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 
   defines = [

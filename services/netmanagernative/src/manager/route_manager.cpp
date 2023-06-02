@@ -65,6 +65,11 @@ const std::string RULEIIF_NULL = "";
 const std::string RULEOIF_NULL = "";
 const std::string LOCAL_MANGLE_INPUT = "routectrl_mangle_INPUT";
 constexpr const char *NETSYS_ROUTE_INIT_DIR_PATH = "/data/service/el1/public/netmanager/route";
+
+struct FibRuleUidRange {
+    __u32 start;
+    __u32 end;
+};
 } // namespace
 
 std::mutex RouteManager::interfaceToTableLock_;
@@ -223,6 +228,79 @@ int32_t RouteManager::ModifyPhysicalNetworkPermission(uint16_t netId, const std:
     }
 
     return UpdatePhysicalNetwork(netId, interfaceName, newPermission, DEL_CONTROL);
+}
+
+int32_t RouteManager::AddInterfaceToVirtualNetwork(int32_t netId, const std::string &interfaceName)
+{
+    return ModifyVirtualNetBasedRules(netId, interfaceName, true);
+}
+
+int32_t RouteManager::RemoveInterfaceFromVirtualNetwork(int32_t netId, const std::string &interfaceName)
+{
+    return 0;
+}
+
+int32_t RouteManager::ModifyVirtualNetBasedRules(int32_t netId, const std::string &ifaceName, bool add)
+{
+    return 0;
+}
+
+int32_t RouteManager::UpdateVpnOutputToLocalRule(const std::string &interfaceName, bool add)
+{
+    return 0;
+}
+
+int32_t RouteManager::UpdateVpnSystemPermissionRule(int32_t netId, uint32_t table, bool add)
+{
+    return 0;
+}
+
+int32_t RouteManager::AddUsersToVirtualNetwork(int32_t netId, const std::string &interfaceName,
+                                               const std::vector<NetManagerStandard::UidRange> &uidRanges)
+{
+    return UpdateVirtualNetwork(netId, interfaceName, uidRanges, true);
+}
+
+int32_t RouteManager::RemoveUsersFromVirtualNetwork(int32_t netId, const std::string &interfaceName,
+                                                    const std::vector<NetManagerStandard::UidRange> &uidRanges)
+{
+    return UpdateVirtualNetwork(netId, interfaceName, uidRanges, false);
+}
+
+int32_t RouteManager::UpdateVirtualNetwork(int32_t netId, const std::string &interfaceName,
+                                           const std::vector<NetManagerStandard::UidRange> &uidRanges, bool add)
+{
+    return 0;
+}
+
+int32_t RouteManager::UpdateVpnUidRangeRule(uint32_t table, uid_t uidStart, uid_t uidEnd, bool add)
+{
+    return 0;
+}
+
+int32_t RouteManager::UpdateExplicitNetworkRuleWithUid(int32_t netId, uint32_t table, NetworkPermission permission,
+                                                       uid_t uidStart, uid_t uidEnd, bool add)
+{
+    return 0;
+}
+
+int32_t RouteManager::UpdateOutputInterfaceRulesWithUid(const std::string &interface, uint32_t table,
+                                                        NetworkPermission permission, uid_t uidStart, uid_t uidEnd,
+                                                        bool add)
+{
+    return 0;
+}
+
+int32_t RouteManager::UpdateVpnRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo, uid_t uidStart,
+                                        uid_t uidEnd)
+{
+    return 0;
+}
+
+int32_t RouteManager::SendRuleToKernelWithUid(uint32_t action, uint16_t ruleFlag, uint8_t ruleType, RuleInfo ruleInfo,
+                                              uid_t uidStart, uid_t uidEnd)
+{
+    return 0;
 }
 
 int32_t RouteManager::AddInterfaceToLocalNetwork(uint16_t netId, const std::string &interfaceName)

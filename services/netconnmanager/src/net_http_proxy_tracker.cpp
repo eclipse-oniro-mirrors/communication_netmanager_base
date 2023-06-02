@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,10 @@
 
 #include "parameter.h"
 
+#include <netinet/in.h>
+
 #include "base64_utils.h"
+#include "netmanager_base_common_utils.h"
 #include "net_http_proxy_tracker.h"
 #include "net_mgr_log_wrapper.h"
 
@@ -32,7 +35,7 @@ constexpr const char *HTTP_PROXY_PORT_KEY = "persist.netmanager_base.http_proxy.
 constexpr const char *HTTP_PROXY_EXCLUSIONS_KEY = "persist.netmanager_base.http_proxy.exclusion_list";
 } // namespace
 
-bool NetHttpProxyTracker::ReadFromSystemParameter(HttpProxy &httpProxy)
+void NetHttpProxyTracker::ReadFromSystemParameter(HttpProxy &httpProxy)
 {
     char httpProxyHost[SYSPARA_MAX_SIZE] = {0};
     char httpProxyPort[SYSPARA_MAX_SIZE] = {0};
@@ -46,11 +49,24 @@ bool NetHttpProxyTracker::ReadFromSystemParameter(HttpProxy &httpProxy)
     std::set<std::string> exclusionList = ParseExclusionList(httpProxyExclusions);
     uint16_t port = static_cast<uint16_t>(std::atoi(httpProxyPort));
     httpProxy = {host, port, exclusionList};
-    return true;
 }
 
-bool NetHttpProxyTracker::WriteToSystemParameter(const HttpProxy &httpProxy)
+bool NetHttpProxyTracker::WriteToSystemParameter(HttpProxy &httpProxy)
 {
+    HttpProxy persistHttpProxy;
+    ReadFromSystemParameter(persistHttpProxy);
+
+    int8_t family = CommonUtils::GetAddrFamily(httpProxy.GetHost());
+    if (!httpProxy.GetHost().empty() && family != AF_INET && family != AF_INET6 &&
+        !CommonUtils::IsValidDomain(httpProxy.GetHost())) {
+        NETMGR_LOG_E("Invalid http proxy host address:%{public}s", httpProxy.GetHost().c_str());
+        std::string host = persistHttpProxy.GetHost();
+        httpProxy.SetHost(std::move(host));
+        httpProxy.SetPort(persistHttpProxy.GetPort());
+        httpProxy.SetExclusionList(persistHttpProxy.GetExclusionList());
+        return false;
+    }
+
     std::string host = Base64::Encode(httpProxy.GetHost());
     if (host.empty()) {
         host = Base64::Encode(DEFAULT_HTTP_PROXY_HOST);
@@ -59,27 +75,27 @@ bool NetHttpProxyTracker::WriteToSystemParameter(const HttpProxy &httpProxy)
     if (ret) {
         NETMGR_LOG_E("Set host:%{public}s to system parameter:%{public}s failed, ret:%{public}d", host.c_str(),
                      HTTP_PROXY_HOST_KEY, ret);
-        return false;
+        std::string host = persistHttpProxy.GetHost();
+        httpProxy.SetHost(std::move(host));
     }
 
-    std::string port = std::to_string(httpProxy.GetPort());
+    std::string port = httpProxy.GetHost().empty() ? DEFAULT_HTTP_PROXY_PORT : std::to_string(httpProxy.GetPort());
     ret = SetParameter(HTTP_PROXY_PORT_KEY, port.c_str());
     if (ret) {
         NETMGR_LOG_E("Set port:%{public}s to system parameter:%{public}s failed, ret:%{public}d", port.c_str(),
                      HTTP_PROXY_PORT_KEY, ret);
-        return false;
+        httpProxy.SetPort(persistHttpProxy.GetPort());
     }
 
-    std::string exclusions = GetExclusionsAsAstring(httpProxy.GetExclusionList());
-    if (exclusions.empty()) {
-        exclusions = DEFAULT_HTTP_PROXY_EXCLUSION_LIST;
-    }
+    std::string exclusions = GetExclusionsAsString(httpProxy.GetExclusionList());
+    exclusions = (httpProxy.GetHost().empty() || exclusions.empty()) ? DEFAULT_HTTP_PROXY_EXCLUSION_LIST : exclusions;
     ret = SetParameter(HTTP_PROXY_EXCLUSIONS_KEY, exclusions.c_str());
     if (ret) {
         NETMGR_LOG_E("Set exclusions:%{public}s to system parameter:%{public}s failed, ret:%{public}d",
                      exclusions.c_str(), HTTP_PROXY_EXCLUSIONS_KEY, ret);
-        return false;
     }
+    std::set<std::string> exclusionList = ret ? persistHttpProxy.GetExclusionList() : ParseExclusionList(exclusions);
+    httpProxy.SetExclusionList(exclusionList);
     return true;
 }
 
@@ -90,24 +106,24 @@ std::set<std::string> NetHttpProxyTracker::ParseExclusionList(const std::string 
         return exclusionList;
     }
     size_t startPos = 0;
-    size_t searchePos = exclusions.find(EXCLUSIONS_SPLIT_SYMBOL);
+    size_t searchPos = exclusions.find(EXCLUSIONS_SPLIT_SYMBOL);
     std::string exclusion;
-    while (searchePos != std::string::npos) {
-        exclusion = exclusions.substr(startPos, (searchePos - startPos));
+    while (searchPos != std::string::npos) {
+        exclusion = exclusions.substr(startPos, (searchPos - startPos));
         exclusionList.insert(exclusion);
-        startPos = searchePos + 1;
-        searchePos = exclusions.find(EXCLUSIONS_SPLIT_SYMBOL, startPos);
+        startPos = searchPos + 1;
+        searchPos = exclusions.find(EXCLUSIONS_SPLIT_SYMBOL, startPos);
     }
     exclusion = exclusions.substr(startPos, (exclusions.size() - startPos));
     exclusionList.insert(exclusion);
     return exclusionList;
 }
 
-std::string NetHttpProxyTracker::GetExclusionsAsAstring(const std::set<std::string> &exculisonList) const
+std::string NetHttpProxyTracker::GetExclusionsAsString(const std::set<std::string> &exclusionList) const
 {
     std::string exclusions;
     int32_t index = 0;
-    for (auto exclusion : exculisonList) {
+    for (auto exclusion : exclusionList) {
         if (exclusions.size() + exclusion.size() >= SYSPARA_MAX_SIZE) {
             break;
         }

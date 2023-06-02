@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,14 @@ constexpr const char *TEST_TEXT = "adfsjfjkfk^#$ajf!@!#$#kjd nck?fgnf<kdjnf>kjas
 constexpr const char *SPLIT = "?";
 constexpr const char *TEST_IP = "155.153.144.154";
 constexpr const char *TEST_IPV4 = "534/6::45/144.15:4::44";
+constexpr const char *TEST_DOMAIN1 = "123445";
+constexpr const char *TEST_DOMAIN2 = ".com";
+constexpr const char *TEST_DOMAIN3 = "test.com";
+constexpr const char *TEST_DOMAIN4 = "testcom";
+constexpr const char *TEST_DOMAIN5 = "com.test";
+constexpr const char *TEST_DOMAIN6 = "test.co.uk";
+constexpr const char *TEST_DOMAIN7 = "test.com.com";
+constexpr const char *TEST_DOMAIN8 = "test1.test2.test3.test4.test5.com";
 constexpr uint32_t ADDREDD_LEN = 16;
 } // namespace
 class UtNetmanagerBaseCommon : public testing::Test {
@@ -397,6 +405,94 @@ HWTEST_F(UtNetmanagerBaseCommon, StrToLongTest001, TestSize.Level1)
     std::string testStr = "145689";
     auto result = CommonUtils::StrToLong(testStr);
     ASSERT_NE(result, 0);
+}
+
+/**
+ * @tc.name: IsValidDomainTest001
+ * @tc.desc: Test UtNetmanagerBaseCommon IsValidDomain.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetmanagerBaseCommon, IsValidDomainTest001, TestSize.Level1)
+{
+    auto result = CommonUtils::IsValidDomain(TEST_DOMAIN1);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsValidDomainTest002
+ * @tc.desc: Test UtNetmanagerBaseCommon IsValidDomain.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetmanagerBaseCommon, IsValidDomainTest002, TestSize.Level1)
+{
+    auto result = CommonUtils::IsValidDomain(TEST_DOMAIN2);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsValidDomainTest003
+ * @tc.desc: Test UtNetmanagerBaseCommon IsValidDomain.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetmanagerBaseCommon, IsValidDomainTest003, TestSize.Level1)
+{
+    auto result = CommonUtils::IsValidDomain(TEST_DOMAIN3);
+    ASSERT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsValidDomainTest004
+ * @tc.desc: Test UtNetmanagerBaseCommon IsValidDomain.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetmanagerBaseCommon, IsValidDomainTest004, TestSize.Level1)
+{
+    auto result = CommonUtils::IsValidDomain(TEST_DOMAIN4);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsValidDomainTest005
+ * @tc.desc: Test UtNetmanagerBaseCommon IsValidDomain.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetmanagerBaseCommon, IsValidDomainTest005, TestSize.Level1)
+{
+    auto result = CommonUtils::IsValidDomain(TEST_DOMAIN5);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsValidDomainTest006
+ * @tc.desc: Test UtNetmanagerBaseCommon IsValidDomain.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetmanagerBaseCommon, IsValidDomainTest006, TestSize.Level1)
+{
+    auto result = CommonUtils::IsValidDomain(TEST_DOMAIN6);
+    ASSERT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsValidDomainTest007
+ * @tc.desc: Test UtNetmanagerBaseCommon IsValidDomain.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetmanagerBaseCommon, IsValidDomainTest007, TestSize.Level1)
+{
+    auto result = CommonUtils::IsValidDomain(TEST_DOMAIN7);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsValidDomainTest008
+ * @tc.desc: Test UtNetmanagerBaseCommon IsValidDomain.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetmanagerBaseCommon, IsValidDomainTest008, TestSize.Level1)
+{
+    auto result = CommonUtils::IsValidDomain(TEST_DOMAIN8);
+    ASSERT_FALSE(result);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

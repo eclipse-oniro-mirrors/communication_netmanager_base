@@ -14,9 +14,12 @@
  */
 
 #include <algorithm>
+#include <cstring>
 #include <gtest/gtest.h>
+#include <iostream>
 
 #include "net_manager_constants.h"
+#include "net_stats_constants.h"
 #include "netsys_controller.h"
 
 namespace OHOS {
@@ -36,8 +39,8 @@ const int NET_ID = 2;
 const int PERMISSION = 5;
 const int PREFIX_LENGTH = 23;
 const int TEST_MTU = 111;
-uint16_t BASE_TIMEOUT_MSEC = 200;
-uint8_t RETRY_COUNT = 3;
+uint16_t g_baseTimeoutMsec = 200;
+uint8_t g_retryCount = 3;
 const int64_t TEST_UID = 1010;
 const int32_t SOCKET_FD = 5;
 const int32_t TEST_STATS_UID = 11111;
@@ -181,14 +184,12 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest007, TestSize.Level1)
 
 HWTEST_F(NetsysControllerTest, NetsysControllerTest008, TestSize.Level1)
 {
-    int32_t ret = NetsysController::GetInstance().SetResolverConfig(
-            NET_ID, BASE_TIMEOUT_MSEC, RETRY_COUNT, {}, {});
+    int32_t ret = NetsysController::GetInstance().SetResolverConfig(NET_ID, g_baseTimeoutMsec, g_retryCount, {}, {});
     EXPECT_EQ(ret, 0);
 
     std::vector<std::string> servers;
     std::vector<std::string> domains;
-    ret = NetsysController::GetInstance().GetResolverConfig(
-            NET_ID, servers, domains, BASE_TIMEOUT_MSEC, RETRY_COUNT);
+    ret = NetsysController::GetInstance().GetResolverConfig(NET_ID, servers, domains, g_baseTimeoutMsec, g_retryCount);
     EXPECT_EQ(ret, 0);
 }
 
@@ -371,7 +372,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest015, TestSize.Level1)
     ret = NetsysController::GetInstance().FirewallEnableChain(TEST_UID, true);
     EXPECT_NE(ret, 0);
 
-    ret = NetsysController::GetInstance().FirewallSetUidRule(TEST_UID, TEST_UID, FIREWALL_RULE);
+    ret = NetsysController::GetInstance().FirewallSetUidRule(TEST_UID, {TEST_UID}, FIREWALL_RULE);
     EXPECT_NE(ret, 0);
 }
 
@@ -411,15 +412,25 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest017, TestSize.Level1)
 
     stats = 0;
     ret = NetsysController::GetInstance().GetUidStats(stats, 0, TEST_STATS_UID);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NetStatsResultCode::STATS_ERR_READ_BPF_FAIL);
 
     stats = 0;
     ret = NetsysController::GetInstance().GetIfaceStats(stats, 0, IFACE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NetStatsResultCode::STATS_ERR_GET_IFACE_NAME_FAILED);
 
     stats = 0;
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
     ret = NetsysController::GetInstance().GetAllStatsInfo(statsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerTest018, TestSize.Level1)
+{
+    std::string respond;
+    int32_t ret = NetsysController::GetInstance().SetIptablesCommandForRes("abc", respond);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER);
+
+    ret = NetsysController::GetInstance().SetIptablesCommandForRes("-L", respond);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

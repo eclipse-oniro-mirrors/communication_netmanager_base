@@ -17,15 +17,18 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "system_ability_definition.h"
-#include "netsys_controller.h"
 #include "interface_manager.h"
+#include "netsys_controller.h"
+#include "system_ability_definition.h"
+
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
 
 #include "dns_config_client.h"
 #include "net_manager_constants.h"
-#define private public
 #include "netsys_native_service.h"
-#undef private
 #include "notify_callback_stub.h"
 
 namespace OHOS {
@@ -33,6 +36,7 @@ namespace NetsysNative {
 namespace {
 using namespace NetManagerStandard;
 using namespace testing::ext;
+#define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 class TestNotifyCallback : public NotifyCallbackStub {
 public:
     TestNotifyCallback() = default;
@@ -106,12 +110,14 @@ void NetsysNativeServiceTest::TearDown() {}
 
 HWTEST_F(NetsysNativeServiceTest, DumpTest001, TestSize.Level1)
 {
+    NetsysNativeService service;
+    service.state_ = NetsysNativeService::ServiceRunningState::STATE_RUNNING;
+    service.OnStart();
     instance_->Init();
     int32_t testFd = 11;
     int32_t ret = instance_->Dump(testFd, {});
     EXPECT_LE(ret, NETMANAGER_SUCCESS);
 }
-
 
 HWTEST_F(NetsysNativeServiceTest, SetResolverConfigTest001, TestSize.Level1)
 {
@@ -444,7 +450,7 @@ HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceTest001, TestSize.Level1)
     EXPECT_NE(ret, 0);
 
     uint32_t firewallRule = 0;
-    ret = instance_->FirewallSetUidRule(chain, uid, firewallRule);
+    ret = instance_->FirewallSetUidRule(chain, {uid}, firewallRule);
     EXPECT_NE(ret, 0);
 
     uint16_t netid = 1000;
@@ -485,6 +491,160 @@ HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceState001, TestSize.Level1)
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
     ret = instance_->GetAllStatsInfo(statsInfo);
     EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetAddrInfoTest001, TestSize.Level1)
+{
+    std::string hostName;
+    std::string serverName;
+    AddrInfo hints;
+    uint16_t netId = 1031;
+    std::vector<AddrInfo> res;
+    instance_->netsysService_->dnsManager_->dnsGetAddrInfo_ = std::make_shared<DnsGetAddrInfo>();
+    int32_t ret = instance_->GetAddrInfo(hostName, serverName, hints, netId, res);
+    DTEST_LOG << ret << std::endl;
+    EXPECT_EQ(ret, EAI_NONAME);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetInternetPermissionTest001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    uint8_t allow = 1;
+    int32_t ret = instance_->SetInternetPermission(uid, allow);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetsysNativeServiceTest, ShareDnsSetTest001, TestSize.Level1)
+{
+    uint16_t netid = 10034;
+    auto backup = std::move(instance_->netsysService_);
+    instance_->netsysService_ = nullptr;
+    auto ret = instance_->ShareDnsSet(netid);
+    instance_->netsysService_ = std::move(backup);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetsysNativeServiceTest, StartDnsProxyListenTest001, TestSize.Level1)
+{
+    auto backup = std::move(instance_->netsysService_);
+    instance_->netsysService_ = nullptr;
+    auto ret = instance_->StartDnsProxyListen();
+    instance_->netsysService_ = std::move(backup);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetsysNativeServiceTest, StopDnsProxyListenTest001, TestSize.Level1)
+{
+    auto backup = std::move(instance_->netsysService_);
+    instance_->netsysService_ = nullptr;
+    auto ret = instance_->StopDnsProxyListen();
+    instance_->netsysService_ = std::move(backup);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetNetworkSharingTrafficTest001, TestSize.Level1)
+{
+    std::string downIface = "dface";
+    std::string upIface = "uface";
+    NetworkSharingTraffic traffic;
+    auto backup = std::move(instance_->sharingManager_);
+    instance_->sharingManager_ = nullptr;
+    auto ret = instance_->GetNetworkSharingTraffic(downIface, upIface, traffic);
+    instance_->sharingManager_ = std::move(backup);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetsysNativeServiceTest, OnAddRemoveSystemAbilityTest001, TestSize.Level1)
+{
+    instance_->hasSARemoved_ = false;
+    instance_->OnAddSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, {});
+    ASSERT_TRUE(instance_->hasSARemoved_);
+    instance_->OnAddSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, {});
+    ASSERT_TRUE(instance_->hasSARemoved_);
+    instance_->hasSARemoved_ = false;
+    instance_->OnAddSystemAbility(-1, {});
+    ASSERT_FALSE(instance_->hasSARemoved_);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetTotalStatsTest001, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    uint32_t type = 1;
+    auto ret = instance_->GetTotalStats(stats, type);
+    EXPECT_EQ(stats, 0);
+    auto backup = std::move(instance_->bpfStats_);
+    ret = instance_->GetTotalStats(stats, type);
+    instance_->bpfStats_ = std::move(backup);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetUidStatsTest001, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    uint32_t uid = 99;
+    uint32_t type = 1;
+    auto ret = instance_->GetUidStats(stats, uid, type);
+    EXPECT_EQ(stats, 0);
+    auto backup = std::move(instance_->bpfStats_);
+    ret = instance_->GetUidStats(stats, uid, type);
+    instance_->bpfStats_ = std::move(backup);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetIfaceStatsTest002, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    uint32_t type = 1;
+    const std::string &iface = "eth0";
+    auto ret = instance_->GetIfaceStats(stats, type, iface);
+    EXPECT_EQ(stats, 0);
+    auto backup = std::move(instance_->bpfStats_);
+    ret = instance_->GetIfaceStats(stats, type, iface);
+    instance_->bpfStats_ = std::move(backup);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetAllStatsInfoTest001, TestSize.Level1)
+{
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
+    auto ret = instance_->GetAllStatsInfo(stats);
+    EXPECT_GE(stats.size(), 0);
+    auto backup = std::move(instance_->bpfStats_);
+    ret = instance_->GetAllStatsInfo(stats);
+    instance_->bpfStats_ = std::move(backup);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest001, TestSize.Level1)
+{
+    std::string iptableCmd = "-Sabbbb";
+    std::string iptableOutput = "";
+    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest002, TestSize.Level1)
+{
+    std::string iptableCmd = "Sabbbb";
+    std::string iptableOutput = "";
+    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER);
+}
+
+HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest003, TestSize.Level1)
+{
+    instance_->notifyCallback_ = nullptr;
+    instance_->OnNetManagerRestart();
+    instance_->manager_ = nullptr;
+    instance_->OnNetManagerRestart();
+    instance_->netsysService_ = nullptr;
+    instance_->OnNetManagerRestart();
+    std::string iptableCmd = "-Sabbbb";
+    std::string iptableOutput = "";
+    auto backup = std::move(instance_->iptablesWrapper_);
+    auto ret = instance_->SetIptablesCommandForRes(iptableCmd, iptableOutput);
+    instance_->iptablesWrapper_ = std::move(backup);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 } // namespace NetsysNative
 } // namespace OHOS

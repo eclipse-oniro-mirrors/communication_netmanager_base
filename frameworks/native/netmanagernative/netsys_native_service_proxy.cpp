@@ -527,6 +527,28 @@ int32_t NetsysNativeServiceProxy::SetProcSysNet(int32_t family, int32_t which, c
     return reply.ReadInt32();
 }
 
+int32_t NetsysNativeServiceProxy::SetInternetPermission(uint32_t uid, uint8_t allow)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint32(uid)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint8(allow)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(INetsysService::NETSYS_SET_INTERNET_PERMISSION, data, reply, option);
+
+    return reply.ReadInt32();
+}
+
 int32_t NetsysNativeServiceProxy::NetworkCreatePhysical(int32_t netId, int32_t permission)
 {
     NETNATIVE_LOGI("Begin to NetworkCreatePhysical");
@@ -546,6 +568,21 @@ int32_t NetsysNativeServiceProxy::NetworkCreatePhysical(int32_t netId, int32_t p
     Remote()->SendRequest(INetsysService::NETSYS_NETWORK_CREATE_PHYSICAL, data, reply, option);
 
     return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::NetworkCreateVirtual(int32_t netId, bool hasDns)
+{
+    return 0;
+}
+
+int32_t NetsysNativeServiceProxy::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    return 0;
+}
+
+int32_t NetsysNativeServiceProxy::NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    return 0;
 }
 
 int32_t NetsysNativeServiceProxy::AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
@@ -1291,7 +1328,8 @@ int32_t NetsysNativeServiceProxy::FirewallEnableChain(uint32_t chain, bool enabl
     return ret;
 }
 
-int32_t NetsysNativeServiceProxy::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
+int32_t NetsysNativeServiceProxy::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids,
+                                                     uint32_t firewallRule)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -1302,7 +1340,7 @@ int32_t NetsysNativeServiceProxy::FirewallSetUidRule(uint32_t chain, uint32_t ui
         NETNATIVE_LOGE("WriteUint32 failed");
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteUint32(uid)) {
+    if (!data.WriteUInt32Vector(uids)) {
         NETNATIVE_LOGE("WriteUint32 failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -1542,5 +1580,35 @@ int32_t NetsysNativeServiceProxy::GetAllStatsInfo(std::vector<OHOS::NetManagerSt
     return ERR_NONE;
 }
 
+int32_t NetsysNativeServiceProxy::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(cmd)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    if (Remote() == nullptr) {
+        NETNATIVE_LOGE("SetIptablesCommandForRes Remote pointer is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ERR_NONE != Remote()->SendRequest(INetsysService::NETSYS_SET_IPTABLES_CMD_FOR_RES, data, reply, option)) {
+        NETNATIVE_LOGE("SetIptablesCommandForRes proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("SetIptablesCommandForRes proxy read ret failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.ReadString(respond)) {
+        NETNATIVE_LOGE("SetIptablesCommandForRes proxy read respond failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
 } // namespace NetsysNative
 } // namespace OHOS

@@ -22,7 +22,7 @@
 #include "network_permission.h"
 #include "route_manager.h"
 #include "traffic_manager.h"
-
+#include "net_manager_constants.h"
 #include "net_manager_native.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
@@ -71,15 +71,35 @@ int32_t NetManagerNative::NetworkReinitRoute()
     return connManager_->ReinitRoute();
 }
 
+int32_t NetManagerNative::SetInternetPermission(uint32_t uid, uint8_t allow)
+{
+    return connManager_->SetInternetPermission(uid, allow);
+}
+
 int32_t NetManagerNative::NetworkCreatePhysical(int32_t netId, int32_t permission)
 {
     return connManager_->CreatePhysicalNetwork(static_cast<uint16_t>(netId),
                                                static_cast<NetworkPermission>(permission));
 }
 
+int32_t NetManagerNative::NetworkCreateVirtual(int32_t netId, bool hasDns)
+{
+    return connManager_->CreateVirtualNetwork(netId, hasDns);
+}
+
 int32_t NetManagerNative::NetworkDestroy(int32_t netId)
 {
     return connManager_->DestroyNetwork(netId);
+}
+
+int32_t NetManagerNative::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    return connManager_->AddUidsToNetwork(netId, uidRanges);
+}
+
+int32_t NetManagerNative::NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+{
+    return connManager_->RemoveUidsFromNetwork(netId, uidRanges);
 }
 
 int32_t NetManagerNative::NetworkAddInterface(int32_t netId, std::string interfaceName)
@@ -352,11 +372,17 @@ int32_t NetManagerNative::FirewallEnableChain(uint32_t chain, bool enable)
     return firewallManager_->EnableChain(chainType, enable);
 }
 
-int32_t NetManagerNative::FirewallSetUidRule(uint32_t chain, uint32_t uid, uint32_t firewallRule)
+int32_t NetManagerNative::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule)
 {
     auto chainType = static_cast<NetManagerStandard::ChainType>(chain);
     auto rule = static_cast<NetManagerStandard::FirewallRule>(firewallRule);
-    return firewallManager_->SetUidRule(chainType, uid, rule);
+    for (auto &uid : uids) {
+        auto ret = firewallManager_->SetUidRule(chainType, uid, rule);
+        if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
+            return ret;
+        }
+    }
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
 void NetManagerNative::ShareDnsSet(uint16_t netId)

@@ -67,6 +67,7 @@
                     "//foundation/communication/netmanager_base/frameworks/js/napi/netstats:statistics",
                     "//foundation/communication/netmanager_base/frameworks/js/napi/netpolicy:policy",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
+                    "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:socket_permission",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient:net_policy_manager_if",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient:net_stats_manager_if"
                 ],
@@ -99,6 +100,16 @@
                             "net_supplier_info.h",
                             "net_specifier.h",
                             "route.h"
+                        ],
+                        "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient/include"
+                    }
+                },
+                {
+                    "type": "so",
+                    "name": "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:socket_permission",
+                    "header": {
+                        "header_files": [
+                            "socket_permission.h"
                         ],
                         "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient/include"
                     }

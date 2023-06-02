@@ -23,17 +23,19 @@
 #include "net_activate.h"
 #include "net_conn_service.h"
 #include "net_conn_types.h"
+#include "net_http_proxy_tracker.h"
+#include "net_datashare_utils.h"
 #include "net_manager_center.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_supplier.h"
 #include "netmanager_base_permission.h"
 #include "netsys_controller.h"
-#include "net_http_proxy_tracker.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
+constexpr uint32_t MAX_REQUEST_NUM = 2000;
 // hisysevent error messgae
 constexpr const char *ERROR_MSG_NULL_SUPPLIER_INFO = "Net supplier info is nullptr";
 constexpr const char *ERROR_MSG_NULL_NET_LINK_INFO = "Net link info is nullptr";
@@ -127,9 +129,7 @@ bool NetConnService::Init()
         return false;
     }
     NetHttpProxyTracker httpProxyTracker;
-    if (!httpProxyTracker.ReadFromSystemParameter(httpProxy_)) {
-        NETMGR_LOG_E("NetConnService Init: read http proxy failed");
-    }
+    httpProxyTracker.ReadFromSystemParameter(globalHttpProxy_);
     SendGlobalHttpProxyChangeBroadcast();
     return true;
 }
@@ -138,6 +138,12 @@ int32_t NetConnService::SystemReady()
 {
     NETMGR_LOG_D("System ready.");
     return NETMANAGER_SUCCESS;
+}
+
+// Do not post into event handler, because this interface should have good performance
+int32_t NetConnService::SetInternetPermission(uint32_t uid, uint8_t allow)
+{
+    return NetsysController::GetInstance().SetInternetPermission(uid, allow);
 }
 
 int32_t NetConnService::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
@@ -609,20 +615,19 @@ void NetConnService::SendGlobalHttpProxyChangeBroadcast()
     info.action = EventFwk::CommonEventSupport::COMMON_EVENT_HTTP_PROXY_CHANGE;
     info.data = "Global HttpProxy Changed";
     info.ordered = true;
-    std::map<std::string, std::string> param = {{"HttpProxy", httpProxy_.ToString()}};
+    std::map<std::string, std::string> param = {{"HttpProxy", globalHttpProxy_.ToString()}};
     DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
 }
 
 int32_t NetConnService::SetGlobalHttpProxyAsync(const HttpProxy &httpProxy)
 {
-    if (httpProxy_.GetHost() != httpProxy.GetHost() || httpProxy_.GetPort() != httpProxy.GetPort() ||
-        httpProxy_.GetExclusionList() != httpProxy.GetExclusionList()) {
-        httpProxy_ = httpProxy;
+    if (globalHttpProxy_ != httpProxy) {
+        globalHttpProxy_ = httpProxy;
         SendGlobalHttpProxyChangeBroadcast();
         std::lock_guard<std::mutex> locker(netManagerMutex_);
         NetHttpProxyTracker httpProxyTracker;
-        if (!httpProxyTracker.WriteToSystemParameter(httpProxy_)) {
-            NETMGR_LOG_E("Write http proxy to system parameter failed");
+        if (!httpProxyTracker.WriteToSystemParameter(globalHttpProxy_)) {
+            return NET_CONN_ERR_HTTP_PROXY_INVALID;
         }
     }
     return NETMANAGER_SUCCESS;
@@ -1225,12 +1230,12 @@ int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::st
 int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
     std::lock_guard<std::mutex> locker(netManagerMutex_);
-    if (httpProxy_.GetHost().empty()) {
+    if (globalHttpProxy_.GetHost().empty()) {
         httpProxy.SetPort(0);
         NETMGR_LOG_E("The http proxy host is empty");
         return NETMANAGER_SUCCESS;
     }
-    httpProxy = httpProxy_;
+    httpProxy = globalHttpProxy_;
     return NETMANAGER_SUCCESS;
 }
 
@@ -1324,8 +1329,7 @@ int32_t NetConnService::Dump(int32_t fd, const std::vector<std::u16string> &args
     std::string result;
     GetDumpMessage(result);
     int32_t ret = dprintf(fd, "%s\n", result.c_str());
-    return ret < 0 ? static_cast<int32_t>(NET_CONN_ERR_CREATE_DUMP_FAILED)
-                   : static_cast<int32_t>(NETMANAGER_SUCCESS);
+    return (ret < 0) ? static_cast<int32_t>(NET_CONN_ERR_CREATE_DUMP_FAILED) : static_cast<int32_t>(NETMANAGER_SUCCESS);
 }
 
 int32_t NetConnService::SetAirplaneMode(bool state)
@@ -1334,6 +1338,15 @@ int32_t NetConnService::SetAirplaneMode(bool state)
         NETMGR_LOG_E("Permission check failed.");
         return NETMANAGER_ERR_NOT_SYSTEM_CALL;
     }
+
+    auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
+    std::string airplaneMode = std::to_string(state);
+    Uri uri(SETTINGS_DATASHARE_URL_AIRPLANE_MODE);
+    int32_t ret = dataShareHelperUtils->Update(uri, SETTINGS_DATASHARE_KEY_AIRPLANE_MODE, airplaneMode);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Update airplane mode:%{public}d to datashare failed.", state);
+    }
+
     BroadcastInfo info;
     info.action = EventFwk::CommonEventSupport::COMMON_EVENT_AIRPLANE_MODE_CHANGED;
     info.data = "Net Manager Airplane Mode Changed";

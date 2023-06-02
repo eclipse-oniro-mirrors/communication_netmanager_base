@@ -37,7 +37,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr uint32_t MAX_REQUEST_NUM = 2000;
+
 class NetConnService : public SystemAbility,
                        public INetActivateCallback,
                        public NetConnServiceStub,
@@ -58,6 +58,15 @@ public:
      * @return Returns 0, the system is ready, otherwise the system is not ready
      */
     int32_t SystemReady() override;
+
+    /**
+     * Disallow or allow a app to create AF_INET or AF_INET6 socket
+     *
+     * @param uid App's uid which need to be disallowed ot allowed to create AF_INET or AF_INET6 socket
+     * @param allow 0 means disallow, 1 means allow
+     * @return return 0 if OK, return error number if not OK
+     */
+    int32_t SetInternetPermission(uint32_t uid, uint8_t allow) override;
 
     /**
      * The interface is register the network
@@ -311,7 +320,7 @@ private:
     std::unique_ptr<NetScore> netScore_ = nullptr;
     sptr<NetConnServiceIface> serviceIface_ = nullptr;
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
-    HttpProxy httpProxy_;
+    HttpProxy globalHttpProxy_;
     std::mutex netManagerMutex_;
     std::shared_ptr<AppExecFwk::EventRunner> netConnEventRunner_ = nullptr;
     std::shared_ptr<NetConnEventHandler> netConnEventHandler_ = nullptr;

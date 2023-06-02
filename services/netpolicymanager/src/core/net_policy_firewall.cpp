@@ -37,15 +37,15 @@ void NetPolicyFirewall::Init()
     powerSaveFirewallRule_->SetAllowedList(powerSaveAllowedList_);
 }
 
-int32_t NetPolicyFirewall::SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed)
+int32_t NetPolicyFirewall::SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
 {
     if (powerSaveAllowedList_.size() > MAX_LIST_SIZE) {
         NETMGR_LOG_E("Device idle allowed list's size is over the max size.");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    UpdateFirewallPolicyList(FIREWALL_CHAIN_DEVICE_IDLE, uid, isAllowed);
+    UpdateFirewallPolicyList(FIREWALL_CHAIN_DEVICE_IDLE, uids, isAllowed);
     GetFileInst()->WriteFirewallRules(FIREWALL_CHAIN_DEVICE_IDLE, deviceIdleAllowedList_, deviceIdleDeniedList_);
-    deviceIdleFirewallRule_->SetAllowedList(uid, isAllowed ? FIREWALL_RULE_ALLOW : FIREWALL_RULE_DENY);
+    deviceIdleFirewallRule_->SetAllowedList(uids, isAllowed ? FIREWALL_RULE_ALLOW : FIREWALL_RULE_DENY);
 
     std::shared_ptr<PolicyEvent> eventData = std::make_shared<PolicyEvent>();
     eventData->eventId = NetPolicyEventHandler::MSG_DEVICE_IDLE_LIST_UPDATED;
@@ -54,15 +54,15 @@ int32_t NetPolicyFirewall::SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetPolicyFirewall::SetPowerSaveAllowedList(uint32_t uid, bool isAllowed)
+int32_t NetPolicyFirewall::SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
 {
     if (powerSaveAllowedList_.size() > MAX_LIST_SIZE) {
         NETMGR_LOG_E("Power save allowed list's size is over the max size.");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    UpdateFirewallPolicyList(FIREWALL_CHAIN_POWER_SAVE, uid, isAllowed);
+    UpdateFirewallPolicyList(FIREWALL_CHAIN_POWER_SAVE, uids, isAllowed);
     GetFileInst()->WriteFirewallRules(FIREWALL_CHAIN_POWER_SAVE, powerSaveAllowedList_, powerSaveDeniedList_);
-    powerSaveFirewallRule_->SetAllowedList(uid, isAllowed ? FIREWALL_RULE_ALLOW : FIREWALL_RULE_DENY);
+    powerSaveFirewallRule_->SetAllowedList(uids, isAllowed ? FIREWALL_RULE_ALLOW : FIREWALL_RULE_DENY);
 
     std::shared_ptr<PolicyEvent> eventData = std::make_shared<PolicyEvent>();
     eventData->eventId = NetPolicyEventHandler::MSG_POWER_SAVE_LIST_UPDATED;
@@ -71,21 +71,23 @@ int32_t NetPolicyFirewall::SetPowerSaveAllowedList(uint32_t uid, bool isAllowed)
     return NETMANAGER_SUCCESS;
 }
 
-void NetPolicyFirewall::UpdateFirewallPolicyList(uint32_t chainType, uint32_t uid, bool isAllowed)
+void NetPolicyFirewall::UpdateFirewallPolicyList(uint32_t chainType, const std::vector<uint32_t> &uids, bool isAllowed)
 {
-    if (chainType == FIREWALL_CHAIN_DEVICE_IDLE) {
-        if (isAllowed) {
-            deviceIdleAllowedList_.emplace(uid);
-        } else {
-            deviceIdleAllowedList_.erase(uid);
+    for (auto &uid : uids) {
+        if (chainType == FIREWALL_CHAIN_DEVICE_IDLE) {
+            if (isAllowed) {
+                deviceIdleAllowedList_.emplace(uid);
+            } else {
+                deviceIdleAllowedList_.erase(uid);
+            }
         }
-    }
 
-    if (chainType == FIREWALL_CHAIN_POWER_SAVE) {
-        if (isAllowed) {
-            powerSaveAllowedList_.emplace(uid);
-        } else {
-            powerSaveAllowedList_.erase(uid);
+        if (chainType == FIREWALL_CHAIN_POWER_SAVE) {
+            if (isAllowed) {
+                powerSaveAllowedList_.emplace(uid);
+            } else {
+                powerSaveAllowedList_.erase(uid);
+            }
         }
     }
 }
@@ -93,6 +95,12 @@ void NetPolicyFirewall::UpdateFirewallPolicyList(uint32_t chainType, uint32_t ui
 int32_t NetPolicyFirewall::GetDeviceIdleAllowedList(std::vector<uint32_t> &uids)
 {
     uids = deviceIdleFirewallRule_->GetAllowedList();
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyFirewall::GetPowerSaveAllowedList(std::vector<uint32_t> &uids)
+{
+    uids = powerSaveFirewallRule_->GetAllowedList();
     return NETMANAGER_SUCCESS;
 }
 
@@ -162,8 +170,8 @@ void NetPolicyFirewall::ResetPolicies()
 
 void NetPolicyFirewall::DeleteUid(uint32_t uid)
 {
-    SetDeviceIdleAllowedList(uid, false);
-    SetPowerSaveAllowedList(uid, false);
+    SetDeviceIdleAllowedList({uid}, false);
+    SetPowerSaveAllowedList({uid}, false);
 
     deviceIdleFirewallRule_->RemoveFromAllowedList(uid);
     powerSaveFirewallRule_->RemoveFromAllowedList(uid);

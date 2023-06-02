@@ -119,7 +119,7 @@ HWTEST_F(NetsysPolicyWrapperTest, FirewallSetUidRuleTest001, TestSize.Level1)
     uint32_t chain = 2;
     uint32_t uid = 666;
     uint32_t firewallRule = 2;
-    auto ret = instance_->FirewallSetUidRule(chain, uid, firewallRule);
+    auto ret = instance_->FirewallSetUidRule(chain, {uid}, firewallRule);
     EXPECT_LE(ret, 0);
 }
 

@@ -20,6 +20,8 @@
 
 #include "ipc_skeleton.h"
 #include "netmanager_base_common_utils.h"
+#include "netmanager_base_permission.h"
+#include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "securec.h"
 
@@ -75,17 +77,11 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     opToInterfaceMap_[NETSYS_DISABLE_NAT] = &NetsysNativeServiceStub::CmdDisableNat;
     opToInterfaceMap_[NETSYS_IPFWD_ADD_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward;
     opToInterfaceMap_[NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward;
-    opToInterfaceMap_[NETSYS_TETHER_DNS_SET] = &NetsysNativeServiceStub::CmdShareDnsSet;
-    opToInterfaceMap_[NETSYS_START_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStartDnsProxyListen;
-    opToInterfaceMap_[NETSYS_STOP_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStopDnsProxyListen;
-    opToInterfaceMap_[NETSYS_GET_SHARING_NETWORK_TRAFFIC] = &NetsysNativeServiceStub::CmdGetNetworkSharingTraffic;
-    opToInterfaceMap_[NETSYS_GET_TOTAL_STATS] = &NetsysNativeServiceStub::CmdGetTotalStats;
-    opToInterfaceMap_[NETSYS_GET_UID_STATS] = &NetsysNativeServiceStub::CmdGetUidStats;
-    opToInterfaceMap_[NETSYS_GET_IFACE_STATS] = &NetsysNativeServiceStub::CmdGetIfaceStats;
-    opToInterfaceMap_[NETSYS_GET_ALL_STATS_INFO] = &NetsysNativeServiceStub::CmdGetAllStatsInfo;
+    opToInterfaceMap_[NETSYS_SET_IPTABLES_CMD_FOR_RES] = &NetsysNativeServiceStub::CmdSetIptablesCommandForRes;
 
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
+    InitOpToInterfaceMapExt();
     uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
              UID_SAMGR, UID_PARAM_WATCHER};
 }
@@ -99,6 +95,7 @@ void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
     opToInterfaceMap_[NETSYS_BANDWIDTH_REMOVE_DENIED_LIST] = &NetsysNativeServiceStub::CmdBandwidthRemoveDeniedList;
     opToInterfaceMap_[NETSYS_BANDWIDTH_ADD_ALLOWED_LIST] = &NetsysNativeServiceStub::CmdBandwidthAddAllowedList;
     opToInterfaceMap_[NETSYS_BANDWIDTH_REMOVE_ALLOWED_LIST] = &NetsysNativeServiceStub::CmdBandwidthRemoveAllowedList;
+    opToInterfaceMap_[NETSYS_SET_INTERNET_PERMISSION] = &NetsysNativeServiceStub::CmdSetInternetPermission;
 }
 
 void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
@@ -109,6 +106,21 @@ void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdFirewallSetUidsDeniedListChain;
     opToInterfaceMap_[NETSYS_FIREWALL_ENABLE_CHAIN] = &NetsysNativeServiceStub::CmdFirewallEnableChain;
     opToInterfaceMap_[NETSYS_FIREWALL_SET_UID_RULE] = &NetsysNativeServiceStub::CmdFirewallSetUidRule;
+}
+
+void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
+{
+    opToInterfaceMap_[NETSYS_TETHER_DNS_SET] = &NetsysNativeServiceStub::CmdShareDnsSet;
+    opToInterfaceMap_[NETSYS_START_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStartDnsProxyListen;
+    opToInterfaceMap_[NETSYS_STOP_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStopDnsProxyListen;
+    opToInterfaceMap_[NETSYS_GET_SHARING_NETWORK_TRAFFIC] = &NetsysNativeServiceStub::CmdGetNetworkSharingTraffic;
+    opToInterfaceMap_[NETSYS_GET_TOTAL_STATS] = &NetsysNativeServiceStub::CmdGetTotalStats;
+    opToInterfaceMap_[NETSYS_GET_UID_STATS] = &NetsysNativeServiceStub::CmdGetUidStats;
+    opToInterfaceMap_[NETSYS_GET_IFACE_STATS] = &NetsysNativeServiceStub::CmdGetIfaceStats;
+    opToInterfaceMap_[NETSYS_GET_ALL_STATS_INFO] = &NetsysNativeServiceStub::CmdGetAllStatsInfo;
+    opToInterfaceMap_[NETSYS_NETWORK_CREATE_VIRTUAL] = &NetsysNativeServiceStub::CmdNetworkCreateVirtual;
+    opToInterfaceMap_[NETSYS_NETWORK_ADD_UIDS] = &NetsysNativeServiceStub::CmdNetworkAddUids;
+    opToInterfaceMap_[NETSYS_NETWORK_DEL_UIDS] = &NetsysNativeServiceStub::CmdNetworkDelUids;
 }
 
 int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -481,6 +493,16 @@ int32_t NetsysNativeServiceStub::CmdSetProcSysNet(MessageParcel &data, MessagePa
     return result;
 }
 
+int32_t NetsysNativeServiceStub::CmdSetInternetPermission(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = data.ReadUint32();
+    uint8_t allow = data.ReadUint8();
+    int32_t result = SetInternetPermission(uid, allow);
+    reply.WriteInt32(result);
+    NETNATIVE_LOG_D("SetInternetPermission has recved result %{public}d", result);
+    return result;
+}
+
 int32_t NetsysNativeServiceStub::CmdNetworkCreatePhysical(MessageParcel &data, MessageParcel &reply)
 {
     int32_t netId = data.ReadInt32();
@@ -491,6 +513,21 @@ int32_t NetsysNativeServiceStub::CmdNetworkCreatePhysical(MessageParcel &data, M
     NETNATIVE_LOG_D("NetworkCreatePhysical has recved result %{public}d", result);
 
     return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdNetworkCreateVirtual(MessageParcel &data, MessageParcel &reply)
+{
+    return 0;
+}
+
+int32_t NetsysNativeServiceStub::CmdNetworkAddUids(MessageParcel &data, MessageParcel &reply)
+{
+    return 0;
+}
+
+int32_t NetsysNativeServiceStub::CmdNetworkDelUids(MessageParcel &data, MessageParcel &reply)
+{
+    return 0;
 }
 
 int32_t NetsysNativeServiceStub::CmdAddInterfaceAddress(MessageParcel &data, MessageParcel &reply)
@@ -855,9 +892,10 @@ int32_t NetsysNativeServiceStub::CmdFirewallSetUidRule(MessageParcel &data, Mess
 {
     NETNATIVE_LOG_D("Begin to dispatch cmd CmdFirewallSetUidRule");
     uint32_t chain = (unsigned)data.ReadUint32();
-    uint32_t uid = (unsigned)data.ReadInt32();
+    std::vector<uint32_t> uids;
+    data.ReadUInt32Vector(&uids);
     uint32_t firewallRule = (unsigned)data.ReadInt32();
-    int32_t result = FirewallSetUidRule(chain, uid, firewallRule);
+    int32_t result = FirewallSetUidRule(chain, uids, firewallRule);
     reply.WriteInt32(result);
     return result;
 }
@@ -966,6 +1004,22 @@ int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, Message
     }
     if (!OHOS::NetManagerStandard::NetStatsInfo::Marshalling(reply, stats)) {
         NETNATIVE_LOGE("Read stats info failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply)
+{
+    std::string cmd = data.ReadString();
+    std::string respond;
+    int32_t result = SetIptablesCommandForRes(cmd, respond);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write CmdSetIptablesCommandForRes result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteString(respond)) {
+        NETNATIVE_LOGE("Write CmdSetIptablesCommandForRes respond failed");
         return ERR_FLATTEN_OBJECT;
     }
     return result;

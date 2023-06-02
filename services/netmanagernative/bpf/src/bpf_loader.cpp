@@ -213,9 +213,9 @@ class ElfLoader {
 public:
     explicit ElfLoader(std::string path) : path_(std::move(path)), kernVersion_(0) {}
 
-    ElfLoadError Unload()
+    ElfLoadError Unload() const
     {
-        struct {
+        const struct {
             uint32_t index;
             const char *infoMsg;
             std::function<ElfLoadError()> fun;
@@ -240,9 +240,9 @@ public:
         return ELF_LOAD_ERR_NONE;
     }
 
-    ElfLoadError Load()
+    ElfLoadError Load() const
     {
-        struct {
+        const struct {
             uint32_t index;
             const char *infoMsg;
             std::function<ElfLoadError()> fun;
@@ -518,7 +518,7 @@ private:
             std::string mapPinLocation = std::string(MAPS_DIR) + "/" + map.name;
             if (access(mapPinLocation.c_str(), F_OK) == 0) {
                 auto ret = UnPin(mapPinLocation);
-                return ret < 0 ? false : true;
+                return ret >= 0;
             }
             return true;
         });
@@ -602,7 +602,7 @@ private:
         return static_cast<bpf_prog_type>(NETMANAGER_ERROR);
     }
 
-    bool DoAttach(int32_t progFd, const std::string &progName)
+    static bool DoAttach(int32_t progFd, const std::string &progName)
     {
         if (progName.size() < 1) {
             NETNATIVE_LOGE("progName is null");
@@ -632,7 +632,7 @@ private:
         return true;
     }
 
-    void DoDetach(const std::string &progPinLocation, const std::string &progName)
+    static void DoDetach(const std::string &progPinLocation, const std::string &progName)
     {
         if (progName.size() < 1) {
             NETNATIVE_LOGE("progName is null");

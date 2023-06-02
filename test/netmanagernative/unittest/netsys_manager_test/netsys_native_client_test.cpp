@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "net_manager_constants.h"
+#include "net_stats_constants.h"
 #include "netsys_native_client.h"
 
 namespace OHOS {
@@ -224,7 +225,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest004, TestSize.Level1)
 
     ret = nativeClient_.FirewallEnableChain(CHAIN, true);
     EXPECT_EQ(ret, -1);
-    ret = nativeClient_.FirewallSetUidRule(CHAIN, NET_ID, FIREWALL_RULE);
+    ret = nativeClient_.FirewallSetUidRule(CHAIN, {NET_ID}, FIREWALL_RULE);
     EXPECT_EQ(ret, -1);
 }
 
@@ -235,10 +236,10 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest005, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 
     ret = nativeClient_.GetUidStats(stats, 0, APP_ID);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, NetStatsResultCode::STATS_ERR_READ_BPF_FAIL);
 
     ret = nativeClient_.GetIfaceStats(stats, 0, IFACE);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, NetStatsResultCode::STATS_ERR_GET_IFACE_NAME_FAILED);
 
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
     ret = nativeClient_.GetAllStatsInfo(statsInfo);

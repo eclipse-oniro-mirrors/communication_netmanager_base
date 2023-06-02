@@ -50,7 +50,7 @@ public:
      * @param uid The UID of application
      * @param rule The firewall rull, see {@link FIREWALL_RULE_ALLOW and FIREWALL_RULE_DENY}
      */
-    virtual void SetAllowedList(uint32_t uid, uint32_t rule);
+    virtual void SetAllowedList(const std::vector<uint32_t> &uids, uint32_t rule);
 
     /**
      * Set the firewall allow list
@@ -146,6 +146,7 @@ protected:
     bool modeEnable_ = false;
 
 private:
+    void SetAllowedList(uint32_t uid, uint32_t rule);
     std::shared_ptr<NetsysPolicyWrapper> netsys_ = nullptr;
 };
 } // namespace NetManagerStandard

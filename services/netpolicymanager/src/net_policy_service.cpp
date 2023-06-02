@@ -217,10 +217,10 @@ int32_t NetPolicyService::UpdateRemindPolicy(int32_t netType, const std::string 
     return netPolicyTraffic_->UpdateRemindPolicy(netType, iccid, remindType);
 }
 
-int32_t NetPolicyService::SetDeviceIdleAllowedList(uint32_t uid, bool isAllowed)
+int32_t NetPolicyService::SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
 {
-    NETMGR_LOG_D("SetDeviceIdleAllowedList info: uid[%{public}d] isAllowed[%{public}d]", uid, isAllowed);
-    return netPolicyFirewall_->SetDeviceIdleAllowedList(uid, isAllowed);
+    NETMGR_LOG_D("SetDeviceIdleAllowedList start");
+    return netPolicyFirewall_->SetDeviceIdleAllowedList(uids, isAllowed);
 }
 
 int32_t NetPolicyService::GetDeviceIdleAllowedList(std::vector<uint32_t> &uids)
@@ -235,10 +235,16 @@ int32_t NetPolicyService::SetDeviceIdlePolicy(bool enable)
     return netPolicyFirewall_->UpdateDeviceIdlePolicy(enable);
 }
 
-int32_t NetPolicyService::SetPowerSaveAllowedList(uint32_t uid, bool isAllowed)
+int32_t NetPolicyService::GetPowerSaveAllowedList(std::vector<uint32_t> &uids)
 {
-    NETMGR_LOG_D("SetPowerSaveAllowedList info: uid[%{public}d] isAllowed[%{public}d]", uid, isAllowed);
-    return netPolicyFirewall_->SetPowerSaveAllowedList(uid, isAllowed);
+    NETMGR_LOG_D("GetPowerSaveAllowedList start");
+    return netPolicyFirewall_->GetPowerSaveAllowedList(uids);
+}
+
+int32_t NetPolicyService::SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
+{
+    NETMGR_LOG_D("SetPowerSaveAllowedList start");
+    return netPolicyFirewall_->SetPowerSaveAllowedList(uids, isAllowed);
 }
 
 int32_t NetPolicyService::GetDumpMessage(std::string &message)

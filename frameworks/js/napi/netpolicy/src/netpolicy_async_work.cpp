@@ -91,6 +91,11 @@ void NetPolicyAsyncWork::ExecSetPowerSaveAllowList(napi_env env, void *data)
     BaseAsyncWork::ExecAsyncWork<SetPowerSaveAllowListContext, NetPolicyExec::ExecSetPowerSaveAllowList>(env, data);
 }
 
+void NetPolicyAsyncWork::ExecGetPowerSaveAllowList(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetPowerSaveAllowListContext, NetPolicyExec::ExecGetPowerSaveAllowList>(env, data);
+}
+
 void NetPolicyAsyncWork::ExecGetBackgroundPolicyByUid(napi_env env, void *data)
 {
     BaseAsyncWork::ExecAsyncWork<GetBackgroundPolicyByUidContext, NetPolicyExec::ExecGetBackgroundPolicyByUid>(env,
@@ -188,6 +193,12 @@ void NetPolicyAsyncWork::UpdateRemindPolicyCallback(napi_env env, napi_status st
 void NetPolicyAsyncWork::SetPowerSaveAllowListCallback(napi_env env, napi_status status, void *data)
 {
     BaseAsyncWork::AsyncWorkCallback<SetPowerSaveAllowListContext, NetPolicyExec::SetPowerSaveAllowListCallback>(
+        env, status, data);
+}
+
+void NetPolicyAsyncWork::GetPowerSaveAllowListCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetPowerSaveAllowListContext, NetPolicyExec::GetPowerSaveAllowListCallback>(
         env, status, data);
 }
 } // namespace NetManagerStandard

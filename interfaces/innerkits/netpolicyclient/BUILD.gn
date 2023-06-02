@@ -77,7 +77,7 @@ ohos_shared_library("net_policy_manager_if") {
   deps = [ ":net_policy_parcel" ]
 
   external_deps = [
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
 
