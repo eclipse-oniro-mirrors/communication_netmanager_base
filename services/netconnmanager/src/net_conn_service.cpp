@@ -35,6 +35,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
+constexpr uint32_t MAX_REQUEST_NUM = 2000;
 // hisysevent error messgae
 constexpr const char *ERROR_MSG_NULL_SUPPLIER_INFO = "Net supplier info is nullptr";
 constexpr const char *ERROR_MSG_NULL_NET_LINK_INFO = "Net link info is nullptr";
