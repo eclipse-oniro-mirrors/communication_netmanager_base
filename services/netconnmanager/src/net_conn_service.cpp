@@ -1378,12 +1378,11 @@ int32_t NetConnService::InterfaceSetIffUp(const std::string &ifaceName)
         NETMGR_LOG_E("The ifaceName in service is null");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    if (strncmp(ifaceName, WLAN_IF_NAME, strlen(WLAN_IF_NAME))) {
-        NETMGR_EXT_LOG_I("Configure only wlan network card, [%{public}s]", ifaceName);
+    if (strncmp(ifaceName.c_str(), WLAN_IF_NAME, strlen(WLAN_IF_NAME))) {
+        NETMGR_LOG_I("Configure only wlan network card, [%{public}s]", ifaceName.c_str());
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     return NetsysController::GetInstance().InterfaceSetIffUp(ifaceName);
 }
-
 } // namespace NetManagerStandard
 } // namespace OHOS
