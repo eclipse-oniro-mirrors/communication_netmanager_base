@@ -167,8 +167,10 @@ void DnsProxyListen::StartListen()
         if (DnsThreadClose()) {
             break;
         }
-        std::thread t(DnsProxyListen::DnsProxyGetPacket, proxySockFd_, recvBuff, proxyAddr).detach();
-        pthread_setname_np(t.native_handle(), "DnsProxyGetPacket");
+        std::thread t(DnsProxyListen::DnsProxyGetPacket, proxySockFd_, recvBuff, proxyAddr);
+        t.detach();
+        std::string threadName = "DnsProxyGetPacket";
+        pthread_setname_np(t.native_handle(), threadName.c_str());
     }
 }
 

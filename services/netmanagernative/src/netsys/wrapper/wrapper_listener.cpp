@@ -58,7 +58,8 @@ int32_t WrapperListener::Start()
         return NetlinkResult::ERROR;
     }
     thread_ = std::thread(WrapperListener::ListenThread, this);
-    pthread_setname_np(thread_.native_handle(), "WrapperListener");
+    std::string threadName = "WrapperListener";
+    pthread_setname_np(thread_.native_handle(), threadName.c_str());
     return NetlinkResult::OK;
 }
 

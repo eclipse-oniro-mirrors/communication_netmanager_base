@@ -168,8 +168,10 @@ void NetStatsCached::ForceUpdateStats()
         CacheStats();
         WriteStats();
         isForce_ = false;
-    }).detach();
-    pthread_setname_np(t.native_handle(), "NetStatsCachedUpdateStats");
+    });
+    t.detach();
+    std::string threadName = "NetStatsCachedUpdateStats";
+    pthread_setname_np(t.native_handle(), threadName.c_str());
 }
 
 void NetStatsCached::Reset() {}

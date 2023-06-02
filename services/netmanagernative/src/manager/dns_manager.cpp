@@ -32,8 +32,10 @@ void StartListen()
 
 DnsManager::DnsManager() : dnsProxyListen_(std::make_shared<DnsProxyListen>())
 {
-    std::thread t(StartListen).detach();
-    pthread_setname_np(t.native_handle(), "DnsManagerListen");
+    std::thread t(StartListen);
+    t.detach();
+    std::string threadName = "DnsManagerListen";
+    pthread_setname_np(t.native_handle(), threadName.c_str());
 }
 
 int32_t DnsManager::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMillis, uint8_t retryCount,
@@ -83,8 +85,10 @@ void DnsManager::ShareDnsSet(uint16_t netId)
 void DnsManager::StartDnsProxyListen()
 {
     dnsProxyListen_->OnListen();
-    std::thread t(StartProxyListen).detach();
-    pthread_setname_np(t.native_handle(), "DnsManagerProxyListen");
+    std::thread t(StartProxyListen);
+    t..detach();
+    std::string threadName = "DnsManagerProxyListen";
+    pthread_setname_np(t.native_handle(), threadName.c_str());
 }
 
 void DnsManager::StopDnsProxyListen()

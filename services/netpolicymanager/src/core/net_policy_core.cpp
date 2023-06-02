@@ -64,8 +64,10 @@ void NetPolicyCore::Init(std::shared_ptr<NetPolicyEventHandler> &handler)
         } else {
             appManager->RegisterAppStateCallback(netAppStatusCallback_);
         }
-    }).detach();
-    pthread_setname_np(t.native_handle(), "NetPolicyCoreInit");
+    });
+    t.detach();
+    std::string threadName = "NetPolicyCoreInit";
+    pthread_setname_np(t.native_handle(), threadName.c_str());
 }
 
 void NetPolicyCore::HandleEvent(const AppExecFwk::InnerEvent::Pointer &event)
@@ -120,8 +122,10 @@ void NetPolicyCore::SubscribeCommonEvent()
         } else {
             NETMGR_LOG_D("SubscribeCommonEvent successful");
         }
-    }).detach();
-    pthread_setname_np(t.native_handle(), "NetPolicyCoreSubEvent");
+    });
+    t.detach();
+    std::string threadName = "NetPolicyCoreSubEvent";
+    pthread_setname_np(t.native_handle(), threadName.c_str());
 }
 
 void NetPolicyCore::ReceiveMessage::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
