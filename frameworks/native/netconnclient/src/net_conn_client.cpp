@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -381,6 +381,18 @@ int32_t NetConnClient::GetGlobalHttpProxy(HttpProxy &httpProxy)
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->GetGlobalHttpProxy(httpProxy);
+}
+
+int32_t NetConnClient::GetDefaultHttpProxy(HttpProxy &httpProxy)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    int32_t bindNetId = 0;
+    GetAppNet(bindNetId);
+    return proxy->GetDefaultHttpProxy(bindNetId, httpProxy);
 }
 
 int32_t NetConnClient::GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList)

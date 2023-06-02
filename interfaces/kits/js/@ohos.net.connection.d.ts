@@ -166,6 +166,21 @@ declare namespace connection {
   function getAddressesByName(host: string, callback: AsyncCallback<Array<NetAddress>>): void;
   function getAddressesByName(host: string): Promise<Array<NetAddress>>;
 
+    /**
+   * Obtains the default {@link HttpProxy} proxy settings.
+   *
+   * If a global proxy is set, the global proxy parameters are returned.
+   * If the process is bound to a {@link NetHandle} using {@link setAppNet},
+   * the {@link NetHandle} proxy settings are returned.
+   * In other cases, the proxy settings of default network are returned.
+   *
+   * @param { AsyncCallback<HttpProxy> } callback Returns the default {@link HttpProxy} settings.
+   * @throws { BusinessError } 2100002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 2100003 - System internal error.
+   */
+  function getDefaultHttpProxy(callback: AsyncCallback<HttpProxy>): void;
+  function getDefaultHttpProxy(): Promise<HttpProxy>;
+
   /**
    * Obtains http proxy configuration
    *

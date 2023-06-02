@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 
 #include "i_net_supplier_callback.h"
 #include "i_net_conn_callback.h"
+#include "http_proxy.h"
 #include "network.h"
 #include "net_caps.h"
 #include "net_specifier.h"
@@ -65,6 +66,7 @@ public:
     std::shared_ptr<Network> GetNetwork() const;
     int32_t GetNetId() const;
     sptr<NetHandle> GetNetHandle() const;
+    void GetHttpProxy(HttpProxy &httpProxy);
     void UpdateNetConnState(NetConnState netConnState);
     bool IsConnecting() const;
     bool IsConnected() const;

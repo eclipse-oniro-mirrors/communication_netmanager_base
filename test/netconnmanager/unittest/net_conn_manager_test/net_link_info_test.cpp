@@ -21,7 +21,10 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
 using namespace testing::ext;
+constexpr const char *TEST_IPV4_ADDR = "127.0.0.1";
+} // namespace
 class NetLinkInfoTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -70,6 +73,8 @@ sptr<NetLinkInfo> GetNetLinkInfo()
     netLinkInfo->routeList_.push_back(*route);
 
     netLinkInfo->mtu_ = 0x5DC;
+
+    netLinkInfo->httpProxy_ = {TEST_IPV4_ADDR, 80, {"localhost"}};
     return netLinkInfo;
 }
 

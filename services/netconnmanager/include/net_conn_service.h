@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -246,6 +246,20 @@ public:
     int32_t GetGlobalHttpProxy(HttpProxy &httpProxy) override;
 
     /**
+     * Obtains the default proxy settings.
+     *
+     * <p>If a global proxy is set, the global proxy parameters are returned.
+     * If the process is bound to a network using {@link setAppNet},
+     * the {@link Network} proxy settings are returned.
+     * In other cases, the default proxy settings of network are returned.
+     *
+     * @param bindNetId App bound network ID
+     * @param httpProxy output param, the http proxy server
+     * @return Returns NETMANAGER_SUCCESS even if HttpProxy is empty
+     */
+    int32_t GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy) override;
+
+    /**
      * Get net id by identifier
      *
      * @param ident Net identifier
@@ -299,8 +313,7 @@ private:
     int32_t UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo);
     int32_t NetDetectionAsync(int32_t netId);
     int32_t RestrictBackgroundChangedAsync(bool restrictBackground);
-    int32_t SetGlobalHttpProxyAsync(const HttpProxy &httpProxy);
-    void SendGlobalHttpProxyChangeBroadcast();
+    void SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy);
     void RequestAllNetworkExceptDefault();
 
 private:
