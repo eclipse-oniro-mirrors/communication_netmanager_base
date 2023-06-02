@@ -86,7 +86,7 @@ void DnsManager::StartDnsProxyListen()
 {
     dnsProxyListen_->OnListen();
     std::thread t(StartProxyListen);
-    t..detach();
+    t.detach();
     std::string threadName = "DnsManagerProxyListen";
     pthread_setname_np(t.native_handle(), threadName.c_str());
 }
