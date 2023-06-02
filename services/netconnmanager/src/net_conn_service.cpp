@@ -23,8 +23,8 @@
 #include "net_activate.h"
 #include "net_conn_service.h"
 #include "net_conn_types.h"
-#include "net_http_proxy_tracker.h"
 #include "net_datashare_utils.h"
+#include "net_http_proxy_tracker.h"
 #include "net_manager_center.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
@@ -1370,5 +1370,15 @@ int32_t NetConnService::SetAppNet(int32_t netId)
 {
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetConnService::InterfaceSetIffUp(const std::string &ifaceName)
+{
+    if (ifaceName.empty()) {
+        NETMGR_LOG_E("The ifaceName in service is null");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    return NetsysController::GetInstance().InterfaceSetIffUp(ifaceName);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
