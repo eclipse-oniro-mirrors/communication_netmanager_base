@@ -166,7 +166,7 @@ declare namespace connection {
   function getAddressesByName(host: string, callback: AsyncCallback<Array<NetAddress>>): void;
   function getAddressesByName(host: string): Promise<Array<NetAddress>>;
 
-    /**
+  /**
    * Obtains the default {@link HttpProxy} proxy settings.
    *
    * If a global proxy is set, the global proxy parameters are returned.
