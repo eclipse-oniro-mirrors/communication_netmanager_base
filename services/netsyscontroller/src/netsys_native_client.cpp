@@ -136,9 +136,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit(const 
 
 NetsysNativeClient::NetsysNativeClient()
 {
-    std::thread([this]() {
-        std::string threadName = "netsysNativeClientGetProxy";
-        pthread_setname_np(pthread_self(), threadName.c_str());
+    std::thread t([this]() {
         uint32_t count = 0;
         while (GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
             std::this_thread::sleep_for(std::chrono::seconds(WAIT_FOR_SERVICE_TIME_S));
@@ -151,6 +149,7 @@ NetsysNativeClient::NetsysNativeClient()
             proxy->RegisterNotifyCallback(nativeNotifyCallback_);
         }
     }).detach();
+    pthread_setname_np(t.native_handle(), "netsysNativeClientGetProxy");
 }
 
 int32_t NetsysNativeClient::SetInternetPermission(uint32_t uid, uint8_t allow)

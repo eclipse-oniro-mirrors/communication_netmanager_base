@@ -27,14 +27,13 @@ namespace nmd {
 void StartListen()
 {
     NETNATIVE_LOG_D("Enter threadStart");
-    std::string threadName = "DnsManagerListen";
-    pthread_setname_np(pthread_self(), threadName.c_str());
     DnsResolvListen().StartListen();
 }
 
 DnsManager::DnsManager() : dnsProxyListen_(std::make_shared<DnsProxyListen>())
 {
-    std::thread(StartListen).detach();
+    std::thread t(StartListen).detach();
+    pthread_setname_np(t.native_handle(), "DnsManagerListen");
 }
 
 int32_t DnsManager::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMillis, uint8_t retryCount,
@@ -73,8 +72,6 @@ void DnsManager::SetDefaultNetwork(uint16_t netId)
 void StartProxyListen()
 {
     NETNATIVE_LOG_D("begin StartProxyListen");
-    std::string threadName = "DnsManagerProxyListen";
-    pthread_setname_np(pthread_self(), threadName.c_str());
     DnsProxyListen().StartListen();
 }
 
@@ -86,7 +83,8 @@ void DnsManager::ShareDnsSet(uint16_t netId)
 void DnsManager::StartDnsProxyListen()
 {
     dnsProxyListen_->OnListen();
-    std::thread(StartProxyListen).detach();
+    std::thread t(StartProxyListen).detach();
+    pthread_setname_np(t.native_handle(), "DnsManagerProxyListen");
 }
 
 void DnsManager::StopDnsProxyListen()

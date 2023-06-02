@@ -47,8 +47,6 @@ DnsProxyListen::~DnsProxyListen()
 
 void DnsProxyListen::DnsProxyGetPacket(int32_t clientSocket, RecvBuff recvBuff, sockaddr_in proxyAddr)
 {
-    std::string threadName = "DnsProxyGetPacket";
-    pthread_setname_np(pthread_self(), threadName.c_str());
     std::vector<std::string> servers;
     std::vector<std::string> domains;
     uint16_t baseTimeoutMsec;
@@ -169,7 +167,8 @@ void DnsProxyListen::StartListen()
         if (DnsThreadClose()) {
             break;
         }
-        std::thread(DnsProxyListen::DnsProxyGetPacket, proxySockFd_, recvBuff, proxyAddr).detach();
+        std::thread t(DnsProxyListen::DnsProxyGetPacket, proxySockFd_, recvBuff, proxyAddr).detach();
+        pthread_setname_np(t.native_handle(), "DnsProxyGetPacket");
     }
 }
 

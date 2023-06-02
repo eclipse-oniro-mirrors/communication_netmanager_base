@@ -88,10 +88,8 @@ void NetMonitor::Start()
     }
     isDetecting_ = true;
     std::shared_ptr<NetMonitor> netMonitor = shared_from_this();
-    std::thread([netMonitor] {
-        std::string threadName = "netDetect";
-        pthread_setname_np(pthread_self(), threadName.c_str());
-        return NetDetectThread(netMonitor); }).detach();
+    std::thread t([netMonitor] {return NetDetectThread(netMonitor); }).detach();
+    pthread_setname_np(t.native_handle(), "netDetect");
 }
 
 void NetMonitor::Stop()

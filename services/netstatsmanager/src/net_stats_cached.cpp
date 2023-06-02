@@ -164,13 +164,12 @@ void NetStatsCached::SetCycleThreshold(uint32_t threshold)
 void NetStatsCached::ForceUpdateStats()
 {
     isForce_ = true;
-    std::thread([this]() {
-        std::string threadName = "NetStatsCachedUpdateStats";
-        pthread_setname_np(pthread_self(), threadName.c_str());
+    std::thread t([this]() {
         CacheStats();
         WriteStats();
         isForce_ = false;
     }).detach();
+    pthread_setname_np(t.native_handle(), "NetStatsCachedUpdateStats");
 }
 
 void NetStatsCached::Reset() {}

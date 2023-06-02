@@ -187,8 +187,6 @@ void SendMessage(int32_t *serverSockfd)
 
 void StartListener()
 {
-    std::string threadName = "FwmarkNetworkListener";
-    pthread_setname_np(pthread_self(), threadName.c_str());
     int32_t serverSockfd = GetControlSocket("fwmarkd");
 
     int32_t result = listen(serverSockfd, MAX_CONCURRENT_CONNECTION_REQUESTS);
@@ -214,6 +212,7 @@ void FwmarkNetwork::ListenerClient()
 {
     std::thread startListener(StartListener);
     startListener.detach();
+    pthread_setname_np(startListener.native_handle(), "FwmarkNetworkListener");
     NETNATIVE_LOGI("FwmarkNetwork: StartListener");
 }
 } // namespace nmd

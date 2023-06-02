@@ -50,9 +50,7 @@ void NetPolicyCore::Init(std::shared_ptr<NetPolicyEventHandler> &handler)
         NETMGR_LOG_E("netAppStatusCallback is nullptr.");
         return;
     }
-    std::thread([this]() {
-        std::string threadName = "NetPolicyCoreInit";
-        pthread_setname_np(pthread_self(), threadName.c_str());
+    std::thread t([this]() {
         auto appManager = std::make_unique<AppMgrClient>();
         uint32_t count = 0;
         int32_t connectResult = AppMgrResultCode::ERROR_SERVICE_NOT_READY;
@@ -67,6 +65,7 @@ void NetPolicyCore::Init(std::shared_ptr<NetPolicyEventHandler> &handler)
             appManager->RegisterAppStateCallback(netAppStatusCallback_);
         }
     }).detach();
+    pthread_setname_np(t.native_handle(), "NetPolicyCoreInit");
 }
 
 void NetPolicyCore::HandleEvent(const AppExecFwk::InnerEvent::Pointer &event)
@@ -100,9 +99,7 @@ void NetPolicyCore::SendEvent(int32_t eventId, std::shared_ptr<PolicyEvent> &eve
 void NetPolicyCore::SubscribeCommonEvent()
 {
     NETMGR_LOG_D("SubscribeCommonEvent");
-    std::thread([this]() {
-        std::string threadName = "NetPolicyCoreSubEvent";
-        pthread_setname_np(pthread_self(), threadName.c_str());
+    std::thread t([this]() {
         EventFwk::MatchingSkills matchingSkills;
         matchingSkills.AddEvent(COMMON_EVENT_POWER_SAVE_MODE_CHANGED);
         matchingSkills.AddEvent(COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED);
@@ -124,6 +121,7 @@ void NetPolicyCore::SubscribeCommonEvent()
             NETMGR_LOG_D("SubscribeCommonEvent successful");
         }
     }).detach();
+    pthread_setname_np(t.native_handle(), "NetPolicyCoreSubEvent");
 }
 
 void NetPolicyCore::ReceiveMessage::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
