@@ -37,6 +37,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
 constexpr int32_t INIT_DETECTION_DELAY_MS = 8 * 1000;
 constexpr int32_t MAX_FAILED_DETECTION_DELAY_MS = 5 * 60 * 1000;
 constexpr int32_t SUCCESSED_DETECTION_DELAY_MS = 30 * 1000;
@@ -61,7 +62,7 @@ constexpr const char SPACE_STR = ' ';
 constexpr const char NEW_LINE_STR = '\n';
 constexpr const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char *DEF_NETDETECT_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
-
+}
 static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 {
     if (netMonitor == nullptr) {
