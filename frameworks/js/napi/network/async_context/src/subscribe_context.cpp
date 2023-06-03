@@ -24,6 +24,7 @@ static constexpr const int PARAM_NO_OPTIONS = 0;
 static constexpr const int PARAM_HAS_OPTIONS = 1;
 
 namespace OHOS::NetManagerStandard {
+static constexpr const char *EVENT_SUBSCRIBE = "subscribe";
 SubscribeContext::SubscribeContext(napi_env env, EventManager *manager)
     : BaseContext(env, manager), successCallback_(nullptr), failCallback_(nullptr)
 {
@@ -81,6 +82,7 @@ bool SubscribeContext::SetSuccessCallback(napi_value options)
     if (successCallback_ != nullptr) {
         (void)napi_delete_reference(GetEnv(), successCallback_);
     }
+    GetManager()->AddListener(GetEnv(), EVENT_SUBSCRIBE, callback, false, false);
     return napi_create_reference(GetEnv(), callback, 1, &successCallback_) == napi_ok;
 }
 

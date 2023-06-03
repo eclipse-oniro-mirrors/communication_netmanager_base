@@ -42,6 +42,7 @@ int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
 int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandle,
                                                        const sptr<NetAllCapabilities> &netAllCap)
 {
+    NETMANAGER_BASE_LOGI("network2 netConnection NetCapabilitiesChange");
     if (netHandle == nullptr) {
         return 0;
     }

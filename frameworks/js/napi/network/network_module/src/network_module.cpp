@@ -20,6 +20,7 @@
 #include "network_async_work.h"
 #include "subscribe_context.h"
 #include "unsubscribe_context.h"
+#include "network_observer.h"
 
 namespace OHOS::NetManagerStandard {
 napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
@@ -30,6 +31,16 @@ napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION(FUNCTION_UNSUBSCRIBE, Unsubscribe),
     };
     NapiUtils::DefineProperties(env, exports, properties);
+    auto manager = new EventManager;
+    auto observer = new NetworkObserver;
+    observer->SetManager(manager);
+    g_observerMap[manager] = observer;
+
+    auto finalizer = [](napi_env, void *data, void *) {
+        auto manager = reinterpret_cast<EventManager *>(data);
+        manager->SetInvalid();
+    };
+    napi_wrap(env, exports, reinterpret_cast<void *>(manager), finalizer, nullptr, nullptr);
     return exports;
 }
 
@@ -43,7 +54,7 @@ napi_value NetworkModule::GetType(napi_env env, napi_callback_info info)
 napi_value NetworkModule::Subscribe(napi_env env, napi_callback_info info)
 {
     NETMANAGER_BASE_LOGI("NetworkModule::Subscribe is called");
-    return ModuleTemplate::InterfaceWithoutManager<SubscribeContext>(env, info, "SystemNetworkSubscribe", nullptr,
+    return ModuleTemplate::Interface<SubscribeContext>(env, info, "SystemNetworkSubscribe", nullptr,
                                                                      NetworkAsyncWork::ExecSubscribe,
                                                                      NetworkAsyncWork::SubscribeCallback);
 }
@@ -51,7 +62,7 @@ napi_value NetworkModule::Subscribe(napi_env env, napi_callback_info info)
 napi_value NetworkModule::Unsubscribe(napi_env env, napi_callback_info info)
 {
     NETMANAGER_BASE_LOGI("NetworkModule::Unsubscribe is called");
-    return ModuleTemplate::InterfaceWithoutManager<UnsubscribeContext>(env, info, "SystemNetworkUnsubscribe", nullptr,
+    return ModuleTemplate::Interface<UnsubscribeContext>(env, info, "SystemNetworkUnsubscribe", nullptr,
                                                                        NetworkAsyncWork::ExecUnsubscribe,
                                                                        NetworkAsyncWork::UnsubscribeCallback);
 }

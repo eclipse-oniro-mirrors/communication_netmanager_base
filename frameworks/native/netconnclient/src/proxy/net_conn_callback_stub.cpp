@@ -35,7 +35,7 @@ NetConnCallbackStub::~NetConnCallbackStub() {}
 int32_t NetConnCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                              MessageOption &option)
 {
-    NETMGR_LOG_D("Stub call start, code:[%{public}d]", code);
+    NETMGR_LOG_E("network2 Stub call start, code:[%{public}d]", code);
     std::u16string myDescripter = NetConnCallbackStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (myDescripter != remoteDescripter) {
@@ -57,6 +57,7 @@ int32_t NetConnCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
 
 int32_t NetConnCallbackStub::OnNetAvailable(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_E("network2 OnNetAvailable Stub call start, ");
     if (!data.ContainFileDescriptors()) {
         NETMGR_LOG_W("sent raw data is less than 32k");
     }
@@ -76,6 +77,7 @@ int32_t NetConnCallbackStub::OnNetAvailable(MessageParcel &data, MessageParcel &
 
 int32_t NetConnCallbackStub::OnNetCapabilitiesChange(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_E("network2 Stub OnNetCapabilitiesChange start,");
     if (!data.ContainFileDescriptors()) {
         NETMGR_LOG_W("sent raw data is less than 32k");
     }
@@ -121,6 +123,7 @@ int32_t NetConnCallbackStub::OnNetCapabilitiesChange(MessageParcel &data, Messag
 
 int32_t NetConnCallbackStub::OnNetConnectionPropertiesChange(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_E("network2 Stub OnNetConnectionPropertiesChange start,");
     if (!data.ContainFileDescriptors()) {
         NETMGR_LOG_W("sent raw data is less than 32k");
     }
@@ -142,6 +145,7 @@ int32_t NetConnCallbackStub::OnNetConnectionPropertiesChange(MessageParcel &data
 
 int32_t NetConnCallbackStub::OnNetLost(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_E("network2 Stub OnNetLost start, ");
     if (!data.ContainFileDescriptors()) {
         NETMGR_LOG_W("sent raw data is less than 32k");
     }
@@ -162,6 +166,7 @@ int32_t NetConnCallbackStub::OnNetLost(MessageParcel &data, MessageParcel &reply
 
 int32_t NetConnCallbackStub::OnNetUnavailable(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_E("network2 Stub OnNetUnavailable start, ");
     if (!data.ContainFileDescriptors()) {
         NETMGR_LOG_W("sent raw data is less than 32k");
     }
@@ -176,6 +181,7 @@ int32_t NetConnCallbackStub::OnNetUnavailable(MessageParcel &data, MessageParcel
 
 int32_t NetConnCallbackStub::OnNetBlockStatusChange(MessageParcel &data, MessageParcel &reply)
 {
+    NETMGR_LOG_E("network2 Stub OnNetBlockStatusChange start, ");
     if (!data.ContainFileDescriptors()) {
         NETMGR_LOG_W("sent raw data is less than 32k");
     }
@@ -200,32 +206,38 @@ int32_t NetConnCallbackStub::OnNetBlockStatusChange(MessageParcel &data, Message
 
 int32_t NetConnCallbackStub::NetAvailable(sptr<NetHandle> &netHandle)
 {
+    NETMGR_LOG_E("network2 Stub NetAvailable start");
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnCallbackStub::NetCapabilitiesChange(sptr<NetHandle> &netHandle,
                                                    const sptr<NetAllCapabilities> &netAllCap)
 {
+    NETMGR_LOG_E("network2 Stub NetCapabilitiesChange start,");
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnCallbackStub::NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
 {
+    NETMGR_LOG_E("network2 Stub NetConnectionPropertiesChange start, ");
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnCallbackStub::NetLost(sptr<NetHandle> &netHandle)
 {
+    NETMGR_LOG_E("network2 Stub NetLost start, ");
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnCallbackStub::NetUnavailable()
 {
+    NETMGR_LOG_E("network2 Stub NetUnavailable start, ");
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnCallbackStub::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
 {
+    NETMGR_LOG_E("network2 Stub NetBlockStatusChange start, ");
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard

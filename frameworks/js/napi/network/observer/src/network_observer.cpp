@@ -102,13 +102,6 @@ int32_t NetworkObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandle, const
         return 0;
     }
 
-    if (manager_->HasEventListener(EVENT_GET_TYPE)) {
-        auto netType = new NetworkType;
-        netType->bearerTypes = netAllCap->bearerTypes_;
-        manager_->EmitByUv(EVENT_GET_TYPE, netType, CallbackTemplate<MakeNetworkResponse>);
-    } else {
-        NETMANAGER_BASE_LOGI("NO EVENT_GET_TYPE");
-    }
     if (manager_->HasEventListener(EVENT_SUBSCRIBE)) {
         auto netType = new NetworkType;
         netType->bearerTypes = netAllCap->bearerTypes_;
@@ -137,13 +130,6 @@ int32_t NetworkObserver::NetUnavailable()
     if (!manager_) {
         NETMANAGER_BASE_LOGI("no event manager");
         return 0;
-    }
-
-    if (manager_->HasEventListener(EVENT_GET_TYPE)) {
-        auto netType = new NetworkType;
-        manager_->EmitByUv(EVENT_GET_TYPE, netType, CallbackTemplate<MakeNetworkResponse>);
-    } else {
-        NETMANAGER_BASE_LOGI("NO EVENT_GET_TYPE");
     }
     if (manager_->HasEventListener(EVENT_SUBSCRIBE)) {
         auto netType = new NetworkType;
