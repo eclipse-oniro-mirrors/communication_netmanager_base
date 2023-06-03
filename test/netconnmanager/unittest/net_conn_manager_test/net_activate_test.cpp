@@ -107,7 +107,6 @@ HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest001, TestSize.Level1)
     EXPECT_FALSE(ret);
     std::string test;
     sptr<NetSupplier> supplier002 = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, test, netCaps);
-    ;
     ret = instance_->MatchRequestAndNetwork(supplier002);
     EXPECT_TRUE(ret);
     std::set<NetCap> netCaps1;
@@ -116,7 +115,6 @@ HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest001, TestSize.Level1)
     ret = instance_->MatchRequestAndNetwork(supplier003);
     EXPECT_TRUE(ret);
     sptr<NetSupplier> supplier004 = new (std::nothrow) NetSupplier(NetBearType::BEARER_CELLULAR, TEST_IDENT, netCaps);
-    ;
     ret = instance_->MatchRequestAndNetwork(supplier004);
     EXPECT_TRUE(ret);
 }

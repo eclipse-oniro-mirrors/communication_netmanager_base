@@ -45,7 +45,7 @@ class NetConnService : public SystemAbility,
     DECLARE_SYSTEM_ABILITY(NetConnService)
 
     NetConnService();
-    ~NetConnService();
+    virtual ~NetConnService();
     using NET_SUPPLIER_MAP = std::map<uint32_t, sptr<NetSupplier>>;
     using NET_NETWORK_MAP = std::map<int32_t, std::shared_ptr<Network>>;
     using NET_ACTIVATE_MAP = std::map<uint32_t, std::shared_ptr<NetActivate>>;
