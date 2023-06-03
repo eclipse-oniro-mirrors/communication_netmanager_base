@@ -42,14 +42,20 @@ class NetConnService : public SystemAbility,
                        public INetActivateCallback,
                        public NetConnServiceStub,
                        public std::enable_shared_from_this<NetConnService> {
-    DECLARE_DELAYED_SINGLETON(NetConnService)
     DECLARE_SYSTEM_ABILITY(NetConnService)
 
+    NetConnService();
+    ~NetConnService();
     using NET_SUPPLIER_MAP = std::map<uint32_t, sptr<NetSupplier>>;
     using NET_NETWORK_MAP = std::map<int32_t, std::shared_ptr<Network>>;
-    using NET_ACTIVATE_MAP = std::map<uint32_t, sptr<NetActivate>>;
+    using NET_ACTIVATE_MAP = std::map<uint32_t,  std::shared_ptr<NetActivate>>;
 
 public:
+    static std::shared_ptr<NetConnService> &GetInstance()
+    {
+        static std::shared_ptr<NetConnService> instance = std::make_shared<NetConnService>();
+        return instance;
+    }
     void OnStart() override;
     void OnStop() override;
     /**
@@ -262,7 +268,9 @@ public:
     void OnNetActivateTimeOut(uint32_t reqId) override;
 
     int32_t SetAppNet(int32_t netId) override;
-
+public:
+    std::shared_ptr<AppExecFwk::EventRunner> netActEventRunner_ = nullptr;
+    std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_ = nullptr;
 private:
     bool Init();
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
@@ -272,13 +280,13 @@ private:
                             const uint32_t &timeoutMS);
     void CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackType type);
     void CallbackForAvailable(sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
-    uint32_t FindBestNetworkForRequest(sptr<NetSupplier> &supplier, sptr<NetActivate> &netActivateNetwork);
-    void SendRequestToAllNetwork(sptr<NetActivate> request);
+    uint32_t FindBestNetworkForRequest(sptr<NetSupplier> &supplier, std::shared_ptr<NetActivate> &netActivateNetwork);
+    void SendRequestToAllNetwork(std::shared_ptr<NetActivate> request);
     void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
     void SendAllRequestToNetwork(sptr<NetSupplier> supplier);
     void FindBestNetworkForAllRequest();
     void MakeDefaultNetWork(sptr<NetSupplier> &oldService, sptr<NetSupplier> &newService);
-    void NotFindBestSupplier(uint32_t reqId, const sptr<NetActivate> &active, const sptr<NetSupplier> &supplier,
+    void NotFindBestSupplier(uint32_t reqId, const std::shared_ptr<NetActivate> &active, const sptr<NetSupplier> &supplier,
                              const sptr<INetConnCallback> &callback);
     void CreateDefaultRequest();
     int32_t RegUnRegNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback, bool isReg);
@@ -312,7 +320,7 @@ private:
     bool registerToService_;
     ServiceRunningState state_;
     sptr<NetSpecifier> defaultNetSpecifier_ = nullptr;
-    sptr<NetActivate> defaultNetActivate_ = nullptr;
+    std::shared_ptr<NetActivate> defaultNetActivate_ = nullptr;
     sptr<NetSupplier> defaultNetSupplier_ = nullptr;
     NET_SUPPLIER_MAP netSuppliers_;
     NET_ACTIVATE_MAP netActivates_;

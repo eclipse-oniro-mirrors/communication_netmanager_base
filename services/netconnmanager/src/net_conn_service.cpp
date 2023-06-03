@@ -43,14 +43,17 @@ constexpr const char *ERROR_MSG_NULL_NET_SPECIFIER = "The parameter of netSpecif
 constexpr const char *ERROR_MSG_CAN_NOT_FIND_SUPPLIER = "Can not find supplier by id:";
 constexpr const char *ERROR_MSG_UPDATE_NETLINK_INFO_FAILED = "Update net link info failed";
 constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
+constexpr const char *NET_ACTIVATE_WORK_THREAD = "NET_ACTIVATE_WORK_THREAD";
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
-    SystemAbility::MakeAndRegisterAbility(DelayedSingleton<NetConnService>::GetInstance().get());
+    SystemAbility::MakeAndRegisterAbility(NetConnService::GetInstance().get());
 
 NetConnService::NetConnService()
     : SystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, true), registerToService_(false), state_(STATE_STOPPED)
 {
+    netActEventRunner_ = AppExecFwk::EventRunner::Create(NET_ACTIVATE_WORK_THREAD);
+    netActEventHandler_ = std::make_shared<AppExecFwk::EventHandler>(netActEventRunner_);
     CreateDefaultRequest();
 }
 
@@ -80,7 +83,8 @@ void NetConnService::CreateDefaultRequest()
         defaultNetSpecifier_ = (std::make_unique<NetSpecifier>()).release();
         defaultNetSpecifier_->SetCapability(NET_CAPABILITY_INTERNET);
         std::weak_ptr<INetActivateCallback> timeoutCb;
-        defaultNetActivate_ = new (std::nothrow) NetActivate(defaultNetSpecifier_, nullptr, timeoutCb, 0);
+        defaultNetActivate_ = std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 1, netActEventHandler_);
+        defaultNetActivate_->StartTimeOutNetAvailable();
         defaultNetActivate_->SetRequestId(DEFAULT_REQUEST_ID);
         netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
     }
@@ -109,7 +113,7 @@ bool NetConnService::Init()
         return false;
     }
     if (!registerToService_) {
-        if (!Publish(DelayedSingleton<NetConnService>::GetInstance().get())) {
+        if (!Publish(NetConnService::GetInstance().get())) {
             NETMGR_LOG_E("Register to sa manager failed");
             return false;
         }
@@ -447,7 +451,7 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
             continue;
         }
         reqId = iterActive->first;
-        sptr<NetActivate> netActivate = iterActive->second;
+        auto netActivate = iterActive->second;
         if (netActivate) {
             sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
             if (supplier) {
@@ -642,7 +646,8 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
-    sptr<NetActivate> request = new (std::nothrow) NetActivate(netSpecifier, callback, timeoutCb, timeoutMS);
+    std::shared_ptr<NetActivate> request = std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netActEventHandler_);
+    request->StartTimeOutNetAvailable();
     uint32_t reqId = request->GetRequestId();
     NETMGR_LOG_D("ActivateNetwork  reqId is [%{public}d]", reqId);
     netActivates_[reqId] = request;
@@ -767,7 +772,7 @@ void NetConnService::FindBestNetworkForAllRequest()
     }
 }
 
-uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier, sptr<NetActivate> &netActivateNetwork)
+uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier, std::shared_ptr<NetActivate> &netActivateNetwork)
 {
     int bestScore = 0;
     supplier = nullptr;
@@ -845,7 +850,7 @@ int32_t NetConnService::GenerateNetId()
     return INVALID_NET_ID;
 }
 
-void NetConnService::NotFindBestSupplier(uint32_t reqId, const sptr<NetActivate> &active,
+void NetConnService::NotFindBestSupplier(uint32_t reqId, const std::shared_ptr<NetActivate> &active,
                                          const sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback)
 {
     if (supplier != nullptr) {
@@ -883,7 +888,7 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
     }
 }
 
-void NetConnService::SendRequestToAllNetwork(sptr<NetActivate> request)
+void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> request)
 {
     NETMGR_LOG_I("SendRequestToAllNetwork.");
     if (request == nullptr) {

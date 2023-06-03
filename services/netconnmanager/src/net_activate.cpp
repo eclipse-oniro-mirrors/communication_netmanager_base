@@ -23,31 +23,31 @@
 namespace OHOS {
 namespace NetManagerStandard {
 static std::atomic<uint32_t> g_nextRequestId = MIN_REQUEST_ID;
-std::shared_ptr<AppExecFwk::EventRunner> netActEventRunner_ = nullptr;
-std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_ = nullptr;
-constexpr const char *NET_ACTIVATE_WORK_THREAD = "NET_ACTIVATE_WORK_THREAD";
 using TimeOutCallback = std::function<void()>;
 
 NetActivate::NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
-                         std::weak_ptr<INetActivateCallback> timeoutCallback, const uint32_t &timeoutMS)
-    : netSpecifier_(specifier), netConnCallback_(callback), timeoutMS_(timeoutMS), timeoutCallback_(timeoutCallback)
+                         std::weak_ptr<INetActivateCallback> timeoutCallback, const uint32_t &timeoutMS,
+                         const std::shared_ptr<AppExecFwk::EventHandler> &netActEventHandler)
+    : netSpecifier_(specifier),
+      netConnCallback_(callback),
+      timeoutMS_(timeoutMS),
+      timeoutCallback_(timeoutCallback),
+      netActEventHandler_(netActEventHandler)
 {
-    if (netActEventRunner_ == nullptr) {
-        netActEventRunner_ = AppExecFwk::EventRunner::Create(NET_ACTIVATE_WORK_THREAD);
-    }
-    if (netActEventHandler_ == nullptr) {
-        netActEventHandler_ = std::make_shared<AppExecFwk::EventHandler>(netActEventRunner_);
-    }
 
     requestId_ = g_nextRequestId++;
     if (g_nextRequestId > MAX_REQUEST_ID) {
         g_nextRequestId = MIN_REQUEST_ID;
     }
+}
+
+void NetActivate::StartTimeOutNetAvailable() {
     activateName_ = "NetActivate" + std::to_string(requestId_);
-    if (timeoutMS_ > 0) {
+    auto self = shared_from_this();
+    if (netActEventHandler_ != nullptr && timeoutMS_ > 0) {
         netActEventHandler_->PostTask(
-            [this]() {
-                this->TimeOutNetAvailable();
+            [self]() {
+                self->TimeOutNetAvailable();
             },
             activateName_,
             timeoutMS_);
