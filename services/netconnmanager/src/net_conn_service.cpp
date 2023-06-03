@@ -46,7 +46,8 @@ constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THRE
 constexpr const char *NET_ACTIVATE_WORK_THREAD = "NET_ACTIVATE_WORK_THREAD";
 } // namespace
 
-const bool REGISTER_LOCAL_RESULT = SystemAbility::MakeAndRegisterAbility(NetConnService::GetInstance().get());
+const bool REGISTER_LOCAL_RESULT =
+    SystemAbility::MakeAndRegisterAbility(NetConnService::GetInstance().get());
 
 NetConnService::NetConnService()
     : SystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, true), registerToService_(false), state_(STATE_STOPPED)
@@ -323,7 +324,8 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
     }
     std::shared_ptr<Network> network = std::make_shared<Network>(
         netId, supplierId,
-        std::bind(&NetConnService::HandleDetectionResult, this, std::placeholders::_1, std::placeholders::_2),
+        std::bind(&NetConnService::HandleDetectionResult, shared_from_this(),
+            std::placeholders::_1, std::placeholders::_2),
         bearerType, netConnEventHandler_);
     NETMGR_LOG_D("Register supplier,supplierId[%{public}d] netId[%{public}d], ", supplierId, netId);
     supplier->SetNetwork(network);
@@ -620,7 +622,7 @@ void NetConnService::SendGlobalHttpProxyChangeBroadcast()
     info.data = "Global HttpProxy Changed";
     info.ordered = true;
     std::map<std::string, std::string> param = {{"HttpProxy", globalHttpProxy_.ToString()}};
-    DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
+    BroadcastManager::GetInstance()->SendBroadcast(info, param);
 }
 
 int32_t NetConnService::SetGlobalHttpProxyAsync(const HttpProxy &httpProxy)
@@ -1360,7 +1362,7 @@ int32_t NetConnService::SetAirplaneMode(bool state)
     info.code = static_cast<int32_t>(state);
     info.ordered = true;
     std::map<std::string, int32_t> param;
-    DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
+    BroadcastManager::GetInstance()->SendBroadcast(info, param);
     return NETMANAGER_SUCCESS;
 }
 

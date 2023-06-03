@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,9 +36,14 @@ class FwmarkClient;
 }
 namespace NetManagerStandard {
 class NetConnClient {
-    DECLARE_DELAYED_SINGLETON(NetConnClient)
-
 public:
+    static std::shared_ptr<NetConnClient> &GetInstance()
+    {
+        static std::shared_ptr<NetConnClient> instance = std::make_shared<NetConnClient>();
+        return instance;
+    }
+    NetConnClient();
+    ~NetConnClient();
     int32_t SystemReady();
     int32_t SetInternetPermission(uint32_t uid, uint8_t allow);
     int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
