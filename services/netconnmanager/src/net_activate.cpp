@@ -41,16 +41,12 @@ NetActivate::NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetCon
     }
 }
 
-void NetActivate::StartTimeOutNetAvailable() {
+void NetActivate::StartTimeOutNetAvailable()
+{
     activateName_ = "NetActivate" + std::to_string(requestId_);
     auto self = shared_from_this();
     if (netActEventHandler_ != nullptr && timeoutMS_ > 0) {
-        netActEventHandler_->PostTask(
-            [self]() {
-                self->TimeOutNetAvailable();
-            },
-            activateName_,
-            timeoutMS_);
+        netActEventHandler_->PostTask([self]() { self->TimeOutNetAvailable(); }, activateName_, timeoutMS_);
     }
 }
 

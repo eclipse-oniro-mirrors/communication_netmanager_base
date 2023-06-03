@@ -46,7 +46,8 @@ public:
 
 public:
     NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
-                std::weak_ptr<INetActivateCallback> timeoutCallback, const uint32_t &timeoutMS, const std::shared_ptr<AppExecFwk::EventHandler> &netActEventHandler);
+                std::weak_ptr<INetActivateCallback> timeoutCallback, const uint32_t &timeoutMS,
+                const std::shared_ptr<AppExecFwk::EventHandler> &netActEventHandler);
     ~NetActivate();
     bool MatchRequestAndNetwork(sptr<NetSupplier> supplier);
     void SetRequestId(uint32_t reqId);

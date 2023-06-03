@@ -46,8 +46,7 @@ constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THRE
 constexpr const char *NET_ACTIVATE_WORK_THREAD = "NET_ACTIVATE_WORK_THREAD";
 } // namespace
 
-const bool REGISTER_LOCAL_RESULT =
-    SystemAbility::MakeAndRegisterAbility(NetConnService::GetInstance().get());
+const bool REGISTER_LOCAL_RESULT = SystemAbility::MakeAndRegisterAbility(NetConnService::GetInstance().get());
 
 NetConnService::NetConnService()
     : SystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, true), registerToService_(false), state_(STATE_STOPPED)
@@ -83,7 +82,8 @@ void NetConnService::CreateDefaultRequest()
         defaultNetSpecifier_ = (std::make_unique<NetSpecifier>()).release();
         defaultNetSpecifier_->SetCapability(NET_CAPABILITY_INTERNET);
         std::weak_ptr<INetActivateCallback> timeoutCb;
-        defaultNetActivate_ = std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 1, netActEventHandler_);
+        defaultNetActivate_ =
+            std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 1, netActEventHandler_);
         defaultNetActivate_->StartTimeOutNetAvailable();
         defaultNetActivate_->SetRequestId(DEFAULT_REQUEST_ID);
         netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
@@ -646,7 +646,8 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
-    std::shared_ptr<NetActivate> request = std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netActEventHandler_);
+    std::shared_ptr<NetActivate> request =
+        std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netActEventHandler_);
     request->StartTimeOutNetAvailable();
     uint32_t reqId = request->GetRequestId();
     NETMGR_LOG_D("ActivateNetwork  reqId is [%{public}d]", reqId);
@@ -772,7 +773,8 @@ void NetConnService::FindBestNetworkForAllRequest()
     }
 }
 
-uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier, std::shared_ptr<NetActivate> &netActivateNetwork)
+uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
+                                                   std::shared_ptr<NetActivate> &netActivateNetwork)
 {
     int bestScore = 0;
     supplier = nullptr;

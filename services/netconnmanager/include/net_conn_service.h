@@ -48,7 +48,7 @@ class NetConnService : public SystemAbility,
     ~NetConnService();
     using NET_SUPPLIER_MAP = std::map<uint32_t, sptr<NetSupplier>>;
     using NET_NETWORK_MAP = std::map<int32_t, std::shared_ptr<Network>>;
-    using NET_ACTIVATE_MAP = std::map<uint32_t,  std::shared_ptr<NetActivate>>;
+    using NET_ACTIVATE_MAP = std::map<uint32_t, std::shared_ptr<NetActivate>>;
 
 public:
     static std::shared_ptr<NetConnService> &GetInstance()
@@ -268,9 +268,7 @@ public:
     void OnNetActivateTimeOut(uint32_t reqId) override;
 
     int32_t SetAppNet(int32_t netId) override;
-public:
-    std::shared_ptr<AppExecFwk::EventRunner> netActEventRunner_ = nullptr;
-    std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_ = nullptr;
+
 private:
     bool Init();
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
@@ -286,8 +284,8 @@ private:
     void SendAllRequestToNetwork(sptr<NetSupplier> supplier);
     void FindBestNetworkForAllRequest();
     void MakeDefaultNetWork(sptr<NetSupplier> &oldService, sptr<NetSupplier> &newService);
-    void NotFindBestSupplier(uint32_t reqId, const std::shared_ptr<NetActivate> &active, const sptr<NetSupplier> &supplier,
-                             const sptr<INetConnCallback> &callback);
+    void NotFindBestSupplier(uint32_t reqId, const std::shared_ptr<NetActivate> &active,
+                             const sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
     void CreateDefaultRequest();
     int32_t RegUnRegNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback, bool isReg);
     int32_t GenerateNetId();
@@ -332,6 +330,8 @@ private:
     std::mutex netManagerMutex_;
     std::shared_ptr<AppExecFwk::EventRunner> netConnEventRunner_ = nullptr;
     std::shared_ptr<NetConnEventHandler> netConnEventHandler_ = nullptr;
+    std::shared_ptr<AppExecFwk::EventRunner> netActEventRunner_ = nullptr;
+    std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
