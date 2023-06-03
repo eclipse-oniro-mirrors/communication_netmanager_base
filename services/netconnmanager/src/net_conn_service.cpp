@@ -83,7 +83,7 @@ void NetConnService::CreateDefaultRequest()
         defaultNetSpecifier_->SetCapability(NET_CAPABILITY_INTERNET);
         std::weak_ptr<INetActivateCallback> timeoutCb;
         defaultNetActivate_ =
-            std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 1, netActEventHandler_);
+            std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 0, netActEventHandler_);
         defaultNetActivate_->StartTimeOutNetAvailable();
         defaultNetActivate_->SetRequestId(DEFAULT_REQUEST_ID);
         netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
