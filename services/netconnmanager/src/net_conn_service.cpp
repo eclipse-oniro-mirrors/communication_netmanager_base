@@ -47,7 +47,7 @@ constexpr const char *NET_ACTIVATE_WORK_THREAD = "NET_ACTIVATE_WORK_THREAD";
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
-    SystemAbility::MakeAndRegisterAbility(&NetConnService::GetInstance());
+    SystemAbility::MakeAndRegisterAbility(NetConnService::GetInstance().get());
 
 NetConnService::NetConnService()
     : SystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, true), registerToService_(false), state_(STATE_STOPPED)
@@ -114,7 +114,7 @@ bool NetConnService::Init()
         return false;
     }
     if (!registerToService_) {
-        if (!Publish(&NetConnService::GetInstance())) {
+        if (!Publish(NetConnService::GetInstance().get())) {
             NETMGR_LOG_E("Register to sa manager failed");
             return false;
         }

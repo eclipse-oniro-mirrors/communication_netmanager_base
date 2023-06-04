@@ -51,9 +51,9 @@ class NetConnService : public SystemAbility,
     using NET_ACTIVATE_MAP = std::map<uint32_t, std::shared_ptr<NetActivate>>;
 
 public:
-    static NetConnService &GetInstance()
+    static std::shared_ptr<NetConnService> &GetInstance()
     {
-        static NetConnService instance;
+        static std::shared_ptr<NetConnService> instance = std::make_shared<NetConnService>();
         return instance;
     }
     void OnStart() override;

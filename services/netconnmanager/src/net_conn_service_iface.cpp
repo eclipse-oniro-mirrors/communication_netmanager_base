@@ -20,44 +20,44 @@ namespace OHOS {
 namespace NetManagerStandard {
 int32_t NetConnServiceIface::GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames)
 {
-    return NetConnService::GetInstance().GetIfaceNames(bearerType, ifaceNames);
+    return NetConnService::GetInstance()->GetIfaceNames(bearerType, ifaceNames);
 }
 
 int32_t NetConnServiceIface::GetIfaceNameByType(NetBearType bearerType, const std::string &ident,
                                                 std::string &ifaceName)
 {
-    return NetConnService::GetInstance().GetIfaceNameByType(bearerType, ident, ifaceName);
+    return NetConnService::GetInstance()->GetIfaceNameByType(bearerType, ident, ifaceName);
 }
 
 int32_t NetConnServiceIface::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
                                                  const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {
-    return NetConnService::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
+    return NetConnService::GetInstance()->RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
 }
 
 int32_t NetConnServiceIface::UnregisterNetSupplier(uint32_t supplierId)
 {
-    return NetConnService::GetInstance().UnregisterNetSupplier(supplierId);
+    return NetConnService::GetInstance()->UnregisterNetSupplier(supplierId);
 }
 
 int32_t NetConnServiceIface::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo)
 {
-    return NetConnService::GetInstance().UpdateNetLinkInfo(supplierId, netLinkInfo);
+    return NetConnService::GetInstance()->UpdateNetLinkInfo(supplierId, netLinkInfo);
 }
 
 int32_t NetConnServiceIface::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo)
 {
-    return NetConnService::GetInstance().UpdateNetSupplierInfo(supplierId, netSupplierInfo);
+    return NetConnService::GetInstance()->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
 }
 
 int32_t NetConnServiceIface::RestrictBackgroundChanged(bool isRestrictBackground)
 {
-    return NetConnService::GetInstance().RestrictBackgroundChanged(isRestrictBackground);
+    return NetConnService::GetInstance()->RestrictBackgroundChanged(isRestrictBackground);
 }
 
 int32_t NetConnServiceIface::RegisterNetConnCallback(const sptr<INetConnCallback> &callback)
 {
-    return NetConnService::GetInstance().RegisterNetConnCallback(callback);
+    return NetConnService::GetInstance()->RegisterNetConnCallback(callback);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
