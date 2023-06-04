@@ -285,6 +285,16 @@ public:
      */
     [[nodiscard]] int32_t SetPowerSaveAllowedList(const std::vector<uint32_t> &uid, bool isAllowed);
 
+    /**
+     *  Set the Power Save Policy object
+     *
+     * @param enable Power save mode is open or not.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    [[nodiscard]] int32_t SetPowerSavePolicy(bool enable);
+
 private:
     class NetPolicyDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

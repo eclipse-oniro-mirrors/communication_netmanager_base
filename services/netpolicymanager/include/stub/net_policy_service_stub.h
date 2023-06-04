@@ -64,6 +64,7 @@ private:
     int32_t OnSetDeviceIdlePolicy(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetPowerSaveAllowedList(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetPowerSaveAllowedList(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetPowerSavePolicy(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetPolicyServiceFunc> memberFuncMap_;
