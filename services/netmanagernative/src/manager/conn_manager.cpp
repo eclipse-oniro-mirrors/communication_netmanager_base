@@ -19,6 +19,7 @@
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "physical_network.h"
+#include "netlink_socket_diag.h"
 #include "virtual_network.h"
 #include "bpf_def.h"
 #include "bpf_path.h"
@@ -114,6 +115,8 @@ int32_t ConnManager::DestroyNetwork(int32_t netId)
         nw->ClearInterfaces();
     }
     networks_.erase(netId);
+    NetLinkSocketDiag sd;
+    sd.DestroySocketsLackingNetwork(netId, true);
     return NETMANAGER_SUCCESS;
 }
 
