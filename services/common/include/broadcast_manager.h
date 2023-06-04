@@ -19,8 +19,6 @@
 #include <string>
 #include <map>
 
-#include "singleton.h"
-
 namespace OHOS {
 namespace NetManagerStandard {
 struct BroadcastInfo {
