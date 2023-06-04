@@ -94,7 +94,7 @@ public:
 void NetConnServiceTest::SetUpTestCase()
 {
     std::set<NetCap> netCaps;
-    NetConnClient::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT,
+    DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT,
         netCaps, g_supplierId);
 }
 
