@@ -48,6 +48,7 @@ public:
         CMD_NPS_GET_BACKGROUND_POLICY_BY_UID,
         CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST,
         CMD_NPS_GET_POWER_SAVE_ALLOWED_LIST,
+        CMD_NPS_SET_POWER_SAVE_POLICY,
         CMD_NPS_END = 100,
     };
 
@@ -222,6 +223,14 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed) = 0;
+
+    /**
+     * Set the Power Save Policy object
+     *
+     * @param enable Power save mode is open or not.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    virtual int32_t SetPowerSavePolicy(bool enable) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
