@@ -34,9 +34,9 @@ struct BroadcastInfo {
 
 class BroadcastManager {
 public:
-    static std::shared_ptr<BroadcastManager> &GetInstance()
+    static BroadcastManager &GetInstance()
     {
-        static std::shared_ptr<BroadcastManager> instance = std::make_shared<BroadcastManager>();
+        static BroadcastManager instance;
         return instance;
     }
 

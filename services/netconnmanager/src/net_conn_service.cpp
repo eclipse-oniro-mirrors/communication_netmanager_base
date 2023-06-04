@@ -114,7 +114,7 @@ bool NetConnService::Init()
         return false;
     }
     if (!registerToService_) {
-        if (!Publish(NetConnService::GetInstance().get())) {
+        if (!Publish(&NetConnService::GetInstance())) {
             NETMGR_LOG_E("Register to sa manager failed");
             return false;
         }
@@ -622,7 +622,7 @@ void NetConnService::SendGlobalHttpProxyChangeBroadcast()
     info.data = "Global HttpProxy Changed";
     info.ordered = true;
     std::map<std::string, std::string> param = {{"HttpProxy", globalHttpProxy_.ToString()}};
-    BroadcastManager::GetInstance()->SendBroadcast(info, param);
+    BroadcastManager::GetInstance().SendBroadcast(info, param);
 }
 
 int32_t NetConnService::SetGlobalHttpProxyAsync(const HttpProxy &httpProxy)
@@ -1362,7 +1362,7 @@ int32_t NetConnService::SetAirplaneMode(bool state)
     info.code = static_cast<int32_t>(state);
     info.ordered = true;
     std::map<std::string, int32_t> param;
-    BroadcastManager::GetInstance()->SendBroadcast(info, param);
+    BroadcastManager::GetInstance().SendBroadcast(info, param);
     return NETMANAGER_SUCCESS;
 }
 
