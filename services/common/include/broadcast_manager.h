@@ -33,15 +33,15 @@ struct BroadcastInfo {
 };
 
 class BroadcastManager {
+    BroadcastManager();
+    ~BroadcastManager();
+
 public:
     static BroadcastManager &GetInstance()
     {
         static BroadcastManager instance;
         return instance;
     }
-
-    BroadcastManager();
-    ~BroadcastManager();
 
     bool SendBroadcast(const BroadcastInfo &info, const std::map<std::string, bool> &param);
 
