@@ -47,7 +47,7 @@ constexpr const char *NET_ACTIVATE_WORK_THREAD = "NET_ACTIVATE_WORK_THREAD";
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
-    SystemAbility::MakeAndRegisterAbility(NetConnService::GetInstance().get());
+    SystemAbility::MakeAndRegisterAbility(&NetConnService::GetInstance());
 
 NetConnService::NetConnService()
     : SystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, true), registerToService_(false), state_(STATE_STOPPED)
