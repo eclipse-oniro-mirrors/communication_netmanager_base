@@ -36,14 +36,9 @@ class FwmarkClient;
 }
 namespace NetManagerStandard {
 class NetConnClient {
+    DECLARE_DELAYED_SINGLETON(NetConnClient)
+
 public:
-    static std::shared_ptr<NetConnClient> &GetInstance()
-    {
-        static std::shared_ptr<NetConnClient> instance = std::make_shared<NetConnClient>();
-        return instance;
-    }
-    NetConnClient();
-    ~NetConnClient();
     int32_t SystemReady();
     int32_t SetInternetPermission(uint32_t uid, uint8_t allow);
     int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,

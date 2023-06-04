@@ -34,7 +34,6 @@ NetActivate::NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetCon
       timeoutCallback_(timeoutCallback),
       netActEventHandler_(netActEventHandler)
 {
-
     requestId_ = g_nextRequestId++;
     if (g_nextRequestId > MAX_REQUEST_ID) {
         g_nextRequestId = MIN_REQUEST_ID;

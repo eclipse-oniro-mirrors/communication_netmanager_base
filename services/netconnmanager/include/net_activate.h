@@ -40,7 +40,7 @@ public:
     virtual void OnNetActivateTimeOut(uint32_t reqId) = 0;
 };
 
-class NetActivate : public virtual RefBase , public std::enable_shared_from_this<NetActivate>{
+class NetActivate : public virtual RefBase, public std::enable_shared_from_this<NetActivate> {
 public:
     using TimeOutHandler = std::function<int32_t(uint32_t &reqId)>;
 
