@@ -31,7 +31,8 @@ namespace nmd {
 using namespace NetManagerStandard;
 
 namespace {
-constexpr uint32_t KERNEL_BUFFER_SIZE = 8192;
+constexpr uint32_t KERNEL_BUFFER_SIZE = 8192U;
+constexpr uint8_t ADDR_POSITION = 3U;
 
 bool InLookBack(uint32_t hostLong)
 {
@@ -65,9 +66,9 @@ bool IsLoopbackSocket(const inet_diag_msg *msg)
         case AF_INET6: {
             const struct in6_addr *src = (const struct in6_addr *)&msg->id.idiag_src;
             const struct in6_addr *dst = (const struct in6_addr *)&msg->id.idiag_dst;
-            return (IN6_IS_ADDR_V4MAPPED(src) && InLookBack(src->s6_addr32[3])) ||
-                   (IN6_IS_ADDR_V4MAPPED(dst) && InLookBack(dst->s6_addr32[3])) || IN6_IS_ADDR_LOOPBACK(src) ||
-                   IN6_IS_ADDR_LOOPBACK(dst) || !memcmp(src, dst, sizeof(*src));
+            return (IN6_IS_ADDR_V4MAPPED(src) && InLookBack(src->s6_addr32[ADDR_POSITION])) ||
+                   (IN6_IS_ADDR_V4MAPPED(dst) && InLookBack(dst->s6_addr32[ADDR_POSITION])) ||
+                   IN6_IS_ADDR_LOOPBACK(src) || IN6_IS_ADDR_LOOPBACK(dst) || !memcmp(src, dst, sizeof(*src));
         }
         default:
             return false;
@@ -250,7 +251,7 @@ int32_t NetLinkSocketDiag::DestroySocketsLackingNetwork(uint16_t netId, bool exc
     controlMark.explicitlySelected = true;
     controlMark.permission = PERMISSION_NETWORK;
 
-    ByteCode byteCode = (struct ByteCode){
+    ByteCode byteCode = {
         // If netId matches, continue, otherwise, leave socket alone.
         {{INET_DIAG_BC_MARK_COND, matchLen, byteCodeLen + rejectOffSet}, netIdMark.intValue, netIdMask.intValue},
         // If the permission bits match, jump to the section below that rejects the socket.
