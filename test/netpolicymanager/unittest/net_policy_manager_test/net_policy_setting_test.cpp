@@ -122,7 +122,7 @@ HWTEST_F(NetPolicySettingTest, OpenDeviceIdle, TestSize.Level1)
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetPolicySettingTest,CloseDeviceIdle, TestSize.Level1)
+HWTEST_F(NetPolicySettingTest, CloseDeviceIdle, TestSize.Level1)
 {
     AccessToken token(testInfoParms1, testPolicyPrams1);
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdlePolicy(false);
