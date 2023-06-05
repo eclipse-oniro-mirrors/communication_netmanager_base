@@ -155,6 +155,7 @@ ohos_shared_library("netsys_native_manager") {
   }
 
   part_name = "netmanager_base"
+  innerapi_tags = [ "platformsdk_indirect" ]
   subsystem_name = "communication"
 }
 
