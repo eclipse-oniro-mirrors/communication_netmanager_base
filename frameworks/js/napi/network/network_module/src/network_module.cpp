@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,9 @@
 #include "netmanager_base_log.h"
 #include "module_template.h"
 #include "network_async_work.h"
+#include "network_observer.h"
 #include "subscribe_context.h"
 #include "unsubscribe_context.h"
-#include "network_observer.h"
 
 namespace OHOS::NetManagerStandard {
 napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)

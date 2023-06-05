@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,6 @@ static constexpr const int PARAM_NO_OPTIONS = 0;
 static constexpr const int PARAM_HAS_OPTIONS = 1;
 
 namespace OHOS::NetManagerStandard {
-static constexpr const char *EVENT_SUBSCRIBE = "subscribe";
 SubscribeContext::SubscribeContext(napi_env env, EventManager *manager)
     : BaseContext(env, manager), failCallback_(nullptr)
 {
