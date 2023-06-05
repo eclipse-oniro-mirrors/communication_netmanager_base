@@ -16,19 +16,16 @@
 #ifndef INCLUDE_NETLINK_SOCK_DIAG_H
 #define INCLUDE_NETLINK_SOCK_DIAG_H
 
-#include <unistd.h>
-#include <sys/socket.h>
-
 #include <linux/netlink.h>
 #include <linux/sock_diag.h>
 #include <linux/inet_diag.h>
-
-#include <functional>
-#include <set>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <sys/socket.h>
 
 namespace OHOS {
 namespace nmd {
-class NetLinkSocketDiag {
+class NetLinkSocketDiag final {
 public:
     NetLinkSocketDiag() = default;
     ~NetLinkSocketDiag();
@@ -37,32 +34,29 @@ public:
      * Destroy all 'active' TCP sockets that no longer exist.
      *
      * @param netId Network ID
-     * @param excludeLoopback “ture” to exclude loopback.
-     * @return Returns 0, destroy successfully, otherwise it will fail.
+     * @param excludeLoopback “true” to exclude loopback.
+     * @return Returns NETMANAGER_SUCCESS, destroy successfully, otherwise it will fail.
      */
     int32_t DestroySocketsLackingNetwork(uint16_t netId, bool excludeLoopback);
 
 private:
-    inline void CloseSocks()
+    inline bool InLookBack(uint32_t a)
     {
-        close(sock_);
-        close(writeSock_);
-        sock_ = writeSock_ = -1;
+        return ((a & htonl(0xff000000)) == htonl(0x7f000000));
     }
 
-    using DestroyFilter = std::function<bool(uint8_t, const inet_diag_msg *)>;
-    using NetlinkDumpCallback = std::function<void(nlmsghdr *)>;
-    bool Connect();
-    int32_t ReadDiagMsg(uint8_t proto, const DestroyFilter &callback);
-    int32_t RockDestroy(uint8_t proto, const inet_diag_msg *msg);
-    int32_t DestroySocket(uint8_t proto, const inet_diag_msg *msg);
-    int32_t SendDumpRequest(uint8_t proto, uint8_t family, uint32_t states, iovec *iov, int iovcnt);
-    int DestroySockets(uint8_t proto, int family, const char *addrstr);
-    int DestroyLiveSockets(const DestroyFilter &destroy, iovec *iov, int iovcnt);
-    int32_t ProcessNetlinkDump(int32_t sock, const NetlinkDumpCallback &callback);
+    bool CreateNetlinkSocket();
+    void CloseNetlinkSocket();
+    int32_t DestroyLiveSockets(bool excludeLoopback, iovec *iov, int iovCnt);
+    int32_t ExecuteDestroySocket(uint8_t proto, const inet_diag_msg *msg);
+    int32_t GetErrorFromKernel(int32_t fd);
+    bool IsLoopbackSocket(const inet_diag_msg *msg);
+    int32_t ProcessSockDiagDumpResponse(uint8_t proto, bool excludeLoopback);
+    int32_t SendSockDiagDumpRequest(uint8_t proto, uint8_t family, uint32_t states, iovec *iov, int iovCnt);
+    void SockDiagDumpCallback(uint8_t proto, bool excludeLoopback, const inet_diag_msg *msg);
 
 private:
-    struct Request {
+    struct SockDiagRequest {
         nlmsghdr nlh_;
         inet_diag_req_v2 req_;
     };
@@ -76,9 +70,13 @@ private:
         MarkMatch controlMatch_;
         inet_diag_bc_op controlJump_;
     };
+    struct Ack {
+        nlmsghdr hdr_;
+        nlmsgerr err_;
+    };
 
-    int32_t sock_ = -1;
-    int32_t writeSock_ = -1;
+    int32_t dumpSock_ = -1;
+    int32_t destroySock_ = -1;
     int32_t socketsDestroyed_ = 0;
 };
 } // namespace nmd
