@@ -211,9 +211,9 @@ FwmarkNetwork::~FwmarkNetwork() {}
 void FwmarkNetwork::ListenerClient()
 {
     std::thread startListener(StartListener);
-    startListener.detach();
-    std::string threadName = "FwmarkNetworkListener";
+    std::string threadName = "FwmarkListen";
     pthread_setname_np(startListener.native_handle(), threadName.c_str());
+    startListener.detach();
     NETNATIVE_LOGI("FwmarkNetwork: StartListener");
 }
 } // namespace nmd

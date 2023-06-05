@@ -149,9 +149,9 @@ NetsysNativeClient::NetsysNativeClient()
             proxy->RegisterNotifyCallback(nativeNotifyCallback_);
         }
     });
-    t.detach();
-    std::string threadName = "netsysNativeClientGetProxy";
+    std::string threadName = "netsysGetProxy";
     pthread_setname_np(t.native_handle(), threadName.c_str());
+    t.detach();
 }
 
 int32_t NetsysNativeClient::SetInternetPermission(uint32_t uid, uint8_t allow)

@@ -168,9 +168,9 @@ void DnsProxyListen::StartListen()
             break;
         }
         std::thread t(DnsProxyListen::DnsProxyGetPacket, proxySockFd_, recvBuff, proxyAddr);
-        t.detach();
-        std::string threadName = "DnsProxyGetPacket";
+        std::string threadName = "DnsPxyPacket";
         pthread_setname_np(t.native_handle(), threadName.c_str());
+        t.detach();
     }
 }
 
