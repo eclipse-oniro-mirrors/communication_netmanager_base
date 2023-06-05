@@ -15,10 +15,11 @@
 
 #include <algorithm>
 #include <cstring>
-#include <iostream>
 #include <gtest/gtest.h>
+#include <iostream>
 
 #include "net_manager_constants.h"
+#include "net_stats_constants.h"
 #include "netsys_controller.h"
 
 namespace OHOS {
@@ -411,11 +412,11 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest017, TestSize.Level1)
 
     stats = 0;
     ret = NetsysController::GetInstance().GetUidStats(stats, 0, TEST_STATS_UID);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NetStatsResultCode::STATS_ERR_READ_BPF_FAIL);
 
     stats = 0;
     ret = NetsysController::GetInstance().GetIfaceStats(stats, 0, IFACE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NetStatsResultCode::STATS_ERR_GET_IFACE_NAME_FAILED);
 
     stats = 0;
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;

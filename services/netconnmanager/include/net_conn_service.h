@@ -37,19 +37,25 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr uint32_t MAX_REQUEST_NUM = 2000;
+
 class NetConnService : public SystemAbility,
                        public INetActivateCallback,
                        public NetConnServiceStub,
                        public std::enable_shared_from_this<NetConnService> {
-    DECLARE_DELAYED_SINGLETON(NetConnService)
     DECLARE_SYSTEM_ABILITY(NetConnService)
 
+    NetConnService();
+    virtual ~NetConnService();
     using NET_SUPPLIER_MAP = std::map<uint32_t, sptr<NetSupplier>>;
     using NET_NETWORK_MAP = std::map<int32_t, std::shared_ptr<Network>>;
-    using NET_ACTIVATE_MAP = std::map<uint32_t, sptr<NetActivate>>;
+    using NET_ACTIVATE_MAP = std::map<uint32_t, std::shared_ptr<NetActivate>>;
 
 public:
+    static std::shared_ptr<NetConnService> &GetInstance()
+    {
+        static std::shared_ptr<NetConnService> instance = std::make_shared<NetConnService>();
+        return instance;
+    }
     void OnStart() override;
     void OnStop() override;
     /**
@@ -286,14 +292,14 @@ private:
                             const uint32_t &timeoutMS);
     void CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackType type);
     void CallbackForAvailable(sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
-    uint32_t FindBestNetworkForRequest(sptr<NetSupplier> &supplier, sptr<NetActivate> &netActivateNetwork);
-    void SendRequestToAllNetwork(sptr<NetActivate> request);
+    uint32_t FindBestNetworkForRequest(sptr<NetSupplier> &supplier, std::shared_ptr<NetActivate> &netActivateNetwork);
+    void SendRequestToAllNetwork(std::shared_ptr<NetActivate> request);
     void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
     void SendAllRequestToNetwork(sptr<NetSupplier> supplier);
     void FindBestNetworkForAllRequest();
     void MakeDefaultNetWork(sptr<NetSupplier> &oldService, sptr<NetSupplier> &newService);
-    void NotFindBestSupplier(uint32_t reqId, const sptr<NetActivate> &active, const sptr<NetSupplier> &supplier,
-                             const sptr<INetConnCallback> &callback);
+    void NotFindBestSupplier(uint32_t reqId, const std::shared_ptr<NetActivate> &active,
+                             const sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
     void CreateDefaultRequest();
     int32_t RegUnRegNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback, bool isReg);
     int32_t GenerateNetId();
@@ -325,7 +331,7 @@ private:
     bool registerToService_;
     ServiceRunningState state_;
     sptr<NetSpecifier> defaultNetSpecifier_ = nullptr;
-    sptr<NetActivate> defaultNetActivate_ = nullptr;
+    std::shared_ptr<NetActivate> defaultNetActivate_ = nullptr;
     sptr<NetSupplier> defaultNetSupplier_ = nullptr;
     NET_SUPPLIER_MAP netSuppliers_;
     NET_ACTIVATE_MAP netActivates_;
@@ -337,6 +343,8 @@ private:
     std::mutex netManagerMutex_;
     std::shared_ptr<AppExecFwk::EventRunner> netConnEventRunner_ = nullptr;
     std::shared_ptr<NetConnEventHandler> netConnEventHandler_ = nullptr;
+    std::shared_ptr<AppExecFwk::EventRunner> netActEventRunner_ = nullptr;
+    std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
