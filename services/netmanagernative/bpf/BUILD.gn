@@ -53,6 +53,7 @@ ohos_shared_library("netsys_bpf_utils") {
     "hiviewdfx_hilog_native:libhilog",
   ]
 
+  innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

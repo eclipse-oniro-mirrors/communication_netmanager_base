@@ -23,10 +23,11 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-static constexpr uint32_t MAX_IFACE_NUM = 16;
-static constexpr uint32_t MAX_NET_CAP_NUM = 32;
-static constexpr uint32_t UID_FOUNDATION = 5523;
-
+namespace {
+constexpr uint32_t MAX_IFACE_NUM = 16;
+constexpr uint32_t MAX_NET_CAP_NUM = 32;
+constexpr uint32_t UID_FOUNDATION = 5523;
+}
 NetConnServiceStub::NetConnServiceStub()
 {
     memberFuncMap_[CMD_NM_SYSTEM_READY] = {&NetConnServiceStub::OnSystemReady, {}};

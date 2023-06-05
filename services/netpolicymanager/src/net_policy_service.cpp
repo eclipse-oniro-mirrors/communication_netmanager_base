@@ -247,6 +247,12 @@ int32_t NetPolicyService::SetPowerSaveAllowedList(const std::vector<uint32_t> &u
     return netPolicyFirewall_->SetPowerSaveAllowedList(uids, isAllowed);
 }
 
+int32_t NetPolicyService::SetPowerSavePolicy(bool enable)
+{
+    NETMGR_LOG_D("SetPowerSavePolicy enable[%{public}d]", enable);
+    return netPolicyFirewall_->UpdatePowerSavePolicy(enable);
+}
+
 int32_t NetPolicyService::GetDumpMessage(std::string &message)
 {
     netPolicyRule_->GetDumpMessage(message);

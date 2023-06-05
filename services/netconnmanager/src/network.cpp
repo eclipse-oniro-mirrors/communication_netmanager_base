@@ -446,7 +446,7 @@ void Network::SendConnectionChangedBroadcast(const NetConnState &netConnState) c
     info.code = static_cast<int32_t>(netConnState);
     info.ordered = true;
     std::map<std::string, int32_t> param = {{"NetType", static_cast<int32_t>(netSupplierType_)}};
-    DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
+    BroadcastManager::GetInstance().SendBroadcast(info, param);
 }
 
 void Network::SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const std::string &errMsg)

@@ -35,6 +35,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
+constexpr uint32_t MAX_REQUEST_NUM = 2000;
 // hisysevent error messgae
 constexpr const char *ERROR_MSG_NULL_SUPPLIER_INFO = "Net supplier info is nullptr";
 constexpr const char *ERROR_MSG_NULL_NET_LINK_INFO = "Net link info is nullptr";
@@ -43,14 +44,17 @@ constexpr const char *ERROR_MSG_CAN_NOT_FIND_SUPPLIER = "Can not find supplier b
 constexpr const char *ERROR_MSG_UPDATE_NETLINK_INFO_FAILED = "Update net link info failed";
 constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
 constexpr const char *WLAN_IF_NAME = "wlan";
+constexpr const char *NET_ACTIVATE_WORK_THREAD = "NET_ACTIVATE_WORK_THREAD";
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
-    SystemAbility::MakeAndRegisterAbility(DelayedSingleton<NetConnService>::GetInstance().get());
+    SystemAbility::MakeAndRegisterAbility(NetConnService::GetInstance().get());
 
 NetConnService::NetConnService()
     : SystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, true), registerToService_(false), state_(STATE_STOPPED)
 {
+    netActEventRunner_ = AppExecFwk::EventRunner::Create(NET_ACTIVATE_WORK_THREAD);
+    netActEventHandler_ = std::make_shared<AppExecFwk::EventHandler>(netActEventRunner_);
     CreateDefaultRequest();
 }
 
@@ -80,7 +84,9 @@ void NetConnService::CreateDefaultRequest()
         defaultNetSpecifier_ = (std::make_unique<NetSpecifier>()).release();
         defaultNetSpecifier_->SetCapability(NET_CAPABILITY_INTERNET);
         std::weak_ptr<INetActivateCallback> timeoutCb;
-        defaultNetActivate_ = new (std::nothrow) NetActivate(defaultNetSpecifier_, nullptr, timeoutCb, 0);
+        defaultNetActivate_ =
+            std::make_shared<NetActivate>(defaultNetSpecifier_, nullptr, timeoutCb, 0, netActEventHandler_);
+        defaultNetActivate_->StartTimeOutNetAvailable();
         defaultNetActivate_->SetRequestId(DEFAULT_REQUEST_ID);
         netActivates_[DEFAULT_REQUEST_ID] = defaultNetActivate_;
     }
@@ -109,7 +115,7 @@ bool NetConnService::Init()
         return false;
     }
     if (!registerToService_) {
-        if (!Publish(DelayedSingleton<NetConnService>::GetInstance().get())) {
+        if (!Publish(NetConnService::GetInstance().get())) {
             NETMGR_LOG_E("Register to sa manager failed");
             return false;
         }
@@ -319,7 +325,8 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
     }
     std::shared_ptr<Network> network = std::make_shared<Network>(
         netId, supplierId,
-        std::bind(&NetConnService::HandleDetectionResult, this, std::placeholders::_1, std::placeholders::_2),
+        std::bind(&NetConnService::HandleDetectionResult, shared_from_this(),
+            std::placeholders::_1, std::placeholders::_2),
         bearerType, netConnEventHandler_);
     NETMGR_LOG_D("Register supplier,supplierId[%{public}d] netId[%{public}d], ", supplierId, netId);
     supplier->SetNetwork(network);
@@ -447,7 +454,7 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
             continue;
         }
         reqId = iterActive->first;
-        sptr<NetActivate> netActivate = iterActive->second;
+        auto netActivate = iterActive->second;
         if (netActivate) {
             sptr<NetSupplier> supplier = netActivate->GetServiceSupply();
             if (supplier) {
@@ -616,7 +623,7 @@ void NetConnService::SendGlobalHttpProxyChangeBroadcast()
     info.data = "Global HttpProxy Changed";
     info.ordered = true;
     std::map<std::string, std::string> param = {{"HttpProxy", globalHttpProxy_.ToString()}};
-    DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
+    BroadcastManager::GetInstance().SendBroadcast(info, param);
 }
 
 int32_t NetConnService::SetGlobalHttpProxyAsync(const HttpProxy &httpProxy)
@@ -642,7 +649,9 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
     std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
-    sptr<NetActivate> request = new (std::nothrow) NetActivate(netSpecifier, callback, timeoutCb, timeoutMS);
+    std::shared_ptr<NetActivate> request =
+        std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netActEventHandler_);
+    request->StartTimeOutNetAvailable();
     uint32_t reqId = request->GetRequestId();
     NETMGR_LOG_D("ActivateNetwork  reqId is [%{public}d]", reqId);
     netActivates_[reqId] = request;
@@ -767,7 +776,8 @@ void NetConnService::FindBestNetworkForAllRequest()
     }
 }
 
-uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier, sptr<NetActivate> &netActivateNetwork)
+uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
+                                                   std::shared_ptr<NetActivate> &netActivateNetwork)
 {
     int bestScore = 0;
     supplier = nullptr;
@@ -845,7 +855,7 @@ int32_t NetConnService::GenerateNetId()
     return INVALID_NET_ID;
 }
 
-void NetConnService::NotFindBestSupplier(uint32_t reqId, const sptr<NetActivate> &active,
+void NetConnService::NotFindBestSupplier(uint32_t reqId, const std::shared_ptr<NetActivate> &active,
                                          const sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback)
 {
     if (supplier != nullptr) {
@@ -883,7 +893,7 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
     }
 }
 
-void NetConnService::SendRequestToAllNetwork(sptr<NetActivate> request)
+void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> request)
 {
     NETMGR_LOG_I("SendRequestToAllNetwork.");
     if (request == nullptr) {
@@ -1353,7 +1363,7 @@ int32_t NetConnService::SetAirplaneMode(bool state)
     info.code = static_cast<int32_t>(state);
     info.ordered = true;
     std::map<std::string, int32_t> param;
-    DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
+    BroadcastManager::GetInstance().SendBroadcast(info, param);
     return NETMANAGER_SUCCESS;
 }
 

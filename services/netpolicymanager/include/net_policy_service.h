@@ -198,6 +198,14 @@ public:
      */
     int32_t SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed) override;
 
+    /**
+     * Process network policy in Power Save mode.
+     *
+     * @param enable Power save mode is open or not.
+     * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t SetPowerSavePolicy(bool enable) override;
+
 private:
     void Init();
     int32_t GetDumpMessage(std::string &message);

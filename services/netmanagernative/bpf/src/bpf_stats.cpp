@@ -21,6 +21,7 @@
 #include "bpf_stats.h"
 #include "securec.h"
 #include "netnative_log_wrapper.h"
+#include "net_stats_constants.h"
 
 namespace OHOS::NetManagerStandard {
 int32_t NetsysBpfStats::GetNumberFromStatsValue(uint64_t &stats, StatsType statsType, const stats_value &value)
@@ -40,7 +41,7 @@ int32_t NetsysBpfStats::GetNumberFromStatsValue(uint64_t &stats, StatsType stats
             break;
         default:
             NETNATIVE_LOGE("invalid StatsType type %{public}d", statsType);
-            return NETMANAGER_ERROR;
+            return STATS_ERR_READ_BPF_FAIL;
     }
     return NETSYS_SUCCESS;
 }
@@ -51,7 +52,7 @@ int32_t NetsysBpfStats::GetTotalStats(uint64_t &stats, StatsType statsType)
     BpfMapper<iface_stats_key, iface_stats_value> ifaceStatsMap(IFACE_STATS_MAP_PATH, BPF_F_RDONLY);
     if (!ifaceStatsMap.IsValid()) {
         NETNATIVE_LOGE("ifaceStatsMap IsValid");
-        return NETMANAGER_ERROR;
+        return STATS_ERR_INVALID_IFACE_NAME_MAP;
     }
 
     iface_stats_value totalStats = {0};
@@ -60,7 +61,7 @@ int32_t NetsysBpfStats::GetTotalStats(uint64_t &stats, StatsType statsType)
         iface_stats_value v = {0};
         if (ifaceStatsMap.Read(k, v) < NETSYS_SUCCESS) {
             NETNATIVE_LOGE("Read ifaceStatsMap err");
-            return NETMANAGER_ERROR;
+            return STATS_ERR_READ_BPF_FAIL;
         }
         totalStats.rxPackets += v.rxPackets;
         totalStats.rxBytes += v.rxBytes;
@@ -76,12 +77,12 @@ int32_t NetsysBpfStats::GetUidStats(uint64_t &stats, StatsType statsType, uint32
     stats = 0;
     BpfMapper<app_uid_stats_key, app_uid_stats_value> appUidStatsMap(APP_UID_STATS_MAP_PATH, BPF_F_RDONLY);
     if (!appUidStatsMap.IsValid()) {
-        return NETMANAGER_ERROR;
+        return STATS_ERR_INVALID_IFACE_NAME_MAP;
     }
 
     app_uid_stats_value uidStats = {0};
     if (appUidStatsMap.Read(uid, uidStats) < 0) {
-        return NETMANAGER_ERROR;
+        return STATS_ERR_READ_BPF_FAIL;
     }
     return GetNumberFromStatsValue(stats, statsType, uidStats);
 }
@@ -90,7 +91,7 @@ int32_t NetsysBpfStats::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::Ne
 {
     BpfMapper<stats_key, stats_value> uidIfaceStatsMap(APP_UID_IF_STATS_MAP_PATH, BPF_F_RDONLY);
     if (!uidIfaceStatsMap.IsValid()) {
-        return NETMANAGER_ERROR;
+        return STATS_ERR_INVALID_IFACE_NAME_MAP;
     }
 
     stats.clear();
@@ -100,13 +101,13 @@ int32_t NetsysBpfStats::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::Ne
         stats_value v = {};
         if (uidIfaceStatsMap.Read(k, v) < 0) {
             NETNATIVE_LOGE("Read ifaceStatsMap err");
-            return NETMANAGER_ERROR;
+            return STATS_ERR_READ_BPF_FAIL;
         }
 
         NetStatsInfo tempStats;
         tempStats.uid_ = k.uId;
         if (memset_s(if_name, sizeof(if_name), 0, sizeof(if_name)) != EOK) {
-            return NETMANAGER_ERROR;
+            return STATS_ERR_READ_BPF_FAIL;
         }
 
         char *pName = if_indextoname(k.ifIndex, if_name);
@@ -128,17 +129,17 @@ int32_t NetsysBpfStats::GetIfaceStats(uint64_t &stats, const StatsType statsType
     stats = 0;
     BpfMapper<iface_stats_key, iface_stats_value> ifaceStatsMap(IFACE_STATS_MAP_PATH, BPF_F_RDONLY);
     if (!ifaceStatsMap.IsValid()) {
-        return NETMANAGER_ERROR;
+        return STATS_ERR_INVALID_IFACE_NAME_MAP;
     }
 
     auto ifIndex = if_nametoindex(interfaceName.c_str());
     if (ifIndex <= 0) {
-        return NETMANAGER_ERROR;
+        return STATS_ERR_GET_IFACE_NAME_FAILED;
     }
 
     iface_stats_value ifaceStats = {0};
     if (ifaceStatsMap.Read(ifIndex, ifaceStats) < 0) {
-        return NETMANAGER_ERROR;
+        return STATS_ERR_READ_BPF_FAIL;
     }
     return GetNumberFromStatsValue(stats, statsType, ifaceStats);
 }
