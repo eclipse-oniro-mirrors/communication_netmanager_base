@@ -86,6 +86,21 @@ HWTEST_F(NetSpecifierTest, SpecifierIsValidTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpecifierIsValidTest004
+ * @tc.desc: Test NetSpecifier::SpecifierIsValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetSpecifierTest, SpecifierIsValidTest004, TestSize.Level1)
+{
+    std::set<NetCap> caps;
+    NetSpecifier specifier;
+    specifier.ident_ = "";
+    specifier.SetCapabilities(caps);
+    bool ret = specifier.SpecifierIsValid();
+    ASSERT_FALSE(ret);
+}
+
+/**
  * @tc.name: SetTypesTest
  * @tc.desc: Test NetSpecifier::SetTypes
  * @tc.type: FUNC
@@ -147,6 +162,20 @@ HWTEST_F(NetSpecifierTest, MarshallingTest02, TestSize.Level1)
  * @tc.type: FUNC
  */
 HWTEST_F(NetSpecifierTest, MarshallingTest03, TestSize.Level1)
+{
+    MessageParcel dataParcel;
+    NetSpecifier specifier;
+    sptr<NetSpecifier> object = nullptr;
+    bool bRet = specifier.Marshalling(dataParcel, object);
+    ASSERT_FALSE(bRet);
+}
+
+/**
+ * @tc.name: MarshallingTest04
+ * @tc.desc: Test static NetSpecifier::Marshalling
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetSpecifierTest, MarshallingTest04, TestSize.Level1)
 {
     MessageParcel dataParcel;
     sptr<NetSpecifier> specifier = nullptr;
