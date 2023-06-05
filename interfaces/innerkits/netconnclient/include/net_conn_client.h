@@ -16,19 +16,19 @@
 #ifndef NET_CONN_MANAGER_H
 #define NET_CONN_MANAGER_H
 
-#include <string>
 #include <map>
+#include <string>
 
 #include "parcel.h"
 #include "singleton.h"
 
+#include "http_proxy.h"
 #include "i_net_conn_service.h"
 #include "i_net_supplier_callback.h"
-#include "net_supplier_callback_base.h"
+#include "net_handle.h"
 #include "net_link_info.h"
 #include "net_specifier.h"
-#include "net_handle.h"
-#include "http_proxy.h"
+#include "net_supplier_callback_base.h"
 
 namespace OHOS {
 namespace nmd {
@@ -67,6 +67,7 @@ public:
     int32_t SetAppNet(int32_t netId);
     int32_t GetAppNet(int32_t &netId);
     int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList);
+    int32_t InterfaceSetIffUp(const std::string &ifaceName);
 
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
