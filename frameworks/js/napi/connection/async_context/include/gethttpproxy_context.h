@@ -26,10 +26,10 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class GetGlobalHttpProxyContext : public BaseContext {
+class GetHttpProxyContext : public BaseContext {
 public:
-    GetGlobalHttpProxyContext() = delete;
-    GetGlobalHttpProxyContext(napi_env env, EventManager *manager);
+    GetHttpProxyContext() = delete;
+    GetHttpProxyContext(napi_env env, EventManager *manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 

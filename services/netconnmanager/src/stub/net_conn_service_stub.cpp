@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,9 +67,10 @@ NetConnServiceStub::NetConnServiceStub()
                                                 {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[CMD_NM_IS_DEFAULT_NET_METERED] = {&NetConnServiceStub::OnIsDefaultNetMetered,
                                                      {Permission::GET_NETWORK_INFO}};
-    memberFuncMap_[CMD_NM_SET_HTTP_PROXY] = {&NetConnServiceStub::OnSetGlobalHttpProxy,
-                                             {Permission::CONNECTIVITY_INTERNAL}};
-    memberFuncMap_[CMD_NM_GET_HTTP_PROXY] = {&NetConnServiceStub::OnGetGlobalHttpProxy, {}};
+    memberFuncMap_[CMD_NM_SET_GLOBAL_HTTP_PROXY] = {&NetConnServiceStub::OnSetGlobalHttpProxy,
+                                                    {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_GET_GLOBAL_HTTP_PROXY] = {&NetConnServiceStub::OnGetGlobalHttpProxy, {}};
+    memberFuncMap_[CMD_NM_GET_DEFAULT_HTTP_PROXY] = {&NetConnServiceStub::OnGetDefaultHttpProxy, {}};
     memberFuncMap_[CMD_NM_GET_NET_ID_BY_IDENTIFIER] = {&NetConnServiceStub::OnGetNetIdByIdentifier, {}};
     memberFuncMap_[CMD_NM_SET_APP_NET] = {&NetConnServiceStub::OnSetAppNet, {Permission::INTERNET}};
     memberFuncMap_[CMD_NM_SET_INTERNET_PERMISSION] = {&NetConnServiceStub::OnSetInternetPermission, {}};
@@ -831,6 +832,29 @@ int32_t NetConnServiceStub::OnGetGlobalHttpProxy(MessageParcel &data, MessagePar
 {
     HttpProxy httpProxy;
     int32_t result = GetGlobalHttpProxy(httpProxy);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    if (result != NETMANAGER_SUCCESS) {
+        return result;
+    }
+
+    if (!httpProxy.Marshalling(reply)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnGetDefaultHttpProxy(MessageParcel &data, MessageParcel &reply)
+{
+    NETMGR_LOG_I("stub execute OnGetDefaultHttpProxy");
+    int32_t bindNetId = 0;
+    if (!data.ReadInt32(bindNetId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    HttpProxy httpProxy;
+    int32_t result = GetDefaultHttpProxy(bindNetId, httpProxy);
     if (!reply.WriteInt32(result)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

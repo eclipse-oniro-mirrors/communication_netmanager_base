@@ -136,7 +136,7 @@ bool NetConnService::Init()
     }
     NetHttpProxyTracker httpProxyTracker;
     httpProxyTracker.ReadFromSystemParameter(globalHttpProxy_);
-    SendGlobalHttpProxyChangeBroadcast();
+    SendHttpProxyChangeBroadcast(globalHttpProxy_);
     return true;
 }
 
@@ -554,7 +554,6 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
         EventReport::SendSupplierFaultEvent(eventInfo);
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-
     eventInfo.netlinkInfo = netLinkInfo->ToString(" ");
     EventReport::SendSupplierBehaviorEvent(eventInfo);
 
@@ -566,7 +565,11 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
         EventReport::SendSupplierFaultEvent(eventInfo);
         return NET_CONN_ERR_NO_SUPPLIER;
     }
+
+    HttpProxy oldHttpProxy;
+    supplier->GetHttpProxy(oldHttpProxy);
     // According to supplier id, get network from the list
+    std::unique_lock<std::mutex> locker(netManagerMutex_);
     if (supplier->UpdateNetLinkInfo(*netLinkInfo) != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("UpdateNetLinkInfo fail");
         eventInfo.errorType = static_cast<int32_t>(FAULT_UPDATE_NETLINK_INFO_FAILED);
@@ -574,6 +577,11 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
         EventReport::SendSupplierFaultEvent(eventInfo);
         return NET_CONN_ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL;
     }
+    locker.unlock();
+    if (oldHttpProxy != netLinkInfo->httpProxy_) {
+        SendHttpProxyChangeBroadcast(netLinkInfo->httpProxy_);
+    }
+
     CallbackForSupplier(supplier, CALL_TYPE_UPDATE_LINK);
     if (!netScore_->GetServiceScore(supplier)) {
         NETMGR_LOG_E("GetServiceScore fail.");
@@ -616,28 +624,14 @@ int32_t NetConnService::RestrictBackgroundChangedAsync(bool restrictBackground)
     return NETMANAGER_SUCCESS;
 }
 
-void NetConnService::SendGlobalHttpProxyChangeBroadcast()
+void NetConnService::SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy)
 {
     BroadcastInfo info;
     info.action = EventFwk::CommonEventSupport::COMMON_EVENT_HTTP_PROXY_CHANGE;
     info.data = "Global HttpProxy Changed";
     info.ordered = true;
-    std::map<std::string, std::string> param = {{"HttpProxy", globalHttpProxy_.ToString()}};
+    std::map<std::string, std::string> param = {{"HttpProxy", httpProxy.ToString()}};
     BroadcastManager::GetInstance().SendBroadcast(info, param);
-}
-
-int32_t NetConnService::SetGlobalHttpProxyAsync(const HttpProxy &httpProxy)
-{
-    if (globalHttpProxy_ != httpProxy) {
-        globalHttpProxy_ = httpProxy;
-        SendGlobalHttpProxyChangeBroadcast();
-        std::lock_guard<std::mutex> locker(netManagerMutex_);
-        NetHttpProxyTracker httpProxyTracker;
-        if (!httpProxyTracker.WriteToSystemParameter(globalHttpProxy_)) {
-            return NET_CONN_ERR_HTTP_PROXY_INVALID;
-        }
-    }
-    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
@@ -1239,13 +1233,37 @@ int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::st
 
 int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
-    std::lock_guard<std::mutex> locker(netManagerMutex_);
     if (globalHttpProxy_.GetHost().empty()) {
         httpProxy.SetPort(0);
         NETMGR_LOG_E("The http proxy host is empty");
         return NETMANAGER_SUCCESS;
     }
     httpProxy = globalHttpProxy_;
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy)
+{
+    if (!globalHttpProxy_.GetHost().empty()) {
+        httpProxy = globalHttpProxy_;
+        NETMGR_LOG_D("Return global http proxy as default.");
+        return NETMANAGER_SUCCESS;
+    }
+
+    std::lock_guard<std::mutex> locker(netManagerMutex_);
+    auto iter = networks_.find(bindNetId);
+    if ((iter != networks_.end()) && (iter->second != nullptr)) {
+        httpProxy = iter->second->GetNetLinkInfo().httpProxy_;
+        NETMGR_LOG_D("Return bound network's http proxy as default.");
+        return NETMANAGER_SUCCESS;
+    }
+
+    if (defaultNetSupplier_ != nullptr) {
+        defaultNetSupplier_->GetHttpProxy(httpProxy);
+        NETMGR_LOG_D("Return default network's http proxy as default.");
+        return NETMANAGER_SUCCESS;
+    }
+    NETMGR_LOG_E("No default http proxy.");
     return NETMANAGER_SUCCESS;
 }
 
@@ -1369,12 +1387,15 @@ int32_t NetConnService::SetAirplaneMode(bool state)
 
 int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
-    int32_t result = NETMANAGER_ERROR;
-    if (netConnEventHandler_) {
-        netConnEventHandler_->PostSyncTask(
-            [this, &httpProxy, &result]() { result = this->SetGlobalHttpProxyAsync(httpProxy); });
+    if (globalHttpProxy_ != httpProxy) {
+        globalHttpProxy_ = httpProxy;
+        NetHttpProxyTracker httpProxyTracker;
+        if (!httpProxyTracker.WriteToSystemParameter(globalHttpProxy_)) {
+            return NET_CONN_ERR_HTTP_PROXY_INVALID;
+        }
+        SendHttpProxyChangeBroadcast(globalHttpProxy_);
     }
-    return result;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnService::SetAppNet(int32_t netId)

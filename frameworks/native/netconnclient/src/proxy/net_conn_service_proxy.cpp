@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1099,7 +1099,7 @@ int32_t NetConnServiceProxy::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_SET_HTTP_PROXY, data, reply, option);
+    int32_t error = remote->SendRequest(CMD_NM_SET_GLOBAL_HTTP_PROXY, data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -1128,7 +1128,46 @@ int32_t NetConnServiceProxy::GetGlobalHttpProxy(HttpProxy &httpProxy)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_GET_HTTP_PROXY, data, reply, option);
+    int32_t error = remote->SendRequest(CMD_NM_GET_GLOBAL_HTTP_PROXY, data, reply, option);
+    if (error != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    int32_t ret = NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!HttpProxy::Unmarshalling(reply, httpProxy)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+    }
+    return ret;
+}
+
+int32_t NetConnServiceProxy::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteInt32(bindNetId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = remote->SendRequest(CMD_NM_GET_DEFAULT_HTTP_PROXY, data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;

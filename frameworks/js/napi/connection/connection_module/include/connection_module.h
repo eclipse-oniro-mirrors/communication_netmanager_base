@@ -41,6 +41,7 @@ public:
     static constexpr const char *FUNCTION_DISABLE_AIRPLANE_MODE = "disableAirplaneMode";
     static constexpr const char *FUNCTION_REPORT_NET_CONNECTED = "reportNetConnected";
     static constexpr const char *FUNCTION_REPORT_NET_DISCONNECTED = "reportNetDisconnected";
+    static constexpr const char *FUNCTION_GET_DEFAULT_HTTP_PROXY = "getDefaultHttpProxy";
     static constexpr const char *FUNCTION_GET_GLOBAL_HTTP_PROXY = "getGlobalHttpProxy";
     static constexpr const char *FUNCTION_SET_GLOBAL_HTTP_PROXY = "setGlobalHttpProxy";
     static constexpr const char *FUNCTION_GET_APP_NET = "getAppNet";
@@ -90,6 +91,7 @@ private:
     static napi_value DisableAirplaneMode(napi_env env, napi_callback_info info);
     static napi_value ReportNetConnected(napi_env env, napi_callback_info info);
     static napi_value ReportNetDisconnected(napi_env env, napi_callback_info info);
+    static napi_value GetDefaultHttpProxy(napi_env env, napi_callback_info info);
     static napi_value GetGlobalHttpProxy(napi_env env, napi_callback_info info);
     static napi_value SetGlobalHttpProxy(napi_env env, napi_callback_info info);
     static napi_value GetAppNet(napi_env env, napi_callback_info info);
