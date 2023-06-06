@@ -86,6 +86,8 @@ ohos_shared_library("net_conn_manager_if") {
     "//third_party/musl/porting/linux/user/src/hook",
   ]
 
+  version_script = "libnetconn_kits.map"
+
   public_configs = [ ":net_conn_manager_if_config" ]
 
   deps = [
