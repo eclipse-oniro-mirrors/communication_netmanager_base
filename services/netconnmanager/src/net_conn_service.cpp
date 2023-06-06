@@ -1234,9 +1234,10 @@ int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::st
 int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
     if (!NetManagerPermission::IsSystemCaller()) {
-        NETMGR_LOG_E("Permission check failed.");
+        NETMGR_LOG_E("Non-system applications use system APIs.");
         return NETMANAGER_ERR_NOT_SYSTEM_CALL;
     }
+
     if (globalHttpProxy_.GetHost().empty()) {
         httpProxy.SetPort(0);
         NETMGR_LOG_E("The http proxy host is empty");
@@ -1367,7 +1368,7 @@ int32_t NetConnService::Dump(int32_t fd, const std::vector<std::u16string> &args
 int32_t NetConnService::SetAirplaneMode(bool state)
 {
     if (!NetManagerPermission::IsSystemCaller()) {
-        NETMGR_LOG_E("Permission check failed.");
+        NETMGR_LOG_E("Non-system applications use system APIs.");
         return NETMANAGER_ERR_NOT_SYSTEM_CALL;
     }
 
@@ -1392,7 +1393,7 @@ int32_t NetConnService::SetAirplaneMode(bool state)
 int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
     if (!NetManagerPermission::IsSystemCaller()) {
-        NETMGR_LOG_E("Permission check failed.");
+        NETMGR_LOG_E("Non-system applications use system APIs.");
         return NETMANAGER_ERR_NOT_SYSTEM_CALL;
     }
 
