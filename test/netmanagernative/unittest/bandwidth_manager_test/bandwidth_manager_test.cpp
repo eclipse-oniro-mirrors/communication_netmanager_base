@@ -51,7 +51,6 @@ void BandwidthManagerTest::SetUpTestCase()
 void BandwidthManagerTest::TearDownTestCase()
 {
     g_BandwidthManager.reset();
-    g_BandwidthManager = nullptr;
 }
 
 void BandwidthManagerTest::SetUp() {}
