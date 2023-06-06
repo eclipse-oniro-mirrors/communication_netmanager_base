@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -331,21 +331,13 @@ int32_t BandwidthManager::EnableDataSaver(bool enable)
     return hasError ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
 }
 
-int32_t BandwidthManager::SetIfaceQuota(const std::string &ifName, int64_t bytes)
+int32_t BandwidthManager::SetIfaceQuotaDetail(const std::string &ifName, int64_t bytes)
 {
-    if (!CommonUtils::CheckIfaceName(ifName)) {
-        NETNATIVE_LOGE("iface name valid check fail: %{public}s", ifName.c_str());
-        return NETMANAGER_ERROR;
-    }
-    NETNATIVE_LOG_D("BandwidthManager SetIfaceQuota: ifName=%{public}s, bytes=%{public}" PRId64, ifName.c_str(), bytes);
-    bool hasError = false;
-    std::unique_lock<std::mutex> lock(bandwidthMutex_);
-    CheckChainInitialization();
-
     std::string command;
     std::string chainName = std::string(CHAIN_NAME_COSTLY_PTR) + ifName;
     std::string fChainName;
     std::string strMaxBytes = std::to_string(bytes);
+    bool hasError = false;
 
     if (ifaceQuotaBytes_.count(ifName) > 0) {
         // -R ohbw_costly_iface 1 -m quota2 ! --quota 12345 --name iface -j REJECT
@@ -395,6 +387,19 @@ int32_t BandwidthManager::SetIfaceQuota(const std::string &ifName, int64_t bytes
                (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
 
     return hasError ? NETMANAGER_ERROR : NETMANAGER_SUCCESS;
+}
+
+int32_t BandwidthManager::SetIfaceQuota(const std::string &ifName, int64_t bytes)
+{
+    if (!CommonUtils::CheckIfaceName(ifName)) {
+        NETNATIVE_LOGE("iface name valid check fail: %{public}s", ifName.c_str());
+        return NETMANAGER_ERROR;
+    }
+    NETNATIVE_LOG_D("BandwidthManager SetIfaceQuota: ifName=%{public}s, bytes=%{public}" PRId64, ifName.c_str(), bytes);
+    std::unique_lock<std::mutex> lock(bandwidthMutex_);
+    CheckChainInitialization();
+
+    return SetIfaceQuotaDetail(ifName, bytes);
 }
 
 int32_t BandwidthManager::RemoveIfaceQuota(const std::string &ifName)

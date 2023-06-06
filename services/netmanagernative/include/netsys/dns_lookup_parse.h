@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -152,6 +152,7 @@ private:
                        uint8_t *const *answers, int32_t *answersLens, int32_t servFailRetry);
     int32_t DnsSendQueries(GetAnswers getAnswers, const uint8_t *const *queries, const int32_t *queriesLens,
                            uint8_t *const *answers, int32_t *answersLens);
+    int32_t LookupIpLiteralForIPV6(const char *hostName, int32_t &family, struct AddrData buf[ARG_INDEX_1]);
 };
 } // namespace nmd
 } // namespace OHOS
