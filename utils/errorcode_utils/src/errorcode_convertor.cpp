@@ -62,7 +62,7 @@ std::map<int32_t, const char *> g_errStringMap = {
     /* Net base common error */
     {NETMANAGER_SUCCESS, "Successful"},
     {NETMANAGER_ERR_PERMISSION_DENIED, "Permission denied"},
-    {NETMANAGER_ERR_NOT_SYSTEM_CALL, "System permission denied"},
+    {NETMANAGER_ERR_NOT_SYSTEM_CALL, "Non-system applications use system APIs"},
     {NETMANAGER_ERR_PARAMETER_ERROR, "Parameter error"},
     {NETMANAGER_ERR_CAPABILITY_NOT_SUPPORTED, "Capability not supported"},
     {NETMANAGER_ERR_INVALID_PARAMETER, "Invalid parameter value"},

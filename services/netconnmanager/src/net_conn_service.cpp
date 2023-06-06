@@ -380,7 +380,7 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
     uint32_t reqId = 0;
     if (FindSameCallback(callback, reqId)) {
         NETMGR_LOG_E("RegisterNetConnCallback find same callback");
-        return NET_CONN_ERR_CALLBACK_NOT_FOUND;
+        return NET_CONN_ERR_SAME_CALLBACK;
     }
     return ActivateNetwork(netSpecifier, callback, timeoutMS);
 }
@@ -436,7 +436,7 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
     uint32_t reqId = 0;
     if (!FindSameCallback(callback, reqId)) {
         NETMGR_LOG_D("UnregisterNetConnCallback can not find same callback");
-        return NET_CONN_ERR_SAME_CALLBACK;
+        return NET_CONN_ERR_NETID_NOT_FOUND;
     }
     NET_ACTIVATE_MAP::iterator iterActive;
     for (iterActive = netActivates_.begin(); iterActive != netActivates_.end();) {
@@ -1239,6 +1239,10 @@ int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::st
 
 int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
+    if (!NetManagerPermission::IsSystemCaller()) {
+        NETMGR_LOG_E("Permission check failed.");
+        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
+    }
     std::lock_guard<std::mutex> locker(netManagerMutex_);
     if (globalHttpProxy_.GetHost().empty()) {
         httpProxy.SetPort(0);
@@ -1369,6 +1373,10 @@ int32_t NetConnService::SetAirplaneMode(bool state)
 
 int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
+    if (!NetManagerPermission::IsSystemCaller()) {
+        NETMGR_LOG_E("Permission check failed.");
+        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
+    }
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask(
