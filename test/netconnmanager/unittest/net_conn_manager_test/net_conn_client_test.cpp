@@ -683,6 +683,35 @@ HWTEST_F(NetConnClientTest, GetDefaultHttpProxyTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RegisterNetSupplier001
+ * @tc.desc: Test NetConnClient::RegisterNetSupplier
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RegisterNetSupplier001, TestSize.Level1)
+{
+    uint32_t supplierId = 100;
+    NetBearType netBearType = BEARER_WIFI;
+    const std::string ident = "";
+    std::set<NetCap> netCaps = {NET_CAPABILITY_INTERNET};
+    auto ret =
+        DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplier(netBearType, ident, netCaps, supplierId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: UnregisterNetSupplier001
+ * @tc.desc: Test NetConnClient::UnregisterNetSupplier
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, UnregisterNetSupplier001, TestSize.Level1)
+{
+    uint32_t supplierId = 100;
+    auto ret =
+        DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetSupplier(supplierId);
+    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
+}
+
+/**
  * @tc.name: RegisterNetSupplierCallbackTest001
  * @tc.desc: Test NetConnClient::RegisterNetSupplierCallback
  * @tc.type: FUNC
