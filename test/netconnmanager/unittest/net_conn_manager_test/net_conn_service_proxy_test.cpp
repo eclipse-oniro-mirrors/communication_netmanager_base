@@ -91,7 +91,8 @@ public:
                 break;
             }
 
-            case INetConnService::CMD_NM_GET_HTTP_PROXY: {
+            case INetConnService::CMD_NM_GET_GLOBAL_HTTP_PROXY:
+            case INetConnService::CMD_NM_GET_DEFAULT_HTTP_PROXY: {
                 HttpProxy httpProxy;
                 httpProxy.Marshalling(reply);
                 break;
