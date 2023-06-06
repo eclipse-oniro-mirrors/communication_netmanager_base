@@ -641,7 +641,7 @@ int32_t NetsysNativeClient::ClearDefaultNetWorkNetId()
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return NETMANAGER_SUCCESS;
+    return proxy->NetworkClearDefault();
 }
 
 int32_t NetsysNativeClient::BindSocket(int32_t socket_fd, uint32_t netId)

@@ -32,6 +32,7 @@ namespace OHOS {
 namespace NetsysNative {
 constexpr int32_t START_TIME_MS = 1900;
 constexpr int32_t EXTRA_MONTH = 1;
+constexpr const int32_t NETID_UNSET = 0;
 static constexpr const char *BFP_NAME_NETSYS_PATH = "/system/etc/bpf/netsys.o";
 const std::regex REGEX_CMD_IPTABLES(std::string(R"(^-[\S]*[\s\S]*)"));
 
@@ -259,6 +260,7 @@ int32_t NetsysNativeService::NetworkRemoveRouteParcel(int32_t netId, const Route
 int32_t NetsysNativeService::NetworkSetDefault(int32_t netId)
 {
     NETNATIVE_LOG_D("NetworkSetDefault in.");
+    fwmarkNetwork_->SetDefaultNetId(netId);
     int32_t result = netsysService_->NetworkSetDefault(netId);
     NETNATIVE_LOG_D("NetworkSetDefault out.");
     return result;
@@ -273,6 +275,7 @@ int32_t NetsysNativeService::NetworkGetDefault()
 
 int32_t NetsysNativeService::NetworkClearDefault()
 {
+    fwmarkNetwork_->SetDefaultNetId(NETID_UNSET);
     int32_t result = netsysService_->NetworkClearDefault();
     NETNATIVE_LOG_D("NetworkClearDefault");
     return result;

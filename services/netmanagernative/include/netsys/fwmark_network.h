@@ -16,6 +16,7 @@
 #ifndef INCLUDE_FWMARK_NETWORK_H
 #define INCLUDE_FWMARK_NETWORK_H
 
+#include <atomic>
 #include <cstdint>
 
 namespace OHOS {
@@ -25,8 +26,17 @@ public:
     FwmarkNetwork();
     ~FwmarkNetwork();
 
+    void SetDefaultNetId(int32_t netId);
+
 private:
     void ListenerClient();
+    void CloseSocket(int32_t *socket, int32_t ret, int32_t errorCode);
+    void SendMessage(int32_t *serverSockfd);
+    void StartListener();
+    int32_t SetMark(int32_t *socketFd, FwmarkCommand *command);
+
+private:
+    std::atomic_int defaultNetId_(0);
 };
 } // namespace nmd
 } // namespace OHOS
