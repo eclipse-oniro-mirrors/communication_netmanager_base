@@ -75,6 +75,8 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_SET_APP_NET] = {&NetConnServiceStub::OnSetAppNet, {Permission::INTERNET}};
     memberFuncMap_[CMD_NM_SET_INTERNET_PERMISSION] = {&NetConnServiceStub::OnSetInternetPermission, {}};
     memberFuncMap_[CMD_NM_SET_IF_UP_MULTICAST] = {&NetConnServiceStub::OnInterfaceSetIffUp, {}};
+
+    systemCode_ = {CMD_NM_SET_AIRPLANE_MODE, CMD_NM_SET_GLOBAL_HTTP_PROXY, CMD_NM_GET_GLOBAL_HTTP_PROXY};
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -119,18 +121,34 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
     }
-    if (code != CMD_NM_GETDEFAULTNETWORK && CheckPermission(itFunc->second.second)) {
+
+    int32_t ret = OnRequestCheck(code);
+    if (ret == NETMANAGER_SUCCESS) {
         return (this->*requestFunc)(data, reply);
     }
-    if (code == CMD_NM_GETDEFAULTNETWORK && CheckPermissionWithCache(itFunc->second.second)) {
-        return (this->*requestFunc)(data, reply);
-    }
-    if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
+    if (!reply.WriteInt32(ret)) {
         return IPC_STUB_WRITE_PARCEL_ERR;
     }
-
     NETMGR_LOG_D("stub default case, need check");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+}
+
+int32_t NetConnServiceStub::OnRequestCheck(uint32_t code)
+{
+    if (std::find(systemCode_.begin(), systemCode_.end(), code) != systemCode_.end()) {
+        if (!NetManagerPermission::IsSystemCaller()) {
+            NETMGR_LOG_E("Non-system applications use system APIs.");
+            return NETMANAGER_ERR_NOT_SYSTEM_CALL;
+        }
+    }
+    auto itFunc = memberFuncMap_.find(code);
+    if (code != CMD_NM_GETDEFAULTNETWORK && CheckPermission(itFunc->second.second)) {
+        return NETMANAGER_SUCCESS;
+    }
+    if (code == CMD_NM_GETDEFAULTNETWORK && CheckPermissionWithCache(itFunc->second.second)) {
+        return NETMANAGER_SUCCESS;
+    }
+    return NETMANAGER_ERR_PERMISSION_DENIED;
 }
 
 bool NetConnServiceStub::CheckPermission(const std::set<std::string> &permissions)
