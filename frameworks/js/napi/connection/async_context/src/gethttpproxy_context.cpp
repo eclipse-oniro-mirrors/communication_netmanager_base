@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "getglobalhttpproxy_context.h"
+#include "gethttpproxy_context.h"
 
 #include <set>
 #include <string>
@@ -38,9 +38,9 @@ bool CheckParamsType(napi_env env, napi_value *params, size_t paramsCount)
 }
 } // namespace
 
-GetGlobalHttpProxyContext::GetGlobalHttpProxyContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+GetHttpProxyContext::GetHttpProxyContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
 
-void GetGlobalHttpProxyContext::ParseParams(napi_value *params, size_t paramsCount)
+void GetHttpProxyContext::ParseParams(napi_value *params, size_t paramsCount)
 {
     if (!CheckParamsType(GetEnv(), params, paramsCount)) {
         NETMANAGER_BASE_LOGE("check params type failed");

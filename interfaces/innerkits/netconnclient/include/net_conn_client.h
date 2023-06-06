@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,19 +16,19 @@
 #ifndef NET_CONN_MANAGER_H
 #define NET_CONN_MANAGER_H
 
-#include <string>
 #include <map>
+#include <string>
 
 #include "parcel.h"
 #include "singleton.h"
 
+#include "http_proxy.h"
 #include "i_net_conn_service.h"
 #include "i_net_supplier_callback.h"
-#include "net_supplier_callback_base.h"
+#include "net_handle.h"
 #include "net_link_info.h"
 #include "net_specifier.h"
-#include "net_handle.h"
-#include "http_proxy.h"
+#include "net_supplier_callback_base.h"
 
 namespace OHOS {
 namespace nmd {
@@ -64,9 +64,11 @@ public:
     int32_t IsDefaultNetMetered(bool &isMetered);
     int32_t SetGlobalHttpProxy(const HttpProxy &httpProxy);
     int32_t GetGlobalHttpProxy(HttpProxy &httpProxy);
+    int32_t GetDefaultHttpProxy(HttpProxy &httpProxy);
     int32_t SetAppNet(int32_t netId);
     int32_t GetAppNet(int32_t &netId);
     int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList);
+    int32_t InterfaceSetIffUp(const std::string &ifaceName);
 
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {

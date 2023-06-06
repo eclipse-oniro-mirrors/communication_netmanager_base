@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 #include "getaddressbyname_context.h"
 #include "getappnet_context.h"
 #include "getdefaultnet_context.h"
-#include "getglobalhttpproxy_context.h"
+#include "gethttpproxy_context.h"
 #include "napi/native_api.h"
 #include "none_params_context.h"
 #include "parse_nethandle_context.h"
@@ -90,9 +90,13 @@ public:
 
     static napi_value ReportNetDisconnectedCallback(ReportNetDisconnectedContext *context);
 
-    static bool ExecGetGlobalHttpProxy(GetGlobalHttpProxyContext *context);
+    static bool ExecGetDefaultHttpProxy(GetHttpProxyContext *context);
 
-    static napi_value GetGlobalHttpProxyCallback(GetGlobalHttpProxyContext *context);
+    static napi_value GetDefaultHttpProxyCallback(GetHttpProxyContext *context);
+
+    static bool ExecGetGlobalHttpProxy(GetHttpProxyContext *context);
+
+    static napi_value GetGlobalHttpProxyCallback(GetHttpProxyContext *context);
 
     static bool ExecSetGlobalHttpProxy(SetGlobalHttpProxyContext *context);
 

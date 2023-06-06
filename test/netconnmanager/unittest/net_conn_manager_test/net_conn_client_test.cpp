@@ -373,8 +373,8 @@ HWTEST_F(NetConnClientTest, IsDefaultNetMeteredTest002, TestSize.Level1)
 
 /**
  * @tc.name: SetGlobalHttpProxyTest001
- * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.Test NetConnClient::SetGlobalHttpProxy,if host is invalid
- * domain or ip address,return NET_CONN_ERR_HTTP_PROXY_INVALID
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy,if host is invalid domain or ip address,
+ * return NET_CONN_ERR_HTTP_PROXY_INVALID
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest001, TestSize.Level1)
@@ -387,8 +387,8 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest001, TestSize.Level1)
 
 /**
  * @tc.name: SetGlobalHttpProxyTest002
- * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.Test NetConnClient::SetGlobalHttpProxy,if host is invalid
- * domain,return NET_CONN_ERR_HTTP_PROXY_INVALID
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy,if host is invalid domain,
+ * return NET_CONN_ERR_HTTP_PROXY_INVALID
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest002, TestSize.Level1)
@@ -414,8 +414,8 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest003, TestSize.Level1)
 
 /**
  * @tc.name: SetGlobalHttpProxyTest004
- * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.Test NetConnClient::SetGlobalHttpProxy,if host is invalid
- * domain,return NET_CONN_ERR_HTTP_PROXY_INVALID
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy,if host is invalid domain,
+ * return NET_CONN_ERR_HTTP_PROXY_INVALID
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest004, TestSize.Level1)
@@ -454,8 +454,8 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest006, TestSize.Level1)
 
 /**
  * @tc.name: SetGlobalHttpProxyTest007
- * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.Test NetConnClient::SetGlobalHttpProxy,if host is invalid
- * domain,return NET_CONN_ERR_HTTP_PROXY_INVALID
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy,if host is invalid domain,
+ * return NET_CONN_ERR_HTTP_PROXY_INVALID
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest007, TestSize.Level1)
@@ -468,8 +468,8 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest007, TestSize.Level1)
 
 /**
  * @tc.name: SetGlobalHttpProxyTest008
- * @tc.desc: Test NetConnClient::SetGlobalHttpProxy.Test NetConnClient::SetGlobalHttpProxy,if host is invalid
- * domain,return NET_CONN_ERR_HTTP_PROXY_INVALID
+ * @tc.desc: Test NetConnClient::SetGlobalHttpProxy,if host is invalid domain,
+ * return NET_CONN_ERR_HTTP_PROXY_INVALID
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest008, TestSize.Level1)
@@ -680,35 +680,6 @@ HWTEST_F(NetConnClientTest, GetDefaultHttpProxyTest003, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultHttpProxy(defaultHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-}
-
-/**
- * @tc.name: RegisterNetSupplier001
- * @tc.desc: Test NetConnClient::RegisterNetSupplier
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnClientTest, RegisterNetSupplier001, TestSize.Level1)
-{
-    uint32_t supplierId = 100;
-    NetBearType netBearType = BEARER_WIFI;
-    const std::string ident = "";
-    std::set<NetCap> netCaps = {NET_CAPABILITY_INTERNET};
-    auto ret =
-        DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplier(netBearType, ident, netCaps, supplierId);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-/**
- * @tc.name: UnregisterNetSupplier001
- * @tc.desc: Test NetConnClient::UnregisterNetSupplier
- * @tc.type: FUNC
- */
-HWTEST_F(NetConnClientTest, UnregisterNetSupplier001, TestSize.Level1)
-{
-    uint32_t supplierId = 100;
-    auto ret =
-        DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetSupplier(supplierId);
-    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
 }
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,6 +97,24 @@ int32_t DnsLookUpName::NameFromNumeric(AddrData buf[ADDR_FIRST_BIT], const std::
     return DnsLookUpParse().LookupIpLiteral(buf, name, family);
 }
 
+int32_t DnsLookUpName::ProcessMdnsFailed(int32_t answersLens[], uint8_t answersBuf[][PACKET_LINE])
+{
+    if (answersLens[ARG_INDEX_0] < ALENS_MAX_LEN ||
+        (answersBuf[ARG_INDEX_0][ARG_INDEX_3] & ADDR_SECOND_LAST_BIT) == TEMPORARY_FAILURE) {
+        NETNATIVE_LOGE("NameFromDns failed try again");
+        return EAI_AGAIN;
+    }
+    if ((answersBuf[ARG_INDEX_0][ARG_INDEX_3] & ADDR_SECOND_LAST_BIT) == SERVER_FAILURE) {
+        NETNATIVE_LOGE("NameFromDns failed return server failure");
+        return EAI_NONAME;
+    }
+    if ((answersBuf[ARG_INDEX_0][ARG_INDEX_3] & ADDR_SECOND_LAST_BIT) == NO_ERROR) {
+        return DNS_ERR_NONE;
+    }
+    NETNATIVE_LOGE("NameFromDns failed non-recoverable failure in name res.");
+    return EAI_FAIL;
+}
+
 int32_t DnsLookUpName::NameFromDns(AddrData buf[MAXADDRS], char canon[CANON_LINE], const std::string name,
                                    int32_t family, const ResolvConf *conf, uint16_t netId)
 {
@@ -137,20 +155,7 @@ int32_t DnsLookUpName::NameFromDns(AddrData buf[MAXADDRS], char canon[CANON_LINE
     if (ctx.cnt) {
         return ctx.cnt;
     }
-    if (answersLens[ARG_INDEX_0] < ALENS_MAX_LEN ||
-        (answersBuf[ARG_INDEX_0][ARG_INDEX_3] & ADDR_SECOND_LAST_BIT) == TEMPORARY_FAILURE) {
-        NETNATIVE_LOGE("NameFromDns failed try again");
-        return EAI_AGAIN;
-    }
-    if ((answersBuf[ARG_INDEX_0][ARG_INDEX_3] & ADDR_SECOND_LAST_BIT) == SERVER_FAILURE) {
-        NETNATIVE_LOGE("NameFromDns failed return server failure");
-        return EAI_NONAME;
-    }
-    if ((answersBuf[ARG_INDEX_0][ARG_INDEX_3] & ADDR_SECOND_LAST_BIT) == NO_ERROR) {
-        return DNS_ERR_NONE;
-    }
-    NETNATIVE_LOGE("NameFromDns failed non-recoverable failure in name res.");
-    return EAI_FAIL;
+    return ProcessMdnsFailed(answersLens, answersBuf);
 }
 
 int32_t DnsLookUpName::NameFromDnsSearch(AddrData buf[MAXADDRS], char canon[CANON_LINE], const std::string name,
@@ -158,37 +163,16 @@ int32_t DnsLookUpName::NameFromDnsSearch(AddrData buf[MAXADDRS], char canon[CANO
 {
     char search[SEARCH_MAX_LEN] = {0};
     ResolvConf conf{};
-    if (DnsLookUpParse().GetResolvConf(&conf, search, sizeof(search), netId) < 0) {
-        NETNATIVE_LOGE("Get resolv from conf failed");
-        return EAI_NONAME;
-    }
-    if (name.empty()) {
-        NETNATIVE_LOGE("the param name is empty.");
+    if (DnsLookUpParse().GetResolvConf(&conf, search, sizeof(search), netId) < 0 || name.empty()) {
+        NETNATIVE_LOGE("Get resolv from conf failed or the param name is empty.");
         return EAI_NONAME;
     }
 
     size_t nameLen;
-    size_t dots;
-    for (dots = nameLen = 0; name[nameLen]; nameLen++) {
-        if (name[nameLen] == DOT) {
-            dots++;
-        }
+    auto ret = NameFromDnsSearch(nameLen, name, conf, search, canon);
+    if (ret != 0) {
+        return ret;
     }
-    if (dots >= conf.nDots || name[nameLen - LOOKUP_NAME_ONE] == DOT) {
-        *search = LOOKUP_NAME_ZERO;
-    }
-
-    if (name[nameLen - LOOKUP_NAME_ONE] == DOT) {
-        nameLen--;
-    }
-    if (!nameLen || name[nameLen - LOOKUP_NAME_ONE] == DOT || nameLen >= SEARCH_MAX_LEN) {
-        NETNATIVE_LOGE("name is unknown");
-        return EAI_NONAME;
-    }
-    if (strcpy_s(canon, name.length() + 1, name.c_str()) != 0) {
-        return EAI_AGAIN;
-    }
-    canon[nameLen] = DOT;
     char *pos, *temp;
     for (pos = search; *pos; pos = temp) {
         for (; isspace(*pos); pos++) {
@@ -217,6 +201,32 @@ int32_t DnsLookUpName::NameFromDnsSearch(AddrData buf[MAXADDRS], char canon[CANO
     return NameFromDns(buf, canon, name, family, &conf, netId);
 }
 
+int32_t DnsLookUpName::NameFromDnsSearch(size_t &nameLen, const std::string name, ResolvConf conf, char search[],
+                                         char canon[])
+{
+    size_t dots;
+    for (dots = nameLen = 0; name[nameLen]; nameLen++) {
+        if (name[nameLen] == DOT) {
+            dots++;
+        }
+    }
+    if (dots >= conf.nDots || name[nameLen - LOOKUP_NAME_ONE] == DOT) {
+        *search = LOOKUP_NAME_ZERO;
+    }
+
+    if (name[nameLen - LOOKUP_NAME_ONE] == DOT) {
+        nameLen--;
+    }
+    if (!nameLen || name[nameLen - LOOKUP_NAME_ONE] == DOT || nameLen >= SEARCH_MAX_LEN) {
+        NETNATIVE_LOGE("name is unknown");
+        return EAI_NONAME;
+    }
+    if (strcpy_s(canon, name.length() + 1, name.c_str()) != 0) {
+        return EAI_AGAIN;
+    }
+    canon[nameLen] = DOT;
+    return 0;
+}
 const struct policy *DnsLookUpName::PolicyOf(const in6_addr *in6Addr)
 {
     for (int32_t i = 0;; i++) {
