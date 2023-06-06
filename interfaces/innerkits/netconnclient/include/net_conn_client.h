@@ -166,7 +166,7 @@ public:
      * @return Returns 0 success. Otherwise fail.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
-     */ 
+     */
     int32_t HasDefaultNet(bool &flag);
 
     /**
@@ -227,7 +227,7 @@ public:
 
     /**
      * The interface is to bind socket
-     * 
+     *
      * @param socket_fd socket file description
      * @param netId network id
      * @return Returns 0 success. Otherwise fail.
@@ -303,7 +303,7 @@ public:
      * @return Returns 0 success. Otherwise fail.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
-     */ 
+     */
     int32_t SetAppNet(int32_t netId);
 
     /**
@@ -320,7 +320,7 @@ public:
      * Get network id by identifier
      *
      * @param ident identifier
-     * @param netIdList  list of network id 
+     * @param netIdList  list of network id
      * @return Returns 0 success. Otherwise fail.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
