@@ -39,7 +39,7 @@ enum IpType {
 class IptablesWrapper : public std::enable_shared_from_this<IptablesWrapper> {
 public:
     IptablesWrapper();
-    virtual ~IptablesWrapper();
+    ~IptablesWrapper();
     static std::shared_ptr<IptablesWrapper> &GetInstance()
     {
         static std::shared_ptr<IptablesWrapper> instance = std::make_shared<IptablesWrapper>();
