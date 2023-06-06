@@ -32,7 +32,7 @@ namespace NetManagerStandard {
 class StatisticsObserverWrapper : public Singleton<StatisticsObserverWrapper> {
 public:
     StatisticsObserverWrapper();
-    virtual ~StatisticsObserverWrapper();
+    ~StatisticsObserverWrapper();
 
     napi_value On(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events,
                   bool asyncCallback);
