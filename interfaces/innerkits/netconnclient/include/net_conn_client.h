@@ -295,6 +295,15 @@ public:
      * @systemapi Hide this for inner system use.
      */
     int32_t GetDefaultHttpProxy(HttpProxy &httpProxy);
+
+    /**
+     * set network id of app binding network
+     *
+     * @param netId network id
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */ 
     int32_t SetAppNet(int32_t netId);
 
     /**
@@ -317,6 +326,15 @@ public:
      * @systemapi Hide this for inner system use.
      */
     int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList);
+
+    /**
+     * Set iface up
+     *
+     * @param ifaceName Network port device name
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t InterfaceSetIffUp(const std::string &ifaceName);
 
 private:
