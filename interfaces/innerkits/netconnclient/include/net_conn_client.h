@@ -68,6 +68,7 @@ public:
     int32_t SetAppNet(int32_t netId);
     int32_t GetAppNet(int32_t &netId);
     int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList);
+    int32_t InterfaceSetIffUp(const std::string &ifaceName);
 
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {

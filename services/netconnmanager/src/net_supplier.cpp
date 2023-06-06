@@ -23,8 +23,10 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
+constexpr int32_t REG_OK = 0;
+}
 static std::atomic<uint32_t> g_nextNetSupplierId = 0x03EB;
-static constexpr int32_t REG_OK = 0;
 
 NetSupplier::NetSupplier(NetBearType bearerType, const std::string &netSupplierIdent, const std::set<NetCap> &netCaps)
     : netSupplierType_(bearerType),

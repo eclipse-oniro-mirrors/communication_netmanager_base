@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <memory>
 #include "net_conn_callback_stub.h"
 #include "net_manager_constants.h"
+#include <gtest/gtest.h>
+#include <memory>
 #define private public
 #include "net_activate.h"
 #undef private
@@ -70,8 +70,9 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-
-    static inline std::unique_ptr<NetActivate> instance_ = nullptr;
+    static inline std::shared_ptr<AppExecFwk::EventRunner> netActEventRunner_ = nullptr;
+    static inline std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_ = nullptr;
+    static inline std::shared_ptr<NetActivate> instance_ = nullptr;
     static inline sptr<INetConnCallback> callback_ = nullptr;
     static inline sptr<NetSpecifier> specifier_ = nullptr;
     static inline std::shared_ptr<INetActivateCallback> timeoutCallback_ = nullptr;
@@ -82,10 +83,16 @@ void NetActivateTest::SetUpTestCase()
     callback_ = new (std::nothrow) ConnCallbackTest();
     specifier_ = new (std::nothrow) NetSpecifier();
     timeoutCallback_ = std::make_shared<NetActivateCallbackTest>();
-    instance_ = std::make_unique<NetActivate>(specifier_, callback_, timeoutCallback_, TEST_TIMEOUT_MS);
+    netActEventRunner_ = AppExecFwk::EventRunner::Create("NET_ACTIVATE_WORK_THREAD");
+    netActEventHandler_ = std::make_shared<AppExecFwk::EventHandler>(netActEventRunner_);
+    instance_ =
+        std::make_shared<NetActivate>(specifier_, callback_, timeoutCallback_, TEST_TIMEOUT_MS, netActEventHandler_);
 }
 
-void NetActivateTest::TearDownTestCase() {}
+void NetActivateTest::TearDownTestCase()
+{
+    instance_ = nullptr;
+}
 
 void NetActivateTest::SetUp() {}
 
@@ -102,7 +109,7 @@ HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest001, TestSize.Level1)
     ret = instance_->MatchRequestAndNetwork(supplier001);
     EXPECT_FALSE(ret);
     std::string test;
-    sptr<NetSupplier> supplier002 = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, test, netCaps);;
+    sptr<NetSupplier> supplier002 = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, test, netCaps);
     ret = instance_->MatchRequestAndNetwork(supplier002);
     EXPECT_TRUE(ret);
     std::set<NetCap> netCaps1;
@@ -110,7 +117,7 @@ HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest001, TestSize.Level1)
     sptr<NetSupplier> supplier003 = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps1);
     ret = instance_->MatchRequestAndNetwork(supplier003);
     EXPECT_TRUE(ret);
-    sptr<NetSupplier> supplier004 = new (std::nothrow) NetSupplier(NetBearType::BEARER_CELLULAR, TEST_IDENT, netCaps);;
+    sptr<NetSupplier> supplier004 = new (std::nothrow) NetSupplier(NetBearType::BEARER_CELLULAR, TEST_IDENT, netCaps);
     ret = instance_->MatchRequestAndNetwork(supplier004);
     EXPECT_TRUE(ret);
 }
@@ -189,8 +196,8 @@ HWTEST_F(NetActivateTest, CompareByNetworkCapabilities001, TestSize.Level1)
     sptr<INetConnCallback> callback = new (std::nothrow) ConnCallbackTest();
     sptr<NetSpecifier> specifier = nullptr;
     std::weak_ptr<INetActivateCallback> timeoutCallback = std::make_shared<NetActivateCallbackTest>();
-    std::unique_ptr<NetActivate> testNetActivate = std::make_unique<NetActivate>(specifier, callback, timeoutCallback,
-                                                                                 TEST_TIMEOUT_MS);
+    std::shared_ptr<NetActivate> testNetActivate =
+        std::make_shared<NetActivate>(specifier, callback, timeoutCallback, TEST_TIMEOUT_MS, netActEventHandler_);
 
     ret = testNetActivate->CompareByNetworkCapabilities(netCaps);
     EXPECT_EQ(ret, false);
@@ -217,8 +224,8 @@ HWTEST_F(NetActivateTest, CompareByNetworkNetType001, TestSize.Level1)
     sptr<INetConnCallback> callback = new (std::nothrow) ConnCallbackTest();
     sptr<NetSpecifier> specifier = nullptr;
     std::weak_ptr<INetActivateCallback> timeoutCallback = std::make_shared<NetActivateCallbackTest>();
-    std::unique_ptr<NetActivate> testNetActivate = std::make_unique<NetActivate>(specifier, callback, timeoutCallback,
-                                                                                 TEST_TIMEOUT_MS);
+    std::shared_ptr<NetActivate> testNetActivate =
+        std::make_shared<NetActivate>(specifier, callback, timeoutCallback, TEST_TIMEOUT_MS, netActEventHandler_);
     ret = testNetActivate->CompareByNetworkNetType(bearerType);
     EXPECT_EQ(ret, false);
 }
@@ -252,8 +259,8 @@ HWTEST_F(NetActivateTest, HaveCapability001, TestSize.Level1)
     sptr<INetConnCallback> callback = new (std::nothrow) ConnCallbackTest();
     sptr<NetSpecifier> specifier = nullptr;
     std::weak_ptr<INetActivateCallback> timeoutCallback = std::make_shared<NetActivateCallbackTest>();
-    std::unique_ptr<NetActivate> testNetActivate = std::make_unique<NetActivate>(specifier, callback, timeoutCallback,
-                                                                                 TEST_TIMEOUT_MS);
+    std::shared_ptr<NetActivate> testNetActivate =
+        std::make_shared<NetActivate>(specifier, callback, timeoutCallback, TEST_TIMEOUT_MS, netActEventHandler_);
 
     ret = testNetActivate->HaveCapability(netCap);
     EXPECT_EQ(ret, false);
@@ -277,8 +284,8 @@ HWTEST_F(NetActivateTest, HaveTypes001, TestSize.Level1)
     sptr<INetConnCallback> callback = new (std::nothrow) ConnCallbackTest();
     sptr<NetSpecifier> specifier = nullptr;
     std::weak_ptr<INetActivateCallback> timeoutCallback = std::make_shared<NetActivateCallbackTest>();
-    std::unique_ptr<NetActivate> testNetActivate = std::make_unique<NetActivate>(specifier, callback, timeoutCallback,
-                                                                                 TEST_TIMEOUT_MS);
+    std::shared_ptr<NetActivate> testNetActivate =
+        std::make_shared<NetActivate>(specifier, callback, timeoutCallback, TEST_TIMEOUT_MS, netActEventHandler_);
 
     ret = testNetActivate->HaveTypes(bearerTypes);
     EXPECT_EQ(ret, false);

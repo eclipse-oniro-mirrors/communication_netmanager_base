@@ -33,6 +33,7 @@ ohos_unittest("netsys_native_manager_test") {
     "iptables_wrapper_test.cpp",
     "local_network_test.cpp",
     "net_conn_manager_test_util.cpp",
+    "net_manager_native_test.cpp",
     "netlink_msg_test.cpp",
     "netsys_addr_info_parcel_test.cpp",
     "netsys_controller_test.cpp",
@@ -49,6 +50,7 @@ ohos_unittest("netsys_native_manager_test") {
     "route_manager_test.cpp",
     "sharing_manager_test.cpp",
     "traffic_manager_test.cpp",
+    "virtual_network_test.cpp",
   ]
 
   include_dirs = [
@@ -62,7 +64,9 @@ ohos_unittest("netsys_native_manager_test") {
     "$NETMANAGERNATIVE_ROOT/include",
     "$NETMANAGERNATIVE_ROOT/include/netsys/wrapper",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/src/netsys",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETMANAGERNATIVE_ROOT/src/netsys/dnsresolv",
   ]
 
   deps = [
@@ -79,6 +83,7 @@ ohos_unittest("netsys_native_manager_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",

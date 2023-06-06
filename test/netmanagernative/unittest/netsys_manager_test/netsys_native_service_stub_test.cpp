@@ -414,7 +414,7 @@ public:
         return 0;
     }
 
-    int32_t SetIpTablesForRes(const std::string &cmd, std::string &respond) override
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override
     {
         return 0;
     }
@@ -1374,11 +1374,11 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkDelUidsTest001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_NONE);
 }
 
-HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpTablesForResTest001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetIptablesCommandForResTest001, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    int32_t ret = notifyStub_->CmdSetIpTablesForRes(data, reply);
+    int32_t ret = notifyStub_->CmdSetIptablesCommandForRes(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 

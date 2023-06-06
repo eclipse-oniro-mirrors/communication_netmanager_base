@@ -26,5 +26,10 @@ bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissio
 {
     return true;
 }
+
+bool NetManagerPermission::IsSystemCaller()
+{
+    return true;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

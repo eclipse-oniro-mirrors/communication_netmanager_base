@@ -409,7 +409,7 @@ void NetPolicyTraffic::PublishQuotaEvent(const std::string &action, const std::s
     info.data = describe;
     info.permission = Permission::CONNECTIVITY_INTERNAL;
     std::map<std::string, int64_t> param = {{"totalQuota", quota}};
-    DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(info, param);
+    BroadcastManager::GetInstance().SendBroadcast(info, param);
 }
 
 bool NetPolicyTraffic::IsValidPeriodDuration(const std::string &periodDuration)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,15 +25,12 @@ static constexpr const int PARAM_HAS_OPTIONS = 1;
 
 namespace OHOS::NetManagerStandard {
 SubscribeContext::SubscribeContext(napi_env env, EventManager *manager)
-    : BaseContext(env, manager), successCallback_(nullptr), failCallback_(nullptr)
+    : BaseContext(env, manager), failCallback_(nullptr)
 {
 }
 
 SubscribeContext::~SubscribeContext()
 {
-    if (successCallback_ != nullptr) {
-        (void)napi_delete_reference(GetEnv(), successCallback_);
-    }
     if (failCallback_ != nullptr) {
         (void)napi_delete_reference(GetEnv(), failCallback_);
     }
@@ -78,10 +75,9 @@ bool SubscribeContext::SetSuccessCallback(napi_value options)
         NETMANAGER_BASE_LOGE("success should be function");
         return false;
     }
-    if (successCallback_ != nullptr) {
-        (void)napi_delete_reference(GetEnv(), successCallback_);
-    }
-    return napi_create_reference(GetEnv(), callback, 1, &successCallback_) == napi_ok;
+
+    GetManager()->AddListener(GetEnv(), EVENT_SUBSCRIBE, callback, false, false);
+    return true;
 }
 
 bool SubscribeContext::SetFailCallback(napi_value options)
@@ -101,16 +97,6 @@ bool SubscribeContext::SetFailCallback(napi_value options)
     return napi_create_reference(GetEnv(), callback, 1, &failCallback_) == napi_ok;
 }
 
-napi_value SubscribeContext::GetSuccessCallback() const
-{
-    if (successCallback_ == nullptr) {
-        return nullptr;
-    }
-    napi_value callback = nullptr;
-    NAPI_CALL(GetEnv(), napi_get_reference_value(GetEnv(), successCallback_, &callback));
-    return callback;
-}
-
 napi_value SubscribeContext::GetFailCallback() const
 {
     if (failCallback_ == nullptr) {
@@ -119,15 +105,5 @@ napi_value SubscribeContext::GetFailCallback() const
     napi_value callback = nullptr;
     NAPI_CALL(GetEnv(), napi_get_reference_value(GetEnv(), failCallback_, &callback));
     return callback;
-}
-
-void SubscribeContext::SetCap(const NetAllCapabilities &cap)
-{
-    cap_ = cap;
-}
-
-NetAllCapabilities SubscribeContext::GetCap()
-{
-    return cap_;
 }
 } // namespace OHOS::NetManagerStandard

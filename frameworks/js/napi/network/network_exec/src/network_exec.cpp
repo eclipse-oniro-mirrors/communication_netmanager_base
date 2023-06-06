@@ -24,12 +24,14 @@
 #include "napi_utils.h"
 #include "netmanager_base_log.h"
 #include "securec.h"
+#include "network_observer.h"
 
 namespace OHOS::NetManagerStandard {
 static constexpr const int ERROR_PARAM_NUM = 2;
 static constexpr const char *ERROR_MSG = "failed";
 static constexpr const char *NETWORK_NONE = "none";
 static constexpr const char *NETWORK_WIFI = "WiFi";
+static constexpr const uint32_t DEFAULT_TIMEOUT_MS = 1000;
 
 #if HAS_TELEPHONY
 static std::string CellularTypeToString(Telephony::SignalInformation::NetworkType type)
@@ -142,23 +144,16 @@ napi_value NetworkExec::GetTypeCallback(GetTypeContext *context)
 bool NetworkExec::ExecSubscribe(SubscribeContext *context)
 {
     NETMANAGER_BASE_LOGI("NetworkExec::ExecSubscribe");
-    NetHandle handle;
-    auto ret = NetConnClient::GetInstance().GetDefaultNet(handle);
-    if (ret != NETMANAGER_SUCCESS) {
-        context->SetErrorCode(ret);
-        return ret == NETMANAGER_SUCCESS;
-    }
+    EventManager *manager = context->GetManager();
 
-    if (handle.GetNetId() == 0) {
-        context->SetErrorCode(NETMANAGER_ERR_INTERNAL);
+    sptr<INetConnCallback> callback = g_observerMap[manager];
+    if (callback == nullptr) {
         return false;
     }
-
-    NetAllCapabilities cap;
-    ret = NetConnClient::GetInstance().GetNetCapabilities(handle, cap);
-    if (ret == NETMANAGER_SUCCESS) {
-        context->SetCap(cap);
-    }
+    sptr<NetSpecifier> specifier = new NetSpecifier;
+    specifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
+    NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
+    int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifier, callback, DEFAULT_TIMEOUT_MS);
 
     context->SetErrorCode(ret);
     return ret == NETMANAGER_SUCCESS;
@@ -176,13 +171,6 @@ napi_value NetworkExec::SubscribeCallback(SubscribeContext *context)
             NapiUtils::CallFunction(context->GetEnv(), NapiUtils::GetUndefined(context->GetEnv()), fail,
                                     ERROR_PARAM_NUM, argv);
         }
-    } else {
-        napi_value success = context->GetSuccessCallback();
-        if (NapiUtils::GetValueType(context->GetEnv(), success) == napi_function) {
-            auto cap = context->GetCap();
-            auto obj = MakeNetworkResponse(context->GetEnv(), cap.bearerTypes_);
-            NapiUtils::CallFunction(context->GetEnv(), NapiUtils::GetUndefined(context->GetEnv()), success, 1, &obj);
-        }
     }
 
     return NapiUtils::GetUndefined(context->GetEnv());
@@ -190,11 +178,20 @@ napi_value NetworkExec::SubscribeCallback(SubscribeContext *context)
 
 bool NetworkExec::ExecUnsubscribe(UnsubscribeContext *context)
 {
-    return true;
+    EventManager *manager = context->GetManager();
+    sptr<INetConnCallback> callback = g_observerMap[manager];
+    if (callback == nullptr) {
+        return false;
+    }
+
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
+    context->SetErrorCode(ret);
+    return ret == NETMANAGER_SUCCESS;
 }
 
 napi_value NetworkExec::UnsubscribeCallback(UnsubscribeContext *context)
 {
+    context->GetManager()->DeleteListener(EVENT_SUBSCRIBE);
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 } // namespace OHOS::NetManagerStandard

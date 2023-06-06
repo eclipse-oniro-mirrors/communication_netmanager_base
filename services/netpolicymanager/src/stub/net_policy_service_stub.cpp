@@ -24,28 +24,26 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 std::map<uint32_t, const char *> g_codeNPS = {
-    {INetPolicyService::CMD_NPS_SET_POLICY_BY_UID, Permission::SET_NETWORK_POLICY},
-    {INetPolicyService::CMD_NPS_SET_NET_QUOTA_POLICIES, Permission::SET_NETWORK_POLICY},
-    {INetPolicyService::CMD_NPS_RESET_POLICIES, Permission::SET_NETWORK_POLICY},
-    {INetPolicyService::CMD_NPS_SET_BACKGROUND_POLICY, Permission::SET_NETWORK_POLICY},
-    {INetPolicyService::CMD_NPS_UPDATE_REMIND_POLICY, Permission::SET_NETWORK_POLICY},
-
-    {INetPolicyService::CMD_NPS_GET_POLICY_BY_UID, Permission::GET_NETWORK_POLICY},
-    {INetPolicyService::CMD_NPS_GET_UIDS_BY_POLICY, Permission::GET_NETWORK_POLICY},
-    {INetPolicyService::CMD_NPS_GET_NET_QUOTA_POLICIES, Permission::GET_NETWORK_POLICY},
-    {INetPolicyService::CMD_NPS_GET_BACKGROUND_POLICY, Permission::GET_NETWORK_POLICY},
-
-    {INetPolicyService::CMD_NPS_IS_NET_ALLOWED_BY_METERED, Permission::CONNECTIVITY_INTERNAL},
-    {INetPolicyService::CMD_NPS_IS_NET_ALLOWED_BY_IFACE, Permission::CONNECTIVITY_INTERNAL},
-    {INetPolicyService::CMD_NPS_REGISTER_NET_POLICY_CALLBACK, Permission::CONNECTIVITY_INTERNAL},
-    {INetPolicyService::CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK, Permission::CONNECTIVITY_INTERNAL},
-    {INetPolicyService::CMD_NPS_GET_BACKGROUND_POLICY_BY_UID, Permission::CONNECTIVITY_INTERNAL},
-    {INetPolicyService::CMD_NPS_SET_IDLE_ALLOWED_LIST, Permission::CONNECTIVITY_INTERNAL},
-    {INetPolicyService::CMD_NPS_GET_IDLE_ALLOWED_LIST, Permission::CONNECTIVITY_INTERNAL},
-    {INetPolicyService::CMD_NPS_SET_DEVICE_IDLE_POLICY, Permission::CONNECTIVITY_INTERNAL},
-    {INetPolicyService::CMD_NPS_GET_POWER_SAVE_ALLOWED_LIST, Permission::CONNECTIVITY_INTERNAL},
-    {INetPolicyService::CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST, Permission::CONNECTIVITY_INTERNAL},
-
+    {INetPolicyService::CMD_NPS_SET_POLICY_BY_UID, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_SET_NET_QUOTA_POLICIES, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_RESET_POLICIES, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_SET_BACKGROUND_POLICY, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_UPDATE_REMIND_POLICY, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_GET_POLICY_BY_UID, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_GET_UIDS_BY_POLICY, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_GET_NET_QUOTA_POLICIES, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_GET_BACKGROUND_POLICY, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_IS_NET_ALLOWED_BY_METERED, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_IS_NET_ALLOWED_BY_IFACE, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_REGISTER_NET_POLICY_CALLBACK, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_GET_BACKGROUND_POLICY_BY_UID, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_SET_IDLE_ALLOWED_LIST, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_GET_IDLE_ALLOWED_LIST, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_SET_DEVICE_IDLE_POLICY, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_GET_POWER_SAVE_ALLOWED_LIST, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_SET_POWER_SAVE_POLICY, Permission::MANAGE_NET_STRATEGY},
 };
 } // namespace
 
@@ -70,6 +68,7 @@ NetPolicyServiceStub::NetPolicyServiceStub()
     memberFuncMap_[CMD_NPS_SET_BACKGROUND_POLICY] = &NetPolicyServiceStub::OnSetBackgroundPolicy;
     memberFuncMap_[CMD_NPS_GET_BACKGROUND_POLICY] = &NetPolicyServiceStub::OnGetBackgroundPolicy;
     memberFuncMap_[CMD_NPS_GET_BACKGROUND_POLICY_BY_UID] = &NetPolicyServiceStub::OnGetBackgroundPolicyByUid;
+    memberFuncMap_[CMD_NPS_SET_POWER_SAVE_POLICY] = &NetPolicyServiceStub::OnSetPowerSavePolicy;
     InitEventHandler();
 }
 
@@ -541,6 +540,23 @@ int32_t NetPolicyServiceStub::OnSetPowerSaveAllowedList(MessageParcel &data, Mes
     }
 
     int32_t result = SetPowerSaveAllowedList(uids, isAllowed);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyServiceStub::OnSetPowerSavePolicy(MessageParcel &data, MessageParcel &reply)
+{
+    bool isAllowed = false;
+    if (!data.ReadBool(isAllowed)) {
+        NETMGR_LOG_E("Read Bool data failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t result = SetPowerSavePolicy(isAllowed);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;

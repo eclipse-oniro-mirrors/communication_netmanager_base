@@ -643,17 +643,17 @@ int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandar
     return bpfStats_->GetAllStatsInfo(stats);
 }
 
-int32_t NetsysNativeService::SetIpTablesForRes(const std::string &cmd, std::string &respond)
+int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)
 {
     if (!regex_match(cmd, REGEX_CMD_IPTABLES)) {
-        NETNATIVE_LOGE("IptablesWrapper invalid command format cmd:[%{public}s]", cmd.c_str());
+        NETNATIVE_LOGE("IptablesWrapper command format is invalid");
         return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
     }
     if (iptablesWrapper_ == nullptr) {
-        NETNATIVE_LOGE("SetIpTablesForRes iptablesWrapper_ is null");
+        NETNATIVE_LOGE("SetIptablesCommandForRes iptablesWrapper_ is null");
         return NetManagerStandard::NETMANAGER_ERROR;
     }
-    respond = iptablesWrapper_->RunCommandForRes(IPTYPE_IPV4, cmd);
+    respond = iptablesWrapper_->RunCommandForRes(IPTYPE_IPV4V6, cmd);
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 } // namespace NetsysNative
