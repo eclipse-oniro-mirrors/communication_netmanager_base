@@ -48,6 +48,7 @@
       "OHOS::NetManagerStandard::NetConnClient::UpdateNetSupplierInfo(unsigned int, OHOS::sptr<OHOS::NetManagerStandard::NetSupplierInfo> const&)";
       "OHOS::NetManagerStandard::NetConnClient::UpdateNetLinkInfo(unsigned int, OHOS::sptr<OHOS::NetManagerStandard::NetLinkInfo> const&)";
       "OHOS::NetManagerStandard::NetConnClient::SystemReady()";
+      "OHOS::NetManagerStandard::NetConnClient::GetDefaultHttpProxy(OHOS::NetManagerStandard::HttpProxy&)";
       "OHOS::NetManagerStandard::NetConnClient::GetNetIdByIdentifier(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::list<int, std::__h::allocator<int>>&)";
       VTT?for?OHOS::NetManagerStandard::NetSpecifier;
       vtable?for?OHOS::NetManagerStandard::NetSpecifier;
