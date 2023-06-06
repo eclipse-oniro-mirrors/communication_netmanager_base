@@ -705,7 +705,7 @@ public:
      * @param respond The respond of execute iptables command
      * @return Value the return value of the netsys interface call
      */
-    virtual int32_t SetIpTablesForRes(const std::string &cmd, std::string &respond) = 0;
+    virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

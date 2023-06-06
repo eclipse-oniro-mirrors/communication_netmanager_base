@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,6 @@
 #include <string>
 #include <map>
 
-#include "singleton.h"
-
 namespace OHOS {
 namespace NetManagerStandard {
 struct BroadcastInfo {
@@ -33,8 +31,16 @@ struct BroadcastInfo {
 };
 
 class BroadcastManager {
-    DECLARE_DELAYED_SINGLETON(BroadcastManager)
+    BroadcastManager();
+    ~BroadcastManager();
+
 public:
+    static BroadcastManager &GetInstance()
+    {
+        static BroadcastManager instance;
+        return instance;
+    }
+
     bool SendBroadcast(const BroadcastInfo &info, const std::map<std::string, bool> &param);
 
     bool SendBroadcast(const BroadcastInfo &info, const std::map<std::string, int32_t> &param);

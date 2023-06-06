@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -148,7 +148,7 @@ void NetConnHiEventTest::HandleDetectionResult(uint32_t supplierId, bool ifValid
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_001, TestSize.Level1)
 {
     int32_t supplierId = 1001;
-    int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->UpdateNetSupplierInfo(supplierId, nullptr);
+    int32_t ret = NetConnService::GetInstance()->UpdateNetSupplierInfo(supplierId, nullptr);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
@@ -160,7 +160,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_001, TestSize.Level1)
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_002, TestSize.Level1)
 {
     int32_t supplierId = 1001;
-    int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->UpdateNetLinkInfo(supplierId, nullptr);
+    int32_t ret = NetConnService::GetInstance()->UpdateNetLinkInfo(supplierId, nullptr);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
@@ -281,7 +281,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_010, TestSize.Level1)
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_011, TestSize.Level1)
 {
     OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
-    int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->RegisterNetConnCallback(nullptr, nullptr, 0);
+    int32_t ret = NetConnService::GetInstance()->RegisterNetConnCallback(nullptr, nullptr, 0);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

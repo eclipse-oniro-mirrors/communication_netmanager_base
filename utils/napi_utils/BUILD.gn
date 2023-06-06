@@ -47,6 +47,7 @@ ohos_shared_library("napi_utils") {
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 
+  innerapi_tags = [ "platformsdk" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

@@ -78,6 +78,7 @@ ohos_shared_library("net_manager_common") {
     "ipc:ipc_single",
   ]
 
+  innerapi_tags = [ "platformsdk" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

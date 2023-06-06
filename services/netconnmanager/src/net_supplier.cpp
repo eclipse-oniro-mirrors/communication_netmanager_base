@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,8 +23,10 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
+constexpr int32_t REG_OK = 0;
+}
 static std::atomic<uint32_t> g_nextNetSupplierId = 0x03EB;
-static constexpr int32_t REG_OK = 0;
 
 NetSupplier::NetSupplier(NetBearType bearerType, const std::string &netSupplierIdent, const std::set<NetCap> &netCaps)
     : netSupplierType_(bearerType),
@@ -144,6 +146,15 @@ int32_t NetSupplier::GetNetId() const
 sptr<NetHandle> NetSupplier::GetNetHandle() const
 {
     return netHandle_;
+}
+
+void NetSupplier::GetHttpProxy(HttpProxy &httpProxy)
+{
+    if (network_ == nullptr) {
+        NETMGR_LOG_E("network_ is nullptr.");
+        return;
+    }
+    httpProxy = network_->GetNetLinkInfo().httpProxy_;
 }
 
 uint32_t NetSupplier::GetSupplierId() const

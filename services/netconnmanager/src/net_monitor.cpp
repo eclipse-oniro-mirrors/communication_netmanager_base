@@ -38,22 +38,23 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-static constexpr int32_t INIT_DETECTION_DELAY_MS = 8 * 1000;
-static constexpr int32_t MAX_FAILED_DETECTION_DELAY_MS = 5 * 60 * 1000;
-static constexpr int32_t SUCCESSED_DETECTION_DELAY_MS = 30 * 1000;
-static constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 60 * 1000;
-static constexpr int32_t DOUBLE = 2;
-static constexpr int32_t DOMAINIPADDR = 128;
-static constexpr int32_t PORTAL_CONTENT_LENGTH_MIN = 4;
-static constexpr int32_t NET_CONTENT_LENGTH = 6;
-static constexpr uint16_t DEFAULT_PORT = 80;
-static constexpr int32_t MAX_RECIVE_SIZE = 2048;
-static constexpr int32_t DOMAIN_POSITION = 3;
-static constexpr int32_t URLPATH_POSITION = 4;
-static constexpr int32_t SOCKET_TIMEOUT = 2;
-static constexpr int32_t MAX_SEND_RETRY = 4;
-static constexpr uint8_t SOCKET_NOT_READY = 0;
-static constexpr uint8_t SOCKET_READY = 1;
+namespace {
+constexpr int32_t INIT_DETECTION_DELAY_MS = 8 * 1000;
+constexpr int32_t MAX_FAILED_DETECTION_DELAY_MS = 5 * 60 * 1000;
+constexpr int32_t SUCCESSED_DETECTION_DELAY_MS = 30 * 1000;
+constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 60 * 1000;
+constexpr int32_t DOUBLE = 2;
+constexpr int32_t DOMAINIPADDR = 128;
+constexpr int32_t PORTAL_CONTENT_LENGTH_MIN = 4;
+constexpr int32_t NET_CONTENT_LENGTH = 6;
+constexpr uint16_t DEFAULT_PORT = 80;
+constexpr int32_t MAX_RECIVE_SIZE = 2048;
+constexpr int32_t DOMAIN_POSITION = 3;
+constexpr int32_t URLPATH_POSITION = 4;
+constexpr int32_t SOCKET_TIMEOUT = 2;
+constexpr int32_t MAX_SEND_RETRY = 4;
+constexpr uint8_t SOCKET_NOT_READY = 0;
+constexpr uint8_t SOCKET_READY = 1;
 constexpr const char *PORTAL_URL_REDIRECT_FIRST_CASE = "Location: ";
 constexpr const char *PORTAL_URL_REDIRECT_SECOND_CASE = "http";
 constexpr const char *CONTENT_STR = "Content-Length:";
@@ -62,7 +63,7 @@ constexpr const char SPACE_STR = ' ';
 constexpr const char NEW_LINE_STR = '\n';
 constexpr const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char *DEF_NETDETECT_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
-
+}
 static void NetDetectThread(const std::shared_ptr<NetMonitor> &netMonitor)
 {
     if (netMonitor == nullptr) {

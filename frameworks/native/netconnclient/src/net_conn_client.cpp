@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,11 +19,11 @@
 #include "system_ability_definition.h"
 
 #include "fwmark_client.h"
-#include "netsys_sock_client.h"
 #include "net_conn_service_proxy.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_supplier_callback_stub.h"
+#include "netsys_sock_client.h"
 
 static constexpr const int32_t MIN_VALID_NETID = 100;
 
@@ -383,6 +383,18 @@ int32_t NetConnClient::GetGlobalHttpProxy(HttpProxy &httpProxy)
     return proxy->GetGlobalHttpProxy(httpProxy);
 }
 
+int32_t NetConnClient::GetDefaultHttpProxy(HttpProxy &httpProxy)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    int32_t bindNetId = 0;
+    GetAppNet(bindNetId);
+    return proxy->GetDefaultHttpProxy(bindNetId, httpProxy);
+}
+
 int32_t NetConnClient::GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList)
 {
     sptr<INetConnService> proxy = GetProxy();
@@ -391,6 +403,16 @@ int32_t NetConnClient::GetNetIdByIdentifier(const std::string &ident, std::list<
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->GetNetIdByIdentifier(ident, netIdList);
+}
+
+int32_t NetConnClient::InterfaceSetIffUp(const std::string &ifaceName)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->InterfaceSetIffUp(ifaceName);
 }
 
 int32_t NetConnClient::SetAppNet(int32_t netId)

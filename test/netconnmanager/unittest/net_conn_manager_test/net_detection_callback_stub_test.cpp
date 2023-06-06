@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 #include <iostream>
-
 #include <memory>
 #define private public
 #include "net_detection_callback_stub.h"
@@ -55,32 +54,39 @@ void NetDetectionCallbackStubTest::SetUp() {}
 
 void NetDetectionCallbackStubTest::TearDown() {}
 
+/**
+ * @tc.name: OnRemoteRequest001
+ * @tc.desc: Test NetDetectionCallbackStub OnRemoteRequest.
+ * @tc.type: FUNC
+ */
 HWTEST_F(NetDetectionCallbackStubTest, OnRemoteRequest001, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(100, data, reply, option);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_DESCRIPTOR_MISMATCH);
+
+    data.WriteInterfaceToken(NetDetectionCallbackStub::GetDescriptor());
+    ret = instance_->OnRemoteRequest(100, data, reply, option);
+    EXPECT_EQ(ret, IPC_STUB_UNKNOW_TRANS_ERR);
 }
 
-HWTEST_F(NetDetectionCallbackStubTest, OnRemoteRequest002, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    int32_t ret = instance_->OnRemoteRequest(0, data, reply, option);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
-}
-
+/**
+ * @tc.name: OnNetDetectionResult001
+ * @tc.desc: Test NetDetectionCallbackStub OnNetDetectionResult.
+ * @tc.type: FUNC
+ */
 HWTEST_F(NetDetectionCallbackStubTest, OnNetDetectionResult001, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-
-    int32_t ret = instance_->OnNetDetectionResult(data, reply);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    MessageOption option;
+    data.WriteInterfaceToken(NetDetectionCallbackStub::GetDescriptor());
+    data.WriteString("test");
+    data.WriteInt32(NET_DETECTION_SUCCESS);
+    int32_t ret = instance_->OnRemoteRequest(INetDetectionCallback::NET_DETECTION_RESULT, data, reply, option);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

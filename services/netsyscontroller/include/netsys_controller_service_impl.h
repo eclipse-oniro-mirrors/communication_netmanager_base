@@ -689,7 +689,7 @@ public:
      * @param respond The respond of execute iptables command
      * @return Value the return value of the netsys interface call
      */
-    int32_t SetIpTablesForRes(const std::string &cmd, std::string &respond) override;
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override;
 
 private:
     MockNetsysNativeClient mockNetsysClient_;
