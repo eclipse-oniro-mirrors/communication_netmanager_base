@@ -170,7 +170,7 @@ public:
     int32_t HasDefaultNet(bool &flag);
 
     /**
-     * The interface is to get all acvite network 
+     * The interface is to get all acvite network
      *
      * @param netList a list of network
      * @return Returns 0 success. Otherwise fail.

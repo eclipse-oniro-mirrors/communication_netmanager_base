@@ -138,7 +138,7 @@ public:
     /**
      * Get traffic details for all network cards
      *
-     * @param infos all network cards informations 
+     * @param infos all network cards informations
      * @return Returns 0 success. Otherwise fail.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
