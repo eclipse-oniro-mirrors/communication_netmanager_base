@@ -29,17 +29,17 @@ public:
     int32_t SystemReady() override;
     int32_t SetInternetPermission(uint32_t uid, uint8_t allow) override;
     int32_t RegisterNetSupplier(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
-        uint32_t &supplierId) override;
+                                uint32_t &supplierId) override;
     int32_t UnregisterNetSupplier(uint32_t supplierId) override;
     int32_t RegisterNetSupplierCallback(uint32_t supplierId, const sptr<INetSupplierCallback> &callback) override;
     int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
-    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-        const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS) override;
+    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
+                                    const uint32_t &timeoutMS) override;
     int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
     int32_t UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState) override;
     int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) override;
     int32_t UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo) override;
-    int32_t  GetDefaultNet(int32_t& netId) override;
+    int32_t GetDefaultNet(int32_t &netId) override;
     int32_t HasDefaultNet(bool &flag) override;
     int32_t GetIfaceNames(NetBearType bearerType, std::list<std::string> &ifaceNames) override;
     int32_t GetIfaceNameByType(NetBearType bearerType, const std::string &ident, std::string &ifaceName) override;
@@ -61,6 +61,7 @@ public:
     int32_t GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy) override;
     int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList) override;
     int32_t SetAppNet(int32_t netId) override;
+    int32_t InterfaceSetIffUp(const std::string &ifaceName) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "netmanager_base_permission.h"
-#include "net_conn_constants.h"
 #include "net_conn_service_stub.h"
+#include "ipc_skeleton.h"
+#include "net_conn_constants.h"
 #include "net_conn_types.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
-#include "ipc_skeleton.h"
+#include "netmanager_base_permission.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -74,6 +74,7 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_GET_NET_ID_BY_IDENTIFIER] = {&NetConnServiceStub::OnGetNetIdByIdentifier, {}};
     memberFuncMap_[CMD_NM_SET_APP_NET] = {&NetConnServiceStub::OnSetAppNet, {Permission::INTERNET}};
     memberFuncMap_[CMD_NM_SET_INTERNET_PERMISSION] = {&NetConnServiceStub::OnSetInternetPermission, {}};
+    memberFuncMap_[CMD_NM_SET_IF_UP_MULTICAST] = {&NetConnServiceStub::OnInterfaceSetIffUp, {}};
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -908,5 +909,19 @@ int32_t NetConnServiceStub::OnSetAppNet(MessageParcel &data, MessageParcel &repl
     }
     return ret;
 }
+
+int32_t NetConnServiceStub::OnInterfaceSetIffUp(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ifaceName;
+    if (!data.ReadString(ifaceName)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t ret = InterfaceSetIffUp(ifaceName);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return ret;
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

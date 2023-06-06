@@ -26,14 +26,14 @@
 #include "singleton.h"
 #include "system_ability.h"
 
-#include "network.h"
+#include "http_proxy.h"
 #include "net_activate.h"
 #include "net_conn_event_handler.h"
 #include "net_conn_service_iface.h"
 #include "net_conn_service_stub.h"
 #include "net_score.h"
 #include "net_supplier.h"
-#include "http_proxy.h"
+#include "network.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -282,6 +282,7 @@ public:
     void OnNetActivateTimeOut(uint32_t reqId) override;
 
     int32_t SetAppNet(int32_t netId) override;
+    int32_t InterfaceSetIffUp(const std::string &ifaceName) override;
 
 private:
     bool Init();

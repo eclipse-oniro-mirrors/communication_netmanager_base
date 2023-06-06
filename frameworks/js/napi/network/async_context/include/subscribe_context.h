@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,6 @@
 #include "napi/native_api.h"
 #include "base_context.h"
 #include "nocopyable.h"
-#include "net_all_capabilities.h"
 
 namespace OHOS::NetManagerStandard {
 class SubscribeContext final : public BaseContext {
@@ -34,13 +33,7 @@ public:
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
-    [[nodiscard]] napi_value GetSuccessCallback() const;
-
     [[nodiscard]] napi_value GetFailCallback() const;
-
-    void SetCap(const NetAllCapabilities &cap_);
-
-    NetAllCapabilities GetCap();
 
 private:
     bool SetSuccessCallback(napi_value options);
@@ -48,10 +41,6 @@ private:
     bool SetFailCallback(napi_value options);
 
     bool CheckParamsType(napi_value *params, size_t paramsCount);
-
-    NetAllCapabilities cap_;
-
-    napi_ref successCallback_;
 
     napi_ref failCallback_;
 };

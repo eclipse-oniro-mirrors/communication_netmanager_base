@@ -20,14 +20,14 @@
 
 #include "iremote_broker.h"
 
+#include "http_proxy.h"
 #include "i_net_conn_callback.h"
-#include "i_net_supplier_callback.h"
 #include "i_net_detection_callback.h"
+#include "i_net_supplier_callback.h"
 #include "net_conn_constants.h"
 #include "net_link_info.h"
-#include "net_supplier_info.h"
 #include "net_specifier.h"
-#include "http_proxy.h"
+#include "net_supplier_info.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -69,6 +69,7 @@ public:
         CMD_NM_GET_NET_ID_BY_IDENTIFIER,
         CMD_NM_SET_APP_NET,
         CMD_NM_SET_INTERNET_PERMISSION,
+        CMD_NM_SET_IF_UP_MULTICAST,
         CMD_NM_GET_DEFAULT_HTTP_PROXY,
         CMD_NM_END,
     };
@@ -109,6 +110,7 @@ public:
     virtual int32_t GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy) = 0;
     virtual int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList) = 0;
     virtual int32_t SetAppNet(int32_t netId) = 0;
+    virtual int32_t InterfaceSetIffUp(const std::string &ifaceName) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
