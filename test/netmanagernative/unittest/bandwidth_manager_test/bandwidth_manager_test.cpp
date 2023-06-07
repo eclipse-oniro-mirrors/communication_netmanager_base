@@ -48,7 +48,10 @@ void BandwidthManagerTest::SetUpTestCase()
     g_BandwidthManager = std::make_shared<BandwidthManager>();
 }
 
-void BandwidthManagerTest::TearDownTestCase() {}
+void BandwidthManagerTest::TearDownTestCase()
+{
+    g_BandwidthManager.reset();
+}
 
 void BandwidthManagerTest::SetUp() {}
 

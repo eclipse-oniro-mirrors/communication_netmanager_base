@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@ NetLinkInfo::NetLinkInfo(const NetLinkInfo &linkInfo)
     routeList_.assign(linkInfo.routeList_.begin(), linkInfo.routeList_.end());
     mtu_ = linkInfo.mtu_;
     tcpBufferSizes_ = linkInfo.tcpBufferSizes_;
+    httpProxy_ = linkInfo.httpProxy_;
 }
 
 NetLinkInfo &NetLinkInfo::operator=(const NetLinkInfo &linkInfo)
@@ -47,6 +48,7 @@ NetLinkInfo &NetLinkInfo::operator=(const NetLinkInfo &linkInfo)
     routeList_.assign(linkInfo.routeList_.begin(), linkInfo.routeList_.end());
     mtu_ = linkInfo.mtu_;
     tcpBufferSizes_ = linkInfo.tcpBufferSizes_;
+    httpProxy_ = linkInfo.httpProxy_;
     return *this;
 }
 
@@ -89,6 +91,10 @@ bool NetLinkInfo::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!parcel.WriteString(tcpBufferSizes_)) {
+        return false;
+    }
+    if (!httpProxy_.Marshalling(parcel)) {
+        NETMGR_LOG_E("Write http proxy to parcel failed");
         return false;
     }
     return true;
@@ -139,7 +145,8 @@ sptr<NetLinkInfo> NetLinkInfo::Unmarshalling(Parcel &parcel)
         }
         ptr->routeList_.push_back(*route);
     }
-    if (!parcel.ReadUint16(ptr->mtu_) || !parcel.ReadString(ptr->tcpBufferSizes_)) {
+    if (!parcel.ReadUint16(ptr->mtu_) || !parcel.ReadString(ptr->tcpBufferSizes_) ||
+        !HttpProxy::Unmarshalling(parcel, ptr->httpProxy_)) {
         return nullptr;
     }
     return ptr;
@@ -190,6 +197,10 @@ bool NetLinkInfo::Marshalling(Parcel &parcel, const sptr<NetLinkInfo> &object)
     if (!parcel.WriteString(object->tcpBufferSizes_)) {
         return false;
     }
+    if (!object->httpProxy_.Marshalling(parcel)) {
+        NETMGR_LOG_E("Write http proxy to parcel failed");
+        return false;
+    }
     return true;
 }
 
@@ -235,6 +246,10 @@ std::string NetLinkInfo::ToString(const std::string &tab) const
     str.append(tab);
     str.append("tcpBufferSizes_ = ");
     str.append(tcpBufferSizes_);
+
+    str.append(tab);
+    str.append("httpProxy = ");
+    str.append(httpProxy_.ToString());
     return str;
 }
 

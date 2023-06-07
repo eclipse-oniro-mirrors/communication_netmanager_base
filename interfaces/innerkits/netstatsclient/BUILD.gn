@@ -69,6 +69,8 @@ ohos_shared_library("net_stats_manager_if") {
     "$NETSYSCONTROLLER_ROOT_DIR/include/",
   ]
 
+  version_script = "libnetstats_kits.map"
+
   public_configs = [ ":net_stats_manager_if_config" ]
 
   deps = [

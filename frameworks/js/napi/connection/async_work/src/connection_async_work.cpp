@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 #include "connection_exec.h"
 #include "base_async_work.h"
 #include "getappnet_context.h"
-#include "getglobalhttpproxy_context.h"
+#include "gethttpproxy_context.h"
 #include "none_params_context.h"
 #include "parse_nethandle_context.h"
 #include "setappnet_context.h"
@@ -144,15 +144,26 @@ void ConnectionAsyncWork::ReportNetDisconnectedCallback(napi_env env, napi_statu
         env, status, data);
 }
 
+void ConnectionAsyncWork::ExecGetDefaultHttpProxy(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetHttpProxyContext, ConnectionExec::ExecGetDefaultHttpProxy>(env, data);
+}
+
+void ConnectionAsyncWork::GetDefaultHttpProxyCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetHttpProxyContext, ConnectionExec::GetDefaultHttpProxyCallback>(env, status,
+                                                                                                       data);
+}
+
 void ConnectionAsyncWork::ExecGetGlobalHttpProxy(napi_env env, void *data)
 {
-    BaseAsyncWork::ExecAsyncWork<GetGlobalHttpProxyContext, ConnectionExec::ExecGetGlobalHttpProxy>(env, data);
+    BaseAsyncWork::ExecAsyncWork<GetHttpProxyContext, ConnectionExec::ExecGetGlobalHttpProxy>(env, data);
 }
 
 void ConnectionAsyncWork::GetGlobalHttpProxyCallback(napi_env env, napi_status status, void *data)
 {
-    BaseAsyncWork::AsyncWorkCallback<GetGlobalHttpProxyContext, ConnectionExec::GetGlobalHttpProxyCallback>(
-        env, status, data);
+    BaseAsyncWork::AsyncWorkCallback<GetHttpProxyContext, ConnectionExec::GetGlobalHttpProxyCallback>(env, status,
+                                                                                                      data);
 }
 
 void ConnectionAsyncWork::ExecSetGlobalHttpProxy(napi_env env, void *data)
@@ -162,8 +173,8 @@ void ConnectionAsyncWork::ExecSetGlobalHttpProxy(napi_env env, void *data)
 
 void ConnectionAsyncWork::SetGlobalHttpProxyCallback(napi_env env, napi_status status, void *data)
 {
-    BaseAsyncWork::AsyncWorkCallback<SetGlobalHttpProxyContext, ConnectionExec::SetGlobalHttpProxyCallback>(
-        env, status, data);
+    BaseAsyncWork::AsyncWorkCallback<SetGlobalHttpProxyContext, ConnectionExec::SetGlobalHttpProxyCallback>(env, status,
+                                                                                                            data);
 }
 
 void ConnectionAsyncWork::ExecGetAppNet(napi_env env, void *data)

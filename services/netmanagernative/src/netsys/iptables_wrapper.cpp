@@ -74,7 +74,7 @@ int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &com
         return NETMANAGER_ERROR;
     }
     std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
-    std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, this, cmd);
+    std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
     handler_->PostTask(executeCommand);
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
@@ -89,7 +89,8 @@ std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::s
     }
     std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
     std::unique_lock<std::mutex> lock(iptablesMutex_);
-    std::function<void()> executeCommandForRes = std::bind(&IptablesWrapper::ExecuteCommandForRes, this, cmd);
+    std::function<void()> executeCommandForRes =
+        std::bind(&IptablesWrapper::ExecuteCommandForRes, shared_from_this(), cmd);
     handler_->PostTask(executeCommandForRes);
     auto status = conditionVarLock_.wait_for(lock, std::chrono::milliseconds(IPTABLES_WAIT_FOR_TIME_MS));
     if (status == std::cv_status::timeout) {

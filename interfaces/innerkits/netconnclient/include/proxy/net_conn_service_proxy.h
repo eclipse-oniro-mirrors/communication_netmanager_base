@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,6 +58,7 @@ public:
     int32_t IsDefaultNetMetered(bool &isMetered) override;
     int32_t SetGlobalHttpProxy(const HttpProxy &httpProxy) override;
     int32_t GetGlobalHttpProxy(HttpProxy &httpProxy) override;
+    int32_t GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy) override;
     int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList) override;
     int32_t SetAppNet(int32_t netId) override;
     int32_t InterfaceSetIffUp(const std::string &ifaceName) override;
