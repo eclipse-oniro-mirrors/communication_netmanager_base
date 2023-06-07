@@ -380,7 +380,7 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
     uint32_t reqId = 0;
     if (FindSameCallback(callback, reqId)) {
         NETMGR_LOG_E("RegisterNetConnCallback find same callback");
-        return NET_CONN_ERR_CALLBACK_NOT_FOUND;
+        return NET_CONN_ERR_SAME_CALLBACK;
     }
     return ActivateNetwork(netSpecifier, callback, timeoutMS);
 }
@@ -436,7 +436,7 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
     uint32_t reqId = 0;
     if (!FindSameCallback(callback, reqId)) {
         NETMGR_LOG_D("UnregisterNetConnCallback can not find same callback");
-        return NET_CONN_ERR_SAME_CALLBACK;
+        return NET_CONN_ERR_NETID_NOT_FOUND;
     }
     NET_ACTIVATE_MAP::iterator iterActive;
     for (iterActive = netActivates_.begin(); iterActive != netActivates_.end();) {
@@ -1362,11 +1362,6 @@ int32_t NetConnService::Dump(int32_t fd, const std::vector<std::u16string> &args
 
 int32_t NetConnService::SetAirplaneMode(bool state)
 {
-    if (!NetManagerPermission::IsSystemCaller()) {
-        NETMGR_LOG_E("Permission check failed.");
-        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
-    }
-
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
     std::string airplaneMode = std::to_string(state);
     Uri uri(SETTINGS_DATASHARE_URL_AIRPLANE_MODE);

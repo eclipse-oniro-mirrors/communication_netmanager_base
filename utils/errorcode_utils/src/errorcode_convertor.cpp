@@ -62,7 +62,7 @@ std::map<int32_t, const char *> g_errStringMap = {
     /* Net base common error */
     {NETMANAGER_SUCCESS, "Successful"},
     {NETMANAGER_ERR_PERMISSION_DENIED, "Permission denied"},
-    {NETMANAGER_ERR_NOT_SYSTEM_CALL, "System permission denied"},
+    {NETMANAGER_ERR_NOT_SYSTEM_CALL, "Non-system applications use system APIs"},
     {NETMANAGER_ERR_PARAMETER_ERROR, "Parameter error"},
     {NETMANAGER_ERR_CAPABILITY_NOT_SUPPORTED, "Capability not supported"},
     {NETMANAGER_ERR_INVALID_PARAMETER, "Invalid parameter value"},
@@ -129,8 +129,8 @@ std::map<int32_t, const char *> g_errStringMap = {
     {NET_CONN_ERR_NO_ANY_NET_TYPE, "no any net type"},
     {NET_CONN_ERR_NO_REGISTERED, "no registered"},
     {NET_CONN_ERR_NETID_NOT_FOUND, "the net id is not found"},
-    {NET_CONN_ERR_SAME_CALLBACK, "the same callback exists"},
     {NET_CONN_ERR_CALLBACK_NOT_FOUND, "the callback is not found"},
+    {NET_CONN_ERR_SAME_CALLBACK, "the same callback exists"},
     {NET_CONN_ERR_REQ_ID_NOT_FOUND, "the request id is not found"},
     {NET_CONN_ERR_NO_DEFAULT_NET, "the net is not defualt"},
     {NET_CONN_ERR_HTTP_PROXY_INVALID, "the http proxy is invalid"},
