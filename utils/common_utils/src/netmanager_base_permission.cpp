@@ -58,12 +58,13 @@ bool NetManagerPermission::CheckPermission(const std::string &permissionName)
 
 bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissionName)
 {
-    static std::map<uint32_t, bool> permissionMap;
-    static std::mutex mutex;
+
     if (permissionName.empty()) {
         NETMGR_LOG_E("permission check failed,permission name is empty.");
         return false;
     }
+    static std::map<uint32_t, bool> permissionMap;
+    static std::mutex mutex;
     auto callerToken = IPCSkeleton::GetCallingTokenID();
     {
         std::lock_guard<std::mutex> lock(mutex);
