@@ -501,5 +501,39 @@ HWTEST_F(RouteManagerTest, ReadAddrGwTest005, TestSize.Level1)
     auto ret = RouteManager::ReadAddrGw(addr, &res);
     EXPECT_LE(ret, 0);
 }
+
+HWTEST_F(RouteManagerTest, AddInterfaceToVirtualNetwork001, TestSize.Level1)
+{
+    uint16_t testNetId = 154;
+    std::string testInterfaceName = "testName";
+    auto ret = RouteManager::AddInterfaceToVirtualNetwork(testNetId, testInterfaceName);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(RouteManagerTest, RemoveInterfaceFromVirtualNetwork001, TestSize.Level1)
+{
+    uint16_t testNetId = 154;
+    std::string testInterfaceName = "testName";
+    auto ret = RouteManager::RemoveInterfaceFromVirtualNetwork(testNetId, testInterfaceName);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(RouteManagerTest, AddUsersToVirtualNetwork001, TestSize.Level1)
+{
+    uint16_t testNetId = 154;
+    std::string testInterfaceName = "testName";
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    auto ret = RouteManager::AddUsersToVirtualNetwork(testNetId, testInterfaceName, uidRanges);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(RouteManagerTest, RemoveUsersFromVirtualNetwork001, TestSize.Level1)
+{
+    uint16_t testNetId = 154;
+    std::string testInterfaceName = "testName";
+    std::vector<NetManagerStandard::UidRange> uidRanges;
+    auto ret = RouteManager::RemoveUsersFromVirtualNetwork(testNetId, testInterfaceName, uidRanges);
+    EXPECT_EQ(ret, -1);
+}
 } // namespace nmd
 } // namespace OHOS
