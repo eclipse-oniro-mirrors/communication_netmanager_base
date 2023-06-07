@@ -28,6 +28,7 @@ namespace {
 std::atomic_int g_netIdForApp(0);
 std::atomic<const SocketDispatchType*> g_dispatch(nullptr);
 std::atomic_bool g_hookFlag(false);
+constexpr DEFAULT_MIN_PID = 1000;
 const SocketDispatchType* GetDispatch()
 {
     return g_dispatch.load(std::memory_order_relaxed);
@@ -46,7 +47,7 @@ int HookSocket(int (*fn)(int, int, int), int domain, int type, int protocol)
         return fd;
     }
 
-    if (g_netIdForApp >= 0) {
+    if (g_netIdForApp >= 0 && getpid() > DEFAULT_MIN_PID) {
         if (OHOS::nmd::FwmarkClient().BindSocket(fd, g_netIdForApp) != OHOS::NetManagerStandard::NETMANAGER_SUCCESS) {
             NETNATIVE_LOGE("BindSocket [%{public}d] to netid [%{public}d] failed",
                 fd, g_netIdForApp.load(std::memory_order_relaxed));
