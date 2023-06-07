@@ -32,16 +32,6 @@
 
 namespace OHOS {
 namespace nmd {
-static constexpr const uint16_t NETID_UNSET = 0;
-static constexpr const int32_t NO_ERROR_CODE = 0;
-static constexpr const int32_t ERROR_CODE_RECVMSG_FAILED = -1;
-static constexpr const int32_t ERROR_CODE_SOCKETFD_INVALID = -2;
-static constexpr const int32_t ERROR_CODE_WRITE_FAILED = -3;
-static constexpr const int32_t ERROR_CODE_GETSOCKOPT_FAILED = -4;
-static constexpr const int32_t ERROR_CODE_SETSOCKOPT_FAILED = -5;
-static constexpr const int32_t ERROR_CODE_SET_MARK = -6;
-static constexpr const int32_t MAX_CONCURRENT_CONNECTION_REQUESTS = 10;
-
 void FwmarkNetwork::CloseSocket(int32_t *socket, int32_t ret, int32_t errorCode)
 {
     if (socket == nullptr) {
@@ -97,7 +87,7 @@ int32_t FwmarkNetwork::SetMark(int32_t *socketFd, FwmarkCommand *command)
                    *socketFd, command->cmdId);
     switch (command->cmdId) {
         case FwmarkCommand::SELECT_NETWORK: {
-            fwmark.netId = (command->netId != NETID_UNSET) ? command->netId : defaultNetId_;
+            fwmark.netId = (command->netId != NETID_UNSET) ? command->netId : defaultNetId_.load();
             if (fwmark.netId == NETID_UNSET) {
                 fwmark.explicitlySelected = false;
                 fwmark.protectedFromVpn = false;

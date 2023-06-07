@@ -32,7 +32,6 @@ namespace OHOS {
 namespace NetsysNative {
 constexpr int32_t START_TIME_MS = 1900;
 constexpr int32_t EXTRA_MONTH = 1;
-constexpr const int32_t NETID_UNSET = 0;
 static constexpr const char *BFP_NAME_NETSYS_PATH = "/system/etc/bpf/netsys.o";
 const std::regex REGEX_CMD_IPTABLES(std::string(R"(^-[\S]*[\s\S]*)"));
 

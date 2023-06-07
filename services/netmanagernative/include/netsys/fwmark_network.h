@@ -23,6 +23,16 @@
 
 namespace OHOS {
 namespace nmd {
+constexpr uint16_t NETID_UNSET = 0;
+constexpr int32_t NO_ERROR_CODE = 0;
+constexpr int32_t ERROR_CODE_RECVMSG_FAILED = -1;
+constexpr int32_t ERROR_CODE_SOCKETFD_INVALID = -2;
+constexpr int32_t ERROR_CODE_WRITE_FAILED = -3;
+constexpr int32_t ERROR_CODE_GETSOCKOPT_FAILED = -4;
+constexpr int32_t ERROR_CODE_SETSOCKOPT_FAILED = -5;
+constexpr int32_t ERROR_CODE_SET_MARK = -6;
+constexpr int32_t MAX_CONCURRENT_CONNECTION_REQUESTS = 10;
+
 class FwmarkNetwork {
 public:
     FwmarkNetwork() = default;
