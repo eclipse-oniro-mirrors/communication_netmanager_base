@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <sys/un.h>
 #include <thread>
+#include <pthread.h>
 #include <unistd.h>
 
 #include "fwmark.h"
@@ -210,6 +211,8 @@ FwmarkNetwork::~FwmarkNetwork() {}
 void FwmarkNetwork::ListenerClient()
 {
     std::thread startListener(StartListener);
+    std::string threadName = "FwmarkListen";
+    pthread_setname_np(startListener.native_handle(), threadName.c_str());
     startListener.detach();
     NETNATIVE_LOGI("FwmarkNetwork: StartListener");
 }

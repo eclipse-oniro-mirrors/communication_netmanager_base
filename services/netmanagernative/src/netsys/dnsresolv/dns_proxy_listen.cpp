@@ -16,6 +16,7 @@
 #include <netinet/ip.h>
 #include <netinet/udp.h>
 #include <thread>
+#include <pthread.h>
 #include <unistd.h>
 
 #include "dns_config_client.h"
@@ -165,7 +166,10 @@ void DnsProxyListen::StartListen()
         if (DnsThreadClose()) {
             break;
         }
-        std::thread(DnsProxyListen::DnsProxyGetPacket, proxySockFd_, recvBuff, proxyAddr).detach();
+        std::thread t(DnsProxyListen::DnsProxyGetPacket, proxySockFd_, recvBuff, proxyAddr);
+        std::string threadName = "DnsPxyPacket";
+        pthread_setname_np(t.native_handle(), threadName.c_str());
+        t.detach();
     }
 }
 
