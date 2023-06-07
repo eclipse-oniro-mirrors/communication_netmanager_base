@@ -58,7 +58,6 @@ bool NetManagerPermission::CheckPermission(const std::string &permissionName)
 
 bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissionName)
 {
-
     if (permissionName.empty()) {
         NETMGR_LOG_E("permission check failed,permission name is empty.");
         return false;
