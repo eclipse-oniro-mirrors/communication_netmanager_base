@@ -28,7 +28,7 @@ namespace {
 std::atomic_int g_netIdForApp(0);
 std::atomic<const SocketDispatchType*> g_dispatch(nullptr);
 std::atomic_bool g_hookFlag(false);
-constexpr DEFAULT_MIN_PID = 1000;
+constexpr int32_t DEFAULT_MIN_PID = 1000;
 const SocketDispatchType* GetDispatch()
 {
     return g_dispatch.load(std::memory_order_relaxed);
