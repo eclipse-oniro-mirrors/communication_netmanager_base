@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <sys/un.h>
 #include <thread>
+#include <pthread.h>
 #include <unistd.h>
 
 #include "fwmark.h"
@@ -175,26 +176,32 @@ void FwmarkNetwork::SendMessage(int32_t *serverSockfd)
 
 void FwmarkNetwork::StartListener()
 {
-    NETNATIVE_LOGI("FwmarkNetwork: StartListener");
-    std::thread([this]() {
-        int32_t serverSockfd = GetControlSocket("fwmarkd");
+    int32_t serverSockfd = GetControlSocket("fwmarkd");
 
-        int32_t result = listen(serverSockfd, MAX_CONCURRENT_CONNECTION_REQUESTS);
-        if (result < 0) {
-            NETNATIVE_LOGE("FwmarkNetwork: listen failed result %{public}d, errno: %{public}d", result, errno);
-            close(serverSockfd);
-            serverSockfd = -1;
-            return;
-        }
-        SendMessage(&serverSockfd);
+    int32_t result = listen(serverSockfd, MAX_CONCURRENT_CONNECTION_REQUESTS);
+    if (result < 0) {
+        NETNATIVE_LOGE("FwmarkNetwork: listen failed result %{public}d, errno: %{public}d", result, errno);
         close(serverSockfd);
         serverSockfd = -1;
-    }).detach();
+        return;
+    }
+    SendMessage(&serverSockfd);
+    close(serverSockfd);
+    serverSockfd = -1;
 }
 
 void FwmarkNetwork::SetDefaultNetId(int32_t netId)
 {
     defaultNetId_ = netId;
+}
+
+void FwmarkNetwork::ListenerClient()
+{
+    std::thread startListener([this]() { StartListener(); });
+    std::string threadName = "FwmarkListen";
+    pthread_setname_np(startListener.native_handle(), threadName.c_str());
+    startListener.detach();
+    NETNATIVE_LOGI("FwmarkNetwork: StartListener");
 }
 } // namespace nmd
 } // namespace OHOS

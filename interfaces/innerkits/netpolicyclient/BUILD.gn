@@ -72,6 +72,8 @@ ohos_shared_library("net_policy_manager_if") {
     "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_policy_service_proxy.cpp",
   ]
 
+  version_script = "libnetpolicy_kits.map"
+
   public_configs = [ ":net_policy_manager_if_config" ]
 
   deps = [ ":net_policy_parcel" ]

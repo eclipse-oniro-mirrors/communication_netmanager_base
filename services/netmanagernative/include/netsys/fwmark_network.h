@@ -38,12 +38,13 @@ public:
     FwmarkNetwork() = default;
     ~FwmarkNetwork() = default;
 
+    void ListenerClient();
     void SetDefaultNetId(int32_t netId);
-    void StartListener();
 
 private:
     void CloseSocket(int32_t *socket, int32_t ret, int32_t errorCode);
     void SendMessage(int32_t *serverSockfd);
+    void StartListener();
     int32_t SetMark(int32_t *socketFd, FwmarkCommand *command);
 
 private:

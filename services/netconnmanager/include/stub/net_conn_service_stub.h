@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,11 +68,15 @@ private:
     int32_t OnIsDefaultNetMetered(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetGlobalHttpProxy(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetGlobalHttpProxy(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetDefaultHttpProxy(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetNetIdByIdentifier(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetAppNet(MessageParcel &data, MessageParcel &reply);
+    int32_t OnInterfaceSetIffUp(MessageParcel &data, MessageParcel &reply);
+    int32_t OnRequestCheck(uint32_t code);
 
 private:
     std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;
+    std::vector<int32_t> systemCode_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

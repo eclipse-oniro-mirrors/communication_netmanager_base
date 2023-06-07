@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <vector>
+#include <pthread.h>
 
 #include "netlink_define.h"
 #include "netnative_log_wrapper.h"
@@ -57,6 +58,8 @@ int32_t WrapperListener::Start()
         return NetlinkResult::ERROR;
     }
     thread_ = std::thread(WrapperListener::ListenThread, this);
+    std::string threadName = "WrapListen";
+    pthread_setname_np(thread_.native_handle(), threadName.c_str());
     return NetlinkResult::OK;
 }
 

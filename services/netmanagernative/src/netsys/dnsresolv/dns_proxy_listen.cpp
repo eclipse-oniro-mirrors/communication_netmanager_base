@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include <netinet/ip.h>
 #include <netinet/udp.h>
 #include <thread>
+#include <pthread.h>
 #include <unistd.h>
 
 #include "dns_config_client.h"
@@ -62,15 +63,15 @@ void DnsProxyListen::DnsProxyGetPacket(int32_t clientSocket, RecvBuff recvBuff, 
 void DnsProxyListen::DnsParseBySocket(int32_t clientSocket, std::vector<std::string> servers, RecvBuff recvBuff,
                                       sockaddr_in proxyAddr)
 {
-    int32_t parseSocketFd = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC | SOCK_NONBLOCK, IPPROTO_UDP);
-    if (parseSocketFd < 0) {
-        NETNATIVE_LOGE("parseSocketFd create socket failed %{public}d", errno);
+    int32_t socketFd = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC | SOCK_NONBLOCK, IPPROTO_UDP);
+    if (socketFd < 0) {
+        NETNATIVE_LOGE("socketFd create socket failed %{public}d", errno);
         return;
     }
 
-    if (!PollUdpDataTransfer::MakeUdpNonBlock(parseSocketFd)) {
+    if (!PollUdpDataTransfer::MakeUdpNonBlock(socketFd)) {
         NETNATIVE_LOGE("MakeNonBlock error  %{public}d: %{public}s", errno, strerror(errno));
-        close(parseSocketFd);
+        close(socketFd);
         return;
     }
     int32_t resLen = 0;
@@ -87,15 +88,14 @@ void DnsProxyListen::DnsParseBySocket(int32_t clientSocket, std::vector<std::str
             continue;
         }
         addrParse.sin_port = htons(DNS_PROXY_PORT);
-        if (PollUdpDataTransfer::PollUdpSendData(parseSocketFd, recvBuff.questionsBuff, recvBuff.questionLen, addrParse,
+        if (PollUdpDataTransfer::PollUdpSendData(socketFd, recvBuff.questionsBuff, recvBuff.questionLen, addrParse,
                                                  addrLen) < 0) {
             NETNATIVE_LOGE("send failed %{public}d: %{public}s", errno, strerror(errno));
             serversNum++;
             continue;
         }
         addrLen = sizeof(addrParse);
-        resLen =
-            PollUdpDataTransfer::PollUdpRecvData(parseSocketFd, requesData, MAX_REQUESTDATA_LEN, addrParse, addrLen);
+        resLen = PollUdpDataTransfer::PollUdpRecvData(socketFd, requesData, MAX_REQUESTDATA_LEN, addrParse, addrLen);
         if (resLen > 0) {
             break;
         }
@@ -108,7 +108,7 @@ void DnsProxyListen::DnsParseBySocket(int32_t clientSocket, std::vector<std::str
         }
         serversNum++;
     }
-    close(parseSocketFd);
+    close(socketFd);
     if (resLen > 0) {
         DnsSendRecvParseData(clientSocket, requesData, resLen, proxyAddr);
     }
@@ -166,7 +166,10 @@ void DnsProxyListen::StartListen()
         if (DnsThreadClose()) {
             break;
         }
-        std::thread(DnsProxyListen::DnsProxyGetPacket, proxySockFd_, recvBuff, proxyAddr).detach();
+        std::thread t(DnsProxyListen::DnsProxyGetPacket, proxySockFd_, recvBuff, proxyAddr);
+        std::string threadName = "DnsPxyPacket";
+        pthread_setname_np(t.native_handle(), threadName.c_str());
+        t.detach();
     }
 }
 

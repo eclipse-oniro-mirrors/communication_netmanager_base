@@ -45,6 +45,7 @@ ohos_shared_library("fwmark_client") {
     external_deps += [ "hilog:libhilog" ]
   }
 
+  innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

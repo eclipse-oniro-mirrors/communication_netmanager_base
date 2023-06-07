@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,13 +102,6 @@ int32_t NetworkObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandle, const
         return 0;
     }
 
-    if (manager_->HasEventListener(EVENT_GET_TYPE)) {
-        auto netType = new NetworkType;
-        netType->bearerTypes = netAllCap->bearerTypes_;
-        manager_->EmitByUv(EVENT_GET_TYPE, netType, CallbackTemplate<MakeNetworkResponse>);
-    } else {
-        NETMANAGER_BASE_LOGI("NO EVENT_GET_TYPE");
-    }
     if (manager_->HasEventListener(EVENT_SUBSCRIBE)) {
         auto netType = new NetworkType;
         netType->bearerTypes = netAllCap->bearerTypes_;
@@ -137,13 +130,6 @@ int32_t NetworkObserver::NetUnavailable()
     if (!manager_) {
         NETMANAGER_BASE_LOGI("no event manager");
         return 0;
-    }
-
-    if (manager_->HasEventListener(EVENT_GET_TYPE)) {
-        auto netType = new NetworkType;
-        manager_->EmitByUv(EVENT_GET_TYPE, netType, CallbackTemplate<MakeNetworkResponse>);
-    } else {
-        NETMANAGER_BASE_LOGI("NO EVENT_GET_TYPE");
     }
     if (manager_->HasEventListener(EVENT_SUBSCRIBE)) {
         auto netType = new NetworkType;

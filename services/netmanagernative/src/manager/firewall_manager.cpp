@@ -31,17 +31,17 @@ bool SetFireWallCommand(const std::string &chainName, std::string command)
 {
     bool ret = false;
     ret = ret ||
-          (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
 
     command = "-t filter -A " + chainName + " -i lo -j RETURN";
     ret = ret ||
-          (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     command = "-t filter -A " + chainName + " -o lo -j RETURN";
     ret = ret ||
-          (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     command = "-t filter -A " + chainName + " -p tcp --tcp-flags RST RST -j RETURN";
     ret = ret ||
-          (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     return ret;
 }
 } // namespace
@@ -191,11 +191,11 @@ int32_t FirewallManager::InitDefaultRules()
     std::string chainName = FetchChainName(ChainType::CHAIN_OHFW_INPUT);
     std::string command = "-t filter -A INPUT -j " + chainName;
     ret = ret ||
-          (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     chainName = FetchChainName(ChainType::CHAIN_OHFW_OUTPUT);
     command = "-t filter -A OUTPUT -j " + chainName;
     ret = ret ||
-          (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
 }
 
@@ -207,31 +207,31 @@ int32_t FirewallManager::ClearAllRules()
     std::string chainName = FetchChainName(ChainType::CHAIN_OHFW_DOZABLE);
     std::string command = "-t filter -F " + chainName;
     ret = ret ||
-          (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
 
     chainName = FetchChainName(ChainType::CHAIN_OHFW_POWERSAVING);
     command = "-t filter -F " + chainName;
     ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+        ret || (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
 
     chainName = FetchChainName(ChainType::CHAIN_OHFW_UNDOZABLE);
     command = "-t filter -F " + chainName;
     ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+        ret || (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
 
     chainName = FetchChainName(ChainType::CHAIN_OHFW_INPUT);
     command = "-t filter -F " + chainName;
     ret =
-        ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+        ret || (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
 
     chainName = FetchChainName(ChainType::CHAIN_OHFW_OUTPUT);
     command = "-t filter -F " + chainName;
     ret = ret ||
-          (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     chainName = FetchChainName(ChainType::CHAIN_OHFW_FORWARD);
     command = "-t filter -F " + chainName;
     ret = ret ||
-          (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
 }
 
@@ -239,7 +239,7 @@ int32_t FirewallManager::IptablesNewChain(ChainType chain)
 {
     NETNATIVE_LOG_D("FirewallManager NewChain: chain=%{public}d", chain);
     std::string command = "-t filter -N " + FetchChainName(chain);
-    return DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command);
+    return IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command);
 }
 
 int32_t FirewallManager::IptablesDeleteChain(ChainType chain)
@@ -248,10 +248,10 @@ int32_t FirewallManager::IptablesDeleteChain(ChainType chain)
     bool ret = false;
     std::string command = "-t filter -F " + FetchChainName(chain);
     ret = ret ||
-          (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     command = "-t filter -X " + FetchChainName(chain);
     ret = ret ||
-          (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     return ret == false ? NETMANAGER_SUCCESS : NETMANAGER_ERROR;
 }
 
@@ -261,7 +261,7 @@ int32_t FirewallManager::IptablesSetRule(const std::string &chainName, const std
     NETNATIVE_LOG_D("FirewallManager IptablesSetRule");
     std::string command =
         "-t filter " + option + " " + chainName + " -m owner --uid-owner " + std::to_string(uid) + " -j " + target;
-    return DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command);
+    return IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command);
 }
 
 int32_t FirewallManager::SetUidsAllowedListChain(ChainType chain, const std::vector<uint32_t> &uids)
@@ -280,26 +280,26 @@ int32_t FirewallManager::SetUidsAllowedListChain(ChainType chain, const std::vec
 
     command = "-t filter -F " + chainName;
     ret = ret ||
-          (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
 
     std::for_each(uids.begin(), uids.end(), [&command, &chainName, &ret](uint32_t uid) {
         std::string strUid = std::to_string(uid);
         command = "-t filter -A " + chainName + " -m owner --uid-owner " + strUid + " -j RETURN";
-        ret = ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
+        ret = ret || (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
                       NETMANAGER_ERROR);
     });
 
     command =
         "-t filter -A " + chainName + " -m owner --uid-owner 0-" + std::to_string(SYSTEM_UID_RANGE) + " -j RETURN";
     ret = ret ||
-          (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     command = "-t filter -A " + chainName + " -m owner ! --uid-owner 0-" + strMaxUid_ + " -j RETURN";
 
     ret = SetFireWallCommand(chainName, command);
 
     command = "-t filter -A " + chainName + " -j DROP";
     ret = ret ||
-          (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
+          (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) == NETMANAGER_ERROR);
     if (ret == false) {
         FirewallChainStatus status = firewallChainStatus_[chain];
         status.uids = uids;
@@ -330,7 +330,7 @@ int32_t FirewallManager::SetUidsDeniedListChain(ChainType chain, const std::vect
     std::for_each(uids.begin(), uids.end(), [&command, &chainName, &ret](uint32_t uid) {
         std::string strUid = std::to_string(uid);
         command = "-t filter -A " + chainName + " -m owner --uid-owner " + strUid + " -j DROP";
-        ret = ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
+        ret = ret || (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
                       NETMANAGER_ERROR);
     });
 
@@ -362,12 +362,12 @@ int32_t FirewallManager::EnableChain(ChainType chain, bool enable)
     if (enable == true && firewallChainStatus_[chain].enable == false) {
         fChainName = FetchChainName(ChainType::CHAIN_OHFW_OUTPUT);
         command = "-t filter -A " + fChainName + " -j " + chainName;
-        ret = ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
+        ret = ret || (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
                       NETMANAGER_ERROR);
     } else if (enable == false && firewallChainStatus_[chain].enable == true) {
         fChainName = FetchChainName(ChainType::CHAIN_OHFW_OUTPUT);
         command = "-t filter -D " + fChainName + " -j " + chainName;
-        ret = ret || (DelayedSingleton<IptablesWrapper>::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
+        ret = ret || (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
                       NETMANAGER_ERROR);
     } else {
         NETNATIVE_LOGI("FirewallManager::EnableChain chain was %{public}s, do not repeat",

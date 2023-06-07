@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -251,16 +251,14 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
      * Add a forward rule, when the status of packets is RELATED,
      * ESTABLISED and from fromIface to toIface, goto tetherctrl_counters
      */
-    result = SetForwardRules(true, SetTetherctrlForward1(toIface, fromIface));
-    if (result) {
+    if (SetForwardRules(true, SetTetherctrlForward1(toIface, fromIface))) {
         return result;
     }
 
     /*
      * Add a forward rule, when the status is INVALID and from toIface to fromIface, just drop
      */
-    result = SetForwardRules(true, SetTetherctrlForward2(toIface, fromIface));
-    if (result) {
+    if (SetForwardRules(true, SetTetherctrlForward2(toIface, fromIface))) {
         Rollback();
         return result;
     }
@@ -268,8 +266,7 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
     /*
      * Add a forward rule, from toIface to fromIface, goto tetherctrl_counters
      */
-    result = SetForwardRules(true, SetTetherctrlForward3(toIface, fromIface));
-    if (result) {
+    if (SetForwardRules(true, SetTetherctrlForward3(toIface, fromIface))) {
         Rollback();
         return result;
     }
@@ -277,8 +274,7 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
     /*
      * Add a forward rule, drop others
      */
-    result = SetForwardRules(true, SET_TETHERCTRL_FORWARD_DROP);
-    if (result) {
+    if (SetForwardRules(true, SET_TETHERCTRL_FORWARD_DROP)) {
         Rollback();
         return result;
     }
@@ -286,8 +282,7 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
     /*
      * Add a forward rule, if from toIface to fromIface return chain of father
      */
-    result = SetForwardRules(true, SetTetherctrlCounters1(fromIface, toIface));
-    if (result) {
+    if (SetForwardRules(true, SetTetherctrlCounters1(fromIface, toIface))) {
         Rollback();
         return result;
     }
@@ -295,14 +290,12 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
     /*
      * Add a forward rule, if from fromIface to toIface return chain of father
      */
-    result = SetForwardRules(true, SetTetherctrlCounters2(fromIface, toIface));
-    if (result) {
+    if (SetForwardRules(true, SetTetherctrlCounters2(fromIface, toIface))) {
         Rollback();
         return result;
     }
 
-    result = RouteManager::EnableSharing(fromIface, toIface);
-    if (result) {
+    if (RouteManager::EnableSharing(fromIface, toIface)) {
         Rollback();
         return result;
     }

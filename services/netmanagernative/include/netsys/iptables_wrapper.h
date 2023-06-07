@@ -37,8 +37,15 @@ enum IpType {
     IPTYPE_IPV4V6 = 3,
 };
 class IptablesWrapper : public std::enable_shared_from_this<IptablesWrapper> {
-    DECLARE_DELAYED_SINGLETON(IptablesWrapper)
 public:
+    IptablesWrapper();
+    ~IptablesWrapper();
+    static std::shared_ptr<IptablesWrapper> &GetInstance()
+    {
+        static std::shared_ptr<IptablesWrapper> instance = std::make_shared<IptablesWrapper>();
+        return instance;
+    }
+
     /**
      * @param ipType ipv4 or ipv6
      * @param command iptables command
@@ -64,7 +71,6 @@ private:
     std::condition_variable conditionVarLock_;
     bool isRunningFlag_ = false;
     bool isIptablesSystemAccess_ = false;
-    bool forRes_ = false;
     std::string result_;
     std::thread iptablesWrapperThread_;
     std::queue<std::string> commandsQueue_;

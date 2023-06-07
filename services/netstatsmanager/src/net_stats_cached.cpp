@@ -17,6 +17,7 @@
 
 #include <initializer_list>
 #include <list>
+#include <pthread.h>
 
 #include "net_stats_constants.h"
 #include "net_stats_data_handler.h"
@@ -163,11 +164,14 @@ void NetStatsCached::SetCycleThreshold(uint32_t threshold)
 void NetStatsCached::ForceUpdateStats()
 {
     isForce_ = true;
-    std::thread([this]() {
+    std::thread t([this]() {
         CacheStats();
         WriteStats();
         isForce_ = false;
-    }).detach();
+    });
+    std::string threadName = "NetCachedStats";
+    pthread_setname_np(t.native_handle(), threadName.c_str());
+    t.detach();
 }
 
 void NetStatsCached::Reset() {}

@@ -31,22 +31,177 @@ class NetStatsClient {
     DECLARE_DELAYED_SINGLETON(NetStatsClient)
 
 public:
+    /**
+     * Register network card traffic monitoring
+     *
+     * @param callback callback function
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback);
+
+    /**
+     * Unregister network card traffic monitoring
+     *
+     * @param callback callback function
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback);
+
+    /**
+     * Get the received traffic of the network card
+     *
+     * @param stats Traffic (bytes)
+     * @param interfaceName network card name
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t GetIfaceRxBytes(uint64_t &stats, const std::string &interfaceName);
+
+    /**
+     * Get the send traffic of the network card
+     *
+     * @param stats Traffic (bytes)
+     * @param interfaceName network card name
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t GetIfaceTxBytes(uint64_t &stats, const std::string &interfaceName);
+
+    /**
+     * Get received traffic from the cell
+     *
+     * @param stats Traffic (bytes)
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t GetCellularRxBytes(uint64_t &stats);
+
+    /**
+     * Get send traffic from the cell
+     *
+     * @param stats Traffic (bytes)
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t GetCellularTxBytes(uint64_t &stats);
+
+    /**
+     * Get all received traffic
+     *
+     * @param stats Traffic (bytes)
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t GetAllRxBytes(uint64_t &stats);
+
+    /**
+     * Get all send traffic
+     *
+     * @param stats Traffic (bytes)
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t GetAllTxBytes(uint64_t &stats);
+
+    /**
+     * Get the received traffic for the specified UID of application
+     *
+     * @param stats Traffic (bytes)
+     * @param uid The specified UID of application.
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t GetUidRxBytes(uint64_t &stats, uint32_t uid);
+
+    /**
+     * Get the send traffic for the specified UID of application
+     *
+     * @param stats Traffic (bytes)
+     * @param uid The specified UID of application.
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t GetUidTxBytes(uint64_t &stats, uint32_t uid);
+
+    /**
+     * Get traffic details for all network cards
+     *
+     * @param infos all network cards informations
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t GetAllStatsInfo(std::vector<NetStatsInfo> &infos);
+
+    /**
+     * Get the historical traffic details of the specified network card
+     *
+     * @param iface network cards name
+     * @param start start time
+     * @param end end time
+     * @param statsInfo traffic information
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end, NetStatsInfo &statsInfo);
+
+    /**
+     * Get the historical traffic details from UID of application.
+     *
+     * @param iface network cards name
+     * @param uid The specified UID of application.
+     * @param start start time
+     * @param end end time
+     * @param statsInfo traffic information
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t GetUidStatsDetail(const std::string &iface, uint32_t uid, uint64_t start, uint64_t end,
                               NetStatsInfo &statsInfo);
+
+    /**
+     * Update the traffic of the specified network card
+     *
+     * @param iface network cards name
+     * @param start start time
+     * @param end end time
+     * @param stats Traffic (bytes)
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t UpdateIfacesStats(const std::string &iface, uint64_t start, uint64_t end, const NetStatsInfo &stats);
+
+    /**
+     * Update network card traffic data
+     *
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t UpdateStatsData();
+
+    /**
+     * Clear network card traffic
+     *
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
     int32_t ResetFactory();
 
 private:

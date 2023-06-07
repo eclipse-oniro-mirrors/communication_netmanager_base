@@ -47,21 +47,21 @@ void BroadcastManagerTest::TearDown() {}
 HWTEST_F(BroadcastManagerTest, SendBroadcastTest001, TestSize.Level1)
 {
     std::map<std::string, bool> params = {{"test1", true}, {"test2", false}, {"test3", false}};
-    bool ret = DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(g_testInfo, params);
+    bool ret = BroadcastManager::GetInstance().SendBroadcast(g_testInfo, params);
     EXPECT_TRUE(ret);
 }
 
 HWTEST_F(BroadcastManagerTest, SendBroadcastTest002, TestSize.Level1)
 {
     std::map<std::string, int32_t> params = {{"test1", 1}, {"test2", 2}, {"test3", 3}};
-    bool ret = DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(g_testInfo, params);
+    bool ret = BroadcastManager::GetInstance().SendBroadcast(g_testInfo, params);
     EXPECT_TRUE(ret);
 }
 
 HWTEST_F(BroadcastManagerTest, SendBroadcastTest003, TestSize.Level1)
 {
     std::map<std::string, std::string> params = {{"test1", "testMsg1"}, {"test2", "testMsg2"}, {"test3", "testMsg3"}};
-    bool ret = DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(g_testInfo, params);
+    bool ret = BroadcastManager::GetInstance().SendBroadcast(g_testInfo, params);
     EXPECT_TRUE(ret);
 }
 
@@ -69,7 +69,7 @@ HWTEST_F(BroadcastManagerTest, SendBroadcastTest004, TestSize.Level1)
 {
     std::map<std::string, std::string> params = {{"test1", "testMsg1"}, {"test2", "testMsg2"}, {"test3", "testMsg3"}};
     BroadcastInfo testInfo;
-    bool ret = DelayedSingleton<BroadcastManager>::GetInstance()->SendBroadcast(testInfo, params);
+    bool ret = BroadcastManager::GetInstance().SendBroadcast(testInfo, params);
     EXPECT_FALSE(ret);
 }
 } // namespace NetManagerStandard

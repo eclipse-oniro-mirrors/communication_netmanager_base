@@ -332,5 +332,16 @@ int32_t NetPolicyClient::SetPowerSaveAllowedList(const std::vector<uint32_t> &ui
 
     return proxy->SetPowerSaveAllowedList(uids, isAllowed);
 }
+
+int32_t NetPolicyClient::SetPowerSavePolicy(bool enable)
+{
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->SetPowerSavePolicy(enable);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

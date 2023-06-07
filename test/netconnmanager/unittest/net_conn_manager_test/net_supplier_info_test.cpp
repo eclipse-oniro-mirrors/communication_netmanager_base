@@ -70,6 +70,19 @@ HWTEST_F(NetSupplierInfoTest, MarshallingTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MarshallingTest003
+ * @tc.desc: Test NetSupplierInfo::Marshalling
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetSupplierInfoTest, MarshallingTest003, TestSize.Level1)
+{
+    MessageParcel data;
+    NetSupplierInfo info;
+    bool bRet = info.Marshalling(data);
+    ASSERT_TRUE(bRet);
+}
+
+/**
  * @tc.name: UnmarshallingTest001
  * @tc.desc: Test NetSupplierInfo::UnmarshallingTest
  * @tc.type: FUNC

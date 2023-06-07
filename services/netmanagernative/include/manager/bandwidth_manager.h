@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,6 +115,7 @@ private:
     int32_t SetGlobalAlert(Operate operate, int64_t bytes);
     int32_t SetCostlyAlert(Operate operate, const std::string &iface, int64_t bytes);
     inline void CheckChainInitialization();
+    int32_t SetIfaceQuotaDetail(const std::string &ifName, int64_t bytes);
 
 private:
     bool chainInitFlag_ = false;

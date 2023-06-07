@@ -40,13 +40,14 @@ public:
     virtual void OnNetActivateTimeOut(uint32_t reqId) = 0;
 };
 
-class NetActivate : public virtual RefBase {
+class NetActivate : public std::enable_shared_from_this<NetActivate> {
 public:
     using TimeOutHandler = std::function<int32_t(uint32_t &reqId)>;
 
 public:
     NetActivate(const sptr<NetSpecifier> &specifier, const sptr<INetConnCallback> &callback,
-                std::weak_ptr<INetActivateCallback> timeoutCallback, const uint32_t &timeoutMS);
+                std::weak_ptr<INetActivateCallback> timeoutCallback, const uint32_t &timeoutMS,
+                const std::shared_ptr<AppExecFwk::EventHandler> &netActEventHandler);
     ~NetActivate();
     bool MatchRequestAndNetwork(sptr<NetSupplier> supplier);
     void SetRequestId(uint32_t reqId);
@@ -55,7 +56,7 @@ public:
     void SetServiceSupply(sptr<NetSupplier> netServiceSupplied);
     sptr<INetConnCallback> GetNetCallback();
     sptr<NetSpecifier> GetNetSpecifier();
-
+    void StartTimeOutNetAvailable();
 private:
     bool CompareByNetworkIdent(const std::string &ident);
     bool CompareByNetworkCapabilities(const NetCaps &netCaps);
@@ -72,6 +73,7 @@ private:
     sptr<NetSupplier> netServiceSupplied_ = nullptr;
     uint32_t timeoutMS_ = 0;
     std::weak_ptr<INetActivateCallback> timeoutCallback_;
+    std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_;
     std::string activateName_ = "";
 };
 } // namespace NetManagerStandard

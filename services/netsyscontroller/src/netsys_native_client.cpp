@@ -22,6 +22,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <thread>
+#include <pthread.h>
 #include <unistd.h>
 
 #include "iservice_registry.h"
@@ -135,7 +136,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit(const 
 
 NetsysNativeClient::NetsysNativeClient()
 {
-    std::thread([this]() {
+    std::thread t([this]() {
         uint32_t count = 0;
         while (GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
             std::this_thread::sleep_for(std::chrono::seconds(WAIT_FOR_SERVICE_TIME_S));
@@ -147,7 +148,10 @@ NetsysNativeClient::NetsysNativeClient()
             nativeNotifyCallback_ = new (std::nothrow) NativeNotifyCallback(*this);
             proxy->RegisterNotifyCallback(nativeNotifyCallback_);
         }
-    }).detach();
+    });
+    std::string threadName = "netsysGetProxy";
+    pthread_setname_np(t.native_handle(), threadName.c_str());
+    t.detach();
 }
 
 int32_t NetsysNativeClient::SetInternetPermission(uint32_t uid, uint8_t allow)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include <thread>
+#include <pthread.h>
 
 #include "dns_resolv_listen.h"
 #include "netnative_log_wrapper.h"
@@ -31,7 +32,10 @@ void StartListen()
 
 DnsManager::DnsManager() : dnsProxyListen_(std::make_shared<DnsProxyListen>())
 {
-    std::thread(StartListen).detach();
+    std::thread t(StartListen);
+    std::string threadName = "DnsMgerListen";
+    pthread_setname_np(t.native_handle(), threadName.c_str());
+    t.detach();
 }
 
 int32_t DnsManager::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMillis, uint8_t retryCount,
@@ -81,7 +85,10 @@ void DnsManager::ShareDnsSet(uint16_t netId)
 void DnsManager::StartDnsProxyListen()
 {
     dnsProxyListen_->OnListen();
-    std::thread(StartProxyListen).detach();
+    std::thread t(StartProxyListen);
+    std::string threadName = "DnsPxyListen";
+    pthread_setname_np(t.native_handle(), threadName.c_str());
+    t.detach();
 }
 
 void DnsManager::StopDnsProxyListen()
