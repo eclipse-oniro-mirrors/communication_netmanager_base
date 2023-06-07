@@ -58,31 +58,33 @@ bool NetManagerPermission::CheckPermission(const std::string &permissionName)
 
 bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissionName)
 {
+    static std::map<uint32_t, bool> permissionMap;
+    static std::mutex mutex;
     if (permissionName.empty()) {
         NETMGR_LOG_E("permission check failed,permission name is empty.");
         return false;
     }
-
-    static std::map<uint32_t, bool> permissionMap;
-
     auto callerToken = IPCSkeleton::GetCallingTokenID();
-    if (permissionMap.find(callerToken) != permissionMap.end()) {
-        return permissionMap[callerToken];
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        auto iter = permissionMap.find(callerToken);
+        if (iter != permissionMap.end()) {
+            return iter->second;
+        }
     }
-
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    bool res = false;
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        permissionMap[callerToken] = true;
-        return true;
+        res = true;
+    } else if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
+        res = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName) ==
+              Security::AccessToken::PERMISSION_GRANTED;
     }
-    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
-        bool res = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName) ==
-                   Security::AccessToken::PERMISSION_GRANTED;
+    {
+        std::lock_guard<std::mutex> lock(mutex);
         permissionMap[callerToken] = res;
-        return res;
     }
-    permissionMap[callerToken] = false;
-    return false;
+    return res;
 }
 
 bool NetManagerPermission::IsSystemCaller()
