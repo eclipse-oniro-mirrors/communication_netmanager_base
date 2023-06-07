@@ -139,6 +139,7 @@ bool NetsysNativeService::Init()
     bpfStats_ = std::make_unique<OHOS::NetManagerStandard::NetsysBpfStats>();
     dhcpController_ = std::make_unique<OHOS::nmd::DhcpController>();
     fwmarkNetwork_ = std::make_unique<OHOS::nmd::FwmarkNetwork>();
+    fwmarkNetwork_->StartListener();
     sharingManager_ = std::make_unique<SharingManager>();
     iptablesWrapper_ = DelayedSingleton<IptablesWrapper>::GetInstance();
 

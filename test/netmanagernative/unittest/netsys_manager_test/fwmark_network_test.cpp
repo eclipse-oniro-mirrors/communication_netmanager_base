@@ -21,7 +21,7 @@
 
 #define private public
 #include "fwmark_client.h"
-#include "fwmark_network.cpp"
+#include "fwmark_network.h"
 #undef private
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
@@ -67,6 +67,7 @@ public:
     void SetUp();
     void TearDown();
     std::shared_ptr<FwmarkClient> fwmarkClient = DelayedSingleton<ManagerNative>::GetInstance()->GetFwmarkClient();
+    std::unique_ptr<FwmarkNetwork> fwmarkNetwork = std::make_unique<OHOS::nmd::FwmarkNetwork>();
 };
 
 void UnitTestFwmarkClient::SetUpTestCase() {}
@@ -160,13 +161,13 @@ HWTEST_F(UnitTestFwmarkClient, CloseSocketTest001, TestSize.Level1)
 {
     int32_t socket = 32;
     int32_t ret = -1;
-    CloseSocket(nullptr, ret, NO_ERROR_CODE);
-    CloseSocket(&socket, ret, ERROR_CODE_RECVMSG_FAILED);
-    CloseSocket(&socket, ret, ERROR_CODE_SOCKETFD_INVALID);
-    CloseSocket(&socket, ret, ERROR_CODE_WRITE_FAILED);
-    CloseSocket(&socket, ret, ERROR_CODE_GETSOCKOPT_FAILED);
-    CloseSocket(&socket, ret, ERROR_CODE_SETSOCKOPT_FAILED);
-    CloseSocket(&socket, ret, ERROR_CODE_SETSOCKOPT_FAILED - 1);
+    fwmarkNetwork->CloseSocket(nullptr, ret, NO_ERROR_CODE);
+    fwmarkNetwork->CloseSocket(&socket, ret, ERROR_CODE_RECVMSG_FAILED);
+    fwmarkNetwork->CloseSocket(&socket, ret, ERROR_CODE_SOCKETFD_INVALID);
+    fwmarkNetwork->CloseSocket(&socket, ret, ERROR_CODE_WRITE_FAILED);
+    fwmarkNetwork->CloseSocket(&socket, ret, ERROR_CODE_GETSOCKOPT_FAILED);
+    fwmarkNetwork->CloseSocket(&socket, ret, ERROR_CODE_SETSOCKOPT_FAILED);
+    fwmarkNetwork->CloseSocket(&socket, ret, ERROR_CODE_SETSOCKOPT_FAILED - 1);
     EXPECT_EQ(ret, -1);
 }
 
@@ -178,7 +179,7 @@ HWTEST_F(UnitTestFwmarkClient, CloseSocketTest001, TestSize.Level1)
 HWTEST_F(UnitTestFwmarkClient, SetMarkTest001, TestSize.Level1)
 {
     FwmarkCommand cmd;
-    auto ret = SetMark(nullptr, &cmd);
+    auto ret = fwmarkNetwork->SetMark(nullptr, &cmd);
     EXPECT_EQ(ret, -1);
 }
 
@@ -190,7 +191,7 @@ HWTEST_F(UnitTestFwmarkClient, SetMarkTest001, TestSize.Level1)
 HWTEST_F(UnitTestFwmarkClient, SetMarkTest002, TestSize.Level1)
 {
     int32_t socketFd = 0;
-    auto ret = SetMark(&socketFd, nullptr);
+    auto ret = fwmarkNetwork->SetMark(&socketFd, nullptr);
     EXPECT_EQ(ret, -1);
 }
 
@@ -203,7 +204,7 @@ HWTEST_F(UnitTestFwmarkClient, SetMarkTest003, TestSize.Level1)
 {
     int32_t socketFd = 1111;
     FwmarkCommand cmd;
-    auto ret = SetMark(&socketFd, &cmd);
+    auto ret = fwmarkNetwork->SetMark(&socketFd, &cmd);
     EXPECT_NE(ret, 0);
     EXPECT_EQ(socketFd, -1);
 }
@@ -221,7 +222,7 @@ HWTEST_F(UnitTestFwmarkClient, SetMarkTest004, TestSize.Level1)
     ASSERT_EQ(ret, 0);
     cmd.cmdId = FwmarkCommand::SELECT_NETWORK;
     cmd.netId = NETID_UNSET;
-    ret = SetMark(&tcpSocket, &cmd);
+    ret = fwmarkNetwork->SetMark(&tcpSocket, &cmd);
     close(tcpSocket);
     tcpSocket = -1;
     EXPECT_EQ(ret, 0);
@@ -240,7 +241,7 @@ HWTEST_F(UnitTestFwmarkClient, SetMarkTest005, TestSize.Level1)
     ASSERT_EQ(ret, 0);
     cmd.cmdId = FwmarkCommand::SELECT_NETWORK;
     cmd.netId = 100;
-    ret = SetMark(&tcpSocket, &cmd);
+    ret = fwmarkNetwork->SetMark(&tcpSocket, &cmd);
     close(tcpSocket);
     tcpSocket = -1;
     EXPECT_EQ(ret, 0);
@@ -259,7 +260,7 @@ HWTEST_F(UnitTestFwmarkClient, SetMarkTest006, TestSize.Level1)
     ASSERT_EQ(ret, 0);
     cmd.cmdId = FwmarkCommand::PROTECT_FROM_VPN;
     cmd.netId = 100;
-    ret = SetMark(&tcpSocket, &cmd);
+    ret = fwmarkNetwork->SetMark(&tcpSocket, &cmd);
     close(tcpSocket);
     tcpSocket = -1;
     EXPECT_EQ(ret, 0);
@@ -278,10 +279,10 @@ HWTEST_F(UnitTestFwmarkClient, SetMarkTest007, TestSize.Level1)
     ASSERT_EQ(ret, 0);
     cmd.cmdId = FwmarkCommand::PROTECT_FROM_VPN;
     cmd.netId = 9999;
-    ret = SetMark(&tcpSocket, &cmd);
+    ret = fwmarkNetwork->SetMark(&tcpSocket, &cmd);
     close(tcpSocket);
     tcpSocket = -1;
-    SendMessage(nullptr);
+    fwmarkNetwork->SendMessage(nullptr);
     EXPECT_EQ(ret, 0);
 }
 } // namespace NetsysNative

@@ -19,24 +19,25 @@
 #include <atomic>
 #include <cstdint>
 
+#include "fwmark_command.h"
+
 namespace OHOS {
 namespace nmd {
 class FwmarkNetwork {
 public:
-    FwmarkNetwork();
-    ~FwmarkNetwork();
+    FwmarkNetwork() = default;
+    ~FwmarkNetwork() = default;
 
     void SetDefaultNetId(int32_t netId);
+    void StartListener();
 
 private:
-    void ListenerClient();
     void CloseSocket(int32_t *socket, int32_t ret, int32_t errorCode);
     void SendMessage(int32_t *serverSockfd);
-    void StartListener();
     int32_t SetMark(int32_t *socketFd, FwmarkCommand *command);
 
 private:
-    std::atomic_int defaultNetId_(0);
+    std::atomic<int32_t> defaultNetId_ = 0;
 };
 } // namespace nmd
 } // namespace OHOS

@@ -23,7 +23,6 @@
 #include <unistd.h>
 
 #include "fwmark.h"
-#include "fwmark_command.h"
 #include "init_socket.h"
 #include "netnative_log_wrapper.h"
 #ifdef USE_SELINUX
@@ -186,32 +185,21 @@ void FwmarkNetwork::SendMessage(int32_t *serverSockfd)
 
 void FwmarkNetwork::StartListener()
 {
-    int32_t serverSockfd = GetControlSocket("fwmarkd");
+    NETNATIVE_LOGI("FwmarkNetwork: StartListener");
+    std::thread([this]() {
+        int32_t serverSockfd = GetControlSocket("fwmarkd");
 
-    int32_t result = listen(serverSockfd, MAX_CONCURRENT_CONNECTION_REQUESTS);
-    if (result < 0) {
-        NETNATIVE_LOGE("FwmarkNetwork: listen failed result %{public}d, errno: %{public}d", result, errno);
+        int32_t result = listen(serverSockfd, MAX_CONCURRENT_CONNECTION_REQUESTS);
+        if (result < 0) {
+            NETNATIVE_LOGE("FwmarkNetwork: listen failed result %{public}d, errno: %{public}d", result, errno);
+            close(serverSockfd);
+            serverSockfd = -1;
+            return;
+        }
+        SendMessage(&serverSockfd);
         close(serverSockfd);
         serverSockfd = -1;
-        return;
-    }
-    SendMessage(&serverSockfd);
-    close(serverSockfd);
-    serverSockfd = -1;
-}
-
-FwmarkNetwork::FwmarkNetwork()
-{
-    ListenerClient();
-}
-
-FwmarkNetwork::~FwmarkNetwork() {}
-
-void FwmarkNetwork::ListenerClient()
-{
-    std::thread startListener([this]() { StartListener });
-    startListener.detach();
-    NETNATIVE_LOGI("FwmarkNetwork: StartListener");
+    }).detach();
 }
 
 void FwmarkNetwork::SetDefaultNetId(int32_t netId)
