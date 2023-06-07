@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,16 +14,16 @@
  */
 
 #include "napi_net_policy.h"
-#include <memory>
-#include <cinttypes>
-#include <charconv>
-#include "net_mgr_log_wrapper.h"
-#include "i_net_policy_service.h"
-#include "net_policy_client.h"
-#include "napi_common.h"
 #include "base_context.h"
-#include "net_policy_event_listener_context.h"
+#include "i_net_policy_service.h"
+#include "napi_common.h"
 #include "net_all_capabilities.h"
+#include "net_mgr_log_wrapper.h"
+#include "net_policy_client.h"
+#include "net_policy_event_listener_context.h"
+#include <charconv>
+#include <cinttypes>
+#include <memory>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -39,8 +39,7 @@ void NapiNetPolicy::ExecSetPolicyByUid(napi_env env, void *data)
         return;
     }
     NetUidPolicy policy = static_cast<NetUidPolicy>(context->policy);
-    context->policyResult =
-        static_cast<int32_t>(DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(context->uid, policy));
+    context->policyResult = static_cast<int32_t>(NetPolicyClient::GetInstance().SetPolicyByUid(context->uid, policy));
     NETMGR_LOG_I("ExecSetPolicyByUid, policy = [%{public}d], policyResult = [%{public}d]", context->policy,
                  context->policyResult);
 }
@@ -53,7 +52,7 @@ void NapiNetPolicy::ExecGetUidsByPolicy(napi_env env, void *data)
         return;
     }
     NetUidPolicy policy = static_cast<NetUidPolicy>(context->policy);
-    context->uidTogether = DelayedSingleton<NetPolicyClient>::GetInstance()->GetUidsByPolicy(policy);
+    context->uidTogether = NetPolicyClient::GetInstance().GetUidsByPolicy(policy);
     NETMGR_LOG_I("ExecGetUidsByPolicy, policy = [%{public}d], res.length = [%{public}d]", context->policy,
                  static_cast<int32_t>(context->uidTogether.size()));
 }
@@ -65,8 +64,7 @@ void NapiNetPolicy::ExecGetPolicyByUid(napi_env env, void *data)
         NETMGR_LOG_E("context == nullptr");
         return;
     }
-    context->policyResult =
-        static_cast<int32_t>(DelayedSingleton<NetPolicyClient>::GetInstance()->GetPolicyByUid(context->uid));
+    context->policyResult = static_cast<int32_t>(NetPolicyClient::GetInstance().GetPolicyByUid(context->uid));
     NETMGR_LOG_D("ExecGetPolicyByUid, uid = [%{public}d], policyResult = [%{public}d]", context->uid,
                  context->policyResult);
 }
@@ -78,7 +76,7 @@ void NapiNetPolicy::ExecSetNetQuotaPolicies(napi_env env, void *data)
         NETMGR_LOG_E("context == nullptr");
         return;
     }
-    context->resultCode = DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetQuotaPolicies(context->quotaPolicys);
+    context->resultCode = NetPolicyClient::GetInstance().SetNetQuotaPolicies(context->quotaPolicys);
 }
 
 void NapiNetPolicy::ExecSetSnoozePolicy(napi_env env, void *data)
@@ -88,8 +86,8 @@ void NapiNetPolicy::ExecSetSnoozePolicy(napi_env env, void *data)
         NETMGR_LOG_E("context == nullptr");
         return;
     }
-    context->resultCode = DelayedSingleton<NetPolicyClient>::GetInstance()->SetSnoozePolicy(
-        context->netType, std::to_string(context->simId));
+    context->resultCode =
+        NetPolicyClient::GetInstance().SetSnoozePolicy(context->netType, std::to_string(context->simId));
 }
 
 void NapiNetPolicy::ExecOn(napi_env env, void *data)
@@ -361,7 +359,7 @@ void NativeGetNetQuotaPolicies(napi_env env, void *data)
         NETMGR_LOG_E("context == nullptr");
         return;
     }
-    NetPolicyResultCode result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetNetQuotaPolicies(context->result);
+    NetPolicyResultCode result = NetPolicyClient::GetInstance().GetNetQuotaPolicies(context->result);
     context->resolved = result == NETMANAGER_SUCCESS;
     context->errorCode = static_cast<int32_t>(result);
 }
@@ -439,7 +437,7 @@ bool MatchRestoreAllPoliciesParameters(napi_env env, napi_value argv[], size_t a
 void NapiNetPolicy::ExecRestoreAllPolicies(napi_env env, void *data)
 {
     auto context = static_cast<RestoreAllPoliciesContext *>(data);
-    DelayedSingleton<NetPolicyClient>::GetInstance()->SetFactoryPolicy(std::to_string(context->simId));
+    NetPolicyClient::GetInstance().SetFactoryPolicy(std::to_string(context->simId));
     context->resolved = true;
 }
 
@@ -499,13 +497,13 @@ void NapiNetPolicy::ExecSetBackgroundPolicy(napi_env env, void *data)
         NETMGR_LOG_E("context == nullptr");
         return;
     }
-    context->resultCode = DelayedSingleton<NetPolicyClient>::GetInstance()->SetBackgroundPolicy(context->allow);
+    context->resultCode = NetPolicyClient::GetInstance().SetBackgroundPolicy(context->allow);
 }
 
 void NapiNetPolicy::ExecGetBackgroundPolicy(napi_env env, void *data)
 {
     auto context = static_cast<GetBackgroundPolicyContext *>(data);
-    context->backgroundPolicy = DelayedSingleton<NetPolicyClient>::GetInstance()->GetCurrentBackgroundPolicy();
+    context->backgroundPolicy = NetPolicyClient::GetInstance().GetCurrentBackgroundPolicy();
     context->resolved = true;
 }
 

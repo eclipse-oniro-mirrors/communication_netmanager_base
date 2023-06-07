@@ -35,10 +35,11 @@ namespace nmd {
 class FwmarkClient;
 }
 namespace NetManagerStandard {
-class NetConnClient {
-    DECLARE_DELAYED_SINGLETON(NetConnClient)
-
+class NetConnClient : public Singleton<NetConnClient> {
 public:
+    NetConnClient();
+    ~NetConnClient();
+
     /**
      * The interface in NetConnService can be called when the system is ready
      *

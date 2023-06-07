@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +53,7 @@ napi_value StatisticsObserverWrapper::On(napi_env env, napi_callback_info info,
         return NapiUtils::GetUndefined(env);
     }
     if (!registered_) {
-        int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->RegisterNetStatsCallback(observer_);
+        int32_t ret = NetStatsClient::GetInstance().RegisterNetStatsCallback(observer_);
         NETMANAGER_BASE_LOGI("ret = [%{public}d]", ret);
         registered_ = (ret == NETMANAGER_SUCCESS);
         if (!registered_) {
@@ -102,7 +102,7 @@ napi_value StatisticsObserverWrapper::Off(napi_env env, napi_callback_info info,
     }
 
     if (manager_->IsListenerListEmpty()) {
-        auto ret = DelayedSingleton<NetStatsClient>::GetInstance()->UnregisterNetStatsCallback(observer_);
+        auto ret = NetStatsClient::GetInstance().UnregisterNetStatsCallback(observer_);
         if (ret != NETMANAGER_SUCCESS) {
             NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
         }

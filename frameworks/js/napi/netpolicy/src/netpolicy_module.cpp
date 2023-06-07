@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,10 +23,10 @@
 #include "is_uid_net_allowed_context.h"
 #include "module_template.h"
 #include "napi_utils.h"
-#include "netmanager_base_log.h"
-#include "netpolicy_async_work.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_constants.h"
+#include "netmanager_base_log.h"
+#include "netpolicy_async_work.h"
 #include "policy_observer_wrapper.h"
 #include "restore_all_policies_context.h"
 #include "set_bg_policy_context.h"
@@ -215,20 +215,20 @@ napi_value GetPowerSaveAllowList(napi_env env, napi_callback_info info)
 
 napi_value On(napi_env env, napi_callback_info info)
 {
-    return DelayedSingleton<PolicyObserverWrapper>::GetInstance()->On(
-        env, info,
-        {EVENT_POLICY_UID_POLICY, EVENT_POLICY_UID_RULE, EVENT_POLICY_METERED_IFACES, EVENT_POLICY_QUOTA_POLICY,
-         EVENT_POLICY_BACKGROUND_POLICY, EVENT_POLICY_STRATEGY_SWITCH},
-        false);
+    return PolicyObserverWrapper::GetInstance().On(env, info,
+                                                   {EVENT_POLICY_UID_POLICY, EVENT_POLICY_UID_RULE,
+                                                    EVENT_POLICY_METERED_IFACES, EVENT_POLICY_QUOTA_POLICY,
+                                                    EVENT_POLICY_BACKGROUND_POLICY, EVENT_POLICY_STRATEGY_SWITCH},
+                                                   false);
 }
 
 napi_value Off(napi_env env, napi_callback_info info)
 {
-    return DelayedSingleton<PolicyObserverWrapper>::GetInstance()->Off(
-        env, info,
-        {EVENT_POLICY_UID_POLICY, EVENT_POLICY_UID_RULE, EVENT_POLICY_METERED_IFACES, EVENT_POLICY_QUOTA_POLICY,
-         EVENT_POLICY_BACKGROUND_POLICY, EVENT_POLICY_STRATEGY_SWITCH},
-        false);
+    return PolicyObserverWrapper::GetInstance().Off(env, info,
+                                                    {EVENT_POLICY_UID_POLICY, EVENT_POLICY_UID_RULE,
+                                                     EVENT_POLICY_METERED_IFACES, EVENT_POLICY_QUOTA_POLICY,
+                                                     EVENT_POLICY_BACKGROUND_POLICY, EVENT_POLICY_STRATEGY_SWITCH},
+                                                    false);
 }
 
 static void CreateBackgroundPolicy(napi_env env, napi_value exports)
