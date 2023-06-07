@@ -534,9 +534,9 @@ void SetInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    uint32_t vectorLength2 = GetData<uint32_t>() % VECTOR_MAX_SIZE;
-    dataParcel.WriteInt32(static_cast<int32_t>(vectorLength2));
-    for (uint32_t i = 0; i <= vectorLength2; i++) {
+    uint32_t vectorLength = GetData<uint32_t>() % VECTOR_MAX_SIZE;
+    dataParcel.WriteInt32(static_cast<int32_t>(vectorLength));
+    for (uint32_t i = 0; i <= vectorLength; i++) {
         dataParcel.WriteString(GetStringFromData(STR_LEN));
     }
 
