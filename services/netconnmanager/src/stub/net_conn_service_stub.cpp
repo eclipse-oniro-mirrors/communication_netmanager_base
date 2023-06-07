@@ -74,7 +74,6 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_GET_NET_ID_BY_IDENTIFIER] = {&NetConnServiceStub::OnGetNetIdByIdentifier, {}};
     memberFuncMap_[CMD_NM_SET_APP_NET] = {&NetConnServiceStub::OnSetAppNet, {Permission::INTERNET}};
     memberFuncMap_[CMD_NM_SET_INTERNET_PERMISSION] = {&NetConnServiceStub::OnSetInternetPermission, {}};
-    memberFuncMap_[CMD_NM_SET_IF_UP_MULTICAST] = {&NetConnServiceStub::OnInterfaceSetIffUp, {}};
 
     systemCode_ = {CMD_NM_SET_AIRPLANE_MODE, CMD_NM_SET_GLOBAL_HTTP_PROXY, CMD_NM_GET_GLOBAL_HTTP_PROXY};
 }
@@ -922,19 +921,6 @@ int32_t NetConnServiceStub::OnSetAppNet(MessageParcel &data, MessageParcel &repl
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     int ret = SetAppNet(netId);
-    if (!reply.WriteInt32(ret)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-    return ret;
-}
-
-int32_t NetConnServiceStub::OnInterfaceSetIffUp(MessageParcel &data, MessageParcel &reply)
-{
-    std::string ifaceName;
-    if (!data.ReadString(ifaceName)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-    int32_t ret = InterfaceSetIffUp(ifaceName);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
