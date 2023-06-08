@@ -36,6 +36,7 @@ private:
     using NetConnServiceFuncPer = std::pair<NetConnServiceFunc, std::set<std::string>>;
 
 private:
+    void InitQueryFuncToInterfaceMap();
     bool CheckPermission(const std::set<std::string> &permissions);
     bool CheckPermissionWithCache(const std::set<std::string> &permissions);
     int32_t OnSystemReady(MessageParcel &data, MessageParcel &reply);
