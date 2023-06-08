@@ -42,6 +42,7 @@ ohos_source_set("net_conn_parcel") {
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/http_proxy.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/inet_addr.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_all_capabilities.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_interface_config.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_link_info.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_specifier.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_supplier_info.cpp",
@@ -76,6 +77,7 @@ ohos_shared_library("net_conn_manager_if") {
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_callback_stub.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_service_proxy.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_detection_callback_stub.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_interface_callback_stub.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_supplier_callback_stub.cpp",
   ]
 

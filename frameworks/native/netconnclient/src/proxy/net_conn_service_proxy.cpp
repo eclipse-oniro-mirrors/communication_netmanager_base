@@ -1301,5 +1301,65 @@ int32_t NetConnServiceProxy::InterfaceSetIffUp(const std::string &ifaceName)
     return result;
 }
 
+int32_t NetConnServiceProxy::RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback)
+{
+    if (callback == nullptr) {
+        NETMGR_LOG_E("The parameter of callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    MessageOption option;
+    MessageParcel replyParcel;
+    int32_t retCode = remote->SendRequest(CMD_NM_REGISTER_NET_INTERFACE_CALLBACK, dataParcel, replyParcel, option);
+    if (retCode != ERR_NONE) {
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    return replyParcel.ReadInt32();
+}
+
+int32_t NetConnServiceProxy::GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!data.WriteString(iface)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = remote->SendRequest(CMD_NM_GET_INTERFACE_CONFIGURATION, data, reply, option);
+    if (error != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    int32_t ret = NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!NetInterfaceConfiguration::Unmarshalling(reply, config)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+    }
+    return ret;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

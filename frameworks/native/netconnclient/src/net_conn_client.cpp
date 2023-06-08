@@ -439,5 +439,25 @@ int32_t NetConnClient::GetAppNet(int32_t &netId)
     netId = GetNetForApp();
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetConnClient::RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->RegisterNetInterfaceCallback(callback);
+}
+
+int32_t NetConnClient::GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetNetInterfaceConfiguration(iface, config);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

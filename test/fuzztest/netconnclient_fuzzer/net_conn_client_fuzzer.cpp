@@ -31,6 +31,7 @@
 #include "net_conn_service.h"
 #include "net_conn_service_stub.h"
 #include "net_conn_client.h"
+#include "net_interface_callback_stub.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -69,6 +70,17 @@ PermissionDef testInternetPermDef = {.permissionName = "ohos.permission.INTERNET
                                      .description = "Test net connect maneger internet",
                                      .descriptionId = 1};
 
+PermissionDef testInternalPermDef = {
+    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+    .bundleName = "net_conn_client_fuzzer",
+    .grantMode = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+    .label = "label",
+    .labelId = 1,
+    .description = "Test net connect manager internal",
+    .descriptionId = 1,
+};
+
 PermissionStateFull testState = {.permissionName = "ohos.permission.GET_NETWORK_INFO",
                                  .isGeneral = true,
                                  .resDeviceID = {"local"},
@@ -81,6 +93,14 @@ PermissionStateFull testInternetState = {.permissionName = "ohos.permission.INTE
                                          .grantStatus = {PermissionState::PERMISSION_GRANTED},
                                          .grantFlags = {2}};
 
+PermissionStateFull testInternalState = {
+    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+    .isGeneral = true,
+    .resDeviceID = {"local"},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
+    .grantFlags = {2},
+};
+
 HapPolicyParams testPolicyPrams = {.apl = APL_SYSTEM_BASIC,
                                    .domain = "test.domain",
                                    .permList = {testPermDef},
@@ -88,8 +108,8 @@ HapPolicyParams testPolicyPrams = {.apl = APL_SYSTEM_BASIC,
 
 HapPolicyParams testInternetPolicyPrams = {.apl = APL_SYSTEM_BASIC,
                                            .domain = "test.domain",
-                                           .permList = {testPermDef, testInternetPermDef},
-                                           .permStateList = {testState, testInternetState}};
+                                           .permList = {testPermDef, testInternetPermDef, testInternalPermDef},
+                                           .permStateList = {testState, testInternetState, testInternalState}};
 } // namespace
 
 template <class T> T GetData()
@@ -191,6 +211,10 @@ public:
 };
 
 class NetSupplierCallbackBaseTest : public NetSupplierCallbackStub {
+};
+
+class NetInterfaceStateCallbackTest : public NetInterfaceStateCallbackStub {
+
 };
 
 static bool g_isInited = false;
@@ -705,6 +729,44 @@ void SetAppNetFuzzTest(const uint8_t *data, size_t size)
 
     int32_t netId = GetData<int32_t>();
     DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(netId);
+}
+
+void RegisterNetInterfaceCallbackFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+
+    AccessToken token;
+    sptr<INetInterfaceStateCallback> callback = new (std::nothrow) NetInterfaceStateCallbackTest();
+    if (callback == nullptr) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+    OnRemoteRequest(INetConnService::CMD_NM_REGISTER_NET_INTERFACE_CALLBACK, dataParcel);
+}
+
+void GetNetInterfaceConfigurationFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    AccessToken token;
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    OnRemoteRequest(INetConnService::CMD_NM_GET_INTERFACE_CONFIGURATION, dataParcel);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

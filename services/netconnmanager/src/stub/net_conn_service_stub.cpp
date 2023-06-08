@@ -75,7 +75,10 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_SET_APP_NET] = {&NetConnServiceStub::OnSetAppNet, {Permission::INTERNET}};
     memberFuncMap_[CMD_NM_SET_INTERNET_PERMISSION] = {&NetConnServiceStub::OnSetInternetPermission, {}};
     memberFuncMap_[CMD_NM_SET_IF_UP_MULTICAST] = {&NetConnServiceStub::OnInterfaceSetIffUp, {}};
-
+    memberFuncMap_[CMD_NM_REGISTER_NET_INTERFACE_CALLBACK] = {&NetConnServiceStub::OnRegisterNetInterfaceCallback,
+                                                              {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_GET_INTERFACE_CONFIGURATION] = {&NetConnServiceStub::OnGetNetInterfaceConfiguration,
+                                                          {Permission::CONNECTIVITY_INTERNAL}};
     systemCode_ = {CMD_NM_SET_AIRPLANE_MODE, CMD_NM_SET_GLOBAL_HTTP_PROXY, CMD_NM_GET_GLOBAL_HTTP_PROXY};
 }
 
@@ -941,5 +944,44 @@ int32_t NetConnServiceStub::OnInterfaceSetIffUp(MessageParcel &data, MessageParc
     return ret;
 }
 
+int32_t NetConnServiceStub::OnRegisterNetInterfaceCallback(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = NETMANAGER_SUCCESS;
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Callback ptr is nullptr.");
+        ret = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        reply.WriteInt32(ret);
+        return ret;
+    }
+
+    sptr<INetInterfaceStateCallback> callback = iface_cast<INetInterfaceStateCallback>(remote);
+    ret = RegisterNetInterfaceCallback(callback);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return ret;
+}
+
+int32_t NetConnServiceStub::OnGetNetInterfaceConfiguration(MessageParcel &data, MessageParcel &reply)
+{
+    std::string iface;
+    if (!data.ReadString(iface)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    NetInterfaceConfiguration config;
+    int32_t ret = GetNetInterfaceConfiguration(iface, config);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!config.Marshalling(reply)) {
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    return ret;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
