@@ -73,7 +73,7 @@ void DealInfoFromKernel(nlmsghdr *nlmsgHeader, uint16_t clearThing, uint32_t tab
  * @param property Property for route
  * @return Returns 0, get route property successfully, otherwise it will fail
  */
-uint32_t GetRouteProperty(const nlmsghdr *nlmsgHeader, int32_t property);
+int32_t GetRouteProperty(const nlmsghdr *nlmsgHeader, int32_t property);
 } // namespace nmd
 } // namespace OHOS
 #endif // !INCLUDE_NETLINK_SOCKET_H

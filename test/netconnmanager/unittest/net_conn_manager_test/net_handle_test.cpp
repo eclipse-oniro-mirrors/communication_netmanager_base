@@ -67,7 +67,7 @@ HWTEST_F(NetHandleTest, GetAddressesByName001, TestSize.Level1)
     auto handler = DelayedSingleton<NetHandle>::GetInstance();
     handler->SetNetId(netId);
     int32_t ret = handler->GetAddressesByName(host, addrList);
-    EXPECT_EQ(ret, NETMANAGER_ERR_NOT_SYSTEM_CALL);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetHandleTest, GetAddressesByName002, TestSize.Level1)
@@ -89,7 +89,7 @@ HWTEST_F(NetHandleTest, GetAddressByName001, TestSize.Level1)
     auto handler = DelayedSingleton<NetHandle>::GetInstance();
     handler->SetNetId(netId);
     int32_t ret = handler->GetAddressByName(host, addr);
-    EXPECT_EQ(ret, NETMANAGER_ERR_NOT_SYSTEM_CALL);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetHandleTest, GetAddressByName002, TestSize.Level1)
