@@ -180,7 +180,7 @@ public:
         return 0;
     }
 
-    int32_t NetStrategySwitch(const std::string &iccid, bool enable)
+    int32_t NetStrategySwitch(const std::string &simId, bool enable)
     {
         return 0;
     }
@@ -336,17 +336,17 @@ void SetCellularPoliciesFuzzTest(const uint8_t *data, size_t size)
     std::vector<NetQuotaPolicy> quotaPolicies;
     for (uint32_t i = 0; i < vectorSize; i++) {
         NetQuotaPolicy netQuotaPolicy;
-        netQuotaPolicy.netType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+        netQuotaPolicy.netlogotype.netType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
 
-        netQuotaPolicy.iccid = GetStringFromData(STR_LEN);
-        netQuotaPolicy.ident = GetStringFromData(STR_LEN);
-        netQuotaPolicy.periodStartTime = GetData<int64_t>();
-        netQuotaPolicy.periodDuration = GetStringFromData(STR_LEN);
+        netQuotaPolicy.netlogotype.simId = GetStringFromData(STR_LEN);
+        netQuotaPolicy.netlogotype.ident = GetStringFromData(STR_LEN);
+        netQuotaPolicy.quotapolicy.periodStartTime = GetData<int64_t>();
+        netQuotaPolicy.quotapolicy.periodDuration = GetStringFromData(STR_LEN);
 
-        netQuotaPolicy.warningBytes = GetData<int64_t>();
-        netQuotaPolicy.limitBytes = GetData<int64_t>();
-        netQuotaPolicy.metered = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-        netQuotaPolicy.limitAction = GetData<uint32_t>() % CREATE_LIMIT_ACTION_VALUE == 0;
+        netQuotaPolicy.quotapolicy.warningBytes = GetData<int64_t>();
+        netQuotaPolicy.quotapolicy.limitBytes = GetData<int64_t>();
+        netQuotaPolicy.quotapolicy.metered = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+        netQuotaPolicy.quotapolicy.limitAction = GetData<uint32_t>() % CREATE_LIMIT_ACTION_VALUE == 0;
 
         quotaPolicies.push_back(netQuotaPolicy);
     }
@@ -428,17 +428,17 @@ void SetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
     std::vector<NetQuotaPolicy> quotaPolicies;
     for (uint32_t i = 0; i < vectorSize; i++) {
         NetQuotaPolicy netQuotaPolicy;
-        netQuotaPolicy.netType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+        netQuotaPolicy.netlogotype.netType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
 
-        netQuotaPolicy.iccid = GetStringFromData(STR_LEN);
-        netQuotaPolicy.ident = GetStringFromData(STR_LEN);
-        netQuotaPolicy.periodStartTime = GetData<int64_t>();
-        netQuotaPolicy.periodDuration = GetStringFromData(STR_LEN);
+        netQuotaPolicy.netlogotype.simId = GetStringFromData(STR_LEN);
+        netQuotaPolicy.netlogotype.ident = GetStringFromData(STR_LEN);
+        netQuotaPolicy.quotapolicy.periodStartTime = GetData<int64_t>();
+        netQuotaPolicy.quotapolicy.periodDuration = GetStringFromData(STR_LEN);
 
-        netQuotaPolicy.warningBytes = GetData<int64_t>();
-        netQuotaPolicy.limitBytes = GetData<int64_t>();
-        netQuotaPolicy.metered = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-        netQuotaPolicy.limitAction = GetData<uint32_t>() % CREATE_LIMIT_ACTION_VALUE == 0;
+        netQuotaPolicy.quotapolicy.warningBytes = GetData<int64_t>();
+        netQuotaPolicy.quotapolicy.limitBytes = GetData<int64_t>();
+        netQuotaPolicy.quotapolicy.metered = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+        netQuotaPolicy.quotapolicy.limitAction = GetData<uint32_t>() % CREATE_LIMIT_ACTION_VALUE == 0;
 
         quotaPolicies.push_back(netQuotaPolicy);
     }
@@ -495,14 +495,14 @@ void ResetPoliciesFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
     AccessToken token(testInfoParms2, testPolicyPrams2);
-    std::string iccid = GetStringFromData(STR_LEN);
+    std::string simId = GetStringFromData(STR_LEN);
 
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
 
-    dataParcel.WriteString(iccid);
+    dataParcel.WriteString(simId);
 
     OnRemoteRequest(INetPolicyService::CMD_NPS_RESET_POLICIES, dataParcel);
 }
@@ -519,7 +519,7 @@ void UpdateRemindPolicyFuzzTest(const uint8_t *data, size_t size)
     AccessToken token(testInfoParms2, testPolicyPrams2);
     int32_t netType = GetData<int32_t>();
     uint32_t remindType = GetData<uint32_t>();
-    std::string iccid = GetStringFromData(STR_LEN);
+    std::string simId = GetStringFromData(STR_LEN);
 
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
@@ -527,7 +527,7 @@ void UpdateRemindPolicyFuzzTest(const uint8_t *data, size_t size)
     }
 
     dataParcel.WriteInt32(netType);
-    dataParcel.WriteString(iccid);
+    dataParcel.WriteString(simId);
     dataParcel.WriteUint32(remindType);
 
     OnRemoteRequest(INetPolicyService::CMD_NPS_UPDATE_REMIND_POLICY, dataParcel);

@@ -59,14 +59,14 @@ void NetPolicyTraffic::Init()
 
 bool NetPolicyTraffic::IsValidQuotaPolicy(const NetQuotaPolicy &quotaPolicy)
 {
-    int32_t netType = quotaPolicy.netType;
+    int32_t netType = quotaPolicy.netlogotype.netType;
     if (!IsValidNetType(netType)) {
         NETMGR_LOG_E("NetPolicyType is invalid policy[%{public}d]", netType);
         return false;
     }
 
-    if (!IsValidPeriodDuration(quotaPolicy.periodDuration)) {
-        NETMGR_LOG_E("periodDuration [%{public}s] must Mx", quotaPolicy.periodDuration.c_str());
+    if (!IsValidPeriodDuration(quotaPolicy.quotapolicy.periodDuration)) {
+        NETMGR_LOG_E("periodDuration [%{public}s] must Mx", quotaPolicy.quotapolicy.periodDuration.c_str());
         return false;
     }
     return true;
@@ -149,22 +149,22 @@ void NetPolicyTraffic::FormalizeQuotaPolicies(const std::vector<NetQuotaPolicy> 
     for (auto quotaPolicy : quotaPolicies) {
         if (!IsValidQuotaPolicy(quotaPolicy)) {
             NETMGR_LOG_E("UpdateQuotaPolicies invalid quota policy netType[%{public}d], periodDuration[%{public}s]",
-                         quotaPolicy.netType, quotaPolicy.periodDuration.c_str());
+                         quotaPolicy.netlogotype.netType, quotaPolicy.quotapolicy.periodDuration.c_str());
             continue;
         }
-        if (quotaPolicy.limitBytes == DATA_USAGE_UNKNOWN) {
-            quotaPolicy.limitAction = LIMIT_ACTION_AUTO_BILL;
-        } else if (quotaPolicy.warningBytes == DATA_USAGE_UNKNOWN) {
-            quotaPolicy.warningBytes = quotaPolicy.limitBytes * NINETY_PERCENTAGE / HUNDRED_PERCENTAGE;
+        if (quotaPolicy.quotapolicy.limitBytes == DATA_USAGE_UNKNOWN) {
+            quotaPolicy.quotapolicy.limitAction = LIMIT_ACTION_AUTO_BILL;
+        } else if (quotaPolicy.quotapolicy.warningBytes == DATA_USAGE_UNKNOWN) {
+            quotaPolicy.quotapolicy.warningBytes = quotaPolicy.quotapolicy.limitBytes * NINETY_PERCENTAGE / HUNDRED_PERCENTAGE;
         }
-        if (quotaPolicy.limitAction == LIMIT_ACTION_AUTO_BILL) {
-            quotaPolicy.limitBytes = DATA_USAGE_UNLIMITED;
+        if (quotaPolicy.quotapolicy.limitAction == LIMIT_ACTION_AUTO_BILL) {
+            quotaPolicy.quotapolicy.limitBytes = DATA_USAGE_UNLIMITED;
         }
-        if (quotaPolicy.warningBytes > quotaPolicy.limitBytes) {
-            quotaPolicy.warningBytes = DATA_USAGE_UNLIMITED;
+        if (quotaPolicy.quotapolicy.warningBytes > quotaPolicy.quotapolicy.limitBytes) {
+            quotaPolicy.quotapolicy.warningBytes = DATA_USAGE_UNLIMITED;
         }
-        if (quotaPolicy.limitBytes == DATA_USAGE_UNLIMITED) {
-            quotaPolicy.limitAction = LIMIT_ACTION_AUTO_BILL;
+        if (quotaPolicy.quotapolicy.limitBytes == DATA_USAGE_UNLIMITED) {
+            quotaPolicy.quotapolicy.limitAction = LIMIT_ACTION_AUTO_BILL;
         }
         quotaPolicies_.push_back(quotaPolicy);
     }
@@ -176,7 +176,7 @@ const std::vector<std::string> NetPolicyTraffic::UpdateMeteredIfacesQuota()
     for (auto &quotaPolicy : quotaPolicies_) {
         std::string iface = GetMatchIfaces(quotaPolicy);
         // set quota for metered iface.
-        if (iface == UNKNOW_IFACE || !quotaPolicy.metered) {
+        if (iface == UNKNOW_IFACE || !quotaPolicy.quotapolicy.metered) {
             continue;
         }
         newMeteredIfaces.push_back(iface);
@@ -219,7 +219,7 @@ void NetPolicyTraffic::UpdateQuotaNotify()
         NetmanagerHiTrace::NetmanagerFinishSyncTrace("Get the usage of traffic end");
         // check if the quota is over the limit
         if (quotaPolicy.IsOverLimit(totalQuota)) {
-            if (quotaPolicy.lastLimitRemind > start) {
+            if (quotaPolicy.quotapolicy.lastLimitRemind > start) {
                 // notify the quota reach limit and has reminded before.
                 NetmanagerHiTrace::NetmanagerStartSyncTrace("Notify quota limit reminded start");
                 NotifyQuotaLimitReminded(totalQuota);
@@ -234,7 +234,7 @@ void NetPolicyTraffic::UpdateQuotaNotify()
             continue;
         }
         // check if the quota is over the warning
-        if (quotaPolicy.IsOverWarning(totalQuota) && quotaPolicy.lastWarningRemind < start) {
+        if (quotaPolicy.IsOverWarning(totalQuota) && quotaPolicy.quotapolicy.lastWarningRemind < start) {
             NetmanagerHiTrace::NetmanagerStartSyncTrace("Notify quota warning remind start");
             NotifyQuotaWarning(totalQuota);
             NetmanagerHiTrace::NetmanagerFinishSyncTrace("Notify quota warning remind end");
@@ -248,16 +248,16 @@ int64_t NetPolicyTraffic::GetQuotaRemain(NetQuotaPolicy &quotaPolicy)
     int64_t start = quotaPolicy.GetPeriodStart();
     int64_t totalQuota = GetTotalQuota(quotaPolicy);
     NETMGR_LOG_D("GetQuotaRemain totalQuota[%{public}s] limit[%{public}s] start[%{public}s]",
-                 std::to_string(totalQuota).c_str(), std::to_string(quotaPolicy.limitBytes).c_str(), ctime(&start));
+                 std::to_string(totalQuota).c_str(), std::to_string(quotaPolicy.quotapolicy.limitBytes).c_str(), ctime(&start));
     // calculate the quota for each policy.
-    bool hasLimit = quotaPolicy.limitBytes != DATA_USAGE_UNKNOWN;
+    bool hasLimit = quotaPolicy.quotapolicy.limitBytes != DATA_USAGE_UNKNOWN;
     int64_t quota = LONG_MAX;
-    if (hasLimit || quotaPolicy.metered) {
-        if (hasLimit && quotaPolicy.periodDuration != QUOTA_POLICY_NO_PERIOD) {
-            if (quotaPolicy.lastLimitRemind >= start) {
+    if (hasLimit || quotaPolicy.quotapolicy.metered) {
+        if (hasLimit && quotaPolicy.quotapolicy.periodDuration != QUOTA_POLICY_NO_PERIOD) {
+            if (quotaPolicy.quotapolicy.lastLimitRemind >= start) {
                 return LONG_MAX;
             }
-            quota = quotaPolicy.limitBytes - totalQuota;
+            quota = quotaPolicy.quotapolicy.limitBytes - totalQuota;
         }
     }
     return quota < 0 ? 0 : quota;
@@ -265,9 +265,9 @@ int64_t NetPolicyTraffic::GetQuotaRemain(NetQuotaPolicy &quotaPolicy)
 
 void NetPolicyTraffic::UpdateNetEnableStatus(const NetQuotaPolicy &quotaPolicy)
 {
-    NETMGR_LOG_D("UpdateNetEnableStatus metered[%{public}d] limitAction[%{public}d]", quotaPolicy.metered,
-                 quotaPolicy.limitAction);
-    if (quotaPolicy.metered || quotaPolicy.limitAction == LIMIT_ACTION_DISABLE) {
+    NETMGR_LOG_D("UpdateNetEnableStatus metered[%{public}d] quotapolicy.limitAction[%{public}d]", quotaPolicy.quotapolicy.metered,
+                 quotaPolicy.quotapolicy.limitAction);
+    if (quotaPolicy.quotapolicy.metered || quotaPolicy.quotapolicy.limitAction == LIMIT_ACTION_DISABLE) {
         SetNetworkEnableStatus(quotaPolicy, false);
     }
 }
@@ -280,7 +280,7 @@ int32_t NetPolicyTraffic::GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quota
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetPolicyTraffic::UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType)
+int32_t NetPolicyTraffic::UpdateRemindPolicy(int32_t netType, const std::string &simId, uint32_t remindType)
 {
     if (!IsValidNetType(netType)) {
         NETMGR_LOG_E("NetPolicyType is invalid policy[%{public}d]", netType);
@@ -293,15 +293,15 @@ int32_t NetPolicyTraffic::UpdateRemindPolicy(int32_t netType, const std::string 
 
     for (uint32_t i = 0; i < quotaPolicies_.size(); ++i) {
         NetQuotaPolicy &quotaPolicy = quotaPolicies_[i];
-        int32_t netTypeTemp = quotaPolicy.netType;
-        std::string iccidTemp = quotaPolicy.iccid;
-        if (netTypeTemp == netType && iccidTemp == iccid) {
+        int32_t netTypeTemp = quotaPolicy.netlogotype.netType;
+        std::string iccidTemp = quotaPolicy.netlogotype.simId;
+        if (netTypeTemp == netType && iccidTemp == simId) {
             switch (remindType) {
                 case REMIND_TYPE_WARNING:
-                    quotaPolicy.lastWarningRemind = time(nullptr);
+                    quotaPolicy.quotapolicy.lastWarningRemind = time(nullptr);
                     break;
                 case REMIND_TYPE_LIMIT:
-                    quotaPolicy.lastLimitRemind = time(nullptr);
+                    quotaPolicy.quotapolicy.lastLimitRemind = time(nullptr);
                     break;
                 default:
                     return NETMANAGER_ERR_PARAMETER_ERROR;
@@ -318,10 +318,10 @@ const std::vector<std::string> &NetPolicyTraffic::GetMeteredIfaces()
     return meteredIfaces_;
 }
 
-int32_t NetPolicyTraffic::ResetPolicies(const std::string &iccid)
+int32_t NetPolicyTraffic::ResetPolicies(const std::string &simId)
 {
     for (auto &quotaPolicy : quotaPolicies_) {
-        if (quotaPolicy.iccid == iccid) {
+        if (quotaPolicy.netlogotype.simId == simId) {
             quotaPolicy.Reset();
         }
     }
@@ -368,16 +368,16 @@ bool NetPolicyTraffic::WriteQuotaPolicies()
 const std::string NetPolicyTraffic::GetMatchIfaces(const NetQuotaPolicy &quotaPolicy)
 {
     std::string ident = "";
-    if (quotaPolicy.netType == BEARER_CELLULAR) {
-        ident = IDENT_PREFIX_CELLULAR + quotaPolicy.iccid;
-    } else if (quotaPolicy.netType == BEARER_WIFI) {
-        ident = quotaPolicy.ident;
-    } else if (quotaPolicy.netType == BEARER_ETHERNET) {
-        ident = quotaPolicy.ident;
+    if (quotaPolicy.netlogotype.netType == BEARER_CELLULAR) {
+        ident = IDENT_PREFIX_CELLULAR + quotaPolicy.netlogotype.simId;
+    } else if (quotaPolicy.netlogotype.netType == BEARER_WIFI) {
+        ident = quotaPolicy.netlogotype.ident;
+    } else if (quotaPolicy.netlogotype.netType == BEARER_ETHERNET) {
+        ident = quotaPolicy.netlogotype.ident;
     }
     std::string iface;
-    GetNetCenterInst().GetIfaceNameByType(static_cast<NetBearType>(quotaPolicy.netType), ident, iface);
-    NETMGR_LOG_D("GetMatchIfaces netType: %{public}d ident: %{public}s iface: %{public}s.", quotaPolicy.netType,
+    GetNetCenterInst().GetIfaceNameByType(static_cast<NetBearType>(quotaPolicy.netlogotype.netType), ident, iface);
+    NETMGR_LOG_D("GetMatchIfaces netType: %{public}d ident: %{public}s iface: %{public}s.", quotaPolicy.netlogotype.netType,
                  ident.c_str(), iface.c_str());
     return iface;
 }
@@ -445,7 +445,7 @@ bool NetPolicyTraffic::IsValidPeriodDuration(const std::string &periodDuration)
     return false;
 }
 
-bool NetPolicyTraffic::IsQuotaPolicyExist(int32_t netType, const std::string &iccid)
+bool NetPolicyTraffic::IsQuotaPolicyExist(int32_t netType, const std::string &simId)
 {
     std::vector<NetQuotaPolicy> quotaPolicies;
     GetFileInst()->ReadQuotaPolicies(quotaPolicies);
@@ -456,7 +456,7 @@ bool NetPolicyTraffic::IsQuotaPolicyExist(int32_t netType, const std::string &ic
     }
 
     for (uint32_t i = 0; i < quotaPolicies.size(); i++) {
-        if (netType == quotaPolicies[i].netType && iccid == quotaPolicies[i].iccid) {
+        if (netType == quotaPolicies[i].netlogotype.netType && simId == quotaPolicies[i].netlogotype.simId) {
             return true;
         }
     }
@@ -478,21 +478,21 @@ void NetPolicyTraffic::GetDumpMessage(std::string &message)
     message.append("}\n");
     message.append(TAB + "QuotaPolicies:\n");
     std::for_each(quotaPolicies_.begin(), quotaPolicies_.end(), [&message](const auto &item) {
-        message.append(TAB + TAB + "NetType: " + std::to_string(item.netType) + "\n" + TAB + TAB +
-                       "IccId: " + item.iccid + "\n" + TAB + TAB + "Ident: " + item.ident + "\n");
-        message.append(TAB + TAB + "PeriodStartTime: " + std::to_string(item.periodStartTime) + "\n");
-        message.append(TAB + TAB + "PeriodDuration: " + item.periodDuration + "\n");
-        message.append(TAB + TAB + "Title: " + item.title + "\n" + TAB + TAB + "Summary: " + item.summary + "\n");
-        message.append(TAB + TAB + "WarningBytes: " + std::to_string(item.warningBytes) + "\n");
-        message.append(TAB + TAB + "LimitBytes: " + std::to_string(item.limitBytes) + "\n");
-        message.append(TAB + TAB + "LastWarningRemind: " + std::to_string(item.lastWarningRemind) + "\n");
-        message.append(TAB + TAB + "LastLimitRemind: " + std::to_string(item.lastLimitRemind) + "\n");
-        message.append(TAB + TAB + "Metered: " + std::to_string(item.metered) + "\n" + TAB + TAB +
-                       "Ident: " + item.ident + "\n");
-        message.append(TAB + TAB + "LimitAction: " + std::to_string(item.limitAction) + "\n" + TAB + TAB +
-                       "UsedBytes: " + std::to_string(item.usedBytes) + "\n");
-        message.append(TAB + TAB + "UsedTimeDuration: " + std::to_string(item.usedTimeDuration) + "\n");
-        message.append(TAB + TAB + "Possessor: " + item.possessor + "\n\n");
+        message.append(TAB + TAB + "NetType: " + std::to_string(item.netlogotype.netType) + "\n" + TAB + TAB +
+                       "simId: " + item.netlogotype.simId + "\n" + TAB + TAB + "Ident: " + item.netlogotype.ident + "\n");
+        message.append(TAB + TAB + "PeriodStartTime: " + std::to_string(item.quotapolicy.periodStartTime) + "\n");
+        message.append(TAB + TAB + "PeriodDuration: " + item.quotapolicy.periodDuration + "\n");
+        message.append(TAB + TAB + "Title: " + item.quotapolicy.title + "\n" + TAB + TAB + "Summary: " + item.quotapolicy.summary + "\n");
+        message.append(TAB + TAB + "quotapolicy.warningBytes: " + std::to_string(item.quotapolicy.warningBytes) + "\n");
+        message.append(TAB + TAB + "quotapolicy.limitBytes: " + std::to_string(item.quotapolicy.limitBytes) + "\n");
+        message.append(TAB + TAB + "quotapolicy.lastWarningRemind: " + std::to_string(item.quotapolicy.lastWarningRemind) + "\n");
+        message.append(TAB + TAB + "quotapolicy.lastLimitRemind: " + std::to_string(item.quotapolicy.lastLimitRemind) + "\n");
+        message.append(TAB + TAB + "Metered: " + std::to_string(item.quotapolicy.metered) + "\n" + TAB + TAB +
+                       "Ident: " + item.netlogotype.ident + "\n");
+        message.append(TAB + TAB + "quotapolicy.limitAction: " + std::to_string(item.quotapolicy.limitAction) + "\n" + TAB + TAB +
+                       "UsedBytes: " + std::to_string(item.quotapolicy.usedBytes) + "\n");
+        message.append(TAB + TAB + "UsedTimeDuration: " + std::to_string(item.quotapolicy.usedTimeDuration) + "\n");
+        message.append(TAB + TAB + "Possessor: " + item.quotapolicy.possessor + "\n\n");
     });
 }
 } // namespace NetManagerStandard

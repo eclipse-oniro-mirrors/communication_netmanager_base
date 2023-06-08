@@ -157,7 +157,7 @@ int32_t NetPolicyCallbackProxy::NetQuotaPolicyChange(const std::vector<NetQuotaP
     return ret;
 }
 
-int32_t NetPolicyCallbackProxy::NetStrategySwitch(const std::string &iccid, bool enable)
+int32_t NetPolicyCallbackProxy::NetStrategySwitch(const std::string &simId, bool enable)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -165,7 +165,7 @@ int32_t NetPolicyCallbackProxy::NetStrategySwitch(const std::string &iccid, bool
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
-    if (!data.WriteString(iccid)) {
+    if (!data.WriteString(simId)) {
         NETMGR_LOG_E("WriteString String data failed");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }

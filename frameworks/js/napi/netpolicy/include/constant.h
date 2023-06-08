@@ -28,7 +28,7 @@ constexpr const char *EVENT_POLICY_STRATEGY_SWITCH = "netStrategySwitch";
 constexpr const char *KEY_POLICY = "policy";
 constexpr const char *KEY_UID = "uid";
 constexpr const char *KEY_RULE = "rule";
-constexpr const char *KEY_ICCID = "iccid";
+constexpr const char *KEY_ICCID = "simId";
 constexpr const char *KEY_ENABLE = "enable";
 
 constexpr int ARRAY_LIMIT = 64;

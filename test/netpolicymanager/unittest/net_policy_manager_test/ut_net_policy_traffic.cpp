@@ -72,26 +72,26 @@ void UtNetPolicyTraffic::TearDownTestCase()
 void UtNetPolicyTraffic::SetUp()
 {
     NetQuotaPolicy quotaPolicy1;
-    quotaPolicy1.iccid = ICCID_1;
-    quotaPolicy1.periodDuration = "M1";
-    quotaPolicy1.netType = NetBearType::BEARER_CELLULAR;
-    quotaPolicy1.warningBytes = TEST_WARNING_BYTES_1;
-    quotaPolicy1.limitBytes = TEST_LIMIT_BYTES_1;
-    quotaPolicy1.lastWarningRemind = TEST_LAST_WARNING_REMIND_1;
-    quotaPolicy1.lastLimitRemind = TEST_LAST_LIMIT_REMIND_1;
-    quotaPolicy1.metered = true;
-    quotaPolicy1.limitAction = LimitAction::LIMIT_ACTION_AUTO_BILL;
+    quotaPolicy1.netlogotype.simId = ICCID_1;
+    quotaPolicy1.quotapolicy.periodDuration = "M1";
+    quotaPolicy1.netlogotype.netType = NetBearType::BEARER_CELLULAR;
+    quotaPolicy1.quotapolicy.warningBytes = TEST_WARNING_BYTES_1;
+    quotaPolicy1.quotapolicy.limitBytes = TEST_LIMIT_BYTES_1;
+    quotaPolicy1.quotapolicy.lastWarningRemind = TEST_LAST_WARNING_REMIND_1;
+    quotaPolicy1.quotapolicy.lastLimitRemind = TEST_LAST_LIMIT_REMIND_1;
+    quotaPolicy1.quotapolicy.metered = true;
+    quotaPolicy1.quotapolicy.limitAction = LimitAction::LIMIT_ACTION_AUTO_BILL;
 
     NetQuotaPolicy quotaPolicy2;
-    quotaPolicy2.iccid = ICCID_2;
-    quotaPolicy2.periodDuration = "Y1";
-    quotaPolicy2.netType = NetBearType::BEARER_CELLULAR;
-    quotaPolicy2.warningBytes = TEST_WARNING_BYTES_2;
-    quotaPolicy2.limitBytes = TEST_LIMIT_BYTES_2;
-    quotaPolicy2.lastWarningRemind = TEST_LAST_WARNING_REMIND_2;
-    quotaPolicy2.lastLimitRemind = TEST_LAST_LIMIT_REMIND_2;
-    quotaPolicy2.metered = true;
-    quotaPolicy2.limitAction = LimitAction::LIMIT_ACTION_DISABLE;
+    quotaPolicy2.netlogotype.simId = ICCID_2;
+    quotaPolicy2.quotapolicy.periodDuration = "Y1";
+    quotaPolicy2.netlogotype.netType = NetBearType::BEARER_CELLULAR;
+    quotaPolicy2.quotapolicy.warningBytes = TEST_WARNING_BYTES_2;
+    quotaPolicy2.quotapolicy.limitBytes = TEST_LIMIT_BYTES_2;
+    quotaPolicy2.quotapolicy.lastWarningRemind = TEST_LAST_WARNING_REMIND_2;
+    quotaPolicy2.quotapolicy.lastLimitRemind = TEST_LAST_LIMIT_REMIND_2;
+    quotaPolicy2.quotapolicy.metered = true;
+    quotaPolicy2.quotapolicy.limitAction = LimitAction::LIMIT_ACTION_DISABLE;
 
     std::vector<NetQuotaPolicy> quotaPolicies;
     quotaPolicies.push_back(quotaPolicy1);
@@ -113,24 +113,24 @@ void UtNetPolicyTraffic::TearDown()
 HWTEST_F(UtNetPolicyTraffic, UpdateQuotaPolicies001, TestSize.Level1)
 {
     NetQuotaPolicy quotaPolicy1;
-    quotaPolicy1.netType = NetBearType::BEARER_CELLULAR;
-    quotaPolicy1.iccid = ICCID_1;
-    quotaPolicy1.periodDuration = "M1";
-    quotaPolicy1.warningBytes = TEST_WARNING_BYTES_3;
-    quotaPolicy1.limitBytes = TEST_LIMIT_BYTES_3;
-    quotaPolicy1.lastLimitRemind = -1;
-    quotaPolicy1.metered = 0;
-    quotaPolicy1.source = 0;
+    quotaPolicy1.netlogotype.netType = NetBearType::BEARER_CELLULAR;
+    quotaPolicy1.netlogotype.simId = ICCID_1;
+    quotaPolicy1.quotapolicy.periodDuration = "M1";
+    quotaPolicy1.quotapolicy.warningBytes = TEST_WARNING_BYTES_3;
+    quotaPolicy1.quotapolicy.limitBytes = TEST_LIMIT_BYTES_3;
+    quotaPolicy1.quotapolicy.lastLimitRemind = -1;
+    quotaPolicy1.quotapolicy.metered = 0;
+    quotaPolicy1.quotapolicy.source = 0;
 
     NetQuotaPolicy quotaPolicy2;
-    quotaPolicy2.netType = NetBearType::BEARER_CELLULAR;
-    quotaPolicy2.iccid = ICCID_2;
-    quotaPolicy2.periodDuration = "Y1";
-    quotaPolicy2.warningBytes = TEST_WARNING_BYTES_3;
-    quotaPolicy2.limitBytes = TEST_LIMIT_BYTES_3;
-    quotaPolicy2.lastLimitRemind = -1;
-    quotaPolicy2.metered = 0;
-    quotaPolicy2.source = 0;
+    quotaPolicy2.netlogotype.netType = NetBearType::BEARER_CELLULAR;
+    quotaPolicy2.netlogotype.simId = ICCID_2;
+    quotaPolicy2.quotapolicy.periodDuration = "Y1";
+    quotaPolicy2.quotapolicy.warningBytes = TEST_WARNING_BYTES_3;
+    quotaPolicy2.quotapolicy.limitBytes = TEST_LIMIT_BYTES_3;
+    quotaPolicy2.quotapolicy.lastLimitRemind = -1;
+    quotaPolicy2.quotapolicy.metered = 0;
+    quotaPolicy2.quotapolicy.source = 0;
     std::vector<NetQuotaPolicy> quotaPolicies;
     quotaPolicies.push_back(quotaPolicy1);
     quotaPolicies.push_back(quotaPolicy2);
@@ -165,12 +165,12 @@ HWTEST_F(UtNetPolicyTraffic, UpdateRemindPolicy001, TestSize.Level1)
     result = g_netPolicyTraffic->GetNetQuotaPolicies(quotaPolicies);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
     for (auto &quotaPolicy : quotaPolicies) {
-        if (quotaPolicy.netType == NetBearType::BEARER_CELLULAR && quotaPolicy.iccid == ICCID_1) {
-            if (quotaPolicy.lastLimitRemind < 0) {
+        if (quotaPolicy.netlogotype.netType == NetBearType::BEARER_CELLULAR && quotaPolicy.netlogotype.simId == ICCID_1) {
+            if (quotaPolicy.quotapolicy.lastLimitRemind < 0) {
                 break;
             }
             auto now = time(nullptr);
-            ASSERT_LT(now - quotaPolicy.lastLimitRemind, 100);
+            ASSERT_LT(now - quotaPolicy.quotapolicy.lastLimitRemind, 100);
             return;
         }
     }
@@ -191,12 +191,12 @@ HWTEST_F(UtNetPolicyTraffic, UpdateRemindPolicy002, TestSize.Level1)
     result = g_netPolicyTraffic->GetNetQuotaPolicies(quotaPolicies);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
     for (auto &quotaPolicy : quotaPolicies) {
-        if (quotaPolicy.netType == NetBearType::BEARER_CELLULAR && quotaPolicy.iccid == ICCID_2) {
-            if (quotaPolicy.lastWarningRemind < 0) {
+        if (quotaPolicy.netlogotype.netType == NetBearType::BEARER_CELLULAR && quotaPolicy.netlogotype.simId == ICCID_2) {
+            if (quotaPolicy.quotapolicy.lastWarningRemind < 0) {
                 break;
             }
             auto now = time(nullptr);
-            ASSERT_LT(now - quotaPolicy.lastWarningRemind, 100);
+            ASSERT_LT(now - quotaPolicy.quotapolicy.lastWarningRemind, 100);
             return;
         }
     }
@@ -217,12 +217,12 @@ HWTEST_F(UtNetPolicyTraffic, UpdateRemindPolicy003, TestSize.Level1)
     result = g_netPolicyTraffic->GetNetQuotaPolicies(quotaPolicies);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
     for (auto &quotaPolicy : quotaPolicies) {
-        if (quotaPolicy.netType == NetBearType::BEARER_CELLULAR && quotaPolicy.iccid == ICCID_2) {
-            if (quotaPolicy.lastWarningRemind < 0) {
+        if (quotaPolicy.netlogotype.netType == NetBearType::BEARER_CELLULAR && quotaPolicy.netlogotype.simId == ICCID_2) {
+            if (quotaPolicy.quotapolicy.lastWarningRemind < 0) {
                 break;
             }
             auto now = time(nullptr);
-            ASSERT_GT(now - quotaPolicy.lastWarningRemind, 100);
+            ASSERT_GT(now - quotaPolicy.quotapolicy.lastWarningRemind, 100);
             return;
         }
     }
@@ -257,10 +257,10 @@ HWTEST_F(UtNetPolicyTraffic, ResetPolicies001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     g_netPolicyTraffic->GetNetQuotaPolicies(quotaPolicies);
     for (auto quotaPolicy : quotaPolicies) {
-        if (quotaPolicy.iccid == ICCID_1) {
-            if (quotaPolicy.periodDuration == "M1" && quotaPolicy.warningBytes == DATA_USAGE_UNKNOWN &&
-                quotaPolicy.limitBytes == DATA_USAGE_UNKNOWN && quotaPolicy.lastWarningRemind == REMIND_NEVER &&
-                quotaPolicy.lastLimitRemind == REMIND_NEVER && !quotaPolicy.metered) {
+        if (quotaPolicy.netlogotype.simId == ICCID_1) {
+            if (quotaPolicy.quotapolicy.periodDuration == "M1" && quotaPolicy.quotapolicy.warningBytes == DATA_USAGE_UNKNOWN &&
+                quotaPolicy.quotapolicy.limitBytes == DATA_USAGE_UNKNOWN && quotaPolicy.quotapolicy.lastWarningRemind == REMIND_NEVER &&
+                quotaPolicy.quotapolicy.lastLimitRemind == REMIND_NEVER && !quotaPolicy.quotapolicy.metered) {
                 SUCCEED();
                 return;
             }
@@ -320,18 +320,18 @@ HWTEST_F(UtNetPolicyTraffic, UpdateNetEnableStatus001, TestSize.Level1)
 {
     // Test NetPolicyTraffic UpdateNetEnableStatus
     NetQuotaPolicy quotaPolicy;
-    quotaPolicy.metered = true;
+    quotaPolicy.quotapolicy.metered = true;
     g_netPolicyTraffic->UpdateNetEnableStatus(quotaPolicy);
 
-    quotaPolicy.metered = false;
-    quotaPolicy.limitAction = LIMIT_ACTION_DISABLE;
+    quotaPolicy.quotapolicy.metered = false;
+    quotaPolicy.quotapolicy.limitAction = LIMIT_ACTION_DISABLE;
     g_netPolicyTraffic->UpdateNetEnableStatus(quotaPolicy);
 
-    quotaPolicy.limitAction = LIMIT_ACTION_NONE;
+    quotaPolicy.quotapolicy.limitAction = LIMIT_ACTION_NONE;
     g_netPolicyTraffic->UpdateNetEnableStatus(quotaPolicy);
 
     // Test NetPolicyTraffic IsValidQuotaPolicy
-    quotaPolicy.netType = NetBearType::BEARER_DEFAULT;
+    quotaPolicy.netlogotype.netType = NetBearType::BEARER_DEFAULT;
     auto ret = g_netPolicyTraffic->IsValidQuotaPolicy(quotaPolicy);
     EXPECT_FALSE(ret);
 }
@@ -345,23 +345,23 @@ HWTEST_F(UtNetPolicyTraffic, FormalizeQuotaPolicies001, TestSize.Level1)
 {
     std::vector<NetQuotaPolicy> quotaPolicies;
     NetQuotaPolicy quotaPolicy;
-    quotaPolicy.metered = false;
-    quotaPolicy.limitAction = LIMIT_ACTION_NONE;
-    quotaPolicy.limitBytes = DATA_USAGE_UNKNOWN;
-    quotaPolicy.netType = NetBearType::BEARER_DEFAULT;
-    quotaPolicy.periodDuration = "ff";
+    quotaPolicy.quotapolicy.metered = false;
+    quotaPolicy.quotapolicy.limitAction = LIMIT_ACTION_NONE;
+    quotaPolicy.quotapolicy.limitBytes = DATA_USAGE_UNKNOWN;
+    quotaPolicy.netlogotype.netType = NetBearType::BEARER_DEFAULT;
+    quotaPolicy.quotapolicy.periodDuration = "ff";
     quotaPolicies.push_back(quotaPolicy);
-    quotaPolicy.netType = NetBearType::BEARER_CELLULAR;
-    quotaPolicy.periodDuration = "";
+    quotaPolicy.netlogotype.netType = NetBearType::BEARER_CELLULAR;
+    quotaPolicy.quotapolicy.periodDuration = "";
     quotaPolicies.push_back(quotaPolicy);
-    quotaPolicy.periodDuration = "testPeriodDuration";
+    quotaPolicy.quotapolicy.periodDuration = "testPeriodDuration";
     quotaPolicies.push_back(quotaPolicy);
-    quotaPolicy.periodDuration = "M1";
+    quotaPolicy.quotapolicy.periodDuration = "M1";
     quotaPolicies.push_back(quotaPolicy);
-    quotaPolicy.netType = NetBearType::BEARER_WIFI;
+    quotaPolicy.netlogotype.netType = NetBearType::BEARER_WIFI;
     quotaPolicies.push_back(quotaPolicy);
-    quotaPolicy.limitBytes = DATA_USAGE_UNLIMITED;
-    quotaPolicy.warningBytes = DATA_USAGE_UNLIMITED;
+    quotaPolicy.quotapolicy.limitBytes = DATA_USAGE_UNLIMITED;
+    quotaPolicy.quotapolicy.warningBytes = DATA_USAGE_UNLIMITED;
     quotaPolicies.push_back(quotaPolicy);
     g_netPolicyTraffic->FormalizeQuotaPolicies(quotaPolicies);
 
@@ -378,8 +378,8 @@ HWTEST_F(UtNetPolicyTraffic, FormalizeQuotaPolicies001, TestSize.Level1)
 HWTEST_F(UtNetPolicyTraffic, IsValidQuotaPolicy002, TestSize.Level1)
 {
     NetQuotaPolicy quotaPolicy;
-    quotaPolicy.netType = NetBearType::BEARER_BLUETOOTH;
-    quotaPolicy.periodDuration = "";
+    quotaPolicy.netlogotype.netType = NetBearType::BEARER_BLUETOOTH;
+    quotaPolicy.quotapolicy.periodDuration = "";
     auto ret = g_netPolicyTraffic->IsValidQuotaPolicy(quotaPolicy);
     EXPECT_FALSE(ret);
 }
@@ -392,8 +392,8 @@ HWTEST_F(UtNetPolicyTraffic, IsValidQuotaPolicy002, TestSize.Level1)
 HWTEST_F(UtNetPolicyTraffic, IsValidQuotaPolicy003, TestSize.Level1)
 {
     NetQuotaPolicy quotaPolicy;
-    quotaPolicy.netType = NetBearType::BEARER_BLUETOOTH;
-    quotaPolicy.periodDuration = "M1";
+    quotaPolicy.netlogotype.netType = NetBearType::BEARER_BLUETOOTH;
+    quotaPolicy.quotapolicy.periodDuration = "M1";
     auto ret = g_netPolicyTraffic->IsValidQuotaPolicy(quotaPolicy);
     EXPECT_TRUE(ret);
 }
@@ -407,8 +407,8 @@ HWTEST_F(UtNetPolicyTraffic, GetTotalQuota001, TestSize.Level1)
 {
     // Test NetPolicyTraffic SetNetworkEnableStatus
     NetQuotaPolicy quotaPolicy;
-    quotaPolicy.netType = NetBearType::BEARER_BLUETOOTH;
-    quotaPolicy.periodDuration = "M1";
+    quotaPolicy.netlogotype.netType = NetBearType::BEARER_BLUETOOTH;
+    quotaPolicy.quotapolicy.periodDuration = "M1";
     g_netPolicyTraffic->SetNetworkEnableStatus(quotaPolicy, true);
 
     // Test NetPolicyTraffic NotifyQuotaWarning
@@ -449,7 +449,7 @@ HWTEST_F(UtNetPolicyTraffic, WriteQuotaPolicies001, TestSize.Level1)
 HWTEST_F(UtNetPolicyTraffic, GetMatchIfaces001, TestSize.Level1)
 {
     NetQuotaPolicy quotaPolicy;
-    quotaPolicy.netType = NetBearType::BEARER_ETHERNET;
+    quotaPolicy.netlogotype.netType = NetBearType::BEARER_ETHERNET;
     auto ret = g_netPolicyTraffic->GetMatchIfaces(quotaPolicy);
     EXPECT_TRUE(ret.empty());
 }
@@ -462,7 +462,7 @@ HWTEST_F(UtNetPolicyTraffic, GetMatchIfaces001, TestSize.Level1)
 HWTEST_F(UtNetPolicyTraffic, GetMatchIfaces002, TestSize.Level1)
 {
     NetQuotaPolicy quotaPolicy;
-    quotaPolicy.netType = NetBearType::BEARER_CELLULAR;
+    quotaPolicy.netlogotype.netType = NetBearType::BEARER_CELLULAR;
     auto ret = g_netPolicyTraffic->GetMatchIfaces(quotaPolicy);
     EXPECT_TRUE(ret.empty());
 }
@@ -475,7 +475,7 @@ HWTEST_F(UtNetPolicyTraffic, GetMatchIfaces002, TestSize.Level1)
 HWTEST_F(UtNetPolicyTraffic, GetMatchIfaces003, TestSize.Level1)
 {
     NetQuotaPolicy quotaPolicy;
-    quotaPolicy.netType = NetBearType::BEARER_WIFI;
+    quotaPolicy.netlogotype.netType = NetBearType::BEARER_WIFI;
     auto ret = g_netPolicyTraffic->GetMatchIfaces(quotaPolicy);
     EXPECT_TRUE(ret.empty());
 }

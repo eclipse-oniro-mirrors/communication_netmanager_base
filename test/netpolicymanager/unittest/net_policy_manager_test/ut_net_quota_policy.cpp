@@ -25,9 +25,9 @@ using namespace testing::ext;
 NetQuotaPolicy GetQuota()
 {
     NetQuotaPolicy policy;
-    policy.iccid = "testIccid";
-    policy.ident = "testIdent";
-    policy.title = "testTitle";
+    policy.netlogotype.simId = "testIccid";
+    policy.netlogotype.ident = "testIdent";
+    policy.quotapolicy.title = "testTitle";
     return policy;
 }
 } // namespace
@@ -55,20 +55,20 @@ void UtNetQuotaPolicy::TearDown() {}
 HWTEST_F(UtNetQuotaPolicy, GetPeriodStart001, TestSize.Level1)
 {
     NetQuotaPolicy netQuotaPolicy1;
-    netQuotaPolicy1.iccid = ICCID_1;
-    netQuotaPolicy1.periodDuration = "M1";
+    netQuotaPolicy1.netlogotype.simId = ICCID_1;
+    netQuotaPolicy1.quotapolicy.periodDuration = "M1";
     auto result = netQuotaPolicy1.GetPeriodStart();
     std::cout << "result1:" << result << std::endl;
 
     NetQuotaPolicy netQuotaPolicy2;
-    netQuotaPolicy2.iccid = ICCID_1;
-    netQuotaPolicy2.periodDuration = "Y1";
+    netQuotaPolicy2.netlogotype.simId = ICCID_1;
+    netQuotaPolicy2.quotapolicy.periodDuration = "Y1";
     auto result2 = netQuotaPolicy2.GetPeriodStart();
     std::cout << "result2:" << result2 << std::endl;
 
     NetQuotaPolicy netQuotaPolicy3;
-    netQuotaPolicy3.iccid = ICCID_1;
-    netQuotaPolicy3.periodDuration = "D1";
+    netQuotaPolicy3.netlogotype.simId = ICCID_1;
+    netQuotaPolicy3.quotapolicy.periodDuration = "D1";
     auto result3 = netQuotaPolicy3.GetPeriodStart();
     std::cout << "result3:" << result3 << std::endl;
 
@@ -91,8 +91,8 @@ HWTEST_F(UtNetQuotaPolicy, Marshalling001, TestSize.Level1)
     NetQuotaPolicy recv1;
     ret = NetQuotaPolicy::Unmarshalling(parcel, recv1);
     ASSERT_TRUE(ret);
-    EXPECT_EQ(recv1.iccid, netQuotaPolicy.iccid);
-    EXPECT_EQ(recv1.ident, netQuotaPolicy.ident);
+    EXPECT_EQ(recv1.netlogotype.simId, netQuotaPolicy.netlogotype.simId);
+    EXPECT_EQ(recv1.netlogotype.ident, netQuotaPolicy.netlogotype.ident);
 }
 
 /**
@@ -110,8 +110,8 @@ HWTEST_F(UtNetQuotaPolicy, Marshalling002, TestSize.Level1)
     NetQuotaPolicy recv;
     ret = NetQuotaPolicy::Unmarshalling(parcel, recv);
     ASSERT_TRUE(ret);
-    EXPECT_EQ(recv.iccid, data.iccid);
-    EXPECT_EQ(recv.ident, data.ident);
+    EXPECT_EQ(recv.netlogotype.simId, data.netlogotype.simId);
+    EXPECT_EQ(recv.netlogotype.ident, data.netlogotype.ident);
 }
 
 /**
@@ -133,8 +133,8 @@ HWTEST_F(UtNetQuotaPolicy, Marshalling003, TestSize.Level1)
     ret = NetQuotaPolicy::Unmarshalling(parcel, recv);
     ASSERT_TRUE(ret);
     std::for_each(recv.begin(), recv.end(), [this](const auto &cv) {
-        EXPECT_EQ(cv.iccid, GetQuota().iccid);
-        EXPECT_EQ(cv.ident, GetQuota().ident);
+        EXPECT_EQ(cv.netlogotype.simId, GetQuota().netlogotype.simId);
+        EXPECT_EQ(cv.netlogotype.ident, GetQuota().netlogotype.ident);
     });
 }
 } // namespace NetManagerStandard

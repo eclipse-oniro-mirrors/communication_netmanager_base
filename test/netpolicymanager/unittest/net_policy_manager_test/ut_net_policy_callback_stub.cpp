@@ -47,7 +47,7 @@ public:
         return 0;
     }
 
-    int32_t NetStrategySwitch(const std::string &iccid, bool enable) override
+    int32_t NetStrategySwitch(const std::string &simId, bool enable) override
     {
         return 0;
     }
@@ -141,9 +141,9 @@ HWTEST_F(UtNetPolicyCallbackStubTest, OnNetQuotaPolicyChangeTest001, TestSize.Le
 {
     std::vector<NetQuotaPolicy> cellularPolicies;
     NetQuotaPolicy policy;
-    policy.iccid = "testIccid";
-    policy.ident = "testIdent";
-    policy.title = "testTitle";
+    policy.netlogotype.simId = "testIccid";
+    policy.netlogotype.ident = "testIdent";
+    policy.quotapolicy.title = "testTitle";
     cellularPolicies.push_back(policy);
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetPolicyCallbackStub::GetDescriptor())) {

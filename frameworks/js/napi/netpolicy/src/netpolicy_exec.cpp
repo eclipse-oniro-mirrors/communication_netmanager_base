@@ -266,19 +266,33 @@ napi_value NetPolicyExec::GetNetQuotaPoliciesCallback(GetNetQuotaPoliciesContext
     return callbackValue;
 }
 
+void NetPolicyExec::FillNetLogoType(napi_env env, napi_value elementObject, const NetQuotaPolicy &netQuotaPolicy)
+{
+    napi_value netLogoType =  NapiUtils::CreateObject(env);
+    NapiUtils::SetInt32Property(env, netLogoType, "netType", netQuotaPolicy.netlogotype.netType);
+    NapiUtils::SetStringPropertyUtf8(env, netLogoType, "simId", netQuotaPolicy.netlogotype.simId);
+    NapiUtils::SetStringPropertyUtf8(env, netLogoType, "ident", netQuotaPolicy.netlogotype.ident);
+    NapiUtils::SetNamedProperty(env, elementObject, "netLogoType", netLogoType);
+}
+
+void NetPolicyExec::FillQuotaPolicy(napi_env env, napi_value elementObject, const NetQuotaPolicy &netQuotaPolicy)
+{
+    napi_value quotaPolicy =  NapiUtils::CreateObject(env);
+    NapiUtils::SetStringPropertyUtf8(env, quotaPolicy, "periodDuration", netQuotaPolicy.quotapolicy.periodDuration);
+    NapiUtils::SetInt64Property(env, quotaPolicy, "warningBytes", netQuotaPolicy.quotapolicy.warningBytes);
+    NapiUtils::SetInt64Property(env, quotaPolicy, "limitBytes", netQuotaPolicy.quotapolicy.limitBytes);
+    NapiUtils::SetInt64Property(env, quotaPolicy, "lastWarningRemind", netQuotaPolicy.quotapolicy.lastWarningRemind);
+    NapiUtils::SetInt64Property(env, quotaPolicy, "lastLimitRemind", netQuotaPolicy.quotapolicy.lastLimitRemind);
+    NapiUtils::SetBooleanProperty(env, quotaPolicy, "metered", netQuotaPolicy.quotapolicy.metered);
+    NapiUtils::SetInt32Property(env, quotaPolicy, "limitAction", netQuotaPolicy.quotapolicy.limitAction);
+    NapiUtils::SetNamedProperty(env, elementObject, "quotaPolicy", quotaPolicy);
+}
+
 napi_value NetPolicyExec::CreateNetQuotaPolicy(napi_env env, const NetQuotaPolicy &item)
 {
     napi_value elementObject = NapiUtils::CreateObject(env);
-    NapiUtils::SetInt32Property(env, elementObject, "netType", item.netType);
-    NapiUtils::SetStringPropertyUtf8(env, elementObject, "iccid", item.iccid);
-    NapiUtils::SetStringPropertyUtf8(env, elementObject, "ident", item.ident);
-    NapiUtils::SetStringPropertyUtf8(env, elementObject, "periodDuration", item.periodDuration);
-    NapiUtils::SetInt64Property(env, elementObject, "warningBytes", item.warningBytes);
-    NapiUtils::SetInt64Property(env, elementObject, "limitBytes", item.limitBytes);
-    NapiUtils::SetInt64Property(env, elementObject, "lastWarningRemind", item.lastWarningRemind);
-    NapiUtils::SetInt64Property(env, elementObject, "lastLimitRemind", item.lastLimitRemind);
-    NapiUtils::SetBooleanProperty(env, elementObject, "metered", item.metered);
-    NapiUtils::SetInt32Property(env, elementObject, "limitAction", item.limitAction);
+    FillNetLogoType(env, elementObject, item);
+    FillQuotaPolicy(env, elementObject, item);
     return elementObject;
 }
 

@@ -28,34 +28,34 @@ static constexpr uint32_t MAX_POLICY_SIZE = 100;
 
 bool NetQuotaPolicy::Marshalling(Parcel &parcel) const
 {
-    if (!parcel.WriteInt32(netType)) {
+    if (!parcel.WriteInt32(netlogotype.netType)) {
         return false;
     }
-    if (!parcel.WriteString(iccid)) {
+    if (!parcel.WriteString(netlogotype.simId)) {
         return false;
     }
-    if (!parcel.WriteInt64(periodStartTime)) {
+    if (!parcel.WriteInt64(quotapolicy.periodStartTime)) {
         return false;
     }
-    if (!parcel.WriteString(periodDuration)) {
+    if (!parcel.WriteString(quotapolicy.periodDuration)) {
         return false;
     }
-    if (!parcel.WriteInt64(warningBytes)) {
+    if (!parcel.WriteInt64(quotapolicy.warningBytes)) {
         return false;
     }
-    if (!parcel.WriteInt64(limitBytes)) {
+    if (!parcel.WriteInt64(quotapolicy.limitBytes)) {
         return false;
     }
-    if (!parcel.WriteInt64(lastLimitRemind)) {
+    if (!parcel.WriteInt64(quotapolicy.lastLimitRemind)) {
         return false;
     }
-    if (!parcel.WriteBool(metered)) {
+    if (!parcel.WriteBool(quotapolicy.metered)) {
         return false;
     }
-    if (!parcel.WriteInt32(source)) {
+    if (!parcel.WriteInt32(quotapolicy.source)) {
         return false;
     }
-    if (!parcel.WriteString(ident)) {
+    if (!parcel.WriteString(netlogotype.ident)) {
         return false;
     }
 
@@ -84,34 +84,34 @@ bool NetQuotaPolicy::Marshalling(Parcel &parcel, const std::vector<NetQuotaPolic
 
 bool NetQuotaPolicy::Unmarshalling(Parcel &parcel, NetQuotaPolicy &quotaPolicy)
 {
-    if (!parcel.ReadInt32(quotaPolicy.netType)) {
+    if (!parcel.ReadInt32(quotaPolicy.netlogotype.netType)) {
         return false;
     }
-    if (!parcel.ReadString(quotaPolicy.iccid)) {
+    if (!parcel.ReadString(quotaPolicy.netlogotype.simId)) {
         return false;
     }
-    if (!parcel.ReadInt64(quotaPolicy.periodStartTime)) {
+    if (!parcel.ReadInt64(quotaPolicy.quotapolicy.periodStartTime)) {
         return false;
     }
-    if (!parcel.ReadString(quotaPolicy.periodDuration)) {
+    if (!parcel.ReadString(quotaPolicy.quotapolicy.periodDuration)) {
         return false;
     }
-    if (!parcel.ReadInt64(quotaPolicy.warningBytes)) {
+    if (!parcel.ReadInt64(quotaPolicy.quotapolicy.warningBytes)) {
         return false;
     }
-    if (!parcel.ReadInt64(quotaPolicy.limitBytes)) {
+    if (!parcel.ReadInt64(quotaPolicy.quotapolicy.limitBytes)) {
         return false;
     }
-    if (!parcel.ReadInt64(quotaPolicy.lastLimitRemind)) {
+    if (!parcel.ReadInt64(quotaPolicy.quotapolicy.lastLimitRemind)) {
         return false;
     }
-    if (!parcel.ReadBool(quotaPolicy.metered)) {
+    if (!parcel.ReadBool(quotaPolicy.quotapolicy.metered)) {
         return false;
     }
-    if (!parcel.ReadInt32(quotaPolicy.source)) {
+    if (!parcel.ReadInt32(quotaPolicy.quotapolicy.source)) {
         return false;
     }
-    if (!parcel.ReadString(quotaPolicy.ident)) {
+    if (!parcel.ReadString(quotaPolicy.netlogotype.ident)) {
         return false;
     }
 
@@ -128,34 +128,34 @@ bool NetQuotaPolicy::Unmarshalling(Parcel &parcel, std::vector<NetQuotaPolicy> &
 
     NetQuotaPolicy quotaPolicyTmp;
     for (uint32_t i = 0; i < vSize; i++) {
-        if (!parcel.ReadInt32(quotaPolicyTmp.netType)) {
+        if (!parcel.ReadInt32(quotaPolicyTmp.netlogotype.netType)) {
             return false;
         }
-        if (!parcel.ReadString(quotaPolicyTmp.iccid)) {
+        if (!parcel.ReadString(quotaPolicyTmp.netlogotype.simId)) {
             return false;
         }
-        if (!parcel.ReadInt64(quotaPolicyTmp.periodStartTime)) {
+        if (!parcel.ReadInt64(quotaPolicyTmp.quotapolicy.periodStartTime)) {
             return false;
         }
-        if (!parcel.ReadString(quotaPolicyTmp.periodDuration)) {
+        if (!parcel.ReadString(quotaPolicyTmp.quotapolicy.periodDuration)) {
             return false;
         }
-        if (!parcel.ReadInt64(quotaPolicyTmp.warningBytes)) {
+        if (!parcel.ReadInt64(quotaPolicyTmp.quotapolicy.warningBytes)) {
             return false;
         }
-        if (!parcel.ReadInt64(quotaPolicyTmp.limitBytes)) {
+        if (!parcel.ReadInt64(quotaPolicyTmp.quotapolicy.limitBytes)) {
             return false;
         }
-        if (!parcel.ReadInt64(quotaPolicyTmp.lastLimitRemind)) {
+        if (!parcel.ReadInt64(quotaPolicyTmp.quotapolicy.lastLimitRemind)) {
             return false;
         }
-        if (!parcel.ReadBool(quotaPolicyTmp.metered)) {
+        if (!parcel.ReadBool(quotaPolicyTmp.quotapolicy.metered)) {
             return false;
         }
-        if (!parcel.ReadInt32(quotaPolicyTmp.source)) {
+        if (!parcel.ReadInt32(quotaPolicyTmp.quotapolicy.source)) {
             return false;
         }
-        if (!parcel.ReadString(quotaPolicyTmp.ident)) {
+        if (!parcel.ReadString(quotaPolicyTmp.netlogotype.ident)) {
             return false;
         }
         quotaPolicies.push_back(quotaPolicyTmp);
@@ -166,25 +166,25 @@ bool NetQuotaPolicy::Unmarshalling(Parcel &parcel, std::vector<NetQuotaPolicy> &
 
 bool NetQuotaPolicy::IsOverWarning(int64_t totalQuota) const
 {
-    return totalQuota > warningBytes;
+    return totalQuota > quotapolicy.warningBytes;
 }
 
 bool NetQuotaPolicy::IsOverLimit(int64_t totalQuota) const
 {
-    return totalQuota > limitBytes;
+    return totalQuota > quotapolicy.limitBytes;
 }
 
 int64_t NetQuotaPolicy::GetPeriodStart()
 {
-    if (periodDuration.size() < PERIOD_DURATION_SIZE) {
-        periodDuration = PERIOD_MONTH;
+    if (quotapolicy.periodDuration.size() < PERIOD_DURATION_SIZE) {
+        quotapolicy.periodDuration = PERIOD_MONTH;
     }
     time_t timeNow;
     time(&timeNow);
     struct tm tm;
     localtime_r(&timeNow, &tm);
-    std::string cycle = periodDuration.substr(0, 1);
-    int32_t start = CommonUtils::StrToInt(periodDuration.substr(1, periodDuration.size()));
+    std::string cycle = quotapolicy.periodDuration.substr(0, 1);
+    int32_t start = CommonUtils::StrToInt(quotapolicy.periodDuration.substr(1, quotapolicy.periodDuration.size()));
 
     if (cycle == PERIOD_DAY) {
         tm.tm_hour = start;
@@ -207,13 +207,13 @@ int64_t NetQuotaPolicy::GetPeriodStart()
 
 void NetQuotaPolicy::Reset()
 {
-    periodDuration = PERIOD_MONTH + std::to_string(PERIOD_START);
-    warningBytes = DATA_USAGE_UNKNOWN;
-    limitBytes = DATA_USAGE_UNKNOWN;
-    lastWarningRemind = REMIND_NEVER;
-    lastLimitRemind = REMIND_NEVER;
-    metered = false;
-    limitAction = LimitAction::LIMIT_ACTION_NONE;
+    quotapolicy.periodDuration = PERIOD_MONTH + std::to_string(PERIOD_START);
+    quotapolicy.warningBytes = DATA_USAGE_UNKNOWN;
+    quotapolicy.limitBytes = DATA_USAGE_UNKNOWN;
+    quotapolicy.lastWarningRemind = REMIND_NEVER;
+    quotapolicy.lastLimitRemind = REMIND_NEVER;
+    quotapolicy.metered = false;
+    quotapolicy.limitAction = LimitAction::LIMIT_ACTION_NONE;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -35,7 +35,7 @@ public:
     int32_t NetUidPolicyChange(uint32_t uid, uint32_t policy) override;
     int32_t NetUidRuleChange(uint32_t uid, uint32_t rule) override;
     int32_t NetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies) override;
-    int32_t NetStrategySwitch(const std::string &iccid, bool enable) override;
+    int32_t NetStrategySwitch(const std::string &simId, bool enable) override;
     int32_t NetMeteredIfacesChange(std::vector<std::string> &ifaces) override;
     int32_t NetBackgroundPolicyChange(bool isBackgroundPolicyAllow) override;
 

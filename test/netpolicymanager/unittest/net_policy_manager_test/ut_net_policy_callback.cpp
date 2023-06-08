@@ -85,7 +85,7 @@ public:
         return 0;
     }
 
-    int32_t NetStrategySwitch(const std::string &iccid, bool enable)
+    int32_t NetStrategySwitch(const std::string &simId, bool enable)
     {
         return 0;
     }
@@ -133,30 +133,30 @@ void NetPolicyCallbackUTest::TearDown()
 void SetFirstNetQuotaPolicy(std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     NetQuotaPolicy quotaPolicy1;
-    quotaPolicy1.iccid = ICCID_1;
-    quotaPolicy1.periodDuration = "M1"; // M1: First day of the month.
-    quotaPolicy1.netType = NetBearType::BEARER_CELLULAR;
-    quotaPolicy1.warningBytes = TEST_WARNING_BYTES_1;
-    quotaPolicy1.limitBytes = TEST_LIMIT_BYTES_1;
-    quotaPolicy1.lastWarningRemind = TEST_LAST_WARNING_REMIND_1;
-    quotaPolicy1.lastLimitRemind = TEST_LAST_LIMIT_REMIND_1;
-    quotaPolicy1.metered = true;
-    quotaPolicy1.limitAction = LimitAction::LIMIT_ACTION_AUTO_BILL;
+    quotaPolicy1.netlogotype.simId = ICCID_1;
+    quotaPolicy1.quotapolicy.periodDuration = "M1"; // M1: First day of the month.
+    quotaPolicy1.netlogotype.netType = NetBearType::BEARER_CELLULAR;
+    quotaPolicy1.quotapolicy.warningBytes = TEST_WARNING_BYTES_1;
+    quotaPolicy1.quotapolicy.limitBytes = TEST_LIMIT_BYTES_1;
+    quotaPolicy1.quotapolicy.lastWarningRemind = TEST_LAST_WARNING_REMIND_1;
+    quotaPolicy1.quotapolicy.lastLimitRemind = TEST_LAST_LIMIT_REMIND_1;
+    quotaPolicy1.quotapolicy.metered = true;
+    quotaPolicy1.quotapolicy.limitAction = LimitAction::LIMIT_ACTION_AUTO_BILL;
     quotaPolicies.push_back(quotaPolicy1);
 }
 
 void SetSecondNetQuotaPolicy(std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     NetQuotaPolicy quotaPolicy2;
-    quotaPolicy2.iccid = ICCID_2;
-    quotaPolicy2.periodDuration = "Y1"; // y1: First day of the year.
-    quotaPolicy2.netType = NetBearType::BEARER_CELLULAR;
-    quotaPolicy2.warningBytes = TEST_WARNING_BYTES_2;
-    quotaPolicy2.limitBytes = TEST_LIMIT_BYTES_2;
-    quotaPolicy2.lastWarningRemind = TEST_LAST_WARNING_REMIND_2;
-    quotaPolicy2.lastLimitRemind = TEST_LAST_LIMIT_REMIND_2;
-    quotaPolicy2.metered = true;
-    quotaPolicy2.limitAction = LimitAction::LIMIT_ACTION_DISABLE;
+    quotaPolicy2.netlogotype.simId = ICCID_2;
+    quotaPolicy2.quotapolicy.periodDuration = "Y1"; // y1: First day of the year.
+    quotaPolicy2.netlogotype.netType = NetBearType::BEARER_CELLULAR;
+    quotaPolicy2.quotapolicy.warningBytes = TEST_WARNING_BYTES_2;
+    quotaPolicy2.quotapolicy.limitBytes = TEST_LIMIT_BYTES_2;
+    quotaPolicy2.quotapolicy.lastWarningRemind = TEST_LAST_WARNING_REMIND_2;
+    quotaPolicy2.quotapolicy.lastLimitRemind = TEST_LAST_LIMIT_REMIND_2;
+    quotaPolicy2.quotapolicy.metered = true;
+    quotaPolicy2.quotapolicy.limitAction = LimitAction::LIMIT_ACTION_DISABLE;
     quotaPolicies.push_back(quotaPolicy2);
 }
 

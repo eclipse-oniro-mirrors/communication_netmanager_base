@@ -50,7 +50,7 @@ constexpr const char *CONFIG_BACKGROUND_POLICY = "backgroundPolicy";
 constexpr const char *CONFIG_BACKGROUND_POLICY_STATUS = "status";
 constexpr const char *CONFIG_QUOTA_POLICY = "quotaPolicy";
 constexpr const char *CONFIG_QUOTA_POLICY_NETTYPE = "netType";
-constexpr const char *CONFIG_QUOTA_POLICY_SUBSCRIBERID = "iccid";
+constexpr const char *CONFIG_QUOTA_POLICY_SUBSCRIBERID = "simId";
 constexpr const char *CONFIG_QUOTA_POLICY_PERIODSTARTTIME = "periodStartTime";
 constexpr const char *CONFIG_QUOTA_POLICY_PERIODDURATION = "periodDuration";
 constexpr const char *CONFIG_QUOTA_POLICY_WARNINGBYTES = "warningBytes";
@@ -85,7 +85,7 @@ struct UidPolicy {
 
 struct NetPolicyQuota {
     std::string netType;
-    std::string iccid;
+    std::string simId;
     std::string periodStartTime;
     std::string periodDuration;
     std::string warningBytes;
@@ -96,7 +96,7 @@ struct NetPolicyQuota {
 };
 
 struct NetPolicyCellular {
-    std::string iccid;
+    std::string simId;
     std::string periodStartTime;
     std::string periodDuration;
     std::string title;

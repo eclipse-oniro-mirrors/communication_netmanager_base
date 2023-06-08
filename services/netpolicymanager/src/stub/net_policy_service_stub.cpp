@@ -430,8 +430,8 @@ int32_t NetPolicyServiceStub::OnSnoozePolicy(MessageParcel &data, MessageParcel 
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    std::string iccid;
-    if (!data.ReadString(iccid)) {
+    std::string simId;
+    if (!data.ReadString(simId)) {
         NETMGR_LOG_E("Read String data failed");
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
@@ -442,7 +442,7 @@ int32_t NetPolicyServiceStub::OnSnoozePolicy(MessageParcel &data, MessageParcel 
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int32_t result = UpdateRemindPolicy(netType, iccid, remindType);
+    int32_t result = UpdateRemindPolicy(netType, simId, remindType);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
