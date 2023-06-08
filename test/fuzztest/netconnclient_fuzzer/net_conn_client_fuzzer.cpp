@@ -213,9 +213,7 @@ public:
 class NetSupplierCallbackBaseTest : public NetSupplierCallbackStub {
 };
 
-class NetInterfaceStateCallbackTest : public NetInterfaceStateCallbackStub {
-
-};
+class NetInterfaceStateCallbackTest : public NetInterfaceStateCallbackStub {};
 
 static bool g_isInited = false;
 void Init()
@@ -799,5 +797,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetDefaultHttpProxyFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetIdByIdentifierFuzzTest(data, size);
     OHOS::NetManagerStandard::SetAppNetFuzzTest(data, size);
+    OHOS::NetManagerStandard::RegisterNetInterfaceCallbackFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetNetInterfaceConfigurationFuzzTest(data, size);
     return 0;
 }

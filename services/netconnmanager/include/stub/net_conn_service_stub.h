@@ -78,7 +78,6 @@ private:
 
 private:
     std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;
-    std::vector<int32_t> systemCode_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

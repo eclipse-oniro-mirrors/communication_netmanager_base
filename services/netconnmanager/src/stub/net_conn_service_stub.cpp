@@ -27,7 +27,10 @@ namespace {
 constexpr uint32_t MAX_IFACE_NUM = 16;
 constexpr uint32_t MAX_NET_CAP_NUM = 32;
 constexpr uint32_t UID_FOUNDATION = 5523;
-}
+const std::vector<int32_t> SYSTEM_CODE{INetConnService::CMD_NM_SET_AIRPLANE_MODE,
+                                       INetConnService::CMD_NM_SET_GLOBAL_HTTP_PROXY,
+                                       INetConnService::CMD_NM_GET_GLOBAL_HTTP_PROXY};
+} // namespace
 NetConnServiceStub::NetConnServiceStub()
 {
     memberFuncMap_[CMD_NM_SYSTEM_READY] = {&NetConnServiceStub::OnSystemReady, {}};
@@ -79,7 +82,6 @@ NetConnServiceStub::NetConnServiceStub()
                                                               {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[CMD_NM_GET_INTERFACE_CONFIGURATION] = {&NetConnServiceStub::OnGetNetInterfaceConfiguration,
                                                           {Permission::CONNECTIVITY_INTERNAL}};
-    systemCode_ = {CMD_NM_SET_AIRPLANE_MODE, CMD_NM_SET_GLOBAL_HTTP_PROXY, CMD_NM_GET_GLOBAL_HTTP_PROXY};
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -138,7 +140,7 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
 
 int32_t NetConnServiceStub::OnRequestCheck(uint32_t code)
 {
-    if (std::find(systemCode_.begin(), systemCode_.end(), code) != systemCode_.end()) {
+    if (std::find(SYSTEM_CODE.begin(), SYSTEM_CODE.end(), code) != SYSTEM_CODE.end()) {
         if (!NetManagerPermission::IsSystemCaller()) {
             NETMGR_LOG_E("Non-system applications use system APIs.");
             return NETMANAGER_ERR_NOT_SYSTEM_CALL;
