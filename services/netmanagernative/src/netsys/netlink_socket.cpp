@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -145,19 +145,19 @@ void DealInfoFromKernel(nlmsghdr *nlmsgHeader, uint16_t clearThing, uint32_t tab
     msg->nlmsg_flags = NLM_F_REQUEST | NLM_F_ACK;
     if (clearThing == RTM_GETRULE) {
         msg->nlmsg_type = RTM_DELRULE;
-        if (GetRouteProperty(nlmsgHeader, FRA_PRIORITY) != LOCAL_PRIORITY) {
+        if (GetRouteProperty(nlmsgHeader, FRA_PRIORITY) != static_cast<int32_t>(LOCAL_PRIORITY)) {
             return;
         }
     } else if (clearThing == RTM_GETROUTE) {
         msg->nlmsg_type = RTM_DELROUTE;
-        if (GetRouteProperty(nlmsgHeader, RTA_TABLE) != table) {
+        if (GetRouteProperty(nlmsgHeader, RTA_TABLE) != static_cast<int32_t>(table)) {
             return;
         }
     }
     SendNetlinkMsgToKernel(msg);
 }
 
-uint32_t GetRouteProperty(const nlmsghdr *nlmsgHeader, int32_t property)
+int32_t GetRouteProperty(const nlmsghdr *nlmsgHeader, int32_t property)
 {
     if (nlmsgHeader == nullptr) {
         NETNATIVE_LOGE("nlmsgHeader is nullptr");
