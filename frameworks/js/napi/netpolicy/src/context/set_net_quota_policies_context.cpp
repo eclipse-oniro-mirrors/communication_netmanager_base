@@ -28,12 +28,6 @@ namespace {
 NetQuotaPolicy ReadQuotaPolicy(napi_env env, napi_value value)
 {
     NetQuotaPolicy data;
-    if (!NapiUtils::HasNamedProperty(env, value, "netLogoType")) {
-        NETMANAGER_BASE_LOGE("xxxx : no have  netLogoType");
-    }
-    if (!NapiUtils::HasNamedProperty(env, value, "quotaPolicy")) {
-        NETMANAGER_BASE_LOGE("xxxx : no have  quotaPolicy");
-    }
     napi_value netLogoType = NapiUtils::GetNamedProperty(env, value, "netLogoType");
     napi_value quotaPolicy = NapiUtils::GetNamedProperty(env, value, "quotaPolicy");
     data.netlogotype.netType = NapiUtils::GetInt32Property(env, netLogoType, "netType");
@@ -46,16 +40,6 @@ NetQuotaPolicy ReadQuotaPolicy(napi_env env, napi_value value)
     data.quotapolicy.lastLimitRemind = NapiUtils::GetInt64Property(env, quotaPolicy, "lastLimitRemind");
     data.quotapolicy.metered = NapiUtils::GetBooleanProperty(env, quotaPolicy, "metered");
     data.quotapolicy.limitAction = NapiUtils::GetInt32Property(env, quotaPolicy, "limitAction");
-    NETMANAGER_BASE_LOGE("xxxx : data.netlogotype.netType: %{public}d", data.netlogotype.netType);
-    NETMANAGER_BASE_LOGE("xxxx : data.netlogotype.simId: %{public}s", data.netlogotype.simId.c_str());
-    NETMANAGER_BASE_LOGE("xxxx : data.netlogotype.ident: %{public}s", data.netlogotype.ident.c_str());
-    NETMANAGER_BASE_LOGE("xxxx : data.quotapolicy.periodDuration: %{public}s", data.quotapolicy.periodDuration.c_str());
-    NETMANAGER_BASE_LOGE("xxxx : data.quotapolicy.warningBytes: %{public}lld", data.quotapolicy.warningBytes);
-    NETMANAGER_BASE_LOGE("xxxx : data.quotapolicy.limitBytes: %{public}lld", data.quotapolicy.limitBytes);
-    NETMANAGER_BASE_LOGE("xxxx : data.quotapolicy.lastWarningRemind: %{public}lld", data.quotapolicy.lastWarningRemind);
-    NETMANAGER_BASE_LOGE("xxxx : data.quotapolicy.lastLimitRemind: %{public}lld", data.quotapolicy.lastLimitRemind);
-    NETMANAGER_BASE_LOGE("xxxx : data.quotapolicy.metered: %{public}d", data.quotapolicy.metered);
-    NETMANAGER_BASE_LOGE("xxxx : data.quotapolicy.limitAction: %{public}d", data.quotapolicy.limitAction);
     return data;
 }
 } // namespace
@@ -74,7 +58,6 @@ void SetNetQuotaPoliciesContext::ParseParams(napi_value *params, size_t paramsCo
 
     uint32_t arrayLength = NapiUtils::GetArrayLength(GetEnv(), params[ARG_INDEX_0]);
     arrayLength = arrayLength > ARRAY_LIMIT ? ARRAY_LIMIT : arrayLength;
-    NETMANAGER_BASE_LOGE("xxxx : arrayLength : %{public}u", arrayLength);
     napi_value elementValue = nullptr;
     for (uint32_t i = 0; i < arrayLength; i++) {
         elementValue = NapiUtils::GetArrayElement(GetEnv(), params[ARG_INDEX_0], i);

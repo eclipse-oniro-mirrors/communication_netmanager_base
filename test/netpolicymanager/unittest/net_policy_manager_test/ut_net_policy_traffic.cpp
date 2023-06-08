@@ -165,7 +165,8 @@ HWTEST_F(UtNetPolicyTraffic, UpdateRemindPolicy001, TestSize.Level1)
     result = g_netPolicyTraffic->GetNetQuotaPolicies(quotaPolicies);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
     for (auto &quotaPolicy : quotaPolicies) {
-        if (quotaPolicy.netlogotype.netType == NetBearType::BEARER_CELLULAR && quotaPolicy.netlogotype.simId == ICCID_1) {
+        if (quotaPolicy.netlogotype.netType == NetBearType::BEARER_CELLULAR &&
+            quotaPolicy.netlogotype.simId == ICCID_1) {
             if (quotaPolicy.quotapolicy.lastLimitRemind < 0) {
                 break;
             }
@@ -191,7 +192,8 @@ HWTEST_F(UtNetPolicyTraffic, UpdateRemindPolicy002, TestSize.Level1)
     result = g_netPolicyTraffic->GetNetQuotaPolicies(quotaPolicies);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
     for (auto &quotaPolicy : quotaPolicies) {
-        if (quotaPolicy.netlogotype.netType == NetBearType::BEARER_CELLULAR && quotaPolicy.netlogotype.simId == ICCID_2) {
+        if (quotaPolicy.netlogotype.netType == NetBearType::BEARER_CELLULAR &&
+            quotaPolicy.netlogotype.simId == ICCID_2) {
             if (quotaPolicy.quotapolicy.lastWarningRemind < 0) {
                 break;
             }
@@ -217,7 +219,8 @@ HWTEST_F(UtNetPolicyTraffic, UpdateRemindPolicy003, TestSize.Level1)
     result = g_netPolicyTraffic->GetNetQuotaPolicies(quotaPolicies);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
     for (auto &quotaPolicy : quotaPolicies) {
-        if (quotaPolicy.netlogotype.netType == NetBearType::BEARER_CELLULAR && quotaPolicy.netlogotype.simId == ICCID_2) {
+        if (quotaPolicy.netlogotype.netType == NetBearType::BEARER_CELLULAR &&
+            quotaPolicy.netlogotype.simId == ICCID_2) {
             if (quotaPolicy.quotapolicy.lastWarningRemind < 0) {
                 break;
             }
@@ -258,8 +261,10 @@ HWTEST_F(UtNetPolicyTraffic, ResetPolicies001, TestSize.Level1)
     g_netPolicyTraffic->GetNetQuotaPolicies(quotaPolicies);
     for (auto quotaPolicy : quotaPolicies) {
         if (quotaPolicy.netlogotype.simId == ICCID_1) {
-            if (quotaPolicy.quotapolicy.periodDuration == "M1" && quotaPolicy.quotapolicy.warningBytes == DATA_USAGE_UNKNOWN &&
-                quotaPolicy.quotapolicy.limitBytes == DATA_USAGE_UNKNOWN && quotaPolicy.quotapolicy.lastWarningRemind == REMIND_NEVER &&
+            if (quotaPolicy.quotapolicy.periodDuration == "M1" &&
+                quotaPolicy.quotapolicy.warningBytes == DATA_USAGE_UNKNOWN &&
+                quotaPolicy.quotapolicy.limitBytes == DATA_USAGE_UNKNOWN &&
+                quotaPolicy.quotapolicy.lastWarningRemind == REMIND_NEVER &&
                 quotaPolicy.quotapolicy.lastLimitRemind == REMIND_NEVER && !quotaPolicy.quotapolicy.metered) {
                 SUCCEED();
                 return;
