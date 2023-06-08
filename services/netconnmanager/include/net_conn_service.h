@@ -282,7 +282,6 @@ public:
     void OnNetActivateTimeOut(uint32_t reqId) override;
 
     int32_t SetAppNet(int32_t netId) override;
-    int32_t InterfaceSetIffUp(const std::string &ifaceName) override;
 
 private:
     bool Init();
