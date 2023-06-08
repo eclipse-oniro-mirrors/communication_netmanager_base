@@ -1450,7 +1450,6 @@ int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceAddressUpdated(con
                                                                              const std::string &ifName, int flags,
                                                                              int scope)
 {
-    NETMGR_LOG_I("OnInterfaceAddressUpdated -> iface:%{public}s", ifName.c_str());
     std::lock_guard<std::mutex> locker(mutex_);
     for (const auto &callback : ifaceStateCallbacks_) {
         if (callback == nullptr) {
@@ -1466,7 +1465,6 @@ int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceAddressRemoved(con
                                                                              const std::string &ifName, int flags,
                                                                              int scope)
 {
-    NETMGR_LOG_I("OnInterfaceAddressRemoved -> iface:%{public}s", ifName.c_str());
     std::lock_guard<std::mutex> locker(mutex_);
     for (const auto &callback : ifaceStateCallbacks_) {
         if (callback == nullptr) {
@@ -1480,7 +1478,6 @@ int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceAddressRemoved(con
 
 int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceAdded(const std::string &iface)
 {
-    NETMGR_LOG_I("OnInterfaceAdded -> iface:%{public}s", iface.c_str());
     std::lock_guard<std::mutex> locker(mutex_);
     for (const auto &callback : ifaceStateCallbacks_) {
         if (callback == nullptr) {
@@ -1494,7 +1491,6 @@ int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceAdded(const std::s
 
 int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceRemoved(const std::string &iface)
 {
-    NETMGR_LOG_I("OnInterfaceRemoved -> iface:%{public}s", iface.c_str());
     std::lock_guard<std::mutex> locker(mutex_);
     for (const auto &callback : ifaceStateCallbacks_) {
         if (callback == nullptr) {
@@ -1508,7 +1504,6 @@ int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceRemoved(const std:
 
 int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceChanged(const std::string &iface, bool up)
 {
-    NETMGR_LOG_I("OnInterfaceChanged -> iface:%{public}s", iface.c_str());
     std::lock_guard<std::mutex> locker(mutex_);
     for (const auto &callback : ifaceStateCallbacks_) {
         if (callback == nullptr) {
@@ -1522,7 +1517,6 @@ int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceChanged(const std:
 
 int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceLinkStateChanged(const std::string &iface, bool up)
 {
-    NETMGR_LOG_I("OnInterfaceLinkStateChanged -> iface:%{public}s, up:%{public}d", iface.c_str(), up);
     std::lock_guard<std::mutex> locker(mutex_);
     for (const auto &callback : ifaceStateCallbacks_) {
         if (callback == nullptr) {

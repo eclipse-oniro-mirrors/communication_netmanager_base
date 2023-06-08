@@ -181,39 +181,40 @@ int32_t NetInterfaceStateCallbackStub::CmdInterfaceLinkStateChanged(MessageParce
 int32_t NetInterfaceStateCallbackStub::OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName,
                                                                  int32_t flags, int32_t scope)
 {
-    NETMGR_LOG_I("OnInterfaceAddressUpdated, addr:[%{public}s], iface:[%{public}s], scope:[%{public}d]", addr.c_str(),
+    NETMGR_LOG_D("OnInterfaceAddressUpdated, addr:[%{public}s], iface:[%{public}s], scope:[%{public}d]", addr.c_str(),
                  ifName.c_str(), scope);
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetInterfaceStateCallbackStub::OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope)
+int32_t NetInterfaceStateCallbackStub::OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName,
+                                                                 int32_t flags, int32_t scope)
 {
-    NETMGR_LOG_I("OnInterfaceAddressRemoved, addr:[%{public}s], iface:[%{public}s], scope:[%{public}d]", addr.c_str(),
+    NETMGR_LOG_D("OnInterfaceAddressRemoved, addr:[%{public}s], iface:[%{public}s], scope:[%{public}d]", addr.c_str(),
                  ifName.c_str(), scope);
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetInterfaceStateCallbackStub::OnInterfaceAdded(const std::string &ifName)
 {
-    NETMGR_LOG_I("OnInterfaceAdded, iface:[%{public}s]", ifName.c_str());
+    NETMGR_LOG_D("OnInterfaceAdded, iface:[%{public}s]", ifName.c_str());
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetInterfaceStateCallbackStub::OnInterfaceRemoved(const std::string &ifName)
 {
-    NETMGR_LOG_I("OnInterfaceRemoved, iface:[%{public}s]", ifName.c_str());
+    NETMGR_LOG_D("OnInterfaceRemoved, iface:[%{public}s]", ifName.c_str());
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetInterfaceStateCallbackStub::OnInterfaceChanged(const std::string &ifName, bool up)
 {
-    NETMGR_LOG_I("OnInterfaceChanged, iface:[%{public}s] -> Up:[%{public}d]", ifName.c_str(), up);
+    NETMGR_LOG_D("OnInterfaceChanged, iface:[%{public}s] -> Up:[%{public}d]", ifName.c_str(), up);
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetInterfaceStateCallbackStub::OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
 {
-    NETMGR_LOG_I("OnInterfaceLinkStateChanged, iface:[%{public}s] -> Up:[%{public}d]", ifName.c_str(), up);
+    NETMGR_LOG_D("OnInterfaceLinkStateChanged, iface:[%{public}s] -> Up:[%{public}d]", ifName.c_str(), up);
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
