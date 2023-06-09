@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,31 +24,29 @@ namespace OHOS {
 namespace NetManagerStandard {
 int32_t StatisticsCallbackObserver::NetIfaceStatsChanged(const std::string &iface)
 {
-    if (!DelayedSingleton<StatisticsObserverWrapper>::GetInstance()->GetEventManager()->HasEventListener(
-        EVENT_STATS_CHANGE)) {
+    if (!StatisticsObserverWrapper::GetInstance().GetEventManager()->HasEventListener(EVENT_STATS_CHANGE)) {
         NETMANAGER_BASE_LOGE("no event listener find %{public}s", EVENT_STATS_CHANGE);
         return 0;
     }
     auto pair = new std::pair<std::string, uint32_t>;
     pair->first = iface;
     pair->second = KEY_UID_ARG;
-    DelayedSingleton<StatisticsObserverWrapper>::GetInstance()->GetEventManager()->EmitByUv(
-        EVENT_STATS_CHANGE, pair, NetIfaceStatsChangedCallback);
+    StatisticsObserverWrapper::GetInstance().GetEventManager()->EmitByUv(EVENT_STATS_CHANGE, pair,
+                                                                         NetIfaceStatsChangedCallback);
     return 0;
 }
 
 int32_t StatisticsCallbackObserver::NetUidStatsChanged(const std::string &iface, uint32_t uid)
 {
-    if (!DelayedSingleton<StatisticsObserverWrapper>::GetInstance()->GetEventManager()->HasEventListener(
-        EVENT_STATS_CHANGE)) {
+    if (!StatisticsObserverWrapper::GetInstance().GetEventManager()->HasEventListener(EVENT_STATS_CHANGE)) {
         NETMANAGER_BASE_LOGE("no event listener find %{public}s", EVENT_STATS_CHANGE);
         return 0;
     }
     auto pair = new std::pair<std::string, uint32_t>;
     pair->first = iface;
     pair->second = uid;
-    DelayedSingleton<StatisticsObserverWrapper>::GetInstance()->GetEventManager()->EmitByUv(EVENT_STATS_CHANGE, pair,
-                                                                                            NetUidStatsChangedCallback);
+    StatisticsObserverWrapper::GetInstance().GetEventManager()->EmitByUv(EVENT_STATS_CHANGE, pair,
+                                                                         NetUidStatsChangedCallback);
     return 0;
 }
 

@@ -15,14 +15,14 @@
 
 #include "network_exec.h"
 
-#include "network_constant.h"
 #include "net_conn_client.h"
 #include "net_manager_constants.h"
+#include "network_constant.h"
 #if HAS_TELEPHONY
 #include "core_service_client.h"
 #endif
-#include "netmanager_base_log.h"
 #include "napi_utils.h"
+#include "netmanager_base_log.h"
 #include "securec.h"
 #include "network_observer.h"
 
@@ -89,7 +89,7 @@ bool NetworkExec::ExecGetType(GetTypeContext *context)
 {
     NETMANAGER_BASE_LOGI("NetworkExec::ExecGetType");
     NetHandle handle;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
+    auto ret = NetConnClient::GetInstance().GetDefaultNet(handle);
     if (ret != NETMANAGER_SUCCESS) {
         context->SetErrorCode(ret);
         return ret == NETMANAGER_SUCCESS;
@@ -101,7 +101,7 @@ bool NetworkExec::ExecGetType(GetTypeContext *context)
     }
 
     NetAllCapabilities cap;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(handle, cap);
+    ret = NetConnClient::GetInstance().GetNetCapabilities(handle, cap);
     if (ret == NETMANAGER_SUCCESS) {
         context->SetCap(cap);
     }
@@ -152,9 +152,8 @@ bool NetworkExec::ExecSubscribe(SubscribeContext *context)
     }
     sptr<NetSpecifier> specifier = new NetSpecifier;
     specifier->netCapabilities_.netCaps_.insert(NET_CAPABILITY_INTERNET);
-    DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(specifier, callback,
-                                                                                          DEFAULT_TIMEOUT_MS);
+    NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
+    int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(specifier, callback, DEFAULT_TIMEOUT_MS);
 
     context->SetErrorCode(ret);
     return ret == NETMANAGER_SUCCESS;

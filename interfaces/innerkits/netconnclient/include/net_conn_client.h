@@ -24,6 +24,7 @@
 
 #include "http_proxy.h"
 #include "i_net_conn_service.h"
+#include "i_net_interface_callback.h"
 #include "i_net_supplier_callback.h"
 #include "net_handle.h"
 #include "net_link_info.h"
@@ -35,10 +36,11 @@ namespace nmd {
 class FwmarkClient;
 }
 namespace NetManagerStandard {
-class NetConnClient {
-    DECLARE_DELAYED_SINGLETON(NetConnClient)
-
+class NetConnClient : public Singleton<NetConnClient> {
 public:
+    NetConnClient();
+    ~NetConnClient();
+
     /**
      * The interface in NetConnService can be called when the system is ready
      *
@@ -328,14 +330,25 @@ public:
     int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList);
 
     /**
-     * Set iface up
+     * Register network interface state change callback
      *
-     * @param ifaceName Network port device name
-     * @return Returns 0 success. Otherwise fail.
+     * @param callback The callback of INetInterfaceStateCallback interface
+     * @return Returns 0, successfully register net connection callback, otherwise it will failed
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t InterfaceSetIffUp(const std::string &ifaceName);
+    int32_t RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback);
+
+    /**
+     * Get network interface configuration
+     *
+     * @param ifaceName Network port device name
+     * @param config Network interface configuration
+     * @return Returns 0, successfully register net connection callback, otherwise it will failed
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config);
 
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {

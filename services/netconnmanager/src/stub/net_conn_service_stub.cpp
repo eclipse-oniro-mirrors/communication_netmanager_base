@@ -27,7 +27,10 @@ namespace {
 constexpr uint32_t MAX_IFACE_NUM = 16;
 constexpr uint32_t MAX_NET_CAP_NUM = 32;
 constexpr uint32_t UID_FOUNDATION = 5523;
-}
+const std::vector<int32_t> SYSTEM_CODE{INetConnService::CMD_NM_SET_AIRPLANE_MODE,
+                                       INetConnService::CMD_NM_SET_GLOBAL_HTTP_PROXY,
+                                       INetConnService::CMD_NM_GET_GLOBAL_HTTP_PROXY};
+} // namespace
 NetConnServiceStub::NetConnServiceStub()
 {
     memberFuncMap_[CMD_NM_SYSTEM_READY] = {&NetConnServiceStub::OnSystemReady, {}};
@@ -48,6 +51,21 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnUnRegisterNetDetectionCallback, {}};
     memberFuncMap_[CMD_NM_NET_DETECTION] = {&NetConnServiceStub::OnNetDetection,
                                             {Permission::GET_NETWORK_INFO, Permission::INTERNET}};
+    memberFuncMap_[CMD_NM_BIND_SOCKET] = {&NetConnServiceStub::OnBindSocket, {}};
+    memberFuncMap_[CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK] = {&NetConnServiceStub::OnRegisterNetSupplierCallback, {}};
+    memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE] = {&NetConnServiceStub::OnSetAirplaneMode,
+                                                {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_SET_GLOBAL_HTTP_PROXY] = {&NetConnServiceStub::OnSetGlobalHttpProxy,
+                                                    {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_SET_APP_NET] = {&NetConnServiceStub::OnSetAppNet, {Permission::INTERNET}};
+    memberFuncMap_[CMD_NM_SET_INTERNET_PERMISSION] = {&NetConnServiceStub::OnSetInternetPermission, {}};
+    memberFuncMap_[CMD_NM_REGISTER_NET_INTERFACE_CALLBACK] = {&NetConnServiceStub::OnRegisterNetInterfaceCallback,
+                                                              {Permission::CONNECTIVITY_INTERNAL}};
+    InitQueryFuncToInterfaceMap();
+}
+
+void NetConnServiceStub::InitQueryFuncToInterfaceMap()
+{
     memberFuncMap_[CMD_NM_GET_IFACE_NAMES] = {&NetConnServiceStub::OnGetIfaceNames, {}};
     memberFuncMap_[CMD_NM_GET_IFACENAME_BY_TYPE] = {&NetConnServiceStub::OnGetIfaceNameByType, {}};
     memberFuncMap_[CMD_NM_GETDEFAULTNETWORK] = {&NetConnServiceStub::OnGetDefaultNet, {Permission::GET_NETWORK_INFO}};
@@ -61,22 +79,13 @@ NetConnServiceStub::NetConnServiceStub()
                                                    {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[CMD_NM_GET_ADDRESSES_BY_NAME] = {&NetConnServiceStub::OnGetAddressesByName, {Permission::INTERNET}};
     memberFuncMap_[CMD_NM_GET_ADDRESS_BY_NAME] = {&NetConnServiceStub::OnGetAddressByName, {Permission::INTERNET}};
-    memberFuncMap_[CMD_NM_BIND_SOCKET] = {&NetConnServiceStub::OnBindSocket, {}};
-    memberFuncMap_[CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK] = {&NetConnServiceStub::OnRegisterNetSupplierCallback, {}};
-    memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE] = {&NetConnServiceStub::OnSetAirplaneMode,
-                                                {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[CMD_NM_IS_DEFAULT_NET_METERED] = {&NetConnServiceStub::OnIsDefaultNetMetered,
                                                      {Permission::GET_NETWORK_INFO}};
-    memberFuncMap_[CMD_NM_SET_GLOBAL_HTTP_PROXY] = {&NetConnServiceStub::OnSetGlobalHttpProxy,
-                                                    {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[CMD_NM_GET_GLOBAL_HTTP_PROXY] = {&NetConnServiceStub::OnGetGlobalHttpProxy, {}};
     memberFuncMap_[CMD_NM_GET_DEFAULT_HTTP_PROXY] = {&NetConnServiceStub::OnGetDefaultHttpProxy, {}};
     memberFuncMap_[CMD_NM_GET_NET_ID_BY_IDENTIFIER] = {&NetConnServiceStub::OnGetNetIdByIdentifier, {}};
-    memberFuncMap_[CMD_NM_SET_APP_NET] = {&NetConnServiceStub::OnSetAppNet, {Permission::INTERNET}};
-    memberFuncMap_[CMD_NM_SET_INTERNET_PERMISSION] = {&NetConnServiceStub::OnSetInternetPermission, {}};
-    memberFuncMap_[CMD_NM_SET_IF_UP_MULTICAST] = {&NetConnServiceStub::OnInterfaceSetIffUp, {}};
-
-    systemCode_ = {CMD_NM_SET_AIRPLANE_MODE, CMD_NM_SET_GLOBAL_HTTP_PROXY, CMD_NM_GET_GLOBAL_HTTP_PROXY};
+    memberFuncMap_[CMD_NM_GET_INTERFACE_CONFIGURATION] = {&NetConnServiceStub::OnGetNetInterfaceConfiguration,
+                                                          {Permission::CONNECTIVITY_INTERNAL}};
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -135,7 +144,7 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
 
 int32_t NetConnServiceStub::OnRequestCheck(uint32_t code)
 {
-    if (std::find(systemCode_.begin(), systemCode_.end(), code) != systemCode_.end()) {
+    if (std::find(SYSTEM_CODE.begin(), SYSTEM_CODE.end(), code) != SYSTEM_CODE.end()) {
         if (!NetManagerPermission::IsSystemCaller()) {
             NETMGR_LOG_E("Non-system applications use system APIs.");
             return NETMANAGER_ERR_NOT_SYSTEM_CALL;
@@ -928,18 +937,44 @@ int32_t NetConnServiceStub::OnSetAppNet(MessageParcel &data, MessageParcel &repl
     return ret;
 }
 
-int32_t NetConnServiceStub::OnInterfaceSetIffUp(MessageParcel &data, MessageParcel &reply)
+int32_t NetConnServiceStub::OnRegisterNetInterfaceCallback(MessageParcel &data, MessageParcel &reply)
 {
-    std::string ifaceName;
-    if (!data.ReadString(ifaceName)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
+    int32_t ret = NETMANAGER_SUCCESS;
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Callback ptr is nullptr.");
+        ret = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        reply.WriteInt32(ret);
+        return ret;
     }
-    int32_t ret = InterfaceSetIffUp(ifaceName);
+
+    sptr<INetInterfaceStateCallback> callback = iface_cast<INetInterfaceStateCallback>(remote);
+    ret = RegisterNetInterfaceCallback(callback);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return ret;
 }
 
+int32_t NetConnServiceStub::OnGetNetInterfaceConfiguration(MessageParcel &data, MessageParcel &reply)
+{
+    std::string iface;
+    if (!data.ReadString(iface)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    NetInterfaceConfiguration config;
+    int32_t ret = GetNetInterfaceConfiguration(iface, config);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!config.Marshalling(reply)) {
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    return ret;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

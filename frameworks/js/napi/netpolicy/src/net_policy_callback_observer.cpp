@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,77 +16,72 @@
 #include "net_policy_callback_observer.h"
 
 #include "constant.h"
-#include "netmanager_base_log.h"
-#include "netpolicy_exec.h"
 #include "net_manager_constants.h"
 #include "net_policy_constants.h"
 #include "net_quota_policy.h"
+#include "netmanager_base_log.h"
+#include "netpolicy_exec.h"
 #include "policy_observer_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 int32_t NetPolicyCallbackObserver::NetUidPolicyChange(uint32_t uid, uint32_t policy)
 {
-    if (!DelayedSingleton<PolicyObserverWrapper>::GetInstance()->GetEventManager()->HasEventListener(
-        EVENT_POLICY_UID_POLICY)) {
+    if (!PolicyObserverWrapper::GetInstance().GetEventManager()->HasEventListener(EVENT_POLICY_UID_POLICY)) {
         NETMANAGER_BASE_LOGE("no event listener find %{public}s", EVENT_POLICY_UID_POLICY);
         return NETMANAGER_SUCCESS;
     }
     auto pair = new std::pair<uint32_t, uint32_t>(uid, policy);
-    DelayedSingleton<PolicyObserverWrapper>::GetInstance()->GetEventManager()->EmitByUv(EVENT_POLICY_UID_POLICY, pair,
-                                                                                        NetUidPolicyChangeCallback);
+    PolicyObserverWrapper::GetInstance().GetEventManager()->EmitByUv(EVENT_POLICY_UID_POLICY, pair,
+                                                                     NetUidPolicyChangeCallback);
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallbackObserver::NetUidRuleChange(uint32_t uid, uint32_t rule)
 {
-    if (!DelayedSingleton<PolicyObserverWrapper>::GetInstance()->GetEventManager()->HasEventListener(
-        EVENT_POLICY_UID_RULE)) {
+    if (!PolicyObserverWrapper::GetInstance().GetEventManager()->HasEventListener(EVENT_POLICY_UID_RULE)) {
         NETMANAGER_BASE_LOGE("no event listener find %{public}s", EVENT_POLICY_UID_RULE);
         return NETMANAGER_SUCCESS;
     }
     auto pair = new std::pair<uint32_t, uint32_t>(uid, rule);
-    DelayedSingleton<PolicyObserverWrapper>::GetInstance()->GetEventManager()->EmitByUv(EVENT_POLICY_UID_RULE, pair,
-                                                                                        NetUidRuleChangeCallback);
+    PolicyObserverWrapper::GetInstance().GetEventManager()->EmitByUv(EVENT_POLICY_UID_RULE, pair,
+                                                                     NetUidRuleChangeCallback);
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallbackObserver::NetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies)
 {
-    if (!DelayedSingleton<PolicyObserverWrapper>::GetInstance()->GetEventManager()->HasEventListener(
-        EVENT_POLICY_QUOTA_POLICY)) {
+    if (!PolicyObserverWrapper::GetInstance().GetEventManager()->HasEventListener(EVENT_POLICY_QUOTA_POLICY)) {
         NETMANAGER_BASE_LOGE("no event listener find %{public}s", EVENT_POLICY_QUOTA_POLICY);
         return NETMANAGER_SUCCESS;
     }
     auto vec = new std::vector<NetQuotaPolicy>(quotaPolicies.size());
     vec->assign(quotaPolicies.begin(), quotaPolicies.end());
-    DelayedSingleton<PolicyObserverWrapper>::GetInstance()->GetEventManager()->EmitByUv(EVENT_POLICY_QUOTA_POLICY, vec,
-                                                                                        NetQuotaPolicyChangeCallback);
+    PolicyObserverWrapper::GetInstance().GetEventManager()->EmitByUv(EVENT_POLICY_QUOTA_POLICY, vec,
+                                                                     NetQuotaPolicyChangeCallback);
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallbackObserver::NetMeteredIfacesChange(std::vector<std::string> &ifaces)
 {
-    if (!DelayedSingleton<PolicyObserverWrapper>::GetInstance()->GetEventManager()->HasEventListener(
-        EVENT_POLICY_METERED_IFACES)) {
+    if (!PolicyObserverWrapper::GetInstance().GetEventManager()->HasEventListener(EVENT_POLICY_METERED_IFACES)) {
         NETMANAGER_BASE_LOGE("no event listener find %{public}s", EVENT_POLICY_METERED_IFACES);
         return NETMANAGER_SUCCESS;
     }
     auto vec = new std::vector<std::string>;
     vec->assign(ifaces.begin(), ifaces.end());
-    DelayedSingleton<PolicyObserverWrapper>::GetInstance()->GetEventManager()->EmitByUv(
-        EVENT_POLICY_METERED_IFACES, vec, NetMeteredIfacesChangeCallback);
+    PolicyObserverWrapper::GetInstance().GetEventManager()->EmitByUv(EVENT_POLICY_METERED_IFACES, vec,
+                                                                     NetMeteredIfacesChangeCallback);
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyCallbackObserver::NetBackgroundPolicyChange(bool isBackgroundPolicyAllow)
 {
-    if (!DelayedSingleton<PolicyObserverWrapper>::GetInstance()->GetEventManager()->HasEventListener(
-        EVENT_POLICY_BACKGROUND_POLICY)) {
+    if (!PolicyObserverWrapper::GetInstance().GetEventManager()->HasEventListener(EVENT_POLICY_BACKGROUND_POLICY)) {
         NETMANAGER_BASE_LOGE("no event listener find %{public}s", EVENT_POLICY_BACKGROUND_POLICY);
         return NETMANAGER_SUCCESS;
     }
-    DelayedSingleton<PolicyObserverWrapper>::GetInstance()->GetEventManager()->EmitByUv(
+    PolicyObserverWrapper::GetInstance().GetEventManager()->EmitByUv(
         EVENT_POLICY_BACKGROUND_POLICY, new bool(isBackgroundPolicyAllow), NetBackgroundPolicyChangeCallback);
     return NETMANAGER_SUCCESS;
 }

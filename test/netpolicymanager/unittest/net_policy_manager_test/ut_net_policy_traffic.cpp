@@ -239,16 +239,8 @@ HWTEST_F(UtNetPolicyTraffic, HandleEvent001, TestSize.Level1)
     int32_t eventId = 0;
     std::shared_ptr<PolicyEvent> policyEvent = nullptr;
     g_netPolicyTraffic->HandleEvent(eventId, policyEvent);
-    SUCCEED();
-}
 
-/**
- * @tc.name: GetMeteredIfaces001
- * @tc.desc: Test NetPolicyTraffic GetMeteredIfaces.
- * @tc.type: FUNC
- */
-HWTEST_F(UtNetPolicyTraffic, GetMeteredIfaces001, TestSize.Level1)
-{
+    // Test NetPolicyTraffic GetMeteredIfaces
     auto &ifaces = g_netPolicyTraffic->GetMeteredIfaces();
     ASSERT_GE(ifaces.size(), NO_DATA_SIZE);
 }
@@ -286,16 +278,8 @@ HWTEST_F(UtNetPolicyTraffic, ReachedLimit001, TestSize.Level1)
 {
     std::string testIface = "wlan0";
     g_netPolicyTraffic->ReachedLimit(testIface);
-    SUCCEED();
-}
 
-/**
- * @tc.name: GetDumpMessage001
- * @tc.desc: Test NetPolicyTraffic GetDumpMessage
- * @tc.type: FUNC
- */
-HWTEST_F(UtNetPolicyTraffic, GetDumpMessage001, TestSize.Level1)
-{
+    // Test NetPolicyTraffic GetDumpMessage
     std::string msg;
     g_netPolicyTraffic->GetDumpMessage(msg);
     ASSERT_FALSE(msg.empty());
@@ -319,20 +303,12 @@ HWTEST_F(UtNetPolicyTraffic, UpdateQuotaPoliciesInner001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyTraffic, GetQuotaRemain001, TestSize.Level1)
 {
+    // Test NetPolicyTraffic UpdateQuotaNotify
+    g_netPolicyTraffic->UpdateQuotaNotify();
+
     NetQuotaPolicy quotaPolicy;
     auto ret = g_netPolicyTraffic->GetQuotaRemain(quotaPolicy);
     ASSERT_GE(ret, 0);
-}
-
-/**
- * @tc.name: UpdateQuotaNotify001
- * @tc.desc: Test NetPolicyTraffic UpdateQuotaNotify
- * @tc.type: FUNC
- */
-HWTEST_F(UtNetPolicyTraffic, UpdateQuotaNotify001, TestSize.Level1)
-{
-    g_netPolicyTraffic->UpdateQuotaNotify();
-    SUCCEED();
 }
 
 /**
@@ -342,38 +318,22 @@ HWTEST_F(UtNetPolicyTraffic, UpdateQuotaNotify001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyTraffic, UpdateNetEnableStatus001, TestSize.Level1)
 {
+    // Test NetPolicyTraffic UpdateNetEnableStatus
     NetQuotaPolicy quotaPolicy;
     quotaPolicy.metered = true;
     g_netPolicyTraffic->UpdateNetEnableStatus(quotaPolicy);
-    SUCCEED();
-}
 
-/**
- * @tc.name: UpdateNetEnableStatus002
- * @tc.desc: Test NetPolicyTraffic UpdateNetEnableStatus
- * @tc.type: FUNC
- */
-HWTEST_F(UtNetPolicyTraffic, UpdateNetEnableStatus002, TestSize.Level1)
-{
-    NetQuotaPolicy quotaPolicy;
     quotaPolicy.metered = false;
     quotaPolicy.limitAction = LIMIT_ACTION_DISABLE;
     g_netPolicyTraffic->UpdateNetEnableStatus(quotaPolicy);
-    SUCCEED();
-}
 
-/**
- * @tc.name: UpdateNetEnableStatus003
- * @tc.desc: Test NetPolicyTraffic UpdateNetEnableStatus
- * @tc.type: FUNC
- */
-HWTEST_F(UtNetPolicyTraffic, UpdateNetEnableStatus003, TestSize.Level1)
-{
-    NetQuotaPolicy quotaPolicy;
-    quotaPolicy.metered = false;
     quotaPolicy.limitAction = LIMIT_ACTION_NONE;
     g_netPolicyTraffic->UpdateNetEnableStatus(quotaPolicy);
-    SUCCEED();
+
+    // Test NetPolicyTraffic IsValidQuotaPolicy
+    quotaPolicy.netType = NetBearType::BEARER_DEFAULT;
+    auto ret = g_netPolicyTraffic->IsValidQuotaPolicy(quotaPolicy);
+    EXPECT_FALSE(ret);
 }
 
 /**
@@ -404,31 +364,10 @@ HWTEST_F(UtNetPolicyTraffic, FormalizeQuotaPolicies001, TestSize.Level1)
     quotaPolicy.warningBytes = DATA_USAGE_UNLIMITED;
     quotaPolicies.push_back(quotaPolicy);
     g_netPolicyTraffic->FormalizeQuotaPolicies(quotaPolicies);
-    SUCCEED();
-}
 
-/**
- * @tc.name: UpdateMeteredIfacesQuota001
- * @tc.desc: Test NetPolicyTraffic UpdateMeteredIfacesQuota
- * @tc.type: FUNC
- */
-HWTEST_F(UtNetPolicyTraffic, UpdateMeteredIfacesQuota001, TestSize.Level1)
-{
+    // Test NetPolicyTraffic UpdateMeteredIfacesQuota
     auto ret = g_netPolicyTraffic->UpdateMeteredIfacesQuota();
     EXPECT_TRUE(ret.empty());
-}
-
-/**
- * @tc.name: IsValidQuotaPolicy001
- * @tc.desc: Test NetPolicyTraffic IsValidQuotaPolicy
- * @tc.type: FUNC
- */
-HWTEST_F(UtNetPolicyTraffic, IsValidQuotaPolicy001, TestSize.Level1)
-{
-    NetQuotaPolicy quotaPolicy;
-    quotaPolicy.netType = NetBearType::BEARER_DEFAULT;
-    auto ret = g_netPolicyTraffic->IsValidQuotaPolicy(quotaPolicy);
-    EXPECT_FALSE(ret);
 }
 
 /**
@@ -466,75 +405,22 @@ HWTEST_F(UtNetPolicyTraffic, IsValidQuotaPolicy003, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyTraffic, GetTotalQuota001, TestSize.Level1)
 {
-    NetQuotaPolicy quotaPolicy;
-    quotaPolicy.netType = NetBearType::BEARER_BLUETOOTH;
-    quotaPolicy.periodDuration = "M1";
-    auto ret = g_netPolicyTraffic->GetTotalQuota(quotaPolicy);
-    ASSERT_GE(ret, 0);
-}
-
-/**
- * @tc.name: SetNetworkEnableStatus001
- * @tc.desc: Test NetPolicyTraffic SetNetworkEnableStatus
- * @tc.type: FUNC
- */
-HWTEST_F(UtNetPolicyTraffic, SetNetworkEnableStatus001, TestSize.Level1)
-{
+    // Test NetPolicyTraffic SetNetworkEnableStatus
     NetQuotaPolicy quotaPolicy;
     quotaPolicy.netType = NetBearType::BEARER_BLUETOOTH;
     quotaPolicy.periodDuration = "M1";
     g_netPolicyTraffic->SetNetworkEnableStatus(quotaPolicy, true);
-    SUCCEED();
-}
 
-/**
- * @tc.name: NotifyQuotaWarning001
- * @tc.desc: Test NetPolicyTraffic NotifyQuotaWarning
- * @tc.type: FUNC
- */
-HWTEST_F(UtNetPolicyTraffic, NotifyQuotaWarning001, TestSize.Level1)
-{
+    // Test NetPolicyTraffic NotifyQuotaWarning
     int64_t testQuota = 23;
     g_netPolicyTraffic->NotifyQuotaWarning(testQuota);
-    SUCCEED();
-}
 
-/**
- * @tc.name: NotifyQuotaLimit001
- * @tc.desc: Test NetPolicyTraffic NotifyQuotaLimit
- * @tc.type: FUNC
- */
-HWTEST_F(UtNetPolicyTraffic, NotifyQuotaLimit001, TestSize.Level1)
-{
-    int64_t testQuota = 23;
-    g_netPolicyTraffic->NotifyQuotaLimit(testQuota);
-    SUCCEED();
-}
-
-/**
- * @tc.name: NotifyQuotaLimitReminded001
- * @tc.desc: Test NetPolicyTraffic NotifyQuotaLimitReminded
- * @tc.type: FUNC
- */
-HWTEST_F(UtNetPolicyTraffic, NotifyQuotaLimitReminded001, TestSize.Level1)
-{
-    int64_t testQuota = 23;
+    // Test NetPolicyTraffic NotifyQuotaLimit
     g_netPolicyTraffic->NotifyQuotaLimitReminded(testQuota);
-    SUCCEED();
-}
 
-/**
- * @tc.name: PublishQuotaEvent001
- * @tc.desc: Test NetPolicyTraffic PublishQuotaEvent
- * @tc.type: FUNC
- */
-HWTEST_F(UtNetPolicyTraffic, PublishQuotaEvent001, TestSize.Level1)
-{
-    std::string action = "testAction";
-    std::string describe = "testDescribe";
-    int64_t quota = 1;
-    g_netPolicyTraffic->PublishQuotaEvent(action, describe, quota);
-    SUCCEED();
+    // Test NetPolicyTraffic GetTotalQuota
+    auto ret = g_netPolicyTraffic->GetTotalQuota(quotaPolicy);
+    ASSERT_GE(ret, 0);
 }
 
 /**
@@ -544,6 +430,12 @@ HWTEST_F(UtNetPolicyTraffic, PublishQuotaEvent001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyTraffic, WriteQuotaPolicies001, TestSize.Level1)
 {
+    // Test NetPolicyTraffic PublishQuotaEvent
+    std::string action = "testAction";
+    std::string describe = "testDescribe";
+    int64_t quota = 1;
+    g_netPolicyTraffic->PublishQuotaEvent(action, describe, quota);
+
     auto ret = g_netPolicyTraffic->WriteQuotaPolicies();
     g_netPolicyTraffic->ReadQuotaPolicies();
     EXPECT_TRUE(ret);

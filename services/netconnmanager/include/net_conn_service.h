@@ -33,6 +33,7 @@
 #include "net_conn_service_stub.h"
 #include "net_score.h"
 #include "net_supplier.h"
+#include "netsys_controller_callback.h"
 #include "network.h"
 
 namespace OHOS {
@@ -282,7 +283,33 @@ public:
     void OnNetActivateTimeOut(uint32_t reqId) override;
 
     int32_t SetAppNet(int32_t netId) override;
-    int32_t InterfaceSetIffUp(const std::string &ifaceName) override;
+    int32_t RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback) override;
+    int32_t GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config) override;
+
+private:
+    class NetInterfaceStateCallback : public NetsysControllerCallback {
+    public:
+        NetInterfaceStateCallback() = default;
+        ~NetInterfaceStateCallback() = default;
+        int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
+                                          int scope) override;
+        int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags,
+                                          int scope) override;
+        int32_t OnInterfaceAdded(const std::string &iface) override;
+        int32_t OnInterfaceRemoved(const std::string &iface) override;
+        int32_t OnInterfaceChanged(const std::string &iface, bool up) override;
+        int32_t OnInterfaceLinkStateChanged(const std::string &iface, bool up) override;
+        int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
+                               const std::string &ifName) override;
+        int32_t OnDhcpSuccess(NetsysControllerCallback::DhcpResult &dhcpResult) override;
+        int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override;
+
+        int32_t RegisterInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback);
+
+    private:
+        std::mutex mutex_;
+        std::vector<sptr<INetInterfaceStateCallback>> ifaceStateCallbacks_;
+    };
 
 private:
     bool Init();
@@ -346,6 +373,7 @@ private:
     std::shared_ptr<NetConnEventHandler> netConnEventHandler_ = nullptr;
     std::shared_ptr<AppExecFwk::EventRunner> netActEventRunner_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_ = nullptr;
+    sptr<NetInterfaceStateCallback> interfaceStateCallback_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
