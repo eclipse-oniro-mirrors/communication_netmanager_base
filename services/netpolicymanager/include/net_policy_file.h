@@ -165,12 +165,12 @@ private:
         quotaPolicy.quotapolicy.lastLimitRemind = CommonUtils::StrToLong(netPolicyQuota.lastLimitSnooze, REMIND_NEVER);
         quotaPolicy.quotapolicy.limitBytes = CommonUtils::StrToLong(netPolicyQuota.limitBytes, DATA_USAGE_UNKNOWN);
         quotaPolicy.quotapolicy.metered = CommonUtils::StrToBool(netPolicyQuota.metered, false);
-        quotaPolicy.netlogotype.netType = CommonUtils::StrToInt(netPolicyQuota.netType, BEARER_DEFAULT);
+        quotaPolicy.networkmatchrule.netType = CommonUtils::StrToInt(netPolicyQuota.netType, BEARER_DEFAULT);
         quotaPolicy.quotapolicy.periodDuration = netPolicyQuota.periodDuration;
         quotaPolicy.quotapolicy.periodStartTime = CommonUtils::StrToLong(netPolicyQuota.periodStartTime);
-        quotaPolicy.netlogotype.simId = netPolicyQuota.simId;
+        quotaPolicy.networkmatchrule.simId = netPolicyQuota.simId;
         quotaPolicy.quotapolicy.warningBytes = CommonUtils::StrToLong(netPolicyQuota.warningBytes, DATA_USAGE_UNKNOWN);
-        quotaPolicy.netlogotype.ident = netPolicyQuota.ident;
+        quotaPolicy.networkmatchrule.ident = netPolicyQuota.ident;
     }
 
     std::shared_ptr<NetPolicyFileEventHandler> GetHandler();

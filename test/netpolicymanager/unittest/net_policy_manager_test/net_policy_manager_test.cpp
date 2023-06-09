@@ -188,12 +188,12 @@ void NetPolicyManagerTest::TearDownTestCase()
     std::vector<NetQuotaPolicy> quotaPolicies;
 
     NetQuotaPolicy quotaPolicy1;
-    quotaPolicy1.netlogotype.netType = -1;
-    quotaPolicy1.netlogotype.simId = std::to_string(TRIGER_DELAY_US);
+    quotaPolicy1.networkmatchrule.netType = -1;
+    quotaPolicy1.networkmatchrule.simId = std::to_string(TRIGER_DELAY_US);
 
     NetQuotaPolicy quotaPolicy2;
-    quotaPolicy2.netlogotype.netType = -1;
-    quotaPolicy2.netlogotype.simId = "sim_abcdefg_1";
+    quotaPolicy2.networkmatchrule.netType = -1;
+    quotaPolicy2.networkmatchrule.simId = "sim_abcdefg_1";
 
     quotaPolicies.push_back(quotaPolicy1);
     quotaPolicies.push_back(quotaPolicy2);
@@ -349,8 +349,8 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager007, TestSize.Level1)
     std::vector<NetQuotaPolicy> quotaPolicies;
 
     NetQuotaPolicy quotaPolicy;
-    quotaPolicy.netlogotype.netType = 0;
-    quotaPolicy.netlogotype.simId = std::to_string(TRIGER_DELAY_US);
+    quotaPolicy.networkmatchrule.netType = 0;
+    quotaPolicy.networkmatchrule.simId = std::to_string(TRIGER_DELAY_US);
     quotaPolicy.quotapolicy.periodStartTime = TRIGER_DELAY_US;
     quotaPolicy.quotapolicy.periodDuration = TEST_STRING_PERIODDURATION;
     quotaPolicy.quotapolicy.warningBytes = TRIGER_DELAY_US;
@@ -388,7 +388,7 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager009, TestSize.Level1)
 
     NetQuotaPolicy cellularPolicy;
     for (uint32_t i = 0; i < TEST_CONSTANT_NUM; ++i) {
-        cellularPolicy.netlogotype.simId = std::to_string(i);
+        cellularPolicy.networkmatchrule.simId = std::to_string(i);
         cellularPolicy.quotapolicy.periodStartTime = TRIGER_DELAY_US + i;
         cellularPolicy.quotapolicy.periodDuration = TEST_STRING_PERIODDURATION;
         cellularPolicy.quotapolicy.title = std::to_string(TRIGER_DELAY_US + i);
@@ -720,8 +720,8 @@ void SetNetQuotaPoliciesCallback()
     std::vector<NetQuotaPolicy> quotaPolicies;
 
     NetQuotaPolicy quotaPolicy;
-    quotaPolicy.netlogotype.netType = 0;
-    quotaPolicy.netlogotype.simId = "sim_abcdefg_1";
+    quotaPolicy.networkmatchrule.netType = 0;
+    quotaPolicy.networkmatchrule.simId = "sim_abcdefg_1";
     quotaPolicy.quotapolicy.periodDuration = "m2";
     quotaPolicy.quotapolicy.warningBytes = TEST_WARNING_BYTES;
     quotaPolicy.quotapolicy.limitBytes = TEST_LIMIT_BYTES;

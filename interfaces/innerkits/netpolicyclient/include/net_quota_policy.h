@@ -43,7 +43,7 @@ struct NetQuotaPolicy : public Parcelable {
         std::string simId;
         /* To specify the identity of network, such as different WLAN */
         std::string ident;
-    } netlogotype;
+    } networkmatchrule;
     struct QuotaPolicy {
         // @deprecated
         int64_t periodStartTime = -1;

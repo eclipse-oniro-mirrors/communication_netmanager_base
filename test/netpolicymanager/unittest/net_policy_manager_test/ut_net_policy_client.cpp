@@ -124,8 +124,8 @@ HapPolicyParams testPolicyPrams3 = {.apl = APL_SYSTEM_BASIC,
 NetQuotaPolicy GetQuota()
 {
     NetQuotaPolicy quotaPolicy;
-    quotaPolicy.netlogotype.netType = 0;
-    quotaPolicy.netlogotype.simId = std::to_string(TRIGER_DELAY_US);
+    quotaPolicy.networkmatchrule.netType = 0;
+    quotaPolicy.networkmatchrule.simId = std::to_string(TRIGER_DELAY_US);
     quotaPolicy.quotapolicy.periodStartTime = TRIGER_DELAY_US;
     quotaPolicy.quotapolicy.periodDuration = TEST_STRING_PERIODDURATION;
     quotaPolicy.quotapolicy.warningBytes = TRIGER_DELAY_US;

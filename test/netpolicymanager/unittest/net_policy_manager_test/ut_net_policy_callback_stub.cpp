@@ -141,8 +141,8 @@ HWTEST_F(UtNetPolicyCallbackStubTest, OnNetQuotaPolicyChangeTest001, TestSize.Le
 {
     std::vector<NetQuotaPolicy> cellularPolicies;
     NetQuotaPolicy policy;
-    policy.netlogotype.simId = "testIccid";
-    policy.netlogotype.ident = "testIdent";
+    policy.networkmatchrule.simId = "testIccid";
+    policy.networkmatchrule.ident = "testIdent";
     policy.quotapolicy.title = "testTitle";
     cellularPolicies.push_back(policy);
     MessageParcel data;

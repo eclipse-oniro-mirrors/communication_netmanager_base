@@ -28,10 +28,10 @@ static constexpr uint32_t MAX_POLICY_SIZE = 100;
 
 bool NetQuotaPolicy::Marshalling(Parcel &parcel) const
 {
-    if (!parcel.WriteInt32(netlogotype.netType)) {
+    if (!parcel.WriteInt32(networkmatchrule.netType)) {
         return false;
     }
-    if (!parcel.WriteString(netlogotype.simId)) {
+    if (!parcel.WriteString(networkmatchrule.simId)) {
         return false;
     }
     if (!parcel.WriteInt64(quotapolicy.periodStartTime)) {
@@ -55,7 +55,7 @@ bool NetQuotaPolicy::Marshalling(Parcel &parcel) const
     if (!parcel.WriteInt32(quotapolicy.source)) {
         return false;
     }
-    if (!parcel.WriteString(netlogotype.ident)) {
+    if (!parcel.WriteString(networkmatchrule.ident)) {
         return false;
     }
 
@@ -84,10 +84,10 @@ bool NetQuotaPolicy::Marshalling(Parcel &parcel, const std::vector<NetQuotaPolic
 
 bool NetQuotaPolicy::Unmarshalling(Parcel &parcel, NetQuotaPolicy &quotaPolicy)
 {
-    if (!parcel.ReadInt32(quotaPolicy.netlogotype.netType)) {
+    if (!parcel.ReadInt32(quotaPolicy.networkmatchrule.netType)) {
         return false;
     }
-    if (!parcel.ReadString(quotaPolicy.netlogotype.simId)) {
+    if (!parcel.ReadString(quotaPolicy.networkmatchrule.simId)) {
         return false;
     }
     if (!parcel.ReadInt64(quotaPolicy.quotapolicy.periodStartTime)) {
@@ -111,7 +111,7 @@ bool NetQuotaPolicy::Unmarshalling(Parcel &parcel, NetQuotaPolicy &quotaPolicy)
     if (!parcel.ReadInt32(quotaPolicy.quotapolicy.source)) {
         return false;
     }
-    if (!parcel.ReadString(quotaPolicy.netlogotype.ident)) {
+    if (!parcel.ReadString(quotaPolicy.networkmatchrule.ident)) {
         return false;
     }
 
@@ -128,10 +128,10 @@ bool NetQuotaPolicy::Unmarshalling(Parcel &parcel, std::vector<NetQuotaPolicy> &
 
     NetQuotaPolicy quotaPolicyTmp;
     for (uint32_t i = 0; i < vSize; i++) {
-        if (!parcel.ReadInt32(quotaPolicyTmp.netlogotype.netType)) {
+        if (!parcel.ReadInt32(quotaPolicyTmp.networkmatchrule.netType)) {
             return false;
         }
-        if (!parcel.ReadString(quotaPolicyTmp.netlogotype.simId)) {
+        if (!parcel.ReadString(quotaPolicyTmp.networkmatchrule.simId)) {
             return false;
         }
         if (!parcel.ReadInt64(quotaPolicyTmp.quotapolicy.periodStartTime)) {
@@ -155,7 +155,7 @@ bool NetQuotaPolicy::Unmarshalling(Parcel &parcel, std::vector<NetQuotaPolicy> &
         if (!parcel.ReadInt32(quotaPolicyTmp.quotapolicy.source)) {
             return false;
         }
-        if (!parcel.ReadString(quotaPolicyTmp.netlogotype.ident)) {
+        if (!parcel.ReadString(quotaPolicyTmp.networkmatchrule.ident)) {
             return false;
         }
         quotaPolicies.push_back(quotaPolicyTmp);

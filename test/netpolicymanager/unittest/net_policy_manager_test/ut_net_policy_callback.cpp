@@ -133,9 +133,9 @@ void NetPolicyCallbackUTest::TearDown()
 void SetFirstNetQuotaPolicy(std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     NetQuotaPolicy quotaPolicy1;
-    quotaPolicy1.netlogotype.simId = ICCID_1;
+    quotaPolicy1.networkmatchrule.simId = ICCID_1;
     quotaPolicy1.quotapolicy.periodDuration = "M1"; // M1: First day of the month.
-    quotaPolicy1.netlogotype.netType = NetBearType::BEARER_CELLULAR;
+    quotaPolicy1.networkmatchrule.netType = NetBearType::BEARER_CELLULAR;
     quotaPolicy1.quotapolicy.warningBytes = TEST_WARNING_BYTES_1;
     quotaPolicy1.quotapolicy.limitBytes = TEST_LIMIT_BYTES_1;
     quotaPolicy1.quotapolicy.lastWarningRemind = TEST_LAST_WARNING_REMIND_1;
@@ -148,9 +148,9 @@ void SetFirstNetQuotaPolicy(std::vector<NetQuotaPolicy> &quotaPolicies)
 void SetSecondNetQuotaPolicy(std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     NetQuotaPolicy quotaPolicy2;
-    quotaPolicy2.netlogotype.simId = ICCID_2;
+    quotaPolicy2.networkmatchrule.simId = ICCID_2;
     quotaPolicy2.quotapolicy.periodDuration = "Y1"; // y1: First day of the year.
-    quotaPolicy2.netlogotype.netType = NetBearType::BEARER_CELLULAR;
+    quotaPolicy2.networkmatchrule.netType = NetBearType::BEARER_CELLULAR;
     quotaPolicy2.quotapolicy.warningBytes = TEST_WARNING_BYTES_2;
     quotaPolicy2.quotapolicy.limitBytes = TEST_LIMIT_BYTES_2;
     quotaPolicy2.quotapolicy.lastWarningRemind = TEST_LAST_WARNING_REMIND_2;

@@ -336,10 +336,10 @@ void SetCellularPoliciesFuzzTest(const uint8_t *data, size_t size)
     std::vector<NetQuotaPolicy> quotaPolicies;
     for (uint32_t i = 0; i < vectorSize; i++) {
         NetQuotaPolicy netQuotaPolicy;
-        netQuotaPolicy.netlogotype.netType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+        netQuotaPolicy.networkmatchrule.netType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
 
-        netQuotaPolicy.netlogotype.simId = GetStringFromData(STR_LEN);
-        netQuotaPolicy.netlogotype.ident = GetStringFromData(STR_LEN);
+        netQuotaPolicy.networkmatchrule.simId = GetStringFromData(STR_LEN);
+        netQuotaPolicy.networkmatchrule.ident = GetStringFromData(STR_LEN);
         netQuotaPolicy.quotapolicy.periodStartTime = GetData<int64_t>();
         netQuotaPolicy.quotapolicy.periodDuration = GetStringFromData(STR_LEN);
 
@@ -428,10 +428,10 @@ void SetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
     std::vector<NetQuotaPolicy> quotaPolicies;
     for (uint32_t i = 0; i < vectorSize; i++) {
         NetQuotaPolicy netQuotaPolicy;
-        netQuotaPolicy.netlogotype.netType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+        netQuotaPolicy.networkmatchrule.netType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
 
-        netQuotaPolicy.netlogotype.simId = GetStringFromData(STR_LEN);
-        netQuotaPolicy.netlogotype.ident = GetStringFromData(STR_LEN);
+        netQuotaPolicy.networkmatchrule.simId = GetStringFromData(STR_LEN);
+        netQuotaPolicy.networkmatchrule.ident = GetStringFromData(STR_LEN);
         netQuotaPolicy.quotapolicy.periodStartTime = GetData<int64_t>();
         netQuotaPolicy.quotapolicy.periodDuration = GetStringFromData(STR_LEN);
 
