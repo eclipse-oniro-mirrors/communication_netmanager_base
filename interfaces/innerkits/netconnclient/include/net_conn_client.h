@@ -24,6 +24,7 @@
 
 #include "http_proxy.h"
 #include "i_net_conn_service.h"
+#include "i_net_interface_callback.h"
 #include "i_net_supplier_callback.h"
 #include "net_handle.h"
 #include "net_link_info.h"
@@ -327,6 +328,27 @@ public:
      * @systemapi Hide this for inner system use.
      */
     int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList);
+
+    /**
+     * Register network interface state change callback
+     *
+     * @param callback The callback of INetInterfaceStateCallback interface
+     * @return Returns 0, successfully register net connection callback, otherwise it will failed
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback);
+
+    /**
+     * Get network interface configuration
+     *
+     * @param ifaceName Network port device name
+     * @param config Network interface configuration
+     * @return Returns 0, successfully register net connection callback, otherwise it will failed
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config);
 
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {

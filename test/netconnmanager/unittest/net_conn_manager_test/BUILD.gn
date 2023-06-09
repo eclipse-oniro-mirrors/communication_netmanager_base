@@ -36,6 +36,7 @@ ohos_unittest("net_conn_manager_test") {
     "net_detection_callback_stub_test.cpp",
     "net_detection_callback_test.cpp",
     "net_handle_test.cpp",
+    "net_interface_callback_stub_test.cpp",
     "net_link_info_test.cpp",
     "net_monitor_test.cpp",
     "net_score_test.cpp",
@@ -57,12 +58,14 @@ ohos_unittest("net_conn_manager_test") {
     "$NETMANAGERNATIVE_ROOT/net_mgr_native/include",
     "$NETMANAGERNATIVE_ROOT/common/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
+    "$NETSYSCONTROLLER_ROOT_DIR/include",
   ]
 
   deps = [
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]
 
   external_deps = [

@@ -32,6 +32,7 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "$NETMANAGERNATIVE_ROOT/net_mgr_native/include",
     "$NETMANAGERNATIVE_ROOT/common/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
+    "$NETSYSCONTROLLER_ROOT_DIR/include",
   ]
 
   cflags = [
@@ -46,6 +47,7 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
+    "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
   ]
 
   defines = [

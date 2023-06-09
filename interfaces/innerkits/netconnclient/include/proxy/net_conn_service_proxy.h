@@ -61,6 +61,8 @@ public:
     int32_t GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy) override;
     int32_t GetNetIdByIdentifier(const std::string &ident, std::list<int32_t> &netIdList) override;
     int32_t SetAppNet(int32_t netId) override;
+    int32_t RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback) override;
+    int32_t GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

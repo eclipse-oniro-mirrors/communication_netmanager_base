@@ -21,6 +21,8 @@
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
 #include "net_conn_types.h"
+#include "net_interface_callback_stub.h"
+#include "net_interface_config.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "token_setproc.h"
@@ -44,6 +46,7 @@ constexpr const char *TEST_DOMAIN4 = "com.test";
 constexpr const char *TEST_DOMAIN5 = "test.co.uk";
 constexpr const char *TEST_DOMAIN6 = "test.com.com";
 constexpr const char *TEST_DOMAIN7 = "test1.test2.test3.test4.test5.com";
+constexpr const char *TEST_IFACE = "eth0";
 
 HapInfoParams testInfoParms = {.bundleName = "net_conn_manager_test",
                                .userID = 1,
@@ -887,6 +890,56 @@ HWTEST_F(NetConnClientTest, UpdateNetSupplierInfo001, TestSize.Level1)
     netSupplierInfo->frequency_ = 0x10;
     int32_t ret = client->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
     EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
+}
+
+/**
+ * @tc.name: GetNetInterfaceConfigurationTest001
+ * @tc.desc: Test NetConnClient::GetNetInterfaceConfiguration
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, GetNetInterfaceConfigurationTest001, TestSize.Level1)
+{
+    AccessToken token;
+    NetInterfaceConfiguration config;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetInterfaceConfiguration(TEST_IFACE, config);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: GetNetInterfaceConfigurationTest001
+ * @tc.desc: Test NetConnClient::GetNetInterfaceConfiguration
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, GetNetInterfaceConfigurationTest002, TestSize.Level1)
+{
+    NetInterfaceConfiguration config;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetInterfaceConfiguration(TEST_IFACE, config);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: RegisterNetInterfaceCallbackTest001
+ * @tc.desc: Test NetConnClient::RegisterNetInterfaceCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RegisterNetInterfaceCallbackTest001, TestSize.Level1)
+{
+    sptr<INetInterfaceStateCallback> callback = new (std::nothrow) NetInterfaceStateCallbackStub();
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetInterfaceCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: RegisterNetInterfaceCallbackTest002
+ * @tc.desc: Test NetConnClient::RegisterNetInterfaceCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RegisterNetInterfaceCallbackTest002, TestSize.Level1)
+{
+    AccessToken token;
+    sptr<INetInterfaceStateCallback> callback = new (std::nothrow) NetInterfaceStateCallbackStub();
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetInterfaceCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

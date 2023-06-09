@@ -48,6 +48,7 @@ ohos_shared_library("net_conn_manager") {
     "src/stub/net_conn_callback_proxy.cpp",
     "src/stub/net_conn_service_stub.cpp",
     "src/stub/net_detection_callback_proxy.cpp",
+    "src/stub/net_interface_callback_proxy.cpp",
     "src/stub/net_supplier_callback_proxy.cpp",
   ]
 
@@ -131,6 +132,7 @@ ohos_static_library("net_conn_manager_static") {
     "src/stub/net_conn_callback_proxy.cpp",
     "src/stub/net_conn_service_stub.cpp",
     "src/stub/net_detection_callback_proxy.cpp",
+    "src/stub/net_interface_callback_proxy.cpp",
     "src/stub/net_supplier_callback_proxy.cpp",
   ]
 
