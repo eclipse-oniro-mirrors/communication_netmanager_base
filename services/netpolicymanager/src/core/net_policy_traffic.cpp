@@ -481,8 +481,8 @@ void NetPolicyTraffic::GetDumpMessage(std::string &message)
     message.append(TAB + "QuotaPolicies:\n");
     std::for_each(quotaPolicies_.begin(), quotaPolicies_.end(), [&message](const auto &item) {
         message.append(TAB + TAB + "NetType: " + std::to_string(item.networkmatchrule.netType) + "\n" + TAB + TAB +
-                       "simId: " + item.networkmatchrule.simId + "\n" + TAB + TAB + "Ident: " + item.networkmatchrule.ident +
-                       "\n");
+                       "simId: " + item.networkmatchrule.simId + "\n" + TAB + TAB +
+                       "Ident: " + item.networkmatchrule.ident + "\n");
         message.append(TAB + TAB + "PeriodStartTime: " + std::to_string(item.quotapolicy.periodStartTime) + "\n");
         message.append(TAB + TAB + "PeriodDuration: " + item.quotapolicy.periodDuration + "\n");
         message.append(TAB + TAB + "Title: " + item.quotapolicy.title + "\n" + TAB + TAB +
