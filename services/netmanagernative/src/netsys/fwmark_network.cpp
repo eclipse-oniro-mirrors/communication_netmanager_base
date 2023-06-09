@@ -24,6 +24,7 @@
 #include <unistd.h>
 
 #include "fwmark.h"
+#include "fwmark_command.h"
 #include "init_socket.h"
 #include "netnative_log_wrapper.h"
 #ifdef USE_SELINUX
@@ -33,7 +34,17 @@
 
 namespace OHOS {
 namespace nmd {
-void FwmarkNetwork::CloseSocket(int32_t *socket, int32_t ret, int32_t errorCode)
+static constexpr const uint16_t NETID_UNSET = 0;
+static constexpr const int32_t NO_ERROR_CODE = 0;
+static constexpr const int32_t ERROR_CODE_RECVMSG_FAILED = -1;
+static constexpr const int32_t ERROR_CODE_SOCKETFD_INVALID = -2;
+static constexpr const int32_t ERROR_CODE_WRITE_FAILED = -3;
+static constexpr const int32_t ERROR_CODE_GETSOCKOPT_FAILED = -4;
+static constexpr const int32_t ERROR_CODE_SETSOCKOPT_FAILED = -5;
+static constexpr const int32_t ERROR_CODE_SET_MARK = -6;
+static constexpr const int32_t MAX_CONCURRENT_CONNECTION_REQUESTS = 10;
+
+void CloseSocket(int32_t *socket, int32_t ret, int32_t errorCode)
 {
     if (socket == nullptr) {
         NETNATIVE_LOGE("CloseSocket failed, socket is nullptr");
@@ -71,7 +82,7 @@ void FwmarkNetwork::CloseSocket(int32_t *socket, int32_t ret, int32_t errorCode)
     *socket = -1;
 }
 
-int32_t FwmarkNetwork::SetMark(int32_t *socketFd, FwmarkCommand *command)
+int32_t SetMark(int32_t *socketFd, FwmarkCommand *command)
 {
     if (command == nullptr || socketFd == nullptr) {
         NETNATIVE_LOGE("SetMark failed, command or socketFd is nullptr");
@@ -88,8 +99,8 @@ int32_t FwmarkNetwork::SetMark(int32_t *socketFd, FwmarkCommand *command)
                    *socketFd, command->cmdId);
     switch (command->cmdId) {
         case FwmarkCommand::SELECT_NETWORK: {
-            fwmark.netId = (command->netId != NETID_UNSET) ? command->netId : defaultNetId_.load();
-            if (fwmark.netId == NETID_UNSET) {
+            fwmark.netId = command->netId;
+            if (command->netId == NETID_UNSET) {
                 fwmark.explicitlySelected = false;
                 fwmark.protectedFromVpn = false;
                 fwmark.permission = PERMISSION_NONE;
@@ -114,7 +125,7 @@ int32_t FwmarkNetwork::SetMark(int32_t *socketFd, FwmarkCommand *command)
     return ret;
 }
 
-void FwmarkNetwork::SendMessage(int32_t *serverSockfd)
+void SendMessage(int32_t *serverSockfd)
 {
     if (serverSockfd == nullptr) {
         NETNATIVE_LOGE("SendMessage failed, serverSockfd is nullptr");
@@ -174,7 +185,7 @@ void FwmarkNetwork::SendMessage(int32_t *serverSockfd)
     }
 }
 
-void FwmarkNetwork::StartListener()
+void StartListener()
 {
     int32_t serverSockfd = GetControlSocket("fwmarkd");
 
@@ -190,14 +201,16 @@ void FwmarkNetwork::StartListener()
     serverSockfd = -1;
 }
 
-void FwmarkNetwork::SetDefaultNetId(int32_t netId)
+FwmarkNetwork::FwmarkNetwork()
 {
-    defaultNetId_ = netId;
+    ListenerClient();
 }
+
+FwmarkNetwork::~FwmarkNetwork() {}
 
 void FwmarkNetwork::ListenerClient()
 {
-    std::thread startListener([this]() { StartListener(); });
+    std::thread startListener(StartListener);
     std::string threadName = "FwmarkListen";
     pthread_setname_np(startListener.native_handle(), threadName.c_str());
     startListener.detach();

@@ -711,7 +711,7 @@ int32_t NetsysNativeServiceProxy::NetworkRemoveInterface(int32_t netId, const st
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::NetworkDestroy(int32_t netId)
+int32_t NetsysNativeServiceProxy::NetworkDestroy(int32_t netId, const std::list<std::string> &ipAddrList)
 {
     NETNATIVE_LOGI("Begin to NetworkDestroy");
     MessageParcel data;
@@ -720,6 +720,16 @@ int32_t NetsysNativeServiceProxy::NetworkDestroy(int32_t netId)
     }
     if (!data.WriteInt32(netId)) {
         return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint32(ipAddrList.size())) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    for (const auto &ipAddr : ipAddrList) {
+        if (!data.WriteString(ipAddr)) {
+            return ERR_FLATTEN_OBJECT;
+        }
     }
 
     MessageParcel reply;

@@ -20,8 +20,9 @@
 #include <linux/sock_diag.h>
 #include <linux/inet_diag.h>
 #include <netinet/in.h>
-#include <unistd.h>
 #include <sys/socket.h>
+#include <list>
+#include <unistd.h>
 
 namespace OHOS {
 namespace nmd {
@@ -33,27 +34,28 @@ public:
     /**
      * Destroy all 'active' TCP sockets that no longer exist.
      *
-     * @param netId Network ID
+     * @param ipAddrList Network IP address list
      * @param excludeLoopback “true” to exclude loopback.
      * @return Returns NETMANAGER_SUCCESS, destroy successfully, otherwise it will fail.
      */
-    int32_t DestroySocketsLackingNetwork(uint16_t netId, bool excludeLoopback);
+    int32_t DestroySocketsLackingNetwork(const std::list<std::string> &ipAddrList, bool excludeLoopback);
 
 private:
     inline bool InLookBack(uint32_t a)
     {
-        return ((a & htonl(0xff000000)) == htonl(0x7f000000));
+        return ((a & 0xff000000) == 0x7f000000);
     }
 
     bool CreateNetlinkSocket();
     void CloseNetlinkSocket();
-    int32_t DestroyLiveSockets(bool excludeLoopback, iovec *iov, int iovCnt);
     int32_t ExecuteDestroySocket(uint8_t proto, const inet_diag_msg *msg);
     int32_t GetErrorFromKernel(int32_t fd);
     bool IsLoopbackSocket(const inet_diag_msg *msg);
-    int32_t ProcessSockDiagDumpResponse(uint8_t proto, bool excludeLoopback);
-    int32_t SendSockDiagDumpRequest(uint8_t proto, uint8_t family, uint32_t states, iovec *iov, int iovCnt);
-    void SockDiagDumpCallback(uint8_t proto, bool excludeLoopback, const inet_diag_msg *msg);
+    bool IsMatchNetwork(const inet_diag_msg *msg, const std::list<std::string> &ipAddrList);
+    int32_t ProcessSockDiagDumpResponse(uint8_t proto, bool excludeLoopback, const std::list<std::string> &ipAddrList);
+    int32_t SendSockDiagDumpRequest(uint8_t proto, uint8_t family, uint32_t states);
+    void SockDiagDumpCallback(uint8_t proto, bool excludeLoopback, const inet_diag_msg *msg,
+                              const std::list<std::string> &ipAddrList);
 
 private:
     struct SockDiagRequest {

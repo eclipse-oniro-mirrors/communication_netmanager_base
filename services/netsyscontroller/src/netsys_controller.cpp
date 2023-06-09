@@ -77,14 +77,14 @@ int32_t NetsysController::NetworkCreateVirtual(int32_t netId, bool hasDns)
     return netsysService_->NetworkCreateVirtual(netId, hasDns);
 }
 
-int32_t NetsysController::NetworkDestroy(int32_t netId)
+int32_t NetsysController::NetworkDestroy(int32_t netId, const std::list<std::string> &ipAddrList)
 {
     NETMGR_LOG_D("Destroy network: netId[%{public}d]", netId);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
-    return netsysService_->NetworkDestroy(netId);
+    return netsysService_->NetworkDestroy(netId, ipAddrList);
 }
 
 int32_t NetsysController::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)

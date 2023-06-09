@@ -82,7 +82,8 @@ int32_t ConnManager::CreatePhysicalNetwork(uint16_t netId, NetworkPermission per
                 interfaceName = physicalInterfaceName_[netId];
             }
             RemoveInterfaceFromNetwork(netId, interfaceName);
-            DestroyNetwork(netId);
+            std::list<std::string> ipAddrList;
+            DestroyNetwork(netId, ipAddrList);
         }
         needReinitRouteFlag_ = false;
     }
@@ -97,7 +98,7 @@ int32_t ConnManager::CreateVirtualNetwork(uint16_t netId, bool hasDns)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t ConnManager::DestroyNetwork(int32_t netId)
+int32_t ConnManager::DestroyNetwork(int32_t netId, const std::list<std::string> &ipAddrList)
 {
     if (netId == LOCAL_NET_ID) {
         NETNATIVE_LOGE("Cannot destroy local network");
@@ -116,7 +117,7 @@ int32_t ConnManager::DestroyNetwork(int32_t netId)
     }
     networks_.erase(netId);
     NetLinkSocketDiag sd;
-    sd.DestroySocketsLackingNetwork(netId, true);
+    sd.DestroySocketsLackingNetwork(ipAddrList, true);
     return NETMANAGER_SUCCESS;
 }
 

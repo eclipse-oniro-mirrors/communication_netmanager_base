@@ -110,7 +110,9 @@ bool Network::ReleaseBasicNetwork()
     if (isPhyNetCreated_) {
         NETMGR_LOG_D("Destroy physical network");
         StopNetDetection();
+        std::list<std::string> ipAddrList;
         for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+            ipAddrList.push_back(inetAddr.address_);
             int32_t prefixLen = inetAddr.prefixlen_;
             if (prefixLen == 0) {
                 prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
@@ -118,7 +120,7 @@ bool Network::ReleaseBasicNetwork()
             NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
         }
         NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
-        NetsysController::GetInstance().NetworkDestroy(netId_);
+        NetsysController::GetInstance().NetworkDestroy(netId_, ipAddrList);
         NetsysController::GetInstance().DestroyNetworkCache(netId_);
         netLinkInfo_.Initialize();
         isPhyNetCreated_ = false;

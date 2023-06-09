@@ -17,6 +17,7 @@
 #define I_NETSYSCONTROLLER_SERVICE_H
 
 #include <linux/if.h>
+#include <list>
 #include <memory>
 #include <netdb.h>
 #include <string>
@@ -68,7 +69,7 @@ public:
      * @param netId Net Id
      * @return Return the return value of the netsys interface call
      */
-    virtual int32_t NetworkDestroy(int32_t netId) = 0;
+    virtual int32_t NetworkDestroy(int32_t netId, const std::list<std::string> &ipAddrList) = 0;
 
     virtual int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) = 0;
     virtual int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges) = 0;

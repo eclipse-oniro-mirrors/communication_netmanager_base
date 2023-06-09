@@ -16,6 +16,7 @@
 #ifndef INCLUDE_CONN_MANAGER_H
 #define INCLUDE_CONN_MANAGER_H
 
+#include <list>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -76,10 +77,11 @@ public:
      *        to be the default network
      *
      * @param netId The network to destroy
+     * @param netId The network ip address list
      *
      * @return Returns 0, successfully destroy the network, otherwise it will fail
      */
-    int32_t DestroyNetwork(int32_t netId);
+    int32_t DestroyNetwork(int32_t netId, const std::list<std::string> &ipAddrList);
 
     /**
      * Set network as default network

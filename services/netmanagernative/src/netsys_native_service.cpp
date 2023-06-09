@@ -138,7 +138,6 @@ bool NetsysNativeService::Init()
     bpfStats_ = std::make_unique<OHOS::NetManagerStandard::NetsysBpfStats>();
     dhcpController_ = std::make_unique<OHOS::nmd::DhcpController>();
     fwmarkNetwork_ = std::make_unique<OHOS::nmd::FwmarkNetwork>();
-    fwmarkNetwork_->ListenerClient();
     sharingManager_ = std::make_unique<SharingManager>();
     iptablesWrapper_ = DelayedSingleton<IptablesWrapper>::GetInstance();
 
@@ -260,7 +259,6 @@ int32_t NetsysNativeService::NetworkRemoveRouteParcel(int32_t netId, const Route
 int32_t NetsysNativeService::NetworkSetDefault(int32_t netId)
 {
     NETNATIVE_LOG_D("NetworkSetDefault in.");
-    fwmarkNetwork_->SetDefaultNetId(netId);
     int32_t result = netsysService_->NetworkSetDefault(netId);
     NETNATIVE_LOG_D("NetworkSetDefault out.");
     return result;
@@ -275,7 +273,6 @@ int32_t NetsysNativeService::NetworkGetDefault()
 
 int32_t NetsysNativeService::NetworkClearDefault()
 {
-    fwmarkNetwork_->SetDefaultNetId(NETID_UNSET);
     int32_t result = netsysService_->NetworkClearDefault();
     NETNATIVE_LOG_D("NetworkClearDefault");
     return result;
@@ -374,9 +371,9 @@ int32_t NetsysNativeService::NetworkRemoveInterface(int32_t netId, const std::st
     return result;
 }
 
-int32_t NetsysNativeService::NetworkDestroy(int32_t netId)
+int32_t NetsysNativeService::NetworkDestroy(int32_t netId, const std::list<std::string> &ipAddrList)
 {
-    int32_t result = netsysService_->NetworkDestroy(netId);
+    int32_t result = netsysService_->NetworkDestroy(netId, ipAddrList);
     NETNATIVE_LOG_D("NetworkDestroy");
     return result;
 }
