@@ -326,7 +326,8 @@ HWTEST_F(NetsysNativeServiceTest, NetworkRemoveInterfaceTest001, TestSize.Level1
 HWTEST_F(NetsysNativeServiceTest, NetworkDestroyTest001, TestSize.Level1)
 {
     int32_t netId = 1000;
-    int32_t ret = instance_->NetworkDestroy(netId);
+    std::list<std::string> ipAddrList;
+    int32_t ret = instance_->NetworkDestroy(netId, ipAddrList);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

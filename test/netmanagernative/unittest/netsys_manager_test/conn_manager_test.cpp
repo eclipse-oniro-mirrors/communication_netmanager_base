@@ -126,7 +126,8 @@ HWTEST_F(ConnManagerTest, CreateVirtualNetwork001, TestSize.Level1)
  */
 HWTEST_F(ConnManagerTest, DestroyNetworkTest001, TestSize.Level1)
 {
-    auto ret = instance_->DestroyNetwork(LOCAL_NET_ID);
+    std::list<std::string> ipAddrList;
+    auto ret = instance_->DestroyNetwork(LOCAL_NET_ID, ipAddrList);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
@@ -137,9 +138,10 @@ HWTEST_F(ConnManagerTest, DestroyNetworkTest001, TestSize.Level1)
  */
 HWTEST_F(ConnManagerTest, DestroyNetworkTest002, TestSize.Level1)
 {
-    int32_t ret = instance_->DestroyNetwork(NETID);
+    std::list<std::string> ipAddrList;
+    int32_t ret = instance_->DestroyNetwork(NETID, ipAddrList);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    ret = instance_->DestroyNetwork(NETID);
+    ret = instance_->DestroyNetwork(NETID, ipAddrList);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -154,7 +156,8 @@ HWTEST_F(ConnManagerTest, DestroyNetworkTest003, TestSize.Level1)
     int32_t ret = instance_->CreatePhysicalNetwork(netId, PERMISSION_NONE);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
-    ret = instance_->DestroyNetwork(netId);
+    std::list<std::string> ipAddrList;
+    ret = instance_->DestroyNetwork(netId, ipAddrList);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

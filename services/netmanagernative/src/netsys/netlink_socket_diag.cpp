@@ -227,8 +227,13 @@ void NetLinkSocketDiag::SockDiagDumpCallback(uint8_t proto, bool excludeLoopback
         return;
     }
 
-    if (excludeLoopback && IsLoopbackSocket(msg) && !IsMatchNetwork(msg, ipAddrList)) {
+    if (excludeLoopback && IsLoopbackSocket(msg)) {
         NETNATIVE_LOGE("Loop back socket, no need to close.");
+        return;
+    }
+
+    if (!IsMatchNetwork(msg, ipAddrList)) {
+        NETNATIVE_LOGE("Socket is not associated with the network");
         return;
     }
 
@@ -238,6 +243,9 @@ void NetLinkSocketDiag::SockDiagDumpCallback(uint8_t proto, bool excludeLoopback
 int32_t NetLinkSocketDiag::DestroySocketsLackingNetwork(const std::list<std::string> &ipAddrList, bool excludeLoopback)
 {
     NETNATIVE_LOG_D("DestroySocketsLackingNetwork in");
+    for (auto &ipAddr : ipAddrList) {
+        NETNATIVE_LOG_D("DestroySocketsLackingNetwork ip addr:%{public}s", ipAddr.c_str());
+    }
     if (!CreateNetlinkSocket()) {
         NETNATIVE_LOGE("Error closing sockets for netId change");
         return NETMANAGER_ERR_INTERNAL;

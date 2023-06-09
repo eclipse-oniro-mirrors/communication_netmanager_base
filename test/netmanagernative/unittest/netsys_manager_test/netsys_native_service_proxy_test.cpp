@@ -130,7 +130,8 @@ HWTEST_F(NetsysNativeServiceProxyTest, DestroyNetworkTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
-    int32_t ret = netsysNativeService->NetworkDestroy(NETID);
+    std::list<std::string> ipAddrList;
+    int32_t ret = netsysNativeService->NetworkDestroy(NETID, ipAddrList);
     EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative
