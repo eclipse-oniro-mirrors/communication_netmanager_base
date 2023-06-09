@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,7 +73,7 @@ void DealInfoFromKernel(nlmsghdr *nlmsgHeader, uint16_t clearThing, uint32_t tab
  * @param property Property for route
  * @return Returns 0, get route property successfully, otherwise it will fail
  */
-uint32_t GetRouteProperty(const nlmsghdr *nlmsgHeader, int32_t property);
+int32_t GetRouteProperty(const nlmsghdr *nlmsgHeader, int32_t property);
 } // namespace nmd
 } // namespace OHOS
 #endif // !INCLUDE_NETLINK_SOCKET_H

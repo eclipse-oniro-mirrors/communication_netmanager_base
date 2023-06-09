@@ -59,7 +59,6 @@ NetConnServiceStub::NetConnServiceStub()
                                                     {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[CMD_NM_SET_APP_NET] = {&NetConnServiceStub::OnSetAppNet, {Permission::INTERNET}};
     memberFuncMap_[CMD_NM_SET_INTERNET_PERMISSION] = {&NetConnServiceStub::OnSetInternetPermission, {}};
-    memberFuncMap_[CMD_NM_SET_IF_UP_MULTICAST] = {&NetConnServiceStub::OnInterfaceSetIffUp, {}};
     memberFuncMap_[CMD_NM_REGISTER_NET_INTERFACE_CALLBACK] = {&NetConnServiceStub::OnRegisterNetInterfaceCallback,
                                                               {Permission::CONNECTIVITY_INTERNAL}};
     InitQueryFuncToInterfaceMap();
@@ -932,19 +931,6 @@ int32_t NetConnServiceStub::OnSetAppNet(MessageParcel &data, MessageParcel &repl
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     int ret = SetAppNet(netId);
-    if (!reply.WriteInt32(ret)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-    return ret;
-}
-
-int32_t NetConnServiceStub::OnInterfaceSetIffUp(MessageParcel &data, MessageParcel &reply)
-{
-    std::string ifaceName;
-    if (!data.ReadString(ifaceName)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
-    }
-    int32_t ret = InterfaceSetIffUp(ifaceName);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

@@ -43,7 +43,6 @@ constexpr const char *ERROR_MSG_NULL_NET_SPECIFIER = "The parameter of netSpecif
 constexpr const char *ERROR_MSG_CAN_NOT_FIND_SUPPLIER = "Can not find supplier by id:";
 constexpr const char *ERROR_MSG_UPDATE_NETLINK_INFO_FAILED = "Update net link info failed";
 constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
-constexpr const char *WLAN_IF_NAME = "wlan";
 constexpr const char *NET_ACTIVATE_WORK_THREAD = "NET_ACTIVATE_WORK_THREAD";
 } // namespace
 
@@ -1401,19 +1400,6 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 int32_t NetConnService::SetAppNet(int32_t netId)
 {
     return NETMANAGER_SUCCESS;
-}
-
-int32_t NetConnService::InterfaceSetIffUp(const std::string &ifaceName)
-{
-    if (ifaceName.empty()) {
-        NETMGR_LOG_E("The ifaceName in service is null");
-        return NETMANAGER_ERR_INVALID_PARAMETER;
-    }
-    if (strncmp(ifaceName.c_str(), WLAN_IF_NAME, strlen(WLAN_IF_NAME))) {
-        NETMGR_LOG_I("Configure only wlan network card, [%{public}s]", ifaceName.c_str());
-        return NETMANAGER_ERR_INVALID_PARAMETER;
-    }
-    return NetsysController::GetInstance().InterfaceSetIffUp(ifaceName);
 }
 
 int32_t NetConnService::RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback)

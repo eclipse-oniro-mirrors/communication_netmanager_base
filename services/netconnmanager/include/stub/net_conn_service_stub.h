@@ -72,7 +72,6 @@ private:
     int32_t OnGetDefaultHttpProxy(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetNetIdByIdentifier(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetAppNet(MessageParcel &data, MessageParcel &reply);
-    int32_t OnInterfaceSetIffUp(MessageParcel &data, MessageParcel &reply);
     int32_t OnRequestCheck(uint32_t code);
     int32_t OnRegisterNetInterfaceCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetNetInterfaceConfiguration(MessageParcel &data, MessageParcel &reply);

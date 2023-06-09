@@ -405,16 +405,6 @@ int32_t NetConnClient::GetNetIdByIdentifier(const std::string &ident, std::list<
     return proxy->GetNetIdByIdentifier(ident, netIdList);
 }
 
-int32_t NetConnClient::InterfaceSetIffUp(const std::string &ifaceName)
-{
-    sptr<INetConnService> proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NETMANAGER_ERR_GET_PROXY_FAIL;
-    }
-    return proxy->InterfaceSetIffUp(ifaceName);
-}
-
 int32_t NetConnClient::SetAppNet(int32_t netId)
 {
     if (netId < MIN_VALID_NETID && netId != 0) {

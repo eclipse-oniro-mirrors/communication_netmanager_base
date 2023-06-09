@@ -1268,39 +1268,6 @@ int32_t NetConnServiceProxy::SetAppNet(int32_t netId)
     return ret;
 }
 
-int32_t NetConnServiceProxy::InterfaceSetIffUp(const std::string &ifaceName)
-{
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-
-    if (!data.WriteString(ifaceName)) {
-        NETMGR_LOG_E("Write string data failed");
-        return NETMANAGER_ERR_WRITE_DATA_FAIL;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_SET_IF_UP_MULTICAST, data, reply, option);
-    if (error != ERR_NONE) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
-        return NETMANAGER_ERR_OPERATION_FAILED;
-    }
-
-    int32_t result = NETMANAGER_ERR_INTERNAL;
-    if (!reply.ReadInt32(result)) {
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
-}
-
 int32_t NetConnServiceProxy::RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback)
 {
     if (callback == nullptr) {
