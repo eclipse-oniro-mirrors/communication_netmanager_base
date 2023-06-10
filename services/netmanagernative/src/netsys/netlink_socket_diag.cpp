@@ -35,11 +35,18 @@ namespace {
 constexpr uint32_t KERNEL_BUFFER_SIZE = 8192U;
 constexpr uint8_t ADDR_POSITION = 3U;
 constexpr int32_t DOMAIN_IP_ADDR_MAX_LEN = 128;
+constexpr uint32_t LOCKBACK_MASK = 0xff000000;
+constexpr uint32_t LOCKBACK_DEFINE = 0x7f000000;
 } // namespace
 
 NetLinkSocketDiag::~NetLinkSocketDiag()
 {
     CloseNetlinkSocket();
+}
+
+bool NetLinkSocketDiag::InLookBack(uint32_t a)
+{
+    return (a & LOCKBACK_MASK) == LOCKBACK_DEFINE;
 }
 
 bool NetLinkSocketDiag::CreateNetlinkSocket()

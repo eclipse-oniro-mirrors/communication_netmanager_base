@@ -41,10 +41,7 @@ public:
     int32_t DestroySocketsLackingNetwork(const std::list<std::string> &ipAddrList, bool excludeLoopback);
 
 private:
-    inline bool InLookBack(uint32_t a)
-    {
-        return ((a & 0xff000000) == 0x7f000000);
-    }
+    static bool InLookBack(uint32_t a);
 
     bool CreateNetlinkSocket();
     void CloseNetlinkSocket();
