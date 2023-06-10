@@ -87,9 +87,9 @@ int32_t NetManagerNative::NetworkCreateVirtual(int32_t netId, bool hasDns)
     return connManager_->CreateVirtualNetwork(netId, hasDns);
 }
 
-int32_t NetManagerNative::NetworkDestroy(int32_t netId)
+int32_t NetManagerNative::NetworkDestroy(int32_t netId, const std::list<std::string> &ipAddrList)
 {
-    return connManager_->DestroyNetwork(netId);
+    return connManager_->DestroyNetwork(netId, ipAddrList);
 }
 
 int32_t NetManagerNative::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)

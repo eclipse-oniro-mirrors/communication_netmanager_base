@@ -52,9 +52,10 @@ public:
      * Destroy the network
      *
      * @param netId
+     * @param ipAddrList Network ip address list
      * @return Return the return value of the netsys interface call
      */
-    int32_t NetworkDestroy(int32_t netId) override;
+    int32_t NetworkDestroy(int32_t netId, const std::list<std::string> &ipAddrList) override;
 
     int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges) override;
     int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges) override;

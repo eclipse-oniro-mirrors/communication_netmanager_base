@@ -186,7 +186,7 @@ int32_t NetsysNativeClient::NetworkCreateVirtual(int32_t netId, bool hasDns)
     return proxy->NetworkCreateVirtual(netId, hasDns);
 }
 
-int32_t NetsysNativeClient::NetworkDestroy(int32_t netId)
+int32_t NetsysNativeClient::NetworkDestroy(int32_t netId, const std::list<std::string> &ipAddrList)
 {
     NETMGR_LOG_I("Destroy network: netId[%{public}d]", netId);
     auto proxy = GetProxy();
@@ -194,7 +194,7 @@ int32_t NetsysNativeClient::NetworkDestroy(int32_t netId)
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->NetworkDestroy(netId);
+    return proxy->NetworkDestroy(netId, ipAddrList);
 }
 
 int32_t NetsysNativeClient::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)

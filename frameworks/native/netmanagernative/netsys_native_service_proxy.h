@@ -68,7 +68,7 @@ public:
     int32_t InterfaceSetIffUp(const std::string &ifaceName) override;
     int32_t NetworkAddInterface(int32_t netId, const std::string &iface) override;
     int32_t NetworkRemoveInterface(int32_t netId, const std::string &iface) override;
-    int32_t NetworkDestroy(int32_t netId) override;
+    int32_t NetworkDestroy(int32_t netId, const std::list<std::string> &ipAddrList) override;
     int32_t GetFwmarkForNetwork(int32_t netId, MarkMaskParcel &markMaskParcel) override;
     int32_t SetInterfaceConfig(const InterfaceConfigurationParcel &cfg) override;
     int32_t GetInterfaceConfig(InterfaceConfigurationParcel &cfg) override;

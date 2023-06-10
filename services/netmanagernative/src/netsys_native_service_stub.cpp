@@ -604,8 +604,26 @@ int32_t NetsysNativeServiceStub::CmdNetworkRemoveInterface(MessageParcel &data, 
 
 int32_t NetsysNativeServiceStub::CmdNetworkDestroy(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t netId = data.ReadInt32();
-    int32_t result = NetworkDestroy(netId);
+    int32_t netId = 0;
+    if (!data.ReadInt32()) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+
+    uint32_t size = 0;
+    if (!data.ReadUint32(size)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    size = size > UIDS_LIST_MAX_SIZE ? UIDS_LIST_MAX_SIZE : size;
+    std::list<std::string> ipAddrList;
+    for (uint32_t i = 0; i < size; ++i) {
+        std::string value;
+        if (!data.ReadString(value)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+        ipAddrList.push_back(value);
+    }
+
+    int32_t result = NetworkDestroy(netId, ipAddrList);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("NetworkDestroy has recved result %{public}d", result);
 

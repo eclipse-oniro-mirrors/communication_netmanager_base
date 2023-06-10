@@ -61,7 +61,7 @@ public:
      * @param netId
      * @return Return the return value of the netsys interface call
      */
-    int32_t NetworkDestroy(int32_t netId);
+    int32_t NetworkDestroy(int32_t netId, const std::list<std::string> &ipAddrList);
 
     int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges);
     int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges);
