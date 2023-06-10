@@ -77,7 +77,7 @@ public:
      *        to be the default network
      *
      * @param netId The network to destroy
-     * @param netId The network ip address list
+     * @param ipAddrList The network ip address list
      *
      * @return Returns 0, successfully destroy the network, otherwise it will fail
      */
