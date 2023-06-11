@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,8 +126,7 @@ HWTEST_F(ConnManagerTest, CreateVirtualNetwork001, TestSize.Level1)
  */
 HWTEST_F(ConnManagerTest, DestroyNetworkTest001, TestSize.Level1)
 {
-    std::list<std::string> ipAddrList;
-    auto ret = instance_->DestroyNetwork(LOCAL_NET_ID, ipAddrList);
+    auto ret = instance_->DestroyNetwork(LOCAL_NET_ID);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
@@ -138,10 +137,9 @@ HWTEST_F(ConnManagerTest, DestroyNetworkTest001, TestSize.Level1)
  */
 HWTEST_F(ConnManagerTest, DestroyNetworkTest002, TestSize.Level1)
 {
-    std::list<std::string> ipAddrList;
-    int32_t ret = instance_->DestroyNetwork(NETID, ipAddrList);
+    int32_t ret = instance_->DestroyNetwork(NETID);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    ret = instance_->DestroyNetwork(NETID, ipAddrList);
+    ret = instance_->DestroyNetwork(NETID);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -156,8 +154,7 @@ HWTEST_F(ConnManagerTest, DestroyNetworkTest003, TestSize.Level1)
     int32_t ret = instance_->CreatePhysicalNetwork(netId, PERMISSION_NONE);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
-    std::list<std::string> ipAddrList;
-    ret = instance_->DestroyNetwork(netId, ipAddrList);
+    ret = instance_->DestroyNetwork(netId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

@@ -19,7 +19,6 @@
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "physical_network.h"
-#include "netlink_socket_diag.h"
 #include "virtual_network.h"
 #include "bpf_def.h"
 #include "bpf_path.h"
@@ -82,8 +81,7 @@ int32_t ConnManager::CreatePhysicalNetwork(uint16_t netId, NetworkPermission per
                 interfaceName = physicalInterfaceName_[netId];
             }
             RemoveInterfaceFromNetwork(netId, interfaceName);
-            std::list<std::string> ipAddrList;
-            DestroyNetwork(netId, ipAddrList);
+            DestroyNetwork(netId);
         }
         needReinitRouteFlag_ = false;
     }
@@ -98,7 +96,7 @@ int32_t ConnManager::CreateVirtualNetwork(uint16_t netId, bool hasDns)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t ConnManager::DestroyNetwork(int32_t netId, const std::list<std::string> &ipAddrList)
+int32_t ConnManager::DestroyNetwork(int32_t netId)
 {
     if (netId == LOCAL_NET_ID) {
         NETNATIVE_LOGE("Cannot destroy local network");
@@ -116,8 +114,6 @@ int32_t ConnManager::DestroyNetwork(int32_t netId, const std::list<std::string> 
         nw->ClearInterfaces();
     }
     networks_.erase(netId);
-    NetLinkSocketDiag sd;
-    sd.DestroySocketsLackingNetwork(ipAddrList, true);
     return NETMANAGER_SUCCESS;
 }
 

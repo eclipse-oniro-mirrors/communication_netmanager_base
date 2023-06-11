@@ -16,7 +16,6 @@
 #ifndef INCLUDE_NET_MANAGER_NATIVE_H
 #define INCLUDE_NET_MANAGER_NATIVE_H
 
-#include <list>
 #include <memory>
 #include <string>
 #include <vector>
@@ -50,7 +49,7 @@ public:
     int32_t SetInternetPermission(uint32_t uid, uint8_t allow);
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission);
     int32_t NetworkCreateVirtual(int32_t netId, bool hasDns);
-    int32_t NetworkDestroy(int32_t netId, const std::list<std::string> &ipAddrList);
+    int32_t NetworkDestroy(int32_t netId);
     int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges);
     int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges);
     int32_t NetworkAddInterface(int32_t netId, std::string iface);
