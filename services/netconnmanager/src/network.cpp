@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,9 +110,7 @@ bool Network::ReleaseBasicNetwork()
     if (isPhyNetCreated_) {
         NETMGR_LOG_D("Destroy physical network");
         StopNetDetection();
-        std::list<std::string> ipAddrList;
         for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
-            ipAddrList.push_back(inetAddr.address_);
             int32_t prefixLen = inetAddr.prefixlen_;
             if (prefixLen == 0) {
                 prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
@@ -120,7 +118,7 @@ bool Network::ReleaseBasicNetwork()
             NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
         }
         NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
-        NetsysController::GetInstance().NetworkDestroy(netId_, ipAddrList);
+        NetsysController::GetInstance().NetworkDestroy(netId_);
         NetsysController::GetInstance().DestroyNetworkCache(netId_);
         netLinkInfo_.Initialize();
         isPhyNetCreated_ = false;

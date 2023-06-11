@@ -72,8 +72,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest001, TestSize.Level1)
     ret = nativeClient_.NetworkCreatePhysical(NET_ID, PERMISSION);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    std::list<std::string> ipAddrList;
-    ret = nativeClient_.NetworkDestroy(NET_ID, ipAddrList);
+    ret = nativeClient_.NetworkDestroy(NET_ID);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient_.NetworkAddInterface(NET_ID, IF_NAME);

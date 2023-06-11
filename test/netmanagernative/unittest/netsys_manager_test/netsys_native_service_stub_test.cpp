@@ -27,7 +27,6 @@ namespace NetsysNative {
 namespace {
 using namespace testing::ext;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
-constexpr const char *TEST_IP_ADDR = "127.0.0.1";
 }
 
 class TestNotifyCallback : public NotifyCallbackStub {
@@ -244,7 +243,7 @@ public:
         return 0;
     }
 
-    int32_t NetworkDestroy(int32_t netId, const std::list<std::string> &ipAddrList) override
+    int32_t NetworkDestroy(int32_t netId) override
     {
         return 0;
     }
@@ -894,7 +893,6 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkInterface001, TestSize.Level1)
 HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkDestroy001, TestSize.Level1)
 {
     int32_t netId = 1001;
-    std::list<std::string> ipAddrList = {TEST_IP_ADDR};
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
@@ -902,15 +900,6 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkDestroy001, TestSize.Level1)
     }
     if (!data.WriteUint32(netId)) {
         return;
-    }
-    if (!data.WriteUint32(ipAddrList.size())) {
-        return;
-    }
-
-    for (const auto &ipAddr : ipAddrList) {
-        if (!data.WriteString(ipAddr)) {
-            return;
-        }
     }
 
     MessageParcel reply;

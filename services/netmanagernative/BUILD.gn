@@ -68,7 +68,6 @@ netsys_native_manager_sources = [
   "src/netsys/net_manager_native.cpp",
   "src/netsys/netlink_msg.cpp",
   "src/netsys/netlink_socket.cpp",
-  "src/netsys/netlink_socket_diag.cpp",
   "src/netsys/netsys_network.cpp",
   "src/netsys/netsys_udp_transfer.cpp",
   "src/netsys/physical_network.cpp",

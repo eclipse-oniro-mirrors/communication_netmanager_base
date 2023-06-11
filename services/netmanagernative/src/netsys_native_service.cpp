@@ -371,9 +371,9 @@ int32_t NetsysNativeService::NetworkRemoveInterface(int32_t netId, const std::st
     return result;
 }
 
-int32_t NetsysNativeService::NetworkDestroy(int32_t netId, const std::list<std::string> &ipAddrList)
+int32_t NetsysNativeService::NetworkDestroy(int32_t netId)
 {
-    int32_t result = netsysService_->NetworkDestroy(netId, ipAddrList);
+    int32_t result = netsysService_->NetworkDestroy(netId);
     NETNATIVE_LOG_D("NetworkDestroy");
     return result;
 }

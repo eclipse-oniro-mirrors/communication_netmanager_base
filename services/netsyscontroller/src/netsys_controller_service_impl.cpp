@@ -46,13 +46,13 @@ int32_t NetsysControllerServiceImpl::NetworkCreateVirtual(int32_t netId, bool ha
     return netsysClient_.NetworkCreateVirtual(netId, hasDns);
 }
 
-int32_t NetsysControllerServiceImpl::NetworkDestroy(int32_t netId, const std::list<std::string> &ipAddrList)
+int32_t NetsysControllerServiceImpl::NetworkDestroy(int32_t netId)
 {
     NETMGR_LOG_I("Destroy network: netId[%{public}d]", netId);
     if (mockNetsysClient_.CheckMockApi(MOCK_NETWORKDESTROY_API)) {
         return mockNetsysClient_.NetworkDestroy(netId);
     }
-    return netsysClient_.NetworkDestroy(netId, ipAddrList);
+    return netsysClient_.NetworkDestroy(netId);
 }
 
 int32_t NetsysControllerServiceImpl::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)

@@ -113,8 +113,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest001, TestSize.Level1)
     int32_t ret = NetsysController::GetInstance().NetworkCreatePhysical(NET_ID, PERMISSION);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    std::list<std::string> ipAddrList;
-    ret = NetsysController::GetInstance().NetworkDestroy(NET_ID, ipAddrList);
+    ret = NetsysController::GetInstance().NetworkDestroy(NET_ID);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
