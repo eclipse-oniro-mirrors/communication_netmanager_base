@@ -33,6 +33,7 @@
 #include "netlink_manager.h"
 #include "netlink_msg.h"
 #include "netlink_socket.h"
+#include "netlink_socket_diag.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "securec.h"
@@ -199,6 +200,8 @@ int InterfaceManager::AddAddress(const char *interfaceName, const char *addr, in
 
 int InterfaceManager::DelAddress(const char *interfaceName, const char *addr, int prefixLen)
 {
+    NetLinkSocketDiag socketDiag;
+    socketDiag.DestroyLiveSockets(interfaceName, addr, true);
     return ModifyAddress(RTM_DELADDR, interfaceName, addr, prefixLen);
 }
 
