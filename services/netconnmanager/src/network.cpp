@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -220,8 +220,9 @@ void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
         int32_t ret = NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, destAddress,
                                                                          route.gateway_.address_);
         if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP) {
-            ret |= NetsysController::GetInstance().NetworkRemoveRoute(LOCAL_NET_ID, route.iface_, destAddress,
-                                                                      LOCAL_ROUTE_NEXT_HOP);
+            int32_t temp = NetsysController::GetInstance().NetworkRemoveRoute(LOCAL_NET_ID, route.iface_, destAddress,
+                                                                              LOCAL_ROUTE_NEXT_HOP);
+            ret = static_cast<u_int32_t>(ret) | static_cast<u_int32_t>(temp);
         }
         if (ret != NETMANAGER_SUCCESS) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_REMOVE_NET_ROUTES_FAILED);

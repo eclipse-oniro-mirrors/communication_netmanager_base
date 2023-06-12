@@ -15,8 +15,8 @@
 
 #include "net_policy_core.h"
 
-#include <thread>
 #include <pthread.h>
+#include <thread>
 
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_base.h"
@@ -65,7 +65,7 @@ void NetPolicyCore::Init(std::shared_ptr<NetPolicyEventHandler> &handler)
             appManager->RegisterAppStateCallback(netAppStatusCallback_);
         }
     });
-    
+
     std::string threadName = "NetPolicyInit";
     pthread_setname_np(t.native_handle(), threadName.c_str());
     t.detach();
@@ -155,7 +155,8 @@ void NetPolicyCore::ReceiveMessage::OnReceiveEvent(const EventFwk::CommonEventDa
     }
 
     if (action == COMMON_EVENT_PACKAGE_REMOVED) {
-        uint32_t deletedUid = eventData.GetWant().GetIntParam(AppExecFwk::Constants::UID, 0);
+        int tempUid = eventData.GetWant().GetIntParam(AppExecFwk::Constants::UID, 0);
+        uint32_t deletedUid = static_cast<uint32_t>(tempUid);
         auto policyEvent = std::make_shared<PolicyEvent>();
         policyEvent->deletedUid = deletedUid;
         receiveMessage_->SendEvent(NetPolicyEventHandler::MSG_UID_REMOVED, policyEvent);
