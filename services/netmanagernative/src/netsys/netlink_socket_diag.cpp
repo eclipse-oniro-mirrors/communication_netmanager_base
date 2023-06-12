@@ -249,12 +249,12 @@ void NetLinkSocketDiag::SockDiagDumpCallback(uint8_t proto, const inet_diag_msg 
     ExecuteDestroySocket(proto, msg);
 }
 
-int32_t NetLinkSocketDiag::DestroyLiveSockets(const std::string &iface, const std::string &ipAddr, bool excludeLoopback)
+void NetLinkSocketDiag::DestroyLiveSockets(const std::string &iface, const std::string &ipAddr, bool excludeLoopback)
 {
     NETNATIVE_LOG_D("DestroySocketsLackingNetwork in");
     if (!CreateNetlinkSocket()) {
         NETNATIVE_LOGE("Error closing sockets for netId change");
-        return NETMANAGER_ERR_INTERNAL;
+        return;
     }
 
     const int32_t proto = IPPROTO_TCP;
@@ -264,17 +264,16 @@ int32_t NetLinkSocketDiag::DestroyLiveSockets(const std::string &iface, const st
         int32_t ret = SendSockDiagDumpRequest(proto, family, states);
         if (ret != NETMANAGER_SUCCESS) {
             NETNATIVE_LOGE("Failed to dump %{public}s sockets", family == AF_INET ? "IPv4" : "IPv6");
-            return ret;
+            break;
         }
         ret = ProcessSockDiagDumpResponse(proto, iface, ipAddr, excludeLoopback);
         if (ret != NETMANAGER_SUCCESS) {
             NETNATIVE_LOGE("Failed to destroy %{public}s sockets", family == AF_INET ? "IPv4" : "IPv6");
-            return ret;
+            break;
         }
     }
 
     NETNATIVE_LOG_D("Destroyed %{public}d sockets", socketsDestroyed_);
-    return NETMANAGER_SUCCESS;
 }
 } // namespace nmd
 } // namespace OHOS

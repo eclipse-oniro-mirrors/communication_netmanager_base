@@ -37,9 +37,8 @@ public:
      * @param ipAddr Network interface name
      * @param ipAddr Network IP address
      * @param excludeLoopback “true” to exclude loopback.
-     * @return Returns NETMANAGER_SUCCESS, destroy successfully, otherwise it will fail.
      */
-    int32_t DestroyLiveSockets(const std::string &iface, const std::string &ipAddr, bool excludeLoopback);
+    void DestroyLiveSockets(const std::string &iface, const std::string &ipAddr, bool excludeLoopback);
 
 private:
     static bool InLookBack(uint32_t a);
