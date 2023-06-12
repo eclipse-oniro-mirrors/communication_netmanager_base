@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,7 +46,7 @@ int HookSocket(int (*fn)(int, int, int), int domain, int type, int protocol)
         return fd;
     }
 
-    if (g_netIdForApp > 0) {
+    if (g_netIdForApp > 0 && (domain == AF_INET || domain == AF_INET6)) {
         if (OHOS::nmd::FwmarkClient().BindSocket(fd, g_netIdForApp) != OHOS::NetManagerStandard::NETMANAGER_SUCCESS) {
             NETNATIVE_LOGE("BindSocket [%{public}d] to netid [%{public}d] failed",
                 fd, g_netIdForApp.load(std::memory_order_relaxed));
