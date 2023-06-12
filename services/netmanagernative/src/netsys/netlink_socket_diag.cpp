@@ -146,10 +146,6 @@ bool NetLinkSocketDiag::IsLoopbackSocket(const inet_diag_msg *msg)
 
 bool NetLinkSocketDiag::IsMatchNetwork(const inet_diag_msg *msg, const std::string &iface, const std::string &ipAddr)
 {
-    if (msg == nullptr || msg->id.idiag_if != if_nametoindex(iface.c_str())) {
-        return false;
-    }
-
     if (msg->idiag_family == AF_INET) {
         if (CommonUtils::GetAddrFamily(ipAddr) != AF_INET) {
             return false;
