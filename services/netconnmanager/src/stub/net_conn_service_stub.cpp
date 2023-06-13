@@ -151,10 +151,11 @@ int32_t NetConnServiceStub::OnRequestCheck(uint32_t code)
         }
     }
     auto itFunc = memberFuncMap_.find(code);
-    if (code != CMD_NM_GETDEFAULTNETWORK && CheckPermission(itFunc->second.second)) {
+    if (code != CMD_NM_GETDEFAULTNETWORK && code != CMD_NM_HASDEFAULTNET && CheckPermission(itFunc->second.second)) {
         return NETMANAGER_SUCCESS;
     }
-    if (code == CMD_NM_GETDEFAULTNETWORK && CheckPermissionWithCache(itFunc->second.second)) {
+    if ((code == CMD_NM_GETDEFAULTNETWORK || code == CMD_NM_HASDEFAULTNET) &&
+        CheckPermissionWithCache(itFunc->second.second)) {
         return NETMANAGER_SUCCESS;
     }
     return NETMANAGER_ERR_PERMISSION_DENIED;
