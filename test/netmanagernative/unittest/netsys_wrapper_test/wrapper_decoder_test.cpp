@@ -99,7 +99,7 @@ HWTEST_F(WrapperDecoderTest, DecodeBinaryTest001, TestSize.Level1)
     std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
     char binarydata[NLMSG_ALIGN(sizeof(struct nlmsghdr)) + NLMSG_ALIGN(sizeof(struct ifinfomsg)) +
                     RTA_ALIGN(sizeof(struct rtattr)) + IFNAMSIZ];
-    memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata));
+    ASSERT_EQ(memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata)), EOK);
     nlmsghdr *pmsghdr = reinterpret_cast<struct nlmsghdr *>(&binarydata);
     ASSERT_NE(pmsghdr, nullptr);
     ifinfomsg *pifInfomsg = reinterpret_cast<struct ifinfomsg *>(NLMSG_DATA(&binarydata));
@@ -123,7 +123,7 @@ HWTEST_F(WrapperDecoderTest, DecodeBinaryTest001, TestSize.Level1)
 
     prtattr->rta_type = IFLA_IFNAME;
     prtattr->rta_len = sizeof(struct rtattr) + IFNAMSIZ;
-    strcpy_s(&binarydata[sizeof(binarydata) - IFNAMSIZ], IFNAMSIZ, "ifacename");
+    ASSERT_EQ(strcpy_s(&binarydata[sizeof(binarydata) - IFNAMSIZ], IFNAMSIZ, "ifacename"), 0);
     pifInfomsg->ifi_flags = IFF_LOWER_UP;
     ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
     EXPECT_TRUE(ret);
@@ -134,14 +134,14 @@ HWTEST_F(WrapperDecoderTest, DecodeBinaryTest002, TestSize.Level1)
     auto msg = std::make_shared<NetsysEventMessage>();
     std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
     char binarydata[NLMSG_ALIGN(sizeof(struct nlmsghdr)) + NLMSG_ALIGN(192)];
-    memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata));
+    ASSERT_EQ(memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata)), EOK);
     nlmsghdr *pmsghdr = reinterpret_cast<struct nlmsghdr *>(&binarydata);
     ASSERT_NE(pmsghdr, nullptr);
     
     pmsghdr->nlmsg_len = NLMSG_ALIGN(sizeof(struct nlmsghdr));
     pmsghdr->nlmsg_type = LOCAL_QLOG_NL_EVENT;
 
-    strcpy_s(&binarydata[NLMSG_ALIGN(sizeof(struct nlmsghdr)) + 28], IFNAMSIZ, "testDevName");
+    ASSERT_EQ(strcpy_s(&binarydata[NLMSG_ALIGN(sizeof(struct nlmsghdr)) + 28], IFNAMSIZ, "testDevName"), 0);
     auto ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
     EXPECT_FALSE(ret);
 
@@ -158,7 +158,7 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest001, TestSize.Level1)
                     RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr)) +
                     RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(struct ifa_cacheinfo)) +
                     RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(uint32_t))];
-    memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata));
+    ASSERT_EQ(memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata)), EOK);
     nlmsghdr *pmsghdr = reinterpret_cast<struct nlmsghdr *>(&binarydata);
     ASSERT_NE(pmsghdr, nullptr);
     ifaddrmsg *pifaddrmsg = reinterpret_cast<struct ifaddrmsg *>(NLMSG_DATA(&binarydata));
@@ -217,7 +217,7 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest002, TestSize.Level1)
                     RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in6_addr)) +
                     RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(struct ifa_cacheinfo)) +
                     RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(uint32_t))];
-    memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata));
+    ASSERT_EQ(memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata)), EOK);
     nlmsghdr *pmsghdr = reinterpret_cast<struct nlmsghdr *>(&binarydata);
     ASSERT_NE(pmsghdr, nullptr);
     ifaddrmsg *pifaddrmsg = reinterpret_cast<struct ifaddrmsg *>(NLMSG_DATA(&binarydata));
@@ -272,7 +272,7 @@ HWTEST_F(WrapperDecoderTest, InterpreteRtMsgTest001, TestSize.Level1)
                     RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr)) +
                     RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(struct in_addr)) +
                     RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(uint32_t))];
-    memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata));
+    ASSERT_EQ(memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata)), EOK);
     nlmsghdr *pmsghdr = reinterpret_cast<struct nlmsghdr *>(&binarydata);
     ASSERT_NE(pmsghdr, nullptr);
     rtmsg *prtmsg = reinterpret_cast<struct rtmsg *>(NLMSG_DATA(&binarydata));
@@ -318,7 +318,7 @@ HWTEST_F(WrapperDecoderTest, InterpreteRtMsgTest001, TestSize.Level1)
     ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
     EXPECT_FALSE(ret);
 
-    unsigned int index = if_nametoindex("wlan0");
+    uint32_t index = if_nametoindex("wlan0");
     if (index == 0) {
         index = if_nametoindex("eth0");
     }
@@ -346,6 +346,7 @@ HWTEST_F(WrapperDecoderTest, PushAsciiMessageTest001, TestSize.Level1)
 
     auto msg = std::make_shared<NetsysEventMessage>();
     std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
+    auto msg = std::make_shared<NetsysEventMessage>();
     auto ret = decoder->PushAsciiMessage(recvmsg);
     EXPECT_TRUE(ret);
 }
