@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,21 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <linux/genetlink.h>
-
 #include "netlink_define.h"
-#define private public
-#include "wrapper_decoder.h"
-#undef private
+#include <arpa/inet.h>
+#include <gtest/gtest.h>
+#include <ifaddrs.h>
+#include <linux/genetlink.h>
+#include <linux/rtnetlink.h>
+#include <net/if.h>
+#include <netdb.h>
 
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
+
+#include "wrapper_decoder.h"
 #include <cstring>
 
 namespace OHOS {
@@ -28,6 +35,9 @@ namespace nmd {
 namespace {
 using namespace testing::ext;
 constexpr int16_t LOCAL_QLOG_NL_EVENT = 112;
+constexpr const char TEST_ASCII_MESSAGE[] = {
+    "action@msg\0ACTION=add\0ACTION=remove\0ACTION=change\0SEQNUM=111\0SEQNUM=\0SUBSYSTEM=net\0SUBSYSTEM="
+    "\0SUBSYSTEM=test\0dfdfcc=ttt\0"};
 } // namespace
 
 class WrapperDecoderTest : public testing::Test {
@@ -77,10 +87,7 @@ HWTEST_F(WrapperDecoderTest, DecodeAsciiTest004, TestSize.Level1)
 {
     auto msg = std::make_shared<NetsysEventMessage>();
     std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
-    const char *buffer =
-        "action@msg\0ACTION=add\0ACTION=remove\0ACTION=change\0SEQNUM=111\0SEQNUM=\0SUBSYSTEM=net\0SUBSYSTEM="
-        "\0SUBSYSTEM=test\0dfdfcc=ttt\0";
-    auto ret = decoder->DecodeAscii(buffer, sizeof(buffer));
+    auto ret = decoder->DecodeAscii(TEST_ASCII_MESSAGE, sizeof(TEST_ASCII_MESSAGE));
     EXPECT_TRUE(ret);
 }
 
@@ -88,74 +95,244 @@ HWTEST_F(WrapperDecoderTest, DecodeBinaryTest001, TestSize.Level1)
 {
     auto msg = std::make_shared<NetsysEventMessage>();
     std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
-    auto ret = decoder->DecodeBinary(nullptr, 0);
-    EXPECT_FALSE(ret);
-    nlmsghdr msghdrVec;
-    msghdrVec.nlmsg_len = 12;
-    msghdrVec.nlmsg_type = RTM_NEWLINK;
-    msghdrVec.nlmsg_flags = 0;
-    msghdrVec.nlmsg_seq = 0;
-    msghdrVec.nlmsg_pid = 5555;
-    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&msghdrVec), sizeof(msghdrVec));
-    EXPECT_FALSE(ret);
-
-    msghdrVec.nlmsg_len = 1;
-    msghdrVec.nlmsg_type = LOCAL_QLOG_NL_EVENT;
-    msghdrVec.nlmsg_flags = 0;
-    msghdrVec.nlmsg_seq = 0;
-    msghdrVec.nlmsg_pid = 5555;
-    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&msghdrVec), sizeof(msghdrVec));
+    char binarydata[NLMSG_ALIGN(sizeof(struct nlmsghdr)) + NLMSG_ALIGN(sizeof(struct ifinfomsg)) +
+                    RTA_ALIGN(sizeof(struct rtattr)) + IFNAMSIZ];
+    memset(&binarydata, 0, sizeof(binarydata));
+    nlmsghdr *pmsghdr = reinterpret_cast<nlmsghdr *>(&binarydata);
+    ASSERT_NE(pmsghdr, nullptr);
+    ifinfomsg *pifInfomsg = reinterpret_cast<ifinfomsg *>(NLMSG_DATA(&binarydata));
+    ASSERT_NE(pifInfomsg, nullptr);
+    pmsghdr->nlmsg_len = sizeof(binarydata);
+    pmsghdr->nlmsg_type = RTM_MAX;
+    rtattr *prtattr =  IFLA_RTA(pifInfomsg);
+    ASSERT_NE(prtattr, nullptr);
+    
+    pifInfomsg->ifi_flags = 0;
+    auto ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), pmsghdr->nlmsg_len);
     EXPECT_FALSE(ret);
 
-    msghdrVec.nlmsg_len = 1;
-    msghdrVec.nlmsg_type = RTM_NEWADDR;
-    msghdrVec.nlmsg_flags = 0;
-    msghdrVec.nlmsg_seq = 0;
-    msghdrVec.nlmsg_pid = 5555;
-    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&msghdrVec), sizeof(msghdrVec));
+    pmsghdr->nlmsg_type = RTM_NEWLINK;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
     EXPECT_FALSE(ret);
 
-    msghdrVec.nlmsg_len = 1;
-    msghdrVec.nlmsg_type = RTM_NEWROUTE;
-    msghdrVec.nlmsg_flags = 0;
-    msghdrVec.nlmsg_seq = 0;
-    msghdrVec.nlmsg_pid = 5555;
-    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&msghdrVec), sizeof(msghdrVec));
+    pifInfomsg->ifi_flags = IFF_LOOPBACK;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
     EXPECT_FALSE(ret);
 
-    msghdrVec.nlmsg_len = 1;
-    msghdrVec.nlmsg_type = RTM_DELADDR;
-    msghdrVec.nlmsg_flags = 0;
-    msghdrVec.nlmsg_seq = 0;
-    msghdrVec.nlmsg_pid = 5555;
-    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&msghdrVec), sizeof(msghdrVec));
+    prtattr->rta_type = IFLA_IFNAME;
+    prtattr->rta_len = sizeof(struct rtattr) + IFNAMSIZ;
+    strcpy(&binarydata[sizeof(binarydata) - IFNAMSIZ], "ifacename");
+    pifInfomsg->ifi_flags = IFF_LOWER_UP;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(WrapperDecoderTest, DecodeBinaryTest002, TestSize.Level1)
+{
+    auto msg = std::make_shared<NetsysEventMessage>();
+    std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
+    char binarydata[NLMSG_ALIGN(sizeof(struct nlmsghdr)) + NLMSG_ALIGN(192)];
+    memset(&binarydata, 0, sizeof(binarydata));
+    nlmsghdr *pmsghdr = reinterpret_cast<nlmsghdr *>(&binarydata);
+    ASSERT_NE(pmsghdr, nullptr);
+    
+    pmsghdr->nlmsg_len = NLMSG_ALIGN(sizeof(struct nlmsghdr));
+    pmsghdr->nlmsg_type = LOCAL_QLOG_NL_EVENT;
+
+    strcpy(&binarydata[NLMSG_ALIGN(sizeof(struct nlmsghdr)) + 28], "testDevName");
+    auto ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
     EXPECT_FALSE(ret);
 
-    msghdrVec.nlmsg_len = 1;
-    msghdrVec.nlmsg_type = RTM_DELROUTE;
-    msghdrVec.nlmsg_flags = 0;
-    msghdrVec.nlmsg_seq = 0;
-    msghdrVec.nlmsg_pid = 5555;
-    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&msghdrVec), sizeof(msghdrVec));
+    pmsghdr->nlmsg_len = sizeof(binarydata);
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest001, TestSize.Level1)
+{
+    auto msg = std::make_shared<NetsysEventMessage>();
+    std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
+    char binarydata[NLMSG_ALIGN(sizeof(struct nlmsghdr)) + NLMSG_ALIGN(sizeof(struct ifaddrmsg)) +
+                    RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr)) +
+                    RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(struct ifa_cacheinfo)) +
+                    RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(uint32_t))];
+    memset(&binarydata, 0, sizeof(binarydata));
+    nlmsghdr *pmsghdr = reinterpret_cast<nlmsghdr *>(&binarydata);
+    ASSERT_NE(pmsghdr, nullptr);
+    ifaddrmsg *pifaddrmsg = reinterpret_cast<ifaddrmsg *>(NLMSG_DATA(&binarydata));
+    ASSERT_NE(pifaddrmsg, nullptr);
+    rtattr *prtattr =  IFA_RTA(pifaddrmsg);
+    ASSERT_NE(prtattr, nullptr);
+    in_addr *ipv4Addr = reinterpret_cast<in_addr *>(RTA_DATA(prtattr));
+    ASSERT_NE(ipv4Addr, nullptr);
+
+    pmsghdr->nlmsg_len = NLMSG_ALIGN(sizeof(struct nlmsghdr));
+    pmsghdr->nlmsg_type = RTM_NEWADDR;
+
+    auto ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
     EXPECT_FALSE(ret);
 
-    msghdrVec.nlmsg_len = 1;
-    msghdrVec.nlmsg_type = __RTM_MAX;
-    msghdrVec.nlmsg_flags = 0;
-    msghdrVec.nlmsg_seq = 0;
-    msghdrVec.nlmsg_pid = 5555;
-    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&msghdrVec), sizeof(msghdrVec));
+    pmsghdr->nlmsg_len = sizeof(binarydata);
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
     EXPECT_FALSE(ret);
+
+    prtattr->rta_type = IFLA_IFNAME;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_FALSE(ret);
+
+    prtattr->rta_type = IFA_ADDRESS;
+    prtattr->rta_len = RTA_ALIGN(sizeof(struct rtattr));
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_FALSE(ret);
+
+    pifaddrmsg->ifa_family = AF_INET;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_FALSE(ret);
+
+    ipv4Addr->s_addr = inet_addr("127.0.0.1");
+    prtattr->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr));
+    rtattr *prtattr1 = reinterpret_cast<rtattr *>(((char*)prtattr) + prtattr->rta_len);
+    ASSERT_NE(prtattr1, nullptr);
+    prtattr1->rta_type = IFA_CACHEINFO;
+    prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr));
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_TRUE(ret);
+
+    prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct ifa_cacheinfo));
+    rtattr *prtattr2 = reinterpret_cast<rtattr *>(((char*)prtattr1) + prtattr1->rta_len);
+    ASSERT_NE(prtattr2, nullptr);
+    prtattr2->rta_type = IFA_FLAGS;
+    prtattr2->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(uint32_t));
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest002, TestSize.Level1)
+{
+    auto msg = std::make_shared<NetsysEventMessage>();
+    std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
+    char binarydata[NLMSG_ALIGN(sizeof(struct nlmsghdr)) + NLMSG_ALIGN(sizeof(struct ifaddrmsg)) +
+                    RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in6_addr)) +
+                    RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(struct ifa_cacheinfo)) +
+                    RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(uint32_t))];
+    memset(&binarydata, 0, sizeof(binarydata));
+    nlmsghdr *pmsghdr = reinterpret_cast<nlmsghdr *>(&binarydata);
+    ASSERT_NE(pmsghdr, nullptr);
+    ifaddrmsg *pifaddrmsg = reinterpret_cast<ifaddrmsg *>(NLMSG_DATA(&binarydata));
+    ASSERT_NE(pifaddrmsg, nullptr);
+    rtattr *prtattr =  IFA_RTA(pifaddrmsg);
+    ASSERT_NE(prtattr, nullptr);
+    in6_addr *ipv6Addr = reinterpret_cast<in6_addr *>(RTA_DATA(prtattr));
+    ASSERT_NE(ipv6Addr, nullptr);
+
+    pmsghdr->nlmsg_len = NLMSG_ALIGN(sizeof(struct nlmsghdr));
+    pmsghdr->nlmsg_type = RTM_NEWADDR;
+
+    auto ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_FALSE(ret);
+
+    pmsghdr->nlmsg_len = sizeof(binarydata);
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_FALSE(ret);
+
+    prtattr->rta_type = IFLA_IFNAME;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_FALSE(ret);
+
+    prtattr->rta_type = IFA_ADDRESS;
+    prtattr->rta_len = RTA_ALIGN(sizeof(struct rtattr));
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_FALSE(ret);
+
+    pifaddrmsg->ifa_family = AF_INET6;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_FALSE(ret);
+
+    prtattr->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in6_addr));
+    rtattr *prtattr1 = reinterpret_cast<rtattr *>(((char*)prtattr) + prtattr->rta_len);
+    ASSERT_NE(prtattr1, nullptr);
+    prtattr1->rta_type = IFA_CACHEINFO;
+    prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct ifa_cacheinfo));
+    rtattr *prtattr2 = reinterpret_cast<rtattr *>(((char*)prtattr1) + prtattr1->rta_len);
+    ASSERT_NE(prtattr2, nullptr);
+    prtattr2->rta_type = IFA_FLAGS;
+    prtattr2->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(uint32_t));
+
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(WrapperDecoderTest, InterpreteRtMsgTest001, TestSize.Level1)
+{
+    auto msg = std::make_shared<NetsysEventMessage>();
+    std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
+    char binarydata[NLMSG_ALIGN(sizeof(struct nlmsghdr)) + NLMSG_ALIGN(sizeof(struct rtmsg)) +
+                    RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr)) +
+                    RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(struct in_addr)) +
+                    RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(uint32_t))];
+    memset(&binarydata, 0, sizeof(binarydata));
+    nlmsghdr *pmsghdr = reinterpret_cast<nlmsghdr *>(&binarydata);
+    ASSERT_NE(pmsghdr, nullptr);
+    rtmsg *prtmsg = reinterpret_cast<rtmsg *>(NLMSG_DATA(&binarydata));
+    ASSERT_NE(prtmsg, nullptr);
+    rtattr *prtattr =  RTM_RTA(prtmsg);
+    ASSERT_NE(prtattr, nullptr);
+    in_addr *ipv4Addr = reinterpret_cast<in_addr *>(RTA_DATA(prtattr));
+    ASSERT_NE(ipv4Addr, nullptr);
+
+    pmsghdr->nlmsg_type = RTM_NEWROUTE;
+    pmsghdr->nlmsg_len = NLMSG_ALIGN(sizeof(struct nlmsghdr));
+    auto ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_FALSE(ret);
+
+    pmsghdr->nlmsg_len = sizeof(binarydata);
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_FALSE(ret);
+
+    prtmsg->rtm_protocol = RTPROT_KERNEL;
+    prtmsg->rtm_family = AF_INET;
+    prtmsg->rtm_scope = RT_SCOPE_UNIVERSE;
+    prtmsg->rtm_type = RTN_UNICAST;
+    prtattr->rta_type = RTA_GATEWAY;
+    prtattr->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr));
+    ipv4Addr->s_addr = inet_addr("0.0.0.0");
+
+    rtattr *prtattr1 = reinterpret_cast<rtattr *>(((char*)prtattr) + prtattr->rta_len);
+    ASSERT_NE(prtattr1, nullptr);
+    prtattr1->rta_type = RTA_DST;
+    prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr));
+    ipv4Addr = reinterpret_cast<in_addr *>(RTA_DATA(prtattr1));
+    ASSERT_NE(ipv4Addr, nullptr);
+    ipv4Addr->s_addr = inet_addr("127.0.0.1");
+
+    rtattr *prtattr2 = reinterpret_cast<rtattr *>(((char*)prtattr1) + prtattr1->rta_len);
+    ASSERT_NE(prtattr2, nullptr);
+    prtattr2->rta_type = RTA_OIF;
+    prtattr2->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(uint32_t));
+    prtmsg->rtm_dst_len = 0;
+
+    int32_t* pdeviceindex = reinterpret_cast<int32_t *>(RTA_DATA(prtattr2));
+    *pdeviceindex = -1;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_FALSE(ret);
+
+    unsigned int index = if_nametoindex("wlan0");
+    if (index == 0) {
+        index = if_nametoindex("eth0");
+    }
+    *pdeviceindex = index;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    if (index > 0) {
+        EXPECT_TRUE(ret);
+    } else {
+        EXPECT_FALSE(ret);
+    }
 }
 
 HWTEST_F(WrapperDecoderTest, PushAsciiMessageTest001, TestSize.Level1)
 {
-    const char *buffer =
-        "action@msg\0ACTION=add\0ACTION=remove\0ACTION=change\0SEQNUM=111\0SEQNUM=\0SUBSYSTEM=net\0SUBSYSTEM="
-        "\0SUBSYSTEM=test\0dfdfcc=ttt\0";
-
-    const char *start = buffer;
-    const char *end = start + sizeof(buffer);
+    const char *start = TEST_ASCII_MESSAGE;
+    const char *end = start + sizeof(TEST_ASCII_MESSAGE);
     std::vector<std::string> recvmsg;
     start += strlen(start) + 1;
     while (start < end) {
