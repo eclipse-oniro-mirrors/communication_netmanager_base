@@ -69,7 +69,8 @@
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:socket_permission",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient:net_policy_manager_if",
-                    "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient:net_stats_manager_if"
+                    "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient:net_stats_manager_if",
+                    "//foundation/communication/netmanager_base/interfaces/innerkits/netmanagernative:net_native_manager_if"
                 ],
                 "service_group": [
                     "//foundation/communication/netmanager_base/services/netmanagernative:netsys_native_manager",
@@ -133,6 +134,16 @@
                             "net_stats_client.h"
                         ],
                         "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient/include"
+                    }
+                },
+                {
+                    "type": "so",
+                    "name": "//foundation/communication/netmanager_base/interfaces/innerkits/netmanagernative:net_native_manager_if",
+                    "header": {
+                        "header_files": [
+                            "netsys_native_service_proxy.h"
+                        ],
+                        "header_base": "//foundation/communication/netmanager_base/interfaces/innerkits/netmanagernative/include"
                     }
                 }
             ],
