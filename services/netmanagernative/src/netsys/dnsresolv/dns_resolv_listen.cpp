@@ -211,8 +211,6 @@ void DnsResolvListen::StartListen()
 {
     NETNATIVE_LOGE("Enter StartListen");
 
-    unlink(DNS_SOCKET_PATH);
-
     serverSockFd_ = GetControlSocket(DNS_SOCKET_NAME);
     if (serverSockFd_ < 0) {
         NETNATIVE_LOGE("create socket failed %{public}d", errno);
