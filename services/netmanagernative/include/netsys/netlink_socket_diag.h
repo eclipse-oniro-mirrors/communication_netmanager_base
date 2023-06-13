@@ -34,11 +34,10 @@ public:
     /**
      * Destroy all 'active' TCP sockets that no longer exist.
      *
-     * @param ipAddr Network interface name
      * @param ipAddr Network IP address
      * @param excludeLoopback “true” to exclude loopback.
      */
-    void DestroyLiveSockets(const std::string &iface, const std::string &ipAddr, bool excludeLoopback);
+    void DestroyLiveSockets(const char *ipAddr, bool excludeLoopback);
 
 private:
     static bool InLookBack(uint32_t a);
@@ -48,12 +47,10 @@ private:
     int32_t ExecuteDestroySocket(uint8_t proto, const inet_diag_msg *msg);
     int32_t GetErrorFromKernel(int32_t fd);
     bool IsLoopbackSocket(const inet_diag_msg *msg);
-    bool IsMatchNetwork(const inet_diag_msg *msg, const std::string &iface, const std::string &ipAddr);
-    int32_t ProcessSockDiagDumpResponse(uint8_t proto, const std::string &iface, const std::string &ipAddr,
-                                        bool excludeLoopback);
+    bool IsMatchNetwork(const inet_diag_msg *msg, const std::string &ipAddr);
+    int32_t ProcessSockDiagDumpResponse(uint8_t proto, const std::string &ipAddr, bool excludeLoopback);
     int32_t SendSockDiagDumpRequest(uint8_t proto, uint8_t family, uint32_t states);
-    void SockDiagDumpCallback(uint8_t proto, const inet_diag_msg *msg, const std::string &iface,
-                              const std::string &ipAddr, bool excludeLoopback);
+    void SockDiagDumpCallback(uint8_t proto, const inet_diag_msg *msg, const std::string &ipAddr, bool excludeLoopback);
 
 private:
     struct SockDiagRequest {
