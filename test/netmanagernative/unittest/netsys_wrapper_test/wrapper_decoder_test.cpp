@@ -14,11 +14,13 @@
  */
 
 #include "netlink_define.h"
+#include "securec.h"
 #include <arpa/inet.h>
 #include <gtest/gtest.h>
 #include <ifaddrs.h>
 #include <linux/genetlink.h>
 #include <linux/rtnetlink.h>
+#include <memory>
 #include <net/if.h>
 #include <netdb.h>
 
@@ -97,10 +99,10 @@ HWTEST_F(WrapperDecoderTest, DecodeBinaryTest001, TestSize.Level1)
     std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
     char binarydata[NLMSG_ALIGN(sizeof(struct nlmsghdr)) + NLMSG_ALIGN(sizeof(struct ifinfomsg)) +
                     RTA_ALIGN(sizeof(struct rtattr)) + IFNAMSIZ];
-    memset(&binarydata, 0, sizeof(binarydata));
-    nlmsghdr *pmsghdr = reinterpret_cast<nlmsghdr *>(&binarydata);
+    memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata));
+    nlmsghdr *pmsghdr = reinterpret_cast<struct nlmsghdr *>(&binarydata);
     ASSERT_NE(pmsghdr, nullptr);
-    ifinfomsg *pifInfomsg = reinterpret_cast<ifinfomsg *>(NLMSG_DATA(&binarydata));
+    ifinfomsg *pifInfomsg = reinterpret_cast<struct ifinfomsg *>(NLMSG_DATA(&binarydata));
     ASSERT_NE(pifInfomsg, nullptr);
     pmsghdr->nlmsg_len = sizeof(binarydata);
     pmsghdr->nlmsg_type = RTM_MAX;
@@ -121,7 +123,7 @@ HWTEST_F(WrapperDecoderTest, DecodeBinaryTest001, TestSize.Level1)
 
     prtattr->rta_type = IFLA_IFNAME;
     prtattr->rta_len = sizeof(struct rtattr) + IFNAMSIZ;
-    strcpy(&binarydata[sizeof(binarydata) - IFNAMSIZ], "ifacename");
+    strcpy_s(&binarydata[sizeof(binarydata) - IFNAMSIZ], IFNAMSIZ, "ifacename");
     pifInfomsg->ifi_flags = IFF_LOWER_UP;
     ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
     EXPECT_TRUE(ret);
@@ -132,14 +134,14 @@ HWTEST_F(WrapperDecoderTest, DecodeBinaryTest002, TestSize.Level1)
     auto msg = std::make_shared<NetsysEventMessage>();
     std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
     char binarydata[NLMSG_ALIGN(sizeof(struct nlmsghdr)) + NLMSG_ALIGN(192)];
-    memset(&binarydata, 0, sizeof(binarydata));
-    nlmsghdr *pmsghdr = reinterpret_cast<nlmsghdr *>(&binarydata);
+    memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata));
+    nlmsghdr *pmsghdr = reinterpret_cast<struct nlmsghdr *>(&binarydata);
     ASSERT_NE(pmsghdr, nullptr);
     
     pmsghdr->nlmsg_len = NLMSG_ALIGN(sizeof(struct nlmsghdr));
     pmsghdr->nlmsg_type = LOCAL_QLOG_NL_EVENT;
 
-    strcpy(&binarydata[NLMSG_ALIGN(sizeof(struct nlmsghdr)) + 28], "testDevName");
+    strcpy_s(&binarydata[NLMSG_ALIGN(sizeof(struct nlmsghdr)) + 28], IFNAMSIZ, "testDevName");
     auto ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
     EXPECT_FALSE(ret);
 
@@ -156,14 +158,14 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest001, TestSize.Level1)
                     RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr)) +
                     RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(struct ifa_cacheinfo)) +
                     RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(uint32_t))];
-    memset(&binarydata, 0, sizeof(binarydata));
-    nlmsghdr *pmsghdr = reinterpret_cast<nlmsghdr *>(&binarydata);
+    memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata));
+    nlmsghdr *pmsghdr = reinterpret_cast<struct nlmsghdr *>(&binarydata);
     ASSERT_NE(pmsghdr, nullptr);
-    ifaddrmsg *pifaddrmsg = reinterpret_cast<ifaddrmsg *>(NLMSG_DATA(&binarydata));
+    ifaddrmsg *pifaddrmsg = reinterpret_cast<struct ifaddrmsg *>(NLMSG_DATA(&binarydata));
     ASSERT_NE(pifaddrmsg, nullptr);
     rtattr *prtattr =  IFA_RTA(pifaddrmsg);
     ASSERT_NE(prtattr, nullptr);
-    in_addr *ipv4Addr = reinterpret_cast<in_addr *>(RTA_DATA(prtattr));
+    in_addr *ipv4Addr = reinterpret_cast<struct in_addr *>(RTA_DATA(prtattr));
     ASSERT_NE(ipv4Addr, nullptr);
 
     pmsghdr->nlmsg_len = NLMSG_ALIGN(sizeof(struct nlmsghdr));
@@ -191,7 +193,7 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest001, TestSize.Level1)
 
     ipv4Addr->s_addr = inet_addr("127.0.0.1");
     prtattr->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr));
-    rtattr *prtattr1 = reinterpret_cast<rtattr *>(((char*)prtattr) + prtattr->rta_len);
+    rtattr *prtattr1 = reinterpret_cast<struct rtattr *>(((char*)prtattr) + prtattr->rta_len);
     ASSERT_NE(prtattr1, nullptr);
     prtattr1->rta_type = IFA_CACHEINFO;
     prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr));
@@ -199,7 +201,7 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest001, TestSize.Level1)
     EXPECT_TRUE(ret);
 
     prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct ifa_cacheinfo));
-    rtattr *prtattr2 = reinterpret_cast<rtattr *>(((char*)prtattr1) + prtattr1->rta_len);
+    rtattr *prtattr2 = reinterpret_cast<struct rtattr *>(((char*)prtattr1) + prtattr1->rta_len);
     ASSERT_NE(prtattr2, nullptr);
     prtattr2->rta_type = IFA_FLAGS;
     prtattr2->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(uint32_t));
@@ -215,14 +217,14 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest002, TestSize.Level1)
                     RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in6_addr)) +
                     RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(struct ifa_cacheinfo)) +
                     RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(uint32_t))];
-    memset(&binarydata, 0, sizeof(binarydata));
-    nlmsghdr *pmsghdr = reinterpret_cast<nlmsghdr *>(&binarydata);
+    memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata));
+    nlmsghdr *pmsghdr = reinterpret_cast<struct nlmsghdr *>(&binarydata);
     ASSERT_NE(pmsghdr, nullptr);
-    ifaddrmsg *pifaddrmsg = reinterpret_cast<ifaddrmsg *>(NLMSG_DATA(&binarydata));
+    ifaddrmsg *pifaddrmsg = reinterpret_cast<struct ifaddrmsg *>(NLMSG_DATA(&binarydata));
     ASSERT_NE(pifaddrmsg, nullptr);
     rtattr *prtattr =  IFA_RTA(pifaddrmsg);
     ASSERT_NE(prtattr, nullptr);
-    in6_addr *ipv6Addr = reinterpret_cast<in6_addr *>(RTA_DATA(prtattr));
+    in6_addr *ipv6Addr = reinterpret_cast<struct in6_addr *>(RTA_DATA(prtattr));
     ASSERT_NE(ipv6Addr, nullptr);
 
     pmsghdr->nlmsg_len = NLMSG_ALIGN(sizeof(struct nlmsghdr));
@@ -249,11 +251,11 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest002, TestSize.Level1)
     EXPECT_FALSE(ret);
 
     prtattr->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in6_addr));
-    rtattr *prtattr1 = reinterpret_cast<rtattr *>(((char*)prtattr) + prtattr->rta_len);
+    rtattr *prtattr1 = reinterpret_cast<struct rtattr *>(((char*)prtattr) + prtattr->rta_len);
     ASSERT_NE(prtattr1, nullptr);
     prtattr1->rta_type = IFA_CACHEINFO;
     prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct ifa_cacheinfo));
-    rtattr *prtattr2 = reinterpret_cast<rtattr *>(((char*)prtattr1) + prtattr1->rta_len);
+    rtattr *prtattr2 = reinterpret_cast<struct rtattr *>(((char*)prtattr1) + prtattr1->rta_len);
     ASSERT_NE(prtattr2, nullptr);
     prtattr2->rta_type = IFA_FLAGS;
     prtattr2->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(uint32_t));
@@ -270,14 +272,14 @@ HWTEST_F(WrapperDecoderTest, InterpreteRtMsgTest001, TestSize.Level1)
                     RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr)) +
                     RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(struct in_addr)) +
                     RTA_ALIGN(sizeof(struct rtattr)) + NLMSG_ALIGN(sizeof(uint32_t))];
-    memset(&binarydata, 0, sizeof(binarydata));
-    nlmsghdr *pmsghdr = reinterpret_cast<nlmsghdr *>(&binarydata);
+    memset_s(&binarydata, sizeof(binarydata), 0, sizeof(binarydata));
+    nlmsghdr *pmsghdr = reinterpret_cast<struct nlmsghdr *>(&binarydata);
     ASSERT_NE(pmsghdr, nullptr);
-    rtmsg *prtmsg = reinterpret_cast<rtmsg *>(NLMSG_DATA(&binarydata));
+    rtmsg *prtmsg = reinterpret_cast<struct rtmsg *>(NLMSG_DATA(&binarydata));
     ASSERT_NE(prtmsg, nullptr);
     rtattr *prtattr =  RTM_RTA(prtmsg);
     ASSERT_NE(prtattr, nullptr);
-    in_addr *ipv4Addr = reinterpret_cast<in_addr *>(RTA_DATA(prtattr));
+    in_addr *ipv4Addr = reinterpret_cast<struct in_addr *>(RTA_DATA(prtattr));
     ASSERT_NE(ipv4Addr, nullptr);
 
     pmsghdr->nlmsg_type = RTM_NEWROUTE;
@@ -297,15 +299,15 @@ HWTEST_F(WrapperDecoderTest, InterpreteRtMsgTest001, TestSize.Level1)
     prtattr->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr));
     ipv4Addr->s_addr = inet_addr("0.0.0.0");
 
-    rtattr *prtattr1 = reinterpret_cast<rtattr *>(((char*)prtattr) + prtattr->rta_len);
+    rtattr *prtattr1 = reinterpret_cast<struct rtattr *>(((char*)prtattr) + prtattr->rta_len);
     ASSERT_NE(prtattr1, nullptr);
     prtattr1->rta_type = RTA_DST;
     prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr));
-    ipv4Addr = reinterpret_cast<in_addr *>(RTA_DATA(prtattr1));
+    ipv4Addr = reinterpret_cast<struct in_addr *>(RTA_DATA(prtattr1));
     ASSERT_NE(ipv4Addr, nullptr);
     ipv4Addr->s_addr = inet_addr("127.0.0.1");
 
-    rtattr *prtattr2 = reinterpret_cast<rtattr *>(((char*)prtattr1) + prtattr1->rta_len);
+    rtattr *prtattr2 = reinterpret_cast<struct rtattr *>(((char*)prtattr1) + prtattr1->rta_len);
     ASSERT_NE(prtattr2, nullptr);
     prtattr2->rta_type = RTA_OIF;
     prtattr2->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(uint32_t));
