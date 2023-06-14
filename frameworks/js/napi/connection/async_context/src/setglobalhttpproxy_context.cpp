@@ -15,9 +15,6 @@
 
 #include "setglobalhttpproxy_context.h"
 
-#include <set>
-#include <string>
-
 #include "napi_constant.h"
 #include "napi_utils.h"
 #include "netmanager_base_log.h"
@@ -54,14 +51,14 @@ void SetGlobalHttpProxyContext::ParseParams(napi_value *params, size_t paramsCou
     httpProxy_.SetHost(NapiUtils::GetStringPropertyUtf8(GetEnv(), params[0], "host"));
     httpProxy_.SetPort(static_cast<uint16_t>(NapiUtils::GetUint32Property(GetEnv(), params[0], "port")));
 
-    std::set<std::string> list;
-    napi_value exclusionList = NapiUtils::GetNamedProperty(GetEnv(), params[0], "exclusionList");
-    uint32_t listLength = NapiUtils::GetArrayLength(GetEnv(), exclusionList);
+    std::list<std::string> exclusionList;
+    napi_value exclusionValue = NapiUtils::GetNamedProperty(GetEnv(), params[0], "exclusionList");
+    uint32_t listLength = NapiUtils::GetArrayLength(GetEnv(), exclusionValue);
     for (uint32_t i = 0; i < listLength; ++i) {
-        napi_value element = NapiUtils::GetArrayElement(GetEnv(), exclusionList, i);
-        list.insert(NapiUtils::GetStringFromValueUtf8(GetEnv(), element));
+        napi_value element = NapiUtils::GetArrayElement(GetEnv(), exclusionValue, i);
+        exclusionList.push_back(NapiUtils::GetStringFromValueUtf8(GetEnv(), element));
     }
-    httpProxy_.SetExclusionList(list);
+    httpProxy_.SetExclusionList(exclusionList);
 
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
         SetParseOK(SetCallback(params[ARG_INDEX_1]) == napi_ok);

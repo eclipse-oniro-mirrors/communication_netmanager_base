@@ -46,7 +46,7 @@ void NetHttpProxyTracker::ReadFromSystemParameter(HttpProxy &httpProxy)
                  sizeof(httpProxyExclusions));
     std::string host = Base64::Decode(httpProxyHost);
     host = (host == DEFAULT_HTTP_PROXY_HOST ? "" : host);
-    std::set<std::string> exclusionList = ParseExclusionList(httpProxyExclusions);
+    std::list<std::string> exclusionList = ParseExclusionList(httpProxyExclusions);
     uint16_t port = static_cast<uint16_t>(std::atoi(httpProxyPort));
     httpProxy = {host, port, exclusionList};
 }
@@ -94,14 +94,14 @@ bool NetHttpProxyTracker::WriteToSystemParameter(HttpProxy &httpProxy)
         NETMGR_LOG_E("Set exclusions:%{public}s to system parameter:%{public}s failed, ret:%{public}d",
                      exclusions.c_str(), HTTP_PROXY_EXCLUSIONS_KEY, ret);
     }
-    std::set<std::string> exclusionList = ret ? persistHttpProxy.GetExclusionList() : ParseExclusionList(exclusions);
+    std::list<std::string> exclusionList = ret ? persistHttpProxy.GetExclusionList() : ParseExclusionList(exclusions);
     httpProxy.SetExclusionList(exclusionList);
     return true;
 }
 
-std::set<std::string> NetHttpProxyTracker::ParseExclusionList(const std::string &exclusions) const
+std::list<std::string> NetHttpProxyTracker::ParseExclusionList(const std::string &exclusions) const
 {
-    std::set<std::string> exclusionList;
+    std::list<std::string> exclusionList;
     if (exclusions.empty() || exclusions == DEFAULT_HTTP_PROXY_EXCLUSION_LIST) {
         return exclusionList;
     }
@@ -110,16 +110,16 @@ std::set<std::string> NetHttpProxyTracker::ParseExclusionList(const std::string 
     std::string exclusion;
     while (searchPos != std::string::npos) {
         exclusion = exclusions.substr(startPos, (searchPos - startPos));
-        exclusionList.insert(exclusion);
+        exclusionList.push_back(exclusion);
         startPos = searchPos + 1;
         searchPos = exclusions.find(EXCLUSIONS_SPLIT_SYMBOL, startPos);
     }
     exclusion = exclusions.substr(startPos, (exclusions.size() - startPos));
-    exclusionList.insert(exclusion);
+    exclusionList.push_back(exclusion);
     return exclusionList;
 }
 
-std::string NetHttpProxyTracker::GetExclusionsAsString(const std::set<std::string> &exclusionList) const
+std::string NetHttpProxyTracker::GetExclusionsAsString(const std::list<std::string> &exclusionList) const
 {
     std::string exclusions;
     int32_t index = 0;
