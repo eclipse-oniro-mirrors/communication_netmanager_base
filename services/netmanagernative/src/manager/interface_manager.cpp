@@ -201,7 +201,7 @@ int InterfaceManager::AddAddress(const char *interfaceName, const char *addr, in
 int InterfaceManager::DelAddress(const char *interfaceName, const char *addr, int prefixLen)
 {
     NetLinkSocketDiag socketDiag;
-    socketDiag.DestroyLiveSockets(interfaceName, addr, true);
+    socketDiag.DestroyLiveSockets(addr, true);
     return ModifyAddress(RTM_DELADDR, interfaceName, addr, prefixLen);
 }
 

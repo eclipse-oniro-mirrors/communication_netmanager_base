@@ -144,7 +144,7 @@ bool NetLinkSocketDiag::IsLoopbackSocket(const inet_diag_msg *msg)
     return false;
 }
 
-bool NetLinkSocketDiag::IsMatchNetwork(const inet_diag_msg *msg, const std::string &iface, const std::string &ipAddr)
+bool NetLinkSocketDiag::IsMatchNetwork(const inet_diag_msg *msg, const std::string &ipAddr)
 {
     if (msg->idiag_family == AF_INET) {
         if (CommonUtils::GetAddrFamily(ipAddr) != AF_INET) {
@@ -173,8 +173,7 @@ bool NetLinkSocketDiag::IsMatchNetwork(const inet_diag_msg *msg, const std::stri
     return false;
 }
 
-int32_t NetLinkSocketDiag::ProcessSockDiagDumpResponse(uint8_t proto, const std::string &iface,
-                                                       const std::string &ipAddr, bool excludeLoopback)
+int32_t NetLinkSocketDiag::ProcessSockDiagDumpResponse(uint8_t proto, const std::string &ipAddr, bool excludeLoopback)
 {
     char buf[KERNEL_BUFFER_SIZE] = {0};
     ssize_t readBytes = read(dumpSock_, buf, sizeof(buf));
@@ -194,7 +193,7 @@ int32_t NetLinkSocketDiag::ProcessSockDiagDumpResponse(uint8_t proto, const std:
                 return NETMANAGER_SUCCESS;
             } else {
                 const auto *msg = reinterpret_cast<inet_diag_msg *>(NLMSG_DATA(nlh));
-                SockDiagDumpCallback(proto, msg, iface, ipAddr, excludeLoopback);
+                SockDiagDumpCallback(proto, msg, ipAddr, excludeLoopback);
             }
         }
         readBytes = read(dumpSock_, buf, sizeof(buf));
@@ -224,8 +223,8 @@ int32_t NetLinkSocketDiag::SendSockDiagDumpRequest(uint8_t proto, uint8_t family
     return GetErrorFromKernel(dumpSock_);
 }
 
-void NetLinkSocketDiag::SockDiagDumpCallback(uint8_t proto, const inet_diag_msg *msg, const std::string &iface,
-                                             const std::string &ipAddr, bool excludeLoopback)
+void NetLinkSocketDiag::SockDiagDumpCallback(uint8_t proto, const inet_diag_msg *msg, const std::string &ipAddr,
+                                             bool excludeLoopback)
 {
     if (msg == nullptr) {
         NETNATIVE_LOGE("msg is nullptr");
@@ -237,7 +236,7 @@ void NetLinkSocketDiag::SockDiagDumpCallback(uint8_t proto, const inet_diag_msg 
         return;
     }
 
-    if (!IsMatchNetwork(msg, iface, ipAddr)) {
+    if (!IsMatchNetwork(msg, ipAddr)) {
         NETNATIVE_LOGE("Socket is not associated with the network");
         return;
     }
@@ -245,11 +244,16 @@ void NetLinkSocketDiag::SockDiagDumpCallback(uint8_t proto, const inet_diag_msg 
     ExecuteDestroySocket(proto, msg);
 }
 
-void NetLinkSocketDiag::DestroyLiveSockets(const std::string &iface, const std::string &ipAddr, bool excludeLoopback)
+void NetLinkSocketDiag::DestroyLiveSockets(const char *ipAddr, bool excludeLoopback)
 {
     NETNATIVE_LOG_D("DestroySocketsLackingNetwork in");
+    if (ipAddr == nullptr) {
+        NETNATIVE_LOGE("Ip address is nullptr.");
+        return;
+    }
+
     if (!CreateNetlinkSocket()) {
-        NETNATIVE_LOGE("Error closing sockets for netId change");
+        NETNATIVE_LOGE("Create netlink diag socket failed.");
         return;
     }
 
@@ -262,7 +266,7 @@ void NetLinkSocketDiag::DestroyLiveSockets(const std::string &iface, const std::
             NETNATIVE_LOGE("Failed to dump %{public}s sockets", family == AF_INET ? "IPv4" : "IPv6");
             break;
         }
-        ret = ProcessSockDiagDumpResponse(proto, iface, ipAddr, excludeLoopback);
+        ret = ProcessSockDiagDumpResponse(proto, ipAddr, excludeLoopback);
         if (ret != NETMANAGER_SUCCESS) {
             NETNATIVE_LOGE("Failed to destroy %{public}s sockets", family == AF_INET ? "IPv4" : "IPv6");
             break;

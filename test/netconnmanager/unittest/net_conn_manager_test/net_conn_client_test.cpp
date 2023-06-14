@@ -741,6 +741,23 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplier001, TestSize.Level1)
     std::set<NetCap> netCaps = {NET_CAPABILITY_INTERNET};
     auto ret =
         DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplier(netBearType, ident, netCaps, supplierId);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: RegisterNetSupplier002
+ * @tc.desc: Test NetConnClient::RegisterNetSupplier
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RegisterNetSupplier002, TestSize.Level1)
+{
+    AccessToken token;
+    uint32_t supplierId = 100;
+    NetBearType netBearType = BEARER_WIFI;
+    const std::string ident = "";
+    std::set<NetCap> netCaps = {NET_CAPABILITY_INTERNET};
+    auto ret =
+        DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplier(netBearType, ident, netCaps, supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -752,8 +769,20 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplier001, TestSize.Level1)
 HWTEST_F(NetConnClientTest, UnregisterNetSupplier001, TestSize.Level1)
 {
     uint32_t supplierId = 100;
-    auto ret =
-        DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetSupplier(supplierId);
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetSupplier(supplierId);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: UnregisterNetSupplier002
+ * @tc.desc: Test NetConnClient::UnregisterNetSupplier
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, UnregisterNetSupplier002, TestSize.Level1)
+{
+    AccessToken token;
+    uint32_t supplierId = 100;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetSupplier(supplierId);
     EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
 }
 
@@ -768,7 +797,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest001, TestSize.Level1)
     sptr<NetSupplierCallbackBase> callback = new (std::nothrow) NetSupplierCallbackBase();
     ASSERT_NE(callback, nullptr);
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplierCallback(supplierId, callback);
-    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -778,6 +807,22 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest002, TestSize.Level1)
 {
+    AccessToken token;
+    uint32_t supplierId = 100;
+    sptr<NetSupplierCallbackBase> callback = new (std::nothrow) NetSupplierCallbackBase();
+    ASSERT_NE(callback, nullptr);
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplierCallback(supplierId, callback);
+    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
+}
+
+/**
+ * @tc.name: RegisterNetSupplierCallbackTest003
+ * @tc.desc: Test NetConnClient::RegisterNetSupplierCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest003, TestSize.Level1)
+{
+    AccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET};
     std::string ident = "ident";
@@ -792,12 +837,13 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: RegisterNetSupplierCallbackTest003
+ * @tc.name: RegisterNetSupplierCallbackTest004
  * @tc.desc: Test NetConnClient::RegisterNetSupplierCallback
  * @tc.type: FUNC
  */
-HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest003, TestSize.Level1)
+HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest004, TestSize.Level1)
 {
+    AccessToken token;
     uint32_t supplierId = 0;
     sptr<NetSupplierCallbackBase> callback;
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplierCallback(supplierId, callback);
@@ -924,6 +970,22 @@ HWTEST_F(NetConnClientTest, UnRegisterNetConnCallback001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, UpdateNetSupplierInfo001, TestSize.Level1)
 {
+    auto client = DelayedSingleton<NetConnClient>::GetInstance();
+    uint32_t supplierId = 1;
+    sptr<NetSupplierInfo> netSupplierInfo = new (std::nothrow) NetSupplierInfo;
+    int32_t ret = client->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: UpdateNetSupplierInfo002
+ * @tc.desc: Test NetConnClient::UpdateNetSupplierInfo, not applying for
+ * permission,return NETMANAGER_ERR_PERMISSION_DENIED
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, UpdateNetSupplierInfo002, TestSize.Level1)
+{
+    AccessToken token;
     auto client = DelayedSingleton<NetConnClient>::GetInstance();
     uint32_t supplierId = 1;
     sptr<NetSupplierInfo> netSupplierInfo = new NetSupplierInfo;
