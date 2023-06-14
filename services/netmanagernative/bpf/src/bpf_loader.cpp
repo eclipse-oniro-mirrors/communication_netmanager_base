@@ -149,7 +149,7 @@ inline int32_t SysBpfObjPin(int32_t fd, const std::string &pathName)
         return NETMANAGER_ERROR;
     }
     attr.pathname = PtrToU64(pathName.c_str());
-    attr.bpf_fd = static_cast<unsigned int>(fd);
+    attr.bpf_fd = static_cast<uint32_t>(fd);
 
     return SysBpf(BPF_OBJ_PIN, &attr, sizeof(attr));
 }
@@ -581,7 +581,7 @@ private:
             return NETMANAGER_ERROR;
         }
         attr.prog_type = type;
-        attr.kern_version = static_cast<unsigned int>(kernVersion_);
+        attr.kern_version = static_cast<uint32_t>(kernVersion_);
         attr.insn_cnt = static_cast<uint32_t>(insnsCnt);
         attr.insns = PtrToU64(insns);
         attr.license = PtrToU64(license_.c_str());

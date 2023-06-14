@@ -31,7 +31,7 @@ void GetUidRxBytesContext::ParseParams(napi_value *params, size_t paramsCount)
         SetNeedThrowException(true);
         return;
     }
-    uid_ = NapiUtils::GetUint32FromValue(GetEnv(), params[ARG_INDEX_0]);
+    uid_ = static_cast<uint32_t>(NapiUtils::GetInt32FromValue(GetEnv(), params[ARG_INDEX_0]));
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
         SetParseOK(SetCallback(params[ARG_INDEX_1]) == napi_ok);
         return;

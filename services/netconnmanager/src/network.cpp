@@ -217,12 +217,13 @@ void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
     NETMGR_LOG_D("UpdateRoutes, old routes: [%{public}s]", netLinkInfo_.ToStringRoute("").c_str());
     for (const auto &route : netLinkInfo_.routeList_) {
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
-        int32_t ret = NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, destAddress,
-                                                                         route.gateway_.address_);
+        int32_t temp = NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, destAddress,
+                                                                          route.gateway_.address_);
+        uint32_t ret = static_cast<uint32_t>(temp);
         if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP) {
-            int32_t temp = NetsysController::GetInstance().NetworkRemoveRoute(LOCAL_NET_ID, route.iface_, destAddress,
-                                                                              LOCAL_ROUTE_NEXT_HOP);
-            ret = static_cast<u_int32_t>(ret) | static_cast<u_int32_t>(temp);
+            temp = NetsysController::GetInstance().NetworkRemoveRoute(LOCAL_NET_ID, route.iface_, destAddress,
+                                                                      LOCAL_ROUTE_NEXT_HOP);
+            ret = ret | static_cast<uint32_t>(temp);
         }
         if (ret != NETMANAGER_SUCCESS) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_REMOVE_NET_ROUTES_FAILED);

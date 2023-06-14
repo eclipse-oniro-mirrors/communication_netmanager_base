@@ -103,22 +103,32 @@ int InterfaceManager::SetMtu(const char *interfaceName, const char *mtuValue)
 {
     if (!CheckIfaceName(interfaceName)) {
         NETNATIVE_LOGE("InterfaceManager::SetMtu isIfaceName fail %{public}d", errno);
+    }
+    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        NETNATIVE_LOGE("InterfaceManager::SetMtu socket fail %{public}d", errno);
         return -1;
     }
-    std::string mtuPath = std::string(SYS_NET_PATH).append(interfaceName).append(MTU_PATH);
-    int fd = open(mtuPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, FILE_PERMISSION);
-    if (fd == -1) {
-        NETNATIVE_LOGE("InterfaceManager::SetMtu open fail %{public}d", errno);
-        return -1;
-    }
-    int nwrite = write(fd, mtuValue, strlen(mtuValue));
-    if (nwrite == -1) {
-        NETNATIVE_LOGE("InterfaceManager::SetMtu write fail %{public}d", errno);
-        close(fd);
-        return -1;
-    }
-    close(fd);
 
+    struct ifreq ifr;
+    if (memset_s(&ifr, sizeof(ifr), 0, sizeof(ifr)) != EOK) {
+        close(sockfd);
+        return -1;
+    }
+    if (strncpy_s(ifr.ifr_name, IFNAMSIZ, interfaceName, strlen(interfaceName)) != EOK) {
+        close(sockfd);
+        return -1;
+    }
+    int mtu = std::stoi(mtuValue);
+    ifr.ifr_mtu = mtu;
+
+    if (ioctl(sockfd, SIOCSIFMTU, &ifr) < 0) {
+        NETNATIVE_LOGE("InterfaceManager::SetMtu ioctl fail %{public}d", errno);
+        close(sockfd);
+        return -1;
+    }
+
+    close(sockfd);
     return 0;
 }
 
