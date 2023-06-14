@@ -123,7 +123,7 @@ std::string NetHttpProxyTracker::GetExclusionsAsString(const std::list<std::stri
 {
     std::string exclusions;
     int32_t index = 0;
-    for (auto exclusion : exclusionList) {
+    for (const auto &exclusion : exclusionList) {
         if (exclusions.size() + exclusion.size() >= SYSPARA_MAX_SIZE) {
             break;
         }
