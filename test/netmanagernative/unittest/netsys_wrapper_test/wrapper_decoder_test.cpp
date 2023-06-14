@@ -193,7 +193,7 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest001, TestSize.Level1)
 
     ipv4Addr->s_addr = inet_addr("127.0.0.1");
     prtattr->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr));
-    rtattr *prtattr1 = reinterpret_cast<struct rtattr *>(((char*)prtattr) + prtattr->rta_len);
+    rtattr *prtattr1 = reinterpret_cast<struct rtattr *>((reinterpret_cast<char*>(prtattr)) + prtattr->rta_len);
     ASSERT_NE(prtattr1, nullptr);
     prtattr1->rta_type = IFA_CACHEINFO;
     prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr));
@@ -201,7 +201,7 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest001, TestSize.Level1)
     EXPECT_TRUE(ret);
 
     prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct ifa_cacheinfo));
-    rtattr *prtattr2 = reinterpret_cast<struct rtattr *>(((char*)prtattr1) + prtattr1->rta_len);
+    rtattr *prtattr2 = reinterpret_cast<struct rtattr *>((reinterpret_cast<char*>(prtattr1)) + prtattr1->rta_len);
     ASSERT_NE(prtattr2, nullptr);
     prtattr2->rta_type = IFA_FLAGS;
     prtattr2->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(uint32_t));
@@ -251,11 +251,11 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest002, TestSize.Level1)
     EXPECT_FALSE(ret);
 
     prtattr->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in6_addr));
-    rtattr *prtattr1 = reinterpret_cast<struct rtattr *>(((char*)prtattr) + prtattr->rta_len);
+    rtattr *prtattr1 = reinterpret_cast<struct rtattr *>((reinterpret_cast<char*>(prtattr)) + prtattr->rta_len);
     ASSERT_NE(prtattr1, nullptr);
     prtattr1->rta_type = IFA_CACHEINFO;
     prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct ifa_cacheinfo));
-    rtattr *prtattr2 = reinterpret_cast<struct rtattr *>(((char*)prtattr1) + prtattr1->rta_len);
+    rtattr *prtattr2 = reinterpret_cast<struct rtattr *>((reinterpret_cast<char*>(prtattr1)) + prtattr1->rta_len);
     ASSERT_NE(prtattr2, nullptr);
     prtattr2->rta_type = IFA_FLAGS;
     prtattr2->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(uint32_t));
@@ -299,7 +299,7 @@ HWTEST_F(WrapperDecoderTest, InterpreteRtMsgTest001, TestSize.Level1)
     prtattr->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr));
     ipv4Addr->s_addr = inet_addr("0.0.0.0");
 
-    rtattr *prtattr1 = reinterpret_cast<struct rtattr *>(((char*)prtattr) + prtattr->rta_len);
+    rtattr *prtattr1 = reinterpret_cast<struct rtattr *>((reinterpret_cast<char*>(prtattr)) + prtattr->rta_len);
     ASSERT_NE(prtattr1, nullptr);
     prtattr1->rta_type = RTA_DST;
     prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr));
@@ -307,7 +307,7 @@ HWTEST_F(WrapperDecoderTest, InterpreteRtMsgTest001, TestSize.Level1)
     ASSERT_NE(ipv4Addr, nullptr);
     ipv4Addr->s_addr = inet_addr("127.0.0.1");
 
-    rtattr *prtattr2 = reinterpret_cast<struct rtattr *>(((char*)prtattr1) + prtattr1->rta_len);
+    rtattr *prtattr2 = reinterpret_cast<struct rtattr *>((reinterpret_cast<char*>(prtattr1)) + prtattr1->rta_len);
     ASSERT_NE(prtattr2, nullptr);
     prtattr2->rta_type = RTA_OIF;
     prtattr2->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(uint32_t));
@@ -346,7 +346,6 @@ HWTEST_F(WrapperDecoderTest, PushAsciiMessageTest001, TestSize.Level1)
 
     auto msg = std::make_shared<NetsysEventMessage>();
     std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
-    auto msg = std::make_shared<NetsysEventMessage>();
     auto ret = decoder->PushAsciiMessage(recvmsg);
     EXPECT_TRUE(ret);
 }
