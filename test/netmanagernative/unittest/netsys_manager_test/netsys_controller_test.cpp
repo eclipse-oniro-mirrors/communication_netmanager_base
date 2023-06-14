@@ -18,6 +18,12 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
+
+#include "net_conn_constants.h"
 #include "net_manager_constants.h"
 #include "net_stats_constants.h"
 #include "netsys_controller.h"
@@ -98,9 +104,14 @@ public:
     void SetUp();
 
     void TearDown();
+
+    static inline std::shared_ptr<NetsysController> instance_ = nullptr;
 };
 
-void NetsysControllerTest::SetUpTestCase() {}
+void NetsysControllerTest::SetUpTestCase()
+{
+    instance_ = std::make_shared<NetsysController>();
+}
 
 void NetsysControllerTest::TearDownTestCase() {}
 
@@ -433,5 +444,301 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest018, TestSize.Level1)
     ret = NetsysController::GetInstance().SetIptablesCommandForRes("-L", respond);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysControllerTest, NetsysControllerErr001, TestSize.Level1)
+{
+    std::vector<UidRange> uidRanges;
+    std::string iface = "test";
+    OHOS::nmd::InterfaceConfigurationParcel Parcel;
+
+    int32_t ret = instance_->SetInternetPermission(0, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->NetworkCreateVirtual(0, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->NetworkDestroy(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->NetworkAddUids(0, uidRanges);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->NetworkDelUids(0, uidRanges);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->NetworkAddInterface(0, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->NetworkRemoveInterface(0, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->NetworkAddRoute(0, iface, iface, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->NetworkRemoveRoute(0, iface, iface, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetInterfaceConfig(Parcel);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->SetInterfaceConfig(Parcel);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->SetInterfaceDown(iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->SetInterfaceUp(iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    instance_->ClearInterfaceAddrs(iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetInterfaceMtu(iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->SetInterfaceMtu(iface, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerErr002, TestSize.Level1)
+{
+    std::string iface = "test";
+    std::vector<std::string> servers;
+    uint16_t baseTimeoutMsec = 0;
+    uint8_t retryCount = 0;
+    AddrInfo hints = {0};
+    std::vector<AddrInfo> res;
+    nmd::NetworkSharingTraffic traffic;
+    addrinfo *aihead = static_cast<addrinfo *>(malloc(sizeof(addrinfo)));
+    if (aihead != nullptr) {
+        aihead->ai_next = nullptr;
+        aihead->ai_addr = static_cast<sockaddr *>(malloc(sizeof(sockaddr)));
+    }
+    if (aihead != nullptr) {
+        aihead->ai_canonname = static_cast<char *>(malloc(10));
+    }
+
+    int32_t ret = instance_->AddInterfaceAddress(iface, iface, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->DelInterfaceAddress(iface, iface, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->InterfaceSetIpAddress(iface, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->InterfaceSetIffUp(iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->SetResolverConfig(0, 0, 0, servers, servers);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetResolverConfig(0, servers, servers, baseTimeoutMsec, retryCount);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->CreateNetworkCache(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->DestroyNetworkCache(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    instance_->FreeAddrInfo(aihead);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetAddrInfo(iface, iface, hints, 0, res);
+    EXPECT_EQ(ret, NetManagerStandard::NetConnResultCode::NET_CONN_ERR_SERVICE_UPDATE_NET_LINK_INFO_FAIL);
+
+    ret = instance_->GetNetworkSharingTraffic(iface, iface, traffic);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerErr003, TestSize.Level1)
+{
+    std::string iface = "test";
+
+    auto ret = instance_->GetCellularRxBytes();
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetCellularTxBytes();
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetAllRxBytes();
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetAllTxBytes();
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetUidRxBytes(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetUidTxBytes(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetUidOnIfaceRxBytes(0, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetUidOnIfaceTxBytes(0, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetIfaceRxBytes(iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetIfaceTxBytes(iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetIfaceRxPackets(iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetIfaceTxPackets(iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerErr004, TestSize.Level1)
+{
+    std::string iface = "test";
+    NetsysNotifyCallback callback;
+
+    auto faceList = instance_->InterfaceGetList();
+    EXPECT_EQ(faceList.size(), 0);
+
+    auto uidList = instance_->UidGetList();
+    EXPECT_EQ(uidList.size(), 0);
+
+    auto ret = instance_->SetDefaultNetWork(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->ClearDefaultNetWorkNetId();
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->BindSocket(0, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->IpEnableForwarding(iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->IpDisableForwarding(iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->EnableNat(iface, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->DisableNat(iface, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->IpfwdAddInterfaceForward(iface, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->IpfwdRemoveInterfaceForward(iface, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->ShareDnsSet(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->StartDnsProxyListen();
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->StopDnsProxyListen();
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->RegisterNetsysNotifyCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerErr005, TestSize.Level1)
+{
+    std::string iface = "test";
+    struct ifreq ifRequest;
+    int32_t ifaceFd = 0;
+    sptr<NetsysControllerCallback> callback;
+    auto ret = instance_->BindNetworkServiceVpn(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_ERR_VPN);
+
+    ret = instance_->BindNetworkServiceVpn(1);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->EnableVirtualNetIfaceCard(0, ifRequest, ifaceFd);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_ERR_VPN);
+
+    ret = instance_->EnableVirtualNetIfaceCard(1, ifRequest, ifaceFd);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->SetIpAddress(0, iface, 0, ifRequest);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_ERR_VPN);
+
+    ret = instance_->SetIpAddress(1, iface, 1, ifRequest);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->SetBlocking(0, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->StartDhcpClient(iface, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->StopDhcpClient(iface, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->StartDhcpService(iface, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->StopDhcpService(iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->BandwidthEnableDataSaver(false);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->BandwidthSetIfaceQuota(iface, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->BandwidthRemoveIfaceQuota(iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->BandwidthAddDeniedList(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->BandwidthRemoveDeniedList(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->BandwidthAddAllowedList(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->BandwidthRemoveAllowedList(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerErr006, TestSize.Level1)
+{
+    std::string iface = "test";
+    std::vector<uint32_t> uids;
+    uint64_t stats = 0;
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
+
+    auto ret = instance_->FirewallSetUidsAllowedListChain(0, uids);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->FirewallSetUidsDeniedListChain(0, uids);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->FirewallEnableChain(0, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->FirewallSetUidRule(0, uids, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetTotalStats(stats, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetUidStats(stats, 0, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetIfaceStats(stats, 0, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetAllStatsInfo(statsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->SetIptablesCommandForRes(iface, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
