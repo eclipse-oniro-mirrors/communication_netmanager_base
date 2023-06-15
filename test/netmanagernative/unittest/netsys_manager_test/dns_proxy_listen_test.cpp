@@ -106,8 +106,8 @@ HWTEST_F(DnsProxyListenTest, StartListenTest, TestSize.Level1)
 {
     NETNATIVE_LOGI("StartListenTest enter");
     DnsProxyListen listener;
-    listener.OffListen();
     listener.OnListen();
+    listener.OffListen();
     listener.SetParseNetId(0);
     listener.StartListen();
     EXPECT_EQ(listener.netId_, 0);

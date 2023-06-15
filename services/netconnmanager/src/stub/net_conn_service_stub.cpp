@@ -30,6 +30,8 @@ constexpr uint32_t UID_FOUNDATION = 5523;
 const std::vector<int32_t> SYSTEM_CODE{INetConnService::CMD_NM_SET_AIRPLANE_MODE,
                                        INetConnService::CMD_NM_SET_GLOBAL_HTTP_PROXY,
                                        INetConnService::CMD_NM_GET_GLOBAL_HTTP_PROXY};
+const std::vector<int32_t> PERMISSION_NEED_CACHE_CODES{INetConnService::CMD_NM_GETDEFAULTNETWORK,
+                                                       INetConnService::CMD_NM_HASDEFAULTNET};
 } // namespace
 NetConnServiceStub::NetConnServiceStub()
 {
@@ -136,7 +138,7 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         }
     }
 
-    int32_t ret = OnRequestCheck(code);
+    int32_t ret = OnRequestCheck(code, itFunc->second.second);
     if (ret == NETMANAGER_SUCCESS) {
         return (this->*requestFunc)(data, reply);
     }
@@ -147,7 +149,7 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int32_t NetConnServiceStub::OnRequestCheck(uint32_t code)
+int32_t NetConnServiceStub::OnRequestCheck(uint32_t code, const std::set<std::string> &permissions)
 {
     if (std::find(SYSTEM_CODE.begin(), SYSTEM_CODE.end(), code) != SYSTEM_CODE.end()) {
         if (!NetManagerPermission::IsSystemCaller()) {
@@ -155,12 +157,16 @@ int32_t NetConnServiceStub::OnRequestCheck(uint32_t code)
             return NETMANAGER_ERR_NOT_SYSTEM_CALL;
         }
     }
-    auto itFunc = memberFuncMap_.find(code);
-    if (code != CMD_NM_GETDEFAULTNETWORK && CheckPermission(itFunc->second.second)) {
-        return NETMANAGER_SUCCESS;
-    }
-    if (code == CMD_NM_GETDEFAULTNETWORK && CheckPermissionWithCache(itFunc->second.second)) {
-        return NETMANAGER_SUCCESS;
+
+    if (std::find(PERMISSION_NEED_CACHE_CODES.begin(), PERMISSION_NEED_CACHE_CODES.end(), code) !=
+        PERMISSION_NEED_CACHE_CODES.end()) {
+        if (CheckPermissionWithCache(permissions)) {
+            return NETMANAGER_SUCCESS;
+        }
+    } else {
+        if (CheckPermission(permissions)) {
+            return NETMANAGER_SUCCESS;
+        }
     }
     return NETMANAGER_ERR_PERMISSION_DENIED;
 }
