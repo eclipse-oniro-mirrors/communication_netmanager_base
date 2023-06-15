@@ -87,22 +87,40 @@ int32_t NetsysController::NetworkDestroy(int32_t netId)
     return netsysService_->NetworkDestroy(netId);
 }
 
-int32_t NetsysController::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+int32_t NetsysController::NetworkAddUids(int32_t netId, const std::vector<int32_t> &beginUids,
+                                         const std::vector<int32_t> &endUids)
 {
     NETMGR_LOG_D("Destroy network: netId[%{public}d]", netId);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
     }
+    if (beginUids.size() != endUids.size()) {
+        NETMGR_LOG_E("beginUids and endUids size is mismatch");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    std::vector<UidRange> uidRanges;
+    for (size_t i = 0; i < beginUids.size(); i++) {
+        uidRanges.emplace_back(UidRange(beginUids[i], endUids[i]));
+    }
     return netsysService_->NetworkAddUids(netId, uidRanges);
 }
 
-int32_t NetsysController::NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges)
+int32_t NetsysController::NetworkDelUids(int32_t netId, const std::vector<int32_t> &beginUids,
+                                         const std::vector<int32_t> &endUids)
 {
     NETMGR_LOG_D("Destroy network: netId[%{public}d]", netId);
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("netsysService_ is null");
         return NETSYS_NETSYSSERVICE_NULL;
+    }
+    if (beginUids.size() != endUids.size()) {
+        NETMGR_LOG_E("beginUids and endUids size is mismatch");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    std::vector<UidRange> uidRanges;
+    for (size_t i = 0; i < beginUids.size(); i++) {
+        uidRanges.emplace_back(UidRange(beginUids[i], endUids[i]));
     }
     return netsysService_->NetworkDelUids(netId, uidRanges);
 }

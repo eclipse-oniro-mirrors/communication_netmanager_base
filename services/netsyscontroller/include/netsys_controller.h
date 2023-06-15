@@ -63,8 +63,8 @@ public:
      */
     int32_t NetworkDestroy(int32_t netId);
 
-    int32_t NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges);
-    int32_t NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges);
+    int32_t NetworkAddUids(int32_t netId, const std::vector<int32_t> &beginUids, const std::vector<int32_t> &endUids);
+    int32_t NetworkDelUids(int32_t netId, const std::vector<int32_t> &beginUids, const std::vector<int32_t> &endUids);
 
     /**
      * Add network port device

@@ -80,6 +80,7 @@ private:
     NetConnState state_ = NET_CONN_STATE_UNKNOWN;
     NetDetectionStatus detectResult_ = UNKNOWN_STATE;
     bool isPhyNetCreated_ = false;
+    bool isVirtualCreated_ = false;
     std::shared_ptr<NetMonitor> netMonitor_ = nullptr;
     NetDetectionHandler netCallback_;
     NetBearType netSupplierType_;

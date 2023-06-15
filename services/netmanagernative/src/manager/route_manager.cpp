@@ -42,7 +42,10 @@ using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace nmd {
 namespace {
+constexpr int32_t RULE_LEVEL_VPN_OUTPUT_TO_LOCAL = 9000;
+constexpr int32_t RULE_LEVEL_SECURE_VPN = 10000;
 constexpr int32_t RULE_LEVEL_EXPLICIT_NETWORK = 11000;
+constexpr int32_t RULE_LEVEL_OUTPUT_IFACE_VPN = 11500;
 constexpr int32_t RULE_LEVEL_OUTPUT_INTERFACE = 12000;
 constexpr int32_t RULE_LEVEL_LOCAL_NETWORK = 13000;
 constexpr int32_t RULE_LEVEL_SHARING = 14000;
@@ -58,6 +61,9 @@ constexpr uint32_t THOUSAND_LEN = 100;
 constexpr uint16_t LOCAL_NET_ID = 99;
 constexpr uint16_t NETID_UNSET = 0;
 constexpr uint32_t MARK_UNSET = 0;
+constexpr uid_t UID_ROOT = 0;
+constexpr uint32_t ROUTEMANAGER_SUCCESS = 0;
+constexpr uint32_t ROUTEMANAGER_ERROR = -1;
 constexpr bool ADD_CONTROL = true;
 constexpr bool DEL_CONTROL = false;
 const std::string RULEIIF_LOOPBACK = "lo";
@@ -237,22 +243,60 @@ int32_t RouteManager::AddInterfaceToVirtualNetwork(int32_t netId, const std::str
 
 int32_t RouteManager::RemoveInterfaceFromVirtualNetwork(int32_t netId, const std::string &interfaceName)
 {
-    return 0;
+    if (ROUTEMANAGER_SUCCESS != ModifyVirtualNetBasedRules(netId, interfaceName, false)) {
+        return ROUTEMANAGER_ERROR;
+    }
+    return ClearRoutes(interfaceName);
 }
 
 int32_t RouteManager::ModifyVirtualNetBasedRules(int32_t netId, const std::string &ifaceName, bool add)
 {
-    return 0;
+    NETNATIVE_LOGI("Entry RouteManager::ModifyVirtualNetBasedRules,add===%{public}d", add);
+    uint32_t table = GetRouteTableFromType(RouteManager::VPN_NETWORK, ifaceName);
+    if (table == RT_TABLE_UNSPEC) {
+        NETNATIVE_LOGE("table == RT_TABLE_UNSPEC, this is error");
+        return ROUTEMANAGER_ERROR;
+    }
+
+    int32_t ret = UpdateVpnOutputToLocalRule(ifaceName, add);
+    ret += UpdateVpnSystemPermissionRule(netId, table, add);
+    ret += UpdateExplicitNetworkRuleWithUid(netId, table, PERMISSION_NONE, UID_ROOT, UID_ROOT, add);
+    return ret;
 }
 
 int32_t RouteManager::UpdateVpnOutputToLocalRule(const std::string &interfaceName, bool add)
 {
-    return 0;
+    RuleInfo ruleInfo;
+    ruleInfo.ruleTable = ROUTE_LOCAL_NETWORK_TABLE;
+    ruleInfo.rulePriority = RULE_LEVEL_VPN_OUTPUT_TO_LOCAL;
+    ruleInfo.ruleFwmark = MARK_UNSET;
+    ruleInfo.ruleMask = MARK_UNSET;
+    ruleInfo.ruleIif = interfaceName;
+    ruleInfo.ruleOif = RULEOIF_NULL;
+
+    return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
 }
 
 int32_t RouteManager::UpdateVpnSystemPermissionRule(int32_t netId, uint32_t table, bool add)
 {
-    return 0;
+    Fwmark fwmark;
+    Fwmark mask;
+
+    fwmark.netId = netId;
+    mask.netId = FWMARK_NET_ID_MASK;
+    NetworkPermission per = NetworkPermission::PERMISSION_SYSTEM;
+    fwmark.permission = per;
+    mask.permission = per;
+
+    RuleInfo ruleInfo;
+    ruleInfo.ruleTable = table;
+    ruleInfo.rulePriority = RULE_LEVEL_SECURE_VPN;
+    ruleInfo.ruleFwmark = fwmark.intValue;
+    ruleInfo.ruleMask = mask.intValue;
+    ruleInfo.ruleIif = RULEIIF_NULL;
+    ruleInfo.ruleOif = RULEOIF_NULL;
+
+    return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, INVALID_UID, INVALID_UID);
 }
 
 int32_t RouteManager::AddUsersToVirtualNetwork(int32_t netId, const std::string &interfaceName,
@@ -270,37 +314,84 @@ int32_t RouteManager::RemoveUsersFromVirtualNetwork(int32_t netId, const std::st
 int32_t RouteManager::UpdateVirtualNetwork(int32_t netId, const std::string &interfaceName,
                                            const std::vector<NetManagerStandard::UidRange> &uidRanges, bool add)
 {
-    return 0;
+    NETNATIVE_LOGI("Entry RouteManager::UpdateVirtualNetwork,add===%{public}d", add);
+    uint32_t table = GetRouteTableFromType(RouteManager::VPN_NETWORK, interfaceName);
+    if (table == RT_TABLE_UNSPEC) {
+        NETNATIVE_LOGE("table == RT_TABLE_UNSPEC, this is error");
+        return ROUTEMANAGER_ERROR;
+    }
+    int32_t ret = ROUTEMANAGER_SUCCESS;
+    for (auto range : uidRanges) {
+        ret += UpdateVpnUidRangeRule(table, range.begin_, range.end_, add);
+        ret += UpdateExplicitNetworkRuleWithUid(netId, table, PERMISSION_NONE, range.begin_, range.end_, add);
+        ret += UpdateOutputInterfaceRulesWithUid(interfaceName, table, PERMISSION_NONE, range.begin_, range.end_, add);
+    }
+    return ret;
 }
 
 int32_t RouteManager::UpdateVpnUidRangeRule(uint32_t table, uid_t uidStart, uid_t uidEnd, bool add)
 {
-    return 0;
+    Fwmark fwmark;
+    Fwmark mask;
+    fwmark.protectedFromVpn = false;
+    mask.protectedFromVpn = true;
+
+    RuleInfo ruleInfo;
+    ruleInfo.ruleTable = table;
+    ruleInfo.rulePriority = RULE_LEVEL_SECURE_VPN;
+    ruleInfo.ruleFwmark = fwmark.intValue;
+    ruleInfo.ruleMask = mask.intValue;
+    ruleInfo.ruleIif = RULEIIF_LOOPBACK;
+    ruleInfo.ruleOif = RULEOIF_NULL;
+
+    return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, uidStart, uidEnd);
 }
 
 int32_t RouteManager::UpdateExplicitNetworkRuleWithUid(int32_t netId, uint32_t table, NetworkPermission permission,
                                                        uid_t uidStart, uid_t uidEnd, bool add)
 {
-    return 0;
+    NETNATIVE_LOGI("Entry RouteManager::UpdateExplicitNetworkRuleWithUid");
+    Fwmark fwmark;
+    fwmark.netId = netId;
+    fwmark.explicitlySelected = true;
+    fwmark.permission = permission;
+
+    Fwmark mask;
+    mask.netId = FWMARK_NET_ID_MASK;
+    mask.explicitlySelected = true;
+    mask.permission = permission;
+
+    RuleInfo ruleInfo;
+    ruleInfo.ruleTable = table;
+    ruleInfo.rulePriority = RULE_LEVEL_EXPLICIT_NETWORK;
+    ruleInfo.ruleFwmark = fwmark.intValue;
+    ruleInfo.ruleMask = mask.intValue;
+    ruleInfo.ruleIif = RULEIIF_LOOPBACK;
+    ruleInfo.ruleOif = RULEOIF_NULL;
+
+    return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, uidStart, uidEnd);
 }
 
 int32_t RouteManager::UpdateOutputInterfaceRulesWithUid(const std::string &interface, uint32_t table,
                                                         NetworkPermission permission, uid_t uidStart, uid_t uidEnd,
                                                         bool add)
 {
-    return 0;
-}
+    NETNATIVE_LOGI("Entry RouteManager::UpdateOutputInterfaceRulesWithUid interface:%{public}s", interface.c_str());
+    Fwmark fwmark;
+    fwmark.permission = permission;
 
-int32_t RouteManager::UpdateVpnRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo, uid_t uidStart,
-                                        uid_t uidEnd)
-{
-    return 0;
-}
+    Fwmark mask;
+    mask.permission = permission;
 
-int32_t RouteManager::SendRuleToKernelWithUid(uint32_t action, uint16_t ruleFlag, uint8_t ruleType, RuleInfo ruleInfo,
-                                              uid_t uidStart, uid_t uidEnd)
-{
-    return 0;
+    RuleInfo ruleInfo;
+    ruleInfo.ruleTable = table;
+    ruleInfo.rulePriority = RULE_LEVEL_OUTPUT_IFACE_VPN;
+    ruleInfo.ruleFwmark = fwmark.intValue;
+    ruleInfo.ruleMask = mask.intValue;
+    ruleInfo.ruleIif = RULEIIF_LOOPBACK;
+    ruleInfo.ruleOif = interface;
+
+    return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, uidStart, uidEnd);
 }
 
 int32_t RouteManager::AddInterfaceToLocalNetwork(uint16_t netId, const std::string &interfaceName)
@@ -600,18 +691,18 @@ int32_t RouteManager::ClearSharingRules(const std::string &inputInterface)
     return UpdateRuleInfo(RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo);
 }
 
-int32_t RouteManager::UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo)
+int32_t RouteManager::UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo, uid_t uidStart, uid_t uidEnd)
 {
     NETNATIVE_LOGI("Entry RouteManager::UpdateRuleInfo");
     if (ruleInfo.rulePriority < 0) {
         NETNATIVE_LOGE("invalid IP-rule priority %{public}d", ruleInfo.rulePriority);
-        return -1;
+        return ROUTEMANAGER_ERROR;
     }
 
     if (ruleInfo.ruleFwmark & ~ruleInfo.ruleMask) {
         NETNATIVE_LOGE("mask 0x%{public}x does not select all the bits set in fwmark 0x%{public}x", ruleInfo.ruleMask,
                        ruleInfo.ruleFwmark);
-        return -1;
+        return ROUTEMANAGER_ERROR;
     }
 
     if (ruleInfo.ruleTable == RT_TABLE_UNSPEC && ruleType == FR_ACT_TO_TBL && action != RTM_DELRULE) {
@@ -620,21 +711,17 @@ int32_t RouteManager::UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo
     }
 
     // The main work is to assemble the structure required for rule.
-    uint16_t ruleFlag = NLM_F_EXCL;
-    if (action == RTM_NEWRULE) {
-        ruleFlag = NLM_F_CREATE;
-    }
-
-    int32_t ret = SendRuleToKernel(action, ruleFlag, ruleType, ruleInfo);
+    uint16_t ruleFlag = (action == RTM_NEWRULE) ? NLM_F_CREATE : NLM_F_EXCL;
+    int32_t ret = SendRuleToKernel(action, ruleFlag, ruleType, ruleInfo, uidStart, uidEnd);
     if (ret < 0) {
         NETNATIVE_LOGE("SendNetlinkMsgToKernel Error, ret = %{public}d", ret);
         return ret;
     }
-
-    return 0;
+    return ROUTEMANAGER_SUCCESS;
 }
 
-int32_t RouteManager::SendRuleToKernel(uint32_t action, uint16_t ruleFlag, uint8_t ruleType, RuleInfo ruleInfo)
+int32_t RouteManager::SendRuleToKernel(uint32_t action, uint16_t ruleFlag, uint8_t ruleType, RuleInfo ruleInfo,
+                                       uid_t uidStart, uid_t uidEnd)
 {
     struct fib_rule_hdr msg = {0};
     msg.action = ruleType;
@@ -654,6 +741,13 @@ int32_t RouteManager::SendRuleToKernel(uint32_t action, uint16_t ruleFlag, uint8
             return ret;
         }
         if (int32_t ret = nlmsg.AddAttr32(FRA_FWMASK, ruleInfo.ruleMask)) {
+            return ret;
+        }
+    }
+    if ((uidStart != INVALID_UID) && (uidEnd != INVALID_UID)) {
+        FibRuleUidRange uidRange = {uidStart, uidEnd};
+        if (int32_t ret = nlmsg.AddAttr(FRA_UID_RANGE, &uidRange, sizeof(uidRange))) {
+            NETNATIVE_LOGE("Entry RouteManager::SendRuleToKernel FRA_UID_RANGE is error.");
             return ret;
         }
     }

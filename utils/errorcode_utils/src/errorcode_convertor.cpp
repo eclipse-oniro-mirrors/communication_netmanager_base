@@ -156,7 +156,11 @@ std::map<int32_t, const char *> g_errStringMap = {
     {NET_MDNS_ERR_ILLEGAL_ARGUMENT, "Illegal argument"},
     {NET_MDNS_ERR_SERVICE_INSTANCE_DUPLICATE, "Service instance duplicated"},
     {NET_MDNS_ERR_SERVICE_INSTANCE_NOT_FOUND, "Service instance not found"},
-    {NET_MDNS_ERR_SEND, "Send packet failed"}
+    {NET_MDNS_ERR_SEND, "Send packet failed"},
+    /* Net vpn Manager */
+    {NETWORKVPN_ERROR_REFUSE_CREATE_VPN, "VPN creation denied, please check the user type"},
+    {NETWORKVPN_ERROR_VPN_EXIST, "VPN exist already, please execute destroy first"},
+    {NETWORKVPN_ERROR_INVALID_FD, "Invalid socket file discriptor"},
 };
 } // namespace
 std::string NetBaseErrorCodeConvertor::ConvertErrorCode(int32_t &errorCode)
