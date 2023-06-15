@@ -155,6 +155,10 @@ void NetPolicyCore::ReceiveMessage::OnReceiveEvent(const EventFwk::CommonEventDa
     }
 
     if (action == COMMON_EVENT_PACKAGE_REMOVED) {
+        if (eventData.GetWant().GetIntParam(AppExecFwk::Constants::UID, 0) < 0) {
+            NETMGR_LOG_E("error:deletedUid < 0!,return");
+            return;
+        }
         uint32_t deletedUid = static_cast<uint32_t>(eventData.GetWant().GetIntParam(AppExecFwk::Constants::UID, 0));
         auto policyEvent = std::make_shared<PolicyEvent>();
         policyEvent->deletedUid = deletedUid;

@@ -104,7 +104,7 @@ int InterfaceManager::SetMtu(const char *interfaceName, const char *mtuValue)
     if (!CheckIfaceName(interfaceName)) {
         NETNATIVE_LOGE("InterfaceManager::SetMtu isIfaceName fail %{public}d", errno);
     }
-    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    int32_t sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
         NETNATIVE_LOGE("InterfaceManager::SetMtu socket fail %{public}d", errno);
         return -1;
@@ -119,7 +119,7 @@ int InterfaceManager::SetMtu(const char *interfaceName, const char *mtuValue)
         close(sockfd);
         return -1;
     }
-    int mtu = std::stoi(mtuValue);
+    int32_t mtu = std::stoi(mtuValue);
     ifr.ifr_mtu = mtu;
 
     if (ioctl(sockfd, SIOCSIFMTU, &ifr) < 0) {
