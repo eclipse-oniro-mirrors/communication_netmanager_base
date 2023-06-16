@@ -357,6 +357,193 @@ void AddInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(NetsysNative::INetsysService::NETSYS_INTERFACE_ADD_ADDRESS, dataParcel);
 }
 
+class TestNotifyCallback : public NetsysNative::NotifyCallbackStub {
+public:
+    TestNotifyCallback() = default;
+    ~TestNotifyCallback()  {};
+    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
+                                      int scope)
+    {
+        return 0;
+    }
+
+    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags,
+                                      int scope)
+    {
+        return 0;
+    }
+
+    int32_t OnInterfaceAdded(const std::string &ifName)
+    {
+        return 0;
+    }
+
+    int32_t OnInterfaceRemoved(const std::string &ifName)
+    {
+        return 0;
+    }
+
+    int32_t OnInterfaceChanged(const std::string &ifName, bool up)
+    {
+        return 0;
+    }
+
+    int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
+    {
+        return 0;
+    }
+
+    int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
+                           const std::string &ifName)
+    {
+        return 0;
+    }
+
+    int32_t OnDhcpSuccess(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult)
+    {
+        return 0;
+    }
+
+    int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface)
+    {
+        return 0;
+    }
+
+};
+
+void RegisterNotifyCallbackFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    sptr<NetsysNative::NotifyCallbackStub> notifyCb = new (std::nothrow) TestNotifyCallback();
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    notifyCb->Marshalling(dataParcel);
+    OnRemoteRequest(NetsysNative::INetsysService::NETSYS_REGISTER_NOTIFY_CALLBACK, dataParcel);
+}
+
+
+void UnRegisterNotifyCallbackFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    sptr<NetsysNative::NotifyCallbackStub> notifyCb = new (std::nothrow) TestNotifyCallback();
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    notifyCb->Marshalling(dataParcel);
+    OnRemoteRequest(NetsysNative::INetsysService::NETSYS_UNREGISTER_NOTIFY_CALLBACK, dataParcel);
+}
+
+void InterfaceSetIffUpFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    std::string ifaceName = GetStringFromData(STR_LEN);
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    if (!dataParcel.WriteString("-L -n")) {
+        return;
+    }
+
+    dataParcel.WriteString(ifaceName);
+    OnRemoteRequest(NetsysNative::INetsysService::NETSYS_INTERFACE_SET_IFF_UP, dataParcel);
+}
+
+void GetAddrInfoFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    std::string serverName = GetStringFromData(STR_LEN);
+    AddrInfo hints;
+    hints.aiFlags = GetData<uint32_t>();
+    hints.aiFamily = GetData<uint32_t>();
+    hints.aiSockType = GetData<uint32_t>();
+    hints.aiProtocol = GetData<uint32_t>();
+    hints.aiAddrLen = GetData<uint32_t>();
+
+    std::string aiCanName = GetStringFromData(STR_LEN);
+    memcpy(hints.aiCanonName, aiCanName.c_str(), MAX_CANON_NAME);
+    uint16_t netId = GetData<uint16_t>();
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+    if (!dataParcel.WriteString("-L -n")) {
+        return;
+    }
+
+    dataParcel.WriteString(serverName);
+    dataParcel.WriteUint32(hints.aiFlags);
+    dataParcel.WriteUint32(hints.aiFamily);
+    dataParcel.WriteUint32(hints.aiSockType);
+    dataParcel.WriteUint32(hints.aiProtocol);
+    dataParcel.WriteUint32(hints.aiAddrLen);
+    dataParcel.WriteString(hints.aiCanonName);
+    dataParcel.WriteUint16(netId);
+    OnRemoteRequest(NetsysNative::INetsysService::NETSYS_GET_ADDR_INFO, dataParcel);
+}
+
+void NetworkAddRouteParcelFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    int32_t netId = GetData<int32_t>();
+    NetsysNative::RouteInfoParcel routInfo;
+    routInfo.destination = GetStringFromData(STR_LEN);
+    routInfo.ifName = GetStringFromData(STR_LEN);
+    routInfo.nextHop = GetStringFromData(STR_LEN);
+    routInfo.mtu = GetData<int32_t>();
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteInt32(netId);
+    dataParcel.WriteString(routInfo.destination);
+    dataParcel.WriteString(routInfo.ifName);
+    dataParcel.WriteString(routInfo.nextHop);
+    dataParcel.WriteInt32(routInfo.mtu);
+    OnRemoteRequest(NetsysNative::INetsysService::NETSYS_NETWORK_ADD_ROUTE_PARCEL, dataParcel);
+}
+
 void SetDefaultNetWorkFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
@@ -941,6 +1128,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::FirewallSetUidsAllowedListChainFuzzTest(data, size);
     OHOS::NetManagerStandard::FirewallSetUidsDeniedListChainFuzzTest(data, size);
     OHOS::NetManagerStandard::FirewallSetUidRuleFuzzTest(data, size);
+    OHOS::NetManagerStandard::RegisterNotifyCallbackFuzzTest(data, size);
+    OHOS::NetManagerStandard::UnRegisterNotifyCallbackFuzzTest(data, size);
+    OHOS::NetManagerStandard::InterfaceSetIffUpFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetAddrInfoFuzzTest(data, size);
+    OHOS::NetManagerStandard::NetworkAddRouteParcelFuzzTest(data, size);
 
     return 0;
 }
