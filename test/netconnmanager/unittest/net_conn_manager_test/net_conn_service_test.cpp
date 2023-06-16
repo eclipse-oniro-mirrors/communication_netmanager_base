@@ -669,7 +669,8 @@ HWTEST_F(NetConnServiceTest, RegisterNetInterfaceCallbackTest001, TestSize.Level
     ret = NetConnService::GetInstance()->RegisterNetInterfaceCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
-    NetConnService::GetInstance()->interfaceStateCallback_ = new (std::nothrow) NetConnService::NetInterfaceStateCallback();
+    NetConnService::GetInstance()->interfaceStateCallback_ =
+        new (std::nothrow) NetConnService::NetInterfaceStateCallback();
     ASSERT_NE(NetConnService::GetInstance()->interfaceStateCallback_, nullptr);
     NetsysController::GetInstance().RegisterCallback(NetConnService::GetInstance()->interfaceStateCallback_);
 
