@@ -32,6 +32,7 @@ namespace NetManagerStandard {
 namespace {
 // hisysevent error messgae
 constexpr const char *ERROR_MSG_CREATE_PHYSICAL_NETWORK_FAILED = "Create physical network failed, net id:";
+constexpr const char *ERROR_MSG_CREATE_VIRTUAL_NETWORK_FAILED = "Create virtual network failed, net id:";
 constexpr const char *ERROR_MSG_ADD_NET_INTERFACE_FAILED = "Add network interface failed";
 constexpr const char *ERROR_MSG_REMOVE_NET_INTERFACE_FAILED = "Remove network interface failed";
 constexpr const char *ERROR_MSG_DELETE_NET_IP_ADDR_FAILED = "Delete network ip address failed";
@@ -101,6 +102,17 @@ bool Network::CreateBasicNetwork()
 
 bool Network::CreateVirtualNetwork()
 {
+    NETMGR_LOG_D("Enter create virtual network");
+    if (!isVirtualCreated_) {
+        // Create a virtual network here
+        bool hasDns = netLinkInfo_.dnsList_.size() ? true : false;
+        if (NetsysController::GetInstance().NetworkCreateVirtual(netId_, hasDns) != NETMANAGER_SUCCESS) {
+            std::string errMsg = std::string(ERROR_MSG_CREATE_VIRTUAL_NETWORK_FAILED).append(std::to_string(netId_));
+            SendSupplierFaultHiSysEvent(FAULT_CREATE_VIRTUAL_NETWORK_FAILED, errMsg);
+        }
+        NetsysController::GetInstance().CreateNetworkCache(netId_);
+        isVirtualCreated_ = true;
+    }
     return true;
 }
 
@@ -128,6 +140,21 @@ bool Network::ReleaseBasicNetwork()
 
 bool Network::ReleaseVirtualNetwork()
 {
+    NETMGR_LOG_D("Enter release virtual network");
+    if (isVirtualCreated_) {
+        for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+            int32_t prefixLen = inetAddr.prefixlen_;
+            if (prefixLen == 0) {
+                prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
+            }
+            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
+        }
+        NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
+        NetsysController::GetInstance().NetworkDestroy(netId_);
+        NetsysController::GetInstance().DestroyNetworkCache(netId_);
+        netLinkInfo_.Initialize();
+        isVirtualCreated_ = false;
+    }
     return true;
 }
 
@@ -183,31 +210,21 @@ void Network::UpdateIpAddrs(const NetLinkInfo &netLinkInfo)
     // Update: remove old Ips first, then add the new Ips
     NETMGR_LOG_D("UpdateIpAddrs, old ip addrs: ...");
     for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
-        int32_t prefixLen = inetAddr.prefixlen_;
-        if (prefixLen == 0) {
-            prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
-        }
-        int32_t ret =
-            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
-        if (ret != NETMANAGER_SUCCESS) {
+        int32_t prefixLen = inetAddr.prefixlen_ ? inetAddr.prefixlen_ : Ipv4PrefixLen(inetAddr.netMask_);
+        if (NETMANAGER_SUCCESS != NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_,
+                                                                                      inetAddr.address_, prefixLen)) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_DELETE_NET_IP_ADDR_FAILED);
         }
     }
 
     NETMGR_LOG_D("UpdateIpAddrs, new ip addrs: ...");
-    for (auto it = netLinkInfo.netAddrList_.begin(); it != netLinkInfo.netAddrList_.end(); ++it) {
-        const struct INetAddr &inetAddr = *it;
-        int32_t prefixLen = inetAddr.prefixlen_;
-        if (prefixLen == 0) {
-            prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
-        }
-        int32_t ret =
-            NetsysController::GetInstance().AddInterfaceAddress(netLinkInfo.ifaceName_, inetAddr.address_, prefixLen);
-        if (ret != NETMANAGER_SUCCESS) {
+    for (const auto &inetAddr : netLinkInfo.netAddrList_) {
+        int32_t prefixLen = inetAddr.prefixlen_ ? inetAddr.prefixlen_ : Ipv4PrefixLen(inetAddr.netMask_);
+        if (NETMANAGER_SUCCESS !=
+            NetsysController::GetInstance().AddInterfaceAddress(netLinkInfo.ifaceName_, inetAddr.address_, prefixLen)) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_IP_ADDR_FAILED);
         }
     }
-    NETMGR_LOG_D("Network UpdateIpAddrs out.");
 }
 
 void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)

@@ -572,17 +572,98 @@ int32_t NetsysNativeServiceProxy::NetworkCreatePhysical(int32_t netId, int32_t p
 
 int32_t NetsysNativeServiceProxy::NetworkCreateVirtual(int32_t netId, bool hasDns)
 {
-    return 0;
+    MessageParcel data;
+    if (!WriteInterfaceToken(data) || !data.WriteInt32(netId) || !data.WriteBool(hasDns)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t ret = remote->SendRequest(INetsysService::NETSYS_NETWORK_CREATE_VIRTUAL, data, reply, option);
+    if (ERR_NONE != ret) {
+        NETNATIVE_LOGE("NetworkCreateVirtual proxy SendRequest failed, error code: [%{public}d]", ret);
+        return IPC_INVOKER_ERR;
+    }
+
+    int32_t result = ERR_INVALID_DATA;
+    if (!reply.ReadInt32(result)) {
+        return IPC_PROXY_TRANSACTION_ERR;
+    }
+    return result;
 }
 
 int32_t NetsysNativeServiceProxy::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
 {
-    return 0;
+    MessageParcel data;
+    if (!WriteInterfaceToken(data) || !data.WriteInt32(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteInt32(uidRanges.size())) {
+        return IPC_PROXY_TRANSACTION_ERR;
+    }
+    for (auto iter : uidRanges) {
+        if (!iter.Marshalling(data)) {
+            return IPC_PROXY_TRANSACTION_ERR;
+        }
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t ret = remote->SendRequest(INetsysService::NETSYS_NETWORK_ADD_UIDS, data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("NetworkAddUids proxy SendRequest failed, error code: [%{public}d]", ret);
+        return IPC_INVOKER_ERR;
+    }
+
+    int32_t result = ERR_INVALID_DATA;
+    if (!reply.ReadInt32(result)) {
+        return IPC_PROXY_TRANSACTION_ERR;
+    }
+    return result;
 }
 
 int32_t NetsysNativeServiceProxy::NetworkDelUids(int32_t netId, const std::vector<UidRange> &uidRanges)
 {
-    return 0;
+    MessageParcel data;
+    if (!WriteInterfaceToken(data) || !data.WriteInt32(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteInt32(uidRanges.size())) {
+        return IPC_PROXY_TRANSACTION_ERR;
+    }
+    for (auto iter : uidRanges) {
+        if (!iter.Marshalling(data)) {
+            return IPC_PROXY_TRANSACTION_ERR;
+        }
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t ret = remote->SendRequest(INetsysService::NETSYS_NETWORK_DEL_UIDS, data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("NetworkDelUids proxy SendRequest failed, error code: [%{public}d]", ret);
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = ERR_INVALID_DATA;
+    if (!reply.ReadInt32(result)) {
+        return IPC_PROXY_TRANSACTION_ERR;
+    }
+    return result;
 }
 
 int32_t NetsysNativeServiceProxy::AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,

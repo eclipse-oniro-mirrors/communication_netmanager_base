@@ -447,7 +447,8 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest018, TestSize.Level1)
 
 HWTEST_F(NetsysControllerTest, NetsysControllerErr001, TestSize.Level1)
 {
-    std::vector<UidRange> uidRanges;
+    std::vector<int32_t> beginUids;
+    std::vector<int32_t> endUids;
     std::string iface = "test";
     OHOS::nmd::InterfaceConfigurationParcel Parcel;
 
@@ -460,10 +461,10 @@ HWTEST_F(NetsysControllerTest, NetsysControllerErr001, TestSize.Level1)
     ret = instance_->NetworkDestroy(0);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 
-    ret = instance_->NetworkAddUids(0, uidRanges);
+    ret = instance_->NetworkAddUids(0, beginUids, endUids);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 
-    ret = instance_->NetworkDelUids(0, uidRanges);
+    ret = instance_->NetworkDelUids(0, beginUids, endUids);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 
     ret = instance_->NetworkAddInterface(0, iface);
