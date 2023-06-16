@@ -18,7 +18,7 @@
     },
     "component": {
         "name": "netmanager_base",
-        "subsystem": "communication",
+        "subsystem": "netmanager",
         "syscap": [
             "SystemCapability.Communication.NetManager.Core"
         ],
