@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
+#include "i_netsys_service.h"
+#include "iservice_registry.h"
+#include "netnative_log_wrapper.h"
+#include "netsys_native_service_proxy.h"
+#include "system_ability_definition.h"
+#include "test.h"
 #include <iostream>
 #include <memory>
-#include "i_netsys_service.h"
-#include "netsys_native_service_proxy.h"
-#include "iservice_registry.h"
-#include "system_ability_definition.h"
-#include "netnative_log_wrapper.h"
-#include "test.h"
 
 using namespace OHOS::nmd;
 using namespace OHOS;
@@ -35,11 +35,11 @@ sptr<INetsysService> GetProxyR()
     NETNATIVE_LOGE("Get samgr >>>>>>>>>>>>>>>>>>>>>>>>>>");
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     NETNATIVE_LOGE("Get samgr %{public}p", samgr.GetRefPtr());
-    std::cout << "Get samgr  "<< samgr.GetRefPtr() << std::endl;
+    std::cout << "Get samgr  " << samgr.GetRefPtr() << std::endl;
 
     auto remote = samgr->GetSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
     NETNATIVE_LOGE("Get remote %{public}p", remote.GetRefPtr());
-    std::cout << "Get remote "<< remote.GetRefPtr() << std::endl;
+    std::cout << "Get remote " << remote.GetRefPtr() << std::endl;
 
     auto proxy = iface_cast<NetsysNative::INetsysService>(remote);
     if (proxy != nullptr) {
@@ -53,7 +53,7 @@ sptr<INetsysService> GetProxyR()
 }
 
 auto netsysServiceR_ = GetProxyR();
-}
+} // namespace
 
 void TestNetworkAddRoute()
 {
@@ -122,7 +122,7 @@ void TestNetworkSetDefault()
         return;
     }
     int ret = netsysServiceR_->NetworkSetDefault(netid);
-    std::cout << "  TestNetworkSetDefault   ret ="<<ret<<std::endl;
+    std::cout << "  TestNetworkSetDefault   ret =" << ret << std::endl;
 }
 
 void TestNetworkSetDefaultWIFI()
@@ -133,7 +133,7 @@ void TestNetworkSetDefaultWIFI()
         return;
     }
     int ret = netsysServiceR_->NetworkSetDefault(netid);
-    std::cout << "  TestNetworkSetDefaultWIFI   ret ="<<ret<<std::endl;
+    std::cout << "  TestNetworkSetDefaultWIFI   ret =" << ret << std::endl;
 }
 
 void TestNetworkGetDefault()
@@ -143,17 +143,17 @@ void TestNetworkGetDefault()
         return;
     }
     int ret = netsysServiceR_->NetworkGetDefault();
-    std::cout << "  TestNetworkGetDefault   ret ="<<ret<<std::endl;
+    std::cout << "  TestNetworkGetDefault   ret =" << ret << std::endl;
 }
 
 void TestNetworkClearDefault()
 {
     if (netsysServiceR_ == nullptr) {
-        std::cout << " TestNetworkClearDefault netsysServiceR_ is nullptr"<<std::endl;
+        std::cout << " TestNetworkClearDefault netsysServiceR_ is nullptr" << std::endl;
         return;
     }
     int ret = netsysServiceR_->NetworkClearDefault();
-    std::cout << "  TestNetworkClearDefault   ret ="<<ret<<std::endl;
+    std::cout << "  TestNetworkClearDefault   ret =" << ret << std::endl;
 }
 
 void TestNetworkGetDefaultUnion()
@@ -188,27 +188,27 @@ void TestNetworkCreatePhysical()
         return;
     }
     int ret = netsysServiceR_->NetworkCreatePhysical(NETID, OHOS::nmd::NetworkPermission::PERMISSION_NONE);
-    std::cout << "  TestNetworkCreatePhysical   ret ="<<ret<<std::endl;
+    std::cout << "  TestNetworkCreatePhysical   ret =" << ret << std::endl;
 }
 
-void TestAddInterfaceAddress()
+void TestInterfaceAddAddress()
 {
     if (netsysServiceR_ == nullptr) {
         std::cout << "  TestAddInterfaceAddress netsysServiceR_ is nullptr" << std::endl;
         return;
     }
     int ret = netsysServiceR_->AddInterfaceAddress("eth0", "172.17.5.245", 23);
-    std::cout << "  TestAddInterfaceAddress    ret ="<<ret<<std::endl;
+    std::cout << "  TestAddInterfaceAddress    ret =" << ret << std::endl;
 }
 
-void TestDelInterfaceAddress()
+void TestInterfaceDelAddress()
 {
     if (netsysServiceR_ == nullptr) {
-        std::cout << "  TestDelInterfaceAddress netsysServiceR_ is nullptr"<<std::endl;
+        std::cout << "  TestDelInterfaceAddress netsysServiceR_ is nullptr" << std::endl;
         return;
     }
     int ret = netsysServiceR_->DelInterfaceAddress("eth0", "172.17.5.245", 23);
-    std::cout << "  TestDelInterfaceAddress    ret ="<<ret<<std::endl;
+    std::cout << "  TestDelInterfaceAddress    ret =" << ret << std::endl;
 }
 
 void TestNetworkAddInterface()
@@ -227,7 +227,7 @@ void TestNetworkAddInterface()
 void TestNetworkRemoveInterface()
 {
     if (netsysServiceR_ == nullptr) {
-        std::cout << " TestNetworkRemoveInterface  netsysServiceR_ is nullptr"<< std::endl;
+        std::cout << " TestNetworkRemoveInterface  netsysServiceR_ is nullptr" << std::endl;
         return;
     }
     int ret = netsysServiceR_->NetworkRemoveInterface(NETID, "rmnet0");
@@ -250,13 +250,12 @@ void TestNetworkAddInterfaceWIFI()
 void TestNetworkRemoveInterfaceWIFI()
 {
     if (netsysServiceR_ == nullptr) {
-        std::cout << " TestNetworkRemoveInterfaceWIFI  netsysServiceR_ is nullptr"<< std::endl;
+        std::cout << " TestNetworkRemoveInterfaceWIFI  netsysServiceR_ is nullptr" << std::endl;
         return;
     }
     int ret = netsysServiceR_->NetworkRemoveInterface(NETID_, "wlan0");
     NETNATIVE_LOGE("TestNetworkRemoveInterfaceWIFI ret = %{public}d", ret);
 }
-
 
 void TestGetFwmarkForNetwork()
 {
@@ -272,7 +271,7 @@ void TestGetFwmarkForNetwork()
 void TestInterfaceSetCfg()
 {
     if (netsysServiceR_ == nullptr) {
-        std::cout << " TestInterfaceSetCfg  netsysServiceR_ is nullptr"<<std::endl;
+        std::cout << " TestInterfaceSetCfg  netsysServiceR_ is nullptr" << std::endl;
         return;
     }
     OHOS::nmd::InterfaceConfigurationParcel parcel;
@@ -290,15 +289,15 @@ void TestInterfaceSetCfg()
 void TestNetGetProcSysNet()
 {
     if (netsysServiceR_ == nullptr) {
-        std::cout << " TestNetGetProcSysNet  netsysServiceR_ is nullptr"<<std::endl;
+        std::cout << " TestNetGetProcSysNet  netsysServiceR_ is nullptr" << std::endl;
         return;
     }
-    std::string  value = "5";
+    std::string value = "5";
     int ret = -1;
     NETNATIVE_LOGE("SetProcSysNet  start");
     ret = netsysServiceR_->SetProcSysNet(IPVERSION, 1, std::string("eth0"), std::string("disable_policy"), value);
     NETNATIVE_LOGE("SetProcSysNet  ret:%{public}d, value:%{public}s \n", ret, value.c_str());
-    std::string  readValue;
+    std::string readValue;
     ret = netsysServiceR_->GetProcSysNet(IPVERSION, 1, std::string("eth0"), std::string("disable_policy"), readValue);
     NETNATIVE_LOGE("GetProcSysNet  ret:%{public}d, readValue=%{public}s\n", ret, readValue.c_str());
     NETNATIVE_LOGE("NetGetProcSysNet  OVER");

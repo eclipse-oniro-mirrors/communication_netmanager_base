@@ -687,12 +687,12 @@ int32_t NetConnServiceProxy::GetSpecificNet(NetBearType bearerType, std::list<in
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
-        int32_t size = 0;
-        if (!reply.ReadInt32(size)) {
+        uint32_t size = 0;
+        if (!reply.ReadUint32(size)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
         size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
-        for (int32_t i = 0; i < size; ++i) {
+        for (uint32_t i = 0; i < size; ++i) {
             uint32_t value;
             if (!reply.ReadUint32(value)) {
                 return NETMANAGER_ERR_READ_REPLY_FAIL;
@@ -730,12 +730,12 @@ int32_t NetConnServiceProxy::GetAllNets(std::list<int32_t> &netIdList)
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
-        int32_t size;
-        if (!reply.ReadInt32(size)) {
+        uint32_t size;
+        if (!reply.ReadUint32(size)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
         size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
-        for (int32_t i = 0; i < size; ++i) {
+        for (uint32_t i = 0; i < size; ++i) {
             uint32_t value;
             if (!reply.ReadUint32(value)) {
                 return NETMANAGER_ERR_READ_REPLY_FAIL;
@@ -922,12 +922,12 @@ int32_t NetConnServiceProxy::GetAddressesByName(const std::string &host, int32_t
     }
 
     if (ret == NETMANAGER_SUCCESS) {
-        int32_t size;
-        if (!reply.ReadInt32(size)) {
+        uint32_t size;
+        if (!reply.ReadUint32(size)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
         size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
-        for (int32_t i = 0; i < size; ++i) {
+        for (uint32_t i = 0; i < size; ++i) {
             sptr<INetAddr> netaddr_ptr = INetAddr::Unmarshalling(reply);
             if (netaddr_ptr != nullptr) {
                 addrList.push_back(*netaddr_ptr);
@@ -1220,13 +1220,13 @@ int32_t NetConnServiceProxy::GetNetIdByIdentifier(const std::string &ident, std:
     }
 
     if (ret == NETMANAGER_SUCCESS) {
-        int32_t size = 0;
-        if (!reply.ReadInt32(size)) {
+        uint32_t size = 0;
+        if (!reply.ReadUint32(size)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
         size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
         int32_t value = 0;
-        for (int32_t i = 0; i < size; ++i) {
+        for (uint32_t i = 0; i < size; ++i) {
             if (!reply.ReadInt32(value)) {
                 return NETMANAGER_ERR_READ_REPLY_FAIL;
             }

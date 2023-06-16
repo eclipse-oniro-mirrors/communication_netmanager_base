@@ -72,7 +72,7 @@ void DnsGetAddrInfo::ParseAddr(int32_t nAddrs, int32_t nServs, ServData (&ports)
     for (int32_t i = 0; i < nAddrs; i++) {
         for (int32_t j = 0; j < nServs; j++, k++) {
             AddrInfo info = {};
-            info.aiFamily = addrs[i].family;
+            info.aiFamily = static_cast<uint32_t>(addrs[i].family);
             info.aiSockType = ports[j].sockType;
             info.aiProtocol = ports[j].proto;
             info.aiAddrLen = addrs[i].family == AF_INET ? static_cast<socklen_t>(sizeof(sockaddr_in))

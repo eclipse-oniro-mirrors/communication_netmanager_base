@@ -349,6 +349,7 @@ int32_t BandwidthManager::SetIfaceQuotaDetail(const std::string &ifName, int64_t
                   " --jump REJECT";
         hasError = hasError || (IptablesWrapper::GetInstance()->RunCommand(IPTYPE_IPV4, command) ==
                                 NETMANAGER_ERROR);
+        NETNATIVE_LOG_D("hasError %d", hasError);
         ifaceQuotaBytes_[ifName] = bytes;
         return NETMANAGER_SUCCESS;
     }

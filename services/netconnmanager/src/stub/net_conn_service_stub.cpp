@@ -603,7 +603,7 @@ int32_t NetConnServiceStub::OnGetSpecificNet(MessageParcel &data, MessageParcel 
     if (ret == NETMANAGER_SUCCESS) {
         uint32_t size = static_cast<uint32_t>(netIdList.size());
         size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
-        if (!reply.WriteInt32(size)) {
+        if (!reply.WriteUint32(size)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
 
@@ -629,8 +629,8 @@ int32_t NetConnServiceStub::OnGetAllNets(MessageParcel &data, MessageParcel &rep
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
-        int32_t size = static_cast<int32_t>(netIdList.size());
-        if (!reply.WriteInt32(size)) {
+        uint32_t size = static_cast<uint32_t>(netIdList.size());
+        if (!reply.WriteUint32(size)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
 
@@ -758,7 +758,7 @@ int32_t NetConnServiceStub::OnGetAddressesByName(MessageParcel &data, MessagePar
     if (ret == NETMANAGER_SUCCESS) {
         uint32_t size = static_cast<uint32_t>(addrList.size());
         size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
-        if (!reply.WriteInt32(size)) {
+        if (!reply.WriteUint32(size)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
         uint32_t index = 0;
@@ -922,8 +922,8 @@ int32_t NetConnServiceStub::OnGetNetIdByIdentifier(MessageParcel &data, MessageP
     }
 
     if (ret == NETMANAGER_SUCCESS) {
-        int32_t size = static_cast<int32_t>(netIdList.size());
-        if (!reply.WriteInt32(size)) {
+        uint32_t size = static_cast<uint32_t>(netIdList.size());
+        if (!reply.WriteUint32(size)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
         for (auto p = netIdList.begin(); p != netIdList.end(); ++p) {
