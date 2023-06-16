@@ -51,8 +51,10 @@ ohos_shared_library("connection") {
     "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
   ]
   external_deps = [
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "napi:ace_napi",
   ]
 
   relative_install_dir = "module/net"

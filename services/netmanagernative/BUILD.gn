@@ -85,7 +85,6 @@ netsys_native_manager_sources = [
 ]
 
 netsys_native_manager_deps = [
-  "$DHCP_MANAGER_ROOT/services/mgr_service:dhcp_manager_service",
   "$FWMARK_CLIENT_DIR:fwmark_client",
   "$NETMANAGERNATIVE_ROOT/netsys_client",
   "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
@@ -133,6 +132,8 @@ ohos_shared_library("netsys_native_manager") {
   }
 
   external_deps = [
+    "c_utils:utils",
+    "dhcp:dhcp_manager_service",
     "eventhandler:libeventhandler",
     "init:libbegetutil",
     "ipc:ipc_core",
