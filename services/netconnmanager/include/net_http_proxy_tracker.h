@@ -29,8 +29,8 @@ public:
     bool WriteToSystemParameter(HttpProxy &httpProxy);
 
 private:
-    std::set<std::string> ParseExclusionList(const std::string &exclusions) const;
-    std::string GetExclusionsAsString(const std::set<std::string> &exclusionList) const;
+    std::list<std::string> ParseExclusionList(const std::string &exclusions) const;
+    std::string GetExclusionsAsString(const std::list<std::string> &exclusionList) const;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

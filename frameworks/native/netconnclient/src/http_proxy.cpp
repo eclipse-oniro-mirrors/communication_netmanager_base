@@ -24,14 +24,14 @@ static const size_t MAX_URL_SIZE = 2048;
 
 HttpProxy::HttpProxy() : port_(0) {}
 
-HttpProxy::HttpProxy(std::string host, uint16_t port, const std::set<std::string> &exclusionList) : port_(0)
+HttpProxy::HttpProxy(std::string host, uint16_t port, const std::list<std::string> &exclusionList) : port_(0)
 {
     if (host.size() <= MAX_URL_SIZE) {
         host_ = std::move(host);
         port_ = port;
         for (const auto &s : exclusionList) {
             if (s.size() <= MAX_URL_SIZE) {
-                exclusionList_.insert(s);
+                exclusionList_.push_back(s);
             }
             if (exclusionList_.size() >= MAX_EXCLUSION_SIZE) {
                 break;
@@ -52,7 +52,7 @@ uint16_t HttpProxy::GetPort() const
     return port_;
 }
 
-std::set<std::string> HttpProxy::GetExclusionList() const
+std::list<std::string> HttpProxy::GetExclusionList() const
 {
     return exclusionList_;
 }
@@ -125,12 +125,12 @@ bool HttpProxy::Unmarshalling(Parcel &parcel, HttpProxy &httpProxy)
         size = MAX_EXCLUSION_SIZE;
     }
 
-    std::set<std::string> exclusionList;
+    std::list<std::string> exclusionList;
     for (uint32_t i = 0; i < size; ++i) {
         std::string s;
         parcel.ReadString(s);
         if (s.size() <= MAX_URL_SIZE) {
-            exclusionList.insert(s);
+            exclusionList.push_back(s);
         }
     }
 

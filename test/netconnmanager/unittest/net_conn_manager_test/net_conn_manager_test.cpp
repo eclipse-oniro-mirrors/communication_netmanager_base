@@ -775,7 +775,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager018, TestSize.Level1)
 {
     HttpProxy httpProxy;
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetGlobalHttpProxy(httpProxy);
-    std::set<std::string> exclusionList = httpProxy.GetExclusionList();
+    std::list<std::string> exclusionList = httpProxy.GetExclusionList();
     std::cout << "Get global http host:" << httpProxy.GetHost() << " ,port:" << httpProxy.GetPort() << std::endl;
     for (auto exclusion : exclusionList) {
         std::cout << "Get global http exclusion:" << exclusion << std::endl;
@@ -792,7 +792,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager019, TestSize.Level1)
 {
     std::string host = "178.169.139.180";
     uint16_t port = 8080;
-    std::set<std::string> exclusionList = {"example.com", "::1", "localhost"};
+    std::list<std::string> exclusionList = {"example.com", "::1", "localhost"};
     HttpProxy httpProxy = {host, port, exclusionList};
     OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
@@ -816,7 +816,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager020, TestSize.Level1)
 {
     std::string host = "";
     uint16_t port = 0;
-    std::set<std::string> exclusionList = {};
+    std::list<std::string> exclusionList = {};
     HttpProxy httpProxy = {host, port, exclusionList};
     OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);

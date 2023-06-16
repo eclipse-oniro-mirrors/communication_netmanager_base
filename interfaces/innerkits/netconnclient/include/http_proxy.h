@@ -17,7 +17,7 @@
 #define NETMANAGER_BASE_HTTP_PROXY_H
 
 #include <string>
-#include <set>
+#include <list>
 
 #include "parcel.h"
 
@@ -26,11 +26,11 @@ namespace NetManagerStandard {
 class HttpProxy : public Parcelable {
 public:
     HttpProxy();
-    HttpProxy(std::string host, uint16_t port, const std::set<std::string> &exclusionList);
+    HttpProxy(std::string host, uint16_t port, const std::list<std::string> &exclusionList);
 
     [[nodiscard]] std::string GetHost() const;
     [[nodiscard]] uint16_t GetPort() const;
-    [[nodiscard]] std::set<std::string> GetExclusionList() const;
+    [[nodiscard]] std::list<std::string> GetExclusionList() const;
     [[nodiscard]] std::string ToString() const;
     void inline SetHost(std::string &&host)
     {
@@ -40,7 +40,7 @@ public:
     {
         port_ = port;
     }
-    void inline SetExclusionList(const std::set<std::string> &list)
+    void inline SetExclusionList(const std::list<std::string> &list)
     {
         exclusionList_ = list;
     }
@@ -53,7 +53,7 @@ public:
 private:
     std::string host_;
     uint16_t port_;
-    std::set<std::string> exclusionList_;
+    std::list<std::string> exclusionList_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

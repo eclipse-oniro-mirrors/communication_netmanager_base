@@ -58,7 +58,7 @@ const std::string IPADDR_DELIMITER = ".";
 constexpr const char *CMD_SEP = " ";
 constexpr const char *DOMAIN_DELIMITER = ".";
 constexpr const char *TLDS_SPLIT_SYMBOL = "|";
-constexpr const char *HOST_DOMAIN_PATTERN_HEADER = "^[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*\\.(";
+constexpr const char *HOST_DOMAIN_PATTERN_HEADER = "^(https?://)?[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*\\.(";
 constexpr const char *HOST_DOMAIN_PATTERN_TAIL = ")$";
 const std::regex IP_PATTERN{
     "((2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)\\.){3}(2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)"};
