@@ -37,7 +37,7 @@ int32_t VirtualNetwork::AddUids(const std::vector<UidRange> &uidVec)
     std::inplace_merge(uidRanges_.begin(), middle, uidRanges_.end()); // restart sort
 
     std::lock_guard<std::mutex> lock(mutex_);
-    for (const std::string &interface : interfaces_) {
+    for (const auto &interface : interfaces_) {
         if (RouteManager::AddUsersToVirtualNetwork(netId_, interface, uidVec)) {
             NETNATIVE_LOGE("failed to add uids on interface %s of netId %u", interface.c_str(), netId_);
             return NETMANAGER_ERROR;
@@ -53,7 +53,7 @@ int32_t VirtualNetwork::RemoveUids(const std::vector<UidRange> &uidVec)
     uidRanges_.erase(end, uidRanges_.end());
 
     std::lock_guard<std::mutex> lock(mutex_);
-    for (const std::string &interface : interfaces_) {
+    for (const auto &interface : interfaces_) {
         if (RouteManager::RemoveUsersFromVirtualNetwork(netId_, interface, uidVec)) {
             NETNATIVE_LOGE("failed to remove uids on interface %s of netId %u", interface.c_str(), netId_);
             return NETMANAGER_ERROR;

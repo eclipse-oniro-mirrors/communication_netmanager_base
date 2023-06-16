@@ -243,7 +243,7 @@ int32_t RouteManager::AddInterfaceToVirtualNetwork(int32_t netId, const std::str
 
 int32_t RouteManager::RemoveInterfaceFromVirtualNetwork(int32_t netId, const std::string &interfaceName)
 {
-    if (ROUTEMANAGER_SUCCESS != ModifyVirtualNetBasedRules(netId, interfaceName, false)) {
+    if (ModifyVirtualNetBasedRules(netId, interfaceName, false) != ROUTEMANAGER_SUCCESS) {
         return ROUTEMANAGER_ERROR;
     }
     return ClearRoutes(interfaceName);
@@ -258,6 +258,7 @@ int32_t RouteManager::ModifyVirtualNetBasedRules(int32_t netId, const std::strin
         return ROUTEMANAGER_ERROR;
     }
 
+    // If the rule fails to be added, continue to execute the next rule
     int32_t ret = UpdateVpnOutputToLocalRule(ifaceName, add);
     ret += UpdateVpnSystemPermissionRule(netId, table, add);
     ret += UpdateExplicitNetworkRuleWithUid(netId, table, PERMISSION_NONE, UID_ROOT, UID_ROOT, add);
@@ -280,13 +281,13 @@ int32_t RouteManager::UpdateVpnOutputToLocalRule(const std::string &interfaceNam
 int32_t RouteManager::UpdateVpnSystemPermissionRule(int32_t netId, uint32_t table, bool add)
 {
     Fwmark fwmark;
-    Fwmark mask;
-
     fwmark.netId = netId;
+    NetworkPermission permission = NetworkPermission::PERMISSION_SYSTEM;
+    fwmark.permission = permission;
+
+    Fwmark mask;
     mask.netId = FWMARK_NET_ID_MASK;
-    NetworkPermission per = NetworkPermission::PERMISSION_SYSTEM;
-    fwmark.permission = per;
-    mask.permission = per;
+    mask.permission = permission;
 
     RuleInfo ruleInfo;
     ruleInfo.ruleTable = table;
@@ -322,6 +323,7 @@ int32_t RouteManager::UpdateVirtualNetwork(int32_t netId, const std::string &int
     }
     int32_t ret = ROUTEMANAGER_SUCCESS;
     for (auto range : uidRanges) {
+        // If the rule fails to be added, continue to execute the next rule
         ret += UpdateVpnUidRangeRule(table, range.begin_, range.end_, add);
         ret += UpdateExplicitNetworkRuleWithUid(netId, table, PERMISSION_NONE, range.begin_, range.end_, add);
         ret += UpdateOutputInterfaceRulesWithUid(interfaceName, table, PERMISSION_NONE, range.begin_, range.end_, add);
