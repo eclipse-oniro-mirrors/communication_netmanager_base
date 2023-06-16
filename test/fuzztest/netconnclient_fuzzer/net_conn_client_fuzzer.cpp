@@ -41,6 +41,7 @@ static constexpr uint32_t CREATE_NET_TYPE_VALUE = 7;
 size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
+constexpr int32_t OBJ_NUM = 3;
 
 using namespace Security::AccessToken;
 using Security::AccessToken::AccessTokenID;
@@ -831,7 +832,7 @@ void GetIfaceNamesFuzzTest(const uint8_t *data, size_t size)
 
     uint32_t bearerType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
     std::list<std::string> ifaceNames;
-    for (int i = 0; i < 3; i++) {
+    for (int32_t i = 0; i < OBJ_NUM; i++) {
         std::string ifaceName = GetStringFromData(STR_LEN);
         ifaceNames.push_back(ifaceName);
     }
@@ -931,7 +932,7 @@ void GetSpecificNetFuzzTest(const uint8_t *data, size_t size)
 
     uint32_t bearerType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
     std::list<int32_t> netIdList;
-    for (int i = 0; i < 3; i++) {
+    for (int32_t i = 0; i < OBJ_NUM; i++) {
         int32_t netId = GetData<uint32_t>();
         netIdList.push_back(netId);
     }
