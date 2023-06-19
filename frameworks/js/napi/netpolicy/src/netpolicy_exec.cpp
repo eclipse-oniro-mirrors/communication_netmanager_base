@@ -266,7 +266,7 @@ napi_value NetPolicyExec::GetNetQuotaPoliciesCallback(GetNetQuotaPoliciesContext
     return callbackValue;
 }
 
-void NetPolicyExec::FillNetLogoType(napi_env env, napi_value elementObject, const NetQuotaPolicy &netQuotaPolicy)
+void NetPolicyExec::FillNetWorkMatchRule(napi_env env, napi_value elementObject, const NetQuotaPolicy &netQuotaPolicy)
 {
     napi_value netWorkMatchRule =  NapiUtils::CreateObject(env);
     NapiUtils::SetInt32Property(env, netWorkMatchRule, "netType", netQuotaPolicy.networkmatchrule.netType);
@@ -291,7 +291,7 @@ void NetPolicyExec::FillQuotaPolicy(napi_env env, napi_value elementObject, cons
 napi_value NetPolicyExec::CreateNetQuotaPolicy(napi_env env, const NetQuotaPolicy &item)
 {
     napi_value elementObject = NapiUtils::CreateObject(env);
-    FillNetLogoType(env, elementObject, item);
+    FillNetWorkMatchRule(env, elementObject, item);
     FillQuotaPolicy(env, elementObject, item);
     return elementObject;
 }
