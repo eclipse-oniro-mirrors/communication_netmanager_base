@@ -33,21 +33,68 @@ bool VirtualNetwork::GetHasDns() const
 
 int32_t VirtualNetwork::AddUids(const std::vector<UidRange> &uidVec)
 {
+    auto middle = uidRanges_.insert(uidRanges_.end(), uidVec.begin(), uidVec.end());
+    std::inplace_merge(uidRanges_.begin(), middle, uidRanges_.end()); // restart sort
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (const auto &interface : interfaces_) {
+        if (RouteManager::AddUsersToVirtualNetwork(netId_, interface, uidVec)) {
+            NETNATIVE_LOGE("failed to add uids on interface %s of netId %u", interface.c_str(), netId_);
+            return NETMANAGER_ERROR;
+        }
+    }
     return NETMANAGER_SUCCESS;
 }
 
 int32_t VirtualNetwork::RemoveUids(const std::vector<UidRange> &uidVec)
 {
+    auto end =
+        std::set_difference(uidRanges_.begin(), uidRanges_.end(), uidVec.begin(), uidVec.end(), uidRanges_.begin());
+    uidRanges_.erase(end, uidRanges_.end());
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (const auto &interface : interfaces_) {
+        if (RouteManager::RemoveUsersFromVirtualNetwork(netId_, interface, uidVec)) {
+            NETNATIVE_LOGE("failed to remove uids on interface %s of netId %u", interface.c_str(), netId_);
+            return NETMANAGER_ERROR;
+        }
+    }
     return NETMANAGER_SUCCESS;
 }
 
 int32_t VirtualNetwork::AddInterface(std::string &interfaceName)
 {
+    NETNATIVE_LOGI("Entry VirtualNetwork::AddInterface %{public}s", interfaceName.c_str());
+    if (ExistInterface(interfaceName)) {
+        NETNATIVE_LOGW("Failed to add interface %{public}s to netId_ %{public}u", interfaceName.c_str(), netId_);
+        return NETMANAGER_ERROR;
+    }
+
+    if (RouteManager::AddInterfaceToVirtualNetwork(netId_, interfaceName)) {
+        NETNATIVE_LOGE("Failed to add interface %{public}s to netId_ %{public}u", interfaceName.c_str(), netId_);
+        return NETMANAGER_ERROR;
+    }
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    interfaces_.insert(interfaceName);
     return NETMANAGER_SUCCESS;
 }
 
 int32_t VirtualNetwork::RemoveInterface(std::string &interfaceName)
 {
+    NETNATIVE_LOGI("Entry VirtualNetwork::RemoveInterface %{public}s", interfaceName.c_str());
+    if (!ExistInterface(interfaceName)) {
+        NETNATIVE_LOGW("Failed to remove interface %{public}s to netId_ %{public}u", interfaceName.c_str(), netId_);
+        return NETMANAGER_SUCCESS;
+    }
+
+    if (RouteManager::RemoveInterfaceFromVirtualNetwork(netId_, interfaceName)) {
+        NETNATIVE_LOGE("Failed to remove interface %{public}s to netId_ %{public}u", interfaceName.c_str(), netId_);
+        return NETMANAGER_ERROR;
+    }
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    interfaces_.erase(interfaceName);
     return NETMANAGER_SUCCESS;
 }
 } // namespace nmd

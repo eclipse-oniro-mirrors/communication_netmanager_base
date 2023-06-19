@@ -34,6 +34,7 @@ static constexpr int32_t MAX_FLAG_NUM = 64;
 static constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
 static constexpr int32_t NETMANAGER_ERR_PERMISSION_DENIED = 201;
 static constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
+static constexpr uint32_t MAX_UID_ARRAY_SIZE = 1024;
 
 NetsysNativeServiceStub::NetsysNativeServiceStub()
 {
@@ -517,17 +518,75 @@ int32_t NetsysNativeServiceStub::CmdNetworkCreatePhysical(MessageParcel &data, M
 
 int32_t NetsysNativeServiceStub::CmdNetworkCreateVirtual(MessageParcel &data, MessageParcel &reply)
 {
-    return 0;
+    int32_t netId = 0;
+    bool hasDns = false;
+    if (!data.ReadInt32(netId) || !data.ReadBool(hasDns)) {
+        NETNATIVE_LOGE("read net id or hasDns failed");
+        return IPC_STUB_ERR;
+    }
+
+    int32_t result = NetworkCreateVirtual(netId, hasDns);
+    if (!reply.WriteInt32(result)) {
+        return IPC_STUB_WRITE_PARCEL_ERR;
+    }
+    NETNATIVE_LOG_D("NetworkCreateVirtual has recved result %{public}d", result);
+    return ERR_NONE;
 }
 
 int32_t NetsysNativeServiceStub::CmdNetworkAddUids(MessageParcel &data, MessageParcel &reply)
 {
-    return 0;
+    int32_t netId = 0;
+    int32_t size = 0;
+    if (!data.ReadInt32(netId) || !data.ReadInt32(size)) {
+        NETNATIVE_LOGE("read net id or size failed");
+        return IPC_STUB_ERR;
+    }
+    size = (size > MAX_UID_ARRAY_SIZE) ? MAX_UID_ARRAY_SIZE : size;
+
+    sptr<UidRange> uid;
+    std::vector<UidRange> uidRanges;
+    for (int32_t index = 0; index < size; index++) {
+        uid = UidRange::Unmarshalling(data);
+        if (uid == nullptr) {
+            NETNATIVE_LOGE("UidRange::Unmarshalling(parcel) is null");
+            return IPC_STUB_ERR;
+        }
+        uidRanges.push_back(*uid);
+    }
+    int32_t result = NetworkAddUids(netId, uidRanges);
+    if (!reply.WriteInt32(result)) {
+        return IPC_STUB_WRITE_PARCEL_ERR;
+    }
+    NETNATIVE_LOG_D("NetworkAddUids has recved result %{public}d", result);
+    return ERR_NONE;
 }
 
 int32_t NetsysNativeServiceStub::CmdNetworkDelUids(MessageParcel &data, MessageParcel &reply)
 {
-    return 0;
+    int32_t netId = 0;
+    int32_t size = 0;
+    if (!data.ReadInt32(netId) || !data.ReadInt32(size)) {
+        NETNATIVE_LOGE("read net id or size failed");
+        return IPC_STUB_ERR;
+    }
+    size = (size > MAX_UID_ARRAY_SIZE) ? MAX_UID_ARRAY_SIZE : size;
+
+    sptr<UidRange> uid;
+    std::vector<UidRange> uidRanges;
+    for (int32_t index = 0; index < size; index++) {
+        uid = UidRange::Unmarshalling(data);
+        if (uid == nullptr) {
+            NETNATIVE_LOGE("UidRange::Unmarshalling(parcel) is null");
+            return IPC_STUB_ERR;
+        }
+        uidRanges.push_back(*uid);
+    }
+    int32_t result = NetworkDelUids(netId, uidRanges);
+    if (!reply.WriteInt32(result)) {
+        return IPC_STUB_WRITE_PARCEL_ERR;
+    }
+    NETNATIVE_LOG_D("NetworkDelUids has recved result %{public}d", result);
+    return ERR_NONE;
 }
 
 int32_t NetsysNativeServiceStub::CmdAddInterfaceAddress(MessageParcel &data, MessageParcel &reply)

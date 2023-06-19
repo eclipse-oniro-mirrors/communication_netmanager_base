@@ -115,7 +115,7 @@ void NetsysNativeService::GetDumpMessage(std::string &message)
 void ExitHandler(int32_t signum)
 {
     (void)signum;
-    exit(1);
+    _Exit(1);
 }
 
 bool NetsysNativeService::Init()

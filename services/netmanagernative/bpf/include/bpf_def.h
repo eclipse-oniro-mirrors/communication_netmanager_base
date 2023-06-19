@@ -21,7 +21,7 @@
 static const int32_t APP_STATS_MAP_SIZE = 5000;
 static const int32_t IFACE_STATS_MAP_SIZE = 1000;
 static const int32_t IFACE_NAME_MAP_SIZE = 1000;
-static const int32_t IFNAME_SIZE = 32;
+enum { IFNAME_SIZE = 32 };
 
 typedef struct {
     enum bpf_map_type type;

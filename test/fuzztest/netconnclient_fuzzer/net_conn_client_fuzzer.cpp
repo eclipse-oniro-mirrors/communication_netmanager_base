@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,9 +28,9 @@
 #include "net_mgr_log_wrapper.h"
 #include "net_supplier_callback_stub.h"
 #define private public
+#include "net_conn_client.h"
 #include "net_conn_service.h"
 #include "net_conn_service_stub.h"
-#include "net_conn_client.h"
 #include "net_interface_callback_stub.h"
 
 namespace OHOS {
@@ -210,6 +210,13 @@ public:
     }
 };
 
+class INetDetectionCallbackTest : public IRemoteStub<INetDetectionCallback> {
+public:
+    virtual int32_t OnNetDetectionResultChanged(NetDetectionResultCode detectionResult, const std::string &urlRedirect)
+    {
+        return 0;
+    }
+};
 class NetSupplierCallbackBaseTest : public NetSupplierCallbackStub {
 };
 
@@ -500,7 +507,7 @@ void RegisterNetSupplierCallbackFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(INetConnService::CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK, dataParcel);
 }
 
-void RegisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
+void RegisterNetConnCallbackBySpecifierFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
         return;
@@ -526,6 +533,30 @@ void RegisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
     OnRemoteRequest(INetConnService::CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER, dataParcel);
+}
+
+void RegisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
+    if (callback == nullptr) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+
+    OnRemoteRequest(INetConnService::CMD_NM_REGISTER_NET_CONN_CALLBACK, dataParcel);
 }
 
 void UnregisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
@@ -716,19 +747,6 @@ void GetNetIdByIdentifierFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(INetConnService::CMD_NM_GET_NET_ID_BY_IDENTIFIER, dataParcel);
 }
 
-void SetAppNetFuzzTest(const uint8_t *data, size_t size)
-{
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
-    int32_t netId = GetData<int32_t>();
-    DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(netId);
-}
-
 void RegisterNetInterfaceCallbackFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
@@ -766,6 +784,217 @@ void GetNetInterfaceConfigurationFuzzTest(const uint8_t *data, size_t size)
     }
     OnRemoteRequest(INetConnService::CMD_NM_GET_INTERFACE_CONFIGURATION, dataParcel);
 }
+
+void SetInternetPermissionFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    uint32_t uid = GetData<uint32_t>();
+    uint8_t allow = GetData<uint8_t>();
+
+    AccessToken token;
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteUint32(uid);
+    dataParcel.WriteUint32(allow);
+    OnRemoteRequest(INetConnService::CMD_NM_SET_INTERNET_PERMISSION, dataParcel);
+}
+
+void UpdateNetStateForTestFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    if (netSpecifier == nullptr) {
+        return;
+    }
+    auto netState = GetData<int32_t>();
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    netSpecifier->Marshalling(dataParcel);
+    dataParcel.WriteInt32(netState);
+    OnRemoteRequest(INetConnService::CMD_NM_UPDATE_NET_STATE_FOR_TEST, dataParcel);
+}
+
+void GetIfaceNamesFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    uint32_t bearerType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    dataParcel.ReadUint32(bearerType);
+
+    OnRemoteRequest(INetConnService::CMD_NM_GET_IFACE_NAMES, dataParcel);
+}
+
+void GetIfaceNameByTypeFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    uint32_t bearerType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+    std::string ident = GetStringFromData(STR_LEN);
+    std::string ifaceName = GetStringFromData(STR_LEN);
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    dataParcel.ReadUint32(bearerType);
+    dataParcel.WriteString(ident);
+    dataParcel.WriteString(ifaceName);
+
+    OnRemoteRequest(INetConnService::CMD_NM_GET_IFACENAME_BY_TYPE, dataParcel);
+}
+
+void RegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    int32_t netId = GetData<int32_t>();
+    sptr<INetDetectionCallbackTest> callback = new (std::nothrow) INetDetectionCallbackTest();
+    if (callback == nullptr) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteInt32(netId);
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+
+    OnRemoteRequest(INetConnService::CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK, dataParcel);
+}
+
+void UnRegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    int32_t netId = GetData<int32_t>();
+    sptr<INetDetectionCallbackTest> callback = new (std::nothrow) INetDetectionCallbackTest();
+    if (callback == nullptr) {
+        return;
+    }
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteInt32(netId);
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+
+    OnRemoteRequest(INetConnService::CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK, dataParcel);
+}
+
+void GetSpecificNetFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    uint32_t bearerType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    dataParcel.ReadUint32(bearerType);
+
+    OnRemoteRequest(INetConnService::CMD_NM_GET_SPECIFIC_NET, dataParcel);
+}
+
+void OnSetAppNetFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    int32_t netId = GetData<int32_t>();
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteInt32(netId);
+
+    OnRemoteRequest(INetConnService::CMD_NM_SET_APP_NET, dataParcel);
+}
+
+void GetSpecificUidNetFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    int32_t uid = GetData<int32_t>();
+    int32_t netId = GetData<int32_t>();
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteInt32(uid);
+    dataParcel.WriteInt32(netId);
+
+    OnRemoteRequest(INetConnService::CMD_NM_GET_SPECIFIC_UID_NET, dataParcel);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -779,6 +1008,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::RegisterNetSupplierCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::UpdateNetSupplierInfoFuzzTest(data, size);
     OHOS::NetManagerStandard::UpdateNetLinkInfoFuzzTest(data, size);
+    OHOS::NetManagerStandard::RegisterNetConnCallbackBySpecifierFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterNetConnCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::UnregisterNetConnCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::GetDefaultNetFuzzTest(data, size);
@@ -796,8 +1026,17 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetGlobalHttpProxyFuzzTest(data, size);
     OHOS::NetManagerStandard::GetDefaultHttpProxyFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetIdByIdentifierFuzzTest(data, size);
-    OHOS::NetManagerStandard::SetAppNetFuzzTest(data, size);
     OHOS::NetManagerStandard::RegisterNetInterfaceCallbackFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetInterfaceConfigurationFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetInternetPermissionFuzzTest(data, size);
+    OHOS::NetManagerStandard::UpdateNetStateForTestFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetIfaceNamesFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetIfaceNameByTypeFuzzTest(data, size);
+    OHOS::NetManagerStandard::RegisterNetDetectionCallbackFuzzTest(data, size);
+    OHOS::NetManagerStandard::UnRegisterNetDetectionCallbackFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetSpecificNetFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetSpecificUidNetFuzzTest(data, size);
+    OHOS::NetManagerStandard::OnSetAppNetFuzzTest(data, size);
+
     return 0;
 }

@@ -280,7 +280,7 @@ int32_t DnsLookUpName::AddrCmp(const void *addrA, const void *addrB)
     return b->sortKey - a->sortKey;
 }
 
-int32_t DnsLookUpName::CheckNameParam(const std::string name, int32_t &flags, int32_t &family, char *canon)
+int32_t DnsLookUpName::CheckNameParam(const std::string name, int32_t &flags, int32_t &family)
 {
     if (!name.empty()) {
         size_t len = name.length() > HOST_MAX_LEN ? HOST_MAX_LEN : name.length();
@@ -288,7 +288,6 @@ int32_t DnsLookUpName::CheckNameParam(const std::string name, int32_t &flags, in
             NETNATIVE_LOGE("name is too long : %{public}d", static_cast<int32_t>(len));
             return EAI_NONAME;
         }
-        canon = const_cast<char *>(name.c_str());
     }
 
     if (static_cast<uint32_t>(flags) & AI_V4MAPPED) {
@@ -470,7 +469,7 @@ int32_t DnsLookUpName::LookUpName(AddrData buf[MAXADDRS], char canon[CANON_LINE]
                                   int32_t family, int32_t flags, uint16_t netId)
 {
     *canon = 0;
-    int32_t error = CheckNameParam(name, flags, family, canon);
+    int32_t error = CheckNameParam(name, flags, family);
     if (error < 0) {
         return error;
     }

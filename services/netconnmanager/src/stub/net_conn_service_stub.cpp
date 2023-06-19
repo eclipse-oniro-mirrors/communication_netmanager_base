@@ -30,6 +30,8 @@ constexpr uint32_t UID_FOUNDATION = 5523;
 const std::vector<int32_t> SYSTEM_CODE{INetConnService::CMD_NM_SET_AIRPLANE_MODE,
                                        INetConnService::CMD_NM_SET_GLOBAL_HTTP_PROXY,
                                        INetConnService::CMD_NM_GET_GLOBAL_HTTP_PROXY};
+const std::vector<int32_t> PERMISSION_NEED_CACHE_CODES{INetConnService::CMD_NM_GETDEFAULTNETWORK,
+                                                       INetConnService::CMD_NM_HASDEFAULTNET};
 } // namespace
 NetConnServiceStub::NetConnServiceStub()
 {
@@ -41,10 +43,14 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_UNREGISTER_NET_CONN_CALLBACK] = {&NetConnServiceStub::OnUnregisterNetConnCallback,
                                                            {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[CMD_NM_UPDATE_NET_STATE_FOR_TEST] = {&NetConnServiceStub::OnUpdateNetStateForTest, {}};
-    memberFuncMap_[CMD_NM_REG_NET_SUPPLIER] = {&NetConnServiceStub::OnRegisterNetSupplier, {}};
-    memberFuncMap_[CMD_NM_UNREG_NETWORK] = {&NetConnServiceStub::OnUnregisterNetSupplier, {}};
-    memberFuncMap_[CMD_NM_SET_NET_SUPPLIER_INFO] = {&NetConnServiceStub::OnUpdateNetSupplierInfo, {}};
-    memberFuncMap_[CMD_NM_SET_NET_LINK_INFO] = {&NetConnServiceStub::OnUpdateNetLinkInfo, {}};
+    memberFuncMap_[CMD_NM_REG_NET_SUPPLIER] = {&NetConnServiceStub::OnRegisterNetSupplier,
+                                               {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_UNREG_NETWORK] = {&NetConnServiceStub::OnUnregisterNetSupplier,
+                                            {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_SET_NET_SUPPLIER_INFO] = {&NetConnServiceStub::OnUpdateNetSupplierInfo,
+                                                    {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_SET_NET_LINK_INFO] = {&NetConnServiceStub::OnUpdateNetLinkInfo,
+                                                {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK] = {&NetConnServiceStub::OnRegisterNetDetectionCallback,
                                                                   {}};
     memberFuncMap_[CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK] = {
@@ -52,7 +58,8 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_NET_DETECTION] = {&NetConnServiceStub::OnNetDetection,
                                             {Permission::GET_NETWORK_INFO, Permission::INTERNET}};
     memberFuncMap_[CMD_NM_BIND_SOCKET] = {&NetConnServiceStub::OnBindSocket, {}};
-    memberFuncMap_[CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK] = {&NetConnServiceStub::OnRegisterNetSupplierCallback, {}};
+    memberFuncMap_[CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK] = {&NetConnServiceStub::OnRegisterNetSupplierCallback,
+                                                             {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE] = {&NetConnServiceStub::OnSetAirplaneMode,
                                                 {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[CMD_NM_SET_GLOBAL_HTTP_PROXY] = {&NetConnServiceStub::OnSetGlobalHttpProxy,
@@ -131,7 +138,7 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         }
     }
 
-    int32_t ret = OnRequestCheck(code);
+    int32_t ret = OnRequestCheck(code, itFunc->second.second);
     if (ret == NETMANAGER_SUCCESS) {
         return (this->*requestFunc)(data, reply);
     }
@@ -142,7 +149,7 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int32_t NetConnServiceStub::OnRequestCheck(uint32_t code)
+int32_t NetConnServiceStub::OnRequestCheck(uint32_t code, const std::set<std::string> &permissions)
 {
     if (std::find(SYSTEM_CODE.begin(), SYSTEM_CODE.end(), code) != SYSTEM_CODE.end()) {
         if (!NetManagerPermission::IsSystemCaller()) {
@@ -150,12 +157,16 @@ int32_t NetConnServiceStub::OnRequestCheck(uint32_t code)
             return NETMANAGER_ERR_NOT_SYSTEM_CALL;
         }
     }
-    auto itFunc = memberFuncMap_.find(code);
-    if (code != CMD_NM_GETDEFAULTNETWORK && CheckPermission(itFunc->second.second)) {
-        return NETMANAGER_SUCCESS;
-    }
-    if (code == CMD_NM_GETDEFAULTNETWORK && CheckPermissionWithCache(itFunc->second.second)) {
-        return NETMANAGER_SUCCESS;
+
+    if (std::find(PERMISSION_NEED_CACHE_CODES.begin(), PERMISSION_NEED_CACHE_CODES.end(), code) !=
+        PERMISSION_NEED_CACHE_CODES.end()) {
+        if (CheckPermissionWithCache(permissions)) {
+            return NETMANAGER_SUCCESS;
+        }
+    } else {
+        if (CheckPermission(permissions)) {
+            return NETMANAGER_SUCCESS;
+        }
     }
     return NETMANAGER_ERR_PERMISSION_DENIED;
 }
@@ -592,7 +603,7 @@ int32_t NetConnServiceStub::OnGetSpecificNet(MessageParcel &data, MessageParcel 
     if (ret == NETMANAGER_SUCCESS) {
         uint32_t size = static_cast<uint32_t>(netIdList.size());
         size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
-        if (!reply.WriteInt32(size)) {
+        if (!reply.WriteUint32(size)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
 
@@ -618,8 +629,8 @@ int32_t NetConnServiceStub::OnGetAllNets(MessageParcel &data, MessageParcel &rep
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
-        int32_t size = static_cast<int32_t>(netIdList.size());
-        if (!reply.WriteInt32(size)) {
+        uint32_t size = static_cast<uint32_t>(netIdList.size());
+        if (!reply.WriteUint32(size)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
 
@@ -747,7 +758,7 @@ int32_t NetConnServiceStub::OnGetAddressesByName(MessageParcel &data, MessagePar
     if (ret == NETMANAGER_SUCCESS) {
         uint32_t size = static_cast<uint32_t>(addrList.size());
         size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
-        if (!reply.WriteInt32(size)) {
+        if (!reply.WriteUint32(size)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
         uint32_t index = 0;
@@ -911,8 +922,8 @@ int32_t NetConnServiceStub::OnGetNetIdByIdentifier(MessageParcel &data, MessageP
     }
 
     if (ret == NETMANAGER_SUCCESS) {
-        int32_t size = static_cast<int32_t>(netIdList.size());
-        if (!reply.WriteInt32(size)) {
+        uint32_t size = static_cast<uint32_t>(netIdList.size());
+        if (!reply.WriteUint32(size)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
         for (auto p = netIdList.begin(); p != netIdList.end(); ++p) {

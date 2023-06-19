@@ -349,7 +349,7 @@ int64_t NetPolicyTraffic::GetTotalQuota(NetQuotaPolicy &quotaPolicy)
     int64_t start = quotaPolicy.GetPeriodStart();
     int64_t end = static_cast<int64_t>(time(nullptr));
     GetNetCenterInst().GetIfaceStatsDetail(iface, start, end, info);
-    int64_t quota = info.rxBytes_ + info.txBytes_;
+    int64_t quota = static_cast<int64_t>(info.rxBytes_ + info.txBytes_);
 
     return quota < 0 ? 0 : quota;
 }

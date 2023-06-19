@@ -18,8 +18,8 @@
 
 #include "i_netsys_service.h"
 #include "iservice_registry.h"
-#include "netsys_native_service_proxy.h"
 #include "netnative_log_wrapper.h"
+#include "netsys_native_service_proxy.h"
 #include "system_ability_definition.h"
 #include "test.h"
 #include "test_notify_callback.h"
@@ -35,11 +35,11 @@ sptr<INetsysService> GetProxyK()
     NETNATIVE_LOGE("Get samgr >>>>>>>>>>>>>>>>>>>>>>>>>>");
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     NETNATIVE_LOGE("Get samgr %{public}p", samgr.GetRefPtr());
-    std::cout << "Get samgr  "<< samgr.GetRefPtr() << std::endl;
+    std::cout << "Get samgr  " << samgr.GetRefPtr() << std::endl;
 
     auto remote = samgr->GetSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
     NETNATIVE_LOGE("Get remote %{public}p", remote.GetRefPtr());
-    std::cout << "Get remote "<< remote.GetRefPtr() << std::endl;
+    std::cout << "Get remote " << remote.GetRefPtr() << std::endl;
 
     auto proxy = iface_cast<NetsysNative::INetsysService>(remote);
     if (proxy != nullptr) {
@@ -53,7 +53,7 @@ sptr<INetsysService> GetProxyK()
 }
 
 auto netsysServiceK_ = GetProxyK();
-}
+} // namespace
 
 namespace {
 void freeNetsysAddrInfo(struct addrinfo *aihead)
@@ -84,34 +84,28 @@ void TestSetResolverConfig()
 
 void TestGetResolverConfig()
 {
-    int  ret = -1;
+    int ret = -1;
     std::vector<std::string> servers;
     std::vector<std::string> domains;
     uint16_t baseTimeoutMsec;
     uint8_t retryCount;
-    int  num = 3;
+    int num = 3;
     for (int i = 0; i < num; i++) {
         ret = netsysServiceK_->GetResolverConfig(i, servers, domains, baseTimeoutMsec, retryCount);
         NETNATIVE_LOGE("NETSYS: getResolverConfig   ret=%{public}d, iii=%{public}d", ret, i);
         NETNATIVE_LOGE("NETSYS:  server size %{public}d, domains  size %{public}d",
-            static_cast<int32_t>(servers.size()), static_cast<int32_t>(domains.size()));
-        for (auto item:servers) {
-            std::cout<<"Server:" <<item.c_str()<<std::endl;
-        }
-        for (auto iter:domains) {
-            std::cout<<"Domains:" <<iter.c_str()<<std::endl;
-        }
+                       static_cast<int32_t>(servers.size()), static_cast<int32_t>(domains.size()));
     }
 }
 
-void  TestInterfaceGetCfg()
+void TestInterfaceGetCfg()
 {
-    std::cout<<"hello"<<std::endl;
+    std::cout << "hello" << std::endl;
 }
 
 void TestCreateNetworkCache()
 {
-    int  ret = -1;
+    int ret = -1;
     ret = netsysServiceK_->CreateNetworkCache(0);
     NETNATIVE_LOGE("NETSYS: CreateNetworkCache0   ret=%{public}d", ret);
     ret = netsysServiceK_->CreateNetworkCache(1);
@@ -120,7 +114,7 @@ void TestCreateNetworkCache()
 
 void TestFlushNetworkCache()
 {
-    int ret = -1 ;
+    int ret = -1;
     ret = netsysServiceK_->FlushNetworkCache(0);
     NETNATIVE_LOGE("NETSYS: FlushNetworkCache0   ret=%{public}d", ret);
     ret = netsysServiceK_->FlushNetworkCache(1);
@@ -134,34 +128,34 @@ void TestDestroyNetworkCache()
     NETNATIVE_LOGE("NETSYS: DestroyNetworkCache1   ret=%{public}d", ret);
 }
 
-void TestSetInterfaceMtu()
+void TestInterfaceSetMtu()
 {
     int ret = -1;
-    std::string  ifName = "eth0";
+    std::string ifName = "eth0";
     int mtu = 1200;
-    std::cout<<"begin to GetMtu"<<std::endl;
+    std::cout << "begin to GetMtu" << std::endl;
     ret = netsysServiceK_->GetInterfaceMtu(ifName);
     NETNATIVE_LOGE("NETSYS: GetMtu   ago  ret=%{public}d", ret);
-    std::cout<<"begin to SetMtu"<<std::endl;
+    std::cout << "begin to SetMtu" << std::endl;
     ret = netsysServiceK_->SetInterfaceMtu(ifName, mtu);
     NETNATIVE_LOGE("NETSYS: SetMtu   ret=%{public}d", ret);
-    std::cout<<"begin22 to GetMtu"<<std::endl;
-    ret =  netsysServiceK_->GetInterfaceMtu(ifName);
+    std::cout << "begin22 to GetMtu" << std::endl;
+    ret = netsysServiceK_->GetInterfaceMtu(ifName);
     NETNATIVE_LOGE("NETSYS: GetMtu   ret=%{public}d", ret);
 }
 
-void TestGetInterfaceMtu()
+void TestInterfaceGetMtu()
 {
     int ret = -1;
-    std::string  ifName = "eth0";
-    int  mtu = 1200;
-    std::cout<<"begin to GetMtu"<<std::endl;
+    std::string ifName = "eth0";
+    int mtu = 1200;
+    std::cout << "begin to GetMtu" << std::endl;
     ret = netsysServiceK_->GetInterfaceMtu(ifName);
     NETNATIVE_LOGE("NETSYS: GetMtu   ago  ret=%{public}d", ret);
-    std::cout<<"begin to SetMtu"<<std::endl;
+    std::cout << "begin to SetMtu" << std::endl;
     ret = netsysServiceK_->SetInterfaceMtu(ifName, mtu);
     NETNATIVE_LOGE("NETSYS: SetMtu   ret=%{public}d", ret);
-    std::cout<<"begin22 to GetMtu"<<std::endl;
+    std::cout << "begin22 to GetMtu" << std::endl;
     ret = netsysServiceK_->GetInterfaceMtu(ifName);
     NETNATIVE_LOGE("NETSYS: GetMtu   ret=%{public}d", ret);
 }
@@ -178,4 +172,3 @@ void TestRegisterNotifyCallback()
 
     return;
 }
-

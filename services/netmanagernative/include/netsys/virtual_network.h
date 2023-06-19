@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <set>
 #include <string>
 #include <vector>
@@ -63,6 +64,7 @@ private:
 private:
     const bool hasDns_ = false;
     std::vector<UidRange> uidRanges_;
+    std::mutex mutex_;
 };
 } // namespace nmd
 } // namespace OHOS

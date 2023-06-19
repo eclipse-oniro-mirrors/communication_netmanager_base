@@ -61,6 +61,9 @@ constexpr const char *TEST_DOMAIN7 = "test1.test2.test3.test4.test5.com";
 constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
 constexpr int64_t TEST_UID = 1010;
 constexpr uint32_t TEST_NOTEXISTSUPPLIER = 1000;
+constexpr const char *TEST_DOMAIN8 = "http://www.example.com";
+constexpr const char *TEST_DOMAIN9 = "https://www.example.com";
+constexpr const char *TEST_DOMAIN10 = "httpd://www.example.com";
 
 class NetSupplierTestCallback : public NetSupplierCallbackStub {
 public:
@@ -509,19 +512,40 @@ HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest008, TestSize.Level1)
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest009, TestSize.Level1)
 {
-    HttpProxy httpProxy = {TEST_IPV4_ADDR, 8080, {}};
-    auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    HttpProxy httpProxy = {TEST_DOMAIN8, 8080, {}};
+    auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest010, TestSize.Level1)
 {
-    HttpProxy httpProxy = {TEST_IPV6_ADDR, 8080, {}};
-    auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    HttpProxy httpProxy = {TEST_DOMAIN9, 8080, {}};
+    auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest011, TestSize.Level1)
+{
+    HttpProxy httpProxy = {TEST_DOMAIN10, 8080, {}};
+    auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_ERR_HTTP_PROXY_INVALID);
+}
+
+HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest012, TestSize.Level1)
+{
+    HttpProxy httpProxy = {TEST_IPV4_ADDR, 8080, {}};
+    auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest013, TestSize.Level1)
+{
+    HttpProxy httpProxy = {TEST_IPV6_ADDR, 8080, {}};
+    auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest014, TestSize.Level1)
 {
     HttpProxy httpProxy;
     auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
