@@ -56,17 +56,6 @@ bool NetHttpProxyTracker::WriteToSystemParameter(HttpProxy &httpProxy)
     HttpProxy persistHttpProxy;
     ReadFromSystemParameter(persistHttpProxy);
 
-    int8_t family = CommonUtils::GetAddrFamily(httpProxy.GetHost());
-    if (!httpProxy.GetHost().empty() && family != AF_INET && family != AF_INET6 &&
-        !CommonUtils::IsValidDomain(httpProxy.GetHost())) {
-        NETMGR_LOG_E("Invalid http proxy host address:%{public}s", httpProxy.GetHost().c_str());
-        std::string host = persistHttpProxy.GetHost();
-        httpProxy.SetHost(std::move(host));
-        httpProxy.SetPort(persistHttpProxy.GetPort());
-        httpProxy.SetExclusionList(persistHttpProxy.GetExclusionList());
-        return false;
-    }
-
     std::string host = Base64::Encode(httpProxy.GetHost());
     if (host.empty()) {
         host = Base64::Encode(DEFAULT_HTTP_PROXY_HOST);
@@ -77,6 +66,9 @@ bool NetHttpProxyTracker::WriteToSystemParameter(HttpProxy &httpProxy)
                      HTTP_PROXY_HOST_KEY, ret);
         std::string host = persistHttpProxy.GetHost();
         httpProxy.SetHost(std::move(host));
+        httpProxy.SetPort(persistHttpProxy.GetPort());
+        httpProxy.SetExclusionList(persistHttpProxy.GetExclusionList());
+        return false;
     }
 
     std::string port = httpProxy.GetHost().empty() ? DEFAULT_HTTP_PROXY_PORT : std::to_string(httpProxy.GetPort());
