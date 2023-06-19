@@ -104,12 +104,12 @@ declare namespace policy {
   /**
    * Reset the specified network management policy.
    *
-   * @param simId Indicates the specified sim that is valid when netType is cellular.
+   * @param iccid Indicates the specified sim that is valid when netType is cellular.
    * @permission ohos.permission.CONNECTIVITY_INTERNAL
    * @systemapi Hide this for inner system use.
    */
-  function restoreAllPolicies(simId: string, callback: AsyncCallback<void>): void;
-  function restoreAllPolicies(simId: string): Promise<void>;
+  function restoreAllPolicies(iccid: string, callback: AsyncCallback<void>): void;
+  function restoreAllPolicies(iccid: string): Promise<void>;
 
   /**
    * Get the status whether the specified uid app can access the metered network or non-metered network.
@@ -169,23 +169,23 @@ declare namespace policy {
   /**
    * Reset network policies\rules\quota policies\firewall rules.
    *
-   * @param simId Specify the matched simId of quota policy.
+   * @param iccid Specify the matched iccid of quota policy.
    * @permission ohos.permission.CONNECTIVITY_INTERNAL
    * @systemapi Hide this for inner system use.
    */
-  function resetPolicies(simId: string, callback: AsyncCallback<void>): void;
-  function resetPolicies(simId: string): Promise<void>;
+  function resetPolicies(iccid: string, callback: AsyncCallback<void>): void;
+  function resetPolicies(iccid: string): Promise<void>;
 
   /**
    * Update the limit or warning remind time of quota policy.
    *
-   * @param simId Specify the matched simId of quota policy when netType is cellular.
+   * @param iccid Specify the matched iccid of quota policy when netType is cellular.
    * @param netType {@link NetBearType}.
    * @permission ohos.permission.CONNECTIVITY_INTERNAL
    * @systemapi Hide this for inner system use.
    */
-  function updateRemindPolicy(netType: NetBearType, simId: string, remindType: RemindType, callback: AsyncCallback<void>): void;
-  function updateRemindPolicy(netType: NetBearType, simId: string, remindType: RemindType): Promise<void>;
+  function updateRemindPolicy(netType: NetBearType, iccid: string, remindType: RemindType, callback: AsyncCallback<void>): void;
+  function updateRemindPolicy(netType: NetBearType, iccid: string, remindType: RemindType): Promise<void>;
 
   /**
    * Register uid policy change listener.
@@ -292,7 +292,7 @@ declare namespace policy {
     /* netType see {@link NetBearType}. */
     netType: NetBearType;
     /* The ID of the target card, valid when netType is BEARER_CELLULAR. */
-    simId: string;
+    iccid: string;
     /* To specify the identity of network, such as different WLAN. */
     ident: string;
     /* The period and the start time for quota policy, defalt: "M1". */
