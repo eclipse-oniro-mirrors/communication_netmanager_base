@@ -136,9 +136,9 @@ bool NetPolicyExec::ExecIsUidNetAllowed(IsUidNetAllowedContext *context)
     return true;
 }
 
-bool NetPolicyExec::ExecSetDeviceIdleAllowList(SetDeviceIdleAllowListContext *context)
+bool NetPolicyExec::ExecSetDeviceIdleTrustlist(SetDeviceIdleTrustlistContext *context)
 {
-    int32_t result = NetPolicyClient::GetInstance().SetDeviceIdleAllowedList(context->uids_, context->isAllow_);
+    int32_t result = NetPolicyClient::GetInstance().SetDeviceIdleTrustlist(context->uids_, context->isAllow_);
     if (result != NETMANAGER_SUCCESS) {
         context->SetErrorCode(result);
         return false;
@@ -147,11 +147,11 @@ bool NetPolicyExec::ExecSetDeviceIdleAllowList(SetDeviceIdleAllowListContext *co
     return true;
 }
 
-bool NetPolicyExec::ExecGetDeviceIdleAllowList(GetDeviceIdleAllowListContext *context)
+bool NetPolicyExec::ExecGetDeviceIdleTrustlist(GetDeviceIdleTrustlistContext *context)
 {
-    int32_t result = NetPolicyClient::GetInstance().GetDeviceIdleAllowedList(context->uids_);
+    int32_t result = NetPolicyClient::GetInstance().GetDeviceIdleTrustlist(context->uids_);
     if (result != NETMANAGER_SUCCESS) {
-        NETMANAGER_BASE_LOGE("ExecGetDeviceIdleAllowList error: result = %{public}d, arr size = %{public}zu", result,
+        NETMANAGER_BASE_LOGE("ExecGetDeviceIdleTrustlist error: result = %{public}d, arr size = %{public}zu", result,
                              context->uids_.size());
         context->SetErrorCode(result);
         return false;
@@ -160,11 +160,11 @@ bool NetPolicyExec::ExecGetDeviceIdleAllowList(GetDeviceIdleAllowListContext *co
     return true;
 }
 
-bool NetPolicyExec::ExecSetPowerSaveAllowList(SetPowerSaveAllowListContext *context)
+bool NetPolicyExec::ExecSetPowerSaveTrustlist(SetPowerSaveTrustlistContext *context)
 {
-    int32_t result = NetPolicyClient::GetInstance().SetPowerSaveAllowedList(context->uids_, context->isAllow_);
+    int32_t result = NetPolicyClient::GetInstance().SetPowerSaveTrustlist(context->uids_, context->isAllow_);
     if (result != NETMANAGER_SUCCESS) {
-        NETMANAGER_BASE_LOGE("ExecSetPowerSaveAllowList error: result = %{public}d, arr size = %{public}zu", result,
+        NETMANAGER_BASE_LOGE("ExecSetPowerSaveTrustlist error: result = %{public}d, arr size = %{public}zu", result,
                              context->uids_.size());
         context->SetErrorCode(result);
         return false;
@@ -173,11 +173,11 @@ bool NetPolicyExec::ExecSetPowerSaveAllowList(SetPowerSaveAllowListContext *cont
     return true;
 }
 
-bool NetPolicyExec::ExecGetPowerSaveAllowList(GetPowerSaveAllowListContext *context)
+bool NetPolicyExec::ExecGetPowerSaveTrustlist(GetPowerSaveTrustlistContext *context)
 {
-    int32_t result = NetPolicyClient::GetInstance().GetPowerSaveAllowedList(context->uids_);
+    int32_t result = NetPolicyClient::GetInstance().GetPowerSaveTrustlist(context->uids_);
     if (result != NETMANAGER_SUCCESS) {
-        NETMANAGER_BASE_LOGE("ExecGetPowerSaveAllowList error: result = %{public}d, arr size = %{public}zu", result,
+        NETMANAGER_BASE_LOGE("ExecGetPowerSaveTrustlist error: result = %{public}d, arr size = %{public}zu", result,
                              context->uids_.size());
         context->SetErrorCode(result);
         return false;
@@ -311,12 +311,12 @@ napi_value NetPolicyExec::IsUidNetAllowedCallback(IsUidNetAllowedContext *contex
     return NapiUtils::GetBoolean(context->GetEnv(), context->isUidNet_);
 }
 
-napi_value NetPolicyExec::SetDeviceIdleAllowListCallback(SetDeviceIdleAllowListContext *context)
+napi_value NetPolicyExec::SetDeviceIdleTrustlistCallback(SetDeviceIdleTrustlistContext *context)
 {
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
-napi_value NetPolicyExec::GetDeviceIdleAllowListCallback(GetDeviceIdleAllowListContext *context)
+napi_value NetPolicyExec::GetDeviceIdleTrustlistCallback(GetDeviceIdleTrustlistContext *context)
 {
     napi_value list = NapiUtils::CreateArray(context->GetEnv(), context->uids_.size());
     uint32_t index = 0;
@@ -327,12 +327,12 @@ napi_value NetPolicyExec::GetDeviceIdleAllowListCallback(GetDeviceIdleAllowListC
     return list;
 }
 
-napi_value NetPolicyExec::SetPowerSaveAllowListCallback(SetPowerSaveAllowListContext *context)
+napi_value NetPolicyExec::SetPowerSaveTrustlistCallback(SetPowerSaveTrustlistContext *context)
 {
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
-napi_value NetPolicyExec::GetPowerSaveAllowListCallback(GetPowerSaveAllowListContext *context)
+napi_value NetPolicyExec::GetPowerSaveTrustlistCallback(GetPowerSaveTrustlistContext *context)
 {
     napi_value list = NapiUtils::CreateArray(context->GetEnv(), context->uids_.size());
     uint32_t index = 0;

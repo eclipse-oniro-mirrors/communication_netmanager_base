@@ -37,7 +37,7 @@ void NetPolicyFirewall::Init()
     powerSaveFirewallRule_->SetAllowedList(powerSaveAllowedList_);
 }
 
-int32_t NetPolicyFirewall::SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
+int32_t NetPolicyFirewall::SetDeviceIdleTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
 {
     if (powerSaveAllowedList_.size() > MAX_LIST_SIZE) {
         NETMGR_LOG_E("Device idle allowed list's size is over the max size.");
@@ -54,7 +54,7 @@ int32_t NetPolicyFirewall::SetDeviceIdleAllowedList(const std::vector<uint32_t> 
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetPolicyFirewall::SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
+int32_t NetPolicyFirewall::SetPowerSaveTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
 {
     if (powerSaveAllowedList_.size() > MAX_LIST_SIZE) {
         NETMGR_LOG_E("Power save allowed list's size is over the max size.");
@@ -92,13 +92,13 @@ void NetPolicyFirewall::UpdateFirewallPolicyList(uint32_t chainType, const std::
     }
 }
 
-int32_t NetPolicyFirewall::GetDeviceIdleAllowedList(std::vector<uint32_t> &uids)
+int32_t NetPolicyFirewall::GetDeviceIdleTrustlist(std::vector<uint32_t> &uids)
 {
     uids = deviceIdleFirewallRule_->GetAllowedList();
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetPolicyFirewall::GetPowerSaveAllowedList(std::vector<uint32_t> &uids)
+int32_t NetPolicyFirewall::GetPowerSaveTrustlist(std::vector<uint32_t> &uids)
 {
     uids = powerSaveFirewallRule_->GetAllowedList();
     return NETMANAGER_SUCCESS;
@@ -170,8 +170,8 @@ void NetPolicyFirewall::ResetPolicies()
 
 void NetPolicyFirewall::DeleteUid(uint32_t uid)
 {
-    SetDeviceIdleAllowedList({uid}, false);
-    SetPowerSaveAllowedList({uid}, false);
+    SetDeviceIdleTrustlist({uid}, false);
+    SetPowerSaveTrustlist({uid}, false);
 
     deviceIdleFirewallRule_->RemoveFromAllowedList(uid);
     powerSaveFirewallRule_->RemoveFromAllowedList(uid);

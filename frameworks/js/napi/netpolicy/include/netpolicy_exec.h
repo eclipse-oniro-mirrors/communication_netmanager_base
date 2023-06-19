@@ -47,13 +47,13 @@ public:
     static bool ExecSetNetQuotaPolicies(SetNetQuotaPoliciesContext *context);
     static bool ExecRestoreAllPolicies(RestoreAllPoliciesContext *context);
     static bool ExecIsUidNetAllowed(IsUidNetAllowedContext *context);
-    static bool ExecSetDeviceIdleAllowList(SetDeviceIdleAllowListContext *context);
-    static bool ExecGetDeviceIdleAllowList(GetDeviceIdleAllowListContext *context);
+    static bool ExecSetDeviceIdleTrustlist(SetDeviceIdleTrustlistContext *context);
+    static bool ExecGetDeviceIdleTrustlist(GetDeviceIdleTrustlistContext *context);
     static bool ExecGetBackgroundPolicyByUid(GetBackgroundPolicyByUidContext *context);
     static bool ExecResetPolicies(ResetPoliciesContext *context);
     static bool ExecUpdateRemindPolicy(UpdateRemindPolicyContext *context);
-    static bool ExecSetPowerSaveAllowList(SetPowerSaveAllowListContext *context);
-    static bool ExecGetPowerSaveAllowList(GetPowerSaveAllowListContext *context);
+    static bool ExecSetPowerSaveTrustlist(SetPowerSaveTrustlistContext *context);
+    static bool ExecGetPowerSaveTrustlist(GetPowerSaveTrustlistContext *context);
 
     static napi_value SetPolicyByUidCallback(SetPolicyByUidContext *context);
     static napi_value GetPolicyByUidCallback(GetPolicyByUidContext *context);
@@ -64,13 +64,13 @@ public:
     static napi_value SetNetQuotaPoliciesCallback(SetNetQuotaPoliciesContext *context);
     static napi_value RestoreAllPoliciesCallback(RestoreAllPoliciesContext *context);
     static napi_value IsUidNetAllowedCallback(IsUidNetAllowedContext *context);
-    static napi_value SetDeviceIdleAllowListCallback(SetDeviceIdleAllowListContext *context);
-    static napi_value GetDeviceIdleAllowListCallback(GetDeviceIdleAllowListContext *context);
+    static napi_value SetDeviceIdleTrustlistCallback(SetDeviceIdleTrustlistContext *context);
+    static napi_value GetDeviceIdleTrustlistCallback(GetDeviceIdleTrustlistContext *context);
     static napi_value GetBackgroundPolicyByUidCallback(GetBackgroundPolicyByUidContext *context);
     static napi_value ResetPoliciesCallback(ResetPoliciesContext *context);
     static napi_value UpdateRemindPolicyCallback(UpdateRemindPolicyContext *context);
-    static napi_value SetPowerSaveAllowListCallback(SetPowerSaveAllowListContext *context);
-    static napi_value GetPowerSaveAllowListCallback(GetPowerSaveAllowListContext *context);
+    static napi_value SetPowerSaveTrustlistCallback(SetPowerSaveTrustlistContext *context);
+    static napi_value GetPowerSaveTrustlistCallback(GetPowerSaveTrustlistContext *context);
 
     static napi_value CreateNetQuotaPolicy(napi_env env, const NetQuotaPolicy &netQuotaPolicy);
     static void FillNetWorkMatchRule(napi_env env, napi_value connectionProperties, const NetQuotaPolicy &netQuotaPolicy);

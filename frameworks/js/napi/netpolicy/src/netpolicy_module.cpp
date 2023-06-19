@@ -70,13 +70,13 @@ constexpr const char *FUNCTION_RESTORE_ALL_POLICIES = "restoreAllPolicies";
 constexpr const char *FUNCTION_SET_BACKGROUND_POLICY = "setBackgroundAllowed";
 constexpr const char *FUNCTION_GET_BACKGROUND_POLICY = "isBackgroundAllowed";
 constexpr const char *FUNCTION_IS_UID_NET_ACCESS = "isUidNetAllowed";
-constexpr const char *FUNCTION_SET_DEVICE_IDLE_ALLOWLIST = "setDeviceIdleAllowList";
-constexpr const char *FUNCTION_GET_DEVICE_IDLE_ALLOWLIST = "getDeviceIdleAllowList";
+constexpr const char *FUNCTION_SET_DEVICE_IDLE_ALLOWLIST = "setDeviceIdleTrustlist";
+constexpr const char *FUNCTION_GET_DEVICE_IDLE_ALLOWLIST = "getDeviceIdleTrustlist";
 constexpr const char *FUNCTION_GET_BACKGROUND_POLICY_BY_UID = "getBackgroundPolicyByUid";
 constexpr const char *FUNCTION_RESET_POLICIES = "resetPolicies";
 constexpr const char *FUNCTION_UPDATE_REMIND_POLICY = "updateRemindPolicy";
-constexpr const char *FUNCTION_SET_POWER_SAVE_ALLOWLIST = "setPowerSaveAllowList";
-constexpr const char *FUNCTION_GET_POWER_SAVE_ALLOWLIST = "getPowerSaveAllowList";
+constexpr const char *FUNCTION_SET_POWER_SAVE_ALLOWLIST = "setPowerSaveTrustlist";
+constexpr const char *FUNCTION_GET_POWER_SAVE_ALLOWLIST = "getPowerSaveTrustlist";
 constexpr const char *FUNCTION_ON = "on";
 constexpr const char *FUNCTION_OFF = "off";
 constexpr const char *REMIND_TYPE = "RemindType";
@@ -164,18 +164,18 @@ napi_value IsUidNetAllowed(napi_env env, napi_callback_info info)
                                                              NetPolicyAsyncWork::IsUidNetAllowedCallback);
 }
 
-napi_value SetDeviceIdleAllowList(napi_env env, napi_callback_info info)
+napi_value SetDeviceIdleTrustlist(napi_env env, napi_callback_info info)
 {
-    return ModuleTemplate::Interface<SetDeviceIdleAllowListContext>(
-        env, info, FUNCTION_SET_DEVICE_IDLE_ALLOWLIST, nullptr, NetPolicyAsyncWork::ExecSetDeviceIdleAllowList,
-        NetPolicyAsyncWork::SetDeviceIdleAllowListCallback);
+    return ModuleTemplate::Interface<SetDeviceIdleTrustlistContext>(
+        env, info, FUNCTION_SET_DEVICE_IDLE_ALLOWLIST, nullptr, NetPolicyAsyncWork::ExecSetDeviceIdleTrustlist,
+        NetPolicyAsyncWork::SetDeviceIdleTrustlistCallback);
 }
 
-napi_value GetDeviceIdleAllowList(napi_env env, napi_callback_info info)
+napi_value GetDeviceIdleTrustlist(napi_env env, napi_callback_info info)
 {
-    return ModuleTemplate::Interface<GetDeviceIdleAllowListContext>(
-        env, info, FUNCTION_GET_DEVICE_IDLE_ALLOWLIST, nullptr, NetPolicyAsyncWork::ExecGetDeviceIdleAllowList,
-        NetPolicyAsyncWork::GetDeviceIdleAllowListCallback);
+    return ModuleTemplate::Interface<GetDeviceIdleTrustlistContext>(
+        env, info, FUNCTION_GET_DEVICE_IDLE_ALLOWLIST, nullptr, NetPolicyAsyncWork::ExecGetDeviceIdleTrustlist,
+        NetPolicyAsyncWork::GetDeviceIdleTrustlistCallback);
 }
 
 napi_value GetBackgroundPolicyByUid(napi_env env, napi_callback_info info)
@@ -199,18 +199,18 @@ napi_value UpdateRemindPolicy(napi_env env, napi_callback_info info)
                                                                 NetPolicyAsyncWork::UpdateRemindPolicyCallback);
 }
 
-napi_value SetPowerSaveAllowList(napi_env env, napi_callback_info info)
+napi_value SetPowerSaveTrustlist(napi_env env, napi_callback_info info)
 {
-    return ModuleTemplate::Interface<SetPowerSaveAllowListContext>(
-        env, info, FUNCTION_SET_POWER_SAVE_ALLOWLIST, nullptr, NetPolicyAsyncWork::ExecSetPowerSaveAllowList,
-        NetPolicyAsyncWork::SetPowerSaveAllowListCallback);
+    return ModuleTemplate::Interface<SetPowerSaveTrustlistContext>(
+        env, info, FUNCTION_SET_POWER_SAVE_ALLOWLIST, nullptr, NetPolicyAsyncWork::ExecSetPowerSaveTrustlist,
+        NetPolicyAsyncWork::SetPowerSaveTrustlistCallback);
 }
 
-napi_value GetPowerSaveAllowList(napi_env env, napi_callback_info info)
+napi_value GetPowerSaveTrustlist(napi_env env, napi_callback_info info)
 {
-    return ModuleTemplate::Interface<GetPowerSaveAllowListContext>(
-        env, info, FUNCTION_GET_POWER_SAVE_ALLOWLIST, nullptr, NetPolicyAsyncWork::ExecGetPowerSaveAllowList,
-        NetPolicyAsyncWork::GetPowerSaveAllowListCallback);
+    return ModuleTemplate::Interface<GetPowerSaveTrustlistContext>(
+        env, info, FUNCTION_GET_POWER_SAVE_ALLOWLIST, nullptr, NetPolicyAsyncWork::ExecGetPowerSaveTrustlist,
+        NetPolicyAsyncWork::GetPowerSaveTrustlistCallback);
 }
 
 napi_value On(napi_env env, napi_callback_info info)
@@ -239,7 +239,7 @@ static void CreateBackgroundPolicy(napi_env env, napi_value exports)
                                     DEFINE_BACKGROUND_POLICY(NET_BACKGROUND_POLICY_NONE),
                                     DEFINE_BACKGROUND_POLICY(NET_BACKGROUND_POLICY_ENABLE),
                                     DEFINE_BACKGROUND_POLICY(NET_BACKGROUND_POLICY_DISABLE),
-                                    DEFINE_BACKGROUND_POLICY(NET_BACKGROUND_POLICY_ALLOWEDLIST),
+                                    DEFINE_BACKGROUND_POLICY(NET_BACKGROUND_POLICY_TRUSTLIST),
                                 });
     NapiUtils::SetNamedProperty(env, exports, NET_BACKGROUND_POLICY, result);
 }
@@ -299,8 +299,8 @@ static void CreateLimitAction(napi_env env, napi_value exports)
     NapiUtils::DefineProperties(env, result,
                                 {
                                     DEFINE_LIMIT_ACTION(LIMIT_ACTION_NONE),
-                                    DEFINE_LIMIT_ACTION(LIMIT_ACTION_DISABLE),
-                                    DEFINE_LIMIT_ACTION(LIMIT_ACTION_AUTO_BILL),
+                                    DEFINE_LIMIT_ACTION(LIMIT_ACTION_ACCESS_DISABLED),
+                                    DEFINE_LIMIT_ACTION(LIMIT_ACTION_ALERT_ONLY),
                                 });
     NapiUtils::SetNamedProperty(env, exports, NET_LIMIT_ACTION, result);
 }
@@ -319,15 +319,15 @@ napi_value InitPolicyModule(napi_env env, napi_value exports)
             DECLARE_NAPI_FUNCTION(FUNCTION_SET_BACKGROUND_POLICY, SetBackgroundPolicy),
             DECLARE_NAPI_FUNCTION(FUNCTION_GET_BACKGROUND_POLICY, GetBackgroundPolicy),
             DECLARE_NAPI_FUNCTION(FUNCTION_IS_UID_NET_ACCESS, IsUidNetAllowed),
-            DECLARE_NAPI_FUNCTION(FUNCTION_SET_DEVICE_IDLE_ALLOWLIST, SetDeviceIdleAllowList),
-            DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEVICE_IDLE_ALLOWLIST, GetDeviceIdleAllowList),
+            DECLARE_NAPI_FUNCTION(FUNCTION_SET_DEVICE_IDLE_ALLOWLIST, SetDeviceIdleTrustlist),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEVICE_IDLE_ALLOWLIST, GetDeviceIdleTrustlist),
             DECLARE_NAPI_FUNCTION(FUNCTION_GET_BACKGROUND_POLICY_BY_UID, GetBackgroundPolicyByUid),
             DECLARE_NAPI_FUNCTION(FUNCTION_RESET_POLICIES, ResetPolicies),
             DECLARE_NAPI_FUNCTION(FUNCTION_UPDATE_REMIND_POLICY, UpdateRemindPolicy),
             DECLARE_NAPI_FUNCTION(FUNCTION_RESET_POLICIES, ResetPolicies),
             DECLARE_NAPI_FUNCTION(FUNCTION_UPDATE_REMIND_POLICY, UpdateRemindPolicy),
-            DECLARE_NAPI_FUNCTION(FUNCTION_SET_POWER_SAVE_ALLOWLIST, SetPowerSaveAllowList),
-            DECLARE_NAPI_FUNCTION(FUNCTION_GET_POWER_SAVE_ALLOWLIST, GetPowerSaveAllowList),
+            DECLARE_NAPI_FUNCTION(FUNCTION_SET_POWER_SAVE_ALLOWLIST, SetPowerSaveTrustlist),
+            DECLARE_NAPI_FUNCTION(FUNCTION_GET_POWER_SAVE_ALLOWLIST, GetPowerSaveTrustlist),
             DECLARE_NAPI_FUNCTION(FUNCTION_ON, On),
             DECLARE_NAPI_FUNCTION(FUNCTION_OFF, Off),
         });

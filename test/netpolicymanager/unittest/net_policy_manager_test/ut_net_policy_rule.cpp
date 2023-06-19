@@ -299,7 +299,7 @@ void SendMessage()
     AccessToken token(testInfoParms, testPolicyPrams);
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdlePolicy(true);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
-    int32_t result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdleAllowedList({TEST_UID1}, true);
+    int32_t result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdleTrustlist({TEST_UID1}, true);
     ASSERT_EQ(result2, NETMANAGER_SUCCESS);
 }
 

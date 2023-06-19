@@ -76,24 +76,24 @@ void NetPolicyAsyncWork::ExecIsUidNetAllowed(napi_env env, void *data)
     BaseAsyncWork::ExecAsyncWork<IsUidNetAllowedContext, NetPolicyExec::ExecIsUidNetAllowed>(env, data);
 }
 
-void NetPolicyAsyncWork::ExecSetDeviceIdleAllowList(napi_env env, void *data)
+void NetPolicyAsyncWork::ExecSetDeviceIdleTrustlist(napi_env env, void *data)
 {
-    BaseAsyncWork::ExecAsyncWork<SetDeviceIdleAllowListContext, NetPolicyExec::ExecSetDeviceIdleAllowList>(env, data);
+    BaseAsyncWork::ExecAsyncWork<SetDeviceIdleTrustlistContext, NetPolicyExec::ExecSetDeviceIdleTrustlist>(env, data);
 }
 
-void NetPolicyAsyncWork::ExecGetDeviceIdleAllowList(napi_env env, void *data)
+void NetPolicyAsyncWork::ExecGetDeviceIdleTrustlist(napi_env env, void *data)
 {
-    BaseAsyncWork::ExecAsyncWork<GetDeviceIdleAllowListContext, NetPolicyExec::ExecGetDeviceIdleAllowList>(env, data);
+    BaseAsyncWork::ExecAsyncWork<GetDeviceIdleTrustlistContext, NetPolicyExec::ExecGetDeviceIdleTrustlist>(env, data);
 }
 
-void NetPolicyAsyncWork::ExecSetPowerSaveAllowList(napi_env env, void *data)
+void NetPolicyAsyncWork::ExecSetPowerSaveTrustlist(napi_env env, void *data)
 {
-    BaseAsyncWork::ExecAsyncWork<SetPowerSaveAllowListContext, NetPolicyExec::ExecSetPowerSaveAllowList>(env, data);
+    BaseAsyncWork::ExecAsyncWork<SetPowerSaveTrustlistContext, NetPolicyExec::ExecSetPowerSaveTrustlist>(env, data);
 }
 
-void NetPolicyAsyncWork::ExecGetPowerSaveAllowList(napi_env env, void *data)
+void NetPolicyAsyncWork::ExecGetPowerSaveTrustlist(napi_env env, void *data)
 {
-    BaseAsyncWork::ExecAsyncWork<GetPowerSaveAllowListContext, NetPolicyExec::ExecGetPowerSaveAllowList>(env, data);
+    BaseAsyncWork::ExecAsyncWork<GetPowerSaveTrustlistContext, NetPolicyExec::ExecGetPowerSaveTrustlist>(env, data);
 }
 
 void NetPolicyAsyncWork::ExecGetBackgroundPolicyByUid(napi_env env, void *data)
@@ -161,15 +161,15 @@ void NetPolicyAsyncWork::IsUidNetAllowedCallback(napi_env env, napi_status statu
     BaseAsyncWork::AsyncWorkCallback<IsUidNetAllowedContext, NetPolicyExec::IsUidNetAllowedCallback>(env, status, data);
 }
 
-void NetPolicyAsyncWork::SetDeviceIdleAllowListCallback(napi_env env, napi_status status, void *data)
+void NetPolicyAsyncWork::SetDeviceIdleTrustlistCallback(napi_env env, napi_status status, void *data)
 {
-    BaseAsyncWork::AsyncWorkCallback<SetDeviceIdleAllowListContext, NetPolicyExec::SetDeviceIdleAllowListCallback>(
+    BaseAsyncWork::AsyncWorkCallback<SetDeviceIdleTrustlistContext, NetPolicyExec::SetDeviceIdleTrustlistCallback>(
         env, status, data);
 }
 
-void NetPolicyAsyncWork::GetDeviceIdleAllowListCallback(napi_env env, napi_status status, void *data)
+void NetPolicyAsyncWork::GetDeviceIdleTrustlistCallback(napi_env env, napi_status status, void *data)
 {
-    BaseAsyncWork::AsyncWorkCallback<GetDeviceIdleAllowListContext, NetPolicyExec::GetDeviceIdleAllowListCallback>(
+    BaseAsyncWork::AsyncWorkCallback<GetDeviceIdleTrustlistContext, NetPolicyExec::GetDeviceIdleTrustlistCallback>(
         env, status, data);
 }
 
@@ -190,15 +190,15 @@ void NetPolicyAsyncWork::UpdateRemindPolicyCallback(napi_env env, napi_status st
                                                                                                            data);
 }
 
-void NetPolicyAsyncWork::SetPowerSaveAllowListCallback(napi_env env, napi_status status, void *data)
+void NetPolicyAsyncWork::SetPowerSaveTrustlistCallback(napi_env env, napi_status status, void *data)
 {
-    BaseAsyncWork::AsyncWorkCallback<SetPowerSaveAllowListContext, NetPolicyExec::SetPowerSaveAllowListCallback>(
+    BaseAsyncWork::AsyncWorkCallback<SetPowerSaveTrustlistContext, NetPolicyExec::SetPowerSaveTrustlistCallback>(
         env, status, data);
 }
 
-void NetPolicyAsyncWork::GetPowerSaveAllowListCallback(napi_env env, napi_status status, void *data)
+void NetPolicyAsyncWork::GetPowerSaveTrustlistCallback(napi_env env, napi_status status, void *data)
 {
-    BaseAsyncWork::AsyncWorkCallback<GetPowerSaveAllowListContext, NetPolicyExec::GetPowerSaveAllowListCallback>(
+    BaseAsyncWork::AsyncWorkCallback<GetPowerSaveTrustlistContext, NetPolicyExec::GetPowerSaveTrustlistCallback>(
         env, status, data);
 }
 } // namespace NetManagerStandard
