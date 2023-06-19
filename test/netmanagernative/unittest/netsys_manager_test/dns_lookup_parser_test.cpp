@@ -447,9 +447,9 @@ HWTEST_F(DNSLookupParserTest, DnsParseCallback002, TestSize.Level1)
 HWTEST_F(DNSLookupParserTest, DnsParseCallback003, TestSize.Level1)
 {
     DpcCtx ctx;
+    AddrData buf[MAXADDRS] = {};
+    ctx.addrs = buf;
     ctx.cnt = MAXADDRS - 1;
-    AddrData addrData;
-    ctx.addrs = &addrData;
     char str[] = "test data";
     ctx.canon = str;
     int32_t rr = RR_A;
@@ -463,6 +463,8 @@ HWTEST_F(DNSLookupParserTest, DnsParseCallback003, TestSize.Level1)
 HWTEST_F(DNSLookupParserTest, DnsParseCallback004, TestSize.Level1)
 {
     DpcCtx ctx;
+    AddrData buf[MAXADDRS] = {};
+    ctx.addrs = buf;
     ctx.cnt = MAXADDRS - 1;
     int32_t rr = RR_AAAA;
     int32_t len = ADDR_A6_LEN + 1;
@@ -475,11 +477,9 @@ HWTEST_F(DNSLookupParserTest, DnsParseCallback004, TestSize.Level1)
 HWTEST_F(DNSLookupParserTest, DnsParseCallback005, TestSize.Level1)
 {
     DpcCtx ctx;
+    AddrData buf[MAXADDRS] = {};
+    ctx.addrs = buf;
     ctx.cnt = MAXADDRS - 1;
-    AddrData addrData;
-    AddrData addrDatas[2];
-    addrDatas[0] = addrData;
-    ctx.addrs = addrDatas;
     char str[] = "test data";
     ctx.canon = str;
     ctx.cnt = 0;
@@ -494,6 +494,8 @@ HWTEST_F(DNSLookupParserTest, DnsParseCallback005, TestSize.Level1)
 HWTEST_F(DNSLookupParserTest, DnsParseCallback006, TestSize.Level1)
 {
     DpcCtx ctx;
+    AddrData buf[MAXADDRS] = {};
+    ctx.addrs = buf;
     ctx.cnt = MAXADDRS - 1;
     int32_t rr = RR_CNAME;
     int32_t len = ADDR_A6_LEN;
