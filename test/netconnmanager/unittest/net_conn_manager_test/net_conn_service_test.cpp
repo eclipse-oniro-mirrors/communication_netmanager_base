@@ -58,12 +58,12 @@ constexpr const char *TEST_DOMAIN4 = "com.test";
 constexpr const char *TEST_DOMAIN5 = "test.co.uk";
 constexpr const char *TEST_DOMAIN6 = "test.com.com";
 constexpr const char *TEST_DOMAIN7 = "test1.test2.test3.test4.test5.com";
-constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
-constexpr int64_t TEST_UID = 1010;
-constexpr uint32_t TEST_NOTEXISTSUPPLIER = 1000;
 constexpr const char *TEST_DOMAIN8 = "http://www.example.com";
 constexpr const char *TEST_DOMAIN9 = "https://www.example.com";
 constexpr const char *TEST_DOMAIN10 = "httpd://www.example.com";
+constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
+constexpr int64_t TEST_UID = 1010;
+constexpr uint32_t TEST_NOTEXISTSUPPLIER = 1000;
 
 class NetSupplierTestCallback : public NetSupplierCallbackStub {
 public:
@@ -623,6 +623,9 @@ HWTEST_F(NetConnServiceTest, GetTest001, TestSize.Level1)
     ret = NetConnService::GetInstance()->RestrictBackgroundChanged(false);
     EXPECT_EQ(ret, NET_CONN_ERR_NET_NO_RESTRICT_BACKGROUND);
 
+    NetConnService::GetInstance()->HandleDetectionResult(TEST_NOTEXISTSUPPLIER, true);
+    NetConnService::GetInstance()->HandleDetectionResult(g_supplierId, true);
+
     std::vector<std::u16string> args;
     args.emplace_back(u"dummy data");
     ret = NetConnService::GetInstance()->Dump(SOCKET_FD, args);
@@ -646,12 +649,6 @@ HWTEST_F(NetConnServiceTest, OnNetActivateTimeOutTest001, TestSize.Level1)
             EXPECT_EQ(iterSupplier->second->requestList_.find(nNetID), iterSupplier->second->requestList_.end());
         }
     }
-}
-
-HWTEST_F(NetConnServiceTest, HandleDetectionResultTest001, TestSize.Level1)
-{
-    NetConnService::GetInstance()->HandleDetectionResult(g_supplierId, true);
-    //ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, GetIfaceNamesTest001, TestSize.Level1)
