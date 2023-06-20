@@ -26,6 +26,7 @@ static constexpr const char *INTERNET = "ohos.permission.INTERNET";
 static constexpr const char *CONNECTIVITY_INTERNAL = "ohos.permission.CONNECTIVITY_INTERNAL";
 static constexpr const char *GET_NETSTATS_SUMMARY = "ohos.permission.GET_NETSTATS_SUMMARY";
 static constexpr const char *MANAGE_NET_STRATEGY = "ohos.permission.MANAGE_NET_STRATEGY";
+static constexpr const char *MANAGE_VPN = "ohos.permission.MANAGE_VPN";
 } // namespace Permission
 
 class NetManagerPermission {

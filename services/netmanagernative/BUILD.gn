@@ -55,6 +55,7 @@ netsys_native_manager_sources = [
   "src/manager/route_manager.cpp",
   "src/manager/sharing_manager.cpp",
   "src/manager/traffic_manager.cpp",
+  "src/manager/vpn_manager.cpp",
   "src/netsys/dnsresolv/dns_getaddrinfo.cpp",
   "src/netsys/dnsresolv/dns_lookup_name.cpp",
   "src/netsys/dnsresolv/dns_lookup_parse.cpp",
