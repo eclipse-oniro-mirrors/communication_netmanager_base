@@ -216,24 +216,24 @@ HWTEST_F(NetPolicyCallbackProxyTest, NetQuotaPolicyChangeTest004, TestSize.Level
 HWTEST_F(NetPolicyCallbackProxyTest, NetStrategySwitchTest001, TestSize.Level1)
 {
     NetPolicyCallbackProxy instance_(nullptr);
-    std::string iccid = "iccid";
-    EXPECT_EQ(instance_.NetStrategySwitch(iccid, true), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    std::string simId = "simId";
+    EXPECT_EQ(instance_.NetStrategySwitch(simId, true), NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
 HWTEST_F(NetPolicyCallbackProxyTest, NetStrategySwitchTest002, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_ERROR);
     NetPolicyCallbackProxy instance_(remoteObj_);
-    std::string iccid = "iccid";
-    EXPECT_EQ(instance_.NetStrategySwitch(iccid, true), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
+    std::string simId = "simId";
+    EXPECT_EQ(instance_.NetStrategySwitch(simId, true), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
 }
 
 HWTEST_F(NetPolicyCallbackProxyTest, NetStrategySwitchTest003, TestSize.Level1)
 {
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
     NetPolicyCallbackProxy instance_(remoteObj_);
-    std::string iccid = "iccid";
-    EXPECT_EQ(instance_.NetStrategySwitch(iccid, true), NETMANAGER_SUCCESS);
+    std::string simId = "simId";
+    EXPECT_EQ(instance_.NetStrategySwitch(simId, true), NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetPolicyCallbackProxyTest, NetMeteredIfacesChangeTest001, TestSize.Level1)

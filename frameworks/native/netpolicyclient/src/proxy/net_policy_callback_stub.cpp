@@ -187,8 +187,8 @@ int32_t NetPolicyCallbackStub::NetMeteredIfacesChange(std::vector<std::string> &
 
 int32_t NetPolicyCallbackStub::OnNetStrategySwitch(MessageParcel &data, MessageParcel &reply)
 {
-    std::string iccid;
-    if (!data.ReadString(iccid)) {
+    std::string simId;
+    if (!data.ReadString(simId)) {
         NETMGR_LOG_E("Read String data failed");
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
@@ -199,7 +199,7 @@ int32_t NetPolicyCallbackStub::OnNetStrategySwitch(MessageParcel &data, MessageP
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int32_t result = NetStrategySwitch(iccid, enable);
+    int32_t result = NetStrategySwitch(simId, enable);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write Int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -207,7 +207,7 @@ int32_t NetPolicyCallbackStub::OnNetStrategySwitch(MessageParcel &data, MessageP
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetPolicyCallbackStub::NetStrategySwitch(const std::string &iccid, bool enable)
+int32_t NetPolicyCallbackStub::NetStrategySwitch(const std::string &simId, bool enable)
 {
     return NETMANAGER_SUCCESS;
 }

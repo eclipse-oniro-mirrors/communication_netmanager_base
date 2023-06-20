@@ -124,15 +124,15 @@ HapPolicyParams testPolicyPrams3 = {.apl = APL_SYSTEM_BASIC,
 NetQuotaPolicy GetQuota()
 {
     NetQuotaPolicy quotaPolicy;
-    quotaPolicy.netType = 0;
-    quotaPolicy.iccid = std::to_string(TRIGER_DELAY_US);
-    quotaPolicy.periodStartTime = TRIGER_DELAY_US;
-    quotaPolicy.periodDuration = TEST_STRING_PERIODDURATION;
-    quotaPolicy.warningBytes = TRIGER_DELAY_US;
-    quotaPolicy.limitBytes = TRIGER_DELAY_US;
-    quotaPolicy.lastLimitRemind = -1;
-    quotaPolicy.metered = true;
-    quotaPolicy.source = 0;
+    quotaPolicy.networkmatchrule.netType = 0;
+    quotaPolicy.networkmatchrule.simId = std::to_string(TRIGER_DELAY_US);
+    quotaPolicy.quotapolicy.periodStartTime = TRIGER_DELAY_US;
+    quotaPolicy.quotapolicy.periodDuration = TEST_STRING_PERIODDURATION;
+    quotaPolicy.quotapolicy.warningBytes = TRIGER_DELAY_US;
+    quotaPolicy.quotapolicy.limitBytes = TRIGER_DELAY_US;
+    quotaPolicy.quotapolicy.lastLimitRemind = -1;
+    quotaPolicy.quotapolicy.metered = true;
+    quotaPolicy.quotapolicy.source = 0;
     return quotaPolicy;
 }
 } // namespace
@@ -354,9 +354,9 @@ HWTEST_F(UtNetPolicyClient, GetNetQuotaPolicies001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, SetFactoryPolicy001, TestSize.Level1)
 {
-    std::string iccid = "0";
+    std::string simId = "0";
     AccessToken token(testInfoParms2, testPolicyPrams2);
-    int32_t ret = g_netPolicyClient->SetFactoryPolicy(iccid);
+    int32_t ret = g_netPolicyClient->SetFactoryPolicy(simId);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -367,9 +367,9 @@ HWTEST_F(UtNetPolicyClient, SetFactoryPolicy001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, ResetPolicies001, TestSize.Level1)
 {
-    std::string iccid = "0";
+    std::string simId = "0";
     AccessToken token(testInfoParms2, testPolicyPrams2);
-    int32_t ret = g_netPolicyClient->ResetPolicies(iccid);
+    int32_t ret = g_netPolicyClient->ResetPolicies(simId);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

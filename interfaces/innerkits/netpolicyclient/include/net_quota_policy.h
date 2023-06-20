@@ -36,40 +36,44 @@ static constexpr int32_t PERIOD_DURATION_SIZE = 2;
 static constexpr int32_t QUOTA_POLICY_MAX_SIZE = 100;
 
 struct NetQuotaPolicy : public Parcelable {
-    /* See {@link NetBearType} */
-    int32_t netType = BEARER_DEFAULT;
-    /* The ID of the target card, valid when netType is BEARER_CELLULAR */
-    std::string iccid;
-    /* To specify the identity of network, such as different WLAN */
-    std::string ident;
-    // @deprecated
-    int64_t periodStartTime = -1;
-    /* The period and the start time for quota policy, default: "M1" */
-    std::string periodDuration = (PERIOD_MONTH + std::to_string(PERIOD_START));
-    // @deprecated
-    std::string title;
-    // @deprecated
-    std::string summary;
-    /* The warning threshold of traffic, default:  DATA_USAGE_UNKNOWN */
-    int64_t warningBytes = DATA_USAGE_UNKNOWN;
-    /* The limit threshold of traffic, default: DATA_USAGE_UNKNOWN */
-    int64_t limitBytes = DATA_USAGE_UNKNOWN;
-    /* The updated wall time that last warning remind, default: REMIND_NEVER */
-    int64_t lastWarningRemind = REMIND_NEVER;
-    /* The updated wall time that last limit remind, default: REMIND_NEVER */
-    int64_t lastLimitRemind = REMIND_NEVER;
-    /* Is metered network or not */
-    bool metered = false;
-    // @deprecated
-    int32_t source = -1;
-    /* The action while the used bytes reach the limit, see {@link LimitAction} */
-    int32_t limitAction = LimitAction::LIMIT_ACTION_NONE;
-    // @deprecated
-    int64_t usedBytes = -1;
-    // @deprecated
-    int64_t usedTimeDuration = -1;
-    // @deprecated
-    std::string possessor;
+    struct NetLogotype {
+        /* See {@link NetBearType} */
+        int32_t netType = BEARER_DEFAULT;
+        /* The ID of the target card, valid when netType is BEARER_CELLULAR */
+        std::string simId;
+        /* To specify the identity of network, such as different WLAN */
+        std::string ident;
+    } networkmatchrule;
+    struct QuotaPolicy {
+        // @deprecated
+        int64_t periodStartTime = -1;
+        /* The period and the start time for quota policy, default: "M1" */
+        std::string periodDuration = (PERIOD_MONTH + std::to_string(PERIOD_START));
+        // @deprecated
+        std::string title;
+        // @deprecated
+        std::string summary;
+        /* The warning threshold of traffic, default:  DATA_USAGE_UNKNOWN */
+        int64_t warningBytes = DATA_USAGE_UNKNOWN;
+        /* The limit threshold of traffic, default: DATA_USAGE_UNKNOWN */
+        int64_t limitBytes = DATA_USAGE_UNKNOWN;
+        /* The updated wall time that last warning remind, default: REMIND_NEVER */
+        int64_t lastWarningRemind = REMIND_NEVER;
+        /* The updated wall time that last limit remind, default: REMIND_NEVER */
+        int64_t lastLimitRemind = REMIND_NEVER;
+        /* Is metered network or not */
+        bool metered = false;
+        // @deprecated
+        int32_t source = -1;
+        /* The action while the used bytes reach the limit, see {@link LimitAction} */
+        int32_t limitAction = LimitAction::LIMIT_ACTION_NONE;
+        // @deprecated
+        int64_t usedBytes = -1;
+        // @deprecated
+        int64_t usedTimeDuration = -1;
+        // @deprecated
+        std::string possessor;
+    } quotapolicy;
 
     virtual bool Marshalling(Parcel &parcel) const override;
     static bool Marshalling(Parcel &parcel, const NetQuotaPolicy &quotaPolicy);

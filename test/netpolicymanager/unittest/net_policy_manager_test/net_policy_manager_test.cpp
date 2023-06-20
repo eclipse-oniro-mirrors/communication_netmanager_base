@@ -188,12 +188,12 @@ void NetPolicyManagerTest::TearDownTestCase()
     std::vector<NetQuotaPolicy> quotaPolicies;
 
     NetQuotaPolicy quotaPolicy1;
-    quotaPolicy1.netType = -1;
-    quotaPolicy1.iccid = std::to_string(TRIGER_DELAY_US);
+    quotaPolicy1.networkmatchrule.netType = -1;
+    quotaPolicy1.networkmatchrule.simId = std::to_string(TRIGER_DELAY_US);
 
     NetQuotaPolicy quotaPolicy2;
-    quotaPolicy2.netType = -1;
-    quotaPolicy2.iccid = "sim_abcdefg_1";
+    quotaPolicy2.networkmatchrule.netType = -1;
+    quotaPolicy2.networkmatchrule.simId = "sim_abcdefg_1";
 
     quotaPolicies.push_back(quotaPolicy1);
     quotaPolicies.push_back(quotaPolicy2);
@@ -349,15 +349,15 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager007, TestSize.Level1)
     std::vector<NetQuotaPolicy> quotaPolicies;
 
     NetQuotaPolicy quotaPolicy;
-    quotaPolicy.netType = 0;
-    quotaPolicy.iccid = std::to_string(TRIGER_DELAY_US);
-    quotaPolicy.periodStartTime = TRIGER_DELAY_US;
-    quotaPolicy.periodDuration = TEST_STRING_PERIODDURATION;
-    quotaPolicy.warningBytes = TRIGER_DELAY_US;
-    quotaPolicy.limitBytes = TRIGER_DELAY_US;
-    quotaPolicy.lastLimitRemind = -1;
-    quotaPolicy.metered = true;
-    quotaPolicy.source = 0;
+    quotaPolicy.networkmatchrule.netType = 0;
+    quotaPolicy.networkmatchrule.simId = std::to_string(TRIGER_DELAY_US);
+    quotaPolicy.quotapolicy.periodStartTime = TRIGER_DELAY_US;
+    quotaPolicy.quotapolicy.periodDuration = TEST_STRING_PERIODDURATION;
+    quotaPolicy.quotapolicy.warningBytes = TRIGER_DELAY_US;
+    quotaPolicy.quotapolicy.limitBytes = TRIGER_DELAY_US;
+    quotaPolicy.quotapolicy.lastLimitRemind = -1;
+    quotaPolicy.quotapolicy.metered = true;
+    quotaPolicy.quotapolicy.source = 0;
     quotaPolicies.push_back(quotaPolicy);
     AccessToken token(testInfoParms2, testPolicyPrams2);
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetQuotaPolicies(quotaPolicies);
@@ -388,16 +388,16 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager009, TestSize.Level1)
 
     NetQuotaPolicy cellularPolicy;
     for (uint32_t i = 0; i < TEST_CONSTANT_NUM; ++i) {
-        cellularPolicy.iccid = std::to_string(i);
-        cellularPolicy.periodStartTime = TRIGER_DELAY_US + i;
-        cellularPolicy.periodDuration = TEST_STRING_PERIODDURATION;
-        cellularPolicy.title = std::to_string(TRIGER_DELAY_US + i);
-        cellularPolicy.summary = std::to_string(TRIGER_DELAY_US + i);
-        cellularPolicy.limitBytes = TRIGER_DELAY_US + i;
-        cellularPolicy.limitAction = TEST_CONSTANT_NUM;
-        cellularPolicy.usedBytes = TRIGER_DELAY_US + i;
-        cellularPolicy.usedTimeDuration = TRIGER_DELAY_US + i;
-        cellularPolicy.possessor = std::to_string(TRIGER_DELAY_US + i);
+        cellularPolicy.networkmatchrule.simId = std::to_string(i);
+        cellularPolicy.quotapolicy.periodStartTime = TRIGER_DELAY_US + i;
+        cellularPolicy.quotapolicy.periodDuration = TEST_STRING_PERIODDURATION;
+        cellularPolicy.quotapolicy.title = std::to_string(TRIGER_DELAY_US + i);
+        cellularPolicy.quotapolicy.summary = std::to_string(TRIGER_DELAY_US + i);
+        cellularPolicy.quotapolicy.limitBytes = TRIGER_DELAY_US + i;
+        cellularPolicy.quotapolicy.limitAction = TEST_CONSTANT_NUM;
+        cellularPolicy.quotapolicy.usedBytes = TRIGER_DELAY_US + i;
+        cellularPolicy.quotapolicy.usedTimeDuration = TRIGER_DELAY_US + i;
+        cellularPolicy.quotapolicy.possessor = std::to_string(TRIGER_DELAY_US + i);
 
         quotaPolicies.push_back(cellularPolicy);
     }
@@ -426,9 +426,9 @@ HWTEST_F(NetPolicyManagerTest, NetPolicyManager010, TestSize.Level1)
  */
 HWTEST_F(NetPolicyManagerTest, NetPolicyManager011, TestSize.Level1)
 {
-    std::string iccid = "0";
+    std::string simId = "0";
     AccessToken token(testInfoParms2, testPolicyPrams2);
-    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->ResetPolicies(iccid);
+    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->ResetPolicies(simId);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
 
@@ -720,14 +720,14 @@ void SetNetQuotaPoliciesCallback()
     std::vector<NetQuotaPolicy> quotaPolicies;
 
     NetQuotaPolicy quotaPolicy;
-    quotaPolicy.netType = 0;
-    quotaPolicy.iccid = "sim_abcdefg_1";
-    quotaPolicy.periodDuration = "m2";
-    quotaPolicy.warningBytes = TEST_WARNING_BYTES;
-    quotaPolicy.limitBytes = TEST_LIMIT_BYTES;
-    quotaPolicy.lastLimitRemind = -1;
-    quotaPolicy.metered = true;
-    quotaPolicy.source = 0;
+    quotaPolicy.networkmatchrule.netType = 0;
+    quotaPolicy.networkmatchrule.simId = "sim_abcdefg_1";
+    quotaPolicy.quotapolicy.periodDuration = "m2";
+    quotaPolicy.quotapolicy.warningBytes = TEST_WARNING_BYTES;
+    quotaPolicy.quotapolicy.limitBytes = TEST_LIMIT_BYTES;
+    quotaPolicy.quotapolicy.lastLimitRemind = -1;
+    quotaPolicy.quotapolicy.metered = true;
+    quotaPolicy.quotapolicy.source = 0;
     quotaPolicies.push_back(quotaPolicy);
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetQuotaPolicies(quotaPolicies);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);

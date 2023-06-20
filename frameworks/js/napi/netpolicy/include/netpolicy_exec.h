@@ -73,6 +73,9 @@ public:
     static napi_value GetPowerSaveAllowListCallback(GetPowerSaveAllowListContext *context);
 
     static napi_value CreateNetQuotaPolicy(napi_env env, const NetQuotaPolicy &netQuotaPolicy);
+    static void FillNetWorkMatchRule(napi_env env, napi_value connectionProperties,
+                                     const NetQuotaPolicy &netQuotaPolicy);
+    static void FillQuotaPolicy(napi_env env, napi_value elementObject, const NetQuotaPolicy &netQuotaPolicy);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

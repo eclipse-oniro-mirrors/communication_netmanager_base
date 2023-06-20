@@ -162,15 +162,15 @@ private:
 
     inline void ToQuotaPolicy(const NetPolicyQuota& netPolicyQuota, NetQuotaPolicy &quotaPolicy)
     {
-        quotaPolicy.lastLimitRemind = CommonUtils::StrToLong(netPolicyQuota.lastLimitSnooze, REMIND_NEVER);
-        quotaPolicy.limitBytes = CommonUtils::StrToLong(netPolicyQuota.limitBytes, DATA_USAGE_UNKNOWN);
-        quotaPolicy.metered = CommonUtils::StrToBool(netPolicyQuota.metered, false);
-        quotaPolicy.netType = CommonUtils::StrToInt(netPolicyQuota.netType, BEARER_DEFAULT);
-        quotaPolicy.periodDuration = netPolicyQuota.periodDuration;
-        quotaPolicy.periodStartTime = CommonUtils::StrToLong(netPolicyQuota.periodStartTime);
-        quotaPolicy.iccid = netPolicyQuota.iccid;
-        quotaPolicy.warningBytes = CommonUtils::StrToLong(netPolicyQuota.warningBytes, DATA_USAGE_UNKNOWN);
-        quotaPolicy.ident = netPolicyQuota.ident;
+        quotaPolicy.quotapolicy.lastLimitRemind = CommonUtils::StrToLong(netPolicyQuota.lastLimitSnooze, REMIND_NEVER);
+        quotaPolicy.quotapolicy.limitBytes = CommonUtils::StrToLong(netPolicyQuota.limitBytes, DATA_USAGE_UNKNOWN);
+        quotaPolicy.quotapolicy.metered = CommonUtils::StrToBool(netPolicyQuota.metered, false);
+        quotaPolicy.networkmatchrule.netType = CommonUtils::StrToInt(netPolicyQuota.netType, BEARER_DEFAULT);
+        quotaPolicy.quotapolicy.periodDuration = netPolicyQuota.periodDuration;
+        quotaPolicy.quotapolicy.periodStartTime = CommonUtils::StrToLong(netPolicyQuota.periodStartTime);
+        quotaPolicy.networkmatchrule.simId = netPolicyQuota.simId;
+        quotaPolicy.quotapolicy.warningBytes = CommonUtils::StrToLong(netPolicyQuota.warningBytes, DATA_USAGE_UNKNOWN);
+        quotaPolicy.networkmatchrule.ident = netPolicyQuota.ident;
     }
 
     std::shared_ptr<NetPolicyFileEventHandler> GetHandler();

@@ -78,7 +78,7 @@ public:
         return 0;
     }
 
-    int32_t UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType) override
+    int32_t UpdateRemindPolicy(int32_t netType, const std::string &simId, uint32_t remindType) override
     {
         return 0;
     }
@@ -98,7 +98,7 @@ public:
         return 0;
     }
 
-    int32_t ResetPolicies(const std::string &iccid) override
+    int32_t ResetPolicies(const std::string &simId) override
     {
         return 0;
     }
@@ -325,7 +325,7 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetNetQuotaPoliciesTest001, TestSize.Level1
     MessageParcel data;
     data.WriteBool(true);
     NetQuotaPolicy quotaPolicy;
-    quotaPolicy.title = "test";
+    quotaPolicy.quotapolicy.title = "test";
     std::vector<NetQuotaPolicy> quotaPolicies;
     quotaPolicies.emplace_back(quotaPolicy);
     NetQuotaPolicy::Marshalling(data, quotaPolicies);
@@ -424,7 +424,7 @@ HWTEST_F(NetPolicyServiceStubTest, OnSnoozePolicyTest001, TestSize.Level1)
     MessageParcel data;
     data.WriteBool(true);
     data.WriteInt32(0);
-    data.WriteString("iccid");
+    data.WriteString("simId");
     data.WriteInt32(0);
     MessageParcel reply;
     MessageOption option;

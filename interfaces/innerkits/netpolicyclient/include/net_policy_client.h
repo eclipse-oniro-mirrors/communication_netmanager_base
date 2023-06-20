@@ -139,25 +139,25 @@ public:
     [[nodiscard]] int32_t GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies);
 
     /**
-     * SetFactoryPolicy reset policys for iccid.
+     * SetFactoryPolicy reset policys for simId.
      *
-     * @param iccid ID, get from telephone module
+     * @param simId ID, get from telephone module
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      * @deprecated
      */
-    NetPolicyResultCode SetFactoryPolicy(const std::string &iccid);
+    NetPolicyResultCode SetFactoryPolicy(const std::string &simId);
 
     /**
      * Reset network policies\rules\quota policies\firewall rules.
      *
-     * @param iccid Specify the matched iccid of quota policy.
+     * @param simId Specify the matched simId of quota policy.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    [[nodiscard]] int32_t ResetPolicies(const std::string &iccid);
+    [[nodiscard]] int32_t ResetPolicies(const std::string &simId);
 
     /**
      * Control if apps can use data on background.
@@ -194,25 +194,25 @@ public:
      * SetSnoozePolicy for Hibernate current policy
      *
      * @param netType {@link NetBearType}.
-     * @param iccid Specify the matched iccid of quota policy when netType is cellular.
+     * @param simId Specify the matched simId of quota policy when netType is cellular.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      * @deprecated
      */
-    NetPolicyResultCode SetSnoozePolicy(int8_t netType, const std::string &iccid);
+    NetPolicyResultCode SetSnoozePolicy(int8_t netType, const std::string &simId);
 
     /**
      * Update the limit or warning remind time of quota policy.
      *
      * @param netType {@link NetBearType}.
-     * @param iccid Specify the matched iccid of quota policy when netType is cellular.
+     * @param simId Specify the matched simId of quota policy when netType is cellular.
      * @param remindType {@link RemindType}.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    [[nodiscard]] int32_t UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType);
+    [[nodiscard]] int32_t UpdateRemindPolicy(int32_t netType, const std::string &simId, uint32_t remindType);
 
     /**
      * SetIdleTrustlist for add trust list for Idle status

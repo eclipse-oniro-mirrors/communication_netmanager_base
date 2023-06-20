@@ -181,13 +181,13 @@ int32_t NetPolicyService::GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quota
     return netPolicyTraffic_->GetNetQuotaPolicies(quotaPolicies);
 }
 
-int32_t NetPolicyService::ResetPolicies(const std::string &iccid)
+int32_t NetPolicyService::ResetPolicies(const std::string &simId)
 {
     NETMGR_LOG_D("ResetPolicies begin");
     if (netPolicyRule_ != nullptr && netPolicyFirewall_ != nullptr && netPolicyTraffic_ != nullptr) {
         netPolicyRule_->ResetPolicies();
         netPolicyFirewall_->ResetPolicies();
-        netPolicyTraffic_->ResetPolicies(iccid);
+        netPolicyTraffic_->ResetPolicies(simId);
         return NETMANAGER_SUCCESS;
     }
     return NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -211,10 +211,10 @@ int32_t NetPolicyService::GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backg
     return netPolicyRule_->GetBackgroundPolicyByUid(uid, backgroundPolicyOfUid);
 }
 
-int32_t NetPolicyService::UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType)
+int32_t NetPolicyService::UpdateRemindPolicy(int32_t netType, const std::string &simId, uint32_t remindType)
 {
     NETMGR_LOG_D("UpdateRemindPolicy start");
-    return netPolicyTraffic_->UpdateRemindPolicy(netType, iccid, remindType);
+    return netPolicyTraffic_->UpdateRemindPolicy(netType, simId, remindType);
 }
 
 int32_t NetPolicyService::SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
