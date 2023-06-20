@@ -108,7 +108,7 @@ int32_t VpnManager::SetVpnMtu(const std::string &ifName, int32_t mtu)
 
     ifr.ifr_mtu = mtu;
     if (ioctl(net4Sock_, SIOCSIFMTU, &ifr) < 0) {
-        NETNATIVE_LOGE("set MTU error, errno:%{public}d, msg:%{public}s", errno, strerror(errno));
+        NETNATIVE_LOGE("set MTU error, errno:%{public}d", errno);
         return NETMANAGER_ERROR;
     }
     NETNATIVE_LOGI("set MTU success");
