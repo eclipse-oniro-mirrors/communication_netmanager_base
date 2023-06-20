@@ -55,6 +55,7 @@ ohos_shared_library("net_policy_manager") {
 
   deps = [
     "$INNERKITS_ROOT/netpolicyclient:net_policy_parcel",
+    "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
@@ -85,7 +86,6 @@ ohos_shared_library("net_policy_manager") {
     "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
     "ipc:ipc_core",
-    "netmanager_base:net_stats_manager_if",
     "safwk:system_ability_fwk",
   ]
 
@@ -134,6 +134,7 @@ ohos_static_library("net_policy_manager_static") {
 
   deps = [
     "$INNERKITS_ROOT/netpolicyclient:net_policy_parcel",
+    "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
@@ -148,7 +149,6 @@ ohos_static_library("net_policy_manager_static") {
     "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
     "ipc:ipc_core",
-    "netmanager_base:net_stats_manager_if",
     "safwk:system_ability_fwk",
   ]
 

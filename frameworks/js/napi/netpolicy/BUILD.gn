@@ -59,8 +59,10 @@ ohos_shared_library("policy") {
   ]
 
   external_deps = [
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "napi:ace_napi",
   ]
   relative_install_dir = "module/net"
   part_name = "netmanager_base"
