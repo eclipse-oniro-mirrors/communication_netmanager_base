@@ -133,9 +133,6 @@ bool NetConnService::Init()
         NETMGR_LOG_E("Make NetScore failed");
         return false;
     }
-    NetHttpProxyTracker httpProxyTracker;
-    httpProxyTracker.ReadFromSystemParameter(globalHttpProxy_);
-    SendHttpProxyChangeBroadcast(globalHttpProxy_);
 
     interfaceStateCallback_ = new (std::nothrow) NetInterfaceStateCallback();
     if (interfaceStateCallback_) {
@@ -1237,6 +1234,14 @@ int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::st
 
 int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
+    static bool isReadFromDataShare = false;
+    if (!isReadFromDataShare) {
+        NetHttpProxyTracker httpProxyTracker;
+        httpProxyTracker.ReadFromSystemParameter(globalHttpProxy_);
+        SendHttpProxyChangeBroadcast(globalHttpProxy_);
+        isReadFromDataShare = true;
+    }
+
     if (globalHttpProxy_.GetHost().empty()) {
         httpProxy.SetPort(0);
         NETMGR_LOG_E("The http proxy host is empty");
@@ -1368,10 +1373,11 @@ int32_t NetConnService::SetAirplaneMode(bool state)
 {
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
     std::string airplaneMode = std::to_string(state);
-    Uri uri(SETTINGS_DATASHARE_URL_AIRPLANE_MODE);
-    int32_t ret = dataShareHelperUtils->Update(uri, SETTINGS_DATASHARE_KEY_AIRPLANE_MODE, airplaneMode);
+    Uri uri(AIRPLANE_MODE_URI);
+    int32_t ret = dataShareHelperUtils->Update(uri, KEY_AIRPLANE_MODE, airplaneMode);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Update airplane mode:%{public}d to datashare failed.", state);
+        return NETMANAGER_ERR_INTERNAL;
     }
 
     BroadcastInfo info;
@@ -1390,7 +1396,7 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
         globalHttpProxy_ = httpProxy;
         NetHttpProxyTracker httpProxyTracker;
         if (!httpProxyTracker.WriteToSystemParameter(globalHttpProxy_)) {
-            return NET_CONN_ERR_HTTP_PROXY_INVALID;
+            return NETMANAGER_ERR_INTERNAL;
         }
         SendHttpProxyChangeBroadcast(globalHttpProxy_);
     }

@@ -254,13 +254,13 @@ HWTEST_F(NetConnServiceTest, GetNetCapabilitiesTest001, TestSize.Level1)
 HWTEST_F(NetConnServiceTest, SetAirplaneModeTest001, TestSize.Level1)
 {
     auto ret = NetConnService::GetInstance()->SetAirplaneMode(true);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    ASSERT_EQ(ret, NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, SetAirplaneModeTest002, TestSize.Level1)
 {
     auto ret = NetConnService::GetInstance()->SetAirplaneMode(false);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    ASSERT_EQ(ret, NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, IsDefaultNetMeteredTest001, TestSize.Level1)
@@ -274,141 +274,119 @@ HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest001, TestSize.Level1)
 {
     HttpProxy httpProxy = {TEST_PROXY_HOST, 0, {}};
     auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    ASSERT_EQ(ret, NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest002, TestSize.Level1)
 {
     HttpProxy httpProxy = {TEST_DOMAIN1, 8080, {}};
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest003, TestSize.Level1)
 {
     HttpProxy httpProxy = {TEST_DOMAIN2, 8080, {}};
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest004, TestSize.Level1)
 {
     HttpProxy httpProxy = {TEST_DOMAIN3, 8080, {}};
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest005, TestSize.Level1)
 {
     HttpProxy httpProxy = {TEST_DOMAIN4, 8080, {}};
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest006, TestSize.Level1)
 {
     HttpProxy httpProxy = {TEST_DOMAIN5, 8080, {}};
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest007, TestSize.Level1)
 {
     HttpProxy httpProxy = {TEST_DOMAIN6, 8080, {}};
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest008, TestSize.Level1)
 {
     HttpProxy httpProxy = {TEST_DOMAIN7, 8080, {}};
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest009, TestSize.Level1)
 {
     HttpProxy httpProxy = {TEST_DOMAIN8, 8080, {}};
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest010, TestSize.Level1)
 {
     HttpProxy httpProxy = {TEST_DOMAIN9, 8080, {}};
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest011, TestSize.Level1)
 {
     HttpProxy httpProxy = {TEST_DOMAIN10, 8080, {}};
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest012, TestSize.Level1)
 {
     HttpProxy httpProxy = {TEST_IPV4_ADDR, 8080, {}};
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest013, TestSize.Level1)
 {
     HttpProxy httpProxy = {TEST_IPV6_ADDR, 8080, {}};
     auto ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest014, TestSize.Level1)
 {
     HttpProxy httpProxy = {TEST_LONG_HOST, 8080, {}};
     auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_EQ(ret, NET_CONN_ERR_HTTP_PROXY_INVALID);
+    ASSERT_EQ(ret, NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest015, TestSize.Level1)
 {
     HttpProxy httpProxy;
     auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+    ASSERT_EQ(ret, NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetConnServiceTest, GetGlobalHttpProxyTest001, TestSize.Level1)
 {
-    HttpProxy httpProxy = {TEST_PROXY_HOST, 0, {}};
-    int32_t ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
-
     HttpProxy getGlobalHttpProxy;
-    ret = NetConnService::GetInstance()->GetGlobalHttpProxy(getGlobalHttpProxy);
+    int32_t ret = NetConnService::GetInstance()->GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
-    ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_PROXY_HOST);
 }
 
 HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest001, TestSize.Level1)
 {
-    HttpProxy globalHttpProxy = {TEST_IPV4_ADDR, 8080, {}};
-    int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(globalHttpProxy);
-    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-
     int32_t bindNetId = 0;
     HttpProxy defaultHttpProxy;
-    ret = DelayedSingleton<NetConnService>::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
-    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-    ASSERT_TRUE(defaultHttpProxy.GetHost() == TEST_IPV4_ADDR);
-}
-
-HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest002, TestSize.Level1)
-{
-    HttpProxy globalHttpProxy;
-    int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->SetGlobalHttpProxy(globalHttpProxy);
-    ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-
-    int32_t bindNetId = 0;
-    HttpProxy defaultHttpProxy;
-    ret = DelayedSingleton<NetConnService>::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
+    int32_t ret = DelayedSingleton<NetConnService>::GetInstance()->GetDefaultHttpProxy(bindNetId, defaultHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 

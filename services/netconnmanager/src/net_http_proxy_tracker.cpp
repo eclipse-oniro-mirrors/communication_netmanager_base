@@ -13,41 +13,49 @@
  * limitations under the License.
  */
 
-#include "parameter.h"
-
-#include <netinet/in.h>
+#include "net_http_proxy_tracker.h"
 
 #include "base64_utils.h"
 #include "netmanager_base_common_utils.h"
-#include "net_http_proxy_tracker.h"
+#include "net_datashare_utils.h"
+#include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-constexpr int32_t SYSPARA_MAX_SIZE = 96;
 constexpr const char *EXCLUSIONS_SPLIT_SYMBOL = ",";
 constexpr const char *DEFAULT_HTTP_PROXY_HOST = "NONE";
 constexpr const char *DEFAULT_HTTP_PROXY_PORT = "0";
 constexpr const char *DEFAULT_HTTP_PROXY_EXCLUSION_LIST = "NONE";
-constexpr const char *HTTP_PROXY_HOST_KEY = "persist.netmanager_base.http_proxy.host";
-constexpr const char *HTTP_PROXY_PORT_KEY = "persist.netmanager_base.http_proxy.port";
-constexpr const char *HTTP_PROXY_EXCLUSIONS_KEY = "persist.netmanager_base.http_proxy.exclusion_list";
 } // namespace
 
 void NetHttpProxyTracker::ReadFromSystemParameter(HttpProxy &httpProxy)
 {
-    char httpProxyHost[SYSPARA_MAX_SIZE] = {0};
-    char httpProxyPort[SYSPARA_MAX_SIZE] = {0};
-    char httpProxyExclusions[SYSPARA_MAX_SIZE] = {0};
-    GetParameter(HTTP_PROXY_HOST_KEY, DEFAULT_HTTP_PROXY_HOST, httpProxyHost, sizeof(httpProxyHost));
-    GetParameter(HTTP_PROXY_PORT_KEY, DEFAULT_HTTP_PROXY_PORT, httpProxyPort, sizeof(httpProxyPort));
-    GetParameter(HTTP_PROXY_EXCLUSIONS_KEY, DEFAULT_HTTP_PROXY_EXCLUSION_LIST, httpProxyExclusions,
-                 sizeof(httpProxyExclusions));
-    std::string host = Base64::Decode(httpProxyHost);
+    auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
+    std::string proxyHost, proxyPort, proxyExclusions;
+    Uri hostUri(GLOBAL_PROXY_HOST_URI);
+    int32_t ret = dataShareHelperUtils->Query(hostUri, KEY_GLOBAL_PROXY_HOST, proxyHost);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Query global proxy host failed.");
+    }
+    std::string host = Base64::Decode(proxyHost);
     host = (host == DEFAULT_HTTP_PROXY_HOST ? "" : host);
-    std::list<std::string> exclusionList = ParseExclusionList(httpProxyExclusions);
-    uint16_t port = static_cast<uint16_t>(std::atoi(httpProxyPort));
+
+    Uri portUri(GLOBAL_PROXY_PORT_URI);
+    ret = dataShareHelperUtils->Query(portUri, KEY_GLOBAL_PROXY_PORT, proxyPort);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Query global proxy port failed.");
+    }
+    uint16_t port = (proxyPort.empty() || host.empty()) ? 0 : static_cast<uint16_t>(std::atoi(proxyPort.c_str()));
+
+    Uri exclusionsUri(GLOBAL_PROXY_EXCLUSIONS_URI);
+    ret = dataShareHelperUtils->Query(exclusionsUri, KEY_GLOBAL_PROXY_EXCLUSIONS, proxyExclusions);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Query global proxy exclusions failed.");
+    }
+    std::list<std::string> exclusionList =
+        host.empty() ? std::list<std::string>() : ParseExclusionList(proxyExclusions);
     httpProxy = {host, port, exclusionList};
 }
 
@@ -56,38 +64,35 @@ bool NetHttpProxyTracker::WriteToSystemParameter(HttpProxy &httpProxy)
     HttpProxy persistHttpProxy;
     ReadFromSystemParameter(persistHttpProxy);
 
-    std::string host = Base64::Encode(httpProxy.GetHost());
-    if (host.empty()) {
-        host = Base64::Encode(DEFAULT_HTTP_PROXY_HOST);
-    }
-    int32_t ret = SetParameter(HTTP_PROXY_HOST_KEY, host.c_str());
-    if (ret) {
-        NETMGR_LOG_E("Set host:%{public}s to system parameter:%{public}s failed, ret:%{public}d", host.c_str(),
-                     HTTP_PROXY_HOST_KEY, ret);
-        std::string host = persistHttpProxy.GetHost();
+    std::string host =
+        httpProxy.GetHost().empty() ? Base64::Encode(DEFAULT_HTTP_PROXY_HOST) : Base64::Encode(httpProxy.GetHost());
+    auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
+    Uri hostUri(GLOBAL_PROXY_HOST_URI);
+    int32_t ret = dataShareHelperUtils->Update(hostUri, KEY_GLOBAL_PROXY_HOST, host);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Set host:%{public}s to datashare failed", host.c_str());
         httpProxy.SetHost(std::move(host));
         httpProxy.SetPort(persistHttpProxy.GetPort());
         httpProxy.SetExclusionList(persistHttpProxy.GetExclusionList());
         return false;
     }
 
+    Uri portUri(GLOBAL_PROXY_PORT_URI);
     std::string port = httpProxy.GetHost().empty() ? DEFAULT_HTTP_PROXY_PORT : std::to_string(httpProxy.GetPort());
-    ret = SetParameter(HTTP_PROXY_PORT_KEY, port.c_str());
-    if (ret) {
-        NETMGR_LOG_E("Set port:%{public}s to system parameter:%{public}s failed, ret:%{public}d", port.c_str(),
-                     HTTP_PROXY_PORT_KEY, ret);
+    ret = dataShareHelperUtils->Update(portUri, KEY_GLOBAL_PROXY_PORT, port);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Set port:%{public}s to datashare failed", port.c_str());
         httpProxy.SetPort(persistHttpProxy.GetPort());
     }
 
     std::string exclusions = GetExclusionsAsString(httpProxy.GetExclusionList());
     exclusions = (httpProxy.GetHost().empty() || exclusions.empty()) ? DEFAULT_HTTP_PROXY_EXCLUSION_LIST : exclusions;
-    ret = SetParameter(HTTP_PROXY_EXCLUSIONS_KEY, exclusions.c_str());
-    if (ret) {
-        NETMGR_LOG_E("Set exclusions:%{public}s to system parameter:%{public}s failed, ret:%{public}d",
-                     exclusions.c_str(), HTTP_PROXY_EXCLUSIONS_KEY, ret);
+    Uri exclusionsUri(GLOBAL_PROXY_EXCLUSIONS_URI);
+    ret = dataShareHelperUtils->Update(exclusionsUri, KEY_GLOBAL_PROXY_EXCLUSIONS, exclusions);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("Set exclusions:%{public}s to datashare", exclusions.c_str());
+        httpProxy.SetExclusionList(persistHttpProxy.GetExclusionList());
     }
-    std::list<std::string> exclusionList = ret ? persistHttpProxy.GetExclusionList() : ParseExclusionList(exclusions);
-    httpProxy.SetExclusionList(exclusionList);
     return true;
 }
 
@@ -116,9 +121,6 @@ std::string NetHttpProxyTracker::GetExclusionsAsString(const std::list<std::stri
     std::string exclusions;
     int32_t index = 0;
     for (const auto &exclusion : exclusionList) {
-        if (exclusions.size() + exclusion.size() >= SYSPARA_MAX_SIZE) {
-            break;
-        }
         if (index > 0) {
             exclusions = exclusions + EXCLUSIONS_SPLIT_SYMBOL;
         }

@@ -30,9 +30,19 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-constexpr const char *SETTINGS_DATASHARE_URL_AIRPLANE_MODE =
+constexpr const char *AIRPLANE_MODE_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=airplane_mode";
-constexpr const char *SETTINGS_DATASHARE_KEY_AIRPLANE_MODE = "settings.telephony.airplanemode";
+constexpr const char *GLOBAL_PROXY_HOST_URI =
+    "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=global_proxy_host";
+constexpr const char *GLOBAL_PROXY_PORT_URI =
+    "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=global_proxy_port";
+constexpr const char *GLOBAL_PROXY_EXCLUSIONS_URI =
+    "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=global_proxy_exclusions";
+
+constexpr const char *KEY_AIRPLANE_MODE = "settings.telephony.airplanemode";
+constexpr const char *KEY_GLOBAL_PROXY_HOST = "settings.netmanager.proxy_host";
+constexpr const char *KEY_GLOBAL_PROXY_PORT = "settings.netmanager.proxy_port";
+constexpr const char *KEY_GLOBAL_PROXY_EXCLUSIONS = "settings.netmanager.proxy_exclusions";
 } // namespace
 
 class NetDataShareHelperUtils final {

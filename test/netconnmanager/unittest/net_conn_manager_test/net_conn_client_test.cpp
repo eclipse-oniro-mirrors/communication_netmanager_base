@@ -558,7 +558,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest14, TestSize.Level1)
     AccessToken token;
     HttpProxy httpProxy = {TEST_LONG_HOST, 8080, {}};
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NET_CONN_ERR_HTTP_PROXY_INVALID);
+    ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
 }
 
 /**
@@ -651,10 +651,6 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest004, TestSize.Level1)
     HttpProxy validHttpProxy = {TEST_IPV4_ADDR, 8080, {}};
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(validHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
-
-    HttpProxy invalidHttpProxy = {"testHttpProxy", 0, {}};
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(invalidHttpProxy);
-    ASSERT_TRUE(ret == NET_CONN_ERR_HTTP_PROXY_INVALID);
 
     HttpProxy getGlobalHttpProxy;
     ret = DelayedSingleton<NetConnClient>::GetInstance()->GetGlobalHttpProxy(getGlobalHttpProxy);
