@@ -258,7 +258,6 @@ private:
                                               NetworkPermission permission, bool add);
     static int32_t UpdateSharingNetwork(uint16_t action, const std::string &inputInterface,
                                         const std::string &outputInterface);
-
     static int32_t UpdateVpnOutputToLocalRule(const std::string &interfaceName, bool add);
     static int32_t UpdateVpnSystemPermissionRule(int32_t netId, uint32_t table, bool add);
 
@@ -268,14 +267,11 @@ private:
     static int32_t UpdateOutputInterfaceRulesWithUid(const std::string &interface, uint32_t table,
                                                      NetworkPermission permission, uid_t uidStart, uid_t uidEnd,
                                                      bool add);
-    static int32_t UpdateVpnRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo, uid_t uidStart,
-                                     uid_t uidEnd);
-    static int32_t SendRuleToKernelWithUid(uint32_t action, uint16_t ruleFlag, uint8_t ruleType, RuleInfo ruleInfo,
-                                           uid_t uidStart, uid_t uidEnd);
-
     static int32_t ClearSharingRules(const std::string &inputInterface);
-    static int32_t UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo);
-    static int32_t SendRuleToKernel(uint32_t action, uint16_t ruleFlag, uint8_t ruleType, RuleInfo ruleInfo);
+    static int32_t UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo, uid_t uidStart = INVALID_UID,
+                                  uid_t uidEnd = INVALID_UID);
+    static int32_t SendRuleToKernel(uint32_t action, uint16_t ruleFlag, uint8_t ruleType, RuleInfo ruleInfo,
+                                    uid_t uidStart, uid_t uidEnd);
     static int32_t UpdateRouteRule(uint16_t action, uint16_t flags, RouteInfo routeInfo);
     static int32_t SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtmsg msg, RouteInfo routeInfo,
                                      uint32_t index);

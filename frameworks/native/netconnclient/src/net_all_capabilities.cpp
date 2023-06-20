@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 
 #include "net_all_capabilities.h"
 
-#include <functional>
 #include "__tree"
+#include <functional>
 
 #include "parcel.h"
 
@@ -75,7 +75,7 @@ bool NetAllCapabilities::Marshalling(Parcel &parcel) const
     if (!parcel.WriteUint32(capSize)) {
         return false;
     }
-    int32_t index = 0;
+    uint32_t index = 0;
     for (auto it = netCaps_.begin(); it != netCaps_.end(); it++) {
         if (++index > MAX_NET_CAP_NUM) {
             break;

@@ -36,8 +36,10 @@ private:
     using NetConnServiceFuncPer = std::pair<NetConnServiceFunc, std::set<std::string>>;
 
 private:
+    void InitQueryFuncToInterfaceMap();
     bool CheckPermission(const std::set<std::string> &permissions);
     bool CheckPermissionWithCache(const std::set<std::string> &permissions);
+    int32_t OnRequestCheck(uint32_t code, const std::set<std::string> &permissions);
     int32_t OnSystemReady(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetInternetPermission(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetSupplier(MessageParcel &data, MessageParcel &reply);
@@ -71,12 +73,11 @@ private:
     int32_t OnGetDefaultHttpProxy(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetNetIdByIdentifier(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetAppNet(MessageParcel &data, MessageParcel &reply);
-    int32_t OnInterfaceSetIffUp(MessageParcel &data, MessageParcel &reply);
-    int32_t OnRequestCheck(uint32_t code);
+    int32_t OnRegisterNetInterfaceCallback(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetNetInterfaceConfiguration(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;
-    std::vector<int32_t> systemCode_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

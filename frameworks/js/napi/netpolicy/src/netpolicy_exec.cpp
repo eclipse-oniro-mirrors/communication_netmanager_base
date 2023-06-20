@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,16 +15,16 @@
 
 #include "netpolicy_exec.h"
 
+#include "napi_utils.h"
 #include "net_policy_client.h"
 #include "net_policy_constants.h"
 #include "netmanager_base_log.h"
-#include "napi_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 bool NetPolicyExec::ExecSetPolicyByUid(SetPolicyByUidContext *context)
 {
-    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(context->uid_, context->policy_);
+    int32_t result = NetPolicyClient::GetInstance().SetPolicyByUid(context->uid_, context->policy_);
     if (result != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecSetPolicyByUid error, uid = %{public}s, policy = %{public}d, result = %{public}d",
                              std::to_string(context->uid_).c_str(), context->policy_, result);
@@ -37,7 +37,7 @@ bool NetPolicyExec::ExecSetPolicyByUid(SetPolicyByUidContext *context)
 
 bool NetPolicyExec::ExecGetPolicyByUid(GetPolicyByUidContext *context)
 {
-    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetPolicyByUid(context->uid_, context->policy_);
+    int32_t result = NetPolicyClient::GetInstance().GetPolicyByUid(context->uid_, context->policy_);
     if (result != NETMANAGER_SUCCESS) {
         context->SetErrorCode(result);
         return false;
@@ -48,8 +48,7 @@ bool NetPolicyExec::ExecGetPolicyByUid(GetPolicyByUidContext *context)
 
 bool NetPolicyExec::ExecGetUidsByPolicy(GetUidsByPolicyContext *context)
 {
-    int32_t result =
-        DelayedSingleton<NetPolicyClient>::GetInstance()->GetUidsByPolicy(context->policy_, context->uidTogether_);
+    int32_t result = NetPolicyClient::GetInstance().GetUidsByPolicy(context->policy_, context->uidTogether_);
     if (result != NETMANAGER_SUCCESS) {
         context->SetErrorCode(result);
         return false;
@@ -60,7 +59,7 @@ bool NetPolicyExec::ExecGetUidsByPolicy(GetUidsByPolicyContext *context)
 
 bool NetPolicyExec::ExecSetBackgroundPolicy(SetBackgroundPolicyContext *context)
 {
-    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetBackgroundPolicy(context->isAllowed_);
+    int32_t result = NetPolicyClient::GetInstance().SetBackgroundPolicy(context->isAllowed_);
     if (result != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecSetBackgroundPolicy error, isAllowed = %{public}d, result = %{public}d",
                              context->isAllowed_, result);
@@ -73,7 +72,7 @@ bool NetPolicyExec::ExecSetBackgroundPolicy(SetBackgroundPolicyContext *context)
 
 bool NetPolicyExec::ExecGetBackgroundPolicy(GetBackgroundPolicyContext *context)
 {
-    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetBackgroundPolicy(context->backgroundPolicy_);
+    int32_t result = NetPolicyClient::GetInstance().GetBackgroundPolicy(context->backgroundPolicy_);
     if (result != NETMANAGER_SUCCESS) {
         context->SetErrorCode(result);
         return false;
@@ -84,7 +83,7 @@ bool NetPolicyExec::ExecGetBackgroundPolicy(GetBackgroundPolicyContext *context)
 
 bool NetPolicyExec::ExecGetNetQuotaPolicies(GetNetQuotaPoliciesContext *context)
 {
-    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetNetQuotaPolicies(context->quotaPolicys_);
+    int32_t result = NetPolicyClient::GetInstance().GetNetQuotaPolicies(context->quotaPolicys_);
     if (result != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecGetNetQuotaPolicies error, result = %{public}d", result);
         context->SetErrorCode(result);
@@ -96,7 +95,7 @@ bool NetPolicyExec::ExecGetNetQuotaPolicies(GetNetQuotaPoliciesContext *context)
 
 bool NetPolicyExec::ExecSetNetQuotaPolicies(SetNetQuotaPoliciesContext *context)
 {
-    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetQuotaPolicies(context->quotaPolicys_);
+    int32_t result = NetPolicyClient::GetInstance().SetNetQuotaPolicies(context->quotaPolicys_);
     if (result != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecSetNetQuotaPolicies error, result = %{public}d, arr size = %{public}zu", result,
                              context->quotaPolicys_.size());
@@ -109,7 +108,7 @@ bool NetPolicyExec::ExecSetNetQuotaPolicies(SetNetQuotaPoliciesContext *context)
 
 bool NetPolicyExec::ExecRestoreAllPolicies(RestoreAllPoliciesContext *context)
 {
-    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->ResetPolicies(context->iccid_);
+    int32_t result = NetPolicyClient::GetInstance().ResetPolicies(context->iccid_);
     if (result != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecRestoreAllPolicies error, result = %{public}d", result);
         context->SetErrorCode(result);
@@ -123,11 +122,9 @@ bool NetPolicyExec::ExecIsUidNetAllowed(IsUidNetAllowedContext *context)
 {
     int32_t result = NETMANAGER_SUCCESS;
     if (context->isBoolean_) {
-        result = DelayedSingleton<NetPolicyClient>::GetInstance()->IsUidNetAllowed(context->uid_, context->isMetered_,
-                                                                                   context->isUidNet_);
+        result = NetPolicyClient::GetInstance().IsUidNetAllowed(context->uid_, context->isMetered_, context->isUidNet_);
     } else {
-        result = DelayedSingleton<NetPolicyClient>::GetInstance()->IsUidNetAllowed(context->uid_, context->iface_,
-                                                                                   context->isUidNet_);
+        result = NetPolicyClient::GetInstance().IsUidNetAllowed(context->uid_, context->iface_, context->isUidNet_);
     }
 
     if (result != NETMANAGER_SUCCESS) {
@@ -141,8 +138,7 @@ bool NetPolicyExec::ExecIsUidNetAllowed(IsUidNetAllowedContext *context)
 
 bool NetPolicyExec::ExecSetDeviceIdleAllowList(SetDeviceIdleAllowListContext *context)
 {
-    int32_t result =
-        DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdleAllowedList(context->uids_, context->isAllow_);
+    int32_t result = NetPolicyClient::GetInstance().SetDeviceIdleAllowedList(context->uids_, context->isAllow_);
     if (result != NETMANAGER_SUCCESS) {
         context->SetErrorCode(result);
         return false;
@@ -153,7 +149,7 @@ bool NetPolicyExec::ExecSetDeviceIdleAllowList(SetDeviceIdleAllowListContext *co
 
 bool NetPolicyExec::ExecGetDeviceIdleAllowList(GetDeviceIdleAllowListContext *context)
 {
-    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetDeviceIdleAllowedList(context->uids_);
+    int32_t result = NetPolicyClient::GetInstance().GetDeviceIdleAllowedList(context->uids_);
     if (result != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecGetDeviceIdleAllowList error: result = %{public}d, arr size = %{public}zu", result,
                              context->uids_.size());
@@ -166,8 +162,7 @@ bool NetPolicyExec::ExecGetDeviceIdleAllowList(GetDeviceIdleAllowListContext *co
 
 bool NetPolicyExec::ExecSetPowerSaveAllowList(SetPowerSaveAllowListContext *context)
 {
-    int32_t result =
-        DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSaveAllowedList(context->uids_, context->isAllow_);
+    int32_t result = NetPolicyClient::GetInstance().SetPowerSaveAllowedList(context->uids_, context->isAllow_);
     if (result != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecSetPowerSaveAllowList error: result = %{public}d, arr size = %{public}zu", result,
                              context->uids_.size());
@@ -180,7 +175,7 @@ bool NetPolicyExec::ExecSetPowerSaveAllowList(SetPowerSaveAllowListContext *cont
 
 bool NetPolicyExec::ExecGetPowerSaveAllowList(GetPowerSaveAllowListContext *context)
 {
-    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetPowerSaveAllowedList(context->uids_);
+    int32_t result = NetPolicyClient::GetInstance().GetPowerSaveAllowedList(context->uids_);
     if (result != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecGetPowerSaveAllowList error: result = %{public}d, arr size = %{public}zu", result,
                              context->uids_.size());
@@ -193,8 +188,8 @@ bool NetPolicyExec::ExecGetPowerSaveAllowList(GetPowerSaveAllowListContext *cont
 
 bool NetPolicyExec::ExecGetBackgroundPolicyByUid(GetBackgroundPolicyByUidContext *context)
 {
-    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->GetBackgroundPolicyByUid(
-        context->uid_, context->backgroundPolicyOfUid_);
+    int32_t result =
+        NetPolicyClient::GetInstance().GetBackgroundPolicyByUid(context->uid_, context->backgroundPolicyOfUid_);
     if (result != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecGetBackgroundPolicyByUid error: result = %{public}d", result);
         context->SetErrorCode(result);
@@ -206,7 +201,7 @@ bool NetPolicyExec::ExecGetBackgroundPolicyByUid(GetBackgroundPolicyByUidContext
 
 bool NetPolicyExec::ExecResetPolicies(ResetPoliciesContext *context)
 {
-    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->ResetPolicies(context->iccid_);
+    int32_t result = NetPolicyClient::GetInstance().ResetPolicies(context->iccid_);
     if (result != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecResetPolicies error: result = %{public}d", result);
         context->SetErrorCode(result);
@@ -218,8 +213,8 @@ bool NetPolicyExec::ExecResetPolicies(ResetPoliciesContext *context)
 
 bool NetPolicyExec::ExecUpdateRemindPolicy(UpdateRemindPolicyContext *context)
 {
-    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->UpdateRemindPolicy(
-        context->netType_, context->iccid_, context->remindType_);
+    int32_t result =
+        NetPolicyClient::GetInstance().UpdateRemindPolicy(context->netType_, context->iccid_, context->remindType_);
     if (result != NETMANAGER_SUCCESS) {
         NETMANAGER_BASE_LOGE("ExecUpdateRemindPolicy error: result = %{public}d", result);
         context->SetErrorCode(result);

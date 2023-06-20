@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#include <string>
 #include "net_conn_client.h"
+#include <string>
 
 int32_t SetInternetPermission(uint32_t uid, uint8_t allow)
 {
-    auto netConn = OHOS::DelayedSingleton<OHOS::NetManagerStandard::NetConnClient>::GetInstance();
-    return netConn->SetInternetPermission(uid, allow);
+    return OHOS::NetManagerStandard::NetConnClient::GetInstance().SetInternetPermission(uid, allow);
 }

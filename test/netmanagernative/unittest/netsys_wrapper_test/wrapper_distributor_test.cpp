@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,113 @@
  * limitations under the License.
  */
 
+#include "net_manager_constants.h"
+#include "notify_callback_stub.h"
+#include <algorithm>
 #include <gtest/gtest.h>
+#include <iostream>
+#include <string>
+#include <vector>
 
+#ifdef GTEST_API_
 #define private public
+#define protected public
+#endif
 #include "wrapper_distributor.h"
 
 namespace OHOS {
 namespace nmd {
 namespace {
 using namespace testing::ext;
+using namespace std;
+using namespace NetManagerStandard;
+using namespace NetsysNative;
 constexpr int32_t TEST_SOCKET = 112;
 constexpr int32_t TEST_FORMAT = NetlinkDefine::NETLINK_FORMAT_BINARY_UNICAST;
+constexpr const char *WIFI_AP_DEFAULT_IFACE_NAME = "wlan0";
+
+class NotifyCallbackImp : public NotifyCallbackStub {
+public:
+    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName,
+                                      int flags, int scope) override
+    {
+        if (ifName == WIFI_AP_DEFAULT_IFACE_NAME) {
+            flags_ = flags;
+        }
+        return NETMANAGER_EXT_SUCCESS;
+    }
+
+    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName,
+                                      int flags, int scope) override
+    {
+        if (ifName == WIFI_AP_DEFAULT_IFACE_NAME) {
+            flags_ = flags;
+        }
+        return NETMANAGER_EXT_SUCCESS;
+    }
+
+    int32_t OnInterfaceAdded(const std::string &ifName) override
+    {
+        ifnameContainer_.emplace_back(ifName);
+        return NETMANAGER_EXT_SUCCESS;
+    }
+
+    int32_t OnInterfaceRemoved(const std::string &ifName) override
+    {
+        auto itfind = std::find(ifnameContainer_.begin(), ifnameContainer_.end(), ifName);
+        if (itfind != ifnameContainer_.end()) {
+            ifnameContainer_.erase(itfind);
+        }
+
+        return NETMANAGER_EXT_SUCCESS;
+    }
+
+    int32_t OnInterfaceChanged(const std::string &ifName, bool up) override
+    {
+        if (ifName == WIFI_AP_DEFAULT_IFACE_NAME) {
+            isWifiInterfaceChanged_ = up;
+        }
+        return NETMANAGER_EXT_SUCCESS;
+    }
+
+    int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) override
+    {
+        if (ifName == WIFI_AP_DEFAULT_IFACE_NAME) {
+            isWifiLinkStateUp_ = up;
+        }
+        return NETMANAGER_EXT_SUCCESS;
+    }
+
+    int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
+                           const std::string &ifName) override
+    {
+        if (ifName == WIFI_AP_DEFAULT_IFACE_NAME) {
+            isRouteUpdated_ = updated;
+        }
+        return NETMANAGER_EXT_SUCCESS;
+    }
+
+    int32_t OnDhcpSuccess(sptr<DhcpResultParcel> &dhcpResult) override
+    {
+        return NETMANAGER_EXT_SUCCESS;
+    }
+
+    int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override
+    {
+        if (iface == WIFI_AP_DEFAULT_IFACE_NAME) {
+            alertName_ = limitName;
+        }
+        return NETMANAGER_EXT_SUCCESS;
+    }
+
+    vector<std::string> ifnameContainer_;
+    std::string  alertName_;
+    int flags_ = 0;
+    bool isWifiInterfaceChanged_ = false;
+    bool isWifiLinkStateUp_ = false;
+    bool isRouteUpdated_ = false;
+};
+
 } // namespace
 
 class WrapperDistributorTest : public testing::Test {
@@ -81,16 +177,62 @@ HWTEST_F(WrapperDistributorTest, RegisterNetlinkCallbacksTest002, TestSize.Level
     std::shared_ptr<NetsysEventMessage> message =  nullptr;
     instance_->HandleDecodeSuccess(message);
 
+    auto callbacks_ = std::make_shared<std::vector<sptr<NetsysNative::INotifyCallback>>>();
+    sptr<NotifyCallbackImp> notifyCallback = new NotifyCallbackImp();
+    callbacks_->push_back(notifyCallback);
+    int32_t ret = instance_->RegisterNetlinkCallbacks(callbacks_);
+    EXPECT_EQ(ret, NetlinkResult::OK);
+
     message = std::make_shared<NetsysEventMessage>();
     message->SetAction(NetsysEventMessage::Action::ADD);
     message->SetSubSys(NetsysEventMessage::SubSys::NET);
+    message->PushMessage(NetsysEventMessage::Type::INTERFACE, WIFI_AP_DEFAULT_IFACE_NAME);
     instance_->HandleDecodeSuccess(message);
-    message->SetSubSys(NetsysEventMessage::SubSys::QLOG);
-    instance_->HandleDecodeSuccess(message);
+    EXPECT_EQ(notifyCallback->ifnameContainer_.size(), 1);
 
-    auto callbacks_ = std::make_shared<std::vector<sptr<NetsysNative::INotifyCallback>>>();
-    int32_t ret = instance_->RegisterNetlinkCallbacks(callbacks_);
-    EXPECT_EQ(ret, NetlinkResult::OK);
+    message->SetAction(NetsysEventMessage::Action::REMOVE);
+    instance_->HandleDecodeSuccess(message);
+    EXPECT_EQ(notifyCallback->ifnameContainer_.size(), 0);
+
+    message->SetAction(NetsysEventMessage::Action::CHANGE);
+    instance_->HandleDecodeSuccess(message);
+    EXPECT_TRUE(notifyCallback->isWifiInterfaceChanged_);
+
+    message->SetAction(NetsysEventMessage::Action::LINKUP);
+    instance_->HandleDecodeSuccess(message);
+    EXPECT_TRUE(notifyCallback->isWifiLinkStateUp_);
+
+    message->SetAction(NetsysEventMessage::Action::LINKDOWN);
+    instance_->HandleDecodeSuccess(message);
+    EXPECT_FALSE(notifyCallback->isWifiLinkStateUp_);
+
+    message->SetAction(NetsysEventMessage::Action::ADDRESSUPDATE);
+    message->PushMessage(NetsysEventMessage::Type::ADDRESS, "127.0.0.1");
+    message->PushMessage(NetsysEventMessage::Type::FLAGS, "1");
+    message->PushMessage(NetsysEventMessage::Type::SCOPE, "1");
+    instance_->HandleDecodeSuccess(message);
+    EXPECT_EQ(notifyCallback->flags_, 1);
+
+    message->SetAction(NetsysEventMessage::Action::ADDRESSREMOVED);
+    message->PushMessage(NetsysEventMessage::Type::FLAGS, "2");
+    message->PushMessage(NetsysEventMessage::Type::SCOPE, "2");
+    instance_->HandleDecodeSuccess(message);
+    EXPECT_EQ(notifyCallback->flags_, 2);
+
+    message->SetAction(NetsysEventMessage::Action::ROUTEUPDATED);
+    message->PushMessage(NetsysEventMessage::Type::ROUTE, "route");
+    message->PushMessage(NetsysEventMessage::Type::GATEWAY, "gateway");
+    instance_->HandleDecodeSuccess(message);
+    EXPECT_TRUE(notifyCallback->isRouteUpdated_);
+
+    message->SetAction(NetsysEventMessage::Action::ROUTEREMOVED);
+    instance_->HandleDecodeSuccess(message);
+    EXPECT_FALSE(notifyCallback->isRouteUpdated_);
+
+    message->SetSubSys(NetsysEventMessage::SubSys::QLOG);
+    message->PushMessage(NetsysEventMessage::Type::ALERT_NAME, "labelName");
+    instance_->HandleDecodeSuccess(message);
+    EXPECT_EQ(notifyCallback->alertName_, "labelName");
 }
 } // namespace nmd
 } // namespace OHOS

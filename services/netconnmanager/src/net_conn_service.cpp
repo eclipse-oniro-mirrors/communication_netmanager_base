@@ -43,7 +43,6 @@ constexpr const char *ERROR_MSG_NULL_NET_SPECIFIER = "The parameter of netSpecif
 constexpr const char *ERROR_MSG_CAN_NOT_FIND_SUPPLIER = "Can not find supplier by id:";
 constexpr const char *ERROR_MSG_UPDATE_NETLINK_INFO_FAILED = "Update net link info failed";
 constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
-constexpr const char *WLAN_IF_NAME = "wlan";
 constexpr const char *NET_ACTIVATE_WORK_THREAD = "NET_ACTIVATE_WORK_THREAD";
 } // namespace
 
@@ -137,6 +136,11 @@ bool NetConnService::Init()
     NetHttpProxyTracker httpProxyTracker;
     httpProxyTracker.ReadFromSystemParameter(globalHttpProxy_);
     SendHttpProxyChangeBroadcast(globalHttpProxy_);
+
+    interfaceStateCallback_ = new (std::nothrow) NetInterfaceStateCallback();
+    if (interfaceStateCallback_) {
+        NetsysController::GetInstance().RegisterCallback(interfaceStateCallback_);
+    }
     return true;
 }
 
@@ -436,7 +440,7 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
     uint32_t reqId = 0;
     if (!FindSameCallback(callback, reqId)) {
         NETMGR_LOG_D("UnregisterNetConnCallback can not find same callback");
-        return NET_CONN_ERR_NETID_NOT_FOUND;
+        return NET_CONN_ERR_CALLBACK_NOT_FOUND;
     }
     NET_ACTIVATE_MAP::iterator iterActive;
     for (iterActive = netActivates_.begin(); iterActive != netActivates_.end();) {
@@ -1398,17 +1402,155 @@ int32_t NetConnService::SetAppNet(int32_t netId)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::InterfaceSetIffUp(const std::string &ifaceName)
+int32_t NetConnService::RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback)
 {
-    if (ifaceName.empty()) {
-        NETMGR_LOG_E("The ifaceName in service is null");
-        return NETMANAGER_ERR_INVALID_PARAMETER;
+    if (callback == nullptr) {
+        NETMGR_LOG_E("callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    if (strncmp(ifaceName.c_str(), WLAN_IF_NAME, strlen(WLAN_IF_NAME))) {
-        NETMGR_LOG_I("Configure only wlan network card, [%{public}s]", ifaceName.c_str());
-        return NETMANAGER_ERR_INVALID_PARAMETER;
+
+    if (interfaceStateCallback_ == nullptr) {
+        NETMGR_LOG_E("interfaceStateCallback_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    return NetsysController::GetInstance().InterfaceSetIffUp(ifaceName);
+    return interfaceStateCallback_->RegisterInterfaceCallback(callback);
+}
+
+int32_t NetConnService::GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config)
+{
+    using namespace OHOS::nmd;
+    InterfaceConfigurationParcel configParcel;
+    configParcel.ifName = iface;
+    if (NetsysController::GetInstance().GetInterfaceConfig(configParcel) != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    config.ifName_ = configParcel.ifName;
+    config.hwAddr_ = configParcel.hwAddr;
+    config.ipv4Addr_ = configParcel.ipv4Addr;
+    config.prefixLength_ = configParcel.prefixLength;
+    config.flags_.assign(configParcel.flags.begin(), configParcel.flags.end());
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceAddressUpdated(const std::string &addr,
+                                                                             const std::string &ifName, int flags,
+                                                                             int scope)
+{
+    std::lock_guard<std::mutex> locker(mutex_);
+    for (const auto &callback : ifaceStateCallbacks_) {
+        if (callback == nullptr) {
+            NETMGR_LOG_E("callback is null");
+            continue;
+        }
+        callback->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceAddressRemoved(const std::string &addr,
+                                                                             const std::string &ifName, int flags,
+                                                                             int scope)
+{
+    std::lock_guard<std::mutex> locker(mutex_);
+    for (const auto &callback : ifaceStateCallbacks_) {
+        if (callback == nullptr) {
+            NETMGR_LOG_E("callback is null");
+            continue;
+        }
+        callback->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceAdded(const std::string &iface)
+{
+    std::lock_guard<std::mutex> locker(mutex_);
+    for (const auto &callback : ifaceStateCallbacks_) {
+        if (callback == nullptr) {
+            NETMGR_LOG_E("callback is null");
+            continue;
+        }
+        callback->OnInterfaceAdded(iface);
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceRemoved(const std::string &iface)
+{
+    std::lock_guard<std::mutex> locker(mutex_);
+    for (const auto &callback : ifaceStateCallbacks_) {
+        if (callback == nullptr) {
+            NETMGR_LOG_E("callback is null");
+            continue;
+        }
+        callback->OnInterfaceRemoved(iface);
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceChanged(const std::string &iface, bool up)
+{
+    std::lock_guard<std::mutex> locker(mutex_);
+    for (const auto &callback : ifaceStateCallbacks_) {
+        if (callback == nullptr) {
+            NETMGR_LOG_E("callback is null");
+            continue;
+        }
+        callback->OnInterfaceChanged(iface, up);
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceLinkStateChanged(const std::string &iface, bool up)
+{
+    std::lock_guard<std::mutex> locker(mutex_);
+    for (const auto &callback : ifaceStateCallbacks_) {
+        if (callback == nullptr) {
+            NETMGR_LOG_E("callback is null");
+            continue;
+        }
+        callback->OnInterfaceLinkStateChanged(iface, up);
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::NetInterfaceStateCallback::OnRouteChanged(bool updated, const std::string &route,
+                                                                  const std::string &gateway, const std::string &ifName)
+{
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::NetInterfaceStateCallback::OnDhcpSuccess(NetsysControllerCallback::DhcpResult &dhcpResult)
+{
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::NetInterfaceStateCallback::OnBandwidthReachedLimit(const std::string &limitName,
+                                                                           const std::string &iface)
+{
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::NetInterfaceStateCallback::RegisterInterfaceCallback(
+    const sptr<INetInterfaceStateCallback> &callback)
+{
+    if (callback == nullptr) {
+        NETMGR_LOG_E("callback is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    std::lock_guard<std::mutex> locker(mutex_);
+    for (const auto &iter : ifaceStateCallbacks_) {
+        if (!iter) {
+            continue;
+        }
+        if (iter->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
+            NETMGR_LOG_E("RegisterNetConnCallback find same callback");
+            return NET_CONN_ERR_SAME_CALLBACK;
+        }
+    }
+    ifaceStateCallbacks_.push_back(callback);
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

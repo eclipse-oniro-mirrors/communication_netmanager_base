@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,7 +55,7 @@ napi_value PolicyObserverWrapper::On(napi_env env, napi_callback_info info,
         return NapiUtils::GetUndefined(env);
     }
     if (!registed_) {
-        int32_t ret = DelayedSingleton<NetPolicyClient>::GetInstance()->RegisterNetPolicyCallback(observer_);
+        int32_t ret = NetPolicyClient::GetInstance().RegisterNetPolicyCallback(observer_);
         NETMANAGER_BASE_LOGI("ret = [%{public}d]", ret);
         registed_ = (ret == NETMANAGER_SUCCESS);
         if (!registed_) {
@@ -103,7 +103,7 @@ napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,
     }
 
     if (manager_->IsListenerListEmpty()) {
-        auto ret = DelayedSingleton<NetPolicyClient>::GetInstance()->UnregisterNetPolicyCallback(observer_);
+        auto ret = NetPolicyClient::GetInstance().UnregisterNetPolicyCallback(observer_);
         if (ret != NETMANAGER_SUCCESS) {
             NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
             return NapiUtils::GetUndefined(env);

@@ -17,19 +17,22 @@
 
 #include "interface_manager.h"
 #include "net_manager_constants.h"
+#include "net_manager_native.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "network_permission.h"
 #include "route_manager.h"
 #include "traffic_manager.h"
-#include "net_manager_constants.h"
-#include "net_manager_native.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 std::vector<uint32_t> OHOS::nmd::NetManagerNative::interfaceIdex_;
 
 namespace OHOS {
 namespace nmd {
+namespace {
+constexpr const char *TUN_CARD_NAME = "vpn-tun";
+} // namespace
+
 NetManagerNative::NetManagerNative()
     : bandwidthManager_(std::make_shared<BandwidthManager>()),
       connManager_(std::make_shared<ConnManager>()),
@@ -119,7 +122,10 @@ int32_t NetManagerNative::AddInterfaceAddress(std::string ifName, std::string ad
 
 int32_t NetManagerNative::DelInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength)
 {
-    return interfaceManager_->DelAddress(ifName.c_str(), addrString.c_str(), prefixLength);
+    if (strncmp(ifName.c_str(), TUN_CARD_NAME, strlen(TUN_CARD_NAME))) {
+        return interfaceManager_->DelAddress(ifName.c_str(), addrString.c_str(), prefixLength);
+    }
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetManagerNative::NetworkAddRoute(int32_t netId, std::string interfaceName, std::string destination,
@@ -179,8 +185,7 @@ int32_t NetManagerNative::GetInterfaceMtu(std::string ifName)
 
 int32_t NetManagerNative::SetInterfaceMtu(std::string ifName, int32_t mtuValue)
 {
-    std::string mtu = std::to_string(mtuValue);
-    return InterfaceManager::SetMtu(ifName.c_str(), mtu.c_str());
+    return InterfaceManager::SetMtu(ifName.c_str(), std::to_string(mtuValue).c_str());
 }
 
 int32_t NetManagerNative::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)

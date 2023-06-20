@@ -687,12 +687,12 @@ int32_t NetConnServiceProxy::GetSpecificNet(NetBearType bearerType, std::list<in
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
-        int32_t size = 0;
-        if (!reply.ReadInt32(size)) {
+        uint32_t size = 0;
+        if (!reply.ReadUint32(size)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
         size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
-        for (int32_t i = 0; i < size; ++i) {
+        for (uint32_t i = 0; i < size; ++i) {
             uint32_t value;
             if (!reply.ReadUint32(value)) {
                 return NETMANAGER_ERR_READ_REPLY_FAIL;
@@ -730,12 +730,12 @@ int32_t NetConnServiceProxy::GetAllNets(std::list<int32_t> &netIdList)
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
-        int32_t size;
-        if (!reply.ReadInt32(size)) {
+        uint32_t size;
+        if (!reply.ReadUint32(size)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
         size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
-        for (int32_t i = 0; i < size; ++i) {
+        for (uint32_t i = 0; i < size; ++i) {
             uint32_t value;
             if (!reply.ReadUint32(value)) {
                 return NETMANAGER_ERR_READ_REPLY_FAIL;
@@ -922,12 +922,12 @@ int32_t NetConnServiceProxy::GetAddressesByName(const std::string &host, int32_t
     }
 
     if (ret == NETMANAGER_SUCCESS) {
-        int32_t size;
-        if (!reply.ReadInt32(size)) {
+        uint32_t size;
+        if (!reply.ReadUint32(size)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
         size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
-        for (int32_t i = 0; i < size; ++i) {
+        for (uint32_t i = 0; i < size; ++i) {
             sptr<INetAddr> netaddr_ptr = INetAddr::Unmarshalling(reply);
             if (netaddr_ptr != nullptr) {
                 addrList.push_back(*netaddr_ptr);
@@ -1220,13 +1220,13 @@ int32_t NetConnServiceProxy::GetNetIdByIdentifier(const std::string &ident, std:
     }
 
     if (ret == NETMANAGER_SUCCESS) {
-        int32_t size = 0;
-        if (!reply.ReadInt32(size)) {
+        uint32_t size = 0;
+        if (!reply.ReadUint32(size)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
         size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
         int32_t value = 0;
-        for (int32_t i = 0; i < size; ++i) {
+        for (uint32_t i = 0; i < size; ++i) {
             if (!reply.ReadInt32(value)) {
                 return NETMANAGER_ERR_READ_REPLY_FAIL;
             }
@@ -1268,38 +1268,65 @@ int32_t NetConnServiceProxy::SetAppNet(int32_t netId)
     return ret;
 }
 
-int32_t NetConnServiceProxy::InterfaceSetIffUp(const std::string &ifaceName)
+int32_t NetConnServiceProxy::RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback)
 {
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
+    if (callback == nullptr) {
+        NETMGR_LOG_E("The parameter of callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
         NETMGR_LOG_E("WriteInterfaceToken failed");
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
-    if (!data.WriteString(ifaceName)) {
-        NETMGR_LOG_E("Write string data failed");
-        return NETMANAGER_ERR_WRITE_DATA_FAIL;
-    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         NETMGR_LOG_E("Remote is null");
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
+    MessageOption option;
+    MessageParcel replyParcel;
+    int32_t retCode = remote->SendRequest(CMD_NM_REGISTER_NET_INTERFACE_CALLBACK, dataParcel, replyParcel, option);
+    if (retCode != ERR_NONE) {
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    return replyParcel.ReadInt32();
+}
+
+int32_t NetConnServiceProxy::GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!data.WriteString(iface)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_SET_IF_UP_MULTICAST, data, reply, option);
+    int32_t error = remote->SendRequest(CMD_NM_GET_INTERFACE_CONFIGURATION, data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
-
-    int32_t result = NETMANAGER_ERR_INTERNAL;
-    if (!reply.ReadInt32(result)) {
+    int32_t ret = NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
-    return result;
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!NetInterfaceConfiguration::Unmarshalling(reply, config)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+    }
+    return ret;
 }
-
 } // namespace NetManagerStandard
 } // namespace OHOS

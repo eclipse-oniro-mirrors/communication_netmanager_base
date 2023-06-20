@@ -27,7 +27,12 @@ namespace {
 constexpr uint32_t MAX_IFACE_NUM = 16;
 constexpr uint32_t MAX_NET_CAP_NUM = 32;
 constexpr uint32_t UID_FOUNDATION = 5523;
-}
+const std::vector<int32_t> SYSTEM_CODE{INetConnService::CMD_NM_SET_AIRPLANE_MODE,
+                                       INetConnService::CMD_NM_SET_GLOBAL_HTTP_PROXY,
+                                       INetConnService::CMD_NM_GET_GLOBAL_HTTP_PROXY};
+const std::vector<int32_t> PERMISSION_NEED_CACHE_CODES{INetConnService::CMD_NM_GETDEFAULTNETWORK,
+                                                       INetConnService::CMD_NM_HASDEFAULTNET};
+} // namespace
 NetConnServiceStub::NetConnServiceStub()
 {
     memberFuncMap_[CMD_NM_SYSTEM_READY] = {&NetConnServiceStub::OnSystemReady, {}};
@@ -38,16 +43,36 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[CMD_NM_UNREGISTER_NET_CONN_CALLBACK] = {&NetConnServiceStub::OnUnregisterNetConnCallback,
                                                            {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[CMD_NM_UPDATE_NET_STATE_FOR_TEST] = {&NetConnServiceStub::OnUpdateNetStateForTest, {}};
-    memberFuncMap_[CMD_NM_REG_NET_SUPPLIER] = {&NetConnServiceStub::OnRegisterNetSupplier, {}};
-    memberFuncMap_[CMD_NM_UNREG_NETWORK] = {&NetConnServiceStub::OnUnregisterNetSupplier, {}};
-    memberFuncMap_[CMD_NM_SET_NET_SUPPLIER_INFO] = {&NetConnServiceStub::OnUpdateNetSupplierInfo, {}};
-    memberFuncMap_[CMD_NM_SET_NET_LINK_INFO] = {&NetConnServiceStub::OnUpdateNetLinkInfo, {}};
+    memberFuncMap_[CMD_NM_REG_NET_SUPPLIER] = {&NetConnServiceStub::OnRegisterNetSupplier,
+                                               {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_UNREG_NETWORK] = {&NetConnServiceStub::OnUnregisterNetSupplier,
+                                            {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_SET_NET_SUPPLIER_INFO] = {&NetConnServiceStub::OnUpdateNetSupplierInfo,
+                                                    {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_SET_NET_LINK_INFO] = {&NetConnServiceStub::OnUpdateNetLinkInfo,
+                                                {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK] = {&NetConnServiceStub::OnRegisterNetDetectionCallback,
                                                                   {}};
     memberFuncMap_[CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK] = {
         &NetConnServiceStub::OnUnRegisterNetDetectionCallback, {}};
     memberFuncMap_[CMD_NM_NET_DETECTION] = {&NetConnServiceStub::OnNetDetection,
                                             {Permission::GET_NETWORK_INFO, Permission::INTERNET}};
+    memberFuncMap_[CMD_NM_BIND_SOCKET] = {&NetConnServiceStub::OnBindSocket, {}};
+    memberFuncMap_[CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK] = {&NetConnServiceStub::OnRegisterNetSupplierCallback,
+                                                             {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE] = {&NetConnServiceStub::OnSetAirplaneMode,
+                                                {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_SET_GLOBAL_HTTP_PROXY] = {&NetConnServiceStub::OnSetGlobalHttpProxy,
+                                                    {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[CMD_NM_SET_APP_NET] = {&NetConnServiceStub::OnSetAppNet, {Permission::INTERNET}};
+    memberFuncMap_[CMD_NM_SET_INTERNET_PERMISSION] = {&NetConnServiceStub::OnSetInternetPermission, {}};
+    memberFuncMap_[CMD_NM_REGISTER_NET_INTERFACE_CALLBACK] = {&NetConnServiceStub::OnRegisterNetInterfaceCallback,
+                                                              {Permission::CONNECTIVITY_INTERNAL}};
+    InitQueryFuncToInterfaceMap();
+}
+
+void NetConnServiceStub::InitQueryFuncToInterfaceMap()
+{
     memberFuncMap_[CMD_NM_GET_IFACE_NAMES] = {&NetConnServiceStub::OnGetIfaceNames, {}};
     memberFuncMap_[CMD_NM_GET_IFACENAME_BY_TYPE] = {&NetConnServiceStub::OnGetIfaceNameByType, {}};
     memberFuncMap_[CMD_NM_GETDEFAULTNETWORK] = {&NetConnServiceStub::OnGetDefaultNet, {Permission::GET_NETWORK_INFO}};
@@ -61,22 +86,13 @@ NetConnServiceStub::NetConnServiceStub()
                                                    {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[CMD_NM_GET_ADDRESSES_BY_NAME] = {&NetConnServiceStub::OnGetAddressesByName, {Permission::INTERNET}};
     memberFuncMap_[CMD_NM_GET_ADDRESS_BY_NAME] = {&NetConnServiceStub::OnGetAddressByName, {Permission::INTERNET}};
-    memberFuncMap_[CMD_NM_BIND_SOCKET] = {&NetConnServiceStub::OnBindSocket, {}};
-    memberFuncMap_[CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK] = {&NetConnServiceStub::OnRegisterNetSupplierCallback, {}};
-    memberFuncMap_[CMD_NM_SET_AIRPLANE_MODE] = {&NetConnServiceStub::OnSetAirplaneMode,
-                                                {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[CMD_NM_IS_DEFAULT_NET_METERED] = {&NetConnServiceStub::OnIsDefaultNetMetered,
                                                      {Permission::GET_NETWORK_INFO}};
-    memberFuncMap_[CMD_NM_SET_GLOBAL_HTTP_PROXY] = {&NetConnServiceStub::OnSetGlobalHttpProxy,
-                                                    {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[CMD_NM_GET_GLOBAL_HTTP_PROXY] = {&NetConnServiceStub::OnGetGlobalHttpProxy, {}};
     memberFuncMap_[CMD_NM_GET_DEFAULT_HTTP_PROXY] = {&NetConnServiceStub::OnGetDefaultHttpProxy, {}};
     memberFuncMap_[CMD_NM_GET_NET_ID_BY_IDENTIFIER] = {&NetConnServiceStub::OnGetNetIdByIdentifier, {}};
-    memberFuncMap_[CMD_NM_SET_APP_NET] = {&NetConnServiceStub::OnSetAppNet, {Permission::INTERNET}};
-    memberFuncMap_[CMD_NM_SET_INTERNET_PERMISSION] = {&NetConnServiceStub::OnSetInternetPermission, {}};
-    memberFuncMap_[CMD_NM_SET_IF_UP_MULTICAST] = {&NetConnServiceStub::OnInterfaceSetIffUp, {}};
-
-    systemCode_ = {CMD_NM_SET_AIRPLANE_MODE, CMD_NM_SET_GLOBAL_HTTP_PROXY, CMD_NM_GET_GLOBAL_HTTP_PROXY};
+    memberFuncMap_[CMD_NM_GET_INTERFACE_CONFIGURATION] = {&NetConnServiceStub::OnGetNetInterfaceConfiguration,
+                                                          {Permission::CONNECTIVITY_INTERNAL}};
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -122,7 +138,7 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
         }
     }
 
-    int32_t ret = OnRequestCheck(code);
+    int32_t ret = OnRequestCheck(code, itFunc->second.second);
     if (ret == NETMANAGER_SUCCESS) {
         return (this->*requestFunc)(data, reply);
     }
@@ -133,20 +149,24 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int32_t NetConnServiceStub::OnRequestCheck(uint32_t code)
+int32_t NetConnServiceStub::OnRequestCheck(uint32_t code, const std::set<std::string> &permissions)
 {
-    if (std::find(systemCode_.begin(), systemCode_.end(), code) != systemCode_.end()) {
+    if (std::find(SYSTEM_CODE.begin(), SYSTEM_CODE.end(), code) != SYSTEM_CODE.end()) {
         if (!NetManagerPermission::IsSystemCaller()) {
             NETMGR_LOG_E("Non-system applications use system APIs.");
             return NETMANAGER_ERR_NOT_SYSTEM_CALL;
         }
     }
-    auto itFunc = memberFuncMap_.find(code);
-    if (code != CMD_NM_GETDEFAULTNETWORK && CheckPermission(itFunc->second.second)) {
-        return NETMANAGER_SUCCESS;
-    }
-    if (code == CMD_NM_GETDEFAULTNETWORK && CheckPermissionWithCache(itFunc->second.second)) {
-        return NETMANAGER_SUCCESS;
+
+    if (std::find(PERMISSION_NEED_CACHE_CODES.begin(), PERMISSION_NEED_CACHE_CODES.end(), code) !=
+        PERMISSION_NEED_CACHE_CODES.end()) {
+        if (CheckPermissionWithCache(permissions)) {
+            return NETMANAGER_SUCCESS;
+        }
+    } else {
+        if (CheckPermission(permissions)) {
+            return NETMANAGER_SUCCESS;
+        }
     }
     return NETMANAGER_ERR_PERMISSION_DENIED;
 }
@@ -583,7 +603,7 @@ int32_t NetConnServiceStub::OnGetSpecificNet(MessageParcel &data, MessageParcel 
     if (ret == NETMANAGER_SUCCESS) {
         uint32_t size = static_cast<uint32_t>(netIdList.size());
         size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
-        if (!reply.WriteInt32(size)) {
+        if (!reply.WriteUint32(size)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
 
@@ -609,8 +629,8 @@ int32_t NetConnServiceStub::OnGetAllNets(MessageParcel &data, MessageParcel &rep
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
-        int32_t size = static_cast<int32_t>(netIdList.size());
-        if (!reply.WriteInt32(size)) {
+        uint32_t size = static_cast<uint32_t>(netIdList.size());
+        if (!reply.WriteUint32(size)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
 
@@ -738,7 +758,7 @@ int32_t NetConnServiceStub::OnGetAddressesByName(MessageParcel &data, MessagePar
     if (ret == NETMANAGER_SUCCESS) {
         uint32_t size = static_cast<uint32_t>(addrList.size());
         size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
-        if (!reply.WriteInt32(size)) {
+        if (!reply.WriteUint32(size)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
         uint32_t index = 0;
@@ -902,8 +922,8 @@ int32_t NetConnServiceStub::OnGetNetIdByIdentifier(MessageParcel &data, MessageP
     }
 
     if (ret == NETMANAGER_SUCCESS) {
-        int32_t size = static_cast<int32_t>(netIdList.size());
-        if (!reply.WriteInt32(size)) {
+        uint32_t size = static_cast<uint32_t>(netIdList.size());
+        if (!reply.WriteUint32(size)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
         for (auto p = netIdList.begin(); p != netIdList.end(); ++p) {
@@ -928,18 +948,44 @@ int32_t NetConnServiceStub::OnSetAppNet(MessageParcel &data, MessageParcel &repl
     return ret;
 }
 
-int32_t NetConnServiceStub::OnInterfaceSetIffUp(MessageParcel &data, MessageParcel &reply)
+int32_t NetConnServiceStub::OnRegisterNetInterfaceCallback(MessageParcel &data, MessageParcel &reply)
 {
-    std::string ifaceName;
-    if (!data.ReadString(ifaceName)) {
-        return NETMANAGER_ERR_READ_DATA_FAIL;
+    int32_t ret = NETMANAGER_SUCCESS;
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Callback ptr is nullptr.");
+        ret = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        reply.WriteInt32(ret);
+        return ret;
     }
-    int32_t ret = InterfaceSetIffUp(ifaceName);
+
+    sptr<INetInterfaceStateCallback> callback = iface_cast<INetInterfaceStateCallback>(remote);
+    ret = RegisterNetInterfaceCallback(callback);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return ret;
 }
 
+int32_t NetConnServiceStub::OnGetNetInterfaceConfiguration(MessageParcel &data, MessageParcel &reply)
+{
+    std::string iface;
+    if (!data.ReadString(iface)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    NetInterfaceConfiguration config;
+    int32_t ret = GetNetInterfaceConfiguration(iface, config);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!config.Marshalling(reply)) {
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    return ret;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

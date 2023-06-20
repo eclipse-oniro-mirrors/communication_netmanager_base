@@ -293,7 +293,7 @@ HWTEST_F(DNSLookupNameTest, ScopeOfTest001, TestSize.Level1)
 {
     DnsLookUpName instance;
     in6_addr addr;
-    addr.s6_addr[0] = htonl (0xffc00000);
+    addr.s6_addr[0] = htonl(0xffc00000);
     addr.s6_addr[ARG_INDEX_1] = 0x01;
     auto ret = instance.ScopeOf(&addr);
     EXPECT_EQ(ret, 0x01);
@@ -324,7 +324,7 @@ HWTEST_F(DNSLookupNameTest, ScopeOfTest004, TestSize.Level1)
 {
     DnsLookUpName instance;
     in6_addr addr;
-    addr.s6_addr32[0] = htonl (0xfec00000);
+    addr.s6_addr32[0] = htonl(0xfec00000);
     auto ret = instance.ScopeOf(&addr);
     EXPECT_EQ(ret, SCOPEOF_RESULT_5);
 }
@@ -361,8 +361,7 @@ HWTEST_F(DNSLookupNameTest, CheckNameParamTest001, TestSize.Level1)
     std::string host = "";
     int32_t family = AF_INET;
     int32_t flag = 0xFFFF;
-    char *canon = nullptr;
-    int32_t ret = name.CheckNameParam(host, flag, family, canon);
+    int32_t ret = name.CheckNameParam(host, flag, family);
     EXPECT_EQ(ret, DNS_ERR_NONE);
 }
 
@@ -373,8 +372,7 @@ HWTEST_F(DNSLookupNameTest, CheckNameParamTest002, TestSize.Level1)
     std::string host = "abcd";
     int32_t family = AF_INET;
     int32_t flag = 0xFFFF;
-    char *canon = nullptr;
-    int32_t ret = name.CheckNameParam(host, flag, family, canon);
+    int32_t ret = name.CheckNameParam(host, flag, family);
     EXPECT_EQ(ret, DNS_ERR_NONE);
 }
 
@@ -385,8 +383,7 @@ HWTEST_F(DNSLookupNameTest, CheckNameParamTest003, TestSize.Level1)
     std::string host = "abcd";
     int32_t family = AF_INET6;
     int32_t flag = 0xFFFF;
-    char *canon = nullptr;
-    int32_t ret = name.CheckNameParam(host, flag, family, canon);
+    int32_t ret = name.CheckNameParam(host, flag, family);
     EXPECT_EQ(ret, DNS_ERR_NONE);
 }
 
@@ -399,8 +396,7 @@ HWTEST_F(DNSLookupNameTest, CheckNameParamTest004, TestSize.Level1)
     }
     int32_t family = AF_INET;
     int32_t flag = 0xFFFF;
-    char *canon = nullptr;
-    int32_t ret = name.CheckNameParam(host, flag, family, canon);
+    int32_t ret = name.CheckNameParam(host, flag, family);
     EXPECT_EQ(ret, EAI_NONAME);
 }
 
