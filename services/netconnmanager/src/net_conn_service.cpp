@@ -1378,7 +1378,6 @@ int32_t NetConnService::SetAirplaneMode(bool state)
     info.action = EventFwk::CommonEventSupport::COMMON_EVENT_AIRPLANE_MODE_CHANGED;
     info.data = "Net Manager Airplane Mode Changed";
     info.code = static_cast<int32_t>(state);
-    info.ordered = true;
     std::map<std::string, int32_t> param;
     BroadcastManager::GetInstance().SendBroadcast(info, param);
     return NETMANAGER_SUCCESS;
