@@ -1237,7 +1237,7 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
     static bool isReadFromDataShare = false;
     if (!isReadFromDataShare) {
         NetHttpProxyTracker httpProxyTracker;
-        httpProxyTracker.ReadFromSystemParameter(globalHttpProxy_);
+        httpProxyTracker.ReadFromSettingsData(globalHttpProxy_);
         SendHttpProxyChangeBroadcast(globalHttpProxy_);
         isReadFromDataShare = true;
     }
@@ -1253,8 +1253,10 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 
 int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy)
 {
-    if (!globalHttpProxy_.GetHost().empty()) {
-        httpProxy = globalHttpProxy_;
+    HttpProxy globalHttpProxy;
+    GetGlobalHttpProxy(globalHttpProxy);
+    if (!globalHttpProxy.GetHost().empty()) {
+        httpProxy = globalHttpProxy;
         NETMGR_LOG_D("Return global http proxy as default.");
         return NETMANAGER_SUCCESS;
     }
@@ -1395,7 +1397,7 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
     if (globalHttpProxy_ != httpProxy) {
         globalHttpProxy_ = httpProxy;
         NetHttpProxyTracker httpProxyTracker;
-        if (!httpProxyTracker.WriteToSystemParameter(globalHttpProxy_)) {
+        if (!httpProxyTracker.WriteToSettingsData(globalHttpProxy_)) {
             return NETMANAGER_ERR_INTERNAL;
         }
         SendHttpProxyChangeBroadcast(globalHttpProxy_);

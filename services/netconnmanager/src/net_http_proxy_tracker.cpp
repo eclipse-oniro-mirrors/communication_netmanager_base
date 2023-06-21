@@ -30,7 +30,7 @@ constexpr const char *DEFAULT_HTTP_PROXY_PORT = "0";
 constexpr const char *DEFAULT_HTTP_PROXY_EXCLUSION_LIST = "NONE";
 } // namespace
 
-void NetHttpProxyTracker::ReadFromSystemParameter(HttpProxy &httpProxy)
+void NetHttpProxyTracker::ReadFromSettingsData(HttpProxy &httpProxy)
 {
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
     std::string proxyHost, proxyPort, proxyExclusions;
@@ -59,10 +59,10 @@ void NetHttpProxyTracker::ReadFromSystemParameter(HttpProxy &httpProxy)
     httpProxy = {host, port, exclusionList};
 }
 
-bool NetHttpProxyTracker::WriteToSystemParameter(HttpProxy &httpProxy)
+bool NetHttpProxyTracker::WriteToSettingsData(HttpProxy &httpProxy)
 {
     HttpProxy persistHttpProxy;
-    ReadFromSystemParameter(persistHttpProxy);
+    ReadFromSettingsData(persistHttpProxy);
 
     std::string host =
         httpProxy.GetHost().empty() ? Base64::Encode(DEFAULT_HTTP_PROXY_HOST) : Base64::Encode(httpProxy.GetHost());
