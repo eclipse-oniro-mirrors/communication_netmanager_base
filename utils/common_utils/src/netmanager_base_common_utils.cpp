@@ -28,6 +28,7 @@
 #include <type_traits>
 #include <unistd.h>
 #include <vector>
+#include <numeric>
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
@@ -499,10 +500,9 @@ bool IsValidDomain(const std::string &domain)
     }
 
     std::string pattern = HOST_DOMAIN_PATTERN_HEADER;
-    for (const std::string &tlds : HOST_DOMAIN_TLDS) {
-        pattern += (tlds + TLDS_SPLIT_SYMBOL);
-    }
-    pattern = pattern.substr(0, pattern.size() - 1) + HOST_DOMAIN_PATTERN_TAIL;
+    pattern = std::accumulate(HOST_DOMAIN_TLDS.begin(), HOST_DOMAIN_TLDS.end(), pattern,
+                              [](std::string pattern, std::string tlds) { return pattern + tlds + TLDS_SPLIT_SYMBOL; });
+    pattern = pattern + HOST_DOMAIN_PATTERN_TAIL;
     std::regex reg(pattern);
     if (!std::regex_match(domain, reg)) {
         NETMGR_LOG_E("Domain:%{public}s regex match failed.", domain.c_str());
