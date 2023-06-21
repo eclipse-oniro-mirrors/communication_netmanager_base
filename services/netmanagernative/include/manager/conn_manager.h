@@ -193,17 +193,17 @@ public:
     int32_t SetPermissionForNetwork(int32_t netId, NetworkPermission permission);
 
     /**
-     * Set the permission required to access a specific network
+     * Find virtual network from netId
      *
      * @param netId The network id
-     * @return Returns true, netId is vpn network
+     * @return Returns nullptr, the netId is not virtual network
      */
-    bool IsVirtualNetwork(int32_t netId);
+    std::shared_ptr<NetsysNetwork> FindVirtualNetwork(int32_t netId);
 
     /**
-     * Set the permission required to access a specific network
+     * Add uids to virtual network
      *
-     * @param netId The network id
+     * @param netId The virtual network id
      * @param uidRanges App uids to set
      *
      * @return Returns 0, successfully set the uids for specific network, otherwise it will fail
@@ -211,12 +211,12 @@ public:
     int32_t AddUidsToNetwork(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);
 
     /**
-     * Set the permission required to access a specific network
+     * Remove uids from virtual network
      *
-     * @param netId The network id
+     * @param netId The virtual network id
      * @param uidRanges App uids to set
      *
-     * @return Returns 0, successfully set the uids for specific network, otherwise it will fail
+     * @return Returns 0, successfully remove the uids for specific network, otherwise it will fail
      */
     int32_t RemoveUidsFromNetwork(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges);
 

@@ -261,15 +261,13 @@ int32_t ConnManager::UpdateRoute(int32_t netId, std::string interfaceName, std::
 
 RouteManager::TableType ConnManager::GetTableType(int32_t netId)
 {
-    RouteManager::TableType tableType;
     if (netId == LOCAL_NET_ID) {
-        tableType = RouteManager::LOCAL_NETWORK;
-    } else if (IsVirtualNetwork(netId)) {
-        tableType = RouteManager::VPN_NETWORK;
+        return RouteManager::LOCAL_NETWORK;
+    } else if (FindVirtualNetwork(netId) != nullptr) {
+        return RouteManager::VPN_NETWORK;
     } else {
-        tableType = RouteManager::INTERFACE;
+        return RouteManager::INTERFACE;
     }
-    return tableType;
 }
 
 int32_t ConnManager::GetFwmarkForNetwork(int32_t netId)
@@ -282,54 +280,40 @@ int32_t ConnManager::SetPermissionForNetwork(int32_t netId, NetworkPermission pe
     return NETMANAGER_ERROR;
 }
 
-bool ConnManager::IsVirtualNetwork(int32_t netId)
+std::shared_ptr<NetsysNetwork> ConnManager::FindVirtualNetwork(int32_t netId)
 {
-    std::map<int32_t, std::shared_ptr<NetsysNetwork>>::iterator iter = networks_.find(netId);
-    if (iter != networks_.end() && iter->second != nullptr) {
-        return !(iter->second->IsPhysical());
+    if (netId == LOCAL_NET_ID) {
+        return nullptr;
     }
-    NETNATIVE_LOGW("ConnManager::IsVirtualNetwork netId:%{public}d is not exist.", netId);
-    return false;
+    auto iter = networks_.find(netId);
+    if (iter == networks_.end() || iter->second == nullptr) {
+        NETNATIVE_LOGE("invalid netId:%{public}d or nw is null.", netId);
+        return nullptr;
+    }
+    if (iter->second->IsPhysical()) {
+        return nullptr;
+    }
+    return iter->second;
 }
 
 int32_t ConnManager::AddUidsToNetwork(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges)
 {
-    const auto &network = FindNetworkById(netId);
-    if (std::get<0>(network) == false) {
-        NETNATIVE_LOGE("no this netId:%{public}d", netId);
-        return NETMANAGER_ERROR;
-    }
-
-    std::shared_ptr<NetsysNetwork> nw = std::get<1>(network);
-    if (nw == nullptr) {
-        NETNATIVE_LOGE("cannot add uids to non-virtual network with netId:%{public}d, nw is null.", netId);
-        return NETMANAGER_ERROR;
-    }
-    if (nw->IsPhysical()) {
+    auto netsysNetwork = FindVirtualNetwork(netId);
+    if (netsysNetwork == nullptr) {
         NETNATIVE_LOGE("cannot add uids to non-virtual network with netId:%{public}d", netId);
         return NETMANAGER_ERROR;
     }
-    return static_cast<VirtualNetwork *>(nw.get())->AddUids(uidRanges);
+    return static_cast<VirtualNetwork *>(netsysNetwork.get())->AddUids(uidRanges);
 }
 
 int32_t ConnManager::RemoveUidsFromNetwork(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges)
 {
-    const auto &network = FindNetworkById(netId);
-    if (std::get<0>(network) == false) {
-        NETNATIVE_LOGE("no this netId:%{public}d", netId);
-        return NETMANAGER_ERROR;
-    }
-
-    std::shared_ptr<NetsysNetwork> nw = std::get<1>(network);
-    if (nw == nullptr) {
-        NETNATIVE_LOGE("cannot remove uids to non-virtual network with netId:%{public}d, nw is null.", netId);
-        return NETMANAGER_ERROR;
-    }
-    if (nw->IsPhysical()) {
+    auto netsysNetwork = FindVirtualNetwork(netId);
+    if (netsysNetwork == nullptr) {
         NETNATIVE_LOGE("cannot remove uids from non-virtual network with netId:%{public}d", netId);
         return NETMANAGER_ERROR;
     }
-    return static_cast<VirtualNetwork *>(nw.get())->RemoveUids(uidRanges);
+    return static_cast<VirtualNetwork *>(netsysNetwork.get())->RemoveUids(uidRanges);
 }
 
 void ConnManager::GetDumpInfos(std::string &infos)

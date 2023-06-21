@@ -246,7 +246,7 @@ int32_t RouteManager::RemoveInterfaceFromVirtualNetwork(int32_t netId, const std
     if (ModifyVirtualNetBasedRules(netId, interfaceName, false) != ROUTEMANAGER_SUCCESS) {
         return ROUTEMANAGER_ERROR;
     }
-    return ClearRoutes(interfaceName);
+    return ClearRouteInfo(RTM_GETROUTE, ROUTE_VPN_NETWORK_TABLE);
 }
 
 int32_t RouteManager::ModifyVirtualNetBasedRules(int32_t netId, const std::string &ifaceName, bool add)
@@ -315,7 +315,7 @@ int32_t RouteManager::RemoveUsersFromVirtualNetwork(int32_t netId, const std::st
 int32_t RouteManager::UpdateVirtualNetwork(int32_t netId, const std::string &interfaceName,
                                            const std::vector<NetManagerStandard::UidRange> &uidRanges, bool add)
 {
-    NETNATIVE_LOGI("Entry RouteManager::UpdateVirtualNetwork,add===%{public}d", add);
+    NETNATIVE_LOGI("Entry RouteManager::UpdateVirtualNetwork, add == %{public}d", add);
     uint32_t table = GetRouteTableFromType(RouteManager::VPN_NETWORK, interfaceName);
     if (table == RT_TABLE_UNSPEC) {
         NETNATIVE_LOGE("table == RT_TABLE_UNSPEC, this is error");
@@ -875,18 +875,17 @@ uint32_t RouteManager::FindTableByInterfacename(const std::string &interfaceName
 
 uint32_t RouteManager::GetRouteTableFromType(TableType tableType, const std::string &interfaceName)
 {
-    uint32_t table;
-    if (tableType == RouteManager::INTERFACE) {
-        table = FindTableByInterfacename(interfaceName);
-    } else if (tableType == RouteManager::LOCAL_NETWORK) {
-        table = ROUTE_LOCAL_NETWORK_TABLE;
-    } else if (tableType == RouteManager::VPN_NETWORK) {
-        table = ROUTE_VPN_NETWORK_TABLE;
-    } else {
-        table = 0;
-        NETNATIVE_LOGE("tableType is error");
+    switch (tableType) {
+        case RouteManager::INTERFACE:
+            return FindTableByInterfacename(interfaceName);
+        case RouteManager::LOCAL_NETWORK:
+            return ROUTE_LOCAL_NETWORK_TABLE;
+        case RouteManager::VPN_NETWORK:
+            return ROUTE_VPN_NETWORK_TABLE;
+        default:
+            NETNATIVE_LOGE("tableType [%{tableType}d] is error", tableType);
+            return RT_TABLE_UNSPEC;
     }
-    return table;
 }
 } // namespace nmd
 } // namespace OHOS
