@@ -122,6 +122,9 @@ std::string NetHttpProxyTracker::GetExclusionsAsString(const std::list<std::stri
     std::string exclusions;
     int32_t index = 0;
     for (const auto &exclusion : exclusionList) {
+        if (exclusion.empty()) {
+            continue;
+        }
         if (index > 0) {
             exclusions = exclusions + EXCLUSIONS_SPLIT_SYMBOL;
         }
