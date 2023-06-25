@@ -331,10 +331,14 @@ HWTEST_F(ConnManagerTest, SetPermissionForNetwork001, TestSize.Level1)
  */
 HWTEST_F(ConnManagerTest, AddUidsToNetwork001, TestSize.Level1)
 {
-    int32_t netId = 1;
+    int32_t netId = 99;
     const std::vector<NetManagerStandard::UidRange> uidRanges;
     int32_t ret = instance_->AddUidsToNetwork(netId, uidRanges);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    netId = 1;
+    ret = instance_->AddUidsToNetwork(netId, uidRanges);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -344,10 +348,14 @@ HWTEST_F(ConnManagerTest, AddUidsToNetwork001, TestSize.Level1)
  */
 HWTEST_F(ConnManagerTest, RemoveUidsFromNetwork001, TestSize.Level1)
 {
-    int32_t netId = 1;
+    int32_t netId = 99;
     const std::vector<NetManagerStandard::UidRange> uidRanges;
     int32_t ret = instance_->RemoveUidsFromNetwork(netId, uidRanges);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    netId = 1;
+    ret = instance_->RemoveUidsFromNetwork(netId, uidRanges);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
