@@ -1387,9 +1387,8 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
     LoadGlobalHttpProxy();
     if (globalHttpProxy_ != httpProxy) {
-        globalHttpProxy_ = httpProxy;
         NetHttpProxyTracker httpProxyTracker;
-        if (!httpProxyTracker.WriteToSettingsData(globalHttpProxy_)) {
+        if (!httpProxyTracker.WriteToSettingsData(httpProxy, globalHttpProxy_)) {
             return NETMANAGER_ERR_INTERNAL;
         }
         SendHttpProxyChangeBroadcast(globalHttpProxy_);
