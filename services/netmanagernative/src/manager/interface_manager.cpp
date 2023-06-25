@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,6 +70,11 @@ bool CheckFilePath(const std::string &fileName, std::string &realPath)
 
 int InterfaceManager::GetMtu(const char *interfaceName)
 {
+    if (interfaceName == nullptr) {
+        NETNATIVE_LOGE("interfaceName is null");
+        return -1;
+    }
+
     if (!CheckIfaceName(interfaceName)) {
         NETNATIVE_LOGE("InterfaceManager::GetMtu isIfaceName fail %{public}d", errno);
         return -1;
@@ -102,6 +107,11 @@ int InterfaceManager::GetMtu(const char *interfaceName)
 
 int InterfaceManager::SetMtu(const char *interfaceName, const char *mtuValue)
 {
+    if (interfaceName == nullptr || mtuValue == nullptr) {
+        NETNATIVE_LOGE("interfaceName or mtuValue is null");
+        return -1;
+    }
+
     if (!CheckIfaceName(interfaceName)) {
         NETNATIVE_LOGE("InterfaceManager::SetMtu isIfaceName fail %{public}d", errno);
     }
@@ -120,7 +130,8 @@ int InterfaceManager::SetMtu(const char *interfaceName, const char *mtuValue)
         close(sockfd);
         return -1;
     }
-    int32_t mtu = std::stoi(mtuValue);
+
+    int32_t mtu = StrToLong(mtuValue);
     ifr.ifr_mtu = mtu;
 
     if (ioctl(sockfd, SIOCSIFMTU, &ifr) < 0) {
@@ -159,7 +170,7 @@ std::vector<std::string> InterfaceManager::GetInterfaceNames()
 
 int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, const char *addr, int prefixLen)
 {
-    if (interfaceName == nullptr) {
+    if (interfaceName == nullptr || addr == nullptr) {
         return -1;
     }
     uint32_t index = if_nametoindex(interfaceName);
