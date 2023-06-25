@@ -58,7 +58,7 @@
                 "jsoncpp",
                 "libuv",
                 "iptables",
-                "thirdparty_selinux",
+                "selinux",
                 "sqlite"
             ]
         },
