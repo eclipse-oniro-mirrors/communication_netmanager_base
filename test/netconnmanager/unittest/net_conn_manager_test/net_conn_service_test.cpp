@@ -372,13 +372,6 @@ HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest014, TestSize.Level1)
     ASSERT_EQ(ret, NETMANAGER_ERR_INTERNAL);
 }
 
-HWTEST_F(NetConnServiceTest, SetGlobalHttpProxyTest015, TestSize.Level1)
-{
-    HttpProxy httpProxy;
-    auto ret = NetConnService::GetInstance()->SetGlobalHttpProxy(httpProxy);
-    ASSERT_EQ(ret, NETMANAGER_ERR_INTERNAL);
-}
-
 HWTEST_F(NetConnServiceTest, GetGlobalHttpProxyTest001, TestSize.Level1)
 {
     HttpProxy getGlobalHttpProxy;

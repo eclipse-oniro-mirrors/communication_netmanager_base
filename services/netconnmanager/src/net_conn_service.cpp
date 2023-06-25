@@ -1234,14 +1234,7 @@ int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::st
 
 int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
-    static bool isReadFromDataShare = false;
-    if (!isReadFromDataShare) {
-        NetHttpProxyTracker httpProxyTracker;
-        httpProxyTracker.ReadFromSettingsData(globalHttpProxy_);
-        SendHttpProxyChangeBroadcast(globalHttpProxy_);
-        isReadFromDataShare = true;
-    }
-
+    LoadGlobalHttpProxy();
     if (globalHttpProxy_.GetHost().empty()) {
         httpProxy.SetPort(0);
         NETMGR_LOG_E("The http proxy host is empty");
@@ -1253,10 +1246,9 @@ int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 
 int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpProxy)
 {
-    HttpProxy globalHttpProxy;
-    GetGlobalHttpProxy(globalHttpProxy);
-    if (!globalHttpProxy.GetHost().empty()) {
-        httpProxy = globalHttpProxy;
+    LoadGlobalHttpProxy();
+    if (!globalHttpProxy_.GetHost().empty()) {
+        httpProxy = globalHttpProxy_;
         NETMGR_LOG_D("Return global http proxy as default.");
         return NETMANAGER_SUCCESS;
     }
@@ -1393,6 +1385,7 @@ int32_t NetConnService::SetAirplaneMode(bool state)
 
 int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
+    LoadGlobalHttpProxy();
     if (globalHttpProxy_ != httpProxy) {
         globalHttpProxy_ = httpProxy;
         NetHttpProxyTracker httpProxyTracker;
@@ -1437,6 +1430,17 @@ int32_t NetConnService::GetNetInterfaceConfiguration(const std::string &iface, N
     config.prefixLength_ = configParcel.prefixLength;
     config.flags_.assign(configParcel.flags.begin(), configParcel.flags.end());
     return NETMANAGER_SUCCESS;
+}
+
+void NetConnService::LoadGlobalHttpProxy()
+{
+    if (isGlobalProxyLoaded_.load()) {
+        NETMGR_LOG_D("Global http proxy has been loaded from the SettingsData database.");
+        return;
+    }
+    NetHttpProxyTracker httpProxyTracker;
+    httpProxyTracker.ReadFromSettingsData(globalHttpProxy_);
+    isGlobalProxyLoaded_ = true;
 }
 
 int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceAddressUpdated(const std::string &addr,
