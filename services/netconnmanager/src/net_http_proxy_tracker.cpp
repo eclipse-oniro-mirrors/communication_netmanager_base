@@ -75,7 +75,7 @@ bool NetHttpProxyTracker::WriteToSystemParameter(HttpProxy &httpProxy)
     if (ret) {
         NETMGR_LOG_E("Set host:%{public}s to system parameter:%{public}s failed, ret:%{public}d", host.c_str(),
                      HTTP_PROXY_HOST_KEY, ret);
-        host = persistHttpProxy.GetHost();
+        std::string host = persistHttpProxy.GetHost();
         httpProxy.SetHost(std::move(host));
     }
 
