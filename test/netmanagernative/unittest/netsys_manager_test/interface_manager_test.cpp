@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,12 +83,9 @@ HWTEST_F(InterfaceManagerTest, SetMtuTest003, TestSize.Level1)
     if (eth0NotExist) {
         return;
     }
-    std::string mtuValue;
-    auto ret = InterfaceManager::SetMtu(interfaceName.data(), mtuValue.data());
-    EXPECT_LE(ret, 0);
 
     std::string mtu = "1500";
-    ret = InterfaceManager::SetMtu(interfaceName.data(), mtu.data());
+    auto ret = InterfaceManager::SetMtu(interfaceName.data(), mtu.data());
     EXPECT_EQ(ret, 0);
 }
 

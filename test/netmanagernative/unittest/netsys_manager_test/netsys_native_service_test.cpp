@@ -571,7 +571,7 @@ HWTEST_F(NetsysNativeServiceTest, GetTotalStatsTest001, TestSize.Level1)
     uint64_t stats = 0;
     uint32_t type = 1;
     auto ret = instance_->GetTotalStats(stats, type);
-    EXPECT_EQ(stats, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_SUCCESS);
     auto backup = std::move(instance_->bpfStats_);
     ret = instance_->GetTotalStats(stats, type);
     instance_->bpfStats_ = std::move(backup);

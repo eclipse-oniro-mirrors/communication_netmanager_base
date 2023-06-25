@@ -346,6 +346,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest014, TestSize.Level1)
 
 HWTEST_F(NetsysControllerTest, NetsysControllerTest015, TestSize.Level1)
 {
+    NetsysController::GetInstance().BandwidthEnableDataSaver(false);
     int32_t ret = NetsysController::GetInstance().BandwidthEnableDataSaver(true);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
