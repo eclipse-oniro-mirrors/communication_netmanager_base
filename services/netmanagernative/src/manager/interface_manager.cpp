@@ -131,7 +131,7 @@ int InterfaceManager::SetMtu(const char *interfaceName, const char *mtuValue)
         return -1;
     }
 
-    int32_t mtu = StrToLong(mtuValue);
+    int32_t mtu = StrToInt(mtuValue);
     ifr.ifr_mtu = mtu;
 
     if (ioctl(sockfd, SIOCSIFMTU, &ifr) < 0) {
