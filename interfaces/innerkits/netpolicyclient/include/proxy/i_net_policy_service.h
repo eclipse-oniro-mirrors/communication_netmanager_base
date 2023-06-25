@@ -141,11 +141,11 @@ public:
      * Update the limit or warning remind time of quota policy.
      *
      * @param netType {@link NetBearType}.
-     * @param iccid Specify the matched iccid of quota policy when netType is cellular.
+     * @param simId Specify the matched simId of quota policy when netType is cellular.
      * @param remindType {@link RemindType}.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    virtual int32_t UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType) = 0;
+    virtual int32_t UpdateRemindPolicy(int32_t netType, const std::string &simId, uint32_t remindType) = 0;
 
     /**
      * Set the UID into device idle allow list.
@@ -175,10 +175,10 @@ public:
     /**
      * Reset network policies\rules\quota policies\firewall rules.
      *
-     * @param iccid Specify the matched iccid of quota policy.
+     * @param simId Specify the matched simId of quota policy.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    virtual int32_t ResetPolicies(const std::string &iccid) = 0;
+    virtual int32_t ResetPolicies(const std::string &simId) = 0;
 
     /**
      * Control if apps can use data on background.

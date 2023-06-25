@@ -204,12 +204,12 @@ int32_t NetPolicyClient::GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quotaP
     return proxy->GetNetQuotaPolicies(quotaPolicies);
 }
 
-NetPolicyResultCode NetPolicyClient::SetFactoryPolicy(const std::string &iccid)
+NetPolicyResultCode NetPolicyClient::SetFactoryPolicy(const std::string &simId)
 {
-    return static_cast<NetPolicyResultCode>(ResetPolicies(iccid));
+    return static_cast<NetPolicyResultCode>(ResetPolicies(simId));
 }
 
-int32_t NetPolicyClient::ResetPolicies(const std::string &iccid)
+int32_t NetPolicyClient::ResetPolicies(const std::string &simId)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -217,7 +217,7 @@ int32_t NetPolicyClient::ResetPolicies(const std::string &iccid)
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
-    return proxy->ResetPolicies(iccid);
+    return proxy->ResetPolicies(simId);
 }
 
 int32_t NetPolicyClient::SetBackgroundPolicy(bool isBackgroundPolicyAllow)
@@ -252,12 +252,12 @@ int32_t NetPolicyClient::GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backgr
     return proxy->GetBackgroundPolicyByUid(uid, backgroundPolicyOfUid);
 }
 
-NetPolicyResultCode NetPolicyClient::SetSnoozePolicy(int8_t netType, const std::string &iccid)
+NetPolicyResultCode NetPolicyClient::SetSnoozePolicy(int8_t netType, const std::string &simId)
 {
-    return static_cast<NetPolicyResultCode>(UpdateRemindPolicy(netType, iccid, RemindType::REMIND_TYPE_LIMIT));
+    return static_cast<NetPolicyResultCode>(UpdateRemindPolicy(netType, simId, RemindType::REMIND_TYPE_LIMIT));
 }
 
-int32_t NetPolicyClient::UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType)
+int32_t NetPolicyClient::UpdateRemindPolicy(int32_t netType, const std::string &simId, uint32_t remindType)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -265,7 +265,7 @@ int32_t NetPolicyClient::UpdateRemindPolicy(int32_t netType, const std::string &
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
-    return proxy->UpdateRemindPolicy(netType, iccid, remindType);
+    return proxy->UpdateRemindPolicy(netType, simId, remindType);
 }
 
 NetPolicyResultCode NetPolicyClient::SetIdleTrustlist(uint32_t uid, bool isTrustlist)

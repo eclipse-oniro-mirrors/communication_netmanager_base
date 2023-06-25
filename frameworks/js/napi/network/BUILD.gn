@@ -41,22 +41,22 @@ ohos_shared_library("network") {
     "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
     "$THIRD_PARTY_ROOT/libuv:uv",
   ]
-  if (defined(global_parts_info) &&
-      defined(global_parts_info.telephony_core_service) &&
-      global_parts_info.telephony_core_service) {
-    deps += [
-      "$TELEPHONY_ROOT/core_service/interfaces/innerkits:tel_core_service_api",
-    ]
-    defines = [ "HAS_TELEPHONY=1" ]
-  } else {
-    defines = [ "HAS_TELEPHONY=0" ]
-  }
 
   external_deps = [
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "napi:ace_napi",
   ]
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.telephony_core_service) &&
+      global_parts_info.telephony_core_service) {
+    external_deps += [ "core_service:tel_core_service_api" ]
+    defines = [ "HAS_TELEPHONY=1" ]
+  } else {
+    defines = [ "HAS_TELEPHONY=0" ]
+  }
 
   relative_install_dir = "module"
   part_name = "netmanager_base"

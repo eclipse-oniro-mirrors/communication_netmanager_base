@@ -39,13 +39,13 @@ ohos_shared_library("napi_utils") {
 
   public_configs = [ ":napi_utils_public_config" ]
 
-  public_deps = [
-    "$ARKUI_ROOT/napi/:ace_napi",
-    "$C_UTILS_ROOT/base:utils",
-    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-  ]
+  public_deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+    "napi:ace_napi",
+  ]
 
   innerapi_tags = [ "platformsdk" ]
   part_name = "netmanager_base"

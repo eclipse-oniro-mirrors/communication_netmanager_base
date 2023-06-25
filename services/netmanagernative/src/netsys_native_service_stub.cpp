@@ -84,7 +84,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitFirewallOpToInterfaceMap();
     InitOpToInterfaceMapExt();
     uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
-             UID_SAMGR, UID_PARAM_WATCHER};
+             UID_SAMGR, UID_PARAM_WATCHER, UID_EDM};
 }
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()

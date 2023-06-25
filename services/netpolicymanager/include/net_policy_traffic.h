@@ -61,11 +61,11 @@ public:
      * Update the limit or warning remind time of quota policy.
      *
      * @param netType {@link NetBearType}.
-     * @param iccid Specify the matched iccid of quota policy when netType is cellular.
+     * @param simId Specify the matched simId of quota policy when netType is cellular.
      * @param remindType {@link RemindType}.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    int32_t UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType);
+    int32_t UpdateRemindPolicy(int32_t netType, const std::string &simId, uint32_t remindType);
 
     /**
      * Handle the event from NetPolicyCore
@@ -85,9 +85,9 @@ public:
     /**
      * Reset network policies\rules\quota policies\firewall rules.
      *
-     * @param iccid Specify the matched iccid of quota policy.
+     * @param simId Specify the matched simId of quota policy.
      */
-    int32_t ResetPolicies(const std::string &iccid);
+    int32_t ResetPolicies(const std::string &simId);
 
     void ReachedLimit(const std::string &iface);
     void UpdateNetPolicy();
@@ -207,7 +207,7 @@ private:
 
     bool IsValidNetType(int32_t netType);
     bool IsValidPeriodDuration(const std::string &periodDuration);
-    bool IsQuotaPolicyExist(int32_t netType, const std::string &iccid);
+    bool IsQuotaPolicyExist(int32_t netType, const std::string &simId);
     bool IsValidNetRemindType(uint32_t remindType);
 
 private:

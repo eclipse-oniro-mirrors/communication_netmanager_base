@@ -22,6 +22,10 @@
       "OHOS::NetManagerStandard::HttpProxy::HttpProxy()";
       VTT?for?OHOS::NetManagerStandard::NetLinkInfo;
       vtable?for?OHOS::NetManagerStandard::NetLinkInfo;
+      "OHOS::NetManagerStandard::INetAddr::Marshalling(OHOS::Parcel&) const";
+      "OHOS::NetManagerStandard::INetAddr::Unmarshalling(OHOS::Parcel&)";
+      "OHOS::NetManagerStandard::Route::Marshalling(OHOS::Parcel&) const";
+      "OHOS::NetManagerStandard::Route::Unmarshalling(OHOS::Parcel&)";
       "OHOS::NetManagerStandard::NetHandle::BindSocket(int)";
       "OHOS::NetManagerStandard::NetConnClient::HasDefaultNet(bool&)";
       "OHOS::NetManagerStandard::NetConnClient::IsDefaultNetMetered(bool&)";

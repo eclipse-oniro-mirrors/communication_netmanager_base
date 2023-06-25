@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,16 +28,18 @@ namespace {
 NetQuotaPolicy ReadQuotaPolicy(napi_env env, napi_value value)
 {
     NetQuotaPolicy data;
-    data.netType = NapiUtils::GetInt32Property(env, value, "netType");
-    data.iccid = NapiUtils::GetStringPropertyUtf8(env, value, "iccid");
-    data.ident = NapiUtils::GetStringPropertyUtf8(env, value, "ident");
-    data.periodDuration = NapiUtils::GetStringPropertyUtf8(env, value, "periodDuration");
-    data.warningBytes = NapiUtils::GetInt64Property(env, value, "warningBytes");
-    data.limitBytes = NapiUtils::GetInt64Property(env, value, "limitBytes");
-    data.lastWarningRemind = NapiUtils::GetInt64Property(env, value, "lastWarningRemind");
-    data.lastLimitRemind = NapiUtils::GetInt64Property(env, value, "lastLimitRemind");
-    data.metered = NapiUtils::GetBooleanProperty(env, value, "metered");
-    data.limitAction = NapiUtils::GetInt32Property(env, value, "limitAction");
+    napi_value netWorkMatchRule = NapiUtils::GetNamedProperty(env, value, "netWorkMatchRule");
+    napi_value quotaPolicy = NapiUtils::GetNamedProperty(env, value, "quotaPolicy");
+    data.networkmatchrule.netType = NapiUtils::GetInt32Property(env, netWorkMatchRule, "netType");
+    data.networkmatchrule.simId = NapiUtils::GetStringPropertyUtf8(env, netWorkMatchRule, "simId");
+    data.networkmatchrule.ident = NapiUtils::GetStringPropertyUtf8(env, netWorkMatchRule, "ident");
+    data.quotapolicy.periodDuration = NapiUtils::GetStringPropertyUtf8(env, quotaPolicy, "periodDuration");
+    data.quotapolicy.warningBytes = NapiUtils::GetInt64Property(env, quotaPolicy, "warningBytes");
+    data.quotapolicy.limitBytes = NapiUtils::GetInt64Property(env, quotaPolicy, "limitBytes");
+    data.quotapolicy.lastWarningRemind = NapiUtils::GetInt64Property(env, quotaPolicy, "lastWarningRemind");
+    data.quotapolicy.lastLimitRemind = NapiUtils::GetInt64Property(env, quotaPolicy, "lastLimitRemind");
+    data.quotapolicy.metered = NapiUtils::GetBooleanProperty(env, quotaPolicy, "metered");
+    data.quotapolicy.limitAction = NapiUtils::GetInt32Property(env, quotaPolicy, "limitAction");
     return data;
 }
 } // namespace

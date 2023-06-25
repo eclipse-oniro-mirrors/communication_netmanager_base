@@ -20,6 +20,7 @@
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "route_manager.h"
+#include "vpn_manager.h"
 
 namespace OHOS {
 namespace nmd {
@@ -70,6 +71,11 @@ int32_t VirtualNetwork::AddInterface(std::string &interfaceName)
         return NETMANAGER_ERROR;
     }
 
+    if (VpnManager::GetInstance().CreateVpnInterface()) {
+        NETNATIVE_LOGE("create vpn interface error");
+        return NETMANAGER_ERROR;
+    }
+
     if (RouteManager::AddInterfaceToVirtualNetwork(netId_, interfaceName)) {
         NETNATIVE_LOGE("Failed to add interface %{public}s to netId_ %{public}u", interfaceName.c_str(), netId_);
         return NETMANAGER_ERROR;
@@ -93,6 +99,7 @@ int32_t VirtualNetwork::RemoveInterface(std::string &interfaceName)
         return NETMANAGER_ERROR;
     }
 
+    VpnManager::GetInstance().DestoryVpnInterface();
     std::lock_guard<std::mutex> lock(mutex_);
     interfaces_.erase(interfaceName);
     return NETMANAGER_SUCCESS;

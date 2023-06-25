@@ -380,7 +380,7 @@ int32_t NetPolicyServiceProxy::GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &
     return result;
 }
 
-int32_t NetPolicyServiceProxy::ResetPolicies(const std::string &iccid)
+int32_t NetPolicyServiceProxy::ResetPolicies(const std::string &simId)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -388,7 +388,7 @@ int32_t NetPolicyServiceProxy::ResetPolicies(const std::string &iccid)
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
-    if (!data.WriteString(iccid)) {
+    if (!data.WriteString(simId)) {
         NETMGR_LOG_E("Write String data failed");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
@@ -525,7 +525,7 @@ int32_t NetPolicyServiceProxy::GetBackgroundPolicyByUid(uint32_t uid, uint32_t &
     return result;
 }
 
-int32_t NetPolicyServiceProxy::UpdateRemindPolicy(int32_t netType, const std::string &iccid, uint32_t remindType)
+int32_t NetPolicyServiceProxy::UpdateRemindPolicy(int32_t netType, const std::string &simId, uint32_t remindType)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -544,7 +544,7 @@ int32_t NetPolicyServiceProxy::UpdateRemindPolicy(int32_t netType, const std::st
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
-    if (!data.WriteString(iccid)) {
+    if (!data.WriteString(simId)) {
         NETMGR_LOG_E("Write String data failed");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ constexpr const char *EVENT_POLICY_STRATEGY_SWITCH = "netStrategySwitch";
 constexpr const char *KEY_POLICY = "policy";
 constexpr const char *KEY_UID = "uid";
 constexpr const char *KEY_RULE = "rule";
-constexpr const char *KEY_ICCID = "iccid";
+constexpr const char *KEY_ICCID = "simId";
 constexpr const char *KEY_ENABLE = "enable";
 
 constexpr int ARRAY_LIMIT = 64;

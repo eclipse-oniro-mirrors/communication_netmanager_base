@@ -129,7 +129,7 @@ void NetPolicyFile::ParseQuotaPolicy(const Json::Value &root, NetPolicy &netPoli
     NetPolicyQuota quotaPolicy;
     for (uint32_t i = 0; i < size; i++) {
         quotaPolicy.netType = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_NETTYPE].asString();
-        quotaPolicy.iccid = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_SUBSCRIBERID].asString();
+        quotaPolicy.simId = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_SUBSCRIBERID].asString();
         quotaPolicy.periodStartTime = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_PERIODSTARTTIME].asString();
         quotaPolicy.periodDuration = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_PERIODDURATION].asString();
         quotaPolicy.warningBytes = arrayQuotaPolicy[i][CONFIG_QUOTA_POLICY_WARNINGBYTES].asString();
@@ -220,7 +220,7 @@ void NetPolicyFile::AddQuotaPolicy(Json::Value &root)
     for (uint32_t i = 0; i < size; i++) {
         Json::Value quotaPolicy;
         quotaPolicy[CONFIG_QUOTA_POLICY_NETTYPE] = netPolicy_.netQuotaPolicies[i].netType;
-        quotaPolicy[CONFIG_QUOTA_POLICY_SUBSCRIBERID] = netPolicy_.netQuotaPolicies[i].iccid;
+        quotaPolicy[CONFIG_QUOTA_POLICY_SUBSCRIBERID] = netPolicy_.netQuotaPolicies[i].simId;
         quotaPolicy[CONFIG_QUOTA_POLICY_PERIODSTARTTIME] = netPolicy_.netQuotaPolicies[i].periodStartTime;
         quotaPolicy[CONFIG_QUOTA_POLICY_PERIODDURATION] = netPolicy_.netQuotaPolicies[i].periodDuration;
         quotaPolicy[CONFIG_QUOTA_POLICY_WARNINGBYTES] = netPolicy_.netQuotaPolicies[i].warningBytes;
@@ -344,17 +344,17 @@ bool NetPolicyFile::UpdateQuotaPolicyExist(const NetQuotaPolicy &quotaPolicy)
     }
 
     for (uint32_t i = 0; i < netPolicy_.netQuotaPolicies.size(); ++i) {
-        if (quotaPolicy.iccid == netPolicy_.netQuotaPolicies[i].iccid &&
-            netPolicy_.netQuotaPolicies[i].netType == std::to_string(quotaPolicy.netType)) {
-            netPolicy_.netQuotaPolicies[i].lastLimitSnooze = std::to_string(quotaPolicy.lastLimitRemind);
-            netPolicy_.netQuotaPolicies[i].limitBytes = std::to_string(quotaPolicy.limitBytes);
-            netPolicy_.netQuotaPolicies[i].metered = std::to_string(quotaPolicy.metered);
-            netPolicy_.netQuotaPolicies[i].netType = std::to_string(quotaPolicy.netType);
-            netPolicy_.netQuotaPolicies[i].periodDuration = quotaPolicy.periodDuration;
-            netPolicy_.netQuotaPolicies[i].periodStartTime = std::to_string(quotaPolicy.periodStartTime);
-            netPolicy_.netQuotaPolicies[i].ident = quotaPolicy.ident;
-            netPolicy_.netQuotaPolicies[i].iccid = quotaPolicy.iccid;
-            netPolicy_.netQuotaPolicies[i].warningBytes = std::to_string(quotaPolicy.warningBytes);
+        if (quotaPolicy.networkmatchrule.simId == netPolicy_.netQuotaPolicies[i].simId &&
+            netPolicy_.netQuotaPolicies[i].netType == std::to_string(quotaPolicy.networkmatchrule.netType)) {
+            netPolicy_.netQuotaPolicies[i].lastLimitSnooze = std::to_string(quotaPolicy.quotapolicy.lastLimitRemind);
+            netPolicy_.netQuotaPolicies[i].limitBytes = std::to_string(quotaPolicy.quotapolicy.limitBytes);
+            netPolicy_.netQuotaPolicies[i].metered = std::to_string(quotaPolicy.quotapolicy.metered);
+            netPolicy_.netQuotaPolicies[i].netType = std::to_string(quotaPolicy.networkmatchrule.netType);
+            netPolicy_.netQuotaPolicies[i].periodDuration = quotaPolicy.quotapolicy.periodDuration;
+            netPolicy_.netQuotaPolicies[i].periodStartTime = std::to_string(quotaPolicy.quotapolicy.periodStartTime);
+            netPolicy_.netQuotaPolicies[i].ident = quotaPolicy.networkmatchrule.ident;
+            netPolicy_.netQuotaPolicies[i].simId = quotaPolicy.networkmatchrule.simId;
+            netPolicy_.netQuotaPolicies[i].warningBytes = std::to_string(quotaPolicy.quotapolicy.warningBytes);
             return true;
         }
     }
@@ -370,18 +370,18 @@ bool NetPolicyFile::WriteQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaP
     for (uint32_t i = 0; i < vSize; i++) {
         if (UpdateQuotaPolicyExist(quotaPolicies[i])) {
             NETMGR_LOG_E("quotaPolicies:periodDuration[%{public}s], don't write this quotaPolicies!",
-                         quotaPolicies[i].periodDuration.c_str());
+                         quotaPolicies[i].quotapolicy.periodDuration.c_str());
             continue;
         }
-        quotaPolicy.lastLimitSnooze = std::to_string(quotaPolicies[i].lastLimitRemind);
-        quotaPolicy.limitBytes = std::to_string(quotaPolicies[i].limitBytes);
-        quotaPolicy.metered = std::to_string(quotaPolicies[i].metered);
-        quotaPolicy.ident = quotaPolicies[i].ident;
-        quotaPolicy.netType = std::to_string(quotaPolicies[i].netType);
-        quotaPolicy.periodDuration = quotaPolicies[i].periodDuration;
-        quotaPolicy.periodStartTime = std::to_string(quotaPolicies[i].periodStartTime);
-        quotaPolicy.iccid = quotaPolicies[i].iccid;
-        quotaPolicy.warningBytes = std::to_string(quotaPolicies[i].warningBytes);
+        quotaPolicy.lastLimitSnooze = std::to_string(quotaPolicies[i].quotapolicy.lastLimitRemind);
+        quotaPolicy.limitBytes = std::to_string(quotaPolicies[i].quotapolicy.limitBytes);
+        quotaPolicy.metered = std::to_string(quotaPolicies[i].quotapolicy.metered);
+        quotaPolicy.ident = quotaPolicies[i].networkmatchrule.ident;
+        quotaPolicy.netType = std::to_string(quotaPolicies[i].networkmatchrule.netType);
+        quotaPolicy.periodDuration = quotaPolicies[i].quotapolicy.periodDuration;
+        quotaPolicy.periodStartTime = std::to_string(quotaPolicies[i].quotapolicy.periodStartTime);
+        quotaPolicy.simId = quotaPolicies[i].networkmatchrule.simId;
+        quotaPolicy.warningBytes = std::to_string(quotaPolicies[i].quotapolicy.warningBytes);
         netPolicy_.netQuotaPolicies.push_back(quotaPolicy);
     }
 
