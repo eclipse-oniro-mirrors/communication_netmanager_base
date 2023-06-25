@@ -16,10 +16,10 @@
 #include "net_http_proxy_tracker.h"
 
 #include "base64_utils.h"
-#include "netmanager_base_common_utils.h"
 #include "net_datashare_utils.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -85,7 +85,8 @@ bool NetHttpProxyTracker::WriteToSettingsData(const HttpProxy &newHttpProxy, Htt
     }
 
     std::string exclusions = GetExclusionsAsString(newHttpProxy.GetExclusionList());
-    exclusions = (newHttpProxy.GetHost().empty() || exclusions.empty()) ? DEFAULT_HTTP_PROXY_EXCLUSION_LIST : exclusions;
+    exclusions =
+        (newHttpProxy.GetHost().empty() || exclusions.empty()) ? DEFAULT_HTTP_PROXY_EXCLUSION_LIST : exclusions;
     Uri exclusionsUri(GLOBAL_PROXY_EXCLUSIONS_URI);
     ret = dataShareHelperUtils->Update(exclusionsUri, KEY_GLOBAL_PROXY_EXCLUSIONS, exclusions);
     if (ret != NETMANAGER_SUCCESS) {
