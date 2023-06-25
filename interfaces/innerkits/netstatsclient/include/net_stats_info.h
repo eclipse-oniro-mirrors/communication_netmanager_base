@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-struct NetStatsInfo : public Parcelable {
+struct NetStatsInfo final: public Parcelable {
     uint32_t uid_ = 0;
     std::string iface_;
     uint64_t date_ = 0;
@@ -77,7 +77,7 @@ struct NetStatsInfo : public Parcelable {
         return *this;
     }
 
-    virtual bool Marshalling(Parcel &parcel) const override;
+    bool Marshalling(Parcel &parcel) const override;
     static bool Marshalling(Parcel &parcel, const NetStatsInfo &stats);
     static bool Marshalling(Parcel &parcel, const std::vector<NetStatsInfo> &statsInfos);
     static bool Unmarshalling(Parcel &parcel, NetStatsInfo &stats);

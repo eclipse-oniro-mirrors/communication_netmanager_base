@@ -34,6 +34,10 @@ config("netmgr_common_config") {
 }
 
 ohos_shared_library("net_manager_common") {
+  sanitize = {
+    cfi = true
+  }
+
   sources = [
     "common_utils/src/base64_utils.cpp",
     "common_utils/src/event_report.cpp",

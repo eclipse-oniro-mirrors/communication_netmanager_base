@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-struct INetAddr : public Parcelable {
+struct INetAddr final: public Parcelable {
     typedef enum {
         UNKNOWN = 0x00,
         IPV4 = 0x01,
@@ -39,7 +39,7 @@ struct INetAddr : public Parcelable {
 
     bool operator==(const INetAddr& obj) const;
 
-    virtual bool Marshalling(Parcel &parcel) const override;
+    bool Marshalling(Parcel &parcel) const override;
     static sptr<INetAddr> Unmarshalling(Parcel &parcel);
     static bool Marshalling(Parcel &parcel, const sptr<INetAddr> &object);
     std::string ToString(const std::string &tab) const;

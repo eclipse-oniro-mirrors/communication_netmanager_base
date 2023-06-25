@@ -35,7 +35,7 @@ static constexpr int32_t YEAR_MAX = 366;
 static constexpr int32_t PERIOD_DURATION_SIZE = 2;
 static constexpr int32_t QUOTA_POLICY_MAX_SIZE = 100;
 
-struct NetQuotaPolicy : public Parcelable {
+struct NetQuotaPolicy final: public Parcelable {
     struct NetLogotype {
         /* See {@link NetBearType} */
         int32_t netType = BEARER_DEFAULT;
@@ -75,7 +75,7 @@ struct NetQuotaPolicy : public Parcelable {
         std::string possessor;
     } quotapolicy;
 
-    virtual bool Marshalling(Parcel &parcel) const override;
+    bool Marshalling(Parcel &parcel) const override;
     static bool Marshalling(Parcel &parcel, const NetQuotaPolicy &quotaPolicy);
     static bool Marshalling(Parcel &parcel, const std::vector<NetQuotaPolicy> &quotaPolicies);
     static bool Unmarshalling(Parcel &parcel, NetQuotaPolicy &quotaPolicy);

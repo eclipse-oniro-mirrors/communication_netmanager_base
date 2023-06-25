@@ -27,6 +27,14 @@ config("napi_utils_public_config") {
 }
 
 ohos_shared_library("napi_utils") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    integer_overflow = true
+    boundary_sanitize = true
+    all_ubsan = true
+  }
+
   sources = [
     "src/base_context.cpp",
     "src/event_listener.cpp",

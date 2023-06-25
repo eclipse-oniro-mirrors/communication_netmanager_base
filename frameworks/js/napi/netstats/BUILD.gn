@@ -25,6 +25,14 @@ config("statistics_config") {
 }
 
 ohos_shared_library("statistics") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    integer_overflow = true
+    boundary_sanitize = true
+    all_ubsan = true
+  }
+
   sources = [
     "src/context/get_cellular_rxbytes_context.cpp",
     "src/context/get_iface_rxbytes_context.cpp",

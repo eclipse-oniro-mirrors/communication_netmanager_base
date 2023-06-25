@@ -42,7 +42,7 @@ enum NetBearType {
     BEARER_DEFAULT
 };
 
-struct NetAllCapabilities : public Parcelable {
+struct NetAllCapabilities final: public Parcelable {
     uint32_t linkUpBandwidthKbps_ = 0;
     uint32_t linkDownBandwidthKbps_ = 0;
     std::set<NetCap> netCaps_;
@@ -54,7 +54,7 @@ struct NetAllCapabilities : public Parcelable {
 
     bool CapsIsValid() const;
     bool CapsIsNull() const;
-    virtual bool Marshalling(Parcel &parcel) const override;
+    bool Marshalling(Parcel &parcel) const override;
     bool Unmarshalling(Parcel &parcel);
     std::string ToString(const std::string &tab) const;
 

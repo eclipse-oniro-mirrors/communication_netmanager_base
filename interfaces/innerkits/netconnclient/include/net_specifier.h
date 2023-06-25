@@ -24,7 +24,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-struct NetSpecifier : public Parcelable {
+struct NetSpecifier final: public Parcelable {
     std::string ident_;
     NetAllCapabilities netCapabilities_;
 
@@ -34,7 +34,7 @@ struct NetSpecifier : public Parcelable {
     void SetTypes(const std::set<NetBearType> &bearerTypes);
     void SetType(NetBearType bearerType);
 
-    virtual bool Marshalling(Parcel &parcel) const override;
+    bool Marshalling(Parcel &parcel) const override;
     static sptr<NetSpecifier> Unmarshalling(Parcel &parcel);
     static bool Marshalling(Parcel &parcel, const sptr<NetSpecifier> &object);
     std::string ToString(const std::string &tab) const;
