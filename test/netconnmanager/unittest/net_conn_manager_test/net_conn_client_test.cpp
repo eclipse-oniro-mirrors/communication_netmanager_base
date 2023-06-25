@@ -51,6 +51,10 @@ constexpr const char *TEST_DOMAIN9 = "https://www.example.com";
 constexpr const char *TEST_DOMAIN10 = "httpd://www.example.com";
 constexpr const char *TEST_LONG_HOST =
     "0123456789qwertyuiopasdfghjklzxcvbnm[]:;<>?!@#$%^&*()qwdqwrtfasfj4897qwe465791qwr87tq4fq7t8qt4654qwr";
+constexpr const char *TEST_LONG_EXCLUSION_LIST =
+    "www.test0.com,www.test1.com,www.test2.com,www.test3.com,www.test4.com,www.test5.com,www.test6.com,www.test7.com,"
+    "www.test8.com,www.test9.com,www.test10.com,www.test11.com,www.test12.com,www.test12.com,www.test12.com,www.test13."
+    "com,www.test14.com,www.test15.com,www.test16.com,www.test17.com,www.test18.com,www.test19.com,www.test20.com";
 constexpr const char *TEST_IFACE = "eth0";
 
 HapInfoParams testInfoParms = {.bundleName = "net_conn_manager_test",
@@ -556,7 +560,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest013, TestSize.Level1)
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest14, TestSize.Level1)
 {
     AccessToken token;
-    HttpProxy httpProxy = {TEST_LONG_HOST, 8080, {}};
+    HttpProxy httpProxy = {TEST_LONG_HOST, 8080, {TEST_LONG_EXCLUSION_LIST}};
     auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
 }

@@ -47,7 +47,7 @@ void NetHttpProxyTracker::ReadFromSettingsData(HttpProxy &httpProxy)
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Query global proxy port failed.");
     }
-    uint16_t port = (proxyPort.empty() || host.empty()) ? 0 : static_cast<uint16_t>(std::atoi(proxyPort.c_str()));
+    uint16_t port = (proxyPort.empty() || host.empty()) ? 0 : static_cast<uint16_t>(CommonUtils::StrToUint(proxyPort));
 
     Uri exclusionsUri(GLOBAL_PROXY_EXCLUSIONS_URI);
     ret = dataShareHelperUtils->Query(exclusionsUri, KEY_GLOBAL_PROXY_EXCLUSIONS, proxyExclusions);
@@ -71,6 +71,7 @@ bool NetHttpProxyTracker::WriteToSettingsData(HttpProxy &httpProxy)
     int32_t ret = dataShareHelperUtils->Update(hostUri, KEY_GLOBAL_PROXY_HOST, host);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Set host:%{public}s to datashare failed", host.c_str());
+        host = persistHttpProxy.GetHost();
         httpProxy.SetHost(std::move(host));
         httpProxy.SetPort(persistHttpProxy.GetPort());
         httpProxy.SetExclusionList(persistHttpProxy.GetExclusionList());
