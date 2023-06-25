@@ -59,6 +59,8 @@ ohos_unittest("net_conn_manager_test") {
     "$NETMANAGERNATIVE_ROOT/common/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
+    "$INNERKITS_ROOT/netmanagernative/include",
   ]
 
   deps = [
