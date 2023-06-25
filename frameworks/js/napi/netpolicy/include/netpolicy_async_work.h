@@ -35,13 +35,13 @@ public:
     static void ExecSetNetQuotaPolicies(napi_env env, void *data);
     static void ExecRestoreAllPolicies(napi_env env, void *data);
     static void ExecIsUidNetAllowed(napi_env env, void *data);
-    static void ExecSetDeviceIdleAllowList(napi_env env, void *data);
-    static void ExecGetDeviceIdleAllowList(napi_env env, void *data);
+    static void ExecSetDeviceIdleTrustlist(napi_env env, void *data);
+    static void ExecGetDeviceIdleTrustlist(napi_env env, void *data);
     static void ExecGetBackgroundPolicyByUid(napi_env env, void *data);
     static void ExecResetPolicies(napi_env env, void *data);
     static void ExecUpdateRemindPolicy(napi_env env, void *data);
-    static void ExecSetPowerSaveAllowList(napi_env env, void *data);
-    static void ExecGetPowerSaveAllowList(napi_env env, void *data);
+    static void ExecSetPowerSaveTrustlist(napi_env env, void *data);
+    static void ExecGetPowerSaveTrustlist(napi_env env, void *data);
 
     static void SetPolicyByUidCallback(napi_env env, napi_status status, void *data);
     static void GetPolicyByUidCallback(napi_env env, napi_status status, void *data);
@@ -52,13 +52,13 @@ public:
     static void SetNetQuotaPoliciesCallback(napi_env env, napi_status status, void *data);
     static void RestoreAllPoliciesCallback(napi_env env, napi_status status, void *data);
     static void IsUidNetAllowedCallback(napi_env env, napi_status status, void *data);
-    static void SetDeviceIdleAllowListCallback(napi_env env, napi_status status, void *data);
-    static void GetDeviceIdleAllowListCallback(napi_env env, napi_status status, void *data);
+    static void SetDeviceIdleTrustlistCallback(napi_env env, napi_status status, void *data);
+    static void GetDeviceIdleTrustlistCallback(napi_env env, napi_status status, void *data);
     static void GetBackgroundPolicyByUidCallback(napi_env env, napi_status status, void *data);
     static void ResetPoliciesCallback(napi_env env, napi_status status, void *data);
     static void UpdateRemindPolicyCallback(napi_env env, napi_status status, void *data);
-    static void SetPowerSaveAllowListCallback(napi_env env, napi_status status, void *data);
-    static void GetPowerSaveAllowListCallback(napi_env env, napi_status status, void *data);
+    static void SetPowerSaveTrustlistCallback(napi_env env, napi_status status, void *data);
+    static void GetPowerSaveTrustlistCallback(napi_env env, napi_status status, void *data);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

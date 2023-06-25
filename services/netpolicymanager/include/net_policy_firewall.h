@@ -34,7 +34,7 @@ public:
      * @param isAllowed The UID is into allow list or not.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    int32_t SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed);
+    int32_t SetDeviceIdleTrustlist(const std::vector<uint32_t> &uids, bool isAllowed);
 
     /**
      * Get the allow list of UID in device idle mode.
@@ -42,7 +42,7 @@ public:
      * @param uids The list of UIDs
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    int32_t GetDeviceIdleAllowedList(std::vector<uint32_t> &uids);
+    int32_t GetDeviceIdleTrustlist(std::vector<uint32_t> &uids);
 
     /**
      * Process network policy in device idle mode.
@@ -65,7 +65,7 @@ public:
      * @param isAllowed The UID is into allow list or not.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    int32_t SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed);
+    int32_t SetPowerSaveTrustlist(const std::vector<uint32_t> &uids, bool isAllowed);
 
     /**
      * Get the Power Save Allowed List object.
@@ -73,7 +73,7 @@ public:
      * @param uids The list of UIDs.
      * @return int32_t Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    int32_t GetPowerSaveAllowedList(std::vector<uint32_t> &uids);
+    int32_t GetPowerSaveTrustlist(std::vector<uint32_t> &uids);
 
     /**
      * Process network policy in device idle mode.

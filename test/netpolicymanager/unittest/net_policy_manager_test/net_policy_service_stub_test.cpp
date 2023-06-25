@@ -83,12 +83,12 @@ public:
         return 0;
     }
 
-    int32_t SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed) override
+    int32_t SetDeviceIdleTrustlist(const std::vector<uint32_t> &uids, bool isAllowed) override
     {
         return 0;
     }
 
-    int32_t GetDeviceIdleAllowedList(std::vector<uint32_t> &uids) override
+    int32_t GetDeviceIdleTrustlist(std::vector<uint32_t> &uids) override
     {
         return 0;
     }
@@ -118,12 +118,12 @@ public:
         return 0;
     }
 
-    int32_t GetPowerSaveAllowedList(std::vector<uint32_t> &uids) override
+    int32_t GetPowerSaveTrustlist(std::vector<uint32_t> &uids) override
     {
         return 0;
     }
 
-    int32_t SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed) override
+    int32_t SetPowerSaveTrustlist(const std::vector<uint32_t> &uids, bool isAllowed) override
     {
         return 0;
     }
@@ -433,11 +433,11 @@ HWTEST_F(NetPolicyServiceStubTest, OnSnoozePolicyTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnSetDeviceIdleAllowedListTest003
- * @tc.desc: Test NetPolicyServiceStub OnSetDeviceIdleAllowedList.
+ * @tc.name: OnSetDeviceIdleTrustlistTest003
+ * @tc.desc: Test NetPolicyServiceStub OnSetDeviceIdleTrustlist.
  * @tc.type: FUNC
  */
-HWTEST_F(NetPolicyServiceStubTest, OnSetDeviceIdleAllowedListTest003, TestSize.Level1)
+HWTEST_F(NetPolicyServiceStubTest, OnSetDeviceIdleTrustlistTest003, TestSize.Level1)
 {
     MessageParcel data;
     data.WriteBool(true);
@@ -447,22 +447,22 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetDeviceIdleAllowedListTest003, TestSize.L
     data.WriteBool(true);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_SET_IDLE_ALLOWED_LIST, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_SET_IDLE_TRUSTLIST, data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
- * @tc.name: OnGetDeviceIdleAllowedListTest001
- * @tc.desc: Test NetPolicyServiceStub OnGetDeviceIdleAllowedList.
+ * @tc.name: OnGetDeviceIdleTrustlistTest001
+ * @tc.desc: Test NetPolicyServiceStub OnGetDeviceIdleTrustlist.
  * @tc.type: FUNC
  */
-HWTEST_F(NetPolicyServiceStubTest, OnGetDeviceIdleAllowedListTest001, TestSize.Level1)
+HWTEST_F(NetPolicyServiceStubTest, OnGetDeviceIdleTrustlistTest001, TestSize.Level1)
 {
     MessageParcel data;
     data.WriteBool(true);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_GET_IDLE_ALLOWED_LIST, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_GET_IDLE_TRUSTLIST, data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -483,27 +483,27 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetDeviceIdlePolicyTest001, TestSize.Level1
 }
 
 /**
- * @tc.name: OnGetPowerSaveAllowedListTest001
- * @tc.desc: Test NetPolicyServiceStub OnGetPowerSaveAllowedList.
+ * @tc.name: OnGetPowerSaveTrustlistTest001
+ * @tc.desc: Test NetPolicyServiceStub OnGetPowerSaveTrustlist.
  * @tc.type: FUNC
  */
-HWTEST_F(NetPolicyServiceStubTest, OnGetPowerSaveAllowedListTest001, TestSize.Level1)
+HWTEST_F(NetPolicyServiceStubTest, OnGetPowerSaveTrustlistTest001, TestSize.Level1)
 {
     MessageParcel data;
     data.WriteBool(true);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(
-        INetPolicyService::CMD_NPS_GET_POWER_SAVE_ALLOWED_LIST, data, reply, option);
+        INetPolicyService::CMD_NPS_GET_POWER_SAVE_TRUSTLIST, data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
- * @tc.name: OnSetPowerSaveAllowedListTest001
- * @tc.desc: Test NetPolicyServiceStub OnSetPowerSaveAllowedList.
+ * @tc.name: OnSetPowerSaveTrustlistTest001
+ * @tc.desc: Test NetPolicyServiceStub OnSetPowerSaveTrustlist.
  * @tc.type: FUNC
  */
-HWTEST_F(NetPolicyServiceStubTest, OnSetPowerSaveAllowedListTest001, TestSize.Level1)
+HWTEST_F(NetPolicyServiceStubTest, OnSetPowerSaveTrustlistTest001, TestSize.Level1)
 {
     MessageParcel data;
     data.WriteBool(true);
@@ -514,7 +514,7 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetPowerSaveAllowedListTest001, TestSize.Le
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(
-        INetPolicyService::CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST, data, reply, option);
+        INetPolicyService::CMD_NPS_SET_POWER_SAVE_TRUSTLIST, data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

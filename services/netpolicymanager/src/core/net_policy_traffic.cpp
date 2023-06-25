@@ -153,19 +153,19 @@ void NetPolicyTraffic::FormalizeQuotaPolicies(const std::vector<NetQuotaPolicy> 
             continue;
         }
         if (quotaPolicy.quotapolicy.limitBytes == DATA_USAGE_UNKNOWN) {
-            quotaPolicy.quotapolicy.limitAction = LIMIT_ACTION_AUTO_BILL;
+            quotaPolicy.quotapolicy.limitAction = LIMIT_ACTION_ALERT_ONLY;
         } else if (quotaPolicy.quotapolicy.warningBytes == DATA_USAGE_UNKNOWN) {
             quotaPolicy.quotapolicy.warningBytes =
                 quotaPolicy.quotapolicy.limitBytes * NINETY_PERCENTAGE / HUNDRED_PERCENTAGE;
         }
-        if (quotaPolicy.quotapolicy.limitAction == LIMIT_ACTION_AUTO_BILL) {
+        if (quotaPolicy.quotapolicy.limitAction == LIMIT_ACTION_ALERT_ONLY) {
             quotaPolicy.quotapolicy.limitBytes = DATA_USAGE_UNLIMITED;
         }
         if (quotaPolicy.quotapolicy.warningBytes > quotaPolicy.quotapolicy.limitBytes) {
             quotaPolicy.quotapolicy.warningBytes = DATA_USAGE_UNLIMITED;
         }
         if (quotaPolicy.quotapolicy.limitBytes == DATA_USAGE_UNLIMITED) {
-            quotaPolicy.quotapolicy.limitAction = LIMIT_ACTION_AUTO_BILL;
+            quotaPolicy.quotapolicy.limitAction = LIMIT_ACTION_ALERT_ONLY;
         }
         quotaPolicies_.push_back(quotaPolicy);
     }
@@ -269,7 +269,7 @@ void NetPolicyTraffic::UpdateNetEnableStatus(const NetQuotaPolicy &quotaPolicy)
 {
     NETMGR_LOG_D("UpdateNetEnableStatus metered[%{public}d] quotapolicy.limitAction[%{public}d]",
                  quotaPolicy.quotapolicy.metered, quotaPolicy.quotapolicy.limitAction);
-    if (quotaPolicy.quotapolicy.metered || quotaPolicy.quotapolicy.limitAction == LIMIT_ACTION_DISABLE) {
+    if (quotaPolicy.quotapolicy.metered || quotaPolicy.quotapolicy.limitAction == LIMIT_ACTION_ACCESS_DISABLED) {
         SetNetworkEnableStatus(quotaPolicy, false);
     }
 }

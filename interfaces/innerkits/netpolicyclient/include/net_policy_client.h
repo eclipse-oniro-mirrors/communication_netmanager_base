@@ -235,7 +235,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    [[nodiscard]] int32_t SetDeviceIdleAllowedList(const std::vector<uint32_t> &uid, bool isAllowed);
+    [[nodiscard]] int32_t SetDeviceIdleTrustlist(const std::vector<uint32_t> &uid, bool isAllowed);
 
     /**
      * GetIdleTrustlist for get trust list for Idle status
@@ -256,7 +256,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    [[nodiscard]] int32_t GetDeviceIdleAllowedList(std::vector<uint32_t> &uids);
+    [[nodiscard]] int32_t GetDeviceIdleTrustlist(std::vector<uint32_t> &uids);
 
     /**
      * Process network policy in device idle mode.
@@ -276,7 +276,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    [[nodiscard]] int32_t GetPowerSaveAllowedList(std::vector<uint32_t> &uids);
+    [[nodiscard]] int32_t GetPowerSaveTrustlist(std::vector<uint32_t> &uids);
 
     /**
      * Get the allow list of UID in power save mode.
@@ -287,7 +287,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    [[nodiscard]] int32_t SetPowerSaveAllowedList(const std::vector<uint32_t> &uid, bool isAllowed);
+    [[nodiscard]] int32_t SetPowerSaveTrustlist(const std::vector<uint32_t> &uid, bool isAllowed);
 
     /**
      *  Set the Power Save Policy object

@@ -23,12 +23,12 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-SetDeviceIdleAllowListContext::SetDeviceIdleAllowListContext(napi_env env, EventManager *manager)
+SetDeviceIdleTrustlistContext::SetDeviceIdleTrustlistContext(napi_env env, EventManager *manager)
     : BaseContext(env, manager)
 {
 }
 
-void SetDeviceIdleAllowListContext::ParseParams(napi_value *params, size_t paramsCount)
+void SetDeviceIdleTrustlistContext::ParseParams(napi_value *params, size_t paramsCount)
 {
     if (!CheckParamsType(params, paramsCount)) {
         NETMANAGER_BASE_LOGE("Check params failed");
@@ -58,7 +58,7 @@ void SetDeviceIdleAllowListContext::ParseParams(napi_value *params, size_t param
     SetParseOK(true);
 }
 
-bool SetDeviceIdleAllowListContext::CheckParamsType(napi_value *params, size_t paramsCount)
+bool SetDeviceIdleTrustlistContext::CheckParamsType(napi_value *params, size_t paramsCount)
 {
     if (paramsCount == PARAM_DOUBLE_OPTIONS) {
         return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_object

@@ -533,7 +533,7 @@ void UpdateRemindPolicyFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(INetPolicyService::CMD_NPS_UPDATE_REMIND_POLICY, dataParcel);
 }
 
-void SetDeviceIdleAllowedListFuzzTest(const uint8_t *data, size_t size)
+void SetDeviceIdleTrustlistFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
         return;
@@ -554,7 +554,7 @@ void SetDeviceIdleAllowedListFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteUInt32Vector(uids);
     dataParcel.WriteBool(isAllowed);
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_SET_IDLE_ALLOWED_LIST, dataParcel);
+    OnRemoteRequest(INetPolicyService::CMD_NPS_SET_IDLE_TRUSTLIST, dataParcel);
 }
 
 void SetDeviceIdlePolicyFuzzTest(const uint8_t *data, size_t size)
@@ -579,7 +579,7 @@ void SetDeviceIdlePolicyFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(INetPolicyService::CMD_NPS_SET_DEVICE_IDLE_POLICY, dataParcel);
 }
 
-void SetPowerSaveAllowedListFuzzTest(const uint8_t *data, size_t size)
+void SetPowerSaveTrustlistFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size <= 0)) {
         return;
@@ -600,10 +600,10 @@ void SetPowerSaveAllowedListFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteBool(isAllowed);
     dataParcel.WriteUInt32Vector(uids);
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST, dataParcel);
+    OnRemoteRequest(INetPolicyService::CMD_NPS_SET_POWER_SAVE_TRUSTLIST, dataParcel);
 }
 
-void GetPowerSaveAllowedListFuzzTest(const uint8_t *data, size_t size)
+void GetPowerSaveTrustlistFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size <= 0)) {
         return;
@@ -619,7 +619,7 @@ void GetPowerSaveAllowedListFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_GET_POWER_SAVE_ALLOWED_LIST, dataParcel);
+    OnRemoteRequest(INetPolicyService::CMD_NPS_GET_POWER_SAVE_TRUSTLIST, dataParcel);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
@@ -638,10 +638,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::IsUidNetAllowedFuzzTest(data, size);
     OHOS::NetManagerStandard::ResetPoliciesFuzzTest(data, size);
     OHOS::NetManagerStandard::UpdateRemindPolicyFuzzTest(data, size);
-    OHOS::NetManagerStandard::SetDeviceIdleAllowedListFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetDeviceIdleTrustlistFuzzTest(data, size);
     OHOS::NetManagerStandard::SetDeviceIdlePolicyFuzzTest(data, size);
-    OHOS::NetManagerStandard::SetPowerSaveAllowedListFuzzTest(data, size);
-    OHOS::NetManagerStandard::GetPowerSaveAllowedListFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetPowerSaveTrustlistFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetPowerSaveTrustlistFuzzTest(data, size);
     OHOS::NetManagerStandard::UnregisterNetPolicyCallbackFuzzTest(data, size);
     return 0;
 }
