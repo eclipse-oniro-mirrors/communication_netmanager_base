@@ -1537,7 +1537,7 @@ void NetworkCreateVirtualFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
-    
+
     int32_t netId = GetData<int32_t>();
     bool hasDns = GetData<bool>();
 
@@ -1560,13 +1560,12 @@ void NetworkAddUidsFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
-    
+
     int32_t netId = GetData<int32_t>();
     std::vector<UidRange> uidRanges;
     UidRange uid;
-    int32_t rangesSize =  GetData<int32_t>() % VECTOR_MAX_SIZE;
-    for (int i = 0; i < rangesSize; i++)
-    {
+    int32_t rangesSize = GetData<int32_t>() % VECTOR_MAX_SIZE;
+    for (int i = 0; i < rangesSize; i++) {
         uidRanges.emplace_back(uid);
     }
 
@@ -1592,13 +1591,12 @@ void NetworkDelUidsFuzzTest(const uint8_t *data, size_t size)
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
-    
+
     int32_t netId = GetData<int32_t>();
     std::vector<UidRange> uidRanges;
     UidRange uid;
-    int32_t rangesSize =  GetData<int32_t>() % VECTOR_MAX_SIZE;
-    for (int i = 0; i < rangesSize; i++)
-    {
+    int32_t rangesSize = GetData<int32_t>() % VECTOR_MAX_SIZE;
+    for (int i = 0; i < rangesSize; i++) {
         uidRanges.emplace_back(uid);
     }
 
