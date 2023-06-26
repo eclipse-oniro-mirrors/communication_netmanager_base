@@ -349,6 +349,7 @@ private:
     int32_t RestrictBackgroundChangedAsync(bool restrictBackground);
     void SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy);
     void RequestAllNetworkExceptDefault();
+    void LoadGlobalHttpProxy();
 
 private:
     enum ServiceRunningState {
@@ -367,6 +368,7 @@ private:
     std::unique_ptr<NetScore> netScore_ = nullptr;
     sptr<NetConnServiceIface> serviceIface_ = nullptr;
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
+    std::atomic<bool> isGlobalProxyLoaded_ = false;
     HttpProxy globalHttpProxy_;
     std::mutex netManagerMutex_;
     std::shared_ptr<AppExecFwk::EventRunner> netConnEventRunner_ = nullptr;
