@@ -59,41 +59,35 @@ void NetHttpProxyTracker::ReadFromSettingsData(HttpProxy &httpProxy)
     httpProxy = {host, port, exclusionList};
 }
 
-bool NetHttpProxyTracker::WriteToSettingsData(const HttpProxy &newHttpProxy, HttpProxy &oldHttpProxy)
+bool NetHttpProxyTracker::WriteToSettingsData(HttpProxy &httpProxy)
 {
-    std::string host = newHttpProxy.GetHost().empty() ? Base64::Encode(DEFAULT_HTTP_PROXY_HOST)
-                                                      : Base64::Encode(newHttpProxy.GetHost());
+    std::string host =
+        httpProxy.GetHost().empty() ? Base64::Encode(DEFAULT_HTTP_PROXY_HOST) : Base64::Encode(httpProxy.GetHost());
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
     Uri hostUri(GLOBAL_PROXY_HOST_URI);
     int32_t ret = dataShareHelperUtils->Update(hostUri, KEY_GLOBAL_PROXY_HOST, host);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Set host:%{public}s to datashare failed", host.c_str());
         return false;
-    } else {
-        host = newHttpProxy.GetHost();
-        oldHttpProxy.SetHost(std::move(host));
     }
 
     Uri portUri(GLOBAL_PROXY_PORT_URI);
-    std::string port =
-        newHttpProxy.GetHost().empty() ? DEFAULT_HTTP_PROXY_PORT : std::to_string(newHttpProxy.GetPort());
+    std::string port = httpProxy.GetHost().empty() ? DEFAULT_HTTP_PROXY_PORT : std::to_string(httpProxy.GetPort());
     ret = dataShareHelperUtils->Update(portUri, KEY_GLOBAL_PROXY_PORT, port);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Set port:%{public}s to datashare failed", port.c_str());
-    } else {
-        oldHttpProxy.SetPort(newHttpProxy.GetPort());
+        return false;
     }
 
-    std::string exclusions = GetExclusionsAsString(newHttpProxy.GetExclusionList());
-    exclusions =
-        (newHttpProxy.GetHost().empty() || exclusions.empty()) ? DEFAULT_HTTP_PROXY_EXCLUSION_LIST : exclusions;
+    std::string exclusions = GetExclusionsAsString(httpProxy.GetExclusionList());
+    exclusions = (httpProxy.GetHost().empty() || exclusions.empty()) ? DEFAULT_HTTP_PROXY_EXCLUSION_LIST : exclusions;
     Uri exclusionsUri(GLOBAL_PROXY_EXCLUSIONS_URI);
     ret = dataShareHelperUtils->Update(exclusionsUri, KEY_GLOBAL_PROXY_EXCLUSIONS, exclusions);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Set exclusions:%{public}s to datashare", exclusions.c_str());
-    } else {
-        oldHttpProxy.SetExclusionList(ParseExclusionList(exclusions));
+        return false;
     }
+    httpProxy.SetExclusionList(ParseExclusionList(exclusions));
     return true;
 }
 

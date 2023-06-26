@@ -26,7 +26,7 @@ public:
     ~NetHttpProxyTracker() = default;
 
     void ReadFromSettingsData(HttpProxy &httpProxy);
-    bool WriteToSettingsData(const HttpProxy &newHttpProxy, HttpProxy &oldHttpProxy);
+    bool WriteToSettingsData(HttpProxy &httpProxy);
 
 private:
     std::list<std::string> ParseExclusionList(const std::string &exclusions) const;
