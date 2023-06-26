@@ -13,8 +13,16 @@
 
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
+config("netsys_controller") {
+  include_dirs = [ 
+    "include",
+    "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
+    "$INNERKITS_ROOT/netstatsclient/include",
+  ]
+}
 
 ohos_shared_library("netsys_controller") {
+ all_dependent_configs = [ ":netsys_controller" ]
   sources = [
     "src/mock_netsys_native_client.cpp",
     "src/netsys_controller.cpp",
