@@ -502,7 +502,7 @@ bool IsValidDomain(const std::string &domain)
     std::string pattern = HOST_DOMAIN_PATTERN_HEADER;
     pattern = std::accumulate(HOST_DOMAIN_TLDS.begin(), HOST_DOMAIN_TLDS.end(), pattern,
                               [](std::string pattern, std::string tlds) { return pattern + tlds + TLDS_SPLIT_SYMBOL; });
-    pattern = pattern + HOST_DOMAIN_PATTERN_TAIL;
+    pattern = pattern.replace(pattern.size() - 1, 1, "") + HOST_DOMAIN_PATTERN_TAIL;
     std::regex reg(pattern);
     if (!std::regex_match(domain, reg)) {
         NETMGR_LOG_E("Domain:%{public}s regex match failed.", domain.c_str());
