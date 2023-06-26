@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMUNICATIONNETMANAGERBASE_SETIDLEDEVICEALLOWLIST_CONTEXT_H
-#define COMMUNICATIONNETMANAGERBASE_SETIDLEDEVICEALLOWLIST_CONTEXT_H
+#ifndef COMMUNICATIONNETMANAGERBASE_SETIDLEDEVICETRUSTLIST_CONTEXT_H
+#define COMMUNICATIONNETMANAGERBASE_SETIDLEDEVICETRUSTLIST_CONTEXT_H
 
 #include <cstddef>
 #include <cstdint>
@@ -25,10 +25,10 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class SetDeviceIdleAllowListContext final : public BaseContext {
+class SetDeviceIdleTrustlistContext final : public BaseContext {
 public:
-    SetDeviceIdleAllowListContext() = delete;
-    explicit SetDeviceIdleAllowListContext(napi_env env, EventManager *manager);
+    SetDeviceIdleTrustlistContext() = delete;
+    explicit SetDeviceIdleTrustlistContext(napi_env env, EventManager *manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
@@ -41,4 +41,4 @@ private:
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // COMMUNICATIONNETMANAGERBASE_SETIDLEDEVICEALLOWLIST_CONTEXT_H
+#endif // COMMUNICATIONNETMANAGERBASE_SETIDLEDEVICETRUSTLIST_CONTEXT_H

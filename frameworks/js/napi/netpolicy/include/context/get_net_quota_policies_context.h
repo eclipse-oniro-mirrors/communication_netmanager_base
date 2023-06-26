@@ -46,8 +46,8 @@ private:
 };
 
 using GetBackgroundPolicyContext = GetNetQuotaPoliciesContext;
-using GetDeviceIdleAllowListContext = GetNetQuotaPoliciesContext;
-using GetPowerSaveAllowListContext = GetNetQuotaPoliciesContext;
+using GetDeviceIdleTrustlistContext = GetNetQuotaPoliciesContext;
+using GetPowerSaveTrustlistContext = GetNetQuotaPoliciesContext;
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // COMMUNICATIONNETMANAGERBASE_GETNETQUOTAPOLICIES_CONTEXT_H

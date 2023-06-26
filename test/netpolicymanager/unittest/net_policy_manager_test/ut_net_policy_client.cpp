@@ -459,15 +459,15 @@ HWTEST_F(UtNetPolicyClient, SetIdleTrustlist001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetDeviceIdleAllowedList001
- * @tc.desc: Test NetPolicyClient SetDeviceIdleAllowedList.
+ * @tc.name: SetDeviceIdleTrustlist001
+ * @tc.desc: Test NetPolicyClient SetDeviceIdleTrustlist.
  * @tc.type: FUNC
  */
-HWTEST_F(UtNetPolicyClient, SetDeviceIdleAllowedList001, TestSize.Level1)
+HWTEST_F(UtNetPolicyClient, SetDeviceIdleTrustlist001, TestSize.Level1)
 {
     AccessToken token(testInfoParms1, testPolicyPrams1);
-    int32_t ret = g_netPolicyClient->SetDeviceIdleAllowedList({TEST_UID}, true);
-    std::cout << "NetPolicyClient018 SetDeviceIdleAllowedList ret:" << ret << std::endl;
+    int32_t ret = g_netPolicyClient->SetDeviceIdleTrustlist({TEST_UID}, true);
+    std::cout << "NetPolicyClient018 SetDeviceIdleTrustlist ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -486,16 +486,16 @@ HWTEST_F(UtNetPolicyClient, GetIdleTrustlist001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetDeviceIdleAllowedList001
- * @tc.desc: Test NetPolicyClient GetDeviceIdleAllowedList.
+ * @tc.name: GetDeviceIdleTrustlist001
+ * @tc.desc: Test NetPolicyClient GetDeviceIdleTrustlist.
  * @tc.type: FUNC
  */
-HWTEST_F(UtNetPolicyClient, GetDeviceIdleAllowedList001, TestSize.Level1)
+HWTEST_F(UtNetPolicyClient, GetDeviceIdleTrustlist001, TestSize.Level1)
 {
     std::vector<uint32_t> uids;
     AccessToken token(testInfoParms1, testPolicyPrams1);
-    int32_t ret = g_netPolicyClient->GetDeviceIdleAllowedList(uids);
-    std::cout << "NetPolicyClient020 GetDeviceIdleAllowedList ret:" << ret << std::endl;
+    int32_t ret = g_netPolicyClient->GetDeviceIdleTrustlist(uids);
+    std::cout << "NetPolicyClient020 GetDeviceIdleTrustlist ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

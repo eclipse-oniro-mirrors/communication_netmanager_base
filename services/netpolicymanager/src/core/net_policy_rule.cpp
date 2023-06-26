@@ -296,7 +296,7 @@ int32_t NetPolicyRule::GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backgrou
     }
 
     if ((policy & NET_POLICY_ALLOW_METERED_BACKGROUND) != 0) {
-        backgroundPolicyOfUid = NET_BACKGROUND_POLICY_ALLOWEDLIST;
+        backgroundPolicyOfUid = NET_BACKGROUND_POLICY_TRUSTLIST;
         return NETMANAGER_SUCCESS;
     }
     backgroundPolicyOfUid = NET_BACKGROUND_POLICY_DISABLE;

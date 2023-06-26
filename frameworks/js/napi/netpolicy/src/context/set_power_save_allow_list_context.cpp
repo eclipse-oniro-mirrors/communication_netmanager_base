@@ -23,12 +23,12 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-SetPowerSaveAllowListContext::SetPowerSaveAllowListContext(napi_env env, EventManager *manager)
+SetPowerSaveTrustlistContext::SetPowerSaveTrustlistContext(napi_env env, EventManager *manager)
     : BaseContext(env, manager)
 {
 }
 
-void SetPowerSaveAllowListContext::ParseParams(napi_value *params, size_t paramsCount)
+void SetPowerSaveTrustlistContext::ParseParams(napi_value *params, size_t paramsCount)
 {
     if (!CheckParamsType(params, paramsCount)) {
         NETMANAGER_BASE_LOGE("Check params failed");
@@ -57,7 +57,7 @@ void SetPowerSaveAllowListContext::ParseParams(napi_value *params, size_t params
     SetParseOK(true);
 }
 
-bool SetPowerSaveAllowListContext::CheckParamsType(napi_value *params, size_t paramsCount)
+bool SetPowerSaveTrustlistContext::CheckParamsType(napi_value *params, size_t paramsCount)
 {
     if (paramsCount == PARAM_DOUBLE_OPTIONS) {
         return NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_object

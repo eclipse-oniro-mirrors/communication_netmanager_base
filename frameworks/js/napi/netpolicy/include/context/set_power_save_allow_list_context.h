@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMUNICATIONNETMANAGERBASE_SETPOWERSAVEALLOWLIST_CONTEXT_H
-#define COMMUNICATIONNETMANAGERBASE_SETPOWERSAVEALLOWLIST_CONTEXT_H
+#ifndef COMMUNICATIONNETMANAGERBASE_SETPOWERSAVETRUSTLIST_CONTEXT_H
+#define COMMUNICATIONNETMANAGERBASE_SETPOWERSAVETRUSTLIST_CONTEXT_H
 
 #include <cstddef>
 #include <cstdint>
@@ -25,10 +25,10 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class SetPowerSaveAllowListContext final : public BaseContext {
+class SetPowerSaveTrustlistContext final : public BaseContext {
 public:
-    SetPowerSaveAllowListContext() = delete;
-    SetPowerSaveAllowListContext(napi_env env, EventManager *manager);
+    SetPowerSaveTrustlistContext() = delete;
+    SetPowerSaveTrustlistContext(napi_env env, EventManager *manager);
 
     void ParseParams(napi_value *params, size_t paramsCount);
 
@@ -41,4 +41,4 @@ private:
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // COMMUNICATIONNETMANAGERBASE_SETPOWERSAVEALLOWLIST_CONTEXT_H
+#endif // COMMUNICATIONNETMANAGERBASE_SETPOWERSAVETRUSTLIST_CONTEXT_H

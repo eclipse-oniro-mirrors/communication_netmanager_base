@@ -80,7 +80,7 @@ void UtNetPolicyTraffic::SetUp()
     quotaPolicy1.quotapolicy.lastWarningRemind = TEST_LAST_WARNING_REMIND_1;
     quotaPolicy1.quotapolicy.lastLimitRemind = TEST_LAST_LIMIT_REMIND_1;
     quotaPolicy1.quotapolicy.metered = true;
-    quotaPolicy1.quotapolicy.limitAction = LimitAction::LIMIT_ACTION_AUTO_BILL;
+    quotaPolicy1.quotapolicy.limitAction = LimitAction::LIMIT_ACTION_ALERT_ONLY;
 
     NetQuotaPolicy quotaPolicy2;
     quotaPolicy2.networkmatchrule.simId = ICCID_2;
@@ -91,7 +91,7 @@ void UtNetPolicyTraffic::SetUp()
     quotaPolicy2.quotapolicy.lastWarningRemind = TEST_LAST_WARNING_REMIND_2;
     quotaPolicy2.quotapolicy.lastLimitRemind = TEST_LAST_LIMIT_REMIND_2;
     quotaPolicy2.quotapolicy.metered = true;
-    quotaPolicy2.quotapolicy.limitAction = LimitAction::LIMIT_ACTION_DISABLE;
+    quotaPolicy2.quotapolicy.limitAction = LimitAction::LIMIT_ACTION_ACCESS_DISABLED;
 
     std::vector<NetQuotaPolicy> quotaPolicies;
     quotaPolicies.push_back(quotaPolicy1);
@@ -329,7 +329,7 @@ HWTEST_F(UtNetPolicyTraffic, UpdateNetEnableStatus001, TestSize.Level1)
     g_netPolicyTraffic->UpdateNetEnableStatus(quotaPolicy);
 
     quotaPolicy.quotapolicy.metered = false;
-    quotaPolicy.quotapolicy.limitAction = LIMIT_ACTION_DISABLE;
+    quotaPolicy.quotapolicy.limitAction = LIMIT_ACTION_ACCESS_DISABLED;
     g_netPolicyTraffic->UpdateNetEnableStatus(quotaPolicy);
 
     quotaPolicy.quotapolicy.limitAction = LIMIT_ACTION_NONE;

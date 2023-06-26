@@ -570,7 +570,7 @@ int32_t NetPolicyServiceProxy::UpdateRemindPolicy(int32_t netType, const std::st
     return result;
 }
 
-int32_t NetPolicyServiceProxy::SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
+int32_t NetPolicyServiceProxy::SetDeviceIdleTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -595,7 +595,7 @@ int32_t NetPolicyServiceProxy::SetDeviceIdleAllowedList(const std::vector<uint32
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NPS_SET_IDLE_ALLOWED_LIST, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_SET_IDLE_TRUSTLIST, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return retCode;
@@ -609,7 +609,7 @@ int32_t NetPolicyServiceProxy::SetDeviceIdleAllowedList(const std::vector<uint32
     return result;
 }
 
-int32_t NetPolicyServiceProxy::GetDeviceIdleAllowedList(std::vector<uint32_t> &uids)
+int32_t NetPolicyServiceProxy::GetDeviceIdleTrustlist(std::vector<uint32_t> &uids)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -625,7 +625,7 @@ int32_t NetPolicyServiceProxy::GetDeviceIdleAllowedList(std::vector<uint32_t> &u
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NPS_GET_IDLE_ALLOWED_LIST, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_GET_IDLE_TRUSTLIST, data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return retCode;
@@ -714,7 +714,7 @@ int32_t NetPolicyServiceProxy::SetPowerSavePolicy(bool enable)
     return result;
 }
 
-int32_t NetPolicyServiceProxy::GetPowerSaveAllowedList(std::vector<uint32_t> &uids)
+int32_t NetPolicyServiceProxy::GetPowerSaveTrustlist(std::vector<uint32_t> &uids)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -730,7 +730,7 @@ int32_t NetPolicyServiceProxy::GetPowerSaveAllowedList(std::vector<uint32_t> &ui
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NPS_GET_POWER_SAVE_ALLOWED_LIST, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_GET_POWER_SAVE_TRUSTLIST, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
@@ -749,7 +749,7 @@ int32_t NetPolicyServiceProxy::GetPowerSaveAllowedList(std::vector<uint32_t> &ui
     return result;
 }
 
-int32_t NetPolicyServiceProxy::SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
+int32_t NetPolicyServiceProxy::SetPowerSaveTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -775,7 +775,7 @@ int32_t NetPolicyServiceProxy::SetPowerSaveAllowedList(const std::vector<uint32_
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST, data, reply, option);
+    int32_t retCode = remote->SendRequest(CMD_NPS_SET_POWER_SAVE_TRUSTLIST, data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;

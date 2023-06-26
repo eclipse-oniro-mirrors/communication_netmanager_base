@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,11 +43,10 @@ void InterfaceManagerTest::TearDown() {}
 
 HWTEST_F(InterfaceManagerTest, GetMtuTest001, TestSize.Level1)
 {
-    std::string interfaceName;
-    auto ret = InterfaceManager::GetMtu(interfaceName.data());
+    auto ret = InterfaceManager::GetMtu(nullptr);
     EXPECT_EQ(ret, -1);
 
-    interfaceName = "IfaceNameIsExtMax16";
+    std::string interfaceName = "IfaceNameIsExtMax16";
     ret = InterfaceManager::GetMtu(interfaceName.data());
     EXPECT_EQ(ret, -1);
 }
@@ -83,13 +82,22 @@ HWTEST_F(InterfaceManagerTest, SetMtuTest003, TestSize.Level1)
     if (eth0NotExist) {
         return;
     }
-    std::string mtuValue;
-    auto ret = InterfaceManager::SetMtu(interfaceName.data(), mtuValue.data());
-    EXPECT_LE(ret, 0);
+
+    char *mtuValue = nullptr;
+    auto ret = InterfaceManager::SetMtu(interfaceName.data(), mtuValue);
+    EXPECT_EQ(ret, -1);
+
+    const char *cmtu = "";
+    ret = InterfaceManager::SetMtu(interfaceName.data(), cmtu);
+    EXPECT_EQ(ret, -1);
 
     std::string mtu = "1500";
     ret = InterfaceManager::SetMtu(interfaceName.data(), mtu.data());
     EXPECT_EQ(ret, 0);
+
+    mtu = "1500000000000000";
+    ret = InterfaceManager::SetMtu(interfaceName.data(), mtu.data());
+    EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(InterfaceManagerTest, AddAddressTest001, TestSize.Level1)
@@ -125,6 +133,14 @@ HWTEST_F(InterfaceManagerTest, AddAddressTest004, TestSize.Level1)
     int32_t prefixLength = 45;
     auto ret = InterfaceManager::AddAddress(interfaceName.c_str(), addr.data(), prefixLength);
     EXPECT_EQ(ret, -errno);
+}
+
+HWTEST_F(InterfaceManagerTest, AddAddressTest005, TestSize.Level1)
+{
+    std::string interfaceName = "eth";
+    int32_t prefixLength = 45;
+    auto ret = InterfaceManager::AddAddress(interfaceName.c_str(), nullptr, prefixLength);
+    EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(InterfaceManagerTest, DelAddressTest001, TestSize.Level1)

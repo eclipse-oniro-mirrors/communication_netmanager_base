@@ -75,14 +75,14 @@
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_manager_if",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_parcel",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:socket_permission",
-                    "//foundation/communication/netmanager_base/services/netsyscontroller:netsys_controller",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netpolicyclient:net_policy_manager_if",
                     "//foundation/communication/netmanager_base/interfaces/innerkits/netstatsclient:net_stats_manager_if",
-                    "//foundation/communication/netmanager_base/interfaces/innerkits/netmanagernative:net_native_manager_if"
+                    "//foundation/communication/netmanager_base/interfaces/innerkits/netmanagernative:net_native_manager_if",
+                    "//foundation/communication/netmanager_base/services/netsyscontroller:netsys_controller",
+                    "//foundation/communication/netmanager_base/services/netmanagernative/fwmarkclient:fwmark_client"
                 ],
                 "service_group": [
                     "//foundation/communication/netmanager_base/services/netmanagernative:netsys_native_manager",
-                    "//foundation/communication/netmanager_base/services/netmanagernative/fwmarkclient:fwmark_client",
                     "//foundation/communication/netmanager_base/services/netmanagernative/netsys_client:netsys_client",
                     "//foundation/communication/netmanager_base/services/netconnmanager:net_conn_manager",
                     "//foundation/communication/netmanager_base/services/netpolicymanager:net_policy_manager",
@@ -214,6 +214,16 @@
                             "netsys_native_client.h"
                         ],
                         "header_base": "//foundation/communication/netmanager_base/services/netsyscontroller/include"
+                    }
+                },
+                {
+                    "type": "so",
+                    "name": "//foundation/communication/netmanager_base/services/netmanagernative/fwmarkclient:fwmark_client",
+                    "header": {
+                        "header_files": [
+                            "fwmark_client.h"
+                        ],
+                        "header_base": "//foundation/communication/netmanager_base/services/netmanagernative/fwmarkclient/include"
                     }
                 }
             ],
