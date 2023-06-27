@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 config("netsys_controller_include") {
-  include_dirs = [ 
+  include_dirs = [
     "include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$INNERKITS_ROOT/netstatsclient/include",
