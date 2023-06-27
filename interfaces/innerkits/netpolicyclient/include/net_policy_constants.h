@@ -66,9 +66,9 @@ enum NetBackgroundPolicy {
     /* Apps can't use metered networks on background. */
     NET_BACKGROUND_POLICY_DISABLE = 2,
     /* Only apps in allowedlist can use metered networks on background. */
-    NET_BACKGROUND_POLICY_ALLOWEDLIST = 3,
+    NET_BACKGROUND_POLICY_TRUSTLIST = 3,
 };
-
+ 
 enum PolicyTransCondition {
     POLICY_TRANS_CONDITION_UID_POLICY_NONE = 1 << 0,
     POLICY_TRANS_CONDITION_ALLOW_METERED_BACKGROUND = 1 << 1,
@@ -86,9 +86,9 @@ enum LimitAction {
     /* Default action, do nothing. */
     LIMIT_ACTION_NONE = -1,
     /* Access is disabled, when quota policy hit the limit */
-    LIMIT_ACTION_DISABLE = 0,
+    LIMIT_ACTION_ACCESS_DISABLED = 0,
     /* The user is billed automatically, when quota policy hit the limit */
-    LIMIT_ACTION_AUTO_BILL = 1,
+    LIMIT_ACTION_ALERT_ONLY = 1,
 };
 
 enum RemindType {

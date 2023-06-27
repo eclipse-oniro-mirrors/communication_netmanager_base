@@ -38,11 +38,11 @@ std::map<uint32_t, const char *> g_codeNPS = {
     {INetPolicyService::CMD_NPS_REGISTER_NET_POLICY_CALLBACK, Permission::MANAGE_NET_STRATEGY},
     {INetPolicyService::CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK, Permission::MANAGE_NET_STRATEGY},
     {INetPolicyService::CMD_NPS_GET_BACKGROUND_POLICY_BY_UID, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_SET_IDLE_ALLOWED_LIST, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_GET_IDLE_ALLOWED_LIST, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_SET_IDLE_TRUSTLIST, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_GET_IDLE_TRUSTLIST, Permission::MANAGE_NET_STRATEGY},
     {INetPolicyService::CMD_NPS_SET_DEVICE_IDLE_POLICY, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_GET_POWER_SAVE_ALLOWED_LIST, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_GET_POWER_SAVE_TRUSTLIST, Permission::MANAGE_NET_STRATEGY},
+    {INetPolicyService::CMD_NPS_SET_POWER_SAVE_TRUSTLIST, Permission::MANAGE_NET_STRATEGY},
     {INetPolicyService::CMD_NPS_SET_POWER_SAVE_POLICY, Permission::MANAGE_NET_STRATEGY},
 };
 } // namespace
@@ -60,11 +60,11 @@ NetPolicyServiceStub::NetPolicyServiceStub()
     memberFuncMap_[CMD_NPS_GET_NET_QUOTA_POLICIES] = &NetPolicyServiceStub::OnGetNetQuotaPolicies;
     memberFuncMap_[CMD_NPS_RESET_POLICIES] = &NetPolicyServiceStub::OnResetPolicies;
     memberFuncMap_[CMD_NPS_UPDATE_REMIND_POLICY] = &NetPolicyServiceStub::OnSnoozePolicy;
-    memberFuncMap_[CMD_NPS_SET_IDLE_ALLOWED_LIST] = &NetPolicyServiceStub::OnSetDeviceIdleAllowedList;
-    memberFuncMap_[CMD_NPS_GET_IDLE_ALLOWED_LIST] = &NetPolicyServiceStub::OnGetDeviceIdleAllowedList;
+    memberFuncMap_[CMD_NPS_SET_IDLE_TRUSTLIST] = &NetPolicyServiceStub::OnSetDeviceIdleTrustlist;
+    memberFuncMap_[CMD_NPS_GET_IDLE_TRUSTLIST] = &NetPolicyServiceStub::OnGetDeviceIdleTrustlist;
     memberFuncMap_[CMD_NPS_SET_DEVICE_IDLE_POLICY] = &NetPolicyServiceStub::OnSetDeviceIdlePolicy;
-    memberFuncMap_[CMD_NPS_GET_POWER_SAVE_ALLOWED_LIST] = &NetPolicyServiceStub::OnGetPowerSaveAllowedList;
-    memberFuncMap_[CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST] = &NetPolicyServiceStub::OnSetPowerSaveAllowedList;
+    memberFuncMap_[CMD_NPS_GET_POWER_SAVE_TRUSTLIST] = &NetPolicyServiceStub::OnGetPowerSaveTrustlist;
+    memberFuncMap_[CMD_NPS_SET_POWER_SAVE_TRUSTLIST] = &NetPolicyServiceStub::OnSetPowerSaveTrustlist;
     memberFuncMap_[CMD_NPS_SET_BACKGROUND_POLICY] = &NetPolicyServiceStub::OnSetBackgroundPolicy;
     memberFuncMap_[CMD_NPS_GET_BACKGROUND_POLICY] = &NetPolicyServiceStub::OnGetBackgroundPolicy;
     memberFuncMap_[CMD_NPS_GET_BACKGROUND_POLICY_BY_UID] = &NetPolicyServiceStub::OnGetBackgroundPolicyByUid;
@@ -451,7 +451,7 @@ int32_t NetPolicyServiceStub::OnSnoozePolicy(MessageParcel &data, MessageParcel 
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetPolicyServiceStub::OnSetDeviceIdleAllowedList(MessageParcel &data, MessageParcel &reply)
+int32_t NetPolicyServiceStub::OnSetDeviceIdleTrustlist(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<uint32_t> uids;
     if (!data.ReadUInt32Vector(&uids)) {
@@ -465,7 +465,7 @@ int32_t NetPolicyServiceStub::OnSetDeviceIdleAllowedList(MessageParcel &data, Me
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int32_t result = SetDeviceIdleAllowedList(uids, isAllowed);
+    int32_t result = SetDeviceIdleTrustlist(uids, isAllowed);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -474,10 +474,10 @@ int32_t NetPolicyServiceStub::OnSetDeviceIdleAllowedList(MessageParcel &data, Me
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetPolicyServiceStub::OnGetDeviceIdleAllowedList(MessageParcel &data, MessageParcel &reply)
+int32_t NetPolicyServiceStub::OnGetDeviceIdleTrustlist(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<uint32_t> uids;
-    int32_t result = GetDeviceIdleAllowedList(uids);
+    int32_t result = GetDeviceIdleTrustlist(uids);
 
     if (!reply.WriteUInt32Vector(uids)) {
         NETMGR_LOG_E("Write uint32 vector reply failed");
@@ -508,10 +508,10 @@ int32_t NetPolicyServiceStub::OnSetDeviceIdlePolicy(MessageParcel &data, Message
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetPolicyServiceStub::OnGetPowerSaveAllowedList(MessageParcel &data, MessageParcel &reply)
+int32_t NetPolicyServiceStub::OnGetPowerSaveTrustlist(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<uint32_t> uids;
-    int32_t result = GetPowerSaveAllowedList(uids);
+    int32_t result = GetPowerSaveTrustlist(uids);
     if (!reply.WriteUInt32Vector(uids)) {
         NETMGR_LOG_E("Write uint32 Vector reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -525,7 +525,7 @@ int32_t NetPolicyServiceStub::OnGetPowerSaveAllowedList(MessageParcel &data, Mes
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetPolicyServiceStub::OnSetPowerSaveAllowedList(MessageParcel &data, MessageParcel &reply)
+int32_t NetPolicyServiceStub::OnSetPowerSaveTrustlist(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<uint32_t> uids;
     if (!data.ReadUInt32Vector(&uids)) {
@@ -539,7 +539,7 @@ int32_t NetPolicyServiceStub::OnSetPowerSaveAllowedList(MessageParcel &data, Mes
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int32_t result = SetPowerSaveAllowedList(uids, isAllowed);
+    int32_t result = SetPowerSaveTrustlist(uids, isAllowed);
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;

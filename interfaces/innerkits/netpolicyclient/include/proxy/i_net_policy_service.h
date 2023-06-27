@@ -39,15 +39,15 @@ public:
         CMD_NPS_SET_NET_QUOTA_POLICIES,
         CMD_NPS_GET_NET_QUOTA_POLICIES,
         CMD_NPS_UPDATE_REMIND_POLICY,
-        CMD_NPS_SET_IDLE_ALLOWED_LIST,
-        CMD_NPS_GET_IDLE_ALLOWED_LIST,
+        CMD_NPS_SET_IDLE_TRUSTLIST,
+        CMD_NPS_GET_IDLE_TRUSTLIST,
         CMD_NPS_SET_DEVICE_IDLE_POLICY,
         CMD_NPS_RESET_POLICIES,
         CMD_NPS_SET_BACKGROUND_POLICY,
         CMD_NPS_GET_BACKGROUND_POLICY,
         CMD_NPS_GET_BACKGROUND_POLICY_BY_UID,
-        CMD_NPS_SET_POWER_SAVE_ALLOWED_LIST,
-        CMD_NPS_GET_POWER_SAVE_ALLOWED_LIST,
+        CMD_NPS_SET_POWER_SAVE_TRUSTLIST,
+        CMD_NPS_GET_POWER_SAVE_TRUSTLIST,
         CMD_NPS_SET_POWER_SAVE_POLICY,
         CMD_NPS_END = 100,
     };
@@ -154,7 +154,7 @@ public:
      * @param isAllowed The UID is into allow list or not.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    virtual int32_t SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed) = 0;
+    virtual int32_t SetDeviceIdleTrustlist(const std::vector<uint32_t> &uids, bool isAllowed) = 0;
 
     /**
      * Get the allow list of UID in device idle mode.
@@ -162,7 +162,7 @@ public:
      * @param uids The list of UIDs
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    virtual int32_t GetDeviceIdleAllowedList(std::vector<uint32_t> &uids) = 0;
+    virtual int32_t GetDeviceIdleTrustlist(std::vector<uint32_t> &uids) = 0;
 
     /**
      * Process network policy in device idle mode.
@@ -213,7 +213,7 @@ public:
      * @param uids The list of UIDs
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    virtual int32_t GetPowerSaveAllowedList(std::vector<uint32_t> &uids) = 0;
+    virtual int32_t GetPowerSaveTrustlist(std::vector<uint32_t> &uids) = 0;
 
     /**
      * Set the Power Save Allowed List object
@@ -222,7 +222,7 @@ public:
      * @param isAllowed The UID is into allow list or not.
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    virtual int32_t SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed) = 0;
+    virtual int32_t SetPowerSaveTrustlist(const std::vector<uint32_t> &uids, bool isAllowed) = 0;
 
     /**
      * Set the Power Save Policy object

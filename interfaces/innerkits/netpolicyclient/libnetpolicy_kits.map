@@ -44,8 +44,8 @@
       "OHOS::NetManagerStandard::NetPolicyClient::ResetPolicies(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetPolicyClient::IsUidNetAllowed(unsigned int, bool, bool&)";
       "OHOS::NetManagerStandard::NetPolicyClient::IsUidNetAllowed(unsigned int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool&)";
-      "OHOS::NetManagerStandard::NetPolicyClient::SetDeviceIdleAllowedList(unsigned int, bool)";
-      "OHOS::NetManagerStandard::NetPolicyClient::GetDeviceIdleAllowedList(std::__h::vector<unsigned int, std::__h::allocator<unsigned int>>&)";
+      "OHOS::NetManagerStandard::NetPolicyClient::SetDeviceIdleTrustlist(unsigned int, bool)";
+      "OHOS::NetManagerStandard::NetPolicyClient::GetDeviceIdleTrustlist(std::__h::vector<unsigned int, std::__h::allocator<unsigned int>>&)";
       "OHOS::NetManagerStandard::NetPolicyClient::GetBackgroundPolicyByUid(unsigned int, unsigned int&)";
       "OHOS::NetManagerStandard::NetPolicyClient::UpdateRemindPolicy(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
       "OHOS::NetManagerStandard::NetPolrooticyClient::~NetPolicyClient()";
@@ -53,8 +53,8 @@
       "OHOS::NetManagerStandard::NetPolicyClient::RegisterNetPolicyCallback(OHOS::sptr<OHOS::NetManagerStandard::INetPolicyCallback> const&)";
       "OHOS::NetManagerStandard::NetPolicyClient::UnregisterNetPolicyCallback(OHOS::sptr<OHOS::NetManagerStandard::INetPolicyCallback> const&)";
       "OHOS::NetManagerStandard::NetPolicyClient::~NetPolicyClient()";
-      "OHOS::NetManagerStandard::NetPolicyClient::SetPowerSaveAllowedList(unsigned int, bool)";
-      "OHOS::NetManagerStandard::NetPolicyClient::GetPowerSaveAllowedList(std::__h::vector<unsigned int, std::__h::allocator<unsigned int>>&)";
+      "OHOS::NetManagerStandard::NetPolicyClient::SetPowerSaveTrustlist(unsigned int, bool)";
+      "OHOS::NetManagerStandard::NetPolicyClient::GetPowerSaveTrustlist(std::__h::vector<unsigned int, std::__h::allocator<unsigned int>>&)";
       "OHOS::NetManagerStandard::NetPolicyClient::SetDeviceIdlePolicy(bool)";
       "OHOS::NetManagerStandard::NetPolicyClient::IsUidNetAccess(unsigned int, bool, bool&)";
       "OHOS::NetManagerStandard::NetPolicyClient::IsUidNetAccess(unsigned int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool&)";
@@ -62,8 +62,8 @@
       "OHOS::NetManagerStandard::NetPolicyClient::SetSnoozePolicy(signed char, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetPolicyClient::SetIdleTrustlist(unsigned int, bool)";
       "OHOS::NetManagerStandard::NetPolicyClient::GetIdleTrustlist(std::__h::vector<unsigned int, std::__h::allocator<unsigned int>>&)";
-      "OHOS::NetManagerStandard::NetPolicyClient::SetDeviceIdleAllowedList(std::__h::vector<unsigned int, std::__h::allocator<unsigned int>> const&, bool)";
-      "OHOS::NetManagerStandard::NetPolicyClient::SetPowerSaveAllowedList(std::__h::vector<unsigned int, std::__h::allocator<unsigned int>> const&, bool)";
+      "OHOS::NetManagerStandard::NetPolicyClient::SetDeviceIdleTrustlist(std::__h::vector<unsigned int, std::__h::allocator<unsigned int>> const&, bool)";
+      "OHOS::NetManagerStandard::NetPolicyClient::SetPowerSaveTrustlist(std::__h::vector<unsigned int, std::__h::allocator<unsigned int>> const&, bool)";
       "OHOS::NetManagerStandard::NetPolicyClient::SetPowerSavePolicy(bool)";
     };
   local:

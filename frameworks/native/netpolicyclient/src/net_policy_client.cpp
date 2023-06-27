@@ -270,10 +270,10 @@ int32_t NetPolicyClient::UpdateRemindPolicy(int32_t netType, const std::string &
 
 NetPolicyResultCode NetPolicyClient::SetIdleTrustlist(uint32_t uid, bool isTrustlist)
 {
-    return static_cast<NetPolicyResultCode>(SetDeviceIdleAllowedList({uid}, isTrustlist));
+    return static_cast<NetPolicyResultCode>(SetDeviceIdleTrustlist({uid}, isTrustlist));
 }
 
-int32_t NetPolicyClient::SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
+int32_t NetPolicyClient::SetDeviceIdleTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -281,15 +281,15 @@ int32_t NetPolicyClient::SetDeviceIdleAllowedList(const std::vector<uint32_t> &u
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
-    return proxy->SetDeviceIdleAllowedList(uids, isAllowed);
+    return proxy->SetDeviceIdleTrustlist(uids, isAllowed);
 }
 
 NetPolicyResultCode NetPolicyClient::GetIdleTrustlist(std::vector<uint32_t> &uids)
 {
-    return static_cast<NetPolicyResultCode>(GetDeviceIdleAllowedList(uids));
+    return static_cast<NetPolicyResultCode>(GetDeviceIdleTrustlist(uids));
 }
 
-int32_t NetPolicyClient::GetDeviceIdleAllowedList(std::vector<uint32_t> &uids)
+int32_t NetPolicyClient::GetDeviceIdleTrustlist(std::vector<uint32_t> &uids)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -297,7 +297,7 @@ int32_t NetPolicyClient::GetDeviceIdleAllowedList(std::vector<uint32_t> &uids)
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
-    return proxy->GetDeviceIdleAllowedList(uids);
+    return proxy->GetDeviceIdleTrustlist(uids);
 }
 
 int32_t NetPolicyClient::SetDeviceIdlePolicy(bool enable)
@@ -311,7 +311,7 @@ int32_t NetPolicyClient::SetDeviceIdlePolicy(bool enable)
     return proxy->SetDeviceIdlePolicy(enable);
 }
 
-int32_t NetPolicyClient::GetPowerSaveAllowedList(std::vector<uint32_t> &uids)
+int32_t NetPolicyClient::GetPowerSaveTrustlist(std::vector<uint32_t> &uids)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -319,10 +319,10 @@ int32_t NetPolicyClient::GetPowerSaveAllowedList(std::vector<uint32_t> &uids)
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
-    return proxy->GetPowerSaveAllowedList(uids);
+    return proxy->GetPowerSaveTrustlist(uids);
 }
 
-int32_t NetPolicyClient::SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
+int32_t NetPolicyClient::SetPowerSaveTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -330,7 +330,7 @@ int32_t NetPolicyClient::SetPowerSaveAllowedList(const std::vector<uint32_t> &ui
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
-    return proxy->SetPowerSaveAllowedList(uids, isAllowed);
+    return proxy->SetPowerSaveTrustlist(uids, isAllowed);
 }
 
 int32_t NetPolicyClient::SetPowerSavePolicy(bool enable)

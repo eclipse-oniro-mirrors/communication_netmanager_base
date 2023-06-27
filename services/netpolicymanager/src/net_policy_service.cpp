@@ -217,16 +217,16 @@ int32_t NetPolicyService::UpdateRemindPolicy(int32_t netType, const std::string 
     return netPolicyTraffic_->UpdateRemindPolicy(netType, simId, remindType);
 }
 
-int32_t NetPolicyService::SetDeviceIdleAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
+int32_t NetPolicyService::SetDeviceIdleTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
 {
-    NETMGR_LOG_D("SetDeviceIdleAllowedList start");
-    return netPolicyFirewall_->SetDeviceIdleAllowedList(uids, isAllowed);
+    NETMGR_LOG_D("SetDeviceIdleTrustlist start");
+    return netPolicyFirewall_->SetDeviceIdleTrustlist(uids, isAllowed);
 }
 
-int32_t NetPolicyService::GetDeviceIdleAllowedList(std::vector<uint32_t> &uids)
+int32_t NetPolicyService::GetDeviceIdleTrustlist(std::vector<uint32_t> &uids)
 {
-    NETMGR_LOG_D("GetDeviceIdleAllowedList start");
-    return netPolicyFirewall_->GetDeviceIdleAllowedList(uids);
+    NETMGR_LOG_D("GetDeviceIdleTrustlist start");
+    return netPolicyFirewall_->GetDeviceIdleTrustlist(uids);
 }
 
 int32_t NetPolicyService::SetDeviceIdlePolicy(bool enable)
@@ -235,16 +235,16 @@ int32_t NetPolicyService::SetDeviceIdlePolicy(bool enable)
     return netPolicyFirewall_->UpdateDeviceIdlePolicy(enable);
 }
 
-int32_t NetPolicyService::GetPowerSaveAllowedList(std::vector<uint32_t> &uids)
+int32_t NetPolicyService::GetPowerSaveTrustlist(std::vector<uint32_t> &uids)
 {
-    NETMGR_LOG_D("GetPowerSaveAllowedList start");
-    return netPolicyFirewall_->GetPowerSaveAllowedList(uids);
+    NETMGR_LOG_D("GetPowerSaveTrustlist start");
+    return netPolicyFirewall_->GetPowerSaveTrustlist(uids);
 }
 
-int32_t NetPolicyService::SetPowerSaveAllowedList(const std::vector<uint32_t> &uids, bool isAllowed)
+int32_t NetPolicyService::SetPowerSaveTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
 {
-    NETMGR_LOG_D("SetPowerSaveAllowedList start");
-    return netPolicyFirewall_->SetPowerSaveAllowedList(uids, isAllowed);
+    NETMGR_LOG_D("SetPowerSaveTrustlist start");
+    return netPolicyFirewall_->SetPowerSaveTrustlist(uids, isAllowed);
 }
 
 int32_t NetPolicyService::SetPowerSavePolicy(bool enable)

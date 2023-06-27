@@ -92,12 +92,12 @@ void NetDataShareHelperUtilsTest::TearDown() {}
 HWTEST_F(NetDataShareHelperUtilsTest, InsertTest001, TestSize.Level1)
 {
     std::string airplaneMode = "1";
-    Uri uri(SETTINGS_DATASHARE_URL_AIRPLANE_MODE);
-    int32_t ret = netDataShareHelperUtils_->Insert(uri, SETTINGS_DATASHARE_KEY_AIRPLANE_MODE, airplaneMode);
+    Uri uri(AIRPLANE_MODE_URI);
+    int32_t ret = netDataShareHelperUtils_->Insert(uri, KEY_AIRPLANE_MODE, airplaneMode);
     ASSERT_TRUE(ret == NETMANAGER_ERROR);
 
     airplaneMode = "0";
-    ret = netDataShareHelperUtils_->Insert(uri, SETTINGS_DATASHARE_KEY_AIRPLANE_MODE, airplaneMode);
+    ret = netDataShareHelperUtils_->Insert(uri, KEY_AIRPLANE_MODE, airplaneMode);
     ASSERT_TRUE(ret == NETMANAGER_ERROR);
 }
 
@@ -110,12 +110,12 @@ HWTEST_F(NetDataShareHelperUtilsTest, InsertTest002, TestSize.Level1)
 {
     OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
     std::string airplaneMode = "1";
-    Uri uri(SETTINGS_DATASHARE_URL_AIRPLANE_MODE);
-    int32_t ret = netDataShareHelperUtils_->Insert(uri, SETTINGS_DATASHARE_KEY_AIRPLANE_MODE, airplaneMode);
+    Uri uri(AIRPLANE_MODE_URI);
+    int32_t ret = netDataShareHelperUtils_->Insert(uri, KEY_AIRPLANE_MODE, airplaneMode);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
 
     airplaneMode = "0";
-    ret = netDataShareHelperUtils_->Insert(uri, SETTINGS_DATASHARE_KEY_AIRPLANE_MODE, airplaneMode);
+    ret = netDataShareHelperUtils_->Insert(uri, KEY_AIRPLANE_MODE, airplaneMode);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
 }
 
@@ -127,12 +127,12 @@ HWTEST_F(NetDataShareHelperUtilsTest, InsertTest002, TestSize.Level1)
 HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest001, TestSize.Level1)
 {
     std::string airplaneMode = "1";
-    Uri uri(SETTINGS_DATASHARE_URL_AIRPLANE_MODE);
-    int32_t ret = netDataShareHelperUtils_->Update(uri, SETTINGS_DATASHARE_KEY_AIRPLANE_MODE, airplaneMode);
+    Uri uri(AIRPLANE_MODE_URI);
+    int32_t ret = netDataShareHelperUtils_->Update(uri, KEY_AIRPLANE_MODE, airplaneMode);
     ASSERT_TRUE(ret == NETMANAGER_ERROR);
 
     airplaneMode = "0";
-    ret = netDataShareHelperUtils_->Update(uri, SETTINGS_DATASHARE_KEY_AIRPLANE_MODE, airplaneMode);
+    ret = netDataShareHelperUtils_->Update(uri, KEY_AIRPLANE_MODE, airplaneMode);
     ASSERT_TRUE(ret == NETMANAGER_ERROR);
 }
 
@@ -145,12 +145,12 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest002, TestSize.Level1)
 {
     OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
     std::string airplaneMode = "1";
-    Uri uri(SETTINGS_DATASHARE_URL_AIRPLANE_MODE);
-    int32_t ret = netDataShareHelperUtils_->Update(uri, SETTINGS_DATASHARE_KEY_AIRPLANE_MODE, airplaneMode);
+    Uri uri(AIRPLANE_MODE_URI);
+    int32_t ret = netDataShareHelperUtils_->Update(uri, KEY_AIRPLANE_MODE, airplaneMode);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
 
     airplaneMode = "0";
-    ret = netDataShareHelperUtils_->Update(uri, SETTINGS_DATASHARE_KEY_AIRPLANE_MODE, airplaneMode);
+    ret = netDataShareHelperUtils_->Update(uri, KEY_AIRPLANE_MODE, airplaneMode);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
 }
 
@@ -162,8 +162,8 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest002, TestSize.Level1)
 HWTEST_F(NetDataShareHelperUtilsTest, QueryTest001, TestSize.Level1)
 {
     std::string airplaneMode;
-    Uri uri(SETTINGS_DATASHARE_URL_AIRPLANE_MODE);
-    int32_t ret = netDataShareHelperUtils_->Query(uri, SETTINGS_DATASHARE_KEY_AIRPLANE_MODE, airplaneMode);
+    Uri uri(AIRPLANE_MODE_URI);
+    int32_t ret = netDataShareHelperUtils_->Query(uri, KEY_AIRPLANE_MODE, airplaneMode);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
     std::cout << "QueryTest result:" << airplaneMode << std::endl;
 }
@@ -177,8 +177,8 @@ HWTEST_F(NetDataShareHelperUtilsTest, QueryTest002, TestSize.Level1)
 {
     OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
     std::string airplaneMode;
-    Uri uri(SETTINGS_DATASHARE_URL_AIRPLANE_MODE);
-    int32_t ret = netDataShareHelperUtils_->Query(uri, SETTINGS_DATASHARE_KEY_AIRPLANE_MODE, airplaneMode);
+    Uri uri(AIRPLANE_MODE_URI);
+    int32_t ret = netDataShareHelperUtils_->Query(uri, KEY_AIRPLANE_MODE, airplaneMode);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
     std::cout << "QueryTest result:" << airplaneMode << std::endl;
 }

@@ -141,7 +141,7 @@ void SetFirstNetQuotaPolicy(std::vector<NetQuotaPolicy> &quotaPolicies)
     quotaPolicy1.quotapolicy.lastWarningRemind = TEST_LAST_WARNING_REMIND_1;
     quotaPolicy1.quotapolicy.lastLimitRemind = TEST_LAST_LIMIT_REMIND_1;
     quotaPolicy1.quotapolicy.metered = true;
-    quotaPolicy1.quotapolicy.limitAction = LimitAction::LIMIT_ACTION_AUTO_BILL;
+    quotaPolicy1.quotapolicy.limitAction = LimitAction::LIMIT_ACTION_ALERT_ONLY;
     quotaPolicies.push_back(quotaPolicy1);
 }
 
@@ -156,7 +156,7 @@ void SetSecondNetQuotaPolicy(std::vector<NetQuotaPolicy> &quotaPolicies)
     quotaPolicy2.quotapolicy.lastWarningRemind = TEST_LAST_WARNING_REMIND_2;
     quotaPolicy2.quotapolicy.lastLimitRemind = TEST_LAST_LIMIT_REMIND_2;
     quotaPolicy2.quotapolicy.metered = true;
-    quotaPolicy2.quotapolicy.limitAction = LimitAction::LIMIT_ACTION_DISABLE;
+    quotaPolicy2.quotapolicy.limitAction = LimitAction::LIMIT_ACTION_ACCESS_DISABLED;
     quotaPolicies.push_back(quotaPolicy2);
 }
 

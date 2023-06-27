@@ -59,11 +59,11 @@ private:
     int32_t OnGetBackgroundPolicy(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetBackgroundPolicyByUid(MessageParcel &data, MessageParcel &reply);
     int32_t OnSnoozePolicy(MessageParcel &data, MessageParcel &reply);
-    int32_t OnSetDeviceIdleAllowedList(MessageParcel &data, MessageParcel &reply);
-    int32_t OnGetDeviceIdleAllowedList(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetDeviceIdleTrustlist(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetDeviceIdleTrustlist(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetDeviceIdlePolicy(MessageParcel &data, MessageParcel &reply);
-    int32_t OnGetPowerSaveAllowedList(MessageParcel &data, MessageParcel &reply);
-    int32_t OnSetPowerSaveAllowedList(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetPowerSaveTrustlist(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetPowerSaveTrustlist(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetPowerSavePolicy(MessageParcel &data, MessageParcel &reply);
 
 private:
