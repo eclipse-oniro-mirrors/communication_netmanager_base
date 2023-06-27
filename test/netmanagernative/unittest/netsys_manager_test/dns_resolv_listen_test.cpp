@@ -191,7 +191,7 @@ HWTEST_F(DnsResolvListenTest, ProcGetCacheCommandTest001, TestSize.Level1)
     uint32_t num = 0;
     struct addr_info_wrapper addr_info[MAX_RESULTS] = {{0}};
     int32_t ret = func(0, param, addr_info, &num);
-    EXPECT_EQ(ret, -ENOENT);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_SUCCESS);
     dlclose(handle);
 }
 

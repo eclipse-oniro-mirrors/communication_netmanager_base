@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -505,35 +505,39 @@ HWTEST_F(RouteManagerTest, ReadAddrGwTest005, TestSize.Level1)
 HWTEST_F(RouteManagerTest, AddInterfaceToVirtualNetwork001, TestSize.Level1)
 {
     uint16_t testNetId = 154;
-    std::string testInterfaceName = "testName";
+    std::string testInterfaceName = "testName0";
     auto ret = RouteManager::AddInterfaceToVirtualNetwork(testNetId, testInterfaceName);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(RouteManagerTest, RemoveInterfaceFromVirtualNetwork001, TestSize.Level1)
 {
     uint16_t testNetId = 154;
-    std::string testInterfaceName = "testName";
+    std::string testInterfaceName = "testName0";
     auto ret = RouteManager::RemoveInterfaceFromVirtualNetwork(testNetId, testInterfaceName);
+    EXPECT_EQ(ret, 0);
+
+    testInterfaceName = "notexist";
+    ret = RouteManager::RemoveInterfaceFromVirtualNetwork(testNetId, testInterfaceName);
     EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(RouteManagerTest, AddUsersToVirtualNetwork001, TestSize.Level1)
 {
     uint16_t testNetId = 154;
-    std::string testInterfaceName = "testName";
+    std::string testInterfaceName = "testName1";
     std::vector<NetManagerStandard::UidRange> uidRanges;
     auto ret = RouteManager::AddUsersToVirtualNetwork(testNetId, testInterfaceName, uidRanges);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(RouteManagerTest, RemoveUsersFromVirtualNetwork001, TestSize.Level1)
 {
     uint16_t testNetId = 154;
-    std::string testInterfaceName = "testName";
+    std::string testInterfaceName = "testName1";
     std::vector<NetManagerStandard::UidRange> uidRanges;
     auto ret = RouteManager::RemoveUsersFromVirtualNetwork(testNetId, testInterfaceName, uidRanges);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, 0);
 }
 } // namespace nmd
 } // namespace OHOS

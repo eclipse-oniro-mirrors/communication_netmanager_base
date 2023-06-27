@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@ using namespace NetConnManagerTestUtil;
 constexpr int32_t NETID = 103;
 const std::string INTERFACENAME = "wlan0";
 constexpr int32_t LOCAL_NET_ID = 99;
+constexpr int32_t ERROR_CODE = -101;
 class ConnManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -308,7 +309,7 @@ HWTEST_F(ConnManagerTest, UpdateRouteTest002, TestSize.Level1)
 {
     int32_t netId = 99;
     int32_t ret = instance_->UpdateRoute(netId, INTERFACENAME, "0.0.0.0/0", "192.168.113.222");
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, ERROR_CODE);
 }
 
 /**
@@ -333,7 +334,11 @@ HWTEST_F(ConnManagerTest, AddUidsToNetwork001, TestSize.Level1)
     int32_t netId = 99;
     const std::vector<NetManagerStandard::UidRange> uidRanges;
     int32_t ret = instance_->AddUidsToNetwork(netId, uidRanges);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    netId = 1;
+    ret = instance_->AddUidsToNetwork(netId, uidRanges);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
@@ -346,7 +351,11 @@ HWTEST_F(ConnManagerTest, RemoveUidsFromNetwork001, TestSize.Level1)
     int32_t netId = 99;
     const std::vector<NetManagerStandard::UidRange> uidRanges;
     int32_t ret = instance_->RemoveUidsFromNetwork(netId, uidRanges);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    netId = 1;
+    ret = instance_->RemoveUidsFromNetwork(netId, uidRanges);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 /**
