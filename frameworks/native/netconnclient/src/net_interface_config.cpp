@@ -89,7 +89,6 @@ bool NetInterfaceConfiguration::Unmarshalling(Parcel &parcel, NetInterfaceConfig
         return false;
     }
     size = (size > MAX_INTERFACE_CONFIG_SIZE) ? MAX_INTERFACE_CONFIG_SIZE : size;
-    std::vector<std::string> vecFlags;
     for (int i = 0; i < size; i++) {
         std::string flag;
         if (!parcel.ReadString(flag)) {
