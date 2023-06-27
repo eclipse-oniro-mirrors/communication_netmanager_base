@@ -22,7 +22,7 @@ config("netsys_controller_include") {
 }
 
 ohos_shared_library("netsys_controller") {
- all_dependent_configs = [ ":netsys_controller_include" ]
+  all_dependent_configs = [ ":netsys_controller_include" ]
   sources = [
     "src/mock_netsys_native_client.cpp",
     "src/netsys_controller.cpp",
