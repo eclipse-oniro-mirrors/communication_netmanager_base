@@ -263,7 +263,7 @@ void SystemReadyFuzzTest(const uint8_t *data, size_t size)
     if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
-    OnRemoteRequest(INetConnService::CMD_NM_SYSTEM_READY, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SYSTEM_READY), dataParcel);
 }
 
 void RegisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
@@ -291,7 +291,7 @@ void RegisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
         dataParcel.WriteUint32(static_cast<uint32_t>(netCap));
     }
 
-    OnRemoteRequest(INetConnService::CMD_NM_REG_NET_SUPPLIER, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REG_NET_SUPPLIER), dataParcel);
 }
 
 void UnregisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
@@ -310,7 +310,7 @@ void UnregisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     dataParcel.WriteUint32(supplierId);
-    OnRemoteRequest(INetConnService::CMD_NM_UNREG_NETWORK, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREG_NETWORK), dataParcel);
 }
 
 void HasDefaultNetFuzzTest(const uint8_t *data, size_t size)
@@ -329,7 +329,7 @@ void HasDefaultNetFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    OnRemoteRequest(INetConnService::CMD_NM_HASDEFAULTNET, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET), dataParcel);
 }
 
 void GetAllNetsFuzzTest(const uint8_t *data, size_t size)
@@ -344,7 +344,7 @@ void GetAllNetsFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    OnRemoteRequest(INetConnService::CMD_NM_GET_ALL_NETS, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ALL_NETS), dataParcel);
 }
 
 void BindSocketFuzzTest(const uint8_t *data, size_t size)
@@ -365,7 +365,7 @@ void BindSocketFuzzTest(const uint8_t *data, size_t size)
     }
     dataParcel.WriteInt32(socket_fd);
     dataParcel.WriteInt32(netId);
-    OnRemoteRequest(INetConnService::CMD_NM_BIND_SOCKET, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_BIND_SOCKET), dataParcel);
 }
 
 void SetAirplaneModeFuzzTest(const uint8_t *data, size_t size)
@@ -385,7 +385,7 @@ void SetAirplaneModeFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     dataParcel.WriteBool(state);
-    OnRemoteRequest(INetConnService::CMD_NM_SET_AIRPLANE_MODE, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_AIRPLANE_MODE), dataParcel);
 }
 
 void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
@@ -407,7 +407,7 @@ void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
     }
     dataParcel.WriteUint32(supplierId);
     netSupplierInfo->Marshalling(dataParcel);
-    OnRemoteRequest(INetConnService::CMD_NM_SET_NET_SUPPLIER_INFO, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_SUPPLIER_INFO), dataParcel);
 }
 
 void GetAddressByNameFuzzTest(const uint8_t *data, size_t size)
@@ -430,7 +430,7 @@ void GetAddressByNameFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(host);
     dataParcel.WriteInt32(netId);
 
-    OnRemoteRequest(INetConnService::CMD_NM_GET_ADDRESS_BY_NAME, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESS_BY_NAME), dataParcel);
 }
 
 void GetAddressesByNameFuzzTest(const uint8_t *data, size_t size)
@@ -453,7 +453,7 @@ void GetAddressesByNameFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(host);
     dataParcel.WriteInt32(netId);
 
-    OnRemoteRequest(INetConnService::CMD_NM_GET_ADDRESSES_BY_NAME, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESSES_BY_NAME), dataParcel);
 }
 
 void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
@@ -478,7 +478,7 @@ void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteUint32(supplierId);
     netLinkInfo->Marshalling(dataParcel);
 
-    OnRemoteRequest(INetConnService::CMD_NM_SET_NET_LINK_INFO, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_LINK_INFO), dataParcel);
 }
 
 void RegisterNetSupplierCallbackFuzzTest(const uint8_t *data, size_t size)
@@ -504,7 +504,7 @@ void RegisterNetSupplierCallbackFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteUint32(supplierId);
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
-    OnRemoteRequest(INetConnService::CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK), dataParcel);
 }
 
 void RegisterNetConnCallbackBySpecifierFuzzTest(const uint8_t *data, size_t size)
@@ -532,7 +532,8 @@ void RegisterNetConnCallbackBySpecifierFuzzTest(const uint8_t *data, size_t size
     dataParcel.WriteUint32(timeoutMS);
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
-    OnRemoteRequest(INetConnService::CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER),
+                    dataParcel);
 }
 
 void RegisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
@@ -556,7 +557,7 @@ void RegisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
 
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
-    OnRemoteRequest(INetConnService::CMD_NM_REGISTER_NET_CONN_CALLBACK, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK), dataParcel);
 }
 
 void UnregisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
@@ -577,7 +578,7 @@ void UnregisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
     }
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
-    OnRemoteRequest(INetConnService::CMD_NM_UNREGISTER_NET_CONN_CALLBACK, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_CONN_CALLBACK), dataParcel);
 }
 
 void GetDefaultNetFuzzTest(const uint8_t *data, size_t size)
@@ -595,7 +596,7 @@ void GetDefaultNetFuzzTest(const uint8_t *data, size_t size)
     if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
-    OnRemoteRequest(INetConnService::CMD_NM_GETDEFAULTNETWORK, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK), dataParcel);
 }
 
 void GetConnectionPropertiesFuzzTest(const uint8_t *data, size_t size)
@@ -615,7 +616,7 @@ void GetConnectionPropertiesFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     dataParcel.WriteInt32(netId);
-    OnRemoteRequest(INetConnService::CMD_NM_GET_CONNECTION_PROPERTIES, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_CONNECTION_PROPERTIES), dataParcel);
 }
 
 void GetNetCapabilitiesFuzzTest(const uint8_t *data, size_t size)
@@ -635,7 +636,7 @@ void GetNetCapabilitiesFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     dataParcel.WriteInt32(netId);
-    OnRemoteRequest(INetConnService::CMD_NM_GET_NET_CAPABILITIES, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_CAPABILITIES), dataParcel);
 }
 
 void NetDetectionFuzzTest(const uint8_t *data, size_t size)
@@ -655,7 +656,7 @@ void NetDetectionFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     dataParcel.WriteInt32(netId);
-    OnRemoteRequest(INetConnService::CMD_NM_NET_DETECTION, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_NET_DETECTION), dataParcel);
 }
 
 void IsDefaultNetMeteredFuzzTest(const uint8_t *data, size_t size)
@@ -672,7 +673,7 @@ void IsDefaultNetMeteredFuzzTest(const uint8_t *data, size_t size)
     if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
-    OnRemoteRequest(INetConnService::CMD_NM_IS_DEFAULT_NET_METERED, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_DEFAULT_NET_METERED), dataParcel);
 }
 
 void SetGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
@@ -691,7 +692,7 @@ void SetGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     httpProxy.Marshalling(dataParcel);
-    OnRemoteRequest(INetConnService::CMD_NM_SET_GLOBAL_HTTP_PROXY, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_GLOBAL_HTTP_PROXY), dataParcel);
 }
 
 void GetGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
@@ -708,7 +709,7 @@ void GetGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
     if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
-    OnRemoteRequest(INetConnService::CMD_NM_GET_GLOBAL_HTTP_PROXY, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY), dataParcel);
 }
 
 void GetDefaultHttpProxyFuzzTest(const uint8_t *data, size_t size)
@@ -725,7 +726,7 @@ void GetDefaultHttpProxyFuzzTest(const uint8_t *data, size_t size)
     if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
-    OnRemoteRequest(INetConnService::CMD_NM_GET_DEFAULT_HTTP_PROXY, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_DEFAULT_HTTP_PROXY), dataParcel);
 }
 
 void GetNetIdByIdentifierFuzzTest(const uint8_t *data, size_t size)
@@ -744,7 +745,7 @@ void GetNetIdByIdentifierFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     dataParcel.WriteString(ident);
-    OnRemoteRequest(INetConnService::CMD_NM_GET_NET_ID_BY_IDENTIFIER, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_ID_BY_IDENTIFIER), dataParcel);
 }
 
 void RegisterNetInterfaceCallbackFuzzTest(const uint8_t *data, size_t size)
@@ -764,7 +765,7 @@ void RegisterNetInterfaceCallbackFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
-    OnRemoteRequest(INetConnService::CMD_NM_REGISTER_NET_INTERFACE_CALLBACK, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_INTERFACE_CALLBACK), dataParcel);
 }
 
 void GetNetInterfaceConfigurationFuzzTest(const uint8_t *data, size_t size)
@@ -782,7 +783,7 @@ void GetNetInterfaceConfigurationFuzzTest(const uint8_t *data, size_t size)
     if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
-    OnRemoteRequest(INetConnService::CMD_NM_GET_INTERFACE_CONFIGURATION, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_INTERFACE_CONFIGURATION), dataParcel);
 }
 
 void SetInternetPermissionFuzzTest(const uint8_t *data, size_t size)
@@ -805,7 +806,7 @@ void SetInternetPermissionFuzzTest(const uint8_t *data, size_t size)
 
     dataParcel.WriteUint32(uid);
     dataParcel.WriteUint32(allow);
-    OnRemoteRequest(INetConnService::CMD_NM_SET_INTERNET_PERMISSION, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERNET_PERMISSION), dataParcel);
 }
 
 void UpdateNetStateForTestFuzzTest(const uint8_t *data, size_t size)
@@ -830,7 +831,7 @@ void UpdateNetStateForTestFuzzTest(const uint8_t *data, size_t size)
 
     netSpecifier->Marshalling(dataParcel);
     dataParcel.WriteInt32(netState);
-    OnRemoteRequest(INetConnService::CMD_NM_UPDATE_NET_STATE_FOR_TEST, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_STATE_FOR_TEST), dataParcel);
 }
 
 void GetIfaceNamesFuzzTest(const uint8_t *data, size_t size)
@@ -851,7 +852,7 @@ void GetIfaceNamesFuzzTest(const uint8_t *data, size_t size)
 
     dataParcel.ReadUint32(bearerType);
 
-    OnRemoteRequest(INetConnService::CMD_NM_GET_IFACE_NAMES, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACE_NAMES), dataParcel);
 }
 
 void GetIfaceNameByTypeFuzzTest(const uint8_t *data, size_t size)
@@ -876,7 +877,7 @@ void GetIfaceNameByTypeFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(ident);
     dataParcel.WriteString(ifaceName);
 
-    OnRemoteRequest(INetConnService::CMD_NM_GET_IFACENAME_BY_TYPE, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACENAME_BY_TYPE), dataParcel);
 }
 
 void RegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
@@ -902,7 +903,8 @@ void RegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteInt32(netId);
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
-    OnRemoteRequest(INetConnService::CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK),
+                    dataParcel);
 }
 
 void UnRegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
@@ -928,7 +930,8 @@ void UnRegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteInt32(netId);
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
-    OnRemoteRequest(INetConnService::CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK),
+                    dataParcel);
 }
 
 void GetSpecificNetFuzzTest(const uint8_t *data, size_t size)
@@ -949,7 +952,7 @@ void GetSpecificNetFuzzTest(const uint8_t *data, size_t size)
 
     dataParcel.ReadUint32(bearerType);
 
-    OnRemoteRequest(INetConnService::CMD_NM_GET_SPECIFIC_NET, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET), dataParcel);
 }
 
 void OnSetAppNetFuzzTest(const uint8_t *data, size_t size)
@@ -970,7 +973,7 @@ void OnSetAppNetFuzzTest(const uint8_t *data, size_t size)
 
     dataParcel.WriteInt32(netId);
 
-    OnRemoteRequest(INetConnService::CMD_NM_SET_APP_NET, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_APP_NET), dataParcel);
 }
 
 void GetSpecificUidNetFuzzTest(const uint8_t *data, size_t size)
@@ -993,7 +996,7 @@ void GetSpecificUidNetFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteInt32(uid);
     dataParcel.WriteInt32(netId);
 
-    OnRemoteRequest(INetConnService::CMD_NM_GET_SPECIFIC_UID_NET, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_UID_NET), dataParcel);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
