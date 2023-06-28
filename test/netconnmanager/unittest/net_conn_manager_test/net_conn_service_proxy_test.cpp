@@ -51,48 +51,48 @@ public:
     {
         reply.WriteInt32(NETMANAGER_SUCCESS);
         switch (code) {
-            case INetConnService::CMD_NM_GET_IFACE_NAMES:
-            case INetConnService::CMD_NM_GET_SPECIFIC_NET:
-            case INetConnService::CMD_NM_GET_ALL_NETS:
-            case INetConnService::CMD_NM_GET_ADDRESSES_BY_NAME:
-            case INetConnService::CMD_NM_GET_NET_ID_BY_IDENTIFIER:
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACE_NAMES):
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET):
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ALL_NETS):
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESSES_BY_NAME):
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_ID_BY_IDENTIFIER):
                 reply.WriteUint32(NETMANAGER_SUCCESS);
                 break;
 
-            case INetConnService::CMD_NM_GET_IFACENAME_BY_TYPE:
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACENAME_BY_TYPE):
                 reply.WriteString(TEST_HOST);
                 break;
 
-            case INetConnService::CMD_NM_GETDEFAULTNETWORK:
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK):
                 reply.WriteInt32(TEST_NETID);
                 break;
 
-            case INetConnService::CMD_NM_HASDEFAULTNET:
-            case INetConnService::CMD_NM_IS_DEFAULT_NET_METERED:
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET):
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_DEFAULT_NET_METERED):
                 reply.WriteBool(true);
                 break;
 
-            case INetConnService::CMD_NM_GET_CONNECTION_PROPERTIES: {
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_CONNECTION_PROPERTIES): {
                 NetLinkInfo linkInfo;
                 linkInfo.ifaceName_ = "ifacename_test";
                 linkInfo.Marshalling(reply);
                 break;
             }
 
-            case INetConnService::CMD_NM_GET_NET_CAPABILITIES: {
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_CAPABILITIES): {
                 NetAllCapabilities netCap;
                 netCap.Marshalling(reply);
                 break;
             }
 
-            case INetConnService::CMD_NM_GET_ADDRESS_BY_NAME: {
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESS_BY_NAME): {
                 INetAddr addr;
                 addr.Marshalling(reply);
                 break;
             }
 
-            case INetConnService::CMD_NM_GET_GLOBAL_HTTP_PROXY:
-            case INetConnService::CMD_NM_GET_DEFAULT_HTTP_PROXY: {
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY):
+            case static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_DEFAULT_HTTP_PROXY): {
                 HttpProxy httpProxy;
                 httpProxy.Marshalling(reply);
                 break;
