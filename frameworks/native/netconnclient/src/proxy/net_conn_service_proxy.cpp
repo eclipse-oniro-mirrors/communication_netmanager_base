@@ -42,7 +42,8 @@ int32_t NetConnServiceProxy::SystemReady()
         NETMGR_LOG_E("Remote is null");
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    int32_t error = remote->SendRequest(CMD_NM_SYSTEM_READY, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SYSTEM_READY), data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -72,7 +73,8 @@ int32_t NetConnServiceProxy::SetInternetPermission(uint32_t uid, uint8_t allow)
         NETMGR_LOG_E("Remote is null");
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    int32_t error = remote->SendRequest(CMD_NM_SET_INTERNET_PERMISSION, data, reply, option);
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERNET_PERMISSION), data,
+                                        reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -115,7 +117,8 @@ int32_t NetConnServiceProxy::RegisterNetSupplier(NetBearType bearerType, const s
         NETMGR_LOG_E("Remote is null");
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    int32_t error = remote->SendRequest(CMD_NM_REG_NET_SUPPLIER, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REG_NET_SUPPLIER), data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -152,7 +155,8 @@ int32_t NetConnServiceProxy::UnregisterNetSupplier(uint32_t supplierId)
         NETMGR_LOG_E("Remote is null");
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    int32_t error = remote->SendRequest(CMD_NM_UNREG_NETWORK, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREG_NETWORK), data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -185,7 +189,9 @@ int32_t NetConnServiceProxy::RegisterNetSupplierCallback(uint32_t supplierId,
 
     MessageOption option;
     MessageParcel replyParcel;
-    int32_t retCode = remote->SendRequest(CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK, dataParcel, replyParcel, option);
+    int32_t retCode =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK), dataParcel,
+                            replyParcel, option);
     NETMGR_LOG_I("SendRequest retCode:[%{public}d]", retCode);
     if (retCode != ERR_NONE) {
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -215,7 +221,8 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<INetConnCallback
 
     MessageOption option;
     MessageParcel replyParcel;
-    int32_t retCode = remote->SendRequest(CMD_NM_REGISTER_NET_CONN_CALLBACK, dataParcel, replyParcel, option);
+    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK),
+                                          dataParcel, replyParcel, option);
     NETMGR_LOG_D("SendRequest retCode:[%{public}d]", retCode);
     if (retCode != ERR_NONE) {
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -249,7 +256,8 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<NetSpecifier> &n
     MessageOption option;
     MessageParcel replyParcel;
     int32_t retCode =
-        remote->SendRequest(CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER, dataParcel, replyParcel, option);
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER),
+                            dataParcel, replyParcel, option);
     NETMGR_LOG_D("SendRequest retCode:[%{public}d]", retCode);
     if (retCode != ERR_NONE) {
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -279,7 +287,8 @@ int32_t NetConnServiceProxy::UnregisterNetConnCallback(const sptr<INetConnCallba
 
     MessageOption option;
     MessageParcel replyParcel;
-    int32_t retCode = remote->SendRequest(CMD_NM_UNREGISTER_NET_CONN_CALLBACK, dataParcel, replyParcel, option);
+    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_CONN_CALLBACK),
+                                          dataParcel, replyParcel, option);
     NETMGR_LOG_D("SendRequest retCode:[%{public}d]", retCode);
     if (retCode != ERR_NONE) {
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -314,7 +323,8 @@ int32_t NetConnServiceProxy::UpdateNetStateForTest(const sptr<NetSpecifier> &net
 
     MessageOption option;
     MessageParcel replyParcel;
-    int32_t retCode = remote->SendRequest(CMD_NM_UPDATE_NET_STATE_FOR_TEST, dataParcel, replyParcel, option);
+    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_STATE_FOR_TEST),
+                                          dataParcel, replyParcel, option);
     NETMGR_LOG_I("NetConnServiceProxy::UpdateNetStateForTest(), SendRequest retCode:[%{public}d]", retCode);
     if (retCode != ERR_NONE) {
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -353,7 +363,8 @@ int32_t NetConnServiceProxy::UpdateNetSupplierInfo(uint32_t supplierId, const sp
         NETMGR_LOG_E("Remote is null");
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    int32_t error = remote->SendRequest(CMD_NM_SET_NET_SUPPLIER_INFO, data, reply, option);
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_SUPPLIER_INFO), data,
+                                        reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -391,7 +402,8 @@ int32_t NetConnServiceProxy::UpdateNetLinkInfo(uint32_t supplierId, const sptr<N
         NETMGR_LOG_E("Remote is null");
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    int32_t error = remote->SendRequest(CMD_NM_SET_NET_LINK_INFO, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_LINK_INFO), data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -424,7 +436,9 @@ int32_t NetConnServiceProxy::RegisterNetDetectionCallback(int32_t netId, const s
     }
     MessageParcel replyParcel;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK, dataParcel, replyParcel, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK),
+                            dataParcel, replyParcel, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -456,7 +470,9 @@ int32_t NetConnServiceProxy::UnRegisterNetDetectionCallback(int32_t netId, const
     }
     MessageParcel replyParcel;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK, dataParcel, replyParcel, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK),
+                            dataParcel, replyParcel, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -482,7 +498,8 @@ int32_t NetConnServiceProxy::NetDetection(int32_t netId)
     }
     MessageParcel replyParcel;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_NET_DETECTION, dataParcel, replyParcel, option);
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_NET_DETECTION), dataParcel,
+                                        replyParcel, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -510,7 +527,8 @@ int32_t NetConnServiceProxy::GetIfaceNames(NetBearType bearerType, std::list<std
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_GET_IFACE_NAMES, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACE_NAMES), data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -562,7 +580,8 @@ int32_t NetConnServiceProxy::GetIfaceNameByType(NetBearType bearerType, const st
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_GET_IFACENAME_BY_TYPE, data, reply, option);
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACENAME_BY_TYPE), data,
+                                        reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -605,7 +624,8 @@ int32_t NetConnServiceProxy::GetDefaultNet(int32_t &netId)
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
 
-    int32_t errCode = remote->SendRequest(CMD_NM_GETDEFAULTNETWORK, dataParcel, replyParcel, option);
+    int32_t errCode = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK),
+                                          dataParcel, replyParcel, option);
     NETMGR_LOG_D("SendRequest errcode:[%{public}d]", errCode);
     if (errCode != ERR_NONE) {
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -637,7 +657,8 @@ int32_t NetConnServiceProxy::HasDefaultNet(bool &flag)
         NETMGR_LOG_E("Remote is null");
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
     }
-    int32_t retCode = remote->SendRequest(CMD_NM_HASDEFAULTNET, dataParcel, replyParcel, option);
+    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET), dataParcel,
+                                          replyParcel, option);
     NETMGR_LOG_D("SendRequest retCode:[%{public}d]", retCode);
     if (retCode != ERR_NONE) {
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -676,7 +697,8 @@ int32_t NetConnServiceProxy::GetSpecificNet(NetBearType bearerType, std::list<in
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_GET_SPECIFIC_NET, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET), data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -719,7 +741,8 @@ int32_t NetConnServiceProxy::GetAllNets(std::list<int32_t> &netIdList)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_GET_ALL_NETS, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ALL_NETS), data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -766,7 +789,8 @@ int32_t NetConnServiceProxy::GetSpecificUidNet(int32_t uid, int32_t &netId)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_GET_SPECIFIC_UID_NET, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_UID_NET), data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -804,7 +828,8 @@ int32_t NetConnServiceProxy::GetConnectionProperties(int32_t netId, NetLinkInfo 
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_GET_CONNECTION_PROPERTIES, data, reply, option);
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_CONNECTION_PROPERTIES),
+                                        data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -843,7 +868,8 @@ int32_t NetConnServiceProxy::GetNetCapabilities(int32_t netId, NetAllCapabilitie
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_GET_NET_CAPABILITIES, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_CAPABILITIES), data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -910,7 +936,8 @@ int32_t NetConnServiceProxy::GetAddressesByName(const std::string &host, int32_t
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_GET_ADDRESSES_BY_NAME, data, reply, option);
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESSES_BY_NAME), data,
+                                        reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -959,7 +986,8 @@ int32_t NetConnServiceProxy::GetAddressByName(const std::string &host, int32_t n
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_GET_ADDRESS_BY_NAME, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESS_BY_NAME), data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -1000,7 +1028,8 @@ int32_t NetConnServiceProxy::BindSocket(int32_t socket_fd, int32_t netId)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_BIND_SOCKET, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_BIND_SOCKET), data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -1032,7 +1061,8 @@ int32_t NetConnServiceProxy::SetAirplaneMode(bool state)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_SET_AIRPLANE_MODE, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_AIRPLANE_MODE), data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -1061,7 +1091,8 @@ int32_t NetConnServiceProxy::IsDefaultNetMetered(bool &isMetered)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_IS_DEFAULT_NET_METERED, data, reply, option);
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_DEFAULT_NET_METERED), data,
+                                        reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -1099,7 +1130,8 @@ int32_t NetConnServiceProxy::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_SET_GLOBAL_HTTP_PROXY, data, reply, option);
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_GLOBAL_HTTP_PROXY), data,
+                                        reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -1128,7 +1160,8 @@ int32_t NetConnServiceProxy::GetGlobalHttpProxy(HttpProxy &httpProxy)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_GET_GLOBAL_HTTP_PROXY, data, reply, option);
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY), data,
+                                        reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -1167,7 +1200,8 @@ int32_t NetConnServiceProxy::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &h
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_GET_DEFAULT_HTTP_PROXY, data, reply, option);
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_DEFAULT_HTTP_PROXY), data,
+                                        reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -1207,7 +1241,8 @@ int32_t NetConnServiceProxy::GetNetIdByIdentifier(const std::string &ident, std:
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_GET_NET_ID_BY_IDENTIFIER, data, reply, option);
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_ID_BY_IDENTIFIER), data,
+                                        reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -1255,7 +1290,8 @@ int32_t NetConnServiceProxy::SetAppNet(int32_t netId)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_SET_APP_NET, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_APP_NET), data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
@@ -1290,7 +1326,9 @@ int32_t NetConnServiceProxy::RegisterNetInterfaceCallback(const sptr<INetInterfa
 
     MessageOption option;
     MessageParcel replyParcel;
-    int32_t retCode = remote->SendRequest(CMD_NM_REGISTER_NET_INTERFACE_CALLBACK, dataParcel, replyParcel, option);
+    int32_t retCode =
+        remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_INTERFACE_CALLBACK),
+                            dataParcel, replyParcel, option);
     if (retCode != ERR_NONE) {
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
@@ -1312,7 +1350,8 @@ int32_t NetConnServiceProxy::GetNetInterfaceConfiguration(const std::string &ifa
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_NM_GET_INTERFACE_CONFIGURATION, data, reply, option);
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_INTERFACE_CONFIGURATION),
+                                        data, reply, option);
     if (error != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return NETMANAGER_ERR_OPERATION_FAILED;
