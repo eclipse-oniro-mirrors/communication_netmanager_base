@@ -141,7 +141,6 @@ ohos_shared_library("socket_permission") {
     integer_overflow = true
     boundary_sanitize = true
     all_ubsan = true
-     debug = true
   }
 
   sources = [ "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/socket_permission.cpp" ]
