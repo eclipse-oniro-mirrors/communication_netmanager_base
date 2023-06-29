@@ -43,7 +43,7 @@
                 "ability_base",
                 "access_token",
                 "hitrace_native",
-                "hisysevent_native",
+                "hisysevent",
                 "core_service",
                 "c_utils",
                 "jsoncpp",
