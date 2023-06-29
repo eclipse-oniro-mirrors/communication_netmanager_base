@@ -1528,6 +1528,92 @@ void SetIptablesCommandForResFuzzTest(const uint8_t *data, size_t size)
 
     OnRemoteRequest(NetsysNative::INetsysService::NETSYS_SET_IPTABLES_CMD_FOR_RES, dataParcel);
 }
+
+void NetworkCreateVirtualFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    int32_t netId = GetData<int32_t>();
+    bool hasDns = GetData<bool>();
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteInt32(netId);
+    dataParcel.WriteBool(hasDns);
+
+    OnRemoteRequest(NetsysNative::INetsysService::NETSYS_NETWORK_CREATE_VIRTUAL, dataParcel);
+}
+
+void NetworkAddUidsFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    int32_t netId = GetData<int32_t>();
+    std::vector<UidRange> uidRanges;
+    UidRange uid;
+    int32_t rangesSize = GetData<int32_t>() % VECTOR_MAX_SIZE;
+    for (int i = 0; i < rangesSize; i++) {
+        uidRanges.emplace_back(uid);
+    }
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteInt32(netId);
+    dataParcel.WriteInt32(rangesSize);
+    for (auto iter : uidRanges) {
+        iter.Marshalling(dataParcel);
+    }
+
+    OnRemoteRequest(NetsysNative::INetsysService::NETSYS_NETWORK_ADD_UIDS, dataParcel);
+}
+
+void NetworkDelUidsFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    int32_t netId = GetData<int32_t>();
+    std::vector<UidRange> uidRanges;
+    UidRange uid;
+    int32_t rangesSize = GetData<int32_t>() % VECTOR_MAX_SIZE;
+    for (int i = 0; i < rangesSize; i++) {
+        uidRanges.emplace_back(uid);
+    }
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteInt32(netId);
+    dataParcel.WriteInt32(rangesSize);
+    for (auto iter : uidRanges) {
+        iter.Marshalling(dataParcel);
+    }
+
+    OnRemoteRequest(NetsysNative::INetsysService::NETSYS_NETWORK_DEL_UIDS, dataParcel);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -1559,6 +1645,9 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::BandwidthRemoveAllowedListFuzzTest(data, size);
     OHOS::NetManagerStandard::FirewallEnableChainFuzzTest(data, size);
     OHOS::NetManagerStandard::GetNetworkSharingTrafficFuzzTest(data, size);
+    OHOS::NetManagerStandard::NetworkCreateVirtualFuzzTest(data, size);
+    OHOS::NetManagerStandard::NetworkAddUidsFuzzTest(data, size);
+    OHOS::NetManagerStandard::NetworkDelUidsFuzzTest(data, size);
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
