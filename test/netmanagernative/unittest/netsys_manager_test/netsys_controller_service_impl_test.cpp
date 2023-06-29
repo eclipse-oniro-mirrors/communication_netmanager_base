@@ -226,5 +226,20 @@ HWTEST_F(NetsysControllerServiceImplTest, RunRegisterMockApi, TestSize.Level1)
     EXPECT_EQ(ret32, NetManagerStandard::NETMANAGER_SUCCESS);
 
 }
+
+HWTEST_F(NetsysControllerServiceImplTest, ServiceImplTest, TestSize.Level1)
+{
+    std::vector<UidRange> uidRanges;
+    UidRange uidRang(1,2);
+    uidRanges.emplace_back(uidRang);
+    auto ret = instance_->NetworkCreateVirtual(5,false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NetworkAddUids(5, uidRanges);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NetworkDelUids(5, uidRanges);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
