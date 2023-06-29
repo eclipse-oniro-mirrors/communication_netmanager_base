@@ -84,7 +84,7 @@ void TestSetResolverConfig()
 
 void TestGetResolverConfig()
 {
-    int ret = -1;
+    int32_t ret = 0;
     std::vector<std::string> servers;
     std::vector<std::string> domains;
     uint16_t baseTimeoutMsec;
