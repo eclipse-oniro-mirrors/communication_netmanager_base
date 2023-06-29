@@ -31,6 +31,9 @@ using namespace testing::ext;
 using namespace NetManagerStandard;
 using namespace NetConnManagerTestUtil;
 constexpr int32_t NETID = 101;
+constexpr int32_t UID = 1000;
+constexpr int32_t MTU = 1500;
+constexpr int32_t WHICH = 14;
 const std::string INTERFACENAME = "wlan0";
 class NetsysNativeServiceProxyTest : public testing::Test {
 public:
@@ -131,6 +134,60 @@ HWTEST_F(NetsysNativeServiceProxyTest, DestroyNetworkTest001, TestSize.Level1)
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->NetworkDestroy(NETID);
+    EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, NetworkAddRouteParcelTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    RouteInfoParcel routeInfo;
+    routeInfo.destination = "destination";
+    routeInfo.ifName = INTERFACENAME;
+    routeInfo.nextHop = "nextHop";
+    routeInfo.mtu = MTU;
+    int32_t ret = netsysNativeService->NetworkAddRouteParcel(NETID, routeInfo);
+    EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, NetworkRemoveRouteParcelTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    RouteInfoParcel routeInfo;
+    routeInfo.destination = "";
+    routeInfo.ifName = INTERFACENAME;
+    routeInfo.nextHop = "";
+    routeInfo.mtu = MTU;
+    int32_t ret = netsysNativeService->NetworkRemoveRouteParcel(NETID, routeInfo);
+    EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, NetworkClearDefaultTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    int32_t ret = netsysNativeService->NetworkClearDefault();
+    EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, GetSetProcSysNetTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::string parameter = "TestParameter";
+    std::string value = "Testvalue";
+    int32_t ret = netsysNativeService->SetProcSysNet(AF_INET, WHICH, INTERFACENAME, parameter, value);
+    ret = netsysNativeService->GetProcSysNet(AF_INET, WHICH, INTERFACENAME, parameter, value);
+    EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, GetProcSysNetTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    int32_t ret = netsysNativeService->SetInternetPermission(UID, true);
+    ret = netsysNativeService->NetworkCreateVirtual(NETID, true);
     EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative
