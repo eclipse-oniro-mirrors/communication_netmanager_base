@@ -118,7 +118,8 @@ HWTEST_F(NetInterfaceCallbackStubTest, OnInterfaceAddressUpdatedTest001, TestSiz
 
     MessageParcel reply;
     MessageOption option;
-    ret = instance_->OnRemoteRequest(INetInterfaceStateCallback::CMD_ON_IFACE_ADDR_UPDATED, data, reply, option);
+    ret = instance_->OnRemoteRequest(static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDR_UPDATED),
+                                     data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -161,7 +162,8 @@ HWTEST_F(NetInterfaceCallbackStubTest, OnInterfaceAddressRemovedTest001, TestSiz
 
     MessageParcel reply;
     MessageOption option;
-    ret = instance_->OnRemoteRequest(INetInterfaceStateCallback::CMD_ON_IFACE_ADDR_REMOVED, data, reply, option);
+    ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDR_REMOVED), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -186,7 +188,8 @@ HWTEST_F(NetInterfaceCallbackStubTest, OnInterfaceAddedTest001, TestSize.Level1)
 
     MessageParcel reply;
     MessageOption option;
-    ret = instance_->OnRemoteRequest(INetInterfaceStateCallback::CMD_ON_IFACE_ADDED, data, reply, option);
+    ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDED), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -211,7 +214,8 @@ HWTEST_F(NetInterfaceCallbackStubTest, OnInterfaceRemovedTest001, TestSize.Level
 
     MessageParcel reply;
     MessageOption option;
-    ret = instance_->OnRemoteRequest(INetInterfaceStateCallback::CMD_ON_IFACE_REMOVED, data, reply, option);
+    ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_REMOVED), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -241,7 +245,8 @@ HWTEST_F(NetInterfaceCallbackStubTest, OnInterfaceChangedTest001, TestSize.Level
 
     MessageParcel reply;
     MessageOption option;
-    ret = instance_->OnRemoteRequest(INetInterfaceStateCallback::CMD_ON_IFACE_CHANGED, data, reply, option);
+    ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_CHANGED), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -271,7 +276,8 @@ HWTEST_F(NetInterfaceCallbackStubTest, OnInterfaceLinkStateChangedTest001, TestS
 
     MessageParcel reply;
     MessageOption option;
-    ret = instance_->OnRemoteRequest(INetInterfaceStateCallback::CMD_ON_IFACE_LINK_STATE_CHANGED, data, reply, option);
+    ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_LINK_STATE_CHANGED), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace

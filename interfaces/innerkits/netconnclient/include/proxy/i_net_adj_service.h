@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <list>
 
+#include "conn_ipc_interface_code.h"
 #include "iremote_broker.h"
 #include "i_net_adj_callback.h"
 #include "net_adj_iface_info.h"
@@ -26,15 +27,6 @@ namespace NetManagerStandard {
 class INetAdjService : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetManagerStandard.INetAdjService");
-    enum {
-        CMD_NM_ADJ_SYSTEM_READY,
-        CMD_NM_ADJ_ADD_IFACE,
-        CMD_NM_ADJ_REMOVE_ADJ_IFACE,
-        CMD_NM_ADJ_REGISTER_ADJ_CALLBACK,
-        CMD_NM_ADJ_UNREGISTER_ADJ_CALLBACK,
-        CMD_NM_ADJ_UPDATE_ADJ_INFO,
-        CMD_NM_ADJ_END,
-    };
 
 public:
     virtual int32_t SystemReady() = 0;

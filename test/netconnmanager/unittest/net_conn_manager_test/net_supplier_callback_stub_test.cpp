@@ -103,7 +103,8 @@ HWTEST_F(NetSupplierCallbackStubTest, RequestNetwork001, TestSize.Level1)
     int32_t ret = supplierCbStub_->OnRemoteRequest(100, data, reply, option);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 
-    ret = supplierCbStub_->OnRemoteRequest(INetSupplierCallback::NET_SUPPLIER_REQUEST_NETWORK, data, reply, option);
+    ret = supplierCbStub_->OnRemoteRequest(
+        static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_REQUEST_NETWORK), data, reply, option);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 
     MessageParcel dataOk;
@@ -120,7 +121,8 @@ HWTEST_F(NetSupplierCallbackStubTest, RequestNetwork001, TestSize.Level1)
     for (auto netCap : netCaps) {
         dataOk.WriteInt32(static_cast<uint32_t>(netCap));
     }
-    ret = supplierCbStub_->OnRemoteRequest(INetSupplierCallback::NET_SUPPLIER_REQUEST_NETWORK, dataOk, reply, option);
+    ret = supplierCbStub_->OnRemoteRequest(
+        static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_REQUEST_NETWORK), dataOk, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -146,8 +148,8 @@ HWTEST_F(NetSupplierCallbackStubTest, ReleaseNetwork001, TestSize.Level1)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = supplierCbStub_->OnRemoteRequest(INetSupplierCallback::NET_SUPPLIER_RELEASE_NETWORK,
-                                                   data, reply, option);
+    int32_t ret = supplierCbStub_->OnRemoteRequest(
+        static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_REQUEST_NETWORK), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

@@ -85,7 +85,8 @@ HWTEST_F(NetDetectionCallbackStubTest, OnNetDetectionResult001, TestSize.Level1)
     data.WriteInterfaceToken(NetDetectionCallbackStub::GetDescriptor());
     data.WriteString("test");
     data.WriteInt32(NET_DETECTION_SUCCESS);
-    int32_t ret = instance_->OnRemoteRequest(INetDetectionCallback::NET_DETECTION_RESULT, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(DetectionCallback::NET_DETECTION_RESULT),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 }
 } // namespace NetManagerStandard

@@ -59,6 +59,48 @@ enum class ConnInterfaceCode {
     CMD_NM_GET_INTERFACE_CONFIGURATION,
     CMD_NM_END,
 };
-}
-}
+
+enum class AdjCallbackInterfaceCode{
+    ADJ_ADD,
+    ADJ_REMOVE,
+};
+
+enum class AdjServiceInterfaceCode{
+    CMD_NM_ADJ_SYSTEM_READY,
+    CMD_NM_ADJ_ADD_IFACE,
+    CMD_NM_ADJ_REMOVE_ADJ_IFACE,
+    CMD_NM_ADJ_REGISTER_ADJ_CALLBACK,
+    CMD_NM_ADJ_UNREGISTER_ADJ_CALLBACK,
+    CMD_NM_ADJ_UPDATE_ADJ_INFO,
+    CMD_NM_ADJ_END,
+};
+
+enum class ConnCallbackInterfaceCode{
+    NET_AVAILABLE,
+    NET_CAPABILITIES_CHANGE,
+    NET_CONNECTION_PROPERTIES_CHANGE,
+    NET_LOST,
+    NET_UNAVAILABLE,
+    NET_BLOCK_STATUS_CHANGE,
+};
+
+enum class DetectionCallback {
+    NET_DETECTION_RESULT = 0,
+};
+
+enum class InterfaceCallbackInterfaceCode {
+    CMD_ON_IFACE_ADDR_UPDATED,
+    CMD_ON_IFACE_ADDR_REMOVED,
+    CMD_ON_IFACE_ADDED,
+    CMD_ON_IFACE_REMOVED,
+    CMD_ON_IFACE_CHANGED,
+    CMD_ON_IFACE_LINK_STATE_CHANGED,
+};
+
+enum class SupplierInterfaceCode {
+    NET_SUPPLIER_REQUEST_NETWORK = 0,
+    NET_SUPPLIER_RELEASE_NETWORK = 1,
+};
+} // namespace NetManagerStandard
+} // namespace OHOS
 #endif // CONN_IPC_INTERFACE_CODE_H

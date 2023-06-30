@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <string>
 #include <set>
 
+#include "conn_ipc_interface_code.h"
 #include "iremote_broker.h"
 
 #include "net_all_capabilities.h"
@@ -30,10 +31,6 @@ public:
     virtual ~INetSupplierCallback() = default;
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetManagerStandard.INetSupplierCallback");
-    enum {
-        NET_SUPPLIER_REQUEST_NETWORK = 0,
-        NET_SUPPLIER_RELEASE_NETWORK = 1,
-    };
 
 public:
     virtual int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps) = 0;

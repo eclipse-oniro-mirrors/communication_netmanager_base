@@ -66,7 +66,9 @@ int32_t NetInterfaceStateCallbackProxy::OnInterfaceAddressUpdated(const std::str
     }
     MessageParcel replyParcel;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_ON_IFACE_ADDR_UPDATED, dataParcel, replyParcel, option);
+    int32_t retCode = remote->SendRequest(
+        static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDR_UPDATED),
+        dataParcel, replyParcel, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, retCode: [%{public}d]", retCode);
         return retCode;
@@ -106,7 +108,9 @@ int32_t NetInterfaceStateCallbackProxy::OnInterfaceAddressRemoved(const std::str
     }
     MessageParcel replyParcel;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_ON_IFACE_ADDR_REMOVED, dataParcel, replyParcel, option);
+    int32_t retCode = remote->SendRequest(
+        static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDR_REMOVED),
+        dataParcel, replyParcel, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, retCode: [%{public}d]", retCode);
         return retCode;
@@ -133,7 +137,8 @@ int32_t NetInterfaceStateCallbackProxy::OnInterfaceAdded(const std::string &ifNa
     }
     MessageParcel replyParcel;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_ON_IFACE_ADDED, dataParcel, replyParcel, option);
+    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDED),
+                                          dataParcel, replyParcel, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, retCode: [%{public}d]", retCode);
         return retCode;
@@ -160,7 +165,8 @@ int32_t NetInterfaceStateCallbackProxy::OnInterfaceRemoved(const std::string &if
     }
     MessageParcel replyParcel;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_ON_IFACE_REMOVED, dataParcel, replyParcel, option);
+    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_REMOVED),
+                                          dataParcel, replyParcel, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, retCode: [%{public}d]", retCode);
         return retCode;
@@ -191,7 +197,8 @@ int32_t NetInterfaceStateCallbackProxy::OnInterfaceChanged(const std::string &if
     }
     MessageParcel replyParcel;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_ON_IFACE_CHANGED, dataParcel, replyParcel, option);
+    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_CHANGED),
+                                          dataParcel, replyParcel, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, retCode: [%{public}d]", retCode);
         return retCode;
@@ -222,7 +229,9 @@ int32_t NetInterfaceStateCallbackProxy::OnInterfaceLinkStateChanged(const std::s
     }
     MessageParcel replyParcel;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(CMD_ON_IFACE_LINK_STATE_CHANGED, dataParcel, replyParcel, option);
+    int32_t retCode = remote->SendRequest(
+        static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_LINK_STATE_CHANGED),
+        dataParcel, replyParcel, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, retCode: [%{public}d]", retCode);
         return retCode;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,12 +19,18 @@ namespace OHOS {
 namespace NetManagerStandard {
 NetAdjServiceStub::NetAdjServiceStub()
 {
-    memberFuncMap_[CMD_NM_ADJ_SYSTEM_READY] = &NetAdjServiceStub::OnSystemReady;
-    memberFuncMap_[CMD_NM_ADJ_ADD_IFACE] = &NetAdjServiceStub::OnAddNetAdjIface;
-    memberFuncMap_[CMD_NM_ADJ_REMOVE_ADJ_IFACE] = &NetAdjServiceStub::OnRemoveNetAdjIface;
-    memberFuncMap_[CMD_NM_ADJ_REGISTER_ADJ_CALLBACK] = &NetAdjServiceStub::OnRegisterAdjIfaceCallback;
-    memberFuncMap_[CMD_NM_ADJ_UNREGISTER_ADJ_CALLBACK] = &NetAdjServiceStub::OnUnregisterAdjIfaceCallback;
-    memberFuncMap_[CMD_NM_ADJ_UPDATE_ADJ_INFO] = &NetAdjServiceStub::OnUpdateNetAdjInfo;
+    memberFuncMap_[static_cast<uint32_t>(AdjServiceInterfaceCode::CMD_NM_ADJ_SYSTEM_READY)] =
+        &NetAdjServiceStub::OnSystemReady;
+    memberFuncMap_[static_cast<uint32_t>(AdjServiceInterfaceCode::CMD_NM_ADJ_ADD_IFACE)] =
+        &NetAdjServiceStub::OnAddNetAdjIface;
+    memberFuncMap_[static_cast<uint32_t>(AdjServiceInterfaceCode::CMD_NM_ADJ_REMOVE_ADJ_IFACE)] =
+        &NetAdjServiceStub::OnRemoveNetAdjIface;
+    memberFuncMap_[static_cast<uint32_t>(AdjServiceInterfaceCode::CMD_NM_ADJ_REGISTER_ADJ_CALLBACK)] =
+        &NetAdjServiceStub::OnRegisterAdjIfaceCallback;
+    memberFuncMap_[static_cast<uint32_t>(AdjServiceInterfaceCode::CMD_NM_ADJ_UNREGISTER_ADJ_CALLBACK)] =
+        &NetAdjServiceStub::OnUnregisterAdjIfaceCallback;
+    memberFuncMap_[static_cast<uint32_t>(AdjServiceInterfaceCode::CMD_NM_ADJ_UPDATE_ADJ_INFO)] =
+        &NetAdjServiceStub::OnUpdateNetAdjInfo;
 }
 
 NetAdjServiceStub::~NetAdjServiceStub()

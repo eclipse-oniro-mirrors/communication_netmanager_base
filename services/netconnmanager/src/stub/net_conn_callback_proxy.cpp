@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,8 @@ int32_t NetConnCallbackProxy::NetAvailable(sptr<NetHandle> &netHandle)
     MessageParcel reply;
     MessageOption option;
     option.SetFlags(MessageOption::TF_ASYNC);
-    int32_t ret = remote->SendRequest(NET_AVAILABLE, data, reply, option);
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_AVAILABLE),
+                                      data, reply, option);
     if (ret != ERR_NONE) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
@@ -103,7 +104,8 @@ int32_t NetConnCallbackProxy::NetCapabilitiesChange(
     MessageParcel reply;
     MessageOption option;
     option.SetFlags(MessageOption::TF_ASYNC);
-    int32_t ret = remote->SendRequest(NET_CAPABILITIES_CHANGE, data, reply, option);
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CAPABILITIES_CHANGE),
+                                      data, reply, option);
     if (ret != ERR_NONE) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
@@ -141,7 +143,9 @@ int32_t NetConnCallbackProxy::NetConnectionPropertiesChange(sptr<NetHandle> &net
     MessageParcel reply;
     MessageOption option;
     option.SetFlags(MessageOption::TF_ASYNC);
-    int32_t ret = remote->SendRequest(NET_CONNECTION_PROPERTIES_CHANGE, data, reply, option);
+    int32_t ret =
+        remote->SendRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CONNECTION_PROPERTIES_CHANGE),
+                                      data, reply, option);
     if (ret != ERR_NONE) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
@@ -174,7 +178,8 @@ int32_t NetConnCallbackProxy::NetLost(sptr<NetHandle> &netHandle)
     MessageParcel reply;
     MessageOption option;
     option.SetFlags(MessageOption::TF_ASYNC);
-    int32_t ret = remote->SendRequest(NET_LOST, data, reply, option);
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_LOST),
+                                      data, reply, option);
     if (ret != ERR_NONE) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
@@ -198,7 +203,8 @@ int32_t NetConnCallbackProxy::NetUnavailable()
     MessageParcel reply;
     MessageOption option;
     option.SetFlags(MessageOption::TF_ASYNC);
-    int32_t ret = remote->SendRequest(NET_UNAVAILABLE, data, reply, option);
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_UNAVAILABLE),
+                                      data, reply, option);
     if (ret != ERR_NONE) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
@@ -233,7 +239,8 @@ int32_t NetConnCallbackProxy::NetBlockStatusChange(sptr<NetHandle> &netHandle, b
     MessageParcel reply;
     MessageOption option;
     option.SetFlags(MessageOption::TF_ASYNC);
-    int32_t ret = remote->SendRequest(NET_BLOCK_STATUS_CHANGE, data, reply, option);
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_BLOCK_STATUS_CHANGE),
+                                      data, reply, option);
     if (ret != ERR_NONE) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }

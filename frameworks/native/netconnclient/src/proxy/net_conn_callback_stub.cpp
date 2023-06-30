@@ -22,12 +22,17 @@ static constexpr uint32_t MAX_NET_CAP_NUM = 32;
 
 NetConnCallbackStub::NetConnCallbackStub()
 {
-    memberFuncMap_[NET_AVAILABLE] = &NetConnCallbackStub::OnNetAvailable;
-    memberFuncMap_[NET_CAPABILITIES_CHANGE] = &NetConnCallbackStub::OnNetCapabilitiesChange;
-    memberFuncMap_[NET_CONNECTION_PROPERTIES_CHANGE] = &NetConnCallbackStub::OnNetConnectionPropertiesChange;
-    memberFuncMap_[NET_LOST] = &NetConnCallbackStub::OnNetLost;
-    memberFuncMap_[NET_UNAVAILABLE] = &NetConnCallbackStub::OnNetUnavailable;
-    memberFuncMap_[NET_BLOCK_STATUS_CHANGE] = &NetConnCallbackStub::OnNetBlockStatusChange;
+    memberFuncMap_[static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_AVAILABLE)] =
+        &NetConnCallbackStub::OnNetAvailable;
+    memberFuncMap_[static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CAPABILITIES_CHANGE)] =
+        &NetConnCallbackStub::OnNetCapabilitiesChange;
+    memberFuncMap_[static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CONNECTION_PROPERTIES_CHANGE)] =
+        &NetConnCallbackStub::OnNetConnectionPropertiesChange;
+    memberFuncMap_[static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_LOST)] = &NetConnCallbackStub::OnNetLost;
+    memberFuncMap_[static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_UNAVAILABLE)] =
+        &NetConnCallbackStub::OnNetUnavailable;
+    memberFuncMap_[static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_BLOCK_STATUS_CHANGE)] =
+        &NetConnCallbackStub::OnNetBlockStatusChange;
 }
 
 NetConnCallbackStub::~NetConnCallbackStub() {}
