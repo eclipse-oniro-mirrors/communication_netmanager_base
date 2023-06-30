@@ -24,51 +24,72 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 std::map<uint32_t, const char *> g_codeNPS = {
-    {INetPolicyService::CMD_NPS_SET_POLICY_BY_UID, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_SET_NET_QUOTA_POLICIES, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_RESET_POLICIES, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_SET_BACKGROUND_POLICY, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_UPDATE_REMIND_POLICY, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_GET_POLICY_BY_UID, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_GET_UIDS_BY_POLICY, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_GET_NET_QUOTA_POLICIES, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_GET_BACKGROUND_POLICY, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_IS_NET_ALLOWED_BY_METERED, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_IS_NET_ALLOWED_BY_IFACE, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_REGISTER_NET_POLICY_CALLBACK, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_GET_BACKGROUND_POLICY_BY_UID, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_SET_IDLE_TRUSTLIST, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_GET_IDLE_TRUSTLIST, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_SET_DEVICE_IDLE_POLICY, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_GET_POWER_SAVE_TRUSTLIST, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_SET_POWER_SAVE_TRUSTLIST, Permission::MANAGE_NET_STRATEGY},
-    {INetPolicyService::CMD_NPS_SET_POWER_SAVE_POLICY, Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POLICY_BY_UID), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POLICY_BY_UID), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_UIDS_BY_POLICY), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_IS_NET_ALLOWED_BY_METERED), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_IS_NET_ALLOWED_BY_IFACE), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_REGISTER_NET_POLICY_CALLBACK), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK),
+     Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NET_QUOTA_POLICIES), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NET_QUOTA_POLICIES), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_UPDATE_REMIND_POLICY), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_TRUSTLIST), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_IDLE_TRUSTLIST), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_DEVICE_IDLE_POLICY), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_RESET_POLICIES), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_BACKGROUND_POLICY), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY_BY_UID), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_TRUSTLIST), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POWER_SAVE_TRUSTLIST), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_POLICY), Permission::MANAGE_NET_STRATEGY},
 };
 } // namespace
 
 NetPolicyServiceStub::NetPolicyServiceStub()
 {
-    memberFuncMap_[CMD_NPS_SET_POLICY_BY_UID] = &NetPolicyServiceStub::OnSetPolicyByUid;
-    memberFuncMap_[CMD_NPS_GET_POLICY_BY_UID] = &NetPolicyServiceStub::OnGetPolicyByUid;
-    memberFuncMap_[CMD_NPS_GET_UIDS_BY_POLICY] = &NetPolicyServiceStub::OnGetUidsByPolicy;
-    memberFuncMap_[CMD_NPS_IS_NET_ALLOWED_BY_METERED] = &NetPolicyServiceStub::OnIsUidNetAllowedMetered;
-    memberFuncMap_[CMD_NPS_IS_NET_ALLOWED_BY_IFACE] = &NetPolicyServiceStub::OnIsUidNetAllowedIfaceName;
-    memberFuncMap_[CMD_NPS_REGISTER_NET_POLICY_CALLBACK] = &NetPolicyServiceStub::OnRegisterNetPolicyCallback;
-    memberFuncMap_[CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK] = &NetPolicyServiceStub::OnUnregisterNetPolicyCallback;
-    memberFuncMap_[CMD_NPS_SET_NET_QUOTA_POLICIES] = &NetPolicyServiceStub::OnSetNetQuotaPolicies;
-    memberFuncMap_[CMD_NPS_GET_NET_QUOTA_POLICIES] = &NetPolicyServiceStub::OnGetNetQuotaPolicies;
-    memberFuncMap_[CMD_NPS_RESET_POLICIES] = &NetPolicyServiceStub::OnResetPolicies;
-    memberFuncMap_[CMD_NPS_UPDATE_REMIND_POLICY] = &NetPolicyServiceStub::OnSnoozePolicy;
-    memberFuncMap_[CMD_NPS_SET_IDLE_TRUSTLIST] = &NetPolicyServiceStub::OnSetDeviceIdleTrustlist;
-    memberFuncMap_[CMD_NPS_GET_IDLE_TRUSTLIST] = &NetPolicyServiceStub::OnGetDeviceIdleTrustlist;
-    memberFuncMap_[CMD_NPS_SET_DEVICE_IDLE_POLICY] = &NetPolicyServiceStub::OnSetDeviceIdlePolicy;
-    memberFuncMap_[CMD_NPS_GET_POWER_SAVE_TRUSTLIST] = &NetPolicyServiceStub::OnGetPowerSaveTrustlist;
-    memberFuncMap_[CMD_NPS_SET_POWER_SAVE_TRUSTLIST] = &NetPolicyServiceStub::OnSetPowerSaveTrustlist;
-    memberFuncMap_[CMD_NPS_SET_BACKGROUND_POLICY] = &NetPolicyServiceStub::OnSetBackgroundPolicy;
-    memberFuncMap_[CMD_NPS_GET_BACKGROUND_POLICY] = &NetPolicyServiceStub::OnGetBackgroundPolicy;
-    memberFuncMap_[CMD_NPS_GET_BACKGROUND_POLICY_BY_UID] = &NetPolicyServiceStub::OnGetBackgroundPolicyByUid;
-    memberFuncMap_[CMD_NPS_SET_POWER_SAVE_POLICY] = &NetPolicyServiceStub::OnSetPowerSavePolicy;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POLICY_BY_UID)] =
+        &NetPolicyServiceStub::OnSetPolicyByUid;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POLICY_BY_UID)] =
+        &NetPolicyServiceStub::OnGetPolicyByUid;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_UIDS_BY_POLICY)] =
+        &NetPolicyServiceStub::OnGetUidsByPolicy;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_IS_NET_ALLOWED_BY_METERED)] =
+        &NetPolicyServiceStub::OnIsUidNetAllowedMetered;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_IS_NET_ALLOWED_BY_IFACE)] =
+        &NetPolicyServiceStub::OnIsUidNetAllowedIfaceName;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_REGISTER_NET_POLICY_CALLBACK)] =
+        &NetPolicyServiceStub::OnRegisterNetPolicyCallback;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK)] =
+        &NetPolicyServiceStub::OnUnregisterNetPolicyCallback;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NET_QUOTA_POLICIES)] =
+        &NetPolicyServiceStub::OnSetNetQuotaPolicies;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NET_QUOTA_POLICIES)] =
+        &NetPolicyServiceStub::OnGetNetQuotaPolicies;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_UPDATE_REMIND_POLICY)] =
+        &NetPolicyServiceStub::OnResetPolicies;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_TRUSTLIST)] =
+        &NetPolicyServiceStub::OnSnoozePolicy;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_IDLE_TRUSTLIST)] =
+        &NetPolicyServiceStub::OnSetDeviceIdleTrustlist;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_DEVICE_IDLE_POLICY)] =
+        &NetPolicyServiceStub::OnGetDeviceIdleTrustlist;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_RESET_POLICIES)] =
+        &NetPolicyServiceStub::OnSetDeviceIdlePolicy;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_BACKGROUND_POLICY)] =
+        &NetPolicyServiceStub::OnGetPowerSaveTrustlist;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY)] =
+        &NetPolicyServiceStub::OnSetPowerSaveTrustlist;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY_BY_UID)] =
+        &NetPolicyServiceStub::OnSetBackgroundPolicy;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_TRUSTLIST)] =
+        &NetPolicyServiceStub::OnGetBackgroundPolicy;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POWER_SAVE_TRUSTLIST)] =
+        &NetPolicyServiceStub::OnGetBackgroundPolicyByUid;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_POLICY)] =
+        &NetPolicyServiceStub::OnSetPowerSavePolicy;
     InitEventHandler();
 }
 

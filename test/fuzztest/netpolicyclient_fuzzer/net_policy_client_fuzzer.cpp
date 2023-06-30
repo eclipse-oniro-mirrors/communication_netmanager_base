@@ -246,7 +246,7 @@ void SetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteUint32(uid);
     dataParcel.WriteUint32(policy);
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_SET_POLICY_BY_UID, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POLICY_BY_UID), dataParcel);
 }
 
 void GetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
@@ -266,7 +266,7 @@ void GetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
     }
     dataParcel.WriteUint32(uid);
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_GET_POLICY_BY_UID, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POLICY_BY_UID), dataParcel);
 }
 
 void GetUidsByPolicyFuzzTest(const uint8_t *data, size_t size)
@@ -283,7 +283,7 @@ void GetUidsByPolicyFuzzTest(const uint8_t *data, size_t size)
     uint32_t policy = GetData<uint32_t>() % 3;
     dataParcel.WriteUint32(policy);
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_GET_UIDS_BY_POLICY, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_UIDS_BY_POLICY), dataParcel);
 }
 
 void SetBackgroundPolicyFuzzTest(const uint8_t *data, size_t size)
@@ -303,7 +303,7 @@ void SetBackgroundPolicyFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     dataParcel.WriteBool(isBackgroundPolicyAllow);
-    OnRemoteRequest(INetPolicyService::CMD_NPS_SET_BACKGROUND_POLICY, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_BACKGROUND_POLICY), dataParcel);
 }
 
 void GetBackgroundPolicyByUidFuzzTest(const uint8_t *data, size_t size)
@@ -322,7 +322,7 @@ void GetBackgroundPolicyByUidFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     dataParcel.WriteUint32(uid);
-    OnRemoteRequest(INetPolicyService::CMD_NPS_GET_BACKGROUND_POLICY_BY_UID, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY_BY_UID), dataParcel);
 }
 
 void SetCellularPoliciesFuzzTest(const uint8_t *data, size_t size)
@@ -358,7 +358,7 @@ void SetCellularPoliciesFuzzTest(const uint8_t *data, size_t size)
 
     NetQuotaPolicy::Marshalling(dataParcel, quotaPolicies);
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_SET_NET_QUOTA_POLICIES, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NET_QUOTA_POLICIES), dataParcel);
 }
 
 void RegisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
@@ -379,7 +379,7 @@ void RegisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
 
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_REGISTER_NET_POLICY_CALLBACK, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_REGISTER_NET_POLICY_CALLBACK), dataParcel);
 }
 
 void UnregisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
@@ -400,7 +400,7 @@ void UnregisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
 
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK), dataParcel);
 }
 
 void GetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
@@ -414,7 +414,7 @@ void GetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_GET_NET_QUOTA_POLICIES, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NET_QUOTA_POLICIES), dataParcel);
 }
 
 void SetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
@@ -449,7 +449,7 @@ void SetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
     }
     NetQuotaPolicy::Marshalling(dataParcel, quotaPolicies);
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_SET_NET_QUOTA_POLICIES, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NET_QUOTA_POLICIES), dataParcel);
 }
 
 void IsUidNetAllowedFuzzTest(const uint8_t *data, size_t size)
@@ -473,7 +473,7 @@ void IsUidNetAllowedFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteUint32(uid);
     dataParcel.WriteBool(metered);
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_IS_NET_ALLOWED_BY_METERED, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_IS_NET_ALLOWED_BY_METERED), dataParcel);
 
     MessageParcel dataParcel2;
     if (!WriteInterfaceToken(dataParcel2)) {
@@ -483,7 +483,7 @@ void IsUidNetAllowedFuzzTest(const uint8_t *data, size_t size)
     dataParcel2.WriteUint32(uid);
     dataParcel2.WriteString(ifaceName);
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_IS_NET_ALLOWED_BY_IFACE, dataParcel2);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_IS_NET_ALLOWED_BY_IFACE), dataParcel2);
 }
 
 void ResetPoliciesFuzzTest(const uint8_t *data, size_t size)
@@ -504,7 +504,7 @@ void ResetPoliciesFuzzTest(const uint8_t *data, size_t size)
 
     dataParcel.WriteString(simId);
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_RESET_POLICIES, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_RESET_POLICIES), dataParcel);
 }
 
 void UpdateRemindPolicyFuzzTest(const uint8_t *data, size_t size)
@@ -530,7 +530,7 @@ void UpdateRemindPolicyFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(simId);
     dataParcel.WriteUint32(remindType);
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_UPDATE_REMIND_POLICY, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_UPDATE_REMIND_POLICY), dataParcel);
 }
 
 void SetDeviceIdleTrustlistFuzzTest(const uint8_t *data, size_t size)
@@ -554,7 +554,7 @@ void SetDeviceIdleTrustlistFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteUInt32Vector(uids);
     dataParcel.WriteBool(isAllowed);
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_SET_IDLE_TRUSTLIST, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_TRUSTLIST), dataParcel);
 }
 
 void SetDeviceIdlePolicyFuzzTest(const uint8_t *data, size_t size)
@@ -576,7 +576,7 @@ void SetDeviceIdlePolicyFuzzTest(const uint8_t *data, size_t size)
 
     dataParcel.WriteBool(enable);
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_SET_DEVICE_IDLE_POLICY, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_DEVICE_IDLE_POLICY), dataParcel);
 }
 
 void SetPowerSaveTrustlistFuzzTest(const uint8_t *data, size_t size)
@@ -600,7 +600,7 @@ void SetPowerSaveTrustlistFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteBool(isAllowed);
     dataParcel.WriteUInt32Vector(uids);
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_SET_POWER_SAVE_TRUSTLIST, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_TRUSTLIST), dataParcel);
 }
 
 void GetPowerSaveTrustlistFuzzTest(const uint8_t *data, size_t size)
@@ -619,7 +619,7 @@ void GetPowerSaveTrustlistFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    OnRemoteRequest(INetPolicyService::CMD_NPS_GET_POWER_SAVE_TRUSTLIST, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POWER_SAVE_TRUSTLIST), dataParcel);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

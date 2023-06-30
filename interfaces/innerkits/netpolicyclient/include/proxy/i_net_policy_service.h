@@ -21,36 +21,13 @@
 #include "i_net_policy_callback.h"
 #include "net_policy_constants.h"
 #include "net_quota_policy.h"
+#include "policy_ipc_interface_code.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 class INetPolicyService : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetManagerStandard.INetPolicyService");
-    enum {
-        CMD_NPS_START = 0,
-        CMD_NPS_SET_POLICY_BY_UID,
-        CMD_NPS_GET_POLICY_BY_UID,
-        CMD_NPS_GET_UIDS_BY_POLICY,
-        CMD_NPS_IS_NET_ALLOWED_BY_METERED,
-        CMD_NPS_IS_NET_ALLOWED_BY_IFACE,
-        CMD_NPS_REGISTER_NET_POLICY_CALLBACK,
-        CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK,
-        CMD_NPS_SET_NET_QUOTA_POLICIES,
-        CMD_NPS_GET_NET_QUOTA_POLICIES,
-        CMD_NPS_UPDATE_REMIND_POLICY,
-        CMD_NPS_SET_IDLE_TRUSTLIST,
-        CMD_NPS_GET_IDLE_TRUSTLIST,
-        CMD_NPS_SET_DEVICE_IDLE_POLICY,
-        CMD_NPS_RESET_POLICIES,
-        CMD_NPS_SET_BACKGROUND_POLICY,
-        CMD_NPS_GET_BACKGROUND_POLICY,
-        CMD_NPS_GET_BACKGROUND_POLICY_BY_UID,
-        CMD_NPS_SET_POWER_SAVE_TRUSTLIST,
-        CMD_NPS_GET_POWER_SAVE_TRUSTLIST,
-        CMD_NPS_SET_POWER_SAVE_POLICY,
-        CMD_NPS_END = 100,
-    };
 
 public:
     /**
