@@ -49,13 +49,13 @@ public:
 
     int SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
     {
-        if (code >= INetStatsService::CMD_GET_IFACE_RXBYTES &&
-            code <= INetStatsService::CMD_GET_UID_TXBYTES) {
+        if (code >= static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_RXBYTES) &&
+            code <= static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_TXBYTES)) {
             if (!reply.WriteInt64(STATS_CODE)) {
                 return NETMANAGER_ERROR;
             }
-        } else if (code == INetStatsService::CMD_GET_IFACE_STATS_DETAIL ||
-                code == INetStatsService::CMD_GET_UID_STATS_DETAIL) {
+        } else if (code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_STATS_DETAIL) ||
+                code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_STATS_DETAIL)) {
             if (eCode == NETMANAGER_ERR_READ_REPLY_FAIL) {
                 return NETSYS_SUCCESS;
             }

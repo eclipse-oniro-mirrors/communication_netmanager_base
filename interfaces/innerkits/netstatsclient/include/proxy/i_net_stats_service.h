@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-20223 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,33 +22,13 @@
 #include "iremote_broker.h"
 #include "net_stats_constants.h"
 #include "net_stats_info.h"
+#include "stats_ipc_interface_code.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 class INetStatsService : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetManagerStandard.INetStatsService");
-    enum {
-        CMD_START = 0,
-        CMD_SYSTEM_READY = 1,
-        CMD_GET_IFACE_STATS_DETAIL = 2,
-        CMD_GET_UID_STATS_DETAIL = 3,
-        CMD_UPDATE_IFACES_STATS = 4,
-        CMD_UPDATE_STATS_DATA = 5,
-        CMD_NSM_REGISTER_NET_STATS_CALLBACK = 6,
-        CMD_NSM_UNREGISTER_NET_STATS_CALLBACK = 7,
-        CMD_NSM_RESET_FACTORY = 8,
-        CMD_GET_IFACE_RXBYTES = 9,
-        CMD_GET_IFACE_TXBYTES = 10,
-        CMD_GET_CELLULAR_RXBYTES = 11,
-        CMD_GET_CELLULAR_TXBYTES = 12,
-        CMD_GET_ALL_RXBYTES = 13,
-        CMD_GET_ALL_TXBYTES = 14,
-        CMD_GET_UID_RXBYTES = 15,
-        CMD_GET_UID_TXBYTES = 16,
-        CMD_GET_ALL_STATS_INFO = 17,
-        CMD_END = 100,
-    };
 
 public:
     virtual int32_t GetIfaceRxBytes(uint64_t &stats, const std::string &interfaceName) = 0;
