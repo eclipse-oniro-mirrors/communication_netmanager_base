@@ -60,12 +60,12 @@ enum class ConnInterfaceCode {
     CMD_NM_END,
 };
 
-enum class AdjCallbackInterfaceCode{
+enum class AdjCallbackInterfaceCode {
     ADJ_ADD,
     ADJ_REMOVE,
 };
 
-enum class AdjServiceInterfaceCode{
+enum class AdjServiceInterfaceCode {
     CMD_NM_ADJ_SYSTEM_READY,
     CMD_NM_ADJ_ADD_IFACE,
     CMD_NM_ADJ_REMOVE_ADJ_IFACE,
@@ -75,7 +75,7 @@ enum class AdjServiceInterfaceCode{
     CMD_NM_ADJ_END,
 };
 
-enum class ConnCallbackInterfaceCode{
+enum class ConnCallbackInterfaceCode {
     NET_AVAILABLE,
     NET_CAPABILITIES_CHANGE,
     NET_CONNECTION_PROPERTIES_CHANGE,

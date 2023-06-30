@@ -145,7 +145,7 @@ int32_t NetConnCallbackProxy::NetConnectionPropertiesChange(sptr<NetHandle> &net
     option.SetFlags(MessageOption::TF_ASYNC);
     int32_t ret =
         remote->SendRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CONNECTION_PROPERTIES_CHANGE),
-                                      data, reply, option);
+                            data, reply, option);
     if (ret != ERR_NONE) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
