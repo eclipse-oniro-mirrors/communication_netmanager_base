@@ -16,7 +16,7 @@
 #ifndef STATS_IPC_INTERFACE_CODE_H
 #define STATS_IPC_INTERFACE_CODE_H
 
-/* SAID: 1151 */
+/* SAID: 1153 */
 namespace OHOS {
 namespace NetManagerStandard {
 enum class StatsInterfaceCode {
