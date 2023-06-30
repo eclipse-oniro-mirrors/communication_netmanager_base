@@ -96,6 +96,14 @@ bool WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 
+bool WriteInterfaceTokenCallback(MessageParcel &data)
+{
+    if (!data.WriteInterfaceToken(NetsysNative::NotifyCallbackStub::GetDescriptor())) {
+        return false;
+    }
+    return true;
+}
+
 class INetSysCallbackTest : public NetsysNative::NotifyCallbackStub {
 public:
     INetSysCallbackTest() : NotifyCallbackStub() {}
@@ -1614,6 +1622,222 @@ void NetworkDelUidsFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(NetsysNative::INetsysService::NETSYS_NETWORK_DEL_UIDS, dataParcel);
 }
 
+void OnInterfaceAddressUpdatedFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    std::string addr = GetStringFromData(STR_LEN);
+    std::string ifName = GetStringFromData(STR_LEN);
+    int32_t flags = GetData<int32_t>();
+    int32_t scope = GetData<int32_t>();
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceTokenCallback(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteString(addr);
+    dataParcel.WriteString(ifName);
+    dataParcel.WriteInt32(flags);
+    dataParcel.WriteInt32(scope);
+    OnRemoteRequest(NetsysNative::INotifyCallback::ON_INTERFACE_ADDRESS_UPDATED, dataParcel);
+}
+
+void OnInterfaceAddressRemovedFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    std::string addr = GetStringFromData(STR_LEN);
+    std::string ifName = GetStringFromData(STR_LEN);
+    int32_t flags = GetData<int32_t>();
+    int32_t scope = GetData<int32_t>();
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceTokenCallback(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteString(addr);
+    dataParcel.WriteString(ifName);
+    dataParcel.WriteInt32(flags);
+    dataParcel.WriteInt32(scope);
+
+    OnRemoteRequest(NetsysNative::INotifyCallback::ON_INTERFACE_ADDRESS_REMOVED, dataParcel);
+}
+
+void OnInterfaceAddedFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    std::string ifName = GetStringFromData(STR_LEN);
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceTokenCallback(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteString(ifName);
+
+    OnRemoteRequest(NetsysNative::INotifyCallback::ON_INTERFACE_ADDED, dataParcel);
+}
+
+void OnInterfaceRemovedFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    std::string ifName = GetStringFromData(STR_LEN);
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceTokenCallback(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteString(ifName);
+
+    OnRemoteRequest(NetsysNative::INotifyCallback::ON_INTERFACE_REMOVED, dataParcel);
+}
+
+void OnInterfaceChangedFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    std::string ifName = GetStringFromData(STR_LEN);
+    bool up = GetData<bool>();
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceTokenCallback(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteString(ifName);
+    dataParcel.WriteBool(up);
+
+    OnRemoteRequest(NetsysNative::INotifyCallback::ON_INTERFACE_CHANGED, dataParcel);
+}
+
+void OnInterfaceLinkStateChangedFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    std::string ifName = GetStringFromData(STR_LEN);
+    bool up = GetData<bool>();
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceTokenCallback(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteString(ifName);
+    dataParcel.WriteBool(up);
+    OnRemoteRequest(NetsysNative::INotifyCallback::ON_INTERFACE_LINK_STATE_CHANGED, dataParcel);
+}
+
+void OnRouteChangedFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    bool updated = GetData<bool>();
+    std::string route = GetStringFromData(STR_LEN);
+    std::string gateway = GetStringFromData(STR_LEN);
+    std::string ifName = GetStringFromData(STR_LEN);
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceTokenCallback(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteBool(updated);
+    dataParcel.WriteString(route);
+    dataParcel.WriteString(gateway);
+    dataParcel.WriteString(ifName);
+
+    OnRemoteRequest(NetsysNative::INotifyCallback::ON_ROUTE_CHANGED, dataParcel);
+}
+
+void OnDhcpSuccessFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    bool updated = GetData<bool>();
+    std::string route = GetStringFromData(STR_LEN);
+    std::string gateway = GetStringFromData(STR_LEN);
+    std::string ifName = GetStringFromData(STR_LEN);
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceTokenCallback(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteBool(updated);
+    dataParcel.WriteString(route);
+    dataParcel.WriteString(gateway);
+    dataParcel.WriteString(ifName);
+
+    OnRemoteRequest(NetsysNative::INotifyCallback::ON_DHCP_SUCCESS, dataParcel);
+}
+
+void OnBandwidthReachedLimitFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    std::string limitName = GetStringFromData(STR_LEN);
+    std::string iface = GetStringFromData(STR_LEN);
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceTokenCallback(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteString(limitName);
+    dataParcel.WriteString(iface);
+
+    OnRemoteRequest(NetsysNative::INotifyCallback::ON_BANDWIDTH_REACHED_LIMIT, dataParcel);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -1648,6 +1872,15 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::NetworkCreateVirtualFuzzTest(data, size);
     OHOS::NetManagerStandard::NetworkAddUidsFuzzTest(data, size);
     OHOS::NetManagerStandard::NetworkDelUidsFuzzTest(data, size);
+    OHOS::NetManagerStandard::OnInterfaceAddressUpdatedFuzzTest(data, size);
+    OHOS::NetManagerStandard::OnInterfaceAddressRemovedFuzzTest(data, size);
+    OHOS::NetManagerStandard::OnInterfaceAddedFuzzTest(data, size);
+    OHOS::NetManagerStandard::OnInterfaceRemovedFuzzTest(data, size);
+    OHOS::NetManagerStandard::OnInterfaceChangedFuzzTest(data, size);
+    OHOS::NetManagerStandard::OnInterfaceLinkStateChangedFuzzTest(data, size);
+    OHOS::NetManagerStandard::OnRouteChangedFuzzTest(data, size);
+    OHOS::NetManagerStandard::OnDhcpSuccessFuzzTest(data, size);
+    OHOS::NetManagerStandard::OnBandwidthReachedLimitFuzzTest(data, size);
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
@@ -1669,7 +1902,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::DestroyNetworkCacheFuzzTest(data, size);
     OHOS::NetManagerStandard::InterfaceGetListFuzzTest(data, size);
     OHOS::NetManagerStandard::ShareDnsSetFuzzTest(data, size);
-    //OHOS::NetManagerStandard::StartDnsProxyListenFuzzTest(data, size);
+    OHOS::NetManagerStandard::StartDnsProxyListenFuzzTest(data, size);
     OHOS::NetManagerStandard::StopDnsProxyListenFuzzTest(data, size);
     OHOS::NetManagerStandard::StartDhcpClientFuzzTest(data, size);
     OHOS::NetManagerStandard::StopDhcpClientFuzzTest(data, size);
