@@ -84,14 +84,13 @@ void TestSetResolverConfig()
 
 void TestGetResolverConfig()
 {
-    int ret = -1;
     std::vector<std::string> servers;
     std::vector<std::string> domains;
     uint16_t baseTimeoutMsec;
     uint8_t retryCount;
     int num = 3;
     for (int i = 0; i < num; i++) {
-        ret = netsysServiceK_->GetResolverConfig(i, servers, domains, baseTimeoutMsec, retryCount);
+        int32_t ret = netsysServiceK_->GetResolverConfig(i, servers, domains, baseTimeoutMsec, retryCount);
         NETNATIVE_LOGE("NETSYS: getResolverConfig   ret=%{public}d, iii=%{public}d", ret, i);
         NETNATIVE_LOGE("NETSYS:  server size %{public}d, domains  size %{public}d",
                        static_cast<int32_t>(servers.size()), static_cast<int32_t>(domains.size()));
