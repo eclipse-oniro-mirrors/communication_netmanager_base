@@ -200,7 +200,6 @@ HWTEST_F(NetsysControllerServiceImplTest, RunRegisterMockApi, TestSize.Level1)
 
     list = instance_->UidGetList();
     EXPECT_EQ(list.size(), static_cast<uint32_t>(0));
-
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, ServiceImplTest, TestSize.Level1)
