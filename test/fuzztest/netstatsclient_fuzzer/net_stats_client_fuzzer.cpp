@@ -416,7 +416,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetIfaceStatsDetailFuzzTest(data, size);
     OHOS::NetManagerStandard::GetUidStatsDetailFuzzTest(data, size);
     OHOS::NetManagerStandard::UpdateIfacesStatsFuzzTest(data, size);
-    //OHOS::NetManagerStandard::UpdateStatsDataFuzzTest(data, size);
+    // OHOS::NetManagerStandard::UpdateStatsDataFuzzTest(data, size);
     OHOS::NetManagerStandard::ResetFactoryFuzzTest(data, size);
     return 0;
 }

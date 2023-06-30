@@ -23,22 +23,38 @@ namespace OHOS {
 namespace NetManagerStandard {
 NetStatsServiceStub::NetStatsServiceStub()
 {
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_REGISTER_NET_STATS_CALLBACK)] = &NetStatsServiceStub::OnRegisterNetStatsCallback;
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_UNREGISTER_NET_STATS_CALLBACK)] = &NetStatsServiceStub::OnUnregisterNetStatsCallback;
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_RXBYTES)] = &NetStatsServiceStub::OnGetIfaceRxBytes;
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_TXBYTES)] = &NetStatsServiceStub::OnGetIfaceTxBytes;
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_RXBYTES)] = &NetStatsServiceStub::OnGetCellularRxBytes;
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_TXBYTES)] = &NetStatsServiceStub::OnGetCellularTxBytes;
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_RXBYTES)] = &NetStatsServiceStub::OnGetAllRxBytes;
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_TXBYTES)] = &NetStatsServiceStub::OnGetAllTxBytes;
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_RXBYTES)] = &NetStatsServiceStub::OnGetUidRxBytes;
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_TXBYTES)] = &NetStatsServiceStub::OnGetUidTxBytes;
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_STATS_DETAIL)] = &NetStatsServiceStub::OnGetIfaceStatsDetail;
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_STATS_DETAIL)] = &NetStatsServiceStub::OnGetUidStatsDetail;
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_IFACES_STATS)] = &NetStatsServiceStub::OnUpdateIfacesStats;
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_STATS_DATA)] = &NetStatsServiceStub::OnUpdateStatsData;
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_RESET_FACTORY)] = &NetStatsServiceStub::OnResetFactory;
-    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_STATS_INFO)] = &NetStatsServiceStub::OnGetAllStatsInfo;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_REGISTER_NET_STATS_CALLBACK)] =
+        &NetStatsServiceStub::OnRegisterNetStatsCallback;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_UNREGISTER_NET_STATS_CALLBACK)] =
+        &NetStatsServiceStub::OnUnregisterNetStatsCallback;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_RXBYTES)] =
+        &NetStatsServiceStub::OnGetIfaceRxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_TXBYTES)] =
+        &NetStatsServiceStub::OnGetIfaceTxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_RXBYTES)] =
+        &NetStatsServiceStub::OnGetCellularRxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_TXBYTES)] =
+        &NetStatsServiceStub::OnGetCellularTxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_RXBYTES)] =
+        &NetStatsServiceStub::OnGetAllRxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_TXBYTES)] =
+        &NetStatsServiceStub::OnGetAllTxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_RXBYTES)] =
+        &NetStatsServiceStub::OnGetUidRxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_TXBYTES)] =
+        &NetStatsServiceStub::OnGetUidTxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_STATS_DETAIL)] =
+        &NetStatsServiceStub::OnGetIfaceStatsDetail;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_STATS_DETAIL)] =
+        &NetStatsServiceStub::OnGetUidStatsDetail;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_IFACES_STATS)] =
+        &NetStatsServiceStub::OnUpdateIfacesStats;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_STATS_DATA)] =
+        &NetStatsServiceStub::OnUpdateStatsData;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_RESET_FACTORY)] =
+        &NetStatsServiceStub::OnResetFactory;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_STATS_INFO)] =
+        &NetStatsServiceStub::OnGetAllStatsInfo;
 }
 
 NetStatsServiceStub::~NetStatsServiceStub() = default;
