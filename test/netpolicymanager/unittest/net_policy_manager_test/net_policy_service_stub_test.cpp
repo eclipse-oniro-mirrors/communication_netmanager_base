@@ -175,7 +175,10 @@ public:
 
 void NetPolicyServiceStubTest::SetUpTestCase() {}
 
-void NetPolicyServiceStubTest::TearDownTestCase() { instance_ = nullptr; }
+void NetPolicyServiceStubTest::TearDownTestCase()
+{
+    instance_ = nullptr;
+}
 
 void NetPolicyServiceStubTest::SetUp() {}
 
@@ -192,7 +195,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnRemoteRequestTest001, TestSize.Level1)
     MessageParcel reply;
     MessageOption option;
     data.WriteBool(false);
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_END, data, reply, option);
+    int32_t ret =
+        instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_END), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_ERR_DESCRIPTOR_MISMATCH);
 }
 
@@ -210,7 +214,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnRemoteRequestTest002, TestSize.Level1)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_END, data, reply, option);
+    int32_t ret =
+        instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_END), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
@@ -228,7 +233,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnRemoteRequestTest003, TestSize.Level1)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_SET_POLICY_BY_UID, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POLICY_BY_UID),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
@@ -245,7 +251,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetPolicyByUidTest001, TestSize.Level1)
     data.WriteUint32(0);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_SET_POLICY_BY_UID, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POLICY_BY_UID),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -261,7 +268,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnGetPolicyByUidTest001, TestSize.Level1)
     data.WriteUint32(TEST_UID);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_GET_POLICY_BY_UID, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POLICY_BY_UID),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -277,7 +285,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnGetUidsByPolicyTest001, TestSize.Level1)
     data.WriteUint32(TEST_UID);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_GET_UIDS_BY_POLICY, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_UIDS_BY_POLICY),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -294,7 +303,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnIsUidNetAllowedMeteredTest001, TestSize.Lev
     data.WriteBool(true);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_IS_NET_ALLOWED_BY_METERED, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_IS_NET_ALLOWED_BY_METERED), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -311,7 +321,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnIsUidNetAllowedIfaceNameTest001, TestSize.L
     data.WriteString(ETH_IFACE_NAME);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_IS_NET_ALLOWED_BY_IFACE, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_IS_NET_ALLOWED_BY_IFACE), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -331,7 +342,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetNetQuotaPoliciesTest001, TestSize.Level1
     NetQuotaPolicy::Marshalling(data, quotaPolicies);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_SET_NET_QUOTA_POLICIES, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NET_QUOTA_POLICIES),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -346,7 +358,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnGetNetQuotaPoliciesTest001, TestSize.Level1
     data.WriteBool(true);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_GET_NET_QUOTA_POLICIES, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NET_QUOTA_POLICIES),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -362,7 +375,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnResetPoliciesTest001, TestSize.Level1)
     data.WriteString("subscriberId");
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_RESET_POLICIES, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_RESET_POLICIES), data,
+                                             reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -378,7 +392,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetBackgroundPolicyTest001, TestSize.Level1
     data.WriteBool(true);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_SET_BACKGROUND_POLICY, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_BACKGROUND_POLICY),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -393,7 +408,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnGetBackgroundPolicyTest001, TestSize.Level1
     data.WriteBool(true);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_GET_BACKGROUND_POLICY, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -410,7 +426,7 @@ HWTEST_F(NetPolicyServiceStubTest, OnGetBackgroundPolicyByUidTest001, TestSize.L
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(
-        INetPolicyService::CMD_NPS_GET_BACKGROUND_POLICY_BY_UID, data, reply, option);
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY_BY_UID), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -428,7 +444,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnSnoozePolicyTest001, TestSize.Level1)
     data.WriteInt32(0);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_UPDATE_REMIND_POLICY, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_UPDATE_REMIND_POLICY),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -447,7 +464,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetDeviceIdleTrustlistTest003, TestSize.Lev
     data.WriteBool(true);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_SET_IDLE_TRUSTLIST, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_TRUSTLIST),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -462,7 +480,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnGetDeviceIdleTrustlistTest001, TestSize.Lev
     data.WriteBool(true);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_GET_IDLE_TRUSTLIST, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_IDLE_TRUSTLIST),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -478,7 +497,8 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetDeviceIdlePolicyTest001, TestSize.Level1
     data.WriteBool(true);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetPolicyService::CMD_NPS_SET_DEVICE_IDLE_POLICY, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_DEVICE_IDLE_POLICY),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -494,7 +514,7 @@ HWTEST_F(NetPolicyServiceStubTest, OnGetPowerSaveTrustlistTest001, TestSize.Leve
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(
-        INetPolicyService::CMD_NPS_GET_POWER_SAVE_TRUSTLIST, data, reply, option);
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POWER_SAVE_TRUSTLIST), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -514,7 +534,7 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetPowerSaveTrustlistTest001, TestSize.Leve
     MessageParcel reply;
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(
-        INetPolicyService::CMD_NPS_SET_POWER_SAVE_TRUSTLIST, data, reply, option);
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_TRUSTLIST), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
