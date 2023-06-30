@@ -135,39 +135,13 @@ HWTEST_F(NetsysControllerServiceImplTest, NoRegisterMockApi, TestSize.Level1)
     ret = instance_->GetResolverConfig(0, servers, domains, baseTimeoutMsec, retryCount);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = instance_->CreateNetworkCache(0);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = instance_->SetDefaultNetWork(0);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = instance_->ClearDefaultNetWorkNetId();
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = instance_->StartDhcpClient(testName, false);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = instance_->StopDhcpClient(testName, false);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
     ret = instance_->RegisterCallback(callback);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = instance_->StartDhcpService(testName, testName);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = instance_->StopDhcpService(testName);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, RunRegisterMockApi, TestSize.Level1)
 {
     std::string testName = "wlan0";
-    std::string ipAddr = "172.17.5.245";
-    NetsysNotifyCallback Callback;
-    Callback.NetsysResponseInterfaceAdd = nullptr;
-    Callback.NetsysResponseInterfaceRemoved = nullptr;
-    int32_t ifaceFd = 5;
 
     auto ret = instance_->GetCellularRxBytes();
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
@@ -200,11 +174,54 @@ HWTEST_F(NetsysControllerServiceImplTest, RunRegisterMockApi, TestSize.Level1)
     ret = instance_->GetIfaceTxPackets(testName);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
+    ret = instance_->CreateNetworkCache(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->SetDefaultNetWork(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->ClearDefaultNetWorkNetId();
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->StartDhcpClient(testName, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->StopDhcpClient(testName, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->StartDhcpService(testName, testName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->StopDhcpService(testName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
     auto list = instance_->InterfaceGetList();
     EXPECT_GT(list.size(), static_cast<uint32_t>(0));
 
     list = instance_->UidGetList();
     EXPECT_EQ(list.size(), static_cast<uint32_t>(0));
+
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, ServiceImplTest, TestSize.Level1)
+{
+    std::vector<UidRange> uidRanges;
+    UidRange uidRang(1, 2);
+    uidRanges.emplace_back(uidRang);
+    int32_t ifaceFd = 5;
+    std::string ipAddr = "172.17.5.245";
+    NetsysNotifyCallback Callback;
+    Callback.NetsysResponseInterfaceAdd = nullptr;
+    Callback.NetsysResponseInterfaceRemoved = nullptr;
+
+    auto ret = instance_->NetworkCreateVirtual(5, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NetworkAddUids(5, uidRanges);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NetworkDelUids(5, uidRanges);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     auto ret32 = instance_->BindSocket(1, 2);
     EXPECT_EQ(ret32, NetManagerStandard::NETMANAGER_SUCCESS);
@@ -224,21 +241,6 @@ HWTEST_F(NetsysControllerServiceImplTest, RunRegisterMockApi, TestSize.Level1)
 
     ret32 = instance_->SetBlocking(5, false);
     EXPECT_EQ(ret32, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetsysControllerServiceImplTest, ServiceImplTest, TestSize.Level1)
-{
-    std::vector<UidRange> uidRanges;
-    UidRange uidRang(1, 2);
-    uidRanges.emplace_back(uidRang);
-    auto ret = instance_->NetworkCreateVirtual(5, false);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = instance_->NetworkAddUids(5, uidRanges);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = instance_->NetworkDelUids(5, uidRanges);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
