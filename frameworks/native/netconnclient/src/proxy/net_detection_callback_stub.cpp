@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,13 +20,14 @@ namespace OHOS {
 namespace NetManagerStandard {
 NetDetectionCallbackStub::NetDetectionCallbackStub()
 {
-    memberFuncMap_[NET_DETECTION_RESULT] = &NetDetectionCallbackStub::OnNetDetectionResult;
+    memberFuncMap_[static_cast<uint32_t>(DetectionCallback::NET_DETECTION_RESULT)] =
+        &NetDetectionCallbackStub::OnNetDetectionResult;
 }
 
 NetDetectionCallbackStub::~NetDetectionCallbackStub() {}
 
-int32_t NetDetectionCallbackStub::OnRemoteRequest(
-    uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+int32_t NetDetectionCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+                                                  MessageOption &option)
 {
     NETMGR_LOG_D("Stub call start, code:[%{public}d]", code);
     std::u16string myDescripter = NetDetectionCallbackStub::GetDescriptor();

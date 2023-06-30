@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,7 +48,8 @@ int32_t NetDetectionCallbackProxy::OnNetDetectionResultChanged(NetDetectionResul
     }
     MessageParcel replyParcel;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(NET_DETECTION_RESULT, dataParcel, replyParcel, option);
+    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(DetectionCallback::NET_DETECTION_RESULT),
+                                          dataParcel, replyParcel, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, retCode: [%{public}d]", retCode);
         return retCode;

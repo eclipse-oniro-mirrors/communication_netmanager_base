@@ -23,12 +23,18 @@ namespace NetManagerStandard {
 
 NetInterfaceStateCallbackStub::NetInterfaceStateCallbackStub()
 {
-    memberFuncMap_[CMD_ON_IFACE_ADDR_UPDATED] = &NetInterfaceStateCallbackStub::CmdInterfaceAddressUpdated;
-    memberFuncMap_[CMD_ON_IFACE_ADDR_REMOVED] = &NetInterfaceStateCallbackStub::CmdInterfaceAddressRemoved;
-    memberFuncMap_[CMD_ON_IFACE_ADDED] = &NetInterfaceStateCallbackStub::CmdInterfaceAdded;
-    memberFuncMap_[CMD_ON_IFACE_REMOVED] = &NetInterfaceStateCallbackStub::CmdInterfaceRemoved;
-    memberFuncMap_[CMD_ON_IFACE_CHANGED] = &NetInterfaceStateCallbackStub::CmdInterfaceChanged;
-    memberFuncMap_[CMD_ON_IFACE_LINK_STATE_CHANGED] = &NetInterfaceStateCallbackStub::CmdInterfaceLinkStateChanged;
+    memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDR_UPDATED)] =
+        &NetInterfaceStateCallbackStub::CmdInterfaceAddressUpdated;
+    memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDR_REMOVED)] =
+        &NetInterfaceStateCallbackStub::CmdInterfaceAddressRemoved;
+    memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDED)] =
+        &NetInterfaceStateCallbackStub::CmdInterfaceAdded;
+    memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_REMOVED)] =
+        &NetInterfaceStateCallbackStub::CmdInterfaceRemoved;
+    memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_CHANGED)] =
+        &NetInterfaceStateCallbackStub::CmdInterfaceChanged;
+    memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_LINK_STATE_CHANGED)] =
+        &NetInterfaceStateCallbackStub::CmdInterfaceLinkStateChanged;
 }
 
 int32_t NetInterfaceStateCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,

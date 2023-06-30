@@ -16,6 +16,7 @@
 #ifndef I_NET_INTERFACE_CALLBACK_H
 #define I_NET_INTERFACE_CALLBACK_H
 
+#include "conn_ipc_interface_code.h"
 #include "iremote_broker.h"
 
 namespace OHOS {
@@ -26,14 +27,6 @@ public:
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetManagerStandard.INetInterfaceStateCallback");
-    enum {
-        CMD_ON_IFACE_ADDR_UPDATED,
-        CMD_ON_IFACE_ADDR_REMOVED,
-        CMD_ON_IFACE_ADDED,
-        CMD_ON_IFACE_REMOVED,
-        CMD_ON_IFACE_CHANGED,
-        CMD_ON_IFACE_LINK_STATE_CHANGED,
-    };
 
 public:
     virtual int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int32_t flags,

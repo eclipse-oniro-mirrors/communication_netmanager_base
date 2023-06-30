@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef I_NET_DETECTION_CALLBACK_H
 #define I_NET_DETECTION_CALLBACK_H
 
+#include "conn_ipc_interface_code.h"
 #include "iremote_broker.h"
 
 #include "net_conn_constants.h"
@@ -27,9 +28,6 @@ public:
     virtual ~INetDetectionCallback() = default;
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetManagerStandard.INetDetectionCallback");
-    enum {
-        NET_DETECTION_RESULT = 0,
-    };
 
 public:
     virtual int32_t OnNetDetectionResultChanged(
