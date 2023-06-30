@@ -27,7 +27,7 @@ NetInterfaceStateCallbackStub::NetInterfaceStateCallbackStub()
         &NetInterfaceStateCallbackStub::CmdInterfaceAddressUpdated;
     memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDR_REMOVED)] =
         &NetInterfaceStateCallbackStub::CmdInterfaceAddressRemoved;
-    memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDR_UPDATED)] =
+    memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_ADDED)] =
         &NetInterfaceStateCallbackStub::CmdInterfaceAdded;
     memberFuncMap_[static_cast<uint32_t>(InterfaceCallbackInterfaceCode::CMD_ON_IFACE_REMOVED)] =
         &NetInterfaceStateCallbackStub::CmdInterfaceRemoved;

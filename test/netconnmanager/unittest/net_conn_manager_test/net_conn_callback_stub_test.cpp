@@ -129,8 +129,7 @@ HWTEST_F(TestNetConnCallbackStub, OnNetCapabilitiesChangeTest001, TestSize.Level
     data.WriteUint32(NetCap::NET_CAPABILITY_MMS);
     data.WriteUint32(netCaps.bearerTypes_.size());
     data.WriteUint32(NetBearType::BEARER_CELLULAR);
-    int32_t ret =
-        instance_->OnRemoteRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CAPABILITIES_CHANGE),
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CAPABILITIES_CHANGE),
                                              data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
@@ -146,9 +145,8 @@ HWTEST_F(TestNetConnCallbackStub, OnNetConnectionPropertiesChangeTest001, TestSi
     data.WriteInterfaceToken(NetConnCallbackStub::GetDescriptor());
     MessageParcel reply;
     MessageOption option;
-    int32_t ret =
-        instance_->OnRemoteRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CONNECTION_PROPERTIES_CHANGE),
-                                             data, reply, option);
+    int32_t ret =instance_->OnRemoteRequest(
+        static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CONNECTION_PROPERTIES_CHANGE), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
 
     MessageParcel dataSuccess;
@@ -159,8 +157,7 @@ HWTEST_F(TestNetConnCallbackStub, OnNetConnectionPropertiesChangeTest001, TestSi
     linkInfo.domain_ = "0.0.0.0";
     linkInfo.Marshalling(dataSuccess);
     ret = instance_->OnRemoteRequest(
-        static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CONNECTION_PROPERTIES_CHANGE),
-                                     dataSuccess, reply, option);
+        static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_CONNECTION_PROPERTIES_CHANGE), dataSuccess, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -210,8 +207,7 @@ HWTEST_F(TestNetConnCallbackStub, OnNetBlockStatusChangeTest001, TestSize.Level1
     data.WriteBool(false);
     MessageParcel reply;
     MessageOption option;
-    int32_t ret =
-        instance_->OnRemoteRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_BLOCK_STATUS_CHANGE),
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(ConnCallbackInterfaceCode::NET_BLOCK_STATUS_CHANGE),
                                              data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }

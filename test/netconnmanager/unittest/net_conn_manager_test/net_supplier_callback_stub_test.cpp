@@ -149,7 +149,7 @@ HWTEST_F(NetSupplierCallbackStubTest, ReleaseNetwork001, TestSize.Level1)
     MessageParcel reply;
     MessageOption option;
     int32_t ret = supplierCbStub_->OnRemoteRequest(
-        static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_REQUEST_NETWORK), data, reply, option);
+        static_cast<uint32_t>(SupplierInterfaceCode::NET_SUPPLIER_RELEASE_NETWORK), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
