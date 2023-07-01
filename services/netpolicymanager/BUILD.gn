@@ -84,7 +84,7 @@ ohos_shared_library("net_policy_manager") {
     "ability_runtime:app_manager",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hitrace_native:hitrace_meter",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
   ]
@@ -99,7 +99,7 @@ ohos_shared_library("net_policy_manager") {
   }
 
   if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps += [ "hilog_native:libhilog" ]
   } else {
     external_deps += [ "hilog:libhilog" ]
   }
@@ -147,7 +147,7 @@ ohos_static_library("net_policy_manager_static") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hitrace_native:hitrace_meter",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
   ]
@@ -162,7 +162,7 @@ ohos_static_library("net_policy_manager_static") {
   }
 
   if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps += [ "hilog_native:libhilog" ]
   } else {
     external_deps += [ "hilog:libhilog" ]
   }

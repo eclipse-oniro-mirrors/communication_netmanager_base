@@ -50,7 +50,7 @@ ohos_shared_library("netsys_bpf_utils") {
 
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog_native:libhilog",
   ]
 
   innerapi_tags = [ "platformsdk_indirect" ]

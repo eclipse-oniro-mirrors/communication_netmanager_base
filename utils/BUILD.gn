@@ -63,7 +63,7 @@ ohos_shared_library("net_manager_common") {
   ]
 
   if (is_standard_system) {
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [ "hilog_native:libhilog" ]
   } else {
     external_deps = [ "hilog:libhilog" ]
   }
@@ -73,7 +73,7 @@ ohos_shared_library("net_manager_common") {
     "access_token:libtokenid_sdk",
     "c_utils:utils",
     "hisysevent:libhisysevent",
-    "hitrace_native:hitrace_meter",
+    "hitrace:hitrace_meter",
     "ipc:ipc_single",
   ]
 
