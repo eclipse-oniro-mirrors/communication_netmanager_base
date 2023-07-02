@@ -1307,7 +1307,7 @@ int32_t NetsysNativeServiceProxy::BandwidthAddAllowedList(uint32_t uid)
         return IPC_PROXY_NULL_INVOKER_ERR;
     }
     int32_t error = remote->SendRequest(
-        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_DENIED_LIST), data, reply, option);
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_ADD_ALLOWED_LIST), data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
