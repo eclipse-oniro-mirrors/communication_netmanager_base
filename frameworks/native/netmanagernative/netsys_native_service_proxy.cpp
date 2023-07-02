@@ -1159,11 +1159,14 @@ int32_t NetsysNativeServiceProxy::BandwidthEnableDataSaver(bool enable)
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    if (remote) {
-        if (ERR_NONE != remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_ENABLE_DATA_SAVER), data, reply, option)) {
-            NETNATIVE_LOGE("proxy SendRequest failed");
-            return ERR_FLATTEN_OBJECT;
-        }
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_ENABLE_DATA_SAVER),
+                                        data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
     }
     int32_t ret = reply.ReadInt32();
     return ret;
@@ -1188,11 +1191,14 @@ int32_t NetsysNativeServiceProxy::BandwidthSetIfaceQuota(const std::string &ifNa
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    if (remote) {
-        if (ERR_NONE != remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_SET_IFACE_QUOTA), data, reply, option)) {
-            NETNATIVE_LOGE("proxy SendRequest failed");
-            return ERR_FLATTEN_OBJECT;
-        }
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_SET_IFACE_QUOTA),
+                                        data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
     }
     int32_t ret = reply.ReadInt32();
     return ret;
@@ -1213,11 +1219,14 @@ int32_t NetsysNativeServiceProxy::BandwidthRemoveIfaceQuota(const std::string &i
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    if (remote) {
-        if (ERR_NONE != remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_IFACE_QUOTA), data, reply, option)) {
-            NETNATIVE_LOGE("proxy SendRequest failed");
-            return ERR_FLATTEN_OBJECT;
-        }
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t error = remote->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_IFACE_QUOTA), data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
     }
     int32_t ret = reply.ReadInt32();
     return ret;
@@ -1238,11 +1247,14 @@ int32_t NetsysNativeServiceProxy::BandwidthAddDeniedList(uint32_t uid)
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    if (remote) {
-        if (ERR_NONE != remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_ADD_DENIED_LIST), data, reply, option)) {
-            NETNATIVE_LOGE("proxy SendRequest failed");
-            return ERR_FLATTEN_OBJECT;
-        }
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_ADD_DENIED_LIST),
+                                        data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
     }
     int32_t ret = reply.ReadInt32();
     return ret;
@@ -1263,11 +1275,14 @@ int32_t NetsysNativeServiceProxy::BandwidthRemoveDeniedList(uint32_t uid)
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    if (remote) {
-        if (ERR_NONE != remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_DENIED_LIST), data, reply, option)) {
-            NETNATIVE_LOGE("proxy SendRequest failed");
-            return ERR_FLATTEN_OBJECT;
-        }
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t error = remote->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_DENIED_LIST), data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
     }
     int32_t ret = reply.ReadInt32();
     return ret;
@@ -1288,11 +1303,14 @@ int32_t NetsysNativeServiceProxy::BandwidthAddAllowedList(uint32_t uid)
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    if (remote) {
-        if (ERR_NONE != remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_ADD_ALLOWED_LIST), data, reply, option)) {
-            NETNATIVE_LOGE("proxy SendRequest failed");
-            return ERR_FLATTEN_OBJECT;
-        }
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t error = remote->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_DENIED_LIST), data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
     }
     int32_t ret = reply.ReadInt32();
     return ret;
@@ -1313,12 +1331,14 @@ int32_t NetsysNativeServiceProxy::BandwidthRemoveAllowedList(uint32_t uid)
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    if (remote) {
-        if (ERR_NONE !=
-            remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_ALLOWED_LIST), data, reply, option)) {
-            NETNATIVE_LOGE("proxy SendRequest failed");
-            return ERR_FLATTEN_OBJECT;
-        }
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t error = remote->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_ALLOWED_LIST), data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
     }
     int32_t ret = reply.ReadInt32();
     return ret;
@@ -1351,12 +1371,14 @@ int32_t NetsysNativeServiceProxy::FirewallSetUidsAllowedListChain(uint32_t chain
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    if (remote) {
-        if (ERR_NONE !=
-            remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_ALLOWED_LIST_CHAIN), data, reply, option)) {
-            NETNATIVE_LOGE("proxy SendRequest failed");
-            return ERR_FLATTEN_OBJECT;
-        }
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t error = remote->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_ALLOWED_LIST_CHAIN), data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
     }
     int32_t ret = reply.ReadInt32();
     return ret;
@@ -1389,12 +1411,14 @@ int32_t NetsysNativeServiceProxy::FirewallSetUidsDeniedListChain(uint32_t chain,
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    if (remote) {
-        if (ERR_NONE !=
-            remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_DENIED_LIST_CHAIN), data, reply, option)) {
-            NETNATIVE_LOGE("proxy SendRequest failed");
-            return ERR_FLATTEN_OBJECT;
-        }
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t error = remote->SendRequest(
+        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_DENIED_LIST_CHAIN), data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
     }
     int32_t ret = reply.ReadInt32();
     return ret;
@@ -1419,11 +1443,14 @@ int32_t NetsysNativeServiceProxy::FirewallEnableChain(uint32_t chain, bool enabl
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    if (remote) {
-        if (ERR_NONE != remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_ENABLE_CHAIN), data, reply, option)) {
-            NETNATIVE_LOGE("proxy SendRequest failed");
-            return ERR_FLATTEN_OBJECT;
-        }
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_ENABLE_CHAIN),
+                                        data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
     }
     int32_t ret = reply.ReadInt32();
     return ret;
@@ -1453,11 +1480,14 @@ int32_t NetsysNativeServiceProxy::FirewallSetUidRule(uint32_t chain, const std::
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();
-    if (remote) {
-        if (ERR_NONE != remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_RULE), data, reply, option)) {
-            NETNATIVE_LOGE("proxy SendRequest failed");
-            return ERR_FLATTEN_OBJECT;
-        }
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_RULE),
+                                        data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
     }
     int32_t ret = reply.ReadInt32();
     return ret;
@@ -1475,7 +1505,8 @@ int32_t NetsysNativeServiceProxy::ShareDnsSet(uint16_t netId)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_TETHER_DNS_SET), data, reply, option);
+    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_TETHER_DNS_SET),
+                                          data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -1492,7 +1523,8 @@ int32_t NetsysNativeServiceProxy::StartDnsProxyListen()
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_START_DNS_PROXY_LISTEN), data, reply, option);
+    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_START_DNS_PROXY_LISTEN),
+                                          data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -1509,7 +1541,8 @@ int32_t NetsysNativeServiceProxy::StopDnsProxyListen()
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DNS_PROXY_LISTEN), data, reply, option);
+    int32_t error = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DNS_PROXY_LISTEN),
+                                          data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -1533,7 +1566,8 @@ int32_t NetsysNativeServiceProxy::GetNetworkSharingTraffic(const std::string &do
 
     MessageParcel reply;
     MessageOption option;
-    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_SHARING_NETWORK_TRAFFIC), data, reply, option);
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_SHARING_NETWORK_TRAFFIC),
+                          data, reply, option);
 
     int32_t ret = reply.ReadInt32();
     if (ret != ERR_NONE) {
@@ -1559,7 +1593,8 @@ int32_t NetsysNativeServiceProxy::GetTotalStats(uint64_t &stats, uint32_t type)
     }
     MessageParcel reply;
     MessageOption option;
-    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_TOTAL_STATS), data, reply, option)) {
+    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_TOTAL_STATS),
+                                          data, reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -1595,7 +1630,8 @@ int32_t NetsysNativeServiceProxy::GetUidStats(uint64_t &stats, uint32_t type, ui
     }
     MessageParcel reply;
     MessageOption option;
-    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_UID_STATS), data, reply, option)) {
+    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_UID_STATS),
+                                          data, reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -1630,7 +1666,8 @@ int32_t NetsysNativeServiceProxy::GetIfaceStats(uint64_t &stats, uint32_t type, 
     }
     MessageParcel reply;
     MessageOption option;
-    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_IFACE_STATS), data, reply, option)) {
+    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_IFACE_STATS),
+                                          data, reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
     }
@@ -1659,7 +1696,8 @@ int32_t NetsysNativeServiceProxy::GetAllStatsInfo(std::vector<OHOS::NetManagerSt
     }
     MessageParcel reply;
     MessageOption option;
-    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_STATS_INFO), data, reply, option)) {
+    if (ERR_NONE != Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_STATS_INFO),
+                                          data, reply, option)) {
         NETNATIVE_LOGE("proxy SendRequest failed");
         return ERR_FLATTEN_OBJECT;
     }
