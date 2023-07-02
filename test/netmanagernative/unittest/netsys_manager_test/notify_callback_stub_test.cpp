@@ -122,7 +122,8 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceAddressUpdated001, TestSize.Level1)
     int32_t ret = notifyStub_->OnRemoteRequest(100, data, reply, option);
     EXPECT_NE(ret, 0);
 
-    ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_INTERFACE_ADDRESS_UPDATED, data, reply, option);
+    ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_UPDATED),
+                                       data, reply, option);
     EXPECT_NE(ret, 0);
 
     MessageParcel dataOk;
@@ -141,7 +142,8 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceAddressUpdated001, TestSize.Level1)
     if (!dataOk.WriteUint32(scope)) {
         return;
     }
-    ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_INTERFACE_ADDRESS_UPDATED, dataOk, reply, option);
+    ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_UPDATED),
+                                       dataOk, reply, option);
     EXPECT_EQ(ret, 0);
 }
 
@@ -169,7 +171,8 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceAddressRemoved001, TestSize.Level1)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_INTERFACE_ADDRESS_REMOVED, data, reply, option);
+    int32_t ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_REMOVED),
+                                               data, reply, option);
     EXPECT_EQ(ret, 0);
 }
 
@@ -185,7 +188,8 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceAdded001, TestSize.Level1)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_INTERFACE_ADDED, data, reply, option);
+    int32_t ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDED),
+                                               data, reply, option);
     EXPECT_EQ(ret, 0);
 }
 
@@ -201,7 +205,8 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceRemoved001, TestSize.Level1)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_INTERFACE_REMOVED, data, reply, option);
+    int32_t ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_REMOVED),
+                                               data, reply, option);
     EXPECT_EQ(ret, 0);
 }
 
@@ -221,7 +226,8 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceChanged001, TestSize.Level1)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_INTERFACE_CHANGED, data, reply, option);
+    int32_t ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_CHANGED),
+                                               data, reply, option);
     EXPECT_EQ(ret, 0);
 }
 
@@ -241,7 +247,8 @@ HWTEST_F(NotifyCallbackStubTest, OnInterfaceLinkStateChanged001, TestSize.Level1
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_INTERFACE_LINK_STATE_CHANGED, data, reply, option);
+    int32_t ret = notifyStub_->OnRemoteRequest(
+        static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_LINK_STATE_CHANGED), data, reply, option);
     EXPECT_EQ(ret, 0);
 }
 
@@ -269,7 +276,8 @@ HWTEST_F(NotifyCallbackStubTest, OnRouteChanged001, TestSize.Level1)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_ROUTE_CHANGED, data, reply, option);
+    int32_t ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_ROUTE_CHANGED),
+                                               data, reply, option);
     EXPECT_EQ(ret, 0);
 }
 
@@ -288,7 +296,8 @@ HWTEST_F(NotifyCallbackStubTest, OnDhcpSuccess001, TestSize.Level1)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_DHCP_SUCCESS, data, reply, option);
+    int32_t ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_DHCP_SUCCESS),
+                                               data, reply, option);
     EXPECT_EQ(ret, 0);
 }
 
@@ -308,7 +317,8 @@ HWTEST_F(NotifyCallbackStubTest, OnBandwidthReachedLimit001, TestSize.Level1)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = notifyStub_->OnRemoteRequest(INotifyCallback::ON_BANDWIDTH_REACHED_LIMIT, data, reply, option);
+    int32_t ret = notifyStub_->OnRemoteRequest(static_cast<uint32_t>(NotifyInterfaceCode::ON_BANDWIDTH_REACHED_LIMIT),
+                                               data, reply, option);
     EXPECT_EQ(ret, 0);
 }
 } // namespace nmd

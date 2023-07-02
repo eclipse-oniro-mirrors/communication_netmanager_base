@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,15 +20,23 @@ namespace OHOS {
 namespace NetsysNative {
 NotifyCallbackStub::NotifyCallbackStub()
 {
-    memberFuncMap_[ON_INTERFACE_ADDRESS_UPDATED] = &NotifyCallbackStub::CmdOnInterfaceAddressUpdated;
-    memberFuncMap_[ON_INTERFACE_ADDRESS_REMOVED] = &NotifyCallbackStub::CmdOnInterfaceAddressRemoved;
-    memberFuncMap_[ON_INTERFACE_ADDED] = &NotifyCallbackStub::CmdOnInterfaceAdded;
-    memberFuncMap_[ON_INTERFACE_REMOVED] = &NotifyCallbackStub::CmdOnInterfaceRemoved;
-    memberFuncMap_[ON_INTERFACE_CHANGED] = &NotifyCallbackStub::CmdOnInterfaceChanged;
-    memberFuncMap_[ON_INTERFACE_LINK_STATE_CHANGED] = &NotifyCallbackStub::CmdOnInterfaceLinkStateChanged;
-    memberFuncMap_[ON_ROUTE_CHANGED] = &NotifyCallbackStub::CmdOnRouteChanged;
-    memberFuncMap_[ON_DHCP_SUCCESS] = &NotifyCallbackStub::CmdDhcpSuccess;
-    memberFuncMap_[ON_BANDWIDTH_REACHED_LIMIT] = &NotifyCallbackStub::CmdOnBandwidthReachedLimit;
+    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_UPDATED)] =
+        &NotifyCallbackStub::CmdOnInterfaceAddressUpdated;
+    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDRESS_REMOVED)] =
+        &NotifyCallbackStub::CmdOnInterfaceAddressRemoved;
+    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_ADDED)] =
+        &NotifyCallbackStub::CmdOnInterfaceAdded;
+    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_REMOVED)] =
+        &NotifyCallbackStub::CmdOnInterfaceRemoved;
+    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_CHANGED)] =
+        &NotifyCallbackStub::CmdOnInterfaceChanged;
+    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_INTERFACE_LINK_STATE_CHANGED)] =
+        &NotifyCallbackStub::CmdOnInterfaceLinkStateChanged;
+    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_ROUTE_CHANGED)] =
+        &NotifyCallbackStub::CmdOnRouteChanged;
+    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_DHCP_SUCCESS)] = &NotifyCallbackStub::CmdDhcpSuccess;
+    memberFuncMap_[static_cast<uint32_t>(NotifyInterfaceCode::ON_BANDWIDTH_REACHED_LIMIT)] =
+        &NotifyCallbackStub::CmdOnBandwidthReachedLimit;
 }
 
 NotifyCallbackStub::~NotifyCallbackStub() {}

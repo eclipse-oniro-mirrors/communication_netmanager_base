@@ -38,47 +38,48 @@ static constexpr uint32_t MAX_UID_ARRAY_SIZE = 1024;
 
 NetsysNativeServiceStub::NetsysNativeServiceStub()
 {
-    opToInterfaceMap_[NETSYS_SET_RESOLVER_CONFIG] = &NetsysNativeServiceStub::CmdSetResolverConfig;
-    opToInterfaceMap_[NETSYS_GET_RESOLVER_CONFIG] = &NetsysNativeServiceStub::CmdGetResolverConfig;
-    opToInterfaceMap_[NETSYS_CREATE_NETWORK_CACHE] = &NetsysNativeServiceStub::CmdCreateNetworkCache;
-    opToInterfaceMap_[NETSYS_DESTROY_NETWORK_CACHE] = &NetsysNativeServiceStub::CmdDestroyNetworkCache;
-    opToInterfaceMap_[NETSYS_GET_ADDR_INFO] = &NetsysNativeServiceStub::CmdGetAddrInfo;
-    opToInterfaceMap_[NETSYS_INTERFACE_SET_MTU] = &NetsysNativeServiceStub::CmdSetInterfaceMtu;
-    opToInterfaceMap_[NETSYS_INTERFACE_GET_MTU] = &NetsysNativeServiceStub::CmdGetInterfaceMtu;
-    opToInterfaceMap_[NETSYS_REGISTER_NOTIFY_CALLBACK] = &NetsysNativeServiceStub::CmdRegisterNotifyCallback;
-    opToInterfaceMap_[NETSYS_UNREGISTER_NOTIFY_CALLBACK] = &NetsysNativeServiceStub::CmdUnRegisterNotifyCallback;
-    opToInterfaceMap_[NETSYS_NETWORK_ADD_ROUTE] = &NetsysNativeServiceStub::CmdNetworkAddRoute;
-    opToInterfaceMap_[NETSYS_NETWORK_REMOVE_ROUTE] = &NetsysNativeServiceStub::CmdNetworkRemoveRoute;
-    opToInterfaceMap_[NETSYS_NETWORK_ADD_ROUTE_PARCEL] = &NetsysNativeServiceStub::CmdNetworkAddRouteParcel;
-    opToInterfaceMap_[NETSYS_NETWORK_REMOVE_ROUTE_PARCEL] = &NetsysNativeServiceStub::CmdNetworkRemoveRouteParcel;
-    opToInterfaceMap_[NETSYS_NETWORK_SET_DEFAULT] = &NetsysNativeServiceStub::CmdNetworkSetDefault;
-    opToInterfaceMap_[NETSYS_NETWORK_GET_DEFAULT] = &NetsysNativeServiceStub::CmdNetworkGetDefault;
-    opToInterfaceMap_[NETSYS_NETWORK_CLEAR_DEFAULT] = &NetsysNativeServiceStub::CmdNetworkClearDefault;
-    opToInterfaceMap_[NETSYS_GET_PROC_SYS_NET] = &NetsysNativeServiceStub::CmdGetProcSysNet;
-    opToInterfaceMap_[NETSYS_SET_PROC_SYS_NET] = &NetsysNativeServiceStub::CmdSetProcSysNet;
-    opToInterfaceMap_[NETSYS_NETWORK_CREATE_PHYSICAL] = &NetsysNativeServiceStub::CmdNetworkCreatePhysical;
-    opToInterfaceMap_[NETSYS_INTERFACE_ADD_ADDRESS] = &NetsysNativeServiceStub::CmdAddInterfaceAddress;
-    opToInterfaceMap_[NETSYS_INTERFACE_DEL_ADDRESS] = &NetsysNativeServiceStub::CmdDelInterfaceAddress;
-    opToInterfaceMap_[NETSYS_INTERFACE_SET_IP_ADDRESS] = &NetsysNativeServiceStub::CmdInterfaceSetIpAddress;
-    opToInterfaceMap_[NETSYS_INTERFACE_SET_IFF_UP] = &NetsysNativeServiceStub::CmdInterfaceSetIffUp;
-    opToInterfaceMap_[NETSYS_NETWORK_ADD_INTERFACE] = &NetsysNativeServiceStub::CmdNetworkAddInterface;
-    opToInterfaceMap_[NETSYS_NETWORK_REMOVE_INTERFACE] = &NetsysNativeServiceStub::CmdNetworkRemoveInterface;
-    opToInterfaceMap_[NETSYS_NETWORK_DESTROY] = &NetsysNativeServiceStub::CmdNetworkDestroy;
-    opToInterfaceMap_[NETSYS_GET_FWMARK_FOR_NETWORK] = &NetsysNativeServiceStub::CmdGetFwmarkForNetwork;
-    opToInterfaceMap_[NETSYS_INTERFACE_SET_CONFIG] = &NetsysNativeServiceStub::CmdSetInterfaceConfig;
-    opToInterfaceMap_[NETSYS_INTERFACE_GET_CONFIG] = &NetsysNativeServiceStub::CmdGetInterfaceConfig;
-    opToInterfaceMap_[NETSYS_INTERFACE_GET_LIST] = &NetsysNativeServiceStub::CmdInterfaceGetList;
-    opToInterfaceMap_[NETSYS_START_DHCP_CLIENT] = &NetsysNativeServiceStub::CmdStartDhcpClient;
-    opToInterfaceMap_[NETSYS_STOP_DHCP_CLIENT] = &NetsysNativeServiceStub::CmdStopDhcpClient;
-    opToInterfaceMap_[NETSYS_START_DHCP_SERVICE] = &NetsysNativeServiceStub::CmdStartDhcpService;
-    opToInterfaceMap_[NETSYS_STOP_DHCP_SERVICE] = &NetsysNativeServiceStub::CmdStopDhcpService;
-    opToInterfaceMap_[NETSYS_IPENABLE_FORWARDING] = &NetsysNativeServiceStub::CmdIpEnableForwarding;
-    opToInterfaceMap_[NETSYS_IPDISABLE_FORWARDING] = &NetsysNativeServiceStub::CmdIpDisableForwarding;
-    opToInterfaceMap_[NETSYS_ENABLE_NAT] = &NetsysNativeServiceStub::CmdEnableNat;
-    opToInterfaceMap_[NETSYS_DISABLE_NAT] = &NetsysNativeServiceStub::CmdDisableNat;
-    opToInterfaceMap_[NETSYS_IPFWD_ADD_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward;
-    opToInterfaceMap_[NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD] = &NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward;
-    opToInterfaceMap_[NETSYS_SET_IPTABLES_CMD_FOR_RES] = &NetsysNativeServiceStub::CmdSetIptablesCommandForRes;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_RESOLVER_CONFIG)] =
+        &NetsysNativeServiceStub::CmdSetResolverConfig;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_RESOLVER_CONFIG)] =
+        &NetsysNativeServiceStub::CmdGetResolverConfig;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_CREATE_NETWORK_CACHE)] =
+        &NetsysNativeServiceStub::CmdCreateNetworkCache;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DESTROY_NETWORK_CACHE)] =
+        &NetsysNativeServiceStub::CmdDestroyNetworkCache;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ADDR_INFO)] =
+        &NetsysNativeServiceStub::CmdGetAddrInfo;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_SET_MTU)] =
+        &NetsysNativeServiceStub::CmdSetInterfaceMtu;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_GET_MTU)] =
+        &NetsysNativeServiceStub::CmdGetInterfaceMtu;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_REGISTER_NOTIFY_CALLBACK)] =
+        &NetsysNativeServiceStub::CmdRegisterNotifyCallback;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UNREGISTER_NOTIFY_CALLBACK)] =
+        &NetsysNativeServiceStub::CmdUnRegisterNotifyCallback;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ADD_ROUTE)] =
+        &NetsysNativeServiceStub::CmdNetworkAddRoute;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_REMOVE_ROUTE)] =
+        &NetsysNativeServiceStub::CmdNetworkRemoveRoute;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ADD_ROUTE_PARCEL)] =
+        &NetsysNativeServiceStub::CmdNetworkAddRouteParcel;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_REMOVE_ROUTE_PARCEL)] =
+        &NetsysNativeServiceStub::CmdNetworkRemoveRouteParcel;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_DEFAULT)] =
+        &NetsysNativeServiceStub::CmdNetworkSetDefault;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_GET_DEFAULT)] =
+        &NetsysNativeServiceStub::CmdNetworkGetDefault;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_CLEAR_DEFAULT)] =
+        &NetsysNativeServiceStub::CmdNetworkClearDefault;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_PROC_SYS_NET)] =
+        &NetsysNativeServiceStub::CmdGetProcSysNet;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_PROC_SYS_NET)] =
+        &NetsysNativeServiceStub::CmdSetProcSysNet;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_CREATE_PHYSICAL)] =
+        &NetsysNativeServiceStub::CmdNetworkCreatePhysical;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_ADD_ADDRESS)] =
+        &NetsysNativeServiceStub::CmdAddInterfaceAddress;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_DEL_ADDRESS)] =
+        &NetsysNativeServiceStub::CmdDelInterfaceAddress;
 
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
@@ -89,39 +90,100 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
 {
-    opToInterfaceMap_[NETSYS_BANDWIDTH_ENABLE_DATA_SAVER] = &NetsysNativeServiceStub::CmdBandwidthEnableDataSaver;
-    opToInterfaceMap_[NETSYS_BANDWIDTH_SET_IFACE_QUOTA] = &NetsysNativeServiceStub::CmdBandwidthSetIfaceQuota;
-    opToInterfaceMap_[NETSYS_BANDWIDTH_REMOVE_IFACE_QUOTA] = &NetsysNativeServiceStub::CmdBandwidthRemoveIfaceQuota;
-    opToInterfaceMap_[NETSYS_BANDWIDTH_ADD_DENIED_LIST] = &NetsysNativeServiceStub::CmdBandwidthAddDeniedList;
-    opToInterfaceMap_[NETSYS_BANDWIDTH_REMOVE_DENIED_LIST] = &NetsysNativeServiceStub::CmdBandwidthRemoveDeniedList;
-    opToInterfaceMap_[NETSYS_BANDWIDTH_ADD_ALLOWED_LIST] = &NetsysNativeServiceStub::CmdBandwidthAddAllowedList;
-    opToInterfaceMap_[NETSYS_BANDWIDTH_REMOVE_ALLOWED_LIST] = &NetsysNativeServiceStub::CmdBandwidthRemoveAllowedList;
-    opToInterfaceMap_[NETSYS_SET_INTERNET_PERMISSION] = &NetsysNativeServiceStub::CmdSetInternetPermission;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_SHARING_NETWORK_TRAFFIC)] =
+        &NetsysNativeServiceStub::CmdGetNetworkSharingTraffic;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_TOTAL_STATS)] =
+        &NetsysNativeServiceStub::CmdGetTotalStats;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_UID_STATS)] =
+        &NetsysNativeServiceStub::CmdGetUidStats;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_IFACE_STATS)] =
+        &NetsysNativeServiceStub::CmdGetIfaceStats;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_STATS_INFO)] =
+        &NetsysNativeServiceStub::CmdGetAllStatsInfo;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_CREATE_VIRTUAL)] =
+        &NetsysNativeServiceStub::CmdNetworkCreateVirtual;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ADD_UIDS)] =
+        &NetsysNativeServiceStub::CmdNetworkAddUids;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_DEL_UIDS)] =
+        &NetsysNativeServiceStub::CmdNetworkDelUids;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_ENABLE_DATA_SAVER)] =
+        &NetsysNativeServiceStub::CmdBandwidthEnableDataSaver;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_SET_IFACE_QUOTA)] =
+        &NetsysNativeServiceStub::CmdBandwidthSetIfaceQuota;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_IFACE_QUOTA)] =
+        &NetsysNativeServiceStub::CmdBandwidthRemoveIfaceQuota;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_ADD_DENIED_LIST)] =
+        &NetsysNativeServiceStub::CmdBandwidthAddDeniedList;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_DENIED_LIST)] =
+        &NetsysNativeServiceStub::CmdBandwidthRemoveDeniedList;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_ADD_ALLOWED_LIST)] =
+        &NetsysNativeServiceStub::CmdBandwidthAddAllowedList;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_ALLOWED_LIST)] =
+        &NetsysNativeServiceStub::CmdBandwidthRemoveAllowedList;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_INTERNET_PERMISSION)] =
+        &NetsysNativeServiceStub::CmdSetInternetPermission;
 }
 
 void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
 {
-    opToInterfaceMap_[NETSYS_FIREWALL_SET_UID_ALLOWED_LIST_CHAIN] =
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_ALLOWED_LIST_CHAIN)] =
         &NetsysNativeServiceStub::CmdFirewallSetUidsAllowedListChain;
-    opToInterfaceMap_[NETSYS_FIREWALL_SET_UID_DENIED_LIST_CHAIN] =
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_DENIED_LIST_CHAIN)] =
         &NetsysNativeServiceStub::CmdFirewallSetUidsDeniedListChain;
-    opToInterfaceMap_[NETSYS_FIREWALL_ENABLE_CHAIN] = &NetsysNativeServiceStub::CmdFirewallEnableChain;
-    opToInterfaceMap_[NETSYS_FIREWALL_SET_UID_RULE] = &NetsysNativeServiceStub::CmdFirewallSetUidRule;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_ENABLE_CHAIN)] =
+        &NetsysNativeServiceStub::CmdFirewallEnableChain;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_RULE)] =
+        &NetsysNativeServiceStub::CmdFirewallSetUidRule;
 }
 
 void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
 {
-    opToInterfaceMap_[NETSYS_TETHER_DNS_SET] = &NetsysNativeServiceStub::CmdShareDnsSet;
-    opToInterfaceMap_[NETSYS_START_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStartDnsProxyListen;
-    opToInterfaceMap_[NETSYS_STOP_DNS_PROXY_LISTEN] = &NetsysNativeServiceStub::CmdStopDnsProxyListen;
-    opToInterfaceMap_[NETSYS_GET_SHARING_NETWORK_TRAFFIC] = &NetsysNativeServiceStub::CmdGetNetworkSharingTraffic;
-    opToInterfaceMap_[NETSYS_GET_TOTAL_STATS] = &NetsysNativeServiceStub::CmdGetTotalStats;
-    opToInterfaceMap_[NETSYS_GET_UID_STATS] = &NetsysNativeServiceStub::CmdGetUidStats;
-    opToInterfaceMap_[NETSYS_GET_IFACE_STATS] = &NetsysNativeServiceStub::CmdGetIfaceStats;
-    opToInterfaceMap_[NETSYS_GET_ALL_STATS_INFO] = &NetsysNativeServiceStub::CmdGetAllStatsInfo;
-    opToInterfaceMap_[NETSYS_NETWORK_CREATE_VIRTUAL] = &NetsysNativeServiceStub::CmdNetworkCreateVirtual;
-    opToInterfaceMap_[NETSYS_NETWORK_ADD_UIDS] = &NetsysNativeServiceStub::CmdNetworkAddUids;
-    opToInterfaceMap_[NETSYS_NETWORK_DEL_UIDS] = &NetsysNativeServiceStub::CmdNetworkDelUids;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_SET_IP_ADDRESS)] =
+        &NetsysNativeServiceStub::CmdInterfaceSetIpAddress;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_SET_IFF_UP)] =
+        &NetsysNativeServiceStub::CmdInterfaceSetIffUp;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ADD_INTERFACE)] =
+        &NetsysNativeServiceStub::CmdNetworkAddInterface;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_REMOVE_INTERFACE)] =
+        &NetsysNativeServiceStub::CmdNetworkRemoveInterface;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_DESTROY)] =
+        &NetsysNativeServiceStub::CmdNetworkDestroy;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_FWMARK_FOR_NETWORK)] =
+        &NetsysNativeServiceStub::CmdGetFwmarkForNetwork;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_SET_CONFIG)] =
+        &NetsysNativeServiceStub::CmdSetInterfaceConfig;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_GET_CONFIG)] =
+        &NetsysNativeServiceStub::CmdGetInterfaceConfig;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_GET_LIST)] =
+        &NetsysNativeServiceStub::CmdInterfaceGetList;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_START_DHCP_CLIENT)] =
+        &NetsysNativeServiceStub::CmdStartDhcpClient;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DHCP_CLIENT)] =
+        &NetsysNativeServiceStub::CmdStopDhcpClient;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_START_DHCP_SERVICE)] =
+        &NetsysNativeServiceStub::CmdStartDhcpService;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DHCP_SERVICE)] =
+        &NetsysNativeServiceStub::CmdStopDhcpService;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_IPENABLE_FORWARDING)] =
+        &NetsysNativeServiceStub::CmdIpEnableForwarding;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_IPDISABLE_FORWARDING)] =
+        &NetsysNativeServiceStub::CmdIpDisableForwarding;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ENABLE_NAT)] =
+        &NetsysNativeServiceStub::CmdEnableNat;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DISABLE_NAT)] =
+        &NetsysNativeServiceStub::CmdDisableNat;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_IPFWD_ADD_INTERFACE_FORWARD)] =
+        &NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD)] =
+        &NetsysNativeServiceStub::CmdIpfwdRemoveInterfaceForward;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_IPTABLES_CMD_FOR_RES)] =
+        &NetsysNativeServiceStub::CmdSetIptablesCommandForRes;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_TETHER_DNS_SET)] =
+        &NetsysNativeServiceStub::CmdShareDnsSet;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_START_DNS_PROXY_LISTEN)] =
+        &NetsysNativeServiceStub::CmdStartDnsProxyListen;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DNS_PROXY_LISTEN)] =
+        &NetsysNativeServiceStub::CmdStopDnsProxyListen;
 }
 
 int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,

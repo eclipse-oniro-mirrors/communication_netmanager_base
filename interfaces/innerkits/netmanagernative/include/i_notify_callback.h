@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 
 #include "dhcp_result_parcel.h"
 #include "iremote_broker.h"
+#include "netsys_ipc_interface_code.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -28,17 +29,6 @@ public:
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INotifyCallback");
-    enum {
-        ON_INTERFACE_ADDRESS_UPDATED = 0,
-        ON_INTERFACE_ADDRESS_REMOVED,
-        ON_INTERFACE_ADDED,
-        ON_INTERFACE_REMOVED,
-        ON_INTERFACE_CHANGED,
-        ON_INTERFACE_LINK_STATE_CHANGED,
-        ON_ROUTE_CHANGED,
-        ON_DHCP_SUCCESS,
-        ON_BANDWIDTH_REACHED_LIMIT,
-    };
 
 public:
     virtual int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
