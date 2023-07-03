@@ -67,7 +67,7 @@ ohos_fuzztest("CommonFuzzTest") {
     "bundle_framework:appexecfwk_core",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hilog_native:libhilog",
+    "hilog:libhilog",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",

@@ -62,11 +62,7 @@ ohos_shared_library("net_manager_common") {
     "$C_UTILS_ROOT/base:utils_config",
   ]
 
-  if (is_standard_system) {
-    external_deps = [ "hilog_native:libhilog" ]
-  } else {
-    external_deps = [ "hilog:libhilog" ]
-  }
+  external_deps = [ "hilog:libhilog" ]
 
   external_deps += [
     "access_token:libaccesstoken_sdk",

@@ -52,7 +52,7 @@ ohos_shared_library("connection") {
   ]
   external_deps = [
     "c_utils:utils",
-    "hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
   ]

@@ -39,11 +39,7 @@ ohos_shared_library("fwmark_client") {
     defines += [ "NETMGR_DEBUG" ]
   }
 
-  if (is_standard_system) {
-    external_deps += [ "hilog_native:libhilog" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-  }
+  external_deps += [ "hilog:libhilog" ]
 
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "netmanager_base"

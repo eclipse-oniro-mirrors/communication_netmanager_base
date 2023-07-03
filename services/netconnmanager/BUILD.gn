@@ -104,11 +104,7 @@ ohos_shared_library("net_conn_manager") {
     defines += [ "SYS_FUNC" ]
   }
 
-  if (is_standard_system) {
-    external_deps += [ "hilog_native:libhilog" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-  }
+  external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
   subsystem_name = "communication"
@@ -171,11 +167,7 @@ ohos_static_library("net_conn_manager_static") {
     defines += [ "SYS_FUNC" ]
   }
 
-  if (is_standard_system) {
-    external_deps += [ "hilog_native:libhilog" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-  }
+  external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
   subsystem_name = "communication"

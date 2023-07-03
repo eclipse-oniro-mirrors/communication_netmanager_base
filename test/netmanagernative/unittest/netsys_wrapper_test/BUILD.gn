@@ -54,11 +54,7 @@ ohos_unittest("netsys_wrapper_test") {
     "LOG_DOMAIN = 0xD0015B0",
   ]
 
-  if (is_standard_system) {
-    external_deps += [ "hilog_native:libhilog" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-  }
+  external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
   subsystem_name = "communication"

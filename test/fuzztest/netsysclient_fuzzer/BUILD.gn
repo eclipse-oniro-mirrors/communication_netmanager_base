@@ -68,7 +68,7 @@ ohos_fuzztest("NetSysClientFuzzTest") {
     "c_utils:utils",
     "dhcp:dhcp_manager_service",
     "eventhandler:libeventhandler",
-    "hilog_native:libhilog",
+    "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",

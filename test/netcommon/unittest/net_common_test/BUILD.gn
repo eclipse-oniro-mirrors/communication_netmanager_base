@@ -65,11 +65,7 @@ ohos_unittest("net_common_test") {
     defines += [ "NETMGR_DEBUG" ]
   }
 
-  if (is_standard_system) {
-    external_deps += [ "hilog_native:libhilog" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-  }
+  external_deps += [ "hilog:libhilog" ]
 
   if (enable_sys_func) {
     defines += [ "SYS_FUNC" ]

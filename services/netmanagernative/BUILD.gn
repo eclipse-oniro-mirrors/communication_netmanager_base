@@ -151,11 +151,7 @@ ohos_shared_library("netsys_native_manager") {
     defines += [ "SERVER_SUPPORT_IPV6" ]
   }
 
-  if (is_standard_system) {
-    external_deps += [ "hilog_native:libhilog" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-  }
+  external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
   innerapi_tags = [ "platformsdk_indirect" ]
@@ -199,11 +195,7 @@ ohos_static_library("netsys_native_manager_static") {
     defines += [ "SERVER_SUPPORT_IPV6" ]
   }
 
-  if (is_standard_system) {
-    external_deps += [ "hilog_native:libhilog" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-  }
+  external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
   subsystem_name = "communication"
