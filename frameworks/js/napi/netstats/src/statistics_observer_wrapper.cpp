@@ -105,6 +105,9 @@ napi_value StatisticsObserverWrapper::Off(napi_env env, napi_callback_info info,
         auto ret = NetStatsClient::GetInstance().UnregisterNetStatsCallback(observer_);
         if (ret != NETMANAGER_SUCCESS) {
             NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
+            NetBaseErrorCodeConvertor convertor;
+            std::string errorMsg = convertor.ConvertErrorCode(ret);
+            napi_throw_error(env, std::to_string(ret).c_str(), errorMsg.c_str());
         }
         registered_ = false;
     }
