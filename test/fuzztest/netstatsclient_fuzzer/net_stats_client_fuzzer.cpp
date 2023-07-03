@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,7 +126,7 @@ void RegisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
     }
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
-    OnRemoteRequest(INetStatsService::CMD_NSM_REGISTER_NET_STATS_CALLBACK, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_REGISTER_NET_STATS_CALLBACK), dataParcel);
 }
 
 void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
@@ -146,7 +146,7 @@ void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
     }
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
-    OnRemoteRequest(INetStatsService::CMD_NSM_UNREGISTER_NET_STATS_CALLBACK, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_UNREGISTER_NET_STATS_CALLBACK), dataParcel);
 }
 
 void GetIfaceRxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -165,7 +165,7 @@ void GetIfaceRxBytesFuzzTest(const uint8_t *data, size_t size)
     }
     dataParcel.WriteString(interfaceName);
 
-    OnRemoteRequest(INetStatsService::CMD_NSM_UNREGISTER_NET_STATS_CALLBACK, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_RXBYTES), dataParcel);
 }
 
 void GetIfaceTxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -184,7 +184,7 @@ void GetIfaceTxBytesFuzzTest(const uint8_t *data, size_t size)
     }
     dataParcel.WriteString(interfaceName);
 
-    OnRemoteRequest(INetStatsService::CMD_GET_IFACE_TXBYTES, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_TXBYTES), dataParcel);
 }
 
 void GetUidRxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -203,7 +203,7 @@ void GetUidRxBytesFuzzTest(const uint8_t *data, size_t size)
     }
     dataParcel.WriteUint32(uid);
 
-    OnRemoteRequest(INetStatsService::CMD_GET_UID_RXBYTES, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_RXBYTES), dataParcel);
 }
 
 void GetUidTxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -222,7 +222,7 @@ void GetUidTxBytesFuzzTest(const uint8_t *data, size_t size)
     }
     dataParcel.WriteUint32(uid);
 
-    OnRemoteRequest(INetStatsService::CMD_GET_UID_TXBYTES, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_TXBYTES), dataParcel);
 }
 
 void GetCellularRxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -239,7 +239,7 @@ void GetCellularRxBytesFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    OnRemoteRequest(INetStatsService::CMD_GET_CELLULAR_RXBYTES, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_RXBYTES), dataParcel);
 }
 
 void GetCellularTxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -256,7 +256,7 @@ void GetCellularTxBytesFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    OnRemoteRequest(INetStatsService::CMD_GET_CELLULAR_TXBYTES, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_TXBYTES), dataParcel);
 }
 
 void GetAllRxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -273,7 +273,7 @@ void GetAllRxBytesFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    OnRemoteRequest(INetStatsService::CMD_GET_ALL_RXBYTES, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_RXBYTES), dataParcel);
 }
 
 void GetAllTxBytesFuzzTest(const uint8_t *data, size_t size)
@@ -290,7 +290,7 @@ void GetAllTxBytesFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    OnRemoteRequest(INetStatsService::CMD_GET_ALL_TXBYTES, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_TXBYTES), dataParcel);
 }
 
 void GetIfaceStatsDetailFuzzTest(const uint8_t *data, size_t size)
@@ -311,7 +311,7 @@ void GetIfaceStatsDetailFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteUint64(GetData<uint64_t>());
     dataParcel.WriteUint64(GetData<uint64_t>());
 
-    OnRemoteRequest(INetStatsService::CMD_GET_IFACE_STATS_DETAIL, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_STATS_DETAIL), dataParcel);
 }
 
 void GetUidStatsDetailFuzzTest(const uint8_t *data, size_t size)
@@ -332,7 +332,7 @@ void GetUidStatsDetailFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteUint64(GetData<uint64_t>());
     dataParcel.WriteUint64(GetData<uint64_t>());
 
-    OnRemoteRequest(INetStatsService::CMD_GET_UID_STATS_DETAIL, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_STATS_DETAIL), dataParcel);
 }
 
 void UpdateIfacesStatsFuzzTest(const uint8_t *data, size_t size)
@@ -361,7 +361,7 @@ void UpdateIfacesStatsFuzzTest(const uint8_t *data, size_t size)
     stats.txPackets_ = GetData<uint64_t>();
     stats.Marshalling(dataParcel);
 
-    OnRemoteRequest(INetStatsService::CMD_UPDATE_IFACES_STATS, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_IFACES_STATS), dataParcel);
 }
 
 void UpdateStatsDataFuzzTest(const uint8_t *data, size_t size)
@@ -378,7 +378,7 @@ void UpdateStatsDataFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    OnRemoteRequest(INetStatsService::CMD_UPDATE_STATS_DATA, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_STATS_DATA), dataParcel);
 }
 
 void ResetFactoryFuzzTest(const uint8_t *data, size_t size)
@@ -395,7 +395,7 @@ void ResetFactoryFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    OnRemoteRequest(INetStatsService::CMD_NSM_RESET_FACTORY, dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_RESET_FACTORY), dataParcel);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
@@ -416,7 +416,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetIfaceStatsDetailFuzzTest(data, size);
     OHOS::NetManagerStandard::GetUidStatsDetailFuzzTest(data, size);
     OHOS::NetManagerStandard::UpdateIfacesStatsFuzzTest(data, size);
-    //OHOS::NetManagerStandard::UpdateStatsDataFuzzTest(data, size);
     OHOS::NetManagerStandard::ResetFactoryFuzzTest(data, size);
     return 0;
 }

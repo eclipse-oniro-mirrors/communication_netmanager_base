@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,9 @@ int32_t NetStatsServiceProxy::RegisterNetStatsCallback(const sptr<INetStatsCallb
 
     MessageOption option;
     MessageParcel replyParcel;
-    int32_t retCode = remote->SendRequest(CMD_NSM_REGISTER_NET_STATS_CALLBACK, dataParcel, replyParcel, option);
+    int32_t retCode =
+        remote->SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_REGISTER_NET_STATS_CALLBACK), dataParcel,
+                            replyParcel, option);
     if (retCode != 0) {
         return retCode;
     }
@@ -85,7 +87,9 @@ int32_t NetStatsServiceProxy::UnregisterNetStatsCallback(const sptr<INetStatsCal
 
     MessageOption option;
     MessageParcel replyParcel;
-    int32_t retCode = remote->SendRequest(CMD_NSM_UNREGISTER_NET_STATS_CALLBACK, dataParcel, replyParcel, option);
+    int32_t retCode =
+        remote->SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_UNREGISTER_NET_STATS_CALLBACK),
+                            dataParcel, replyParcel, option);
     if (retCode != 0) {
         return retCode;
     }
@@ -111,7 +115,8 @@ int32_t NetStatsServiceProxy::GetIfaceRxBytes(uint64_t &stats, const std::string
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_GET_IFACE_RXBYTES, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_RXBYTES), data, reply, option);
     if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -139,7 +144,8 @@ int32_t NetStatsServiceProxy::GetIfaceTxBytes(uint64_t &stats, const std::string
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_GET_IFACE_TXBYTES, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_TXBYTES), data, reply, option);
     if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -163,7 +169,8 @@ int32_t NetStatsServiceProxy::GetCellularRxBytes(uint64_t &stats)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_GET_CELLULAR_RXBYTES, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_RXBYTES), data, reply, option);
     if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -187,7 +194,8 @@ int32_t NetStatsServiceProxy::GetCellularTxBytes(uint64_t &stats)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_GET_CELLULAR_TXBYTES, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_TXBYTES), data, reply, option);
     if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -211,7 +219,8 @@ int32_t NetStatsServiceProxy::GetAllRxBytes(uint64_t &stats)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_GET_ALL_RXBYTES, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_RXBYTES), data, reply, option);
     if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -235,7 +244,8 @@ int32_t NetStatsServiceProxy::GetAllTxBytes(uint64_t &stats)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_GET_ALL_TXBYTES, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_TXBYTES), data, reply, option);
     if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -263,7 +273,8 @@ int32_t NetStatsServiceProxy::GetUidRxBytes(uint64_t &stats, uint32_t uid)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_GET_UID_RXBYTES, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_RXBYTES), data, reply, option);
     if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -291,7 +302,8 @@ int32_t NetStatsServiceProxy::GetUidTxBytes(uint64_t &stats, uint32_t uid)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(CMD_GET_UID_TXBYTES, data, reply, option);
+    int32_t error =
+        remote->SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_TXBYTES), data, reply, option);
     if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
@@ -319,7 +331,8 @@ int32_t NetStatsServiceProxy::GetIfaceStatsDetail(const std::string &iface, uint
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t sendResult = remote->SendRequest(CMD_GET_IFACE_STATS_DETAIL, data, reply, option);
+    int32_t sendResult =
+        remote->SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_STATS_DETAIL), data, reply, option);
     if (sendResult != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", sendResult);
         return sendResult;
@@ -349,7 +362,8 @@ int32_t NetStatsServiceProxy::GetUidStatsDetail(const std::string &iface, uint32
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t sendResult = remote->SendRequest(CMD_GET_UID_STATS_DETAIL, data, reply, option);
+    int32_t sendResult =
+        remote->SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_STATS_DETAIL), data, reply, option);
     if (sendResult != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", sendResult);
         return sendResult;
@@ -383,7 +397,8 @@ int32_t NetStatsServiceProxy::UpdateIfacesStats(const std::string &iface, uint64
 
     MessageParcel reply;
     MessageOption option;
-    int32_t sendResult = remote->SendRequest(CMD_UPDATE_IFACES_STATS, data, reply, option);
+    int32_t sendResult =
+        remote->SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_IFACES_STATS), data, reply, option);
     if (sendResult != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", sendResult);
         return sendResult;
@@ -406,7 +421,8 @@ int32_t NetStatsServiceProxy::UpdateStatsData()
 
     MessageParcel reply;
     MessageOption option;
-    int32_t sendResult = remote->SendRequest(CMD_UPDATE_STATS_DATA, data, reply, option);
+    int32_t sendResult =
+        remote->SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_STATS_DATA), data, reply, option);
     if (sendResult != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", sendResult);
         return sendResult;
@@ -428,7 +444,8 @@ int32_t NetStatsServiceProxy::ResetFactory()
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t sendResult = remote->SendRequest(CMD_NSM_RESET_FACTORY, data, reply, option);
+    int32_t sendResult =
+        remote->SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_RESET_FACTORY), data, reply, option);
     if (sendResult != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", sendResult);
         return sendResult;
@@ -450,7 +467,8 @@ int32_t NetStatsServiceProxy::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t result = remote->SendRequest(CMD_GET_ALL_STATS_INFO, data, reply, option);
+    int32_t result =
+        remote->SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_STATS_INFO), data, reply, option);
     if (result != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", result);
         return result;
