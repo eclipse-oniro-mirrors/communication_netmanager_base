@@ -147,7 +147,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, NetworkAddRouteParcelTest001, TestSize.Le
     routeInfo.nextHop = "nextHop";
     routeInfo.mtu = MTU;
     int32_t ret = netsysNativeService->NetworkAddRouteParcel(NETID, routeInfo);
-    EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(NetsysNativeServiceProxyTest, NetworkRemoveRouteParcelTest001, TestSize.Level1)
@@ -160,7 +160,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, NetworkRemoveRouteParcelTest001, TestSize
     routeInfo.nextHop = "";
     routeInfo.mtu = MTU;
     int32_t ret = netsysNativeService->NetworkRemoveRouteParcel(NETID, routeInfo);
-    EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, -1);
 }
 
 HWTEST_F(NetsysNativeServiceProxyTest, NetworkClearDefaultTest001, TestSize.Level1)
@@ -168,7 +168,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, NetworkClearDefaultTest001, TestSize.Leve
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->NetworkClearDefault();
-    EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceProxyTest, GetSetProcSysNetTest001, TestSize.Level1)
@@ -179,7 +179,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetSetProcSysNetTest001, TestSize.Level1)
     std::string value = "Testvalue";
     int32_t ret = netsysNativeService->SetProcSysNet(AF_INET, WHICH, INTERFACENAME, parameter, value);
     ret = netsysNativeService->GetProcSysNet(AF_INET, WHICH, INTERFACENAME, parameter, value);
-    EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, ERR_FLATTEN_OBJECT);
 }
 
 HWTEST_F(NetsysNativeServiceProxyTest, GetProcSysNetTest001, TestSize.Level1)
@@ -188,7 +188,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetProcSysNetTest001, TestSize.Level1)
     ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->SetInternetPermission(UID, true);
     ret = netsysNativeService->NetworkCreateVirtual(NETID, true);
-    EXPECT_LE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative
 } // namespace OHOS
