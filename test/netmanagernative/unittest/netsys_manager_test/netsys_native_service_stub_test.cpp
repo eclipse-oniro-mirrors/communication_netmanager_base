@@ -1354,6 +1354,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkCreateVirtualTest001, TestSize.L
 {
     MessageParcel data;
     MessageParcel reply;
+    data.WriteInt32(0);
+    data.WriteBool(false);
     int32_t ret = notifyStub_->CmdNetworkCreateVirtual(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
@@ -1362,6 +1364,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkAddUidsTest001, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
+    data.WriteInt32(0);
+    data.WriteInt32(0);
     int32_t ret = notifyStub_->CmdNetworkAddUids(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
@@ -1370,6 +1374,8 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetworkDelUidsTest001, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
+    data.WriteInt32(0);
+    data.WriteInt32(0);
     int32_t ret = notifyStub_->CmdNetworkDelUids(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }

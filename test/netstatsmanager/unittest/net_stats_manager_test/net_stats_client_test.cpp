@@ -317,5 +317,18 @@ HWTEST_F(NetStatsClientTest, NetStatsClient004, TestSize.Level1)
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->ResetFactory();
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetStatsClientTest, NetStatsClient005, TestSize.Level1)
+{
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateStatsData();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsClientTest, NetStatsClient006, TestSize.Level1)
+{
+    std::vector<NetStatsInfo> infos;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllStatsInfo(infos);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

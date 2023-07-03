@@ -25,6 +25,7 @@ namespace {
 using namespace testing::ext;
 static constexpr const char *DESTINATION = "192.168.1.3/24";
 static constexpr const char *NEXT_HOP = "192.168.1.1";
+static constexpr const char *LOCALIP = "127.0.0.1";
 static constexpr const char *IF_NAME = "iface0";
 static constexpr const char *ETH0 = "eth0";
 static constexpr const char *IFACE = "test0";
@@ -33,10 +34,13 @@ static constexpr const char *INTERFACE_NAME = "interface_name";
 static constexpr const char *REQUESTOR = "requestor";
 const int32_t MTU = 111;
 const int32_t NET_ID = 2;
+const int32_t IFACEFD = 5;
 const int64_t UID = 1010;
 const int32_t APP_ID = 101010;
 const int32_t SOCKET_FD = 5;
 const int32_t PERMISSION = 5;
+const int32_t STATRUID = 1000;
+const int32_t ENDUID = 1100;
 const int32_t PREFIX_LENGTH = 23;
 uint16_t BASE_TIMEOUT_MSEC = 200;
 const int64_t CHAIN = 1010;
@@ -244,6 +248,48 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest005, TestSize.Level1)
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
     ret = nativeClient_.GetAllStatsInfo(statsInfo);
     EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest006, TestSize.Level1)
+{
+    std::vector<UidRange> uidRanges;
+    std::vector<int32_t> beginUids;
+    std::vector<int32_t> endUids;
+    beginUids.push_back(STATRUID);
+    endUids.push_back(ENDUID);
+    for (size_t i = 0; i < beginUids.size(); i++) {
+        uidRanges.emplace_back(UidRange(beginUids[i], endUids[i]));
+    }
+    nativeClient_.NetworkAddUids(NET_ID, uidRanges);
+    nativeClient_.NetworkDelUids(NET_ID, uidRanges);
+    int32_t ret = nativeClient_.NetworkCreatePhysical(NET_ID, PERMISSION);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest007, TestSize.Level1)
+{
+    NetsysNotifyCallback callback;
+    struct ifreq ifreq = {};
+    int32_t ret = nativeClient_.RegisterNetsysNotifyCallback(callback);
+    EXPECT_EQ(ret, 0);
+    ret = nativeClient_.BindNetworkServiceVpn(SOCKET_FD);
+    int32_t ifacefd1 = 0;
+    nativeClient_.EnableVirtualNetIfaceCard(SOCKET_FD, ifreq, ifacefd1);
+    int32_t sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    ret = nativeClient_.BindNetworkServiceVpn(sockfd);
+    int32_t ifacefd2 = 0;
+    nativeClient_.EnableVirtualNetIfaceCard(sockfd, ifreq, ifacefd2);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest008, TestSize.Level1)
+{
+    int32_t ret = nativeClient_.SetBlocking(IFACEFD, true);
+    EXPECT_EQ(ret, NETSYS_ERR_VPN);
+    struct ifreq ifreq = {};
+    int32_t sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    ret = nativeClient_.SetIpAddress(sockfd, LOCALIP, PREFIX_LENGTH, ifreq);
+    EXPECT_EQ(ret, NETSYS_ERR_VPN);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

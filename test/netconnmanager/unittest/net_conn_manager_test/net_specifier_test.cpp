@@ -126,6 +126,9 @@ HWTEST_F(NetSpecifierTest, SetTypeTest, TestSize.Level1)
     ASSERT_NE(specifier, nullptr);
     NetBearType bearerType = NetBearType::BEARER_WIFI;
     specifier->SetType(bearerType);
+    std::set<NetBearType> bearerTypes;
+    bearerTypes.insert(bearerType);
+    specifier->SetTypes(bearerTypes);
 }
 
 /**

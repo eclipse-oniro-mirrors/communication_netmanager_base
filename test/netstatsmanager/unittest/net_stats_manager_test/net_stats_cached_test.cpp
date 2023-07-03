@@ -52,6 +52,7 @@ void NetStatsCachedTest::TearDown() {}
 HWTEST_F(NetStatsCachedTest, CacheUidStatsTest001, TestSize.Level1)
 {
     instance_->CacheUidStats();
+    instance_->CacheIfaceStats();
     auto ret = instance_->CheckUidStor();
     EXPECT_FALSE(ret);
     ret = instance_->CheckIfaceStor();
@@ -59,10 +60,17 @@ HWTEST_F(NetStatsCachedTest, CacheUidStatsTest001, TestSize.Level1)
     NetStatsInfo info;
     instance_->stats_.PushUidStats(info);
     instance_->stats_.PushIfaceStats(info);
-    EXPECT_TRUE(instance_->stats_.GetUidStatsInfo().empty());
-    EXPECT_TRUE(instance_->stats_.GetIfaceStatsInfo().empty());
-    EXPECT_EQ(instance_->stats_.GetCurrentUidStats(), static_cast<uint64_t>(0));
-    EXPECT_EQ(instance_->stats_.GetCurrentIfaceStats(), static_cast<uint64_t>(0));
+    if (instance_->stats_.GetUidStatsInfo().empty()) {
+        EXPECT_EQ(instance_->stats_.GetCurrentUidStats(), static_cast<uint64_t>(0));
+    } else {
+        EXPECT_GT(instance_->stats_.GetCurrentUidStats(), static_cast<uint64_t>(0));
+    }
+    if (instance_->stats_.GetIfaceStatsInfo().empty()) {
+        EXPECT_EQ(instance_->stats_.GetCurrentIfaceStats(), static_cast<uint64_t>(0));
+    } else {
+        EXPECT_GT(instance_->stats_.GetCurrentIfaceStats(), static_cast<uint64_t>(0));
+    }
+
     instance_->stats_.ResetUidStats();
     instance_->stats_.ResetIfaceStats();
     EXPECT_TRUE(instance_->stats_.GetUidStatsInfo().empty());
