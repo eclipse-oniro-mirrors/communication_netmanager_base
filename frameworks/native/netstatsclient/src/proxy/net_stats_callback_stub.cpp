@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,10 @@ namespace OHOS {
 namespace NetManagerStandard {
 NetStatsCallbackStub::NetStatsCallbackStub()
 {
-    memberFuncMap_[NET_STATS_IFACE_CHANGED] = &NetStatsCallbackStub::OnNetIfaceStatsChanged;
-    memberFuncMap_[NET_STATS_UID_CHANGED] = &NetStatsCallbackStub::OnNetUidStatsChanged;
+    memberFuncMap_[static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_IFACE_CHANGED)] =
+        &NetStatsCallbackStub::OnNetIfaceStatsChanged;
+    memberFuncMap_[static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_UID_CHANGED)] =
+        &NetStatsCallbackStub::OnNetUidStatsChanged;
 }
 
 NetStatsCallbackStub::~NetStatsCallbackStub() = default;
