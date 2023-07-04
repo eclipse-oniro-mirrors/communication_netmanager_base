@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetStatsCallbackProxy::NetStatsCallbackProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<INetStatsCallback>(impl)
-{
-}
+NetStatsCallbackProxy::NetStatsCallbackProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<INetStatsCallback>(impl) {}
 
 NetStatsCallbackProxy::~NetStatsCallbackProxy() = default;
 
@@ -46,7 +44,8 @@ int32_t NetStatsCallbackProxy::NetIfaceStatsChanged(const std::string &iface)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = remote->SendRequest(NET_STATS_IFACE_CHANGED, data, reply, option);
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_IFACE_CHANGED), data,
+                                      reply, option);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
@@ -77,7 +76,8 @@ int32_t NetStatsCallbackProxy::NetUidStatsChanged(const std::string &iface, uint
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = remote->SendRequest(NET_STATS_UID_CHANGED, data, reply, option);
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_UID_CHANGED), data,
+                                      reply, option);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }

@@ -19,6 +19,11 @@
 /* SAID: 1153 */
 namespace OHOS {
 namespace NetManagerStandard {
+enum class StatsCallBackInterfaceCode {
+    NET_STATS_IFACE_CHANGED = 0,
+    NET_STATS_UID_CHANGED = 1,
+};
+
 enum class StatsInterfaceCode {
     CMD_START = 0,
     CMD_SYSTEM_READY,
@@ -40,6 +45,6 @@ enum class StatsInterfaceCode {
     CMD_GET_ALL_STATS_INFO,
     CMD_END = 100,
 };
-}
+} // namespace NetManagerStandard
 } // namespace OHOS
 #endif // STATS_IPC_INTERFACE_CODE_H
