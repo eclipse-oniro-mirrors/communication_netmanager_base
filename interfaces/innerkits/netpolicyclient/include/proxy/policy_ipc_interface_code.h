@@ -43,6 +43,14 @@ enum class PolicyInterfaceCode {
     CMD_NPS_SET_POWER_SAVE_POLICY,
     CMD_NPS_END = 100,
 };
-}
+enum class PolicyCallbackInterfaceCode {
+    NOTIFY_NET_UID_POLICY_CHANGE = 1,
+    NOTIFY_NET_UID_RULE_CHANGE = 2,
+    NOTIFY_NET_QUOTA_POLICY_CHANGE = 3,
+    NET_POLICY_STRATEGYSWITCH_CHANGE = 4,
+    NOTIFY_NET_METERED_IFACES_CHANGE = 5,
+    NOTIFY_BACKGROUND_POLICY_CHANGE = 6,
+};
+} // namespace NetManagerStandard
 } // namespace OHOS
 #endif // POLICY_IPC_INTERFACE_CODE_H

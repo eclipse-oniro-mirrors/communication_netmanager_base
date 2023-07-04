@@ -24,11 +24,16 @@ static constexpr uint32_t MAX_IFACE_SIZE = 100;
 
 NetPolicyCallbackStub::NetPolicyCallbackStub()
 {
-    memberFuncMap_[NOTIFY_NET_UID_POLICY_CHANGE] = &NetPolicyCallbackStub::OnNetUidPolicyChange;
-    memberFuncMap_[NOTIFY_NET_UID_RULE_CHANGE] = &NetPolicyCallbackStub::OnNetUidRuleChange;
-    memberFuncMap_[NOTIFY_NET_QUOTA_POLICY_CHANGE] = &NetPolicyCallbackStub::OnNetQuotaPolicyChange;
-    memberFuncMap_[NOTIFY_NET_METERED_IFACES_CHANGE] = &NetPolicyCallbackStub::OnNetMeteredIfacesChange;
-    memberFuncMap_[NOTIFY_BACKGROUND_POLICY_CHANGE] = &NetPolicyCallbackStub::OnNetBackgroundPolicyChange;
+    memberFuncMap_[static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_POLICY_CHANGE)] =
+        &NetPolicyCallbackStub::OnNetUidPolicyChange;
+    memberFuncMap_[static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_RULE_CHANGE)] =
+        &NetPolicyCallbackStub::OnNetUidRuleChange;
+    memberFuncMap_[static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_QUOTA_POLICY_CHANGE)] =
+        &NetPolicyCallbackStub::OnNetQuotaPolicyChange;
+    memberFuncMap_[static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_METERED_IFACES_CHANGE)] =
+        &NetPolicyCallbackStub::OnNetMeteredIfacesChange;
+    memberFuncMap_[static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_BACKGROUND_POLICY_CHANGE)] =
+        &NetPolicyCallbackStub::OnNetBackgroundPolicyChange;
 }
 
 NetPolicyCallbackStub::~NetPolicyCallbackStub() {}

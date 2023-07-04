@@ -52,7 +52,8 @@ int32_t NetPolicyCallbackProxy::NetUidPolicyChange(uint32_t uid, uint32_t policy
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = remote->SendRequest(NOTIFY_NET_UID_POLICY_CHANGE, data, reply, option);
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_POLICY_CHANGE),
+                                      data, reply, option);
     if (ret != 0) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
@@ -86,7 +87,8 @@ int32_t NetPolicyCallbackProxy::NetUidRuleChange(uint32_t uid, uint32_t rule)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = remote->SendRequest(NOTIFY_NET_UID_RULE_CHANGE, data, reply, option);
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_RULE_CHANGE),
+                                      data, reply, option);
     if (ret != 0) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
@@ -115,7 +117,8 @@ int32_t NetPolicyCallbackProxy::NetBackgroundPolicyChange(bool isBackgroundPolic
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = remote->SendRequest(NOTIFY_BACKGROUND_POLICY_CHANGE, data, reply, option);
+    int32_t ret = remote->SendRequest(
+        static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_BACKGROUND_POLICY_CHANGE), data, reply, option);
     if (ret != 0) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
@@ -149,7 +152,8 @@ int32_t NetPolicyCallbackProxy::NetQuotaPolicyChange(const std::vector<NetQuotaP
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = remote->SendRequest(NOTIFY_NET_QUOTA_POLICY_CHANGE, data, reply, option);
+    int32_t ret = remote->SendRequest(
+        static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_QUOTA_POLICY_CHANGE), data, reply, option);
     if (ret != 0) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
@@ -183,7 +187,8 @@ int32_t NetPolicyCallbackProxy::NetStrategySwitch(const std::string &simId, bool
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = remote->SendRequest(NET_POLICY_STRATEGYSWITCH_CHANGE, data, reply, option);
+    int32_t ret = remote->SendRequest(
+        static_cast<uint32_t>(PolicyCallbackInterfaceCode::NET_POLICY_STRATEGYSWITCH_CHANGE), data, reply, option);
     if (ret != 0) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
@@ -219,7 +224,8 @@ int32_t NetPolicyCallbackProxy::NetMeteredIfacesChange(std::vector<std::string> 
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = remote->SendRequest(NOTIFY_NET_METERED_IFACES_CHANGE, data, reply, option);
+    int32_t ret = remote->SendRequest(
+        static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_METERED_IFACES_CHANGE), data, reply, option);
     if (ret != 0) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
         return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
