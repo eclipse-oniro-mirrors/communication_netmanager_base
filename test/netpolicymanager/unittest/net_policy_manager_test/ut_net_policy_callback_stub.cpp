@@ -100,7 +100,8 @@ HWTEST_F(UtNetPolicyCallbackStubTest, OnNetUidPolicyChangeTest001, TestSize.Leve
     int32_t ret = instance_->OnRemoteRequest(100, data, reply, option);
     EXPECT_NE(ret, 0);
 
-    ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_POLICY_CHANGE), data, reply, option);
+    ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_POLICY_CHANGE),
+                                     data, reply, option);
     EXPECT_NE(ret, 0);
 
     MessageParcel dataOk;
@@ -113,7 +114,8 @@ HWTEST_F(UtNetPolicyCallbackStubTest, OnNetUidPolicyChangeTest001, TestSize.Leve
     if (!dataOk.WriteUint32(policy)) {
         return;
     }
-    ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_POLICY_CHANGE), dataOk, reply, option);
+    ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_POLICY_CHANGE),
+                                     dataOk, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -133,7 +135,8 @@ HWTEST_F(UtNetPolicyCallbackStubTest, OnNetUidRuleChangeTest001, TestSize.Level1
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_RULE_CHANGE), data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_RULE_CHANGE), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -155,7 +158,8 @@ HWTEST_F(UtNetPolicyCallbackStubTest, OnNetQuotaPolicyChangeTest001, TestSize.Le
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_QUOTA_POLICY_CHANGE), data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_QUOTA_POLICY_CHANGE), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -179,7 +183,8 @@ HWTEST_F(UtNetPolicyCallbackStubTest, OnNetMeteredIfacesChangeTest001, TestSize.
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_METERED_IFACES_CHANGE), data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_METERED_IFACES_CHANGE), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -196,7 +201,8 @@ HWTEST_F(UtNetPolicyCallbackStubTest, NotifyNetQuotaPolicyChangeTest002, TestSiz
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_BACKGROUND_POLICY_CHANGE), data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_BACKGROUND_POLICY_CHANGE), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
