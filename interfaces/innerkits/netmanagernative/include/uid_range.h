@@ -44,7 +44,7 @@ struct __attribute__ ((visibility("default"))) UidRange : public Parcelable {
         return !(lhs == rhs);
     }
 
-    virtual bool Marshalling(Parcel &parcel) const override;
+    bool Marshalling(Parcel &parcel) const override;
     static sptr<UidRange> Unmarshalling(Parcel &parcel);
 
     int32_t begin_ = -1;

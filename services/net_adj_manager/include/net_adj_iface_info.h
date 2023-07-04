@@ -29,7 +29,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-struct NetAdjIfaceInfo : public Parcelable {
+struct NetAdjIfaceInfo final: public Parcelable {
     // Type from {@code NetAdjInfo::NetAdjType}.
     uint32_t type_;
 

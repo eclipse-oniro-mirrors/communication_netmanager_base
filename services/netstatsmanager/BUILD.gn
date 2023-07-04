@@ -38,6 +38,12 @@ config("net_stats_manager_config") {
 }
 
 ohos_shared_library("net_stats_manager") {
+  sanitize = {
+    integer_overflow = true
+    boundary_sanitize = true
+    all_ubsan = true
+  }
+
   sources = [
     "src/common/net_stats_service_common.cpp",
     "src/net_stats_cached.cpp",

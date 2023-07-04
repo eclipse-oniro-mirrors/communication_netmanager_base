@@ -31,6 +31,13 @@ config("net_policy_manager_config") {
 }
 
 ohos_shared_library("net_policy_manager") {
+  sanitize = {
+    cfi = true
+    integer_overflow = true
+    boundary_sanitize = true
+    all_ubsan = true
+  }
+
   sources = [
     "src/common/net_policy_event_handler.cpp",
     "src/common/net_policy_file_event_handler.cpp",

@@ -31,7 +31,7 @@ public:
     NetsysAddrInfoParcel(const addrinfo *addr, const uint16_t netId, const std::string Node,
                          const std::string ServData);
     ~NetsysAddrInfoParcel() = default;
-    virtual bool Marshalling(Parcel &parcel) const override;
+    bool Marshalling(Parcel &parcel) const override;
     static sptr<NetsysAddrInfoParcel> Unmarshalling(MessageParcel &parcel);
     static bool UnmarshallingAddrinfo(MessageParcel &parcelMsg, int size, addrinfo *headNode);
 

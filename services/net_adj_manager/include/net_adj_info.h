@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-struct NetAdjInfo : public Parcelable {
+struct NetAdjInfo final: public Parcelable {
     enum {
         // Wi-Fi Station and AP.
         TYPE_WIFI = 0,

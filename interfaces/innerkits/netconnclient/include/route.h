@@ -33,7 +33,7 @@ enum {
     RTN_THROW = 9
 };
 
-struct Route : public Parcelable {
+struct Route final: public Parcelable {
     std::string iface_;
     INetAddr destination_;
     INetAddr gateway_;
@@ -45,7 +45,7 @@ struct Route : public Parcelable {
 
     bool operator==(const Route& obj) const;
 
-    virtual bool Marshalling(Parcel &parcel) const override;
+    bool Marshalling(Parcel &parcel) const override;
     static sptr<Route> Unmarshalling(Parcel &parcel);
     static bool Marshalling(Parcel &parcel, const sptr<Route> &object);
     std::string ToString(const std::string &tab) const;

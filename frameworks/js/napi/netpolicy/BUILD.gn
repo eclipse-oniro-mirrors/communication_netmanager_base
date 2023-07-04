@@ -32,6 +32,14 @@ config("policy_config") {
 }
 
 ohos_shared_library("policy") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    integer_overflow = true
+    boundary_sanitize = true
+    all_ubsan = true
+  }
+
   sources = [
     "src/context/get_net_quota_policies_context.cpp",
     "src/context/get_policy_by_uid_context.cpp",

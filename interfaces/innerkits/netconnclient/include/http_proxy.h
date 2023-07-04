@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class HttpProxy : public Parcelable {
+class HttpProxy final: public Parcelable {
 public:
     HttpProxy();
     HttpProxy(std::string host, uint16_t port, const std::list<std::string> &exclusionList);

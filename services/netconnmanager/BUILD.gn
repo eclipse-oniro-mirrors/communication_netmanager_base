@@ -32,6 +32,15 @@ config("net_conn_manager_config") {
 }
 
 ohos_shared_library("net_conn_manager") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    integer_overflow = true
+    boundary_sanitize = true
+    all_ubsan = true
+    blocklist = "./connect_blocklist.txt"
+  }
+
   sources = [
     "$NETCONNMANAGER_COMMON_DIR/src/route_utils.cpp",
     "src/net_activate.cpp",

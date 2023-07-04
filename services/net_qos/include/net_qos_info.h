@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-struct NetQosInfo : public Parcelable {
+struct NetQosInfo final: public Parcelable {
     enum {
         QOS_LEVEL_1 = 1,
         QOS_LEVEL_2 = 2,

@@ -30,7 +30,7 @@ enum NetConnState {
     NET_CONN_STATE_DISCONNECTING = 4,
     NET_CONN_STATE_DISCONNECTED = 5,
 };
-struct NetSupplierInfo : public Parcelable {
+struct NetSupplierInfo final: public Parcelable {
     bool isAvailable_ = false;
     bool isRoaming_ = false;
     int8_t strength_ = 0x00;
@@ -39,7 +39,7 @@ struct NetSupplierInfo : public Parcelable {
     uint32_t linkDownBandwidthKbps_ = 0;
     int32_t uid_ = 0;
 
-    virtual bool Marshalling(Parcel &parcel) const override;
+    bool Marshalling(Parcel &parcel) const override;
     static sptr<NetSupplierInfo> Unmarshalling(Parcel &parcel);
     static bool Marshalling(Parcel &parcel, const sptr<NetSupplierInfo> &object);
     std::string ToString(const std::string &tab) const;

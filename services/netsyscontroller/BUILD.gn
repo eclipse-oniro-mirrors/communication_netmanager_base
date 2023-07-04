@@ -22,6 +22,13 @@ config("netsys_controller_include") {
 }
 
 ohos_shared_library("netsys_controller") {
+  sanitize = {
+    cfi = true
+    integer_overflow = true
+    boundary_sanitize = true
+    all_ubsan = true
+  }
+
   all_dependent_configs = [ ":netsys_controller_include" ]
   sources = [
     "src/mock_netsys_native_client.cpp",
