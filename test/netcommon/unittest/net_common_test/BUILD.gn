@@ -50,7 +50,7 @@ ohos_unittest("net_common_test") {
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "hisysevent:libhisysevent",
-    "hitrace_native:hitrace_meter",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
@@ -65,11 +65,7 @@ ohos_unittest("net_common_test") {
     defines += [ "NETMGR_DEBUG" ]
   }
 
-  if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-  }
+  external_deps += [ "hilog:libhilog" ]
 
   if (enable_sys_func) {
     defines += [ "SYS_FUNC" ]

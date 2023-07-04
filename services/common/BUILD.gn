@@ -62,11 +62,7 @@ ohos_shared_library("net_service_common") {
     defines += [ "NETMGR_DEBUG" ]
   }
 
-  if (is_standard_system) {
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
-  } else {
-    external_deps += [ "hilog:libhilog" ]
-  }
+  external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
   subsystem_name = "communication"
