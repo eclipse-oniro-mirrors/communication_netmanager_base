@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@ static constexpr const char *CONNECTIVITY_INTERNAL = "ohos.permission.CONNECTIVI
 static constexpr const char *GET_NETSTATS_SUMMARY = "ohos.permission.GET_NETSTATS_SUMMARY";
 static constexpr const char *MANAGE_NET_STRATEGY = "ohos.permission.MANAGE_NET_STRATEGY";
 static constexpr const char *MANAGE_VPN = "ohos.permission.MANAGE_VPN";
+static constexpr const char *GET_NETWORK_STATS = "ohos.permission.GET_NETWORK_STATS";
 } // namespace Permission
 
 class NetManagerPermission {

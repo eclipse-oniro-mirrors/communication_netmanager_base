@@ -87,7 +87,7 @@ int32_t NetStatsServiceStub::OnRegisterNetStatsCallback(MessageParcel &data, Mes
         NETMGR_LOG_E("Permission check failed.");
         return NETMANAGER_ERR_NOT_SYSTEM_CALL;
     }
-    if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_STATS)) {
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     int32_t result = NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -112,7 +112,7 @@ int32_t NetStatsServiceStub::OnUnregisterNetStatsCallback(MessageParcel &data, M
         NETMGR_LOG_E("Permission check failed.");
         return NETMANAGER_ERR_NOT_SYSTEM_CALL;
     }
-    if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_STATS)) {
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     int32_t result = NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -292,7 +292,7 @@ int32_t NetStatsServiceStub::OnGetIfaceStatsDetail(MessageParcel &data, MessageP
         NETMGR_LOG_E("Permission check failed.");
         return NETMANAGER_ERR_NOT_SYSTEM_CALL;
     }
-    if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_STATS)) {
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     std::string iface;
@@ -319,7 +319,7 @@ int32_t NetStatsServiceStub::OnGetUidStatsDetail(MessageParcel &data, MessagePar
         NETMGR_LOG_E("Permission check failed.");
         return NETMANAGER_ERR_NOT_SYSTEM_CALL;
     }
-    if (!NetManagerPermission::CheckPermission(Permission::CONNECTIVITY_INTERNAL)) {
+    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_STATS)) {
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
     std::string iface;
