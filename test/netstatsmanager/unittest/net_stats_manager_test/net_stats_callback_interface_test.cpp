@@ -120,7 +120,8 @@ public:
         }
         MessageParcel reply;
         MessageOption option;
-        int32_t ret = netStatsCb_->OnRemoteRequest(INetStatsCallback::NET_STATS_IFACE_CHANGED, dataErr, reply, option);
+        int32_t ret = netStatsCb_->OnRemoteRequest(
+            static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_IFACE_CHANGED), dataErr, reply, option);
         std::cout << "thread HandleIfaceChangedThread 001 ret:" << ret << std::endl;
         return ret;
     }
@@ -136,7 +137,8 @@ public:
         }
         MessageParcel reply;
         MessageOption option;
-        int32_t ret = netStatsCb_->OnRemoteRequest(INetStatsCallback::NET_STATS_IFACE_CHANGED, data, reply, option);
+        int32_t ret = netStatsCb_->OnRemoteRequest(
+            static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_IFACE_CHANGED), data, reply, option);
         std::cout << "thread HandleIfaceChangedThread 002 ret:" << ret << std::endl;
         return ret;
     }
@@ -149,7 +151,8 @@ public:
         }
         MessageParcel reply;
         MessageOption option;
-        int32_t ret = netStatsCb_->OnRemoteRequest(INetStatsCallback::NET_STATS_UID_CHANGED, dataNoStr, reply, option);
+        int32_t ret = netStatsCb_->OnRemoteRequest(
+            static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_UID_CHANGED), dataNoStr, reply, option);
         std::cout << "thread NetUidStatsChanged 001 ret:" << ret << std::endl;
         return ret;
     }
@@ -165,7 +168,8 @@ public:
         }
         MessageParcel reply;
         MessageOption option;
-        int32_t ret = netStatsCb_->OnRemoteRequest(INetStatsCallback::NET_STATS_UID_CHANGED, dataNoInt, reply, option);
+        int32_t ret = netStatsCb_->OnRemoteRequest(
+            static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_UID_CHANGED), dataNoInt, reply, option);
         std::cout << "thread NetUidStatsChanged 002 ret:" << ret << std::endl;
         return ret;
     }
@@ -184,7 +188,8 @@ public:
         }
         MessageParcel reply;
         MessageOption option;
-        int32_t ret = netStatsCb_->OnRemoteRequest(INetStatsCallback::NET_STATS_UID_CHANGED, data, reply, option);
+        int32_t ret = netStatsCb_->OnRemoteRequest(
+            static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_UID_CHANGED), data, reply, option);
         std::cout << "thread NetUidStatsChanged 003 ret:" << ret << std::endl;
         return ret;
     }

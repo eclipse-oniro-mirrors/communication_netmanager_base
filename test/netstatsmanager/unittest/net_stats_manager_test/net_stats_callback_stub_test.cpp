@@ -111,7 +111,8 @@ HWTEST_F(NetStatsCallbackStubTest, OnRemoteRequestTest003, TestSize.Level1)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetStatsCallback::NET_STATS_IFACE_CHANGED, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_IFACE_CHANGED),
+                                             data, reply, option);
     EXPECT_EQ(ret, 0);
 }
 
@@ -128,7 +129,8 @@ HWTEST_F(NetStatsCallbackStubTest, OnNetIfaceStatsChangedTest001, TestSize.Level
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetStatsCallback::NET_STATS_IFACE_CHANGED, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_IFACE_CHANGED),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
 }
 
@@ -148,7 +150,8 @@ HWTEST_F(NetStatsCallbackStubTest, OnNetIfaceStatsChangedTest002, TestSize.Level
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetStatsCallback::NET_STATS_IFACE_CHANGED, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_IFACE_CHANGED),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -165,7 +168,8 @@ HWTEST_F(NetStatsCallbackStubTest, OnNetUidStatsChangedTest001, TestSize.Level1)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetStatsCallback::NET_STATS_UID_CHANGED, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_UID_CHANGED),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
 }
 
@@ -185,7 +189,8 @@ HWTEST_F(NetStatsCallbackStubTest, OnNetUidStatsChangedTest002, TestSize.Level1)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetStatsCallback::NET_STATS_UID_CHANGED, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_UID_CHANGED),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_ERR_READ_DATA_FAIL);
 }
 
@@ -208,7 +213,8 @@ HWTEST_F(NetStatsCallbackStubTest, OnNetUidStatsChangedTest003, TestSize.Level1)
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = instance_->OnRemoteRequest(INetStatsCallback::NET_STATS_UID_CHANGED, data, reply, option);
+    int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(StatsCallBackInterfaceCode::NET_STATS_UID_CHANGED),
+                                             data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
