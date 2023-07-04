@@ -68,25 +68,25 @@ NetPolicyServiceStub::NetPolicyServiceStub()
         &NetPolicyServiceStub::OnSetNetQuotaPolicies;
     memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NET_QUOTA_POLICIES)] =
         &NetPolicyServiceStub::OnGetNetQuotaPolicies;
-    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_UPDATE_REMIND_POLICY)] =
-        &NetPolicyServiceStub::OnResetPolicies;
-    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_TRUSTLIST)] =
-        &NetPolicyServiceStub::OnSnoozePolicy;
-    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_IDLE_TRUSTLIST)] =
-        &NetPolicyServiceStub::OnSetDeviceIdleTrustlist;
-    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_DEVICE_IDLE_POLICY)] =
-        &NetPolicyServiceStub::OnGetDeviceIdleTrustlist;
     memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_RESET_POLICIES)] =
+        &NetPolicyServiceStub::OnResetPolicies;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_UPDATE_REMIND_POLICY)] =
+        &NetPolicyServiceStub::OnSnoozePolicy;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_TRUSTLIST)] =
+        &NetPolicyServiceStub::OnSetDeviceIdleTrustlist;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_IDLE_TRUSTLIST)] =
+        &NetPolicyServiceStub::OnGetDeviceIdleTrustlist;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_DEVICE_IDLE_POLICY)] =
         &NetPolicyServiceStub::OnSetDeviceIdlePolicy;
-    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_BACKGROUND_POLICY)] =
-        &NetPolicyServiceStub::OnGetPowerSaveTrustlist;
-    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY)] =
-        &NetPolicyServiceStub::OnSetPowerSaveTrustlist;
-    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY_BY_UID)] =
-        &NetPolicyServiceStub::OnSetBackgroundPolicy;
-    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_TRUSTLIST)] =
-        &NetPolicyServiceStub::OnGetBackgroundPolicy;
     memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POWER_SAVE_TRUSTLIST)] =
+        &NetPolicyServiceStub::OnGetPowerSaveTrustlist;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_TRUSTLIST)] =
+        &NetPolicyServiceStub::OnSetPowerSaveTrustlist;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_BACKGROUND_POLICY)] =
+        &NetPolicyServiceStub::OnSetBackgroundPolicy;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY)] =
+        &NetPolicyServiceStub::OnGetBackgroundPolicy;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY_BY_UID)] =
         &NetPolicyServiceStub::OnGetBackgroundPolicyByUid;
     memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_POLICY)] =
         &NetPolicyServiceStub::OnSetPowerSavePolicy;

@@ -22,6 +22,7 @@
 
 #include "net_policy_constants.h"
 #include "net_quota_policy.h"
+#include "policy_ipc_interface_code.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -31,14 +32,6 @@ public:
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetManagerStandard.INetPolicyCallback");
-    enum {
-        NOTIFY_NET_UID_POLICY_CHANGE = 1,
-        NOTIFY_NET_UID_RULE_CHANGE = 2,
-        NOTIFY_NET_QUOTA_POLICY_CHANGE = 3,
-        NET_POLICY_STRATEGYSWITCH_CHANGE = 4,
-        NOTIFY_NET_METERED_IFACES_CHANGE = 5,
-        NOTIFY_BACKGROUND_POLICY_CHANGE = 6,
-    };
 
 public:
     /**
