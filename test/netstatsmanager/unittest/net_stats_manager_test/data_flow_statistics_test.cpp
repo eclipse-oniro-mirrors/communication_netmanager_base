@@ -46,7 +46,7 @@ HapInfoParams testInfoParms = {
 };
 
 PermissionDef testPermDef = {
-    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+    .permissionName = "ohos.permission.GET_NETWORK_STATS",
     .bundleName = "net_stats_manager_test",
     .grantMode = 1,
     .availableLevel = APL_SYSTEM_BASIC,
@@ -57,7 +57,7 @@ PermissionDef testPermDef = {
 };
 
 PermissionStateFull testState = {
-    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+    .permissionName = "ohos.permission.GET_NETWORK_STATS",
     .isGeneral = true,
     .resDeviceID = {"local"},
     .grantStatus = {PermissionState::PERMISSION_GRANTED},
