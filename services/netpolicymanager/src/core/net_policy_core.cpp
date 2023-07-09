@@ -147,7 +147,7 @@ void NetPolicyCore::ReceiveMessage::OnReceiveEvent(const EventFwk::CommonEventDa
     }
 
     if (action == COMMON_EVENT_DEVICE_IDLE_MODE_CHANGED) {
-        bool isDeviceIdle = static_cast<bool>(eventData.GetWant().GetRemoteObject(DEVICE_IDLE_MODE_KEY));
+        bool isDeviceIdle = static_cast<bool>(eventData.GetWant().GetBoolParam(DEVICE_IDLE_MODE_KEY, false));
         auto policyEvent = std::make_shared<PolicyEvent>();
         policyEvent->deviceIdleMode = isDeviceIdle;
         receiveMessage_->SendEvent(NetPolicyEventHandler::MSG_DEVICE_IDLE_MODE_CHANGED, policyEvent);
