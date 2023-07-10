@@ -36,11 +36,12 @@ namespace nmd {
 class FwmarkClient;
 }
 namespace NetManagerStandard {
-class NetConnClient : public Singleton<NetConnClient> {
+class NetConnClient {
 public:
     NetConnClient();
     ~NetConnClient();
 
+    static NetConnClient &GetInstance();
     /**
      * The interface in NetConnService can be called when the system is ready
      *
