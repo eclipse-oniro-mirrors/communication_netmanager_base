@@ -28,11 +28,11 @@ namespace {
 NetQuotaPolicy ReadQuotaPolicy(napi_env env, napi_value value)
 {
     NetQuotaPolicy data;
-    napi_value netWorkMatchRule = NapiUtils::GetNamedProperty(env, value, "netWorkMatchRule");
+    napi_value netWorkMatchRule = NapiUtils::GetNamedProperty(env, value, "networkMatchRule");
     napi_value quotaPolicy = NapiUtils::GetNamedProperty(env, value, "quotaPolicy");
     data.networkmatchrule.netType = NapiUtils::GetInt32Property(env, netWorkMatchRule, "netType");
     data.networkmatchrule.simId = NapiUtils::GetStringPropertyUtf8(env, netWorkMatchRule, "simId");
-    data.networkmatchrule.ident = NapiUtils::GetStringPropertyUtf8(env, netWorkMatchRule, "ident");
+    data.networkmatchrule.ident = NapiUtils::GetStringPropertyUtf8(env, netWorkMatchRule, "identity");
     data.quotapolicy.periodDuration = NapiUtils::GetStringPropertyUtf8(env, quotaPolicy, "periodDuration");
     data.quotapolicy.warningBytes = NapiUtils::GetInt64Property(env, quotaPolicy, "warningBytes");
     data.quotapolicy.limitBytes = NapiUtils::GetInt64Property(env, quotaPolicy, "limitBytes");
