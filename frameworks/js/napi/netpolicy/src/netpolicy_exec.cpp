@@ -271,8 +271,8 @@ void NetPolicyExec::FillNetWorkMatchRule(napi_env env, napi_value elementObject,
     napi_value netWorkMatchRule =  NapiUtils::CreateObject(env);
     NapiUtils::SetInt32Property(env, netWorkMatchRule, "netType", netQuotaPolicy.networkmatchrule.netType);
     NapiUtils::SetStringPropertyUtf8(env, netWorkMatchRule, "simId", netQuotaPolicy.networkmatchrule.simId);
-    NapiUtils::SetStringPropertyUtf8(env, netWorkMatchRule, "ident", netQuotaPolicy.networkmatchrule.ident);
-    NapiUtils::SetNamedProperty(env, elementObject, "netWorkMatchRule", netWorkMatchRule);
+    NapiUtils::SetStringPropertyUtf8(env, netWorkMatchRule, "identity", netQuotaPolicy.networkmatchrule.ident);
+    NapiUtils::SetNamedProperty(env, elementObject, "networkMatchRule", netWorkMatchRule);
 }
 
 void NetPolicyExec::FillQuotaPolicy(napi_env env, napi_value elementObject, const NetQuotaPolicy &netQuotaPolicy)
