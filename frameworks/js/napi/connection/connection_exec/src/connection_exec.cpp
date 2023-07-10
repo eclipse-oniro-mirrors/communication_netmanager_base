@@ -279,7 +279,7 @@ napi_value ConnectionExec::ReportNetDisconnectedCallback(ReportNetConnectedConte
 
 bool ConnectionExec::ExecGetDefaultHttpProxy(GetHttpProxyContext *context)
 {
-    int32_t errorCode = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultHttpProxy(context->httpProxy_);
+    int32_t errorCode = NetConnClient::GetInstance().GetDefaultHttpProxy(context->httpProxy_);
     if (errorCode != NET_CONN_SUCCESS) {
         context->SetErrorCode(errorCode);
         return false;
