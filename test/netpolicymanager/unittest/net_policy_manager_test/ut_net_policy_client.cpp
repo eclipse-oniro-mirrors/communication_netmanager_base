@@ -24,6 +24,10 @@
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 
+
+#ifdef GTEST_API_
+#define private public
+#endif
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_callback_test.h"
 #include "net_policy_client.h"
@@ -191,6 +195,10 @@ HWTEST_F(UtNetPolicyClient, SetPolicyByUid001, TestSize.Level1)
 {
     AccessToken token(testInfoParms2, testPolicyPrams2);
     int32_t ret = g_netPolicyClient->SetPolicyByUid(TEST_UID, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
+    // NetPolicyClient::NetPolicyDeathRecipient deathRecipient(*g_netPolicyClient);
+    // // sptr<IRemoteObject> remote = nullptr;
+    // // deathRecipient_.OnRemoteDied(remote);
+    // (void)deathRecipient;
     std::cout << "NetPolicyClient001 SetPolicyByUid ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
