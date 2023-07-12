@@ -366,6 +366,9 @@ private:
 private:
     NetConnClient();
     ~NetConnClient();
+    NetConnClient& operator=(const NetConnClient&) = delete;
+    NetConnClient(const NetConnClient&) = delete;
+
     sptr<INetConnService> GetProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
