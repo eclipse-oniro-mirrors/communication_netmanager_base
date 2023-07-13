@@ -531,7 +531,7 @@ int32_t DnsLookUpName::SwitchSocketType(int32_t sockType, const std::string name
 int32_t DnsLookUpName::LookUpServer(ServData buf[MAXSERVS], const std::string name, int32_t proto, int32_t sockType,
                                     int32_t flags)
 {
-    auto end = std::make_unique<char>(name.length());
+    char* end = nullptr;
     unsigned long port = 0;
     int32_t error = SwitchSocketType(sockType, name, proto, buf);
     if (error < 0) {
@@ -542,9 +542,9 @@ int32_t DnsLookUpName::LookUpServer(ServData buf[MAXSERVS], const std::string na
         if (!*serv) {
             return EAI_SERVICE;
         }
-        port = strtoul(serv, reinterpret_cast<char **>(&end), HOST_NAME_LEN);
+        port = strtoul(serv, &end, HOST_NAME_LEN);
     }
-    if (!*end) {
+    if (!end) {
         if (port > PORT_NUM) {
             return EAI_SERVICE;
         }
