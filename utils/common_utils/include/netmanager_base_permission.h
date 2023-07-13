@@ -28,6 +28,7 @@ static constexpr const char *GET_NETSTATS_SUMMARY = "ohos.permission.GET_NETSTAT
 static constexpr const char *MANAGE_NET_STRATEGY = "ohos.permission.MANAGE_NET_STRATEGY";
 static constexpr const char *MANAGE_VPN = "ohos.permission.MANAGE_VPN";
 static constexpr const char *GET_NETWORK_STATS = "ohos.permission.GET_NETWORK_STATS";
+static constexpr const char *NETSYS_INTERNAL = "ohos.permission.NETSYS_INTERNAL";
 } // namespace Permission
 
 class NetManagerPermission {
