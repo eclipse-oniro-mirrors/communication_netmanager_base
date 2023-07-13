@@ -342,7 +342,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest013, TestSize.Level1)
 {
     uint32_t uid = 0;
     uint8_t allow = 0;
-    auto ret = nativeClient_->SetInternetPermission(uid, allow);
+    auto ret = nativeClient_.SetInternetPermission(uid, allow);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 

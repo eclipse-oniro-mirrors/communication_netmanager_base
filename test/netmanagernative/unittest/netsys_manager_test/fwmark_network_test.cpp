@@ -295,8 +295,8 @@ HWTEST_F(UnitTestFwmarkClient, SetMarkTest008, TestSize.Level1)
     int32_t socketFd = -1;
     auto ret = fwmarkClient->ProtectFromVpn(socketFd);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
-    int32_t socketFd = 1111;
-    auto ret = fwmarkClient->ProtectFromVpn(socketFd);
+    socketFd = 1111;
+    ret = fwmarkClient->ProtectFromVpn(socketFd);
     EXPECT_EQ(ret, ERROR_CODE_SENDMSG_FAILED);
 }
 } // namespace NetsysNative
