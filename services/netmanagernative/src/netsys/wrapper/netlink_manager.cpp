@@ -109,8 +109,10 @@ NetlinkManager::NetlinkManager()
 
 NetlinkManager::~NetlinkManager()
 {
-    callbacks_->clear();
-    callbacks_ = nullptr;
+    if (callbacks_ != nullptr) {
+        callbacks_->clear();
+        callbacks_ = nullptr;
+    }
 }
 
 int32_t NetlinkManager::StartListener()
