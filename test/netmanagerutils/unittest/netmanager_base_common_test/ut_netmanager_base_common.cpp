@@ -516,7 +516,7 @@ HWTEST_F(UtNetmanagerBaseCommon, GetMaskByLengthTest008, TestSize.Level1)
 {
     uint32_t length = 8;
     auto result = CommonUtils::GetMaskByLength(length);
-    EXPECT_NE(result, nullptr);
+    EXPECT_NE(result, "");
 }
 
 /**
@@ -533,22 +533,22 @@ HWTEST_F(UtNetmanagerBaseCommon, Ipv4PrefixLenTest008, TestSize.Level1)
     std::string ip = {};
     auto result = CommonUtils::Ipv4PrefixLen(ip);
     EXPECT_EQ(result, 0);
-    std::string ip = "192.168.0";
+    ip = "192.168.0";
     result = CommonUtils::Ipv4PrefixLen(ip);
     EXPECT_EQ(result, 0);
-    std::string ip = "255.255.255.255";
+    ip = "255.255.255.255";
     result = CommonUtils::Ipv4PrefixLen(ip);
     EXPECT_EQ(result, BIT32);
-    std::string ip = "255.255.255.0";
+    ip = "255.255.255.0";
     result = CommonUtils::Ipv4PrefixLen(ip);
     EXPECT_EQ(result, BIT24);
-    std::string ip = "255.255.0.0";
+    ip = "255.255.0.0";
     result = CommonUtils::Ipv4PrefixLen(ip);
     EXPECT_EQ(result, BIT16);
-    std::string ip = "255.0.0.0";
+    ip = "255.0.0.0";
     result = CommonUtils::Ipv4PrefixLen(ip);
     EXPECT_EQ(result, BIT8);
-    std::string ip = "255.192.0.0";
+    ip = "255.192.0.0";
     result = CommonUtils::Ipv4PrefixLen(ip);
     EXPECT_EQ(result, 10);
 }
@@ -563,10 +563,10 @@ HWTEST_F(UtNetmanagerBaseCommon, StrToUint64Test008, TestSize.Level1)
     std::string value = {};
     uint64_t defaultErr = 0;
     auto result = CommonUtils::StrToUint64(value,defaultErr);
-    EXPECT_NE(result, defaultErr);
-    std::string value = "100";
+    EXPECT_EQ(result, defaultErr);
+    value = "100";
     result = CommonUtils::StrToUint64(value,defaultErr);
-    EXPECT_NE(result, 100);
+    EXPECT_EQ(result, 100);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
