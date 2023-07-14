@@ -29,6 +29,7 @@
       "OHOS::NetManagerStandard::NetHandle::BindSocket(int)";
       "OHOS::NetManagerStandard::NetConnClient::HasDefaultNet(bool&)";
       "OHOS::NetManagerStandard::NetConnClient::IsDefaultNetMetered(bool&)";
+      "OHOS::NetManagerStandard::NetConnClient::GetInstance()";
       "OHOS::NetManagerStandard::NetConnClient::GetConnectionProperties(OHOS::NetManagerStandard::NetHandle const&, OHOS::NetManagerStandard::NetLinkInfo&)";
       "OHOS::NetManagerStandard::NetConnClient::GetAllNets(std::__h::list<OHOS::sptr<OHOS::NetManagerStandard::NetHandle>, std::__h::allocator<OHOS::sptr<OHOS::NetManagerStandard::NetHandle>>>&)";
       "OHOS::NetManagerStandard::NetConnClient::SetAirplaneMode(bool)";
