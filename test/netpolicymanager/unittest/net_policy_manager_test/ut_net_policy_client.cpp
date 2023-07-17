@@ -20,6 +20,7 @@
 
 #include <gtest/gtest.h>
 
+#include "iservice_registry.h"
 #include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
@@ -195,10 +196,10 @@ HWTEST_F(UtNetPolicyClient, SetPolicyByUid001, TestSize.Level1)
 {
     AccessToken token(testInfoParms2, testPolicyPrams2);
     int32_t ret = g_netPolicyClient->SetPolicyByUid(TEST_UID, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
-    // NetPolicyClient::NetPolicyDeathRecipient deathRecipient(*g_netPolicyClient);
-    // // sptr<IRemoteObject> remote = nullptr;
-    // // deathRecipient_.OnRemoteDied(remote);
-    // (void)deathRecipient;
+    NetPolicyClient::NetPolicyDeathRecipient deathRecipient(*g_netPolicyClient);
+    sptr<ISystemAbilityManager> sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> remote = sam->CheckSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
+    deathRecipient.OnRemoteDied(remote);
     std::cout << "NetPolicyClient001 SetPolicyByUid ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
