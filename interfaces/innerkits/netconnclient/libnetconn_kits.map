@@ -19,7 +19,7 @@
       "OHOS::NetManagerStandard::NetAllCapabilities::operator=(OHOS::NetManagerStandard::NetAllCapabilities const&)";
       "OHOS::NetManagerStandard::NetAllCapabilities::NetAllCapabilities(OHOS::NetManagerStandard::NetAllCapabilities const&)";
       VTT?for?OHOS::NetManagerStandard::HttpProxy;
-	  vtable?for?OHOS::NetManagerStandard::HttpProxy;
+      vtable?for?OHOS::NetManagerStandard::HttpProxy;
       "OHOS::NetManagerStandard::HttpProxy::HttpProxy()";
       VTT?for?OHOS::NetManagerStandard::NetLinkInfo;
       vtable?for?OHOS::NetManagerStandard::NetLinkInfo;
