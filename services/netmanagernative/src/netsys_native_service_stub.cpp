@@ -603,7 +603,7 @@ int32_t NetsysNativeServiceStub::CmdNetworkAddUids(MessageParcel &data, MessageP
         NETNATIVE_LOGE("read net id or size failed");
         return IPC_STUB_ERR;
     }
-    size = (size > const_cast<uint32_t>(MAX_UID_ARRAY_SIZE)) ? const_cast<uint32_t>(MAX_UID_ARRAY_SIZE) : size;
+    size = (size > static_cast<uint32_t>(MAX_UID_ARRAY_SIZE)) ? static_cast<uint32_t>(MAX_UID_ARRAY_SIZE) : size;
 
     sptr<UidRange> uid;
     std::vector<UidRange> uidRanges;
@@ -632,7 +632,7 @@ int32_t NetsysNativeServiceStub::CmdNetworkDelUids(MessageParcel &data, MessageP
         return IPC_STUB_ERR;
     }
 
-    size = (size > const_cast<uint32_t>(MAX_UID_ARRAY_SIZE)) ? const_cast<uint32_t>(MAX_UID_ARRAY_SIZE) : size;
+    size = (size > static_cast<uint32_t>(MAX_UID_ARRAY_SIZE)) ? static_cast<uint32_t>(MAX_UID_ARRAY_SIZE) : size;
 
     sptr<UidRange> uid;
     std::vector<UidRange> uidRanges;
