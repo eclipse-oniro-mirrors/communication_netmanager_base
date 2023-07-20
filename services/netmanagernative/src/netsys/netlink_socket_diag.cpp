@@ -92,7 +92,6 @@ int32_t NetLinkSocketDiag::ExecuteDestroySocket(uint8_t proto, const inet_diag_m
     }
 
     SockDiagRequest request;
-    request.nlh_ = {.nlmsg_type = SOCK_DESTROY, .nlmsg_flags = NLM_F_REQUEST, .nlmsg_len = sizeof(request)};
     request.nlh_.nlmsg_type = SOCK_DESTROY;
     request.nlh_.nlmsg_flags = NLM_F_REQUEST;
     request.nlh_.nlmsg_len = sizeof(request);

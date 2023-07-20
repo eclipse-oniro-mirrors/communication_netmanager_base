@@ -84,7 +84,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
     InitOpToInterfaceMapExt();
-    uids_ = {UID_ROOT,  UID_SHELL,         UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
+    uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
              UID_SAMGR, UID_PARAM_WATCHER, UID_EDM};
 }
 
@@ -603,7 +603,7 @@ int32_t NetsysNativeServiceStub::CmdNetworkAddUids(MessageParcel &data, MessageP
         NETNATIVE_LOGE("read net id or size failed");
         return IPC_STUB_ERR;
     }
-    size = (size > static_cast<uint32_t>(MAX_UID_ARRAY_SIZE)) ? static_cast<uint32_t>(MAX_UID_ARRAY_SIZE) : size;
+    size = (size > static_cast<int32_t>(MAX_UID_ARRAY_SIZE)) ? static_cast<int32_t>(MAX_UID_ARRAY_SIZE) : size;
 
     sptr<UidRange> uid;
     std::vector<UidRange> uidRanges;
@@ -632,7 +632,7 @@ int32_t NetsysNativeServiceStub::CmdNetworkDelUids(MessageParcel &data, MessageP
         return IPC_STUB_ERR;
     }
 
-    size = (size > static_cast<uint32_t>(MAX_UID_ARRAY_SIZE)) ? static_cast<uint32_t>(MAX_UID_ARRAY_SIZE) : size;
+    size = (size > static_cast<int32_t>(MAX_UID_ARRAY_SIZE)) ? static_cast<int32_t>(MAX_UID_ARRAY_SIZE) : size;
 
     sptr<UidRange> uid;
     std::vector<UidRange> uidRanges;
