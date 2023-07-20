@@ -73,26 +73,28 @@ void NetActivate::TimeOutNetAvailable()
 
 bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier)
 {
-    NETMGR_LOG_I("MatchRequestAndNetwork Enter");
+    NETMGR_LOG_I("MatchRequestAndNetwork enter, supplier[%{public}d, %{public}s]",
+                 (supplier ? supplier->GetSupplierId() : 0),
+                 (supplier ? supplier->GetNetSupplierIdent().c_str() : "nullptr"));
     if (supplier == nullptr) {
         NETMGR_LOG_E("supplier is null");
         return false;
     }
     if (!CompareByNetworkIdent(supplier->GetNetSupplierIdent())) {
-        NETMGR_LOG_D("supplier ident is not satisfy");
+        NETMGR_LOG_W("supplier ident is not satisfy");
         return false;
     }
     if (!CompareByNetworkCapabilities(supplier->GetNetCaps())) {
-        NETMGR_LOG_D("supplier capa is not satisfy");
+        NETMGR_LOG_W("supplier capability is not satisfy");
         return false;
     }
     if (!CompareByNetworkNetType((supplier->GetNetSupplierType()))) {
-        NETMGR_LOG_D("supplier net type not satisfy");
+        NETMGR_LOG_W("supplier net type not satisfy");
         return false;
     }
     NetAllCapabilities netAllCaps = supplier->GetNetCapabilities();
     if (!CompareByNetworkBand(netAllCaps.linkUpBandwidthKbps_, netAllCaps.linkDownBandwidthKbps_)) {
-        NETMGR_LOG_D("supplier net band not satisfy");
+        NETMGR_LOG_W("supplier net band not satisfy");
         return false;
     }
 

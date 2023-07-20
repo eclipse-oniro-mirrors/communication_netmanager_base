@@ -294,8 +294,8 @@ int32_t NetConnService::RestrictBackgroundChanged(bool restrictBackground)
 int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const std::string &ident,
                                                  const std::set<NetCap> &netCaps, uint32_t &supplierId)
 {
-    NETMGR_LOG_D("register supplier, netType[%{public}u], ident[%{public}s]", static_cast<uint32_t>(bearerType),
-                 ident.c_str());
+    NETMGR_LOG_I("RegisterNetSupplier service in, bearerType[%{public}u], ident[%{public}s]",
+                 static_cast<uint32_t>(bearerType), ident.c_str());
     // If there is no supplier in the list, create a supplier
     if (bearerType < BEARER_CELLULAR || bearerType >= BEARER_DEFAULT) {
         NETMGR_LOG_E("netType parameter invalid");
@@ -329,7 +329,7 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
         std::bind(&NetConnService::HandleDetectionResult, shared_from_this(),
             std::placeholders::_1, std::placeholders::_2),
         bearerType, netConnEventHandler_);
-    NETMGR_LOG_D("Register supplier,supplierId[%{public}d] netId[%{public}d], ", supplierId, netId);
+    NETMGR_LOG_I("Register supplier,supplierId[%{public}d] netId[%{public}d], ", supplierId, netId);
     supplier->SetNetwork(network);
     supplier->SetNetValid(true);
     // save supplier
@@ -340,14 +340,14 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
 
     struct EventInfo eventInfo = {.netId = netId, .bearerType = bearerType, .ident = ident, .supplierId = supplierId};
     EventReport::SendSupplierBehaviorEvent(eventInfo);
-    NETMGR_LOG_D("RegisterNetSupplier service out. netSuppliers_ size[%{public}zd]", netSuppliers_.size());
+    NETMGR_LOG_I("RegisterNetSupplier service out. netSuppliers_ size[%{public}zd]", netSuppliers_.size());
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnService::RegisterNetSupplierCallbackAsync(uint32_t supplierId,
                                                          const sptr<INetSupplierCallback> &callback)
 {
-    NETMGR_LOG_D("Register net supplier callback async");
+    NETMGR_LOG_I("RegisterNetSupplierCallback service in, supplierId[%{public}d]", supplierId);
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter callback is null");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -359,7 +359,7 @@ int32_t NetConnService::RegisterNetSupplierCallbackAsync(uint32_t supplierId,
     }
     supplier->RegisterSupplierCallback(callback);
     SendAllRequestToNetwork(supplier);
-    NETMGR_LOG_D("RegisterNetSupplierCallback service out.");
+    NETMGR_LOG_I("RegisterNetSupplierCallback service out.");
     return NETMANAGER_SUCCESS;
 }
 
@@ -388,14 +388,14 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
 
 int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId)
 {
-    NETMGR_LOG_D("UnregisterNetSupplier supplierId[%{public}d]", supplierId);
+    NETMGR_LOG_I("UnregisterNetSupplier supplierId[%{public}d] in", supplierId);
     // Remove supplier from the list based on supplierId
     auto supplier = FindNetSupplier(supplierId);
     if (supplier == nullptr) {
         NETMGR_LOG_E("supplier doesn't exist.");
         return NET_CONN_ERR_NO_SUPPLIER;
     }
-    NETMGR_LOG_D("unregister supplier[%{public}d, %{public}s], defaultNetSupplier[%{public}d], %{public}s",
+    NETMGR_LOG_I("Unregister supplier[%{public}d, %{public}s], defaultNetSupplier[%{public}d], %{public}s]",
                  supplier->GetSupplierId(), supplier->GetNetSupplierIdent().c_str(),
                  defaultNetSupplier_ ? defaultNetSupplier_->GetSupplierId() : 0,
                  defaultNetSupplier_ ? defaultNetSupplier_->GetNetSupplierIdent().c_str() : "null");
@@ -423,7 +423,7 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId)
     netSuppliers_.erase(supplierId);
     locker.unlock();
     FindBestNetworkForAllRequest();
-    NETMGR_LOG_D("UnregisterNetSupplier supplierId[%{public}d] out", supplierId);
+    NETMGR_LOG_I("UnregisterNetSupplier supplierId[%{public}d] out", supplierId);
     return NETMANAGER_SUCCESS;
 }
 
@@ -545,7 +545,7 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
 
 int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo)
 {
-    NETMGR_LOG_D("UpdateNetLinkInfo service in. supplierId[%{public}d]", supplierId);
+    NETMGR_LOG_I("UpdateNetLinkInfo service in. supplierId[%{public}d]", supplierId);
     struct EventInfo eventInfo = {.updateNetlinkId = supplierId};
 
     if (netLinkInfo == nullptr) {
@@ -588,7 +588,7 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
         NETMGR_LOG_E("GetServiceScore fail.");
     }
     FindBestNetworkForAllRequest();
-    NETMGR_LOG_D("UpdateNetLinkInfo service out.");
+    NETMGR_LOG_I("UpdateNetLinkInfo service out.");
     return NETMANAGER_SUCCESS;
 }
 
@@ -831,7 +831,8 @@ void NetConnService::RequestAllNetworkExceptDefault()
             continue;
         }
         if (!netSupplier.second->RequestToConnect(reqId)) {
-            NETMGR_LOG_E("Request to connect failed");
+            NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed",
+                         netSupplier.second->GetSupplierId(), netSupplier.second->GetNetSupplierIdent().c_str());
         }
     }
 }
@@ -883,7 +884,8 @@ void NetConnService::SendAllRequestToNetwork(sptr<NetSupplier> supplier)
         }
         bool result = supplier->RequestToConnect(iter->first);
         if (!result) {
-            NETMGR_LOG_E("connect supplier failed, result: %{public}d", result);
+            NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", supplier->GetSupplierId(),
+                         supplier->GetNetSupplierIdent().c_str());
         }
     }
 }
@@ -907,7 +909,8 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
         }
         bool result = iter->second->RequestToConnect(reqId);
         if (!result) {
-            NETMGR_LOG_E("connect service failed, result %{public}d", result);
+            NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", iter->second->GetSupplierId(),
+                         iter->second->GetNetSupplierIdent().c_str());
         }
     }
 }
@@ -926,24 +929,22 @@ void NetConnService::SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, 
 
 void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackType type)
 {
-    NETMGR_LOG_I("CallbackForSupplier Enter");
+    NETMGR_LOG_I("Callback for supplier[%{public}d, %{public}s] type: %{public}d",
+                 supplier ? supplier->GetSupplierId() : 0,
+                 supplier ? supplier->GetNetSupplierIdent().c_str() : "nullptr", static_cast<int32_t>(type));
     if (supplier == nullptr) {
         return;
     }
     std::set<uint32_t> &bestReqList = supplier->GetBestRequestList();
-    NETMGR_LOG_D("bestReqList size = %{public}zd", bestReqList.size());
     for (auto it : bestReqList) {
         auto reqIt = netActivates_.find(it);
         if ((reqIt == netActivates_.end()) || (reqIt->second == nullptr)) {
-            NETMGR_LOG_D("netActivates_ not find reqId : %{public}d", it);
             continue;
         }
         sptr<INetConnCallback> callback = reqIt->second->GetNetCallback();
         if (!callback) {
-            NETMGR_LOG_D("callback is nullptr");
             continue;
         }
-
         sptr<NetHandle> netHandle = supplier->GetNetHandle();
         switch (type) {
             case CALL_TYPE_LOST: {
@@ -979,6 +980,8 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
 
 void NetConnService::CallbackForAvailable(sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback)
 {
+    NETMGR_LOG_I("CallbackForAvailable, supplier[%{public}d, %{public}s]", supplier ? supplier->GetSupplierId() : 0,
+                 supplier ? supplier->GetNetSupplierIdent().c_str() : "nullptr");
     if (supplier == nullptr || callback == nullptr) {
         NETMGR_LOG_E("Input parameter is null.");
         return;
@@ -1557,7 +1560,7 @@ int32_t NetConnService::NetInterfaceStateCallback::RegisterInterfaceCallback(
             continue;
         }
         if (iter->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
-            NETMGR_LOG_E("RegisterNetConnCallback find same callback");
+            NETMGR_LOG_E("RegisterInterfaceCallback find same callback");
             return NET_CONN_ERR_SAME_CALLBACK;
         }
     }
