@@ -109,6 +109,7 @@ napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,
             NetBaseErrorCodeConvertor convertor;
             std::string errorMsg = convertor.ConvertErrorCode(ret);
             napi_throw_error(env, std::to_string(ret).c_str(), errorMsg.c_str());
+            NapiUtils::GetUndefined(env);
         }
         registed_ = false;
     }
