@@ -167,7 +167,7 @@ HWTEST_F(UnitTestFwmarkClient, CloseSocketTest001, TestSize.Level1)
     CloseSocket(&socket, ret, ERROR_CODE_GETSOCKOPT_FAILED);
     CloseSocket(&socket, ret, ERROR_CODE_SETSOCKOPT_FAILED);
     CloseSocket(&socket, ret, ERROR_CODE_SETSOCKOPT_FAILED - 1);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(socket, -1);
 }
 
 /**
