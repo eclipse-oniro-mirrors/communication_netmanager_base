@@ -263,7 +263,7 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest002, TestSize.Level1)
     ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
     EXPECT_TRUE(ret);
 }
-void InterpreteRtMsgTest001Part1(struct rtattr *prtattr1)
+void InterpreteRtMsgTest001Part1(struct rtattr *prtattr1, char *binarydata)
 {
     rtattr *prtattr2 = reinterpret_cast<struct rtattr *>((reinterpret_cast<char *>(prtattr1)) + prtattr1->rta_len);
     ASSERT_NE(prtattr2, nullptr);
@@ -330,7 +330,7 @@ HWTEST_F(WrapperDecoderTest, InterpreteRtMsgTest001, TestSize.Level1)
     ipv4Addr = reinterpret_cast<struct in_addr *>(RTA_DATA(prtattr1));
     ASSERT_NE(ipv4Addr, nullptr);
     ipv4Addr->s_addr = inet_addr("127.0.0.1");
-    InterpreteRtMsgTest001Part1(prtattr1);
+    InterpreteRtMsgTest001Part1(prtattr1, binarydata);
 }
 
 HWTEST_F(WrapperDecoderTest, PushAsciiMessageTest001, TestSize.Level1)
