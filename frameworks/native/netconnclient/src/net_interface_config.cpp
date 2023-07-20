@@ -57,7 +57,7 @@ bool NetInterfaceConfiguration::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    int32_t size = 0;
+    size_t size = 0;
     for (const auto &flag : flags_) {
         if (!parcel.WriteString(flag)) {
             return false;
@@ -84,7 +84,7 @@ bool NetInterfaceConfiguration::Unmarshalling(Parcel &parcel, NetInterfaceConfig
     if (!parcel.ReadInt32(config.prefixLength_)) {
         return false;
     }
-    int size = 0;
+    size_t size = 0;
     if (!parcel.ReadInt32(size)) {
         return false;
     }
