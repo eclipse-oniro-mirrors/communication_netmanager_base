@@ -263,7 +263,8 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest002, TestSize.Level1)
     ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
     EXPECT_TRUE(ret);
 }
-void InterpreteRtMsgTest001Part1(struct rtattr *prtattr1, char *binarydata)
+void InterpreteRtMsgTest001Part1(rtmsg *prtmsg, struct rtattr *prtattr1, char *binarydata,
+                                 std::unique_ptr<WrapperDecoder> decoder)
 {
     rtattr *prtattr2 = reinterpret_cast<struct rtattr *>((reinterpret_cast<char *>(prtattr1)) + prtattr1->rta_len);
     ASSERT_NE(prtattr2, nullptr);
@@ -273,7 +274,7 @@ void InterpreteRtMsgTest001Part1(struct rtattr *prtattr1, char *binarydata)
 
     int32_t *pdeviceindex = reinterpret_cast<int32_t *>(RTA_DATA(prtattr2));
     *pdeviceindex = -1;
-    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    auto ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
     EXPECT_FALSE(ret);
 
     uint32_t index = if_nametoindex("wlan0");
@@ -330,7 +331,7 @@ HWTEST_F(WrapperDecoderTest, InterpreteRtMsgTest001, TestSize.Level1)
     ipv4Addr = reinterpret_cast<struct in_addr *>(RTA_DATA(prtattr1));
     ASSERT_NE(ipv4Addr, nullptr);
     ipv4Addr->s_addr = inet_addr("127.0.0.1");
-    InterpreteRtMsgTest001Part1(prtattr1, binarydata);
+    InterpreteRtMsgTest001Part1(prtmsg, prtattr1, binarydata, decoder);
 }
 
 HWTEST_F(WrapperDecoderTest, PushAsciiMessageTest001, TestSize.Level1)
