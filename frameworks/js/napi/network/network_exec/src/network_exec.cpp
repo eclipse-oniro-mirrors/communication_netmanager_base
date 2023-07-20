@@ -27,8 +27,8 @@
 #endif
 #include "napi_utils.h"
 #include "netmanager_base_log.h"
-#include "securec.h"
 #include "network_observer.h"
+#include "securec.h"
 
 namespace OHOS::NetManagerStandard {
 static constexpr const int ERROR_PARAM_NUM = 2;

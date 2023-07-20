@@ -17,15 +17,15 @@
 
 #include <arpa/inet.h>
 #include <cstring>
-#include <unistd.h>
-#include <sys/uio.h>
 #include <net/if.h>
 #include <netinet/tcp.h>
+#include <sys/uio.h>
+#include <unistd.h>
 
+#include "fwmark.h"
 #include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
-#include "fwmark.h"
 #include "securec.h"
 
 namespace OHOS {
@@ -95,7 +95,7 @@ int32_t NetLinkSocketDiag::ExecuteDestroySocket(uint8_t proto, const inet_diag_m
     request.nlh_ = {.nlmsg_type = SOCK_DESTROY, .nlmsg_flags = NLM_F_REQUEST, .nlmsg_len = sizeof(request)};
     request.nlh_.nlmsg_type = SOCK_DESTROY;
     request.nlh_.nlmsg_flags = NLM_F_REQUEST;
-    request.nlh_.nlmsg_len =  sizeof(request);
+    request.nlh_.nlmsg_len = sizeof(request);
 
     request.req_ = {.sdiag_family = msg->idiag_family,
                     .sdiag_protocol = proto,

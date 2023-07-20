@@ -19,9 +19,9 @@
 #include <unistd.h>
 
 #include "ipc_skeleton.h"
+#include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
 #include "netmanager_base_permission.h"
-#include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "securec.h"
 
@@ -84,7 +84,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
     InitOpToInterfaceMapExt();
-    uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
+    uids_ = {UID_ROOT,  UID_SHELL,         UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
              UID_SAMGR, UID_PARAM_WATCHER, UID_EDM};
 }
 
@@ -631,7 +631,7 @@ int32_t NetsysNativeServiceStub::CmdNetworkDelUids(MessageParcel &data, MessageP
         NETNATIVE_LOGE("read net id or size failed");
         return IPC_STUB_ERR;
     }
-    
+
     size = (size > const_cast<uint32_t>(MAX_UID_ARRAY_SIZE)) ? const_cast<uint32_t>(MAX_UID_ARRAY_SIZE) : size;
 
     sptr<UidRange> uid;
