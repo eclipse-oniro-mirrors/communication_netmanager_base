@@ -34,10 +34,12 @@
 #include "netlink_msg.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
+#include "net_manager_constants.h"
 #include "securec.h"
 
 #include "route_manager.h"
 
+using namespace OHOS::NetManagerStandard;
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace nmd {
@@ -713,21 +715,24 @@ int32_t RouteManager::UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo
     }
 
     // The main work is to assemble the structure required for rule.
-    uint16_t ruleFlag = (action == RTM_NEWRULE) ? NLM_F_CREATE : NLM_F_EXCL;
-    int32_t ret = SendRuleToKernel(action, ruleFlag, ruleType, ruleInfo, uidStart, uidEnd);
-    if (ret < 0) {
-        NETNATIVE_LOGE("SendNetlinkMsgToKernel Error, ret = %{public}d", ret);
-        return ret;
+    int32_t ret = NETMANAGER_SUCCESS;
+    for (const uint8_t family : {AF_INET, AF_INET6}) {
+        if (SendRuleToKernel(action, family, ruleType, ruleInfo, uidStart, uidEnd) < 0) {
+            NETNATIVE_LOGE("Update %{public}s rule info failed, action = %{public}d, ret = %{public}d",
+                           (family == AF_INET) ? "IPv4" : "IPv6", action, ret);
+            ret = NETMANAGER_ERR_INTERNAL;
+        }
     }
-    return ROUTEMANAGER_SUCCESS;
+    return ret;
 }
 
-int32_t RouteManager::SendRuleToKernel(uint32_t action, uint16_t ruleFlag, uint8_t ruleType, RuleInfo ruleInfo,
+int32_t RouteManager::SendRuleToKernel(uint32_t action, uint8_t family, uint8_t ruleType, RuleInfo ruleInfo,
                                        uid_t uidStart, uid_t uidEnd)
 {
     struct fib_rule_hdr msg = {0};
     msg.action = ruleType;
-    msg.family = AF_INET;
+    msg.family = family;
+    uint16_t ruleFlag = (action == RTM_NEWRULE) ? NLM_F_CREATE : NLM_F_EXCL;
     NetlinkMsg nlmsg(ruleFlag, NETLINK_MAX_LEN, getpid());
     nlmsg.AddRule(action, msg);
     if (int32_t ret = nlmsg.AddAttr32(FRA_PRIORITY, ruleInfo.rulePriority)) {

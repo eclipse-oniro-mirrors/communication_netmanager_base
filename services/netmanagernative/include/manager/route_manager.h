@@ -270,7 +270,7 @@ private:
     static int32_t ClearSharingRules(const std::string &inputInterface);
     static int32_t UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo ruleInfo, uid_t uidStart = INVALID_UID,
                                   uid_t uidEnd = INVALID_UID);
-    static int32_t SendRuleToKernel(uint32_t action, uint16_t ruleFlag, uint8_t ruleType, RuleInfo ruleInfo,
+    static int32_t SendRuleToKernel(uint32_t action, uint8_t family, uint8_t ruleType, RuleInfo ruleInfo,
                                     uid_t uidStart, uid_t uidEnd);
     static int32_t UpdateRouteRule(uint16_t action, uint16_t flags, RouteInfo routeInfo);
     static int32_t SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtmsg msg, RouteInfo routeInfo,
