@@ -38,7 +38,7 @@ public:
 
 public:
     int32_t CreateVpnInterface();
-    void DestoryVpnInterface();
+    void DestroyVpnInterface();
     int32_t SetVpnMtu(const std::string &ifName, int32_t mtu);
     int32_t SetVpnAddress(const std::string &ifName, const std::string &tunAddr, int32_t prefix);
 
@@ -47,9 +47,9 @@ private:
     int32_t SetVpnDown();
     int32_t InitIfreq(ifreq &ifr, const std::string &cardName);
 
-    int32_t SendVpnInterfaceFdToClient(int32_t serverfd, int32_t tunFd);
-    void StartUnixSocketListen(int32_t tunFd);
-    void StartVpnInterfaceFdListen(int32_t tunFd);
+    int32_t SendVpnInterfaceFdToClient(int32_t clientFd, int32_t tunFd);
+    void StartUnixSocketListen();
+    void StartVpnInterfaceFdListen();
 
 private:
     std::atomic_int tunFd_ = 0;
