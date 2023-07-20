@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -723,7 +723,7 @@ int32_t NetPolicyServiceProxy::SetPowerSavePolicy(bool enable)
                                           data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     int32_t result = 0;
@@ -754,7 +754,7 @@ int32_t NetPolicyServiceProxy::GetPowerSaveTrustlist(std::vector<uint32_t> &uids
                                           data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     if (!reply.ReadUInt32Vector(&uids)) {
@@ -800,7 +800,7 @@ int32_t NetPolicyServiceProxy::SetPowerSaveTrustlist(const std::vector<uint32_t>
                                           data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     int32_t result = 0;
