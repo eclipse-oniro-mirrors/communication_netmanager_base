@@ -306,7 +306,7 @@ ohos_unittest("resolver_config_test") {
 }
 
 ohos_unittest("conn_manager_test") {
-  module_out_path = "netmanager_base/netsys_manager_test"
+  module_out_path = "netmanager_base/solve_conn_manager_test"
   sources = [ "conn_manager_test.cpp" ]
 
   include_dirs = [
