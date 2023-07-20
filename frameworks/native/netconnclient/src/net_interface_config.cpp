@@ -84,10 +84,11 @@ bool NetInterfaceConfiguration::Unmarshalling(Parcel &parcel, NetInterfaceConfig
     if (!parcel.ReadInt32(config.prefixLength_)) {
         return false;
     }
-    size_t size = 0;
-    if (!parcel.ReadInt32(size)) {
+    int32_t tmpSize = 0;
+    if (!parcel.ReadInt32(tmpSize)) {
         return false;
     }
+    size_t size =static_cast<size_t>(tmpSize);
     size = (size > MAX_INTERFACE_CONFIG_SIZE) ? MAX_INTERFACE_CONFIG_SIZE : size;
     for (int i = 0; i < size; i++) {
         std::string flag;
