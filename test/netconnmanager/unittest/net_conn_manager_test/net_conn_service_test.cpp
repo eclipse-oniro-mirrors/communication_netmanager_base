@@ -321,7 +321,7 @@ HWTEST_F(NetConnServiceTest, GetAllNetsTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceTest, GetSpecificUidNetTest001, TestSize.Level1)
 {
-    int32_t defaultNetId = 0;
+    int32_t defaultNetId = 5;
     auto ret = NetConnService::GetInstance()->GetDefaultNet(defaultNetId);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
     EXPECT_NE(defaultNetId, 0);
