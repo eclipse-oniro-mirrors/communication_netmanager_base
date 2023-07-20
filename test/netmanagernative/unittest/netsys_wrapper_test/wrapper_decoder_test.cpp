@@ -319,7 +319,7 @@ HWTEST_F(WrapperDecoderTest, InterpreteRtMsgTest001, TestSize.Level1)
     ipv4Addr->s_addr = inet_addr("127.0.0.1");
     rtattr *prtattr2 = reinterpret_cast<struct rtattr *>((reinterpret_cast<char *>(prtattr1)) + prtattr1->rta_len);
     ASSERT_NE(prtattr2, nullptr);
-    InterpreteRtMsgTest001Part3(prtattr2, ptrmsg);
+    InterpreteRtMsgTest001Part3(prtattr2, prtmsg);
     int32_t *pdeviceindex = reinterpret_cast<int32_t *>(RTA_DATA(prtattr2));
     *pdeviceindex = -1;
     ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
