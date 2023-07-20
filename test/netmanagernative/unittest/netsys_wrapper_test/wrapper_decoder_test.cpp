@@ -263,31 +263,29 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest002, TestSize.Level1)
     ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
     EXPECT_TRUE(ret);
 }
-void InterpreteRtMsgTest001Part1(rtmsg *prtmsg, struct rtattr *prtattr1, char *binarydata,
-                                 std::unique_ptr<WrapperDecoder> decoder)
+void InterpreteRtMsgTest001Part1(rtmsg *prtmsg, tattr *prtattr, in_addr *ipv4Addr)
 {
-    rtattr *prtattr2 = reinterpret_cast<struct rtattr *>((reinterpret_cast<char *>(prtattr1)) + prtattr1->rta_len);
-    ASSERT_NE(prtattr2, nullptr);
+    prtmsg->rtm_protocol = RTPROT_KERNEL;
+    prtmsg->rtm_family = AF_INET;
+    prtmsg->rtm_scope = RT_SCOPE_UNIVERSE;
+    prtmsg->rtm_type = RTN_UNICAST;
+    prtattr->rta_type = RTA_GATEWAY;
+    prtattr->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr));
+    ipv4Addr->s_addr = inet_addr("0.0.0.0");
+}
+
+void InterpreteRtMsgTest001Part2(rtattr *prtattr1, in_addr **ipv4Addr)
+{
+    prtattr1->rta_type = RTA_DST;
+    prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr));
+    *ipv4Addr = reinterpret_cast<struct in_addr *>(RTA_DATA(prtattr1));
+}
+
+void InterpreteRtMsgTest001Part3(rtattr *prtattr2, tmsg *prtmsg)
+{
     prtattr2->rta_type = RTA_OIF;
     prtattr2->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(uint32_t));
     prtmsg->rtm_dst_len = 0;
-
-    int32_t *pdeviceindex = reinterpret_cast<int32_t *>(RTA_DATA(prtattr2));
-    *pdeviceindex = -1;
-    auto ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
-    EXPECT_FALSE(ret);
-
-    uint32_t index = if_nametoindex("wlan0");
-    if (index == 0) {
-        index = if_nametoindex("eth0");
-    }
-    *pdeviceindex = index;
-    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
-    if (index > 0) {
-        EXPECT_TRUE(ret);
-    } else {
-        EXPECT_FALSE(ret);
-    }
 }
 HWTEST_F(WrapperDecoderTest, InterpreteRtMsgTest001, TestSize.Level1)
 {
@@ -306,32 +304,37 @@ HWTEST_F(WrapperDecoderTest, InterpreteRtMsgTest001, TestSize.Level1)
     ASSERT_NE(prtattr, nullptr);
     in_addr *ipv4Addr = reinterpret_cast<struct in_addr *>(RTA_DATA(prtattr));
     ASSERT_NE(ipv4Addr, nullptr);
-
     pmsghdr->nlmsg_type = RTM_NEWROUTE;
     pmsghdr->nlmsg_len = NLMSG_ALIGN(sizeof(struct nlmsghdr));
     auto ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
     EXPECT_FALSE(ret);
-
     pmsghdr->nlmsg_len = sizeof(binarydata);
     ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
     EXPECT_FALSE(ret);
-
-    prtmsg->rtm_protocol = RTPROT_KERNEL;
-    prtmsg->rtm_family = AF_INET;
-    prtmsg->rtm_scope = RT_SCOPE_UNIVERSE;
-    prtmsg->rtm_type = RTN_UNICAST;
-    prtattr->rta_type = RTA_GATEWAY;
-    prtattr->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr));
-    ipv4Addr->s_addr = inet_addr("0.0.0.0");
-
+    InterpreteRtMsgTest001Part1(prtmsg);
     rtattr *prtattr1 = reinterpret_cast<struct rtattr *>((reinterpret_cast<char *>(prtattr)) + prtattr->rta_len);
     ASSERT_NE(prtattr1, nullptr);
-    prtattr1->rta_type = RTA_DST;
-    prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr));
-    ipv4Addr = reinterpret_cast<struct in_addr *>(RTA_DATA(prtattr1));
+    InterpreteRtMsgTest001Part2(prtattr1, &ipv4Addr);
     ASSERT_NE(ipv4Addr, nullptr);
     ipv4Addr->s_addr = inet_addr("127.0.0.1");
-    InterpreteRtMsgTest001Part1(prtmsg, prtattr1, binarydata, decoder);
+    rtattr *prtattr2 = reinterpret_cast<struct rtattr *>((reinterpret_cast<char *>(prtattr1)) + prtattr1->rta_len);
+    ASSERT_NE(prtattr2, nullptr);
+    InterpreteRtMsgTest001Part3(prtattr2, ptrmsg);
+    int32_t *pdeviceindex = reinterpret_cast<int32_t *>(RTA_DATA(prtattr2));
+    *pdeviceindex = -1;
+    auto ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    EXPECT_FALSE(ret);
+    uint32_t index = if_nametoindex("wlan0");
+    if (index == 0) {
+        index = if_nametoindex("eth0");
+    }
+    *pdeviceindex = index;
+    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
+    if (index > 0) {
+        EXPECT_TRUE(ret);
+    } else {
+        EXPECT_FALSE(ret);
+    }
 }
 
 HWTEST_F(WrapperDecoderTest, PushAsciiMessageTest001, TestSize.Level1)
