@@ -264,7 +264,8 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest002, TestSize.Level1)
     EXPECT_TRUE(ret);
 }
 
-void InterpreteRtMsgTest001ParmaCheck(rtmsg *prtmsg, rtattr *prtattr, rtattr **prtattr1, rtattr **prtattr2, in_addr *ipv4Addr)
+void InterpreteRtMsgTest001ParmaCheck(rtmsg *prtmsg, rtattr *prtattr, rtattr **prtattr1, rtattr **prtattr2,
+                                      in_addr *ipv4Addr)
 {
 
     prtmsg->rtm_protocol = RTPROT_KERNEL;
@@ -286,10 +287,7 @@ void InterpreteRtMsgTest001ParmaCheck(rtmsg *prtmsg, rtattr *prtattr, rtattr **p
     prtattr2->rta_type = RTA_OIF;
     prtattr2->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(uint32_t));
     prtmsg->rtm_dst_len = 0;
-
-
 }
-
 
 HWTEST_F(WrapperDecoderTest, InterpreteRtMsgTest001, TestSize.Level1)
 {
