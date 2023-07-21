@@ -276,15 +276,15 @@ void InterpreteRtMsgTest001ParmaCheck(rtmsg *prtmsg, rtattr *prtattr, rtattr **p
     ipv4Addr->s_addr = inet_addr("0.0.0.0");
     *prtattr1 = reinterpret_cast<struct rtattr *>((reinterpret_cast<char *>(prtattr)) + prtattr->rta_len);
     ASSERT_NE(prtattr1, nullptr);
-    *prtattr1->rta_type = RTA_DST;
-    *prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr));
+    (*prtattr1)->rta_type = RTA_DST;
+    (*prtattr1)->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr));
     ipv4Addr = reinterpret_cast<struct in_addr *>(RTA_DATA(*prtattr1));
     ASSERT_NE(ipv4Addr, nullptr);
     ipv4Addr->s_addr = inet_addr("127.0.0.1");
-    *prtattr2 = reinterpret_cast<struct rtattr *>((reinterpret_cast<char *>(*prtattr1)) + *prtattr1->rta_len);
+    (*prtattr2) = reinterpret_cast<struct rtattr *>((reinterpret_cast<char *>(*prtattr1)) + *prtattr1->rta_len);
     ASSERT_NE(*prtattr2, nullptr);
-    *prtattr2->rta_type = RTA_OIF;
-    *prtattr2->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(uint32_t));
+    (*prtattr2)->rta_type = RTA_OIF;
+    (*prtattr2)->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(uint32_t));
     prtmsg->rtm_dst_len = 0;
 }
 
