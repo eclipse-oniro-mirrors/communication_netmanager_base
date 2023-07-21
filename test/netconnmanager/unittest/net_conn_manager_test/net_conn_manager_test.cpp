@@ -623,11 +623,11 @@ HWTEST_F(NetConnManagerTest, NetConnManager015, TestSize.Level1)
     std::cout << "isMetered : " << isMetered << std::endl;
 }
 
-int32_t CheckNetListRemainWhenConnected(std::list<sptr<NetHandle>> &netlist)
+int32_t CheckNetListRemainWhenConnected(std::list<sptr<NetHandle>> &netList)
 {
-    netlist.clear();
-    int32_t result = NetConnClient::GetInstance().GetAllNets(netlist);
-    std::cout << "Check1: netIdList size:" << netlist.size() << std::endl;
+    netList.clear();
+    int32_t result = NetConnClient::GetInstance().GetAllNets(netList);
+    std::cout << "Check1: netIdList size:" << netList.size() << std::endl;
     return result;
 }
 
