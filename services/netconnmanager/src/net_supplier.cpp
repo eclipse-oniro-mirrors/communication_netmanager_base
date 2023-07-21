@@ -67,8 +67,6 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
     network_->UpdateBasicNetwork(netSupplierInfo_.isAvailable_);
     if (!netSupplierInfo_.isAvailable_) {
         UpdateNetConnState(NET_CONN_STATE_DISCONNECTED);
-    } else if (!IsConnected()) {
-        UpdateNetConnState(NET_CONN_STATE_CONNECTING);
     }
 }
 
@@ -187,12 +185,8 @@ int32_t NetSupplier::GetSupplierUid() const
 bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps)
 {
     NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request connect", supplierId_, netSupplierIdent_.c_str());
-    if (IsConnecting()) {
-        NETMGR_LOG_W("The supplier is currently connecting, there is no need to repeat the request for connection.");
-        return true;
-    }
-    if (IsConnected()) {
-        NETMGR_LOG_W("The supplier has already connected, there is no need to repeat the request for connection.");
+    if (netSupplierInfo_.isAvailable_) {
+        NETMGR_LOG_W("The supplier is currently available, there is no need to repeat the request for connection.");
         return true;
     }
     UpdateNetConnState(NET_CONN_STATE_IDLE);
@@ -223,8 +217,8 @@ bool NetSupplier::GetRestrictBackground() const
 bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
 {
     NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request disconnect", supplierId_, netSupplierIdent_.c_str());
-    if ((!IsConnecting()) && (!IsConnected())) {
-        NETMGR_LOG_W("The supplier has disconnected, there is no need to repeat the request to disconnect.");
+    if (!netSupplierInfo_.isAvailable_) {
+        NETMGR_LOG_W("The supplier is currently unavailable, there is no need to repeat the request to disconnect.");
         return true;
     }
     if (netController_ == nullptr) {
@@ -262,14 +256,6 @@ bool NetSupplier::IsConnected() const
         return network_->IsConnected();
     }
     return false;
-}
-
-void NetSupplier::AddRequestIdToList(uint32_t requestId)
-{
-    NETMGR_LOG_D("AddRequestIdToList reqId = [%{public}u]", requestId);
-    if (requestList_.find(requestId) == requestList_.end()) {
-        requestList_.insert(requestId);
-    }
 }
 
 bool NetSupplier::RequestToConnect(uint32_t reqId)
