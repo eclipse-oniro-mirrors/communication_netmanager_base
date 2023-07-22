@@ -516,7 +516,7 @@ HWTEST_F(UtNetmanagerBaseCommon, GetMaskByLengthTest008, TestSize.Level1)
 {
     uint32_t length = 8;
     auto result = CommonUtils::GetMaskByLength(length);
-    EXPECT_NE(result, "");
+    EXPECT_NE(result, "255.255.255.0");
 }
 
 /**
@@ -565,8 +565,9 @@ HWTEST_F(UtNetmanagerBaseCommon, StrToUint64Test008, TestSize.Level1)
     auto result = CommonUtils::StrToUint64(value,defaultErr);
     EXPECT_EQ(result, defaultErr);
     value = "100";
+    uint64_t value2 = 100;
     result = CommonUtils::StrToUint64(value,defaultErr);
-    EXPECT_EQ(result, 100);
+    EXPECT_EQ(result, value2);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

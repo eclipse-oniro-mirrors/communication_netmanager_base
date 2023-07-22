@@ -329,17 +329,13 @@ HWTEST_F(NetStatsClientTest, NetStatsClient005, TestSize.Level1)
 
 HWTEST_F(NetStatsClientTest, NetStatsClient006, TestSize.Level1)
 {
+    sptr<IRemoteObject::DeathRecipient> deathRecipient =
+    new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient->OnRemoteDied(remote);
     std::vector<NetStatsInfo> infos;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllStatsInfo(infos);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetStatsClientTest, NetStatsClient007, TestSize.Level1)
-{
-    sptr<IRemoteObject::DeathRecipient> deathRecipient =
-        new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
-    sptr<IRemoteObject> remote = nullptr;
-    deathRecipient->OnRemoteDied(remote);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
