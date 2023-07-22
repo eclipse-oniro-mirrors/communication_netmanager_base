@@ -176,5 +176,21 @@ HWTEST_F(NetLinkInfoTest, ToStringRouteTest, TestSize.Level1)
     }
     EXPECT_EQ(ret, 1);
 }
+
+/**
+ * @tc.name: operatorAndMarshalling
+ * @tc.desc: Test NetLinkInfo::operatorAndMarshalling
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetLinkInfoTest, operatorAndMarshallingTest, TestSize.Level1)
+{
+    sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
+    ASSERT_TRUE(netLinkInfo != nullptr);
+    NetLinkInfo netLinkInfoa = *netLinkInfo;
+    EXPECT_EQ(netLinkInfoa.domain_, "test");
+    Parcel data;
+    bool bRet = netLinkInfo->Marshalling(data);
+    ASSERT_TRUE(bRet == true);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

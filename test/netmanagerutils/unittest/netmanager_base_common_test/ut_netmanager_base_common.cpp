@@ -494,5 +494,79 @@ HWTEST_F(UtNetmanagerBaseCommon, IsValidDomainTest008, TestSize.Level1)
     auto result = CommonUtils::IsValidDomain(TEST_DOMAIN8);
     ASSERT_FALSE(result);
 }
+
+/**
+ * @tc.name: ToLowerTest008
+ * @tc.desc: Test UtNetmanagerBaseCommon ToLower.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetmanagerBaseCommon, ToLowerTest008, TestSize.Level1)
+{
+    std::string res = "HeLLo worLd";
+    auto result = CommonUtils::ToLower(res);
+    EXPECT_EQ(result, "hello world");
+}
+
+/**
+ * @tc.name: GetMaskByLengthTest008
+ * @tc.desc: Test UtNetmanagerBaseCommon GetMaskByLength.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetmanagerBaseCommon, GetMaskByLengthTest008, TestSize.Level1)
+{
+    uint32_t length = 8;
+    auto result = CommonUtils::GetMaskByLength(length);
+    EXPECT_NE(result, "");
+}
+
+/**
+ * @tc.name: Ipv4PrefixLenTest008
+ * @tc.desc: Test UtNetmanagerBaseCommon Ipv4PrefixLen.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetmanagerBaseCommon, Ipv4PrefixLenTest008, TestSize.Level1)
+{
+    constexpr int32_t BIT32 = 32;
+    constexpr int32_t BIT24 = 24;
+    constexpr int32_t BIT16 = 16;
+    constexpr int32_t BIT8 = 8;
+    std::string ip = {};
+    auto result = CommonUtils::Ipv4PrefixLen(ip);
+    EXPECT_EQ(result, 0);
+    ip = "192.168.0";
+    result = CommonUtils::Ipv4PrefixLen(ip);
+    EXPECT_EQ(result, 0);
+    ip = "255.255.255.255";
+    result = CommonUtils::Ipv4PrefixLen(ip);
+    EXPECT_EQ(result, BIT32);
+    ip = "255.255.255.0";
+    result = CommonUtils::Ipv4PrefixLen(ip);
+    EXPECT_EQ(result, BIT24);
+    ip = "255.255.0.0";
+    result = CommonUtils::Ipv4PrefixLen(ip);
+    EXPECT_EQ(result, BIT16);
+    ip = "255.0.0.0";
+    result = CommonUtils::Ipv4PrefixLen(ip);
+    EXPECT_EQ(result, BIT8);
+    ip = "255.192.0.0";
+    result = CommonUtils::Ipv4PrefixLen(ip);
+    EXPECT_EQ(result, 10);
+}
+
+/**
+ * @tc.name: StrToUint64Test008
+ * @tc.desc: Test UtNetmanagerBaseCommon StrToUint64.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetmanagerBaseCommon, StrToUint64Test008, TestSize.Level1)
+{
+    std::string value = {};
+    uint64_t defaultErr = 0;
+    auto result = CommonUtils::StrToUint64(value,defaultErr);
+    EXPECT_EQ(result, defaultErr);
+    value = "100";
+    result = CommonUtils::StrToUint64(value,defaultErr);
+    EXPECT_EQ(result, 100);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
