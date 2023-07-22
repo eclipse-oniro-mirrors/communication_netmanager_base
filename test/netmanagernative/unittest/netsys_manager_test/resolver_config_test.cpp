@@ -18,7 +18,6 @@
 #include <dlfcn.h>
 
 #include "dns_config_client.h"
-#include "net_conn_manager_test_util.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_client.h"
 #include "netsys_native_service_proxy.h"
@@ -29,13 +28,32 @@
 using SetCache = int32_t (*)(uint16_t netId, struct ParamWrapper param, struct addrinfo *res);
 using GetCache = int32_t (*)(uint16_t netId, struct ParamWrapper param,
                             struct AddrInfo addr_info[MAX_RESULTS],
-                            uint32_t *num);
+                             uint32_t *num);
 using GetConfig = int32_t (*)(uint16_t netId, struct ResolvConfig *config);
 
 namespace OHOS {
 namespace NetsysNative {
 using namespace testing::ext;
-using namespace NetManagerStandard::NetConnManagerTestUtil;
+namespace {
+sptr<NetsysNative::INetsysService> ConnManagerGetProxy()
+{
+    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgr == nullptr) {
+        return nullptr;
+    }
+
+    auto remote = samgr->GetSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
+    if (remote == nullptr) {
+        return nullptr;
+    }
+
+    auto proxy = iface_cast<NetsysNative::INetsysService>(remote);
+    if (proxy == nullptr) {
+        return nullptr;
+    }
+    return proxy;
+}
+} // namespace
 class ResolverConfigTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -64,7 +82,6 @@ HWTEST_F(ResolverConfigTest, ResolverConfigTest001, TestSize.Level1)
     NETNATIVE_LOGE("ResolverConfigTest001 ResolverConfigTest001 ResolverConfigTest001");
     EXPECT_EQ(ret, 0);
 }
-
 
 HWTEST_F(ResolverConfigTest, ResolverConfigTest002, TestSize.Level1)
 {
