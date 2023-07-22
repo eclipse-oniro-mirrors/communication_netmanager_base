@@ -299,7 +299,7 @@ private:
 
     bool IsVersionValid()
     {
-        return elfIo_.get_version() == EV_CURRENT;
+        return elfIo_.get_version() == ELFIO::EV_CURRENT;
     }
 
     static bool SetRlimit()
@@ -395,10 +395,10 @@ private:
     {
         std::map<ELFIO::Elf64_Addr, std::string> mapName;
         for (const auto &section : elfIo_.sections) {
-            if (section->get_type() != SHT_SYMTAB && section->get_type() != SHT_DYNSYM) {
+            if (section->get_type() != ELFIO::SHT_SYMTAB && section->get_type() != ELFIO::SHT_DYNSYM) {
                 continue;
             }
-            ELFIO::symbol_section_accessor symbols(elfIo_, section);
+            ELFIO::symbol_section_accessor symbols(elfIo_, section.get());
             for (ELFIO::Elf_Xword i = 0; i < symbols.get_symbols_num(); i++) {
                 std::string name;
                 ELFIO::Elf64_Addr value = 0;
@@ -408,7 +408,7 @@ private:
                 ELFIO::Elf_Half elfSection = 0;
                 unsigned char other = 0;
                 symbols.get_symbol(i, name, value, size, bind, type, elfSection, other);
-                if (type != STT_OBJECT || !EndsWith(name, "_map")) {
+                if (type != ELFIO::STT_OBJECT || !EndsWith(name, "_map")) {
                     continue;
                 }
                 if (mapName.find(value) != mapName.end()) {
@@ -432,7 +432,7 @@ private:
             return true;
         }
 
-        ELFIO::section *mapsSection = *it;
+        ELFIO::section *mapsSection = it->get();
         auto defs = reinterpret_cast<const bpf_map_def *>(mapsSection->get_data());
         auto mapNum = mapsSection->get_size() / sizeof(bpf_map_def);
         for (size_t i = 0; i < static_cast<size_t>(mapNum); i++) {
@@ -708,7 +708,7 @@ private:
     bool ParseRelocation()
     {
         return std::all_of(elfIo_.sections.begin(), elfIo_.sections.end(), [this](auto &section) -> bool {
-            if (section->get_type() != SHT_REL) {
+            if (section->get_type() != ELFIO::SHT_REL) {
                 return true;
             }
 
@@ -718,7 +718,7 @@ private:
                 return true;
             }
 
-            if (progSec->get_type() != SHT_PROGBITS || ((progSec->get_flags() & SHF_EXECINSTR) == 0)) {
+            if (progSec->get_type() != ELFIO::SHT_PROGBITS || ((progSec->get_flags() & ELFIO::SHF_EXECINSTR) == 0)) {
                 return true;
             }
 
@@ -726,7 +726,7 @@ private:
             if (insn == nullptr) {
                 return false;
             }
-            if (!ApplyRelocation(insn, section)) {
+            if (!ApplyRelocation(insn, section.get())) {
                 return false;
             }
             return true;
