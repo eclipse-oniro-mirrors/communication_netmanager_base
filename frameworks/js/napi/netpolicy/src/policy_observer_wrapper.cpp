@@ -106,9 +106,6 @@ napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,
         auto ret = NetPolicyClient::GetInstance().UnregisterNetPolicyCallback(observer_);
         if (ret != NETMANAGER_SUCCESS) {
             NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
-            NetBaseErrorCodeConvertor convertor;
-            std::string errorMsg = convertor.ConvertErrorCode(ret);
-            napi_throw_error(env, std::to_string(ret).c_str(), errorMsg.c_str());
             return NapiUtils::GetUndefined(env);
         }
         registed_ = false;
