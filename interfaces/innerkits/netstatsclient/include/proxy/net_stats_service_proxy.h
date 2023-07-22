@@ -47,7 +47,8 @@ public:
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
-    int32_t SendRequest(sptr<IRemoteObject> &remote, uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    int32_t SendRequest(sptr<IRemoteObject> &remote, uint32_t code, MessageParcel &data, MessageParcel &reply,
+                        MessageOption &option);
 
 private:
     static inline BrokerDelegator<NetStatsServiceProxy> delegator_;
