@@ -85,10 +85,16 @@ int32_t NetStatsServiceStub::OnRegisterNetStatsCallback(MessageParcel &data, Mes
 {
     if (!NetManagerPermission::IsSystemCaller()) {
         NETMGR_LOG_E("Permission check failed.");
-        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
+        if (!reply.WriteInt32(NETMANAGER_ERR_NOT_SYSTEM_CALL)) {
+            return IPC_STUB_WRITE_PARCEL_ERR;
+        }
+        return NETMANAGER_SUCCESS;
     }
     if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_STATS)) {
-        return NETMANAGER_ERR_PERMISSION_DENIED;
+        if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
+            return IPC_STUB_WRITE_PARCEL_ERR;
+        }
+        return NETMANAGER_SUCCESS;
     }
     int32_t result = NETMANAGER_ERR_LOCAL_PTR_NULL;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
@@ -110,10 +116,16 @@ int32_t NetStatsServiceStub::OnUnregisterNetStatsCallback(MessageParcel &data, M
 {
     if (!NetManagerPermission::IsSystemCaller()) {
         NETMGR_LOG_E("Permission check failed.");
-        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
+        if (!reply.WriteInt32(NETMANAGER_ERR_NOT_SYSTEM_CALL)) {
+            return IPC_STUB_WRITE_PARCEL_ERR;
+        }
+        return NETMANAGER_SUCCESS;
     }
     if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_STATS)) {
-        return NETMANAGER_ERR_PERMISSION_DENIED;
+        if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
+            return IPC_STUB_WRITE_PARCEL_ERR;
+        }
+        return NETMANAGER_SUCCESS;
     }
     int32_t result = NETMANAGER_ERR_LOCAL_PTR_NULL;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
@@ -139,14 +151,15 @@ int32_t NetStatsServiceStub::OnGetIfaceRxBytes(MessageParcel &data, MessageParce
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     int32_t result = GetIfaceRxBytes(stats, iface);
-    if (!reply.WriteUint64(stats)) {
-        NETMGR_LOG_E("WriteUint64 failed");
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("WriteInt32 failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (result == NETMANAGER_SUCCESS) {
+        if (!reply.WriteUint64(stats)) {
+            NETMGR_LOG_E("WriteUint64 failed");
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -161,16 +174,16 @@ int32_t NetStatsServiceStub::OnGetIfaceTxBytes(MessageParcel &data, MessageParce
     }
 
     int32_t result = GetIfaceTxBytes(stats, iface);
-    if (!reply.WriteUint64(stats)) {
-        NETMGR_LOG_E("WriteUint64 failed");
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("WriteInt32 failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-
+    if (result == NETMANAGER_SUCCESS) {
+        if (!reply.WriteUint64(stats)) {
+            NETMGR_LOG_E("WriteUint64 failed");
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
     return NETMANAGER_SUCCESS;
 }
 
@@ -178,16 +191,16 @@ int32_t NetStatsServiceStub::OnGetCellularRxBytes(MessageParcel &data, MessagePa
 {
     uint64_t stats = 0;
     int32_t ret = GetCellularRxBytes(stats);
-    if (!reply.WriteUint64(stats)) {
-        NETMGR_LOG_E("WriteUint64 failed");
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-
     if (!reply.WriteInt32(ret)) {
         NETMGR_LOG_E("WriteInt32 failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!reply.WriteUint64(stats)) {
+            NETMGR_LOG_E("WriteUint64 failed");
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
     return NETMANAGER_SUCCESS;
 }
 
@@ -195,16 +208,16 @@ int32_t NetStatsServiceStub::OnGetCellularTxBytes(MessageParcel &data, MessagePa
 {
     uint64_t stats = 0;
     int32_t ret = GetCellularTxBytes(stats);
-    if (!reply.WriteUint64(stats)) {
-        NETMGR_LOG_E("WriteUint64 failed");
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-
     if (!reply.WriteInt32(ret)) {
         NETMGR_LOG_E("WriteInt32 failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!reply.WriteUint64(stats)) {
+            NETMGR_LOG_E("WriteUint64 failed");
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
     return NETMANAGER_SUCCESS;
 }
 
@@ -212,14 +225,15 @@ int32_t NetStatsServiceStub::OnGetAllRxBytes(MessageParcel &data, MessageParcel 
 {
     uint64_t stats = 0;
     int32_t ret = GetAllRxBytes(stats);
-    if (!reply.WriteUint64(stats)) {
-        NETMGR_LOG_E("WriteUint64 failed");
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-
     if (!reply.WriteInt32(ret)) {
         NETMGR_LOG_E("WriteInt32 failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!reply.WriteUint64(stats)) {
+            NETMGR_LOG_E("WriteUint64 failed");
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
     }
 
     return NETMANAGER_SUCCESS;
@@ -229,14 +243,15 @@ int32_t NetStatsServiceStub::OnGetAllTxBytes(MessageParcel &data, MessageParcel 
 {
     uint64_t stats = 0;
     int32_t ret = GetAllTxBytes(stats);
-    if (!reply.WriteUint64(stats)) {
-        NETMGR_LOG_E("WriteUint64 failed");
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-
     if (!reply.WriteInt32(ret)) {
         NETMGR_LOG_E("WriteInt32 failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!reply.WriteUint64(stats)) {
+            NETMGR_LOG_E("WriteUint64 failed");
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
     }
 
     return NETMANAGER_SUCCESS;
@@ -252,14 +267,15 @@ int32_t NetStatsServiceStub::OnGetUidRxBytes(MessageParcel &data, MessageParcel 
     }
 
     int32_t result = GetUidRxBytes(stats, uid);
-    if (!reply.WriteUint64(stats)) {
-        NETMGR_LOG_E("WriteUint64 failed");
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("WriteInt32 failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (result == NETMANAGER_SUCCESS) {
+        if (!reply.WriteUint64(stats)) {
+            NETMGR_LOG_E("WriteUint64 failed");
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -274,14 +290,15 @@ int32_t NetStatsServiceStub::OnGetUidTxBytes(MessageParcel &data, MessageParcel 
     }
 
     int32_t result = GetUidTxBytes(stats, uid);
-    if (!reply.WriteUint64(stats)) {
-        NETMGR_LOG_E("WriteUint64 failed");
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("WriteInt32 failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (result == NETMANAGER_SUCCESS) {
+        if (!reply.WriteUint64(stats)) {
+            NETMGR_LOG_E("WriteUint64 failed");
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -290,10 +307,16 @@ int32_t NetStatsServiceStub::OnGetIfaceStatsDetail(MessageParcel &data, MessageP
 {
     if (!NetManagerPermission::IsSystemCaller()) {
         NETMGR_LOG_E("Permission check failed.");
-        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
+        if (!reply.WriteInt32(NETMANAGER_ERR_NOT_SYSTEM_CALL)) {
+            return IPC_STUB_WRITE_PARCEL_ERR;
+        }
+        return NETMANAGER_SUCCESS;
     }
     if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_STATS)) {
-        return NETMANAGER_ERR_PERMISSION_DENIED;
+        if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
+            return IPC_STUB_WRITE_PARCEL_ERR;
+        }
+        return NETMANAGER_SUCCESS;
     }
     std::string iface;
     uint64_t start = 0;
@@ -303,12 +326,14 @@ int32_t NetStatsServiceStub::OnGetIfaceStatsDetail(MessageParcel &data, MessageP
     }
     NetStatsInfo info;
     int32_t ret = GetIfaceStatsDetail(iface, start, end, info);
-    if (!info.Marshalling(reply)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
 
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!info.Marshalling(reply)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -317,10 +342,16 @@ int32_t NetStatsServiceStub::OnGetUidStatsDetail(MessageParcel &data, MessagePar
 {
     if (!NetManagerPermission::IsSystemCaller()) {
         NETMGR_LOG_E("Permission check failed.");
-        return NETMANAGER_ERR_NOT_SYSTEM_CALL;
+        if (!reply.WriteInt32(NETMANAGER_ERR_NOT_SYSTEM_CALL)) {
+            return IPC_STUB_WRITE_PARCEL_ERR;
+        }
+        return NETMANAGER_SUCCESS;
     }
     if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_STATS)) {
-        return NETMANAGER_ERR_PERMISSION_DENIED;
+        if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
+            return IPC_STUB_WRITE_PARCEL_ERR;
+        }
+        return NETMANAGER_SUCCESS;
     }
     std::string iface;
     uint32_t uid = 0;
@@ -331,12 +362,13 @@ int32_t NetStatsServiceStub::OnGetUidStatsDetail(MessageParcel &data, MessagePar
     }
     NetStatsInfo info;
     int32_t ret = GetUidStatsDetail(iface, uid, start, end, info);
-    if (!info.Marshalling(reply)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!info.Marshalling(reply)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -384,11 +416,13 @@ int32_t NetStatsServiceStub::OnGetAllStatsInfo(MessageParcel &data, MessageParce
 {
     std::vector<NetStatsInfo> infos;
     int32_t result = GetAllStatsInfo(infos);
-    if (!NetStatsInfo::Marshalling(reply, infos)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
     if (!reply.WriteInt32(result)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (result == NETMANAGER_SUCCESS) {
+        if (!NetStatsInfo::Marshalling(reply, infos)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
