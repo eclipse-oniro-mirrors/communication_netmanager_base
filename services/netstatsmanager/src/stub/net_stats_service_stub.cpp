@@ -326,7 +326,6 @@ int32_t NetStatsServiceStub::OnGetIfaceStatsDetail(MessageParcel &data, MessageP
     }
     NetStatsInfo info;
     int32_t ret = GetIfaceStatsDetail(iface, start, end, info);
-
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

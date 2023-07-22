@@ -229,7 +229,6 @@ int32_t NetPolicyServiceStub::OnGetUidsByPolicy(MessageParcel &data, MessageParc
 
     std::vector<uint32_t> uids;
     int32_t result = GetUidsByPolicy(policy, uids);
-
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -291,7 +290,6 @@ int32_t NetPolicyServiceStub::OnIsUidNetAllowedIfaceName(MessageParcel &data, Me
 
     bool isAllowed = false;
     int32_t result = IsUidNetAllowed(uid, ifaceName, isAllowed);
-
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -416,7 +414,6 @@ int32_t NetPolicyServiceStub::OnGetBackgroundPolicy(MessageParcel &data, Message
 {
     bool backgroundPolicy = false;
     int32_t result = GetBackgroundPolicy(backgroundPolicy);
-
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -440,7 +437,6 @@ int32_t NetPolicyServiceStub::OnGetBackgroundPolicyByUid(MessageParcel &data, Me
 
     uint32_t backgroundPolicyOfUid = 0;
     int32_t result = GetBackgroundPolicyByUid(uid, backgroundPolicyOfUid);
-
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -511,7 +507,6 @@ int32_t NetPolicyServiceStub::OnGetDeviceIdleTrustlist(MessageParcel &data, Mess
 {
     std::vector<uint32_t> uids;
     int32_t result = GetDeviceIdleTrustlist(uids);
-
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -546,7 +541,6 @@ int32_t NetPolicyServiceStub::OnGetPowerSaveTrustlist(MessageParcel &data, Messa
 {
     std::vector<uint32_t> uids;
     int32_t result = GetPowerSaveTrustlist(uids);
-
     if (!reply.WriteInt32(result)) {
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
