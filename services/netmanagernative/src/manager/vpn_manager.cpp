@@ -45,7 +45,7 @@ constexpr int32_t MAX_UNIX_SOCKET_CLIENT = 5;
 int32_t VpnManager::CreateVpnInterface()
 {
     if (tunFd_ != 0) {
-        StartVpnInterfaceFdListen(tunFd_);
+        StartVpnInterfaceFdListen();
         return NETMANAGER_SUCCESS;
     }
 
@@ -77,11 +77,11 @@ int32_t VpnManager::CreateVpnInterface()
     NETNATIVE_LOGI("open virtual device successfully, [%{public}d]", tunfd);
     tunFd_ = tunfd;
     SetVpnUp();
-    StartVpnInterfaceFdListen(tunFd_);
+    StartVpnInterfaceFdListen();
     return NETMANAGER_SUCCESS;
 }
 
-void VpnManager::DestoryVpnInterface()
+void VpnManager::DestroyVpnInterface()
 {
     SetVpnDown();
     if (net4Sock_ != 0) {
@@ -198,58 +198,46 @@ int32_t VpnManager::InitIfreq(ifreq &ifr, const std::string &cardName)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t VpnManager::SendVpnInterfaceFdToClient(int32_t serverfd, int32_t tunFd)
+int32_t VpnManager::SendVpnInterfaceFdToClient(int32_t clientFd, int32_t tunFd)
 {
-    sockaddr_un clientAddr;
-    socklen_t len = sizeof(clientAddr);
-    while (true) {
-        int32_t clientFd = accept(serverfd, reinterpret_cast<sockaddr *>(&clientAddr), &len);
-        if (clientFd < 0) {
-            NETNATIVE_LOGE("accept socket error: %{public}d", errno);
-            continue;
-        }
+    char buf[1] = {0};
+    iovec iov;
+    iov.iov_base = buf;
+    iov.iov_len = sizeof(buf);
+    union {
+        cmsghdr align;
+        char cmsg[CMSG_SPACE(sizeof(int32_t))];
+    } cmsgu;
+    if (memset_s(cmsgu.cmsg, sizeof(cmsgu.cmsg), 0, sizeof(cmsgu.cmsg)) != EOK) {
+        NETNATIVE_LOGE("memset_s cmsgu.cmsg failed!");
+        return NETMANAGER_ERROR;
+    }
+    msghdr message;
+    if (memset_s(&message, sizeof(message), 0, sizeof(message)) != EOK) {
+        NETNATIVE_LOGE("memset_s message failed!");
+        return NETMANAGER_ERROR;
+    }
 
-        char buf[1] = {0};
-        iovec iov;
-        iov.iov_base = buf;
-        iov.iov_len = sizeof(buf);
-        union {
-            cmsghdr align;
-            char cmsg[CMSG_SPACE(sizeof(int32_t))];
-        } cmsgu;
-        if (memset_s(cmsgu.cmsg, sizeof(cmsgu.cmsg), 0, sizeof(cmsgu.cmsg)) != EOK) {
-            NETNATIVE_LOGE("memset_s cmsgu.cmsg failed!");
-            close(clientFd);
-            continue;
-        }
-        msghdr message;
-        if (memset_s(&message, sizeof(message), 0, sizeof(message)) != EOK) {
-            NETNATIVE_LOGE("memset_s message failed!");
-            close(clientFd);
-            continue;
-        }
-        message.msg_iov = &iov;
-        message.msg_iovlen = 1;
-        message.msg_control = cmsgu.cmsg;
-        message.msg_controllen = sizeof(cmsgu.cmsg);
-        cmsghdr *cmsgh = CMSG_FIRSTHDR(&message);
-        cmsgh->cmsg_len = CMSG_LEN(sizeof(tunFd));
-        cmsgh->cmsg_level = SOL_SOCKET;
-        cmsgh->cmsg_type = SCM_RIGHTS;
-        if (memcpy_s(CMSG_DATA(cmsgh), sizeof(tunFd), &tunFd, sizeof(tunFd)) != EOK) {
-            NETNATIVE_LOGE("memcpy_s cmsgu failed!");
-            close(clientFd);
-            continue;
-        }
-        if (sendmsg(clientFd, &message, 0) < 0) {
-            NETNATIVE_LOGE("sendmsg sockfd error: %{public}d", errno);
-        }
-        close(clientFd);
+    message.msg_iov = &iov;
+    message.msg_iovlen = 1;
+    message.msg_control = cmsgu.cmsg;
+    message.msg_controllen = sizeof(cmsgu.cmsg);
+    cmsghdr *cmsgh = CMSG_FIRSTHDR(&message);
+    cmsgh->cmsg_len = CMSG_LEN(sizeof(tunFd));
+    cmsgh->cmsg_level = SOL_SOCKET;
+    cmsgh->cmsg_type = SCM_RIGHTS;
+    if (memcpy_s(CMSG_DATA(cmsgh), sizeof(tunFd), &tunFd, sizeof(tunFd)) != EOK) {
+        NETNATIVE_LOGE("memcpy_s cmsgu failed!");
+        return NETMANAGER_ERROR;
+    }
+    if (sendmsg(clientFd, &message, 0) < 0) {
+        NETNATIVE_LOGE("sendmsg error: %{public}d, clientfd[%{public}d], tunfd[%{public}d]", errno, clientFd, tunFd);
+        return NETMANAGER_ERROR;
     }
     return NETMANAGER_SUCCESS;
 }
 
-void VpnManager::StartUnixSocketListen(int32_t tunFd)
+void VpnManager::StartUnixSocketListen()
 {
     NETNATIVE_LOGI("StartUnixSocketListen...");
     int32_t serverfd = GetControlSocket("tunfd");
@@ -259,13 +247,24 @@ void VpnManager::StartUnixSocketListen(int32_t tunFd)
         return;
     }
 
-    NETNATIVE_LOGI("StartUnixSocketListen... tunfd: [%{public}d]", tunFd);
-    SendVpnInterfaceFdToClient(serverfd, tunFd);
+    sockaddr_in clientAddr;
+    socklen_t len = sizeof(clientAddr);
+    while (true) {
+        int32_t clientFd = accept(serverfd, reinterpret_cast<sockaddr *>(&clientAddr), &len);
+        if (clientFd < 0) {
+            NETNATIVE_LOGE("accept socket error: %{public}d", errno);
+            continue;
+        }
+
+        SendVpnInterfaceFdToClient(clientFd, tunFd_);
+        close(clientFd);
+    }
+
     close(serverfd);
     listeningFlag_ = false;
 }
 
-void VpnManager::StartVpnInterfaceFdListen(int32_t tunFd)
+void VpnManager::StartVpnInterfaceFdListen()
 {
     if (listeningFlag_) {
         NETNATIVE_LOGI("VpnInterface fd is listening...");
@@ -273,7 +272,7 @@ void VpnManager::StartVpnInterfaceFdListen(int32_t tunFd)
     }
 
     NETNATIVE_LOGI("StartVpnInterfaceFdListen...");
-    std::thread unixThread([this, tunFd]() { StartUnixSocketListen(tunFd); });
+    std::thread unixThread([this]() { StartUnixSocketListen(); });
     unixThread.detach();
     pthread_setname_np(unixThread.native_handle(), "unix_socket_tunfd");
     listeningFlag_ = true;
