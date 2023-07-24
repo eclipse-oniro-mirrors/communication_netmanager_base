@@ -717,8 +717,8 @@ int32_t RouteManager::UpdateRuleInfo(uint32_t action, uint8_t ruleType, RuleInfo
     // The main work is to assemble the structure required for rule.
     for (const uint8_t family : {AF_INET, AF_INET6}) {
         if (SendRuleToKernel(action, family, ruleType, ruleInfo, uidStart, uidEnd) < 0) {
-            NETNATIVE_LOGE("Update %{public}s rule info failed, action = %{public}d, ret = %{public}d",
-                           (family == AF_INET) ? "IPv4" : "IPv6", action, ret);
+            NETNATIVE_LOGE("Update %{public}s rule info failed, action = %{public}d",
+                           (family == AF_INET) ? "IPv4" : "IPv6", action);
             return NETMANAGER_ERR_INTERNAL;
         }
     }
