@@ -118,7 +118,8 @@ napi_value InterfaceSync(napi_env env, napi_callback_info info, const std::strin
     napi_unwrap(env, thisVal, reinterpret_cast<void **>(&manager));
 
     auto deleter = [](Context *context) { delete context; };
-    std::unique_ptr<Context, decltype(deleter)> context(new Context(env, manager), deleter);
+    auto text = new Context(env, manager);
+    std::unique_ptr<Context, decltype(deleter)> context(text, deleter);
     if (!context) {
         return NapiUtils::GetUndefined(context->GetEnv());
     }

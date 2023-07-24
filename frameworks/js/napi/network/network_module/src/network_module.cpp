@@ -15,13 +15,13 @@
 
 #include "network_module.h"
 #include "gettype_context.h"
-#include "netmanager_base_log.h"
 #include "module_template.h"
+#include "netmanager_base_log.h"
 #include "network_async_work.h"
+#include "network_exec.h"
 #include "network_observer.h"
 #include "subscribe_context.h"
 #include "unsubscribe_context.h"
-#include "network_exec.h"
 
 namespace OHOS::NetManagerStandard {
 napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
