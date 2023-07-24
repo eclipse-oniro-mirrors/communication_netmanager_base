@@ -21,6 +21,7 @@
 #include "network_observer.h"
 #include "subscribe_context.h"
 #include "unsubscribe_context.h"
+#include "network_exec.h"
 
 namespace OHOS::NetManagerStandard {
 napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
@@ -55,16 +56,15 @@ napi_value NetworkModule::Subscribe(napi_env env, napi_callback_info info)
 {
     NETMANAGER_BASE_LOGI("NetworkModule::Subscribe is called");
     return ModuleTemplate::Interface<SubscribeContext>(env, info, "SystemNetworkSubscribe", nullptr,
-                                                                     NetworkAsyncWork::ExecSubscribe,
-                                                                     NetworkAsyncWork::SubscribeCallback);
+                                                       NetworkAsyncWork::ExecSubscribe,
+                                                       NetworkAsyncWork::SubscribeCallback);
 }
 
 napi_value NetworkModule::Unsubscribe(napi_env env, napi_callback_info info)
 {
     NETMANAGER_BASE_LOGI("NetworkModule::Unsubscribe is called");
-    return ModuleTemplate::Interface<UnsubscribeContext>(env, info, "SystemNetworkUnsubscribe", nullptr,
-                                                                       NetworkAsyncWork::ExecUnsubscribe,
-                                                                       NetworkAsyncWork::UnsubscribeCallback);
+    return ModuleTemplate::InterfaceSync<UnsubscribeContext>(
+        env, info, "SystemNetworkUnsubscribe", nullptr, NetworkExec::ExecUnsubscribe, NetworkExec::UnsubscribeCallback);
 }
 
 NAPI_MODULE(network, NetworkModule::InitNetworkModule)
