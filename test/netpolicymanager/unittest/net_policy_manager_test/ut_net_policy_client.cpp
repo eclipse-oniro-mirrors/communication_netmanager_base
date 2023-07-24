@@ -195,11 +195,11 @@ sptr<NetPolicyCallbackTest> UtNetPolicyClient::GetINetPolicyCallbackSample() con
 HWTEST_F(UtNetPolicyClient, SetPolicyByUid001, TestSize.Level1)
 {
     AccessToken token(testInfoParms2, testPolicyPrams2);
-    int32_t ret = g_netPolicyClient->SetPolicyByUid(TEST_UID, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
     NetPolicyClient::NetPolicyDeathRecipient deathRecipient(*g_netPolicyClient);
     sptr<ISystemAbilityManager> sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     sptr<IRemoteObject> remote = sam->CheckSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     deathRecipient.OnRemoteDied(remote);
+    int32_t ret = g_netPolicyClient->SetPolicyByUid(TEST_UID, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
     std::cout << "NetPolicyClient001 SetPolicyByUid ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }

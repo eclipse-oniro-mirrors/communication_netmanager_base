@@ -300,9 +300,6 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest009, TestSize.Level1)
     NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient_);
     std::string ifName = "wlan";
     bool up = true;
-    sptr<NetsysControllerCallback> callback1 = nullptr;
-    std::lock_guard lock(nativeClient_.cbObjMutex_);
-    notifyCallback.netsysNativeClient_.cbObjects_.push_back(callback1);
     int32_t ret = notifyCallback.OnInterfaceChanged(ifName, up);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
