@@ -18,6 +18,7 @@
 
 #include <string>
 #include <vector>
+
 namespace OHOS {
 namespace NetManagerStandard {
 constexpr uint32_t DEFAULT_FOREGROUND_UID = 123;
