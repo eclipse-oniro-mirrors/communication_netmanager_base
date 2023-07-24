@@ -42,19 +42,16 @@ void NetSettings::SetForegroundUid(uint32_t uid)
 
 bool NetSettings::IsSystem(uint32_t uid)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     return std::find(systemUids_.begin(), systemUids_.end(), uid) != systemUids_.end();
 }
 
 void NetSettings::AddSystemUid(uint32_t uid)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     systemUids_.push_back(uid);
 }
 
 void NetSettings::RemoveSystemUid(uint32_t uid)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     if (uid == 0) {
         systemUids_.clear();
         return;

@@ -55,9 +55,6 @@ bool NetQuotaPolicy::Marshalling(Parcel &parcel) const
     if (!parcel.WriteInt32(quotapolicy.source)) {
         return false;
     }
-    if (!parcel.WriteInt32(quotapolicy.limitAction)) {
-        return false;
-    }
     if (!parcel.WriteString(networkmatchrule.ident)) {
         return false;
     }
@@ -114,9 +111,6 @@ bool NetQuotaPolicy::Unmarshalling(Parcel &parcel, NetQuotaPolicy &quotaPolicy)
     if (!parcel.ReadInt32(quotaPolicy.quotapolicy.source)) {
         return false;
     }
-    if (!parcel.ReadInt32(quotaPolicy.quotapolicy.limitAction)) {
-        return false;
-    }
     if (!parcel.ReadString(quotaPolicy.networkmatchrule.ident)) {
         return false;
     }
@@ -159,9 +153,6 @@ bool NetQuotaPolicy::Unmarshalling(Parcel &parcel, std::vector<NetQuotaPolicy> &
             return false;
         }
         if (!parcel.ReadInt32(quotaPolicyTmp.quotapolicy.source)) {
-            return false;
-        }
-        if (!parcel.ReadInt32(quotaPolicyTmp.quotapolicy.limitAction)) {
             return false;
         }
         if (!parcel.ReadString(quotaPolicyTmp.networkmatchrule.ident)) {
