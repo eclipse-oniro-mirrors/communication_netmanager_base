@@ -42,7 +42,8 @@ enum NetBearType {
     BEARER_DEFAULT
 };
 
-struct NetAllCapabilities final: public Parcelable {
+#define NET_SYMBOL_VISIBLE __attribute__((visibility("default")))
+struct NET_SYMBOL_VISIBLE NetAllCapabilities final : public Parcelable {
     uint32_t linkUpBandwidthKbps_ = 0;
     uint32_t linkDownBandwidthKbps_ = 0;
     std::set<NetCap> netCaps_;

@@ -23,7 +23,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class HttpProxy final: public Parcelable {
+#define NET_SYMBOL_VISIBLE __attribute__((visibility("default")))
+class NET_SYMBOL_VISIBLE HttpProxy final : public Parcelable {
 public:
     HttpProxy();
     HttpProxy(std::string host, uint16_t port, const std::list<std::string> &exclusionList);

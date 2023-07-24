@@ -20,7 +20,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-struct NetStatsInfo final: public Parcelable {
+#define NET_SYMBOL_VISIBLE __attribute__((visibility("default")))
+struct NET_SYMBOL_VISIBLE NetStatsInfo final : public Parcelable {
     uint32_t uid_ = 0;
     std::string iface_;
     uint64_t date_ = 0;

@@ -35,7 +35,8 @@ static constexpr int32_t YEAR_MAX = 366;
 static constexpr int32_t PERIOD_DURATION_SIZE = 2;
 static constexpr int32_t QUOTA_POLICY_MAX_SIZE = 100;
 
-struct NetQuotaPolicy final: public Parcelable {
+#define NET_SYMBOL_VISIBLE __attribute__((visibility("default")))
+struct NET_SYMBOL_VISIBLE NetQuotaPolicy final : public Parcelable {
     struct NetLogotype {
         /* See {@link NetBearType} */
         int32_t netType = BEARER_DEFAULT;

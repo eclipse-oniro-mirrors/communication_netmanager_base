@@ -51,7 +51,17 @@ ohos_source_set("net_policy_parcel") {
   ]
 
   deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
-
+  cflags = [
+    "-flto",
+    "-fsanitize=cfi",
+    "-fsanitize-cfi-cross-dso",
+    "-fvisibility=hidden",
+  ]
+  ldflags = [
+    "-flto",
+    "-fsanitize=cfi",
+    "-fsanitize-cfi-cross-dso",
+  ]
   external_deps = [ "c_utils:utils" ]
   external_deps += [ "hilog:libhilog" ]
 
@@ -61,6 +71,8 @@ ohos_source_set("net_policy_parcel") {
 
 ohos_shared_library("net_policy_manager_if") {
   sanitize = {
+    cfi = true
+    cfi_cross_dso = true
     integer_overflow = true
     boundary_sanitize = true
     all_ubsan = true
