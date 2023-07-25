@@ -62,10 +62,10 @@ struct NET_SYMBOL_VISIBLE NetStatsInfo final : public Parcelable {
         NetStatsInfo info;
         info.uid_ = other.uid_;
         info.iface_ = other.iface_;
-        info.rxPackets_ = rxPackets_ - other.rxPackets_;
-        info.rxBytes_ = rxBytes_ - other.rxBytes_;
-        info.txPackets_ = txPackets_ - other.txPackets_;
-        info.txBytes_ = txBytes_ - other.txBytes_;
+        info.rxPackets_ = (rxPackets_ > other.rxPackets_) ? rxPackets_ - other.rxPackets_ : 0;
+        info.rxBytes_ = (rxBytes_ > other.rxBytes_) ? rxBytes_ - other.rxBytes_ : 0;
+        info.txPackets_ = (txPackets_ > other.txPackets_) ? txPackets_ - other.txPackets_ : 0;
+        info.txBytes_ = (txBytes_ > other.txBytes_) ? txBytes_ - other.txBytes_ : 0;
         return info;
     }
 
