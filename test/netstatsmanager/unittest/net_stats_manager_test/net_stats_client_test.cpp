@@ -330,7 +330,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient005, TestSize.Level1)
 HWTEST_F(NetStatsClientTest, NetStatsClient006, TestSize.Level1)
 {
     sptr<IRemoteObject::DeathRecipient> deathRecipient =
-    new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+        new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
     sptr<IRemoteObject> remote = nullptr;
     deathRecipient->OnRemoteDied(remote);
     std::vector<NetStatsInfo> infos;

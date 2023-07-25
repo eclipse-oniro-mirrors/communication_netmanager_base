@@ -242,7 +242,6 @@ HWTEST_F(NetsysControllerServiceImplTest, ServiceImplTest, TestSize.Level1)
     EXPECT_EQ(ret32, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
-
 HWTEST_F(NetsysControllerServiceImplTest, SetInternetPermission, TestSize.Level1)
 {
     uint32_t uid = 0;
