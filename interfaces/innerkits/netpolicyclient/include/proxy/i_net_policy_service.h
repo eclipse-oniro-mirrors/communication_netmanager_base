@@ -214,7 +214,7 @@ public:
      *
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    virtual int32_t CheckPermisson() = 0;
+    virtual int32_t CheckPermission() = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

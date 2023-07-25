@@ -344,7 +344,7 @@ int32_t NetPolicyClient::SetPowerSavePolicy(bool enable)
     return proxy->SetPowerSavePolicy(enable);
 }
 
-int32_t NetPolicyClient::CheckPermisson()
+int32_t NetPolicyClient::CheckPermission()
 {
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -352,7 +352,7 @@ int32_t NetPolicyClient::CheckPermisson()
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
 
-    return proxy->CheckPermisson();
+    return proxy->CheckPermission();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

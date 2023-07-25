@@ -662,7 +662,7 @@ bool NetPolicyServiceProxy::WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 
-int32_t NetPolicyServiceProxy::CheckPermisson()
+int32_t NetPolicyServiceProxy::CheckPermission()
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -678,7 +678,7 @@ int32_t NetPolicyServiceProxy::CheckPermisson()
 
     MessageParcel reply;
     MessageOption option;
-    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_CHECK_PERMISSION), data, reply,
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CHECK_PERMISSION), data, reply,
                        option);
 }
 } // namespace NetManagerStandard

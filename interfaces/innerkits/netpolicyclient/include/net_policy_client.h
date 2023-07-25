@@ -304,7 +304,7 @@ public:
      *
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    [[nodiscard]] int32_t CheckPermisson();
+    [[nodiscard]] int32_t CheckPermission();
 
 private:
     class NetPolicyDeathRecipient : public IRemoteObject::DeathRecipient {

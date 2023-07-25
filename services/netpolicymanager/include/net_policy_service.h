@@ -211,7 +211,7 @@ public:
      *
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
-    int32_t CheckPermisson() override;
+    int32_t CheckPermission() override;
 
 private:
     void Init();

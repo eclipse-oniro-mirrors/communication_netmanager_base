@@ -35,7 +35,7 @@ public:
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 protected:
-    bool CheckPermission(const std::string &permission, uint32_t funcCode);
+    bool SubCheckPermission(const std::string &permission, uint32_t funcCode);
     int32_t CheckPolicyPermission(uint32_t funcCode);
     std::shared_ptr<AppExecFwk::EventRunner> runner_;
     std::shared_ptr<NetPolicyEventHandler> handler_;
@@ -65,7 +65,7 @@ private:
     int32_t OnGetPowerSaveTrustlist(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetPowerSaveTrustlist(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetPowerSavePolicy(MessageParcel &data, MessageParcel &reply);
-    int32_t OnCheckPermisson(MessageParcel &data, MessageParcel &reply);
+    int32_t OnCheckPermission(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetPolicyServiceFunc> memberFuncMap_;

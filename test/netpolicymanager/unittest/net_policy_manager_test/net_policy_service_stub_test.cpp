@@ -133,7 +133,7 @@ public:
         return 0;
     }
 
-    int32_t CheckPermisson() override
+    int32_t CheckPermission() override
     {
         return 0;
     }

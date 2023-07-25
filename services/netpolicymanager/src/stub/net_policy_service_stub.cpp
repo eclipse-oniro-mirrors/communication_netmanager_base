@@ -45,7 +45,7 @@ std::map<uint32_t, const char *> g_codeNPS = {
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_TRUSTLIST), Permission::MANAGE_NET_STRATEGY},
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POWER_SAVE_TRUSTLIST), Permission::MANAGE_NET_STRATEGY},
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_POLICY), Permission::MANAGE_NET_STRATEGY},
-    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_CHECK_PERMISSION), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CHECK_PERMISSION), Permission::MANAGE_NET_STRATEGY},
 };
 } // namespace
 
@@ -91,8 +91,8 @@ NetPolicyServiceStub::NetPolicyServiceStub()
         &NetPolicyServiceStub::OnGetBackgroundPolicyByUid;
     memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_POLICY)] =
         &NetPolicyServiceStub::OnSetPowerSavePolicy;
-    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_CHECK_PERMISSION)] =
-        &NetPolicyServiceStub::OnCheckPermisson;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CHECK_PERMISSION)] =
+        &NetPolicyServiceStub::OnCheckPermission;
     InitEventHandler();
 }
 
@@ -149,7 +149,7 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-bool NetPolicyServiceStub::CheckPermission(const std::string &permission, uint32_t funcCode)
+bool NetPolicyServiceStub::SubCheckPermission(const std::string &permission, uint32_t funcCode)
 {
     if (NetManagerPermission::CheckPermission(permission)) {
         return true;
@@ -165,7 +165,7 @@ int32_t NetPolicyServiceStub::CheckPolicyPermission(uint32_t code)
         return NETMANAGER_ERR_NOT_SYSTEM_CALL;
     }
     if (g_codeNPS.find(code) != g_codeNPS.end()) {
-        result = CheckPermission(g_codeNPS[code], code);
+        result = SubCheckPermission(g_codeNPS[code], code);
         if (!result) {
             return NETMANAGER_ERR_PERMISSION_DENIED;
         }
@@ -598,7 +598,7 @@ int32_t NetPolicyServiceStub::OnSetPowerSavePolicy(MessageParcel &data, MessageP
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetPolicyServiceStub::OnCheckPermisson(MessageParcel &data, MessageParcel &reply)
+int32_t NetPolicyServiceStub::OnCheckPermission(MessageParcel &data, MessageParcel &reply)
 {
     if (!reply.WriteInt32(NETMANAGER_SUCCESS)) {
         NETMGR_LOG_E("Write int32 reply failed");
