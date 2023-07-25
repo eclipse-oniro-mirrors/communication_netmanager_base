@@ -512,35 +512,35 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetResolverConfig003, TestSize.Level1)
     EXPECT_EQ(ret, ERR_NONE);
 }
 
-HWTEST_F(NetsysNativeServiceStubTest, CmdGetResolverConfig001, TestSize.Level1)
+bool IsDataParemerVaild(MessageParcel &data)
 {
     uint16_t netId = 1001;
-
-    MessageParcel data;
     if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
+        return false;
     }
     if (!data.WriteUint16(netId)) {
+        return false;
+    }
+    return true;
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetResolverConfig001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!IsDataParemerVaild(data)) {
         return;
     }
-
-    MessageParcel reply;
     int32_t ret = notifyStub_->CmdGetResolverConfig(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 
 HWTEST_F(NetsysNativeServiceStubTest, CmdCreateNetworkCache001, TestSize.Level1)
 {
-    uint16_t netId = 1001;
-
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+    if (!IsDataParemerVaild(data)) {
         return;
     }
-    if (!data.WriteUint16(netId)) {
-        return;
-    }
-
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdCreateNetworkCache(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
@@ -548,16 +548,10 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdCreateNetworkCache001, TestSize.Level1)
 
 HWTEST_F(NetsysNativeServiceStubTest, CmdDestroyNetworkCache001, TestSize.Level1)
 {
-    uint16_t netId = 1001;
-
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+    if (!IsDataParemerVaild(data)) {
         return;
     }
-    if (!data.WriteUint16(netId)) {
-        return;
-    }
-
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdDestroyNetworkCache(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
