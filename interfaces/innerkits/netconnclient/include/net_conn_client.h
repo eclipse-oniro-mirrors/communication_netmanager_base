@@ -36,10 +36,9 @@ namespace nmd {
 class FwmarkClient;
 }
 namespace NetManagerStandard {
-class NetConnClient : public Singleton<NetConnClient> {
+class NetConnClient {
 public:
-    NetConnClient();
-    ~NetConnClient();
+    static NetConnClient &GetInstance();
 
     /**
      * The interface in NetConnService can be called when the system is ready
@@ -365,6 +364,11 @@ private:
     };
 
 private:
+    NetConnClient();
+    ~NetConnClient();
+    NetConnClient& operator=(const NetConnClient&) = delete;
+    NetConnClient(const NetConnClient&) = delete;
+
     sptr<INetConnService> GetProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 

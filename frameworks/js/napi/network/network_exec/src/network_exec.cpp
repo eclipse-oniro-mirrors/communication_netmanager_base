@@ -184,7 +184,7 @@ bool NetworkExec::ExecUnsubscribe(UnsubscribeContext *context)
         return false;
     }
 
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
+    int32_t ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
     context->SetErrorCode(ret);
     return ret == NETMANAGER_SUCCESS;
 }

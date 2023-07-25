@@ -33,6 +33,12 @@ NetConnClient::NetConnClient() : NetConnService_(nullptr), deathRecipient_(nullp
 
 NetConnClient::~NetConnClient() {}
 
+NetConnClient &NetConnClient::GetInstance()
+{
+    static NetConnClient gInstance;
+    return gInstance;
+}
+
 int32_t NetConnClient::SystemReady()
 {
     sptr<INetConnService> proxy = GetProxy();

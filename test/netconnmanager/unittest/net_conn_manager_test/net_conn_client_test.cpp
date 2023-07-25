@@ -220,7 +220,7 @@ HWTEST_F(NetConnClientTest, GetDefaultNetTest001, TestSize.Level1)
 {
     std::cout << "GetDefaultNetTest001 In" << std::endl;
     NetHandle handle;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
+    auto ret = NetConnClient::GetInstance().GetDefaultNet(handle);
     ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
@@ -236,7 +236,7 @@ HWTEST_F(NetConnClientTest, GetDefaultNetTest002, TestSize.Level1)
     AccessToken token;
     NetHandle handle;
     int32_t netId = 0;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
+    auto ret = NetConnClient::GetInstance().GetDefaultNet(handle);
     netId = handle.GetNetId();
     if (netId == 0) {
         std::cout << "No network" << std::endl;
@@ -258,7 +258,7 @@ HWTEST_F(NetConnClientTest, GetDefaultNetTest002, TestSize.Level1)
 HWTEST_F(NetConnClientTest, HasDefaultNetTest001, TestSize.Level1)
 {
     bool bFlag = false;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->HasDefaultNet(bFlag);
+    auto ret = NetConnClient::GetInstance().HasDefaultNet(bFlag);
     ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
@@ -272,7 +272,7 @@ HWTEST_F(NetConnClientTest, HasDefaultNetTest002, TestSize.Level1)
 {
     AccessToken token;
     bool bFlag = false;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->HasDefaultNet(bFlag);
+    auto ret = NetConnClient::GetInstance().HasDefaultNet(bFlag);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
 }
 
@@ -286,11 +286,11 @@ HWTEST_F(NetConnClientTest, HasDefaultNetTest002, TestSize.Level1)
 HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest001, TestSize.Level1)
 {
     NetHandle handle;
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
+    int32_t ret = NetConnClient::GetInstance().GetDefaultNet(handle);
     ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 
     NetAllCapabilities netAllCap;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(handle, netAllCap);
+    ret = NetConnClient::GetInstance().GetNetCapabilities(handle, netAllCap);
     ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
@@ -304,12 +304,12 @@ HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest001, TestSize.Level1)
 HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest002, TestSize.Level1)
 {
     NetHandle handle;
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
+    int32_t ret = NetConnClient::GetInstance().GetDefaultNet(handle);
     ASSERT_TRUE(ret == NETMANAGER_ERR_PERMISSION_DENIED);
 
     AccessToken token;
     NetAllCapabilities netAllCap;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(handle, netAllCap);
+    ret = NetConnClient::GetInstance().GetNetCapabilities(handle, netAllCap);
     ASSERT_TRUE(ret == NET_CONN_ERR_INVALID_NETWORK);
 }
 
@@ -324,11 +324,11 @@ HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest003, TestSize.Level1)
 {
     AccessToken token;
     NetHandle handle;
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultNet(handle);
+    int32_t ret = NetConnClient::GetInstance().GetDefaultNet(handle);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
 
     NetAllCapabilities netAllCap;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetCapabilities(handle, netAllCap);
+    ret = NetConnClient::GetInstance().GetNetCapabilities(handle, netAllCap);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS || ret == NET_CONN_ERR_INVALID_NETWORK);
 }
 
@@ -340,7 +340,7 @@ HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest003, TestSize.Level1)
 HWTEST_F(NetConnClientTest, SetAirplaneModeTest001, TestSize.Level1)
 {
     AccessToken token;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAirplaneMode(true);
+    auto ret = NetConnClient::GetInstance().SetAirplaneMode(true);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -352,7 +352,7 @@ HWTEST_F(NetConnClientTest, SetAirplaneModeTest001, TestSize.Level1)
 HWTEST_F(NetConnClientTest, SetAirplaneModeTest002, TestSize.Level1)
 {
     AccessToken token;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAirplaneMode(false);
+    auto ret = NetConnClient::GetInstance().SetAirplaneMode(false);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -364,7 +364,7 @@ HWTEST_F(NetConnClientTest, SetAirplaneModeTest002, TestSize.Level1)
 HWTEST_F(NetConnClientTest, IsDefaultNetMeteredTest001, TestSize.Level1)
 {
     bool bRes = false;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->IsDefaultNetMetered(bRes);
+    auto ret = NetConnClient::GetInstance().IsDefaultNetMetered(bRes);
     ASSERT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
     ASSERT_TRUE(bRes == false);
 }
@@ -378,7 +378,7 @@ HWTEST_F(NetConnClientTest, IsDefaultNetMeteredTest002, TestSize.Level1)
 {
     AccessToken token;
     bool bRes = false;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->IsDefaultNetMetered(bRes);
+    auto ret = NetConnClient::GetInstance().IsDefaultNetMetered(bRes);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
     ASSERT_TRUE(bRes == true);
 }
@@ -392,7 +392,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest001, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {"testHttpProxy", 0, {}};
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
 }
 
@@ -405,7 +405,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest002, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN1, 8080, {}};
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
 }
 
@@ -418,7 +418,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest003, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN2, 8080, {}};
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
@@ -431,7 +431,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest004, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN3, 8080, {}};
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
@@ -444,7 +444,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest005, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN4, 8080, {}};
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
@@ -457,7 +457,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest006, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN5, 8080, {}};
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
@@ -470,7 +470,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest007, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN6, 8080, {}};
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
@@ -483,7 +483,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest008, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN7, 8080, {}};
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
@@ -496,7 +496,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest09, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN8, 8080, {}};
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
@@ -509,7 +509,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest10, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN9, 8080, {}};
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
@@ -522,7 +522,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest11, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN10, 8080, {}};
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
@@ -535,7 +535,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest012, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_IPV4_ADDR, 8080, {}};
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
@@ -548,7 +548,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest013, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_IPV6_ADDR, 8080, {}};
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
@@ -561,7 +561,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest14, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_LONG_HOST, 8080, {TEST_LONG_EXCLUSION_LIST}};
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
 }
 
@@ -574,7 +574,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest015, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
@@ -586,7 +586,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest015, TestSize.Level1)
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest016, TestSize.Level1)
 {
     HttpProxy httpProxy = {TEST_IPV4_ADDR, 8080, {}};
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
@@ -599,11 +599,11 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest001, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_IPV4_ADDR, 8080, {}};
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 
     HttpProxy getGlobalHttpProxy;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetGlobalHttpProxy(getGlobalHttpProxy);
+    ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
     ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_IPV4_ADDR);
 }
@@ -617,11 +617,11 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest002, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_IPV6_ADDR, 8080, {}};
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 
     HttpProxy getGlobalHttpProxy;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetGlobalHttpProxy(getGlobalHttpProxy);
+    ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
     ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_IPV6_ADDR);
 }
@@ -635,11 +635,11 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest003, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN2, 8080, {}};
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 
     HttpProxy getGlobalHttpProxy;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetGlobalHttpProxy(getGlobalHttpProxy);
+    ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
     ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_DOMAIN2);
 }
@@ -653,11 +653,11 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest004, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy validHttpProxy = {TEST_IPV4_ADDR, 8080, {}};
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(validHttpProxy);
+    int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(validHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 
     HttpProxy getGlobalHttpProxy;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetGlobalHttpProxy(getGlobalHttpProxy);
+    ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
     ASSERT_TRUE(getGlobalHttpProxy.GetHost() == TEST_IPV4_ADDR);
 }
@@ -671,11 +671,11 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest005, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy httpProxy;
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(httpProxy);
+    int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 
     HttpProxy getGlobalHttpProxy;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetGlobalHttpProxy(getGlobalHttpProxy);
+    ret = NetConnClient::GetInstance().GetGlobalHttpProxy(getGlobalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
     ASSERT_TRUE(getGlobalHttpProxy.GetHost().empty());
 }
@@ -689,11 +689,11 @@ HWTEST_F(NetConnClientTest, GetDefaultHttpProxyTest001, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy validHttpProxy = {TEST_IPV4_ADDR, 8080, {}};
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(validHttpProxy);
+    int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(validHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 
     HttpProxy defaultHttpProxy;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultHttpProxy(defaultHttpProxy);
+    ret = NetConnClient::GetInstance().GetDefaultHttpProxy(defaultHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
     ASSERT_TRUE(defaultHttpProxy.GetHost() == TEST_IPV4_ADDR);
 }
@@ -707,11 +707,11 @@ HWTEST_F(NetConnClientTest, GetDefaultHttpProxyTest002, TestSize.Level1)
 {
     AccessToken token;
     HttpProxy globalHttpProxy;
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetGlobalHttpProxy(globalHttpProxy);
+    int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(globalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 
     HttpProxy defaultHttpProxy;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultHttpProxy(defaultHttpProxy);
+    ret = NetConnClient::GetInstance().GetDefaultHttpProxy(defaultHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
@@ -724,16 +724,16 @@ HWTEST_F(NetConnClientTest, GetDefaultHttpProxyTest003, TestSize.Level1)
 {
     AccessToken token;
     int32_t netId = 102;
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(netId);
+    int32_t ret = NetConnClient::GetInstance().SetAppNet(netId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     HttpProxy defaultHttpProxy;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultHttpProxy(defaultHttpProxy);
+    ret = NetConnClient::GetInstance().GetDefaultHttpProxy(defaultHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 
     int32_t cancelNetId = 0;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(cancelNetId);
+    ret = NetConnClient::GetInstance().SetAppNet(cancelNetId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->GetDefaultHttpProxy(defaultHttpProxy);
+    ret = NetConnClient::GetInstance().GetDefaultHttpProxy(defaultHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
@@ -749,7 +749,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplier001, TestSize.Level1)
     const std::string ident = "";
     std::set<NetCap> netCaps = {NET_CAPABILITY_INTERNET};
     auto ret =
-        DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplier(netBearType, ident, netCaps, supplierId);
+        NetConnClient::GetInstance().RegisterNetSupplier(netBearType, ident, netCaps, supplierId);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
@@ -766,7 +766,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplier002, TestSize.Level1)
     const std::string ident = "";
     std::set<NetCap> netCaps = {NET_CAPABILITY_INTERNET};
     auto ret =
-        DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplier(netBearType, ident, netCaps, supplierId);
+        NetConnClient::GetInstance().RegisterNetSupplier(netBearType, ident, netCaps, supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -778,7 +778,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplier002, TestSize.Level1)
 HWTEST_F(NetConnClientTest, UnregisterNetSupplier001, TestSize.Level1)
 {
     uint32_t supplierId = 100;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetSupplier(supplierId);
+    auto ret = NetConnClient::GetInstance().UnregisterNetSupplier(supplierId);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
@@ -791,7 +791,7 @@ HWTEST_F(NetConnClientTest, UnregisterNetSupplier002, TestSize.Level1)
 {
     AccessToken token;
     uint32_t supplierId = 100;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetSupplier(supplierId);
+    auto ret = NetConnClient::GetInstance().UnregisterNetSupplier(supplierId);
     EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
 }
 
@@ -805,7 +805,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest001, TestSize.Level1)
     uint32_t supplierId = 100;
     sptr<NetSupplierCallbackBase> callback = new (std::nothrow) NetSupplierCallbackBase();
     ASSERT_NE(callback, nullptr);
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplierCallback(supplierId, callback);
+    auto ret = NetConnClient::GetInstance().RegisterNetSupplierCallback(supplierId, callback);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
@@ -820,7 +820,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest002, TestSize.Level1)
     uint32_t supplierId = 100;
     sptr<NetSupplierCallbackBase> callback = new (std::nothrow) NetSupplierCallbackBase();
     ASSERT_NE(callback, nullptr);
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplierCallback(supplierId, callback);
+    auto ret = NetConnClient::GetInstance().RegisterNetSupplierCallback(supplierId, callback);
     EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
 }
 
@@ -837,11 +837,11 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest003, TestSize.Level1)
     std::string ident = "ident";
     uint32_t supplierId = 0;
     int32_t result =
-        DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
+        NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     sptr<NetSupplierCallbackBase> callback = new (std::nothrow) NetSupplierCallbackBase();
     ASSERT_NE(callback, nullptr);
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplierCallback(supplierId, callback);
+    auto ret = NetConnClient::GetInstance().RegisterNetSupplierCallback(supplierId, callback);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -855,7 +855,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest004, TestSize.Level1)
     AccessToken token;
     uint32_t supplierId = 0;
     sptr<NetSupplierCallbackBase> callback;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetSupplierCallback(supplierId, callback);
+    auto ret = NetConnClient::GetInstance().RegisterNetSupplierCallback(supplierId, callback);
     EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
 }
 
@@ -868,7 +868,7 @@ HWTEST_F(NetConnClientTest, SetAppNetTest001, TestSize.Level1)
 {
     AccessToken token;
     int32_t netId = 99;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(netId);
+    auto ret = NetConnClient::GetInstance().SetAppNet(netId);
     EXPECT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
 }
 
@@ -881,11 +881,11 @@ HWTEST_F(NetConnClientTest, SetAppNetTest002, TestSize.Level1)
 {
     AccessToken token;
     int32_t netId = 102;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(netId);
+    auto ret = NetConnClient::GetInstance().SetAppNet(netId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     int32_t cancelNetId = 0;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(cancelNetId);
+    ret = NetConnClient::GetInstance().SetAppNet(cancelNetId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -898,15 +898,15 @@ HWTEST_F(NetConnClientTest, GetAppNetTest001, TestSize.Level1)
 {
     AccessToken token;
     int32_t netId = 102;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(netId);
+    auto ret = NetConnClient::GetInstance().SetAppNet(netId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     int32_t getNetId = 0;
-    DelayedSingleton<NetConnClient>::GetInstance()->GetAppNet(getNetId);
+    NetConnClient::GetInstance().GetAppNet(getNetId);
     EXPECT_EQ(getNetId, netId);
 
     int32_t cancelNetId = 0;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->SetAppNet(cancelNetId);
+    ret = NetConnClient::GetInstance().SetAppNet(cancelNetId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -920,8 +920,8 @@ HWTEST_F(NetConnClientTest, RegisterNetConnCallback001, TestSize.Level1)
 {
     AccessToken token;
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(callback);
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
+    int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(callback);
+    ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -937,7 +937,7 @@ HWTEST_F(NetConnClientTest, RegisterNetConnCallback002, TestSize.Level1)
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
     uint32_t timesOut = 1;
     auto ret =
-        DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(netSpecifier, callback, timesOut);
+        NetConnClient::GetInstance().RegisterNetConnCallback(netSpecifier, callback, timesOut);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
@@ -953,7 +953,7 @@ HWTEST_F(NetConnClientTest, RegisterNetConnCallback003, TestSize.Level1)
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
     uint32_t timesOut = 1;
     auto ret =
-        DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(netSpecifier, callback, timesOut);
+        NetConnClient::GetInstance().RegisterNetConnCallback(netSpecifier, callback, timesOut);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
@@ -966,8 +966,8 @@ HWTEST_F(NetConnClientTest, RegisterNetConnCallback003, TestSize.Level1)
 HWTEST_F(NetConnClientTest, UnRegisterNetConnCallback001, TestSize.Level1)
 {
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetConnCallback(callback);
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->UnregisterNetConnCallback(callback);
+    int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(callback);
+    ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
@@ -979,10 +979,10 @@ HWTEST_F(NetConnClientTest, UnRegisterNetConnCallback001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, UpdateNetSupplierInfo001, TestSize.Level1)
 {
-    auto client = DelayedSingleton<NetConnClient>::GetInstance();
+    auto& client = NetConnClient::GetInstance();
     uint32_t supplierId = 1;
     sptr<NetSupplierInfo> netSupplierInfo = new (std::nothrow) NetSupplierInfo;
-    int32_t ret = client->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
+    int32_t ret = client.UpdateNetSupplierInfo(supplierId, netSupplierInfo);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
@@ -995,14 +995,14 @@ HWTEST_F(NetConnClientTest, UpdateNetSupplierInfo001, TestSize.Level1)
 HWTEST_F(NetConnClientTest, UpdateNetSupplierInfo002, TestSize.Level1)
 {
     AccessToken token;
-    auto client = DelayedSingleton<NetConnClient>::GetInstance();
+    auto& client = NetConnClient::GetInstance();
     uint32_t supplierId = 1;
     sptr<NetSupplierInfo> netSupplierInfo = new NetSupplierInfo;
     netSupplierInfo->isAvailable_ = true;
     netSupplierInfo->isRoaming_ = true;
     netSupplierInfo->strength_ = 0x64;
     netSupplierInfo->frequency_ = 0x10;
-    int32_t ret = client->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
+    int32_t ret = client.UpdateNetSupplierInfo(supplierId, netSupplierInfo);
     EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
 }
 
@@ -1015,7 +1015,7 @@ HWTEST_F(NetConnClientTest, GetNetInterfaceConfigurationTest001, TestSize.Level1
 {
     AccessToken token;
     NetInterfaceConfiguration config;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetInterfaceConfiguration(TEST_IFACE, config);
+    auto ret = NetConnClient::GetInstance().GetNetInterfaceConfiguration(TEST_IFACE, config);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -1027,7 +1027,7 @@ HWTEST_F(NetConnClientTest, GetNetInterfaceConfigurationTest001, TestSize.Level1
 HWTEST_F(NetConnClientTest, GetNetInterfaceConfigurationTest002, TestSize.Level1)
 {
     NetInterfaceConfiguration config;
-    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->GetNetInterfaceConfiguration(TEST_IFACE, config);
+    auto ret = NetConnClient::GetInstance().GetNetInterfaceConfiguration(TEST_IFACE, config);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
@@ -1039,7 +1039,7 @@ HWTEST_F(NetConnClientTest, GetNetInterfaceConfigurationTest002, TestSize.Level1
 HWTEST_F(NetConnClientTest, RegisterNetInterfaceCallbackTest001, TestSize.Level1)
 {
     sptr<INetInterfaceStateCallback> callback = new (std::nothrow) NetInterfaceStateCallbackStub();
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetInterfaceCallback(callback);
+    int32_t ret = NetConnClient::GetInstance().RegisterNetInterfaceCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
@@ -1052,7 +1052,7 @@ HWTEST_F(NetConnClientTest, RegisterNetInterfaceCallbackTest002, TestSize.Level1
 {
     AccessToken token;
     sptr<INetInterfaceStateCallback> callback = new (std::nothrow) NetInterfaceStateCallbackStub();
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->RegisterNetInterfaceCallback(callback);
+    int32_t ret = NetConnClient::GetInstance().RegisterNetInterfaceCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

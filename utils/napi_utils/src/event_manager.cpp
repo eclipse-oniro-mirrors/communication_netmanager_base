@@ -40,7 +40,7 @@ bool EventManager::IsValid() const
 void EventManager::AddListener(napi_env env, const std::string &type, napi_value callback, bool once,
                                bool asyncCallback)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lock(mutexForListenersAndEmitByUv_);
     auto it = std::remove_if(listeners_.begin(), listeners_.end(),
                              [type](const EventListener &listener) -> bool { return listener.MatchType(type); });
     if (it != listeners_.end()) {
@@ -51,7 +51,7 @@ void EventManager::AddListener(napi_env env, const std::string &type, napi_value
 
 void EventManager::DeleteListener(const std::string &type, napi_value callback)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lock(mutexForListenersAndEmitByUv_);
     auto it =
         std::remove_if(listeners_.begin(), listeners_.end(), [type, callback](const EventListener &listener) -> bool {
             return listener.Match(type, callback);
@@ -61,6 +61,7 @@ void EventManager::DeleteListener(const std::string &type, napi_value callback)
 
 void EventManager::Emit(const std::string &type, const std::pair<napi_value, napi_value> &argv)
 {
+    std::lock_guard lock(mutexForEmitAndEmitByUv_);
     std::for_each(listeners_.begin(), listeners_.end(), [type, argv](const EventListener &listener) {
         if (listener.IsAsyncCallback()) {
             /* AsyncCallback(BusinessError error, T data) */
@@ -92,8 +93,8 @@ void *EventManager::GetData()
 
 void EventManager::EmitByUv(const std::string &type, void *data, void(handler)(uv_work_t *, int status))
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-
+    std::lock_guard lock1(mutexForEmitAndEmitByUv_);
+    std::lock_guard lock2(mutexForListenersAndEmitByUv_);
     if (!IsValid()) {
         return;
     }
@@ -106,15 +107,14 @@ void EventManager::EmitByUv(const std::string &type, void *data, void(handler)(u
 
 bool EventManager::HasEventListener(const std::string &type)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-
+    std::lock_guard lock2(mutexForListenersAndEmitByUv_);
     return std::any_of(listeners_.begin(), listeners_.end(),
                        [&type](const EventListener &listener) -> bool { return listener.MatchType(type); });
 }
 
 void EventManager::DeleteListener(const std::string &type)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lock2(mutexForListenersAndEmitByUv_);
     auto it = std::remove_if(listeners_.begin(), listeners_.end(),
                              [type](const EventListener &listener) -> bool { return listener.MatchType(type); });
     listeners_.erase(it, listeners_.end());
