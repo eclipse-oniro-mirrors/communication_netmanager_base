@@ -438,12 +438,12 @@ void RegisterNetSupplierCallbackFuzzTest(const uint8_t *data, size_t size)
     AccessToken token;
     uint32_t supplierId = GetData<uint32_t>();
     sptr<NetSupplierCallbackBaseTest> callback = new (std::nothrow) NetSupplierCallbackBaseTest();
-    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+    if (callback == nullptr) {
         return;
     }
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteUint32(supplierId);
