@@ -180,25 +180,25 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
         NETNATIVE_LOGE("InterfaceManager::ModifyAddress, if_nametoindex error %{public}d", errno);
         return -errno;
     }
-    int8_t family = CommonUtils::GetAddrFamily(addr);
+    auto family = CommonUtils::GetAddrFamily(addr);
     if (family != AF_INET && family != AF_INET6) {
         NETNATIVE_LOGE("Ivalid ip address: %{public}s", addr);
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
-    struct ifaddrmsg ifm = {family, static_cast<uint8_t>(prefixLen), 0, 0, index};
+    ifaddrmsg ifm = {static_cast<uint8_t>(family), static_cast<uint8_t>(prefixLen), 0, 0, index};
     nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, getpid());
     nlmsg.AddAddress(action, ifm);
 
     if (family == AF_INET6) {
-        struct in6_addr in6Addr;
+        in6_addr in6Addr;
         if (inet_pton(AF_INET6, addr, &in6Addr) == -1) {
             NETNATIVE_LOGE("Modify ipv6 address, inet_pton error %{public}d", errno);
             return NETMANAGER_ERR_INTERNAL;
         }
         nlmsg.AddAttr(IFA_LOCAL, &in6Addr, sizeof(in6Addr));
     } else {
-        struct in_addr inAddr;
+        in_addr inAddr;
         if (inet_pton(AF_INET, addr, &inAddr) == -1) {
             NETNATIVE_LOGE("Modify ipv4 address, inet_pton error %{public}d", errno);
             return NETMANAGER_ERR_INTERNAL;
@@ -213,7 +213,7 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
     NETNATIVE_LOGI("InterfaceManager::ModifyAddress:%{public}u %{public}s %{public}s %{public}d", action, interfaceName,
                    ToAnonymousIp(addr).c_str(), prefixLen);
 
-    int32_t ret = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    auto ret = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
     if (ret < 0) {
         return -EIO;
     }
