@@ -16,11 +16,12 @@
 #include <gtest/gtest.h>
 
 #include "accesstoken_kit.h"
-#include "nativetoken_kit.h"
 #include "iservice_registry.h"
+#include "nativetoken_kit.h"
 #include "system_ability_definition.h"
 #include "token_setproc.h"
 
+#include "http_proxy.h"
 #include "net_common_event_test.h"
 #include "net_conn_callback_test.h"
 #include "net_conn_client.h"
@@ -29,7 +30,6 @@
 #include "net_detection_callback_test.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
-#include "http_proxy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -273,8 +273,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager002, TestSize.Level1)
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
     std::string ident = "ident01";
     uint32_t supplierId = 0;
-    int32_t result =
-        NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
+    int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
 }
 
@@ -290,8 +289,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager003, TestSize.Level1)
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
     std::string ident = "ident02";
     uint32_t supplierId = 0;
-    int32_t result =
-        NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
+    int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
 
     result = NetConnClient::GetInstance().UnregisterNetSupplier(supplierId);
@@ -311,8 +309,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager004, TestSize.Level1)
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
     std::string ident = "ident03";
     uint32_t supplierId = 0;
-    int32_t result =
-        NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
+    int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
 
     sptr<NetSupplierInfo> netSupplierInfo = new NetSupplierInfo;
@@ -337,8 +334,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager005, TestSize.Level1)
 
     std::string ident = "ident04";
     uint32_t supplierId = 0;
-    int32_t result =
-        NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
+    int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
 
     sptr<NetLinkInfo> netLinkInfo = GetUpdateLinkInfoSample();
@@ -359,8 +355,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager006, TestSize.Level1)
 
     std::string ident = "ident";
     uint32_t supplierId = 0;
-    int32_t result =
-        NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
+    int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
 
     sptr<NetSpecifier> netSpecifier = (std::make_unique<NetSpecifier>()).release();
@@ -392,7 +387,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager006, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager008, TestSize.Level1)
 {
-    auto& client = NetConnClient::GetInstance();
+    auto &client = NetConnClient::GetInstance();
     sptr<INetConnService> proxy = NetConnManagerTest::GetProxy();
     if (proxy == nullptr) {
         return;
@@ -493,22 +488,19 @@ HWTEST_F(NetConnManagerTest, NetConnManager011, TestSize.Level1)
     OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
     std::string ident = "ident";
     uint32_t supplierId1 = 0;
-    int32_t result =
-        NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId1);
+    int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId1);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     std::cout << "supplierId1 : " << supplierId1 << std::endl;
 
     ident = "ident2";
     uint32_t supplierId2 = 0;
-    result =
-        NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId2);
+    result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId2);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     std::cout << "supplierId2 : " << supplierId2 << std::endl;
 
     ident = "ident3";
     uint32_t supplierId3 = 0;
-    result =
-        NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId3);
+    result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId3);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     std::cout << "supplierId3 : " << supplierId3 << std::endl;
 
@@ -538,22 +530,19 @@ HWTEST_F(NetConnManagerTest, NetConnManager012, TestSize.Level1)
     OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternetPolicyPrams);
     std::string ident = "ident";
     uint32_t supplierId1 = 0;
-    int32_t result =
-        NetConnClient::GetInstance().RegisterNetSupplier(bearerTypeCel, ident, netCaps, supplierId1);
+    int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerTypeCel, ident, netCaps, supplierId1);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     std::cout << "supplierId1 : " << supplierId1 << std::endl;
 
     ident = "ident2";
     uint32_t supplierId2 = 0;
-    result =
-        NetConnClient::GetInstance().RegisterNetSupplier(bearerTypeEth, ident, netCaps, supplierId2);
+    result = NetConnClient::GetInstance().RegisterNetSupplier(bearerTypeEth, ident, netCaps, supplierId2);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     std::cout << "supplierId2 : " << supplierId2 << std::endl;
 
     ident = "ident3";
     uint32_t supplierId3 = 0;
-    result =
-        NetConnClient::GetInstance().RegisterNetSupplier(bearerTypeCel, ident, netCaps, supplierId3);
+    result = NetConnClient::GetInstance().RegisterNetSupplier(bearerTypeCel, ident, netCaps, supplierId3);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     std::cout << "supplierId3 : " << supplierId3 << std::endl;
 
@@ -578,8 +567,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager013, TestSize.Level1)
     OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternetPolicyPrams);
     std::string ident = "ident";
     uint32_t supplierId = 0;
-    int32_t result =
-        NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
+    int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     std::cout << "supplierId : " << supplierId << std::endl;
 
@@ -602,8 +590,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
     OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternetPolicyPrams);
     std::string ident = "ident";
     uint32_t supplierId = 0;
-    int32_t result =
-        NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
+    int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     std::cout << "supplierId : " << supplierId << std::endl;
 
@@ -695,7 +682,7 @@ int32_t CheckNetListWhenUnregistered(std::list<sptr<NetHandle>> &netList, uint32
  */
 HWTEST_F(NetConnManagerTest, NetConnManager016, TestSize.Level1)
 {
-    auto& client = NetConnClient::GetInstance();
+    auto &client = NetConnClient::GetInstance();
     sptr<INetConnService> proxy = NetConnManagerTest::GetProxy();
     if (proxy == nullptr) {
         return;

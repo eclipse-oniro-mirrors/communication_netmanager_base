@@ -17,15 +17,15 @@
 
 #include <arpa/inet.h>
 #include <cstring>
-#include <unistd.h>
-#include <sys/uio.h>
 #include <net/if.h>
 #include <netinet/tcp.h>
+#include <sys/uio.h>
+#include <unistd.h>
 
+#include "fwmark.h"
 #include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
-#include "fwmark.h"
 #include "securec.h"
 
 namespace OHOS {
@@ -92,7 +92,10 @@ int32_t NetLinkSocketDiag::ExecuteDestroySocket(uint8_t proto, const inet_diag_m
     }
 
     SockDiagRequest request;
-    request.nlh_ = {.nlmsg_type = SOCK_DESTROY, .nlmsg_flags = NLM_F_REQUEST, .nlmsg_len = sizeof(request)};
+    request.nlh_.nlmsg_type = SOCK_DESTROY;
+    request.nlh_.nlmsg_flags = NLM_F_REQUEST;
+    request.nlh_.nlmsg_len = sizeof(request);
+
     request.req_ = {.sdiag_family = msg->idiag_family,
                     .sdiag_protocol = proto,
                     .idiag_states = static_cast<uint32_t>(1 << msg->idiag_state),
@@ -211,7 +214,10 @@ int32_t NetLinkSocketDiag::SendSockDiagDumpRequest(uint8_t proto, uint8_t family
     iovec iov;
     iov.iov_base = &request;
     iov.iov_len = len;
-    request.nlh_ = {.nlmsg_type = SOCK_DIAG_BY_FAMILY, .nlmsg_flags = (NLM_F_REQUEST | NLM_F_DUMP), .nlmsg_len = len};
+    request.nlh_.nlmsg_type = SOCK_DIAG_BY_FAMILY;
+    request.nlh_.nlmsg_flags = (NLM_F_REQUEST | NLM_F_DUMP);
+    request.nlh_.nlmsg_len = len;
+
     request.req_ = {.sdiag_family = family, .sdiag_protocol = proto, .idiag_states = states};
 
     ssize_t writeLen = writev(dumpSock_, &iov, (sizeof(iov) / sizeof(iovec)));

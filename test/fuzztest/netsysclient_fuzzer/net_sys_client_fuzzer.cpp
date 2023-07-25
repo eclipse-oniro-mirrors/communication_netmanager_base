@@ -18,9 +18,9 @@
 #include <securec.h>
 
 #include "iservice_registry.h"
+#include "notify_callback_stub.h"
 #include "singleton.h"
 #include "system_ability_definition.h"
-#include "notify_callback_stub.h"
 
 #include "netsys_native_client.h"
 #define private public
@@ -189,8 +189,7 @@ void NetworkDestroyFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     dataParcel.WriteInt32(netId);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_DESTROY),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_DESTROY), dataParcel);
 }
 
 void NetworkAddInterfaceFuzzTest(const uint8_t *data, size_t size)
@@ -211,8 +210,7 @@ void NetworkAddInterfaceFuzzTest(const uint8_t *data, size_t size)
     }
     dataParcel.WriteInt32(netId);
     dataParcel.WriteString(iface);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_ADD_INTERFACE),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_ADD_INTERFACE), dataParcel);
 }
 
 void NetworkRemoveInterfaceFuzzTest(const uint8_t *data, size_t size)
@@ -259,8 +257,7 @@ void NetworkAddRouteFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(ifName);
     dataParcel.WriteString(destination);
     dataParcel.WriteString(nextHop);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_ADD_ROUTE),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_ADD_ROUTE), dataParcel);
 }
 
 void NetworkRemoveRouteFuzzTest(const uint8_t *data, size_t size)
@@ -285,8 +282,7 @@ void NetworkRemoveRouteFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(ifName);
     dataParcel.WriteString(destination);
     dataParcel.WriteString(nextHop);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_REMOVE_ROUTE),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_REMOVE_ROUTE), dataParcel);
 }
 
 void GetInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
@@ -306,8 +302,7 @@ void GetInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
     }
 
     dataParcel.WriteString(cfg.ifName);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_GET_CONFIG),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_GET_CONFIG), dataParcel);
 }
 
 void GetInterfaceMtuFuzzTest(const uint8_t *data, size_t size)
@@ -326,8 +321,7 @@ void GetInterfaceMtuFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     dataParcel.WriteString(interfaceName);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_GET_MTU),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_GET_MTU), dataParcel);
 }
 
 void SetInterfaceMtuFuzzTest(const uint8_t *data, size_t size)
@@ -348,8 +342,7 @@ void SetInterfaceMtuFuzzTest(const uint8_t *data, size_t size)
     }
     dataParcel.WriteString(interfaceName);
     dataParcel.WriteInt32(mtu);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_SET_MTU),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_SET_MTU), dataParcel);
 }
 
 void AddInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
@@ -372,22 +365,19 @@ void AddInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(interfaceName);
     dataParcel.WriteString(ipAddr);
     dataParcel.WriteInt32(prefixLength);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_ADD_ADDRESS),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_ADD_ADDRESS), dataParcel);
 }
 
 class TestNotifyCallback : public NetsysNative::NotifyCallbackStub {
 public:
     TestNotifyCallback() = default;
-    ~TestNotifyCallback()  {};
-    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
-                                      int scope)
+    ~TestNotifyCallback(){};
+    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags, int scope)
     {
         return 0;
     }
 
-    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags,
-                                      int scope)
+    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags, int scope)
     {
         return 0;
     }
@@ -450,7 +440,6 @@ void RegisterNotifyCallbackFuzzTest(const uint8_t *data, size_t size)
                     dataParcel);
 }
 
-
 void UnRegisterNotifyCallbackFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
@@ -492,8 +481,7 @@ void InterfaceSetIffUpFuzzTest(const uint8_t *data, size_t size)
     }
 
     dataParcel.WriteString(ifaceName);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_SET_IFF_UP),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_SET_IFF_UP), dataParcel);
 }
 
 void GetAddrInfoFuzzTest(const uint8_t *data, size_t size)
@@ -568,7 +556,6 @@ void NetworkAddRouteParcelFuzzTest(const uint8_t *data, size_t size)
                     dataParcel);
 }
 
-
 void NetworkSetDefaultFuzzTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
@@ -586,8 +573,7 @@ void NetworkSetDefaultFuzzTest(const uint8_t *data, size_t size)
     }
 
     dataParcel.WriteInt32(netId);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_SET_DEFAULT),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_SET_DEFAULT), dataParcel);
 }
 
 void NetworkGetDefaultFuzzTest(const uint8_t *data, size_t size)
@@ -603,8 +589,7 @@ void NetworkGetDefaultFuzzTest(const uint8_t *data, size_t size)
     if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_GET_DEFAULT),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_GET_DEFAULT), dataParcel);
 }
 void SetDefaultNetWorkFuzzTest(const uint8_t *data, size_t size)
 {
@@ -623,8 +608,7 @@ void SetDefaultNetWorkFuzzTest(const uint8_t *data, size_t size)
     }
 
     dataParcel.WriteInt32(netId);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_SET_CONFIG),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_SET_CONFIG), dataParcel);
 }
 
 void IpfwdAddInterfaceForwardFuzzTest(const uint8_t *data, size_t size)
@@ -648,7 +632,6 @@ void IpfwdAddInterfaceForwardFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_IPFWD_ADD_INTERFACE_FORWARD),
                     dataParcel);
 }
-
 
 void IpfwdRemoveInterfaceForwardFuzzTest(const uint8_t *data, size_t size)
 {
@@ -737,9 +720,8 @@ void FirewallSetUidsDeniedListChainFuzzTest(const uint8_t *data, size_t size)
 
     dataParcel.WriteString(ifaceName);
     dataParcel.WriteString(ipAddress);
-    OnRemoteRequest(
-        static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_DENIED_LIST_CHAIN),
-        dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_DENIED_LIST_CHAIN),
+                    dataParcel);
 }
 
 void FirewallSetUidRuleFuzzTest(const uint8_t *data, size_t size)
@@ -768,8 +750,7 @@ void FirewallSetUidRuleFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteInt32(chain);
     dataParcel.WriteInt32(firewallRule);
 
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_RULE),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_RULE), dataParcel);
 }
 void SetInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
 {
@@ -802,8 +783,7 @@ void SetInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(cfg.ipv4Addr);
     dataParcel.WriteInt32(cfg.prefixLength);
     dataParcel.WriteInt32(cfg.flags.size());
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_SET_CONFIG),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_SET_CONFIG), dataParcel);
 }
 
 void NetworkClearDefaultFuzzTest(const uint8_t *data, size_t size)
@@ -820,8 +800,7 @@ void NetworkClearDefaultFuzzTest(const uint8_t *data, size_t size)
     if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_CLEAR_DEFAULT),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_CLEAR_DEFAULT), dataParcel);
 }
 
 void GetProcSysNetFuzzTest(const uint8_t *data, size_t size)
@@ -849,8 +828,7 @@ void GetProcSysNetFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(ifname);
     dataParcel.WriteString(parameter);
     dataParcel.WriteString(value);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_PROC_SYS_NET),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_PROC_SYS_NET), dataParcel);
 }
 
 void SetProcSysNetFuzzTest(const uint8_t *data, size_t size)
@@ -878,8 +856,7 @@ void SetProcSysNetFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(ifname);
     dataParcel.WriteString(parameter);
     dataParcel.WriteString(value);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_RULE),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_RULE), dataParcel);
 }
 
 void SetInternetPermissionFuzzTest(const uint8_t *data, size_t size)
@@ -950,8 +927,7 @@ void IpEnableForwardingFuzzTest(const uint8_t *data, size_t size)
     }
 
     dataParcel.WriteString(requestor);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_IPENABLE_FORWARDING),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_IPENABLE_FORWARDING), dataParcel);
 }
 
 void IpDisableForwardingFuzzTest(const uint8_t *data, size_t size)
@@ -971,8 +947,7 @@ void IpDisableForwardingFuzzTest(const uint8_t *data, size_t size)
     }
 
     dataParcel.WriteString(requestor);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_IPDISABLE_FORWARDING),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_IPDISABLE_FORWARDING), dataParcel);
 }
 
 void EnableNatFuzzTest(const uint8_t *data, size_t size)
@@ -1187,8 +1162,7 @@ void FirewallEnableChainFuzzTest(const uint8_t *data, size_t size)
 
     dataParcel.WriteInt32(chain);
     dataParcel.WriteBool(enable);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FIREWALL_ENABLE_CHAIN),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FIREWALL_ENABLE_CHAIN), dataParcel);
 }
 
 void GetNetworkSharingTrafficFuzzTest(const uint8_t *data, size_t size)
@@ -1242,8 +1216,7 @@ void DelInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(interfaceName);
     dataParcel.WriteString(ipAddr);
     dataParcel.WriteInt32(prefixLength);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_DEL_ADDRESS),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_DEL_ADDRESS), dataParcel);
 }
 
 void SetResolverConfigFuzzTest(const uint8_t *data, size_t size)
@@ -1278,8 +1251,7 @@ void SetResolverConfigFuzzTest(const uint8_t *data, size_t size)
     for (uint32_t i = 0; i <= vectorLength2; i++) {
         dataParcel.WriteString(GetStringFromData(STR_LEN));
     }
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_RESOLVER_CONFIG),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_RESOLVER_CONFIG), dataParcel);
 }
 
 void GetResolverConfigFuzzTest(const uint8_t *data, size_t size)
@@ -1297,8 +1269,7 @@ void GetResolverConfigFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     dataParcel.WriteUint16(netId);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_RESOLVER_CONFIG),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_RESOLVER_CONFIG), dataParcel);
 }
 
 void CreateNetworkCacheFuzzTest(const uint8_t *data, size_t size)
@@ -1317,8 +1288,7 @@ void CreateNetworkCacheFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     dataParcel.WriteUint16(netId);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_CREATE_NETWORK_CACHE),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_CREATE_NETWORK_CACHE), dataParcel);
 }
 
 void DestroyNetworkCacheFuzzTest(const uint8_t *data, size_t size)
@@ -1336,8 +1306,7 @@ void DestroyNetworkCacheFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     dataParcel.WriteUint16(netId);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_DESTROY_NETWORK_CACHE),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_DESTROY_NETWORK_CACHE), dataParcel);
 }
 
 void InterfaceGetListFuzzTest(const uint8_t *data, size_t size)
@@ -1353,8 +1322,7 @@ void InterfaceGetListFuzzTest(const uint8_t *data, size_t size)
     if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_GET_LIST),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_GET_LIST), dataParcel);
 }
 
 void ShareDnsSetFuzzTest(const uint8_t *data, size_t size)
@@ -1372,8 +1340,7 @@ void ShareDnsSetFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     dataParcel.WriteUint16(netId);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_TETHER_DNS_SET),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_TETHER_DNS_SET), dataParcel);
 }
 
 void StartDnsProxyListenFuzzTest(const uint8_t *data, size_t size)
@@ -1406,8 +1373,7 @@ void StopDnsProxyListenFuzzTest(const uint8_t *data, size_t size)
     if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_STOP_DNS_PROXY_LISTEN),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_STOP_DNS_PROXY_LISTEN), dataParcel);
 }
 
 void StartDhcpClientFuzzTest(const uint8_t *data, size_t size)
@@ -1697,8 +1663,7 @@ void OnInterfaceAddressUpdatedFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(ifName);
     dataParcel.WriteInt32(flags);
     dataParcel.WriteInt32(scope);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_INTERFACE_ADDRESS_UPDATED),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_INTERFACE_ADDRESS_UPDATED), dataParcel);
 }
 
 void OnInterfaceAddressRemovedFuzzTest(const uint8_t *data, size_t size)
@@ -1725,8 +1690,7 @@ void OnInterfaceAddressRemovedFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteInt32(flags);
     dataParcel.WriteInt32(scope);
 
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_INTERFACE_ADDRESS_REMOVED),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_INTERFACE_ADDRESS_REMOVED), dataParcel);
 }
 
 void OnInterfaceAddedFuzzTest(const uint8_t *data, size_t size)
@@ -1891,13 +1855,9 @@ void OnBandwidthReachedLimitFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(limitName);
     dataParcel.WriteString(iface);
 
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_BANDWIDTH_REACHED_LIMIT),
-                    dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_BANDWIDTH_REACHED_LIMIT), dataParcel);
 }
-} // namespace NetManagerStandard
-} // namespace OHOS
 
-/* Fuzzer entry point1 */
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
 {
     OHOS::NetManagerStandard::RegisterNotifyCallbackFuzzTest(data, size);
@@ -1938,6 +1898,10 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::OnDhcpSuccessFuzzTest(data, size);
     OHOS::NetManagerStandard::OnBandwidthReachedLimitFuzzTest(data, size);
 }
+} // namespace NetManagerStandard
+} // namespace OHOS
+
+/* Fuzzer entry point1 */
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
@@ -1973,6 +1937,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::FirewallSetUidsAllowedListChainFuzzTest(data, size);
     OHOS::NetManagerStandard::FirewallSetUidsDeniedListChainFuzzTest(data, size);
     OHOS::NetManagerStandard::FirewallSetUidRuleFuzzTest(data, size);
-    LLVMFuzzerTestOneInputNew(data, size);
+    OHOS::NetManagerStandard::LLVMFuzzerTestOneInputNew(data, size);
     return 0;
 }
