@@ -259,5 +259,10 @@ int32_t NetPolicyService::GetDumpMessage(std::string &message)
     netPolicyTraffic_->GetDumpMessage(message);
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetPolicyService::CheckPermisson()
+{
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

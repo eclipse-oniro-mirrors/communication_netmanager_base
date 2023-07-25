@@ -65,6 +65,7 @@
       "OHOS::NetManagerStandard::NetPolicyClient::SetDeviceIdleTrustlist(std::__h::vector<unsigned int, std::__h::allocator<unsigned int>> const&, bool)";
       "OHOS::NetManagerStandard::NetPolicyClient::SetPowerSaveTrustlist(std::__h::vector<unsigned int, std::__h::allocator<unsigned int>> const&, bool)";
       "OHOS::NetManagerStandard::NetPolicyClient::SetPowerSavePolicy(bool)";
+      "OHOS::NetManagerStandard::NetPolicyClient::CheckPermisson()";
     };
   local:
    *;

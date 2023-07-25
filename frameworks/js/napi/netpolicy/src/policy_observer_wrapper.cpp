@@ -63,10 +63,18 @@ napi_value PolicyObserverWrapper::On(napi_env env, napi_callback_info info,
             NetBaseErrorCodeConvertor convertor;
             std::string errorMsg = convertor.ConvertErrorCode(ret);
             napi_throw_error(env, std::to_string(ret).c_str(), errorMsg.c_str());
+        } else {
+            manager_->AddListener(env, event, params[ARG_INDEX_1], false, asyncCallback);
         }
-    }
-    if (registed_) {
+    } else {
         manager_->AddListener(env, event, params[ARG_INDEX_1], false, asyncCallback);
+        int32_t ret = NetPolicyClient::GetInstance().CheckPermisson();
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMANAGER_BASE_LOGE("register callback error");
+            NetBaseErrorCodeConvertor convertor;
+            std::string errorMsg = convertor.ConvertErrorCode(ret);
+            napi_throw_error(env, std::to_string(ret).c_str(), errorMsg.c_str());
+        }
     }
     return NapiUtils::GetUndefined(env);
 }
@@ -106,9 +114,19 @@ napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,
         auto ret = NetPolicyClient::GetInstance().UnregisterNetPolicyCallback(observer_);
         if (ret != NETMANAGER_SUCCESS) {
             NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
-            return NapiUtils::GetUndefined(env);
+            NetBaseErrorCodeConvertor convertor;
+            std::string errorMsg = convertor.ConvertErrorCode(ret);
+            napi_throw_error(env, std::to_string(ret).c_str(), errorMsg.c_str());
         }
         registed_ = false;
+    } else {
+        int32_t ret = NetPolicyClient::GetInstance().CheckPermisson();
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
+            NetBaseErrorCodeConvertor convertor;
+            std::string errorMsg = convertor.ConvertErrorCode(ret);
+            napi_throw_error(env, std::to_string(ret).c_str(), errorMsg.c_str());
+        }
     }
 
     return NapiUtils::GetUndefined(env);

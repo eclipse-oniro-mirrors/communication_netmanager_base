@@ -661,5 +661,25 @@ bool NetPolicyServiceProxy::WriteInterfaceToken(MessageParcel &data)
     }
     return true;
 }
+
+int32_t NetPolicyServiceProxy::CheckPermisson()
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_CHECK_PERMISSION), data, reply,
+                       option);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
