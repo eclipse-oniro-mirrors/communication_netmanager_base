@@ -315,7 +315,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest010, TestSize.Level1)
 HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest011, TestSize.Level1)
 {
     NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient_);
-    std::string limitName="wlan";
+    std::string limitName = "wlan";
     std::string iface = "vpncard";
     int32_t ret = notifyCallback.OnBandwidthReachedLimit(limitName, iface);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);

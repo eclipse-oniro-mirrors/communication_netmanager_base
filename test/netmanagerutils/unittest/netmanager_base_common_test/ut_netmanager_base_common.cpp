@@ -562,11 +562,11 @@ HWTEST_F(UtNetmanagerBaseCommon, StrToUint64Test008, TestSize.Level1)
 {
     std::string value = {};
     uint64_t defaultErr = 0;
-    auto result = CommonUtils::StrToUint64(value,defaultErr);
+    auto result = CommonUtils::StrToUint64(value, defaultErr);
     EXPECT_EQ(result, defaultErr);
     value = "100";
     uint64_t value2 = 100;
-    result = CommonUtils::StrToUint64(value,defaultErr);
+    result = CommonUtils::StrToUint64(value, defaultErr);
     EXPECT_EQ(result, value2);
 }
 } // namespace NetManagerStandard

@@ -20,11 +20,10 @@
 
 #include <gtest/gtest.h>
 
-#include "iservice_registry.h"
 #include "accesstoken_kit.h"
+#include "iservice_registry.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
-
 
 #ifdef GTEST_API_
 #define private public
