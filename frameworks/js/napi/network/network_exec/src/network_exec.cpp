@@ -18,13 +18,17 @@
 #include "net_conn_client.h"
 #include "net_manager_constants.h"
 #include "network_constant.h"
+#ifndef HAS_TELEPHONY
+#define HAS_TELEPHONY 0
+#endif
+
 #if HAS_TELEPHONY
 #include "core_service_client.h"
 #endif
 #include "napi_utils.h"
 #include "netmanager_base_log.h"
-#include "securec.h"
 #include "network_observer.h"
+#include "securec.h"
 
 namespace OHOS::NetManagerStandard {
 static constexpr const int ERROR_PARAM_NUM = 2;
