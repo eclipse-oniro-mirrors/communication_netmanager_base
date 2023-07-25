@@ -19,7 +19,6 @@
 #include "system_ability_definition.h"
 
 #include "conn_manager.h"
-#include "net_conn_manager_test_util.h"
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_proxy.h"
@@ -29,12 +28,31 @@ namespace OHOS {
 namespace NetsysNative {
 using namespace testing::ext;
 using namespace NetManagerStandard;
-using namespace NetConnManagerTestUtil;
 constexpr int32_t NETID = 101;
 constexpr int32_t UID = 1000;
 constexpr int32_t MTU = 1500;
 constexpr int32_t WHICH = 14;
 const std::string INTERFACENAME = "wlan0";
+namespace {
+sptr<NetsysNative::INetsysService> ConnManagerGetProxy()
+{
+    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgr == nullptr) {
+        return nullptr;
+    }
+
+    auto remote = samgr->GetSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
+    if (remote == nullptr) {
+        return nullptr;
+    }
+
+    auto proxy = iface_cast<NetsysNative::INetsysService>(remote);
+    if (proxy == nullptr) {
+        return nullptr;
+    }
+    return proxy;
+}
+} // namespace
 class NetsysNativeServiceProxyTest : public testing::Test {
 public:
     static void SetUpTestCase();
