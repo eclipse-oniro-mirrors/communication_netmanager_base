@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-#define NET_SYMBOL_VISIBLE __attribute__((visibility("default")))
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 class NET_SYMBOL_VISIBLE HttpProxy final : public Parcelable {
 public:
     HttpProxy();

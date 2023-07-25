@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-#define NET_SYMBOL_VISIBLE __attribute__((visibility("default")))
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 struct NET_SYMBOL_VISIBLE NetInterfaceConfiguration : public Parcelable {
     std::string ifName_;
     std::string hwAddr_;

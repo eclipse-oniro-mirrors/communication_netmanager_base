@@ -33,7 +33,7 @@ enum {
     RTN_THROW = 9
 };
 
-#define NET_SYMBOL_VISIBLE __attribute__((visibility("default")))
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 struct NET_SYMBOL_VISIBLE Route final : public Parcelable {
     std::string iface_;
     INetAddr destination_;
