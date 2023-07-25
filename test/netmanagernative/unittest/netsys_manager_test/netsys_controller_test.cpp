@@ -689,4 +689,107 @@ HWTEST_F(NetsysControllerTest, NetsysControllerErr004, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 
     ret = instance_->StopDnsProxyListen();
-    EXPECT_EQ(ret, NetManagerStandard:
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->RegisterNetsysNotifyCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerErr005, TestSize.Level1)
+{
+    std::string iface = "test";
+    struct ifreq ifRequest;
+    int32_t ifaceFd = 0;
+    sptr<NetsysControllerCallback> callback;
+    auto ret = instance_->BindNetworkServiceVpn(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_ERR_VPN);
+
+    ret = instance_->BindNetworkServiceVpn(1);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->EnableVirtualNetIfaceCard(0, ifRequest, ifaceFd);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_ERR_VPN);
+
+    ret = instance_->EnableVirtualNetIfaceCard(1, ifRequest, ifaceFd);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->SetIpAddress(0, iface, 0, ifRequest);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_ERR_VPN);
+
+    ret = instance_->SetIpAddress(1, iface, 1, ifRequest);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->SetBlocking(0, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->StartDhcpClient(iface, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->StopDhcpClient(iface, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->StartDhcpService(iface, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->StopDhcpService(iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->BandwidthEnableDataSaver(false);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->BandwidthSetIfaceQuota(iface, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->BandwidthRemoveIfaceQuota(iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->BandwidthAddDeniedList(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->BandwidthRemoveDeniedList(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->BandwidthAddAllowedList(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->BandwidthRemoveAllowedList(0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerErr006, TestSize.Level1)
+{
+    std::string iface = "test";
+    std::vector<uint32_t> uids;
+    uint64_t stats = 0;
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
+
+    auto ret = instance_->FirewallSetUidsAllowedListChain(0, uids);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->FirewallSetUidsDeniedListChain(0, uids);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->FirewallEnableChain(0, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->FirewallSetUidRule(0, uids, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetTotalStats(stats, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetUidStats(stats, 0, 0);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetIfaceStats(stats, 0, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->GetAllStatsInfo(statsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->SetIptablesCommandForRes(iface, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+} // namespace NetManagerStandard
+} // namespace OHOS
