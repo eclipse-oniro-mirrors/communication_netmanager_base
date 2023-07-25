@@ -18,6 +18,10 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "accesstoken_kit.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
+
 #ifdef GTEST_API_
 #define private public
 #define protected public
@@ -53,7 +57,52 @@ const int32_t TEST_STATS_UID = 11111;
 int g_ifaceFd = 5;
 const int64_t BYTES = 2097152;
 const uint32_t FIREWALL_RULE = 1;
+
+using namespace Security::AccessToken;
+using Security::AccessToken::AccessTokenID;
+HapInfoParams testInfoParms1 = {.userID = 1,
+                                .bundleName = "netsys_native_manager_test",
+                                .instIndex = 0,
+                                .appIDDesc = "test"};
+PermissionDef testPermDef1 = {.permissionName = "ohos.permission.NETSYS_INTERNAL",
+                              .bundleName = "netsys_native_manager_test",
+                              .grantMode = 1,
+                              .availableLevel = APL_SYSTEM_BASIC,
+                              .label = "label",
+                              .labelId = 1,
+                              .description = "Test netsys_native_manager_test",
+                              .descriptionId = 1};
+
+PermissionStateFull testState1 = {.permissionName = "ohos.permission.NETSYS_INTERNAL",
+                                  .isGeneral = true,
+                                  .resDeviceID = {"local"},
+                                  .grantStatus = {PermissionState::PERMISSION_GRANTED},
+                                  .grantFlags = {2}};
+
+HapPolicyParams testPolicyPrams1 = {.apl = APL_SYSTEM_BASIC,
+                                    .domain = "test.domain",
+                                    .permList = {testPermDef1},
+                                    .permStateList = {testState1}};
 } // namespace
+
+class AccessToken {
+public:
+    AccessToken(HapInfoParams &testInfoParms, HapPolicyParams &testPolicyPrams) : currentID_(GetSelfTokenID())
+    {
+        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
+        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
+        SetSelfTokenID(tokenIdEx.tokenIDEx);
+    }
+    ~AccessToken()
+    {
+        AccessTokenKit::DeleteToken(accessID_);
+        SetSelfTokenID(currentID_);
+    }
+
+private:
+    AccessTokenID currentID_;
+    AccessTokenID accessID_ = 0;
+};
 
 class NetsysControllerCallbackTest : public NetsysControllerCallback {
 public:
@@ -439,7 +488,11 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest017, TestSize.Level1)
 HWTEST_F(NetsysControllerTest, NetsysControllerTest018, TestSize.Level1)
 {
     std::string respond;
-    int32_t ret = NetsysController::GetInstance().SetIptablesCommandForRes("abc", respond);
+    int32_t ret = NetsysController::GetInstance().SetIptablesCommandForRes("-L", respond);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_NET_CONN_MANAGER);
+
+    AccessToken token(testInfoParms1, testPolicyPrams1);
+    ret = NetsysController::GetInstance().SetIptablesCommandForRes("abc", respond);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER);
 
     ret = NetsysController::GetInstance().SetIptablesCommandForRes("-L", respond);

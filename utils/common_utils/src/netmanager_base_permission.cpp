@@ -100,5 +100,23 @@ bool NetManagerPermission::IsSystemCaller()
     }
     return checkResult;
 }
+
+bool NetManagerPermission::CheckNetSysInternalPermission(const std::string &permissionName)
+{
+    if (permissionName.empty()) {
+        NETMGR_LOG_E("permission check failed,permission name is empty.");
+        return false;
+    }
+
+    auto callerToken = IPCSkeleton::GetCallingTokenID();
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
+    if (result != Security::AccessToken::PERMISSION_GRANTED) {
+        NETMGR_LOG_E("permission check failed, permission:%{public}s, callerToken:%{public}u, tokenType:%{public}d",
+                     permissionName.c_str(), callerToken, tokenType);
+        return false;
+    }
+    return true;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
