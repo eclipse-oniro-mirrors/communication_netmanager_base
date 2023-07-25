@@ -31,8 +31,7 @@ int32_t NetPolicyServiceProxy::SendRequest(sptr<IRemoteObject> &remote, uint32_t
         NETMGR_LOG_E("Remote is null");
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
-    int32_t retCode =
-        remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POLICY_BY_UID), data, reply, option);
+    int32_t retCode = remote->SendRequest(code, data, reply, option);
     if (retCode != NETMANAGER_SUCCESS) {
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
