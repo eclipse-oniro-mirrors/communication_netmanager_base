@@ -15,9 +15,9 @@
 
 #include <gtest/gtest.h>
 
-// #ifdef GTEST_API_
+#ifdef GTEST_API_
 #define private public
-// #endif
+#endif
 #include "net_manager_constants.h"
 #include "net_stats_constants.h"
 #include "netsys_native_client.h"
