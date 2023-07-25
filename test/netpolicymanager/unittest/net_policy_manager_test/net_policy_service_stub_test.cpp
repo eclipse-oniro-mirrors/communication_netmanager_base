@@ -133,6 +133,11 @@ public:
         return 0;
     }
 
+    int32_t CheckPermisson() override
+    {
+        return 0;
+    }
+
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
     {
         bool byPassPolicyPermission = false;
