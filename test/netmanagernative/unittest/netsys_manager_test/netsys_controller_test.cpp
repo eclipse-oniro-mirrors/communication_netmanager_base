@@ -18,9 +18,9 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
-#include <accesstoken_kit.h>
-#include <ipc_skeleton.h>
-#include <tokenid_kit.h>
+#include "accesstoken_kit.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
 
 #ifdef GTEST_API_
 #define private public
