@@ -241,5 +241,16 @@ HWTEST_F(NetsysControllerServiceImplTest, ServiceImplTest, TestSize.Level1)
     ret32 = instance_->SetBlocking(5, false);
     EXPECT_EQ(ret32, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+
+HWTEST_F(NetsysControllerServiceImplTest, SetInternetPermission, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    uint8_t allow = 0;
+
+    auto ret = instance_->SetInternetPermission(uid, allow);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

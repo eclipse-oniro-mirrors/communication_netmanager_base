@@ -31,6 +31,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 class NetsysNativeClient {
+private:
     class NativeNotifyCallback : public OHOS::NetsysNative::NotifyCallbackStub {
     public:
         NativeNotifyCallback(NetsysNativeClient &netsysNativeClient);

@@ -15,6 +15,9 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+#define private public
+#endif
 #include "net_manager_constants.h"
 #include "net_stats_constants.h"
 #include "netsys_native_client.h"
@@ -291,5 +294,49 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest008, TestSize.Level1)
     ret = nativeClient_.SetIpAddress(sockfd, LOCALIP, PREFIX_LENGTH, ifreq);
     EXPECT_EQ(ret, NETSYS_ERR_VPN);
 }
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest009, TestSize.Level1)
+{
+    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient_);
+    std::string ifName = "wlan";
+    bool up = true;
+    int32_t ret = notifyCallback.OnInterfaceChanged(ifName, up);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest010, TestSize.Level1)
+{
+    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient_);
+    sptr<OHOS::NetsysNative::DhcpResultParcel> dhcpResult = new (std::nothrow) OHOS::NetsysNative::DhcpResultParcel();
+    int32_t ret = notifyCallback.OnDhcpSuccess(dhcpResult);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest011, TestSize.Level1)
+{
+    NetsysNativeClient::NativeNotifyCallback notifyCallback(nativeClient_);
+    std::string limitName="wlan";
+    std::string iface = "vpncard";
+    int32_t ret = notifyCallback.OnBandwidthReachedLimit(limitName, iface);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest013, TestSize.Level1)
+{
+    wptr<IRemoteObject> remote = nullptr;
+    nativeClient_.OnRemoteDied(remote);
+    int handle = 1;
+    sptr<IRemoteObject> result = nullptr;
+    std::u16string descriptor = std::u16string();
+    result = new (std::nothrow) IPCObjectProxy(handle, descriptor);
+    IRemoteObject *object = result.GetRefPtr();
+    remote = object;
+    nativeClient_.OnRemoteDied(remote);
+    uint32_t uid = 0;
+    uint8_t allow = 0;
+    auto ret = nativeClient_.SetInternetPermission(uid, allow);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

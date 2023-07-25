@@ -23,6 +23,9 @@
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 
+#ifdef GTEST_API_
+#define private public
+#endif
 #include "net_manager_center.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_callback_test.h"
@@ -326,6 +329,10 @@ HWTEST_F(NetStatsClientTest, NetStatsClient005, TestSize.Level1)
 
 HWTEST_F(NetStatsClientTest, NetStatsClient006, TestSize.Level1)
 {
+    sptr<IRemoteObject::DeathRecipient> deathRecipient =
+    new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient->OnRemoteDied(remote);
     std::vector<NetStatsInfo> infos;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllStatsInfo(infos);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
