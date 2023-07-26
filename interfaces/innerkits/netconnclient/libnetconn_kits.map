@@ -41,6 +41,10 @@
       "OHOS::NetManagerStandard::NetConnClient::SetAppNet(int)";
       "OHOS::NetManagerStandard::NetConnClient::GetDefaultNet(OHOS::NetManagerStandard::NetHandle&)";
       "OHOS::NetManagerStandard::NetConnClient::GetNetCapabilities(OHOS::NetManagerStandard::NetHandle const&, OHOS::NetManagerStandard::NetAllCapabilities&)";
+      "OHOS::NetManagerStandard::NetConnClient::GetAddressesByName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int, std::__h::vector<OHOS::NetManagerStandard::INetAddr, std::__h::allocator<OHOS::NetManagerStandard::INetAddr>>&)";
+      "OHOS::NetManagerStandard::NetConnClient::GetAddressByName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int, OHOS::NetManagerStandard::INetAddr&)";
+      "OHOS::NetManagerStandard::NetConnClient::BindSocket(int, int)";
+      "OHOS::NetManagerStandard::NetConnClient::OnRemoteDied(OHOS::wptr<OHOS::IRemoteObject> const&)";
       "OHOS::NetManagerStandard::NetConnClient::NetConnClient()";
       "OHOS::NetManagerStandard::NetConnClient::~NetConnClient()";
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetConnCallback(OHOS::sptr<OHOS::NetManagerStandard::NetSpecifier> const&, OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback> const&, unsigned int const&)";
