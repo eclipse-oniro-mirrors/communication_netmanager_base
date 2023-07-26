@@ -125,16 +125,16 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
             return NETMANAGER_ERR_INTERNAL;
         }
     }
-    int32_t checkPermissionResult = CheckPolicyPermission(code);
-    if (checkPermissionResult != NETMANAGER_SUCCESS) {
-        if (!reply.WriteInt32(checkPermissionResult)) {
-            return IPC_STUB_WRITE_PARCEL_ERR;
-        }
-        return NETMANAGER_SUCCESS;
-    }
     auto itFunc = memberFuncMap_.find(code);
-    int32_t result = NETMANAGER_SUCCESS;
     if (itFunc != memberFuncMap_.end()) {
+        int32_t checkPermissionResult = CheckPolicyPermission(code);
+        if (checkPermissionResult != NETMANAGER_SUCCESS) {
+            if (!reply.WriteInt32(checkPermissionResult)) {
+                return IPC_STUB_WRITE_PARCEL_ERR;
+            }
+            return NETMANAGER_SUCCESS;
+        }
+        int32_t result = NETMANAGER_SUCCESS;
         auto requestFunc = itFunc->second;
         if (requestFunc != nullptr) {
             handler_->PostSyncTask(
