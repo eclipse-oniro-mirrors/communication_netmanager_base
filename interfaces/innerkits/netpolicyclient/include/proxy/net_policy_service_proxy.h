@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,8 @@ public:
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
+    int32_t SendRequest(sptr<IRemoteObject> &remote, uint32_t code, MessageParcel &data, MessageParcel &reply,
+                        MessageOption &option);
 
 private:
     static inline BrokerDelegator<NetPolicyServiceProxy> delegator_;

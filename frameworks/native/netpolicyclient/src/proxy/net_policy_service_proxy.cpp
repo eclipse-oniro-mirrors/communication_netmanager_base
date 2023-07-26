@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,25 @@ namespace NetManagerStandard {
 NetPolicyServiceProxy::NetPolicyServiceProxy(const sptr<IRemoteObject> &impl) : IRemoteProxy<INetPolicyService>(impl) {}
 
 NetPolicyServiceProxy::~NetPolicyServiceProxy() = default;
+
+int32_t NetPolicyServiceProxy::SendRequest(sptr<IRemoteObject> &remote, uint32_t code, MessageParcel &data,
+                                           MessageParcel &reply, MessageOption &option)
+{
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    int32_t retCode = remote->SendRequest(code, data, reply, option);
+    if (retCode != NETMANAGER_SUCCESS) {
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    int32_t ret = NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+
+    return ret;
+}
 
 int32_t NetPolicyServiceProxy::SetPolicyByUid(uint32_t uid, uint32_t policy)
 {
@@ -49,19 +68,8 @@ int32_t NetPolicyServiceProxy::SetPolicyByUid(uint32_t uid, uint32_t policy)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode =
-        remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POLICY_BY_UID), data, reply, option);
-    if (retCode != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return retCode;
-    }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POLICY_BY_UID), data, reply,
+                       option);
 }
 
 int32_t NetPolicyServiceProxy::GetPolicyByUid(uint32_t uid, uint32_t &policy)
@@ -86,7 +94,7 @@ int32_t NetPolicyServiceProxy::GetPolicyByUid(uint32_t uid, uint32_t &policy)
     MessageParcel reply;
     MessageOption option;
     int32_t retCode =
-        remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POLICY_BY_UID), data, reply, option);
+        SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POLICY_BY_UID), data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return retCode;
@@ -96,13 +104,8 @@ int32_t NetPolicyServiceProxy::GetPolicyByUid(uint32_t uid, uint32_t &policy)
         NETMGR_LOG_E("Read uint32 reply failed");
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
 
-    return result;
+    return retCode;
 }
 
 int32_t NetPolicyServiceProxy::GetUidsByPolicy(uint32_t policy, std::vector<uint32_t> &uids)
@@ -126,8 +129,8 @@ int32_t NetPolicyServiceProxy::GetUidsByPolicy(uint32_t policy, std::vector<uint
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_UIDS_BY_POLICY), data,
-                                          reply, option);
+    int32_t retCode = SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_UIDS_BY_POLICY), data,
+                                  reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return retCode;
@@ -137,13 +140,7 @@ int32_t NetPolicyServiceProxy::GetUidsByPolicy(uint32_t policy, std::vector<uint
         NETMGR_LOG_E("Read uint32 vector reply failed");
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return retCode;
 }
 
 int32_t NetPolicyServiceProxy::IsUidNetAllowed(uint32_t uid, bool metered, bool &isAllowed)
@@ -172,8 +169,8 @@ int32_t NetPolicyServiceProxy::IsUidNetAllowed(uint32_t uid, bool metered, bool 
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_IS_NET_ALLOWED_BY_METERED),
-                                          data, reply, option);
+    int32_t retCode = SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_IS_NET_ALLOWED_BY_METERED),
+                                  data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return retCode;
@@ -183,13 +180,7 @@ int32_t NetPolicyServiceProxy::IsUidNetAllowed(uint32_t uid, bool metered, bool 
         NETMGR_LOG_E("Read Bool reply failed");
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return retCode;
 }
 
 int32_t NetPolicyServiceProxy::IsUidNetAllowed(uint32_t uid, const std::string &ifaceName, bool &isAllowed)
@@ -218,8 +209,8 @@ int32_t NetPolicyServiceProxy::IsUidNetAllowed(uint32_t uid, const std::string &
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_IS_NET_ALLOWED_BY_IFACE),
-                                          data, reply, option);
+    int32_t retCode = SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_IS_NET_ALLOWED_BY_IFACE),
+                                  data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return retCode;
@@ -229,13 +220,7 @@ int32_t NetPolicyServiceProxy::IsUidNetAllowed(uint32_t uid, const std::string &
         NETMGR_LOG_E("Read Bool reply failed");
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return retCode;
 }
 
 int32_t NetPolicyServiceProxy::RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback)
@@ -260,20 +245,8 @@ int32_t NetPolicyServiceProxy::RegisterNetPolicyCallback(const sptr<INetPolicyCa
 
     MessageOption option;
     MessageParcel replyParcel;
-    int32_t retCode =
-        remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_REGISTER_NET_POLICY_CALLBACK),
-                            dataParcel, replyParcel, option);
-    if (retCode != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return retCode;
-    }
-
-    int32_t result = 0;
-    if (!replyParcel.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_REGISTER_NET_POLICY_CALLBACK),
+                       dataParcel, replyParcel, option);
 }
 
 int32_t NetPolicyServiceProxy::UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback)
@@ -298,20 +271,8 @@ int32_t NetPolicyServiceProxy::UnregisterNetPolicyCallback(const sptr<INetPolicy
 
     MessageOption option;
     MessageParcel replyParcel;
-    int32_t retCode =
-        remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK),
-                            dataParcel, replyParcel, option);
-    if (retCode != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return retCode;
-    }
-
-    int32_t result = 0;
-    if (!replyParcel.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK),
+                       dataParcel, replyParcel, option);
 }
 
 int32_t NetPolicyServiceProxy::SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies)
@@ -340,19 +301,8 @@ int32_t NetPolicyServiceProxy::SetNetQuotaPolicies(const std::vector<NetQuotaPol
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NET_QUOTA_POLICIES),
-                                          data, reply, option);
-    if (retCode != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return retCode;
-    }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NET_QUOTA_POLICIES), data, reply,
+                       option);
 }
 
 int32_t NetPolicyServiceProxy::GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies)
@@ -371,8 +321,8 @@ int32_t NetPolicyServiceProxy::GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NET_QUOTA_POLICIES),
-                                          data, reply, option);
+    int32_t retCode = SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NET_QUOTA_POLICIES),
+                                  data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return retCode;
@@ -382,13 +332,7 @@ int32_t NetPolicyServiceProxy::GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &
         NETMGR_LOG_E("Unmarshalling failed.");
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return retCode;
 }
 
 int32_t NetPolicyServiceProxy::ResetPolicies(const std::string &simId)
@@ -412,19 +356,7 @@ int32_t NetPolicyServiceProxy::ResetPolicies(const std::string &simId)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode =
-        remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_RESET_POLICIES), data, reply, option);
-    if (retCode != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return retCode;
-    }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_RESET_POLICIES), data, reply, option);
 }
 
 int32_t NetPolicyServiceProxy::SetBackgroundPolicy(bool isBackgroundPolicyAllow)
@@ -448,19 +380,8 @@ int32_t NetPolicyServiceProxy::SetBackgroundPolicy(bool isBackgroundPolicyAllow)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_BACKGROUND_POLICY),
-                                          data, reply, option);
-    if (retCode != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return retCode;
-    }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_BACKGROUND_POLICY), data, reply,
+                       option);
 }
 
 int32_t NetPolicyServiceProxy::GetBackgroundPolicy(bool &backgroundPolicy)
@@ -479,8 +400,8 @@ int32_t NetPolicyServiceProxy::GetBackgroundPolicy(bool &backgroundPolicy)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY),
-                                          data, reply, option);
+    int32_t retCode = SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY),
+                                  data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return retCode;
@@ -490,13 +411,7 @@ int32_t NetPolicyServiceProxy::GetBackgroundPolicy(bool &backgroundPolicy)
         NETMGR_LOG_E("Read Bool reply failed");
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return retCode;
 }
 
 int32_t NetPolicyServiceProxy::GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backgroundPolicyOfUid)
@@ -520,8 +435,8 @@ int32_t NetPolicyServiceProxy::GetBackgroundPolicyByUid(uint32_t uid, uint32_t &
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(
-        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY_BY_UID), data, reply, option);
+    int32_t retCode = SendRequest(
+        remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY_BY_UID), data, reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return retCode;
@@ -531,13 +446,7 @@ int32_t NetPolicyServiceProxy::GetBackgroundPolicyByUid(uint32_t uid, uint32_t &
         NETMGR_LOG_E("Read uint32 reply failed");
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return retCode;
 }
 
 int32_t NetPolicyServiceProxy::UpdateRemindPolicy(int32_t netType, const std::string &simId, uint32_t remindType)
@@ -571,19 +480,8 @@ int32_t NetPolicyServiceProxy::UpdateRemindPolicy(int32_t netType, const std::st
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_UPDATE_REMIND_POLICY),
-                                          data, reply, option);
-    if (retCode != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return retCode;
-    }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_UPDATE_REMIND_POLICY), data, reply,
+                       option);
 }
 
 int32_t NetPolicyServiceProxy::SetDeviceIdleTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
@@ -611,19 +509,8 @@ int32_t NetPolicyServiceProxy::SetDeviceIdleTrustlist(const std::vector<uint32_t
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_TRUSTLIST), data,
-                                          reply, option);
-    if (retCode != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return retCode;
-    }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_IDLE_TRUSTLIST), data, reply,
+                       option);
 }
 
 int32_t NetPolicyServiceProxy::GetDeviceIdleTrustlist(std::vector<uint32_t> &uids)
@@ -642,8 +529,8 @@ int32_t NetPolicyServiceProxy::GetDeviceIdleTrustlist(std::vector<uint32_t> &uid
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_IDLE_TRUSTLIST), data,
-                                          reply, option);
+    int32_t retCode = SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_IDLE_TRUSTLIST), data,
+                                  reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return retCode;
@@ -653,13 +540,7 @@ int32_t NetPolicyServiceProxy::GetDeviceIdleTrustlist(std::vector<uint32_t> &uid
         NETMGR_LOG_E("Read reply uint32 Vector failed");
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return retCode;
 }
 
 int32_t NetPolicyServiceProxy::SetDeviceIdlePolicy(bool enable)
@@ -683,19 +564,8 @@ int32_t NetPolicyServiceProxy::SetDeviceIdlePolicy(bool enable)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_DEVICE_IDLE_POLICY),
-                                          data, reply, option);
-    if (retCode != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return retCode;
-    }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_DEVICE_IDLE_POLICY), data, reply,
+                       option);
 }
 
 int32_t NetPolicyServiceProxy::SetPowerSavePolicy(bool enable)
@@ -719,19 +589,8 @@ int32_t NetPolicyServiceProxy::SetPowerSavePolicy(bool enable)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_POLICY),
-                                          data, reply, option);
-    if (retCode != ERR_NONE) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-    }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_POLICY), data, reply,
+                       option);
 }
 
 int32_t NetPolicyServiceProxy::GetPowerSaveTrustlist(std::vector<uint32_t> &uids)
@@ -750,24 +609,18 @@ int32_t NetPolicyServiceProxy::GetPowerSaveTrustlist(std::vector<uint32_t> &uids
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POWER_SAVE_TRUSTLIST),
-                                          data, reply, option);
+    int32_t retCode = SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POWER_SAVE_TRUSTLIST),
+                                  data, reply, option);
     if (retCode != ERR_NONE) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        return retCode;
     }
 
     if (!reply.ReadUInt32Vector(&uids)) {
         NETMGR_LOG_E("proxy SendRequest Readuint32Vector failed");
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return retCode;
 }
 
 int32_t NetPolicyServiceProxy::SetPowerSaveTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
@@ -796,19 +649,8 @@ int32_t NetPolicyServiceProxy::SetPowerSaveTrustlist(const std::vector<uint32_t>
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_TRUSTLIST),
-                                          data, reply, option);
-    if (retCode != ERR_NONE) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-    }
-
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_TRUSTLIST), data,
+                       reply, option);
 }
 
 bool NetPolicyServiceProxy::WriteInterfaceToken(MessageParcel &data)
