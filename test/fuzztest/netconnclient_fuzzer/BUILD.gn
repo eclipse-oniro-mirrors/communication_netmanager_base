@@ -41,7 +41,10 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "net_conn_client_fuzzer.cpp" ]
+  sources = [
+    "mock_net_conn_permission.cpp",
+    "net_conn_client_fuzzer.cpp",
+  ]
 
   deps = [
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
