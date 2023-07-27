@@ -246,7 +246,7 @@ int32_t NetConnServiceStub::OnRegisterNetSupplier(MessageParcel &data, MessagePa
     if (!data.ReadUint32(type)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
-     if (type > static_cast<uint32>(NetBearType::BEARER_DEFAULT)) {
+    if (type > static_cast<uint32_t>(NetBearType::BEARER_DEFAULT)) {
         return NETMANAGER_ERR_INTERNAL;
     }
     bearerType = static_cast<NetBearType>(type);
@@ -614,10 +614,10 @@ int32_t NetConnServiceStub::OnGetSpecificNet(MessageParcel &data, MessageParcel 
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    if (type > static_cast<uint32>(NetBearType::BEARER_DEFAULT)) {
+    if (type > static_cast<uint32_t>(NetBearType::BEARER_DEFAULT)) {
         return NETMANAGER_ERR_INTERNAL;
     }
- 
+
     NetBearType bearerType = static_cast<NetBearType>(type);
 
     NETMGR_LOG_D("stub execute GetSpecificNet");
