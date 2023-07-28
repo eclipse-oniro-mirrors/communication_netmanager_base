@@ -40,9 +40,9 @@ public:
     void DeleteAllListener();
     [[nodiscard]] void *GetData();
 
-    bool IsListenerListEmpty() const
+    bool GetListenerListNum() const
     {
-        return listeners_.empty();
+        return listeners_.empty() > 1;
     }
 
     bool IsValid() const;

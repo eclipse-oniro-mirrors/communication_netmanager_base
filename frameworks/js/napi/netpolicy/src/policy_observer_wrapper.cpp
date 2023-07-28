@@ -106,7 +106,7 @@ napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,
         return NapiUtils::GetUndefined(env);
     }
 
-    if (!manager_->IsListenerListEmpty()) {
+    if (!manager_->GetListenerListNum()) {
         int32_t ret = NetPolicyClient::GetInstance().CheckPermission();
         if (ret != NETMANAGER_SUCCESS) {
             NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
@@ -123,7 +123,7 @@ napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,
         }
     }
 
-    if (manager_->IsListenerListEmpty()) {
+    if (manager_->GetListenerListNum()) {
         auto ret = NetPolicyClient::GetInstance().UnregisterNetPolicyCallback(observer_);
         if (ret != NETMANAGER_SUCCESS) {
             NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
