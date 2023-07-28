@@ -101,7 +101,7 @@ napi_value StatisticsObserverWrapper::Off(napi_env env, napi_callback_info info,
         manager_->DeleteListener(event);
     }
 
-    if (manager_->GetListenerListNum()) {
+    if (manager_->IsListenerListEmpty()) {
         auto ret = NetStatsClient::GetInstance().UnregisterNetStatsCallback(observer_);
         if (ret != NETMANAGER_SUCCESS) {
             NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);

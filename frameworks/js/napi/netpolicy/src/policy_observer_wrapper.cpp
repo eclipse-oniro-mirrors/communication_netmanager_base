@@ -24,6 +24,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+constexpr const int DELETE_SIZE = 1;
 PolicyObserverWrapper::PolicyObserverWrapper()
     : observer_(new NetPolicyCallbackObserver()), manager_(new EventManager()), registed_(false)
 {
@@ -106,7 +107,7 @@ napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,
         return NapiUtils::GetUndefined(env);
     }
 
-    if (!manager_->GetListenerListNum()) {
+    if (!(manager_->GetListenerListNum() > DELETE_SIZE)) {
         int32_t ret = NetPolicyClient::GetInstance().CheckPermission();
         if (ret != NETMANAGER_SUCCESS) {
             NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
@@ -123,7 +124,7 @@ napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,
         }
     }
 
-    if (manager_->GetListenerListNum()) {
+    if (manager_->IsListenerListEmpty()) {
         auto ret = NetPolicyClient::GetInstance().UnregisterNetPolicyCallback(observer_);
         if (ret != NETMANAGER_SUCCESS) {
             NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);

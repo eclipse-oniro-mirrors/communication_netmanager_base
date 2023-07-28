@@ -16,9 +16,9 @@
 #ifndef COMMUNICATIONNETMANAGER_BASE_EVENT_MANAGER_H
 #define COMMUNICATIONNETMANAGER_BASE_EVENT_MANAGER_H
 
+#include <atomic>
 #include <list>
 #include <mutex>
-#include <atomic>
 
 #include <uv.h>
 
@@ -40,11 +40,15 @@ public:
     void DeleteAllListener();
     [[nodiscard]] void *GetData();
 
-    bool GetListenerListNum() const
+    bool IsListenerListEmpty() const
     {
-        return listeners_.empty() > 1;
+        return listeners_.empty();
     }
 
+    size_t GetListenerListNum() const
+    {
+        return listeners_.size();
+    }
     bool IsValid() const;
     void SetInvalid();
 
