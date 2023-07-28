@@ -28,8 +28,8 @@ constexpr uint32_t MAX_IFACE_NUM = 16;
 constexpr uint32_t MAX_NET_CAP_NUM = 32;
 constexpr uint32_t UID_FOUNDATION = 5523;
 const std::vector<uint32_t> SYSTEM_CODE{static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_AIRPLANE_MODE),
-                                       static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_GLOBAL_HTTP_PROXY),
-                                       static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY)};
+                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_GLOBAL_HTTP_PROXY),
+                                        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY)};
 const std::vector<uint32_t> PERMISSION_NEED_CACHE_CODES{
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK),
     static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET)};
@@ -245,6 +245,9 @@ int32_t NetConnServiceStub::OnRegisterNetSupplier(MessageParcel &data, MessagePa
     uint32_t type = 0;
     if (!data.ReadUint32(type)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (type > static_cast<uint32_t>(NetBearType::BEARER_DEFAULT)) {
+        return NETMANAGER_ERR_INTERNAL;
     }
     bearerType = static_cast<NetBearType>(type);
 
@@ -610,6 +613,11 @@ int32_t NetConnServiceStub::OnGetSpecificNet(MessageParcel &data, MessageParcel 
     if (!data.ReadUint32(type)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
+
+    if (type > static_cast<uint32_t>(NetBearType::BEARER_DEFAULT)) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+
     NetBearType bearerType = static_cast<NetBearType>(type);
 
     NETMGR_LOG_D("stub execute GetSpecificNet");
