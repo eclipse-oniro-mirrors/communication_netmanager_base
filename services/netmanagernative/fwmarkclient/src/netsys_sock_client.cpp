@@ -15,6 +15,7 @@
 
 #include "netsys_sock_client.h"
 
+#include <cerrno>
 #include <atomic>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -42,7 +43,7 @@ int HookSocket(int (*fn)(int, int, int), int domain, int type, int protocol)
     }
 
     if (fd < 0) {
-        NETNATIVE_LOGE("musl create socket failed");
+        NETNATIVE_LOGE("musl create socket failed, errno %{public}d", errno);
         return fd;
     }
 

@@ -99,7 +99,7 @@ int32_t VirtualNetwork::RemoveInterface(std::string &interfaceName)
         return NETMANAGER_ERROR;
     }
 
-    VpnManager::GetInstance().DestoryVpnInterface();
+    VpnManager::GetInstance().DestroyVpnInterface();
     std::lock_guard<std::mutex> lock(mutex_);
     interfaces_.erase(interfaceName);
     return NETMANAGER_SUCCESS;

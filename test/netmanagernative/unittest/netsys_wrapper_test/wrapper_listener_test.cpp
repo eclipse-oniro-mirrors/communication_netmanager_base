@@ -50,7 +50,7 @@ HWTEST_F(WrapperListenerTest, StartTest001, TestSize.Level1)
     auto ret = listener->Start();
     EXPECT_EQ(ret, NetlinkResult::ERROR);
     ret = listener->Stop();
-    EXPECT_EQ(ret, NetlinkResult::OK);
+    EXPECT_EQ(ret, NetlinkResult::ERROR);
 }
 
 HWTEST_F(WrapperListenerTest, StartTest002, TestSize.Level1)

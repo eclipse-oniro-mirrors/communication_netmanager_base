@@ -18,7 +18,7 @@
 
 #include <string>
 #include <vector>
-
+#include <mutex>
 namespace OHOS {
 namespace NetManagerStandard {
 constexpr uint32_t DEFAULT_FOREGROUND_UID = 123;
@@ -40,6 +40,7 @@ public:
 private:
     uint32_t foregroundUid_ = DEFAULT_FOREGROUND_UID;
     std::vector<uint32_t> systemUids_;
+    std::mutex mutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -281,12 +281,14 @@ void RegisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     uint32_t bearerType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
-    dataParcel.ReadUint32(bearerType);
+    dataParcel.WriteUint32(bearerType);
 
     std::string ident = GetStringFromData(STR_LEN);
     dataParcel.WriteString(ident);
 
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
+    uint32_t capsSize = static_cast<uint32_t>(netCaps.size());
+    dataParcel.WriteUint32(capsSize);
     for (auto netCap : netCaps) {
         dataParcel.WriteUint32(static_cast<uint32_t>(netCap));
     }
@@ -805,7 +807,7 @@ void SetInternetPermissionFuzzTest(const uint8_t *data, size_t size)
     }
 
     dataParcel.WriteUint32(uid);
-    dataParcel.WriteUint32(allow);
+    dataParcel.WriteUint8(allow);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERNET_PERMISSION), dataParcel);
 }
 
@@ -850,7 +852,7 @@ void GetIfaceNamesFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    dataParcel.ReadUint32(bearerType);
+    dataParcel.WriteUint32(bearerType);
 
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACE_NAMES), dataParcel);
 }
@@ -866,16 +868,14 @@ void GetIfaceNameByTypeFuzzTest(const uint8_t *data, size_t size)
 
     uint32_t bearerType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
     std::string ident = GetStringFromData(STR_LEN);
-    std::string ifaceName = GetStringFromData(STR_LEN);
 
     MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
 
-    dataParcel.ReadUint32(bearerType);
+    dataParcel.WriteUint32(bearerType);
     dataParcel.WriteString(ident);
-    dataParcel.WriteString(ifaceName);
 
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACENAME_BY_TYPE), dataParcel);
 }
@@ -950,7 +950,7 @@ void GetSpecificNetFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    dataParcel.ReadUint32(bearerType);
+    dataParcel.WriteUint32(bearerType);
 
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET), dataParcel);
 }

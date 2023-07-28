@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,6 +101,47 @@ napi_value Interface(napi_env env, napi_callback_info info, const std::string &a
         return context->CreatePromise();
     }
     return NapiUtils::GetUndefined(env);
+}
+
+template <class Context>
+napi_value InterfaceSync(napi_env env, napi_callback_info info, const std::string &asyncWorkName,
+                         bool (*Work)(napi_env, napi_value, Context *), bool (*executor)(Context *),
+                         napi_value (*callback)(Context *))
+{
+    static_assert(std::is_base_of<BaseContext, Context>::value);
+
+    napi_value thisVal = nullptr;
+    size_t paramsCount = MAX_PARAM_NUM;
+    napi_value params[MAX_PARAM_NUM] = {nullptr};
+    NAPI_CALL(env, napi_get_cb_info(env, info, &paramsCount, params, &thisVal, nullptr));
+    EventManager *manager = nullptr;
+    napi_unwrap(env, thisVal, reinterpret_cast<void **>(&manager));
+
+    auto deleter = [](Context *context) { delete context; };
+    auto text = new Context(env, manager);
+    std::unique_ptr<Context, decltype(deleter)> context(text, deleter);
+    if (!context) {
+        return NapiUtils::GetUndefined(context->GetEnv());
+    }
+
+    context->ParseParams(params, paramsCount);
+    NETMANAGER_BASE_LOGI("js params parse OK ? %{public}d", context->IsParseOK());
+
+    if (Work != nullptr) {
+        if (!Work(env, thisVal, context.get())) {
+            NETMANAGER_BASE_LOGE("work failed error code = %{public}d", context->GetErrorCode());
+        }
+    }
+
+    if (!executor || !callback) {
+        NETMANAGER_BASE_LOGE("executor or callback is null");
+        return NapiUtils::GetUndefined(context->GetEnv());
+    }
+
+    if (!executor(context.get())) {
+        return NapiUtils::GetUndefined(context->GetEnv());
+    }
+    return callback(context.get());
 }
 
 template <class Context>
