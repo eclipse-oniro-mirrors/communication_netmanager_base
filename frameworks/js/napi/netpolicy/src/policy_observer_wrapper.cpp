@@ -107,7 +107,7 @@ napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,
         return NapiUtils::GetUndefined(env);
     }
 
-    if (manager_->GetListenerListNum() >= DELETE_SIZE) {
+    if (manager_->GetListenerListNum() > DELETE_SIZE) {
         int32_t ret = NetPolicyClient::GetInstance().CheckPermission();
         if (ret != NETMANAGER_SUCCESS) {
             NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
@@ -132,6 +132,11 @@ napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,
             std::string errorMsg = convertor.ConvertErrorCode(ret);
             napi_throw_error(env, std::to_string(ret).c_str(), errorMsg.c_str());
         } else {
+            if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
+                manager_->DeleteListener(event, params[ARG_INDEX_1]);
+            } else {
+                manager_->DeleteListener(event);
+            }
             registed_ = false;
         }
     }
