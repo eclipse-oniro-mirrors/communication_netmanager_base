@@ -678,8 +678,13 @@ int32_t NetPolicyServiceProxy::CheckPermission()
 
     MessageParcel reply;
     MessageOption option;
-    return SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CHECK_PERMISSION), data, reply,
-                       option);
+    remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CHECK_PERMISSION), data, reply, option);
+    int32_t result = 0;
+    if (!reply.ReadInt32(result)) {
+        NETMGR_LOG_E("Read int32 reply failed.");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return result;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
