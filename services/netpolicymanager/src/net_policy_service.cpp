@@ -32,8 +32,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-static std::atomic<bool>
-    g_RegisterToService(SystemAbility::MakeAndRegisterAbility(DelayedSingleton<NetPolicyService>::GetInstance().get()));
+static std::atomic<bool> g_RegisterToService(
+    SystemAbility::MakeAndRegisterAbility(DelayedSingleton<NetPolicyService>::GetInstance().get()));
 
 NetPolicyService::NetPolicyService()
     : SystemAbility(COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID, true), state_(STATE_STOPPED)
@@ -257,6 +257,11 @@ int32_t NetPolicyService::GetDumpMessage(std::string &message)
 {
     netPolicyRule_->GetDumpMessage(message);
     netPolicyTraffic_->GetDumpMessage(message);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyService::CheckPermission()
+{
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
