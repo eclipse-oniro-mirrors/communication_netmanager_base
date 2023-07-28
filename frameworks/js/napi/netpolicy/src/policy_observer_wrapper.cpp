@@ -133,7 +133,7 @@ napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,
     return NapiUtils::GetUndefined(env);
 }
 
-void PolicyObserverWrapper::DeleteListener(size_t paramsCount, napi_value params, std::string event)
+void PolicyObserverWrapper::DeleteListener(size_t paramsCount, napi_value *params, std::string event)
 {
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
         manager_->DeleteListener(event, params[ARG_INDEX_1]);

@@ -40,7 +40,7 @@ public:
                   bool asyncCallback);
     napi_value Off(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events,
                    bool asyncCallback);
-    void DeleteListener(size_t paramsCount, napi_value params, std::string event);
+    void DeleteListener(size_t paramsCount, napi_value *params, std::string event);
     EventManager *GetEventManager() const
     {
         return manager_;
