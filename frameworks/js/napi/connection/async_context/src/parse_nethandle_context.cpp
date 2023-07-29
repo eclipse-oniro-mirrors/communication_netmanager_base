@@ -29,13 +29,15 @@ void ParseNetHandleContext::ParseParams(napi_value *params, size_t paramsCount)
         return;
     }
 
+    auto value = NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0], KEY_NET_ID);
+    if (NapiUtils::GetValueType(GetEnv(), value) != napi_number) {
+        SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        return;
+    }
+
     int32_t netId_ = NapiUtils::GetInt32Property(GetEnv(), params[ARG_INDEX_0], KEY_NET_ID);
     netHandle_.SetNetId(netId_);
 
-    if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
-        SetParseOK(SetCallback(params[ARG_INDEX_1]) == napi_ok);
-        return;
-    }
     SetParseOK(true);
 }
 
@@ -45,20 +47,19 @@ bool ParseNetHandleContext::CheckParamsType(napi_value *params, size_t paramsCou
         if (NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_object) {
             return true;
         }
-        if (NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_function) {
-            SetCallback(params[paramsCount - 1]);
-        }
     }
 
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
-        if (NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) == napi_object &&
-               NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_function) {
-            return true;
+        if (NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) != napi_function) {
+            return false;
         }
-        if (NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_1]) == napi_function) {
-            SetCallback(params[paramsCount - 1]);
+        auto status = SetCallback(params[ARG_INDEX_1]);
+        if (NapiUtils::GetValueType(GetEnv(), params[ARG_INDEX_0]) != napi_object) {
+            return false;
         }
+        return (status == napi_ok);
     }
+
     return false;
 }
 } // namespace OHOS::NetManagerStandard
