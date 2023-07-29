@@ -118,7 +118,7 @@ napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,
         }
         DeleteListener(paramsCount, params, event);
     }
-    if (manager_->GetListenerListNum() == DELETE_SIZE) {
+    if (manager_->GetListenerListNum() <= DELETE_SIZE) {
         auto ret = NetPolicyClient::GetInstance().UnregisterNetPolicyCallback(observer_);
         if (ret != NETMANAGER_SUCCESS) {
             NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
