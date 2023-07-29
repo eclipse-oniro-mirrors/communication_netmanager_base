@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,9 +48,12 @@ public:
     int32_t GetPowerSaveTrustlist(std::vector<uint32_t> &uids) override;
     int32_t SetPowerSaveTrustlist(const std::vector<uint32_t> &uids, bool isAllowed) override;
     int32_t SetPowerSavePolicy(bool enable) override;
+    int32_t CheckPermission() override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
+    int32_t SendRequest(sptr<IRemoteObject> &remote, uint32_t code, MessageParcel &data, MessageParcel &reply,
+                        MessageOption &option);
 
 private:
     static inline BrokerDelegator<NetPolicyServiceProxy> delegator_;

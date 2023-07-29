@@ -19,9 +19,9 @@
 #include <unistd.h>
 
 #include "ipc_skeleton.h"
+#include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
 #include "netmanager_base_permission.h"
-#include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "securec.h"
 
@@ -603,7 +603,7 @@ int32_t NetsysNativeServiceStub::CmdNetworkAddUids(MessageParcel &data, MessageP
         NETNATIVE_LOGE("read net id or size failed");
         return IPC_STUB_ERR;
     }
-    size = (size > MAX_UID_ARRAY_SIZE) ? MAX_UID_ARRAY_SIZE : size;
+    size = (size > static_cast<int32_t>(MAX_UID_ARRAY_SIZE)) ? static_cast<int32_t>(MAX_UID_ARRAY_SIZE) : size;
 
     sptr<UidRange> uid;
     std::vector<UidRange> uidRanges;
@@ -631,7 +631,8 @@ int32_t NetsysNativeServiceStub::CmdNetworkDelUids(MessageParcel &data, MessageP
         NETNATIVE_LOGE("read net id or size failed");
         return IPC_STUB_ERR;
     }
-    size = (size > MAX_UID_ARRAY_SIZE) ? MAX_UID_ARRAY_SIZE : size;
+
+    size = (size > static_cast<int32_t>(MAX_UID_ARRAY_SIZE)) ? static_cast<int32_t>(MAX_UID_ARRAY_SIZE) : size;
 
     sptr<UidRange> uid;
     std::vector<UidRange> uidRanges;
@@ -1132,6 +1133,11 @@ int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, Message
 
 int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply)
 {
+    if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NETNATIVE_LOGE("CmdSetIptablesCommandForRes CheckNetSysInternalPermission failed");
+        return NETMANAGER_ERR_PERMISSION_DENIED;
+    }
     std::string cmd = data.ReadString();
     std::string respond;
     int32_t result = SetIptablesCommandForRes(cmd, respond);

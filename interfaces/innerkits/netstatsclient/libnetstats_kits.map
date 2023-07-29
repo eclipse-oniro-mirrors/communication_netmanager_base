@@ -33,6 +33,7 @@
       "OHOS::NetManagerStandard::NetStatsClient::UpdateStatsData()";
       "OHOS::NetManagerStandard::NetStatsClient::~NetStatsClient()";
       "OHOS::NetManagerStandard::NetStatsClient::ResetFactory()";
+      "OHOS::NetManagerStandard::NetStatsClient::OnRemoteDied(OHOS::wptr<OHOS::IRemoteObject> const&)";
       "OHOS::NetManagerStandard::NetStatsClient::GetCellularRxBytes(unsigned long&)";
       "OHOS::NetManagerStandard::NetStatsClient::GetCellularTxBytes(unsigned long&)";
       "OHOS::NetManagerStandard::NetStatsClient::GetAllRxBytes(unsigned long&)";

@@ -107,5 +107,20 @@ HWTEST_F(NetStatsInfoTest, MarshallingUnmarshallingTest003, TestSize.Level1)
     std::vector<NetStatsInfo> results;
     EXPECT_TRUE(NetStatsInfo::Unmarshalling(parcel, results));
 }
+
+/**
+ * @tc.name: NetStatsInfoOperator
+ * @tc.desc: Test NetStatsInfo Operator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsInfoTest, NetStatsInfoOperator, TestSize.Level1)
+{
+    NetStatsInfo infoa = GetNetStatsInfoData();
+    NetStatsInfo infob = GetNetStatsInfoData();
+    NetStatsInfo infoc = infoa - infob;
+    EXPECT_EQ(infoc.rxBytes_, 0);
+    infoc += infoa;
+    EXPECT_EQ(infoc.rxBytes_, infoa.rxBytes_);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -16,9 +16,9 @@
 #ifndef COMMUNICATIONNETMANAGER_BASE_EVENT_MANAGER_H
 #define COMMUNICATIONNETMANAGER_BASE_EVENT_MANAGER_H
 
+#include <atomic>
 #include <list>
 #include <mutex>
-#include <atomic>
 
 #include <uv.h>
 
@@ -45,6 +45,10 @@ public:
         return listeners_.empty();
     }
 
+    size_t GetListenerListNum() const
+    {
+        return listeners_.size();
+    }
     bool IsValid() const;
     void SetInvalid();
 
