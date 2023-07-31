@@ -719,7 +719,7 @@ int32_t NetsysNativeServiceStub::CmdNetworkRemoveInterface(MessageParcel &data, 
     std::string iface = data.ReadString();
     int32_t result = NetworkRemoveInterface(netId, iface);
     reply.WriteInt32(result);
-    NETNATIVE_LOG_D("NetworkRemoveRouteParcel has recved result %{public}d", result);
+    NETNATIVE_LOG_D("NetworkRemoveInterface has recved result %{public}d", result);
 
     return result;
 }

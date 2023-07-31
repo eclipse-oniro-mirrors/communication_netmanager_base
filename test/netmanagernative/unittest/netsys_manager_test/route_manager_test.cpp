@@ -15,12 +15,14 @@
 
 #include <gtest/gtest.h>
 
+#include "net_manager_constants.h"
 #include "route_manager.h"
 
 namespace OHOS {
 namespace nmd {
 namespace {
 using namespace testing::ext;
+using namespace OHOS::NetManagerStandard;
 } // namespace
 
 class RouteManagerTest : public testing::Test {
@@ -204,7 +206,7 @@ HWTEST_F(RouteManagerTest, RemoveInterfaceFromPhysicalNetworkTest001, TestSize.L
     uint16_t testNetId = 154;
     const std::string testInterfaceName = "eth0";
     auto ret = RouteManager::RemoveInterfaceFromPhysicalNetwork(testNetId, testInterfaceName, PERMISSION_NONE);
-    EXPECT_LE(ret, 0);
+    EXPECT_LE(ret, NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(RouteManagerTest, RemoveInterfaceFromPhysicalNetworkTest002, TestSize.Level1)
@@ -212,7 +214,7 @@ HWTEST_F(RouteManagerTest, RemoveInterfaceFromPhysicalNetworkTest002, TestSize.L
     uint16_t testNetId = 154;
     const std::string testInterfaceName = "eth1";
     auto ret = RouteManager::RemoveInterfaceFromPhysicalNetwork(testNetId, testInterfaceName, PERMISSION_NETWORK);
-    EXPECT_LE(ret, 0);
+    EXPECT_LE(ret, NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(RouteManagerTest, RemoveInterfaceFromPhysicalNetworkTest003, TestSize.Level1)
@@ -220,7 +222,7 @@ HWTEST_F(RouteManagerTest, RemoveInterfaceFromPhysicalNetworkTest003, TestSize.L
     uint16_t testNetId = 154;
     const std::string testInterfaceName = "wlan0";
     auto ret = RouteManager::RemoveInterfaceFromPhysicalNetwork(testNetId, testInterfaceName, PERMISSION_SYSTEM);
-    EXPECT_LE(ret, 0);
+    EXPECT_LE(ret, NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(RouteManagerTest, RemoveInterfaceFromPhysicalNetworkTest004, TestSize.Level1)
@@ -334,7 +336,7 @@ HWTEST_F(RouteManagerTest, RemoveInterfaceFromLocalNetworkTest003, TestSize.Leve
     uint16_t testNetId = 154;
     const std::string testInterfaceName = "testInterfaceName";
     auto ret = RouteManager::RemoveInterfaceFromLocalNetwork(testNetId, testInterfaceName);
-    EXPECT_LE(ret, 0);
+    EXPECT_LE(ret, NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(RouteManagerTest, RemoveInterfaceFromLocalNetworkTest004, TestSize.Level1)
