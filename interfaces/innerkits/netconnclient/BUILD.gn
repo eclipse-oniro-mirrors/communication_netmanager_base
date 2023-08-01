@@ -79,7 +79,6 @@ ohos_shared_library("net_conn_manager_if") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    integer_overflow = true
     boundary_sanitize = true
     all_ubsan = true
     blocklist = "./connect_blocklist.txt"
@@ -141,7 +140,6 @@ ohos_shared_library("socket_permission") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    integer_overflow = true
     boundary_sanitize = true
     all_ubsan = true
   }

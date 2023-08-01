@@ -73,7 +73,6 @@ ohos_shared_library("net_policy_manager_if") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    integer_overflow = true
     boundary_sanitize = true
     all_ubsan = true
   }
