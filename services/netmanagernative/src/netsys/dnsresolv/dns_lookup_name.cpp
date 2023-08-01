@@ -411,11 +411,7 @@ void DnsLookUpName::LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId)
         int32_t family = buf[i].family;
         uint32_t key = 0;
         sockaddr_in6 sa6 = {0};
-        sockaddr_in6 da6 = {
-            .sin6_family = AF_INET6,
-            .sin6_port = PORT_NUM,
-            .sin6_scope_id = buf[i].scopeid,
-        };
+        sockaddr_in6 da6 = {.sin6_family = AF_INET6, .sin6_port = PORT_NUM, .sin6_scope_id = buf[i].scopeid};
         sockaddr_in sa4 = {0};
         sockaddr_in da4 = {.sin_family = AF_INET, .sin_port = PORT_NUM};
         void *sa, *da;
@@ -445,16 +441,8 @@ void DnsLookUpName::LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId)
         int32_t preFixLen = 0;
         int32_t lookUpNameFd = socket(family, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
         if (lookUpNameFd >= 0) {
-            ScokAddrCopy addrBuff = {
-                .lookUpNameFd = lookUpNameFd,
-                .sa6 = sa6,
-                .da6 = da6,
-                .sa4 = sa4,
-                .saLen = saLen,
-                .daLen = daLen,
-                .dLabel = dLabel,
-                .family = family,
-            };
+            ScokAddrCopy addrBuff = {.lookUpNameFd = lookUpNameFd, .sa6 = sa6, .da6 = da6, .sa4 = sa4,
+                    .saLen = saLen, .daLen = daLen, .dLabel = dLabel, .family = family};
             SockAddrCopy(addrBuff, da, sa, dScope, preFixLen, key);
         }
         key |= dPrec << DAS_PREC_SHIFT;

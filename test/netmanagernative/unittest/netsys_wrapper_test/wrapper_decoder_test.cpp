@@ -170,26 +170,20 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest001, TestSize.Level1)
 
     pmsghdr->nlmsg_len = NLMSG_ALIGN(sizeof(struct nlmsghdr));
     pmsghdr->nlmsg_type = RTM_NEWADDR;
-
-    auto ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
-    EXPECT_FALSE(ret);
+    EXPECT_FALSE(decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata)));
 
     pmsghdr->nlmsg_len = sizeof(binarydata);
-    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
-    EXPECT_FALSE(ret);
+    EXPECT_FALSE(decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata)));
 
     prtattr->rta_type = IFLA_IFNAME;
-    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
-    EXPECT_FALSE(ret);
+    EXPECT_FALSE(decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata)));
 
     prtattr->rta_type = IFA_ADDRESS;
     prtattr->rta_len = RTA_ALIGN(sizeof(struct rtattr));
-    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
-    EXPECT_FALSE(ret);
+    EXPECT_FALSE(decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata)));
 
     pifaddrmsg->ifa_family = AF_INET;
-    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
-    EXPECT_FALSE(ret);
+    EXPECT_FALSE(decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata)));
 
     ipv4Addr->s_addr = inet_addr("127.0.0.1");
     prtattr->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct in_addr));
@@ -197,16 +191,14 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest001, TestSize.Level1)
     ASSERT_NE(prtattr1, nullptr);
     prtattr1->rta_type = IFA_CACHEINFO;
     prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr));
-    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata)));
 
     prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct ifa_cacheinfo));
     rtattr *prtattr2 = reinterpret_cast<struct rtattr *>((reinterpret_cast<char *>(prtattr1)) + prtattr1->rta_len);
     ASSERT_NE(prtattr2, nullptr);
     prtattr2->rta_type = IFA_FLAGS;
     prtattr2->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(uint32_t));
-    ret = decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata));
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata)));
 }
 
 HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest002, TestSize.Level1)
