@@ -36,6 +36,7 @@ config("netmgr_common_config") {
 ohos_shared_library("net_manager_common") {
   sanitize = {
     cfi = true
+    debug = false
   }
 
   sources = [

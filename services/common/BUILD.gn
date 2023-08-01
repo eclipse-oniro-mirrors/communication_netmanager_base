@@ -24,6 +24,7 @@ ohos_shared_library("net_service_common") {
     cfi = true
     boundary_sanitize = true
     all_ubsan = true
+    debug = false
   }
 
   sources = [

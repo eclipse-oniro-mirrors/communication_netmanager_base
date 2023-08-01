@@ -97,6 +97,11 @@ netsys_native_manager_deps = [
 ]
 
 ohos_shared_library("netsys_native_manager") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   configs = [ ":netsys_native_manager_config" ]
 
   cflags = [

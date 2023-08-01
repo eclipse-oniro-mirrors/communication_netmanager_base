@@ -82,6 +82,7 @@ ohos_shared_library("net_conn_manager_if") {
     boundary_sanitize = true
     all_ubsan = true
     blocklist = "./connect_blocklist.txt"
+    debug = false
   }
 
   sources = [
@@ -142,6 +143,7 @@ ohos_shared_library("socket_permission") {
     cfi_cross_dso = true
     boundary_sanitize = true
     all_ubsan = true
+    debug = false
   }
 
   sources = [ "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/socket_permission.cpp" ]

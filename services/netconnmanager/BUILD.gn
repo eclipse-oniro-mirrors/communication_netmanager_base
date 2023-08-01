@@ -38,6 +38,7 @@ ohos_shared_library("net_conn_manager") {
     boundary_sanitize = true
     all_ubsan = true
     blocklist = "./connect_blocklist.txt"
+    debug = false
   }
 
   sources = [

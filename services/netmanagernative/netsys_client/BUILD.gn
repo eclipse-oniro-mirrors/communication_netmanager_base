@@ -20,6 +20,7 @@ ohos_shared_library("netsys_client") {
     cfi_cross_dso = true
     boundary_sanitize = true
     all_ubsan = true
+    debug = false
   }
 
   sources = [

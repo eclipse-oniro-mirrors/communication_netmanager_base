@@ -27,6 +27,7 @@ ohos_shared_library("netsys_controller") {
     cfi_cross_dso = true
     boundary_sanitize = true
     all_ubsan = true
+    debug = false
   }
 
   all_dependent_configs = [ ":netsys_controller_include" ]

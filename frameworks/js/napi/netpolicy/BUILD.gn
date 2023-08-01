@@ -37,6 +37,7 @@ ohos_shared_library("policy") {
     cfi_cross_dso = true
     boundary_sanitize = true
     all_ubsan = true
+    debug = false
   }
 
   sources = [
