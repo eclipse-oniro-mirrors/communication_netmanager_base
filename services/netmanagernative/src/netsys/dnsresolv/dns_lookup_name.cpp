@@ -442,7 +442,7 @@ void DnsLookUpName::LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId)
         int32_t lookUpNameFd = socket(family, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
         if (lookUpNameFd >= 0) {
             ScokAddrCopy addrBuff = {.lookUpNameFd = lookUpNameFd, .sa6 = sa6, .da6 = da6, .sa4 = sa4,
-                    .saLen = saLen, .daLen = daLen, .dLabel = dLabel, .family = family};
+                .saLen = saLen, .daLen = daLen, .dLabel = dLabel, .family = family};
             SockAddrCopy(addrBuff, da, sa, dScope, preFixLen, key);
         }
         key |= dPrec << DAS_PREC_SHIFT;
