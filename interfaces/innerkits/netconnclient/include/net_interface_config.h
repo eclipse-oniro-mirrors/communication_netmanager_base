@@ -23,7 +23,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-struct NetInterfaceConfiguration : public Parcelable {
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
+struct NET_SYMBOL_VISIBLE NetInterfaceConfiguration : public Parcelable {
     std::string ifName_;
     std::string hwAddr_;
     std::string ipv4Addr_;
@@ -36,6 +37,6 @@ struct NetInterfaceConfiguration : public Parcelable {
     bool Marshalling(Parcel &parcel) const override;
     static bool Unmarshalling(Parcel &parcel, NetInterfaceConfiguration &config);
 };
-} // namespace nmd
+} // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NET_INTERFACE_CONFIG_H

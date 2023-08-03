@@ -33,9 +33,10 @@ config("net_policy_manager_config") {
 ohos_shared_library("net_policy_manager") {
   sanitize = {
     cfi = true
-    integer_overflow = true
+    cfi_cross_dso = true
     boundary_sanitize = true
     all_ubsan = true
+    debug = false
   }
 
   sources = [
@@ -113,6 +114,17 @@ ohos_shared_library("net_policy_manager") {
 
 ohos_static_library("net_policy_manager_static") {
   testonly = true
+  cflags = [
+    "-flto",
+    "-fsanitize=cfi",
+    "-fsanitize-cfi-cross-dso",
+    "-fvisibility=hidden",
+  ]
+  ldflags = [
+    "-flto",
+    "-fsanitize=cfi",
+    "-fsanitize-cfi-cross-dso",
+  ]
   sources = [
     "src/common/net_policy_event_handler.cpp",
     "src/common/net_policy_file_event_handler.cpp",

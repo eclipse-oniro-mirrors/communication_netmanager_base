@@ -24,7 +24,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-struct NetSpecifier final: public Parcelable {
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
+struct NET_SYMBOL_VISIBLE NetSpecifier final : public Parcelable {
     std::string ident_;
     NetAllCapabilities netCapabilities_;
 

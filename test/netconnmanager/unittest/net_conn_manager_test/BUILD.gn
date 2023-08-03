@@ -16,7 +16,17 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_unittest("net_conn_manager_test") {
   module_out_path = "netmanager_base/net_conn_manager_test"
-
+  cflags = [
+    "-flto",
+    "-fsanitize=cfi",
+    "-fsanitize-cfi-cross-dso",
+    "-fvisibility=hidden",
+  ]
+  ldflags = [
+    "-flto",
+    "-fsanitize=cfi",
+    "-fsanitize-cfi-cross-dso",
+  ]
   sources = [
     "inet_addr_test.cpp",
     "net_activate_test.cpp",
