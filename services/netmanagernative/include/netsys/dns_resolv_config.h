@@ -17,6 +17,8 @@
 #define INCLUDE_DNSRESOLV_CONFIG_H
 
 #include <atomic>
+#include <list>
+#include <memory>
 #include <vector>
 
 #include "delayed_queue.h"
@@ -66,6 +68,7 @@ private:
     int32_t revisionId_;
     int32_t timeoutMsec_;
     uint8_t retryCount_;
+    std::list<std::shared_ptr<DelayedTaskWrapper>> delayedTaskWrapperList_;
     std::vector<std::string> nameServers_;
     std::vector<std::string> searchDomains_;
     NetManagerStandard::LRUCache<AddrInfo> cache_;

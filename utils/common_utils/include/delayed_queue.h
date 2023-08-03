@@ -20,6 +20,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
+#include <memory>
 #include <thread>
 #include <set>
 #include <map>
@@ -27,19 +28,24 @@
 namespace OHOS::NetManagerStandard {
 template <typename T, size_t ARRAY_SIZE, size_t DELAYED_COUNT> class DelayedQueue {
 public:
-    DelayedQueue() : index_(0), isRun_(false), needRun_(true)
+    DelayedQueue() : index_(0), needRun_(true)
     {
         std::thread([this] {
-            isRun_ = true;
-
             while (needRun_) {
                 {
                     // deal with elems in elems[index_]
                     std::lock_guard<std::mutex> guard(mutex_);
                     for (const auto &elem : elems_[index_]) {
-                        elem.Execute();
+                        auto sharedElem = elem.lock();
+                        if (sharedElem) {
+                            sharedElem->Execute();
+                        }
                     }
                     elems_[index_].clear();
+                }
+
+                if (!needRun_) {
+                    break;
                 }
 
                 // wait for one second or until needRun_ is false
@@ -49,9 +55,6 @@ public:
                 std::lock_guard<std::mutex> guard(mutex_);
                 index_ = (index_ + 1) % (ARRAY_SIZE + DELAYED_COUNT);
             }
-
-            isRun_ = false;
-            isRunCondition_.notify_all();
         }).detach();
     }
 
@@ -60,13 +63,9 @@ public:
         // set needRun_ = false, and notify the thread to wake
         needRun_ = false;
         needRunCondition_.notify_all();
-
-        // wait until isRun is false(isRun is false, means that the thread is end)
-        std::unique_lock<std::mutex> isRunLock(isRunMutex_);
-        isRunCondition_.wait(isRunLock, [this] { return !isRun_; });
     }
 
-    void Put(const T &elem)
+    void Put(const std::weak_ptr<T> &elem)
     {
         std::lock_guard<std::mutex> guard(mutex_);
         if (indexMap_.find(elem) != indexMap_.end()) {
@@ -84,14 +83,11 @@ public:
 private:
     int index_;
     std::mutex mutex_;
-    std::atomic_bool isRun_;
     std::atomic_bool needRun_;
-    std::condition_variable isRunCondition_;
     std::condition_variable needRunCondition_;
-    std::mutex isRunMutex_;
     std::mutex needRunMutex_;
-    std::array<std::set<T>, ARRAY_SIZE + DELAYED_COUNT> elems_;
-    std::map<T, int> indexMap_;
+    std::array<std::set<std::weak_ptr<T>, std::owner_less<std::weak_ptr<T>>>, ARRAY_SIZE + DELAYED_COUNT> elems_;
+    std::map<std::weak_ptr<T>, int, std::owner_less<std::weak_ptr<T>>> indexMap_;
 };
 } // namespace OHOS::NetManagerStandard
 
