@@ -22,6 +22,7 @@ config("net_service_common_config") {
 ohos_shared_library("net_service_common") {
   sanitize = {
     cfi = true
+    cfi_cross_dso = true
     boundary_sanitize = true
     all_ubsan = true
     debug = false
