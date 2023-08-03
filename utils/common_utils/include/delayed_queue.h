@@ -19,11 +19,11 @@
 #include <array>
 #include <atomic>
 #include <condition_variable>
-#include <mutex>
-#include <memory>
-#include <thread>
-#include <set>
 #include <map>
+#include <memory>
+#include <mutex>
+#include <set>
+#include <thread>
 
 namespace OHOS::NetManagerStandard {
 template <typename T, size_t ARRAY_SIZE, size_t DELAYED_COUNT> class DelayedQueue {
