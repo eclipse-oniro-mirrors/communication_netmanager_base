@@ -374,20 +374,6 @@ int32_t NetStatsServiceStub::OnGetUidStatsDetail(MessageParcel &data, MessagePar
 
 int32_t NetStatsServiceStub::OnUpdateIfacesStats(MessageParcel &data, MessageParcel &reply)
 {
-    if (!NetManagerPermission::IsSystemCaller()) {
-        NETMGR_LOG_E("Permission check failed.");
-        if (!reply.WriteInt32(NETMANAGER_ERR_NOT_SYSTEM_CALL)) {
-            return IPC_STUB_WRITE_PARCEL_ERR;
-        }
-        return NETMANAGER_SUCCESS;
-    }
-    if (!NetManagerPermission::CheckPermission(Permission::GET_NETWORK_STATS)) {
-        if (!reply.WriteInt32(NETMANAGER_ERR_PERMISSION_DENIED)) {
-            return IPC_STUB_WRITE_PARCEL_ERR;
-        }
-        return NETMANAGER_SUCCESS;
-    }
-
     std::string iface;
     uint64_t start = 0;
     uint64_t end = 0;
@@ -409,6 +395,15 @@ int32_t NetStatsServiceStub::OnUpdateIfacesStats(MessageParcel &data, MessagePar
 
 int32_t NetStatsServiceStub::OnUpdateStatsData(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t ret = UpdateStatsData();
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsServiceStub::OnResetFactory(MessageParcel &data, MessageParcel &reply)
+{
     if (!NetManagerPermission::IsSystemCaller()) {
         NETMGR_LOG_E("Permission check failed.");
         if (!reply.WriteInt32(NETMANAGER_ERR_NOT_SYSTEM_CALL)) {
@@ -423,15 +418,6 @@ int32_t NetStatsServiceStub::OnUpdateStatsData(MessageParcel &data, MessageParce
         return NETMANAGER_SUCCESS;
     }
 
-    int32_t ret = UpdateStatsData();
-    if (!reply.WriteInt32(ret)) {
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-    return NETMANAGER_SUCCESS;
-}
-
-int32_t NetStatsServiceStub::OnResetFactory(MessageParcel &data, MessageParcel &reply)
-{
     int32_t ret = ResetFactory();
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;

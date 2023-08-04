@@ -319,17 +319,31 @@ HWTEST_F(NetStatsClientTest, NetStatsClient004, TestSize.Level1)
     info.txPackets_ = MOCK_TXPACKETS;
 
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->ResetFactory();
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetStatsClientTest, NetStatsClient005, TestSize.Level1)
 {
     AccessToken token;
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateStatsData();
+    NetStatsInfo info;
+    info.iface_ = MOCK_IFACE;
+    info.date_ = MOCK_DATE;
+    info.rxBytes_ = MOCK_RXBYTES;
+    info.txBytes_ = MOCK_TXBYTES;
+    info.rxPackets_ = MOCK_RXPACKETS;
+    info.txPackets_ = MOCK_TXPACKETS;
+
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->ResetFactory();
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsClientTest, NetStatsClient006, TestSize.Level1)
+{
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateStatsData();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsClientTest, NetStatsClient007, TestSize.Level1)
 {
     sptr<IRemoteObject::DeathRecipient> deathRecipient =
         new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
