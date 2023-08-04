@@ -39,7 +39,6 @@ int32_t NetStatsServiceProxy::SendRequest(sptr<IRemoteObject> &remote, uint32_t 
     if (!reply.ReadInt32(ret)) {
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
-
     return ret;
 }
 
