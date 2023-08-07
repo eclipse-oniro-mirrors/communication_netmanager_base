@@ -299,6 +299,13 @@ public:
      */
     [[nodiscard]] int32_t SetPowerSavePolicy(bool enable);
 
+    /**
+     * Check if you have permission
+     *
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    [[nodiscard]] int32_t CheckPermission();
+
 private:
     class NetPolicyDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

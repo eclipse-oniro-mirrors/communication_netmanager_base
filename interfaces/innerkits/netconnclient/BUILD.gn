@@ -48,7 +48,17 @@ ohos_source_set("net_conn_parcel") {
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_supplier_info.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/route.cpp",
   ]
-
+  cflags = [
+    "-flto",
+    "-fsanitize=cfi",
+    "-fsanitize-cfi-cross-dso",
+    "-fvisibility=hidden",
+  ]
+  ldflags = [
+    "-flto",
+    "-fsanitize=cfi",
+    "-fsanitize-cfi-cross-dso",
+  ]
   include_dirs = [
     "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netconnclient/include",
@@ -68,10 +78,11 @@ ohos_source_set("net_conn_parcel") {
 ohos_shared_library("net_conn_manager_if") {
   sanitize = {
     cfi = true
-    integer_overflow = true
+    cfi_cross_dso = true
     boundary_sanitize = true
     all_ubsan = true
     blocklist = "./connect_blocklist.txt"
+    debug = false
   }
 
   sources = [
@@ -130,9 +141,9 @@ ohos_shared_library("socket_permission") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    integer_overflow = true
     boundary_sanitize = true
     all_ubsan = true
+    debug = false
   }
 
   sources = [ "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/socket_permission.cpp" ]

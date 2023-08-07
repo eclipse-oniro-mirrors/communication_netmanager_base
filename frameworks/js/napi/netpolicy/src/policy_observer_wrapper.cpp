@@ -24,6 +24,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
+constexpr const int DELETE_SIZE = 1;
 PolicyObserverWrapper::PolicyObserverWrapper()
     : observer_(new NetPolicyCallbackObserver()), manager_(new EventManager()), registed_(false)
 {
@@ -63,10 +64,19 @@ napi_value PolicyObserverWrapper::On(napi_env env, napi_callback_info info,
             NetBaseErrorCodeConvertor convertor;
             std::string errorMsg = convertor.ConvertErrorCode(ret);
             napi_throw_error(env, std::to_string(ret).c_str(), errorMsg.c_str());
+        } else {
+            manager_->AddListener(env, event, params[ARG_INDEX_1], false, asyncCallback);
         }
-    }
-    if (registed_) {
-        manager_->AddListener(env, event, params[ARG_INDEX_1], false, asyncCallback);
+    } else {
+        int32_t ret = NetPolicyClient::GetInstance().CheckPermission();
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMANAGER_BASE_LOGE("register callback error");
+            NetBaseErrorCodeConvertor convertor;
+            std::string errorMsg = convertor.ConvertErrorCode(ret);
+            napi_throw_error(env, std::to_string(ret).c_str(), errorMsg.c_str());
+        } else {
+            manager_->AddListener(env, event, params[ARG_INDEX_1], false, asyncCallback);
+        }
     }
     return NapiUtils::GetUndefined(env);
 }
@@ -96,22 +106,42 @@ napi_value PolicyObserverWrapper::Off(napi_env env, napi_callback_info info,
     if (std::find(events.begin(), events.end(), event) == events.end()) {
         return NapiUtils::GetUndefined(env);
     }
+
+    if (manager_->GetListenerListNum() > DELETE_SIZE) {
+        int32_t ret = NetPolicyClient::GetInstance().CheckPermission();
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
+            NetBaseErrorCodeConvertor convertor;
+            std::string errorMsg = convertor.ConvertErrorCode(ret);
+            napi_throw_error(env, std::to_string(ret).c_str(), errorMsg.c_str());
+            return NapiUtils::GetUndefined(env);
+        }
+        DeleteListener(paramsCount, params, event);
+        return NapiUtils::GetUndefined(env);
+    }
+    if (manager_->GetListenerListNum() <= DELETE_SIZE) {
+        auto ret = NetPolicyClient::GetInstance().UnregisterNetPolicyCallback(observer_);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
+            NetBaseErrorCodeConvertor convertor;
+            std::string errorMsg = convertor.ConvertErrorCode(ret);
+            napi_throw_error(env, std::to_string(ret).c_str(), errorMsg.c_str());
+        } else {
+            DeleteListener(paramsCount, params, event);
+            registed_ = false;
+        }
+    }
+    return NapiUtils::GetUndefined(env);
+}
+
+void PolicyObserverWrapper::DeleteListener(size_t paramsCount, napi_value *params, std::string event)
+{
     if (paramsCount == PARAM_OPTIONS_AND_CALLBACK) {
         manager_->DeleteListener(event, params[ARG_INDEX_1]);
     } else {
         manager_->DeleteListener(event);
     }
-
-    if (manager_->IsListenerListEmpty()) {
-        auto ret = NetPolicyClient::GetInstance().UnregisterNetPolicyCallback(observer_);
-        if (ret != NETMANAGER_SUCCESS) {
-            NETMANAGER_BASE_LOGE("unregister ret = %{public}d", ret);
-            return NapiUtils::GetUndefined(env);
-        }
-        registed_ = false;
-    }
-
-    return NapiUtils::GetUndefined(env);
 }
+
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -20,7 +20,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-struct NetStatsInfo final: public Parcelable {
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
+struct NET_SYMBOL_VISIBLE NetStatsInfo final : public Parcelable {
     uint32_t uid_ = 0;
     std::string iface_;
     uint64_t date_ = 0;
@@ -61,10 +62,10 @@ struct NetStatsInfo final: public Parcelable {
         NetStatsInfo info;
         info.uid_ = other.uid_;
         info.iface_ = other.iface_;
-        info.rxPackets_ = rxPackets_ - other.rxPackets_;
-        info.rxBytes_ = rxBytes_ - other.rxBytes_;
-        info.txPackets_ = txPackets_ - other.txPackets_;
-        info.txBytes_ = txBytes_ - other.txBytes_;
+        info.rxPackets_ = (rxPackets_ > other.rxPackets_) ? rxPackets_ - other.rxPackets_ : 0;
+        info.rxBytes_ = (rxBytes_ > other.rxBytes_) ? rxBytes_ - other.rxBytes_ : 0;
+        info.txPackets_ = (txPackets_ > other.txPackets_) ? txPackets_ - other.txPackets_ : 0;
+        info.txBytes_ = (txBytes_ > other.txBytes_) ? txBytes_ - other.txBytes_ : 0;
         return info;
     }
 

@@ -46,6 +46,7 @@ constexpr const char *ERROR_MSG_SET_NET_MTU_FAILED = "Set netlink interface mtu 
 constexpr const char *ERROR_MSG_SET_DEFAULT_NETWORK_FAILED = "Set default network failed";
 constexpr const char *ERROR_MSG_CLEAR_DEFAULT_NETWORK_FAILED = "Clear default network failed";
 constexpr const char *LOCAL_ROUTE_NEXT_HOP = "0.0.0.0";
+constexpr const char *LOCAL_ROUTE_IPV6_DESTINATION = "::";
 } // namespace
 
 Network::Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &handler, NetBearType bearerType,
@@ -129,6 +130,17 @@ bool Network::ReleaseBasicNetwork()
             }
             NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
         }
+        for (const auto &route : netLinkInfo_.routeList_) {
+            std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
+            NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, destAddress,
+                                                               route.gateway_.address_);
+            if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP &&
+                route.destination_.address_ != LOCAL_ROUTE_IPV6_DESTINATION) {
+                auto family = GetAddrFamily(route.destination_.address_);
+                std::string nextHop = (family == AF_INET6) ? "" : LOCAL_ROUTE_NEXT_HOP;
+                NetsysController::GetInstance().NetworkRemoveRoute(LOCAL_NET_ID, route.iface_, destAddress, nextHop);
+            }
+        }
         NetsysController::GetInstance().NetworkRemoveInterface(netId_, netLinkInfo_.ifaceName_);
         NetsysController::GetInstance().NetworkDestroy(netId_);
         NetsysController::GetInstance().DestroyNetworkCache(netId_);
@@ -210,7 +222,10 @@ void Network::UpdateIpAddrs(const NetLinkInfo &netLinkInfo)
     // Update: remove old Ips first, then add the new Ips
     NETMGR_LOG_D("UpdateIpAddrs, old ip addrs: ...");
     for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
-        int32_t prefixLen = inetAddr.prefixlen_ ? inetAddr.prefixlen_ : Ipv4PrefixLen(inetAddr.netMask_);
+        auto family = GetAddrFamily(inetAddr.address_);
+        auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_)
+                                             : ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_)
+                                                                     : Ipv4PrefixLen(inetAddr.netMask_));
         if (NETMANAGER_SUCCESS != NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_,
                                                                                       inetAddr.address_, prefixLen)) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_DELETE_NET_IP_ADDR_FAILED);
@@ -219,7 +234,10 @@ void Network::UpdateIpAddrs(const NetLinkInfo &netLinkInfo)
 
     NETMGR_LOG_D("UpdateIpAddrs, new ip addrs: ...");
     for (const auto &inetAddr : netLinkInfo.netAddrList_) {
-        int32_t prefixLen = inetAddr.prefixlen_ ? inetAddr.prefixlen_ : Ipv4PrefixLen(inetAddr.netMask_);
+        auto family = GetAddrFamily(inetAddr.address_);
+        auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_)
+                                             : ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_)
+                                                                     : Ipv4PrefixLen(inetAddr.netMask_));
         if (NETMANAGER_SUCCESS !=
             NetsysController::GetInstance().AddInterfaceAddress(netLinkInfo.ifaceName_, inetAddr.address_, prefixLen)) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_IP_ADDR_FAILED);
@@ -234,15 +252,16 @@ void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
     NETMGR_LOG_D("UpdateRoutes, old routes: [%{public}s]", netLinkInfo_.ToStringRoute("").c_str());
     for (const auto &route : netLinkInfo_.routeList_) {
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
-        int32_t temp = NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, destAddress,
-                                                                          route.gateway_.address_);
-        uint32_t ret = static_cast<uint32_t>(temp);
-        if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP) {
-            temp = NetsysController::GetInstance().NetworkRemoveRoute(LOCAL_NET_ID, route.iface_, destAddress,
-                                                                      LOCAL_ROUTE_NEXT_HOP);
-            ret = ret | static_cast<uint32_t>(temp);
+        auto ret = NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, destAddress,
+                                                                      route.gateway_.address_);
+        int32_t res = NETMANAGER_SUCCESS;
+        if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP &&
+            route.destination_.address_ != LOCAL_ROUTE_IPV6_DESTINATION) {
+            auto family = GetAddrFamily(route.destination_.address_);
+            std::string nextHop = (family == AF_INET6) ? "" : LOCAL_ROUTE_NEXT_HOP;
+            res = NetsysController::GetInstance().NetworkRemoveRoute(LOCAL_NET_ID, route.iface_, destAddress, nextHop);
         }
-        if (ret != NETMANAGER_SUCCESS) {
+        if (ret != NETMANAGER_SUCCESS || res != NETMANAGER_SUCCESS) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_REMOVE_NET_ROUTES_FAILED);
         }
     }
@@ -250,14 +269,16 @@ void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
     NETMGR_LOG_D("UpdateRoutes, new routes: [%{public}s]", netLinkInfo.ToStringRoute("").c_str());
     for (const auto &route : netLinkInfo.routeList_) {
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
-        int32_t ret =
+        auto ret =
             NetsysController::GetInstance().NetworkAddRoute(netId_, route.iface_, destAddress, route.gateway_.address_);
-        int32_t result = 0;
-        if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP) {
-            result = NetsysController::GetInstance().NetworkAddRoute(LOCAL_NET_ID, route.iface_, destAddress,
-                                                                     LOCAL_ROUTE_NEXT_HOP);
+        int32_t res = NETMANAGER_SUCCESS;
+        if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP &&
+            route.destination_.address_ != LOCAL_ROUTE_IPV6_DESTINATION) {
+            auto family = GetAddrFamily(route.destination_.address_);
+            std::string nextHop = (family == AF_INET6) ? "" : LOCAL_ROUTE_NEXT_HOP;
+            res = NetsysController::GetInstance().NetworkAddRoute(LOCAL_NET_ID, route.iface_, destAddress, nextHop);
         }
-        if (ret != NETMANAGER_SUCCESS || result != NETMANAGER_SUCCESS) {
+        if (ret != NETMANAGER_SUCCESS || res != NETMANAGER_SUCCESS) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_ROUTES_FAILED);
         }
     }

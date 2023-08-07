@@ -18,11 +18,12 @@
 
 #include "interface_manager.h"
 #include "netsys_controller.h"
-
+#include "net_manager_constants.h"
 namespace OHOS {
 namespace nmd {
 namespace {
 using namespace testing::ext;
+using namespace OHOS::NetManagerStandard;
 } // namespace
 
 class InterfaceManagerTest : public testing::Test {
@@ -106,7 +107,7 @@ HWTEST_F(InterfaceManagerTest, AddAddressTest001, TestSize.Level1)
     std::string addr = "";
     int32_t prefixLength = 0;
     auto ret = InterfaceManager::AddAddress(interfaceName.data(), addr.data(), prefixLength);
-    EXPECT_LE(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
 HWTEST_F(InterfaceManagerTest, AddAddressTest002, TestSize.Level1)
@@ -123,7 +124,7 @@ HWTEST_F(InterfaceManagerTest, AddAddressTest003, TestSize.Level1)
     std::string addr;
     int32_t prefixLength = 45;
     auto ret = InterfaceManager::AddAddress(interfaceName.c_str(), addr.data(), prefixLength);
-    EXPECT_LE(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
 HWTEST_F(InterfaceManagerTest, AddAddressTest004, TestSize.Level1)
@@ -149,7 +150,7 @@ HWTEST_F(InterfaceManagerTest, DelAddressTest001, TestSize.Level1)
     std::string addr = "";
     int32_t prefixLength = 0;
     auto ret = InterfaceManager::DelAddress(interfaceName.data(), addr.data(), prefixLength);
-    EXPECT_LE(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
 HWTEST_F(InterfaceManagerTest, DelAddressTest002, TestSize.Level1)
@@ -166,7 +167,7 @@ HWTEST_F(InterfaceManagerTest, DelAddressTest003, TestSize.Level1)
     int32_t prefixLength = 45;
     std::string addr;
     auto ret = InterfaceManager::DelAddress(interfaceName.data(), addr.data(), prefixLength);
-    EXPECT_LE(ret, 0);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
 HWTEST_F(InterfaceManagerTest, GetInterfaceNamesTest001, TestSize.Level1)

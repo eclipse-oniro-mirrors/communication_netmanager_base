@@ -23,9 +23,9 @@
 #include <napi/native_node_api.h>
 
 #include "event_manager.h"
-#include "netmanager_base_log.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_callback_observer.h"
+#include "netmanager_base_log.h"
 #include "refbase.h"
 #include "singleton.h"
 
@@ -40,11 +40,12 @@ public:
                   bool asyncCallback);
     napi_value Off(napi_env env, napi_callback_info info, const std::initializer_list<std::string> &events,
                    bool asyncCallback);
-
+    void DeleteListener(size_t paramsCount, napi_value *params, std::string event);
     EventManager *GetEventManager() const
     {
         return manager_;
     }
+
 private:
     sptr<NetPolicyCallbackObserver> observer_;
     EventManager *manager_;

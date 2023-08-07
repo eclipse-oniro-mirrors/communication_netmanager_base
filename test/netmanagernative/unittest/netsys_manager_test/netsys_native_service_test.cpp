@@ -593,7 +593,7 @@ HWTEST_F(NetsysNativeServiceTest, GetUidStatsTest001, TestSize.Level1)
 
 HWTEST_F(NetsysNativeServiceTest, GetIfaceStatsTest002, TestSize.Level1)
 {
-    uint64_t stats = 5;
+    uint64_t stats = 0;
     uint32_t type = 1;
     const std::string &iface = "eth0";
     auto ret = instance_->GetIfaceStats(stats, type, iface);

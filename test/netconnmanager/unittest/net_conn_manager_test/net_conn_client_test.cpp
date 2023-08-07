@@ -17,7 +17,9 @@
 
 #include "accesstoken_kit.h"
 #include "message_parcel.h"
-#include "network.h"
+#ifdef GTEST_API_
+#define private public
+#endif
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
 #include "net_conn_types.h"
@@ -25,6 +27,7 @@
 #include "net_interface_config.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "network.h"
 #include "token_setproc.h"
 
 #include "i_net_conn_callback.h"
@@ -748,8 +751,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplier001, TestSize.Level1)
     NetBearType netBearType = BEARER_WIFI;
     const std::string ident = "";
     std::set<NetCap> netCaps = {NET_CAPABILITY_INTERNET};
-    auto ret =
-        NetConnClient::GetInstance().RegisterNetSupplier(netBearType, ident, netCaps, supplierId);
+    auto ret = NetConnClient::GetInstance().RegisterNetSupplier(netBearType, ident, netCaps, supplierId);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
@@ -765,8 +767,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplier002, TestSize.Level1)
     NetBearType netBearType = BEARER_WIFI;
     const std::string ident = "";
     std::set<NetCap> netCaps = {NET_CAPABILITY_INTERNET};
-    auto ret =
-        NetConnClient::GetInstance().RegisterNetSupplier(netBearType, ident, netCaps, supplierId);
+    auto ret = NetConnClient::GetInstance().RegisterNetSupplier(netBearType, ident, netCaps, supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -836,8 +837,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest003, TestSize.Level1)
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET};
     std::string ident = "ident";
     uint32_t supplierId = 0;
-    int32_t result =
-        NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
+    int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
     sptr<NetSupplierCallbackBase> callback = new (std::nothrow) NetSupplierCallbackBase();
     ASSERT_NE(callback, nullptr);
@@ -936,8 +936,7 @@ HWTEST_F(NetConnClientTest, RegisterNetConnCallback002, TestSize.Level1)
     sptr<NetSpecifier> netSpecifier = nullptr;
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
     uint32_t timesOut = 1;
-    auto ret =
-        NetConnClient::GetInstance().RegisterNetConnCallback(netSpecifier, callback, timesOut);
+    auto ret = NetConnClient::GetInstance().RegisterNetConnCallback(netSpecifier, callback, timesOut);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
@@ -952,8 +951,7 @@ HWTEST_F(NetConnClientTest, RegisterNetConnCallback003, TestSize.Level1)
     sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
     uint32_t timesOut = 1;
-    auto ret =
-        NetConnClient::GetInstance().RegisterNetConnCallback(netSpecifier, callback, timesOut);
+    auto ret = NetConnClient::GetInstance().RegisterNetConnCallback(netSpecifier, callback, timesOut);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
@@ -979,7 +977,7 @@ HWTEST_F(NetConnClientTest, UnRegisterNetConnCallback001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, UpdateNetSupplierInfo001, TestSize.Level1)
 {
-    auto& client = NetConnClient::GetInstance();
+    auto &client = NetConnClient::GetInstance();
     uint32_t supplierId = 1;
     sptr<NetSupplierInfo> netSupplierInfo = new (std::nothrow) NetSupplierInfo;
     int32_t ret = client.UpdateNetSupplierInfo(supplierId, netSupplierInfo);
@@ -995,7 +993,7 @@ HWTEST_F(NetConnClientTest, UpdateNetSupplierInfo001, TestSize.Level1)
 HWTEST_F(NetConnClientTest, UpdateNetSupplierInfo002, TestSize.Level1)
 {
     AccessToken token;
-    auto& client = NetConnClient::GetInstance();
+    auto &client = NetConnClient::GetInstance();
     uint32_t supplierId = 1;
     sptr<NetSupplierInfo> netSupplierInfo = new NetSupplierInfo;
     netSupplierInfo->isAvailable_ = true;
@@ -1054,6 +1052,122 @@ HWTEST_F(NetConnClientTest, RegisterNetInterfaceCallbackTest002, TestSize.Level1
     sptr<INetInterfaceStateCallback> callback = new (std::nothrow) NetInterfaceStateCallbackStub();
     int32_t ret = NetConnClient::GetInstance().RegisterNetInterfaceCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SystemReadyTest002
+ * @tc.desc: Test NetConnClient::SystemReady
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, SystemReadyTest002, TestSize.Level1)
+{
+    AccessToken token;
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SystemReady();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: UpdateNetLinkInfoTest002
+ * @tc.desc: Test NetConnClient::UpdateNetLinkInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, UpdateNetLinkInfoTest002, TestSize.Level1)
+{
+    AccessToken token;
+    uint32_t supplierId = 1;
+    sptr<NetLinkInfo> netLinkInfo = std::make_unique<NetLinkInfo>().release();
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->UpdateNetLinkInfo(supplierId, netLinkInfo);
+    EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
+}
+
+/**
+ * @tc.name: GetAllNetsTest002
+ * @tc.desc: Test NetConnClient::GetAllNets
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, GetAllNetsTest002, TestSize.Level1)
+{
+    AccessToken token;
+    std::list<sptr<NetHandle>> netList;
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(netList);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: GetConnectionPropertiesTest002
+ * @tc.desc: Test NetConnClient::GetConnectionProperties
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, GetConnectionPropertiesTest002, TestSize.Level1)
+{
+    AccessToken token;
+    NetHandle netHandle;
+    NetLinkInfo info;
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetConnectionProperties(netHandle, info);
+    EXPECT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
+}
+
+/**
+ * @tc.name: GetAddressesByNameTest002
+ * @tc.desc: Test NetConnClient::GetAddressesByName
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, GetAddressesByNameTest002, TestSize.Level1)
+{
+    AccessToken token;
+    const std::string host = "ipaddr";
+    int32_t netId = 1;
+    std::vector<INetAddr> addrList = {};
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetAddressesByName(host, netId, addrList);
+    EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: GetAddressByNameTest002
+ * @tc.desc: Test NetConnClient::GetAddressByName
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, GetAddressByNameTest002, TestSize.Level1)
+{
+    AccessToken token;
+    std::string host = "ipaddr";
+    int32_t netId = 1;
+    INetAddr addr;
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetAddressByName(host, netId, addr);
+    EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: BindSocketTest002
+ * @tc.desc: Test NetConnClient::BindSocket
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, BindSocketTest002, TestSize.Level1)
+{
+    AccessToken token;
+    NetConnClient::NetConnDeathRecipient deathRecipient(*DelayedSingleton<NetConnClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient.OnRemoteDied(remote);
+    int32_t socket_fd = 0;
+    int32_t netId = 99;
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->BindSocket(socket_fd, netId);
+    EXPECT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
+    netId = 101;
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->BindSocket(socket_fd, netId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: NetDetectionTest002
+ * @tc.desc: Test NetConnClient::NetDetection
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, NetDetectionTest002, TestSize.Level1)
+{
+    AccessToken token;
+    NetHandle netHandle;
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(netHandle);
+    EXPECT_EQ(ret, NET_CONN_ERR_NETID_NOT_FOUND);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

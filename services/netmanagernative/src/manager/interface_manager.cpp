@@ -34,12 +34,14 @@
 #include "netlink_msg.h"
 #include "netlink_socket.h"
 #include "netlink_socket_diag.h"
+#include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "securec.h"
 
 namespace OHOS {
 namespace nmd {
+using namespace NetManagerStandard;
 using namespace NetManagerStandard::CommonUtils;
 
 namespace {
@@ -178,40 +180,44 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
         NETNATIVE_LOGE("InterfaceManager::ModifyAddress, if_nametoindex error %{public}d", errno);
         return -errno;
     }
-
-    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, getpid());
-
-    struct ifaddrmsg ifm = {0};
-    ifm.ifa_family = AF_INET;
-    ifm.ifa_index = index;
-    ifm.ifa_scope = 0;
-    ifm.ifa_prefixlen = static_cast<uint32_t>(prefixLen);
-
-    nlmsg.AddAddress(action, ifm);
-
-    struct in_addr inAddr;
-    int ret = inet_pton(AF_INET, addr, &inAddr);
-    if (ret == -1) {
-        NETNATIVE_LOGE("InterfaceManager::ModifyAddress, inet_pton error %{public}d", errno);
-        return -errno;
+    auto family = CommonUtils::GetAddrFamily(addr);
+    if (family != AF_INET && family != AF_INET6) {
+        NETNATIVE_LOGE("Ivalid ip address: %{public}s", addr);
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
-    nlmsg.AddAttr(IFA_LOCAL, &inAddr, sizeof(inAddr));
+    ifaddrmsg ifm = {static_cast<uint8_t>(family), static_cast<uint8_t>(prefixLen), 0, 0, index};
+    nmd::NetlinkMsg nlmsg(NLM_F_CREATE | NLM_F_EXCL, nmd::NETLINK_MAX_LEN, getpid());
+    nlmsg.AddAddress(action, ifm);
 
-    if (action == RTM_NEWADDR) {
-        inAddr.s_addr |= htonl((1U << (BIT_MAX - prefixLen)) - 1);
-        nlmsg.AddAttr(IFA_BROADCAST, &inAddr, sizeof(inAddr));
+    if (family == AF_INET6) {
+        in6_addr in6Addr;
+        if (inet_pton(AF_INET6, addr, &in6Addr) == -1) {
+            NETNATIVE_LOGE("Modify ipv6 address, inet_pton error %{public}d", errno);
+            return NETMANAGER_ERR_INTERNAL;
+        }
+        nlmsg.AddAttr(IFA_LOCAL, &in6Addr, sizeof(in6Addr));
+    } else {
+        in_addr inAddr;
+        if (inet_pton(AF_INET, addr, &inAddr) == -1) {
+            NETNATIVE_LOGE("Modify ipv4 address, inet_pton error %{public}d", errno);
+            return NETMANAGER_ERR_INTERNAL;
+        }
+        nlmsg.AddAttr(IFA_LOCAL, &inAddr, sizeof(inAddr));
+        if (action == RTM_NEWADDR) {
+            inAddr.s_addr |= htonl((1U << (BIT_MAX - prefixLen)) - 1);
+            nlmsg.AddAttr(IFA_BROADCAST, &inAddr, sizeof(inAddr));
+        }
     }
 
     NETNATIVE_LOGI("InterfaceManager::ModifyAddress:%{public}u %{public}s %{public}s %{public}d", action, interfaceName,
                    ToAnonymousIp(addr).c_str(), prefixLen);
 
-    ret = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
+    auto ret = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
     if (ret < 0) {
         return -EIO;
     }
-
-    return 0;
+    return NETMANAGER_SUCCESS;
 }
 
 int InterfaceManager::AddAddress(const char *interfaceName, const char *addr, int prefixLen)

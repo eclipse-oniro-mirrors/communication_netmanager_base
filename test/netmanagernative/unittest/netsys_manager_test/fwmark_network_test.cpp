@@ -284,5 +284,17 @@ HWTEST_F(UnitTestFwmarkClient, SetMarkTest007, TestSize.Level1)
     SendMessage(nullptr);
     EXPECT_EQ(ret, 0);
 }
+
+/**
+ * @tc.name: SetMarkTest008
+ * @tc.desc: Test FwmarkNetwork ProtectFromVpn.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UnitTestFwmarkClient, SetMarkTest008, TestSize.Level1)
+{
+    int32_t socketFd = 1111;
+    auto ret = fwmarkClient->ProtectFromVpn(socketFd);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+}
 } // namespace NetsysNative
 } // namespace OHOS

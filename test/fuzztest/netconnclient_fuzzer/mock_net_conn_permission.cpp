@@ -13,30 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef NET_INTERFACE_CONFIG_H
-#define NET_INTERFACE_CONFIG_H
-
-#include <string>
-#include <vector>
-
-#include "parcel.h"
+#include "netmanager_base_permission.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
-struct NET_SYMBOL_VISIBLE NetInterfaceConfiguration : public Parcelable {
-    std::string ifName_;
-    std::string hwAddr_;
-    std::string ipv4Addr_;
-    int prefixLength_ = 0;
-    std::vector<std::string> flags_;
+bool NetManagerPermission::CheckPermission(const std::string &permissionName)
+{
+    return true;
+}
 
-    bool IsInterfaceUp();
-    bool IsInterfaceRunning();
+bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissionName)
+{
+    return true;
+}
 
-    bool Marshalling(Parcel &parcel) const override;
-    static bool Unmarshalling(Parcel &parcel, NetInterfaceConfiguration &config);
-};
+bool NetManagerPermission::IsSystemCaller()
+{
+    return true;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // NET_INTERFACE_CONFIG_H

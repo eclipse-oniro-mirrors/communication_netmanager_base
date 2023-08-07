@@ -255,6 +255,21 @@ bool WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 
+bool IsConnClientDataAndSizeValid(const uint8_t *data, size_t size, MessageParcel &dataParcel)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return false;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    if (!WriteInterfaceToken(dataParcel)) {
+        return false;
+    }
+    return true;
+}
+
 void SystemReadyFuzzTest(const uint8_t *data, size_t size)
 {
     AccessToken token;
@@ -268,25 +283,20 @@ void SystemReadyFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     AccessToken token;
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     uint32_t bearerType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
-    dataParcel.ReadUint32(bearerType);
+    dataParcel.WriteUint32(bearerType);
 
     std::string ident = GetStringFromData(STR_LEN);
     dataParcel.WriteString(ident);
 
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
+    uint32_t capsSize = static_cast<uint32_t>(netCaps.size());
+    dataParcel.WriteUint32(capsSize);
     for (auto netCap : netCaps) {
         dataParcel.WriteUint32(static_cast<uint32_t>(netCap));
     }
@@ -296,17 +306,10 @@ void RegisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
 
 void UnregisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     AccessToken token;
     uint32_t supplierId = GetData<uint32_t>();
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteUint32(supplierId);
@@ -315,17 +318,10 @@ void UnregisterNetSupplierFuzzTest(const uint8_t *data, size_t size)
 
 void HasDefaultNetFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     AccessToken token;
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
 
@@ -349,18 +345,11 @@ void GetAllNetsFuzzTest(const uint8_t *data, size_t size)
 
 void BindSocketFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     AccessToken token;
     int32_t socket_fd = GetData<int32_t>();
     int32_t netId = GetData<int32_t>();
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteInt32(socket_fd);
@@ -370,18 +359,11 @@ void BindSocketFuzzTest(const uint8_t *data, size_t size)
 
 void SetAirplaneModeFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     AccessToken token;
     bool state = GetData<bool>();
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteBool(state);
@@ -390,19 +372,12 @@ void SetAirplaneModeFuzzTest(const uint8_t *data, size_t size)
 
 void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     AccessToken token;
     uint32_t supplierId = GetData<uint32_t>();
     sptr<NetSupplierInfo> netSupplierInfo = new (std::nothrow) NetSupplierInfo();
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteUint32(supplierId);
@@ -412,19 +387,12 @@ void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
 
 void GetAddressByNameFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     AccessToken token;
     std::string host = GetStringFromData(STR_LEN);
     int32_t netId = GetData<int32_t>();
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteString(host);
@@ -435,19 +403,12 @@ void GetAddressByNameFuzzTest(const uint8_t *data, size_t size)
 
 void GetAddressesByNameFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     AccessToken token;
     std::string host = GetStringFromData(STR_LEN);
     int32_t netId = GetData<int32_t>();
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteString(host);
@@ -458,13 +419,6 @@ void GetAddressesByNameFuzzTest(const uint8_t *data, size_t size)
 
 void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     uint32_t supplierId = GetData<uint32_t>();
     sptr<NetLinkInfo> netLinkInfo = new (std::nothrow) NetLinkInfo();
     if (netLinkInfo == nullptr) {
@@ -472,7 +426,7 @@ void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
     }
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteUint32(supplierId);
@@ -483,13 +437,6 @@ void UpdateNetLinkInfoFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterNetSupplierCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     AccessToken token;
     uint32_t supplierId = GetData<uint32_t>();
     sptr<NetSupplierCallbackBaseTest> callback = new (std::nothrow) NetSupplierCallbackBaseTest();
@@ -498,7 +445,7 @@ void RegisterNetSupplierCallbackFuzzTest(const uint8_t *data, size_t size)
     }
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteUint32(supplierId);
@@ -509,13 +456,6 @@ void RegisterNetSupplierCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterNetConnCallbackBySpecifierFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     AccessToken token;
     sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
@@ -525,7 +465,7 @@ void RegisterNetConnCallbackBySpecifierFuzzTest(const uint8_t *data, size_t size
     uint32_t timeoutMS = GetData<uint32_t>();
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     netSpecifier->Marshalling(dataParcel);
@@ -538,20 +478,13 @@ void RegisterNetConnCallbackBySpecifierFuzzTest(const uint8_t *data, size_t size
 
 void RegisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
     if (callback == nullptr) {
         return;
     }
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
 
@@ -583,17 +516,10 @@ void UnregisterNetConnCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void GetDefaultNetFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     AccessToken token;
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK), dataParcel);
@@ -601,18 +527,11 @@ void GetDefaultNetFuzzTest(const uint8_t *data, size_t size)
 
 void GetConnectionPropertiesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     AccessToken token;
     int32_t netId = GetData<int32_t>();
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteInt32(netId);
@@ -621,18 +540,11 @@ void GetConnectionPropertiesFuzzTest(const uint8_t *data, size_t size)
 
 void GetNetCapabilitiesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     AccessToken token;
     int32_t netId = GetData<int32_t>();
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteInt32(netId);
@@ -641,18 +553,11 @@ void GetNetCapabilitiesFuzzTest(const uint8_t *data, size_t size)
 
 void NetDetectionFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     AccessTokenInternetInfo tokenInternetInfo;
     int32_t netId = GetData<int32_t>();
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteInt32(netId);
@@ -661,16 +566,10 @@ void NetDetectionFuzzTest(const uint8_t *data, size_t size)
 
 void IsDefaultNetMeteredFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
     AccessToken token;
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_DEFAULT_NET_METERED), dataParcel);
@@ -678,17 +577,11 @@ void IsDefaultNetMeteredFuzzTest(const uint8_t *data, size_t size)
 
 void SetGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
     AccessToken token;
     HttpProxy httpProxy = {GetStringFromData(STR_LEN), 0, {}};
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     httpProxy.Marshalling(dataParcel);
@@ -697,16 +590,10 @@ void SetGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
 
 void GetGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
     AccessToken token;
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY), dataParcel);
@@ -714,16 +601,10 @@ void GetGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
 
 void GetDefaultHttpProxyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
     AccessToken token;
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_DEFAULT_HTTP_PROXY), dataParcel);
@@ -731,17 +612,11 @@ void GetDefaultHttpProxyFuzzTest(const uint8_t *data, size_t size)
 
 void GetNetIdByIdentifierFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
     AccessToken token;
     std::string ident = GetStringFromData(STR_LEN);
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteString(ident);
@@ -770,17 +645,10 @@ void RegisterNetInterfaceCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void GetNetInterfaceConfigurationFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     AccessToken token;
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_INTERFACE_CONFIGURATION), dataParcel);
@@ -788,36 +656,22 @@ void GetNetInterfaceConfigurationFuzzTest(const uint8_t *data, size_t size)
 
 void SetInternetPermissionFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     uint32_t uid = GetData<uint32_t>();
     uint8_t allow = GetData<uint8_t>();
 
     AccessToken token;
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
 
     dataParcel.WriteUint32(uid);
-    dataParcel.WriteUint32(allow);
+    dataParcel.WriteUint8(allow);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERNET_PERMISSION), dataParcel);
 }
 
 void UpdateNetStateForTestFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
     if (netSpecifier == nullptr) {
         return;
@@ -825,7 +679,7 @@ void UpdateNetStateForTestFuzzTest(const uint8_t *data, size_t size)
     auto netState = GetData<int32_t>();
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
 
@@ -836,59 +690,36 @@ void UpdateNetStateForTestFuzzTest(const uint8_t *data, size_t size)
 
 void GetIfaceNamesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     uint32_t bearerType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
 
-    dataParcel.ReadUint32(bearerType);
+    dataParcel.WriteUint32(bearerType);
 
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACE_NAMES), dataParcel);
 }
 
 void GetIfaceNameByTypeFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     uint32_t bearerType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
     std::string ident = GetStringFromData(STR_LEN);
-    std::string ifaceName = GetStringFromData(STR_LEN);
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
 
-    dataParcel.ReadUint32(bearerType);
+    dataParcel.WriteUint32(bearerType);
     dataParcel.WriteString(ident);
-    dataParcel.WriteString(ifaceName);
 
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACENAME_BY_TYPE), dataParcel);
 }
 
 void RegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     int32_t netId = GetData<int32_t>();
     sptr<INetDetectionCallbackTest> callback = new (std::nothrow) INetDetectionCallbackTest();
     if (callback == nullptr) {
@@ -896,7 +727,7 @@ void RegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
     }
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
 
@@ -909,13 +740,6 @@ void RegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void UnRegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     int32_t netId = GetData<int32_t>();
     sptr<INetDetectionCallbackTest> callback = new (std::nothrow) INetDetectionCallbackTest();
     if (callback == nullptr) {
@@ -923,7 +747,7 @@ void UnRegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
     }
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
 
@@ -936,38 +760,24 @@ void UnRegisterNetDetectionCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void GetSpecificNetFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     uint32_t bearerType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
 
-    dataParcel.ReadUint32(bearerType);
+    dataParcel.WriteUint32(bearerType);
 
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET), dataParcel);
 }
 
 void OnSetAppNetFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     int32_t netId = GetData<int32_t>();
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
 
@@ -978,18 +788,11 @@ void OnSetAppNetFuzzTest(const uint8_t *data, size_t size)
 
 void GetSpecificUidNetFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     int32_t uid = GetData<int32_t>();
     int32_t netId = GetData<int32_t>();
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
 

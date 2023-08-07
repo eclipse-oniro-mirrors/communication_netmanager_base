@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,9 @@
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 
+#ifdef GTEST_API_
+#define private public
+#endif
 #include "net_manager_center.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_callback_test.h"
@@ -283,20 +286,21 @@ HWTEST_F(NetStatsClientTest, NetStatsClient002, TestSize.Level1)
 HWTEST_F(NetStatsClientTest, NetStatsClient003, TestSize.Level1)
 {
     NETMGR_LOG_I("NetStatsClientTest::NetStatsClient003 enter");
+    std::string iface = "test_iface";
     AccessToken token;
     NetStatsInfo info;
-    info.iface_ = MOCK_IFACE;
+    info.iface_ = iface;
     info.date_ = MOCK_DATE;
     info.rxBytes_ = MOCK_RXBYTES;
     info.txBytes_ = MOCK_TXBYTES;
     info.rxPackets_ = MOCK_RXPACKETS;
     info.txPackets_ = MOCK_TXPACKETS;
     NETMGR_LOG_I("UpdateIfacesStats enter");
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateIfacesStats(MOCK_IFACE, 0, UINT32_MAX, info);
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateIfacesStats(iface, 0, UINT32_MAX, info);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     NETMGR_LOG_I("GetIfaceStatsDetail enter");
-    DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(MOCK_IFACE, 0, UINT32_MAX, info);
-    EXPECT_EQ(info.iface_, MOCK_IFACE);
+    DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(iface, 0, UINT32_MAX, info);
+    EXPECT_EQ(info.iface_, iface);
     EXPECT_EQ(info.date_, UINT32_MAX);
     EXPECT_EQ(info.rxBytes_, MOCK_RXBYTES);
     EXPECT_EQ(info.txBytes_, MOCK_TXBYTES);
@@ -315,17 +319,36 @@ HWTEST_F(NetStatsClientTest, NetStatsClient004, TestSize.Level1)
     info.txPackets_ = MOCK_TXPACKETS;
 
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->ResetFactory();
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetStatsClientTest, NetStatsClient005, TestSize.Level1)
 {
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateStatsData();
+    AccessToken token;
+    NetStatsInfo info;
+    info.iface_ = MOCK_IFACE;
+    info.date_ = MOCK_DATE;
+    info.rxBytes_ = MOCK_RXBYTES;
+    info.txBytes_ = MOCK_TXBYTES;
+    info.rxPackets_ = MOCK_RXPACKETS;
+    info.txPackets_ = MOCK_TXPACKETS;
+
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->ResetFactory();
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsClientTest, NetStatsClient006, TestSize.Level1)
 {
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->UpdateStatsData();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsClientTest, NetStatsClient007, TestSize.Level1)
+{
+    sptr<IRemoteObject::DeathRecipient> deathRecipient =
+        new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient->OnRemoteDied(remote);
     std::vector<NetStatsInfo> infos;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllStatsInfo(infos);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);

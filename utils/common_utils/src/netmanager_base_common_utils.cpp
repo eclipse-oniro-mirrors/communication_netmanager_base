@@ -42,6 +42,7 @@ constexpr size_t MAX_DISPLAY_NUM = 2;
 constexpr uint32_t IPV4_DOT_NUM = 3;
 constexpr int32_t MIN_BYTE = 0;
 constexpr int32_t MAX_BYTE = 255;
+constexpr int32_t BYTE_16 = 16;
 constexpr uint32_t BIT_NUM_BYTE = 8;
 constexpr int32_t BITS_24 = 24;
 constexpr int32_t BITS_16 = 16;
@@ -55,12 +56,14 @@ constexpr int32_t DOMAIN_VALID_MIN_PART_SIZE = 2;
 constexpr int32_t DOMAIN_VALID_MAX_PART_SIZE = 5;
 constexpr int32_t NET_MASK_MAX_LENGTH = 32;
 constexpr int32_t NET_MASK_GROUP_COUNT = 4;
+constexpr int32_t MAX_IPV6_PREFIX_LENGTH = 128;
 const std::string IPADDR_DELIMITER = ".";
 constexpr const char *CMD_SEP = " ";
 constexpr const char *DOMAIN_DELIMITER = ".";
 constexpr const char *TLDS_SPLIT_SYMBOL = "|";
 constexpr const char *HOST_DOMAIN_PATTERN_HEADER = "^(https?://)?[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*\\.(";
 constexpr const char *HOST_DOMAIN_PATTERN_TAIL = ")$";
+constexpr const char *DEFAULT_IPV6_ANY_INIT_ADDR = "::";
 const std::regex IP_PATTERN{
     "((2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)\\.){3}(2([0-4]\\d|5[0-5])|1\\d\\d|[1-9]\\d|\\d)"};
 
@@ -159,6 +162,35 @@ std::string GetMaskByLength(uint32_t length)
     return sMask;
 }
 
+std::string GetIpv6Prefix(const std::string &ipv6Addr, uint8_t prefixLen)
+{
+    if (prefixLen >= MAX_IPV6_PREFIX_LENGTH) {
+        return ipv6Addr;
+    }
+
+    in6_addr ipv6AddrBuf = IN6ADDR_ANY_INIT;
+    inet_pton(AF_INET6, ipv6Addr.c_str(), &ipv6AddrBuf);
+
+    char buf[INET6_ADDRSTRLEN] = {0};
+    if (inet_ntop(AF_INET6, &ipv6AddrBuf, buf, INET6_ADDRSTRLEN) == nullptr) {
+        return ipv6Addr;
+    }
+
+    in6_addr ipv6Prefix = IN6ADDR_ANY_INIT;
+    uint32_t byteIndex = prefixLen / BIT_NUM_BYTE;
+    if (memset_s(ipv6Prefix.s6_addr, sizeof(ipv6Prefix.s6_addr), 0, sizeof(ipv6Prefix.s6_addr)) != EOK ||
+        memcpy_s(ipv6Prefix.s6_addr, sizeof(ipv6Prefix.s6_addr), &ipv6AddrBuf, byteIndex) != EOK) {
+        return DEFAULT_IPV6_ANY_INIT_ADDR;
+    }
+    uint32_t bitOffset = prefixLen & 0x7;
+    if ((bitOffset != 0) && (byteIndex < INET_ADDRSTRLEN)) {
+        ipv6Prefix.s6_addr[byteIndex] = ipv6AddrBuf.s6_addr[byteIndex] & (0xff00 >> bitOffset);
+    }
+    char ipv6PrefixBuf[INET6_ADDRSTRLEN] = {0};
+    inet_ntop(AF_INET6, &ipv6Prefix, ipv6PrefixBuf, INET6_ADDRSTRLEN);
+    return ipv6PrefixBuf;
+}
+
 std::string ConvertIpv4Address(uint32_t addressIpv4)
 {
     if (addressIpv4 == 0) {
@@ -246,6 +278,53 @@ int32_t Ipv4PrefixLen(const std::string &ip)
         }
     }
     return cnt;
+}
+
+int32_t Ipv6PrefixLen(const std::string &ip)
+{
+    constexpr int32_t LENGTH_8 = 8;
+    constexpr int32_t LENGTH_7 = 7;
+    constexpr int32_t LENGTH_6 = 6;
+    constexpr int32_t LENGTH_5 = 5;
+    constexpr int32_t LENGTH_4 = 4;
+    constexpr int32_t LENGTH_3 = 3;
+    constexpr int32_t LENGTH_2 = 2;
+    constexpr int32_t LENGTH_1 = 1;
+    if (ip.empty()) {
+        return 0;
+    }
+    in6_addr addr{};
+    inet_pton(AF_INET6, ip.c_str(), &addr);
+    int32_t prefixLen = 0;
+    for (int32_t i = 0; i < BYTE_16; ++i) {
+        if (addr.s6_addr[i] == 0xFF) {
+            prefixLen += LENGTH_8;
+        } else if (addr.s6_addr[i] == 0xFE) {
+            prefixLen += LENGTH_7;
+            break;
+        } else if (addr.s6_addr[i] == 0xFC) {
+            prefixLen += LENGTH_6;
+            break;
+        } else if (addr.s6_addr[i] == 0xF8) {
+            prefixLen += LENGTH_5;
+            break;
+        } else if (addr.s6_addr[i] == 0xF0) {
+            prefixLen += LENGTH_4;
+            break;
+        } else if (addr.s6_addr[i] == 0xE0) {
+            prefixLen += LENGTH_3;
+            break;
+        } else if (addr.s6_addr[i] == 0xC0) {
+            prefixLen += LENGTH_2;
+            break;
+        } else if (addr.s6_addr[i] == 0x80) {
+            prefixLen += LENGTH_1;
+            break;
+        } else {
+            break;
+        }
+    }
+    return prefixLen;
 }
 
 bool ParseInt(const std::string &str, int32_t *value)

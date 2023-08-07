@@ -22,7 +22,8 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-struct INetAddr final: public Parcelable {
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
+struct NET_SYMBOL_VISIBLE INetAddr final : public Parcelable {
     typedef enum {
         UNKNOWN = 0x00,
         IPV4 = 0x01,
@@ -37,7 +38,7 @@ struct INetAddr final: public Parcelable {
     std::string hostName_;
     uint8_t port_ = 0;
 
-    bool operator==(const INetAddr& obj) const;
+    bool operator==(const INetAddr &obj) const;
 
     bool Marshalling(Parcel &parcel) const override;
     static sptr<INetAddr> Unmarshalling(Parcel &parcel);

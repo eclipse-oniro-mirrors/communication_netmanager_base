@@ -33,7 +33,8 @@ enum {
     RTN_THROW = 9
 };
 
-struct Route final: public Parcelable {
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
+struct NET_SYMBOL_VISIBLE Route final : public Parcelable {
     std::string iface_;
     INetAddr destination_;
     INetAddr gateway_;
@@ -43,7 +44,7 @@ struct Route final: public Parcelable {
     bool hasGateway_ = true;
     bool isDefaultRoute_ = false;
 
-    bool operator==(const Route& obj) const;
+    bool operator==(const Route &obj) const;
 
     bool Marshalling(Parcel &parcel) const override;
     static sptr<Route> Unmarshalling(Parcel &parcel);
