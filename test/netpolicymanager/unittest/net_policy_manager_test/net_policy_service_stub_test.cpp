@@ -221,7 +221,7 @@ HWTEST_F(NetPolicyServiceStubTest, OnRemoteRequestTest002, TestSize.Level1)
     MessageOption option;
     int32_t ret =
         instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_END), data, reply, option);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, IPC_STUB_UNKNOW_TRANS_ERR);
 }
 
 /**
@@ -240,7 +240,11 @@ HWTEST_F(NetPolicyServiceStubTest, OnRemoteRequestTest003, TestSize.Level1)
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POLICY_BY_UID),
                                              data, reply, option);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    int32_t result = NETMANAGER_ERROR;
+    EXPECT_EQ(reply.ReadInt32(result), true);
+    EXPECT_EQ(result, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 /**
