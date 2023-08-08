@@ -62,8 +62,8 @@ bool CreateNetlinkDistributor(int32_t netlinkType, const DistributorParam &param
     sockAddr.nl_groups = param.groups;
 
     if ((socketFd = socket(PF_NETLINK, SOCK_DGRAM | SOCK_CLOEXEC, netlinkType)) < 0) {
-        NETNATIVE_LOGE("Creat socket for family failed NetLinkType is %{public}d: %{public}s = %{public}d",
-                       netlinkType, strerror(errno), errno);
+        NETNATIVE_LOGE("Creat socket for family failed NetLinkType is %{public}d: %{public}s = %{public}d", netlinkType,
+                       strerror(errno), errno);
         return false;
     }
 
