@@ -58,6 +58,7 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
     netAllCapabilities_.linkUpBandwidthKbps_ = netSupplierInfo_.linkUpBandwidthKbps_;
     netAllCapabilities_.linkDownBandwidthKbps_ = netSupplierInfo_.linkDownBandwidthKbps_;
     if (oldAvailable == netSupplierInfo_.isAvailable_) {
+        NETMGR_LOG_W("Same supplier available status:[%{public}d]", oldAvailable);
         return;
     }
     if (network_ == nullptr) {

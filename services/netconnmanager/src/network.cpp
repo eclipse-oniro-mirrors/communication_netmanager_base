@@ -475,7 +475,7 @@ void Network::UpdateNetConnState(NetConnState netConnState)
     }
 
     SendConnectionChangedBroadcast(netConnState);
-    NETMGR_LOG_D("Network[%{public}d] state changed, from [%{public}d] to [%{public}d]", netId_, oldState, state_);
+    NETMGR_LOG_I("Network[%{public}d] state changed, from [%{public}d] to [%{public}d]", netId_, oldState, state_);
 }
 
 void Network::SendConnectionChangedBroadcast(const NetConnState &netConnState) const
