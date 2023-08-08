@@ -169,13 +169,14 @@ bool IsDataAndSizeValid(const uint8_t *data, size_t size, MessageParcel &dataPar
 
 void NetworkCreatePhysicalFuzzTest(const uint8_t *data, size_t size)
 {
-    int32_t netId = GetData<int32_t>();
-    int32_t permission = GetData<int32_t>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    int32_t netId = GetData<int32_t>();
+    int32_t permission = GetData<int32_t>();
+
     dataParcel.WriteInt32(netId);
     dataParcel.WriteInt32(permission);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_CREATE_PHYSICAL),
@@ -184,24 +185,26 @@ void NetworkCreatePhysicalFuzzTest(const uint8_t *data, size_t size)
 
 void NetworkDestroyFuzzTest(const uint8_t *data, size_t size)
 {
-    int32_t netId = GetData<int32_t>();
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    int32_t netId = GetData<int32_t>();
     dataParcel.WriteInt32(netId);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_DESTROY), dataParcel);
 }
 
 void NetworkAddInterfaceFuzzTest(const uint8_t *data, size_t size)
 {
-    int32_t netId = GetData<int32_t>();
-    std::string iface = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    int32_t netId = GetData<int32_t>();
+    std::string iface = GetStringFromData(STR_LEN);
+
     dataParcel.WriteInt32(netId);
     dataParcel.WriteString(iface);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_ADD_INTERFACE), dataParcel);
@@ -209,13 +212,14 @@ void NetworkAddInterfaceFuzzTest(const uint8_t *data, size_t size)
 
 void NetworkRemoveInterfaceFuzzTest(const uint8_t *data, size_t size)
 {
-    int32_t netId = GetData<int32_t>();
-    std::string iface = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    int32_t netId = GetData<int32_t>();
+    std::string iface = GetStringFromData(STR_LEN);
+
     dataParcel.WriteInt32(netId);
     dataParcel.WriteString(iface);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_REMOVE_INTERFACE),
@@ -224,15 +228,16 @@ void NetworkRemoveInterfaceFuzzTest(const uint8_t *data, size_t size)
 
 void NetworkAddRouteFuzzTest(const uint8_t *data, size_t size)
 {
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
     int32_t netId = GetData<int32_t>();
     std::string ifName = GetStringFromData(STR_LEN);
     std::string destination = GetStringFromData(STR_LEN);
     std::string nextHop = GetStringFromData(STR_LEN);
 
-    MessageParcel dataParcel;
-    if (!IsDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
     dataParcel.WriteInt32(netId);
     dataParcel.WriteString(ifName);
     dataParcel.WriteString(destination);
@@ -242,15 +247,16 @@ void NetworkAddRouteFuzzTest(const uint8_t *data, size_t size)
 
 void NetworkRemoveRouteFuzzTest(const uint8_t *data, size_t size)
 {
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
     int32_t netId = GetData<int32_t>();
     std::string ifName = GetStringFromData(STR_LEN);
     std::string destination = GetStringFromData(STR_LEN);
     std::string nextHop = GetStringFromData(STR_LEN);
 
-    MessageParcel dataParcel;
-    if (!IsDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
     dataParcel.WriteInt32(netId);
     dataParcel.WriteString(ifName);
     dataParcel.WriteString(destination);
@@ -260,12 +266,13 @@ void NetworkRemoveRouteFuzzTest(const uint8_t *data, size_t size)
 
 void GetInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
 {
-    OHOS::nmd::InterfaceConfigurationParcel cfg;
-    cfg.ifName = GetStringFromData(STR_LEN);
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    OHOS::nmd::InterfaceConfigurationParcel cfg;
+    cfg.ifName = GetStringFromData(STR_LEN);
 
     dataParcel.WriteString(cfg.ifName);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_GET_CONFIG), dataParcel);
@@ -273,25 +280,27 @@ void GetInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
 
 void GetInterfaceMtuFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string interfaceName = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string interfaceName = GetStringFromData(STR_LEN);
+
     dataParcel.WriteString(interfaceName);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_GET_MTU), dataParcel);
 }
 
 void SetInterfaceMtuFuzzTest(const uint8_t *data, size_t size)
 {
-    int32_t mtu = GetData<int32_t>();
-    std::string interfaceName = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    int32_t mtu = GetData<int32_t>();
+    std::string interfaceName = GetStringFromData(STR_LEN);
+
     dataParcel.WriteString(interfaceName);
     dataParcel.WriteInt32(mtu);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_SET_MTU), dataParcel);
@@ -299,14 +308,15 @@ void SetInterfaceMtuFuzzTest(const uint8_t *data, size_t size)
 
 void AddInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string interfaceName = GetStringFromData(STR_LEN);
-    std::string ipAddr = GetStringFromData(STR_LEN);
-    int32_t prefixLength = GetData<int32_t>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string interfaceName = GetStringFromData(STR_LEN);
+    std::string ipAddr = GetStringFromData(STR_LEN);
+    int32_t prefixLength = GetData<int32_t>();
+
     dataParcel.WriteString(interfaceName);
     dataParcel.WriteString(ipAddr);
     dataParcel.WriteInt32(prefixLength);
@@ -366,12 +376,12 @@ public:
 
 void RegisterNotifyCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    sptr<NetsysNative::NotifyCallbackStub> notifyCb = new (std::nothrow) TestNotifyCallback();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    sptr<NetsysNative::NotifyCallbackStub> notifyCb = new (std::nothrow) TestNotifyCallback();
 
     notifyCb->Marshalling(dataParcel);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_REGISTER_NOTIFY_CALLBACK),
@@ -380,12 +390,12 @@ void RegisterNotifyCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void UnRegisterNotifyCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    sptr<NetsysNative::NotifyCallbackStub> notifyCb = new (std::nothrow) TestNotifyCallback();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    sptr<NetsysNative::NotifyCallbackStub> notifyCb = new (std::nothrow) TestNotifyCallback();
 
     notifyCb->Marshalling(dataParcel);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_UNREGISTER_NOTIFY_CALLBACK),
@@ -394,12 +404,13 @@ void UnRegisterNotifyCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void InterfaceSetIffUpFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string ifaceName = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string ifaceName = GetStringFromData(STR_LEN);
+
     if (!dataParcel.WriteString("-L -n")) {
         return;
     }
@@ -410,6 +421,11 @@ void InterfaceSetIffUpFuzzTest(const uint8_t *data, size_t size)
 
 void GetAddrInfoFuzzTest(const uint8_t *data, size_t size)
 {
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
     std::string serverName = GetStringFromData(STR_LEN);
     AddrInfo hints;
     hints.aiFlags = GetData<uint32_t>();
@@ -424,10 +440,6 @@ void GetAddrInfoFuzzTest(const uint8_t *data, size_t size)
     }
     uint16_t netId = GetData<uint16_t>();
 
-    MessageParcel dataParcel;
-    if (!IsDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
     if (!dataParcel.WriteString("-L -n")) {
         return;
     }
@@ -445,17 +457,17 @@ void GetAddrInfoFuzzTest(const uint8_t *data, size_t size)
 
 void NetworkAddRouteParcelFuzzTest(const uint8_t *data, size_t size)
 {
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
     int32_t netId = GetData<int32_t>();
     NetsysNative::RouteInfoParcel routInfo;
     routInfo.destination = GetStringFromData(STR_LEN);
     routInfo.ifName = GetStringFromData(STR_LEN);
     routInfo.nextHop = GetStringFromData(STR_LEN);
     routInfo.mtu = GetData<int32_t>();
-
-    MessageParcel dataParcel;
-    if (!IsDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
 
     dataParcel.WriteInt32(netId);
     dataParcel.WriteString(routInfo.destination);
@@ -468,12 +480,12 @@ void NetworkAddRouteParcelFuzzTest(const uint8_t *data, size_t size)
 
 void NetworkSetDefaultFuzzTest(const uint8_t *data, size_t size)
 {
-    int32_t netId = GetData<int32_t>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    int32_t netId = GetData<int32_t>();
 
     dataParcel.WriteInt32(netId);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_SET_DEFAULT), dataParcel);
@@ -489,12 +501,12 @@ void NetworkGetDefaultFuzzTest(const uint8_t *data, size_t size)
 }
 void SetDefaultNetWorkFuzzTest(const uint8_t *data, size_t size)
 {
-    int32_t netId = GetData<int32_t>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    int32_t netId = GetData<int32_t>();
 
     dataParcel.WriteInt32(netId);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_SET_CONFIG), dataParcel);
@@ -502,13 +514,14 @@ void SetDefaultNetWorkFuzzTest(const uint8_t *data, size_t size)
 
 void IpfwdAddInterfaceForwardFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string fromIface = GetStringFromData(STR_LEN);
-    std::string toIface = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string fromIface = GetStringFromData(STR_LEN);
+    std::string toIface = GetStringFromData(STR_LEN);
+
     dataParcel.WriteString(fromIface);
     dataParcel.WriteString(toIface);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_IPFWD_ADD_INTERFACE_FORWARD),
@@ -517,13 +530,14 @@ void IpfwdAddInterfaceForwardFuzzTest(const uint8_t *data, size_t size)
 
 void IpfwdRemoveInterfaceForwardFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string fromIface = GetStringFromData(STR_LEN);
-    std::string toIface = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string fromIface = GetStringFromData(STR_LEN);
+    std::string toIface = GetStringFromData(STR_LEN);
+
     dataParcel.WriteString(fromIface);
     dataParcel.WriteString(toIface);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_IPFWD_REMOVE_INTERFACE_FORWARD),
@@ -532,13 +546,13 @@ void IpfwdRemoveInterfaceForwardFuzzTest(const uint8_t *data, size_t size)
 
 void InterfaceSetIpAddressFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string ifaceName = GetStringFromData(STR_LEN);
-    std::string ipAddress = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string ifaceName = GetStringFromData(STR_LEN);
+    std::string ipAddress = GetStringFromData(STR_LEN);
 
     dataParcel.WriteString(ifaceName);
     dataParcel.WriteString(ipAddress);
@@ -548,13 +562,13 @@ void InterfaceSetIpAddressFuzzTest(const uint8_t *data, size_t size)
 
 void FirewallSetUidsAllowedListChainFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string ifaceName = GetStringFromData(STR_LEN);
-    std::string ipAddress = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string ifaceName = GetStringFromData(STR_LEN);
+    std::string ipAddress = GetStringFromData(STR_LEN);
 
     dataParcel.WriteString(ifaceName);
     dataParcel.WriteString(ipAddress);
@@ -564,13 +578,13 @@ void FirewallSetUidsAllowedListChainFuzzTest(const uint8_t *data, size_t size)
 
 void FirewallSetUidsDeniedListChainFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string ifaceName = GetStringFromData(STR_LEN);
-    std::string ipAddress = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string ifaceName = GetStringFromData(STR_LEN);
+    std::string ipAddress = GetStringFromData(STR_LEN);
 
     dataParcel.WriteString(ifaceName);
     dataParcel.WriteString(ipAddress);
@@ -580,13 +594,13 @@ void FirewallSetUidsDeniedListChainFuzzTest(const uint8_t *data, size_t size)
 
 void FirewallSetUidRuleFuzzTest(const uint8_t *data, size_t size)
 {
-    int32_t chain = GetData<int32_t>();
-    int32_t firewallRule = GetData<int32_t>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    int32_t chain = GetData<int32_t>();
+    int32_t firewallRule = GetData<int32_t>();
 
     uint32_t vectorLength = GetData<uint32_t>() % VECTOR_MAX_SIZE;
     dataParcel.WriteInt32(static_cast<int32_t>(vectorLength));
@@ -601,16 +615,16 @@ void FirewallSetUidRuleFuzzTest(const uint8_t *data, size_t size)
 }
 void SetInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
 {
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
     OHOS::nmd::InterfaceConfigurationParcel cfg;
     cfg.ifName = GetStringFromData(STR_LEN);
     cfg.hwAddr = GetStringFromData(STR_LEN);
     cfg.ipv4Addr = GetStringFromData(STR_LEN);
     cfg.prefixLength = GetData<int32_t>();
-
-    MessageParcel dataParcel;
-    if (!IsDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
 
     uint32_t vectorLength = GetData<uint32_t>() % VECTOR_MAX_SIZE;
     dataParcel.WriteInt32(static_cast<int32_t>(vectorLength));
@@ -637,16 +651,16 @@ void NetworkClearDefaultFuzzTest(const uint8_t *data, size_t size)
 
 void GetProcSysNetFuzzTest(const uint8_t *data, size_t size)
 {
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
     int32_t family = GetData<int32_t>();
     int32_t which = GetData<int32_t>();
     std::string ifname = GetStringFromData(STR_LEN);
     std::string parameter = GetStringFromData(STR_LEN);
     std::string value = GetStringFromData(STR_LEN);
-
-    MessageParcel dataParcel;
-    if (!IsDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
 
     dataParcel.WriteInt32(family);
     dataParcel.WriteInt32(which);
@@ -658,16 +672,16 @@ void GetProcSysNetFuzzTest(const uint8_t *data, size_t size)
 
 void SetProcSysNetFuzzTest(const uint8_t *data, size_t size)
 {
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
     int32_t family = GetData<int32_t>();
     int32_t which = GetData<int32_t>();
     std::string ifname = GetStringFromData(STR_LEN);
     std::string parameter = GetStringFromData(STR_LEN);
     std::string value = GetStringFromData(STR_LEN);
-
-    MessageParcel dataParcel;
-    if (!IsDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
 
     dataParcel.WriteInt32(family);
     dataParcel.WriteInt32(which);
@@ -679,13 +693,13 @@ void SetProcSysNetFuzzTest(const uint8_t *data, size_t size)
 
 void SetInternetPermissionFuzzTest(const uint8_t *data, size_t size)
 {
-    int32_t uid = GetData<int32_t>();
-    int8_t allow = GetData<int8_t>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    int32_t uid = GetData<int32_t>();
+    int8_t allow = GetData<int8_t>();
 
     dataParcel.WriteInt32(uid);
     dataParcel.WriteInt32(allow);
@@ -695,15 +709,15 @@ void SetInternetPermissionFuzzTest(const uint8_t *data, size_t size)
 
 void GetFwmarkForNetworkFuzzTest(const uint8_t *data, size_t size)
 {
-    uint32_t netId = GetData<uint32_t>();
-    NetsysNative::MarkMaskParcel markParcl;
-    markParcl.mark = GetData<int32_t>();
-    markParcl.mask = GetData<int32_t>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    uint32_t netId = GetData<uint32_t>();
+    NetsysNative::MarkMaskParcel markParcl;
+    markParcl.mark = GetData<int32_t>();
+    markParcl.mask = GetData<int32_t>();
 
     dataParcel.WriteInt32(netId);
     dataParcel.WriteInt32(markParcl.mark);
@@ -714,12 +728,12 @@ void GetFwmarkForNetworkFuzzTest(const uint8_t *data, size_t size)
 
 void IpEnableForwardingFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string requestor = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string requestor = GetStringFromData(STR_LEN);
 
     dataParcel.WriteString(requestor);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_IPENABLE_FORWARDING), dataParcel);
@@ -727,12 +741,12 @@ void IpEnableForwardingFuzzTest(const uint8_t *data, size_t size)
 
 void IpDisableForwardingFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string requestor = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string requestor = GetStringFromData(STR_LEN);
 
     dataParcel.WriteString(requestor);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_IPDISABLE_FORWARDING), dataParcel);
@@ -740,13 +754,13 @@ void IpDisableForwardingFuzzTest(const uint8_t *data, size_t size)
 
 void EnableNatFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string downstreamIface = GetStringFromData(STR_LEN);
-    std::string upstreamIface = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string downstreamIface = GetStringFromData(STR_LEN);
+    std::string upstreamIface = GetStringFromData(STR_LEN);
 
     dataParcel.WriteString(downstreamIface);
     dataParcel.WriteString(upstreamIface);
@@ -755,13 +769,13 @@ void EnableNatFuzzTest(const uint8_t *data, size_t size)
 
 void DisableNatFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string downstreamIface = GetStringFromData(STR_LEN);
-    std::string upstreamIface = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string downstreamIface = GetStringFromData(STR_LEN);
+    std::string upstreamIface = GetStringFromData(STR_LEN);
 
     dataParcel.WriteString(downstreamIface);
     dataParcel.WriteString(upstreamIface);
@@ -770,12 +784,12 @@ void DisableNatFuzzTest(const uint8_t *data, size_t size)
 
 void BandwidthEnableDataSaverFuzzTest(const uint8_t *data, size_t size)
 {
-    bool enable = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    bool enable = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
 
     dataParcel.WriteBool(enable);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_BANDWIDTH_ENABLE_DATA_SAVER),
@@ -784,13 +798,13 @@ void BandwidthEnableDataSaverFuzzTest(const uint8_t *data, size_t size)
 
 void BandwidthSetIfaceQuotaFuzzTest(const uint8_t *data, size_t size)
 {
-    int64_t bytes = GetData<int64_t>();
-    std::string ifName = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    int64_t bytes = GetData<int64_t>();
+    std::string ifName = GetStringFromData(STR_LEN);
 
     dataParcel.WriteInt64(bytes);
     dataParcel.WriteString(ifName);
@@ -800,12 +814,12 @@ void BandwidthSetIfaceQuotaFuzzTest(const uint8_t *data, size_t size)
 
 void BandwidthRemoveIfaceQuotaFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string ifName = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string ifName = GetStringFromData(STR_LEN);
 
     dataParcel.WriteString(ifName);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_IFACE_QUOTA),
@@ -814,11 +828,12 @@ void BandwidthRemoveIfaceQuotaFuzzTest(const uint8_t *data, size_t size)
 
 void BandwidthAddDeniedListFuzzTest(const uint8_t *data, size_t size)
 {
-    uint32_t uid = GetData<uint32_t>();
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    uint32_t uid = GetData<uint32_t>();
 
     dataParcel.WriteInt32(uid);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_BANDWIDTH_ADD_DENIED_LIST),
@@ -827,12 +842,12 @@ void BandwidthAddDeniedListFuzzTest(const uint8_t *data, size_t size)
 
 void BandwidthRemoveDeniedListFuzzTest(const uint8_t *data, size_t size)
 {
-    uint32_t uid = GetData<uint32_t>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    uint32_t uid = GetData<uint32_t>();
 
     dataParcel.WriteInt32(uid);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_DENIED_LIST),
@@ -841,12 +856,12 @@ void BandwidthRemoveDeniedListFuzzTest(const uint8_t *data, size_t size)
 
 void BandwidthAddAllowedListFuzzTest(const uint8_t *data, size_t size)
 {
-    uint32_t uid = GetData<uint32_t>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    uint32_t uid = GetData<uint32_t>();
 
     dataParcel.WriteInt32(uid);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_BANDWIDTH_ADD_ALLOWED_LIST),
@@ -855,12 +870,12 @@ void BandwidthAddAllowedListFuzzTest(const uint8_t *data, size_t size)
 
 void BandwidthRemoveAllowedListFuzzTest(const uint8_t *data, size_t size)
 {
-    uint32_t uid = GetData<uint32_t>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    uint32_t uid = GetData<uint32_t>();
 
     dataParcel.WriteInt32(uid);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_ALLOWED_LIST),
@@ -869,13 +884,14 @@ void BandwidthRemoveAllowedListFuzzTest(const uint8_t *data, size_t size)
 
 void FirewallEnableChainFuzzTest(const uint8_t *data, size_t size)
 {
-    uint32_t chain = GetData<uint32_t>();
-    bool enable = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    uint32_t chain = GetData<uint32_t>();
+    bool enable = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+
     dataParcel.WriteInt32(chain);
     dataParcel.WriteBool(enable);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FIREWALL_ENABLE_CHAIN), dataParcel);
@@ -883,17 +899,17 @@ void FirewallEnableChainFuzzTest(const uint8_t *data, size_t size)
 
 void GetNetworkSharingTrafficFuzzTest(const uint8_t *data, size_t size)
 {
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
     std::string downIface = GetStringFromData(STR_LEN);
     std::string upIface = GetStringFromData(STR_LEN);
     NetsysNative::NetworkSharingTraffic traffic;
     traffic.receive = GetData<int64_t>();
     traffic.send = GetData<int64_t>();
     traffic.all = GetData<int64_t>();
-
-    MessageParcel dataParcel;
-    if (!IsDataAndSizeValid(data, size, dataParcel)) {
-        return;
-    }
 
     dataParcel.WriteString(downIface);
     dataParcel.WriteString(upIface);
@@ -906,14 +922,14 @@ void GetNetworkSharingTrafficFuzzTest(const uint8_t *data, size_t size)
 
 void DelInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string interfaceName = GetStringFromData(STR_LEN);
-    std::string ipAddr = GetStringFromData(STR_LEN);
-    int32_t prefixLength = GetData<int32_t>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string interfaceName = GetStringFromData(STR_LEN);
+    std::string ipAddr = GetStringFromData(STR_LEN);
+    int32_t prefixLength = GetData<int32_t>();
 
     dataParcel.WriteString(interfaceName);
     dataParcel.WriteString(ipAddr);
@@ -923,14 +939,15 @@ void DelInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
 
 void SetResolverConfigFuzzTest(const uint8_t *data, size_t size)
 {
-    uint16_t netId = GetData<uint16_t>();
-    uint16_t baseTimeoutMsec = GetData<uint16_t>();
-    uint8_t retryCount = GetData<uint8_t>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    uint16_t netId = GetData<uint16_t>();
+    uint16_t baseTimeoutMsec = GetData<uint16_t>();
+    uint8_t retryCount = GetData<uint8_t>();
+
     dataParcel.WriteUint16(netId);
     dataParcel.WriteUint16(baseTimeoutMsec);
     dataParcel.WriteUint8(retryCount);
@@ -951,34 +968,39 @@ void SetResolverConfigFuzzTest(const uint8_t *data, size_t size)
 
 void GetResolverConfigFuzzTest(const uint8_t *data, size_t size)
 {
-    uint16_t netId = GetData<uint16_t>();
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    uint16_t netId = GetData<uint16_t>();
+
     dataParcel.WriteUint16(netId);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_RESOLVER_CONFIG), dataParcel);
 }
 
 void CreateNetworkCacheFuzzTest(const uint8_t *data, size_t size)
 {
-    uint16_t netId = GetData<uint16_t>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    uint16_t netId = GetData<uint16_t>();
+
     dataParcel.WriteUint16(netId);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_CREATE_NETWORK_CACHE), dataParcel);
 }
 
 void DestroyNetworkCacheFuzzTest(const uint8_t *data, size_t size)
 {
-    uint16_t netId = GetData<uint16_t>();
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    uint16_t netId = GetData<uint16_t>();
+
     dataParcel.WriteUint16(netId);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_DESTROY_NETWORK_CACHE), dataParcel);
 }
@@ -994,11 +1016,11 @@ void InterfaceGetListFuzzTest(const uint8_t *data, size_t size)
 
 void ShareDnsSetFuzzTest(const uint8_t *data, size_t size)
 {
-    uint16_t netId = GetData<uint16_t>();
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+    uint16_t netId = GetData<uint16_t>();
     dataParcel.WriteUint16(netId);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_TETHER_DNS_SET), dataParcel);
 }
@@ -1024,12 +1046,12 @@ void StopDnsProxyListenFuzzTest(const uint8_t *data, size_t size)
 
 void StartDhcpClientFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string iface = GetStringFromData(STR_LEN);
-    bool bIpv6 = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+    std::string iface = GetStringFromData(STR_LEN);
+    bool bIpv6 = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
     dataParcel.WriteString(iface);
     dataParcel.WriteBool(bIpv6);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_START_DHCP_CLIENT), dataParcel);
@@ -1037,13 +1059,13 @@ void StartDhcpClientFuzzTest(const uint8_t *data, size_t size)
 
 void StopDhcpClientFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string iface = GetStringFromData(STR_LEN);
-    bool bIpv6 = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+    std::string iface = GetStringFromData(STR_LEN);
+    bool bIpv6 = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+
     dataParcel.WriteString(iface);
     dataParcel.WriteBool(bIpv6);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_STOP_DHCP_CLIENT), dataParcel);
@@ -1051,12 +1073,12 @@ void StopDhcpClientFuzzTest(const uint8_t *data, size_t size)
 
 void StartDhcpServiceFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string iface = GetStringFromData(STR_LEN);
-    std::string ipv4addr = GetStringFromData(STR_LEN);
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+    std::string iface = GetStringFromData(STR_LEN);
+    std::string ipv4addr = GetStringFromData(STR_LEN);
     dataParcel.WriteString(iface);
     dataParcel.WriteString(ipv4addr);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_START_DHCP_SERVICE), dataParcel);
@@ -1064,11 +1086,11 @@ void StartDhcpServiceFuzzTest(const uint8_t *data, size_t size)
 
 void StopDhcpServiceFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string iface = GetStringFromData(STR_LEN);
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+    std::string iface = GetStringFromData(STR_LEN);
     dataParcel.WriteString(iface);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_STOP_DHCP_SERVICE), dataParcel);
 }
@@ -1139,13 +1161,13 @@ void SetIptablesCommandForResFuzzTest(const uint8_t *data, size_t size)
 
 void NetworkCreateVirtualFuzzTest(const uint8_t *data, size_t size)
 {
-    int32_t netId = GetData<int32_t>();
-    bool hasDns = GetData<bool>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    int32_t netId = GetData<int32_t>();
+    bool hasDns = GetData<bool>();
 
     dataParcel.WriteInt32(netId);
     dataParcel.WriteBool(hasDns);
@@ -1156,17 +1178,17 @@ void NetworkCreateVirtualFuzzTest(const uint8_t *data, size_t size)
 
 void NetworkAddUidsFuzzTest(const uint8_t *data, size_t size)
 {
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
     int32_t netId = GetData<int32_t>();
     std::vector<UidRange> uidRanges;
     UidRange uid;
     int32_t rangesSize = GetData<int32_t>() % VECTOR_MAX_SIZE;
     for (int i = 0; i < rangesSize; i++) {
         uidRanges.emplace_back(uid);
-    }
-
-    MessageParcel dataParcel;
-    if (!IsDataAndSizeValid(data, size, dataParcel)) {
-        return;
     }
 
     dataParcel.WriteInt32(netId);
@@ -1180,17 +1202,17 @@ void NetworkAddUidsFuzzTest(const uint8_t *data, size_t size)
 
 void NetworkDelUidsFuzzTest(const uint8_t *data, size_t size)
 {
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
     int32_t netId = GetData<int32_t>();
     std::vector<UidRange> uidRanges;
     UidRange uid;
     int32_t rangesSize = GetData<int32_t>() % VECTOR_MAX_SIZE;
     for (int i = 0; i < rangesSize; i++) {
         uidRanges.emplace_back(uid);
-    }
-
-    MessageParcel dataParcel;
-    if (!IsDataAndSizeValid(data, size, dataParcel)) {
-        return;
     }
 
     dataParcel.WriteInt32(netId);
@@ -1204,15 +1226,15 @@ void NetworkDelUidsFuzzTest(const uint8_t *data, size_t size)
 
 void OnInterfaceAddressUpdatedFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string addr = GetStringFromData(STR_LEN);
-    std::string ifName = GetStringFromData(STR_LEN);
-    int32_t flags = GetData<int32_t>();
-    int32_t scope = GetData<int32_t>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string addr = GetStringFromData(STR_LEN);
+    std::string ifName = GetStringFromData(STR_LEN);
+    int32_t flags = GetData<int32_t>();
+    int32_t scope = GetData<int32_t>();
 
     dataParcel.WriteString(addr);
     dataParcel.WriteString(ifName);
@@ -1223,15 +1245,15 @@ void OnInterfaceAddressUpdatedFuzzTest(const uint8_t *data, size_t size)
 
 void OnInterfaceAddressRemovedFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string addr = GetStringFromData(STR_LEN);
-    std::string ifName = GetStringFromData(STR_LEN);
-    int32_t flags = GetData<int32_t>();
-    int32_t scope = GetData<int32_t>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string addr = GetStringFromData(STR_LEN);
+    std::string ifName = GetStringFromData(STR_LEN);
+    int32_t flags = GetData<int32_t>();
+    int32_t scope = GetData<int32_t>();
 
     dataParcel.WriteString(addr);
     dataParcel.WriteString(ifName);
@@ -1243,12 +1265,12 @@ void OnInterfaceAddressRemovedFuzzTest(const uint8_t *data, size_t size)
 
 void OnInterfaceAddedFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string ifName = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string ifName = GetStringFromData(STR_LEN);
 
     dataParcel.WriteString(ifName);
 
@@ -1257,12 +1279,12 @@ void OnInterfaceAddedFuzzTest(const uint8_t *data, size_t size)
 
 void OnInterfaceRemovedFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string ifName = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string ifName = GetStringFromData(STR_LEN);
 
     dataParcel.WriteString(ifName);
 
@@ -1271,13 +1293,13 @@ void OnInterfaceRemovedFuzzTest(const uint8_t *data, size_t size)
 
 void OnInterfaceChangedFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string ifName = GetStringFromData(STR_LEN);
-    bool up = GetData<bool>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string ifName = GetStringFromData(STR_LEN);
+    bool up = GetData<bool>();
 
     dataParcel.WriteString(ifName);
     dataParcel.WriteBool(up);
@@ -1287,13 +1309,13 @@ void OnInterfaceChangedFuzzTest(const uint8_t *data, size_t size)
 
 void OnInterfaceLinkStateChangedFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string ifName = GetStringFromData(STR_LEN);
-    bool up = GetData<bool>();
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string ifName = GetStringFromData(STR_LEN);
+    bool up = GetData<bool>();
 
     dataParcel.WriteString(ifName);
     dataParcel.WriteBool(up);
@@ -1303,15 +1325,15 @@ void OnInterfaceLinkStateChangedFuzzTest(const uint8_t *data, size_t size)
 
 void OnRouteChangedFuzzTest(const uint8_t *data, size_t size)
 {
-    bool updated = GetData<bool>();
-    std::string route = GetStringFromData(STR_LEN);
-    std::string gateway = GetStringFromData(STR_LEN);
-    std::string ifName = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    bool updated = GetData<bool>();
+    std::string route = GetStringFromData(STR_LEN);
+    std::string gateway = GetStringFromData(STR_LEN);
+    std::string ifName = GetStringFromData(STR_LEN);
 
     dataParcel.WriteBool(updated);
     dataParcel.WriteString(route);
@@ -1323,15 +1345,15 @@ void OnRouteChangedFuzzTest(const uint8_t *data, size_t size)
 
 void OnDhcpSuccessFuzzTest(const uint8_t *data, size_t size)
 {
-    bool updated = GetData<bool>();
-    std::string route = GetStringFromData(STR_LEN);
-    std::string gateway = GetStringFromData(STR_LEN);
-    std::string ifName = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    bool updated = GetData<bool>();
+    std::string route = GetStringFromData(STR_LEN);
+    std::string gateway = GetStringFromData(STR_LEN);
+    std::string ifName = GetStringFromData(STR_LEN);
 
     dataParcel.WriteBool(updated);
     dataParcel.WriteString(route);
@@ -1343,13 +1365,13 @@ void OnDhcpSuccessFuzzTest(const uint8_t *data, size_t size)
 
 void OnBandwidthReachedLimitFuzzTest(const uint8_t *data, size_t size)
 {
-    std::string limitName = GetStringFromData(STR_LEN);
-    std::string iface = GetStringFromData(STR_LEN);
-
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+
+    std::string limitName = GetStringFromData(STR_LEN);
+    std::string iface = GetStringFromData(STR_LEN);
 
     dataParcel.WriteString(limitName);
     dataParcel.WriteString(iface);
