@@ -58,6 +58,7 @@ void NetSupplier::UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo)
     netAllCapabilities_.linkUpBandwidthKbps_ = netSupplierInfo_.linkUpBandwidthKbps_;
     netAllCapabilities_.linkDownBandwidthKbps_ = netSupplierInfo_.linkDownBandwidthKbps_;
     if (oldAvailable == netSupplierInfo_.isAvailable_) {
+        NETMGR_LOG_W("Same supplier available status:[%{public}d]", oldAvailable);
         return;
     }
     if (network_ == nullptr) {
@@ -184,13 +185,9 @@ int32_t NetSupplier::GetSupplierUid() const
 
 bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps)
 {
-    NETMGR_LOG_D("param ident[%{public}s]", netSupplierIdent_.c_str());
-    if (IsConnecting()) {
-        NETMGR_LOG_D("this service is connecting");
-        return true;
-    }
-    if (IsConnected()) {
-        NETMGR_LOG_D("this service is already connected");
+    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request connect", supplierId_, netSupplierIdent_.c_str());
+    if (netSupplierInfo_.isAvailable_) {
+        NETMGR_LOG_W("The supplier is currently available, there is no need to repeat the request for connection.");
         return true;
     }
     UpdateNetConnState(NET_CONN_STATE_IDLE);
@@ -206,7 +203,6 @@ bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps)
         NETMGR_LOG_E("RequestNetwork fail");
         return false;
     }
-    UpdateNetConnState(NET_CONN_STATE_CONNECTING);
     return true;
 }
 
@@ -221,9 +217,9 @@ bool NetSupplier::GetRestrictBackground() const
 
 bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
 {
-    NETMGR_LOG_D("supplier[%{public}d, %{public}s]", supplierId_, netSupplierIdent_.c_str());
-    if ((!IsConnecting()) && (!IsConnected())) {
-        NETMGR_LOG_D("no need to disconnect");
+    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request disconnect", supplierId_, netSupplierIdent_.c_str());
+    if (!netSupplierInfo_.isAvailable_) {
+        NETMGR_LOG_W("The supplier is currently unavailable, there is no need to repeat the request to disconnect.");
         return true;
     }
     if (netController_ == nullptr) {
@@ -263,47 +259,54 @@ bool NetSupplier::IsConnected() const
     return false;
 }
 
-void NetSupplier::AddRequestIdToList(uint32_t requestId)
-{
-    NETMGR_LOG_D("AddRequestIdToList reqId = [%{public}u]", requestId);
-    requestList_.insert(requestId);
-}
-
 bool NetSupplier::RequestToConnect(uint32_t reqId)
 {
-    requestList_.insert(reqId);
+    if (requestList_.find(reqId) == requestList_.end()) {
+        requestList_.insert(reqId);
+    }
     return SupplierConnection(netCaps_.ToSet());
 }
 
 int32_t NetSupplier::SelectAsBestNetwork(uint32_t reqId)
 {
-    NETMGR_LOG_D("NetSupplier::SelectAsBestNetwork");
-    requestList_.insert(reqId);
-    bestReqList_.insert(reqId);
+    NETMGR_LOG_I("Request[%{public}d] select supplier[%{public}d, %{public}s] as best network", reqId, supplierId_,
+                 netSupplierIdent_.c_str());
+    if (requestList_.find(reqId) == requestList_.end()) {
+        requestList_.insert(reqId);
+    }
+    if (bestReqList_.find(reqId) == bestReqList_.end()) {
+        bestReqList_.insert(reqId);
+    }
     return NETMANAGER_SUCCESS;
 }
 
 void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t supplierId)
 {
-    NETMGR_LOG_D("NetSupplier::ReceiveBestScore, supplierId[%{public}d, %{public}s], bestSupplierId[%{public}d]",
-                 supplierId_, netSupplierIdent_.c_str(), supplierId);
+    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] receive best score, bestSupplierId[%{public}d]", supplierId_,
+                 netSupplierIdent_.c_str(), supplierId);
+    if (supplierId == supplierId_) {
+        NETMGR_LOG_W("Same net supplier, no need to disconnect.");
+        return;
+    }
     if (requestList_.empty()) {
         SupplierDisconnection(netCaps_.ToSet());
         return;
     }
-    auto iter = requestList_.find(reqId);
-    if (iter == requestList_.end()) {
-        NETMGR_LOG_D("NetSupplier::ReceiveBestScore, supplierId[%{public}d], can not find request[%{public}d]",
-                     supplierId_, reqId);
+    if (requestList_.find(reqId) == requestList_.end()) {
+        NETMGR_LOG_W("Can not find request[%{public}d]", reqId);
         return;
     }
-    if (supplierId != supplierId_ && netScore_ < bestScore) {
-        requestList_.erase(reqId);
-        if (requestList_.empty()) {
-            SupplierDisconnection(netCaps_.ToSet());
-        }
-        bestReqList_.erase(reqId);
+    if (netScore_ >= bestScore) {
+        NETMGR_LOG_W("High priority network, no need to disconnect");
+        return;
     }
+    requestList_.erase(reqId);
+    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] remaining request list size[%{public}d]", supplierId_,
+                 netSupplierIdent_.c_str(), requestList_.size());
+    if (requestList_.empty()) {
+        SupplierDisconnection(netCaps_.ToSet());
+    }
+    bestReqList_.erase(reqId);
 }
 
 int32_t NetSupplier::CancelRequest(uint32_t reqId)

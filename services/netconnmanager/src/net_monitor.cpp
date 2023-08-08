@@ -490,7 +490,7 @@ int32_t NetMonitor::GetIpAddr(const std::string domain, std::string &ip_addr, in
         ip_addr = ip;
         socketType = AF_INET6;
     }
-    NETMGR_LOG_D("Get net[%{public}d] monitor ip:%{public}s", netId_, CommonUtils::ToAnonymousIp(ip_addr).c_str());
+    NETMGR_LOG_I("Get net[%{public}d] monitor ip:%{public}s", netId_, CommonUtils::ToAnonymousIp(ip_addr).c_str());
     return 0;
 }
 
