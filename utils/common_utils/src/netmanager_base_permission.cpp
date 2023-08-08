@@ -63,25 +63,28 @@ bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissio
     }
 
     static std::map<uint32_t, bool> permissionMap;
-
+    static std::mutex mutex;
     auto callerToken = IPCSkeleton::GetCallingTokenID();
-    if (permissionMap.find(callerToken) != permissionMap.end()) {
-        return permissionMap[callerToken];
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        auto iter = permissionMap.find(callerToken);
+        if (iter != permissionMap.end()) {
+            return iter->second;
+        }
     }
-
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    bool res = false;
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        permissionMap[callerToken] = true;
-        return true;
+        res = true;
+    } else if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
+        res = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName) ==
+              Security::AccessToken::PERMISSION_GRANTED;
     }
-    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
-        bool res = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName) ==
-                   Security::AccessToken::PERMISSION_GRANTED;
+    {
+        std::lock_guard<std::mutex> lock(mutex);
         permissionMap[callerToken] = res;
-        return res;
     }
-    permissionMap[callerToken] = false;
-    return false;
+    return res;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
