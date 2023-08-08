@@ -12,6 +12,20 @@
 # limitations under the License.
 import("//build/ohos.gni")
 
+ohos_prebuilt_etc("netmanager_trust") {
+  source = "netmanager_trust.json"
+  module_install_dir = "profile"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+ohos_prebuilt_etc("netsysnative_trust") {
+  source = "netsysnative_trust.json"
+  module_install_dir = "profile"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
 ## Install netmanager_base.rc/netmanager_base.rc to /system/etc/init
 ohos_prebuilt_etc("netmanager_base.rc") {
   source = "netmanager_base.cfg"
