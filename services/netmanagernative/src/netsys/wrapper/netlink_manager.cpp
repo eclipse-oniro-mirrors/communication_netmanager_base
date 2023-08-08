@@ -94,9 +94,6 @@ bool CreateNetlinkDistributor(int32_t netlinkType, const DistributorParam &param
 }
 } // namespace
 
-std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> NetlinkManager::callbacks_ =
-    std::make_shared<std::vector<sptr<NetsysNative::INotifyCallback>>>();
-std::mutex NetlinkManager::linkCallbackMutex_;
 NetlinkManager::NetlinkManager()
 {
     for (const auto &it : distributorParamList_) {
