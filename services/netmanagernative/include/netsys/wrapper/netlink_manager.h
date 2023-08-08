@@ -22,7 +22,7 @@
 
 #include "i_notify_callback.h"
 
-#define NET_SYMBOL_VISIBLE __attribute__((visibility("default")))
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 namespace OHOS {
 namespace nmd {
 class NET_SYMBOL_VISIBLE NetlinkManager {
