@@ -30,7 +30,7 @@ template <typename T, size_t ARRAY_SIZE, size_t DELAYED_COUNT> class DelayedQueu
 public:
     DelayedQueue() : index_(0), needRun_(true)
     {
-        std::thread([this] {
+        std::thread([this]() {
             while (needRun_) {
                 {
                     // deal with elems in elems[index_]
