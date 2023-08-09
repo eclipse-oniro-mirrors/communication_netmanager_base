@@ -31,7 +31,8 @@ public:
     DelayedQueue() : index_(0), needRun_(true)
     {
         std::thread([this]() {
-            while (needRun_) { {
+            while (needRun_) {
+                {
                     // deal with elems in elems[index_]
                     std::lock_guard<std::mutex> guard(mutex_);
                     for (const auto &elem : elems_[index_]) {
