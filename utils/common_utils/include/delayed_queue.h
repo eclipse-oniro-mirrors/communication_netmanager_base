@@ -48,7 +48,6 @@ public:
                     break;
                 }
 
-                // wait for one second or until needRun_ is false
                 std::unique_lock<std::mutex> needRunLock(needRunMutex_);
                 needRunCondition_.wait_for(needRunLock, std::chrono::seconds(1), [this] { return !needRun_; });
 
