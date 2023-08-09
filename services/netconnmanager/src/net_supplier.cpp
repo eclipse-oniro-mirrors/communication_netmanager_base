@@ -98,9 +98,10 @@ std::string NetSupplier::GetNetSupplierIdent() const
 
 bool NetSupplier::CompareNetCaps(const std::set<NetCap> caps) const
 {
-    const bool ret = (caps == netCaps_.ToSet());
-    NETMGR_LOG_D("CompareNetCaps ret:[%{public}d]", ret);
-    return ret;
+    if (caps.empty()) {
+        return true;
+    }
+    return netCaps_.HasNetCaps(caps);
 }
 
 bool NetSupplier::HasNetCap(NetCap cap) const
