@@ -302,7 +302,7 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
         return;
     }
     requestList_.erase(reqId);
-    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] remaining request list size[%{public}d]", supplierId_,
+    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] remaining request list size[%{public}zd]", supplierId_,
                  netSupplierIdent_.c_str(), requestList_.size());
     if (requestList_.empty()) {
         SupplierDisconnection(netCaps_.ToSet());
