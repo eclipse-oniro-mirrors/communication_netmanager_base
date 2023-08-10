@@ -98,9 +98,10 @@ std::string NetSupplier::GetNetSupplierIdent() const
 
 bool NetSupplier::CompareNetCaps(const std::set<NetCap> caps) const
 {
-    const bool ret = (caps == netCaps_.ToSet());
-    NETMGR_LOG_D("CompareNetCaps ret:[%{public}d]", ret);
-    return ret;
+    if (caps.empty()) {
+        return true;
+    }
+    return netCaps_.HasNetCaps(caps);
 }
 
 bool NetSupplier::HasNetCap(NetCap cap) const
@@ -301,7 +302,7 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
         return;
     }
     requestList_.erase(reqId);
-    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] remaining request list size[%{public}d]", supplierId_,
+    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] remaining request list size[%{public}zd]", supplierId_,
                  netSupplierIdent_.c_str(), requestList_.size());
     if (requestList_.empty()) {
         SupplierDisconnection(netCaps_.ToSet());

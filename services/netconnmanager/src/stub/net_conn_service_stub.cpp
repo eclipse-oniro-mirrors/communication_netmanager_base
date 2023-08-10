@@ -273,7 +273,7 @@ int32_t NetConnServiceStub::OnRegisterNetSupplier(MessageParcel &data, MessagePa
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("supplierId[%{public}d].", supplierId);
+        NETMGR_LOG_I("supplierId[%{public}d].", supplierId);
         if (!reply.WriteUint32(supplierId)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }

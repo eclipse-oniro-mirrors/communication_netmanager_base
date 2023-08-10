@@ -303,7 +303,7 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
     }
     sptr<NetSupplier> supplier = GetNetSupplierFromList(bearerType, ident, netCaps);
     if (supplier != nullptr) {
-        NETMGR_LOG_D("supplier already exists.");
+        NETMGR_LOG_E("Supplier[%{public}d %{public}s] already exists.", supplier->GetSupplierId(), ident.c_str());
         supplierId = supplier->GetSupplierId();
         return NETMANAGER_SUCCESS;
     }
