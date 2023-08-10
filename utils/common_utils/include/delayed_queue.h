@@ -32,14 +32,16 @@ public:
     {
         std::thread([this]() {
             while (needRun_) {
-                std::lock_guard<std::mutex> guard(mutex_);
-                for (const auto &elem : elems_[index_]) {
-                    auto sharedElem = elem.lock();
-                    if (sharedElem) {
-                        sharedElem->Execute();
+                {
+                    std::lock_guard<std::mutex> guard(mutex_);
+                    for (const auto &elem : elems_[index_]) {
+                        auto sharedElem = elem.lock();
+                        if (sharedElem) {
+                            sharedElem->Execute();
+                        }
                     }
+                    elems_[index_].clear();
                 }
-                elems_[index_].clear();
                 if (!needRun_) {
                     break;
                 }
