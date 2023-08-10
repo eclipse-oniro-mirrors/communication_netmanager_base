@@ -96,6 +96,9 @@ NetManagerStandard::LRUCache<AddrInfo> &DnsResolvConfig::GetCache()
 
 void DnsResolvConfig::SetCacheDelayed(const std::string &hostName)
 {
-    delayedQueue_.Put(DelayedTaskWrapper(hostName, cache_));
+    auto wrapper = std::make_shared<DelayedTaskWrapper>(hostName, cache_);
+    delayedTaskWrapperList_.push_back(wrapper);
+    std::weak_ptr<DelayedTaskWrapper> weakWrapper = wrapper;
+    delayedQueue_.Put(weakWrapper);
 }
 } // namespace OHOS::nmd
