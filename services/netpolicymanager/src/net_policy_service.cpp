@@ -155,6 +155,11 @@ int32_t NetPolicyService::RegisterNetPolicyCallback(const sptr<INetPolicyCallbac
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
+    if (netPolicyCallback_ == nullptr) {
+        NETMGR_LOG_E("netPolicyCallback_ is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
     return netPolicyCallback_->RegisterNetPolicyCallbackAsync(callback);
 }
 
@@ -166,6 +171,10 @@ int32_t NetPolicyService::UnregisterNetPolicyCallback(const sptr<INetPolicyCallb
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
+    if (netPolicyCallback_ == nullptr) {
+        NETMGR_LOG_E("netPolicyCallback_ is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     return netPolicyCallback_->UnregisterNetPolicyCallbackAsync(callback);
 }
 
