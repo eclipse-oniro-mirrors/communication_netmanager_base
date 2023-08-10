@@ -1250,15 +1250,25 @@ void OnInterfaceAddressRemovedFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    std::string addr = GetStringFromData(STR_LEN);
-    std::string ifName = GetStringFromData(STR_LEN);
-    int32_t flags = GetData<int32_t>();
-    int32_t scope = GetData<int32_t>();
+    uint16_t netId = GetData<uint16_t>();
+    uint16_t baseTimeoutMsec = GetData<uint16_t>();
+    uint8_t retryCount = GetData<uint8_t>();
 
-    dataParcel.WriteString(addr);
-    dataParcel.WriteString(ifName);
-    dataParcel.WriteInt32(flags);
-    dataParcel.WriteInt32(scope);
+    dataParcel.WriteUint16(netId);
+    dataParcel.WriteUint16(baseTimeoutMsec);
+    dataParcel.WriteUint8(retryCount);
+
+    uint32_t vectorLength = GetData<uint32_t>() % VECTOR_MAX_SIZE;
+    dataParcel.WriteInt32(static_cast<int32_t>(vectorLength));
+    for (uint32_t i = 0; i <= vectorLength; i++) {
+        dataParcel.WriteString(GetStringFromData(STR_LEN));
+    }
+
+    uint32_t vectorLength2 = GetData<uint32_t>() % VECTOR_MAX_SIZE;
+    dataParcel.WriteInt32(static_cast<int32_t>(vectorLength2));
+    for (uint32_t i = 0; i <= vectorLength2; i++) {
+        dataParcel.WriteString(GetStringFromData(STR_LEN));
+    }
 
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_INTERFACE_ADDRESS_REMOVED), dataParcel);
 }
@@ -1270,9 +1280,9 @@ void OnInterfaceAddedFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    std::string ifName = GetStringFromData(STR_LEN);
+    uint16_t netId = GetData<uint16_t>();
 
-    dataParcel.WriteString(ifName);
+    dataParcel.WriteUint16(netId);
 
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_INTERFACE_ADDED), dataParcel);
 }
@@ -1284,9 +1294,9 @@ void OnInterfaceRemovedFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    std::string ifName = GetStringFromData(STR_LEN);
+    uint16_t netId = GetData<uint16_t>();
 
-    dataParcel.WriteString(ifName);
+    dataParcel.WriteUint16(netId);
 
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_INTERFACE_REMOVED), dataParcel);
 }
@@ -1314,11 +1324,9 @@ void OnInterfaceLinkStateChangedFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    std::string ifName = GetStringFromData(STR_LEN);
-    bool up = GetData<bool>();
+    uint16_t netId = GetData<uint16_t>();
 
-    dataParcel.WriteString(ifName);
-    dataParcel.WriteBool(up);
+    dataParcel.WriteUint16(netId);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_INTERFACE_LINK_STATE_CHANGED),
                     dataParcel);
 }
@@ -1330,16 +1338,32 @@ void OnRouteChangedFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    bool updated = GetData<bool>();
-    std::string route = GetStringFromData(STR_LEN);
-    std::string gateway = GetStringFromData(STR_LEN);
-    std::string ifName = GetStringFromData(STR_LEN);
+    std::string serverName = GetStringFromData(STR_LEN);
+    AddrInfo hints;
+    hints.aiFlags = GetData<uint32_t>();
+    hints.aiFamily = GetData<uint32_t>();
+    hints.aiSockType = GetData<uint32_t>();
+    hints.aiProtocol = GetData<uint32_t>();
+    hints.aiAddrLen = GetData<uint32_t>();
 
-    dataParcel.WriteBool(updated);
-    dataParcel.WriteString(route);
-    dataParcel.WriteString(gateway);
-    dataParcel.WriteString(ifName);
+    std::string aiCanName = GetStringFromData(STR_LEN);
+    if (memcpy_s(hints.aiCanonName, sizeof(hints.aiCanonName), aiCanName.c_str(), aiCanName.length()) != 0) {
+        return;
+    }
+    uint16_t netId = GetData<uint16_t>();
 
+    if (!dataParcel.WriteString("-L -n")) {
+        return;
+    }
+
+    dataParcel.WriteString(serverName);
+    dataParcel.WriteUint32(hints.aiFlags);
+    dataParcel.WriteUint32(hints.aiFamily);
+    dataParcel.WriteUint32(hints.aiSockType);
+    dataParcel.WriteUint32(hints.aiProtocol);
+    dataParcel.WriteUint32(hints.aiAddrLen);
+    dataParcel.WriteString(hints.aiCanonName);
+    dataParcel.WriteUint16(netId);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_ROUTE_CHANGED), dataParcel);
 }
 
@@ -1350,15 +1374,11 @@ void OnDhcpSuccessFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    bool updated = GetData<bool>();
-    std::string route = GetStringFromData(STR_LEN);
-    std::string gateway = GetStringFromData(STR_LEN);
-    std::string ifName = GetStringFromData(STR_LEN);
+    int32_t mtu = GetData<int32_t>();
+    std::string interfaceName = GetStringFromData(STR_LEN);
 
-    dataParcel.WriteBool(updated);
-    dataParcel.WriteString(route);
-    dataParcel.WriteString(gateway);
-    dataParcel.WriteString(ifName);
+    dataParcel.WriteString(interfaceName);
+    dataParcel.WriteInt32(mtu);
 
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_DHCP_SUCCESS), dataParcel);
 }
@@ -1370,11 +1390,9 @@ void OnBandwidthReachedLimitFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    std::string limitName = GetStringFromData(STR_LEN);
-    std::string iface = GetStringFromData(STR_LEN);
+    std::string interfaceName = GetStringFromData(STR_LEN);
 
-    dataParcel.WriteString(limitName);
-    dataParcel.WriteString(iface);
+    dataParcel.WriteString(interfaceName);
 
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_BANDWIDTH_REACHED_LIMIT), dataParcel);
 }
