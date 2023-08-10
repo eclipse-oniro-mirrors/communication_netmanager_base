@@ -32,7 +32,6 @@ public:
     {
         std::thread([this]() {
             while (needRun_) {
-                // deal with elems in elems[index_]
                 std::lock_guard<std::mutex> guard(mutex_);
                 for (const auto &elem : elems_[index_]) {
                     auto sharedElem = elem.lock();
@@ -41,14 +40,11 @@ public:
                     }
                 }
                 elems_[index_].clear();
-
                 if (!needRun_) {
                     break;
                 }
-
                 std::unique_lock<std::mutex> needRunLock(needRunMutex_);
                 needRunCondition_.wait_for(needRunLock, std::chrono::seconds(1), [this] { return !needRun_; });
-
                 std::lock_guard<std::mutex> guard(mutex_);
                 index_ = (index_ + 1) % (ARRAY_SIZE + DELAYED_COUNT);
             }
