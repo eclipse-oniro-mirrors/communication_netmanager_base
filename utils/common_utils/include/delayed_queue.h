@@ -32,7 +32,6 @@ public:
     {
         std::thread([this]() {
             while (needRun_) {
-                {
                     // deal with elems in elems[index_]
                     std::lock_guard<std::mutex> guard(mutex_);
                     for (const auto &elem : elems_[index_]) {
@@ -42,7 +41,6 @@ public:
                         }
                     }
                     elems_[index_].clear();
-                }
 
                 if (!needRun_) {
                     break;
