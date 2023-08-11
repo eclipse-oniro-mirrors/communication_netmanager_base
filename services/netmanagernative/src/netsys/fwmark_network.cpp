@@ -131,17 +131,13 @@ void SendMessage(int32_t *serverSockfd)
         NETNATIVE_LOGE("SendMessage failed, serverSockfd is nullptr");
         return;
     }
-
     int32_t clientSockfd;
     struct sockaddr_un clientAddr;
     socklen_t len = sizeof(clientAddr);
     while (true) {
         clientSockfd = accept(*serverSockfd, reinterpret_cast<struct sockaddr *>(&clientAddr), &len);
         FwmarkCommand fwmCmd;
-        iovec iov = {
-            .iov_base = &fwmCmd,
-            .iov_len = sizeof(fwmCmd),
-        };
+        iovec iov = {.iov_base = &fwmCmd, .iov_len = sizeof(fwmCmd)};
         int32_t socketFd = -1;
         union {
             cmsghdr cmh;
@@ -150,12 +146,7 @@ void SendMessage(int32_t *serverSockfd)
         (void)memset_s(cmsgu.cmsg, sizeof(cmsgu.cmsg), 0, sizeof(cmsgu.cmsg));
         msghdr message;
         (void)memset_s(&message, sizeof(message), 0, sizeof(message));
-        message = {
-            .msg_iov = &iov,
-            .msg_iovlen = 1,
-            .msg_control = cmsgu.cmsg,
-            .msg_controllen = sizeof(cmsgu.cmsg),
-        };
+        message = {.msg_iov = &iov, .msg_iovlen = 1, .msg_control = cmsgu.cmsg, .msg_controllen = sizeof(cmsgu.cmsg)};
         int32_t ret = recvmsg(clientSockfd, &message, 0);
         if (ret < 0) {
             CloseSocket(&clientSockfd, ret, ERROR_CODE_RECVMSG_FAILED);
