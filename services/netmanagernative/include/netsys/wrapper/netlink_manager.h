@@ -37,12 +37,12 @@ public:
 
     int32_t StartListener();
     int32_t StopListener();
-    static int32_t RegisterNetlinkCallback(sptr<NetsysNative::INotifyCallback> callback);
-    static int32_t UnregisterNetlinkCallback(sptr<NetsysNative::INotifyCallback> callback);
+    int32_t RegisterNetlinkCallback(sptr<NetsysNative::INotifyCallback> callback);
+    int32_t UnregisterNetlinkCallback(sptr<NetsysNative::INotifyCallback> callback);
 
 private:
-    static std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> callbacks_;
-    static std::mutex linkCallbackMutex_;
+    std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> callbacks_;
+    std::mutex linkCallbackMutex_;
 };
 } // namespace nmd
 } // namespace OHOS
