@@ -46,7 +46,7 @@ ohos_fuzztest("NetPolicyClientFuzzTest") {
     "-fsanitize-cfi-cross-dso",
     "-fvisibility=hidden",
   ]
-   ldflags = [
+  ldflags = [
     "-flto",
     "-fsanitize=cfi",
     "-fsanitize-cfi-cross-dso",
