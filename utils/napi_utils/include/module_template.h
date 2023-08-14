@@ -126,7 +126,10 @@ napi_value InterfaceSync(napi_env env, napi_callback_info info, const std::strin
 
     context->ParseParams(params, paramsCount);
     NETMANAGER_BASE_LOGI("js params parse OK ? %{public}d", context->IsParseOK());
-
+    if (!context->IsParseOK()) {
+        napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
+        return NapiUtils::GetUndefined(env);
+    }
     if (Work != nullptr) {
         if (!Work(env, thisVal, context.get())) {
             NETMANAGER_BASE_LOGE("work failed error code = %{public}d", context->GetErrorCode());
@@ -139,7 +142,8 @@ napi_value InterfaceSync(napi_env env, napi_callback_info info, const std::strin
     }
 
     if (!executor(context.get())) {
-        return NapiUtils::GetUndefined(context->GetEnv());
+        napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
+        return NapiUtils::GetUndefined(env);
     }
     return callback(context.get());
 }

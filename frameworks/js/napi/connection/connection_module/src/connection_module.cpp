@@ -168,10 +168,15 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
         DECLARE_NAPI_FUNCTION(FUNCTION_CREATE_NET_CONNECTION, CreateNetConnection),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_ADDRESSES_BY_NAME, GetAddressesByName),
         DECLARE_NAPI_FUNCTION(FUNCTION_HAS_DEFAULT_NET, HasDefaultNet),
+        DECLARE_NAPI_FUNCTION(FUNCTION_HAS_DEFAULT_NET_SYNC, HasDefaultNetSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_IS_DEFAULT_NET_METERED, IsDefaultNetMetered),
+        DECLARE_NAPI_FUNCTION(FUNCTION_IS_DEFAULT_NET_METERED_SYNC, IsDefaultNetMeteredSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_NET_CAPABILITIES, GetNetCapabilities),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_NET_CAPABILITIES_SYNC, GetNetCapabilitiesSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_CONNECTION_PROPERTIES, GetConnectionProperties),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_CONNECTION_PROPERTIES_SYNC, GetConnectionPropertiesSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_ALL_NETS, GetAllNets),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_ALL_NETS_SYNC, GetAllNetsSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_ENABLE_AIRPLANE_MODE, EnableAirplaneMode),
         DECLARE_NAPI_FUNCTION(FUNCTION_DISABLE_AIRPLANE_MODE, DisableAirplaneMode),
         DECLARE_NAPI_FUNCTION(FUNCTION_REPORT_NET_CONNECTED, ReportNetConnected),
@@ -180,6 +185,7 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_GLOBAL_HTTP_PROXY, GetGlobalHttpProxy),
         DECLARE_NAPI_FUNCTION(FUNCTION_SET_GLOBAL_HTTP_PROXY, SetGlobalHttpProxy),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_APP_NET, GetAppNet),
+        DECLARE_NAPI_FUNCTION(FUNCTION_GET_APP_NET_SYNC, GetAppNetSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_SET_APP_NET, SetAppNet),
     };
     NapiUtils::DefineProperties(env, exports, functions);
@@ -235,11 +241,25 @@ napi_value ConnectionModule::HasDefaultNet(napi_env env, napi_callback_info info
                                                            ConnectionAsyncWork::HasDefaultNetCallback);
 }
 
+napi_value ConnectionModule::HasDefaultNetSync(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<HasDefaultNetContext>(env, info, FUNCTION_HAS_DEFAULT_NET, nullptr,
+                                                               ConnectionExec::ExecHasDefaultNet,
+                                                               ConnectionExec::HasDefaultNetCallback);
+}
+
 napi_value ConnectionModule::IsDefaultNetMetered(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::Interface<IsDefaultNetMeteredContext>(env, info, FUNCTION_IS_DEFAULT_NET_METERED, nullptr,
                                                                  ConnectionAsyncWork::ExecIsDefaultNetMetered,
                                                                  ConnectionAsyncWork::IsDefaultNetMeteredCallback);
+}
+
+napi_value ConnectionModule::IsDefaultNetMeteredSync(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<IsDefaultNetMeteredContext>(env, info, FUNCTION_IS_DEFAULT_NET_METERED, nullptr,
+                                                                     ConnectionExec::ExecIsDefaultNetMetered,
+                                                                     ConnectionExec::IsDefaultNetMeteredCallback);
 }
 
 napi_value ConnectionModule::GetNetCapabilities(napi_env env, napi_callback_info info)
@@ -249,11 +269,25 @@ napi_value ConnectionModule::GetNetCapabilities(napi_env env, napi_callback_info
                                                                 ConnectionAsyncWork::GetNetCapabilitiesCallback);
 }
 
+napi_value ConnectionModule::GetNetCapabilitiesSync(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<GetNetCapabilitiesContext>(env, info, FUNCTION_GET_NET_CAPABILITIES, nullptr,
+                                                                    ConnectionExec::ExecGetNetCapabilities,
+                                                                    ConnectionExec::GetNetCapabilitiesCallback);
+}
+
 napi_value ConnectionModule::GetConnectionProperties(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::Interface<GetConnectionPropertiesContext>(
         env, info, FUNCTION_GET_CONNECTION_PROPERTIES, nullptr, ConnectionAsyncWork::ExecGetConnectionProperties,
         ConnectionAsyncWork::GetConnectionPropertiesCallback);
+}
+
+napi_value ConnectionModule::GetConnectionPropertiesSync(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<GetConnectionPropertiesContext>(
+        env, info, FUNCTION_GET_CONNECTION_PROPERTIES, nullptr, ConnectionExec::ExecGetConnectionProperties,
+        ConnectionExec::GetConnectionPropertiesCallback);
 }
 
 napi_value ConnectionModule::CreateNetConnection(napi_env env, napi_callback_info info)
@@ -289,6 +323,13 @@ napi_value ConnectionModule::GetAllNets(napi_env env, napi_callback_info info)
     return ModuleTemplate::Interface<GetAllNetsContext>(env, info, FUNCTION_GET_ALL_NETS, nullptr,
                                                         ConnectionAsyncWork::ExecGetAllNets,
                                                         ConnectionAsyncWork::GetAllNetsCallback);
+}
+
+napi_value ConnectionModule::GetAllNetsSync(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<GetAllNetsContext>(env, info, FUNCTION_GET_ALL_NETS, nullptr,
+                                                        ConnectionExec::ExecGetAllNets,
+                                                        ConnectionExec::GetAllNetsCallback);
 }
 
 napi_value ConnectionModule::EnableAirplaneMode(napi_env env, napi_callback_info info)
@@ -345,6 +386,13 @@ napi_value ConnectionModule::GetAppNet(napi_env env, napi_callback_info info)
     return ModuleTemplate::Interface<GetAppNetContext>(env, info, FUNCTION_GET_APP_NET, nullptr,
                                                        ConnectionAsyncWork::ExecGetAppNet,
                                                        ConnectionAsyncWork::GetAppNetCallback);
+}
+
+napi_value ConnectionModule::GetAppNetSync(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<GetAppNetContext>(env, info, FUNCTION_GET_APP_NET, nullptr,
+                                                       ConnectionExec::ExecGetAppNet,
+                                                       ConnectionExec::GetAppNetCallback);
 }
 
 napi_value ConnectionModule::SetAppNet(napi_env env, napi_callback_info info)
