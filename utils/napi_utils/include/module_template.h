@@ -121,7 +121,7 @@ napi_value InterfaceSync(napi_env env, napi_callback_info info, const std::strin
     auto text = new Context(env, manager);
     std::unique_ptr<Context, decltype(deleter)> context(text, deleter);
     if (!context) {
-        return NapiUtils::GetUndefined(context->GetEnv());
+        return NapiUtils::GetUndefined(env);
     }
 
     context->ParseParams(params, paramsCount);

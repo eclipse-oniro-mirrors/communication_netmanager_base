@@ -33,6 +33,7 @@ ohos_shared_library("napi_utils") {
     boundary_sanitize = true
     all_ubsan = true
     debug = false
+    blocklist = "./napi_utils_blocklist.txt"
   }
 
   sources = [
