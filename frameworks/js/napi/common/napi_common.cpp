@@ -256,13 +256,13 @@ napi_value NapiCommon::HandleAsyncWork(napi_env env, BaseContext *baseContext, c
     NAPI_CALL(env,
         napi_create_async_work(
             env, resource, resourceName, execute, complete, static_cast<void *>(context.get()), &context->work));
-    napi_status queueWorkStatus = napi_queue_async_work(env, context->work);
+    napi_status queueWorkStatus = napi_queue_async_work_with_qos(env, context->work, napi_qos_default);
     if (queueWorkStatus == napi_ok) {
         context.release();
-        NETMGR_LOG_I("NapiCommon HandleAsyncWork napi_queue_async_work ok");
+        NETMGR_LOG_I("NapiCommon HandleAsyncWork napi_queue_async_work_with_qos ok");
     } else {
         std::string errorCode = std::to_string(queueWorkStatus);
-        std::string errorMessage = "error at napi_queue_async_work";
+        std::string errorMessage = "error at napi_queue_async_work_with_qos";
         NAPI_CALL(env, napi_throw_error(env, errorCode.c_str(), errorMessage.c_str()));
     }
     NETMGR_LOG_I("NapiCommon HandleAsyncWork end");
