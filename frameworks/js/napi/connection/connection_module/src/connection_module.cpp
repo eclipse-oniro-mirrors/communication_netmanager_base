@@ -328,8 +328,8 @@ napi_value ConnectionModule::GetAllNets(napi_env env, napi_callback_info info)
 napi_value ConnectionModule::GetAllNetsSync(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::InterfaceSync<GetAllNetsContext>(env, info, FUNCTION_GET_ALL_NETS, nullptr,
-                                                        ConnectionExec::ExecGetAllNets,
-                                                        ConnectionExec::GetAllNetsCallback);
+                                                            ConnectionExec::ExecGetAllNets,
+                                                            ConnectionExec::GetAllNetsCallback);
 }
 
 napi_value ConnectionModule::EnableAirplaneMode(napi_env env, napi_callback_info info)
@@ -391,8 +391,8 @@ napi_value ConnectionModule::GetAppNet(napi_env env, napi_callback_info info)
 napi_value ConnectionModule::GetAppNetSync(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::InterfaceSync<GetAppNetContext>(env, info, FUNCTION_GET_APP_NET, nullptr,
-                                                       ConnectionExec::ExecGetAppNet,
-                                                       ConnectionExec::GetAppNetCallback);
+                                                           ConnectionExec::ExecGetAppNet,
+                                                           ConnectionExec::GetAppNetCallback);
 }
 
 napi_value ConnectionModule::SetAppNet(napi_env env, napi_callback_info info)
