@@ -31,12 +31,17 @@ public:
     static constexpr const char *FUNCTION_GET_DEFAULT_NET = "getDefaultNet";
     static constexpr const char *FUNCTION_GET_DEFAULT_NET_SYNC = "getDefaultNetSync";
     static constexpr const char *FUNCTION_HAS_DEFAULT_NET = "hasDefaultNet";
+    static constexpr const char *FUNCTION_HAS_DEFAULT_NET_SYNC = "hasDefaultNetSync";
     static constexpr const char *FUNCTION_IS_DEFAULT_NET_METERED = "isDefaultNetMetered";
+    static constexpr const char *FUNCTION_IS_DEFAULT_NET_METERED_SYNC = "isDefaultNetMeteredSync";
     static constexpr const char *FUNCTION_GET_NET_CAPABILITIES = "getNetCapabilities";
+    static constexpr const char *FUNCTION_GET_NET_CAPABILITIES_SYNC = "getNetCapabilitiesSync";
     static constexpr const char *FUNCTION_GET_CONNECTION_PROPERTIES = "getConnectionProperties";
+    static constexpr const char *FUNCTION_GET_CONNECTION_PROPERTIES_SYNC = "getConnectionPropertiesSync";
     static constexpr const char *FUNCTION_CREATE_NET_CONNECTION = "createNetConnection";
     static constexpr const char *FUNCTION_GET_ADDRESSES_BY_NAME = "getAddressesByName";
     static constexpr const char *FUNCTION_GET_ALL_NETS = "getAllNets";
+    static constexpr const char *FUNCTION_GET_ALL_NETS_SYNC = "getAllNetsSync";
     static constexpr const char *FUNCTION_ENABLE_AIRPLANE_MODE = "enableAirplaneMode";
     static constexpr const char *FUNCTION_DISABLE_AIRPLANE_MODE = "disableAirplaneMode";
     static constexpr const char *FUNCTION_REPORT_NET_CONNECTED = "reportNetConnected";
@@ -45,6 +50,7 @@ public:
     static constexpr const char *FUNCTION_GET_GLOBAL_HTTP_PROXY = "getGlobalHttpProxy";
     static constexpr const char *FUNCTION_SET_GLOBAL_HTTP_PROXY = "setGlobalHttpProxy";
     static constexpr const char *FUNCTION_GET_APP_NET = "getAppNet";
+    static constexpr const char *FUNCTION_GET_APP_NET_SYNC = "getAppNetSync";
     static constexpr const char *FUNCTION_SET_APP_NET = "setAppNet";
     static constexpr const char *INTERFACE_NET_CONNECTION = "NetConnection";
     static constexpr const char *INTERFACE_NET_CAP = "NetCap";
@@ -83,10 +89,15 @@ private:
     static napi_value CreateNetConnection(napi_env env, napi_callback_info info);
     static napi_value GetAddressesByName(napi_env env, napi_callback_info info);
     static napi_value HasDefaultNet(napi_env env, napi_callback_info info);
+    static napi_value HasDefaultNetSync(napi_env env, napi_callback_info info);
     static napi_value IsDefaultNetMetered(napi_env env, napi_callback_info info);
+    static napi_value IsDefaultNetMeteredSync(napi_env env, napi_callback_info info);
     static napi_value GetNetCapabilities(napi_env env, napi_callback_info info);
+    static napi_value GetNetCapabilitiesSync(napi_env env, napi_callback_info info);
     static napi_value GetConnectionProperties(napi_env env, napi_callback_info info);
+    static napi_value GetConnectionPropertiesSync(napi_env env, napi_callback_info info);
     static napi_value GetAllNets(napi_env env, napi_callback_info info);
+    static napi_value GetAllNetsSync(napi_env env, napi_callback_info info);
     static napi_value EnableAirplaneMode(napi_env env, napi_callback_info info);
     static napi_value DisableAirplaneMode(napi_env env, napi_callback_info info);
     static napi_value ReportNetConnected(napi_env env, napi_callback_info info);
@@ -95,6 +106,7 @@ private:
     static napi_value GetGlobalHttpProxy(napi_env env, napi_callback_info info);
     static napi_value SetGlobalHttpProxy(napi_env env, napi_callback_info info);
     static napi_value GetAppNet(napi_env env, napi_callback_info info);
+    static napi_value GetAppNetSync(napi_env env, napi_callback_info info);
     static napi_value SetAppNet(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::NetManagerStandard
