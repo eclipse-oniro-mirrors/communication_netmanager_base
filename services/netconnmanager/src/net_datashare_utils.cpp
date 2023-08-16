@@ -25,6 +25,7 @@ namespace NetManagerStandard {
 namespace {
 constexpr const char *SETTINGS_DATASHARE_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
+constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 constexpr const char *SETTINGS_DATA_COLUMN_KEYWORD = "KEYWORD";
 constexpr const char *SETTINGS_DATA_COLUMN_VALUE = "VALUE";
 
@@ -48,7 +49,7 @@ std::shared_ptr<DataShare::DataShareHelper> NetDataShareHelperUtils::CreateDataS
         NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbility Service Failed.");
         return nullptr;
     }
-    return DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI);
+    return DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
 }
 
 int32_t NetDataShareHelperUtils::Query(Uri &uri, const std::string &key, std::string &value)
