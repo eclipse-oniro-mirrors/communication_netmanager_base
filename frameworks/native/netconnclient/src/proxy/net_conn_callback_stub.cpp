@@ -101,7 +101,9 @@ int32_t NetConnCallbackStub::OnNetCapabilitiesChange(MessageParcel &data, Messag
         if (!data.ReadUint32(value)) {
             return NETMANAGER_ERR_READ_DATA_FAIL;
         }
-        netAllCap->netCaps_.insert(static_cast<NetCap>(value));
+        if (value < NET_CAPABILITY_INTERNAL_DEFAULT) {
+            netAllCap->netCaps_.insert(static_cast<NetCap>(value));
+        }
     }
     if (!data.ReadUint32(size)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
@@ -110,6 +112,9 @@ int32_t NetConnCallbackStub::OnNetCapabilitiesChange(MessageParcel &data, Messag
     for (uint32_t i = 0; i < size; i++) {
         if (!data.ReadUint32(value)) {
             return NETMANAGER_ERR_READ_DATA_FAIL;
+        }
+        if (value >= BEARER_DEFAULT) {
+            return NETMANAGER_ERR_INTERNAL;
         }
         netAllCap->bearerTypes_.insert(static_cast<NetBearType>(value));
     }
