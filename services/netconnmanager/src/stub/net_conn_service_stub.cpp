@@ -264,7 +264,9 @@ int32_t NetConnServiceStub::OnRegisterNetSupplier(MessageParcel &data, MessagePa
         if (!data.ReadUint32(value)) {
             return NETMANAGER_ERR_READ_DATA_FAIL;
         }
-        netCaps.insert(static_cast<NetCap>(value));
+        if (value < NET_CAPABILITY_INTERNAL_DEFAULT) {
+            netCaps.insert(static_cast<NetCap>(value));
+        }
     }
 
     uint32_t supplierId = 0;
@@ -527,6 +529,9 @@ int32_t NetConnServiceStub::OnGetIfaceNames(MessageParcel &data, MessageParcel &
     if (!data.ReadUint32(netType)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
+    if (netType > static_cast<uint32_t>(NetBearType::BEARER_DEFAULT)) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
     NetBearType bearerType = static_cast<NetBearType>(netType);
     std::list<std::string> ifaceNames;
     int32_t ret = GetIfaceNames(bearerType, ifaceNames);
@@ -552,6 +557,9 @@ int32_t NetConnServiceStub::OnGetIfaceNameByType(MessageParcel &data, MessagePar
     uint32_t netType = 0;
     if (!data.ReadUint32(netType)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (netType > static_cast<uint32_t>(NetBearType::BEARER_DEFAULT)) {
+        return NETMANAGER_ERR_INTERNAL;
     }
     NetBearType bearerType = static_cast<NetBearType>(netType);
 

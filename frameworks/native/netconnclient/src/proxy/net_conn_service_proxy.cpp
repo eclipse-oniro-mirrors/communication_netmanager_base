@@ -563,7 +563,9 @@ int32_t NetConnServiceProxy::GetIfaceNameByType(NetBearType bearerType, const st
         NETMGR_LOG_E("WriteInterfaceToken failed");
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
-
+    if (bearerType >= BEARER_DEFAULT) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
     uint32_t netType = static_cast<NetBearType>(bearerType);
     if (!data.WriteUint32(netType)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
@@ -900,7 +902,9 @@ int32_t NetConnServiceProxy::GetNetCapData(MessageParcel &reply, NetAllCapabilit
         if (!reply.ReadUint32(value)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
-        netAllCap.netCaps_.insert(static_cast<NetCap>(value));
+        if (value < NET_CAPABILITY_INTERNAL_DEFAULT) {
+            netAllCap.netCaps_.insert(static_cast<NetCap>(value));
+        }
     }
     if (!reply.ReadUint32(size)) {
         return NETMANAGER_ERR_READ_REPLY_FAIL;

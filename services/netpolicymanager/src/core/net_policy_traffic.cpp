@@ -378,6 +378,9 @@ const std::string NetPolicyTraffic::GetMatchIfaces(const NetQuotaPolicy &quotaPo
         ident = quotaPolicy.networkmatchrule.ident;
     }
     std::string iface;
+    if (quotaPolicy.networkmatchrule.netType >= BEARER_DEFAULT) {
+        return iface;
+    }
     GetNetCenterInst().GetIfaceNameByType(static_cast<NetBearType>(quotaPolicy.networkmatchrule.netType), ident, iface);
     NETMGR_LOG_D("GetMatchIfaces netType: %{public}d ident: %{public}s iface: %{public}s.",
                  quotaPolicy.networkmatchrule.netType, ident.c_str(), iface.c_str());

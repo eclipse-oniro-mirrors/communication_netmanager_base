@@ -14,8 +14,8 @@
  */
 #include "net_supplier_callback_stub.h"
 
-#include "net_mgr_log_wrapper.h"
 #include "net_manager_constants.h"
+#include "net_mgr_log_wrapper.h"
 
 static constexpr uint32_t MAX_NET_CAP_NUM = 32;
 
@@ -71,7 +71,9 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
     size = (size > MAX_NET_CAP_NUM) ? MAX_NET_CAP_NUM : size;
     for (uint32_t i = 0; i < size; i++) {
         data.ReadUint32(value);
-        netCaps.insert(static_cast<NetCap>(value));
+        if (value < NET_CAPABILITY_INTERNAL_DEFAULT) {
+            netCaps.insert(static_cast<NetCap>(value));
+        }
     }
 
     RequestNetwork(ident, netCaps);
@@ -92,7 +94,9 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
     size = (size > MAX_NET_CAP_NUM) ? MAX_NET_CAP_NUM : size;
     for (uint32_t i = 0; i < size; i++) {
         data.ReadUint32(value);
-        netCaps.insert(static_cast<NetCap>(value));
+        if (value < NET_CAPABILITY_INTERNAL_DEFAULT) {
+            netCaps.insert(static_cast<NetCap>(value));
+        }
     }
 
     ReleaseNetwork(ident, netCaps);
