@@ -48,7 +48,7 @@ DnsResolvListen::~DnsResolvListen()
     }
 }
 
-void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint32_t netId)
+void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint16_t netId)
 {
     DNS_CONFIG_PRINT("ProcGetConfigCommand");
     ResolvConfig sendData = {0};
@@ -57,7 +57,7 @@ void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint32_t netId)
     uint16_t baseTimeoutMsec = DEFAULT_TIMEOUT;
     uint8_t retryCount = DEFAULT_RETRY;
 
-    auto status = DelayedSingleton<DnsParamCache>::GetInstance()->GetResolverConfig(
+    auto status = DnsParamCache::GetInstance().GetResolverConfig(
         static_cast<uint16_t>(netId), servers, domains, baseTimeoutMsec, retryCount);
     DNS_CONFIG_PRINT("GetResolverConfig status: %{public}d", status);
     if (status < 0) {
@@ -105,7 +105,7 @@ int32_t DnsResolvListen::ProcGetKeyForCache(int clientSockFd, char *name)
     return 0;
 }
 
-void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint32_t netId)
+void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint16_t netId)
 {
     DNS_CONFIG_PRINT("ProcGetCacheCommand");
     char name[MAX_HOST_NAME_LEN] = {0};
@@ -114,7 +114,7 @@ void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint32_t netId)
         return;
     }
 
-    auto cacheRes = DelayedSingleton<DnsParamCache>::GetInstance()->GetDnsCache(netId, name);
+    auto cacheRes = DnsParamCache::GetInstance().GetDnsCache(netId, name);
 
     uint32_t resNum = std::min<uint32_t>(MAX_RESULTS, static_cast<uint32_t>(cacheRes.size()));
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&resNum), sizeof(resNum))) {
@@ -142,7 +142,7 @@ void DnsResolvListen::ProcGetCacheCommand(int clientSockFd, uint32_t netId)
     DNS_CONFIG_PRINT("ProcGetCacheCommand end");
 }
 
-void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint32_t netId)
+void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint16_t netId)
 {
     DNS_CONFIG_PRINT("ProcSetCacheCommand");
     char name[MAX_HOST_NAME_LEN] = {0};
@@ -171,10 +171,18 @@ void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint32_t netId)
     }
 
     for (size_t i = 0; i < resNum; ++i) {
-        DelayedSingleton<DnsParamCache>::GetInstance()->SetDnsCache(netId, name, addrInfo[i]);
+        DnsParamCache::GetInstance().SetDnsCache(netId, name, addrInfo[i]);
     }
-    DelayedSingleton<DnsParamCache>::GetInstance()->SetCacheDelayed(netId, name);
+    DnsParamCache::GetInstance().SetCacheDelayed(netId, name);
     DNS_CONFIG_PRINT("ProcSetCacheCommand end");
+}
+
+void DnsResolvListen::ProcJudgeIpv6Command(int clientSockFd, uint16_t netId)
+{
+    int enable = DnsParamCache::GetInstance().IsIpv6Enable(netId) ? 1 : 0;
+    if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&enable), sizeof(int))) {
+        DNS_CONFIG_PRINT("send failed");
+    }
 }
 
 void DnsResolvListen::ProcCommand(int clientSockFd)
@@ -198,6 +206,9 @@ void DnsResolvListen::ProcCommand(int clientSockFd)
             break;
         case SET_CACHE:
             ProcSetCacheCommand(clientSockFd, netId);
+            break;
+        case JUDGE_IPV6:
+            ProcJudgeIpv6Command(clientSockFd, netId);
             break;
         default:
             DNS_CONFIG_PRINT("invalid command %{public}u", info->command);

@@ -168,7 +168,7 @@ int32_t DnsLookUpParse::GetResolvConf(struct ResolvConf *conf, char *search, siz
     uint8_t retry = 0;
     std::vector<std::string> nameServers;
     std::vector<std::string> domains;
-    int32_t ret = OHOS::DelayedSingleton<OHOS::nmd::DnsParamCache>::GetInstance()->GetResolverConfig(
+    int32_t ret = OHOS::nmd::DnsParamCache::GetInstance().GetResolverConfig(
         netId, nameServers, domains, timeOutMs, retry);
     if (ret < 0) {
         return -1;

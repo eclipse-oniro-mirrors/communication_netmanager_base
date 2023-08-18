@@ -47,7 +47,7 @@ extern "C" {
 #define DEFAULT_SERVER_LENTH 16
 #define DEFAULT_SERVER_NAME 114
 
-enum CommandType { GET_CONFIG = 1, GET_CACHE = 2, SET_CACHE = 3 };
+enum CommandType { GET_CONFIG = 1, GET_CACHE = 2, SET_CACHE = 3, JUDGE_IPV6 = 4 };
 
 struct RequestInfo {
     uint32_t command;

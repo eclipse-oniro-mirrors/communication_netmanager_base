@@ -34,8 +34,9 @@
 namespace OHOS::nmd {
 class DnsParamCache {
 public:
-    DnsParamCache();
     ~DnsParamCache() = default;
+
+    static DnsParamCache &GetInstance();
 
     // for net_conn_service
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
@@ -61,7 +62,13 @@ public:
 
     int32_t DestroyNetworkCache(uint16_t netId);
 
+    bool IsIpv6Enable(uint16_t netId);
+
+    void EnableIpv6(uint16_t netId);
+
 private:
+    DnsParamCache();
+
     std::mutex cacheMutex_;
 
     std::atomic_uint defaultNetId_;

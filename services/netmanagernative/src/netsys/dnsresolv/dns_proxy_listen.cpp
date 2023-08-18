@@ -51,7 +51,7 @@ void DnsProxyListen::DnsProxyGetPacket(int32_t clientSocket, RecvBuff recvBuff, 
     std::vector<std::string> domains;
     uint16_t baseTimeoutMsec;
     uint8_t retryCount;
-    auto status = DelayedSingleton<DnsParamCache>::GetInstance()->GetResolverConfig(
+    auto status = DnsParamCache::GetInstance().GetResolverConfig(
         DnsProxyListen::netId_, servers, domains, baseTimeoutMsec, retryCount);
     if (status < 0) {
         NETNATIVE_LOGE("GetResolvConfig failed set default server failed status:[%{poublic}d]", status);

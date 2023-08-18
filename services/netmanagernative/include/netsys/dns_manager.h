@@ -116,6 +116,8 @@ public:
      */
     int32_t DestroyNetworkCache(uint16_t netId);
 
+    void EnableIpv6(uint16_t netId);
+
 private:
     std::shared_ptr<DnsProxyListen> dnsProxyListen_;
     std::shared_ptr<DnsGetAddrInfo> dnsGetAddrInfo_;

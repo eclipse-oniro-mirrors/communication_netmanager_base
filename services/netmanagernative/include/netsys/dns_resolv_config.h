@@ -48,6 +48,10 @@ public:
 
     void SetCacheDelayed(const std::string &hostName);
 
+    bool IsIpv6Enable();
+
+    void EnableIpv6();
+
 private:
     class DelayedTaskWrapper {
     public:
@@ -74,6 +78,7 @@ private:
     NetManagerStandard::LRUCache<AddrInfo> cache_;
     NetManagerStandard::DelayedQueue<DelayedTaskWrapper, NetManagerStandard::DEFAULT_CAPABILITY, DEFAULT_DELAYED_COUNT>
         delayedQueue_;
+    bool isIpv6Enable_;
 };
 } // namespace OHOS::nmd
 #endif // INCLUDE_DNSRESOLV_CONFIG_H

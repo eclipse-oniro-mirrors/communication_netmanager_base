@@ -17,15 +17,14 @@
 
 #include <errno.h>
 #include <sys/socket.h>
-#include <sys/time.h>
 
 #include "dns_config_client.h"
-#include "netdb.h"
-#include "securec.h"
-#include "stdbool.h"
-#include "sys/select.h"
-#include "sys/un.h"
-#include "unistd.h"
+#include <netdb.h>
+#include <securec.h>
+#include <stdbool.h>
+#include <sys/select.h>
+#include <sys/un.h>
+#include <unistd.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -374,6 +373,38 @@ int32_t NetSysSetResolvCache(uint16_t netId, const struct ParamWrapper param, st
     }
 
     return 0;
+}
+
+static int32_t NetSysIsIpv6EnableInternal(int sockFd, uint16_t netId, int *enable)
+{
+    struct RequestInfo info = {
+        .command = JUDGE_IPV6,
+        .netId = netId,
+    };
+
+    if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollRecvData(sockFd, (char *)enable, sizeof(int))) {
+        DNS_CONFIG_PRINT("read failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    return CloseSocketReturn(sockFd, 0);
+}
+
+int NetSysIsIpv6Enable(uint16_t netId)
+{
+    int sockFd = CreateConnectionToNetSys();
+    int enable = 0;
+    int err = NetSysIsIpv6EnableInternal(sockFd, netId, &enable);
+    if (err < 0) {
+        return 0;
+    }
+
+    return enable;
 }
 
 #ifdef __cplusplus

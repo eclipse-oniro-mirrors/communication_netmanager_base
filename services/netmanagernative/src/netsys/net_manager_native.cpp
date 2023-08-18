@@ -93,7 +93,9 @@ int32_t NetManagerNative::NetworkCreateVirtual(int32_t netId, bool hasDns)
 
 int32_t NetManagerNative::NetworkDestroy(int32_t netId)
 {
-    return connManager_->DestroyNetwork(netId);
+    auto ret = connManager_->DestroyNetwork(netId);
+    dnsManager_->DestroyNetworkCache(netId);
+    return ret;
 }
 
 int32_t NetManagerNative::NetworkAddUids(int32_t netId, const std::vector<UidRange> &uidRanges)
@@ -135,7 +137,11 @@ int32_t NetManagerNative::DelInterfaceAddress(std::string ifName, std::string ad
 int32_t NetManagerNative::NetworkAddRoute(int32_t netId, std::string interfaceName, std::string destination,
                                           std::string nextHop)
 {
-    return connManager_->AddRoute(netId, interfaceName, destination, nextHop);
+    auto ret = connManager_->AddRoute(netId, interfaceName, destination, nextHop);
+    if (ret == 0 && IsValidIPV6(destination) && IsValidIPV6(nextHop)) {
+        dnsManager_->EnableIpv6(netId);
+    }
+    return ret;
 }
 
 int32_t NetManagerNative::NetworkRemoveRoute(int32_t netId, std::string interfaceName, std::string destination,
