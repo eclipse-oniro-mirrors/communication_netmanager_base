@@ -100,8 +100,7 @@ bool NetworkExec::ExecGetType(GetTypeContext *context)
     }
 
     if (handle.GetNetId() == 0) {
-        context->SetErrorCode(NETMANAGER_ERR_INTERNAL);
-        return false;
+        return true;
     }
 
     NetAllCapabilities cap;
@@ -182,9 +181,11 @@ napi_value NetworkExec::SubscribeCallback(SubscribeContext *context)
 
 bool NetworkExec::ExecUnsubscribe(UnsubscribeContext *context)
 {
+    NETMANAGER_BASE_LOGI("NetworkExec::ExecUnsubscribe");
     EventManager *manager = context->GetManager();
     sptr<INetConnCallback> callback = g_observerMap[manager];
     if (callback == nullptr) {
+        NETMANAGER_BASE_LOGE("callback is null");
         return false;
     }
 
