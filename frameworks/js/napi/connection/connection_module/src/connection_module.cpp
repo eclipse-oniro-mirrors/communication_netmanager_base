@@ -311,11 +311,9 @@ napi_value ConnectionModule::GetDefaultNet(napi_env env, napi_callback_info info
 
 napi_value ConnectionModule::GetDefaultNetSync(napi_env env, napi_callback_info info)
 {
-    GetDefaultNetContext context(env, nullptr);
-    if (ConnectionExec::ExecGetDefaultNet(&context)) {
-        return ConnectionExec::GetDefaultNetCallback(&context);
-    }
-    return NapiUtils::CreateErrorMessage(env, context.GetErrorCode(), context.GetErrorMessage());
+    return ModuleTemplate::InterfaceSync<GetDefaultNetContext>(env, info, FUNCTION_GET_DEFAULT_NET, nullptr,
+                                                               ConnectionExec::ExecGetDefaultNet,
+                                                               ConnectionExec::GetDefaultNetCallback);
 }
 
 napi_value ConnectionModule::GetAllNets(napi_env env, napi_callback_info info)
