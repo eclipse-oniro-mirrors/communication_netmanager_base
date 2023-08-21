@@ -41,10 +41,7 @@ ConnManager::ConnManager()
 
 ConnManager::~ConnManager()
 {
-    {
-        std::lock_guard<std::mutex> lock(interfaceNameMutex_);
-        networks_.clear();
-    }
+    networks_.clear();
 }
 
 int32_t ConnManager::SetInternetPermission(uint32_t uid, uint8_t allow)
@@ -71,15 +68,14 @@ int32_t ConnManager::CreatePhysicalNetwork(uint16_t netId, NetworkPermission per
 {
     if (needReinitRouteFlag_) {
         std::set<int32_t> netIds;
-        {
-            std::lock_guard<std::mutex> lock(interfaceNameMutex_);
-            for (const auto &iter : networks_) {
-                if (iter.first == LOCAL_NET_ID || iter.second == nullptr) {
-                    continue;
-                }
-                netIds.insert(iter.second->GetNetId());
+
+        networks_.Iterate([](id, NetsysNetworkPtr) {
+            if (id == LOCAL_NET_ID || NetsysNetworkPtr == nullptr) {
+                return;
             }
-        }
+            netIds.insert(NetsysNetworkPtr->GetNetId());
+        });
+
         for (auto netId : netIds) {
             std::string interfaceName;
             {
@@ -92,16 +88,13 @@ int32_t ConnManager::CreatePhysicalNetwork(uint16_t netId, NetworkPermission per
         needReinitRouteFlag_ = false;
     }
     std::shared_ptr<NetsysNetwork> network = std::make_shared<PhysicalNetwork>(netId, permission);
-    {
-        std::lock_guard<std::mutex> lock(interfaceNameMutex_);
-        networks_[netId] = network;
-    }
+    networks_[netId] = network;
+
     return NETMANAGER_SUCCESS;
 }
 
 int32_t ConnManager::CreateVirtualNetwork(uint16_t netId, bool hasDns)
 {
-    std::lock_guard<std::mutex> lock(interfaceNameMutex_);
     networks_[netId] = std::make_shared<VirtualNetwork>(netId, hasDns);
     return NETMANAGER_SUCCESS;
 }
@@ -124,10 +117,8 @@ int32_t ConnManager::DestroyNetwork(int32_t netId)
         nw->ClearInterfaces();
     }
 
-    {
-        std::lock_guard<std::mutex> lock(interfaceNameMutex_);
-        networks_.erase(netId);
-    }
+    networks_.erase(netId);
+
     return NETMANAGER_SUCCESS;
 }
 
@@ -183,15 +174,13 @@ int32_t ConnManager::ClearDefaultNetwork()
 std::tuple<bool, std::shared_ptr<NetsysNetwork>> ConnManager::FindNetworkById(int32_t netId)
 {
     NETNATIVE_LOG_D("Entry ConnManager::FindNetworkById netId:%{public}d", netId);
-    std::map<int32_t, std::shared_ptr<NetsysNetwork>>::iterator it;
-    {
-        std::lock_guard<std::mutex> lock(interfaceNameMutex_);
-        for (it = networks_.begin(); it != networks_.end(); ++it) {
-            if (netId == it->first) {
-                return std::make_tuple(true, it->second);
-            }
-        }
+
+    std::shared_ptr<NetsysNetwork> netsysNetworkPtr;
+    bool ret = networks_.find(netId, netsysNetworkPtr);
+    if (ret) {
+        return std::make_tuple(true, netsysNetworkPtr);
     }
+
     return std::make_tuple<bool, std::shared_ptr<NetsysNetwork>>(false, nullptr);
 }
 
@@ -205,13 +194,19 @@ int32_t ConnManager::GetNetworkForInterface(std::string &interfaceName)
     NETNATIVE_LOG_D("Entry ConnManager::GetNetworkForInterface interfaceName:%{public}s", interfaceName.c_str());
     std::map<int32_t, std::shared_ptr<NetsysNetwork>>::iterator it;
 
-    std::lock_guard<std::mutex> lock(interfaceNameMutex_);
-    for (it = networks_.begin(); it != networks_.end(); ++it) {
-        if (it->second->ExistInterface(interfaceName)) {
-            return it->first;
+    int32_t InterfaceId = INTERFACE_UNSET;
+    networks_.Iterate([&InterfaceId, interfaceName](id, NetsysNetworkPtr) {
+        if (InterfaceId != INTERFACE_UNSET) {
+            return;
         }
-    }
-    return INTERFACE_UNSET;
+        if (NetsysNetworkPtr != nullptr) {
+            if (NetsysNetworkPtr->ExitInterface(interfaceName)) {
+                InterfaceId = id;
+            }
+        }
+    });
+
+    return InterfaceId;
 }
 
 int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interfaceName)
@@ -304,20 +299,18 @@ std::shared_ptr<NetsysNetwork> ConnManager::FindVirtualNetwork(int32_t netId)
     if (netId == LOCAL_NET_ID) {
         return nullptr;
     }
-    auto iter = networks_.end();
-    {
-        std::lock_guard<std::mutex> lock(interfaceNameMutex_);
-        iter = networks_.find(netId);
-    }
-    if (iter == networks_.end() || iter->second == nullptr) {
+
+    std::shared_ptr<NetsysNetwork> netsysNetworkPtr = nullptr;
+    auto ret = networks_.find(netId, netsysNetworkPtr);
+    if (!ret || netsysNetworkPtr == nullptr) {
         NETNATIVE_LOGE("invalid netId:%{public}d or nw is null.", netId);
         return nullptr;
     }
-    if (iter->second->IsPhysical()) {
+    if (netsysNetworkPtr->IsPhysical()) {
         return nullptr;
     }
 
-    return iter->second;
+    return netsysNetworkPtr;
 }
 
 int32_t ConnManager::AddUidsToNetwork(int32_t netId, const std::vector<NetManagerStandard::UidRange> &uidRanges)
@@ -345,15 +338,16 @@ void ConnManager::GetDumpInfos(std::string &infos)
     static const std::string TAB = "  ";
     infos.append("Netsys connect manager :\n");
     infos.append(TAB + "default NetId: " + std::to_string(defaultNetId_) + "\n");
-    std::lock_guard<std::mutex> lock(interfaceNameMutex_);
-    std::for_each(networks_.begin(), networks_.end(), [&infos](const auto &network) {
-        infos.append(TAB + "NetId:" + std::to_string(network.first));
+
+    networks_.Iterate([&infos](Id, networkPtr) {
+        infos.append(TAB + "NetId:" + std::to_string(Id));
         std::string interfaces = TAB + "interfaces: {";
-        for (const auto &interface : network.second->GetAllInterface()) {
+        for (const auto &interface : networkPtr->GetAllInterface()) {
             interfaces.append(interface + ", ");
         }
         infos.append(interfaces + "}\n");
     });
+
 }
 } // namespace nmd
 } // namespace OHOS
