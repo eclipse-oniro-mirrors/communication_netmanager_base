@@ -41,7 +41,7 @@ ConnManager::ConnManager()
 
 ConnManager::~ConnManager()
 {
-    networks_.clear();
+    networks_.Clear();
 }
 
 int32_t ConnManager::SetInternetPermission(uint32_t uid, uint8_t allow)
@@ -114,7 +114,7 @@ int32_t ConnManager::DestroyNetwork(int32_t netId)
         }
         nw->ClearInterfaces();
     }
-    networks_.erase(netId);
+    networks_.Erase(netId);
     return NETMANAGER_SUCCESS;
 }
 
@@ -171,7 +171,7 @@ std::tuple<bool, std::shared_ptr<NetsysNetwork>> ConnManager::FindNetworkById(in
 {
     NETNATIVE_LOG_D("Entry ConnManager::FindNetworkById netId:%{public}d", netId);
     std::shared_ptr<NetsysNetwork> netsysNetworkPtr;
-    bool ret = networks_.find(netId, netsysNetworkPtr);
+    bool ret = networks_.Find(netId, netsysNetworkPtr);
     if (ret) {
         return std::make_tuple(true, netsysNetworkPtr);
     }
@@ -292,7 +292,7 @@ std::shared_ptr<NetsysNetwork> ConnManager::FindVirtualNetwork(int32_t netId)
         return nullptr;
     }
     std::shared_ptr<NetsysNetwork> netsysNetworkPtr = nullptr;
-    auto ret = networks_.find(netId, netsysNetworkPtr);
+    auto ret = networks_.Find(netId, netsysNetworkPtr);
     if (!ret || netsysNetworkPtr == nullptr) {
         NETNATIVE_LOGE("invalid netId:%{public}d or nw is null.", netId);
         return nullptr;
