@@ -175,7 +175,6 @@ std::tuple<bool, std::shared_ptr<NetsysNetwork>> ConnManager::FindNetworkById(in
     if (ret) {
         return std::make_tuple(true, netsysNetworkPtr);
     }
-
     return std::make_tuple<bool, std::shared_ptr<NetsysNetwork>>(false, nullptr);
 }
 
