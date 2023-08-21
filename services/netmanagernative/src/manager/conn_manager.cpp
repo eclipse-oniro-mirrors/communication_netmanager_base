@@ -68,7 +68,6 @@ int32_t ConnManager::CreatePhysicalNetwork(uint16_t netId, NetworkPermission per
 {
     if (needReinitRouteFlag_) {
         std::set<int32_t> netIds;
-
         networks_.Iterate([](id, NetsysNetworkPtr) {
             if (id == LOCAL_NET_ID || NetsysNetworkPtr == nullptr) {
                 return;
@@ -89,7 +88,6 @@ int32_t ConnManager::CreatePhysicalNetwork(uint16_t netId, NetworkPermission per
     }
     std::shared_ptr<NetsysNetwork> network = std::make_shared<PhysicalNetwork>(netId, permission);
     networks_[netId] = network;
-
     return NETMANAGER_SUCCESS;
 }
 
@@ -116,9 +114,7 @@ int32_t ConnManager::DestroyNetwork(int32_t netId)
         }
         nw->ClearInterfaces();
     }
-
     networks_.erase(netId);
-
     return NETMANAGER_SUCCESS;
 }
 
@@ -174,7 +170,6 @@ int32_t ConnManager::ClearDefaultNetwork()
 std::tuple<bool, std::shared_ptr<NetsysNetwork>> ConnManager::FindNetworkById(int32_t netId)
 {
     NETNATIVE_LOG_D("Entry ConnManager::FindNetworkById netId:%{public}d", netId);
-
     std::shared_ptr<NetsysNetwork> netsysNetworkPtr;
     bool ret = networks_.find(netId, netsysNetworkPtr);
     if (ret) {
@@ -193,7 +188,6 @@ int32_t ConnManager::GetNetworkForInterface(std::string &interfaceName)
 {
     NETNATIVE_LOG_D("Entry ConnManager::GetNetworkForInterface interfaceName:%{public}s", interfaceName.c_str());
     std::map<int32_t, std::shared_ptr<NetsysNetwork>>::iterator it;
-
     int32_t InterfaceId = INTERFACE_UNSET;
     networks_.Iterate([&InterfaceId, interfaceName](id, NetsysNetworkPtr) {
         if (InterfaceId != INTERFACE_UNSET) {
@@ -205,7 +199,6 @@ int32_t ConnManager::GetNetworkForInterface(std::string &interfaceName)
             }
         }
     });
-
     return InterfaceId;
 }
 
@@ -299,7 +292,6 @@ std::shared_ptr<NetsysNetwork> ConnManager::FindVirtualNetwork(int32_t netId)
     if (netId == LOCAL_NET_ID) {
         return nullptr;
     }
-
     std::shared_ptr<NetsysNetwork> netsysNetworkPtr = nullptr;
     auto ret = networks_.find(netId, netsysNetworkPtr);
     if (!ret || netsysNetworkPtr == nullptr) {
@@ -309,7 +301,6 @@ std::shared_ptr<NetsysNetwork> ConnManager::FindVirtualNetwork(int32_t netId)
     if (netsysNetworkPtr->IsPhysical()) {
         return nullptr;
     }
-
     return netsysNetworkPtr;
 }
 
@@ -338,7 +329,6 @@ void ConnManager::GetDumpInfos(std::string &infos)
     static const std::string TAB = "  ";
     infos.append("Netsys connect manager :\n");
     infos.append(TAB + "default NetId: " + std::to_string(defaultNetId_) + "\n");
-
     networks_.Iterate([&infos](Id, networkPtr) {
         infos.append(TAB + "NetId:" + std::to_string(Id));
         std::string interfaces = TAB + "interfaces: {";
@@ -347,7 +337,6 @@ void ConnManager::GetDumpInfos(std::string &infos)
         }
         infos.append(interfaces + "}\n");
     });
-
 }
 } // namespace nmd
 } // namespace OHOS
