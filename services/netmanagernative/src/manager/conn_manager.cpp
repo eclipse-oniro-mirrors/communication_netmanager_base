@@ -68,7 +68,7 @@ int32_t ConnManager::CreatePhysicalNetwork(uint16_t netId, NetworkPermission per
 {
     if (needReinitRouteFlag_) {
         std::set<int32_t> netIds;
-        networks_.Iterate([](int32_t id, td::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
+        networks_.Iterate([&netIds](int32_t id, std::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
             if (id == LOCAL_NET_ID || NetsysNetworkPtr == nullptr) {
                 return;
             }
