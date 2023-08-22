@@ -193,7 +193,7 @@ int32_t ConnManager::GetNetworkForInterface(std::string &interfaceName)
             return;
         }
         if (NetsysNetworkPtr != nullptr) {
-            if (NetsysNetworkPtr->ExitInterface(interfaceName)) {
+            if (NetsysNetworkPtr->ExistInterface(interfaceName)) {
                 InterfaceId = id;
             }
         }
