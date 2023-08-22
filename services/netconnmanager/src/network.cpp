@@ -187,7 +187,16 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
 
 NetLinkInfo Network::GetNetLinkInfo() const
 {
-    return netLinkInfo_;
+    NetLinkInfo linkInfo = netLinkInfo_;
+    for (auto iter = linkInfo.routeList_.begin(); iter != linkInfo.routeList_.end();) {
+        if (iter->destination_.address_ == LOCAL_ROUTE_NEXT_HOP ||
+            iter->destination_.address_ == LOCAL_ROUTE_IPV6_DESTINATION) {
+            ++iter;
+            continue;
+        }
+        iter = linkInfo.routeList_.erase(iter);
+    }
+    return linkInfo;
 }
 
 void Network::UpdateInterfaces(const NetLinkInfo &netLinkInfo)
