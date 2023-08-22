@@ -166,15 +166,12 @@ std::map<int32_t, const char *> g_errStringMap = {
 std::string NetBaseErrorCodeConvertor::ConvertErrorCode(int32_t &errorCode)
 {
     std::string errmsg;
-    if (g_errStringMap.find(errorCode) != g_errStringMap.end()) {
-        errmsg = g_errStringMap.at(errorCode);
-    }
     if (errorCode > ERROR_DIVISOR || errorCode == IPC_PROXY_ERR) {
         if (g_errNumMap.find(errorCode) != g_errNumMap.end()) {
             errorCode = g_errNumMap.at(errorCode);
         }
     }
-    if (errmsg.empty() && g_errStringMap.find(errorCode) != g_errStringMap.end()) {
+    if (g_errStringMap.find(errorCode) != g_errStringMap.end()) {
         errmsg = g_errStringMap.at(errorCode);
     }
     return errmsg;
