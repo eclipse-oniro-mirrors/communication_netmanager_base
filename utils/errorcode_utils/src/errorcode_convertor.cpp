@@ -174,7 +174,7 @@ std::string NetBaseErrorCodeConvertor::ConvertErrorCode(int32_t &errorCode)
             errorCode = g_errNumMap.at(errorCode);
         }
     }
-    if (errmsg.empty() && g_errStringMap.find(errorCode) != g_errStringMap.end()) {
+    if (g_errStringMap.find(errorCode) != g_errStringMap.end()) {
         errmsg = g_errStringMap.at(errorCode);
     }
     return errmsg;
