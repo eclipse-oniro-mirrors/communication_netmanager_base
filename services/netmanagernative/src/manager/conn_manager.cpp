@@ -188,7 +188,7 @@ int32_t ConnManager::GetNetworkForInterface(std::string &interfaceName)
     NETNATIVE_LOG_D("Entry ConnManager::GetNetworkForInterface interfaceName:%{public}s", interfaceName.c_str());
     std::map<int32_t, std::shared_ptr<NetsysNetwork>>::iterator it;
     int32_t InterfaceId = INTERFACE_UNSET;
-    networks_.Iterate([&InterfaceId, &interfaceName](int32_t id, td::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
+    networks_.Iterate([&InterfaceId, &interfaceName](int32_t id, std::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
         if (InterfaceId != INTERFACE_UNSET) {
             return;
         }
@@ -328,7 +328,7 @@ void ConnManager::GetDumpInfos(std::string &infos)
     static const std::string TAB = "  ";
     infos.append("Netsys connect manager :\n");
     infos.append(TAB + "default NetId: " + std::to_string(defaultNetId_) + "\n");
-    networks_.Iterate([&infos](int32_t id, td::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
+    networks_.Iterate([&infos](int32_t id, std::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
         infos.append(TAB + "NetId:" + std::to_string(id));
         std::string interfaces = TAB + "interfaces: {";
         for (const auto &interface : NetsysNetworkPtr->GetAllInterface()) {
