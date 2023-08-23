@@ -138,8 +138,8 @@ int32_t NetManagerNative::NetworkAddRoute(int32_t netId, std::string interfaceNa
                                           std::string nextHop)
 {
     auto ret = connManager_->AddRoute(netId, interfaceName, destination, nextHop);
-    if (ret == 0 && IsValidIPV6(destination) && IsValidIPV6(nextHop)) {
-        dnsManager_->EnableIpv6(netId);
+    if (!ret) {
+        dnsManager_->EnableIpv6(netId, destination, nextHop);
     }
     return ret;
 }

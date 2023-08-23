@@ -17,6 +17,7 @@
 #include <thread>
 
 #include "dns_resolv_listen.h"
+#include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "singleton.h"
 
@@ -24,6 +25,8 @@
 
 namespace OHOS {
 namespace nmd {
+using namespace OHOS::NetManagerStandard::CommonUtils;
+
 void StartListen()
 {
     NETNATIVE_LOG_D("Enter threadStart");
@@ -38,8 +41,15 @@ DnsManager::DnsManager() : dnsProxyListen_(std::make_shared<DnsProxyListen>())
     t.detach();
 }
 
-void DnsManager::EnableIpv6(uint16_t netId)
+void DnsManager::EnableIpv6(uint16_t netId, std::string &destination, const std::string &nextHop)
 {
+    auto pos = destination.find("/");
+    if (pos != std::string::npos) {
+        destination = destination.substr(0, pos);
+    }
+    if (!IsValidIPV6(destination) || !IsValidIPV6(nextHop)) {
+        return;
+    }
     DnsParamCache::GetInstance().EnableIpv6(netId);
 }
 
