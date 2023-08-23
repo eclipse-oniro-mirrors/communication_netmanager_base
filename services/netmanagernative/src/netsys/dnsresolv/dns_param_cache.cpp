@@ -58,7 +58,7 @@ int32_t DnsParamCache::CreateCacheForNet(uint16_t netId)
         NETNATIVE_LOGE("DnsParamCache::CreateCacheForNet, netid already exist, no need to create");
         return -EEXIST;
     }
-    it->second.SetNetId(netId);
+    serverConfigMap_[netId].SetNetId(netId);
     return 0;
 }
 

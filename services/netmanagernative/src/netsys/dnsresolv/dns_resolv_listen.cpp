@@ -57,8 +57,8 @@ void DnsResolvListen::ProcGetConfigCommand(int clientSockFd, uint16_t netId)
     uint16_t baseTimeoutMsec = DEFAULT_TIMEOUT;
     uint8_t retryCount = DEFAULT_RETRY;
 
-    auto status = DnsParamCache::GetInstance().GetResolverConfig(
-        static_cast<uint16_t>(netId), servers, domains, baseTimeoutMsec, retryCount);
+    auto status = DnsParamCache::GetInstance().GetResolverConfig(static_cast<uint16_t>(netId), servers, domains,
+                                                                 baseTimeoutMsec, retryCount);
     DNS_CONFIG_PRINT("GetResolverConfig status: %{public}d", status);
     if (status < 0) {
         sendData.error = status;
