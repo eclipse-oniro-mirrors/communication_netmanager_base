@@ -43,9 +43,9 @@ public:
     bool UpdateBasicNetwork(bool isAvailable_);
     bool UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo);
     NetLinkInfo GetNetLinkInfo() const;
-    void UpdateIpAddrs(const NetLinkInfo &netLinkInfo);
-    void UpdateInterfaces(const NetLinkInfo &netLinkInfo);
-    void UpdateRoutes(const NetLinkInfo &netLinkInfo);
+    void UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo);
+    void UpdateInterfaces(const NetLinkInfo &newNetLinkInfo);
+    void UpdateRoutes(const NetLinkInfo &newNetLinkInfo);
     void UpdateDns(const NetLinkInfo &netLinkInfo);
     void UpdateMtu(const NetLinkInfo &netLinkInfo);
     void RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);

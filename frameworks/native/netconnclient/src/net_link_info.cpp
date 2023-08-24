@@ -215,6 +215,16 @@ void NetLinkInfo::Initialize()
     tcpBufferSizes_ = "";
 }
 
+bool NetLinkInfo::HasNetAddr(const INetAddr &netAddr) const
+{
+    return std::find(netAddrList_.begin(), netAddrList_.end(), netAddr) != netAddrList_.end();
+}
+
+bool NetLinkInfo::HasRoute(const Route &route) const
+{
+    return std::find(routeList_.begin(), routeList_.end(), route) != routeList_.end();
+}
+
 std::string NetLinkInfo::ToString(const std::string &tab) const
 {
     std::string str;

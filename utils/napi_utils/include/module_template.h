@@ -142,6 +142,7 @@ napi_value InterfaceSync(napi_env env, napi_callback_info info, const std::strin
     }
 
     if (!executor(context.get())) {
+        NETMANAGER_BASE_LOGE("executor is fail, errorcode= %{public}d", context->GetErrorCode());
         napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
         return NapiUtils::GetUndefined(env);
     }

@@ -187,21 +187,30 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
 
 NetLinkInfo Network::GetNetLinkInfo() const
 {
-    return netLinkInfo_;
+    NetLinkInfo linkInfo = netLinkInfo_;
+    for (auto iter = linkInfo.routeList_.begin(); iter != linkInfo.routeList_.end();) {
+        if (iter->destination_.address_ == LOCAL_ROUTE_NEXT_HOP ||
+            iter->destination_.address_ == LOCAL_ROUTE_IPV6_DESTINATION) {
+            ++iter;
+            continue;
+        }
+        iter = linkInfo.routeList_.erase(iter);
+    }
+    return linkInfo;
 }
 
-void Network::UpdateInterfaces(const NetLinkInfo &netLinkInfo)
+void Network::UpdateInterfaces(const NetLinkInfo &newNetLinkInfo)
 {
     NETMGR_LOG_D("Network UpdateInterfaces in.");
-    if (netLinkInfo.ifaceName_ == netLinkInfo_.ifaceName_) {
+    if (newNetLinkInfo.ifaceName_ == netLinkInfo_.ifaceName_) {
         NETMGR_LOG_D("Network UpdateInterfaces out. same with before.");
         return;
     }
 
     int32_t ret = NETMANAGER_SUCCESS;
     // Call netsys to add and remove interface
-    if (!netLinkInfo.ifaceName_.empty()) {
-        ret = NetsysController::GetInstance().NetworkAddInterface(netId_, netLinkInfo.ifaceName_);
+    if (!newNetLinkInfo.ifaceName_.empty()) {
+        ret = NetsysController::GetInstance().NetworkAddInterface(netId_, newNetLinkInfo.ifaceName_);
         if (ret != NETMANAGER_SUCCESS) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_INTERFACE_FAILED);
         }
@@ -212,16 +221,21 @@ void Network::UpdateInterfaces(const NetLinkInfo &netLinkInfo)
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_REMOVE_NET_INTERFACE_FAILED);
         }
     }
-    netLinkInfo_.ifaceName_ = netLinkInfo.ifaceName_;
+    netLinkInfo_.ifaceName_ = newNetLinkInfo.ifaceName_;
     NETMGR_LOG_D("Network UpdateInterfaces out.");
 }
 
-void Network::UpdateIpAddrs(const NetLinkInfo &netLinkInfo)
+void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
 {
     // netLinkInfo_ represents the old, netLinkInfo represents the new
     // Update: remove old Ips first, then add the new Ips
     NETMGR_LOG_D("UpdateIpAddrs, old ip addrs: ...");
     for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+        if (newNetLinkInfo.HasNetAddr(inetAddr)) {
+            NETMGR_LOG_W("Same ip address:[%{public}s], there is not need to be deleted",
+                         CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
+            continue;
+        }
         auto family = GetAddrFamily(inetAddr.address_);
         auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_)
                                              : ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_)
@@ -233,24 +247,34 @@ void Network::UpdateIpAddrs(const NetLinkInfo &netLinkInfo)
     }
 
     NETMGR_LOG_D("UpdateIpAddrs, new ip addrs: ...");
-    for (const auto &inetAddr : netLinkInfo.netAddrList_) {
+    for (const auto &inetAddr : newNetLinkInfo.netAddrList_) {
+        if (netLinkInfo_.HasNetAddr(inetAddr)) {
+            NETMGR_LOG_W("Same ip address:[%{public}s], there is no need to add it again",
+                         CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
+            continue;
+        }
         auto family = GetAddrFamily(inetAddr.address_);
         auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_)
                                              : ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_)
                                                                      : Ipv4PrefixLen(inetAddr.netMask_));
-        if (NETMANAGER_SUCCESS !=
-            NetsysController::GetInstance().AddInterfaceAddress(netLinkInfo.ifaceName_, inetAddr.address_, prefixLen)) {
+        if (NETMANAGER_SUCCESS != NetsysController::GetInstance().AddInterfaceAddress(newNetLinkInfo.ifaceName_,
+                                                                                      inetAddr.address_, prefixLen)) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_IP_ADDR_FAILED);
         }
     }
 }
 
-void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
+void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
 {
     // netLinkInfo_ contains the old routes info, netLinkInfo contains the new routes info
     // Update: remove old routes first, then add the new routes
     NETMGR_LOG_D("UpdateRoutes, old routes: [%{public}s]", netLinkInfo_.ToStringRoute("").c_str());
     for (const auto &route : netLinkInfo_.routeList_) {
+        if (newNetLinkInfo.HasRoute(route)) {
+            NETMGR_LOG_W("Same route:[%{public}s]  ifo, there is not need to be deleted",
+                         CommonUtils::ToAnonymousIp(route.destination_.address_).c_str());
+            continue;
+        }
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
         auto ret = NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, destAddress,
                                                                       route.gateway_.address_);
@@ -266,8 +290,13 @@ void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
         }
     }
 
-    NETMGR_LOG_D("UpdateRoutes, new routes: [%{public}s]", netLinkInfo.ToStringRoute("").c_str());
-    for (const auto &route : netLinkInfo.routeList_) {
+    NETMGR_LOG_D("UpdateRoutes, new routes: [%{public}s]", newNetLinkInfo.ToStringRoute("").c_str());
+    for (const auto &route : newNetLinkInfo.routeList_) {
+        if (netLinkInfo_.HasRoute(route)) {
+            NETMGR_LOG_W("Same route:[%{public}s]  ifo, there is no need to add it again",
+                         CommonUtils::ToAnonymousIp(route.destination_.address_).c_str());
+            continue;
+        }
         std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
         auto ret =
             NetsysController::GetInstance().NetworkAddRoute(netId_, route.iface_, destAddress, route.gateway_.address_);
@@ -283,7 +312,7 @@ void Network::UpdateRoutes(const NetLinkInfo &netLinkInfo)
         }
     }
     NETMGR_LOG_D("Network UpdateRoutes out.");
-    if (netLinkInfo.routeList_.empty()) {
+    if (newNetLinkInfo.routeList_.empty()) {
         SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_UPDATE_NET_ROUTES_FAILED);
     }
 }

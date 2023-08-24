@@ -26,7 +26,7 @@
 #include "netsys_network.h"
 #include "network_permission.h"
 #include "route_manager.h"
-
+#include "safe_map.h"
 namespace OHOS {
 namespace nmd {
 class ConnManager {
@@ -231,7 +231,7 @@ private:
     int32_t defaultNetId_;
     bool needReinitRouteFlag_;
     std::map<int32_t, std::string> physicalInterfaceName_;
-    std::map<int32_t, std::shared_ptr<NetsysNetwork>> networks_;
+    SafeMap<int32_t, std::shared_ptr<NetsysNetwork>> networks_;
     std::mutex interfaceNameMutex_;
     std::tuple<bool, std::shared_ptr<NetsysNetwork>> FindNetworkById(int32_t netId);
     int32_t GetNetworkForInterface(std::string &interfaceName);
