@@ -131,7 +131,7 @@ public:
 sptr<INetConnCallback> g_callback = new (std::nothrow) NetConnTestCallback();
 sptr<INetDetectionCallback> g_detectionCallback = new (std::nothrow) NetDetectionCallbackTest();
 uint32_t g_supplierId = 0;
-uint32_t g_VPNSupplierId = 0;
+uint32_t g_vpnSupplierId = 0;
 } // namespace
 
 class NetConnServiceTest : public testing::Test {
