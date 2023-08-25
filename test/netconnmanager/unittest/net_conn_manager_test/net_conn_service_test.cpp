@@ -206,7 +206,7 @@ HWTEST_F(NetConnServiceTest, RegisterNetSupplierTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     ret = NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_VPN, TEST_IDENT,
-        netCaps, g_VPNSupplierId);
+        netCaps, g_vpnSupplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -232,11 +232,11 @@ HWTEST_F(NetConnServiceTest, UpdateNetSupplierInfoTest001, TestSize.Level1)
 
     netSupplierInfo->isAvailable_ = true;
     netSupplierInfo->uid_ = TEST_UID;
-    ret = NetConnService::GetInstance()->UpdateNetSupplierInfo(g_VPNSupplierId, netSupplierInfo);
+    ret = NetConnService::GetInstance()->UpdateNetSupplierInfo(g_vpnSupplierId, netSupplierInfo);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     netSupplierInfo->isAvailable_ = false;
-    ret = NetConnService::GetInstance()->UpdateNetSupplierInfo(g_VPNSupplierId, netSupplierInfo);
+    ret = NetConnService::GetInstance()->UpdateNetSupplierInfo(g_vpnSupplierId, netSupplierInfo);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 }
 
