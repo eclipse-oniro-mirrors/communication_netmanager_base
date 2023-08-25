@@ -279,7 +279,7 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
         auto ret = NetsysController::GetInstance().NetworkRemoveRoute(netId_, route.iface_, destAddress,
                                                                       route.gateway_.address_);
         int32_t res = NETMANAGER_SUCCESS;
-        if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP &&
+        if (netSupplierType_ != BEARER_VPN && route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP &&
             route.destination_.address_ != LOCAL_ROUTE_IPV6_DESTINATION) {
             auto family = GetAddrFamily(route.destination_.address_);
             std::string nextHop = (family == AF_INET6) ? "" : LOCAL_ROUTE_NEXT_HOP;
@@ -301,7 +301,7 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
         auto ret =
             NetsysController::GetInstance().NetworkAddRoute(netId_, route.iface_, destAddress, route.gateway_.address_);
         int32_t res = NETMANAGER_SUCCESS;
-        if (route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP &&
+        if (netSupplierType_ != BEARER_VPN && route.destination_.address_ != LOCAL_ROUTE_NEXT_HOP &&
             route.destination_.address_ != LOCAL_ROUTE_IPV6_DESTINATION) {
             auto family = GetAddrFamily(route.destination_.address_);
             std::string nextHop = (family == AF_INET6) ? "" : LOCAL_ROUTE_NEXT_HOP;
