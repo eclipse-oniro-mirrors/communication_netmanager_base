@@ -103,7 +103,7 @@ int32_t ConnManager::DestroyNetwork(int32_t netId)
         NETNATIVE_LOGE("Cannot destroy local network");
         return NETMANAGER_ERROR;
     }
-    const auto &net = FindNetworkById(netId);
+    auto net = FindNetworkById(netId);
     if (std::get<0>(net)) {
         std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
         if (defaultNetId_ == netId) {
@@ -125,7 +125,7 @@ int32_t ConnManager::SetDefaultNetwork(int32_t netId)
     }
 
     // check if this network exists
-    const auto &net = FindNetworkById(netId);
+    auto net = FindNetworkById(netId);
     if (std::get<0>(net)) {
         std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
         if (!nw->IsPhysical()) {
@@ -136,7 +136,7 @@ int32_t ConnManager::SetDefaultNetwork(int32_t netId)
     }
 
     if (defaultNetId_ != 0) {
-        const auto &defaultNet = FindNetworkById(defaultNetId_);
+        auto defaultNet = FindNetworkById(defaultNetId_);
         if (std::get<0>(defaultNet)) {
             std::shared_ptr<NetsysNetwork> nw = std::get<1>(defaultNet);
             if (!nw->IsPhysical()) {
@@ -153,7 +153,7 @@ int32_t ConnManager::SetDefaultNetwork(int32_t netId)
 int32_t ConnManager::ClearDefaultNetwork()
 {
     if (defaultNetId_ != 0) {
-        const auto &net = FindNetworkById(defaultNetId_);
+        auto net = FindNetworkById(defaultNetId_);
         if (std::get<0>(net)) {
             std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
             if (!nw->IsPhysical()) {
@@ -211,7 +211,7 @@ int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interface
         return NETMANAGER_ERROR;
     }
 
-    const auto &net = FindNetworkById(netId);
+    auto net = FindNetworkById(netId);
     if (std::get<0>(net)) {
         std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
         if (nw->IsPhysical()) {
@@ -229,7 +229,7 @@ int32_t ConnManager::RemoveInterfaceFromNetwork(int32_t netId, std::string &inte
     if ((alreadySetNetId != netId) || (alreadySetNetId == INTERFACE_UNSET)) {
         return NETMANAGER_SUCCESS;
     } else if (alreadySetNetId == netId) {
-        const auto &net = FindNetworkById(netId);
+        auto net = FindNetworkById(netId);
         if (std::get<0>(net)) {
             std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
             int32_t ret = nw->RemoveInterface(interfaceName);
