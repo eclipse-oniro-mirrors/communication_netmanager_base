@@ -180,7 +180,7 @@ void DnsResolvListen::ProcSetCacheCommand(int clientSockFd, uint16_t netId)
 void DnsResolvListen::ProcJudgeIpv6Command(int clientSockFd, uint16_t netId)
 {
     int enable = DnsParamCache::GetInstance().IsIpv6Enable(netId) ? 1 : 0;
-    if (!PollSendData(clientSockFd, reinterpret_cast<std::string>(&enable), sizeof(int))) {
+    if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&enable), sizeof(int))) {
         DNS_CONFIG_PRINT("send failed");
     }
 }
