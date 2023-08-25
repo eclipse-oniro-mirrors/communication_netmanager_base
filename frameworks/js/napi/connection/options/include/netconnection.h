@@ -53,6 +53,7 @@ private:
 };
 
 extern std::map<NetConnCallbackObserver *, NetConnection *> NET_CONNECTIONS;
+extern std::mutex g_netConnectionsMutex;
 } // namespace OHOS::NetManagerStandard
 
 #endif /* NETMANAGER_BASE_NETCONNECTION_H */

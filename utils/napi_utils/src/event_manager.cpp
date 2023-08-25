@@ -61,7 +61,8 @@ void EventManager::DeleteListener(const std::string &type, napi_value callback)
 
 void EventManager::Emit(const std::string &type, const std::pair<napi_value, napi_value> &argv)
 {
-    std::lock_guard lock(mutexForEmitAndEmitByUv_);
+    std::lock_guard lock1(mutexForListenersAndEmitByUv_);
+    std::lock_guard lock2(mutexForEmitAndEmitByUv_);
     std::for_each(listeners_.begin(), listeners_.end(), [type, argv](const EventListener &listener) {
         if (listener.IsAsyncCallback()) {
             /* AsyncCallback(BusinessError error, T data) */
@@ -122,7 +123,8 @@ void EventManager::DeleteListener(const std::string &type)
 
 void EventManager::DeleteAllListener()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    NETMANAGER_BASE_LOGI("DeleteAllListener()");
+    std::lock_guard lock(mutexForListenersAndEmitByUv_);
     listeners_.clear();
 }
 
