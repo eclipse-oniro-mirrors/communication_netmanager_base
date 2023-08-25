@@ -104,10 +104,10 @@ int32_t ConnManager::DestroyNetwork(int32_t netId)
         return NETMANAGER_ERROR;
     }
     auto net = FindNetworkById(netId);
-    if (std::get<0>(net)) {
-        std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
+    std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
+    if (std::get<0>(net) && (nw != nullptr)) {
         if (defaultNetId_ == netId) {
-            if (nw->IsPhysical()) {
+            if ((nw != nullptr) && nw->IsPhysical()) {
                 static_cast<PhysicalNetwork *>(nw.get())->RemoveDefault();
             }
             defaultNetId_ = 0;
@@ -126,8 +126,8 @@ int32_t ConnManager::SetDefaultNetwork(int32_t netId)
 
     // check if this network exists
     auto net = FindNetworkById(netId);
-    if (std::get<0>(net)) {
-        std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
+    std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
+    if (std::get<0>(net) && (nw != nullptr)) {
         if (!nw->IsPhysical()) {
             NETNATIVE_LOGE("SetDefaultNetwork fail, network :%{public}d is not physical ", netId);
             return NETMANAGER_ERROR;
@@ -137,8 +137,8 @@ int32_t ConnManager::SetDefaultNetwork(int32_t netId)
 
     if (defaultNetId_ != 0) {
         auto defaultNet = FindNetworkById(defaultNetId_);
-        if (std::get<0>(defaultNet)) {
-            std::shared_ptr<NetsysNetwork> nw = std::get<1>(defaultNet);
+        std::shared_ptr<NetsysNetwork> nw = std::get<1>(defaultNet);
+        if (std::get<0>(defaultNet) && (nw != nullptr)) {
             if (!nw->IsPhysical()) {
                 NETNATIVE_LOGE("SetDefaultNetwork fail, defaultNetId_ :%{public}d is not physical", defaultNetId_);
                 return NETMANAGER_ERROR;
@@ -154,8 +154,8 @@ int32_t ConnManager::ClearDefaultNetwork()
 {
     if (defaultNetId_ != 0) {
         auto net = FindNetworkById(defaultNetId_);
-        if (std::get<0>(net)) {
-            std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
+        std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
+        if (std::get<0>(net) && (nw != nullptr)) {
             if (!nw->IsPhysical()) {
                 NETNATIVE_LOGE("ClearDefaultNetwork fail, defaultNetId_ :%{public}d is not physical", defaultNetId_);
                 return NETMANAGER_ERROR;
@@ -170,7 +170,7 @@ int32_t ConnManager::ClearDefaultNetwork()
 std::tuple<bool, std::shared_ptr<NetsysNetwork>> ConnManager::FindNetworkById(int32_t netId)
 {
     NETNATIVE_LOG_D("Entry ConnManager::FindNetworkById netId:%{public}d", netId);
-    std::shared_ptr<NetsysNetwork> netsysNetworkPtr;
+    std::shared_ptr<NetsysNetwork> netsysNetworkPtr = nullptr;
     bool ret = networks_.Find(netId, netsysNetworkPtr);
     if (ret) {
         return std::make_tuple(true, netsysNetworkPtr);
@@ -212,8 +212,8 @@ int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interface
     }
 
     auto net = FindNetworkById(netId);
-    if (std::get<0>(net)) {
-        std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
+    std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
+    if (std::get<0>(net) && (nw != nullptr)) {
         if (nw->IsPhysical()) {
             std::lock_guard<std::mutex> lock(interfaceNameMutex_);
             physicalInterfaceName_[netId] = interfaceName;
@@ -230,8 +230,8 @@ int32_t ConnManager::RemoveInterfaceFromNetwork(int32_t netId, std::string &inte
         return NETMANAGER_SUCCESS;
     } else if (alreadySetNetId == netId) {
         auto net = FindNetworkById(netId);
-        if (std::get<0>(net)) {
-            std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
+        std::shared_ptr<NetsysNetwork> nw = std::get<1>(net);
+        if (std::get<0>(net) && (nw != nullptr)) {
             int32_t ret = nw->RemoveInterface(interfaceName);
             if (nw->IsPhysical()) {
                 std::lock_guard<std::mutex> lock(interfaceNameMutex_);
