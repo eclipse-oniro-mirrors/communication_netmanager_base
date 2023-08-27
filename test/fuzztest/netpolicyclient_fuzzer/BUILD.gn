@@ -41,16 +41,8 @@ ohos_fuzztest("NetPolicyClientFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
-    "-flto",
-    "-fsanitize=cfi",
-    "-fsanitize-cfi-cross-dso",
-    "-fvisibility=hidden",
   ]
-  ldflags = [
-    "-flto",
-    "-fsanitize=cfi",
-    "-fsanitize-cfi-cross-dso",
-  ]
+
   sources = [
     "mock_net_policy_permission.cpp",
     "net_policy_client_fuzzer.cpp",
@@ -58,8 +50,9 @@ ohos_fuzztest("NetPolicyClientFuzzTest") {
 
   deps = [
     "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if",
+    "$INNERKITS_ROOT/netpolicyclient:net_policy_parcel",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
-    "$NETMANAGER_BASE_ROOT/services/netpolicymanager:net_policy_manager_static",
+    "$NETMANAGER_BASE_ROOT/services/netpolicymanager:net_policy_manager",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$THIRD_PARTY_ROOT/jsoncpp:jsoncpp",
   ]
