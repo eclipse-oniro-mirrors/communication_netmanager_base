@@ -94,8 +94,8 @@ void *EventManager::GetData()
 
 void EventManager::EmitByUv(const std::string &type, void *data, void(handler)(uv_work_t *, int status))
 {
-    std::lock_guard lock1(mutexForEmitAndEmitByUv_);
-    std::lock_guard lock2(mutexForListenersAndEmitByUv_);
+    std::lock_guard lock1(mutexForListenersAndEmitByUv_);
+    std::lock_guard lock2(mutexForEmitAndEmitByUv_);
     if (!IsValid()) {
         return;
     }
