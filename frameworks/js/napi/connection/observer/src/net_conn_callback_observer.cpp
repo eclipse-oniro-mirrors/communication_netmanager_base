@@ -26,6 +26,7 @@ int32_t NetConnCallbackObserver::NetAvailable(sptr<NetHandle> &netHandle)
     if (netHandle == nullptr) {
         return 0;
     }
+    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
@@ -45,6 +46,7 @@ int32_t NetConnCallbackObserver::NetCapabilitiesChange(sptr<NetHandle> &netHandl
     if (netHandle == nullptr) {
         return 0;
     }
+    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
@@ -67,6 +69,7 @@ int32_t NetConnCallbackObserver::NetConnectionPropertiesChange(sptr<NetHandle> &
     if (netHandle == nullptr) {
         return 0;
     }
+    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
@@ -89,6 +92,7 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
     if (netHandle == nullptr) {
         return 0;
     }
+    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
@@ -104,6 +108,7 @@ int32_t NetConnCallbackObserver::NetLost(sptr<NetHandle> &netHandle)
 
 int32_t NetConnCallbackObserver::NetUnavailable()
 {
+    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
@@ -119,6 +124,7 @@ int32_t NetConnCallbackObserver::NetUnavailable()
 
 int32_t NetConnCallbackObserver::NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
 {
+    std::lock_guard<std::mutex> lock(g_netConnectionsMutex);
     NetConnection *netConnection = NET_CONNECTIONS[this];
     if (netConnection == nullptr) {
         NETMANAGER_BASE_LOGI("can not find netConnection handle");
