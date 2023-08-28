@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include <thread>
 #include <pthread.h>
+#include <thread>
 
 #include "dns_resolv_listen.h"
+#include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "singleton.h"
 
@@ -24,6 +25,8 @@
 
 namespace OHOS {
 namespace nmd {
+using namespace OHOS::NetManagerStandard::CommonUtils;
+
 void StartListen()
 {
     NETNATIVE_LOG_D("Enter threadStart");
@@ -38,12 +41,23 @@ DnsManager::DnsManager() : dnsProxyListen_(std::make_shared<DnsProxyListen>())
     t.detach();
 }
 
+void DnsManager::EnableIpv6(uint16_t netId, std::string &destination, const std::string &nextHop)
+{
+    auto pos = destination.find("/");
+    if (pos != std::string::npos) {
+        destination = destination.substr(0, pos);
+    }
+    if (!IsValidIPV6(destination) || !IsValidIPV6(nextHop)) {
+        return;
+    }
+    DnsParamCache::GetInstance().EnableIpv6(netId);
+}
+
 int32_t DnsManager::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMillis, uint8_t retryCount,
                                       const std::vector<std::string> &servers, const std::vector<std::string> &domains)
 {
     NETNATIVE_LOG_D("manager_SetResolverConfig netId[%{public}d]", netId);
-    return DelayedSingleton<DnsParamCache>::GetInstance()->SetResolverConfig(netId, baseTimeoutMillis, retryCount,
-                                                                             servers, domains);
+    return DnsParamCache::GetInstance().SetResolverConfig(netId, baseTimeoutMillis, retryCount, servers, domains);
 }
 
 int32_t DnsManager::GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
@@ -51,24 +65,23 @@ int32_t DnsManager::GetResolverConfig(uint16_t netId, std::vector<std::string> &
                                       uint8_t &retryCount)
 {
     NETNATIVE_LOG_D("manager_GetResolverConfig netId[%{public}d]", netId);
-    return DelayedSingleton<DnsParamCache>::GetInstance()->GetResolverConfig(netId, servers, domains, baseTimeoutMillis,
-                                                                             retryCount);
+    return DnsParamCache::GetInstance().GetResolverConfig(netId, servers, domains, baseTimeoutMillis, retryCount);
 }
 
 int32_t DnsManager::CreateNetworkCache(uint16_t netId)
 {
     NETNATIVE_LOG_D("manager_CreateNetworkCache netId[%{public}d]", netId);
-    return DelayedSingleton<DnsParamCache>::GetInstance()->CreateCacheForNet(netId);
+    return DnsParamCache::GetInstance().CreateCacheForNet(netId);
 }
 
 int32_t DnsManager::DestroyNetworkCache(uint16_t netId)
 {
-    return DelayedSingleton<DnsParamCache>::GetInstance()->DestroyNetworkCache(netId);
+    return DnsParamCache::GetInstance().DestroyNetworkCache(netId);
 }
 
 void DnsManager::SetDefaultNetwork(uint16_t netId)
 {
-    DelayedSingleton<DnsParamCache>::GetInstance()->SetDefaultNetwork(netId);
+    DnsParamCache::GetInstance().SetDefaultNetwork(netId);
 }
 
 void StartProxyListen()
@@ -99,14 +112,14 @@ void DnsManager::StopDnsProxyListen()
 void DnsManager::GetDumpInfo(std::string &info)
 {
     NETNATIVE_LOG_D("Get dump info");
-    DelayedSingleton<DnsParamCache>::GetInstance()->GetDumpInfo(info);
+    DnsParamCache::GetInstance().GetDumpInfo(info);
 }
 
 int32_t DnsManager::GetAddrInfo(const std::string &hostName, const std::string &serverName, const AddrInfo &hints,
                                 uint16_t netId, std::vector<AddrInfo> &res)
 {
     if (netId == 0) {
-        netId = DelayedSingleton<DnsParamCache>::GetInstance()->GetDefaultNetwork();
+        netId = DnsParamCache::GetInstance().GetDefaultNetwork();
         NETNATIVE_LOG_D("DnsManager DnsGetaddrinfo netId == 0 defaultNetId_ : %{public}d", netId);
     }
     return dnsGetAddrInfo_->GetAddrInfo(hostName, serverName, hints, netId, res);

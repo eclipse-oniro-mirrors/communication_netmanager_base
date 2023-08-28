@@ -15,6 +15,11 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
+
 #include "dns_config_client.h"
 #include "dns_param_cache.h"
 #include "netnative_log_wrapper.h"
