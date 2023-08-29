@@ -572,7 +572,7 @@ void FirewallSetUidsAllowedListChainFuzzTest(const uint8_t *data, size_t size)
 
     dataParcel.WriteString(ifaceName);
     dataParcel.WriteString(ipAddress);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_SET_IP_ADDRESS),
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_ALLOWED_LIST_CHAIN),
                     dataParcel);
 }
 
@@ -688,7 +688,7 @@ void SetProcSysNetFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(ifname);
     dataParcel.WriteString(parameter);
     dataParcel.WriteString(value);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_RULE), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_PROC_SYS_NET), dataParcel);
 }
 
 void SetInternetPermissionFuzzTest(const uint8_t *data, size_t size)
@@ -1254,6 +1254,7 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::NetworkCreateVirtualFuzzTest(data, size);
     OHOS::NetManagerStandard::NetworkAddUidsFuzzTest(data, size);
     OHOS::NetManagerStandard::NetworkDelUidsFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetIfaceStatsFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
