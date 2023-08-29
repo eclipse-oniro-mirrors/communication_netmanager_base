@@ -90,7 +90,7 @@ bool NetInterfaceConfiguration::Unmarshalling(Parcel &parcel, NetInterfaceConfig
     }
     size_t size = static_cast<size_t>(tmpSize);
     size = (size > MAX_INTERFACE_CONFIG_SIZE) ? MAX_INTERFACE_CONFIG_SIZE : size;
-    for (int i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         std::string flag;
         if (!parcel.ReadString(flag)) {
             return false;
