@@ -217,12 +217,7 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
         NETNATIVE_LOGE("Check remote descriptor failed");
         return IPC_STUB_INVALID_DATA_ERR;
     }
-
-    {
-        std::lock_guard<std::mutex> lock(runLock_) ;
-        return (this->*(interfaceIndex->second))(data, reply);
-         
-    }
+    return (this->*(interfaceIndex->second))(data, reply);
 }
 
 int32_t NetsysNativeServiceStub::CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply)
