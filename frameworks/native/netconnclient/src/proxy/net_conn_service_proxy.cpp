@@ -60,7 +60,8 @@ int32_t NetConnServiceProxy::SetInternetPermission(uint32_t uid, uint8_t allow)
     if (!data.WriteUint8(allow)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERNET_PERMISSION), data, reply);
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_INTERNET_PERMISSION),
+                                      data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
     }
@@ -152,8 +153,8 @@ int32_t NetConnServiceProxy::RegisterNetSupplierCallback(uint32_t supplierId,
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
     MessageParcel replyParcel;
-    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK), 
-                                        dataParcel, replyParcel);
+    int32_t retCode = RemoteSendRequest(
+        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_SUPPLIER_CALLBACK), dataParcel, replyParcel);
     if (retCode != NETMANAGER_SUCCESS) {
         return retCode;
     }
@@ -203,7 +204,7 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<NetSpecifier> &n
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
     MessageParcel replyParcel;
-    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER), 
+    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER),
                                         dataParcel, replyParcel);
     if (retCode != NETMANAGER_SUCCESS) {
         return retCode;
@@ -256,7 +257,7 @@ int32_t NetConnServiceProxy::UpdateNetStateForTest(const sptr<NetSpecifier> &net
     }
 
     MessageParcel replyParcel;
-    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_STATE_FOR_TEST), 
+    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_STATE_FOR_TEST),
                                         dataParcel, replyParcel);
     if (retCode != NETMANAGER_SUCCESS) {
         return retCode;
@@ -290,7 +291,7 @@ int32_t NetConnServiceProxy::UpdateNetSupplierInfo(uint32_t supplierId, const sp
     }
     NETMGR_LOG_D("proxy Marshalling success");
 
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_SUPPLIER_INFO), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_SUPPLIER_INFO),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -322,7 +323,7 @@ int32_t NetConnServiceProxy::UpdateNetLinkInfo(uint32_t supplierId, const sptr<N
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_LINK_INFO), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_NET_LINK_INFO),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -349,8 +350,8 @@ int32_t NetConnServiceProxy::RegisterNetDetectionCallback(int32_t netId, const s
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
     MessageParcel replyParcel;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK), 
-                                      dataParcel, replyParcel);
+    int32_t error = RemoteSendRequest(
+        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_DETECTION_RET_CALLBACK), dataParcel, replyParcel);
     if (error != NETMANAGER_SUCCESS) {
         return error;
     }
@@ -375,8 +376,8 @@ int32_t NetConnServiceProxy::UnRegisterNetDetectionCallback(int32_t netId, const
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
     MessageParcel replyParcel;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK), 
-                                     dataParcel, replyParcel);
+    int32_t error = RemoteSendRequest(
+        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK), dataParcel, replyParcel);
     if (error != NETMANAGER_SUCCESS) {
         return error;
     }
@@ -395,7 +396,7 @@ int32_t NetConnServiceProxy::NetDetection(int32_t netId)
     }
 
     MessageParcel replyParcel;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_NET_DETECTION), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_NET_DETECTION),
                                       dataParcel, replyParcel);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -416,7 +417,7 @@ int32_t NetConnServiceProxy::GetIfaceNames(NetBearType bearerType, std::list<std
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACE_NAMES), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACE_NAMES),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -464,11 +465,11 @@ int32_t NetConnServiceProxy::GetIfaceNameByType(NetBearType bearerType, const st
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACENAME_BY_TYPE), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACENAME_BY_TYPE),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
-     }
+    }
 
     int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
@@ -527,7 +528,7 @@ int32_t NetConnServiceProxy::HasDefaultNet(bool &flag)
     }
 
     MessageParcel replyParcel;
-    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET), 
+    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET),
                                         dataParcel, replyParcel);
     if (retCode != NETMANAGER_SUCCESS) {
         return retCode;
@@ -560,7 +561,7 @@ int32_t NetConnServiceProxy::GetSpecificNet(NetBearType bearerType, std::list<in
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_NET),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -596,7 +597,7 @@ int32_t NetConnServiceProxy::GetAllNets(std::list<int32_t> &netIdList)
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ALL_NETS), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ALL_NETS),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -636,11 +637,11 @@ int32_t NetConnServiceProxy::GetSpecificUidNet(int32_t uid, int32_t &netId)
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_UID_NET), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_UID_NET),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
-     }
+    }
 
     int32_t ret = NETMANAGER_SUCCESS;
     if (!reply.ReadInt32(ret)) {
@@ -667,7 +668,7 @@ int32_t NetConnServiceProxy::GetConnectionProperties(int32_t netId, NetLinkInfo 
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_CONNECTION_PROPERTIES), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_CONNECTION_PROPERTIES),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -699,7 +700,7 @@ int32_t NetConnServiceProxy::GetNetCapabilities(int32_t netId, NetAllCapabilitie
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_CAPABILITIES), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_CAPABILITIES),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -762,7 +763,7 @@ int32_t NetConnServiceProxy::GetAddressesByName(const std::string &host, int32_t
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESSES_BY_NAME), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESSES_BY_NAME),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -805,7 +806,7 @@ int32_t NetConnServiceProxy::GetAddressByName(const std::string &host, int32_t n
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESS_BY_NAME), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_ADDRESS_BY_NAME),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -839,7 +840,7 @@ int32_t NetConnServiceProxy::BindSocket(int32_t socket_fd, int32_t netId)
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_BIND_SOCKET), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_BIND_SOCKET),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -865,7 +866,7 @@ int32_t NetConnServiceProxy::SetAirplaneMode(bool state)
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_AIRPLANE_MODE), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_AIRPLANE_MODE),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -887,7 +888,7 @@ int32_t NetConnServiceProxy::IsDefaultNetMetered(bool &isMetered)
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_DEFAULT_NET_METERED), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_DEFAULT_NET_METERED),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -918,7 +919,7 @@ int32_t NetConnServiceProxy::SetGlobalHttpProxy(const HttpProxy &httpProxy)
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_GLOBAL_HTTP_PROXY), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_GLOBAL_HTTP_PROXY),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -940,7 +941,7 @@ int32_t NetConnServiceProxy::GetGlobalHttpProxy(HttpProxy &httpProxy)
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_GLOBAL_HTTP_PROXY),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -972,7 +973,7 @@ int32_t NetConnServiceProxy::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &h
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_DEFAULT_HTTP_PROXY), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_DEFAULT_HTTP_PROXY),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -1005,7 +1006,7 @@ int32_t NetConnServiceProxy::GetNetIdByIdentifier(const std::string &ident, std:
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_ID_BY_IDENTIFIER), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_NET_ID_BY_IDENTIFIER),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -1047,7 +1048,7 @@ int32_t NetConnServiceProxy::SetAppNet(int32_t netId)
     }
 
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_APP_NET), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SET_APP_NET),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;
@@ -1093,7 +1094,7 @@ int32_t NetConnServiceProxy::GetNetInterfaceConfiguration(const std::string &ifa
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     MessageParcel reply;
-    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_INTERFACE_CONFIGURATION), 
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_INTERFACE_CONFIGURATION),
                                       data, reply);
     if (error != NETMANAGER_SUCCESS) {
         return error;

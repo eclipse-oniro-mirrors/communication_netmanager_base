@@ -213,7 +213,7 @@ void GetCellularRxBytesFuzzTest(const uint8_t *data, size_t size)
 }
 
 void GetCellularTxBytesFuzzTest(const uint8_t *data, size_t size)
-{   
+{
     MessageParcel dataParcel;
     CheckMessageParcel(dataParcel, data, size);
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_TXBYTES), dataParcel);

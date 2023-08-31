@@ -879,8 +879,8 @@ uint32_t RouteManager::GetRouteTableFromType(TableType tableType, const std::str
 }
 
 int32_t RouteManager::SetRouteInfo(TableType tableType, const std::string &interfaceName,
-                                  const std::string &destinationName, const std::string &nextHop,
-                                  RouteInfo &routeInfo)
+                                   const std::string &destinationName, const std::string &nextHop,
+                                   RouteInfo &routeInfo)
 {
     uint32_t table = GetRouteTableFromType(tableType, interfaceName);
     if (table == RT_TABLE_UNSPEC) {
