@@ -93,17 +93,13 @@ int32_t RouteManager::AddRoute(TableType tableType, const std::string &interface
 {
     NETNATIVE_LOGI("Entry RouteManager::AddRoute,interfaceName:%{public}s,destination:%{public}s, nextHop:%{public}s",
                    interfaceName.c_str(), ToAnonymousIp(destinationName).c_str(), ToAnonymousIp(nextHop).c_str());
-    uint32_t table = GetRouteTableFromType(tableType, interfaceName);
-    if (table == RT_TABLE_UNSPEC) {
-        return -1;
-    }
 
     // This is a user-defined structure used to integrate the information required for setting up routes.
     RouteInfo routeInfo;
-    routeInfo.routeTable = table;
-    routeInfo.routeInterfaceName = interfaceName;
-    routeInfo.routeDestinationName = destinationName;
-    routeInfo.routeNextHop = nextHop;
+    if (SetRouteInfo(tableType, interfaceName, destinationName, nextHop, routeInfo) != 0) {
+        return -1;
+    }
+
     return UpdateRouteRule(RTM_NEWROUTE, NLM_F_CREATE | NLM_F_EXCL, routeInfo);
 }
 
@@ -112,16 +108,11 @@ int32_t RouteManager::RemoveRoute(TableType tableType, const std::string &interf
 {
     NETNATIVE_LOGI("Entry RouteManager::RemoveRoute,interfaceName:%{public}s,destination:%{public}s,nextHop:%{public}s",
                    interfaceName.c_str(), ToAnonymousIp(destinationName).c_str(), ToAnonymousIp(nextHop).c_str());
-    uint32_t table = GetRouteTableFromType(tableType, interfaceName);
-    if (table == RT_TABLE_UNSPEC) {
-        return -1;
-    }
 
     RouteInfo routeInfo;
-    routeInfo.routeTable = table;
-    routeInfo.routeInterfaceName = interfaceName;
-    routeInfo.routeDestinationName = destinationName;
-    routeInfo.routeNextHop = nextHop;
+    if (SetRouteInfo(tableType, interfaceName, destinationName, nextHop, routeInfo) != 0) {
+        return -1;
+    }
     return UpdateRouteRule(RTM_DELROUTE, NLM_F_EXCL, routeInfo);
 }
 
@@ -130,16 +121,11 @@ int32_t RouteManager::UpdateRoute(TableType tableType, const std::string &interf
 {
     NETNATIVE_LOGI("Entry RouteManager::UpdateRoute,interfaceName:%{public}s,destination:%{public}s,nextHop:%{public}s",
                    interfaceName.c_str(), ToAnonymousIp(destinationName).c_str(), ToAnonymousIp(nextHop).c_str());
-    uint32_t table = GetRouteTableFromType(tableType, interfaceName);
-    if (table == RT_TABLE_UNSPEC) {
-        return -1;
-    }
 
     RouteInfo routeInfo;
-    routeInfo.routeTable = table;
-    routeInfo.routeInterfaceName = interfaceName;
-    routeInfo.routeDestinationName = destinationName;
-    routeInfo.routeNextHop = nextHop;
+    if (SetRouteInfo(tableType, interfaceName, destinationName, nextHop, routeInfo) != 0) {
+        return -1;
+    }
     return UpdateRouteRule(RTM_NEWROUTE, NLM_F_REPLACE, routeInfo);
 }
 
@@ -890,6 +876,22 @@ uint32_t RouteManager::GetRouteTableFromType(TableType tableType, const std::str
             NETNATIVE_LOGE("tableType [%{tableType}d] is error", tableType);
             return RT_TABLE_UNSPEC;
     }
+}
+
+int32_t RouteManager::SetRouteInfo(TableType tableType, const std::string &interfaceName,
+                                  const std::string &destinationName, const std::string &nextHop,
+                                  RouteInfo &routeInfo)
+{
+    uint32_t table = GetRouteTableFromType(tableType, interfaceName);
+    if (table == RT_TABLE_UNSPEC) {
+        return -1;
+    }
+
+    routeInfo.routeTable = table;
+    routeInfo.routeInterfaceName = interfaceName;
+    routeInfo.routeDestinationName = destinationName;
+    routeInfo.routeNextHop = nextHop;
+    return 0;
 }
 } // namespace nmd
 } // namespace OHOS

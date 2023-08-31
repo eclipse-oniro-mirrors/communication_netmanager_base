@@ -277,6 +277,9 @@ private:
                                      uint32_t index);
     static uint32_t FindTableByInterfacename(const std::string &interfaceName);
     static uint32_t GetRouteTableFromType(TableType tableType, const std::string &interfaceName);
+    static int32_t SetRouteInfo(TableType tableType, const std::string &interfaceName,
+                                const std::string &destinationName, const std::string &nextHop,
+                                RouteInfo &routeInfo);
 };
 } // namespace nmd
 } // namespace OHOS

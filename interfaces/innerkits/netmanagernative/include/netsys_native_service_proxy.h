@@ -106,6 +106,7 @@ public:
     int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override;
 
 private:
+    int32_t DealBandwidth(uint32_t uid, uint32_t code);
     static inline BrokerDelegator<NetsysNativeServiceProxy> delegator_;
 };
 } // namespace NetsysNative
