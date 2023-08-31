@@ -443,7 +443,8 @@ void GetAddrInfoFuzzTest(const uint8_t *data, size_t size)
 
     dataParcel.WriteString(hostName);
     dataParcel.WriteString(serverName);
-    dataParcel.WriteRawData(&hints, sizeof(AddrInfo)) dataParcel.WriteUint16(netId);
+    dataParcel.WriteRawData(&hints, sizeof(AddrInfo));
+    dataParcel.WriteUint16(netId);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_ADDR_INFO), dataParcel);
 }
 
