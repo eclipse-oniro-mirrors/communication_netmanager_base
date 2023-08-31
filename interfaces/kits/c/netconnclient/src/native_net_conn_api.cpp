@@ -110,8 +110,7 @@ int32_t OH_NetConn_GetNetCapabilities(OH_NetConn_NetHandle *netHandle,
     }
     NetAllCapabilities netAllCapsObj = NetAllCapabilities();
     int32_t ret = NetConnClient::GetInstance().GetNetCapabilities(netHandleObj, netAllCapsObj);
-    if (int32_t retConv =
-            Conv2NetAllCapabilities(netAllCapsObj, netAllCapabilities) != NETMANAGER_SUCCESS) {
+    if (int32_t retConv = Conv2NetAllCapabilities(netAllCapsObj, netAllCapabilities) != NETMANAGER_SUCCESS) {
         return retConv;
     }
     return ret;

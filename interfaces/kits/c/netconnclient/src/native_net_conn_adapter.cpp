@@ -16,7 +16,7 @@
 #include "native_net_conn_adapter.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
-#include<map>
+#include <map>
 
 namespace OHOS::NetManagerStandard {
 
@@ -25,45 +25,40 @@ using IpTypeMap = std::map<uint8_t, OH_NetConn_IpType>;
 using NetCapMap = std::map<NetCap, OH_NetConn_NetCap>;
 using RtnTypeMap = std::map<int32_t, OH_NetConn_RtnType>;
 
-static BearTypeMap bearTypeMap = {
-    {BEARER_CELLULAR, OH_NETCONN_BEARER_CELLULAR},
-    {BEARER_WIFI, OH_NETCONN_BEARER_WIFI},
-    {BEARER_BLUETOOTH, OH_NETCONN_BEARER_BLUETOOTH},
-    {BEARER_ETHERNET, OH_NETCONN_BEARER_ETHERNET},
-    {BEARER_VPN, OH_NETCONN_BEARER_VPN},
-    {BEARER_WIFI_AWARE, OH_NETCONN_BEARER_WIFI_AWARE},
-    {BEARER_DEFAULT, OH_NETCONN_BEARER_DEFAULT}
-};
+static BearTypeMap bearTypeMap = {{BEARER_CELLULAR, OH_NETCONN_BEARER_CELLULAR},
+                                  {BEARER_WIFI, OH_NETCONN_BEARER_WIFI},
+                                  {BEARER_BLUETOOTH, OH_NETCONN_BEARER_BLUETOOTH},
+                                  {BEARER_ETHERNET, OH_NETCONN_BEARER_ETHERNET},
+                                  {BEARER_VPN, OH_NETCONN_BEARER_VPN},
+                                  {BEARER_WIFI_AWARE, OH_NETCONN_BEARER_WIFI_AWARE},
+                                  {BEARER_DEFAULT, OH_NETCONN_BEARER_DEFAULT}};
 
-static IpTypeMap ipTypeMap = {
-    {INetAddr::IPV4, OH_NETCONN_IPV4},
-    {INetAddr::IPV6, OH_NETCONN_IPV6},
-    {INetAddr::UNKNOWN, OH_NETCONN_UNKNOWN}
-};
+static IpTypeMap ipTypeMap = {{INetAddr::IPV4, OH_NETCONN_IPV4},
+                              {INetAddr::IPV6, OH_NETCONN_IPV6},
+                              {INetAddr::UNKNOWN, OH_NETCONN_UNKNOWN}};
 
-static NetCapMap netCapMap = {
-    {NET_CAPABILITY_MMS, OH_NETCONN_NET_CAPABILITY_MMS},
-    {NET_CAPABILITY_NOT_METERED, OH_NETCONN_NET_CAPABILITY_NOT_METERED},
-    {NET_CAPABILITY_INTERNET, OH_NETCONN_NET_CAPABILITY_INTERNET},
-    {NET_CAPABILITY_NOT_VPN, OH_NETCONN_NET_CAPABILITY_NOT_VPN},
-    {NET_CAPABILITY_VALIDATED, OH_NETCONN_NET_CAPABILITY_VALIDATED},
-    {NET_CAPABILITY_CAPTIVE_PORTAL, OH_NETCONN_NET_CAPABILITY_CAPTIVE_PORTAL},
-    {NET_CAPABILITY_INTERNAL_DEFAULT, OH_NETCONN_NET_CAPABILITY_INTERNAL_DEFAULT}
-};
+static NetCapMap netCapMap = {{NET_CAPABILITY_MMS, OH_NETCONN_NET_CAPABILITY_MMS},
+                              {NET_CAPABILITY_NOT_METERED, OH_NETCONN_NET_CAPABILITY_NOT_METERED},
+                              {NET_CAPABILITY_INTERNET, OH_NETCONN_NET_CAPABILITY_INTERNET},
+                              {NET_CAPABILITY_NOT_VPN, OH_NETCONN_NET_CAPABILITY_NOT_VPN},
+                              {NET_CAPABILITY_VALIDATED, OH_NETCONN_NET_CAPABILITY_VALIDATED},
+                              {NET_CAPABILITY_CAPTIVE_PORTAL, OH_NETCONN_NET_CAPABILITY_CAPTIVE_PORTAL},
+                              {NET_CAPABILITY_INTERNAL_DEFAULT, OH_NETCONN_NET_CAPABILITY_INTERNAL_DEFAULT}};
 
-static RtnTypeMap rtnTypeMap= {
-    {RTN_UNICAST, OH_NETCONN_RTN_UNICAST},
-    {RTN_UNREACHABLE, OH_NETCONN_RTN_UNREACHABLE},
-    {RTN_THROW, OH_NETCONN_RTN_THROW}
-};
+static RtnTypeMap rtnTypeMap = {{RTN_UNICAST, OH_NETCONN_RTN_UNICAST},
+                                {RTN_UNREACHABLE, OH_NETCONN_RTN_UNREACHABLE},
+                                {RTN_THROW, OH_NETCONN_RTN_THROW}};
 
-static int32_t Conv2Ch(std::string s, char* ch)
+static int32_t Conv2Ch(std::string s, const char *ch)
 {
     if (s.length() > MAX_STR_LEN - 1) {
         NETMGR_LOG_E("string out of memory");
         return NETMANAGER_ERR_INTERNAL;
     }
-    strcpy(ch, s.c_str());
+    if ((int ret = strcpy_s(ch, s.length() + 1, s.c_str())) != 0) {
+        NETMGR_LOG_E("string copy failed");
+        return NETMANAGER_ERR_INTERNAL;
+    }
     return NETMANAGER_SUCCESS;
 }
 
@@ -74,7 +69,7 @@ static int32_t Conv2INetAddr(INetAddr &netAddrObj, OH_NetConn_INetAddr *netAddr)
     netAddr->port = netAddrObj.port_;
 
     IpTypeMap::iterator iter = ipTypeMap.find(netAddrObj.type_);
-    if(iter == ipTypeMap.end()){
+    if (iter == ipTypeMap.end()) {
         NETMGR_LOG_E("unknown ipTypeMap key");
         return NETMANAGER_ERR_INTERNAL;
     }
@@ -98,7 +93,7 @@ static int32_t Conv2Route(Route &routeObj, OH_NetConn_Route *route)
     route->isDefaultRoute = routeObj.isDefaultRoute_;
 
     RtnTypeMap::iterator iter = rtnTypeMap.find(routeObj.rtnType_);
-    if(iter == rtnTypeMap.end()){
+    if (iter == rtnTypeMap.end()) {
         NETMGR_LOG_E("unknown rtnTypeMap key");
         return NETMANAGER_ERR_INTERNAL;
     }
@@ -239,7 +234,7 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, OH_NetConn_Ne
         }
 
         NetCapMap::iterator iterMap = netCapMap.find(*iter);
-        if(iterMap == netCapMap.end()){
+        if (iterMap == netCapMap.end()) {
             NETMGR_LOG_E("unknown netCapMap key");
             return NETMANAGER_ERR_INTERNAL;
         }
@@ -254,9 +249,9 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, OH_NetConn_Ne
             NETMGR_LOG_E("bearerTypes out of memory");
             return NETMANAGER_ERR_INTERNAL;
         }
-        
+
         BearTypeMap::iterator iterMap = bearTypeMap.find(*iter);
-        if(iterMap == bearTypeMap.end()){
+        if (iterMap == bearTypeMap.end()) {
             NETMGR_LOG_E("unknown bearTypeMap key");
             return NETMANAGER_ERR_INTERNAL;
         }
