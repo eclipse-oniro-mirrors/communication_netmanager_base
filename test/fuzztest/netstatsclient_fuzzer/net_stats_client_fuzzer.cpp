@@ -118,7 +118,6 @@ void CheckMessageParcel(MessageParcel &dataParcel, const uint8_t *data, size_t s
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
 
-    MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
         return;
     }
