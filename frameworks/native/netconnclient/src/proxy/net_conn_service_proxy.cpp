@@ -177,7 +177,7 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<INetConnCallback
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
     MessageParcel replyParcel;
-    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK), 
+    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK),
                                         dataParcel, replyParcel);
     if (retCode != NETMANAGER_SUCCESS) {
         return retCode;
@@ -204,8 +204,9 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<NetSpecifier> &n
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
     MessageParcel replyParcel;
-    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER),
-                                        dataParcel, replyParcel);
+    int32_t retCode = RemoteSendRequest(
+        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER),
+        dataParcel, replyParcel);
     if (retCode != NETMANAGER_SUCCESS) {
         return retCode;
     }
@@ -228,7 +229,7 @@ int32_t NetConnServiceProxy::UnregisterNetConnCallback(const sptr<INetConnCallba
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
     MessageParcel replyParcel;
-    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_CONN_CALLBACK), 
+    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_CONN_CALLBACK),
                                         dataParcel, replyParcel);
     if (retCode != NETMANAGER_SUCCESS) {
         return retCode;
@@ -377,7 +378,8 @@ int32_t NetConnServiceProxy::UnRegisterNetDetectionCallback(int32_t netId, const
 
     MessageParcel replyParcel;
     int32_t error = RemoteSendRequest(
-        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK), dataParcel, replyParcel);
+        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_DETECTION_RET_CALLBACK),
+        dataParcel, replyParcel);
     if (error != NETMANAGER_SUCCESS) {
         return error;
     }
@@ -501,7 +503,7 @@ int32_t NetConnServiceProxy::GetDefaultNet(int32_t &netId)
     }
 
     MessageParcel replyParcel;
-    int32_t errCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK), 
+    int32_t errCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK),
                                         dataParcel, replyParcel);
     if (errCode != NETMANAGER_SUCCESS) {
         return errCode;
@@ -1076,8 +1078,9 @@ int32_t NetConnServiceProxy::RegisterNetInterfaceCallback(const sptr<INetInterfa
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
     MessageParcel replyParcel;
-    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_INTERFACE_CALLBACK), 
-                                        dataParcel, replyParcel);
+    int32_t retCode = RemoteSendRequest(
+        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_INTERFACE_CALLBACK),
+        dataParcel, replyParcel);
     if (retCode != NETMANAGER_SUCCESS) {
         return retCode;
     }
