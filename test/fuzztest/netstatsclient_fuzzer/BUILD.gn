@@ -39,7 +39,7 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  
+
   sources = [
     "mock_net_permission.cpp",
     "net_stats_client_fuzzer.cpp",
