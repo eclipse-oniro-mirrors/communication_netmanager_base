@@ -39,11 +39,7 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
+  
   sources = [
     "mock_net_permission.cpp",
     "net_stats_client_fuzzer.cpp",
