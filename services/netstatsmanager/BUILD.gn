@@ -113,17 +113,11 @@ ohos_shared_library("net_stats_manager") {
 
 ohos_static_library("net_stats_manager_static") {
   testonly = true
-  cflags = [
-    "-flto",
-    "-fsanitize=cfi",
-    "-fsanitize-cfi-cross-dso",
-    "-fvisibility=hidden",
-  ]
-  ldflags = [
-    "-flto",
-    "-fsanitize=cfi",
-    "-fsanitize-cfi-cross-dso",
-  ]
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [
     "src/common/net_stats_service_common.cpp",
     "src/net_stats_cached.cpp",
