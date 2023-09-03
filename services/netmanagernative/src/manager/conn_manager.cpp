@@ -185,6 +185,8 @@ int32_t ConnManager::GetDefaultNetwork() const
 
 int32_t ConnManager::GetNetworkForInterface(std::string &interfaceName)
 {
+    NETNATIVE_LOG_D("Entry ConnManager::GetNetworkForInterface interfaceName:%{public}s", interfaceName.c_str());
+    std::map<int32_t, std::shared_ptr<NetsysNetwork>>::iterator it;
     int32_t InterfaceId = INTERFACE_UNSET;
     networks_.Iterate([&InterfaceId, &interfaceName](int32_t id, std::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
         if (InterfaceId != INTERFACE_UNSET) {
