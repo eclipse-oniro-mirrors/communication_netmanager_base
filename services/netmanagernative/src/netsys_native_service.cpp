@@ -124,6 +124,7 @@ bool NetsysNativeService::Init()
     (void)signal(SIGABRT, ExitHandler);
 
     if (netsysService_ == nullptr) {
+
         netsysService_ = std::make_unique<nmd::NetManagerNative>();
         if (netsysService_ == nullptr) {
             NETNATIVE_LOGE("netsysService_ is nullptr!");
