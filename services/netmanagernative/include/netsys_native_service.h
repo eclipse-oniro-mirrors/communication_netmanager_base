@@ -140,6 +140,8 @@ private:
 
     ServiceRunningState state_{ServiceRunningState::STATE_STOPPED};
 
+    static sptr<NetsysNativeService> instance_;
+
     std::unique_ptr<OHOS::nmd::NetManagerNative> netsysService_ = nullptr;
     std::unique_ptr<OHOS::nmd::NetlinkManager> manager_ = nullptr;
     std::unique_ptr<OHOS::nmd::DhcpController> dhcpController_ = nullptr;
