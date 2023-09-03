@@ -117,6 +117,7 @@ private:
 
 private:
     std::vector<int32_t> uids_;
+    std::mutex runLock_;
 };
 } // namespace NetsysNative
 } // namespace OHOS
