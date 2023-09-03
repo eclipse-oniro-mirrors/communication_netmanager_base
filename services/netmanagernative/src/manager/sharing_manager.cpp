@@ -141,20 +141,14 @@ void SharingManager::InitChildChains()
 int32_t SharingManager::IpEnableForwarding(const std::string &requestor)
 {
     NETNATIVE_LOG_D("IpEnableForwarding requestor: %{public}s", requestor.c_str());
-    {
-        std::lock_guard<std::mutex> guard(initedMutex_);
-        forwardingRequests_.insert(requestor);
-    }
+    forwardingRequests_.insert(requestor);
     return SetIpFwdEnable();
 }
 
 int32_t SharingManager::IpDisableForwarding(const std::string &requestor)
 {
     NETNATIVE_LOG_D("IpDisableForwarding requestor: %{public}s", requestor.c_str());
-    {
-        std::lock_guard<std::mutex> guard(initedMutex_);
-        forwardingRequests_.erase(requestor);
-    }
+    forwardingRequests_.erase(requestor);
     return SetIpFwdEnable();
 }
 
@@ -194,7 +188,8 @@ int32_t SharingManager::DisableNat(const std::string &downstreamIface, const std
 {
     CheckInited();
     if (downstreamIface == upstreamIface) {
-        NETNATIVE_LOGE("Duplicate interface specified: %{public}s %s", downstreamIface.c_str(), upstreamIface.c_str());
+        NETNATIVE_LOGE("Duplicate interface specified: %{public}s %s", downstreamIface.c_str(),
+                       upstreamIface.c_str());
         return -1;
     }
     if (!CommonUtils::CheckIfaceName(upstreamIface)) {
@@ -402,7 +397,8 @@ int32_t SharingManager::SetForwardRules(bool set, const std::string &cmds)
 {
     const std::string op = set ? "-A" : "-D";
 
-    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4, "-t filter " + op + cmds) != NetManagerStandard::NETMANAGER_SUCCESS) {
+    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4, "-t filter " + op + cmds) !=
+        NetManagerStandard::NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("IptablesWrapper run command failed");
         return -1;
     }
