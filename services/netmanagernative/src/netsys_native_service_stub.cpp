@@ -217,12 +217,7 @@ int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &d
         NETNATIVE_LOGE("Check remote descriptor failed");
         return IPC_STUB_INVALID_DATA_ERR;
     }
-
-    {
-        std::lock_guard<std::mutex> lock(runLock_) ;
-        return (this->*(interfaceIndex->second))(data, reply);
-         
-    }
+    return (this->*(interfaceIndex->second))(data, reply);
 }
 
 int32_t NetsysNativeServiceStub::CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply)
@@ -1146,7 +1141,7 @@ int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, Message
 int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply)
 {
     if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
-            NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
         NETNATIVE_LOGE("CmdSetIptablesCommandForRes CheckNetSysInternalPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
