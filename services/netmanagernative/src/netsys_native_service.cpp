@@ -14,18 +14,18 @@
  */
 
 #include <csignal>
-#include <regex>
 #include <sys/types.h>
+#include <regex>
 #include <thread>
 #include <unistd.h>
 
-#include "bpf_loader.h"
 #include "iservice_registry.h"
+#include "system_ability_definition.h"
+#include "bpf_loader.h"
 #include "net_manager_constants.h"
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service.h"
-#include "system_ability_definition.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
@@ -123,14 +123,13 @@ bool NetsysNativeService::Init()
     (void)signal(SIGTERM, ExitHandler);
     (void)signal(SIGABRT, ExitHandler);
 
+    netsysService_ = std::make_unique<nmd::NetManagerNative>();
     if (netsysService_ == nullptr) {
-        netsysService_ = std::make_unique<nmd::NetManagerNative>();
-        if (netsysService_ == nullptr) {
-            NETNATIVE_LOGE("netsysService_ is nullptr!");
-            return false;
-        }
-        netsysService_->Init();
+        NETNATIVE_LOGE("netsysService_ is nullptr!");
+        return false;
     }
+    netsysService_->Init();
+
     manager_ = std::make_unique<OHOS::nmd::NetlinkManager>();
     if (manager_ == nullptr) {
         NETNATIVE_LOGE("manager_ is nullptr!");
