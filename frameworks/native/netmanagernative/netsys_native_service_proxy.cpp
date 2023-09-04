@@ -1688,9 +1688,7 @@ int32_t NetsysNativeServiceProxy::DealBandwidth(uint32_t uid, uint32_t code)
         return ERR_FLATTEN_OBJECT;
     }
 
-    int32_t ret = reply.ReadInt32();
-
-    return ret;
+    return reply.ReadInt32();
 }
 } // namespace NetsysNative
 } // namespace OHOS

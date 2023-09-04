@@ -109,7 +109,7 @@ bool WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 
-void CheckMessageParcel(MessageParcel &dataParcel, const uint8_t *data, size_t size)
+void CheckParamVaild(MessageParcel &dataParcel, const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
         return;
@@ -168,7 +168,7 @@ void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
 void GetIfaceRxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
-    CheckMessageParcel(dataParcel, data, size);
+    CheckParamVaild(dataParcel, data, size);
     std::string interfaceName = GetStringFromData(STR_LEN);
     dataParcel.WriteString(interfaceName);
 
@@ -178,7 +178,7 @@ void GetIfaceRxBytesFuzzTest(const uint8_t *data, size_t size)
 void GetIfaceTxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
-    CheckMessageParcel(dataParcel, data, size);
+    CheckParamVaild(dataParcel, data, size);
     std::string interfaceName = GetStringFromData(STR_LEN);
     dataParcel.WriteString(interfaceName);
 
@@ -188,7 +188,7 @@ void GetIfaceTxBytesFuzzTest(const uint8_t *data, size_t size)
 void GetUidRxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
-    CheckMessageParcel(dataParcel, data, size);
+    CheckParamVaild(dataParcel, data, size);
     uint32_t uid = GetData<uint32_t>();
     dataParcel.WriteUint32(uid);
 
@@ -198,7 +198,7 @@ void GetUidRxBytesFuzzTest(const uint8_t *data, size_t size)
 void GetUidTxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
-    CheckMessageParcel(dataParcel, data, size);
+    CheckParamVaild(dataParcel, data, size);
     uint32_t uid = GetData<uint32_t>();
     dataParcel.WriteUint32(uid);
 
@@ -208,35 +208,35 @@ void GetUidTxBytesFuzzTest(const uint8_t *data, size_t size)
 void GetCellularRxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
-    CheckMessageParcel(dataParcel, data, size);
+    CheckParamVaild(dataParcel, data, size);
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_RXBYTES), dataParcel);
 }
 
 void GetCellularTxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
-    CheckMessageParcel(dataParcel, data, size);
+    CheckParamVaild(dataParcel, data, size);
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_TXBYTES), dataParcel);
 }
 
 void GetAllRxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
-    CheckMessageParcel(dataParcel, data, size);
+    CheckParamVaild(dataParcel, data, size);
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_RXBYTES), dataParcel);
 }
 
 void GetAllTxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
-    CheckMessageParcel(dataParcel, data, size);
+    CheckParamVaild(dataParcel, data, size);
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_TXBYTES), dataParcel);
 }
 
 void GetIfaceStatsDetailFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
-    CheckMessageParcel(dataParcel, data, size);
+    CheckParamVaild(dataParcel, data, size);
     dataParcel.WriteString(GetStringFromData(STR_LEN));
     dataParcel.WriteUint64(GetData<uint64_t>());
     dataParcel.WriteUint64(GetData<uint64_t>());
@@ -247,7 +247,7 @@ void GetIfaceStatsDetailFuzzTest(const uint8_t *data, size_t size)
 void GetUidStatsDetailFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
-    CheckMessageParcel(dataParcel, data, size);
+    CheckParamVaild(dataParcel, data, size);
     dataParcel.WriteString(GetStringFromData(STR_LEN));
     dataParcel.WriteUint64(GetData<uint32_t>());
     dataParcel.WriteUint64(GetData<uint64_t>());
@@ -259,7 +259,7 @@ void GetUidStatsDetailFuzzTest(const uint8_t *data, size_t size)
 void UpdateIfacesStatsFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
-    CheckMessageParcel(dataParcel, data, size);
+    CheckParamVaild(dataParcel, data, size);
     dataParcel.WriteString(GetStringFromData(STR_LEN));
     dataParcel.WriteUint64(GetData<uint64_t>());
     dataParcel.WriteUint64(GetData<uint64_t>());
@@ -279,14 +279,14 @@ void UpdateIfacesStatsFuzzTest(const uint8_t *data, size_t size)
 void UpdateStatsDataFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
-    CheckMessageParcel(dataParcel, data, size);
+    CheckParamVaild(dataParcel, data, size);
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_UPDATE_STATS_DATA), dataParcel);
 }
 
 void ResetFactoryFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
-    CheckMessageParcel(dataParcel, data, size);
+    CheckParamVaild(dataParcel, data, size);
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_RESET_FACTORY), dataParcel);
 }
 } // namespace NetManagerStandard

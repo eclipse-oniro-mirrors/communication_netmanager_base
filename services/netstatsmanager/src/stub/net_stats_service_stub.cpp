@@ -83,7 +83,7 @@ int32_t NetStatsServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
 
 int32_t NetStatsServiceStub::OnRegisterNetStatsCallback(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t ret = CheckMessageParcel(reply);
+    int32_t ret = CheckNetManagerAvailable(reply);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
@@ -105,7 +105,7 @@ int32_t NetStatsServiceStub::OnRegisterNetStatsCallback(MessageParcel &data, Mes
 
 int32_t NetStatsServiceStub::OnUnregisterNetStatsCallback(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t ret = CheckMessageParcel(reply);
+    int32_t ret = CheckNetManagerAvailable(reply);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
@@ -287,7 +287,7 @@ int32_t NetStatsServiceStub::OnGetUidTxBytes(MessageParcel &data, MessageParcel 
 
 int32_t NetStatsServiceStub::OnGetIfaceStatsDetail(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t res = CheckMessageParcel(reply);
+    int32_t res = CheckNetManagerAvailable(reply);
     if (res != NETMANAGER_SUCCESS) {
         return res;
     }
@@ -312,7 +312,7 @@ int32_t NetStatsServiceStub::OnGetIfaceStatsDetail(MessageParcel &data, MessageP
 
 int32_t NetStatsServiceStub::OnGetUidStatsDetail(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t res = CheckMessageParcel(reply);
+    int32_t res = CheckNetManagerAvailable(reply);
     if (res != NETMANAGER_SUCCESS) {
         return res;
     }
@@ -369,7 +369,7 @@ int32_t NetStatsServiceStub::OnUpdateStatsData(MessageParcel &data, MessageParce
 
 int32_t NetStatsServiceStub::OnResetFactory(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t res = CheckMessageParcel(reply);
+    int32_t res = CheckNetManagerAvailable(reply);
     if (res != NETMANAGER_SUCCESS) {
         return res;
     }
@@ -396,7 +396,7 @@ int32_t NetStatsServiceStub::OnGetAllStatsInfo(MessageParcel &data, MessageParce
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetStatsServiceStub::CheckMessageParcel(MessageParcel &reply)
+int32_t NetStatsServiceStub::CheckNetManagerAvailable(MessageParcel &reply)
 {
     if (!NetManagerPermission::IsSystemCaller()) {
         NETMGR_LOG_E("Permission check failed.");

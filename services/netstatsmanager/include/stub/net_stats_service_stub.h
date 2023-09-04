@@ -50,7 +50,7 @@ private:
     int32_t OnResetFactory(MessageParcel &data, MessageParcel &reply);
 
 private:
-    int32_t CheckMessageParcel(MessageParcel &reply);
+    int32_t CheckNetManagerAvailable(MessageParcel &reply);
     std::map<uint32_t, NetStatsServiceFunc> memberFuncMap_;
 };
 } // namespace NetManagerStandard
