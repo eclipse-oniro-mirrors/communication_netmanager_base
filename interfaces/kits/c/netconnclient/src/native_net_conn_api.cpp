@@ -43,7 +43,8 @@ int32_t OH_NetConn_GetDefaultNet(OH_NetConn_NetHandle *netHandle)
 
     NetHandle netHandleObj = NetHandle();
     int32_t ret = NetConnClient::GetInstance().GetDefaultNet(netHandleObj);
-    if (int32_t retConv = Conv2NetHandle(netHandleObj, netHandle) != NETMANAGER_SUCCESS) {
+    int32_t retConv = Conv2NetHandle(netHandleObj, netHandle);
+    if (retConv != NETMANAGER_SUCCESS) {
         return retConv;
     }
     return ret;
@@ -71,7 +72,8 @@ int32_t OH_NetConn_GetAllNets(OH_NetConn_NetHandleList *netHandleList)
 
     std::list<OHOS::sptr<NetHandle>> netHandleObjList;
     int32_t ret = NetConnClient::GetInstance().GetAllNets(netHandleObjList);
-    if (int32_t retConv = Conv2NetHandleList(netHandleObjList, netHandleList) != NETMANAGER_SUCCESS) {
+    int32_t retConv = Conv2NetHandleList(netHandleObjList, netHandleList);
+    if (retConv != NETMANAGER_SUCCESS) {
         return retConv;
     }
     return ret;
@@ -85,12 +87,14 @@ int32_t OH_NetConn_GetConnectionProperties(OH_NetConn_NetHandle *netHandle, OH_N
     }
 
     NetHandle netHandleObj = NetHandle();
-    if (int32_t retConv = Conv2NetHandleObj(netHandle, netHandleObj) != NETMANAGER_SUCCESS) {
+    int32_t retConv = Conv2NetHandleObj(netHandle, netHandleObj);
+    if (retConv != NETMANAGER_SUCCESS) {
         return retConv;
     }
     NetLinkInfo infoObj = NetLinkInfo();
     int32_t ret = NetConnClient::GetInstance().GetConnectionProperties(netHandleObj, infoObj);
-    if (int32_t retConv = Conv2NetLinkInfo(infoObj, info) != NETMANAGER_SUCCESS) {
+    retConv = Conv2NetLinkInfo(infoObj, info);
+    if (retConv != NETMANAGER_SUCCESS) {
         return retConv;
     }
     return ret;
@@ -105,13 +109,14 @@ int32_t OH_NetConn_GetNetCapabilities(OH_NetConn_NetHandle *netHandle,
     }
 
     NetHandle netHandleObj = NetHandle();
-    if (int32_t retConv = Conv2NetHandleObj(netHandle, netHandleObj) != NETMANAGER_SUCCESS) {
+    int32_t retConv = Conv2NetHandleObj(netHandle, netHandleObj);
+    if (retConv != NETMANAGER_SUCCESS) {
         return retConv;
     }
     NetAllCapabilities netAllCapsObj = NetAllCapabilities();
     int32_t ret = NetConnClient::GetInstance().GetNetCapabilities(netHandleObj, netAllCapsObj);
-    if (int32_t retConv =
-            Conv2NetAllCapabilities(netAllCapsObj, netAllCapabilities) != NETMANAGER_SUCCESS) {
+    retConv = Conv2NetAllCapabilities(netAllCapsObj, netAllCapabilities);
+    if (retConv != NETMANAGER_SUCCESS) {
         return retConv;
     }
     return ret;
@@ -126,7 +131,8 @@ int32_t OH_NetConn_GetDefaultHttpProxy(OH_NetConn_HttpProxy *httpProxy)
 
     HttpProxy httpProxyObj = HttpProxy();
     int32_t ret = NetConnClient::GetInstance().GetDefaultHttpProxy(httpProxyObj);
-    if (int32_t retConv = Conv2HttpProxy(httpProxyObj, httpProxy) != NETMANAGER_SUCCESS) {
+    int32_t retConv = Conv2HttpProxy(httpProxyObj, httpProxy);
+    if (retConv != NETMANAGER_SUCCESS) {
         return retConv;
     }
     return ret;

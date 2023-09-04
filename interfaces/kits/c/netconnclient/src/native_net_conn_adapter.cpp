@@ -16,8 +16,8 @@
 #include "native_net_conn_adapter.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
-#include <map>
 #include "securec.h"
+#include <map>
 
 namespace OHOS::NetManagerStandard {
 
@@ -77,10 +77,12 @@ static int32_t Conv2INetAddr(INetAddr &netAddrObj, OH_NetConn_INetAddr *netAddr)
     netAddr->type = iter->second;
 
     int32_t ret;
-    if ((ret = Conv2Ch(netAddrObj.address_, netAddr->address)) != NETMANAGER_SUCCESS) {
+    ret = Conv2Ch(netAddrObj.address_, netAddr->address);
+    if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-    if ((ret = Conv2Ch(netAddrObj.hostName_, netAddr->hostName)) != NETMANAGER_SUCCESS) {
+    ret = Conv2Ch(netAddrObj.hostName_, netAddr->hostName);
+    if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
     return NETMANAGER_SUCCESS;
@@ -101,13 +103,16 @@ static int32_t Conv2Route(Route &routeObj, OH_NetConn_Route *route)
     route->rtnType = iter->second;
 
     int32_t ret;
-    if ((ret = Conv2Ch(routeObj.iface_, route->iface)) != NETMANAGER_SUCCESS) {
+    ret = Conv2Ch(routeObj.iface_, route->iface);
+    if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-    if ((ret = Conv2INetAddr(routeObj.destination_, &(route->destination))) != NETMANAGER_SUCCESS) {
+    ret = Conv2INetAddr(routeObj.destination_, &(route->destination));
+    if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-    if ((ret = Conv2INetAddr(routeObj.gateway_, &(route->gateway))) != NETMANAGER_SUCCESS) {
+    ret = Conv2INetAddr(routeObj.gateway_, &(route->gateway));
+    if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
     return NETMANAGER_SUCCESS;
@@ -127,14 +132,13 @@ int32_t Conv2NetHandleObj(OH_NetConn_NetHandle *netHandle, NetHandle &netHandleO
 
 int32_t Conv2NetHandleList(std::list<sptr<NetHandle>> &netHandleObjList, OH_NetConn_NetHandleList *netHandleList)
 {
-    std::list<sptr<NetHandle>>::iterator iter;
     int32_t i = 0;
-    for (iter = netHandleObjList.begin(); iter != netHandleObjList.end(); ++iter) {
+    for (auto netHandleObj : netHandleObjList) {
         if (i > OH_NETCONN_MAX_NET_SIZE - 1) {
             NETMGR_LOG_E("netHandleList out of memory")
             return NETMANAGER_ERR_INTERNAL;
         }
-        netHandleList->netHandleList[i++].netId = (**iter).GetNetId();
+        netHandleList->netHandleList[i++].netId = (*netHandleObj).GetNetId();
     }
     netHandleList->netHandleListSize = netHandleObjList.size();
     return NETMANAGER_SUCCESS;
@@ -143,78 +147,84 @@ int32_t Conv2NetHandleList(std::list<sptr<NetHandle>> &netHandleObjList, OH_NetC
 int32_t Conv2HttpProxy(HttpProxy &httpProxyObj, OH_NetConn_HttpProxy *httpProxy)
 {
     int32_t ret;
-    if ((ret = Conv2Ch(httpProxyObj.GetHost(), httpProxy->host)) != NETMANAGER_SUCCESS) {
+    ret = Conv2Ch(httpProxyObj.GetHost(), httpProxy->host);
+    if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
     httpProxy->port = httpProxyObj.GetPort();
 
-    std::list<std::string>::iterator iter;
     int32_t i = 0;
-    for (iter = httpProxyObj.GetExclusionList().begin(); iter != httpProxyObj.GetExclusionList().end(); ++iter) {
+    for (auto exclusion : httpProxyObj.GetExclusionList())
         if (i > OH_NETCONN_MAX_EXCLUSION_SIZE - 1) {
             NETMGR_LOG_E("exclusionList out of memory");
             return NETMANAGER_ERR_INTERNAL;
         }
-        if ((ret = Conv2Ch(*iter, httpProxy->exclusionList[i++])) != NETMANAGER_SUCCESS) {
+        ret = Conv2Ch(exclusion, httpProxy->exclusionList[i++]));
+        if (ret != NETMANAGER_SUCCESS) {
             return ret;
         }
-    }
-    httpProxy->exclusionListSize = httpProxyObj.GetExclusionList().size();
+}
+httpProxy->exclusionListSize = httpProxyObj.GetExclusionList().size();
 
-    return NETMANAGER_SUCCESS;
+return NETMANAGER_SUCCESS;
 }
 
 int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, OH_NetConn_NetLinkInfo *info)
 {
     int32_t ret;
-    if ((ret = Conv2Ch(infoObj.ifaceName_, info->ifaceName)) != NETMANAGER_SUCCESS) {
+    ret = Conv2Ch(infoObj.ifaceName_, info->ifaceName);
+    if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-    if ((ret = Conv2Ch(infoObj.domain_, info->domain)) != NETMANAGER_SUCCESS) {
+    ret = Conv2Ch(infoObj.domain_, info->domain);
+    if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-    if ((ret = Conv2Ch(infoObj.tcpBufferSizes_, info->tcpBufferSizes)) != NETMANAGER_SUCCESS) {
+    ret = Conv2Ch(infoObj.tcpBufferSizes_, info->tcpBufferSizes);
+    if ((ret != NETMANAGER_SUCCESS) {
         return ret;
     }
 
     int32_t i = 0;
-    for (std::list<INetAddr>::iterator iter = infoObj.netAddrList_.begin(); iter != infoObj.netAddrList_.end();
-         ++iter) {
+    for (auto netAddr : infoObj.netAddrList_) {
         if (i > OH_NETCONN_MAX_ADDR_SIZE - 1) {
             NETMGR_LOG_E("netAddrList out of memory");
             return NETMANAGER_ERR_INTERNAL;
         }
-        if ((ret = Conv2INetAddr(*iter, &(info->netAddrList[i++]))) != NETMANAGER_SUCCESS) {
+        ret = Conv2INetAddr(netAddr, &(info->netAddrList[i++]));
+        if (ret != NETMANAGER_SUCCESS) {
             return ret;
         }
     }
     info->netAddrListSize = infoObj.netAddrList_.size();
 
     i = 0;
-    for (std::list<INetAddr>::iterator iter = infoObj.dnsList_.begin(); iter != infoObj.dnsList_.end(); ++iter) {
+    for (auto dns : infoObj.dnsList_) {
         if (i > OH_NETCONN_MAX_ADDR_SIZE - 1) {
             NETMGR_LOG_E("dnsList out of memory");
             return NETMANAGER_ERR_INTERNAL;
         }
-        if ((ret = Conv2INetAddr(*iter, &(info->dnsList[i++]))) != NETMANAGER_SUCCESS) {
+        ret = Conv2INetAddr(dns, &(info->dnsList[i++]));
+        if (ret != NETMANAGER_SUCCESS) {
             return ret;
         }
     }
     info->dnsListSize = infoObj.dnsList_.size();
 
     i = 0;
-    for (std::list<Route>::iterator iter = infoObj.routeList_.begin(); iter != infoObj.routeList_.end(); ++iter) {
+    for (auto route : infoObj.routeList_) {
         if (i > OH_NETCONN_MAX_ROUTE_SIZE - 1) {
             NETMGR_LOG_E("routeList out of memory");
             return NETMANAGER_ERR_INTERNAL;
         }
-        if ((ret = Conv2Route(*iter, &(info->routeList[i++])) != NETMANAGER_SUCCESS)) {
+        ret = Conv2Route(route, &(info->routeList[i++]); if (ret != NETMANAGER_SUCCESS))
+        {
             return ret;
         }
     }
     info->routeListSize = infoObj.routeList_.size();
-
-    if ((ret = Conv2HttpProxy(infoObj.httpProxy_, &(info->httpProxy))) != NETMANAGER_SUCCESS) {
+    ret = Conv2HttpProxy(infoObj.httpProxy_, &(info->httpProxy))
+    if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
 
@@ -227,14 +237,13 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, OH_NetConn_Ne
     netAllCaps->linkDownBandwidthKbps = netAllCapsObj.linkDownBandwidthKbps_;
 
     int32_t i = 0;
-    for (std::set<NetCap>::iterator iter = netAllCapsObj.netCaps_.begin(); iter != netAllCapsObj.netCaps_.end();
-         ++iter) {
+    for (auto netCap : netAllCapsObj.netCaps_) {
         if (i > OH_NETCONN_MAX_CAP_SIZE - 1) {
             NETMGR_LOG_E("netCapsList out of memory");
             return NETMANAGER_ERR_INTERNAL;
         }
 
-        NetCapMap::iterator iterMap = netCapMap.find(*iter);
+        NetCapMap::iterator iterMap = netCapMap.find(netCap);
         if (iterMap == netCapMap.end()) {
             NETMGR_LOG_E("unknown netCapMap key");
             return NETMANAGER_ERR_INTERNAL;
@@ -244,14 +253,13 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, OH_NetConn_Ne
     netAllCaps->netCapsSize = netAllCapsObj.netCaps_.size();
 
     i = 0;
-    for (std::set<NetBearType>::iterator iter = netAllCapsObj.bearerTypes_.begin();
-         iter != netAllCapsObj.bearerTypes_.end(); ++iter) {
+    for (auto bearType : netAllCapsObj.bearerTypes) {
         if (i > OH_NETCONN_MAX_BEAR_TYPE_SIZE - 1) {
             NETMGR_LOG_E("bearerTypes out of memory");
             return NETMANAGER_ERR_INTERNAL;
         }
 
-        BearTypeMap::iterator iterMap = bearTypeMap.find(*iter);
+        BearTypeMap::iterator iterMap = bearTypeMap.find(bearType);
         if (iterMap == bearTypeMap.end()) {
             NETMGR_LOG_E("unknown bearTypeMap key");
             return NETMANAGER_ERR_INTERNAL;
