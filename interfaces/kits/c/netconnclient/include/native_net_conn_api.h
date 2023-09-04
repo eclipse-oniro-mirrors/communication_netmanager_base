@@ -20,7 +20,7 @@
  * @addtogroup NetConn
  * @{
  *
- * @brief Provides C interfaces to manage and use data networks.
+ * @brief 为网络管理的数据网络连接模块提供C接口
  *
  * @since 10
  * @version 1.0
@@ -29,7 +29,7 @@
 /**
  * @file native_net_conn_api.h
  *
- * @brief Defines C interfaces to manage and use data networks.
+ * @brief 为网络管理的数据网络连接模块定义C接口
  *
  * @syscap SystemCapability.Communication.NetManager.Core
  * @since 10
@@ -43,13 +43,14 @@ extern "C" {
 #endif
 
 /**
- * @brief Checks whether the default data network is activated.
+ * @brief 查询是否有默认激活的数据网络
  *
- * @param hasDefaultNet Whether the default data network is activated.
- * @return 0 - Success.
- * @return 201 - Permission denied.
- * @return 401 - Parameter error.
- * @return 2100003 - System internal error.
+ * @param hasDefaultNet 是否有默认网络
+ * @return 0 - 成功.
+ * @return 201 - 缺少权限.
+ * @return 401 - 参数错误.
+ * @return 2100002 - 无法连接到服务.
+ * @return 2100003 - 内部错误.
  * @permission ohos.permission.GET_NETWORK_INFO
  * @since 10
  * @version 1.0
@@ -57,13 +58,14 @@ extern "C" {
 int32_t OH_NetConn_HasDefaultNet(int32_t *hasDefaultNet);
 
 /**
- * @brief Obtains the data network that is activated by default.
+ * @brief 获取激活的默认的数据网络
  *
- * @param netHandle Stores the data network id.
- * @return 0 - Success.
- * @return 201 - Permission denied.
- * @return 401 - Parameter error.
- * @return 2100003 - System internal error.
+ * @param netHandle 存放网络ID
+ * @return 0 - 成功.
+ * @return 201 - 缺少权限.
+ * @return 401 - 参数错误.
+ * @return 2100002 - 无法连接到服务.
+ * @return 2100003 - 内部错误.
  * @permission ohos.permission.GET_NETWORK_INFO
  * @since 10
  * @version 1.0
@@ -71,13 +73,14 @@ int32_t OH_NetConn_HasDefaultNet(int32_t *hasDefaultNet);
 int32_t OH_NetConn_GetDefaultNet(OH_NetConn_NetHandle *netHandle);
 
 /**
- * @brief Checks whether data traffic usage on the current network is metered.
+ * @brief 查询默认数据网络是否记流量
  *
- * @param isMetered Whether the current network is metered.
- * @return 0 - Success.
- * @return 201 - Permission denied.
- * @return 401 - Parameter error.
- * @return 2100003 - System internal error.
+ * @param isMetered 是否激活
+ * @return 0 - 成功.
+ * @return 201 - 缺少权限.
+ * @return 401 - 参数错误.
+ * @return 2100002 - 无法连接到服务.
+ * @return 2100003 - 内部错误.
  * @permission ohos.permission.GET_NETWORK_INFO
  * @since 10
  * @version 1.0
@@ -85,13 +88,14 @@ int32_t OH_NetConn_GetDefaultNet(OH_NetConn_NetHandle *netHandle);
 int32_t OH_NetConn_IsDefaultNetMetered(int32_t *isMetered);
 
 /**
- * @brief Obtains the list of data networks that are activated.
+ * @brief 查询所有激活的数据网络
  *
- * @param netHandleList Stores the list of data networks.
- * @return 0 - Success.
- * @return 201 - Permission denied.
- * @return 401 - Parameter error.
- * @return 2100003 - System internal error.
+ * @param netHandleList 网络信息列表
+ * @return 0 - 成功.
+ * @return 201 - 缺少权限.
+ * @return 401 - 参数错误.
+ * @return 2100002 - 无法连接到服务.
+ * @return 2100003 - 内部错误.
  * @permission ohos.permission.GET_NETWORK_INFO
  * @since 10
  * @version 1.0
@@ -99,14 +103,15 @@ int32_t OH_NetConn_IsDefaultNetMetered(int32_t *isMetered);
 int32_t OH_NetConn_GetAllNets(OH_NetConn_NetHandleList *netHandleList);
 
 /**
- * @brief Queries the connection properties of a network.
+ * @brief 查询某个数据网络的链路信息
  *
- * @param netHandle Stores the data network id.
- * @param info Stores the connection properties
- * @return 0 - Success.
- * @return 201 - Permission denied.
- * @return 401 - Parameter error.
- * @return 2100003 - System internal error.
+ * @param netHandle 存放网络ID
+ * @param info 存放链路信息
+ * @return 0 - 成功.
+ * @return 201 - 缺少权限.
+ * @return 401 - 参数错误.
+ * @return 2100002 - 无法连接到服务.
+ * @return 2100003 - 内部错误.
  * @permission ohos.permission.GET_NETWORK_INFO
  * @since 10
  * @version 1.0
@@ -114,14 +119,15 @@ int32_t OH_NetConn_GetAllNets(OH_NetConn_NetHandleList *netHandleList);
 int32_t OH_NetConn_GetConnectionProperties(OH_NetConn_NetHandle *netHandle, OH_NetConn_NetLinkInfo *info);
 
 /**
- * @brief Obtains capabilities of a network.
+ * @brief 查询某个网络的能力集
  *
- * @param netHandle Stores the data network id.
- * @param netAllCapacities Stores capabilities.
- * @return 0 - Success.
- * @return 201 - Permission denied.
- * @return 401 - Parameter error.
- * @return 2100003 - System internal error.
+ * @param netHandle 存放网络ID
+ * @param netAllCapacities 存放能力集
+ * @return 0 - 成功.
+ * @return 201 - 缺少权限.
+ * @return 401 - 参数错误.
+ * @return 2100002 - 无法连接到服务.
+ * @return 2100003 - 内部错误.
  * @permission ohos.permission.GET_NETWORK_INFO
  * @since 10
  * @version 1.0
@@ -129,12 +135,13 @@ int32_t OH_NetConn_GetConnectionProperties(OH_NetConn_NetHandle *netHandle, OH_N
 int32_t OH_NetConn_GetNetCapabilities(OH_NetConn_NetHandle *netHandle, OH_NetConn_NetAllCapabilities *netAllCapacities);
 
 /**
- * @brief Obtains the default proxy settings.
+ * @brief 查询默认的网络代理
  *
- * @param httpProxy Stores proxy settings.
- * @return 0 - Success.
- * @return 401 - Parameter error.
- * @return 2100003 - System internal error.
+ * @param httpProxy 存放代理配置信息
+ * @return 0 - 成功.
+ * @return 401 - 参数错误.
+ * @return 2100002 - 无法连接到服务.
+ * @return 2100003 - 内部错误.
  * @since 10
  * @version 1.0
  */

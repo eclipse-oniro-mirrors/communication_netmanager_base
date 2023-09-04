@@ -20,7 +20,7 @@
  * @addtogroup NetConn
  * @{
  *
- * @brief Provides structs and enums for C interfaces of data network.
+ * @brief 为网络管理的数据网络连接模块的C接口提供数据结构
  *
  * @since 10
  * @version 1.0
@@ -28,7 +28,7 @@
 
 /**
  * @file native_net_conn_type.h
- * @brief Defines structs and enums for C interfaces of data network.
+ * @brief 定义网络连接模块的C接口需要的数据结构
  *
  * @syscap SystemCapability.Communication.NetManager.Core
  * @since 10
@@ -51,7 +51,7 @@ extern "C" {
 #define OH_NETCONN_MAX_STR_LEN 256
 
 /**
- * @brief Network capabilities
+ * @brief 网络能力集
  *
  * @since 10
  * @version 1.0
@@ -75,7 +75,7 @@ typedef enum OH_NetConn_NetCap {
 } OH_NetConn_NetCap;
 
 /**
- * @brief Network bearer types.
+ * @brief 网络载体类型
  *
  * @since 10
  * @version 1.0
@@ -99,7 +99,7 @@ typedef enum OH_NetConn_NetBearType {
 } OH_NetConn_NetBearType;
 
 /**
- * @brief Return types of route.
+ * @brief 路由返回类型
  *
  * @since 10
  * @version 1.0
@@ -115,7 +115,7 @@ typedef enum OH_NetConn_RtnType {
 } OH_NetConn_RtnType;
 
 /**
- * @brief IP type.
+ * @brief IP类型.
  *
  * @since 10
  * @version 1.0
@@ -131,7 +131,7 @@ typedef enum {
 } OH_NetConn_IpType;
 
 /**
- * @brief Stores a network id.
+ * @brief 存放网络ID.
  *
  * @since 10
  * @version 1.0
@@ -143,7 +143,7 @@ typedef struct OH_NetConn_NetHandle {
 } OH_NetConn_NetHandle;
 
 /**
- * @brief Network list
+ * @brief 网络列表
  *
  * @since 10
  * @version 1.0
@@ -157,7 +157,7 @@ typedef struct OH_NetConn_NetHandleList {
 } OH_NetConn_NetHandleList;
 
 /**
- * @brief Network capabilities
+ * @brief 网络能力集
  *
  * @since 10
  * @version 1.0
@@ -179,7 +179,7 @@ typedef struct OH_NetConn_NetAllCapabilities {
 } OH_NetConn_NetAllCapabilities;
 
 /**
- * @brief Network Address
+ * @brief 网络地址
  *
  * @since 10
  * @version 1.0
@@ -201,7 +201,7 @@ typedef struct OH_NetConn_INetAddr {
 } OH_NetConn_INetAddr;
 
 /**
- * @brief Route
+ * @brief 路由配置信息
  *
  * @since 10
  * @version 1.0
@@ -227,7 +227,7 @@ typedef struct OH_NetConn_Route {
 } OH_NetConn_Route;
 
 /**
- * @brief Http proxy
+ * @brief 代理配置信息
  *
  * @since 10
  * @version 1.0
