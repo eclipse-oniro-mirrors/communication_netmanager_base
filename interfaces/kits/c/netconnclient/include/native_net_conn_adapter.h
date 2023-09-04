@@ -37,5 +37,4 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, OH_NetConn_Ne
 int32_t Conv2HttpProxy(HttpProxy &httpProxyObj, OH_NetConn_HttpProxy *httpProxy);
 
 } // namespace OHOS::NetManagerStandard
-
 #endif /* NATIVE_NET_CONN_ADAPTER_H */

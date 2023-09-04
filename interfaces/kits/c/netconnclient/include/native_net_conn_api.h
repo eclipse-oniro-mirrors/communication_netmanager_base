@@ -20,7 +20,7 @@
  * @addtogroup NetConn
  * @{
  *
- * @brief 向应用提供网络连接管理功能，包括获取各种数据网络连接的链路信息和能力集信息等
+ * @brief Provides C interfaces to manage and use data networks.
  *
  * @since 10
  * @version 1.0
@@ -29,8 +29,9 @@
 /**
  * @file native_net_conn_api.h
  *
- * @brief 定义获取和使用网络信息的相关接口
+ * @brief Defines C interfaces to manage and use data networks.
  *
+ * @syscap SystemCapability.Communication.NetManager.Core
  * @since 10
  * @version 1.0
  */
@@ -42,10 +43,13 @@ extern "C" {
 #endif
 
 /**
- * @brief 查询是否有默认网络
+ * @brief Checks whether the default data network is activated.
  *
- * @param hasDefaultNet 用来存放是否有默认网络的结果 1是0否
- * @return 查询成功则返回0, 否则失败
+ * @param hasDefaultNet Whether the default data network is activated.
+ * @return 0 - Success.
+ * @return 201 - Permission denied.
+ * @return 401 - Parameter error.
+ * @return 2100003 - System internal error.
  * @permission ohos.permission.GET_NETWORK_INFO
  * @since 10
  * @version 1.0
@@ -53,10 +57,13 @@ extern "C" {
 int32_t OH_NetConn_HasDefaultNet(int32_t *hasDefaultNet);
 
 /**
- * @brief 获取一个含有默认网络的netId的NetHandle
+ * @brief Obtains the data network that is activated by default.
  *
- * @param netHandle 用来存放网络的ID
- * @return 获取成功则返回0, 否则失败
+ * @param netHandle Stores the data network id.
+ * @return 0 - Success.
+ * @return 201 - Permission denied.
+ * @return 401 - Parameter error.
+ * @return 2100003 - System internal error.
  * @permission ohos.permission.GET_NETWORK_INFO
  * @since 10
  * @version 1.0
@@ -64,10 +71,13 @@ int32_t OH_NetConn_HasDefaultNet(int32_t *hasDefaultNet);
 int32_t OH_NetConn_GetDefaultNet(OH_NetConn_NetHandle *netHandle);
 
 /**
- * @brief 查询默认网络是否记录流量
+ * @brief Checks whether data traffic usage on the current network is metered.
  *
- * @param isMetered 用来存放是否记流量的结果 1是0否
- * @return 查询成功则返回0, 否则失败
+ * @param isMetered Whether the current network is metered.
+ * @return 0 - Success.
+ * @return 201 - Permission denied.
+ * @return 401 - Parameter error.
+ * @return 2100003 - System internal error.
  * @permission ohos.permission.GET_NETWORK_INFO
  * @since 10
  * @version 1.0
@@ -75,10 +85,13 @@ int32_t OH_NetConn_GetDefaultNet(OH_NetConn_NetHandle *netHandle);
 int32_t OH_NetConn_IsDefaultNetMetered(int32_t *isMetered);
 
 /**
- * @brief 获取所处于连接状态的网络的MetHandle列表
+ * @brief Obtains the list of data networks that are activated.
  *
- * @param netHandleList 用来存放netHandle的列表
- * @return 获取成功则返回0, 否则失败
+ * @param netHandleList Stores the list of data networks.
+ * @return 0 - Success.
+ * @return 201 - Permission denied.
+ * @return 401 - Parameter error.
+ * @return 2100003 - System internal error.
  * @permission ohos.permission.GET_NETWORK_INFO
  * @since 10
  * @version 1.0
@@ -86,11 +99,14 @@ int32_t OH_NetConn_IsDefaultNetMetered(int32_t *isMetered);
 int32_t OH_NetConn_GetAllNets(OH_NetConn_NetHandleList *netHandleList);
 
 /**
- * @brief 查询网络的链路信息
+ * @brief Queries the connection properties of a network.
  *
- * @param netHandle 存放要查询的网络ID
- * @param info 存放查询到的链路信息
- * @return 查询成功则返回0, 否则失败
+ * @param netHandle Stores the data network id.
+ * @param info Stores the connection properties
+ * @return 0 - Success.
+ * @return 201 - Permission denied.
+ * @return 401 - Parameter error.
+ * @return 2100003 - System internal error.
  * @permission ohos.permission.GET_NETWORK_INFO
  * @since 10
  * @version 1.0
@@ -98,11 +114,14 @@ int32_t OH_NetConn_GetAllNets(OH_NetConn_NetHandleList *netHandleList);
 int32_t OH_NetConn_GetConnectionProperties(OH_NetConn_NetHandle *netHandle, OH_NetConn_NetLinkInfo *info);
 
 /**
- * @brief 查询网络的能力集信息
+ * @brief Obtains capabilities of a network.
  *
- * @param netHandle 存放要查询的网络ID
- * @param netAllCapacities 存放查询到的能力集信息
- * @return 成功则返回0, 否则失败
+ * @param netHandle Stores the data network id.
+ * @param netAllCapacities Stores capabilities.
+ * @return 0 - Success.
+ * @return 201 - Permission denied.
+ * @return 401 - Parameter error.
+ * @return 2100003 - System internal error.
  * @permission ohos.permission.GET_NETWORK_INFO
  * @since 10
  * @version 1.0
@@ -110,10 +129,12 @@ int32_t OH_NetConn_GetConnectionProperties(OH_NetConn_NetHandle *netHandle, OH_N
 int32_t OH_NetConn_GetNetCapabilities(OH_NetConn_NetHandle *netHandle, OH_NetConn_NetAllCapabilities *netAllCapacities);
 
 /**
- * @brief 获取当前网络代理信息
+ * @brief Obtains the default proxy settings.
  *
- * @param httpProxy 存放代理的信息
- * @return 成功则返回0, 否则失败
+ * @param httpProxy Stores proxy settings.
+ * @return 0 - Success.
+ * @return 401 - Parameter error.
+ * @return 2100003 - System internal error.
  * @since 10
  * @version 1.0
  */

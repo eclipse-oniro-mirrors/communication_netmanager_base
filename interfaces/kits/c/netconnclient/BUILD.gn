@@ -19,6 +19,7 @@ ohos_ndk_library("libnetconn_ndk") {
   output_extension = "z.so"
   ndk_description_file = "./libnetconn.ndk.json"
   min_compact_version = "1"
+  system_capability = "SystemCapability.Communication.NetManager.Core"
 }
 
 ohos_ndk_headers("netconn_header") {
@@ -39,8 +40,6 @@ ohos_shared_library("netconn_ndk") {
   ]
 
   deps = [
-    ":libnetconn_ndk",
-    ":netconn_header",
     "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   ]

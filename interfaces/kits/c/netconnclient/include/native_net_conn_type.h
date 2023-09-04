@@ -20,7 +20,7 @@
  * @addtogroup NetConn
  * @{
  *
- * @brief 声明了网络连接管理所需要的各种宏、枚举、数据结构等
+ * @brief Provides structs and enums for C interfaces of data network.
  *
  * @since 10
  * @version 1.0
@@ -28,7 +28,9 @@
 
 /**
  * @file native_net_conn_type.h
- * @brief 提供NetConn中需要的宏、枚举、数据结构等
+ * @brief Defines structs and enums for C interfaces of data network.
+ *
+ * @syscap SystemCapability.Communication.NetManager.Core
  * @since 10
  * @version 1.0
  *
@@ -40,16 +42,16 @@
 extern "C" {
 #endif
 
-#define MAX_NET_SIZE 32
-#define MAX_BEAR_TYPE_SIZE 32
-#define MAX_CAP_SIZE 32
-#define MAX_ADDR_SIZE 32
-#define MAX_ROUTE_SIZE 64
-#define MAX_EXCLUSION_SIZE 256
-#define MAX_STR_LEN 256
+#define OH_NETCONN_MAX_NET_SIZE 32
+#define OH_NETCONN_MAX_BEAR_TYPE_SIZE 32
+#define OH_NETCONN_MAX_CAP_SIZE 32
+#define OH_NETCONN_MAX_ADDR_SIZE 32
+#define OH_NETCONN_MAX_ROUTE_SIZE 64
+#define OH_NETCONN_MAX_EXCLUSION_SIZE 256
+#define OH_NETCONN_MAX_STR_LEN 256
 
 /**
- * @brief 网络能力类型
+ * @brief Network capabilities
  *
  * @since 10
  * @version 1.0
@@ -58,69 +60,69 @@ extern "C" {
 typedef enum OH_NetConn_NetCap {
     /* MMS */
     OH_NETCONN_NET_CAPABILITY_MMS = 0,
-    /* 不计流量 */
+    /* Not Metered */
     OH_NETCONN_NET_CAPABILITY_NOT_METERED = 11,
-    /* INTERNET */
+    /* Internet */
     OH_NETCONN_NET_CAPABILITY_INTERNET = 12,
-    /* NOT VPN */
+    /* Not VPN */
     OH_NETCONN_NET_CAPABILITY_NOT_VPN = 15,
-    /* 校验 */
+    /* Validated */
     OH_NETCONN_NET_CAPABILITY_VALIDATED = 16,
-    /* 强制主页 */
+    /* Captive portal */
     OH_NETCONN_NET_CAPABILITY_CAPTIVE_PORTAL = 17,
-    /* 缺省 */
+    /* Internal Default */
     OH_NETCONN_NET_CAPABILITY_INTERNAL_DEFAULT
 } OH_NetConn_NetCap;
 
 /**
- * @brief 网络载体类型
+ * @brief Network bearer types.
  *
  * @since 10
  * @version 1.0
  */
 
 typedef enum OH_NetConn_NetBearType {
-    /* 蜂窝数据 */
+    /* Cellular */
     OH_NETCONN_BEARER_CELLULAR = 0,
     /* WIFI */
     OH_NETCONN_BEARER_WIFI = 1,
-    /* 蓝牙 */
+    /* Bluetooth */
     OH_NETCONN_BEARER_BLUETOOTH = 2,
-    /* 以太网 */
+    /* Ethernet */
     OH_NETCONN_BEARER_ETHERNET = 3,
     /* VPN */
     OH_NETCONN_BEARER_VPN = 4,
-    /* WIFI_AWARE */
+    /* WIFI aware */
     OH_NETCONN_BEARER_WIFI_AWARE = 5,
-    /* 缺省 */
+    /* Default */
     OH_NETCONN_BEARER_DEFAULT
 } OH_NetConn_NetBearType;
 
 /**
- * @brief 路由返回类型
+ * @brief Return types of route.
  *
  * @since 10
  * @version 1.0
  */
 
 typedef enum OH_NetConn_RtnType {
-    /* UNICAST */
+    /* Unicast */
     OH_NETCONN_RTN_UNICAST = 1,
-    /* UNREACHABLE */
+    /* Unreachable */
     OH_NETCONN_RTN_UNREACHABLE = 7,
-    /* THROW */
+    /* Throw */
     OH_NETCONN_RTN_THROW = 9
 } OH_NetConn_RtnType;
 
 /**
- * @brief IP的类型
+ * @brief IP type.
  *
  * @since 10
  * @version 1.0
  */
 
 typedef enum {
-    /* 未知 */
+    /* Unknown */
     OH_NETCONN_UNKNOWN = 0x00,
     /* IPV4 */
     OH_NETCONN_IPV4 = 0x01,
@@ -129,148 +131,148 @@ typedef enum {
 } OH_NetConn_IpType;
 
 /**
- * @brief 存放netId的结构体
+ * @brief Stores a network id.
  *
  * @since 10
  * @version 1.0
  */
 
 typedef struct OH_NetConn_NetHandle {
-    /* 网络ID标识 */
+    /* Network id */
     int32_t netId;
 } OH_NetConn_NetHandle;
 
 /**
- * @brief 存放netHandle的列表的结构体
+ * @brief Network list
  *
  * @since 10
  * @version 1.0
  */
 
 typedef struct OH_NetConn_NetHandleList {
-    /* netHandle列表 */
-    OH_NetConn_NetHandle netHandleList[MAX_NET_SIZE];
-    /* netHandleList实际有效空间大小 */
+    /* List of netHandle */
+    OH_NetConn_NetHandle netHandleList[OH_NETCONN_MAX_NET_SIZE];
+    /* Actual size of netHandleList */
     int32_t netHandleListSize;
 } OH_NetConn_NetHandleList;
 
 /**
- * @brief 存放网络能力集的结构体
+ * @brief Network capabilities
  *
  * @since 10
  * @version 1.0
  */
 
 typedef struct OH_NetConn_NetAllCapabilities {
-    /* 上行带宽 */
+    /* LinkUpBandwidthKbps */
     uint32_t linkUpBandwidthKbps;
-    /* 下行带宽 */
+    /* LinkDownBandwidthKbps */
     uint32_t linkDownBandwidthKbps;
-    /* 能力列表 */
-    OH_NetConn_NetCap netCaps[MAX_CAP_SIZE];
-    /* netCaps实际有效空间大小 */
+    /* List of capabilities */
+    OH_NetConn_NetCap netCaps[OH_NETCONN_MAX_CAP_SIZE];
+    /* Actual size of netCaps */
     int32_t netCapsSize;
-    /* 载体类型 */
-    OH_NetConn_NetBearType bearerTypes[MAX_BEAR_TYPE_SIZE];
-    /* bearerTypes实际有效空间大小 */
+    /* List of bearer types */
+    OH_NetConn_NetBearType bearerTypes[OH_NETCONN_MAX_BEAR_TYPE_SIZE];
+    /* Actual size of bearerTypes */
     int32_t bearerTypesSize;
 } OH_NetConn_NetAllCapabilities;
 
 /**
- * @brief 网络地址的结构体
+ * @brief Network Address
  *
  * @since 10
  * @version 1.0
  */
 
 typedef struct OH_NetConn_INetAddr {
-    /* IP类型 */
+    /* Ip type */
     OH_NetConn_IpType type;
-    /* 家族 */
+    /* Family */
     uint8_t family;
-    /* 前缀长度 */
+    /* Length of prefix */
     uint8_t prefixlen;
-    /* 端口 */
+    /* Port */
     uint8_t port;
-    /* 地址 */
-    char address[MAX_STR_LEN];
-    /* 主机名 */
-    char hostName[MAX_STR_LEN];
+    /* Address */
+    char address[OH_NETCONN_MAX_STR_LEN];
+    /* Host name */
+    char hostName[OH_NETCONN_MAX_STR_LEN];
 } OH_NetConn_INetAddr;
 
 /**
- * @brief 路由信息的结构体
+ * @brief Route
  *
  * @since 10
  * @version 1.0
  */
 
 typedef struct OH_NetConn_Route {
-    /* 网络接口 */
-    char iface[MAX_STR_LEN];
-    /* 目的地址 */
+    /* Interface */
+    char iface[OH_NETCONN_MAX_STR_LEN];
+    /* Destination address */
     OH_NetConn_INetAddr destination;
-    /* 网关 */
+    /* Gateway address*/
     OH_NetConn_INetAddr gateway;
-    /* 返回类型 */
+    /* Return type */
     OH_NetConn_RtnType rtnType;
-    /* 最大传输单元 */
+    /* MTU */
     int32_t mtu;
-    /* 是否是主机 1是0否 */
+    /* Whether is host */
     int32_t isHost;
-    /* 是否有网关 1是0否*/
+    /* Whether has Gateway*/
     int32_t hasGateway;
-    /* 是否是默认路由 1是0否*/
+    /* Whether is default route*/
     int32_t isDefaultRoute;
 } OH_NetConn_Route;
 
 /**
- * @brief 网络代理信息的结构体
+ * @brief Http proxy
  *
  * @since 10
  * @version 1.0
  */
 
 typedef struct OH_NetConn_HttpProxy {
-    /* 主机名 */
-    char host[MAX_STR_LEN];
-    /* 绕过的地址 */
-    char exclusionList[MAX_EXCLUSION_SIZE][MAX_STR_LEN];
-    /* exclusionList实际有效空间大小 */
+    /* Host name */
+    char host[OH_NETCONN_MAX_STR_LEN];
+    /* List of exclusion */
+    char exclusionList[OH_NETCONN_MAX_EXCLUSION_SIZE][OH_NETCONN_MAX_STR_LEN];
+    /* Actual size of exclusionList */
     int32_t exclusionListSize;
-    /* 端口 */
+    /* Port */
     uint16_t port;
 } OH_NetConn_HttpProxy;
 
 /**
- * @brief 网络链路信息的结构体
+ * @brief Network link information
  *
  * @since 10
  * @version 1.0
  */
 
 typedef struct OH_NetConn_NetLinkInfo {
-    /* 接口名 */
-    char ifaceName[MAX_STR_LEN];
-    /* 主机 */
-    char domain[MAX_STR_LEN];
-    /* TCP缓冲区大小 */
-    char tcpBufferSizes[MAX_STR_LEN];
-    /* 最大传输单元 */
+    /* Interface name */
+    char ifaceName[OH_NETCONN_MAX_STR_LEN];
+    /* Domain */
+    char domain[OH_NETCONN_MAX_STR_LEN];
+    /* TCP butter size */
+    char tcpBufferSizes[OH_NETCONN_MAX_STR_LEN];
+    /* MTU */
     uint16_t mtu;
-    /* 网络地址列表 */
-    OH_NetConn_INetAddr netAddrList[MAX_ADDR_SIZE];
-    /* netAddrList实际有效空间大小 */
+    /* Address list */
+    OH_NetConn_INetAddr netAddrList[OH_NETCONN_MAX_ADDR_SIZE];
+    /* Actual size of netAddrList */
     int32_t netAddrListSize;
-    /* DNS表 */
-    OH_NetConn_INetAddr dnsList[MAX_ADDR_SIZE];
-    /* dnsList实际有效空间大小 */
+    /* DNS list */
+    OH_NetConn_INetAddr dnsList[OH_NETCONN_MAX_ADDR_SIZE];
+    /* Actual size od dnsList */
     int32_t dnsListSize;
-    /* 路由表 */
-    OH_NetConn_Route routeList[MAX_ROUTE_SIZE];
-    /* routeList实际有效空间大小 */
+    /* Route list */
+    OH_NetConn_Route routeList[OH_NETCONN_MAX_ROUTE_SIZE];
+    /* Actual size of routeList */
     int32_t routeListSize;
-    /* 代理 */
+    /* Http proxy */
     OH_NetConn_HttpProxy httpProxy;
 } OH_NetConn_NetLinkInfo;
 
