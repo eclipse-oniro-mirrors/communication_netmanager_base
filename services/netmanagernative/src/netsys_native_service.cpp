@@ -140,6 +140,7 @@ bool NetsysNativeService::Init()
     fwmarkNetwork_ = std::make_unique<OHOS::nmd::FwmarkNetwork>();
     sharingManager_ = std::make_unique<SharingManager>();
     iptablesWrapper_ = DelayedSingleton<IptablesWrapper>::GetInstance();
+    netDiagWrapper = NetDiagWrapper::GetInstance();
 
     auto ret = OHOS::NetManagerStandard::LoadElf(BFP_NAME_NETSYS_PATH);
     NETNATIVE_LOGI("LoadElf is %{public}d", ret);
@@ -655,6 +656,63 @@ int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, st
     }
     respond = iptablesWrapper_->RunCommandForRes(IPTYPE_IPV4V6, cmd);
     return NetManagerStandard::NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeService::NetDiagPingHost(const NetDiagPingOption &pingOption,
+                                             const sptr<INetDiagCallback> &callback)
+{
+    if (netDiagWrapper == nullptr) {
+        NETNATIVE_LOGE("netDiagWrapper is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netDiagWrapper->PingHost(pingOption, callback);
+}
+
+int32_t NetsysNativeService::NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables)
+{
+    if (netDiagWrapper == nullptr) {
+        NETNATIVE_LOGE("netDiagWrapper is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netDiagWrapper->GetRouteTable(routeTables);
+}
+
+int32_t NetsysNativeService::NetDiagGetSocketsInfo(NetDiagProtocolType socketType, NetDiagSocketsInfo &socketsInfo)
+{
+    if (netDiagWrapper == nullptr) {
+        NETNATIVE_LOGE("netDiagWrapper is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netDiagWrapper->GetSocketsInfo(socketType, socketsInfo);
+}
+
+int32_t NetsysNativeService::NetDiagGetInterfaceConfig(std::list<NetDiagIfaceConfig> &configs,
+                                                       const std::string &ifaceName)
+{
+    if (netDiagWrapper == nullptr) {
+        NETNATIVE_LOGE("netDiagWrapper is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netDiagWrapper->GetInterfaceConfig(configs, ifaceName);
+}
+
+int32_t NetsysNativeService::NetDiagUpdateInterfaceConfig(const NetDiagIfaceConfig &config,
+                                                          const std::string &ifaceName, bool add)
+{
+    if (netDiagWrapper == nullptr) {
+        NETNATIVE_LOGE("netDiagWrapper is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netDiagWrapper->UpdateInterfaceConfig(config, ifaceName, add);
+}
+
+int32_t NetsysNativeService::NetDiagSetInterfaceActiveState(const std::string &ifaceName, bool up)
+{
+    if (netDiagWrapper == nullptr) {
+        NETNATIVE_LOGE("netDiagWrapper is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netDiagWrapper->SetInterfaceActiveState(ifaceName, up);
 }
 } // namespace NetsysNative
 } // namespace OHOS

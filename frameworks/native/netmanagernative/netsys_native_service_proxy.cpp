@@ -19,6 +19,7 @@
 
 #include "netnative_log_wrapper.h"
 #include "netsys_addr_info_parcel.h"
+#include "net_manager_constants.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -1747,6 +1748,231 @@ int32_t NetsysNativeServiceProxy::SetIptablesCommandForRes(const std::string &cm
     }
     if (!reply.ReadString(respond)) {
         NETNATIVE_LOGE("SetIptablesCommandForRes proxy read respond failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::NetDiagPingHost(const NetDiagPingOption &pingOption,
+                                                  const sptr<INetDiagCallback> &callback)
+{
+    NETNATIVE_LOGI("Begin to NetDiagPingHost");
+    if (callback == nullptr) {
+        NETNATIVE_LOGE("The parameter of callback is nullptr");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!pingOption.Marshalling(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETDIAG_PING_HOST), data, reply, option);
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("Read result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables)
+{
+    NETNATIVE_LOGI("Begin to NetDiagGetRouteTable");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETDIAG_GET_ROUTE_TABLE), data, reply,
+                        option);
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("Read result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (ret == NetManagerStandard::NETMANAGER_SUCCESS) {
+        uint32_t size = 0;
+        if (!reply.ReadUint32(size)) {
+            NETNATIVE_LOGE("Read uint32 failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+
+        for (uint32_t i = 0; i < size; ++i) {
+            NetDiagRouteTable routeTable;
+            if (!NetDiagRouteTable::Unmarshalling(reply, routeTable)) {
+                NETNATIVE_LOGE("NetDiagRouteTable unmarshalling failed.");
+                return ERR_FLATTEN_OBJECT;
+            }
+            routeTables.push_back(routeTable);
+        }
+    }
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::NetDiagGetSocketsInfo(NetDiagProtocolType socketType, NetDiagSocketsInfo &socketsInfo)
+{
+    NETNATIVE_LOGI("Begin to NetDiagGetSocketsInfo");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint8(static_cast<uint8_t>(socketType))) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETDIAG_GET_SOCKETS_INFO), data, reply,
+                        option);
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("Read result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (ret == NetManagerStandard::NETMANAGER_SUCCESS) {
+        if (!NetDiagSocketsInfo::Unmarshalling(reply, socketsInfo)) {
+            NETNATIVE_LOGE("NetDiagSocketsInfo Unmarshalling failed.");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::NetDiagGetInterfaceConfig(std::list<NetDiagIfaceConfig> &configs,
+                                                            const std::string &ifaceName)
+{
+    NETNATIVE_LOGI("Begin to NetDiagGetInterfaceConfig");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(ifaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETDIAG_GET_IFACE_CONFIG), data, reply,
+                        option);
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("Read result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (ret == NetManagerStandard::NETMANAGER_SUCCESS) {
+        uint32_t size = 0;
+        if (!reply.ReadUint32(size)) {
+            NETNATIVE_LOGE("Read uint32 failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+
+        for (uint32_t i = 0; i < size; ++i) {
+            NetDiagIfaceConfig ifaceConfig;
+            if (!NetDiagIfaceConfig::Unmarshalling(reply, ifaceConfig)) {
+                NETNATIVE_LOGE("NetDiagIfaceConfig Unmarshalling failed.");
+                return ERR_FLATTEN_OBJECT;
+            }
+            configs.push_back(ifaceConfig);
+        }
+    }
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::NetDiagUpdateInterfaceConfig(const NetDiagIfaceConfig &config,
+                                                               const std::string &ifaceName, bool add)
+{
+    NETNATIVE_LOGI("Begin to NetDiagUpdateInterfaceConfig");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!config.Marshalling(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(ifaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(add)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETDIAG_UPDATE_IFACE_CONFIG), data, reply,
+                        option);
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("Read result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::NetDiagSetInterfaceActiveState(const std::string &ifaceName, bool up)
+{
+    NETNATIVE_LOGI("Begin to NetDiagSetInterfaceActiveState");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(ifaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(up)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETDIAG_SET_IFACE_ACTIVE_STATE), data, reply,
+                        option);
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("Read result failed");
         return ERR_FLATTEN_OBJECT;
     }
     return ret;

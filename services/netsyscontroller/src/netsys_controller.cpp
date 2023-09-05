@@ -900,5 +900,62 @@ int32_t NetsysController::SetIptablesCommandForRes(const std::string &cmd, std::
     return netsysService_->SetIptablesCommandForRes(cmd, respond);
 }
 
+int32_t NetsysController::NetDiagPingHost(const OHOS::NetsysNative::NetDiagPingOption &pingOption,
+                                          const sptr<OHOS::NetsysNative::INetDiagCallback> &callback)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NetDiagPingHost(pingOption, callback);
+}
+
+int32_t NetsysController::NetDiagGetRouteTable(std::list<OHOS::NetsysNative::NetDiagRouteTable> &routeTables)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NetDiagGetRouteTable(routeTables);
+}
+
+int32_t NetsysController::NetDiagGetSocketsInfo(OHOS::NetsysNative::NetDiagProtocolType socketType,
+                                                OHOS::NetsysNative::NetDiagSocketsInfo &socketsInfo)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NetDiagGetSocketsInfo(socketType, socketsInfo);
+}
+
+int32_t NetsysController::NetDiagGetInterfaceConfig(std::list<OHOS::NetsysNative::NetDiagIfaceConfig> &configs,
+                                                    const std::string &ifaceName)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NetDiagGetInterfaceConfig(configs, ifaceName);
+}
+
+int32_t NetsysController::NetDiagUpdateInterfaceConfig(const OHOS::NetsysNative::NetDiagIfaceConfig &config,
+                                                       const std::string &ifaceName, bool add)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NetDiagUpdateInterfaceConfig(config, ifaceName, add);
+}
+
+int32_t NetsysController::NetDiagSetInterfaceActiveState(const std::string &ifaceName, bool up)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NetDiagSetInterfaceActiveState(ifaceName, up);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
