@@ -133,7 +133,7 @@ int32_t Conv2NetHandleObj(OH_NetConn_NetHandle *netHandle, NetHandle &netHandleO
 int32_t Conv2NetHandleList(std::list<sptr<NetHandle>> &netHandleObjList, OH_NetConn_NetHandleList *netHandleList)
 {
     int32_t i = 0;
-    for (auto netHandleObj : netHandleObjList) {
+    for (const auto& netHandleObj : netHandleObjList) {
         if (i > OH_NETCONN_MAX_NET_SIZE - 1) {
             NETMGR_LOG_E("netHandleList out of memory")
             return NETMANAGER_ERR_INTERNAL;
@@ -154,7 +154,7 @@ int32_t Conv2HttpProxy(HttpProxy &httpProxyObj, OH_NetConn_HttpProxy *httpProxy)
     httpProxy->port = httpProxyObj.GetPort();
 
     int32_t i = 0;
-    for (auto exclusion : httpProxyObj.GetExclusionList())
+    for (const auto& exclusion : httpProxyObj.GetExclusionList())
         if (i > OH_NETCONN_MAX_EXCLUSION_SIZE - 1) {
             NETMGR_LOG_E("exclusionList out of memory");
             return NETMANAGER_ERR_INTERNAL;
@@ -186,7 +186,7 @@ int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, OH_NetConn_NetLinkInfo *info)
     }
 
     int32_t i = 0;
-    for (auto netAddr : infoObj.netAddrList_) {
+    for (const auto& netAddr : infoObj.netAddrList_) {
         if (i > OH_NETCONN_MAX_ADDR_SIZE - 1) {
             NETMGR_LOG_E("netAddrList out of memory");
             return NETMANAGER_ERR_INTERNAL;
@@ -199,7 +199,7 @@ int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, OH_NetConn_NetLinkInfo *info)
     info->netAddrListSize = infoObj.netAddrList_.size();
 
     i = 0;
-    for (auto dns : infoObj.dnsList_) {
+    for (const auto& dns : infoObj.dnsList_) {
         if (i > OH_NETCONN_MAX_ADDR_SIZE - 1) {
             NETMGR_LOG_E("dnsList out of memory");
             return NETMANAGER_ERR_INTERNAL;
@@ -212,7 +212,7 @@ int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, OH_NetConn_NetLinkInfo *info)
     info->dnsListSize = infoObj.dnsList_.size();
 
     i = 0;
-    for (auto route : infoObj.routeList_) {
+    for (const auto& route : infoObj.routeList_) {
         if (i > OH_NETCONN_MAX_ROUTE_SIZE - 1) {
             NETMGR_LOG_E("routeList out of memory");
             return NETMANAGER_ERR_INTERNAL;
@@ -237,7 +237,7 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, OH_NetConn_Ne
     netAllCaps->linkDownBandwidthKbps = netAllCapsObj.linkDownBandwidthKbps_;
 
     int32_t i = 0;
-    for (auto netCap : netAllCapsObj.netCaps_) {
+    for (const auto& netCap : netAllCapsObj.netCaps_) {
         if (i > OH_NETCONN_MAX_CAP_SIZE - 1) {
             NETMGR_LOG_E("netCapsList out of memory");
             return NETMANAGER_ERR_INTERNAL;
@@ -253,7 +253,7 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, OH_NetConn_Ne
     netAllCaps->netCapsSize = netAllCapsObj.netCaps_.size();
 
     i = 0;
-    for (auto bearType : netAllCapsObj.bearerTypes) {
+    for (const auto& bearType : netAllCapsObj.bearerTypes) {
         if (i > OH_NETCONN_MAX_BEAR_TYPE_SIZE - 1) {
             NETMGR_LOG_E("bearerTypes out of memory");
             return NETMANAGER_ERR_INTERNAL;
