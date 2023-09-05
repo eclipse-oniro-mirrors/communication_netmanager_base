@@ -800,8 +800,8 @@ void BandwidthSetIfaceQuotaFuzzTest(const uint8_t *data, size_t size)
     int64_t bytes = GetData<int64_t>();
     std::string ifName = GetStringFromData(STR_LEN);
 
-    dataParcel.WriteInt64(bytes);
     dataParcel.WriteString(ifName);
+    dataParcel.WriteInt64(bytes);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_BANDWIDTH_SET_IFACE_QUOTA),
                     dataParcel);
 }
