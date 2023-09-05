@@ -466,7 +466,6 @@ void NetworkAddRouteParcelFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(routInfo.destination);
     dataParcel.WriteString(routInfo.ifName);
     dataParcel.WriteString(routInfo.nextHop);
-    dataParcel.WriteInt32(routInfo.mtu);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_ADD_ROUTE_PARCEL),
                     dataParcel);
 }
@@ -502,7 +501,7 @@ void SetDefaultNetWorkFuzzTest(const uint8_t *data, size_t size)
     int32_t netId = GetData<int32_t>();
 
     dataParcel.WriteInt32(netId);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_SET_CONFIG), dataParcel);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_SET_DEFAULT), dataParcel);
 }
 
 void IpfwdAddInterfaceForwardFuzzTest(const uint8_t *data, size_t size)
@@ -560,11 +559,14 @@ void FirewallSetUidsAllowedListChainFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    std::string ifaceName = GetStringFromData(STR_LEN);
-    std::string ipAddress = GetStringFromData(STR_LEN);
+    auto chain = GetData<uint32_t>();
+    auto uidSize = static_cast<uint32_t>(GetData<uint8_t>());
 
-    dataParcel.WriteString(ifaceName);
-    dataParcel.WriteString(ipAddress);
+    dataParcel.WriteUint32(chain);
+    dataParcel.WriteUint32(uidSize);
+    for (uint32_t index = 0; index < uidSize; index++) {
+        dataParcel.WriteUint32(GetData<uint32_t>());
+    }
     OnRemoteRequest(
         static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_ALLOWED_LIST_CHAIN),
         dataParcel);
@@ -577,11 +579,14 @@ void FirewallSetUidsDeniedListChainFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    std::string ifaceName = GetStringFromData(STR_LEN);
-    std::string ipAddress = GetStringFromData(STR_LEN);
+    auto chain = GetData<uint32_t>();
+    auto uidSize = static_cast<uint32_t>(GetData<uint8_t>());
 
-    dataParcel.WriteString(ifaceName);
-    dataParcel.WriteString(ipAddress);
+    dataParcel.WriteUint32(chain);
+    dataParcel.WriteUint32(uidSize);
+    for (uint32_t index = 0; index < uidSize; index++) {
+        dataParcel.WriteUint32(GetData<uint32_t>());
+    }
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_DENIED_LIST_CHAIN),
                     dataParcel);
 }
@@ -596,13 +601,13 @@ void FirewallSetUidRuleFuzzTest(const uint8_t *data, size_t size)
     int32_t chain = GetData<int32_t>();
     int32_t firewallRule = GetData<int32_t>();
 
+    dataParcel.WriteInt32(chain);
     uint32_t vectorLength = GetData<uint32_t>() % VECTOR_MAX_SIZE;
     dataParcel.WriteInt32(static_cast<int32_t>(vectorLength));
     for (uint32_t i = 0; i <= vectorLength; i++) {
         dataParcel.WriteInt32(GetData<uint32_t>());
     }
 
-    dataParcel.WriteInt32(chain);
     dataParcel.WriteInt32(firewallRule);
 
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_RULE), dataParcel);
@@ -620,17 +625,15 @@ void SetInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
     cfg.ipv4Addr = GetStringFromData(STR_LEN);
     cfg.prefixLength = GetData<int32_t>();
 
+    dataParcel.WriteString(cfg.ifName);
+    dataParcel.WriteString(cfg.hwAddr);
+    dataParcel.WriteString(cfg.ipv4Addr);
     uint32_t vectorLength = GetData<uint32_t>() % VECTOR_MAX_SIZE;
     dataParcel.WriteInt32(static_cast<int32_t>(vectorLength));
     for (uint32_t i = 0; i <= vectorLength; i++) {
         dataParcel.WriteString(GetStringFromData(STR_LEN));
     }
 
-    dataParcel.WriteString(cfg.ifName);
-    dataParcel.WriteString(cfg.hwAddr);
-    dataParcel.WriteString(cfg.ipv4Addr);
-    dataParcel.WriteInt32(cfg.prefixLength);
-    dataParcel.WriteInt32(cfg.flags.size());
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_SET_CONFIG), dataParcel);
 }
 
@@ -660,7 +663,6 @@ void GetProcSysNetFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteInt32(which);
     dataParcel.WriteString(ifname);
     dataParcel.WriteString(parameter);
-    dataParcel.WriteString(value);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_PROC_SYS_NET), dataParcel);
 }
 
@@ -692,11 +694,11 @@ void SetInternetPermissionFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    int32_t uid = GetData<int32_t>();
+    uint32_t uid = GetData<uint32_t>();
     int8_t allow = GetData<int8_t>();
 
-    dataParcel.WriteInt32(uid);
-    dataParcel.WriteInt32(allow);
+    dataParcel.WriteUint32(uid);
+    dataParcel.WriteInt8(allow);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_INTERNET_PERMISSION),
                     dataParcel);
 }
@@ -708,7 +710,7 @@ void GetFwmarkForNetworkFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    uint32_t netId = GetData<uint32_t>();
+    int32_t netId = GetData<int32_t>();
     NetsysNative::MarkMaskParcel markParcl;
     markParcl.mark = GetData<int32_t>();
     markParcl.mask = GetData<int32_t>();
@@ -900,16 +902,9 @@ void GetNetworkSharingTrafficFuzzTest(const uint8_t *data, size_t size)
 
     std::string downIface = GetStringFromData(STR_LEN);
     std::string upIface = GetStringFromData(STR_LEN);
-    NetsysNative::NetworkSharingTraffic traffic;
-    traffic.receive = GetData<int64_t>();
-    traffic.send = GetData<int64_t>();
-    traffic.all = GetData<int64_t>();
 
     dataParcel.WriteString(downIface);
     dataParcel.WriteString(upIface);
-    dataParcel.WriteInt64(traffic.receive);
-    dataParcel.WriteInt64(traffic.send);
-    dataParcel.WriteInt64(traffic.all);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_SHARING_NETWORK_TRAFFIC),
                     dataParcel);
 }
