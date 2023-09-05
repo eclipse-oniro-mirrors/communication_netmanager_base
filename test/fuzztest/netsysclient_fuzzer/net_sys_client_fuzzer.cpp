@@ -24,9 +24,9 @@
 
 #include "netsys_native_client.h"
 #define private public
+#include "iptables_wrapper.h"
 #include "netsys_native_service.h"
 #include "netsys_native_service_stub.h"
-
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
@@ -67,6 +67,7 @@ std::string GetStringFromData(int strlen)
 static bool g_isInited = false;
 void Init()
 {
+    nmd::IptablesWrapper::GetInstance();
     if (!DelayedSingleton<NetsysNative::NetsysNativeService>::GetInstance()->Init()) {
         g_isInited = false;
     } else {
@@ -382,7 +383,6 @@ void RegisterNotifyCallbackFuzzTest(const uint8_t *data, size_t size)
     }
 
     sptr<NetsysNative::NotifyCallbackStub> notifyCb = new (std::nothrow) TestNotifyCallback();
-
     notifyCb->Marshalling(dataParcel);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_REGISTER_NOTIFY_CALLBACK),
                     dataParcel);
