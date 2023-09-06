@@ -374,6 +374,41 @@ public:
     }
 };
 
+int32_t OnRemoteRequestCallBack(uint32_t code, MessageParcel &data)
+{
+    MessageParcel reply;
+    MessageOption option;
+    TestNotifyCallback notifyCallBackTest;
+    int32_t ret = notifyCallBackTest.OnRemoteRequest(code, data, reply, option);
+    return ret;
+}
+
+void OnInterfaceAddressUpdatedFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size == 0)) {
+        return;
+    }
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+
+    std::string addr = GetStringFromData(STR_LEN);
+    std::string ifName = GetStringFromData(STR_LEN);
+    int32_t flags = GetData<int32_t>();
+    int32_t scope = GetData<int32_t>();
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceTokenCallback(dataParcel)) {
+        return;
+    }
+
+    dataParcel.WriteString(addr);
+    dataParcel.WriteString(ifName);
+    dataParcel.WriteInt32(flags);
+    dataParcel.WriteInt32(scope);
+    OnRemoteRequestCallBack(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_INTERFACE_ADDRESS_UPDATED), dataParcel);
+}
+
 void RegisterNotifyCallbackFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
@@ -1272,6 +1307,7 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetIfaceStatsFuzzTest(data, size);
     OHOS::NetManagerStandard::GetUidStatsFuzzTest(data, size);
     OHOS::NetManagerStandard::NetworkRemoveRouteParcelFuzzTest(data, size);
+    OHOS::NetManagerStandard::OnInterfaceAddressUpdatedFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
