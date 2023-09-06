@@ -48,7 +48,7 @@ IptablesWrapper::IptablesWrapper()
 IptablesWrapper::~IptablesWrapper()
 {
     isRunningFlag_ = false;
-     if (handlerRunner_) {
+    if (handlerRunner_) {
         handlerRunner_->Stop();
         handlerRunner_.reset();
     }
