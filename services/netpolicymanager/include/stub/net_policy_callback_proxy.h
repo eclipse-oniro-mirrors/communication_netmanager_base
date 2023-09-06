@@ -41,6 +41,7 @@ private:
     bool WriteInterfaceToken(MessageParcel &data);
 
 private:
+    int32_t SendRequest(MessageParcel &data, uint32_t code);
     static inline BrokerDelegator<NetPolicyCallbackProxy> delegator_;
 };
 } // namespace NetManagerStandard

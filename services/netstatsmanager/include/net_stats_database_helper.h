@@ -55,6 +55,7 @@ public:
 private:
     int32_t Open(const std::string &path);
     int32_t Close();
+    int32_t BindInt64(int32_t idx, uint64_t start, uint64_t end);
     sqlite3 *sqlite_ = nullptr;
     NetStatsSqliteStatement statement_;
 };
