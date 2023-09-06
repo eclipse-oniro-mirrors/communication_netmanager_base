@@ -63,7 +63,7 @@ static int32_t Conv2Ch(std::string s, char *ch)
     return NETMANAGER_SUCCESS;
 }
 
-static int32_t Conv2INetAddr(INetAddr &netAddrObj, OH_NetConn_INetAddr *netAddr)
+static int32_t Conv2INetAddr(const INetAddr &netAddrObj, OH_NetConn_INetAddr *netAddr)
 {
     netAddr->family = netAddrObj.family_;
     netAddr->prefixlen = netAddrObj.prefixlen_;
@@ -88,7 +88,7 @@ static int32_t Conv2INetAddr(INetAddr &netAddrObj, OH_NetConn_INetAddr *netAddr)
     return NETMANAGER_SUCCESS;
 }
 
-static int32_t Conv2Route(Route &routeObj, OH_NetConn_Route *route)
+static int32_t Conv2Route(const Route &routeObj, OH_NetConn_Route *route)
 {
     route->mtu = routeObj.mtu_;
     route->isHost = routeObj.isHost_;
@@ -154,19 +154,19 @@ int32_t Conv2HttpProxy(HttpProxy &httpProxyObj, OH_NetConn_HttpProxy *httpProxy)
     httpProxy->port = httpProxyObj.GetPort();
 
     int32_t i = 0;
-    for (const auto& exclusion : httpProxyObj.GetExclusionList())
+    for (const auto& exclusion : httpProxyObj.GetExclusionList()) {
         if (i > OH_NETCONN_MAX_EXCLUSION_SIZE - 1) {
             NETMGR_LOG_E("exclusionList out of memory");
             return NETMANAGER_ERR_INTERNAL;
         }
-        ret = Conv2Ch(exclusion, httpProxy->exclusionList[i++]));
+        ret = Conv2Ch(exclusion, httpProxy->exclusionList[i++]);
         if (ret != NETMANAGER_SUCCESS) {
             return ret;
         }
-}
-httpProxy->exclusionListSize = httpProxyObj.GetExclusionList().size();
+    }
+    httpProxy->exclusionListSize = httpProxyObj.GetExclusionList().size();
 
-return NETMANAGER_SUCCESS;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, OH_NetConn_NetLinkInfo *info)
@@ -181,7 +181,7 @@ int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, OH_NetConn_NetLinkInfo *info)
         return ret;
     }
     ret = Conv2Ch(infoObj.tcpBufferSizes_, info->tcpBufferSizes);
-    if ((ret != NETMANAGER_SUCCESS) {
+    if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
 
@@ -217,18 +217,13 @@ int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, OH_NetConn_NetLinkInfo *info)
             NETMGR_LOG_E("routeList out of memory");
             return NETMANAGER_ERR_INTERNAL;
         }
-        ret = Conv2Route(route, &(info->routeList[i++]); if (ret != NETMANAGER_SUCCESS))
-        {
+        ret = Conv2Route(route, &(info->routeList[i++]));
+        if (ret != NETMANAGER_SUCCESS) {
             return ret;
         }
     }
     info->routeListSize = infoObj.routeList_.size();
-    ret = Conv2HttpProxy(infoObj.httpProxy_, &(info->httpProxy))
-    if (ret != NETMANAGER_SUCCESS) {
-        return ret;
-    }
-
-    return NETMANAGER_SUCCESS;
+    return Conv2HttpProxy(infoObj.httpProxy_, &(info->httpProxy));
 }
 
 int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, OH_NetConn_NetAllCapabilities *netAllCaps)
@@ -253,7 +248,7 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, OH_NetConn_Ne
     netAllCaps->netCapsSize = netAllCapsObj.netCaps_.size();
 
     i = 0;
-    for (const auto& bearType : netAllCapsObj.bearerTypes) {
+    for (const auto& bearType : netAllCapsObj.bearerTypes_) {
         if (i > OH_NETCONN_MAX_BEAR_TYPE_SIZE - 1) {
             NETMGR_LOG_E("bearerTypes out of memory");
             return NETMANAGER_ERR_INTERNAL;
@@ -270,5 +265,4 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, OH_NetConn_Ne
 
     return NETMANAGER_SUCCESS;
 }
-
 } // namespace OHOS::NetManagerStandard

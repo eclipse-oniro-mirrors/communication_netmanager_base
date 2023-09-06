@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_ndk_library("libnetconn_ndk") {
-  output_name = "netconn"
+  output_name = "netconn_ndk"
   output_extension = "z.so"
   ndk_description_file = "./libnetconn.ndk.json"
   min_compact_version = "1"
@@ -51,4 +51,5 @@ ohos_shared_library("netconn_ndk") {
 
   part_name = "netmanager_base"
   subsystem_name = "communication"
+  innerapi_tags = [ "ndk" ]
 }
