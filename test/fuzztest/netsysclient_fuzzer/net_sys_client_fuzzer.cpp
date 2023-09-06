@@ -471,6 +471,27 @@ void NetworkAddRouteParcelFuzzTest(const uint8_t *data, size_t size)
                     dataParcel);
 }
 
+void NetworkRemoveRouteParcelFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    int32_t netId = GetData<int32_t>();
+    NetsysNative::RouteInfoParcel routInfo;
+    routInfo.destination = GetStringFromData(STR_LEN);
+    routInfo.ifName = GetStringFromData(STR_LEN);
+    routInfo.nextHop = GetStringFromData(STR_LEN);
+
+    dataParcel.WriteInt32(netId);
+    dataParcel.WriteString(routInfo.destination);
+    dataParcel.WriteString(routInfo.ifName);
+    dataParcel.WriteString(routInfo.nextHop);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_REMOVE_ROUTE_PARCEL),
+                    dataParcel);
+}
+
 void NetworkSetDefaultFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
@@ -1249,6 +1270,8 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::NetworkAddUidsFuzzTest(data, size);
     OHOS::NetManagerStandard::NetworkDelUidsFuzzTest(data, size);
     OHOS::NetManagerStandard::GetIfaceStatsFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetUidStatsFuzzTest(data, size);
+    OHOS::NetManagerStandard::NetworkRemoveRouteParcelFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
