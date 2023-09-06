@@ -113,6 +113,7 @@ public:
     int32_t NetDiagSetInterfaceActiveState(const std::string &ifaceName, bool up) override;
 
 private:
+    int32_t DealBandwidth(uint32_t uid, uint32_t code);
     static inline BrokerDelegator<NetsysNativeServiceProxy> delegator_;
 };
 } // namespace NetsysNative

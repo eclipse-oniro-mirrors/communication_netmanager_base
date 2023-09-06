@@ -1234,113 +1234,25 @@ int32_t NetsysNativeServiceProxy::BandwidthRemoveIfaceQuota(const std::string &i
 
 int32_t NetsysNativeServiceProxy::BandwidthAddDeniedList(uint32_t uid)
 {
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETNATIVE_LOGE("WriteInterfaceToken failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteUint32(uid)) {
-        NETNATIVE_LOGE("WriteUint32 failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    auto remote = Remote();
-    if (remote == nullptr) {
-        return IPC_PROXY_NULL_INVOKER_ERR;
-    }
-    int32_t error = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_ADD_DENIED_LIST),
-                                        data, reply, option);
-    if (error != ERR_NONE) {
-        NETNATIVE_LOGE("proxy SendRequest failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-    int32_t ret = reply.ReadInt32();
+    int32_t ret = DealBandwidth(uid, static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_ADD_DENIED_LIST));
     return ret;
 }
 
 int32_t NetsysNativeServiceProxy::BandwidthRemoveDeniedList(uint32_t uid)
 {
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETNATIVE_LOGE("WriteInterfaceToken failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteUint32(uid)) {
-        NETNATIVE_LOGE("WriteUint32 failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    auto remote = Remote();
-    if (remote == nullptr) {
-        return IPC_PROXY_NULL_INVOKER_ERR;
-    }
-    int32_t error = remote->SendRequest(
-        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_DENIED_LIST), data, reply, option);
-    if (error != ERR_NONE) {
-        NETNATIVE_LOGE("proxy SendRequest failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-    int32_t ret = reply.ReadInt32();
+    int32_t ret = DealBandwidth(uid, static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_DENIED_LIST));
     return ret;
 }
 
 int32_t NetsysNativeServiceProxy::BandwidthAddAllowedList(uint32_t uid)
 {
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETNATIVE_LOGE("WriteInterfaceToken failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteUint32(uid)) {
-        NETNATIVE_LOGE("WriteUint32 failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    auto remote = Remote();
-    if (remote == nullptr) {
-        return IPC_PROXY_NULL_INVOKER_ERR;
-    }
-    int32_t error = remote->SendRequest(
-        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_ADD_ALLOWED_LIST), data, reply, option);
-    if (error != ERR_NONE) {
-        NETNATIVE_LOGE("proxy SendRequest failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-    int32_t ret = reply.ReadInt32();
+    int32_t ret = DealBandwidth(uid, static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_ADD_ALLOWED_LIST));
     return ret;
 }
 
 int32_t NetsysNativeServiceProxy::BandwidthRemoveAllowedList(uint32_t uid)
 {
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETNATIVE_LOGE("WriteInterfaceToken failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteUint32(uid)) {
-        NETNATIVE_LOGE("WriteUint32 failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    auto remote = Remote();
-    if (remote == nullptr) {
-        return IPC_PROXY_NULL_INVOKER_ERR;
-    }
-    int32_t error = remote->SendRequest(
-        static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_ALLOWED_LIST), data, reply, option);
-    if (error != ERR_NONE) {
-        NETNATIVE_LOGE("proxy SendRequest failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-    int32_t ret = reply.ReadInt32();
+    int32_t ret = DealBandwidth(uid, static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_BANDWIDTH_REMOVE_ALLOWED_LIST));
     return ret;
 }
 
@@ -1750,6 +1662,33 @@ int32_t NetsysNativeServiceProxy::SetIptablesCommandForRes(const std::string &cm
         return ERR_FLATTEN_OBJECT;
     }
     return ret;
+}
+
+int32_t NetsysNativeServiceProxy::DealBandwidth(uint32_t uid, uint32_t code)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETNATIVE_LOGE("WriteInterfaceToken failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(uid)) {
+        NETNATIVE_LOGE("WriteUint32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t error = remote->SendRequest(code, data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    return reply.ReadInt32();
 }
 } // namespace NetsysNative
 } // namespace OHOS

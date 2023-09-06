@@ -439,18 +439,11 @@ void GetAddrInfoFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     uint16_t netId = GetData<uint16_t>();
+    std::string hostName = GetStringFromData(STR_LEN);
 
-    if (!dataParcel.WriteString("-L -n")) {
-        return;
-    }
-
+    dataParcel.WriteString(hostName);
     dataParcel.WriteString(serverName);
-    dataParcel.WriteUint32(hints.aiFlags);
-    dataParcel.WriteUint32(hints.aiFamily);
-    dataParcel.WriteUint32(hints.aiSockType);
-    dataParcel.WriteUint32(hints.aiProtocol);
-    dataParcel.WriteUint32(hints.aiAddrLen);
-    dataParcel.WriteString(hints.aiCanonName);
+    dataParcel.WriteRawData(&hints, sizeof(AddrInfo));
     dataParcel.WriteUint16(netId);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_ADDR_INFO), dataParcel);
 }
@@ -572,8 +565,9 @@ void FirewallSetUidsAllowedListChainFuzzTest(const uint8_t *data, size_t size)
 
     dataParcel.WriteString(ifaceName);
     dataParcel.WriteString(ipAddress);
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_ALLOWED_LIST_CHAIN),
-                    dataParcel);
+    OnRemoteRequest(
+        static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_ALLOWED_LIST_CHAIN),
+        dataParcel);
 }
 
 void FirewallSetUidsDeniedListChainFuzzTest(const uint8_t *data, size_t size)

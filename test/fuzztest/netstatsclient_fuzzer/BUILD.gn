@@ -38,16 +38,8 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
-    "-flto",
-    "-fsanitize=cfi",
-    "-fsanitize-cfi-cross-dso",
-    "-fvisibility=hidden",
   ]
-  ldflags = [
-    "-flto",
-    "-fsanitize=cfi",
-    "-fsanitize-cfi-cross-dso",
-  ]
+
   sources = [
     "mock_net_permission.cpp",
     "net_stats_client_fuzzer.cpp",
