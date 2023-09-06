@@ -67,6 +67,7 @@ public:
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     int32_t GetNetCapData(MessageParcel &reply, NetAllCapabilities &netAllCap);
+    int32_t RemoteSendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply);
 
 private:
     static inline BrokerDelegator<NetConnServiceProxy> delegator_;
