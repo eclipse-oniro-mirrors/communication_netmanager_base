@@ -87,13 +87,13 @@ int32_t ConnManager::CreatePhysicalNetwork(uint16_t netId, NetworkPermission per
         needReinitRouteFlag_ = false;
     }
     std::shared_ptr<NetsysNetwork> network = std::make_shared<PhysicalNetwork>(netId, permission);
-    networks_[netId] = network;
+    networks_.EnsureInsert(netId, network);
     return NETMANAGER_SUCCESS;
 }
 
 int32_t ConnManager::CreateVirtualNetwork(uint16_t netId, bool hasDns)
 {
-    networks_[netId] = std::make_shared<VirtualNetwork>(netId, hasDns);
+    networks_.EnsureInsert(netId, std::make_shared<VirtualNetwork>(netId, hasDns));
     return NETMANAGER_SUCCESS;
 }
 
