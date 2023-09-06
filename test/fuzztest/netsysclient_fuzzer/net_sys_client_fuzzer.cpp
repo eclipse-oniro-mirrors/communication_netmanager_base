@@ -628,6 +628,7 @@ void SetInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(cfg.ifName);
     dataParcel.WriteString(cfg.hwAddr);
     dataParcel.WriteString(cfg.ipv4Addr);
+    dataParcel.WriteInt32(cfg.prefixLength);
     uint32_t vectorLength = GetData<uint32_t>() % VECTOR_MAX_SIZE;
     dataParcel.WriteInt32(static_cast<int32_t>(vectorLength));
     for (uint32_t i = 0; i <= vectorLength; i++) {
