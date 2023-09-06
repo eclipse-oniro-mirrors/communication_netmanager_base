@@ -44,21 +44,7 @@ int32_t NetPolicyCallbackProxy::NetUidPolicyChange(uint32_t uid, uint32_t policy
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int32_t ret = remote->SendRequest(static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_POLICY_CHANGE),
-                                      data, reply, option);
-    if (ret != 0) {
-        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-    }
-    return ret;
+    return SendRequest(data, static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_POLICY_CHANGE));
 }
 
 int32_t NetPolicyCallbackProxy::NetUidRuleChange(uint32_t uid, uint32_t rule)
@@ -79,21 +65,7 @@ int32_t NetPolicyCallbackProxy::NetUidRuleChange(uint32_t uid, uint32_t rule)
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int32_t ret = remote->SendRequest(static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_RULE_CHANGE),
-                                      data, reply, option);
-    if (ret != 0) {
-        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-    }
-    return ret;
+    return SendRequest(data, static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_UID_RULE_CHANGE));
 }
 
 int32_t NetPolicyCallbackProxy::NetBackgroundPolicyChange(bool isBackgroundPolicyAllow)
@@ -109,21 +81,7 @@ int32_t NetPolicyCallbackProxy::NetBackgroundPolicyChange(bool isBackgroundPolic
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int32_t ret = remote->SendRequest(
-        static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_BACKGROUND_POLICY_CHANGE), data, reply, option);
-    if (ret != 0) {
-        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-    }
-    return ret;
+    return SendRequest(data, static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_BACKGROUND_POLICY_CHANGE));
 }
 
 int32_t NetPolicyCallbackProxy::NetQuotaPolicyChange(const std::vector<NetQuotaPolicy> &quotaPolicies)
@@ -144,21 +102,7 @@ int32_t NetPolicyCallbackProxy::NetQuotaPolicyChange(const std::vector<NetQuotaP
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int32_t ret = remote->SendRequest(
-        static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_QUOTA_POLICY_CHANGE), data, reply, option);
-    if (ret != 0) {
-        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-    }
-    return ret;
+    return SendRequest(data, static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_QUOTA_POLICY_CHANGE));
 }
 
 int32_t NetPolicyCallbackProxy::NetStrategySwitch(const std::string &simId, bool enable)
@@ -179,21 +123,7 @@ int32_t NetPolicyCallbackProxy::NetStrategySwitch(const std::string &simId, bool
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int32_t ret = remote->SendRequest(
-        static_cast<uint32_t>(PolicyCallbackInterfaceCode::NET_POLICY_STRATEGYSWITCH_CHANGE), data, reply, option);
-    if (ret != 0) {
-        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-    }
-    return ret;
+    return SendRequest(data, static_cast<uint32_t>(PolicyCallbackInterfaceCode::NET_POLICY_STRATEGYSWITCH_CHANGE));
 }
 
 int32_t NetPolicyCallbackProxy::NetMeteredIfacesChange(std::vector<std::string> &ifaces)
@@ -216,21 +146,7 @@ int32_t NetPolicyCallbackProxy::NetMeteredIfacesChange(std::vector<std::string> 
         }
     }
 
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int32_t ret = remote->SendRequest(
-        static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_METERED_IFACES_CHANGE), data, reply, option);
-    if (ret != 0) {
-        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
-        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
-    }
-    return ret;
+    return SendRequest(data, static_cast<uint32_t>(PolicyCallbackInterfaceCode::NOTIFY_NET_METERED_IFACES_CHANGE));
 }
 
 bool NetPolicyCallbackProxy::WriteInterfaceToken(MessageParcel &data)
@@ -240,6 +156,25 @@ bool NetPolicyCallbackProxy::WriteInterfaceToken(MessageParcel &data)
         return false;
     }
     return true;
+}
+
+int32_t NetPolicyCallbackProxy::SendRequest(MessageParcel &data, uint32_t code)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("Remote is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(code, data, reply, option);
+    if (ret != 0) {
+        NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
+        return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    }
+
+    return ret;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -175,15 +175,9 @@ int32_t NetStatsDatabaseHelper::SelectData(const uint32_t uid, uint64_t start, u
         NETMGR_LOG_E("Bind int32 failed ret:%{public}d", ret);
         return STATS_ERR_READ_DATA_FAIL;
     }
-    ret = statement_.BindInt64(++idx, start);
+    ret = BindInt64(idx, start, end);
     if (ret != SQLITE_OK) {
-        NETMGR_LOG_E("Bind int64 failed ret:%{public}d", ret);
-        return STATS_ERR_READ_DATA_FAIL;
-    }
-    ret = statement_.BindInt64(++idx, end);
-    if (ret != SQLITE_OK) {
-        NETMGR_LOG_E("Bind int64 failed ret:%{public}d", ret);
-        return STATS_ERR_READ_DATA_FAIL;
+        return ret;
     }
     return Step(infos);
 }
@@ -205,15 +199,9 @@ int32_t NetStatsDatabaseHelper::SelectData(const std::string &iface, uint64_t st
         NETMGR_LOG_E("Bind text failed ret:%{public}d", ret);
         return STATS_ERR_READ_DATA_FAIL;
     }
-    ret = statement_.BindInt64(++idx, start);
+    ret = BindInt64(idx, start, end);
     if (ret != SQLITE_OK) {
-        NETMGR_LOG_E("Bind int64 failed ret:%{public}d", ret);
-        return STATS_ERR_READ_DATA_FAIL;
-    }
-    ret = statement_.BindInt64(++idx, end);
-    if (ret != SQLITE_OK) {
-        NETMGR_LOG_E("Bind int64 failed ret:%{public}d", ret);
-        return STATS_ERR_READ_DATA_FAIL;
+        return ret;
     }
     return Step(infos);
 }
@@ -240,15 +228,9 @@ int32_t NetStatsDatabaseHelper::SelectData(const std::string &iface, const uint3
         NETMGR_LOG_E("Bind text failed ret:%{public}d", ret);
         return STATS_ERR_READ_DATA_FAIL;
     }
-    ret = statement_.BindInt64(++idx, start);
+    ret = BindInt64(idx, start, end);
     if (ret != SQLITE_OK) {
-        NETMGR_LOG_E("Bind int64 failed ret:%{public}d", ret);
-        return STATS_ERR_READ_DATA_FAIL;
-    }
-    ret = statement_.BindInt64(++idx, end);
-    if (ret != SQLITE_OK) {
-        NETMGR_LOG_E("Bind int64 failed ret:%{public}d", ret);
-        return STATS_ERR_READ_DATA_FAIL;
+        return ret;
     }
     return Step(infos);
 }
@@ -318,6 +300,22 @@ int32_t NetStatsDatabaseHelper::Step(std::vector<NetStatsInfo> &infos)
     }
     statement_.ResetStatementAndClearBindings();
     return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsDatabaseHelper::BindInt64(int32_t idx, uint64_t start, uint64_t end)
+{
+    int32_t ret = statement_.BindInt64(++idx, start);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("Bind int64 failed ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+    ret = statement_.BindInt64(++idx, end);
+    if (ret != SQLITE_OK) {
+        NETMGR_LOG_E("Bind int64 failed ret:%{public}d", ret);
+        return STATS_ERR_READ_DATA_FAIL;
+    }
+
+    return ret;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

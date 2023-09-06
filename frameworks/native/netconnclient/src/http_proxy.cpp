@@ -128,7 +128,9 @@ bool HttpProxy::Unmarshalling(Parcel &parcel, HttpProxy &httpProxy)
     std::list<std::string> exclusionList;
     for (uint32_t i = 0; i < size; ++i) {
         std::string s;
-        parcel.ReadString(s);
+        if (!parcel.ReadString(s)) {
+            return false;
+        }
         if (s.size() <= MAX_URL_SIZE) {
             exclusionList.push_back(s);
         }
