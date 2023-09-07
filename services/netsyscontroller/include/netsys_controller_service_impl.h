@@ -690,14 +690,6 @@ public:
      * @return Value the return value of the netsys interface call
      */
     int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override;
-
-    /**
-     * Check network connectivity by sending packets to a host and reporting its response.
-     *
-     * @param pingOption Ping option
-     * @param callback The respond of execute ping cmd.
-     * @return Value the return value of the netsys interface call
-     */
    
 private:
     MockNetsysNativeClient mockNetsysClient_;
