@@ -15,4 +15,5 @@
 type:*OHOS::Parcel*
 type:*OHOS::RefBase*
 fun:*Marshalling*
+fun:*Unmarshalling*
 src:*net_conn_service_proxy.cpp
