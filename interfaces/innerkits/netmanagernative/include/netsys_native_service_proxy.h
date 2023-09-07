@@ -104,13 +104,6 @@ public:
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) override;
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
     int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override;
-    int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) override;
-    int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) override;
-    int32_t NetDiagGetSocketsInfo(NetDiagProtocolType socketType, NetDiagSocketsInfo &socketsInfo) override;
-    int32_t NetDiagGetInterfaceConfig(std::list<NetDiagIfaceConfig> &configs, const std::string &ifaceName) override;
-    int32_t NetDiagUpdateInterfaceConfig(const NetDiagIfaceConfig &config, const std::string &ifaceName,
-                                         bool add) override;
-    int32_t NetDiagSetInterfaceActiveState(const std::string &ifaceName, bool up) override;
 
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);
