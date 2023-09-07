@@ -75,6 +75,7 @@ private:
     std::thread iptablesWrapperThread_;
     std::queue<std::string> commandsQueue_;
     std::shared_ptr<EventHandler> handler_ = nullptr;
+    std::shared_ptr<EventRunner> handlerRunner_ = nullptr;
 };
 } // namespace nmd
 } // namespace OHOS

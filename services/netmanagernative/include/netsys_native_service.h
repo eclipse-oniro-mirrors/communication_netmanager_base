@@ -150,13 +150,13 @@ private:
 
     static sptr<NetsysNativeService> instance_;
 
+    std::shared_ptr<IptablesWrapper> iptablesWrapper_ = nullptr;
     std::unique_ptr<OHOS::nmd::NetManagerNative> netsysService_ = nullptr;
     std::unique_ptr<OHOS::nmd::NetlinkManager> manager_ = nullptr;
     std::unique_ptr<OHOS::nmd::DhcpController> dhcpController_ = nullptr;
     std::unique_ptr<OHOS::nmd::FwmarkNetwork> fwmarkNetwork_ = nullptr;
     std::unique_ptr<OHOS::nmd::SharingManager> sharingManager_ = nullptr;
     std::unique_ptr<OHOS::NetManagerStandard::NetsysBpfStats> bpfStats_ = nullptr;
-    std::shared_ptr<IptablesWrapper> iptablesWrapper_ = nullptr;
     std::shared_ptr<OHOS::nmd::NetDiagWrapper> netDiagWrapper = nullptr;
 
     sptr<INotifyCallback> notifyCallback_ = nullptr;

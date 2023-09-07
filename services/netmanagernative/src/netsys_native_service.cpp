@@ -139,7 +139,7 @@ bool NetsysNativeService::Init()
     dhcpController_ = std::make_unique<OHOS::nmd::DhcpController>();
     fwmarkNetwork_ = std::make_unique<OHOS::nmd::FwmarkNetwork>();
     sharingManager_ = std::make_unique<SharingManager>();
-    iptablesWrapper_ = DelayedSingleton<IptablesWrapper>::GetInstance();
+    iptablesWrapper_ = IptablesWrapper::GetInstance();
     netDiagWrapper = NetDiagWrapper::GetInstance();
 
     auto ret = OHOS::NetManagerStandard::LoadElf(BFP_NAME_NETSYS_PATH);
