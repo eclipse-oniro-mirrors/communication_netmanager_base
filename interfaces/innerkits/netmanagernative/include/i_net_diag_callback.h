@@ -18,7 +18,6 @@
 #include <string>
 
 #include "iremote_broker.h"
-
 #include "netsys_net_diag_data.h"
 
 namespace OHOS {

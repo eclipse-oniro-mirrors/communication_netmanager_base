@@ -15,9 +15,8 @@
 #ifndef NET_DIAG_CALLBACK_PROXY_H
 #define NET_DIAG_CALLBACK_PROXY_H
 
-#include "iremote_proxy.h"
-
 #include "i_net_diag_callback.h"
+#include "iremote_proxy.h"
 
 namespace OHOS {
 namespace NetsysNative {
