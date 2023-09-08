@@ -23,9 +23,8 @@
 #include "netmanager_base_common_utils.h"
 #include "netmanager_base_permission.h"
 #include "netnative_log_wrapper.h"
-#include "securec.h"
-
 #include "netsys_native_service_stub.h"
+#include "securec.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
@@ -89,7 +88,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitFirewallOpToInterfaceMap();
     InitOpToInterfaceMapExt();
     InitNetDiagOpToInterfaceMap();
-    uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
+    uids_ = {UID_ROOT,  UID_SHELL,         UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
              UID_SAMGR, UID_PARAM_WATCHER, UID_EDM};
 }
 
@@ -1163,7 +1162,7 @@ int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, Message
 int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply)
 {
     if (!NetManagerStandard::NetManagerPermission::CheckNetSysInternalPermission(
-        NetManagerStandard::Permission::NETSYS_INTERNAL)) {
+            NetManagerStandard::Permission::NETSYS_INTERNAL)) {
         NETNATIVE_LOGE("CmdSetIptablesCommandForRes CheckNetSysInternalPermission failed");
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
