@@ -14,16 +14,15 @@
  */
 
 #include "net_diag_wrapper.h"
+#include "net_manager_constants.h"
+#include "netmanager_base_common_utils.h"
+#include "netnative_log_wrapper.h"
 
 #include <algorithm>
 #include <iomanip>
 #include <pthread.h>
 #include <sstream>
 #include <thread>
-
-#include "net_manager_constants.h"
-#include "netmanager_base_common_utils.h"
-#include "netnative_log_wrapper.h"
 
 namespace OHOS {
 namespace nmd {
@@ -85,18 +84,16 @@ constexpr const char *PING_NAME_DOES_NOT_RESOLVED = "Name does not resolve";
 constexpr const char *PING_NETWORK_UNREACHABLE = "Network unreachable";
 } // namespace
 
-NetDiagWrapper::NetDiagWrapper()
-{
-}
+NetDiagWrapper::NetDiagWrapper() {}
 
 int32_t NetDiagWrapper::PingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback)
 {
+    NETNATIVE_LOGI("Generate ping command: ");
     std::string command;
     int32_t ret = GeneratePingCommand(pingOption, command);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-    NETNATIVE_LOGI("Generate ping command: %{public}s", command.c_str());
 
     auto wrapper = shared_from_this();
     std::thread pingThread([wrapper, command, callback]() {
@@ -198,6 +195,7 @@ int32_t NetDiagWrapper::GetInterfaceConfig(std::list<NetDiagIfaceConfig> &config
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
+    std::chrono::steady_clock::time_point pt1 = std::chrono::steady_clock::now();
     std::regex nameRegex(R"(([^\s]+)\s+Link encap:([^\s]+)\s+HWaddr\s+([^\s]+)|([^\s]+)\s+Link encap:(.*))");
     std::regex inetRegex(R"(inet addr:([^\s]+)\s+(?:Bcast:([^\s]+)\s+)?(?:Mask:([^\s]+))?)");
     std::regex inet6Regex(R"(inet6 addr:\s+([^\s]+)\s+Scope:\s+([^\s]+))");
@@ -238,6 +236,11 @@ int32_t NetDiagWrapper::GetInterfaceConfig(std::list<NetDiagIfaceConfig> &config
             continue;
         }
     }
+
+    std::chrono::steady_clock::time_point pt2 = std::chrono::steady_clock::now();
+    NETNATIVE_LOGE("GetInterfaceConfig regex   use time  %{public}d (ms)",
+                   static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(tp2 - tp1).count()));
+
     return NETMANAGER_SUCCESS;
 }
 
