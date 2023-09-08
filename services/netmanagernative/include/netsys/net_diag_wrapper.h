@@ -21,15 +21,13 @@
 #include <mutex>
 #include <regex>
 
-#include "singleton.h"
-
 #include "i_net_diag_callback.h"
 #include "netsys_net_diag_data.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace nmd {
 namespace {
-// using namespace OHOS::AppExecFwk;
 using namespace NetsysNative;
 } // namespace
 class NetDiagWrapper : public std::enable_shared_from_this<NetDiagWrapper> {
@@ -66,11 +64,6 @@ private:
     void ExtractIfaceMtu(const std::smatch &match, NetDiagIfaceConfig &ifaceInfo);
     void ExtractIfaceTxQueueLen(const std::smatch &match, NetDiagIfaceConfig &ifaceInfo);
     void ExtractIfaceTransDataBytes(const std::smatch &match, NetDiagIfaceConfig &ifaceInfo);
-
-private:
-    // std::shared_ptr<EventHandler> eventHandler_ = nullptr;
-    // std::mutex execMutex_;
-    // std::condition_variable condVar_;
 };
 } // namespace nmd
 } // namespace OHOS
