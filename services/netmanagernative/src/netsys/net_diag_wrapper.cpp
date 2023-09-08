@@ -23,7 +23,6 @@
 #include <pthread.h>
 #include <sstream>
 #include <thread>
-#include <chrono>
 
 namespace OHOS {
 namespace nmd {
@@ -237,11 +236,6 @@ int32_t NetDiagWrapper::GetInterfaceConfig(std::list<NetDiagIfaceConfig> &config
             continue;
         }
     }
-
-    std::chrono::steady_clock::time_point tp2 = std::chrono::steady_clock::now();
-    NETNATIVE_LOGE("GetInterfaceConfig regex   use time  %{public}d (ms)",
-                   static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(tp2 - tp1).count()));
-
     return NETMANAGER_SUCCESS;
 }
 
