@@ -16,9 +16,9 @@
 #ifndef NETSYS_CONTROLLER_H
 #define NETSYS_CONTROLLER_H
 
+#include "i_net_diag_callback.h"
 #include "i_netsys_controller_service.h"
 #include "refbase.h"
-
 namespace OHOS {
 namespace NetManagerStandard {
 class NetsysController {

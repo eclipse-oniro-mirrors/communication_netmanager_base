@@ -126,7 +126,7 @@ void Rollback()
 
 SharingManager::SharingManager()
 {
-    iptablesWrapper_ = DelayedSingleton<IptablesWrapper>::GetInstance();
+    iptablesWrapper_ = IptablesWrapper::GetInstance();
 }
 
 void SharingManager::InitChildChains()

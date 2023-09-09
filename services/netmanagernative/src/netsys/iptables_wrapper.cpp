@@ -38,16 +38,24 @@ IptablesWrapper::IptablesWrapper()
         isIptablesSystemAccess_ = false;
     }
 
-    auto eventLoop = AppExecFwk::EventRunner::Create("IptablesWrapper");
-    if (eventLoop == nullptr) {
+    handlerRunner_ = AppExecFwk::EventRunner::Create("IptablesWrapper");
+    if (handlerRunner_ == nullptr) {
         return;
     }
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop);
+    handler_ = std::make_shared<AppExecFwk::EventHandler>(handlerRunner_);
 }
 
 IptablesWrapper::~IptablesWrapper()
 {
     isRunningFlag_ = false;
+    if (handlerRunner_) {
+        handlerRunner_->Stop();
+        handlerRunner_.reset();
+    }
+    if (handler_) {
+        handler_.reset();
+        handler_ = nullptr;
+    }
 }
 
 void IptablesWrapper::ExecuteCommand(const std::string &command)

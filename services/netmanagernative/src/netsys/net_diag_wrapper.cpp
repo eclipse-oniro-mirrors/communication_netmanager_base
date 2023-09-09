@@ -14,16 +14,15 @@
  */
 
 #include "net_diag_wrapper.h"
+#include "net_manager_constants.h"
+#include "netmanager_base_common_utils.h"
+#include "netnative_log_wrapper.h"
 
 #include <algorithm>
 #include <iomanip>
 #include <pthread.h>
 #include <sstream>
 #include <thread>
-
-#include "net_manager_constants.h"
-#include "netmanager_base_common_utils.h"
-#include "netnative_log_wrapper.h"
 
 namespace OHOS {
 namespace nmd {
@@ -85,18 +84,16 @@ constexpr const char *PING_NAME_DOES_NOT_RESOLVED = "Name does not resolve";
 constexpr const char *PING_NETWORK_UNREACHABLE = "Network unreachable";
 } // namespace
 
-NetDiagWrapper::NetDiagWrapper()
-{
-}
+NetDiagWrapper::NetDiagWrapper() {}
 
 int32_t NetDiagWrapper::PingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback)
 {
+    NETNATIVE_LOGI("Generate ping command: ");
     std::string command;
     int32_t ret = GeneratePingCommand(pingOption, command);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-    NETNATIVE_LOGI("Generate ping command: %{public}s", command.c_str());
 
     auto wrapper = shared_from_this();
     std::thread pingThread([wrapper, command, callback]() {
@@ -198,6 +195,7 @@ int32_t NetDiagWrapper::GetInterfaceConfig(std::list<NetDiagIfaceConfig> &config
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
+   
     std::regex nameRegex(R"(([^\s]+)\s+Link encap:([^\s]+)\s+HWaddr\s+([^\s]+)|([^\s]+)\s+Link encap:(.*))");
     std::regex inetRegex(R"(inet addr:([^\s]+)\s+(?:Bcast:([^\s]+)\s+)?(?:Mask:([^\s]+))?)");
     std::regex inet6Regex(R"(inet6 addr:\s+([^\s]+)\s+Scope:\s+([^\s]+))");
@@ -404,15 +402,15 @@ void NetDiagWrapper::ExtractPingHeader(const std::smatch &match, NetDiagPingResu
                        PING_HEADER_MATCH_SIZE);
         return;
     }
-    constexpr int32_t HOST_POS = 1;
-    constexpr int32_t IP_POS = 2;
-    constexpr int32_t DATA_SIZE_POS = 3;
-    constexpr int32_t PAYLOAD_SIZE_POS = 4;
+    constexpr int32_t hostPos = 1;
+    constexpr int32_t ipPos = 2;
+    constexpr int32_t dataSizePos = 3;
+    constexpr int32_t payloadSizePos = 4;
 
-    pingResult.host_ = match[HOST_POS].str();
-    pingResult.ipAddr_ = match[IP_POS].str();
-    pingResult.dateSize_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[DATA_SIZE_POS].str()));
-    pingResult.payloadSize_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[PAYLOAD_SIZE_POS].str()));
+    pingResult.host_ = match[hostPos].str();
+    pingResult.ipAddr_ = match[ipPos].str();
+    pingResult.dateSize_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[dataSizePos].str()));
+    pingResult.payloadSize_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[payloadSizePos].str()));
 }
 
 void NetDiagWrapper::ExtractIcmpSeqInfo(const std::smatch &match, NetDiagPingResult &pingResult)
@@ -423,18 +421,18 @@ void NetDiagWrapper::ExtractIcmpSeqInfo(const std::smatch &match, NetDiagPingRes
         return;
     }
 
-    constexpr int32_t BYTES_POS = 1;
-    constexpr int32_t FROM_POS = 2;
-    constexpr int32_t ICMP_SEQ_POS = 3;
-    constexpr int32_t TTL_POS = 4;
-    constexpr int32_t TIME_POS = 5;
+    constexpr int32_t bytesPos = 1;
+    constexpr int32_t fromPos = 2;
+    constexpr int32_t icmpSeqPos = 3;
+    constexpr int32_t ttlPos = 4;
+    constexpr int32_t timePos = 5;
 
     PingIcmpResponseInfo icmpRespInfo;
-    icmpRespInfo.bytes_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[BYTES_POS].str()));
-    icmpRespInfo.from_ = match[FROM_POS].str();
-    icmpRespInfo.icmpSeq_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[ICMP_SEQ_POS].str()));
-    icmpRespInfo.ttl_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[TTL_POS].str()));
-    icmpRespInfo.costTime_ = CommonUtils::StrToUint(match[TIME_POS].str());
+    icmpRespInfo.bytes_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[bytesPos].str()));
+    icmpRespInfo.from_ = match[fromPos].str();
+    icmpRespInfo.icmpSeq_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[icmpSeqPos].str()));
+    icmpRespInfo.ttl_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[ttlPos].str()));
+    icmpRespInfo.costTime_ = CommonUtils::StrToUint(match[timePos].str());
     pingResult.icmpRespList_.push_back(icmpRespInfo);
 }
 
@@ -445,10 +443,10 @@ void NetDiagWrapper::ExtractPingStatistics(const std::smatch &match, NetDiagPing
                        PING_STATISTICS_MATCH_SIZE);
         return;
     }
-    constexpr int32_t TRANS_POS = 1;
-    constexpr int32_t RECV_POS = 2;
-    pingResult.transCount_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[TRANS_POS].str()));
-    pingResult.recvCount_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[RECV_POS].str()));
+    constexpr int32_t transPos = 1;
+    constexpr int32_t recvPos = 2;
+    pingResult.transCount_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[transPos].str()));
+    pingResult.recvCount_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[recvPos].str()));
 }
 
 void NetDiagWrapper::ExtractRouteTableInfo(const std::smatch &match, std::list<NetDiagRouteTable> &routeTables)
@@ -458,24 +456,24 @@ void NetDiagWrapper::ExtractRouteTableInfo(const std::smatch &match, std::list<N
                        NETSTAT_ROUTE_TABLE_MATCH_SIZE);
         return;
     }
-    constexpr int32_t DST_POS = 1;
-    constexpr int32_t GATEWAY_POS = 2;
-    constexpr int32_t MASK_POS = 3;
-    constexpr int32_t FLAGS_POS = 4;
-    constexpr int32_t METRIC_POS = 5;
-    constexpr int32_t REF_POS = 6;
-    constexpr int32_t USE_POS = 7;
-    constexpr int32_t IFACE_POS = 8;
+    constexpr int32_t dstPos = 1;
+    constexpr int32_t gatewayPos = 2;
+    constexpr int32_t maskPos = 3;
+    constexpr int32_t flagsPos = 4;
+    constexpr int32_t metricPos = 5;
+    constexpr int32_t refPos = 6;
+    constexpr int32_t usePos = 7;
+    constexpr int32_t ifacePos = 8;
 
     NetDiagRouteTable routeTable;
-    routeTable.destination_ = match[DST_POS].str();
-    routeTable.gateway_ = match[GATEWAY_POS].str();
-    routeTable.mask_ = match[MASK_POS].str();
-    routeTable.flags_ = match[FLAGS_POS].str();
-    routeTable.metric_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[METRIC_POS].str()));
-    routeTable.ref_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[REF_POS].str()));
-    routeTable.use_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[USE_POS].str()));
-    routeTable.iface_ = match[IFACE_POS].str();
+    routeTable.destination_ = match[dstPos].str();
+    routeTable.gateway_ = match[gatewayPos].str();
+    routeTable.mask_ = match[maskPos].str();
+    routeTable.flags_ = match[flagsPos].str();
+    routeTable.metric_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[metricPos].str()));
+    routeTable.ref_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[refPos].str()));
+    routeTable.use_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[usePos].str()));
+    routeTable.iface_ = match[ifacePos].str();
     routeTables.push_back(routeTable);
     return;
 }
@@ -487,26 +485,26 @@ void NetDiagWrapper::ExtractNetProtoSocketsInfo(const std::smatch &match, NetDia
                        NETSTAT_NET_PROTOCOL_MATCH_SIZE);
         return;
     }
-    constexpr int32_t PROTO_POS = 1;
-    constexpr int32_t RECV_POS = 2;
-    constexpr int32_t SEND_POS = 3;
-    constexpr int32_t LOCAL_ADDR_POS = 4;
-    constexpr int32_t FOREIGN_ADDR_POS = 5;
-    constexpr int32_t STATE_POS = 6;
-    constexpr int32_t USER_POS = 7;
-    constexpr int32_t INODE_POS = 8;
-    constexpr int32_t PROGRAM_POS = 9;
+    constexpr int32_t protoPos = 1;
+    constexpr int32_t recvPos = 2;
+    constexpr int32_t sendPos = 3;
+    constexpr int32_t localAddrPos = 4;
+    constexpr int32_t foreignAddrPos = 5;
+    constexpr int32_t statePos = 6;
+    constexpr int32_t userPos = 7;
+    constexpr int32_t iNodePos = 8;
+    constexpr int32_t programePos = 9;
 
     NeyDiagNetProtoSocketInfo socketInfo;
-    socketInfo.protocol_ = match[PROTO_POS].str();
-    socketInfo.recvQueue_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[RECV_POS].str()));
-    socketInfo.sendQueue_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[SEND_POS].str()));
-    socketInfo.localAddr_ = match[LOCAL_ADDR_POS].str();
-    socketInfo.foreignAddr_ = match[FOREIGN_ADDR_POS].str();
-    socketInfo.state_ = match[STATE_POS].str();
-    socketInfo.user_ = match[USER_POS].str();
-    socketInfo.inode_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[INODE_POS].str()));
-    socketInfo.programName_ = match[PROGRAM_POS].str();
+    socketInfo.protocol_ = match[protoPos].str();
+    socketInfo.recvQueue_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[recvPos].str()));
+    socketInfo.sendQueue_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[sendPos].str()));
+    socketInfo.localAddr_ = match[localAddrPos].str();
+    socketInfo.foreignAddr_ = match[foreignAddrPos].str();
+    socketInfo.state_ = match[statePos].str();
+    socketInfo.user_ = match[userPos].str();
+    socketInfo.inode_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[iNodePos].str()));
+    socketInfo.programName_ = match[programePos].str();
     socketsInfo.netProtoSocketsInfo_.push_back(socketInfo);
 }
 
@@ -517,22 +515,22 @@ void NetDiagWrapper::ExtractUnixSocketsInfo(const std::smatch &match, NetDiagSoc
                        NETSTAT_UNIX_MATCH_SIZE);
         return;
     }
-    constexpr int32_t PROTO_POS = 1;
-    constexpr int32_t REF_CNT_POS = 2;
-    constexpr int32_t FLAGS_POS = 3;
-    constexpr int32_t TYPE_POS = 4;
-    constexpr int32_t STATE_POS = 5;
-    constexpr int32_t INODE_POS = 6;
-    constexpr int32_t PATH_POS = 7;
+    constexpr int32_t protoPos = 1;
+    constexpr int32_t refCntPos = 2;
+    constexpr int32_t flagsPos = 3;
+    constexpr int32_t typePos = 4;
+    constexpr int32_t statePos = 5;
+    constexpr int32_t iNodePos = 6;
+    constexpr int32_t pathPos = 7;
 
     NetDiagUnixSocketInfo socketInfo;
-    socketInfo.protocol_ = match[PROTO_POS].str();
-    socketInfo.refCnt_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[REF_CNT_POS].str()));
-    socketInfo.flags_ = match[FLAGS_POS].str();
-    socketInfo.type_ = match[TYPE_POS].str();
-    socketInfo.state_ = match[STATE_POS].str();
-    socketInfo.inode_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[INODE_POS].str()));
-    socketInfo.path_ = match[PATH_POS].str();
+    socketInfo.protocol_ = match[protoPos].str();
+    socketInfo.refCnt_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[refCntPos].str()));
+    socketInfo.flags_ = match[flagsPos].str();
+    socketInfo.type_ = match[typePos].str();
+    socketInfo.state_ = match[statePos].str();
+    socketInfo.inode_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[iNodePos].str()));
+    socketInfo.path_ = match[pathPos].str();
     socketsInfo.unixSocketsInfo_.push_back(socketInfo);
 }
 
@@ -543,18 +541,18 @@ void NetDiagWrapper::ExtractIfaceName(const std::smatch &match, NetDiagIfaceConf
                        IFCONFIG_NAME_INFO_MATCH_SIZE);
         return;
     }
-    constexpr int32_t IFACE_NAME_POS = 1;
-    constexpr int32_t LINK_ENCAP_POS = 2;
-    constexpr int32_t MAC_ADDR_POS = 3;
-    constexpr int32_t LO_IFACE_POS = 4;
-    constexpr int32_t LO_LINK_ENCAP_POS = 5;
-    if (!match[IFACE_NAME_POS].str().empty()) {
-        ifaceInfo.ifaceName_ = match[IFACE_NAME_POS].str();
-        ifaceInfo.linkEncap_ = match[LINK_ENCAP_POS].str();
-        ifaceInfo.macAddr_ = match[MAC_ADDR_POS].str();
-    } else if (!match[LO_IFACE_POS].str().empty()) {
-        ifaceInfo.ifaceName_ = match[LO_IFACE_POS].str();
-        ifaceInfo.linkEncap_ = match[LO_LINK_ENCAP_POS].str();
+    constexpr int32_t iFaceNamePos = 1;
+    constexpr int32_t linkEncapPos = 2;
+    constexpr int32_t matAddrPos = 3;
+    constexpr int32_t loIfacePos = 4;
+    constexpr int32_t loLinkEncapPos = 5;
+    if (!match[iFaceNamePos].str().empty()) {
+        ifaceInfo.ifaceName_ = match[iFaceNamePos].str();
+        ifaceInfo.linkEncap_ = match[linkEncapPos].str();
+        ifaceInfo.macAddr_ = match[matAddrPos].str();
+    } else if (!match[loIfacePos].str().empty()) {
+        ifaceInfo.ifaceName_ = match[loIfacePos].str();
+        ifaceInfo.linkEncap_ = match[loLinkEncapPos].str();
         ifaceInfo.macAddr_ = "";
     }
 }
@@ -567,14 +565,14 @@ void NetDiagWrapper::ExtractIfaceInet(const std::smatch &match, NetDiagIfaceConf
         return;
     }
 
-    constexpr int32_t IFACE_ADDR_POS = 0;
-    constexpr int32_t IFACE_BCAST_POS = 1;
-    constexpr int32_t IFACE_MASK_POS = 2;
+    constexpr int32_t ifaceAddrPos = 0;
+    constexpr int32_t ifaceBcastPos = 1;
+    constexpr int32_t ifaceMaskPos = 2;
 
-    ifaceInfo.ipv4Addr_ = match[IFACE_ADDR_POS].str();
-    ifaceInfo.ipv4Bcast_ = match[IFACE_BCAST_POS].str();
-    if (!match[IFACE_MASK_POS].str().empty()) {
-        ifaceInfo.ipv4Mask_ = match[IFACE_MASK_POS].str();
+    ifaceInfo.ipv4Addr_ = match[ifaceAddrPos].str();
+    ifaceInfo.ipv4Bcast_ = match[ifaceBcastPos].str();
+    if (!match[ifaceMaskPos].str().empty()) {
+        ifaceInfo.ipv4Mask_ = match[ifaceMaskPos].str();
     }
 }
 
@@ -606,8 +604,8 @@ void NetDiagWrapper::ExtractIfaceTxQueueLen(const std::smatch &match, NetDiagIfa
         return;
     }
 
-    constexpr int32_t IFACE_QUEENLEN_POS = 0;
-    ifaceInfo.txQueueLen_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[IFACE_QUEENLEN_POS].str()));
+    constexpr int32_t ifaceQueenLenPos = 0;
+    ifaceInfo.txQueueLen_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[ifaceQueenLenPos].str()));
 }
 
 void NetDiagWrapper::ExtractIfaceTransDataBytes(const std::smatch &match, NetDiagIfaceConfig &ifaceInfo)
@@ -617,10 +615,10 @@ void NetDiagWrapper::ExtractIfaceTransDataBytes(const std::smatch &match, NetDia
                        IFCONFIG_TRANS_BYTES_MATCH_SIZE);
         return;
     }
-    constexpr int32_t IFACE_RX_POS = 0;
-    constexpr int32_t IFACE_TX_POS = 1;
-    ifaceInfo.rxBytes_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[IFACE_RX_POS].str()));
-    ifaceInfo.txBytes_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[IFACE_TX_POS].str()));
+    constexpr int32_t ifaceRxPos = 0;
+    constexpr int32_t ifaceTxPos = 1;
+    ifaceInfo.rxBytes_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[ifaceRxPos].str()));
+    ifaceInfo.txBytes_ = static_cast<uint16_t>(CommonUtils::StrToUint(match[ifaceTxPos].str()));
 }
 } // namespace nmd
 } // namespace OHOS

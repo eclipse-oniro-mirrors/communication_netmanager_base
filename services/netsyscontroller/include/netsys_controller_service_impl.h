@@ -691,65 +691,6 @@ public:
      */
     int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override;
 
-    /**
-     * Check network connectivity by sending packets to a host and reporting its response.
-     *
-     * @param pingOption Ping option
-     * @param callback The respond of execute ping cmd.
-     * @return Value the return value of the netsys interface call
-     */
-    int32_t NetDiagPingHost(const OHOS::NetsysNative::NetDiagPingOption &pingOption,
-                            const sptr<OHOS::NetsysNative::INetDiagCallback> &callback) override;
-
-    /**
-     * Get networking route table
-     *
-     * @param routeTables Network route table list.
-     * @return Value the return value of the netsys interface call
-     */
-    int32_t NetDiagGetRouteTable(std::list<OHOS::NetsysNative::NetDiagRouteTable> &routeTables) override;
-
-    /**
-     * Get networking sockets info.
-     *
-     * @param socketType Network protocol.
-     * @param socketsInfo The result of network sockets info.
-     * @return Value the return value of the netsys interface call
-     */
-    int32_t NetDiagGetSocketsInfo(OHOS::NetsysNative::NetDiagProtocolType socketType,
-                                  OHOS::NetsysNative::NetDiagSocketsInfo &socketsInfo) override;
-
-    /**
-     * Get network interface configuration.
-     *
-     * @param configs The result of network interface configuration.
-     * @param ifaceName Get interface configuration information for the specified interface name.
-     *                  If the interface name is empty, default to getting all interface configuration information.
-     * @return Value the return value of the netsys interface call
-     */
-    int32_t NetDiagGetInterfaceConfig(std::list<OHOS::NetsysNative::NetDiagIfaceConfig> &configs,
-                                      const std::string &ifaceName) override;
-
-    /**
-     * Update network interface configuration.
-     *
-     * @param configs Network interface configuration.
-     * @param ifaceName Interface name.
-     * @param add Add or delete.
-     * @return Value the return value of the netsys interface call
-     */
-    int32_t NetDiagUpdateInterfaceConfig(const OHOS::NetsysNative::NetDiagIfaceConfig &config,
-                                         const std::string &ifaceName, bool add) override;
-
-    /**
-     * Set network interface up/down state.
-     *
-     * @param ifaceName Interface name.
-     * @param up Up or down.
-     * @return Value the return value of the netsys interface call
-     */
-    int32_t NetDiagSetInterfaceActiveState(const std::string &ifaceName, bool up) override;
-
 private:
     MockNetsysNativeClient mockNetsysClient_;
     NetsysNativeClient netsysClient_;
