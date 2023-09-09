@@ -28,10 +28,15 @@
 #endif
 
 #include "net_conn_constants.h"
+#include "net_diag_callback_stub.h"
 #include "net_manager_constants.h"
 #include "net_stats_constants.h"
+#include "netnative_log_wrapper.h"
 #include "netsys_controller.h"
+#include "netsys_ipc_interface_code.h"
+#include "netsys_net_diag_data.h"
 
+#include <thread>
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
@@ -57,6 +62,7 @@ const int32_t TEST_STATS_UID = 11111;
 int g_ifaceFd = 5;
 const int64_t BYTES = 2097152;
 const uint32_t FIREWALL_RULE = 1;
+bool g_isWaitAsync = false;
 
 using namespace Security::AccessToken;
 using Security::AccessToken::AccessTokenID;
@@ -144,6 +150,69 @@ public:
     }
 };
 
+class NetDiagCallbackControllerTest : public IRemoteStub<NetsysNative::INetDiagCallback> {
+public:
+    NetDiagCallbackControllerTest()
+    {
+        memberFuncMap_[static_cast<uint32_t>(NetsysNative::NetDiagInterfaceCode::ON_NOTIFY_PING_RESULT)] =
+            &NetDiagCallbackControllerTest::CmdNotifyPingResult;
+    }
+    virtual ~NetDiagCallbackControllerTest() = default;
+
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
+    {
+        NETNATIVE_LOGI("Stub call start, code:[%{public}d]", code);
+        std::u16string myDescriptor = NetsysNative::NetDiagCallbackStub::GetDescriptor();
+        std::u16string remoteDescriptor = data.ReadInterfaceToken();
+        if (myDescriptor != remoteDescriptor) {
+            NETNATIVE_LOGE("Descriptor checked failed");
+            return NetManagerStandard::NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
+        }
+
+        auto itFunc = memberFuncMap_.find(code);
+        if (itFunc != memberFuncMap_.end()) {
+            auto requestFunc = itFunc->second;
+            if (requestFunc != nullptr) {
+                return (this->*requestFunc)(data, reply);
+            }
+        }
+
+        NETNATIVE_LOGI("Stub default case, need check");
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+
+    int32_t OnNotifyPingResult(const NetsysNative::NetDiagPingResult &pingResult) override
+    {
+        g_isWaitAsync = false;
+        NETNATIVE_LOGI(
+            "OnNotifyPingResult received dateSize_:%{public}d payloadSize_:%{public}d transCount_:%{public}d "
+            "recvCount_:%{public}d",
+            pingResult.dateSize_, pingResult.payloadSize_, pingResult.transCount_, pingResult.recvCount_);
+        return NetManagerStandard::NETMANAGER_SUCCESS;
+    }
+
+private:
+    using NetDiagCallbackFunc = int32_t (NetDiagCallbackControllerTest::*)(MessageParcel &, MessageParcel &);
+
+private:
+    int32_t CmdNotifyPingResult(MessageParcel &data, MessageParcel &reply)
+    {
+        NetsysNative::NetDiagPingResult pingResult;
+        if (!NetsysNative::NetDiagPingResult::Unmarshalling(data, pingResult)) {
+            return NetManagerStandard::NETMANAGER_ERR_READ_DATA_FAIL;
+        }
+
+        int32_t result = OnNotifyPingResult(pingResult);
+        if (!reply.WriteInt32(result)) {
+            return NetManagerStandard::NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NetManagerStandard::NETMANAGER_SUCCESS;
+    }
+
+private:
+    std::map<uint32_t, NetDiagCallbackFunc> memberFuncMap_;
+};
+
 class NetsysControllerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -155,6 +224,8 @@ public:
     void TearDown();
 
     static inline std::shared_ptr<NetsysController> instance_ = nullptr;
+
+    sptr<NetDiagCallbackControllerTest> netDiagCallback = new NetDiagCallbackControllerTest();
 };
 
 void NetsysControllerTest::SetUpTestCase()
@@ -793,6 +864,156 @@ HWTEST_F(NetsysControllerTest, NetsysControllerErr006, TestSize.Level1)
 
     ret = instance_->SetIptablesCommandForRes(iface, iface);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, NetDiagGetRouteTable001, TestSize.Level1)
+{
+    std::list<OHOS::NetsysNative::NetDiagRouteTable> diagrouteTable;
+    auto ret = NetsysController::GetInstance().NetDiagGetRouteTable(diagrouteTable);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    for (const auto &lt : diagrouteTable) {
+        NETNATIVE_LOGI(
+            "show NetDiagRouteTable destination_:%{public}s gateway_:%{public}s"
+            "mask_:%{public}s iface_:%{public}s flags_:%{public}s metric_:%{public}d"
+            "ref_:%{public}d use_:%{public}d",
+            lt.destination_.c_str(), lt.gateway_.c_str(), lt.mask_.c_str(), lt.iface_.c_str(), lt.flags_.c_str(),
+            lt.metric_, lt.ref_, lt.use_);
+    }
+}
+
+void ShowSocketInfo(NetsysNative::NetDiagSocketsInfo &info)
+{
+    for (const auto &lt : info.netProtoSocketsInfo_) {
+        NETNATIVE_LOGI(
+            "ShowSocketInfo NeyDiagNetProtoSocketInfo protocol_:%{public}s localAddr_:%{public}s"
+            "foreignAddr_:%{public}s state_:%{public}s user_:%{public}s programName_:%{public}s recvQueue_:%{public}d"
+            "sendQueue_:%{public}d inode_:%{public}d ",
+            lt.protocol_.c_str(), lt.localAddr_.c_str(), lt.foreignAddr_.c_str(), lt.state_.c_str(), lt.user_.c_str(),
+            lt.programName_.c_str(), lt.recvQueue_, lt.sendQueue_, lt.inode_);
+    }
+
+    for (const auto &lt : info.unixSocketsInfo_) {
+        NETNATIVE_LOGI(
+            "ShowSocketInfo  unixSocketsInfo_ refCnt_:%{public}d inode_:%{public}d protocol_:%{public}s"
+            "flags_:%{public}s type_:%{public}s state_:%{public}s path_:%{public}s",
+            lt.refCnt_, lt.inode_, lt.protocol_.c_str(), lt.flags_.c_str(), lt.type_.c_str(), lt.state_.c_str(),
+            lt.path_.c_str());
+    }
+}
+
+HWTEST_F(NetsysControllerTest, NetDiagGetSocketsInfo001, TestSize.Level1)
+{
+    OHOS::NetsysNative::NetDiagProtocolType socketType = OHOS::NetsysNative::NetDiagProtocolType::PROTOCOL_TYPE_ALL;
+    OHOS::NetsysNative::NetDiagSocketsInfo socketsInfo;
+    auto ret = NetsysController::GetInstance().NetDiagGetSocketsInfo(socketType, socketsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ShowSocketInfo(socketsInfo);
+
+    socketsInfo.unixSocketsInfo_.clear();
+    socketsInfo.netProtoSocketsInfo_.clear();
+    socketType = OHOS::NetsysNative::NetDiagProtocolType::PROTOCOL_TYPE_RAW;
+    ret = NetsysController::GetInstance().NetDiagGetSocketsInfo(socketType, socketsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ShowSocketInfo(socketsInfo);
+
+    socketsInfo.unixSocketsInfo_.clear();
+    socketsInfo.netProtoSocketsInfo_.clear();
+    socketType = OHOS::NetsysNative::NetDiagProtocolType::PROTOCOL_TYPE_TCP;
+    ret = NetsysController::GetInstance().NetDiagGetSocketsInfo(socketType, socketsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ShowSocketInfo(socketsInfo);
+
+    socketsInfo.unixSocketsInfo_.clear();
+    socketsInfo.netProtoSocketsInfo_.clear();
+    socketType = OHOS::NetsysNative::NetDiagProtocolType::PROTOCOL_TYPE_UDP;
+    ret = NetsysController::GetInstance().NetDiagGetSocketsInfo(socketType, socketsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ShowSocketInfo(socketsInfo);
+
+    socketsInfo.unixSocketsInfo_.clear();
+    socketsInfo.netProtoSocketsInfo_.clear();
+    socketType = OHOS::NetsysNative::NetDiagProtocolType::PROTOCOL_TYPE_UNIX;
+    ret = NetsysController::GetInstance().NetDiagGetSocketsInfo(socketType, socketsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ShowSocketInfo(socketsInfo);
+}
+
+HWTEST_F(NetsysControllerTest, NetDiagGetInterfaceConfig001, TestSize.Level1)
+{
+    std::list<OHOS::NetsysNative::NetDiagIfaceConfig> configs;
+    std::string ifaceName = "eth0";
+
+    auto ret = NetsysController::GetInstance().NetDiagGetInterfaceConfig(configs, ifaceName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    for (const OHOS::NetsysNative::NetDiagIfaceConfig &lt : configs) {
+        NETNATIVE_LOGI(
+            "ShowSocketInfo  DiagGetInterfaceConfig  ifaceName_:%{public}s linkEncap_:%{public}s  macAddr_:%{public}s"
+            "ipv4Addr_:%{public}s ipv4Bcast_:%{public}s ipv4Mask_:%{public}s mtu_:%{public}d txQueueLen_:%{public}d"
+            "rxBytes_:%{public}d txBytes_:%{public}d isUp_:%{public}d",
+            lt.ifaceName_.c_str(), lt.linkEncap_.c_str(), lt.macAddr_.c_str(), lt.ipv4Addr_.c_str(),
+            lt.ipv4Bcast_.c_str(), lt.ipv4Mask_.c_str(), lt.mtu_, lt.txQueueLen_, lt.rxBytes_, lt.txBytes_, lt.isUp_);
+    }
+
+    configs.clear();
+    ifaceName = "eth1";
+    ret = NetsysController::GetInstance().NetDiagGetInterfaceConfig(configs, ifaceName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    for (const OHOS::NetsysNative::NetDiagIfaceConfig &lt : configs) {
+        NETNATIVE_LOGI(
+            "ShowSocketInfo  DiagGetInterfaceConfig ifaceName_:%{public}s linkEncap_:%{public}s  macAddr_:%{public}s"
+            "ipv4Addr_:%{public}s ipv4Bcast_:%{public}s ipv4Mask_:%{public}s mtu_:%{public}d txQueueLen_:%{public}d"
+            "rxBytes_:%{public}d txBytes_:%{public}d isUp_:%{public}d ",
+            lt.ifaceName_.c_str(), lt.linkEncap_.c_str(), lt.macAddr_.c_str(), lt.ipv4Addr_.c_str(),
+            lt.ipv4Bcast_.c_str(), lt.ipv4Mask_.c_str(), lt.mtu_, lt.txQueueLen_, lt.rxBytes_, lt.txBytes_, lt.isUp_);
+    }
+}
+
+HWTEST_F(NetsysControllerTest, NetDiagSetInterfaceActiveState001, TestSize.Level1)
+{
+    std::list<OHOS::NetsysNative::NetDiagIfaceConfig> configs;
+    std::string ifaceName = "eth0";
+
+    auto ret = NetsysController::GetInstance().NetDiagSetInterfaceActiveState(ifaceName, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    configs.clear();
+    ifaceName = "eth1";
+    ret = NetsysController::GetInstance().NetDiagSetInterfaceActiveState(ifaceName, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, NetDiagUpdateInterfaceConfig001, TestSize.Level1)
+{
+    std::string ifaceName = "eth0";
+    OHOS::NetsysNative::NetDiagIfaceConfig config;
+    config.ifaceName_ = ifaceName;
+    config.ipv4Addr_ = "192.168.222.234";
+    config.ipv4Mask_ = "255.255.255.0";
+    config.ipv4Bcast_ = "255.255.255.0";
+    bool add = true;
+    auto ret = NetsysController::GetInstance().NetDiagUpdateInterfaceConfig(config, ifaceName, add);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ifaceName = "eth1";
+    add = false;
+    ret = NetsysController::GetInstance().NetDiagUpdateInterfaceConfig(config, ifaceName, add);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, NetDiagPing001, TestSize.Level1)
+{
+    OHOS::NetsysNative::NetDiagPingOption pingOption;
+    pingOption.destination_ = "127.0.0.1";
+
+    g_isWaitAsync = true;
+    auto ret = NetsysController::GetInstance().NetDiagPingHost(pingOption, netDiagCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    while (g_isWaitAsync) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 }
 
 } // namespace NetManagerStandard
