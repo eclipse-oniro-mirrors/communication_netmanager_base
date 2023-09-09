@@ -17,6 +17,7 @@
 #include <cstring>
 #include <gtest/gtest.h>
 #include <iostream>
+#include <thread>
 
 #include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
@@ -36,7 +37,6 @@
 #include "netsys_ipc_interface_code.h"
 #include "netsys_net_diag_data.h"
 
-#include <thread>
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
