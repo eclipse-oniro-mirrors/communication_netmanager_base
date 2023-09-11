@@ -14,7 +14,6 @@
  */
 
 #include "net_diag_callback_stub.h"
-
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_ipc_interface_code.h"
