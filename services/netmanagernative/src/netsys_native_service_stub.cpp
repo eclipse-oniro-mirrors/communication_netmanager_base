@@ -23,18 +23,21 @@
 #include "netmanager_base_common_utils.h"
 #include "netmanager_base_permission.h"
 #include "netnative_log_wrapper.h"
-#include "securec.h"
-
 #include "netsys_native_service_stub.h"
+#include "securec.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetsysNative {
-static constexpr int32_t MAX_FLAG_NUM = 64;
-static constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
-static constexpr int32_t NETMANAGER_ERR_PERMISSION_DENIED = 201;
-static constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
-static constexpr uint32_t MAX_UID_ARRAY_SIZE = 1024;
+namespace {
+constexpr int32_t MAX_FLAG_NUM = 64;
+constexpr int32_t MAX_DNS_CONFIG_SIZE = 4;
+constexpr int32_t NETMANAGER_ERR_PERMISSION_DENIED = 201;
+constexpr uint32_t UIDS_LIST_MAX_SIZE = 1024;
+constexpr uint32_t MAX_UID_ARRAY_SIZE = 1024;
+constexpr uint32_t MAX_CONFIG_LIST_SIZE = 1024;
+constexpr uint32_t MAX_ROUTE_TABLE_SIZE = 128;
+} // namespace
 
 NetsysNativeServiceStub::NetsysNativeServiceStub()
 {
@@ -84,7 +87,9 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
     InitOpToInterfaceMapExt();
-    uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_EDM};
+    InitNetDiagOpToInterfaceMap();
+    uids_ = {UID_ROOT,  UID_SHELL,         UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
+             UID_SAMGR, UID_PARAM_WATCHER, UID_EDM};
 }
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
@@ -183,6 +188,22 @@ void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
         &NetsysNativeServiceStub::CmdStartDnsProxyListen;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DNS_PROXY_LISTEN)] =
         &NetsysNativeServiceStub::CmdStopDnsProxyListen;
+}
+
+void NetsysNativeServiceStub::InitNetDiagOpToInterfaceMap()
+{
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETDIAG_PING_HOST)] =
+        &NetsysNativeServiceStub::CmdNetDiagPingHost;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETDIAG_GET_ROUTE_TABLE)] =
+        &NetsysNativeServiceStub::CmdNetDiagGetRouteTable;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETDIAG_GET_SOCKETS_INFO)] =
+        &NetsysNativeServiceStub::CmdNetDiagGetSocketsInfo;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETDIAG_GET_IFACE_CONFIG)] =
+        &NetsysNativeServiceStub::CmdNetDiagGetInterfaceConfig;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETDIAG_UPDATE_IFACE_CONFIG)] =
+        &NetsysNativeServiceStub::CmdNetDiagUpdateInterfaceConfig;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETDIAG_SET_IFACE_ACTIVE_STATE)] =
+        &NetsysNativeServiceStub::CmdNetDiagSetInterfaceActiveState;
 }
 
 int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -1159,5 +1180,160 @@ int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data
     return result;
 }
 
+int32_t NetsysNativeServiceStub::CmdNetDiagPingHost(MessageParcel &data, MessageParcel &reply)
+{
+    NetDiagPingOption pingOption;
+    if (!NetDiagPingOption::Unmarshalling(data, pingOption)) {
+        NETNATIVE_LOGE("Unmarshalling failed.");
+        return IPC_STUB_ERR;
+    }
+
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("remote is nullptr.");
+        return IPC_STUB_ERR;
+    }
+
+    sptr<INetDiagCallback> callback = iface_cast<INetDiagCallback>(remote);
+    int32_t result = NetDiagPingHost(pingOption, callback);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdNetDiagGetRouteTable(MessageParcel &data, MessageParcel &reply)
+{
+    std::list<NetDiagRouteTable> routeTables;
+    int32_t result = NetDiagGetRouteTable(routeTables);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result == NetManagerStandard::NETMANAGER_SUCCESS) {
+        if (!reply.WriteUint32(static_cast<uint32_t>(std::min(MAX_ROUTE_TABLE_SIZE, routeTables.size())))) {
+            NETNATIVE_LOGE("Write uint32 failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+        uint32_t count = 0;
+        for (const auto &routeTable : routeTables) {
+            if (!routeTable.Marshalling(reply)) {
+                NETNATIVE_LOGE("NetDiagRouteTable marshalling failed");
+                return ERR_FLATTEN_OBJECT;
+            }
+            ++count;
+            if (count >= MAX_ROUTE_TABLE_SIZE) {
+                break;
+            }
+        }
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdNetDiagGetSocketsInfo(MessageParcel &data, MessageParcel &reply)
+{
+    uint8_t socketType = 0;
+    if (!data.ReadUint8(socketType)) {
+        NETNATIVE_LOGE("Read uint8 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    NetDiagSocketsInfo socketsInfo;
+    int32_t result = NetDiagGetSocketsInfo(static_cast<NetDiagProtocolType>(socketType), socketsInfo);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result == NetManagerStandard::NETMANAGER_SUCCESS) {
+        if (!socketsInfo.Marshalling(reply)) {
+            NETNATIVE_LOGE("NetDiagSocketsInfo marshalling failed.");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdNetDiagGetInterfaceConfig(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ifaceName;
+    if (!data.ReadString(ifaceName)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    std::list<NetDiagIfaceConfig> configList;
+    int32_t result = NetDiagGetInterfaceConfig(configList, ifaceName);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result == NetManagerStandard::NETMANAGER_SUCCESS) {
+        if (!reply.WriteUint32(static_cast<uint32_t>(std::min(MAX_CONFIG_LIST_SIZE, configList.size())))) {
+            NETNATIVE_LOGE("Write uint32 failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+        uint32_t count = 0;
+        for (const auto &config : configList) {
+            if (!config.Marshalling(reply)) {
+                NETNATIVE_LOGE("NetDiagIfaceConfig marshalling failed");
+                return ERR_FLATTEN_OBJECT;
+            }
+            ++count;
+            if (count >= MAX_CONFIG_LIST_SIZE) {
+                break;
+            }
+        }
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdNetDiagUpdateInterfaceConfig(MessageParcel &data, MessageParcel &reply)
+{
+    NetDiagIfaceConfig config;
+    if (!NetDiagIfaceConfig::Unmarshalling(data, config)) {
+        NETNATIVE_LOGE("NetDiagIfaceConfig unmarshalling failed.");
+        return IPC_STUB_ERR;
+    }
+
+    std::string ifaceName;
+    if (!data.ReadString(ifaceName)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    bool add = false;
+    if (!data.ReadBool(add)) {
+        NETNATIVE_LOGE("Read bool failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = NetDiagUpdateInterfaceConfig(config, ifaceName, add);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdNetDiagSetInterfaceActiveState(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ifaceName;
+    if (!data.ReadString(ifaceName)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    bool up = false;
+    if (!data.ReadBool(up)) {
+        NETNATIVE_LOGE("Read bool failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = NetDiagSetInterfaceActiveState(ifaceName, up);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
 } // namespace NetsysNative
 } // namespace OHOS

@@ -19,6 +19,7 @@
 #include <string>
 
 #include "dns_config_client.h"
+#include "i_net_diag_callback.h"
 #include "i_notify_callback.h"
 #include "interface_type.h"
 #include "iremote_broker.h"
@@ -112,6 +113,13 @@ public:
     virtual int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) = 0;
     virtual int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
     virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) = 0;
+    virtual int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) = 0;
+    virtual int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) = 0;
+    virtual int32_t NetDiagGetSocketsInfo(NetDiagProtocolType socketType, NetDiagSocketsInfo &socketsInfo) = 0;
+    virtual int32_t NetDiagGetInterfaceConfig(std::list<NetDiagIfaceConfig> &configs, const std::string &ifaceName) = 0;
+    virtual int32_t NetDiagUpdateInterfaceConfig(const NetDiagIfaceConfig &config, const std::string &ifaceName,
+                                                 bool add) = 0;
+    virtual int32_t NetDiagSetInterfaceActiveState(const std::string &ifaceName, bool up) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

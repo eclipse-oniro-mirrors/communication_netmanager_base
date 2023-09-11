@@ -647,5 +647,44 @@ int32_t NetsysControllerServiceImpl::SetIptablesCommandForRes(const std::string 
     return netsysClient_.SetIptablesCommandForRes(cmd, respond);
 }
 
+int32_t NetsysControllerServiceImpl::NetDiagPingHost(const OHOS::NetsysNative::NetDiagPingOption &pingOption,
+                                                     const sptr<OHOS::NetsysNative::INetDiagCallback> &callback)
+{
+    NETMGR_LOG_D("NetsysControllerServiceImpl::NetDiagPingHost");
+    return netsysClient_.NetDiagPingHost(pingOption, callback);
+}
+
+int32_t NetsysControllerServiceImpl::NetDiagGetRouteTable(std::list<OHOS::NetsysNative::NetDiagRouteTable> &routeTables)
+{
+    NETMGR_LOG_D("NetsysControllerServiceImpl::NetDiagGetRouteTable");
+    return netsysClient_.NetDiagGetRouteTable(routeTables);
+}
+
+int32_t NetsysControllerServiceImpl::NetDiagGetSocketsInfo(OHOS::NetsysNative::NetDiagProtocolType socketType,
+                                                           OHOS::NetsysNative::NetDiagSocketsInfo &socketsInfo)
+{
+    NETMGR_LOG_D("NetsysControllerServiceImpl::NetDiagGetSocketsInfo");
+    return netsysClient_.NetDiagGetSocketsInfo(socketType, socketsInfo);
+}
+
+int32_t NetsysControllerServiceImpl::NetDiagGetInterfaceConfig(
+    std::list<OHOS::NetsysNative::NetDiagIfaceConfig> &configs, const std::string &ifaceName)
+{
+    NETMGR_LOG_D("NetsysControllerServiceImpl::NetDiagGetInterfaceConfig");
+    return netsysClient_.NetDiagGetInterfaceConfig(configs, ifaceName);
+}
+
+int32_t NetsysControllerServiceImpl::NetDiagUpdateInterfaceConfig(const OHOS::NetsysNative::NetDiagIfaceConfig &config,
+                                                                  const std::string &ifaceName, bool add)
+{
+    NETMGR_LOG_D("NetsysControllerServiceImpl::NetDiagUpdateInterfaceConfig");
+    return netsysClient_.NetDiagUpdateInterfaceConfig(config, ifaceName, add);
+}
+
+int32_t NetsysControllerServiceImpl::NetDiagSetInterfaceActiveState(const std::string &ifaceName, bool up)
+{
+    NETMGR_LOG_D("NetsysControllerServiceImpl::NetDiagSetInterfaceActiveState");
+    return netsysClient_.NetDiagSetInterfaceActiveState(ifaceName, up);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

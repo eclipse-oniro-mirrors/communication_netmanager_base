@@ -26,6 +26,7 @@
 #include "fwmark_network.h"
 #include "i_netsys_service.h"
 #include "iremote_stub.h"
+#include "net_diag_wrapper.h"
 #include "net_manager_native.h"
 #include "netlink_manager.h"
 #include "netsys_native_service_stub.h"
@@ -121,6 +122,13 @@ public:
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) override;
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
     int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override;
+    int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) override;
+    int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) override;
+    int32_t NetDiagGetSocketsInfo(NetDiagProtocolType socketType, NetDiagSocketsInfo &socketsInfo) override;
+    int32_t NetDiagGetInterfaceConfig(std::list<NetDiagIfaceConfig> &configs, const std::string &ifaceName) override;
+    int32_t NetDiagUpdateInterfaceConfig(const NetDiagIfaceConfig &config, const std::string &ifaceName,
+                                         bool add) override;
+    int32_t NetDiagSetInterfaceActiveState(const std::string &ifaceName, bool up) override;
 
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
@@ -149,6 +157,7 @@ private:
     std::unique_ptr<OHOS::nmd::FwmarkNetwork> fwmarkNetwork_ = nullptr;
     std::unique_ptr<OHOS::nmd::SharingManager> sharingManager_ = nullptr;
     std::unique_ptr<OHOS::NetManagerStandard::NetsysBpfStats> bpfStats_ = nullptr;
+    std::shared_ptr<OHOS::nmd::NetDiagWrapper> netDiagWrapper = nullptr;
 
     sptr<INotifyCallback> notifyCallback_ = nullptr;
 
