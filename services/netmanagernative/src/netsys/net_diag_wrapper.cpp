@@ -195,7 +195,7 @@ int32_t NetDiagWrapper::GetInterfaceConfig(std::list<NetDiagIfaceConfig> &config
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-   
+
     std::regex nameRegex(R"(([^\s]+)\s+Link encap:([^\s]+)\s+HWaddr\s+([^\s]+)|([^\s]+)\s+Link encap:(.*))");
     std::regex inetRegex(R"(inet addr:([^\s]+)\s+(?:Bcast:([^\s]+)\s+)?(?:Mask:([^\s]+))?)");
     std::regex inet6Regex(R"(inet6 addr:\s+([^\s]+)\s+Scope:\s+([^\s]+))");
