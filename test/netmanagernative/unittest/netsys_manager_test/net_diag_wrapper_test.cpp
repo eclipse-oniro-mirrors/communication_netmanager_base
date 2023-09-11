@@ -496,6 +496,5 @@ HWTEST_F(NetDiagWrapperTest, RunInterFaceConfigCommandTest003, TestSize.Level1)
     ret = netDiagWrapper->SetInterfaceActiveState(IFACENAME2, true);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
-
 } // namespace NetsysNative
 } // namespace OHOS
