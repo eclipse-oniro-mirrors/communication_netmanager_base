@@ -126,8 +126,9 @@ void NetDiagPingFuzzTest(const uint8_t *data, size_t size)
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
+    OHOS::NetsysNative::NetDiagPingOption pingOption;
 
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_CREATE_PHYSICAL),
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_PING_HOST),
                     dataParcel);
 }
 
