@@ -15,11 +15,16 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
 #define private public
+#define protected public
+#endif
 #include "i_netsys_service.h"
+#include "net_diag_callback_stub.h"
 #include "net_manager_constants.h"
+#include "netnative_log_wrapper.h"
 #include "netsys_native_service_stub.h"
-#undef private
+#include "netsys_net_diag_data.h"
 #include "notify_callback_stub.h"
 
 namespace OHOS {
@@ -27,20 +32,78 @@ namespace NetsysNative {
 namespace {
 using namespace testing::ext;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
-}
+} // namespace
+class NetDiagCallbackServiceStubTest : public IRemoteStub<INetDiagCallback> {
+public:
+    NetDiagCallbackServiceStubTest()
+    {
+        memberFuncMap_[static_cast<uint32_t>(NetDiagInterfaceCode::ON_NOTIFY_PING_RESULT)] =
+            &NetDiagCallbackServiceStubTest::CmdNotifyPingResult;
+    }
+    virtual ~NetDiagCallbackServiceStubTest() = default;
+
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
+    {
+        NETNATIVE_LOGI("Stub call start, code:[%{public}d]", code);
+        std::u16string myDescriptor = NetDiagCallbackStub::GetDescriptor();
+        std::u16string remoteDescriptor = data.ReadInterfaceToken();
+        if (myDescriptor != remoteDescriptor) {
+            NETNATIVE_LOGE("Descriptor checked failed");
+            return NetManagerStandard::NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
+        }
+
+        auto itFunc = memberFuncMap_.find(code);
+        if (itFunc != memberFuncMap_.end()) {
+            auto requestFunc = itFunc->second;
+            if (requestFunc != nullptr) {
+                return (this->*requestFunc)(data, reply);
+            }
+        }
+
+        NETNATIVE_LOGI("Stub default case, need check");
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+    int32_t OnNotifyPingResult(const NetDiagPingResult &pingResult) override
+    {
+        NETNATIVE_LOGI(
+            "OnNotifyPingResult received dateSize_:%{public}d payloadSize_:%{public}d transCount_:%{public}d "
+            "recvCount_:%{public}d",
+            pingResult.dateSize_, pingResult.payloadSize_, pingResult.transCount_, pingResult.recvCount_);
+        return NetManagerStandard::NETMANAGER_SUCCESS;
+    }
+
+private:
+    using NetDiagCallbackFunc = int32_t (NetDiagCallbackServiceStubTest::*)(MessageParcel &, MessageParcel &);
+
+private:
+    int32_t CmdNotifyPingResult(MessageParcel &data, MessageParcel &reply)
+    {
+        NetDiagPingResult pingResult;
+        if (!NetDiagPingResult::Unmarshalling(data, pingResult)) {
+            return NetManagerStandard::NETMANAGER_ERR_READ_DATA_FAIL;
+        }
+
+        int32_t result = OnNotifyPingResult(pingResult);
+        if (!reply.WriteInt32(result)) {
+            return NetManagerStandard::NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NetManagerStandard::NETMANAGER_SUCCESS;
+    }
+
+private:
+    std::map<uint32_t, NetDiagCallbackFunc> memberFuncMap_;
+};
 
 class TestNotifyCallback : public NotifyCallbackStub {
 public:
     TestNotifyCallback() = default;
-    ~TestNotifyCallback() override {};
-    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
-                                      int scope) override
+    ~TestNotifyCallback() override{};
+    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags, int scope) override
     {
         return 0;
     }
 
-    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags,
-                                      int scope) override
+    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags, int scope) override
     {
         return 0;
     }
@@ -85,7 +148,7 @@ public:
 class TestNetsysNativeServiceStub : public NetsysNativeServiceStub {
 public:
     TestNetsysNativeServiceStub() = default;
-    ~TestNetsysNativeServiceStub() override {};
+    ~TestNetsysNativeServiceStub() override{};
 
     int32_t SetInternetPermission(uint32_t uid, uint8_t allow) override
     {
@@ -93,15 +156,13 @@ public:
     }
 
     int32_t SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMsec, uint8_t retryCount,
-                                      const std::vector<std::string> &servers,
-                                      const std::vector<std::string> &domains) override
+                              const std::vector<std::string> &servers, const std::vector<std::string> &domains) override
     {
         return 0;
     }
 
-    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers,
-                                      std::vector<std::string> &domains, uint16_t &baseTimeoutMsec,
-                                      uint8_t &retryCount) override
+    int32_t GetResolverConfig(uint16_t netId, std::vector<std::string> &servers, std::vector<std::string> &domains,
+                              uint16_t &baseTimeoutMsec, uint8_t &retryCount) override
     {
         return 0;
     }
@@ -117,7 +178,7 @@ public:
     }
 
     int32_t GetAddrInfo(const std::string &hostName, const std::string &serverName, const AddrInfo &hints,
-                                uint16_t netId, std::vector<AddrInfo> &res) override
+                        uint16_t netId, std::vector<AddrInfo> &res) override
     {
         return 0;
     }
@@ -143,13 +204,13 @@ public:
     }
 
     int32_t NetworkAddRoute(int32_t netId, const std::string &interfaceName, const std::string &destination,
-                                    const std::string &nextHop) override
+                            const std::string &nextHop) override
     {
         return 0;
     }
 
     int32_t NetworkRemoveRoute(int32_t netId, const std::string &interfaceName, const std::string &destination,
-                                       const std::string &nextHop) override
+                               const std::string &nextHop) override
     {
         return 0;
     }
@@ -179,14 +240,14 @@ public:
         return 0;
     }
 
-    int32_t GetProcSysNet(int32_t family, int32_t which, const std::string &ifname,
-                                  const std::string &parameter, std::string &value) override
+    int32_t GetProcSysNet(int32_t family, int32_t which, const std::string &ifname, const std::string &parameter,
+                          std::string &value) override
     {
         return 0;
     }
 
-    int32_t SetProcSysNet(int32_t family, int32_t which, const std::string &ifname,
-                                  const std::string &parameter, std::string &value) override
+    int32_t SetProcSysNet(int32_t family, int32_t which, const std::string &ifname, const std::string &parameter,
+                          std::string &value) override
     {
         return 0;
     }
@@ -212,13 +273,13 @@ public:
     }
 
     int32_t AddInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
-                                        int32_t prefixLength) override
+                                int32_t prefixLength) override
     {
         return 0;
     }
 
     int32_t DelInterfaceAddress(const std::string &interfaceName, const std::string &addrString,
-                                        int32_t prefixLength) override
+                                int32_t prefixLength) override
     {
         return 0;
     }
@@ -389,7 +450,7 @@ public:
     }
 
     int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
-                                             NetworkSharingTraffic &traffic) override
+                                     NetworkSharingTraffic &traffic) override
     {
         return 0;
     }
@@ -418,6 +479,37 @@ public:
     {
         return 0;
     }
+
+    int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) override
+    {
+        return 0;
+    }
+
+    int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) override
+    {
+        return 0;
+    }
+
+    int32_t NetDiagGetSocketsInfo(NetDiagProtocolType socketType, NetDiagSocketsInfo &socketsInfo) override
+    {
+        return 0;
+    }
+
+    int32_t NetDiagGetInterfaceConfig(std::list<NetDiagIfaceConfig> &configs, const std::string &ifaceName) override
+    {
+        return 0;
+    }
+
+    int32_t NetDiagUpdateInterfaceConfig(const NetDiagIfaceConfig &config, const std::string &ifaceName,
+                                         bool add) override
+    {
+        return 0;
+    }
+
+    int32_t NetDiagSetInterfaceActiveState(const std::string &ifaceName, bool up) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
@@ -428,6 +520,7 @@ public:
     void TearDown();
 
     static inline std::shared_ptr<NetsysNativeServiceStub> notifyStub_ = nullptr;
+    sptr<NetDiagCallbackServiceStubTest> ptrCallback = new NetDiagCallbackServiceStubTest();
 };
 
 void NetsysNativeServiceStubTest::SetUpTestCase()
@@ -1398,6 +1491,107 @@ HWTEST_F(NetsysNativeServiceStubTest, OnRemoteRequestTest001, TestSize.Level1)
     code = 8;
     result = notifyStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNetDiagPingHostCommandForResTest001, TestSize.Level1)
+{
+    NetDiagPingOption pingOption;
+    MessageParcel data;
+
+    pingOption.Marshalling(data);
+    MessageParcel reply;
+
+    int32_t ret = notifyStub_->CmdNetDiagPingHost(data, reply);
+    EXPECT_EQ(ret, IPC_STUB_ERR);
+
+    pingOption.Marshalling(data);
+    data.WriteRemoteObject(ptrCallback->AsObject().GetRefPtr());
+    ret = notifyStub_->CmdNetDiagPingHost(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNetDiagGetRouteTableCommandForResTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t ret = notifyStub_->CmdNetDiagGetRouteTable(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNetDiagGetSocketsInfoCommandForResTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteUint8(NetDiagProtocolType::PROTOCOL_TYPE_ALL);
+    int32_t ret = notifyStub_->CmdNetDiagGetSocketsInfo(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    data.WriteUint8(NetDiagProtocolType::PROTOCOL_TYPE_TCP);
+    ret = notifyStub_->CmdNetDiagGetSocketsInfo(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    data.WriteUint8(NetDiagProtocolType::PROTOCOL_TYPE_UDP);
+    ret = notifyStub_->CmdNetDiagGetSocketsInfo(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    data.WriteUint8(NetDiagProtocolType::PROTOCOL_TYPE_UNIX);
+    ret = notifyStub_->CmdNetDiagGetSocketsInfo(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    data.WriteUint8(NetDiagProtocolType::PROTOCOL_TYPE_RAW);
+    ret = notifyStub_->CmdNetDiagGetSocketsInfo(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNetDiagSetInterfaceActiveStateCommandForResTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("eth0");
+    data.WriteBool(true);
+    int32_t ret = notifyStub_->CmdNetDiagSetInterfaceActiveState(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    data.WriteString("eth0");
+    data.WriteBool(false);
+    ret = notifyStub_->CmdNetDiagSetInterfaceActiveState(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNetDiagUpdateInterfaceConfigCommandForResTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    NetDiagIfaceConfig config;
+    config.ifaceName_ = "eth0";
+    const std::string ifaceName = "eth0";
+    config.ipv4Addr_ = "192.168.222.234";
+    config.mtu_ = 1000;
+    config.ipv4Mask_ = "255.255.255.0";
+    config.ipv4Bcast_ = "255.255.255.0";
+    config.txQueueLen_ = 1000;
+    config.Marshalling(data);
+    data.WriteString("eth0");
+    data.WriteBool(true);
+    int32_t ret = notifyStub_->CmdNetDiagUpdateInterfaceConfig(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNetDiagGetInterfaceConfigCommandForResTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("eth0");
+    int32_t ret = notifyStub_->CmdNetDiagGetInterfaceConfig(data, reply);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    MessageParcel data1;
+    MessageParcel reply1;
+    data1.WriteString("eth1");
+    int32_t ret1 = notifyStub_->CmdNetDiagGetInterfaceConfig(data1, reply1);
+    EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative
 } // namespace OHOS
