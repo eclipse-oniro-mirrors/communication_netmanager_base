@@ -20,6 +20,6 @@ group("fuzztest") {
     "netpolicyclient_fuzzer:fuzztest",
     "netstatsclient_fuzzer:fuzztest",
     "netsysclient_fuzzer:fuzztest",
-    "netsysclient_netdiag_fuzzer:fuzztest",
+    "netsysclientnetdiag_fuzzer:fuzztest",
   ]
 }

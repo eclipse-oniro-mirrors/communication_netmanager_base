@@ -31,11 +31,9 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 const uint8_t *g_baseFuzzData = nullptr;
-static constexpr uint32_t CONVERT_NUMBER_TO_BOOL = 2;
 size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
-constexpr size_t VECTOR_MAX_SIZE = 15;
 } // namespace
 
 template <class T> T GetData()
@@ -120,15 +118,17 @@ bool IsDataAndSizeValid(const uint8_t *data, size_t size, MessageParcel &dataPar
     return true;
 }
 
-void NetDiagPingFuzzTest(const uint8_t *data, size_t size)
+void NetDiagGetSocketInfoFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
-    OHOS::NetsysNative::NetDiagPingOption pingOption;
 
-    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_PING_HOST),
+    NetsysNative::NetDiagProtocolType protoclType =
+        static_cast<NetsysNative::NetDiagProtocolType>(GetData<uint8_t>() % 4);
+    dataParcel.WriteUint8(static_cast<uint8_t>(protoclType));
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_GET_SOCKETS_INFO),
                     dataParcel);
 }
 
@@ -138,11 +138,86 @@ void NetDiagGetRouteTableFuzzTest(const uint8_t *data, size_t size)
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
-
-    NetDiagProtocolType protoclType = GetData<uint8>()%4;
-
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_GET_ROUTE_TABLE),
                     dataParcel);
+}
+
+void NetDiagUpdateInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    OHOS::NetsysNative::NetDiagIfaceConfig config;
+    config.ifaceName_ = GetStringFromData(STR_LEN);
+    config.linkEncap_ = GetStringFromData(STR_LEN);
+    config.macAddr_ = GetStringFromData(STR_LEN);
+    config.ipv4Addr_ = GetStringFromData(STR_LEN);
+    config.ipv4Bcast_ = GetStringFromData(STR_LEN);
+    config.ipv4Mask_ = GetStringFromData(STR_LEN);
+    config.mtu_ = GetData<uint32_t>();
+    config.txQueueLen_ = GetData<uint32_t>();
+    config.rxBytes_ = GetData<int32_t>();
+    config.txBytes_ = GetData<int32_t>();
+
+    if (!config.Marshalling(dataParcel)) {
+        return;
+    }
+
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_UPDATE_IFACE_CONFIG),
+                    dataParcel);
+}
+
+void NetDiagSetInterfaceActiveFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    std::string iFaceName = GetStringFromData(STR_LEN);
+    bool isUp = GetData<uint32_t>() % 2 == 0 ? true : false;
+
+    dataParcel.WriteString(iFaceName);
+    dataParcel.WriteBool(isUp);
+
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_SET_IFACE_ACTIVE_STATE),
+                    dataParcel);
+}
+
+void NetDiagGetInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    std::string iFaceName = GetStringFromData(STR_LEN);
+    dataParcel.WriteString(iFaceName);
+
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_GET_IFACE_CONFIG),
+                    dataParcel);
+}
+
+void NetDiagPingFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    OHOS::NetsysNative::NetDiagPingOption pingOption;
+    pingOption.destination_ = GetStringFromData(STR_LEN);
+    pingOption.source_ = GetStringFromData(STR_LEN);
+    pingOption.count_ = GetData<int16_t>();
+    pingOption.dataSize_ = GetData<int16_t>();
+    pingOption.mark_ = GetData<int16_t>();
+    pingOption.ttl_ = GetData<int16_t>();
+    pingOption.timeOut_ = GetData<int16_t>();
+    pingOption.duration_ = GetData<int16_t>();
+    pingOption.flood_ = GetData<int16_t>() % 2 == 0 ? true : false;
+
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_PING_HOST), dataParcel);
 }
 
 } // namespace NetManagerStandard
@@ -151,8 +226,11 @@ void NetDiagGetRouteTableFuzzTest(const uint8_t *data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
+    OHOS::NetManagerStandard::NetDiagGetSocketInfoFuzzTest(data, size);
     OHOS::NetManagerStandard::NetDiagGetRouteTableFuzzTest(data, size);
+    OHOS::NetManagerStandard::NetDiagUpdateInterfaceConfigFuzzTest(data, size);
+    OHOS::NetManagerStandard::NetDiagSetInterfaceActiveFuzzTest(data, size);
+    OHOS::NetManagerStandard::NetDiagGetInterfaceConfigFuzzTest(data, size);
     OHOS::NetManagerStandard::NetDiagPingFuzzTest(data, size);
-   
     return 0;
 }
