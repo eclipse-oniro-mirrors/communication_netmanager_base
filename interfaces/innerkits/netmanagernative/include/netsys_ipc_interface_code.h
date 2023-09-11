@@ -87,6 +87,12 @@ enum class NetsysInterfaceCode {
     NETSYS_NETWORK_CREATE_VIRTUAL,
     NETSYS_NETWORK_ADD_UIDS,
     NETSYS_NETWORK_DEL_UIDS,
+    NETSYS_NETDIAG_PING_HOST,
+    NETSYS_NETDIAG_GET_ROUTE_TABLE,
+    NETSYS_NETDIAG_GET_SOCKETS_INFO,
+    NETSYS_NETDIAG_GET_IFACE_CONFIG,
+    NETSYS_NETDIAG_UPDATE_IFACE_CONFIG,
+    NETSYS_NETDIAG_SET_IFACE_ACTIVE_STATE,
 };
 
 enum class NotifyInterfaceCode {
@@ -99,6 +105,10 @@ enum class NotifyInterfaceCode {
     ON_ROUTE_CHANGED,
     ON_DHCP_SUCCESS,
     ON_BANDWIDTH_REACHED_LIMIT,
+};
+
+enum class NetDiagInterfaceCode {
+    ON_NOTIFY_PING_RESULT = 0,
 };
 } // namespace NetsysNative
 } // namespace OHOS

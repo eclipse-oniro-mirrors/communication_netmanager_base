@@ -47,7 +47,7 @@ private:
     void InitBandwidthOpToInterfaceMap();
     void InitFirewallOpToInterfaceMap();
     void InitOpToInterfaceMapExt();
-    int32_t CmdEchoServer(MessageParcel &data, MessageParcel &reply);
+    void InitNetDiagOpToInterfaceMap();
     int32_t CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdCreateNetworkCache(MessageParcel &data, MessageParcel &reply);
@@ -114,6 +114,12 @@ private:
     int32_t CmdGetIfaceStats(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetAllStatsInfo(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNetDiagPingHost(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNetDiagGetRouteTable(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNetDiagGetSocketsInfo(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNetDiagGetInterfaceConfig(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNetDiagUpdateInterfaceConfig(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdNetDiagSetInterfaceActiveState(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::vector<int32_t> uids_;

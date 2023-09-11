@@ -195,7 +195,7 @@ int32_t NetDiagWrapper::GetInterfaceConfig(std::list<NetDiagIfaceConfig> &config
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-    std::chrono::steady_clock::time_point pt1 = std::chrono::steady_clock::now();
+   
     std::regex nameRegex(R"(([^\s]+)\s+Link encap:([^\s]+)\s+HWaddr\s+([^\s]+)|([^\s]+)\s+Link encap:(.*))");
     std::regex inetRegex(R"(inet addr:([^\s]+)\s+(?:Bcast:([^\s]+)\s+)?(?:Mask:([^\s]+))?)");
     std::regex inet6Regex(R"(inet6 addr:\s+([^\s]+)\s+Scope:\s+([^\s]+))");
@@ -236,11 +236,6 @@ int32_t NetDiagWrapper::GetInterfaceConfig(std::list<NetDiagIfaceConfig> &config
             continue;
         }
     }
-
-    std::chrono::steady_clock::time_point pt2 = std::chrono::steady_clock::now();
-    NETNATIVE_LOGE("GetInterfaceConfig regex   use time  %{public}d (ms)",
-                   static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(tp2 - tp1).count()));
-
     return NETMANAGER_SUCCESS;
 }
 
