@@ -268,7 +268,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetIfaceRxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.GetIfaceRxBytes(stats, ETH_IFACE_NAME), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(instance_.GetIfaceRxBytes(stats, ETH_IFACE_NAME), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
