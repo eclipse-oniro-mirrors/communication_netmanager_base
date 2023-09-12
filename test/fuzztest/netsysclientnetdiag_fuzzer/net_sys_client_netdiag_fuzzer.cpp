@@ -14,7 +14,6 @@
  */
 
 #include <thread>
-
 #include <securec.h>
 
 #include "iservice_registry.h"
@@ -164,7 +163,6 @@ void NetDiagUpdateInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
     if (!config.Marshalling(dataParcel)) {
         return;
     }
-
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_UPDATE_IFACE_CONFIG),
                     dataParcel);
 }
@@ -195,7 +193,6 @@ void NetDiagGetInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
 
     std::string iFaceName = GetStringFromData(STR_LEN);
     dataParcel.WriteString(iFaceName);
-
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_GET_IFACE_CONFIG),
                     dataParcel);
 }
@@ -216,10 +213,8 @@ void NetDiagPingFuzzTest(const uint8_t *data, size_t size)
     pingOption.timeOut_ = GetData<int16_t>();
     pingOption.duration_ = GetData<int16_t>();
     pingOption.flood_ = GetData<int16_t>() % 2 == 0 ? true : false;
-
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_PING_HOST), dataParcel);
 }
-
 } // namespace NetManagerStandard
 } // namespace OHOS
 
