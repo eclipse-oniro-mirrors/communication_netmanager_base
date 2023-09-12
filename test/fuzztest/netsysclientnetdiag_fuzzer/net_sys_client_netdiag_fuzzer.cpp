@@ -211,7 +211,7 @@ void NetDiagUpdateInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
-
+    bool isAdd = GetData<int32_t>() % 2 == 0 ? true : false;
     OHOS::NetsysNative::NetDiagIfaceConfig config;
     config.ifaceName_ = GetStringFromData(STR_LEN);
     config.linkEncap_ = GetStringFromData(STR_LEN);
@@ -227,6 +227,8 @@ void NetDiagUpdateInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
     if (!config.Marshalling(dataParcel)) {
         return;
     }
+    dataParcel.WriteString(GetStringFromData(STR_LEN));
+    dataParcel.WriteBool(isAdd);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_UPDATE_IFACE_CONFIG),
                     dataParcel);
 }
