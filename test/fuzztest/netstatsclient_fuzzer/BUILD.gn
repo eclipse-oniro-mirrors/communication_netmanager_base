@@ -19,7 +19,7 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("NetStatsClientFuzzTest") {
-  module_out_path = "netmanager_base/net_stats_client"
+  module_out_path = fuzz_test_path
   fuzz_config_file = "$NETMANAGER_BASE_ROOT/test/fuzztest/netstatsclient_fuzzer"
 
   include_dirs = [
