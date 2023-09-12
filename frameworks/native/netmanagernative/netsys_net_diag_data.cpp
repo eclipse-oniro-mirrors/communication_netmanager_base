@@ -162,7 +162,8 @@ bool NetDiagPingResult::Marshalling(Parcel &parcel) const
     if (!parcel.WriteUint16(recvCount_)) {
         return false;
     }
-    if (!parcel.WriteUint32(static_cast<uint32_t>(std::min(ICMP_SEQ_LIST_MAX_SIZE, icmpRespList_.size())))) {
+    if (!parcel.WriteUint32(
+        static_cast<uint32_t>(std::min(ICMP_SEQ_LIST_MAX_SIZE, static_cast<uint32_t>(icmpRespList_.size()))))) {
         return false;
     }
     uint32_t count = 0;
@@ -388,7 +389,8 @@ bool NeyDiagNetProtoSocketInfo::Unmarshalling(Parcel &parcel, NeyDiagNetProtoSoc
 
 bool NetDiagSocketsInfo::Marshalling(Parcel &parcel) const
 {
-    if (!parcel.WriteUint32(static_cast<uint32_t>(std::min(SOCKET_INFO_LIST_MAX_SIZE, unixSocketsInfo_.size())))) {
+    if (!parcel.WriteUint32(
+        static_cast<uint32_t>(std::min(SOCKET_INFO_LIST_MAX_SIZE, static_cast<uint32_t>(unixSocketsInfo_.size()))))) {
         return false;
     }
     uint32_t count = 0;
@@ -401,7 +403,8 @@ bool NetDiagSocketsInfo::Marshalling(Parcel &parcel) const
         }
     }
 
-    if (!parcel.WriteUint32(static_cast<uint32_t>(std::min(SOCKET_INFO_LIST_MAX_SIZE, netProtoSocketsInfo_.size())))) {
+    if (!parcel.WriteUint32(
+        static_cast<uint32_t>(std::min(SOCKET_INFO_LIST_MAX_SIZE, static_cast<uint32_t>(netProtoSocketsInfo_.size()))))) {
         return false;
     }
     count = 0;
@@ -474,7 +477,8 @@ bool NetDiagIfaceConfig::Marshalling(Parcel &parcel) const
         !parcel.WriteString(ipv4Addr_) || !parcel.WriteString(ipv4Bcast_) || !parcel.WriteString(ipv4Mask_)) {
         return false;
     }
-    if (!parcel.WriteUint32(static_cast<uint32_t>(std::min(IFCONFIG_MAX_IPV6_ADDR_NUM, ipv6Addrs_.size())))) {
+    if (!parcel.WriteUint32(static_cast<uint32_t>(
+        std::min(IFCONFIG_MAX_IPV6_ADDR_NUM, static_cast<uint32_t>(ipv6Addrs_.size()))))) {
         return false;
     }
     uint32_t count = 0;

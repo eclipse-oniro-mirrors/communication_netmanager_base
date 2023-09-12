@@ -16,15 +16,16 @@
 #include <securec.h>
 #include <thread>
 
-#include "iptables_wrapper.h"
 #include "iservice_registry.h"
 #include "net_diag_callback_stub.h"
 #include "netsys_native_client.h"
-#include "netsys_native_service.h"
-#include "netsys_native_service_stub.h"
 #include "notify_callback_stub.h"
 #include "singleton.h"
 #include "system_ability_definition.h"
+#define private public
+#include "iptables_wrapper.h"
+#include "netsys_native_service.h"
+#include "netsys_native_service_stub.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -186,9 +187,9 @@ void NetDiagGetSocketInfoFuzzTest(const uint8_t *data, size_t size)
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
-
+    const int maxProtoType = 5;
     NetsysNative::NetDiagProtocolType protoclType =
-        static_cast<NetsysNative::NetDiagProtocolType>(GetData<uint8_t>() % 4);
+        static_cast<NetsysNative::NetDiagProtocolType>(GetData<uint8_t>() % maxProtoType);
     dataParcel.WriteUint8(static_cast<uint8_t>(protoclType));
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_GET_SOCKETS_INFO),
                     dataParcel);
@@ -211,7 +212,7 @@ void NetDiagUpdateInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     const int numberTow = 2;
-    bool isAdd = (GetData<int32_t>() % numberTow == 0) ? true : false;
+    bool isAdd = (GetData<int32_t>() % numberTow == numberTow) ? true : false;
     OHOS::NetsysNative::NetDiagIfaceConfig config;
     config.ifaceName_ = GetStringFromData(STR_LEN);
     config.linkEncap_ = GetStringFromData(STR_LEN);
