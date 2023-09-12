@@ -13,19 +13,20 @@
  * limitations under the License.
  */
 
-#include <thread>
 #include <securec.h>
+#include <thread>
 
 #include "iservice_registry.h"
+#include "net_diag_callback_stub.h"
+#include "netsys_native_client.h"
 #include "notify_callback_stub.h"
 #include "singleton.h"
 #include "system_ability_definition.h"
-
-#include "netsys_native_client.h"
 #define private public
 #include "iptables_wrapper.h"
 #include "netsys_native_service.h"
 #include "netsys_native_service_stub.h"
+
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
@@ -33,6 +34,7 @@ const uint8_t *g_baseFuzzData = nullptr;
 size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
+bool g_isWaitAsync = false;
 } // namespace
 
 template <class T> T GetData()
@@ -60,6 +62,68 @@ std::string GetStringFromData(int strlen)
     std::string str(cstr);
     return str;
 }
+class NetDiagCallbackControllerFuzzTest : public IRemoteStub<NetsysNative::INetDiagCallback> {
+public:
+    NetDiagCallbackControllerFuzzTest()
+    {
+        memberFuncMap_[static_cast<uint32_t>(NetsysNative::NetDiagInterfaceCode::ON_NOTIFY_PING_RESULT)] =
+            &NetDiagCallbackControllerFuzzTest::CmdNotifyPingResult;
+    }
+    virtual ~NetDiagCallbackControllerFuzzTest() = default;
+
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
+    {
+        NETNATIVE_LOGI("Stub call start, code:[%{public}d]", code);
+        std::u16string myDescriptor = NetsysNative::NetDiagCallbackStub::GetDescriptor();
+        std::u16string remoteDescriptor = data.ReadInterfaceToken();
+        if (myDescriptor != remoteDescriptor) {
+            NETNATIVE_LOGE("Descriptor checked failed");
+            return NetManagerStandard::NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
+        }
+
+        auto itFunc = memberFuncMap_.find(code);
+        if (itFunc != memberFuncMap_.end()) {
+            auto requestFunc = itFunc->second;
+            if (requestFunc != nullptr) {
+                return (this->*requestFunc)(data, reply);
+            }
+        }
+
+        NETNATIVE_LOGI("Stub default case, need check");
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+
+    int32_t OnNotifyPingResult(const NetsysNative::NetDiagPingResult &pingResult) override
+    {
+        g_isWaitAsync = false;
+        NETNATIVE_LOGI(
+            "OnNotifyPingResult received dateSize_:%{public}d payloadSize_:%{public}d transCount_:%{public}d "
+            "recvCount_:%{public}d",
+            pingResult.dateSize_, pingResult.payloadSize_, pingResult.transCount_, pingResult.recvCount_);
+        return NetManagerStandard::NETMANAGER_SUCCESS;
+    }
+
+private:
+    using NetDiagCallbackFunc = int32_t (NetDiagCallbackControllerFuzzTest::*)(MessageParcel &, MessageParcel &);
+
+private:
+    int32_t CmdNotifyPingResult(MessageParcel &data, MessageParcel &reply)
+    {
+        NetsysNative::NetDiagPingResult pingResult;
+        if (!NetsysNative::NetDiagPingResult::Unmarshalling(data, pingResult)) {
+            return NetManagerStandard::NETMANAGER_ERR_READ_DATA_FAIL;
+        }
+
+        int32_t result = OnNotifyPingResult(pingResult);
+        if (!reply.WriteInt32(result)) {
+            return NetManagerStandard::NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        return NetManagerStandard::NETMANAGER_SUCCESS;
+    }
+
+private:
+    std::map<uint32_t, NetDiagCallbackFunc> memberFuncMap_;
+};
 
 static bool g_isInited = false;
 void Init()
@@ -199,6 +263,7 @@ void NetDiagGetInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
 
 void NetDiagPingFuzzTest(const uint8_t *data, size_t size)
 {
+    const int maxWaitSecond = 10;
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
@@ -213,7 +278,27 @@ void NetDiagPingFuzzTest(const uint8_t *data, size_t size)
     pingOption.timeOut_ = GetData<int16_t>();
     pingOption.duration_ = GetData<int16_t>();
     pingOption.flood_ = GetData<int16_t>() % 2 == 0 ? true : false;
+
+    if (!pingOption.Marshalling(dataParcel)) {
+        return;
+    }
+
+    sptr<NetDiagCallbackControllerFuzzTest> callBack = new NetDiagCallbackControllerFuzzTest();
+
+    if (!dataParcel.WriteRemoteObject(callBack->AsObject().GetRefPtr())) {
+        return;
+    }
+
+    g_isWaitAsync = true;
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_PING_HOST), dataParcel);
+    std::chrono::steady_clock::time_point tp1 = std::chrono::steady_clock::now();
+    while (g_isWaitAsync) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::chrono::steady_clock::time_point tp2 = std::chrono::steady_clock::now();
+        if (std::chrono::duration_cast<std::chrono::seconds>(tp2 - tp1).count() > maxWaitSecond) {
+            break;
+        }
+    }
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

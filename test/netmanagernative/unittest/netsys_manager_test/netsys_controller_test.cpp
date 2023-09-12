@@ -1020,6 +1020,5 @@ HWTEST_F(NetsysControllerTest, NetDiagPing001, TestSize.Level1)
         }
     }
 }
-
 } // namespace NetManagerStandard
 } // namespace OHOS
