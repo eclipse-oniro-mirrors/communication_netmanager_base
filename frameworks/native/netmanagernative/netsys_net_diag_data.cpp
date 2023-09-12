@@ -403,8 +403,8 @@ bool NetDiagSocketsInfo::Marshalling(Parcel &parcel) const
         }
     }
 
-    if (!parcel.WriteUint32(
-        static_cast<uint32_t>(std::min(SOCKET_INFO_LIST_MAX_SIZE, static_cast<uint32_t>(netProtoSocketsInfo_.size()))))) {
+    if (!parcel.WriteUint32(static_cast<uint32_t>(
+            std::min(SOCKET_INFO_LIST_MAX_SIZE, static_cast<uint32_t>(netProtoSocketsInfo_.size()))))) {
         return false;
     }
     count = 0;
