@@ -186,7 +186,7 @@ HWTEST_F(NetStatsServiceProxyTest, RegisterNetStatsCallbackTest001, TestSize.Lev
 HWTEST_F(NetStatsServiceProxyTest, RegisterNetStatsCallbackTest002, TestSize.Level1)
 {
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.RegisterNetStatsCallback(callback_), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(instance_.RegisterNetStatsCallback(callback_), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -232,7 +232,7 @@ HWTEST_F(NetStatsServiceProxyTest, UnregisterNetStatsCallbackTest001, TestSize.L
 HWTEST_F(NetStatsServiceProxyTest, UnregisterNetStatsCallbackTest002, TestSize.Level1)
 {
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.UnregisterNetStatsCallback(callback_), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(instance_.UnregisterNetStatsCallback(callback_), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -307,7 +307,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetIfaceTxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.GetIfaceTxBytes(stats, ETH_IFACE_NAME), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(instance_.GetIfaceTxBytes(stats, ETH_IFACE_NAME), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -346,7 +346,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetCellularRxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.GetCellularRxBytes(stats), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(instance_.GetCellularRxBytes(stats), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -385,7 +385,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetCellularTxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.GetCellularTxBytes(stats), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(instance_.GetCellularTxBytes(stats), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -424,7 +424,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetAllRxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.GetAllRxBytes(stats), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(instance_.GetAllRxBytes(stats), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -463,7 +463,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetAllTxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.GetAllTxBytes(stats), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(instance_.GetAllTxBytes(stats), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -502,7 +502,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetUidRxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.GetUidRxBytes(stats, TEST_UID), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(instance_.GetUidRxBytes(stats, TEST_UID), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -541,7 +541,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetUidTxBytesTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.GetUidTxBytes(stats, TEST_UID), NETMANAGER_ERR_LOCAL_PTR_NULL);
+    EXPECT_EQ(instance_.GetUidTxBytes(stats, TEST_UID), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -581,7 +581,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetIfaceStatsDetailTest001, TestSize.Level1)
     NetStatsInfo info;
     std::string iface = "wlan0";
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.GetIfaceStatsDetail(iface, 0, UINT32_MAX, info), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
+    EXPECT_EQ(instance_.GetIfaceStatsDetail(iface, 0, UINT32_MAX, info), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -638,7 +638,7 @@ HWTEST_F(NetStatsServiceProxyTest, GetUidStatsDetailTest001, TestSize.Level1)
     std::string iface = "wlan0";
     uint32_t uid = 1234;
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.GetUidStatsDetail(iface, uid, 0, UINT32_MAX, info), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
+    EXPECT_EQ(instance_.GetUidStatsDetail(iface, uid, 0, UINT32_MAX, info), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -697,7 +697,7 @@ HWTEST_F(NetStatsServiceProxyTest, UpdateIfacesStatsTest001, TestSize.Level1)
     NetStatsInfo info;
     std::string iface = "wlan0";
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.UpdateIfacesStats(iface, 0, UINT32_MAX, info), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
+    EXPECT_EQ(instance_.UpdateIfacesStats(iface, 0, UINT32_MAX, info), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -736,7 +736,7 @@ HWTEST_F(NetStatsServiceProxyTest, UpdateIfacesStatsTest003, TestSize.Level1)
 HWTEST_F(NetStatsServiceProxyTest, UpdateStatsDataTest001, TestSize.Level1)
 {
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.UpdateStatsData(), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
+    EXPECT_EQ(instance_.UpdateStatsData(), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
@@ -771,7 +771,7 @@ HWTEST_F(NetStatsServiceProxyTest, UpdateStatsDataTest003, TestSize.Level1)
 HWTEST_F(NetStatsServiceProxyTest, ResetFactoryTest001, TestSize.Level1)
 {
     NetStatsServiceProxy instance_(nullptr);
-    EXPECT_EQ(instance_.ResetFactory(), NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
+    EXPECT_EQ(instance_.ResetFactory(), NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 /**
