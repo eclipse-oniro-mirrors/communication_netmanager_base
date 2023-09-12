@@ -564,10 +564,10 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest018, TestSize.Level1)
 
     AccessToken token(testInfoParms1, testPolicyPrams1);
     ret = NetsysController::GetInstance().SetIptablesCommandForRes("abc", respond);
-    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER);
 
     ret = NetsysController::GetInstance().SetIptablesCommandForRes("-L", respond);
-    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerTest, NetsysControllerErr001, TestSize.Level1)
