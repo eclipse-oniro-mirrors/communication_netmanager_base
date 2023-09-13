@@ -62,6 +62,7 @@ std::string GetStringFromData(int strlen)
     std::string str(cstr);
     return str;
 }
+
 class NetDiagCallbackControllerFuzzTest : public IRemoteStub<NetsysNative::INetDiagCallback> {
 public:
     NetDiagCallbackControllerFuzzTest()
@@ -129,11 +130,7 @@ static bool g_isInited = false;
 void Init()
 {
     nmd::IptablesWrapper::GetInstance();
-    if (!DelayedSingleton<NetsysNative::NetsysNativeService>::GetInstance()->Init()) {
-        g_isInited = false;
-    } else {
-        g_isInited = true;
-    }
+    g_isInited = DelayedSingleton<NetsysNative::NetsysNativeService>::GetInstance()->Init()
 }
 
 int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
@@ -152,18 +149,12 @@ int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
 
 bool WriteInterfaceToken(MessageParcel &data)
 {
-    if (!data.WriteInterfaceToken(NetsysNative::NetsysNativeServiceStub::GetDescriptor())) {
-        return false;
-    }
-    return true;
+   return data.WriteInterfaceToken(NetsysNative::NetsysNativeServiceStub::GetDescriptor())
 }
 
 bool WriteInterfaceTokenCallback(MessageParcel &data)
 {
-    if (!data.WriteInterfaceToken(NetsysNative::NotifyCallbackStub::GetDescriptor())) {
-        return false;
-    }
-    return true;
+   return data.WriteInterfaceToken(NetsysNative::NotifyCallbackStub::GetDescriptor();
 }
 
 bool IsDataAndSizeValid(const uint8_t *data, size_t size, MessageParcel &dataParcel)
@@ -242,7 +233,7 @@ void NetDiagSetInterfaceActiveFuzzTest(const uint8_t *data, size_t size)
     }
     const int numberTow = 2;
     std::string iFaceName = GetStringFromData(STR_LEN);
-    bool isUp = GetData<uint32_t>() % numberTow == 0 ? true : false;
+    bool isUp = GetData<uint32_t>() % numberTow == 0 ;
 
     dataParcel.WriteString(iFaceName);
     dataParcel.WriteBool(isUp);
@@ -281,7 +272,7 @@ void NetDiagPingFuzzTest(const uint8_t *data, size_t size)
     pingOption.ttl_ = GetData<int16_t>();
     pingOption.timeOut_ = GetData<int16_t>();
     pingOption.duration_ = GetData<int16_t>();
-    pingOption.flood_ = GetData<int16_t>() % numberTow == 0 ? true : false;
+    pingOption.flood_ = GetData<int16_t>() % numberTow == 0 ;
 
     if (!pingOption.Marshalling(dataParcel)) {
         return;
