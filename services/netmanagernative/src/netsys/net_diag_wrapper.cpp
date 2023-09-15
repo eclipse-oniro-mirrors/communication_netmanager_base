@@ -398,7 +398,8 @@ void NetDiagWrapper::ExtractPingResult(const std::string &result, const sptr<INe
 void NetDiagWrapper::ExtractPingHeader(const std::smatch &match, NetDiagPingResult &pingResult)
 {
     if (match.size() < PING_HEADER_MATCH_SIZE) {
-        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d", match.size(),
+        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d",
+                       static_cast<uint32_t>(match.size()),
                        PING_HEADER_MATCH_SIZE);
         return;
     }
@@ -416,7 +417,8 @@ void NetDiagWrapper::ExtractPingHeader(const std::smatch &match, NetDiagPingResu
 void NetDiagWrapper::ExtractIcmpSeqInfo(const std::smatch &match, NetDiagPingResult &pingResult)
 {
     if (match.size() < PING_ICMP_SEQ_MATCH_SIZE) {
-        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d", match.size(),
+        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d",
+                       static_cast<uint32_t>(match.size()),
                        PING_ICMP_SEQ_MATCH_SIZE);
         return;
     }
@@ -439,7 +441,8 @@ void NetDiagWrapper::ExtractIcmpSeqInfo(const std::smatch &match, NetDiagPingRes
 void NetDiagWrapper::ExtractPingStatistics(const std::smatch &match, NetDiagPingResult &pingResult)
 {
     if (match.size() < PING_STATISTICS_MATCH_SIZE) {
-        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d", match.size(),
+        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d",
+                       static_cast<uint32_t>(match.size()),
                        PING_STATISTICS_MATCH_SIZE);
         return;
     }
@@ -452,7 +455,8 @@ void NetDiagWrapper::ExtractPingStatistics(const std::smatch &match, NetDiagPing
 void NetDiagWrapper::ExtractRouteTableInfo(const std::smatch &match, std::list<NetDiagRouteTable> &routeTables)
 {
     if (match.size() < NETSTAT_ROUTE_TABLE_MATCH_SIZE) {
-        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d", match.size(),
+        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d",
+                       static_cast<uint32_t>(match.size()),
                        NETSTAT_ROUTE_TABLE_MATCH_SIZE);
         return;
     }
@@ -481,7 +485,8 @@ void NetDiagWrapper::ExtractRouteTableInfo(const std::smatch &match, std::list<N
 void NetDiagWrapper::ExtractNetProtoSocketsInfo(const std::smatch &match, NetDiagSocketsInfo &socketsInfo)
 {
     if (match.size() < NETSTAT_NET_PROTOCOL_MATCH_SIZE) {
-        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d", match.size(),
+        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d",
+                       static_cast<uint32_t>(match.size()),
                        NETSTAT_NET_PROTOCOL_MATCH_SIZE);
         return;
     }
@@ -511,7 +516,8 @@ void NetDiagWrapper::ExtractNetProtoSocketsInfo(const std::smatch &match, NetDia
 void NetDiagWrapper::ExtractUnixSocketsInfo(const std::smatch &match, NetDiagSocketsInfo &socketsInfo)
 {
     if (match.size() < NETSTAT_UNIX_MATCH_SIZE) {
-        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d", match.size(),
+        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d",
+                       static_cast<uint32_t>(match.size()),
                        NETSTAT_UNIX_MATCH_SIZE);
         return;
     }
@@ -537,7 +543,8 @@ void NetDiagWrapper::ExtractUnixSocketsInfo(const std::smatch &match, NetDiagSoc
 void NetDiagWrapper::ExtractIfaceName(const std::smatch &match, NetDiagIfaceConfig &ifaceInfo)
 {
     if (match.size() < IFCONFIG_NAME_INFO_MATCH_SIZE) {
-        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d", match.size(),
+        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d",
+                       static_cast<uint32_t>(match.size()),
                        IFCONFIG_NAME_INFO_MATCH_SIZE);
         return;
     }
@@ -560,7 +567,8 @@ void NetDiagWrapper::ExtractIfaceName(const std::smatch &match, NetDiagIfaceConf
 void NetDiagWrapper::ExtractIfaceInet(const std::smatch &match, NetDiagIfaceConfig &ifaceInfo)
 {
     if (match.size() < IFCONFIG_INET_INFO_MATCH_SIZE) {
-        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d", match.size(),
+        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d",
+                       static_cast<uint32_t>(match.size()),
                        IFCONFIG_INET_INFO_MATCH_SIZE);
         return;
     }
@@ -579,7 +587,8 @@ void NetDiagWrapper::ExtractIfaceInet(const std::smatch &match, NetDiagIfaceConf
 void NetDiagWrapper::ExtractIfaceInet6(const std::smatch &match, NetDiagIfaceConfig &ifaceInfo)
 {
     if (match.size() < IFCONFIG_INET6_INFO_MATCH_SIZE) {
-        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d", match.size(),
+        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d",
+                       static_cast<uint32_t>(match.size()),
                        IFCONFIG_INET6_INFO_MATCH_SIZE);
         return;
     }
@@ -588,7 +597,8 @@ void NetDiagWrapper::ExtractIfaceInet6(const std::smatch &match, NetDiagIfaceCon
 void NetDiagWrapper::ExtractIfaceMtu(const std::smatch &match, NetDiagIfaceConfig &ifaceInfo)
 {
     if (match.size() < IFCONFIG_MTU_MATCH_SIZE) {
-        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d", match.size(),
+        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d",
+                       static_cast<uint32_t>(match.size()),
                        IFCONFIG_MTU_MATCH_SIZE);
         return;
     }
@@ -599,7 +609,8 @@ void NetDiagWrapper::ExtractIfaceMtu(const std::smatch &match, NetDiagIfaceConfi
 void NetDiagWrapper::ExtractIfaceTxQueueLen(const std::smatch &match, NetDiagIfaceConfig &ifaceInfo)
 {
     if (match.size() < IFCONFIG_TX_QUEUE_LEN_MATCH_SIZE) {
-        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d", match.size(),
+        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d",
+                       static_cast<uint32_t>(match.size()),
                        IFCONFIG_TX_QUEUE_LEN_MATCH_SIZE);
         return;
     }
@@ -611,7 +622,8 @@ void NetDiagWrapper::ExtractIfaceTxQueueLen(const std::smatch &match, NetDiagIfa
 void NetDiagWrapper::ExtractIfaceTransDataBytes(const std::smatch &match, NetDiagIfaceConfig &ifaceInfo)
 {
     if (match.size() < IFCONFIG_TRANS_BYTES_MATCH_SIZE) {
-        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d", match.size(),
+        NETNATIVE_LOGE("Regex match size:[%{public}d] is too small than %{public}d",
+                       static_cast<uint32_t>(match.size()),
                        IFCONFIG_TRANS_BYTES_MATCH_SIZE);
         return;
     }
