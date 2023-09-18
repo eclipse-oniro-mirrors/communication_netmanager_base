@@ -309,7 +309,11 @@ sptr<INetConnService> NetConnClient::GetProxy()
         return nullptr;
     }
 
-    deathRecipient_ = (std::make_unique<NetConnDeathRecipient>(*this)).release();
+    deathRecipient_ = new (std::nothrow) NetConnDeathRecipient(*this);
+    if (deathRecipient_ == nullptr) {
+        NETMGR_LOG_E("get deathRecipient_ failed");
+        return nullptr;
+    }
     if ((remote->IsProxyObject()) && (!remote->AddDeathRecipient(deathRecipient_))) {
         NETMGR_LOG_E("add death recipient failed");
         return nullptr;
