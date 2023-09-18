@@ -108,15 +108,15 @@ int32_t NetPolicyFirewall::UpdateDeviceIdlePolicy(bool enable)
 {
     if (deviceIdleMode_ == enable) {
         NETMGR_LOG_E("Same device idle policy.");
-        return NETMANAGER_ERR_PARAMETER_ERROR;
+        return NETMANAGER_SUCCESS;
     }
     if (enable) {
         deviceIdleFirewallRule_->SetAllowedList();
     }
+    deviceIdleMode_ = enable;
     NetmanagerHiTrace::NetmanagerStartSyncTrace("Update device idle firewall status start");
     deviceIdleFirewallRule_->EnableFirewall(enable);
     NetmanagerHiTrace::NetmanagerFinishSyncTrace("Update device idle firewall status end");
-    deviceIdleMode_ = enable;
     // notify to other core.
     auto policyEvent = std::make_shared<PolicyEvent>();
     policyEvent->deviceIdleMode = enable;
@@ -130,15 +130,15 @@ int32_t NetPolicyFirewall::UpdatePowerSavePolicy(bool enable)
 {
     if (powerSaveMode_ == enable) {
         NETMGR_LOG_E("Same power save policy.");
-        return NETMANAGER_ERR_PARAMETER_ERROR;
+        return NETMANAGER_SUCCESS;
     }
     if (enable) {
         powerSaveFirewallRule_->SetAllowedList();
     }
+    powerSaveMode_ = enable;
     NetmanagerHiTrace::NetmanagerStartSyncTrace("Update power save firewall status start");
     powerSaveFirewallRule_->EnableFirewall(enable);
     NetmanagerHiTrace::NetmanagerFinishSyncTrace("Update power save firewall status end");
-    powerSaveMode_ = enable;
     // notify to other core.
     auto policyEvent = std::make_shared<PolicyEvent>();
     policyEvent->powerSaveMode = enable;
