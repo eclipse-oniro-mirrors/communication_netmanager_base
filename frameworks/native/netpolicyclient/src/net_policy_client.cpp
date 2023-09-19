@@ -111,7 +111,11 @@ sptr<INetPolicyService> NetPolicyClient::GetProxy()
         return nullptr;
     }
 
-    deathRecipient_ = (std::make_unique<NetPolicyDeathRecipient>(*this)).release();
+    deathRecipient_ = new (std::nothrow) NetPolicyDeathRecipient(*this);
+    if (deathRecipient_ == nullptr) {
+        NETMGR_LOG_E("get deathRecipient_ failed");
+        return nullptr;
+    }
     if ((remote->IsProxyObject()) && (!remote->AddDeathRecipient(deathRecipient_))) {
         NETMGR_LOG_E("add death recipient failed");
         return nullptr;
