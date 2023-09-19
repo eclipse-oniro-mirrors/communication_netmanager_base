@@ -194,8 +194,13 @@ HWTEST_F(NetsysBpfStatsTest, LoadAndIfaceStats, TestSize.Level1)
     BpfMapper<iface_stats_key, iface_stats_value> ifaceStatsMap(IFACE_STATS_MAP_PATH, BPF_ANY);
     EXPECT_TRUE(ifaceStatsMap.IsValid());
 
+     
     auto ifIndex = if_nametoindex(TEST_IFACE_NAME_WLAN0);
 
+    auto keys = ifaceStatsMap.GetAllKeys();
+    auto r = ifaceStatsMap.Clear(keys);
+    EXPECT_EQ(r, NETSYS_SUCCESS);
+    
     iface_stats_value ifaceStats = {0};
     ifaceStats.rxBytes = TEST_BYTES0;
     ifaceStats.rxPackets = TEST_BYTES0;
@@ -217,13 +222,13 @@ HWTEST_F(NetsysBpfStatsTest, LoadAndIfaceStats, TestSize.Level1)
 
     stats = 0;
     EXPECT_EQ(bpfStats->GetTotalStats(stats, StatsType::STATS_TYPE_RX_BYTES), NETSYS_SUCCESS);
-   
+    EXPECT_EQ(stats, TEST_BYTES0);   
     EXPECT_EQ(bpfStats->GetTotalStats(stats, StatsType::STATS_TYPE_RX_PACKETS), NETSYS_SUCCESS);
-
+    EXPECT_EQ(stats, TEST_BYTES0);
     EXPECT_EQ(bpfStats->GetTotalStats(stats, StatsType::STATS_TYPE_TX_BYTES), NETSYS_SUCCESS);
-
+    EXPECT_EQ(stats, TEST_BYTES0);
     EXPECT_EQ(bpfStats->GetTotalStats(stats, StatsType::STATS_TYPE_TX_PACKETS), NETSYS_SUCCESS);
-
+    EXPECT_EQ(stats, TEST_BYTES0);
     ret = ifaceStatsMap.Delete(ifIndex);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 }

@@ -1472,7 +1472,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdSetIptablesCommandForResTest001, TestSi
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdSetIptablesCommandForRes(data, reply);
-    EXPECT_EQ(ret, ERR_NONE);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetsysNativeServiceStubTest, OnRemoteRequestTest001, TestSize.Level1)
