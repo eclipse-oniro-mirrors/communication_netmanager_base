@@ -1212,7 +1212,8 @@ int32_t NetsysNativeServiceStub::CmdNetDiagGetRouteTable(MessageParcel &data, Me
         return ERR_FLATTEN_OBJECT;
     }
     if (result == NetManagerStandard::NETMANAGER_SUCCESS) {
-        if (!reply.WriteUint32(static_cast<uint32_t>(std::min(MAX_ROUTE_TABLE_SIZE, routeTables.size())))) {
+        if (!reply.WriteUint32(
+            static_cast<uint32_t>(std::min(MAX_ROUTE_TABLE_SIZE, static_cast<uint32_t>(routeTables.size()))))) {
             NETNATIVE_LOGE("Write uint32 failed");
             return ERR_FLATTEN_OBJECT;
         }
@@ -1267,7 +1268,8 @@ int32_t NetsysNativeServiceStub::CmdNetDiagGetInterfaceConfig(MessageParcel &dat
         return ERR_FLATTEN_OBJECT;
     }
     if (result == NetManagerStandard::NETMANAGER_SUCCESS) {
-        if (!reply.WriteUint32(static_cast<uint32_t>(std::min(MAX_CONFIG_LIST_SIZE, configList.size())))) {
+        if (!reply.WriteUint32(
+            static_cast<uint32_t>(std::min(MAX_CONFIG_LIST_SIZE, static_cast<uint32_t>(configList.size()))))) {
             NETNATIVE_LOGE("Write uint32 failed");
             return ERR_FLATTEN_OBJECT;
         }
