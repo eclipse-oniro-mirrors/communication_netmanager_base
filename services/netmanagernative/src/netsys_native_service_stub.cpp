@@ -1177,7 +1177,7 @@ int32_t NetsysNativeServiceStub::CmdSetIptablesCommandForRes(MessageParcel &data
         NETNATIVE_LOGE("Write CmdSetIptablesCommandForRes respond failed");
         return ERR_FLATTEN_OBJECT;
     }
-    return result;
+    return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
 int32_t NetsysNativeServiceStub::CmdNetDiagPingHost(MessageParcel &data, MessageParcel &reply)
