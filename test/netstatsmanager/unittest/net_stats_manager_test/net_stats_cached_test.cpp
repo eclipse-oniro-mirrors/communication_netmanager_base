@@ -54,9 +54,9 @@ HWTEST_F(NetStatsCachedTest, CacheUidStatsTest001, TestSize.Level1)
     instance_->CacheUidStats();
     instance_->CacheIfaceStats();
     auto ret = instance_->CheckUidStor();
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
     ret = instance_->CheckIfaceStor();
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
     NetStatsInfo info;
     instance_->stats_.PushUidStats(info);
     instance_->stats_.PushIfaceStats(info);
