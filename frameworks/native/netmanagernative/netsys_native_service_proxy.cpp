@@ -1651,16 +1651,18 @@ int32_t NetsysNativeServiceProxy::SetIptablesCommandForRes(const std::string &cm
                                           data, reply, option);
     if (error != ERR_NONE) {
         NETNATIVE_LOGE("SetIptablesCommandForRes proxy SendRequest failed");
-        return ERR_FLATTEN_OBJECT;
+        return error;
     }
     int32_t ret;
     if (!reply.ReadInt32(ret)) {
         NETNATIVE_LOGE("SetIptablesCommandForRes proxy read ret failed");
         return ERR_FLATTEN_OBJECT;
     }
-    if (!reply.ReadString(respond)) {
-        NETNATIVE_LOGE("SetIptablesCommandForRes proxy read respond failed");
-        return ERR_FLATTEN_OBJECT;
+    if (ret == ERR_NONE) {
+        if (!reply.ReadString(respond)) {
+            NETNATIVE_LOGE("SetIptablesCommandForRes proxy read respond failed");
+            return ERR_FLATTEN_OBJECT;
+        }
     }
     return ret;
 }

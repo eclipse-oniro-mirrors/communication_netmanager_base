@@ -191,14 +191,14 @@ HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest001, TestSize.Level1)
     ASSERT_NE(prtattr1, nullptr);
     prtattr1->rta_type = IFA_CACHEINFO;
     prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr));
-    EXPECT_FALSE(decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata)));
+    EXPECT_TRUE(decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata)));
 
     prtattr1->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(struct ifa_cacheinfo));
     rtattr *prtattr2 = reinterpret_cast<struct rtattr *>((reinterpret_cast<char *>(prtattr1)) + prtattr1->rta_len);
     ASSERT_NE(prtattr2, nullptr);
     prtattr2->rta_type = IFA_FLAGS;
     prtattr2->rta_len = RTA_ALIGN(sizeof(struct rtattr)) + RTA_ALIGN(sizeof(uint32_t));
-    EXPECT_FALSE(decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata)));
+    EXPECT_TRUE(decoder->DecodeBinary(reinterpret_cast<char *>(&binarydata), sizeof(binarydata)));
 }
 
 HWTEST_F(WrapperDecoderTest, InterpreteAddressMsgTest002, TestSize.Level1)

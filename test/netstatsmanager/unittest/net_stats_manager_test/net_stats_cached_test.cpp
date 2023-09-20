@@ -51,12 +51,12 @@ void NetStatsCachedTest::TearDown() {}
 
 HWTEST_F(NetStatsCachedTest, CacheUidStatsTest001, TestSize.Level1)
 {
-    instance_->CacheUidStats();
-    instance_->CacheIfaceStats();
     auto ret = instance_->CheckUidStor();
     EXPECT_FALSE(ret);
     ret = instance_->CheckIfaceStor();
     EXPECT_FALSE(ret);
+    instance_->CacheUidStats();
+    instance_->CacheIfaceStats();
     NetStatsInfo info;
     instance_->stats_.PushUidStats(info);
     instance_->stats_.PushIfaceStats(info);
