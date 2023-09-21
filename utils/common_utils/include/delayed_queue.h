@@ -30,7 +30,7 @@ template <typename T, size_t ARRAY_SIZE, size_t DELAYED_COUNT> class DelayedQueu
 public:
     DelayedQueue() : index_(0), needRun_(true)
     {
-      pthread_ =  std::thread([this]() {
+      pthread_ = std::thread([this]() {
             while (needRun_) {
                 {
                     std::lock_guard<std::mutex> guard(mutex_);
