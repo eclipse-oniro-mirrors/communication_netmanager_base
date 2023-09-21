@@ -228,7 +228,7 @@ HWTEST_F(NetsysBpfStatsTest, LoadAndIfaceStats, TestSize.Level1)
     EXPECT_EQ(stats, TEST_BYTES0);
     EXPECT_EQ(bpfStats->GetTotalStats(stats, StatsType::STATS_TYPE_TX_PACKETS), NETSYS_SUCCESS);
     EXPECT_EQ(stats, TEST_BYTES0);
-    
+
     ret = ifaceStatsMap.Delete(ifIndex);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 }
