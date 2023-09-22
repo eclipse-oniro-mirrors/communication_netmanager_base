@@ -52,11 +52,11 @@ HWTEST_F(NetConnEventHandlerTest, PostAsyncTaskTest001, TestSize.Level1)
     EXPECT_TRUE(ret);
 }
 
-HWTEST_F(NetConnEventHandlerTest, PostAsyncTaskTest002, TestSize.Level1)
+HWTEST_F(NetConnEventHandlerTest, PostSyncTaskTest001, TestSize.Level1)
 {
     instance_->RemoveAsyncTask(TEST_TASK_NAME);
 
-    bool ret = instance_->PostAsyncTask(g_testCallback, TEST_TASK_NAME, TEST_DELAY_TIME);
+    bool ret = instance_->PostSyncTask(g_testCallback);
     EXPECT_TRUE(ret);
 }
 } // namespace NetManagerStandard
