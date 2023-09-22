@@ -270,8 +270,8 @@ void DnsLookUpParse::SearchNameServer(GetAnswers *getAnswers, int32_t *answersLe
     }
 }
 
-int32_t DnsLookUpParse::DnsGetAnswers(GetAnswers getAnswers, const uint8_t *const *queries, const int32_t *queriesLens,
-                                      uint8_t *const *answers, int32_t *answersLens, int32_t servFailRetry)
+void DnsLookUpParse::DnsGetAnswers(GetAnswers getAnswers, const uint8_t *const *queries, const int32_t *queriesLens,
+                                   uint8_t *const *answers, int32_t *answersLens, int32_t servFailRetry)
 {
     socklen_t psl[1] = {getAnswers.saLen};
     int32_t recvLen = 0;
@@ -316,15 +316,14 @@ int32_t DnsLookUpParse::DnsGetAnswers(GetAnswers getAnswers, const uint8_t *cons
         } else {
             if (memcpy_s(answers[i], recvLen, answers[next], recvLen) != 0) {
                 NETNATIVE_LOGE("memcpy_s faild");
-                return DNS_ERR_INTERNAL;
+                return;
             }
         }
 
         if (next == getAnswers.queriesNum) {
-            return DNS_ERR_NONE;
+            return;
         }
     }
-    return DNS_ERR_INTERNAL;
 }
 
 int32_t DnsLookUpParse::DnsSendQueries(GetAnswers getAnswers, const uint8_t *const *queries, const int32_t *queriesLens,
@@ -348,9 +347,7 @@ int32_t DnsLookUpParse::DnsSendQueries(GetAnswers getAnswers, const uint8_t *con
         if (poll(&pfd, 1, time1 + retryInterval - time2) <= 0) {
             continue;
         }
-        if (DnsGetAnswers(getAnswers, queries, queriesLens, answers, answersLens, servFailRetry) == DNS_ERR_NONE) {
-            break;
-        }
+        DnsGetAnswers(getAnswers, queries, queriesLens, answers, answersLens, servFailRetry);
     }
     return DNS_ERR_NONE;
 }

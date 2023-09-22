@@ -28,7 +28,6 @@ config("net_conn_manager_config") {
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient/include",
     "$INNERKITS_ROOT/netmanagernative/include",
     "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
-    "$THIRD_PARTY_ROOT/curl/include",
   ]
 }
 
@@ -50,8 +49,6 @@ ohos_shared_library("net_conn_manager") {
     "src/net_conn_service.cpp",
     "src/net_conn_service_iface.cpp",
     "src/net_datashare_utils.cpp",
-    "src/net_http_probe.cpp",
-    "src/net_http_probe_result.cpp",
     "src/net_http_proxy_tracker.cpp",
     "src/net_monitor.cpp",
     "src/net_score.cpp",
@@ -71,7 +68,6 @@ ohos_shared_library("net_conn_manager") {
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/curl:curl_shared",
   ]
 
   cflags = [
@@ -138,8 +134,6 @@ ohos_static_library("net_conn_manager_static") {
     "src/net_conn_service.cpp",
     "src/net_conn_service_iface.cpp",
     "src/net_datashare_utils.cpp",
-    "src/net_http_probe.cpp",
-    "src/net_http_probe_result.cpp",
     "src/net_http_proxy_tracker.cpp",
     "src/net_monitor.cpp",
     "src/net_score.cpp",
@@ -159,7 +153,6 @@ ohos_static_library("net_conn_manager_static") {
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/curl:curl_shared",
   ]
 
   external_deps = [

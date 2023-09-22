@@ -24,12 +24,12 @@ NetConnEventHandler::NetConnEventHandler(const std::shared_ptr<AppExecFwk::Event
 
 bool NetConnEventHandler::PostAsyncTask(const Callback &callback, int64_t delayTime)
 {
-    return AppExecFwk::EventHandler::PostTask(callback, delayTime, Priority::HIGH);
+    return AppExecFwk::EventHandler::PostTask(callback, delayTime);
 }
 
-bool NetConnEventHandler::PostSyncTask(const Callback &callback)
+bool NetConnEventHandler::PostAsyncTask(const Callback &callback, const std::string &name, int64_t delayTime)
 {
-    return AppExecFwk::EventHandler::PostSyncTask(callback, Priority::HIGH);
+    return AppExecFwk::EventHandler::PostTask(callback, name, delayTime);
 }
 
 void NetConnEventHandler::RemoveAsyncTask(const std::string &name)

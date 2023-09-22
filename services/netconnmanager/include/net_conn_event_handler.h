@@ -27,8 +27,8 @@ class NetConnEventHandler final : public AppExecFwk::EventHandler {
 public:
     explicit NetConnEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
     ~NetConnEventHandler() override = default;
-    bool PostAsyncTask(const Callback &callback, int64_t delayTime = 0);
-    bool PostSyncTask(const Callback &callback);
+    bool PostAsyncTask(const Callback &callback, int64_t delayTime);
+    bool PostAsyncTask(const Callback &callback, const std::string &name = std::string(), int64_t delayTime = 0);
     void RemoveAsyncTask(const std::string &name);
 };
 } // namespace NetManagerStandard

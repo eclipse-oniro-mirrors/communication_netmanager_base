@@ -235,6 +235,21 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NetConnHiEventTest_008
+ * @tc.desc: Test NetConnManager HiSysEvent:SetSocketParameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_008, TestSize.Level1)
+{
+    int32_t netId = 1000;
+    std::weak_ptr<INetMonitorCallback> callback;
+    callback.reset();
+    sptr<NetMonitor> netMonitor = new (std::nothrow) NetMonitor(netId, callback);
+    int32_t ret = netMonitor->SetSocketParameter(-1);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: NetConnHiEventTest_009
  * @tc.desc: Test NetConnManager HiSysEvent:SetDefaultNetWork
  * @tc.type: FUNC

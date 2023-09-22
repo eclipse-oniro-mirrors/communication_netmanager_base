@@ -118,7 +118,6 @@ struct DpcCtx {
 
 enum DnsResultCode {
     DNS_ERR_NONE = 0,
-    DNS_ERR_INTERNAL = -1,
 };
 
 union {
@@ -149,8 +148,8 @@ private:
     void SetSocAddr(int32_t fd, uint32_t &nns);
     void SearchNameServer(GetAnswers *getAnswers, int32_t *answersLens, const uint8_t *const *queries,
                           const int32_t *queriesLens);
-    int32_t DnsGetAnswers(GetAnswers getAnswers, const uint8_t *const *queries, const int32_t *queriesLens,
-                          uint8_t *const *answers, int32_t *answersLens, int32_t servFailRetry);
+    void DnsGetAnswers(GetAnswers getAnswers, const uint8_t *const *queries, const int32_t *queriesLens,
+                       uint8_t *const *answers, int32_t *answersLens, int32_t servFailRetry);
     int32_t DnsSendQueries(GetAnswers getAnswers, const uint8_t *const *queries, const int32_t *queriesLens,
                            uint8_t *const *answers, int32_t *answersLens);
     int32_t LookupIpLiteralForIPV6(const char *hostName, int32_t &family, struct AddrData buf[ARG_INDEX_1]);

@@ -56,7 +56,6 @@ public:
     bool IsConnecting() const;
     bool IsConnected() const;
     void UpdateNetConnState(NetConnState netConnState);
-    void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
 
     void OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect) override;
 

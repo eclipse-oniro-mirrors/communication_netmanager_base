@@ -350,7 +350,6 @@ private:
     void SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy);
     void RequestAllNetworkExceptDefault();
     void LoadGlobalHttpProxy();
-    void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
 
 private:
     enum ServiceRunningState {
