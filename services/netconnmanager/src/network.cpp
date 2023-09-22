@@ -390,11 +390,17 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
 
 void Network::StartNetDetection(bool needReport)
 {
-    NETMGR_LOG_D("Enter Network::StartNetDetection");
+    NETMGR_LOG_I("Enter Network::StartNetDetection");
     if (needReport) {
         StopNetDetection();
+        InitNetMonitor();
+        return;
     }
-    InitNetMonitor();
+    if (!netMonitor_) {
+        InitNetMonitor();
+        return;
+    }
+    netMonitor_->UpdateNetLinkInfo(netLinkInfo_);
 }
 
 void Network::StopNetDetection()
@@ -408,13 +414,12 @@ void Network::StopNetDetection()
 
 void Network::InitNetMonitor()
 {
+    NETMGR_LOG_I("Enter Network::InitNetMonitor()");
+    std::weak_ptr<INetMonitorCallback> monitorCallback = shared_from_this();
+    netMonitor_ = std::make_shared<NetMonitor>(netId_, netSupplierType_, netLinkInfo_, monitorCallback);
     if (netMonitor_ == nullptr) {
-        std::weak_ptr<INetMonitorCallback> monitorCallback = shared_from_this();
-        netMonitor_ = std::make_shared<NetMonitor>(netId_, monitorCallback);
-        if (netMonitor_ == nullptr) {
-            NETMGR_LOG_E("new NetMonitor failed,netMonitor_ is null!");
-            return;
-        }
+        NETMGR_LOG_E("new NetMonitor failed,netMonitor_ is null!");
+        return;
     }
     netMonitor_->Start();
 }
@@ -530,6 +535,15 @@ void Network::SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const s
 void Network::ResetNetlinkInfo()
 {
     netLinkInfo_.Initialize();
+}
+
+void Network::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
+{
+    if (netMonitor_ == nullptr) {
+        NETMGR_LOG_E("netMonitor_ is nullptr");
+        return;
+    }
+    netMonitor_->UpdateGlobalHttpProxy(httpProxy);
 }
 
 void Network::OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)

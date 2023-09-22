@@ -1400,6 +1400,7 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
             return NETMANAGER_ERR_INTERNAL;
         }
         SendHttpProxyChangeBroadcast(globalHttpProxy_);
+        UpdateGlobalHttpProxy(globalHttpProxy_);
     }
     return NETMANAGER_SUCCESS;
 }
@@ -1448,6 +1449,22 @@ void NetConnService::LoadGlobalHttpProxy()
     NetHttpProxyTracker httpProxyTracker;
     httpProxyTracker.ReadFromSettingsData(globalHttpProxy_);
     isGlobalProxyLoaded_ = true;
+}
+
+void NetConnService::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
+{
+    if (netConnEventHandler_ == nullptr) {
+        NETMGR_LOG_E("netConnEventHandler_ is nullptr.");
+        return;
+    }
+    netConnEventHandler_->PostAsyncTask([this, httpProxy]() {
+        for (const auto &supplier : netSuppliers_) {
+            if (supplier.second == nullptr) {
+                continue;
+            }
+            supplier.second->UpdateGlobalHttpProxy(httpProxy);
+        }
+    });
 }
 
 int32_t NetConnService::NetInterfaceStateCallback::OnInterfaceAddressUpdated(const std::string &addr,

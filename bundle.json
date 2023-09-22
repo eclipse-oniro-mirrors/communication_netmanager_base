@@ -54,6 +54,7 @@
                 "napi"
             ],
             "third_party": [
+                "curl",
                 "jsoncpp",
                 "libuv",
                 "iptables",
