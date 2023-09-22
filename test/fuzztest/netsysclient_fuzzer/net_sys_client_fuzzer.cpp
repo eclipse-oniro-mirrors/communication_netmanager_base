@@ -714,7 +714,6 @@ void GetProcSysNetFuzzTest(const uint8_t *data, size_t size)
     int32_t which = GetData<int32_t>();
     std::string ifname = GetStringFromData(STR_LEN);
     std::string parameter = GetStringFromData(STR_LEN);
-    std::string value = GetStringFromData(STR_LEN);
 
     dataParcel.WriteInt32(family);
     dataParcel.WriteInt32(which);

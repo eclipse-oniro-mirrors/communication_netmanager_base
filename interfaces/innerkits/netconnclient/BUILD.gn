@@ -120,7 +120,10 @@ ohos_shared_library("net_conn_manager_if") {
 
   external_deps += [ "hilog:libhilog" ]
 
-  innerapi_tags = [ "platformsdk" ]
+  innerapi_tags = [
+    "platformsdk",
+    "sasdk",
+  ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
