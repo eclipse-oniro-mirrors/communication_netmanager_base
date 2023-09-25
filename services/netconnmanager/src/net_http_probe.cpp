@@ -232,7 +232,12 @@ std::string NetHttpProbe::GetAddrInfo(const std::string &domain)
     std::string ipAddress;
     char ip[DOMAIN_IP_ADDR_LEN_MAX] = {0};
     for (auto &node : result) {
-        (void)memset_s(&ip, sizeof(ip), 0, sizeof(ip));
+        error_t err = memset_s(&ip, sizeof(ip), 0, sizeof(ip));
+        if (err != EOK) {
+            NETMGR_LOG_E("memset_s failed,err:%{public}d", err);
+            return std::string();
+        }
+
         if (node.aiFamily == AF_INET) {
             if (!inet_ntop(AF_INET, &node.aiAddr.sin.sin_addr, ip, sizeof(ip))) {
                 continue;
