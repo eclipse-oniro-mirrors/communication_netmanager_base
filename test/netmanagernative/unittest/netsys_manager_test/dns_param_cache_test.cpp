@@ -134,7 +134,7 @@ HWTEST_F(DNSParamCacheTest, DestroyNetworkCacheTest, TestSize.Level1)
     DnsParamCache dnsParCache;
     uint16_t netId = 1;
     int32_t ret = dnsParCache.DestroyNetworkCache(netId);
-    EXPECT_EQ(ret, -EEXIST);
+    EXPECT_EQ(ret, -ENOENT);
     dnsParCache.SetDefaultNetwork(netId);
     dnsParCache.CreateCacheForNet(netId);
     ret = dnsParCache.DestroyNetworkCache(netId);

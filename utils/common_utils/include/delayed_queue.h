@@ -30,7 +30,7 @@ template <typename T, size_t ARRAY_SIZE, size_t DELAYED_COUNT> class DelayedQueu
 public:
     DelayedQueue() : index_(0), needRun_(true)
     {
-        std::thread([this]() {
+        pthread_ = std::thread([this]() {
             while (needRun_) {
                 {
                     std::lock_guard<std::mutex> guard(mutex_);
@@ -50,7 +50,7 @@ public:
                 std::lock_guard<std::mutex> guard(mutex_);
                 index_ = (index_ + 1) % (ARRAY_SIZE + DELAYED_COUNT);
             }
-        }).detach();
+        });
     }
 
     ~DelayedQueue()
@@ -58,6 +58,9 @@ public:
         // set needRun_ = false, and notify the thread to wake
         needRun_ = false;
         needRunCondition_.notify_all();
+        if (pthread_.joinable()) {
+            pthread_.join();
+        }
     }
 
     void Put(const std::weak_ptr<T> &elem)
@@ -76,6 +79,7 @@ public:
     }
 
 private:
+    std::thread pthread_;
     int index_;
     std::mutex mutex_;
     std::atomic_bool needRun_;

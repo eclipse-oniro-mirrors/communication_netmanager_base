@@ -196,6 +196,10 @@ HWTEST_F(NetsysBpfStatsTest, LoadAndIfaceStats, TestSize.Level1)
 
     auto ifIndex = if_nametoindex(TEST_IFACE_NAME_WLAN0);
 
+    auto keys = ifaceStatsMap.GetAllKeys();
+    auto r = ifaceStatsMap.Clear(keys);
+    EXPECT_EQ(r, NETSYS_SUCCESS);
+
     iface_stats_value ifaceStats = {0};
     ifaceStats.rxBytes = TEST_BYTES0;
     ifaceStats.rxPackets = TEST_BYTES0;
