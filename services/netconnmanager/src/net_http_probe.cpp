@@ -232,7 +232,7 @@ std::string NetHttpProbe::GetAddrInfo(const std::string &domain)
     std::string ipAddress;
     char ip[DOMAIN_IP_ADDR_LEN_MAX] = {0};
     for (auto &node : result) {
-        error_t err = memset_s(&ip, sizeof(ip), 0, sizeof(ip));
+        errno_t err = memset_s(&ip, sizeof(ip), 0, sizeof(ip));
         if (err != EOK) {
             NETMGR_LOG_E("memset_s failed,err:%{public}d", err);
             return std::string();
@@ -530,11 +530,11 @@ void NetHttpProbe::RecvHttpProbeResponse()
         curl_easy_getinfo(curlMsg->easy_handle, CURLINFO_REDIRECT_URL, &redirectUrl);
 
         if (curlMsg->easy_handle == httpCurl_) {
-            httpProbeResult_ = {responseCode, redirectUrl ? redirectUrl : std::string()};
+            httpProbeResult_ = {responseCode, redirectUrl};
             NETMGR_LOG_I("Recv net[%{public}d] http probe response, code:[%{public}d], redirectUrl:[%{public}s]",
                          netId_, httpProbeResult_.GetCode(), httpProbeResult_.GetRedirectUrl().c_str());
         } else if (curlMsg->easy_handle == httpsCurl_) {
-            httpsProbeResult_ = {responseCode, redirectUrl ? redirectUrl : std::string()};
+            httpsProbeResult_ = {responseCode, redirectUrl};
             NETMGR_LOG_I("Recv net[%{public}d] https probe response, code:[%{public}d], redirectUrl:[%{public}s]",
                          netId_, httpsProbeResult_.GetCode(), httpsProbeResult_.GetRedirectUrl().c_str());
         } else {
