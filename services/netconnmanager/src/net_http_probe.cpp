@@ -526,7 +526,7 @@ void NetHttpProbe::RecvHttpProbeResponse()
         int64_t responseCode = 0;
         curl_easy_getinfo(curlMsg->easy_handle, CURLINFO_RESPONSE_CODE, &responseCode);
 
-        char *redirectUrl = nullptr;
+        std::string redirectUrl;
         curl_easy_getinfo(curlMsg->easy_handle, CURLINFO_REDIRECT_URL, &redirectUrl);
 
         if (curlMsg->easy_handle == httpCurl_) {
