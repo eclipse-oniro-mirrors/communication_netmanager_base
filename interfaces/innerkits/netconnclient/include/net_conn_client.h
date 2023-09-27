@@ -36,6 +36,7 @@ namespace nmd {
 class FwmarkClient;
 }
 namespace NetManagerStandard {
+constexpr uint32_t RESERVED_BUFFER_SIZE = 512;
 class NetConnClient {
 public:
     static NetConnClient &GetInstance();
@@ -373,6 +374,7 @@ private:
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
 private:
+    char buffer_[RESERVED_BUFFER_SIZE] = {0};
     std::mutex mutex_;
     sptr<INetConnService> NetConnService_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
