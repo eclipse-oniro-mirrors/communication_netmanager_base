@@ -18,9 +18,8 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-constexpr int32_t SUCCESS_CODE_MIN = 200;
-constexpr int32_t SUCCESS_CODE_MAX = 299;
-constexpr int32_t PORTAL_CODE_MIN = 300;
+constexpr int32_t SUCCESS_CODE = 204;
+constexpr int32_t PORTAL_CODE_MIN = 200;
 constexpr int32_t PORTAL_CODE_MAX = 399;
 } // namespace
 NetHttpProbeResult::NetHttpProbeResult(int32_t code, const std::string &redirectUrl)
@@ -40,12 +39,12 @@ std::string NetHttpProbeResult::GetRedirectUrl() const
 
 bool NetHttpProbeResult::IsSuccessful() const
 {
-    return (responseCode_ >= SUCCESS_CODE_MIN && responseCode_ <= SUCCESS_CODE_MAX);
+    return (responseCode_ == SUCCESS_CODE);
 }
 
 bool NetHttpProbeResult::IsNeedPortal() const
 {
-    return (responseCode_ >= PORTAL_CODE_MIN && responseCode_ <= PORTAL_CODE_MAX) && !redirectUrl_.empty();
+    return (responseCode_ >= PORTAL_CODE_MIN && responseCode_ <= PORTAL_CODE_MAX) && (responseCode_ != SUCCESS_CODE) && !redirectUrl_.empty();
 }
 
 bool NetHttpProbeResult::IsFailed() const

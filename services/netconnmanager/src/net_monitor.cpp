@@ -105,15 +105,15 @@ void NetMonitor::Detection()
     NetHttpProbeResult probeResult = SendHttpProbe(PROBE_HTTP_HTTPS);
     if (isDetecting_) {
         NetDetectionStatus result = UNKNOWN_STATE;
-        if (probeResult.IsNeedPortal()) {
-            NETMGR_LOG_W("Net[%{public}d] need portal", netId_);
-            detectionDelay_ = CAPTIVE_PORTAL_DETECTION_DELAY_MS;
-            result = CAPTIVE_PORTAL_STATE;
-        } else if (probeResult.IsSuccessful()) {
+        if (probeResult.IsSuccessful()) {
             NETMGR_LOG_I("Net[%{public}d] probe success", netId_);
             detectionDelay_ = SUCCESSED_DETECTION_DELAY_MS;
             detectionSteps_ = 0;
             result = VERIFICATION_STATE;
+        } else if (probeResult.IsNeedPortal()) {
+            NETMGR_LOG_W("Net[%{public}d] need portal", netId_);
+            detectionDelay_ = CAPTIVE_PORTAL_DETECTION_DELAY_MS;
+            result = CAPTIVE_PORTAL_STATE;
         } else {
             NETMGR_LOG_E("Net[%{public}d] probe failed", netId_);
             detectionDelay_ = static_cast<uint32_t>(INIT_DETECTION_DELAY_MS * DOUBLE * detectionSteps_);
@@ -177,6 +177,11 @@ NetHttpProbeResult NetMonitor::SendHttpProbe(ProbeType probeType)
 
 void NetMonitor::GetHttpProbeUrlFromConfig(std::string &httpUrl, std::string &httpsUrl)
 {
+    if (!std::filesystem::exists(URL_CFG_FILE)) {
+        NETMGR_LOG_E("File not exist (%{public}s)", URL_CFG_FILE.c_str());
+        return;
+    }
+
     std::ifstream file(URL_CFG_FILE);
     if (!file.is_open()) {
         NETMGR_LOG_E("Open file failed (%{public}s)", strerror(errno));
