@@ -29,7 +29,10 @@ static constexpr const int32_t MIN_VALID_NETID = 100;
 
 namespace OHOS {
 namespace NetManagerStandard {
-NetConnClient::NetConnClient() : NetConnService_(nullptr), deathRecipient_(nullptr) {}
+NetConnClient::NetConnClient() : NetConnService_(nullptr), deathRecipient_(nullptr)
+{
+    buffer_[RESERVED_BUFFER_SIZE-1] = '\0';
+}
 
 NetConnClient::~NetConnClient() {}
 
@@ -51,6 +54,8 @@ int32_t NetConnClient::SystemReady()
 
 int32_t NetConnClient::SetInternetPermission(uint32_t uid, uint8_t allow)
 {
+    char buffer[RESERVED_BUFFER_SIZE] = {0};
+    buffer[RESERVED_BUFFER_SIZE-1] = '\0';
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
