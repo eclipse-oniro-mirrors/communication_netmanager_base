@@ -178,7 +178,7 @@ NetHttpProbeResult NetMonitor::SendHttpProbe(ProbeType probeType)
 void NetMonitor::GetHttpProbeUrlFromConfig(std::string &httpUrl, std::string &httpsUrl)
 {
     if (!std::filesystem::exists(URL_CFG_FILE)) {
-        NETMGR_LOG_E("File not exist (%{public}s)", URL_CFG_FILE.c_str());
+        NETMGR_LOG_E("File not exist (%{public}s)", URL_CFG_FILE);
         return;
     }
 
