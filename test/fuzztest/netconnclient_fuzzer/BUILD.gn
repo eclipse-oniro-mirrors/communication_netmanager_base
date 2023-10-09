@@ -33,6 +33,7 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "$NETMANAGERNATIVE_ROOT/common/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$THIRD_PARTY_ROOT/curl/include",
   ]
 
   cflags = [
@@ -52,6 +53,7 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
+    "$THIRD_PARTY_ROOT/curl:curl_shared",
   ]
 
   defines = [

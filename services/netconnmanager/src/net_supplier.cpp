@@ -398,5 +398,12 @@ void NetSupplier::ClearDefault()
         network_->ClearDefaultNetWorkNetId();
     }
 }
+
+void NetSupplier::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
+{
+    if (network_) {
+        network_->UpdateGlobalHttpProxy(httpProxy);
+    }
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -89,6 +89,7 @@ public:
     void SetDefault();
     void ClearDefault();
     void RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback);
+    void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
 
 private:
     NetBearType netSupplierType_;
