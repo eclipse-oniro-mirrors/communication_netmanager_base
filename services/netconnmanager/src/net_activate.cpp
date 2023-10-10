@@ -119,7 +119,7 @@ bool NetActivate::CompareByNetworkCapabilities(const NetCaps &netCaps)
     }
     std::set<NetCap> &reqCaps = netSpecifier_->netCapabilities_.netCaps_;
     if (reqCaps.empty()) {
-        return true;
+        return netCaps.HasNetCaps(NET_CAPABILITY_INTERNET);
     }
     return netCaps.HasNetCaps(reqCaps);
 }
