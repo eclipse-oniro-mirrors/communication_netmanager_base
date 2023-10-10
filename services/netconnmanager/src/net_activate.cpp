@@ -119,7 +119,8 @@ bool NetActivate::CompareByNetworkCapabilities(const NetCaps &netCaps)
     }
     std::set<NetCap> &reqCaps = netSpecifier_->netCapabilities_.netCaps_;
     if (reqCaps.empty()) {
-        return true;
+        NETMGR_LOG_I("Use default Supplier for empty cap");
+        return netCaps.HasNetCap(NET_CAPABILITY_INTERNET);
     }
     return netCaps.HasNetCaps(reqCaps);
 }
