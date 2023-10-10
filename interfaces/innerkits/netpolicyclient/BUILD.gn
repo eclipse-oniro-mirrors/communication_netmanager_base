@@ -53,7 +53,6 @@ ohos_source_set("net_policy_parcel") {
   deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
   sanitize = {
     cfi = true
-    cfi_cross_dso = true
     debug = false
   }
   external_deps = [ "c_utils:utils" ]
@@ -66,7 +65,6 @@ ohos_source_set("net_policy_parcel") {
 ohos_shared_library("net_policy_manager_if") {
   sanitize = {
     cfi = true
-    cfi_cross_dso = true
     boundary_sanitize = true
     all_ubsan = true
     debug = false

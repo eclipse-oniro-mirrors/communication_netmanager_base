@@ -50,7 +50,6 @@ ohos_source_set("net_conn_parcel") {
   ]
   sanitize = {
     cfi = true
-    cfi_cross_dso = true
     debug = false
   }
   include_dirs = [
@@ -72,7 +71,6 @@ ohos_source_set("net_conn_parcel") {
 ohos_shared_library("net_conn_manager_if") {
   sanitize = {
     cfi = true
-    cfi_cross_dso = true
     blocklist = "./connect_blocklist.txt"
     debug = false
   }
@@ -135,7 +133,6 @@ config("socket_permission_config") {
 ohos_shared_library("socket_permission") {
   sanitize = {
     cfi = true
-    cfi_cross_dso = true
     boundary_sanitize = true
     all_ubsan = true
     debug = false
