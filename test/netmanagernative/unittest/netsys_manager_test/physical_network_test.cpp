@@ -98,7 +98,7 @@ HWTEST_F(PhysicalNetworkTest, AddInterfaceTest002, TestSize.Level1)
     
     interfaceName = "wlan1";
     auto ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
-    bool wlan1Exist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName1) != ifaceList.end();
+    bool wlan1Exist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) != ifaceList.end();
     if (wlan1Exist) {
         return;
     }
