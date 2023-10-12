@@ -350,6 +350,15 @@ public:
      */
     int32_t GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config);
 
+    int32_t AddNetworkRoute(int32_t netId, const std::string &ifName, const std::string &destination,
+                            const std::string &nextHop);
+    int32_t RemoveNetworkRoute(int32_t netId, const std::string &ifName, const std::string &destination,
+                               const std::string &nextHop);
+    int32_t AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                int32_t prefixLength);
+    int32_t DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                int32_t prefixLength);
+
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

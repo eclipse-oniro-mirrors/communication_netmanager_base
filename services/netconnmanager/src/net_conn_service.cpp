@@ -1587,5 +1587,29 @@ int32_t NetConnService::NetInterfaceStateCallback::RegisterInterfaceCallback(
     ifaceStateCallbacks_.push_back(callback);
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetConnService::AddNetworkRoute(int32_t netId, const std::string &ifName,
+                                        const std::string &destination, const std::string &nextHop)
+{
+    return NetsysController::GetInstance().NetworkAddRoute(netId, ifName, destination, nextHop);
+}
+
+int32_t NetConnService::RemoveNetworkRoute(int32_t netId, const std::string &ifName,
+                                           const std::string &destination, const std::string &nextHop)
+{
+    return NetsysController::GetInstance().NetworkRemoveRoute(netId, ifName, destination, nextHop);
+}
+
+int32_t NetConnService::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                            int32_t prefixLength)
+{
+    return NetsysController::GetInstance().AddInterfaceAddress(ifName, ipAddr, prefixLength);
+}
+
+int32_t NetConnService::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                            int32_t prefixLength)
+{
+    return NetsysController::GetInstance().DelInterfaceAddress(ifName, ipAddr, prefixLength);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

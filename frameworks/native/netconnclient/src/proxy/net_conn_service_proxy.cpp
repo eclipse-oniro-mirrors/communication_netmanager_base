@@ -1131,5 +1131,137 @@ int32_t NetConnServiceProxy::RemoteSendRequest(uint32_t code, MessageParcel &dat
 
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetConnServiceProxy::AddNetworkRoute(int32_t netId, const std::string &ifName,
+                                             const std::string &destination, const std::string &nextHop)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteInt32(netId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!data.WriteString(ifName)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!data.WriteString(destination)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!data.WriteString(nextHop)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_NET_ROUTE),
+                                      data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t NetConnServiceProxy::RemoveNetworkRoute(int32_t netId, const std::string &ifName,
+                                                const std::string &destination, const std::string &nextHop)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteInt32(netId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!data.WriteString(ifName)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!data.WriteString(destination)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!data.WriteString(nextHop)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ROUTE),
+                                      data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t NetConnServiceProxy::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                                 int32_t prefixLength)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteString(ifName)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!data.WriteString(ipAddr)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!data.WriteInt32(prefixLength)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_NET_ADDRESS),
+                                      data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t NetConnServiceProxy::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                                 int32_t prefixLength)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteString(ifName)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!data.WriteString(ipAddr)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!data.WriteInt32(prefixLength)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ADDRESS),
+                                      data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

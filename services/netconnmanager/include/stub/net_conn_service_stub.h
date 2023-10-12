@@ -75,6 +75,10 @@ private:
     int32_t OnSetAppNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetInterfaceCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetNetInterfaceConfiguration(MessageParcel &data, MessageParcel &reply);
+    int32_t OnAddNetworkRoute(MessageParcel &data, MessageParcel &reply);
+    int32_t OnRemoveNetworkRoute(MessageParcel &data, MessageParcel &reply);
+    int32_t OnAddInterfaceAddress(MessageParcel &data, MessageParcel &reply);
+    int32_t OnDelInterfaceAddress(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;

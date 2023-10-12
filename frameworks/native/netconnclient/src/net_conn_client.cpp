@@ -464,5 +464,57 @@ int32_t NetConnClient::GetNetInterfaceConfiguration(const std::string &iface, Ne
     }
     return proxy->GetNetInterfaceConfiguration(iface, config);
 }
+
+int32_t NetConnClient::AddNetworkRoute(int32_t netId, const std::string &ifName,
+                                       const std::string &destination, const std::string &nextHop)
+{
+    NETMGR_LOG_D("AddNetworkRoute client in.");
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->AddNetworkRoute(netId, ifName, destination, nextHop);
+}
+
+int32_t NetConnClient::RemoveNetworkRoute(int32_t netId, const std::string &ifName,
+                                          const std::string &destination, const std::string &nextHop)
+{
+    NETMGR_LOG_D("RemoveNetworkRoute client in.");
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->RemoveNetworkRoute(netId, ifName, destination, nextHop);
+}
+
+int32_t NetConnClient::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                           int32_t prefixLength)
+{
+    NETMGR_LOG_D("AddInterfaceAddress client in.");
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->AddInterfaceAddress(ifName, ipAddr, prefixLength);
+}
+
+int32_t NetConnClient::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                           int32_t prefixLength)
+{
+    NETMGR_LOG_D("DelInterfaceAddress client in.");
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->DelInterfaceAddress(ifName, ipAddr, prefixLength);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
