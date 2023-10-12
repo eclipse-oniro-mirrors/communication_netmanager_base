@@ -206,7 +206,7 @@ HWTEST_F(DnsResolvListenTest, ConstructorTest001, TestSize.Level1)
 
 HWTEST_F(DnsResolvListenTest, ProcGetConfigCommand001, TestSize.Level1)
 {
-    instance_->ProcGetConfigCommand(CLIENT_SOCK_FD, NET_ID);
+    instance_->ProcGetConfigCommand(CLIENT_SOCK_FD, static_cast<uint16_t>(NET_ID));
     ASSERT_EQ(instance_->serverSockFd_, -1);
 }
 
@@ -214,8 +214,8 @@ HWTEST_F(DnsResolvListenTest, ProcGetKeyForCache001, TestSize.Level1)
 {
     char name[MAX_HOST_NAME_LEN] = {0};
     auto ret = instance_->ProcGetKeyForCache(CLIENT_SOCK_FD, name);
-    instance_->ProcSetCacheCommand(CLIENT_SOCK_FD, NET_ID);
-    instance_->ProcGetCacheCommand(CLIENT_SOCK_FD, NET_ID);
+    instance_->ProcSetCacheCommand(CLIENT_SOCK_FD, static_cast<uint16_t>(NET_ID));
+    instance_->ProcGetCacheCommand(CLIENT_SOCK_FD, static_cast<uint16_t>(NET_ID));
     instance_->ProcCommand(CLIENT_SOCK_FD);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
