@@ -70,8 +70,12 @@ HWTEST_F(PhysicalNetworkTest, AddInterfaceTest001, TestSize.Level1)
     ret = physicNetwork.AddInterface(interfaceName1);
     EXPECT_EQ(ret, 0);
     std::string interfaceName2 = "eth1";
-    ret = physicNetwork.AddInterface(interfaceName2);
-    EXPECT_EQ(ret, 0);
+    ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
+    bool eth1Exist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName2) != ifaceList.end();
+    if (eth1Exist) {
+        ret = physicNetwork.AddInterface(interfaceName2);
+        EXPECT_EQ(ret, 0);
+    }
 
     ret = physicNetwork.RemoveInterface(interfaceName1);
     physicNetwork.RemoveDefault();
@@ -91,7 +95,13 @@ HWTEST_F(PhysicalNetworkTest, AddInterfaceTest002, TestSize.Level1)
     interfaceName = "wlan0";
     ret = instance_->AddInterface(interfaceName);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    
     interfaceName = "wlan1";
+    auto ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
+    bool wlan1Exist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName1) != ifaceList.end();
+    if (wlan1Exist) {
+        return;
+    }
     ret = instance_->AddInterface(interfaceName);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
