@@ -86,7 +86,7 @@ int32_t NetConnClient::UnregisterNetSupplier(uint32_t supplierId)
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-
+    netSupplierCallback_.erase(supplierId);
     return proxy->UnregisterNetSupplier(supplierId);
 }
 
@@ -100,7 +100,7 @@ int32_t NetConnClient::RegisterNetSupplierCallback(uint32_t supplierId, const sp
     }
     sptr<NetSupplierCallbackStub> ptr = std::make_unique<NetSupplierCallbackStub>().release();
     ptr->RegisterSupplierCallbackImpl(callback);
-    //netSupplierCallback_[supplierId] = ptr;
+    netSupplierCallback_[supplierId] = ptr;
     return proxy->RegisterNetSupplierCallback(supplierId, ptr);
 }
 
