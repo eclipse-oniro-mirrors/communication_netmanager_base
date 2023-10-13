@@ -66,6 +66,10 @@ int32_t WrapperListener::Start()
 int32_t WrapperListener::Stop()
 {
     NETNATIVE_LOGI("WrapperListener: Stop");
+    if (socket_ < 0) {
+        NETNATIVE_LOGE("listener socket_ < 0 %{public}d", socket_);
+        return NetlinkResult::ERROR;
+    }
     char pipe = PIPE_SHUTDOWN;
     if (TEMP_FAILURE_RETRY(write(pipe_[1], &pipe, sizeof(pipe))) != 1) {
         NETNATIVE_LOGE("write pipe failed errno = %{public}d, %{public}s", errno, strerror(errno));
