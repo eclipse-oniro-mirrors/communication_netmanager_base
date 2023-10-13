@@ -100,7 +100,7 @@ int32_t NetConnClient::RegisterNetSupplierCallback(uint32_t supplierId, const sp
     }
     sptr<NetSupplierCallbackStub> ptr = std::make_unique<NetSupplierCallbackStub>().release();
     ptr->RegisterSupplierCallbackImpl(callback);
-    netSupplierCallback_[supplierId] = ptr;
+    //netSupplierCallback_[supplierId] = ptr;
     return proxy->RegisterNetSupplierCallback(supplierId, ptr);
 }
 
