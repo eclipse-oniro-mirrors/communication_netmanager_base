@@ -76,6 +76,14 @@ public:
     virtual int32_t SetAppNet(int32_t netId) = 0;
     virtual int32_t RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback) = 0;
     virtual int32_t GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config) = 0;
+    virtual int32_t AddNetworkRoute(int32_t netId, const std::string &ifName,
+                                    const std::string &destination, const std::string &nextHop) = 0;
+    virtual int32_t RemoveNetworkRoute(int32_t netId, const std::string &ifName,
+                                       const std::string &destination, const std::string &nextHop) = 0;
+    virtual int32_t AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                        int32_t prefixLength) = 0;
+    virtual int32_t DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                        int32_t prefixLength) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

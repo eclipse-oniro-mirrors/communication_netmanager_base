@@ -74,6 +74,14 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnSetInternetPermission, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_INTERFACE_CALLBACK)] = {
         &NetConnServiceStub::OnRegisterNetInterfaceCallback, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_NET_ROUTE)] = {
+        &NetConnServiceStub::OnAddNetworkRoute, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ROUTE)] = {
+        &NetConnServiceStub::OnRemoveNetworkRoute, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_NET_ADDRESS)] = {
+        &NetConnServiceStub::OnAddInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ADDRESS)] = {
+        &NetConnServiceStub::OnDelInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
     InitQueryFuncToInterfaceMap();
 }
 
@@ -1020,6 +1028,117 @@ int32_t NetConnServiceStub::OnGetNetInterfaceConfiguration(MessageParcel &data, 
         }
     }
     return ret;
+}
+
+int32_t NetConnServiceStub::OnAddNetworkRoute(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t netId = 0;
+    if (!data.ReadInt32(netId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string ifName = "";
+    if (!data.ReadString(ifName)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string destination = "";
+    if (!data.ReadString(destination)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string nextHop = "";
+    if (!data.ReadString(nextHop)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = AddNetworkRoute(netId, ifName, destination, nextHop);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+
+int32_t NetConnServiceStub::OnRemoveNetworkRoute(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t netId = 0;
+    if (!data.ReadInt32(netId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string ifName = "";
+    if (!data.ReadString(ifName)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string destination = "";
+    if (!data.ReadString(destination)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string nextHop = "";
+    if (!data.ReadString(nextHop)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = RemoveNetworkRoute(netId, ifName, destination, nextHop);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnAddInterfaceAddress(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ifName = "";
+    if (!data.ReadString(ifName)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string ipAddr = "";
+    if (!data.ReadString(ipAddr)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t prefixLength = 0;
+    if (!data.ReadInt32(prefixLength)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = AddInterfaceAddress(ifName, ipAddr, prefixLength);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnDelInterfaceAddress(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ifName = "";
+    if (!data.ReadString(ifName)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string ipAddr = "";
+    if (!data.ReadString(ipAddr)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t prefixLength = 0;
+    if (!data.ReadInt32(prefixLength)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = DelInterfaceAddress(ifName, ipAddr, prefixLength);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

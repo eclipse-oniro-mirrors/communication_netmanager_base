@@ -63,6 +63,14 @@ public:
     int32_t SetAppNet(int32_t netId) override;
     int32_t RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback) override;
     int32_t GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config) override;
+    int32_t AddNetworkRoute(int32_t netId, const std::string &ifName, const std::string &destination,
+                            const std::string &nextHop) override;
+    int32_t RemoveNetworkRoute(int32_t netId, const std::string &ifName, const std::string &destination,
+                               const std::string &nextHop) override;
+    int32_t AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                int32_t prefixLength) override;
+    int32_t DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
+                                int32_t prefixLength) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
