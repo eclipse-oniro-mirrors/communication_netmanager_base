@@ -55,6 +55,7 @@ enum class InterfaceMenu {
     NETWORK_ADD_INTERFACE_WIFI = 27,
     NETWORK_REMOVE_INTERFACE_WIFI = 28,
     NETWORK_SET_DEFAULT_WIFI = 29,
+    SET_TCP_BUFFER_SIZES = 30,
     INPUT_QUIT = 100,
 };
 
@@ -92,6 +93,7 @@ void Init()
     g_memberFuncMap[InterfaceMenu::NETWORK_ADD_INTERFACE_WIFI] = TestNetworkAddInterfaceWIFI;
     g_memberFuncMap[InterfaceMenu::NETWORK_REMOVE_INTERFACE_WIFI] = TestNetworkRemoveInterfaceWIFI;
     g_memberFuncMap[InterfaceMenu::NETWORK_SET_DEFAULT_WIFI] = TestNetworkSetDefaultWIFI;
+    g_memberFuncMap[InterfaceMenu::SET_TCP_BUFFER_SIZES] = TestSetTcpBufferSizes;
 }
 
 void Prompt()
@@ -127,6 +129,7 @@ void Prompt()
         "27 TestNetworkAddInterfaceWIFI\n"
         "28 TestNetworkRemoveInterfaceWIFI\n"
         "29 TestNetworkSetDefaultWIFI\n"
+        "30 SetTcpBufferSizes\n"
         "100:exit \n");
 }
 

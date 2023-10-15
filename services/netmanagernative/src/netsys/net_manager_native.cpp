@@ -32,6 +32,10 @@ namespace OHOS {
 namespace nmd {
 namespace {
 constexpr const char *TUN_CARD_NAME = "vpn-tun";
+constexpr const char *TCP_RMEM_PROC_FILE = "/proc/sys/net/ipv4/tcp_rmem";
+constexpr const char *TCP_WMEM_PROC_FILE = "/proc/sys/net/ipv4/tcp_wmem";
+constexpr uint32_t TCP_BUFFER_SIZES_TYPE = 2;
+constexpr uint32_t MAX_TCP_BUFFER_SIZES_COUNT = 6;
 } // namespace
 
 NetManagerNative::NetManagerNative()
@@ -199,6 +203,28 @@ int32_t NetManagerNative::SetInterfaceMtu(std::string ifName, int32_t mtuValue)
         return InterfaceManager::SetMtu(ifName.c_str(), std::to_string(mtuValue).c_str());
     }
     return VpnManager::GetInstance().SetVpnMtu(ifName, mtuValue);
+}
+
+int32_t NetManagerNative::SetTcpBufferSizes(const std::string &tcpBufferSizes)
+{
+    NETNATIVE_LOGI("tcpBufferSizes:%{public}s", tcpBufferSizes.c_str());
+    const std::vector<std::string> vTcpBufferSizes = Split(tcpBufferSizes, ",");
+    if (vTcpBufferSizes.size() != MAX_TCP_BUFFER_SIZES_COUNT) {
+        NETNATIVE_LOGE("NetManagerNative::SetTcpBufferSizes size is not equals MAX_TCP_BUFFER_SIZES_COUNT");
+        return -1;
+    }
+    std::string tcp_rwmem[TCP_BUFFER_SIZES_TYPE];
+    for (size_t i = 0; i < TCP_BUFFER_SIZES_TYPE; i++) {
+        for (size_t j = 0; j < MAX_TCP_BUFFER_SIZES_COUNT / TCP_BUFFER_SIZES_TYPE; j++) {
+            tcp_rwmem[i] += Strip(vTcpBufferSizes[i * (MAX_TCP_BUFFER_SIZES_COUNT / TCP_BUFFER_SIZES_TYPE) + j]);
+            tcp_rwmem[i] += ' ';
+        }
+    }
+    if (!WriteFile(TCP_RMEM_PROC_FILE, tcp_rwmem[0]) || !WriteFile(TCP_WMEM_PROC_FILE, tcp_rwmem[1])) {
+        NETNATIVE_LOGE("NetManagerNative::SetTcpBufferSizes sysctlbyname fail %{public}d", errno);
+        return -1;
+    }
+    return 0;
 }
 
 int32_t NetManagerNative::InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress)

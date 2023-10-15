@@ -65,6 +65,8 @@ inline uint64_t GetCurrentSecond()
     return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch())
         .count();
 }
+
+bool WriteFile(const std::string &filePath, const std::string &fileContent);
 } // namespace OHOS::NetManagerStandard::CommonUtils
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_COMMON_UTILS_H */

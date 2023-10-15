@@ -188,6 +188,11 @@ public:
         return 0;
     }
 
+    int32_t SetTcpBufferSizes(const std::string &tcpBufferSizes) override
+    {
+        return 0;
+    }
+
     int32_t GetInterfaceMtu(const std::string &interfaceName) override
     {
         return 0;

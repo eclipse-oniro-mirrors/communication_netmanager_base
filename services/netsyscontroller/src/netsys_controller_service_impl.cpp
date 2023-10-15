@@ -164,6 +164,12 @@ int32_t NetsysControllerServiceImpl::SetInterfaceMtu(const std::string &ifName, 
     return netsysClient_.SetInterfaceMtu(ifName, mtu);
 }
 
+int32_t NetsysControllerServiceImpl::SetTcpBufferSizes(const std::string &tcpBufferSizes)
+{
+    NETMGR_LOG_I("Set tcp buffer sizes: tcpBufferSizes[%{public}s]", tcpBufferSizes.c_str());
+    return netsysClient_.SetTcpBufferSizes(tcpBufferSizes);
+}
+
 int32_t NetsysControllerServiceImpl::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                          int32_t prefixLength)
 {

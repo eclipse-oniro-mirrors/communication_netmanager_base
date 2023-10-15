@@ -35,6 +35,7 @@ static constexpr const char *IFACE = "test0";
 static constexpr const char *IP_ADDR = "172.17.5.245";
 static constexpr const char *INTERFACE_NAME = "interface_name";
 static constexpr const char *REQUESTOR = "requestor";
+static constexpr const char *TCP_BUFFER_SIZES = "524288,1048576,2097152,262144,524288,1048576";
 const int32_t MTU = 111;
 const int32_t NET_ID = 2;
 const int32_t IFACEFD = 5;
@@ -110,6 +111,9 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest001, TestSize.Level1)
     EXPECT_EQ(ret, -1);
 
     ret = nativeClient_.SetInterfaceMtu(IF_NAME, MTU);
+    EXPECT_EQ(ret, -1);
+
+    ret = nativeClient_.SetTcpBufferSizes(TCP_BUFFER_SIZES);
     EXPECT_EQ(ret, -1);
 }
 

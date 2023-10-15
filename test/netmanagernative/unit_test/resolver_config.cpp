@@ -171,3 +171,11 @@ void TestRegisterNotifyCallback()
 
     return;
 }
+
+void TestSetTcpBufferSizes()
+{
+    std::string tcpBufferSizes = "524288,1048576,2097152,262144,524288,1048576";
+    std::cout << "begin to SetTcpBufferSizes" << std::endl;
+    ret = netsysServiceK_->SetTcpBufferSizes(tcpBufferSizes);
+    NETNATIVE_LOGE("NETSYS: SetTcpBufferSizes   ret=%{public}d", ret);
+}

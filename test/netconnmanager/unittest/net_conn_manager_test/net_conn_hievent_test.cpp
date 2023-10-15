@@ -269,5 +269,19 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_011, TestSize.Level1)
     int32_t ret = NetConnService::GetInstance()->RegisterNetConnCallback(nullptr, nullptr, 0);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.name: NetConnHiEventTest_012
+ * @tc.desc: Test NetConnManager HiSysEvent:UpdateTcpBufferSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_012, TestSize.Level1)
+{
+    sptr<Network> network = GetNetwork();
+    ASSERT_NE(network, nullptr);
+    sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfo();
+    ASSERT_NE(netLinkInfo, nullptr);
+    network->UpdateTcpBufferSize(*netLinkInfo);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

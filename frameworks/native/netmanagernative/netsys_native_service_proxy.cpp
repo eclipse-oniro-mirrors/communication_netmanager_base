@@ -244,6 +244,24 @@ int32_t NetsysNativeServiceProxy::SetInterfaceMtu(const std::string &interfaceNa
     return reply.ReadInt32();
 }
 
+int32_t NetsysNativeServiceProxy::SetTcpBufferSizes(const std::string &tcpBufferSizes)
+{
+    NETNATIVE_LOGI("Begin to SetTcpBufferSizes");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(tcpBufferSizes)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_TCP_BUFFER_SIZES), data, reply, option);
+
+    return reply.ReadInt32();
+}
+
 int32_t NetsysNativeServiceProxy::GetInterfaceMtu(const std::string &interfaceName)
 {
     NETNATIVE_LOGI("Begin to GetInterfaceMtu");

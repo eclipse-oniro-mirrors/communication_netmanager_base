@@ -74,6 +74,7 @@ public:
     void ClearInterfaceAddrs(const std::string ifName);
     int32_t GetInterfaceMtu(std::string ifName);
     int32_t SetInterfaceMtu(std::string ifName, int32_t mtuValue);
+    int32_t SetTcpBufferSizes(const std::string &tcpBufferSizes);
     int32_t AddInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength);
     int32_t DelInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength);
     int32_t InterfaceSetIpAddress(const std::string &ifaceName, const std::string &ipAddress);

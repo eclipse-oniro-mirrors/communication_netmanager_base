@@ -113,6 +113,7 @@ HWTEST_F(NetworkTest, UpdateTest001, TestSize.Level1)
     instance_->UpdateRoutes(info);
     instance_->UpdateDns(info);
     instance_->UpdateMtu(info);
+    instance_->UpdateTcpBufferSize(info);
     instance_->RegisterNetDetectionCallback(callabck_);
     int32_t ret = instance_->UnRegisterNetDetectionCallback(callabck_);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);

@@ -48,6 +48,8 @@ public:
     virtual int32_t SetInterfaceMtu(const std::string &interfaceName, int mtu) = 0;
     virtual int32_t GetInterfaceMtu(const std::string &interfaceName) = 0;
 
+    virtual int32_t SetTcpBufferSizes(const std::string &tcpBufferSizes) = 0;
+
     virtual int32_t RegisterNotifyCallback(sptr<INotifyCallback> &callback) = 0;
     virtual int32_t UnRegisterNotifyCallback(sptr<INotifyCallback> &callback) = 0;
 
