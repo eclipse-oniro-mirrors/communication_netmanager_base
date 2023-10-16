@@ -297,7 +297,14 @@ void Network::UpdateRoutes(const NetLinkInfo &newNetLinkInfo)
                          CommonUtils::ToAnonymousIp(route.destination_.address_).c_str());
             continue;
         }
-        std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
+
+        auto type = route.destination_.type_;
+        NETMGR_LOG_D("UpdateRoutes, new routes type: [%{public}d]", type);
+
+        std::string typeAddress = (type == IPV6_TYPE) ? LOCAL_ROUTE_IPV6_DESTINATION : LOCAL_ROUTE_NEXT_HOP;
+        std::string destAddress = typeAddress + "/" + std::to_string(route.destination_.prefixlen_);
+        NETMGR_LOG_D("UpdateRoutes, new routes destAddress: [%{public}s]", destAddress.c_str());
+
         auto ret =
             NetsysController::GetInstance().NetworkAddRoute(netId_, route.iface_, destAddress, route.gateway_.address_);
         int32_t res = NETMANAGER_SUCCESS;
