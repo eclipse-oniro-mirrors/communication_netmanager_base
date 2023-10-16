@@ -49,7 +49,7 @@ int32_t NetStatsCallbackProxy::NetIfaceStatsChanged(const std::string &iface)
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
-    return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    return ret;
 }
 
 int32_t NetStatsCallbackProxy::NetUidStatsChanged(const std::string &iface, uint32_t uid)
@@ -81,7 +81,7 @@ int32_t NetStatsCallbackProxy::NetUidStatsChanged(const std::string &iface, uint
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Proxy SendRequest failed, ret code:[%{public}d]", ret);
     }
-    return NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    return ret;
 }
 
 bool NetStatsCallbackProxy::WriteInterfaceToken(MessageParcel &data)
