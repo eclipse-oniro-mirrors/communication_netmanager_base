@@ -42,11 +42,6 @@ enum NetBearType {
     BEARER_DEFAULT
 };
 
-enum NetIpType {
-    IPV4_TYPE = 1,
-    IPV6_TYPE = 2
-};
-
 #define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 struct NET_SYMBOL_VISIBLE NetAllCapabilities final : public Parcelable {
     uint32_t linkUpBandwidthKbps_ = 0;

@@ -48,7 +48,7 @@ void DnsManager::EnableIpv6(uint16_t netId, std::string &destination, const std:
         destination = destination.substr(0, pos);
     }
     if (!IsValidIPV6(destination) || !IsValidIPV6(nextHop)) {
-        NETNATIVE_LOG_D("check IsValidIPV6 faild");
+        NETNATIVE_LOG_E("check IsValidIPV6 faild");
         return;
     }
     DnsParamCache::GetInstance().EnableIpv6(netId);
