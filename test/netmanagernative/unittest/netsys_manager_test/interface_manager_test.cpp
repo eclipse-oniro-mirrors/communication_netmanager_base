@@ -106,6 +106,11 @@ HWTEST_F(InterfaceManagerTest, AddAddressTest001, TestSize.Level1)
     std::string interfaceName = "eth0";
     std::string addr = "";
     int32_t prefixLength = 0;
+    auto ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
+    bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) == ifaceList.end();
+    if (eth0NotExist) {
+        return;
+    }
     auto ret = InterfaceManager::AddAddress(interfaceName.data(), addr.data(), prefixLength);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
@@ -123,6 +128,11 @@ HWTEST_F(InterfaceManagerTest, AddAddressTest003, TestSize.Level1)
     std::string interfaceName = "eth0";
     std::string addr;
     int32_t prefixLength = 45;
+    auto ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
+    bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) == ifaceList.end();
+    if (eth0NotExist) {
+        return;
+    }
     auto ret = InterfaceManager::AddAddress(interfaceName.c_str(), addr.data(), prefixLength);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
@@ -149,6 +159,11 @@ HWTEST_F(InterfaceManagerTest, DelAddressTest001, TestSize.Level1)
     std::string interfaceName = "eth0";
     std::string addr = "";
     int32_t prefixLength = 0;
+    auto ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
+    bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) == ifaceList.end();
+    if (eth0NotExist) {
+        return;
+    }
     auto ret = InterfaceManager::DelAddress(interfaceName.data(), addr.data(), prefixLength);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
@@ -166,6 +181,11 @@ HWTEST_F(InterfaceManagerTest, DelAddressTest003, TestSize.Level1)
     std::string interfaceName = "eth0";
     int32_t prefixLength = 45;
     std::string addr;
+    auto ifaceList = NetManagerStandard::NetsysController::GetInstance().InterfaceGetList();
+    bool eth0NotExist = std::find(ifaceList.begin(), ifaceList.end(), interfaceName) == ifaceList.end();
+    if (eth0NotExist) {
+        return;
+    }
     auto ret = InterfaceManager::DelAddress(interfaceName.data(), addr.data(), prefixLength);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
