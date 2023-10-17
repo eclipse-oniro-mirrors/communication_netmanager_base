@@ -81,7 +81,7 @@ int32_t NetConnClient::UnregisterNetSupplier(uint32_t supplierId)
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-
+    netSupplierCallback_.erase(supplierId);
     return proxy->UnregisterNetSupplier(supplierId);
 }
 
