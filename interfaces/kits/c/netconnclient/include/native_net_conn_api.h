@@ -148,29 +148,29 @@ int32_t OH_NetConn_GetNetCapabilities(OH_NetConn_NetHandle *netHandle, OH_NetCon
 int32_t OH_NetConn_GetDefaultHttpProxy(OH_NetConn_HttpProxy *httpProxy);
 
 /**
- * @brief 查询默认的网络代理
+ * @brief Query default network proxy
  *
- * @param host 所需查询的host名
- * @param serv 服务名
- * @param hint 指向addrinfo结构体的指针
- * @param res 存放DNS查询结果，以链表形式返回
- * @param netId DNS查询netId 为0是使用默认netid查询
- * @return 0 - 成功.
- * @return 401 - 参数错误.
- * @return 2100003 - 内部错误.
+ * @param host The host name to query
+ * @param serv Service name
+ * @param hint Pointer to the addrinfo structure
+ * @param res Store DNS query results and return them in a linked list format
+ * @param netId DNS query netId, 0 is used for default netid query
+ * @return 0 - Success.
+ * @return 401 - Parameter error.
+ * @return 2100003 - Internal error.
  * @since 11
  * @version 1.0
 */
 int32_t OH_NetConn_GetAddrInfo(char *host, char *serv, struct addrinfo *hint, struct addrinfo **res, int32_t netId);
 
 /**
- * @brief 查询默认的网络代理
+ * @brief Query default network proxy
  *
- * @param res DNS查询结果链表头
- * @return 0 - 成功.
- * @return 401 - 参数错误.
- * @return 2100002 - 无法连接到服务.
- * @return 2100003 - 内部错误.
+ * @param res DNS query result chain header
+ * @return 0 - Success.
+ * @return 401 - Parameter error.
+ * @return 2100002 - Unable to connect to service.
+ * @return 2100003 - Internal error.
  * @since 11
  * @version 1.0
 */
