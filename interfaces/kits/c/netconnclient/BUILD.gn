@@ -51,5 +51,5 @@ ohos_shared_library("netconn_ndk") {
 
   part_name = "netmanager_base"
   subsystem_name = "communication"
-  innerapi_tags = [ "ndk" ]
+  relative_install_dir = "ndk"
 }
