@@ -1,9 +1,4 @@
 [
-    {"name": "OH_NetConn_HasDefaultNet"},
-    {"name": "OH_NetConn_GetDefaultNet"},
-    {"name": "OH_NetConn_IsDefaultNetMetered"},
-    {"name": "OH_NetConn_GetAllNets"},
-    {"name": "OH_NetConn_GetConnectionProperties"},
-    {"name": "OH_NetConn_GetNetCapabilities"},
-    {"name": "OH_NetConn_GetDefaultHttpProxy"}
+    {"name": "OH_NetConn_GetAddrInfo"},
+    {"name": "OH_NetConn_FreeDnsResult"}
 ]
