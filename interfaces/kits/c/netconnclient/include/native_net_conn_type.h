@@ -143,20 +143,6 @@ typedef struct OH_NetConn_NetHandle {
 } OH_NetConn_NetHandle;
 
 /**
- * @brief 网络列表
- *
- * @since 10
- * @version 1.0
- */
-
-typedef struct OH_NetConn_NetHandleList {
-    /* List of netHandle */
-    OH_NetConn_NetHandle netHandleList[OH_NETCONN_MAX_NET_SIZE];
-    /* Actual size of netHandleList */
-    int32_t netHandleListSize;
-} OH_NetConn_NetHandleList;
-
-/**
  * @brief 网络能力集
  *
  * @since 10
@@ -275,6 +261,20 @@ typedef struct OH_NetConn_NetLinkInfo {
     /* Http proxy */
     OH_NetConn_HttpProxy httpProxy;
 } OH_NetConn_NetLinkInfo;
+
+/**
+ * @brief Network list
+ *
+ * @since 11
+ * @version 1.0
+ */
+
+typedef struct OH_NetConn_NetHandleList {
+    /* List of netHandle */
+    OH_NetConn_NetHandle netHandleList[OH_NETCONN_MAX_NET_SIZE];
+    /* Actual size of netHandleList */
+    int32_t netHandleListSize;
+} OH_NetConn_NetHandleList;
 
 #ifdef __cplusplus
 }

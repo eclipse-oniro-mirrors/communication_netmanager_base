@@ -88,21 +88,6 @@ int32_t OH_NetConn_GetDefaultNet(OH_NetConn_NetHandle *netHandle);
 int32_t OH_NetConn_IsDefaultNetMetered(int32_t *isMetered);
 
 /**
- * @brief 查询所有激活的数据网络
- *
- * @param netHandleList 网络信息列表
- * @return 0 - 成功.
- * @return 201 - 缺少权限.
- * @return 401 - 参数错误.
- * @return 2100002 - 无法连接到服务.
- * @return 2100003 - 内部错误.
- * @permission ohos.permission.GET_NETWORK_INFO
- * @since 10
- * @version 1.0
- */
-int32_t OH_NetConn_GetAllNets(OH_NetConn_NetHandleList *netHandleList);
-
-/**
  * @brief 查询某个数据网络的链路信息
  *
  * @param netHandle 存放网络ID
@@ -148,6 +133,22 @@ int32_t OH_NetConn_GetNetCapabilities(OH_NetConn_NetHandle *netHandle, OH_NetCon
 int32_t OH_NetConn_GetDefaultHttpProxy(OH_NetConn_HttpProxy *httpProxy);
 
 /**
+ * @brief Query all active data networks
+ *
+ * @param netHandleList Network Information List
+ * @return 0 - Success.
+ * @return 201 - Missing permissions.
+ * @return 401 - Parameter error.
+ * @return 2100002 - Unable to connect to service.
+ * @return 2100003 - Internal error.
+ * @permission ohos.permission.GET_NETWORK_INFO
+ * @syscap SystemCapability.Communication.NetManager.Core
+ * @since 11
+ * @version 1.0
+ */
+int32_t OH_NetConn_GetAllNets(OH_NetConn_NetHandleList *netHandleList);
+
+/**
  * @brief Query default network proxy
  *
  * @param host The host name to query
@@ -158,6 +159,8 @@ int32_t OH_NetConn_GetDefaultHttpProxy(OH_NetConn_HttpProxy *httpProxy);
  * @return 0 - Success.
  * @return 401 - Parameter error.
  * @return 2100003 - Internal error.
+ * @permission ohos.permission.INTERNET
+ * @syscap SystemCapability.Communication.NetManager.Core
  * @since 11
  * @version 1.0
 */
@@ -171,10 +174,13 @@ int32_t OH_NetConn_GetAddrInfo(char *host, char *serv, struct addrinfo *hint, st
  * @return 401 - Parameter error.
  * @return 2100002 - Unable to connect to service.
  * @return 2100003 - Internal error.
+ * @permission ohos.permission.INTERNET
+ * @syscap SystemCapability.Communication.NetManager.Core
  * @since 11
  * @version 1.0
 */
 int32_t OH_NetConn_FreeDnsResult(struct addrinfo *res);
+
 
 #ifdef __cplusplus
 }
