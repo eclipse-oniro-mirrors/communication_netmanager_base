@@ -249,6 +249,10 @@ HWTEST_F(NetsysControllerServiceImplTest, SetInternetPermission, TestSize.Level1
 
     auto ret = instance_->SetInternetPermission(uid, allow);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+
+    std::string tcpBufferSizes = "524288,1048576,2097152,262144,524288,1048576";
+    ret = instance_->SetTcpBufferSizes(tcpBufferSizes);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 } // namespace NetManagerStandard

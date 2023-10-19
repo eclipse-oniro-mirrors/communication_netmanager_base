@@ -41,6 +41,17 @@ constexpr uint32_t MAX_ROUTE_TABLE_SIZE = 128;
 
 NetsysNativeServiceStub::NetsysNativeServiceStub()
 {
+    InitNetInfoOpToInterfaceMap();
+    InitBandwidthOpToInterfaceMap();
+    InitFirewallOpToInterfaceMap();
+    InitOpToInterfaceMapExt();
+    InitNetDiagOpToInterfaceMap();
+    uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
+        UID_SAMGR, UID_PARAM_WATCHER, UID_EDM};
+}
+
+void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
+{
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_RESOLVER_CONFIG)] =
         &NetsysNativeServiceStub::CmdSetResolverConfig;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_RESOLVER_CONFIG)] =
@@ -55,6 +66,8 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
         &NetsysNativeServiceStub::CmdSetInterfaceMtu;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_GET_MTU)] =
         &NetsysNativeServiceStub::CmdGetInterfaceMtu;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_TCP_BUFFER_SIZES)] =
+        &NetsysNativeServiceStub::CmdSetTcpBufferSizes;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_REGISTER_NOTIFY_CALLBACK)] =
         &NetsysNativeServiceStub::CmdRegisterNotifyCallback;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UNREGISTER_NOTIFY_CALLBACK)] =
@@ -83,13 +96,6 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
         &NetsysNativeServiceStub::CmdAddInterfaceAddress;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_DEL_ADDRESS)] =
         &NetsysNativeServiceStub::CmdDelInterfaceAddress;
-
-    InitBandwidthOpToInterfaceMap();
-    InitFirewallOpToInterfaceMap();
-    InitOpToInterfaceMapExt();
-    InitNetDiagOpToInterfaceMap();
-    uids_ = {UID_ROOT,  UID_SHELL,         UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
-             UID_SAMGR, UID_PARAM_WATCHER, UID_EDM};
 }
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
@@ -432,6 +438,16 @@ int32_t NetsysNativeServiceStub::CmdGetInterfaceMtu(MessageParcel &data, Message
     int32_t result = GetInterfaceMtu(ifName);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("GetInterfaceMtu has recved result %{public}d", result);
+
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetTcpBufferSizes(MessageParcel &data, MessageParcel &reply)
+{
+    std::string tcpBufferSizes = data.ReadString();
+    int32_t result = SetTcpBufferSizes(tcpBufferSizes);
+    reply.WriteInt32(result);
+    NETNATIVE_LOG_D("SetTcpBufferSizes has recved result %{public}d", result);
 
     return ERR_NONE;
 }

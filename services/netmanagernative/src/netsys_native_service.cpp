@@ -208,6 +208,12 @@ int32_t NetsysNativeService::GetInterfaceMtu(const std::string &interfaceName)
     return netsysService_->GetInterfaceMtu(interfaceName);
 }
 
+int32_t NetsysNativeService::SetTcpBufferSizes(const std::string &tcpBufferSizes)
+{
+    NETNATIVE_LOG_D("SetTcpBufferSizes  Begin");
+    return netsysService_->SetTcpBufferSizes(tcpBufferSizes);
+}
+
 int32_t NetsysNativeService::RegisterNotifyCallback(sptr<INotifyCallback> &callback)
 {
     NETNATIVE_LOG_D("RegisterNotifyCallback");

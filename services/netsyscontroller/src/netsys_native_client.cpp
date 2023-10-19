@@ -359,6 +359,17 @@ int32_t NetsysNativeClient::SetInterfaceMtu(const std::string &ifName, int32_t m
     return proxy->SetInterfaceMtu(ifName, mtu);
 }
 
+int32_t NetsysNativeClient::SetTcpBufferSizes(const std::string &tcpBufferSizes)
+{
+    NETMGR_LOG_D("Set tcp buffer sizes: tcpBufferSizes[%{public}s]", tcpBufferSizes.c_str());
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetTcpBufferSizes(tcpBufferSizes);
+}
+
 int32_t NetsysNativeClient::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                 int32_t prefixLength)
 {

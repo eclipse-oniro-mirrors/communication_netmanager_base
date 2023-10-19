@@ -44,6 +44,7 @@ public:
 private:
     using ServiceInterface = int32_t (NetsysNativeServiceStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, ServiceInterface> opToInterfaceMap_;
+    void InitNetInfoOpToInterfaceMap();
     void InitBandwidthOpToInterfaceMap();
     void InitFirewallOpToInterfaceMap();
     void InitOpToInterfaceMapExt();
@@ -55,6 +56,7 @@ private:
     int32_t CmdGetAddrInfo(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetInterfaceMtu(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetInterfaceMtu(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetTcpBufferSizes(MessageParcel &data, MessageParcel &reply);
 
     int32_t CmdRegisterNotifyCallback(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUnRegisterNotifyCallback(MessageParcel &data, MessageParcel &reply);

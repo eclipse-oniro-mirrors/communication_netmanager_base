@@ -165,6 +165,14 @@ public:
     int32_t SetInterfaceMtu(const std::string &ifName, int32_t mtu);
 
     /**
+     * @brief Set tcp buffer sizes
+     *
+     * @param tcpBufferSizes tcpBufferSizes
+     * @return Return the return value of the netsys interface call
+     */
+    int32_t SetTcpBufferSizes(const std::string &tcpBufferSizes);
+
+    /**
      * Add ip address
      *
      * @param ifName Network port device name

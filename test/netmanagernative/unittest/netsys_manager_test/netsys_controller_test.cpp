@@ -50,6 +50,7 @@ static constexpr const char *PARCEL_IPV4_ADDR = "192.168.55.121";
 static constexpr const char *IP_ADDR = "172.17.5.245";
 static constexpr const char *INTERFACE_NAME = "";
 static constexpr const char *IF_NAME = "iface0";
+static constexpr const char *TCP_BUFFER_SIZES = "524288,1048576,2097152,262144,524288,1048576";
 const int NET_ID = 2;
 const int PERMISSION = 5;
 const int PREFIX_LENGTH = 23;
@@ -295,6 +296,9 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest006, TestSize.Level1)
     EXPECT_EQ(ret, -1);
 
     ret = NetsysController::GetInstance().GetInterfaceMtu(ETH0);
+    EXPECT_EQ(ret, -1);
+
+    ret = NetsysController::GetInstance().SetTcpBufferSizes(TCP_BUFFER_SIZES);
     EXPECT_EQ(ret, -1);
 }
 
@@ -863,6 +867,9 @@ HWTEST_F(NetsysControllerTest, NetsysControllerErr006, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 
     ret = instance_->SetIptablesCommandForRes(iface, iface);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->SetTcpBufferSizes("");
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 

@@ -236,6 +236,13 @@ HWTEST_F(NetsysNativeServiceTest, SetInterfaceMtu001, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 }
 
+HWTEST_F(NetsysNativeServiceTest, SetTcpBufferSizes001, TestSize.Level1)
+{
+    std::string tcpBufferSizes = "524288,1048576,2097152,262144,524288,1048576";
+    int32_t ret = instance_->SetTcpBufferSizes(tcpBufferSizes);
+    EXPECT_EQ(ret, 0);
+}
+
 HWTEST_F(NetsysNativeServiceTest, GetInterfaceMtu001, TestSize.Level1)
 {
     std::string testName = "test0";

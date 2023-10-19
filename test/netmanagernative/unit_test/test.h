@@ -52,6 +52,7 @@ void TestNetworkGetDefaultUnion(void);
 void TestNetworkSetDefaultWIFI(void);
 void TestNetworkAddInterfaceWIFI(void);
 void TestNetworkRemoveInterfaceWIFI(void);
+void TestSetTcpBufferSizes(void);
 
 
 #endif // !NETSYS_MAIN_TEST_H__

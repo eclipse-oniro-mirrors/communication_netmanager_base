@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <vector>
 #include <numeric>
+#include <fstream>
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
@@ -606,6 +607,19 @@ bool IsValidDomain(const std::string &domain)
         }
         tldsList.insert(item);
     }
+    return true;
+}
+
+bool WriteFile(const std::string &filePath, const std::string &fileContent)
+{
+    std::fstream file(filePath.c_str(), std::fstream::out | std::fstream::trunc);
+    if (!file.is_open()) {
+        NETMGR_LOG_E("write file=%{public}s fstream failed. err %{public}d %{public}s",
+            filePath.c_str(), errno, strerror(errno));
+        return false;
+    }
+    file << fileContent.c_str();
+    file.close();
     return true;
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils
