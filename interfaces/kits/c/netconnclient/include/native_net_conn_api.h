@@ -20,7 +20,7 @@
  * @addtogroup NetConn
  * @{
  *
- * @brief Provide C interface for the data network connection module of network management
+ * @brief Provide C interface for the data network connection module of network management.
  *
  * @since 11
  * @version 1.0
@@ -29,7 +29,7 @@
 /**
  * @file native_net_conn_api.h
  *
- * @brief Provide C interface for the data network connection module of network management
+ * @brief Provide C interface for the data network connection module of network management.
  *
  * @syscap SystemCapability.Communication.NetManager.Core
  * @since 11
@@ -43,13 +43,13 @@ extern "C" {
 #endif
 
 /**
- * @brief Query default network proxy
+ * @brief Get DNS result with netId.
  *
- * @param host The host name to query
- * @param serv Service name
- * @param hint Pointer to the addrinfo structure
- * @param res Store DNS query results and return them in a linked list format
- * @param netId DNS query netId, 0 is used for default netid query
+ * @param host The host name to query.
+ * @param serv Service name.
+ * @param hint Pointer to the addrinfo structure.
+ * @param res Store DNS query results and return them in a linked list format.
+ * @param netId DNS query netId, 0 is used for default netid query.
  * @return 0 - Success.
  * @return 201 - Missing permissions.
  * @return 401 - Parameter error.
@@ -63,9 +63,9 @@ extern "C" {
 int32_t OH_NetConn_GetAddrInfo(char *host, char *serv, struct addrinfo *hint, struct addrinfo **res, int32_t netId);
 
 /**
- * @brief Query default network proxy
+ * @brief Free DNS result.
  *
- * @param res DNS query result chain header
+ * @param res DNS query result chain header.
  * @return 0 - Success.
  * @return 201 - Missing permissions.
  * @return 401 - Parameter error.
