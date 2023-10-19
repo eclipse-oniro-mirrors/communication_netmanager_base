@@ -1263,5 +1263,67 @@ int32_t NetConnServiceProxy::DelInterfaceAddress(const std::string &ifName, cons
 
     return reply.ReadInt32();
 }
+
+int32_t NetConnServiceProxy::AddStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                          const std::string &ifName)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteString(ipAddr)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!data.WriteString(macAddr)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!data.WriteString(ifName)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_STATIC_ARP),
+                                      data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t NetConnServiceProxy::DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                          const std::string &ifName)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteString(ipAddr)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!data.WriteString(macAddr)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!data.WriteString(ifName)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_ARP),
+                                      data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -71,6 +71,8 @@ public:
                                 int32_t prefixLength) override;
     int32_t DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                 int32_t prefixLength) override;
+    int32_t AddStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName) override;
+    int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

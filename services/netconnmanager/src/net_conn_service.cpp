@@ -1611,5 +1611,17 @@ int32_t NetConnService::DelInterfaceAddress(const std::string &ifName, const std
 {
     return NetsysController::GetInstance().DelInterfaceAddress(ifName, ipAddr, prefixLength);
 }
+
+int32_t NetConnService::AddStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                     const std::string &ifName)
+{
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                     const std::string &ifName)
+{
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

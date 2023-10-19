@@ -37,6 +37,7 @@ private:
 
 private:
     void InitQueryFuncToInterfaceMap();
+    void InitStaticArpToInterfaceMap();
     bool CheckPermission(const std::set<std::string> &permissions);
     bool CheckPermissionWithCache(const std::set<std::string> &permissions);
     int32_t OnRequestCheck(uint32_t code, const std::set<std::string> &permissions);
@@ -79,6 +80,8 @@ private:
     int32_t OnRemoveNetworkRoute(MessageParcel &data, MessageParcel &reply);
     int32_t OnAddInterfaceAddress(MessageParcel &data, MessageParcel &reply);
     int32_t OnDelInterfaceAddress(MessageParcel &data, MessageParcel &reply);
+    int32_t OnAddStaticArp(MessageParcel &data, MessageParcel &reply);
+    int32_t OnDelStaticArp(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;

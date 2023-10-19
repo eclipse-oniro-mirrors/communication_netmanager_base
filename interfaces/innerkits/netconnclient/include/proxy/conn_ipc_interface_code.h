@@ -61,6 +61,8 @@ enum class ConnInterfaceCode {
     CMD_NM_REMOVE_NET_ROUTE,
     CMD_NM_ADD_NET_ADDRESS,
     CMD_NM_REMOVE_NET_ADDRESS,
+    CMD_NM_ADD_STATIC_ARP,
+    CMD_NM_DEL_STATIC_ARP,
     CMD_NM_END,
 };
 
