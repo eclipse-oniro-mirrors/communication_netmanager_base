@@ -131,18 +131,6 @@ typedef enum {
 } OH_NetConn_IpType;
 
 /**
- * @brief 存放网络ID.
- *
- * @since 10
- * @version 1.0
- */
-
-typedef struct OH_NetConn_NetHandle {
-    /* Network id */
-    int32_t netId;
-} OH_NetConn_NetHandle;
-
-/**
  * @brief 网络能力集
  *
  * @since 10
@@ -261,6 +249,18 @@ typedef struct OH_NetConn_NetLinkInfo {
     /* Http proxy */
     OH_NetConn_HttpProxy httpProxy;
 } OH_NetConn_NetLinkInfo;
+
+/**
+ * @brief Store Network ID
+ *
+ * @since 11
+ * @version 1.0
+ */
+
+typedef struct OH_NetConn_NetHandle {
+    /* Network id */
+    int32_t netId;
+} OH_NetConn_NetHandle;
 
 /**
  * @brief Network list
