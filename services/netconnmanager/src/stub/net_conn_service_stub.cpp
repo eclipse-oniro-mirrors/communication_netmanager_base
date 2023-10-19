@@ -36,8 +36,8 @@ const std::vector<uint32_t> PERMISSION_NEED_CACHE_CODES{
 } // namespace
 NetConnServiceStub::NetConnServiceStub()
 {
-    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SYSTEM_READY)] = {&NetConnServiceStub::OnSystemReady,
-                                                                                     {}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_SYSTEM_READY)] = {
+        &NetConnServiceStub::OnSystemReady, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK)] = {
         &NetConnServiceStub::OnRegisterNetConnCallback, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER)] = {
@@ -82,7 +82,16 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnAddInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ADDRESS)] = {
         &NetConnServiceStub::OnDelInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
+    InitStaticArpToInterfaceMap();
     InitQueryFuncToInterfaceMap();
+}
+
+void NetConnServiceStub::InitStaticArpToInterfaceMap()
+{
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_STATIC_ARP)] = {
+        &NetConnServiceStub::OnAddStaticArp, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_ARP)] = {
+        &NetConnServiceStub::OnDelStaticArp, {Permission::CONNECTIVITY_INTERNAL}};
 }
 
 void NetConnServiceStub::InitQueryFuncToInterfaceMap()
@@ -1134,6 +1143,56 @@ int32_t NetConnServiceStub::OnDelInterfaceAddress(MessageParcel &data, MessagePa
     }
 
     int32_t ret = DelInterfaceAddress(ifName, ipAddr, prefixLength);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnAddStaticArp(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ipAddr = "";
+    if (!data.ReadString(ipAddr)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string macAddr = "";
+    if (!data.ReadString(macAddr)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string ifName = "";
+    if (!data.ReadString(ifName)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = AddStaticArp(ipAddr, macAddr, ifName);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnDelStaticArp(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ipAddr = "";
+    if (!data.ReadString(ipAddr)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string macAddr = "";
+    if (!data.ReadString(macAddr)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    std::string ifName = "";
+    if (!data.ReadString(ifName)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = DelStaticArp(ipAddr, macAddr, ifName);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

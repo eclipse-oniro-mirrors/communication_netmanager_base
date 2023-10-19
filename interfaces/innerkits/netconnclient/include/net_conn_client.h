@@ -358,6 +358,8 @@ public:
                                 int32_t prefixLength);
     int32_t DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                 int32_t prefixLength);
+    int32_t AddStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName);
+    int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName);
 
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {

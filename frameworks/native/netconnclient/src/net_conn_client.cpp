@@ -516,5 +516,29 @@ int32_t NetConnClient::DelInterfaceAddress(const std::string &ifName, const std:
 
     return proxy->DelInterfaceAddress(ifName, ipAddr, prefixLength);
 }
+
+int32_t NetConnClient::AddStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName)
+{
+    NETMGR_LOG_D("AddStaticArp client in.");
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->AddStaticArp(ipAddr, macAddr, ifName);
+}
+
+int32_t NetConnClient::DelStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName)
+{
+    NETMGR_LOG_D("DelStaticArp client in.");
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->DelStaticArp(ipAddr, macAddr, ifName);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
