@@ -473,17 +473,21 @@ int32_t InterfaceManager::AssembleArp(const std::string &ipAddr, const std::stri
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
-    sockaddr_in& netAddrStruct = *reinterpret_cast<sockaddr_in*>(&req.arp_pa);
     sockaddr& ethAddrStruct = req.arp_ha;
-
     ethAddrStruct.sa_family = ARPHRD_ETHER;
     if (MacStringToArray(macAddr, ethAddrStruct) != 0) {
         NETNATIVE_LOGE("macStringToArray error");
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
 
-    netAddrStruct.sin_family = AF_INET;
-    netAddrStruct.sin_addr.s_addr = ConvertIpv4Address(ipAddr);
+    in_addr ipv4Addr = {};
+    if (inet_aton(ipAddr.c_str(), &ipv4Addr) == 0) {
+        NETNATIVE_LOGE("addr inet_aton error");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    auto sin = reinterpret_cast<sockaddr_in *>(&req.arp_pa);
+    sin->sin_family = AF_INET;
+    sin->sin_addr = ipv4Addr;
 
     if (strncpy_s(req.arp_dev, sizeof(req.arp_dev),
                   ifName.c_str(), ifName.size()) != 0) {
