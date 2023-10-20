@@ -142,7 +142,7 @@ HWTEST_F(UtNetPolicyFirewall, NetPolicyFirewall006, TestSize.Level1)
     netPolicyFirewall_->UpdateDeviceIdlePolicy(false);
     netPolicyFirewall_->UpdateDeviceIdlePolicy(true);
     int32_t ret = netPolicyFirewall_->UpdateDeviceIdlePolicy(true);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_ERR_STATUS_EXIST);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

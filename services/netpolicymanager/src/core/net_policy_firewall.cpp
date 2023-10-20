@@ -108,7 +108,7 @@ int32_t NetPolicyFirewall::UpdateDeviceIdlePolicy(bool enable)
 {
     if (deviceIdleMode_ == enable) {
         NETMGR_LOG_E("Same device idle policy.");
-        return NETMANAGER_ERR_STAUTS_EXIST;
+        return NETMANAGER_ERR_STATUS_EXIST;
     }
     if (enable) {
         deviceIdleFirewallRule_->SetAllowedList();
@@ -130,7 +130,7 @@ int32_t NetPolicyFirewall::UpdatePowerSavePolicy(bool enable)
 {
     if (powerSaveMode_ == enable) {
         NETMGR_LOG_E("Same power save policy.");
-        return NETMANAGER_ERR_STAUTS_EXIST;
+        return NETMANAGER_ERR_STATUS_EXIST;
     }
     if (enable) {
         powerSaveFirewallRule_->SetAllowedList();
