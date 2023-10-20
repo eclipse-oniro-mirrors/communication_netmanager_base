@@ -113,6 +113,10 @@ public:
     int32_t NetDiagUpdateInterfaceConfig(const NetDiagIfaceConfig &config, const std::string &ifaceName,
                                          bool add) override;
     int32_t NetDiagSetInterfaceActiveState(const std::string &ifaceName, bool up) override;
+    int32_t AddStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                         const std::string &ifName) override;
+    int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                         const std::string &ifName) override;
 
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);

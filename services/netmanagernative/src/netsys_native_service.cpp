@@ -720,5 +720,27 @@ int32_t NetsysNativeService::NetDiagSetInterfaceActiveState(const std::string &i
     }
     return netDiagWrapper->SetInterfaceActiveState(ifaceName, up);
 }
+
+int32_t NetsysNativeService::AddStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                          const std::string &ifName)
+{
+    NETNATIVE_LOG_D("AddStaticArp");
+    if (netsysService_ == nullptr) {
+        NETNATIVE_LOGE("netsysService_ is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netsysService_->AddStaticArp(ipAddr, macAddr, ifName);
+}
+
+int32_t NetsysNativeService::DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                          const std::string &ifName)
+{
+    NETNATIVE_LOG_D("DelStaticArp");
+    if (netsysService_ == nullptr) {
+        NETNATIVE_LOGE("netsysService_ is null");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netsysService_->DelStaticArp(ipAddr, macAddr, ifName);
+}
 } // namespace NetsysNative
 } // namespace OHOS

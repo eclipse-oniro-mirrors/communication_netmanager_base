@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <system_error>
 #include <unistd.h>
+#include <regex>
 
 #include "netlink_manager.h"
 #include "netlink_msg.h"
@@ -57,6 +58,10 @@ constexpr uint32_t MOVE_BIT_LEFT31 = 31;
 constexpr uint32_t BIT_MAX = 32;
 constexpr uint32_t IOCTL_RETRY_TIME = 32;
 constexpr int32_t MAX_MTU_LEN = 11;
+constexpr int32_t MAC_ADDRESS_STR_LEN = 18;
+constexpr int32_t MAC_ADDRESS_INT_LEN = 6;
+constexpr int32_t MAC_SSCANF_SPACE = 3;
+const std::regex REGEX_CMD_MAC_ADDRESS("^[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}$");
 
 bool CheckFilePath(const std::string &fileName, std::string &realPath)
 {
@@ -413,6 +418,109 @@ int InterfaceManager::SetIffUp(const std::string &ifaceName)
     }
     close(inetSocket);
     return 0;
+}
+
+int32_t InterfaceManager::AddStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                       const std::string &ifName)
+{
+    arpreq req = {};
+    int32_t res = AssembleArp(ipAddr, macAddr, ifName, req);
+    if (res != NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("AssembleArp error");
+        return res;
+    }
+
+    int32_t inetSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    if (ioctl(inetSocket, SIOCSARP, &req) < 0) {
+        NETNATIVE_LOGE("AddStaticArp ioctl SIOCSARP error: %{public}s", strerror(errno));
+        close(inetSocket);
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    close(inetSocket);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t InterfaceManager::DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                       const std::string &ifName)
+{
+    arpreq req = {};
+    int32_t res = AssembleArp(ipAddr, macAddr, ifName, req);
+    if (res != NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("AssembleArp error");
+        return res;
+    }
+
+    int32_t inetSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    if (ioctl(inetSocket, SIOCDARP, &req) < 0) {
+        NETNATIVE_LOGE("DelStaticArp ioctl SIOCDARP error: %{public}s", strerror(errno));
+        close(inetSocket);
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+    close(inetSocket);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t InterfaceManager::AssembleArp(const std::string &ipAddr, const std::string &macAddr,
+                                      const std::string &ifName, arpreq &req)
+{
+    if (!IsValidIPV4(ipAddr)) {
+        NETNATIVE_LOGE("ipAddr error");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    if (!regex_match(macAddr, REGEX_CMD_MAC_ADDRESS)) {
+        NETNATIVE_LOGE("macAddr error");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    sockaddr_in& netAddrStruct = *reinterpret_cast<sockaddr_in*>(&req.arp_pa);
+    sockaddr& ethAddrStruct = req.arp_ha;
+
+    ethAddrStruct.sa_family = ARPHRD_ETHER;
+    if (MacStringToArray(macAddr, ethAddrStruct) != 0) {
+        NETNATIVE_LOGE("macStringToArray error");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    netAddrStruct.sin_family = AF_INET;
+    netAddrStruct.sin_addr.s_addr = ConvertIpv4Address(ipAddr);
+
+    if (strncpy_s(req.arp_dev, sizeof(req.arp_dev),
+                  ifName.c_str(), ifName.size()) != 0) {
+        NETNATIVE_LOGE("strncpy_s is false");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    req.arp_flags = ATF_COM;
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t InterfaceManager::MacStringToArray(const std::string &macAddr, sockaddr &macSock)
+{
+    char strMac[MAC_ADDRESS_INT_LEN] = {};
+    char strAddr[MAC_ADDRESS_STR_LEN] = {};
+    uint32_t v = 0;
+    if (memcpy_s(strAddr, MAC_ADDRESS_STR_LEN, macAddr.c_str(), macAddr.size()) != 0) {
+        NETNATIVE_LOGE("memcpy_s is false");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    for (int i = 0; i < MAC_ADDRESS_INT_LEN; i++) {
+        if (sscanf_s(strAddr+MAC_SSCANF_SPACE*i, "%2x", &v, sizeof(uint32_t)) <= 0) {
+            NETNATIVE_LOGE("sscanf_s is false");
+            return NETMANAGER_ERR_OPERATION_FAILED;
+        }
+        strMac[i] = (char)v;
+    }
+
+    if (strncpy_s(macSock.sa_data, sizeof(macSock.sa_data),
+                  strMac, MAC_ADDRESS_INT_LEN) != 0) {
+        NETNATIVE_LOGE("strncpy_s is false");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 } // namespace nmd
 } // namespace OHOS

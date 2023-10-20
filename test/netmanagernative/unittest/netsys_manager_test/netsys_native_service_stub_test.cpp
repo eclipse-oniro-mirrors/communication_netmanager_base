@@ -515,6 +515,16 @@ public:
     {
         return 0;
     }
+
+    int32_t AddStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName) override
+    {
+        return 0;
+    }
+
+    int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
@@ -1598,5 +1608,6 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetDiagGetInterfaceConfigCommandForResT
     int32_t ret1 = notifyStub_->CmdNetDiagGetInterfaceConfig(data1, reply1);
     EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
 }
+
 } // namespace NetsysNative
 } // namespace OHOS

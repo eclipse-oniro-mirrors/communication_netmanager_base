@@ -1264,5 +1264,27 @@ int32_t NetsysNativeClient::NetDiagSetInterfaceActiveState(const std::string &if
     }
     return proxy->NetDiagSetInterfaceActiveState(ifaceName, up);
 }
+
+int32_t NetsysNativeClient::AddStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                         const std::string &ifName)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->AddStaticArp(ipAddr, macAddr, ifName);
+}
+
+int32_t NetsysNativeClient::DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                         const std::string &ifName)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->DelStaticArp(ipAddr, macAddr, ifName);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

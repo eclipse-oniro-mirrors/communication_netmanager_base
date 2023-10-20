@@ -1936,5 +1936,81 @@ int32_t NetsysNativeServiceProxy::NetDiagSetInterfaceActiveState(const std::stri
     }
     return ret;
 }
+
+int32_t NetsysNativeServiceProxy::AddStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                               const std::string &ifName)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(ipAddr)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(macAddr)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(ifName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("AddStaticArp Remote is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ADD_STATIC_ARP),
+                                        data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("AddStaticArp proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("AddStaticArp proxy read ret failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                               const std::string &ifName)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(ipAddr)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(macAddr)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(ifName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("DelStaticArp Remote is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_STATIC_ARP),
+                                        data, reply, option);
+    if (error != ERR_NONE) {
+        NETNATIVE_LOGE("DelStaticArp proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("DelStaticArp proxy read ret failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
 } // namespace NetsysNative
 } // namespace OHOS

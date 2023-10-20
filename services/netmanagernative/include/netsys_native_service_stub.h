@@ -49,6 +49,7 @@ private:
     void InitFirewallOpToInterfaceMap();
     void InitOpToInterfaceMapExt();
     void InitNetDiagOpToInterfaceMap();
+    void InitStaticArpToInterfaceMap();
     int32_t CmdSetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetResolverConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdCreateNetworkCache(MessageParcel &data, MessageParcel &reply);
@@ -122,6 +123,8 @@ private:
     int32_t CmdNetDiagGetInterfaceConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetDiagUpdateInterfaceConfig(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetDiagSetInterfaceActiveState(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdAddStaticArp(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdDelStaticArp(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::vector<int32_t> uids_;

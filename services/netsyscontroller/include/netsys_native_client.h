@@ -787,6 +787,10 @@ public:
      * @return Value the return value of the netsys interface call
      */
     int32_t NetDiagSetInterfaceActiveState(const std::string &ifaceName, bool up);
+    int32_t AddStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                         const std::string &ifName);
+    int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                         const std::string &ifName);
 
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);

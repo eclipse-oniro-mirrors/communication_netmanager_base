@@ -121,6 +121,8 @@ public:
     void GetDumpInfo(std::string &infos);
     int32_t DnsGetAddrInfo(const std::string &hostName, const std::string &serverName, const AddrInfo &hints,
                            uint16_t netId, std::vector<AddrInfo> &res);
+    int32_t AddStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName);
+    int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName);
 
 private:
     std::shared_ptr<BandwidthManager> bandwidthManager_ = nullptr;

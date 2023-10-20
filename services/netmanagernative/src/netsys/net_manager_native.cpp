@@ -455,5 +455,27 @@ void NetManagerNative::GetDumpInfo(std::string &infos)
     connManager_->GetDumpInfos(infos);
     dnsManager_->GetDumpInfo(infos);
 }
+
+int32_t NetManagerNative::AddStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                       const std::string &ifName)
+{
+    if (interfaceManager_ == nullptr) {
+        NETNATIVE_LOGE("interfaceManager_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    return interfaceManager_->AddStaticArp(ipAddr, macAddr, ifName);
+}
+
+int32_t NetManagerNative::DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                       const std::string &ifName)
+{
+    if (interfaceManager_ == nullptr) {
+        NETNATIVE_LOGE("interfaceManager_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    return interfaceManager_->DelStaticArp(ipAddr, macAddr, ifName);
+}
 } // namespace nmd
 } // namespace OHOS

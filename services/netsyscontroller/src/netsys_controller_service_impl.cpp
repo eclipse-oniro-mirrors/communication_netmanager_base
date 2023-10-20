@@ -692,5 +692,19 @@ int32_t NetsysControllerServiceImpl::NetDiagSetInterfaceActiveState(const std::s
     NETMGR_LOG_D("NetsysControllerServiceImpl::NetDiagSetInterfaceActiveState");
     return netsysClient_.NetDiagSetInterfaceActiveState(ifaceName, up);
 }
+
+int32_t NetsysControllerServiceImpl::AddStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                                  const std::string &ifName)
+{
+    NETMGR_LOG_D("NetsysControllerServiceImpl::AddStaticArp");
+    return netsysClient_.AddStaticArp(ipAddr, macAddr, ifName);
+}
+
+int32_t NetsysControllerServiceImpl::DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                                  const std::string &ifName)
+{
+    NETMGR_LOG_D("NetsysControllerServiceImpl::DelStaticArp");
+    return netsysClient_.DelStaticArp(ipAddr, macAddr, ifName);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
