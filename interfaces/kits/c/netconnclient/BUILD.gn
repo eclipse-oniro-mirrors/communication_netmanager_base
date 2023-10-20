@@ -24,9 +24,7 @@ ohos_ndk_library("libnetconn_ndk") {
 
 ohos_ndk_headers("netconn_header") {
   dest_dir = "$ndk_headers_out_dir/netconn"
-  sources = [
-    "./include/native_net_conn_api.h"
-  ]
+  sources = [ "./include/native_net_conn_api.h" ]
 }
 
 ohos_shared_library("netconn_ndk") {
