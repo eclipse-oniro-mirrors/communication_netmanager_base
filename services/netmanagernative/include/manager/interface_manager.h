@@ -20,6 +20,7 @@
 #include <ostream>
 #include <string>
 #include <vector>
+#include "net/if_arp.h"
 
 namespace OHOS {
 namespace nmd {
@@ -105,9 +106,16 @@ public:
      * @return Returns 0, set up to network successfully, otherwise it will fail
      */
     static int SetIffUp(const std::string &ifaceName);
+    static int32_t AddStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                const std::string &ifName);
+    static int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
+                                const std::string &ifName);
 
 private:
     static int ModifyAddress(uint32_t action, const char *interfaceName, const char *addr, int prefixLen);
+    static int32_t AssembleArp(const std::string &ipAddr, const std::string &macAddr,
+                               const std::string &ifName, arpreq &req);
+    static int32_t MacStringToArray(const std::string &macAddr, sockaddr &macSock);
 };
 } // namespace nmd
 } // namespace OHOS

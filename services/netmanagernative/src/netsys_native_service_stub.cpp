@@ -46,6 +46,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitFirewallOpToInterfaceMap();
     InitOpToInterfaceMapExt();
     InitNetDiagOpToInterfaceMap();
+    InitStaticArpToInterfaceMap();
     uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
         UID_SAMGR, UID_PARAM_WATCHER, UID_EDM};
 }
@@ -210,6 +211,14 @@ void NetsysNativeServiceStub::InitNetDiagOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdNetDiagUpdateInterfaceConfig;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETDIAG_SET_IFACE_ACTIVE_STATE)] =
         &NetsysNativeServiceStub::CmdNetDiagSetInterfaceActiveState;
+}
+
+void NetsysNativeServiceStub::InitStaticArpToInterfaceMap()
+{
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_ADD_STATIC_ARP)] =
+        &NetsysNativeServiceStub::CmdAddStaticArp;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_STATIC_ARP)] =
+        &NetsysNativeServiceStub::CmdDelStaticArp;
 }
 
 int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -1351,6 +1360,66 @@ int32_t NetsysNativeServiceStub::CmdNetDiagSetInterfaceActiveState(MessageParcel
         NETNATIVE_LOGE("Write result failed");
         return ERR_FLATTEN_OBJECT;
     }
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdAddStaticArp(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ipAddr = "";
+    if (!data.ReadString(ipAddr)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::string macAddr = "";
+    if (!data.ReadString(macAddr)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::string ifName = "";
+    if (!data.ReadString(ifName)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = AddStaticArp(ipAddr, macAddr, ifName);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    NETNATIVE_LOG_D("CmdAddStaticArp has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdDelStaticArp(MessageParcel &data, MessageParcel &reply)
+{
+    std::string ipAddr = "";
+    if (!data.ReadString(ipAddr)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::string macAddr = "";
+    if (!data.ReadString(macAddr)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::string ifName = "";
+    if (!data.ReadString(ifName)) {
+        NETNATIVE_LOGE("Read string failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = DelStaticArp(ipAddr, macAddr, ifName);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    NETNATIVE_LOG_D("CmdDelStaticArp has recved result %{public}d", result);
+
     return result;
 }
 } // namespace NetsysNative
