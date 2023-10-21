@@ -15,7 +15,10 @@
 
 #include <algorithm>
 #include <gtest/gtest.h>
-
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
 #include "interface_manager.h"
 #include "netsys_controller.h"
 #include "net_manager_constants.h"
@@ -245,6 +248,34 @@ HWTEST_F(InterfaceManagerTest, SetIffUpTest002, TestSize.Level1)
     std::string ifaceName = "eth1";
     ret = InterfaceManager::SetIffUp(ifaceName);
     EXPECT_LE(ret, 0);
+}
+
+HWTEST_F(InterfaceManagerTest, AssembleArp001, TestSize.Level1)
+{
+    std::string ipAddr = "192.168.1.100";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "wlan0";
+    arpreq req = {};
+    auto ret = InterfaceManager::AssembleArp(ipAddr, macAddr, ifName, req);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(InterfaceManagerTest, AddStaticArpTest001, TestSize.Level1)
+{
+    std::string ipAddr = "192.168.1.100";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "wlan0";
+    auto ret = InterfaceManager::AddStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, 0);
+}
+
+HWTEST_F(InterfaceManagerTest, DelStaticArpTest001, TestSize.Level1)
+{
+    std::string ipAddr = "192.168.1.100";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "wlan0";
+    auto ret = InterfaceManager::DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, 0);
 }
 } // namespace nmd
 } // namespace OHOS

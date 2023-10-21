@@ -342,5 +342,16 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest013, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest014, TestSize.Level1)
+{
+    std::string ipAddr = "192.168.1.100";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "wlan0";
+    auto ret = nativeClient_.AddStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = nativeClient_.DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

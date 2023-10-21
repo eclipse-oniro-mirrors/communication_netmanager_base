@@ -679,5 +679,61 @@ HWTEST_F(NetConnServiceTest, GetNetInterfaceConfigurationTest001, TestSize.Level
     auto ret = NetConnService::GetInstance()->GetNetInterfaceConfiguration("wlan0", config);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceTest, AddNetworkRouteTest001, TestSize.Level1)
+{
+    int32_t netId = 10;
+    std::string ifName = "wlan0";
+    std::string destination = "0.0.0.0/0";
+    std::string nextHop = "0.0.0.1234";
+    int32_t ret = NetConnService::GetInstance()->AddNetworkRoute(netId, ifName, destination, nextHop);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetConnServiceTest, RemoveNetworkRouteTest001, TestSize.Level1)
+{
+    int32_t netId = 10;
+    std::string ifName = "wlan0";
+    std::string destination = "0.0.0.0/0";
+    std::string nextHop = "0.0.0.1234";
+    int32_t ret = NetConnService::GetInstance()->RemoveNetworkRoute(netId, ifName, destination, nextHop);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetConnServiceTest, AddInterfaceAddressTest001, TestSize.Level1)
+{
+    std::string ifName = "wlan0";
+    std::string ipAddr = "0.0.0.1";
+    int32_t prefixLength = 23;
+    int32_t ret = NetConnService::GetInstance()->AddInterfaceAddress(ifName, ipAddr, prefixLength);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, DelInterfaceAddressTest001, TestSize.Level1)
+{
+    std::string ifName = "wlan0";
+    std::string ipAddr = "0.0.0.1";
+    int32_t prefixLength = 23;
+    int32_t ret = NetConnService::GetInstance()->DelInterfaceAddress(ifName, ipAddr, prefixLength);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, AddStaticArpTest001, TestSize.Level1)
+{
+    std::string ipAddr = "192.168.1.100";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "wlan0";
+    int32_t ret = NetConnService::GetInstance()->AddStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, DelStaticArpTest001, TestSize.Level1)
+{
+    std::string ipAddr = "192.168.1.100";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "wlan0";
+    int32_t ret = NetConnService::GetInstance()->DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

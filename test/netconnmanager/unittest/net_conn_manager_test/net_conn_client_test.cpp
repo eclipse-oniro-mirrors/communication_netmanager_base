@@ -1169,5 +1169,84 @@ HWTEST_F(NetConnClientTest, NetDetectionTest002, TestSize.Level1)
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(netHandle);
     EXPECT_EQ(ret, NET_CONN_ERR_NETID_NOT_FOUND);
 }
+
+HWTEST_F(NetConnClientTest, NetworkRouteTest001, TestSize.Level1)
+{
+    AccessToken token;
+    int32_t netId = 10;
+    std::string ifName = "wlan0";
+    std::string destination = "0.0.0.0/0";
+    std::string nextHop = "0.0.0.1234";
+
+    int32_t ret = NetConnClient::GetInstance().AddNetworkRoute(netId, ifName, destination, nextHop);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    ret = NetConnClient::GetInstance().RemoveNetworkRoute(netId, ifName, destination, nextHop);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+
+HWTEST_F(NetConnClientTest, InterfaceAddressTest001, TestSize.Level1)
+{
+    AccessToken token;
+    std::string ifName = "wlan0";
+    std::string ipAddr = "0.0.0.1";
+    int32_t prefixLength = 23;
+
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->AddInterfaceAddress(ifName, ipAddr, prefixLength);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->DelInterfaceAddress(ifName, ipAddr, prefixLength);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnClientTest, StaticArpTest001, TestSize.Level1)
+{
+    AccessToken token;
+    std::string ifName = "wlan0";
+    std::string ipAddr = "123.12.12.123";
+    std::string macAddr = "12:23:34:12:12:11";
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->AddStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ipAddr = "1234";
+    macAddr = "12:23:34:12:12:11";
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->AddStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ipAddr = "123.12.12.123";
+    macAddr = "12:234:34";
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->AddStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+HWTEST_F(NetConnClientTest, StaticArpTest002, TestSize.Level1)
+{
+    AccessToken token;
+    std::string ipAddr = "123.12.12.123";
+    std::string macAddr = "12:23:34:12:12:11";
+    std::string ifName = "wlan0";
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ipAddr = "123.12.12.123";
+    macAddr = "12:23:34:12:12:11";
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+
+    ipAddr = "123.12.12.1235678";
+    macAddr = "12:23:34:12:12:11";
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ipAddr = "123.12.12.123";
+    macAddr = "12:23:34:12:12";
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ipAddr = "123.12.12.123";
+    macAddr = "12:23:34:12:12:11";
+    ifName = "";
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

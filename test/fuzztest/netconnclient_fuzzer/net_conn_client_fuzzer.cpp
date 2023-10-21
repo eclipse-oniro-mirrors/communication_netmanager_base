@@ -801,6 +801,112 @@ void GetSpecificUidNetFuzzTest(const uint8_t *data, size_t size)
 
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SPECIFIC_UID_NET), dataParcel);
 }
+
+void AddNetworkRouteFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    int32_t netId = GetData<int32_t>();
+    std::string ifName = GetStringFromData(STR_LEN);
+    std::string destination = GetStringFromData(STR_LEN);
+    std::string nextHop = GetStringFromData(STR_LEN);
+    dataParcel.WriteInt32(netId);
+    dataParcel.WriteString(ifName);
+    dataParcel.WriteString(destination);
+    dataParcel.WriteString(nextHop);
+
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_NET_ROUTE), dataParcel);
+}
+
+void RemoveNetworkRouteFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    int32_t netId = GetData<int32_t>();
+    std::string ifName = GetStringFromData(STR_LEN);
+    std::string destination = GetStringFromData(STR_LEN);
+    std::string nextHop = GetStringFromData(STR_LEN);
+    dataParcel.WriteInt32(netId);
+    dataParcel.WriteString(ifName);
+    dataParcel.WriteString(destination);
+    dataParcel.WriteString(nextHop);
+
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ROUTE), dataParcel);
+}
+
+void AddInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    int32_t prefixLength = GetData<int32_t>();
+    std::string ifName = GetStringFromData(STR_LEN);
+    std::string ipAddr = GetStringFromData(STR_LEN);
+    dataParcel.WriteString(ifName);
+    dataParcel.WriteString(ipAddr);
+    dataParcel.WriteInt32(prefixLength);
+
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_NET_ADDRESS), dataParcel);
+}
+
+void DelInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    int32_t prefixLength = GetData<int32_t>();
+    std::string ifName = GetStringFromData(STR_LEN);
+    std::string ipAddr = GetStringFromData(STR_LEN);
+    dataParcel.WriteString(ifName);
+    dataParcel.WriteString(ipAddr);
+    dataParcel.WriteInt32(prefixLength);
+
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ADDRESS), dataParcel);
+}
+
+void AddStaticArpFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    std::string ipAddr = GetStringFromData(STR_LEN);
+    std::string macAddr = GetStringFromData(STR_LEN);
+    std::string ifName = GetStringFromData(STR_LEN);
+    dataParcel.WriteString(ifName);
+    dataParcel.WriteString(macAddr);
+    dataParcel.WriteString(ifName);
+
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_STATIC_ARP), dataParcel);
+}
+
+void DelStaticArpFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    std::string ipAddr = GetStringFromData(STR_LEN);
+    std::string macAddr = GetStringFromData(STR_LEN);
+    std::string ifName = GetStringFromData(STR_LEN);
+    dataParcel.WriteString(ifName);
+    dataParcel.WriteString(macAddr);
+    dataParcel.WriteString(ifName);
+
+    OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_DEL_STATIC_ARP), dataParcel);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -843,6 +949,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetSpecificNetFuzzTest(data, size);
     OHOS::NetManagerStandard::GetSpecificUidNetFuzzTest(data, size);
     OHOS::NetManagerStandard::OnSetAppNetFuzzTest(data, size);
-
+    OHOS::NetManagerStandard::AddNetworkRouteFuzzTest(data, size);
+    OHOS::NetManagerStandard::RemoveNetworkRouteFuzzTest(data, size);
+    OHOS::NetManagerStandard::AddInterfaceAddressFuzzTest(data, size);
+    OHOS::NetManagerStandard::DelInterfaceAddressFuzzTest(data, size);
+    OHOS::NetManagerStandard::AddStaticArpFuzzTest(data, size);
+    OHOS::NetManagerStandard::DelStaticArpFuzzTest(data, size);
     return 0;
 }

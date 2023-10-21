@@ -1609,5 +1609,32 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetDiagGetInterfaceConfigCommandForResT
     EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysNativeServiceStubTest, CmdStaticArp001, TestSize.Level1)
+{
+    std::string ipAddr = "192.168.1.100";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "wlan0";
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteString(ipAddr)) {
+        return;
+    }
+    if (!data.WriteString(macAddr)) {
+        return;
+    }
+    if (!data.WriteString(ifName)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdAddStaticArp(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+
+    ret = notifyStub_->CmdDelStaticArp(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
 } // namespace NetsysNative
 } // namespace OHOS

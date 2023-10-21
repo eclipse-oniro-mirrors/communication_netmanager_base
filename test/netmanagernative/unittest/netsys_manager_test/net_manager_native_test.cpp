@@ -168,5 +168,24 @@ HWTEST_F(NetManagerNativeTest, DnsGetAddrInfo001, TestSize.Level1)
     auto ret = instance_->DnsGetAddrInfo(hostName, serverName, hints, netId, res);
     EXPECT_EQ(ret, EAI_NONAME);
 }
+
+
+HWTEST_F(NetManagerNativeTest, AddStaticArpTest001, TestSize.Level1)
+{
+    std::string ipAddr = "192.168.1.100";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "wlan0";
+    auto ret = instance_->AddStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetManagerNativeTest, DelStaticArpTest001, TestSize.Level1)
+{
+    std::string ipAddr = "192.168.1.100";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "wlan0";
+    auto ret = instance_->DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace nmd
 } // namespace OHOS
