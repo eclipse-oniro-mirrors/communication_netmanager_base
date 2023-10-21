@@ -34,8 +34,7 @@ constexpr const char* HTTP_URL_HEADER = "HttpProbeUrl:";
 constexpr const char  NEW_LINE_STR = '\n';
 constexpr const uint32_t TIME_DELAY = 100;
 
-DnsQualityDiag::DnsQualityDiag() :
-  defaultNetId_(0),
+DnsQualityDiag::DnsQualityDiag() : defaultNetId_(0),
   monitor_loop_delay(TIME_DELAY),
   report_delay(TIME_DELAY),
   handler_started(false),
@@ -97,7 +96,7 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
                 case AF_INET:
                     ai.type_ = NetsysNative::ADDR_TYPE_IPV4;
                     ai.addr_ = tmp->aiAddr.sa.sa_data;
-                break;
+                    break;
                 case AF_INET6:
                     char temp[40] = {'\0'};
                     int ret = sprintf_s(temp, sizeof(temp),
@@ -123,7 +122,7 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
                     }
                     ai.type_ = NetsysNative::ADDR_TYPE_IPV6;
                     ai.addr_ = temp;
-                break;
+                    break;
             }
             if (report.addrlist_.size() < MAX_RESULT_SIZE) {
                 report.addrlist_.push_back(ai);
@@ -296,7 +295,7 @@ int32_t DnsQualityDiag::HandleEvent(const AppExecFwk::InnerEvent::Pointer &event
             break;
         case DnsQualityEventHandler::MSG_DNS_QUERY_FAIL:
             handle_dns_fail();
-    	    break;
+            break;
         case DnsQualityEventHandler::MSG_DNS_REPORT_LOOP:
             send_dns_report();
             break;
