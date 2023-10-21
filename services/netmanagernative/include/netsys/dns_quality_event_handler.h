@@ -41,9 +41,6 @@ public:
      * @param policyEvent The informations passed from other core
      */
     void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
-
-private:
-
 };
 
 } // namespace OHOS::nmd

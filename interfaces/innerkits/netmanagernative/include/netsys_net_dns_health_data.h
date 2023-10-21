@@ -34,9 +34,7 @@ struct NetDnsHealthReport final : public Parcelable {
 
     bool Marshalling(Parcel &parcel) const override;
     static bool Unmarshalling(Parcel &parcel, NetDnsHealthReport &result);
-
 };
-
 
 } // namespace NetsysNative
 } // namespace OHOS

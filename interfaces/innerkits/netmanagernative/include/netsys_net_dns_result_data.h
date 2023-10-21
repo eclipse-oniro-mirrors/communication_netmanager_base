@@ -38,7 +38,6 @@ struct NetDnsResultAddrInfo final : public Parcelable {
 
     bool Marshalling(Parcel &parcel) const override;
     static bool Unmarshalling(Parcel &parcel, NetDnsResultAddrInfo &addrinfo);
-
 };
 
 struct NetDnsResultReport final : public Parcelable {
@@ -53,7 +52,6 @@ struct NetDnsResultReport final : public Parcelable {
 
     bool Marshalling(Parcel &parcel) const override;
     static bool Unmarshalling(Parcel &parcel, NetDnsResultReport &result);
-
 };
 
 } // namespace NetsysNative

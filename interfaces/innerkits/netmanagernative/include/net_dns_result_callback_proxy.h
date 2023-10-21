@@ -17,7 +17,6 @@
 #include "iremote_proxy.h"
 
 #include "i_net_dns_result_callback.h"
-// #define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 
 namespace OHOS {
 namespace NetsysNative {

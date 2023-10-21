@@ -44,7 +44,7 @@ public:
     static DnsQualityDiag &GetInstance();
 
     // for net_conn_service
-    int32_t ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t pid, int32_t usedtime, char* name,
+    int32_t ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t pid, int32_t usedtime, std::string* name,
                               uint32_t size, int32_t failreason, QueryParam param, AddrInfo* addrinfo);
 
     int32_t RegisterResultListener(const sptr<NetsysNative::INetDnsResultCallback> &callback, uint32_t timeStep);
@@ -78,13 +78,10 @@ private:
 
     std::list<sptr<NetsysNative::INetDnsHealthCallback>> healthListeners_;
 
-    // std::shared_ptr<AppExecFwk::EventRunner> runner_;
     std::shared_ptr<DnsQualityEventHandler> handler_;
 
     std::list<NetsysNative::NetDnsResultReport> report_;
 
-    //static std::vector<std::string> SelectNameservers(const std::vector<std::string> &servers);
-    
     int32_t SendHealthReport(NetsysNative::NetDnsHealthReport healthreport);
     int32_t InitHandler();
     int32_t query_default_host();

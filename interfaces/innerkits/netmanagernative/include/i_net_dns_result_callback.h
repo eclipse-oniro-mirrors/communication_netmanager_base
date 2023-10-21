@@ -36,7 +36,6 @@ public:
 
 public:
     virtual     int32_t OnDnsResultReport(uint32_t size, const std::list<NetDnsResultReport>) = 0;
-
 };
 } // namespace NetsysNative
 } // namespace OHOS
