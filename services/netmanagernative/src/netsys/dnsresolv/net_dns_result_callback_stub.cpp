@@ -24,7 +24,6 @@ NetDnsResultCallbackStub::NetDnsResultCallbackStub()
 {
     memberFuncMap_[static_cast<uint32_t>(NetDnsResultInterfaceCode::ON_DNS_RESULT_REPORT)] =
         &NetDnsResultCallbackStub::CmdDnsResultReport;
-
 }
 
 int32_t NetDnsResultCallbackStub::OnRemoteRequest(
