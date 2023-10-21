@@ -20,8 +20,6 @@
 #include <fstream>
 #include <sstream>
 
-//#include "netmanager_base_common_utils.h"
-
 namespace OHOS::nmd {
 
 namespace {
@@ -34,11 +32,12 @@ constexpr const uint32_t MAX_RESULT_SIZE = 32;
 constexpr const char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char* HTTP_URL_HEADER = "HttpProbeUrl:";
 constexpr const char  NEW_LINE_STR = '\n';
+constexpr const uint32_t TIME_DELAY = 100;
 
 DnsQualityDiag::DnsQualityDiag() :
   defaultNetId_(0),
-  monitor_loop_delay(100),
-  report_delay(100),
+  monitor_loop_delay(TIME_DELAY),
+  report_delay(TIME_DELAY),
   handler_started(false),
   handler_(nullptr)
   {
@@ -75,12 +74,13 @@ int32_t DnsQualityDiag::SendHealthReport(NetsysNative::NetDnsHealthReport health
     return 0;
 }
 
-int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t pid, int32_t usedtime, char* name,
-                              uint32_t size, int32_t failreason, QueryParam queryParam, AddrInfo* addrinfo)
+int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t pid, int32_t usedtime,
+    std::string* name, uint32_t size, int32_t failreason, QueryParam queryParam, AddrInfo* addrinfo)
 {
     bool reportSizeReachLimit = (report_.size() >= MAX_RESULT_SIZE);
 
-    NETNATIVE_LOGI("ReportDnsResult: %{public}d, %{public}d, %{public}d, %{public}d, %{public}d, %{public}d", netId, uid, pid, usedtime, size, failreason);
+    NETNATIVE_LOGI("ReportDnsResult: %{public}d, %{public}d, %{public}d, %{public}d, %{public}d, %{public}d",
+                   netId, uid, pid, usedtime, size, failreason);
 
     if (!reportSizeReachLimit) {
         NetsysNative::NetDnsResultReport report;
@@ -91,30 +91,38 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
         report.queryresult_ = failreason;
         report.host_ = name;
         for (uint8_t i = 0; i < size; i++) {
-	        NetsysNative::NetDnsResultAddrInfo ai;
-	        AddrInfo *tmp = &(addrinfo[i]);
-            switch(tmp->aiFamily) {
-            case AF_INET:
-                ai.type_ = NetsysNative::ADDR_TYPE_IPV4;
-                ai.addr_ = tmp->aiAddr.sa.sa_data;
+            NetsysNative::NetDnsResultAddrInfo ai;
+            AddrInfo *tmp = &(addrinfo[i]);
+            switch (tmp->aiFamily) {
+                case AF_INET:
+                    ai.type_ = NetsysNative::ADDR_TYPE_IPV4;
+                    ai.addr_ = tmp->aiAddr.sa.sa_data;
                 break;
-            case AF_INET6:
-                char temp[40] = {'\0'};
-                int ret = sprintf_s(temp, sizeof(temp),
-                            "%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X",
-                            tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[0], tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[1],
-                            tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[2], tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[3],
-                            tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[4], tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[5],
-                            tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[6], tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[7],
-                            tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[8], tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[9],
-                            tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[10], tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[11],
-                            tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[12], tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[13],
-                            tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[14], tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[15]);
-                if (ret == -1) {
-                    continue;
-                }
-                ai.type_ = NetsysNative::ADDR_TYPE_IPV6;
-                ai.addr_ = temp;
+                case AF_INET6:
+                    char temp[40] = {'\0'};
+                    int ret = sprintf_s(temp, sizeof(temp),
+                              "%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X",
+                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[0],
+                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[1],
+                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[2],
+                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[3],
+                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[4],
+                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[5],
+                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[6],
+                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[7],
+                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[8],
+                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[9],
+                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[10],
+                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[11],
+                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[12],
+                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[13],
+                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[14],
+                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[15]);
+                    if (ret == -1) {
+                        continue;
+                    }
+                    ai.type_ = NetsysNative::ADDR_TYPE_IPV6;
+                    ai.addr_ = temp;
                 break;
             }
             if (report.addrlist_.size() < MAX_RESULT_SIZE) {
@@ -193,8 +201,8 @@ int32_t DnsQualityDiag::query_default_host()
 
     OHOS::NetManagerStandard::NetHandle netHandle;
     OHOS::NetManagerStandard::NetConnClient::GetInstance().GetDefaultNet(netHandle);
-    int netid = netHandle.GetNetId(); 
-    
+    int netid = netHandle.GetNetId();
+
     NETNATIVE_LOGI("query_default_host: %{public}d, ", netid);
 
     param.qp_netid = netid;
@@ -204,7 +212,7 @@ int32_t DnsQualityDiag::query_default_host()
 }
 
 int32_t DnsQualityDiag::handle_dns_loop()
-{   
+{
     if (handler_started) {
         if (report_.size() == 0) {
             query_default_host();
@@ -282,20 +290,20 @@ int32_t DnsQualityDiag::HandleEvent(const AppExecFwk::InnerEvent::Pointer &event
     }
     NETNATIVE_LOGI("DnsQualityDiag Handler event: %{public}d", event->GetInnerEventId());
 
-    switch(event->GetInnerEventId()) {
-    case DnsQualityEventHandler::MSG_DNS_MONITOR_LOOP:
-        handle_dns_loop();
-        break;
-    case DnsQualityEventHandler::MSG_DNS_QUERY_FAIL:
-        handle_dns_fail();
-    	break;
-    case DnsQualityEventHandler::MSG_DNS_REPORT_LOOP:
-        send_dns_report();
-        break;
-    case DnsQualityEventHandler::MSG_DNS_NEW_REPORT:
-        auto report = event->GetSharedObject<NetsysNative::NetDnsResultReport>();
-        add_dns_report(report);
-        break;
+    switch (event->GetInnerEventId()) {
+        case DnsQualityEventHandler::MSG_DNS_MONITOR_LOOP:
+            handle_dns_loop();
+            break;
+        case DnsQualityEventHandler::MSG_DNS_QUERY_FAIL:
+            handle_dns_fail();
+    	    break;
+        case DnsQualityEventHandler::MSG_DNS_REPORT_LOOP:
+            send_dns_report();
+            break;
+        case DnsQualityEventHandler::MSG_DNS_NEW_REPORT:
+            auto report = event->GetSharedObject<NetsysNative::NetDnsResultReport>();
+            add_dns_report(report);
+            break;
     }
     return 0;
 }
