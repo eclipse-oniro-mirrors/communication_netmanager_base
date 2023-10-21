@@ -26,10 +26,10 @@ using namespace OHOS::NetManagerStandard;
 } // namespace
 
 NetDnsResultCallbackProxy::NetDnsResultCallbackProxy(const sptr<IRemoteObject> &impl)
-       	: IRemoteProxy<INetDnsResultCallback>(impl) {}
+    : IRemoteProxy<INetDnsResultCallback>(impl) {}
 
-int32_t NetDnsResultCallbackProxy::OnDnsResultReport(uint32_t listsize, 
-						     const std::list<NetDnsResultReport> dnsResultReport)
+int32_t NetDnsResultCallbackProxy::OnDnsResultReport(uint32_t listsize,
+    const std::list<NetDnsResultReport> dnsResultReport)
 {
     NETNATIVE_LOGI("Proxy OnDnsResultReport");
     MessageParcel data;
@@ -61,7 +61,8 @@ int32_t NetDnsResultCallbackProxy::OnDnsResultReport(uint32_t listsize,
     MessageParcel reply;
     MessageOption option;
     int32_t ret =
-        remote->SendRequest(static_cast<uint32_t>(NetDnsResultInterfaceCode::ON_DNS_RESULT_REPORT), data, reply, option);
+        remote->SendRequest(static_cast<uint32_t>(NetDnsResultInterfaceCode::ON_DNS_RESULT_REPORT),
+                            data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed, error: [%{public}d]", ret);
         return NETMANAGER_ERR_OPERATION_FAILED;

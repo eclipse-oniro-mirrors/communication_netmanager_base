@@ -26,7 +26,7 @@ using namespace OHOS::NetManagerStandard;
 } // namespace
 
 NetDnsHealthCallbackProxy::NetDnsHealthCallbackProxy(const sptr<IRemoteObject> &impl)
-       	: IRemoteProxy<INetDnsHealthCallback>(impl) {}
+    : IRemoteProxy<INetDnsHealthCallback>(impl) {}
 
 int32_t NetDnsHealthCallbackProxy::OnDnsHealthReport(const NetDnsHealthReport &dnsHealthReport)
 {
@@ -51,7 +51,8 @@ int32_t NetDnsHealthCallbackProxy::OnDnsHealthReport(const NetDnsHealthReport &d
     MessageParcel reply;
     MessageOption option;
     int32_t ret =
-        remote->SendRequest(static_cast<uint32_t>(NetDnsHealthInterfaceCode::ON_DNS_HEALTH_REPORT), data, reply, option);
+        remote->SendRequest(static_cast<uint32_t>(NetDnsHealthInterfaceCode::ON_DNS_HEALTH_REPORT),
+                            data, reply, option);
     if (ret != ERR_NONE) {
         NETNATIVE_LOGE("proxy SendRequest failed, error: [%{public}d]", ret);
         return NETMANAGER_ERR_OPERATION_FAILED;

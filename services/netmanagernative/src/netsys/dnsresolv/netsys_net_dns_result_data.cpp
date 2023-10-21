@@ -111,7 +111,6 @@ bool NetDnsResultReport::Unmarshalling(Parcel &parcel, NetDnsResultReport &resul
         resultReport.addrlist_.push_back(addrInfo);
     }
 
-
     return true;
 }
 } // namespace NetsysNative

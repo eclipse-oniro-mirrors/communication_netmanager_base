@@ -24,7 +24,6 @@ NetDnsHealthCallbackStub::NetDnsHealthCallbackStub()
 {
     memberFuncMap_[static_cast<uint32_t>(NetDnsHealthInterfaceCode::ON_DNS_HEALTH_REPORT)] =
         &NetDnsHealthCallbackStub::CmdDnsHealthReport;
-
 }
 
 int32_t NetDnsHealthCallbackStub::OnRemoteRequest(
