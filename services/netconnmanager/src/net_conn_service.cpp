@@ -101,6 +101,7 @@ void NetConnService::OnStop()
     if (netConnEventHandler_) {
         netConnEventHandler_.reset();
     }
+    //NetsysController::GetInstance().UnregisterDnsResultCallback(dnsResultCallback_);
     state_ = STATE_STOPPED;
     registerToService_ = false;
     NETMGR_LOG_D("NetConnService::OnStop end");
@@ -138,6 +139,10 @@ bool NetConnService::Init()
     if (interfaceStateCallback_) {
         NetsysController::GetInstance().RegisterCallback(interfaceStateCallback_);
     }
+    dnsResultCallback_ = std::make_unique<NetDnsResultCallback>().release();
+    int regDnsResultCallback = NetsysController::GetInstance().RegisterDnsResultCallback(dnsResultCallback_, 500);
+    NETMGR_LOG_I("Register Dns Result callback result: [%{public}d]", regDnsResultCallback);
+
     return true;
 }
 
@@ -1330,6 +1335,7 @@ void NetConnService::GetDumpMessage(std::string &message)
         message.append("\tLinkDownBandwidthKbps: 0\n");
         message.append("\tUid: 0\n");
     }
+    dnsResultCallback_->GetDumpMessageForDnsResult(message);
 }
 
 int32_t NetConnService::HasDefaultNet(bool &flag)
@@ -1440,6 +1446,17 @@ int32_t NetConnService::GetNetInterfaceConfiguration(const std::string &iface, N
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetConnService::NetDetectionForDnsHealth(int32_t netId, int32_t dnsHealthSuccess)
+{
+    NETMGR_LOG_D("Enter NetConnService::NetDetectionForDnsHealth");
+    auto iterNetwork = networks_.find(netId);
+    if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
+        NETMGR_LOG_E("Could not find the corresponding network");
+        return NET_CONN_ERR_NETID_NOT_FOUND;
+    }
+    iterNetwork->second->NetDetectionForDnsHealth(dnsHealthSuccess);
+    return NETMANAGER_SUCCESS;
+}
 void NetConnService::LoadGlobalHttpProxy()
 {
     if (isGlobalProxyLoaded_.load()) {

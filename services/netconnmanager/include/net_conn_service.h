@@ -282,6 +282,14 @@ public:
      */
     void OnNetActivateTimeOut(uint32_t reqId) override;
 
+    /**
+     * The interface of network detection called when DNS health check failed
+     *
+     * @param netId network ID
+     * @return int32_t Whether the network probe is successful
+     */
+    int32_t NetDetectionForDnsHealth(int32_t netId, int32_t dnsHealthSuccess);
+
     int32_t SetAppNet(int32_t netId) override;
     int32_t RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback) override;
     int32_t GetNetInterfaceConfiguration(const std::string &iface, NetInterfaceConfiguration &config) override;
@@ -389,6 +397,7 @@ private:
     std::shared_ptr<AppExecFwk::EventRunner> netActEventRunner_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_ = nullptr;
     sptr<NetInterfaceStateCallback> interfaceStateCallback_ = nullptr;
+    sptr<NetDnsResultCallback> dnsResultCallback_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
