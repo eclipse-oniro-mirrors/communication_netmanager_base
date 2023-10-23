@@ -85,5 +85,13 @@ HWTEST_F(NetSettingsTest, RemoveSystemUidTest001, TestSize.Level1)
     bool ret = instance_.IsSystem(testSysUid);
     ASSERT_FALSE(ret);
 }
+
+HWTEST_F(NetSettingsTest, RouteUtilsBranchTest001, TestSize.Level1)
+{
+    uint32_t testSysUid = 0;
+    instance_.RemoveSystemUid(testSysUid);
+    bool ret = instance_.IsSystem(testSysUid);
+    ASSERT_FALSE(ret);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

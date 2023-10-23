@@ -19,12 +19,17 @@
 
 #include "net_conn_types.h"
 #include "net_manager_constants.h"
+#ifdef GTEST_API_
+#define private public
+#endif
 #include "route_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
+constexpr uint32_t INVALID_VALUE = 50;
+
 Route GetRoute()
 {
     std::string iface("eth0");
@@ -258,5 +263,17 @@ HWTEST_F(RouteUtilsTest, UpdateRoutes02, TestSize.Level1)
     EXPECT_TRUE(RouteUtils::UpdateRoutes(TEST_NETID, nlin, nlio));
 }
 
+HWTEST_F(RouteUtilsTest, RouteUtilsBranchTest001, TestSize.Level1)
+{
+    Route route = {};
+    route.rtnType_ = INVALID_VALUE;
+    routeOperateType op = static_cast<routeOperateType>(INVALID_VALUE);
+    int32_t netId = 100;
+    int32_t ret = RouteUtils::ModifyRoute(op, netId, route);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    int32_t prefixLen = 0;
+    std::string str = RouteUtils::MaskAddress("", prefixLen);
+    EXPECT_EQ(str, "");
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

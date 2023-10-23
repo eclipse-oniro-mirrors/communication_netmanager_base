@@ -230,5 +230,16 @@ HWTEST_F(NetsysNativeServiceProxyTest, DelStaticArp001, TestSize.Level1)
     int32_t ret = netsysNativeService->DelStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeServiceProxyTest, GetFwmarkForNetworkTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    MarkMaskParcel markMaskParcel;
+    markMaskParcel.mark = 1;
+    markMaskParcel.mask = 0XFFFF;
+    int32_t ret = netsysNativeService->GetFwmarkForNetwork(NETID, markMaskParcel);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS
