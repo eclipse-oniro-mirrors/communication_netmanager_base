@@ -34,15 +34,16 @@ constexpr const char* HTTP_URL_HEADER = "HttpProbeUrl:";
 constexpr const char  NEW_LINE_STR = '\n';
 constexpr const uint32_t TIME_DELAY = 100;
 
-DnsQualityDiag::DnsQualityDiag() : defaultNetId_(0),
-  monitor_loop_delay(TIME_DELAY),
-  report_delay(TIME_DELAY),
-  handler_started(false),
-  handler_(nullptr)
-  {
-      InitHandler();
-      load_query_addr(HW_HICLOUD_ADDR);
-  }
+DnsQualityDiag::DnsQualityDiag()
+    : defaultNetId_(0),
+      monitor_loop_delay(TIME_DELAY),
+      report_delay(TIME_DELAY),
+      handler_started(false),
+      handler_(nullptr)
+{
+    InitHandler();
+    load_query_addr(HW_HICLOUD_ADDR);
+}
 
 DnsQualityDiag &DnsQualityDiag::GetInstance()
 {
