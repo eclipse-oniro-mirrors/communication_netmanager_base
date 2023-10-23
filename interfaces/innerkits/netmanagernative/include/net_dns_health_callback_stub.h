@@ -16,10 +16,9 @@
 #ifndef NET_DNS_HEALTH_CALLBACK_STUB_H
 #define NET_DNS_HEALTH_CALLBACK_STUB_H
 
-#include "i_net_dns_health_callback.h"
-
 #include <map>
 
+#include "i_net_dns_health_callback.h"
 #include "iremote_stub.h"
 
 namespace OHOS {
@@ -34,11 +33,7 @@ public:
 
 private:
     using NetDnsHealthCallbackFunc = int32_t (NetDnsHealthCallbackStub::*)(MessageParcel &, MessageParcel &);
-
-private:
     int32_t CmdDnsHealthReport(MessageParcel &data, MessageParcel &reply);
-
-private:
     std::map<uint32_t, NetDnsHealthCallbackFunc> memberFuncMap_;
 };
 } // namespace NetsysNative

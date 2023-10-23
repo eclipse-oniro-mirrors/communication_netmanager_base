@@ -22,7 +22,6 @@
 #include "event_runner.h"
 #include "singleton.h"
 
-
 namespace OHOS::nmd {
 class DnsQualityEventHandler : public AppExecFwk::EventHandler {
 public:
@@ -34,12 +33,6 @@ public:
     DnsQualityEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner);
     virtual ~DnsQualityEventHandler() override;
 
-    /**
-     * Process the event from EventHandler
-     *
-     * @param eventId The event id
-     * @param policyEvent The informations passed from other core
-     */
     void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
 };
 

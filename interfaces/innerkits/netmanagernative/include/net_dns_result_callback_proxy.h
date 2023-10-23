@@ -14,8 +14,8 @@
  */
 #ifndef  NET_DNS_RESULT_CALLBACK_PROXY_H
 #define  NET_DNS_RESULT_CALLBACK_PROXY_H
-#include "iremote_proxy.h"
 
+#include "iremote_proxy.h"
 #include "i_net_dns_result_callback.h"
 
 namespace OHOS {

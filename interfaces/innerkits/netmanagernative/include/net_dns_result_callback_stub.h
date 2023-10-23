@@ -16,10 +16,9 @@
 #ifndef NET_DNS_RESULT_CALLBACK_STUB_H
 #define NET_DNS_RESULT_CALLBACK_STUB_H
 
-#include "i_net_dns_result_callback.h"
-
 #include <map>
 
+#include "i_net_dns_result_callback.h"
 #include "iremote_stub.h"
 #include "netsys_net_dns_result_data.h"
 
@@ -35,11 +34,7 @@ public:
 
 private:
     using NetDnsResultCallbackFunc = int32_t (NetDnsResultCallbackStub::*)(MessageParcel &, MessageParcel &);
-
-private:
     int32_t CmdDnsResultReport(MessageParcel &data, MessageParcel &reply);
-
-private:
     std::map<uint32_t, NetDnsResultCallbackFunc> memberFuncMap_;
 };
 } // namespace NetsysNative

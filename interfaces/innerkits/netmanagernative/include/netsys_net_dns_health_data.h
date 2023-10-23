@@ -23,7 +23,6 @@
 
 namespace OHOS {
 namespace NetsysNative {
-
 struct NetDnsHealthReport final : public Parcelable {
     uint32_t        netid_;
     uint32_t        uid_;
@@ -35,7 +34,6 @@ struct NetDnsHealthReport final : public Parcelable {
     bool Marshalling(Parcel &parcel) const override;
     static bool Unmarshalling(Parcel &parcel, NetDnsHealthReport &result);
 };
-
 } // namespace NetsysNative
 } // namespace OHOS
 #endif // NETSYS_NET_DNS_HEALTH_DATA_H

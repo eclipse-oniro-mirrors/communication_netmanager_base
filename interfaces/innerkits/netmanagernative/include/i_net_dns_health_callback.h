@@ -22,7 +22,6 @@
 
 namespace OHOS {
 namespace NetsysNative {
-
 class INetDnsHealthCallback : public IRemoteBroker {
 public:
     virtual ~INetDnsHealthCallback() = default;
@@ -34,7 +33,7 @@ public:
     };
 
 public:
-    virtual     int32_t OnDnsHealthReport(const NetDnsHealthReport &dnsHealthReport) = 0;
+    virtual int32_t OnDnsHealthReport(const NetDnsHealthReport &dnsHealthReport) = 0;
 };
 } // namespace NetsysNative
 } // namespace OHOS

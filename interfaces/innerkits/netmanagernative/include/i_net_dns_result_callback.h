@@ -22,8 +22,6 @@
 
 namespace OHOS {
 namespace NetsysNative {
-
-
 class INetDnsResultCallback : public IRemoteBroker {
 public:
     virtual ~INetDnsResultCallback() = default;
@@ -35,7 +33,7 @@ public:
     };
 
 public:
-    virtual     int32_t OnDnsResultReport(uint32_t size, const std::list<NetDnsResultReport>) = 0;
+    virtual int32_t OnDnsResultReport(uint32_t size, const std::list<NetDnsResultReport>) = 0;
 };
 } // namespace NetsysNative
 } // namespace OHOS

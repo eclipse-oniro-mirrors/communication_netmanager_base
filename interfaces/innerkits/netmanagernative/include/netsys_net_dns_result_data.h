@@ -43,17 +43,15 @@ struct NetDnsResultAddrInfo final : public Parcelable {
 struct NetDnsResultReport final : public Parcelable {
     uint32_t        netid_;
     uint32_t        uid_;
-    uint32_t        pid_;//对齐pid是否需要
+    uint32_t        pid_;
     uint32_t        timeused_;
     uint32_t        queryresult_;
     std::string     host_;
     std::list<NetDnsResultAddrInfo> addrlist_;
-    // std::list<NetsysAddrInfoParcel> addrInfoList_;
 
     bool Marshalling(Parcel &parcel) const override;
     static bool Unmarshalling(Parcel &parcel, NetDnsResultReport &result);
 };
-
 } // namespace NetsysNative
 } // namespace OHOS
 #endif // NETSYS_NET_DNS_RESULT_DATA_H
