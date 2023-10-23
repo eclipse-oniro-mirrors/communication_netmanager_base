@@ -653,5 +653,31 @@ HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest003, TestSize.Leve
     instance_->iptablesWrapper_ = std::move(backup);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
+
+HWTEST_F(NetsysNativeServiceTest, AddStaticArpTest001, TestSize.Level1)
+{
+    std::string ipAddr = "192.168.1.100";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "wlan0";
+    if (instance_->netsysService_ == nullptr) {
+        instance_->Init();
+        return;
+    }
+    int32_t ret = instance_->AddStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, DelStaticArpTest001, TestSize.Level1)
+{
+    std::string ipAddr = "192.168.1.100";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "wlan0";
+    if (instance_->netsysService_ == nullptr) {
+        instance_->Init();
+        return;
+    }
+    int32_t ret = instance_->DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS
