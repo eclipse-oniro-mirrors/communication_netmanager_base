@@ -101,7 +101,6 @@ void NetConnService::OnStop()
     if (netConnEventHandler_) {
         netConnEventHandler_.reset();
     }
-    //NetsysController::GetInstance().UnregisterDnsResultCallback(dnsResultCallback_);
     state_ = STATE_STOPPED;
     registerToService_ = false;
     NETMGR_LOG_D("NetConnService::OnStop end");
@@ -1457,6 +1456,7 @@ int32_t NetConnService::NetDetectionForDnsHealth(int32_t netId, int32_t dnsHealt
     iterNetwork->second->NetDetectionForDnsHealth(dnsHealthSuccess);
     return NETMANAGER_SUCCESS;
 }
+
 void NetConnService::LoadGlobalHttpProxy()
 {
     if (isGlobalProxyLoaded_.load()) {

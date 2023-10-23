@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define DNS_RESULT_CALL_BACK_H
 
 #include <map>
+
 #include "netsys_net_dns_result_data.h"
 #include "netsys_dns_report_callback.h"
 
@@ -27,8 +28,8 @@ struct NetDnsResult{
     uint32_t        totalReports_;
     uint32_t        failReports_;
 };
-class NetDnsResultCallback : public NetsysDnsReportCallback {
 
+class NetDnsResultCallback : public NetsysDnsReportCallback {
 public:
     int32_t OnDnsResultReport(uint32_t size, const std::list<NetsysNative::NetDnsResultReport>);
     void GetDumpMessageForDnsResult(std::string &message);
@@ -36,7 +37,6 @@ public:
 private:
     std::map<uint32_t, NetDnsResult> netDnsResult_;
 };
-
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // DNS_RESULT_CALL_BACK_H
