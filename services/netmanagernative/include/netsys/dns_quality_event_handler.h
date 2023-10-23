@@ -35,6 +35,5 @@ public:
 
     void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
 };
-
 } // namespace OHOS::nmd
 #endif // DNS_QUALITY_EVENT_HANDLER_H
