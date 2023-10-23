@@ -464,5 +464,81 @@ HWTEST_F(NetManagerCenterTest, IsUidNetAllowedTest002, TestSize.Level1)
     bool ret = instance_.IsUidNetAllowed(0, false);
     EXPECT_TRUE(ret);
 }
+
+HWTEST_F(NetManagerCenterTest, NetManagerCenterBranchTest001, TestSize.Level1)
+{
+    instance_.RegisterPolicyService(nullptr);
+    std::list<std::string> list;
+    int32_t ret = instance_.GetIfaceNames(NetBearType::BEARER_DEFAULT, list);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    std::string ifaceName;
+    ret = instance_.GetIfaceNameByType(NetBearType::BEARER_DEFAULT, TEST_IDENT, ifaceName);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    uint32_t supplierId = 0;
+    ret = instance_.UpdateNetLinkInfo(supplierId, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = instance_.UpdateNetSupplierInfo(supplierId, nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = instance_.RegisterNetConnCallback(nullptr);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    instance_.RegisterStatsService(nullptr);
+    ret = instance_.ResetStatsFactory();
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = instance_.ResetPolicyFactory();
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = instance_.ResetPolicies();
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    instance_.RegisterEthernetService(nullptr);
+    ret = instance_.ResetEthernetFactory();
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = instance_.RestrictBackgroundChanged(false);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetManagerCenterTest, NetManagerCenterBranchTest002, TestSize.Level1)
+{
+    sptr<NetConnBaseService> connService = new (std::nothrow) TestConnService();
+    instance_.RegisterConnService(connService);
+    NetBearType bearerType = BEARER_CELLULAR;
+    std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET};
+    std::string ident = "ident";
+    int32_t result = instance_.RegisterNetSupplier(bearerType, ident, netCaps, supplierId_);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+
+    result = instance_.UnregisterNetSupplier(supplierId_);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+
+    uint32_t supplierId = 0;
+    sptr<NetLinkInfo> netLinkInfo = new (std::nothrow) NetLinkInfo();
+    result = instance_.UpdateNetLinkInfo(supplierId, netLinkInfo);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+
+    result = instance_.UpdateNetSupplierInfo(supplierId, nullptr);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+
+    result = instance_.RegisterNetConnCallback(nullptr);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+
+    result = instance_.RestrictBackgroundChanged(false);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+
+    sptr<NetStatsBaseService> netStatsService = new (std::nothrow) TestNetStatsService();
+    instance_.RegisterStatsService(netStatsService);
+    int32_t ret = instance_.ResetStatsFactory();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    sptr<NetPolicyBaseService> netPolicyService = new (std::nothrow) TestNetPolicyService();
+    instance_.RegisterPolicyService(netPolicyService);
+    EXPECT_EQ(instance_.ResetPolicyFactory(), NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

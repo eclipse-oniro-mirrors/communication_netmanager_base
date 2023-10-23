@@ -72,5 +72,23 @@ HWTEST_F(BroadcastManagerTest, SendBroadcastTest004, TestSize.Level1)
     bool ret = BroadcastManager::GetInstance().SendBroadcast(testInfo, params);
     EXPECT_FALSE(ret);
 }
+
+HWTEST_F(BroadcastManagerTest, SendBroadcastTest005, TestSize.Level1)
+{
+    std::map<std::string, int64_t> params = {{"test1", 1}, {"test2", 2}, {"test3", 3}};
+    bool ret = BroadcastManager::GetInstance().SendBroadcast(g_testInfo, params);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(BroadcastManagerTest, SendBroadcastTest006, TestSize.Level1)
+{
+    std::map<std::string, std::string> params = {{"test1", "testMsg1"}, {"test2", "testMsg2"}, {"test3", "testMsg3"}};
+    BroadcastInfo info = {};
+    g_testInfo.action = "testAction";
+    g_testInfo.data = "testData";
+    info.permission = "ohos.permission.INTERNET";
+    bool ret = BroadcastManager::GetInstance().SendBroadcast(info, params);
+    EXPECT_FALSE(ret);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
