@@ -14,7 +14,6 @@
  */
 
 #include "dns_quality_event_handler.h"
-
 #include "dns_quality_diag.h"
 
 namespace OHOS::nmd {
@@ -33,5 +32,4 @@ void DnsQualityEventHandler::ProcessEvent(const AppExecFwk::InnerEvent::Pointer 
     }
     DnsQualityDiag::GetInstance().HandleEvent(event);
 }
-
 } // namespace OHOS::nmd

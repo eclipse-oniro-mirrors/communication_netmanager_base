@@ -20,7 +20,6 @@
 
 namespace OHOS {
 namespace NetsysNative {
-
 namespace {
 using namespace OHOS::NetManagerStandard;
 } // namespace

@@ -14,7 +14,6 @@
  */
 
 #include "net_dns_result_callback_stub.h"
-
 #include "netnative_log_wrapper.h"
 #include "netsys_ipc_interface_code.h"
 
@@ -76,6 +75,5 @@ int32_t NetDnsResultCallbackStub::OnDnsResultReport(uint32_t size, std::list<Net
 {
     return 0;
 }
-
 } // namespace NetsysNative
 } // namespace OHOS

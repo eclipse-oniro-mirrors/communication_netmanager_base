@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "net_dns_health_callback_stub.h"
-
 #include "netnative_log_wrapper.h"
 #include "netsys_ipc_interface_code.h"
 #include "net_conn_constants.h"
@@ -68,6 +67,5 @@ int32_t NetDnsHealthCallbackStub::OnDnsHealthReport(const NetDnsHealthReport &dn
 {
     return 0;
 }
-
 } // namespace NetsysNative
 } // namespace OHOS
