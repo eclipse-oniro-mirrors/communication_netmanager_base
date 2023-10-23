@@ -410,7 +410,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
     queryparam param;
     param.qp_type = QEURY_TYPE_NORMAL;
     param.qp_netid = netid;
-    NETMANAGER_BASE_LOGE("getaddrinfo_ext  %{public}d %{public}d", netid, param.qp_netid);
+    NETMANAGER_BASE_LOGI("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
 
     int status = getaddrinfo_ext(context->host_.c_str(), nullptr, nullptr, &res, &param);
     if (status < 0) {
@@ -463,7 +463,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext
     queryparam param;
     param.qp_type = QEURY_TYPE_NORMAL;
     param.qp_netid = netid;
-    NETMANAGER_BASE_LOGE("getaddrinfo_ext  %{public}d %{public}d", netid, param.qp_netid);
+    NETMANAGER_BASE_LOGI("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
 
     int status = getaddrinfo_ext(context->host_.c_str(), nullptr, nullptr, &res, &param);
     if (status < 0) {
