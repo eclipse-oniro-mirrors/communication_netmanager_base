@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
+#include <fstream>
+#include <sstream>
+
 #include "dns_quality_diag.h"
 #include "third_party/musl/include/netdb.h"
 #include "net_handle.h"
 #include "net_conn_client.h"
-#include <fstream>
-#include <sstream>
 
 namespace OHOS::nmd {
-
 namespace {
 using namespace OHOS::NetsysNative;
-} // namespace
+}
 
 constexpr const char *DNS_DIAG_WORK_THREAD = "DNS_DIAG_WORK_THREAD";
 constexpr const char *HW_HICLOUD_ADDR = "http://connectivitycheck.platform.hicloud.com/generate_204";
@@ -89,6 +89,7 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
         report.timeused_ = usedtime;
         report.queryresult_ = failreason;
         report.host_ = name;
+        int maxSize = 40;
         for (uint8_t i = 0; i < size; i++) {
             NetsysNative::NetDnsResultAddrInfo ai;
             AddrInfo *tmp = &(addrinfo[i]);
@@ -98,7 +99,7 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
                     ai.addr_ = tmp->aiAddr.sa.sa_data;
                     break;
                 case AF_INET6:
-                    char temp[40] = {'\0'};
+                    char temp[maxSize] = {'\0'};
                     int ret = sprintf_s(temp, sizeof(temp),
                               "%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X",
                               tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[0],
@@ -138,7 +139,7 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
         handler_->SendEvent(event);
     }
 
-return 0;
+    return 0;
 }
 
 int32_t DnsQualityDiag::RegisterResultListener(const sptr<INetDnsResultCallback> &callback, uint32_t timeStep)
@@ -306,5 +307,4 @@ int32_t DnsQualityDiag::HandleEvent(const AppExecFwk::InnerEvent::Pointer &event
     }
     return 0;
 }
-
 } // namespace OHOS::nmd
