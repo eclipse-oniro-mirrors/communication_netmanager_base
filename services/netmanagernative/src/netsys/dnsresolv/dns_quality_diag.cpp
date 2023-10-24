@@ -76,28 +76,28 @@ int32_t DnsQualityDiag::SendHealthReport(NetsysNative::NetDnsHealthReport health
 int32_t DnsQualityDiag::ParseReportAddr(uint32_t size, AddrInfo* addrinfo, NetsysNative::NetDnsResultReport &report)
 {
     for (uint8_t i = 0; i < size; i++) {
-	    NetsysNative::NetDnsResultAddrInfo ai;
-	    AddrInfo *tmp = &(addrinfo[i]);
-        switch(tmp->aiFamily) {
-        case AF_INET:
-            ai.type_ = NetsysNative::ADDR_TYPE_IPV4;
-            ai.addr_ = tmp->aiAddr.sa.sa_data;
-            break;
-        case AF_INET6:
-            uint8_t* s6addr = tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr;
-            std::ostringstream oss;
-            uint32_t size = sizeof(tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr) / sizeof(uint8_t);
-            if (size == 0) {
-                continue;
-            }
-            oss << s6addr[0];
-            for (uint32_t i = 1; i < size; ++i) {
-                oss << ':';
-                oss << s6addr[i];
-            }
-            ai.type_ = NetsysNative::ADDR_TYPE_IPV6;
-            ai.addr_ = oss.str();
-            break;
+        NetsysNative::NetDnsResultAddrInfo ai;
+        AddrInfo *tmp = &(addrinfo[i]);
+        switch (tmp->aiFamily) {
+            case AF_INET:
+                ai.type_ = NetsysNative::ADDR_TYPE_IPV4;
+                ai.addr_ = tmp->aiAddr.sa.sa_data;
+                break;
+            case AF_INET6:
+                uint8_t* s6addr = tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr;
+                std::ostringstream oss;
+                uint32_t size = sizeof(tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr) / sizeof(uint8_t);
+                if (size == 0) {
+                    continue;
+                }
+                oss << s6addr[0];
+                for (uint32_t i = 1; i < size; ++i) {
+                    oss << ':';
+                    oss << s6addr[i];
+                }
+                ai.type_ = NetsysNative::ADDR_TYPE_IPV6;
+                ai.addr_ = oss.str();
+                break;
         }
         if (report.addrlist_.size() < MAX_RESULT_SIZE) {
             report.addrlist_.push_back(ai);
