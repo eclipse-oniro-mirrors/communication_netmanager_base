@@ -32,7 +32,7 @@ constexpr const uint32_t MAX_RESULT_SIZE = 32;
 constexpr const char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
 constexpr const char* HTTP_URL_HEADER = "HttpProbeUrl:";
 constexpr const char  NEW_LINE_STR = '\n';
-constexpr const uint32_t TIME_DELAY = 100;
+constexpr const uint32_t TIME_DELAY = 500;
 
 DnsQualityDiag::DnsQualityDiag()
     : defaultNetId_(0),
@@ -73,6 +73,41 @@ int32_t DnsQualityDiag::SendHealthReport(NetsysNative::NetDnsHealthReport health
 
     return 0;
 }
+int32_t DnsQualityDiag::ParseReportAddr(uint32_t size, AddrInfo* addrinfo, NetsysNative::NetDnsResultReport &report)
+{
+    for (uint8_t i = 0; i < size; i++) {
+	    NetsysNative::NetDnsResultAddrInfo ai;
+	    AddrInfo *tmp = &(addrinfo[i]);
+        switch(tmp->aiFamily) {
+        case AF_INET:
+            ai.type_ = NetsysNative::ADDR_TYPE_IPV4;
+            ai.addr_ = tmp->aiAddr.sa.sa_data;
+            break;
+        case AF_INET6:
+            uint8_t* s6addr = tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr;
+            std::ostringstream oss;
+            uint32_t size = sizeof(tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr) / sizeof(uint8_t);
+            if (size == 0) {
+                continue;
+            }
+            oss << s6addr[0];
+            for (uint32_t i = 1; i < size; ++i) {
+                oss << ':';
+                oss << s6addr[i];
+            }
+            ai.type_ = NetsysNative::ADDR_TYPE_IPV6;
+            ai.addr_ = oss.str();
+            break;
+        }
+        if (report.addrlist_.size() < MAX_RESULT_SIZE) {
+            report.addrlist_.push_back(ai);
+        } else {
+            break;
+        }
+        NETNATIVE_LOGI("ReportDnsResult: %{public}s", ai.addr_.c_str());
+    }
+    return 0;
+}
 
 int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t pid, int32_t usedtime,
     std::string* name, uint32_t size, int32_t failreason, QueryParam queryParam, AddrInfo* addrinfo)
@@ -90,48 +125,8 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
         report.timeused_ = usedtime;
         report.queryresult_ = failreason;
         report.host_ = name;
-        int maxSize = 40;
-        for (uint8_t i = 0; i < size; i++) {
-            NetsysNative::NetDnsResultAddrInfo ai;
-            AddrInfo *tmp = &(addrinfo[i]);
-            switch (tmp->aiFamily) {
-                case AF_INET:
-                    ai.type_ = NetsysNative::ADDR_TYPE_IPV4;
-                    ai.addr_ = tmp->aiAddr.sa.sa_data;
-                    break;
-                case AF_INET6:
-                    char temp[maxSize] = {'\0'};
-                    int ret = sprintf_s(temp, sizeof(temp),
-                              "%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X",
-                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[0],
-                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[1],
-                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[2],
-                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[3],
-                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[4],
-                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[5],
-                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[6],
-                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[7],
-                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[8],
-                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[9],
-                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[10],
-                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[11],
-                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[12],
-                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[13],
-                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[14],
-                              tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr[15]);
-                    if (ret == -1) {
-                        continue;
-                    }
-                    ai.type_ = NetsysNative::ADDR_TYPE_IPV6;
-                    ai.addr_ = temp;
-                    break;
-            }
-            if (report.addrlist_.size() < MAX_RESULT_SIZE) {
-                report.addrlist_.push_back(ai);
-            } else {
-                break;
-            }
-            NETNATIVE_LOGI("ReportDnsResult: %{public}s, ", ai.addr_.c_str());
+        if (failreason == 0) {
+            ParseReportAddr(size, addrinfo, report);
         }
         NETNATIVE_LOGI("ReportDnsResult: %{public}s", report.host_.c_str());
         std::shared_ptr<NetsysNative::NetDnsResultReport> rpt =
