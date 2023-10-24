@@ -1445,7 +1445,7 @@ int32_t NetConnService::GetNetInterfaceConfiguration(const std::string &iface, N
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::NetDetectionForDnsHealth(int32_t netId, int32_t dnsHealthSuccess)
+int32_t NetConnService::NetDetectionForDnsHealth(int32_t netId, bool dnsHealthSuccess)
 {
     NETMGR_LOG_D("Enter NetConnService::NetDetectionForDnsHealth");
     auto iterNetwork = networks_.find(netId);

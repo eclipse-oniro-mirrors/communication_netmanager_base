@@ -288,7 +288,7 @@ public:
      * @param netId network ID
      * @return int32_t Whether the network probe is successful
      */
-    int32_t NetDetectionForDnsHealth(int32_t netId, int32_t dnsHealthSuccess);
+    int32_t NetDetectionForDnsHealth(int32_t netId, bool dnsHealthSuccess);
 
     int32_t SetAppNet(int32_t netId) override;
     int32_t RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback) override;

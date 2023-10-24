@@ -45,6 +45,7 @@ ohos_shared_library("net_conn_manager") {
 
   sources = [
     "$NETCONNMANAGER_COMMON_DIR/src/route_utils.cpp",
+    "src/dns_result_call_back.cpp",
     "src/net_activate.cpp",
     "src/net_caps.cpp",
     "src/net_conn_event_handler.cpp",
@@ -58,7 +59,6 @@ ohos_shared_library("net_conn_manager") {
     "src/net_score.cpp",
     "src/net_supplier.cpp",
     "src/network.cpp",
-    "src/dns_result_call_back.cpp",
     "src/stub/net_conn_callback_proxy.cpp",
     "src/stub/net_conn_service_stub.cpp",
     "src/stub/net_detection_callback_proxy.cpp",
@@ -70,8 +70,8 @@ ohos_shared_library("net_conn_manager") {
 
   deps = [
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
     "$THIRD_PARTY_ROOT/curl:curl_shared",

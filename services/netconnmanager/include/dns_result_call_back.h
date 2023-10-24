@@ -17,9 +17,11 @@
 #define DNS_RESULT_CALL_BACK_H
 
 #include <map>
+#include <mutex>
 
 #include "netsys_net_dns_result_data.h"
 #include "netsys_dns_report_callback.h"
+#include "safe_map.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -28,14 +30,14 @@ struct NetDnsResult{
     uint32_t        totalReports_;
     uint32_t        failReports_;
 };
-
 class NetDnsResultCallback : public NetsysDnsReportCallback {
+
 public:
     int32_t OnDnsResultReport(uint32_t size, const std::list<NetsysNative::NetDnsResultReport>);
     void GetDumpMessageForDnsResult(std::string &message);
 
 private:
-    std::map<uint32_t, NetDnsResult> netDnsResult_;
+    SafeMap<uint32_t, NetDnsResult> netDnsResult_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

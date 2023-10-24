@@ -421,24 +421,24 @@ void Network::StartNetDetection(bool needReport)
     netMonitor_->UpdateNetLinkInfo(netLinkInfo_);
 }
 
-void Network::NetDetectionForDnsHealth(int32_t dnsHealthSuccess)
+void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
 {
-    NETMGR_LOG_I("Enter Network::NetDetectionForDnsHealth ,dnsHealthSuccess = %{public}d", dnsHealthSuccess);
+    NETMGR_LOG_I("Enter Network::NetDetectionForDnsHealth");
     if (netMonitor_ == nullptr) {
         NETMGR_LOG_E("netMonitor_ is nullptr");
         return;
     }
     NetDetectionStatus lastDetectResult = detectResult_;
-    NETMGR_LOG_I("Last netDetectionState: [%{public}d], dnsHealthSuccess [%{public}d]", lastDetectResult, dnsHealthSuccess);
-    if ((lastDetectResult == INVALID_DETECTION_STATE) && (dnsHealthSuccess == 0)) {
+    NETMGR_LOG_I("Last netDetectionState: [%{public}d]", lastDetectResult);
+    if ((lastDetectResult == INVALID_DETECTION_STATE) && dnsHealthSuccess) {
         NETMGR_LOG_I("Dns report success, so restart detection.");
         netMonitor_->Stop();
         netMonitor_->Start();
-    }else if (netMonitor_->IsDetecting()) {
-        NETMGR_LOG_I("netMonitor_ is detecting, no need to restart.");
-    }else if ((dnsHealthSuccess) == 1 && (lastDetectResult == VERIFICATION_STATE)){
-        NETMGR_LOG_I("start net detection");
+    } else if ((lastDetectResult == VERIFICATION_STATE) && !dnsHealthSuccess && !(netMonitor_->IsDetecting())){
+        NETMGR_LOG_I("Dns report fail, start net detection");
         netMonitor_->Start();
+    } else {
+        NETMGR_LOG_I("Not match, no need to restart.");
     }
 }
 
