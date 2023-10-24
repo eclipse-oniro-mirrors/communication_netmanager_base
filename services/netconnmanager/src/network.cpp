@@ -434,7 +434,7 @@ void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
         NETMGR_LOG_I("Dns report success, so restart detection.");
         netMonitor_->Stop();
         netMonitor_->Start();
-    } else if ((lastDetectResult == VERIFICATION_STATE) && !dnsHealthSuccess && !(netMonitor_->IsDetecting())){
+    } else if ((lastDetectResult == VERIFICATION_STATE) && !dnsHealthSuccess && !(netMonitor_->IsDetecting())) {
         NETMGR_LOG_I("Dns report fail, start net detection");
         netMonitor_->Start();
     } else {
