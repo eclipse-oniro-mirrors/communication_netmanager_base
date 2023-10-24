@@ -26,13 +26,13 @@ namespace {
 using namespace OHOS::NetsysNative;
 }
 
-constexpr const char *DNS_DIAG_WORK_THREAD = "DNS_DIAG_WORK_THREAD";
-constexpr const char *HW_HICLOUD_ADDR = "http://connectivitycheck.platform.hicloud.com/generate_204";
-constexpr const uint32_t MAX_RESULT_SIZE = 32;
-constexpr const char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
-constexpr const char* HTTP_URL_HEADER = "HttpProbeUrl:";
-constexpr const char  NEW_LINE_STR = '\n';
-constexpr const uint32_t TIME_DELAY = 500;
+constexpr char *DNS_DIAG_WORK_THREAD = "DNS_DIAG_WORK_THREAD";
+constexpr char *HW_HICLOUD_ADDR = "http://connectivitycheck.platform.hicloud.com/generate_204";
+constexpr uint32_t MAX_RESULT_SIZE = 32;
+constexpr char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
+constexpr char* HTTP_URL_HEADER = "HttpProbeUrl:";
+constexpr char  NEW_LINE_STR = '\n';
+constexpr uint32_t TIME_DELAY = 500;
 
 DnsQualityDiag::DnsQualityDiag()
     : defaultNetId_(0),
@@ -228,14 +228,22 @@ int32_t DnsQualityDiag::handle_dns_fail()
 
 int32_t DnsQualityDiag::send_dns_report()
 {
-    std::list<NetsysNative::NetDnsResultReport> reportSend(report_);
-    report_.clear();
-    NETNATIVE_LOGE("send_dns_report (%{public}lu)", reportSend.size());
-    for (auto cb: resultListeners_) {
-        NETNATIVE_LOGI("send_dns_report cb)");
-        cb->OnDnsResultReport(reportSend.size(), reportSend);
+    if (handler_started == 0) {
+        report_.clear();
+        return 0;
     }
-    handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_REPORT_LOOP, report_delay);
+
+    if (report_.size() > 0) {
+        std::list<NetsysNative::NetDnsResultReport> reportSend(report_);
+        report_.clear();
+        NETNATIVE_LOGE("send_dns_report (%{public}lu)", reportSend.size());
+        for (auto cb: resultListeners_) {
+            NETNATIVE_LOGI("send_dns_report cb)");
+            cb->OnDnsResultReport(reportSend.size(), reportSend);
+        }
+        handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_REPORT_LOOP, report_delay);
+    }
+
     return 0;
 }
 
