@@ -69,7 +69,7 @@ void NetDnsResultCallback::IterateDnsReportResults(
         NETMGR_LOG_I("netId_: %{public}d, queryResult_: %{public}d, pid_ : %{public}d",
                      it.netid_, it.queryresult_, it.pid_);
         NetDnsResult existResult;
-        bool ret =  netDnsResult_.Find(it.netid_, existResult); 
+        bool ret =  netDnsResult_.Find(it.netid_, existResult);
         if (!ret && it.netid_ == 0) {
             NetDnsResult newDefaultResult;
             if (!netDnsResult_.Find(defaultNetid, newDefaultResult)) {
