@@ -27,10 +27,10 @@ using namespace OHOS::NetsysNative;
 }
 
 constexpr char *DNS_DIAG_WORK_THREAD = "DNS_DIAG_WORK_THREAD";
-constexpr char *HW_HICLOUD_ADDR = "http://connectivitycheck.platform.hicloud.com/generate_204";
+constexpr char *HW_HICLOUD_ADDR = "connectivitycheck.platform.hicloud.com";
 constexpr uint32_t MAX_RESULT_SIZE = 32;
 constexpr char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
-constexpr char* HTTP_URL_HEADER = "HttpProbeUrl:";
+constexpr char* DNS_URL_HEADER = "DnsProbeUrl:";
 constexpr char  NEW_LINE_STR = '\n';
 constexpr uint32_t TIME_DELAY = 500;
 
@@ -274,9 +274,9 @@ int32_t DnsQualityDiag::load_query_addr(const char* defaultAddr)
     std::ostringstream oss;
     oss << file.rdbuf();
     std::string content = oss.str();
-    auto pos = content.find(HTTP_URL_HEADER);
+    auto pos = content.find(DNS_URL_HEADER);
     if (pos != std::string::npos) {
-        pos += strlen(HTTP_URL_HEADER);
+        pos += strlen(DNS_URL_HEADER);
         queryAddr = content.substr(pos, content.find(NEW_LINE_STR, pos) - pos);
     } else {
         queryAddr = defaultAddr;
