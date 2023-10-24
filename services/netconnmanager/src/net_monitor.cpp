@@ -41,7 +41,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-constexpr int32_t INIT_DETECTION_DELAY_MS = 8 * 1000;
+constexpr int32_t INIT_DETECTION_DELAY_MS = 1 * 1000;
 constexpr int32_t MAX_FAILED_DETECTION_DELAY_MS = 5 * 60 * 1000;
 constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 60 * 1000;
 constexpr int32_t DOUBLE = 2;
