@@ -415,7 +415,7 @@ napi_value ConnectionModule::NetHandleInterface::GetAddressesByName(napi_env env
 napi_value ConnectionModule::NetHandleInterface::GetAddressByName(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::Interface<GetAddressByNameContext>(
-        env, info, FUNCTION_GET_ADDRESSES_BY_NAME, 
+        env, info, FUNCTION_GET_ADDRESSES_BY_NAME,
         [](napi_env theEnv, napi_value thisVal, GetAddressByNameContext *context) -> bool {
             context->netId_ = NapiUtils::GetInt32Property(theEnv, thisVal, PROPERTY_NET_ID);
             return true;
