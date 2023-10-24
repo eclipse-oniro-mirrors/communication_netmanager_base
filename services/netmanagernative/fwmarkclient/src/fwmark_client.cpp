@@ -128,11 +128,12 @@ int32_t FwmarkClient::HandleError(int32_t ret, int32_t errorCode)
     return NETMANAGER_ERROR;
 }
 
-extern "C" int32_t BindSocket(int32_t fd, uint32_t netId)
+#ifdef __cplusplus
+extern int32_t BindSocket(int32_t fd, uint32_t netId)
 {
     FwmarkClient instance;
     return instance.BindSocket(fd, netId);
 }
-
+#endif
 } // namespace nmd
 } // namespace OHOS
