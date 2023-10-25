@@ -47,6 +47,7 @@ constexpr int32_t TEST_NETID = 3;
 constexpr int32_t TEST_SOCKETFD = 2;
 const int32_t NET_ID = 2;
 const int32_t SOCKET_FD = 2;
+const int32_t ZERO_VALUE = 0;
 constexpr const char *TEST_IDENT = "testIdent";
 constexpr const char *TEST_HOST = "testHost";
 constexpr const char *TEST_PROXY_HOST = "testHttpProxy";
@@ -734,6 +735,40 @@ HWTEST_F(NetConnServiceTest, DelStaticArpTest001, TestSize.Level1)
     std::string ifName = "wlan0";
     int32_t ret = NetConnService::GetInstance()->DelStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest001, TestSize.Level1)
+{
+    NetConnService::GetInstance()->OnStart();
+    EXPECT_EQ(NetConnService::GetInstance()->state_, NetConnService::STATE_RUNNING);
+    NetConnService::GetInstance()->OnStop();
+    EXPECT_EQ(NetConnService::GetInstance()->state_, NetConnService::STATE_STOPPED);
+    bool result = NetConnService::GetInstance()->Init();
+    EXPECT_FALSE(result);
+
+    uint32_t reqId = 0;
+    result = NetConnService::GetInstance()->FindSameCallback(nullptr, reqId);
+    EXPECT_FALSE(result);
+
+    sptr<NetSupplier> supplier = nullptr;
+    std::shared_ptr<NetActivate> netActivateNetwork = nullptr;
+    auto ret = NetConnService::GetInstance()->FindBestNetworkForRequest(supplier, netActivateNetwork);
+    EXPECT_EQ(ret, ZERO_VALUE);
+
+    NetConnService::GetInstance()->SendAllRequestToNetwork(nullptr);
+
+    NetConnService::GetInstance()->SendRequestToAllNetwork(nullptr);
+
+    sptr<NetLinkInfo> netLinkInfo = new (std::nothrow) NetLinkInfo();
+    ASSERT_NE(netLinkInfo, nullptr);
+    netLinkInfo->httpProxy_.SetHost(TEST_HOST);
+    ret = NetConnService::GetInstance()->UpdateNetLinkInfo(g_supplierId, netLinkInfo);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+
+    CallbackType type = CallbackType::CALL_TYPE_AVAILABLE;
+    supplier = NetConnService::GetInstance()->FindNetSupplier(g_supplierId);
+    NetConnService::GetInstance()->CallbackForSupplier(supplier, type);
+    ASSERT_NE(supplier, nullptr);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

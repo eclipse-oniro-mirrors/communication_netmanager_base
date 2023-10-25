@@ -33,6 +33,8 @@
 #include "bpf_path.h"
 #include "bpf_stats.h"
 
+#include "net_stats_constants.h"
+
 namespace OHOS {
 namespace NetManagerStandard {
 static constexpr uint32_t TEST_UID1 = 10010;
@@ -40,6 +42,7 @@ static constexpr uint32_t TEST_UID2 = 10100;
 static constexpr uint32_t TEST_UID_IF1 = 11001;
 static constexpr uint32_t TEST_UID_IF2 = 11002;
 static constexpr uint32_t TEST_BYTES0 = 11;
+static constexpr uint32_t STATS_TYPE_INVALID_VALUE = 4;
 static constexpr const char *TEST_IFACE_NAME_WLAN0 = "wlan0";
 static constexpr const char *TEST_IFACE_NAME_LO = "lo";
 static constexpr const char *TEST_IFACE_NAME_DUMMY0 = "dummy0";
@@ -267,6 +270,16 @@ HWTEST_F(NetsysBpfStatsTest, UnloadElf, TestSize.Level1)
 
     ret = OHOS::NetManagerStandard::UnloadElf(TEST_BFP_NAME_NETSYS_PATH);
     EXPECT_GE(ret, NETSYS_SUCCESS);
+}
+
+HWTEST_F(NetsysBpfStatsTest, GetNumberFromStatsValue, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    StatsType statsType = static_cast<StatsType>(STATS_TYPE_INVALID_VALUE);
+    stats_value value = {};
+    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    auto ret = bpfStats->GetNumberFromStatsValue(stats, statsType, value);
+    EXPECT_EQ(ret, NetManagerStandard::NetStatsResultCode::STATS_ERR_READ_BPF_FAIL);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
