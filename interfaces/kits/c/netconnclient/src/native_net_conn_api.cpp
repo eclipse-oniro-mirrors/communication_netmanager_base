@@ -20,7 +20,6 @@
 
 using namespace OHOS::NetManagerStandard;
 
-
 int32_t OH_NetConn_GetAddrInfo(char *host, char *serv, struct addrinfo *hint, struct addrinfo **res, int32_t netId)
 {
     int32_t ret = NETMANAGER_SUCCESS;
