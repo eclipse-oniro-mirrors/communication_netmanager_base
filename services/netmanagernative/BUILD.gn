@@ -147,6 +147,7 @@ ohos_shared_library("netsys_native_manager") {
     "LOG_DOMAIN = 0xD0015B0",
     "NETSYS_CONFIG_DEBUG=0",
     "DNS_CONFIG_DEBUG=0",
+    "NETSYS_DNS_MONITOR=0",
   ]
 
   if (build_selinux) {

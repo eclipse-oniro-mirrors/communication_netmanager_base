@@ -146,7 +146,9 @@ int32_t DnsQualityDiag::RegisterResultListener(const sptr<INetDnsResultCallback>
     if (handler_started != true) {
         handler_started = true;
         handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_REPORT_LOOP, report_delay);
+#if NETSYS_DNS_MONITOR
         handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_MONITOR_LOOP, monitor_loop_delay);
+#endif
     }
     NETNATIVE_LOGI("RegisterResultListener, %{public}d", report_delay);
 
