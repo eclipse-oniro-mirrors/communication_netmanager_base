@@ -76,7 +76,6 @@ int32_t OH_NetConn_GetAddrInfo(char *host, char *serv, struct addrinfo *hint, st
 */
 int32_t OH_NetConn_FreeDnsResult(struct addrinfo *res);
 
-
 #ifdef __cplusplus
 }
 #endif
