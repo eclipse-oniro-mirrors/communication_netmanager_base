@@ -44,7 +44,7 @@ public:
     static DnsQualityDiag &GetInstance();
 
     // for net_conn_service
-    int32_t ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t pid, int32_t usedtime, std::string* name,
+    int32_t ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t pid, int32_t usedtime, char* name,
                               uint32_t size, int32_t failreason, QueryParam param, AddrInfo* addrinfo);
 
     int32_t RegisterResultListener(const sptr<NetsysNative::INetDnsResultCallback> &callback, uint32_t timeStep);

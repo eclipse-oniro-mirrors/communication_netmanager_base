@@ -134,6 +134,21 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit(const 
     return NETMANAGER_SUCCESS;
 }
 
+NetsysNativeClient::NativeNetDnsResultCallback::NativeNetDnsResultCallback(NetsysNativeClient &netsysNativeClient)
+    : netsysNativeClient_(netsysNativeClient)
+{
+}
+
+int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsResultReport(uint32_t size,
+    std::list<OHOS::NetsysNative::NetDnsResultReport> res)
+{
+    std::lock_guard lock(netsysNativeClient_.cbDnsReportObjMutex_);
+    for (auto &cb : netsysNativeClient_.cbDnsReportObjects_) {
+        cb->OnDnsResultReport(size, res);
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 NetsysNativeClient::NetsysNativeClient()
 {
     std::thread t([this]() {
@@ -1285,6 +1300,51 @@ int32_t NetsysNativeClient::DelStaticArp(const std::string &ipAddr, const std::s
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->DelStaticArp(ipAddr, macAddr, ifName);
+}
+
+int32_t NetsysNativeClient::RegisterDnsResultCallback(
+    const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback, uint32_t timeStep)
+{
+    NETMGR_LOG_I("NetsysNativeClient::RegisterCallback");
+    if (callback == nullptr) {
+        NETMGR_LOG_E("Callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return IPC_PROXY_ERR;
+    }
+    std::lock_guard lock(cbObjMutex_);
+    cbDnsReportObjects_.push_back(callback);
+    dnsReportTimeStep = timeStep;
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeClient::UnregisterDnsResultCallback(
+    const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback)
+{
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetsysNativeClient::RegisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->RegisterDnsHealthCallback(callback);
+}
+
+int32_t NetsysNativeClient::UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("NetsysNativeClient proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->UnregisterDnsHealthCallback(callback);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

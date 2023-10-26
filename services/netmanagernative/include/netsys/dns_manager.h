@@ -21,6 +21,8 @@
 #include "dns_getaddrinfo.h"
 #include "dns_param_cache.h"
 #include "dns_proxy_listen.h"
+#include "i_net_dns_result_callback.h"
+#include "i_net_dns_health_callback.h"
 
 namespace OHOS {
 namespace nmd {
@@ -117,6 +119,11 @@ public:
     int32_t DestroyNetworkCache(uint16_t netId);
 
     void EnableIpv6(uint16_t netId, std::string &destination, const std::string &nextHop);
+
+    int32_t RegisterDnsResultCallback(const sptr<NetsysNative::INetDnsResultCallback> &callback, uint32_t timeStep);
+    int32_t UnregisterDnsResultCallback(const sptr<NetsysNative::INetDnsResultCallback> &callback);
+    int32_t RegisterDnsHealthCallback(const sptr<NetsysNative::INetDnsHealthCallback> &callback);
+    int32_t UnregisterDnsHealthCallback(const sptr<NetsysNative::INetDnsHealthCallback> &callback);
 
 private:
     std::shared_ptr<DnsProxyListen> dnsProxyListen_;

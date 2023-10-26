@@ -742,5 +742,26 @@ int32_t NetsysNativeService::DelStaticArp(const std::string &ipAddr, const std::
     }
     return netsysService_->DelStaticArp(ipAddr, macAddr, ifName);
 }
+
+int32_t NetsysNativeService::RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t timeStep)
+{
+    return netsysService_->RegisterDnsResultCallback(callback, timeStep);
+}
+
+int32_t NetsysNativeService::UnregisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback)
+{
+    return netsysService_->UnregisterDnsResultCallback(callback);
+}
+
+int32_t NetsysNativeService::RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback)
+{
+    return netsysService_->RegisterDnsHealthCallback(callback);
+}
+
+int32_t NetsysNativeService::UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback)
+{
+    return netsysService_->UnregisterDnsHealthCallback(callback);
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

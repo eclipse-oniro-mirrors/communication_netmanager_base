@@ -18,6 +18,8 @@
 #include <thread>
 
 #include "dns_config_client.h"
+#include "net_handle.h"
+#include "net_conn_client.h"
 #include "dns_param_cache.h"
 #include "netsys_client.h"
 #include "init_socket.h"
@@ -25,8 +27,11 @@
 #include "selinux.h"
 #endif
 #include "singleton.h"
+#include <ipc_skeleton.h>
 
 #include "dns_resolv_listen.h"
+#include "dns_quality_diag.h"
+#include "fwmark_client.h"
 
 namespace OHOS::nmd {
 static constexpr const uint32_t MAX_LISTEN_NUM = 1024;
@@ -185,6 +190,114 @@ void DnsResolvListen::ProcJudgeIpv6Command(int clientSockFd, uint16_t netId)
     }
 }
 
+void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
+{
+    NETNATIVE_LOGI("ProcPostDnsResultCommand");
+
+    char name[MAX_HOST_NAME_LEN] = {0};
+
+    uint32_t netid = netId;
+    NETNATIVE_LOGE("ProcPostDnsResultCommand %{public}d", netid);
+
+    uint32_t uid;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&uid), sizeof(uint32_t))) {
+        NETNATIVE_LOGE("read1 errno %{public}d", errno);
+        close(clientSockFd);
+        return;
+    }
+
+    uint32_t pid;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&pid), sizeof(uint32_t))) {
+        NETNATIVE_LOGE("read2 errno %{public}d", errno);
+        close(clientSockFd);
+        return;
+    }
+    
+    int32_t res = ProcGetKeyForCache(clientSockFd, name);
+    if (res < 0) {
+        return;
+    }
+
+    uint32_t usedtime;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&usedtime), sizeof(uint32_t))) {
+        NETNATIVE_LOGE("read3 errno %{public}d", errno);
+        close(clientSockFd);
+        return;
+    }
+
+    int32_t queryret;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&queryret), sizeof(int32_t))) {
+        NETNATIVE_LOGE("read4 errno %{public}d", errno);
+        close(clientSockFd);
+        return;
+    }
+
+    uint32_t ai_size = MAX_RESULTS;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&ai_size), sizeof(ai_size))) {
+        NETNATIVE_LOGE("read5 errno %{public}d", errno);
+        close(clientSockFd);
+        return;
+    }
+
+    struct QueryParam param;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&param), sizeof(struct QueryParam))) {
+        NETNATIVE_LOGE("read6 errno %{public}d", errno);
+        close(clientSockFd);
+        return;
+    }
+
+    if ((queryret == 0) && (ai_size > 0)) {
+        ai_size = std::min<uint32_t>(MAX_RESULTS, ai_size);
+        AddrInfo addrInfo[ai_size] = {};
+        if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(addrInfo), sizeof(AddrInfo) * ai_size)) {
+            NETNATIVE_LOGE("read errno %{public}d", errno);
+            close(clientSockFd);
+            return;
+        }
+        DnsQualityDiag::GetInstance().ReportDnsResult(netid, uid, pid, usedtime, name,
+                                                      ai_size, queryret, param, addrInfo);
+    } else {
+        DnsQualityDiag::GetInstance().ReportDnsResult(netid, uid, pid, usedtime, name, 0, queryret, param, nullptr);
+    }
+
+    NETNATIVE_LOGI("ProcPostDnsResultCommand end");
+}
+
+void DnsResolvListen::ProcGetDefaultNetworkCommand(int clientSockFd, uint16_t netId)
+{
+    // Todo recv data
+    NETNATIVE_LOGI("ProcGetDefaultNetworkCommand");
+
+    OHOS::NetManagerStandard::NetHandle netHandle;
+    OHOS::NetManagerStandard::NetConnClient::GetInstance().GetDefaultNet(netHandle);
+    int netid = netHandle.GetNetId();
+    NETNATIVE_LOGE("ProcGetDefaultNetworkCommand %{public}d", netid);
+    if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&netid), sizeof(int))) {
+        NETNATIVE_LOGE("send failed");
+    }
+
+    NETNATIVE_LOGI("ProcGetDefaultNetworkCommand end");
+}
+
+void DnsResolvListen::ProcBindSocketCommand(int clientSockFd, uint16_t netId)
+{
+    // Todo recv data
+    NETNATIVE_LOGI("ProcBindSocketCommand");
+
+    int32_t fd = 0;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&fd), sizeof(int32_t))) {
+        NETNATIVE_LOGE("read errno %{public}d", errno);
+        close(clientSockFd);
+        return;
+    }
+    NETNATIVE_LOGE("ProcGetDefaultNetworkCommand %{public}d, %{public}d", netId, fd);
+    if (OHOS::nmd::FwmarkClient().BindSocket(fd, netId) != OHOS::NetManagerStandard::NETMANAGER_SUCCESS) {
+        NETNATIVE_LOGE("BindSocket to netid failed");
+    }
+ 
+    NETNATIVE_LOGI("ProcBindSocketCommand end");
+}
+
 void DnsResolvListen::ProcCommand(int clientSockFd)
 {
     char buff[sizeof(RequestInfo)] = {0};
@@ -209,6 +322,15 @@ void DnsResolvListen::ProcCommand(int clientSockFd)
             break;
         case JUDGE_IPV6:
             ProcJudgeIpv6Command(clientSockFd, netId);
+            break;
+        case POST_DNS_RESULT:
+            ProcPostDnsResultCommand(clientSockFd, netId);
+            break;
+        case GET_DEFAULT_NETWORK:
+            ProcGetDefaultNetworkCommand(clientSockFd, netId);
+            break;
+        case BIND_SOCKET:
+            ProcBindSocketCommand(clientSockFd, netId);
             break;
         default:
             DNS_CONFIG_PRINT("invalid command %{public}u", info->command);

@@ -389,6 +389,7 @@ private:
     std::shared_ptr<AppExecFwk::EventRunner> netActEventRunner_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_ = nullptr;
     sptr<NetInterfaceStateCallback> interfaceStateCallback_ = nullptr;
+    sptr<NetDnsResultCallback> dnsResultCallback_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

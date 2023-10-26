@@ -33,6 +33,11 @@ config("netsys_native_manager_config") {
     "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
     "$FWMARK_CLIENT_DIR/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
+    "$NETCONNMANAGER_SOURCE_DIR/include",
+    "$NETCONNMANAGER_SOURCE_DIR/include/stub",
+    "$INNERKITS_ROOT/netconnclient/include/proxy",
+    "$THIRD_PARTY_ROOT/curl/include",
+    "$NETSYSCONTROLLER_ROOT_DIR/include",
   ]
 
   if (build_selinux) {
@@ -63,8 +68,16 @@ netsys_native_manager_sources = [
   "src/netsys/dnsresolv/dns_lookup_parse.cpp",
   "src/netsys/dnsresolv/dns_param_cache.cpp",
   "src/netsys/dnsresolv/dns_proxy_listen.cpp",
+  "src/netsys/dnsresolv/dns_quality_diag.cpp",
+  "src/netsys/dnsresolv/dns_quality_event_handler.cpp",
   "src/netsys/dnsresolv/dns_resolv_config.cpp",
   "src/netsys/dnsresolv/dns_resolv_listen.cpp",
+  "src/netsys/dnsresolv/net_dns_health_callback_proxy.cpp",
+  "src/netsys/dnsresolv/net_dns_health_callback_stub.cpp",
+  "src/netsys/dnsresolv/net_dns_result_callback_proxy.cpp",
+  "src/netsys/dnsresolv/net_dns_result_callback_stub.cpp",
+  "src/netsys/dnsresolv/netsys_net_dns_health_data.cpp",
+  "src/netsys/dnsresolv/netsys_net_dns_result_data.cpp",
   "src/netsys/fwmark_network.cpp",
   "src/netsys/iptables_wrapper.cpp",
   "src/netsys/local_network.cpp",
@@ -90,6 +103,7 @@ netsys_native_manager_sources = [
 
 netsys_native_manager_deps = [
   "$FWMARK_CLIENT_DIR:fwmark_client",
+  "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
   "$NETMANAGERNATIVE_ROOT/netsys_client",
   "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
   "$THIRD_PARTY_ROOT/iptables:iptables",

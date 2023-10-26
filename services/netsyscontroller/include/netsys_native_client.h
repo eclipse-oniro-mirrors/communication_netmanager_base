@@ -24,10 +24,13 @@
 
 #include "i_netsys_service.h"
 #include "i_net_diag_callback.h"
+#include "i_net_dns_health_callback.h"
+#include "net_dns_result_callback_stub.h"
 #include "netsys_controller_callback.h"
 #include "netsys_controller_define.h"
 #include "network_sharing.h"
 #include "notify_callback_stub.h"
+#include "netsys_dns_report_callback.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -49,6 +52,16 @@ private:
                                const std::string &ifName) override;
         int32_t OnDhcpSuccess(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult) override;
         int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override;
+
+    private:
+        NetsysNativeClient &netsysNativeClient_;
+    };
+
+    class NativeNetDnsResultCallback : public OHOS::NetsysNative::NetDnsResultCallbackStub {
+    public:
+        NativeNetDnsResultCallback(NetsysNativeClient &netsysNativeClient);
+        ~NativeNetDnsResultCallback() override = default;
+        int32_t OnDnsResultReport(uint32_t size, std::list<OHOS::NetsysNative::NetDnsResultReport> res) override;
 
     private:
         NetsysNativeClient &netsysNativeClient_;
@@ -792,6 +805,40 @@ public:
     int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
                          const std::string &ifName);
 
+        /**
+     * Register Dns Result Callback Listener.
+     *
+     * @param callback Callback function
+     * @param timestep Time gap between two callbacks
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t RegisterDnsResultCallback(const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback,
+        uint32_t timeStep);
+
+    /**
+     * Unregister Dns Result Callback Listener.
+     *
+     * @param callback Callback function
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t UnregisterDnsResultCallback(const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback);
+
+    /**
+     * Register Dns Health Callback Listener.
+     *
+     * @param callback Callback function
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t RegisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback);
+
+    /**
+     * Unregister Dns Health Callback Listener.
+     *
+     * @param callback Callback function
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback);
+
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);
     void ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface);
@@ -800,11 +847,15 @@ private:
 
 private:
     sptr<OHOS::NetsysNative::INotifyCallback> nativeNotifyCallback_ = nullptr;
+    sptr<OHOS::NetsysNative::INetDnsResultCallback> nativeDnsReportCallback_ = nullptr;
+    uint32_t dnsReportTimeStep = 500;
     sptr<OHOS::NetsysNative::INetsysService> netsysNativeService_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
     std::vector<sptr<NetsysControllerCallback>> cbObjects_;
+    std::vector<sptr<NetsysDnsReportCallback>> cbDnsReportObjects_;
     std::mutex mutex_;
     std::mutex cbObjMutex_;
+    std::mutex cbDnsReportObjMutex_;
 
 private:
     class NetNativeConnDeathRecipient : public IRemoteObject::DeathRecipient {

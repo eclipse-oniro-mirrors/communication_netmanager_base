@@ -34,6 +34,9 @@ private:
     static void ProcSetCacheCommand(int clientSockFd, uint16_t netId);
     static void ProcGetCacheCommand(int clientSockFd, uint16_t netId);
     static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId);
+    static void ProcPostDnsResultCommand(int clientSockFd, uint16_t netId);
+    static void ProcGetDefaultNetworkCommand(int clientSockFd, uint16_t netId);
+    static void ProcBindSocketCommand(int clientSockFd, uint16_t netId);
     static void ProcCommand(int clientSockFd);
     static int32_t ProcGetKeyForCache(int clientSockFd, char *name);
 

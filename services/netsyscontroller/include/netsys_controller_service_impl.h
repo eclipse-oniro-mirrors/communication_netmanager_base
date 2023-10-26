@@ -763,6 +763,41 @@ public:
     int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
                          const std::string &ifName) override;
 
+    /**
+     * Register Dns Result Callback Listener.
+     *
+     * @param callback Callback function
+     * @param timestep Time gap between two callbacks
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t RegisterDnsResultCallback(const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback,
+        uint32_t timeStep) override;
+
+    /**
+     * Unregister Dns Result Callback Listener.
+     *
+     * @param callback Callback function
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t UnregisterDnsResultCallback(
+        const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback) override;
+
+    /**
+     * Register Dns Health Callback Listener.
+     *
+     * @param callback Callback function
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t RegisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback) override;
+
+    /**
+     * Unregister Dns Health Callback Listener.
+     *
+     * @param callback Callback function
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback) override;
+
 private:
     MockNetsysNativeClient mockNetsysClient_;
     NetsysNativeClient netsysClient_;
