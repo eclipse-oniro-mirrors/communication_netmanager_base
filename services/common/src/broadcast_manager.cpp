@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +53,7 @@ bool BroadcastManager::SendBroadcastEx(const BroadcastInfo &info, const std::map
         NETMGR_LOG_E("The parameter of action is empty");
         return false;
     }
-    NETMGR_LOG_I("Net Send broadcast: %{public}s",info.action.c_str());
+    NETMGR_LOG_I("Net Send broadcast: %{public}s", info.action.c_str());
     AAFwk::Want want;
     want.SetAction(info.action);
     for (const auto &x : param) {

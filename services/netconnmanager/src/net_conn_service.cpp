@@ -596,7 +596,7 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
 
 int32_t NetConnService::NetDetectionAsync(int32_t netId)
 {
-    NETMGR_LOG_I("Enter NetConnService::NetDetection");
+    NETMGR_LOG_I("Enter NetConnService::NetDetection, netId=[%{public}d]", netId);
     auto iterNetwork = networks_.find(netId);
     if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
         NETMGR_LOG_E("Could not find the corresponding network.");
@@ -950,12 +950,10 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
     for (auto it : bestReqList) {
         auto reqIt = netActivates_.find(it);
         if ((reqIt == netActivates_.end()) || (reqIt->second == nullptr)) {
-            NETMGR_LOG_E("reqIt[%{public}d] not exists ", reqIt->first);
             continue;
         }
         sptr<INetConnCallback> callback = reqIt->second->GetNetCallback();
         if (!callback) {
-            NETMGR_LOG_E("callback is null for CallbackForSupplier");
             continue;
         }
         sptr<NetHandle> netHandle = supplier->GetNetHandle();
@@ -989,7 +987,6 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
                 break;
         }
     }
-    NETMGR_LOG_I("CallbackForSupplier end.");
 }
 
 void NetConnService::CallbackForAvailable(sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback)
@@ -1055,6 +1052,7 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, bool ifValid)
     if (!ifValid && defaultNetSupplier_ && defaultNetSupplier_->GetSupplierId() == supplierId) {
         RequestAllNetworkExceptDefault();
     }
+    NETMGR_LOG_I("Enter HandleDetectionResult end");
 }
 
 std::list<sptr<NetSupplier>> NetConnService::GetNetSupplierFromList(NetBearType bearerType, const std::string &ident)
@@ -1383,7 +1381,7 @@ int32_t NetConnService::Dump(int32_t fd, const std::vector<std::u16string> &args
 
 int32_t NetConnService::SetAirplaneMode(bool state)
 {
-    NETMGR_LOG_I("Enter SetAirplaneMode.");
+    NETMGR_LOG_I("Enter SetAirplaneMode, AirplaneMode is %{public}d", state);
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
     std::string airplaneMode = std::to_string(state);
     Uri uri(AIRPLANE_MODE_URI);

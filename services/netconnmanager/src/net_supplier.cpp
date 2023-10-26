@@ -327,7 +327,7 @@ int32_t NetSupplier::CancelRequest(uint32_t reqId)
 
 void NetSupplier::RemoveBestRequest(uint32_t reqId)
 {
-    NETMGR_LOG_I("Enter RemoveBestRequest supplierId=[%{public}d], reqId=[%{public}]", supplierId_, reqId);
+    NETMGR_LOG_I("Enter RemoveBestRequest supplierId=[%{public}d], reqId=[%{public}d]", supplierId_, reqId);
     auto iter = bestReqList_.find(reqId);
     if (iter == bestReqList_.end()) {
         return;

@@ -231,7 +231,7 @@ int32_t NetPolicyRule::IsUidNetAllowed(uint32_t uid, bool metered, bool &isAllow
     if (iter != uidPolicyRules_.end()) {
         rule = iter->second.rule_;
     }
-    NETMGR_LOG_I("IsUidNetAllowed:rule[%{public}u], backgroundAllow_[%{public}d]", rule. backgroundAllow_);
+    NETMGR_LOG_I("IsUidNetAllowed:rule[%{public}u], backgroundAllow_[%{public}d]", rule, backgroundAllow_);
     if (rule == NetUidRule::NET_RULE_REJECT_ALL) {
         isAllowed = false;
         return NETMANAGER_SUCCESS;
