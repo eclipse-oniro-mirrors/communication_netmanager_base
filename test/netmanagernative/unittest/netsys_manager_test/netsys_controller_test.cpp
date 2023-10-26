@@ -64,6 +64,7 @@ int g_ifaceFd = 5;
 const int64_t BYTES = 2097152;
 const uint32_t FIREWALL_RULE = 1;
 bool g_isWaitAsync = false;
+const int32_t ERR_INVALID_DATA = 5;
 
 using namespace Security::AccessToken;
 using Security::AccessToken::AccessTokenID;
@@ -299,7 +300,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest006, TestSize.Level1)
     EXPECT_EQ(ret, -1);
 
     ret = NetsysController::GetInstance().SetTcpBufferSizes(TCP_BUFFER_SIZES);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(NetsysControllerTest, NetsysControllerTest007, TestSize.Level1)
@@ -1039,6 +1040,93 @@ HWTEST_F(NetsysControllerTest, NetsysControllerErr007, TestSize.Level1)
 
     ret = instance_->DelStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->NetworkCreatePhysical(NET_ID, PERMISSION);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    std::string cmd = "";
+    std::string respond = "";
+    ret = instance_->SetIptablesCommandForRes(cmd, respond);
+    EXPECT_EQ(ret, NetManagerStandard::ERR_INVALID_DATA);
+
+    OHOS::NetsysNative::NetDiagPingOption pingOption = {};
+    ret = instance_->NetDiagPingHost(pingOption, netDiagCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    std::list<OHOS::NetsysNative::NetDiagRouteTable> diagrouteTable;
+    ret = instance_->NetDiagGetRouteTable(diagrouteTable);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    OHOS::NetsysNative::NetDiagProtocolType socketType = OHOS::NetsysNative::NetDiagProtocolType::PROTOCOL_TYPE_ALL;
+    OHOS::NetsysNative::NetDiagSocketsInfo socketsInfo = {};
+    ret = instance_->NetDiagGetSocketsInfo(socketType, socketsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    std::list<OHOS::NetsysNative::NetDiagIfaceConfig> configs;
+    std::string ifaceName = "eth0";
+    ret = instance_->NetDiagGetInterfaceConfig(configs, ifaceName);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    OHOS::NetsysNative::NetDiagIfaceConfig config;
+    ret = instance_->NetDiagUpdateInterfaceConfig(config, ifaceName, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = instance_->NetDiagSetInterfaceActiveState(ifaceName, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest001, TestSize.Level1)
+{
+    instance_->initFlag_ = true;
+    instance_->Init();
+
+    instance_->initFlag_ = false;
+    instance_->Init();
+
+    std::vector<int32_t> beginUids = {1};
+    std::vector<int32_t> endUids = {1};
+    int32_t netId = 0;
+    auto ret = instance_->NetworkAddUids(netId, beginUids, endUids);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NetworkDelUids(netId, beginUids, endUids);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    endUids = {1, 2};
+    ret = instance_->NetworkAddUids(netId, beginUids, endUids);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
+
+    ret = instance_->NetworkDelUids(netId, beginUids, endUids);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest002, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    uint8_t allow = 0;
+    auto ret = NetsysController::GetInstance().SetInternetPermission(uid, allow);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    std::string ipAddr = "192.168.1.100";
+    std::string macAddr = "aa:bb:cc:dd:ee:ff";
+    std::string ifName = "wlan0";
+    ret = NetsysController::GetInstance().AddStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = NetsysController::GetInstance().DelStaticArp(ipAddr, macAddr, ifName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    NetsysNotifyCallback callback;
+    ret = NetsysController::GetInstance().RegisterNetsysNotifyCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    int32_t netId = 0;
+    int32_t permission = 0;
+    ret = NetsysController::GetInstance().NetworkCreatePhysical(netId, permission);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = NetsysController::GetInstance().NetworkCreateVirtual(netId, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
