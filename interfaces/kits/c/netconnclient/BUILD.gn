@@ -20,11 +20,18 @@ ohos_ndk_library("libnetconn_ndk") {
   ndk_description_file = "./libnetconn.ndk.json"
   min_compact_version = "1"
   system_capability = "SystemCapability.Communication.NetManager.Core"
+  system_capability_headers = [
+      "./include/native_net_conn_api.h",
+      "./include/native_net_conn_type.h",
+  ]
 }
 
 ohos_ndk_headers("netconn_header") {
   dest_dir = "$ndk_headers_out_dir/netconn"
-  sources = [ "./include/native_net_conn_api.h" ]
+  sources = [
+      "./include/native_net_conn_api.h",
+      "./include/native_net_conn_type.h",
+  ]
 }
 
 ohos_shared_library("netconn_ndk") {
