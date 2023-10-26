@@ -27,9 +27,10 @@ int32_t NetDnsResultCallback::OnDnsResultReport(uint32_t size,
     netDnsResult_.Clear();
     IterateDnsReportResults(netDnsResultReport);
     netDnsResult_.Iterate([](int32_t netid, NetDnsResult dnsResult) {
-        NETMGR_LOG_I("netId_: %{public}d, totalReports_: %{public}d, failReports_: %{public}d",
-                     netid, dnsResult.totalReports_, dnsResult.failReports_);
-        if (dnsResult.failReports_ / dnsResult.totalReports_ > FAIL_RATE) {
+        double failRate = dnsResult.failReports_ / dnsResult.totalReports_;
+        NETMGR_LOG_I("netId_: %{public}d, totalReports_: %{public}d, failReports_: %{public}d, failrate : %{public}f",
+                     netid, dnsResult.totalReports_, dnsResult.failReports_, failRate);
+        if (failRate > FAIL_RATE) {
             NETMGR_LOG_I("Netdetection for dns fail, netId:%{public}d,totalReports:%{public}d, failReports:%{public}d",
                          netid, dnsResult.totalReports_, dnsResult.failReports_);
             int result = NetConnService::GetInstance()->NetDetectionForDnsHealth(netid, false);
