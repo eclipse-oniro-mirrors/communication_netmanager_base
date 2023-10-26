@@ -36,8 +36,6 @@
  * @version 1.0
  */
 
-#include "native_net_conn_type.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
