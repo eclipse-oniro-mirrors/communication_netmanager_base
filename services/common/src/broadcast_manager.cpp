@@ -53,7 +53,7 @@ bool BroadcastManager::SendBroadcastEx(const BroadcastInfo &info, const std::map
         NETMGR_LOG_E("The parameter of action is empty");
         return false;
     }
-
+    NETMGR_LOG_I("Net Send broadcast: %{public}s",info.action.c_str());
     AAFwk::Want want;
     want.SetAction(info.action);
     for (const auto &x : param) {

@@ -119,7 +119,7 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
         NETMGR_LOG_E("descriptor checked fail");
         return NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
     }
-
+    NETMGR_LOG_D("stub call start, code = [%{public}d]", code);
     if (handler_ == nullptr) {
         NETMGR_LOG_E("Net policy handler is null, recreate handler.");
         InitEventHandler();
@@ -143,6 +143,7 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
             handler_->PostSyncTask(
                 [this, &data, &reply, &requestFunc, &result]() { result = (this->*requestFunc)(data, reply); },
                 AppExecFwk::EventQueue::Priority::HIGH);
+            NETMGR_LOG_D("stub call end, code = [%{public}d], ret = [%{public}d]", code, result);
             return result;
         }
     }

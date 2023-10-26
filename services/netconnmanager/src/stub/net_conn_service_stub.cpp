@@ -175,7 +175,9 @@ int32_t NetConnServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
 
     int32_t ret = OnRequestCheck(code, itFunc->second.second);
     if (ret == NETMANAGER_SUCCESS) {
-        return (this->*requestFunc)(data, reply);
+        ret =(this->*requestFunc)(data, reply);
+        NETMGR_LOG_D("stub call end, code = [%{public}d]", code);
+        return ret;
     }
     if (!reply.WriteInt32(ret)) {
         return IPC_STUB_WRITE_PARCEL_ERR;

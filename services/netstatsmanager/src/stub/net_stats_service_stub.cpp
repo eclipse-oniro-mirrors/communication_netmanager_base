@@ -75,7 +75,9 @@ int32_t NetStatsServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     if (itFunc != memberFuncMap_.end()) {
         auto requestFunc = itFunc->second;
         if (requestFunc != nullptr) {
-            return (this->*requestFunc)(data, reply);
+            int32_t ret = (this->*requestFunc)(data, reply);
+            NETMGR_LOG_D("stub call end, code = [%{public}d], ret = [%{public}d]", code, ret);
+            return ret;
         }
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

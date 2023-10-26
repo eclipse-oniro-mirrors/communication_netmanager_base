@@ -415,6 +415,7 @@ void Network::StartNetDetection(bool needReport)
         return;
     }
     if (!netMonitor_) {
+        NETMGR_LOG_I("netMonitor_ is null.");
         InitNetMonitor();
         return;
     }
