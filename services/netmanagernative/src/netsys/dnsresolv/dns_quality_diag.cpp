@@ -110,7 +110,7 @@ int32_t DnsQualityDiag::ParseReportAddr(uint32_t size, AddrInfo* addrinfo, Netsy
 }
 
 int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t pid, int32_t usedtime,
-    std::string* name, uint32_t size, int32_t failreason, QueryParam queryParam, AddrInfo* addrinfo)
+    char* name, uint32_t size, int32_t failreason, QueryParam queryParam, AddrInfo* addrinfo)
 {
     bool reportSizeReachLimit = (report_.size() >= MAX_RESULT_SIZE);
 
