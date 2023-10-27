@@ -44,16 +44,15 @@ public:
      */
     int32_t ProtectFromVpn(int32_t socketFd);
 
-    #ifdef __cplusplus
-    extern "C" int32_t BindSocket(int32_t fd, uint32_t netId);
-    #endif
-
 private:
     // Sends |data| to the fwmark network, along with |fd| as ancillary data using cmsg(3).
     int32_t Send(FwmarkCommand *data, int32_t fd);
     int32_t HandleError(int32_t ret, int32_t errorCode);
     int32_t socketFd_;
 };
+#ifdef __cplusplus
+    extern "C" int32_t BindSocket(int32_t fd, uint32_t netId);
+#endif
 } // namespace nmd
 } // namespace OHOS
 #endif // INCLUDE_FWMARK_CLIENT_H

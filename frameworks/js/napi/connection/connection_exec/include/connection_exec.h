@@ -16,7 +16,7 @@
 #ifndef COMMUNICATIONNETMANAGERBASE_CONNECTION_EXEC_H
 #define COMMUNICATIONNETMANAGERBASE_CONNECTION_EXEC_H
 
-#include "third_party/musl/include/netdb.h"
+#include <netdb.h>
 
 #include "bindsocket_context.h"
 #include "getaddressbyname_context.h"
