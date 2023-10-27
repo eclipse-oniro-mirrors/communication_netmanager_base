@@ -36,6 +36,8 @@ public:
     void ParseParams(napi_value *params, size_t paramsCount);
 
 public:
+    int32_t netId_;
+
     std::string host_;
 
     std::vector<NetAddress> addresses_;

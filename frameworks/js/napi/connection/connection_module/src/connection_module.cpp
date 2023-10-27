@@ -403,15 +403,23 @@ napi_value ConnectionModule::SetAppNet(napi_env env, napi_callback_info info)
 napi_value ConnectionModule::NetHandleInterface::GetAddressesByName(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::Interface<GetAddressByNameContext>(
-        env, info, FUNCTION_GET_ADDRESSES_BY_NAME, nullptr,
-        ConnectionAsyncWork::NetHandleAsyncWork::ExecGetAddressesByName,
+        env, info, FUNCTION_GET_ADDRESSES_BY_NAME,
+        [](napi_env theEnv, napi_value thisVal, GetAddressByNameContext *context) -> bool {
+            context->netId_ = NapiUtils::GetInt32Property(theEnv, thisVal, PROPERTY_NET_ID);
+            return true;
+        },
+	ConnectionAsyncWork::NetHandleAsyncWork::ExecGetAddressesByName,
         ConnectionAsyncWork::NetHandleAsyncWork::GetAddressesByNameCallback);
 }
 
 napi_value ConnectionModule::NetHandleInterface::GetAddressByName(napi_env env, napi_callback_info info)
 {
     return ModuleTemplate::Interface<GetAddressByNameContext>(
-        env, info, FUNCTION_GET_ADDRESSES_BY_NAME, nullptr,
+        env, info, FUNCTION_GET_ADDRESSES_BY_NAME,
+        [](napi_env theEnv, napi_value thisVal, GetAddressByNameContext *context) -> bool {
+            context->netId_ = NapiUtils::GetInt32Property(theEnv, thisVal, PROPERTY_NET_ID);
+            return true;
+        },
         ConnectionAsyncWork::NetHandleAsyncWork::ExecGetAddressByName,
         ConnectionAsyncWork::NetHandleAsyncWork::GetAddressByNameCallback);
 }
