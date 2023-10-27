@@ -2013,7 +2013,8 @@ int32_t NetsysNativeServiceProxy::DelStaticArp(const std::string &ipAddr, const 
     return ret;
 }
 
-int32_t NetsysNativeServiceProxy::RegisterDnsResultCallback(const sptr<OHOS::NetsysNative::INetDnsResultCallback> &callback, uint32_t timeStep)
+int32_t NetsysNativeServiceProxy::RegisterDnsResultCallback(
+    const sptr<OHOS::NetsysNative::INetDnsResultCallback> &callback, uint32_t timeStep)
 {
     NETNATIVE_LOGI("Begin to RegisterDnsResultCallback");
     MessageParcel data;
@@ -2044,7 +2045,8 @@ int32_t NetsysNativeServiceProxy::RegisterDnsResultCallback(const sptr<OHOS::Net
     return ret;
 }
 
-int32_t NetsysNativeServiceProxy::UnregisterDnsResultCallback(const sptr<OHOS::NetsysNative::INetDnsResultCallback> &callback)
+int32_t NetsysNativeServiceProxy::UnregisterDnsResultCallback(
+    const sptr<OHOS::NetsysNative::INetDnsResultCallback> &callback)
 {
     NETNATIVE_LOGI("Begin to UnregisterDnsResultCallback");
     MessageParcel data;
@@ -2072,7 +2074,8 @@ int32_t NetsysNativeServiceProxy::UnregisterDnsResultCallback(const sptr<OHOS::N
     return ret;
 }
 
-int32_t NetsysNativeServiceProxy::RegisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
+int32_t NetsysNativeServiceProxy::RegisterDnsHealthCallback(
+    const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
 {
     NETNATIVE_LOGI("Begin to RegisterDnsHealthCallback");
     MessageParcel data;
@@ -2100,7 +2103,8 @@ int32_t NetsysNativeServiceProxy::RegisterDnsHealthCallback(const sptr<OHOS::Net
     return ret;
 }
 
-int32_t NetsysNativeServiceProxy::UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
+int32_t NetsysNativeServiceProxy::UnregisterDnsHealthCallback(
+    const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
 {
     NETNATIVE_LOGI("Begin to UnregisterDnsHealthCallback");
     MessageParcel data;
