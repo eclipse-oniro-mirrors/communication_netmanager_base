@@ -123,6 +123,7 @@ int32_t NetPolicyFirewall::UpdateDeviceIdlePolicy(bool enable)
     NetmanagerHiTrace::NetmanagerStartSyncTrace("Notify other policy class device idle status start");
     SendEvent(NetPolicyEventHandler::MSG_DEVICE_IDLE_MODE_CHANGED, policyEvent);
     NetmanagerHiTrace::NetmanagerFinishSyncTrace("Notify other policy class device idle status end");
+    NETMGR_LOG_I("NetPolicyFirewall::UpdateDeviceIdlePolicy End.");
     return NETMANAGER_SUCCESS;
 }
 
@@ -145,6 +146,7 @@ int32_t NetPolicyFirewall::UpdatePowerSavePolicy(bool enable)
     NetmanagerHiTrace::NetmanagerStartSyncTrace("Notify other policy class power save status start");
     SendEvent(NetPolicyEventHandler::MSG_DEVICE_IDLE_MODE_CHANGED, policyEvent);
     NetmanagerHiTrace::NetmanagerFinishSyncTrace("Notify other policy class power save status end");
+    NETMGR_LOG_I("NetPolicyFirewall::UpdatePowerSavePolicy End");
     return NETMANAGER_SUCCESS;
 }
 
@@ -175,6 +177,7 @@ void NetPolicyFirewall::DeleteUid(uint32_t uid)
 
     deviceIdleFirewallRule_->RemoveFromAllowedList(uid);
     powerSaveFirewallRule_->RemoveFromAllowedList(uid);
+    NETMGR_LOG_I("NetPolicyFirewall::DeleteUid End");
 }
 
 void NetPolicyFirewall::HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEvent> &policyEvent)

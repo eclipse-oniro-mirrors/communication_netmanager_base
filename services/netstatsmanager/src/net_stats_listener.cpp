@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,7 @@ void NetStatsListener::RegisterStatsCallback(const std::string &event, StatsCall
         NETMGR_LOG_W("Key %{public}s has been assigned and will be replaced", event.c_str());
     }
     callbackMap_[event] = callback;
+    NETMGR_LOG_I("NetStatsListener RegisterStatsCallback is successful");
 }
 
 void NetStatsListener::OnReceiveEvent(const CommonEventData &data)

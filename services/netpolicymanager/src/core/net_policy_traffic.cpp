@@ -140,6 +140,7 @@ int32_t NetPolicyTraffic::UpdateQuotaPoliciesInner()
     }
     // notify the the quota policy change.
     GetCbInst()->NotifyNetQuotaPolicyChangeAsync(quotaPolicies_);
+    NETMGR_LOG_I("End UpdateQuotaPoliciesInner.");
     return NETMANAGER_SUCCESS;
 }
 
@@ -311,7 +312,7 @@ int32_t NetPolicyTraffic::UpdateRemindPolicy(int32_t netType, const std::string 
         }
     }
     UpdateQuotaPoliciesInner();
-
+    NETMGR_LOG_I("NetPolicyTraffic::UpdateRemindPolicy end.");
     return NETMANAGER_SUCCESS;
 }
 

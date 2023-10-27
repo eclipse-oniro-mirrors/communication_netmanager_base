@@ -55,7 +55,7 @@ int32_t NetPolicyCallback::RegisterNetPolicyCallbackAsync(const sptr<INetPolicyC
 int32_t NetPolicyCallback::RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback)
 {
     uint32_t callbackCounts = callbacks_.size();
-    NETMGR_LOG_D("callback counts [%{public}u]", callbackCounts);
+    NETMGR_LOG_I("callback counts [%{public}u]", callbackCounts);
     if (callbackCounts >= LIMIT_CALLBACK_NUM) {
         NETMGR_LOG_E("callback counts cannot more than [%{public}u]", LIMIT_CALLBACK_NUM);
         return NETMANAGER_ERR_PARAMETER_ERROR;
@@ -69,6 +69,7 @@ int32_t NetPolicyCallback::RegisterNetPolicyCallback(const sptr<INetPolicyCallba
     }
 
     callbacks_.emplace_back(callback);
+    NETMGR_LOG_I("End RegisterNetPolicyCallback");
     return NETMANAGER_SUCCESS;
 }
 
@@ -91,6 +92,7 @@ int32_t NetPolicyCallback::UnregisterNetPolicyCallbackAsync(const sptr<INetPolic
 
 int32_t NetPolicyCallback::UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback)
 {
+    NETMGR_LOG_I("Enter UnregisterNetPolicyCallback");
     auto it = std::remove_if(callbacks_.begin(), callbacks_.end(),
                              [callback](const sptr<INetPolicyCallback> &tempCallback) -> bool {
                                  if (tempCallback == nullptr || tempCallback->AsObject() == nullptr ||
@@ -100,7 +102,7 @@ int32_t NetPolicyCallback::UnregisterNetPolicyCallback(const sptr<INetPolicyCall
                                  return callback->AsObject().GetRefPtr() == tempCallback->AsObject().GetRefPtr();
                              });
     callbacks_.erase(it, callbacks_.end());
-
+    NETMGR_LOG_I("End UnregisterNetPolicyCallback");
     return NETMANAGER_SUCCESS;
 }
 
@@ -119,6 +121,7 @@ int32_t NetPolicyCallback::NotifyNetUidPolicyChangeAsync(uint32_t uid, uint32_t 
 
 int32_t NetPolicyCallback::NotifyNetUidPolicyChange(uint32_t uid, uint32_t policy)
 {
+    NETMGR_LOG_I("NotifyNetUidPolicyChange uid= %{public}d policy= %{public}d", uid, policy);
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
             callback->NetUidPolicyChange(uid, policy);
@@ -143,6 +146,7 @@ int32_t NetPolicyCallback::NotifyNetUidRuleChangeAsync(uint32_t uid, uint32_t ru
 
 int32_t NetPolicyCallback::NotifyNetUidRuleChange(uint32_t uid, uint32_t rule)
 {
+    NETMGR_LOG_I("NotifyNetUidRuleChange uid= %{public}d policy= %{public}d", uid, rule);
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
             callback->NetUidRuleChange(uid, rule);
@@ -217,6 +221,7 @@ int32_t NetPolicyCallback::NotifyNetMeteredIfacesChangeAsync(std::vector<std::st
 
 int32_t NetPolicyCallback::NotifyNetMeteredIfacesChange(std::vector<std::string> &ifaces)
 {
+    NETMGR_LOG_D("NotifyNetMeteredIfacesChange iface size[%{public}zu]", ifaces.size());
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
             callback->NetMeteredIfacesChange(ifaces);

@@ -60,6 +60,7 @@ void NetPolicyRule::TransPolicyToRule(uint32_t uid)
 int32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
 {
     if (!IsValidNetPolicy(policy)) {
+        NETMGR_LOG_E("policy[%{public}d] is invalid", policy);
         return POLICY_ERR_INVALID_POLICY;
     }
     NetmanagerHiTrace::NetmanagerStartSyncTrace("TransPolicyToRule start");
@@ -79,6 +80,7 @@ int32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
     auto policyCondition = BuildTransCondition(uid, policy);
     TransConditionToRuleAndNetsys(policyCondition, uid, policy);
     NetmanagerHiTrace::NetmanagerFinishSyncTrace("TransPolicyToRule end");
+    NETMGR_LOG_I("End TransPolicyToRule");
     return NETMANAGER_SUCCESS;
 }
 
@@ -229,7 +231,7 @@ int32_t NetPolicyRule::IsUidNetAllowed(uint32_t uid, bool metered, bool &isAllow
     if (iter != uidPolicyRules_.end()) {
         rule = iter->second.rule_;
     }
-
+    NETMGR_LOG_I("IsUidNetAllowed:rule[%{public}u], backgroundAllow_[%{public}d]", rule, backgroundAllow_);
     if (rule == NetUidRule::NET_RULE_REJECT_ALL) {
         isAllowed = false;
         return NETMANAGER_SUCCESS;

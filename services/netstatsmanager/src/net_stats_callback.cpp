@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ void NetStatsCallback::RegisterNetStatsCallback(const sptr<INetStatsCallback> &c
             return;
         }
     }
-
+    NETMGR_LOG_I("netStatsCallback_ add callback.");
     netStatsCallback_.emplace_back(callback);
 }
 
@@ -56,6 +56,7 @@ void NetStatsCallback::UnregisterNetStatsCallback(const sptr<INetStatsCallback> 
     for (auto iter = netStatsCallback_.begin(); iter != netStatsCallback_.end(); ++iter) {
         if (callback->AsObject().GetRefPtr() == (*iter)->AsObject().GetRefPtr()) {
             netStatsCallback_.erase(iter);
+            NETMGR_LOG_I("netStatsCallback_ erase callback.");
             return;
         }
     }

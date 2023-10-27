@@ -312,6 +312,7 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
 
 int32_t NetSupplier::CancelRequest(uint32_t reqId)
 {
+    NETMGR_LOG_I("CancelRequest netId = %{public}u", reqId);
     auto iter = requestList_.find(reqId);
     if (iter == requestList_.end()) {
         return NET_CONN_ERR_SERVICE_NO_REQUEST;
@@ -326,7 +327,7 @@ int32_t NetSupplier::CancelRequest(uint32_t reqId)
 
 void NetSupplier::RemoveBestRequest(uint32_t reqId)
 {
-    NETMGR_LOG_D("Enter RemoveBestRequest");
+    NETMGR_LOG_I("Enter RemoveBestRequest supplierId=[%{public}d], reqId=[%{public}d]", supplierId_, reqId);
     auto iter = bestReqList_.find(reqId);
     if (iter == bestReqList_.end()) {
         return;
@@ -387,6 +388,7 @@ int32_t NetSupplier::GetRealScore()
 
 void NetSupplier::SetDefault()
 {
+    NETMGR_LOG_I("set default supplier[%{public}d].", supplierId_);
     if (network_) {
         network_->SetDefaultNetWork();
     }
@@ -394,6 +396,7 @@ void NetSupplier::SetDefault()
 
 void NetSupplier::ClearDefault()
 {
+    NETMGR_LOG_I("clear default supplier[%{public}d].", supplierId_);
     if (network_) {
         network_->ClearDefaultNetWorkNetId();
     }
@@ -401,6 +404,7 @@ void NetSupplier::ClearDefault()
 
 void NetSupplier::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
 {
+    NETMGR_LOG_I("supplierId[%{public}d] update global httpProxy.", supplierId_);
     if (network_) {
         network_->UpdateGlobalHttpProxy(httpProxy);
     }

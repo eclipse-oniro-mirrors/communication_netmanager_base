@@ -177,6 +177,7 @@ bool NetStatsService::Init()
 
 int32_t NetStatsService::RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
 {
+    NETMGR_LOG_I("Enter RegisterNetStatsCallback");
     if (callback == nullptr) {
         NETMGR_LOG_E("RegisterNetStatsCallback parameter callback is null");
         return NETMANAGER_ERR_PARAMETER_ERROR;
@@ -187,6 +188,7 @@ int32_t NetStatsService::RegisterNetStatsCallback(const sptr<INetStatsCallback> 
 
 int32_t NetStatsService::UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
 {
+    NETMGR_LOG_I("Enter UnregisterNetStatsCallback");
     if (callback == nullptr) {
         NETMGR_LOG_E("UnregisterNetStatsCallback parameter callback is null");
         return NETMANAGER_ERR_PARAMETER_ERROR;
@@ -249,22 +251,26 @@ int32_t NetStatsService::GetCellularTxBytes(uint64_t &stats)
 
 int32_t NetStatsService::GetAllRxBytes(uint64_t &stats)
 {
+    NETMGR_LOG_D("Enter GetAllRxBytes");
     return NetsysController::GetInstance().GetTotalStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_RX_BYTES));
 }
 
 int32_t NetStatsService::GetAllTxBytes(uint64_t &stats)
 {
+    NETMGR_LOG_D("Enter GetAllTxBytes");
     return NetsysController::GetInstance().GetTotalStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_TX_BYTES));
 }
 
 int32_t NetStatsService::GetUidRxBytes(uint64_t &stats, uint32_t uid)
 {
+    NETMGR_LOG_D("Enter GetUidRxBytes, uid is %{public}d", uid);
     return NetsysController::GetInstance().GetUidStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_RX_BYTES),
                                                        uid);
 }
 
 int32_t NetStatsService::GetUidTxBytes(uint64_t &stats, uint32_t uid)
 {
+    NETMGR_LOG_D("Enter GetUidTxBytes,uid is %{public}d", uid);
     return NetsysController::GetInstance().GetUidStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_TX_BYTES),
                                                        uid);
 }
@@ -273,15 +279,18 @@ int32_t NetStatsService::GetIfaceStatsDetail(const std::string &iface, uint64_t 
                                              NetStatsInfo &statsInfo)
 {
     // Start of get traffic data by interface name.
+    NETMGR_LOG_D("Enter GetIfaceStatsDetail, iface= %{public}s", iface.c_str());
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetIfaceStatsDetail start");
     if (start > end) {
+        NETMGR_LOG_E("start is after end.");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     std::vector<NetStatsInfo> allInfo;
     auto history = std::make_unique<NetStatsHistory>();
     int32_t ret = history->GetHistory(allInfo, iface, start, end);
 
-    if (nullptr == netStatsCached_) {
+    if (netStatsCached_ == nullptr) {
+        NETMGR_LOG_E("netStatsCached_ is fail");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     netStatsCached_->GetIfaceStatsCached(allInfo);
@@ -305,15 +314,18 @@ int32_t NetStatsService::GetUidStatsDetail(const std::string &iface, uint32_t ui
                                            NetStatsInfo &statsInfo)
 {
     // Start of get traffic data by usr id.
+    NETMGR_LOG_D("Enter GetIfaceStatsDetail, iface= %{public}s uid= %{public}d", iface.c_str(), uid);
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetUidStatsDetail start");
     if (start > end) {
+        NETMGR_LOG_E("start is after end.");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     std::vector<NetStatsInfo> allInfo;
     auto history = std::make_unique<NetStatsHistory>();
     int32_t ret = history->GetHistory(allInfo, iface, uid, start, end);
-    if (nullptr == netStatsCached_) {
-        return NETMANAGER_ERR_OPERATION_FAILED;
+    if (netStatsCached_ == nullptr) {
+        NETMGR_LOG_E("netStatsCached_ is fail");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     netStatsCached_->GetUidStatsCached(allInfo);
     if (ret != NETMANAGER_SUCCESS) {
@@ -337,8 +349,10 @@ int32_t NetStatsService::UpdateIfacesStats(const std::string &iface, uint64_t st
                                            const NetStatsInfo &stats)
 {
     // Start of update traffic data by date.
+    NETMGR_LOG_I("UpdateIfacesStats ifaces is %{public}s", iface.c_str());
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService UpdateIfacesStats start");
     if (start > end) {
+        NETMGR_LOG_E("start is after end.");
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     std::vector<NetStatsInfo> infos;
@@ -360,11 +374,13 @@ int32_t NetStatsService::UpdateIfacesStats(const std::string &iface, uint64_t st
 
 int32_t NetStatsService::UpdateStatsData()
 {
+    NETMGR_LOG_D("Enter UpdateStatsData.");
     if (netStatsCached_ == nullptr) {
         NETMGR_LOG_E("Cached is nullptr");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     netStatsCached_->ForceUpdateStats();
+    NETMGR_LOG_D("End UpdateStatsData.");
     return NETMANAGER_SUCCESS;
 }
 
@@ -376,6 +392,7 @@ int32_t NetStatsService::ResetFactory()
 
 int32_t NetStatsService::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
 {
+    NETMGR_LOG_D("Enter GetAllStatsInfo.");
     return NetsysController::GetInstance().GetAllStatsInfo(infos);
 }
 
