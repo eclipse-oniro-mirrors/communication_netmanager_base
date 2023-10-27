@@ -33,14 +33,14 @@ int32_t NetDnsResultCallback::OnDnsResultReport(uint32_t size,
         if (failRate > FAIL_RATE) {
             NETMGR_LOG_I("Netdetection for dns fail, netId:%{public}d,totalReports:%{public}d, failReports:%{public}d",
                          netid, dnsResult.totalReports_, dnsResult.failReports_);
-            int result = NetConnService::GetInstance()->NetDetectionForDnsHealth(netid, false);
+            int32_t result = NetConnService::GetInstance()->NetDetectionForDnsHealth(netid, false);
             if (result != 0) {
                 NETMGR_LOG_E("NetDetectionForDnsHealth failed");
             }
         } else {
             NETMGR_LOG_I("Netdetection for dns success, netId:%{public}d, totalReports:%{public}d,"
                          "failReports:%{public}d", netid, dnsResult.totalReports_, dnsResult.failReports_);
-            int result = NetConnService::GetInstance()->NetDetectionForDnsHealth(netid, true);
+            int32_t result = NetConnService::GetInstance()->NetDetectionForDnsHealth(netid, true);
             if (result != 0) {
                 NETMGR_LOG_E("NetDetectionForDnsHealth failed");
             }
