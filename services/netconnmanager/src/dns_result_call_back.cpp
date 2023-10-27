@@ -27,7 +27,7 @@ int32_t NetDnsResultCallback::OnDnsResultReport(uint32_t size,
     netDnsResult_.Clear();
     IterateDnsReportResults(netDnsResultReport);
     netDnsResult_.Iterate([](int32_t netid, NetDnsResult dnsResult) {
-        double failRate = dnsResult.failReports_ / dnsResult.totalReports_;
+        double failRate = static_cast<double>(dnsResult.failReports_) / dnsResult.totalReports_;
         NETMGR_LOG_I("netId_: %{public}d, totalReports_: %{public}d, failReports_: %{public}d, failrate : %{public}f",
                      netid, dnsResult.totalReports_, dnsResult.failReports_, failRate);
         if (failRate > FAIL_RATE) {
