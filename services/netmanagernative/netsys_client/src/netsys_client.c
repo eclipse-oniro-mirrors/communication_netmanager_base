@@ -417,9 +417,8 @@ static int32_t NetSysPostDnsResultInternal(int sockFd, uint16_t netId, char* nam
 
     int32_t uid = getuid();
     int32_t pid = getpid();
-    char* packagen = getlogin();
     uint32_t nameLen = strlen(name) + 1;
-    NETSYS_CLIENT_PRINT("NetSysPostDnsResultInternal uid %d, pid %d, netid %d pkg %s", uid, pid, netId, packagen);
+    NETSYS_CLIENT_PRINT("NetSysPostDnsResultInternal uid %d, pid %d, netid %d pkg", uid, pid, netId);
 
     struct AddrInfo addrInfo[MAX_RESULTS] = {};
     int32_t resNum = 0;
