@@ -193,7 +193,9 @@ int32_t DnsQualityDiag::SetLoopDelay(int32_t delay)
 
 int32_t DnsQualityDiag::query_default_host()
 {
+#if NETSYS_DNS_MONITOR
     struct addrinfo *res;
+#endif
     struct queryparam param;
     param.qp_type = 1;
 
@@ -204,8 +206,11 @@ int32_t DnsQualityDiag::query_default_host()
     NETNATIVE_LOGI("query_default_host: %{public}d, ", netid);
 
     param.qp_netid = netid;
+#if NETSYS_DNS_MONITOR
     getaddrinfo_ext(queryAddr.c_str(), NULL, NULL, &res, &param);
     freeaddrinfo(res);
+#endif
+
     return 0;
 }
 
