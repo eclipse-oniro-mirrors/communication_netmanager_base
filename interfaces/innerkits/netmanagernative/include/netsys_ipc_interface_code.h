@@ -117,6 +117,15 @@ enum class NotifyInterfaceCode {
 enum class NetDiagInterfaceCode {
     ON_NOTIFY_PING_RESULT = 0,
 };
+
+enum class NetDnsResultInterfaceCode {
+    ON_DNS_RESULT_REPORT = 0,
+};
+
+enum class NetDnsHealthInterfaceCode {
+    ON_DNS_HEALTH_REPORT = 0,
+};
+
 } // namespace NetsysNative
 } // namespace OHOS
 #endif // NETSYS_IPC_INTERFACE_CODE_H
