@@ -2012,5 +2012,120 @@ int32_t NetsysNativeServiceProxy::DelStaticArp(const std::string &ipAddr, const 
     }
     return ret;
 }
+
+int32_t NetsysNativeServiceProxy::RegisterDnsResultCallback(const sptr<OHOS::NetsysNative::INetDnsResultCallback> &callback, uint32_t timeStep)
+{
+    NETNATIVE_LOGI("Begin to RegisterDnsResultCallback");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(timeStep)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_REGISTER_DNS_RESULT_LISTENER), data, reply,
+                        option);
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("Read result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::UnregisterDnsResultCallback(const sptr<OHOS::NetsysNative::INetDnsResultCallback> &callback)
+{
+    NETNATIVE_LOGI("Begin to UnregisterDnsResultCallback");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UNREGISTER_DNS_RESULT_LISTENER), data, reply,
+                        option);
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("Read result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::RegisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
+{
+    NETNATIVE_LOGI("Begin to RegisterDnsHealthCallback");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_REGISTER_DNS_HEALTH_LISTENER), data, reply,
+                        option);
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("Read result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
+{
+    NETNATIVE_LOGI("Begin to UnregisterDnsHealthCallback");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        NETNATIVE_LOGE("Remote is null");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UNREGISTER_DNS_HEALTH_LISTENER), data, reply,
+                        option);
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("Read result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
 } // namespace NetsysNative
 } // namespace OHOS
