@@ -26,13 +26,13 @@ namespace {
 using namespace OHOS::NetsysNative;
 }
 
-constexpr char *DNS_DIAG_WORK_THREAD = "DNS_DIAG_WORK_THREAD";
-constexpr char *HW_HICLOUD_ADDR = "connectivitycheck.platform.hicloud.com";
-constexpr uint32_t MAX_RESULT_SIZE = 32;
-constexpr char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
-constexpr char* DNS_URL_HEADER = "DnsProbeUrl:";
-constexpr char  NEW_LINE_STR = '\n';
-constexpr uint32_t TIME_DELAY = 500;
+const char *DNS_DIAG_WORK_THREAD = "DNS_DIAG_WORK_THREAD";
+const char *HW_HICLOUD_ADDR = "connectivitycheck.platform.hicloud.com";
+const uint32_t MAX_RESULT_SIZE = 32;
+const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
+const char *DNS_URL_HEADER = "DnsProbeUrl:";
+const char NEW_LINE_STR = '\n';
+const uint32_t TIME_DELAY = 500;
 
 DnsQualityDiag::DnsQualityDiag()
     : defaultNetId_(0),
