@@ -248,7 +248,7 @@ void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
 
     if ((queryret == 0) && (ai_size > 0)) {
         ai_size = std::min<uint32_t>(MAX_RESULTS, ai_size);
-        AddrInfo addrInfo[ai_size] = {};
+        AddrInfo addrInfo[MAX_RESULTS] = {};
         if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(addrInfo), sizeof(AddrInfo) * ai_size)) {
             NETNATIVE_LOGE("read errno %{public}d", errno);
             close(clientSockFd);

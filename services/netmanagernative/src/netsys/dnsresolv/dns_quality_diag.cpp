@@ -243,7 +243,7 @@ int32_t DnsQualityDiag::send_dns_report()
     if (report_.size() > 0) {
         std::list<NetsysNative::NetDnsResultReport> reportSend(report_);
         report_.clear();
-        NETNATIVE_LOGE("send_dns_report (%{public}lu)", reportSend.size());
+        NETNATIVE_LOGE("send_dns_report (%{public}u)", reportSend.size());
         for (auto cb: resultListeners_) {
             NETNATIVE_LOGI("send_dns_report cb)");
             cb->OnDnsResultReport(reportSend.size(), reportSend);
