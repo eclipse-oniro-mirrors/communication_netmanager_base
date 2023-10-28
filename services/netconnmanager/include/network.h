@@ -58,6 +58,7 @@ public:
     bool IsConnected() const;
     void UpdateNetConnState(NetConnState netConnState);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
+    void NetDetectionForDnsHealth(bool dnsHealthSuccess);
 
     void OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect) override;
 

@@ -41,10 +41,9 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-constexpr int32_t INIT_DETECTION_DELAY_MS = 8 * 1000;
+constexpr int32_t INIT_DETECTION_DELAY_MS = 1 * 1000;
 constexpr int32_t MAX_FAILED_DETECTION_DELAY_MS = 5 * 60 * 1000;
-constexpr int32_t SUCCESSED_DETECTION_DELAY_MS = 30 * 1000;
-constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 60 * 1000;
+constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 30 * 1000;
 constexpr int32_t DOUBLE = 2;
 constexpr const char NEW_LINE_STR = '\n';
 constexpr const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
@@ -107,8 +106,7 @@ void NetMonitor::Detection()
         NetDetectionStatus result = UNKNOWN_STATE;
         if (probeResult.IsSuccessful()) {
             NETMGR_LOG_I("Net[%{public}d] probe success", netId_);
-            detectionDelay_ = SUCCESSED_DETECTION_DELAY_MS;
-            detectionSteps_ = 0;
+            isDetecting_ = false;
             result = VERIFICATION_STATE;
         } else if (probeResult.IsNeedPortal()) {
             NETMGR_LOG_W("Net[%{public}d] need portal", netId_);

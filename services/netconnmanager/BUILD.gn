@@ -21,6 +21,7 @@ config("net_conn_manager_config") {
     "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netconnclient/include",
     "$INNERKITS_ROOT/netconnclient/include/proxy",
+    "$INNERKITS_ROOT/netmanagernative/include",
     "$INNERKITS_ROOT/netstatsclient/include",
     "$NETCONNMANAGER_COMMON_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
@@ -44,6 +45,7 @@ ohos_shared_library("net_conn_manager") {
 
   sources = [
     "$NETCONNMANAGER_COMMON_DIR/src/route_utils.cpp",
+    "src/dns_result_call_back.cpp",
     "src/net_activate.cpp",
     "src/net_caps.cpp",
     "src/net_conn_event_handler.cpp",
@@ -68,6 +70,7 @@ ohos_shared_library("net_conn_manager") {
 
   deps = [
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
@@ -132,6 +135,7 @@ ohos_static_library("net_conn_manager_static") {
   }
   sources = [
     "$NETCONNMANAGER_COMMON_DIR/src/route_utils.cpp",
+    "src/dns_result_call_back.cpp",
     "src/net_activate.cpp",
     "src/net_caps.cpp",
     "src/net_conn_event_handler.cpp",
@@ -156,6 +160,7 @@ ohos_static_library("net_conn_manager_static") {
 
   deps = [
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
+    "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
