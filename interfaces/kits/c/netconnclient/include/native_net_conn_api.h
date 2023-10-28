@@ -36,7 +36,7 @@
  * @version 1.0
  */
 
-#include "native_net_conn_type.h"
+#include <netdb.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -77,7 +77,6 @@ int32_t OH_NetConn_GetAddrInfo(char *host, char *serv, struct addrinfo *hint, st
  * @version 1.0
 */
 int32_t OH_NetConn_FreeDnsResult(struct addrinfo *res);
-
 
 #ifdef __cplusplus
 }
