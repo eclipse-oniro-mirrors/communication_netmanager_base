@@ -1344,7 +1344,9 @@ void NetConnService::GetDumpMessage(std::string &message)
         message.append("\tLinkDownBandwidthKbps: 0\n");
         message.append("\tUid: 0\n");
     }
-    dnsResultCallback_->GetDumpMessageForDnsResult(message);
+    if (dnsResultCallback_ != nullptr) {
+        dnsResultCallback_->GetDumpMessageForDnsResult(message);
+    }
 }
 
 int32_t NetConnService::HasDefaultNet(bool &flag)

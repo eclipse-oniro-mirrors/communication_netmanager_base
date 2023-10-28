@@ -18,6 +18,9 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+#define private public
+#endif
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_constants.h"
 #include "net_stats_data_handler.h"
@@ -197,6 +200,21 @@ HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest005, TestSize.Level1)
     int32_t ret = handler.ReadStatsData(infos, iface, 0, testUid, LONG_MAX);
     std::cout << "Data size: " << infos.size() << std::endl;
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsDataHandlerTest, NetStatsDataHandlerBranchTest001, TestSize.Level1)
+{
+    NetStatsDataHandler handler;
+    uint64_t uid = 100;
+    int32_t ret = handler.DeleteByUid(uid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    std::string tableName = "";
+    ret = handler.DeleteByDate(tableName, 0, 0);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+
+    ret = handler.ClearData();
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

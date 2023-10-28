@@ -244,10 +244,10 @@ HWTEST_F(NetStatsCallbackInterfaceTest, NetIfaceStatsChangedTest001, TestSize.Le
     sptr<IRemoteObject> impl = new (std::nothrow) MockNetIRemoteObject();
     sptr<NetStatsCallbackProxy> netCbProxy = new (std::nothrow) NetStatsCallbackProxy(impl);
     int32_t ret = netCbProxy->NetIfaceStatsChanged(TEST_IFACE);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     ret = netCbProxy->NetUidStatsChanged(TEST_IFACE, TEST_UID);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

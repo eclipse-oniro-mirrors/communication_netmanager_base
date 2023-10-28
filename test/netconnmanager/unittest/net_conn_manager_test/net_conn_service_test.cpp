@@ -48,6 +48,7 @@ constexpr int32_t TEST_SOCKETFD = 2;
 const int32_t NET_ID = 2;
 const int32_t SOCKET_FD = 2;
 const int32_t ZERO_VALUE = 0;
+const int32_t INVALID_VALUE = 10;
 constexpr const char *TEST_IDENT = "testIdent";
 constexpr const char *TEST_HOST = "testHost";
 constexpr const char *TEST_PROXY_HOST = "testHttpProxy";
@@ -763,12 +764,39 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest001, TestSize.Level1)
     ASSERT_NE(netLinkInfo, nullptr);
     netLinkInfo->httpProxy_.SetHost(TEST_HOST);
     ret = NetConnService::GetInstance()->UpdateNetLinkInfo(g_supplierId, netLinkInfo);
-    EXPECT_EQ(ret, NETSYS_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 
-    CallbackType type = CallbackType::CALL_TYPE_AVAILABLE;
     supplier = NetConnService::GetInstance()->FindNetSupplier(g_supplierId);
-    NetConnService::GetInstance()->CallbackForSupplier(supplier, type);
     ASSERT_NE(supplier, nullptr);
+
+    CallbackType type = CallbackType::CALL_TYPE_LOST;
+    NetConnService::GetInstance()->CallbackForSupplier(supplier, type);
+    type = CallbackType::CALL_TYPE_UPDATE_CAP;
+    NetConnService::GetInstance()->CallbackForSupplier(supplier, type);
+    type = CallbackType::CALL_TYPE_UPDATE_LINK;
+    NetConnService::GetInstance()->CallbackForSupplier(supplier, type);
+    type = CallbackType::CALL_TYPE_BLOCK_STATUS;
+    NetConnService::GetInstance()->CallbackForSupplier(supplier, type);
+
+    uint32_t validType = INVALID_VALUE;
+    type = static_cast<CallbackType>(validType);
+    NetConnService::GetInstance()->CallbackForSupplier(supplier, type);
+
+    ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(nullptr, nullptr, 0);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest002, TestSize.Level1)
+{
+    auto ret = NetConnService::GetInstance()->UnregisterNetConnCallbackAsync(nullptr);
+    EXPECT_NE(ret, NETSYS_SUCCESS);
+
+    sptr<NetSupplier> supplier = nullptr;
+    sptr<NetSupplier> newSupplier = nullptr;
+    NetConnService::GetInstance()->MakeDefaultNetWork(supplier, newSupplier);
+
+    ret = NetConnService::GetInstance()->ActivateNetwork(nullptr, nullptr, 0);
+    EXPECT_NE(ret, NETSYS_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

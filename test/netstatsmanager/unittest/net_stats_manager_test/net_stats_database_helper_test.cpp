@@ -17,6 +17,9 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+#define private public
+#endif
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_database_helper.h"
@@ -193,6 +196,23 @@ HWTEST_F(NetStatsDatabaseHelperTest, ClearDataHelperTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = helper->ClearData(UID_TABLE);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsDatabaseHelperTest, NetStatsDatabaseHelperBranchTest001, TestSize.Level1)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>("");
+    int32_t ret = helper->Open("");
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = helper->Close();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    int32_t id = 0;
+    ret = helper->BindInt64(id, 0, 0);
+    EXPECT_EQ(ret, STATS_ERR_READ_DATA_FAIL);
+
+    ret = helper->ClearData("");
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

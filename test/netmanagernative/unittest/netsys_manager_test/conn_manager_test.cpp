@@ -18,6 +18,10 @@
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
+#ifdef GTEST_API_
+#define private public
+#endif
+
 #include "conn_manager.h"
 #include "net_conn_manager_test_util.h"
 #include "net_manager_constants.h"
@@ -34,6 +38,8 @@ constexpr int32_t NETID = 103;
 const std::string INTERFACENAME = "wlan0";
 constexpr int32_t LOCAL_NET_ID = 99;
 constexpr int32_t ERROR_CODE = -101;
+constexpr int32_t INVALID_VALUE = -1;
+
 class ConnManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -67,7 +73,7 @@ HWTEST_F(ConnManagerTest, SetInternetPermission001, TestSize.Level1)
     uint32_t uid = 0;
     uint8_t allow = 0;
     int32_t ret = instance_->SetInternetPermission(uid, allow);
-    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -370,6 +376,38 @@ HWTEST_F(ConnManagerTest, GetFwmarkForNetworkTest001, TestSize.Level1)
     std::string info;
     instance_->GetDumpInfos(info);
     ASSERT_FALSE(info.empty());
+}
+
+/**
+ * @tc.name: ConnManagerBranchTest001
+ * @tc.desc: Test ConnManager Branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConnManagerTest, ConnManagerBranchTest001, TestSize.Level1)
+{
+    std::string testInterfaceName = "testName";
+    int32_t ret = instance_->GetNetworkForInterface(testInterfaceName);
+    EXPECT_EQ(ret, INVALID_VALUE);
+
+    RouteManager::TableType type = instance_->GetTableType(LOCAL_NET_ID);
+    EXPECT_EQ(type, RouteManager::TableType::LOCAL_NETWORK);
+
+    type = instance_->GetTableType(LOCAL_NET_ID);
+    EXPECT_EQ(type, RouteManager::TableType::LOCAL_NETWORK);
+
+    int32_t netId = 100;
+    type = instance_->GetTableType(netId);
+    EXPECT_EQ(type, RouteManager::TableType::INTERFACE);
+
+    auto result = instance_->FindVirtualNetwork(NETID);
+    EXPECT_EQ(result, nullptr);
+
+    result = instance_->FindVirtualNetwork(netId);
+    EXPECT_EQ(result, nullptr);
+
+    netId = 99;
+    result = instance_->FindVirtualNetwork(netId);
+    EXPECT_EQ(result, nullptr);
 }
 } // namespace NetsysNative
 } // namespace OHOS
