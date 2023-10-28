@@ -21,6 +21,8 @@
 #include "dns_config_client.h"
 #include "i_net_diag_callback.h"
 #include "i_notify_callback.h"
+#include "i_net_dns_result_callback.h"
+#include "i_net_dns_health_callback.h"
 #include "interface_type.h"
 #include "iremote_broker.h"
 #include "net_stats_info.h"
@@ -126,6 +128,10 @@ public:
                                  const std::string &ifName) = 0;
     virtual int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
                                  const std::string &ifName) = 0;
+    virtual int32_t RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t delay) = 0;
+    virtual int32_t UnregisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback) = 0;
+    virtual int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) = 0;
+    virtual int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

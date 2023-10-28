@@ -407,6 +407,157 @@ int NetSysIsIpv6Enable(uint16_t netId)
     return enable;
 }
 
+static int32_t NetSysPostDnsResultInternal(int sockFd, uint16_t netId, char* name, int usedtime, int queryret,
+                                           struct addrinfo *res, struct QueryParam *param)
+{
+    struct RequestInfo info = {
+        .command = POST_DNS_RESULT,
+        .netId = netId,
+    };
+
+    int32_t uid = getuid();
+    int32_t pid = getpid();
+    uint32_t nameLen = strlen(name) + 1;
+    NETSYS_CLIENT_PRINT("NetSysPostDnsResultInternal uid %d, pid %d, netid %d pkg", uid, pid, netId);
+
+    struct AddrInfo addrInfo[MAX_RESULTS] = {};
+    int32_t resNum = 0;
+    if (queryret == 0) {
+        resNum = FillAddrInfo(addrInfo, res);
+    }
+    if (resNum < 0) {
+        return CloseSocketReturn(sockFd, -1);
+    }
+
+    if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollSendData(sockFd, (char *)&uid, sizeof(int32_t))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollSendData(sockFd, (char *)&pid, sizeof(int32_t))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollSendData(sockFd, (char *)&nameLen, sizeof(uint32_t))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollSendData(sockFd, name, (sizeof(char) * nameLen))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollSendData(sockFd, (char *)&usedtime, sizeof(int))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollSendData(sockFd, (char *)&queryret, sizeof(int))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollSendData(sockFd, (char *)&resNum, sizeof(int32_t))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollSendData(sockFd, (char *)param, sizeof(struct QueryParam))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (resNum > 0) {
+        if (!PollSendData(sockFd, (char *)addrInfo, sizeof(struct AddrInfo) * resNum)) {
+            DNS_CONFIG_PRINT("send failed %d", errno);
+            return CloseSocketReturn(sockFd, -errno);
+        }
+    }
+    return CloseSocketReturn(sockFd, 0);
+}
+
+int32_t NetSysPostDnsResult(int netid, char* name, int usedtime, int queryret,
+                            struct addrinfo *res, struct QueryParam *param)
+{
+    int sockFd = CreateConnectionToNetSys();
+    int err = NetSysPostDnsResultInternal(sockFd, netid, name, usedtime, queryret, res, param);
+    if (err < 0) {
+        return -1;
+    }
+
+    return 0;
+}
+
+static int32_t NetSysGetDefaultNetworkInternal(int sockFd, uint16_t netId, int32_t *currentNetId)
+{
+    struct RequestInfo info = {
+        .command = GET_DEFAULT_NETWORK,
+        .netId = netId,
+    };
+
+    if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollRecvData(sockFd, (char *)currentNetId, sizeof(int))) {
+        DNS_CONFIG_PRINT("read failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+    DNS_CONFIG_PRINT("currentNetId %d", *currentNetId);
+    return CloseSocketReturn(sockFd, 0);
+}
+
+int32_t NetSysGetDefaultNetwork(uint16_t netId, int32_t* currentNetId)
+{
+    int sockFd = CreateConnectionToNetSys();
+    int err = NetSysGetDefaultNetworkInternal(sockFd, netId, currentNetId);
+    if (err < 0) {
+        return -1;
+    }
+
+    return 0;
+}
+
+static int32_t NetSysBindSocketInternal(int sockFd, uint16_t netId, int32_t fd)
+{
+    struct RequestInfo info = {
+        .command = BIND_SOCKET,
+        .netId = netId,
+    };
+
+    if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    if (!PollSendData(sockFd, (const char *)(&fd), sizeof(int32_t))) {
+        DNS_CONFIG_PRINT("send failed %d", errno);
+        return CloseSocketReturn(sockFd, -errno);
+    }
+
+    return CloseSocketReturn(sockFd, 0);
+}
+
+int32_t NetSysBindSocket(int32_t fd, uint32_t netId)
+{
+    int sockFd = CreateConnectionToNetSys();
+    DNS_CONFIG_PRINT("NetSysBindSocket %d", fd);
+    int err = NetSysBindSocketInternal(sockFd, netId, fd);
+    if (err < 0) {
+        return -1;
+    }
+
+    return 0;
+}
+
 #ifdef __cplusplus
 }
 #endif
