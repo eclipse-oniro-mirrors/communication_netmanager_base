@@ -30,6 +30,7 @@ struct NetDnsResult {
     uint32_t        totalReports_;
     uint32_t        failReports_;
 };
+
 class NetDnsResultCallback : public NetsysDnsReportCallback {
 public:
     int32_t OnDnsResultReport(uint32_t size, const std::list<NetsysNative::NetDnsResultReport>);
