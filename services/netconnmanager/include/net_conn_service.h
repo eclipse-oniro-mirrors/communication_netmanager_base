@@ -35,6 +35,7 @@
 #include "net_supplier.h"
 #include "netsys_controller_callback.h"
 #include "network.h"
+#include "dns_result_call_back.h"
 
 namespace OHOS {
 namespace NetManagerStandard {

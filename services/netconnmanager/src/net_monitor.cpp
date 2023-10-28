@@ -71,11 +71,6 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
     LoadGlobalHttpProxy();
 }
 
-NetMonitor::~NetMonitor()
-{
-    NETMGR_LOG_I("NetMonitor[%{public}d] is destroyed", netId_);
-}
-
 void NetMonitor::Start()
 {
     NETMGR_LOG_I("Start net[%{public}d] monitor in", netId_);
