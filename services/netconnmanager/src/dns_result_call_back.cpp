@@ -23,7 +23,7 @@ constexpr double FAIL_RATE = 0.2;
 int32_t NetDnsResultCallback::OnDnsResultReport(uint32_t size,
     const std::list<NetsysNative::NetDnsResultReport> netDnsResultReport)
 {
-    NETMGR_LOG_I("Dns Result Report interface is called");
+    NETMGR_LOG_D("Dns Result Report interface is called");
     netDnsResult_.Clear();
     IterateDnsReportResults(netDnsResultReport);
     netDnsResult_.Iterate([](int32_t netid, NetDnsResult dnsResult) {
@@ -62,7 +62,6 @@ void NetDnsResultCallback::GetDumpMessageForDnsResult(std::string &message)
 void NetDnsResultCallback::IterateDnsReportResults(
     const std::list<NetsysNative::NetDnsResultReport> netDnsResultReport)
 {
-    NETMGR_LOG_I("IterateDnsReportResults in");
     int32_t defaultNetid = 0;
     int32_t result = NetConnService::GetInstance()->GetDefaultNet(defaultNetid);
     NETMGR_LOG_I("GetDefaultNet result: %{public}d, defaultNetid: %{public}d", result, defaultNetid);

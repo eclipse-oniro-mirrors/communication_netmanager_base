@@ -139,8 +139,8 @@ bool NetConnService::Init()
         NetsysController::GetInstance().RegisterCallback(interfaceStateCallback_);
     }
     dnsResultCallback_ = std::make_unique<NetDnsResultCallback>().release();
-    int32_t regDnsResultCallback = NetsysController::GetInstance().RegisterDnsResultCallback(dnsResultCallback_, 500);
-    NETMGR_LOG_I("Register Dns Result callback result: [%{public}d]", regDnsResultCallback);
+    int32_t regDnsResult = NetsysController::GetInstance().RegisterDnsResultCallback(dnsResultCallback_, 0);
+    NETMGR_LOG_I("Register Dns Result callback result: [%{public}d]", regDnsResult);
 
     return true;
 }
