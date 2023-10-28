@@ -36,7 +36,7 @@
  * @version 1.0
  */
 
-#include "third_party/musl/include/netdb.h"
+#include <netdb.h>
 
 #ifdef __cplusplus
 extern "C" {
