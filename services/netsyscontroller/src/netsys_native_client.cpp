@@ -162,6 +162,8 @@ NetsysNativeClient::NetsysNativeClient()
         if (proxy != nullptr) {
             nativeNotifyCallback_ = new (std::nothrow) NativeNotifyCallback(*this);
             proxy->RegisterNotifyCallback(nativeNotifyCallback_);
+            nativeDnsReportCallback_ = new (std::nothrow) NativeNetDnsResultCallback(*this);
+            proxy->RegisterDnsResultCallback(nativeDnsReportCallback_, dnsReportTimeStep);
         }
     });
     std::string threadName = "netsysGetProxy";

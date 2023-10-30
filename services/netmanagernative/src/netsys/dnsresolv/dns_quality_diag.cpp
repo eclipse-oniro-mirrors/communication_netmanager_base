@@ -235,7 +235,7 @@ int32_t DnsQualityDiag::handle_dns_fail()
 
 int32_t DnsQualityDiag::send_dns_report()
 {
-    if (handler_started == 0) {
+    if (!handler_started) {
         report_.clear();
         return 0;
     }
@@ -248,9 +248,8 @@ int32_t DnsQualityDiag::send_dns_report()
             NETNATIVE_LOGI("send_dns_report cb)");
             cb->OnDnsResultReport(reportSend.size(), reportSend);
         }
-        handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_REPORT_LOOP, report_delay);
     }
-
+    handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_REPORT_LOOP, report_delay);
     return 0;
 }
 
