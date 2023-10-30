@@ -2131,5 +2131,39 @@ int32_t NetsysNativeServiceProxy::UnregisterDnsHealthCallback(
     }
     return ret;
 }
+
+int32_t NetsysNativeServiceProxy::GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(type)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint64(cookie)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t res = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_COOKIE_STATS),
+                                        data, reply, option);
+    if (res != ERR_NONE) {
+        NETNATIVE_LOGE("GetCookieStats SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!reply.ReadUint64(stats)) {
+        NETNATIVE_LOGE("get stats falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
 } // namespace NetsysNative
 } // namespace OHOS

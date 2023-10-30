@@ -1027,5 +1027,14 @@ int32_t NetsysController::UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNat
     }
     return netsysService_->UnregisterDnsHealthCallback(callback);
 }
+
+int32_t NetsysController::GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("GetCookieStats netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->GetCookieStats(stats, type, cookie);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

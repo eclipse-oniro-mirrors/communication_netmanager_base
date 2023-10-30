@@ -396,5 +396,16 @@ int32_t NetStatsService::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
     return NetsysController::GetInstance().GetAllStatsInfo(infos);
 }
 
+int32_t NetStatsService::GetCookieRxBytes(uint64_t &stats, uint64_t cookie)
+{
+    return NetsysController::GetInstance().GetCookieStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_RX_BYTES),
+                                                          cookie);
+}
+
+int32_t NetStatsService::GetCookieTxBytes(uint64_t &stats, uint64_t cookie)
+{
+    return NetsysController::GetInstance().GetCookieStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_TX_BYTES),
+                                                          cookie);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

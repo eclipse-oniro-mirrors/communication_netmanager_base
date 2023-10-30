@@ -48,6 +48,8 @@ private:
     int32_t OnUpdateIfacesStats(MessageParcel &data, MessageParcel &reply);
     int32_t OnUpdateStatsData(MessageParcel &data, MessageParcel &reply);
     int32_t OnResetFactory(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetCookieRxBytes(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetCookieTxBytes(MessageParcel &data, MessageParcel &reply);
 
 private:
     int32_t CheckNetManagerAvailable(MessageParcel &reply);

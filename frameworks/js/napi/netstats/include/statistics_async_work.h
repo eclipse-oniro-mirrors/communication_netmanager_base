@@ -38,6 +38,8 @@ public:
     static void ExecGetIfaceUidStats(napi_env env, void *data);
     static void ExecUpdateIfacesStats(napi_env env, void *data);
     static void ExecUpdateStatsData(napi_env env, void *data);
+    static void ExecGetSockfdRxBytes(napi_env env, void *data);
+    static void ExecGetSockfdTxBytes(napi_env env, void *data);
 
     static void GetCellularRxBytesCallback(napi_env env, napi_status status, void *data);
     static void GetCellularTxBytesCallback(napi_env env, napi_status status, void *data);
@@ -51,6 +53,8 @@ public:
     static void GetIfaceUidStatsCallback(napi_env env, napi_status status, void *data);
     static void UpdateIfacesStatsCallback(napi_env env, napi_status status, void *data);
     static void UpdateStatsDataCallback(napi_env env, napi_status status, void *data);
+    static void GetSockfdRxBytesCallback(napi_env env, napi_status status, void *data);
+    static void GetSockfdTxBytesCallback(napi_env env, napi_status status, void *data);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

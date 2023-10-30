@@ -50,6 +50,8 @@ constexpr const char *FUNCTION_UPDATE_IFACE_STATS = "updateIfacesStats";
 constexpr const char *FUNCTION_UPDATE_STATS_DATA = "updateStatsData";
 constexpr const char *FUNCTION_ON = "on";
 constexpr const char *FUNCTION_OFF = "off";
+constexpr const char *FUNCTION_GET_SOCKFD_RXBYTES = "getSockfdRxBytes";
+constexpr const char *FUNCTION_GET_SOCKFD_TXBYTES = "getSockfdTxBytes";
 } // namespace
 
 napi_value GetCellularRxBytes(napi_env env, napi_callback_info info)
@@ -92,6 +94,20 @@ napi_value GetUidTxBytes(napi_env env, napi_callback_info info)
     return ModuleTemplate::Interface<GetUidTxBytesContext>(env, info, FUNCTION_GET_UID_TXBYTES, nullptr,
                                                            StatisticsAsyncWork::ExecGetUidTxBytes,
                                                            StatisticsAsyncWork::GetUidTxBytesCallback);
+}
+
+napi_value GetSockfdRxBytes(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetSockfdRxBytesContext>(env, info, FUNCTION_GET_SOCKFD_RXBYTES, nullptr,
+                                                              StatisticsAsyncWork::ExecGetSockfdRxBytes,
+                                                              StatisticsAsyncWork::GetSockfdRxBytesCallback);
+}
+
+napi_value GetSockfdTxBytes(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<GetSockfdTxBytesContext>(env, info, FUNCTION_GET_SOCKFD_TXBYTES, nullptr,
+                                                              StatisticsAsyncWork::ExecGetSockfdTxBytes,
+                                                              StatisticsAsyncWork::GetSockfdTxBytesCallback);
 }
 
 napi_value GetIfaceRxBytes(napi_env env, napi_callback_info info)
@@ -156,6 +172,8 @@ napi_value InitStatisticsModule(napi_env env, napi_value exports)
                                     DECLARE_NAPI_FUNCTION(FUNCTION_GET_ALL_TXBYTES, GetAllTxBytes),
                                     DECLARE_NAPI_FUNCTION(FUNCTION_GET_UID_RXBYTES, GetUidRxBytes),
                                     DECLARE_NAPI_FUNCTION(FUNCTION_GET_UID_TXBYTES, GetUidTxBytes),
+                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_SOCKFD_RXBYTES, GetSockfdRxBytes),
+                                    DECLARE_NAPI_FUNCTION(FUNCTION_GET_SOCKFD_TXBYTES, GetSockfdTxBytes),
                                     DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_RXBYTES, GetIfaceRxBytes),
                                     DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_TXBYTES, GetIfaceTxBytes),
                                     DECLARE_NAPI_FUNCTION(FUNCTION_GET_IFACE_STATS, GetIfaceStats),

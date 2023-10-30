@@ -763,5 +763,9 @@ int32_t NetsysNativeService::UnregisterDnsHealthCallback(const sptr<INetDnsHealt
     return netsysService_->UnregisterDnsHealthCallback(callback);
 }
 
+int32_t NetsysNativeService::GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie)
+{
+    return NetManagerStandard::NETMANAGER_SUCCESS;
+}
 } // namespace NetsysNative
 } // namespace OHOS

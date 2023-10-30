@@ -43,6 +43,8 @@ enum class StatsInterfaceCode {
     CMD_GET_UID_RXBYTES,
     CMD_GET_UID_TXBYTES,
     CMD_GET_ALL_STATS_INFO,
+    CMD_GET_COOKIE_RXBYTES,
+    CMD_GET_COOKIE_TXBYTES,
     CMD_END = 100,
 };
 } // namespace NetManagerStandard

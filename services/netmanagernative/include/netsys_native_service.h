@@ -139,6 +139,7 @@ public:
     int32_t UnregisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback) override;
     int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) override;
     int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) override;
+    int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) override;
 
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;

@@ -27,6 +27,7 @@
 #include "get_iface_uid_stats_context.h"
 #include "get_uid_rxbytes_context.h"
 #include "update_iface_stats_context.h"
+#include "get_sockfd_rxbytes_context.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -47,6 +48,8 @@ public:
     static bool ExecGetIfaceUidStats(GetIfaceUidStatsContext *context);
     static bool ExecUpdateIfacesStats(UpdateIfacesStatsContext *context);
     static bool ExecUpdateStatsData(UpdateStatsDataContext *context);
+    static bool ExecGetSockfdRxBytes(GetSockfdRxBytesContext *context);
+    static bool ExecGetSockfdTxBytes(GetSockfdTxBytesContext *context);
 
     static napi_value GetCellularRxBytesCallback(GetCellularRxBytesContext *context);
     static napi_value GetCellularTxBytesCallback(GetCellularTxBytesContext *context);
@@ -60,6 +63,8 @@ public:
     static napi_value GetIfaceUidStatsCallback(GetIfaceUidStatsContext *context);
     static napi_value UpdateIfacesStatsCallback(UpdateIfacesStatsContext *context);
     static napi_value UpdateStatsDataCallback(UpdateStatsDataContext *context);
+    static napi_value GetSockfdRxBytesCallback(GetSockfdRxBytesContext *context);
+    static napi_value GetSockfdTxBytesCallback(GetSockfdTxBytesContext *context);
 
     static napi_value CreateCodeMessage(napi_env env, const std::string &msg, int32_t code);
 };

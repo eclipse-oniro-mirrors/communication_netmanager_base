@@ -816,6 +816,16 @@ public:
      * @return Value the return value of the netsys interface call
      */
     virtual int32_t UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback) = 0;
+
+    /**
+     * Get Cookie Stats.
+     *
+     * @param stats stats
+     * @param type type
+     * @param cookie cookie
+     * @return Value the return value of the netsys interface call
+     */
+    virtual int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -20,6 +20,7 @@
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "sys/socket.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -254,6 +255,52 @@ int32_t NetStatsClient::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->GetAllStatsInfo(infos);
+}
+
+int32_t NetStatsClient::GetSockfdRxBytes(uint64_t &stats, int32_t sockfd)
+{
+    if (sockfd <= 0) {
+        NETMGR_LOG_E("sockfd is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    uint64_t optrval = 0;
+    uint32_t optlen = sizeof(optrval);
+    if (getsockopt(sockfd, SOL_SOCKET, SO_COOKIE, &optrval, &optlen) == -1) {
+        NETMGR_LOG_E("getsockopt error");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    return proxy->GetCookieRxBytes(stats, optrval);
+}
+
+int32_t NetStatsClient::GetSockfdTxBytes(uint64_t &stats, int32_t sockfd)
+{
+    if (sockfd <= 0) {
+        NETMGR_LOG_E("sockfd is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    uint64_t optrval = 0;
+    uint32_t optlen = sizeof(optrval);
+    if (getsockopt(sockfd, SOL_SOCKET, SO_COOKIE, &optrval, &optlen) == -1) {
+        NETMGR_LOG_E("getsockopt error");
+        return NETMANAGER_ERR_OPERATION_FAILED;
+    }
+
+    return proxy->GetCookieTxBytes(stats, optrval);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

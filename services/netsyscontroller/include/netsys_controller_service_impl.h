@@ -798,6 +798,16 @@ public:
      */
     int32_t UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback) override;
 
+    /**
+     * Get Cookie Stats.
+     *
+     * @param stats stats
+     * @param type type
+     * @param cookie cookie
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) override;
+
 private:
     MockNetsysNativeClient mockNetsysClient_;
     NetsysNativeClient netsysClient_;

@@ -205,6 +205,28 @@ public:
      */
     int32_t ResetFactory();
 
+    /**
+     * Get Sockfd RxBytes
+     *
+     * @param stats stats
+     * @param sockfd sockfd
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t GetSockfdRxBytes(uint64_t &stats, int32_t sockfd);
+
+    /**
+     * Get Sockfd TxBytes
+     *
+     * @param stats stats
+     * @param sockfd sockfd
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t GetSockfdTxBytes(uint64_t &stats, int32_t sockfd);
+
 private:
     class NetStatsDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
