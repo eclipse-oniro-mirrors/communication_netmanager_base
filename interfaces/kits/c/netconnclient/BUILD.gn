@@ -14,10 +14,10 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-ohos_ndk_library("libnetconn_ndk") {
-  output_name = "netconn_ndk"
-  output_extension = "z.so"
-  ndk_description_file = "./libnetconn.ndk.json"
+ohos_ndk_library("libnet_connection") {
+  output_name = "net_connection"
+  output_extension = "so"
+  ndk_description_file = "./libnet_connection.ndk.json"
   min_compact_version = "1"
   system_capability = "SystemCapability.Communication.NetManager.Core"
   system_capability_headers = [ "./include/native_net_conn_api.h" ]
@@ -28,7 +28,8 @@ ohos_ndk_headers("netconn_header") {
   sources = [ "./include/native_net_conn_api.h" ]
 }
 
-ohos_shared_library("netconn_ndk") {
+ohos_shared_library("net_connection") {
+  output_extension = "so"
   include_dirs =
       [ "$NETMANAGER_BASE_ROOT/interfaces/kits/c/netconnclient/include" ]
 
