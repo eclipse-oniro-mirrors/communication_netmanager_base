@@ -365,13 +365,47 @@ HWTEST_F(FirewallManagerTest, IsFirewallChian2, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsFirewallChian3
+ * @tc.desc: Test FirewallManager IsFirewallChian3.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, IsFirewallChian3, TestSize.Level1)
+{
+    int32_t ret = g_firewallManager->IsFirewallChian(ChainType::CHAIN_OHFW_POWERSAVING);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: IsFirewallChian4
+ * @tc.desc: Test FirewallManager IsFirewallChian4.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FirewallManagerTest, IsFirewallChian4, TestSize.Level1)
+{
+    int32_t ret = g_firewallManager->IsFirewallChian(ChainType::CHAIN_OHFW_UNDOZABLE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: FetchChainName
  * @tc.desc: Test FirewallManager FetchChainName.
  * @tc.type: FUNC
  */
 HWTEST_F(FirewallManagerTest, FetchChainName, TestSize.Level1)
 {
-    std::string ret = g_firewallManager->FetchChainName(ChainType::CHAIN_OHBW_DATA_SAVER);
+    std::string ret = g_firewallManager->FetchChainName(ChainType::CHAIN_OHFW_INPUT);
+    EXPECT_EQ(ret, "ohfw_INPUT");
+    ret = g_firewallManager->FetchChainName(ChainType::CHAIN_OHFW_OUTPUT);
+    EXPECT_EQ(ret, "ohfw_OUTPUT");
+    ret = g_firewallManager->FetchChainName(ChainType::CHAIN_OHFW_FORWARD);
+    EXPECT_EQ(ret, "ohfw_FORWARD");
+    ret = g_firewallManager->FetchChainName(ChainType::CHAIN_OHFW_DOZABLE);
+    EXPECT_EQ(ret, "ohfw_dozable");
+    ret = g_firewallManager->FetchChainName(ChainType::CHAIN_OHFW_POWERSAVING);
+    EXPECT_EQ(ret, "ohfw_powersaving");
+    ret = g_firewallManager->FetchChainName(ChainType::CHAIN_OHFW_UNDOZABLE);
+    EXPECT_EQ(ret, "ohfw_undozable");
+    ret = g_firewallManager->FetchChainName(ChainType::CHAIN_OHBW_DATA_SAVER);
     EXPECT_EQ(ret, "oh_unusable");
 }
 

@@ -50,5 +50,23 @@ HWTEST_F(NetManagerPermissionTest, CheckPermissionWithCacheTest001, TestSize.Lev
     auto ret = NetManagerPermission::CheckPermissionWithCache({});
     EXPECT_FALSE(ret);
 }
+
+HWTEST_F(NetManagerPermissionTest, IsSystemCallerTest001, TestSize.Level1)
+{
+    auto ret = NetManagerPermission::IsSystemCaller();
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetManagerPermissionTest, CheckNetSysInternalPermissionTest001, TestSize.Level1)
+{
+    auto ret = NetManagerPermission::CheckNetSysInternalPermission({});
+    EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetManagerPermissionTest, CheckNetSysInternalPermissionTest002, TestSize.Level1)
+{
+    auto ret = NetManagerPermission::CheckNetSysInternalPermission({"ohos.permission.MANAGE_VPN"});
+    EXPECT_FALSE(ret);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

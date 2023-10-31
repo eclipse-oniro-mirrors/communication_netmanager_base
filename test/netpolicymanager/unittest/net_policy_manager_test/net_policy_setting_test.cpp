@@ -128,5 +128,18 @@ HWTEST_F(NetPolicySettingTest, CloseDeviceIdle, TestSize.Level1)
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdlePolicy(false);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetPolicySettingTest, HasPermission, TestSize.Level1)
+{
+    AccessToken token(testInfoParms1, testPolicyPrams1);
+    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->CheckPermission();
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetPolicySettingTest, NoPermission, TestSize.Level1)
+{
+    int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->CheckPermission();
+    EXPECT_EQ(result, NETMANAGER_ERR_PERMISSION_DENIED);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

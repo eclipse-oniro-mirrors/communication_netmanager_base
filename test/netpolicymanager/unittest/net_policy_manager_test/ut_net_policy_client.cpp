@@ -556,5 +556,61 @@ HWTEST_F(UtNetPolicyClient, RegisterNetPolicyCallback001, TestSize.Level1)
     int32_t ret2 = g_netPolicyClient->UnregisterNetPolicyCallback(callback);
     ASSERT_EQ(ret2, NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.name: GetPowerSaveTrustlist001
+ * @tc.desc: Test NetPolicyClient GetPowerSaveTrustlist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, GetPowerSaveTrustlist001, TestSize.Level1)
+{
+    AccessToken token(testInfoParms1, testPolicyPrams1);
+    std::vector<uint32_t> uids;
+    int32_t ret = g_netPolicyClient->GetPowerSaveTrustlist(uids);
+    std::cout << "NetPolicyClient023 GetPowerSaveTrustlist ret:" << ret << std::endl;
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetPowerSaveTrustlist001
+ * @tc.desc: Test NetPolicyClient SetPowerSaveTrustlist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, SetPowerSaveTrustlist001, TestSize.Level1)
+{
+    AccessToken token(testInfoParms1, testPolicyPrams1);
+    std::vector<uint32_t> uids;
+    bool isAllowed = true;
+    int32_t ret = g_netPolicyClient->SetPowerSaveTrustlist(uids, isAllowed);
+    std::cout << "NetPolicyClient024 SetPowerSaveTrustlist ret:" << ret << std::endl;
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: SetPowerSavePolicy001
+ * @tc.desc: Test NetPolicyClient SetPowerSavePolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, SetPowerSavePolicy001, TestSize.Level1)
+{
+    AccessToken token(testInfoParms1, testPolicyPrams1);
+    bool enable = true;
+    int32_t ret = g_netPolicyClient->SetPowerSavePolicy(enable);
+    std::cout << "NetPolicyClient025 SetPowerSavePolicy ret:" << ret << std::endl;
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: CheckPermission001
+ * @tc.desc: Test NetPolicyClient CheckPermission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, CheckPermission001, TestSize.Level1)
+{
+    AccessToken token(testInfoParms1, testPolicyPrams1);
+    int32_t ret = g_netPolicyClient->CheckPermission();
+    std::cout << "NetPolicyClient026 CheckPermission ret:" << ret << std::endl;
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

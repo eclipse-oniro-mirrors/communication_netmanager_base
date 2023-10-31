@@ -54,8 +54,6 @@ int32_t NetConnClient::SystemReady()
 
 int32_t NetConnClient::SetInternetPermission(uint32_t uid, uint8_t allow)
 {
-    char buffer[RESERVED_BUFFER_SIZE] = {0};
-    buffer[RESERVED_BUFFER_SIZE-1] = '\0';
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");

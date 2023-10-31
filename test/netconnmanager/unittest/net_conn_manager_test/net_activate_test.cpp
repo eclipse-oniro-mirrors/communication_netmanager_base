@@ -101,7 +101,7 @@ void NetActivateTest::TearDown() {}
 HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest001, TestSize.Level1)
 {
     std::set<NetCap> netCaps;
-    netCaps.insert(NET_CAPABILITY_NOT_METERED);
+    netCaps.insert(NET_CAPABILITY_INTERNET);
     sptr<NetSupplier> supplier = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps);
     bool ret = instance_->MatchRequestAndNetwork(supplier);
     EXPECT_TRUE(ret);
@@ -113,7 +113,7 @@ HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest001, TestSize.Level1)
     ret = instance_->MatchRequestAndNetwork(supplier002);
     EXPECT_TRUE(ret);
     std::set<NetCap> netCaps1;
-    netCaps1.insert(NET_CAPABILITY_MMS);
+    netCaps1.insert(NET_CAPABILITY_INTERNET);
     sptr<NetSupplier> supplier003 = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps1);
     ret = instance_->MatchRequestAndNetwork(supplier003);
     EXPECT_TRUE(ret);
@@ -125,6 +125,7 @@ HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest001, TestSize.Level1)
 HWTEST_F(NetActivateTest, MatchRequestAndNetworkTest002, TestSize.Level1)
 {
     std::set<NetCap> netCaps;
+    netCaps.insert(NET_CAPABILITY_INTERNET);
     sptr<NetSupplier> supplier = nullptr;
     bool ret = instance_->MatchRequestAndNetwork(supplier);
     EXPECT_EQ(ret, false);
@@ -189,7 +190,7 @@ HWTEST_F(NetActivateTest, CompareByNetworkIdent001, TestSize.Level1)
 HWTEST_F(NetActivateTest, CompareByNetworkCapabilities001, TestSize.Level1)
 {
     NetCaps netCaps;
-    netCaps.InsertNetCap(NetCap::NET_CAPABILITY_NOT_VPN);
+    netCaps.InsertNetCap(NetCap::NET_CAPABILITY_INTERNET);
     bool ret = instance_->CompareByNetworkCapabilities(netCaps);
     EXPECT_EQ(ret, true);
 
