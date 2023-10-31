@@ -24,7 +24,7 @@ ohos_ndk_library("libnet_connection") {
 }
 
 ohos_ndk_headers("netconn_header") {
-  dest_dir = "$ndk_headers_out_dir/netconn"
+  dest_dir = "$ndk_headers_out_dir/network/netmanager"
   sources = [ "./include/native_net_conn_api.h" ]
 }
 
