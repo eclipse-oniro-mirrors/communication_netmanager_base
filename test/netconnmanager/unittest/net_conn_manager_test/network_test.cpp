@@ -140,5 +140,24 @@ HWTEST_F(NetworkTest, StartNetDetectionTest001, TestSize.Level1)
     std::string urlRedirect = "test_redirect";
     instance_->OnHandleNetMonitorResult(NetDetectionStatus::INVALID_DETECTION_STATE, urlRedirect);
 }
+HWTEST_F(NetworkTest, NetDetectionForDnsHealthTest001, TestSize.Level1)
+{
+    std::string urlRedirect = "test_redirect";
+    instance_->OnHandleNetMonitorResult(NetDetectionStatus::INVALID_DETECTION_STATE, urlRedirect);
+    instance_->NetDetectionForDnsHealth(true);
+    instance_->OnHandleNetMonitorResult(NetDetectionStatus::VERIFICATION_STATE, urlRedirect);
+    instance_->NetDetectionForDnsHealth(false);
+    bool ret = instance_->IsConnecting();
+    EXPECT_TRUE(ret);
+    instance_->UpdateNetConnState(NetConnState::NET_CONN_STATE_CONNECTED);
+    ret = instance_->IsConnected();
+    EXPECT_TRUE(ret);
+    instance_->UpdateNetConnState(NetConnState::NET_CONN_STATE_DISCONNECTING);
+    ret = instance_->IsConnecting();
+    EXPECT_FALSE(ret);
+    instance_->UpdateNetConnState(NetConnState::NET_CONN_STATE_DISCONNECTED);
+    ret = instance_->IsConnected();
+    EXPECT_FALSE(ret);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

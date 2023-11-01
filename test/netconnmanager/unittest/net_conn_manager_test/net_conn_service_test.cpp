@@ -770,5 +770,18 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest001, TestSize.Level1)
     NetConnService::GetInstance()->CallbackForSupplier(supplier, type);
     ASSERT_NE(supplier, nullptr);
 }
+
+HWTEST_F(NetConnServiceTest, NetDetectionForDnsHealthTest001, TestSize.Level1)
+{
+    int32_t netId = 0;
+    auto ret = NetConnService::GetInstance()->GetDefaultNet(netId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    bool dnsHealthSuccess = true;
+    bool dnsHealthFail = false;
+    ret = NetConnService::GetInstance()->NetDetectionForDnsHealth(netId, dnsHealthSuccess);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = NetConnService::GetInstance()->NetDetectionForDnsHealth(netId, dnsHealthFail);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -22,6 +22,7 @@ ohos_unittest("net_conn_manager_test") {
     debug = false
   }
   sources = [
+    "dns_result_call_back_test.cpp",
     "inet_addr_test.cpp",
     "net_activate_test.cpp",
     "net_all_capabilities_test.cpp",
@@ -40,6 +41,7 @@ ohos_unittest("net_conn_manager_test") {
     "net_detection_callback_stub_test.cpp",
     "net_detection_callback_test.cpp",
     "net_handle_test.cpp",
+    "net_http_probe_test.cpp",
     "net_interface_callback_stub_test.cpp",
     "net_link_info_test.cpp",
     "net_monitor_test.cpp",
