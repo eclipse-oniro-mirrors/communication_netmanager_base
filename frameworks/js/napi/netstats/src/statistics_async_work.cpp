@@ -86,6 +86,16 @@ void StatisticsAsyncWork::ExecUpdateStatsData(napi_env env, void *data)
     BaseAsyncWork::ExecAsyncWork<UpdateStatsDataContext, StatisticsExec::ExecUpdateStatsData>(env, data);
 }
 
+void StatisticsAsyncWork::ExecGetSockfdRxBytes(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetSockfdRxBytesContext, StatisticsExec::ExecGetSockfdRxBytes>(env, data);
+}
+
+void StatisticsAsyncWork::ExecGetSockfdTxBytes(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetSockfdTxBytesContext, StatisticsExec::ExecGetSockfdTxBytes>(env, data);
+}
+
 void StatisticsAsyncWork::GetCellularRxBytesCallback(napi_env env, napi_status status, void *data)
 {
     BaseAsyncWork::AsyncWorkCallback<GetCellularRxBytesContext, StatisticsExec::GetCellularRxBytesCallback>(
@@ -150,6 +160,18 @@ void StatisticsAsyncWork::UpdateStatsDataCallback(napi_env env, napi_status stat
 {
     BaseAsyncWork::AsyncWorkCallback<UpdateStatsDataContext, StatisticsExec::UpdateStatsDataCallback>(env, status,
                                                                                                       data);
+}
+
+void StatisticsAsyncWork::GetSockfdRxBytesCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetSockfdRxBytesContext, StatisticsExec::GetSockfdRxBytesCallback>(env, status,
+                                                                                                        data);
+}
+
+void StatisticsAsyncWork::GetSockfdTxBytesCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetSockfdTxBytesContext, StatisticsExec::GetSockfdTxBytesCallback>(env, status,
+                                                                                                        data);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

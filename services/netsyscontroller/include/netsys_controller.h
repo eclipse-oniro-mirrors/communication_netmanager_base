@@ -807,6 +807,16 @@ public:
      * @return Value the return value of the netsys interface call
      */
     int32_t UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback);
+
+    /**
+     * Get Cookie Stats
+     *
+     * @param stats stats
+     * @param type type
+     * @param cookie cookie
+     * @return returns the stats of the cookie
+     */
+    int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie);
 private:
     NetsysController() = default;
 

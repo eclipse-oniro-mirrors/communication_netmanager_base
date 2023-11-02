@@ -55,6 +55,10 @@ NetStatsServiceStub::NetStatsServiceStub()
         &NetStatsServiceStub::OnResetFactory;
     memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_STATS_INFO)] =
         &NetStatsServiceStub::OnGetAllStatsInfo;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_RXBYTES)] =
+        &NetStatsServiceStub::OnGetCookieRxBytes;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_TXBYTES)] =
+        &NetStatsServiceStub::OnGetCookieTxBytes;
 }
 
 NetStatsServiceStub::~NetStatsServiceStub() = default;
@@ -414,6 +418,52 @@ int32_t NetStatsServiceStub::CheckNetManagerAvailable(MessageParcel &reply)
         return NETMANAGER_SUCCESS;
     }
 
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsServiceStub::OnGetCookieRxBytes(MessageParcel &data, MessageParcel &reply)
+{
+    uint64_t cookie = 0;
+    uint64_t stats = 0;
+    if (!data.ReadUint64(cookie)) {
+        NETMGR_LOG_E("ReadUint64 failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t result = GetCookieRxBytes(stats, cookie);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("WriteInt32 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (result == NETMANAGER_SUCCESS) {
+        if (!reply.WriteUint64(stats)) {
+            NETMGR_LOG_E("WriteUint64 failed");
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsServiceStub::OnGetCookieTxBytes(MessageParcel &data, MessageParcel &reply)
+{
+    uint64_t cookie = 0;
+    uint64_t stats = 0;
+    if (!data.ReadUint64(cookie)) {
+        NETMGR_LOG_E("ReadUint64 failed");
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t result = GetCookieTxBytes(stats, cookie);
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("WriteInt32 failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (result == NETMANAGER_SUCCESS) {
+        if (!reply.WriteUint64(stats)) {
+            NETMGR_LOG_E("WriteUint64 failed");
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard

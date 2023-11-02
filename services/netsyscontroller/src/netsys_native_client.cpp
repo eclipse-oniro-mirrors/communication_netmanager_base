@@ -1348,5 +1348,15 @@ int32_t NetsysNativeClient::UnregisterDnsHealthCallback(const sptr<OHOS::NetsysN
     }
     return proxy->UnregisterDnsHealthCallback(callback);
 }
+
+int32_t NetsysNativeClient::GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetCookieStats(stats, type, cookie);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

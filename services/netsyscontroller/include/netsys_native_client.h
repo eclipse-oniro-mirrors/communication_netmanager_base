@@ -839,6 +839,16 @@ public:
      */
     int32_t UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback);
 
+    /**
+     * Get Cookie Stats.
+     *
+     * @param stats stats
+     * @param type type
+     * @param cookie cookie
+     * @return Value the return value of the netsys interface call
+     */
+    int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie);
+
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);
     void ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface);

@@ -50,6 +50,8 @@ public:
                                       const NetStatsInfo &stats) = 0;
     virtual int32_t UpdateStatsData() = 0;
     virtual int32_t ResetFactory() = 0;
+    virtual int32_t GetCookieRxBytes(uint64_t &stats, uint64_t cookie) = 0;
+    virtual int32_t GetCookieTxBytes(uint64_t &stats, uint64_t cookie) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

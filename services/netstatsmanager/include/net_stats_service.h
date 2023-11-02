@@ -58,6 +58,8 @@ public:
                               const NetStatsInfo &stats) override;
     int32_t UpdateStatsData() override;
     int32_t ResetFactory() override;
+    int32_t GetCookieRxBytes(uint64_t &stats, uint64_t cookie) override;
+    int32_t GetCookieTxBytes(uint64_t &stats, uint64_t cookie) override;
 
 private:
     bool Init();

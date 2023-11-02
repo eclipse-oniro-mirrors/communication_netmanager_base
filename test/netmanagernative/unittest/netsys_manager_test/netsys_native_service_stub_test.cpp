@@ -545,6 +545,11 @@ public:
     {
         return 0;
     }
+
+    int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {

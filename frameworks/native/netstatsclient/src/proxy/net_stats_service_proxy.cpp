@@ -402,5 +402,57 @@ int32_t NetStatsServiceProxy::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
     }
     return result;
 }
+
+int32_t NetStatsServiceProxy::GetCookieRxBytes(uint64_t &stats, uint64_t cookie)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!data.WriteUint64(cookie)) {
+        NETMGR_LOG_E("proxy cookie%{public}llu", cookie);
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    MessageParcel reply;
+    int32_t error =
+        SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_RXBYTES), data, reply);
+    if (error != 0) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        return error;
+    }
+    if (!reply.ReadUint64(stats)) {
+        NETMGR_LOG_E("ReadUint64 failed");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return error;
+}
+
+int32_t NetStatsServiceProxy::GetCookieTxBytes(uint64_t &stats, uint64_t cookie)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!data.WriteUint64(cookie)) {
+        NETMGR_LOG_E("proxy cookie%{public}llu", cookie);
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    MessageParcel reply;
+    int32_t error =
+        SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_TXBYTES), data, reply);
+    if (error != 0) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        return error;
+    }
+    if (!reply.ReadUint64(stats)) {
+        NETMGR_LOG_E("ReadUint64 failed");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return error;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

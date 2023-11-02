@@ -114,6 +114,8 @@ void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdGetIfaceStats;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_STATS_INFO)] =
         &NetsysNativeServiceStub::CmdGetAllStatsInfo;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_COOKIE_STATS)] =
+        &NetsysNativeServiceStub::CmdGetCookieStats;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_CREATE_VIRTUAL)] =
         &NetsysNativeServiceStub::CmdNetworkCreateVirtual;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ADD_UIDS)] =
@@ -1533,6 +1535,33 @@ int32_t NetsysNativeServiceStub::CmdUnregisterDnsHealthListener(MessageParcel &d
 
     result = UnregisterDnsHealthCallback(callback);
     reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdGetCookieStats(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t type = 0;
+    if (!data.ReadUint32(type)) {
+        NETNATIVE_LOGE("Read uint32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    uint64_t cookie = 0;
+    if (!data.ReadUint64(cookie)) {
+        NETNATIVE_LOGE("Read uint64 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    uint64_t stats = 0;
+    int32_t result = GetCookieStats(stats, type, cookie);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteUint64(stats)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
     return result;
 }
 } // namespace NetsysNative

@@ -119,6 +119,20 @@ bool StatisticsExec::ExecUpdateStatsData(UpdateStatsDataContext *context)
     return result == NETMANAGER_SUCCESS;
 }
 
+bool StatisticsExec::ExecGetSockfdRxBytes(GetSockfdRxBytesContext *context)
+{
+    int32_t result = NetStatsClient::GetInstance().GetSockfdRxBytes(context->bytes64_, context->sockfd_);
+    context->SetErrorCode(result);
+    return result == NETMANAGER_SUCCESS;
+}
+
+bool StatisticsExec::ExecGetSockfdTxBytes(GetSockfdTxBytesContext *context)
+{
+    int32_t result = NetStatsClient::GetInstance().GetSockfdTxBytes(context->bytes64_, context->sockfd_);
+    context->SetErrorCode(result);
+    return result == NETMANAGER_SUCCESS;
+}
+
 napi_value StatisticsExec::GetCellularRxBytesCallback(GetCellularRxBytesContext *context)
 {
     return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
@@ -187,6 +201,16 @@ napi_value StatisticsExec::UpdateIfacesStatsCallback(UpdateIfacesStatsContext *c
 napi_value StatisticsExec::UpdateStatsDataCallback(UpdateStatsDataContext *context)
 {
     return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+napi_value StatisticsExec::GetSockfdRxBytesCallback(GetSockfdRxBytesContext *context)
+{
+    return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
+}
+
+napi_value StatisticsExec::GetSockfdTxBytesCallback(GetSockfdTxBytesContext *context)
+{
+    return NapiUtils::CreateInt64(context->GetEnv(), context->bytes64_);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
