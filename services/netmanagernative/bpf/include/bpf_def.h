@@ -58,6 +58,9 @@ typedef stats_value app_uid_stats_value;
 
 typedef stats_key app_uid_if_stats_key;
 typedef stats_value app_uid_if_stats_value;
+
+typedef __u64 socket_cookie_stats_key;
+typedef stats_value app_cookie_stats_value;
 // network stats end
 
 // internet permission begin

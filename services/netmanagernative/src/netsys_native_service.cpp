@@ -765,7 +765,12 @@ int32_t NetsysNativeService::UnregisterDnsHealthCallback(const sptr<INetDnsHealt
 
 int32_t NetsysNativeService::GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie)
 {
-    return NetManagerStandard::NETMANAGER_SUCCESS;
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+
+    return bpfStats_->GetCookieStats(stats, static_cast<OHOS::NetManagerStandard::StatsType>(type), cookie);
 }
 } // namespace NetsysNative
 } // namespace OHOS

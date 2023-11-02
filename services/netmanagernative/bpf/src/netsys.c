@@ -54,6 +54,16 @@ bpf_map_def SEC("maps") app_uid_if_stats_map = {
     .numa_node = 0,
 };
 
+bpf_map_def SEC("maps") app_cookie_stats_map = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(socket_cookie_stats_key),
+    .value_size = sizeof(app_cookie_stats_value),
+    .max_entries = IFACE_NAME_MAP_SIZE,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
 SEC("cgroup_skb/uid/ingress")
 int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
 {
@@ -95,6 +105,18 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
     if (value_if != NULL) {
         __sync_fetch_and_add(&value_if->rxPackets, 1);
         __sync_fetch_and_add(&value_if->rxBytes, skb->len);
+    }
+
+    socket_cookie_stats_key sock_cookie = bpf_get_socket_cookie(skb);
+    app_cookie_stats_value *value_cookie = bpf_map_lookup_elem(&app_cookie_stats_map, &sock_cookie);
+    if (value_cookie == NULL) {
+        app_cookie_stats_value newValue = {};
+        bpf_map_update_elem(&app_cookie_stats_map, &sock_cookie, &newValue, BPF_NOEXIST);
+        value_cookie = bpf_map_lookup_elem(&app_cookie_stats_map, &sock_cookie);
+    }
+    if (value_cookie != NULL) {
+        __sync_fetch_and_add(&value_cookie->rxPackets, 1);
+        __sync_fetch_and_add(&value_cookie->rxBytes, skb->len);
     }
     return 1;
 }
@@ -140,6 +162,18 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
     if (value_if != NULL) {
         __sync_fetch_and_add(&value_if->txPackets, 1);
         __sync_fetch_and_add(&value_if->txBytes, skb->len);
+    }
+
+    socket_cookie_stats_key sock_cookie = bpf_get_socket_cookie(skb);
+    app_cookie_stats_value *value_cookie = bpf_map_lookup_elem(&app_cookie_stats_map, &sock_cookie);
+    if (value_cookie == NULL) {
+        app_cookie_stats_value newValue = {};
+        bpf_map_update_elem(&app_cookie_stats_map, &sock_cookie, &newValue, BPF_NOEXIST);
+        value_cookie = bpf_map_lookup_elem(&app_cookie_stats_map, &sock_cookie);
+    }
+    if (value_cookie != NULL) {
+        __sync_fetch_and_add(&value_cookie->txPackets, 1);
+        __sync_fetch_and_add(&value_cookie->txBytes, skb->len);
     }
     return 1;
 }
