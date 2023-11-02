@@ -405,16 +405,10 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
     if (!context->IsParseOK()) {
         return false;
     }
-    uint32_t netid = context->netId_;
     addrinfo *res = nullptr;
-    queryparam param;
-    param.qp_type = QEURY_TYPE_NORMAL;
-    param.qp_netid = netid;
-    NETMANAGER_BASE_LOGI("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
-
-    int status = getaddrinfo_ext(context->host_.c_str(), nullptr, nullptr, &res, &param);
+    int status = getaddrinfo(context->host_.c_str(), nullptr, nullptr, &res);
     if (status < 0) {
-        NETMANAGER_BASE_LOGE("getaddrinfo_ext errno %{public}d %{public}s", errno, strerror(errno));
+        NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s", errno, strerror(errno));
         int32_t temp = TransErrorCode(errno);
         context->SetErrorCode(temp);
         return false;
@@ -458,14 +452,8 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext
     if (!context->IsParseOK()) {
         return false;
     }
-    uint32_t netid = context->netId_;
     addrinfo *res = nullptr;
-    queryparam param;
-    param.qp_type = QEURY_TYPE_NORMAL;
-    param.qp_netid = netid;
-    NETMANAGER_BASE_LOGI("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
-
-    int status = getaddrinfo_ext(context->host_.c_str(), nullptr, nullptr, &res, &param);
+    int status = getaddrinfo(context->host_.c_str(), nullptr, nullptr, &res);
     if (status < 0) {
         NETMANAGER_BASE_LOGE("getaddrinfo errno %{public}d %{public}s", errno, strerror(errno));
         int32_t temp = TransErrorCode(errno);

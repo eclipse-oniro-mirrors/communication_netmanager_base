@@ -26,7 +26,6 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "$INNERKITS_ROOT/include",
     "$INNERKITS_ROOT/netconnclient/include",
     "$INNERKITS_ROOT/netconnclient/include/proxy",
-    "$INNERKITS_ROOT/netmanagernative/include",
     "$NETCONNMANAGER_SOURCE_DIR/include/stub",
     "$NETCONNMANAGER_SOURCE_DIR/include",
     "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",

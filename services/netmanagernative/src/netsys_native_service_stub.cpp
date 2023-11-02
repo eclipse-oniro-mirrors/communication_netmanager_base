@@ -25,8 +25,6 @@
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_stub.h"
 #include "securec.h"
-#include "i_net_dns_result_callback.h"
-#include "i_net_dns_health_callback.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
@@ -48,7 +46,6 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitFirewallOpToInterfaceMap();
     InitOpToInterfaceMapExt();
     InitNetDiagOpToInterfaceMap();
-    InitNetDnsDiagOpToInterfaceMap();
     InitStaticArpToInterfaceMap();
     uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
         UID_SAMGR, UID_PARAM_WATCHER, UID_EDM};
@@ -222,18 +219,6 @@ void NetsysNativeServiceStub::InitStaticArpToInterfaceMap()
         &NetsysNativeServiceStub::CmdAddStaticArp;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_STATIC_ARP)] =
         &NetsysNativeServiceStub::CmdDelStaticArp;
-}
-
-void NetsysNativeServiceStub::InitNetDnsDiagOpToInterfaceMap()
-{
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_REGISTER_DNS_RESULT_LISTENER)] =
-        &NetsysNativeServiceStub::CmdRegisterDnsResultListener;
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UNREGISTER_DNS_RESULT_LISTENER)] =
-        &NetsysNativeServiceStub::CmdUnregisterDnsResultListener;
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_REGISTER_DNS_HEALTH_LISTENER)] =
-        &NetsysNativeServiceStub::CmdRegisterDnsHealthListener;
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UNREGISTER_DNS_HEALTH_LISTENER)] =
-        &NetsysNativeServiceStub::CmdUnregisterDnsHealthListener;
 }
 
 int32_t NetsysNativeServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -1435,104 +1420,6 @@ int32_t NetsysNativeServiceStub::CmdDelStaticArp(MessageParcel &data, MessagePar
     }
     NETNATIVE_LOG_D("CmdDelStaticArp has recved result %{public}d", result);
 
-    return result;
-}
-
-int32_t NetsysNativeServiceStub::CmdRegisterDnsResultListener(MessageParcel &data, MessageParcel &reply)
-{
-    int32_t result = NETMANAGER_SUCCESS;
-    sptr<IRemoteObject> remote = data.ReadRemoteObject();
-    if (remote == nullptr) {
-        NETNATIVE_LOGE("Callback ptr is nullptr.");
-        result = IPC_STUB_ERR;
-        reply.WriteInt32(result);
-        return result;
-    }
-
-    sptr<INetDnsResultCallback> callback = iface_cast<INetDnsResultCallback>(remote);
-    if (callback == nullptr) {
-        result = ERR_FLATTEN_OBJECT;
-        reply.WriteInt32(result);
-        return result;
-    }
-
-    uint32_t delay;
-    if (!data.ReadUint32(delay)) {
-        NETNATIVE_LOGE("Read uint32 failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    result = RegisterDnsResultCallback(callback, delay);
-    reply.WriteInt32(result);
-    return result;
-}
-
-int32_t NetsysNativeServiceStub::CmdUnregisterDnsResultListener(MessageParcel &data, MessageParcel &reply)
-{
-    int32_t result = NETMANAGER_SUCCESS;
-    sptr<IRemoteObject> remote = data.ReadRemoteObject();
-    if (remote == nullptr) {
-        NETNATIVE_LOGE("Callback ptr is nullptr.");
-        result = IPC_STUB_ERR;
-        reply.WriteInt32(result);
-        return result;
-    }
-
-    sptr<INetDnsResultCallback> callback = iface_cast<INetDnsResultCallback>(remote);
-    if (callback == nullptr) {
-        result = ERR_FLATTEN_OBJECT;
-        reply.WriteInt32(result);
-        return result;
-    }
-
-    result = UnregisterDnsResultCallback(callback);
-    reply.WriteInt32(result);
-    return result;
-}
-
-int32_t NetsysNativeServiceStub::CmdRegisterDnsHealthListener(MessageParcel &data, MessageParcel &reply)
-{
-    int32_t result = NETMANAGER_SUCCESS;
-    sptr<IRemoteObject> remote = data.ReadRemoteObject();
-    if (remote == nullptr) {
-        NETNATIVE_LOGE("Callback ptr is nullptr.");
-        result = IPC_STUB_ERR;
-        reply.WriteInt32(result);
-        return result;
-    }
-
-    sptr<INetDnsHealthCallback> callback = iface_cast<INetDnsHealthCallback>(remote);
-    if (callback == nullptr) {
-        result = ERR_FLATTEN_OBJECT;
-        reply.WriteInt32(result);
-        return result;
-    }
-
-    result = RegisterDnsHealthCallback(callback);
-    reply.WriteInt32(result);
-    return result;
-}
-
-int32_t NetsysNativeServiceStub::CmdUnregisterDnsHealthListener(MessageParcel &data, MessageParcel &reply)
-{
-    int32_t result = NETMANAGER_SUCCESS;
-    sptr<IRemoteObject> remote = data.ReadRemoteObject();
-    if (remote == nullptr) {
-        NETNATIVE_LOGE("Callback ptr is nullptr.");
-        result = IPC_STUB_ERR;
-        reply.WriteInt32(result);
-        return result;
-    }
-
-    sptr<INetDnsHealthCallback> callback = iface_cast<INetDnsHealthCallback>(remote);
-    if (callback == nullptr) {
-        result = ERR_FLATTEN_OBJECT;
-        reply.WriteInt32(result);
-        return result;
-    }
-
-    result = UnregisterDnsHealthCallback(callback);
-    reply.WriteInt32(result);
     return result;
 }
 } // namespace NetsysNative

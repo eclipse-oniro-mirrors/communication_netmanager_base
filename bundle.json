@@ -64,7 +64,9 @@
         },
         "build": {
             "group_type": {
-                "base_group": [ "//foundation/communication/netmanager_base/interfaces/kits/c/netconnclient:netconn_ndk" ],
+                "base_group": [
+                    "//foundation/communication/netmanager_base/interfaces/kits/c/netconnclient:netconn_ndk"
+                ],
                 "fwk_group": [
                     "//foundation/communication/netmanager_base/utils:net_manager_common",
                     "//foundation/communication/netmanager_base/utils/napi_utils:napi_utils",

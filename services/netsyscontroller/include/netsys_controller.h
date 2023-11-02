@@ -17,8 +17,6 @@
 #define NETSYS_CONTROLLER_H
 
 #include "i_net_diag_callback.h"
-#include "i_net_dns_health_callback.h"
-#include "i_net_dns_result_callback.h"
 #include "i_netsys_controller_service.h"
 #include "refbase.h"
 namespace OHOS {
@@ -773,40 +771,6 @@ public:
     int32_t NetDiagSetInterfaceActiveState(const std::string &ifaceName, bool up);
     int32_t AddStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName);
     int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName);
-
-    /**
-     * Register Dns Result Callback Listener.
-     *
-     * @param callback Callback function
-     * @param timestep Time gap between two callbacks
-     * @return Value the return value of the netsys interface call
-     */
-    int32_t RegisterDnsResultCallback(const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback,
-        uint32_t timeStep);
-
-    /**
-     * Unregister Dns Result Callback Listener.
-     *
-     * @param callback Callback function
-     * @return Value the return value of the netsys interface call
-     */
-    int32_t UnregisterDnsResultCallback(const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback);
-
-    /**
-     * Register Dns Health Callback Listener.
-     *
-     * @param callback Callback function
-     * @return Value the return value of the netsys interface call
-     */
-    int32_t RegisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback);
-
-    /**
-     * Unregister Dns Health Callback Listener.
-     *
-     * @param callback Callback function
-     * @return Value the return value of the netsys interface call
-     */
-    int32_t UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback);
 private:
     NetsysController() = default;
 

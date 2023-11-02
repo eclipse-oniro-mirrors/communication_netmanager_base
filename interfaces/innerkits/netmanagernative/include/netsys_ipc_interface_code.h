@@ -96,10 +96,6 @@ enum class NetsysInterfaceCode {
     NETSYS_NETDIAG_SET_IFACE_ACTIVE_STATE,
     NETSYS_ADD_STATIC_ARP,
     NETSYS_DEL_STATIC_ARP,
-    NETSYS_REGISTER_DNS_RESULT_LISTENER,
-    NETSYS_UNREGISTER_DNS_RESULT_LISTENER,
-    NETSYS_REGISTER_DNS_HEALTH_LISTENER,
-    NETSYS_UNREGISTER_DNS_HEALTH_LISTENER,
 };
 
 enum class NotifyInterfaceCode {
@@ -117,15 +113,6 @@ enum class NotifyInterfaceCode {
 enum class NetDiagInterfaceCode {
     ON_NOTIFY_PING_RESULT = 0,
 };
-
-enum class NetDnsResultInterfaceCode {
-    ON_DNS_RESULT_REPORT = 0,
-};
-
-enum class NetDnsHealthInterfaceCode {
-    ON_DNS_HEALTH_REPORT = 0,
-};
-
 } // namespace NetsysNative
 } // namespace OHOS
 #endif // NETSYS_IPC_INTERFACE_CODE_H

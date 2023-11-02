@@ -21,10 +21,6 @@
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetManagerStandard {
-namespace {
-using namespace OHOS::NetsysNative;
-} // namespace
-	
 void NetsysControllerServiceImpl::Init()
 {
     mockNetsysClient_.RegisterMockApi();
@@ -709,32 +705,6 @@ int32_t NetsysControllerServiceImpl::DelStaticArp(const std::string &ipAddr, con
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::DelStaticArp");
     return netsysClient_.DelStaticArp(ipAddr, macAddr, ifName);
-}
-
-int32_t NetsysControllerServiceImpl::RegisterDnsResultCallback(
-    const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback, uint32_t timeStep)
-{
-    NETMGR_LOG_D("NetsysControllerServiceImpl::RegisterDnsResultListener");
-    return netsysClient_.RegisterDnsResultCallback(callback, timeStep);
-}
-
-int32_t NetsysControllerServiceImpl::UnregisterDnsResultCallback(
-    const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback)
-{
-    NETMGR_LOG_D("NetsysControllerServiceImpl::UnregisterDnsResultListener");
-    return netsysClient_.UnregisterDnsResultCallback(callback);
-}
-
-int32_t NetsysControllerServiceImpl::RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback)
-{
-    NETMGR_LOG_D("NetsysControllerServiceImpl::RegisterDnsResultListener");
-    return netsysClient_.RegisterDnsHealthCallback(callback);
-}
-
-int32_t NetsysControllerServiceImpl::UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback)
-{
-    NETMGR_LOG_D("NetsysControllerServiceImpl::UnregisterDnsResultListener");
-    return netsysClient_.UnregisterDnsHealthCallback(callback);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

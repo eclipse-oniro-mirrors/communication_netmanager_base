@@ -525,26 +525,6 @@ public:
     {
         return 0;
     }
-
-    int32_t RegisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback, uint32_t delay) override
-    {
-        return 0;
-    }
-
-    int32_t UnregisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback) override
-    {
-        return 0;
-    }
-
-    int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) override
-    {
-        return 0;
-    }
-
-    int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) override
-    {
-        return 0;
-    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
