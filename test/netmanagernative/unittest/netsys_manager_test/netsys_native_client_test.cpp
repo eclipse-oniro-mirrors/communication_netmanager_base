@@ -114,7 +114,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest001, TestSize.Level1)
     EXPECT_EQ(ret, -1);
 
     ret = nativeClient_.SetTcpBufferSizes(TCP_BUFFER_SIZES);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest002, TestSize.Level1)

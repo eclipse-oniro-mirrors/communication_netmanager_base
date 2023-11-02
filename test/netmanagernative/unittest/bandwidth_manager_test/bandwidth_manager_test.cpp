@@ -647,5 +647,36 @@ HWTEST_F(BandwidthManagerTest, RemoveAllowedList001, TestSize.Level1)
     ret = g_BandwidthManager->RemoveAllowedList(uid);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
+
+/**
+ * @tc.name: BandwidthManagerBranchTest001
+ * @tc.desc: Test BandwidthManager Branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BandwidthManagerTest, BandwidthManagerBranchTest001, TestSize.Level1)
+{
+    int32_t ret = g_BandwidthManager->InitDefaultBwChainRules();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = g_BandwidthManager->InitDefaultListBoxChainRules();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = g_BandwidthManager->InitDefaultAlertChainRules();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = g_BandwidthManager->InitDefaultRules();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = g_BandwidthManager->IptablesNewChain(ChainType::CHAIN_FORWARD);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = g_BandwidthManager->IptablesDeleteChain(ChainType::CHAIN_FORWARD);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    std::string ifName = "wlan0";
+    int64_t bytes = 0;
+    ret = g_BandwidthManager->SetIfaceQuotaDetail(ifName, bytes);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

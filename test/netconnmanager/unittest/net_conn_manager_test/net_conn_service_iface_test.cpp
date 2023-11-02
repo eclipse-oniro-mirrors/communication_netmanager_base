@@ -61,7 +61,10 @@ HWTEST_F(NetConnServiceIfaceTest, GetIfaceNameByTypeTest001, TestSize.Level1)
 HWTEST_F(NetConnServiceIfaceTest, RegisterNetSupplierTest001, TestSize.Level1)
 {
     uint32_t supplierId = 0;
-    int32_t ret = instance_.UnregisterNetSupplier(supplierId);
+    std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET};
+    int32_t ret = instance_.RegisterNetSupplier(NetBearType::BEARER_CELLULAR, "", netCaps, supplierId);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+    ret = instance_.UnregisterNetSupplier(supplierId);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
