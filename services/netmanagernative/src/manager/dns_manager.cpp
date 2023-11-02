@@ -20,7 +20,6 @@
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "singleton.h"
-#include "dns_quality_diag.h"
 
 #include "dns_manager.h"
 
@@ -126,27 +125,5 @@ int32_t DnsManager::GetAddrInfo(const std::string &hostName, const std::string &
     }
     return dnsGetAddrInfo_->GetAddrInfo(hostName, serverName, hints, netId, res);
 }
-
-int32_t DnsManager::RegisterDnsResultCallback(const sptr<NetsysNative::INetDnsResultCallback> &callback,
-                                              uint32_t timeStep)
-{
-    return DnsQualityDiag::GetInstance().RegisterResultListener(callback, timeStep);
-}
-
-int32_t DnsManager::UnregisterDnsResultCallback(const sptr<NetsysNative::INetDnsResultCallback> &callback)
-{
-    return DnsQualityDiag::GetInstance().UnregisterResultListener(callback);
-}
-
-int32_t DnsManager::RegisterDnsHealthCallback(const sptr<NetsysNative::INetDnsHealthCallback> &callback)
-{
-    return DnsQualityDiag::GetInstance().RegisterHealthListener(callback);
-}
-
-int32_t DnsManager::UnregisterDnsHealthCallback(const sptr<NetsysNative::INetDnsHealthCallback> &callback)
-{
-    return DnsQualityDiag::GetInstance().UnregisterHealthListener(callback);
-}
-
 } // namespace nmd
 } // namespace OHOS

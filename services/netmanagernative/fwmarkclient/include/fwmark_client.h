@@ -50,9 +50,6 @@ private:
     int32_t HandleError(int32_t ret, int32_t errorCode);
     int32_t socketFd_;
 };
-#ifdef __cplusplus
-    extern "C" int32_t BindSocket(int32_t fd, uint32_t netId);
-#endif
 } // namespace nmd
 } // namespace OHOS
 #endif // INCLUDE_FWMARK_CLIENT_H

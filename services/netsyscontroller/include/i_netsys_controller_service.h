@@ -25,11 +25,8 @@
 #include "dns_config_client.h"
 #include "interface_type.h"
 #include "i_net_diag_callback.h"
-#include "i_net_dns_result_callback.h"
-#include "i_net_dns_health_callback.h"
 #include "net_stats_info.h"
 #include "netsys_controller_callback.h"
-#include "netsys_dns_report_callback.h"
 #include "netsys_controller_define.h"
 #include "network_sharing.h"
 #include "uid_range.h"
@@ -781,41 +778,6 @@ public:
                                  const std::string &ifName) = 0;
     virtual int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
                                  const std::string &ifName) = 0;
-
-    /**
-     * Register Dns Result Callback Listener.
-     *
-     * @param callback Callback function
-     * @param timestep Time gap between two callbacks
-     * @return Value the return value of the netsys interface call
-     */
-    virtual int32_t RegisterDnsResultCallback(const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback,
-                                              uint32_t timeStep) = 0;
-
-    /**
-     * Unregister Dns Result Callback Listener.
-     *
-     * @param callback Callback function
-     * @return Value the return value of the netsys interface call
-     */
-    virtual int32_t UnregisterDnsResultCallback(
-        const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback) = 0;
-
-    /**
-     * Register Dns Health Callback Listener.
-     *
-     * @param callback Callback function
-     * @return Value the return value of the netsys interface call
-     */
-    virtual int32_t RegisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback) = 0;
-
-    /**
-     * Unregister Dns Health Callback Listener.
-     *
-     * @param callback Callback function
-     * @return Value the return value of the netsys interface call
-     */
-    virtual int32_t UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -47,15 +47,7 @@ extern "C" {
 #define DEFAULT_SERVER_LENTH 16
 #define DEFAULT_SERVER_NAME 114
 
-enum CommandType {
-    GET_CONFIG = 1,
-    GET_CACHE = 2,
-    SET_CACHE = 3,
-    JUDGE_IPV6 = 4,
-    POST_DNS_RESULT = 5,
-    GET_DEFAULT_NETWORK = 6,
-    BIND_SOCKET = 7
-};
+enum CommandType { GET_CONFIG = 1, GET_CACHE = 2, SET_CACHE = 3, JUDGE_IPV6 = 4 };
 
 struct RequestInfo {
     uint32_t command;
@@ -89,16 +81,6 @@ struct ParamWrapper {
     char *host;
     char *serv;
     struct addrinfo *hint;
-};
-
-typedef int32_t (*FuncNetDnsqueryHook)(int32_t, int32_t, int32_t);
-
-struct QueryParam {
-    int32_t type_;
-    int32_t netid_;
-    int32_t mark_;
-    int32_t flags_;
-    FuncNetDnsqueryHook qhook_;
 };
 
 #ifdef __cplusplus

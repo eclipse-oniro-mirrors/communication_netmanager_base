@@ -19,8 +19,6 @@
 #include "net_mgr_log_wrapper.h"
 #include "netmanager_base_common_utils.h"
 #include "netsys_controller_service_impl.h"
-#include "i_net_dns_result_callback.h"
-#include "i_net_dns_health_callback.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
@@ -988,44 +986,6 @@ int32_t NetsysController::DelStaticArp(const std::string &ipAddr, const std::str
         return NETSYS_NETSYSSERVICE_NULL;
     }
     return netsysService_->DelStaticArp(ipAddr, macAddr, ifName);
-}
-
-int32_t NetsysController::RegisterDnsResultCallback(
-    const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback, uint32_t timeStep)
-{
-    if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("netsysService is null");
-        return NETSYS_NETSYSSERVICE_NULL;
-    }
-    return netsysService_->RegisterDnsResultCallback(callback, timeStep);
-}
-
-int32_t NetsysController::UnregisterDnsResultCallback(
-    const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback)
-{
-    if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("netsysService is null");
-        return NETSYS_NETSYSSERVICE_NULL;
-    }
-    return netsysService_->UnregisterDnsResultCallback(callback);
-}
-
-int32_t NetsysController::RegisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
-{
-    if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("netsysService is null");
-        return NETSYS_NETSYSSERVICE_NULL;
-    }
-    return netsysService_->RegisterDnsHealthCallback(callback);
-}
-
-int32_t NetsysController::UnregisterDnsHealthCallback(const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
-{
-    if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("netsysService is null");
-        return NETSYS_NETSYSSERVICE_NULL;
-    }
-    return netsysService_->UnregisterDnsHealthCallback(callback);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

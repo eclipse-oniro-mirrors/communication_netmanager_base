@@ -26,13 +26,13 @@ namespace {
 using namespace OHOS::NetsysNative;
 }
 
-const char *DNS_DIAG_WORK_THREAD = "DNS_DIAG_WORK_THREAD";
-const char *HW_HICLOUD_ADDR = "connectivitycheck.platform.hicloud.com";
-const uint32_t MAX_RESULT_SIZE = 32;
-const char *URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
-const char *DNS_URL_HEADER = "DnsProbeUrl:";
-const char NEW_LINE_STR = '\n';
-const uint32_t TIME_DELAY = 500;
+constexpr char *DNS_DIAG_WORK_THREAD = "DNS_DIAG_WORK_THREAD";
+constexpr char *HW_HICLOUD_ADDR = "connectivitycheck.platform.hicloud.com";
+constexpr uint32_t MAX_RESULT_SIZE = 32;
+constexpr char* URL_CFG_FILE = "/system/etc/netdetectionurl.conf";
+constexpr char* DNS_URL_HEADER = "DnsProbeUrl:";
+constexpr char  NEW_LINE_STR = '\n';
+constexpr uint32_t TIME_DELAY = 500;
 
 DnsQualityDiag::DnsQualityDiag()
     : defaultNetId_(0),
@@ -110,7 +110,7 @@ int32_t DnsQualityDiag::ParseReportAddr(uint32_t size, AddrInfo* addrinfo, Netsy
 }
 
 int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t pid, int32_t usedtime,
-    char* name, uint32_t size, int32_t failreason, QueryParam queryParam, AddrInfo* addrinfo)
+    std::string* name, uint32_t size, int32_t failreason, QueryParam queryParam, AddrInfo* addrinfo)
 {
     bool reportSizeReachLimit = (report_.size() >= MAX_RESULT_SIZE);
 
@@ -146,9 +146,7 @@ int32_t DnsQualityDiag::RegisterResultListener(const sptr<INetDnsResultCallback>
     if (handler_started != true) {
         handler_started = true;
         handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_REPORT_LOOP, report_delay);
-#if NETSYS_DNS_MONITOR
         handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_MONITOR_LOOP, monitor_loop_delay);
-#endif
     }
     NETNATIVE_LOGI("RegisterResultListener, %{public}d", report_delay);
 
@@ -193,9 +191,7 @@ int32_t DnsQualityDiag::SetLoopDelay(int32_t delay)
 
 int32_t DnsQualityDiag::query_default_host()
 {
-#if NETSYS_DNS_MONITOR
     struct addrinfo *res;
-#endif
     struct queryparam param;
     param.qp_type = 1;
 
@@ -206,11 +202,8 @@ int32_t DnsQualityDiag::query_default_host()
     NETNATIVE_LOGI("query_default_host: %{public}d, ", netid);
 
     param.qp_netid = netid;
-#if NETSYS_DNS_MONITOR
     getaddrinfo_ext(queryAddr.c_str(), NULL, NULL, &res, &param);
     freeaddrinfo(res);
-#endif
-
     return 0;
 }
 
@@ -235,7 +228,7 @@ int32_t DnsQualityDiag::handle_dns_fail()
 
 int32_t DnsQualityDiag::send_dns_report()
 {
-    if (!handler_started) {
+    if (handler_started == 0) {
         report_.clear();
         return 0;
     }
@@ -243,13 +236,14 @@ int32_t DnsQualityDiag::send_dns_report()
     if (report_.size() > 0) {
         std::list<NetsysNative::NetDnsResultReport> reportSend(report_);
         report_.clear();
-        NETNATIVE_LOGE("send_dns_report (%{public}u)", reportSend.size());
+        NETNATIVE_LOGE("send_dns_report (%{public}lu)", reportSend.size());
         for (auto cb: resultListeners_) {
             NETNATIVE_LOGI("send_dns_report cb)");
             cb->OnDnsResultReport(reportSend.size(), reportSend);
         }
+        handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_REPORT_LOOP, report_delay);
     }
-    handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_REPORT_LOOP, report_delay);
+
     return 0;
 }
 
