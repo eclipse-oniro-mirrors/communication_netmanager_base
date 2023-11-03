@@ -144,4 +144,22 @@ int32_t NetsysBpfStats::GetIfaceStats(uint64_t &stats, const StatsType statsType
     return GetNumberFromStatsValue(stats, statsType, ifaceStats);
 }
 
+int32_t NetsysBpfStats::GetCookieStats(uint64_t &stats, StatsType statsType, uint64_t cookie)
+{
+    NETNATIVE_LOGI("GetCookieStats start");
+    stats = 0;
+    BpfMapper<socket_cookie_stats_key, app_cookie_stats_value> appUidCookieStatsMap(APP_COOKIE_STATS_MAP_PATH,
+                                                                                    BPF_F_RDONLY);
+    if (!appUidCookieStatsMap.IsValid()) {
+        NETNATIVE_LOGE("GetCookieStats appUidCookieStatsMap is valid");
+        return STATS_ERR_INVALID_IFACE_NAME_MAP;
+    }
+
+    app_cookie_stats_value cookieStats = {0};
+    if (appUidCookieStatsMap.Read(cookie, cookieStats) < 0) {
+        NETNATIVE_LOGE("GetCookieStats appUidCookieStatsMap read error");
+        return STATS_ERR_READ_BPF_FAIL;
+    }
+    return GetNumberFromStatsValue(stats, statsType, cookieStats);
+}
 } // namespace OHOS::NetManagerStandard

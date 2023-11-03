@@ -74,6 +74,7 @@ public:
      * @return returns 0 for success other as failed.
      */
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
+    int32_t GetCookieStats(uint64_t &stats, StatsType statsType, uint64_t cookie);
 
 private:
     static int32_t GetNumberFromStatsValue(uint64_t &stats, StatsType statsType, const stats_value &value);
