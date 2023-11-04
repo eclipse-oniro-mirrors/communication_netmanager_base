@@ -17,7 +17,7 @@
 #define NATIVE_NET_CONN_API_H
 
 /**
- * @addtogroup NetConn
+ * @addtogroup NetConnection
  * @{
  *
  * @brief Provide C interface for the data network connection module of network management.
@@ -27,11 +27,12 @@
  */
 
 /**
- * @file native_net_conn_api.h
+ * @file net_connection.h
  *
  * @brief Provide C interface for the data network connection module of network management.
  *
  * @syscap SystemCapability.Communication.NetManager.Core
+ * @library libnet_connection.so
  * @since 11
  * @version 1.0
  */
