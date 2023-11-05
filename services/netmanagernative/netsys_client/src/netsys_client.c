@@ -491,7 +491,7 @@ int32_t NetSysPostDnsResult(int netid, char* name, int usedtime, int queryret,
                             struct addrinfo *res, struct QueryParam *param)
 {
     if (name == NULL) {
-    	return -1;
+        return -1;
     }
 
     int sockFd = CreateConnectionToNetSys();
