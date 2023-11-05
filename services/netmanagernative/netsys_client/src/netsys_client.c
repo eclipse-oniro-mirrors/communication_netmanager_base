@@ -490,7 +490,7 @@ static int32_t NetSysPostDnsResultInternal(int sockFd, uint16_t netId, char* nam
 int32_t NetSysPostDnsResult(int netid, char* name, int usedtime, int queryret,
                             struct addrinfo *res, struct QueryParam *param)
 {
-    if (name == nullptr) {
+    if (name == NULL) {
     	return -1;
     }
 
