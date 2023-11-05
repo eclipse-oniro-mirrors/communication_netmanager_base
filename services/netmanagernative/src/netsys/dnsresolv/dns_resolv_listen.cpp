@@ -324,7 +324,7 @@ void DnsResolvListen::ProcCommand(int clientSockFd)
             ProcJudgeIpv6Command(clientSockFd, netId);
             break;
         case POST_DNS_RESULT:
-            // ProcPostDnsResultCommand(clientSockFd, netId);
+            ProcPostDnsResultCommand(clientSockFd, netId);
             break;
         case GET_DEFAULT_NETWORK:
             ProcGetDefaultNetworkCommand(clientSockFd, netId);
