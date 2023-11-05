@@ -247,16 +247,15 @@ void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
     }
 
     if ((queryret == 0) && (ai_size > 0)) {
-        // ai_size = std::min<uint32_t>(MAX_RESULTS, ai_size);
-        // AddrInfo addrInfo[MAX_RESULTS] = {};
-        // if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(addrInfo), sizeof(AddrInfo) * ai_size)) {
-        //     NETNATIVE_LOGE("read errno %{public}d", errno);
-        //     close(clientSockFd);
-        //     return;
-        //}
-        // DnsQualityDiag::GetInstance().ReportDnsResult(netid, uid, pid, usedtime, name,
-        //                                              ai_size, queryret, param, addrInfo);
-	NETNATIVE_LOGI("ProcPostDnsResultCommand end2");
+        ai_size = std::min<uint32_t>(MAX_RESULTS, ai_size);
+        AddrInfo addrInfo[MAX_RESULTS] = {};
+        if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(addrInfo), sizeof(AddrInfo) * ai_size)) {
+            NETNATIVE_LOGE("read errno %{public}d", errno);
+            close(clientSockFd);
+            return;
+        }
+        DnsQualityDiag::GetInstance().ReportDnsResult(netid, uid, pid, usedtime, name,
+                                                      ai_size, queryret, param, addrInfo);
     } else {
         DnsQualityDiag::GetInstance().ReportDnsResult(netid, uid, pid, usedtime, name, 0, queryret, param, nullptr);
     }
@@ -325,7 +324,7 @@ void DnsResolvListen::ProcCommand(int clientSockFd)
             ProcJudgeIpv6Command(clientSockFd, netId);
             break;
         case POST_DNS_RESULT:
-            ProcPostDnsResultCommand(clientSockFd, netId);
+            // ProcPostDnsResultCommand(clientSockFd, netId);
             break;
         case GET_DEFAULT_NETWORK:
             ProcGetDefaultNetworkCommand(clientSockFd, netId);
