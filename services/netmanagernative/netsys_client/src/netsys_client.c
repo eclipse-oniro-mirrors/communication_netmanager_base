@@ -490,6 +490,10 @@ static int32_t NetSysPostDnsResultInternal(int sockFd, uint16_t netId, char* nam
 int32_t NetSysPostDnsResult(int netid, char* name, int usedtime, int queryret,
                             struct addrinfo *res, struct QueryParam *param)
 {
+    if (name == nullptr) {
+    	return -1;
+    }
+
     int sockFd = CreateConnectionToNetSys();
     if (sockFd < 0) {
         DNS_CONFIG_PRINT("NetSysPostDnsResult CreateConnectionToNetSys connect to netsys err: %d", errno);
