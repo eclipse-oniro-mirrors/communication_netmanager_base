@@ -398,6 +398,10 @@ static int32_t NetSysIsIpv6EnableInternal(int sockFd, uint16_t netId, int *enabl
 int NetSysIsIpv6Enable(uint16_t netId)
 {
     int sockFd = CreateConnectionToNetSys();
+    if (sockFd < 0) {
+        DNS_CONFIG_PRINT("NetSysIsIpv6Enable CreateConnectionToNetSys connect to netsys err: %d", errno);
+        return sockFd;
+    }
     int enable = 0;
     int err = NetSysIsIpv6EnableInternal(sockFd, netId, &enable);
     if (err < 0) {
@@ -486,7 +490,15 @@ static int32_t NetSysPostDnsResultInternal(int sockFd, uint16_t netId, char* nam
 int32_t NetSysPostDnsResult(int netid, char* name, int usedtime, int queryret,
                             struct addrinfo *res, struct QueryParam *param)
 {
+    if (name == NULL) {
+        return -1;
+    }
+
     int sockFd = CreateConnectionToNetSys();
+    if (sockFd < 0) {
+        DNS_CONFIG_PRINT("NetSysPostDnsResult CreateConnectionToNetSys connect to netsys err: %d", errno);
+        return sockFd;
+    }
     int err = NetSysPostDnsResultInternal(sockFd, netid, name, usedtime, queryret, res, param);
     if (err < 0) {
         return -1;
