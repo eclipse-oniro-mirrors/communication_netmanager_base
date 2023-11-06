@@ -1093,7 +1093,6 @@ HWTEST_F(NetConnClientTest, NetworkRouteTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
-
 HWTEST_F(NetConnClientTest, InterfaceAddressTest001, TestSize.Level1)
 {
     NetConnManagerAccessToken token;
@@ -1156,6 +1155,23 @@ HWTEST_F(NetConnClientTest, StaticArpTest002, TestSize.Level1)
     ifName = "";
     ret = DelayedSingleton<NetConnClient>::GetInstance()->DelStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+HWTEST_F(NetConnClientTest, NetConnClientBranchTest001, TestSize.Level1)
+{
+    int32_t uid = 0;
+    uint8_t allow = 0;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetInternetPermission(uid, allow);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+
+    uint32_t supplierId = 0;
+    sptr<NetSupplierInfo> netSupplierInfo = nullptr;
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    sptr<NetLinkInfo> netLinkInfo = nullptr;
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->UpdateNetLinkInfo(supplierId, netLinkInfo);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

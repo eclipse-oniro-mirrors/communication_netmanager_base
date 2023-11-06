@@ -109,6 +109,8 @@ HWTEST_F(DataFlowStatisticsTest, NetStatsManager005, TestSize.Level1)
     std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
     int64_t ret = flow->GetUidTxBytes(TEST_UID);
     ASSERT_GE(ret, -1);
+    ret = flow->GetUidRxBytes(TEST_UID);
+    ASSERT_GE(ret, -1);
 }
 
 /**

@@ -36,6 +36,8 @@ namespace {
 using namespace testing::ext;
 constexpr const char *ETH_IFACE_NAME = "lo";
 constexpr int64_t TEST_UID = 1010;
+constexpr int32_t TEST_SOCKETFD = 1;
+
 void GetIfaceNamesFromManager(std::list<std::string> &ifaceNames)
 {
     NetManagerCenter::GetInstance().GetIfaceNames(BEARER_CELLULAR, ifaceNames);
@@ -294,6 +296,26 @@ HWTEST_F(NetStatsClientTest, NetStatsClient007, TestSize.Level1)
     std::vector<NetStatsInfo> infos;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllStatsInfo(infos);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsClientTest, NetStatsClient008, TestSize.Level1)
+{
+    sptr<IRemoteObject::DeathRecipient> deathRecipient =
+        new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient->OnRemoteDied(remote);
+    deathRecipient->OnRemoteDied(remote);
+    uint64_t stats = 0;
+    int32_t sockfd = 0;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetSockfdRxBytes(stats, sockfd);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+    ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetSockfdTxBytes(stats, sockfd);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+
+    ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetSockfdRxBytes(stats, TEST_SOCKETFD);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+    ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetSockfdTxBytes(stats, TEST_SOCKETFD);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
