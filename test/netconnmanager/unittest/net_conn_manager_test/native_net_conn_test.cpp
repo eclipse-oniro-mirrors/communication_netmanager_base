@@ -31,85 +31,11 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
+using namespace testing::ext;
 constexpr const char *LONG_HOST =
     "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
     "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
     "1111111111111111111111111111";
-
-using namespace testing::ext;
-using namespace Security::AccessToken;
-using Security::AccessToken::AccessTokenID;
-
-HapInfoParams testInfoParms = {
-    .userID = 1,
-    .bundleName = "native_net_conn_test",
-    .instIndex = 0,
-    .appIDDesc = "test",
-};
-
-PermissionDef testNetInfoPermDef = {
-    .permissionName = "ohos.permission.GET_NETWORK_INFO",
-    .bundleName = "net_conn_manager_test",
-    .grantMode = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-    .label = "label",
-    .labelId = 1,
-    .description = "Test net connect manager",
-    .descriptionId = 1,
-};
-
-PermissionDef testInternetPermDef = {
-    .permissionName = "ohos.permission.INTERNET",
-    .bundleName = "net_conn_manager_test",
-    .grantMode = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-    .label = "label",
-    .labelId = 1,
-    .description = "Test net connect manager internet",
-    .descriptionId = 1,
-};
-
-PermissionDef testInternalPermDef = {
-    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
-    .bundleName = "net_conn_manager_test",
-    .grantMode = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-    .label = "label",
-    .labelId = 1,
-    .description = "Test net connect manager internet",
-    .descriptionId = 1,
-};
-
-PermissionStateFull testNetInfoState = {
-    .permissionName = "ohos.permission.GET_NETWORK_INFO",
-    .isGeneral = true,
-    .resDeviceID = {"local"},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .grantFlags = {2},
-};
-
-PermissionStateFull testInternetState = {
-    .permissionName = "ohos.permission.INTERNET",
-    .isGeneral = true,
-    .resDeviceID = {"local"},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .grantFlags = {2},
-};
-
-PermissionStateFull testInternalState = {
-    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
-    .isGeneral = true,
-    .resDeviceID = {"local"},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .grantFlags = {2},
-};
-
-HapPolicyParams testInternetPolicyPrams = {
-    .apl = APL_SYSTEM_BASIC,
-    .domain = "test.domain",
-    .permList = {testNetInfoPermDef, testInternetPermDef, testInternalPermDef},
-    .permStateList = {testNetInfoState, testInternetState, testInternalState},
-};
 } // namespace
 
 class NativeNetConnTest : public testing::Test {
@@ -128,25 +54,6 @@ public:
     void LogHttpProxy(const OH_NetConn_HttpProxy httpProxy) const;
     void LogNetLinkInfo(const OH_NetConn_NetLinkInfo info) const;
     void LogNetAllCapabilities(const OH_NetConn_NetAllCapabilities netAllCaps) const;
-};
-
-class AccessToken {
-public:
-    AccessToken() : currentID_(GetSelfTokenID())
-    {
-        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testInternetPolicyPrams);
-        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(tokenIdEx.tokenIDEx);
-    }
-    ~AccessToken()
-    {
-        AccessTokenKit::DeleteToken(accessID_);
-        SetSelfTokenID(currentID_);
-    }
-
-private:
-    AccessTokenID currentID_;
-    AccessTokenID accessID_ = 0;
 };
 
 void NativeNetConnTest::SetUpTestCase() {}
@@ -309,7 +216,7 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest001, TestSize.Level1)
  */
 HWTEST_F(NativeNetConnTest, NativeNetConnTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     int32_t flag = 0;
     int32_t ret = OH_NetConn_HasDefaultNet(&flag);
     std::cout << "has Default Net: " << flag << std::endl;
@@ -337,7 +244,7 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest003, TestSize.Level1)
  */
 HWTEST_F(NativeNetConnTest, NativeNetConnTest004, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     int32_t ret = AddNetwork("ident");
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
     OH_NetConn_NetHandle netHandle = OH_NetConn_NetHandle();
@@ -367,7 +274,7 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest005, TestSize.Level1)
  */
 HWTEST_F(NativeNetConnTest, NativeNetConnTest006, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     int32_t flag = 0;
     int32_t ret = OH_NetConn_HasDefaultNet(&flag);
     std::cout << "is defaultNet metered: " << flag << std::endl;
@@ -395,7 +302,7 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest007, TestSize.Level1)
  */
 HWTEST_F(NativeNetConnTest, NativeNetConnTest008, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     OH_NetConn_NetHandleList netHandleList = OH_NetConn_NetHandleList();
     int32_t ret = OH_NetConn_GetAllNets(&netHandleList);
     for (int32_t i = 0; i < netHandleList.netHandleListSize; i++) {
@@ -425,7 +332,7 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest009, TestSize.Level1)
  */
 HWTEST_F(NativeNetConnTest, NativeNetConnTest010, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     int32_t ret;
     for (int32_t i = 0; i < OH_NETCONN_MAX_NET_SIZE + 1; i++) {
         std::string ident = "ident" + std::to_string(i);
@@ -445,7 +352,7 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest010, TestSize.Level1)
  */
 HWTEST_F(NativeNetConnTest, NativeNetConnTest011, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     int32_t ret = AddNetwork("ident");
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfoSample();
@@ -469,7 +376,7 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest011, TestSize.Level1)
  */
 HWTEST_F(NativeNetConnTest, NativeNetConnTest012, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     OH_NetConn_NetHandle *netHandle = nullptr;
     OH_NetConn_NetLinkInfo info = OH_NetConn_NetLinkInfo();
     int32_t ret = OH_NetConn_GetConnectionProperties(netHandle, &info);
@@ -484,7 +391,7 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest012, TestSize.Level1)
  */
 HWTEST_F(NativeNetConnTest, NativeNetConnTest013, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     int32_t ret = AddNetwork("ident");
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfoSample();
@@ -508,7 +415,7 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest013, TestSize.Level1)
  */
 HWTEST_F(NativeNetConnTest, NativeNetConnTest014, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     int32_t ret = AddNetwork("ident");
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfoSample();
@@ -532,7 +439,7 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest014, TestSize.Level1)
  */
 HWTEST_F(NativeNetConnTest, NativeNetConnTest015, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     int32_t ret = AddNetwork("ident");
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
     sptr<NetLinkInfo> netLinkInfo = GetNetLinkInfoSample();
@@ -557,7 +464,7 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest015, TestSize.Level1)
  */
 HWTEST_F(NativeNetConnTest, NativeNetConnTest016, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     int32_t ret = AddNetwork("ident");
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
     OH_NetConn_NetHandle netHandle = OH_NetConn_NetHandle();
@@ -601,7 +508,7 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest018, TestSize.Level1)
  */
 HWTEST_F(NativeNetConnTest, NativeNetConnTest019, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy validHttpProxy = {"127.0.0.1", 8080, {}};
     int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(validHttpProxy);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
@@ -619,7 +526,7 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest019, TestSize.Level1)
  */
 HWTEST_F(NativeNetConnTest, NativeNetConnTest020, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy validHttpProxy = {LONG_HOST, 8080, {}};
     int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(validHttpProxy);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);

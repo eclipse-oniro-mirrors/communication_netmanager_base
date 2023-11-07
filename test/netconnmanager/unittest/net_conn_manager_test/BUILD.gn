@@ -33,6 +33,7 @@ ohos_unittest("net_conn_manager_test") {
     "net_conn_event_handler_test.cpp",
     "net_conn_hievent_test.cpp",
     "net_conn_manager_test.cpp",
+    "net_conn_security.cpp",
     "net_conn_service_iface_test.cpp",
     "net_conn_service_proxy_test.cpp",
     "net_conn_service_test.cpp",
