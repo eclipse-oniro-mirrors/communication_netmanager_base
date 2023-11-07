@@ -42,7 +42,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 constexpr int32_t INIT_DETECTION_DELAY_MS = 1 * 1000;
-constexpr int32_t MAX_FAILED_DETECTION_DELAY_MS = 5 * 60 * 1000;
+constexpr int32_t MAX_FAILED_DETECTION_DELAY_MS = 10 * 60 * 1000;
 constexpr int32_t CAPTIVE_PORTAL_DETECTION_DELAY_MS = 30 * 1000;
 constexpr int32_t DOUBLE = 2;
 constexpr const char NEW_LINE_STR = '\n';
@@ -107,6 +107,7 @@ void NetMonitor::Detection()
         if (probeResult.IsSuccessful()) {
             NETMGR_LOG_I("Net[%{public}d] probe success", netId_);
             isDetecting_ = false;
+            detectionSteps_ = 0;
             result = VERIFICATION_STATE;
         } else if (probeResult.IsNeedPortal()) {
             NETMGR_LOG_W("Net[%{public}d] need portal", netId_);
@@ -114,10 +115,9 @@ void NetMonitor::Detection()
             result = CAPTIVE_PORTAL_STATE;
         } else {
             NETMGR_LOG_E("Net[%{public}d] probe failed", netId_);
-            detectionDelay_ = static_cast<uint32_t>(INIT_DETECTION_DELAY_MS * DOUBLE * detectionSteps_);
-            if (detectionDelay_ == 0) {
-                detectionDelay_ = INIT_DETECTION_DELAY_MS;
-            } else if (detectionDelay_ >= MAX_FAILED_DETECTION_DELAY_MS) {
+            detectionDelay_ = static_cast<uint32_t>(INIT_DETECTION_DELAY_MS * pow(DOUBLE, detectionSteps_));
+            NETMGR_LOG_I("Net probe failed detectionDelay time [%{public}d]", detectionDelay_);
+            if (detectionDelay_ >= MAX_FAILED_DETECTION_DELAY_MS) {
                 detectionDelay_ = MAX_FAILED_DETECTION_DELAY_MS;
             }
             detectionSteps_++;
