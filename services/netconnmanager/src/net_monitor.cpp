@@ -116,10 +116,10 @@ void NetMonitor::Detection()
         } else {
             NETMGR_LOG_E("Net[%{public}d] probe failed", netId_);
             detectionDelay_ = static_cast<uint32_t>(INIT_DETECTION_DELAY_MS * pow(DOUBLE, detectionSteps_));
-            NETMGR_LOG_I("Net probe failed detectionDelay time [%{public}d]", detectionDelay_);
             if (detectionDelay_ >= MAX_FAILED_DETECTION_DELAY_MS) {
                 detectionDelay_ = MAX_FAILED_DETECTION_DELAY_MS;
             }
+            NETMGR_LOG_I("Net probe failed detectionDelay time [%{public}d]", detectionDelay_);
             detectionSteps_++;
             result = INVALID_DETECTION_STATE;
         }
