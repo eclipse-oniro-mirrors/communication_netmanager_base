@@ -390,6 +390,7 @@ private:
     sptr<INetConnService> NetConnService_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
     std::map<uint32_t, sptr<INetSupplierCallback>> netSupplierCallback_;
+    std::tuple<sptr<NetSpecifier>, sptr<INetConnCallback>, uint32_t> registerConnTuple_ = {nullptr, nullptr, 0};
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

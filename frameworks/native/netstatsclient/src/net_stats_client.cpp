@@ -14,6 +14,7 @@
  */
 
 #include "net_stats_client.h"
+#include <thread>
 
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
@@ -21,6 +22,9 @@
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "sys/socket.h"
+
+static constexpr uint32_t WAIT_FOR_SERVICE_TIME_S = 1;
+static constexpr uint32_t MAX_GET_SERVICE_COUNT = 30;
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -30,11 +34,14 @@ NetStatsClient::~NetStatsClient() = default;
 
 int32_t NetStatsClient::RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
 {
+    NETMGR_LOG_D("RegisterNetStatsCallback client in");
     sptr<INetStatsService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
+    NETMGR_LOG_D("RegisterNetStatsCallback save callback");
+    callback_ = callback;
 
     return proxy->RegisterNetStatsCallback(callback);
 }
@@ -112,6 +119,25 @@ void NetStatsClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 
     local->RemoveDeathRecipient(deathRecipient_);
     netStatsService_ = nullptr;
+    if (callback_ != nullptr) {
+        NETMGR_LOG_D("on remote died recover callback");
+        std::thread t([this]() {
+            uint32_t count = 0;
+            while (GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
+                std::this_thread::sleep_for(std::chrono::seconds(WAIT_FOR_SERVICE_TIME_S));
+                count++;
+            }
+            auto proxy = GetProxy();
+            NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
+            if (proxy != nullptr) {
+                int ret = RegisterNetStatsCallback(callback_);
+                NETMGR_LOG_D("Register result %{public}d", ret);
+            }
+        });
+        std::string threadName = "nestatsGetProxy";
+        pthread_setname_np(t.native_handle(), threadName.c_str());
+        t.detach();
+    }
 }
 
 int32_t NetStatsClient::GetIfaceRxBytes(uint64_t &stats, const std::string &interfaceName)

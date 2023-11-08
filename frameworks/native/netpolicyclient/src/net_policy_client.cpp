@@ -14,11 +14,15 @@
  */
 
 #include "net_policy_client.h"
+#include <thread>
 
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
 #include "net_mgr_log_wrapper.h"
+
+static constexpr uint32_t WAIT_FOR_SERVICE_TIME_S = 1;
+static constexpr uint32_t MAX_GET_SERVICE_COUNT = 30;
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -152,15 +156,37 @@ void NetPolicyClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 
     local->RemoveDeathRecipient(deathRecipient_);
     netPolicyService_ = nullptr;
+    if (callback_ != nullptr) {
+        NETMGR_LOG_D("on remote died recover callback");
+        std::thread t([this]() {
+            uint32_t count = 0;
+            while (GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
+                std::this_thread::sleep_for(std::chrono::seconds(WAIT_FOR_SERVICE_TIME_S));
+                count++;
+            }
+            auto proxy = GetProxy();
+            NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
+            if (proxy != nullptr) {
+                int ret = RegisterNetPolicyCallback(callback_);
+                NETMGR_LOG_D("Register result %{public}d", ret);
+            }
+        });
+        std::string threadName = "netpolicyGetProxy";
+        pthread_setname_np(t.native_handle(), threadName.c_str());
+        t.detach();
+    }
 }
 
 int32_t NetPolicyClient::RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback)
 {
+    NETMGR_LOG_D("RegisterNetPolicyCallback client in");
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
+    NETMGR_LOG_D("RegisterNetPolicyCallback save callback");
+    callback_ = callback;
 
     return proxy->RegisterNetPolicyCallback(callback);
 }

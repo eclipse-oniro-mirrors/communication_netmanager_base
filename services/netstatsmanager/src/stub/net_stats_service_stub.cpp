@@ -103,6 +103,7 @@ int32_t NetStatsServiceStub::OnRegisterNetStatsCallback(MessageParcel &data, Mes
 
     sptr<INetStatsCallback> callback = iface_cast<INetStatsCallback>(remote);
     result = RegisterNetStatsCallback(callback);
+    NETMGR_LOG_D("OnRegisterNetStatsCallback result = [%{public}d]", result);
     if (!reply.WriteInt32(result)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

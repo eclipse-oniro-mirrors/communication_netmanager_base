@@ -42,6 +42,7 @@ int32_t NetStatsServiceProxy::SendRequest(uint32_t code, MessageParcel &data,
     if (!reply.ReadInt32(ret)) {
         return NETMANAGER_ERR_READ_REPLY_FAIL;
     }
+    NETMGR_LOG_D("SendRequest gsw ret = [%{public}d]", ret);
     return ret;
 }
 

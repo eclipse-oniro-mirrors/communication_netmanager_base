@@ -14,6 +14,7 @@
  */
 
 #include "net_conn_client.h"
+#include <thread>
 
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
@@ -26,6 +27,8 @@
 #include "netsys_sock_client.h"
 
 static constexpr const int32_t MIN_VALID_NETID = 100;
+static constexpr uint32_t WAIT_FOR_SERVICE_TIME_S = 1;
+static constexpr uint32_t MAX_GET_SERVICE_COUNT = 30;
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -110,6 +113,8 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<INetConnCallback> &cal
         NETMGR_LOG_E("The parameter of proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
+    NETMGR_LOG_D("RegisterNetConnCallback save callback.");
+    std::get<1>(registerConnTuple_) = callback;
 
     return proxy->RegisterNetConnCallback(callback);
 }
@@ -127,6 +132,10 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpec
         NETMGR_LOG_E("The parameter of proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
+    NETMGR_LOG_D("RegisterNetConnCallback save netSpecifier and callback and timeoutMS.");
+    std::get<0>(registerConnTuple_) = netSpecifier;
+    std::get<1>(registerConnTuple_) = callback;
+    std::get<2>(registerConnTuple_) = timeoutMS;
 
     return proxy->RegisterNetConnCallback(netSpecifier, callback, timeoutMS);
 }
@@ -364,6 +373,37 @@ void NetConnClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 
     local->RemoveDeathRecipient(deathRecipient_);
     NetConnService_ = nullptr;
+
+    if (std::get<1>(registerConnTuple_) != nullptr) {
+        NETMGR_LOG_D("on remote died recover callback");
+        std::thread t([this]() {
+            uint32_t count = 0;
+            while (GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
+                std::this_thread::sleep_for(std::chrono::seconds(WAIT_FOR_SERVICE_TIME_S));
+                count++;
+            }
+            auto proxy = GetProxy();
+            NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
+            if (proxy != nullptr) {
+                sptr<NetSpecifier> specifier = std::get<0>(registerConnTuple_);
+                sptr<INetConnCallback> callback = std::get<1>(registerConnTuple_);
+                uint32_t timeoutMS = std::get<2>(registerConnTuple_);
+                if (specifier != nullptr && timeoutMS != 0) {
+                    int32_t ret = RegisterNetConnCallback(specifier, callback, timeoutMS);
+                    NETMGR_LOG_D("Register result hasNetSpecifier_ and timeoutMS_ %{public}d", ret);
+                } else if (specifier != nullptr) {
+                    int32_t ret = RegisterNetConnCallback(specifier, callback, 0);
+                    NETMGR_LOG_D("Register result hasNetSpecifier_ %{public}d", ret);
+                } else if (callback != nullptr) {
+                    int32_t ret = RegisterNetConnCallback(callback);
+                    NETMGR_LOG_D("Register result %{public}d", ret);
+                }
+            }
+        });
+        std::string threadName = "netconnGetProxy";
+        pthread_setname_np(t.native_handle(), threadName.c_str());
+        t.detach();
+    }
 }
 
 int32_t NetConnClient::IsDefaultNetMetered(bool &isMetered)
