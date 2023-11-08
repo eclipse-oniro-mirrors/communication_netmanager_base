@@ -289,6 +289,26 @@ void ResetFactoryFuzzTest(const uint8_t *data, size_t size)
     CheckParamVaild(dataParcel, data, size);
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_RESET_FACTORY), dataParcel);
 }
+
+void GetCookieRxBytesFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    CheckParamVaild(dataParcel, data, size);
+    uint64_t cookie = GetData<uint64_t>();
+    dataParcel.WriteUint32(cookie);
+
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_RXBYTES), dataParcel);
+}
+
+void GetCookieTxBytesFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    CheckParamVaild(dataParcel, data, size);
+    uint64_t cookie = GetData<uint64_t>();
+    dataParcel.WriteUint32(cookie);
+
+    OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_TXBYTES), dataParcel);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -309,5 +329,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetUidStatsDetailFuzzTest(data, size);
     OHOS::NetManagerStandard::UpdateIfacesStatsFuzzTest(data, size);
     OHOS::NetManagerStandard::ResetFactoryFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetCookieRxBytesFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetCookieTxBytesFuzzTest(data, size);
     return 0;
 }
