@@ -25,6 +25,7 @@ namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
 constexpr int32_t TEST_NETID = 999;
+constexpr const char *TEST_PROXY_HOST = "testHttpProxy";
 constexpr const char *TEST_HTTP_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
 constexpr const char *TEST_HTTPS_URL = "https://connectivitycheck.platform.hicloud.com/generate_204";
 
@@ -52,8 +53,20 @@ void NetHttpProbeTest::TearDown() {}
 
 HWTEST_F(NetHttpProbeTest, SendProbeTest001, TestSize.Level1)
 {
+    instance_->GetHttpProbeResult();
+    instance_->GetHttpsProbeResult();
+    HttpProxy httpProxy = {TEST_PROXY_HOST, 0, {}};
+    NetLinkInfo info;
+    instance_->UpdateNetLinkInfo(info);
+    instance_->UpdateGlobalHttpProxy(httpProxy);
     int32_t ret = instance_->SendProbe(PROBE_HTTP_HTTPS, TEST_HTTP_URL, TEST_HTTPS_URL);
     EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+HWTEST_F(NetHttpProbeTest, HasProbeType001, TestSize.Level1)
+{
+    bool ret = instance_->HasProbeType(ProbeType::PROBE_HTTP, ProbeType::PROBE_HTTP_HTTPS);
+    EXPECT_TRUE(ret);
 }
 
 } // namespace
