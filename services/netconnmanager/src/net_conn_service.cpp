@@ -1673,32 +1673,42 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
     }
 }
 
-void NetConnService::OnNetSysRestart()
+bool NetConnService::IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns)
 {
-    NETMGR_LOG_I("NetConnService::OnNetSysRestart");
-
-    /* 恢复所有满足条件的Supplier */
     NET_ACTIVATE_MAP::iterator iterActive;
     for (iterActive = netActivates_.begin(); iterActive != netActivates_.end(); ++iterActive) {
         if (!iterActive->second) {
             continue;
         }
-
-        NET_SUPPLIER_MAP::iterator iter;
-        for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
-            if (iter->second == nullptr) {
-                continue;
-            }
-            NETMGR_LOG_D("supplier info, supplier[%{public}d, %{public}s], realScore[%{public}d], isConnected[%{public}d]",
-                        iter->second->GetSupplierId(), iter->second->GetNetSupplierIdent().c_str(),
-                        iter->second->GetRealScore(), iter->second->IsConnected());
-            if ((!iter->second->IsConnected()) || (!iterActive->second->MatchRequestAndNetwork(iter->second))) {
-                NETMGR_LOG_D("Supplier[%{public}d] is not connected or not match request.", iter->second->GetSupplierId());
-                continue;
-            }
-
-            iter->second->ResumeNetworkInfo();
+        if (iterActive->second->MatchRequestAndNetwork(ns)) {
+            return true;
         }
+    }
+
+    return false;
+}
+
+void NetConnService::OnNetSysRestart()
+{
+    NETMGR_LOG_I("NetConnService::OnNetSysRestart");
+
+    /* 恢复所有满足条件的Supplier，从netSuppliers_开始 */
+    NET_SUPPLIER_MAP::iterator iter;
+    for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
+        if (iter->second == nullptr) {
+            continue;
+        }
+
+        NETMGR_LOG_D("supplier info, supplier[%{public}d, %{public}s], realScore[%{public}d], isConnected[%{public}d]",
+                    iter->second->GetSupplierId(), iter->second->GetNetSupplierIdent().c_str(),
+                    iter->second->GetRealScore(), iter->second->IsConnected());
+
+        if ((!iter->second->IsConnected()) || (!IsSupplierMatchRequestAndNetwork(iter->second))) {
+            NETMGR_LOG_D("Supplier[%{public}d] is not connected or not match request.", iter->second->GetSupplierId());
+            continue;
+        }
+
+        iter->second->ResumeNetworkInfo();
     }
 
     /* 删除默认路由，清空defaultNetSupplier_ */

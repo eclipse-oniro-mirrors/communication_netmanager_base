@@ -378,6 +378,9 @@ private:
 
     void OnNetSysRestart();
 
+    /* 生产者是否匹配请求 */
+    bool IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns);
+
 private:
     enum ServiceRunningState {
         STATE_STOPPED = 0,
