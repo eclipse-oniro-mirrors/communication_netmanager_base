@@ -120,6 +120,10 @@ bool NetConnService::Init()
         }
         registerToService_ = true;
     }
+
+    /* 增加对netsysnative进程重启监听 */
+    AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
+
     netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
     if (netConnEventRunner_ == nullptr) {
         NETMGR_LOG_E("Create event runner failed.");
@@ -1658,6 +1662,53 @@ int32_t NetConnService::DelStaticArp(const std::string &ipAddr, const std::strin
                                      const std::string &ifName)
 {
     return NetsysController::GetInstance().DelStaticArp(ipAddr, macAddr, ifName);
+}
+
+void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
+{
+    NETMGR_LOG_I("NetConnService::OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
+        NETMGR_LOG_I("NetConnService::OnAddSystemAbility systemAbilityId[%{public}d] netsysnative service restarted", systemAbilityId);
+        OnNetSysRestart();
+    }
+}
+
+void NetConnService::OnNetSysRestart()
+{
+    NETMGR_LOG_I("NetConnService::OnNetSysRestart");
+
+    /* 恢复所有满足条件的Supplier */
+    NET_ACTIVATE_MAP::iterator iterActive;
+    for (iterActive = netActivates_.begin(); iterActive != netActivates_.end(); ++iterActive) {
+        if (!iterActive->second) {
+            continue;
+        }
+
+        NET_SUPPLIER_MAP::iterator iter;
+        for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
+            if (iter->second == nullptr) {
+                continue;
+            }
+            NETMGR_LOG_D("supplier info, supplier[%{public}d, %{public}s], realScore[%{public}d], isConnected[%{public}d]",
+                        iter->second->GetSupplierId(), iter->second->GetNetSupplierIdent().c_str(),
+                        iter->second->GetRealScore(), iter->second->IsConnected());
+            if ((!iter->second->IsConnected()) || (!iterActive->second->MatchRequestAndNetwork(iter->second))) {
+                NETMGR_LOG_D("Supplier[%{public}d] is not connected or not match request.", iter->second->GetSupplierId());
+                continue;
+            }
+
+            iter->second->ResumeNetworkInfo();
+        }
+    }
+
+    /* 删除默认路由，清空defaultNetSupplier_ */
+    if (defaultNetSupplier_ != nullptr) {
+        defaultNetSupplier_->ClearDefault();
+        defaultNetSupplier_ = nullptr;
+    }
+
+    // 寻找最优网络
+    FindBestNetworkForAllRequest();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
