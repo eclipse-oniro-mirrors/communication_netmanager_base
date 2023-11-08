@@ -884,7 +884,7 @@ void AddStaticArpFuzzTest(const uint8_t *data, size_t size)
     std::string ipAddr = GetStringFromData(STR_LEN);
     std::string macAddr = GetStringFromData(STR_LEN);
     std::string ifName = GetStringFromData(STR_LEN);
-    dataParcel.WriteString(ifName);
+    dataParcel.WriteString(ipAddr);
     dataParcel.WriteString(macAddr);
     dataParcel.WriteString(ifName);
 
@@ -901,7 +901,7 @@ void DelStaticArpFuzzTest(const uint8_t *data, size_t size)
     std::string ipAddr = GetStringFromData(STR_LEN);
     std::string macAddr = GetStringFromData(STR_LEN);
     std::string ifName = GetStringFromData(STR_LEN);
-    dataParcel.WriteString(ifName);
+    dataParcel.WriteString(ipAddr);
     dataParcel.WriteString(macAddr);
     dataParcel.WriteString(ifName);
 
