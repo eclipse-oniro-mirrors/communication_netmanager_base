@@ -1,4 +1,10 @@
 [
-    {"name": "OH_NetConn_GetAddrInfo"},
-    {"name": "OH_NetConn_FreeDnsResult"}
+    {
+        "first_introdeced": "11",
+        "name": "OH_NetConn_GetAddrInfo"
+    },
+    {
+        "first_introdeced": "11",
+        "name": "OH_NetConn_FreeDnsResult"
+    }
 ]
