@@ -71,7 +71,7 @@ HWTEST_F(TestDnsResultCallback, OnDnsResultReportTest001, TestSize.Level1)
     std::list<NetsysNative::NetDnsResultReport> netDnsResultReport;
     netDnsResultReport.push_back(netDnsPassReport);
     netDnsResultReport.push_back(netDnsFailReport);
-    int32_t ret = instance_->OnDnsResultReport(netDnsResultReport.size(),netDnsResultReport);
+    int32_t ret = instance_->OnDnsResultReport(netDnsResultReport.size(), netDnsResultReport);
     EXPECT_EQ(ret, 0);
 }
 } // namespace

@@ -40,7 +40,6 @@ public:
 
 void NetHttpProbeTest::SetUpTestCase()
 {
-
     instance_ =
         std::make_shared<NetHttpProbe>(TEST_NETID, NetBearType::BEARER_DEFAULT, NetLinkInfo());
 }
