@@ -832,6 +832,38 @@ sptr<OHOS::NetsysNative::INetsysService> NetsysNativeClient::GetProxy()
     return netsysNativeService_;
 }
 
+void NetsysNativeClient::RegisterNotifyCallback()
+{
+    std::thread t([this]() {
+        uint32_t count = 0;
+        NETMGR_LOG_I("start to GetProxy");
+        while (GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
+            std::this_thread::sleep_for(std::chrono::seconds(WAIT_FOR_SERVICE_TIME_S));
+            count++;
+        }
+        NETMGR_LOG_I("stop GetProxy");
+        auto proxy = GetProxy();
+        NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
+        if (proxy != nullptr) {
+            if (nativeNotifyCallback_ == nullptr) {
+                nativeNotifyCallback_ = new (std::nothrow) NativeNotifyCallback(*this);
+            }
+            NETMGR_LOG_I("call proxy->RegisterNotifyCallback");
+            proxy->RegisterNotifyCallback(nativeNotifyCallback_);
+
+            if (nativeDnsReportCallback_ == nullptr) {
+                nativeDnsReportCallback_ = new (std::nothrow) NativeNetDnsResultCallback(*this);
+            }
+
+            NETMGR_LOG_I("call proxy->RegisterDnsResultCallback");
+            proxy->RegisterDnsResultCallback(nativeDnsReportCallback_, dnsReportTimeStep);
+        }
+    });
+    std::string threadName = "netsysGetProxy";
+    pthread_setname_np(t.native_handle(), threadName.c_str());
+    t.detach();
+}
+
 void NetsysNativeClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     NETMGR_LOG_D("on remote died");
@@ -859,6 +891,9 @@ void NetsysNativeClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
     }
 
     netsysNativeService_ = nullptr;
+
+    /* 【稳定性】网络管理稳定性适配【NetlinkWrapper】从NetsysController过来的注册回调会丢失 */
+    RegisterNotifyCallback();
 }
 
 int32_t NetsysNativeClient::BindNetworkServiceVpn(int32_t socketFd)
