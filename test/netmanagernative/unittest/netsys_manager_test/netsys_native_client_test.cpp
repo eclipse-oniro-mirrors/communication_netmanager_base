@@ -36,6 +36,9 @@ static constexpr const char *IP_ADDR = "172.17.5.245";
 static constexpr const char *INTERFACE_NAME = "interface_name";
 static constexpr const char *REQUESTOR = "requestor";
 static constexpr const char *TCP_BUFFER_SIZES = "524288,1048576,2097152,262144,524288,1048576";
+static constexpr uint64_t TEST_COOKIE = 1;
+static constexpr uint32_t TEST_STATS_TYPE1 = 0;
+static constexpr uint32_t TEST_STATS_TYPE2 = 2;
 const int32_t MTU = 111;
 const int32_t NET_ID = 2;
 const int32_t IFACEFD = 5;
@@ -352,6 +355,15 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest014, TestSize.Level1)
 
     ret = nativeClient_.DelStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, GetCookieStatsTest001, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    int32_t ret = nativeClient_.GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = nativeClient_.GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
