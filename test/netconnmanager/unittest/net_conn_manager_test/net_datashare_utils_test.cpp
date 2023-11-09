@@ -23,43 +23,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-namespace {
 using namespace testing::ext;
-using namespace Security::AccessToken;
-using Security::AccessToken::AccessTokenID;
-
-HapInfoParams testInfoParms = {.bundleName = "net_datashare_utils_test",
-                               .userID = 100,
-                               .instIndex = 0,
-                               .appIDDesc = "test",
-                               .isSystemApp = true};
-
-PermissionDef testPermDef = {
-    .permissionName = "ohos.permission.MANAGE_SECURE_SETTINGS",
-    .bundleName = "net_datashare_utils_test",
-    .grantMode = 1,
-    .label = "label",
-    .labelId = 1,
-    .description = "Test net data share",
-    .descriptionId = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-};
-
-PermissionStateFull testState = {
-    .grantFlags = {2},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .isGeneral = true,
-    .permissionName = "ohos.permission.MANAGE_SECURE_SETTINGS",
-    .resDeviceID = {"local"},
-};
-
-HapPolicyParams testPolicyPrams = {
-    .apl = APL_SYSTEM_BASIC,
-    .domain = "test.domain",
-    .permList = {testPermDef},
-    .permStateList = {testState},
-};
-} // namespace
 
 std::unique_ptr<NetDataShareHelperUtils> netDataShareHelperUtils_ = nullptr;
 class NetDataShareHelperUtilsTest : public testing::Test {
@@ -108,7 +72,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, InsertTest001, TestSize.Level1)
  */
 HWTEST_F(NetDataShareHelperUtilsTest, InsertTest002, TestSize.Level1)
 {
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
+    NetDataShareAccessToken token;
     std::string airplaneMode = "1";
     Uri uri(AIRPLANE_MODE_URI);
     int32_t ret = netDataShareHelperUtils_->Insert(uri, KEY_AIRPLANE_MODE, airplaneMode);
@@ -143,7 +107,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest001, TestSize.Level1)
  */
 HWTEST_F(NetDataShareHelperUtilsTest, UpdateTest002, TestSize.Level1)
 {
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
+    NetDataShareAccessToken token;
     std::string airplaneMode = "1";
     Uri uri(AIRPLANE_MODE_URI);
     int32_t ret = netDataShareHelperUtils_->Update(uri, KEY_AIRPLANE_MODE, airplaneMode);
@@ -175,7 +139,7 @@ HWTEST_F(NetDataShareHelperUtilsTest, QueryTest001, TestSize.Level1)
  */
 HWTEST_F(NetDataShareHelperUtilsTest, QueryTest002, TestSize.Level1)
 {
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
+    NetDataShareAccessToken token;
     std::string airplaneMode;
     Uri uri(AIRPLANE_MODE_URI);
     int32_t ret = netDataShareHelperUtils_->Query(uri, KEY_AIRPLANE_MODE, airplaneMode);

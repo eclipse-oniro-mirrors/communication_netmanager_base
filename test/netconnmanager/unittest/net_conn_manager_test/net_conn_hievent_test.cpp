@@ -18,56 +18,15 @@
 #include <string>
 #include <unistd.h>
 
-#include "accesstoken_kit.h"
-#include "nativetoken_kit.h"
-#include "net_conn_service.h"
-#include "net_conn_security.h"
-#include "net_all_capabilities.h"
-#include "iservice_registry.h"
 #include "i_net_monitor_callback.h"
+#include "net_all_capabilities.h"
+#include "net_conn_security.h"
+#include "net_conn_service.h"
 #include "system_ability_definition.h"
-#include "token_setproc.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-namespace {
 using namespace testing::ext;
-using namespace Security::AccessToken;
-using Security::AccessToken::AccessTokenID;
-
-HapInfoParams testInfoParms = {
-    .userID = 1,
-    .bundleName = "net_conn_hievent_test",
-    .instIndex = 0,
-    .appIDDesc = "test",
-};
-
-PermissionDef testPermDef = {
-    .permissionName = "ohos.permission.GET_NETWORK_INFO",
-    .bundleName = "net_conn_hievent_test",
-    .grantMode = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-    .label = "label",
-    .labelId = 1,
-    .description = "Test net connect maneger HiSysEvent",
-    .descriptionId = 1,
-};
-
-PermissionStateFull testState = {
-    .permissionName = "ohos.permission.GET_NETWORK_INFO",
-    .isGeneral = true,
-    .resDeviceID = {"local"},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .grantFlags = {2},
-};
-
-HapPolicyParams testPolicyPrams = {
-    .apl = APL_SYSTEM_BASIC,
-    .domain = "test.domain",
-    .permList = {testPermDef},
-    .permStateList = {testState},
-};
-} // namespace
 
 class NetConnHiEventTest : public testing::Test {
 public:
@@ -265,7 +224,7 @@ HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_010, TestSize.Level1)
  */
 HWTEST_F(NetConnHiEventTest, NetConnHiEventTest_011, TestSize.Level1)
 {
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testPolicyPrams);
+    NetConnManagerAccessToken token;
     int32_t ret = NetConnService::GetInstance()->RegisterNetConnCallback(nullptr, nullptr, 0);
     EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
