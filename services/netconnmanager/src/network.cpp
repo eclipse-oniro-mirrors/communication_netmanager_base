@@ -597,24 +597,20 @@ void Network::OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, con
 
 bool Network::ResumeNetworkInfo()
 {
-    // 备份netLinkInfo_
     NetLinkInfo nli = netLinkInfo_;
 
-    // 销毁网络
     NETMGR_LOG_D("Network::ResumeNetworkInfo UpdateBasicNetwork false");
     if (!UpdateBasicNetwork(false)) {
         NETMGR_LOG_E("%s release existed basic network failed", __FUNCTION__);
         return false;
     }
 
-    // 创建网络
     NETMGR_LOG_D("Network::ResumeNetworkInfo UpdateBasicNetwork true");
     if (!UpdateBasicNetwork(true)) {
         NETMGR_LOG_E("%s create basic network failed", __FUNCTION__);
         return false;
     }
 
-    // 更新网络链接信息
     NETMGR_LOG_D("Network::ResumeNetworkInfo UpdateNetLinkInfo");
     return UpdateNetLinkInfo(nli);
 }
