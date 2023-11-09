@@ -1667,7 +1667,8 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
 {
     NETMGR_LOG_I("NetConnService::OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
-        NETMGR_LOG_I("NetConnService::OnAddSystemAbility systemAbilityId[%{public}d] netsysnative service restarted", systemAbilityId);
+        NETMGR_LOG_I("NetConnService::OnAddSystemAbility systemAbilityId[%{public}d] netsysnative service restarted",
+            systemAbilityId);
         OnNetSysRestart();
     }
 }
@@ -1698,8 +1699,8 @@ void NetConnService::OnNetSysRestart()
         }
 
         NETMGR_LOG_D("supplier info, supplier[%{public}d, %{public}s], realScore[%{public}d], isConnected[%{public}d]",
-                    iter->second->GetSupplierId(), iter->second->GetNetSupplierIdent().c_str(),
-                    iter->second->GetRealScore(), iter->second->IsConnected());
+            iter->second->GetSupplierId(), iter->second->GetNetSupplierIdent().c_str(),
+            iter->second->GetRealScore(), iter->second->IsConnected());
 
         if ((!iter->second->IsConnected()) || (!IsSupplierMatchRequestAndNetwork(iter->second))) {
             NETMGR_LOG_D("Supplier[%{public}d] is not connected or not match request.", iter->second->GetSupplierId());
