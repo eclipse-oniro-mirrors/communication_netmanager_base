@@ -538,5 +538,17 @@ int32_t NetConnClient::DelStaticArp(const std::string &ipAddr, const std::string
 
     return proxy->DelStaticArp(ipAddr, macAddr, ifName);
 }
+
+int32_t NetConnClient::RegisterSlotType(uint32_t supplierId, std::string type)
+{
+    NETMGR_LOG_I("RegisterSlotType client in.supplierId[%{public}d] type[%{public}s]", supplierId, type.c_str());
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->RegisterSlotType(supplierId, type);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

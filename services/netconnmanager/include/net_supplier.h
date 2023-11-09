@@ -90,6 +90,8 @@ public:
     void ClearDefault();
     void RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
+    void SetSupplierType(std::string type);
+    std::string GetSupplierType();
 
 private:
     NetBearType netSupplierType_;
@@ -107,6 +109,7 @@ private:
     std::shared_ptr<Network> network_ = nullptr;
     sptr<NetHandle> netHandle_ = nullptr;
     bool restrictBackground_ = true;
+    std::string type_ = "";
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

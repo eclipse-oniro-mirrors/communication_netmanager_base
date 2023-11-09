@@ -1325,5 +1325,31 @@ int32_t NetConnServiceProxy::DelStaticArp(const std::string &ipAddr, const std::
 
     return reply.ReadInt32();
 }
+
+int32_t NetConnServiceProxy::RegisterSlotType(uint32_t supplierId, std::string type)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    if (!data.WriteUint32(supplierId)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    if (!data.WriteString(type)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_SLOT_TYPE),
+                                      data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

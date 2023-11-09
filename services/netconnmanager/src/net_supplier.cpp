@@ -409,5 +409,16 @@ void NetSupplier::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
         network_->UpdateGlobalHttpProxy(httpProxy);
     }
 }
+
+void NetSupplier::SetSupplierType(std::string type)
+{
+    NETMGR_LOG_I("supplierId[%{public}d] update type[%{public}s].", supplierId_, type.c_str());
+    type_ = type;
+}
+
+std::string NetSupplier::GetSupplierType()
+{
+    return type_;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

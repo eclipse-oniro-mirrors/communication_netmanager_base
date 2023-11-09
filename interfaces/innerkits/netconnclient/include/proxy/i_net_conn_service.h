@@ -88,6 +88,7 @@ public:
                                  const std::string &ifName) = 0;
     virtual int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr,
                                  const std::string &ifName) = 0;
+    virtual int32_t RegisterSlotType(uint32_t supplierId, std::string type) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
