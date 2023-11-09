@@ -410,7 +410,6 @@ void NetSupplier::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
     }
 }
 
-/* 【稳定性】网络管理稳定性适配 */
 bool NetSupplier::ResumeNetworkInfo()
 {
     if (network_ == nullptr) {

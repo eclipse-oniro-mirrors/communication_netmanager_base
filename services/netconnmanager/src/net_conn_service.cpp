@@ -121,7 +121,6 @@ bool NetConnService::Init()
         registerToService_ = true;
     }
 
-    /* 增加对netsysnative进程重启监听 */
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
 
     netConnEventRunner_ = AppExecFwk::EventRunner::Create(NET_CONN_MANAGER_WORK_THREAD);
@@ -1692,7 +1691,6 @@ void NetConnService::OnNetSysRestart()
 {
     NETMGR_LOG_I("NetConnService::OnNetSysRestart");
 
-    /* 恢复所有满足条件的Supplier，从netSuppliers_开始 */
     NET_SUPPLIER_MAP::iterator iter;
     for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
         if (iter->second == nullptr) {
@@ -1711,13 +1709,11 @@ void NetConnService::OnNetSysRestart()
         iter->second->ResumeNetworkInfo();
     }
 
-    /* 删除默认路由，清空defaultNetSupplier_ */
     if (defaultNetSupplier_ != nullptr) {
         defaultNetSupplier_->ClearDefault();
         defaultNetSupplier_ = nullptr;
     }
 
-    // 寻找最优网络
     FindBestNetworkForAllRequest();
 }
 } // namespace NetManagerStandard
