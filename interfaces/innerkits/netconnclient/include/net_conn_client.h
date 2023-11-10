@@ -382,6 +382,7 @@ private:
     NetConnClient(const NetConnClient&) = delete;
 
     sptr<INetConnService> GetProxy();
+    void RecoverCallback();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
 private:
@@ -390,7 +391,7 @@ private:
     sptr<INetConnService> NetConnService_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
     std::map<uint32_t, sptr<INetSupplierCallback>> netSupplierCallback_;
-    std::tuple<sptr<NetSpecifier>, sptr<INetConnCallback>, uint32_t> registerConnTuple_ = {nullptr, nullptr, 0};
+    std::list<std::tuple<sptr<NetSpecifier>, sptr<INetConnCallback>, uint32_t>> registerConnTupleList_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

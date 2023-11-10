@@ -142,6 +142,25 @@ bool NetConnService::Init()
     int32_t regDnsResult = NetsysController::GetInstance().RegisterDnsResultCallback(dnsResultCallback_, 0);
     NETMGR_LOG_I("Register Dns Result callback result: [%{public}d]", regDnsResult);
 
+    // recover airplane mode yyc
+    auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
+    std::string airplaneMode;
+    Uri uri(AIRPLANE_MODE_URI);
+    int32_t ret = dataShareHelperUtils->Query(uri, KEY_AIRPLANE_MODE, airplaneMode);
+    if (ret == NETMANAGER_SUCCESS) {
+        bool state = atoi(airplaneMode.c_str());
+        NETMGR_LOG_D("recover airplane mode, AirplaneMode is %{public}d", state);
+        SetAirplaneMode(state);
+    }
+
+    // recover httpproxy yyc
+    LoadGlobalHttpProxy();
+    if (!globalHttpProxy_.GetHost().empty()) {
+        NETMGR_LOG_D("globalHttpProxy_ not empty, send broadcast");
+        SendHttpProxyChangeBroadcast(globalHttpProxy_);
+    }
+    UpdateGlobalHttpProxy(globalHttpProxy_);
+
     return true;
 }
 

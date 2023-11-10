@@ -322,6 +322,7 @@ private:
 
 private:
     sptr<INetPolicyService> GetProxy();
+    void RecoverCallback();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
 private:
