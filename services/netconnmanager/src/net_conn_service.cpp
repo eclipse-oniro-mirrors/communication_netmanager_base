@@ -1672,5 +1672,16 @@ int32_t NetConnService::RegisterSlotType(uint32_t supplierId, std::string type)
     supplier->SetSupplierType(type);
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetConnService::GetSlotType(std::string &type)
+{
+    if (defaultNetSupplier_ == nullptr) {
+        NETMGR_LOG_E("supplier is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    type = defaultNetSupplier_->GetSupplierType();
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

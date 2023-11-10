@@ -362,6 +362,7 @@ public:
     int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName);
 
     int32_t RegisterSlotType(uint32_t supplierId, std::string type);
+    int32_t GetSlotType(std::string &type);
 
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {

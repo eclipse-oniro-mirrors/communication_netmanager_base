@@ -83,6 +83,7 @@ private:
     int32_t OnAddStaticArp(MessageParcel &data, MessageParcel &reply);
     int32_t OnDelStaticArp(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterSlotType(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetSlotType(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetConnServiceFuncPer> memberFuncMap_;

@@ -74,6 +74,7 @@ public:
     int32_t AddStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName) override;
     int32_t DelStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName) override;
     int32_t RegisterSlotType(uint32_t supplierId, std::string type) override;
+    int32_t GetSlotType(std::string &type) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

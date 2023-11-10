@@ -40,7 +40,8 @@
       "OHOS::NetManagerStandard::NetConnClient::SetGlobalHttpProxy(OHOS::NetManagerStandard::HttpProxy const&)";
       "OHOS::NetManagerStandard::NetConnClient::GetAppNet(int&)";
       "OHOS::NetManagerStandard::NetConnClient::SetAppNet(int)";
-      "OHOS::NetManagerStandard::NetConnClient::RegisterSlotType(unsigned int, std::string)";
+      "OHOS::NetManagerStandard::NetConnClient::RegisterSlotType(unsigned int, std::__h::basic_string<char, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>)";
+      "OHOS::NetManagerStandard::NetConnClient::GetSlotType(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
       "OHOS::NetManagerStandard::NetConnClient::GetDefaultNet(OHOS::NetManagerStandard::NetHandle&)";
       "OHOS::NetManagerStandard::NetConnClient::GetNetCapabilities(OHOS::NetManagerStandard::NetHandle const&, OHOS::NetManagerStandard::NetAllCapabilities&)";
       "OHOS::NetManagerStandard::NetConnClient::GetAddressesByName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int, std::__h::vector<OHOS::NetManagerStandard::INetAddr, std::__h::allocator<OHOS::NetManagerStandard::INetAddr>>&)";

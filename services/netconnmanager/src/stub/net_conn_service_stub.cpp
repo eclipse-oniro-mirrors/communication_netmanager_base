@@ -130,6 +130,8 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
         &NetConnServiceStub::OnGetNetInterfaceConfiguration, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_SLOT_TYPE)] = {
         &NetConnServiceStub::OnRegisterSlotType, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SLOT_TYPE)] = {
+        &NetConnServiceStub::OnGetSlotType, {Permission::GET_NETWORK_INFO}};
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -1221,6 +1223,19 @@ int32_t NetConnServiceStub::OnRegisterSlotType(MessageParcel &data, MessageParce
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnGetSlotType(MessageParcel &data, MessageParcel &reply)
+{
+    std::string type = "";
+    int32_t ret = GetSlotType(type);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (!reply.WriteString(type)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard

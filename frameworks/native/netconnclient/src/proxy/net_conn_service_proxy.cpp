@@ -1351,5 +1351,28 @@ int32_t NetConnServiceProxy::RegisterSlotType(uint32_t supplierId, std::string t
 
     return reply.ReadInt32();
 }
+
+int32_t NetConnServiceProxy::GetSlotType(std::string &type)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SLOT_TYPE),
+                                      data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+    int32_t ret = reply.ReadInt32();
+    if (ret == NETMANAGER_SUCCESS) {
+        if (reply.ReadString(type)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+    }
+    return ret;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

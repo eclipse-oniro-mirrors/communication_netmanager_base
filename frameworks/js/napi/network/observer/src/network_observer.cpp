@@ -14,11 +14,8 @@
  */
 
 #include "network_observer.h"
+#include "net_conn_client.h"
 #include "network_constant.h"
-
-#if HAS_TELEPHONY
-#include "core_service_client.h"
-#endif
 
 #include "netmanager_base_log.h"
 #include "securec.h"
@@ -32,25 +29,6 @@ static std::mutex OBSERVER_MUTEX;
 namespace OHOS::NetManagerStandard {
 std::map<EventManager *, sptr<NetworkObserver>> g_observerMap;
 
-#if HAS_TELEPHONY
-static std::string CellularTypeToString(Telephony::SignalInformation::NetworkType type)
-{
-    switch (type) {
-        case Telephony::SignalInformation::NetworkType::GSM:
-            return "2g";
-        case Telephony::SignalInformation::NetworkType::CDMA:
-        case Telephony::SignalInformation::NetworkType::WCDMA:
-        case Telephony::SignalInformation::NetworkType::TDSCDMA:
-            return "3g";
-        case Telephony::SignalInformation::NetworkType::LTE:
-            return "4g";
-        default:
-            break;
-    }
-    return "5g";
-}
-#endif
-
 static napi_value MakeNetworkResponse(napi_env env, NetworkType *data)
 {
     auto deleter = [](NetworkType *t) { delete t; };
@@ -63,24 +41,16 @@ static napi_value MakeNetworkResponse(napi_env env, NetworkType *data)
         return obj;
     }
 
-#if HAS_TELEPHONY
     if (netType->bearerTypes.find(BEARER_CELLULAR) != netType->bearerTypes.end()) {
-        std::vector<sptr<Telephony::SignalInformation>> vec;
-        DelayedRefSingleton<Telephony::CoreServiceClient>::GetInstance().GetSignalInfoList(0, vec);
-        if (vec.empty()) {
-            NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, NETWORK_NONE);
-            NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, false);
-            return obj;
+        std::string type = "";
+        int32_t ret = NetConnClient::GetInstance().GetSlotType(type);
+        if (ret != NETMANAGER_SUCCESS || type.empty()) {
+            type = "none";
         }
-
-        std::sort(vec.begin(), vec.end(),
-                  [](const sptr<Telephony::SignalInformation> &info1, const sptr<Telephony::SignalInformation> &info2)
-                      -> bool { return info1->GetSignalLevel() > info2->GetSignalLevel(); });
-        NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, CellularTypeToString(vec[0]->GetNetworkType()));
+        NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, type);
         NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, true);
         return obj;
     }
-#endif
 
     NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, NETWORK_NONE);
     NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, false);

@@ -550,5 +550,16 @@ int32_t NetConnClient::RegisterSlotType(uint32_t supplierId, std::string type)
 
     return proxy->RegisterSlotType(supplierId, type);
 }
+
+int32_t NetConnClient::GetSlotType(std::string &type)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->GetSlotType(type);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

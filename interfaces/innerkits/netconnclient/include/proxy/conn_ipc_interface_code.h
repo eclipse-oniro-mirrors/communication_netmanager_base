@@ -64,6 +64,7 @@ enum class ConnInterfaceCode {
     CMD_NM_ADD_STATIC_ARP,
     CMD_NM_DEL_STATIC_ARP,
     CMD_NM_REGISTER_SLOT_TYPE,
+    CMD_NM_GET_SLOT_TYPE,
     CMD_NM_END,
 };
 
