@@ -45,7 +45,7 @@ public:
 };
 
 void NetSupplierTest::SetUpTestCase()
-{   
+{
     std::set<NetCap> netCaps;
     netCaps.insert(NET_CAPABILITY_INTERNET);
     supplier = new (std::nothrow) NetSupplier(NetBearType::BEARER_ETHERNET, TEST_IDENT, netCaps);
