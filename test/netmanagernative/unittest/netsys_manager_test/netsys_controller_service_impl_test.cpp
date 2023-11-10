@@ -34,6 +34,9 @@ namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
 } // namespace
+static constexpr uint64_t TEST_COOKIE = 1;
+static constexpr uint32_t TEST_STATS_TYPE1 = 0;
+static constexpr uint32_t TEST_STATS_TYPE2 = 2;
 
 class NetsysControllerServiceImplTest : public testing::Test {
 public:
@@ -685,6 +688,16 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
 
     result = instance_->SetBlocking(socketFd, false);
     EXPECT_EQ(result, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, GetCookieStatsTest001, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    auto ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -51,6 +51,9 @@ static constexpr const char *IP_ADDR = "172.17.5.245";
 static constexpr const char *INTERFACE_NAME = "";
 static constexpr const char *IF_NAME = "iface0";
 static constexpr const char *TCP_BUFFER_SIZES = "524288,1048576,2097152,262144,524288,1048576";
+static constexpr uint64_t TEST_COOKIE = 1;
+static constexpr uint32_t TEST_STATS_TYPE1 = 0;
+static constexpr uint32_t TEST_STATS_TYPE2 = 2;
 const int NET_ID = 2;
 const int PERMISSION = 5;
 const int PREFIX_LENGTH = 23;
@@ -1126,6 +1129,16 @@ HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest002, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = NetsysController::GetInstance().NetworkCreateVirtual(netId, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerTest, GetCookieStatsTest001, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    int32_t ret = NetsysController::GetInstance().GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = NetsysController::GetInstance().GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

@@ -1269,6 +1269,20 @@ void NetworkDelUidsFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETWORK_DEL_UIDS), dataParcel);
 }
 
+void GetCookieStatsFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    uint32_t type = GetData<uint32_t>();
+    uint64_t cookie = GetData<uint64_t>();
+
+    dataParcel.WriteUint32(type);
+    dataParcel.WriteUint32(cookie);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_COOKIE_STATS), dataParcel);
+}
+
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
 {
     OHOS::NetManagerStandard::RegisterNotifyCallbackFuzzTest(data, size);
@@ -1303,6 +1317,7 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetUidStatsFuzzTest(data, size);
     OHOS::NetManagerStandard::NetworkRemoveRouteParcelFuzzTest(data, size);
     OHOS::NetManagerStandard::OnInterfaceAddressUpdatedFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetCookieStatsFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -78,6 +78,7 @@ HWTEST_F(NetworkTest, operatorTest001, TestSize.Level1)
     Network work2(netId2, TEST_SUPPLIERID, nullptr, NetBearType::BEARER_ETHERNET, nullptr);
     EXPECT_FALSE(work1 == work2);
 }
+
 HWTEST_F(NetworkTest, GetNetIdTest001, TestSize.Level1)
 {
     int32_t ret = instance_->GetNetId();
@@ -106,11 +107,13 @@ HWTEST_F(NetworkTest, UpdateNetLinkInfoTest001, TestSize.Level1)
     bool ret = instance_->UpdateNetLinkInfo(info);
     EXPECT_TRUE(ret);
 }
+
 HWTEST_F(NetworkTest, GetNetLinkInfoTest001, TestSize.Level1)
 {
     NetLinkInfo ret = instance_->GetNetLinkInfo();
     EXPECT_FALSE(ret.ToString("").empty());
 }
+
 HWTEST_F(NetworkTest, UpdateTest001, TestSize.Level1)
 {
     NetLinkInfo info;
@@ -124,6 +127,7 @@ HWTEST_F(NetworkTest, UpdateTest001, TestSize.Level1)
     int32_t ret = instance_->UnRegisterNetDetectionCallback(callabck_);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
 HWTEST_F(NetworkTest, StartNetDetectionTest001, TestSize.Level1)
 {
     instance_->StartNetDetection(true);
@@ -145,6 +149,26 @@ HWTEST_F(NetworkTest, StartNetDetectionTest001, TestSize.Level1)
     instance_->UpdateNetConnState(NetConnState::NET_CONN_STATE_CONNECTING);
     std::string urlRedirect = "test_redirect";
     instance_->OnHandleNetMonitorResult(NetDetectionStatus::INVALID_DETECTION_STATE, urlRedirect);
+}
+
+HWTEST_F(NetworkTest, NetDetectionForDnsHealthTest001, TestSize.Level1)
+{
+    std::string urlRedirect = "test_redirect";
+    instance_->OnHandleNetMonitorResult(NetDetectionStatus::INVALID_DETECTION_STATE, urlRedirect);
+    instance_->NetDetectionForDnsHealth(true);
+    instance_->OnHandleNetMonitorResult(NetDetectionStatus::VERIFICATION_STATE, urlRedirect);
+    instance_->NetDetectionForDnsHealth(false);
+    bool ret = instance_->IsConnecting();
+    EXPECT_TRUE(ret);
+    instance_->UpdateNetConnState(NetConnState::NET_CONN_STATE_CONNECTED);
+    ret = instance_->IsConnected();
+    EXPECT_TRUE(ret);
+    instance_->UpdateNetConnState(NetConnState::NET_CONN_STATE_DISCONNECTING);
+    ret = instance_->IsConnecting();
+    EXPECT_FALSE(ret);
+    instance_->UpdateNetConnState(NetConnState::NET_CONN_STATE_DISCONNECTED);
+    ret = instance_->IsConnected();
+    EXPECT_FALSE(ret);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

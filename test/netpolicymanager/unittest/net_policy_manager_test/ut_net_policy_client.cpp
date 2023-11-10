@@ -20,10 +20,7 @@
 
 #include <gtest/gtest.h>
 
-#include "accesstoken_kit.h"
 #include "iservice_registry.h"
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
 
 #ifdef GTEST_API_
 #define private public
@@ -33,97 +30,18 @@
 #include "net_policy_client.h"
 #include "net_policy_constants.h"
 #include "net_policy_inner_define.h"
+#include "net_policy_security.h"
 #include "net_policy_service.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
-using namespace Security::AccessToken;
-using Security::AccessToken::AccessTokenID;
 std::shared_ptr<NetPolicyClient> g_netPolicyClient = nullptr;
 constexpr int32_t TRIGER_DELAY_US = 100000;
 constexpr int32_t WAIT_TIME_SECOND_LONG = 10;
 constexpr uint32_t TEST_UID = 10000;
 const std::string TEST_STRING_PERIODDURATION = "M1";
-
-HapInfoParams testInfoParms1 = {.userID = 1,
-                                .bundleName = "net_policy_manager_test",
-                                .instIndex = 0,
-                                .appIDDesc = "test",
-                                .isSystemApp = true};
-
-PermissionDef testPermDef1 = {.permissionName = "ohos.permission.MANAGE_NET_STRATEGY",
-                              .bundleName = "net_policy_manager_test",
-                              .grantMode = 1,
-                              .availableLevel = APL_SYSTEM_BASIC,
-                              .label = "label",
-                              .labelId = 1,
-                              .description = "Test net policy connectivity internal",
-                              .descriptionId = 1};
-
-PermissionStateFull testState1 = {.permissionName = "ohos.permission.MANAGE_NET_STRATEGY",
-                                  .isGeneral = true,
-                                  .resDeviceID = {"local"},
-                                  .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                  .grantFlags = {2}};
-
-HapPolicyParams testPolicyPrams1 = {.apl = APL_SYSTEM_BASIC,
-                                    .domain = "test.domain",
-                                    .permList = {testPermDef1},
-                                    .permStateList = {testState1}};
-
-HapInfoParams testInfoParms2 = {.userID = 1,
-                                .bundleName = "net_policy_manager_test",
-                                .instIndex = 0,
-                                .appIDDesc = "test",
-                                .isSystemApp = true};
-
-PermissionDef testPermDef2 = {.permissionName = "ohos.permission.MANAGE_NET_STRATEGY",
-                              .bundleName = "net_policy_manager_test",
-                              .grantMode = 1,
-                              .availableLevel = APL_SYSTEM_BASIC,
-                              .label = "label",
-                              .labelId = 1,
-                              .description = "Test net policy connectivity internal",
-                              .descriptionId = 1};
-
-PermissionStateFull testState2 = {.permissionName = "ohos.permission.MANAGE_NET_STRATEGY",
-                                  .isGeneral = true,
-                                  .resDeviceID = {"local"},
-                                  .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                  .grantFlags = {2}};
-
-HapPolicyParams testPolicyPrams2 = {.apl = APL_SYSTEM_BASIC,
-                                    .domain = "test.domain",
-                                    .permList = {testPermDef2},
-                                    .permStateList = {testState2}};
-
-HapInfoParams testInfoParms3 = {.userID = 1,
-                                .bundleName = "net_policy_manager_test",
-                                .instIndex = 0,
-                                .appIDDesc = "test",
-                                .isSystemApp = true};
-
-PermissionDef testPermDef3 = {.permissionName = "ohos.permission.MANAGE_NET_STRATEGY",
-                              .bundleName = "net_policy_manager_test",
-                              .grantMode = 1,
-                              .availableLevel = APL_SYSTEM_BASIC,
-                              .label = "label",
-                              .labelId = 1,
-                              .description = "Test net policy connectivity internal",
-                              .descriptionId = 1};
-
-PermissionStateFull testState3 = {.permissionName = "ohos.permission.MANAGE_NET_STRATEGY",
-                                  .isGeneral = true,
-                                  .resDeviceID = {"local"},
-                                  .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                  .grantFlags = {2}};
-
-HapPolicyParams testPolicyPrams3 = {.apl = APL_SYSTEM_BASIC,
-                                    .domain = "test.domain",
-                                    .permList = {testPermDef3},
-                                    .permStateList = {testState3}};
 
 NetQuotaPolicy GetQuota()
 {
@@ -140,25 +58,6 @@ NetQuotaPolicy GetQuota()
     return quotaPolicy;
 }
 } // namespace
-
-class AccessToken {
-public:
-    AccessToken(HapInfoParams &testInfoParms, HapPolicyParams &testPolicyPrams) : currentID_(GetSelfTokenID())
-    {
-        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
-        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(tokenIdEx.tokenIDEx);
-    }
-    ~AccessToken()
-    {
-        AccessTokenKit::DeleteToken(accessID_);
-        SetSelfTokenID(currentID_);
-    }
-
-private:
-    AccessTokenID currentID_;
-    AccessTokenID accessID_;
-};
 
 class UtNetPolicyClient : public testing::Test {
 public:
@@ -193,7 +92,7 @@ sptr<NetPolicyCallbackTest> UtNetPolicyClient::GetINetPolicyCallbackSample() con
  */
 HWTEST_F(UtNetPolicyClient, SetPolicyByUid001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms2, testPolicyPrams2);
+    NetPolicyAccessToken token;
     NetPolicyClient::NetPolicyDeathRecipient deathRecipient(*g_netPolicyClient);
     sptr<ISystemAbilityManager> sam = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     sptr<IRemoteObject> remote = sam->CheckSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
@@ -210,7 +109,7 @@ HWTEST_F(UtNetPolicyClient, SetPolicyByUid001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, GetPolicyByUid001, TestSize.Level1)
 {
-    AccessToken token2(testInfoParms3, testPolicyPrams3);
+    NetPolicyAccessToken token;
     uint32_t policy = 0;
     int32_t ret = g_netPolicyClient->GetPolicyByUid(TEST_UID, policy);
     std::cout << "NetPolicyClient002 GetPolicyByUid policy:" << policy << std::endl;
@@ -225,7 +124,7 @@ HWTEST_F(UtNetPolicyClient, GetPolicyByUid001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, GetUidsByPolicy001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms3, testPolicyPrams3);
+    NetPolicyAccessToken token;
     std::vector<uint32_t> uids;
     int32_t ret = g_netPolicyClient->GetUidsByPolicy(NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND, uids);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
@@ -239,7 +138,7 @@ HWTEST_F(UtNetPolicyClient, GetUidsByPolicy001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, IsUidNetAllowed001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetPolicyAccessToken token;
     bool isAllowed = false;
     int32_t ret = g_netPolicyClient->IsUidNetAllowed(TEST_UID, false, isAllowed);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
@@ -254,7 +153,7 @@ HWTEST_F(UtNetPolicyClient, IsUidNetAllowed001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, IsUidNetAllowed002, TestSize.Level1)
 {
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetPolicyAccessToken token;
     bool isAllowed = false;
     const std::string ifaceName = "iface";
     int32_t ret = g_netPolicyClient->IsUidNetAllowed(TEST_UID, ifaceName, isAllowed);
@@ -270,7 +169,7 @@ HWTEST_F(UtNetPolicyClient, IsUidNetAllowed002, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, IsUidNetAccess001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetPolicyAccessToken token;
     bool isAllowed = false;
     int32_t ret = g_netPolicyClient->IsUidNetAccess(TEST_UID, false, isAllowed);
     std::cout << "NetPolicyClient006 IsUidNetAccess isAllowed:" << isAllowed << std::endl;
@@ -285,7 +184,7 @@ HWTEST_F(UtNetPolicyClient, IsUidNetAccess001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, IsUidNetAccess002, TestSize.Level1)
 {
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetPolicyAccessToken token;
     bool isAllowed = false;
     const std::string ifaceName = "iface";
     int32_t ret = g_netPolicyClient->IsUidNetAccess(TEST_UID, ifaceName, isAllowed);
@@ -301,7 +200,7 @@ HWTEST_F(UtNetPolicyClient, IsUidNetAccess002, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, SetNetQuotaPolicies001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms2, testPolicyPrams2);
+    NetPolicyAccessToken token;
     std::vector<NetQuotaPolicy> quotaPolicies;
     quotaPolicies.push_back(GetQuota());
     int32_t ret = g_netPolicyClient->SetNetQuotaPolicies(quotaPolicies);
@@ -316,7 +215,7 @@ HWTEST_F(UtNetPolicyClient, SetNetQuotaPolicies001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, SetNetQuotaPolicies002, TestSize.Level1)
 {
-    AccessToken token(testInfoParms2, testPolicyPrams2);
+    NetPolicyAccessToken token;
     std::vector<NetQuotaPolicy> quotaPolicies;
     int32_t ret = g_netPolicyClient->SetNetQuotaPolicies(quotaPolicies);
     std::cout << "NetPolicyClient008 SetNetQuotaPolicies ret:" << ret << std::endl;
@@ -330,7 +229,7 @@ HWTEST_F(UtNetPolicyClient, SetNetQuotaPolicies002, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, SetNetQuotaPolicies003, TestSize.Level1)
 {
-    AccessToken token(testInfoParms2, testPolicyPrams2);
+    NetPolicyAccessToken token;
     std::vector<NetQuotaPolicy> quotaPolicies;
     for (int32_t i = 0; i < QUOTA_POLICY_MAX_SIZE; i++) {
         quotaPolicies.push_back(GetQuota());
@@ -348,7 +247,7 @@ HWTEST_F(UtNetPolicyClient, SetNetQuotaPolicies003, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, GetNetQuotaPolicies001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms3, testPolicyPrams3);
+    NetPolicyAccessToken token;
     std::vector<NetQuotaPolicy> quotaPolicies;
     int32_t ret = g_netPolicyClient->GetNetQuotaPolicies(quotaPolicies);
     std::cout << "NetPolicyClient009 GetNetQuotaPolicies ret:" << ret << std::endl;
@@ -363,7 +262,7 @@ HWTEST_F(UtNetPolicyClient, GetNetQuotaPolicies001, TestSize.Level1)
 HWTEST_F(UtNetPolicyClient, SetFactoryPolicy001, TestSize.Level1)
 {
     std::string simId = "0";
-    AccessToken token(testInfoParms2, testPolicyPrams2);
+    NetPolicyAccessToken token;
     int32_t ret = g_netPolicyClient->SetFactoryPolicy(simId);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
@@ -376,7 +275,7 @@ HWTEST_F(UtNetPolicyClient, SetFactoryPolicy001, TestSize.Level1)
 HWTEST_F(UtNetPolicyClient, ResetPolicies001, TestSize.Level1)
 {
     std::string simId = "0";
-    AccessToken token(testInfoParms2, testPolicyPrams2);
+    NetPolicyAccessToken token;
     int32_t ret = g_netPolicyClient->ResetPolicies(simId);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
@@ -388,7 +287,7 @@ HWTEST_F(UtNetPolicyClient, ResetPolicies001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, SetBackgroundPolicy001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms2, testPolicyPrams2);
+    NetPolicyAccessToken token;
     int32_t ret = g_netPolicyClient->SetBackgroundPolicy(true);
     std::cout << "NetPolicyClient012 SetBackgroundPolicy ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
@@ -402,7 +301,7 @@ HWTEST_F(UtNetPolicyClient, SetBackgroundPolicy001, TestSize.Level1)
 HWTEST_F(UtNetPolicyClient, GetBackgroundPolicy001, TestSize.Level1)
 {
     bool backgroundPolicy;
-    AccessToken token(testInfoParms3, testPolicyPrams3);
+    NetPolicyAccessToken token;
     int32_t ret = g_netPolicyClient->GetBackgroundPolicy(backgroundPolicy);
     std::cout << "NetPolicyClient013 GetBackgroundPolicy ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
@@ -416,11 +315,11 @@ HWTEST_F(UtNetPolicyClient, GetBackgroundPolicy001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, GetBackgroundPolicyByUid001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms2, testPolicyPrams2);
+    NetPolicyAccessToken token;
     int32_t ret1 = g_netPolicyClient->SetBackgroundPolicy(false);
     ASSERT_EQ(ret1, NETMANAGER_SUCCESS);
     uint32_t backgroundPolicyOfUid = 0;
-    AccessToken token2(testInfoParms1, testPolicyPrams1);
+
     int32_t ret2 = g_netPolicyClient->GetBackgroundPolicyByUid(TEST_UID, backgroundPolicyOfUid);
     ASSERT_EQ(ret2, NETMANAGER_SUCCESS);
     ASSERT_EQ(backgroundPolicyOfUid, NET_BACKGROUND_POLICY_DISABLE);
@@ -433,7 +332,7 @@ HWTEST_F(UtNetPolicyClient, GetBackgroundPolicyByUid001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, SetSnoozePolicy001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms2, testPolicyPrams2);
+    NetPolicyAccessToken token;
     int32_t ret = g_netPolicyClient->SetSnoozePolicy(0, std::to_string(TRIGER_DELAY_US));
     std::cout << "NetPolicyClient015 SetSnoozePolicy ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
@@ -446,7 +345,7 @@ HWTEST_F(UtNetPolicyClient, SetSnoozePolicy001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, UpdateRemindPolicy001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms2, testPolicyPrams2);
+    NetPolicyAccessToken token;
     int32_t ret =
         g_netPolicyClient->UpdateRemindPolicy(0, std::to_string(TRIGER_DELAY_US), RemindType::REMIND_TYPE_LIMIT);
     std::cout << "NetPolicyClient016 UpdateRemindPolicy ret:" << ret << std::endl;
@@ -460,7 +359,7 @@ HWTEST_F(UtNetPolicyClient, UpdateRemindPolicy001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, SetIdleTrustlist001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetPolicyAccessToken token;
     int32_t ret = g_netPolicyClient->SetIdleTrustlist(TEST_UID, true);
     std::cout << "NetPolicyClient017 SetIdleTrustlist ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
@@ -473,7 +372,7 @@ HWTEST_F(UtNetPolicyClient, SetIdleTrustlist001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, SetDeviceIdleTrustlist001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetPolicyAccessToken token;
     int32_t ret = g_netPolicyClient->SetDeviceIdleTrustlist({TEST_UID}, true);
     std::cout << "NetPolicyClient018 SetDeviceIdleTrustlist ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
@@ -487,7 +386,7 @@ HWTEST_F(UtNetPolicyClient, SetDeviceIdleTrustlist001, TestSize.Level1)
 HWTEST_F(UtNetPolicyClient, GetIdleTrustlist001, TestSize.Level1)
 {
     std::vector<uint32_t> uids;
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetPolicyAccessToken token;
     int32_t ret = g_netPolicyClient->GetIdleTrustlist(uids);
     std::cout << "NetPolicyClient019 GetIdleTrustlist ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
@@ -501,7 +400,7 @@ HWTEST_F(UtNetPolicyClient, GetIdleTrustlist001, TestSize.Level1)
 HWTEST_F(UtNetPolicyClient, GetDeviceIdleTrustlist001, TestSize.Level1)
 {
     std::vector<uint32_t> uids;
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetPolicyAccessToken token;
     int32_t ret = g_netPolicyClient->GetDeviceIdleTrustlist(uids);
     std::cout << "NetPolicyClient020 GetDeviceIdleTrustlist ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
@@ -514,7 +413,7 @@ HWTEST_F(UtNetPolicyClient, GetDeviceIdleTrustlist001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, SetDeviceIdlePolicy001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetPolicyAccessToken token;
     int32_t ret = g_netPolicyClient->SetDeviceIdlePolicy(true);
     std::cout << "NetPolicyClient021 SetDeviceIdlePolicy ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
@@ -522,7 +421,7 @@ HWTEST_F(UtNetPolicyClient, SetDeviceIdlePolicy001, TestSize.Level1)
 
 void PolicyServiceCallback()
 {
-    AccessToken token(testInfoParms2, testPolicyPrams2);
+    NetPolicyAccessToken token;
     usleep(TRIGER_DELAY_US);
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(
         TEST_UID, NetUidPolicy::NET_POLICY_REJECT_METERED_BACKGROUND);
@@ -535,7 +434,7 @@ void PolicyServiceCallback()
  */
 HWTEST_F(UtNetPolicyClient, RegisterNetPolicyCallback001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetPolicyAccessToken token;
     sptr<NetPolicyCallbackTest> callback = GetINetPolicyCallbackSample();
     int32_t ret1 = g_netPolicyClient->RegisterNetPolicyCallback(callback);
     if (ret1 == NETMANAGER_SUCCESS && callback != nullptr) {
@@ -552,7 +451,7 @@ HWTEST_F(UtNetPolicyClient, RegisterNetPolicyCallback001, TestSize.Level1)
     } else {
         std::cout << "NetPolicyClient022 RegisterNetPolicyCallback return fail" << std::endl;
     }
-    AccessToken token2(testInfoParms1, testPolicyPrams1);
+    NetPolicyAccessToken token1;
     int32_t ret2 = g_netPolicyClient->UnregisterNetPolicyCallback(callback);
     ASSERT_EQ(ret2, NETMANAGER_SUCCESS);
 }
@@ -564,7 +463,7 @@ HWTEST_F(UtNetPolicyClient, RegisterNetPolicyCallback001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, GetPowerSaveTrustlist001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetPolicyAccessToken token;
     std::vector<uint32_t> uids;
     int32_t ret = g_netPolicyClient->GetPowerSaveTrustlist(uids);
     std::cout << "NetPolicyClient023 GetPowerSaveTrustlist ret:" << ret << std::endl;
@@ -578,7 +477,7 @@ HWTEST_F(UtNetPolicyClient, GetPowerSaveTrustlist001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, SetPowerSaveTrustlist001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetPolicyAccessToken token;
     std::vector<uint32_t> uids;
     bool isAllowed = true;
     int32_t ret = g_netPolicyClient->SetPowerSaveTrustlist(uids, isAllowed);
@@ -593,7 +492,7 @@ HWTEST_F(UtNetPolicyClient, SetPowerSaveTrustlist001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, SetPowerSavePolicy001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetPolicyAccessToken token;
     bool enable = true;
     int32_t ret = g_netPolicyClient->SetPowerSavePolicy(enable);
     std::cout << "NetPolicyClient025 SetPowerSavePolicy ret:" << ret << std::endl;
@@ -607,7 +506,7 @@ HWTEST_F(UtNetPolicyClient, SetPowerSavePolicy001, TestSize.Level1)
  */
 HWTEST_F(UtNetPolicyClient, CheckPermission001, TestSize.Level1)
 {
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetPolicyAccessToken token;
     int32_t ret = g_netPolicyClient->CheckPermission();
     std::cout << "NetPolicyClient026 CheckPermission ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);

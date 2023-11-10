@@ -15,13 +15,8 @@
 
 #include <gtest/gtest.h>
 
-#include "accesstoken_kit.h"
-#include "iservice_registry.h"
-#include "nativetoken_kit.h"
-#include "system_ability_definition.h"
-#include "token_setproc.h"
-
 #include "http_proxy.h"
+#include "iservice_registry.h"
 #include "net_common_event_test.h"
 #include "net_conn_callback_test.h"
 #include "net_conn_client.h"
@@ -30,6 +25,7 @@
 #include "net_detection_callback_test.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -37,93 +33,6 @@ namespace {
 constexpr int WAIT_TIME_SECOND_LONG = 5;
 constexpr int WAIT_TIME_SECOND_NET_DETECTION = 2;
 using namespace testing::ext;
-using namespace Security::AccessToken;
-using Security::AccessToken::AccessTokenID;
-
-HapInfoParams testInfoParms = {
-    .userID = 1,
-    .bundleName = "net_conn_manager_test",
-    .instIndex = 0,
-    .appIDDesc = "test",
-};
-
-PermissionDef testNetInfoPermDef = {
-    .permissionName = "ohos.permission.GET_NETWORK_INFO",
-    .bundleName = "net_conn_manager_test",
-    .grantMode = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-    .label = "label",
-    .labelId = 1,
-    .description = "Test net connect manager",
-    .descriptionId = 1,
-};
-
-PermissionDef testInternetPermDef = {
-    .permissionName = "ohos.permission.INTERNET",
-    .bundleName = "net_conn_manager_test",
-    .grantMode = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-    .label = "label",
-    .labelId = 1,
-    .description = "Test net connect manager internet",
-    .descriptionId = 1,
-};
-
-PermissionDef testInternalPermDef = {
-    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
-    .bundleName = "net_conn_manager_test",
-    .grantMode = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-    .label = "label",
-    .labelId = 1,
-    .description = "Test net connect manager internet",
-    .descriptionId = 1,
-};
-
-PermissionStateFull testNetInfoState = {
-    .permissionName = "ohos.permission.GET_NETWORK_INFO",
-    .isGeneral = true,
-    .resDeviceID = {"local"},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .grantFlags = {2},
-};
-
-PermissionStateFull testInternetState = {
-    .permissionName = "ohos.permission.INTERNET",
-    .isGeneral = true,
-    .resDeviceID = {"local"},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .grantFlags = {2},
-};
-
-PermissionStateFull testInternalState = {
-    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
-    .isGeneral = true,
-    .resDeviceID = {"local"},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .grantFlags = {2},
-};
-
-HapPolicyParams testNetInfoPolicyPrams = {
-    .apl = APL_SYSTEM_BASIC,
-    .domain = "test.domain",
-    .permList = {testNetInfoPermDef},
-    .permStateList = {testNetInfoState},
-};
-
-HapPolicyParams testInternalPolicyPrams = {
-    .apl = APL_SYSTEM_BASIC,
-    .domain = "test.domain",
-    .permList = {testInternalPermDef},
-    .permStateList = {testInternalState},
-};
-
-HapPolicyParams testInternetPolicyPrams = {
-    .apl = APL_SYSTEM_BASIC,
-    .domain = "test.domain",
-    .permList = {testNetInfoPermDef, testInternetPermDef, testInternalPermDef},
-    .permStateList = {testNetInfoState, testInternetState, testInternalState},
-};
 } // namespace
 
 std::shared_ptr<NetCommonEventTest> netCommonEventTest_ = nullptr;
@@ -268,7 +177,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager001, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager002, TestSize.Level1)
 {
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
+    NetConnManagerAccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
     std::string ident = "ident01";
@@ -284,7 +193,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager002, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager003, TestSize.Level1)
 {
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
+    NetConnManagerAccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
     std::string ident = "ident02";
@@ -304,7 +213,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager003, TestSize.Level1)
 
 HWTEST_F(NetConnManagerTest, NetConnManager004, TestSize.Level1)
 {
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
+    NetConnManagerAccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
     std::string ident = "ident03";
@@ -328,7 +237,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager004, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager005, TestSize.Level1)
 {
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
+    NetConnManagerAccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
 
@@ -349,7 +258,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager005, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager006, TestSize.Level1)
 {
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternetPolicyPrams);
+    NetConnManagerAccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET};
 
@@ -392,7 +301,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager008, TestSize.Level1)
     if (proxy == nullptr) {
         return;
     }
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternetPolicyPrams);
+    NetConnManagerAccessToken token;
     std::list<sptr<NetHandle>> netList;
     int32_t result = client.GetAllNets(netList);
     std::cout << "netIdList size:" << netList.size() << std::endl;
@@ -485,7 +394,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager011, TestSize.Level1)
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
 
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
+    NetConnManagerAccessToken token;
     std::string ident = "ident";
     uint32_t supplierId1 = 0;
     int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId1);
@@ -527,7 +436,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager012, TestSize.Level1)
     NetBearType bearerTypeEth = BEARER_ETHERNET;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET};
 
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternetPolicyPrams);
+    NetConnManagerAccessToken token;
     std::string ident = "ident";
     uint32_t supplierId1 = 0;
     int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerTypeCel, ident, netCaps, supplierId1);
@@ -564,7 +473,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager013, TestSize.Level1)
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
 
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternetPolicyPrams);
+    NetConnManagerAccessToken token;
     std::string ident = "ident";
     uint32_t supplierId = 0;
     int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
@@ -587,7 +496,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
 
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternetPolicyPrams);
+    NetConnManagerAccessToken token;
     std::string ident = "ident";
     uint32_t supplierId = 0;
     int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
@@ -616,7 +525,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager015, TestSize.Level1)
 {
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testNetInfoPolicyPrams);
+    NetConnManagerAccessToken token;
     bool isMetered = false;
     int32_t result = NetConnClient::GetInstance().IsDefaultNetMetered(isMetered);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
@@ -687,7 +596,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager016, TestSize.Level1)
     if (proxy == nullptr) {
         return;
     }
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternetPolicyPrams);
+    NetConnManagerAccessToken token;
     int32_t result;
     std::list<sptr<NetHandle>> netList;
     result = client.GetAllNets(netList);
@@ -781,7 +690,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager019, TestSize.Level1)
     uint16_t port = 8080;
     std::list<std::string> exclusionList = {"example.com", "::1", "localhost"};
     HttpProxy httpProxy = {host, port, exclusionList};
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
+    NetConnManagerNotSystemToken token;
     int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NETMANAGER_ERR_NOT_SYSTEM_CALL);
 
@@ -805,7 +714,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager020, TestSize.Level1)
     uint16_t port = 0;
     std::list<std::string> exclusionList = {};
     HttpProxy httpProxy = {host, port, exclusionList};
-    OHOS::NetManagerStandard::AccessToken token(testInfoParms, testInternalPolicyPrams);
+    NetConnManagerNotSystemToken token;
     int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NETMANAGER_ERR_NOT_SYSTEM_CALL);
 
