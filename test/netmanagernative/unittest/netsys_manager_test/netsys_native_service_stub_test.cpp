@@ -33,6 +33,8 @@ namespace {
 using namespace testing::ext;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 } // namespace
+static constexpr uint64_t TEST_COOKIE = 1;
+
 class NetDiagCallbackServiceStubTest : public IRemoteStub<INetDiagCallback> {
 public:
     NetDiagCallbackServiceStubTest()
@@ -1659,6 +1661,25 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdStaticArp001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_NONE);
 
     ret = notifyStub_->CmdDelStaticArp(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetCookieStats001, TestSize.Level1)
+{
+    uint32_t type = 0;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteUint32(type)) {
+        return;
+    }
+    if (!data.WriteUint64(TEST_COOKIE)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdGetCookieStats(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 } // namespace NetsysNative
