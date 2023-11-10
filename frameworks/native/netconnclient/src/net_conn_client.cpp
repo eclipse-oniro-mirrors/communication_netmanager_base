@@ -163,7 +163,7 @@ int32_t NetConnClient::UnregisterNetConnCallback(const sptr<INetConnCallback> &c
         }
     }
 
-    return 
+    return ret;
 }
 
 int32_t NetConnClient::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo)
