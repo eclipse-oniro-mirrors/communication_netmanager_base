@@ -50,6 +50,7 @@ ohos_unittest("net_conn_manager_test") {
     "net_supplier_info_test.cpp",
     "network_test.cpp",
     "route_test.cpp",
+    "net_supplier_test.cpp",
   ]
 
   include_dirs = [

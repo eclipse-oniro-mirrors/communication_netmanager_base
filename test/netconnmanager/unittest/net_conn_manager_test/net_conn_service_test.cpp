@@ -38,6 +38,9 @@
 #include "net_http_proxy_tracker.h"
 #include "net_interface_callback_stub.h"
 
+#include "system_ability_definition.h"
+
+
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
@@ -168,6 +171,23 @@ void NetConnServiceTest::TearDownTestCase() {}
 void NetConnServiceTest::SetUp() {}
 
 void NetConnServiceTest::TearDown() {}
+
+HWTEST_F(NetConnServiceTest, OnAddSystemAbilityTest001, TestSize.Level1)
+{
+    std::string deviceId = "dev1";
+    NetConnService::GetInstance()->OnAddSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID, deviceId);
+}
+
+HWTEST_F(NetConnServiceTest, IsSupplierMatchRequestAndNetworkTest001, TestSize.Level1)
+{
+    sptr<NetSupplier> supplier = nullptr;
+    bool ret = NetConnService::GetInstance()->IsSupplierMatchRequestAndNetwork(supplier);
+    EXPECT_FALSE(ret);
+
+    NetConnService::GetInstance()->CreateDefaultRequest();
+    ret = NetConnService::GetInstance()->IsSupplierMatchRequestAndNetwork(supplier);
+    EXPECT_FALSE(ret);
+}
 
 HWTEST_F(NetConnServiceTest, SystemReadyTest001, TestSize.Level1)
 {

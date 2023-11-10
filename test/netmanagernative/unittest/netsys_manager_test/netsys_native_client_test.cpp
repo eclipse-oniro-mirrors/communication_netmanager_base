@@ -353,5 +353,10 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest014, TestSize.Level1)
     ret = nativeClient_.DelStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeClientTest, RegisterNotifyCallbackTest015, TestSize.Level1)
+{
+    nativeClient_.RegisterNotifyCallback();
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
