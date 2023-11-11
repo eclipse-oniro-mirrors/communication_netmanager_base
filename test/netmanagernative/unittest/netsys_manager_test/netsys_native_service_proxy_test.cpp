@@ -20,6 +20,7 @@
 
 #include "conn_manager.h"
 #include "net_manager_constants.h"
+#include "net_stats_constants.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_proxy.h"
 #include "network_permission.h"
@@ -255,6 +256,37 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetCookieStatsTest001, TestSize.Level1)
 
     ret = netsysNativeService->GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, NetsysNativeServiceProxyBranchTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+
+    sptr<OHOS::NetsysNative::INetDnsResultCallback> resultCallback = nullptr;
+    uint32_t timeStep = 0;
+    int32_t ret = netsysNativeService->RegisterDnsResultCallback(resultCallback, timeStep);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = netsysNativeService->UnregisterDnsResultCallback(resultCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    sptr<OHOS::NetsysNative::INetDnsHealthCallback> healthCallback = nullptr;
+    ret = netsysNativeService->RegisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = netsysNativeService->UnregisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    sptr<INotifyCallback> notifyCallback =nullptr;
+    ret = netsysNativeService->UnRegisterNotifyCallback(notifyCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    uint64_t stats = 0;
+    uint32_t type = 0;
+    uint64_t cookie = 0;
+    ret = netsysNativeService->GetCookieStats(stats, type, cookie);
+    EXPECT_EQ(ret, NetManagerStandard::NetStatsResultCode::STATS_ERR_READ_BPF_FAIL);
 }
 } // namespace NetsysNative
 } // namespace OHOS

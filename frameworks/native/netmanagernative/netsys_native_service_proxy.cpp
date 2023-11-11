@@ -308,7 +308,7 @@ int32_t NetsysNativeServiceProxy::UnRegisterNotifyCallback(sptr<INotifyCallback>
     MessageParcel data;
     if (callback == nullptr) {
         NETNATIVE_LOGE("The parameter of callback is nullptr");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
     if (!WriteInterfaceToken(data)) {
@@ -2017,6 +2017,10 @@ int32_t NetsysNativeServiceProxy::RegisterDnsResultCallback(
     const sptr<OHOS::NetsysNative::INetDnsResultCallback> &callback, uint32_t timeStep)
 {
     NETNATIVE_LOGI("Begin to RegisterDnsResultCallback");
+    if (callback == nullptr) {
+        NETNATIVE_LOGE("INetDnsResultCallback is nullptr");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -2049,6 +2053,10 @@ int32_t NetsysNativeServiceProxy::UnregisterDnsResultCallback(
     const sptr<OHOS::NetsysNative::INetDnsResultCallback> &callback)
 {
     NETNATIVE_LOGI("Begin to UnregisterDnsResultCallback");
+    if (callback == nullptr) {
+        NETNATIVE_LOGE("INetDnsResultCallback is nullptr");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -2078,6 +2086,10 @@ int32_t NetsysNativeServiceProxy::RegisterDnsHealthCallback(
     const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
 {
     NETNATIVE_LOGI("Begin to RegisterDnsHealthCallback");
+    if (callback == nullptr) {
+        NETNATIVE_LOGE("INetDnsHealthCallback is nullptr");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -2107,6 +2119,10 @@ int32_t NetsysNativeServiceProxy::UnregisterDnsHealthCallback(
     const sptr<OHOS::NetsysNative::INetDnsHealthCallback> &callback)
 {
     NETNATIVE_LOGI("Begin to UnregisterDnsHealthCallback");
+    if (callback == nullptr) {
+        NETNATIVE_LOGE("INetDnsHealthCallback is nullptr");
+        return NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
