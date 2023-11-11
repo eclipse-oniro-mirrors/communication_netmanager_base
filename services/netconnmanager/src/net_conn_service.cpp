@@ -149,17 +149,6 @@ bool NetConnService::Init()
 
 void NetConnService::RecoverInfo()
 {
-    // recover airplane mode
-    auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
-    std::string airplaneMode;
-    Uri uri(AIRPLANE_MODE_URI);
-    int32_t ret = dataShareHelperUtils->Query(uri, KEY_AIRPLANE_MODE, airplaneMode);
-    if (ret == NETMANAGER_SUCCESS) {
-        bool state = atoi(airplaneMode.c_str());
-        NETMGR_LOG_D("recover airplane mode, AirplaneMode is %{public}d", state);
-        SetAirplaneMode(state);
-    }
-
     // recover httpproxy
     LoadGlobalHttpProxy();
     if (!globalHttpProxy_.GetHost().empty()) {
