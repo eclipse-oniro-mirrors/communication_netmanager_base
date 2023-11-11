@@ -114,7 +114,7 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<INetConnCallback> &cal
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     int32_t ret = proxy->RegisterNetConnCallback(callback);
-    if (ret == 0) {
+    if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("RegisterNetConnCallback success, save callback.");
         registerConnTupleList_.push_back(std::make_tuple(nullptr, callback, 0));
     }
@@ -136,7 +136,7 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpec
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     int32_t ret = proxy->RegisterNetConnCallback(netSpecifier, callback, timeoutMS);
-    if (ret == 0) {
+    if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("RegisterNetConnCallback success, save netSpecifier and callback and timeoutMS.");
         registerConnTupleList_.push_back(std::make_tuple(netSpecifier, callback, timeoutMS));
     }
@@ -153,10 +153,10 @@ int32_t NetConnClient::UnregisterNetConnCallback(const sptr<INetConnCallback> &c
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     int32_t ret = proxy->UnregisterNetConnCallback(callback);
-    if (ret == 0) {
+    if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("UnregisterNetConnCallback success, delete callback.");
         for (auto it = registerConnTupleList_.begin(); it != registerConnTupleList_.end(); ++it) {
-            if(std::get<1>(*it)->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
+            if (std::get<1>(*it)->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr()) {
                 registerConnTupleList_.erase(it);
                 break;
             }
@@ -421,7 +421,7 @@ void NetConnClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
         std::thread t([this]() {
             RecoverCallback();
         });
-        std::string threadName = "netconnGetProxy";
+        std::string threadName = "netconnRecoverCallback";
         pthread_setname_np(t.native_handle(), threadName.c_str());
         t.detach();
     }

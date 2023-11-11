@@ -41,7 +41,7 @@ int32_t NetStatsClient::RegisterNetStatsCallback(const sptr<INetStatsCallback> &
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     int32_t ret = proxy->RegisterNetStatsCallback(callback);
-    if (ret == 0) {
+    if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("RegisterNetStatsCallback success, save callback");
         callback_ = callback;
     }
@@ -57,7 +57,7 @@ int32_t NetStatsClient::UnregisterNetStatsCallback(const sptr<INetStatsCallback>
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     int32_t ret = proxy->UnregisterNetStatsCallback(callback);
-    if (ret == 0) {
+    if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("UnRegisterNetStatsCallback success, delete callback");
         callback_ = nullptr;
     }
@@ -147,7 +147,7 @@ void NetStatsClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
         std::thread t([this]() {
             RecoverCallback();
         });
-        std::string threadName = "nestatsGetProxy";
+        std::string threadName = "nestatsRecoverCallback";
         pthread_setname_np(t.native_handle(), threadName.c_str());
         t.detach();
     }

@@ -176,7 +176,7 @@ void NetPolicyClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
         std::thread t([this]() {
             RecoverCallback();
         });
-        std::string threadName = "netpolicyGetProxy";
+        std::string threadName = "netpolicyRecoverCallback";
         pthread_setname_np(t.native_handle(), threadName.c_str());
         t.detach();
     }
@@ -191,7 +191,7 @@ int32_t NetPolicyClient::RegisterNetPolicyCallback(const sptr<INetPolicyCallback
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     int32_t ret = proxy->RegisterNetPolicyCallback(callback);
-    if (ret == 0) {
+    if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("RegisterNetPolicyCallback success, save callback");
         callback_ = callback;
     }
@@ -207,7 +207,7 @@ int32_t NetPolicyClient::UnregisterNetPolicyCallback(const sptr<INetPolicyCallba
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     int32_t ret = proxy->UnregisterNetPolicyCallback(callback);
-    if (ret == 0) {
+    if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("UnRegisterNetPolicyCallback success, delete callback");
         callback_ = nullptr;
     }
