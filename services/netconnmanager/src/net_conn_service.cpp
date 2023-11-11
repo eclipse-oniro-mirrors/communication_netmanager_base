@@ -154,8 +154,8 @@ void NetConnService::RecoverInfo()
     if (!globalHttpProxy_.GetHost().empty()) {
         NETMGR_LOG_D("globalHttpProxy_ not empty, send broadcast");
         SendHttpProxyChangeBroadcast(globalHttpProxy_);
+        UpdateGlobalHttpProxy(globalHttpProxy_);
     }
-    UpdateGlobalHttpProxy(globalHttpProxy_);
 }
 
 int32_t NetConnService::SystemReady()
