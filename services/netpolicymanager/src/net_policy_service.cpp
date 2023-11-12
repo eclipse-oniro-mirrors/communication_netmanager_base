@@ -93,6 +93,7 @@ int32_t NetPolicyService::Dump(int32_t fd, const std::vector<std::u16string> &ar
 void NetPolicyService::Init()
 {
     NETMGR_LOG_D("NetPolicyService Init");
+    AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
     handler_->PostTask(
         [this]() {
             serviceComm_ = (std::make_unique<NetPolicyServiceCommon>()).release();
@@ -273,6 +274,20 @@ int32_t NetPolicyService::GetDumpMessage(std::string &message)
 int32_t NetPolicyService::CheckPermission()
 {
     return NETMANAGER_SUCCESS;
+}
+
+void NetPolicyService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
+{
+    NETMGR_LOG_I("NetPolicyService::OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
+        OnNetSysRestart();
+    }
+}
+
+void NetPolicyService::OnNetSysRestart()
+{
+    NETMGR_LOG_I("NetPolicyService::OnNetSysRestart");
+    netPolicyRule_->TransPolicyToRule();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
