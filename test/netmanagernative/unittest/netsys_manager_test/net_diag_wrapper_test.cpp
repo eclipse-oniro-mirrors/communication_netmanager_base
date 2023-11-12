@@ -47,7 +47,11 @@ const uint32_t PING_WAIT_MS = 1;
 const std::string IFACENAME1 = "eth0";
 const std::string IFACENAME2 = "eth1";
 const std::string IFACENAME3 = "wlan0";
+const std::string TEST_STRING_VALUE = "test";
 bool g_waitPingSync = false;
+const uint16_t TEST_UINT16_VALUE = 1;
+const uint32_t TEST_UINT32_VALUE = 2;
+
 class NetDiagCallbackStubTest : public IRemoteStub<INetDiagCallback> {
 public:
     NetDiagCallbackStubTest()
@@ -495,6 +499,91 @@ HWTEST_F(NetDiagWrapperTest, RunInterFaceConfigCommandTest003, TestSize.Level1)
 
     ret = netDiagWrapper->SetInterfaceActiveState(IFACENAME2, true);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetDiagWrapperTest, NetDiagWrapperBranchTest001, TestSize.Level1)
+{
+    PingIcmpResponseInfo responseInfo;
+    responseInfo.bytes_ = TEST_UINT16_VALUE;
+    responseInfo.icmpSeq_ = TEST_UINT16_VALUE;
+    responseInfo.ttl_ = TEST_UINT16_VALUE;
+    responseInfo.costTime_ = TEST_UINT32_VALUE;
+    responseInfo.from_ = TEST_STRING_VALUE;
+    Parcel parcel;
+    auto ret = responseInfo.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ret = responseInfo.Unmarshalling(parcel, responseInfo);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetDiagWrapperTest, NetDiagWrapperBranchTest002, TestSize.Level1)
+{
+    NetDiagPingResult pingResult;
+    pingResult.host_ = TEST_STRING_VALUE;
+    pingResult.ipAddr_ = TEST_STRING_VALUE;
+    pingResult.dateSize_ = TEST_UINT16_VALUE;
+    pingResult.payloadSize_ = TEST_UINT16_VALUE;
+    pingResult.transCount_ = TEST_UINT16_VALUE;
+    pingResult.recvCount_ = TEST_UINT16_VALUE;
+    Parcel parcel;
+    auto ret = pingResult.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ret = pingResult.Unmarshalling(parcel, pingResult);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetDiagWrapperTest, NetDiagWrapperBranchTest003, TestSize.Level1)
+{
+    NetDiagRouteTable routeTable;
+    routeTable.destination_ = TEST_STRING_VALUE;
+    routeTable.gateway_ = TEST_STRING_VALUE;
+    routeTable.mask_ = TEST_STRING_VALUE;
+    routeTable.iface_ = TEST_STRING_VALUE;
+    routeTable.flags_ = TEST_STRING_VALUE;
+    routeTable.metric_ = TEST_UINT32_VALUE;
+    routeTable.ref_ = TEST_UINT32_VALUE;
+    routeTable.use_ = TEST_UINT32_VALUE;
+    Parcel parcel;
+    auto ret = routeTable.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ret = routeTable.Unmarshalling(parcel, routeTable);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetDiagWrapperTest, NetDiagWrapperBranchTest004, TestSize.Level1)
+{
+    NetDiagUnixSocketInfo socketInfo;
+    socketInfo.refCnt_ = TEST_UINT16_VALUE;
+    socketInfo.inode_ = TEST_UINT32_VALUE;
+    socketInfo.protocol_ = TEST_STRING_VALUE;
+    socketInfo.flags_ = TEST_STRING_VALUE;
+    socketInfo.type_ = TEST_STRING_VALUE;
+    socketInfo.state_ = TEST_STRING_VALUE;
+    socketInfo.path_ = TEST_STRING_VALUE;
+    Parcel parcel;
+    auto ret = socketInfo.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ret = socketInfo.Unmarshalling(parcel, socketInfo);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetDiagWrapperTest, NetDiagWrapperBranchTest005, TestSize.Level1)
+{
+    NeyDiagNetProtoSocketInfo protoSocketInfo;
+    protoSocketInfo.protocol_ = TEST_STRING_VALUE;
+    protoSocketInfo.localAddr_ = TEST_STRING_VALUE;
+    protoSocketInfo.foreignAddr_ = TEST_STRING_VALUE;
+    protoSocketInfo.state_ = TEST_STRING_VALUE;
+    protoSocketInfo.user_ = TEST_STRING_VALUE;
+    protoSocketInfo.programName_ = TEST_STRING_VALUE;
+    protoSocketInfo.recvQueue_ = TEST_UINT16_VALUE;
+    protoSocketInfo.sendQueue_ = TEST_UINT16_VALUE;
+    protoSocketInfo.inode_ = TEST_UINT32_VALUE;
+    Parcel parcel;
+    auto ret = protoSocketInfo.Marshalling(parcel);
+    EXPECT_TRUE(ret);
+    ret = protoSocketInfo.Unmarshalling(parcel, protoSocketInfo);
+    EXPECT_TRUE(ret);
 }
 } // namespace NetsysNative
 } // namespace OHOS

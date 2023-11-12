@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,37 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef NETMANAGER_NET_CONN_SECURITY_H
-#define NETMANAGER_NET_CONN_SECURITY_H
+#ifndef NET_POLICY_SECURITY_H
+#define NET_POLICY_SECURITY_H
 
 #include "accesstoken_kit.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-class NetConnManagerAccessToken {
+class NetPolicyAccessToken {
 public:
-    NetConnManagerAccessToken();
-    ~NetConnManagerAccessToken();
-
-private:
-    Security::AccessToken::AccessTokenID currentID_ = 0;
-    Security::AccessToken::AccessTokenID accessID_ = 0;
-};
-
-class NetConnManagerNotSystemToken {
-public:
-    NetConnManagerNotSystemToken();
-    ~NetConnManagerNotSystemToken();
-
-private:
-    Security::AccessToken::AccessTokenID currentID_ = 0;
-    Security::AccessToken::AccessTokenID accessID_ = 0;
-};
-
-class NetDataShareAccessToken {
-public:
-    NetDataShareAccessToken();
-    ~NetDataShareAccessToken();
+    NetPolicyAccessToken();
+    ~NetPolicyAccessToken();
 
 private:
     Security::AccessToken::AccessTokenID currentID_ = 0;
@@ -51,4 +31,4 @@ private:
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // NETMANAGER_NET_CONN_SECURITY_H
+#endif // NET_POLICY_SECURITY_H

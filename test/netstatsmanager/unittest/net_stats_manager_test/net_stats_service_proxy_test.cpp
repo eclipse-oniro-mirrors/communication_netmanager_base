@@ -37,6 +37,7 @@ namespace {
 constexpr const char *ETH_IFACE_NAME = "lo";
 constexpr int64_t TEST_UID = 1010;
 constexpr uint64_t STATS_CODE = 100;
+static constexpr uint64_t TEST_COOKIE = 1;
 class MockNetIRemoteObject : public IRemoteObject {
 public:
     MockNetIRemoteObject() : IRemoteObject(u"mock_i_remote_object") {}
@@ -761,6 +762,52 @@ HWTEST_F(NetStatsServiceProxyTest, UpdateStatsDataTest003, TestSize.Level1)
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
     NetStatsServiceProxy instance_(remoteObj_);
     EXPECT_EQ(instance_.UpdateStatsData(), NETSYS_SUCCESS);
+}
+
+HWTEST_F(NetStatsServiceProxyTest, GetCookieRxBytesTest001, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    NetStatsServiceProxy instance_(nullptr);
+    EXPECT_EQ(instance_.GetCookieRxBytes(stats, TEST_COOKIE), NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+HWTEST_F(NetStatsServiceProxyTest, GetCookieRxBytesTest002, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    remoteObj_->SetErrorCode(NETMANAGER_ERROR);
+    NetStatsServiceProxy instance_(remoteObj_);
+    EXPECT_EQ(instance_.GetCookieRxBytes(stats, TEST_COOKIE), NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+HWTEST_F(NetStatsServiceProxyTest, GetCookieRxBytesTest003, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
+    NetStatsServiceProxy instance_(remoteObj_);
+    EXPECT_EQ(instance_.GetCookieRxBytes(stats, TEST_COOKIE), NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+HWTEST_F(NetStatsServiceProxyTest, GetCookieTxBytesTest001, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    NetStatsServiceProxy instance_(nullptr);
+    EXPECT_EQ(instance_.GetCookieTxBytes(stats, TEST_COOKIE), NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+HWTEST_F(NetStatsServiceProxyTest, GetCookieTxBytesTest002, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    remoteObj_->SetErrorCode(NETMANAGER_ERROR);
+    NetStatsServiceProxy instance_(remoteObj_);
+    EXPECT_EQ(instance_.GetCookieTxBytes(stats, TEST_COOKIE), NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+HWTEST_F(NetStatsServiceProxyTest, GetCookieTxBytesTest003, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
+    NetStatsServiceProxy instance_(remoteObj_);
+    EXPECT_EQ(instance_.GetCookieTxBytes(stats, TEST_COOKIE), NETMANAGER_ERR_READ_REPLY_FAIL);
 }
 
 /**

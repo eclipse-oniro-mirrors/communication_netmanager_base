@@ -28,7 +28,7 @@ namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
 constexpr uint32_t TEST_NETID = 999;
-// constexpr int32_t TEST_SOCKETFD = -1;
+
 class TestMonitorCallback : public INetMonitorCallback {
 public:
     inline void OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect) override

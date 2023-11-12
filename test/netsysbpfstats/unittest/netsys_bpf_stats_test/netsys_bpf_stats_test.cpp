@@ -43,6 +43,7 @@ static constexpr uint32_t TEST_UID_IF1 = 11001;
 static constexpr uint32_t TEST_UID_IF2 = 11002;
 static constexpr uint32_t TEST_BYTES0 = 11;
 static constexpr uint32_t STATS_TYPE_INVALID_VALUE = 4;
+static constexpr uint64_t TEST_COOKIE1 = 1;
 static constexpr const char *TEST_IFACE_NAME_WLAN0 = "wlan0";
 static constexpr const char *TEST_IFACE_NAME_LO = "lo";
 static constexpr const char *TEST_IFACE_NAME_DUMMY0 = "dummy0";
@@ -261,6 +262,38 @@ HWTEST_F(NetsysBpfStatsTest, LoadAndUidIfaceStats, TestSize.Level1)
     std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
     EXPECT_EQ(bpfStats->GetAllStatsInfo(stats), NETSYS_SUCCESS);
+}
+
+HWTEST_F(NetsysBpfStatsTest, LoadAndCookieStats, TestSize.Level1)
+{
+    BpfMapper<socket_cookie_stats_key, app_cookie_stats_value> appCookieStatsMap(APP_COOKIE_STATS_MAP_PATH, BPF_ANY);
+    EXPECT_TRUE(appCookieStatsMap.IsValid());
+    app_cookie_stats_value value;
+    value.rxBytes = TEST_BYTES0;
+    value.rxPackets = TEST_BYTES0;
+    value.txBytes = TEST_BYTES0;
+    value.txPackets = TEST_BYTES0;
+    auto ret = appCookieStatsMap.Write(TEST_COOKIE1, value, BPF_ANY);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+
+    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    uint64_t stats = 0;
+    EXPECT_EQ(bpfStats->GetCookieStats(stats, StatsType::STATS_TYPE_RX_BYTES, TEST_COOKIE1), NETSYS_SUCCESS);
+    EXPECT_EQ(stats, TEST_BYTES0);
+    EXPECT_EQ(bpfStats->GetCookieStats(stats, StatsType::STATS_TYPE_RX_PACKETS, TEST_COOKIE1), NETSYS_SUCCESS);
+    EXPECT_EQ(stats, TEST_BYTES0);
+    EXPECT_EQ(bpfStats->GetCookieStats(stats, StatsType::STATS_TYPE_TX_BYTES, TEST_COOKIE1), NETSYS_SUCCESS);
+    EXPECT_EQ(stats, TEST_BYTES0);
+    EXPECT_EQ(bpfStats->GetCookieStats(stats, StatsType::STATS_TYPE_TX_PACKETS, TEST_COOKIE1), NETSYS_SUCCESS);
+    EXPECT_EQ(stats, TEST_BYTES0);
+
+    ret = appCookieStatsMap.Delete(TEST_COOKIE1);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+
+    std::vector<socket_cookie_stats_key> keys;
+    keys.emplace_back(TEST_COOKIE1);
+    ret = appCookieStatsMap.Clear(keys);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetsysBpfStatsTest, UnloadElf, TestSize.Level1)

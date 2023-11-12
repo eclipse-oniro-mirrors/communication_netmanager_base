@@ -19,76 +19,19 @@
 
 #include <gtest/gtest.h>
 
-#include "accesstoken_kit.h"
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
-
 #include "data_flow_statistics.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_callback_test.h"
 #include "net_stats_client.h"
 #include "net_stats_constants.h"
+#include "net_stats_security.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
-using namespace Security::AccessToken;
-using Security::AccessToken::AccessTokenID;
 constexpr uint32_t TEST_UID = 1001;
 const std::string ETH_IFACE_NAME = "eth0";
-HapInfoParams testInfoParms = {
-    .userID = 1,
-    .bundleName = "net_stats_manager_test",
-    .instIndex = 0,
-    .appIDDesc = "test",
-    .isSystemApp = true,
-};
-
-PermissionDef testPermDef = {
-    .permissionName = "ohos.permission.GET_NETWORK_STATS",
-    .bundleName = "net_stats_manager_test",
-    .grantMode = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-    .label = "label",
-    .labelId = 1,
-    .description = "Test net stats connectivity internal",
-    .descriptionId = 1,
-};
-
-PermissionStateFull testState = {
-    .permissionName = "ohos.permission.GET_NETWORK_STATS",
-    .isGeneral = true,
-    .resDeviceID = {"local"},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .grantFlags = {2},
-};
-
-HapPolicyParams testPolicyPrams = {
-    .apl = APL_SYSTEM_BASIC,
-    .domain = "test.domain",
-    .permList = {testPermDef},
-    .permStateList = {testState},
-};
-
-class AccessToken {
-public:
-    AccessToken() : currentID_(GetSelfTokenID())
-    {
-        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
-        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(tokenIdEx.tokenIDEx);
-    }
-    ~AccessToken()
-    {
-        AccessTokenKit::DeleteToken(accessID_);
-        SetSelfTokenID(currentID_);
-    }
-
-private:
-    AccessTokenID currentID_;
-    AccessTokenID accessID_ = 0;
-};
 } // namespace
 class DataFlowStatisticsTest : public testing::Test {
 public:
@@ -166,6 +109,8 @@ HWTEST_F(DataFlowStatisticsTest, NetStatsManager005, TestSize.Level1)
     std::unique_ptr<DataFlowStatistics> flow = std::make_unique<DataFlowStatistics>();
     int64_t ret = flow->GetUidTxBytes(TEST_UID);
     ASSERT_GE(ret, -1);
+    ret = flow->GetUidRxBytes(TEST_UID);
+    ASSERT_GE(ret, -1);
 }
 
 /**
@@ -227,7 +172,7 @@ HWTEST_F(DataFlowStatisticsTest, NetStatsManager010, TestSize.Level1)
  */
 HWTEST_F(DataFlowStatisticsTest, NetStatsManager011, TestSize.Level1)
 {
-    AccessToken token;
+    NetStatsSecurityAccessToken token;
     sptr<NetStatsCallbackTest> callback = GetINetStatsCallbackSample();
     int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->RegisterNetStatsCallback(callback);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);

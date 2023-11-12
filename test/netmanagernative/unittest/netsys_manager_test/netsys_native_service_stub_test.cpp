@@ -33,6 +33,8 @@ namespace {
 using namespace testing::ext;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 } // namespace
+static constexpr uint64_t TEST_COOKIE = 1;
+
 class NetDiagCallbackServiceStubTest : public IRemoteStub<INetDiagCallback> {
 public:
     NetDiagCallbackServiceStubTest()
@@ -1634,16 +1636,13 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdNetDiagGetInterfaceConfigCommandForResT
     EXPECT_EQ(ret1, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysNativeServiceStubTest, CmdStaticArp001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceStubTest, CmdAddStaticArp001, TestSize.Level1)
 {
     std::string ipAddr = "192.168.1.100";
     std::string macAddr = "aa:bb:cc:dd:ee:ff";
     std::string ifName = "wlan0";
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
     if (!data.WriteString(ipAddr)) {
         return;
     }
@@ -1657,8 +1656,46 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdStaticArp001, TestSize.Level1)
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdAddStaticArp(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
+}
 
-    ret = notifyStub_->CmdDelStaticArp(data, reply);
+HWTEST_F(NetsysNativeServiceStubTest, CmdDelStaticArp001, TestSize.Level1)
+{
+    std::string ipAddrTest = "192.168.1.100";
+    std::string macAddrTest = "aa:bb:cc:dd:ee:ff";
+    std::string ifNameTest = "wlan0";
+
+    MessageParcel data;
+    if (!data.WriteString(ipAddrTest)) {
+        return;
+    }
+    if (!data.WriteString(macAddrTest)) {
+        return;
+    }
+    if (!data.WriteString(ifNameTest)) {
+        return;
+    }
+
+    MessageParcel reply;
+    auto ret = notifyStub_->CmdDelStaticArp(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetCookieStats001, TestSize.Level1)
+{
+    uint32_t type = 0;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteUint32(type)) {
+        return;
+    }
+    if (!data.WriteUint64(TEST_COOKIE)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdGetCookieStats(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 } // namespace NetsysNative

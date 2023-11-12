@@ -15,20 +15,19 @@
 
 #include <gtest/gtest.h>
 
-#include "accesstoken_kit.h"
 #include "message_parcel.h"
 #ifdef GTEST_API_
 #define private public
 #endif
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
+#include "net_conn_security.h"
 #include "net_conn_types.h"
 #include "net_interface_callback_stub.h"
 #include "net_interface_config.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "network.h"
-#include "token_setproc.h"
 
 #include "i_net_conn_callback.h"
 #include "iremote_stub.h"
@@ -37,8 +36,6 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
-using namespace Security::AccessToken;
-using Security::AccessToken::AccessTokenID;
 
 constexpr const char *TEST_IPV4_ADDR = "127.0.0.1";
 constexpr const char *TEST_IPV6_ADDR = "240C:1:1:1::1";
@@ -59,76 +56,6 @@ constexpr const char *TEST_LONG_EXCLUSION_LIST =
     "www.test8.com,www.test9.com,www.test10.com,www.test11.com,www.test12.com,www.test12.com,www.test12.com,www.test13."
     "com,www.test14.com,www.test15.com,www.test16.com,www.test17.com,www.test18.com,www.test19.com,www.test20.com";
 constexpr const char *TEST_IFACE = "eth0";
-
-HapInfoParams testInfoParms = {.bundleName = "net_conn_manager_test",
-                               .userID = 1,
-                               .instIndex = 0,
-                               .appIDDesc = "test",
-                               .isSystemApp = true};
-
-PermissionDef testPermDef = {
-    .permissionName = "ohos.permission.GET_NETWORK_INFO",
-    .bundleName = "net_conn_manager_test",
-    .grantMode = 1,
-    .label = "label",
-    .labelId = 1,
-    .description = "Test net connect maneger",
-    .descriptionId = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-};
-
-PermissionDef testInternalPermDef = {
-    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
-    .bundleName = "net_conn_manager_test",
-    .grantMode = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-    .label = "label",
-    .labelId = 1,
-    .description = "Test net connect manager internal",
-    .descriptionId = 1,
-};
-
-PermissionDef testInternetPermDef = {
-    .permissionName = "ohos.permission.INTERNET",
-    .bundleName = "net_conn_manager_test",
-    .grantMode = 1,
-    .availableLevel = APL_SYSTEM_BASIC,
-    .label = "label",
-    .labelId = 1,
-    .description = "Test net connect manager internet",
-    .descriptionId = 1,
-};
-
-PermissionStateFull testState = {
-    .grantFlags = {2},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .isGeneral = true,
-    .permissionName = "ohos.permission.GET_NETWORK_INFO",
-    .resDeviceID = {"local"},
-};
-
-PermissionStateFull testInternalState = {
-    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
-    .isGeneral = true,
-    .resDeviceID = {"local"},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .grantFlags = {2},
-};
-
-PermissionStateFull testInternetState = {
-    .permissionName = "ohos.permission.INTERNET",
-    .isGeneral = true,
-    .resDeviceID = {"local"},
-    .grantStatus = {PermissionState::PERMISSION_GRANTED},
-    .grantFlags = {2},
-};
-
-HapPolicyParams testPolicyPrams = {
-    .apl = APL_SYSTEM_BASIC,
-    .domain = "test.domain",
-    .permList = {testPermDef, testInternalPermDef, testInternetPermDef},
-    .permStateList = {testState, testInternalState, testInternetState},
-};
 } // namespace
 
 class NetSupplierCallbackBaseTest : public NetSupplierCallbackBase {
@@ -144,24 +71,6 @@ public:
     {
         return NETMANAGER_SUCCESS;
     };
-};
-class AccessToken {
-public:
-    AccessToken() : currentID_(GetSelfTokenID())
-    {
-        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
-        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(tokenIdEx.tokenIDEx);
-    }
-    ~AccessToken()
-    {
-        AccessTokenKit::DeleteToken(accessID_);
-        SetSelfTokenID(currentID_);
-    }
-
-private:
-    AccessTokenID currentID_;
-    AccessTokenID accessID_ = 0;
 };
 
 class NetConnClientTest : public testing::Test {
@@ -236,7 +145,7 @@ HWTEST_F(NetConnClientTest, GetDefaultNetTest001, TestSize.Level1)
 HWTEST_F(NetConnClientTest, GetDefaultNetTest002, TestSize.Level1)
 {
     std::cout << "GetDefaultNetTest002 In" << std::endl;
-    AccessToken token;
+    NetConnManagerAccessToken token;
     NetHandle handle;
     int32_t netId = 0;
     auto ret = NetConnClient::GetInstance().GetDefaultNet(handle);
@@ -273,7 +182,7 @@ HWTEST_F(NetConnClientTest, HasDefaultNetTest001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, HasDefaultNetTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     bool bFlag = false;
     auto ret = NetConnClient::GetInstance().HasDefaultNet(bFlag);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
@@ -310,7 +219,7 @@ HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest002, TestSize.Level1)
     int32_t ret = NetConnClient::GetInstance().GetDefaultNet(handle);
     ASSERT_TRUE(ret == NETMANAGER_ERR_PERMISSION_DENIED);
 
-    AccessToken token;
+    NetConnManagerAccessToken token;
     NetAllCapabilities netAllCap;
     ret = NetConnClient::GetInstance().GetNetCapabilities(handle, netAllCap);
     ASSERT_TRUE(ret == NET_CONN_ERR_INVALID_NETWORK);
@@ -325,7 +234,7 @@ HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest003, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     NetHandle handle;
     int32_t ret = NetConnClient::GetInstance().GetDefaultNet(handle);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
@@ -342,7 +251,7 @@ HWTEST_F(NetConnClientTest, GetNetCapabilitiesTest003, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetAirplaneModeTest001, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     auto ret = NetConnClient::GetInstance().SetAirplaneMode(true);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
@@ -354,7 +263,7 @@ HWTEST_F(NetConnClientTest, SetAirplaneModeTest001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetAirplaneModeTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     auto ret = NetConnClient::GetInstance().SetAirplaneMode(false);
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
@@ -379,7 +288,7 @@ HWTEST_F(NetConnClientTest, IsDefaultNetMeteredTest001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, IsDefaultNetMeteredTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     bool bRes = false;
     auto ret = NetConnClient::GetInstance().IsDefaultNetMetered(bRes);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
@@ -393,7 +302,7 @@ HWTEST_F(NetConnClientTest, IsDefaultNetMeteredTest002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest001, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {"testHttpProxy", 0, {}};
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
@@ -406,7 +315,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN1, 8080, {}};
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
@@ -419,7 +328,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest003, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN2, 8080, {}};
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -432,7 +341,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest003, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest004, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN3, 8080, {}};
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -445,7 +354,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest004, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest005, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN4, 8080, {}};
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -458,7 +367,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest005, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest006, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN5, 8080, {}};
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -471,7 +380,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest006, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest007, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN6, 8080, {}};
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -484,7 +393,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest007, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest008, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN7, 8080, {}};
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -497,7 +406,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest008, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest09, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN8, 8080, {}};
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -510,7 +419,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest09, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest10, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN9, 8080, {}};
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -523,7 +432,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest10, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest11, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN10, 8080, {}};
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -536,7 +445,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest11, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest012, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {TEST_IPV4_ADDR, 8080, {}};
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -549,7 +458,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest012, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest013, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {TEST_IPV6_ADDR, 8080, {}};
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -562,7 +471,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest013, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest14, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {TEST_LONG_HOST, 8080, {TEST_LONG_EXCLUSION_LIST}};
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
@@ -575,7 +484,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest14, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest015, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy;
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -600,7 +509,7 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest016, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest001, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {TEST_IPV4_ADDR, 8080, {}};
     int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -618,7 +527,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {TEST_IPV6_ADDR, 8080, {}};
     int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -636,7 +545,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest003, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy = {TEST_DOMAIN2, 8080, {}};
     int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -654,7 +563,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest003, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest004, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy validHttpProxy = {TEST_IPV4_ADDR, 8080, {}};
     int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(validHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -672,7 +581,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest004, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest005, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy httpProxy;
     int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -690,7 +599,7 @@ HWTEST_F(NetConnClientTest, GetGlobalHttpProxyTest005, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, GetDefaultHttpProxyTest001, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy validHttpProxy = {TEST_IPV4_ADDR, 8080, {}};
     int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(validHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -708,7 +617,7 @@ HWTEST_F(NetConnClientTest, GetDefaultHttpProxyTest001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, GetDefaultHttpProxyTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     HttpProxy globalHttpProxy;
     int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(globalHttpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
@@ -725,7 +634,7 @@ HWTEST_F(NetConnClientTest, GetDefaultHttpProxyTest002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, GetDefaultHttpProxyTest003, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     int32_t netId = 102;
     int32_t ret = NetConnClient::GetInstance().SetAppNet(netId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -762,7 +671,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplier001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, RegisterNetSupplier002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     uint32_t supplierId = 100;
     NetBearType netBearType = BEARER_WIFI;
     const std::string ident = "";
@@ -790,7 +699,7 @@ HWTEST_F(NetConnClientTest, UnregisterNetSupplier001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, UnregisterNetSupplier002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     uint32_t supplierId = 100;
     auto ret = NetConnClient::GetInstance().UnregisterNetSupplier(supplierId);
     EXPECT_EQ(ret, NET_CONN_ERR_NO_SUPPLIER);
@@ -817,7 +726,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     uint32_t supplierId = 100;
     sptr<NetSupplierCallbackBase> callback = new (std::nothrow) NetSupplierCallbackBase();
     ASSERT_NE(callback, nullptr);
@@ -832,7 +741,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest003, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET};
     std::string ident = "ident";
@@ -852,7 +761,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest003, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest004, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     uint32_t supplierId = 0;
     sptr<NetSupplierCallbackBase> callback;
     auto ret = NetConnClient::GetInstance().RegisterNetSupplierCallback(supplierId, callback);
@@ -866,7 +775,7 @@ HWTEST_F(NetConnClientTest, RegisterNetSupplierCallbackTest004, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetAppNetTest001, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     int32_t netId = 99;
     auto ret = NetConnClient::GetInstance().SetAppNet(netId);
     EXPECT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
@@ -879,7 +788,7 @@ HWTEST_F(NetConnClientTest, SetAppNetTest001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, SetAppNetTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     int32_t netId = 102;
     auto ret = NetConnClient::GetInstance().SetAppNet(netId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -896,7 +805,7 @@ HWTEST_F(NetConnClientTest, SetAppNetTest002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, GetAppNetTest001, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     int32_t netId = 102;
     auto ret = NetConnClient::GetInstance().SetAppNet(netId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -918,7 +827,7 @@ HWTEST_F(NetConnClientTest, GetAppNetTest001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, RegisterNetConnCallback001, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
     int32_t ret = NetConnClient::GetInstance().RegisterNetConnCallback(callback);
     ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
@@ -992,7 +901,7 @@ HWTEST_F(NetConnClientTest, UpdateNetSupplierInfo001, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, UpdateNetSupplierInfo002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     auto &client = NetConnClient::GetInstance();
     uint32_t supplierId = 1;
     sptr<NetSupplierInfo> netSupplierInfo = new NetSupplierInfo;
@@ -1011,7 +920,7 @@ HWTEST_F(NetConnClientTest, UpdateNetSupplierInfo002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, GetNetInterfaceConfigurationTest001, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     NetInterfaceConfiguration config;
     auto ret = NetConnClient::GetInstance().GetNetInterfaceConfiguration(TEST_IFACE, config);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -1048,7 +957,7 @@ HWTEST_F(NetConnClientTest, RegisterNetInterfaceCallbackTest001, TestSize.Level1
  */
 HWTEST_F(NetConnClientTest, RegisterNetInterfaceCallbackTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     sptr<INetInterfaceStateCallback> callback = new (std::nothrow) NetInterfaceStateCallbackStub();
     int32_t ret = NetConnClient::GetInstance().RegisterNetInterfaceCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -1061,7 +970,7 @@ HWTEST_F(NetConnClientTest, RegisterNetInterfaceCallbackTest002, TestSize.Level1
  */
 HWTEST_F(NetConnClientTest, SystemReadyTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->SystemReady();
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
@@ -1073,7 +982,7 @@ HWTEST_F(NetConnClientTest, SystemReadyTest002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, UpdateNetLinkInfoTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     uint32_t supplierId = 1;
     sptr<NetLinkInfo> netLinkInfo = std::make_unique<NetLinkInfo>().release();
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->UpdateNetLinkInfo(supplierId, netLinkInfo);
@@ -1087,7 +996,7 @@ HWTEST_F(NetConnClientTest, UpdateNetLinkInfoTest002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, GetAllNetsTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     std::list<sptr<NetHandle>> netList;
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetAllNets(netList);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -1100,7 +1009,7 @@ HWTEST_F(NetConnClientTest, GetAllNetsTest002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, GetConnectionPropertiesTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     NetHandle netHandle;
     NetLinkInfo info;
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetConnectionProperties(netHandle, info);
@@ -1114,7 +1023,7 @@ HWTEST_F(NetConnClientTest, GetConnectionPropertiesTest002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, GetAddressesByNameTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     const std::string host = "ipaddr";
     int32_t netId = 1;
     std::vector<INetAddr> addrList = {};
@@ -1129,7 +1038,7 @@ HWTEST_F(NetConnClientTest, GetAddressesByNameTest002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, GetAddressByNameTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     std::string host = "ipaddr";
     int32_t netId = 1;
     INetAddr addr;
@@ -1144,7 +1053,7 @@ HWTEST_F(NetConnClientTest, GetAddressByNameTest002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, BindSocketTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     NetConnClient::NetConnDeathRecipient deathRecipient(*DelayedSingleton<NetConnClient>::GetInstance());
     sptr<IRemoteObject> remote = nullptr;
     deathRecipient.OnRemoteDied(remote);
@@ -1164,7 +1073,7 @@ HWTEST_F(NetConnClientTest, BindSocketTest002, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, NetDetectionTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     NetHandle netHandle;
     int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->NetDetection(netHandle);
     EXPECT_EQ(ret, NET_CONN_ERR_NETID_NOT_FOUND);
@@ -1172,7 +1081,7 @@ HWTEST_F(NetConnClientTest, NetDetectionTest002, TestSize.Level1)
 
 HWTEST_F(NetConnClientTest, NetworkRouteTest001, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     int32_t netId = 10;
     std::string ifName = "wlan0";
     std::string destination = "0.0.0.0/0";
@@ -1184,10 +1093,9 @@ HWTEST_F(NetConnClientTest, NetworkRouteTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
-
 HWTEST_F(NetConnClientTest, InterfaceAddressTest001, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     std::string ifName = "wlan0";
     std::string ipAddr = "0.0.0.1";
     int32_t prefixLength = 23;
@@ -1200,7 +1108,7 @@ HWTEST_F(NetConnClientTest, InterfaceAddressTest001, TestSize.Level1)
 
 HWTEST_F(NetConnClientTest, StaticArpTest001, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     std::string ifName = "wlan0";
     std::string ipAddr = "123.12.12.123";
     std::string macAddr = "12:23:34:12:12:11";
@@ -1220,7 +1128,7 @@ HWTEST_F(NetConnClientTest, StaticArpTest001, TestSize.Level1)
 
 HWTEST_F(NetConnClientTest, StaticArpTest002, TestSize.Level1)
 {
-    AccessToken token;
+    NetConnManagerAccessToken token;
     std::string ipAddr = "123.12.12.123";
     std::string macAddr = "12:23:34:12:12:11";
     std::string ifName = "wlan0";
@@ -1247,6 +1155,23 @@ HWTEST_F(NetConnClientTest, StaticArpTest002, TestSize.Level1)
     ifName = "";
     ret = DelayedSingleton<NetConnClient>::GetInstance()->DelStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+HWTEST_F(NetConnClientTest, NetConnClientBranchTest001, TestSize.Level1)
+{
+    int32_t uid = 0;
+    uint8_t allow = 0;
+    auto ret = DelayedSingleton<NetConnClient>::GetInstance()->SetInternetPermission(uid, allow);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+
+    uint32_t supplierId = 0;
+    sptr<NetSupplierInfo> netSupplierInfo = nullptr;
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    sptr<NetLinkInfo> netLinkInfo = nullptr;
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->UpdateNetLinkInfo(supplierId, netLinkInfo);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

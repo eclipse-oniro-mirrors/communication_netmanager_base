@@ -59,6 +59,7 @@
       "OHOS::NetManagerStandard::DataFlowStatistics::GetAllRxBytes()";
       "OHOS::NetManagerStandard::DataFlowStatistics::GetAllTxBytes()";
       "OHOS::NetManagerStandard::DataFlowStatistics::GetUidTxBytes(unsigned int)";
+      "OHOS::NetManagerStandard::DataFlowStatistics::GetUidRxBytes(unsigned int)";
       "OHOS::NetManagerStandard::DataFlowStatistics::GetIfaceRxBytes(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::DataFlowStatistics::GetIfaceTxBytes(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetStatsCallbackStub::~NetStatsCallbackStub()";

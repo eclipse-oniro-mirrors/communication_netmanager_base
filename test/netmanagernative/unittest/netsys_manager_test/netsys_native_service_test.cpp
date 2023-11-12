@@ -36,6 +36,8 @@ namespace NetsysNative {
 namespace {
 using namespace NetManagerStandard;
 using namespace testing::ext;
+static constexpr uint64_t TEST_COOKIE = 1;
+static constexpr uint32_t TEST_STATS_TYPE1 = 0;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 class TestNotifyCallback : public NotifyCallbackStub {
 public:
@@ -678,6 +680,24 @@ HWTEST_F(NetsysNativeServiceTest, DelStaticArpTest001, TestSize.Level1)
     }
     int32_t ret = instance_->DelStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetCookieStatsTest001, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    int32_t ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, GetCookieStatsTest002, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    auto ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
+    EXPECT_EQ(stats, 0);
+    auto backup = std::move(instance_->bpfStats_);
+    ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
+    instance_->bpfStats_ = std::move(backup);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 } // namespace NetsysNative
 } // namespace OHOS
