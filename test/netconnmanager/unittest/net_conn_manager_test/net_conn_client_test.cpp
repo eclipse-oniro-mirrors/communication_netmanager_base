@@ -1173,5 +1173,34 @@ HWTEST_F(NetConnClientTest, NetConnClientBranchTest001, TestSize.Level1)
     ret = DelayedSingleton<NetConnClient>::GetInstance()->UpdateNetLinkInfo(supplierId, netLinkInfo);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
+
+HWTEST_F(NetConnClientTest, RegisterSlotTypeTest001, TestSize.Level1)
+{
+    NetConnManagerAccessToken token;
+    uint32_t supplierId = 100;
+    std::string type = "4G";
+    int32_t ret = NetConnClient::GetInstance().RegisterSlotType(supplierId,type);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+
+    type = "";
+    ret = NetConnClient::GetInstance().GetSlotType(type);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+    EXPECT_TRUE(type.empty());
+}
+
+HWTEST_F(NetConnClientTest, RegisterSlotTypeTest002, TestSize.Level1)
+{
+    NetConnManagerAccessToken token;
+    NetBearType netBearType = BEARER_CELLULAR;
+    std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET};
+    std::string ident = "ident";
+    uint32_t supplierId = 0;
+    auto ret = NetConnClient::GetInstance().RegisterNetSupplier(netBearType, ident, netCaps, supplierId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    std::string type = "4G";
+    ret = NetConnClient::GetInstance().RegisterSlotType(supplierId,type);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

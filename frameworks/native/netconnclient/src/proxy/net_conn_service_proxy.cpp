@@ -1368,7 +1368,7 @@ int32_t NetConnServiceProxy::GetSlotType(std::string &type)
     }
     int32_t ret = reply.ReadInt32();
     if (ret == NETMANAGER_SUCCESS) {
-        if (reply.ReadString(type)) {
+        if (!reply.ReadString(type)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
     }
