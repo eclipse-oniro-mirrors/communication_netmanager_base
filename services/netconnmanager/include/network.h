@@ -62,6 +62,8 @@ public:
 
     void OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect) override;
 
+    bool ResumeNetworkInfo();
+
 private:
     void StopNetDetection();
     bool CreateBasicNetwork();

@@ -855,6 +855,8 @@ private:
     sptr<OHOS::NetsysNative::INetsysService> GetProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
+    void RegisterNotifyCallback();
+
 private:
     sptr<OHOS::NetsysNative::INotifyCallback> nativeNotifyCallback_ = nullptr;
     sptr<OHOS::NetsysNative::INetDnsResultCallback> nativeDnsReportCallback_ = nullptr;

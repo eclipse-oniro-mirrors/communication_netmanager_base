@@ -594,5 +594,25 @@ void Network::OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, con
             0);
     }
 }
+
+bool Network::ResumeNetworkInfo()
+{
+    NetLinkInfo nli = netLinkInfo_;
+
+    NETMGR_LOG_D("Network::ResumeNetworkInfo UpdateBasicNetwork false");
+    if (!UpdateBasicNetwork(false)) {
+        NETMGR_LOG_E("%s release existed basic network failed", __FUNCTION__);
+        return false;
+    }
+
+    NETMGR_LOG_D("Network::ResumeNetworkInfo UpdateBasicNetwork true");
+    if (!UpdateBasicNetwork(true)) {
+        NETMGR_LOG_E("%s create basic network failed", __FUNCTION__);
+        return false;
+    }
+
+    NETMGR_LOG_D("Network::ResumeNetworkInfo UpdateNetLinkInfo");
+    return UpdateNetLinkInfo(nli);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
