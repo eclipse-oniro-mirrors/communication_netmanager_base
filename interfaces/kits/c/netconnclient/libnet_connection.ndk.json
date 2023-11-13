@@ -1,10 +1,14 @@
 [
     {
-        "first_introdeced": "11",
+        "first_introduced": "11",
         "name": "OH_NetConn_GetAddrInfo"
     },
     {
-        "first_introdeced": "11",
+        "first_introduced": "11",
         "name": "OH_NetConn_FreeDnsResult"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OH_NetConn_GetAllNets"
     }
 ]
