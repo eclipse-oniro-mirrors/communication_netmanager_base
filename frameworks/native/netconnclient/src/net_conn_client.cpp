@@ -380,13 +380,13 @@ void NetConnClient::RecoverCallback()
             sptr<INetConnCallback> callback = std::get<1>(mem);
             uint32_t timeoutMS = std::get<2>(mem);
             if (specifier != nullptr && timeoutMS != 0) {
-                int32_t ret = RegisterNetConnCallback(specifier, callback, timeoutMS);
+                int32_t ret = proxy->RegisterNetConnCallback(specifier, callback, timeoutMS);
                 NETMGR_LOG_D("Register result hasNetSpecifier_ and timeoutMS_ %{public}d", ret);
             } else if (specifier != nullptr) {
-                int32_t ret = RegisterNetConnCallback(specifier, callback, 0);
+                int32_t ret = proxy->RegisterNetConnCallback(specifier, callback, 0);
                 NETMGR_LOG_D("Register result hasNetSpecifier_ %{public}d", ret);
             } else if (callback != nullptr) {
-                int32_t ret = RegisterNetConnCallback(callback);
+                int32_t ret = proxy->RegisterNetConnCallback(callback);
                 NETMGR_LOG_D("Register result %{public}d", ret);
             }
         }

@@ -144,7 +144,7 @@ void NetPolicyClient::RecoverCallback()
     auto proxy = GetProxy();
     NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
     if (proxy != nullptr && callback_ != nullptr) {
-        int32_t ret = RegisterNetPolicyCallback(callback_);
+        int32_t ret = proxy->RegisterNetPolicyCallback(callback_);
         NETMGR_LOG_D("Register result %{public}d", ret);
     }
 }
