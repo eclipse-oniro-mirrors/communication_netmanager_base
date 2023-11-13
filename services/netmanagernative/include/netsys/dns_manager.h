@@ -128,6 +128,7 @@ public:
 private:
     std::shared_ptr<DnsProxyListen> dnsProxyListen_;
     std::shared_ptr<DnsGetAddrInfo> dnsGetAddrInfo_;
+    int32_t FillAddrInfo(std::vector<AddrInfo> &addrInfo, addrinfo *res);
 };
 } // namespace nmd
 } // namespace OHOS

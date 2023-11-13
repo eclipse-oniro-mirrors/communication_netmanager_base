@@ -23,6 +23,7 @@
 #include "dns_quality_diag.h"
 
 #include "dns_manager.h"
+#include <netdb.h>
 
 namespace OHOS {
 namespace nmd {
@@ -124,7 +125,32 @@ int32_t DnsManager::GetAddrInfo(const std::string &hostName, const std::string &
         netId = DnsParamCache::GetInstance().GetDefaultNetwork();
         NETNATIVE_LOG_D("DnsManager DnsGetaddrinfo netId == 0 defaultNetId_ : %{public}d", netId);
     }
-    return dnsGetAddrInfo_->GetAddrInfo(hostName, serverName, hints, netId, res);
+    struct addrinfo hint = {};
+    struct addrinfo *result;
+    struct queryparam qparam = {};
+
+    if ((hostName.size() == 0) && (serverName.size() == 0)) {
+        return -1;
+    }
+
+    qparam.qp_netid = netId;
+    qparam.qp_type = 0;
+
+    hint.ai_family = hints.aiFamily;
+    hint.ai_flags = hints.aiFlags;
+    hint.ai_protocol = hints.aiProtocol;
+    hint.ai_socktype = hints.aiSockType;
+    NETNATIVE_LOGI("DnsManager %{public}d, %{public}d, %{public}d, %{public}d", hint.ai_family, hint.ai_flags, hint.ai_protocol, hint.ai_socktype);
+ 
+    int32_t ret = getaddrinfo_ext(((hostName.size() == 0) ? NULL : hostName.c_str()),
+		                  ((serverName.size() == 0) ? NULL : serverName.c_str()),
+				  &hint, &result, &qparam);
+    if (ret == 0) {
+        ret = FillAddrInfo(res, result);
+        freeaddrinfo(result);
+    }
+
+    return ret;
 }
 
 int32_t DnsManager::RegisterDnsResultCallback(const sptr<NetsysNative::INetDnsResultCallback> &callback,
@@ -148,5 +174,34 @@ int32_t DnsManager::UnregisterDnsHealthCallback(const sptr<NetsysNative::INetDns
     return DnsQualityDiag::GetInstance().UnregisterHealthListener(callback);
 }
 
+int32_t DnsManager::FillAddrInfo(std::vector<AddrInfo> &addrInfo, addrinfo *res)
+{
+    int32_t resNum = 0;
+    addrinfo *tmp = res;
+
+    while (tmp) {
+        AddrInfo info;
+        info.aiFlags = tmp->ai_flags;
+        info.aiFamily = tmp->ai_family;
+        info.aiSockType = tmp->ai_socktype;
+        info.aiProtocol = tmp->ai_protocol;
+        info.aiAddrLen = tmp->ai_addrlen;
+        if (memcpy_s(&info.aiAddr, sizeof(info.aiAddr), tmp->ai_addr, tmp->ai_addrlen) != 0) {
+            NETNATIVE_LOGE("memcpy_s failed");
+        }
+        if (strcpy_s(info.aiCanonName, sizeof(info.aiCanonName), tmp->ai_canonname) != 0) {
+            NETNATIVE_LOGE("strcpy_s failed");
+        }
+
+        ++resNum;
+        addrInfo.emplace_back(info);
+        tmp = tmp->ai_next;
+        if (resNum >= MAX_RESULTS) {
+            break;
+        }
+    }
+    NETNATIVE_LOGI("FillAddrInfo %{public}d", resNum);
+    return 0;
+}
 } // namespace nmd
 } // namespace OHOS
