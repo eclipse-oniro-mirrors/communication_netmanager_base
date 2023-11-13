@@ -17,7 +17,7 @@
 #define NATIVE_NET_CONN_TYPE_H
 
 /**
-* @addtogroup NetConn
+* @addtogroup NetConnection
 * @{
 *
 * @brief Provides the data structures for the C APIs of the network connection module for network management.
@@ -27,10 +27,10 @@
 */
 
 /**
-* @file native_net_conn_type.h
+* @file net_connection.h
 * @brief Defines the data structures for the C APIs of the network connection module.
 *
-* @library libnetconn_ndk.z.so
+* @library libnet_connection.so
 * @syscap SystemCapability.Communication.NetManager.Core
 * @since 11
 * @version 1.0

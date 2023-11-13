@@ -20,7 +20,7 @@ ohos_ndk_library("libnet_connection") {
   ndk_description_file = "./libnet_connection.ndk.json"
   min_compact_version = "1"
   system_capability = "SystemCapability.Communication.NetManager.Core"
- system_capability_headers = [
+  system_capability_headers = [
     "./include/net_connection.h",
     "./include/net_connection_type.h",
   ]
