@@ -357,11 +357,6 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest014, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysNativeClientTest, RegisterNotifyCallbackTest015, TestSize.Level1)
-{
-    nativeClient_.RegisterNotifyCallback();
-}
-
 HWTEST_F(NetsysNativeClientTest, GetCookieStatsTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
