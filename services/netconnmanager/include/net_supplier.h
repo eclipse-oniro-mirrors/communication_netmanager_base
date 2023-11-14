@@ -92,7 +92,7 @@ public:
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
     void SetSupplierType(int32_t type);
     std::string GetSupplierType();
-    std::string TechToType(NetRadioTech type);
+    std::string TechToType(NetSlotTech type);
 
     bool ResumeNetworkInfo();
 
