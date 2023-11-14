@@ -90,8 +90,9 @@ public:
     void ClearDefault();
     void RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
-    void SetSupplierType(std::string type);
+    void SetSupplierType(int32_t type);
     std::string GetSupplierType();
+    std::string TechToType(NetRadioTech type);
 
     bool ResumeNetworkInfo();
 

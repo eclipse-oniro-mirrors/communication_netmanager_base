@@ -1178,11 +1178,11 @@ HWTEST_F(NetConnClientTest, RegisterSlotTypeTest001, TestSize.Level1)
 {
     NetConnManagerAccessToken token;
     uint32_t supplierId = 100;
-    std::string type = "4G";
-    int32_t ret = NetConnClient::GetInstance().RegisterSlotType(supplierId,type);
+    int32_t tech = 2;
+    int32_t ret = NetConnClient::GetInstance().RegisterSlotType(supplierId, tech);
     EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 
-    type = "";
+    std::string type = "";
     ret = NetConnClient::GetInstance().GetSlotType(type);
     EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
     EXPECT_TRUE(type.empty());
@@ -1198,8 +1198,8 @@ HWTEST_F(NetConnClientTest, RegisterSlotTypeTest002, TestSize.Level1)
     auto ret = NetConnClient::GetInstance().RegisterNetSupplier(netBearType, ident, netCaps, supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
-    std::string type = "4G";
-    ret = NetConnClient::GetInstance().RegisterSlotType(supplierId,type);
+    int32_t tech = 2;
+    ret = NetConnClient::GetInstance().RegisterSlotType(supplierId, tech);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard

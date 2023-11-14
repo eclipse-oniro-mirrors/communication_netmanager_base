@@ -410,10 +410,33 @@ void NetSupplier::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
     }
 }
 
-void NetSupplier::SetSupplierType(std::string type)
+std::string NetSupplier::TechToType(NetRadioTech techType)
 {
-    NETMGR_LOG_I("supplierId[%{public}d] update type[%{public}s].", supplierId_, type.c_str());
-    type_ = type;
+    switch (techType) {
+        case NetRadioTech::RADIO_TECHNOLOGY_GSM:
+            return SLOT_TYPE_2G;
+        case NetRadioTech::RADIO_TECHNOLOGY_WCDMA:
+        case NetRadioTech::RADIO_TECHNOLOGY_HSPAP:
+        case NetRadioTech::RADIO_TECHNOLOGY_HSPA:
+        case NetRadioTech::RADIO_TECHNOLOGY_1XRTT:
+        case NetRadioTech::RADIO_TECHNOLOGY_EVDO:
+        case NetRadioTech::RADIO_TECHNOLOGY_EHRPD:
+        case NetRadioTech::RADIO_TECHNOLOGY_TD_SCDMA:
+            return SLOT_TYPE_3G;
+        case NetRadioTech::RADIO_TECHNOLOGY_LTE:
+        case NetRadioTech::RADIO_TECHNOLOGY_LTE_CA:
+            return SLOT_TYPE_4G;
+        case NetRadioTech::RADIO_TECHNOLOGY_NR:
+            return SLOT_TYPE_5G;
+        default:
+            return "";
+    }
+}
+
+void NetSupplier::SetSupplierType(int32_t type)
+{
+    NETMGR_LOG_I("supplierId[%{public}d] update type[%{public}d].", supplierId_, type);
+    type_ = TechToType(static_cast<NetRadioTech>(type));
 }
 
 std::string NetSupplier::GetSupplierType()

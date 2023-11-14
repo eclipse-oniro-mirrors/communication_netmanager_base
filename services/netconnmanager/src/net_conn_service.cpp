@@ -1663,13 +1663,13 @@ int32_t NetConnService::DelStaticArp(const std::string &ipAddr, const std::strin
     return NetsysController::GetInstance().DelStaticArp(ipAddr, macAddr, ifName);
 }
 
-int32_t NetConnService::RegisterSlotType(uint32_t supplierId, std::string type)
+int32_t NetConnService::RegisterSlotType(uint32_t supplierId, int32_t type)
 {
     if (netSuppliers_.find(supplierId) == netSuppliers_.end()) {
         NETMGR_LOG_E("supplierId[%{public}d] is not exits", supplierId);
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    NETMGR_LOG_I("supplierId[%{public}d] update type[%{public}s].", supplierId, type.c_str());
+    NETMGR_LOG_I("supplierId[%{public}d] update type[%{public}d].", supplierId, type);
 
     sptr<NetSupplier> supplier = netSuppliers_[supplierId];
     supplier->SetSupplierType(type);

@@ -1326,7 +1326,7 @@ int32_t NetConnServiceProxy::DelStaticArp(const std::string &ipAddr, const std::
     return reply.ReadInt32();
 }
 
-int32_t NetConnServiceProxy::RegisterSlotType(uint32_t supplierId, std::string type)
+int32_t NetConnServiceProxy::RegisterSlotType(uint32_t supplierId, int32_t type)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1339,7 +1339,7 @@ int32_t NetConnServiceProxy::RegisterSlotType(uint32_t supplierId, std::string t
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
-    if (!data.WriteString(type)) {
+    if (!data.WriteInt32(type)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 

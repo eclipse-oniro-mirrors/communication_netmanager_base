@@ -1213,8 +1213,8 @@ int32_t NetConnServiceStub::OnRegisterSlotType(MessageParcel &data, MessageParce
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    std::string type = "";
-    if (!data.ReadString(type)) {
+    int32_t type = 0;
+    if (!data.ReadInt32(type)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 

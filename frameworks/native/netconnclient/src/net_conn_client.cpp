@@ -539,9 +539,9 @@ int32_t NetConnClient::DelStaticArp(const std::string &ipAddr, const std::string
     return proxy->DelStaticArp(ipAddr, macAddr, ifName);
 }
 
-int32_t NetConnClient::RegisterSlotType(uint32_t supplierId, std::string type)
+int32_t NetConnClient::RegisterSlotType(uint32_t supplierId, int32_t type)
 {
-    NETMGR_LOG_I("RegisterSlotType client in.supplierId[%{public}d] type[%{public}s]", supplierId, type.c_str());
+    NETMGR_LOG_I("RegisterSlotType client in.supplierId[%{public}d] type[%{public}d]", supplierId, type);
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
