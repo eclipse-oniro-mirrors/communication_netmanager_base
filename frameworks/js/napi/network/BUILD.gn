@@ -57,15 +57,6 @@ ohos_shared_library("network") {
     "napi:ace_napi",
   ]
 
-  if (defined(global_parts_info) &&
-      defined(global_parts_info.telephony_core_service) &&
-      global_parts_info.telephony_core_service) {
-    external_deps += [ "core_service:tel_core_service_api" ]
-    defines = [ "HAS_TELEPHONY=1" ]
-  } else {
-    defines = [ "HAS_TELEPHONY=0" ]
-  }
-
   relative_install_dir = "module"
   part_name = "netmanager_base"
   subsystem_name = "communication"

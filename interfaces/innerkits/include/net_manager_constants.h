@@ -129,6 +129,12 @@ enum {
     NET_MDNS_ERR_WRITE_DUMP = 2204010,
 };
 
+enum class NetSlotTech {
+    SLOT_TYPE_GSM = 1,
+    SLOT_TYPE_LTE = 9,
+    SLOT_TYPE_LTE_CA = 10,
+};
+
 // Error code for netmanager dns resolver
 constexpr ErrCode DNS_ERR_OFFSET = ErrCodeOffset(SUBSYS_COMMUNICATION, NETMANAGER_DNS_RESOLVER_MANAGER);
 // Error code for netmanager conn manager

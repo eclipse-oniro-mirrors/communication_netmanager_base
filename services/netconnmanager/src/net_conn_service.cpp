@@ -1676,6 +1676,30 @@ int32_t NetConnService::DelStaticArp(const std::string &ipAddr, const std::strin
     return NetsysController::GetInstance().DelStaticArp(ipAddr, macAddr, ifName);
 }
 
+int32_t NetConnService::RegisterSlotType(uint32_t supplierId, int32_t type)
+{
+    if (netSuppliers_.find(supplierId) == netSuppliers_.end()) {
+        NETMGR_LOG_E("supplierId[%{public}d] is not exits", supplierId);
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    NETMGR_LOG_I("supplierId[%{public}d] update type[%{public}d].", supplierId, type);
+
+    sptr<NetSupplier> supplier = netSuppliers_[supplierId];
+    supplier->SetSupplierType(type);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::GetSlotType(std::string &type)
+{
+    if (defaultNetSupplier_ == nullptr) {
+        NETMGR_LOG_E("supplier is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    type = defaultNetSupplier_->GetSupplierType();
+    return NETMANAGER_SUCCESS;
+}
+
 void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
     NETMGR_LOG_I("NetConnService::OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);

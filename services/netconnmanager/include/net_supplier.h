@@ -90,6 +90,9 @@ public:
     void ClearDefault();
     void RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
+    void SetSupplierType(int32_t type);
+    std::string GetSupplierType();
+    std::string TechToType(NetSlotTech type);
 
     bool ResumeNetworkInfo();
 
@@ -109,6 +112,7 @@ private:
     std::shared_ptr<Network> network_ = nullptr;
     sptr<NetHandle> netHandle_ = nullptr;
     bool restrictBackground_ = true;
+    std::string type_ = "";
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -18,13 +18,7 @@
 #include "net_conn_client.h"
 #include "net_manager_constants.h"
 #include "network_constant.h"
-#ifndef HAS_TELEPHONY
-#define HAS_TELEPHONY 0
-#endif
 
-#if HAS_TELEPHONY
-#include "core_service_client.h"
-#endif
 #include "napi_utils.h"
 #include "netmanager_base_log.h"
 #include "network_observer.h"
@@ -37,25 +31,6 @@ static constexpr const char *NETWORK_NONE = "none";
 static constexpr const char *NETWORK_WIFI = "WiFi";
 static constexpr const uint32_t DEFAULT_TIMEOUT_MS = 1000;
 
-#if HAS_TELEPHONY
-static std::string CellularTypeToString(Telephony::SignalInformation::NetworkType type)
-{
-    switch (type) {
-        case Telephony::SignalInformation::NetworkType::GSM:
-            return "2g";
-        case Telephony::SignalInformation::NetworkType::CDMA:
-        case Telephony::SignalInformation::NetworkType::WCDMA:
-        case Telephony::SignalInformation::NetworkType::TDSCDMA:
-            return "3g";
-        case Telephony::SignalInformation::NetworkType::LTE:
-            return "4g";
-        default:
-            break;
-    }
-    return "5g";
-}
-#endif
-
 static napi_value MakeNetworkResponse(napi_env env, const std::set<NetBearType> &bearerTypes)
 {
     napi_value obj = NapiUtils::CreateObject(env);
@@ -65,24 +40,16 @@ static napi_value MakeNetworkResponse(napi_env env, const std::set<NetBearType> 
         return obj;
     }
 
-#if HAS_TELEPHONY
     if (bearerTypes.find(BEARER_CELLULAR) != bearerTypes.end()) {
-        std::vector<sptr<Telephony::SignalInformation>> vec;
-        DelayedRefSingleton<Telephony::CoreServiceClient>::GetInstance().GetSignalInfoList(0, vec);
-        if (vec.empty()) {
-            NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, NETWORK_NONE);
-            NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, false);
-            return obj;
+        std::string type = "";
+        int32_t ret = NetConnClient::GetInstance().GetSlotType(type);
+        if (ret != NETMANAGER_SUCCESS || type.empty()) {
+            type = "none";
         }
-
-        std::sort(vec.begin(), vec.end(),
-                  [](const sptr<Telephony::SignalInformation> &info1, const sptr<Telephony::SignalInformation> &info2)
-                      -> bool { return info1->GetSignalLevel() > info2->GetSignalLevel(); });
-        NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, CellularTypeToString(vec[0]->GetNetworkType()));
+        NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, type);
         NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, true);
         return obj;
     }
-#endif
 
     NapiUtils::SetStringPropertyUtf8(env, obj, KEY_TYPE, NETWORK_NONE);
     NapiUtils::SetBooleanProperty(env, obj, KEY_METERED, false);

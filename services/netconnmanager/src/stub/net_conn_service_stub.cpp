@@ -128,6 +128,10 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
         &NetConnServiceStub::OnGetNetIdByIdentifier, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_INTERFACE_CONFIGURATION)] = {
         &NetConnServiceStub::OnGetNetInterfaceConfiguration, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_SLOT_TYPE)] = {
+        &NetConnServiceStub::OnRegisterSlotType, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_SLOT_TYPE)] = {
+        &NetConnServiceStub::OnGetSlotType, {Permission::GET_NETWORK_INFO}};
 }
 
 NetConnServiceStub::~NetConnServiceStub() {}
@@ -1199,6 +1203,39 @@ int32_t NetConnServiceStub::OnDelStaticArp(MessageParcel &data, MessageParcel &r
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnRegisterSlotType(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t supplierId = 0;
+    if (!data.ReadUint32(supplierId)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t type = 0;
+    if (!data.ReadInt32(type)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+
+    int32_t ret = RegisterSlotType(supplierId, type);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnGetSlotType(MessageParcel &data, MessageParcel &reply)
+{
+    std::string type = "";
+    int32_t ret = GetSlotType(type);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (!reply.WriteString(type)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard

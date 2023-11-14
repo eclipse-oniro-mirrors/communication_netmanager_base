@@ -410,6 +410,30 @@ void NetSupplier::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
     }
 }
 
+std::string NetSupplier::TechToType(NetSlotTech techType)
+{
+    switch (techType) {
+        case NetSlotTech::SLOT_TYPE_GSM:
+            return "2G";
+        case NetSlotTech::SLOT_TYPE_LTE:
+        case NetSlotTech::SLOT_TYPE_LTE_CA:
+            return "4G";
+        default:
+            return "3G";
+    }
+}
+
+void NetSupplier::SetSupplierType(int32_t type)
+{
+    NETMGR_LOG_I("supplierId[%{public}d] update type[%{public}d].", supplierId_, type);
+    type_ = TechToType(static_cast<NetSlotTech>(type));
+}
+
+std::string NetSupplier::GetSupplierType()
+{
+    return type_;
+}
+
 bool NetSupplier::ResumeNetworkInfo()
 {
     if (network_ == nullptr) {
