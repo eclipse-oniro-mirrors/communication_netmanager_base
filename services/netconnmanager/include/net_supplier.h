@@ -91,6 +91,8 @@ public:
     void RegisterSupplierCallback(const sptr<INetSupplierCallback> &callback);
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
 
+    bool ResumeNetworkInfo();
+
 private:
     NetBearType netSupplierType_;
     std::string netSupplierIdent_;

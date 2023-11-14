@@ -332,8 +332,12 @@ private:
         std::vector<sptr<INetInterfaceStateCallback>> ifaceStateCallbacks_;
     };
 
+protected:
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
+
 private:
     bool Init();
+    void RecoverInfo();
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
     sptr<NetSupplier> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident,
                                              const std::set<NetCap> &netCaps);
@@ -372,6 +376,10 @@ private:
     void RequestAllNetworkExceptDefault();
     void LoadGlobalHttpProxy();
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
+
+    void OnNetSysRestart();
+
+    bool IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns);
 
 private:
     enum ServiceRunningState {

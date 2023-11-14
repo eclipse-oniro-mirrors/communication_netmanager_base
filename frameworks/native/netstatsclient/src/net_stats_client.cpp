@@ -14,6 +14,7 @@
  */
 
 #include "net_stats_client.h"
+#include <thread>
 
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
@@ -22,21 +23,30 @@
 #include "net_mgr_log_wrapper.h"
 #include "sys/socket.h"
 
+static constexpr uint32_t WAIT_FOR_SERVICE_TIME_MS = 500;
+static constexpr uint32_t MAX_GET_SERVICE_COUNT = 10;
+
 namespace OHOS {
 namespace NetManagerStandard {
-NetStatsClient::NetStatsClient() : netStatsService_(nullptr), deathRecipient_(nullptr) {}
+NetStatsClient::NetStatsClient() : netStatsService_(nullptr), deathRecipient_(nullptr), callback_(nullptr) {}
 
 NetStatsClient::~NetStatsClient() = default;
 
 int32_t NetStatsClient::RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
 {
+    NETMGR_LOG_D("RegisterNetStatsCallback client in");
     sptr<INetStatsService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
+    int32_t ret = proxy->RegisterNetStatsCallback(callback);
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("RegisterNetStatsCallback success, save callback");
+        callback_ = callback;
+    }
 
-    return proxy->RegisterNetStatsCallback(callback);
+    return ret;
 }
 
 int32_t NetStatsClient::UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback)
@@ -46,8 +56,13 @@ int32_t NetStatsClient::UnregisterNetStatsCallback(const sptr<INetStatsCallback>
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
+    int32_t ret = proxy->UnregisterNetStatsCallback(callback);
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("UnRegisterNetStatsCallback success, delete callback");
+        callback_ = nullptr;
+    }
 
-    return proxy->UnregisterNetStatsCallback(callback);
+    return ret;
 }
 
 sptr<INetStatsService> NetStatsClient::GetProxy()
@@ -90,6 +105,21 @@ sptr<INetStatsService> NetStatsClient::GetProxy()
     return netStatsService_;
 }
 
+void NetStatsClient::RecoverCallback()
+{
+    uint32_t count = 0;
+    while (GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_SERVICE_TIME_MS));
+        count++;
+    }
+    auto proxy = GetProxy();
+    NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
+    if (proxy != nullptr && callback_ != nullptr) {
+        int32_t ret = proxy->RegisterNetStatsCallback(callback_);
+        NETMGR_LOG_D("Register result %{public}d", ret);
+    }
+}
+
 void NetStatsClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     NETMGR_LOG_D("on remote died");
@@ -112,6 +142,15 @@ void NetStatsClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 
     local->RemoveDeathRecipient(deathRecipient_);
     netStatsService_ = nullptr;
+    if (callback_ != nullptr) {
+        NETMGR_LOG_D("on remote died recover callback");
+        std::thread t([this]() {
+            RecoverCallback();
+        });
+        std::string threadName = "nestatsRecoverCallback";
+        pthread_setname_np(t.native_handle(), threadName.c_str());
+        t.detach();
+    }
 }
 
 int32_t NetStatsClient::GetIfaceRxBytes(uint64_t &stats, const std::string &interfaceName)

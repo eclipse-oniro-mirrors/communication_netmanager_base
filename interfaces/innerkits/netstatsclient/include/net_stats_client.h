@@ -243,12 +243,14 @@ private:
 
 private:
     sptr<INetStatsService> GetProxy();
+    void RecoverCallback();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
 private:
     std::mutex mutex_;
     sptr<INetStatsService> netStatsService_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
+    sptr<INetStatsCallback> callback_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

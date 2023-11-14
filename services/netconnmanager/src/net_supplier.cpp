@@ -409,5 +409,15 @@ void NetSupplier::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
         network_->UpdateGlobalHttpProxy(httpProxy);
     }
 }
+
+bool NetSupplier::ResumeNetworkInfo()
+{
+    if (network_ == nullptr) {
+        NETMGR_LOG_E("network_ is nullptr!");
+        return false;
+    }
+
+    return network_->ResumeNetworkInfo();
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
