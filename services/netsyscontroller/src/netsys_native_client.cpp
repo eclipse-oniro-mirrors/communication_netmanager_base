@@ -151,24 +151,7 @@ int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsResultReport(uint32
 
 NetsysNativeClient::NetsysNativeClient()
 {
-    std::thread t([this]() {
-        uint32_t count = 0;
-        while (GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
-            std::this_thread::sleep_for(std::chrono::seconds(WAIT_FOR_SERVICE_TIME_S));
-            count++;
-        }
-        auto proxy = GetProxy();
-        NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
-        if (proxy != nullptr) {
-            nativeNotifyCallback_ = new (std::nothrow) NativeNotifyCallback(*this);
-            proxy->RegisterNotifyCallback(nativeNotifyCallback_);
-            nativeDnsReportCallback_ = new (std::nothrow) NativeNetDnsResultCallback(*this);
-            proxy->RegisterDnsResultCallback(nativeDnsReportCallback_, dnsReportTimeStep);
-        }
-    });
-    std::string threadName = "netsysGetProxy";
-    pthread_setname_np(t.native_handle(), threadName.c_str());
-    t.detach();
+    RegisterNotifyCallback();
 }
 
 int32_t NetsysNativeClient::SetInternetPermission(uint32_t uid, uint8_t allow)
@@ -832,6 +815,37 @@ sptr<OHOS::NetsysNative::INetsysService> NetsysNativeClient::GetProxy()
     return netsysNativeService_;
 }
 
+void NetsysNativeClient::RegisterNotifyCallback()
+{
+    std::thread t([this]() {
+        uint32_t count = 0;
+        while (GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
+            std::this_thread::sleep_for(std::chrono::seconds(WAIT_FOR_SERVICE_TIME_S));
+            count++;
+        }
+        auto proxy = GetProxy();
+        NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
+        if (proxy != nullptr) {
+            if (nativeNotifyCallback_ == nullptr) {
+                nativeNotifyCallback_ = new (std::nothrow) NativeNotifyCallback(*this);
+            }
+
+            NETMGR_LOG_D("call proxy->RegisterNotifyCallback");
+            proxy->RegisterNotifyCallback(nativeNotifyCallback_);
+
+            if (nativeDnsReportCallback_ == nullptr) {
+                nativeDnsReportCallback_ = new (std::nothrow) NativeNetDnsResultCallback(*this);
+            }
+
+            NETMGR_LOG_D("call proxy->RegisterDnsResultCallback");
+            proxy->RegisterDnsResultCallback(nativeDnsReportCallback_, dnsReportTimeStep);
+        }
+    });
+    std::string threadName = "netsysGetProxy";
+    pthread_setname_np(t.native_handle(), threadName.c_str());
+    t.detach();
+}
+
 void NetsysNativeClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     NETMGR_LOG_D("on remote died");
@@ -859,6 +873,8 @@ void NetsysNativeClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
     }
 
     netsysNativeService_ = nullptr;
+
+    RegisterNotifyCallback();
 }
 
 int32_t NetsysNativeClient::BindNetworkServiceVpn(int32_t socketFd)

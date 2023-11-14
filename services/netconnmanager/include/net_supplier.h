@@ -93,6 +93,8 @@ public:
     void SetSupplierType(std::string type);
     std::string GetSupplierType();
 
+    bool ResumeNetworkInfo();
+
 private:
     NetBearType netSupplierType_;
     std::string netSupplierIdent_;
