@@ -140,11 +140,10 @@ int32_t DnsManager::GetAddrInfo(const std::string &hostName, const std::string &
     hint.ai_flags = hints.aiFlags;
     hint.ai_protocol = hints.aiProtocol;
     hint.ai_socktype = hints.aiSockType;
-    NETNATIVE_LOGI("DnsManager %{public}d, %{public}d, %{public}d, %{public}d", hint.ai_family, hint.ai_flags, hint.ai_protocol, hint.ai_socktype);
  
     int32_t ret = getaddrinfo_ext(((hostName.size() == 0) ? NULL : hostName.c_str()),
-		                  ((serverName.size() == 0) ? NULL : serverName.c_str()),
-				  &hint, &result, &qparam);
+                                  ((serverName.size() == 0) ? NULL : serverName.c_str()),
+                                  &hint, &result, &qparam);
     if (ret == 0) {
         ret = FillAddrInfo(res, result);
         freeaddrinfo(result);
