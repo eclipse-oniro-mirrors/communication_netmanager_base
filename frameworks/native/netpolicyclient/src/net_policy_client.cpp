@@ -14,15 +14,19 @@
  */
 
 #include "net_policy_client.h"
+#include <thread>
 
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
 #include "net_mgr_log_wrapper.h"
 
+static constexpr uint32_t WAIT_FOR_SERVICE_TIME_MS = 500;
+static constexpr uint32_t MAX_GET_SERVICE_COUNT = 10;
+
 namespace OHOS {
 namespace NetManagerStandard {
-NetPolicyClient::NetPolicyClient() : netPolicyService_(nullptr), deathRecipient_(nullptr) {}
+NetPolicyClient::NetPolicyClient() : netPolicyService_(nullptr), deathRecipient_(nullptr), callback_(nullptr) {}
 
 NetPolicyClient::~NetPolicyClient() = default;
 
@@ -130,6 +134,21 @@ sptr<INetPolicyService> NetPolicyClient::GetProxy()
     return netPolicyService_;
 }
 
+void NetPolicyClient::RecoverCallback()
+{
+    uint32_t count = 0;
+    while (GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_FOR_SERVICE_TIME_MS));
+        count++;
+    }
+    auto proxy = GetProxy();
+    NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
+    if (proxy != nullptr && callback_ != nullptr) {
+        int32_t ret = proxy->RegisterNetPolicyCallback(callback_);
+        NETMGR_LOG_D("Register result %{public}d", ret);
+    }
+}
+
 void NetPolicyClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     NETMGR_LOG_D("on remote died");
@@ -152,17 +171,32 @@ void NetPolicyClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 
     local->RemoveDeathRecipient(deathRecipient_);
     netPolicyService_ = nullptr;
+    if (callback_ != nullptr) {
+        NETMGR_LOG_D("on remote died recover callback");
+        std::thread t([this]() {
+            RecoverCallback();
+        });
+        std::string threadName = "netpolicyRecoverCallback";
+        pthread_setname_np(t.native_handle(), threadName.c_str());
+        t.detach();
+    }
 }
 
 int32_t NetPolicyClient::RegisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback)
 {
+    NETMGR_LOG_D("RegisterNetPolicyCallback client in");
     sptr<INetPolicyService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-
-    return proxy->RegisterNetPolicyCallback(callback);
+    int32_t ret = proxy->RegisterNetPolicyCallback(callback);
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("RegisterNetPolicyCallback success, save callback");
+        callback_ = callback;
+    }
+    
+    return ret;
 }
 
 int32_t NetPolicyClient::UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback)
@@ -172,8 +206,13 @@ int32_t NetPolicyClient::UnregisterNetPolicyCallback(const sptr<INetPolicyCallba
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
+    int32_t ret = proxy->UnregisterNetPolicyCallback(callback);
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("UnRegisterNetPolicyCallback success, delete callback");
+        callback_ = nullptr;
+    }
 
-    return proxy->UnregisterNetPolicyCallback(callback);
+    return ret;
 }
 
 int32_t NetPolicyClient::SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies)

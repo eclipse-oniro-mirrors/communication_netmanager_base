@@ -145,7 +145,20 @@ bool NetConnService::Init()
     int32_t regDnsResult = NetsysController::GetInstance().RegisterDnsResultCallback(dnsResultCallback_, 0);
     NETMGR_LOG_I("Register Dns Result callback result: [%{public}d]", regDnsResult);
 
+    RecoverInfo();
+
     return true;
+}
+
+void NetConnService::RecoverInfo()
+{
+    // recover httpproxy
+    LoadGlobalHttpProxy();
+    if (!globalHttpProxy_.GetHost().empty()) {
+        NETMGR_LOG_D("globalHttpProxy_ not empty, send broadcast");
+        SendHttpProxyChangeBroadcast(globalHttpProxy_);
+        UpdateGlobalHttpProxy(globalHttpProxy_);
+    }
 }
 
 int32_t NetConnService::SystemReady()
