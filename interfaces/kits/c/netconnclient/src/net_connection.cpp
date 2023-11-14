@@ -14,8 +14,9 @@
  */
 
 #include "net_connection.h"
-#include "net_connection_adapter.h"
 #include "net_conn_client.h"
+#include "net_connection_type.h"
+#include "net_connection_adapter.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 

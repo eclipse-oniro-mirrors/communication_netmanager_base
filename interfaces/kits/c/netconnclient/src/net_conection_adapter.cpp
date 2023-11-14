@@ -11,7 +11,7 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
-*/
+ */
 
 #include <map>
 
@@ -23,15 +23,15 @@
 namespace OHOS::NetManagerStandard {
 int32_t Conv2NetHandleList(std::list<sptr<NetHandle>> &netHandleObjList, OH_NetConn_NetHandleList *netHandleList)
 {
-   int32_t i = 0;
-   for (const auto& netHandleObj : netHandleObjList) {
-       if (i > OH_NETCONN_MAX_NET_SIZE - 1) {
-           NETMGR_LOG_E("netHandleList out of memory")
-           return NETMANAGER_ERR_INTERNAL;
-       }
-       netHandleList->netHandles[i++].netId = (*netHandleObj).GetNetId();
-   }
-   netHandleList->netHandleListSize = netHandleObjList.size();
-   return NETMANAGER_SUCCESS;
+    int32_t i = 0;
+    for (const auto& netHandleObj : netHandleObjList) {
+        if (i > OH_NETCONN_MAX_NET_SIZE - 1) {
+            NETMGR_LOG_E("netHandleList out of memory");
+            return NETMANAGER_ERR_INTERNAL;
+        }
+        netHandleList->netHandles[i++].netId = (*netHandleObj).GetNetId();
+    }
+    netHandleList->netHandleListSize = netHandleObjList.size();
+    return NETMANAGER_SUCCESS;
 }
 } // namespace OHOS::NetManagerStandard

@@ -27,7 +27,7 @@
 */
 
 /**
-* @file net_connection.h
+* @file net_connection_type.h
 * @brief Defines the data structures for the C APIs of the network connection module.
 *
 * @library libnet_connection.so
@@ -52,8 +52,8 @@ extern "C" {
 * @version 1.0
 */
 typedef struct OH_NetConn_NetHandle {
-   /** Network ID */
-   int32_t netId;
+    /** Network ID */
+    int32_t netId;
 } OH_NetConn_NetHandle;
 
 /**
@@ -63,10 +63,10 @@ typedef struct OH_NetConn_NetHandle {
 * @version 1.0
 */
 typedef struct OH_NetConn_NetHandleList {
-   /** Network handle list */
-   OH_NetConn_NetHandle netHandles[OH_NETCONN_MAX_NET_SIZE];
-   /** Actual size of the network handle list */
-   int32_t netHandleListSize;
+    /** Network handle list */
+    OH_NetConn_NetHandle netHandles[OH_NETCONN_MAX_NET_SIZE];
+    /** Actual size of the network handle list */
+    int32_t netHandleListSize;
 } OH_NetConn_NetHandleList;
 
 #ifdef __cplusplus
