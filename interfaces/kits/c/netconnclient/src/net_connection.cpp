@@ -15,6 +15,8 @@
 
 #include "net_connection.h"
 #include "net_conn_client.h"
+#include "net_connection_type.h"
+#include "net_connection_adapter.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 
@@ -53,4 +55,20 @@ int32_t OH_NetConn_FreeDnsResult(struct addrinfo *res)
     freeaddrinfo(res);
 
     return NETMANAGER_SUCCESS;
+}
+
+int32_t OH_NetConn_GetAllNets(OH_NetConn_NetHandleList *netHandleList)
+{
+    if (netHandleList == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_GetAllNets received invalid parameters");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    std::list<OHOS::sptr<NetHandle>> netHandleObjList;
+    int32_t ret = NetConnClient::GetInstance().GetAllNets(netHandleObjList);
+    int32_t retConv = Conv2NetHandleList(netHandleObjList, netHandleList);
+    if (retConv != NETMANAGER_SUCCESS) {
+        return retConv;
+    }
+    return ret;
 }
