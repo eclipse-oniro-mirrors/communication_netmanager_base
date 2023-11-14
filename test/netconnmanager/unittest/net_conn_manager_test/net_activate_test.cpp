@@ -291,5 +291,12 @@ HWTEST_F(NetActivateTest, HaveTypes001, TestSize.Level1)
     ret = testNetActivate->HaveTypes(bearerTypes);
     EXPECT_EQ(ret, false);
 }
+
+HWTEST_F(NetActivateTest, NetActivateBranchTest001, TestSize.Level1)
+{
+    instance_->netConnCallback_ = nullptr;
+    instance_->TimeOutNetAvailable();
+    EXPECT_TRUE(instance_->GetNetCallback() == nullptr);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

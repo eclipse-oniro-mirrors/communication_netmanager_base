@@ -278,7 +278,10 @@ HWTEST_F(NetsysNativeServiceProxyTest, NetsysNativeServiceProxyBranchTest001, Te
     ret = netsysNativeService->UnregisterDnsHealthCallback(healthCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 
-    sptr<INotifyCallback> notifyCallback =nullptr;
+    sptr<INotifyCallback> notifyCallback = nullptr;
+    ret = netsysNativeService->RegisterNotifyCallback(notifyCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
     ret = netsysNativeService->UnRegisterNotifyCallback(notifyCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 

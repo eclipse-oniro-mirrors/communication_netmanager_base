@@ -591,6 +591,38 @@ HWTEST_F(NetConnServiceProxyTest, SetAppNetTest001, TestSize.Level1)
     int32_t ret = instance_->SetAppNet(TEST_NETID);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.name: NetConnServiceProxyBranchTest001
+ * @tc.desc: Test NetConnServiceProxy Branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceProxyTest, NetConnServiceProxyBranchTest001, TestSize.Level1)
+{
+    sptr<INetSupplierCallback> supplierCallback = nullptr;
+    int32_t ret = instance_->RegisterNetSupplierCallback(g_supplierId, supplierCallback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    sptr<INetConnCallback> connCallback = nullptr;
+    ret = instance_->RegisterNetConnCallback(connCallback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    sptr<NetSpecifier> netSpecifier = nullptr;
+    uint32_t timeoutMS = 0;
+    ret = instance_->RegisterNetConnCallback(netSpecifier, connCallback, timeoutMS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->UnregisterNetConnCallback(connCallback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    int32_t netState = 0;
+    ret = instance_->UpdateNetStateForTest(netSpecifier, netState);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    sptr<INetInterfaceStateCallback> stateCallback = nullptr;
+    ret = instance_->RegisterNetInterfaceCallback(stateCallback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
