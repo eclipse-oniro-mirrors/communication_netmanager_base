@@ -183,6 +183,10 @@ bool WrapperDecoder::DecodeAscii(const char *buffer, int32_t buffSize)
         return false;
     }
     const auto msg = Split(buf, SYMBOL_AT);
+    if (msg.size() <= 1) {
+        NETNATIVE_LOGE("msg.size() = %{public}d, buf = %{public}s.", msg.size(), buf.c_str());
+        return false;
+    }
     const std::string path = msg[1];
     if (path.empty()) {
         return false;
