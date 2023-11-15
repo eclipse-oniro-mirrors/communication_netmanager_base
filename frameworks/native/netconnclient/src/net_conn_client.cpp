@@ -25,6 +25,7 @@
 #include "net_mgr_log_wrapper.h"
 #include "net_supplier_callback_stub.h"
 #include "netsys_sock_client.h"
+#include "network_security_config.h"
 
 static constexpr const int32_t MIN_VALID_NETID = 100;
 static constexpr uint32_t WAIT_FOR_SERVICE_TIME_MS = 500;
@@ -621,6 +622,12 @@ int32_t NetConnClient::GetSlotType(std::string &type)
     }
 
     return proxy->GetSlotType(type);
+}
+
+int32_t NetConnClient::GetPinSetForHostName(const std::string &hostname, std::string &pins)
+{
+    auto networkSecurityConfig = std::make_unique<NetworkSecurityConfig>();
+    return networkSecurityConfig->GetPinSetForHostName(hostname, pins);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

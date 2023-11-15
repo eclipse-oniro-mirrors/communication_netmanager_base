@@ -70,6 +70,13 @@
       "OHOS::NetManagerStandard::NetConnClient::AddStaticArp(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetConnClient::DelInterfaceAddress(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
       "OHOS::NetManagerStandard::NetConnClient::AddInterfaceAddress(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
+      "OHOS::NetManagerStandard::NetConnClient::GetPinSetForHostName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
+      VTT?for?OHOS::NetManagerStandard::NetworkSecurityConfig;
+      vtable?for?OHOS::NetManagerStandard::NetworkSecurityConfig;
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonPinSet(Json::Value const&, OHOS::NetManagerStandard::PinSet&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonDomains(Json::Value const&, std::__h::vector<OHOS::NetManagerStandard::Domain, std::__h::allocator<OHOS::NetManagerStandard::Domain>>&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonTrustAnchors(Json::Value const&, OHOS::NetManagerStandard::TrustAnchors&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::GetPinSetForHostName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
       VTT?for?OHOS::NetManagerStandard::NetSpecifier;
       vtable?for?OHOS::NetManagerStandard::NetSpecifier;
       "OHOS::NetManagerStandard::NetLinkInfo::NetLinkInfo(OHOS::NetManagerStandard::NetLinkInfo const&)";
