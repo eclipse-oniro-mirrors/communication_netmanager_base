@@ -46,7 +46,6 @@ napi_value InterfaceWithoutManager(napi_env env, napi_callback_info info, const 
 
     auto context = new Context(env, nullptr);
     context->ParseParams(params, paramsCount);
-    NETMANAGER_BASE_LOGI("js params parse OK ? %{public}d", context->IsParseOK());
     if (context->IsNeedThrowException()) { // only api9 or later need throw exception.
         napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
         delete context;
@@ -83,7 +82,6 @@ napi_value Interface(napi_env env, napi_callback_info info, const std::string &a
 
     auto context = new Context(env, manager);
     context->ParseParams(params, paramsCount);
-    NETMANAGER_BASE_LOGI("js params parse OK ? %{public}d", context->IsParseOK());
     if (context->IsNeedThrowException()) { // only api9 or later need throw exception.
         napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
         delete context;
@@ -125,7 +123,6 @@ napi_value InterfaceSync(napi_env env, napi_callback_info info, const std::strin
     }
 
     context->ParseParams(params, paramsCount);
-    NETMANAGER_BASE_LOGI("js params parse OK ? %{public}d", context->IsParseOK());
     if (!context->IsParseOK()) {
         napi_throw_error(env, std::to_string(context->GetErrorCode()).c_str(), context->GetErrorMessage().c_str());
         return NapiUtils::GetUndefined(env);

@@ -291,6 +291,7 @@ int32_t NetConnClient::GetAddressByName(const std::string &host, int32_t netId, 
 int32_t NetConnClient::BindSocket(int32_t socket_fd, int32_t netId)
 {
     if (netId < MIN_VALID_NETID) {
+        NETMGR_LOG_E("netId is invalid.");
         return NET_CONN_ERR_INVALID_NETWORK;
     }
     std::shared_ptr<nmd::FwmarkClient> fwmarkClient_ = std::make_shared<nmd::FwmarkClient>();
@@ -417,7 +418,7 @@ void NetConnClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
     NetConnService_ = nullptr;
 
     if (!registerConnTupleList_.empty()) {
-        NETMGR_LOG_D("on remote died recover callback");
+        NETMGR_LOG_I("on remote died recover callback");
         std::thread t([this]() {
             RecoverCallback();
         });
@@ -527,7 +528,7 @@ int32_t NetConnClient::GetNetInterfaceConfiguration(const std::string &iface, Ne
 int32_t NetConnClient::AddNetworkRoute(int32_t netId, const std::string &ifName,
                                        const std::string &destination, const std::string &nextHop)
 {
-    NETMGR_LOG_D("AddNetworkRoute client in.");
+    NETMGR_LOG_I("AddNetworkRoute client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -540,7 +541,7 @@ int32_t NetConnClient::AddNetworkRoute(int32_t netId, const std::string &ifName,
 int32_t NetConnClient::RemoveNetworkRoute(int32_t netId, const std::string &ifName,
                                           const std::string &destination, const std::string &nextHop)
 {
-    NETMGR_LOG_D("RemoveNetworkRoute client in.");
+    NETMGR_LOG_I("RemoveNetworkRoute client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -553,7 +554,7 @@ int32_t NetConnClient::RemoveNetworkRoute(int32_t netId, const std::string &ifNa
 int32_t NetConnClient::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                            int32_t prefixLength)
 {
-    NETMGR_LOG_D("AddInterfaceAddress client in.");
+    NETMGR_LOG_I("AddInterfaceAddress client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -566,7 +567,7 @@ int32_t NetConnClient::AddInterfaceAddress(const std::string &ifName, const std:
 int32_t NetConnClient::DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                            int32_t prefixLength)
 {
-    NETMGR_LOG_D("DelInterfaceAddress client in.");
+    NETMGR_LOG_I("DelInterfaceAddress client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -578,7 +579,7 @@ int32_t NetConnClient::DelInterfaceAddress(const std::string &ifName, const std:
 
 int32_t NetConnClient::AddStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName)
 {
-    NETMGR_LOG_D("AddStaticArp client in.");
+    NETMGR_LOG_I("AddStaticArp client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -590,7 +591,7 @@ int32_t NetConnClient::AddStaticArp(const std::string &ipAddr, const std::string
 
 int32_t NetConnClient::DelStaticArp(const std::string &ipAddr, const std::string &macAddr, const std::string &ifName)
 {
-    NETMGR_LOG_D("DelStaticArp client in.");
+    NETMGR_LOG_I("DelStaticArp client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
