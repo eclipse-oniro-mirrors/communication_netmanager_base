@@ -34,6 +34,8 @@ const uint8_t *g_baseFuzzData = nullptr;
 size_t g_baseFuzzSize = 0;
 size_t g_baseFuzzPos;
 constexpr size_t STR_LEN = 10;
+constexpr int32_t NUMBER_TWO = 2;
+constexpr int32_t NUMBER_ONE = 1;
 bool g_isWaitAsync = false;
 } // namespace
 
@@ -198,8 +200,7 @@ void NetDiagUpdateInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
-    const int numberTow = 2;
-    bool isAdd = (GetData<int32_t>() % numberTow == numberTow) ? true : false;
+    bool isAdd = (GetData<int32_t>() % NUMBER_TWO == NUMBER_ONE) ? true : false;
     OHOS::NetsysNative::NetDiagIfaceConfig config;
     config.ifaceName_ = GetStringFromData(STR_LEN);
     config.linkEncap_ = GetStringFromData(STR_LEN);

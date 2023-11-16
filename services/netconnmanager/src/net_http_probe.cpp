@@ -506,13 +506,8 @@ void NetHttpProbe::RecvHttpProbeResponse()
         return;
     }
     CURLMsg *curlMsg = nullptr;
-    do {
-        int msgQueue = 0;
-        curlMsg = curl_multi_info_read(curlMulti_, &msgQueue);
-        if (!curlMsg) {
-            break;
-        }
-
+    int32_t msgQueue = 0;
+    while ((curlMsg = curl_multi_info_read(curlMulti_, &msgQueue)) != nullptr) {
         if (curlMsg->msg != CURLMSG_DONE) {
             NETMGR_LOG_W("curl multi read not done, msg:[%{public}d]", curlMsg->msg);
             continue;
@@ -540,7 +535,7 @@ void NetHttpProbe::RecvHttpProbeResponse()
         } else {
             NETMGR_LOG_E("Unknown curl handle.");
         }
-    } while (curlMsg);
+    }
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

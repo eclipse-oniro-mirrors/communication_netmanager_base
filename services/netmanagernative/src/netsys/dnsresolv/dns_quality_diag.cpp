@@ -91,9 +91,9 @@ int32_t DnsQualityDiag::ParseReportAddr(uint32_t size, AddrInfo* addrinfo, Netsy
                     continue;
                 }
                 oss << s6addr[0];
-                for (uint32_t i = 1; i < size; ++i) {
+                for (uint32_t n = 1; n < size; ++n) {
                     oss << ':';
-                    oss << s6addr[i];
+                    oss << s6addr[n];
                 }
                 ai.type_ = NetsysNative::ADDR_TYPE_IPV6;
                 ai.addr_ = oss.str();
