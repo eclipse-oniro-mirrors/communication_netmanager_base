@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
-#include "net_score.h"
-
-#include "net_mgr_log_wrapper.h"
-#include "net_conn_types.h"
-
 #include <gtest/gtest.h>
+
+#ifdef GTEST_API_
+#define private public
+#endif
+
+#include "net_conn_types.h"
+#include "net_mgr_log_wrapper.h"
+#include "net_score.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -72,6 +75,49 @@ HWTEST_F(NetScoreTest, GetServiceScore, TestSize.Level1)
     ASSERT_TRUE(result == true);
     ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
     ASSERT_TRUE(supplier->GetRealScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
+}
+
+HWTEST_F(NetScoreTest, NetSupplierBranchTest, TestSize.Level1)
+{
+    std::set<NetCap> netCaps{NET_CAPABILITY_MMS, NET_CAPABILITY_INTERNET};
+    std::string ident = "ident";
+    NetBearType bearerType = BEARER_CELLULAR;
+    sptr<NetSupplier> supplier = (std::make_unique<NetSupplier>(bearerType, ident, netCaps)).release();
+
+    HttpProxy httpProxy;
+    supplier->ClearDefault();
+    supplier->UpdateGlobalHttpProxy(httpProxy);
+    uint32_t reqId = 0;
+    supplier->RemoveBestRequest(reqId);
+    supplier->IsConnecting();
+
+    NetSupplierInfo netSupplierInfo = {};
+    supplier->network_ = nullptr;
+    supplier->UpdateNetSupplierInfo(netSupplierInfo);
+
+    NetLinkInfo netLinkInfo = {};
+    supplier->UpdateNetLinkInfo(netLinkInfo);
+    supplier->GetHttpProxy(httpProxy);
+    supplier->ClearDefault();
+    supplier->UpdateGlobalHttpProxy(httpProxy);
+
+    std::set<NetCap> caps;
+    bool ret = supplier->CompareNetCaps(caps);
+    ASSERT_TRUE(ret);
+
+    ret = supplier->HasNetCaps(caps);
+    ASSERT_TRUE(ret);
+
+    ret = supplier->IsConnecting();
+    ASSERT_FALSE(ret);
+
+    supplier->netController_ = nullptr;
+    supplier->netSupplierInfo_.isAvailable_ = true;
+    ret = supplier->SupplierDisconnection(caps);
+    ASSERT_FALSE(ret);
+
+    int32_t result = supplier->GetNetId();
+    EXPECT_EQ(result, INVALID_NET_ID);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

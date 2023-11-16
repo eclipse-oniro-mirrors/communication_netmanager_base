@@ -15,6 +15,10 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+#define private public
+#endif
+
 #include "net_detection_callback_stub.h"
 #include "net_manager_constants.h"
 #include "network.h"
@@ -24,7 +28,10 @@ namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
 constexpr int32_t TEST_NETID = 12;
+constexpr int32_t INVALID_VALUE = 100;
 constexpr uint32_t TEST_SUPPLIERID = 214;
+constexpr const char *TEST_PROXY_HOST = "testHttpProxy";
+
 class NetDetectionCallbackTest : public NetDetectionCallbackStub {
 public:
     inline int32_t OnNetDetectionResultChanged(NetDetectionResultCode detectionResult,
@@ -169,6 +176,36 @@ HWTEST_F(NetworkTest, NetDetectionForDnsHealthTest001, TestSize.Level1)
     instance_->UpdateNetConnState(NetConnState::NET_CONN_STATE_DISCONNECTED);
     ret = instance_->IsConnected();
     EXPECT_FALSE(ret);
+}
+
+HWTEST_F(NetworkTest, NetworkTestBranchTest001, TestSize.Level1)
+{
+    sptr<INetDetectionCallback> callback = nullptr;
+    instance_->RegisterNetDetectionCallback(callback);
+    auto ret = instance_->UnRegisterNetDetectionCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    HttpProxy httpProxy = {TEST_PROXY_HOST, 0, {}};
+    instance_->UpdateGlobalHttpProxy(httpProxy);
+
+    NetConnState netConnState = NetConnState::NET_CONN_STATE_UNKNOWN;
+    instance_->UpdateNetConnState(netConnState);
+    EXPECT_EQ(instance_->state_, NetConnState::NET_CONN_STATE_UNKNOWN);
+
+    instance_->netMonitor_ = nullptr;
+    instance_->NetDetectionForDnsHealth(true);
+    instance_->UpdateGlobalHttpProxy(httpProxy);
+
+    int32_t internalRet = static_cast<int32_t>(VERIFICATION_STATE);
+    NetDetectionResultCode code = instance_->NetDetectionResultConvert(internalRet);
+    EXPECT_EQ(code, NetDetectionResultCode::NET_DETECTION_SUCCESS);
+
+    internalRet = static_cast<int32_t>(CAPTIVE_PORTAL_STATE);
+    code = instance_->NetDetectionResultConvert(internalRet);
+    EXPECT_EQ(code, NetDetectionResultCode::NET_DETECTION_CAPTIVE_PORTAL);
+
+    code = instance_->NetDetectionResultConvert(INVALID_VALUE);
+    EXPECT_EQ(code, NetDetectionResultCode::NET_DETECTION_FAIL);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
