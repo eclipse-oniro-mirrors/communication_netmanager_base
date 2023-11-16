@@ -35,6 +35,7 @@ bool VirtualNetwork::GetHasDns() const
 int32_t VirtualNetwork::AddUids(const std::vector<UidRange> &uidVec)
 {
     std::lock_guard<std::mutex> lock(mutex_);
+    NETNATIVE_LOG_D("VirtualNetwork::AddUids update uidRanges_");
     auto middle = uidRanges_.insert(uidRanges_.end(), uidVec.begin(), uidVec.end());
     std::inplace_merge(uidRanges_.begin(), middle, uidRanges_.end()); // restart sort
 

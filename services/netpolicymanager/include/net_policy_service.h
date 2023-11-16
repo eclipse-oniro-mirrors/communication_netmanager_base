@@ -214,9 +214,14 @@ public:
      */
     int32_t CheckPermission() override;
 
+protected:
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override; // 调用OnNetSysRestart
+
 private:
     void Init();
     int32_t GetDumpMessage(std::string &message);
+
+    void OnNetSysRestart();
 
 private:
     enum ServiceRunningState {

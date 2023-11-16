@@ -142,6 +142,9 @@ public:
      */
     void GetDumpMessage(std::string &message);
 
+    // When system's mode status is changed, do this function.
+    void TransPolicyToRule();
+
 private:
     void NetsysCtrl(uint32_t uid, uint32_t netsysCtrl);
     void TransConditionToRuleAndNetsys(uint32_t policyCondition, uint32_t uid, uint32_t policy);
@@ -151,8 +154,6 @@ private:
     uint32_t BuildTransCondition(uint32_t uid, uint32_t policy);
     uint32_t GetMatchTransCondition(uint32_t policyCondition);
 
-    // When system's mode status is changed, do this function.
-    void TransPolicyToRule();
     // When a uid add into some forbidden list, do this function.
     void TransPolicyToRule(uint32_t uid);
     bool IsIdleMode();
