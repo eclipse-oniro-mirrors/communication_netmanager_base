@@ -132,8 +132,8 @@ napi_value ConnectionExec::GetDefaultNetCallback(GetDefaultNetContext *context)
 bool ConnectionExec::ExecHasDefaultNet(HasDefaultNetContext *context)
 {
     auto ret = NetConnClient::GetInstance().HasDefaultNet(context->hasDefaultNet_);
-    NETMANAGER_BASE_LOGI("ExecHasDefaultNet ret %{public}d", ret);
     if (ret != NETMANAGER_SUCCESS && ret != NET_CONN_ERR_NO_DEFAULT_NET) {
+        NETMANAGER_BASE_LOGE("ExecHasDefaultNet ret %{public}d", ret);
         context->SetErrorCode(ret);
         return false;
     }
@@ -152,7 +152,6 @@ bool ConnectionExec::ExecIsDefaultNetMetered(IsDefaultNetMeteredContext *context
         NETMANAGER_BASE_LOGE("get net metered status failed %{public}d", ret);
         context->SetErrorCode(ret);
     }
-    NETMANAGER_BASE_LOGD("exec is default net metered ret %{public}d", ret);
     return ret == NETMANAGER_SUCCESS;
 }
 
@@ -350,7 +349,6 @@ napi_value ConnectionExec::SetGlobalHttpProxyCallback(SetGlobalHttpProxyContext 
 
 bool ConnectionExec::ExecGetAppNet(GetAppNetContext *context)
 {
-    NETMANAGER_BASE_LOGI("into");
     int32_t netId = 0;
     int32_t errorCode = NetConnClient::GetInstance().GetAppNet(netId);
     if (errorCode != NET_CONN_SUCCESS) {
@@ -364,7 +362,6 @@ bool ConnectionExec::ExecGetAppNet(GetAppNetContext *context)
 
 napi_value ConnectionExec::GetAppNetCallback(GetAppNetContext *context)
 {
-    NETMANAGER_BASE_LOGI("into");
     return CreateNetHandle(context->GetEnv(), &context->netHandle_);
 }
 
@@ -382,7 +379,6 @@ bool ConnectionExec::ExecSetAppNet(SetAppNetContext *context)
 
 napi_value ConnectionExec::SetAppNetCallback(SetAppNetContext *context)
 {
-    NETMANAGER_BASE_LOGI("into");
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
@@ -410,7 +406,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
     queryparam param;
     param.qp_type = QEURY_TYPE_NORMAL;
     param.qp_netid = netid;
-    NETMANAGER_BASE_LOGI("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
+    NETMANAGER_BASE_LOGD("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
 
     int status = getaddrinfo_ext(context->host_.c_str(), nullptr, nullptr, &res, &param);
     if (status < 0) {
@@ -463,7 +459,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext
     queryparam param;
     param.qp_type = QEURY_TYPE_NORMAL;
     param.qp_netid = netid;
-    NETMANAGER_BASE_LOGI("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
+    NETMANAGER_BASE_LOGD("getaddrinfo_ext %{public}d %{public}d", netid, param.qp_netid);
 
     int status = getaddrinfo_ext(context->host_.c_str(), nullptr, nullptr, &res, &param);
     if (status < 0) {
@@ -589,8 +585,10 @@ bool ConnectionExec::NetConnectionExec::ExecUnregister(UnregisterContext *contex
     sptr<INetConnCallback> callback = conn->GetObserver();
 
     int32_t ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
-    NETMANAGER_BASE_LOGI("Unregister result %{public}d", ret);
-    context->SetErrorCode(ret);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMANAGER_BASE_LOGE("Unregister result %{public}d", ret);
+        context->SetErrorCode(ret);
+    }
     return ret == NETMANAGER_SUCCESS;
 }
 
