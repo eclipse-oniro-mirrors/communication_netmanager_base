@@ -806,9 +806,7 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
         NETMGR_LOG_E("netActivateNetwork is null");
         return bestScore;
     }
-    NETMGR_LOG_I(
-        "FindBestNetworkForRequest Enter, request[%{public}d] is [%{public}s]", netActivateNetwork->GetRequestId(),
-        netActivateNetwork->GetNetSpecifier() ? netActivateNetwork->GetNetSpecifier()->ToString(" ").c_str() : "null");
+
     NET_SUPPLIER_MAP::iterator iter;
     for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
         if (iter->second == nullptr) {
@@ -827,9 +825,11 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
             supplier = iter->second;
         }
     }
-    NETMGR_LOG_I("FindBestNetworkForRequest exit, bestScore[%{public}d], bestSupplier[%{public}d, %{public}s]",
+    NETMGR_LOG_I("FindBestNetworkForRequest exit, bestScore[%{public}d], bestSupplier[%{public}d, %{public}s], request[%{public}d] is [%{public}s],",
                  bestScore, supplier ? supplier->GetSupplierId() : 0,
-                 supplier ? supplier->GetNetSupplierIdent().c_str() : "null");
+                 supplier ? supplier->GetNetSupplierIdent().c_str() : "null",
+                 netActivateNetwork->GetRequestId(),
+                 netActivateNetwork->GetNetSpecifier() ? netActivateNetwork->GetNetSpecifier()->ToString(" ").c_str() : "null");
     return bestScore;
 }
 
@@ -947,7 +947,7 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
 
 void NetConnService::SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId)
 {
-    NETMGR_LOG_I("Send best supplier[%{public}d]-score[%{public}d] to all supplier", supplierId, bestScore);
+    NETMGR_LOG_D("Send best supplier[%{public}d]-score[%{public}d] to all supplier", supplierId, bestScore);
     NET_SUPPLIER_MAP::iterator iter;
     for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
         if (iter->second == nullptr) {
@@ -1033,11 +1033,12 @@ void NetConnService::CallbackForAvailable(sptr<NetSupplier> &supplier, const spt
 
 void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<NetSupplier> &newSupplier)
 {
-    NETMGR_LOG_I("MakeDefaultNetWork in, oldSupplier[%{public}d, %{public}s], newSupplier[%{public}d, %{public}s]",
+    NETMGR_LOG_I("MakeDefaultNetWork in, oldSupplier[%{public}d, %{public}s], newSupplier[%{public}d, %{public}s], old equals new is [%{public}d]",
                  oldSupplier ? oldSupplier->GetSupplierId() : 0,
                  oldSupplier ? oldSupplier->GetNetSupplierIdent().c_str() : "null",
                  newSupplier ? newSupplier->GetSupplierId() : 0,
-                 newSupplier ? newSupplier->GetNetSupplierIdent().c_str() : "null");
+                 newSupplier ? newSupplier->GetNetSupplierIdent().c_str() : "null",
+                 oldSupplier == newSupplier);
     if (oldSupplier == newSupplier) {
         NETMGR_LOG_D("old supplier equal to new supplier.");
         return;
@@ -1050,8 +1051,6 @@ void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<Net
     }
     std::lock_guard<std::mutex> locker(netManagerMutex_);
     oldSupplier = newSupplier;
-    NETMGR_LOG_I("Default supplier set to: [%{public}d, %{public}s]", oldSupplier ? oldSupplier->GetSupplierId() : 0,
-                 oldSupplier ? oldSupplier->GetNetSupplierIdent().c_str() : "null");
 }
 
 void NetConnService::HandleDetectionResult(uint32_t supplierId, bool ifValid)
