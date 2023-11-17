@@ -44,7 +44,7 @@ bool NetHttpProbeResult::IsSuccessful() const
 
 bool NetHttpProbeResult::IsNeedPortal() const
 {
-    return (responseCode_ >= PORTAL_CODE_MIN && responseCode_ <= PORTAL_CODE_MAX) && (responseCode_ != SUCCESS_CODE) && !redirectUrl_.empty();
+    return (responseCode_ >= PORTAL_CODE_MIN && responseCode_ <= PORTAL_CODE_MAX) && (responseCode_ != SUCCESS_CODE);
 }
 
 bool NetHttpProbeResult::IsFailed() const
