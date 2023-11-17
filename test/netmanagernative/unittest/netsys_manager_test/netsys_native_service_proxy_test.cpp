@@ -289,7 +289,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, NetsysNativeServiceProxyBranchTest001, Te
     uint32_t type = 0;
     uint64_t cookie = 0;
     ret = netsysNativeService->GetCookieStats(stats, type, cookie);
-    EXPECT_EQ(ret, NetManagerStandard::NetStatsResultCode::STATS_ERR_READ_BPF_FAIL);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
 }
 } // namespace NetsysNative
 } // namespace OHOS
