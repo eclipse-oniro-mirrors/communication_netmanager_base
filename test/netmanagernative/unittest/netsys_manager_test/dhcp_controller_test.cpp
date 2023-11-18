@@ -99,10 +99,10 @@ HWTEST_F(DhcpControllerTest, StartDhcpTest001, TestSize.Level1)
 {
     std::string testInterfaceName = "eth0";
     std::string testIpv4Addr = "112.254.154.415";
-    instance_->StartDhcpClient(testInterfaceName, false);
-    instance_->StopDhcpClient(testInterfaceName, false);
-    instance_->StartDhcpClient(testInterfaceName, true);
-    instance_->StopDhcpClient(testInterfaceName, true);
+    instance_->StartClient(testInterfaceName, false);
+    instance_->StopClient(testInterfaceName, false);
+    instance_->StartClient(testInterfaceName, true);
+    instance_->StopClient(testInterfaceName, true);
     auto ret = instance_->StartDhcpService(testInterfaceName, testIpv4Addr);
     ASSERT_FALSE(ret);
     ret = instance_->StopDhcpService(testInterfaceName);
@@ -112,27 +112,26 @@ HWTEST_F(DhcpControllerTest, StartDhcpTest001, TestSize.Level1)
     ret = instance_->StopDhcpService(testInterfaceName);
     ASSERT_TRUE(ret);
 
-    OHOS::Wifi::DhcpResult dhcpRet;
-    instance_->Process(testInterfaceName, dhcpRet);
+    DhcpResult dhcpRet;
+    instance_->Process(testInterfaceName, &dhcpRet);
 }
 
 HWTEST_F(DhcpControllerTest, TestErr, TestSize.Level1)
 {
     std::unique_ptr<DhcpController::DhcpControllerResultNotify> notifier =
-        std::make_unique<DhcpController::DhcpControllerResultNotify>(*instance_);
+        std::make_unique<DhcpController::DhcpControllerResultNotify>();
     int status = 0;
     std::string ifname = "testIfaceName";
-    OHOS::Wifi::DhcpResult result;
-    notifier->OnSuccess(status, ifname, result);
+    DhcpResult result;
+    notifier->OnSuccess(status, ifname.c_str(), &result);
     std::string reason = "for test";
-    notifier->OnFailed(status, ifname, reason);
-    notifier->OnSerExitNotify(ifname);
+    notifier->OnFailed(status, ifname.c_str(), reason.c_str());
     std::string testInterfaceName = "dfsgagr";
     std::string testIpv4Addr = "asgesag";
-    instance_->StartDhcpClient(testInterfaceName, false);
-    instance_->StopDhcpClient(testInterfaceName, false);
-    instance_->StartDhcpClient(testInterfaceName, true);
-    instance_->StopDhcpClient(testInterfaceName, true);
+    instance_->StartClient(testInterfaceName, false);
+    instance_->StopClient(testInterfaceName, false);
+    instance_->StartClient(testInterfaceName, true);
+    instance_->StopClient(testInterfaceName, true);
     auto ret = instance_->StartDhcpService(testInterfaceName, testIpv4Addr);
     ASSERT_FALSE(ret);
     ret = instance_->StopDhcpService(testInterfaceName);

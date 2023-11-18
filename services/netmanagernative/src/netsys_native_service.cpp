@@ -418,14 +418,14 @@ int32_t NetsysNativeService::InterfaceGetList(std::vector<std::string> &ifaces)
 int32_t NetsysNativeService::StartDhcpClient(const std::string &iface, bool bIpv6)
 {
     NETNATIVE_LOG_D("StartDhcpClient");
-    dhcpController_->StartDhcpClient(iface, bIpv6);
+    dhcpController_->StartClient(iface, bIpv6);
     return ERR_NONE;
 }
 
 int32_t NetsysNativeService::StopDhcpClient(const std::string &iface, bool bIpv6)
 {
     NETNATIVE_LOG_D("StopDhcpClient");
-    dhcpController_->StopDhcpClient(iface, bIpv6);
+    dhcpController_->StopClient(iface, bIpv6);
     return ERR_NONE;
 }
 
