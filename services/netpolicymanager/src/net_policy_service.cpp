@@ -289,7 +289,7 @@ void NetPolicyService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
 
 void NetPolicyService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    NETNATIVE_LOGI("NetPolicyService::OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    NETMGR_LOG_I("NetPolicyService::OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
         hasSARemoved_ = true;
     }
@@ -299,7 +299,10 @@ void NetPolicyService::OnRemoveSystemAbility(int32_t systemAbilityId, const std:
 void NetPolicyService::OnNetSysRestart()
 {
     NETMGR_LOG_I("NetPolicyService::OnNetSysRestart");
-    netPolicyRule_->TransPolicyToRule();
+    
+    if (netPolicyRule_ != nullptr) {
+        netPolicyRule_->TransPolicyToRule();
+    }
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
