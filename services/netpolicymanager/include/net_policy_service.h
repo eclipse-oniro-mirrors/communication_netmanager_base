@@ -216,6 +216,7 @@ public:
 
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override; // 调用OnNetSysRestart
+    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
 
 private:
     void Init();
@@ -239,6 +240,8 @@ private:
     sptr<NetPolicyServiceCommon> serviceComm_ = nullptr;
     std::mutex mutex_;
     std::vector<uint16_t> monthDay_;
+
+    bool hasSARemoved_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
