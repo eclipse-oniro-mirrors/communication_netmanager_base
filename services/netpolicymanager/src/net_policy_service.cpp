@@ -295,7 +295,6 @@ void NetPolicyService::OnRemoveSystemAbility(int32_t systemAbilityId, const std:
     }
 }
 
-
 void NetPolicyService::OnNetSysRestart()
 {
     NETMGR_LOG_I("NetPolicyService::OnNetSysRestart");
