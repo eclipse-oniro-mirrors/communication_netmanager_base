@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 #include "connection_module.h"
 #include "constant.h"
@@ -378,6 +379,87 @@ bool ConnectionExec::ExecSetAppNet(SetAppNetContext *context)
 }
 
 napi_value ConnectionExec::SetAppNetCallback(SetAppNetContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+bool ConnectionExec::ExecSetCustomDNSRule(SetCustomDNSRuleContext *context)
+{
+    if (context->host_.empty() || context->ip_.empty()) {
+        context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        return false;
+    }
+    if (!context->IsParseOK()) {
+        context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        return false;
+    }
+
+    std::vector<std::string> ip = context->ip_;
+
+    std::string host_ips = context->host_ + ",";
+    for (size_t i = 0; i < ip.size(); i++) {
+        host_ips.append(ip[i]);
+        if (i < ip.size() - 1) {
+            host_ips.append(",");
+        }
+    }
+
+    NETMANAGER_BASE_LOGI("set host with ip addr string: %{public}s", host_ips.c_str());
+    int res = predefined_host_set_hosts(host_ips.c_str());
+    if (res != NETMANAGER_SUCCESS) {
+        NETMANAGER_BASE_LOGE("ExecSetCustomDNSRule failed %{public}d", res);
+        context->SetErrorCode(res);
+        return false;
+    }
+
+    return true;
+}
+
+napi_value ConnectionExec::SetCustomDNSRuleCallback(SetCustomDNSRuleContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+bool ConnectionExec::ExecDeleteCustomDNSRule(DeleteCustomDNSRuleContext *context)
+{
+    if (!context->IsParseOK()) {
+        context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        return false;
+    }
+
+    NETMANAGER_BASE_LOGI("delete host with ip addr string: %{public}s", context->host_.c_str());
+    int res = predefined_host_remove_host(context->host_.c_str());
+    if (res != NETMANAGER_SUCCESS) {
+        NETMANAGER_BASE_LOGE("ExecDeleteCustomDNSRule failed %{public}d", res);
+        context->SetErrorCode(res);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::DeleteCustomDNSRuleCallback(DeleteCustomDNSRuleContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
+bool ConnectionExec::ExecDeleteCustomDNSRules(DeleteCustomDNSRulesContext *context)
+{
+    if (!context->IsParseOK()) {
+        context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        return false;
+    }
+
+    int res = predefined_host_clear_all_hosts();
+    if (res != NETMANAGER_SUCCESS) {
+        NETMANAGER_BASE_LOGE("ExecDeleteCustomDNSRules failed %{public}d", res);
+        context->SetErrorCode(res);
+        return false;
+    }
+
+    return true;
+}
+
+napi_value ConnectionExec::DeleteCustomDNSRulesCallback(DeleteCustomDNSRulesContext *context)
 {
     return NapiUtils::GetUndefined(context->GetEnv());
 }

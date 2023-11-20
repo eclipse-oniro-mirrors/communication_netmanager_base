@@ -91,6 +91,33 @@ int32_t OH_NetConn_FreeDnsResult(struct addrinfo *res);
  */
 int32_t OH_NetConn_GetAllNets(OH_NetConn_NetHandleList *netHandleList);
 
+/**
+ * @brief Registers a custom DNS resolver.
+ *
+ * @param resolver Pointer to the custom DNS resolver.
+ * @return 0 - Success. 201 - Missing permissions.
+ *         401 - Parameter error. 2100002 - Unable to connect to service.
+ *         2100003 - Internal error.
+ * @permission ohos.permission.INTERNET
+ * @syscap SystemCapability.Communication.NetManager.Core
+ * @since 11
+ * @version 1.0
+*/
+int32_t OHOS_NetConn_RegisterDnsResolver(OH_NetConn_CustomDnsResolver resolver);
+
+/**
+ * @brief Unregisters a custom DNS resolver.
+ *
+ * @return 0 - Success. 201 - Missing permissions.
+ *         401 - Parameter error. 2100002 - Unable to connect to service.
+ *         2100003 - Internal error.
+ * @permission ohos.permission.INTERNET
+ * @syscap SystemCapability.Communication.NetManager.Core
+ * @since 11
+ * @version 1.0
+*/
+int32_t OHOS_NetConn_UnregisterDnsResolver(void);
+
 #ifdef __cplusplus
 }
 #endif

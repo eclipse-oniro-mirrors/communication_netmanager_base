@@ -33,6 +33,9 @@
 #include "register_context.h"
 #include "setappnet_context.h"
 #include "setglobalhttpproxy_context.h"
+#include "setcustomdnsrule_context.h"
+#include "deletecustomdnsrule_context.h"
+#include "deletecustomdnsrules_context.h"
 
 static constexpr const char *CONNECTION_MODULE_NAME = "net.connection";
 
@@ -184,6 +187,9 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_DEFAULT_HTTP_PROXY, GetDefaultHttpProxy),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_GLOBAL_HTTP_PROXY, GetGlobalHttpProxy),
         DECLARE_NAPI_FUNCTION(FUNCTION_SET_GLOBAL_HTTP_PROXY, SetGlobalHttpProxy),
+        DECLARE_NAPI_FUNCTION(FUNCTION_SET_CUSTOM_DNS_RULE, AddCustomDnsRule),
+        DECLARE_NAPI_FUNCTION(FUNCTION_DELETE_CUSTOM_DNS_RULE, RemoveCustomDnsRule),
+        DECLARE_NAPI_FUNCTION(FUNCTION_DELETE_CUSTOM_DNS_RULES, ClearCustomDnsRules),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_APP_NET, GetAppNet),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_APP_NET_SYNC, GetAppNetSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_SET_APP_NET, SetAppNet),
@@ -398,6 +404,27 @@ napi_value ConnectionModule::SetAppNet(napi_env env, napi_callback_info info)
     return ModuleTemplate::Interface<SetAppNetContext>(env, info, FUNCTION_SET_APP_NET, nullptr,
                                                        ConnectionAsyncWork::ExecSetAppNet,
                                                        ConnectionAsyncWork::SetAppNetCallback);
+}
+
+napi_value ConnectionModule::AddCustomDnsRule(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<SetCustomDNSRuleContext>(env, info, FUNCTION_SET_CUSTOM_DNS_RULE, nullptr,
+                                                              ConnectionAsyncWork::ExecSetCustomDNSRule,
+                                                              ConnectionAsyncWork::SetCustomDNSRuleCallback);
+}
+
+napi_value ConnectionModule::RemoveCustomDnsRule(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<DeleteCustomDNSRuleContext>(env, info, FUNCTION_DELETE_CUSTOM_DNS_RULE, nullptr,
+                                                                 ConnectionAsyncWork::ExecDeleteCustomDNSRule,
+                                                                 ConnectionAsyncWork::DeleteCustomDNSRuleCallback);
+}
+
+napi_value ConnectionModule::ClearCustomDnsRules(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<DeleteCustomDNSRulesContext>(env, info, FUNCTION_DELETE_CUSTOM_DNS_RULES, nullptr,
+                                                                 ConnectionAsyncWork::ExecDeleteCustomDNSRules,
+                                                                 ConnectionAsyncWork::DeleteCustomDNSRulesCallback);
 }
 
 napi_value ConnectionModule::NetHandleInterface::GetAddressesByName(napi_env env, napi_callback_info info)

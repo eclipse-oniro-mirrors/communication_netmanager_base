@@ -23,6 +23,9 @@
 #include "parse_nethandle_context.h"
 #include "setappnet_context.h"
 #include "setglobalhttpproxy_context.h"
+#include "setcustomdnsrule_context.h"
+#include "deletecustomdnsrule_context.h"
+#include "deletecustomdnsrules_context.h"
 
 namespace OHOS::NetManagerStandard {
 void ConnectionAsyncWork::ExecGetAddressesByName(napi_env env, void *data)
@@ -195,6 +198,39 @@ void ConnectionAsyncWork::ExecSetAppNet(napi_env env, void *data)
 void ConnectionAsyncWork::SetAppNetCallback(napi_env env, napi_status status, void *data)
 {
     BaseAsyncWork::AsyncWorkCallback<SetAppNetContext, ConnectionExec::SetAppNetCallback>(env, status, data);
+}
+
+void ConnectionAsyncWork::ExecSetCustomDNSRule(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<SetCustomDNSRuleContext, ConnectionExec::ExecSetCustomDNSRule>(env, data);
+}
+
+void ConnectionAsyncWork::SetCustomDNSRuleCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<SetCustomDNSRuleContext, ConnectionExec::SetCustomDNSRuleCallback>(env, status,
+                                                                                                        data);
+}
+
+void ConnectionAsyncWork::ExecDeleteCustomDNSRule(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<DeleteCustomDNSRuleContext, ConnectionExec::ExecDeleteCustomDNSRule>(env, data);
+}
+
+void ConnectionAsyncWork::DeleteCustomDNSRuleCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<DeleteCustomDNSRuleContext, ConnectionExec::DeleteCustomDNSRuleCallback>(env,
+        status, data);
+}
+
+void ConnectionAsyncWork::ExecDeleteCustomDNSRules(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<DeleteCustomDNSRulesContext, ConnectionExec::ExecDeleteCustomDNSRules>(env, data);
+}
+
+void ConnectionAsyncWork::DeleteCustomDNSRulesCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<DeleteCustomDNSRulesContext, ConnectionExec::DeleteCustomDNSRulesCallback>(env,
+        status, data);
 }
 
 void ConnectionAsyncWork::NetHandleAsyncWork::ExecGetAddressesByName(napi_env env, void *data)

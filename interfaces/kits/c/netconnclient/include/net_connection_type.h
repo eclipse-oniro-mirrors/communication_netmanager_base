@@ -69,6 +69,20 @@ typedef struct OH_NetConn_NetHandleList {
     int32_t netHandleListSize;
 } OH_NetConn_NetHandleList;
 
+/*
+ * @brief Pointer to the custom DNS resolver.
+ *
+ * @param host The host name to query.
+ * @param serv Service name.
+ * @param hint Pointer to the addrinfo structure.
+ * @param res Store DNS query results and return them in a linked list format.
+ *
+ * @since 11
+ * @version 1.0
+ */
+typedef int (*OH_NetConn_CustomDnsResolver)(const char *host, const char *serv,
+    const struct addrinfo *hint, struct addrinfo **res);
+
 #ifdef __cplusplus
 }
 #endif

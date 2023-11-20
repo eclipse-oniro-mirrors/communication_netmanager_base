@@ -90,6 +90,18 @@ public:
 
     static void SetAppNetCallback(napi_env env, napi_status status, void *data);
 
+    static void ExecSetCustomDNSRule(napi_env env, void *data);
+
+    static void SetCustomDNSRuleCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecDeleteCustomDNSRule(napi_env env, void *data);
+
+    static void DeleteCustomDNSRuleCallback(napi_env env, napi_status status, void *data);
+
+    static void ExecDeleteCustomDNSRules(napi_env env, void *data);
+
+    static void DeleteCustomDNSRulesCallback(napi_env env, napi_status status, void *data);
+
     class NetHandleAsyncWork final {
     public:
         NetHandleAsyncWork() = delete;

@@ -570,6 +570,96 @@ declare namespace connection {
   function getDefaultHttpProxy(): Promise<HttpProxy>;
 
   /**
+   * Add a custom {@link host} and corresponding {@link ip} mapping.
+   * @permission ohos.permission.INTERNET
+   * @param { string } host - Indicates the host name or the domain.
+   * @param { Array<string> } ip - List of IP addresses mapped to the host name.
+   * @param { AsyncCallback<void> } callback - Returns the callback of addCustomDnsRule.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100001 - Invalid parameter value.
+   * @throws { BusinessError } 2100002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @since 11
+   */
+  function addCustomDnsRule(host: string, ip: Array<string>, callback: AsyncCallback<void>): void;
+
+  /**
+   * Add a custom {@link host} and corresponding {@link ip} mapping.
+   * @permission ohos.permission.INTERNET
+   * @param { string } host - Indicates the host name or the domain.
+   * @param { Array<string> } ip - List of IP addresses mapped to the host name.
+   * @returns { Promise<void> } the promise returned by the function.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100001 - Invalid parameter value.
+   * @throws { BusinessError } 2100002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @since 11
+   */
+  function addCustomDnsRule(host: string, ip: Array<string>): Promise<void>;
+
+  /**
+   * Remove the custom DNS rule of the {@link host}.
+   * @permission ohos.permission.INTERNET
+   * @param { string } host - Indicates the host name or the domain.
+   * @param { AsyncCallback<void> } callback - Returns the callback of removeCustomDnsRule.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100001 - Invalid parameter value.
+   * @throws { BusinessError } 2100002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @since 11
+   */
+  function removeCustomDnsRule(host: string, callback: AsyncCallback<void>): void;
+
+  /**
+   * Remove the custom DNS rule of the {@link host}.
+   * @permission ohos.permission.INTERNET
+   * @param { string } host - Indicates the host name or the domain.
+   * @returns { Promise<void> } the promise returned by the function.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100001 - Invalid parameter value.
+   * @throws { BusinessError } 2100002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @since 11
+   */
+  function removeCustomDnsRule(host: string): Promise<void>;
+
+  /**
+   * Clear all custom DNS rules.
+   * @permission ohos.permission.INTERNET
+   * @param { AsyncCallback<void> } callback - Returns the callback of clearCustomDnsRules.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100001 - Invalid parameter value.
+   * @throws { BusinessError } 2100002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @since 11
+   */
+  function clearCustomDnsRules(callback: AsyncCallback<void>): void;
+
+  /**
+   * Clear all custom DNS rules.
+   * @permission ohos.permission.INTERNET
+   * @returns { Promise<void> } the promise returned by the function.
+   * @throws { BusinessError } 201 - Permission denied.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100001 - Invalid parameter value.
+   * @throws { BusinessError } 2100002 - Operation failed. Cannot connect to service.
+   * @throws { BusinessError } 2100003 - System internal error.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @since 11
+   */
+  function clearCustomDnsRules(): Promise<void>;
+
+  /**
    * Represents the network connection handle.
    * @interface NetConnection
    * @syscap SystemCapability.Communication.NetManager.Core
