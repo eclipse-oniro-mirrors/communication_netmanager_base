@@ -630,5 +630,12 @@ int32_t NetConnClient::GetPinSetForHostName(const std::string &hostname, std::st
     auto networkSecurityConfig = std::make_unique<NetworkSecurityConfig>();
     return networkSecurityConfig->GetPinSetForHostName(hostname, pins);
 }
+
+int32_t NetConnClient::GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs)
+{
+    auto networkSecurityConfig = std::make_unique<NetworkSecurityConfig>();
+    return networkSecurityConfig->GetTrustAnchorsForHostName(hostname, certs);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

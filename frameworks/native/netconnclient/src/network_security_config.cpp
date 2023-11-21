@@ -108,8 +108,8 @@ int32_t NetworkSecurityConfig::GetJsonFromBundle(std::string &jsonProfile)
     ret = bundleMgrProxy->GetJsonProfile(AppExecFwk::ProfileType::NETWORK_PROFILE,
         bundleInfo.name, bundleInfo.entryModuleName, jsonProfile);
     if (ret != ERR_OK) {
-        NETMGR_LOG_E("Failed to get json profile from bundle manager.");
-        return NETMANAGER_ERR_INTERNAL;
+        NETMGR_LOG_D("No network_config profile configured in bundle manager.");
+        return NETMANAGER_SUCCESS;
     }
 
     return NETMANAGER_SUCCESS;
@@ -273,12 +273,15 @@ int32_t NetworkSecurityConfig::GetPinSetForHostName(const std::string &hostname,
         }
     }
 
+    if (pPinSet == nullptr) {
+        return NETMANAGER_SUCCESS;
+    }
     if (!ValidateDate(pPinSet->expiration_)) {
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }
 
     std::stringstream ss;
-    for (auto pin: pPinSet->pins_) {
+    for (auto &pin: pPinSet->pins_) {
         ss << pin.digestAlgorithm_ << "//" << pin.digest_ << ";";
     }
 
@@ -290,6 +293,42 @@ int32_t NetworkSecurityConfig::GetPinSetForHostName(const std::string &hostname,
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetworkSecurityConfig::GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs)
+{
+    if (hostname.empty()) {
+        NETMGR_LOG_E("Failed to get pinset, hostname is empty.");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    auto ret = GetConfig();
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+
+    TrustAnchors *pTrustAnchors = nullptr;
+    for (auto &domainConfig: domainConfigs_) {
+        for (auto &domain: domainConfig.domains_) {
+            if (hostname == domain.domainName_) {
+                pTrustAnchors = &domainConfig.trustAnchors_;
+                break;
+            } else if (domain.includeSubDomains_ && Endswith(hostname, domain.domainName_)) {
+                pTrustAnchors = &domainConfig.trustAnchors_;
+                break;
+            }
+        }
+        if (pTrustAnchors != nullptr) {
+            break;
+        }
+    }
+
+    if (pTrustAnchors == nullptr) {
+        pTrustAnchors = &baseConfig_.trustAnchors_;
+    }
+
+    certs = pTrustAnchors->certs_;
+
+    return NETMANAGER_SUCCESS;
+}
 
 void NetworkSecurityConfig::DumpConfigs()
 {
