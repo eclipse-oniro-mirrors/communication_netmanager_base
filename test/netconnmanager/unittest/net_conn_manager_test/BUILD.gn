@@ -52,6 +52,7 @@ ohos_unittest("net_conn_manager_test") {
     "net_supplier_callback_stub_test.cpp",
     "net_supplier_info_test.cpp",
     "net_supplier_test.cpp",
+    "network_security_config_test.cpp",
     "network_test.cpp",
     "route_test.cpp",
   ]
@@ -77,6 +78,7 @@ ohos_unittest("net_conn_manager_test") {
     "$NETCONNMANAGER_SOURCE_DIR:net_conn_manager_static",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
+    "$THIRD_PARTY_ROOT/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
@@ -86,6 +88,8 @@ ohos_unittest("net_conn_manager_test") {
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
     "data_share:datashare_common",

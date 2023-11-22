@@ -79,6 +79,7 @@ ohos_shared_library("net_conn_manager_if") {
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_conn_client.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_handle.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/net_supplier_callback_base.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/network_security_config.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_callback_stub.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_service_proxy.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_detection_callback_stub.cpp",
@@ -100,9 +101,12 @@ ohos_shared_library("net_conn_manager_if") {
   deps = [
     ":net_conn_parcel",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
+    "$THIRD_PARTY_ROOT/jsoncpp:jsoncpp",
   ]
 
   external_deps = [
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]

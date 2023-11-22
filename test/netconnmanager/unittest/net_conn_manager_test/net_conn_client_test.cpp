@@ -1202,5 +1202,14 @@ HWTEST_F(NetConnClientTest, RegisterSlotTypeTest002, TestSize.Level1)
     ret = NetConnClient::GetInstance().RegisterSlotType(supplierId, tech);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnClientTest, GetPinSetForHostName001, TestSize.Level1)
+{
+    std::string hostname("www.example.com");
+    std::string pins;
+    auto ret = NetConnClient::GetInstance().GetPinSetForHostName(hostname, pins);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
