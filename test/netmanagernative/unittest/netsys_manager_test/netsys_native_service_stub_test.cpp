@@ -21,6 +21,8 @@
 #endif
 #include "i_netsys_service.h"
 #include "net_diag_callback_stub.h"
+#include "net_dns_health_callback_stub.h"
+#include "net_dns_result_callback_stub.h"
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_stub.h"
@@ -142,6 +144,28 @@ public:
     }
 
     int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override
+    {
+        return 0;
+    }
+};
+
+class TestNetDnsResultCallback : public NetDnsResultCallbackStub {
+public:
+    TestNetDnsResultCallback() = default;
+    ~TestNetDnsResultCallback() override{};
+
+    int32_t OnDnsResultReport(uint32_t size, const std::list<NetDnsResultReport>) override
+    {
+        return 0;
+    }
+};
+
+class TestNetDnsHealthCallback : public NetDnsHealthCallbackStub {
+public:
+    TestNetDnsHealthCallback() = default;
+    ~TestNetDnsHealthCallback() override{};
+
+    int32_t OnDnsHealthReport(const NetDnsHealthReport &dnsHealthReport) override
     {
         return 0;
     }
@@ -1697,6 +1721,73 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetCookieStats001, TestSize.Level1)
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdGetCookieStats(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterDnsResultListener001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    sptr<INetDnsResultCallback> callback = new (std::nothrow) TestNetDnsResultCallback();
+    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return;
+    }
+    uint32_t timeStep = 1;
+    if (!data.WriteUint32(timeStep)) {
+        return;
+    }
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdRegisterDnsResultListener(data, reply);
+    EXPECT_EQ(ret, IPC_STUB_ERR);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdUnregisterDnsResultListener001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    sptr<INetDnsResultCallback> callback = new (std::nothrow) TestNetDnsResultCallback();
+    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdUnregisterDnsResultListener(data, reply);
+    EXPECT_EQ(ret, IPC_STUB_ERR);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterDnsHealthListener001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    sptr<INetDnsHealthCallback> callback = new (std::nothrow) TestNetDnsHealthCallback();
+    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdRegisterDnsHealthListener(data, reply);
+    EXPECT_EQ(ret, IPC_STUB_ERR);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdUnregisterDnsHealthListener001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    sptr<INetDnsHealthCallback> callback = new (std::nothrow) TestNetDnsHealthCallback();
+    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdUnregisterDnsHealthListener(data, reply);
+    EXPECT_EQ(ret, IPC_STUB_ERR);
 }
 } // namespace NetsysNative
 } // namespace OHOS

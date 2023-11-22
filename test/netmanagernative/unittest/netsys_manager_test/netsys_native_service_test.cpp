@@ -699,5 +699,103 @@ HWTEST_F(NetsysNativeServiceTest, GetCookieStatsTest002, TestSize.Level1)
     instance_->bpfStats_ = std::move(backup);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
+
+HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceBranchTest001, TestSize.Level1)
+{
+    int32_t netId = 0;
+    int32_t ret = instance_->NetworkCreateVirtual(netId, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    int32_t systemAbilityId = 0;
+    std::string deviceId = "";
+    instance_->OnRemoveSystemAbility(systemAbilityId, deviceId);
+    systemAbilityId = COMM_NET_CONN_MANAGER_SYS_ABILITY_ID;
+    instance_->OnRemoveSystemAbility(systemAbilityId, deviceId);
+
+    std::vector<UidRange> uidRanges;
+    ret = instance_->NetworkAddUids(netId, uidRanges);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NetworkDelUids(netId, uidRanges);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    NetDiagPingOption pingOption;
+    sptr<INetDiagCallback> callback = nullptr;
+    ret = instance_->NetDiagPingHost(pingOption, callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER);
+
+    pingOption.destination_ = "test";
+    ret = instance_->NetDiagPingHost(pingOption, callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    std::list<NetDiagRouteTable> routeTables;
+    ret = instance_->NetDiagGetRouteTable(routeTables);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    NetDiagProtocolType socketType = NetDiagProtocolType::PROTOCOL_TYPE_ALL;
+    NetDiagSocketsInfo socketsInfo;
+    ret = instance_->NetDiagGetSocketsInfo(socketType, socketsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    std::list<NetDiagIfaceConfig> configs;
+    std::string ifaceName = "test";
+    ret = instance_->NetDiagGetInterfaceConfig(configs, ifaceName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    NetDiagIfaceConfig ifConfig;
+    ret = instance_->NetDiagUpdateInterfaceConfig(ifConfig, ifaceName, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->NetDiagSetInterfaceActiveState(ifaceName, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceBranchTest002, TestSize.Level1)
+{
+    NetDiagPingOption pingOption;
+    sptr<INetDiagCallback> callback = nullptr;
+    instance_->netDiagWrapper = nullptr;
+    int32_t ret = instance_->NetDiagPingHost(pingOption, callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    std::list<NetDiagRouteTable> routeTables;
+    ret = instance_->NetDiagGetRouteTable(routeTables);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    NetDiagProtocolType socketType = NetDiagProtocolType::PROTOCOL_TYPE_ALL;
+    NetDiagSocketsInfo socketsInfo;
+    ret = instance_->NetDiagGetSocketsInfo(socketType, socketsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    std::list<NetDiagIfaceConfig> configs;
+    std::string ifaceName = "test";
+    ret = instance_->NetDiagGetInterfaceConfig(configs, ifaceName);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    NetDiagIfaceConfig ifConfig;
+    ret = instance_->NetDiagUpdateInterfaceConfig(ifConfig, ifaceName, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->NetDiagSetInterfaceActiveState(ifaceName, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceBranchTest003, TestSize.Level1)
+{
+    sptr<INetDnsResultCallback> dnsResultCallback = nullptr;
+    uint32_t timeStep = 0;
+    int32_t ret = instance_->RegisterDnsResultCallback(dnsResultCallback, timeStep);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->UnregisterDnsResultCallback(dnsResultCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    sptr<INetDnsHealthCallback> healthCallback = nullptr;
+    ret = instance_->RegisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->UnregisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS
