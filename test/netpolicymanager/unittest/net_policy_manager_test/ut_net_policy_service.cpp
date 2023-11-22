@@ -26,6 +26,7 @@
 #include "net_policy_rule.h"
 #include "net_policy_service.h"
 #include "net_policy_traffic.h"
+#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -178,6 +179,61 @@ HWTEST_F(UtNetPolicyService, GetDumpMessage01, TestSize.Level1)
 {
     std::string message;
     int32_t ret = instance_->GetDumpMessage(message);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: NetPolicyServiceBranchTest001
+ * @tc.desc: Test NetPolicyService Branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyService, NetPolicyServiceBranchTest001, TestSize.Level1)
+{
+    int32_t systemAbilityId = 0;
+    std::string deviceId = "";
+    instance_->OnStop();
+    instance_->OnStart();
+    instance_->Init();
+
+    instance_->OnAddSystemAbility(systemAbilityId, deviceId);
+    instance_->OnRemoveSystemAbility(systemAbilityId, deviceId);
+
+    systemAbilityId = COMM_NETSYS_NATIVE_SYS_ABILITY_ID;
+    instance_->OnAddSystemAbility(systemAbilityId, deviceId);
+    instance_->OnRemoveSystemAbility(systemAbilityId, deviceId);
+
+    int32_t fd = 0;
+    std::vector<std::u16string> args;
+    int32_t ret = instance_->Dump(fd, args);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    uint32_t policy = 0;
+    std::vector<uint32_t> uids;
+    ret = instance_->GetUidsByPolicy(policy, uids);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    int32_t netType = 0;
+    std::string simId = "";
+    uint32_t remindType = 0;
+    ret = instance_->UpdateRemindPolicy(netType, simId, remindType);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->GetDeviceIdleTrustlist(uids);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->SetDeviceIdlePolicy(false);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->SetPowerSaveTrustlist(uids, false);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->GetPowerSaveTrustlist(uids);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->SetPowerSavePolicy(false);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->CheckPermission();
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
