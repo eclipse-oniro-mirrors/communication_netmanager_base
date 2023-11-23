@@ -108,13 +108,12 @@ int32_t NetworkSecurityConfig::GetJsonFromBundle(std::string &jsonProfile)
     ret = bundleMgrProxy->GetJsonProfile(AppExecFwk::ProfileType::NETWORK_PROFILE,
         bundleInfo.name, bundleInfo.entryModuleName, jsonProfile);
     if (ret != ERR_OK) {
-        NETMGR_LOG_E("Failed to get json profile from bundle manager.");
-        return NETMANAGER_ERR_INTERNAL;
+        NETMGR_LOG_D("No network_config profile configured in bundle manager.");
+        return NETMANAGER_SUCCESS;
     }
 
     return NETMANAGER_SUCCESS;
 }
-
 
 void NetworkSecurityConfig::ParseJsonTrustAnchors(const Json::Value &root, TrustAnchors &trustAnchors)
 {
@@ -271,6 +270,10 @@ int32_t NetworkSecurityConfig::GetPinSetForHostName(const std::string &hostname,
         if (pPinSet != nullptr) {
             break;
         }
+    }
+
+    if (pPinSet == nullptr) {
+        return NETMANAGER_SUCCESS;
     }
 
     if (!ValidateDate(pPinSet->expiration_)) {
