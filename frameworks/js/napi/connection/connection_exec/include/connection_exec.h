@@ -32,6 +32,7 @@
 #include "setcustomdnsrule_context.h"
 #include "deletecustomdnsrule_context.h"
 #include "deletecustomdnsrules_context.h"
+#include "setapphttpproxy_context.h"
 
 namespace OHOS::NetManagerStandard {
 static constexpr size_t MAX_ARRAY_LENGTH = 64;
@@ -104,6 +105,10 @@ public:
     static bool ExecSetGlobalHttpProxy(SetGlobalHttpProxyContext *context);
 
     static napi_value SetGlobalHttpProxyCallback(SetGlobalHttpProxyContext *context);
+
+    static bool ExecSetAppHttpProxy(SetAppHttpProxyContext *context);
+
+    static napi_value SetAppHttpProxyCallback(SetAppHttpProxyContext *context);
 
     static bool ExecGetAppNet(GetAppNetContext *context);
 

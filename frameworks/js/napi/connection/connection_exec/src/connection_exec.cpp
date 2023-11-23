@@ -348,6 +348,21 @@ napi_value ConnectionExec::SetGlobalHttpProxyCallback(SetGlobalHttpProxyContext 
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
+bool ConnectionExec::ExecSetAppHttpProxy(SetAppHttpProxyContext *context)
+{
+    int32_t errorCode = NetConnClient::GetInstance().SetAppHttpProxy(context->httpProxy_);
+    if (errorCode != NET_CONN_SUCCESS) {
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::SetAppHttpProxyCallback(SetAppHttpProxyContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
 bool ConnectionExec::ExecGetAppNet(GetAppNetContext *context)
 {
     int32_t netId = 0;

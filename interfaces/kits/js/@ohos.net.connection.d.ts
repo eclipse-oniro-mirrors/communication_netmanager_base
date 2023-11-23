@@ -520,6 +520,7 @@ declare namespace connection {
    * @since 10
    */
   function setGlobalHttpProxy(httpProxy: HttpProxy, callback: AsyncCallback<void>): void;
+  function setAppHttpProxy(httpProxy: HttpProxy): void;
 
   /**
    * Set a network independent global {@link HttpProxy} proxy settings.
@@ -536,6 +537,7 @@ declare namespace connection {
    * @since 10
    */
   function setGlobalHttpProxy(httpProxy: HttpProxy): Promise<void>;
+  function setAppHttpProxy(httpProxy: HttpProxy): Promise<void>;
 
   /**
    * Obtains the default {@link HttpProxy} proxy settings.
