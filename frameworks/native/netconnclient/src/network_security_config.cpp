@@ -115,7 +115,6 @@ int32_t NetworkSecurityConfig::GetJsonFromBundle(std::string &jsonProfile)
     return NETMANAGER_SUCCESS;
 }
 
-
 void NetworkSecurityConfig::ParseJsonTrustAnchors(const Json::Value &root, TrustAnchors &trustAnchors)
 {
     if (!root.isArray()) {
@@ -276,6 +275,7 @@ int32_t NetworkSecurityConfig::GetPinSetForHostName(const std::string &hostname,
     if (pPinSet == nullptr) {
         return NETMANAGER_SUCCESS;
     }
+
     if (!ValidateDate(pPinSet->expiration_)) {
         return NETMANAGER_ERR_PERMISSION_DENIED;
     }

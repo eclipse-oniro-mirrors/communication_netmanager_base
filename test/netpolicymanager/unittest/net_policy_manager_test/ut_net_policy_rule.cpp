@@ -17,6 +17,10 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+#define private public
+#define protected public
+#endif
 #include "net_policy_callback_test.h"
 #include "net_policy_client.h"
 #include "net_policy_firewall.h"
@@ -29,6 +33,7 @@ namespace {
 using namespace testing::ext;
 constexpr int32_t WAIT_TIME_SECOND_LONG = 10;
 constexpr int32_t WAIT_TIME_THIRTY_SECOND_LONG = 30;
+constexpr int32_t INVALID_VALUE = 100;
 constexpr uint32_t TEST_UID1 = 200;
 constexpr uint32_t TEST_UID2 = 13000;
 std::shared_ptr<NetPolicyRule> g_netPolicyRule = nullptr;
@@ -270,6 +275,38 @@ HWTEST_F(UtNetPolicyRule, NetPolicyRule008, TestSize.Level1)
     NetPolicyAccessToken token3;
     int32_t result4 = DelayedSingleton<NetPolicyClient>::GetInstance()->UnregisterNetPolicyCallback(callbackR);
     ASSERT_EQ(result4, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: NetPolicyRuleBranchTest001
+ * @tc.desc: Test NetPolicyRule Branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyRule, NetPolicyRuleBranchTest001, TestSize.Level1)
+{
+    g_netPolicyRule->DeleteUid(TEST_UID2);
+
+    auto policyEvent = std::make_shared<PolicyEvent>();
+    int32_t eventId = static_cast<int32_t>(NetPolicyEventHandler::MSG_UID_REMOVED);
+    g_netPolicyRule->HandleEvent(eventId, policyEvent);
+
+    eventId = static_cast<int32_t>(NetPolicyEventHandler::MSG_UID_STATE_FOREGROUND);
+    g_netPolicyRule->HandleEvent(eventId, policyEvent);
+
+    eventId = static_cast<int32_t>(NetPolicyEventHandler::MSG_UID_STATE_BACKGROUND);
+    g_netPolicyRule->HandleEvent(eventId, policyEvent);
+
+    eventId = INVALID_VALUE;
+    g_netPolicyRule->HandleEvent(eventId, policyEvent);
+
+    g_netPolicyRule->UpdateForegroundUidList(TEST_UID2, false);
+    g_netPolicyRule->UpdateForegroundUidList(TEST_UID2, true);
+
+    std::string message = "";
+    g_netPolicyRule->GetDumpMessage(message);
+
+    bool ret = g_netPolicyRule->IsValidNetPolicy(INVALID_VALUE);
+    ASSERT_FALSE(ret);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

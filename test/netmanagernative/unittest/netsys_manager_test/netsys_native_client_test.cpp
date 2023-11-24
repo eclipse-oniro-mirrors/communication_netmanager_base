@@ -365,5 +365,15 @@ HWTEST_F(NetsysNativeClientTest, GetCookieStatsTest001, TestSize.Level1)
     ret = nativeClient_.GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeClientTest, NetsysNativeClientBranchTest001, TestSize.Level1)
+{
+    uint32_t timeStep = 0;
+    sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> callback = nullptr;
+    int32_t ret = nativeClient_.RegisterDnsResultCallback(callback, timeStep);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+    ret = nativeClient_.UnregisterDnsResultCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

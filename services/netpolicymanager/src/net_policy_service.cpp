@@ -110,18 +110,30 @@ void NetPolicyService::Init()
 int32_t NetPolicyService::SetPolicyByUid(uint32_t uid, uint32_t policy)
 {
     NETMGR_LOG_I("SetPolicyByUid uid[%{public}d] policy[%{public}d]", uid, policy);
+    if (netPolicyRule_ == nullptr) {
+        NETMGR_LOG_E("netPolicyRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     return netPolicyRule_->TransPolicyToRule(uid, policy);
 }
 
 int32_t NetPolicyService::GetPolicyByUid(uint32_t uid, uint32_t &policy)
 {
     NETMGR_LOG_D("GetPolicyByUid uid[%{public}d]", uid);
+    if (netPolicyRule_ == nullptr) {
+        NETMGR_LOG_E("netPolicyRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     return netPolicyRule_->GetPolicyByUid(uid, policy);
 }
 
 int32_t NetPolicyService::GetUidsByPolicy(uint32_t policy, std::vector<uint32_t> &uids)
 {
     NETMGR_LOG_D("GetUidsByPolicy policy[%{public}d]", policy);
+    if (netPolicyRule_ == nullptr) {
+        NETMGR_LOG_E("netPolicyRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     return netPolicyRule_->GetUidsByPolicy(policy, uids);
 }
 
@@ -182,12 +194,20 @@ int32_t NetPolicyService::UnregisterNetPolicyCallback(const sptr<INetPolicyCallb
 int32_t NetPolicyService::SetNetQuotaPolicies(const std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     NETMGR_LOG_I("SetNetQuotaPolicies quotaPolicySize[%{public}zd]", quotaPolicies.size());
+    if (netPolicyTraffic_ == nullptr) {
+        NETMGR_LOG_E("netPolicyTraffic_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     return netPolicyTraffic_->UpdateQuotaPolicies(quotaPolicies);
 }
 
 int32_t NetPolicyService::GetNetQuotaPolicies(std::vector<NetQuotaPolicy> &quotaPolicies)
 {
     NETMGR_LOG_D("GetNetQuotaPolicies begin");
+    if (netPolicyTraffic_ == nullptr) {
+        NETMGR_LOG_E("netPolicyTraffic_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     return netPolicyTraffic_->GetNetQuotaPolicies(quotaPolicies);
 }
 
@@ -207,65 +227,109 @@ int32_t NetPolicyService::ResetPolicies(const std::string &simId)
 int32_t NetPolicyService::SetBackgroundPolicy(bool allow)
 {
     NETMGR_LOG_I("SetBackgroundPolicy allow[%{public}d]", allow);
+    if (netPolicyRule_ == nullptr) {
+        NETMGR_LOG_E("netPolicyRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     return netPolicyRule_->SetBackgroundPolicy(allow);
 }
 
 int32_t NetPolicyService::GetBackgroundPolicy(bool &backgroundPolicy)
 {
     NETMGR_LOG_D("GetBackgroundPolicy begin");
+    if (netPolicyRule_ == nullptr) {
+        NETMGR_LOG_E("netPolicyRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     return netPolicyRule_->GetBackgroundPolicy(backgroundPolicy);
 }
 
 int32_t NetPolicyService::GetBackgroundPolicyByUid(uint32_t uid, uint32_t &backgroundPolicyOfUid)
 {
     NETMGR_LOG_D("GetBackgroundPolicyByUid uid[%{public}d]", uid);
+    if (netPolicyRule_ == nullptr) {
+        NETMGR_LOG_E("netPolicyRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     return netPolicyRule_->GetBackgroundPolicyByUid(uid, backgroundPolicyOfUid);
 }
 
 int32_t NetPolicyService::UpdateRemindPolicy(int32_t netType, const std::string &simId, uint32_t remindType)
 {
     NETMGR_LOG_I("UpdateRemindPolicy start");
+    if (netPolicyTraffic_ == nullptr) {
+        NETMGR_LOG_E("netPolicyTraffic_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     return netPolicyTraffic_->UpdateRemindPolicy(netType, simId, remindType);
 }
 
 int32_t NetPolicyService::SetDeviceIdleTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
 {
     NETMGR_LOG_I("SetDeviceIdleTrustlist start");
+    if (netPolicyFirewall_ == nullptr) {
+        NETMGR_LOG_E("netPolicyFirewall_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     return netPolicyFirewall_->SetDeviceIdleTrustlist(uids, isAllowed);
 }
 
 int32_t NetPolicyService::GetDeviceIdleTrustlist(std::vector<uint32_t> &uids)
 {
     NETMGR_LOG_D("GetDeviceIdleTrustlist start");
+    if (netPolicyFirewall_ == nullptr) {
+        NETMGR_LOG_E("netPolicyFirewall_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     return netPolicyFirewall_->GetDeviceIdleTrustlist(uids);
 }
 
 int32_t NetPolicyService::SetDeviceIdlePolicy(bool enable)
 {
     NETMGR_LOG_I("SetDeviceIdlePolicy enable[%{public}d]", enable);
+    if (netPolicyFirewall_ == nullptr) {
+        NETMGR_LOG_E("netPolicyFirewall_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     return netPolicyFirewall_->UpdateDeviceIdlePolicy(enable);
 }
 
 int32_t NetPolicyService::GetPowerSaveTrustlist(std::vector<uint32_t> &uids)
 {
     NETMGR_LOG_D("GetPowerSaveTrustlist start");
+    if (netPolicyFirewall_ == nullptr) {
+        NETMGR_LOG_E("netPolicyFirewall_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     return netPolicyFirewall_->GetPowerSaveTrustlist(uids);
 }
 
 int32_t NetPolicyService::SetPowerSaveTrustlist(const std::vector<uint32_t> &uids, bool isAllowed)
 {
     NETMGR_LOG_I("SetPowerSaveTrustlist start");
+    if (netPolicyFirewall_ == nullptr) {
+        NETMGR_LOG_E("netPolicyFirewall_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     return netPolicyFirewall_->SetPowerSaveTrustlist(uids, isAllowed);
 }
 
 int32_t NetPolicyService::SetPowerSavePolicy(bool enable)
 {
     NETMGR_LOG_I("SetPowerSavePolicy enable[%{public}d]", enable);
+    if (netPolicyFirewall_ == nullptr) {
+        NETMGR_LOG_E("netPolicyFirewall_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     return netPolicyFirewall_->UpdatePowerSavePolicy(enable);
 }
 
 int32_t NetPolicyService::GetDumpMessage(std::string &message)
 {
+    if (netPolicyRule_ == nullptr || netPolicyTraffic_ == nullptr) {
+        NETMGR_LOG_E("netPolicyFirewall_ or netPolicyTraffic_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     netPolicyRule_->GetDumpMessage(message);
     netPolicyTraffic_->GetDumpMessage(message);
     return NETMANAGER_SUCCESS;
