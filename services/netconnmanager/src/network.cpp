@@ -420,24 +420,36 @@ void Network::StartNetDetection(bool needReport)
         return;
     }
     netMonitor_->UpdateNetLinkInfo(netLinkInfo_);
+    InitNetMonitor();
 }
 
 void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
 {
     NETMGR_LOG_I("Enter Network::NetDetectionForDnsHealth");
+    if (eventHandler_) {
+        eventHandler_ -> PostAsyncTask(
+            [dnsHealthSuccess, this]() {this->NetDetectionForDnsHealthAsync(dnsHealthSuccess);},
+            0);
+    }
+}
+
+void Network::NetDetectionForDnsHealthAsync(bool dnsHealthSuccess)
+{
+    NETMGR_LOG_I("Enter Network::NetDetectionForDnsHealthAsyc");
     if (netMonitor_ == nullptr) {
         NETMGR_LOG_E("netMonitor_ is nullptr");
         return;
     }
     NetDetectionStatus lastDetectResult = detectResult_;
     NETMGR_LOG_I("Last netDetectionState: [%{public}d]", lastDetectResult);
-    if ((lastDetectResult == INVALID_DETECTION_STATE) && dnsHealthSuccess) {
+    if ((lastDetectResult == INVALID_DETECTION_STATE) && dnsHealthSuccess && !isDetectingForDns_) {
         NETMGR_LOG_I("Dns report success, so restart detection.");
-        netMonitor_->Stop();
-        netMonitor_->Start();
+        isDetectingForDns_ = true;
+        StopNetDetection();
+        InitNetMonitor();
     } else if ((lastDetectResult == VERIFICATION_STATE) && !dnsHealthSuccess && !(netMonitor_->IsDetecting())) {
         NETMGR_LOG_I("Dns report fail, start net detection");
-        netMonitor_->Start();
+        InitNetMonitor();
     } else {
         NETMGR_LOG_I("Not match, no need to restart.");
     }
@@ -455,11 +467,13 @@ void Network::StopNetDetection()
 void Network::InitNetMonitor()
 {
     NETMGR_LOG_I("Enter Network::InitNetMonitor()");
-    std::weak_ptr<INetMonitorCallback> monitorCallback = shared_from_this();
-    netMonitor_ = std::make_shared<NetMonitor>(netId_, netSupplierType_, netLinkInfo_, monitorCallback);
     if (netMonitor_ == nullptr) {
-        NETMGR_LOG_E("new NetMonitor failed,netMonitor_ is null!");
-        return;
+        std::weak_ptr<INetMonitorCallback> monitorCallback = shared_from_this();
+        netMonitor_ = std::make_shared<NetMonitor>(netId_, netSupplierType_, netLinkInfo_, monitorCallback);
+        if (netMonitor_ == nullptr) {
+            NETMGR_LOG_E("new NetMonitor failed,netMonitor_ is null!");
+            return;
+        }
     }
     netMonitor_->Start();
 }
@@ -467,6 +481,7 @@ void Network::InitNetMonitor()
 void Network::HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
 {
     NETMGR_LOG_D("HandleNetMonitorResult, netDetectionState[%{public}d]", netDetectionState);
+    isDetectingForDns_ = false;
     NotifyNetDetectionResult(NetDetectionResultConvert(static_cast<int32_t>(netDetectionState)), urlRedirect);
     if (netCallback_ && (detectResult_ != netDetectionState)) {
         detectResult_ = netDetectionState;

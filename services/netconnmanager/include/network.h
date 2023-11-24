@@ -77,6 +77,7 @@ private:
     void SendConnectionChangedBroadcast(const NetConnState &netConnState) const;
     void SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const std::string &errMsg);
     void ResetNetlinkInfo();
+    void NetDetectionForDnsHealthAsync(bool dnsHealthSuccess);
 
 private:
     int32_t netId_ = 0;
@@ -91,6 +92,7 @@ private:
     NetBearType netSupplierType_;
     std::vector<sptr<INetDetectionCallback>> netDetectionRetCallback_;
     std::shared_ptr<NetConnEventHandler> eventHandler_;
+    std::atomic<bool> isDetectingForDns_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
