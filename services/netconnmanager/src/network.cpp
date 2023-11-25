@@ -428,7 +428,7 @@ void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
     if (eventHandler_) {
         eventHandler_ -> PostSyncTask(
             [dnsHealthSuccess, this]() {this->NetDetectionForDnsHealthSync(dnsHealthSuccess);
-            });
+        });
     }
 }
 
