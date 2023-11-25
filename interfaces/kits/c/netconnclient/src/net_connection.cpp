@@ -72,3 +72,23 @@ int32_t OH_NetConn_GetAllNets(OH_NetConn_NetHandleList *netHandleList)
     }
     return ret;
 }
+
+int32_t OHOS_NetConn_RegisterDnsResolver(OH_NetConn_CustomDnsResolver resolver)
+{
+    if (resolver == nullptr) {
+        NETMGR_LOG_E("OHOS_NetConn_RegisterDnsResolver received invalid parameters");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    int32_t ret = setdnsresolvehook(resolver);
+    if (ret < 0) {
+        ret = NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    return ret;
+}
+
+int32_t OHOS_NetConn_UnregisterDnsResolver()
+{
+    int32_t ret = removednsresolvehook();
+    return ret;
+}

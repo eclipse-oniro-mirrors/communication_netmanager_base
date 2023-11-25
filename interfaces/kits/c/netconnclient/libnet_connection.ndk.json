@@ -10,5 +10,13 @@
     {
         "first_introduced": "11",
         "name": "OH_NetConn_GetAllNets"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OHOS_NetConn_RegisterDnsResolver"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OHOS_NetConn_UnregisterDnsResolver"
     }
 ]

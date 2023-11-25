@@ -29,6 +29,9 @@
 #include "register_context.h"
 #include "setappnet_context.h"
 #include "setglobalhttpproxy_context.h"
+#include "setcustomdnsrule_context.h"
+#include "deletecustomdnsrule_context.h"
+#include "deletecustomdnsrules_context.h"
 
 namespace OHOS::NetManagerStandard {
 static constexpr size_t MAX_ARRAY_LENGTH = 64;
@@ -109,6 +112,18 @@ public:
     static bool ExecSetAppNet(SetAppNetContext *context);
 
     static napi_value SetAppNetCallback(SetAppNetContext *context);
+
+    static bool ExecSetCustomDNSRule(SetCustomDNSRuleContext *context);
+
+    static napi_value SetCustomDNSRuleCallback(SetCustomDNSRuleContext *context);
+
+    static bool ExecDeleteCustomDNSRule(DeleteCustomDNSRuleContext *context);
+
+    static napi_value DeleteCustomDNSRuleCallback(DeleteCustomDNSRuleContext *context);
+
+    static bool ExecDeleteCustomDNSRules(DeleteCustomDNSRulesContext *context);
+
+    static napi_value DeleteCustomDNSRulesCallback(DeleteCustomDNSRulesContext *context);
 
     class NetHandleExec final {
     public:
