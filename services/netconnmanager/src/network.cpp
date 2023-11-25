@@ -426,8 +426,8 @@ void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
 {
     NETMGR_LOG_I("Enter Network::NetDetectionForDnsHealth");
     if (eventHandler_) {
-        eventHandler_ -> PostSyncTask(
-            [dnsHealthSuccess, this]() {this->NetDetectionForDnsHealthSync(dnsHealthSuccess);
+        eventHandler_ -> PostSyncTask([dnsHealthSuccess, this]() {
+            this->NetDetectionForDnsHealthSync(dnsHealthSuccess);
         });
     }
 }
