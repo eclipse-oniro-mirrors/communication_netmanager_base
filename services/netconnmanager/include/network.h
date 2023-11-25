@@ -77,7 +77,9 @@ private:
     void SendConnectionChangedBroadcast(const NetConnState &netConnState) const;
     void SendSupplierFaultHiSysEvent(NetConnSupplerFault errorType, const std::string &errMsg);
     void ResetNetlinkInfo();
-    void NetDetectionForDnsHealthAsync(bool dnsHealthSuccess);
+    void NetDetectionForDnsHealthSync(bool dnsHealthSuccess);
+    bool IsDetectionForDnsSuccess(NetDetectionStatus netDetectionState, bool dnsHealthSuccess);
+    bool IsDetectionForDnsFail(NetDetectionStatus netDetectionState, bool dnsHealthSuccess);
 
 private:
     int32_t netId_ = 0;
