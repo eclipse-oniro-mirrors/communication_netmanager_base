@@ -425,16 +425,6 @@ void Network::StartNetDetection(bool needReport)
 void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
 {
     NETMGR_LOG_I("Enter Network::NetDetectionForDnsHealth");
-    if (eventHandler_) {
-        eventHandler_ -> PostSyncTask([dnsHealthSuccess, this]() {
-            this->NetDetectionForDnsHealthSync(dnsHealthSuccess);
-        });
-    }
-}
-
-void Network::NetDetectionForDnsHealthSync(bool dnsHealthSuccess)
-{
-    NETMGR_LOG_I("Enter Network::NetDetectionForDnsHealthSync");
     if (netMonitor_ == nullptr) {
         NETMGR_LOG_E("netMonitor_ is nullptr");
         return;
