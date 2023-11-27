@@ -1386,10 +1386,10 @@ int32_t NetConnService::IsDefaultNetMetered(bool &isMetered)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::BindSocket(int32_t socket_fd, int32_t netId)
+int32_t NetConnService::BindSocket(int32_t socketFd, int32_t netId)
 {
     NETMGR_LOG_D("Enter BindSocket.");
-    return NetsysController::GetInstance().BindSocket(socket_fd, netId);
+    return NetsysController::GetInstance().BindSocket(socketFd, netId);
 }
 
 int32_t NetConnService::Dump(int32_t fd, const std::vector<std::u16string> &args)

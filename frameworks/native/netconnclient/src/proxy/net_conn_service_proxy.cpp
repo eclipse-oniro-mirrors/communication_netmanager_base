@@ -826,7 +826,7 @@ int32_t NetConnServiceProxy::GetAddressByName(const std::string &host, int32_t n
     return ret;
 }
 
-int32_t NetConnServiceProxy::BindSocket(int32_t socket_fd, int32_t netId)
+int32_t NetConnServiceProxy::BindSocket(int32_t socketFd, int32_t netId)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -834,7 +834,7 @@ int32_t NetConnServiceProxy::BindSocket(int32_t socket_fd, int32_t netId)
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
 
-    if (!data.WriteInt32(socket_fd)) {
+    if (!data.WriteInt32(socketFd)) {
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     if (!data.WriteInt32(netId)) {

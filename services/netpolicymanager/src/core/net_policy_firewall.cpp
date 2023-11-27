@@ -62,6 +62,10 @@ int32_t NetPolicyFirewall::SetPowerSaveTrustlist(const std::vector<uint32_t> &ui
     }
     UpdateFirewallPolicyList(FIREWALL_CHAIN_POWER_SAVE, uids, isAllowed);
     GetFileInst()->WriteFirewallRules(FIREWALL_CHAIN_POWER_SAVE, powerSaveAllowedList_, powerSaveDeniedList_);
+    if (powerSaveFirewallRule_ == nullptr) {
+        NETMGR_LOG_E("powerSaveFirewallRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     powerSaveFirewallRule_->SetAllowedList(uids, isAllowed ? FIREWALL_RULE_ALLOW : FIREWALL_RULE_DENY);
 
     std::shared_ptr<PolicyEvent> eventData = std::make_shared<PolicyEvent>();
@@ -94,12 +98,20 @@ void NetPolicyFirewall::UpdateFirewallPolicyList(uint32_t chainType, const std::
 
 int32_t NetPolicyFirewall::GetDeviceIdleTrustlist(std::vector<uint32_t> &uids)
 {
+    if (deviceIdleFirewallRule_ == nullptr) {
+        NETMGR_LOG_E("deviceIdleFirewallRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     uids = deviceIdleFirewallRule_->GetAllowedList();
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetPolicyFirewall::GetPowerSaveTrustlist(std::vector<uint32_t> &uids)
 {
+    if (powerSaveFirewallRule_ == nullptr) {
+        NETMGR_LOG_E("deviceIdleFirewallRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     uids = powerSaveFirewallRule_->GetAllowedList();
     return NETMANAGER_SUCCESS;
 }
@@ -109,6 +121,10 @@ int32_t NetPolicyFirewall::UpdateDeviceIdlePolicy(bool enable)
     if (deviceIdleMode_ == enable) {
         NETMGR_LOG_E("Same device idle policy.");
         return NETMANAGER_ERR_STATUS_EXIST;
+    }
+    if (deviceIdleFirewallRule_ == nullptr) {
+        NETMGR_LOG_E("deviceIdleFirewallRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     if (enable) {
         deviceIdleFirewallRule_->SetAllowedList();
@@ -132,6 +148,10 @@ int32_t NetPolicyFirewall::UpdatePowerSavePolicy(bool enable)
     if (powerSaveMode_ == enable) {
         NETMGR_LOG_E("Same power save policy.");
         return NETMANAGER_ERR_STATUS_EXIST;
+    }
+    if (powerSaveFirewallRule_ == nullptr) {
+        NETMGR_LOG_E("powerSaveFirewallRule_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     if (enable) {
         powerSaveFirewallRule_->SetAllowedList();

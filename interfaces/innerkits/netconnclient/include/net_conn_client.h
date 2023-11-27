@@ -230,13 +230,13 @@ public:
     /**
      * The interface is to bind socket
      *
-     * @param socket_fd socket file description
+     * @param socketFd socket file description
      * @param netId network id
      * @return Returns 0 success. Otherwise fail.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t BindSocket(int32_t socket_fd, int32_t netId);
+    int32_t BindSocket(int32_t socketFd, int32_t netId);
 
     /**
      * The interface of network detection called by the application

@@ -187,8 +187,8 @@ HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest004, TestSi
     ret = nativeClient_.ClearDefaultNetWorkNetId();
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    int32_t socket_fd = 0;
-    ret = nativeClient_.BindSocket(socket_fd, netId);
+    int32_t socketFd = 0;
+    ret = nativeClient_.BindSocket(socketFd, netId);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     uint16_t id = 0;
@@ -199,12 +199,12 @@ HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest004, TestSi
     ret = nativeClient_.RegisterNetsysNotifyCallback(callback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = nativeClient_.BindNetworkServiceVpn(socket_fd);
+    ret = nativeClient_.BindNetworkServiceVpn(socketFd);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     struct ifreq ifRequest = {};
     int32_t ifaceFd = 0;
-    ret = nativeClient_.EnableVirtualNetIfaceCard(socket_fd, ifRequest, ifaceFd);
+    ret = nativeClient_.EnableVirtualNetIfaceCard(socketFd, ifRequest, ifaceFd);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
@@ -215,9 +215,9 @@ HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest005, TestSi
 
     int32_t ifaceFd = 0;
     std::string iface = "";
-    int32_t socket_fd = 0;
+    int32_t socketFd = 0;
     struct ifreq ifRequest = {};
-    int32_t ret = nativeClient_.SetIpAddress(socket_fd, "", ifaceFd, ifRequest);
+    int32_t ret = nativeClient_.SetIpAddress(socketFd, "", ifaceFd, ifRequest);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient_.SetBlocking(ifaceFd, false);

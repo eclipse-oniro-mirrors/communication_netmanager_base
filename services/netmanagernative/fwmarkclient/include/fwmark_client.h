@@ -30,7 +30,7 @@ public:
     /**
      * Binds {@code fd} to the network designated by {@code netId}.
      *
-     * @param socket_fd
+     * @param socketFd
      * @param netId
      *
      * @return Return the return value of the netsys interface call
@@ -40,7 +40,7 @@ public:
     /**
      * Protect {@code socketFd} to the network bypass VPN.
      *
-     * @param socket_fd
+     * @param socketFd
      */
     int32_t ProtectFromVpn(int32_t socketFd);
 
