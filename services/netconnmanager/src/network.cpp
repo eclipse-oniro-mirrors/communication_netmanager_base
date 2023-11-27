@@ -425,17 +425,28 @@ void Network::StartNetDetection(bool needReport)
 void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
 {
     NETMGR_LOG_I("Enter Network::NetDetectionForDnsHealth");
+    if (eventHandler_) {
+        eventHandler_ -> PostSyncTask([dnsHealthSuccess, this]() {
+            this->NetDetectionForDnsHealthSync(dnsHealthSuccess);
+        });
+    }
+}
+
+void Network::NetDetectionForDnsHealthSync(bool dnsHealthSuccess)
+{
+    NETMGR_LOG_I("Enter Network::NetDetectionForDnsHealthSync");
     if (netMonitor_ == nullptr) {
         NETMGR_LOG_E("netMonitor_ is nullptr");
         return;
     }
     NetDetectionStatus lastDetectResult = detectResult_;
     NETMGR_LOG_I("Last netDetectionState: [%{public}d]", lastDetectResult);
-    if ((lastDetectResult == INVALID_DETECTION_STATE) && dnsHealthSuccess) {
+    if (IsDetectionForDnsSuccess(lastDetectResult, dnsHealthSuccess)) {
         NETMGR_LOG_I("Dns report success, so restart detection.");
-        netMonitor_->Stop();
-        netMonitor_->Start();
-    } else if ((lastDetectResult == VERIFICATION_STATE) && !dnsHealthSuccess && !(netMonitor_->IsDetecting())) {
+        isDetectingForDns_ = true;
+        StopNetDetection();
+        InitNetMonitor();
+    } else if (IsDetectionForDnsFail(lastDetectResult, dnsHealthSuccess)) {
         NETMGR_LOG_I("Dns report fail, start net detection");
         netMonitor_->Start();
     } else {
@@ -467,6 +478,7 @@ void Network::InitNetMonitor()
 void Network::HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
 {
     NETMGR_LOG_D("HandleNetMonitorResult, netDetectionState[%{public}d]", netDetectionState);
+    isDetectingForDns_ = false;
     NotifyNetDetectionResult(NetDetectionResultConvert(static_cast<int32_t>(netDetectionState)), urlRedirect);
     if (netCallback_ && (detectResult_ != netDetectionState)) {
         detectResult_ = netDetectionState;
@@ -613,6 +625,16 @@ bool Network::ResumeNetworkInfo()
 
     NETMGR_LOG_D("Network::ResumeNetworkInfo UpdateNetLinkInfo");
     return UpdateNetLinkInfo(nli);
+}
+
+bool Network::IsDetectionForDnsSuccess(NetDetectionStatus netDetectionState, bool dnsHealthSuccess)
+{
+    return ((netDetectionState == INVALID_DETECTION_STATE) && dnsHealthSuccess && !isDetectingForDns_);
+}
+
+bool Network::IsDetectionForDnsFail(NetDetectionStatus netDetectionState, bool dnsHealthSuccess)
+{
+    return ((netDetectionState == VERIFICATION_STATE) && !dnsHealthSuccess && !(netMonitor_->IsDetecting()));
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
