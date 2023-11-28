@@ -449,7 +449,8 @@ int32_t NetConnClient::SetGlobalHttpProxy(const HttpProxy &httpProxy)
     return proxy->SetGlobalHttpProxy(httpProxy);
 }
 
-void NetConnClient::RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback, uint32_t &callbackid)
+void NetConnClient::RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback,
+                                                 uint32_t &callbackid)
 {
     uint32_t id = currentCallbackId_;
     std::lock_guard<std::mutex> lock(appHttpProxyCbMapMutex_);
@@ -672,5 +673,12 @@ int32_t NetConnClient::GetPinSetForHostName(const std::string &hostname, std::st
     auto networkSecurityConfig = std::make_unique<NetworkSecurityConfig>();
     return networkSecurityConfig->GetPinSetForHostName(hostname, pins);
 }
+
+int32_t NetConnClient::GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs)
+{
+    auto networkSecurityConfig = std::make_unique<NetworkSecurityConfig>();
+    return networkSecurityConfig->GetTrustAnchorsForHostName(hostname, certs);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

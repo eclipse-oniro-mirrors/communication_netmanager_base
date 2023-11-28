@@ -351,13 +351,13 @@ void GetAllNetsFuzzTest(const uint8_t *data, size_t size)
 void BindSocketFuzzTest(const uint8_t *data, size_t size)
 {
     AccessToken token;
-    int32_t socket_fd = GetData<int32_t>();
+    int32_t socketFd = GetData<int32_t>();
     int32_t netId = GetData<int32_t>();
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
-    dataParcel.WriteInt32(socket_fd);
+    dataParcel.WriteInt32(socketFd);
     dataParcel.WriteInt32(netId);
     OnRemoteRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_BIND_SOCKET), dataParcel);
 }

@@ -55,6 +55,7 @@ struct DomainConfig {
 class NetworkSecurityConfig final {
 public:
     int32_t GetPinSetForHostName(const std::string &hostname, std::string &pins);
+    int32_t GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs);
 
 private:
     int32_t GetConfig();

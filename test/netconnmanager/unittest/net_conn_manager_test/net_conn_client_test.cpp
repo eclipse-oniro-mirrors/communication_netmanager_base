@@ -1211,6 +1211,14 @@ HWTEST_F(NetConnClientTest, GetPinSetForHostName001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
 }
 
+HWTEST_F(NetConnClientTest, GetTrustAnchorsForHostName001, TestSize.Level1)
+{
+    std::string hostname("www.example.com");
+    std::vector<std::string> certs;
+    auto ret = NetConnClient::GetInstance().GetTrustAnchorsForHostName(hostname, certs);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
 HWTEST_F(NetConnClientTest, RegisterAppHttpProxyCallback001, TestSize.Level1)
 {
     std::function<void(const HttpProxy &httpProxy)> callback;
@@ -1221,7 +1229,7 @@ HWTEST_F(NetConnClientTest, RegisterAppHttpProxyCallback001, TestSize.Level1)
 }
 
 HWTEST_F(NetConnClientTest, UnregisterAppHttpProxyCallback001, TestSize.Level1)
-
+{
     uint32_t callbackid = 0;
     NetConnClient::GetInstance().UnregisterAppHttpProxyCallback(callbackid);
     EXPECT_EQ(callbackid, 0);
