@@ -24,8 +24,6 @@ ohos_fuzztest("NetSysClientNetDiagFuzzTest") {
       "$NETMANAGER_BASE_ROOT/test/fuzztest/netsysclientnetdiag_fuzzer"
 
   include_dirs = [
-    "$DHCP_MANAGER_ROOT/interfaces/inner_api/include",
-    "$DHCP_MANAGER_ROOT/interfaces/inner_api/interfaces",
     "$NETCONNMANAGER_COMMON_DIR/include",
     "$NETCONNMANAGER_SOURCE_DIR/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
@@ -67,7 +65,7 @@ ohos_fuzztest("NetSysClientNetDiagFuzzTest") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "dhcp:dhcp_manager_service",
+    "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "init:libbegetutil",

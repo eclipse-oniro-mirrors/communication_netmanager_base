@@ -157,7 +157,7 @@ ohos_shared_library("netsys_native_manager") {
 
   external_deps = [
     "c_utils:utils",
-    "dhcp:dhcp_manager_service",
+    "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
     "init:libbegetutil",
     "ipc:ipc_core",
@@ -190,6 +190,7 @@ ohos_static_library("netsys_native_manager_static") {
   deps = netsys_native_manager_deps
 
   external_deps = [
+    "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
     "init:libbegetutil",
     "ipc:ipc_core",
