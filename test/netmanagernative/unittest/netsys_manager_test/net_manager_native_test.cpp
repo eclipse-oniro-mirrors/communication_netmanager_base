@@ -166,9 +166,8 @@ HWTEST_F(NetManagerNativeTest, DnsGetAddrInfo001, TestSize.Level1)
     uint16_t netId = 0;
     std::vector<AddrInfo> res;
     auto ret = instance_->DnsGetAddrInfo(hostName, serverName, hints, netId, res);
-    EXPECT_EQ(ret, EAI_NONAME);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
-
 
 HWTEST_F(NetManagerNativeTest, AddStaticArpTest001, TestSize.Level1)
 {

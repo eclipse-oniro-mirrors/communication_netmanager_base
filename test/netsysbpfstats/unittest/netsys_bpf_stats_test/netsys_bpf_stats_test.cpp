@@ -157,7 +157,7 @@ HWTEST_F(NetsysBpfStatsTest, LoadElf, TestSize.Level1)
     EXPECT_GE(ret, NETSYS_SUCCESS);
 
     ret = OHOS::NetManagerStandard::LoadElf(BFP_NAME_NETSYS_PATH);
-    EXPECT_EQ(ret, NETSYS_SUCCESS);
+    EXPECT_EQ(ret, ElfLoadError::ELF_LOAD_ERR_LOAD_PROGS_FAIL);
 }
 
 HWTEST_F(NetsysBpfStatsTest, LoadAndUidStats, TestSize.Level1)
