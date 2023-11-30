@@ -385,16 +385,28 @@ napi_value ConnectionExec::SetAppNetCallback(SetAppNetContext *context)
 
 bool ConnectionExec::ExecSetCustomDNSRule(SetCustomDNSRuleContext *context)
 {
-    if (context->host_.empty() || context->ip_.empty()) {
-        context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+    if (context == nullptr) {
+        NETMANAGER_BASE_LOGE("context is nullptr");
         return false;
     }
-    if (!context->IsParseOK()) {
-        context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+
+    if (!CommonUtils::HasInternetPermission()) {
+        context->SetErrorCode(NETMANAGER_ERR_PERMISSION_DENIED);
         return false;
     }
 
     std::vector<std::string> ip = context->ip_;
+    for (size_t i = 0; i < ip.size(); i++) {
+        if (!CommonUtils::IsValidIPV4(ip[i]) && !CommonUtils::IsValidIPV6(ip[i])) {
+            context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+            return false;
+        }
+    }
+
+    if (!context->IsParseOK()) {
+        context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        return false;
+    }
 
     std::string host_ips = context->host_ + ",";
     for (size_t i = 0; i < ip.size(); i++) {
@@ -422,6 +434,15 @@ napi_value ConnectionExec::SetCustomDNSRuleCallback(SetCustomDNSRuleContext *con
 
 bool ConnectionExec::ExecDeleteCustomDNSRule(DeleteCustomDNSRuleContext *context)
 {
+    if (context == nullptr) {
+        NETMANAGER_BASE_LOGE("context is nullptr");
+        return false;
+    }
+    if (!CommonUtils::HasInternetPermission()) {
+        context->SetErrorCode(NETMANAGER_ERR_PERMISSION_DENIED);
+        return false;
+    }
+
     if (!context->IsParseOK()) {
         context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
         return false;
@@ -444,6 +465,15 @@ napi_value ConnectionExec::DeleteCustomDNSRuleCallback(DeleteCustomDNSRuleContex
 
 bool ConnectionExec::ExecDeleteCustomDNSRules(DeleteCustomDNSRulesContext *context)
 {
+    if (context == nullptr) {
+        NETMANAGER_BASE_LOGE("context is nullptr");
+        return false;
+    }
+    if (!CommonUtils::HasInternetPermission()) {
+        context->SetErrorCode(NETMANAGER_ERR_PERMISSION_DENIED);
+        return false;
+    }
+
     if (!context->IsParseOK()) {
         context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
         return false;
