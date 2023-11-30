@@ -659,7 +659,7 @@ int32_t NetsysNativeClient::ClearDefaultNetWorkNetId()
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetsysNativeClient::BindSocket(int32_t socket_fd, uint32_t netId)
+int32_t NetsysNativeClient::BindSocket(int32_t socketFd, uint32_t netId)
 {
     NETMGR_LOG_D("NetsysNativeClient::BindSocket: netId = [%{public}u]", netId);
     auto proxy = GetProxy();

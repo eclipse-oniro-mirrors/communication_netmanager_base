@@ -831,5 +831,66 @@ HWTEST_F(NetConnServiceTest, NetDetectionForDnsHealthTest001, TestSize.Level1)
     ret = NetConnService::GetInstance()->NetDetectionForDnsHealth(netId, dnsHealthFail);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest003, TestSize.Level1)
+{
+    NetConnService::GetInstance()->RecoverInfo();
+
+    HttpProxy proxy;
+    uint32_t supplierId = 0;
+    NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
+    NetConnService::GetInstance()->UnregisterNetSupplier(supplierId);
+    NetConnService::GetInstance()->UpdateGlobalHttpProxy(proxy);
+
+    sptr<INetSupplierCallback> supplierCallback = nullptr;
+    auto ret = NetConnService::GetInstance()->RegisterNetSupplierCallbackAsync(supplierId, supplierCallback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = NetConnService::GetInstance()->RegisterNetSupplierCallback(supplierId, supplierCallback);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    sptr<INetConnCallback> callback = nullptr;
+    uint32_t timeoutMS = 0;
+    sptr<NetSpecifier> netSpecifier = nullptr;
+    ret = NetConnService::GetInstance()->RegisterNetConnCallback(netSpecifier, callback, timeoutMS);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    NetConnService::GetInstance()->RequestAllNetworkExceptDefault();
+
+    NetConnService::NetInterfaceStateCallback stateCallback;
+    std::string testString = "test";
+    int32_t testInt = 0;
+    ret = stateCallback.OnInterfaceAddressUpdated(testString, testString, testInt, testInt);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = stateCallback.OnInterfaceAddressRemoved(testString, testString, testInt, testInt);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = stateCallback.OnInterfaceAdded(testString);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = stateCallback.OnInterfaceRemoved(testString);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = stateCallback.OnInterfaceChanged(testString, false);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = stateCallback.OnInterfaceLinkStateChanged(testString, false);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = stateCallback.OnRouteChanged(false, testString, testString, testString);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    NetsysControllerCallback::DhcpResult dhcpResult;
+    ret = stateCallback.OnDhcpSuccess(dhcpResult);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = stateCallback.OnBandwidthReachedLimit(testString, testString);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    sptr<INetInterfaceStateCallback> interfaceStateCallback = nullptr;
+    ret = stateCallback.RegisterInterfaceCallback(interfaceStateCallback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

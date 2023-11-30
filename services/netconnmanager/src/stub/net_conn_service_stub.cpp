@@ -861,8 +861,8 @@ int32_t NetConnServiceStub::OnGetAddressByName(MessageParcel &data, MessageParce
 
 int32_t NetConnServiceStub::OnBindSocket(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t socket_fd;
-    if (!data.ReadInt32(socket_fd)) {
+    int32_t socketFd;
+    if (!data.ReadInt32(socketFd)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
     int32_t netId;
@@ -871,7 +871,7 @@ int32_t NetConnServiceStub::OnBindSocket(MessageParcel &data, MessageParcel &rep
     }
     NETMGR_LOG_D("stub execute BindSocket");
 
-    int32_t ret = BindSocket(socket_fd, netId);
+    int32_t ret = BindSocket(socketFd, netId);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

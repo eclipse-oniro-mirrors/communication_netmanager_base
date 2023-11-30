@@ -66,7 +66,7 @@ public:
     virtual int32_t GetSpecificUidNet(int32_t uid, int32_t &netId) = 0;
     virtual int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) = 0;
     virtual int32_t GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap) = 0;
-    virtual int32_t BindSocket(int32_t socket_fd, int32_t netId) = 0;
+    virtual int32_t BindSocket(int32_t socketFd, int32_t netId) = 0;
     virtual int32_t SetAirplaneMode(bool state) = 0;
     virtual int32_t IsDefaultNetMetered(bool &isMetered) = 0;
     virtual int32_t SetGlobalHttpProxy(const HttpProxy &httpProxy) = 0;

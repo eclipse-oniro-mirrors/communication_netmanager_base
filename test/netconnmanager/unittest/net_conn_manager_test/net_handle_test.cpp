@@ -41,21 +41,21 @@ void NetHandleTest::TearDown() {}
 
 HWTEST_F(NetHandleTest, BindSocket001, TestSize.Level1)
 {
-    int32_t socket_fd = 1;
+    int32_t socketFd = 1;
     int32_t netId = 101;
     auto handler = DelayedSingleton<NetHandle>::GetInstance();
     handler->SetNetId(netId);
-    int32_t result = handler->BindSocket(socket_fd);
+    int32_t result = handler->BindSocket(socketFd);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetHandleTest, BindSocket002, TestSize.Level1)
 {
-    int32_t socket_fd = -1;
+    int32_t socketFd = -1;
     int32_t netId = 101;
     auto handler = DelayedSingleton<NetHandle>::GetInstance();
     handler->SetNetId(netId);
-    int32_t result = handler->BindSocket(socket_fd);
+    int32_t result = handler->BindSocket(socketFd);
     ASSERT_TRUE(result == NETMANAGER_ERR_PARAMETER_ERROR);
 }
 

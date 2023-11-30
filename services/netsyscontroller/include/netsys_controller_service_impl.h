@@ -391,11 +391,11 @@ public:
     /**
      * Obtains the NIC list.
      *
-     * @param socket_fd
+     * @param socketFd
      * @param netId
      * @return Return the return value of the netsys interface call
      */
-    int32_t BindSocket(int32_t socket_fd, uint32_t netId) override;
+    int32_t BindSocket(int32_t socketFd, uint32_t netId) override;
 
     /**
      * Enable ip forwarding.

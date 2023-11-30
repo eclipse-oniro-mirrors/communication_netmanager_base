@@ -191,10 +191,6 @@ HWTEST_F(UtNetPolicyService, NetPolicyServiceBranchTest001, TestSize.Level1)
 {
     int32_t systemAbilityId = 0;
     std::string deviceId = "";
-    instance_->OnStop();
-    instance_->OnStart();
-    instance_->Init();
-
     instance_->OnAddSystemAbility(systemAbilityId, deviceId);
     instance_->OnRemoveSystemAbility(systemAbilityId, deviceId);
 
@@ -205,7 +201,7 @@ HWTEST_F(UtNetPolicyService, NetPolicyServiceBranchTest001, TestSize.Level1)
     int32_t fd = 0;
     std::vector<std::u16string> args;
     int32_t ret = instance_->Dump(fd, args);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 
     uint32_t policy = 0;
     std::vector<uint32_t> uids;
@@ -216,7 +212,101 @@ HWTEST_F(UtNetPolicyService, NetPolicyServiceBranchTest001, TestSize.Level1)
     std::string simId = "";
     uint32_t remindType = 0;
     ret = instance_->UpdateRemindPolicy(netType, simId, remindType);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ret = instance_->CheckPermission();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = instance_->GetDeviceIdleTrustlist(uids);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->SetDeviceIdlePolicy(false);
+    EXPECT_EQ(ret, NETMANAGER_ERR_STATUS_EXIST);
+
+    ret = instance_->SetDeviceIdlePolicy(true);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->SetPowerSaveTrustlist(uids, false);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->GetPowerSaveTrustlist(uids);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->SetPowerSavePolicy(false);
+    EXPECT_EQ(ret, NETMANAGER_ERR_STATUS_EXIST);
+
+    ret = instance_->SetPowerSavePolicy(true);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+/**
+ * @tc.name: NetPolicyServiceBranchTest002
+ * @tc.desc: Test NetPolicyService Branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyService, NetPolicyServiceBranchTest002, TestSize.Level1)
+{
+    ASSERT_TRUE(instance_->netPolicyRule_ != nullptr);
+    ASSERT_TRUE(instance_->netPolicyTraffic_ != nullptr);
+    ASSERT_TRUE(instance_->netPolicyFirewall_ != nullptr);
+    if (instance_->netPolicyFirewall_ == nullptr) {
+        return;
+    }
+    instance_->netPolicyFirewall_->Init();
+
+    uint32_t policy = 0;
+    std::vector<uint32_t> uids;
+    auto ret = instance_->GetUidsByPolicy(policy, uids);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    int32_t netType = 0;
+    std::string simId = "";
+    uint32_t remindType = 0;
+    ret = instance_->UpdateRemindPolicy(netType, simId, remindType);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+
+    ret = instance_->CheckPermission();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = instance_->GetDeviceIdleTrustlist(uids);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = instance_->SetDeviceIdlePolicy(false);
+    EXPECT_EQ(ret, NETMANAGER_ERR_STATUS_EXIST);
+
+    ret = instance_->SetDeviceIdlePolicy(true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = instance_->SetPowerSaveTrustlist(uids, false);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = instance_->GetPowerSaveTrustlist(uids);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    ret = instance_->SetPowerSavePolicy(false);
+    EXPECT_EQ(ret, NETMANAGER_ERR_STATUS_EXIST);
+
+    ret = instance_->SetPowerSavePolicy(true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: NetPolicyServiceBranchTest003
+ * @tc.desc: Test NetPolicyService Branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyService, NetPolicyServiceBranchTest003, TestSize.Level1)
+{
+    instance_->OnStop();
+    int32_t netType = 0;
+    std::string simId = "";
+    uint32_t remindType = 0;
+    std::vector<uint32_t> uids;
+    auto ret = instance_->UpdateRemindPolicy(netType, simId, remindType);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->CheckPermission();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     ret = instance_->GetDeviceIdleTrustlist(uids);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
@@ -232,9 +322,6 @@ HWTEST_F(UtNetPolicyService, NetPolicyServiceBranchTest001, TestSize.Level1)
 
     ret = instance_->SetPowerSavePolicy(false);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
-
-    ret = instance_->CheckPermission();
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

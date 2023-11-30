@@ -43,13 +43,13 @@ int32_t NetHandle::GetAddressByName(const std::string &host, INetAddr &addr)
     return NetConnClient::GetInstance().GetAddressByName(host, netId_, addr);
 }
 
-int32_t NetHandle::BindSocket(int32_t socket_fd)
+int32_t NetHandle::BindSocket(int32_t socketFd)
 {
-    if (socket_fd < 0) {
-        NETMGR_LOG_E("socket_fd is invalid");
+    if (socketFd < 0) {
+        NETMGR_LOG_E("socketFd is invalid");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    return NetConnClient::GetInstance().BindSocket(socket_fd, netId_);
+    return NetConnClient::GetInstance().BindSocket(socketFd, netId_);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
