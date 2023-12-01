@@ -237,10 +237,15 @@ HWTEST_F(UtNetPolicyService, NetPolicyServiceBranchTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(UtNetPolicyService, OnAddSystemAbility001, TestSize.Level1)
+HWTEST_F(UtNetPolicyService, OnRemoveSystemAbility001, TestSize.Level1)
 {
     std::string deviceId = "dev1";
     instance_->OnRemoveSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID, deviceId);
+}
+
+HWTEST_F(UtNetPolicyService, OnAddSystemAbility001, TestSize.Level1)
+{
+    std::string deviceId = "dev1";
     instance_->OnAddSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID, deviceId);
 }
 } // namespace NetManagerStandard
