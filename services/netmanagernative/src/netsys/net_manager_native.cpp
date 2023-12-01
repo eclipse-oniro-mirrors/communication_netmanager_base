@@ -132,9 +132,7 @@ int32_t NetManagerNative::AddInterfaceAddress(std::string ifName, std::string ad
 
 int32_t NetManagerNative::DelInterfaceAddress(std::string ifName, std::string addrString, int32_t prefixLength)
 {
-    if (strncmp(ifName.c_str(), TUN_CARD_NAME, strlen(TUN_CARD_NAME)) != 0) {
-        return interfaceManager_->DelAddress(ifName.c_str(), addrString.c_str(), prefixLength);
-    }
+    interfaceManager_->DelAddress(ifName.c_str(), addrString.c_str(), prefixLength);
     return NETMANAGER_SUCCESS;
 }
 
