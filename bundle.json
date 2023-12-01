@@ -56,6 +56,7 @@
                 "jsoncpp",
                 "libuv",
                 "iptables",
+                "openssl",
                 "selinux",
                 "sqlite"
             ]

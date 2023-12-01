@@ -71,6 +71,7 @@ ohos_unittest("net_conn_manager_test") {
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$INNERKITS_ROOT/netmanagernative/include",
     "$THIRD_PARTY_ROOT/curl/include",
+    "$THIRD_PARTY_ROOT/openssl/include",
   ]
 
   deps = [
@@ -79,6 +80,8 @@ ohos_unittest("net_conn_manager_test") {
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
     "$THIRD_PARTY_ROOT/jsoncpp:jsoncpp",
+    "$THIRD_PARTY_ROOT/openssl:libcrypto_shared",
+    "$THIRD_PARTY_ROOT/openssl:libssl_shared",
   ]
 
   external_deps = [

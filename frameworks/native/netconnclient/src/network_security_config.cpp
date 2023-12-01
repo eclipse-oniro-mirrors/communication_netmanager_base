@@ -19,6 +19,14 @@
 #include "net_mgr_log_wrapper.h"
 #include "net_manager_constants.h"
 #include "network_security_config.h"
+#include <unistd.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <fstream>
+#include <dirent.h>
+#include <cstdio>
+#include "openssl/hmac.h"
+#include "openssl/evp.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -36,6 +44,14 @@ const std::string TAG_EXPIRATION("expiration");
 const std::string TAG_PIN("pin");
 const std::string TAG_DIGEST_ALGORITHM("digest-algorithm");
 const std::string TAG_DIGEST("digest");
+
+const std::string REHASHD_CA_CERTS_DIR("/data/storage/el2/base/haps/entry/files/rehashed_ca_certs");
+#ifdef WINDOWS_PLATFORM
+const char OS_PATH_SEPARATOR = '\\';
+#else
+const char OS_PATH_SEPARATOR = '/';
+#endif
+
 
 sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
 {
@@ -67,15 +83,216 @@ bool Endswith(const std::string &str, const std::string &suffix)
     return false;
 }
 
+NetworkSecurityConfig& NetworkSecurityConfig::GetInstance()
+{
+    static auto instance = new NetworkSecurityConfig();
+    return *instance;
+}
+
+bool NetworkSecurityConfig::IsCACertFileName(const char *fileName)
+{
+    std::string str;
+    auto ext = strrchr(fileName, '.');
+    if (ext != nullptr) {
+        str = ext + 1;
+    }
+
+    for(auto &c: str) {
+        c = tolower(c);
+    }
+
+    return (str == "pem" || str == "crt");
+}
+
+void NetworkSecurityConfig::GetCAFilesFromPath(const std::string caPath, std::vector<std::string> &caFiles)
+{
+    DIR *dir = opendir(caPath.c_str());
+    if(dir == nullptr) {
+        NETMGR_LOG_E("open CA path[%{public}s] fail. [%{public}d]", caPath.c_str(), errno);
+        return;
+    }
+
+    struct dirent *entry = readdir(dir);
+    while(entry != nullptr) {
+        if (IsCACertFileName(entry->d_name)) {
+            if (caPath[caPath.length() - 1] != OS_PATH_SEPARATOR) {
+                caFiles.push_back(caPath + OS_PATH_SEPARATOR + entry->d_name);
+            } else {
+                caFiles.push_back(caPath + entry->d_name);
+            }
+        }
+        NETMGR_LOG_D("Read CA File [%{public}s] from CA Path ", entry->d_name);
+        entry = readdir(dir);
+    }
+
+    closedir(dir);
+}
+
+void NetworkSecurityConfig::AddSurfixToCACertFileName(const std::string &caPath,
+    std::set<std::string> &allFileNames, std::string &caFile)
+{
+    uint32_t count = 0;
+    for (auto &fileName: allFileNames) {
+        if (fileName.find(caFile) != std::string::npos) {
+            count++;
+        }
+    }
+
+    caFile = caFile + '.' + std::to_string(count);
+    allFileNames.insert(caFile);
+}
+
+X509 *NetworkSecurityConfig::ReadCertFile(const std::string &fileName)
+{
+    std::ifstream certFile(fileName.c_str());
+    if(!certFile.is_open()) {
+        NETMGR_LOG_E("Fail to read cert fail [%{public}s]", fileName.c_str());
+        return nullptr;
+    }
+
+    certFile.seekg(0,std::ios::end);
+    auto certSize = certFile.tellg();
+
+    certFile.seekg(0, std::ios::beg);
+    auto certData = new char[certSize];
+    certFile.read(certData, certSize);
+    certFile.close();
+
+    BIO *bio = BIO_new_mem_buf(certData, certSize);
+    if (bio == nullptr) {
+        NETMGR_LOG_E("Fail to call BIO_new_mem_buf");
+        delete[] certData;
+        return nullptr;
+    }
+
+    X509 *x509 = PEM_read_bio_X509(bio, nullptr, nullptr, nullptr);
+    if (x509 == nullptr) {
+        NETMGR_LOG_E("Fail to call PEM_read_bio_X509.");
+    }
+
+    BIO_free(bio);
+    delete[] certData;
+    return x509;
+}
+
+std::string NetworkSecurityConfig::GetRehashedCADirName(const std::string &caPath)
+{
+    constexpr unsigned int HASHED_DIR_NAME_HEX_LEN = 16;
+    unsigned char hashedHex[HASHED_DIR_NAME_HEX_LEN] = {0};
+
+    HMAC(EVP_sha1(), nullptr, 0, 
+         reinterpret_cast<const unsigned char *>(caPath.c_str()), caPath.size(),
+         hashedHex, const_cast<unsigned int *>(&HASHED_DIR_NAME_HEX_LEN));
+
+    /* Encode the hashed string by base16 */
+    constexpr unsigned int HASHED_DIR_NAME_LEN = HASHED_DIR_NAME_HEX_LEN * 2;
+    unsigned char hashedStr[HASHED_DIR_NAME_LEN + 1] = {0};
+    auto inBuf = hashedHex;
+    auto outBuf = hashedStr;
+    for (unsigned int inLen = 0;  inLen < sizeof(hashedHex); inBuf++, inLen++) {
+        unsigned char base16Pair[] = {*inBuf / 16, *inBuf % 16};
+        for (unsigned int i = 0; i < sizeof(base16Pair); i++) {
+            if (base16Pair[i] < 10) {
+                *outBuf++ = '0' + base16Pair[i];
+            } else {
+                *outBuf++ = 'a' + base16Pair[i] - 10;
+            }
+        }
+    }
+
+    std::string hashedDirName(reinterpret_cast<char *>(hashedStr));
+    return hashedDirName;
+}
+
+std::string NetworkSecurityConfig::BuildRehasedCAPath(const std::string &caPath)
+{
+    if (access(REHASHD_CA_CERTS_DIR.c_str(), F_OK) == -1) {
+        if (mkdir(REHASHD_CA_CERTS_DIR.c_str(), S_IRWXU | S_IRWXG) == -1) {
+            NETMGR_LOG_E("Fail to make a rehased caCerts dir [%{public}d]", errno);
+            return "";
+        }
+    }
+
+    auto dirName = GetRehashedCADirName(caPath);
+    auto rehashedCertpath = REHASHD_CA_CERTS_DIR + OS_PATH_SEPARATOR + dirName;
+    if (access(rehashedCertpath.c_str(), F_OK) == -1) {
+        if (mkdir(rehashedCertpath.c_str(), S_IRWXU | S_IRWXG) == -1) {
+            NETMGR_LOG_E("Fail to make a rehased caCerts dir [%{public}d]", errno);
+            return "";
+        }
+    }
+
+    NETMGR_LOG_D("Build dir [%{public}s]", rehashedCertpath.c_str());
+    return rehashedCertpath;
+}
+
+std::string NetworkSecurityConfig::GetRehasedCAPath(const std::string &caPath)
+{
+    if (access(REHASHD_CA_CERTS_DIR.c_str(), F_OK) == -1) {
+        return "";
+    }
+
+    auto dirName = GetRehashedCADirName(caPath);
+    if (dirName.empty()) {
+        return "";
+    }
+
+    auto rehashedCertpath = REHASHD_CA_CERTS_DIR + OS_PATH_SEPARATOR + dirName;
+    if (access(rehashedCertpath.c_str(), F_OK) == -1) {
+        return "";
+    }
+
+    return rehashedCertpath;
+}
+
+std::string NetworkSecurityConfig::ReHashCAPathForX509(const std::string &caPath)
+{
+    std::set<std::string> allFiles;
+    std::vector<std::string> caFiles;
+
+    auto rehashedCertpath = BuildRehasedCAPath(caPath);
+    if (rehashedCertpath.empty()) {
+        return rehashedCertpath;
+    }
+
+    GetCAFilesFromPath(caPath, caFiles);
+
+    for (auto &caFile: caFiles) {
+        auto x509 = ReadCertFile(caFile);
+        if (x509 == nullptr) {
+            continue;
+        }
+
+        constexpr int X509_HASH_LEN = 16;
+        char buf[X509_HASH_LEN] = {0};
+        sprintf(buf, "%08lx", X509_subject_name_hash(x509));
+        X509_free(x509);
+
+        std::string hashName(buf);
+        AddSurfixToCACertFileName(rehashedCertpath, allFiles, hashName);
+
+        std::string rehashedCaFile = rehashedCertpath + OS_PATH_SEPARATOR + hashName;
+        std::ifstream src(caFile);
+        std::ofstream dst(rehashedCaFile);
+        dst << src.rdbuf();
+        NETMGR_LOG_D("Rehased cert generated. [%{public}s]", rehashedCaFile.c_str());
+    }
+
+    return rehashedCertpath;
+}
+
 bool NetworkSecurityConfig::ValidateDate(const std::string &dateStr)
 {
     return true;
 }
 
-
 int32_t NetworkSecurityConfig::GetConfig()
 {
     std::string json;
+    if (configCached_) {
+        return NETMANAGER_SUCCESS;
+    }
+
     auto ret = GetJsonFromBundle(json);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("Failed to get json from bundler manager.");
@@ -87,6 +304,7 @@ int32_t NetworkSecurityConfig::GetConfig()
         return ret;
     }
 
+    configCached_ = true;
     return NETMANAGER_SUCCESS;
 }
 
@@ -108,7 +326,7 @@ int32_t NetworkSecurityConfig::GetJsonFromBundle(std::string &jsonProfile)
     ret = bundleMgrProxy->GetJsonProfile(AppExecFwk::ProfileType::NETWORK_PROFILE,
         bundleInfo.name, bundleInfo.entryModuleName, jsonProfile);
     if (ret != ERR_OK) {
-        NETMGR_LOG_D("No network_config profile configured in bundle manager.");
+        NETMGR_LOG_D("No network_config profile configured in bundle manager.[%{public}d]", ret);
         return NETMANAGER_SUCCESS;
     }
 
@@ -248,12 +466,13 @@ int32_t NetworkSecurityConfig::GetPinSetForHostName(const std::string &hostname,
 {
     if (hostname.empty()) {
         NETMGR_LOG_E("Failed to get pinset, hostname is empty.");
-        return NETMANAGER_ERR_PARAMETER_ERROR;
+        return NETMANAGER_SUCCESS;
     }
 
     auto ret = GetConfig();
     if (ret != NETMANAGER_SUCCESS) {
-        return ret;
+        NETMGR_LOG_E("Failed to get pinset config.");
+        return NETMANAGER_SUCCESS;
     }
 
     PinSet *pPinSet = nullptr;
@@ -296,13 +515,14 @@ int32_t NetworkSecurityConfig::GetPinSetForHostName(const std::string &hostname,
 int32_t NetworkSecurityConfig::GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs)
 {
     if (hostname.empty()) {
-        NETMGR_LOG_E("Failed to get pinset, hostname is empty.");
-        return NETMANAGER_ERR_PARAMETER_ERROR;
+        NETMGR_LOG_E("Failed to get trust anchors, hostname is empty.");
+        return NETMANAGER_SUCCESS;
     }
 
     auto ret = GetConfig();
     if (ret != NETMANAGER_SUCCESS) {
-        return ret;
+        NETMGR_LOG_E("Failed to get trust anchors.");
+        return NETMANAGER_SUCCESS;
     }
 
     TrustAnchors *pTrustAnchors = nullptr;
@@ -325,7 +545,20 @@ int32_t NetworkSecurityConfig::GetTrustAnchorsForHostName(const std::string &hos
         pTrustAnchors = &baseConfig_.trustAnchors_;
     }
 
-    certs = pTrustAnchors->certs_;
+    for (auto &certPath: pTrustAnchors->certs_) {
+        auto rehashedCertpath = GetRehasedCAPath(certPath);
+        if (rehashedCertpath.empty())
+        {
+            rehashedCertpath = ReHashCAPathForX509(certPath);
+        }
+        if (!rehashedCertpath.empty())
+        {
+            certs.push_back(rehashedCertpath);
+        } else {
+            certs.push_back(certPath);
+        }
+        NETMGR_LOG_D("Get cert [%{public}s] [%{public}s]", certPath.c_str(), rehashedCertpath.c_str());
+    }
 
     return NETMANAGER_SUCCESS;
 }

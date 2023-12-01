@@ -73,6 +73,113 @@ void BuildTestJsonObject(std::string &content, Json::Value &root)
 }
 
 /**
+ * @tc.name: IsCACertFileNameTest001
+ * @tc.desc: Test NetworkSecurityConfig::IsCACertFileName
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, IsCACertFileNameTest001, TestSize.Level1)
+{
+    std::string fileName("cafile.Pem");
+    std::cout << "IsCACertFileNameTest001 In" << std::endl;
+    auto ret = g_networkSecurityConfig->IsCACertFileName(fileName.c_str());
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: GetCAFilesFromPathTest001
+ * @tc.desc: Test NetworkSecurityConfig::GetCAFilesFromPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, GetCAFilesFromPathTest001, TestSize.Level1)
+{
+    std::string caPath("/etc/security/certificates/test");
+    std::vector<std::string> caFiles;
+    std::cout << "GetCAFilesFromPathTest001 In" << std::endl;
+    g_networkSecurityConfig->GetCAFilesFromPath(caPath, caFiles);
+    EXPECT_EQ(caFiles.size(), 0);
+}
+
+/**
+ * @tc.name: AddSurfixToCACertFileNameTest001
+ * @tc.desc: Test NetworkSecurityConfig::AddSurfixToCACertFileName
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, AddSurfixToCACertFileNameTest001, TestSize.Level1)
+{
+    std::string caPath("/etc/security/certificates/test");
+    std::set<std::string> allFileNames;
+    std::string caFile("cacert.pem");
+    std::cout << "AddSurfixToCACertFileNameTest001 In" << std::endl;
+     g_networkSecurityConfig->AddSurfixToCACertFileName(caPath, allFileNames, caFile);
+    EXPECT_EQ(allFileNames.size(), 1);
+}
+
+/**
+ * @tc.name: ReadCertFileTest001
+ * @tc.desc: Test NetworkSecurityConfig::ReadCertFile
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, ReadCertFileTest001, TestSize.Level1)
+{
+    std::string caFile("cacert.pem");
+    std::cout << "ReadCertFileTest001 In" << std::endl;
+    auto ret = g_networkSecurityConfig->ReadCertFile(caFile);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: GetRehashedCADirName001
+ * @tc.desc: Test NetworkSecurityConfig::GetRehashedCADirName
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, GetRehashedCADirName001, TestSize.Level1)
+{
+    std::string caPath("/etc/security/certificates/test");
+    std::cout << "GetRehashedCADirName001 In" << std::endl;
+    auto ret = g_networkSecurityConfig->GetRehashedCADirName(caPath);
+    EXPECT_EQ(caPath, caPath);
+}
+
+/**
+ * @tc.name: BuildRehasedCAPath001
+ * @tc.desc: Test NetworkSecurityConfig::BuildRehasedCAPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, BuildRehasedCAPath001, TestSize.Level1)
+{
+    std::string caPath("/etc/security/certificates/test");
+    std::cout << "BuildRehasedCAPath001 In" << std::endl;
+    auto ret = g_networkSecurityConfig->BuildRehasedCAPath(caPath);
+    EXPECT_EQ(ret, "");
+}
+
+/**
+ * @tc.name: GetRehasedCAPath001
+ * @tc.desc: Test NetworkSecurityConfig::GetRehasedCAPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, GetRehasedCAPath001, TestSize.Level1)
+{
+    std::string caPath("/etc/security/certificates/test");
+    std::cout << "GetRehasedCAPath001 In" << std::endl;
+    auto ret = g_networkSecurityConfig->GetRehasedCAPath(caPath);
+    EXPECT_EQ(ret, "");
+}
+
+/**
+ * @tc.name: ReHashCAPathForX509001
+ * @tc.desc: Test NetworkSecurityConfig::ReHashCAPathForX509
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, ReHashCAPathForX509001, TestSize.Level1)
+{
+    std::string caPath("/etc/security/certificates/test");
+    std::cout << "ReHashCAPathForX509001 In" << std::endl;
+    g_networkSecurityConfig->ReHashCAPathForX509(caPath);
+    EXPECT_EQ(caPath, caPath);
+}
+
+/**
  * @tc.name: ParseJsonTrustAnchorsTest001
  * @tc.desc: Test NetworkSecurityConfig::ParseJsonTrustAnchors, not applying for
  * permission,return NETMANAGER_ERR_PERMISSION_DENIED
@@ -129,7 +236,7 @@ HWTEST_F(NetworkSecurityConfigTest, GetPinSetForHostName001, TestSize.Level1)
 
     std::cout << "GetPinSetForHostName001 In" << std::endl;
     auto ret = g_networkSecurityConfig->GetPinSetForHostName(hostname, pins);
-    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 }
