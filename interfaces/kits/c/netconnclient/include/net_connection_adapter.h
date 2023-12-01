@@ -24,7 +24,7 @@
 
 namespace OHOS::NetManagerStandard {
 
-int32_t Conv2NetHandleList(std::list<sptr<NetHandle>> &netHandleObjList, OH_NetConn_NetHandleList *netHandleList);
+int32_t Conv2NetHandleList(const std::list<sptr<NetHandle>> &netHandleObjList, OH_NetConn_NetHandleList *netHandleList);
 
 } // namespace OHOS::NetManagerStandard
 #endif /* NATIVE_NET_CONN_ADAPTER_H */

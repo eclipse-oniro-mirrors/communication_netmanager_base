@@ -619,6 +619,7 @@ bool WriteFile(const std::string &filePath, const std::string &fileContent)
         return false;
     }
     file << fileContent;
+    file.close();
     return true;
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils
