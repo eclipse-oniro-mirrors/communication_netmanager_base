@@ -104,7 +104,7 @@ int32_t DnsQualityDiag::ParseReportAddr(uint32_t size, AddrInfo* addrinfo, Netsy
         } else {
             break;
         }
-        NETNATIVE_LOGI("ReportDnsResult: %{public}s", ai.addr_.c_str());
+        NETNATIVE_LOG_D("ReportDnsResult: %{public}s", ai.addr_.c_str());
     }
     return 0;
 }
@@ -114,7 +114,7 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
 {
     bool reportSizeReachLimit = (report_.size() >= MAX_RESULT_SIZE);
 
-    NETNATIVE_LOGI("ReportDnsResult: %{public}d, %{public}d, %{public}d, %{public}d, %{public}d, %{public}d",
+    NETNATIVE_LOG_D("ReportDnsResult: %{public}d, %{public}d, %{public}d, %{public}d, %{public}d, %{public}d",
                    netId, uid, pid, usedtime, size, failreason);
 
     if (!reportSizeReachLimit) {
@@ -128,7 +128,7 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
         if (failreason == 0) {
             ParseReportAddr(size, addrinfo, report);
         }
-        NETNATIVE_LOGI("ReportDnsResult: %{public}s", report.host_.c_str());
+        NETNATIVE_LOG_D("ReportDnsResult: %{public}s", report.host_.c_str());
         std::shared_ptr<NetsysNative::NetDnsResultReport> rpt =
             std::make_shared<NetsysNative::NetDnsResultReport>(report);
         auto event = AppExecFwk::InnerEvent::Get(DnsQualityEventHandler::MSG_DNS_NEW_REPORT, rpt);
@@ -150,7 +150,7 @@ int32_t DnsQualityDiag::RegisterResultListener(const sptr<INetDnsResultCallback>
         handler_->SendEvent(DnsQualityEventHandler::MSG_DNS_MONITOR_LOOP, monitor_loop_delay);
 #endif
     }
-    NETNATIVE_LOGI("RegisterResultListener, %{public}d", report_delay);
+    NETNATIVE_LOG_D("RegisterResultListener, %{public}d", report_delay);
 
     return 0;
 }
@@ -161,7 +161,7 @@ int32_t DnsQualityDiag::UnregisterResultListener(const sptr<INetDnsResultCallbac
     if (resultListeners_.empty()) {
         handler_started = false;
     }
-    NETNATIVE_LOGI("UnregisterResultListener");
+    NETNATIVE_LOG_D("UnregisterResultListener");
     
     return 0;
 }
@@ -203,7 +203,7 @@ int32_t DnsQualityDiag::query_default_host()
     OHOS::NetManagerStandard::NetConnClient::GetInstance().GetDefaultNet(netHandle);
     int netid = netHandle.GetNetId();
 
-    NETNATIVE_LOGI("query_default_host: %{public}d, ", netid);
+    NETNATIVE_LOG_D("query_default_host: %{public}d, ", netid);
 
     param.qp_netid = netid;
 #if NETSYS_DNS_MONITOR
@@ -243,7 +243,7 @@ int32_t DnsQualityDiag::send_dns_report()
     if (report_.size() > 0) {
         std::list<NetsysNative::NetDnsResultReport> reportSend(report_);
         report_.clear();
-        NETNATIVE_LOGE("send_dns_report (%{public}u)", reportSend.size());
+        NETNATIVE_LOG_D("send_dns_report (%{public}u)", reportSend.size());
         for (auto cb: resultListeners_) {
             NETNATIVE_LOGI("send_dns_report cb)");
             cb->OnDnsResultReport(reportSend.size(), reportSend);
@@ -255,7 +255,7 @@ int32_t DnsQualityDiag::send_dns_report()
 
 int32_t DnsQualityDiag::add_dns_report(std::shared_ptr<NetsysNative::NetDnsResultReport> report)
 {
-    NETNATIVE_LOGE("add_dns_report (%{public}s)", report->host_.c_str());
+    NETNATIVE_LOGI("add_dns_report (%{public}s)", report->host_.c_str());
     if (report_.size() < MAX_RESULT_SIZE) {
         report_.push_back(*report);
     }
@@ -287,7 +287,7 @@ int32_t DnsQualityDiag::load_query_addr(const char* defaultAddr)
     } else {
         queryAddr = defaultAddr;
     }
-    NETNATIVE_LOGI("Get queryAddr url:[%{public}s]]", queryAddr.c_str());
+    NETNATIVE_LOG_D("Get queryAddr url:[%{public}s]]", queryAddr.c_str());
 
     return 0;
 }
@@ -298,7 +298,7 @@ int32_t DnsQualityDiag::HandleEvent(const AppExecFwk::InnerEvent::Pointer &event
         NETNATIVE_LOGI("DnsQualityDiag Handler not started");
         return 0;
     }
-    NETNATIVE_LOGI("DnsQualityDiag Handler event: %{public}d", event->GetInnerEventId());
+    NETNATIVE_LOG_D("DnsQualityDiag Handler event: %{public}d", event->GetInnerEventId());
 
     switch (event->GetInnerEventId()) {
         case DnsQualityEventHandler::MSG_DNS_MONITOR_LOOP:
