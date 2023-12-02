@@ -1013,11 +1013,6 @@ int32_t NetsysNativeClient::RegisterCallback(const sptr<NetsysControllerCallback
         NETMGR_LOG_E("Callback is nullptr");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    auto proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
     std::lock_guard lock(cbObjMutex_);
     cbObjects_.push_back(callback);
     return NETMANAGER_SUCCESS;
