@@ -18,6 +18,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <linux/if.h>
+#include <linux/ipv6.h>
 #include <linux/if_tun.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
@@ -31,6 +32,7 @@
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "securec.h"
+#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -70,7 +72,13 @@ int32_t VpnManager::CreateVpnInterface()
     net4Sock_ = socket(AF_INET, SOCK_DGRAM, 0);
     if (net4Sock_ < 0) {
         close(tunfd);
-        NETNATIVE_LOGE("create SOCK_DGRAM failed: %{public}d", errno);
+        NETNATIVE_LOGE("create SOCK_DGRAM ipv4 failed: %{public}d", errno);
+        return NETMANAGER_ERROR;
+    }
+    net6Sock_ = socket(AF_INET6, SOCK_DGRAM, 0);
+    if (net6Sock_ < 0) {
+        close(tunfd);
+        NETNATIVE_LOGE("create SOCK_DGRAM ipv6 failed: %{public}d", errno);
         return NETMANAGER_ERROR;
     }
 
@@ -87,6 +95,10 @@ void VpnManager::DestroyVpnInterface()
     if (net4Sock_ != 0) {
         close(net4Sock_);
         net4Sock_ = 0;
+    }
+    if (net6Sock_ != 0) {
+        close(net6Sock_);
+        net6Sock_ = 0;
     }
     if (tunFd_ != 0) {
         close(tunFd_);
@@ -122,31 +134,50 @@ int32_t VpnManager::SetVpnAddress(const std::string &ifName, const std::string &
         return NETMANAGER_ERROR;
     }
 
-    in_addr ipv4Addr = {};
-    if (inet_aton(tunAddr.c_str(), &ipv4Addr) == 0) {
-        NETNATIVE_LOGE("addr: %{public}s inet_aton error", tunAddr.c_str());
-        return NETMANAGER_ERROR;
-    }
+    bool isIpv6 = CommonUtils::IsValidIPV6(tunAddr);
+    NETNATIVE_LOGI("SetVpnAddress addr: %{public}s, isIpv6: %{public}d", tunAddr.c_str(), isIpv6);
+    if (isIpv6){
+        struct in6_ifreq ifr6 = {};
+        if (ioctl(net6Sock_, SIOCGIFINDEX, &ifr) <0) {
+            NETNATIVE_LOGE(" get network interface ipv6 failed: %{public}d", errno);
+            return NETMANAGER_ERROR;
+        }
+        if(inet_pton(AF_INET6, tunAddr.c_str(), &ifr6.ifr6_addr) == 0) {
+            NETNATIVE_LOGE("inet_pton ipv6 address failed: %{public}d", errno);
+        }
+        ifr6.ifr6_prefixlen = prefix;
+        ifr6.ifr6_ifindex = ifr.ifr_ifindex;
+        if (ioctl(net6Sock_, SIOCSIFADDR, &ifr6) < 0) {
+            NETNATIVE_LOGE("ioctl set ipv6 address failed: %{public}d", errno);
+            return NETMANAGER_ERROR;
+        }
+    }else {
+        in_addr ipv4Addr = {};
+        if (inet_aton(tunAddr.c_str(), &ipv4Addr) == 0) {
+            NETNATIVE_LOGE("addr: %{public}s inet_aton error", tunAddr.c_str());
+            return NETMANAGER_ERROR;
+        }
 
-    auto sin = reinterpret_cast<sockaddr_in *>(&ifr.ifr_addr);
-    sin->sin_family = AF_INET;
-    sin->sin_addr = ipv4Addr;
-    if (ioctl(net4Sock_, SIOCSIFADDR, &ifr) < 0) {
-        NETNATIVE_LOGE("ioctl set ip address failed: %{public}d", errno);
-        return NETMANAGER_ERROR;
-    }
+        auto sin = reinterpret_cast<sockaddr_in *>(&ifr.ifr_addr);
+        sin->sin_family = AF_INET;
+        sin->sin_addr = ipv4Addr;
+        if (ioctl(net4Sock_, SIOCSIFADDR, &ifr) < 0) {
+            NETNATIVE_LOGE("ioctl set ipv4 address failed: %{public}d", errno);
+            return NETMANAGER_ERROR;
+        }
 
-    if (prefix <= 0 || prefix >= NET_MASK_MAX_LENGTH) {
-        NETNATIVE_LOGE("prefix: %{public}d error", prefix);
-        return NETMANAGER_ERROR;
-    }
-    in_addr_t mask = prefix ? (~0 << (NET_MASK_MAX_LENGTH - prefix)) : 0;
-    sin = reinterpret_cast<sockaddr_in *>(&ifr.ifr_netmask);
-    sin->sin_family = AF_INET;
-    sin->sin_addr.s_addr = htonl(mask);
-    if (ioctl(net4Sock_, SIOCSIFNETMASK, &ifr) < 0) {
-        NETNATIVE_LOGE("ioctl set ip mask failed: %{public}d", errno);
-        return NETMANAGER_ERROR;
+        if (prefix <= 0 || prefix >= NET_MASK_MAX_LENGTH) {
+            NETNATIVE_LOGE("prefix: %{public}d error", prefix);
+            return NETMANAGER_ERROR;
+        }
+        in_addr_t mask = prefix ? (~0 << (NET_MASK_MAX_LENGTH - prefix)) : 0;
+        sin = reinterpret_cast<sockaddr_in *>(&ifr.ifr_netmask);
+        sin->sin_family = AF_INET;
+        sin->sin_addr.s_addr = htonl(mask);
+        if (ioctl(net4Sock_, SIOCSIFNETMASK, &ifr) < 0) {
+            NETNATIVE_LOGE("ioctl set ip mask failed: %{public}d", errno);
+            return NETMANAGER_ERROR;
+        }
     }
 
     NETNATIVE_LOGI("set ip address success");
