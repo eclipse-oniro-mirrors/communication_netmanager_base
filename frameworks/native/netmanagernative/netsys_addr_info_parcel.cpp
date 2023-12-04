@@ -97,6 +97,7 @@ bool NetsysAddrInfoParcel::UnmarshallingAddrinfo(MessageParcel &parcelMsg, int s
             node->ai_canonname = static_cast<char *>(calloc(sizeof(char), (canSize + 1)));
             if (memcpy_s(node->ai_canonname, canSize, buffer, canSize) != 0) {
                 NETNATIVE_LOGE("memcpy_s faild");
+                free(node);
                 return false;
             }
         }
@@ -107,6 +108,7 @@ bool NetsysAddrInfoParcel::UnmarshallingAddrinfo(MessageParcel &parcelMsg, int s
             node->ai_addr = static_cast<sockaddr *>(calloc(1, node->ai_addrlen + 1));
             if (memcpy_s(node->ai_addr, node->ai_addrlen, aiAddr, node->ai_addrlen) != 0) {
                 NETNATIVE_LOGE("memcpy_s faild");
+                free(node);
                 return false;
             }
         }
