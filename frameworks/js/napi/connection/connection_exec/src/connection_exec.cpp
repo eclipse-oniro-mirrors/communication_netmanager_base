@@ -34,6 +34,7 @@ namespace OHOS::NetManagerStandard {
 namespace {
 constexpr int32_t NO_PERMISSION_CODE = 1;
 constexpr int32_t RESOURCE_UNAVALIEBLE_CODE = 11;
+constexpr int32_t PERMISSION_DENIED_CODE = 13;
 constexpr int32_t NET_UNREACHABLE_CODE = 101;
 } // namespace
 
@@ -395,6 +396,11 @@ bool ConnectionExec::ExecSetCustomDNSRule(SetCustomDNSRuleContext *context)
         return false;
     }
 
+    if (context->host_.empty() || context->ip_.empty()) {
+        context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        return false;
+    }
+
     std::vector<std::string> ip = context->ip_;
     for (size_t i = 0; i < ip.size(); i++) {
         if (!CommonUtils::IsValidIPV4(ip[i]) && !CommonUtils::IsValidIPV6(ip[i])) {
@@ -498,6 +504,8 @@ int32_t TransErrorCode(int32_t error)
 {
     switch (error) {
         case NO_PERMISSION_CODE:
+            return NETMANAGER_ERR_PERMISSION_DENIED;
+        case PERMISSION_DENIED_CODE:
             return NETMANAGER_ERR_PERMISSION_DENIED;
         case RESOURCE_UNAVALIEBLE_CODE:
             return NETMANAGER_ERR_INVALID_PARAMETER;
