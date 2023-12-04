@@ -78,7 +78,7 @@ void NetDnsResultCallback::IterateDnsReportResults(
                 defaultResult.failReports_ = it.queryresult_ == 0 ? 0 : 1;
                 netDnsResult_.EnsureInsert(defaultNetid, defaultResult);
             } else {
-                newDefaultResult = netDnsResult_[defaultNetid];
+                newDefaultResult = netDnsResult_.ReadVal(defaultNetid);
                 newDefaultResult.totalReports_++;
                 newDefaultResult.failReports_ += it.queryresult_ == 0 ? 0 : 1;
                 netDnsResult_.EnsureInsert(defaultNetid, newDefaultResult);
@@ -89,7 +89,7 @@ void NetDnsResultCallback::IterateDnsReportResults(
             newResult.failReports_ = it.queryresult_ == 0 ? 0 : 1;
             netDnsResult_.EnsureInsert(it.netid_, newResult);
         } else {
-            existResult = netDnsResult_[it.netid_];
+            existResult = netDnsResult_.ReadVal(it.netid_);
             existResult.totalReports_++;
             existResult.failReports_ += it.queryresult_ == 0 ? 0 : 1;
             netDnsResult_.EnsureInsert(it.netid_, existResult);

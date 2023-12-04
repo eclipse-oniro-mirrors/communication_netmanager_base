@@ -289,7 +289,7 @@ int32_t NetConnClient::GetAddressByName(const std::string &host, int32_t netId, 
     return proxy->GetAddressByName(host, netId, addr);
 }
 
-int32_t NetConnClient::BindSocket(int32_t socket_fd, int32_t netId)
+int32_t NetConnClient::BindSocket(int32_t socketFd, int32_t netId)
 {
     if (netId < MIN_VALID_NETID) {
         NETMGR_LOG_E("netId is invalid.");
@@ -300,7 +300,7 @@ int32_t NetConnClient::BindSocket(int32_t socket_fd, int32_t netId)
         NETMGR_LOG_E("fwmarkClient_ is nullptr");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    fwmarkClient_->BindSocket(socket_fd, netId);
+    fwmarkClient_->BindSocket(socketFd, netId);
     return NETMANAGER_SUCCESS;
 }
 

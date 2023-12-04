@@ -659,7 +659,7 @@ int32_t NetsysNativeClient::ClearDefaultNetWorkNetId()
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetsysNativeClient::BindSocket(int32_t socket_fd, uint32_t netId)
+int32_t NetsysNativeClient::BindSocket(int32_t socketFd, uint32_t netId)
 {
     NETMGR_LOG_D("NetsysNativeClient::BindSocket: netId = [%{public}u]", netId);
     auto proxy = GetProxy();
@@ -1012,11 +1012,6 @@ int32_t NetsysNativeClient::RegisterCallback(const sptr<NetsysControllerCallback
     if (callback == nullptr) {
         NETMGR_LOG_E("Callback is nullptr");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-    auto proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
     }
     std::lock_guard lock(cbObjMutex_);
     cbObjects_.push_back(callback);

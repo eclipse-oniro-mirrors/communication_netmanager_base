@@ -1057,12 +1057,12 @@ HWTEST_F(NetConnClientTest, BindSocketTest002, TestSize.Level1)
     NetConnClient::NetConnDeathRecipient deathRecipient(*DelayedSingleton<NetConnClient>::GetInstance());
     sptr<IRemoteObject> remote = nullptr;
     deathRecipient.OnRemoteDied(remote);
-    int32_t socket_fd = 0;
+    int32_t socketFd = 0;
     int32_t netId = 99;
-    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->BindSocket(socket_fd, netId);
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->BindSocket(socketFd, netId);
     EXPECT_EQ(ret, NET_CONN_ERR_INVALID_NETWORK);
     netId = 101;
-    ret = DelayedSingleton<NetConnClient>::GetInstance()->BindSocket(socket_fd, netId);
+    ret = DelayedSingleton<NetConnClient>::GetInstance()->BindSocket(socketFd, netId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -1184,7 +1184,7 @@ HWTEST_F(NetConnClientTest, RegisterSlotTypeTest001, TestSize.Level1)
 
     std::string type = "";
     ret = NetConnClient::GetInstance().GetSlotType(type);
-    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
     EXPECT_TRUE(type.empty());
 }
 

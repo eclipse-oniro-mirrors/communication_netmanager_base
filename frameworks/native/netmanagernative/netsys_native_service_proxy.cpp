@@ -286,7 +286,7 @@ int32_t NetsysNativeServiceProxy::RegisterNotifyCallback(sptr<INotifyCallback> &
     MessageParcel data;
     if (callback == nullptr) {
         NETNATIVE_LOGE("The parameter of callback is nullptr");
-        return ERR_NULL_OBJECT;
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
     if (!WriteInterfaceToken(data)) {

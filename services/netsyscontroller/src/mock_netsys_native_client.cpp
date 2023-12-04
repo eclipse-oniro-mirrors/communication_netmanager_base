@@ -528,7 +528,7 @@ int32_t MockNetsysNativeClient::ClearDefaultNetWorkNetId()
     return 0;
 }
 
-int32_t MockNetsysNativeClient::BindSocket(int32_t socket_fd, uint32_t netId)
+int32_t MockNetsysNativeClient::BindSocket(int32_t socketFd, uint32_t netId)
 {
     NETMGR_LOG_D("MockNetsysNativeClient::BindSocket: netId = [%{public}u]", netId);
     return NETMANAGER_SUCCESS;

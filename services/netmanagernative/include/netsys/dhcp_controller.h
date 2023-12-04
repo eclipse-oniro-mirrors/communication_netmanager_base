@@ -16,24 +16,22 @@
 #ifndef INCLUDE_DHCP_CONTROLLER_H
 #define INCLUDE_DHCP_CONTROLLER_H
 
-#include "dhcp_service_api.h"
-#include "i_dhcp_result_notify.h"
 #include "i_notify_callback.h"
+#include "dhcp_c_api.h"
 
 namespace OHOS {
 namespace nmd {
 class DhcpController {
 public:
-    class DhcpControllerResultNotify : public OHOS::Wifi::IDhcpResultNotify {
+    class DhcpControllerResultNotify {
     public:
-        explicit DhcpControllerResultNotify(DhcpController &dhcpController);
-        virtual ~DhcpControllerResultNotify() override;
-        void OnSuccess(int status, const std::string &ifname, OHOS::Wifi::DhcpResult &result) override;
-        void OnFailed(int status, const std::string &ifname, const std::string &reason) override;
-        void OnSerExitNotify(const std::string &ifname) override;
-
+        explicit DhcpControllerResultNotify();
+        ~DhcpControllerResultNotify();
+        static void OnSuccess(int status, const char *ifname, DhcpResult *result);
+        static void OnFailed(int status, const char *ifname, const char *reason);
+        static void SetDhcpController(DhcpController *dhcpController);
     private:
-        DhcpController &dhcpController_;
+        static DhcpController *dhcpController_;
     };
 
 public:
@@ -41,14 +39,15 @@ public:
     ~DhcpController();
 
     int32_t RegisterNotifyCallback(sptr<OHOS::NetsysNative::INotifyCallback> &callback);
-    void StartDhcpClient(const std::string &iface, bool bIpv6);
-    void StopDhcpClient(const std::string &iface, bool bIpv6);
+    void StartClient(const std::string &iface, bool bIpv6);
+    void StopClient(const std::string &iface, bool bIpv6);
     bool StartDhcpService(const std::string &iface, const std::string &ipv4addr);
     bool StopDhcpService(const std::string &iface);
 
-    void Process(const std::string &iface, OHOS::Wifi::DhcpResult &result);
+    void Process(const std::string &iface, DhcpResult *result);
 
 private:
+    ClientCallBack clientEvent;
     std::unique_ptr<DhcpControllerResultNotify> dhcpResultNotify_ = nullptr;
     sptr<OHOS::NetsysNative::INotifyCallback> callback_ = nullptr;
 };

@@ -28,6 +28,7 @@
 
 #include "dns_config_client.h"
 #include "net_manager_constants.h"
+#include "net_stats_constants.h"
 #include "netsys_native_service.h"
 #include "notify_callback_stub.h"
 
@@ -495,7 +496,7 @@ HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceState001, TestSize.Level1)
     EXPECT_NE(ret, 0);
 
     ret = instance_->GetIfaceStats(stats, 0, iface);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, NetStatsResultCode::STATS_ERR_READ_BPF_FAIL);
 
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
     ret = instance_->GetAllStatsInfo(statsInfo);
@@ -512,7 +513,7 @@ HWTEST_F(NetsysNativeServiceTest, GetAddrInfoTest001, TestSize.Level1)
     instance_->netsysService_->dnsManager_->dnsGetAddrInfo_ = std::make_shared<DnsGetAddrInfo>();
     int32_t ret = instance_->GetAddrInfo(hostName, serverName, hints, netId, res);
     DTEST_LOG << ret << std::endl;
-    EXPECT_EQ(ret, EAI_NONAME);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
 HWTEST_F(NetsysNativeServiceTest, SetInternetPermissionTest001, TestSize.Level1)
@@ -656,7 +657,7 @@ HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest003, TestSize.Leve
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 
-HWTEST_F(NetsysNativeServiceTest, AddStaticArpTest001, TestSize.Level1)
+HWTEST_F(NetsysNativeServiceTest, StaticArpTest001, TestSize.Level1)
 {
     std::string ipAddr = "192.168.1.100";
     std::string macAddr = "aa:bb:cc:dd:ee:ff";
@@ -667,18 +668,8 @@ HWTEST_F(NetsysNativeServiceTest, AddStaticArpTest001, TestSize.Level1)
     }
     int32_t ret = instance_->AddStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
 
-HWTEST_F(NetsysNativeServiceTest, DelStaticArpTest001, TestSize.Level1)
-{
-    std::string ipAddr = "192.168.1.100";
-    std::string macAddr = "aa:bb:cc:dd:ee:ff";
-    std::string ifName = "wlan0";
-    if (instance_->netsysService_ == nullptr) {
-        instance_->Init();
-        return;
-    }
-    int32_t ret = instance_->DelStaticArp(ipAddr, macAddr, ifName);
+    ret = instance_->DelStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

@@ -622,4 +622,17 @@ bool WriteFile(const std::string &filePath, const std::string &fileContent)
     file.close();
     return true;
 }
+
+bool HasInternetPermission()
+{
+    int testSock = socket(AF_INET, SOCK_STREAM, 0);
+    if (testSock < 0 && errno == EPERM) {
+        NETMGR_LOG_E("make tcp testSock failed errno is %{public}d %{public}s", errno, strerror(errno));
+        return false;
+    }
+    if (testSock > 0) {
+        close(testSock);
+    }
+    return true;
+}
 } // namespace OHOS::NetManagerStandard::CommonUtils

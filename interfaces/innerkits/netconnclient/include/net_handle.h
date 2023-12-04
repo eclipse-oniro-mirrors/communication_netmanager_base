@@ -32,7 +32,7 @@ public:
     explicit NetHandle(int32_t netId) : netId_(netId) {}
     ~NetHandle() override = default;
 
-    int32_t BindSocket(int32_t socket_fd);
+    int32_t BindSocket(int32_t socketFd);
     int32_t GetAddressesByName(const std::string &host, std::vector<INetAddr> &addrList);
     int32_t GetAddressByName(const std::string &host, INetAddr &addr);
 

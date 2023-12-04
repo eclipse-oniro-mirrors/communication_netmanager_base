@@ -30,8 +30,6 @@
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetsysNative {
-constexpr int32_t START_TIME_MS = 1900;
-constexpr int32_t EXTRA_MONTH = 1;
 static constexpr const char *BFP_NAME_NETSYS_PATH = "/system/etc/bpf/netsys.o";
 const std::regex REGEX_CMD_IPTABLES(std::string(R"(^-[\S]*[\s\S]*)"));
 
@@ -64,38 +62,18 @@ void NetsysNativeService::OnStart()
     }
     NETNATIVE_LOGI("Publish NetsysNativeService SUCCESS");
     state_ = ServiceRunningState::STATE_RUNNING;
-    struct tm *timeNow;
-    time_t second = time(0);
-    if (second < 0) {
-        return;
-    }
-    timeNow = localtime(&second);
-    if (timeNow != nullptr) {
-        NETNATIVE_LOGI(
-            "NetsysNativeService start time:%{public}d-%{public}d-%{public}d %{public}d:%{public}d:%{public}d",
-            timeNow->tm_year + START_TIME_MS, timeNow->tm_mon + EXTRA_MONTH, timeNow->tm_mday, timeNow->tm_hour,
-            timeNow->tm_min, timeNow->tm_sec);
-    }
+    NETNATIVE_LOGI("start listener");
     manager_->StartListener();
+    NETNATIVE_LOGI("start listener end on start end");
 }
 
 void NetsysNativeService::OnStop()
 {
     std::lock_guard<std::mutex> guard(instanceLock_);
-    struct tm *timeNow;
-    time_t second = time(0);
-    if (second < 0) {
-        return;
-    }
-    timeNow = localtime(&second);
-    if (timeNow != nullptr) {
-        NETNATIVE_LOGI(
-            "NetsysNativeService dump time:%{public}d-%{public}d-%{public}d %{public}d:%{public}d:%{public}d",
-            timeNow->tm_year + START_TIME_MS, timeNow->tm_mon + EXTRA_MONTH, timeNow->tm_mday, timeNow->tm_hour,
-            timeNow->tm_min, timeNow->tm_sec);
-    }
     state_ = ServiceRunningState::STATE_STOPPED;
+    NETNATIVE_LOGI("stop listener");
     manager_->StopListener();
+    NETNATIVE_LOGI("stop listener end on stop end");
 }
 
 int32_t NetsysNativeService::Dump(int32_t fd, const std::vector<std::u16string> &args)
@@ -418,14 +396,14 @@ int32_t NetsysNativeService::InterfaceGetList(std::vector<std::string> &ifaces)
 int32_t NetsysNativeService::StartDhcpClient(const std::string &iface, bool bIpv6)
 {
     NETNATIVE_LOG_D("StartDhcpClient");
-    dhcpController_->StartDhcpClient(iface, bIpv6);
+    dhcpController_->StartClient(iface, bIpv6);
     return ERR_NONE;
 }
 
 int32_t NetsysNativeService::StopDhcpClient(const std::string &iface, bool bIpv6)
 {
     NETNATIVE_LOG_D("StopDhcpClient");
-    dhcpController_->StopDhcpClient(iface, bIpv6);
+    dhcpController_->StopClient(iface, bIpv6);
     return ERR_NONE;
 }
 

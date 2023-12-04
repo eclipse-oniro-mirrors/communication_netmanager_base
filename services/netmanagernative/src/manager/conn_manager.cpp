@@ -34,7 +34,7 @@ constexpr int32_t LOCAL_NET_ID = 99;
 
 ConnManager::ConnManager()
 {
-    networks_[LOCAL_NET_ID] = std::make_shared<LocalNetwork>(LOCAL_NET_ID);
+    networks_.EnsureInsert(LOCAL_NET_ID, std::make_shared<LocalNetwork>(LOCAL_NET_ID));
     defaultNetId_ = 0;
     needReinitRouteFlag_ = false;
 }
