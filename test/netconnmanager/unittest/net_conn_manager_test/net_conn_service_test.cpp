@@ -831,5 +831,17 @@ HWTEST_F(NetConnServiceTest, NetDetectionForDnsHealthTest001, TestSize.Level1)
     ret = NetConnService::GetInstance()->NetDetectionForDnsHealth(netId, dnsHealthFail);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetConnServiceTest, OnRemoveSystemAbility001, TestSize.Level1)
+{
+    std::string deviceId = "dev1";
+    NetConnService::GetInstance()->OnRemoveSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID, deviceId);
+}
+
+HWTEST_F(NetConnServiceTest, OnAddSystemAbility001, TestSize.Level1)
+{
+    std::string deviceId = "dev1";
+    NetConnService::GetInstance()->OnAddSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID, deviceId);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

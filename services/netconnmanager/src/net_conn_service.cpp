@@ -1703,9 +1703,18 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
 {
     NETMGR_LOG_I("NetConnService::OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
-        NETMGR_LOG_I("NetConnService::OnAddSystemAbility systemAbilityId[%{public}d] netsysnative service restarted",
-            systemAbilityId);
-        OnNetSysRestart();
+        if (hasSARemoved_) {
+            OnNetSysRestart();
+            hasSARemoved_ = false;
+        }
+    }
+}
+
+void NetConnService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
+{
+    NETMGR_LOG_I("NetConnService::OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
+        hasSARemoved_ = true;
     }
 }
 
