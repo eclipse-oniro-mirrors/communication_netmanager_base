@@ -25,7 +25,8 @@ namespace {
 
 } // namespace
 
-FactoryResetNetworkContext::FactoryResetNetworkContext(napi_env env, EventManager *manager) : BaseContext(env, manager) {}
+FactoryResetNetworkContext::FactoryResetNetworkContext(napi_env env, EventManager *manager)
+    : BaseContext(env, manager) {}
 
 void FactoryResetNetworkContext::ParseParams(napi_value *params, size_t paramsCount)
 {

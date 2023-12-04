@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ int32_t NetFactoryResetCallback::RegisterNetFactoryResetCallbackAsync(const sptr
     }
     int32_t ret = NETMANAGER_SUCCESS;
     if (factoryResetCallHandler_) {
-        factoryResetCallHandler_->PostSyncTask([this, &callback, &ret]() {
+        factoryResetCallHandler_->PostSyncTask([&callback, &ret]() {
             ret = RegisterNetFactoryResetCallback(callback);
         });
     }
@@ -60,8 +60,6 @@ int32_t NetFactoryResetCallback::RegisterNetFactoryResetCallback(const sptr<INet
         NETMGR_LOG_E("callback counts cannot more than [%{public}u]", LIMIT_CALLBACK_NUM);
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
-    
-    std::lock_guard<std::mutex> locker(mutex_);
 
     for (uint32_t i = 0; i < callbackCounts; i++) {
         if (callback->AsObject().GetRefPtr() == callbacks_[i]->AsObject().GetRefPtr()) {
@@ -71,7 +69,7 @@ int32_t NetFactoryResetCallback::RegisterNetFactoryResetCallback(const sptr<INet
     }
 
     callbacks_.emplace_back(callback);
-    NETMGR_LOG_I("End RegisterNetFactoryResetCallback,callback counts [%{public}u]", callbacks_.size());
+    NETMGR_LOG_I("End RegisterNetFactoryResetCallback,callback counts [%{public}zu]", callbacks_.size());
     return NETMANAGER_SUCCESS;
 }
 
@@ -84,7 +82,7 @@ int32_t NetFactoryResetCallback::UnregisterNetFactoryResetCallbackAsync(const sp
 
     int32_t ret = NETMANAGER_SUCCESS;
     if (factoryResetCallHandler_) {
-        factoryResetCallHandler_->PostSyncTask([this, &callback, &ret]() {
+        factoryResetCallHandler_->PostSyncTask([&callback, &ret]() {
             ret = UnregisterNetFactoryResetCallback(callback);
         });
     }
@@ -96,13 +94,13 @@ int32_t NetFactoryResetCallback::UnregisterNetFactoryResetCallback(const sptr<IN
 {
     NETMGR_LOG_I("Enter UnregisterNetFactoryResetCallback");
     auto it = std::remove_if(callbacks_.begin(), callbacks_.end(),
-                             [callback](const sptr<INetFactoryResetCallback> &tempCallback) -> bool {
-                                 if (tempCallback == nullptr || tempCallback->AsObject() == nullptr ||
-                                     tempCallback->AsObject().GetRefPtr() == nullptr) {
-                                     return true;
-                                 }
-                                 return callback->AsObject().GetRefPtr() == tempCallback->AsObject().GetRefPtr();
-                             });
+        [callback](const sptr<INetFactoryResetCallback> &tempCallback) -> bool {
+            if (tempCallback == nullptr || tempCallback->AsObject() == nullptr ||
+                tempCallback->AsObject().GetRefPtr() == nullptr) {
+                return true;
+            }
+            return callback->AsObject().GetRefPtr() == tempCallback->AsObject().GetRefPtr();
+        });
     callbacks_.erase(it, callbacks_.end());
     NETMGR_LOG_I("End UnregisterNetFactoryResetCallback");
     return NETMANAGER_SUCCESS;
@@ -114,7 +112,7 @@ int32_t NetFactoryResetCallback::NotifyNetFactoryResetAsync()
     NETMGR_LOG_I("NotifyNetFactoryResetAsync enter");
     int32_t ret = NETMANAGER_SUCCESS;
     if (factoryResetCallHandler_) {
-        factoryResetCallHandler_->PostSyncTask([this, &ret]() {
+        factoryResetCallHandler_->PostSyncTask([&ret]() {
             ret = NotifyNetFactoryReset();
         });
     }
@@ -124,8 +122,7 @@ int32_t NetFactoryResetCallback::NotifyNetFactoryResetAsync()
 
 int32_t NetFactoryResetCallback::NotifyNetFactoryReset()
 {
-    NETMGR_LOG_I("NotifyNetFactoryReset enter");
-    NETMGR_LOG_I("NotifyNetFactoryReset callback count=[%{public}d]", callbacks_.size());
+    NETMGR_LOG_I("NotifyNetFactoryReset enter, callback count = [%{public}zu]", callbacks_.size());
     for (const auto &callback : callbacks_) {
         if (callback != nullptr && callback->AsObject() != nullptr && callback->AsObject().GetRefPtr() != nullptr) {
             callback->OnNetFactoryReset();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,8 +28,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-class NetFactoryResetCallback : public RefBase{
-    //DECLARE_DELAYED_SINGLETON(NetFactoryResetCallback);
+class NetFactoryResetCallback : public RefBase {
 
 public:
     NetFactoryResetCallback();
@@ -60,7 +59,6 @@ private:
     int32_t NotifyNetFactoryReset();
 
 private:
-    std::mutex mutex_;
     std::vector<sptr<INetFactoryResetCallback>> callbacks_;
     std::shared_ptr<AppExecFwk::EventRunner> factoryResetCallRunner_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> factoryResetCallHandler_ = nullptr;
