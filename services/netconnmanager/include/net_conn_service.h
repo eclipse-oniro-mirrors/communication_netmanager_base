@@ -336,6 +336,7 @@ private:
 
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
+    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
 
 private:
     bool Init();
@@ -409,6 +410,8 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_ = nullptr;
     sptr<NetInterfaceStateCallback> interfaceStateCallback_ = nullptr;
     sptr<NetDnsResultCallback> dnsResultCallback_ = nullptr;
+
+    bool hasSARemoved_ = false;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
