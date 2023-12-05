@@ -449,6 +449,11 @@ bool ConnectionExec::ExecDeleteCustomDNSRule(DeleteCustomDNSRuleContext *context
         return false;
     }
 
+    if (context->host_.empty()) {
+        context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        return false;
+    }
+
     if (!context->IsParseOK()) {
         context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
         return false;
