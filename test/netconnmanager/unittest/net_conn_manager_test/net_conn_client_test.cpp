@@ -1219,5 +1219,28 @@ HWTEST_F(NetConnClientTest, GetTrustAnchorsForHostName001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
 }
 
+HWTEST_F(NetConnClientTest, RegisterAppHttpProxyCallback001, TestSize.Level1)
+{
+    std::function<void(const HttpProxy &httpProxy)> callback;
+    uint32_t callbackid = 0;
+
+    NetConnClient::GetInstance().RegisterAppHttpProxyCallback(callback, callbackid);
+    EXPECT_EQ(callbackid, 0);
+}
+
+HWTEST_F(NetConnClientTest, UnregisterAppHttpProxyCallback001, TestSize.Level1)
+{
+    uint32_t callbackid = 0;
+    NetConnClient::GetInstance().UnregisterAppHttpProxyCallback(callbackid);
+    EXPECT_EQ(callbackid, 0);
+}
+
+HWTEST_F(NetConnClientTest, SetAppHttpProxy001, TestSize.Level1)
+{
+    HttpProxy httpProxy;
+    auto ret = NetConnClient::GetInstance().SetAppHttpProxy(httpProxy);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

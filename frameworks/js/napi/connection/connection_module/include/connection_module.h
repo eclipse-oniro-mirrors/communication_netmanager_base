@@ -52,6 +52,7 @@ public:
     static constexpr const char *FUNCTION_SET_CUSTOM_DNS_RULE = "addCustomDnsRule";
     static constexpr const char *FUNCTION_DELETE_CUSTOM_DNS_RULE = "removeCustomDnsRule";
     static constexpr const char *FUNCTION_DELETE_CUSTOM_DNS_RULES = "clearCustomDnsRules";
+    static constexpr const char *FUNCTION_SET_APP_HTTP_PROXY = "setAppHttpProxy";
     static constexpr const char *FUNCTION_GET_APP_NET = "getAppNet";
     static constexpr const char *FUNCTION_GET_APP_NET_SYNC = "getAppNetSync";
     static constexpr const char *FUNCTION_SET_APP_NET = "setAppNet";
@@ -111,6 +112,7 @@ private:
     static napi_value AddCustomDnsRule(napi_env env, napi_callback_info info);
     static napi_value RemoveCustomDnsRule(napi_env env, napi_callback_info info);
     static napi_value ClearCustomDnsRules(napi_env env, napi_callback_info info);
+    static napi_value SetAppHttpProxy(napi_env env, napi_callback_info info);
     static napi_value GetAppNet(napi_env env, napi_callback_info info);
     static napi_value GetAppNetSync(napi_env env, napi_callback_info info);
     static napi_value SetAppNet(napi_env env, napi_callback_info info);

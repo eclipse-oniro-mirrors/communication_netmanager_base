@@ -449,6 +449,42 @@ int32_t NetConnClient::SetGlobalHttpProxy(const HttpProxy &httpProxy)
     return proxy->SetGlobalHttpProxy(httpProxy);
 }
 
+void NetConnClient::RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback,
+                                                 uint32_t &callbackid)
+{
+    uint32_t id = currentCallbackId_;
+    std::lock_guard<std::mutex> lock(appHttpProxyCbMapMutex_);
+
+    currentCallbackId_++;
+    appHttpProxyCbMap_[id] = callback;
+    callbackid = id;
+    NETMGR_LOG_I("registerCallback id:%{public}d.", id);
+}
+
+void NetConnClient::UnregisterAppHttpProxyCallback(uint32_t callbackid)
+{
+    NETMGR_LOG_I("unregisterCallback callbackid:%{public}d.", callbackid);
+    std::lock_guard<std::mutex> lock(appHttpProxyCbMapMutex_);
+    appHttpProxyCbMap_.erase(callbackid);
+}
+
+int32_t NetConnClient::SetAppHttpProxy(const HttpProxy &httpProxy)
+{
+    NETMGR_LOG_I("AppHttpProxy:%{public}s:%{public}d",
+                 httpProxy.GetHost().empty() ? "" : httpProxy.GetHost().c_str(),
+                 httpProxy.GetPort());
+
+    if (appHttpProxy_ != httpProxy) {
+        appHttpProxy_ = httpProxy;
+        std::lock_guard<std::mutex> lock(appHttpProxyCbMapMutex_);
+        for (const auto &pair : appHttpProxyCbMap_) {
+            pair.second(httpProxy);
+        }
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetConnClient::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
     sptr<INetConnService> proxy = GetProxy();
@@ -461,6 +497,13 @@ int32_t NetConnClient::GetGlobalHttpProxy(HttpProxy &httpProxy)
 
 int32_t NetConnClient::GetDefaultHttpProxy(HttpProxy &httpProxy)
 {
+    if (!appHttpProxy_.GetHost().empty()) {
+        httpProxy = appHttpProxy_;
+        NETMGR_LOG_D("Return AppHttpProxy:%{public}s:%{public}d",
+                     httpProxy.GetHost().c_str(), httpProxy.GetPort());
+        return NETMANAGER_SUCCESS;
+    }
+
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");

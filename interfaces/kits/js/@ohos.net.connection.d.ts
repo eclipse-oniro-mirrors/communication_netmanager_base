@@ -483,6 +483,12 @@ declare namespace connection {
 
   /**
    * Obtains the network independent global {@link HttpProxy} proxy settings.
+   *
+   * If a application level proxy is set, the application level proxy parameters are returned.
+   * If a global proxy is set, the global proxy parameters are returned.
+   * If the process is bound to a {@link NetHandle} using {@link setAppNet}, the {@link NetHandle} proxy settings are returned.
+   * In other cases, the proxy settings of default network are returned.
+   *
    * @param { AsyncCallback<HttpProxy> } callback Returns the proxy settings. For details, see {@link HttpProxy}.
    * @throws { BusinessError } 401 - Parameter error.
    * @throws { BusinessError } 2100002 - Operation failed. Cannot connect to service.
@@ -495,6 +501,12 @@ declare namespace connection {
 
   /**
    * Obtains the network independent global {@link HttpProxy} proxy settings.
+   *
+   * If a application level proxy is set, the application level proxy parameters are returned.
+   * If a global proxy is set, the global proxy parameters are returned.
+   * If the process is bound to a {@link NetHandle} using {@link setAppNet}, the {@link NetHandle} proxy settings are returned.
+   * In other cases, the proxy settings of default network are returned.
+   *
    * @returns { Promise<HttpProxy> } the promise returned by the function.
    * @throws { BusinessError } 401 - Parameter error.
    * @throws { BusinessError } 2100002 - Operation failed. Cannot connect to service.
@@ -504,6 +516,17 @@ declare namespace connection {
    * @since 10
    */
   function getGlobalHttpProxy(): Promise<HttpProxy>;
+
+  /**
+   * Set application level http proxy {@link HttpProxy}.
+   * @param { HttpProxy } httpProxy - Indicates the application level proxy settings. For details, see {@link HttpProxy}.
+   * @throws { BusinessError } 401 - Parameter error.
+   * @throws { BusinessError } 2100001 - Invalid http proxy.
+   * @syscap SystemCapability.Communication.NetManager.Core
+   * @since 11
+   */
+
+  function setAppHttpProxy(httpProxy: HttpProxy): void;
 
   /**
    * Set a network independent global {@link HttpProxy} proxy settings.
