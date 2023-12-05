@@ -461,6 +461,7 @@ void GetAddrInfoFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
+    std::string hostName = GetStringFromData(STR_LEN);
     std::string serverName = GetStringFromData(STR_LEN);
     AddrInfo hints;
     hints.aiFlags = GetData<uint32_t>();
@@ -474,7 +475,6 @@ void GetAddrInfoFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     uint16_t netId = GetData<uint16_t>();
-    std::string hostName = GetStringFromData(STR_LEN);
 
     dataParcel.WriteString(hostName);
     dataParcel.WriteString(serverName);
