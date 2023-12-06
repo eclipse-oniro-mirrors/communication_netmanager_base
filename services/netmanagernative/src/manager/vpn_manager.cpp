@@ -153,7 +153,7 @@ int32_t VpnManager::SetVpnAddress(const std::string &ifName, const std::string &
     } else {
         in_addr ipv4Addr = {};
         if (inet_aton(tunAddr.c_str(), &ipv4Addr) == 0) {
-            NETNATIVE_LOGE("addr: %{private}s inet_aton error", tunAddr.c_str());
+            NETNATIVE_LOGE("addr inet_aton error");
             return NETMANAGER_ERROR;
         }
 
