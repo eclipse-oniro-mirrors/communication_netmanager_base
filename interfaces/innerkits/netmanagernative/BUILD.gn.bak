@@ -62,6 +62,7 @@ ohos_shared_library("net_native_manager_if") {
   }
   sources = [
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/net_diag_callback_stub.cpp",
+    "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_addr_info_parcel.cpp",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_native_service_proxy.cpp",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/netsys_net_diag_data.cpp",
     "$NETSYSNATIVE_INNERKITS_SOURCE_DIR/notify_callback_proxy.cpp",
