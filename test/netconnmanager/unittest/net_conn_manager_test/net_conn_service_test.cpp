@@ -172,10 +172,18 @@ void NetConnServiceTest::SetUp() {}
 
 void NetConnServiceTest::TearDown() {}
 
-HWTEST_F(NetConnServiceTest, OnAddSystemAbilityTest001, TestSize.Level1)
+HWTEST_F(NetConnServiceTest, OnRemoveSystemAbility001, TestSize.Level1)
+{
+    std::string deviceId = "dev1";
+    NetConnService::GetInstance()->OnRemoveSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID, deviceId);
+    EXPECT_TRUE(NetConnService::GetInstance()->hasSARemoved_);
+}
+
+HWTEST_F(NetConnServiceTest, OnAddSystemAbility001, TestSize.Level1)
 {
     std::string deviceId = "dev1";
     NetConnService::GetInstance()->OnAddSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID, deviceId);
+    EXPECT_FALSE(NetConnService::GetInstance()->hasSARemoved_);
 }
 
 HWTEST_F(NetConnServiceTest, IsSupplierMatchRequestAndNetworkTest001, TestSize.Level1)

@@ -323,5 +323,19 @@ HWTEST_F(UtNetPolicyService, NetPolicyServiceBranchTest003, TestSize.Level1)
     ret = instance_->SetPowerSavePolicy(false);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
+
+HWTEST_F(UtNetPolicyService, OnRemoveSystemAbility001, TestSize.Level1)
+{
+    std::string deviceId = "dev1";
+    instance_->OnRemoveSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID, deviceId);
+    EXPECT_TRUE(instance_->hasSARemoved_);
+}
+
+HWTEST_F(UtNetPolicyService, OnAddSystemAbility001, TestSize.Level1)
+{
+    std::string deviceId = "dev1";
+    instance_->OnAddSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID, deviceId);
+    EXPECT_FALSE(instance_->hasSARemoved_);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -52,10 +52,7 @@ public:
     void TearDown();
 };
 
-void NetworkSecurityConfigTest::SetUpTestCase()
-{
-    g_networkSecurityConfig = std::make_shared<NetworkSecurityConfig>();
-}
+void NetworkSecurityConfigTest::SetUpTestCase() {}
 
 void NetworkSecurityConfigTest::TearDownTestCase() {}
 
@@ -81,7 +78,7 @@ HWTEST_F(NetworkSecurityConfigTest, IsCACertFileNameTest001, TestSize.Level1)
 {
     std::string fileName("cafile.Pem");
     std::cout << "IsCACertFileNameTest001 In" << std::endl;
-    auto ret = g_networkSecurityConfig->IsCACertFileName(fileName.c_str());
+    auto ret = NetworkSecurityConfig::GetInstance().IsCACertFileName(fileName.c_str());
     EXPECT_EQ(ret, true);
 }
 
@@ -95,7 +92,7 @@ HWTEST_F(NetworkSecurityConfigTest, GetCAFilesFromPathTest001, TestSize.Level1)
     std::string caPath("/etc/security/certificates/test");
     std::vector<std::string> caFiles;
     std::cout << "GetCAFilesFromPathTest001 In" << std::endl;
-    g_networkSecurityConfig->GetCAFilesFromPath(caPath, caFiles);
+    NetworkSecurityConfig::GetInstance().GetCAFilesFromPath(caPath, caFiles);
     EXPECT_EQ(caFiles.size(), 0);
 }
 
@@ -110,7 +107,7 @@ HWTEST_F(NetworkSecurityConfigTest, AddSurfixToCACertFileNameTest001, TestSize.L
     std::set<std::string> allFileNames;
     std::string caFile("cacert.pem");
     std::cout << "AddSurfixToCACertFileNameTest001 In" << std::endl;
-     g_networkSecurityConfig->AddSurfixToCACertFileName(caPath, allFileNames, caFile);
+    NetworkSecurityConfig::GetInstance().AddSurfixToCACertFileName(caPath, allFileNames, caFile);
     EXPECT_EQ(allFileNames.size(), 1);
 }
 
@@ -123,7 +120,7 @@ HWTEST_F(NetworkSecurityConfigTest, ReadCertFileTest001, TestSize.Level1)
 {
     std::string caFile("cacert.pem");
     std::cout << "ReadCertFileTest001 In" << std::endl;
-    auto ret = g_networkSecurityConfig->ReadCertFile(caFile);
+    auto ret = NetworkSecurityConfig::GetInstance().ReadCertFile(caFile);
     EXPECT_EQ(ret, nullptr);
 }
 
@@ -136,7 +133,7 @@ HWTEST_F(NetworkSecurityConfigTest, GetRehashedCADirName001, TestSize.Level1)
 {
     std::string caPath("/etc/security/certificates/test");
     std::cout << "GetRehashedCADirName001 In" << std::endl;
-    auto ret = g_networkSecurityConfig->GetRehashedCADirName(caPath);
+    auto ret = NetworkSecurityConfig::GetInstance().GetRehashedCADirName(caPath);
     EXPECT_EQ(caPath, caPath);
 }
 
@@ -149,7 +146,7 @@ HWTEST_F(NetworkSecurityConfigTest, BuildRehasedCAPath001, TestSize.Level1)
 {
     std::string caPath("/etc/security/certificates/test");
     std::cout << "BuildRehasedCAPath001 In" << std::endl;
-    auto ret = g_networkSecurityConfig->BuildRehasedCAPath(caPath);
+    auto ret = NetworkSecurityConfig::GetInstance().BuildRehasedCAPath(caPath);
     EXPECT_EQ(ret, "");
 }
 
@@ -162,7 +159,7 @@ HWTEST_F(NetworkSecurityConfigTest, GetRehasedCAPath001, TestSize.Level1)
 {
     std::string caPath("/etc/security/certificates/test");
     std::cout << "GetRehasedCAPath001 In" << std::endl;
-    auto ret = g_networkSecurityConfig->GetRehasedCAPath(caPath);
+    auto ret = NetworkSecurityConfig::GetInstance().GetRehasedCAPath(caPath);
     EXPECT_EQ(ret, "");
 }
 
@@ -175,7 +172,7 @@ HWTEST_F(NetworkSecurityConfigTest, ReHashCAPathForX509001, TestSize.Level1)
 {
     std::string caPath("/etc/security/certificates/test");
     std::cout << "ReHashCAPathForX509001 In" << std::endl;
-    g_networkSecurityConfig->ReHashCAPathForX509(caPath);
+    NetworkSecurityConfig::GetInstance().ReHashCAPathForX509(caPath);
     EXPECT_EQ(caPath, caPath);
 }
 
@@ -194,7 +191,7 @@ HWTEST_F(NetworkSecurityConfigTest, ParseJsonTrustAnchorsTest001, TestSize.Level
     BuildTestJsonObject(jsonTxt, root);
 
     std::cout << "ParseJsonTrustAnchorsTest001 In" << std::endl;
-    g_networkSecurityConfig->ParseJsonTrustAnchors(root, trustAnchors);
+    NetworkSecurityConfig::GetInstance().ParseJsonTrustAnchors(root, trustAnchors);
     EXPECT_EQ(trustAnchors.certs_[0], "@resource/raw/ca");
 }
 
@@ -213,7 +210,7 @@ HWTEST_F(NetworkSecurityConfigTest, ParseJsonPinSet001, TestSize.Level1)
     BuildTestJsonObject(jsonTxt, root);
 
     std::cout << "ParseJsonPinSet001 In" << std::endl;
-    g_networkSecurityConfig->ParseJsonPinSet(root, pinSet);
+    NetworkSecurityConfig::GetInstance().ParseJsonPinSet(root, pinSet);
     ASSERT_EQ(pinSet.pins_[0].digestAlgorithm_, "sha256");
     ASSERT_EQ(pinSet.pins_[0].digest_, "Q9TCQAWqP4t+eq41xnKaUgJdrPWqyG5L+Ni2YzMhqdY=");
     ASSERT_EQ(pinSet.pins_[1].digestAlgorithm_, "sha256");
@@ -235,7 +232,7 @@ HWTEST_F(NetworkSecurityConfigTest, GetPinSetForHostName001, TestSize.Level1)
     std::string pins;
 
     std::cout << "GetPinSetForHostName001 In" << std::endl;
-    auto ret = g_networkSecurityConfig->GetPinSetForHostName(hostname, pins);
+    auto ret = NetworkSecurityConfig::GetInstance().GetPinSetForHostName(hostname, pins);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

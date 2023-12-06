@@ -38,6 +38,9 @@
       "OHOS::NetManagerStandard::NetConnClient::GetGlobalHttpProxy(OHOS::NetManagerStandard::HttpProxy&)";
       "OHOS::NetManagerStandard::NetConnClient::InterfaceSetIffUp(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetConnClient::SetGlobalHttpProxy(OHOS::NetManagerStandard::HttpProxy const&)";
+      "OHOS::NetManagerStandard::NetConnClient::SetAppHttpProxy(OHOS::NetManagerStandard::HttpProxy const&)";
+      "OHOS::NetManagerStandard::NetConnClient::UnregisterAppHttpProxyCallback(unsigned int)";
+      "OHOS::NetManagerStandard::NetConnClient::RegisterAppHttpProxyCallback(std::__h::function<void (OHOS::NetManagerStandard::HttpProxy const&)>, unsigned int&)";
       "OHOS::NetManagerStandard::NetConnClient::GetAppNet(int&)";
       "OHOS::NetManagerStandard::NetConnClient::SetAppNet(int)";
       "OHOS::NetManagerStandard::NetConnClient::RegisterSlotType(unsigned int, int)";
@@ -74,6 +77,9 @@
       "OHOS::NetManagerStandard::NetConnClient::GetTrustAnchorsForHostName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>&)";
       VTT?for?OHOS::NetManagerStandard::NetworkSecurityConfig;
       vtable?for?OHOS::NetManagerStandard::NetworkSecurityConfig;
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::NetworkSecurityConfig()";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::~NetworkSecurityConfig()";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::GetInstance()";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::GetRehashedCADirName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::BuildRehasedCAPath(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::GetRehasedCAPath(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";

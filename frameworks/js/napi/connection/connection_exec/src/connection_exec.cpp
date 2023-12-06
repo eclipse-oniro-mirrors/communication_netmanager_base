@@ -34,6 +34,7 @@ namespace OHOS::NetManagerStandard {
 namespace {
 constexpr int32_t NO_PERMISSION_CODE = 1;
 constexpr int32_t RESOURCE_UNAVALIEBLE_CODE = 11;
+constexpr int32_t PERMISSION_DENIED_CODE = 13;
 constexpr int32_t NET_UNREACHABLE_CODE = 101;
 } // namespace
 
@@ -348,6 +349,21 @@ napi_value ConnectionExec::SetGlobalHttpProxyCallback(SetGlobalHttpProxyContext 
     return NapiUtils::GetUndefined(context->GetEnv());
 }
 
+bool ConnectionExec::ExecSetAppHttpProxy(SetAppHttpProxyContext *context)
+{
+    int32_t errorCode = NetConnClient::GetInstance().SetAppHttpProxy(context->httpProxy_);
+    if (errorCode != NET_CONN_SUCCESS) {
+        context->SetErrorCode(errorCode);
+        return false;
+    }
+    return true;
+}
+
+napi_value ConnectionExec::SetAppHttpProxyCallback(SetAppHttpProxyContext *context)
+{
+    return NapiUtils::GetUndefined(context->GetEnv());
+}
+
 bool ConnectionExec::ExecGetAppNet(GetAppNetContext *context)
 {
     int32_t netId = 0;
@@ -385,16 +401,33 @@ napi_value ConnectionExec::SetAppNetCallback(SetAppNetContext *context)
 
 bool ConnectionExec::ExecSetCustomDNSRule(SetCustomDNSRuleContext *context)
 {
-    if (context->host_.empty() || context->ip_.empty()) {
-        context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+    if (context == nullptr) {
+        NETMANAGER_BASE_LOGE("context is nullptr");
         return false;
     }
-    if (!context->IsParseOK()) {
+
+    if (!CommonUtils::HasInternetPermission()) {
+        context->SetErrorCode(NETMANAGER_ERR_PERMISSION_DENIED);
+        return false;
+    }
+
+    if (context->host_.empty() || context->ip_.empty()) {
         context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
         return false;
     }
 
     std::vector<std::string> ip = context->ip_;
+    for (size_t i = 0; i < ip.size(); i++) {
+        if (!CommonUtils::IsValidIPV4(ip[i]) && !CommonUtils::IsValidIPV6(ip[i])) {
+            context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+            return false;
+        }
+    }
+
+    if (!context->IsParseOK()) {
+        context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        return false;
+    }
 
     std::string host_ips = context->host_ + ",";
     for (size_t i = 0; i < ip.size(); i++) {
@@ -422,6 +455,20 @@ napi_value ConnectionExec::SetCustomDNSRuleCallback(SetCustomDNSRuleContext *con
 
 bool ConnectionExec::ExecDeleteCustomDNSRule(DeleteCustomDNSRuleContext *context)
 {
+    if (context == nullptr) {
+        NETMANAGER_BASE_LOGE("context is nullptr");
+        return false;
+    }
+    if (!CommonUtils::HasInternetPermission()) {
+        context->SetErrorCode(NETMANAGER_ERR_PERMISSION_DENIED);
+        return false;
+    }
+
+    if (context->host_.empty()) {
+        context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
+        return false;
+    }
+
     if (!context->IsParseOK()) {
         context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
         return false;
@@ -444,6 +491,15 @@ napi_value ConnectionExec::DeleteCustomDNSRuleCallback(DeleteCustomDNSRuleContex
 
 bool ConnectionExec::ExecDeleteCustomDNSRules(DeleteCustomDNSRulesContext *context)
 {
+    if (context == nullptr) {
+        NETMANAGER_BASE_LOGE("context is nullptr");
+        return false;
+    }
+    if (!CommonUtils::HasInternetPermission()) {
+        context->SetErrorCode(NETMANAGER_ERR_PERMISSION_DENIED);
+        return false;
+    }
+
     if (!context->IsParseOK()) {
         context->SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
         return false;
@@ -468,6 +524,8 @@ int32_t TransErrorCode(int32_t error)
 {
     switch (error) {
         case NO_PERMISSION_CODE:
+            return NETMANAGER_ERR_PERMISSION_DENIED;
+        case PERMISSION_DENIED_CODE:
             return NETMANAGER_ERR_PERMISSION_DENIED;
         case RESOURCE_UNAVALIEBLE_CODE:
             return NETMANAGER_ERR_INVALID_PARAMETER;

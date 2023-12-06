@@ -190,6 +190,7 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
         DECLARE_NAPI_FUNCTION(FUNCTION_SET_CUSTOM_DNS_RULE, AddCustomDnsRule),
         DECLARE_NAPI_FUNCTION(FUNCTION_DELETE_CUSTOM_DNS_RULE, RemoveCustomDnsRule),
         DECLARE_NAPI_FUNCTION(FUNCTION_DELETE_CUSTOM_DNS_RULES, ClearCustomDnsRules),
+        DECLARE_NAPI_FUNCTION(FUNCTION_SET_APP_HTTP_PROXY, SetAppHttpProxy),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_APP_NET, GetAppNet),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_APP_NET_SYNC, GetAppNetSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_SET_APP_NET, SetAppNet),
@@ -383,6 +384,13 @@ napi_value ConnectionModule::SetGlobalHttpProxy(napi_env env, napi_callback_info
     return ModuleTemplate::Interface<SetGlobalHttpProxyContext>(env, info, FUNCTION_SET_GLOBAL_HTTP_PROXY, nullptr,
                                                                 ConnectionAsyncWork::ExecSetGlobalHttpProxy,
                                                                 ConnectionAsyncWork::SetGlobalHttpProxyCallback);
+}
+
+napi_value ConnectionModule::SetAppHttpProxy(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<SetAppHttpProxyContext>(env, info, FUNCTION_SET_APP_HTTP_PROXY, nullptr,
+                                                                 ConnectionExec::ExecSetAppHttpProxy,
+                                                                 ConnectionExec::SetAppHttpProxyCallback);
 }
 
 napi_value ConnectionModule::GetAppNet(napi_env env, napi_callback_info info)

@@ -366,6 +366,10 @@ public:
     int32_t RegisterSlotType(uint32_t supplierId, int32_t type);
     int32_t GetSlotType(std::string &type);
 
+    void RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback, uint32_t &callbackid);
+    void UnregisterAppHttpProxyCallback(uint32_t callbackid);
+    int32_t SetAppHttpProxy(const HttpProxy &httpProxy);
+
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
@@ -391,6 +395,10 @@ private:
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
 private:
+    std::mutex appHttpProxyCbMapMutex_;
+    uint32_t currentCallbackId_ = 0;
+    std::map<uint32_t, std::function<void(const HttpProxy &httpProxy)>> appHttpProxyCbMap_;
+    HttpProxy appHttpProxy_;
     char buffer_[RESERVED_BUFFER_SIZE] = {0};
     std::mutex mutex_;
     sptr<INetConnService> NetConnService_;

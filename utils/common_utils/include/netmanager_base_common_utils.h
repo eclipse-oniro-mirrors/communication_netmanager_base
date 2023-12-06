@@ -59,6 +59,7 @@ uint64_t StrToUint64(const std::string &value, uint64_t defaultErr = 0);
 bool CheckIfaceName(const std::string &name);
 int32_t ForkExec(const std::string &command, std::string *out = nullptr);
 bool IsValidDomain(const std::string &domain);
+bool HasInternetPermission();
 
 inline uint64_t GetCurrentSecond()
 {
