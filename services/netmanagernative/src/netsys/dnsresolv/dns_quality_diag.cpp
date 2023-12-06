@@ -78,27 +78,20 @@ int32_t DnsQualityDiag::ParseReportAddr(uint32_t size, AddrInfo* addrinfo, Netsy
     for (uint8_t i = 0; i < size; i++) {
         NetsysNative::NetDnsResultAddrInfo ai;
         AddrInfo *tmp = &(addrinfo[i]);
+        void* addr = NULL;
+        char c_addr[INET6_ADDRSTRLEN];
         switch (tmp->aiFamily) {
             case AF_INET:
                 ai.type_ = NetsysNative::ADDR_TYPE_IPV4;
-                ai.addr_ = tmp->aiAddr.sa.sa_data;
+                addr = &(tmp->aiAddr.sin.sin_addr);
                 break;
             case AF_INET6:
-                uint8_t* s6addr = tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr;
-                std::ostringstream oss;
-                uint32_t size = sizeof(tmp->aiAddr.sin6.sin6_addr.__in6_union.__s6_addr) / sizeof(uint8_t);
-                if (size == 0) {
-                    continue;
-                }
-                oss << s6addr[0];
-                for (uint32_t n = 1; n < size; ++n) {
-                    oss << ':';
-                    oss << s6addr[n];
-                }
                 ai.type_ = NetsysNative::ADDR_TYPE_IPV6;
-                ai.addr_ = oss.str();
+                addr = &(tmp->aiAddr.sin6.sin6_addr);
                 break;
         }
+        inet_ntop(tmp->aiFamily, addr, c_addr, sizeof(c_addr));
+        ai.addr_ = c_addr;
         if (report.addrlist_.size() < MAX_RESULT_SIZE) {
             report.addrlist_.push_back(ai);
         } else {
