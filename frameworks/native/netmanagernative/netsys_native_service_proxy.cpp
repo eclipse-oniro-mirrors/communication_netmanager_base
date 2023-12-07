@@ -19,7 +19,6 @@
 
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
-#include "netsys_addr_info_parcel.h"
 
 namespace OHOS {
 namespace NetsysNative {
