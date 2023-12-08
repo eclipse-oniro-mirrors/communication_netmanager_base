@@ -38,7 +38,7 @@ private:
 private:
     void InitQueryFuncToInterfaceMap();
     void InitStaticArpToInterfaceMap();
-    void InitResetNetFuncToInterfaceMap();
+    void InitInterfaceFuncToInterfaceMap();
     void InitResetNetFuncToInterfaceMap();
     bool CheckPermission(const std::set<std::string> &permissions);
     bool CheckPermissionWithCache(const std::set<std::string> &permissions);
