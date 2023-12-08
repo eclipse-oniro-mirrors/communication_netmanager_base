@@ -65,6 +65,8 @@ enum class ConnInterfaceCode {
     CMD_NM_DEL_STATIC_ARP,
     CMD_NM_REGISTER_SLOT_TYPE,
     CMD_NM_GET_SLOT_TYPE,
+    CMD_NM_FACTORYRESET_NETWORK,
+    CMD_NM_REGISTER_NET_FACTORYRESET_CALLBACK,
     CMD_NM_END,
 };
 
@@ -108,6 +110,10 @@ enum class InterfaceCallbackInterfaceCode {
 enum class SupplierInterfaceCode {
     NET_SUPPLIER_REQUEST_NETWORK = 0,
     NET_SUPPLIER_RELEASE_NETWORK = 1,
+};
+
+enum class FactoryResetCallbackInterfaceCode {
+    NET_FACTORYRESET = 0,
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

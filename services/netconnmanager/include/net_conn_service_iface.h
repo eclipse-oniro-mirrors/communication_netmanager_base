@@ -33,6 +33,7 @@ public:
     int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) override;
     int32_t RestrictBackgroundChanged(bool isRestrictBackground) override;
     int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
+    int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) override;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -331,6 +331,15 @@ int32_t NetPolicyTraffic::ResetPolicies(const std::string &simId)
     return UpdateQuotaPoliciesInner();
 }
 
+int32_t NetPolicyTraffic::ResetPolicies()
+{
+    for (auto &quotaPolicy : quotaPolicies_) {
+        NETMGR_LOG_I("NetPolicyTraffic::ResetPolicies [%{public}s.", quotaPolicy.networkmatchrule.simId.c_str());
+        quotaPolicy.Reset();
+    }
+    return UpdateQuotaPoliciesInner();
+}
+
 void NetPolicyTraffic::ReachedLimit(const std::string &iface)
 {
     NETMGR_LOG_D("ReachedLimit iface:%{public}s.", iface.c_str());

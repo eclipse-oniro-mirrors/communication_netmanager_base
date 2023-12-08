@@ -20,6 +20,7 @@
 #include "net_conn_service_proxy.h"
 #include "net_manager_constants.h"
 #include "net_supplier_callback_stub.h"
+#include "i_net_factoryreset_callback.h"
 #include <gtest/gtest.h>
 #include <iostream>
 #include <memory>
@@ -192,6 +193,14 @@ public:
     }
 };
 
+class NetFactoryResetTestCallback : public IRemoteStub<INetFactoryResetCallback> {
+public:
+    int32_t OnNetFactoryReset() override
+    {
+        return 0;
+    }
+};
+
 class NetConnServiceProxyTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -204,6 +213,7 @@ public:
     static inline sptr<INetSupplierCallback> supplierCallback_ = new (std::nothrow) NetSupplierCallbackStub();
     static inline sptr<INetConnCallback> netConnCallback_ = new (std::nothrow) NetConnTestCallback();
     static inline sptr<INetDetectionCallback> detectionCallback_ = new (std::nothrow) NetDetectionTestCallback();
+    static inline sptr<INetFactoryResetCallback> netFactoryResetCallback_ = new (std::nothrow) NetFactoryResetTestCallback();
 };
 
 void NetConnServiceProxyTest::SetUpTestCase() {}
@@ -593,6 +603,28 @@ HWTEST_F(NetConnServiceProxyTest, SetAppNetTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FactoryResetNetworkTest001
+ * @tc.desc: Test NetConnServiceProxy FactoryResetNetwork.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceProxyTest, FactoryResetNetworkTest001, TestSize.Level1)
+{
+    int32_t ret = instance_->FactoryResetNetwork();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: RegisterNetConnCallbackTest001
+ * @tc.desc: Test NetConnServiceProxy RegisterNetFactoryResetCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceProxyTest, RegisterNetFactoryResetCallbackTest001, TestSize.Level1)
+{
+    int32_t ret = instance_->RegisterNetFactoryResetCallback(netFactoryResetCallback_);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: NetConnServiceProxyBranchTest001
  * @tc.desc: Test NetConnServiceProxy Branch.
  * @tc.type: FUNC
@@ -621,6 +653,10 @@ HWTEST_F(NetConnServiceProxyTest, NetConnServiceProxyBranchTest001, TestSize.Lev
 
     sptr<INetInterfaceStateCallback> stateCallback = nullptr;
     ret = instance_->RegisterNetInterfaceCallback(stateCallback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    sptr<INetFactoryResetCallback> netFactoryResetCallback = nullptr;
+    ret = instance_->RegisterNetFactoryResetCallback(netFactoryResetCallback);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 }

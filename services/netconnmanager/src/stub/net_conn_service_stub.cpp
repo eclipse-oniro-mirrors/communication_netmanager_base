@@ -82,6 +82,11 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnAddInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ADDRESS)] = {
         &NetConnServiceStub::OnDelInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_FACTORYRESET_NETWORK)] = {
+        &NetConnServiceStub::OnFactoryResetNetwork, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_FACTORYRESET_CALLBACK)] = {
+        &NetConnServiceStub::OnRegisterNetFactoryResetCallback, {Permission::CONNECTIVITY_INTERNAL}};
+
     InitStaticArpToInterfaceMap();
     InitQueryFuncToInterfaceMap();
 }
@@ -234,8 +239,12 @@ bool NetConnServiceStub::CheckPermissionWithCache(const std::set<std::string> &p
 
 int32_t NetConnServiceStub::OnSystemReady(MessageParcel &data, MessageParcel &reply)
 {
-    SystemReady();
-    return 0;
+    int32_t ret = SystemReady();
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return ret;
 }
 
 int32_t NetConnServiceStub::OnSetInternetPermission(MessageParcel &data, MessageParcel &reply)
@@ -1237,6 +1246,44 @@ int32_t NetConnServiceStub::OnGetSlotType(MessageParcel &data, MessageParcel &re
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnFactoryResetNetwork(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = FactoryResetNetwork();
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnRegisterNetFactoryResetCallback(MessageParcel &data, MessageParcel &reply)
+{
+    if (!data.ContainFileDescriptors()) {
+        NETMGR_LOG_E("Execute ContainFileDescriptors failed");
+    }
+
+    int32_t result = NETMANAGER_SUCCESS;
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("remote ptr is nullptr.");
+        result = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        reply.WriteInt32(result);
+        return result;
+    }
+
+    sptr<INetFactoryResetCallback> callback = iface_cast<INetFactoryResetCallback>(remote);
+    if (callback == nullptr) {
+        result = NETMANAGER_ERR_LOCAL_PTR_NULL;
+        reply.WriteInt32(result);
+        NETMGR_LOG_E("Callback ptr is nullptr.");
+        return result;
+    }
+
+    result = RegisterNetFactoryResetCallback(callback);
+    reply.WriteInt32(result);
+    return result;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

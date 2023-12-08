@@ -680,5 +680,25 @@ int32_t NetConnClient::GetTrustAnchorsForHostName(const std::string &hostname, s
     return networkSecurityConfig->GetTrustAnchorsForHostName(hostname, certs);
 }
 
+int32_t NetConnClient::FactoryResetNetwork()
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->FactoryResetNetwork();
+}
+
+int32_t NetConnClient::RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->RegisterNetFactoryResetCallback(callback);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -59,6 +59,8 @@ public:
     static constexpr const char *INTERFACE_NET_CONNECTION = "NetConnection";
     static constexpr const char *INTERFACE_NET_CAP = "NetCap";
     static constexpr const char *INTERFACE_NET_BEAR_TYPE = "NetBearType";
+    static constexpr const char *FUNCTION_FACTORY_RESET_NETWORK = "factoryReset";
+    static constexpr const char *FUNCTION_FACTORY_RESET_NETWORK_SYNC = "factoryResetNetworkSync";
 
     static napi_value InitConnectionModule(napi_env env, napi_value exports);
 
@@ -116,6 +118,8 @@ private:
     static napi_value GetAppNet(napi_env env, napi_callback_info info);
     static napi_value GetAppNetSync(napi_env env, napi_callback_info info);
     static napi_value SetAppNet(napi_env env, napi_callback_info info);
+    static napi_value FactoryResetNetwork(napi_env env, napi_callback_info info);
+    static napi_value FactoryResetNetworkSync(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::NetManagerStandard
 

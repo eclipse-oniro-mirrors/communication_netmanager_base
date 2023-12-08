@@ -83,6 +83,7 @@ ohos_shared_library("net_conn_manager_if") {
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_callback_stub.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_conn_service_proxy.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_detection_callback_stub.cpp",
+    "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_factoryreset_callback_stub.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_interface_callback_stub.cpp",
     "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/proxy/net_supplier_callback_stub.cpp",
   ]

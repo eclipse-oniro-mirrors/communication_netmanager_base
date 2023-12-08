@@ -89,6 +89,12 @@ public:
      */
     int32_t ResetPolicies(const std::string &simId);
 
+    /**
+     * Reset all network policies\rules\quota policies\firewall rules.
+     *
+     */
+    int32_t ResetPolicies();
+
     void ReachedLimit(const std::string &iface);
     void UpdateNetPolicy();
     void GetDumpMessage(std::string &message);

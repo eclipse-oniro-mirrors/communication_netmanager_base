@@ -29,6 +29,7 @@
 #include "net_quota_policy.h"
 #include "net_settings.h"
 #include "netmanager_base_permission.h"
+#include "net_policy_base.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -103,6 +104,7 @@ void NetPolicyService::Init()
             netPolicyTraffic_ = netPolicyCore_->CreateCore<NetPolicyTraffic>();
             netPolicyFirewall_ = netPolicyCore_->CreateCore<NetPolicyFirewall>();
             netPolicyRule_ = netPolicyCore_->CreateCore<NetPolicyRule>();
+            RegisterFactoryResetCallback();
         },
         AppExecFwk::EventQueue::Priority::HIGH);
 }
@@ -365,6 +367,39 @@ void NetPolicyService::OnNetSysRestart()
     
     if (netPolicyRule_ != nullptr) {
         netPolicyRule_->TransPolicyToRule();
+    }
+}
+
+int32_t NetPolicyService::FactoryResetPolicies()
+{
+    NETMGR_LOG_I("FactoryResetPolicies begin");
+    if (netPolicyRule_ != nullptr && netPolicyFirewall_ != nullptr && netPolicyTraffic_ != nullptr) {
+        netPolicyRule_->ResetPolicies();
+        netPolicyFirewall_->ResetPolicies();
+        netPolicyTraffic_->ResetPolicies();
+        NETMGR_LOG_I("FactoryResetPolicies end.");
+        return NETMANAGER_SUCCESS;
+    }
+    return NETMANAGER_ERR_LOCAL_PTR_NULL;
+}
+
+void NetPolicyService::RegisterFactoryResetCallback()
+{
+    NETMGR_LOG_I("NetPolicyService RegisterFactetCallback enter.");
+
+    if (netFactoryResetCallback_ == nullptr) {
+        netFactoryResetCallback_ =
+            (std::make_unique<FactoryResetCallBack>(std::static_pointer_cast<NetPolicyService>(shared_from_this())))
+                .release();
+    }
+
+    if (netFactoryResetCallback_ != nullptr) {
+        int32_t ret = NetManagerCenter::GetInstance().RegisterNetFactoryResetCallback(netFactoryResetCallback_);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("NetPolicyService RegisterFactoryResetCallback ret[%{public}d]", ret);
+        }
+    } else {
+        NETMGR_LOG_E("netFactoryResetCallback_ is null");
     }
 }
 } // namespace NetManagerStandard

@@ -138,6 +138,11 @@ public:
         return 0;
     }
 
+    int32_t FactoryResetPolicies() override
+    {
+        return 0;
+    }
+
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
     {
         bool byPassPolicyPermission = false;
@@ -547,5 +552,20 @@ HWTEST_F(NetPolicyServiceStubTest, OnSetPowerSaveTrustlistTest001, TestSize.Leve
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+/**
+ * @tc.name: OnFactoryResetPoliciesTest001
+ * @tc.desc: Test NetPolicyServiceStub OnFactoryResetPolicies.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyServiceStubTest, OnFactoryResetPoliciesTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    data.WriteBool(true);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_FACTORYRESET_POLICIES), data, reply, option);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

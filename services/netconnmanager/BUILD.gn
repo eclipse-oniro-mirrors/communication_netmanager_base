@@ -52,6 +52,7 @@ ohos_shared_library("net_conn_manager") {
     "src/net_conn_service.cpp",
     "src/net_conn_service_iface.cpp",
     "src/net_datashare_utils.cpp",
+    "src/net_factoryreset_callback.cpp",
     "src/net_http_probe.cpp",
     "src/net_http_probe_result.cpp",
     "src/net_http_proxy_tracker.cpp",
@@ -62,6 +63,7 @@ ohos_shared_library("net_conn_manager") {
     "src/stub/net_conn_callback_proxy.cpp",
     "src/stub/net_conn_service_stub.cpp",
     "src/stub/net_detection_callback_proxy.cpp",
+    "src/stub/net_factoryreset_callback_proxy.cpp",
     "src/stub/net_interface_callback_proxy.cpp",
     "src/stub/net_supplier_callback_proxy.cpp",
   ]
@@ -142,6 +144,7 @@ ohos_static_library("net_conn_manager_static") {
     "src/net_conn_service.cpp",
     "src/net_conn_service_iface.cpp",
     "src/net_datashare_utils.cpp",
+    "src/net_factoryreset_callback.cpp",
     "src/net_http_probe.cpp",
     "src/net_http_probe_result.cpp",
     "src/net_http_proxy_tracker.cpp",
@@ -152,6 +155,7 @@ ohos_static_library("net_conn_manager_static") {
     "src/stub/net_conn_callback_proxy.cpp",
     "src/stub/net_conn_service_stub.cpp",
     "src/stub/net_detection_callback_proxy.cpp",
+    "src/stub/net_factoryreset_callback_proxy.cpp",
     "src/stub/net_interface_callback_proxy.cpp",
     "src/stub/net_supplier_callback_proxy.cpp",
   ]

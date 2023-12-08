@@ -41,7 +41,11 @@ int32_t NetConnServiceProxy::SystemReady()
         return error;
     }
 
-    return NETMANAGER_SUCCESS;
+    int32_t ret = NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return ret;
 }
 
 int32_t NetConnServiceProxy::SetInternetPermission(uint32_t uid, uint8_t allow)
@@ -1373,6 +1377,51 @@ int32_t NetConnServiceProxy::GetSlotType(std::string &type)
         }
     }
     return ret;
+}
+
+int32_t NetConnServiceProxy::FactoryResetNetwork()
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    MessageParcel reply;
+    int32_t error =
+        RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_FACTORYRESET_NETWORK), data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+
+    int32_t ret = NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return ret;
+}
+
+int32_t NetConnServiceProxy::RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback)
+{
+    if (callback == nullptr) {
+        NETMGR_LOG_E("The parameter of callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+
+    MessageParcel replyParcel;
+    int32_t retCode = RemoteSendRequest(
+        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_FACTORYRESET_CALLBACK), dataParcel, replyParcel);
+    if (retCode != NETMANAGER_SUCCESS) {
+        return retCode;
+    }
+    return replyParcel.ReadInt32();
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

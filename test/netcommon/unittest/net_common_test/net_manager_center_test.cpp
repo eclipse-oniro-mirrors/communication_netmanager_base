@@ -78,6 +78,10 @@ public:
     {
         return NETMANAGER_SUCCESS;
     }
+    inline int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) override
+    {
+        return NETMANAGER_SUCCESS;
+    }
 };
 
 class TestNetEthernetService : public NetEthernetBaseService {
@@ -501,6 +505,9 @@ HWTEST_F(NetManagerCenterTest, NetManagerCenterBranchTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 
     ret = instance_.RestrictBackgroundChanged(false);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = instance_.RegisterNetFactoryResetCallback(nullptr);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 

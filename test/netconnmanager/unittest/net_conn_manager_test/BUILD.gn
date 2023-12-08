@@ -41,6 +41,8 @@ ohos_unittest("net_conn_manager_test") {
     "net_datashare_utils_test.cpp",
     "net_detection_callback_stub_test.cpp",
     "net_detection_callback_test.cpp",
+    "net_factoryreset_callback_stub_test.cpp",
+    "net_factoryreset_callback_test.cpp",
     "net_handle_test.cpp",
     "net_http_probe_test.cpp",
     "net_interface_callback_stub_test.cpp",
