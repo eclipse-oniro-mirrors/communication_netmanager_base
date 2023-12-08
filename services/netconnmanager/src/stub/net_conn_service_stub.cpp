@@ -82,7 +82,6 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnAddInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ADDRESS)] = {
         &NetConnServiceStub::OnDelInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
-
     InitResetNetFuncToInterfaceMap();
     InitStaticArpToInterfaceMap();
     InitQueryFuncToInterfaceMap();

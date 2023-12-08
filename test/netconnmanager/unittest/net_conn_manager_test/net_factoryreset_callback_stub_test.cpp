@@ -16,9 +16,10 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <memory>
+#ifdef GTEST_API_
 #define private public
+#endif
 #include "net_factoryreset_callback_stub.h"
-#undef private
 
 namespace OHOS {
 namespace NetManagerStandard {
