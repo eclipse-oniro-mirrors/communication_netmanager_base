@@ -213,7 +213,8 @@ public:
     static inline sptr<INetSupplierCallback> supplierCallback_ = new (std::nothrow) NetSupplierCallbackStub();
     static inline sptr<INetConnCallback> netConnCallback_ = new (std::nothrow) NetConnTestCallback();
     static inline sptr<INetDetectionCallback> detectionCallback_ = new (std::nothrow) NetDetectionTestCallback();
-    static inline sptr<INetFactoryResetCallback> netFactoryResetCallback_ = new (std::nothrow) NetFactoryResetTestCallback();
+    static inline sptr<INetFactoryResetCallback> netFactoryResetCallback_ =
+        new (std::nothrow) NetFactoryResetTestCallback();
 };
 
 void NetConnServiceProxyTest::SetUpTestCase() {}
