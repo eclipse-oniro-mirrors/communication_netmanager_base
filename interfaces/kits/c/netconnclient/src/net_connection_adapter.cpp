@@ -21,7 +21,7 @@
 #include "securec.h"
 
 namespace OHOS::NetManagerStandard {
-int32_t Conv2NetHandleList(std::list<sptr<NetHandle>> &netHandleObjList, OH_NetConn_NetHandleList *netHandleList)
+int32_t Conv2NetHandleList(const std::list<sptr<NetHandle>> &netHandleObjList, OH_NetConn_NetHandleList *netHandleList)
 {
     int32_t i = 0;
     for (const auto& netHandleObj : netHandleObjList) {

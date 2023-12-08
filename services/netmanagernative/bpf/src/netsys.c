@@ -184,7 +184,7 @@ bpf_map_def SEC("maps") sock_permission_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(sock_permission_key),
     .value_size = sizeof(sock_permission_value),
-    .max_entries = 65536,
+    .max_entries = SOCT_PERMISSION_MAP_SIZE,
 };
 
 SEC("cgroup_sock/inet_create_socket")

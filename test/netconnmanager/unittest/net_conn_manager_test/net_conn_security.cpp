@@ -137,9 +137,8 @@ HapPolicyParams netDataSharePolicy = {
 };
 } // namespace
 
-NetConnManagerAccessToken::NetConnManagerAccessToken()
+NetConnManagerAccessToken::NetConnManagerAccessToken() : currentID_(GetSelfTokenID())
 {
-    currentID_ = GetSelfTokenID();
     AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(netConnManagerInfo, netConnManagerPolicy);
     accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
     SetSelfTokenID(tokenIdEx.tokenIDEx);
@@ -151,9 +150,8 @@ NetConnManagerAccessToken::~NetConnManagerAccessToken()
     SetSelfTokenID(currentID_);
 }
 
-NetConnManagerNotSystemToken::NetConnManagerNotSystemToken()
+NetConnManagerNotSystemToken::NetConnManagerNotSystemToken() : currentID_(GetSelfTokenID())
 {
-    currentID_ = GetSelfTokenID();
     AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(netConnManagerNotSystemInfo, netConnManagerPolicy);
     accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
     SetSelfTokenID(tokenIdEx.tokenIDEx);
@@ -165,9 +163,8 @@ NetConnManagerNotSystemToken::~NetConnManagerNotSystemToken()
     SetSelfTokenID(currentID_);
 }
 
-NetDataShareAccessToken::NetDataShareAccessToken()
+NetDataShareAccessToken::NetDataShareAccessToken() : currentID_(GetSelfTokenID())
 {
-    currentID_ = GetSelfTokenID();
     AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(netDataShareInfo, netDataSharePolicy);
     accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
     SetSelfTokenID(tokenIdEx.tokenIDEx);
