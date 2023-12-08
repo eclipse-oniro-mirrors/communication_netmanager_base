@@ -689,27 +689,7 @@ int32_t NetPolicyServiceProxy::CheckPermission()
 
 int32_t NetPolicyServiceProxy::FactoryResetPolicies()
 {
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        NETMGR_LOG_E("WriteInterfaceToken failed");
-        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        NETMGR_LOG_E("Remote is null");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_FACTORYRESET_POLICIES), data, reply, option);
-    int32_t result = 0;
-    if (!reply.ReadInt32(result)) {
-        NETMGR_LOG_E("Read int32 reply failed.");
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return result;
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

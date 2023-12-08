@@ -613,12 +613,6 @@ int32_t NetPolicyServiceStub::OnCheckPermission(MessageParcel &data, MessageParc
 
 int32_t NetPolicyServiceStub::OnFactoryResetPolicies(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t result = FactoryResetPolicies();
-    if (!reply.WriteInt32(result)) {
-        NETMGR_LOG_E("Write int32 reply failed");
-        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
-    }
-
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard

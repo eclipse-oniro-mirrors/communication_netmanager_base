@@ -82,13 +82,18 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnAddInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ADDRESS)] = {
         &NetConnServiceStub::OnDelInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
+
+    InitResetNetFuncToInterfaceMap();
+    InitStaticArpToInterfaceMap();
+    InitQueryFuncToInterfaceMap();
+}
+
+void NetConnServiceStub::InitResetNetFuncToInterfaceMap()
+{
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_FACTORYRESET_NETWORK)] = {
         &NetConnServiceStub::OnFactoryResetNetwork, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_FACTORYRESET_CALLBACK)] = {
         &NetConnServiceStub::OnRegisterNetFactoryResetCallback, {Permission::CONNECTIVITY_INTERNAL}};
-
-    InitStaticArpToInterfaceMap();
-    InitQueryFuncToInterfaceMap();
 }
 
 void NetConnServiceStub::InitStaticArpToInterfaceMap()
@@ -1260,10 +1265,6 @@ int32_t NetConnServiceStub::OnFactoryResetNetwork(MessageParcel &data, MessagePa
 
 int32_t NetConnServiceStub::OnRegisterNetFactoryResetCallback(MessageParcel &data, MessageParcel &reply)
 {
-    if (!data.ContainFileDescriptors()) {
-        NETMGR_LOG_E("Execute ContainFileDescriptors failed");
-    }
-
     int32_t result = NETMANAGER_SUCCESS;
     sptr<IRemoteObject> remote = data.ReadRemoteObject();
     if (remote == nullptr) {
@@ -1282,8 +1283,11 @@ int32_t NetConnServiceStub::OnRegisterNetFactoryResetCallback(MessageParcel &dat
     }
 
     result = RegisterNetFactoryResetCallback(callback);
-    reply.WriteInt32(result);
-    return result;
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

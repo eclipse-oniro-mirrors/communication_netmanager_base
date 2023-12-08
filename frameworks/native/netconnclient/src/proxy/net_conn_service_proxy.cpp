@@ -41,11 +41,7 @@ int32_t NetConnServiceProxy::SystemReady()
         return error;
     }
 
-    int32_t ret = NETMANAGER_SUCCESS;
-    if (!reply.ReadInt32(ret)) {
-        return NETMANAGER_ERR_READ_REPLY_FAIL;
-    }
-    return ret;
+    return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnServiceProxy::SetInternetPermission(uint32_t uid, uint8_t allow)
