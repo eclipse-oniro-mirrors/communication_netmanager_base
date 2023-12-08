@@ -78,13 +78,18 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnAddNetworkRoute, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ROUTE)] = {
         &NetConnServiceStub::OnRemoveNetworkRoute, {Permission::CONNECTIVITY_INTERNAL}};
+    InitInterfaceFuncToInterfaceMap();
+    InitResetNetFuncToInterfaceMap();
+    InitStaticArpToInterfaceMap();
+    InitQueryFuncToInterfaceMap();
+}
+
+void NetConnServiceStub::InitInterfaceFuncToInterfaceMap()
+{
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_ADD_NET_ADDRESS)] = {
         &NetConnServiceStub::OnAddInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ADDRESS)] = {
         &NetConnServiceStub::OnDelInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
-    InitResetNetFuncToInterfaceMap();
-    InitStaticArpToInterfaceMap();
-    InitQueryFuncToInterfaceMap();
 }
 
 void NetConnServiceStub::InitResetNetFuncToInterfaceMap()
