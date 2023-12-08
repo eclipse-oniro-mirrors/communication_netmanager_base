@@ -51,6 +51,16 @@ ohos_shared_library("netsys_bpf_utils") {
     "//third_party/elfio/elfio",
   ]
 
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2 -O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2 -O2",
+  ]
+
   defines = [
     "NETMGRNATIVE_LOG_TAG = \"NetSysBpf\"",
     "LOG_DOMAIN = 0xD0015B0",

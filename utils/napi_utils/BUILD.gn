@@ -24,6 +24,16 @@ config("napi_utils_public_config") {
     "include",
     "$THIRD_PARTY_ROOT/node/src",
   ]
+
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2 -O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2 -O2",
+  ]
 }
 
 ohos_shared_library("napi_utils") {
