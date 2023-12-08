@@ -40,7 +40,7 @@ bool NetManagerPermission::CheckPermission(const std::string &permissionName)
     int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
     if (result != Security::AccessToken::PERMISSION_GRANTED) {
         NETMGR_LOG_E("permission check failed, permission:%{public}s, callerToken:%{public}u", permissionName.c_str(),
-                callerToken);
+                     callerToken);
         return false;
     }
     return true;
@@ -62,7 +62,6 @@ bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissio
             return iter->second;
         }
     }
-    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
     bool res = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName) ==
                Security::AccessToken::PERMISSION_GRANTED;
     {
