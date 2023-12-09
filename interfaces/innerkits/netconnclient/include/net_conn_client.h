@@ -30,6 +30,7 @@
 #include "net_link_info.h"
 #include "net_specifier.h"
 #include "net_supplier_callback_base.h"
+#include "i_net_factoryreset_callback.h"
 
 namespace OHOS {
 namespace nmd {
@@ -366,6 +367,8 @@ public:
     int32_t RegisterSlotType(uint32_t supplierId, int32_t type);
     int32_t GetSlotType(std::string &type);
 
+    int32_t FactoryResetNetwork();
+    int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback);
     void RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback, uint32_t &callbackid);
     void UnregisterAppHttpProxyCallback(uint32_t callbackid);
     int32_t SetAppHttpProxy(const HttpProxy &httpProxy);

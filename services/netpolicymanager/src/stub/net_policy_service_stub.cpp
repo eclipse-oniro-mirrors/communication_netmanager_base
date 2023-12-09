@@ -46,6 +46,7 @@ std::map<uint32_t, const char *> g_codeNPS = {
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POWER_SAVE_TRUSTLIST), Permission::MANAGE_NET_STRATEGY},
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_POLICY), Permission::MANAGE_NET_STRATEGY},
     {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CHECK_PERMISSION), Permission::MANAGE_NET_STRATEGY},
+    {static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_FACTORYRESET_POLICIES), Permission::MANAGE_NET_STRATEGY},
 };
 } // namespace
 
@@ -93,6 +94,8 @@ NetPolicyServiceStub::NetPolicyServiceStub()
         &NetPolicyServiceStub::OnSetPowerSavePolicy;
     memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CHECK_PERMISSION)] =
         &NetPolicyServiceStub::OnCheckPermission;
+    memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_FACTORYRESET_POLICIES)] =
+        &NetPolicyServiceStub::OnFactoryResetPolicies;
     InitEventHandler();
 }
 
@@ -605,6 +608,11 @@ int32_t NetPolicyServiceStub::OnCheckPermission(MessageParcel &data, MessageParc
         NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetPolicyServiceStub::OnFactoryResetPolicies(MessageParcel &data, MessageParcel &reply)
+{
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard

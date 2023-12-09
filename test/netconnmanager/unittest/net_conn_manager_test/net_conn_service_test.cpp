@@ -37,6 +37,7 @@
 #include "netsys_controller.h"
 #include "net_http_proxy_tracker.h"
 #include "net_interface_callback_stub.h"
+#include "net_factoryreset_callback_stub.h"
 
 #include "system_ability_definition.h"
 
@@ -837,6 +838,30 @@ HWTEST_F(NetConnServiceTest, NetDetectionForDnsHealthTest001, TestSize.Level1)
     ret = NetConnService::GetInstance()->NetDetectionForDnsHealth(netId, dnsHealthSuccess);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = NetConnService::GetInstance()->NetDetectionForDnsHealth(netId, dnsHealthFail);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, FactoryResetNetworkTest001, TestSize.Level1)
+{
+    NetConnService::GetInstance()->netFactoryResetCallback_ =
+        new (std::nothrow) NetFactoryResetCallback();
+    ASSERT_NE(NetConnService::GetInstance()->netFactoryResetCallback_, nullptr);
+    auto ret = NetConnService::GetInstance()->FactoryResetNetwork();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnServiceTest, RegisterNetFactoryResetCallbackTest001, TestSize.Level1)
+{
+    sptr<INetFactoryResetCallback> callback = nullptr;
+    auto ret = NetConnService::GetInstance()->RegisterNetFactoryResetCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    NetConnService::GetInstance()->netFactoryResetCallback_ =
+        new (std::nothrow) NetFactoryResetCallback();
+    ASSERT_NE(NetConnService::GetInstance()->netFactoryResetCallback_, nullptr);
+
+    callback = new (std::nothrow) NetFactoryResetCallbackStub();
+    ret = NetConnService::GetInstance()->RegisterNetFactoryResetCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

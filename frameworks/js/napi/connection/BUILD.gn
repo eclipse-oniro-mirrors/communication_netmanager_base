@@ -39,6 +39,7 @@ ohos_shared_library("connection") {
     "async_context/src/bindsocket_context.cpp",
     "async_context/src/deletecustomdnsrule_context.cpp",
     "async_context/src/deletecustomdnsrules_context.cpp",
+    "async_context/src/factoryresetnetwork_context.cpp",
     "async_context/src/getaddressbyname_context.cpp",
     "async_context/src/getappnet_context.cpp",
     "async_context/src/getdefaultnet_context.cpp",

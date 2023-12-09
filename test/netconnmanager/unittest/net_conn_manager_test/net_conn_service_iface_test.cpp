@@ -18,6 +18,7 @@
 #include "net_conn_service_iface.h"
 #include "net_conn_constants.h"
 #include "net_manager_constants.h"
+#include "net_factoryreset_callback_stub.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -90,5 +91,15 @@ HWTEST_F(NetConnServiceIfaceTest, RestrictBackgroundChangedTest001, TestSize.Lev
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
+HWTEST_F(NetConnServiceIfaceTest, RegisterNetFactoryResetCallbackTest001, TestSize.Level1)
+{
+    sptr<INetFactoryResetCallback> callback = nullptr;
+    auto ret = instance_.RegisterNetFactoryResetCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    callback = new (std::nothrow) NetFactoryResetCallbackStub();
+    ret = instance_.RegisterNetFactoryResetCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

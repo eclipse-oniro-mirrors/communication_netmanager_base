@@ -28,6 +28,7 @@
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "network.h"
+#include "net_factoryreset_callback_stub.h"
 
 #include "i_net_conn_callback.h"
 #include "iremote_stub.h"
@@ -117,6 +118,16 @@ public:
     }
 
     int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
+    {
+        return 0;
+    }
+};
+
+class INetFactoryResetCallbackTest : public IRemoteStub<INetFactoryResetCallback> {
+public:
+    INetFactoryResetCallbackTest() = default;
+
+    int32_t OnNetFactoryReset()
     {
         return 0;
     }
@@ -1217,6 +1228,49 @@ HWTEST_F(NetConnClientTest, GetTrustAnchorsForHostName001, TestSize.Level1)
     std::vector<std::string> certs;
     auto ret = NetConnClient::GetInstance().GetTrustAnchorsForHostName(hostname, certs);
     EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+}
+
+/**
+ * @tc.name: FactoryResetNetworkTest001
+ * @tc.desc: Test NetConnClient::FactoryResetNetwork
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, FactoryResetNetworkTest001, TestSize.Level1)
+{
+    NetConnManagerAccessToken token;
+    int32_t ret = NetConnClient::GetInstance().FactoryResetNetwork();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: RegisterNetFactoryResetCallbackTest001
+ * @tc.desc: Test NetConnClient::RegisterNetFactoryResetCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RegisterNetFactoryResetCallbackTest001, TestSize.Level1)
+{
+    sptr<INetFactoryResetCallbackTest> callback = new (std::nothrow) INetFactoryResetCallbackTest();
+    int32_t ret = NetConnClient::GetInstance().RegisterNetFactoryResetCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: RegisterNetFactoryResetCallbackTest002
+ * @tc.desc: Test NetConnClient::RegisterNetFactoryResetCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RegisterNetFactoryResetCallbackTest002, TestSize.Level1)
+{
+    NetConnManagerAccessToken token;
+
+    sptr<INetFactoryResetCallback> callback = nullptr;
+    int32_t ret = NetConnClient::GetInstance().RegisterNetFactoryResetCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    callback = new (std::nothrow) INetFactoryResetCallbackTest();
+    ASSERT_NE(callback, nullptr);
+    ret = NetConnClient::GetInstance().RegisterNetFactoryResetCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnClientTest, RegisterAppHttpProxyCallback001, TestSize.Level1)

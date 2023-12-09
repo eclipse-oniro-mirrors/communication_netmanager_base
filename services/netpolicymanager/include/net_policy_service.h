@@ -213,6 +213,13 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     int32_t CheckPermission() override;
+	
+	/**
+     * factory reset net policies
+     *
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    int32_t FactoryResetPolicies() override;
 
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
@@ -242,6 +249,30 @@ private:
     std::vector<uint16_t> monthDay_;
 
     bool hasSARemoved_ = false;
+
+private:
+    void RegisterFactoryResetCallback();
+
+    class FactoryResetCallBack : public IRemoteStub<INetFactoryResetCallback> {
+    public:
+        FactoryResetCallBack(std::shared_ptr<NetPolicyService> netPolicy)
+        {
+            netPolicy_ = netPolicy;
+        }
+
+        int32_t OnNetFactoryReset()
+        {
+            if (netPolicy_ != nullptr) {
+                netPolicy_->FactoryResetPolicies();
+                return NETMANAGER_SUCCESS;
+            } else {
+                return NETMANAGER_ERR_LOCAL_PTR_NULL;
+            }
+        }
+    private:
+        std::shared_ptr<NetPolicyService> netPolicy_ = nullptr;
+    };
+    sptr<INetFactoryResetCallback> netFactoryResetCallback_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

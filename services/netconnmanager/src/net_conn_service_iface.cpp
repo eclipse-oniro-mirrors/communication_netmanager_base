@@ -15,6 +15,7 @@
 
 #include "net_conn_service_iface.h"
 #include "net_conn_service.h"
+#include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -58,6 +59,11 @@ int32_t NetConnServiceIface::RestrictBackgroundChanged(bool isRestrictBackground
 int32_t NetConnServiceIface::RegisterNetConnCallback(const sptr<INetConnCallback> &callback)
 {
     return NetConnService::GetInstance()->RegisterNetConnCallback(callback);
+}
+
+int32_t NetConnServiceIface::RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback)
+{
+    return NetConnService::GetInstance()->RegisterNetFactoryResetCallback(callback);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

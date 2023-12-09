@@ -102,6 +102,10 @@ public:
 
     static void DeleteCustomDNSRulesCallback(napi_env env, napi_status status, void *data);
 
+    static void ExecFactoryResetNetwork(napi_env env, void *data);
+
+    static void FactoryResetNetworkCallback(napi_env env, napi_status status, void *data);
+
     class NetHandleAsyncWork final {
     public:
         NetHandleAsyncWork() = delete;

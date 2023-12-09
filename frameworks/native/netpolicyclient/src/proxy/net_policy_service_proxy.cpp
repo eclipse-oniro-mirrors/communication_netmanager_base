@@ -686,5 +686,10 @@ int32_t NetPolicyServiceProxy::CheckPermission()
     }
     return result;
 }
+
+int32_t NetPolicyServiceProxy::FactoryResetPolicies()
+{
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

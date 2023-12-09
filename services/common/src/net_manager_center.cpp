@@ -16,6 +16,7 @@
 #include "net_manager_center.h"
 
 #include "net_manager_constants.h"
+#include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -179,6 +180,15 @@ bool NetManagerCenter::IsUidNetAllowed(uint32_t uid, bool metered)
         return NETMANAGER_ERROR;
     }
     return policyService_->IsUidNetAllowed(uid, metered);
+}
+
+int32_t NetManagerCenter::RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback)
+{
+    if (connService_ == nullptr) {
+        return NETMANAGER_ERROR;
+    }
+    NETMGR_LOG_I("NetManagerCenter RegisterNetFactoryResetCallback");
+    return connService_->RegisterNetFactoryResetCallback(callback);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -42,6 +42,7 @@ enum class PolicyInterfaceCode {
     CMD_NPS_GET_POWER_SAVE_TRUSTLIST,
     CMD_NPS_SET_POWER_SAVE_POLICY,
     CMD_NPS_CHECK_PERMISSION,
+    CMD_NPS_FACTORYRESET_POLICIES,
     CMD_NPS_END = 100,
 };
 enum class PolicyCallbackInterfaceCode {

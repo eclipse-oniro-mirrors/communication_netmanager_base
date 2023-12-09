@@ -25,6 +25,8 @@
 #include "i_net_detection_callback.h"
 #include "i_net_interface_callback.h"
 #include "i_net_supplier_callback.h"
+#include "i_net_factoryreset_callback.h"
+
 #include "net_conn_constants.h"
 #include "net_interface_config.h"
 #include "net_link_info.h"
@@ -90,6 +92,9 @@ public:
                                  const std::string &ifName) = 0;
     virtual int32_t RegisterSlotType(uint32_t supplierId, int32_t type) = 0;
     virtual int32_t GetSlotType(std::string &type) = 0;
+
+    virtual int32_t FactoryResetNetwork() = 0;
+    virtual int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

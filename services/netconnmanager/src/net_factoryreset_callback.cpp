@@ -44,7 +44,7 @@ int32_t NetFactoryResetCallback::RegisterNetFactoryResetCallbackAsync(const sptr
     }
     int32_t ret = NETMANAGER_SUCCESS;
     if (factoryResetCallHandler_) {
-        factoryResetCallHandler_->PostSyncTask([&callback, &ret]() {
+        factoryResetCallHandler_->PostSyncTask([this, &callback, &ret]() {
             ret = RegisterNetFactoryResetCallback(callback);
         });
     }
@@ -82,7 +82,7 @@ int32_t NetFactoryResetCallback::UnregisterNetFactoryResetCallbackAsync(const sp
 
     int32_t ret = NETMANAGER_SUCCESS;
     if (factoryResetCallHandler_) {
-        factoryResetCallHandler_->PostSyncTask([&callback, &ret]() {
+        factoryResetCallHandler_->PostSyncTask([this, &callback, &ret]() {
             ret = UnregisterNetFactoryResetCallback(callback);
         });
     }
@@ -112,7 +112,7 @@ int32_t NetFactoryResetCallback::NotifyNetFactoryResetAsync()
     NETMGR_LOG_I("NotifyNetFactoryResetAsync enter");
     int32_t ret = NETMANAGER_SUCCESS;
     if (factoryResetCallHandler_) {
-        factoryResetCallHandler_->PostSyncTask([&ret]() {
+        factoryResetCallHandler_->PostSyncTask([this, &ret]() {
             ret = NotifyNetFactoryReset();
         });
     }
