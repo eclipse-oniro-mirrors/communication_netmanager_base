@@ -18,5 +18,33 @@
     {
         "first_introduced": "11",
         "name": "OHOS_NetConn_UnregisterDnsResolver"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OH_NetConn_HasDefaultNet"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OH_NetConn_GetDefaultNet"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OH_NetConn_IsDefaultNetMetered"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OH_NetConn_GetConnectionProperties"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OH_NetConn_GetNetCapabilities"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OH_NetConn_GetNetCapabilities"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OH_NetConn_GetDefaultHttpProxy"
     }
 ]
