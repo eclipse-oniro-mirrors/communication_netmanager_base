@@ -246,17 +246,18 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
         if (NETMANAGER_SUCCESS != NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_,
                                                                                       inetAddr.address_, prefixLen)) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_DELETE_NET_IP_ADDR_FAILED);
-        } else {
-            netLinkInfo_.routeList_.remove_if([family](const Route &route) {
-                INetAddr::IpType addrFamily = INetAddr::IpType::UNKNOWN;
-                if (family == AF_INET) {
-                    addrFamily = INetAddr::IpType::IPV4;
-                } else if (family == AF_INET6) {
-                    addrFamily = INetAddr::IpType::IPV6;
-                }
-                return route.destination_.type_ == addrFamily;
-            });
         }
+
+        /* do remove netsys route whenever DelInterfaceAddress success or fail */
+        netLinkInfo_.routeList_.remove_if([family](const Route &route) {
+            INetAddr::IpType addrFamily = INetAddr::IpType::UNKNOWN;
+            if (family == AF_INET) {
+                addrFamily = INetAddr::IpType::IPV4;
+            } else if (family == AF_INET6) {
+                addrFamily = INetAddr::IpType::IPV6;
+            }
+            return route.destination_.type_ == addrFamily;
+        });
     }
 
     NETMGR_LOG_D("UpdateIpAddrs, new ip addrs: ...");
