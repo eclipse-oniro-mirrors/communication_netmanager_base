@@ -77,7 +77,7 @@ int32_t OH_NetConn_HasDefaultNet(int32_t *hasDefaultNet)
 {
     if (hasDefaultNet == nullptr) {
         NETMGR_LOG_E("OH_NetConn_HasDefaultNet received invalid parameters");
-        return NETMANAGER_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
     bool flagBool = false;
@@ -90,7 +90,7 @@ int32_t OH_NetConn_GetDefaultNet(NetConn_NetHandle *netHandle)
 {
     if (netHandle == nullptr) {
         NETMGR_LOG_E("OH_NetConn_GetDefaultNet received invalid parameters");
-        return NETMANAGER_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
     NetHandle netHandleObj = NetHandle();
@@ -106,7 +106,7 @@ int32_t OH_NetConn_IsDefaultNetMetered(int32_t *isMetered)
 {
     if (isMetered == nullptr) {
         NETMGR_LOG_E("OH_NetConn_IsDefaultNetMetered received invalid parameters");
-        return NETMANAGER_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
     bool flagBool = false;
@@ -119,7 +119,7 @@ int32_t OH_NetConn_GetConnectionProperties(NetConn_NetHandle *netHandle, NetConn
 {
     if (netHandle == nullptr || prop == nullptr) {
         NETMGR_LOG_E("OH_NetConn_GetConnectionProperties received invalid parameters");
-        return NETMANAGER_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
     NetHandle netHandleObj = NetHandle();
@@ -141,7 +141,7 @@ int32_t OH_NetConn_GetNetCapabilities(NetConn_NetHandle *netHandle,
 {
     if (netHandle == nullptr || netAllCapabilities == nullptr) {
         NETMGR_LOG_E("OH_NetConn_GetNetCapabilities received invalid parameters");
-        return NETMANAGER_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
     NetHandle netHandleObj = NetHandle();
@@ -162,7 +162,7 @@ int32_t OH_NetConn_GetDefaultHttpProxy(NetConn_HttpProxy *httpProxy)
 {
     if (httpProxy == nullptr) {
         NETMGR_LOG_E("OH_NetConn_GetDefaultHttpProxy received invalid parameters");
-        return NETMANAGER_ERR_INVALID_PARAMETER;
+        return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
     HttpProxy httpProxyObj = HttpProxy();

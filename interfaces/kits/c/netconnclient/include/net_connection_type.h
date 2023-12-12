@@ -1,41 +1,41 @@
 /*
-* Copyright (c) 2023 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef NATIVE_NET_CONN_TYPE_H
 #define NATIVE_NET_CONN_TYPE_H
 
 /**
-* @addtogroup NetConnection
-* @{
-*
-* @brief Provides the data structures for the C APIs of the network connection module for network management.
-*
-* @since 11
-* @version 1.0
-*/
+ * @addtogroup NetConnection
+ * @{
+ *
+ * @brief Provides the data structures for the C APIs of the network connection module for network management.
+ *
+ * @since 11
+ * @version 1.0
+ */
 
 /**
-* @file net_connection_type.h
-* @brief Defines the data structures for the C APIs of the network connection module.
-*
-* @library libnet_connection.so
-* @syscap SystemCapability.Communication.NetManager.Core
-* @since 11
-* @version 1.0
-*
-*/
+ * @file net_connection_type.h
+ * @brief Defines the data structures for the C APIs of the network connection module.
+ *
+ * @library libnet_connection.so
+ * @syscap SystemCapability.Communication.NetManager.Core
+ * @since 11
+ * @version 1.0
+ *
+ */
 
 #include <stdint.h>
 
@@ -52,22 +52,21 @@ extern "C" {
 #define NETCONN_MAX_STR_LEN 256
 
 /**
-* @brief Defines network capabilities.
-*
-* @since 11
-* @version 1.0
-*/
-
+ * @brief Defines network capabilities.
+ *
+ * @since 11
+ * @version 1.0
+ */
 typedef enum NetConn_NetCap {
-    /* MMS */
+    /** MMS */
     NETCONN_NET_CAPABILITY_MMS = 0,
-    /* Not Metered */
+    /** Not Metered */
     NETCONN_NET_CAPABILITY_NOT_METERED = 11,
-    /* Internet */
+    /** Internet */
     NETCONN_NET_CAPABILITY_INTERNET = 12,
-    /* Not VPN */
+    /** Not VPN */
     NETCONN_NET_CAPABILITY_NOT_VPN = 15,
-    /* Validated */
+    /** Validated */
     NETCONN_NET_CAPABILITY_VALIDATED = 16,
 } NetConn_NetCap;
 
@@ -87,18 +86,18 @@ typedef enum NetConn_NetBearerType {
 } NetConn_NetBearerType;
 
 /**
-* @brief Defines the network handle.
-*
-* @since 11
-* @version 1.0
-*/
+ * @brief Defines the network handle.
+ *
+ * @since 11
+ * @version 1.0
+ */
 typedef struct NetConn_NetHandle {
     /** Network ID */
     int32_t netId;
 } NetConn_NetHandle;
 
 /**
- * @brief Defines all network capabilities.
+ * @brief Defines network capabilities.
  *
  * @since 11
  * @version 1.0
@@ -172,7 +171,7 @@ typedef struct NetConn_HttpProxy {
 } NetConn_HttpProxy;
 
 /**
- * @brief Defines the network link information.
+ * @brief Defines the network connection properties.
  *
  * @since 11
  * @version 1.0
@@ -203,11 +202,11 @@ typedef struct NetConn_ConnectionProperties {
 } NetConn_ConnectionProperties;
 
 /**
-* @brief Defines the network handle list.
-*
-* @since 11
-* @version 1.0
-*/
+ * @brief Defines the network handle list.
+ *
+ * @since 11
+ * @version 1.0
+ */
 typedef struct NetConn_NetHandleList {
     /** Network handle list */
     NetConn_NetHandle netHandles[NETCONN_MAX_NET_SIZE];
@@ -215,7 +214,7 @@ typedef struct NetConn_NetHandleList {
     int32_t netHandleListSize;
 } NetConn_NetHandleList;
 
-/*
+/**
  * @brief Pointer to the custom DNS resolver.
  *
  * @param host The host name to query.

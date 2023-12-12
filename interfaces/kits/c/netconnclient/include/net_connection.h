@@ -56,7 +56,7 @@ extern "C" {
  * @syscap SystemCapability.Communication.NetManager.Core
  * @since 11
  * @version 1.0
-*/
+ */
 int32_t OH_NetConn_HasDefaultNet(int32_t *hasDefaultNet);
 
 /**
@@ -88,10 +88,10 @@ int32_t OH_NetConn_GetDefaultNet(NetConn_NetHandle *netHandle);
 int32_t OH_NetConn_IsDefaultNetMetered(int32_t *isMetered);
 
 /**
- * @brief Obtains the link information of a data network.
+ * @brief Obtains the connection properties of a data network.
  *
  * @param netHandle Pointer to the network handle that contains the network ID.
- * @param info Pointer to the link information.
+ * @param prop Pointer to the connection properties.
  * @return 0 - Success. 201 - Missing permissions.
  *         401 - Parameter error. 2100002 - Unable to connect to service.
  *         2100003 - Internal error.
@@ -106,7 +106,7 @@ int32_t OH_NetConn_GetConnectionProperties(NetConn_NetHandle *netHandle, NetConn
  * @brief Obtains the capabilities of a data network.
  *
  * @param netHandle Pointer to the network handle that contains the network ID.
- * @param netAllCapacities Pointer to the network capabilities.
+ * @param netCapacities Pointer to the network capabilities.
  * @return 0 - Success. 201 - Missing permissions.
  *         401 - Parameter error. 2100002 - Unable to connect to service.
  *         2100003 - Internal error.
@@ -115,10 +115,10 @@ int32_t OH_NetConn_GetConnectionProperties(NetConn_NetHandle *netHandle, NetConn
  * @since 11
  * @version 1.0
  */
-int32_t OH_NetConn_GetNetCapabilities(NetConn_NetHandle *netHandle, NetConn_NetCapabilities *netAllCapacities);
+int32_t OH_NetConn_GetNetCapabilities(NetConn_NetHandle *netHandle, NetConn_NetCapabilities *netCapacities);
 
 /**
- * @brief Obtains the default network proxy.
+ * @brief Obtains the default http proxy.
  *
  * @param httpProxy Pointer to the HTTP proxy.
  * @return 0 - Success. 201 - Missing permissions.
@@ -145,7 +145,7 @@ int32_t OH_NetConn_GetDefaultHttpProxy(NetConn_HttpProxy *httpProxy);
  * @syscap SystemCapability.Communication.NetManager.Core
  * @since 11
  * @version 1.0
-*/
+ */
 int32_t OH_NetConn_GetAddrInfo(char *host, char *serv, struct addrinfo *hint, struct addrinfo **res, int32_t netId);
 
 /**
@@ -159,7 +159,7 @@ int32_t OH_NetConn_GetAddrInfo(char *host, char *serv, struct addrinfo *hint, st
  * @syscap SystemCapability.Communication.NetManager.Core
  * @since 11
  * @version 1.0
-*/
+ */
 int32_t OH_NetConn_FreeDnsResult(struct addrinfo *res);
 
 /**
@@ -187,7 +187,7 @@ int32_t OH_NetConn_GetAllNets(NetConn_NetHandleList *netHandleList);
  * @syscap SystemCapability.Communication.NetManager.Core
  * @since 11
  * @version 1.0
-*/
+ */
 int32_t OHOS_NetConn_RegisterDnsResolver(OH_NetConn_CustomDnsResolver resolver);
 
 /**
@@ -200,7 +200,7 @@ int32_t OHOS_NetConn_RegisterDnsResolver(OH_NetConn_CustomDnsResolver resolver);
  * @syscap SystemCapability.Communication.NetManager.Core
  * @since 11
  * @version 1.0
-*/
+ */
 int32_t OHOS_NetConn_UnregisterDnsResolver(void);
 
 #ifdef __cplusplus

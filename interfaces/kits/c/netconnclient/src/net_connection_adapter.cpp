@@ -54,8 +54,7 @@ static int32_t Conv2INetAddr(const INetAddr &netAddrObj, NetConn_NetAddr *netAdd
     netAddr->prefixlen = netAddrObj.prefixlen_;
     netAddr->port = netAddrObj.port_;
 
-    int32_t ret;
-    ret = Conv2Ch(netAddrObj.address_, netAddr->address);
+    int32_t ret = Conv2Ch(netAddrObj.address_, netAddr->address);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
@@ -90,8 +89,7 @@ int32_t Conv2NetHandleObj(NetConn_NetHandle *netHandle, NetHandle &netHandleObj)
 
 int32_t Conv2HttpProxy(HttpProxy &httpProxyObj, NetConn_HttpProxy *httpProxy)
 {
-    int32_t ret;
-    ret = Conv2Ch(httpProxyObj.GetHost(), httpProxy->host);
+    int32_t ret = Conv2Ch(httpProxyObj.GetHost(), httpProxy->host);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
@@ -103,8 +101,6 @@ int32_t Conv2HttpProxy(HttpProxy &httpProxyObj, NetConn_HttpProxy *httpProxy)
             NETMGR_LOG_E("exclusionList out of memory");
             return NETMANAGER_ERR_INTERNAL;
         }
-
-
         ret = Conv2Ch(exclusion, httpProxy->exclusionList[i++]);
         if (ret != NETMANAGER_SUCCESS) {
             return ret;
@@ -119,8 +115,7 @@ int32_t Conv2HttpProxy(HttpProxy &httpProxyObj, NetConn_HttpProxy *httpProxy)
 
 int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, NetConn_ConnectionProperties *prop)
 {
-    int32_t ret;
-    ret = Conv2Ch(infoObj.ifaceName_, prop->ifaceName);
+    int32_t ret = Conv2Ch(infoObj.ifaceName_, prop->ifaceName);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
