@@ -19,6 +19,7 @@
 #include <string>
 #include <set>
 #include <json/json.h>
+#include "openssl/ssl.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -54,11 +55,22 @@ struct DomainConfig {
 
 class NetworkSecurityConfig final {
 public:
+    static NetworkSecurityConfig& GetInstance();
     int32_t GetPinSetForHostName(const std::string &hostname, std::string &pins);
     int32_t GetTrustAnchorsForHostName(const std::string &hostname, std::vector<std::string> &certs);
 
 private:
     int32_t GetConfig();
+    bool IsCACertFileName(const char *fileName);
+    void GetCAFilesFromPath(const std::string caPath, std::vector<std::string> &caFiles);
+    void AddSurfixToCACertFileName(const std::string &caPath,
+                                   std::set<std::string> &allFileNames, std::string &caFile);
+    X509 *ReadCertFile(const std::string &fileName);
+    std::string GetRehashedCADirName(const std::string &caPath);
+    std::string BuildRehasedCAPath(const std::string &caPath);
+    std::string GetRehasedCAPath(const std::string &caPath);
+    std::string ReHashCAPathForX509(const std::string &caPath);
+    int32_t CreateRehashedCertFiles();
     int32_t GetJsonFromBundle(std::string &jsonProfile);
     int32_t ParseJsonConfig(const std::string &content);
     void ParseJsonBaseConfig(const Json::Value &root, BaseConfig &baseConfig);
@@ -70,6 +82,8 @@ private:
     void DumpConfigs();
 
 private:
+    NetworkSecurityConfig();
+    ~NetworkSecurityConfig();
     BaseConfig baseConfig_;
     std::vector<DomainConfig> domainConfigs_;
 };
