@@ -194,6 +194,8 @@ napi_value ConnectionModule::InitConnectionModule(napi_env env, napi_value expor
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_APP_NET, GetAppNet),
         DECLARE_NAPI_FUNCTION(FUNCTION_GET_APP_NET_SYNC, GetAppNetSync),
         DECLARE_NAPI_FUNCTION(FUNCTION_SET_APP_NET, SetAppNet),
+        DECLARE_NAPI_FUNCTION(FUNCTION_FACTORY_RESET_NETWORK, FactoryResetNetwork),
+        DECLARE_NAPI_FUNCTION(FUNCTION_FACTORY_RESET_NETWORK_SYNC, FactoryResetNetworkSync),
     };
     NapiUtils::DefineProperties(env, exports, functions);
 
@@ -433,6 +435,20 @@ napi_value ConnectionModule::ClearCustomDnsRules(napi_env env, napi_callback_inf
     return ModuleTemplate::Interface<DeleteCustomDNSRulesContext>(env, info, FUNCTION_DELETE_CUSTOM_DNS_RULES, nullptr,
                                                                  ConnectionAsyncWork::ExecDeleteCustomDNSRules,
                                                                  ConnectionAsyncWork::DeleteCustomDNSRulesCallback);
+}
+
+napi_value ConnectionModule::FactoryResetNetwork(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::Interface<FactoryResetNetworkContext>(env, info, FUNCTION_FACTORY_RESET_NETWORK, nullptr,
+                                                                 ConnectionAsyncWork::ExecFactoryResetNetwork,
+                                                                 ConnectionAsyncWork::FactoryResetNetworkCallback);
+}
+
+napi_value ConnectionModule::FactoryResetNetworkSync(napi_env env, napi_callback_info info)
+{
+    return ModuleTemplate::InterfaceSync<FactoryResetNetworkContext>(env, info, FUNCTION_FACTORY_RESET_NETWORK, nullptr,
+                                                                     ConnectionExec::ExecFactoryResetNetwork,
+                                                                     ConnectionExec::FactoryResetNetworkCallback);
 }
 
 napi_value ConnectionModule::NetHandleInterface::GetAddressesByName(napi_env env, napi_callback_info info)

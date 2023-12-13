@@ -66,6 +66,7 @@ private:
     int32_t OnSetPowerSaveTrustlist(MessageParcel &data, MessageParcel &reply);
     int32_t OnSetPowerSavePolicy(MessageParcel &data, MessageParcel &reply);
     int32_t OnCheckPermission(MessageParcel &data, MessageParcel &reply);
+    int32_t OnFactoryResetPolicies(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetPolicyServiceFunc> memberFuncMap_;

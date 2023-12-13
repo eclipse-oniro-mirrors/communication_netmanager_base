@@ -58,6 +58,8 @@ public:
     bool IsUidNetAccess(uint32_t uid, bool metered);
     bool IsUidNetAllowed(uint32_t uid, bool metered);
 
+    int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback);
+
 private:
     sptr<NetConnBaseService> connService_;
     sptr<NetStatsBaseService> statsService_;

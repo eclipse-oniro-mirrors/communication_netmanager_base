@@ -22,6 +22,7 @@
 #include "net_supplier_info.h"
 #include "i_net_conn_callback.h"
 #include "refbase.h"
+#include "i_net_factoryreset_callback.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -36,6 +37,7 @@ public:
     virtual int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) = 0;
     virtual int32_t RestrictBackgroundChanged(bool isRestrictBackground) = 0;
     virtual int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) = 0;
+    virtual int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

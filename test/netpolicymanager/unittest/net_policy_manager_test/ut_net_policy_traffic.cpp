@@ -274,6 +274,18 @@ HWTEST_F(UtNetPolicyTraffic, ResetPolicies001, TestSize.Level1)
     FAIL();
 }
 
+
+/**
+ * @tc.name: ResetPolicies002
+ * @tc.desc: Test NetPolicyTraffic ResetPolicies
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyTraffic, ResetPolicies002, TestSize.Level1)
+{
+    auto ret = g_netPolicyTraffic->ResetPolicies();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 /**
  * @tc.name: ReachedLimit001
  * @tc.desc: Test NetPolicyTraffic ReachedLimit

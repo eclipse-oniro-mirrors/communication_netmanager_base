@@ -612,13 +612,13 @@ bool IsValidDomain(const std::string &domain)
 
 bool WriteFile(const std::string &filePath, const std::string &fileContent)
 {
-    std::fstream file(filePath.c_str(), std::fstream::out | std::fstream::trunc);
+    std::ofstream file(filePath, std::ios::out | std::ios::trunc);
     if (!file.is_open()) {
         NETMGR_LOG_E("write file=%{public}s fstream failed. err %{public}d %{public}s",
             filePath.c_str(), errno, strerror(errno));
         return false;
     }
-    file << fileContent.c_str();
+    file << fileContent;
     file.close();
     return true;
 }

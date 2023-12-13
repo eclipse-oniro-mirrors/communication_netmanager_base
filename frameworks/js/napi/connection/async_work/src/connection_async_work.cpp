@@ -233,6 +233,17 @@ void ConnectionAsyncWork::DeleteCustomDNSRulesCallback(napi_env env, napi_status
         status, data);
 }
 
+void ConnectionAsyncWork::ExecFactoryResetNetwork(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<FactoryResetNetworkContext, ConnectionExec::ExecFactoryResetNetwork>(env, data);
+}
+
+void ConnectionAsyncWork::FactoryResetNetworkCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<FactoryResetNetworkContext, ConnectionExec::FactoryResetNetworkCallback>(env,
+        status, data);
+}
+
 void ConnectionAsyncWork::NetHandleAsyncWork::ExecGetAddressesByName(napi_env env, void *data)
 {
     BaseAsyncWork::ExecAsyncWork<GetAddressByNameContext, ConnectionExec::NetHandleExec::ExecGetAddressesByName>(env,

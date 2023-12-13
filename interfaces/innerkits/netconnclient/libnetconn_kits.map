@@ -92,6 +92,8 @@
       "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonDomains(Json::Value const&, std::__h::vector<OHOS::NetManagerStandard::Domain, std::__h::allocator<OHOS::NetManagerStandard::Domain>>&)";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonTrustAnchors(Json::Value const&, OHOS::NetManagerStandard::TrustAnchors&)";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::GetPinSetForHostName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
+      "OHOS::NetManagerStandard::NetConnClient::FactoryResetNetwork()";
+      "OHOS::NetManagerStandard::NetConnClient::RegisterNetFactoryResetCallback(OHOS::sptr<OHOS::NetManagerStandard::INetFactoryResetCallback> const&)";
       VTT?for?OHOS::NetManagerStandard::NetSpecifier;
       vtable?for?OHOS::NetManagerStandard::NetSpecifier;
       "OHOS::NetManagerStandard::NetLinkInfo::NetLinkInfo(OHOS::NetManagerStandard::NetLinkInfo const&)";
@@ -169,6 +171,15 @@
       "non-virtual thunk to OHOS::NetManagerStandard::NetInterfaceStateCallbackStub::OnInterfaceRemoved(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "non-virtual thunk to OHOS::NetManagerStandard::NetInterfaceStateCallbackStub::OnInterfaceChanged(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";
       "non-virtual thunk to OHOS::NetManagerStandard::NetInterfaceStateCallbackStub::OnInterfaceLinkStateChanged(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";
+      VTT?for?OHOS::NetManagerStandard::NetFactoryResetCallbackStub;
+      vtable?for?OHOS::NetManagerStandard::NetFactoryResetCallbackStub;
+      "OHOS::NetManagerStandard::NetFactoryResetCallbackStub::NetFactoryResetCallbackStub()";
+      "OHOS::NetManagerStandard::NetFactoryResetCallbackStub::~NetFactoryResetCallbackStub()";
+      "OHOS::NetManagerStandard::NetFactoryResetCallbackStub::OnNetFactoryReset()";
+      "OHOS::NetManagerStandard::NetFactoryResetCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetFactoryResetCallbackStub::~NetFactoryResetCallbackStub()";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetFactoryResetCallbackStub::OnNetFactoryReset()";
+      "virtual thunk to OHOS::NetManagerStandard::NetFactoryResetCallbackStub::~NetFactoryResetCallbackStub()";
     };
   local:
    *;

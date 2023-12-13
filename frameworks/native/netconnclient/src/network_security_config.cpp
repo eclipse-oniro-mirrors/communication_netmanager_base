@@ -499,7 +499,7 @@ int32_t NetworkSecurityConfig::GetPinSetForHostName(const std::string &hostname,
 
     PinSet *pPinSet = nullptr;
     for (auto &domainConfig: domainConfigs_) {
-        for (auto &domain: domainConfig.domains_) {
+        for (const auto &domain: domainConfig.domains_) {
             if (hostname == domain.domainName_) {
                 pPinSet = &domainConfig.pinSet_;
                 break;
@@ -545,7 +545,7 @@ int32_t NetworkSecurityConfig::GetTrustAnchorsForHostName(const std::string &hos
 
     TrustAnchors *pTrustAnchors = nullptr;
     for (auto &domainConfig: domainConfigs_) {
-        for (auto &domain: domainConfig.domains_) {
+        for (const auto &domain: domainConfig.domains_) {
             if (hostname == domain.domainName_) {
                 pTrustAnchors = &domainConfig.trustAnchors_;
                 break;

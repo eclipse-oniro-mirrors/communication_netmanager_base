@@ -169,7 +169,7 @@ int32_t NetConnClient::UnregisterNetConnCallback(const sptr<INetConnCallback> &c
 
 int32_t NetConnClient::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo)
 {
-    NETMGR_LOG_D("UpdateNetSupplierInfo client in.");
+    NETMGR_LOG_I("UpdateNetSupplierInfo client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -181,7 +181,7 @@ int32_t NetConnClient::UpdateNetSupplierInfo(uint32_t supplierId, const sptr<Net
 
 int32_t NetConnClient::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo)
 {
-    NETMGR_LOG_D("UpdateNetLinkInfo client in.");
+    NETMGR_LOG_I("UpdateNetLinkInfo client in.");
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
@@ -678,5 +678,25 @@ int32_t NetConnClient::GetTrustAnchorsForHostName(const std::string &hostname, s
     return NetworkSecurityConfig::GetInstance().GetTrustAnchorsForHostName(hostname, certs);
 }
 
+int32_t NetConnClient::FactoryResetNetwork()
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->FactoryResetNetwork();
+}
+
+int32_t NetConnClient::RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->RegisterNetFactoryResetCallback(callback);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

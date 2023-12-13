@@ -36,6 +36,8 @@
 #include "netsys_controller_callback.h"
 #include "network.h"
 #include "dns_result_call_back.h"
+#include "net_factoryreset_callback.h"
+
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -308,6 +310,8 @@ public:
                          const std::string &ifName) override;
     int32_t RegisterSlotType(uint32_t supplierId, int32_t type) override;
     int32_t GetSlotType(std::string &type) override;
+    int32_t FactoryResetNetwork() override;
+    int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) override;
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -410,6 +414,7 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> netActEventHandler_ = nullptr;
     sptr<NetInterfaceStateCallback> interfaceStateCallback_ = nullptr;
     sptr<NetDnsResultCallback> dnsResultCallback_ = nullptr;
+    sptr<NetFactoryResetCallback> netFactoryResetCallback_ = nullptr;
 
     bool hasSARemoved_ = false;
 };

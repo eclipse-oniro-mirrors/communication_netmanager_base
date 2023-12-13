@@ -145,8 +145,13 @@ bool NetConnService::Init()
     int32_t regDnsResult = NetsysController::GetInstance().RegisterDnsResultCallback(dnsResultCallback_, 0);
     NETMGR_LOG_I("Register Dns Result callback result: [%{public}d]", regDnsResult);
 
-    RecoverInfo();
+    netFactoryResetCallback_ = std::make_unique<NetFactoryResetCallback>().release();
+    if (netFactoryResetCallback_ == nullptr) {
+        NETMGR_LOG_E("netFactoryResetCallback_ is nullptr");
+    }
 
+    RecoverInfo();
+    NETMGR_LOG_I("NetConnService::Init end");
     return true;
 }
 
@@ -163,8 +168,12 @@ void NetConnService::RecoverInfo()
 
 int32_t NetConnService::SystemReady()
 {
-    NETMGR_LOG_D("System ready.");
-    return NETMANAGER_SUCCESS;
+    if (state_ == STATE_RUNNING) {
+        NETMGR_LOG_D("System ready.");
+        return NETMANAGER_SUCCESS;
+    } else {
+        return NETMANAGER_ERROR;
+    }
 }
 
 // Do not post into event handler, because this interface should have good performance
@@ -1697,6 +1706,36 @@ int32_t NetConnService::GetSlotType(std::string &type)
 
     type = defaultNetSupplier_->GetSupplierType();
     return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::FactoryResetNetwork()
+{
+    NETMGR_LOG_I("Enter FactoryResetNetwork.");
+
+    SetAirplaneMode(false);
+
+    if (netFactoryResetCallback_ == nullptr) {
+        NETMGR_LOG_E("netFactoryResetCallback_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    netFactoryResetCallback_->NotifyNetFactoryResetAsync();
+
+    NETMGR_LOG_I("End FactoryResetNetwork.");
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback)
+{
+    if (callback == nullptr) {
+        NETMGR_LOG_E("callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    NETMGR_LOG_I("Enter RegisterNetFactoryResetCallback.");
+    if (netFactoryResetCallback_ == nullptr) {
+        NETMGR_LOG_E("netFactoryResetCallback_ is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    return netFactoryResetCallback_->RegisterNetFactoryResetCallbackAsync(callback);
 }
 
 void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)

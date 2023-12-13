@@ -32,6 +32,7 @@
 #include "setcustomdnsrule_context.h"
 #include "deletecustomdnsrule_context.h"
 #include "deletecustomdnsrules_context.h"
+#include "factoryresetnetwork_context.h"
 #include "setapphttpproxy_context.h"
 
 namespace OHOS::NetManagerStandard {
@@ -129,6 +130,10 @@ public:
     static bool ExecDeleteCustomDNSRules(DeleteCustomDNSRulesContext *context);
 
     static napi_value DeleteCustomDNSRulesCallback(DeleteCustomDNSRulesContext *context);
+
+    static bool ExecFactoryResetNetwork(FactoryResetNetworkContext *context);
+
+    static napi_value FactoryResetNetworkCallback(FactoryResetNetworkContext *context);
 
     class NetHandleExec final {
     public:

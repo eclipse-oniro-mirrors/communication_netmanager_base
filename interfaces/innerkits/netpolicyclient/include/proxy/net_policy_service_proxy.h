@@ -49,6 +49,7 @@ public:
     int32_t SetPowerSaveTrustlist(const std::vector<uint32_t> &uids, bool isAllowed) override;
     int32_t SetPowerSavePolicy(bool enable) override;
     int32_t CheckPermission() override;
+    int32_t FactoryResetPolicies() override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

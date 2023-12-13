@@ -59,9 +59,8 @@ HapPolicyParams netStatsManagerPolicy = {
 };
 } // namespace
 
-NetStatsSecurityAccessToken::NetStatsSecurityAccessToken()
+NetStatsSecurityAccessToken::NetStatsSecurityAccessToken() : currentID_(GetSelfTokenID())
 {
-    currentID_ = GetSelfTokenID();
     AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(netStatsManagerInfo, netStatsManagerPolicy);
     accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
     SetSelfTokenID(tokenIdEx.tokenIDEx);
