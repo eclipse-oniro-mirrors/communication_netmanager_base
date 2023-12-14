@@ -232,7 +232,7 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
 {
     // netLinkInfo_ represents the old, netLinkInfo represents the new
     // Update: remove old Ips first, then add the new Ips
-    NETMGR_LOG_D("UpdateIpAddrs, old ip addrs: ...");
+    NETMGR_LOG_I("UpdateIpAddrs, old ip addrs size: [%{public}u]", netLinkInfo_.netAddrList_.size());
     for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
         if (newNetLinkInfo.HasNetAddr(inetAddr)) {
             NETMGR_LOG_W("Same ip address:[%{public}s], there is not need to be deleted",
@@ -260,7 +260,7 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
         });
     }
 
-    NETMGR_LOG_D("UpdateIpAddrs, new ip addrs: ...");
+    NETMGR_LOG_I("UpdateIpAddrs, new ip addrs size: [%{public}u]", newNetLinkInfo.netAddrList_.size());
     for (const auto &inetAddr : newNetLinkInfo.netAddrList_) {
         if (netLinkInfo_.HasNetAddr(inetAddr)) {
             NETMGR_LOG_W("Same ip address:[%{public}s], there is no need to add it again",
