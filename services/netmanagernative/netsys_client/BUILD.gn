@@ -30,6 +30,16 @@ ohos_shared_library("netsys_client") {
 
   include_dirs = [ "$NETMANAGERNATIVE_ROOT/include/netsys" ]
 
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2 -O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2 -O2",
+  ]
+
   external_deps = [ "c_utils:utils" ]
 
   defines = [

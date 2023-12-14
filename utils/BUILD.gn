@@ -31,6 +31,16 @@ config("netmgr_common_config") {
     "$INNERKITS_ROOT/netpolicyclient/include",
     "$INNERKITS_ROOT/netstatsclient/include",
   ]
+
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2 -O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2 -O2",
+  ]
 }
 
 ohos_shared_library("net_manager_common") {

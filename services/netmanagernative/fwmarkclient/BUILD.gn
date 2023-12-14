@@ -36,6 +36,16 @@ ohos_shared_library("fwmark_client") {
     "//third_party/musl/porting/linux/user/src/hook",
   ]
 
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2 -O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2 -O2",
+  ]
+
   external_deps = [ "c_utils:utils" ]
 
   defines = [

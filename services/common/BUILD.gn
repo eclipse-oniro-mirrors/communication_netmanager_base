@@ -17,6 +17,16 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 config("net_service_common_config") {
   # header file path
   include_dirs = [ "$INNERKITS_ROOT/netconnclient/include/proxy" ]
+
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2 -O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2 -O2",
+  ]
 }
 
 ohos_shared_library("net_service_common") {
