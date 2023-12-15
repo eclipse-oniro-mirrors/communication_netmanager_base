@@ -48,6 +48,7 @@ constexpr const char *ERROR_MSG_SET_DEFAULT_NETWORK_FAILED = "Set default networ
 constexpr const char *ERROR_MSG_CLEAR_DEFAULT_NETWORK_FAILED = "Clear default network failed";
 constexpr const char *LOCAL_ROUTE_NEXT_HOP = "0.0.0.0";
 constexpr const char *LOCAL_ROUTE_IPV6_DESTINATION = "::";
+constexpr int32_t ERRNO_EADDRNOTAVAIL = -99;
 } // namespace
 
 Network::Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &handler, NetBearType bearerType,
@@ -243,21 +244,27 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
         auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_)
                                              : ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_)
                                                                      : Ipv4PrefixLen(inetAddr.netMask_));
-        if (NETMANAGER_SUCCESS != NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_,
-                                                                                      inetAddr.address_, prefixLen)) {
+        int32_t ret = NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_,
+            inetAddr.address_, prefixLen);
+        if (NETMANAGER_SUCCESS != ret) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_DELETE_NET_IP_ADDR_FAILED);
         }
 
+        if ((ret == ERRNO_EADDRNOTAVAIL) || (ret == 0)) {
+            NETMGR_LOG_W("remove route info of ip address:[%{public}s]",
+                CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
+            netLinkInfo_.routeList_.remove_if([family](const Route &route) {
+                INetAddr::IpType addrFamily = INetAddr::IpType::UNKNOWN;
+                if (family == AF_INET) {
+                    addrFamily = INetAddr::IpType::IPV4;
+                } else if (family == AF_INET6) {
+                    addrFamily = INetAddr::IpType::IPV6;
+                }
+                return route.destination_.type_ == addrFamily;
+            });
+        }
+
         /* do remove netsys route whenever DelInterfaceAddress success or fail */
-        netLinkInfo_.routeList_.remove_if([family](const Route &route) {
-            INetAddr::IpType addrFamily = INetAddr::IpType::UNKNOWN;
-            if (family == AF_INET) {
-                addrFamily = INetAddr::IpType::IPV4;
-            } else if (family == AF_INET6) {
-                addrFamily = INetAddr::IpType::IPV6;
-            }
-            return route.destination_.type_ == addrFamily;
-        });
     }
 
     NETMGR_LOG_I("UpdateIpAddrs, new ip addrs size: [%{public}zu]", newNetLinkInfo.netAddrList_.size());
