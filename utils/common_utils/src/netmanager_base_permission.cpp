@@ -36,21 +36,11 @@ bool NetManagerPermission::CheckPermission(const std::string &permissionName)
         NETMGR_LOG_E("permission check failed,permission name is empty.");
         return false;
     }
-
     auto callerToken = IPCSkeleton::GetCallingTokenID();
-    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
-    int result = Security::AccessToken::PERMISSION_DENIED;
-    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        result = Security::AccessToken::PERMISSION_GRANTED;
-    } else if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
-        result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
-    } else {
-        NETMGR_LOG_E("permission check failed, callerToken:%{public}u, tokenType:%{public}d", callerToken, tokenType);
-    }
-
+    int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName);
     if (result != Security::AccessToken::PERMISSION_GRANTED) {
-        NETMGR_LOG_E("permission check failed, permission:%{public}s, callerToken:%{public}u, tokenType:%{public}d",
-                     permissionName.c_str(), callerToken, tokenType);
+        NETMGR_LOG_E("permission check failed, permission:%{public}s, callerToken:%{public}u", permissionName.c_str(),
+                     callerToken);
         return false;
     }
     return true;
@@ -72,14 +62,8 @@ bool NetManagerPermission::CheckPermissionWithCache(const std::string &permissio
             return iter->second;
         }
     }
-    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
-    bool res = false;
-    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        res = true;
-    } else if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
-        res = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName) ==
-              Security::AccessToken::PERMISSION_GRANTED;
-    }
+    bool res = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName) ==
+               Security::AccessToken::PERMISSION_GRANTED;
     {
         std::lock_guard<std::mutex> lock(mutex);
         permissionMap[callerToken] = res;
