@@ -45,74 +45,47 @@ constexpr const char *EVENT_KEY_NET_MONITOR_STATUS = "STATUS";
 
 void EventReport::SendSupplierFaultEvent(const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::NETMANAGER_STANDARD,
-        NET_CONN_SUPPLER_FAULT,
-        HiSysEvent::EventType::FAULT,
+    HiSysEventWrite(HiSysEvent::Domain::NETMANAGER_STANDARD, NET_CONN_SUPPLER_FAULT, HiSysEvent::EventType::FAULT,
         EVENT_KEY_NET_SUPPLIER_UPDATE_SUPPLIERID, eventInfo.updateSupplierId,
-        EVENT_KEY_NET_SUPPLIER_UPDATE_SUPPLIERINFO, eventInfo.supplierInfo,
-        EVENT_KEY_NET_SUPPLIER_UPDATE_NETLINKID, eventInfo.updateNetlinkId,
-        EVENT_KEY_NET_SUPPLIER_UPDATE_NETLINKINFO, eventInfo.netlinkInfo,
-        EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
-        EVENT_KEY_ERROR_MSG, eventInfo.errorMsg);
+        EVENT_KEY_NET_SUPPLIER_UPDATE_SUPPLIERINFO, eventInfo.supplierInfo, EVENT_KEY_NET_SUPPLIER_UPDATE_NETLINKID,
+        eventInfo.updateNetlinkId, EVENT_KEY_NET_SUPPLIER_UPDATE_NETLINKINFO, eventInfo.netlinkInfo,
+        EVENT_KEY_ERROR_TYPE, eventInfo.errorType, EVENT_KEY_ERROR_MSG, eventInfo.errorMsg);
 }
 
 void EventReport::SendSupplierBehaviorEvent(const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::NETMANAGER_STANDARD,
-        NET_CONN_SUPPLER_STAT,
-        HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_NET_SUPPLIER_REGISTER_BEARERTYPE, eventInfo.bearerType,
-        EVENT_KEY_NET_SUPPLIER_REGISTER_IDENT, eventInfo.ident,
-        EVENT_KEY_NET_SUPPLIER_REGISTER_SUPPLIERID, eventInfo.supplierId,
+    HiSysEventWrite(HiSysEvent::Domain::NETMANAGER_STANDARD, NET_CONN_SUPPLER_STAT, HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_NET_SUPPLIER_REGISTER_BEARERTYPE, eventInfo.bearerType, EVENT_KEY_NET_SUPPLIER_REGISTER_IDENT,
+        eventInfo.ident, EVENT_KEY_NET_SUPPLIER_REGISTER_SUPPLIERID, eventInfo.supplierId,
         EVENT_KEY_NET_SUPPLIER_UPDATE_SUPPLIERID, eventInfo.updateSupplierId,
-        EVENT_KEY_NET_SUPPLIER_UPDATE_SUPPLIERINFO, eventInfo.supplierInfo,
-        EVENT_KEY_NET_SUPPLIER_UPDATE_NETLINKID, eventInfo.updateNetlinkId,
-        EVENT_KEY_NET_SUPPLIER_UPDATE_NETLINKINFO, eventInfo.netlinkInfo);
+        EVENT_KEY_NET_SUPPLIER_UPDATE_SUPPLIERINFO, eventInfo.supplierInfo, EVENT_KEY_NET_SUPPLIER_UPDATE_NETLINKID,
+        eventInfo.updateNetlinkId, EVENT_KEY_NET_SUPPLIER_UPDATE_NETLINKINFO, eventInfo.netlinkInfo);
 }
 
 void EventReport::SendRequestFaultEvent(const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::NETMANAGER_STANDARD,
-        NET_CONN_REQUEST_FAULT,
-        HiSysEvent::EventType::FAULT,
-        EVENT_KEY_NET_REQUEST_CAPABILITY, eventInfo.capabilities,
-        EVENT_KEY_NET_REQUEST_SUPPLIERIDENT, eventInfo.supplierIdent,
-        EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
-        EVENT_KEY_ERROR_MSG, eventInfo.errorMsg);
+    HiSysEventWrite(HiSysEvent::Domain::NETMANAGER_STANDARD, NET_CONN_REQUEST_FAULT, HiSysEvent::EventType::FAULT,
+        EVENT_KEY_NET_REQUEST_CAPABILITY, eventInfo.capabilities, EVENT_KEY_NET_REQUEST_SUPPLIERIDENT,
+        eventInfo.supplierIdent, EVENT_KEY_ERROR_TYPE, eventInfo.errorType, EVENT_KEY_ERROR_MSG, eventInfo.errorMsg);
 }
 
 void EventReport::SendRequestBehaviorEvent(const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::NETMANAGER_STANDARD,
-        NET_CONN_REQUEST_STAT,
-        HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_NET_REQUEST_CAPABILITY, eventInfo.capabilities,
-        EVENT_KEY_NET_REQUEST_SUPPLIERIDENT, eventInfo.supplierIdent,
-        EVENT_KEY_NET_REQUEST_CALLBACK_AVAILABLE, eventInfo.callbackAvailable);
+    HiSysEventWrite(HiSysEvent::Domain::NETMANAGER_STANDARD, NET_CONN_REQUEST_STAT, HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_NET_REQUEST_CAPABILITY, eventInfo.capabilities, EVENT_KEY_NET_REQUEST_SUPPLIERIDENT,
+        eventInfo.supplierIdent, EVENT_KEY_NET_REQUEST_CALLBACK_AVAILABLE, eventInfo.callbackAvailable);
 }
 
 void EventReport::SendMonitorFaultEvent(const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::NETMANAGER_STANDARD,
-        NET_CONN_MONITOR_FAULT,
-        HiSysEvent::EventType::FAULT,
-        EVENT_KEY_NET_MONITOR_SOCKETFD, eventInfo.socketFd,
-        EVENT_KEY_NET_MONITOR_NETID, eventInfo.netId,
-        EVENT_KEY_ERROR_TYPE, eventInfo.errorType,
-        EVENT_KEY_ERROR_MSG, eventInfo.errorMsg);
+    HiSysEventWrite(HiSysEvent::Domain::NETMANAGER_STANDARD, NET_CONN_MONITOR_FAULT, HiSysEvent::EventType::FAULT,
+        EVENT_KEY_NET_MONITOR_SOCKETFD, eventInfo.socketFd, EVENT_KEY_NET_MONITOR_NETID, eventInfo.netId,
+        EVENT_KEY_ERROR_TYPE, eventInfo.errorType, EVENT_KEY_ERROR_MSG, eventInfo.errorMsg);
 }
 
 void EventReport::SendMonitorBehaviorEvent(const EventInfo &eventInfo)
 {
-    HiSysEventWrite(
-        HiSysEvent::Domain::NETMANAGER_STANDARD,
-        NET_CONN_MONITOR_STAT,
-        HiSysEvent::EventType::BEHAVIOR,
+    HiSysEventWrite(HiSysEvent::Domain::NETMANAGER_STANDARD, NET_CONN_MONITOR_STAT, HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_NET_MONITOR_STATUS, eventInfo.monitorStatus);
 }
 } // namespace NetManagerStandard
