@@ -263,8 +263,6 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
                 return route.destination_.type_ == addrFamily;
             });
         }
-
-        /* do remove netsys route whenever DelInterfaceAddress success or fail */
     }
 
     NETMGR_LOG_I("UpdateIpAddrs, new ip addrs size: [%{public}zu]", newNetLinkInfo.netAddrList_.size());
