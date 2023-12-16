@@ -35,6 +35,7 @@
 #include "netmanager_base_common_utils.h"
 #include "netsys_native_client.h"
 #include "netsys_native_service_proxy.h"
+#include "ipc_skeleton.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
@@ -45,6 +46,7 @@ static constexpr const char *IF_CFG_DOWN = "down";
 static constexpr const char *NETSYS_ROUTE_INIT_DIR_PATH = "/data/service/el1/public/netmanager/route";
 static constexpr uint32_t WAIT_FOR_SERVICE_TIME_S = 1;
 static constexpr uint32_t MAX_GET_SERVICE_COUNT = 30;
+static constexpr uint32_t UID_BROKER_SERVICE = 5557;
 
 NetsysNativeClient::NativeNotifyCallback::NativeNotifyCallback(NetsysNativeClient &netsysNativeClient)
     : netsysNativeClient_(netsysNativeClient)
@@ -161,7 +163,9 @@ int32_t NetsysNativeClient::SetInternetPermission(uint32_t uid, uint8_t allow)
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->SetInternetPermission(uid, allow);
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    uint8_t isContainer = callingUid == UID_BROKER_SERVICE ? 1 : 0;
+    return proxy->SetInternetPermission(uid, allow, isContainer);
 }
 
 int32_t NetsysNativeClient::NetworkCreatePhysical(int32_t netId, int32_t permission)

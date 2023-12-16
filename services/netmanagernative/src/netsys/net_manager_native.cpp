@@ -79,9 +79,9 @@ int32_t NetManagerNative::NetworkReinitRoute()
     return connManager_->ReinitRoute();
 }
 
-int32_t NetManagerNative::SetInternetPermission(uint32_t uid, uint8_t allow)
+int32_t NetManagerNative::SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isContainer)
 {
-    return connManager_->SetInternetPermission(uid, allow);
+    return connManager_->SetInternetPermission(uid, allow, isContainer);
 }
 
 int32_t NetManagerNative::NetworkCreatePhysical(int32_t netId, int32_t permission)

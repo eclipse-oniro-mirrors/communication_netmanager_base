@@ -176,7 +176,7 @@ public:
     TestNetsysNativeServiceStub() = default;
     ~TestNetsysNativeServiceStub() override{};
 
-    int32_t SetInternetPermission(uint32_t uid, uint8_t allow) override
+    int32_t SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isContainer) override
     {
         return 0;
     }

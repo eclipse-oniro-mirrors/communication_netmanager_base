@@ -44,18 +44,29 @@ ConnManager::~ConnManager()
     networks_.Clear();
 }
 
-int32_t ConnManager::SetInternetPermission(uint32_t uid, uint8_t allow)
+int32_t ConnManager::SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isContainer)
 {
     // 0 means root
     if (uid == 0) {
         return NETMANAGER_ERROR;
     }
+    if (isContainer) {
+        BpfMapper<sock_permission_key, sock_permission_value> permissionMap(CONTAINER_SOCKET_PERMISSION_MAP_PATH,
+                                                                            BPF_F_WRONLY);
+        if (!permissionMap.IsValid()) {
+            return NETMANAGER_ERROR;
+        }
+        // 0 means no permission
+        if (permissionMap.Write(uid, allow, 0) != 0) {
+            return NETMANAGER_ERROR;
+        }
 
-    BpfMapper<sock_permission_key, sock_permission_value> permissionMap(SOCKET_PERMISSION_MAP_PATH, BPF_F_WRONLY);
+        return NETMANAGER_SUCCESS;
+    }
+    BpfMapper<sock_permission_key, sock_permission_value> permissionMap(OH_SOCKET_PERMISSION_MAP_PATH, BPF_F_WRONLY);
     if (!permissionMap.IsValid()) {
         return NETMANAGER_ERROR;
     }
-
     // 0 means no permission
     if (permissionMap.Write(uid, allow, 0) != 0) {
         return NETMANAGER_ERROR;
