@@ -47,7 +47,7 @@ public:
     void Init();
 
     int32_t NetworkReinitRoute();
-    int32_t SetInternetPermission(uint32_t uid, uint8_t allow);
+    int32_t SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isContainer);
     int32_t NetworkCreatePhysical(int32_t netId, int32_t permission);
     int32_t NetworkCreateVirtual(int32_t netId, bool hasDns);
     int32_t NetworkDestroy(int32_t netId);

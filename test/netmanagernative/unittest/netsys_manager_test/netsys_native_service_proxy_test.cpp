@@ -208,7 +208,7 @@ HWTEST_F(NetsysNativeServiceProxyTest, GetProcSysNetTest001, TestSize.Level1)
 {
     OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
     ASSERT_NE(netsysNativeService, nullptr);
-    int32_t ret = netsysNativeService->SetInternetPermission(UID, true);
+    int32_t ret = netsysNativeService->SetInternetPermission(UID, true, false);
     ret = netsysNativeService->NetworkCreateVirtual(NETID, true);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }

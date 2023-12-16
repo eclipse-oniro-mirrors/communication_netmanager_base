@@ -63,7 +63,6 @@ int32_t NetConnClient::SetInternetPermission(uint32_t uid, uint8_t allow)
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-
     return proxy->SetInternetPermission(uid, allow);
 }
 

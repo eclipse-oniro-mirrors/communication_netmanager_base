@@ -180,19 +180,31 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
 // network stats end
 
 // internet permission begin
-bpf_map_def SEC("maps") sock_permission_map = {
+bpf_map_def SEC("maps") oh_sock_permission_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(sock_permission_key),
     .value_size = sizeof(sock_permission_value),
-    .max_entries = SOCT_PERMISSION_MAP_SIZE,
+    .max_entries = OH_SOCK_PERMISSION_MAP_SIZE,
+};
+
+bpf_map_def SEC("maps") container_sock_permission_map = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(sock_permission_key),
+    .value_size = sizeof(sock_permission_value),
+    .max_entries = CONTAINER_SOCK_PERMISSION_MAP_SIZE,
 };
 
 SEC("cgroup_sock/inet_create_socket")
 int inet_create_socket(struct bpf_sock *sk)
 {
-    __u64 gid_uid = bpf_get_current_uid_gid();
-    __u32 uid = (__u32)(gid_uid & 0x00000000FFFFFFFF);
-    sock_permission_value *value = bpf_map_lookup_elem(&sock_permission_map, &uid);
+    void *map_ptr = &oh_sock_permission_map;
+    if (bpf_get_netns_cookie(sk) != bpf_get_netns_cookie(NULL)) {
+        map_ptr = &container_sock_permission_map;
+    }
+
+    __u64 uid_gid = bpf_get_current_uid_gid();
+    __u32 uid = (__u32)(uid_gid & 0x00000000FFFFFFFF);
+    sock_permission_value *value = bpf_map_lookup_elem(map_ptr, &uid);
     // value == NULL means that the process attached to this uid is not a hap process which started by appspawn
     // it is a native process, native process should have this permission
     if (value == NULL) {

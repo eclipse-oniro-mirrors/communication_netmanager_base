@@ -17,6 +17,7 @@
 #include "net_conn_constants.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace NetManagerStandard {

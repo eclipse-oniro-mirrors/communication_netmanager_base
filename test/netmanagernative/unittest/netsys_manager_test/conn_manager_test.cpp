@@ -72,7 +72,8 @@ HWTEST_F(ConnManagerTest, SetInternetPermission001, TestSize.Level1)
 {
     uint32_t uid = 0;
     uint8_t allow = 0;
-    int32_t ret = instance_->SetInternetPermission(uid, allow);
+    uint8_t isContainer = 0;
+    int32_t ret = instance_->SetInternetPermission(uid, allow, isContainer);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
@@ -85,7 +86,8 @@ HWTEST_F(ConnManagerTest, SetInternetPermission002, TestSize.Level1)
 {
     uint32_t uid = 1;
     uint8_t allow = 0;
-    int32_t ret = instance_->SetInternetPermission(uid, allow);
+    uint8_t isContainer = 0;
+    int32_t ret = instance_->SetInternetPermission(uid, allow, isContainer);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
