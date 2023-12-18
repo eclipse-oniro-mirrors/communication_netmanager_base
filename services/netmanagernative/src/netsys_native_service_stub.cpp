@@ -51,7 +51,7 @@ NetsysNativeServiceStub::NetsysNativeServiceStub()
     InitNetDnsDiagOpToInterfaceMap();
     InitStaticArpToInterfaceMap();
     uids_ = {UID_ROOT, UID_SHELL, UID_NET_MANAGER, UID_WIFI, UID_RADIO, UID_HIDUMPER_SERVICE,
-        UID_SAMGR, UID_PARAM_WATCHER, UID_EDM, UID_SECURITY_GUARD};
+        UID_SAMGR, UID_PARAM_WATCHER, UID_EDM, UID_SECURITY_COLLECTOR};
 }
 
 void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
