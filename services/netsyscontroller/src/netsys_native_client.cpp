@@ -164,8 +164,8 @@ int32_t NetsysNativeClient::SetInternetPermission(uint32_t uid, uint8_t allow)
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     auto callingUid = IPCSkeleton::GetCallingUid();
-    uint8_t isContainer = callingUid == UID_BROKER_SERVICE ? 1 : 0;
-    return proxy->SetInternetPermission(uid, allow, isContainer);
+    uint8_t isBroker = callingUid == UID_BROKER_SERVICE ? 1 : 0;
+    return proxy->SetInternetPermission(uid, allow, isBroker);
 }
 
 int32_t NetsysNativeClient::NetworkCreatePhysical(int32_t netId, int32_t permission)

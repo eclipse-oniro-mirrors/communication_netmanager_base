@@ -630,8 +630,8 @@ int32_t NetsysNativeServiceStub::CmdSetInternetPermission(MessageParcel &data, M
 {
     uint32_t uid = data.ReadUint32();
     uint8_t allow = data.ReadUint8();
-    uint8_t isContainer = data.ReadUint8();
-    int32_t result = SetInternetPermission(uid, allow, isContainer);
+    uint8_t isBroker = data.ReadUint8();
+    int32_t result = SetInternetPermission(uid, allow, isBroker);
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("SetInternetPermission has recved result %{public}d", result);
     return result;
