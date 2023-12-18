@@ -520,8 +520,8 @@ HWTEST_F(NetsysNativeServiceTest, SetInternetPermissionTest001, TestSize.Level1)
 {
     uint32_t uid = 0;
     uint8_t allow = 1;
-    uint8_t isContainer = 0;
-    int32_t ret = instance_->SetInternetPermission(uid, allow, isContainer);
+    uint8_t isBroker = 0;
+    int32_t ret = instance_->SetInternetPermission(uid, allow, isBroker);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 

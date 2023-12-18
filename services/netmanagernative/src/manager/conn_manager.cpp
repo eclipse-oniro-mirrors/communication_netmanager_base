@@ -44,14 +44,14 @@ ConnManager::~ConnManager()
     networks_.Clear();
 }
 
-int32_t ConnManager::SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isContainer)
+int32_t ConnManager::SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isBroker)
 {
     // 0 means root
     if (uid == 0) {
         return NETMANAGER_ERROR;
     }
-    if (isContainer) {
-        BpfMapper<sock_permission_key, sock_permission_value> permissionMap(CONTAINER_SOCKET_PERMISSION_MAP_PATH,
+    if (isBroker) {
+        BpfMapper<sock_permission_key, sock_permission_value> permissionMap(BROKER_SOCKET_PERMISSION_MAP_PATH,
                                                                             BPF_F_WRONLY);
         if (!permissionMap.IsValid()) {
             return NETMANAGER_ERROR;

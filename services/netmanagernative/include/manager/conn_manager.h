@@ -47,7 +47,7 @@ public:
      * @param allow 0 means disallow, 1 means allow
      * @return return 0 if OK, return error number if not OK
      */
-    int32_t SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isContainer);
+    int32_t SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isBroker);
 
     /**
      * Creates a physical network

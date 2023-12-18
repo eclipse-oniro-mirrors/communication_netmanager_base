@@ -279,9 +279,9 @@ int32_t NetsysNativeService::SetProcSysNet(int32_t family, int32_t which, const 
     return result;
 }
 
-int32_t NetsysNativeService::SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isContainer)
+int32_t NetsysNativeService::SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isBroker)
 {
-    int32_t result = netsysService_->SetInternetPermission(uid, allow, isContainer);
+    int32_t result = netsysService_->SetInternetPermission(uid, allow, isBroker);
     NETNATIVE_LOG_D("SetInternetPermission out.");
     return result;
 }

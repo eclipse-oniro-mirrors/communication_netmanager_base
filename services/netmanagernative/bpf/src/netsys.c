@@ -187,11 +187,11 @@ bpf_map_def SEC("maps") oh_sock_permission_map = {
     .max_entries = OH_SOCK_PERMISSION_MAP_SIZE,
 };
 
-bpf_map_def SEC("maps") container_sock_permission_map = {
+bpf_map_def SEC("maps") broker_sock_permission_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(sock_permission_key),
     .value_size = sizeof(sock_permission_value),
-    .max_entries = CONTAINER_SOCK_PERMISSION_MAP_SIZE,
+    .max_entries = BROKER_SOCK_PERMISSION_MAP_SIZE,
 };
 
 SEC("cgroup_sock/inet_create_socket")
@@ -199,7 +199,7 @@ int inet_create_socket(struct bpf_sock *sk)
 {
     void *map_ptr = &oh_sock_permission_map;
     if (bpf_get_netns_cookie(sk) != bpf_get_netns_cookie(NULL)) {
-        map_ptr = &container_sock_permission_map;
+        map_ptr = &broker_sock_permission_map;
     }
 
     __u64 uid_gid = bpf_get_current_uid_gid();

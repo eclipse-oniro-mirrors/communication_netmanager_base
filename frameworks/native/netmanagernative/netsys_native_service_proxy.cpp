@@ -551,7 +551,7 @@ int32_t NetsysNativeServiceProxy::SetProcSysNet(int32_t family, int32_t which, c
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isContainer)
+int32_t NetsysNativeServiceProxy::SetInternetPermission(uint32_t uid, uint8_t allow, uint8_t isBroker)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -566,7 +566,7 @@ int32_t NetsysNativeServiceProxy::SetInternetPermission(uint32_t uid, uint8_t al
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!data.WriteUint8(isContainer)) {
+    if (!data.WriteUint8(isBroker)) {
         return ERR_FLATTEN_OBJECT;
     }
 
