@@ -172,9 +172,17 @@ int32_t NetPolicyFirewall::UpdatePowerSavePolicy(bool enable)
 
 void NetPolicyFirewall::ResetPolicies()
 {
+    if (deviceIdleFirewallRule_ == nullptr) {
+        NETMGR_LOG_E("deviceIdleFirewallRule_ is nullptr");
+        return ;
+    }
     deviceIdleFirewallRule_->ClearAllowedList();
     deviceIdleFirewallRule_->ClearDeniedList();
 
+    if (powerSaveFirewallRule_ == nullptr) {
+        NETMGR_LOG_E("powerSaveFirewallRule_ is nullptr");
+        return ;
+    }
     powerSaveFirewallRule_->ClearAllowedList();
     powerSaveFirewallRule_->ClearDeniedList();
 

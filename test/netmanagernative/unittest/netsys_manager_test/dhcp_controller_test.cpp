@@ -98,7 +98,7 @@ HWTEST_F(DhcpControllerTest, RegisterNotifyCallbackTest001, TestSize.Level1)
 HWTEST_F(DhcpControllerTest, StartDhcpTest001, TestSize.Level1)
 {
     std::string testInterfaceName = "eth0";
-    std::string testIpv4Addr = "112.254.154.415";
+    std::string testIpv4Addr = "112.254.454.415";
     instance_->StartClient(testInterfaceName, false);
     instance_->StopClient(testInterfaceName, false);
     instance_->StartClient(testInterfaceName, true);

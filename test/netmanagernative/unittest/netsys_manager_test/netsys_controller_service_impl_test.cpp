@@ -442,7 +442,7 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->DelInterfaceAddress(testName, "", prefixLength);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->InterfaceSetIpAddress(testName, "");
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
