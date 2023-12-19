@@ -495,7 +495,7 @@ HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceState001, TestSize.Level1)
     ret = instance_->GetUidStats(stats, 0, appID);
     EXPECT_NE(ret, 0);
 
-    ret = instance_->GetIfaceStats(stats, 0, iface);
+    ret = instance_->GetIfaceStats(stats, 5, iface);
     EXPECT_EQ(ret, NetStatsResultCode::STATS_ERR_READ_BPF_FAIL);
 
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;

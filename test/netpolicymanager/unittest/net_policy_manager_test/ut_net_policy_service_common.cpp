@@ -15,9 +15,13 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+#define private public
+#endif
 #include "net_manager_constants.h"
 #include "net_policy_service_common.h"
 #include "net_settings.h"
+#include "net_policy_service.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -44,6 +48,13 @@ void UtNetPolicyServiceCommonTest::TearDown() {}
 
 HWTEST_F(UtNetPolicyServiceCommonTest, ResetPoliciesTest001, TestSize.Level1)
 {
+    auto ret = instance_->ResetPolicies();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(UtNetPolicyServiceCommonTest, ResetPoliciesTest002, TestSize.Level1)
+{
+    DelayedSingleton<NetPolicyService>::GetInstance()->netPolicyRule_ = nullptr;
     auto ret = instance_->ResetPolicies();
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
