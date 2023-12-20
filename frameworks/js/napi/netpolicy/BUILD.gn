@@ -29,12 +29,12 @@ config("policy_config") {
     "-Werror",
     "-g3",
     "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2 -O2",
+    "-D_FORTIFY_SOURCE=2",
   ]
 
   cflags_cc = [
     "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2 -O2",
+    "-D_FORTIFY_SOURCE=2",
   ]
 }
 
