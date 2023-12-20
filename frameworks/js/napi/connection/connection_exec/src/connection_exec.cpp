@@ -710,7 +710,11 @@ void ConnectionExec::FillRouoteList(napi_env env, napi_value connectionPropertie
             NapiUtils::SetStringPropertyUtf8(env, route, KEY_INTERFACE, it->iface_);
 
             napi_value dest = NapiUtils::CreateObject(env);
-            NapiUtils::SetStringPropertyUtf8(env, dest, KEY_ADDRESS, it->destination_.address_);
+            napi_value netAddr = NapiUtils::CreateObject(env);
+            NapiUtils::SetStringPropertyUtf8(env, netAddr, KEY_ADDRESS, it->destination_.address_);
+            NapiUtils::SetUint32Property(env, netAddr, KEY_FAMILY, it->destination_.family_);
+            NapiUtils::SetUint32Property(env, netAddr, KEY_PORT, it->destination_.port_);
+            NapiUtils::SetNamedProperty(env, dest, KEY_ADDRESS, netAddr);
             NapiUtils::SetUint32Property(env, dest, KEY_PREFIX_LENGTH, it->destination_.prefixlen_);
             NapiUtils::SetNamedProperty(env, route, KEY_DESTINATION, dest);
 
