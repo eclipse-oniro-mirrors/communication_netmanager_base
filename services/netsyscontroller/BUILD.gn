@@ -23,11 +23,13 @@ config("netsys_controller_include") {
   cflags = [
     "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
+    "-O2",
   ]
 
   cflags_cc = [
     "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
+    "-O2",
   ]
 }
 
