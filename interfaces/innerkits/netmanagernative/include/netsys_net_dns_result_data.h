@@ -31,8 +31,9 @@ enum NetDnsResultAddrType : uint32_t {
     ADDR_TYPE_IPV4 = 0,
     ADDR_TYPE_IPV6 = 1,
 };
+#define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 
-struct NetDnsResultAddrInfo final : public Parcelable {
+struct NET_SYMBOL_VISIBLE NetDnsResultAddrInfo final : public Parcelable {
     uint32_t	    type_;
     std::string     addr_;
 
@@ -40,7 +41,7 @@ struct NetDnsResultAddrInfo final : public Parcelable {
     static bool Unmarshalling(Parcel &parcel, NetDnsResultAddrInfo &addrinfo);
 };
 
-struct NetDnsResultReport final : public Parcelable {
+struct NET_SYMBOL_VISIBLE NetDnsResultReport final : public Parcelable {
     uint32_t        netid_;
     uint32_t        uid_;
     uint32_t        pid_;
