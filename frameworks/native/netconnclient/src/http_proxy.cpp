@@ -91,7 +91,8 @@ bool HttpProxy::Marshalling(Parcel &parcel) const
             return true;
         }
     }
-
+    parcel.WriteString(username_);
+    parcel.WriteString(password_);
     return true;
 }
 
@@ -137,6 +138,8 @@ bool HttpProxy::Unmarshalling(Parcel &parcel, HttpProxy &httpProxy)
     }
 
     httpProxy = {host, port, exclusionList};
+    parcel.ReadString(httpProxy.username_);
+    parcel.ReadString(httpProxy.password_);
     return true;
 }
 

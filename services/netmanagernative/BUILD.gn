@@ -126,14 +126,14 @@ ohos_shared_library("netsys_native_manager") {
     "-ffunction-sections",
     "-Os",
     "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2 -O2",
+    "-D_FORTIFY_SOURCE=2",
   ]
 
   cflags_cc = [
     "-fvisibility-inlines-hidden",
     "-Os",
     "-fstack-protector-strong",
-    "-D_FORTIFY_SOURCE=2 -O2",
+    "-D_FORTIFY_SOURCE=2",
   ]
 
   ldflags = [

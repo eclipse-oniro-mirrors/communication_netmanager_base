@@ -20,12 +20,22 @@
 #include <list>
 
 #include "parcel.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+struct SecureData : public std::string {
+    ~SecureData()
+    {
+        // Clear Data, to keep the memory safe
+        (void)memset_s(data(), size(), 0, size());
+    }
+};
+class NetConnService;
 #define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 class NET_SYMBOL_VISIBLE HttpProxy final : public Parcelable {
 public:
+    friend class NetConnService;
     HttpProxy();
     HttpProxy(std::string host, uint16_t port, const std::list<std::string> &exclusionList);
 
@@ -45,6 +55,14 @@ public:
     {
         exclusionList_ = list;
     }
+    void inline SetUserName(const SecureData &username)
+    {
+        username_ = username;
+    }
+    void inline SetPassword(const SecureData &password)
+    {
+        password_ = password;
+    }
 
     bool operator==(const HttpProxy &httpProxy) const;
     bool operator!=(const HttpProxy &httpProxy) const;
@@ -54,6 +72,8 @@ public:
 private:
     std::string host_;
     uint16_t port_;
+    SecureData username_;
+    SecureData password_;
     std::list<std::string> exclusionList_;
 };
 } // namespace NetManagerStandard

@@ -44,6 +44,7 @@ constexpr const char *ERROR_MSG_CAN_NOT_FIND_SUPPLIER = "Can not find supplier b
 constexpr const char *ERROR_MSG_UPDATE_NETLINK_INFO_FAILED = "Update net link info failed";
 constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
 constexpr const char *NET_ACTIVATE_WORK_THREAD = "NET_ACTIVATE_WORK_THREAD";
+constexpr const char *NET_HTTP_PROBE_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -1433,12 +1434,52 @@ int32_t NetConnService::SetAirplaneMode(bool state)
     return NETMANAGER_SUCCESS;
 }
 
+void NetConnService::ActiveHttpProxy()
+{
+    while (httpProxyThreadNeedRun_.load()) {
+        CURL *curl = nullptr;
+        HttpProxy tempProxy;
+        {
+            std::lock_guard guard(globalHttpProxyMutex_);
+            tempProxy = globalHttpProxy_;
+        }
+        auto proxyType = (tempProxy.host_.find("https://") != std::string::npos) ? CURLPROXY_HTTPS : CURLPROXY_HTTP;
+        if (!tempProxy.host_.empty() && !tempProxy.username_.empty()) {
+            curl = curl_easy_init();
+            curl_easy_setopt(curl, CURLOPT_URL, NET_HTTP_PROBE_URL);
+            curl_easy_setopt(curl, CURLOPT_PROXY, tempProxy.host_.c_str());
+            curl_easy_setopt(curl, CURLOPT_PROXYPORT, tempProxy.port_);
+            curl_easy_setopt(curl, CURLOPT_PROXYTYPE, proxyType);
+            curl_easy_setopt(curl, CURLOPT_PROXYUSERNAME, tempProxy.username_.c_str());
+            curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
+            if (!tempProxy.password_.empty()) {
+                curl_easy_setopt(curl, CURLOPT_PROXYPASSWORD, tempProxy.password_.c_str());
+            }
+        }
+        if (curl) {
+            auto ret = curl_easy_perform(curl);
+            NETMGR_LOG_I("SetGlobalHttpProxy ActiveHttpProxy %{public}d", static_cast<int>(ret));
+            curl_easy_cleanup(curl);
+        }
+        std::unique_lock lock(httpProxyThreadMutex_);
+        httpProxyThreadCv_.wait_for(lock, std::chrono::seconds(HTTP_PROXY_ACTIVE_PERIOD_S));
+    }
+}
+
 int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
     NETMGR_LOG_I("Enter SetGlobalHttpProxy.");
+    if (!httpProxyThreadNeedRun_) {
+        httpProxyThreadNeedRun_ = true;
+        std::thread([this]() { ActiveHttpProxy(); }).detach();
+    }
     LoadGlobalHttpProxy();
     if (globalHttpProxy_ != httpProxy) {
-        globalHttpProxy_ = httpProxy;
+        {
+            std::lock_guard guard(globalHttpProxyMutex_);
+            globalHttpProxy_ = httpProxy;
+        }
+        httpProxyThreadCv_.notify_all();
         NetHttpProxyTracker httpProxyTracker;
         if (!httpProxyTracker.WriteToSettingsData(globalHttpProxy_)) {
             NETMGR_LOG_E("GlobalHttpProxy write settingDate fail.");

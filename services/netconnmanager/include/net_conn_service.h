@@ -38,7 +38,6 @@
 #include "dns_result_call_back.h"
 #include "net_factoryreset_callback.h"
 
-
 namespace OHOS {
 namespace NetManagerStandard {
 
@@ -383,6 +382,7 @@ private:
     void RequestAllNetworkExceptDefault();
     void LoadGlobalHttpProxy();
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
+    void ActiveHttpProxy();
 
     void OnNetSysRestart();
 
@@ -407,6 +407,7 @@ private:
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
     std::atomic<bool> isGlobalProxyLoaded_ = false;
     HttpProxy globalHttpProxy_;
+    std::mutex globalHttpProxyMutex_;
     std::mutex netManagerMutex_;
     std::shared_ptr<AppExecFwk::EventRunner> netConnEventRunner_ = nullptr;
     std::shared_ptr<NetConnEventHandler> netConnEventHandler_ = nullptr;
@@ -415,6 +416,10 @@ private:
     sptr<NetInterfaceStateCallback> interfaceStateCallback_ = nullptr;
     sptr<NetDnsResultCallback> dnsResultCallback_ = nullptr;
     sptr<NetFactoryResetCallback> netFactoryResetCallback_ = nullptr;
+    std::atomic_bool httpProxyThreadNeedRun_ = false;
+    std::condition_variable httpProxyThreadCv_;
+    std::mutex httpProxyThreadMutex_;
+    static constexpr const uint32_t HTTP_PROXY_ACTIVE_PERIOD_S = 300;
 
     bool hasSARemoved_ = false;
 };
