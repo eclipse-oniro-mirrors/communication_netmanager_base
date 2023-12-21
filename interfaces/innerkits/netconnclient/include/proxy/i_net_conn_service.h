@@ -95,6 +95,7 @@ public:
 
     virtual int32_t FactoryResetNetwork() = 0;
     virtual int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) = 0;
+    virtual int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

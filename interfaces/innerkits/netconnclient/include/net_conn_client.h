@@ -372,6 +372,15 @@ public:
     void RegisterAppHttpProxyCallback(std::function<void(const HttpProxy &httpProxy)> callback, uint32_t &callbackid);
     void UnregisterAppHttpProxyCallback(uint32_t callbackid);
     int32_t SetAppHttpProxy(const HttpProxy &httpProxy);
+     /**
+     * Whether this url prefer cellular
+     *
+     * @param url url input
+     * @param preferCellular out param, whether prefer cellular
+     * @return Returns 0, unregister the network successfully, otherwise it will fail
+     */
+    int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular);
+ 
 
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
