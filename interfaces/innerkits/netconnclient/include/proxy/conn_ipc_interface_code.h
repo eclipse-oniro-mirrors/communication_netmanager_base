@@ -67,8 +67,8 @@ enum class ConnInterfaceCode {
     CMD_NM_GET_SLOT_TYPE,
     CMD_NM_FACTORYRESET_NETWORK,
     CMD_NM_REGISTER_NET_FACTORYRESET_CALLBACK,
-    CMD_NM_END,
     CMD_NM_IS_PREFER_CELLULAR_URL,
+    CMD_NM_END,
 };
 
 enum class AdjCallbackInterfaceCode {
