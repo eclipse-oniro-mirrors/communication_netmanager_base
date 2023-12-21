@@ -697,5 +697,15 @@ int32_t NetConnClient::RegisterNetFactoryResetCallback(const sptr<INetFactoryRes
     }
     return proxy->RegisterNetFactoryResetCallback(callback);
 }
+
+int32_t NetConnClient::IsPreferCellularUrl(const std::string& url, bool& preferCellular)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->IsPreferCellularUrl(url, preferCellular);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
