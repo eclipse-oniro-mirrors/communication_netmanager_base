@@ -214,12 +214,9 @@ void DnsResolvListen::ProcPostDnsResultCommandEx(int32_t clientSockFd, int32_t& 
 
 void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
 {
-    NETNATIVE_LOGI("ProcPostDnsResultCommand");
-
     char name[MAX_HOST_NAME_LEN] = {0};
 
     uint32_t netid = netId;
-    NETNATIVE_LOGE("ProcPostDnsResultCommand %{public}d", netid);
 
     uint32_t uid = 0;
     uint32_t pid = 0;
@@ -265,15 +262,11 @@ void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
     } else {
         DnsQualityDiag::GetInstance().ReportDnsResult(netid, uid, pid, usedtime, name, 0, queryret, param, nullptr);
     }
-
-    NETNATIVE_LOGI("ProcPostDnsResultCommand end");
 }
 
 void DnsResolvListen::ProcGetDefaultNetworkCommand(int clientSockFd, uint16_t netId)
 {
     // Todo recv data
-    NETNATIVE_LOGI("ProcGetDefaultNetworkCommand");
-
     OHOS::NetManagerStandard::NetHandle netHandle;
     OHOS::NetManagerStandard::NetConnClient::GetInstance().GetDefaultNet(netHandle);
     int netid = netHandle.GetNetId();
@@ -281,15 +274,11 @@ void DnsResolvListen::ProcGetDefaultNetworkCommand(int clientSockFd, uint16_t ne
     if (!PollSendData(clientSockFd, reinterpret_cast<char *>(&netid), sizeof(int))) {
         NETNATIVE_LOGE("send failed");
     }
-
-    NETNATIVE_LOGI("ProcGetDefaultNetworkCommand end");
 }
 
 void DnsResolvListen::ProcBindSocketCommand(int clientSockFd, uint16_t netId)
 {
     // Todo recv data
-    NETNATIVE_LOGI("ProcBindSocketCommand");
-
     int32_t fd = 0;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&fd), sizeof(int32_t))) {
         NETNATIVE_LOGE("read errno %{public}d", errno);
@@ -300,8 +289,6 @@ void DnsResolvListen::ProcBindSocketCommand(int clientSockFd, uint16_t netId)
     if (OHOS::nmd::FwmarkClient().BindSocket(fd, netId) != OHOS::NetManagerStandard::NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("BindSocket to netid failed");
     }
- 
-    NETNATIVE_LOGI("ProcBindSocketCommand end");
 }
 
 void DnsResolvListen::ProcCommand(int clientSockFd)

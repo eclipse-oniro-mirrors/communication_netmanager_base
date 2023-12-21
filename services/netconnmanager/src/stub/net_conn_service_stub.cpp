@@ -317,7 +317,7 @@ int32_t NetConnServiceStub::OnRegisterNetSupplier(MessageParcel &data, MessagePa
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     if (ret == NETMANAGER_SUCCESS) {
-        NETMGR_LOG_I("supplierId[%{public}d].", supplierId);
+        NETMGR_LOG_D("supplierId[%{public}d].", supplierId);
         if (!reply.WriteUint32(supplierId)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
@@ -436,7 +436,7 @@ int32_t NetConnServiceStub::OnUnregisterNetConnCallback(MessageParcel &data, Mes
 
 int32_t NetConnServiceStub::OnUpdateNetStateForTest(MessageParcel &data, MessageParcel &reply)
 {
-    NETMGR_LOG_I("Test NetConnServiceStub::OnUpdateNetStateForTest(), begin");
+    NETMGR_LOG_D("Test NetConnServiceStub::OnUpdateNetStateForTest(), begin");
     sptr<NetSpecifier> netSpecifier = NetSpecifier::Unmarshalling(data);
 
     int32_t netState;
@@ -444,9 +444,9 @@ int32_t NetConnServiceStub::OnUpdateNetStateForTest(MessageParcel &data, Message
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    NETMGR_LOG_I("Test NetConnServiceStub::OnUpdateNetStateForTest(), netState[%{public}d]", netState);
+    NETMGR_LOG_D("Test NetConnServiceStub::OnUpdateNetStateForTest(), netState[%{public}d]", netState);
     int32_t result = UpdateNetStateForTest(netSpecifier, netState);
-    NETMGR_LOG_I("Test NetConnServiceStub::OnUpdateNetStateForTest(), result[%{public}d]", result);
+    NETMGR_LOG_D("Test NetConnServiceStub::OnUpdateNetStateForTest(), result[%{public}d]", result);
     reply.WriteInt32(result);
     return result;
 }
@@ -962,7 +962,7 @@ int32_t NetConnServiceStub::OnGetGlobalHttpProxy(MessageParcel &data, MessagePar
 
 int32_t NetConnServiceStub::OnGetDefaultHttpProxy(MessageParcel &data, MessageParcel &reply)
 {
-    NETMGR_LOG_I("stub execute OnGetDefaultHttpProxy");
+    NETMGR_LOG_D("stub execute OnGetDefaultHttpProxy");
     int32_t bindNetId = 0;
     if (!data.ReadInt32(bindNetId)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;

@@ -104,7 +104,6 @@ int32_t DnsQualityDiag::ParseReportAddr(uint32_t size, AddrInfo* addrinfo, Netsy
         } else {
             break;
         }
-        NETNATIVE_LOG_D("ReportDnsResult: %{public}s", ai.addr_.c_str());
     }
     return 0;
 }
