@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <fstream>
 #include <sys/time.h>
 
 #include "common_event_support.h"
@@ -1841,6 +1842,31 @@ void NetConnService::OnNetSysRestart()
     }
 
     FindBestNetworkForAllRequest();
+}
+
+int32_t NetConnService::IsPreferCellularUrl(const std::string& url, bool& preferCellular)
+{
+    static std::vector<std::string> preferredUrlList = GetPreferredUrl();
+    preferCellular = std::any_of(preferredUrlList.begin(), preferredUrlList.end(),
+                                 [&url](const std::string &str) { return url.find(str) != std::string::npos; });
+    return 0;
+}
+ 
+std::vector<std::string> NetConnService::GetPreferredUrl()
+{
+    std::vector<std::string> preferCellularUrlList;
+    const std::string preferCellularUrlPath = "/system/etc/prefer_cellular_url_list.txt";
+    std::ifstream preferCellularFile(preferCellularUrlPath);
+    if (preferCellularFile.is_open()) {
+        std::string line;
+        while (getline(preferCellularFile, line)) {
+            preferCellularUrlList.push_back(line);
+        }
+        preferCellularFile.close();
+    } else {
+        NETMGR_LOG_E("open prefer cellular url file failure.");
+    }
+    return preferCellularUrlList;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
