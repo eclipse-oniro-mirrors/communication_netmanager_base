@@ -419,7 +419,7 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
 void Network::StartNetDetection(bool needReport)
 {
     NETMGR_LOG_I("Enter Network::StartNetDetection");
-    if (needReport) {
+    if (needReport || netMonitor_) {
         StopNetDetection();
         InitNetMonitor();
         return;
@@ -429,7 +429,6 @@ void Network::StartNetDetection(bool needReport)
         InitNetMonitor();
         return;
     }
-    netMonitor_->UpdateNetLinkInfo(netLinkInfo_);
 }
 
 void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
