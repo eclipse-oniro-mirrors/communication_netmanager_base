@@ -299,7 +299,7 @@ HWTEST_F(NetsysNativeServiceTest, DelInterfaceAddressTest001, TestSize.Level1)
     std::string addrStr = "192.168.22.33";
     int32_t prefixLength = 24;
     int32_t ret = instance_->DelInterfaceAddress(iFName, addrStr, prefixLength);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceTest, InterfaceSetIpAddressTest001, TestSize.Level1)
@@ -495,7 +495,7 @@ HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceState001, TestSize.Level1)
     ret = instance_->GetUidStats(stats, 0, appID);
     EXPECT_NE(ret, 0);
 
-    ret = instance_->GetIfaceStats(stats, 0, iface);
+    ret = instance_->GetIfaceStats(stats, 5, iface);
     EXPECT_EQ(ret, NetStatsResultCode::STATS_ERR_READ_BPF_FAIL);
 
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;

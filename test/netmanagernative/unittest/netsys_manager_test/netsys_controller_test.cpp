@@ -1089,8 +1089,11 @@ HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest001, TestSize.Level1)
     std::vector<int32_t> beginUids = {1};
     std::vector<int32_t> endUids = {1};
     int32_t netId = 0;
+
+    NetsysController::GetInstance().NetworkCreateVirtual(netId, false);
+
     auto ret = instance_->NetworkAddUids(netId, beginUids, endUids);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->NetworkDelUids(netId, beginUids, endUids);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
