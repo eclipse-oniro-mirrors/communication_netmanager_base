@@ -311,6 +311,7 @@ public:
     int32_t GetSlotType(std::string &type) override;
     int32_t FactoryResetNetwork() override;
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) override;
+    int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) override;
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -387,6 +388,7 @@ private:
     void OnNetSysRestart();
 
     bool IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns);
+    std::vector<std::string> GetPreferredUrl();
 
 private:
     enum ServiceRunningState {

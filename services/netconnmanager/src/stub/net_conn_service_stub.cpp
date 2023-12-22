@@ -79,6 +79,8 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnAddNetworkRoute, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ROUTE)] = {
         &NetConnServiceStub::OnRemoveNetworkRoute, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_PREFER_CELLULAR_URL)] = {
+        &NetConnServiceStub::OnIsPreferCellularUrl, {}};
     InitInterfaceFuncToInterfaceMap();
     InitResetNetFuncToInterfaceMap();
     InitStaticArpToInterfaceMap();
@@ -1292,6 +1294,24 @@ int32_t NetConnServiceStub::OnRegisterNetFactoryResetCallback(MessageParcel &dat
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
+    return NETMANAGER_SUCCESS;
+}
+ 
+int32_t NetConnServiceStub::OnIsPreferCellularUrl(MessageParcel &data, MessageParcel &reply)
+{
+    std::string url;
+    if (!data.ReadString(url)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    bool preferCellular = false;
+    int32_t ret = IsPreferCellularUrl(url, preferCellular);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (!reply.WriteBool(preferCellular)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+ 
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard

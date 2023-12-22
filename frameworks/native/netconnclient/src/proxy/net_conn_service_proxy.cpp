@@ -1420,5 +1420,30 @@ int32_t NetConnServiceProxy::RegisterNetFactoryResetCallback(const sptr<INetFact
     }
     return replyParcel.ReadInt32();
 }
+
+int32_t NetConnServiceProxy::IsPreferCellularUrl(const std::string& url, bool& preferCellular)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!data.WriteString(url)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t error = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_PREFER_CELLULAR_URL),
+                                      data, reply);
+    if (error != NETMANAGER_SUCCESS) {
+        return error;
+    }
+    int32_t ret = reply.ReadInt32();
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!reply.ReadBool(preferCellular)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+    }
+    return ret;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

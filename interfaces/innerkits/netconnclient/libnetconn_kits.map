@@ -33,6 +33,7 @@
       "OHOS::NetManagerStandard::NetConnClient::GetInstance()";
       "OHOS::NetManagerStandard::NetConnClient::GetConnectionProperties(OHOS::NetManagerStandard::NetHandle const&, OHOS::NetManagerStandard::NetLinkInfo&)";
       "OHOS::NetManagerStandard::NetConnClient::GetAllNets(std::__h::list<OHOS::sptr<OHOS::NetManagerStandard::NetHandle>, std::__h::allocator<OHOS::sptr<OHOS::NetManagerStandard::NetHandle>>>&)";
+      "OHOS::NetManagerStandard::NetConnClient::IsPreferCellularUrl(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool&)";
       "OHOS::NetManagerStandard::NetConnClient::SetAirplaneMode(bool)";
       "OHOS::NetManagerStandard::NetConnClient::NetDetection(OHOS::NetManagerStandard::NetHandle const&)";
       "OHOS::NetManagerStandard::NetConnClient::GetGlobalHttpProxy(OHOS::NetManagerStandard::HttpProxy&)";
