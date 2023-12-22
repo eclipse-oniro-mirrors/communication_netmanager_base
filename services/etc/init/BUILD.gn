@@ -62,3 +62,10 @@ ohos_prebuilt_etc("netdetectionurl.conf") {
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
+
+## Install prefer_cellular_url_list.txt to /system/etc
+ohos_prebuilt_etc("prefer_cellular_url_list.txt") {
+  source = "prefer_cellular_url_list.txt"
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
