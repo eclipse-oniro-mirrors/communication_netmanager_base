@@ -380,7 +380,6 @@ public:
      * @return Returns 0, unregister the network successfully, otherwise it will fail
      */
     int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular);
- 
 
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
