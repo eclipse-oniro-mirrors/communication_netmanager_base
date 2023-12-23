@@ -77,11 +77,13 @@ ohos_shared_library("net_conn_manager_if") {
   cflags = [
     "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
+    "-O2",
   ]
 
   cflags_cc = [
     "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
+    "-O2",
   ]
 
   sources = [
@@ -158,11 +160,13 @@ ohos_shared_library("socket_permission") {
   cflags = [
     "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
+    "-O2",
   ]
 
   cflags_cc = [
     "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
+    "-O2",
   ]
 
   sources = [ "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/socket_permission.cpp" ]
