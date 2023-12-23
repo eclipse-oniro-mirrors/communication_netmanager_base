@@ -80,7 +80,7 @@ NetConnServiceStub::NetConnServiceStub()
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ROUTE)] = {
         &NetConnServiceStub::OnRemoveNetworkRoute, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_PREFER_CELLULAR_URL)] = {
-        &NetConnServiceStub::OnIsPreferCellularUrl, {}};
+        &NetConnServiceStub::OnIsPreferCellularUrl, {Permission::GET_NETWORK_INFO}};
     InitInterfaceFuncToInterfaceMap();
     InitResetNetFuncToInterfaceMap();
     InitStaticArpToInterfaceMap();
