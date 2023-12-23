@@ -27,7 +27,7 @@ int32_t NetDataShareHelperUtilsIface::Query(const std::string &strUri, const std
     return ret;
 }
 
-int32_t NetDataShareHelperUtilsIface::Insert(const std::string &strUri, const std::string &key, 
+int32_t NetDataShareHelperUtilsIface::Insert(const std::string &strUri, const std::string &key,
                                              const std::string &value)
 {
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
@@ -36,7 +36,7 @@ int32_t NetDataShareHelperUtilsIface::Insert(const std::string &strUri, const st
     return ret;
 }
 
-int32_t NetDataShareHelperUtilsIface::Update(const std::string &strUri, const std::string &key, 
+int32_t NetDataShareHelperUtilsIface::Update(const std::string &strUri, const std::string &key,
                                              const std::string &value)
 {
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
