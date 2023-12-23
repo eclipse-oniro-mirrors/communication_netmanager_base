@@ -55,6 +55,8 @@ ohos_shared_library("net_manager_common") {
   sources = [
     "common_utils/src/base64_utils.cpp",
     "common_utils/src/event_report.cpp",
+    "common_utils/src/net_datashare_utils.cpp",
+    "common_utils/src/net_datashare_utils_iface.cpp",
     "common_utils/src/netmanager_base_common_utils.cpp",
     "common_utils/src/netmanager_base_permission.cpp",
     "common_utils/src/netmanager_hitrace.cpp",
@@ -83,12 +85,16 @@ ohos_shared_library("net_manager_common") {
   external_deps = [ "hilog:libhilog" ]
 
   external_deps += [
+    "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
     "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_single",
+    "samgr:samgr_proxy",
   ]
 
   innerapi_tags = [ "platformsdk" ]
