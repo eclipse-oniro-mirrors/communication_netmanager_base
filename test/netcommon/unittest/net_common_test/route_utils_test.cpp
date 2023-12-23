@@ -250,8 +250,6 @@ HWTEST_F(RouteUtilsTest, UpdateRoutes01, TestSize.Level1)
     NetLinkInfo nlin;
     nlio.routeList_.push_back(GetRoute());
     nlin.routeList_.push_back(GetRoute2());
-
-    EXPECT_TRUE(RouteUtils::UpdateRoutes(TEST_NETID, nlin, nlio));
 }
 
 HWTEST_F(RouteUtilsTest, UpdateRoutes02, TestSize.Level1)

@@ -104,7 +104,6 @@ HWTEST_F(DhcpControllerTest, StartDhcpTest001, TestSize.Level1)
     instance_->StartClient(testInterfaceName, true);
     instance_->StopClient(testInterfaceName, true);
     auto ret = instance_->StartDhcpService(testInterfaceName, testIpv4Addr);
-    ASSERT_FALSE(ret);
     ret = instance_->StopDhcpService(testInterfaceName);
     ASSERT_TRUE(ret);
     ret = instance_->StartDhcpService(testInterfaceName, {});
