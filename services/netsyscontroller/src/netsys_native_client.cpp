@@ -1327,11 +1327,6 @@ int32_t NetsysNativeClient::RegisterDnsResultCallback(
         NETMGR_LOG_E("Callback is nullptr");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    auto proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return IPC_PROXY_ERR;
-    }
     std::lock_guard lock(cbObjMutex_);
     cbDnsReportObjects_.push_back(callback);
     dnsReportTimeStep = timeStep;
@@ -1341,6 +1336,13 @@ int32_t NetsysNativeClient::RegisterDnsResultCallback(
 int32_t NetsysNativeClient::UnregisterDnsResultCallback(
     const sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> &callback)
 {
+    if (callback == nullptr) {
+        NETMGR_LOG_E("Callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    std::lock_guard lock(cbObjMutex_);
+    cbDnsReportObjects_.erase(
+        std::remove(cbDnsReportObjects_.begin(), cbDnsReportObjects_.end(), callback), cbDnsReportObjects_.end());
     return NETMANAGER_SUCCESS;
 }
 
