@@ -41,10 +41,6 @@
     },
     {
         "first_introduced": "11",
-        "name": "OH_NetConn_GetNetCapabilities"
-    },
-    {
-        "first_introduced": "11",
         "name": "OH_NetConn_GetDefaultHttpProxy"
     }
 ]
