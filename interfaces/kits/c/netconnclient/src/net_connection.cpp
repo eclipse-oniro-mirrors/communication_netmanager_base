@@ -27,17 +27,20 @@ using namespace OHOS::NetManagerStandard;
 static int32_t ERRORCODE_TRANS(int status)
 {
     int32_t ret = NETMANAGER_ERR_INTERNAL;
-    switch(status) {
+    switch (status) {
         case EAI_BADFLAGS:
-        if (errno == EPERM || errno == EACCES) {
-            ret = NETMANAGER_ERR_PERMISSION_DENIED;
-        } else {
-            ret = NETMANAGER_ERR_PARAMETER_ERROR;
-        }
-        break;
+            if (errno == EPERM || errno == EACCES) {
+                ret = NETMANAGER_ERR_PERMISSION_DENIED;
+            } else {
+                ret = NETMANAGER_ERR_PARAMETER_ERROR;
+            }
+            break;
         case EAI_SERVICE:
-        ret = NETMANAGER_ERR_OPERATION_FAILED;
-        break;
+            ret = NETMANAGER_ERR_OPERATION_FAILED;
+            break;
+        default:
+            ret = NETMANAGER_ERR_INTERNAL;
+            break;
     }
     return ret;
 }
