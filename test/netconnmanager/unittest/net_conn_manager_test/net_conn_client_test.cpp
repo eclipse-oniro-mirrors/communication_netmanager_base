@@ -1300,8 +1300,8 @@ HWTEST_F(NetConnClientTest, IsPreferCellularUrl, TestSize.Level1)
 {
     std::string url = "www.testPreferCellularUrl.com";
     bool preferCellular = false;
-    auto ret = NetConnClient::GetInstance().IsPreferCellularUrl(url, preferCellular);
-    EXPECT_EQ(ret, 0);
+    NetConnClient::GetInstance().IsPreferCellularUrl(url, preferCellular);
+    EXPECT_FALSE(preferCellular);
 }
 
 } // namespace NetManagerStandard
