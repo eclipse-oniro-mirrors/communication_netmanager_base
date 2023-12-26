@@ -22,6 +22,26 @@
 
 using namespace OHOS::NetManagerStandard;
 
+#define VALIE_NETID_START 100
+
+static int32_t ERRORCODE_TRANS(int status)
+{
+    int32_t ret = NETMANAGER_ERR_INTERNAL;
+    switch(status) {
+        case EAI_BADFLAGS:
+        if (errno == EPERM || errno == EACCES) {
+            ret = NETMANAGER_ERR_PERMISSION_DENIED;
+        } else {
+            ret = NETMANAGER_ERR_PARAMETER_ERROR;
+        }
+        break;
+        case EAI_SERVICE:
+        ret = NETMANAGER_ERR_OPERATION_FAILED;
+        break;
+    }
+    return ret;
+}
+
 int32_t OH_NetConn_GetAddrInfo(char *host, char *serv, struct addrinfo *hint, struct addrinfo **res, int32_t netId)
 {
     int32_t ret = NETMANAGER_SUCCESS;
@@ -32,18 +52,27 @@ int32_t OH_NetConn_GetAddrInfo(char *host, char *serv, struct addrinfo *hint, st
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
+    if (strlen(host) == 0) {
+        NETMGR_LOG_E("OH_NetConn_GetAddrInfo received invalid host");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    if (netId > 0 && netId < VALIE_NETID_START) {
+        NETMGR_LOG_E("OH_NetConn_GetAddrInfo received invalid netId");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
     memset(&qp_param, 0, sizeof(struct queryparam));
     qp_param.qp_netid = netId;
     qp_param.qp_type = 0;
 
     status = getaddrinfo_ext(host, serv, hint, res, &qp_param);
     if (status < 0) {
-        ret = NETMANAGER_ERR_PARAMETER_ERROR;
+        ret = ERRORCODE_TRANS(status);
     }
 
     return ret;
 }
-
 
 int32_t OH_NetConn_FreeDnsResult(struct addrinfo *res)
 {
