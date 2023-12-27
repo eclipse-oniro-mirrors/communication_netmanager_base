@@ -26,7 +26,7 @@ using namespace OHOS::NetManagerStandard;
 
 static int32_t ERRORCODE_TRANS(int status)
 {
-    int32_t ret = NETMANAGER_ERR_INTERNAL;
+    int32_t ret;
     switch (status) {
         case EAI_BADFLAGS:
             if (errno == EPERM || errno == EACCES) {
@@ -71,6 +71,7 @@ int32_t OH_NetConn_GetAddrInfo(char *host, char *serv, struct addrinfo *hint, st
 
     status = getaddrinfo_ext(host, serv, hint, res, &qp_param);
     if (status < 0) {
+	NETMGR_LOG_E("OH_NetConn_GetAddrInfo fail status:%{public}d", status);
         ret = ERRORCODE_TRANS(status);
     }
 
