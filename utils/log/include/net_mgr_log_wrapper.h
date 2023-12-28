@@ -59,17 +59,17 @@ static constexpr OHOS::HiviewDFX::HiLogLabel NET_MGR_LABEL = {LOG_CORE, LOG_DOMA
 #ifdef NETMGR_DEBUG
 #define MAKE_FILE_NAME (strrchr(__FILE__, '/') + 1)
 #define PRINT_LOG(op, fmt, ...)                                                                               \
-    (void)OHOS::HiviewDFX::HiLog::op(NET_MGR_LABEL, "[%{public}s-(%{public}s:%{public}d)]" fmt, __FUNCTION__, \
+   (void)HILOG_##op(LOG_CORE, "[%{public}s-(%{public}s:%{public}d)]" fmt, __FUNCTION__, \
                                      MAKE_FILE_NAME, __LINE__, ##__VA_ARGS__)
 #else
 #define PRINT_LOG(op, fmt, ...)
 #endif
 
-#define NETMGR_LOG_D(fmt, ...) PRINT_LOG(Debug, fmt, ##__VA_ARGS__)
-#define NETMGR_LOG_E(fmt, ...) PRINT_LOG(Error, fmt, ##__VA_ARGS__)
-#define NETMGR_LOG_W(fmt, ...) PRINT_LOG(Warn, fmt, ##__VA_ARGS__)
-#define NETMGR_LOG_I(fmt, ...) PRINT_LOG(Info, fmt, ##__VA_ARGS__)
-#define NETMGR_LOG_F(fmt, ...) PRINT_LOG(Fatal, fmt, ##__VA_ARGS__)
+#define NETMGR_LOG_D(fmt, ...) PRINT_LOG(DEBUG, fmt, ##__VA_ARGS__)
+#define NETMGR_LOG_E(fmt, ...) PRINT_LOG(ERROR, fmt, ##__VA_ARGS__)
+#define NETMGR_LOG_W(fmt, ...) PRINT_LOG(WARN, fmt, ##__VA_ARGS__)
+#define NETMGR_LOG_I(fmt, ...) PRINT_LOG(INFO, fmt, ##__VA_ARGS__)
+#define NETMGR_LOG_F(fmt, ...) PRINT_LOG(FATAL, fmt, ##__VA_ARGS__)
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NETMGR_LOG_WRAPPER_H
