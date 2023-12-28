@@ -29,7 +29,7 @@ static constexpr OHOS::HiviewDFX::HiLogLabel NET_MGR_LABEL = {LOG_CORE, LOG_DOMA
 #define FILENAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 
 #define PRINT_NATIVE_LOG(op, fmt, ...)                                                                               \
-   (void)HILOG_##op(LOG_CORE, "[%{public}s-(%{public}s:%{public}d)]" fmt, __FUNCTION__, \
+    (void)HILOG_##op(LOG_CORE, "[%{public}s-(%{public}s:%{public}d)]" fmt, __FUNCTION__, \
                                     FILENAME, __LINE__, ##__VA_ARGS__)
 
 #define NETNATIVE_LOG_D(fmt, ...) PRINT_NATIVE_LOG(DEBUG, fmt, ##__VA_ARGS__)

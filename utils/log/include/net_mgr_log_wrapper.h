@@ -59,8 +59,8 @@ static constexpr OHOS::HiviewDFX::HiLogLabel NET_MGR_LABEL = {LOG_CORE, LOG_DOMA
 #ifdef NETMGR_DEBUG
 #define MAKE_FILE_NAME (strrchr(__FILE__, '/') + 1)
 #define PRINT_LOG(op, fmt, ...)                                                                               \
-   (void)HILOG_##op(LOG_CORE, "[%{public}s-(%{public}s:%{public}d)]" fmt, __FUNCTION__, \
-                                     MAKE_FILE_NAME, __LINE__, ##__VA_ARGS__)
+    (void)HILOG_##op(LOG_CORE, "[%{public}s-(%{public}s:%{public}d)]" fmt, __FUNCTION__, \
+                                    MAKE_FILE_NAME, __LINE__, ##__VA_ARGS__)
 #else
 #define PRINT_LOG(op, fmt, ...)
 #endif
