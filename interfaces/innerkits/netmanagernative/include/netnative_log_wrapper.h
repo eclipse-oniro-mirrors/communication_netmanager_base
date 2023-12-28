@@ -21,10 +21,10 @@
 #include "hilog/log.h"
 
 #ifndef NETMGRNATIVE_LOG_TAG
-#define NETMGRNATIVE_LOG_TAG "NetsysNativeService"
+#define LOG_TAG "NetsysNativeService"
+#else
+#define LOG_TAG NETMGRNATIVE_LOG_TAG
 #endif
-
-static constexpr OHOS::HiviewDFX::HiLogLabel NET_MGR_LABEL = {LOG_CORE, LOG_DOMAIN, NETMGRNATIVE_LOG_TAG};
 
 #define FILENAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 

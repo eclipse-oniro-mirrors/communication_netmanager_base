@@ -51,10 +51,10 @@ private:
 };
 
 #ifndef NETMGR_LOG_TAG
-#define NETMGR_LOG_TAG "NetMgrSubsystem"
+#define LOG_TAG "NetMgrSubsystem"
+#else
+#define LOG_TAG NETMGR_LOG_TAG
 #endif
-
-static constexpr OHOS::HiviewDFX::HiLogLabel NET_MGR_LABEL = {LOG_CORE, LOG_DOMAIN, NETMGR_LOG_TAG};
 
 #ifdef NETMGR_DEBUG
 #define MAKE_FILE_NAME (strrchr(__FILE__, '/') + 1)
