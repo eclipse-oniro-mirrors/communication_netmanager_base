@@ -21,9 +21,9 @@
 #include "network_security_config.h"
 #include <sys/stat.h>
 #include <fstream>
-#include <dirent.h>
 #include <securec.h>
 #include "openssl/evp.h"
+#include "resource_manager.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -42,7 +42,9 @@ const std::string TAG_PIN("pin");
 const std::string TAG_DIGEST_ALGORITHM("digest-algorithm");
 const std::string TAG_DIGEST("digest");
 
-const std::string REHASHD_CA_CERTS_DIR("/data/storage/el2/base/haps/entry/files/rehashed_ca_certs");
+const std::string BUNDLE_INSTALL_PATH("/data/storage/el1/bundle");
+const std::string INSTALL_FILE_SUFFIX(".hap");
+const std::string REHASHD_CA_CERTS_DIR("/data/storage/el2/base/files/rehashed_ca_certs");
 #ifdef WINDOWS_PLATFORM
 const char OS_PATH_SEPARATOR = '\\';
 #else
@@ -112,30 +114,6 @@ bool NetworkSecurityConfig::IsCACertFileName(const char *fileName)
     return (str == "pem" || str == "crt");
 }
 
-void NetworkSecurityConfig::GetCAFilesFromPath(const std::string caPath, std::vector<std::string> &caFiles)
-{
-    DIR *dir = opendir(caPath.c_str());
-    if (dir == nullptr) {
-        NETMGR_LOG_E("open CA path[%{public}s] fail. [%{public}d]", caPath.c_str(), errno);
-        return;
-    }
-
-    struct dirent *entry = readdir(dir);
-    while (entry != nullptr) {
-        if (IsCACertFileName(entry->d_name)) {
-            if (caPath.back() != OS_PATH_SEPARATOR) {
-                caFiles.push_back(caPath + OS_PATH_SEPARATOR + entry->d_name);
-            } else {
-                caFiles.push_back(caPath + entry->d_name);
-            }
-            NETMGR_LOG_D("Read CA File [%{public}s] from CA Path", entry->d_name);
-        }
-        entry = readdir(dir);
-    }
-
-    closedir(dir);
-}
-
 void NetworkSecurityConfig::AddSurfixToCACertFileName(const std::string &caPath,
     std::set<std::string> &allFileNames, std::string &caFile)
 {
@@ -150,31 +128,34 @@ void NetworkSecurityConfig::AddSurfixToCACertFileName(const std::string &caPath,
     allFileNames.insert(caFile);
 }
 
-X509 *NetworkSecurityConfig::ReadCertFile(const std::string &fileName)
+void NetworkSecurityConfig::ReadHashFromCertdata(const std::string &rawData, std::string &subjectHash)
 {
-    std::ifstream certFile(fileName.c_str());
-    if (!certFile.is_open()) {
-        NETMGR_LOG_E("Fail to read cert fail [%{public}s]", fileName.c_str());
-        return nullptr;
-    }
-
-    std::stringstream certStream;
-    certStream << certFile.rdbuf();
-
-    const std::string &certData = certStream.str();
-    BIO *bio = BIO_new_mem_buf(certData.c_str(), -1);
+    BIO *bio = BIO_new_mem_buf(rawData.c_str(), -1);
     if (bio == nullptr) {
         NETMGR_LOG_E("Fail to call BIO_new_mem_buf");
-        return nullptr;
+        return;
     }
 
     X509 *x509 = PEM_read_bio_X509(bio, nullptr, nullptr, nullptr);
+    BIO_free(bio);
+    bio = nullptr;
+
     if (x509 == nullptr) {
         NETMGR_LOG_E("Fail to call PEM_read_bio_X509.");
+        return;
     }
 
-    BIO_free(bio);
-    return x509;
+    constexpr int X509_HASH_LEN = 16;
+    char buf[X509_HASH_LEN] = {0};
+    auto n = sprintf_s(buf, sizeof(buf), "%08lx", X509_subject_name_hash(x509));
+    if (n == 0) {
+        return;
+    }
+
+    X509_free(x509);
+    x509 = nullptr;
+
+    subjectHash = buf;
 }
 
 std::string NetworkSecurityConfig::GetRehashedCADirName(const std::string &caPath)
@@ -244,12 +225,37 @@ std::string NetworkSecurityConfig::GetRehasedCAPath(const std::string &caPath)
     return rehashedCertpath;
 }
 
+void NetworkSecurityConfig::WriteDataToFile(const std::string &content, const size_t len, const std::string &caFilePath)
+{
+    if (access(caFilePath.c_str(), F_OK) == 0) {
+        NETMGR_LOG_D("File [%{public}s] exists.", caFilePath.c_str());
+        return;
+    }
+
+    std::ofstream dst(caFilePath);
+    if (!dst.is_open()) {
+        NETMGR_LOG_E("fail to open cert file.");
+        return;
+    }
+    dst.write(content.c_str(), len);
+    NETMGR_LOG_D("Rehased cert generated. [%{public}s]", caFilePath.c_str());
+}
+
 std::string NetworkSecurityConfig::ReHashCAPathForX509(const std::string &caPath)
 {
     std::set<std::string> allFiles;
     std::vector<std::string> caFiles;
 
-    GetCAFilesFromPath(caPath, caFiles);
+    std::string hapPath = BUNDLE_INSTALL_PATH + OS_PATH_SEPARATOR + bundleEntryModuleName_ + INSTALL_FILE_SUFFIX;
+    auto resourceManager(Global::Resource::CreateResourceManager());
+    auto ret = resourceManager->AddResource(hapPath.c_str());
+    if (ret != true) {
+        NETMGR_LOG_E("AddResource to resourceManager fail, [%{public}d]", ret);
+        return "";
+    }
+
+    resourceManager->GetRawFileList(caPath, caFiles);
+    NETMGR_LOG_D("Read ResourceManager: [%{public}s] [%{public}s]", hapPath.c_str(), caPath.c_str());
     if (caFiles.empty()) {
         NETMGR_LOG_D("No customized CA certs.");
         return "";
@@ -261,34 +267,27 @@ std::string NetworkSecurityConfig::ReHashCAPathForX509(const std::string &caPath
     }
 
     for (auto &caFile: caFiles) {
-        auto x509 = ReadCertFile(caFile);
-        if (x509 == nullptr) {
+        size_t len;
+        std::unique_ptr<uint8_t[]> rawData;
+        ret = resourceManager->GetRawFileFromHap(caPath + OS_PATH_SEPARATOR + caFile, len, rawData);
+        if (ret != 0) {
+            NETMGR_LOG_E("GetRawFileList from resourceManager fail, [%{public}d]", ret);
             continue;
         }
 
-        constexpr int X509_HASH_LEN = 16;
-        char buf[X509_HASH_LEN] = {0};
-        sprintf_s(buf, sizeof(buf), "%08lx", X509_subject_name_hash(x509));
-        X509_free(x509);
-        x509 = nullptr;
+        std::stringstream certStream;
+        certStream << rawData.get();
+        const std::string &caContent = certStream.str();
 
-        std::string hashName(buf);
+        std::string hashName;
+        ReadHashFromCertdata(caContent, hashName);
+        if (hashName.empty()) {
+            continue;
+        }
+
         AddSurfixToCACertFileName(rehashedCertpath, allFiles, hashName);
 
-        std::string rehashedCaFile = rehashedCertpath + OS_PATH_SEPARATOR + hashName;
-        if (access(rehashedCaFile.c_str(), F_OK) == 0) {
-            NETMGR_LOG_D("File [%{public}s] exists.", rehashedCaFile.c_str());
-            continue;
-        }
-
-        std::ifstream src(caFile);
-        std::ofstream dst(rehashedCaFile);
-        if (!src.is_open() || !dst.is_open()) {
-            NETMGR_LOG_E("fail to open cert file.");
-            continue;
-        }
-        dst << src.rdbuf();
-        NETMGR_LOG_D("Rehased cert generated. [%{public}s]", rehashedCaFile.c_str());
+        WriteDataToFile(caContent, len, rehashedCertpath + OS_PATH_SEPARATOR + hashName);
     }
 
     return rehashedCertpath;
@@ -351,8 +350,9 @@ int32_t NetworkSecurityConfig::GetJsonFromBundle(std::string &jsonProfile)
         return NETMANAGER_ERR_INTERNAL;
     }
 
+    bundleEntryModuleName_ = bundleInfo.entryModuleName;
     ret = bundleMgrProxy->GetJsonProfile(AppExecFwk::ProfileType::NETWORK_PROFILE,
-        bundleInfo.name, bundleInfo.entryModuleName, jsonProfile);
+        bundleInfo.name, bundleEntryModuleName_, jsonProfile);
     if (ret != ERR_OK) {
         NETMGR_LOG_D("No network_config profile configured in bundle manager.[%{public}d]", ret);
         return NETMANAGER_SUCCESS;

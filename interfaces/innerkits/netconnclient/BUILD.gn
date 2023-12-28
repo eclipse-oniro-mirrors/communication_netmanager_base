@@ -123,6 +123,7 @@ ohos_shared_library("net_conn_manager_if") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "ipc:ipc_core",
+    "resource_management:global_resmgr",
     "samgr:samgr_proxy",
   ]
 

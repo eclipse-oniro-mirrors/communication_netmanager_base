@@ -62,13 +62,13 @@ public:
 private:
     int32_t GetConfig();
     bool IsCACertFileName(const char *fileName);
-    void GetCAFilesFromPath(const std::string caPath, std::vector<std::string> &caFiles);
     void AddSurfixToCACertFileName(const std::string &caPath,
                                    std::set<std::string> &allFileNames, std::string &caFile);
-    X509 *ReadCertFile(const std::string &fileName);
+    void ReadHashFromCertdata(const std::string &rawData, std::string &subjectHash);
     std::string GetRehashedCADirName(const std::string &caPath);
     std::string BuildRehasedCAPath(const std::string &caPath);
     std::string GetRehasedCAPath(const std::string &caPath);
+    void WriteDataToFile(const std::string &content, const size_t len, const std::string &caFilePath);
     std::string ReHashCAPathForX509(const std::string &caPath);
     int32_t CreateRehashedCertFiles();
     int32_t GetJsonFromBundle(std::string &jsonProfile);
@@ -86,6 +86,7 @@ private:
     ~NetworkSecurityConfig();
     BaseConfig baseConfig_;
     std::vector<DomainConfig> domainConfigs_;
+    std::string bundleEntryModuleName_;
 };
 
 }
