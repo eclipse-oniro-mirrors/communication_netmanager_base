@@ -20,6 +20,7 @@
 #include <memory>
 #include "hilog/log.h"
 
+#undef LOG_TAG
 #ifndef NETMGRNATIVE_LOG_TAG
 #define LOG_TAG "NetsysNativeService"
 #else

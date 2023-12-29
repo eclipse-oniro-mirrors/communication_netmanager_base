@@ -50,6 +50,7 @@ private:
     static NetMgrLogLevel level_;
 };
 
+#undef LOG_TAG
 #ifndef NETMGR_LOG_TAG
 #define LOG_TAG "NetMgrSubsystem"
 #else
