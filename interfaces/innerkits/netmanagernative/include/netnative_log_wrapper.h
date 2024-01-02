@@ -20,22 +20,23 @@
 #include <memory>
 #include "hilog/log.h"
 
+#undef LOG_TAG
 #ifndef NETMGRNATIVE_LOG_TAG
-#define NETMGRNATIVE_LOG_TAG "NetsysNativeService"
+#define LOG_TAG "NetsysNativeService"
+#else
+#define LOG_TAG NETMGRNATIVE_LOG_TAG
 #endif
-
-static constexpr OHOS::HiviewDFX::HiLogLabel NET_MGR_LABEL = {LOG_CORE, LOG_DOMAIN, NETMGRNATIVE_LOG_TAG};
 
 #define FILENAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 
-#define PRINT_NATIVE_LOG(op, fmt, ...)                                                                        \
-    (void)OHOS::HiviewDFX::HiLog::op(NET_MGR_LABEL, "[%{public}s-(%{public}s:%{public}d)]" fmt, __FUNCTION__, \
-                                     FILENAME, __LINE__, ##__VA_ARGS__)
+#define PRINT_NATIVE_LOG(op, fmt, ...)                                                                               \
+    (void)HILOG_##op(LOG_CORE, "[%{public}s-(%{public}s:%{public}d)]" fmt, __FUNCTION__, \
+                                    FILENAME, __LINE__, ##__VA_ARGS__)
 
-#define NETNATIVE_LOG_D(fmt, ...) PRINT_NATIVE_LOG(Debug, fmt, ##__VA_ARGS__)
-#define NETNATIVE_LOGE(fmt, ...) PRINT_NATIVE_LOG(Error, fmt, ##__VA_ARGS__)
-#define NETNATIVE_LOGW(fmt, ...) PRINT_NATIVE_LOG(Warn, fmt, ##__VA_ARGS__)
-#define NETNATIVE_LOGI(fmt, ...) PRINT_NATIVE_LOG(Info, fmt, ##__VA_ARGS__)
-#define NETNATIVE_LOGF(fmt, ...) PRINT_NATIVE_LOG(Fatal, fmt, ##__VA_ARGS__)
+#define NETNATIVE_LOG_D(fmt, ...) PRINT_NATIVE_LOG(DEBUG, fmt, ##__VA_ARGS__)
+#define NETNATIVE_LOGE(fmt, ...) PRINT_NATIVE_LOG(ERROR, fmt, ##__VA_ARGS__)
+#define NETNATIVE_LOGW(fmt, ...) PRINT_NATIVE_LOG(WARN, fmt, ##__VA_ARGS__)
+#define NETNATIVE_LOGI(fmt, ...) PRINT_NATIVE_LOG(INFO, fmt, ##__VA_ARGS__)
+#define NETNATIVE_LOGF(fmt, ...) PRINT_NATIVE_LOG(FATAL, fmt, ##__VA_ARGS__)
 
 #endif // NETNATIVE_LOG_WRAPPER_H
