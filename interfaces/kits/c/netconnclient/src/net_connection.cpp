@@ -22,7 +22,7 @@
 
 using namespace OHOS::NetManagerStandard;
 
-constexpr int32_t VALIE_NETID_START = 100;
+constexpr int32_t VALID_NETID_START = 100;
 
 static int32_t ERRORCODE_TRANS(int status)
 {
@@ -60,7 +60,7 @@ int32_t OH_NetConn_GetAddrInfo(char *host, char *serv, struct addrinfo *hint, st
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
-    if (netId > 0 && netId < VALIE_NETID_START) {
+    if (netId > 0 && netId < VALID_NETID_START) {
         NETMGR_LOG_E("OH_NetConn_GetAddrInfo received invalid netId");
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
