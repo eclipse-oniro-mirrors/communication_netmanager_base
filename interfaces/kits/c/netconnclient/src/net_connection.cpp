@@ -22,7 +22,7 @@
 
 using namespace OHOS::NetManagerStandard;
 
-#define VALIE_NETID_START 100
+static const int32_t VALIE_NETID_START = 100;
 
 static int32_t ERRORCODE_TRANS(int status)
 {
