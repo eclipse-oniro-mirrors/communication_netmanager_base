@@ -24,7 +24,7 @@ using namespace OHOS::NetManagerStandard;
 
 constexpr int32_t VALID_NETID_START = 100;
 
-static int32_t ERRORCODE_TRANS(int status)
+static int32_t ErrorCodeTrans(int status)
 {
     int32_t ret;
     switch (status) {
@@ -72,7 +72,7 @@ int32_t OH_NetConn_GetAddrInfo(char *host, char *serv, struct addrinfo *hint, st
     status = getaddrinfo_ext(host, serv, hint, res, &qp_param);
     if (status < 0) {
         NETMGR_LOG_E("OH_NetConn_GetAddrInfo fail status:%{public}d", status);
-        ret = ERRORCODE_TRANS(status);
+        ret = ErrorCodeTrans(status);
     }
 
     return ret;
