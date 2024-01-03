@@ -32,7 +32,7 @@
 #define LOG_DOMAIN 0xD0015B0
 
 #define NETMANAGER_BASE_HILOG_PRINT(Level, fmt, ...)                                                                        \
-    (void)HILOG_##op(LOG_CORE, "NETMANAGER_BASE [%{public}s %{public}d] " fmt, MAKE_FILE_NAME, \
+    (void)HILOG_##Level(LOG_CORE, "NETMANAGER_BASE [%{public}s %{public}d] " fmt, MAKE_FILE_NAME, \
                                         __LINE__, ##__VA_ARGS__)
 
 #define NETMANAGER_BASE_LOGE(fmt, ...) NETMANAGER_BASE_HILOG_PRINT(ERROR, fmt, ##__VA_ARGS__)
