@@ -187,9 +187,9 @@ int32_t DnsQualityDiag::query_default_host()
 {
 #if NETSYS_DNS_MONITOR
     struct addrinfo *res;
-#endif
     struct queryparam param;
     param.qp_type = 1;
+#endif
 
     OHOS::NetManagerStandard::NetHandle netHandle;
     OHOS::NetManagerStandard::NetConnClient::GetInstance().GetDefaultNet(netHandle);
@@ -197,8 +197,8 @@ int32_t DnsQualityDiag::query_default_host()
 
     NETNATIVE_LOG_D("query_default_host: %{public}d, ", netid);
 
-    param.qp_netid = netid;
 #if NETSYS_DNS_MONITOR
+    param.qp_netid = netid;
     getaddrinfo_ext(queryAddr.c_str(), NULL, NULL, &res, &param);
     freeaddrinfo(res);
 #endif

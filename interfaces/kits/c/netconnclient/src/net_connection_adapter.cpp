@@ -35,7 +35,7 @@ static NetCapMap netCapMap = {{NET_CAPABILITY_MMS,         NETCONN_NET_CAPABILIT
                               {NET_CAPABILITY_NOT_VPN,     NETCONN_NET_CAPABILITY_NOT_VPN},
                               {NET_CAPABILITY_VALIDATED,   NETCONN_NET_CAPABILITY_VALIDATED}};
 
-static int32_t Conv2Ch(std::string s, char *ch)
+static int32_t Conv2Ch(const std::string s, char *ch)
 {
     if (s.length() > NETCONN_MAX_STR_LEN - 1) {
         NETMGR_LOG_E("string out of memory");
