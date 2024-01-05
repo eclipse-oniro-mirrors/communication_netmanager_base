@@ -518,9 +518,9 @@ int32_t InterfaceManager::MacStringToArray(const std::string &macAddr, sockaddr 
         strMac[i] = (char)v;
     }
 
-    if (strncpy_s(macSock.sa_data, sizeof(macSock.sa_data),
+    if (memcpy_s(macSock.sa_data, sizeof(macSock.sa_data),
                   strMac, MAC_ADDRESS_INT_LEN) != 0) {
-        NETNATIVE_LOGE("strncpy_s is false");
+        NETNATIVE_LOGE("memcpy_s is false");
         return NETMANAGER_ERR_OPERATION_FAILED;
     }
 
