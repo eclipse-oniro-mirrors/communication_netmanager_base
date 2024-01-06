@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,17 +83,18 @@ HWTEST_F(NetworkSecurityConfigTest, IsCACertFileNameTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetCAFilesFromPathTest001
- * @tc.desc: Test NetworkSecurityConfig::GetCAFilesFromPath
+ * @tc.name: WriteDataToFile001
+ * @tc.desc: Test NetworkSecurityConfig::WriteDataToFile
  * @tc.type: FUNC
  */
-HWTEST_F(NetworkSecurityConfigTest, GetCAFilesFromPathTest001, TestSize.Level1)
+HWTEST_F(NetworkSecurityConfigTest, WriteDataToFile001, TestSize.Level1)
 {
-    std::string caPath("/etc/security/certificates/test");
-    std::vector<std::string> caFiles;
-    std::cout << "GetCAFilesFromPathTest001 In" << std::endl;
-    NetworkSecurityConfig::GetInstance().GetCAFilesFromPath(caPath, caFiles);
-    EXPECT_EQ(caFiles.size(), 0);
+    const std::string content("-----BEGIN CERTIFICATE-----");
+    const size_t len = content.size();
+    std::string caFilePath("/etc/security/certificates/test.pem");
+    std::cout << "WriteDataToFile001 In" << std::endl;
+    NetworkSecurityConfig::GetInstance().WriteDataToFile(content, len, caFilePath);
+    EXPECT_EQ(content.size(), len);
 }
 
 /**
@@ -112,16 +113,17 @@ HWTEST_F(NetworkSecurityConfigTest, AddSurfixToCACertFileNameTest001, TestSize.L
 }
 
 /**
- * @tc.name: ReadCertFileTest001
+ * @tc.name: ReadHashFromCertdata001
  * @tc.desc: Test NetworkSecurityConfig::ReadCertFile
  * @tc.type: FUNC
  */
-HWTEST_F(NetworkSecurityConfigTest, ReadCertFileTest001, TestSize.Level1)
+HWTEST_F(NetworkSecurityConfigTest, ReadHashFromCertdata001, TestSize.Level1)
 {
-    std::string caFile("cacert.pem");
-    std::cout << "ReadCertFileTest001 In" << std::endl;
-    auto ret = NetworkSecurityConfig::GetInstance().ReadCertFile(caFile);
-    EXPECT_EQ(ret, nullptr);
+    const std::string rawData("-----BEGIN CERTIFICATE-----");
+    std::string subjectHash;
+    std::cout << "ReadHashFromCertdata001 In" << std::endl;
+    NetworkSecurityConfig::GetInstance().ReadHashFromCertdata(rawData, subjectHash);
+    EXPECT_EQ(subjectHash.size(), 0);
 }
 
 /**
