@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -396,25 +396,28 @@ int32_t NetManagerNative::BandwidthRemoveAllowedList(uint32_t uid)
     return bandwidthManager_->RemoveAllowedList(uid);
 }
 
-int32_t NetManagerNative::FirewallSetUidsAllowedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
+__attribute__((no_sanitize("cfi"))) int32_t NetManagerNative::FirewallSetUidsAllowedListChain(uint32_t chain,
+    const std::vector<uint32_t> &uids)
 {
     auto chainType = static_cast<NetManagerStandard::ChainType>(chain);
     return firewallManager_->SetUidsAllowedListChain(chainType, uids);
 }
 
-int32_t NetManagerNative::FirewallSetUidsDeniedListChain(uint32_t chain, const std::vector<uint32_t> &uids)
+__attribute__((no_sanitize("cfi"))) int32_t NetManagerNative::FirewallSetUidsDeniedListChain(uint32_t chain,
+    const std::vector<uint32_t> &uids)
 {
     auto chainType = static_cast<NetManagerStandard::ChainType>(chain);
     return firewallManager_->SetUidsDeniedListChain(chainType, uids);
 }
 
-int32_t NetManagerNative::FirewallEnableChain(uint32_t chain, bool enable)
+__attribute__((no_sanitize("cfi"))) int32_t NetManagerNative::FirewallEnableChain(uint32_t chain, bool enable)
 {
     auto chainType = static_cast<NetManagerStandard::ChainType>(chain);
     return firewallManager_->EnableChain(chainType, enable);
 }
 
-int32_t NetManagerNative::FirewallSetUidRule(uint32_t chain, const std::vector<uint32_t> &uids, uint32_t firewallRule)
+__attribute__((no_sanitize("cfi"))) int32_t NetManagerNative::FirewallSetUidRule(uint32_t chain,
+    const std::vector<uint32_t> &uids, uint32_t firewallRule)
 {
     auto chainType = static_cast<NetManagerStandard::ChainType>(chain);
     auto rule = static_cast<NetManagerStandard::FirewallRule>(firewallRule);

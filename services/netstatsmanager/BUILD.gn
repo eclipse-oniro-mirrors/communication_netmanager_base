@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -45,6 +45,8 @@ ohos_shared_library("net_stats_manager") {
     all_ubsan = true
     debug = false
   }
+
+  branch_protector_ret = "pac_ret"
 
   sources = [
     "src/common/net_stats_service_common.cpp",
@@ -122,6 +124,9 @@ ohos_static_library("net_stats_manager_static") {
     cfi_cross_dso = true
     debug = false
   }
+
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "src/common/net_stats_service_common.cpp",
     "src/net_stats_cached.cpp",
