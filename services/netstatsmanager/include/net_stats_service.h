@@ -64,6 +64,7 @@ public:
 private:
     bool Init();
     void GetDumpMessage(std::string &message);
+    bool GetIfaceNamesFromManager(std::list<std::string> &ifaceNames);
 
 private:
     enum ServiceRunningState {

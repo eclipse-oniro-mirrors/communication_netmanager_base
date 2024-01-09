@@ -93,14 +93,14 @@ int32_t NetPolicyCallback::UnregisterNetPolicyCallbackAsync(const sptr<INetPolic
 int32_t NetPolicyCallback::UnregisterNetPolicyCallback(const sptr<INetPolicyCallback> &callback)
 {
     NETMGR_LOG_I("Enter UnregisterNetPolicyCallback");
-    auto it = std::remove_if(callbacks_.begin(), callbacks_.end(),
-                             [callback](const sptr<INetPolicyCallback> &tempCallback) -> bool {
-                                 if (tempCallback == nullptr || tempCallback->AsObject() == nullptr ||
-                                     tempCallback->AsObject().GetRefPtr() == nullptr) {
-                                     return true;
-                                 }
-                                 return callback->AsObject().GetRefPtr() == tempCallback->AsObject().GetRefPtr();
-                             });
+    auto it = std::remove_if(
+        callbacks_.begin(), callbacks_.end(), [callback](const sptr<INetPolicyCallback> &tempCallback) -> bool {
+            if (tempCallback == nullptr || tempCallback->AsObject() == nullptr ||
+                tempCallback->AsObject().GetRefPtr() == nullptr) {
+                return true;
+            }
+            return callback->AsObject().GetRefPtr() == tempCallback->AsObject().GetRefPtr();
+        });
     callbacks_.erase(it, callbacks_.end());
     NETMGR_LOG_I("End UnregisterNetPolicyCallback");
     return NETMANAGER_SUCCESS;

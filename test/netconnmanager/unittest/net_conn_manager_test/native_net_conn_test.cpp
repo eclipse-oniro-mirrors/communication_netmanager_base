@@ -36,6 +36,8 @@ constexpr const char *LONG_HOST =
     "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
     "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
     "1111111111111111111111111111";
+constexpr const char *HOST_NAME = "127.0.0.1";
+constexpr uint16_t PORT = 8080;
 } // namespace
 
 class NativeNetConnTest : public testing::Test {
@@ -97,7 +99,7 @@ HttpProxy NativeNetConnTest::GetHttpProxySample() const
 {
     HttpProxy httpProxy = HttpProxy();
     httpProxy.SetHost("testHost");
-    httpProxy.SetPort(8080);
+    httpProxy.SetPort(PORT);
     std::list<std::string> exclusionList;
     exclusionList.push_back("testExclusion");
     httpProxy.SetExclusionList(exclusionList);
@@ -509,7 +511,7 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest018, TestSize.Level1)
 HWTEST_F(NativeNetConnTest, NativeNetConnTest019, TestSize.Level1)
 {
     NetConnManagerAccessToken token;
-    HttpProxy validHttpProxy = {"127.0.0.1", 8080, {}};
+    HttpProxy validHttpProxy = {HOST_NAME, PORT, {}};
     int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(validHttpProxy);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
     OH_NetConn_HttpProxy httpProxy = OH_NetConn_HttpProxy();
@@ -527,7 +529,7 @@ HWTEST_F(NativeNetConnTest, NativeNetConnTest019, TestSize.Level1)
 HWTEST_F(NativeNetConnTest, NativeNetConnTest020, TestSize.Level1)
 {
     NetConnManagerAccessToken token;
-    HttpProxy validHttpProxy = {LONG_HOST, 8080, {}};
+    HttpProxy validHttpProxy = {LONG_HOST, PORT, {}};
     int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(validHttpProxy);
     ASSERT_TRUE(ret == NETMANAGER_SUCCESS);
     OH_NetConn_HttpProxy httpProxy = OH_NetConn_HttpProxy();

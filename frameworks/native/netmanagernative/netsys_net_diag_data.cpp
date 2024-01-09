@@ -517,7 +517,8 @@ bool NetDiagIfaceConfig::Unmarshalling(Parcel &parcel, NetDiagIfaceConfig &iface
     }
     size = (size > IFCONFIG_MAX_IPV6_ADDR_NUM) ? IFCONFIG_MAX_IPV6_ADDR_NUM : size;
     for (uint32_t i = 0; i < size; ++i) {
-        std::string ipv6Addr, scope;
+        std::string ipv6Addr;
+        std::string scope;
         if (!parcel.ReadString(ipv6Addr)) {
             return false;
         }

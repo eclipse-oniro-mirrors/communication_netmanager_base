@@ -172,8 +172,10 @@ std::string NetworkSecurityConfig::GetRehashedCADirName(const std::string &caPat
     constexpr unsigned int BASE16_ELE_SIZE = 2;
     char hashedStr[HASHED_DIR_NAME_LEN + 1] = {0};
     for (unsigned int i = 0; i < HASHED_DIR_NAME_LEN / BASE16_ELE_SIZE; i++) {
-        sprintf_s(&hashedStr[BASE16_ELE_SIZE * i], sizeof(hashedStr) - BASE16_ELE_SIZE * i,
-                  "%02x", hashedHex[i]);
+        if (sprintf_s(&hashedStr[BASE16_ELE_SIZE * i], sizeof(hashedStr) - BASE16_ELE_SIZE * i, "%02x", hashedHex[i]) <
+            0) {
+            return "";
+        }
     }
 
     return hashedStr;

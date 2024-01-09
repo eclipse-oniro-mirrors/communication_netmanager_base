@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INCLUDE_BITCAST_H__
-#define INCLUDE_BITCAST_H__
+#ifndef INCLUDE_BITCAST_H
+#define INCLUDE_BITCAST_H
 
 #include <cstring>
 
@@ -31,4 +31,4 @@ struct is_bitcastable
 } // namespace common
 } // namespace nmd
 } // namespace OHOS
-#endif // !INCLUDE_BITCAST_H__
+#endif // INCLUDE_BITCAST_H

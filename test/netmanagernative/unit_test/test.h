@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef  NETSYS_MAIN_TEST_H__
-#define  NETSYS_MAIN_TEST_H__
+#ifndef NETSYS_MAIN_TEST_H
+#define NETSYS_MAIN_TEST_H
+
 #include <cstdint>
 #include <iostream>
 #include <map>
+
 #include "i_netsys_service.h"
 #include "test_notify_callback.h"
 
@@ -54,5 +56,4 @@ void TestNetworkAddInterfaceWIFI(void);
 void TestNetworkRemoveInterfaceWIFI(void);
 void TestSetTcpBufferSizes(void);
 
-
-#endif // !NETSYS_MAIN_TEST_H__
+#endif // NETSYS_MAIN_TEST_H

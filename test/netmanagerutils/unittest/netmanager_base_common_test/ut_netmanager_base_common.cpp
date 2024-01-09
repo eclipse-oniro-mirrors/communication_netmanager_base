@@ -34,6 +34,10 @@ constexpr const char *TEST_DOMAIN6 = "test.co.uk";
 constexpr const char *TEST_DOMAIN7 = "test.com.com";
 constexpr const char *TEST_DOMAIN8 = "test1.test2.test3.test4.test5.com";
 constexpr uint32_t ADDREDD_LEN = 16;
+constexpr int32_t BIT_32 = 32;
+constexpr int32_t BIT_24 = 24;
+constexpr int32_t BIT_16 = 16;
+constexpr int32_t BIT_8 = 8;
 } // namespace
 class UtNetmanagerBaseCommon : public testing::Test {
 public:
@@ -526,10 +530,6 @@ HWTEST_F(UtNetmanagerBaseCommon, GetMaskByLengthTest008, TestSize.Level1)
  */
 HWTEST_F(UtNetmanagerBaseCommon, Ipv4PrefixLenTest008, TestSize.Level1)
 {
-    constexpr int32_t BIT32 = 32;
-    constexpr int32_t BIT24 = 24;
-    constexpr int32_t BIT16 = 16;
-    constexpr int32_t BIT8 = 8;
     std::string ip = {};
     auto result = CommonUtils::Ipv4PrefixLen(ip);
     EXPECT_EQ(result, 0);
@@ -538,16 +538,16 @@ HWTEST_F(UtNetmanagerBaseCommon, Ipv4PrefixLenTest008, TestSize.Level1)
     EXPECT_EQ(result, 0);
     ip = "255.255.255.255";
     result = CommonUtils::Ipv4PrefixLen(ip);
-    EXPECT_EQ(result, BIT32);
+    EXPECT_EQ(result, BIT_32);
     ip = "255.255.255.0";
     result = CommonUtils::Ipv4PrefixLen(ip);
-    EXPECT_EQ(result, BIT24);
+    EXPECT_EQ(result, BIT_24);
     ip = "255.255.0.0";
     result = CommonUtils::Ipv4PrefixLen(ip);
-    EXPECT_EQ(result, BIT16);
+    EXPECT_EQ(result, BIT_16);
     ip = "255.0.0.0";
     result = CommonUtils::Ipv4PrefixLen(ip);
-    EXPECT_EQ(result, BIT8);
+    EXPECT_EQ(result, BIT_8);
     ip = "255.192.0.0";
     result = CommonUtils::Ipv4PrefixLen(ip);
     EXPECT_EQ(result, 10);

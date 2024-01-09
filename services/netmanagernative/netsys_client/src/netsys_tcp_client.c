@@ -47,12 +47,12 @@ bool MakeNonBlock(int sock)
     return true;
 }
 
-int64_t SendWrapper(int fd, char *buf, size_t len)
+static int64_t SendWrapper(int fd, char *buf, size_t len)
 {
     return send(fd, buf, len, 0);
 }
 
-int64_t RecvWrapper(int fd, char *buf, size_t len)
+static int64_t RecvWrapper(int fd, char *buf, size_t len)
 {
     return recv(fd, buf, len, 0);
 }
@@ -80,7 +80,7 @@ int64_t Poll(int sock, short event, int *retry)
     return POLL_SUCCESS;
 }
 
-bool ProcData(int sock, char *data, size_t size, short event, int64_t (*func)(int fd, char *buf, size_t len))
+static bool ProcData(int sock, char *data, size_t size, short event, int64_t (*func)(int fd, char *buf, size_t len))
 {
     char *curPos = data;
     size_t leftSize = size;

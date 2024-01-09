@@ -407,7 +407,8 @@ void OnInterfaceAddressUpdatedFuzzTest(const uint8_t *data, size_t size)
     dataParcel.WriteString(ifName);
     dataParcel.WriteInt32(flags);
     dataParcel.WriteInt32(scope);
-    OnRemoteRequestCallBack(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_INTERFACE_ADDRESS_UPDATED), dataParcel);
+    OnRemoteRequestCallBack(static_cast<uint32_t>(NetsysNative::NotifyInterfaceCode::ON_INTERFACE_ADDRESS_UPDATED),
+                            dataParcel);
 }
 
 void RegisterNotifyCallbackFuzzTest(const uint8_t *data, size_t size)

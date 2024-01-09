@@ -45,6 +45,7 @@ constexpr int32_t MIN_BYTE = 0;
 constexpr int32_t MAX_BYTE = 255;
 constexpr int32_t BYTE_16 = 16;
 constexpr uint32_t BIT_NUM_BYTE = 8;
+constexpr int32_t BITS_32 = 32;
 constexpr int32_t BITS_24 = 24;
 constexpr int32_t BITS_16 = 16;
 constexpr int32_t BITS_8 = 8;
@@ -239,10 +240,6 @@ uint32_t ConvertIpv4Address(const std::string &address)
 
 int32_t Ipv4PrefixLen(const std::string &ip)
 {
-    constexpr int32_t BIT32 = 32;
-    constexpr int32_t BIT24 = 24;
-    constexpr int32_t BIT16 = 16;
-    constexpr int32_t BIT8 = 8;
     if (ip.empty()) {
         return 0;
     }
@@ -257,21 +254,21 @@ int32_t Ipv4PrefixLen(const std::string &ip)
     if (ret != sizeof(int32_t)) {
         return 0;
     }
-    ipNum = (c1 << static_cast<uint32_t>(BIT24)) | (c2 << static_cast<uint32_t>(BIT16)) |
-            (c3 << static_cast<uint32_t>(BIT8)) | c4;
+    ipNum = (c1 << static_cast<uint32_t>(BITS_24)) | (c2 << static_cast<uint32_t>(BITS_16)) |
+            (c3 << static_cast<uint32_t>(BITS_8)) | c4;
     if (ipNum == 0xFFFFFFFF) {
-        return BIT32;
+        return BITS_32;
     }
     if (ipNum == 0xFFFFFF00) {
-        return BIT24;
+        return BITS_24;
     }
     if (ipNum == 0xFFFF0000) {
-        return BIT16;
+        return BITS_16;
     }
     if (ipNum == 0xFF000000) {
-        return BIT8;
+        return BITS_8;
     }
-    for (int32_t i = 0; i < BIT32; i++) {
+    for (int32_t i = 0; i < BITS_32; i++) {
         if ((ipNum << i) & 0x80000000) {
             cnt++;
         } else {
@@ -581,7 +578,7 @@ bool IsValidDomain(const std::string &domain)
 
     std::string pattern = HOST_DOMAIN_PATTERN_HEADER;
     pattern = std::accumulate(HOST_DOMAIN_TLDS.begin(), HOST_DOMAIN_TLDS.end(), pattern,
-                              [](const std::string& pattern, const std::string& tlds) { return pattern + tlds + TLDS_SPLIT_SYMBOL; });
+        [](const std::string &pattern, const std::string &tlds) { return pattern + tlds + TLDS_SPLIT_SYMBOL; });
     pattern = pattern.replace(pattern.size() - 1, 1, "") + HOST_DOMAIN_PATTERN_TAIL;
     std::regex reg(pattern);
     if (!std::regex_match(domain, reg)) {

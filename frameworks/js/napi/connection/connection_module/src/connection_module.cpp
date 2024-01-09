@@ -266,9 +266,8 @@ napi_value ConnectionModule::IsDefaultNetMetered(napi_env env, napi_callback_inf
 
 napi_value ConnectionModule::IsDefaultNetMeteredSync(napi_env env, napi_callback_info info)
 {
-    return ModuleTemplate::InterfaceSync<IsDefaultNetMeteredContext>(env, info, FUNCTION_IS_DEFAULT_NET_METERED, nullptr,
-                                                                     ConnectionExec::ExecIsDefaultNetMetered,
-                                                                     ConnectionExec::IsDefaultNetMeteredCallback);
+    return ModuleTemplate::InterfaceSync<IsDefaultNetMeteredContext>(env, info, FUNCTION_IS_DEFAULT_NET_METERED,
+        nullptr, ConnectionExec::ExecIsDefaultNetMetered, ConnectionExec::IsDefaultNetMeteredCallback);
 }
 
 napi_value ConnectionModule::GetNetCapabilities(napi_env env, napi_callback_info info)

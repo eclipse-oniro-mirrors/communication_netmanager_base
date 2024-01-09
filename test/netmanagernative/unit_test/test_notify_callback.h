@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef  TEST_NOTIFY_CALLBACK_H__
-#define  TEST_NOTIFY_CALLBACK_H__
+#ifndef TEST_NOTIFY_CALLBACK_H
+#define TEST_NOTIFY_CALLBACK_H
 
 #include "notify_callback_stub.h"
 
@@ -35,4 +35,4 @@ public:
 };
 } // namespace NetsysNative
 } // namespace OHOS
-#endif
+#endif // TEST_NOTIFY_CALLBACK_H

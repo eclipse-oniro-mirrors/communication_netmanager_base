@@ -26,7 +26,7 @@ using namespace OHOS::nmd;
 using namespace OHOS;
 using namespace OHOS::NetsysNative;
 const int NETID = 12;
-const int NETID_ = 13;
+const int NETID_TEST = 13;
 const int IPVERSION = 4;
 const int MASK_MAX = 65535;
 namespace {
@@ -127,7 +127,7 @@ void TestNetworkSetDefault()
 
 void TestNetworkSetDefaultWIFI()
 {
-    int netid = NETID_;
+    int netid = NETID_TEST;
     if (netsysServiceR_ == nullptr) {
         std::cout << " TestNetworkSetDefaultWIFI netsysServiceR_ is nullptr" << std::endl;
         return;
@@ -169,11 +169,11 @@ void TestNetworkGetDefaultUnion()
     netsysServiceR_->NetworkSetDefault(NETID);
     id = netsysServiceR_->NetworkGetDefault();
     NETNATIVE_LOGE("NetworkDefault  after SET  id =%{public}d", id);
-    ret = netsysServiceR_->NetworkCreatePhysical(NETID_, OHOS::nmd::NetworkPermission::PERMISSION_NONE);
+    ret = netsysServiceR_->NetworkCreatePhysical(NETID_TEST, OHOS::nmd::NetworkPermission::PERMISSION_NONE);
     NETNATIVE_LOGE("NetworkCreatePhysical_A   ret =%{public}d", ret);
     id = netsysServiceR_->NetworkGetDefault();
     NETNATIVE_LOGE("NetworkDefault   id =%{public}d", id);
-    netsysServiceR_->NetworkSetDefault(NETID_);
+    netsysServiceR_->NetworkSetDefault(NETID_TEST);
     id = netsysServiceR_->NetworkGetDefault();
     NETNATIVE_LOGE("NetworkDefault  after SET  id =%{public}d", id);
     netsysServiceR_->NetworkClearDefault();
@@ -241,7 +241,7 @@ void TestNetworkAddInterfaceWIFI()
         return;
     }
     int ret = -1;
-    ret = netsysServiceR_->NetworkCreatePhysical(NETID_, OHOS::nmd::NetworkPermission::PERMISSION_NONE);
+    ret = netsysServiceR_->NetworkCreatePhysical(NETID_TEST, OHOS::nmd::NetworkPermission::PERMISSION_NONE);
     NETNATIVE_LOGE("TestNetworkAddInterfaceWIFI  ret = %{public}d", ret);
     ret = netsysServiceR_->NetworkAddInterface(NETID, "wlan0");
     NETNATIVE_LOGE("TestNetworkAddInterfaceWIFI   ret = %{public}d", ret);
@@ -253,7 +253,7 @@ void TestNetworkRemoveInterfaceWIFI()
         std::cout << " TestNetworkRemoveInterfaceWIFI  netsysServiceR_ is nullptr" << std::endl;
         return;
     }
-    int ret = netsysServiceR_->NetworkRemoveInterface(NETID_, "wlan0");
+    int ret = netsysServiceR_->NetworkRemoveInterface(NETID_TEST, "wlan0");
     NETNATIVE_LOGE("TestNetworkRemoveInterfaceWIFI ret = %{public}d", ret);
 }
 

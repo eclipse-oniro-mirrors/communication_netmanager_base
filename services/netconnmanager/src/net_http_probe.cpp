@@ -357,7 +357,7 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
         return true;
     }
 
-    std::string proxyHost, proxyDomain, proxyIpAddress;
+    std::string proxyHost;
     int32_t proxyPort = 0;
     /* Prioritize the use of global HTTP proxy, if there is no global proxy, use network http proxy */
     if (!globalHttpProxy_.GetHost().empty()) {
@@ -370,12 +370,12 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
         return true;
     }
 
-    proxyDomain = ExtractDomainFormUrl(proxyHost);
+    std::string proxyDomain = ExtractDomainFormUrl(proxyHost);
     if (proxyDomain.empty()) {
         NETMGR_LOG_E("Extract proxy domain from host return empty.");
         return true;
     }
-    proxyIpAddress = GetAddrInfo(proxyDomain);
+    std::string proxyIpAddress = GetAddrInfo(proxyDomain);
 
     NETMGR_LOG_I("Using proxy for http probe on netId:[%{public}d]", netId_);
     bool ret = false;
@@ -440,7 +440,8 @@ bool NetHttpProbe::SendDnsProbe(ProbeType probeType, const std::string &httpUrl,
         return true;
     }
 
-    std::string httpDomain, httpsDomain;
+    std::string httpDomain;
+    std::string httpsDomain;
     if (HasProbeType(probeType, ProbeType::PROBE_HTTP)) {
         httpDomain = ExtractDomainFormUrl(httpUrl);
         if (httpDomain.empty()) {

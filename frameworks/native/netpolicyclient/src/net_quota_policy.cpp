@@ -25,6 +25,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 static constexpr uint32_t MAX_POLICY_SIZE = 100;
+static constexpr int32_t INVALID_VALUE = -1;
 
 bool NetQuotaPolicy::Marshalling(Parcel &parcel) const
 {
@@ -189,7 +190,10 @@ int64_t NetQuotaPolicy::GetPeriodStart()
         quotapolicy.periodDuration = PERIOD_MONTH;
     }
     time_t timeNow;
-    time(&timeNow);
+    time_t now = time(&timeNow);
+    if (now < 0) {
+        return INVALID_VALUE;
+    }
     struct tm tm;
     localtime_r(&timeNow, &tm);
     std::string cycle = quotapolicy.periodDuration.substr(0, 1);
