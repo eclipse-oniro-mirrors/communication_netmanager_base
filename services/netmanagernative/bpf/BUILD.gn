@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -34,6 +34,8 @@ ohos_shared_library("netsys_bpf_utils") {
     all_ubsan = true
     debug = false
   }
+
+  branch_protector_ret = "pac_ret"
 
   sources = [
     "$NETSTATSMANAGER_INNERKITS_SOURCE_DIR/src/net_stats_info.cpp",
