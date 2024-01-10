@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -327,13 +327,9 @@ int32_t DnsLookUpParse::DnsGetAnswers(GetAnswers getAnswers, const uint8_t *cons
     return DNS_ERR_INTERNAL;
 }
 
-__attribute__((no_sanitize("cfi"))) int32_t DnsLookUpParse::DnsSendQueries(GetAnswers getAnswers,
-    const uint8_t *const *queries, const int32_t *queriesLens, uint8_t *const *answers, int32_t *answersLens)
+int32_t DnsLookUpParse::DnsSendQueries(GetAnswers getAnswers, const uint8_t *const *queries, const int32_t *queriesLens,
+                                       uint8_t *const *answers, int32_t *answersLens)
 {
-    if (getAnswers.attempts == 0) {
-        return DNS_ERR_INTERNAL;
-    }
-
     pollfd pfd{};
     pfd.fd = getAnswers.fd;
     pfd.events = POLLIN;
