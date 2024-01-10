@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,7 @@ void NetHttpProxyTracker::ReadFromSettingsData(HttpProxy &httpProxy)
     httpProxy = {host, port, exclusionList};
 }
 
-__attribute__((no_sanitize("cfi"))) bool NetHttpProxyTracker::WriteToSettingsData(HttpProxy &httpProxy)
+bool NetHttpProxyTracker::WriteToSettingsData(HttpProxy &httpProxy)
 {
     std::string host =
         httpProxy.GetHost().empty() ? Base64::Encode(DEFAULT_HTTP_PROXY_HOST) : Base64::Encode(httpProxy.GetHost());

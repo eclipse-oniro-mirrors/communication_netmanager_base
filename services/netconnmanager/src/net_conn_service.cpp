@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,7 @@ void NetConnService::OnStart()
     NETMGR_LOG_D("NetConnService::OnStart end");
 }
 
-__attribute__((no_sanitize("cfi"))) void NetConnService::CreateDefaultRequest()
+void NetConnService::CreateDefaultRequest()
 {
     if (!defaultNetActivate_) {
         defaultNetSpecifier_ = (std::make_unique<NetSpecifier>()).release();
@@ -966,8 +966,7 @@ void NetConnService::SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, 
     }
 }
 
-__attribute__((no_sanitize("cfi"))) void NetConnService::CallbackForSupplier(
-    sptr<NetSupplier> &supplier, CallbackType type)
+void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackType type)
 {
     if (supplier == nullptr) {
         NETMGR_LOG_E("supplier is nullptr");
@@ -1457,8 +1456,7 @@ int32_t NetConnService::SetAppNet(int32_t netId)
     return NETMANAGER_SUCCESS;
 }
 
-__attribute__((no_sanitize("cfi"))) int32_t NetConnService::RegisterNetInterfaceCallback(
-    const sptr<INetInterfaceStateCallback> &callback)
+int32_t NetConnService::RegisterNetInterfaceCallback(const sptr<INetInterfaceStateCallback> &callback)
 {
     if (callback == nullptr) {
         NETMGR_LOG_E("callback is nullptr");
@@ -1628,7 +1626,7 @@ int32_t NetConnService::NetInterfaceStateCallback::OnBandwidthReachedLimit(const
     return NETMANAGER_SUCCESS;
 }
 
-__attribute__((no_sanitize("cfi"))) int32_t NetConnService::NetInterfaceStateCallback::RegisterInterfaceCallback(
+int32_t NetConnService::NetInterfaceStateCallback::RegisterInterfaceCallback(
     const sptr<INetInterfaceStateCallback> &callback)
 {
     if (callback == nullptr) {
