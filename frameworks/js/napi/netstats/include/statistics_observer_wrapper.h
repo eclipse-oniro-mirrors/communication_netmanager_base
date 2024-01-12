@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef statistics_observer_wrapper_H
-#define statistics_observer_wrapper_H
+#ifndef STATISTICS_OBSERVER_WRAPPER_H
+#define STATISTICS_OBSERVER_WRAPPER_H
 
 #include <initializer_list>
 #include <string>
@@ -51,4 +51,4 @@ private:
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // statistics_observer_wrapper_H
+#endif // STATISTICS_OBSERVER_WRAPPER_H

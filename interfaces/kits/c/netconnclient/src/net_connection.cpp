@@ -65,7 +65,10 @@ int32_t OH_NetConn_GetAddrInfo(char *host, char *serv, struct addrinfo *hint, st
         return NETMANAGER_ERR_PARAMETER_ERROR;
     }
 
-    memset(&qp_param, 0, sizeof(struct queryparam));
+    if (memset_s(&qp_param, sizeof(struct queryparam), 0, sizeof(struct queryparam)) != EOK) {
+        NETMGR_LOG_E("OH_NetConn_GetAddrInfo memset_s failed!");
+        return NETMANAGER_ERR_MEMSET_FAIL;
+    }
     qp_param.qp_netid = netId;
     qp_param.qp_type = 0;
 

@@ -511,7 +511,7 @@ int32_t InterfaceManager::MacStringToArray(const std::string &macAddr, sockaddr 
     }
 
     for (int i = 0; i < MAC_ADDRESS_INT_LEN; i++) {
-        if (sscanf_s(strAddr+MAC_SSCANF_SPACE*i, "%2x", &v, sizeof(uint32_t)) <= 0) {
+        if (sscanf_s(strAddr+MAC_SSCANF_SPACE*i, "%2x", &v) <= 0) {
             NETNATIVE_LOGE("sscanf_s is false");
             return NETMANAGER_ERR_OPERATION_FAILED;
         }

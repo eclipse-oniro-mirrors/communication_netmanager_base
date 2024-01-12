@@ -33,7 +33,9 @@ constexpr const char *DEFAULT_HTTP_PROXY_EXCLUSION_LIST = "NONE";
 void NetHttpProxyTracker::ReadFromSettingsData(HttpProxy &httpProxy)
 {
     auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
-    std::string proxyHost, proxyPort, proxyExclusions;
+    std::string proxyHost;
+    std::string proxyPort;
+    std::string proxyExclusions;
     Uri hostUri(GLOBAL_PROXY_HOST_URI);
     int32_t ret = dataShareHelperUtils->Query(hostUri, KEY_GLOBAL_PROXY_HOST, proxyHost);
     if (ret != NETMANAGER_SUCCESS) {

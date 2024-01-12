@@ -45,16 +45,6 @@ constexpr std::initializer_list<NetBearType> BEAR_TYPE_LIST = {
     NetBearType::BEARER_CELLULAR, NetBearType::BEARER_WIFI, NetBearType::BEARER_BLUETOOTH,
     NetBearType::BEARER_ETHERNET, NetBearType::BEARER_VPN,  NetBearType::BEARER_WIFI_AWARE,
 };
-
-bool GetIfaceNamesFromManager(std::list<std::string> &ifaceNames)
-{
-    int32_t ret = NetManagerCenter::GetInstance().GetIfaceNames(BEARER_CELLULAR, ifaceNames);
-    if (ret != NETMANAGER_SUCCESS || ifaceNames.empty()) {
-        NETMGR_LOG_E("Iface list is empty, ret = %{public}d", ret);
-        return false;
-    }
-    return true;
-}
 } // namespace
 const bool REGISTER_LOCAL_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<NetStatsService>::GetInstance().get());
@@ -406,6 +396,16 @@ int32_t NetStatsService::GetCookieTxBytes(uint64_t &stats, uint64_t cookie)
 {
     return NetsysController::GetInstance().GetCookieStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_TX_BYTES),
                                                           cookie);
+}
+
+bool NetStatsService::GetIfaceNamesFromManager(std::list<std::string> &ifaceNames)
+{
+    int32_t ret = NetManagerCenter::GetInstance().GetIfaceNames(BEARER_CELLULAR, ifaceNames);
+    if (ret != NETMANAGER_SUCCESS || ifaceNames.empty()) {
+        NETMGR_LOG_E("Iface list is empty, ret = %{public}d", ret);
+        return false;
+    }
+    return true;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -311,13 +311,13 @@ static long GetUidTrafficFromBpf(int uid, int cgroupType)
         close(sock);
         return -1;
     }
-    sockaddr_un s_un;
-    s_un.sun_family = AF_UNIX;
-    if (strcpy_s(s_un.sun_path, sizeof(s_un.sun_path), UID_TRAFFIC_BPF_PATH.c_str()) != 0) {
+    sockaddr_un sockAddrInfo;
+    sockAddrInfo.sun_family = AF_UNIX;
+    if (strcpy_s(sockAddrInfo.sun_path, sizeof(sockAddrInfo.sun_path), UID_TRAFFIC_BPF_PATH.c_str()) != 0) {
         close(sock);
         return -1;
     }
-    if (connect(sock, reinterpret_cast<sockaddr *>(&s_un), sizeof(s_un)) != 0) {
+    if (connect(sock, reinterpret_cast<sockaddr *>(&sockAddrInfo), sizeof(sockAddrInfo)) != 0) {
         close(sock);
         return -1;
     }

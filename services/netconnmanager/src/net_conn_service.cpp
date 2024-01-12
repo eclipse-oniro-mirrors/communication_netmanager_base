@@ -836,11 +836,12 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
             supplier = iter->second;
         }
     }
-    NETMGR_LOG_I("FindBestNetworkForRequest exit, bestScore[%{public}d], bestSupplier[%{public}d, %{public}s], request[%{public}d] is [%{public}s],",
-                 bestScore, supplier ? supplier->GetSupplierId() : 0,
-                 supplier ? supplier->GetNetSupplierIdent().c_str() : "null",
-                 netActivateNetwork->GetRequestId(),
-                 netActivateNetwork->GetNetSpecifier() ? netActivateNetwork->GetNetSpecifier()->ToString(" ").c_str() : "null");
+    NETMGR_LOG_I(
+        "FindBestNetworkForRequest exit, bestScore[%{public}d], bestSupplier[%{public}d, %{public}s], "
+        "request[%{public}d] is [%{public}s],",
+        bestScore, supplier ? supplier->GetSupplierId() : 0,
+        supplier ? supplier->GetNetSupplierIdent().c_str() : "null", netActivateNetwork->GetRequestId(),
+        netActivateNetwork->GetNetSpecifier() ? netActivateNetwork->GetNetSpecifier()->ToString(" ").c_str() : "null");
     return bestScore;
 }
 
@@ -1044,12 +1045,12 @@ void NetConnService::CallbackForAvailable(sptr<NetSupplier> &supplier, const spt
 
 void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<NetSupplier> &newSupplier)
 {
-    NETMGR_LOG_I("MakeDefaultNetWork in, oldSupplier[%{public}d, %{public}s], newSupplier[%{public}d, %{public}s], old equals new is [%{public}d]",
-                 oldSupplier ? oldSupplier->GetSupplierId() : 0,
-                 oldSupplier ? oldSupplier->GetNetSupplierIdent().c_str() : "null",
-                 newSupplier ? newSupplier->GetSupplierId() : 0,
-                 newSupplier ? newSupplier->GetNetSupplierIdent().c_str() : "null",
-                 oldSupplier == newSupplier);
+    NETMGR_LOG_I(
+        "MakeDefaultNetWork in, oldSupplier[%{public}d, %{public}s], newSupplier[%{public}d, %{public}s], old equals "
+        "new is [%{public}d]", oldSupplier ? oldSupplier->GetSupplierId() : 0,
+        oldSupplier ? oldSupplier->GetNetSupplierIdent().c_str() : "null",
+        newSupplier ? newSupplier->GetSupplierId() : 0,
+        newSupplier ? newSupplier->GetNetSupplierIdent().c_str() : "null", oldSupplier == newSupplier);
     if (oldSupplier == newSupplier) {
         NETMGR_LOG_D("old supplier equal to new supplier.");
         return;

@@ -125,8 +125,10 @@ int32_t DnsLookUpName::NameFromDns(AddrData buf[MAXADDRS], char canon[CANON_LINE
         {.af = AF_INET6, .rr = RR_A},
         {.af = AF_INET, .rr = RR_AAAA},
     };
-    uint8_t queriesBuf[ARG_INDEX_2][BUFF_MAX_LEN], answersBuf[ARG_INDEX_2][PACKET_LINE];
-    int32_t queriesLens[ARG_INDEX_2], answersLens[ARG_INDEX_2];
+    uint8_t queriesBuf[ARG_INDEX_2][BUFF_MAX_LEN];
+    uint8_t answersBuf[ARG_INDEX_2][PACKET_LINE];
+    int32_t queriesLens[ARG_INDEX_2];
+    int32_t answersLens[ARG_INDEX_2];
     int32_t queriesNum = 0;
     for (int32_t i = 0; i < BUFF_NUM; i++) {
         if (family != afrr[i].af) {
@@ -173,7 +175,8 @@ int32_t DnsLookUpName::NameFromDnsSearch(AddrData buf[MAXADDRS], char canon[CANO
     if (ret != 0) {
         return ret;
     }
-    char *pos, *temp;
+    char *pos;
+    char *temp;
     for (pos = search; *pos; pos = temp) {
         for (; isspace(*pos); pos++) {
         };
@@ -414,8 +417,10 @@ void DnsLookUpName::LookUpNameParam(AddrData *buf, int32_t cnt, int32_t netId)
         sockaddr_in6 da6 = {.sin6_family = AF_INET6, .sin6_port = PORT_NUM, .sin6_scope_id = buf[i].scopeid};
         sockaddr_in sa4 = {0};
         sockaddr_in da4 = {.sin_family = AF_INET, .sin_port = PORT_NUM};
-        void *sa, *da;
-        socklen_t saLen, daLen;
+        void *sa;
+        void *da;
+        socklen_t saLen;
+        socklen_t daLen;
         if (family == AF_INET6) {
             if (memcpy_s(da6.sin6_addr.s6_addr, ADDR_A6_LEN, buf[i].addr, ADDR_A6_LEN) != 0) {
                 NETNATIVE_LOGE("memcpy_s faild");

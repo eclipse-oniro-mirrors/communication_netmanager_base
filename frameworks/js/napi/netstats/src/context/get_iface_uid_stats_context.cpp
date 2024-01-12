@@ -56,14 +56,13 @@ void GetIfaceUidStatsContext::ParseParams(napi_value *params, size_t paramsCount
         return;
     }
     bool checkUidType = NapiUtils::GetValueType(
-                            GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0], UID)) == napi_number;
+        GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0], UID)) == napi_number;
     bool checkIfaceType =
         NapiUtils::GetValueType(GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), ifaceInfo, IFACE)) == napi_string;
     bool checkStartType =
         NapiUtils::GetValueType(GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), ifaceInfo, START_TIME)) == napi_number;
     bool checkEndType =
         NapiUtils::GetValueType(GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), ifaceInfo, END_TIME)) == napi_number;
-
     if (!(checkUidType && checkIfaceType && checkStartType && checkEndType)) {
         NETMANAGER_BASE_LOGE("param napi_type error");
         SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);

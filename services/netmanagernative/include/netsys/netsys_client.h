@@ -47,13 +47,7 @@ extern "C" {
 
 bool MakeNonBlock(int sock);
 
-int64_t SendWrapper(int fd, char *buf, size_t len);
-
-int64_t RecvWrapper(int fd, char *buf, size_t len);
-
 int64_t Poll(int sock, short event, int *retry);
-
-bool ProcData(int sock, char *data, size_t size, short event, int64_t (*func)(int fd, char *buf, size_t len));
 
 bool PollSendData(int sock, const char *data, size_t size);
 

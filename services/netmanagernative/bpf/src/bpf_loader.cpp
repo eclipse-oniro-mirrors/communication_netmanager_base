@@ -53,10 +53,11 @@ static constexpr const char *CGROUP_DIR = "/sys/fs/cgroup";
 static constexpr const char *MAPS_DIR = "/sys/fs/bpf/netsys/maps";
 static constexpr const char *PROGS_DIR = "/sys/fs/bpf/netsys/progs";
 
+// There is no limit to the size of SECTION_NAMES.
 static const struct SectionName {
     const char *sectionName;
     size_t sectionNameLength;
-} SECTION_NAMES[] /* NOLINT */ = {
+} SECTION_NAMES[] = {
     DEFINE_SECTION_NAME("kprobe/"),
     DEFINE_SECTION_NAME("kretprobe/"),
     DEFINE_SECTION_NAME("tracepoint/"),
