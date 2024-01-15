@@ -83,18 +83,17 @@ HWTEST_F(NetworkSecurityConfigTest, IsCACertFileNameTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: WriteDataToFile001
- * @tc.desc: Test NetworkSecurityConfig::WriteDataToFile
+ * @tc.name: GetCAFilesFromPathTest001
+ * @tc.desc: Test NetworkSecurityConfig::GetCAFilesFromPath
  * @tc.type: FUNC
  */
-HWTEST_F(NetworkSecurityConfigTest, WriteDataToFile001, TestSize.Level1)
+HWTEST_F(NetworkSecurityConfigTest, GetCAFilesFromPathTest001, TestSize.Level1)
 {
-    const std::string content("-----BEGIN CERTIFICATE-----");
-    const size_t len = content.size();
-    std::string caFilePath("/etc/security/certificates/test.pem");
-    std::cout << "WriteDataToFile001 In" << std::endl;
-    NetworkSecurityConfig::GetInstance().WriteDataToFile(content, len, caFilePath);
-    EXPECT_EQ(content.size(), len);
+    std::string caPath("/etc/security/certificates/test");
+    std::vector<std::string> caFiles;
+    std::cout << "GetCAFilesFromPathTest001 In" << std::endl;
+    NetworkSecurityConfig::GetInstance().GetCAFilesFromPath(caPath, caFiles);
+    EXPECT_EQ(caFiles.size(), 0);
 }
 
 /**
@@ -113,17 +112,16 @@ HWTEST_F(NetworkSecurityConfigTest, AddSurfixToCACertFileNameTest001, TestSize.L
 }
 
 /**
- * @tc.name: ReadHashFromCertdata001
+ * @tc.name: ReadCertFileTest001
  * @tc.desc: Test NetworkSecurityConfig::ReadCertFile
  * @tc.type: FUNC
  */
-HWTEST_F(NetworkSecurityConfigTest, ReadHashFromCertdata001, TestSize.Level1)
+HWTEST_F(NetworkSecurityConfigTest, ReadCertFileTest001, TestSize.Level1)
 {
-    const std::string rawData("-----BEGIN CERTIFICATE-----");
-    std::string subjectHash;
-    std::cout << "ReadHashFromCertdata001 In" << std::endl;
-    NetworkSecurityConfig::GetInstance().ReadHashFromCertdata(rawData, subjectHash);
-    EXPECT_EQ(subjectHash.size(), 0);
+    std::string caFile("cacert.pem");
+    std::cout << "ReadCertFileTest001 In" << std::endl;
+    auto ret = NetworkSecurityConfig::GetInstance().ReadCertFile(caFile);
+    EXPECT_EQ(ret, nullptr);
 }
 
 /**
