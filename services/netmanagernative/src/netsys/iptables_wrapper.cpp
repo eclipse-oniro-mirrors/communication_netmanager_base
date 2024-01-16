@@ -96,10 +96,11 @@ std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::s
         return result_;
     }
     std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
-    std::unique_lock<std::mutex> lock(iptablesMutex_);
     std::function<void()> executeCommandForRes =
         std::bind(&IptablesWrapper::ExecuteCommandForRes, shared_from_this(), cmd);
     handler_->PostTask(executeCommandForRes);
+
+    std::unique_lock<std::mutex> lock(iptablesMutex_);
     auto status = conditionVarLock_.wait_for(lock, std::chrono::milliseconds(IPTABLES_WAIT_FOR_TIME_MS));
     if (status == std::cv_status::timeout) {
         NETNATIVE_LOGI("ExecuteCommandForRes timeout!");
