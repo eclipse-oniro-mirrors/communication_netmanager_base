@@ -268,7 +268,9 @@ std::string NetworkSecurityConfig::ReHashCAPathForX509(const std::string &caPath
 
         constexpr int X509_HASH_LEN = 16;
         char buf[X509_HASH_LEN] = {0};
-        sprintf_s(buf, sizeof(buf), "%08lx", X509_subject_name_hash(x509));
+        if (sprintf_s(buf, sizeof(buf), "%08lx", X509_subject_name_hash(x509)) < 0) {
+            return "";
+        }
         X509_free(x509);
         x509 = nullptr;
 
