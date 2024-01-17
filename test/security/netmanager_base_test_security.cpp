@@ -31,11 +31,45 @@ HapInfoParams netManagerBaseParms = {
     .isSystemApp = true,
 };
 
-PermissionDef testNetConnInternetPermDef = {
-    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+HapInfoParams netConnManagerNotSystemInfo = {
+    .userID = 1,
+    .bundleName = "netmanager_base_test",
+    .instIndex = 0,
+    .appIDDesc = "test",
+};
+
+HapInfoParams netDataShareInfo = {
+    .userID = 100,
+    .bundleName = "netmanager_base_test",
+    .instIndex = 0,
+    .appIDDesc = "test",
+    .isSystemApp = true,
+};
+
+PermissionDef testNetConnInfoPermDef = {
+    .permissionName = "ohos.permission.GET_NETWORK_INFO",
     .bundleName = "netmanager_base_test",
     .grantMode = 1,
-    .availableLevel = OHOS::Security::AccessToken::ATokenAplEnum::APL_SYSTEM_BASIC,
+    .availableLevel = APL_SYSTEM_BASIC,
+    .label = "label",
+    .labelId = 1,
+    .description = "Test ethernet maneger network info",
+    .descriptionId = 1,
+};
+
+PermissionStateFull testNetConnInfoState = {
+    .permissionName = "ohos.permission.GET_NETWORK_INFO",
+    .isGeneral = true,
+    .resDeviceID = { "local" },
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .grantFlags = { 2 },
+};
+
+PermissionDef testNetConnInternetPermDef = {
+    .permissionName = "ohos.permission.INTERNET",
+    .bundleName = "netmanager_base_test",
+    .grantMode = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
     .label = "label",
     .labelId = 1,
     .description = "Test net connect manager internet",
@@ -43,6 +77,25 @@ PermissionDef testNetConnInternetPermDef = {
 };
 
 PermissionStateFull testNetConnInternetState = {
+    .permissionName = "ohos.permission.INTERNET",
+    .isGeneral = true,
+    .resDeviceID = { "local" },
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .grantFlags = { 2 },
+};
+
+PermissionDef testNetConnInternalPermDef = {
+    .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
+    .bundleName = "netmanager_base_test",
+    .grantMode = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+    .label = "label",
+    .labelId = 1,
+    .description = "Test net connect manager internet",
+    .descriptionId = 1,
+};
+
+PermissionStateFull testNetConnInternalState = {
     .permissionName = "ohos.permission.CONNECTIVITY_INTERNAL",
     .isGeneral = true,
     .resDeviceID = { "local" },
@@ -50,31 +103,89 @@ PermissionStateFull testNetConnInternetState = {
     .grantFlags = { 2 },
 };
 
-PermissionDef getNetworkInfoPermDef = {
-    .permissionName = "ohos.permission.GET_NETWORK_INFO",
+PermissionDef testNetPolicyStrategyPermDef = {
+    .permissionName = "ohos.permission.MANAGE_NET_STRATEGY",
     .bundleName = "netmanager_base_test",
     .grantMode = 1,
-    .availableLevel = OHOS::Security::AccessToken::ATokenAplEnum::APL_SYSTEM_BASIC,
+    .availableLevel = APL_SYSTEM_BASIC,
     .label = "label",
     .labelId = 1,
-    .description = "Test net connect manager network info",
+    .description = "Test net policy manager",
     .descriptionId = 1,
 };
 
-PermissionStateFull getNetworkInfoState = {
-    .permissionName = "ohos.permission.GET_NETWORK_INFO",
+PermissionStateFull testManageNetStrategyState = {
+    .permissionName = "ohos.permission.MANAGE_NET_STRATEGY",
     .isGeneral = true,
     .resDeviceID = { "local" },
     .grantStatus = { PermissionState::PERMISSION_GRANTED },
     .grantFlags = { 2 },
 };
 
+PermissionDef testNetSysInternalDef = {
+    .permissionName = "ohos.permission.NETSYS_INTERNAL",
+    .bundleName = "netmanager_base_test",
+    .grantMode = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+    .label = "label",
+    .labelId = 1,
+    .description = "Test netsys_native_manager_test",
+    .descriptionId = 1,
+};
+
+PermissionStateFull testNetSysInternalState = {
+    .permissionName = "ohos.permission.NETSYS_INTERNAL",
+    .isGeneral = true,
+    .resDeviceID = { "local" },
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .grantFlags = { 2 },
+};
+
+PermissionDef testNetConnSettingsPermDef = {
+    .permissionName = "ohos.permission.MANAGE_SECURE_SETTINGS",
+    .bundleName = "netmanager_base_test",
+    .grantMode = 1,
+    .label = "label",
+    .labelId = 1,
+    .description = "Test net data share",
+    .descriptionId = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+};
+
+PermissionStateFull testNetConnSettingsState = {
+    .grantFlags = { 2 },
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .isGeneral = true,
+    .permissionName = "ohos.permission.MANAGE_SECURE_SETTINGS",
+    .resDeviceID = { "local" },
+};
+
+PermissionDef testNetStatsPermDef = {
+    .permissionName = "ohos.permission.GET_NETWORK_STATS",
+    .bundleName = "netmanager_base_test",
+    .grantMode = 1,
+    .availableLevel = APL_SYSTEM_BASIC,
+    .label = "label",
+    .labelId = 1,
+    .description = "Test net stats manager",
+    .descriptionId = 1,
+};
+
+PermissionStateFull testNetStatsState = {
+    .permissionName = "ohos.permission.GET_NETWORK_STATS",
+    .isGeneral = true,
+    .resDeviceID = { "local" },
+    .grantStatus = { PermissionState::PERMISSION_GRANTED },
+    .grantFlags = { 2 },
+};
 
 HapPolicyParams netManagerBasePolicy = {
     .apl = APL_SYSTEM_BASIC,
     .domain = "test.domain",
-    .permList = { getNetworkInfoPermDef, testNetConnInternetPermDef },
-    .permStateList = { getNetworkInfoState, testNetConnInternetState },
+    .permList = { testNetConnInfoPermDef, testNetConnInternetPermDef, testNetConnInternalPermDef,
+        testNetPolicyStrategyPermDef, testNetSysInternalDef, testNetStatsPermDef },
+    .permStateList = { testNetConnInfoState, testNetConnInternetState, testNetConnInternalState,
+        testManageNetStrategyState, testNetSysInternalState, testNetStatsState },
 };
 
 PermissionDef testNoPermissionDef = {
@@ -102,6 +213,13 @@ HapPolicyParams testNoPermission = {
     .permList = { testNoPermissionDef },
     .permStateList = { testNoPermissionState },
 };
+
+HapPolicyParams netDataSharePolicy = {
+    .apl = APL_SYSTEM_BASIC,
+    .domain = "test.domain",
+    .permList = { testNetConnSettingsPermDef },
+    .permStateList = { testNetConnSettingsState },
+};
 } // namespace
 
 NetManagerBaseAccessToken::NetManagerBaseAccessToken() : currentID_(GetSelfTokenID())
@@ -117,27 +235,40 @@ NetManagerBaseAccessToken::~NetManagerBaseAccessToken()
     SetSelfTokenID(currentID_);
 }
 
-NetManagerBaseNotSystemAccessToken::NetManagerBaseNotSystemAccessToken() : currentID_(GetSelfTokenID())
+NetManagerBaseNotSystemToken::NetManagerBaseNotSystemToken() : currentID_(GetSelfTokenID())
 {
-    AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(netManagerBaseParms, netManagerBasePolicy);
+    AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(netConnManagerNotSystemInfo, netManagerBasePolicy);
     accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
     SetSelfTokenID(accessID_);
 }
 
-NetManagerBaseNotSystemAccessToken::~NetManagerBaseNotSystemAccessToken()
+NetManagerBaseNotSystemToken::~NetManagerBaseNotSystemToken()
 {
     AccessTokenKit::DeleteToken(accessID_);
     SetSelfTokenID(currentID_);
 }
 
-NoPermissionAccessToken::NoPermissionAccessToken() : currentID_(GetSelfTokenID())
+NetManagerBaseNoPermissionToken::NetManagerBaseNoPermissionToken() : currentID_(GetSelfTokenID())
 {
     AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(netManagerBaseParms, testNoPermission);
     accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
     SetSelfTokenID(tokenIdEx.tokenIDEx);
 }
 
-NoPermissionAccessToken::~NoPermissionAccessToken()
+NetManagerBaseNoPermissionToken::~NetManagerBaseNoPermissionToken()
+{
+    AccessTokenKit::DeleteToken(accessID_);
+    SetSelfTokenID(currentID_);
+}
+
+NetManagerBaseDataShareToken::NetManagerBaseDataShareToken() : currentID_(GetSelfTokenID())
+{
+    AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(netDataShareInfo, netDataSharePolicy);
+    accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
+    SetSelfTokenID(tokenIdEx.tokenIDEx);
+}
+
+NetManagerBaseDataShareToken::~NetManagerBaseDataShareToken()
 {
     AccessTokenKit::DeleteToken(accessID_);
     SetSelfTokenID(currentID_);

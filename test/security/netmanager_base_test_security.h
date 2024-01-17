@@ -30,20 +30,30 @@ private:
     Security::AccessToken::AccessTokenID accessID_ = 0;
 };
 
-class NetManagerBaseNotSystemAccessToken {
+class NetManagerBaseNotSystemToken {
 public:
-    NetManagerBaseNotSystemAccessToken();
-    ~NetManagerBaseNotSystemAccessToken();
+    NetManagerBaseNotSystemToken();
+    ~NetManagerBaseNotSystemToken();
 
 private:
     Security::AccessToken::AccessTokenID currentID_ = 0;
     Security::AccessToken::AccessTokenID accessID_ = 0;
 };
 
-class NoPermissionAccessToken {
+class NetManagerBaseNoPermissionToken {
 public:
-    NoPermissionAccessToken();
-    ~NoPermissionAccessToken();
+    NetManagerBaseNoPermissionToken();
+    ~NetManagerBaseNoPermissionToken();
+
+private:
+    Security::AccessToken::AccessTokenID currentID_ = 0;
+    Security::AccessToken::AccessTokenID accessID_ = 0;
+};
+
+class NetManagerBaseDataShareToken {
+public:
+    NetManagerBaseDataShareToken();
+    ~NetManagerBaseDataShareToken();
 
 private:
     Security::AccessToken::AccessTokenID currentID_ = 0;
