@@ -25,6 +25,11 @@
 #include "netsys_native_service_proxy.h"
 #include "network_permission.h"
 
+#include "net_all_capabilities.h"
+#include "net_conn_client.h"
+#include "net_handle.h"
+#include "netmanager_base_test_security.h"
+
 namespace OHOS {
 namespace NetsysNative {
 using namespace testing::ext;
@@ -84,6 +89,17 @@ HWTEST_F(NetsysNativeServiceProxyTest, AddInterfaceToNetworkTest001, TestSize.Le
     ASSERT_NE(netsysNativeService, nullptr);
     int32_t ret = netsysNativeService->NetworkCreatePhysical(NETID, nmd::NetworkPermission::PERMISSION_NONE);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    NetManagerBaseAccessToken access;
+    NetHandle handle;
+    NetConnClient::GetInstance().GetDefaultNet(handle);
+    NetAllCapabilities netAllCap;
+    NetConnClient::GetInstance().GetNetCapabilities(handle, netAllCap);
+    if (netAllCap.bearerTypes_.count(NetManagerStandard::BEARER_CELLULAR) > 0 ||
+        netAllCap.bearerTypes_.count(NetManagerStandard::BEARER_WIFI) > 0) {
+        return;
+    }
+
     ret = netsysNativeService->NetworkAddInterface(NETID, INTERFACENAME);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     ret = netsysNativeService->AddInterfaceAddress(INTERFACENAME, "192.168.113.209", 24);

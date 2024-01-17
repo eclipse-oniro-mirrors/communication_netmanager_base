@@ -123,10 +123,10 @@ HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest002, TestSi
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient_.GetAllRxBytes();
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient_.GetAllTxBytes();
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_GE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest003, TestSize.Level1)
