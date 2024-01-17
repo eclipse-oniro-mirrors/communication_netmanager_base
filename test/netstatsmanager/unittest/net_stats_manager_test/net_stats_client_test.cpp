@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,8 @@
 
 #include <gtest/gtest.h>
 
+#include "netmanager_base_test_security.h"
+
 #ifdef GTEST_API_
 #define private public
 #endif
@@ -27,7 +29,6 @@
 #include "net_stats_callback_test.h"
 #include "net_stats_client.h"
 #include "net_stats_constants.h"
-#include "net_stats_security.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -210,7 +211,7 @@ HWTEST_F(NetStatsClientTest, GetUidTxBytesTest001, TestSize.Level1)
 
 HWTEST_F(NetStatsClientTest, NetStatsClient001, TestSize.Level1)
 {
-    NetStatsSecurityAccessToken token;
+    NetManagerBaseAccessToken token;
     NetStatsInfo info;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetIfaceStatsDetail(MOCK_IFACE, 0, UINT32_MAX, info);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
@@ -219,7 +220,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient001, TestSize.Level1)
 
 HWTEST_F(NetStatsClientTest, NetStatsClient002, TestSize.Level1)
 {
-    NetStatsSecurityAccessToken token;
+    NetManagerBaseAccessToken token;
     NetStatsInfo info;
     int32_t ret =
         DelayedSingleton<NetStatsClient>::GetInstance()->GetUidStatsDetail(MOCK_IFACE, MOCK_UID, 0, UINT32_MAX, info);
@@ -231,7 +232,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient003, TestSize.Level1)
 {
     NETMGR_LOG_I("NetStatsClientTest::NetStatsClient003 enter");
     std::string iface = "test_iface";
-    NetStatsSecurityAccessToken token;
+    NetManagerBaseAccessToken token;
     NetStatsInfo info;
     info.iface_ = iface;
     info.date_ = MOCK_DATE;
@@ -268,7 +269,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient004, TestSize.Level1)
 
 HWTEST_F(NetStatsClientTest, NetStatsClient005, TestSize.Level1)
 {
-    NetStatsSecurityAccessToken token;
+    NetManagerBaseAccessToken token;
     NetStatsInfo info;
     info.iface_ = MOCK_IFACE;
     info.date_ = MOCK_DATE;

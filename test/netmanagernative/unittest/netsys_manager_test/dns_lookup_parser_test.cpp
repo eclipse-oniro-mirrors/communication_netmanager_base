@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,6 +74,18 @@ void SetSocAddrTest002(const std::shared_ptr<DnsLookUpParse> &ins)
     ins->SetSocAddr(socketFd, nns);
     close(socketFd);
     socketFd = -1;
+}
+
+int32_t ResMkQueryTest(
+    const std::shared_ptr<DnsLookUpParse> &ins, const int32_t op, const std::string &dName, const int32_t bufLen)
+{
+    int32_t mineClass = 0;
+    int32_t type = 0;
+    const uint8_t *data = nullptr;
+    int32_t dataLen = 0;
+    const uint8_t *newrr = nullptr;
+    uint8_t *buf = nullptr;
+    return ins->ResMkQuery(op, dName, mineClass, type, data, dataLen, newrr, buf, bufLen);
 }
 } // namespace
 class DNSLookupParserTest : public testing::Test {
@@ -541,14 +553,9 @@ HWTEST_F(DNSLookupParserTest, ResMkQuery001, TestSize.Level1)
     int32_t op = 0;
     std::string dName = "test name";
     dName[dName.length() - 1] = DOT;
-    int32_t mineClass = 0;
-    int32_t type = 0;
-    const uint8_t *data = nullptr;
-    int32_t dataLen = 0;
-    const uint8_t *newrr = nullptr;
-    uint8_t *buf = nullptr;
     int32_t bufLen = 0;
-    auto ret = instance_->ResMkQuery(op, dName, mineClass, type, data, dataLen, newrr, buf, bufLen);
+
+    auto ret = ResMkQueryTest(instance_, op, dName, bufLen);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 
@@ -559,14 +566,9 @@ HWTEST_F(DNSLookupParserTest, ResMkQuery002, TestSize.Level1)
     for (int32_t i = 0; i < HOST_MAX_LEN; i++) {
         dName.append("a");
     }
-    int32_t mineClass = 0;
-    int32_t type = 0;
-    const uint8_t *data = nullptr;
-    int32_t dataLen = 0;
-    const uint8_t *newrr = nullptr;
-    uint8_t *buf = nullptr;
+
     int32_t bufLen = 0;
-    auto ret = instance_->ResMkQuery(op, dName, mineClass, type, data, dataLen, newrr, buf, bufLen);
+    auto ret = ResMkQueryTest(instance_, op, dName, bufLen);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 
@@ -577,14 +579,9 @@ HWTEST_F(DNSLookupParserTest, ResMkQuery003, TestSize.Level1)
     for (int32_t i = 0; i < HOST_MAX_LEN / 2; i++) {
         dName.append("a");
     }
-    int32_t mineClass = 0;
-    int32_t type = 0;
-    const uint8_t *data = nullptr;
-    int32_t dataLen = 0;
-    const uint8_t *newrr = nullptr;
-    uint8_t *buf = nullptr;
+
     int32_t bufLen = 0;
-    auto ret = instance_->ResMkQuery(op, dName, mineClass, type, data, dataLen, newrr, buf, bufLen);
+    auto ret = ResMkQueryTest(instance_, op, dName, bufLen);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 
@@ -595,14 +592,9 @@ HWTEST_F(DNSLookupParserTest, ResMkQuery004, TestSize.Level1)
     for (int32_t i = 0; i < HOST_MAX_LEN / 2; i++) {
         dName.append("a");
     }
-    int32_t mineClass = 0;
-    int32_t type = 0;
-    const uint8_t *data = nullptr;
-    int32_t dataLen = 0;
-    const uint8_t *newrr = nullptr;
-    uint8_t *buf = nullptr;
+
     int32_t bufLen = (HOST_MAX_LEN / 2) + 1;
-    auto ret = instance_->ResMkQuery(op, dName, mineClass, type, data, dataLen, newrr, buf, bufLen);
+    auto ret = ResMkQueryTest(instance_, op, dName, bufLen);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 

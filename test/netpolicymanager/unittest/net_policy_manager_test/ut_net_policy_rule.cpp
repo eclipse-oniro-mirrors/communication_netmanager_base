@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@
 #include "net_policy_client.h"
 #include "net_policy_firewall.h"
 #include "net_policy_rule.h"
-#include "net_policy_security.h"
+#include "netmanager_base_test_security.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -218,7 +218,7 @@ HWTEST_F(UtNetPolicyRule, NetPolicyRule007, TestSize.Level1)
 
 void SetPolicyUid()
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPolicyByUid(
         TEST_UID1, NetUidPolicy::NET_POLICY_ALLOW_METERED_BACKGROUND);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
@@ -226,7 +226,7 @@ void SetPolicyUid()
 
 void SendMessage()
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdlePolicy(true);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
     int32_t result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdleTrustlist({TEST_UID1}, true);
@@ -240,7 +240,7 @@ void SendMessage()
  */
 HWTEST_F(UtNetPolicyRule, NetPolicyRule008, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdlePolicy(false);
     sptr<NetPolicyCallbackTest> callback = GetINetPolicyCallbackSample();
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->RegisterNetPolicyCallback(callback);
@@ -255,11 +255,11 @@ HWTEST_F(UtNetPolicyRule, NetPolicyRule008, TestSize.Level1)
     } else {
         std::cout << "RegisterNetPolicyCallback failed!" << std::endl;
     }
-    NetPolicyAccessToken token1;
+    NetManagerBaseAccessToken token1;
     int32_t result2 = DelayedSingleton<NetPolicyClient>::GetInstance()->UnregisterNetPolicyCallback(callback);
     ASSERT_EQ(result2, NETMANAGER_SUCCESS);
 
-    NetPolicyAccessToken token2;
+    NetManagerBaseAccessToken token2;
     sptr<NetPolicyCallbackTest> callbackR = GetINetPolicyCallbackSample();
     int32_t result3 = DelayedSingleton<NetPolicyClient>::GetInstance()->RegisterNetPolicyCallback(callbackR);
     if (result3 == NETMANAGER_SUCCESS) {
@@ -272,7 +272,7 @@ HWTEST_F(UtNetPolicyRule, NetPolicyRule008, TestSize.Level1)
     } else {
         std::cout << "RegisterNetPolicyCallbackR failed!" << std::endl;
     }
-    NetPolicyAccessToken token3;
+    NetManagerBaseAccessToken token3;
     int32_t result4 = DelayedSingleton<NetPolicyClient>::GetInstance()->UnregisterNetPolicyCallback(callbackR);
     ASSERT_EQ(result4, NETMANAGER_SUCCESS);
 }
