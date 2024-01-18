@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,11 +26,10 @@
 #define protected public
 #endif
 
+#include "common_notify_callback_test.h"
 #include "dns_config_client.h"
-#include "net_manager_constants.h"
 #include "net_stats_constants.h"
 #include "netsys_native_service.h"
-#include "notify_callback_stub.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -40,58 +39,6 @@ using namespace testing::ext;
 static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
-class TestNotifyCallback : public NotifyCallbackStub {
-public:
-    TestNotifyCallback() = default;
-    ~TestNotifyCallback() override {};
-    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
-                                      int scope) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags,
-                                      int scope) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceAdded(const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceRemoved(const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceChanged(const std::string &ifName, bool up) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) override
-    {
-        return 0;
-    }
-
-    int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
-                           const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t OnDhcpSuccess(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult) override
-    {
-        return 0;
-    }
-
-    int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override
-    {
-        return 0;
-    }
-};
 } // namespace
 
 class NetsysNativeServiceTest : public testing::Test {
@@ -258,7 +205,7 @@ HWTEST_F(NetsysNativeServiceTest, GetInterfaceMtu001, TestSize.Level1)
 
 HWTEST_F(NetsysNativeServiceTest, RegisterNotifyCallback001, TestSize.Level1)
 {
-    sptr<INotifyCallback> callback = new (std::nothrow) TestNotifyCallback();
+    sptr<INotifyCallback> callback = new (std::nothrow) NotifyCallbackTest();
     int32_t ret = instance_->RegisterNotifyCallback(callback);
     EXPECT_EQ(ret, 0);
 

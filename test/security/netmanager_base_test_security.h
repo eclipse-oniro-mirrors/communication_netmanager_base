@@ -61,4 +61,4 @@ private:
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // NETMANAGER_EXT_TEST_SECURITY_H
+#endif // NETMANAGER_BASE_TEST_SECURITY_H
