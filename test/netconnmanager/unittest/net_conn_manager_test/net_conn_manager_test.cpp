@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,10 +21,10 @@
 #include "net_conn_callback_test.h"
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
-#include "net_conn_security.h"
 #include "net_detection_callback_test.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "netmanager_base_test_security.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {
@@ -51,6 +51,7 @@ public:
 
     void LogCapabilities(const std::list<sptr<NetHandle>> &netList) const;
     static sptr<INetConnService> GetProxy();
+    void GlobalHttpProxyTest(HttpProxy &httpProxy);
 };
 
 void NetConnManagerTest::SetUpTestCase()
@@ -159,6 +160,21 @@ sptr<INetConnService> NetConnManagerTest::GetProxy()
     }
 }
 
+void NetConnManagerTest::GlobalHttpProxyTest(HttpProxy &httpProxy)
+{
+    NetManagerBaseNotSystemToken token;
+    int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_NOT_SYSTEM_CALL);
+
+    ret = NetConnClient::GetInstance().GetGlobalHttpProxy(httpProxy);
+    ASSERT_TRUE(ret == NETMANAGER_ERR_NOT_SYSTEM_CALL);
+    std::list<std::string> exclusionList = httpProxy.GetExclusionList();
+    std::cout << "Get global http host:" << httpProxy.GetHost() << " ,port:" << httpProxy.GetPort() << std::endl;
+    for (auto exclusion : exclusionList) {
+        std::cout << "Get global http exclusion:" << exclusion << std::endl;
+    }
+}
+
 /**
  * @tc.name: NetConnManager001
  * @tc.desc: Test NetConnManager SystemReady.
@@ -177,7 +193,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager001, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager002, TestSize.Level1)
 {
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
     std::string ident = "ident01";
@@ -193,7 +209,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager002, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager003, TestSize.Level1)
 {
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
     std::string ident = "ident02";
@@ -213,7 +229,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager003, TestSize.Level1)
 
 HWTEST_F(NetConnManagerTest, NetConnManager004, TestSize.Level1)
 {
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
     std::string ident = "ident03";
@@ -237,7 +253,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager004, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager005, TestSize.Level1)
 {
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
 
@@ -258,7 +274,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager005, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager006, TestSize.Level1)
 {
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET};
 
@@ -301,7 +317,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager008, TestSize.Level1)
     if (proxy == nullptr) {
         return;
     }
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     std::list<sptr<NetHandle>> netList;
     int32_t result = client.GetAllNets(netList);
     std::cout << "netIdList size:" << netList.size() << std::endl;
@@ -394,7 +410,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager011, TestSize.Level1)
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
 
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     std::string ident = "ident";
     uint32_t supplierId1 = 0;
     int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId1);
@@ -436,7 +452,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager012, TestSize.Level1)
     NetBearType bearerTypeEth = BEARER_ETHERNET;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET};
 
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     std::string ident = "ident";
     uint32_t supplierId1 = 0;
     int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerTypeCel, ident, netCaps, supplierId1);
@@ -473,7 +489,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager013, TestSize.Level1)
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
 
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     std::string ident = "ident";
     uint32_t supplierId = 0;
     int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
@@ -496,7 +512,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
     NetBearType bearerType = BEARER_CELLULAR;
     std::set<NetCap> netCaps{NET_CAPABILITY_INTERNET, NET_CAPABILITY_MMS};
 
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     std::string ident = "ident";
     uint32_t supplierId = 0;
     int32_t result = NetConnClient::GetInstance().RegisterNetSupplier(bearerType, ident, netCaps, supplierId);
@@ -525,7 +541,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager014, TestSize.Level1)
  */
 HWTEST_F(NetConnManagerTest, NetConnManager015, TestSize.Level1)
 {
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     bool isMetered = false;
     int32_t result = NetConnClient::GetInstance().IsDefaultNetMetered(isMetered);
     ASSERT_TRUE(result == NETMANAGER_SUCCESS);
@@ -596,7 +612,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager016, TestSize.Level1)
     if (proxy == nullptr) {
         return;
     }
-    NetConnManagerAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result;
     std::list<sptr<NetHandle>> netList;
     result = client.GetAllNets(netList);
@@ -690,17 +706,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager019, TestSize.Level1)
     uint16_t port = 8080;
     std::list<std::string> exclusionList = {"example.com", "::1", "localhost"};
     HttpProxy httpProxy = {host, port, exclusionList};
-    NetConnManagerNotSystemToken token;
-    int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_ERR_NOT_SYSTEM_CALL);
-
-    ret = NetConnClient::GetInstance().GetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_ERR_NOT_SYSTEM_CALL);
-    exclusionList = httpProxy.GetExclusionList();
-    std::cout << "Get global http host:" << httpProxy.GetHost() << " ,port:" << httpProxy.GetPort() << std::endl;
-    for (auto exclusion : exclusionList) {
-        std::cout << "Get global http exclusion:" << exclusion << std::endl;
-    }
+    GlobalHttpProxyTest(httpProxy);
 }
 
 /**
@@ -714,17 +720,7 @@ HWTEST_F(NetConnManagerTest, NetConnManager020, TestSize.Level1)
     uint16_t port = 0;
     std::list<std::string> exclusionList = {};
     HttpProxy httpProxy = {host, port, exclusionList};
-    NetConnManagerNotSystemToken token;
-    int32_t ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_ERR_NOT_SYSTEM_CALL);
-
-    ret = NetConnClient::GetInstance().GetGlobalHttpProxy(httpProxy);
-    ASSERT_TRUE(ret == NETMANAGER_ERR_NOT_SYSTEM_CALL);
-    exclusionList = httpProxy.GetExclusionList();
-    std::cout << "Get global http host:" << httpProxy.GetHost() << " ,port:" << httpProxy.GetPort() << std::endl;
-    for (auto exclusion : exclusionList) {
-        std::cout << "Get global http exclusion:" << exclusion << std::endl;
-    }
+    GlobalHttpProxyTest(httpProxy);
 }
 
 HWTEST_F(NetConnManagerTest, NetConnManager021, TestSize.Level1)

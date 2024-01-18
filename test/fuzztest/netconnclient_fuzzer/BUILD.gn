@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -33,6 +33,7 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "$NETMANAGERNATIVE_ROOT/net_mgr_native/include",
     "$NETMANAGERNATIVE_ROOT/common/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
+    "$NETMANAGER_BASE_ROOT/test/security",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$THIRD_PARTY_ROOT/curl/include",
   ]
@@ -45,6 +46,7 @@ ohos_fuzztest("NetConnClientFuzzTest") {
   ]
 
   sources = [
+    "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
     "mock_net_conn_permission.cpp",
     "net_conn_client_fuzzer.cpp",
   ]

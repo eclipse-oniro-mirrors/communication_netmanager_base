@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,7 @@
 #include <iostream>
 #include <thread>
 
-#include "accesstoken_kit.h"
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
+#include "netmanager_base_test_security.h"
 
 #ifdef GTEST_API_
 #define private public
@@ -68,52 +66,7 @@ const int64_t BYTES = 2097152;
 const uint32_t FIREWALL_RULE = 1;
 bool g_isWaitAsync = false;
 const int32_t ERR_INVALID_DATA = 5;
-
-using namespace Security::AccessToken;
-using Security::AccessToken::AccessTokenID;
-HapInfoParams testInfoParms1 = {.userID = 1,
-                                .bundleName = "netsys_native_manager_test",
-                                .instIndex = 0,
-                                .appIDDesc = "test"};
-PermissionDef testPermDef1 = {.permissionName = "ohos.permission.NETSYS_INTERNAL",
-                              .bundleName = "netsys_native_manager_test",
-                              .grantMode = 1,
-                              .availableLevel = APL_SYSTEM_BASIC,
-                              .label = "label",
-                              .labelId = 1,
-                              .description = "Test netsys_native_manager_test",
-                              .descriptionId = 1};
-
-PermissionStateFull testState1 = {.permissionName = "ohos.permission.NETSYS_INTERNAL",
-                                  .isGeneral = true,
-                                  .resDeviceID = {"local"},
-                                  .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                  .grantFlags = {2}};
-
-HapPolicyParams testPolicyPrams1 = {.apl = APL_SYSTEM_BASIC,
-                                    .domain = "test.domain",
-                                    .permList = {testPermDef1},
-                                    .permStateList = {testState1}};
 } // namespace
-
-class AccessToken {
-public:
-    AccessToken(HapInfoParams &testInfoParms, HapPolicyParams &testPolicyPrams) : currentID_(GetSelfTokenID())
-    {
-        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
-        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(tokenIdEx.tokenIDEx);
-    }
-    ~AccessToken()
-    {
-        AccessTokenKit::DeleteToken(accessID_);
-        SetSelfTokenID(currentID_);
-    }
-
-private:
-    AccessTokenID currentID_;
-    AccessTokenID accessID_ = 0;
-};
 
 class NetsysControllerCallbackTest : public NetsysControllerCallback {
 public:
@@ -570,7 +523,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest018, TestSize.Level1)
     int32_t ret = NetsysController::GetInstance().SetIptablesCommandForRes("-L", respond);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
 
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetManagerBaseAccessToken token;
     ret = NetsysController::GetInstance().SetIptablesCommandForRes("abc", respond);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
 
