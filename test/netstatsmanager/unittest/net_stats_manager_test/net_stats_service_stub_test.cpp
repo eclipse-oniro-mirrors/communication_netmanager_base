@@ -23,11 +23,9 @@
 
 #include "i_net_stats_callback.h"
 #include "net_all_capabilities.h"
-#include "net_manager_constants.h"
 
 #include "net_stats_service_stub.h"
-#include "net_stats_callback_stub.h"
-#include "net_stats_constants.h"
+#include "common_net_stats_callback_test.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -37,22 +35,6 @@ constexpr uint64_t OUTOFFRANGECODE = 100;
 constexpr uint32_t TEST_UINT32_VALUE = 100;
 constexpr uint64_t TEST_UINT64_VALUE = 100;
 constexpr const char *TEST_STRING = "test";
-
-class TestNetStatsCallback : public NetStatsCallbackStub {
-public:
-    TestNetStatsCallback() = default;
-    ~TestNetStatsCallback() override{};
-
-    int32_t NetIfaceStatsChanged(const std::string &iface) override
-    {
-        return 0;
-    }
-
-    int32_t NetUidStatsChanged(const std::string &iface, uint32_t uid) override
-    {
-        return 0;
-    }
-};
 
 class MockNetStatsServiceStub : public NetStatsServiceStub {
 public:
@@ -196,7 +178,7 @@ HWTEST_F(TestNetStatsServiceStub, RegisterNetStatsCallbackTest001, TestSize.Leve
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
     }
-    sptr<INetStatsCallback> callback = new (std::nothrow) TestNetStatsCallback();
+    sptr<INetStatsCallback> callback = new (std::nothrow) NetStatsCallbackTestCb();
     if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
         return;
     }
@@ -218,7 +200,7 @@ HWTEST_F(TestNetStatsServiceStub, UnregisterNetStatsCallbackTest001, TestSize.Le
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
     }
-    sptr<INetStatsCallback> callback = new (std::nothrow) TestNetStatsCallback();
+    sptr<INetStatsCallback> callback = new (std::nothrow) NetStatsCallbackTestCb();
     if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
         return;
     }

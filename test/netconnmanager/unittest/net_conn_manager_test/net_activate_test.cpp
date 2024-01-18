@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-#include "net_conn_callback_stub.h"
-#include "net_manager_constants.h"
 #include <gtest/gtest.h>
 #include <memory>
+
+#include "common_net_conn_callback_test.h"
+#include "net_conn_callback_stub.h"
+#include "net_manager_constants.h"
 #define private public
 #include "net_activate.h"
 #undef private
@@ -28,33 +30,6 @@ using namespace testing::ext;
 constexpr uint32_t TEST_TIMEOUT_MS = 1000;
 constexpr uint32_t TEST_REQUEST_ID = 54656;
 constexpr const char *TEST_IDENT = "testIdent";
-class ConnCallbackTest : public NetConnCallbackStub {
-    inline int32_t NetAvailable(sptr<NetHandle> &netHandle) override
-    {
-        return NETMANAGER_SUCCESS;
-    }
-    inline int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle,
-                                         const sptr<NetAllCapabilities> &netAllCap) override
-    {
-        return NETMANAGER_SUCCESS;
-    }
-    inline int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info) override
-    {
-        return NETMANAGER_SUCCESS;
-    }
-    inline int32_t NetLost(sptr<NetHandle> &netHandle) override
-    {
-        return NETMANAGER_SUCCESS;
-    }
-    inline int32_t NetUnavailable() override
-    {
-        return NETMANAGER_SUCCESS;
-    }
-    inline int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override
-    {
-        return NETMANAGER_SUCCESS;
-    }
-};
 
 class NetActivateCallbackTest : public INetActivateCallback {
     void OnNetActivateTimeOut(uint32_t reqId) override
@@ -80,7 +55,7 @@ public:
 
 void NetActivateTest::SetUpTestCase()
 {
-    callback_ = new (std::nothrow) ConnCallbackTest();
+    callback_ = new (std::nothrow) NetConnCallbackStubCb();
     specifier_ = new (std::nothrow) NetSpecifier();
     timeoutCallback_ = std::make_shared<NetActivateCallbackTest>();
     netActEventRunner_ = AppExecFwk::EventRunner::Create("NET_ACTIVATE_WORK_THREAD");
@@ -194,7 +169,7 @@ HWTEST_F(NetActivateTest, CompareByNetworkCapabilities001, TestSize.Level1)
     bool ret = instance_->CompareByNetworkCapabilities(netCaps);
     EXPECT_EQ(ret, true);
 
-    sptr<INetConnCallback> callback = new (std::nothrow) ConnCallbackTest();
+    sptr<INetConnCallback> callback = new (std::nothrow) NetConnCallbackStubCb();
     sptr<NetSpecifier> specifier = nullptr;
     std::weak_ptr<INetActivateCallback> timeoutCallback = std::make_shared<NetActivateCallbackTest>();
     std::shared_ptr<NetActivate> testNetActivate =
@@ -222,7 +197,7 @@ HWTEST_F(NetActivateTest, CompareByNetworkNetType001, TestSize.Level1)
     ret = instance_->CompareByNetworkNetType(bearerType);
     EXPECT_EQ(ret, true);
 
-    sptr<INetConnCallback> callback = new (std::nothrow) ConnCallbackTest();
+    sptr<INetConnCallback> callback = new (std::nothrow) NetConnCallbackStubCb();
     sptr<NetSpecifier> specifier = nullptr;
     std::weak_ptr<INetActivateCallback> timeoutCallback = std::make_shared<NetActivateCallbackTest>();
     std::shared_ptr<NetActivate> testNetActivate =
@@ -257,7 +232,7 @@ HWTEST_F(NetActivateTest, HaveCapability001, TestSize.Level1)
     ret = instance_->HaveCapability(netCap);
     EXPECT_EQ(ret, false);
 
-    sptr<INetConnCallback> callback = new (std::nothrow) ConnCallbackTest();
+    sptr<INetConnCallback> callback = new (std::nothrow) NetConnCallbackStubCb();
     sptr<NetSpecifier> specifier = nullptr;
     std::weak_ptr<INetActivateCallback> timeoutCallback = std::make_shared<NetActivateCallbackTest>();
     std::shared_ptr<NetActivate> testNetActivate =
@@ -282,7 +257,7 @@ HWTEST_F(NetActivateTest, HaveTypes001, TestSize.Level1)
     ret = instance_->HaveTypes(bearerTypes);
     EXPECT_EQ(ret, true);
 
-    sptr<INetConnCallback> callback = new (std::nothrow) ConnCallbackTest();
+    sptr<INetConnCallback> callback = new (std::nothrow) NetConnCallbackStubCb();
     sptr<NetSpecifier> specifier = nullptr;
     std::weak_ptr<INetActivateCallback> timeoutCallback = std::make_shared<NetActivateCallbackTest>();
     std::shared_ptr<NetActivate> testNetActivate =

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +17,7 @@
 #include <iostream>
 
 #include "net_stats_callback_proxy.h"
-#include "net_stats_callback_stub.h"
-#include "net_stats_constants.h"
+#include "common_net_stats_callback_test.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -26,24 +25,6 @@ namespace {
 using namespace testing::ext;
 constexpr const char *TEST_IFACE = "TEST_IFACE";
 constexpr uint32_t TEST_UID = 4454;
-
-class NetStatsCallbackStubTest : public NetStatsCallbackStub {
-public:
-    NetStatsCallbackStubTest() = default;
-    ~NetStatsCallbackStubTest() override {}
-    int32_t NetIfaceStatsChanged(const std::string &iface) override
-    {
-        std::cout << std::endl;
-        std::cout << "Stub NetIfaceStatsChanged::iface: " << iface << std::endl;
-        return 0;
-    }
-    int32_t NetUidStatsChanged(const std::string &iface, uint32_t uid) override
-    {
-        std::cout << std::endl;
-        std::cout << "Stub NetUidStatsChanged::iface: " << iface << ", uid:" << uid << std::endl;
-        return 0;
-    }
-};
 
 class MockNetIRemoteObject : public IRemoteObject {
 public:
@@ -211,7 +192,7 @@ public:
 void NetStatsCallbackInterfaceTest::SetUpTestCase()
 {
     instance_ = std::make_shared<NetStatsCallbackNotifyTest>();
-    sptr<NetStatsCallbackStub> callback = new (std::nothrow) NetStatsCallbackStubTest();
+    sptr<NetStatsCallbackStub> callback = new (std::nothrow) NetStatsCallbackTestCb();
     instance_->RegisterNetStatsCbChanged(callback);
 }
 
