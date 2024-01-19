@@ -16,11 +16,11 @@
 #include <securec.h>
 #include <thread>
 
+#include "common_net_conn_callback_test.h"
 #include "i_net_supplier_callback.h"
 #include "iservice_registry.h"
 #include "net_conn_constants.h"
 #include "net_mgr_log_wrapper.h"
-#include "net_supplier_callback_stub.h"
 #include "netmanager_base_test_security.h"
 #include "system_ability_definition.h"
 #define private public
@@ -65,47 +65,12 @@ std::string GetStringFromData(int strlen)
     return str;
 }
 
-class INetConnCallbackTest : public IRemoteStub<INetConnCallback> {
-public:
-    int32_t NetAvailable(sptr<NetHandle> &netHandle)
-    {
-        return 0;
-    }
-
-    int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap)
-    {
-        return 0;
-    }
-
-    int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
-    {
-        return 0;
-    }
-
-    int32_t NetLost(sptr<NetHandle> &netHandle)
-    {
-        return 0;
-    }
-
-    int32_t NetUnavailable()
-    {
-        return 0;
-    }
-
-    int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
-    {
-        return 0;
-    }
-};
-
 class INetDetectionCallbackTest : public IRemoteStub<INetDetectionCallback> {
 public:
     virtual int32_t OnNetDetectionResultChanged(NetDetectionResultCode detectionResult, const std::string &urlRedirect)
     {
         return 0;
     }
-};
-class NetSupplierCallbackBaseTest : public NetSupplierCallbackStub {
 };
 
 class NetInterfaceStateCallbackTest : public NetInterfaceStateCallbackStub {};
@@ -332,7 +297,7 @@ void RegisterNetSupplierCallbackFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
     uint32_t supplierId = GetData<uint32_t>();
-    sptr<NetSupplierCallbackBaseTest> callback = new (std::nothrow) NetSupplierCallbackBaseTest();
+    sptr<NetSupplierCallbackStubTestCb> callback = new (std::nothrow) NetSupplierCallbackStubTestCb();
     if (callback == nullptr) {
         return;
     }

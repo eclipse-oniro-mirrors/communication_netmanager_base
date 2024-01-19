@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #define private public
 #define protected public
 #endif
+#include "common_notify_callback_test.h"
 #include "dhcp_controller.h"
 #include "notify_callback_stub.h"
 
@@ -27,48 +28,6 @@ namespace nmd {
 namespace {
 using namespace testing::ext;
 using namespace NetsysNative;
-class NotifyCallbackTest : public NotifyCallbackStub {
-public:
-    inline int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags,
-                                             int scope) override
-    {
-        return 0;
-    }
-    inline int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags,
-                                             int scope) override
-    {
-        return 0;
-    }
-    inline int32_t OnInterfaceAdded(const std::string &ifName) override
-    {
-        return 0;
-    }
-    inline int32_t OnInterfaceRemoved(const std::string &ifName) override
-    {
-        return 0;
-    }
-    inline int32_t OnInterfaceChanged(const std::string &ifName, bool up) override
-    {
-        return 0;
-    }
-    inline int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) override
-    {
-        return 0;
-    }
-    inline int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
-                                  const std::string &ifName) override
-    {
-        return 0;
-    }
-    inline int32_t OnDhcpSuccess(sptr<DhcpResultParcel> &dhcpResult) override
-    {
-        return 0;
-    }
-    inline int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override
-    {
-        return 0;
-    }
-};
 } // namespace
 
 class DhcpControllerTest : public testing::Test {

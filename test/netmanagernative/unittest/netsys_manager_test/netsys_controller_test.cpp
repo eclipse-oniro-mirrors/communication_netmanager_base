@@ -26,6 +26,7 @@
 #define protected public
 #endif
 
+#include "common_net_diag_callback_test.h"
 #include "net_conn_constants.h"
 #include "net_diag_callback_stub.h"
 #include "net_manager_constants.h"
@@ -108,69 +109,6 @@ public:
     }
 };
 
-class NetDiagCallbackControllerTest : public IRemoteStub<NetsysNative::INetDiagCallback> {
-public:
-    NetDiagCallbackControllerTest()
-    {
-        memberFuncMap_[static_cast<uint32_t>(NetsysNative::NetDiagInterfaceCode::ON_NOTIFY_PING_RESULT)] =
-            &NetDiagCallbackControllerTest::CmdNotifyPingResult;
-    }
-    virtual ~NetDiagCallbackControllerTest() = default;
-
-    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
-    {
-        NETNATIVE_LOGI("Stub call start, code:[%{public}d]", code);
-        std::u16string myDescriptor = NetsysNative::NetDiagCallbackStub::GetDescriptor();
-        std::u16string remoteDescriptor = data.ReadInterfaceToken();
-        if (myDescriptor != remoteDescriptor) {
-            NETNATIVE_LOGE("Descriptor checked failed");
-            return NetManagerStandard::NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
-        }
-
-        auto itFunc = memberFuncMap_.find(code);
-        if (itFunc != memberFuncMap_.end()) {
-            auto requestFunc = itFunc->second;
-            if (requestFunc != nullptr) {
-                return (this->*requestFunc)(data, reply);
-            }
-        }
-
-        NETNATIVE_LOGI("Stub default case, need check");
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-    }
-
-    int32_t OnNotifyPingResult(const NetsysNative::NetDiagPingResult &pingResult) override
-    {
-        g_isWaitAsync = false;
-        NETNATIVE_LOGI(
-            "OnNotifyPingResult received dateSize_:%{public}d payloadSize_:%{public}d transCount_:%{public}d "
-            "recvCount_:%{public}d",
-            pingResult.dateSize_, pingResult.payloadSize_, pingResult.transCount_, pingResult.recvCount_);
-        return NetManagerStandard::NETMANAGER_SUCCESS;
-    }
-
-private:
-    using NetDiagCallbackFunc = int32_t (NetDiagCallbackControllerTest::*)(MessageParcel &, MessageParcel &);
-
-private:
-    int32_t CmdNotifyPingResult(MessageParcel &data, MessageParcel &reply)
-    {
-        NetsysNative::NetDiagPingResult pingResult;
-        if (!NetsysNative::NetDiagPingResult::Unmarshalling(data, pingResult)) {
-            return NetManagerStandard::NETMANAGER_ERR_READ_DATA_FAIL;
-        }
-
-        int32_t result = OnNotifyPingResult(pingResult);
-        if (!reply.WriteInt32(result)) {
-            return NetManagerStandard::NETMANAGER_ERR_WRITE_REPLY_FAIL;
-        }
-        return NetManagerStandard::NETMANAGER_SUCCESS;
-    }
-
-private:
-    std::map<uint32_t, NetDiagCallbackFunc> memberFuncMap_;
-};
-
 class NetsysControllerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -183,7 +121,7 @@ public:
 
     static inline std::shared_ptr<NetsysController> instance_ = nullptr;
 
-    sptr<NetDiagCallbackControllerTest> netDiagCallback = new NetDiagCallbackControllerTest();
+    sptr<NetsysNative::NetDiagCallbackStubTest> netDiagCallback = new NetsysNative::NetDiagCallbackStubTest();
 };
 
 void NetsysControllerTest::SetUpTestCase()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,43 +16,13 @@
 #include <gtest/gtest.h>
 
 #include "net_manager_constants.h"
-#include "net_supplier_callback_base.h"
 #include "net_supplier_callback_stub.h"
+#include "common_net_conn_callback_test.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
-class NetSupplierCallbackStubTestCb : public NetSupplierCallbackStub {
-public:
-    NetSupplierCallbackStubTestCb() = default;
-    ~NetSupplierCallbackStubTestCb() {}
-
-    int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
-    {
-        return 0;
-    }
-
-    int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
-    {
-        return 0;
-    }
-};
-
-class NetSupplierCallbackBaseTestCb : public NetSupplierCallbackBase {
-public:
-    ~NetSupplierCallbackBaseTestCb() = default;
-
-    int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
-    {
-        return NETMANAGER_SUCCESS;
-    };
-
-    int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
-    {
-        return NETMANAGER_SUCCESS;
-    };
-};
 } // namespace
 
 class NetSupplierCallbackStubTest : public testing::Test {

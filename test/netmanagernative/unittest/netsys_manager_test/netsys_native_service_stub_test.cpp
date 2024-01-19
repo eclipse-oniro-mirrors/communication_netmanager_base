@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,15 +19,13 @@
 #define private public
 #define protected public
 #endif
+#include "common_net_diag_callback_test.h"
+#include "common_notify_callback_test.h"
 #include "i_netsys_service.h"
-#include "net_diag_callback_stub.h"
 #include "net_dns_health_callback_stub.h"
 #include "net_dns_result_callback_stub.h"
-#include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service_stub.h"
-#include "netsys_net_diag_data.h"
-#include "notify_callback_stub.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -36,118 +34,6 @@ using namespace testing::ext;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 } // namespace
 static constexpr uint64_t TEST_COOKIE = 1;
-
-class NetDiagCallbackServiceStubTest : public IRemoteStub<INetDiagCallback> {
-public:
-    NetDiagCallbackServiceStubTest()
-    {
-        memberFuncMap_[static_cast<uint32_t>(NetDiagInterfaceCode::ON_NOTIFY_PING_RESULT)] =
-            &NetDiagCallbackServiceStubTest::CmdNotifyPingResult;
-    }
-    virtual ~NetDiagCallbackServiceStubTest() = default;
-
-    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
-    {
-        NETNATIVE_LOGI("Stub call start, code:[%{public}d]", code);
-        std::u16string myDescriptor = NetDiagCallbackStub::GetDescriptor();
-        std::u16string remoteDescriptor = data.ReadInterfaceToken();
-        if (myDescriptor != remoteDescriptor) {
-            NETNATIVE_LOGE("Descriptor checked failed");
-            return NetManagerStandard::NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
-        }
-
-        auto itFunc = memberFuncMap_.find(code);
-        if (itFunc != memberFuncMap_.end()) {
-            auto requestFunc = itFunc->second;
-            if (requestFunc != nullptr) {
-                return (this->*requestFunc)(data, reply);
-            }
-        }
-
-        NETNATIVE_LOGI("Stub default case, need check");
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-    }
-    int32_t OnNotifyPingResult(const NetDiagPingResult &pingResult) override
-    {
-        NETNATIVE_LOGI(
-            "OnNotifyPingResult received dateSize_:%{public}d payloadSize_:%{public}d transCount_:%{public}d "
-            "recvCount_:%{public}d",
-            pingResult.dateSize_, pingResult.payloadSize_, pingResult.transCount_, pingResult.recvCount_);
-        return NetManagerStandard::NETMANAGER_SUCCESS;
-    }
-
-private:
-    using NetDiagCallbackFunc = int32_t (NetDiagCallbackServiceStubTest::*)(MessageParcel &, MessageParcel &);
-
-private:
-    int32_t CmdNotifyPingResult(MessageParcel &data, MessageParcel &reply)
-    {
-        NetDiagPingResult pingResult;
-        if (!NetDiagPingResult::Unmarshalling(data, pingResult)) {
-            return NetManagerStandard::NETMANAGER_ERR_READ_DATA_FAIL;
-        }
-
-        int32_t result = OnNotifyPingResult(pingResult);
-        if (!reply.WriteInt32(result)) {
-            return NetManagerStandard::NETMANAGER_ERR_WRITE_REPLY_FAIL;
-        }
-        return NetManagerStandard::NETMANAGER_SUCCESS;
-    }
-
-private:
-    std::map<uint32_t, NetDiagCallbackFunc> memberFuncMap_;
-};
-
-class TestNotifyCallback : public NotifyCallbackStub {
-public:
-    TestNotifyCallback() = default;
-    ~TestNotifyCallback() override{};
-    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags, int scope) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags, int scope) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceAdded(const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceRemoved(const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceChanged(const std::string &ifName, bool up) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) override
-    {
-        return 0;
-    }
-
-    int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
-                           const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t OnDhcpSuccess(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult) override
-    {
-        return 0;
-    }
-
-    int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override
-    {
-        return 0;
-    }
-};
 
 class TestNetDnsResultCallback : public NetDnsResultCallbackStub {
 public:
@@ -586,7 +472,7 @@ public:
     void TearDown();
 
     static inline std::shared_ptr<NetsysNativeServiceStub> notifyStub_ = nullptr;
-    sptr<NetDiagCallbackServiceStubTest> ptrCallback = new NetDiagCallbackServiceStubTest();
+    sptr<NetDiagCallbackStubTest> ptrCallback = new NetDiagCallbackStubTest();
 };
 
 void NetsysNativeServiceStubTest::SetUpTestCase()
@@ -806,7 +692,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetInterfaceMtu001, TestSize.Level1)
 HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterNotifyCallback001, TestSize.Level1)
 {
     std::string ifName = "ifName";
-    sptr<INotifyCallback> callback = new (std::nothrow) TestNotifyCallback();
+    sptr<INotifyCallback> callback = new (std::nothrow) NotifyCallbackTest();
     MessageParcel data;
     if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
         return;
@@ -828,7 +714,7 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterNotifyCallback001, TestSize.Lev
 HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterNotifyCallback002, TestSize.Level1)
 {
     std::string ifName = "ifName";
-    sptr<INotifyCallback> callback = new (std::nothrow) TestNotifyCallback();
+    sptr<INotifyCallback> callback = new (std::nothrow) NotifyCallbackTest();
     MessageParcel data;
     EXPECT_TRUE(data.WriteRemoteObject(callback->AsObject().GetRefPtr()));
 

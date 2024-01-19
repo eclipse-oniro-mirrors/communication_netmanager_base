@@ -33,6 +33,7 @@ ohos_fuzztest("NetConnClientFuzzTest") {
     "$NETMANAGERNATIVE_ROOT/net_mgr_native/include",
     "$NETMANAGERNATIVE_ROOT/common/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETMANAGER_BASE_ROOT/test/security",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$THIRD_PARTY_ROOT/curl/include",

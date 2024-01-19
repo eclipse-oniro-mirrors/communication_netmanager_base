@@ -19,6 +19,7 @@
 #ifdef GTEST_API_
 #define private public
 #endif
+#include "common_net_conn_callback_test.h"
 #include "i_net_conn_callback.h"
 #include "iremote_stub.h"
 #include "net_conn_client.h"
@@ -58,21 +59,6 @@ constexpr const char *TEST_LONG_EXCLUSION_LIST =
 constexpr const char *TEST_IFACE = "eth0";
 } // namespace
 
-class NetSupplierCallbackBaseTest : public NetSupplierCallbackBase {
-public:
-    virtual ~NetSupplierCallbackBaseTest() = default;
-
-    int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
-    {
-        return NETMANAGER_SUCCESS;
-    };
-
-    int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
-    {
-        return NETMANAGER_SUCCESS;
-    };
-};
-
 class NetConnClientTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -88,39 +74,6 @@ void NetConnClientTest::TearDownTestCase() {}
 void NetConnClientTest::SetUp() {}
 
 void NetConnClientTest::TearDown() {}
-
-class INetConnCallbackTest : public IRemoteStub<INetConnCallback> {
-public:
-    int32_t NetAvailable(sptr<NetHandle> &netHandle)
-    {
-        return 0;
-    }
-
-    int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap)
-    {
-        return 0;
-    }
-
-    int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info)
-    {
-        return 0;
-    }
-
-    int32_t NetLost(sptr<NetHandle> &netHandle)
-    {
-        return 0;
-    }
-
-    int32_t NetUnavailable()
-    {
-        return 0;
-    }
-
-    int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked)
-    {
-        return 0;
-    }
-};
 
 class INetFactoryResetCallbackTest : public IRemoteStub<INetFactoryResetCallback> {
 public:

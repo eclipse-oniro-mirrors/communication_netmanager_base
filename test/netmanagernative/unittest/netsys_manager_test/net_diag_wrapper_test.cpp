@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #define protected public
 #endif
 
+#include "common_net_diag_callback_test.h"
 #include "net_diag_callback_stub.h"
 #include "net_diag_wrapper.h"
 #include "net_manager_constants.h"
@@ -28,6 +29,7 @@
 #include "netsys_ipc_interface_code.h"
 #include "netsys_net_diag_data.h"
 #include "thread"
+
 namespace OHOS {
 namespace NetsysNative {
 using namespace testing::ext;
@@ -48,73 +50,9 @@ const std::string IFACENAME1 = "eth0";
 const std::string IFACENAME2 = "eth1";
 const std::string IFACENAME3 = "wlan0";
 const std::string TEST_STRING_VALUE = "test";
-bool g_waitPingSync = false;
 const uint16_t TEST_UINT16_VALUE = 1;
 const uint32_t TEST_UINT32_VALUE = 2;
 
-class NetDiagCallbackStubTest : public IRemoteStub<INetDiagCallback> {
-public:
-    NetDiagCallbackStubTest()
-    {
-        memberFuncMap_[static_cast<uint32_t>(NetDiagInterfaceCode::ON_NOTIFY_PING_RESULT)] =
-            &NetDiagCallbackStubTest::CmdNotifyPingResult;
-    }
-    virtual ~NetDiagCallbackStubTest() = default;
-
-    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
-    {
-        NETNATIVE_LOGI("Stub call start, code:[%{public}d]", code);
-        std::u16string myDescriptor = NetDiagCallbackStub::GetDescriptor();
-        std::u16string remoteDescriptor = data.ReadInterfaceToken();
-        if (myDescriptor != remoteDescriptor) {
-            NETNATIVE_LOGE("Descriptor checked failed");
-            return NetManagerStandard::NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
-        }
-
-        auto itFunc = memberFuncMap_.find(code);
-        if (itFunc != memberFuncMap_.end()) {
-            auto requestFunc = itFunc->second;
-            if (requestFunc != nullptr) {
-                return (this->*requestFunc)(data, reply);
-            }
-        }
-
-        NETNATIVE_LOGI("Stub default case, need check");
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-    }
-    int32_t OnNotifyPingResult(const NetDiagPingResult &pingResult) override
-    {
-        g_waitPingSync = false;
-        NETNATIVE_LOGI(
-            "OnNotifyPingResult received dateSize_:%{public}d payloadSize_:%{public}d transCount_:%{public}d "
-            "recvCount_:%{public}d",
-            pingResult.dateSize_, pingResult.payloadSize_, pingResult.transCount_, pingResult.recvCount_);
-        return NetManagerStandard::NETMANAGER_SUCCESS;
-    }
-
-private:
-    using NetDiagCallbackFunc = int32_t (NetDiagCallbackStubTest::*)(MessageParcel &, MessageParcel &);
-
-private:
-    int32_t CmdNotifyPingResult(MessageParcel &data, MessageParcel &reply)
-    {
-        NETNATIVE_LOGI("CmdNotifyPingResult received CmdNotifyPingResult");
-
-        NetDiagPingResult pingResult;
-        if (!NetDiagPingResult::Unmarshalling(data, pingResult)) {
-            return NetManagerStandard::NETMANAGER_ERR_READ_DATA_FAIL;
-        }
-
-        int32_t result = OnNotifyPingResult(pingResult);
-        if (!reply.WriteInt32(result)) {
-            return NetManagerStandard::NETMANAGER_ERR_WRITE_REPLY_FAIL;
-        }
-        return NetManagerStandard::NETMANAGER_SUCCESS;
-    }
-
-private:
-    std::map<uint32_t, NetDiagCallbackFunc> memberFuncMap_;
-};
 class NetDiagWrapperTest : public testing::Test {
 public:
     NetDiagWrapperTest();

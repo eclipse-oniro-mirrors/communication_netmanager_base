@@ -55,6 +55,7 @@ ohos_unittest("net_policy_manager_test") {
     "$INNERKITS_ROOT/netconnclient/include",
     "$NETCONNMANAGER_COMMON_DIR/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
     "$NETMANAGER_BASE_ROOT/test/security",
   ]
 
