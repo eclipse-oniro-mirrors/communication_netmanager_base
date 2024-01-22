@@ -826,9 +826,17 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest003, TestSize.Level1)
 
     HttpProxy proxy;
     uint32_t supplierId = 0;
+    std::string testString = "test";
+    int32_t testInt = 0;
+    std::set<NetCap> netCaps;
     NetConnService::GetInstance()->netConnEventHandler_ = nullptr;
+    NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_BLUETOOTH, testString, netCaps, supplierId);
     NetConnService::GetInstance()->UnregisterNetSupplier(supplierId);
     NetConnService::GetInstance()->UpdateGlobalHttpProxy(proxy);
+    NetConnService::GetInstance()->OnNetActivateTimeOut(testInt);
+    NetConnService::GetInstance()->UnregisterNetSupplierAsync(supplierId);
+    sptr<NetSupplier> supplier = nullptr;
+    NetConnService::GetInstance()->CallbackForSupplier(supplier, CallbackType::CALL_TYPE_AVAILABLE);
 
     sptr<INetSupplierCallback> supplierCallback = nullptr;
     auto ret = NetConnService::GetInstance()->RegisterNetSupplierCallbackAsync(supplierId, supplierCallback);
@@ -843,12 +851,39 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest003, TestSize.Level1)
     ret = NetConnService::GetInstance()->RegisterNetConnCallback(netSpecifier, callback, timeoutMS);
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 
+    ret = NetConnService::GetInstance()->UnregisterNetConnCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    sptr<INetDetectionCallback> detectionCallback = nullptr;
+    ret = NetConnService::GetInstance()->RegUnRegNetDetectionCallback(testInt, detectionCallback, false);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = NetConnService::GetInstance()->UpdateNetStateForTest(netSpecifier, testInt);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    sptr<NetSupplierInfo> netSupplierInfo = nullptr;
+    ret = NetConnService::GetInstance()->UpdateNetSupplierInfo(testInt, netSupplierInfo);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    sptr<NetLinkInfo> netLinkInfo = nullptr;
+    ret = NetConnService::GetInstance()->UpdateNetLinkInfo(testInt, netLinkInfo);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = NetConnService::GetInstance()->NetDetection(testInt);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+
+    ret = NetConnService::GetInstance()->RestrictBackgroundChanged(false);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest004, TestSize.Level1)
+{
     NetConnService::GetInstance()->RequestAllNetworkExceptDefault();
 
     NetConnService::NetInterfaceStateCallback stateCallback;
     std::string testString = "test";
     int32_t testInt = 0;
-    ret = stateCallback.OnInterfaceAddressUpdated(testString, testString, testInt, testInt);
+    auto ret = stateCallback.OnInterfaceAddressUpdated(testString, testString, testInt, testInt);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     ret = stateCallback.OnInterfaceAddressRemoved(testString, testString, testInt, testInt);
