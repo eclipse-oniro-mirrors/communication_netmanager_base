@@ -1729,26 +1729,38 @@ int32_t NetConnService::DelStaticArp(const std::string &ipAddr, const std::strin
 
 int32_t NetConnService::RegisterSlotType(uint32_t supplierId, int32_t type)
 {
-    if (netSuppliers_.find(supplierId) == netSuppliers_.end()) {
-        NETMGR_LOG_E("supplierId[%{public}d] is not exits", supplierId);
-        return NETMANAGER_ERR_INVALID_PARAMETER;
+    int32_t result = NETMANAGER_SUCCESS;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask([this, supplierId, type, &result]() {
+            if (netSuppliers_.find(supplierId) == netSuppliers_.end()) {
+                NETMGR_LOG_E("supplierId[%{public}d] is not exits", supplierId);
+                result =  NETMANAGER_ERR_INVALID_PARAMETER;
+            } else {
+                NETMGR_LOG_I("supplierId[%{public}d] update type[%{public}d].", supplierId, type);
+                sptr<NetSupplier> supplier = netSuppliers_[supplierId];
+                supplier->SetSupplierType(type);
+                result =  NETMANAGER_SUCCESS;
+            }
+        });
     }
-    NETMGR_LOG_I("supplierId[%{public}d] update type[%{public}d].", supplierId, type);
-
-    sptr<NetSupplier> supplier = netSuppliers_[supplierId];
-    supplier->SetSupplierType(type);
-    return NETMANAGER_SUCCESS;
+    return result;
 }
 
 int32_t NetConnService::GetSlotType(std::string &type)
 {
-    if (defaultNetSupplier_ == nullptr) {
-        NETMGR_LOG_E("supplier is nullptr");
-        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    int32_t result = NETMANAGER_SUCCESS;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask([this, &type, &result]() {
+            if (defaultNetSupplier_ == nullptr) {
+                NETMGR_LOG_E("supplier is nullptr");
+                result =  NETMANAGER_ERR_LOCAL_PTR_NULL;
+            } else {
+                type = defaultNetSupplier_->GetSupplierType();
+                result =  NETMANAGER_SUCCESS;
+            }
+        });
     }
-
-    type = defaultNetSupplier_->GetSupplierType();
-    return NETMANAGER_SUCCESS;
+    return result;
 }
 
 int32_t NetConnService::FactoryResetNetwork()
