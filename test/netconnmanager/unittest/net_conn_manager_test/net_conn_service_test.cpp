@@ -20,7 +20,6 @@
 #define protected public
 #endif
 
-#include "accesstoken_kit.h"
 #include "common_net_conn_callback_test.h"
 #include "http_proxy.h"
 #include "net_all_capabilities.h"
@@ -34,11 +33,9 @@
 #include "net_http_proxy_tracker.h"
 #include "net_interface_callback_stub.h"
 #include "net_manager_center.h"
-#include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "netsys_controller.h"
 #include "system_ability_definition.h"
-#include "token_setproc.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -76,34 +73,6 @@ constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THRE
 constexpr int64_t TEST_UID = 1010;
 constexpr uint32_t TEST_NOTEXISTSUPPLIER = 1000;
 
-class NetConnTestCallback : public NetConnCallbackStub {
-public:
-    inline int32_t NetAvailable(sptr<NetHandle> &netHandle) override
-    {
-        return 0;
-    }
-    inline int32_t NetCapabilitiesChange(sptr<NetHandle> &netHandle, const sptr<NetAllCapabilities> &netAllCap) override
-    {
-        return 0;
-    }
-    inline int32_t NetConnectionPropertiesChange(sptr<NetHandle> &netHandle, const sptr<NetLinkInfo> &info) override
-    {
-        return 0;
-    }
-    inline int32_t NetLost(sptr<NetHandle> &netHandle) override
-    {
-        return 0;
-    }
-    inline int32_t NetUnavailable() override
-    {
-        return 0;
-    }
-    inline int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override
-    {
-        return 0;
-    }
-};
-
 class TestDnsService : public DnsBaseService {
 public:
     int32_t GetAddressesByName(const std::string &hostName, int32_t netId,
@@ -120,7 +89,7 @@ public:
     }
 };
 
-sptr<INetConnCallback> g_callback = new (std::nothrow) NetConnTestCallback();
+sptr<INetConnCallback> g_callback = new (std::nothrow) NetConnCallbackStubCb();
 sptr<INetDetectionCallback> g_detectionCallback = new (std::nothrow) NetDetectionCallbackTest();
 uint32_t g_supplierId = 0;
 uint32_t g_vpnSupplierId = 0;
@@ -281,7 +250,7 @@ HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceTest, UnregisterNetConnCallbackTest001, TestSize.Level1)
 {
-    sptr<INetConnCallback> netCallback = new (std::nothrow) NetConnTestCallback();
+    sptr<INetConnCallback> netCallback = new (std::nothrow) NetConnCallbackStubCb();
     auto ret = NetConnService::GetInstance()->UnregisterNetConnCallback(netCallback);
     EXPECT_EQ(ret, NET_CONN_ERR_CALLBACK_NOT_FOUND);
 

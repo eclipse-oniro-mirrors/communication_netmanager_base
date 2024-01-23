@@ -27,10 +27,9 @@
 #endif
 
 #include "common_net_diag_callback_test.h"
+#include "common_netsys_controller_callback_test.h"
 #include "net_conn_constants.h"
 #include "net_diag_callback_stub.h"
-#include "net_manager_constants.h"
-#include "net_stats_constants.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_controller.h"
 #include "netsys_ipc_interface_code.h"
@@ -68,46 +67,6 @@ const uint32_t FIREWALL_RULE = 1;
 bool g_isWaitAsync = false;
 const int32_t ERR_INVALID_DATA = 5;
 } // namespace
-
-class NetsysControllerCallbackTest : public NetsysControllerCallback {
-public:
-    virtual int32_t OnInterfaceAddressUpdated(const std::string &, const std::string &, int, int)
-    {
-        return 0;
-    }
-    virtual int32_t OnInterfaceAddressRemoved(const std::string &, const std::string &, int, int)
-    {
-        return 0;
-    }
-    virtual int32_t OnInterfaceAdded(const std::string &)
-    {
-        return 0;
-    }
-    virtual int32_t OnInterfaceRemoved(const std::string &)
-    {
-        return 0;
-    }
-    virtual int32_t OnInterfaceChanged(const std::string &, bool)
-    {
-        return 0;
-    }
-    virtual int32_t OnInterfaceLinkStateChanged(const std::string &, bool)
-    {
-        return 0;
-    }
-    virtual int32_t OnRouteChanged(bool, const std::string &, const std::string &, const std::string &)
-    {
-        return 0;
-    }
-    virtual int32_t OnDhcpSuccess(NetsysControllerCallback::DhcpResult &dhcpResult)
-    {
-        return 0;
-    }
-    virtual int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface)
-    {
-        return 0;
-    }
-};
 
 class NetsysControllerTest : public testing::Test {
 public:
@@ -430,7 +389,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest016, TestSize.Level1)
     ret = NetsysController::GetInstance().GetAddrInfo(hostName, serverName, hints, netId, res);
     EXPECT_NE(ret, 0);
 
-    auto callback = new NetsysControllerCallbackTest();
+    auto callback = new NetsysControllerCallbackTestCb();
     ret = NetsysController::GetInstance().RegisterCallback(callback);
     EXPECT_EQ(ret, 0);
 }

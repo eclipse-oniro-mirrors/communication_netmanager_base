@@ -110,46 +110,6 @@ public:
     virtual ~INetSysCallbackTest() {}
 };
 
-class NetsysControllerCallbackTest : public NetsysControllerCallback {
-public:
-    virtual int32_t OnInterfaceAddressUpdated(const std::string &, const std::string &, int, int)
-    {
-        return 0;
-    }
-    virtual int32_t OnInterfaceAddressRemoved(const std::string &, const std::string &, int, int)
-    {
-        return 0;
-    }
-    virtual int32_t OnInterfaceAdded(const std::string &)
-    {
-        return 0;
-    }
-    virtual int32_t OnInterfaceRemoved(const std::string &)
-    {
-        return 0;
-    }
-    virtual int32_t OnInterfaceChanged(const std::string &, bool)
-    {
-        return 0;
-    }
-    virtual int32_t OnInterfaceLinkStateChanged(const std::string &, bool)
-    {
-        return 0;
-    }
-    virtual int32_t OnRouteChanged(bool, const std::string &, const std::string &, const std::string &)
-    {
-        return 0;
-    }
-    virtual int32_t OnDhcpSuccess(NetsysControllerCallback::DhcpResult &dhcpResult)
-    {
-        return 0;
-    }
-    virtual int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface)
-    {
-        return 0;
-    }
-};
-
 static NetsysNative::NetsysNativeService g_netSysNativeClient;
 
 bool IsDataAndSizeValid(const uint8_t *data, size_t size, MessageParcel &dataParcel)

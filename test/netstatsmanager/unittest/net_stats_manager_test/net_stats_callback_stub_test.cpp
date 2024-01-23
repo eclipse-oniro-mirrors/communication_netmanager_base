@@ -20,30 +20,12 @@
 #define protected public
 #endif
 
-#include "net_manager_constants.h"
-#include "net_stats_callback_stub.h"
+#include "common_net_stats_callback_test.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 constexpr uint64_t OUTOFFRANGECODE = 100;
-class MockNetStatsCallbackStubTest : public NetStatsCallbackStub {
-public:
-    MockNetStatsCallbackStubTest() = default;
-    ~MockNetStatsCallbackStubTest() override {}
-    int32_t NetIfaceStatsChanged(const std::string &iface) override
-    {
-        std::cout << std::endl;
-        std::cout << "Stub NetIfaceStatsChanged::iface: " << iface << std::endl;
-        return 0;
-    }
-    int32_t NetUidStatsChanged(const std::string &iface, uint32_t uid) override
-    {
-        std::cout << std::endl;
-        std::cout << "Stub NetUidStatsChanged::iface: " << iface << ", uid:" << uid << std::endl;
-        return 0;
-    }
-};
 } // namespace
 
 using namespace testing::ext;
@@ -53,7 +35,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    static inline std::shared_ptr<NetStatsCallbackStub> instance_ = std::make_shared<MockNetStatsCallbackStubTest>();
+    static inline std::shared_ptr<NetStatsCallbackStub> instance_ = std::make_shared<NetStatsCallbackTestCb>();
 };
 
 void NetStatsCallbackStubTest::SetUpTestCase() {}
