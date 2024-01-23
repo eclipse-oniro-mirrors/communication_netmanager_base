@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,15 +19,14 @@
 #include <iostream>
 #include <thread>
 
-#include "accesstoken_kit.h"
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
+#include "netmanager_base_test_security.h"
 
 #ifdef GTEST_API_
 #define private public
 #define protected public
 #endif
 
+#include "common_net_diag_callback_test.h"
 #include "net_conn_constants.h"
 #include "net_diag_callback_stub.h"
 #include "net_manager_constants.h"
@@ -68,52 +67,7 @@ const int64_t BYTES = 2097152;
 const uint32_t FIREWALL_RULE = 1;
 bool g_isWaitAsync = false;
 const int32_t ERR_INVALID_DATA = 5;
-
-using namespace Security::AccessToken;
-using Security::AccessToken::AccessTokenID;
-HapInfoParams testInfoParms1 = {.userID = 1,
-                                .bundleName = "netsys_native_manager_test",
-                                .instIndex = 0,
-                                .appIDDesc = "test"};
-PermissionDef testPermDef1 = {.permissionName = "ohos.permission.NETSYS_INTERNAL",
-                              .bundleName = "netsys_native_manager_test",
-                              .grantMode = 1,
-                              .availableLevel = APL_SYSTEM_BASIC,
-                              .label = "label",
-                              .labelId = 1,
-                              .description = "Test netsys_native_manager_test",
-                              .descriptionId = 1};
-
-PermissionStateFull testState1 = {.permissionName = "ohos.permission.NETSYS_INTERNAL",
-                                  .isGeneral = true,
-                                  .resDeviceID = {"local"},
-                                  .grantStatus = {PermissionState::PERMISSION_GRANTED},
-                                  .grantFlags = {2}};
-
-HapPolicyParams testPolicyPrams1 = {.apl = APL_SYSTEM_BASIC,
-                                    .domain = "test.domain",
-                                    .permList = {testPermDef1},
-                                    .permStateList = {testState1}};
 } // namespace
-
-class AccessToken {
-public:
-    AccessToken(HapInfoParams &testInfoParms, HapPolicyParams &testPolicyPrams) : currentID_(GetSelfTokenID())
-    {
-        AccessTokenIDEx tokenIdEx = AccessTokenKit::AllocHapToken(testInfoParms, testPolicyPrams);
-        accessID_ = tokenIdEx.tokenIdExStruct.tokenID;
-        SetSelfTokenID(tokenIdEx.tokenIDEx);
-    }
-    ~AccessToken()
-    {
-        AccessTokenKit::DeleteToken(accessID_);
-        SetSelfTokenID(currentID_);
-    }
-
-private:
-    AccessTokenID currentID_;
-    AccessTokenID accessID_ = 0;
-};
 
 class NetsysControllerCallbackTest : public NetsysControllerCallback {
 public:
@@ -155,69 +109,6 @@ public:
     }
 };
 
-class NetDiagCallbackControllerTest : public IRemoteStub<NetsysNative::INetDiagCallback> {
-public:
-    NetDiagCallbackControllerTest()
-    {
-        memberFuncMap_[static_cast<uint32_t>(NetsysNative::NetDiagInterfaceCode::ON_NOTIFY_PING_RESULT)] =
-            &NetDiagCallbackControllerTest::CmdNotifyPingResult;
-    }
-    virtual ~NetDiagCallbackControllerTest() = default;
-
-    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
-    {
-        NETNATIVE_LOGI("Stub call start, code:[%{public}d]", code);
-        std::u16string myDescriptor = NetsysNative::NetDiagCallbackStub::GetDescriptor();
-        std::u16string remoteDescriptor = data.ReadInterfaceToken();
-        if (myDescriptor != remoteDescriptor) {
-            NETNATIVE_LOGE("Descriptor checked failed");
-            return NetManagerStandard::NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
-        }
-
-        auto itFunc = memberFuncMap_.find(code);
-        if (itFunc != memberFuncMap_.end()) {
-            auto requestFunc = itFunc->second;
-            if (requestFunc != nullptr) {
-                return (this->*requestFunc)(data, reply);
-            }
-        }
-
-        NETNATIVE_LOGI("Stub default case, need check");
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-    }
-
-    int32_t OnNotifyPingResult(const NetsysNative::NetDiagPingResult &pingResult) override
-    {
-        g_isWaitAsync = false;
-        NETNATIVE_LOGI(
-            "OnNotifyPingResult received dateSize_:%{public}d payloadSize_:%{public}d transCount_:%{public}d "
-            "recvCount_:%{public}d",
-            pingResult.dateSize_, pingResult.payloadSize_, pingResult.transCount_, pingResult.recvCount_);
-        return NetManagerStandard::NETMANAGER_SUCCESS;
-    }
-
-private:
-    using NetDiagCallbackFunc = int32_t (NetDiagCallbackControllerTest::*)(MessageParcel &, MessageParcel &);
-
-private:
-    int32_t CmdNotifyPingResult(MessageParcel &data, MessageParcel &reply)
-    {
-        NetsysNative::NetDiagPingResult pingResult;
-        if (!NetsysNative::NetDiagPingResult::Unmarshalling(data, pingResult)) {
-            return NetManagerStandard::NETMANAGER_ERR_READ_DATA_FAIL;
-        }
-
-        int32_t result = OnNotifyPingResult(pingResult);
-        if (!reply.WriteInt32(result)) {
-            return NetManagerStandard::NETMANAGER_ERR_WRITE_REPLY_FAIL;
-        }
-        return NetManagerStandard::NETMANAGER_SUCCESS;
-    }
-
-private:
-    std::map<uint32_t, NetDiagCallbackFunc> memberFuncMap_;
-};
-
 class NetsysControllerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -230,7 +121,7 @@ public:
 
     static inline std::shared_ptr<NetsysController> instance_ = nullptr;
 
-    sptr<NetDiagCallbackControllerTest> netDiagCallback = new NetDiagCallbackControllerTest();
+    sptr<NetsysNative::NetDiagCallbackStubTest> netDiagCallback = new NetsysNative::NetDiagCallbackStubTest();
 };
 
 void NetsysControllerTest::SetUpTestCase()
@@ -570,7 +461,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest018, TestSize.Level1)
     int32_t ret = NetsysController::GetInstance().SetIptablesCommandForRes("-L", respond);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
 
-    AccessToken token(testInfoParms1, testPolicyPrams1);
+    NetManagerBaseAccessToken token;
     ret = NetsysController::GetInstance().SetIptablesCommandForRes("abc", respond);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
 

@@ -15,63 +15,13 @@
 
 #include <gtest/gtest.h>
 
+#include "common_notify_callback_test.h"
 #include "notify_callback_stub.h"
 
 namespace OHOS {
 namespace NetsysNative {
 namespace {
 using namespace testing::ext;
-class NotifyCallbackStubTestCb : public NotifyCallbackStub {
-public:
-    NotifyCallbackStubTestCb() = default;
-    ~NotifyCallbackStubTestCb() {}
-
-    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags, int scope) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags, int scope) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceAdded(const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceRemoved(const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceChanged(const std::string &ifName, bool up) override
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up) override
-    {
-        return 0;
-    }
-
-    int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
-                           const std::string &ifName) override
-    {
-        return 0;
-    }
-
-    int32_t OnDhcpSuccess(sptr<DhcpResultParcel> &dhcpResult) override
-    {
-        return 0;
-    }
-
-    int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface) override
-    {
-        return 0;
-    }
-};
 } // namespace
 
 class NotifyCallbackStubTest : public testing::Test {
@@ -81,12 +31,12 @@ public:
     void SetUp();
     void TearDown();
 
-    static inline std::shared_ptr<NotifyCallbackStubTestCb> notifyStub_ = nullptr;
+    static inline std::shared_ptr<NotifyCallbackTest> notifyStub_ = nullptr;
 };
 
 void NotifyCallbackStubTest::SetUpTestCase()
 {
-    notifyStub_ = std::make_shared<NotifyCallbackStubTestCb>();
+    notifyStub_ = std::make_shared<NotifyCallbackTest>();
 }
 
 void NotifyCallbackStubTest::TearDownTestCase() {}

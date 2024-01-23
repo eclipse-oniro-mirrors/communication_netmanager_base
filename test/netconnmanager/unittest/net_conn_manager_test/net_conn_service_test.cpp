@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,26 +21,24 @@
 #endif
 
 #include "accesstoken_kit.h"
+#include "common_net_conn_callback_test.h"
+#include "http_proxy.h"
 #include "net_all_capabilities.h"
-#include "net_conn_service.h"
+#include "net_conn_callback_stub.h"
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
+#include "net_conn_service.h"
 #include "net_conn_types.h"
-#include "net_manager_constants.h"
-#include "net_mgr_log_wrapper.h"
-#include "token_setproc.h"
-#include "net_supplier_callback_stub.h"
-#include "net_conn_callback_stub.h"
-#include "http_proxy.h"
 #include "net_detection_callback_test.h"
-#include "net_manager_center.h"
-#include "netsys_controller.h"
+#include "net_factoryreset_callback_stub.h"
 #include "net_http_proxy_tracker.h"
 #include "net_interface_callback_stub.h"
-#include "net_factoryreset_callback_stub.h"
-
+#include "net_manager_center.h"
+#include "net_manager_constants.h"
+#include "net_mgr_log_wrapper.h"
+#include "netsys_controller.h"
 #include "system_ability_definition.h"
-
+#include "token_setproc.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -77,18 +75,6 @@ constexpr const char *TEST_LONG_EXCLUSION_LIST =
 constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
 constexpr int64_t TEST_UID = 1010;
 constexpr uint32_t TEST_NOTEXISTSUPPLIER = 1000;
-
-class NetSupplierTestCallback : public NetSupplierCallbackStub {
-public:
-    inline int32_t RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
-    {
-        return NETMANAGER_SUCCESS;
-    }
-    inline int32_t ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps) override
-    {
-        return NETMANAGER_SUCCESS;
-    }
-};
 
 class NetConnTestCallback : public NetConnCallbackStub {
 public:
@@ -243,7 +229,7 @@ HWTEST_F(NetConnServiceTest, RegisterNetSupplierTest001, TestSize.Level1)
 
 HWTEST_F(NetConnServiceTest, RegisterNetSupplierCallbackTest001, TestSize.Level1)
 {
-    sptr<INetSupplierCallback> callback = new (std::nothrow) NetSupplierTestCallback();
+    sptr<INetSupplierCallback> callback = new (std::nothrow) NetSupplierCallbackStubTestCb();
     ASSERT_NE(callback, nullptr);
     std::set<NetCap> netCaps;
     auto ret = NetConnService::GetInstance()->RegisterNetSupplierCallback(g_supplierId, callback);

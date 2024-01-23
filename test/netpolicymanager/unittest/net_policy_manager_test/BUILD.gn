@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,11 +22,11 @@ ohos_unittest("net_policy_manager_test") {
     debug = false
   }
   sources = [
+    "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
     "net_policy_callback_proxy_test.cpp",
     "net_policy_callback_test.cpp",
     "net_policy_exception_service_test.cpp",
     "net_policy_manager_test.cpp",
-    "net_policy_security.cpp",
     "net_policy_service_stub_test.cpp",
     "net_policy_setting_test.cpp",
     "ut_firewall_rule.cpp",
@@ -55,6 +55,8 @@ ohos_unittest("net_policy_manager_test") {
     "$INNERKITS_ROOT/netconnclient/include",
     "$NETCONNMANAGER_COMMON_DIR/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
+    "$NETMANAGER_BASE_ROOT/test/security",
   ]
 
   deps = [

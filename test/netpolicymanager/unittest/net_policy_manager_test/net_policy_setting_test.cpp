@@ -22,7 +22,7 @@
 #include "net_policy_client.h"
 #include "net_policy_constants.h"
 #include "net_policy_inner_define.h"
-#include "net_policy_security.h"
+#include "netmanager_base_test_security.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -50,35 +50,35 @@ void NetPolicySettingTest::TearDown() {}
 
 HWTEST_F(NetPolicySettingTest, OpenPowerSave, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSavePolicy(true);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetPolicySettingTest, ClosePowerSave, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetPowerSavePolicy(false);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetPolicySettingTest, OpenDeviceIdle, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdlePolicy(true);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetPolicySettingTest, CloseDeviceIdle, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->SetDeviceIdlePolicy(false);
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetPolicySettingTest, HasPermission, TestSize.Level1)
 {
-    NetPolicyAccessToken token;
+    NetManagerBaseAccessToken token;
     int32_t result = DelayedSingleton<NetPolicyClient>::GetInstance()->CheckPermission();
     EXPECT_EQ(result, NETMANAGER_SUCCESS);
 }

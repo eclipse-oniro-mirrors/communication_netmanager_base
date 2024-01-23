@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
+#include <securec.h>
 #include <thread>
 
-#include <securec.h>
-
+#include "common_notify_callback_test.h"
 #include "iservice_registry.h"
+#include "netsys_native_client.h"
 #include "notify_callback_stub.h"
 #include "singleton.h"
 #include "system_ability_definition.h"
-
-#include "netsys_native_client.h"
 #define private public
 #include "iptables_wrapper.h"
 #include "netsys_native_service.h"
@@ -324,62 +323,11 @@ void AddInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_INTERFACE_ADD_ADDRESS), dataParcel);
 }
 
-class TestNotifyCallback : public NetsysNative::NotifyCallbackStub {
-public:
-    TestNotifyCallback() = default;
-    ~TestNotifyCallback(){};
-    int32_t OnInterfaceAddressUpdated(const std::string &addr, const std::string &ifName, int flags, int scope)
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceAddressRemoved(const std::string &addr, const std::string &ifName, int flags, int scope)
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceAdded(const std::string &ifName)
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceRemoved(const std::string &ifName)
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceChanged(const std::string &ifName, bool up)
-    {
-        return 0;
-    }
-
-    int32_t OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
-    {
-        return 0;
-    }
-
-    int32_t OnRouteChanged(bool updated, const std::string &route, const std::string &gateway,
-                           const std::string &ifName)
-    {
-        return 0;
-    }
-
-    int32_t OnDhcpSuccess(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult)
-    {
-        return 0;
-    }
-
-    int32_t OnBandwidthReachedLimit(const std::string &limitName, const std::string &iface)
-    {
-        return 0;
-    }
-};
-
 int32_t OnRemoteRequestCallBack(uint32_t code, MessageParcel &data)
 {
     MessageParcel reply;
     MessageOption option;
-    TestNotifyCallback notifyCallBackTest;
+    NetsysNative::NotifyCallbackTest notifyCallBackTest;
     int32_t ret = notifyCallBackTest.OnRemoteRequest(code, data, reply, option);
     return ret;
 }
@@ -418,7 +366,7 @@ void RegisterNotifyCallbackFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    sptr<NetsysNative::NotifyCallbackStub> notifyCb = new (std::nothrow) TestNotifyCallback();
+    sptr<NetsysNative::NotifyCallbackStub> notifyCb = new (std::nothrow) NetsysNative::NotifyCallbackTest();
     notifyCb->Marshalling(dataParcel);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_REGISTER_NOTIFY_CALLBACK),
                     dataParcel);
@@ -431,7 +379,7 @@ void UnRegisterNotifyCallbackFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    sptr<NetsysNative::NotifyCallbackStub> notifyCb = new (std::nothrow) TestNotifyCallback();
+    sptr<NetsysNative::NotifyCallbackStub> notifyCb = new (std::nothrow) NetsysNative::NotifyCallbackTest();
 
     notifyCb->Marshalling(dataParcel);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_UNREGISTER_NOTIFY_CALLBACK),

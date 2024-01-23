@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,6 +22,7 @@ ohos_unittest("net_conn_manager_test") {
     debug = false
   }
   sources = [
+    "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
     "dns_result_call_back_test.cpp",
     "inet_addr_test.cpp",
     "net_activate_test.cpp",
@@ -34,7 +35,6 @@ ohos_unittest("net_conn_manager_test") {
     "net_conn_event_handler_test.cpp",
     "net_conn_hievent_test.cpp",
     "net_conn_manager_test.cpp",
-    "net_conn_security.cpp",
     "net_conn_service_iface_test.cpp",
     "net_conn_service_proxy_test.cpp",
     "net_conn_service_test.cpp",
@@ -69,6 +69,8 @@ ohos_unittest("net_conn_manager_test") {
     "$NETMANAGERNATIVE_ROOT/net_mgr_native/include",
     "$NETMANAGERNATIVE_ROOT/common/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
+    "$NETMANAGER_BASE_ROOT/test/commonduplicatedcode",
+    "$NETMANAGER_BASE_ROOT/test/security",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$INNERKITS_ROOT/netmanagernative/include",
