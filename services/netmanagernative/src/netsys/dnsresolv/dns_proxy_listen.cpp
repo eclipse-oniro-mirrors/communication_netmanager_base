@@ -31,6 +31,7 @@ namespace OHOS {
 namespace nmd {
 uint16_t DnsProxyListen::netId_ = 0;
 bool DnsProxyListen::proxyListenSwitch_ = false;
+std::mutex DnsProxyListen::listenerMutex_;
 constexpr uint16_t DNS_PROXY_PORT = 53;
 constexpr uint8_t RESPONSE_FLAG = 0x80;
 constexpr uint8_t RESPONSE_FLAG_USED = 80;
@@ -134,14 +135,14 @@ void DnsProxyListen::StartListen()
         }
     }
 
-    {
-	std::lock_gurad<std::mutex> lock(listenerMutex_);
-        sockaddr_in proxyAddr;
-        (void)memset_s(&proxyAddr, sizeof(proxyAddr), 0, sizeof(proxyAddr));
-        proxyAddr.sin_family = AF_INET;
-        proxyAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-        proxyAddr.sin_port = htons(DNS_PROXY_PORT);
+    sockaddr_in proxyAddr;
+    (void)memset_s(&proxyAddr, sizeof(proxyAddr), 0, sizeof(proxyAddr));
+    proxyAddr.sin_family = AF_INET;
+    proxyAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    proxyAddr.sin_port = htons(DNS_PROXY_PORT);
 
+    {
+        std::lock_gurad<std::mutex> lock(DnsProxyListen::listenerMutex_);
         if (bind(proxySockFd_, (sockaddr *)&proxyAddr, sizeof(proxyAddr)) == -1) {
             NETNATIVE_LOGE("bind errno %{public}d: %{public}s", errno, strerror(errno));
             close(proxySockFd_);
@@ -149,6 +150,7 @@ void DnsProxyListen::StartListen()
             return;
         }
     }
+
     while (true) {
         if (DnsThreadClose()) {
             break;
