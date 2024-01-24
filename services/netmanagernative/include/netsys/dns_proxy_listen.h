@@ -17,6 +17,7 @@
 #define INCLUDE_DNS_PROXY_LISTEN_H
 
 #include <iostream>
+#include <mutex>
 #include <netinet/in.h>
 #include <vector>
 
@@ -66,6 +67,7 @@ private:
     int32_t proxySockFd_;
     static uint16_t netId_;
     static bool proxyListenSwitch_;
+    static std::mutex listenerMutex_;
 };
 } // namespace nmd
 } // namespace OHOS

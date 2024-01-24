@@ -134,17 +134,20 @@ void DnsProxyListen::StartListen()
         }
     }
 
-    sockaddr_in proxyAddr;
-    (void)memset_s(&proxyAddr, sizeof(proxyAddr), 0, sizeof(proxyAddr));
-    proxyAddr.sin_family = AF_INET;
-    proxyAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    proxyAddr.sin_port = htons(DNS_PROXY_PORT);
+    {
+	std::lock_gurad<std::mutex> lock(listenerMutex_);
+        sockaddr_in proxyAddr;
+        (void)memset_s(&proxyAddr, sizeof(proxyAddr), 0, sizeof(proxyAddr));
+        proxyAddr.sin_family = AF_INET;
+        proxyAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+        proxyAddr.sin_port = htons(DNS_PROXY_PORT);
 
-    if (bind(proxySockFd_, (sockaddr *)&proxyAddr, sizeof(proxyAddr)) == -1) {
-        NETNATIVE_LOGE("bind errno %{public}d: %{public}s", errno, strerror(errno));
-        close(proxySockFd_);
-        proxySockFd_ = -1;
-        return;
+        if (bind(proxySockFd_, (sockaddr *)&proxyAddr, sizeof(proxyAddr)) == -1) {
+            NETNATIVE_LOGE("bind errno %{public}d: %{public}s", errno, strerror(errno));
+            close(proxySockFd_);
+            proxySockFd_ = -1;
+            return;
+        }
     }
     while (true) {
         if (DnsThreadClose()) {
