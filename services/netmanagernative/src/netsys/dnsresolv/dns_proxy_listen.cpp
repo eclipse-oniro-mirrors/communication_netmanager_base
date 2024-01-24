@@ -142,7 +142,7 @@ void DnsProxyListen::StartListen()
     proxyAddr.sin_port = htons(DNS_PROXY_PORT);
 
     {
-        std::lock_gurad<std::mutex> lock(DnsProxyListen::listenerMutex_);
+        std::lock_guard<std::mutex> lock(DnsProxyListen::listenerMutex_);
         if (bind(proxySockFd_, (sockaddr *)&proxyAddr, sizeof(proxyAddr)) == -1) {
             NETNATIVE_LOGE("bind errno %{public}d: %{public}s", errno, strerror(errno));
             close(proxySockFd_);
