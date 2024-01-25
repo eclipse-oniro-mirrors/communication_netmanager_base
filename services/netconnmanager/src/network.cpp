@@ -611,7 +611,7 @@ void Network::OnHandleNetMonitorResult(NetDetectionStatus netDetectionState, con
 {
     if (eventHandler_) {
         eventHandler_->PostAsyncTask(
-            [netDetectionState, &urlRedirect, this]() { this->HandleNetMonitorResult(netDetectionState, urlRedirect); },
+            [netDetectionState, urlRedirect, this]() { this->HandleNetMonitorResult(netDetectionState, urlRedirect); },
             0);
     }
 }

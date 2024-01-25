@@ -61,6 +61,8 @@
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetSupplier(OHOS::NetManagerStandard::NetBearType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&, unsigned int&)";
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetSupplierCallback(unsigned int, OHOS::sptr<OHOS::NetManagerStandard::NetSupplierCallbackBase> const&)";
       "OHOS::NetManagerStandard::NetConnClient::UnregisterNetSupplier(unsigned int)";
+      "OHOS::NetManagerStandard::NetConnClient::RegisterNetDetectionCallback(int, OHOS::sptr<OHOS::NetManagerStandard::INetDetectionCallback> const&)";
+      "OHOS::NetManagerStandard::NetConnClient::UnRegisterNetDetectionCallback(int, OHOS::sptr<OHOS::NetManagerStandard::INetDetectionCallback> const&)";
       "OHOS::NetManagerStandard::NetConnClient::UpdateNetSupplierInfo(unsigned int, OHOS::sptr<OHOS::NetManagerStandard::NetSupplierInfo> const&)";
       "OHOS::NetManagerStandard::NetConnClient::UpdateNetLinkInfo(unsigned int, OHOS::sptr<OHOS::NetManagerStandard::NetLinkInfo> const&)";
       "OHOS::NetManagerStandard::NetConnClient::SystemReady()";
@@ -144,6 +146,8 @@
       "OHOS::NetManagerStandard::NetDetectionCallbackStub::OnNetDetectionResult(OHOS::MessageParcel&, OHOS::MessageParcel&)";
       "OHOS::NetManagerStandard::NetDetectionCallbackStub::~NetDetectionCallbackStub()";
       "OHOS::NetManagerStandard::NetDetectionCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
+      "OHOS::NetManagerStandard::NetDetectionCallbackStub::OnNetDetectionResultChanged(OHOS::NetManagerStandard::NetDetectionResultCode, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "non-virtual thunk to OHOS::NetManagerStandard::NetDetectionCallbackStub::OnNetDetectionResultChanged(OHOS::NetManagerStandard::NetDetectionResultCode, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "non-virtual thunk to OHOS::NetManagerStandard::NetDetectionCallbackStub::~NetDetectionCallbackStub()";
       "virtual thunk to OHOS::NetManagerStandard::NetDetectionCallbackStub::~NetDetectionCallbackStub()";
       "OHOS::NetManagerStandard::NetHandle::GetAddressesByName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::vector<OHOS::NetManagerStandard::INetAddr, std::__h::allocator<OHOS::NetManagerStandard::INetAddr>>&)";

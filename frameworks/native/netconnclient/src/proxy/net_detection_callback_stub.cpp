@@ -71,5 +71,11 @@ int32_t NetDetectionCallbackStub::OnNetDetectionResult(MessageParcel &data, Mess
 
     return NETMANAGER_SUCCESS;
 }
+
+int32_t NetDetectionCallbackStub::OnNetDetectionResultChanged(NetDetectionResultCode detectionResult,
+    const std::string &urlRedirect)
+{
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
