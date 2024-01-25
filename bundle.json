@@ -93,7 +93,6 @@
                     "//foundation/communication/netmanager_base/services/etc/init:netmanager_base.rc",
                     "//foundation/communication/netmanager_base/services/etc/init:netsysnative.rc",
                     "//foundation/communication/netmanager_base/services/etc/init:resolv.conf",
-                    "//foundation/communication/netmanager_base/services/etc/init:prefer_cellular_url_list.txt",
                     "//foundation/communication/netmanager_base/services/etc/init:xtables.lock",
                     "//foundation/communication/netmanager_base/services/common:net_service_common",
                     "//foundation/communication/netmanager_base/sa_profile:net_manager_profile"
