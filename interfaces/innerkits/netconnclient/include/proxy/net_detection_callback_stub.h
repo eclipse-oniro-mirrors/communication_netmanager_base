@@ -32,6 +32,8 @@ public:
     int32_t OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
+    int32_t OnNetDetectionResultChanged(NetDetectionResultCode detectionResult,
+        const std::string &urlRedirect) override;
 private:
     using NetDetectionCallbackFunc = int32_t (NetDetectionCallbackStub::*)(MessageParcel &, MessageParcel &);
 

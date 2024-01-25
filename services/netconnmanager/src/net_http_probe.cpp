@@ -523,7 +523,14 @@ void NetHttpProbe::RecvHttpProbeResponse()
         curl_easy_getinfo(curlMsg->easy_handle, CURLINFO_RESPONSE_CODE, &responseCode);
 
         std::string redirectUrl;
-        curl_easy_getinfo(curlMsg->easy_handle, CURLINFO_REDIRECT_URL, &redirectUrl);
+        char* url = nullptr;
+        curl_easy_getinfo(curlMsg->easy_handle, CURLINFO_REDIRECT_URL, &url);
+        if (url != nullptr) {
+            redirectUrl = url;
+        } else {
+            curl_easy_getinfo(curlMsg->easy_handle, CURLINFO_EFFECTIVE_URL, &url);
+            redirectUrl = url;
+        }
 
         if (curlMsg->easy_handle == httpCurl_) {
             httpProbeResult_ = {responseCode, redirectUrl};

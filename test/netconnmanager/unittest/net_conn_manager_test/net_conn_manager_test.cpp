@@ -26,7 +26,7 @@
 #include "net_mgr_log_wrapper.h"
 #include "netmanager_base_test_security.h"
 #include "system_ability_definition.h"
-
+#include "net_detection_callback_stub.h"
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
@@ -302,6 +302,32 @@ HWTEST_F(NetConnManagerTest, NetConnManager006, TestSize.Level1)
     }
 
     result = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
+    ASSERT_EQ(result, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: NetConnManager007
+ * @tc.desc: Test NetConnManager RegisterNetDetectionCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnManagerTest, NetConnManager007, TestSize.Level1)
+{
+    NetHandle netHandle;
+    int32_t result = NetConnClient::GetInstance().GetDefaultNet(netHandle);
+    if (result != NETMANAGER_SUCCESS) {
+        return ;
+    }
+    sptr<NetDetectionCallbackStub> callback = new NetDetectionCallbackStub();
+    int32_t netId = netHandle.GetNetId();
+    std::cout << "RegisterNetDetectionCallback netId:"<< netId << std::endl;
+    result = NetConnClient::GetInstance().RegisterNetDetectionCallback(netId, callback);
+    if (result == 0) {
+        std::cout << "RegisterNetDetectionCallback register success" << std::endl;
+        return;
+    }
+    std::cout << "RegisterNetDetectionCallback failed ret = %{public}d"<< result << std::endl;
+
+    result = NetConnClient::GetInstance().UnRegisterNetDetectionCallback(netId, callback);
     ASSERT_EQ(result, NETMANAGER_SUCCESS);
 }
 
