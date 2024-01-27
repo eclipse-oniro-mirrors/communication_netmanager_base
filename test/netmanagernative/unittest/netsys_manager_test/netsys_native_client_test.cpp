@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -373,6 +373,12 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientBranchTest001, TestSize.Level
     int32_t ret = nativeClient_.RegisterDnsResultCallback(callback, timeStep);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
     ret = nativeClient_.UnregisterDnsResultCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    sptr<OHOS::NetsysNative::INetDnsHealthCallback> healthCallback = nullptr;
+    ret = nativeClient_.RegisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+    ret = nativeClient_.UnregisterDnsHealthCallback(healthCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 } // namespace NetManagerStandard

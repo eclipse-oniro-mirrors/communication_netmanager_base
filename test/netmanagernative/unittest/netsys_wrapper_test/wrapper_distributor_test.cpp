@@ -234,5 +234,33 @@ HWTEST_F(WrapperDistributorTest, RegisterNetlinkCallbacksTest002, TestSize.Level
     instance_->HandleDecodeSuccess(message);
     EXPECT_EQ(notifyCallback->alertName_, "labelName");
 }
+
+HWTEST_F(WrapperDistributorTest, WrapperDistributorBranchTest001, TestSize.Level1)
+{
+    instance_->netlinkCallbacks_ = nullptr;
+    std::shared_ptr<NetsysEventMessage> message = std::make_shared<NetsysEventMessage>();
+    instance_->HandleDecodeSuccess(message);
+
+    std::string ifName = "";
+    instance_->NotifyInterfaceAdd(ifName);
+    instance_->NotifyInterfaceRemove(ifName);
+    instance_->NotifyInterfaceChange(ifName, false);
+    instance_->NotifyInterfaceLinkStateChange(ifName, false);
+
+    std::string labelName = "";
+    instance_->NotifyQuotaLimitReache(labelName, ifName);
+    std::string addr = "";
+    int32_t flags = 0;
+    int32_t scope = 0;
+    instance_->NotifyInterfaceAddressUpdate(addr, ifName, flags, scope);
+    instance_->NotifyInterfaceAddressRemove(addr, ifName, flags, scope);
+
+    std::string route = "";
+    std::string gateway = "";
+    instance_->NotifyRouteChange(false, route, gateway, ifName);
+
+    int32_t ret = instance_->RegisterNetlinkCallbacks(nullptr);
+    EXPECT_EQ(ret, NetlinkResult::ERR_NULL_PTR);
+}
 } // namespace nmd
 } // namespace OHOS
