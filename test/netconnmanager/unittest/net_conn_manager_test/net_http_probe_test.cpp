@@ -15,10 +15,13 @@
 
 #include <gtest/gtest.h>
 
+#ifdef GTEST_API_
+#define private public
+#endif
 #include "net_http_probe.h"
+#include "net_http_probe_result.h"
 #include "net_link_info.h"
 #include "net_manager_constants.h"
-#include "net_http_probe_result.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -26,6 +29,7 @@ namespace {
 using namespace testing::ext;
 constexpr int32_t TEST_NETID = 999;
 constexpr const char *TEST_PROXY_HOST = "testHttpProxy";
+constexpr const char *TEST_STRING = "testString";
 constexpr const char *TEST_HTTP_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
 constexpr const char *TEST_HTTPS_URL = "https://connectivitycheck.platform.hicloud.com/generate_204";
 
@@ -40,8 +44,7 @@ public:
 
 void NetHttpProbeTest::SetUpTestCase()
 {
-    instance_ =
-        std::make_shared<NetHttpProbe>(TEST_NETID, NetBearType::BEARER_DEFAULT, NetLinkInfo());
+    instance_ = std::make_shared<NetHttpProbe>(TEST_NETID, NetBearType::BEARER_DEFAULT, NetLinkInfo());
 }
 
 void NetHttpProbeTest::TearDownTestCase() {}
@@ -68,6 +71,32 @@ HWTEST_F(NetHttpProbeTest, HasProbeType001, TestSize.Level1)
     EXPECT_TRUE(ret);
 }
 
+HWTEST_F(NetHttpProbeTest, NetHttpProbeBranchTest001, TestSize.Level1)
+{
+    instance_->SendHttpProbeRequest();
+    instance_->RecvHttpProbeResponse();
+
+    std::string domain = "";
+    std::string result = instance_->GetAddrInfo(domain);
+    ASSERT_TRUE(result.empty());
+
+    int32_t port = 0;
+    bool ret = instance_->SetResolveOption(ProbeType::PROBE_HTTP, domain, TEST_STRING, port);
+    ASSERT_FALSE(ret);
+
+    ret = instance_->SetResolveOption(ProbeType::PROBE_HTTP, TEST_STRING, TEST_STRING, port);
+    ASSERT_FALSE(ret);
+
+    ret = instance_->SetResolveOption(ProbeType::PROBE_HTTPS, TEST_STRING, TEST_STRING, port);
+    ASSERT_FALSE(ret);
+
+    bool useProxy = true;
+    ret = instance_->SendDnsProbe(ProbeType::PROBE_HTTPS, TEST_STRING, TEST_STRING, useProxy);
+    ASSERT_TRUE(ret);
+
+    ret = instance_->SendDnsProbe(ProbeType::PROBE_HTTPS, TEST_STRING, TEST_STRING, useProxy);
+    ASSERT_TRUE(ret);
+}
 } // namespace
 } // namespace NetManagerStandard
 } // namespace OHOS
