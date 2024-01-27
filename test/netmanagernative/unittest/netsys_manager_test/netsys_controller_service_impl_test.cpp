@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -698,6 +698,24 @@ HWTEST_F(NetsysControllerServiceImplTest, GetCookieStatsTest001, TestSize.Level1
 
     ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest009, TestSize.Level1)
+{
+    uint32_t timeStep = 0;
+    sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> reportCallback = nullptr;
+    auto ret = instance_->RegisterDnsResultCallback(reportCallback, timeStep);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->UnregisterDnsResultCallback(reportCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    sptr<NetsysNative::INetDnsHealthCallback> healthCallback = nullptr;
+    ret = instance_->RegisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = instance_->UnregisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

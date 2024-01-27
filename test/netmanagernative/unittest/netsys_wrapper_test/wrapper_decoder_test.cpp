@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -343,6 +343,36 @@ HWTEST_F(WrapperDecoderTest, PushAsciiMessageTest001, TestSize.Level1)
     auto msg = std::make_shared<NetsysEventMessage>();
     std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
     auto ret = decoder->PushAsciiMessage(recvmsg);
+    EXPECT_TRUE(ret);
+}
+
+HWTEST_F(WrapperDecoderTest, WrapperDecoderBranchTest001, TestSize.Level1)
+{
+    auto msg = std::make_shared<NetsysEventMessage>();
+    std::unique_ptr<WrapperDecoder> decoder = std::make_unique<WrapperDecoder>(msg);
+
+    nlmsghdr *hdrMsg = nullptr;
+    auto ret = decoder->InterpreteInfoMsg(hdrMsg);
+    EXPECT_FALSE(ret);
+
+    ifaddrmsg *addrMsg = nullptr;
+    std::string testString = "";
+    ifa_cacheinfo *cacheInfo = nullptr;
+    ret = decoder->SaveAddressMsg(testString, addrMsg, testString, cacheInfo, testString);
+    EXPECT_FALSE(ret);
+
+    uint8_t type = RTM_NEWNEIGH;
+    auto result = decoder->CheckRtParam(hdrMsg, type);
+    EXPECT_TRUE(result == nullptr);
+
+    int32_t length = 0;
+    int32_t family = AF_INET6;
+    ret = decoder->SaveRtMsg(testString, testString, testString, length, family);
+    EXPECT_FALSE(ret);
+
+    length = 1;
+    testString = "test";
+    ret = decoder->SaveRtMsg(testString, testString, testString, length, family);
     EXPECT_TRUE(ret);
 }
 } // namespace nmd
