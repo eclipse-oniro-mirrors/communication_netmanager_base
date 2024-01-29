@@ -40,7 +40,6 @@ NetDataShareHelperUtils::NetDataShareHelperUtils()
 
 std::shared_ptr<DataShare::DataShareHelper> NetDataShareHelperUtils::CreateDataShareHelper()
 {
-    NETMGR_LOG_D("DataShareHelper CreateDataShareHelper start");
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
         NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbilityManager failed.");
@@ -56,7 +55,6 @@ std::shared_ptr<DataShare::DataShareHelper> NetDataShareHelperUtils::CreateDataS
 
 int32_t NetDataShareHelperUtils::Query(Uri &uri, const std::string &key, std::string &value)
 {
-    NETMGR_LOG_D("DataShareHelper Query start");
     if (dataShareHelper_ == nullptr) {
         NETMGR_LOG_E("dataShareHelper_ is nullptr");
         return NETMANAGER_ERROR;
@@ -86,7 +84,6 @@ int32_t NetDataShareHelperUtils::Query(Uri &uri, const std::string &key, std::st
 
 int32_t NetDataShareHelperUtils::Insert(Uri &uri, const std::string &key, const std::string &value)
 {
-    NETMGR_LOG_D("DataShareHelper insert start");
     if (dataShareHelper_ == nullptr) {
         NETMGR_LOG_E("dataShareHelper_ is nullptr");
         return NETMANAGER_ERROR;
@@ -108,7 +105,6 @@ int32_t NetDataShareHelperUtils::Insert(Uri &uri, const std::string &key, const 
 
 int32_t NetDataShareHelperUtils::Update(Uri &uri, const std::string &key, const std::string &value)
 {
-    NETMGR_LOG_D("DataShareHelper update start");
     if (dataShareHelper_ == nullptr) {
         NETMGR_LOG_E("dataShareHelper_ is nullptr");
         return NETMANAGER_ERROR;
