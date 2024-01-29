@@ -41,4 +41,4 @@ public:
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
-#endif // NET_DATASHARE_UTILS_IFACE_H
+#endif // NET_DATASHARE_UTILS_H
