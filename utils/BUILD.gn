@@ -16,6 +16,7 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 group("common_target") {
   deps = [
+    ":net_data_share",
     ":net_manager_common",
     "napi_utils:napi_utils",
   ]
@@ -55,8 +56,6 @@ ohos_shared_library("net_manager_common") {
   sources = [
     "common_utils/src/base64_utils.cpp",
     "common_utils/src/event_report.cpp",
-    "common_utils/src/net_datashare_utils.cpp",
-    "common_utils/src/net_datashare_utils_iface.cpp",
     "common_utils/src/netmanager_base_common_utils.cpp",
     "common_utils/src/netmanager_base_permission.cpp",
     "common_utils/src/netmanager_hitrace.cpp",
@@ -85,15 +84,74 @@ ohos_shared_library("net_manager_common") {
   external_deps = [ "hilog:libhilog" ]
 
   external_deps += [
-    "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
     "c_utils:utils",
-    "data_share:datashare_common",
-    "data_share:datashare_consumer",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_single",
+  ]
+
+  innerapi_tags = [ "platformsdk" ]
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+config("netmgr_datashare_config") {
+  include_dirs = [
+    "data_share/include",
+    "log/include",
+  ]
+
+  cflags = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+
+  cflags_cc = [
+    "-fstack-protector-strong",
+    "-D_FORTIFY_SOURCE=2",
+    "-O2",
+  ]
+}
+
+ohos_shared_library("net_data_share") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  sources = [
+    "data_share/src/net_datashare_utils.cpp",
+    "data_share/src/net_datashare_utils_iface.cpp",
+  ]
+
+  defines = [
+    "NETMGR_LOG_TAG = \"NetMgrDataShare\"",
+    "LOG_DOMAIN = 0xD0015B0",
+  ]
+
+  if (enable_netmgr_debug) {
+    defines += [ "NETMGR_DEBUG" ]
+  }
+
+  if (is_standard_system) {
+    defines += [ "STANDARD_SYSTEM_ENABLE" ]
+  }
+
+  public_configs = [
+    ":netmgr_datashare_config",
+    "$C_UTILS_ROOT/base:utils_config",
+  ]
+
+  external_deps = [
+    "ability_base:zuri",
+    "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+    "hilog:libhilog",
     "samgr:samgr_proxy",
   ]
 
