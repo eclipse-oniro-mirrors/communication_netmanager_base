@@ -101,6 +101,7 @@ config("netmgr_datashare_config") {
   include_dirs = [
     "data_share/include",
     "log/include",
+    "$INNERKITS_ROOT/include",
   ]
 
   cflags = [
