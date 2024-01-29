@@ -959,7 +959,7 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
 
 void NetConnService::SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId)
 {
-    NETMGR_LOG_D("Send best supplier[%{public}d]-score[%{public}d] to all supplier", supplierId, bestScore);
+    NETMGR_LOG_I("Send best supplier[%{public}d]-score[%{public}d] to all supplier", supplierId, bestScore);
     NET_SUPPLIER_MAP::iterator iter;
     for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
         if (iter->second == nullptr) {

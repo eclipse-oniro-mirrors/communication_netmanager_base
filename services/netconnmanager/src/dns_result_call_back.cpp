@@ -31,14 +31,14 @@ int32_t NetDnsResultCallback::OnDnsResultReport(uint32_t size,
         NETMGR_LOG_I("netId_: %{public}d, totalReports_: %{public}d, failReports_: %{public}d, failrate : %{public}f",
                      netid, dnsResult.totalReports_, dnsResult.failReports_, failRate);
         if (failRate > FAIL_RATE) {
-            NETMGR_LOG_I("Netdetection for dns fail, netId:%{public}d,totalReports:%{public}d, failReports:%{public}d",
+            NETMGR_LOG_D("Netdetection for dns fail, netId:%{public}d,totalReports:%{public}d, failReports:%{public}d",
                          netid, dnsResult.totalReports_, dnsResult.failReports_);
             int32_t result = NetConnService::GetInstance()->NetDetectionForDnsHealth(netid, false);
             if (result != 0) {
                 NETMGR_LOG_E("NetDetectionForDnsHealth failed");
             }
         } else {
-            NETMGR_LOG_I("Netdetection for dns success, netId:%{public}d, totalReports:%{public}d,"
+            NETMGR_LOG_D("Netdetection for dns success, netId:%{public}d, totalReports:%{public}d,"
                          "failReports:%{public}d", netid, dnsResult.totalReports_, dnsResult.failReports_);
             int32_t result = NetConnService::GetInstance()->NetDetectionForDnsHealth(netid, true);
             if (result != 0) {
@@ -66,7 +66,7 @@ void NetDnsResultCallback::IterateDnsReportResults(
     int32_t result = NetConnService::GetInstance()->GetDefaultNet(defaultNetid);
     NETMGR_LOG_I("GetDefaultNet result: %{public}d, defaultNetid: %{public}d", result, defaultNetid);
     for (auto &it : netDnsResultReport) {
-        NETMGR_LOG_I("netId_: %{public}d, queryResult_: %{public}d, pid_ : %{public}d",
+        NETMGR_LOG_D("netId_: %{public}d, queryResult_: %{public}d, pid_ : %{public}d",
                      it.netid_, it.queryresult_, it.pid_);
         NetDnsResult existResult;
         bool ret =  netDnsResult_.Find(it.netid_, existResult);
