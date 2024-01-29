@@ -29,8 +29,6 @@ constexpr const char *SETTINGS_DATA_COLUMN_KEYWORD = "KEYWORD";
 constexpr const char *SETTINGS_DATA_COLUMN_VALUE = "VALUE";
 
 constexpr int INVALID_VALUE = -1;
-constexpr int NETMANAGER_ERROR = -1;
-constexpr int NETMANAGER_SUCCESS = 0;
 } // namespace
 
 NetDataShareHelperUtils::NetDataShareHelperUtils()
