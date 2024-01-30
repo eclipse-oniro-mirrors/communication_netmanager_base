@@ -766,13 +766,13 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest001, TestSize.Level1)
     type = static_cast<CallbackType>(validType);
     NetConnService::GetInstance()->CallbackForSupplier(supplier, type);
 
-    ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(nullptr, nullptr, 0);
+    ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(nullptr, nullptr, 0, TEST_UID);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
 HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest002, TestSize.Level1)
 {
-    auto ret = NetConnService::GetInstance()->UnregisterNetConnCallbackAsync(nullptr);
+    auto ret = NetConnService::GetInstance()->UnregisterNetConnCallbackAsync(nullptr, TEST_UID);
     EXPECT_NE(ret, NETSYS_SUCCESS);
 
     sptr<NetSupplier> supplier = nullptr;

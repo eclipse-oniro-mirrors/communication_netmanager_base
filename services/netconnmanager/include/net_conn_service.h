@@ -52,6 +52,7 @@ class NetConnService : public SystemAbility,
     using NET_SUPPLIER_MAP = std::map<uint32_t, sptr<NetSupplier>>;
     using NET_NETWORK_MAP = std::map<int32_t, std::shared_ptr<Network>>;
     using NET_ACTIVATE_MAP = std::map<uint32_t, std::shared_ptr<NetActivate>>;
+    using NET_UIDREQUEST_MAP = std::map<uint32_t, uint32_t>;
 
 public:
     static std::shared_ptr<NetConnService> &GetInstance()
@@ -371,8 +372,8 @@ private:
     int32_t UnregisterNetSupplierAsync(uint32_t supplierId);
     int32_t RegisterNetSupplierCallbackAsync(uint32_t supplierId, const sptr<INetSupplierCallback> &callback);
     int32_t RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
-                                         const uint32_t &timeoutMS);
-    int32_t UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback);
+                                         const uint32_t &timeoutMS, const uint32_t callingUid);
+    int32_t UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback, const uint32_t callingUid);
     int32_t RegUnRegNetDetectionCallbackAsync(int32_t netId, const sptr<INetDetectionCallback> &callback, bool isReg);
     int32_t UpdateNetStateForTestAsync(const sptr<NetSpecifier> &netSpecifier, int32_t netState);
     int32_t UpdateNetSupplierInfoAsync(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo);
@@ -403,6 +404,7 @@ private:
     sptr<NetSupplier> defaultNetSupplier_ = nullptr;
     NET_SUPPLIER_MAP netSuppliers_;
     NET_ACTIVATE_MAP netActivates_;
+    NET_UIDREQUEST_MAP netUidrequest_;
     NET_NETWORK_MAP networks_;
     std::unique_ptr<NetScore> netScore_ = nullptr;
     sptr<NetConnServiceIface> serviceIface_ = nullptr;
