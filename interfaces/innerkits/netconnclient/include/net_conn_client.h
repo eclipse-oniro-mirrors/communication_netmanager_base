@@ -151,6 +151,27 @@ public:
     int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback);
 
     /**
+     * Register net detection callback by netId
+     *
+     * @param netSpecifier specifier information
+     * @param callback The callback of INetDetectionCallback interface
+     * @param timeoutMS net connection time out
+     * @return Returns 0, successfully register net detection callback, otherwise it will failed
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback);
+    /**
+     * Unregister net detection callback by netId
+     *
+     * @param callback The callback of INetDetectionCallback interface
+     * @return Returns 0, successfully unregister net detection callback, otherwise it will fail
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback);
+    
+    /**
      * The interface is to get default network
      *
      * @param netHandle network handle
