@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,10 @@
  */
 
 #include <gtest/gtest.h>
+
+#ifdef GTEST_API_
+#define private public
+#endif
 
 #include "data_receiver.h"
 #include "netlink_define.h"
@@ -72,5 +76,13 @@ HWTEST_F(DataReceiverTest, StopTest001, TestSize.Level1)
     EXPECT_EQ(ret, NetlinkResult::OK);
 }
 
+HWTEST_F(DataReceiverTest, DataReceiverBranchTest001, TestSize.Level1)
+{
+    int32_t socket = 0;
+    instance_->StartReceive(socket);
+    uid_t uid = 0;
+    ssize_t count = instance_->ReceiveMessage(true, uid);
+    EXPECT_LE(count, 0);
+}
 } // namespace nmd
 } // namespace OHOS
