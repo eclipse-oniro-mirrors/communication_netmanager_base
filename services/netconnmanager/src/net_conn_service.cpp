@@ -423,7 +423,6 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
             return NET_CONN_ERR_NET_OVER_MAX_REQUEST_NUM;
         } else {
             requestNetwork->second++;
-            NETMGR_LOG_I("callUid size is [%{public}d] ", requestNetwork->second);
         }
      }
 
