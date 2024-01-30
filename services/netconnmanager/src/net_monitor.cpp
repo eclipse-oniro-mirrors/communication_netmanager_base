@@ -91,7 +91,7 @@ void NetMonitor::Stop()
     NETMGR_LOG_I("Stop net[%{public}d] monitor in", netId_);
     isDetecting_ = false;
     detectionCond_.notify_all();
-    NETMGR_LOG_I("Stop net[%{public}d] monitor out", netId_);
+    NETMGR_LOG_D("Stop net[%{public}d] monitor out", netId_);
 }
 
 bool NetMonitor::IsDetecting()

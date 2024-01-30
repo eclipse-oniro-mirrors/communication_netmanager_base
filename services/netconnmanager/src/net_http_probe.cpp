@@ -52,7 +52,7 @@ std::mutex NetHttpProbe::initCurlMutex_;
 int32_t NetHttpProbe::useCurlCount_ = 0;
 bool NetHttpProbe::CurlGlobalInit()
 {
-    NETMGR_LOG_I("curl_global_init() in");
+    NETMGR_LOG_D("curl_global_init() in");
     std::lock_guard<std::mutex> lock(initCurlMutex_);
     if (useCurlCount_ == 0) {
         NETMGR_LOG_I("Call curl_global_init()");
@@ -62,16 +62,16 @@ bool NetHttpProbe::CurlGlobalInit()
         }
     }
     useCurlCount_++;
-    NETMGR_LOG_I("curl_global_init() count:[%{public}d]", useCurlCount_);
+    NETMGR_LOG_D("curl_global_init() count:[%{public}d]", useCurlCount_);
     return true;
 }
 
 void NetHttpProbe::CurlGlobalCleanup()
 {
-    NETMGR_LOG_I("CurlGlobalCleanup() in");
+    NETMGR_LOG_D("CurlGlobalCleanup() in");
     std::lock_guard<std::mutex> lock(initCurlMutex_);
     useCurlCount_ = useCurlCount_ > 0 ? (useCurlCount_ - 1) : 0;
-    NETMGR_LOG_I("Curl global used count remain:[%{public}d]", useCurlCount_);
+    NETMGR_LOG_D("Curl global used count remain:[%{public}d]", useCurlCount_);
     if (useCurlCount_ == 0) {
         NETMGR_LOG_I("Call curl_global_cleanup()");
         curl_global_cleanup();
