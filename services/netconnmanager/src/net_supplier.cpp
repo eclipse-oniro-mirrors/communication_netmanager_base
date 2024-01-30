@@ -283,7 +283,7 @@ int32_t NetSupplier::SelectAsBestNetwork(uint32_t reqId)
 
 void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t supplierId)
 {
-    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] receive best score, bestSupplierId[%{public}d]", supplierId_,
+    NETMGR_LOG_D("Supplier[%{public}d, %{public}s] receive best score, bestSupplierId[%{public}d]", supplierId_,
                  netSupplierIdent_.c_str(), supplierId);
     if (supplierId == supplierId_) {
         NETMGR_LOG_W("Same net supplier, no need to disconnect.");
@@ -302,7 +302,7 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
         return;
     }
     requestList_.erase(reqId);
-    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] remaining request list size[%{public}zd]", supplierId_,
+    NETMGR_LOG_D("Supplier[%{public}d, %{public}s] remaining request list size[%{public}zd]", supplierId_,
                  netSupplierIdent_.c_str(), requestList_.size());
     if (requestList_.empty()) {
         SupplierDisconnection(netCaps_.ToSet());
