@@ -71,7 +71,6 @@ constexpr const char *TEST_LONG_EXCLUSION_LIST =
     "com,www.test14.com,www.test15.com,www.test16.com,www.test17.com,www.test18.com,www.test19.com,www.test20.com";
 constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
 constexpr int64_t TEST_UID = 1010;
-constexpr int64_t TEST_CALLBACK_UID = 1111;
 constexpr uint32_t TEST_NOTEXISTSUPPLIER = 1000;
 
 class TestDnsService : public DnsBaseService {
@@ -271,6 +270,7 @@ HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest002, TestSize.Level1)
 HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest003, TestSize.Level1)
 {
     sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    int64_t TEST_CALLBACK_UID = 1111;
     auto ret = -1;
     for (int32_t i = 1; i <= 2000; ++i) {
         ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(netSpecifier, g_callback, 0, TEST_CALLBACK_UID);

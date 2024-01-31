@@ -385,8 +385,8 @@ private:
     void LoadGlobalHttpProxy();
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
     void ActiveHttpProxy();
-    void DoUnregisterNetUid(const uint32_t callingUid);
-    void DoRegisterNetUid(const uint32_t callingUid);
+    void DecreaseNetConnCallbackCntForUid(const uint32_t callingUid);
+    int32_t IncreaseNetConnCallbackCntForUid(const uint32_t callingUid);
 
     void OnNetSysRestart();
 
@@ -406,7 +406,7 @@ private:
     sptr<NetSupplier> defaultNetSupplier_ = nullptr;
     NET_SUPPLIER_MAP netSuppliers_;
     NET_ACTIVATE_MAP netActivates_;
-    NET_UIDREQUEST_MAP netUidrequest_;
+    NET_UIDREQUEST_MAP netUidRequest_;
     NET_NETWORK_MAP networks_;
     std::unique_ptr<NetScore> netScore_ = nullptr;
     sptr<NetConnServiceIface> serviceIface_ = nullptr;

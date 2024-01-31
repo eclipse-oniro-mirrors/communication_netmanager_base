@@ -411,7 +411,10 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
         EventReport::SendRequestFaultEvent(eventInfo);
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    DoRegisterNetUid(callingUid);
+    int32_t ret = IncreaseNetConnCallbackCntForUid(callingUid);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
     uint32_t reqId = 0;
     if (FindSameCallback(callback, reqId)) {
         NETMGR_LOG_E("RegisterNetConnCallback find same callback");
@@ -470,7 +473,7 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
         NETMGR_LOG_E("callback is null");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    DoUnregisterNetUid(callingUid);
+    DecreaseNetConnCallbackCntForUid(callingUid);
     uint32_t reqId = 0;
     if (!FindSameCallback(callback, reqId)) {
         NETMGR_LOG_E("UnregisterNetConnCallback can not find same callback");
@@ -511,11 +514,11 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
     return NETMANAGER_SUCCESS;
 }
 
-void NetConnService::DoRegisterNetUid(const uint32_t callingUid)
+int32_t NetConnService::IncreaseNetConnCallbackCntForUid(const uint32_t callingUid)
 {
-    auto requestNetwork = netUidrequest_.find(callingUid);
-    if (requestNetwork == netUidrequest_.end()) {
-        netUidrequest_.insert(std::make_pair(callingUid, 1));
+    auto requestNetwork = netUidRequest_.find(callingUid);
+    if (requestNetwork == netUidRequest_.end()) {
+        netUidRequest_.insert(std::make_pair(callingUid, 1));
     } else {
         if (requestNetwork->second >= MAX_ALLOW_UID_NUM) {
             NETMGR_LOG_E("return falied for UID [%{public}d] has registered over [%{public}d] callback",
@@ -525,19 +528,20 @@ void NetConnService::DoRegisterNetUid(const uint32_t callingUid)
             requestNetwork->second++;
         }
     }
+    return NETMANAGER_SUCCESS;
 }
 
-void NetConnService::DoUnregisterNetUid(const uint32_t callingUid)
+void NetConnService::DecreaseNetConnCallbackCntForUid(const uint32_t callingUid)
 {
-    auto requestNetwork = netUidrequest_.find(callingUid);
-    if (requestNetwork == netUidrequest_.end()) {
+    auto requestNetwork = netUidRequest_.find(callingUid);
+    if (requestNetwork == netUidRequest_.end()) {
         NETMGR_LOG_E("Could not find the request calling uid");
     } else {
         if (requestNetwork->second >= 1) {
             requestNetwork->second--;
         }
         if (requestNetwork->second == 0) {
-            netUidrequest_.erase(requestNetwork);
+            netUidRequest_.erase(requestNetwork);
         }
     }
 }
