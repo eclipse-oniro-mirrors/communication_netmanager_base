@@ -144,7 +144,6 @@ ohos_shared_library("net_data_share") {
 
   public_configs = [
     ":netmgr_datashare_config",
-    "$C_UTILS_ROOT/base:utils_config",
   ]
 
   external_deps = [
