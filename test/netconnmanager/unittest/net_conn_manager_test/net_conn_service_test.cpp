@@ -273,7 +273,7 @@ HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest003, TestSize.Level1)
     int64_t TEST_CALLBACK_UID = 1111;
     auto ret = -1;
     for (int32_t i = 1; i <= 2000; ++i) {
-        ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(netSpecifier, g_callback, 0
+        ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(netSpecifier, g_callback, 0,
                                                                                         TEST_CALLBACK_UID);
         EXPECT_EQ(ret, NET_CONN_ERR_SAME_CALLBACK);
     }
