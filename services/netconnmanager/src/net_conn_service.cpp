@@ -531,7 +531,8 @@ void NetConnService::DoUnregisterNetUid(const uint32_t callingUid) {
     } else {
         if (requestNetwork->second >= 1) {
             requestNetwork->second--;
-        } else (requestNetwork->second == 0) {
+        }
+        if (requestNetwork->second == 0) {
             netUidrequest_.erase(requestNetwork);
         }
     }
