@@ -411,14 +411,14 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
         EventReport::SendRequestFaultEvent(eventInfo);
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    int32_t ret = IncreaseNetConnCallbackCntForUid(callingUid);
-    if (ret != NETMANAGER_SUCCESS) {
-        return ret;
-    }
     uint32_t reqId = 0;
     if (FindSameCallback(callback, reqId)) {
         NETMGR_LOG_E("RegisterNetConnCallback find same callback");
         return NET_CONN_ERR_SAME_CALLBACK;
+    }
+    int32_t ret = IncreaseNetConnCallbackCntForUid(callingUid);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
     }
     return ActivateNetwork(netSpecifier, callback, timeoutMS);
 }

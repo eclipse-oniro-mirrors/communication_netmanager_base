@@ -272,13 +272,20 @@ HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest003, TestSize.Level1)
     sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
     int64_t TEST_CALLBACK_UID = 1111;
     auto ret = -1;
+    vector<sptr<INetConnCallback>> uidCallbacks;
     for (int32_t i = 1; i <= 2000; ++i) {
-        ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(netSpecifier, g_callback, 0,
-                                                                                        TEST_CALLBACK_UID);
-        EXPECT_EQ(ret, NET_CONN_ERR_SAME_CALLBACK);
+        sptr<INetConnCallback> uidCallback = new (std::nothrow) NetConnCallbackStubCb();
+        ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(netSpecifier, uidCallback, 0, TEST_CALLBACK_UID);
+        EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+        uidCallbacks.push_back(uidCallback);
     }
-    ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(netSpecifier, g_callback, 0, TEST_CALLBACK_UID);
+    sptr<INetConnCallback> uidCallback = new (std::nothrow) NetConnCallbackStubCb();
+    ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(netSpecifier, uidCallback, 0, TEST_CALLBACK_UID);
     EXPECT_EQ(ret, NET_CONN_ERR_NET_OVER_MAX_REQUEST_NUM);
+    for (auto& callback : uidCallbacks) {
+        ret = NetConnService::GetInstance()->UnregisterNetConnCallbackAsync(callback, TEST_CALLBACK_UID);
+        EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    }
 }
 
 HWTEST_F(NetConnServiceTest, RegisterNetDetectionCallbackTest001, TestSize.Level1)
