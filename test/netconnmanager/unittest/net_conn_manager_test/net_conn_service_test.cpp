@@ -275,7 +275,8 @@ HWTEST_F(NetConnServiceTest, RegisterNetConnCallbackTest003, TestSize.Level1)
     vector<sptr<INetConnCallback>> uidCallbacks;
     for (int32_t i = 1; i <= 2000; ++i) {
         sptr<INetConnCallback> uidCallback = new (std::nothrow) NetConnCallbackStubCb();
-        ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(netSpecifier, uidCallback, 0, TEST_CALLBACK_UID);
+        ret = NetConnService::GetInstance()->RegisterNetConnCallbackAsync(netSpecifier, uidCallback, 0,
+                                                                                        TEST_CALLBACK_UID);
         EXPECT_EQ(ret, NETMANAGER_SUCCESS);
         uidCallbacks.push_back(uidCallback);
     }
