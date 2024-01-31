@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,27 @@ HWTEST_F(NetSupplierTest, ResumeNetworkInfoTest001, TestSize.Level1)
     supplier->SetNetwork(network);
     ret = supplier->ResumeNetworkInfo();
     EXPECT_TRUE(ret);
+
+    supplier->ClearDefault();
+
+    ret = supplier->IsConnecting();
+    EXPECT_FALSE(ret);
+
+    ret = supplier->IsConnected();
+    EXPECT_FALSE(ret);
+
+    std::string result = supplier->TechToType(NetSlotTech::SLOT_TYPE_GSM);
+    EXPECT_TRUE(result == "2G");
+
+    result = supplier->TechToType(NetSlotTech::SLOT_TYPE_LTE);
+    EXPECT_TRUE(result == "4G");
+
+    result = supplier->TechToType(NetSlotTech::SLOT_TYPE_LTE_CA);
+    EXPECT_TRUE(result == "4G");
+
+    uint32_t invalidValue = 100;
+    result = supplier->TechToType(static_cast<NetSlotTech>(invalidValue));
+    EXPECT_TRUE(result == "3G");
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

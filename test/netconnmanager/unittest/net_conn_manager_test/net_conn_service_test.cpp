@@ -937,5 +937,35 @@ HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest004, TestSize.Level1)
     ret = stateCallback.RegisterInterfaceCallback(interfaceStateCallback);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
+
+HWTEST_F(NetConnServiceTest, NetConnServiceBranchTest005, TestSize.Level1)
+{
+    NetHttpProxyTracker httpProxyTracker;
+    std::string exclusions = "";
+    NetConnService::GetInstance()->GetPreferredUrl();
+    std::list<std::string> list = httpProxyTracker.ParseExclusionList(exclusions);
+    EXPECT_TRUE(list.empty());
+
+    std::string result = httpProxyTracker.GetExclusionsAsString(list);
+    EXPECT_TRUE(result.empty());
+
+    uint32_t supplierId = 10;
+    int32_t type = 0;
+    auto ret = NetConnService::GetInstance()->RegisterSlotType(supplierId, type);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    std::string slotType = "";
+    ret = NetConnService::GetInstance()->GetSlotType(slotType);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    std::string url = "";
+    bool preferCellular = false;
+    ret = NetConnService::GetInstance()->IsPreferCellularUrl(url, preferCellular);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+
+    NetConnService::GetInstance()->netFactoryResetCallback_ = nullptr;
+    ret = NetConnService::GetInstance()->FactoryResetNetwork();
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
