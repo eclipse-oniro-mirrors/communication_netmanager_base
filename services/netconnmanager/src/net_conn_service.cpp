@@ -482,8 +482,7 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId)
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::UnregisterNetConnCallbackAsync(
-                                                       const sptr<INetConnCallback> &callback,
+int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback,
                                                        const uint32_t callingUid)
 {
     NETMGR_LOG_I("UnregisterNetConnCallback Enter, call uid [%{public}d]", callingUid);
