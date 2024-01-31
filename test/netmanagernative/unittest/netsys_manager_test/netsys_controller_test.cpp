@@ -994,5 +994,42 @@ HWTEST_F(NetsysControllerTest, GetCookieStatsTest001, TestSize.Level1)
     ret = NetsysController::GetInstance().GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest003, TestSize.Level1)
+{
+    uint32_t timeStep = 0;
+    sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> callback = nullptr;
+    int32_t ret = NetsysController::GetInstance().RegisterDnsResultCallback(callback, timeStep);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = NetsysController::GetInstance().UnregisterDnsResultCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    sptr<OHOS::NetsysNative::INetDnsHealthCallback> healthCallback = nullptr;
+    ret = NetsysController::GetInstance().RegisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+
+    ret = NetsysController::GetInstance().UnregisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest004, TestSize.Level1)
+{
+    NetsysController::GetInstance().netsysService_ = nullptr;
+    uint32_t timeStep = 0;
+    sptr<OHOS::NetManagerStandard::NetsysDnsReportCallback> callback = nullptr;
+    int32_t ret = NetsysController::GetInstance().RegisterDnsResultCallback(callback, timeStep);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = NetsysController::GetInstance().UnregisterDnsResultCallback(callback);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    sptr<OHOS::NetsysNative::INetDnsHealthCallback> healthCallback = nullptr;
+    ret = NetsysController::GetInstance().RegisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+
+    ret = NetsysController::GetInstance().UnregisterDnsHealthCallback(healthCallback);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
