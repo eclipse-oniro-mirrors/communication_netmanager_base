@@ -15,8 +15,6 @@
 
 #include "net_stats_listener.h"
 
-#include "bundle_constants.h"
-
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_data_handler.h"
@@ -26,8 +24,9 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 using namespace OHOS::EventFwk;
+constexpr const char* UID = "uid";
 NetStatsListener::StatsCallback onUidRemove = [](const Want &want) {
-    uint32_t uid = want.GetIntParam(AppExecFwk::Constants::UID, 0);
+    uint32_t uid = want.GetIntParam(UID, 0);
     auto handler = std::make_unique<NetStatsDataHandler>();
     NETMGR_LOG_D("Net Manager delete uid, uid:[%{public}d]", uid);
     return handler->DeleteByUid(uid);

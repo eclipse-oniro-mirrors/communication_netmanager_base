@@ -16,6 +16,7 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 group("common_target") {
   deps = [
+    ":net_bundle_utils",
     ":net_data_share",
     ":net_manager_common",
     "napi_utils:napi_utils",
@@ -154,6 +155,47 @@ ohos_shared_library("net_data_share") {
   ]
 
   innerapi_tags = [ "platformsdk" ]
+  part_name = "netmanager_base"
+  subsystem_name = "communication"
+}
+
+ohos_shared_library("net_bundle_utils") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  include_dirs = [
+    "bundle_utils/include",
+    "log/include",
+    "$INNERKITS_ROOT/include",
+  ]
+
+  sources = [ "bundle_utils/src/net_bundle_impl.cpp" ]
+
+  defines = [
+    "NETMGR_LOG_TAG = \"NetMgrBundleUtils\"",
+    "LOG_DOMAIN = 0xD0015B0",
+  ]
+
+  if (enable_netmgr_debug) {
+    defines += [ "NETMGR_DEBUG" ]
+  }
+
+  if (is_standard_system) {
+    defines += [ "STANDARD_SYSTEM_ENABLE" ]
+  }
+
+  external_deps = [
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }

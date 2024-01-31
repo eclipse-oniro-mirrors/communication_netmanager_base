@@ -86,6 +86,7 @@ private:
     ~NetworkSecurityConfig();
     BaseConfig baseConfig_;
     std::vector<DomainConfig> domainConfigs_;
+    void *handler_ = nullptr;
 };
 
 }

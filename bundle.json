@@ -67,6 +67,7 @@
                 "fwk_group": [
                     "//foundation/communication/netmanager_base/utils:net_manager_common",
                     "//foundation/communication/netmanager_base/utils:net_data_share",
+                    "//foundation/communication/netmanager_base/utils:net_bundle_utils",
                     "//foundation/communication/netmanager_base/utils/napi_utils:napi_utils",
                     "//foundation/communication/netmanager_base/frameworks/js/napi/connection:connection",
                     "//foundation/communication/netmanager_base/frameworks/js/napi/network:network",
@@ -185,6 +186,15 @@
                         "header_base": "//foundation/communication/netmanager_base/utils/data_share/include"
                     }
                 },
+                {
+                    "type": "so",
+                    "name": "//foundation/communication/netmanager_base/utils:net_bundle_utils",
+                    "header": {
+                        "header_files": [
+                        ],
+                        "header_base": "//foundation/communication/netmanager_base/utils/bundle_utils/include"
+                    }
+                }, 
                 {
                     "type": "so",
                     "name": "//foundation/communication/netmanager_base/interfaces/innerkits/netconnclient:net_conn_parcel",

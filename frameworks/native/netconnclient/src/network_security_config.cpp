@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
-#include "iservice_registry.h"
-#include "system_ability_definition.h"
-#include "bundle_mgr_proxy.h"
-#include "net_mgr_log_wrapper.h"
-#include "net_manager_constants.h"
 #include "network_security_config.h"
+
 #include <sys/stat.h>
 #include <fstream>
 #include <dirent.h>
+#include <unistd.h>
+#include <dlfcn.h>
 #include <securec.h>
+
 #include "openssl/evp.h"
+#include "net_mgr_log_wrapper.h"
+#include "net_manager_constants.h"
+#include "net_bundle.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -50,22 +52,13 @@ const char OS_PATH_SEPARATOR = '/';
 #endif
 
 
-sptr<AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
-{
-    auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (!systemAbilityManager) {
-        NETMGR_LOG_E("fail to get system ability mgr.");
-        return nullptr;
-    }
+#ifdef __LP64__
+const std::string LIB_LOAD_PATH = "/system/lib64/libnet_bundle_utils.z.so";
+#else
+const std::string LIB_LOAD_PATH = "/system/lib/libnet_bundle_utils.z.so";
+#endif
 
-    auto remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    if (!remoteObject) {
-        NETMGR_LOG_E("fail to get bundle manager proxy.");
-        return nullptr;
-    }
-
-    return iface_cast<AppExecFwk::BundleMgrProxy>(remoteObject);
-}
+using GetNetBundleClass = INetBundle* (*)();
 
 bool Endswith(const std::string &str, const std::string &suffix)
 {
@@ -89,7 +82,12 @@ NetworkSecurityConfig::NetworkSecurityConfig()
     }
 }
 
-NetworkSecurityConfig::~NetworkSecurityConfig() {}
+NetworkSecurityConfig::~NetworkSecurityConfig()
+{
+    if (handler_ != nullptr) {
+        dlclose(handler_);
+    }
+}
 
 NetworkSecurityConfig& NetworkSecurityConfig::GetInstance()
 {
@@ -340,28 +338,27 @@ int32_t NetworkSecurityConfig::GetConfig()
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetworkSecurityConfig::GetJsonFromBundle(std::string &jsonProfile)
+__attribute__((no_sanitize("cfi"))) int32_t NetworkSecurityConfig::GetJsonFromBundle(std::string &jsonProfile)
 {
-    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
-    if (bundleMgrProxy == nullptr) {
-        NETMGR_LOG_E("Failed to get bundle manager proxy.");
+    handler_ = dlopen(LIB_LOAD_PATH.c_str(), RTLD_LAZY | RTLD_NODELETE);
+    if (handler_ == nullptr) {
+        NETMGR_LOG_E("load failed, failed reason : %{public}s", dlerror());
         return NETMANAGER_ERR_INTERNAL;
     }
-
-    AppExecFwk::BundleInfo bundleInfo;
-    auto ret = bundleMgrProxy->GetBundleInfoForSelf(0, bundleInfo);
-    if (ret != ERR_OK) {
-        NETMGR_LOG_E("GetSelfBundleName: bundleName get fail.");
+    GetNetBundleClass getNetBundle = (GetNetBundleClass)dlsym(handler_, "GetNetBundle");
+    if (getNetBundle == nullptr) {
+        NETMGR_LOG_E("GetNetBundle faild, failed reason : %{public}s", dlerror());
+        dlclose(handler_);
         return NETMANAGER_ERR_INTERNAL;
     }
-
-    ret = bundleMgrProxy->GetJsonProfile(AppExecFwk::ProfileType::NETWORK_PROFILE,
-        bundleInfo.name, bundleInfo.entryModuleName, jsonProfile);
-    if (ret != ERR_OK) {
-        NETMGR_LOG_D("No network_config profile configured in bundle manager.[%{public}d]", ret);
-        return NETMANAGER_SUCCESS;
+    auto netBundle = getNetBundle();
+    if (netBundle == nullptr) {
+        NETMGR_LOG_E("netBundle is nullptr");
+        dlclose(handler_);
+        return NETMANAGER_ERR_INTERNAL;
     }
-
+    netBundle->GetJsonFromBundle(jsonProfile);
+    NETMGR_LOG_D("get profile success");
     return NETMANAGER_SUCCESS;
 }
 
