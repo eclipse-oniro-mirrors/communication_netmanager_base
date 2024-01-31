@@ -522,8 +522,8 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
     NETMGR_LOG_I("UnregisterNetConnCallback End.");
     return NETMANAGER_SUCCESS;
 }
-
-void NetConnService::DoUnregisterNetUid(const uint32_t callingUid) {
+void NetConnService::DoUnregisterNetUid(const uint32_t callingUid)
+{
 
     auto requestNetwork = netUidrequest_.find(callingUid);
     if (requestNetwork == netUidrequest_.end()) {
