@@ -411,19 +411,7 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
         EventReport::SendRequestFaultEvent(eventInfo);
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-
-    auto requestNetwork = netUidrequest_.find(callingUid);
-    if (requestNetwork == netUidrequest_.end()) {
-        netUidrequest_.insert(std::make_pair(callingUid, 1));
-    } else {
-        if (requestNetwork->second >= MAX_ALLOW_UID_NUM) {
-            NETMGR_LOG_E("callUid [%{public}d] is over 2000", requestNetwork->second);
-            return NET_CONN_ERR_NET_OVER_MAX_REQUEST_NUM;
-        } else {
-            requestNetwork->second++;
-        }
-    }
-
+    DoRegisterNetUid(callingUid);
     uint32_t reqId = 0;
     if (FindSameCallback(callback, reqId)) {
         NETMGR_LOG_E("RegisterNetConnCallback find same callback");
@@ -522,9 +510,25 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
     NETMGR_LOG_I("UnregisterNetConnCallback End.");
     return NETMANAGER_SUCCESS;
 }
+
+void NetConnService::DoRegisterNetUid(const uint32_t callingUid)
+{
+    auto requestNetwork = netUidrequest_.find(callingUid);
+    if (requestNetwork == netUidrequest_.end()) {
+        netUidrequest_.insert(std::make_pair(callingUid, 1));
+    } else {
+        if (requestNetwork->second >= MAX_ALLOW_UID_NUM) {
+            NETMGR_LOG_E("return falied for UID [%{public}d] has registered over [%{public}d] callback",
+                         callingUid, MAX_ALLOW_UID_NUM);
+            return NET_CONN_ERR_NET_OVER_MAX_REQUEST_NUM;
+        } else {
+            requestNetwork->second++;
+        }
+    }
+}
+
 void NetConnService::DoUnregisterNetUid(const uint32_t callingUid)
 {
-
     auto requestNetwork = netUidrequest_.find(callingUid);
     if (requestNetwork == netUidrequest_.end()) {
         NETMGR_LOG_E("Could not find the request calling uid");

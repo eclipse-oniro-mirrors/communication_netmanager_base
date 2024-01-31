@@ -386,6 +386,7 @@ private:
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
     void ActiveHttpProxy();
     void DoUnregisterNetUid(const uint32_t callingUid);
+    void DoRegisterNetUid(const uint32_t callingUid);
 
     void OnNetSysRestart();
 
