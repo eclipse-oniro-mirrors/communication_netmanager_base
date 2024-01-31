@@ -37,8 +37,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-constexpr uint32_t MAX_REQUEST_NUM = 5000;
-constexpr uint32_t MAX_ALLOW_UID_NUM = 100;
+constexpr uint32_t MAX_ALLOW_UID_NUM = 2000;
 // hisysevent error messgae
 constexpr const char *ERROR_MSG_NULL_SUPPLIER_INFO = "Net supplier info is nullptr";
 constexpr const char *ERROR_MSG_NULL_NET_LINK_INFO = "Net link info is nullptr";
@@ -218,8 +217,7 @@ int32_t NetConnService::RegisterNetConnCallback(const sptr<INetConnCallback> &ca
 int32_t NetConnService::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
                                                 const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
 {
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
-    NETMGR_LOG_I("RegisterNetConnCallback calling UID [%{public}d] ", callingUid);
+    int32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
 
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
@@ -248,8 +246,7 @@ int32_t NetConnService::UnregisterNetSupplier(uint32_t supplierId)
 
 int32_t NetConnService::UnregisterNetConnCallback(const sptr<INetConnCallback> &callback)
 {
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
-    NETMGR_LOG_I("UnregisterNetConnCallback calling UID [%{public}d] ", callingUid);
+    int32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask(
@@ -406,7 +403,7 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
                                                      const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS,
                                                      const uint32_t callingUid)
 {
-    NETMGR_LOG_I("Register net connect callback async, call uid [%{public}d]", callingUid);
+    NETMGR_LOG_I("Register net connect callback async, call uid [%{public}u]", callingUid);
     if (netSpecifier == nullptr || callback == nullptr) {
         NETMGR_LOG_E("The parameter of netSpecifier or callback is null");
         struct EventInfo eventInfo = {.errorType = static_cast<int32_t>(FAULT_INVALID_PARAMETER),
@@ -417,21 +414,16 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
 
     auto requestNetwork = netUidrequest_.find(callingUid);
     if (requestNetwork == netUidrequest_.end()) {
-        NETMGR_LOG_E("Could not find the request calling uid");
         netUidrequest_.insert(std::make_pair(callingUid, 1));
     } else {
         if (requestNetwork->second >= MAX_ALLOW_UID_NUM) {
-            NETMGR_LOG_E("callUid [%{public}d] is > 100", requestNetwork->second);
+            NETMGR_LOG_E("callUid [%{public}d] is over 2000", requestNetwork->second);
             return NET_CONN_ERR_NET_OVER_MAX_REQUEST_NUM;
         } else {
             requestNetwork->second++;
         }
     }
 
-    if (netActivates_.size() >= MAX_REQUEST_NUM) {
-        NETMGR_LOG_E("Over the max request number");
-        return NET_CONN_ERR_NET_OVER_MAX_REQUEST_NUM;
-    }
     uint32_t reqId = 0;
     if (FindSameCallback(callback, reqId)) {
         NETMGR_LOG_E("RegisterNetConnCallback find same callback");
@@ -485,23 +477,12 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId)
 int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback,
                                                        const uint32_t callingUid)
 {
-    NETMGR_LOG_I("UnregisterNetConnCallback Enter, call uid [%{public}d]", callingUid);
+    NETMGR_LOG_I("UnregisterNetConnCallback Enter, call uid [%{public}u]", callingUid);
     if (callback == nullptr) {
         NETMGR_LOG_E("callback is null");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-
-    auto requestNetwork = netUidrequest_.find(callingUid);
-    if (requestNetwork == netUidrequest_.end()) {
-        NETMGR_LOG_E("Could not find the request calling uid");
-        return NET_CONN_ERR_CALLBACK_NOT_FOUND;
-    } else {
-        if (requestNetwork->second >= 1) {
-            requestNetwork->second--;
-        } else {
-            netUidrequest_.erase(requestNetwork);
-        }
-    }
+    DoUnregisterNetUid(callingUid);
     uint32_t reqId = 0;
     if (!FindSameCallback(callback, reqId)) {
         NETMGR_LOG_E("UnregisterNetConnCallback can not find same callback");
@@ -540,6 +521,20 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
     }
     NETMGR_LOG_I("UnregisterNetConnCallback End.");
     return NETMANAGER_SUCCESS;
+}
+
+void NetConnService::DoUnregisterNetUid(const uint32_t callingUid) {
+
+    auto requestNetwork = netUidrequest_.find(callingUid);
+    if (requestNetwork == netUidrequest_.end()) {
+        NETMGR_LOG_E("Could not find the request calling uid");
+    } else {
+        if (requestNetwork->second >= 1) {
+            requestNetwork->second--;
+        } else (requestNetwork->second == 0) {
+            netUidrequest_.erase(requestNetwork);
+        }
+    }
 }
 
 int32_t NetConnService::RegUnRegNetDetectionCallbackAsync(int32_t netId, const sptr<INetDetectionCallback> &callback,
