@@ -142,9 +142,7 @@ ohos_shared_library("net_data_share") {
     defines += [ "STANDARD_SYSTEM_ENABLE" ]
   }
 
-  public_configs = [
-    ":netmgr_datashare_config",
-  ]
+  public_configs = [ ":netmgr_datashare_config" ]
 
   external_deps = [
     "ability_base:zuri",
