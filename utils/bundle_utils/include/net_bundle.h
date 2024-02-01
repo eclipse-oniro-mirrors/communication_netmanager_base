@@ -18,14 +18,13 @@
 
 #include <string>
 
-
 namespace OHOS {
 namespace NetManagerStandard {
 class INetBundle {
 public:
-  virtual int32_t GetJsonFromBundle(std::string &jsonProfile) = 0;
+    virtual int32_t GetJsonFromBundle(std::string &jsonProfile) = 0;
 };
-extern "C" __attribute__((visibility("default"))) INetBundle* GetNetBundle();
+extern "C" __attribute__((visibility("default"))) INetBundle *GetNetBundle();
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NET_BUNDLE__H

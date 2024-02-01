@@ -24,7 +24,7 @@ class NetBundleImpl : public INetBundle {
 public:
     int32_t GetJsonFromBundle(std::string &jsonProfile) override;
 };
-extern "C" __attribute__((visibility("default"))) INetBundle* GetNetBundle();
+extern "C" __attribute__((visibility("default"))) INetBundle *GetNetBundle();
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NET_BUNDLE_IMPL_H

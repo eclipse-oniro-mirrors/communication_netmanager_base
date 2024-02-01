@@ -51,7 +51,6 @@ const char OS_PATH_SEPARATOR = '\\';
 const char OS_PATH_SEPARATOR = '/';
 #endif
 
-
 #ifdef __LP64__
 const std::string LIB_LOAD_PATH = "/system/lib64/libnet_bundle_utils.z.so";
 #else
@@ -82,12 +81,7 @@ NetworkSecurityConfig::NetworkSecurityConfig()
     }
 }
 
-NetworkSecurityConfig::~NetworkSecurityConfig()
-{
-    if (handler_ != nullptr) {
-        dlclose(handler_);
-    }
-}
+NetworkSecurityConfig::~NetworkSecurityConfig() {}
 
 NetworkSecurityConfig& NetworkSecurityConfig::GetInstance()
 {
@@ -338,27 +332,44 @@ int32_t NetworkSecurityConfig::GetConfig()
     return NETMANAGER_SUCCESS;
 }
 
-__attribute__((no_sanitize("cfi"))) int32_t NetworkSecurityConfig::GetJsonFromBundle(std::string &jsonProfile)
+__attribute__((no_sanitize("cfi"))) std::string NetworkSecurityConfig::GetJsonProfile()
 {
-    handler_ = dlopen(LIB_LOAD_PATH.c_str(), RTLD_LAZY | RTLD_NODELETE);
-    if (handler_ == nullptr) {
+    void *handler = dlopen(LIB_LOAD_PATH.c_str(), RTLD_LAZY | RTLD_NODELETE);
+    if (handler == nullptr) {
         NETMGR_LOG_E("load failed, failed reason : %{public}s", dlerror());
-        return NETMANAGER_ERR_INTERNAL;
+        return "";
     }
-    GetNetBundleClass getNetBundle = (GetNetBundleClass)dlsym(handler_, "GetNetBundle");
+    GetNetBundleClass getNetBundle = (GetNetBundleClass)dlsym(handler, "GetNetBundle");
     if (getNetBundle == nullptr) {
         NETMGR_LOG_E("GetNetBundle faild, failed reason : %{public}s", dlerror());
-        dlclose(handler_);
-        return NETMANAGER_ERR_INTERNAL;
+        dlclose(handler);
+        return "";
     }
     auto netBundle = getNetBundle();
     if (netBundle == nullptr) {
         NETMGR_LOG_E("netBundle is nullptr");
-        dlclose(handler_);
+        dlclose(handler);
+        return "";
+    }
+    std::string jsonProfile;
+    auto ret = netBundle->GetJsonFromBundle(jsonProfile);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("get profile failed");
+        dlclose(handler);
+        return "";
+    }
+    NETMGR_LOG_D("get profile success");
+    dlclose(handler);
+    return jsonProfile;
+}
+
+int32_t NetworkSecurityConfig::GetJsonFromBundle(std::string &jsonProfile)
+{
+    static std::string json = GetJsonProfile();
+    if (json.empty()) {
         return NETMANAGER_ERR_INTERNAL;
     }
-    netBundle->GetJsonFromBundle(jsonProfile);
-    NETMGR_LOG_D("get profile success");
+    jsonProfile = json;
     return NETMANAGER_SUCCESS;
 }
 

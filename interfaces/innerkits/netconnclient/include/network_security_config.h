@@ -80,13 +80,13 @@ private:
     void ParseJsonPinSet(const Json::Value &root, PinSet &pinSet);
     bool ValidateDate(const std::string &dateStr);
     void DumpConfigs();
+    std::string GetJsonProfile();
 
 private:
     NetworkSecurityConfig();
     ~NetworkSecurityConfig();
     BaseConfig baseConfig_;
     std::vector<DomainConfig> domainConfigs_;
-    void *handler_ = nullptr;
 };
 
 }

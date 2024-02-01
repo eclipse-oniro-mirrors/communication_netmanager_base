@@ -61,7 +61,7 @@ int32_t NetBundleImpl::GetJsonFromBundle(std::string &jsonProfile)
     return NETMANAGER_SUCCESS;
 }
 
-INetBundle* GetNetBundle()
+INetBundle *GetNetBundle()
 {
     static NetBundleImpl impl;
     return &impl;
