@@ -355,8 +355,8 @@ int32_t NetworkSecurityConfig::GetJsonFromBundle(std::string &jsonProfile)
         return NETMANAGER_ERR_INTERNAL;
     }
 
-    ret = bundleMgrProxy->GetJsonProfile(AppExecFwk::ProfileType::NETWORK_PROFILE, 
-        bundleInfo.name, bundleInfo.entryModuleName, jsonProfile);
+    ret = bundleMgrProxy->GetJsonProfile(AppExecFwk::ProfileType::NETWORK_PROFILE, bundleInfo.name,
+                                         bundleInfo.entryModuleName, jsonProfile);
     if (ret != ERR_OK) {
         NETMGR_LOG_D("No network_config profile configured in bundle manager.[%{public}d]", ret);
         return NETMANAGER_SUCCESS;
