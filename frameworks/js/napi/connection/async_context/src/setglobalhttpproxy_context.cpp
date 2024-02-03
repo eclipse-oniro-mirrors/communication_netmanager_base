@@ -50,6 +50,18 @@ void SetGlobalHttpProxyContext::ParseParams(napi_value *params, size_t paramsCou
 
     httpProxy_.SetHost(NapiUtils::GetStringPropertyUtf8(GetEnv(), params[0], "host"));
     httpProxy_.SetPort(static_cast<uint16_t>(NapiUtils::GetUint32Property(GetEnv(), params[0], "port")));
+    if (NapiUtils::HasNamedProperty(GetEnv(), params[0], "username")) {
+        SecureData secData;
+        std::string &temp = secData;
+        temp = NapiUtils::GetStringPropertyUtf8(GetEnv(), params[0], "username");
+        httpProxy_.SetUserName(secData);
+    }
+    if (NapiUtils::HasNamedProperty(GetEnv(), params[0], "password")) {
+        SecureData secData;
+        std::string &temp = secData;
+        temp =NapiUtils::GetStringPropertyUtf8(GetEnv(), params[0], "password");
+        httpProxy_.SetPassword(secData);
+    }
 
     std::list<std::string> exclusionList;
     napi_value exclusionValue = NapiUtils::GetNamedProperty(GetEnv(), params[0], "exclusionList");

@@ -1513,8 +1513,13 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
     NETMGR_LOG_I("Enter SetGlobalHttpProxy.");
     if (!httpProxyThreadNeedRun_) {
+        NETMGR_LOG_I("ActiveHttpProxy  user.len[%{public}zu], pwd.len[%{public}zu]", httpProxy.username_.length(),
+                     httpProxy.password_.length());
         httpProxyThreadNeedRun_ = true;
-        std::thread([this]() { ActiveHttpProxy(); }).detach();
+        std::thread t([this]() { ActiveHttpProxy(); });
+        std::string threadName = "ActiveHttpProxy";
+        pthread_setname_np(t.native_handle(), threadName.c_str());
+        t.detach();
     }
     LoadGlobalHttpProxy();
     if (globalHttpProxy_ != httpProxy) {

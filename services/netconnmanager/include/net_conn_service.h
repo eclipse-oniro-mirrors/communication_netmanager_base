@@ -425,7 +425,7 @@ private:
     std::atomic_bool httpProxyThreadNeedRun_ = false;
     std::condition_variable httpProxyThreadCv_;
     std::mutex httpProxyThreadMutex_;
-    static constexpr const uint32_t HTTP_PROXY_ACTIVE_PERIOD_S = 300;
+    static constexpr const uint32_t HTTP_PROXY_ACTIVE_PERIOD_S = 120;
 
     bool hasSARemoved_ = false;
 };
