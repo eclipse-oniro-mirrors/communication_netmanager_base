@@ -25,6 +25,8 @@
 namespace OHOS {
 namespace NetManagerStandard {
 struct SecureData : public std::string {
+    explicit SecureData() : std::string() {}
+    explicit SecureData(const std::string &str) : std::string(str) {}
     ~SecureData()
     {
         // Clear Data, to keep the memory safe
