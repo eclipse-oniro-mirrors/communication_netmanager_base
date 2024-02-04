@@ -15,8 +15,15 @@
 
 #include "net_conn_client.h"
 #include <string>
+#include <thread>
+
+void SetInternetPermissionImpl(uint32_t uid, uint8_t allow)
+{
+    OHOS::NetManagerStandard::NetConnClient::GetInstance().SetInternetPermission(uid, allow);
+}
 
 int32_t SetInternetPermission(uint32_t uid, uint8_t allow)
 {
-    return OHOS::NetManagerStandard::NetConnClient::GetInstance().SetInternetPermission(uid, allow);
+    std::thread(SetInternetPermissionImpl, uid, allow);
+    return 0;
 }

@@ -171,6 +171,10 @@ void WrapperDistributor::NotifyInterfaceAdd(const std::string &ifName)
         return;
     }
     for (auto &callback : *netlinkCallbacks_) {
+        if (!callback) {
+            NETNATIVE_LOGE("NotifyInterfaceAdd callback is nullptr");
+            continue;
+        }
         callback->OnInterfaceAdded(ifName);
     }
 }
@@ -183,6 +187,10 @@ void WrapperDistributor::NotifyInterfaceRemove(const std::string &ifName)
         return;
     }
     for (auto &callback : *netlinkCallbacks_) {
+        if (!callback) {
+            NETNATIVE_LOGE("NotifyInterfaceRemove callback is nullptr");
+            continue;
+        }
         callback->OnInterfaceRemoved(ifName);
     }
 }
@@ -195,6 +203,10 @@ void WrapperDistributor::NotifyInterfaceChange(const std::string &ifName, bool u
         return;
     }
     for (auto &callback : *netlinkCallbacks_) {
+        if (!callback) {
+            NETNATIVE_LOGE("NotifyInterfaceChange callback is nullptr");
+            continue;
+        }
         callback->OnInterfaceChanged(ifName, up);
     }
 }
@@ -207,6 +219,10 @@ void WrapperDistributor::NotifyInterfaceLinkStateChange(const std::string &ifNam
         return;
     }
     for (auto &callback : *netlinkCallbacks_) {
+        if (!callback) {
+            NETNATIVE_LOGE("NotifyInterfaceLinkStateChange callback is nullptr");
+            continue;
+        }
         callback->OnInterfaceLinkStateChanged(ifName, up);
     }
 }
@@ -219,6 +235,10 @@ void WrapperDistributor::NotifyQuotaLimitReache(const std::string &labelName, co
         return;
     }
     for (auto &callback : *netlinkCallbacks_) {
+        if (!callback) {
+            NETNATIVE_LOGE("NotifyQuotaLimitReache callback is nullptr");
+            continue;
+        }
         callback->OnBandwidthReachedLimit(labelName, ifName);
     }
 }
@@ -233,6 +253,10 @@ void WrapperDistributor::NotifyInterfaceAddressUpdate(const std::string &addr, c
         return;
     }
     for (auto &callback : *netlinkCallbacks_) {
+        if (!callback) {
+            NETNATIVE_LOGE("NotifyInterfaceAddressUpdate callback is nullptr");
+            continue;
+        }
         callback->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
     }
 }
@@ -247,6 +271,10 @@ void WrapperDistributor::NotifyInterfaceAddressRemove(const std::string &addr, c
         return;
     }
     for (auto &callback : *netlinkCallbacks_) {
+        if (!callback) {
+            NETNATIVE_LOGE("NotifyInterfaceAddressRemove callback is nullptr");
+            continue;
+        }
         callback->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
     }
 }
@@ -262,6 +290,10 @@ void WrapperDistributor::NotifyRouteChange(bool updated, const std::string &rout
         return;
     }
     for (auto &callback : *netlinkCallbacks_) {
+        if (!callback) {
+            NETNATIVE_LOGE("NotifyRouteChange callback is nullptr");
+            continue;
+        }
         callback->OnRouteChanged(updated, route, gateway, ifName);
     }
 }
