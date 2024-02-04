@@ -103,6 +103,7 @@ ohos_shared_library("net_conn_manager_if") {
     "$INNERKITS_ROOT/netmanagernative/include",
     "$NETMANAGERNATIVE_ROOT/fwmarkclient/include",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "$NETMANAGER_BASE_ROOT/utils/bundle_utils/include",
     "//third_party/musl/porting/linux/user/src/hook",
     "//third_party/openssl/include",
   ]
@@ -120,8 +121,6 @@ ohos_shared_library("net_conn_manager_if") {
   ]
 
   external_deps = [
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
