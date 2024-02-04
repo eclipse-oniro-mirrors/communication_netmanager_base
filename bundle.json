@@ -49,8 +49,7 @@
                 "ability_runtime",
                 "data_share",
                 "napi",
-                "bundle_framework",
-                "resource_management"
+                "bundle_framework"
             ],
             "third_party": [
                 "curl",
