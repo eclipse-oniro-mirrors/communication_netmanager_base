@@ -135,6 +135,7 @@ void NetHttpProbe::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
 
 void NetHttpProbe::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
 {
+    std::lock_guard<std::mutex> locker(proxyMtx_);
     globalHttpProxy_ = httpProxy;
 }
 
@@ -360,13 +361,8 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
     std::string proxyHost;
     int32_t proxyPort = 0;
     /* Prioritize the use of global HTTP proxy, if there is no global proxy, use network http proxy */
-    if (!globalHttpProxy_.GetHost().empty()) {
-        proxyHost = globalHttpProxy_.GetHost();
-        proxyPort = static_cast<int32_t>(globalHttpProxy_.GetPort());
-    } else if (!netLinkInfo_.httpProxy_.GetHost().empty()) {
-        proxyHost = netLinkInfo_.httpProxy_.GetHost();
-        proxyPort = static_cast<int32_t>(netLinkInfo_.httpProxy_.GetPort());
-    } else {
+    if (!LoadProxy(proxyHost, proxyHost)) {
+        NETMGR_LOG_E("global http proxy or network proxy is empty.");
         return true;
     }
 
@@ -544,6 +540,20 @@ void NetHttpProbe::RecvHttpProbeResponse()
             NETMGR_LOG_E("Unknown curl handle.");
         }
     }
+}
+int32_t NetHttpProbe::LoadProxy(std::string &proxyHost, int32_t &proxyPort)
+{
+    std::lock_guard<std::mutex> locker(proxyMtx_);
+    if (!globalHttpProxy_.GetHost().empty()) {
+        proxyHost = globalHttpProxy_.GetHost();
+        proxyPort = static_cast<int32_t>(globalHttpProxy_.GetPort());
+    } else if (!netLinkInfo_.httpProxy_.GetHost().empty()) {
+        proxyHost = netLinkInfo_.httpProxy_.GetHost();
+        proxyPort = static_cast<int32_t>(netLinkInfo_.httpProxy_.GetPort());
+    } else {
+        return false;
+    }
+    return true;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -140,7 +140,7 @@ void NetMonitor::Detection()
 
 NetHttpProbeResult NetMonitor::SendHttpProbe(ProbeType probeType)
 {
-    std::lock_guard<std::mutex> locker(proxyMtx_);
+    std::lock_guard<std::mutex> locker(probeMtx_);
     std::string httpProbeUrl;
     std::string httpsProbeUrl;
     GetHttpProbeUrlFromConfig(httpProbeUrl, httpsProbeUrl);
@@ -215,17 +215,8 @@ void NetMonitor::LoadGlobalHttpProxy()
     UpdateGlobalHttpProxy(globalHttpProxy);
 }
 
-void NetMonitor::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
-{
-    std::lock_guard<std::mutex> locker(proxyMtx_);
-    if (httpProbe_) {
-        httpProbe_->UpdateNetLinkInfo(netLinkInfo);
-    }
-}
-
 void NetMonitor::UpdateGlobalHttpProxy(const HttpProxy &httpProxy)
 {
-    std::lock_guard<std::mutex> locker(proxyMtx_);
     if (httpProbe_) {
         httpProbe_->UpdateGlobalHttpProxy(httpProxy);
     }
