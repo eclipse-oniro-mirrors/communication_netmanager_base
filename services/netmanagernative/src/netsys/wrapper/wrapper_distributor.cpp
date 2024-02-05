@@ -233,9 +233,8 @@ void WrapperDistributor::NotifyInterfaceAddressUpdate(const std::string &addr, c
         return;
     }
     std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
-    netlinkCallbacks_->erase(std::remove_if(netlinkCallbacks_->begin(), netlinkCallbacks_->end(), [](auto mem) {
-        return mem == nullptr;
-    }), netlinkCallbacks_->end());
+    netlinkCallbacks_->erase(std::remove_if(netlinkCallbacks_->begin(), netlinkCallbacks_->end(),
+                             [](auto mem) { return mem == nullptr}), netlinkCallbacks_->end());
     for (auto &callback : *netlinkCallbacks_) {
         auto temp = callback;
         temp->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
