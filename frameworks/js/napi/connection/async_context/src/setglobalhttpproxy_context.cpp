@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,14 @@ void SetGlobalHttpProxyContext::ParseParams(napi_value *params, size_t paramsCou
 
     httpProxy_.SetHost(NapiUtils::GetStringPropertyUtf8(GetEnv(), params[0], "host"));
     httpProxy_.SetPort(static_cast<uint16_t>(NapiUtils::GetUint32Property(GetEnv(), params[0], "port")));
+    if (NapiUtils::HasNamedProperty(GetEnv(), params[0], "username")) {
+        SecureData secData = NapiUtils::GetSecureDataPropertyUtf8(GetEnv(), params[0], "username");
+        httpProxy_.SetUserName(secData);
+    }
+    if (NapiUtils::HasNamedProperty(GetEnv(), params[0], "password")) {
+        SecureData secData = NapiUtils::GetSecureDataPropertyUtf8(GetEnv(), params[0], "password");
+        httpProxy_.SetPassword(secData);
+    }
 
     std::list<std::string> exclusionList;
     napi_value exclusionValue = NapiUtils::GetNamedProperty(GetEnv(), params[0], "exclusionList");

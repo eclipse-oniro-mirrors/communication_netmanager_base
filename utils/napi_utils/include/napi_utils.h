@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,8 @@
 #include <napi/native_api.h>
 #include <napi/native_common.h>
 #include <uv.h>
+
+#include "secure_data.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -55,7 +57,9 @@ void SetInt64Property(napi_env env, napi_value object, const std::string &name, 
 /* String UTF8 */
 napi_value CreateStringUtf8(napi_env env, const std::string &str);
 std::string GetStringFromValueUtf8(napi_env env, napi_value value);
+SecureData GetSecureDataFromValueUtf8(napi_env env, napi_value value);
 std::string GetStringPropertyUtf8(napi_env env, napi_value object, const std::string &propertyName);
+SecureData GetSecureDataPropertyUtf8(napi_env env, napi_value object, const std::string &propertyName);
 void SetStringPropertyUtf8(napi_env env, napi_value object, const std::string &name, const std::string &value);
 
 /* array buffer */

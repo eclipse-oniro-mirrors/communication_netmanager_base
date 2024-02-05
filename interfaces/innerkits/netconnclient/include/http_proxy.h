@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,16 +21,10 @@
 
 #include "parcel.h"
 #include "securec.h"
+#include "secure_data.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-struct SecureData : public std::string {
-    ~SecureData()
-    {
-        // Clear Data, to keep the memory safe
-        (void)memset_s(data(), size(), 0, size());
-    }
-};
 class NetConnService;
 #define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 class NET_SYMBOL_VISIBLE HttpProxy final : public Parcelable {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -209,6 +209,18 @@ std::string GetStringFromValueUtf8(napi_env env, napi_value value)
     return result;
 }
 
+SecureData GetSecureDataFromValueUtf8(napi_env env, napi_value value)
+{
+    SecureData result;
+    char str[MAX_STRING_LENGTH] = {0};
+    size_t length = 0;
+    NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, value, str, MAX_STRING_LENGTH, &length), result);
+    if (length > 0) {
+        result.append(str, length);
+    }
+    return result;
+}
+
 std::string GetStringPropertyUtf8(napi_env env, napi_value object, const std::string &propertyName)
 {
     if (!HasNamedProperty(env, object, propertyName)) {
@@ -216,6 +228,12 @@ std::string GetStringPropertyUtf8(napi_env env, napi_value object, const std::st
     }
     napi_value value = GetNamedProperty(env, object, propertyName);
     return GetStringFromValueUtf8(env, value);
+}
+
+SecureData GetSecureDataPropertyUtf8(napi_env env, napi_value object, const std::string &propertyName)
+{
+    napi_value value = GetNamedProperty(env, object, propertyName);
+    return GetSecureDataFromValueUtf8(env, value);
 }
 
 void SetStringPropertyUtf8(napi_env env, napi_value object, const std::string &name, const std::string &value)

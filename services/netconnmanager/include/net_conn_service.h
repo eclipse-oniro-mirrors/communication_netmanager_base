@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -425,7 +425,7 @@ private:
     std::atomic_bool httpProxyThreadNeedRun_ = false;
     std::condition_variable httpProxyThreadCv_;
     std::mutex httpProxyThreadMutex_;
-    static constexpr const uint32_t HTTP_PROXY_ACTIVE_PERIOD_S = 300;
+    static constexpr const uint32_t HTTP_PROXY_ACTIVE_PERIOD_S = 120;
 
     bool hasSARemoved_ = false;
 };
