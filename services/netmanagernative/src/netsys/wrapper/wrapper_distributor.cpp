@@ -232,13 +232,13 @@ void WrapperDistributor::NotifyInterfaceAddressUpdate(const std::string &addr, c
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
         return;
     }
-    for (auto it = netlinkCallbacks_->begin(); it != netlinkCallbacks_->end();) {
-        if (*it == nullptr) {
-            it = netlinkCallbacks_->erase(it);
-        } else {
-            (*it)->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
-            ++it;
-        }
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
+    netlinkCallbacks_->erase(std::remove_if(netlinkCallbacks_->begin(), netlinkCallbacks_->end(), [](auto mem) {
+        return mem == nullptr;
+    }), netlinkCallbacks_->end());
+    for (auto &callback : *netlinkCallbacks_) {
+        auto temp = callback;
+        temp->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
     }
 }
 
