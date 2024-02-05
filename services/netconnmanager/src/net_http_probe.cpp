@@ -361,7 +361,7 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
     std::string proxyHost;
     int32_t proxyPort = 0;
     /* Prioritize the use of global HTTP proxy, if there is no global proxy, use network http proxy */
-    if (!LoadProxy(proxyHost, proxyHost)) {
+    if (!LoadProxy(proxyHost, proxyPort)) {
         NETMGR_LOG_E("global http proxy or network proxy is empty.");
         return true;
     }
