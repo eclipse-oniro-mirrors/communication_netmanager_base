@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1504,8 +1504,10 @@ void NetConnService::ActiveHttpProxy()
             NETMGR_LOG_I("SetGlobalHttpProxy ActiveHttpProxy %{public}d", static_cast<int>(ret));
             curl_easy_cleanup(curl);
         }
-        std::unique_lock lock(httpProxyThreadMutex_);
-        httpProxyThreadCv_.wait_for(lock, std::chrono::seconds(HTTP_PROXY_ACTIVE_PERIOD_S));
+        if (httpProxyThreadNeedRun_.load()) {
+            std::unique_lock lock(httpProxyThreadMutex_);
+            httpProxyThreadCv_.wait_for(lock, std::chrono::seconds(HTTP_PROXY_ACTIVE_PERIOD_S));
+        }
     }
 }
 
@@ -1522,7 +1524,6 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
         t.detach();
     } else if (httpProxyThreadNeedRun_ && httpProxy.GetHost().empty()) {
         httpProxyThreadNeedRun_ = false;
-        httpProxyThreadCv_.notify_all();
     }
 
     LoadGlobalHttpProxy();
