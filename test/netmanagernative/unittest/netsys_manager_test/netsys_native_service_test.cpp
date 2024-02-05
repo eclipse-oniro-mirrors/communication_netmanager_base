@@ -457,7 +457,6 @@ HWTEST_F(NetsysNativeServiceTest, GetAddrInfoTest001, TestSize.Level1)
     AddrInfo hints;
     uint16_t netId = 1031;
     std::vector<AddrInfo> res;
-    instance_->netsysService_->dnsManager_->dnsGetAddrInfo_ = std::make_shared<DnsGetAddrInfo>();
     int32_t ret = instance_->GetAddrInfo(hostName, serverName, hints, netId, res);
     DTEST_LOG << ret << std::endl;
     EXPECT_EQ(ret, NETMANAGER_ERROR);
