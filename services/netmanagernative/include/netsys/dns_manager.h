@@ -18,7 +18,6 @@
 
 #include <vector>
 
-#include "dns_getaddrinfo.h"
 #include "dns_param_cache.h"
 #include "dns_proxy_listen.h"
 #include "i_net_dns_result_callback.h"
@@ -127,7 +126,6 @@ public:
 
 private:
     std::shared_ptr<DnsProxyListen> dnsProxyListen_;
-    std::shared_ptr<DnsGetAddrInfo> dnsGetAddrInfo_;
     int32_t FillAddrInfo(std::vector<AddrInfo> &addrInfo, addrinfo *res);
 };
 } // namespace nmd

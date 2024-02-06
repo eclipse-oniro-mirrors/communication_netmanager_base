@@ -19,10 +19,6 @@ ohos_unittest("netsys_native_manager_test") {
   sources = [
     "dhcp_controller_test.cpp",
     "dhcp_result_parcel_test.cpp",
-    "dns_getaddrinfo_test.cpp",
-    "dns_getaddrinfo_test_new.cpp",
-    "dns_lookup_name_test.cpp",
-    "dns_lookup_parser_test.cpp",
     "dns_manager_test.cpp",
     "dns_param_cache_test.cpp",
     "dns_proxy_listen_test.cpp",
