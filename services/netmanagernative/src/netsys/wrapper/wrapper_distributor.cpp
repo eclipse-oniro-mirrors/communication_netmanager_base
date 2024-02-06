@@ -53,6 +53,7 @@ int32_t WrapperDistributor::RegisterNetlinkCallbacks(
         NETNATIVE_LOGE("netlinkCallbacks is nullptr");
         return NetlinkResult::ERR_NULL_PTR;
     }
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     netlinkCallbacks_ = netlinkCallbacks;
     return NetlinkResult::OK;
 }
@@ -170,8 +171,11 @@ void WrapperDistributor::NotifyInterfaceAdd(const std::string &ifName)
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
         return;
     }
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     for (auto &callback : *netlinkCallbacks_) {
-        callback->OnInterfaceAdded(ifName);
+        if (callback != nullptr) {
+            callback->OnInterfaceAdded(ifName);
+        }
     }
 }
 
@@ -182,8 +186,11 @@ void WrapperDistributor::NotifyInterfaceRemove(const std::string &ifName)
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
         return;
     }
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     for (auto &callback : *netlinkCallbacks_) {
-        callback->OnInterfaceRemoved(ifName);
+        if (callback != nullptr) {
+            callback->OnInterfaceRemoved(ifName);
+        }
     }
 }
 
@@ -194,8 +201,11 @@ void WrapperDistributor::NotifyInterfaceChange(const std::string &ifName, bool u
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
         return;
     }
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     for (auto &callback : *netlinkCallbacks_) {
-        callback->OnInterfaceChanged(ifName, up);
+        if (callback != nullptr) {
+            callback->OnInterfaceChanged(ifName, up);
+        }
     }
 }
 
@@ -206,8 +216,11 @@ void WrapperDistributor::NotifyInterfaceLinkStateChange(const std::string &ifNam
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
         return;
     }
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     for (auto &callback : *netlinkCallbacks_) {
-        callback->OnInterfaceLinkStateChanged(ifName, up);
+        if (callback != nullptr) {
+            callback->OnInterfaceLinkStateChanged(ifName, up);
+        }
     }
 }
 
@@ -218,8 +231,11 @@ void WrapperDistributor::NotifyQuotaLimitReache(const std::string &labelName, co
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
         return;
     }
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     for (auto &callback : *netlinkCallbacks_) {
-        callback->OnBandwidthReachedLimit(labelName, ifName);
+        if (callback != nullptr) {
+            callback->OnBandwidthReachedLimit(labelName, ifName);
+        }
     }
 }
 
@@ -233,12 +249,10 @@ void WrapperDistributor::NotifyInterfaceAddressUpdate(const std::string &addr, c
         return;
     }
     std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
-    netlinkCallbacks_->erase(
-        std::remove_if(netlinkCallbacks_->begin(), netlinkCallbacks_->end(), [](auto mem) { return mem == nullptr; }),
-        netlinkCallbacks_->end());
     for (auto &callback : *netlinkCallbacks_) {
-        auto temp = callback;
-        temp->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
+        if (callback != nullptr) {
+            callback->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
+        }
     }
 }
 
@@ -251,8 +265,11 @@ void WrapperDistributor::NotifyInterfaceAddressRemove(const std::string &addr, c
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
         return;
     }
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     for (auto &callback : *netlinkCallbacks_) {
-        callback->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
+        if (callback != nullptr) {
+            callback->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
+        }
     }
 }
 
@@ -266,8 +283,11 @@ void WrapperDistributor::NotifyRouteChange(bool updated, const std::string &rout
         NETNATIVE_LOGE("netlinkCallbacks_ is nullptr");
         return;
     }
+    std::lock_guard<std::mutex> lock(netlinkCallbacksMutex_);
     for (auto &callback : *netlinkCallbacks_) {
-        callback->OnRouteChanged(updated, route, gateway, ifName);
+        if (callback != nullptr) {
+            callback->OnRouteChanged(updated, route, gateway, ifName);
+        }
     }
 }
 } // namespace nmd
