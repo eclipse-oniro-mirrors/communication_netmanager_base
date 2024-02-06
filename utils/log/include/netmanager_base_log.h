@@ -25,21 +25,15 @@
 
 #include "hilog/log.h"
 
-#undef LOG_TAG
-#define LOG_TAG "NetMgrSubsystem"
+#define NETMANAGER_BASE_LOG_TAG "NetMgrSubsystem"
 
-#undef LOG_DOMAIN
-#define LOG_DOMAIN 0xD0015B0
+#define NETMANAGER_BASE_LOG_DOMAIN 0xD0015B0
+
+static constexpr OHOS::HiviewDFX::HiLogLabel NETMANAGER_BASE_LOG_LABEL = {LOG_CORE, NETMANAGER_BASE_LOG_DOMAIN, NETMANAGER_BASE_LOG_TAG};
 
 #define NETMANAGER_BASE_HILOG_PRINT(Level, fmt, ...)                                                                        \
-    (void)HILOG_##Level(LOG_CORE, "NETMANAGER_BASE [%{public}s %{public}d] " fmt, MAKE_FILE_NAME, \
+    (void)OHOS::HiviewDFX::HiLog::Level(NETMANAGER_BASE_LOG_LABEL, "NETMANAGER_BASE [%{public}s %{public}d] " fmt, MAKE_FILE_NAME, \
                                         __LINE__, ##__VA_ARGS__)
-
-#define NETMANAGER_BASE_LOGE(fmt, ...) NETMANAGER_BASE_HILOG_PRINT(ERROR, fmt, ##__VA_ARGS__)
-
-#define NETMANAGER_BASE_LOGI(fmt, ...) NETMANAGER_BASE_HILOG_PRINT(INFO, fmt, ##__VA_ARGS__)
-
-#define NETMANAGER_BASE_LOGD(fmt, ...) NETMANAGER_BASE_HILOG_PRINT(DEBUG, fmt, ##__VA_ARGS__)
 
 #else
 
@@ -81,12 +75,12 @@ static void NetManagerStandardPrintLog(const char *fmt, ...)
 #define NETMANAGER_BASE_HILOG_PRINT(Level, fmt, ...) \
     NetManagerStandardPrintLog("NETMANAGER_BASE %s [%s %d] " fmt, #Level, MAKE_FILE_NAME, __LINE__, ##__VA_ARGS__)
 
+#endif /* !defined(_WIN32) && !defined(__APPLE__) */
+
 #define NETMANAGER_BASE_LOGE(fmt, ...) NETMANAGER_BASE_HILOG_PRINT(Error, fmt, ##__VA_ARGS__)
 
 #define NETMANAGER_BASE_LOGI(fmt, ...) NETMANAGER_BASE_HILOG_PRINT(Info, fmt, ##__VA_ARGS__)
 
 #define NETMANAGER_BASE_LOGD(fmt, ...) NETMANAGER_BASE_HILOG_PRINT(Debug, fmt, ##__VA_ARGS__)
-
-#endif /* !defined(_WIN32) && !defined(__APPLE__) */
 
 #endif /* COMMUNICATIONNETMANAGER_BASE_NETMANAGER_BASE_LOG */
