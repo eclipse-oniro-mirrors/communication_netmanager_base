@@ -59,11 +59,13 @@ private:
                       const bool useProxy);
     void SendHttpProbeRequest();
     void RecvHttpProbeResponse();
+    int32_t LoadProxy(std::string &proxyHost, int32_t &proxyPort);
 
 private:
     static std::mutex initCurlMutex_;
     static int32_t useCurlCount_;
 
+    std::mutex proxyMtx_;
     bool isCurlInit_ = false;
     uint32_t netId_ = 0;
     NetBearType netBearType_ = BEARER_DEFAULT;

@@ -82,12 +82,6 @@ public:
     void Detection();
 
     /**
-     * Update network http proxy
-     *
-     */
-    void UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo);
-
-    /**
      * Update global http proxy
      *
      */
@@ -103,7 +97,7 @@ private:
     std::atomic<bool> isDetecting_ = false;
     int32_t detectionSteps_ = 0;
     std::mutex detectionMtx_;
-    std::mutex proxyMtx_;
+    std::mutex probeMtx_;
     std::condition_variable detectionCond_;
     uint32_t detectionDelay_ = 0;
     std::weak_ptr<INetMonitorCallback> netMonitorCallback_;
