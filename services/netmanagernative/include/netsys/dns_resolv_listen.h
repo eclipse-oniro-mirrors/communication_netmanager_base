@@ -35,8 +35,6 @@ private:
     static void ProcGetCacheCommand(int clientSockFd, uint16_t netId);
     static void ProcJudgeIpv6Command(int clientSockFd, uint16_t netId);
     static void ProcPostDnsResultCommand(int clientSockFd, uint16_t netId);
-    static void ProcPostDnsResultCommandEx(int32_t clientSockFd, int32_t& queryret,
-                                           uint32_t& ai_size, struct QueryParam& param);
     static void ProcGetDefaultNetworkCommand(int clientSockFd, uint16_t netId);
     static void ProcBindSocketCommand(int clientSockFd, uint16_t netId);
     static void ProcCommand(int clientSockFd);
