@@ -190,48 +190,22 @@ void DnsResolvListen::ProcJudgeIpv6Command(int clientSockFd, uint16_t netId)
     }
 }
 
-void DnsResolvListen::ProcPostDnsResultCommandEx(int32_t clientSockFd, int32_t& queryret,
-                                                 uint32_t& ai_size, struct QueryParam& param)
-{
-    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&queryret), sizeof(int32_t))) {
-        NETNATIVE_LOGE("read queryret errno %{public}d", errno);
-        close(clientSockFd);
-        return;
-    }
-
-    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&ai_size), sizeof(ai_size))) {
-        NETNATIVE_LOGE("read ai_size errno %{public}d", errno);
-        close(clientSockFd);
-        return;
-    }
-
-    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&param), sizeof(struct QueryParam))) {
-        NETNATIVE_LOGE("read param errno %{public}d", errno);
-        close(clientSockFd);
-        return;
-    }
-}
-
 void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
 {
     char name[MAX_HOST_NAME_LEN] = {0};
 
     uint32_t netid = netId;
 
-    uint32_t uid = 0;
-    uint32_t pid = 0;
-    uint32_t usedtime = 0;
-    int32_t queryret = 0;
-    struct QueryParam param;
-    uint32_t ai_size = MAX_RESULTS;
+    uint32_t uid;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&uid), sizeof(uint32_t))) {
-        NETNATIVE_LOGE("read uid errno %{public}d", errno);
+        NETNATIVE_LOGE("read1 errno %{public}d", errno);
         close(clientSockFd);
         return;
     }
 
+    uint32_t pid;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&pid), sizeof(uint32_t))) {
-        NETNATIVE_LOGE("read pid errno %{public}d", errno);
+        NETNATIVE_LOGE("read2 errno %{public}d", errno);
         close(clientSockFd);
         return;
     }
@@ -241,13 +215,33 @@ void DnsResolvListen::ProcPostDnsResultCommand(int clientSockFd, uint16_t netId)
         return;
     }
 
+    uint32_t usedtime;
     if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&usedtime), sizeof(uint32_t))) {
-        NETNATIVE_LOGE("read usedtime errno %{public}d", errno);
+        NETNATIVE_LOGE("read3 errno %{public}d", errno);
         close(clientSockFd);
         return;
     }
 
-    ProcPostDnsResultCommandEx(clientSockFd, queryret, ai_size, param);
+    int32_t queryret;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&queryret), sizeof(int32_t))) {
+        NETNATIVE_LOGE("read4 errno %{public}d", errno);
+        close(clientSockFd);
+        return;
+    }
+
+    uint32_t ai_size = MAX_RESULTS;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&ai_size), sizeof(ai_size))) {
+        NETNATIVE_LOGE("read5 errno %{public}d", errno);
+        close(clientSockFd);
+        return;
+    }
+
+    struct QueryParam param;
+    if (!PollRecvData(clientSockFd, reinterpret_cast<char *>(&param), sizeof(struct QueryParam))) {
+        NETNATIVE_LOGE("read6 errno %{public}d", errno);
+        close(clientSockFd);
+        return;
+    }
 
     if ((queryret == 0) && (ai_size > 0)) {
         ai_size = std::min<uint32_t>(MAX_RESULTS, ai_size);
