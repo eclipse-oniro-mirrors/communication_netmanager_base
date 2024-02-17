@@ -65,6 +65,18 @@ std::string GetStringFromData(int strlen)
     return str;
 }
 
+SecureData GetSecureDataFromData(int8_t strlen)
+{
+    SecureData secureData;
+    char cstr[strlen];
+    cstr[strlen - 1] = '\0';
+    for (int i = 0; i < strlen - 1; i++) {
+        cstr[i] = GetData<char>();
+    }
+    secureData.append(cstr, strlen-1);
+    return secureData;
+}
+
 class INetDetectionCallbackTest : public IRemoteStub<INetDetectionCallback> {
 public:
     virtual int32_t OnNetDetectionResultChanged(NetDetectionResultCode detectionResult, const std::string &urlRedirect)
@@ -456,7 +468,8 @@ void SetGlobalHttpProxyFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
     HttpProxy httpProxy = {GetStringFromData(STR_LEN), 0, {}};
-
+    httpProxy.SetUserName(GetSecureDataFromData(STR_LEN));
+    httpProxy.SetPassword(GetSecureDataFromData(STR_LEN));
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
         return;
