@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,8 @@ std::list<std::string> HttpProxy::GetExclusionList() const
 
 bool HttpProxy::operator==(const HttpProxy &httpProxy) const
 {
-    return (host_ == httpProxy.host_ && port_ == httpProxy.port_ && exclusionList_ == httpProxy.exclusionList_);
+    return (host_ == httpProxy.host_ && port_ == httpProxy.port_ && exclusionList_ == httpProxy.exclusionList_ &&
+            username_ == httpProxy.username_ && password_ == httpProxy.password_);
 }
 
 bool HttpProxy::operator!=(const HttpProxy &httpProxy) const
