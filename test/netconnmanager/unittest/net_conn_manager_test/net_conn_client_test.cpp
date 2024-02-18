@@ -21,15 +21,12 @@
 #endif
 #include "common_net_conn_callback_test.h"
 #include "i_net_conn_callback.h"
-#include "iremote_stub.h"
 #include "net_conn_client.h"
 #include "net_conn_constants.h"
-#include "net_conn_types.h"
 #include "net_factoryreset_callback_stub.h"
 #include "net_interface_callback_stub.h"
 #include "net_interface_config.h"
 #include "net_manager_constants.h"
-#include "net_mgr_log_wrapper.h"
 #include "netmanager_base_test_security.h"
 #include "network.h"
 
@@ -57,6 +54,8 @@ constexpr const char *TEST_LONG_EXCLUSION_LIST =
     "www.test8.com,www.test9.com,www.test10.com,www.test11.com,www.test12.com,www.test12.com,www.test12.com,www.test13."
     "com,www.test14.com,www.test15.com,www.test16.com,www.test17.com,www.test18.com,www.test19.com,www.test20.com";
 constexpr const char *TEST_IFACE = "eth0";
+constexpr const char *PROXY_NAME = "123456789";
+constexpr const int32_t PROXY_NAME_SIZE = 9;
 } // namespace
 
 class NetConnClientTest : public testing::Test {
@@ -410,6 +409,12 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest012, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
     HttpProxy httpProxy = {TEST_IPV4_ADDR, 8080, {}};
+    SecureData name;
+    name.append(PROXY_NAME, PROXY_NAME_SIZE);
+    SecureData pwd;
+    pwd.append(PROXY_NAME, PROXY_NAME_SIZE);
+    httpProxy.SetUserName(name);
+    httpProxy.SetPassword(pwd);
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
@@ -461,6 +466,12 @@ HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest015, TestSize.Level1)
 HWTEST_F(NetConnClientTest, SetGlobalHttpProxyTest016, TestSize.Level1)
 {
     HttpProxy httpProxy = {TEST_IPV4_ADDR, 8080, {}};
+    SecureData name;
+    SecureData pwd;
+    name.append(PROXY_NAME, PROXY_NAME_SIZE);
+    pwd.append(PROXY_NAME, PROXY_NAME_SIZE);
+    httpProxy.SetUserName(name);
+    httpProxy.SetPassword(pwd);
     auto ret = NetConnClient::GetInstance().SetGlobalHttpProxy(httpProxy);
     ASSERT_TRUE(ret == NETMANAGER_ERR_PERMISSION_DENIED);
 }
