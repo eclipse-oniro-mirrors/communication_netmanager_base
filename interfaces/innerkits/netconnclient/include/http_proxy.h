@@ -21,7 +21,7 @@
 
 #include "parcel.h"
 #include "securec.h"
-#include "secure_data.h"
+#include "netmanager_secure_data.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
