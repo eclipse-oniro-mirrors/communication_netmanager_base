@@ -19,6 +19,7 @@
 #include "data_receiver.h"
 #include "i_notify_callback.h"
 #include "netsys_event_message.h"
+#include <mutex>
 
 #define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 namespace OHOS {
@@ -54,6 +55,7 @@ private:
 
     std::unique_ptr<DataReceiver> receiver_;
     std::shared_ptr<std::vector<sptr<NetsysNative::INotifyCallback>>> netlinkCallbacks_;
+    std::mutex netlinkCallbacksMutex_;
 };
 } // namespace nmd
 } // namespace OHOS
