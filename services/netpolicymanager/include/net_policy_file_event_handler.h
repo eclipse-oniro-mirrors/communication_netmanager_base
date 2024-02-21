@@ -17,6 +17,7 @@
 #define NET_POLICY_FILE_EVENT_HANDLER_H
 
 #include <iostream>
+#include <dirent.h>
 
 #include "event_handler.h"
 #include "event_runner.h"
