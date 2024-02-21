@@ -31,6 +31,7 @@
 #include "net_specifier.h"
 #include "net_supplier_callback_base.h"
 #include "i_net_factoryreset_callback.h"
+#include "safe_map.h"
 
 namespace OHOS {
 namespace nmd {
@@ -437,6 +438,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
     std::map<uint32_t, sptr<INetSupplierCallback>> netSupplierCallback_;
     std::list<std::tuple<sptr<NetSpecifier>, sptr<INetConnCallback>, uint32_t>> registerConnTupleList_;
+    SafeMap<uint32_t, uint8_t> netPermissionMap_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

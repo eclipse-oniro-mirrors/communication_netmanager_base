@@ -1148,6 +1148,20 @@ HWTEST_F(NetConnClientTest, NetConnClientBranchTest001, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
+HWTEST_F(NetConnClientTest, SetInternetPermissionTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    int32_t uid = 0;
+    uint8_t allow = 0;
+    auto ret = NetConnClient::GetInstance().SetInternetPermission(uid, allow);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(NetConnClient::GetInstance().netPermissionMap_.Size(), 1);
+
+    ret = NetConnClient::GetInstance().SetInternetPermission(uid, allow);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(NetConnClient::GetInstance().netPermissionMap_.Size(), 1);
+}
+
 HWTEST_F(NetConnClientTest, RegisterSlotTypeTest001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
