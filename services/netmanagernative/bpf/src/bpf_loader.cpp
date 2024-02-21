@@ -19,6 +19,8 @@
 #include <functional>
 #include <iostream>
 #include <linux/bpf.h>
+#include <linux/if_ether.h>
+#include <arpa/inet.h>
 #include <map>
 #include <memory.h>
 #include <string>
@@ -215,7 +217,7 @@ inline int32_t UnPin(const std::string &path)
 
 class ElfLoader {
 public:
-    explicit ElfLoader(std::string path) : path_(std::move(path)), kernVersion_(0) {}
+    explicit ElfLoader(std::string path) : path_(std::move(path)), kernVersion_(0), sockFd_(-1) {}
 
     ElfLoadError Unload() const
     {
@@ -703,7 +705,23 @@ private:
             }
         }
 
-        return DoAttach(progFd, progName);
+        /* attach socket filter */
+        if (progType == BPF_PROG_TYPE_SOCKET_FILTER) {
+            sockFd_ = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+            if (sockFd_ < 0) {
+                NETNATIVE_LOGE("create socket failed, %{public}d, err: %{public}d", sockFd_, errno);
+                /* return true to ignore this prog */
+                return true;
+            }
+            if (setsockopt(sockFd_, SOL_SOCKET, SO_ATTACH_BPF, &progFd, sizeof(progFd)) < 0) {
+                NETNATIVE_LOGE("attach socket failed, err: %{public}d", errno);
+                close(sockFd_);
+                sockFd_ = -1;
+            }
+            return true;
+        } else {
+            return DoAttach(progFd, progName);
+        }
     }
 
     bool ParseRelocation()
@@ -769,6 +787,7 @@ private:
     std::string license_;
     int32_t kernVersion_;
     std::vector<BpfMapData> maps_;
+    int32_t sockFd_;
 
     std::function<ElfLoadError()> isPathValid_ = [this]() -> ElfLoadError {
         if (!IsPathValid()) {

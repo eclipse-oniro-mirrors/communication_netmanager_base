@@ -64,6 +64,39 @@ bpf_map_def SEC("maps") app_cookie_stats_map = {
     .numa_node = 0,
 };
 
+SEC("socket/iface/stats")
+int socket_iface_stats(struct __sk_buff *skb)
+{
+    if (skb == NULL) {
+        return 1;
+    }
+
+    if (skb->pkt_type == PACKET_LOOPBACK) {
+        return 1;
+    }
+
+    uint64_t ifindex = skb->ifindex;
+    iface_stats_value *value_if = bpf_map_lookup_elem(&iface_stats_map, &ifindex);
+    if (value_if == NULL) {
+        iface_stats_value newValue = {};
+        bpf_map_update_elem(&iface_stats_map, &ifindex, &newValue, BPF_NOEXIST);
+        value_if = bpf_map_lookup_elem(&iface_stats_map, &ifindex);
+    }
+
+    if (skb->pkt_type == PACKET_OUTGOING) {
+        if (value_if != NULL) {
+            __sync_fetch_and_add(&value_if->txPackets, 1);
+            __sync_fetch_and_add(&value_if->txBytes, skb->len);
+        }
+    } else {
+        if (value_if != NULL) {
+            __sync_fetch_and_add(&value_if->rxPackets, 1);
+            __sync_fetch_and_add(&value_if->rxBytes, skb->len);
+        }
+    }
+    return 1;
+}
+
 SEC("cgroup_skb/uid/ingress")
 int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
 {
@@ -95,18 +128,6 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
         __sync_fetch_and_add(&value_uid_if->rxPackets, 1);
         __sync_fetch_and_add(&value_uid_if->rxBytes, skb->len);
     }
-    uint64_t ifindex = skb->ifindex;
-    iface_stats_value *value_if = bpf_map_lookup_elem(&iface_stats_map, &ifindex);
-    if (value_if == NULL) {
-        iface_stats_value newValue = {};
-        bpf_map_update_elem(&iface_stats_map, &ifindex, &newValue, BPF_NOEXIST);
-        value_if = bpf_map_lookup_elem(&iface_stats_map, &ifindex);
-    }
-    if (value_if != NULL) {
-        __sync_fetch_and_add(&value_if->rxPackets, 1);
-        __sync_fetch_and_add(&value_if->rxBytes, skb->len);
-    }
-
     socket_cookie_stats_key sock_cookie = bpf_get_socket_cookie(skb);
     app_cookie_stats_value *value_cookie = bpf_map_lookup_elem(&app_cookie_stats_map, &sock_cookie);
     if (value_cookie == NULL) {
@@ -152,18 +173,6 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
         __sync_fetch_and_add(&value_uid_if->txPackets, 1);
         __sync_fetch_and_add(&value_uid_if->txBytes, skb->len);
     }
-    uint64_t ifindex = skb->ifindex;
-    iface_stats_value *value_if = bpf_map_lookup_elem(&iface_stats_map, &ifindex);
-    if (value_if == NULL) {
-        iface_stats_value newValue = {};
-        bpf_map_update_elem(&iface_stats_map, &ifindex, &newValue, BPF_NOEXIST);
-        value_if = bpf_map_lookup_elem(&iface_stats_map, &ifindex);
-    }
-    if (value_if != NULL) {
-        __sync_fetch_and_add(&value_if->txPackets, 1);
-        __sync_fetch_and_add(&value_if->txBytes, skb->len);
-    }
-
     socket_cookie_stats_key sock_cookie = bpf_get_socket_cookie(skb);
     app_cookie_stats_value *value_cookie = bpf_map_lookup_elem(&app_cookie_stats_map, &sock_cookie);
     if (value_cookie == NULL) {
