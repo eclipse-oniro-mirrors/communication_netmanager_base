@@ -707,7 +707,6 @@ private:
 
         /* attach socket filter */
         if (progType == BPF_PROG_TYPE_SOCKET_FILTER) {
-            sockFd_ = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
             if (sockFd_ < 0) {
                 NETNATIVE_LOGE("create socket failed, %{public}d, err: %{public}d", sockFd_, errno);
                 /* return true to ignore this prog */
@@ -754,6 +753,10 @@ private:
 
     bool UnloadProgs()
     {
+        if (sockFd_ != -1) {
+            close(sockFd_);
+            sockFd_ = -1;
+        }
         return std::all_of(elfIo_.sections.begin(), elfIo_.sections.end(), [this](const auto &section) -> bool {
             if (!MatchSecName(section->get_name())) {
                 return true;
@@ -773,6 +776,7 @@ private:
 
     bool LoadProgs()
     {
+        sockFd_ = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
         return std::all_of(elfIo_.sections.begin(), elfIo_.sections.end(), [this](const auto &section) -> bool {
             if (!MatchSecName(section->get_name())) {
                 return true;
