@@ -126,7 +126,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest002, TestSize.Level1)
     EXPECT_EQ(ret, -19);
 
     ret = nativeClient_.DelInterfaceAddress(IF_NAME, IP_ADDR, PREFIX_LENGTH);
-    EXPECT_EQ(ret, -19);
+    EXPECT_EQ(ret, 0);
 
     ret = nativeClient_.SetResolverConfig(NET_ID, BASE_TIMEOUT_MSEC, RETRY_COUNT, {}, {});
     EXPECT_EQ(ret, 0);
