@@ -58,12 +58,22 @@ int32_t NetConnClient::SystemReady()
 
 int32_t NetConnClient::SetInternetPermission(uint32_t uid, uint8_t allow)
 {
+    uint8_t oldAllow;
+    bool ret = netPermissionMap_.Find(uid, oldAllow);
+    if (ret && allow == oldAllow) {
+        return NETMANAGER_SUCCESS;
+    }
+
     sptr<INetConnService> proxy = GetProxy();
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
-    return proxy->SetInternetPermission(uid, allow);
+    int32_t result = proxy->SetInternetPermission(uid, allow);
+    if (result == NETMANAGER_SUCCESS) {
+        netPermissionMap_.EnsureInsert(uid, allow);
+    }
+    return result;
 }
 
 int32_t NetConnClient::RegisterNetSupplier(NetBearType bearerType, const std::string &ident,
