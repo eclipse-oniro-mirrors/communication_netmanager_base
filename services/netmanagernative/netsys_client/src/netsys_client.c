@@ -159,7 +159,7 @@ static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct Re
         .netId = netId,
     };
     if (netId == 0 && GetNetForApp() > 0) {
-        info.netId = static_cast<uint32_t>(GetNetForApp());
+        info.netId = (uint32_t)GetNetForApp();
     }
     DNS_CONFIG_PRINT("NetSysGetResolvConfInternal begin netid: %d", info.netId);
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
@@ -240,7 +240,7 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, const st
         .netId = netId,
     };
     if (netId == 0 && GetNetForApp() > 0) {
-        info.netId = static_cast<uint32_t>(GetNetForApp());
+        info.netId = (uint32_t)GetNetForApp();
     }
     int32_t res = NetsysSendKeyForCache(sockFd, param, info);
     if (res < 0) {
@@ -329,7 +329,7 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const st
         .netId = netId,
     };
     if (netId == 0 && GetNetForApp() > 0) {
-        info.netId = static_cast<uint32_t>(GetNetForApp());
+        info.netId = (uint32_t)GetNetForApp();
     }
     int32_t result = NetsysSendKeyForCache(sockFd, param, info);
     if (result < 0) {
