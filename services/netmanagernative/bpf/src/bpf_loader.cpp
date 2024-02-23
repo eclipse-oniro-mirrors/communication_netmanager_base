@@ -100,6 +100,8 @@ static const constexpr struct {
     DEFINE_PROG_TYPE("cgroup_skb_uid_egress", BPF_CGROUP_INET_EGRESS),
 };
 
+int32_t g_sockFd = -1;
+
 struct BpfMapData {
     BpfMapData() : fd(0)
     {
@@ -707,15 +709,15 @@ private:
 
         /* attach socket filter */
         if (progType == BPF_PROG_TYPE_SOCKET_FILTER) {
-            if (sockFd_ < 0) {
-                NETNATIVE_LOGE("create socket failed, %{public}d, err: %{public}d", sockFd_, errno);
+            if (g_sockFd < 0) {
+                NETNATIVE_LOGE("create socket failed, %{public}d, err: %{public}d", g_sockFd, errno);
                 /* return true to ignore this prog */
                 return true;
             }
-            if (setsockopt(sockFd_, SOL_SOCKET, SO_ATTACH_BPF, &progFd, sizeof(progFd)) < 0) {
+            if (setsockopt(g_sockFd, SOL_SOCKET, SO_ATTACH_BPF, &progFd, sizeof(progFd)) < 0) {
                 NETNATIVE_LOGE("attach socket failed, err: %{public}d", errno);
-                close(sockFd_);
-                sockFd_ = -1;
+                close(g_sockFd);
+                g_sockFd = -1;
             }
             return true;
         } else {
@@ -753,9 +755,9 @@ private:
 
     bool UnloadProgs()
     {
-        if (sockFd_ > 0) {
-            close(sockFd_);
-            sockFd_ = -1;
+        if (g_sockFd > 0) {
+            close(g_sockFd);
+            g_sockFd = -1;
         }
         return std::all_of(elfIo_.sections.begin(), elfIo_.sections.end(), [this](const auto &section) -> bool {
             if (!MatchSecName(section->get_name())) {
@@ -776,10 +778,10 @@ private:
 
     bool LoadProgs()
     {
-        if (sockFd_ > 0) {
-            close(sockFd_);
+        if (g_sockFd > 0) {
+            close(g_sockFd);
         }
-        sockFd_ = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+        g_sockFd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
         return std::all_of(elfIo_.sections.begin(), elfIo_.sections.end(), [this](const auto &section) -> bool {
             if (!MatchSecName(section->get_name())) {
                 return true;
@@ -794,7 +796,6 @@ private:
     std::string license_;
     int32_t kernVersion_;
     std::vector<BpfMapData> maps_;
-    static int32_t sockFd_ = -1;
 
     std::function<ElfLoadError()> isPathValid_ = [this]() -> ElfLoadError {
         if (!IsPathValid()) {
