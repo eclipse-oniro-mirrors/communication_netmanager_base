@@ -21,7 +21,7 @@
 
 #define MAKE_FILE_NAME (strrchr(__FILE__, '/') + 1)
 
-#if !defined(_WIN32) && !defined(__APPLE__)
+#if !defined(_WIN32) && !defined(__APPLE__) && !defined(__ANDROID__)
 
 #include "hilog/log.h"
 
