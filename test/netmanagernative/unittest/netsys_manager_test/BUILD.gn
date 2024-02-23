@@ -16,6 +16,15 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 ohos_unittest("netsys_native_manager_test") {
   module_out_path = "netmanager_base/netsys_native_manager_test"
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "dhcp_controller_test.cpp",
     "dhcp_result_parcel_test.cpp",
@@ -95,6 +104,14 @@ ohos_unittest("netsys_native_manager_test") {
 }
 
 ohos_unittest("netsys_controller_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
   module_out_path = "netmanager_base/netsys_controller_test"
   sources = [
     "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
@@ -153,6 +170,15 @@ ohos_unittest("netsys_controller_test") {
 
 ohos_unittest("netsys_native_client_test") {
   module_out_path = "netmanager_base/netsys_native_client_test"
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
   sources = [ "netsys_native_client_test.cpp" ]
 
   include_dirs = [
@@ -201,6 +227,14 @@ ohos_unittest("netsys_native_client_test") {
 }
 
 ohos_unittest("netsys_native_service_proxy_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
   module_out_path = "netmanager_base/netsys_native_service_proxy_test"
   sources = [
     "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
@@ -261,6 +295,15 @@ ohos_unittest("netsys_native_service_proxy_test") {
 
 ohos_unittest("resolver_config_test") {
   module_out_path = "netmanager_base/resolver_config_test"
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
   sources = [ "resolver_config_test.cpp" ]
 
   include_dirs = [
@@ -310,6 +353,15 @@ ohos_unittest("resolver_config_test") {
 
 ohos_unittest("conn_manager_test") {
   module_out_path = "netmanager_base/solve_conn_manager_test"
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  branch_protector_ret = "pac_ret"
+
   sources = [ "conn_manager_test.cpp" ]
 
   include_dirs = [

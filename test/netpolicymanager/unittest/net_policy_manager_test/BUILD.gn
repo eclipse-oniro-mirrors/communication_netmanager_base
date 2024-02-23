@@ -21,6 +21,9 @@ ohos_unittest("net_policy_manager_test") {
     cfi_cross_dso = true
     debug = false
   }
+
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "$NETMANAGER_BASE_ROOT/test/security/netmanager_base_test_security.cpp",
     "net_policy_callback_proxy_test.cpp",
