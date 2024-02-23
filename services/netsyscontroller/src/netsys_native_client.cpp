@@ -1375,5 +1375,25 @@ int32_t NetsysNativeClient::GetCookieStats(uint64_t &stats, uint32_t type, uint6
     }
     return proxy->GetCookieStats(stats, type, cookie);
 }
+
+int32_t NetsysNativeClient::GetNetworkSharingType(std::vector<uint32_t>& sharingTypeIsOn)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetNetworkSharingType(sharingTypeIsOn);
+}
+
+int32_t NetsysNativeClient::UpdateNetworkSharingType(uint32_t type, bool isOpen)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->UpdateNetworkSharingType(type, isOpen);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

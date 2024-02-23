@@ -132,6 +132,8 @@ private:
     int32_t CmdRegisterDnsHealthListener(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUnregisterDnsHealthListener(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetCookieStats(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetNetworkSharingType(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdUpdateNetworkSharingType(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::vector<int32_t> uids_;

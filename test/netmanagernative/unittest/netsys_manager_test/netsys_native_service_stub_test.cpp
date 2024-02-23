@@ -462,6 +462,16 @@ public:
     {
         return 0;
     }
+
+    int32_t GetNetworkSharingType(std::vector<uint32_t>& sharingTypeIsOn) override
+    {
+        return 0;
+    }
+    
+    int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {

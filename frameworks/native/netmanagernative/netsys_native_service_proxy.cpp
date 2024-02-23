@@ -19,6 +19,7 @@
 
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
+#include <limits>
 
 namespace OHOS {
 namespace NetsysNative {
@@ -2182,6 +2183,78 @@ int32_t NetsysNativeServiceProxy::GetCookieStats(uint64_t &stats, uint32_t type,
         NETNATIVE_LOGE("get stats falil");
         return ERR_FLATTEN_OBJECT;
     }
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::GetNetworkSharingType(std::vector<uint32_t>& sharingTypeIsOn)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::GetNetworkSharingType in");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_NETWORK_SHARING_TYPE),
+                                        data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("GetNetworkSharingType SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    uint32_t count = std::numeric_limits<uint32_t>::min();
+    if (!reply.ReadUint32(count)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    NETNATIVE_LOGI("sharing type count = [%{public}d]", count);
+    uint32_t tmp = std::numeric_limits<uint32_t>::max();
+    for (size_t index = 0; index < count; ++index) {
+        if (!reply.ReadUint32(tmp)) {
+            NETNATIVE_LOGE("GetNetworkSharingType falil");
+            return ERR_FLATTEN_OBJECT;
+        }
+        sharingTypeIsOn.push_back(tmp);
+        NETNATIVE_LOGI(" sharing type is [%{public}d]", tmp);
+    }
+
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::UpdateNetworkSharingType(uint32_t type, bool isOpen)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::UpdateNetworkSharingType");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(type)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isOpen)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_NETWORK_SHARING_TYPE),
+                                        data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("UpdateNetworkSharingType SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("UpdateNetworkSharingType get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+
     return ret;
 }
 } // namespace NetsysNative

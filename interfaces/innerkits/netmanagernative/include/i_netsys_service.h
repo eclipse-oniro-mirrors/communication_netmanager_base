@@ -133,6 +133,8 @@ public:
     virtual int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) = 0;
     virtual int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback) = 0;
     virtual int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) = 0;
+    virtual int32_t GetNetworkSharingType(std::vector<uint32_t>& sharingTypeIsOn) = 0;
+    virtual int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative
