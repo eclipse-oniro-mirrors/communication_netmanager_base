@@ -217,7 +217,7 @@ inline int32_t UnPin(const std::string &path)
 
 class ElfLoader {
 public:
-    explicit ElfLoader(std::string path) : path_(std::move(path)), kernVersion_(0), sockFd_(-1) {}
+    explicit ElfLoader(std::string path) : path_(std::move(path)), kernVersion_(0) {}
 
     ElfLoadError Unload() const
     {
@@ -753,7 +753,7 @@ private:
 
     bool UnloadProgs()
     {
-        if (sockFd_ != -1) {
+        if (sockFd_ > 0) {
             close(sockFd_);
             sockFd_ = -1;
         }
@@ -776,6 +776,9 @@ private:
 
     bool LoadProgs()
     {
+        if (sockFd_ > 0) {
+            close(sockFd_);
+        }
         sockFd_ = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
         return std::all_of(elfIo_.sections.begin(), elfIo_.sections.end(), [this](const auto &section) -> bool {
             if (!MatchSecName(section->get_name())) {
@@ -791,7 +794,7 @@ private:
     std::string license_;
     int32_t kernVersion_;
     std::vector<BpfMapData> maps_;
-    int32_t sockFd_;
+    static int32_t sockFd_ = -1;
 
     std::function<ElfLoadError()> isPathValid_ = [this]() -> ElfLoadError {
         if (!IsPathValid()) {
