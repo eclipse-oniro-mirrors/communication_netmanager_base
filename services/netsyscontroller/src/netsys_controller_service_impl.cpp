@@ -751,7 +751,7 @@ int32_t NetsysControllerServiceImpl::GetNetworkSharingType(std::vector<uint32_t>
 
 int32_t NetsysControllerServiceImpl::UpdateNetworkSharingType(uint32_t type, bool isOpen)
 {
-    NETMGR_LOG_D("NetsysControllerServiceImpl::UpdateNetworkSharingType: type=%{public}zu isOpen=%{public}d",
+    NETMGR_LOG_D("NetsysControllerServiceImpl::UpdateNetworkSharingType: type=%{public}d isOpen=%{public}d",
                  type, isOpen);
     return netsysClient_.UpdateNetworkSharingType(type, isOpen);
 }
