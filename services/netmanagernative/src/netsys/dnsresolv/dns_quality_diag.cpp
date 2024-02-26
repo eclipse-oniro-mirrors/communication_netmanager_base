@@ -247,7 +247,6 @@ int32_t DnsQualityDiag::send_dns_report()
 
 int32_t DnsQualityDiag::add_dns_report(std::shared_ptr<NetsysNative::NetDnsResultReport> report)
 {
-    NETNATIVE_LOGI("add_dns_report (%{public}s)", report->host_.c_str());
     if (report_.size() < MAX_RESULT_SIZE) {
         report_.push_back(*report);
     }
