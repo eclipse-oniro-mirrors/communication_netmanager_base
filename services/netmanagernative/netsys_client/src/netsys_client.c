@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <sys/socket.h>
 
+#include "app_net_client.h"
 #include "dns_config_client.h"
 #include <netdb.h>
 #include <securec.h>
@@ -157,7 +158,9 @@ static int32_t NetSysGetResolvConfInternal(int sockFd, uint16_t netId, struct Re
         .command = GET_CONFIG,
         .netId = netId,
     };
-
+    if (netId == 0 && GetNetForApp() > 0) {
+        info.netId = (uint32_t)GetNetForApp();
+    }
     DNS_CONFIG_PRINT("NetSysGetResolvConfInternal begin netid: %d", info.netId);
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
@@ -236,7 +239,9 @@ static int32_t NetSysGetResolvCacheInternal(int sockFd, uint16_t netId, const st
         .command = GET_CACHE,
         .netId = netId,
     };
-
+    if (netId == 0 && GetNetForApp() > 0) {
+        info.netId = (uint32_t)GetNetForApp();
+    }
     int32_t res = NetsysSendKeyForCache(sockFd, param, info);
     if (res < 0) {
         return res;
@@ -323,7 +328,9 @@ static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const st
         .command = SET_CACHE,
         .netId = netId,
     };
-
+    if (netId == 0 && GetNetForApp() > 0) {
+        info.netId = (uint32_t)GetNetForApp();
+    }
     int32_t result = NetsysSendKeyForCache(sockFd, param, info);
     if (result < 0) {
         return result;
