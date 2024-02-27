@@ -151,6 +151,10 @@ void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdFirewallEnableChain;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_RULE)] =
         &NetsysNativeServiceStub::CmdFirewallSetUidRule;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_NETWORK_SHARING_TYPE)] =
+        &NetsysNativeServiceStub::CmdGetNetworkSharingType;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_NETWORK_SHARING_TYPE)] =
+        &NetsysNativeServiceStub::CmdUpdateNetworkSharingType;
 }
 
 void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
@@ -201,10 +205,6 @@ void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
         &NetsysNativeServiceStub::CmdStartDnsProxyListen;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_STOP_DNS_PROXY_LISTEN)] =
         &NetsysNativeServiceStub::CmdStopDnsProxyListen;
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_NETWORK_SHARING_TYPE)] =
-        &NetsysNativeServiceStub::CmdGetNetworkSharingType;
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_NETWORK_SHARING_TYPE)] =
-        &NetsysNativeServiceStub::CmdUpdateNetworkSharingType;
 }
 
 void NetsysNativeServiceStub::InitNetDiagOpToInterfaceMap()
