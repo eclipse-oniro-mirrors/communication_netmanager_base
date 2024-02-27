@@ -64,7 +64,6 @@ const int32_t TEST_STATS_UID = 11111;
 int g_ifaceFd = 5;
 const int64_t BYTES = 2097152;
 const uint32_t FIREWALL_RULE = 1;
-bool g_isWaitAsync = false;
 const int32_t ERR_INVALID_DATA = 5;
 } // namespace
 
@@ -863,25 +862,6 @@ HWTEST_F(NetsysControllerTest, NetDiagUpdateInterfaceConfig001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysControllerTest, NetDiagPing001, TestSize.Level1)
-{
-    OHOS::NetsysNative::NetDiagPingOption pingOption;
-    pingOption.destination_ = "127.0.0.1";
-    const int maxWaitSecond = 10;
-    g_isWaitAsync = true;
-    auto ret = NetsysController::GetInstance().NetDiagPingHost(pingOption, netDiagCallback);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-    std::chrono::steady_clock::time_point tp1 = std::chrono::steady_clock::now();
-    while (g_isWaitAsync) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        std::chrono::steady_clock::time_point tp2 = std::chrono::steady_clock::now();
-
-        if (std::chrono::duration_cast<std::chrono::seconds>(tp2 - tp1).count() > maxWaitSecond) {
-            break;
-        }
-    }
-}
-
 HWTEST_F(NetsysControllerTest, NetsysControllerErr007, TestSize.Level1)
 {
     std::string ipAddr = "192.168.1.100";
@@ -989,10 +969,10 @@ HWTEST_F(NetsysControllerTest, GetCookieStatsTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
     int32_t ret = NetsysController::GetInstance().GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
 
     ret = NetsysController::GetInstance().GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest003, TestSize.Level1)

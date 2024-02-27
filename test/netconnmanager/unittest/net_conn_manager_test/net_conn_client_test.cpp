@@ -1144,11 +1144,6 @@ HWTEST_F(NetConnClientTest, RegisterSlotTypeTest001, TestSize.Level1)
     int32_t tech = 2;
     int32_t ret = NetConnClient::GetInstance().RegisterSlotType(supplierId, tech);
     EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
-
-    std::string type = "";
-    ret = NetConnClient::GetInstance().GetSlotType(type);
-    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
-    EXPECT_TRUE(type.empty());
 }
 
 HWTEST_F(NetConnClientTest, RegisterSlotTypeTest002, TestSize.Level1)

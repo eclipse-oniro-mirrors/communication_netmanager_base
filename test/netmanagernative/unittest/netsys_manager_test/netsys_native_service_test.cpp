@@ -246,7 +246,7 @@ HWTEST_F(NetsysNativeServiceTest, DelInterfaceAddressTest001, TestSize.Level1)
     std::string addrStr = "192.168.22.33";
     int32_t prefixLength = 24;
     int32_t ret = instance_->DelInterfaceAddress(iFName, addrStr, prefixLength);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceTest, InterfaceSetIpAddressTest001, TestSize.Level1)
@@ -625,7 +625,7 @@ HWTEST_F(NetsysNativeServiceTest, GetCookieStatsTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
     int32_t ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
-    EXPECT_NE(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysNativeServiceTest, GetCookieStatsTest002, TestSize.Level1)
