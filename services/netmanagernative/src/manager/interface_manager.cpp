@@ -218,11 +218,7 @@ int InterfaceManager::ModifyAddress(uint32_t action, const char *interfaceName, 
     NETNATIVE_LOGI("InterfaceManager::ModifyAddress:%{public}u %{public}s %{public}s %{public}d", action, interfaceName,
                    ToAnonymousIp(addr).c_str(), prefixLen);
 
-    auto ret = SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
-    if (ret < 0) {
-        return -EIO;
-    }
-    return NETMANAGER_SUCCESS;
+    return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
 }
 
 int InterfaceManager::AddAddress(const char *interfaceName, const char *addr, int prefixLen)

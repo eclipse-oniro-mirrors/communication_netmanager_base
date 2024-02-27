@@ -19,6 +19,8 @@
 #include <functional>
 #include <iostream>
 #include <linux/bpf.h>
+#include <linux/if_ether.h>
+#include <arpa/inet.h>
 #include <map>
 #include <memory.h>
 #include <string>
@@ -97,6 +99,8 @@ static const constexpr struct {
     DEFINE_PROG_TYPE("cgroup_skb_uid_ingress", BPF_CGROUP_INET_INGRESS),
     DEFINE_PROG_TYPE("cgroup_skb_uid_egress", BPF_CGROUP_INET_EGRESS),
 };
+
+int32_t g_sockFd = -1;
 
 struct BpfMapData {
     BpfMapData() : fd(0)
@@ -703,7 +707,22 @@ private:
             }
         }
 
-        return DoAttach(progFd, progName);
+        /* attach socket filter */
+        if (progType == BPF_PROG_TYPE_SOCKET_FILTER) {
+            if (g_sockFd < 0) {
+                NETNATIVE_LOGE("create socket failed, %{public}d, err: %{public}d", g_sockFd, errno);
+                /* return true to ignore this prog */
+                return true;
+            }
+            if (setsockopt(g_sockFd, SOL_SOCKET, SO_ATTACH_BPF, &progFd, sizeof(progFd)) < 0) {
+                NETNATIVE_LOGE("attach socket failed, err: %{public}d", errno);
+                close(g_sockFd);
+                g_sockFd = -1;
+            }
+            return true;
+        } else {
+            return DoAttach(progFd, progName);
+        }
     }
 
     bool ParseRelocation()
@@ -736,6 +755,10 @@ private:
 
     bool UnloadProgs()
     {
+        if (g_sockFd > 0) {
+            close(g_sockFd);
+            g_sockFd = -1;
+        }
         return std::all_of(elfIo_.sections.begin(), elfIo_.sections.end(), [this](const auto &section) -> bool {
             if (!MatchSecName(section->get_name())) {
                 return true;
@@ -755,6 +778,10 @@ private:
 
     bool LoadProgs()
     {
+        if (g_sockFd > 0) {
+            close(g_sockFd);
+        }
+        g_sockFd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
         return std::all_of(elfIo_.sections.begin(), elfIo_.sections.end(), [this](const auto &section) -> bool {
             if (!MatchSecName(section->get_name())) {
                 return true;
