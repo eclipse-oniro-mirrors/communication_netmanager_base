@@ -1376,7 +1376,7 @@ int32_t NetsysNativeClient::GetCookieStats(uint64_t &stats, uint32_t type, uint6
     return proxy->GetCookieStats(stats, type, cookie);
 }
 
-int32_t NetsysNativeClient::GetNetworkSharingType(std::vector<uint32_t>& sharingTypeIsOn)
+int32_t NetsysNativeClient::GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)
 {
     auto proxy = GetProxy();
     if (proxy == nullptr) {

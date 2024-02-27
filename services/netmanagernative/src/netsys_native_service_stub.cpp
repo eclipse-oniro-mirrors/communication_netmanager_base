@@ -17,7 +17,6 @@
 #include <net/route.h>
 #include <netdb.h>
 #include <unistd.h>
-#include <limits>
 
 #include "ipc_skeleton.h"
 #include "net_manager_constants.h"
@@ -1574,7 +1573,7 @@ int32_t NetsysNativeServiceStub::CmdGetCookieStats(MessageParcel &data, MessageP
 
 int32_t NetsysNativeServiceStub::CmdGetNetworkSharingType(MessageParcel &data, MessageParcel &reply)
 {
-    std::vector<uint32_t> sharingTypeIsOn;
+    std::set<uint32_t> sharingTypeIsOn;
     int32_t ret = GetNetworkSharingType(sharingTypeIsOn);
     if (!reply.WriteInt32(ret)) {
         NETNATIVE_LOGE("Write parcel failed");
@@ -1596,10 +1595,14 @@ int32_t NetsysNativeServiceStub::CmdGetNetworkSharingType(MessageParcel &data, M
 
 int32_t NetsysNativeServiceStub::CmdUpdateNetworkSharingType(MessageParcel &data, MessageParcel &reply)
 {
-    uint32_t type = std::numeric_limits<uint32_t>::max();
+    uint32_t type = ERR_NONE;
     if (!data.ReadUint32(type)) {
         NETNATIVE_LOGE("Read uint32 failed");
         return ERR_FLATTEN_OBJECT;
+    }
+    if (type < ERR_NONE) {
+        NETNATIVE_LOGE("type parameter invalid");
+        return ERR_INVALID_DATA;
     }
 
     bool isOpen = false;

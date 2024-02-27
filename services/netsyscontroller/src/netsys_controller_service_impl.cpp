@@ -743,7 +743,7 @@ int32_t NetsysControllerServiceImpl::GetCookieStats(uint64_t &stats, uint32_t ty
     return netsysClient_.GetCookieStats(stats, type, cookie);
 }
 
-int32_t NetsysControllerServiceImpl::GetNetworkSharingType(std::vector<uint32_t>& sharingTypeIsOn)
+int32_t NetsysControllerServiceImpl::GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)
 {
     NETMGR_LOG_D("NetsysControllerServiceImpl::GetNetworkSharingType");
     return netsysClient_.GetNetworkSharingType(sharingTypeIsOn);

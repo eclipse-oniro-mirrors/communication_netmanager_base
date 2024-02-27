@@ -1037,7 +1037,7 @@ int32_t NetsysController::GetCookieStats(uint64_t &stats, uint32_t type, uint64_
     return netsysService_->GetCookieStats(stats, type, cookie);
 }
 
-int32_t NetsysController::GetNetworkSharingType(std::vector<uint32_t>& sharingTypeIsOn)
+int32_t NetsysController::GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)
 {
     if (netsysService_ == nullptr) {
         NETMGR_LOG_E("GetNetworkSharingType netsysService is null");

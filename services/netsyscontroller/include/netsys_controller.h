@@ -21,6 +21,7 @@
 #include "i_net_dns_result_callback.h"
 #include "i_netsys_controller_service.h"
 #include "refbase.h"
+#include <set>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -819,7 +820,7 @@ public:
      */
     int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie);
 
-    int32_t GetNetworkSharingType(std::vector<uint32_t>& sharingTypeIsOn);
+    int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn);
 
     int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen);
 

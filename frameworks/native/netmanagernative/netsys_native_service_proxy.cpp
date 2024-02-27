@@ -19,7 +19,6 @@
 
 #include "net_manager_constants.h"
 #include "netnative_log_wrapper.h"
-#include <limits>
 
 namespace OHOS {
 namespace NetsysNative {
@@ -2186,7 +2185,7 @@ int32_t NetsysNativeServiceProxy::GetCookieStats(uint64_t &stats, uint32_t type,
     return ret;
 }
 
-int32_t NetsysNativeServiceProxy::GetNetworkSharingType(std::vector<uint32_t>& sharingTypeIsOn)
+int32_t NetsysNativeServiceProxy::GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)
 {
     NETNATIVE_LOGI("NetsysNativeServiceProxy::GetNetworkSharingType in");
     MessageParcel data;
@@ -2208,19 +2207,19 @@ int32_t NetsysNativeServiceProxy::GetNetworkSharingType(std::vector<uint32_t>& s
         return ERR_FLATTEN_OBJECT;
     }
 
-    uint32_t count = std::numeric_limits<uint32_t>::min();
+    uint32_t count = ERR_NONE;
     if (!reply.ReadUint32(count)) {
         NETNATIVE_LOGE("get ret falil");
         return ERR_FLATTEN_OBJECT;
     }
     NETNATIVE_LOGI("sharing type count = [%{public}d]", count);
-    uint32_t tmp = std::numeric_limits<uint32_t>::max();
+    uint32_t tmp = ERR_NONE;
     for (size_t index = 0; index < count; ++index) {
         if (!reply.ReadUint32(tmp)) {
             NETNATIVE_LOGE("GetNetworkSharingType falil");
             return ERR_FLATTEN_OBJECT;
         }
-        sharingTypeIsOn.push_back(tmp);
+        sharingTypeIsOn.insert(tmp);
         NETNATIVE_LOGI(" sharing type is [%{public}d]", tmp);
     }
 

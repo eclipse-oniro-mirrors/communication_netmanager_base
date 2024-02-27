@@ -21,6 +21,7 @@
 #include <netdb.h>
 #include <string>
 #include <vector>
+#include <set>
 
 #include "dns_config_client.h"
 #include "interface_type.h"
@@ -827,7 +828,7 @@ public:
      */
     virtual int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) = 0;
 
-    virtual int32_t GetNetworkSharingType(std::vector<uint32_t>& sharingTypeIsOn) = 0;
+    virtual int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn) = 0;
 
     virtual int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) = 0;
 };
