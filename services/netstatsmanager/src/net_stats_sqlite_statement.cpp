@@ -30,7 +30,7 @@ NetStatsSqliteStatement::~NetStatsSqliteStatement()
 int32_t NetStatsSqliteStatement::Prepare(sqlite3 *dbHandle, const std::string &newSql)
 {
     if (sqlCmd_.compare(newSql) == 0) {
-        NETMGR_LOG_I("%{public}s is already prepared", newSql.c_str());
+        NETMGR_LOG_D("%{public}s is already prepared", newSql.c_str());
         return SQLITE_OK;
     }
     sqlite3_stmt *stmt = nullptr;
