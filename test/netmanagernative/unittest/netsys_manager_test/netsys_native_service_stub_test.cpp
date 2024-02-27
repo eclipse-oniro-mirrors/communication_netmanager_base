@@ -463,7 +463,7 @@ public:
         return 0;
     }
 
-    int32_t GetNetworkSharingType(std::vector<uint32_t>& sharingTypeIsOn) override
+    int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn) override
     {
         return 0;
     }
