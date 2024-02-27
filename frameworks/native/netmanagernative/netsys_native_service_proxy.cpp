@@ -704,16 +704,8 @@ int32_t NetsysNativeServiceProxy::AddInterfaceAddress(const std::string &interfa
 {
     NETNATIVE_LOGI("Begin to AddInterfaceAddress");
     MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(interfaceName)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(addrString)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteInt32(prefixLength)) {
+    if (!WriteInterfaceToken(data) || !data.WriteString(interfaceName) || !data.WriteString(addrString) ||
+        !data.WriteInt32(prefixLength)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -730,16 +722,8 @@ int32_t NetsysNativeServiceProxy::DelInterfaceAddress(const std::string &interfa
 {
     NETNATIVE_LOGI("Begin to DelInterfaceAddress");
     MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(interfaceName)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(addrString)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteInt32(prefixLength)) {
+    if (!WriteInterfaceToken(data) || !data.WriteString(interfaceName) || !data.WriteString(addrString) ||
+        !data.WriteInt32(prefixLength)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -1944,18 +1928,10 @@ int32_t NetsysNativeServiceProxy::AddStaticArp(const std::string &ipAddr, const 
                                                const std::string &ifName)
 {
     MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
+    if (!WriteInterfaceToken(data) || !data.WriteString(ipAddr) || !data.WriteString(macAddr) ||
+        !data.WriteString(ifName)) {
         return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(ipAddr)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(macAddr)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(ifName)) {
-        return ERR_FLATTEN_OBJECT;
-    }
+    } 
 
     MessageParcel reply;
     MessageOption option;
@@ -1982,18 +1958,10 @@ int32_t NetsysNativeServiceProxy::DelStaticArp(const std::string &ipAddr, const 
                                                const std::string &ifName)
 {
     MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
+    if (!WriteInterfaceToken(data) || !data.WriteString(ipAddr) || !data.WriteString(macAddr) ||
+        !data.WriteString(ifName)) {
         return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(ipAddr)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(macAddr)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(ifName)) {
-        return ERR_FLATTEN_OBJECT;
-    }
+    } 
 
     MessageParcel reply;
     MessageOption option;
