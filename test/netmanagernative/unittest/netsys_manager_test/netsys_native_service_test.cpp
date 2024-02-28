@@ -735,5 +735,31 @@ HWTEST_F(NetsysNativeServiceTest, NetsysNativeServiceBranchTest003, TestSize.Lev
     ret = instance_->UnregisterDnsHealthCallback(healthCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeServiceTest, GetNetworkSharingTypeTest001, TestSize.Level1)
+{
+    uint32_t type = 0;
+    int32_t ret = instance_->UpdateNetworkSharingType(type, true);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    std::set<uint32_t> sharingTypeIsOn;
+    ret = instance_->GetNetworkSharingType(sharingTypeIsOn);
+    EXPECT_EQ(sharingTypeIsOn.size(), 1);
+
+    ret = instance_->UpdateNetworkSharingType(type, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    sharingTypeIsOn.clear();
+    ret = instance_->GetNetworkSharingType(sharingTypeIsOn);
+    EXPECT_EQ(sharingTypeIsOn.size(), 0);
+}
+
+HWTEST_F(NetsysNativeServiceTest, UpdateNetworkSharingTypeTest001, TestSize.Level1)
+{
+    uint32_t type = 0;
+    int32_t ret = instance_->UpdateNetworkSharingType(type, true);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->UpdateNetworkSharingType(type, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS
