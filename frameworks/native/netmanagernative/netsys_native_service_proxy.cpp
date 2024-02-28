@@ -704,16 +704,8 @@ int32_t NetsysNativeServiceProxy::AddInterfaceAddress(const std::string &interfa
 {
     NETNATIVE_LOGI("Begin to AddInterfaceAddress");
     MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(interfaceName)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(addrString)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteInt32(prefixLength)) {
+    if (!WriteInterfaceToken(data) || !data.WriteString(interfaceName) || !data.WriteString(addrString) ||
+        !data.WriteInt32(prefixLength)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -730,16 +722,8 @@ int32_t NetsysNativeServiceProxy::DelInterfaceAddress(const std::string &interfa
 {
     NETNATIVE_LOGI("Begin to DelInterfaceAddress");
     MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(interfaceName)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(addrString)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteInt32(prefixLength)) {
+    if (!WriteInterfaceToken(data) || !data.WriteString(interfaceName) || !data.WriteString(addrString) ||
+        !data.WriteInt32(prefixLength)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -1944,16 +1928,8 @@ int32_t NetsysNativeServiceProxy::AddStaticArp(const std::string &ipAddr, const 
                                                const std::string &ifName)
 {
     MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(ipAddr)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(macAddr)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(ifName)) {
+    if (!WriteInterfaceToken(data) || !data.WriteString(ipAddr) || !data.WriteString(macAddr) ||
+        !data.WriteString(ifName)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -1982,16 +1958,8 @@ int32_t NetsysNativeServiceProxy::DelStaticArp(const std::string &ipAddr, const 
                                                const std::string &ifName)
 {
     MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(ipAddr)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(macAddr)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(ifName)) {
+    if (!WriteInterfaceToken(data) || !data.WriteString(ipAddr) || !data.WriteString(macAddr) ||
+        !data.WriteString(ifName)) {
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -2182,6 +2150,78 @@ int32_t NetsysNativeServiceProxy::GetCookieStats(uint64_t &stats, uint32_t type,
         NETNATIVE_LOGE("get stats falil");
         return ERR_FLATTEN_OBJECT;
     }
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::GetNetworkSharingType in");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_NETWORK_SHARING_TYPE),
+                                        data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("GetNetworkSharingType SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    uint32_t count = ERR_NONE;
+    if (!reply.ReadUint32(count)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    NETNATIVE_LOGI("sharing type count = [%{public}d]", count);
+    uint32_t tmp = ERR_NONE;
+    for (size_t index = 0; index < count; ++index) {
+        if (!reply.ReadUint32(tmp)) {
+            NETNATIVE_LOGE("GetNetworkSharingType falil");
+            return ERR_FLATTEN_OBJECT;
+        }
+        sharingTypeIsOn.insert(tmp);
+        NETNATIVE_LOGI(" sharing type is [%{public}d]", tmp);
+    }
+
+    return ret;
+}
+
+int32_t NetsysNativeServiceProxy::UpdateNetworkSharingType(uint32_t type, bool isOpen)
+{
+    NETNATIVE_LOGI("NetsysNativeServiceProxy::UpdateNetworkSharingType");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(type)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isOpen)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_NETWORK_SHARING_TYPE),
+                                        data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("UpdateNetworkSharingType SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    ret = NetManagerStandard::NETMANAGER_SUCCESS;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("UpdateNetworkSharingType get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+
     return ret;
 }
 } // namespace NetsysNative

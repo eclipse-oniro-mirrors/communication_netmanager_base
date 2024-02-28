@@ -750,5 +750,26 @@ int32_t NetsysNativeService::GetCookieStats(uint64_t &stats, uint32_t type, uint
 
     return bpfStats_->GetCookieStats(stats, static_cast<OHOS::NetManagerStandard::StatsType>(type), cookie);
 }
+
+int32_t NetsysNativeService::GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)
+{
+    NETNATIVE_LOGI("NetsysNativeService::GetNetworkSharingType");
+    std::lock_guard<std::mutex> guard(instanceLock_);
+    sharingTypeIsOn = sharingTypeIsOn_;
+    return NETSYS_SUCCESS;
+}
+
+int32_t NetsysNativeService::UpdateNetworkSharingType(uint32_t type, bool isOpen)
+{
+    NETNATIVE_LOGI("NetsysNativeService::UpdateNetworkSharingType");
+    std::lock_guard<std::mutex> guard(instanceLock_);
+    if (isOpen) {
+        sharingTypeIsOn_.insert(type);
+    } else {
+        sharingTypeIsOn_.erase(std::find(sharingTypeIsOn_.begin(), sharingTypeIsOn_.end(), type));
+    }
+    return NETSYS_SUCCESS;
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

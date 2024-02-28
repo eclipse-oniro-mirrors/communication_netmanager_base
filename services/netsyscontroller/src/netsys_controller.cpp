@@ -1036,5 +1036,23 @@ int32_t NetsysController::GetCookieStats(uint64_t &stats, uint32_t type, uint64_
     }
     return netsysService_->GetCookieStats(stats, type, cookie);
 }
+
+int32_t NetsysController::GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("GetNetworkSharingType netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->GetNetworkSharingType(sharingTypeIsOn);
+}
+
+int32_t NetsysController::UpdateNetworkSharingType(uint32_t type, bool isOpen)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("UpdateNetworkSharingType netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->UpdateNetworkSharingType(type, isOpen);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

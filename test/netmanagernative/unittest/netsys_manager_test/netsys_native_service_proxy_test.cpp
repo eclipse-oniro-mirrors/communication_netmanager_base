@@ -307,5 +307,26 @@ HWTEST_F(NetsysNativeServiceProxyTest, NetsysNativeServiceProxyBranchTest001, Te
     ret = netsysNativeService->GetCookieStats(stats, type, cookie);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
 }
+
+HWTEST_F(NetsysNativeServiceProxyTest, GetNetworkSharingTypeTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::set<uint32_t> sharingTypeIsOn;
+    int32_t ret = netsysNativeService->GetNetworkSharingType(sharingTypeIsOn);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, UpdateNetworkSharingTypeTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    uint32_t type = 0;
+    int32_t ret = netsysNativeService->UpdateNetworkSharingType(type, true);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = netsysNativeService->UpdateNetworkSharingType(type, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

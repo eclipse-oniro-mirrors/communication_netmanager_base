@@ -21,6 +21,7 @@
 #include <netdb.h>
 #include <string>
 #include <vector>
+#include <set>
 
 #include "dns_config_client.h"
 #include "interface_type.h"
@@ -826,6 +827,10 @@ public:
      * @return Value the return value of the netsys interface call
      */
     virtual int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) = 0;
+
+    virtual int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn) = 0;
+
+    virtual int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

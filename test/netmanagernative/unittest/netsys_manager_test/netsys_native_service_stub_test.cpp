@@ -462,6 +462,16 @@ public:
     {
         return 0;
     }
+
+    int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn) override
+    {
+        return 0;
+    }
+    
+    int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
@@ -1674,6 +1684,38 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdUnregisterDnsHealthListener001, TestSiz
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdUnregisterDnsHealthListener(data, reply);
     EXPECT_EQ(ret, IPC_STUB_ERR);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetNetworkSharingType001, TestSize.Level1)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdGetNetworkSharingType(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateNetworkSharingType001, TestSize.Level1)
+{
+    uint32_t type = 0;
+    bool isOpen = true;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteUint32(type)) {
+        return;
+    }
+    if (!data.WriteBool(isOpen)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdUpdateNetworkSharingType(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
 }
 } // namespace NetsysNative
 } // namespace OHOS

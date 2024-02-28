@@ -150,6 +150,10 @@ void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdFirewallEnableChain;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_FIREWALL_SET_UID_RULE)] =
         &NetsysNativeServiceStub::CmdFirewallSetUidRule;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_NETWORK_SHARING_TYPE)] =
+        &NetsysNativeServiceStub::CmdGetNetworkSharingType;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_UPDATE_NETWORK_SHARING_TYPE)] =
+        &NetsysNativeServiceStub::CmdUpdateNetworkSharingType;
 }
 
 void NetsysNativeServiceStub::InitOpToInterfaceMapExt()
@@ -1565,6 +1569,55 @@ int32_t NetsysNativeServiceStub::CmdGetCookieStats(MessageParcel &data, MessageP
         return ERR_FLATTEN_OBJECT;
     }
     return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdGetNetworkSharingType(MessageParcel &data, MessageParcel &reply)
+{
+    std::set<uint32_t> sharingTypeIsOn;
+    int32_t ret = GetNetworkSharingType(sharingTypeIsOn);
+    if (!reply.WriteInt32(ret)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteUint32(sharingTypeIsOn.size())) {
+            NETNATIVE_LOGE("Write parcel failed");
+            return ERR_FLATTEN_OBJECT;
+    }
+    for (auto mem : sharingTypeIsOn) {
+        if (!reply.WriteUint32(mem)) {
+            NETNATIVE_LOGE("Write parcel failed");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    
+    return ret;
+}
+
+int32_t NetsysNativeServiceStub::CmdUpdateNetworkSharingType(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t type = ERR_NONE;
+    if (!data.ReadUint32(type)) {
+        NETNATIVE_LOGE("Read uint32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (type < ERR_NONE) {
+        NETNATIVE_LOGE("type parameter invalid");
+        return ERR_INVALID_DATA;
+    }
+
+    bool isOpen = false;
+    if (!data.ReadBool(isOpen)) {
+        NETNATIVE_LOGE("Read bool failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret = UpdateNetworkSharingType(type, isOpen);
+    if (!reply.WriteInt32(ret)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    return ret;
 }
 } // namespace NetsysNative
 } // namespace OHOS
