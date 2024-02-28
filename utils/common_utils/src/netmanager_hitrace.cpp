@@ -22,13 +22,13 @@ namespace NetManagerStandard {
 void NetmanagerHiTrace::NetmanagerStartSyncTrace(const std::string &value)
 {
     StartTrace(HITRACE_TAG_NET, value);
-    NETMGR_LOG_I("NetmanagerStartSyncTrace value:%{public}s", value.c_str());
+    NETMGR_LOG_D("NetmanagerStartSyncTrace value:%{public}s", value.c_str());
 }
 
 void NetmanagerHiTrace::NetmanagerFinishSyncTrace(const std::string &value)
 {
     FinishTrace(HITRACE_TAG_NET);
-    NETMGR_LOG_I("NetmanagerFinishSyncTrace value:%{public}s", value.c_str());
+    NETMGR_LOG_D("NetmanagerFinishSyncTrace value:%{public}s", value.c_str());
 }
 
 void NetmanagerHiTrace::NetmanagerStartAsyncTrace(const std::string &value, int32_t taskId)

@@ -433,7 +433,7 @@ int64_t MockNetsysNativeClient::GetIfaceTxPackets(const std::string &interfaceNa
 
 std::vector<std::string> MockNetsysNativeClient::InterfaceGetList()
 {
-    NETMGR_LOG_I("MockNetsysNativeClient InterfaceGetList");
+    NETMGR_LOG_D("MockNetsysNativeClient InterfaceGetList");
     DIR *dir(nullptr);
     std::vector<std::string> ifList;
     if ((dir = opendir(INTERFACE_LIST_DIR.c_str())) == nullptr) {

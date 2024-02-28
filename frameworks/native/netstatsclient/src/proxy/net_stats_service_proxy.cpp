@@ -156,7 +156,7 @@ int32_t NetStatsServiceProxy::GetCellularRxBytes(uint64_t &stats)
     MessageParcel reply;
     int32_t error =
         SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_RXBYTES), data, reply);
-    if (error != 0) {
+    if (error != 0 && error != STATS_ERR_GET_IFACE_NAME_FAILED) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
     }
@@ -178,7 +178,7 @@ int32_t NetStatsServiceProxy::GetCellularTxBytes(uint64_t &stats)
     MessageParcel reply;
     int32_t error =
         SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_CELLULAR_TXBYTES), data, reply);
-    if (error != 0) {
+    if (error != 0 && error != STATS_ERR_GET_IFACE_NAME_FAILED) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
     }

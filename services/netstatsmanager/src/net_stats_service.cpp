@@ -402,7 +402,7 @@ bool NetStatsService::GetIfaceNamesFromManager(std::list<std::string> &ifaceName
 {
     int32_t ret = NetManagerCenter::GetInstance().GetIfaceNames(BEARER_CELLULAR, ifaceNames);
     if (ret != NETMANAGER_SUCCESS || ifaceNames.empty()) {
-        NETMGR_LOG_E("Iface list is empty, ret = %{public}d", ret);
+        NETMGR_LOG_D("Iface list is empty, ret = %{public}d", ret);
         return false;
     }
     return true;

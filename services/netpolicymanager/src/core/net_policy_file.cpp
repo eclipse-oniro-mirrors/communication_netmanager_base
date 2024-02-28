@@ -330,7 +330,7 @@ void NetPolicyFile::WritePolicyByUid(uint32_t netUidPolicyOpType, uint32_t uid, 
         uidPolicy.policy = std::to_string(static_cast<uint32_t>(policy));
         netPolicy_.uidPolicies.push_back(uidPolicy);
     } else {
-        NETMGR_LOG_I("Need to do nothing!");
+        NETMGR_LOG_D("Need to do nothing!");
     }
 
     WriteFile();
