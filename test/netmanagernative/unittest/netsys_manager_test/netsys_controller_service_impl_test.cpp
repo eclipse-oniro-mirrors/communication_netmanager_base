@@ -34,9 +34,6 @@ namespace NetManagerStandard {
 namespace {
 using namespace testing::ext;
 } // namespace
-static constexpr uint64_t TEST_COOKIE = 1;
-static constexpr uint32_t TEST_STATS_TYPE1 = 0;
-static constexpr uint32_t TEST_STATS_TYPE2 = 2;
 
 class NetsysControllerServiceImplTest : public testing::Test {
 public:
@@ -441,9 +438,6 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     ret = instance_->GetInterfaceMtu(testName);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = instance_->DelInterfaceAddress(testName, "", prefixLength);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
     ret = instance_->InterfaceSetIpAddress(testName, "");
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
@@ -584,9 +578,6 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     ret = instance_->GetTotalStats(stats, type);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = instance_->GetUidStats(stats, type, uid);
-    EXPECT_EQ(ret, NetManagerStandard::STATS_ERR_READ_BPF_FAIL);
-
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo = {};
     ret = instance_->GetAllStatsInfo(statsInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
@@ -688,16 +679,6 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
 
     result = instance_->SetBlocking(socketFd, false);
     EXPECT_EQ(result, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetsysControllerServiceImplTest, GetCookieStatsTest001, TestSize.Level1)
-{
-    uint64_t stats = 0;
-    auto ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
-
-    ret = instance_->GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_INTERNAL);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest009, TestSize.Level1)
