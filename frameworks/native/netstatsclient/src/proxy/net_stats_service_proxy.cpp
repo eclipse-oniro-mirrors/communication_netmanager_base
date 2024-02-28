@@ -200,7 +200,7 @@ int32_t NetStatsServiceProxy::GetAllRxBytes(uint64_t &stats)
     MessageParcel reply;
     int32_t error =
         SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_RXBYTES), data, reply);
-    if (error != 0 && error != STATS_ERR_GET_IFACE_NAME_FAILED) {
+    if (error != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
         return error;
     }
