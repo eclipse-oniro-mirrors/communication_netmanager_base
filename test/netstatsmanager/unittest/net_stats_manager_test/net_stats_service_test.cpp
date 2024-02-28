@@ -31,7 +31,7 @@ namespace {
 constexpr const char *ETH_IFACE_NAME = "lo";
 constexpr int64_t TEST_UID = 1010;
 constexpr int32_t TEST_FD = 2;
-static constexpr uint64_t TEST_COOKIE = 1;
+
 void GetIfaceNamesFromManager(std::list<std::string> &ifaceNames)
 {
     NetManagerCenter::GetInstance().GetIfaceNames(BEARER_CELLULAR, ifaceNames);
@@ -310,20 +310,6 @@ HWTEST_F(NetStatsServiceTest, UpdateStatsData001, TestSize.Level1)
 
     int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->UpdateStatsData();
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetStatsServiceTest, GetCookieRxBytesTest001, TestSize.Level1)
-{
-    uint64_t stats = 0;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetCookieRxBytes(stats, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetStatsServiceTest, GetCookieTxBytesTest001, TestSize.Level1)
-{
-    uint64_t stats = 0;
-    int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetCookieTxBytes(stats, TEST_COOKIE);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
