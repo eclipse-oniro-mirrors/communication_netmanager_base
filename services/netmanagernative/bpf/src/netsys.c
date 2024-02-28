@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,10 +100,7 @@ int socket_iface_stats(struct __sk_buff *skb)
 SEC("cgroup_skb/uid/ingress")
 int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
 {
-    if (skb == NULL) {
-        return 1;
-    }
-    if (skb->pkt_type == PACKET_LOOPBACK) {
+    if (skb == NULL || skb->pkt_type == PACKET_LOOPBACK) {
         return 1;
     }
     uint64_t sock_uid = bpf_get_socket_uid(skb);
@@ -145,10 +142,7 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
 SEC("cgroup_skb/uid/egress")
 int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
 {
-    if (skb == NULL) {
-        return 1;
-    }
-    if (skb->pkt_type == PACKET_LOOPBACK) {
+    if (skb == NULL || skb->pkt_type == PACKET_LOOPBACK) {
         return 1;
     }
     uint64_t sock_uid = bpf_get_socket_uid(skb);
