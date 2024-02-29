@@ -121,11 +121,21 @@ bool NetPolicyFileEventHandler::DeleteBak()
     struct stat buffer;
     if (stat(POLICY_FILE_BAK_NAME, &buffer) == 0) {
         int32_t err = remove(POLICY_FILE_BAK_NAME);
-        sync();
         if (err != 0) {
             NETMGR_LOG_E("remove file error.");
             return false;
         }
+        int fd = open(POLICY_FILE_BAK_PATH, O_RDONLY);
+        if (fd == -1) {
+            NETMGR_LOG_E("open the file path failed.");
+            return false;
+        }
+        if (fsync(fd) != 0) {
+            NETMGR_LOG_E("fsync the file path failed.");
+            close(fd);
+            return false;
+        }
+        close(fd);
     }
     return true;
 }
