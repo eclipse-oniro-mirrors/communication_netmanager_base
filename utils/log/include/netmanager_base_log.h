@@ -27,7 +27,6 @@
 
 #undef LOG_TAG
 #define LOG_TAG "NETMANAGER_BASE-1"
-
 #undef LOG_DOMAIN
 #define LOG_DOMAIN 0xD0015B0
 
