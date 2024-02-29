@@ -1,0 +1,2 @@
+src:*src/netsys_client.c
+src:*src/netsys_tcp_client.c
