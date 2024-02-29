@@ -78,7 +78,7 @@ static void NetManagerStandardPrintLog(const char *fmt, ...)
 }
 
 #define NETMANAGER_BASE_HILOG_PRINT(Level, fmt, ...) \
-    NetManagerStandardPrintLog("NETMANAGER_EXT %s [%s %d] " fmt, #Level, MAKE_FILE_NAME, __LINE__, ##__VA_ARGS__)
+    NetManagerStandardPrintLog("NETMANAGER_BASE %s [%s %d] " fmt, #Level, MAKE_FILE_NAME, __LINE__, ##__VA_ARGS__)
 
 #define NETMANAGER_BASE_LOGE(fmt, ...) NETMANAGER_BASE_HILOG_PRINT(Error, fmt, ##__VA_ARGS__)
 
