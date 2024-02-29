@@ -21,6 +21,7 @@ ohos_shared_library("netsys_client") {
     boundary_sanitize = true
     all_ubsan = true
     debug = false
+    blocklist = "cfi_blocklist.txt"
   }
 
   sources = [
