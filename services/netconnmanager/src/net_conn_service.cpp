@@ -549,7 +549,7 @@ void NetConnService::DecreaseNetConnCallbackCntForUid(const uint32_t callingUid)
 int32_t NetConnService::RegUnRegNetDetectionCallbackAsync(int32_t netId, const sptr<INetDetectionCallback> &callback,
                                                           bool isReg)
 {
-    NETMGR_LOG_D("Enter NetConnService::RegUnRegNetDetectionCallback");
+    NETMGR_LOG_I("Enter Async");
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter of callback is null");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;

@@ -388,7 +388,7 @@ void Network::UpdateTcpBufferSize(const NetLinkInfo &netLinkInfo)
 
 void Network::RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback)
 {
-    NETMGR_LOG_D("Enter RegisterNetDetectionCallback");
+    NETMGR_LOG_I("Enter RNDCB");
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter callback is null");
         return;
@@ -406,7 +406,7 @@ void Network::RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &ca
 
 int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback)
 {
-    NETMGR_LOG_D("Enter UnRegisterNetDetectionCallback");
+    NETMGR_LOG_I("Enter URNDCB");
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter of callback is null");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
@@ -492,7 +492,7 @@ void Network::InitNetMonitor()
 
 void Network::HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect)
 {
-    NETMGR_LOG_D("HandleNetMonitorResult, netDetectionState[%{public}d]", netDetectionState);
+    NETMGR_LOG_I("HNMR, [%{public}d]", netDetectionState);
     isDetectingForDns_ = false;
     NotifyNetDetectionResult(NetDetectionResultConvert(static_cast<int32_t>(netDetectionState)), urlRedirect);
     if (netCallback_ && (detectResult_ != netDetectionState)) {
