@@ -585,7 +585,7 @@ void Network::SendConnectionChangedBroadcast(const NetConnState &netConnState) c
     info.action = EventFwk::CommonEventSupport::COMMON_EVENT_CONNECTIVITY_CHANGE;
     info.data = "Net Manager Connection State Changed";
     info.code = static_cast<int32_t>(netConnState);
-    info.ordered = true;
+    info.ordered = false;
     std::map<std::string, int32_t> param = {{"NetType", static_cast<int32_t>(netSupplierType_)}};
     BroadcastManager::GetInstance().SendBroadcast(info, param);
 }
