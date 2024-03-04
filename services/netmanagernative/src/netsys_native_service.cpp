@@ -766,7 +766,7 @@ int32_t NetsysNativeService::UpdateNetworkSharingType(uint32_t type, bool isOpen
     if (isOpen) {
         sharingTypeIsOn_.insert(type);
     } else {
-        sharingTypeIsOn_.erase(std::find(sharingTypeIsOn_.begin(), sharingTypeIsOn_.end(), type));
+        sharingTypeIsOn_.erase(type);
     }
     return NETSYS_SUCCESS;
 }
