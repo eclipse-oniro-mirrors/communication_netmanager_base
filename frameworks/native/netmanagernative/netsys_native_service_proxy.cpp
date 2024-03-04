@@ -2180,7 +2180,6 @@ int32_t NetsysNativeServiceProxy::GetNetworkSharingType(std::set<uint32_t>& shar
         NETNATIVE_LOGE("get ret falil");
         return ERR_FLATTEN_OBJECT;
     }
-    NETNATIVE_LOGI("sharing type count = [%{public}d]", count);
     uint32_t tmp = ERR_NONE;
     for (size_t index = 0; index < count; ++index) {
         if (!reply.ReadUint32(tmp)) {
@@ -2188,7 +2187,6 @@ int32_t NetsysNativeServiceProxy::GetNetworkSharingType(std::set<uint32_t>& shar
             return ERR_FLATTEN_OBJECT;
         }
         sharingTypeIsOn.insert(tmp);
-        NETNATIVE_LOGI(" sharing type is [%{public}d]", tmp);
     }
 
     return ret;
