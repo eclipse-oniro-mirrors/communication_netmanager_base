@@ -26,6 +26,9 @@
 #define protected public
 #endif
 
+#include "bpf_def.h"
+#include "bpf_mapper.h"
+#include "bpf_path.h"
 #include "common_net_diag_callback_test.h"
 #include "common_netsys_controller_callback_test.h"
 #include "net_conn_constants.h"
@@ -989,6 +992,7 @@ HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest002, TestSize.Level1)
 HWTEST_F(NetsysControllerTest, GetCookieStatsTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
+    BpfMapper<socket_cookie_stats_key, app_cookie_stats_value> appCookieStatsMap(APP_COOKIE_STATS_MAP_PATH, BPF_ANY);
     int32_t ret = NetsysController::GetInstance().GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
