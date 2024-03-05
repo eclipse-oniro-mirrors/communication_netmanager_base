@@ -34,7 +34,7 @@ constexpr const char *TEST_DOMAIN6 = "test.co.uk";
 constexpr const char *TEST_DOMAIN7 = "test.com.com";
 constexpr const char *TEST_DOMAIN8 = "test1.test2.test3.test4.test5.com";
 
-const std::string TEST_DOMAIN9= "www.test.com";
+const std::string TEST_DOMAIN9 = "www.test.com";
 const std::string TEST_DOMAIN10 = "*";
 const std::string TEST_DOMAIN11 = "";
 const std::string TEST_DOMAIN12 = "*.test.*";
