@@ -33,6 +33,13 @@ constexpr const char *TEST_DOMAIN5 = "com.test";
 constexpr const char *TEST_DOMAIN6 = "test.co.uk";
 constexpr const char *TEST_DOMAIN7 = "test.com.com";
 constexpr const char *TEST_DOMAIN8 = "test1.test2.test3.test4.test5.com";
+
+const std::string TEST_DOMAIN9= "www.test.com";
+const std::string TEST_DOMAIN10 = "*";
+const std::string TEST_DOMAIN11 = "";
+const std::string TEST_DOMAIN12 = "*.test.*";
+const std::string TEST_DOMAIN13 = "*.test./{*";
+
 constexpr uint32_t ADDREDD_LEN = 16;
 constexpr int32_t BIT_32 = 32;
 constexpr int32_t BIT_24 = 24;
@@ -579,37 +586,37 @@ HWTEST_F(UtNetmanagerBaseCommon, Trim, TestSize.Level2)
 
 HWTEST_F(UtNetmanagerBaseCommon, UrlRegexParse001, TestSize.Level2)
 {
-    bool isMatch = CommonUtils::UrlRegexParse("www.huawei.com", "*");
+    bool isMatch = CommonUtils::UrlRegexParse(TEST_DOMAIN9, TEST_DOMAIN10);
     EXPECT_EQ(isMatch, true);
 }
 
 HWTEST_F(UtNetmanagerBaseCommon, UrlRegexParse002, TestSize.Level2)
 {
-    bool isMatch = CommonUtils::UrlRegexParse("www.huawei.com", "");
+    bool isMatch = CommonUtils::UrlRegexParse(TEST_DOMAIN9, TEST_DOMAIN11);
     EXPECT_EQ(isMatch, false);
 }
 
 HWTEST_F(UtNetmanagerBaseCommon, UrlRegexParse003, TestSize.Level2)
 {
-    bool isMatch = CommonUtils::UrlRegexParse("www.huawei.com", "*.huawei.*");
+    bool isMatch = CommonUtils::UrlRegexParse(TEST_DOMAIN9, TEST_DOMAIN12);
     EXPECT_EQ(isMatch, true);
 }
 
 HWTEST_F(UtNetmanagerBaseCommon, UrlRegexParse004, TestSize.Level2)
 {
-    bool isMatch = CommonUtils::UrlRegexParse("www.huawei.com", "www.huawei.com");
+    bool isMatch = CommonUtils::UrlRegexParse(TEST_DOMAIN9, TEST_DOMAIN9);
     EXPECT_EQ(isMatch, true);
 }
 
 HWTEST_F(UtNetmanagerBaseCommon, IsUrlRegexValid001, TestSize.Level2)
 {
-    bool isValid = CommonUtils::IsUrlRegexValid("*.huawei.*");
+    bool isValid = CommonUtils::IsUrlRegexValid(TEST_DOMAIN12);
     EXPECT_EQ(isValid, true);
 }
 
 HWTEST_F(UtNetmanagerBaseCommon, IsUrlRegexValid002, TestSize.Level2)
 {
-    bool isValid = CommonUtils::IsUrlRegexValid("*.huawei./{*");
+    bool isValid = CommonUtils::IsUrlRegexValid(TEST_DOMAIN13);
     EXPECT_EQ(isValid, false);
 }
 } // namespace NetManagerStandard
