@@ -23,6 +23,8 @@ ohos_shared_library("netsys_client") {
     debug = false
   }
 
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "src/netsys_client.c",
     "src/netsys_tcp_client.c",

@@ -54,6 +54,8 @@ ohos_shared_library("net_manager_common") {
     debug = false
   }
 
+  branch_protector_ret = "pac_ret"
+
   sources = [
     "common_utils/src/base64_utils.cpp",
     "common_utils/src/event_report.cpp",
