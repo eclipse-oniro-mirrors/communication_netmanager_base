@@ -569,5 +569,48 @@ HWTEST_F(UtNetmanagerBaseCommon, StrToUint64Test008, TestSize.Level1)
     result = CommonUtils::StrToUint64(value, defaultErr);
     EXPECT_EQ(result, value2);
 }
+
+HWTEST_F(UtNetmanagerBaseCommon, Trim, TestSize.Level2)
+{
+    std::string str = "    trim   ";
+    std::string strResult = CommonUtils::Trim(str);
+    EXPECT_STREQ(strResult.c_str(), "trim");
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, UrlRegexParse001, TestSize.Level2)
+{
+    bool isMatch = CommonUtils::UrlRegexParse("www.huawei.com", "*");
+    EXPECT_EQ(isMatch, true);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, UrlRegexParse002, TestSize.Level2)
+{
+    bool isMatch = CommonUtils::UrlRegexParse("www.huawei.com", "");
+    EXPECT_EQ(isMatch, false);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, UrlRegexParse003, TestSize.Level2)
+{
+    bool isMatch = CommonUtils::UrlRegexParse("www.huawei.com", "*.huawei.*");
+    EXPECT_EQ(isMatch, true);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, UrlRegexParse004, TestSize.Level2)
+{
+    bool isMatch = CommonUtils::UrlRegexParse("www.huawei.com", "www.huawei.com");
+    EXPECT_EQ(isMatch, true);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsUrlRegexValid001, TestSize.Level2)
+{
+    bool isValid = CommonUtils::IsUrlRegexValid("*.huawei.*");
+    EXPECT_EQ(isValid, true);
+}
+
+HWTEST_F(UtNetmanagerBaseCommon, IsUrlRegexValid002, TestSize.Level2)
+{
+    bool isValid = CommonUtils::IsUrlRegexValid("*.huawei./{*");
+    EXPECT_EQ(isValid, false);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

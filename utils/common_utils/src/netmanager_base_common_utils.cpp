@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <netinet/in.h>
 #include <regex>
+#include <sstream>
 #include <set>
 #include <string>
 #include <sys/socket.h>
@@ -631,5 +632,57 @@ bool HasInternetPermission()
         close(testSock);
     }
     return true;
+}
+
+std::string Trim(const std::string &str)
+{
+    size_t start = str.find_first_not_of(" \t\n\r");
+    size_t end = str.find_last_not_of(" \t\n\r");
+    if (start == std::string::npos || end == std::string::npos) {
+        return "";
+    }
+    return str.substr(start, end - start + 1);
+}
+
+bool IsUrlRegexValid(const std::string &regex)
+{
+    if (Trim(regex).empty()) {
+        return false;
+    }
+    return regex_match(regex, std::regex("^[a-zA-Z0-9\\-_\\.*]+$"));
+}
+
+std::string InsertCharBefore(const std::string &input, const char from, const char preChar, const char nextChar)
+{
+    std::ostringstream output;
+    for (size_t i = 0; i < input.size(); ++i) {
+        if (input[i] == from && (i == input.size() - 1 || input[i + 1] != nextChar)) {
+            output << preChar;
+        }
+        output << input[i];
+    }
+    return output.str();
+}
+
+std::string ReplaceCharacters(const std::string &input)
+{
+    std::string output = InsertCharBefore(input, '*', '.', '\0');
+    output = InsertCharBefore(output, '.', '\\', '*');
+    return output;
+}
+
+bool UrlRegexParse(const std::string &str, const std::string &patternStr)
+{
+    if (patternStr.empty()) {
+        return false;
+    }
+    if (patternStr == "*") {
+        return true;
+    }
+    if (!IsUrlRegexValid(patternStr)) {
+        return patternStr == str;
+    }
+    std::regex pattern(ReplaceCharacters(patternStr));
+    return !patternStr.empty() && std::regex_match(str, pattern);
 }
 } // namespace OHOS::NetManagerStandard::CommonUtils
