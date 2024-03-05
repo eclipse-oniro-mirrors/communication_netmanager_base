@@ -20,11 +20,14 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <dlfcn.h>
+#include <regex>
+#include <sstream>
 #include <securec.h>
 
 #include "openssl/evp.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_manager_constants.h"
+#include "netmanager_base_common_utils.h"
 #include "net_bundle.h"
 
 namespace OHOS {
@@ -44,7 +47,7 @@ const std::string TAG_PIN("pin");
 const std::string TAG_DIGEST_ALGORITHM("digest-algorithm");
 const std::string TAG_DIGEST("digest");
 
-const std::string REHASHD_CA_CERTS_DIR("/data/storage/el2/base/haps/entry/files/rehashed_ca_certs");
+const std::string REHASHD_CA_CERTS_DIR("/data/storage/el2/base/files/rehashed_ca_certs");
 #ifdef WINDOWS_PLATFORM
 const char OS_PATH_SEPARATOR = '\\';
 #else
@@ -57,20 +60,7 @@ const std::string LIB_LOAD_PATH = "/system/lib64/libnet_bundle_utils.z.so";
 const std::string LIB_LOAD_PATH = "/system/lib/libnet_bundle_utils.z.so";
 #endif
 
-using GetNetBundleClass = INetBundle* (*)();
-
-bool Endswith(const std::string &str, const std::string &suffix)
-{
-    if (str.length() < suffix.length()) {
-        return false;
-    }
-
-    if (str.rfind(suffix) == (str.length() - suffix.length())) {
-        return true;
-    }
-
-    return false;
-}
+using GetNetBundleClass = INetBundle *(*)();
 
 NetworkSecurityConfig::NetworkSecurityConfig()
 {
@@ -83,7 +73,7 @@ NetworkSecurityConfig::NetworkSecurityConfig()
 
 NetworkSecurityConfig::~NetworkSecurityConfig() {}
 
-NetworkSecurityConfig& NetworkSecurityConfig::GetInstance()
+NetworkSecurityConfig &NetworkSecurityConfig::GetInstance()
 {
     static NetworkSecurityConfig gInstance;
     return gInstance;
@@ -97,7 +87,7 @@ bool NetworkSecurityConfig::IsCACertFileName(const char *fileName)
         str = ext + 1;
     }
 
-    for (auto &c: str) {
+    for (auto &c : str) {
         c = tolower(c);
     }
 
@@ -128,11 +118,11 @@ void NetworkSecurityConfig::GetCAFilesFromPath(const std::string caPath, std::ve
     closedir(dir);
 }
 
-void NetworkSecurityConfig::AddSurfixToCACertFileName(const std::string &caPath,
-    std::set<std::string> &allFileNames, std::string &caFile)
+void NetworkSecurityConfig::AddSurfixToCACertFileName(const std::string &caPath, std::set<std::string> &allFileNames,
+                                                      std::string &caFile)
 {
     uint32_t count = 0;
-    for (auto &fileName: allFileNames) {
+    for (auto &fileName : allFileNames) {
         if (fileName.find(caFile) != std::string::npos) {
             count++;
         }
@@ -172,8 +162,8 @@ X509 *NetworkSecurityConfig::ReadCertFile(const std::string &fileName)
 std::string NetworkSecurityConfig::GetRehashedCADirName(const std::string &caPath)
 {
     unsigned char hashedHex[EVP_MAX_MD_SIZE];
-    auto ret = EVP_Digest(reinterpret_cast<const unsigned char *>(caPath.c_str()), caPath.size(),
-                          hashedHex, nullptr, EVP_sha256(), nullptr);
+    auto ret = EVP_Digest(reinterpret_cast<const unsigned char *>(caPath.c_str()), caPath.size(), hashedHex, nullptr,
+                          EVP_sha256(), nullptr);
     if (ret != 1) {
         return "";
     }
@@ -254,7 +244,7 @@ std::string NetworkSecurityConfig::ReHashCAPathForX509(const std::string &caPath
         return rehashedCertpath;
     }
 
-    for (auto &caFile: caFiles) {
+    for (auto &caFile : caFiles) {
         auto x509 = ReadCertFile(caFile);
         if (x509 == nullptr) {
             continue;
@@ -292,11 +282,11 @@ std::string NetworkSecurityConfig::ReHashCAPathForX509(const std::string &caPath
 
 int32_t NetworkSecurityConfig::CreateRehashedCertFiles()
 {
-    for (auto &cert: baseConfig_.trustAnchors_.certs_) {
-            ReHashCAPathForX509(cert);
-        }
-    for (auto &domainConfig: domainConfigs_) {
-        for (auto &cert: domainConfig.trustAnchors_.certs_) {
+    for (auto &cert : baseConfig_.trustAnchors_.certs_) {
+        ReHashCAPathForX509(cert);
+    }
+    for (auto &domainConfig : domainConfigs_) {
+        for (auto &cert : domainConfig.trustAnchors_.certs_) {
             ReHashCAPathForX509(cert);
         }
     }
@@ -433,10 +423,8 @@ void NetworkSecurityConfig::ParseJsonPinSet(const Json::Value &root, PinSet &pin
     auto pinRoot = root[TAG_PIN.c_str()];
     auto size = pinRoot.size();
     for (uint32_t i = 0; i < size; i++) {
-        if (pinRoot[i].isMember(TAG_DIGEST_ALGORITHM.c_str()) &&
-            pinRoot[i][TAG_DIGEST_ALGORITHM.c_str()].isString() &&
-            pinRoot[i].isMember(TAG_DIGEST.c_str()) &&
-            pinRoot[i][TAG_DIGEST.c_str()].isString()) {
+        if (pinRoot[i].isMember(TAG_DIGEST_ALGORITHM.c_str()) && pinRoot[i][TAG_DIGEST_ALGORITHM.c_str()].isString() &&
+            pinRoot[i].isMember(TAG_DIGEST.c_str()) && pinRoot[i][TAG_DIGEST.c_str()].isString()) {
             Pin pin;
             pin.digestAlgorithm_ = pinRoot[i][TAG_DIGEST_ALGORITHM.c_str()].asString();
             pin.digest_ = pinRoot[i][TAG_DIGEST.c_str()].asString();
@@ -510,12 +498,12 @@ int32_t NetworkSecurityConfig::GetPinSetForHostName(const std::string &hostname,
     }
 
     PinSet *pPinSet = nullptr;
-    for (auto &domainConfig: domainConfigs_) {
-        for (const auto &domain: domainConfig.domains_) {
+    for (auto &domainConfig : domainConfigs_) {
+        for (const auto &domain : domainConfig.domains_) {
             if (hostname == domain.domainName_) {
                 pPinSet = &domainConfig.pinSet_;
                 break;
-            } else if (domain.includeSubDomains_ && Endswith(hostname, domain.domainName_)) {
+            } else if (domain.includeSubDomains_ && CommonUtils::UrlRegexParse(hostname, domain.domainName_)) {
                 pPinSet = &domainConfig.pinSet_;
                 break;
             }
@@ -535,7 +523,7 @@ int32_t NetworkSecurityConfig::GetPinSetForHostName(const std::string &hostname,
     }
 
     std::stringstream ss;
-    for (const auto &pin: pPinSet->pins_) {
+    for (const auto &pin : pPinSet->pins_) {
         NETMGR_LOG_D("Got pinnned pubkey %{public}s", pin.digest_.c_str());
         ss << pin.digestAlgorithm_ << "//" << pin.digest_ << ";";
     }
@@ -561,7 +549,7 @@ int32_t NetworkSecurityConfig::GetTrustAnchorsForHostName(const std::string &hos
             if (hostname == domain.domainName_) {
                 pTrustAnchors = &domainConfig.trustAnchors_;
                 break;
-            } else if (domain.includeSubDomains_ && Endswith(hostname, domain.domainName_)) {
+            } else if (domain.includeSubDomains_ && CommonUtils::UrlRegexParse(hostname, domain.domainName_)) {
                 pTrustAnchors = &domainConfig.trustAnchors_;
                 break;
             }
@@ -575,7 +563,7 @@ int32_t NetworkSecurityConfig::GetTrustAnchorsForHostName(const std::string &hos
         pTrustAnchors = &baseConfig_.trustAnchors_;
     }
 
-    for (auto &certPath: pTrustAnchors->certs_) {
+    for (auto &certPath : pTrustAnchors->certs_) {
         auto rehashedCertpath = GetRehasedCAPath(certPath);
         if (!rehashedCertpath.empty()) {
             certs.push_back(rehashedCertpath);
@@ -593,29 +581,28 @@ int32_t NetworkSecurityConfig::GetTrustAnchorsForHostName(const std::string &hos
 void NetworkSecurityConfig::DumpConfigs()
 {
     NETMGR_LOG_I("DumpConfigs:baseConfig_.trustAnchors_.certs");
-    for (auto &cert: baseConfig_.trustAnchors_.certs_) {
+    for (auto &cert : baseConfig_.trustAnchors_.certs_) {
         NETMGR_LOG_I("[%{public}s]", cert.c_str());
     }
 
     NETMGR_LOG_I("DumpConfigs:domainConfigs_");
-    for (auto &domainConfig: domainConfigs_) {
+    for (auto &domainConfig : domainConfigs_) {
         NETMGR_LOG_I("=======================");
-        for (auto &domain: domainConfig.domains_) {
-            NETMGR_LOG_I("domainConfigs_.domains_[%{public}s][%{public}s]",
-                         domain.domainName_.c_str(),
+        for (auto &domain : domainConfig.domains_) {
+            NETMGR_LOG_I("domainConfigs_.domains_[%{public}s][%{public}s]", domain.domainName_.c_str(),
                          domain.includeSubDomains_ ? "include_subDomain" : "not_include_subDomain");
         }
         NETMGR_LOG_I("domainConfigs_.domains_.pinSet_.expiration_[%{public}s]",
                      domainConfig.pinSet_.expiration_.c_str());
-        for (auto &pin: domainConfig.pinSet_.pins_) {
-            NETMGR_LOG_I("domainConfigs_.domains_.pinSet_.pins[%{public}s][%{public}s]",
-                         pin.digestAlgorithm_.c_str(), pin.digest_.c_str());
+        for (auto &pin : domainConfig.pinSet_.pins_) {
+            NETMGR_LOG_I("domainConfigs_.domains_.pinSet_.pins[%{public}s][%{public}s]", pin.digestAlgorithm_.c_str(),
+                         pin.digest_.c_str());
         }
-        for (auto &cert: domainConfig.trustAnchors_.certs_) {
+        for (auto &cert : domainConfig.trustAnchors_.certs_) {
             NETMGR_LOG_I("domainConfigs_.domains_.trustAnchors_.certs_[%{public}s]", cert.c_str());
         }
     }
 }
 
-}
-}
+} // namespace NetManagerStandard
+} // namespace OHOS
