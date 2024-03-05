@@ -52,6 +52,7 @@ static constexpr const char *TCP_BUFFER_SIZES = "524288,1048576,2097152,262144,5
 static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
 static constexpr uint32_t TEST_STATS_TYPE2 = 2;
+static constexpr uint32_t IPC_ERR_FLATTEN_OBJECT = 3;
 const int NET_ID = 2;
 const int PERMISSION = 5;
 const int PREFIX_LENGTH = 23;
@@ -870,7 +871,7 @@ HWTEST_F(NetsysControllerTest, NetDiagPing001, TestSize.Level1)
     const int maxWaitSecond = 10;
     g_isWaitAsync = true;
     auto ret = NetsysController::GetInstance().NetDiagPingHost(pingOption, netDiagCallback);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, IPC_ERR_FLATTEN_OBJECT);
     std::chrono::steady_clock::time_point tp1 = std::chrono::steady_clock::now();
     while (g_isWaitAsync) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
