@@ -390,6 +390,10 @@ int32_t NetStatsServiceStub::OnResetFactory(MessageParcel &data, MessageParcel &
 
 int32_t NetStatsServiceStub::OnGetAllStatsInfo(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t ret = CheckNetManagerAvailable(reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
     std::vector<NetStatsInfo> infos;
     int32_t result = GetAllStatsInfo(infos);
     if (!reply.WriteInt32(result)) {
