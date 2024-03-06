@@ -867,8 +867,8 @@ private:
     uint32_t dnsReportTimeStep = 500;
     sptr<OHOS::NetsysNative::INetsysService> netsysNativeService_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
-    std::vector<sptr<NetsysControllerCallback>> cbObjects_;
-    std::vector<sptr<NetsysDnsReportCallback>> cbDnsReportObjects_;
+    std::list<sptr<NetsysControllerCallback>> cbObjects_;
+    std::list<sptr<NetsysDnsReportCallback>> cbDnsReportObjects_;
     std::mutex mutex_;
     std::mutex cbObjMutex_;
     std::mutex cbDnsReportObjMutex_;
