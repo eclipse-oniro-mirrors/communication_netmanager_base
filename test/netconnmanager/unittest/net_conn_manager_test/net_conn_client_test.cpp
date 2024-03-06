@@ -1153,10 +1153,12 @@ HWTEST_F(NetConnClientTest, SetInternetPermissionTest001, TestSize.Level1)
     NetManagerBaseAccessToken token;
     int32_t uid = 0;
     uint8_t allow = 0;
+    NetConnClient::GetInstance().netPermissionMap_.EnsureInsert(0, 0);
     auto ret = NetConnClient::GetInstance().SetInternetPermission(uid, allow);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     EXPECT_EQ(NetConnClient::GetInstance().netPermissionMap_.Size(), 1);
 
+    NetManagerBaseAccessToken access;
     ret = NetConnClient::GetInstance().SetInternetPermission(uid, allow);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     EXPECT_EQ(NetConnClient::GetInstance().netPermissionMap_.Size(), 1);

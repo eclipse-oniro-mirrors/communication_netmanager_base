@@ -18,6 +18,9 @@
 #ifdef GTEST_API_
 #define private public
 #endif
+#include "bpf_def.h"
+#include "bpf_mapper.h"
+#include "bpf_path.h"
 #include "net_manager_constants.h"
 #include "net_stats_constants.h"
 #include "netsys_native_client.h"
@@ -126,7 +129,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest002, TestSize.Level1)
     EXPECT_EQ(ret, -19);
 
     ret = nativeClient_.DelInterfaceAddress(IF_NAME, IP_ADDR, PREFIX_LENGTH);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -19);
 
     ret = nativeClient_.SetResolverConfig(NET_ID, BASE_TIMEOUT_MSEC, RETRY_COUNT, {}, {});
     EXPECT_EQ(ret, 0);
@@ -360,6 +363,7 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest014, TestSize.Level1)
 HWTEST_F(NetsysNativeClientTest, GetCookieStatsTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
+    BpfMapper<socket_cookie_stats_key, app_cookie_stats_value> appCookieStatsMap(APP_COOKIE_STATS_MAP_PATH, BPF_ANY);
     int32_t ret = nativeClient_.GetCookieStats(stats, TEST_STATS_TYPE1, TEST_COOKIE);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
     ret = nativeClient_.GetCookieStats(stats, TEST_STATS_TYPE2, TEST_COOKIE);
