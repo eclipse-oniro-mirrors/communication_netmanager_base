@@ -58,8 +58,13 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressUpdated(cons
                                                                             int scope)
 {
     std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto &cb : netsysNativeClient_.cbObjects_) {
-        cb->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
+    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient_.cbObjects_.erase(cb);
+        } else {
+            (*cb)->OnInterfaceAddressUpdated(addr, ifName, flags, scope);
+            ++cb;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -69,8 +74,13 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(cons
                                                                             int scope)
 {
     std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto &cb : netsysNativeClient_.cbObjects_) {
-        cb->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
+    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient_.cbObjects_.erase(cb);
+        } else {
+            (*cb)->OnInterfaceAddressRemoved(addr, ifName, flags, scope);
+            ++cb;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -78,8 +88,13 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAddressRemoved(cons
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::string &ifName)
 {
     std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto &cb : netsysNativeClient_.cbObjects_) {
-        cb->OnInterfaceAdded(ifName);
+    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient_.cbObjects_.erase(cb);
+        } else {
+            (*cb)->OnInterfaceAdded(ifName);
+            ++cb;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -87,8 +102,13 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceAdded(const std::st
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::string &ifName)
 {
     std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto &cb : netsysNativeClient_.cbObjects_) {
-        cb->OnInterfaceRemoved(ifName);
+    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient_.cbObjects_.erase(cb);
+        } else {
+            (*cb)->OnInterfaceRemoved(ifName);
+            ++cb;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -96,8 +116,13 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceRemoved(const std::
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::string &ifName, bool up)
 {
     std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto &cb : netsysNativeClient_.cbObjects_) {
-        cb->OnInterfaceChanged(ifName, up);
+    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient_.cbObjects_.erase(cb);
+        } else {
+            (*cb)->OnInterfaceChanged(ifName, up);
+            ++cb;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -105,8 +130,13 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceChanged(const std::
 int32_t NetsysNativeClient::NativeNotifyCallback::OnInterfaceLinkStateChanged(const std::string &ifName, bool up)
 {
     std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto &cb : netsysNativeClient_.cbObjects_) {
-        cb->OnInterfaceLinkStateChanged(ifName, up);
+    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient_.cbObjects_.erase(cb);
+        } else {
+            (*cb)->OnInterfaceLinkStateChanged(ifName, up);
+            ++cb;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -115,8 +145,13 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnRouteChanged(bool updated, c
                                                                  const std::string &gateway, const std::string &ifName)
 {
     std::lock_guard lock(netsysNativeClient_.cbObjMutex_);
-    for (auto &cb : netsysNativeClient_.cbObjects_) {
-        cb->OnRouteChanged(updated, route, gateway, ifName);
+    for (auto cb = netsysNativeClient_.cbObjects_.begin(); cb != netsysNativeClient_.cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient_.cbObjects_.erase(cb);
+        } else {
+            (*cb)->OnRouteChanged(updated, route, gateway, ifName);
+            ++cb;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -145,8 +180,14 @@ int32_t NetsysNativeClient::NativeNetDnsResultCallback::OnDnsResultReport(uint32
     std::list<OHOS::NetsysNative::NetDnsResultReport> res)
 {
     std::lock_guard lock(netsysNativeClient_.cbDnsReportObjMutex_);
-    for (auto &cb : netsysNativeClient_.cbDnsReportObjects_) {
-        cb->OnDnsResultReport(size, res);
+    for (auto cb = netsysNativeClient_.cbDnsReportObjects_.begin();
+         cb != netsysNativeClient_.cbDnsReportObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = netsysNativeClient_.cbDnsReportObjects_.erase(cb);
+        } else {
+            (*cb)->OnDnsResultReport(size, res);
+            ++cb;
+        }
     }
     return NETMANAGER_SUCCESS;
 }
@@ -1027,16 +1068,21 @@ void NetsysNativeClient::ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultPa
     NETMGR_LOG_I("NetsysNativeClient::ProcessDhcpResult");
     std::lock_guard lock(cbObjMutex_);
     NetsysControllerCallback::DhcpResult result;
-    for (auto &cbObject : cbObjects_) {
-        result.iface_ = dhcpResult->iface_;
-        result.ipAddr_ = dhcpResult->ipAddr_;
-        result.gateWay_ = dhcpResult->gateWay_;
-        result.subNet_ = dhcpResult->subNet_;
-        result.route1_ = dhcpResult->route1_;
-        result.route2_ = dhcpResult->route2_;
-        result.dns1_ = dhcpResult->dns1_;
-        result.dns2_ = dhcpResult->dns2_;
-        cbObject->OnDhcpSuccess(result);
+    for (auto cb = cbObjects_.begin(); cb != cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = cbObjects_.erase(cb);
+        } else {
+            result.iface_ = dhcpResult->iface_;
+            result.ipAddr_ = dhcpResult->ipAddr_;
+            result.gateWay_ = dhcpResult->gateWay_;
+            result.subNet_ = dhcpResult->subNet_;
+            result.route1_ = dhcpResult->route1_;
+            result.route2_ = dhcpResult->route2_;
+            result.dns1_ = dhcpResult->dns1_;
+            result.dns2_ = dhcpResult->dns2_;
+            (*cb)->OnDhcpSuccess(result);
+            ++cb;
+        }
     }
 }
 
@@ -1067,10 +1113,14 @@ void NetsysNativeClient::ProcessBandwidthReachedLimit(const std::string &limitNa
     NETMGR_LOG_D("NetsysNativeClient ProcessBandwidthReachedLimit, limitName=%{public}s, iface=%{public}s",
                  limitName.c_str(), iface.c_str());
     std::lock_guard lock(cbObjMutex_);
-    std::for_each(cbObjects_.begin(), cbObjects_.end(),
-                  [limitName, iface](const sptr<NetsysControllerCallback> &callback) {
-                      callback->OnBandwidthReachedLimit(limitName, iface);
-                  });
+    for (auto cb = cbObjects_.begin(); cb != cbObjects_.end();) {
+        if (*cb == nullptr) {
+            cb = cbObjects_.erase(cb);
+        } else {
+            (*cb)->OnBandwidthReachedLimit(limitName, iface);
+            ++cb;
+        }
+    }
 }
 
 int32_t NetsysNativeClient::BandwidthEnableDataSaver(bool enable)
@@ -1327,7 +1377,7 @@ int32_t NetsysNativeClient::RegisterDnsResultCallback(
         NETMGR_LOG_E("Callback is nullptr");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    std::lock_guard lock(cbObjMutex_);
+    std::lock_guard lock(cbDnsReportObjMutex_);
     cbDnsReportObjects_.push_back(callback);
     dnsReportTimeStep = timeStep;
     return NETMANAGER_SUCCESS;
@@ -1340,9 +1390,8 @@ int32_t NetsysNativeClient::UnregisterDnsResultCallback(
         NETMGR_LOG_E("Callback is nullptr");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    std::lock_guard lock(cbObjMutex_);
-    cbDnsReportObjects_.erase(
-        std::remove(cbDnsReportObjects_.begin(), cbDnsReportObjects_.end(), callback), cbDnsReportObjects_.end());
+    std::lock_guard lock(cbDnsReportObjMutex_);
+    cbDnsReportObjects_.remove(callback);
     return NETMANAGER_SUCCESS;
 }
 
