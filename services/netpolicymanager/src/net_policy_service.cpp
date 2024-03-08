@@ -45,7 +45,7 @@ NetPolicyService::~NetPolicyService() = default;
 
 void NetPolicyService::OnStart()
 {
-    NETMGR_LOG_I("NetPolicyService OnStart");
+    NETMGR_LOG_I("OnStart");
     if (state_ == STATE_RUNNING) {
         NETMGR_LOG_W("NetPolicyService already start.");
         return;
@@ -93,7 +93,7 @@ int32_t NetPolicyService::Dump(int32_t fd, const std::vector<std::u16string> &ar
 
 void NetPolicyService::Init()
 {
-    NETMGR_LOG_D("NetPolicyService Init");
+    NETMGR_LOG_D("Init");
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
     handler_->PostTask(
         [this]() {
@@ -344,7 +344,7 @@ int32_t NetPolicyService::CheckPermission()
 
 void NetPolicyService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    NETMGR_LOG_I("NetPolicyService::OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    NETMGR_LOG_I("OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
         if (hasSARemoved_) {
             OnNetSysRestart();
@@ -355,7 +355,7 @@ void NetPolicyService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
 
 void NetPolicyService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    NETMGR_LOG_I("NetPolicyService::OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    NETMGR_LOG_I("OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
         hasSARemoved_ = true;
     }
@@ -363,7 +363,7 @@ void NetPolicyService::OnRemoveSystemAbility(int32_t systemAbilityId, const std:
 
 void NetPolicyService::OnNetSysRestart()
 {
-    NETMGR_LOG_I("NetPolicyService::OnNetSysRestart");
+    NETMGR_LOG_I("OnNetSysRestart");
     
     if (netPolicyRule_ != nullptr) {
         netPolicyRule_->TransPolicyToRule();
@@ -385,7 +385,7 @@ int32_t NetPolicyService::FactoryResetPolicies()
 
 void NetPolicyService::RegisterFactoryResetCallback()
 {
-    NETMGR_LOG_I("NetPolicyService RegisterFactetCallback enter.");
+    NETMGR_LOG_I("RegisterFactetCallback enter.");
 
     if (netFactoryResetCallback_ == nullptr) {
         netFactoryResetCallback_ =
@@ -396,7 +396,7 @@ void NetPolicyService::RegisterFactoryResetCallback()
     if (netFactoryResetCallback_ != nullptr) {
         int32_t ret = NetManagerCenter::GetInstance().RegisterNetFactoryResetCallback(netFactoryResetCallback_);
         if (ret != NETMANAGER_SUCCESS) {
-            NETMGR_LOG_E("NetPolicyService RegisterFactoryResetCallback ret[%{public}d]", ret);
+            NETMGR_LOG_E("RegisterFactoryResetCallback ret[%{public}d]", ret);
         }
     } else {
         NETMGR_LOG_E("netFactoryResetCallback_ is null");
