@@ -188,7 +188,7 @@ bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps)
 {
     NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request connect", supplierId_, netSupplierIdent_.c_str());
     if (netSupplierInfo_.isAvailable_) {
-        NETMGR_LOG_W("The supplier is currently available, there is no need to repeat the request for connection.");
+        NETMGR_LOG_D("The supplier is currently available, there is no need to repeat the request for connection.");
         return true;
     }
     UpdateNetConnState(NET_CONN_STATE_IDLE);

@@ -158,7 +158,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnRouteChanged(bool updated, c
 
 int32_t NetsysNativeClient::NativeNotifyCallback::OnDhcpSuccess(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult)
 {
-    NETMGR_LOG_I("NetsysNativeClient::NativeNotifyCallback::OnDhcpSuccess");
+    NETMGR_LOG_I("OnDhcpSuccess");
     netsysNativeClient_.ProcessDhcpResult(dhcpResult);
     return NETMANAGER_SUCCESS;
 }
@@ -166,7 +166,7 @@ int32_t NetsysNativeClient::NativeNotifyCallback::OnDhcpSuccess(sptr<OHOS::Netsy
 int32_t NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit(const std::string &limitName,
                                                                           const std::string &iface)
 {
-    NETMGR_LOG_I("NetsysNativeClient::NativeNotifyCallback::OnBandwidthReachedLimit");
+    NETMGR_LOG_I("OnBandwidthReachedLimit");
     netsysNativeClient_.ProcessBandwidthReachedLimit(limitName, iface);
     return NETMANAGER_SUCCESS;
 }

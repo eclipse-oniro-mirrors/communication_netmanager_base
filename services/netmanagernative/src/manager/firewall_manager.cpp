@@ -74,13 +74,13 @@ inline void FirewallManager::CheckChainInitialization()
 
 std::string FirewallManager::ReadMaxUidConfig()
 {
-    NETNATIVE_LOG_D("FirewallManager::ReadMaxUidConfig");
+    NETNATIVE_LOG_D("ReadMaxUidConfig");
     std::string maxUid;
     std::string content;
 
     std::ifstream file(CONFIG_FILE_PATH);
     if (!file.is_open()) {
-        NETNATIVE_LOGE("FirewallManager::ReadMaxUidConfig fstream failed");
+        NETNATIVE_LOGE("ReadMaxUidConfig fstream failed");
         return std::to_string(DEFAULT_MAX_UID_RANGE);
     }
 

@@ -44,7 +44,7 @@ NotifyCallbackStub::~NotifyCallbackStub() {}
 int32_t NotifyCallbackStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    NETNATIVE_LOGI("Stub call start, code:[%{public}d]", code);
+    NETNATIVE_LOG_D("Stub call start, code:[%{public}d]", code);
     std::u16string myDescripter = NotifyCallbackStub::GetDescriptor();
     std::u16string remoteDescripter = data.ReadInterfaceToken();
     if (myDescripter != remoteDescripter) {

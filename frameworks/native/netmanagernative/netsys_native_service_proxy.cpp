@@ -2155,7 +2155,7 @@ int32_t NetsysNativeServiceProxy::GetCookieStats(uint64_t &stats, uint32_t type,
 
 int32_t NetsysNativeServiceProxy::GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy::GetNetworkSharingType in");
+    NETNATIVE_LOGI("GetNetworkSharingType in");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -2194,7 +2194,7 @@ int32_t NetsysNativeServiceProxy::GetNetworkSharingType(std::set<uint32_t>& shar
 
 int32_t NetsysNativeServiceProxy::UpdateNetworkSharingType(uint32_t type, bool isOpen)
 {
-    NETNATIVE_LOGI("NetsysNativeServiceProxy::UpdateNetworkSharingType");
+    NETNATIVE_LOGI("UpdateNetworkSharingType");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
