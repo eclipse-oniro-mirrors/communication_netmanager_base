@@ -15,69 +15,13 @@
 
 #include <gtest/gtest.h>
 
+#include "common_mock_net_remote_object_test.h"
 #include "notify_callback_proxy.h"
 
 namespace OHOS {
 namespace NetsysNative {
 namespace {
 using namespace testing::ext;
-
-class MockNetIRemoteObject : public IRemoteObject {
-public:
-    MockNetIRemoteObject() : IRemoteObject(u"mock_i_remote_object") {}
-    ~MockNetIRemoteObject() {}
-
-    int32_t GetObjectRefCount() override
-    {
-        return 0;
-    }
-
-    int SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
-    {
-        return 0;
-    }
-
-    bool IsProxyObject() const override
-    {
-        return true;
-    }
-
-    bool CheckObjectLegality() const override
-    {
-        return true;
-    }
-
-    bool AddDeathRecipient(const sptr<DeathRecipient> &recipient) override
-    {
-        return true;
-    }
-
-    bool RemoveDeathRecipient(const sptr<DeathRecipient> &recipient) override
-    {
-        return true;
-    }
-
-    bool Marshalling(Parcel &parcel) const override
-    {
-        return true;
-    }
-
-    sptr<IRemoteBroker> AsInterface() override
-    {
-        return nullptr;
-    }
-
-    int Dump(int fd, const std::vector<std::u16string> &args) override
-    {
-        return 0;
-    }
-
-    std::u16string GetObjectDescriptor() const
-    {
-        std::u16string descriptor = std::u16string();
-        return descriptor;
-    }
-};
 } // namespace
 
 class NotifyCallbackProxyTest : public testing::Test {
@@ -92,7 +36,7 @@ public:
 
 void NotifyCallbackProxyTest::SetUpTestCase()
 {
-    sptr<IRemoteObject> impl = new (std::nothrow) MockNetIRemoteObject();
+    sptr<IRemoteObject> impl = new (std::nothrow) NetManagerStandard::MockNetIRemoteObject();
     notifyProxy = std::make_shared<NotifyCallbackProxy>(impl);
 }
 
@@ -114,7 +58,7 @@ HWTEST_F(NotifyCallbackProxyTest, OnInterfaceAddressUpdated001, TestSize.Level1)
 
 HWTEST_F(NotifyCallbackProxyTest, OnInterfaceAddressRemoved001, TestSize.Level1)
 {
-    sptr<IRemoteObject> impl = new (std::nothrow) MockNetIRemoteObject();
+    sptr<IRemoteObject> impl = new (std::nothrow) NetManagerStandard::MockNetIRemoteObject();
     sptr<NotifyCallbackProxy> notifyProxy = new (std::nothrow) NotifyCallbackProxy(impl);
     std::string addr = "192.161.0.5";
     std::string ifName = "test0";

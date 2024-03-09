@@ -28,6 +28,7 @@
 #include "net_conn_service.h"
 #include "net_conn_service_stub.h"
 #include "net_interface_callback_stub.h"
+#include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -102,6 +103,7 @@ void Init()
 int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
 {
     if (!g_isInited) {
+        NETMGR_LOG_D("Net conn client fuzz test g_isInited is false.");
         Init();
     }
 
@@ -115,6 +117,7 @@ int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
 bool WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        NETMGR_LOG_D("Write token failed.");
         return false;
     }
     return true;
@@ -123,6 +126,7 @@ bool WriteInterfaceToken(MessageParcel &data)
 bool IsConnClientDataAndSizeValid(const uint8_t *data, size_t size, MessageParcel &dataParcel)
 {
     if ((data == nullptr) || (size == 0)) {
+        NETMGR_LOG_D("IsConnClientDataAndSizeValid data is nullptr or size is zero.");
         return false;
     }
     g_baseFuzzData = data;
@@ -248,6 +252,7 @@ void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("UpdateNetSupplierInfoFuzzTest write token failed or invalid parameter.");
         return;
     }
     dataParcel.WriteUint32(supplierId);
@@ -263,6 +268,7 @@ void GetAddressByNameFuzzTest(const uint8_t *data, size_t size)
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("GetAddressByNameFuzzTest write token failed or invalid parameter.");
         return;
     }
     dataParcel.WriteString(host);
@@ -570,6 +576,7 @@ void UpdateNetStateForTestFuzzTest(const uint8_t *data, size_t size)
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("UpdateNetSupplierInfoFuzzTest write token failed or invalid parameter.");
         return;
     }
 
@@ -584,6 +591,7 @@ void GetIfaceNamesFuzzTest(const uint8_t *data, size_t size)
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("GetIfaceNamesFuzzTest write token failed or invalid parameter.");
         return;
     }
 
@@ -599,6 +607,7 @@ void GetIfaceNameByTypeFuzzTest(const uint8_t *data, size_t size)
 
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("GetIfaceNameByTypeFuzzTest write token failed or invalid parameter.");
         return;
     }
 
@@ -696,6 +705,7 @@ void AddNetworkRouteFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("AddNetworkRouteFuzzTest write token failed or invalid parameter.");
         return;
     }
 
@@ -715,6 +725,7 @@ void RemoveNetworkRouteFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("RemoveNetworkRouteFuzzTest write token failed or invalid parameter.");
         return;
     }
 
@@ -734,6 +745,7 @@ void AddInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("AddInterfaceAddressFuzzTest write token failed or invalid parameter.");
         return;
     }
 
@@ -751,6 +763,7 @@ void DelInterfaceAddressFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     if (!IsConnClientDataAndSizeValid(data, size, dataParcel)) {
+        NETMGR_LOG_D("DelInterfaceAddressFuzzTest write token failed or invalid parameter.");
         return;
     }
 
