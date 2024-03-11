@@ -47,7 +47,7 @@ DnsProxyListen::~DnsProxyListen()
     }
 }
 
-void DnsProxyListen::DnsProxyGetPacket(int32_t clientSocket, RecvBuff &recvBuff, sockaddr_in &proxyAddr)
+void DnsProxyListen::DnsProxyGetPacket(int32_t clientSocket, const RecvBuff &recvBuff, const sockaddr_in &proxyAddr)
 {
     std::vector<std::string> servers;
     std::vector<std::string> domains;
