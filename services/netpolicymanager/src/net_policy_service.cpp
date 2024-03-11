@@ -47,7 +47,7 @@ void NetPolicyService::OnStart()
 {
     NETMGR_LOG_I("OnStart");
     if (state_ == STATE_RUNNING) {
-        NETMGR_LOG_W("NetPolicyService already start.");
+        NETMGR_LOG_W("already start.");
         return;
     }
 
