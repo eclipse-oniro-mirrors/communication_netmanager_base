@@ -45,7 +45,7 @@ NetsysNativeService::NetsysNativeService()
 
 void NetsysNativeService::OnStart()
 {
-    NETNATIVE_LOGI("NetsysNativeService::OnStart Begin");
+    NETNATIVE_LOGI("OnStart Begin");
     std::lock_guard<std::mutex> guard(instanceLock_);
     if (state_ == ServiceRunningState::STATE_RUNNING) {
         return;
@@ -128,7 +128,7 @@ bool NetsysNativeService::Init()
 
 void NetsysNativeService::OnNetManagerRestart()
 {
-    NETNATIVE_LOGI("NetsysNativeClient::OnNetManagerRestart");
+    NETNATIVE_LOGI("OnNetManagerRestart");
     if (netsysService_ != nullptr) {
         netsysService_->NetworkReinitRoute();
     }
@@ -211,7 +211,7 @@ int32_t NetsysNativeService::UnRegisterNotifyCallback(sptr<INotifyCallback> &cal
 int32_t NetsysNativeService::NetworkAddRoute(int32_t netId, const std::string &interfaceName,
                                              const std::string &destination, const std::string &nextHop)
 {
-    NETNATIVE_LOG_D("NetsysNativeService::NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s", netId,
+    NETNATIVE_LOG_D("NetworkAddRoute unpacket %{public}d %{public}s %{public}s %{public}s", netId,
                     interfaceName.c_str(), ToAnonymousIp(destination).c_str(), ToAnonymousIp(nextHop).c_str());
 
     int32_t result = netsysService_->NetworkAddRoute(netId, interfaceName, destination, nextHop);
@@ -569,7 +569,7 @@ int32_t NetsysNativeService::GetNetworkSharingTraffic(const std::string &downIfa
 
 void NetsysNativeService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    NETNATIVE_LOGI("NetsysNativeService::OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    NETNATIVE_LOGI("OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
         if (!hasSARemoved_) {
             hasSARemoved_ = true;
@@ -581,7 +581,7 @@ void NetsysNativeService::OnAddSystemAbility(int32_t systemAbilityId, const std:
 
 void NetsysNativeService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    NETNATIVE_LOGI("NetsysNativeService::OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    NETNATIVE_LOGI("OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NET_CONN_MANAGER_SYS_ABILITY_ID) {
         OnNetManagerRestart();
         hasSARemoved_ = true;
@@ -753,7 +753,7 @@ int32_t NetsysNativeService::GetCookieStats(uint64_t &stats, uint32_t type, uint
 
 int32_t NetsysNativeService::GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)
 {
-    NETNATIVE_LOGI("NetsysNativeService::GetNetworkSharingType");
+    NETNATIVE_LOGI("GetNetworkSharingType");
     std::lock_guard<std::mutex> guard(instanceLock_);
     sharingTypeIsOn = sharingTypeIsOn_;
     return NETSYS_SUCCESS;
@@ -761,7 +761,7 @@ int32_t NetsysNativeService::GetNetworkSharingType(std::set<uint32_t>& sharingTy
 
 int32_t NetsysNativeService::UpdateNetworkSharingType(uint32_t type, bool isOpen)
 {
-    NETNATIVE_LOGI("NetsysNativeService::UpdateNetworkSharingType");
+    NETNATIVE_LOGI("UpdateNetworkSharingType");
     std::lock_guard<std::mutex> guard(instanceLock_);
     if (isOpen) {
         sharingTypeIsOn_.insert(type);
