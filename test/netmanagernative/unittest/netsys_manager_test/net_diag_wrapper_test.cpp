@@ -52,6 +52,7 @@ const std::string IFACENAME3 = "wlan0";
 const std::string TEST_STRING_VALUE = "test";
 const uint16_t TEST_UINT16_VALUE = 1;
 const uint32_t TEST_UINT32_VALUE = 2;
+const uint32_t PING_TIMEOUT_EXIT = 10;
 
 class NetDiagWrapperTest : public testing::Test {
 public:
@@ -251,8 +252,13 @@ HWTEST_F(NetDiagWrapperTest, RunPingCommandTest009, TestSize.Level1)
                    NetManagerStandard::NETMANAGER_SUCCESS);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
+    int32_t times = PING_TIMEOUT_EXIT;
     while (g_waitPingSync) {
         std::this_thread::sleep_for(std::chrono::seconds(PING_WAIT_MS));
+        times--;
+        if (times == 0) {
+            break;
+        }
     }
 }
 
@@ -275,8 +281,13 @@ HWTEST_F(NetDiagWrapperTest, RunPingCommandTest010, TestSize.Level1)
                    NetManagerStandard::NETMANAGER_SUCCESS);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
+    int32_t times = PING_TIMEOUT_EXIT;
     while (g_waitPingSync) {
         std::this_thread::sleep_for(std::chrono::seconds(PING_WAIT_MS));
+        times--;
+        if (times == 0) {
+            break;
+        }
     }
 }
 
@@ -301,8 +312,13 @@ HWTEST_F(NetDiagWrapperTest, RunPingCommandTest011, TestSize.Level1)
                    NetManagerStandard::NETMANAGER_SUCCESS);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
+    int32_t times = PING_TIMEOUT_EXIT;
     while (g_waitPingSync) {
         std::this_thread::sleep_for(std::chrono::seconds(PING_WAIT_MS));
+        times--;
+        if (times == 0) {
+            break;
+        }
     }
 }
 
