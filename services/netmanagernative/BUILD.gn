@@ -164,10 +164,10 @@ ohos_shared_library("netsys_native_manager") {
     "c_utils:utils",
     "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "ffrt:libffrt",
   ]
 
   public_configs = [ "$NETMANAGER_BASE_ROOT/utils:netmgr_common_config" ]
@@ -235,8 +235,8 @@ ohos_static_library("netsys_native_manager_static") {
   }
 
   external_deps += [
-    "hilog:libhilog",
     "ffrt:libffrt",
+    "hilog:libhilog",
   ]
 
   part_name = "netmanager_base"
