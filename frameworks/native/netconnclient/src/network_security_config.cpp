@@ -55,9 +55,9 @@ const char OS_PATH_SEPARATOR = '/';
 #endif
 
 #ifdef __LP64__
-const std::string LIB_LOAD_PATH = "/system/lib64/libnet_bundle_utils.z.so";
+const std::string LIB_LOAD_PATH = "/system/lib64/platformsdk/libnet_bundle_utils.z.so";
 #else
-const std::string LIB_LOAD_PATH = "/system/lib/libnet_bundle_utils.z.so";
+const std::string LIB_LOAD_PATH = "/system/lib/platformsdk/libnet_bundle_utils.z.so";
 #endif
 
 using GetNetBundleClass = INetBundle *(*)();

@@ -198,6 +198,7 @@ ohos_shared_library("net_bundle_utils") {
     "samgr:samgr_proxy",
   ]
 
+  innerapi_tags = [ "platformsdk" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
