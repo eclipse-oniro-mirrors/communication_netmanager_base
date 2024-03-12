@@ -163,7 +163,7 @@ int32_t NetConnServiceProxy::RegisterNetSupplierCallback(uint32_t supplierId,
     return replyParcel.ReadInt32();
 }
 
-int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<INetConnCallback> &callback)
+int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<INetConnCallback> callback)
 {
     if (callback == nullptr) {
         NETMGR_LOG_E("The parameter of callback is nullptr");
@@ -175,7 +175,7 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<INetConnCallback
         NETMGR_LOG_E("WriteInterfaceToken failed");
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
-    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+    dataParcel.WriteRemoteObject(callback->AsObject());
 
     MessageParcel replyParcel;
     int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK),
@@ -188,7 +188,7 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<INetConnCallback
 }
 
 int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-                                                     const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
+                                                     const sptr<INetConnCallback> callback, const uint32_t &timeoutMS)
 {
     if (netSpecifier == nullptr || callback == nullptr) {
         NETMGR_LOG_E("The parameter of netSpecifier or callback is nullptr");
@@ -202,7 +202,7 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<NetSpecifier> &n
     }
     netSpecifier->Marshalling(dataParcel);
     dataParcel.WriteUint32(timeoutMS);
-    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+    dataParcel.WriteRemoteObject(callback->AsObject());
 
     MessageParcel replyParcel;
     int32_t retCode = RemoteSendRequest(

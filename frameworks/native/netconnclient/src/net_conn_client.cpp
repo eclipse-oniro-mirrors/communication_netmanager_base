@@ -115,7 +115,7 @@ int32_t NetConnClient::RegisterNetSupplierCallback(uint32_t supplierId, const sp
     return proxy->RegisterNetSupplierCallback(supplierId, ptr);
 }
 
-int32_t NetConnClient::RegisterNetConnCallback(const sptr<INetConnCallback> &callback)
+int32_t NetConnClient::RegisterNetConnCallback(const sptr<INetConnCallback> callback)
 {
     NETMGR_LOG_D("RegisterNetConnCallback client in.");
     sptr<INetConnService> proxy = GetProxy();
@@ -133,7 +133,7 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<INetConnCallback> &cal
 }
 
 int32_t NetConnClient::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-                                               const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
+                                               const sptr<INetConnCallback> callback, const uint32_t &timeoutMS)
 {
     NETMGR_LOG_D("RegisterNetConnCallback with timeout client in.");
     if (netSpecifier == nullptr || !netSpecifier->SpecifierIsValid()) {

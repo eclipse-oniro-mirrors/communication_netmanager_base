@@ -59,12 +59,12 @@ public:
         return 0;
     }
 
-    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) override
+    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> callback) override
     {
         return 0;
     }
 
-    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
+    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> callback,
         const uint32_t &timeoutMS) override
     {
         return 0;

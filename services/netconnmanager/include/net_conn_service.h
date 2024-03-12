@@ -118,7 +118,7 @@ public:
      *
      * @return Returns 0, successfully register net connection callback, otherwise it will failed
      */
-    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
+    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> callback) override;
 
     /**
      * Register net connection callback by NetSpecifier
@@ -129,7 +129,7 @@ public:
      *
      * @return Returns 0, successfully register net connection callback, otherwise it will failed
      */
-    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
+    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> callback,
                                     const uint32_t &timeoutMS) override;
 
     /**

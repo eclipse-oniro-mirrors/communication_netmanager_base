@@ -47,9 +47,9 @@ public:
                                         const std::set<NetCap> &netCaps, uint32_t &supplierId) = 0;
     virtual int32_t UnregisterNetSupplier(uint32_t supplierId) = 0;
     virtual int32_t RegisterNetSupplierCallback(uint32_t supplierId, const sptr<INetSupplierCallback> &callback) = 0;
-    virtual int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) = 0;
+    virtual int32_t RegisterNetConnCallback(const sptr<INetConnCallback> callback) = 0;
     virtual int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-                                            const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS) = 0;
+                                            const sptr<INetConnCallback> callback, const uint32_t &timeoutMS) = 0;
     virtual int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback) = 0;
     virtual int32_t UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState) = 0;
     virtual int32_t UpdateNetSupplierInfo(uint32_t supplierId, const sptr<NetSupplierInfo> &netSupplierInfo) = 0;
