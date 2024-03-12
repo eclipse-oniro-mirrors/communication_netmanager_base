@@ -164,6 +164,7 @@ ohos_shared_library("netsys_native_manager") {
     "c_utils:utils",
     "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
@@ -233,7 +234,10 @@ ohos_static_library("netsys_native_manager_static") {
     defines += [ "SERVER_SUPPORT_IPV6" ]
   }
 
-  external_deps += [ "hilog:libhilog" ]
+  external_deps += [
+    "ffrt:libffrt",
+    "hilog:libhilog",
+  ]
 
   part_name = "netmanager_base"
   subsystem_name = "communication"

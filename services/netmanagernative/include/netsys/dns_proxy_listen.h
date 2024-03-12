@@ -58,7 +58,7 @@ private:
         char questionsBuff[MAX_REQUESTDATA_LEN];
         int32_t questionLen;
     };
-    static void DnsProxyGetPacket(int32_t clientSocket, RecvBuff recvBuff, sockaddr_in proxyAddr);
+    static void DnsProxyGetPacket(int32_t clientSocket, const RecvBuff &recvBuff, const sockaddr_in &proxyAddr);
     static void DnsParseBySocket(int32_t clientSocket, std::vector<std::string> servers, RecvBuff recvBuff,
                                  sockaddr_in proxyAddr);
     static void DnsSendRecvParseData(int32_t clientSocket, char *requestData, int32_t resLen, sockaddr_in proxyAddr);
