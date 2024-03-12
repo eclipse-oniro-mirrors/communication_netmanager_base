@@ -343,6 +343,7 @@ bool NetPolicyRule::IsLimitByAdmin()
 
 bool NetPolicyRule::IsForeground(uint32_t uid)
 {
+    std::lock_guard lock(foregroundUidListMutex_);
     return std::find(foregroundUidList_.begin(), foregroundUidList_.end(), uid) != foregroundUidList_.end();
 }
 
@@ -410,6 +411,7 @@ void NetPolicyRule::HandleEvent(int32_t eventId, const std::shared_ptr<PolicyEve
 
 void NetPolicyRule::UpdateForegroundUidList(uint32_t uid, bool isForeground)
 {
+    std::lock_guard lock(foregroundUidListMutex_);
     if (isForeground) {
         foregroundUidList_.insert(uid);
         return;

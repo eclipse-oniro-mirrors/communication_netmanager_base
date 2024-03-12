@@ -175,6 +175,7 @@ private:
     std::set<uint32_t> deviceIdleAllowedList_;
     std::set<uint32_t> powerSaveAllowedList_;
     std::set<uint32_t> foregroundUidList_;
+    std::mutex foregroundUidListMutex_;
 
 private:
     /**
