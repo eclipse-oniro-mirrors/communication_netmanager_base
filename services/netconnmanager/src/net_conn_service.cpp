@@ -66,7 +66,7 @@ void NetConnService::OnStart()
 {
     struct timeval tv;
     gettimeofday(&tv, nullptr);
-    NETMGR_LOG_D("NetConnService::OnStart begin");
+    NETMGR_LOG_D("OnStart begin");
     if (state_ == STATE_RUNNING) {
         NETMGR_LOG_D("the state is already running");
         return;
@@ -77,7 +77,7 @@ void NetConnService::OnStart()
     }
     state_ = STATE_RUNNING;
     gettimeofday(&tv, nullptr);
-    NETMGR_LOG_D("NetConnService::OnStart end");
+    NETMGR_LOG_D("OnStart end");
 }
 
 void NetConnService::CreateDefaultRequest()
@@ -96,7 +96,7 @@ void NetConnService::CreateDefaultRequest()
 
 void NetConnService::OnStop()
 {
-    NETMGR_LOG_D("NetConnService::OnStop begin");
+    NETMGR_LOG_D("OnStop begin");
     if (netConnEventRunner_) {
         netConnEventRunner_->Stop();
         netConnEventRunner_.reset();
@@ -106,7 +106,7 @@ void NetConnService::OnStop()
     }
     state_ = STATE_STOPPED;
     registerToService_ = false;
-    NETMGR_LOG_D("NetConnService::OnStop end");
+    NETMGR_LOG_D("OnStop end");
 }
 
 bool NetConnService::Init()
@@ -154,7 +154,7 @@ bool NetConnService::Init()
     }
 
     RecoverInfo();
-    NETMGR_LOG_I("NetConnService::Init end");
+    NETMGR_LOG_I("Init end");
     return true;
 }
 
@@ -230,7 +230,7 @@ int32_t NetConnService::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpe
 
 int32_t NetConnService::RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback)
 {
-    NETMGR_LOG_D("Enter NetConnService::RegisterNetDetectionCallback");
+    NETMGR_LOG_D("Enter RegisterNetDetectionCallback");
     return RegUnRegNetDetectionCallback(netId, callback, true);
 }
 
@@ -259,7 +259,7 @@ int32_t NetConnService::UnregisterNetConnCallback(const sptr<INetConnCallback> &
 
 int32_t NetConnService::UnRegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback)
 {
-    NETMGR_LOG_D("Enter NetConnService::UnRegisterNetDetectionCallback");
+    NETMGR_LOG_D("Enter UnRegisterNetDetectionCallback");
     return RegUnRegNetDetectionCallback(netId, callback, false);
 }
 
@@ -1846,7 +1846,7 @@ int32_t NetConnService::RegisterNetFactoryResetCallback(const sptr<INetFactoryRe
 
 void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    NETMGR_LOG_I("NetConnService::OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    NETMGR_LOG_I("OnAddSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
         if (hasSARemoved_) {
             OnNetSysRestart();
@@ -1857,7 +1857,7 @@ void NetConnService::OnAddSystemAbility(int32_t systemAbilityId, const std::stri
 
 void NetConnService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    NETMGR_LOG_I("NetConnService::OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
+    NETMGR_LOG_I("OnRemoveSystemAbility systemAbilityId[%{public}d]", systemAbilityId);
     if (systemAbilityId == COMM_NETSYS_NATIVE_SYS_ABILITY_ID) {
         hasSARemoved_ = true;
     }
@@ -1880,7 +1880,7 @@ bool NetConnService::IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns)
 
 void NetConnService::OnNetSysRestart()
 {
-    NETMGR_LOG_I("NetConnService::OnNetSysRestart");
+    NETMGR_LOG_I("OnNetSysRestart");
 
     NET_SUPPLIER_MAP::iterator iter;
     for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {

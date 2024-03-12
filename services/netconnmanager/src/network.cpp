@@ -424,7 +424,7 @@ int32_t Network::UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback
 
 void Network::StartNetDetection(bool needReport)
 {
-    NETMGR_LOG_I("Enter Network::StartNetDetection");
+    NETMGR_LOG_I("Enter StartNetDetection");
     if (needReport || netMonitor_) {
         StopNetDetection();
         InitNetMonitor();
@@ -439,7 +439,7 @@ void Network::StartNetDetection(bool needReport)
 
 void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
 {
-    NETMGR_LOG_I("Enter Network::NetDetectionForDnsHealth");
+    NETMGR_LOG_I("Enter NetDetectionForDnsHealth");
     if (eventHandler_) {
         eventHandler_ -> PostSyncTask([dnsHealthSuccess, this]() {
             this->NetDetectionForDnsHealthSync(dnsHealthSuccess);
@@ -449,7 +449,7 @@ void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
 
 void Network::NetDetectionForDnsHealthSync(bool dnsHealthSuccess)
 {
-    NETMGR_LOG_I("Enter Network::NetDetectionForDnsHealthSync");
+    NETMGR_LOG_D("Enter NetDetectionForDnsHealthSync");
     if (netMonitor_ == nullptr) {
         NETMGR_LOG_E("netMonitor_ is nullptr");
         return;
@@ -471,7 +471,7 @@ void Network::NetDetectionForDnsHealthSync(bool dnsHealthSuccess)
 
 void Network::StopNetDetection()
 {
-    NETMGR_LOG_D("Enter Network::StopNetDetection");
+    NETMGR_LOG_D("Enter StopNetDetection");
     if (netMonitor_ != nullptr) {
         netMonitor_->Stop();
         netMonitor_ = nullptr;
@@ -480,7 +480,7 @@ void Network::StopNetDetection()
 
 void Network::InitNetMonitor()
 {
-    NETMGR_LOG_I("Enter Network::InitNetMonitor()");
+    NETMGR_LOG_I("Enter InitNetMonitor()");
     std::weak_ptr<INetMonitorCallback> monitorCallback = shared_from_this();
     netMonitor_ = std::make_shared<NetMonitor>(netId_, netSupplierType_, netLinkInfo_, monitorCallback);
     if (netMonitor_ == nullptr) {
@@ -626,19 +626,19 @@ bool Network::ResumeNetworkInfo()
 {
     NetLinkInfo nli = netLinkInfo_;
 
-    NETMGR_LOG_D("Network::ResumeNetworkInfo UpdateBasicNetwork false");
+    NETMGR_LOG_D("ResumeNetworkInfo UpdateBasicNetwork false");
     if (!UpdateBasicNetwork(false)) {
         NETMGR_LOG_E("%s release existed basic network failed", __FUNCTION__);
         return false;
     }
 
-    NETMGR_LOG_D("Network::ResumeNetworkInfo UpdateBasicNetwork true");
+    NETMGR_LOG_D("ResumeNetworkInfo UpdateBasicNetwork true");
     if (!UpdateBasicNetwork(true)) {
         NETMGR_LOG_E("%s create basic network failed", __FUNCTION__);
         return false;
     }
 
-    NETMGR_LOG_D("Network::ResumeNetworkInfo UpdateNetLinkInfo");
+    NETMGR_LOG_D("ResumeNetworkInfo UpdateNetLinkInfo");
     return UpdateNetLinkInfo(nli);
 }
 

@@ -50,7 +50,7 @@ void PhysicalNetwork::RemoveDefault()
 
 int32_t PhysicalNetwork::AddInterface(std::string &interfaceName)
 {
-    NETNATIVE_LOGI("Entry PhysicalNetwork::AddInterface %{public}s", interfaceName.c_str());
+    NETNATIVE_LOGI("AddInterface %{public}s", interfaceName.c_str());
     if (ExistInterface(interfaceName)) {
         return NETMANAGER_SUCCESS;
     }
@@ -71,7 +71,7 @@ int32_t PhysicalNetwork::AddInterface(std::string &interfaceName)
 
 int32_t PhysicalNetwork::RemoveInterface(std::string &interfaceName)
 {
-    NETNATIVE_LOGI("Entry PhysicalNetwork::RemoveInterface %{public}s", interfaceName.c_str());
+    NETNATIVE_LOGI("RemoveInterface %{public}s", interfaceName.c_str());
     if (!ExistInterface(interfaceName)) {
         return NETMANAGER_SUCCESS;
     }

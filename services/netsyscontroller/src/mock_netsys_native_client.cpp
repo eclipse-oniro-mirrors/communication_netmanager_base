@@ -415,7 +415,7 @@ int64_t MockNetsysNativeClient::GetIfaceTxBytes(const std::string &interfaceName
 
 int64_t MockNetsysNativeClient::GetIfaceRxPackets(const std::string &interfaceName)
 {
-    NETMGR_LOG_I("GetIfaceRxBytes iface name is [%{public}s]", interfaceName.c_str());
+    NETMGR_LOG_D("GetIfaceRxPackets iface name is [%{public}s]", interfaceName.c_str());
     if (access(TEST_IFACE_RX_P.c_str(), F_OK) == 0) {
         return 0;
     }
@@ -424,7 +424,7 @@ int64_t MockNetsysNativeClient::GetIfaceRxPackets(const std::string &interfaceNa
 
 int64_t MockNetsysNativeClient::GetIfaceTxPackets(const std::string &interfaceName)
 {
-    NETMGR_LOG_I("GetIfaceTxBytes iface name is [%{public}s]", interfaceName.c_str());
+    NETMGR_LOG_D("GetIfaceTxPackets iface name is [%{public}s]", interfaceName.c_str());
     if (access(TEST_IFACE_TX_P.c_str(), F_OK) == 0) {
         return 0;
     }
