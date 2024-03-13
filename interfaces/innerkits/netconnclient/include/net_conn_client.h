@@ -126,7 +126,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback);
+    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> callback);
 
     /**
      * Register net connection callback by NetSpecifier
@@ -138,7 +138,7 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
+    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> callback,
                                     const uint32_t &timeoutMS);
 
     /**

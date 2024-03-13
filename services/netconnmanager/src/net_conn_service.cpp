@@ -208,14 +208,14 @@ int32_t NetConnService::RegisterNetSupplierCallback(uint32_t supplierId, const s
     return result;
 }
 
-int32_t NetConnService::RegisterNetConnCallback(const sptr<INetConnCallback> &callback)
+int32_t NetConnService::RegisterNetConnCallback(const sptr<INetConnCallback> callback)
 {
     NETMGR_LOG_D("RegisterNetConnCallback service in.");
     return RegisterNetConnCallback(defaultNetSpecifier_, callback, 0);
 }
 
 int32_t NetConnService::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
-                                                const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS)
+                                                const sptr<INetConnCallback> callback, const uint32_t &timeoutMS)
 {
     int32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
 

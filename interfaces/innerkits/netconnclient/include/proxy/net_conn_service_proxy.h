@@ -32,8 +32,8 @@ public:
                                 uint32_t &supplierId) override;
     int32_t UnregisterNetSupplier(uint32_t supplierId) override;
     int32_t RegisterNetSupplierCallback(uint32_t supplierId, const sptr<INetSupplierCallback> &callback) override;
-    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
-    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
+    int32_t RegisterNetConnCallback(const sptr<INetConnCallback> callback) override;
+    int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> callback,
                                     const uint32_t &timeoutMS) override;
     int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
     int32_t UpdateNetStateForTest(const sptr<NetSpecifier> &netSpecifier, int32_t netState) override;
