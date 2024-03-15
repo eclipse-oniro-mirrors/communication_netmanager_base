@@ -202,7 +202,6 @@
                     "header": {
                         "header_files": [
                             "http_proxy.h",
-                            "inet_addr.h",
                             "net_all_capabilities.h",
                             "net_interface_config.h",
                             "net_link_info.h",
