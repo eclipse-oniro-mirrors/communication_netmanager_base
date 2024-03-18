@@ -129,15 +129,6 @@ class NetConnCallbackStubCb : public NetConnCallbackStub {
         return NETMANAGER_SUCCESS;
     }
 };
-
-class PreAirplaneCallbackStubCb : public IRemoteStub<PreAirplaneCallbackStub> {
-public:
-    int32_t PreAirplaneStart()
-    {
-        std::cout << "PreAirplaneStart2() success" << std::endl;
-        return NETMANAGER_SUCCESS; 
-    }
-};
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // COMMON_NET_CONN_CALLBACK_TEST_H
