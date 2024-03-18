@@ -63,7 +63,7 @@ public:
     int32_t PreAirplaneStart()
     {
         std::cout << "PreAirplaneStart1() success" << std::endl;
-        return NETMANAGER_SUCCESS; 
+        return NETMANAGER_SUCCESS;
     }
 };
 
