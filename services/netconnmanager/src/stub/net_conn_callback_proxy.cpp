@@ -255,5 +255,26 @@ bool NetConnCallbackProxy::WriteInterfaceToken(MessageParcel &data)
     }
     return true;
 }
+
+PreAirplaneCallbackProxy::PreAirplaneCallbackProxy(const sptr<IRemoteObject> &impl)
+    : IRemoteProxy<IPreAirplaneCallback>(impl)
+{}
+
+PreAirplaneCallbackProxy::~PreAirplaneCallbackProxy() {}
+
+int32_t PreAirplaneCallbackProxy::PreAirplaneStart()
+{
+    NETMGR_LOG_I("PreAirplaneCallbackProxy::PreAirplaneStart()");
+    return NETMANAGER_SUCCESS;
+}
+
+bool PreAirplaneCallbackProxy::WriteInterfaceToken(MessageParcel &data)
+{
+    if (!data.WriteInterfaceToken(PreAirplaneCallbackProxy::GetDescriptor())) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return false;
+    }
+    return true;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -54,6 +54,27 @@ private:
 private:
     std::map<uint32_t, NetConnCallbackFunc> memberFuncMap_;
 };
+
+class PreAirplaneCallbackStub : public IRemoteStub<IPreAirplaneCallback> {
+public:
+    PreAirplaneCallbackStub();
+    virtual ~PreAirplaneCallbackStub();
+
+    int32_t OnRemoteRequest(
+        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+
+public:
+    int32_t PreAirplaneStart() override;
+
+private:
+    using PreAirplaneCallbackFunc = int32_t (PreAirplaneCallbackStub::*)(MessageParcel &, MessageParcel &);
+
+private:
+    int32_t OnPreAirplaneStart(MessageParcel &data, MessageParcel &reply);
+
+private:
+    std::map<uint32_t, PreAirplaneCallbackFunc> memberFuncMap_;
+};
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NET_CONN_CALLBACK_STUB_H

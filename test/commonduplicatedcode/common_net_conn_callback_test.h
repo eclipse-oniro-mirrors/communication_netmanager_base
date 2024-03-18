@@ -58,6 +58,15 @@ public:
     }
 };
 
+class IPreAirplaneCallbackTest : public IRemoteStub<IPreAirplaneCallback> {
+public:
+    int32_t PreAirplaneStart()
+    {
+        std::cout << "PreAirplaneStart1() success" << std::endl;
+        return NETMANAGER_SUCCESS; 
+    }
+};
+
 class NetSupplierCallbackBaseTestCb : public NetSupplierCallbackBase {
 public:
     virtual ~NetSupplierCallbackBaseTestCb() = default;
@@ -118,6 +127,15 @@ class NetConnCallbackStubCb : public NetConnCallbackStub {
     int32_t NetBlockStatusChange(sptr<NetHandle> &netHandle, bool blocked) override
     {
         return NETMANAGER_SUCCESS;
+    }
+};
+
+class PreAirplaneCallbackStubCb : public IRemoteStub<PreAirplaneCallbackStub> {
+public:
+    int32_t PreAirplaneStart()
+    {
+        std::cout << "PreAirplaneStart2() success" << std::endl;
+        return NETMANAGER_SUCCESS; 
     }
 };
 } // namespace NetManagerStandard

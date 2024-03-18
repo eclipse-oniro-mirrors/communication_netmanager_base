@@ -93,6 +93,8 @@ void NetConnServiceStub::InitInterfaceFuncToInterfaceMap()
         &NetConnServiceStub::OnAddInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REMOVE_NET_ADDRESS)] = {
         &NetConnServiceStub::OnDelInterfaceAddress, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_PREAIRPLANE_CALLBACK)] = {
+        &NetConnServiceStub::OnRegisterPreAirplaneCallback, {Permission::CONNECTIVITY_INTERNAL}};
 }
 
 void NetConnServiceStub::InitResetNetFuncToInterfaceMap()
@@ -1312,6 +1314,33 @@ int32_t NetConnServiceStub::OnIsPreferCellularUrl(MessageParcel &data, MessagePa
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
  
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnRegisterPreAirplaneCallback(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t result = NETMANAGER_SUCCESS;
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("remote ptr is nullptr.");
+        result = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+        reply.WriteInt32(result);
+        return result;
+    }
+
+    sptr<IPreAirplaneCallback> callback = iface_cast<IPreAirplaneCallback>(remote);
+    if (callback == nullptr) {
+        result = NETMANAGER_ERR_LOCAL_PTR_NULL;
+        reply.WriteInt32(result);
+        NETMGR_LOG_E("Callback ptr is nullptr.");
+        return result;
+    }
+
+    result = RegisterPreAirplaneCallback(callback);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard

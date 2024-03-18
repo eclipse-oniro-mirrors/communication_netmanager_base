@@ -741,5 +741,23 @@ int32_t NetConnClient::IsPreferCellularUrl(const std::string& url, bool& preferC
     }
     return proxy->IsPreferCellularUrl(url, preferCellular);
 }
+
+int32_t NetConnClient::RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback)
+{
+    NETMGR_LOG_D("RegisterPreAirplaneCallback client in.");
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    int32_t ret = proxy->RegisterPreAirplaneCallback(callback);
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("RegisterPreAirplaneCallback success, save callback.");
+        preAirplaneCallback_ = callback;
+    }
+
+    return ret;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -243,4 +243,10 @@ void NetConnCallbackObserver::NetBlockStatusChangeCallback(uv_work_t *work, int 
 {
     CallbackTemplate<CreateNetBlockStatusChangeParam>(work, status);
 }
+
+int32_t PreAirplaneCallback::PreAirplaneStart()
+{
+    NETMANAGER_BASE_LOGI("PreAirplaneStart");
+    return 0;
+}
 } // namespace OHOS::NetManagerStandard

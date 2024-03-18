@@ -15,6 +15,7 @@
 
 #include <fstream>
 #include <sys/time.h>
+#include <regex>
 
 #include "common_event_support.h"
 #include "system_ability_definition.h"
@@ -33,6 +34,7 @@
 #include "netmanager_base_permission.h"
 #include "netsys_controller.h"
 #include "ipc_skeleton.h"
+#include "parameter.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -47,6 +49,11 @@ constexpr const char *ERROR_MSG_UPDATE_NETLINK_INFO_FAILED = "Update net link in
 constexpr const char *NET_CONN_MANAGER_WORK_THREAD = "NET_CONN_MANAGER_WORK_THREAD";
 constexpr const char *NET_ACTIVATE_WORK_THREAD = "NET_ACTIVATE_WORK_THREAD";
 constexpr const char *NET_HTTP_PROBE_URL = "http://connectivitycheck.platform.hicloud.com/generate_204";
+const uint32_t SYS_PARAMETER_SIZE = 256;
+constexpr const char *CFG_NETWORK_PRE_AIRPLANE_MODE_WAIT_TIMES = "persist.network.pre_airplane_mode_wait_times";
+constexpr const char *NO_DELAY_TIME_CONFIG = "100";
+constexpr uint32_t INPUT_VALUE_LENGTH = 10;
+constexpr uint32_t MAX_DELAY_TIME = 200;
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -1454,26 +1461,78 @@ int32_t NetConnService::Dump(int32_t fd, const std::vector<std::u16string> &args
     return (ret < 0) ? static_cast<int32_t>(NET_CONN_ERR_CREATE_DUMP_FAILED) : static_cast<int32_t>(NETMANAGER_SUCCESS);
 }
 
+bool NetConnService::IsValidDecValue(const std::string &inputValue)
+{
+    if (inputValue.length() > INPUT_VALUE_LENGTH) {
+        NETMGR_LOG_E("The value entered is out of range, value:%{public}s", inputValue.c_str());
+        return false;
+    }
+    bool isValueNumber = regex_match(inputValue, std::regex("(-[\\d+]+)|(\\d+)"));
+    if (isValueNumber) {
+        int64_t numberValue = std::stoll(inputValue);
+        if ((numberValue >= INT32_MIN) && (numberValue <= INT32_MAX)) {
+            return true;
+        }
+    }
+    NETMGR_LOG_I("InputValue is not a decimal number");
+    return false;
+}
+
+uint32_t NetConnService::GetDelayNotifyTime()
+{
+    char param[SYS_PARAMETER_SIZE] = { 0 };
+    uint32_t delayTime = 0;
+    int32_t code = GetParameter(CFG_NETWORK_PRE_AIRPLANE_MODE_WAIT_TIMES, NO_DELAY_TIME_CONFIG,
+                                param, SYS_PARAMETER_SIZE);
+    std::string time = param;
+    if (code <= 0 || !IsValidDecValue(time)) {
+        delayTime = std::stoi(NO_DELAY_TIME_CONFIG);
+    } else {
+        uint32_t tmp = std::stoi(time);
+        delayTime = tmp > MAX_DELAY_TIME ? std::stoi(NO_DELAY_TIME_CONFIG) : tmp;
+    }
+    NETMGR_LOG_I("delay time is %{public}u", delayTime);
+    return delayTime;
+}
+
+int32_t NetConnService::RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback)
+{
+    NETMGR_LOG_I("RegisterPreAirplaneCallback");
+    preAirplaneCallback_ = callback;
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetConnService::SetAirplaneMode(bool state)
 {
     NETMGR_LOG_I("Enter SetAirplaneMode, AirplaneMode is %{public}d", state);
-    auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
-    std::string airplaneMode = std::to_string(state);
-    Uri uri(AIRPLANE_MODE_URI);
-    int32_t ret = dataShareHelperUtils->Update(uri, KEY_AIRPLANE_MODE, airplaneMode);
-    if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("Update airplane mode:%{public}d to datashare failed.", state);
-        return NETMANAGER_ERR_INTERNAL;
+    if (state && preAirplaneCallback_) {
+        int32_t ret = this->preAirplaneCallback_->PreAirplaneStart();
+        if (ret == NETMANAGER_SUCCESS) {
+            NETMGR_LOG_I("preAirplanecallback success");
+        }
     }
+    this->netConnEventHandler_->RemoveAsyncTask("delay airplane mode");
+    uint32_t delayTime = GetDelayNotifyTime();
+    this->netConnEventHandler_->PostAsyncTask(
+        [state]() {
+            auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
+            std::string airplaneMode = std::to_string(state);
+            Uri uri(AIRPLANE_MODE_URI);
+            int32_t ret = dataShareHelperUtils->Update(uri, KEY_AIRPLANE_MODE, airplaneMode);
+            if (ret != NETMANAGER_SUCCESS) {
+                NETMGR_LOG_E("Update airplane mode:%{public}d to datashare failed.", state);
+                return;
+            }
+            BroadcastInfo info;
+            info.action = EventFwk::CommonEventSupport::COMMON_EVENT_AIRPLANE_MODE_CHANGED;
+            info.data = "Net Manager Airplane Mode Changed";
+            info.code = static_cast<int32_t>(state);
+            info.ordered = false;
+            std::map<std::string, int32_t> param;
+            BroadcastManager::GetInstance().SendBroadcast(info, param);
+        },
+        "delay airplane mode", delayTime);
 
-    BroadcastInfo info;
-    info.action = EventFwk::CommonEventSupport::COMMON_EVENT_AIRPLANE_MODE_CHANGED;
-    info.data = "Net Manager Airplane Mode Changed";
-    info.code = static_cast<int32_t>(state);
-    info.ordered = false;
-    std::map<std::string, int32_t> param;
-    BroadcastManager::GetInstance().SendBroadcast(info, param);
-    NETMGR_LOG_I("End SetAirplaneMode.");
     return NETMANAGER_SUCCESS;
 }
 

@@ -56,6 +56,7 @@
       "OHOS::NetManagerStandard::NetConnClient::~NetConnClient()";
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetConnCallback(OHOS::sptr<OHOS::NetManagerStandard::NetSpecifier> const&, OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback>, unsigned int const&)";
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetConnCallback(OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback>)";
+      "OHOS::NetManagerStandard::NetConnClient::RegisterPreAirplaneCallback(OHOS::sptr<OHOS::NetManagerStandard::IPreAirplaneCallback>)";
       "OHOS::NetManagerStandard::NetConnClient::SetInternetPermission(unsigned int, unsigned char)";
       "OHOS::NetManagerStandard::NetConnClient::UnregisterNetConnCallback(OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback> const&)";
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetSupplier(OHOS::NetManagerStandard::NetBearType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<OHOS::NetManagerStandard::NetCap, std::__h::less<OHOS::NetManagerStandard::NetCap>, std::__h::allocator<OHOS::NetManagerStandard::NetCap>> const&, unsigned int&)";
