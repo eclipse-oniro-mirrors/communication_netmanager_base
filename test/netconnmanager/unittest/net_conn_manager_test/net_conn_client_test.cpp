@@ -1288,10 +1288,6 @@ HWTEST_F(NetConnClientTest, RegisterPreAirplaneCallback, TestSize.Level1)
     NetManagerBaseAccessToken token;
     sptr<IPreAirplaneCallbackTest> callback = new (std::nothrow) IPreAirplaneCallbackTest();
     int32_t ret = NetConnClient::GetInstance().RegisterPreAirplaneCallback(callback);
-    std::cout << "ret = " << ret << std::endl;
-    std::cout << "before sleep" << std::endl;
-    sleep(120);
-    std::cout << "after sleep" << std::endl;
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
