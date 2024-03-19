@@ -497,7 +497,7 @@ void Network::HandleNetMonitorResult(NetDetectionStatus netDetectionState, const
     NotifyNetDetectionResult(NetDetectionResultConvert(static_cast<int32_t>(netDetectionState)), urlRedirect);
     if (netCallback_ && (detectResult_ != netDetectionState)) {
         detectResult_ = netDetectionState;
-        netCallback_(supplierId_, netDetectionState == VERIFICATION_STATE);
+        netCallback_(supplierId_, netDetectionState);
     }
 }
 

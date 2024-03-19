@@ -32,7 +32,7 @@ namespace NetManagerStandard {
 constexpr uint32_t INVALID_NET_ID = 0;
 constexpr int32_t MIN_NET_ID = 100;
 constexpr int32_t MAX_NET_ID = 0xFFFF - 0x400;
-using NetDetectionHandler = std::function<void(uint32_t supplierId, bool ifValid)>;
+using NetDetectionHandler = std::function<void(uint32_t supplierId, NetDetectionStatus netState)>;
 class Network : public virtual RefBase, public INetMonitorCallback, public std::enable_shared_from_this<Network> {
 public:
     Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &handler, NetBearType bearerType,

@@ -367,7 +367,7 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
             std::placeholders::_1, std::placeholders::_2),
         bearerType, netConnEventHandler_);
     supplier->SetNetwork(network);
-    supplier->SetNetValid(true);
+    supplier->SetNetValid(VERIFICATION_STATE);
     // save supplier
     std::unique_lock<std::mutex> locker(netManagerMutex_);
     netSuppliers_[supplierId] = supplier;
@@ -1106,21 +1106,22 @@ void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<Net
     oldSupplier = newSupplier;
 }
 
-void NetConnService::HandleDetectionResult(uint32_t supplierId, bool ifValid)
+void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStatus netState)
 {
-    NETMGR_LOG_I("Enter HandleDetectionResult, ifValid[%{public}d]", ifValid);
+    NETMGR_LOG_I("Enter HandleDetectionResult, ifValid[%{public}d]", netState);
     auto supplier = FindNetSupplier(supplierId);
     if (supplier == nullptr) {
         NETMGR_LOG_E("supplier doesn't exist.");
         return;
     }
-    supplier->SetNetValid(ifValid);
+    supplier->SetNetValid(netState);
     CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     if (!netScore_->GetServiceScore(supplier)) {
         NETMGR_LOG_E("GetServiceScore fail.");
         return;
     }
     FindBestNetworkForAllRequest();
+    bool ifValid = netState == VERIFICATION_STATE;
     if (!ifValid && defaultNetSupplier_ && defaultNetSupplier_->GetSupplierId() == supplierId) {
         RequestAllNetworkExceptDefault();
     }
