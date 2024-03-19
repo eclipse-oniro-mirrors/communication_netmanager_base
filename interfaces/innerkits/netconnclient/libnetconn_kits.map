@@ -186,6 +186,13 @@
       "non-virtual thunk to OHOS::NetManagerStandard::NetFactoryResetCallbackStub::~NetFactoryResetCallbackStub()";
       "non-virtual thunk to OHOS::NetManagerStandard::NetFactoryResetCallbackStub::OnNetFactoryReset()";
       "virtual thunk to OHOS::NetManagerStandard::NetFactoryResetCallbackStub::~NetFactoryResetCallbackStub()";
+      "OHOS::NetManagerStandard::PreAirplaneCallbackStub::OnRemoteRequest(unsigned int, OHOS::MessageParcel&, OHOS::MessageParcel&, OHOS::MessageOption&)";
+      "non-virtual thunk to OHOS::NetManagerStandard::PreAirplaneCallbackStub::~PreAirplaneCallbackStub()";
+      "non-virtual thunk to OHOS::NetManagerStandard::PreAirplaneCallbackStub::PreAirplaneStart()";
+      "OHOS::NetManagerStandard::PreAirplaneCallbackStub::~PreAirplaneCallbackStub()";
+      "OHOS::NetManagerStandard::PreAirplaneCallbackStub::PreAirplaneStart()";
+      "virtual thunk to OHOS::NetManagerStandard::PreAirplaneCallbackStub::~PreAirplaneCallbackStub()";
+      "OHOS::NetManagerStandard::PreAirplaneCallbackStub::PreAirplaneCallbackStub()";
     };
   local:
    *;

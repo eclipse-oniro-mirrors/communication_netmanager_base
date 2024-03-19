@@ -91,11 +91,6 @@ private:
 
     static void NetBlockStatusChangeCallback(uv_work_t *work, int status);
 };
-
-class PreAirplaneCallback : public PreAirplaneCallbackStub {
-public:
-    int32_t PreAirplaneStart() override;
-};
 } // namespace OHOS::NetManagerStandard
 
 #endif /* NETMANAGER_BASE_NET_CONN_CALLBACK_OBSERVER_H */
