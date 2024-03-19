@@ -60,6 +60,14 @@ extern "C" {
 typedef enum NetConn_NetCap {
     /** MMS */
     NETCONN_NET_CAPABILITY_MMS = 0,
+    /** SUPL */
+    NETCONN_NET_CAPABILITY_SUPL = 1,
+    /** DUN */
+    NETCONN_NET_CAPABILITY_DUN = 2,
+    /** IA */
+    NETCONN_NET_CAPABILITY_IA = 3,
+    /** XCAP */
+    NETCONN_NET_CAPABILITY_XCAP = 4,
     /** Not Metered */
     NETCONN_NET_CAPABILITY_NOT_METERED = 11,
     /** Internet */

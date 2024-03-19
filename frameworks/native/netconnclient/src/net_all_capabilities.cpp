@@ -173,6 +173,18 @@ void NetAllCapabilities::ToStrNetCaps(const std::set<NetCap> &netCaps, std::stri
             case NET_CAPABILITY_MMS:
                 str.append("NET_CAPABILITY_MMS");
                 break;
+            case NET_CAPABILITY_SUPL:
+                str.append("NET_CAPABILITY_SUPL");
+                break;
+            case NET_CAPABILITY_DUN:
+                str.append("NET_CAPABILITY_DUN");
+                break;
+            case NET_CAPABILITY_IA:
+                str.append("NET_CAPABILITY_IA");
+                break;
+            case NET_CAPABILITY_XCAP:
+                str.append("NET_CAPABILITY_XCAP");
+                break;
             case NET_CAPABILITY_NOT_METERED:
                 str.append("NET_CAPABILITY_NOT_METERED");
                 break;
