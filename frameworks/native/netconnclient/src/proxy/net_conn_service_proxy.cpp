@@ -1468,5 +1468,28 @@ int32_t NetConnServiceProxy::RegisterPreAirplaneCallback(const sptr<IPreAirplane
     }
     return replyParcel.ReadInt32();
 }
+
+int32_t NetConnServiceProxy::UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback)
+{
+    if (callback == nullptr) {
+        NETMGR_LOG_E("The parameter of callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
+
+    MessageParcel replyParcel;
+    int32_t retCode = RemoteSendRequest(
+        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_PREAIRPLANE_CALLBACK), dataParcel, replyParcel);
+    if (retCode != NETMANAGER_SUCCESS) {
+        return retCode;
+    }
+    return replyParcel.ReadInt32();
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

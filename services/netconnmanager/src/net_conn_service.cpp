@@ -1498,17 +1498,26 @@ uint32_t NetConnService::GetDelayNotifyTime()
 int32_t NetConnService::RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback)
 {
     NETMGR_LOG_I("RegisterPreAirplaneCallback");
-    preAirplaneCallback_ = callback;
+    preAirplaneCallbacks_.insert(callback);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback)
+{
+    NETMGR_LOG_I("UnregisterPreAirplaneCallback");
+    preAirplaneCallbacks_.erase(callback);
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnService::SetAirplaneMode(bool state)
 {
     NETMGR_LOG_I("Enter SetAirplaneMode, AirplaneMode is %{public}d", state);
-    if (state && preAirplaneCallback_) {
-        int32_t ret = this->preAirplaneCallback_->PreAirplaneStart();
-        if (ret == NETMANAGER_SUCCESS) {
-            NETMGR_LOG_I("preAirplanecallback success");
+    if (state && !preAirplaneCallbacks_.empty()) {
+        for (auto mem : preAirplaneCallbacks_) {
+            if(mem != nullptr) {
+                int32_t ret = mem->PreAirplaneStart();
+                NETMGR_LOG_D("PreAirplaneStart result %{public}d", ret);
+            }
         }
     }
     this->netConnEventHandler_->RemoveAsyncTask("delay airplane mode");
