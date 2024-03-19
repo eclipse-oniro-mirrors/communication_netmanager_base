@@ -782,9 +782,8 @@ int32_t NetConnClient::UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCall
         NETMGR_LOG_D("UnregisterPreAirplaneCallback success,delete callback.");
         preAirplaneCallbacks_.erase(callback);
     }
-
+    
     return ret;
-
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

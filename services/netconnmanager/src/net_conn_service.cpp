@@ -1514,7 +1514,7 @@ int32_t NetConnService::SetAirplaneMode(bool state)
     NETMGR_LOG_I("Enter SetAirplaneMode, AirplaneMode is %{public}d", state);
     if (state && !preAirplaneCallbacks_.empty()) {
         for (auto mem : preAirplaneCallbacks_) {
-            if(mem != nullptr) {
+            if (mem != nullptr) {
                 int32_t ret = mem->PreAirplaneStart();
                 NETMGR_LOG_D("PreAirplaneStart result %{public}d", ret);
             }

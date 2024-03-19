@@ -1369,9 +1369,8 @@ int32_t NetConnServiceStub::OnUnregisterPreAirplaneCallback(MessageParcel &data,
     if (!reply.WriteInt32(result)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
-
+    
     return NETMANAGER_SUCCESS;
-
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
