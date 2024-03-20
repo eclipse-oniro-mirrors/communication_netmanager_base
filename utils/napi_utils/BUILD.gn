@@ -16,10 +16,10 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 config("napi_utils_config") {
   visibility = [ ":napi_utils" ]
-  include_dirs = [ 
+  include_dirs = [
     "$INNERKITS_ROOT/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
-    ]
+  ]
 }
 
 config("napi_utils_public_config") {
