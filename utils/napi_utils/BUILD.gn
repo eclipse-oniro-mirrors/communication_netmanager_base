@@ -16,13 +16,17 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 config("napi_utils_config") {
   visibility = [ ":napi_utils" ]
-  include_dirs = [ "$INNERKITS_ROOT/include" ]
+  include_dirs = [ 
+    "$INNERKITS_ROOT/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
+    ]
 }
 
 config("napi_utils_public_config") {
   include_dirs = [
     "include",
     "$THIRD_PARTY_ROOT/node/src",
+    "$NETMANAGER_BASE_ROOT/utils/errorcode_utils/include",
   ]
 
   cflags = [
@@ -62,7 +66,7 @@ ohos_shared_library("napi_utils") {
 
   public_configs = [ ":napi_utils_public_config" ]
 
-  public_deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
+  deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
 
   external_deps = [
     "c_utils:utils",
