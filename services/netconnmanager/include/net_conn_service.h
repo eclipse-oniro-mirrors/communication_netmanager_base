@@ -430,7 +430,7 @@ private:
     std::condition_variable httpProxyThreadCv_;
     std::mutex httpProxyThreadMutex_;
     static constexpr const uint32_t HTTP_PROXY_ACTIVE_PERIOD_S = 120;
-    std::set<sptr<IPreAirplaneCallback>> preAirplaneCallbacks_;
+    std::map<int32_t, sptr<IPreAirplaneCallback>> preAirplaneCallbacks_;
 
     bool hasSARemoved_ = false;
 };

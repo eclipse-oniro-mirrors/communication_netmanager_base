@@ -1497,15 +1497,17 @@ uint32_t NetConnService::GetDelayNotifyTime()
 
 int32_t NetConnService::RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback)
 {
-    NETMGR_LOG_I("RegisterPreAirplaneCallback");
-    preAirplaneCallbacks_.insert(callback);
+    int32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
+    NETMGR_LOG_I("RegisterPreAirplaneCallback, calllinguid [%{public}d]", callingUid);
+    preAirplaneCallbacks_.insert({callingUid, callback});
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetConnService::UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback)
 {
-    NETMGR_LOG_I("UnregisterPreAirplaneCallback");
-    preAirplaneCallbacks_.erase(callback);
+    int32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
+    NETMGR_LOG_I("UnregisterPreAirplaneCallback, calllinguid [%{public}d]", callingUid);
+    preAirplaneCallbacks_.erase(callingUid);
     return NETMANAGER_SUCCESS;
 }
 
@@ -1514,16 +1516,18 @@ int32_t NetConnService::SetAirplaneMode(bool state)
     NETMGR_LOG_I("Enter SetAirplaneMode, AirplaneMode is %{public}d", state);
     if (state && !preAirplaneCallbacks_.empty()) {
         for (auto mem : preAirplaneCallbacks_) {
-            if (mem != nullptr) {
-                int32_t ret = mem->PreAirplaneStart();
+            if (mem.second != nullptr) {
+                int32_t ret = mem.second->PreAirplaneStart();
                 NETMGR_LOG_D("PreAirplaneStart result %{public}d", ret);
             }
         }
     }
     this->netConnEventHandler_->RemoveAsyncTask("delay airplane mode");
     uint32_t delayTime = GetDelayNotifyTime();
+
     this->netConnEventHandler_->PostAsyncTask(
         [state]() {
+            NETMGR_LOG_D("Enter delay");
             auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
             std::string airplaneMode = std::to_string(state);
             Uri uri(AIRPLANE_MODE_URI);
