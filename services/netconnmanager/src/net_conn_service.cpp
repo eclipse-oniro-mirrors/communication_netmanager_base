@@ -217,7 +217,7 @@ int32_t NetConnService::RegisterNetConnCallback(const sptr<INetConnCallback> cal
 int32_t NetConnService::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier,
                                                 const sptr<INetConnCallback> callback, const uint32_t &timeoutMS)
 {
-    int32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
+    uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
 
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
@@ -310,6 +310,8 @@ int32_t NetConnService::UpdateNetLinkInfo(uint32_t supplierId, const sptr<NetLin
 
 int32_t NetConnService::NetDetection(int32_t netId)
 {
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    NETMGR_LOG_I("NetDetection, call uid [%{public}d]", callingUid);
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask([this, netId, &result]() { result = this->NetDetectionAsync(netId); });
