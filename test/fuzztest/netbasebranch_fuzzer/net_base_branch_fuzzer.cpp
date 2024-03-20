@@ -23,6 +23,7 @@
 
 #define private public
 #include "net_http_probe.h"
+#include "net_policy_rule.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -67,7 +68,7 @@ SecureData GetSecureDataFromData(int8_t strlen)
     for (int i = 0; i < strlen - 1; i++) {
         cstr[i] = GetNetBranchFuzzData<char>();
     }
-    secureData.append(cstr, strlen-1);
+    secureData.append(cstr, strlen - 1);
     return secureData;
 }
 
@@ -113,6 +114,27 @@ void NetHttpProbeBranchFuzzTest(const uint8_t *data, size_t size)
     instance_->RecvHttpProbeResponse();
     instance_->LoadProxy(testString, testId);
 }
+
+void NetPolicyRuleBranchFuzzTest(const uint8_t *data, size_t size)
+{
+    if ((data == nullptr) || (size < 1)) {
+        return;
+    }
+    std::shared_ptr<NetPolicyRule> netPolicyRule = std::make_shared<NetPolicyRule>();
+    uint32_t testId = GetNetBranchFuzzData<uint32_t>();
+    netPolicyRule->DeleteUid(testId);
+    bool isForeground = GetNetBranchFuzzData<bool>();
+    netPolicyRule->UpdateForegroundUidList(testId, isForeground);
+    std::string message = GetStringFromData(STR_LEN);
+    netPolicyRule->GetDumpMessage(message);
+
+    auto policyEvent = std::make_shared<PolicyEvent>();
+    netPolicyRule->HandleEvent(testId, policyEvent);
+    netPolicyRule->IsValidNetPolicy(testId);
+    uint32_t netsysCtrl = GetNetBranchFuzzData<uint32_t>();
+    netPolicyRule->NetsysCtrl(testId, netsysCtrl);
+    netPolicyRule->BuildTransCondition(testId, netsysCtrl);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -121,5 +143,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::NetManagerStandard::NetHttpProbeBranchFuzzTest(data, size);
+    OHOS::NetManagerStandard::NetPolicyRuleBranchFuzzTest(data, size);
     return 0;
 }

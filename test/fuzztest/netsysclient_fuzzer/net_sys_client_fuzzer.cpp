@@ -18,6 +18,8 @@
 
 #include "common_notify_callback_test.h"
 #include "iservice_registry.h"
+#include "net_dns_health_callback_stub.h"
+#include "net_dns_result_callback_stub.h"
 #include "netsys_native_client.h"
 #include "notify_callback_stub.h"
 #include "singleton.h"
@@ -108,6 +110,28 @@ class INetSysCallbackTest : public NetsysNative::NotifyCallbackStub {
 public:
     INetSysCallbackTest() : NotifyCallbackStub() {}
     virtual ~INetSysCallbackTest() {}
+};
+
+class NetDnsResultCallbackFuzzTest : public NetsysNative::NetDnsResultCallbackStub {
+public:
+    NetDnsResultCallbackFuzzTest() = default;
+    ~NetDnsResultCallbackFuzzTest() override{};
+
+    int32_t OnDnsResultReport(uint32_t size, const std::list<NetsysNative::NetDnsResultReport>) override
+    {
+        return 0;
+    }
+};
+
+class TestNetDnsHealthCallbackFuzzTest : public NetsysNative::NetDnsHealthCallbackStub {
+public:
+    TestNetDnsHealthCallbackFuzzTest() = default;
+    ~TestNetDnsHealthCallbackFuzzTest() override{};
+
+    int32_t OnDnsHealthReport(const NetsysNative::NetDnsHealthReport &dnsHealthReport) override
+    {
+        return 0;
+    }
 };
 
 static NetsysNative::NetsysNativeService g_netSysNativeClient;
@@ -1188,8 +1212,175 @@ void GetCookieStatsFuzzTest(const uint8_t *data, size_t size)
     uint64_t cookie = GetData<uint64_t>();
 
     dataParcel.WriteUint32(type);
-    dataParcel.WriteUint32(cookie);
+    dataParcel.WriteUint64(cookie);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_COOKIE_STATS), dataParcel);
+}
+
+void CmdCreateNetworkCacheFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    uint16_t netId = GetData<uint16_t>();
+    dataParcel.WriteUint16(netId);
+
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_CREATE_NETWORK_CACHE), dataParcel);
+}
+
+void CmdGetTotalStatsFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    uint8_t type = GetData<uint8_t>();
+    dataParcel.WriteUint8(type);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_TOTAL_STATS), dataParcel);
+}
+
+void CmdSetTcpBufferSizesFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    std::string tcpBufferSizes = GetStringFromData(STR_LEN);
+    dataParcel.WriteString(tcpBufferSizes);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_TCP_BUFFER_SIZES), dataParcel);
+}
+
+void CmdGetAllStatsInfoFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_ALL_STATS_INFO), dataParcel);
+}
+
+void CmdSetIptablesCommandForResFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    std::string cmd = GetStringFromData(STR_LEN);
+    dataParcel.WriteString(cmd);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_IPTABLES_CMD_FOR_RES),
+                    dataParcel);
+}
+
+void CmdAddStaticArpFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    std::string ipAddr = GetStringFromData(STR_LEN);
+    dataParcel.WriteString(ipAddr);
+    std::string macAddr = GetStringFromData(STR_LEN);
+    dataParcel.WriteString(macAddr);
+    std::string ifName = GetStringFromData(STR_LEN);
+    dataParcel.WriteString(ifName);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_ADD_STATIC_ARP), dataParcel);
+}
+
+void CmdDelStaticArpFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    std::string ifName = GetStringFromData(STR_LEN);
+    std::string macAddr = GetStringFromData(STR_LEN);
+    std::string ipAddr = GetStringFromData(STR_LEN);
+    dataParcel.WriteString(ipAddr);
+    dataParcel.WriteString(macAddr);
+    dataParcel.WriteString(ifName);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_DEL_STATIC_ARP), dataParcel);
+}
+
+void CmdRegisterDnsResultListenerFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    sptr<NetsysNative::INetDnsResultCallback> callback = new (std::nothrow) NetDnsResultCallbackFuzzTest();
+    if (!dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return;
+    }
+    uint32_t timeStep = GetData<uint32_t>();
+    dataParcel.WriteUint32(timeStep);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_REGISTER_DNS_RESULT_LISTENER),
+                    dataParcel);
+}
+
+void CmdUnregisterDnsResultListenerFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    sptr<NetsysNative::INetDnsResultCallback> callback = new (std::nothrow) NetDnsResultCallbackFuzzTest();
+    if (!dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return;
+    }
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_UNREGISTER_DNS_RESULT_LISTENER),
+                    dataParcel);
+}
+
+void CmdRegisterDnsHealthListenerFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    sptr<NetsysNative::INetDnsHealthCallback> callback = new (std::nothrow) TestNetDnsHealthCallbackFuzzTest();
+    if (!dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return;
+    }
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_REGISTER_DNS_HEALTH_LISTENER),
+                    dataParcel);
+}
+
+void CmdUnregisterDnsHealthListenerFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    sptr<NetsysNative::INetDnsHealthCallback> callback = new (std::nothrow) TestNetDnsHealthCallbackFuzzTest();
+    if (!dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return;
+    }
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_UNREGISTER_DNS_HEALTH_LISTENER),
+                    dataParcel);
+}
+
+void CmdGetNetworkSharingTypeFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_GET_NETWORK_SHARING_TYPE),
+                    dataParcel);
+}
+
+void CmdUpdateNetworkSharingTypeFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    uint32_t type = GetData<uint32_t>();
+    bool isOpen = GetData<bool>();
+    dataParcel.WriteUint32(type);
+    dataParcel.WriteBool(isOpen);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_UPDATE_NETWORK_SHARING_TYPE),
+                    dataParcel);
 }
 
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
@@ -1227,6 +1418,19 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::NetworkRemoveRouteParcelFuzzTest(data, size);
     OHOS::NetManagerStandard::OnInterfaceAddressUpdatedFuzzTest(data, size);
     OHOS::NetManagerStandard::GetCookieStatsFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdCreateNetworkCacheFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdGetTotalStatsFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdSetTcpBufferSizesFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdGetAllStatsInfoFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdSetIptablesCommandForResFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdAddStaticArpFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdDelStaticArpFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdRegisterDnsResultListenerFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdUnregisterDnsResultListenerFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdRegisterDnsHealthListenerFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdUnregisterDnsHealthListenerFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdGetNetworkSharingTypeFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdUpdateNetworkSharingTypeFuzzTest(data, size);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
