@@ -363,16 +363,26 @@ int32_t NetworkSecurityConfig::GetJsonFromBundle(std::string &jsonProfile)
     return NETMANAGER_SUCCESS;
 }
 
-void NetworkSecurityConfig::ParseJsonTrustAnchors(const Json::Value &root, TrustAnchors &trustAnchors)
+void NetworkSecurityConfig::ParseJsonTrustAnchors(const Json::Value &root, const cJSON* const object,
+                                                  TrustAnchors &trustAnchors)
 {
     if (!root.isArray()) {
         return;
+    }
+
+    uint32_t sizeTd = cJSON_GetArraySize(object);
+    for (uint32_t j = 0; j < sizeTd; j++) {
+        cJSON *trustAnchorsItem = cJSON_GetArrayItem(object, j);
+        cJSON *certificates = cJSON_GetObjectItem(trustAnchorsItem, TAG_CERTIFICATES.c_str());
+        std::string cert = certificates->valuestring;
+        NETMGR_LOG_E("ParseJsonTrustAnchors certificates: %{public}s", cert.c_str());
     }
 
     auto size = root.size();
     for (uint32_t i = 0; i < size; i++) {
         if (root[i].isMember(TAG_CERTIFICATES.c_str()) && root[i][TAG_CERTIFICATES.c_str()].isString()) {
             auto cert_path = root[i][TAG_CERTIFICATES.c_str()].asString();
+            NETMGR_LOG_E("ParseJsonTrustAnchors cert_path: %{public}s", cert_path.c_str());
             trustAnchors.certs_.push_back(cert_path);
         }
     }
@@ -380,10 +390,30 @@ void NetworkSecurityConfig::ParseJsonTrustAnchors(const Json::Value &root, Trust
     return;
 }
 
-void NetworkSecurityConfig::ParseJsonDomains(const Json::Value &root, std::vector<Domain> &domains)
+void NetworkSecurityConfig::ParseJsonDomains(const Json::Value &root, const cJSON* const object,
+                                             std::vector<Domain> &domains)
 {
     if (!root.isArray()) {
         return;
+    }
+
+    uint32_t sizeTd = cJSON_GetArraySize(object);
+    for (uint32_t j = 0; j < sizeTd; j++) {
+        Domain domainTs;
+        cJSON *domainItem = cJSON_GetArrayItem(object, j);
+        cJSON *name = cJSON_GetObjectItem(domainItem, TAG_NAME.c_str());
+        if (cJSON_IsNull(name) && !cJSON_IsString(name)) {
+            continue;
+        }
+        domainTs.domainName_ = name->valuestring;
+        NETMGR_LOG_E("ParseJsonDomains name: %{public}s", domainTs.domainName_.c_str());
+        cJSON *subDomains = cJSON_GetObjectItem(domainItem, TAG_INCLUDE_SUBDOMAINS.c_str());
+        if (!cJSON_IsNull(subDomains) && cJSON_IsBool(subDomains)) {
+            domainTs.includeSubDomains_ = cJSON_IsBool(subDomains) ? true : false;
+            NETMGR_LOG_E("ParseJsonDomains subDomains: %{public}d", domainTs.includeSubDomains_);
+        } else {
+            domainTs.includeSubDomains_ = true;
+        }
     }
 
     auto size = root.size();
@@ -393,9 +423,10 @@ void NetworkSecurityConfig::ParseJsonDomains(const Json::Value &root, std::vecto
             continue;
         }
         domain.domainName_ = root[i][TAG_NAME.c_str()].asString();
-
+        NETMGR_LOG_E("ParseJsonDomains domainName_: %{public}s", domain.domainName_.c_str());
         if (root[i].isMember(TAG_INCLUDE_SUBDOMAINS.c_str()) && root[i][TAG_INCLUDE_SUBDOMAINS.c_str()].isBool()) {
             domain.includeSubDomains_ = root[i][TAG_INCLUDE_SUBDOMAINS.c_str()].asBool();
+            NETMGR_LOG_E("ParseJsonDomains subDomains: %{public}d", domain.includeSubDomains_);
         } else {
             domain.includeSubDomains_ = true;
         }
@@ -406,20 +437,40 @@ void NetworkSecurityConfig::ParseJsonDomains(const Json::Value &root, std::vecto
     return;
 }
 
-void NetworkSecurityConfig::ParseJsonPinSet(const Json::Value &root, PinSet &pinSet)
+void NetworkSecurityConfig::ParseJsonPinSet(const Json::Value &root, const cJSON* const object, PinSet &pinSet)
 {
     if (root.isNull()) {
         return;
     }
-
+    cJSON *expiration = cJSON_GetObjectItem(object, TAG_EXPIRATION.c_str());
+    if (!cJSON_IsNull(expiration) && cJSON_IsString(expiration)) {
+        NETMGR_LOG_E("ParseJsonPinSet expiration: %{public}s", expiration->valuestring);
+    }
+    cJSON *pins = cJSON_GetObjectItem(object, TAG_PIN.c_str());
+    if (cJSON_IsNull(pins) || !cJSON_IsArray(pins)) {
+        return;
+    }
+    uint32_t sizeTd = cJSON_GetArraySize(pins);
+    for (uint32_t j = 0; j < sizeTd; j++) {
+        cJSON *pinsItem = cJSON_GetArrayItem(pins, j);
+        cJSON *digestAlgorithm = cJSON_GetObjectItem(pinsItem, TAG_DIGEST_ALGORITHM.c_str());
+        if (cJSON_IsNull(digestAlgorithm) || !cJSON_IsString(digestAlgorithm)) {
+            continue;
+        }
+        NETMGR_LOG_E("ParseJsonPinSet digestAlgorithm: %{public}s", digestAlgorithm->valuestring);
+        cJSON *digest = cJSON_GetObjectItem(pinsItem, TAG_DIGEST.c_str());
+        if (cJSON_IsNull(digest) || !cJSON_IsString(digest)) {
+            continue;
+        }
+        NETMGR_LOG_E("ParseJsonPinSet digest: %{public}s", digest->valuestring);
+    }
     if (root.isMember(TAG_EXPIRATION.c_str()) && root[TAG_EXPIRATION.c_str()].isString()) {
         pinSet.expiration_ = root[TAG_EXPIRATION.c_str()].asString();
+        NETMGR_LOG_E("ParseJsonPinSet pinSet.expiration_: %{public}s", pinSet.expiration_.c_str());
     }
-
     if (!root.isMember(TAG_PIN.c_str()) || !root[TAG_PIN.c_str()].isArray()) {
         return;
     }
-
     auto pinRoot = root[TAG_PIN.c_str()];
     auto size = pinRoot.size();
     for (uint32_t i = 0; i < size; i++) {
@@ -427,34 +478,49 @@ void NetworkSecurityConfig::ParseJsonPinSet(const Json::Value &root, PinSet &pin
             pinRoot[i].isMember(TAG_DIGEST.c_str()) && pinRoot[i][TAG_DIGEST.c_str()].isString()) {
             Pin pin;
             pin.digestAlgorithm_ = pinRoot[i][TAG_DIGEST_ALGORITHM.c_str()].asString();
+            NETMGR_LOG_E("ParseJsonPinSet pin.digestAlgorithm_: %{public}s", pin.digestAlgorithm_.c_str());
             pin.digest_ = pinRoot[i][TAG_DIGEST.c_str()].asString();
+            NETMGR_LOG_E("ParseJsonPinSet pin.digest_: %{public}s", pin.digest_.c_str());
             pinSet.pins_.push_back(pin);
         }
     }
-
     return;
 }
 
-void NetworkSecurityConfig::ParseJsonBaseConfig(const Json::Value &root, BaseConfig &baseConfig)
+void NetworkSecurityConfig::ParseJsonBaseConfig(const Json::Value &root, const cJSON* const object,
+                                                BaseConfig &baseConfig)
 {
     if (root.isNull()) {
         return;
     }
-    ParseJsonTrustAnchors(root[TAG_TRUST_ANCHORS.c_str()], baseConfig.trustAnchors_);
+
+    cJSON *trustAnchors = cJSON_GetObjectItem(object, TAG_TRUST_ANCHORS.c_str());
+    if (trustAnchors == nullptr) {
+        return;
+    }
+
+    ParseJsonTrustAnchors(root[TAG_TRUST_ANCHORS.c_str()], trustAnchors, baseConfig.trustAnchors_);
 }
 
-void NetworkSecurityConfig::ParseJsonDomainConfigs(const Json::Value &root, std::vector<DomainConfig> &domainConfigs)
+void NetworkSecurityConfig::ParseJsonDomainConfigs(const Json::Value &root, const cJSON* const object,
+                                                   std::vector<DomainConfig> &domainConfigs)
 {
     if (!root.isArray()) {
         return;
     }
-
+    uint32_t sizeTd = cJSON_GetArraySize(object);
+    NETMGR_LOG_E("ParseJsonDomainConfigs sizeTd: %{public}u", sizeTd);
     auto size = root.size();
+    NETMGR_LOG_E("ParseJsonDomainConfigs size: %{public}u", size);
     for (uint32_t i = 0; i < size; i++) {
+        cJSON *domainConfigItem = cJSON_GetArrayItem(object, i);
         DomainConfig domainConfig;
-        ParseJsonDomains(root[i][TAG_DOMAINS.c_str()], domainConfig.domains_);
-        ParseJsonTrustAnchors(root[i][TAG_TRUST_ANCHORS.c_str()], domainConfig.trustAnchors_);
-        ParseJsonPinSet(root[i][TAG_PIN_SET.c_str()], domainConfig.pinSet_);
+        cJSON *domains = cJSON_GetObjectItem(domainConfigItem, TAG_DOMAINS.c_str());
+        ParseJsonDomains(root[i][TAG_DOMAINS.c_str()], domains, domainConfig.domains_);
+        cJSON *trustAnchors = cJSON_GetObjectItem(domainConfigItem, TAG_TRUST_ANCHORS.c_str());
+        ParseJsonTrustAnchors(root[i][TAG_TRUST_ANCHORS.c_str()], trustAnchors, domainConfig.trustAnchors_);
+        cJSON *pinSet = cJSON_GetObjectItem(domainConfigItem, TAG_PIN_SET.c_str());
+        ParseJsonPinSet(root[i][TAG_PIN_SET.c_str()], pinSet, domainConfig.pinSet_);
 
         domainConfigs.push_back(domainConfig);
     }
@@ -465,6 +531,29 @@ void NetworkSecurityConfig::ParseJsonDomainConfigs(const Json::Value &root, std:
 int32_t NetworkSecurityConfig::ParseJsonConfig(const std::string &content)
 {
     if (content.empty()) {
+        return NETMANAGER_SUCCESS;
+    }
+
+    cJSON *json = cJSON_Parse(content.c_str());
+    if (json == nullptr) {
+        NETMGR_LOG_E("Failed to parse network json profile.");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    NETMGR_LOG_E("ParseJsonConfig : %{public}s", cJSON_Print(json));
+
+    cJSON *networkSecurityConfig = cJSON_GetObjectItem(json, TAG_NETWORK_SECURITY_CONFIG.c_str());
+    if (networkSecurityConfig == nullptr) {
+        NETMGR_LOG_E("networkSecurityConfig is null");
+        return NETMANAGER_SUCCESS;
+    }
+    cJSON *baseConfig = cJSON_GetObjectItem(networkSecurityConfig, TAG_BASE_CONFIG.c_str());
+    if (baseConfig == nullptr) {
+        NETMGR_LOG_E("baseConfig is null");
+        return NETMANAGER_SUCCESS;
+    }
+    cJSON *domainConfig = cJSON_GetObjectItem(networkSecurityConfig, TAG_DOMAIN_CONFIG.c_str());
+    if (domainConfig != nullptr) {
+        NETMGR_LOG_E("domainConfig is null");
         return NETMANAGER_SUCCESS;
     }
 
@@ -483,10 +572,15 @@ int32_t NetworkSecurityConfig::ParseJsonConfig(const std::string &content)
         return NETMANAGER_SUCCESS;
     }
 
-    ParseJsonBaseConfig(root[TAG_NETWORK_SECURITY_CONFIG.c_str()][TAG_BASE_CONFIG.c_str()], baseConfig_);
+    Json::StyledWriter styled_writer;
+    std::string json_str = styled_writer.write(root);
+    NETMGR_LOG_E("ParseJsonConfig root: %{public}s", json_str.c_str());
 
-    ParseJsonDomainConfigs(root[TAG_NETWORK_SECURITY_CONFIG.c_str()][TAG_DOMAIN_CONFIG.c_str()], domainConfigs_);
+    ParseJsonBaseConfig(root[TAG_NETWORK_SECURITY_CONFIG.c_str()][TAG_BASE_CONFIG.c_str()], baseConfig, baseConfig_);
 
+    ParseJsonDomainConfigs(root[TAG_NETWORK_SECURITY_CONFIG.c_str()][TAG_DOMAIN_CONFIG.c_str()],
+                           domainConfig, domainConfigs_);
+    cJSON_Delete(json);
     return NETMANAGER_SUCCESS;
 }
 

@@ -55,6 +55,7 @@
             "third_party": [
                 "curl",
                 "jsoncpp",
+                "cJSON",
                 "libuv",
                 "iptables",
                 "openssl",

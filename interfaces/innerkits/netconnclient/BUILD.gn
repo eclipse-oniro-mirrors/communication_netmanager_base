@@ -125,6 +125,7 @@ ohos_shared_library("net_conn_manager_if") {
     ":net_conn_parcel",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$THIRD_PARTY_ROOT/jsoncpp:jsoncpp",
+    "$THIRD_PARTY_ROOT/cJSON:cjson",
     "$THIRD_PARTY_ROOT/openssl:libcrypto_shared",
     "$THIRD_PARTY_ROOT/openssl:libssl_shared",
   ]

@@ -19,6 +19,7 @@
 #include <string>
 #include <set>
 #include <json/json.h>
+#include "cJSON.h"
 #include "openssl/ssl.h"
 
 namespace OHOS {
@@ -73,11 +74,12 @@ private:
     int32_t CreateRehashedCertFiles();
     int32_t GetJsonFromBundle(std::string &jsonProfile);
     int32_t ParseJsonConfig(const std::string &content);
-    void ParseJsonBaseConfig(const Json::Value &root, BaseConfig &baseConfig);
-    void ParseJsonDomainConfigs(const Json::Value &root, std::vector<DomainConfig> &domainConfigs);
-    void ParseJsonTrustAnchors(const Json::Value &root, TrustAnchors &trustAnchors);
-    void ParseJsonDomains(const Json::Value &root, std::vector<Domain> &domains);
-    void ParseJsonPinSet(const Json::Value &root, PinSet &pinSet);
+    void ParseJsonBaseConfig(const Json::Value &root, const cJSON* const object, BaseConfig &baseConfig);
+    void ParseJsonDomainConfigs(const Json::Value &root, const cJSON* const object,
+                                std::vector<DomainConfig> &domainConfigs);
+    void ParseJsonTrustAnchors(const Json::Value &root, const cJSON* const object, TrustAnchors &trustAnchors);
+    void ParseJsonDomains(const Json::Value &root, const cJSON* const object, std::vector<Domain> &domains);
+    void ParseJsonPinSet(const Json::Value &root, const cJSON* const object, PinSet &pinSet);
     bool ValidateDate(const std::string &dateStr);
     void DumpConfigs();
     std::string GetJsonProfile();
