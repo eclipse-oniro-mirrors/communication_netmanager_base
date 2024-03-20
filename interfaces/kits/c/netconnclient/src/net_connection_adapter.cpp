@@ -30,6 +30,10 @@ static BearTypeMap bearTypeMap = {{BEARER_CELLULAR, NETCONN_BEARER_CELLULAR},
                                   {BEARER_ETHERNET, NETCONN_BEARER_ETHERNET}};
 
 static NetCapMap netCapMap = {{NET_CAPABILITY_MMS,         NETCONN_NET_CAPABILITY_MMS},
+                              {NET_CAPABILITY_SUPL,         NETCONN_NET_CAPABILITY_SUPL},
+                              {NET_CAPABILITY_DUN,         NETCONN_NET_CAPABILITY_DUN},
+                              {NET_CAPABILITY_IA,         NETCONN_NET_CAPABILITY_IA},
+                              {NET_CAPABILITY_XCAP,         NETCONN_NET_CAPABILITY_XCAP},
                               {NET_CAPABILITY_NOT_METERED, NETCONN_NET_CAPABILITY_NOT_METERED},
                               {NET_CAPABILITY_INTERNET,    NETCONN_NET_CAPABILITY_INTERNET},
                               {NET_CAPABILITY_NOT_VPN,     NETCONN_NET_CAPABILITY_NOT_VPN},
