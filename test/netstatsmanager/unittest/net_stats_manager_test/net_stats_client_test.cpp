@@ -290,6 +290,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient006, TestSize.Level1)
 
 HWTEST_F(NetStatsClientTest, NetStatsClient007, TestSize.Level1)
 {
+    NetManagerBaseAccessToken token;
     sptr<IRemoteObject::DeathRecipient> deathRecipient =
         new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
     sptr<IRemoteObject> remote = nullptr;
