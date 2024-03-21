@@ -245,8 +245,6 @@ PreAirplaneCallbackStub::PreAirplaneCallbackStub()
         &PreAirplaneCallbackStub::OnPreAirplaneStart;
 }
 
-PreAirplaneCallbackStub::~PreAirplaneCallbackStub() {}
-
 int32_t PreAirplaneCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
                                                  MessageOption &option)
 {

@@ -395,7 +395,7 @@ private:
     bool IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns);
     std::vector<std::string> GetPreferredUrl();
     bool IsValidDecValue(const std::string &inputValue);
-    uint32_t GetDelayNotifyTime();
+    int32_t GetDelayNotifyTime();
 
 private:
     enum ServiceRunningState {

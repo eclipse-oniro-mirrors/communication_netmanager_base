@@ -260,8 +260,6 @@ PreAirplaneCallbackProxy::PreAirplaneCallbackProxy(const sptr<IRemoteObject> &im
     : IRemoteProxy<IPreAirplaneCallback>(impl)
 {}
 
-PreAirplaneCallbackProxy::~PreAirplaneCallbackProxy() {}
-
 int32_t PreAirplaneCallbackProxy::PreAirplaneStart()
 {
     NETMGR_LOG_I("PreAirplaneCallbackProxy::PreAirplaneStart()");

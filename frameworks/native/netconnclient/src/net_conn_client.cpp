@@ -409,7 +409,7 @@ void NetConnClient::RecoverCallback()
     }
     auto proxy = GetProxy();
     NETMGR_LOG_W("Get proxy %{public}s, count: %{public}u", proxy == nullptr ? "failed" : "success", count);
-    if (proxy != nullptr && !registerConnTupleList_.empty()) {
+    if (proxy != nullptr) {
         for (auto mem : registerConnTupleList_) {
             sptr<NetSpecifier> specifier = std::get<0>(mem);
             sptr<INetConnCallback> callback = std::get<1>(mem);
@@ -426,7 +426,7 @@ void NetConnClient::RecoverCallback()
             }
         }
     }
-    if (proxy != nullptr && !preAirplaneCallbacks_.empty()) {
+    if (proxy != nullptr) {
         for (auto mem : preAirplaneCallbacks_) {
             if (mem != nullptr) {
                 int32_t ret = proxy->RegisterPreAirplaneCallback(mem);
@@ -782,7 +782,7 @@ int32_t NetConnClient::UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCall
         NETMGR_LOG_D("UnregisterPreAirplaneCallback success,delete callback.");
         preAirplaneCallbacks_.erase(callback);
     }
-    
+
     return ret;
 }
 } // namespace NetManagerStandard

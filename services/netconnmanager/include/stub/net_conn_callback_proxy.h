@@ -45,15 +45,13 @@ private:
 class PreAirplaneCallbackProxy : public IRemoteProxy<IPreAirplaneCallback> {
 public:
     explicit PreAirplaneCallbackProxy(const sptr<IRemoteObject> &impl);
-    virtual ~PreAirplaneCallbackProxy();
+    virtual ~PreAirplaneCallbackProxy() = default;
 
-public:
     int32_t PreAirplaneStart() override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
 
-private:
     static inline BrokerDelegator<PreAirplaneCallbackProxy> delegator_;
 };
 } // namespace NetManagerStandard
