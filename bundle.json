@@ -50,12 +50,12 @@
                 "ability_runtime",
                 "data_share",
                 "napi",
-                "bundle_framework"
+                "bundle_framework",
+                "cJSON"
             ],
             "third_party": [
                 "curl",
                 "jsoncpp",
-                "cJSON",
                 "libuv",
                 "iptables",
                 "openssl",

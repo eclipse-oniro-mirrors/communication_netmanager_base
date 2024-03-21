@@ -71,7 +71,6 @@ ohos_shared_library("net_policy_manager") {
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
     "$THIRD_PARTY_ROOT/jsoncpp:jsoncpp",
-    "$THIRD_PARTY_ROOT/cJSON:cjson",
   ]
 
   cflags = [
@@ -100,6 +99,7 @@ ohos_shared_library("net_policy_manager") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:app_manager",
+    "cJSON:cjson",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "hitrace:hitrace_meter",
@@ -161,7 +161,6 @@ ohos_static_library("net_policy_manager_static") {
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
     "$THIRD_PARTY_ROOT/jsoncpp:jsoncpp",
-    "$THIRD_PARTY_ROOT/cJSON:cjson",
   ]
 
   external_deps = [
@@ -184,7 +183,10 @@ ohos_static_library("net_policy_manager_static") {
     defines += [ "NETMGR_DEBUG" ]
   }
 
-  external_deps += [ "hilog:libhilog" ]
+  external_deps += [
+    "cJSON:cjson",
+    "hilog:libhilog",
+  ]
 
   part_name = "netmanager_base"
   subsystem_name = "communication"

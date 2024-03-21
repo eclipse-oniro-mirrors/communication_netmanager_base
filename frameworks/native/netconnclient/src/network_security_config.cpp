@@ -374,7 +374,7 @@ void NetworkSecurityConfig::ParseJsonTrustAnchors(const Json::Value &root, const
     for (uint32_t j = 0; j < sizeTd; j++) {
         cJSON *trustAnchorsItem = cJSON_GetArrayItem(object, j);
         cJSON *certificates = cJSON_GetObjectItem(trustAnchorsItem, TAG_CERTIFICATES.c_str());
-        std::string cert = certificates->valuestring;
+        std::string cert = cJSON_GetStringValue(certificates);
         NETMGR_LOG_E("ParseJsonTrustAnchors certificates: %{public}s", cert.c_str());
     }
 
@@ -405,11 +405,11 @@ void NetworkSecurityConfig::ParseJsonDomains(const Json::Value &root, const cJSO
         if (cJSON_IsNull(name) && !cJSON_IsString(name)) {
             continue;
         }
-        domainTs.domainName_ = name->valuestring;
+        domainTs.domainName_ = cJSON_GetStringValue(name);
         NETMGR_LOG_E("ParseJsonDomains name: %{public}s", domainTs.domainName_.c_str());
         cJSON *subDomains = cJSON_GetObjectItem(domainItem, TAG_INCLUDE_SUBDOMAINS.c_str());
         if (!cJSON_IsNull(subDomains) && cJSON_IsBool(subDomains)) {
-            domainTs.includeSubDomains_ = cJSON_IsBool(subDomains) ? true : false;
+            domainTs.includeSubDomains_ = cJSON_IsTrue(subDomains) ? true : false;
             NETMGR_LOG_E("ParseJsonDomains subDomains: %{public}d", domainTs.includeSubDomains_);
         } else {
             domainTs.includeSubDomains_ = true;

@@ -18,7 +18,6 @@
 #include <fcntl.h>
 #include <string>
 
-
 #include "net_manager_center.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_policy_file_event_handler.h"
@@ -125,9 +124,9 @@ void NetPolicyFile::ParseUidPolicy(const Json::Value &root, const cJSON* const o
                 NETMGR_LOG_E("Json2Obj policy is null or not string");
                 continue;
             }
-            uidPolicyTest.uid = uid->valuestring;
+            uidPolicyTest.uid = cJSON_GetStringValue(uid);
             NETMGR_LOG_E("Json2Obj uid: %{public}s", uidPolicyTest.uid.c_str());
-            uidPolicyTest.policy = policy->valuestring;
+            uidPolicyTest.policy = cJSON_GetStringValue(policy);
             NETMGR_LOG_E("Json2Obj policy: %{public}s", uidPolicyTest.policy.c_str());
         }
     }
@@ -149,7 +148,7 @@ void NetPolicyFile::ParseBackgroundPolicy(const Json::Value &root, const cJSON* 
     cJSON *netBackgroundPolicy = cJSON_GetObjectItem(object, CONFIG_BACKGROUND_POLICY);
     if (netBackgroundPolicy != nullptr) {
         cJSON *status = cJSON_GetObjectItem(netBackgroundPolicy, CONFIG_BACKGROUND_POLICY_STATUS);
-        netPolicy.backgroundPolicyStatus = status->valuestring;
+        netPolicy.backgroundPolicyStatus = cJSON_GetStringValue(status);
         NETMGR_LOG_E("Json2Obj backgroundPolicyStatus: %{public}s", netPolicy.backgroundPolicyStatus.c_str());
     }
 
@@ -220,14 +219,14 @@ void NetPolicyFile::ParseFirewallRule(const Json::Value &root, const cJSON* cons
             uint32_t itemSize = cJSON_GetArraySize(netDeniedList);
             for (uint32_t j = 0; j < itemSize; j++) {
                 cJSON *netDeniedListItem = cJSON_GetArrayItem(netDeniedList, j);
-                std::string netDeniedListItemStr = netDeniedListItem->valuestring;
+                std::string netDeniedListItemStr = cJSON_GetStringValue(netDeniedListItem);
                 uint32_t deniedListNumber = CommonUtils::StrToUint(netDeniedListItemStr);
                 NETMGR_LOG_E("Json2Obj netFirewallRules.deniedList: %{public}d", deniedListNumber);
             }
             itemSize = cJSON_GetArraySize(netAllowedList);
             for (uint32_t j = 0; j < itemSize; j++) {
                 cJSON *netAllowedListItem = cJSON_GetArrayItem(netAllowedList, j);
-                std::string netAllowedListItemStr = netAllowedListItem->valuestring;
+                std::string netAllowedListItemStr = cJSON_GetStringValue(netAllowedListItem);
                 uint32_t allowedListNumber = CommonUtils::StrToUint(netAllowedListItemStr);
                 NETMGR_LOG_E("Json2Obj netFirewallRules.allowedList: %{public}d", allowedListNumber);
             }
@@ -280,7 +279,7 @@ bool NetPolicyFile::Json2Obj(const std::string &content, NetPolicy &netPolicy)
         if (hosVersion == nullptr) {
             netPolicy.hosVersion = HOS_VERSION;
         } else {
-            netPolicy.hosVersion = hosVersion->valuestring;
+            netPolicy.hosVersion = cJSON_GetStringValue(hosVersion);
             NETMGR_LOG_E("Json2Obj hosVersion: %{public}s", netPolicy.hosVersion.c_str());
         }
 
