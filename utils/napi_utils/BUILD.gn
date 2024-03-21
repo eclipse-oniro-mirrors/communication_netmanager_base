@@ -66,7 +66,7 @@ ohos_shared_library("napi_utils") {
 
   public_configs = [ ":napi_utils_public_config" ]
 
-  public_deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
+  deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
 
   external_deps = [
     "c_utils:utils",
