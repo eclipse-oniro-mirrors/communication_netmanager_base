@@ -193,8 +193,6 @@
       "OHOS::NetManagerStandard::PreAirplaneCallbackStub::PreAirplaneStart()";
       "virtual thunk to OHOS::NetManagerStandard::PreAirplaneCallbackStub::~PreAirplaneCallbackStub()";
       "OHOS::NetManagerStandard::PreAirplaneCallbackStub::PreAirplaneCallbackStub()";
-      "vtable for OHOS::NetManagerStandard::PreAirplaneCallbackStub";
-      "VTT for OHOS::NetManagerStandard::PreAirplaneCallbackStub";
     };
   local:
    *;

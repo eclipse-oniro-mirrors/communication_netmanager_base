@@ -1286,13 +1286,10 @@ HWTEST_F(NetConnClientTest, IsPreferCellularUrl, TestSize.Level1)
 HWTEST_F(NetConnClientTest, RegisterPreAirplaneCallback, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
-    sptr<PreAirplaneCallbackTest> callback = new (std::nothrow) PreAirplaneCallbackTest();
+    sptr<IPreAirplaneCallbackTest> callback = new (std::nothrow) IPreAirplaneCallbackTest();
     int32_t ret = NetConnClient::GetInstance().RegisterPreAirplaneCallback(callback);
-    sleep(60);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
-
-
 
 } // namespace NetManagerStandard
 } // namespace OHOS
