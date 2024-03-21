@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include <securec.h>
 #include <thread>
 
+#include "common_net_diag_callback_test.h"
 #include "iservice_registry.h"
 #include "net_diag_callback_stub.h"
 #include "netsys_native_client.h"
@@ -39,94 +40,31 @@ constexpr int32_t NUMBER_ONE = 1;
 bool g_isWaitAsync = false;
 } // namespace
 
-template <class T> T GetData()
+template <class T> T NetDiagGetData()
 {
     T object{};
-    size_t objectSize = sizeof(object);
-    if (g_baseFuzzData == nullptr || objectSize > g_baseFuzzSize - g_baseFuzzPos) {
+    size_t netDiagSize = sizeof(object);
+    if (g_baseFuzzData == nullptr || netDiagSize > g_baseFuzzSize - g_baseFuzzPos) {
         return object;
     }
-    errno_t ret = memcpy_s(&object, objectSize, g_baseFuzzData + g_baseFuzzPos, objectSize);
+    errno_t ret = memcpy_s(&object, netDiagSize, g_baseFuzzData + g_baseFuzzPos, netDiagSize);
     if (ret != EOK) {
         return {};
     }
-    g_baseFuzzPos += objectSize;
+    g_baseFuzzPos += netDiagSize;
     return object;
 }
 
-std::string GetStringFromData(int strlen)
+std::string NetDiagGetString(int strlen)
 {
     char cstr[strlen];
     cstr[strlen - 1] = '\0';
     for (int i = 0; i < strlen - 1; i++) {
-        cstr[i] = GetData<char>();
+        cstr[i] = NetDiagGetData<char>();
     }
     std::string str(cstr);
     return str;
 }
-
-class NetDiagCallbackControllerFuzzTest : public IRemoteStub<NetsysNative::INetDiagCallback> {
-public:
-    NetDiagCallbackControllerFuzzTest()
-    {
-        memberFuncMap_[static_cast<uint32_t>(NetsysNative::NetDiagInterfaceCode::ON_NOTIFY_PING_RESULT)] =
-            &NetDiagCallbackControllerFuzzTest::CmdNotifyPingResult;
-    }
-    virtual ~NetDiagCallbackControllerFuzzTest() = default;
-
-    int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
-    {
-        NETNATIVE_LOGI("Stub call start, code:[%{public}d]", code);
-        std::u16string myDescriptor = NetsysNative::NetDiagCallbackStub::GetDescriptor();
-        std::u16string remoteDescriptor = data.ReadInterfaceToken();
-        if (myDescriptor != remoteDescriptor) {
-            NETNATIVE_LOGE("Descriptor checked failed");
-            return NetManagerStandard::NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
-        }
-
-        auto itFunc = memberFuncMap_.find(code);
-        if (itFunc != memberFuncMap_.end()) {
-            auto requestFunc = itFunc->second;
-            if (requestFunc != nullptr) {
-                return (this->*requestFunc)(data, reply);
-            }
-        }
-
-        NETNATIVE_LOGI("Stub default case, need check");
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-    }
-
-    int32_t OnNotifyPingResult(const NetsysNative::NetDiagPingResult &pingResult) override
-    {
-        g_isWaitAsync = false;
-        NETNATIVE_LOGI(
-            "OnNotifyPingResult received dateSize_:%{public}d payloadSize_:%{public}d transCount_:%{public}d "
-            "recvCount_:%{public}d",
-            pingResult.dateSize_, pingResult.payloadSize_, pingResult.transCount_, pingResult.recvCount_);
-        return NetManagerStandard::NETMANAGER_SUCCESS;
-    }
-
-private:
-    using NetDiagCallbackFunc = int32_t (NetDiagCallbackControllerFuzzTest::*)(MessageParcel &, MessageParcel &);
-
-private:
-    int32_t CmdNotifyPingResult(MessageParcel &data, MessageParcel &reply)
-    {
-        NetsysNative::NetDiagPingResult pingResult;
-        if (!NetsysNative::NetDiagPingResult::Unmarshalling(data, pingResult)) {
-            return NetManagerStandard::NETMANAGER_ERR_READ_DATA_FAIL;
-        }
-
-        int32_t result = OnNotifyPingResult(pingResult);
-        if (!reply.WriteInt32(result)) {
-            return NetManagerStandard::NETMANAGER_ERR_WRITE_REPLY_FAIL;
-        }
-        return NetManagerStandard::NETMANAGER_SUCCESS;
-    }
-
-private:
-    std::map<uint32_t, NetDiagCallbackFunc> memberFuncMap_;
-};
 
 static bool g_isInited = false;
 void Init()
@@ -178,7 +116,7 @@ void NetDiagGetSocketInfoFuzzTest(const uint8_t *data, size_t size)
     }
     const int maxProtoType = 5;
     NetsysNative::NetDiagProtocolType protoclType =
-        static_cast<NetsysNative::NetDiagProtocolType>(GetData<uint8_t>() % maxProtoType);
+        static_cast<NetsysNative::NetDiagProtocolType>(NetDiagGetData<uint8_t>() % maxProtoType);
     dataParcel.WriteUint8(static_cast<uint8_t>(protoclType));
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_GET_SOCKETS_INFO),
                     dataParcel);
@@ -200,23 +138,23 @@ void NetDiagUpdateInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
         return;
     }
-    bool isAdd = (GetData<int32_t>() % NUMBER_TWO == NUMBER_ONE) ? true : false;
+    bool isAdd = (NetDiagGetData<int32_t>() % NUMBER_TWO == NUMBER_ONE) ? true : false;
     OHOS::NetsysNative::NetDiagIfaceConfig config;
-    config.ifaceName_ = GetStringFromData(STR_LEN);
-    config.linkEncap_ = GetStringFromData(STR_LEN);
-    config.macAddr_ = GetStringFromData(STR_LEN);
-    config.ipv4Addr_ = GetStringFromData(STR_LEN);
-    config.ipv4Bcast_ = GetStringFromData(STR_LEN);
-    config.ipv4Mask_ = GetStringFromData(STR_LEN);
-    config.mtu_ = GetData<uint32_t>();
-    config.txQueueLen_ = GetData<uint32_t>();
-    config.rxBytes_ = GetData<int32_t>();
-    config.txBytes_ = GetData<int32_t>();
+    config.ifaceName_ = NetDiagGetString(STR_LEN);
+    config.linkEncap_ = NetDiagGetString(STR_LEN);
+    config.macAddr_ = NetDiagGetString(STR_LEN);
+    config.ipv4Addr_ = NetDiagGetString(STR_LEN);
+    config.ipv4Bcast_ = NetDiagGetString(STR_LEN);
+    config.ipv4Mask_ = NetDiagGetString(STR_LEN);
+    config.mtu_ = NetDiagGetData<uint32_t>();
+    config.txQueueLen_ = NetDiagGetData<uint32_t>();
+    config.rxBytes_ = NetDiagGetData<int32_t>();
+    config.txBytes_ = NetDiagGetData<int32_t>();
 
     if (!config.Marshalling(dataParcel)) {
         return;
     }
-    dataParcel.WriteString(GetStringFromData(STR_LEN));
+    dataParcel.WriteString(NetDiagGetString(STR_LEN));
     dataParcel.WriteBool(isAdd);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_UPDATE_IFACE_CONFIG),
                     dataParcel);
@@ -229,8 +167,8 @@ void NetDiagSetInterfaceActiveFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     const int numberTow = 2;
-    std::string iFaceName = GetStringFromData(STR_LEN);
-    bool isUp = GetData<uint32_t>() % numberTow == 0;
+    std::string iFaceName = NetDiagGetString(STR_LEN);
+    bool isUp = NetDiagGetData<uint32_t>() % numberTow == 0;
 
     dataParcel.WriteString(iFaceName);
     dataParcel.WriteBool(isUp);
@@ -246,7 +184,7 @@ void NetDiagGetInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    std::string iFaceName = GetStringFromData(STR_LEN);
+    std::string iFaceName = NetDiagGetString(STR_LEN);
     dataParcel.WriteString(iFaceName);
     OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NETDIAG_GET_IFACE_CONFIG),
                     dataParcel);
@@ -261,22 +199,21 @@ void NetDiagPingFuzzTest(const uint8_t *data, size_t size)
         return;
     }
     OHOS::NetsysNative::NetDiagPingOption pingOption;
-    pingOption.destination_ = GetStringFromData(STR_LEN);
-    pingOption.source_ = GetStringFromData(STR_LEN);
-    pingOption.count_ = GetData<int16_t>();
-    pingOption.dataSize_ = GetData<int16_t>();
-    pingOption.mark_ = GetData<int16_t>();
-    pingOption.ttl_ = GetData<int16_t>();
-    pingOption.timeOut_ = GetData<int16_t>();
-    pingOption.duration_ = GetData<int16_t>();
-    pingOption.flood_ = GetData<int16_t>() % numberTow == 0;
+    pingOption.destination_ = NetDiagGetString(STR_LEN);
+    pingOption.source_ = NetDiagGetString(STR_LEN);
+    pingOption.count_ = NetDiagGetData<int16_t>();
+    pingOption.dataSize_ = NetDiagGetData<int16_t>();
+    pingOption.mark_ = NetDiagGetData<int16_t>();
+    pingOption.ttl_ = NetDiagGetData<int16_t>();
+    pingOption.timeOut_ = NetDiagGetData<int16_t>();
+    pingOption.duration_ = NetDiagGetData<int16_t>();
+    pingOption.flood_ = NetDiagGetData<int16_t>() % numberTow == 0;
 
     if (!pingOption.Marshalling(dataParcel)) {
         return;
     }
 
-    sptr<NetDiagCallbackControllerFuzzTest> callBack = new NetDiagCallbackControllerFuzzTest();
-
+    sptr<NetsysNative::NetDiagCallbackStubTest> callBack = new NetsysNative::NetDiagCallbackStubTest();
     if (!dataParcel.WriteRemoteObject(callBack->AsObject().GetRefPtr())) {
         return;
     }
