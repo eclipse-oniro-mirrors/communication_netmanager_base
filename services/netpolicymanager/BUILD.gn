@@ -26,7 +26,6 @@ config("net_policy_manager_config") {
     "include/stub",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
-    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
   ]
 }
 
@@ -70,7 +69,6 @@ ohos_shared_library("net_policy_manager") {
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/jsoncpp:jsoncpp",
   ]
 
   cflags = [
@@ -103,7 +101,9 @@ ohos_shared_library("net_policy_manager") {
     "eventhandler:libeventhandler",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
+    "jsoncpp:jsoncpp",
     "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 
   defines = [

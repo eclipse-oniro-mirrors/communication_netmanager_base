@@ -28,7 +28,6 @@ config("net_conn_manager_config") {
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient/include",
     "$INNERKITS_ROOT/netmanagernative/include",
-    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
     "$THIRD_PARTY_ROOT/curl/include",
   ]
 }
@@ -78,7 +77,6 @@ ohos_shared_library("net_conn_manager") {
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/curl:curl_shared",
   ]
 
   cflags = [
@@ -109,6 +107,7 @@ ohos_shared_library("net_conn_manager") {
     "ability_runtime:ability_manager",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "curl:curl_shared",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
