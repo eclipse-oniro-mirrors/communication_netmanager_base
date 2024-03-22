@@ -63,7 +63,8 @@ ohos_fuzztest("NetBaseBranchFuzzTest") {
   ]
 
   external_deps = [
-    "hilog:libhilog",
+    "cJSON:cjson",
+	"hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
   ]

@@ -357,6 +357,7 @@ int32_t NetworkSecurityConfig::GetJsonFromBundle(std::string &jsonProfile)
 {
     static std::string json = GetJsonProfile();
     if (json.empty()) {
+		NETMGR_LOG_E("json is nullptr");
         return NETMANAGER_ERR_INTERNAL;
     }
     jsonProfile = json;
