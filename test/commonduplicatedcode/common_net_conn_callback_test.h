@@ -58,6 +58,14 @@ public:
     }
 };
 
+class IPreAirplaneCallbackTest : public IRemoteStub<IPreAirplaneCallback> {
+public:
+    int32_t PreAirplaneStart()
+    {
+        return NETMANAGER_SUCCESS;
+    }
+};
+
 class NetSupplierCallbackBaseTestCb : public NetSupplierCallbackBase {
 public:
     virtual ~NetSupplierCallbackBaseTestCb() = default;

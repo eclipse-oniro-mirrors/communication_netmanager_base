@@ -41,6 +41,19 @@ private:
 private:
     static inline BrokerDelegator<NetConnCallbackProxy> delegator_;
 };
+
+class PreAirplaneCallbackProxy : public IRemoteProxy<IPreAirplaneCallback> {
+public:
+    explicit PreAirplaneCallbackProxy(const sptr<IRemoteObject> &impl);
+    virtual ~PreAirplaneCallbackProxy() = default;
+
+    int32_t PreAirplaneStart() override;
+
+private:
+    bool WriteInterfaceToken(MessageParcel &data);
+
+    static inline BrokerDelegator<PreAirplaneCallbackProxy> delegator_;
+};
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NET_CONN_CALLBACK_PROXY_H
