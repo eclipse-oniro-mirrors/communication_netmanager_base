@@ -18,8 +18,6 @@ config("napi_utils_config") {
   visibility = [ ":napi_utils" ]
   include_dirs = [
     "$INNERKITS_ROOT/include",
-    "$NETMANAGER_BASE_ROOT/log/include",
-    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]
 }
 
@@ -27,7 +25,10 @@ config("napi_utils_public_config") {
   include_dirs = [
     "include",
     "$THIRD_PARTY_ROOT/node/src",
+    "$NETMANAGER_BASE_ROOT/log/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "$NETMANAGER_BASE_ROOT/utils/errorcode_utils/include",
+
   ]
 
   cflags = [
