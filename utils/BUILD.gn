@@ -32,8 +32,6 @@ config("netmgr_common_config") {
     "$INNERKITS_ROOT/netconnclient/include",
     "$INNERKITS_ROOT/netpolicyclient/include",
     "$INNERKITS_ROOT/netstatsclient/include",
-    "$NETMANAGER_BASE_ROOT/services/netsyscontroller/include",
-    "$NETMANAGER_BASE_ROOT/services/netmanagernative/include/netsys",
   ]
 
   cflags = [
