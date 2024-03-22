@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -416,7 +416,7 @@ int32_t NetStatsServiceProxy::GetCookieRxBytes(uint64_t &stats, uint64_t cookie)
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     if (!data.WriteUint64(cookie)) {
-        NETMGR_LOG_E("proxy cookie%{public}llu", cookie);
+        NETMGR_LOG_E("proxy cookie write failed.");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
@@ -442,7 +442,7 @@ int32_t NetStatsServiceProxy::GetCookieTxBytes(uint64_t &stats, uint64_t cookie)
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     if (!data.WriteUint64(cookie)) {
-        NETMGR_LOG_E("proxy cookie%{public}llu", cookie);
+        NETMGR_LOG_E("proxy cookie write failed.");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
