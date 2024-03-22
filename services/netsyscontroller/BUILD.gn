@@ -44,7 +44,7 @@ ohos_shared_library("netsys_controller") {
 
   branch_protector_ret = "pac_ret"
 
-  all_dependent_configs = [ ":netsys_controller_include" ]
+  configs = [ ":netsys_controller_include" ]
   sources = [
     "src/mock_netsys_native_client.cpp",
     "src/netsys_controller.cpp",
