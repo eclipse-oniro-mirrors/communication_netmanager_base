@@ -238,5 +238,54 @@ int32_t NetConnCallbackStub::NetBlockStatusChange(sptr<NetHandle> &netHandle, bo
 {
     return NETMANAGER_SUCCESS;
 }
+
+PreAirplaneCallbackStub::PreAirplaneCallbackStub()
+{
+    memberFuncMap_[static_cast<uint32_t>(PreAirplaneCallbackInterfaceCode::PRE_AIRPLANE_START)] =
+        &PreAirplaneCallbackStub::OnPreAirplaneStart;
+}
+
+int32_t PreAirplaneCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+                                                 MessageOption &option)
+{
+    NETMGR_LOG_D("Stub call start, code:[%{public}d]", code);
+    std::u16string myDescripter = PreAirplaneCallbackStub::GetDescriptor();
+    std::u16string remoteDescripter = data.ReadInterfaceToken();
+    if (myDescripter != remoteDescripter) {
+        NETMGR_LOG_E("Descriptor checked failed");
+        return NETMANAGER_ERR_DESCRIPTOR_MISMATCH;
+    }
+
+    auto itFunc = memberFuncMap_.find(code);
+    if (itFunc != memberFuncMap_.end()) {
+        auto requestFunc = itFunc->second;
+        if (requestFunc != nullptr) {
+            return (this->*requestFunc)(data, reply);
+        }
+    }
+
+    NETMGR_LOG_D("Stub default case, need check");
+    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+}
+
+int32_t PreAirplaneCallbackStub::PreAirplaneStart()
+{
+    NETMGR_LOG_D("Stub PreAirplaneStart");
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t PreAirplaneCallbackStub::OnPreAirplaneStart(MessageParcel &data, MessageParcel &reply)
+{
+    if (!data.ContainFileDescriptors()) {
+        NETMGR_LOG_W("sent raw data is less than 32k");
+    }
+
+    int32_t result = PreAirplaneStart();
+    if (!reply.WriteInt32(result)) {
+        NETMGR_LOG_E("Write parcel failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    return NETMANAGER_SUCCESS;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

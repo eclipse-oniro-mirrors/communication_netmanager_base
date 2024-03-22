@@ -128,23 +128,32 @@ bool WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 
-void SetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
+bool IsValidPolicyFuzzData(const uint8_t *data, size_t size, MessageParcel &dataParcel)
 {
     if ((data == nullptr) || (size == 0)) {
-        return;
+        return false;
     }
+
     g_baseFuzzData = data;
     g_baseFuzzSize = size;
     g_baseFuzzPos = 0;
 
-    NetManagerBaseAccessToken token;
-    uint32_t uid = GetData<uint32_t>();
-    uint32_t policy = GetData<uint32_t>() % 3;
-
-    MessageParcel dataParcel;
     if (!WriteInterfaceToken(dataParcel)) {
+        return false;
+    }
+    return true;
+}
+
+void SetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
+
+    uint32_t uid = GetData<uint32_t>();
+    uint32_t policy = GetData<uint32_t>() % 3;
     dataParcel.WriteUint32(uid);
     dataParcel.WriteUint32(policy);
 
@@ -153,17 +162,11 @@ void SetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 
 void GetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
     NetManagerBaseAccessToken token;
     uint32_t uid = GetData<uint32_t>();
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteUint32(uid);
@@ -173,13 +176,10 @@ void GetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 
 void GetUidsByPolicyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
     NetManagerBaseAccessToken token;
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
     uint32_t policy = GetData<uint32_t>() % 3;
@@ -190,18 +190,11 @@ void GetUidsByPolicyFuzzTest(const uint8_t *data, size_t size)
 
 void SetBackgroundPolicyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     NetManagerBaseAccessToken token;
     bool isBackgroundPolicyAllow = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteBool(isBackgroundPolicyAllow);
@@ -210,17 +203,11 @@ void SetBackgroundPolicyFuzzTest(const uint8_t *data, size_t size)
 
 void GetBackgroundPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
     NetManagerBaseAccessToken token;
     uint32_t uid = GetData<uint32_t>();
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
     dataParcel.WriteUint32(uid);
@@ -229,9 +216,6 @@ void GetBackgroundPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 
 void SetCellularPoliciesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
     NetManagerBaseAccessToken token;
 
     uint32_t vectorSize = GetData<uint32_t>() % 21;
@@ -254,7 +238,7 @@ void SetCellularPoliciesFuzzTest(const uint8_t *data, size_t size)
     }
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
 
@@ -265,9 +249,6 @@ void SetCellularPoliciesFuzzTest(const uint8_t *data, size_t size)
 
 void RegisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
     NetManagerBaseAccessToken token;
     sptr<INetPolicyCallbackTest> callback = new (std::nothrow) INetPolicyCallbackTest();
     if (callback == nullptr) {
@@ -275,7 +256,7 @@ void RegisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
     }
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
 
@@ -286,20 +267,15 @@ void RegisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
 
 void UnregisterNetPolicyCallbackFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
-    NetManagerBaseAccessToken token;
     sptr<INetPolicyCallbackTest> callback = new (std::nothrow) INetPolicyCallbackTest();
     if (callback == nullptr) {
         return;
     }
-
-    MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
-        return;
-    }
-
     dataParcel.WriteRemoteObject(callback->AsObject().GetRefPtr());
 
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_UNREGISTER_NET_POLICY_CALLBACK), dataParcel);
@@ -321,11 +297,11 @@ void GetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
 
 void SetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
-    NetManagerBaseAccessToken token;
-
     uint32_t vectorSize = GetData<uint32_t>() % 21;
     std::vector<NetQuotaPolicy> quotaPolicies;
     for (uint32_t i = 0; i < vectorSize; i++) {
@@ -344,11 +320,6 @@ void SetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
 
         quotaPolicies.push_back(netQuotaPolicy);
     }
-
-    MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
-        return;
-    }
     NetQuotaPolicy::Marshalling(dataParcel, quotaPolicies);
 
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NET_QUOTA_POLICIES), dataParcel);
@@ -356,22 +327,14 @@ void SetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
 
 void IsUidNetAllowedFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-    NetManagerBaseAccessToken token;
     uint32_t uid = GetData<uint32_t>();
     bool metered = uid % CONVERT_NUMBER_TO_BOOL == 0;
     std::string ifaceName = GetStringFromData(STR_LEN);
-
-    MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
-        return;
-    }
-
     dataParcel.WriteUint32(uid);
     dataParcel.WriteBool(metered);
 
@@ -390,17 +353,11 @@ void IsUidNetAllowedFuzzTest(const uint8_t *data, size_t size)
 
 void ResetPoliciesFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
     NetManagerBaseAccessToken token;
     std::string simId = GetStringFromData(STR_LEN);
 
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
 
@@ -411,23 +368,14 @@ void ResetPoliciesFuzzTest(const uint8_t *data, size_t size)
 
 void UpdateRemindPolicyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
-    NetManagerBaseAccessToken token;
     int32_t netType = GetData<int32_t>();
     uint32_t remindType = GetData<uint32_t>();
     std::string simId = GetStringFromData(STR_LEN);
-
-    MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
-        return;
-    }
-
     dataParcel.WriteInt32(netType);
     dataParcel.WriteString(simId);
     dataParcel.WriteUint32(remindType);
@@ -437,22 +385,14 @@ void UpdateRemindPolicyFuzzTest(const uint8_t *data, size_t size)
 
 void SetDeviceIdleTrustlistFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
 
-    NetManagerBaseAccessToken token;
     bool isAllowed = GetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
     std::vector<uint32_t> uids = GetData<std::vector<uint32_t>>();
-
-    MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
-        return;
-    }
-
     dataParcel.WriteUInt32Vector(uids);
     dataParcel.WriteBool(isAllowed);
 
@@ -461,21 +401,13 @@ void SetDeviceIdleTrustlistFuzzTest(const uint8_t *data, size_t size)
 
 void SetDeviceIdlePolicyFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size == 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     NetManagerBaseAccessToken token;
-    bool enable = GetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
 
+    bool enable = GetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
     dataParcel.WriteBool(enable);
 
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_DEVICE_IDLE_POLICY), dataParcel);
@@ -483,17 +415,9 @@ void SetDeviceIdlePolicyFuzzTest(const uint8_t *data, size_t size)
 
 void SetPowerSaveTrustlistFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     NetManagerBaseAccessToken token;
-
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
 
@@ -507,21 +431,59 @@ void SetPowerSaveTrustlistFuzzTest(const uint8_t *data, size_t size)
 
 void GetPowerSaveTrustlistFuzzTest(const uint8_t *data, size_t size)
 {
-    if ((data == nullptr) || (size <= 0)) {
-        return;
-    }
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-
     NetManagerBaseAccessToken token;
-
     MessageParcel dataParcel;
-    if (!WriteInterfaceToken(dataParcel)) {
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
 
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_POWER_SAVE_TRUSTLIST), dataParcel);
+}
+
+void GetDeviceIdleTrustlistFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_IDLE_TRUSTLIST), dataParcel);
+}
+
+void GetBackgroundPolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_BACKGROUND_POLICY), dataParcel);
+}
+
+void SetPowerSavePolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+
+    bool enable = GetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    dataParcel.WriteBool(enable);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_POLICY), dataParcel);
+}
+
+void CheckPermissionFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CHECK_PERMISSION), dataParcel);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
@@ -545,5 +507,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::SetPowerSaveTrustlistFuzzTest(data, size);
     OHOS::NetManagerStandard::GetPowerSaveTrustlistFuzzTest(data, size);
     OHOS::NetManagerStandard::UnregisterNetPolicyCallbackFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetDeviceIdleTrustlistFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetBackgroundPolicyFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetPowerSavePolicyFuzzTest(data, size);
+    OHOS::NetManagerStandard::CheckPermissionFuzzTest(data, size);
     return 0;
 }

@@ -403,6 +403,10 @@ public:
      */
     int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular);
 
+    int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback);
+
+    int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback);
+
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
@@ -439,6 +443,7 @@ private:
     std::map<uint32_t, sptr<INetSupplierCallback>> netSupplierCallback_;
     std::list<std::tuple<sptr<NetSpecifier>, sptr<INetConnCallback>, uint32_t>> registerConnTupleList_;
     SafeMap<uint32_t, uint8_t> netPermissionMap_;
+    std::set<sptr<IPreAirplaneCallback>> preAirplaneCallbacks_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

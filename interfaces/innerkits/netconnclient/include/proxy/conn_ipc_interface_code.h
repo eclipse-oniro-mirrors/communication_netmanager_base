@@ -68,6 +68,8 @@ enum class ConnInterfaceCode {
     CMD_NM_FACTORYRESET_NETWORK,
     CMD_NM_REGISTER_NET_FACTORYRESET_CALLBACK,
     CMD_NM_IS_PREFER_CELLULAR_URL,
+    CMD_NM_REGISTER_PREAIRPLANE_CALLBACK,
+    CMD_NM_UNREGISTER_PREAIRPLANE_CALLBACK,
     CMD_NM_END,
 };
 
@@ -93,6 +95,10 @@ enum class ConnCallbackInterfaceCode {
     NET_LOST,
     NET_UNAVAILABLE,
     NET_BLOCK_STATUS_CHANGE,
+};
+
+enum class PreAirplaneCallbackInterfaceCode {
+    PRE_AIRPLANE_START,
 };
 
 enum class DetectionCallback {

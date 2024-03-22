@@ -266,6 +266,16 @@ public:
     {
         return 0;
     }
+
+    int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override
+    {
+        return 0;
+    }
+
+    int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override
+    {
+        return 0;
+    }
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
