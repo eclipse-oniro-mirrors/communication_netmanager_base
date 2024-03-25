@@ -1501,7 +1501,7 @@ int32_t NetConnService::RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallb
 {
     int32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
     NETMGR_LOG_D("RegisterPreAirplaneCallback, calllinguid [%{public}d]", callingUid);
-    preAirplaneCallbacks_.emplace(std::make_pair(callingUid, callback));
+    preAirplaneCallbacks_[callingUid] = callback;
     return NETMANAGER_SUCCESS;
 }
 

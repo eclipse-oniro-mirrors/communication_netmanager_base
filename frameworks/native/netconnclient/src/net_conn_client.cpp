@@ -426,13 +426,9 @@ void NetConnClient::RecoverCallback()
             }
         }
     }
-    if (proxy != nullptr) {
-        for (auto mem : preAirplaneCallbacks_) {
-            if (mem != nullptr) {
-                int32_t ret = proxy->RegisterPreAirplaneCallback(mem);
-                NETMGR_LOG_D("Register pre airplane result %{public}d", ret);
-            }
-        }
+    if (proxy != nullptr && preAirplaneCallback_ != nullptr) {
+        int32_t ret = proxy->RegisterPreAirplaneCallback(preAirplaneCallback_);
+        NETMGR_LOG_D("Register pre airplane result %{public}d", ret);
     }
 }
 
@@ -459,7 +455,7 @@ void NetConnClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
     local->RemoveDeathRecipient(deathRecipient_);
     NetConnService_ = nullptr;
 
-    if (!registerConnTupleList_.empty() || !preAirplaneCallbacks_.empty()) {
+    if (!registerConnTupleList_.empty() || preAirplaneCallback_ != nullptr) {
         NETMGR_LOG_I("on remote died recover callback");
         std::thread t([this]() {
             RecoverCallback();
@@ -762,7 +758,7 @@ int32_t NetConnClient::RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallba
     int32_t ret = proxy->RegisterPreAirplaneCallback(callback);
     if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("RegisterPreAirplaneCallback success, save callback.");
-        preAirplaneCallbacks_.insert(callback);
+        preAirplaneCallback_ = callback;
     }
 
     return ret;
@@ -780,7 +776,7 @@ int32_t NetConnClient::UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCall
     int32_t ret = proxy->UnregisterPreAirplaneCallback(callback);
     if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("UnregisterPreAirplaneCallback success,delete callback.");
-        preAirplaneCallbacks_.erase(callback);
+        preAirplaneCallback_ = nullptr;
     }
 
     return ret;
