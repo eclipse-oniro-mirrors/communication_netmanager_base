@@ -22,6 +22,7 @@
 #include "net_manager_constants.h"
 #include "net_supplier_callback_base.h"
 #include "net_supplier_callback_stub.h"
+#include <iostream>
 
 namespace OHOS {
 namespace NetManagerStandard {
