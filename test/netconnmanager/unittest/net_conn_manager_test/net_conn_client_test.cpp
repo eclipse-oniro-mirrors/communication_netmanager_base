@@ -1286,8 +1286,9 @@ HWTEST_F(NetConnClientTest, IsPreferCellularUrl, TestSize.Level1)
 HWTEST_F(NetConnClientTest, RegisterPreAirplaneCallback, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
-    sptr<IPreAirplaneCallbackTest> callback = new (std::nothrow) IPreAirplaneCallbackTest();
+    sptr<PreAirplaneCallbackTest> callback = new (std::nothrow) PreAirplaneCallbackTest();
     int32_t ret = NetConnClient::GetInstance().RegisterPreAirplaneCallback(callback);
+    sleep(60);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 

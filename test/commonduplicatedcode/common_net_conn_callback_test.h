@@ -58,10 +58,11 @@ public:
     }
 };
 
-class IPreAirplaneCallbackTest : public IRemoteStub<IPreAirplaneCallback> {
+class PreAirplaneCallbackTest : public PreAirplaneCallbackStub {
 public:
-    int32_t PreAirplaneStart()
+    int32_t PreAirplaneStart() override
     {
+        std::cout << "test PreAirplaneStart" << std::endl;
         return NETMANAGER_SUCCESS;
     }
 };
