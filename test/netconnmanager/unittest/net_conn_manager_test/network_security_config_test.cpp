@@ -60,15 +60,9 @@ void NetworkSecurityConfigTest::SetUp() {}
 
 void NetworkSecurityConfigTest::TearDown() {}
 
-void BuildTestJsonObject(std::string &content, Json::Value &root, cJSON *json)
+void BuildTestJsonObject(std::string &content, cJSON *json)
 {
     json = cJSON_Parse(content.c_str());
-
-    Json::CharReaderBuilder builder;
-    std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
-    JSONCPP_STRING errs;
-
-    reader->parse(content.c_str(), content.c_str() + content.length(), &root, &errs);
 }
 
 /**
@@ -186,15 +180,14 @@ HWTEST_F(NetworkSecurityConfigTest, ReHashCAPathForX509001, TestSize.Level1)
  */
 HWTEST_F(NetworkSecurityConfigTest, ParseJsonTrustAnchorsTest001, TestSize.Level1)
 {
-    Json::Value root;
     TrustAnchors trustAnchors;
-    cJSON *json = nullptr;
+    cJSON *root = nullptr;
 
     std::string jsonTxt(TEST_TRUST_ANCHORS);
-    BuildTestJsonObject(jsonTxt, root, json);
+    BuildTestJsonObject(jsonTxt, root);
 
     std::cout << "ParseJsonTrustAnchorsTest001 In" << std::endl;
-    NetworkSecurityConfig::GetInstance().ParseJsonTrustAnchors(root, json, trustAnchors);
+    NetworkSecurityConfig::GetInstance().ParseJsonTrustAnchors(root, trustAnchors);
     EXPECT_EQ(trustAnchors.certs_[0], "@resource/raw/ca");
 }
 
@@ -206,15 +199,14 @@ HWTEST_F(NetworkSecurityConfigTest, ParseJsonTrustAnchorsTest001, TestSize.Level
  */
 HWTEST_F(NetworkSecurityConfigTest, ParseJsonPinSet001, TestSize.Level1)
 {
-    Json::Value root;
     PinSet pinSet;
-    cJSON *json = nullptr;
+    cJSON *root = nullptr;
 
     std::string jsonTxt(TEST_PINSET);
-    BuildTestJsonObject(jsonTxt, root, json);
+    BuildTestJsonObject(jsonTxt, root);
 
     std::cout << "ParseJsonPinSet001 In" << std::endl;
-    NetworkSecurityConfig::GetInstance().ParseJsonPinSet(root, json, pinSet);
+    NetworkSecurityConfig::GetInstance().ParseJsonPinSet(root, pinSet);
     ASSERT_EQ(pinSet.pins_[0].digestAlgorithm_, "sha256");
     ASSERT_EQ(pinSet.pins_[0].digest_, "Q9TCQAWqP4t+eq41xnKaUgJdrPWqyG5L+Ni2YzMhqdY=");
     ASSERT_EQ(pinSet.pins_[1].digestAlgorithm_, "sha256");

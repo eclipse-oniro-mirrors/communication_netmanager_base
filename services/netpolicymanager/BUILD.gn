@@ -70,7 +70,6 @@ ohos_shared_library("net_policy_manager") {
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/jsoncpp:jsoncpp",
   ]
 
   cflags = [
@@ -160,7 +159,6 @@ ohos_static_library("net_policy_manager_static") {
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/jsoncpp:jsoncpp",
   ]
 
   external_deps = [

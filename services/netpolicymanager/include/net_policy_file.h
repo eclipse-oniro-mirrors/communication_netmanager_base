@@ -29,7 +29,6 @@
 #include <unistd.h>
 #include <vector>
 
-#include <json/json.h>
 #include "cJSON.h"
 #include "singleton.h"
 
@@ -146,15 +145,15 @@ private:
     bool ReadFile();
     bool WriteFile();
 
-    void AddUidPolicy(Json::Value &root, cJSON *object);
-    void AddBackgroundPolicy(Json::Value &root, cJSON *object);
-    void AddQuotaPolicy(Json::Value &root, cJSON *object);
-    void AddFirewallRule(Json::Value &root, cJSON *object);
+    void AddUidPolicy(cJSON *root);
+    void AddBackgroundPolicy(cJSON *root);
+    void AddQuotaPolicy(cJSON *root);
+    void AddFirewallRule(cJSON *root);
 
-    void ParseUidPolicy(const Json::Value &root, const cJSON* const object, NetPolicy &netPolicy);
-    void ParseBackgroundPolicy(const Json::Value &root, const cJSON* const object, NetPolicy &netPolicy);
-    void ParseQuotaPolicy(const Json::Value &root, const cJSON* const object, NetPolicy &netPolicy);
-    void ParseFirewallRule(const Json::Value &root, const cJSON* const object, NetPolicy &netPolicy);
+    void ParseUidPolicy(const cJSON* const root, NetPolicy &netPolicy);
+    void ParseBackgroundPolicy(const cJSON* const root, NetPolicy &netPolicy);
+    void ParseQuotaPolicy(const cJSON* const root, NetPolicy &netPolicy);
+    void ParseFirewallRule(const cJSON* const root, NetPolicy &netPolicy);
 
     bool UpdateQuotaPolicyExist(const NetQuotaPolicy &quotaPolicy);
     uint32_t ArbitrationWritePolicyToFile(uint32_t uid, uint32_t policy);
