@@ -39,27 +39,27 @@ constexpr size_t STR_LEN = 10;
 } // namespace
 
 template<class T>
-T GetData()
+T NetPolicyGetData()
 {
     T object {};
-    size_t objectSize = sizeof(object);
-    if (g_baseFuzzData == nullptr || objectSize > g_baseFuzzSize - g_baseFuzzPos) {
+    size_t netPolicySize = sizeof(object);
+    if (g_baseFuzzData == nullptr || netPolicySize > g_baseFuzzSize - g_baseFuzzPos) {
         return object;
     }
-    errno_t ret = memcpy_s(&object, objectSize, g_baseFuzzData + g_baseFuzzPos, objectSize);
+    errno_t ret = memcpy_s(&object, netPolicySize, g_baseFuzzData + g_baseFuzzPos, netPolicySize);
     if (ret != EOK) {
         return {};
     }
-    g_baseFuzzPos += objectSize;
+    g_baseFuzzPos += netPolicySize;
     return object;
 }
 
-std::string GetStringFromData(int strlen)
+std::string NetPolicyGetString(int strlen)
 {
     char cstr[strlen];
     cstr[strlen - 1] = '\0';
     for (int i = 0; i < strlen - 1; i++) {
-        cstr[i] = GetData<char>();
+        cstr[i] = NetPolicyGetData<char>();
     }
     std::string str(cstr);
     return str;
@@ -152,8 +152,8 @@ void SetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    uint32_t uid = GetData<uint32_t>();
-    uint32_t policy = GetData<uint32_t>() % 3;
+    uint32_t uid = NetPolicyGetData<uint32_t>();
+    uint32_t policy = NetPolicyGetData<uint32_t>() % 3;
     dataParcel.WriteUint32(uid);
     dataParcel.WriteUint32(policy);
 
@@ -163,7 +163,7 @@ void SetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 void GetPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
-    uint32_t uid = GetData<uint32_t>();
+    uint32_t uid = NetPolicyGetData<uint32_t>();
 
     MessageParcel dataParcel;
     if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
@@ -182,7 +182,7 @@ void GetUidsByPolicyFuzzTest(const uint8_t *data, size_t size)
     if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
-    uint32_t policy = GetData<uint32_t>() % 3;
+    uint32_t policy = NetPolicyGetData<uint32_t>() % 3;
     dataParcel.WriteUint32(policy);
 
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_UIDS_BY_POLICY), dataParcel);
@@ -191,7 +191,7 @@ void GetUidsByPolicyFuzzTest(const uint8_t *data, size_t size)
 void SetBackgroundPolicyFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
-    bool isBackgroundPolicyAllow = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    bool isBackgroundPolicyAllow = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
 
     MessageParcel dataParcel;
     if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
@@ -204,7 +204,7 @@ void SetBackgroundPolicyFuzzTest(const uint8_t *data, size_t size)
 void GetBackgroundPolicyByUidFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
-    uint32_t uid = GetData<uint32_t>();
+    uint32_t uid = NetPolicyGetData<uint32_t>();
 
     MessageParcel dataParcel;
     if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
@@ -218,21 +218,21 @@ void SetCellularPoliciesFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
 
-    uint32_t vectorSize = GetData<uint32_t>() % 21;
+    uint32_t vectorSize = NetPolicyGetData<uint32_t>() % 21;
     std::vector<NetQuotaPolicy> quotaPolicies;
     for (uint32_t i = 0; i < vectorSize; i++) {
         NetQuotaPolicy netQuotaPolicy;
-        netQuotaPolicy.networkmatchrule.netType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+        netQuotaPolicy.networkmatchrule.netType = NetPolicyGetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
 
-        netQuotaPolicy.networkmatchrule.simId = GetStringFromData(STR_LEN);
-        netQuotaPolicy.networkmatchrule.ident = GetStringFromData(STR_LEN);
-        netQuotaPolicy.quotapolicy.periodStartTime = GetData<int64_t>();
-        netQuotaPolicy.quotapolicy.periodDuration = GetStringFromData(STR_LEN);
+        netQuotaPolicy.networkmatchrule.simId = NetPolicyGetString(STR_LEN);
+        netQuotaPolicy.networkmatchrule.ident = NetPolicyGetString(STR_LEN);
+        netQuotaPolicy.quotapolicy.periodStartTime = NetPolicyGetData<int64_t>();
+        netQuotaPolicy.quotapolicy.periodDuration = NetPolicyGetString(STR_LEN);
 
-        netQuotaPolicy.quotapolicy.warningBytes = GetData<int64_t>();
-        netQuotaPolicy.quotapolicy.limitBytes = GetData<int64_t>();
-        netQuotaPolicy.quotapolicy.metered = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-        netQuotaPolicy.quotapolicy.limitAction = GetData<uint32_t>() % CREATE_LIMIT_ACTION_VALUE == 0;
+        netQuotaPolicy.quotapolicy.warningBytes = NetPolicyGetData<int64_t>();
+        netQuotaPolicy.quotapolicy.limitBytes = NetPolicyGetData<int64_t>();
+        netQuotaPolicy.quotapolicy.metered = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+        netQuotaPolicy.quotapolicy.limitAction = NetPolicyGetData<uint32_t>() % CREATE_LIMIT_ACTION_VALUE == 0;
 
         quotaPolicies.push_back(netQuotaPolicy);
     }
@@ -302,21 +302,21 @@ void SetNetQuotaPoliciesFuzzTest(const uint8_t *data, size_t size)
     if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
-    uint32_t vectorSize = GetData<uint32_t>() % 21;
+    uint32_t vectorSize = NetPolicyGetData<uint32_t>() % 21;
     std::vector<NetQuotaPolicy> quotaPolicies;
     for (uint32_t i = 0; i < vectorSize; i++) {
         NetQuotaPolicy netQuotaPolicy;
-        netQuotaPolicy.networkmatchrule.netType = GetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
+        netQuotaPolicy.networkmatchrule.netType = NetPolicyGetData<uint32_t>() % CREATE_NET_TYPE_VALUE;
 
-        netQuotaPolicy.networkmatchrule.simId = GetStringFromData(STR_LEN);
-        netQuotaPolicy.networkmatchrule.ident = GetStringFromData(STR_LEN);
-        netQuotaPolicy.quotapolicy.periodStartTime = GetData<int64_t>();
-        netQuotaPolicy.quotapolicy.periodDuration = GetStringFromData(STR_LEN);
+        netQuotaPolicy.networkmatchrule.simId = NetPolicyGetString(STR_LEN);
+        netQuotaPolicy.networkmatchrule.ident = NetPolicyGetString(STR_LEN);
+        netQuotaPolicy.quotapolicy.periodStartTime = NetPolicyGetData<int64_t>();
+        netQuotaPolicy.quotapolicy.periodDuration = NetPolicyGetString(STR_LEN);
 
-        netQuotaPolicy.quotapolicy.warningBytes = GetData<int64_t>();
-        netQuotaPolicy.quotapolicy.limitBytes = GetData<int64_t>();
-        netQuotaPolicy.quotapolicy.metered = GetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-        netQuotaPolicy.quotapolicy.limitAction = GetData<uint32_t>() % CREATE_LIMIT_ACTION_VALUE == 0;
+        netQuotaPolicy.quotapolicy.warningBytes = NetPolicyGetData<int64_t>();
+        netQuotaPolicy.quotapolicy.limitBytes = NetPolicyGetData<int64_t>();
+        netQuotaPolicy.quotapolicy.metered = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+        netQuotaPolicy.quotapolicy.limitAction = NetPolicyGetData<uint32_t>() % CREATE_LIMIT_ACTION_VALUE == 0;
 
         quotaPolicies.push_back(netQuotaPolicy);
     }
@@ -332,9 +332,9 @@ void IsUidNetAllowedFuzzTest(const uint8_t *data, size_t size)
     if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
-    uint32_t uid = GetData<uint32_t>();
+    uint32_t uid = NetPolicyGetData<uint32_t>();
     bool metered = uid % CONVERT_NUMBER_TO_BOOL == 0;
-    std::string ifaceName = GetStringFromData(STR_LEN);
+    std::string ifaceName = NetPolicyGetString(STR_LEN);
     dataParcel.WriteUint32(uid);
     dataParcel.WriteBool(metered);
 
@@ -354,7 +354,7 @@ void IsUidNetAllowedFuzzTest(const uint8_t *data, size_t size)
 void ResetPoliciesFuzzTest(const uint8_t *data, size_t size)
 {
     NetManagerBaseAccessToken token;
-    std::string simId = GetStringFromData(STR_LEN);
+    std::string simId = NetPolicyGetString(STR_LEN);
 
     MessageParcel dataParcel;
     if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
@@ -373,9 +373,9 @@ void UpdateRemindPolicyFuzzTest(const uint8_t *data, size_t size)
     if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
         return;
     }
-    int32_t netType = GetData<int32_t>();
-    uint32_t remindType = GetData<uint32_t>();
-    std::string simId = GetStringFromData(STR_LEN);
+    int32_t netType = NetPolicyGetData<int32_t>();
+    uint32_t remindType = NetPolicyGetData<uint32_t>();
+    std::string simId = NetPolicyGetString(STR_LEN);
     dataParcel.WriteInt32(netType);
     dataParcel.WriteString(simId);
     dataParcel.WriteUint32(remindType);
@@ -391,8 +391,8 @@ void SetDeviceIdleTrustlistFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    bool isAllowed = GetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-    std::vector<uint32_t> uids = GetData<std::vector<uint32_t>>();
+    bool isAllowed = NetPolicyGetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    std::vector<uint32_t> uids = NetPolicyGetData<std::vector<uint32_t>>();
     dataParcel.WriteUInt32Vector(uids);
     dataParcel.WriteBool(isAllowed);
 
@@ -407,7 +407,7 @@ void SetDeviceIdlePolicyFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    bool enable = GetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    bool enable = NetPolicyGetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
     dataParcel.WriteBool(enable);
 
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_DEVICE_IDLE_POLICY), dataParcel);
@@ -421,8 +421,8 @@ void SetPowerSaveTrustlistFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    bool isAllowed = GetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
-    std::vector<uint32_t> uids = GetData<std::vector<uint32_t>>();
+    bool isAllowed = NetPolicyGetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    std::vector<uint32_t> uids = NetPolicyGetData<std::vector<uint32_t>>();
     dataParcel.WriteBool(isAllowed);
     dataParcel.WriteUInt32Vector(uids);
 
@@ -470,7 +470,7 @@ void SetPowerSavePolicyFuzzTest(const uint8_t *data, size_t size)
         return;
     }
 
-    bool enable = GetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
+    bool enable = NetPolicyGetData<int32_t>() % CONVERT_NUMBER_TO_BOOL == 0;
     dataParcel.WriteBool(enable);
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POWER_SAVE_POLICY), dataParcel);
 }
