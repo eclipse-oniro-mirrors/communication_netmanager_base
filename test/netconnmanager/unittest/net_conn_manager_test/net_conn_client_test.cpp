@@ -56,6 +56,7 @@ constexpr const char *TEST_LONG_EXCLUSION_LIST =
 constexpr const char *TEST_IFACE = "eth0";
 constexpr const char *PROXY_NAME = "123456789";
 constexpr const int32_t PROXY_NAME_SIZE = 9;
+constexpr const int32_t SLEEP_TIMES = 30;
 } // namespace
 
 class NetConnClientTest : public testing::Test {
@@ -1288,7 +1289,7 @@ HWTEST_F(NetConnClientTest, RegisterPreAirplaneCallback, TestSize.Level1)
     NetManagerBaseAccessToken token;
     sptr<PreAirplaneCallbackTest> callback = new (std::nothrow) PreAirplaneCallbackTest();
     int32_t ret = NetConnClient::GetInstance().RegisterPreAirplaneCallback(callback);
-    sleep(60);
+    sleep(SLEEP_TIMES);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
