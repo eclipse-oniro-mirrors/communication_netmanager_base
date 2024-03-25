@@ -677,14 +677,14 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
 
 int32_t NetConnService::NetDetectionAsync(int32_t netId)
 {
-    NETMGR_LOG_I("Enter NetConnService::NetDetection, netId=[%{public}d]", netId);
+    NETMGR_LOG_I("Enter NetDetection, netId=[%{public}d]", netId);
     auto iterNetwork = networks_.find(netId);
     if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
         NETMGR_LOG_E("Could not find the corresponding network.");
         return NET_CONN_ERR_NETID_NOT_FOUND;
     }
     iterNetwork->second->StartNetDetection(true);
-    NETMGR_LOG_I("End NetConnService::NetDetection");
+    NETMGR_LOG_I("End NetDetection");
     return NETMANAGER_SUCCESS;
 }
 
@@ -706,7 +706,7 @@ int32_t NetConnService::RestrictBackgroundChangedAsync(bool restrictBackground)
         }
         it->second->SetRestrictBackground(restrictBackground);
     }
-    NETMGR_LOG_I("End NetConnService::RestrictBackgroundChangedAsync");
+    NETMGR_LOG_I("End RestrictBackgroundChangedAsync");
     return NETMANAGER_SUCCESS;
 }
 
@@ -754,7 +754,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         callback->NetUnavailable();
     }
 
-    NETMGR_LOG_I("Not matched to the optimal network, send request to all networks.");
+    NETMGR_LOG_D("Not matched to the optimal network, send request to all networks.");
     SendRequestToAllNetwork(request);
     return NETMANAGER_SUCCESS;
 }
@@ -887,7 +887,7 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
         }
     }
     NETMGR_LOG_I(
-        "FindBestNetworkForRequest exit, bestScore[%{public}d], bestSupplier[%{public}d, %{public}s], "
+        "bestScore[%{public}d], bestSupplier[%{public}d, %{public}s], "
         "request[%{public}d] is [%{public}s],",
         bestScore, supplier ? supplier->GetSupplierId() : 0,
         supplier ? supplier->GetNetSupplierIdent().c_str() : "null", netActivateNetwork->GetRequestId(),
@@ -1096,7 +1096,7 @@ void NetConnService::CallbackForAvailable(sptr<NetSupplier> &supplier, const spt
 void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<NetSupplier> &newSupplier)
 {
     NETMGR_LOG_I(
-        "MakeDefaultNetWork in, oldSupplier[%{public}d, %{public}s], newSupplier[%{public}d, %{public}s], old equals "
+        "oldSupplier[%{public}d, %{public}s], newSupplier[%{public}d, %{public}s], old equals "
         "new is [%{public}d]", oldSupplier ? oldSupplier->GetSupplierId() : 0,
         oldSupplier ? oldSupplier->GetNetSupplierIdent().c_str() : "null",
         newSupplier ? newSupplier->GetSupplierId() : 0,
@@ -1363,7 +1363,7 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
         NETMGR_LOG_D("Return default network's http proxy as default.");
         return NETMANAGER_SUCCESS;
     }
-    NETMGR_LOG_E("No default http proxy.");
+    NETMGR_LOG_D("No default http proxy.");
     return NETMANAGER_SUCCESS;
 }
 

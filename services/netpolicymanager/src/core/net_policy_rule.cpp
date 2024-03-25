@@ -80,7 +80,7 @@ int32_t NetPolicyRule::TransPolicyToRule(uint32_t uid, uint32_t policy)
     auto policyCondition = BuildTransCondition(uid, policy);
     TransConditionToRuleAndNetsys(policyCondition, uid, policy);
     NetmanagerHiTrace::NetmanagerFinishSyncTrace("TransPolicyToRule end");
-    NETMGR_LOG_I("End TransPolicyToRule");
+    NETMGR_LOG_D("End TransPolicyToRule");
     return NETMANAGER_SUCCESS;
 }
 

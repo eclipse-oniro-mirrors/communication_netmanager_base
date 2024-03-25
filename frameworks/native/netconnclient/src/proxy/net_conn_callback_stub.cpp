@@ -63,7 +63,7 @@ int32_t NetConnCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
 int32_t NetConnCallbackStub::OnNetAvailable(MessageParcel &data, MessageParcel &reply)
 {
     if (!data.ContainFileDescriptors()) {
-        NETMGR_LOG_W("sent raw data is less than 32k");
+        NETMGR_LOG_D("sent raw data is less than 32k");
     }
     int32_t netId = 0;
     if (!data.ReadInt32(netId)) {
@@ -82,7 +82,7 @@ int32_t NetConnCallbackStub::OnNetAvailable(MessageParcel &data, MessageParcel &
 int32_t NetConnCallbackStub::OnNetCapabilitiesChange(MessageParcel &data, MessageParcel &reply)
 {
     if (!data.ContainFileDescriptors()) {
-        NETMGR_LOG_W("sent raw data is less than 32k");
+        NETMGR_LOG_D("sent raw data is less than 32k");
     }
 
     int32_t netId = 0;
@@ -132,7 +132,7 @@ int32_t NetConnCallbackStub::OnNetCapabilitiesChange(MessageParcel &data, Messag
 int32_t NetConnCallbackStub::OnNetConnectionPropertiesChange(MessageParcel &data, MessageParcel &reply)
 {
     if (!data.ContainFileDescriptors()) {
-        NETMGR_LOG_W("sent raw data is less than 32k");
+        NETMGR_LOG_D("sent raw data is less than 32k");
     }
 
     int32_t netId;
@@ -153,7 +153,7 @@ int32_t NetConnCallbackStub::OnNetConnectionPropertiesChange(MessageParcel &data
 int32_t NetConnCallbackStub::OnNetLost(MessageParcel &data, MessageParcel &reply)
 {
     if (!data.ContainFileDescriptors()) {
-        NETMGR_LOG_W("sent raw data is less than 32k");
+        NETMGR_LOG_D("sent raw data is less than 32k");
     }
 
     int32_t netId;
@@ -173,7 +173,7 @@ int32_t NetConnCallbackStub::OnNetLost(MessageParcel &data, MessageParcel &reply
 int32_t NetConnCallbackStub::OnNetUnavailable(MessageParcel &data, MessageParcel &reply)
 {
     if (!data.ContainFileDescriptors()) {
-        NETMGR_LOG_W("sent raw data is less than 32k");
+        NETMGR_LOG_D("sent raw data is less than 32k");
     }
 
     int32_t result = NetUnavailable();
@@ -187,7 +187,7 @@ int32_t NetConnCallbackStub::OnNetUnavailable(MessageParcel &data, MessageParcel
 int32_t NetConnCallbackStub::OnNetBlockStatusChange(MessageParcel &data, MessageParcel &reply)
 {
     if (!data.ContainFileDescriptors()) {
-        NETMGR_LOG_W("sent raw data is less than 32k");
+        NETMGR_LOG_D("sent raw data is less than 32k");
     }
 
     int32_t netId;

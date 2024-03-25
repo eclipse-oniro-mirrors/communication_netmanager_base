@@ -73,7 +73,7 @@ void NetActivate::TimeOutNetAvailable()
 
 bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier)
 {
-    NETMGR_LOG_I("MatchRequestAndNetwork enter, supplier[%{public}d, %{public}s], request[%{public}d]",
+    NETMGR_LOG_I("supplier[%{public}d, %{public}s], request[%{public}d]",
                  (supplier ? supplier->GetSupplierId() : 0),
                  (supplier ? supplier->GetNetSupplierIdent().c_str() : "nullptr"), requestId_);
     if (supplier == nullptr) {
