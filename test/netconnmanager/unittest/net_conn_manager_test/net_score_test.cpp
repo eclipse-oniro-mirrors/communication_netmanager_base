@@ -60,7 +60,7 @@ HWTEST_F(NetScoreTest, GetServiceScore, TestSize.Level1)
     sptr<NetSupplier> supplier = (std::make_unique<NetSupplier>(bearerType, ident, netCaps)).release();
 
     // mock Failed to detect network
-    supplier->SetNetValid(false);
+    supplier->SetNetValid(INVALID_DETECTION_STATE);
 
     bool result = netScore_->GetServiceScore(supplier);
     ASSERT_TRUE(result == true);
@@ -68,8 +68,16 @@ HWTEST_F(NetScoreTest, GetServiceScore, TestSize.Level1)
     ASSERT_TRUE(supplier->GetRealScore() ==
         (static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE) - NET_VALID_SCORE));
 
+    supplier->SetNetValid(CAPTIVE_PORTAL_STATE);
+
+    result = netScore_->GetServiceScore(supplier);
+    ASSERT_TRUE(result == true);
+    ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
+    ASSERT_TRUE(supplier->GetRealScore() ==
+        (static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE) - NET_VALID_SCORE));
+
     // mock successed to detect network
-    supplier->SetNetValid(true);
+    supplier->SetNetValid(VERIFICATION_STATE);
 
     result = netScore_->GetServiceScore(supplier);
     ASSERT_TRUE(result == true);

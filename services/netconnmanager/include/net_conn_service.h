@@ -214,7 +214,7 @@ public:
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override;
     int32_t GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap) override;
     int32_t BindSocket(int32_t socketFd, int32_t netId) override;
-    void HandleDetectionResult(uint32_t supplierId, bool ifValid);
+    void HandleDetectionResult(uint32_t supplierId, NetDetectionStatus netState);
     int32_t RestrictBackgroundChanged(bool isRestrictBackground);
     /**
      * Set airplane mode
