@@ -22,6 +22,7 @@
 #include "net_manager_constants.h"
 #include "net_supplier_callback_base.h"
 #include "net_supplier_callback_stub.h"
+#include <iostream>
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -58,10 +59,11 @@ public:
     }
 };
 
-class IPreAirplaneCallbackTest : public IRemoteStub<IPreAirplaneCallback> {
+class PreAirplaneCallbackTest : public PreAirplaneCallbackStub {
 public:
-    int32_t PreAirplaneStart()
+    int32_t PreAirplaneStart() override
     {
+        std::cout << "test PreAirplaneStart" << std::endl;
         return NETMANAGER_SUCCESS;
     }
 };

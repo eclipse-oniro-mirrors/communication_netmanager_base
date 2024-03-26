@@ -443,7 +443,7 @@ private:
     std::map<uint32_t, sptr<INetSupplierCallback>> netSupplierCallback_;
     std::list<std::tuple<sptr<NetSpecifier>, sptr<INetConnCallback>, uint32_t>> registerConnTupleList_;
     SafeMap<uint32_t, uint8_t> netPermissionMap_;
-    std::set<sptr<IPreAirplaneCallback>> preAirplaneCallbacks_;
+    sptr<IPreAirplaneCallback> preAirplaneCallback_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
