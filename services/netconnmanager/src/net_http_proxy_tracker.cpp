@@ -90,6 +90,10 @@ bool NetHttpProxyTracker::WriteToSettingsData(HttpProxy &httpProxy)
         return false;
     }
     httpProxy.SetExclusionList(ParseExclusionList(exclusions));
+    if (!httpProxy.GetUsername().empty()) {
+        auto userInfoHelp = NetProxyUserinfo::GetInstance();
+        userInfoHelp.SaveHttpProxyHostPass(httpProxy);
+    }
     return true;
 }
 

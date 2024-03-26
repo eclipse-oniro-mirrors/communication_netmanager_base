@@ -1554,12 +1554,16 @@ int32_t NetConnService::SetAirplaneMode(bool state)
 
 void NetConnService::ActiveHttpProxy()
 {
+    NETMGR_LOG_D("ActiveHttpProxy thread start");
     while (httpProxyThreadNeedRun_.load()) {
+        NETMGR_LOG_D("Keep global http-proxy active every 2 minutes");
         CURL *curl = nullptr;
         HttpProxy tempProxy;
         {
             std::lock_guard guard(globalHttpProxyMutex_);
+            auto userInfoHelp = NetProxyUserinfo::GetInstance();
             tempProxy = globalHttpProxy_;
+            userInfoHelp.GetHttpProxyHostPass(tempProxy);
         }
         auto proxyType = (tempProxy.host_.find("https://") != std::string::npos) ? CURLPROXY_HTTPS : CURLPROXY_HTTP;
         if (!tempProxy.host_.empty() && !tempProxy.username_.empty()) {
@@ -1990,7 +1994,7 @@ int32_t NetConnService::IsPreferCellularUrl(const std::string& url, bool& prefer
                                  [&url](const std::string &str) { return url.find(str) != std::string::npos; });
     return 0;
 }
- 
+
 std::vector<std::string> NetConnService::GetPreferredUrl()
 {
     std::vector<std::string> preferCellularUrlList;

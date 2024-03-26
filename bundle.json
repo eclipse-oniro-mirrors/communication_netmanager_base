@@ -53,7 +53,8 @@
                 "ability_runtime",
                 "data_share",
                 "napi",
-                "bundle_framework"
+                "bundle_framework",
+                "relational_store"
             ],
             "third_party": [
                 "curl",

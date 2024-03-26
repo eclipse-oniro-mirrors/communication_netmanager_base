@@ -428,7 +428,7 @@ private:
     NetConnClient(const NetConnClient&) = delete;
 
     sptr<INetConnService> GetProxy();
-    void RecoverCallback();
+    void RecoverCallbackAndGlobalProxy();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
 private:
@@ -436,6 +436,7 @@ private:
     uint32_t currentCallbackId_ = 0;
     std::map<uint32_t, std::function<void(const HttpProxy &httpProxy)>> appHttpProxyCbMap_;
     HttpProxy appHttpProxy_;
+    HttpProxy globalHttpProxy_;
     char buffer_[RESERVED_BUFFER_SIZE] = {0};
     std::mutex mutex_;
     sptr<INetConnService> NetConnService_;
