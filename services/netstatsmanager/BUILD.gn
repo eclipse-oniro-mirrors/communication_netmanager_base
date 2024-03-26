@@ -30,7 +30,6 @@ config("net_stats_manager_config") {
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/manager",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys/wrapper",
-    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
@@ -101,6 +100,7 @@ ohos_shared_library("net_stats_manager") {
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 
   defines = [
