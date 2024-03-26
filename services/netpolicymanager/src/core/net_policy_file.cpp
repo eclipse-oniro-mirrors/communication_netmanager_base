@@ -313,7 +313,8 @@ void NetPolicyFile::AddUidPolicy(cJSON *root)
     for (uint32_t i = 0; i < size; i++) {
         cJSON *uidPolicyItem = cJSON_CreateObject();
         cJSON_AddItemToObject(uidPolicyItem, CONFIG_UID, cJSON_CreateString(netPolicy_.uidPolicies[i].uid.c_str()));
-        cJSON_AddItemToObject(uidPolicyItem, CONFIG_POLICY, cJSON_CreateString(netPolicy_.uidPolicies[i].policy.c_str()));
+        cJSON_AddItemToObject(uidPolicyItem, CONFIG_POLICY,
+                              cJSON_CreateString(netPolicy_.uidPolicies[i].policy.c_str()));
         cJSON_AddItemToArray(uidPolicy, uidPolicyItem);
     }
 
