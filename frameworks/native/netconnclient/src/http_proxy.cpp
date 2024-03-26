@@ -52,6 +52,16 @@ uint16_t HttpProxy::GetPort() const
     return port_;
 }
 
+SecureData HttpProxy::GetUsername() const
+{
+    return username_;
+}
+
+SecureData HttpProxy::GetPassword() const
+{
+    return password_;
+}
+
 std::list<std::string> HttpProxy::GetExclusionList() const
 {
     return exclusionList_;

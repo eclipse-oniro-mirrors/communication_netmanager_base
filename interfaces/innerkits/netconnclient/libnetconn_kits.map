@@ -193,6 +193,9 @@
       "OHOS::NetManagerStandard::PreAirplaneCallbackStub::PreAirplaneStart()";
       "virtual thunk to OHOS::NetManagerStandard::PreAirplaneCallbackStub::~PreAirplaneCallbackStub()";
       "OHOS::NetManagerStandard::PreAirplaneCallbackStub::PreAirplaneCallbackStub()";
+      "OHOS::NetManagerStandard::NetProxyUserinfo::GetInstance()";
+      "OHOS::NetManagerStandard::NetProxyUserinfo::SaveHttpProxyHostPass(OHOS::NetManagerStandard::HttpProxy const&)";
+      "OHOS::NetManagerStandard::NetProxyUserinfo::GetHttpProxyHostPass(OHOS::NetManagerStandard::HttpProxy&)";
       "vtable for OHOS::NetManagerStandard::PreAirplaneCallbackStub";
       "VTT for OHOS::NetManagerStandard::PreAirplaneCallbackStub";
     };
