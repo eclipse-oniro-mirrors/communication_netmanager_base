@@ -439,7 +439,7 @@ void Network::StartNetDetection(bool needReport)
 
 void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
 {
-    NETMGR_LOG_I("Enter NetDetectionForDnsHealth");
+    NETMGR_LOG_D("Enter NetDetectionForDnsHealth");
     if (eventHandler_) {
         eventHandler_ -> PostSyncTask([dnsHealthSuccess, this]() {
             this->NetDetectionForDnsHealthSync(dnsHealthSuccess);
@@ -465,7 +465,7 @@ void Network::NetDetectionForDnsHealthSync(bool dnsHealthSuccess)
         NETMGR_LOG_I("Dns report fail, start net detection");
         netMonitor_->Start();
     } else {
-        NETMGR_LOG_I("Not match, no need to restart.");
+        NETMGR_LOG_D("Not match, no need to restart.");
     }
 }
 
@@ -480,7 +480,7 @@ void Network::StopNetDetection()
 
 void Network::InitNetMonitor()
 {
-    NETMGR_LOG_I("Enter InitNetMonitor()");
+    NETMGR_LOG_D("Enter InitNetMonitor");
     std::weak_ptr<INetMonitorCallback> monitorCallback = shared_from_this();
     netMonitor_ = std::make_shared<NetMonitor>(netId_, netSupplierType_, netLinkInfo_, monitorCallback);
     if (netMonitor_ == nullptr) {
@@ -555,7 +555,7 @@ bool Network::IsConnected() const
 void Network::UpdateNetConnState(NetConnState netConnState)
 {
     if (state_ == netConnState) {
-        NETMGR_LOG_E("Ignore same network state changed.");
+        NETMGR_LOG_D("Ignore same network state changed.");
         return;
     }
     NetConnState oldState = state_;

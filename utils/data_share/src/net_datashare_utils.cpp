@@ -41,12 +41,12 @@ std::shared_ptr<DataShare::DataShareHelper> NetDataShareHelperUtils::CreateDataS
 {
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
-        NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbilityManager failed.");
+        NETMGR_LOG_E("GetSystemAbilityManager failed.");
         return nullptr;
     }
     sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     if (remoteObj == nullptr) {
-        NETMGR_LOG_E("NetDataShareHelperUtils GetSystemAbility Service Failed.");
+        NETMGR_LOG_E("GetSystemAbility Service Failed.");
         return nullptr;
     }
     return DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
@@ -63,12 +63,12 @@ int32_t NetDataShareHelperUtils::Query(Uri &uri, const std::string &key, std::st
     predicates.EqualTo(SETTINGS_DATA_COLUMN_KEYWORD, key);
     auto result = dataShareHelper_->Query(uri, predicates, columns);
     if (result == nullptr) {
-        NETMGR_LOG_E("DataShareHelper query error, result is null");
+        NETMGR_LOG_E("query error, result is null");
         return NETMANAGER_ERROR;
     }
 
     if (result->GoToFirstRow() != DataShare::E_OK) {
-        NETMGR_LOG_E("DataShareHelper query failed,go to first row error");
+        NETMGR_LOG_E("go to first row error");
         result->Close();
         return NETMANAGER_ERROR;
     }
@@ -77,7 +77,7 @@ int32_t NetDataShareHelperUtils::Query(Uri &uri, const std::string &key, std::st
     result->GetColumnIndex(SETTINGS_DATA_COLUMN_VALUE, columnIndex);
     result->GetString(columnIndex, value);
     result->Close();
-    NETMGR_LOG_I("DataShareHelper query success,value[%{public}s]", value.c_str());
+    NETMGR_LOG_D("query success,value[%{public}s]", value.c_str());
     return NETMANAGER_SUCCESS;
 }
 
@@ -94,11 +94,11 @@ int32_t NetDataShareHelperUtils::Insert(Uri &uri, const std::string &key, const 
     valuesBucket.Put(SETTINGS_DATA_COLUMN_VALUE, valueObj);
     int32_t result = dataShareHelper_->Insert(uri, valuesBucket);
     if (result == INVALID_VALUE) {
-        NETMGR_LOG_E("DataShareHelper insert failed, insert result:%{public}d", result);
+        NETMGR_LOG_E("insert failed");
         return NETMANAGER_ERROR;
     }
     dataShareHelper_->NotifyChange(uri);
-    NETMGR_LOG_I("DataShareHelper insert success");
+    NETMGR_LOG_I("insert success");
     return NETMANAGER_SUCCESS;
 }
 
@@ -124,7 +124,7 @@ int32_t NetDataShareHelperUtils::Update(Uri &uri, const std::string &key, const 
         return NETMANAGER_ERROR;
     }
     dataShareHelper_->NotifyChange(uri);
-    NETMGR_LOG_I("DataShareHelper update success");
+    NETMGR_LOG_I("update success");
     return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard

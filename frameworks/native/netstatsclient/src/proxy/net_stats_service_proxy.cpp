@@ -109,7 +109,9 @@ int32_t NetStatsServiceProxy::GetIfaceRxBytes(uint64_t &stats, const std::string
     int32_t error =
         SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_RXBYTES), data, reply);
     if (error != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        if (error != STATS_ERR_READ_BPF_FAIL) {
+            NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        }
         return error;
     }
     if (!reply.ReadUint64(stats)) {
@@ -135,7 +137,9 @@ int32_t NetStatsServiceProxy::GetIfaceTxBytes(uint64_t &stats, const std::string
     int32_t error =
         SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_TXBYTES), data, reply);
     if (error != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        if (error != STATS_ERR_READ_BPF_FAIL) {
+            NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        }
         return error;
     }
     if (!reply.ReadUint64(stats)) {
