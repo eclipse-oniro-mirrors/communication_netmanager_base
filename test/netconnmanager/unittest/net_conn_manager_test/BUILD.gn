@@ -52,6 +52,7 @@ ohos_unittest("net_conn_manager_test") {
     "net_interface_callback_stub_test.cpp",
     "net_link_info_test.cpp",
     "net_monitor_test.cpp",
+    "net_proxy_userinfo_test.cpp",
     "net_score_test.cpp",
     "net_specifier_test.cpp",
     "net_supplier_callback_base_test.cpp",
@@ -61,7 +62,6 @@ ohos_unittest("net_conn_manager_test") {
     "network_security_config_test.cpp",
     "network_test.cpp",
     "route_test.cpp",
-    "net_proxy_userinfo_test.cpp",
   ]
 
   include_dirs = [
@@ -109,9 +109,9 @@ ohos_unittest("net_conn_manager_test") {
     "eventhandler:libeventhandler",
     "hisysevent:libhisysevent",
     "ipc:ipc_core",
+    "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "relational_store:native_rdb",
   ]
 
   defines = [
