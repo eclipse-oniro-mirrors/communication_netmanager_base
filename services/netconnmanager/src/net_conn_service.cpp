@@ -1520,7 +1520,8 @@ int32_t NetConnService::SetAirplaneMode(bool state)
 {
     NETMGR_LOG_I("Enter SetAirplaneMode, AirplaneMode is %{public}d", state);
     if (state) {
-        for (auto mem : preAirplaneCallbacks_) {
+        std::lock_guard guard(preAirplaneCbsMutex_);
+        for (const auto& mem : preAirplaneCallbacks_) {
             if (mem.second != nullptr) {
                 int32_t ret = mem.second->PreAirplaneStart();
                 NETMGR_LOG_D("PreAirplaneStart result %{public}d", ret);
