@@ -739,7 +739,7 @@ int32_t NetsysControllerServiceImpl::UnregisterDnsHealthCallback(const sptr<INet
 
 int32_t NetsysControllerServiceImpl::GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie)
 {
-    NETMGR_LOG_D("GetCookieStats: type=%{public}d", type);
+    NETMGR_LOG_D("GetCookieStats: type=%{public}u", type);
     return netsysClient_.GetCookieStats(stats, type, cookie);
 }
 
