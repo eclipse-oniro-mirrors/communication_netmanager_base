@@ -1502,6 +1502,7 @@ int32_t NetConnService::RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallb
 {
     int32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
     NETMGR_LOG_D("RegisterPreAirplaneCallback, calllinguid [%{public}d]", callingUid);
+    std::lock_guard guard(preAirplaneCbsMutex_);
     preAirplaneCallbacks_[callingUid] = callback;
     return NETMANAGER_SUCCESS;
 }
@@ -1510,6 +1511,7 @@ int32_t NetConnService::UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCal
 {
     int32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
     NETMGR_LOG_D("UnregisterPreAirplaneCallback, calllinguid [%{public}d]", callingUid);
+    std::lock_guard guard(preAirplaneCbsMutex_);
     preAirplaneCallbacks_.erase(callingUid);
     return NETMANAGER_SUCCESS;
 }
@@ -1518,7 +1520,8 @@ int32_t NetConnService::SetAirplaneMode(bool state)
 {
     NETMGR_LOG_I("Enter SetAirplaneMode, AirplaneMode is %{public}d", state);
     if (state) {
-        for (auto mem : preAirplaneCallbacks_) {
+        std::lock_guard guard(preAirplaneCbsMutex_);
+        for (const auto& mem : preAirplaneCallbacks_) {
             if (mem.second != nullptr) {
                 int32_t ret = mem.second->PreAirplaneStart();
                 NETMGR_LOG_D("PreAirplaneStart result %{public}d", ret);

@@ -198,6 +198,7 @@
       "OHOS::NetManagerStandard::NetProxyUserinfo::GetHttpProxyHostPass(OHOS::NetManagerStandard::HttpProxy&)";
       "vtable for OHOS::NetManagerStandard::PreAirplaneCallbackStub";
       "VTT for OHOS::NetManagerStandard::PreAirplaneCallbackStub";
+      "VTT?for?OHOS::NetManagerStandard::PreAirplaneCallbackStub";
     };
   local:
    *;
