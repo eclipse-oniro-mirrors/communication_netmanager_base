@@ -195,6 +195,7 @@
       "OHOS::NetManagerStandard::PreAirplaneCallbackStub::PreAirplaneCallbackStub()";
       "vtable for OHOS::NetManagerStandard::PreAirplaneCallbackStub";
       "VTT for OHOS::NetManagerStandard::PreAirplaneCallbackStub";
+      "VTT?for?OHOS::NetManagerStandard::PreAirplaneCallbackStub";
     };
   local:
    *;
