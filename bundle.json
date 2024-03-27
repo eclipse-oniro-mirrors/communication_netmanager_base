@@ -42,6 +42,7 @@
                 "access_token",
                 "hitrace",
                 "hisysevent",
+                "cJSON",
                 "c_utils",
                 "samgr",
                 "init",
@@ -50,8 +51,7 @@
                 "ability_runtime",
                 "data_share",
                 "napi",
-                "bundle_framework",
-                "cJSON"
+                "bundle_framework"
             ],
             "third_party": [
                 "curl",
