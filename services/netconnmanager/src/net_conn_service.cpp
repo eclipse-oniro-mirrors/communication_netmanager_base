@@ -715,7 +715,7 @@ void NetConnService::SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy)
     BroadcastInfo info;
     info.action = EventFwk::CommonEventSupport::COMMON_EVENT_HTTP_PROXY_CHANGE;
     info.data = "Global HttpProxy Changed";
-    info.ordered = true;
+    info.ordered = false;
     std::map<std::string, std::string> param = {{"HttpProxy", httpProxy.ToString()}};
     BroadcastManager::GetInstance().SendBroadcast(info, param);
 }
