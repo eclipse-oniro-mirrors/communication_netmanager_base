@@ -278,7 +278,7 @@ private:
     static int32_t SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtmsg msg, RouteInfo routeInfo,
                                      uint32_t index);
     static bool CheckInternalNetId(int32_t netId);
-    static uint32_t FindTableByInterfacename(const std::string &interfaceName);
+    static uint32_t FindTableByInterfacename(const std::string &interfaceName, int32_t netId = 0);
     static uint32_t GetRouteTableFromType(TableType tableType, const std::string &interfaceName);
     static int32_t SetRouteInfo(TableType tableType, const std::string &interfaceName,
                                 const std::string &destinationName, const std::string &nextHop,

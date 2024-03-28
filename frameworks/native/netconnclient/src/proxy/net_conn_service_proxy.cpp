@@ -216,7 +216,7 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<NetSpecifier> &n
 }
 
 int32_t NetConnServiceProxy::RequestNetConnection(const sptr<NetSpecifier> netSpecifier,
-                                                     const sptr<INetConnCallback> callback, const uint32_t timeoutMS)
+                                                  const sptr<INetConnCallback> callback, const uint32_t timeoutMS)
 {
     if (netSpecifier == nullptr || callback == nullptr) {
         NETMGR_LOG_E("The parameter of netSpecifier or callback is nullptr");

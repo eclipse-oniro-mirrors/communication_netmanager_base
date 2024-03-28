@@ -362,7 +362,7 @@ private:
     enum RegisterType {
         REGISTER_NET_CONN_CALLBACK,
         REQUEST_NET_CONNECTION,
-    }
+    };
     bool Init();
     void RecoverInfo();
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
@@ -375,7 +375,8 @@ private:
     void CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackType type);
     void CallbackForAvailable(sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
     uint32_t FindBestNetworkForRequest(sptr<NetSupplier> &supplier, std::shared_ptr<NetActivate> &netActivateNetwork);
-    uint32_t FindInternalNetworkForRequest(sptr<NetSupplier> &supplier, std::shared_ptr<NetActivate> &netActivateNetwork);
+    uint32_t FindInternalNetworkForRequest(sptr<NetSupplier> &supplier,
+                                           std::shared_ptr<NetActivate> &netActivateNetwork);
     void SendRequestToAllNetwork(std::shared_ptr<NetActivate> request);
     void SendRequestToInternalNetwork(std::shared_ptr<NetActivate> request);
     void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId);

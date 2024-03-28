@@ -208,7 +208,8 @@ int32_t ConnManager::GetNetworkForInterface(int32_t netId, std::string &interfac
     std::map<int32_t, std::shared_ptr<NetsysNetwork>>::iterator it;
     int32_t InterfaceId = INTERFACE_UNSET;
     int32_t netIdType = GetNetIdType(netId);
-    networks_.Iterate([&InterfaceId, &interfaceName, &netIdType](int32_t id, std::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
+    networks_.Iterate([&InterfaceId, &interfaceName, &netIdType]
+        (int32_t id, std::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
         if (GetNetIdType(id) != netIdType) {
             return;
         }
@@ -296,7 +297,7 @@ RouteManager::TableType ConnManager::GetTableType(int32_t netId)
         return RouteManager::VPN_NETWORK;
     } else if (netId >= NetManagerStandard::MIN_INTERNAL_NET_ID &&
         netId <= NetManagerStandard::MAX_INTERNAL_NET_ID) {
-        return RouteManager::INTERNAL_DEFAULT; 
+        return RouteManager::INTERNAL_DEFAULT;
     } else {
         return RouteManager::INTERFACE;
     }

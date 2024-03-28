@@ -24,7 +24,7 @@
 #include <net/if.h>
 #include <netlink_socket.h>
 #include <sstream>
-#include <stdint.h>
+#include <cstdint>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/uio.h>

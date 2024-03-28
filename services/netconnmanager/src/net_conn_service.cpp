@@ -241,7 +241,7 @@ int32_t NetConnService::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpe
 }
 
 int32_t NetConnService::RequestNetConnection(const sptr<NetSpecifier> netSpecifier,
-                                                const sptr<INetConnCallback> callback, const uint32_t timeoutMS)
+                                             const sptr<INetConnCallback> callback, const uint32_t timeoutMS)
 {
     uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
 
@@ -454,8 +454,8 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
 }
 
 int32_t NetConnService::RequestNetConnectionAsync(const sptr<NetSpecifier> &netSpecifier,
-                                                     const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS,
-                                                     const uint32_t callingUid)
+                                                  const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS,
+                                                  const uint32_t callingUid)
 {
     NETMGR_LOG_I("Request net connect callback async, call uid [%{public}u]", callingUid);
     if (netSpecifier == nullptr || callback == nullptr) {
@@ -573,11 +573,11 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
 
 int32_t NetConnService::IncreaseNetConnCallbackCntForUid(const uint32_t callingUid, const RegisterType registerType)
 {
-    std::map<uint32_t, uint32_t> *netUidRequest = registerType == REGISTER_NET_CONN_CALLBACK ?
-        &netUidRequest_ : &internalDefaultUidRequest_; 
-    auto requestNetwork = netUidRequest->find(callingUid);
-    if (requestNetwork == netUidRequest->end()) {
-        netUidRequest->insert(std::make_pair(callingUid, 1));
+    std::map<uint32_t, uint32_t> &netUidRequest = registerType == REGISTER_NET_CONN_CALLBACK ?
+        netUidRequest_ : internalDefaultUidRequest_;
+    auto requestNetwork = netUidRequest.find(callingUid);
+    if (requestNetwork == netUidRequest.end()) {
+        netUidRequest.insert(std::make_pair(callingUid, 1));
     } else {
         if (requestNetwork->second >= MAX_ALLOW_UID_NUM) {
             NETMGR_LOG_E("return falied for UID [%{public}d] has registered over [%{public}d] callback",
@@ -592,17 +592,17 @@ int32_t NetConnService::IncreaseNetConnCallbackCntForUid(const uint32_t callingU
 
 void NetConnService::DecreaseNetConnCallbackCntForUid(const uint32_t callingUid, const RegisterType registerType)
 {
-    std::map<uint32_t, uint32_t> *netUidRequest = registerType == REGISTER_NET_CONN_CALLBACK ?
-        &netUidRequest_ : &internalDefaultUidRequest_; 
-    auto requestNetwork = netUidRequest->find(callingUid);
-    if (requestNetwork == netUidRequest->end()) {
+    std::map<uint32_t, uint32_t> &netUidRequest = registerType == REGISTER_NET_CONN_CALLBACK ?
+        netUidRequest_ : internalDefaultUidRequest_;
+    auto requestNetwork = netUidRequest.find(callingUid);
+    if (requestNetwork == netUidRequest.end()) {
         NETMGR_LOG_E("Could not find the request calling uid");
     } else {
         if (requestNetwork->second >= 1) {
             requestNetwork->second--;
         }
         if (requestNetwork->second == 0) {
-            netUidRequest->erase(requestNetwork);
+            netUidRequest.erase(requestNetwork);
         }
     }
 }
@@ -811,8 +811,9 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::ActivateInternalNetwork(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
-                                        const uint32_t &timeoutMS)
+int32_t NetConnService::ActivateInternalNetwork(const sptr<NetSpecifier> &netSpecifier,
+                                                const sptr<INetConnCallback> &callback,
+                                                const uint32_t &timeoutMS)
 {
     NETMGR_LOG_D("ActivateNetwork Enter");
     if (netSpecifier == nullptr || callback == nullptr) {
@@ -840,7 +841,7 @@ int32_t NetConnService::ActivateInternalNetwork(const sptr<NetSpecifier> &netSpe
         CallbackForAvailable(bestNet, callback);
         if (bestNet->GetNetSupplierType() == BEARER_CELLULAR || bestNet->GetNetSupplierType() == BEARER_WIFI) {
             EventInfo eventInfo = {.capabilities = bestNet->GetNetCapabilities().ToString(" "),
-                                          .supplierIdent = bestNet->GetNetSupplierIdent()};
+                                   .supplierIdent = bestNet->GetNetSupplierIdent()};
             EventReport::SendRequestBehaviorEvent(eventInfo);
         }
         return NETMANAGER_SUCCESS;
@@ -891,7 +892,8 @@ sptr<NetSupplier> NetConnService::FindNetSupplier(uint32_t supplierId)
     return nullptr;
 }
 
-bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId, RegisterType &registerType)
+bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback,
+                                      uint32_t &reqId, RegisterType &registerType)
 {
     if (callback == nullptr) {
         NETMGR_LOG_E("callback is null");
@@ -912,7 +914,8 @@ bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback, ui
             if (netActivate) {
                 sptr<NetSpecifier> specifier = netActivate->GetNetSpecifier();
                 registerType = (specifier != nullptr &&
-                    specifier->netCapabilities_.netCaps_.count(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0) ?
+                    specifier->netCapabilities_.netCaps_.count(
+                    NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0) ?
                     REQUEST_NET_CONNECTION : REGISTER_NET_CONN_CALLBACK;
             }
             return true;
@@ -1009,7 +1012,7 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
 }
 
 uint32_t NetConnService::FindInternalNetworkForRequest(sptr<NetSupplier> &supplier,
-                                                   std::shared_ptr<NetActivate> &netActivateNetwork)
+                                                       std::shared_ptr<NetActivate> &netActivateNetwork)
 {
     int score = 0;
     supplier = nullptr;

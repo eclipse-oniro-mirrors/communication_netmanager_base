@@ -257,9 +257,8 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
             continue;
         }
         auto family = GetAddrFamily(inetAddr.address_);
-        auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_)
-                                             : ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_)
-                                                                     : Ipv4PrefixLen(inetAddr.netMask_));
+        auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_) :
+            ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_) : Ipv4PrefixLen(inetAddr.netMask_));
         int32_t ret = NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_,
             inetAddr.address_, prefixLen);
         if (NETMANAGER_SUCCESS != ret) {
@@ -292,9 +291,8 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
             continue;
         }
         auto family = GetAddrFamily(inetAddr.address_);
-        auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_)
-                                             : ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_)
-                                                                     : Ipv4PrefixLen(inetAddr.netMask_));
+        auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_) :
+            ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_) : Ipv4PrefixLen(inetAddr.netMask_));
         if (NETMANAGER_SUCCESS != NetsysController::GetInstance().AddInterfaceAddress(newNetLinkInfo.ifaceName_,
                                                                                       inetAddr.address_, prefixLen)) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_IP_ADDR_FAILED);

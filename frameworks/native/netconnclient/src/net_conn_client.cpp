@@ -156,8 +156,8 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpec
     return ret;
 }
 
-int32_t NetConnClient::RequestNetConnection(const sptr<NetSpecifier> netSpecifier, const sptr<INetConnCallback> callback,
-                                            const uint32_t timeoutMS)
+int32_t NetConnClient::RequestNetConnection(const sptr<NetSpecifier> netSpecifier,
+                                            const sptr<INetConnCallback> callback, const uint32_t timeoutMS)
 {
     NETMGR_LOG_D("RequestNetConnection with timeout client in.");
     if (netSpecifier == nullptr || !netSpecifier->SpecifierIsValid()) {
@@ -439,8 +439,8 @@ void NetConnClient::RecoverCallback()
             sptr<NetSpecifier> specifier = std::get<0>(mem);
             sptr<INetConnCallback> callback = std::get<1>(mem);
             uint32_t timeoutMS = std::get<2>(mem);
-            bool isInternalDefault = (specifier != nullptr &&
-                specifier->netCapabilities.netCaps_.count(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0);
+            bool isInternalDefault = specifier != nullptr &&
+                specifier->netCapabilities_.netCaps_.count(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0;
             int32_t ret = NETMANAGER_SUCCESS;
             if (specifier != nullptr && timeoutMS != 0) {
                 ret = isInternalDefault ? proxy->RequestNetConnection(specifier, callback, timeoutMS) :

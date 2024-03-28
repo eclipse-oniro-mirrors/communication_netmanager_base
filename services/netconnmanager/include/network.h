@@ -43,7 +43,7 @@ public:
     ~Network() = default;
     bool operator==(const Network &network) const;
     int32_t GetNetId() const;
-    uint32_t GetSupplerId() const;
+    uint32_t GetSupplierId() const;
     bool UpdateBasicNetwork(bool isAvailable_);
     bool UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo);
     NetLinkInfo GetNetLinkInfo() const;

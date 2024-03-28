@@ -40,6 +40,7 @@ private:
     void InitStaticArpToInterfaceMap();
     void InitInterfaceFuncToInterfaceMap();
     void InitResetNetFuncToInterfaceMap();
+    void InitAll();
     bool CheckPermission(const std::set<std::string> &permissions);
     bool CheckPermissionWithCache(const std::set<std::string> &permissions);
     int32_t OnRequestCheck(uint32_t code, const std::set<std::string> &permissions);
