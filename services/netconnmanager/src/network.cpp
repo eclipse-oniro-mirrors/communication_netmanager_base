@@ -196,7 +196,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateTcpBufferSize(netLinkInfo);
 
     netLinkInfo_ = netLinkInfo;
-    if (netSupplierType_ != BEARER_VPN && isNeedNetDetection) {
+    if (netSupplierType_ != BEARER_VPN && isNeedNetDetection_) {
         StartNetDetection(false);
     }
     return true;
