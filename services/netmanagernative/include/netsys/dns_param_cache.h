@@ -19,6 +19,7 @@
 #include <iostream>
 #include <map>
 
+#include "ffrt.h"
 #include "dns_resolv_config.h"
 #include "netnative_log_wrapper.h"
 
@@ -69,7 +70,7 @@ public:
 private:
     DnsParamCache();
 
-    std::mutex cacheMutex_;
+    ffrt::mutex cacheMutex_;
 
     std::atomic_uint defaultNetId_;
 
