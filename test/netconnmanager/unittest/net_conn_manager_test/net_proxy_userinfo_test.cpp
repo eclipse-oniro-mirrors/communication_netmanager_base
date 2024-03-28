@@ -46,8 +46,6 @@ HWTEST_F(NetProxyUserinfoTest, SaveHttpProxyHostPassTest001, TestSize.Level1)
     httpProxy.SetHost("www.xxx.com");
     uint16_t port = 8080;
     httpProxy.SetPort(port);
-    httpProxy.SetUserName("test");
-    httpProxy.SetPassword("test");
     NetProxyUserinfoTest::instance_.SaveHttpProxyHostPass(httpProxy);
     EXPECT_EQ(httpProxy.GetUsername().empty(), false);
 }
