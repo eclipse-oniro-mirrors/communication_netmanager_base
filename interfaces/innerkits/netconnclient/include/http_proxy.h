@@ -37,6 +37,8 @@ public:
     [[nodiscard]] uint16_t GetPort() const;
     [[nodiscard]] std::list<std::string> GetExclusionList() const;
     [[nodiscard]] std::string ToString() const;
+    [[nodiscard]] SecureData GetUsername() const;
+    [[nodiscard]] SecureData GetPassword() const;
     void inline SetHost(std::string &&host)
     {
         host_ = host;

@@ -39,7 +39,7 @@ void NetHttpProxyTracker::ReadFromSettingsData(HttpProxy &httpProxy)
     Uri hostUri(GLOBAL_PROXY_HOST_URI);
     int32_t ret = dataShareHelperUtils->Query(hostUri, KEY_GLOBAL_PROXY_HOST, proxyHost);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("Query global proxy host failed.");
+        NETMGR_LOG_D("Query global proxy host failed.");
     }
     std::string host = Base64::Decode(proxyHost);
     host = (host == DEFAULT_HTTP_PROXY_HOST ? "" : host);
@@ -47,14 +47,14 @@ void NetHttpProxyTracker::ReadFromSettingsData(HttpProxy &httpProxy)
     Uri portUri(GLOBAL_PROXY_PORT_URI);
     ret = dataShareHelperUtils->Query(portUri, KEY_GLOBAL_PROXY_PORT, proxyPort);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("Query global proxy port failed.");
+        NETMGR_LOG_D("Query global proxy port failed.");
     }
     uint16_t port = (proxyPort.empty() || host.empty()) ? 0 : static_cast<uint16_t>(CommonUtils::StrToUint(proxyPort));
 
     Uri exclusionsUri(GLOBAL_PROXY_EXCLUSIONS_URI);
     ret = dataShareHelperUtils->Query(exclusionsUri, KEY_GLOBAL_PROXY_EXCLUSIONS, proxyExclusions);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("Query global proxy exclusions failed.");
+        NETMGR_LOG_D("Query global proxy exclusions failed.");
     }
     std::list<std::string> exclusionList =
         host.empty() ? std::list<std::string>() : ParseExclusionList(proxyExclusions);
@@ -90,6 +90,10 @@ bool NetHttpProxyTracker::WriteToSettingsData(HttpProxy &httpProxy)
         return false;
     }
     httpProxy.SetExclusionList(ParseExclusionList(exclusions));
+    if (!httpProxy.GetUsername().empty()) {
+        auto userInfoHelp = NetProxyUserinfo::GetInstance();
+        userInfoHelp.SaveHttpProxyHostPass(httpProxy);
+    }
     return true;
 }
 

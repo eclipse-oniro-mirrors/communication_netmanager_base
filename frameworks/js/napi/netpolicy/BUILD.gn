@@ -22,6 +22,7 @@ config("policy_config") {
     "include/context",
     "$INNERKITS_ROOT/include",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
+    "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
   ]
 
   cflags = [
@@ -74,6 +75,7 @@ ohos_shared_library("policy") {
 
   deps = [
     "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if",
+    "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETMANAGER_BASE_ROOT/utils/napi_utils:napi_utils",
   ]
 

@@ -58,7 +58,7 @@ static napi_value MakeNetworkResponse(napi_env env, const std::set<NetBearType> 
 
 bool NetworkExec::ExecGetType(GetTypeContext *context)
 {
-    NETMANAGER_BASE_LOGI("NetworkExec::ExecGetType");
+    NETMANAGER_BASE_LOGD("ExecGetType");
     NetHandle handle;
     auto ret = NetConnClient::GetInstance().GetDefaultNet(handle);
     if (ret != NETMANAGER_SUCCESS) {
@@ -113,7 +113,7 @@ napi_value NetworkExec::GetTypeCallback(GetTypeContext *context)
 
 bool NetworkExec::ExecSubscribe(SubscribeContext *context)
 {
-    NETMANAGER_BASE_LOGI("NetworkExec::ExecSubscribe");
+    NETMANAGER_BASE_LOGI("ExecSubscribe");
     EventManager *manager = context->GetManager();
 
     sptr<INetConnCallback> callback = g_observerMap[manager];
@@ -148,7 +148,7 @@ napi_value NetworkExec::SubscribeCallback(SubscribeContext *context)
 
 bool NetworkExec::ExecUnsubscribe(UnsubscribeContext *context)
 {
-    NETMANAGER_BASE_LOGI("NetworkExec::ExecUnsubscribe");
+    NETMANAGER_BASE_LOGI("ExecUnsubscribe");
     EventManager *manager = context->GetManager();
     sptr<INetConnCallback> callback = g_observerMap[manager];
     if (callback == nullptr) {
