@@ -425,7 +425,7 @@ int32_t NetConnClient::SetAirplaneMode(bool state)
     return proxy->SetAirplaneMode(state);
 }
 
-void NetConnClient::RecoverCallback()
+void NetConnClient::RecoverCallbackAndGlobalProxy()
 {
     uint32_t count = 0;
     while (GetProxy() == nullptr && count < MAX_GET_SERVICE_COUNT) {
@@ -456,13 +456,14 @@ void NetConnClient::RecoverCallback()
             }
         }
     }
-    if (proxy != nullptr) {
-        for (auto mem : preAirplaneCallbacks_) {
-            if (mem != nullptr) {
-                int32_t ret = proxy->RegisterPreAirplaneCallback(mem);
-                NETMGR_LOG_D("Register pre airplane result %{public}d", ret);
-            }
-        }
+    if (proxy != nullptr && preAirplaneCallback_ != nullptr) {
+        int32_t ret = proxy->RegisterPreAirplaneCallback(preAirplaneCallback_);
+        NETMGR_LOG_D("Register pre airplane result %{public}d", ret);
+    }
+
+    if (proxy != nullptr && !globalHttpProxy_.GetHost().empty()) {
+        int32_t ret = proxy->SetGlobalHttpProxy(globalHttpProxy_);
+        NETMGR_LOG_D("globalHttpProxy_ Register result %{public}d", ret);
     }
 }
 
@@ -489,10 +490,10 @@ void NetConnClient::OnRemoteDied(const wptr<IRemoteObject> &remote)
     local->RemoveDeathRecipient(deathRecipient_);
     NetConnService_ = nullptr;
 
-    if (!registerConnTupleList_.empty() || !preAirplaneCallbacks_.empty()) {
+    if (!registerConnTupleList_.empty() || preAirplaneCallback_ != nullptr || !globalHttpProxy_.GetHost().empty()) {
         NETMGR_LOG_I("on remote died recover callback");
         std::thread t([this]() {
-            RecoverCallback();
+            RecoverCallbackAndGlobalProxy();
         });
         std::string threadName = "netconnRecoverCallback";
         pthread_setname_np(t.native_handle(), threadName.c_str());
@@ -516,6 +517,9 @@ int32_t NetConnClient::SetGlobalHttpProxy(const HttpProxy &httpProxy)
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    if (globalHttpProxy_ != httpProxy) {
+        globalHttpProxy_ = httpProxy;
     }
     return proxy->SetGlobalHttpProxy(httpProxy);
 }
@@ -792,7 +796,7 @@ int32_t NetConnClient::RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallba
     int32_t ret = proxy->RegisterPreAirplaneCallback(callback);
     if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("RegisterPreAirplaneCallback success, save callback.");
-        preAirplaneCallbacks_.insert(callback);
+        preAirplaneCallback_ = callback;
     }
 
     return ret;
@@ -810,7 +814,7 @@ int32_t NetConnClient::UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCall
     int32_t ret = proxy->UnregisterPreAirplaneCallback(callback);
     if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("UnregisterPreAirplaneCallback success,delete callback.");
-        preAirplaneCallbacks_.erase(callback);
+        preAirplaneCallback_ = nullptr;
     }
 
     return ret;

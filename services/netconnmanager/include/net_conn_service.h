@@ -226,7 +226,7 @@ public:
     int32_t GetConnectionProperties(int32_t netId, NetLinkInfo &info) override;
     int32_t GetNetCapabilities(int32_t netId, NetAllCapabilities &netAllCap) override;
     int32_t BindSocket(int32_t socketFd, int32_t netId) override;
-    void HandleDetectionResult(uint32_t supplierId, bool ifValid);
+    void HandleDetectionResult(uint32_t supplierId, NetDetectionStatus netState);
     int32_t RestrictBackgroundChanged(bool isRestrictBackground);
     /**
      * Set airplane mode
@@ -463,6 +463,7 @@ private:
     std::mutex httpProxyThreadMutex_;
     static constexpr const uint32_t HTTP_PROXY_ACTIVE_PERIOD_S = 120;
     std::map<int32_t, sptr<IPreAirplaneCallback>> preAirplaneCallbacks_;
+    std::mutex preAirplaneCbsMutex_;
 
     bool hasSARemoved_ = false;
 };

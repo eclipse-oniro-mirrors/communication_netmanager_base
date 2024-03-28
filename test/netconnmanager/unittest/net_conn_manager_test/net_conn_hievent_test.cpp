@@ -38,7 +38,7 @@ public:
     sptr<Network> GetNetwork();
     sptr<NetLinkInfo> GetNetLinkInfo() const;
     void HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect);
-    void HandleDetectionResult(uint32_t supplierId, bool ifValid);
+    void HandleDetectionResult(uint32_t supplierId, NetDetectionStatus netState);
 };
 
 void NetConnHiEventTest::SetUpTestCase() {}
@@ -97,7 +97,7 @@ sptr<NetLinkInfo> NetConnHiEventTest::GetNetLinkInfo() const
 }
 
 void NetConnHiEventTest::HandleNetMonitorResult(NetDetectionStatus netDetectionState, const std::string &urlRedirect) {}
-void NetConnHiEventTest::HandleDetectionResult(uint32_t supplierId, bool ifValid) {}
+void NetConnHiEventTest::HandleDetectionResult(uint32_t supplierId, NetDetectionStatus netState) {}
 
 /**
  * @tc.name: NetConnHiEventTest_001

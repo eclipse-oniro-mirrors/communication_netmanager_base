@@ -73,7 +73,7 @@ NetMonitor::NetMonitor(uint32_t netId, NetBearType bearType, const NetLinkInfo &
 
 void NetMonitor::Start()
 {
-    NETMGR_LOG_I("Start net[%{public}d] monitor in", netId_);
+    NETMGR_LOG_D("Start net[%{public}d] monitor in", netId_);
     if (isDetecting_) {
         NETMGR_LOG_W("Net[%{public}d] monitor is detecting, no need to start", netId_);
         return;

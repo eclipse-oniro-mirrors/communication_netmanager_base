@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -235,7 +235,7 @@ int32_t DnsQualityDiag::send_dns_report()
     if (report_.size() > 0) {
         std::list<NetsysNative::NetDnsResultReport> reportSend(report_);
         report_.clear();
-        NETNATIVE_LOG_D("send_dns_report (%{public}u)", reportSend.size());
+        NETNATIVE_LOG_D("send_dns_report (%{public}zu)", reportSend.size());
         for (auto cb: resultListeners_) {
             NETNATIVE_LOG_D("send_dns_report cb)");
             cb->OnDnsResultReport(reportSend.size(), reportSend);

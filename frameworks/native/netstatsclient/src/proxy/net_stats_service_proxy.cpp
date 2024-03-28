@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,7 +109,9 @@ int32_t NetStatsServiceProxy::GetIfaceRxBytes(uint64_t &stats, const std::string
     int32_t error =
         SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_RXBYTES), data, reply);
     if (error != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        if (error != STATS_ERR_READ_BPF_FAIL) {
+            NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        }
         return error;
     }
     if (!reply.ReadUint64(stats)) {
@@ -135,7 +137,9 @@ int32_t NetStatsServiceProxy::GetIfaceTxBytes(uint64_t &stats, const std::string
     int32_t error =
         SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_TXBYTES), data, reply);
     if (error != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        if (error != STATS_ERR_READ_BPF_FAIL) {
+            NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        }
         return error;
     }
     if (!reply.ReadUint64(stats)) {
@@ -416,7 +420,7 @@ int32_t NetStatsServiceProxy::GetCookieRxBytes(uint64_t &stats, uint64_t cookie)
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     if (!data.WriteUint64(cookie)) {
-        NETMGR_LOG_E("proxy cookie%{public}llu", cookie);
+        NETMGR_LOG_E("proxy cookie write failed.");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
@@ -442,7 +446,7 @@ int32_t NetStatsServiceProxy::GetCookieTxBytes(uint64_t &stats, uint64_t cookie)
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     if (!data.WriteUint64(cookie)) {
-        NETMGR_LOG_E("proxy cookie%{public}llu", cookie);
+        NETMGR_LOG_E("proxy cookie write failed.");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 

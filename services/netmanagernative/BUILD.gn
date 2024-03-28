@@ -30,7 +30,6 @@ config("netsys_native_manager_config") {
     "$C_UTILS_ROOT/base/include",
     "$DHCP_MANAGER_ROOT/interfaces/inner_api/include",
     "$DHCP_MANAGER_ROOT/interfaces/inner_api/interfaces",
-    "$SAMGR_MANAGER_ROOT/interfaces/innerkits/samgr_proxy/include",
     "$FWMARK_CLIENT_DIR/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
     "$NETCONNMANAGER_SOURCE_DIR/include",
@@ -168,6 +167,7 @@ ohos_shared_library("netsys_native_manager") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 
   public_configs = [ "$NETMANAGER_BASE_ROOT/utils:netmgr_common_config" ]

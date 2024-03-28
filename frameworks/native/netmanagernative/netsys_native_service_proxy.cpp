@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "net_manager_constants.h"
+#include "net_stats_constants.h"
 #include "netnative_log_wrapper.h"
 
 namespace OHOS {
@@ -1596,7 +1597,9 @@ int32_t NetsysNativeServiceProxy::GetIfaceStats(uint64_t &stats, uint32_t type, 
         return ERR_FLATTEN_OBJECT;
     }
     if (ret != ERR_NONE) {
-        NETNATIVE_LOGE("fail to GetIfaceStats ret= %{public}d", ret);
+        if (ret != STATS_ERR_READ_BPF_FAIL) {
+            NETNATIVE_LOGE("fail to GetIfaceStats ret= %{public}d", ret);
+        }
         return ret;
     }
     if (!reply.ReadUint64(stats)) {

@@ -15,7 +15,7 @@
 
 #ifndef NET_HTTP_PROXY_TRACKER_H
 #define NET_HTTP_PROXY_TRACKER_H
-
+#include "net_proxy_userinfo.h"
 #include "http_proxy.h"
 
 namespace OHOS {

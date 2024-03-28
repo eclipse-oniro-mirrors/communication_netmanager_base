@@ -70,7 +70,7 @@ public:
     void UpdateNetConnState(NetConnState netConnState);
     bool IsConnecting() const;
     bool IsConnected() const;
-    void SetNetValid(bool ifValid);
+    void SetNetValid(NetDetectionStatus netState);
     bool IsNetValidated();
     void SetNetScore(int32_t score);
     int32_t GetNetScore() const;

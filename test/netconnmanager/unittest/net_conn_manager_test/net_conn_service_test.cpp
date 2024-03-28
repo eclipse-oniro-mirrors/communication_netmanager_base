@@ -605,8 +605,8 @@ HWTEST_F(NetConnServiceTest, GetTest001, TestSize.Level1)
     ret = NetConnService::GetInstance()->RestrictBackgroundChanged(false);
     EXPECT_EQ(ret, NET_CONN_ERR_NET_NO_RESTRICT_BACKGROUND);
 
-    NetConnService::GetInstance()->HandleDetectionResult(TEST_NOTEXISTSUPPLIER, true);
-    NetConnService::GetInstance()->HandleDetectionResult(g_supplierId, true);
+    NetConnService::GetInstance()->HandleDetectionResult(TEST_NOTEXISTSUPPLIER, VERIFICATION_STATE);
+    NetConnService::GetInstance()->HandleDetectionResult(g_supplierId, VERIFICATION_STATE);
 
     std::vector<std::u16string> args;
     args.emplace_back(u"dummy data");

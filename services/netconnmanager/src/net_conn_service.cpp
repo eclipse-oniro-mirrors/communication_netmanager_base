@@ -397,7 +397,7 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
         bearerType, netConnEventHandler_);
     network->SetNeedNetDetection(netCaps.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps.end());
     supplier->SetNetwork(network);
-    supplier->SetNetValid(true);
+    supplier->SetNetValid(VERIFICATION_STATE);
     // save supplier
     std::unique_lock<std::mutex> locker(netManagerMutex_);
     netSuppliers_[supplierId] = supplier;
@@ -729,14 +729,14 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
 
 int32_t NetConnService::NetDetectionAsync(int32_t netId)
 {
-    NETMGR_LOG_I("Enter NetConnService::NetDetection, netId=[%{public}d]", netId);
+    NETMGR_LOG_I("Enter NetDetection, netId=[%{public}d]", netId);
     auto iterNetwork = networks_.find(netId);
     if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
         NETMGR_LOG_E("Could not find the corresponding network.");
         return NET_CONN_ERR_NETID_NOT_FOUND;
     }
     iterNetwork->second->StartNetDetection(true);
-    NETMGR_LOG_I("End NetConnService::NetDetection");
+    NETMGR_LOG_I("End NetDetection");
     return NETMANAGER_SUCCESS;
 }
 
@@ -758,7 +758,7 @@ int32_t NetConnService::RestrictBackgroundChangedAsync(bool restrictBackground)
         }
         it->second->SetRestrictBackground(restrictBackground);
     }
-    NETMGR_LOG_I("End NetConnService::RestrictBackgroundChangedAsync");
+    NETMGR_LOG_I("End RestrictBackgroundChangedAsync");
     return NETMANAGER_SUCCESS;
 }
 
@@ -806,7 +806,7 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         callback->NetUnavailable();
     }
 
-    NETMGR_LOG_I("Not matched to the optimal network, send request to all networks.");
+    NETMGR_LOG_D("Not matched to the optimal network, send request to all networks.");
     SendRequestToAllNetwork(request);
     return NETMANAGER_SUCCESS;
 }
@@ -1003,7 +1003,7 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
         }
     }
     NETMGR_LOG_I(
-        "FindBestNetworkForRequest exit, bestScore[%{public}d], bestSupplier[%{public}d, %{public}s], "
+        "bestScore[%{public}d], bestSupplier[%{public}d, %{public}s], "
         "request[%{public}d] is [%{public}s],",
         bestScore, supplier ? supplier->GetSupplierId() : 0,
         supplier ? supplier->GetNetSupplierIdent().c_str() : "null", netActivateNetwork->GetRequestId(),
@@ -1308,7 +1308,7 @@ void NetConnService::CallbackForAvailable(sptr<NetSupplier> &supplier, const spt
 void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<NetSupplier> &newSupplier)
 {
     NETMGR_LOG_I(
-        "MakeDefaultNetWork in, oldSupplier[%{public}d, %{public}s], newSupplier[%{public}d, %{public}s], old equals "
+        "oldSupplier[%{public}d, %{public}s], newSupplier[%{public}d, %{public}s], old equals "
         "new is [%{public}d]", oldSupplier ? oldSupplier->GetSupplierId() : 0,
         oldSupplier ? oldSupplier->GetNetSupplierIdent().c_str() : "null",
         newSupplier ? newSupplier->GetSupplierId() : 0,
@@ -1327,21 +1327,22 @@ void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<Net
     oldSupplier = newSupplier;
 }
 
-void NetConnService::HandleDetectionResult(uint32_t supplierId, bool ifValid)
+void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStatus netState)
 {
-    NETMGR_LOG_I("Enter HandleDetectionResult, ifValid[%{public}d]", ifValid);
+    NETMGR_LOG_I("Enter HandleDetectionResult, ifValid[%{public}d]", netState);
     auto supplier = FindNetSupplier(supplierId);
     if (supplier == nullptr) {
         NETMGR_LOG_E("supplier doesn't exist.");
         return;
     }
-    supplier->SetNetValid(ifValid);
+    supplier->SetNetValid(netState);
     CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     if (!netScore_->GetServiceScore(supplier)) {
         NETMGR_LOG_E("GetServiceScore fail.");
         return;
     }
     FindBestNetworkForAllRequest();
+    bool ifValid = netState == VERIFICATION_STATE;
     if (!ifValid && defaultNetSupplier_ && defaultNetSupplier_->GetSupplierId() == supplierId) {
         RequestAllNetworkExceptDefault();
     }
@@ -1588,7 +1589,7 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
         NETMGR_LOG_D("Return default network's http proxy as default.");
         return NETMANAGER_SUCCESS;
     }
-    NETMGR_LOG_E("No default http proxy.");
+    NETMGR_LOG_D("No default http proxy.");
     return NETMANAGER_SUCCESS;
 }
 
@@ -1726,7 +1727,8 @@ int32_t NetConnService::RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallb
 {
     int32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
     NETMGR_LOG_D("RegisterPreAirplaneCallback, calllinguid [%{public}d]", callingUid);
-    preAirplaneCallbacks_.emplace(std::make_pair(callingUid, callback));
+    std::lock_guard guard(preAirplaneCbsMutex_);
+    preAirplaneCallbacks_[callingUid] = callback;
     return NETMANAGER_SUCCESS;
 }
 
@@ -1734,6 +1736,7 @@ int32_t NetConnService::UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCal
 {
     int32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
     NETMGR_LOG_D("UnregisterPreAirplaneCallback, calllinguid [%{public}d]", callingUid);
+    std::lock_guard guard(preAirplaneCbsMutex_);
     preAirplaneCallbacks_.erase(callingUid);
     return NETMANAGER_SUCCESS;
 }
@@ -1742,7 +1745,8 @@ int32_t NetConnService::SetAirplaneMode(bool state)
 {
     NETMGR_LOG_I("Enter SetAirplaneMode, AirplaneMode is %{public}d", state);
     if (state) {
-        for (auto mem : preAirplaneCallbacks_) {
+        std::lock_guard guard(preAirplaneCbsMutex_);
+        for (const auto& mem : preAirplaneCallbacks_) {
             if (mem.second != nullptr) {
                 int32_t ret = mem.second->PreAirplaneStart();
                 NETMGR_LOG_D("PreAirplaneStart result %{public}d", ret);
@@ -1778,12 +1782,16 @@ int32_t NetConnService::SetAirplaneMode(bool state)
 
 void NetConnService::ActiveHttpProxy()
 {
+    NETMGR_LOG_D("ActiveHttpProxy thread start");
     while (httpProxyThreadNeedRun_.load()) {
+        NETMGR_LOG_D("Keep global http-proxy active every 2 minutes");
         CURL *curl = nullptr;
         HttpProxy tempProxy;
         {
             std::lock_guard guard(globalHttpProxyMutex_);
+            auto userInfoHelp = NetProxyUserinfo::GetInstance();
             tempProxy = globalHttpProxy_;
+            userInfoHelp.GetHttpProxyHostPass(tempProxy);
         }
         auto proxyType = (tempProxy.host_.find("https://") != std::string::npos) ? CURLPROXY_HTTPS : CURLPROXY_HTTP;
         if (!tempProxy.host_.empty() && !tempProxy.username_.empty()) {
