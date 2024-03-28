@@ -1593,7 +1593,7 @@ void NetConnService::ActiveHttpProxy()
 int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
 {
     NETMGR_LOG_I("Enter SetGlobalHttpProxy. httpproxy = %{public}s", httpProxy.GetHost().c_str());
-    if (!httpProxyThreadNeedRun_ && !httpProxy.GetHost().empty()) {
+    if (!httpProxyThreadNeedRun_ && !httpProxy.GetUsername().empty()) {
         NETMGR_LOG_I("ActiveHttpProxy  user.len[%{public}zu], pwd.len[%{public}zu]", httpProxy.username_.length(),
                      httpProxy.password_.length());
         httpProxyThreadNeedRun_ = true;
