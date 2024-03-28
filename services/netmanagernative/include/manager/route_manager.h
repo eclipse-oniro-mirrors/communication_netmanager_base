@@ -19,7 +19,7 @@
 #include <linux/netlink.h>
 #include <map>
 #include <netinet/in.h>
-#include <stdint.h>
+#include <cstdint>
 
 #include "netlink_msg.h"
 #include "network_permission.h"
