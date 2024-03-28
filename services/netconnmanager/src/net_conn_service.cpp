@@ -12,12 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <atomic>
+#include <cstdint>
 #include <fstream>
+#include <functional>
+#include <memory>
 #include <sys/time.h>
+#include <utility>
 #include <regex>
 
 #include "common_event_support.h"
+#include "network.h"
 #include "system_ability_definition.h"
 
 #include "broadcast_manager.h"
@@ -235,6 +240,20 @@ int32_t NetConnService::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpe
     return result;
 }
 
+int32_t NetConnService::RequestNetConnection(const sptr<NetSpecifier> netSpecifier,
+                                                const sptr<INetConnCallback> callback, const uint32_t timeoutMS)
+{
+    uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
+
+    int32_t result = NETMANAGER_ERROR;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask([this, netSpecifier, callback, timeoutMS, callingUid, &result]() {
+            result = this->RequestNetConnectionAsync(netSpecifier, callback, timeoutMS, callingUid);
+        });
+    }
+    return result;
+}
+
 int32_t NetConnService::RegisterNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback)
 {
     NETMGR_LOG_D("Enter RegisterNetDetectionCallback");
@@ -364,7 +383,8 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
         NETMGR_LOG_E("GetServiceScore fail.");
     }
     // create network
-    int32_t netId = GenerateNetId();
+    bool isContainInternal = netCaps.find(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT) != netCaps.end();
+    int32_t netId = isContainInternal ? GenerateInternalNetId() : GenerateNetId();
     NETMGR_LOG_D("GenerateNetId is: [%{public}d]", netId);
     if (netId == INVALID_NET_ID) {
         NETMGR_LOG_E("GenerateNetId fail");
@@ -375,6 +395,7 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
         std::bind(&NetConnService::HandleDetectionResult, shared_from_this(),
             std::placeholders::_1, std::placeholders::_2),
         bearerType, netConnEventHandler_);
+    network->SetNeedNetDetection(netCaps.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps.end());
     supplier->SetNetwork(network);
     supplier->SetNetValid(true);
     // save supplier
@@ -432,6 +453,30 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
     return ActivateNetwork(netSpecifier, callback, timeoutMS);
 }
 
+int32_t NetConnService::RequestNetConnectionAsync(const sptr<NetSpecifier> &netSpecifier,
+                                                     const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS,
+                                                     const uint32_t callingUid)
+{
+    NETMGR_LOG_I("Request net connect callback async, call uid [%{public}u]", callingUid);
+    if (netSpecifier == nullptr || callback == nullptr) {
+        NETMGR_LOG_E("The parameter of netSpecifier or callback is null");
+        struct EventInfo eventInfo = {.errorType = static_cast<int32_t>(FAULT_INVALID_PARAMETER),
+                                      .errorMsg = ERROR_MSG_NULL_NET_SPECIFIER};
+        EventReport::SendRequestFaultEvent(eventInfo);
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    uint32_t reqId = 0;
+    if (FindSameCallback(callback, reqId)) {
+        NETMGR_LOG_E("RequestNetConnection find same callback");
+        return NET_CONN_ERR_SAME_CALLBACK;
+    }
+    int32_t ret = IncreaseNetConnCallbackCntForUid(callingUid, REQUEST_NET_CONNECTION);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    return ActivateInternalNetwork(netSpecifier, callback, timeoutMS);
+}
+
 int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId)
 {
     NETMGR_LOG_I("UnregisterNetSupplier service in, supplierId[%{public}d]", supplierId);
@@ -482,11 +527,14 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
         NETMGR_LOG_E("callback is null");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    DecreaseNetConnCallbackCntForUid(callingUid);
+    RegisterType registerType = REGISTER_NET_CONN_CALLBACK;
     uint32_t reqId = 0;
-    if (!FindSameCallback(callback, reqId)) {
+    if (!FindSameCallback(callback, reqId, registerType)) {
+        DecreaseNetConnCallbackCntForUid(callingUid, registerType);
         NETMGR_LOG_E("UnregisterNetConnCallback can not find same callback");
         return NET_CONN_ERR_CALLBACK_NOT_FOUND;
+    } else {
+        DecreaseNetConnCallbackCntForUid(callingUid, registerType);
     }
     NET_ACTIVATE_MAP::iterator iterActive;
     for (iterActive = netActivates_.begin(); iterActive != netActivates_.end();) {
@@ -523,11 +571,13 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
     return NETMANAGER_SUCCESS;
 }
 
-int32_t NetConnService::IncreaseNetConnCallbackCntForUid(const uint32_t callingUid)
+int32_t NetConnService::IncreaseNetConnCallbackCntForUid(const uint32_t callingUid, const RegisterType registerType)
 {
-    auto requestNetwork = netUidRequest_.find(callingUid);
-    if (requestNetwork == netUidRequest_.end()) {
-        netUidRequest_.insert(std::make_pair(callingUid, 1));
+    std::map<uint32_t, uint32_t> *netUidRequest = registerType == REGISTER_NET_CONN_CALLBACK ?
+        &netUidRequest_ : &internalDefaultUidRequest_; 
+    auto requestNetwork = netUidRequest->find(callingUid);
+    if (requestNetwork == netUidRequest->end()) {
+        netUidRequest->insert(std::make_pair(callingUid, 1));
     } else {
         if (requestNetwork->second >= MAX_ALLOW_UID_NUM) {
             NETMGR_LOG_E("return falied for UID [%{public}d] has registered over [%{public}d] callback",
@@ -540,17 +590,19 @@ int32_t NetConnService::IncreaseNetConnCallbackCntForUid(const uint32_t callingU
     return NETMANAGER_SUCCESS;
 }
 
-void NetConnService::DecreaseNetConnCallbackCntForUid(const uint32_t callingUid)
+void NetConnService::DecreaseNetConnCallbackCntForUid(const uint32_t callingUid, const RegisterType registerType)
 {
-    auto requestNetwork = netUidRequest_.find(callingUid);
-    if (requestNetwork == netUidRequest_.end()) {
+    std::map<uint32_t, uint32_t> *netUidRequest = registerType == REGISTER_NET_CONN_CALLBACK ?
+        &netUidRequest_ : &internalDefaultUidRequest_; 
+    auto requestNetwork = netUidRequest->find(callingUid);
+    if (requestNetwork == netUidRequest->end()) {
         NETMGR_LOG_E("Could not find the request calling uid");
     } else {
         if (requestNetwork->second >= 1) {
             requestNetwork->second--;
         }
         if (requestNetwork->second == 0) {
-            netUidRequest_.erase(requestNetwork);
+            netUidRequest->erase(requestNetwork);
         }
     }
 }
@@ -759,6 +811,49 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetConnService::ActivateInternalNetwork(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
+                                        const uint32_t &timeoutMS)
+{
+    NETMGR_LOG_D("ActivateNetwork Enter");
+    if (netSpecifier == nullptr || callback == nullptr) {
+        NETMGR_LOG_E("The parameter of netSpecifier or callback is null");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    std::weak_ptr<INetActivateCallback> timeoutCb = shared_from_this();
+    std::shared_ptr<NetActivate> request =
+        std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netActEventHandler_);
+    if (request == nullptr) {
+        NETMGR_LOG_E("The request is null");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    request->StartTimeOutNetAvailable();
+    uint32_t reqId = request->GetRequestId();
+    NETMGR_LOG_I("Make a new request, request id:[%{public}d]", reqId);
+    netActivates_[reqId] = request;
+    sptr<NetSupplier> bestNet = nullptr;
+    auto bestScore = FindInternalNetworkForRequest(bestNet, request);
+    if (bestNet != nullptr && bestNet->IsConnected()) {
+        NETMGR_LOG_I("Match to optimal supplier:[%{public}d %{public}s], netId[%{public}d], score:[%{public}d]",
+                     bestNet->GetSupplierId(), bestNet->GetNetSupplierIdent().c_str(), bestNet->GetNetId(), bestScore);
+        bestNet->SelectAsBestNetwork(reqId);
+        request->SetServiceSupply(bestNet);
+        CallbackForAvailable(bestNet, callback);
+        if (bestNet->GetNetSupplierType() == BEARER_CELLULAR || bestNet->GetNetSupplierType() == BEARER_WIFI) {
+            EventInfo eventInfo = {.capabilities = bestNet->GetNetCapabilities().ToString(" "),
+                                          .supplierIdent = bestNet->GetNetSupplierIdent()};
+            EventReport::SendRequestBehaviorEvent(eventInfo);
+        }
+        return NETMANAGER_SUCCESS;
+    }
+    if (timeoutMS == 0) {
+        callback->NetUnavailable();
+    }
+
+    NETMGR_LOG_D("Internal network not connecting, request to connect.");
+    SendRequestToInternalNetwork(request);
+    return NETMANAGER_SUCCESS;
+}
+
 void NetConnService::OnNetActivateTimeOut(uint32_t reqId)
 {
     if (netConnEventHandler_) {
@@ -796,7 +891,7 @@ sptr<NetSupplier> NetConnService::FindNetSupplier(uint32_t supplierId)
     return nullptr;
 }
 
-bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId)
+bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId, RegisterType &registerType)
 {
     if (callback == nullptr) {
         NETMGR_LOG_E("callback is null");
@@ -813,10 +908,23 @@ bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback, ui
         }
         if (callback->AsObject().GetRefPtr() == saveCallback->AsObject().GetRefPtr()) {
             reqId = iterActive->first;
+            auto netActivate = iterActive->second;
+            if (netActivate) {
+                sptr<NetSpecifier> specifier = netActivate->GetNetSpecifier();
+                registerType = (specifier != nullptr &&
+                    specifier->netCapabilities_.netCaps_.count(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0) ?
+                    REQUEST_NET_CONNECTION : REGISTER_NET_CONN_CALLBACK;
+            }
             return true;
         }
     }
     return false;
+}
+
+bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId)
+{
+    RegisterType registerType = REGISTER_NET_CONN_CALLBACK;
+    return FindSameCallback(callback, reqId, registerType);
 }
 
 void NetConnService::FindBestNetworkForAllRequest()
@@ -876,6 +984,11 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
         NETMGR_LOG_D("supplier info, supplier[%{public}d, %{public}s], realScore[%{public}d], isConnected[%{public}d]",
                      iter->second->GetSupplierId(), iter->second->GetNetSupplierIdent().c_str(),
                      iter->second->GetRealScore(), iter->second->IsConnected());
+        if (iter->second->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT) &&
+            netActivateNetwork->GetRequestId() == DEFAULT_REQUEST_ID) {
+            NETMGR_LOG_D("Supplier[%{public}d] is internal, skip.", iter->second->GetSupplierId());
+            continue;
+        }
         if ((!iter->second->IsConnected()) || (!netActivateNetwork->MatchRequestAndNetwork(iter->second))) {
             NETMGR_LOG_D("Supplier[%{public}d] is not connected or not match request.", iter->second->GetSupplierId());
             continue;
@@ -894,6 +1007,47 @@ uint32_t NetConnService::FindBestNetworkForRequest(sptr<NetSupplier> &supplier,
         netActivateNetwork->GetNetSpecifier() ? netActivateNetwork->GetNetSpecifier()->ToString(" ").c_str() : "null");
     return bestScore;
 }
+
+uint32_t NetConnService::FindInternalNetworkForRequest(sptr<NetSupplier> &supplier,
+                                                   std::shared_ptr<NetActivate> &netActivateNetwork)
+{
+    int score = 0;
+    supplier = nullptr;
+    if (netActivateNetwork == nullptr) {
+        NETMGR_LOG_E("netActivateNetwork is null");
+        return score;
+    }
+
+    NET_SUPPLIER_MAP::iterator iter;
+    for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
+        if (iter->second == nullptr) {
+            continue;
+        }
+        NETMGR_LOG_D("supplier info, supplier[%{public}d, %{public}s], realScore[%{public}d], isConnected[%{public}d]",
+                     iter->second->GetSupplierId(), iter->second->GetNetSupplierIdent().c_str(),
+                     iter->second->GetRealScore(), iter->second->IsConnected());
+        if (!iter->second->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT)) {
+            NETMGR_LOG_D("Supplier[%{public}d] is not internal, skip.", iter->second->GetSupplierId());
+            continue;
+        }
+        if (!netActivateNetwork->MatchRequestAndNetwork(iter->second)) {
+            NETMGR_LOG_D("Supplier[%{public}d] is not match request.", iter->second->GetSupplierId());
+            continue;
+        }
+        supplier = iter->second;
+        score = supplier->GetRealScore();
+        break;
+    }
+    NETMGR_LOG_I("FindInternalNetworkForRequest exit, score[%{public}d], supplier[%{public}d, %{public}s], "
+        "request[%{public}d] is [%{public}s],",
+        score, supplier ? supplier->GetSupplierId() : 0,
+        supplier ? supplier->GetNetSupplierIdent().c_str() : "null",
+        netActivateNetwork->GetRequestId(),
+        netActivateNetwork->GetNetSpecifier() ?
+        netActivateNetwork->GetNetSpecifier()->ToString(" ").c_str() : "null");
+    return score;
+}
+
 
 void NetConnService::RequestAllNetworkExceptDefault()
 {
@@ -917,6 +1071,10 @@ void NetConnService::RequestAllNetworkExceptDefault()
         if (netSupplier.second->GetNetScore() >= defaultNetSupplier_->GetNetScore()) {
             continue;
         }
+        if (netSupplier.second->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT)) {
+            NETMGR_LOG_I("Supplier[%{public}d] is internal, skip.", netSupplier.second->GetSupplierId());
+            continue;
+        }
         if (!defaultNetActivate_->MatchRequestAndNetwork(netSupplier.second)) {
             continue;
         }
@@ -936,6 +1094,21 @@ int32_t NetConnService::GenerateNetId()
         }
         if (networks_.find(netIdLastValue_) == networks_.end()) {
             return netIdLastValue_;
+        }
+    }
+    return INVALID_NET_ID;
+}
+
+int32_t NetConnService::GenerateInternalNetId()
+{
+    for (int32_t i = MIN_INTERNAL_NET_ID; i <= MAX_INTERNAL_NET_ID; ++i) {
+        int32_t value = internalNetIdLastValue_++;
+        if (value > MAX_INTERNAL_NET_ID) {
+            internalNetIdLastValue_ = MIN_INTERNAL_NET_ID;
+            value = MIN_INTERNAL_NET_ID;
+        }
+        if (networks_.find(value) == networks_.end()) {
+            return value;
         }
     }
     return INVALID_NET_ID;
@@ -996,6 +1169,39 @@ void NetConnService::SendRequestToAllNetwork(std::shared_ptr<NetActivate> reques
         if (iter->second == nullptr) {
             continue;
         }
+        if (iter->second->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT)) {
+            NETMGR_LOG_D("Supplier[%{public}d] is internal, skip.", iter->second->GetSupplierId());
+            continue;
+        }
+        if (!request->MatchRequestAndNetwork(iter->second)) {
+            continue;
+        }
+        bool result = iter->second->RequestToConnect(reqId);
+        if (!result) {
+            NETMGR_LOG_E("Request network for supplier[%{public}d, %{public}s] failed", iter->second->GetSupplierId(),
+                         iter->second->GetNetSupplierIdent().c_str());
+        }
+    }
+}
+
+void NetConnService::SendRequestToInternalNetwork(std::shared_ptr<NetActivate> request)
+{
+    if (request == nullptr) {
+        NETMGR_LOG_E("request is null");
+        return;
+    }
+
+    uint32_t reqId = request->GetRequestId();
+    NETMGR_LOG_I("Send request[%{public}d] to internal supplier", request->GetRequestId());
+    NET_SUPPLIER_MAP::iterator iter;
+    for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
+        if (iter->second == nullptr) {
+            continue;
+        }
+        if (!iter->second->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT)) {
+            NETMGR_LOG_D("Supplier[%{public}d] is not internal, skip.", iter->second->GetSupplierId());
+            continue;
+        }
         if (!request->MatchRequestAndNetwork(iter->second)) {
             continue;
         }
@@ -1013,6 +1219,9 @@ void NetConnService::SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, 
     NET_SUPPLIER_MAP::iterator iter;
     for (iter = netSuppliers_.begin(); iter != netSuppliers_.end(); ++iter) {
         if (iter->second == nullptr) {
+            continue;
+        }
+        if (iter->second->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT)) {
             continue;
         }
         iter->second->ReceiveBestScore(reqId, bestScore, supplierId);
@@ -1228,13 +1437,26 @@ int32_t NetConnService::GetSpecificNet(NetBearType bearerType, std::list<int32_t
 int32_t NetConnService::GetAllNets(std::list<int32_t> &netIdList)
 {
     std::lock_guard<std::mutex> locker(netManagerMutex_);
+    int32_t currentUid = IPCSkeleton::GetCallingUid();
     for (const auto &network : networks_) {
         if (network.second != nullptr && network.second->IsConnected()) {
-            netIdList.push_back(network.second->GetNetId());
+            int32_t netId = network.second->GetNetId();
+            sptr<NetSupplier> curSupplier = FindNetSupplier(network.second->GetSupplierId());
+            // inner virtual interface and uid is not trusted, skip
+            if (curSupplier->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT) && !IsInRequestNetUids(currentUid)) {
+                NETMGR_LOG_D("Network [%{public}d] is internal, uid [%{public}d] skips.", netId, currentUid);
+                continue;
+            }
+            netIdList.push_back(netId);
         }
     }
     NETMGR_LOG_D("netSuppliers_ size[%{public}zd] netIdList size[%{public}zd]", netSuppliers_.size(), netIdList.size());
     return NETMANAGER_SUCCESS;
+}
+
+bool NetConnService::IsInRequestNetUids(int32_t uid)
+{
+    return internalDefaultUidRequest_.count(uid) > 0;
 }
 
 int32_t NetConnService::GetSpecificUidNet(int32_t uid, int32_t &netId)
@@ -1944,6 +2166,10 @@ bool NetConnService::IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns)
         if (!iterActive->second) {
             continue;
         }
+        if (ns->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT)) {
+            NETMGR_LOG_D("Supplier[%{public}d] is internal, skip.", ns->GetSupplierId());
+            continue;
+        }
         if (iterActive->second->MatchRequestAndNetwork(ns)) {
             return true;
         }
@@ -1988,6 +2214,19 @@ int32_t NetConnService::IsPreferCellularUrl(const std::string& url, bool& prefer
     preferCellular = std::any_of(preferredUrlList.begin(), preferredUrlList.end(),
                                  [&url](const std::string &str) { return url.find(str) != std::string::npos; });
     return 0;
+}
+
+bool NetConnService::IsAddrInOtherNetwork(int32_t netId, const INetAddr &netAddr)
+{
+    for (const auto &network : networks_) {
+        if (network.second->GetNetId() == netId) {
+            continue;
+        }
+        if (network.second->GetNetLinkInfo().HasNetAddr(netAddr)) {
+            return true;
+        }
+    }
+    return false;
 }
  
 std::vector<std::string> NetConnService::GetPreferredUrl()

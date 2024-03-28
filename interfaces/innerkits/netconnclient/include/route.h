@@ -19,6 +19,7 @@
 #include <iosfwd>
 #include <cstdint>
 #include <string>
+#include <linux/rtnetlink.h>
 
 #include "parcel.h"
 #include "refbase.h"
@@ -27,11 +28,6 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-enum {
-    RTN_UNICAST = 1,
-    RTN_UNREACHABLE = 7,
-    RTN_THROW = 9
-};
 
 #define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 struct NET_SYMBOL_VISIBLE Route final : public Parcelable {

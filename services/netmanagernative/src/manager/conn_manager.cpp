@@ -23,6 +23,7 @@
 #include "netnative_log_wrapper.h"
 #include "physical_network.h"
 #include "virtual_network.h"
+#include "network.h"
 
 namespace OHOS {
 namespace nmd {
@@ -30,6 +31,8 @@ using namespace NetManagerStandard;
 namespace {
 constexpr int32_t INTERFACE_UNSET = -1;
 constexpr int32_t LOCAL_NET_ID = 99;
+constexpr int32_t NET_ID_DEFAULT = 1;
+constexpr int32_t NET_ID_INTERNAL_DEFAULT = 2;
 } // namespace
 
 ConnManager::ConnManager()
@@ -194,12 +197,21 @@ int32_t ConnManager::GetDefaultNetwork() const
     return defaultNetId_;
 }
 
-int32_t ConnManager::GetNetworkForInterface(std::string &interfaceName)
+int32_t GetNetIdType(int32_t netId)
+{
+    return netId >= MIN_NET_ID ? NET_ID_DEFAULT : NET_ID_INTERNAL_DEFAULT;
+}
+
+int32_t ConnManager::GetNetworkForInterface(int32_t netId, std::string &interfaceName)
 {
     NETNATIVE_LOG_D("Entry ConnManager::GetNetworkForInterface interfaceName:%{public}s", interfaceName.c_str());
     std::map<int32_t, std::shared_ptr<NetsysNetwork>>::iterator it;
     int32_t InterfaceId = INTERFACE_UNSET;
-    networks_.Iterate([&InterfaceId, &interfaceName](int32_t id, std::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
+    int32_t netIdType = GetNetIdType(netId);
+    networks_.Iterate([&InterfaceId, &interfaceName, &netIdType](int32_t id, std::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
+        if (GetNetIdType(id) != netIdType) {
+            return;
+        }
         if (InterfaceId != INTERFACE_UNSET) {
             return;
         }
@@ -216,7 +228,7 @@ int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interface
 {
     NETNATIVE_LOG_D("Entry ConnManager::AddInterfaceToNetwork netId:%{public}d, interfaceName:%{public}s", netId,
                     interfaceName.c_str());
-    int32_t alreadySetNetId = GetNetworkForInterface(interfaceName);
+    int32_t alreadySetNetId = GetNetworkForInterface(netId, interfaceName);
     if ((alreadySetNetId != netId) && (alreadySetNetId != INTERFACE_UNSET)) {
         NETNATIVE_LOGE("AddInterfaceToNetwork failed alreadySetNetId:%{public}d", alreadySetNetId);
         return NETMANAGER_ERROR;
@@ -236,7 +248,7 @@ int32_t ConnManager::AddInterfaceToNetwork(int32_t netId, std::string &interface
 
 int32_t ConnManager::RemoveInterfaceFromNetwork(int32_t netId, std::string &interfaceName)
 {
-    int32_t alreadySetNetId = GetNetworkForInterface(interfaceName);
+    int32_t alreadySetNetId = GetNetworkForInterface(netId, interfaceName);
     if ((alreadySetNetId != netId) || (alreadySetNetId == INTERFACE_UNSET)) {
         return NETMANAGER_SUCCESS;
     } else if (alreadySetNetId == netId) {
@@ -282,6 +294,9 @@ RouteManager::TableType ConnManager::GetTableType(int32_t netId)
         return RouteManager::LOCAL_NETWORK;
     } else if (FindVirtualNetwork(netId) != nullptr) {
         return RouteManager::VPN_NETWORK;
+    } else if (netId >= NetManagerStandard::MIN_INTERNAL_NET_ID &&
+        netId <= NetManagerStandard::MAX_INTERNAL_NET_ID) {
+        return RouteManager::INTERNAL_DEFAULT; 
     } else {
         return RouteManager::INTERFACE;
     }

@@ -50,6 +50,7 @@ private:
     int32_t OnRegisterNetSupplierCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetConnCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetConnCallbackBySpecifier(MessageParcel &data, MessageParcel &reply);
+    int32_t OnRequestNetConnectionBySpecifier(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnregisterNetConnCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnUpdateNetStateForTest(MessageParcel &data, MessageParcel &reply);
     int32_t OnUpdateNetSupplierInfo(MessageParcel &data, MessageParcel &reply);

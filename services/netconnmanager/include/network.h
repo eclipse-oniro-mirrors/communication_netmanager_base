@@ -26,10 +26,13 @@
 #include "net_monitor.h"
 #include "net_supplier_info.h"
 #include "route.h"
+#include "net_conn_service_iface.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 constexpr uint32_t INVALID_NET_ID = 0;
+constexpr int32_t MIN_INTERNAL_NET_ID = 1;
+constexpr int32_t MAX_INTERNAL_NET_ID = 50;
 constexpr int32_t MIN_NET_ID = 100;
 constexpr int32_t MAX_NET_ID = 0xFFFF - 0x400;
 using NetDetectionHandler = std::function<void(uint32_t supplierId, bool ifValid)>;
@@ -40,6 +43,7 @@ public:
     ~Network() = default;
     bool operator==(const Network &network) const;
     int32_t GetNetId() const;
+    uint32_t GetSupplerId() const;
     bool UpdateBasicNetwork(bool isAvailable_);
     bool UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo);
     NetLinkInfo GetNetLinkInfo() const;
@@ -52,6 +56,7 @@ public:
     void RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
     int32_t UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
     void StartNetDetection(bool needReport);
+    void SetNeedNetDetection(bool isNeed);
     void SetDefaultNetWork();
     void ClearDefaultNetWorkNetId();
     bool IsConnecting() const;
@@ -80,6 +85,7 @@ private:
     void NetDetectionForDnsHealthSync(bool dnsHealthSuccess);
     bool IsDetectionForDnsSuccess(NetDetectionStatus netDetectionState, bool dnsHealthSuccess);
     bool IsDetectionForDnsFail(NetDetectionStatus netDetectionState, bool dnsHealthSuccess);
+    bool IsAddrInOtherNetwork(const INetAddr &netAddr);
 
 private:
     int32_t netId_ = 0;
@@ -95,6 +101,7 @@ private:
     std::vector<sptr<INetDetectionCallback>> netDetectionRetCallback_;
     std::shared_ptr<NetConnEventHandler> eventHandler_;
     std::atomic<bool> isDetectingForDns_ = false;
+    std::atomic_bool isNeedNetDetection_ = true;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

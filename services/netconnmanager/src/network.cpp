@@ -66,6 +66,11 @@ int32_t Network::GetNetId() const
     return netId_;
 }
 
+uint32_t Network::GetSupplierId() const
+{
+    return supplierId_;
+}
+
 bool Network::operator==(const Network &network) const
 {
     return netId_ == network.netId_;
@@ -119,6 +124,11 @@ bool Network::CreateVirtualNetwork()
     return true;
 }
 
+bool Network::IsAddrInOtherNetwork(const INetAddr &netAddr)
+{
+    return NetConnServiceIface().IsAddrInOtherNetwork(netId_, netAddr);
+}
+
 bool Network::ReleaseBasicNetwork()
 {
     NETMGR_LOG_D("Enter ReleaseBasicNetwork");
@@ -126,6 +136,9 @@ bool Network::ReleaseBasicNetwork()
         NETMGR_LOG_D("Destroy physical network");
         StopNetDetection();
         for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+            if (IsAddrInOtherNetwork(inetAddr)) {
+                continue;
+            }
             int32_t prefixLen = inetAddr.prefixlen_;
             if (prefixLen == 0) {
                 prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
@@ -183,7 +196,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateTcpBufferSize(netLinkInfo);
 
     netLinkInfo_ = netLinkInfo;
-    if (netSupplierType_ != BEARER_VPN) {
+    if (netSupplierType_ != BEARER_VPN && isNeedNetDetection) {
         StartNetDetection(false);
     }
     return true;
@@ -235,6 +248,9 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
     // Update: remove old Ips first, then add the new Ips
     NETMGR_LOG_I("UpdateIpAddrs, old ip addrs size: [%{public}zu]", netLinkInfo_.netAddrList_.size());
     for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+        if (IsAddrInOtherNetwork(inetAddr)) {
+            continue;
+        }
         if (newNetLinkInfo.HasNetAddr(inetAddr)) {
             NETMGR_LOG_W("Same ip address:[%{public}s], there is not need to be deleted",
                          CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
@@ -267,6 +283,9 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
 
     NETMGR_LOG_I("UpdateIpAddrs, new ip addrs size: [%{public}zu]", newNetLinkInfo.netAddrList_.size());
     for (const auto &inetAddr : newNetLinkInfo.netAddrList_) {
+        if (IsAddrInOtherNetwork(inetAddr)) {
+            continue;
+        }
         if (netLinkInfo_.HasNetAddr(inetAddr)) {
             NETMGR_LOG_W("Same ip address:[%{public}s], there is no need to add it again",
                          CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
@@ -435,6 +454,12 @@ void Network::StartNetDetection(bool needReport)
         InitNetMonitor();
         return;
     }
+}
+
+void Network::SetNeedNetDetection(bool isNeed)
+{
+    NETMGR_LOG_I("set net detection flag to %{public}s", isNeed ? "true" : "false");
+    isNeedNetDetection_ = isNeed;
 }
 
 void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)

@@ -388,7 +388,7 @@ HWTEST_F(ConnManagerTest, GetFwmarkForNetworkTest001, TestSize.Level1)
 HWTEST_F(ConnManagerTest, ConnManagerBranchTest001, TestSize.Level1)
 {
     std::string testInterfaceName = "testName";
-    int32_t ret = instance_->GetNetworkForInterface(testInterfaceName);
+    int32_t ret = instance_->GetNetworkForInterface(100, testInterfaceName);
     EXPECT_EQ(ret, INVALID_VALUE);
 
     RouteManager::TableType type = instance_->GetTableType(LOCAL_NET_ID);

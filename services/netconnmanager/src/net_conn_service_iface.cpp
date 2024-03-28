@@ -65,5 +65,10 @@ int32_t NetConnServiceIface::RegisterNetFactoryResetCallback(const sptr<INetFact
 {
     return NetConnService::GetInstance()->RegisterNetFactoryResetCallback(callback);
 }
+
+bool NetConnServiceIface::IsAddrInOtherNetwork(int32_t netId, const INetAddr &netAddr)
+{
+    return NetConnService::GetInstance()->IsAddrInOtherNetwork(netId, netAddr); 
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

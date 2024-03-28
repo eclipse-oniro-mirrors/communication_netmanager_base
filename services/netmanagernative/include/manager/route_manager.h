@@ -19,6 +19,7 @@
 #include <linux/netlink.h>
 #include <map>
 #include <netinet/in.h>
+#include <stdint.h>
 
 #include "netlink_msg.h"
 #include "network_permission.h"
@@ -63,6 +64,7 @@ public:
         INTERFACE,
         VPN_NETWORK,
         LOCAL_NETWORK,
+        INTERNAL_DEFAULT,
     };
 
     /**
@@ -242,7 +244,7 @@ private:
     static std::map<std::string, uint32_t> interfaceToTable_;
     static int32_t Init();
     static int32_t ClearRules();
-    static int32_t ClearRoutes(const std::string &interfaceName);
+    static int32_t ClearRoutes(const std::string &interfaceName, int32_t netId = 0);
     static int32_t AddLocalNetworkRules();
     static int32_t UpdatePhysicalNetwork(uint16_t netId, const std::string &interfaceName, NetworkPermission permission,
                                          bool add);
@@ -275,6 +277,7 @@ private:
     static int32_t UpdateRouteRule(uint16_t action, uint16_t flags, RouteInfo routeInfo);
     static int32_t SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtmsg msg, RouteInfo routeInfo,
                                      uint32_t index);
+    static bool CheckInternalNetId(int32_t netId);
     static uint32_t FindTableByInterfacename(const std::string &interfaceName);
     static uint32_t GetRouteTableFromType(TableType tableType, const std::string &interfaceName);
     static int32_t SetRouteInfo(TableType tableType, const std::string &interfaceName,

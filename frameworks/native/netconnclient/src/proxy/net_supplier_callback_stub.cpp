@@ -71,7 +71,7 @@ int32_t NetSupplierCallbackStub::OnRequestNetwork(MessageParcel &data, MessagePa
     size = (size > MAX_NET_CAP_NUM) ? MAX_NET_CAP_NUM : size;
     for (uint32_t i = 0; i < size; i++) {
         data.ReadUint32(value);
-        if (value < NET_CAPABILITY_INTERNAL_DEFAULT) {
+        if (value < NET_CAPABILITY_END) {
             netCaps.insert(static_cast<NetCap>(value));
         }
     }
@@ -94,7 +94,7 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
     size = (size > MAX_NET_CAP_NUM) ? MAX_NET_CAP_NUM : size;
     for (uint32_t i = 0; i < size; i++) {
         data.ReadUint32(value);
-        if (value < NET_CAPABILITY_INTERNAL_DEFAULT) {
+        if (value < NET_CAPABILITY_END) {
             netCaps.insert(static_cast<NetCap>(value));
         }
     }

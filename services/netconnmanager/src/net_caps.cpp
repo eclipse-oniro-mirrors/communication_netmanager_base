@@ -31,7 +31,7 @@ bool NetCaps::operator==(const NetCaps &netCaps) const
 
 bool NetCaps::IsValidNetCap(NetCap cap)
 {
-    return (cap >= NET_CAPABILITY_MMS) && (cap < NET_CAPABILITY_INTERNAL_DEFAULT);
+    return (cap >= NET_CAPABILITY_MMS) && (cap < NET_CAPABILITY_END);
 }
 
 void NetCaps::InsertNetCap(NetCap cap)
@@ -61,7 +61,7 @@ bool NetCaps::HasNetCaps(const std::set<NetCap> &caps) const
 std::set<NetCap> NetCaps::ToSet() const
 {
     std::set<NetCap> ret;
-    for (auto cap = static_cast<NetCap>(0); cap < NET_CAPABILITY_INTERNAL_DEFAULT; cap = static_cast<NetCap>(cap + 1)) {
+    for (auto cap = static_cast<NetCap>(0); cap < NET_CAPABILITY_END; cap = static_cast<NetCap>(cap + 1)) {
         if (HasNetCap(cap)) {
             ret.insert(cap);
         }

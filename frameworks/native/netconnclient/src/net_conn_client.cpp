@@ -28,6 +28,8 @@
 #include "network_security_config.h"
 
 static constexpr const int32_t MIN_VALID_NETID = 100;
+static constexpr const int32_t MIN_VALID_INTERNAL_NETID = 1;
+static constexpr const int32_t MAX_VALID_INTERNAL_NETID = 50;
 static constexpr uint32_t WAIT_FOR_SERVICE_TIME_MS = 500;
 static constexpr uint32_t MAX_GET_SERVICE_COUNT = 10;
 
@@ -148,6 +150,28 @@ int32_t NetConnClient::RegisterNetConnCallback(const sptr<NetSpecifier> &netSpec
     int32_t ret = proxy->RegisterNetConnCallback(netSpecifier, callback, timeoutMS);
     if (ret == NETMANAGER_SUCCESS) {
         NETMGR_LOG_D("RegisterNetConnCallback success, save netSpecifier and callback and timeoutMS.");
+        registerConnTupleList_.push_back(std::make_tuple(netSpecifier, callback, timeoutMS));
+    }
+
+    return ret;
+}
+
+int32_t NetConnClient::RequestNetConnection(const sptr<NetSpecifier> netSpecifier, const sptr<INetConnCallback> callback,
+                                            const uint32_t timeoutMS)
+{
+    NETMGR_LOG_D("RequestNetConnection with timeout client in.");
+    if (netSpecifier == nullptr || !netSpecifier->SpecifierIsValid()) {
+        NETMGR_LOG_E("The parameter of netSpecifier is invalid");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("The parameter of proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    int32_t ret = proxy->RequestNetConnection(netSpecifier, callback, timeoutMS);
+    if (ret == NETMANAGER_SUCCESS) {
+        NETMGR_LOG_D("RequestNetConnection success, save netSpecifier and callback and timeoutMS.");
         registerConnTupleList_.push_back(std::make_tuple(netSpecifier, callback, timeoutMS));
     }
 
@@ -324,7 +348,8 @@ int32_t NetConnClient::GetAddressByName(const std::string &host, int32_t netId, 
 
 int32_t NetConnClient::BindSocket(int32_t socketFd, int32_t netId)
 {
-    if (netId < MIN_VALID_NETID) {
+    // default netId begin whit 100, inner virtual interface netId between 1 and 50
+    if (netId < MIN_VALID_INTERNAL_NETID || (netId > MAX_VALID_INTERNAL_NETID && netId < MIN_VALID_NETID)) {
         NETMGR_LOG_E("netId is invalid.");
         return NET_CONN_ERR_INVALID_NETWORK;
     }
@@ -414,11 +439,16 @@ void NetConnClient::RecoverCallback()
             sptr<NetSpecifier> specifier = std::get<0>(mem);
             sptr<INetConnCallback> callback = std::get<1>(mem);
             uint32_t timeoutMS = std::get<2>(mem);
+            bool isInternalDefault = (specifier != nullptr &&
+                specifier->netCapabilities.netCaps_.count(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0);
+            int32_t ret = NETMANAGER_SUCCESS;
             if (specifier != nullptr && timeoutMS != 0) {
-                int32_t ret = proxy->RegisterNetConnCallback(specifier, callback, timeoutMS);
+                ret = isInternalDefault ? proxy->RequestNetConnection(specifier, callback, timeoutMS) :
+                    proxy->RegisterNetConnCallback(specifier, callback, timeoutMS);
                 NETMGR_LOG_D("Register result hasNetSpecifier_ and timeoutMS_ %{public}d", ret);
             } else if (specifier != nullptr) {
-                int32_t ret = proxy->RegisterNetConnCallback(specifier, callback, 0);
+                ret = isInternalDefault ? proxy->RequestNetConnection(specifier, callback, 0) :
+                    proxy->RegisterNetConnCallback(specifier, callback, 0);
                 NETMGR_LOG_D("Register result hasNetSpecifier_ %{public}d", ret);
             } else if (callback != nullptr) {
                 int32_t ret = proxy->RegisterNetConnCallback(callback);

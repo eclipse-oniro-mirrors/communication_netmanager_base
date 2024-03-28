@@ -215,6 +215,34 @@ int32_t NetConnServiceProxy::RegisterNetConnCallback(const sptr<NetSpecifier> &n
     return replyParcel.ReadInt32();
 }
 
+int32_t NetConnServiceProxy::RequestNetConnection(const sptr<NetSpecifier> netSpecifier,
+                                                     const sptr<INetConnCallback> callback, const uint32_t timeoutMS)
+{
+    if (netSpecifier == nullptr || callback == nullptr) {
+        NETMGR_LOG_E("The parameter of netSpecifier or callback is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+
+    MessageParcel dataParcel;
+    if (!WriteInterfaceToken(dataParcel)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    netSpecifier->Marshalling(dataParcel);
+    dataParcel.WriteUint32(timeoutMS);
+    dataParcel.WriteRemoteObject(callback->AsObject());
+
+    MessageParcel replyParcel;
+    int32_t retCode = RemoteSendRequest(
+        static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REQUEST_NET_CONNECTION),
+        dataParcel, replyParcel);
+    if (retCode != NETMANAGER_SUCCESS) {
+        return retCode;
+    }
+    NETMGR_LOG_D("SendRequest retCode:[%{public}d]", retCode);
+    return replyParcel.ReadInt32();
+}
+
 int32_t NetConnServiceProxy::UnregisterNetConnCallback(const sptr<INetConnCallback> &callback)
 {
     if (callback == nullptr) {
@@ -734,7 +762,7 @@ int32_t NetConnServiceProxy::GetNetCapData(MessageParcel &reply, NetAllCapabilit
         if (!reply.ReadUint32(value)) {
             return NETMANAGER_ERR_READ_REPLY_FAIL;
         }
-        if (value < NET_CAPABILITY_INTERNAL_DEFAULT) {
+        if (value < NET_CAPABILITY_END) {
             netAllCap.netCaps_.insert(static_cast<NetCap>(value));
         }
     }
