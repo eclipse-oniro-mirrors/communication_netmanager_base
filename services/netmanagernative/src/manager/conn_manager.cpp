@@ -295,8 +295,7 @@ RouteManager::TableType ConnManager::GetTableType(int32_t netId)
         return RouteManager::LOCAL_NETWORK;
     } else if (FindVirtualNetwork(netId) != nullptr) {
         return RouteManager::VPN_NETWORK;
-    } else if (netId >= NetManagerStandard::MIN_INTERNAL_NET_ID &&
-        netId <= NetManagerStandard::MAX_INTERNAL_NET_ID) {
+    } else if (NetManagerStandard::CheckInternalNetId(netId)) {
         return RouteManager::INTERNAL_DEFAULT;
     } else {
         return RouteManager::INTERFACE;

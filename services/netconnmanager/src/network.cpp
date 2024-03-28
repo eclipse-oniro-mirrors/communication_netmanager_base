@@ -280,7 +280,12 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
         }
     }
 
-    NETMGR_LOG_I("UpdateIpAddrs, new ip addrs size: [%{public}zu]", newNetLinkInfo.netAddrList_.size());
+    HandleUpdateIpAddrs(newNetLinkInfo);
+}
+
+void Network::HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
+{
+    NETMGR_LOG_I("HandleUpdateIpAddrs, new ip addrs size: [%{public}zu]", newNetLinkInfo.netAddrList_.size());
     for (const auto &inetAddr : newNetLinkInfo.netAddrList_) {
         if (IsAddrInOtherNetwork(inetAddr)) {
             continue;

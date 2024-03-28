@@ -35,6 +35,10 @@ constexpr int32_t MIN_INTERNAL_NET_ID = 1;
 constexpr int32_t MAX_INTERNAL_NET_ID = 50;
 constexpr int32_t MIN_NET_ID = 100;
 constexpr int32_t MAX_NET_ID = 0xFFFF - 0x400;
+inline bool CheckInternalNetId(int32_t netId)
+{
+    return netId >= MIN_INTERNAL_NET_ID && netId <= MAX_INTERNAL_NET_ID;
+}
 using NetDetectionHandler = std::function<void(uint32_t supplierId, NetDetectionStatus netState)>;
 class Network : public virtual RefBase, public INetMonitorCallback, public std::enable_shared_from_this<Network> {
 public:
@@ -48,6 +52,7 @@ public:
     bool UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo);
     NetLinkInfo GetNetLinkInfo() const;
     void UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo);
+    void HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo);
     void UpdateInterfaces(const NetLinkInfo &newNetLinkInfo);
     void UpdateRoutes(const NetLinkInfo &newNetLinkInfo);
     void UpdateDns(const NetLinkInfo &netLinkInfo);
