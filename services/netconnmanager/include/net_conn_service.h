@@ -434,6 +434,27 @@ private:
     std::mutex preAirplaneCbsMutex_;
 
     bool hasSARemoved_ = false;
+
+private:
+    class ConnCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
+    public:
+        explicit ConnCallbackDeathRecipient(NetConnService &client) : client_(client) {}
+        ~ConnCallbackDeathRecipient() override = default;
+        void OnRemoteDied(const wptr<IRemoteObject> &remote) override
+        {
+            client_.OnRemoteDied(remote);
+        }
+
+    private:
+        NetConnService &client_;
+    };
+    void OnRemoteDied(const wptr<IRemoteObject> &remoteObject);
+    void AddClientDeathRecipient(const sptr<INetConnCallback> &callback);
+    void RemoveClientDeathRecipient(const sptr<INetConnCallback> &callback);
+    void RemoveALLClientDeathRecipient();
+    std::mutex remoteMutex_;
+    sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
+    std::vector<sptr<INetConnCallback>> remoteCallback_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
