@@ -174,6 +174,7 @@ private:
     }
 
     std::shared_ptr<NetPolicyFileEventHandler> GetHandler();
+    std::mutex uidPoliciesMutex_;
 
 public:
     NetPolicy netPolicy_;
