@@ -70,6 +70,12 @@ public:
         return 0;
     }
 
+    int32_t RequestNetConnection(const sptr<NetSpecifier> netSpecifier,
+        const sptr<INetConnCallback> callback, const uint32_t timeoutMS) override
+    {
+        return 0;
+    }
+
     int32_t UnregisterNetConnCallback(const sptr<INetConnCallback> &callback) override
     {
         return 0;
