@@ -28,7 +28,7 @@ void NetStatsCallback::RegisterNetStatsCallback(const sptr<INetStatsCallback> &c
         NETMGR_LOG_E("The parameter callback is null");
         return;
     }
-    std::lock_guard<ffrt::mutex> lock(statsCallbackMetux_);
+    std::lock_guard lock(statsCallbackMetux_);
     uint32_t callBackNum = netStatsCallback_.size();
     NETMGR_LOG_D("netStatsCallback_ callback num [%{public}d]", callBackNum);
     if (callBackNum >= LIMIT_STATS_CALLBACK_NUM) {
@@ -52,7 +52,7 @@ void NetStatsCallback::UnregisterNetStatsCallback(const sptr<INetStatsCallback> 
         NETMGR_LOG_E("The parameter of callback is null");
         return;
     }
-    std::lock_guard<ffrt::mutex> lock(statsCallbackMetux_);
+    std::lock_guard lock(statsCallbackMetux_);
     for (auto iter = netStatsCallback_.begin(); iter != netStatsCallback_.end(); ++iter) {
         if (callback->AsObject().GetRefPtr() == (*iter)->AsObject().GetRefPtr()) {
             netStatsCallback_.erase(iter);
@@ -65,7 +65,7 @@ void NetStatsCallback::UnregisterNetStatsCallback(const sptr<INetStatsCallback> 
 int32_t NetStatsCallback::NotifyNetIfaceStatsChanged(const std::string &iface)
 {
     NETMGR_LOG_D("NotifyNetIfaceStatsChanged info: iface[%{public}s]", iface.c_str());
-    std::lock_guard<ffrt::mutex> lock(statsCallbackMetux_);
+    std::lock_guard lock(statsCallbackMetux_);
     for (auto it = netStatsCallback_.begin(); it < netStatsCallback_.end();) {
         if ((*it) == nullptr || (*it)->NetIfaceStatsChanged(iface) == NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL) {
             netStatsCallback_.erase(it);
@@ -79,7 +79,7 @@ int32_t NetStatsCallback::NotifyNetIfaceStatsChanged(const std::string &iface)
 int32_t NetStatsCallback::NotifyNetUidStatsChanged(const std::string &iface, uint32_t uid)
 {
     NETMGR_LOG_D("UpdateIfacesStats info: iface[%{public}s] uid[%{public}d]", iface.c_str(), uid);
-    std::lock_guard<ffrt::mutex> lock(statsCallbackMetux_);
+    std::lock_guard lock(statsCallbackMetux_);
     for (auto it = netStatsCallback_.begin(); it < netStatsCallback_.end();) {
         if ((*it) == nullptr || (*it)->NetUidStatsChanged(iface, uid) == NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL) {
             netStatsCallback_.erase(it);
