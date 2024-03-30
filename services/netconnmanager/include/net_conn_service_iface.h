@@ -34,7 +34,8 @@ public:
     int32_t RestrictBackgroundChanged(bool isRestrictBackground) override;
     int32_t RegisterNetConnCallback(const sptr<INetConnCallback> &callback) override;
     int32_t RegisterNetFactoryResetCallback(const sptr<INetFactoryResetCallback> &callback) override;
-    bool IsAddrInOtherNetwork(int32_t netId, const INetAddr &netAddr);
+    bool IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr);
+    bool IsIfaceNameInUse(const std::string &ifaceName);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -31,8 +31,6 @@ using namespace NetManagerStandard;
 namespace {
 constexpr int32_t INTERFACE_UNSET = -1;
 constexpr int32_t LOCAL_NET_ID = 99;
-constexpr int32_t NET_ID_DEFAULT = 1;
-constexpr int32_t NET_ID_INTERNAL_DEFAULT = 2;
 } // namespace
 
 ConnManager::ConnManager()
@@ -197,7 +195,7 @@ int32_t ConnManager::GetDefaultNetwork() const
     return defaultNetId_;
 }
 
-int32_t GetNetIdType(int32_t netId)
+NetIdType ConnManager::GetNetIdType(int32_t netId)
 {
     return netId >= MIN_NET_ID ? NET_ID_DEFAULT : NET_ID_INTERNAL_DEFAULT;
 }
@@ -207,7 +205,7 @@ int32_t ConnManager::GetNetworkForInterface(int32_t netId, std::string &interfac
     NETNATIVE_LOG_D("Entry ConnManager::GetNetworkForInterface interfaceName:%{public}s", interfaceName.c_str());
     std::map<int32_t, std::shared_ptr<NetsysNetwork>>::iterator it;
     int32_t InterfaceId = INTERFACE_UNSET;
-    int32_t netIdType = GetNetIdType(netId);
+    NetIdType netIdType = GetNetIdType(netId);
     networks_.Iterate([&InterfaceId, &interfaceName, &netIdType]
         (int32_t id, std::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
         if (GetNetIdType(id) != netIdType) {
@@ -295,7 +293,7 @@ RouteManager::TableType ConnManager::GetTableType(int32_t netId)
         return RouteManager::LOCAL_NETWORK;
     } else if (FindVirtualNetwork(netId) != nullptr) {
         return RouteManager::VPN_NETWORK;
-    } else if (NetManagerStandard::CheckInternalNetId(netId)) {
+    } else if (NetManagerStandard::IsInternalNetId(netId)) {
         return RouteManager::INTERNAL_DEFAULT;
     } else {
         return RouteManager::INTERFACE;

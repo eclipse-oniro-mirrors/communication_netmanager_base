@@ -126,7 +126,12 @@ bool Network::CreateVirtualNetwork()
 
 bool Network::IsAddrInOtherNetwork(const INetAddr &netAddr)
 {
-    return NetConnServiceIface().IsAddrInOtherNetwork(netId_, netAddr);
+    return NetConnServiceIface().IsAddrInOtherNetwork(netLinkInfo_.ifaceName_, netId_, netAddr);
+}
+
+bool Network::IsIfaceNameInUse()
+{
+    return NetConnServiceIface().IsIfaceNameInUse(netLinkInfo_.ifaceName_);
 }
 
 bool Network::ReleaseBasicNetwork()
@@ -135,15 +140,14 @@ bool Network::ReleaseBasicNetwork()
     if (isPhyNetCreated_) {
         NETMGR_LOG_D("Destroy physical network");
         StopNetDetection();
-        for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
-            if (IsAddrInOtherNetwork(inetAddr)) {
-                continue;
+        if (!IsIfaceNameInUse()) {
+            for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+                int32_t prefixLen = inetAddr.prefixlen_;
+                if (prefixLen == 0) {
+                    prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
+                }
+                NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
             }
-            int32_t prefixLen = inetAddr.prefixlen_;
-            if (prefixLen == 0) {
-                prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
-            }
-            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
         }
         for (const auto &route : netLinkInfo_.routeList_) {
             std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);

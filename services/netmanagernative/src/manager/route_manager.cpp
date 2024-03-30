@@ -67,7 +67,7 @@ constexpr uint16_t LOCAL_NET_ID = 99;
 constexpr uint16_t NETID_UNSET = 0;
 constexpr uint32_t MARK_UNSET = 0;
 constexpr uid_t UID_ROOT = 0;
-constexpr uid_t UID_PUSH = 7023;
+constexpr std::pair<uid_t, uid_t> UID_ALLOW_INTERNAL = {7023, 7023};
 constexpr uint32_t ROUTEMANAGER_SUCCESS = 0;
 constexpr uint32_t ROUTEMANAGER_ERROR = -1;
 constexpr bool ADD_CONTROL = true;
@@ -208,7 +208,7 @@ int32_t RouteManager::RemoveInterfaceFromPhysicalNetwork(uint16_t netId, const s
         NETNATIVE_LOGE("ClearRoutes err, error is %{public}d", ret);
         return ret;
     }
-    if (NetManagerStandard::CheckInternalNetId(netId)) {
+    if (NetManagerStandard::IsInternalNetId(netId)) {
         NETNATIVE_LOGI("InternalNetId skip");
         return 0;
     }
@@ -630,8 +630,9 @@ int32_t RouteManager::UpdateExplicitNetworkRule(uint16_t netId, uint32_t table, 
     ruleInfo.ruleIif = RULEIIF_LOOPBACK;
     ruleInfo.ruleOif = RULEOIF_NULL;
 
-    if (NetManagerStandard::CheckInternalNetId(netId)) {
-        return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo, UID_PUSH, UID_PUSH);
+    if (NetManagerStandard::IsInternalNetId(netId)) {
+        return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL,
+            ruleInfo, UID_ALLOW_INTERNAL.first(), UID_ALLOW_INTERNAL.second);
     }
     return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo);
 }
@@ -860,7 +861,7 @@ int32_t RouteManager::SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtm
 uint32_t RouteManager::FindTableByInterfacename(const std::string &interfaceName, int32_t netId)
 {
     NETNATIVE_LOGI("FindTableByInterfacename netId %{public}d", netId);
-    if (NetManagerStandard::CheckInternalNetId(netId)) {
+    if (NetManagerStandard::IsInternalNetId(netId)) {
         return ROUTE_INTERNAL_DEFAULT_TABLE;
     }
     auto iter = interfaceToTable_.find(interfaceName);

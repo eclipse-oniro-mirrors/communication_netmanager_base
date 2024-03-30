@@ -35,7 +35,7 @@ constexpr int32_t MIN_INTERNAL_NET_ID = 1;
 constexpr int32_t MAX_INTERNAL_NET_ID = 50;
 constexpr int32_t MIN_NET_ID = 100;
 constexpr int32_t MAX_NET_ID = 0xFFFF - 0x400;
-inline bool CheckInternalNetId(int32_t netId)
+inline bool IsInternalNetId(int32_t netId)
 {
     return netId >= MIN_INTERNAL_NET_ID && netId <= MAX_INTERNAL_NET_ID;
 }
@@ -91,6 +91,7 @@ private:
     bool IsDetectionForDnsSuccess(NetDetectionStatus netDetectionState, bool dnsHealthSuccess);
     bool IsDetectionForDnsFail(NetDetectionStatus netDetectionState, bool dnsHealthSuccess);
     bool IsAddrInOtherNetwork(const INetAddr &netAddr);
+    bool IsIfaceNameInUse();
 
 private:
     int32_t netId_ = 0;

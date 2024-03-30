@@ -327,7 +327,8 @@ public:
     int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) override;
     int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
-    bool IsAddrInOtherNetwork(int32_t netId, const INetAddr &netAddr);
+    bool IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr);
+    bool IsIfaceNameInUse(const std::string &ifaceName);
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -360,8 +361,9 @@ protected:
 
 private:
     enum RegisterType {
-        REGISTER_NET_CONN_CALLBACK,
-        REQUEST_NET_CONNECTION,
+        INVAILDTYPE,
+        REGISTER,
+        REQUEST,
     };
     bool Init();
     void RecoverInfo();
@@ -370,15 +372,12 @@ private:
                                              const std::set<NetCap> &netCaps);
     int32_t ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
                             const uint32_t &timeoutMS);
-    int32_t ActivateInternalNetwork(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
-                            const uint32_t &timeoutMS);
     void CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackType type);
     void CallbackForAvailable(sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
     uint32_t FindBestNetworkForRequest(sptr<NetSupplier> &supplier, std::shared_ptr<NetActivate> &netActivateNetwork);
     uint32_t FindInternalNetworkForRequest(std::shared_ptr<NetActivate> &netActivateNetwork,
                                            sptr<NetSupplier> &supplier);
-    void SendRequestToAllNetwork(std::shared_ptr<NetActivate> request, bool isInternal = false);
-    void SendRequestToInternalNetwork(std::shared_ptr<NetActivate> request);
+    void SendRequestToAllNetwork(std::shared_ptr<NetActivate> request);
     void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
     void SendAllRequestToNetwork(sptr<NetSupplier> supplier);
     void FindBestNetworkForAllRequest();
