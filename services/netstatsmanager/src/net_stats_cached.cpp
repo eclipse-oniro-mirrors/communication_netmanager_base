@@ -19,7 +19,6 @@
 #include <list>
 #include <pthread.h>
 
-#include "ffrt_inner.h"
 #include "net_stats_constants.h"
 #include "net_stats_data_handler.h"
 #include "net_stats_database_defines.h"
@@ -47,8 +46,8 @@ int32_t NetStatsCached::StartCached()
         NETMGR_LOG_E("Create iface table failed");
         return STATS_ERR_CREATE_TABLE_FAIL;
     }
-    cacheTimer_ = std::make_unique<FfrtTimer>();
-    writeTimer_ = std::make_unique<FfrtTimer>();
+    cacheTimer_ = std::make_unique<Timer>();
+    writeTimer_ = std::make_unique<Timer>();
     cacheTimer_->Start(cycleThreshold_, [this]() { CacheStats(); });
     writeTimer_->Start(STATS_PACKET_CYCLE_MS, [this]() { WriteStats(); });
     return ret;
@@ -121,14 +120,14 @@ void NetStatsCached::CacheIfaceStats()
 
 void NetStatsCached::CacheStats()
 {
-    std::lock_guard<ffrt::mutex> lock(lock_);
+    std::unique_lock<std::mutex> lock(lock_);
     CacheUidStats();
     CacheIfaceStats();
 }
 
 void NetStatsCached::WriteStats()
 {
-    std::lock_guard<ffrt::mutex> lock(lock_);
+    std::unique_lock<std::mutex> lock(lock_);
     WriteUidStats();
     WriteIfaceStats();
 }
@@ -158,19 +157,21 @@ void NetStatsCached::SetCycleThreshold(uint32_t threshold)
 {
     NETMGR_LOG_D("Current cycle threshold has changed current is : %{public}d", threshold);
     cycleThreshold_ = threshold;
-    cacheTimer_ = std::make_unique<FfrtTimer>();
+    cacheTimer_ = std::make_unique<Timer>();
     cacheTimer_->Start(cycleThreshold_, [this]() { CacheStats(); });
 }
 
 void NetStatsCached::ForceUpdateStats()
 {
     isForce_ = true;
-    std::function<void()> netCachedStats = [this] () {
+    std::thread t([this]() {
         CacheStats();
         WriteStats();
         isForce_ = false;
-    };
-    ffrt::submit(std::move(netCachedStats), {}, {}, ffrt::task_attr().name("NetCachedStats"));
+    });
+    std::string threadName = "NetCachedStats";
+    pthread_setname_np(t.native_handle(), threadName.c_str());
+    t.detach();
 }
 
 void NetStatsCached::Reset() {}
