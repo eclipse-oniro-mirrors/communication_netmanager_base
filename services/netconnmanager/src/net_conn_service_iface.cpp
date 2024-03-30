@@ -70,9 +70,9 @@ bool NetConnServiceIface::IsAddrInOtherNetwork(const std::string &ifaceName, int
 {
     return NetConnService::GetInstance()->IsAddrInOtherNetwork(ifaceName, netId, netAddr);
 }
-bool IsIfaceNameInUse(const std::string &ifaceName)
+bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId)
 {
-    return NetConnService::GetInstance()->IsIfaceNameInUse(ifaceName);
+    return NetConnService::GetInstance()->IsIfaceNameInUse(ifaceName, netId);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

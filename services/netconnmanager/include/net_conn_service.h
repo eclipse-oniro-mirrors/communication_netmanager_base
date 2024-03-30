@@ -328,7 +328,7 @@ public:
     int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     bool IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr);
-    bool IsIfaceNameInUse(const std::string &ifaceName);
+    bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId);
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -361,7 +361,7 @@ protected:
 
 private:
     enum RegisterType {
-        INVAILDTYPE,
+        INVALIDTYPE,
         REGISTER,
         REQUEST,
     };
@@ -413,9 +413,9 @@ private:
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
     void ActiveHttpProxy();
     void DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
-        const RegisterType registerType = REGISTER_NET_CONN_CALLBACK);
+        const RegisterType registerType = REGISTER);
     int32_t IncreaseNetConnCallbackCntForUid(const uint32_t callingUid,
-        const RegisterType registerType = REGISTER_NET_CONN_CALLBACK);
+        const RegisterType registerType = REGISTER);
 
     void OnNetSysRestart();
 

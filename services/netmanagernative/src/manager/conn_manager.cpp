@@ -195,20 +195,15 @@ int32_t ConnManager::GetDefaultNetwork() const
     return defaultNetId_;
 }
 
-NetIdType ConnManager::GetNetIdType(int32_t netId)
-{
-    return netId >= MIN_NET_ID ? NET_ID_DEFAULT : NET_ID_INTERNAL_DEFAULT;
-}
-
 int32_t ConnManager::GetNetworkForInterface(int32_t netId, std::string &interfaceName)
 {
     NETNATIVE_LOG_D("Entry ConnManager::GetNetworkForInterface interfaceName:%{public}s", interfaceName.c_str());
     std::map<int32_t, std::shared_ptr<NetsysNetwork>>::iterator it;
     int32_t InterfaceId = INTERFACE_UNSET;
-    NetIdType netIdType = GetNetIdType(netId);
-    networks_.Iterate([&InterfaceId, &interfaceName, &netIdType]
+    bool isInternalNetId = IsInternalNetId(netId);
+    networks_.Iterate([&InterfaceId, &interfaceName, isInternalNetId]
         (int32_t id, std::shared_ptr<NetsysNetwork> &NetsysNetworkPtr) {
-        if (GetNetIdType(id) != netIdType) {
+        if (IsInternalNetId(id) != isInternalNetId) {
             return;
         }
         if (InterfaceId != INTERFACE_UNSET) {

@@ -632,7 +632,7 @@ int32_t RouteManager::UpdateExplicitNetworkRule(uint16_t netId, uint32_t table, 
 
     if (NetManagerStandard::IsInternalNetId(netId)) {
         return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL,
-            ruleInfo, UID_ALLOW_INTERNAL.first(), UID_ALLOW_INTERNAL.second);
+            ruleInfo, UID_ALLOW_INTERNAL.first, UID_ALLOW_INTERNAL.second);
     }
     return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo);
 }

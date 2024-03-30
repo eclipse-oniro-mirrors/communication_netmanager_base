@@ -228,13 +228,6 @@ public:
     void GetDumpInfos(std::string &infos);
 
 private:
-    enum NetIdType {
-        NET_ID_DEFAULT = 0,
-        NET_ID_INTERNAL_DEFAULT
-    };
-
-    NetIdType ConnManager::GetNetIdType(int32_t netId);
-private:
     int32_t defaultNetId_;
     bool needReinitRouteFlag_;
     std::map<int32_t, std::string> physicalInterfaceName_;

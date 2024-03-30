@@ -24,6 +24,7 @@
 #include "network.h"
 #include "route_utils.h"
 #include "securec.h"
+#include "net_conn_service_iface.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 
@@ -131,7 +132,7 @@ bool Network::IsAddrInOtherNetwork(const INetAddr &netAddr)
 
 bool Network::IsIfaceNameInUse()
 {
-    return NetConnServiceIface().IsIfaceNameInUse(netLinkInfo_.ifaceName_);
+    return NetConnServiceIface().IsIfaceNameInUse(netLinkInfo_.ifaceName_, netId_);
 }
 
 bool Network::ReleaseBasicNetwork()

@@ -470,7 +470,7 @@ int32_t NetConnService::RequestNetConnectionAsync(const sptr<NetSpecifier> &netS
         NETMGR_LOG_E("RequestNetConnection found same callback");
         return NET_CONN_ERR_SAME_CALLBACK;
     }
-    int32_t ret = IncreaseNetConnCallbackCntForUid(callingUid, REQUEST_NET_CONNECTION);
+    int32_t ret = IncreaseNetConnCallbackCntForUid(callingUid, REQUEST);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
@@ -527,9 +527,9 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
         NETMGR_LOG_E("callback is null");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
-    RegisterType registerType = INVAILDTYPE;
+    RegisterType registerType = INVALIDTYPE;
     uint32_t reqId = 0;
-    if (!FindSameCallback(callback, reqId, registerType) || registerType == INVAILDTYPE) {
+    if (!FindSameCallback(callback, reqId, registerType) || registerType == INVALIDTYPE) {
         NETMGR_LOG_E("UnregisterNetConnCallback can not find same callback or callback is invalid.");
         return NET_CONN_ERR_CALLBACK_NOT_FOUND;
     }
@@ -572,7 +572,7 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
 
 int32_t NetConnService::IncreaseNetConnCallbackCntForUid(const uint32_t callingUid, const RegisterType registerType)
 {
-    auto &netUidRequest = registerType == REGISTER_NET_CONN_CALLBACK ?
+    auto &netUidRequest = registerType == REGISTER ?
         netUidRequest_ : internalDefaultUidRequest_;
     auto requestNetwork = netUidRequest.find(callingUid);
     if (requestNetwork == netUidRequest.end()) {
@@ -591,7 +591,7 @@ int32_t NetConnService::IncreaseNetConnCallbackCntForUid(const uint32_t callingU
 
 void NetConnService::DecreaseNetConnCallbackCntForUid(const uint32_t callingUid, const RegisterType registerType)
 {
-    auto &netUidRequest = registerType == REGISTER_NET_CONN_CALLBACK ?
+    auto &netUidRequest = registerType == REGISTER ?
         netUidRequest_ : internalDefaultUidRequest_;
     auto requestNetwork = netUidRequest.find(callingUid);
     if (requestNetwork == netUidRequest.end()) {
@@ -870,7 +870,7 @@ bool NetConnService::FindSameCallback(const sptr<INetConnCallback> &callback,
                 registerType = (specifier != nullptr &&
                     specifier->netCapabilities_.netCaps_.count(
                         NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT) > 0) ?
-                        REQUEST_NET_CONNECTION : REGISTER_NET_CONN_CALLBACK;
+                        REQUEST : REGISTER;
             }
             return true;
         }
@@ -2118,7 +2118,7 @@ bool NetConnService::IsAddrInOtherNetwork(const std::string &ifaceName, int32_t 
     return false;
 }
 
-bool IsIfaceNameInUse(const std::string &ifaceName)
+bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId)
 {
     for (const auto &network : networks_) {
         if (network.second->GetNetId() == netId) {

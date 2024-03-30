@@ -26,7 +26,6 @@
 #include "net_monitor.h"
 #include "net_supplier_info.h"
 #include "route.h"
-#include "net_conn_service_iface.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
