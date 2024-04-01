@@ -104,6 +104,7 @@ private:
     bool inited_ = false;
     std::mutex initedMutex_;
 
+    void IpfwdExecSaveBak();
     void InitChildChains();
     void CheckInited();
     int32_t SetIpFwdEnable();
