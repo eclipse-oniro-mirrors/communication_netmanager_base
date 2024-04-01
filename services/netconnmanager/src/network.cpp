@@ -143,10 +143,7 @@ bool Network::ReleaseBasicNetwork()
         StopNetDetection();
         if (!IsIfaceNameInUse()) {
             for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
-                int32_t prefixLen = inetAddr.prefixlen_;
-                if (prefixLen == 0) {
-                    prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
-                }
+                int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
                 NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
             }
         }
