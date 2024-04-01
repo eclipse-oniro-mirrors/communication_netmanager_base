@@ -101,7 +101,6 @@ bool NetPolicyFile::WriteFile()
 
 const std::vector<UidPolicy> &NetPolicyFile::ReadUidPolicies()
 {
-    std::lock_guard<std::mutex> guard(uidPoliciesMutex_);
     return netPolicy_.uidPolicies;
 }
 
@@ -235,7 +234,6 @@ void NetPolicyFile::AddQuotaPolicy(Json::Value &root)
 
 void NetPolicyFile::AddUidPolicy(Json::Value &root)
 {
-    std::lock_guard<std::mutex> guard(uidPoliciesMutex_);
     uint32_t size = netPolicy_.uidPolicies.size();
     for (uint32_t i = 0; i < size; i++) {
         Json::Value uidPolicy;
@@ -274,7 +272,6 @@ void NetPolicyFile::AddFirewallRule(Json::Value &root)
 
 uint32_t NetPolicyFile::ArbitrationWritePolicyToFile(uint32_t uid, uint32_t policy)
 {
-    std::lock_guard<std::mutex> guard(uidPoliciesMutex_);
     uint32_t size = netPolicy_.uidPolicies.size();
     bool haveUidAndPolicy = false;
     uint32_t oldPolicy;
@@ -312,7 +309,6 @@ void NetPolicyFile::WritePolicyByUid(uint32_t uid, uint32_t policy)
 
 void NetPolicyFile::WritePolicyByUid(uint32_t netUidPolicyOpType, uint32_t uid, uint32_t policy)
 {
-    std::lock_guard<std::mutex> guard(uidPoliciesMutex_);
     NETMGR_LOG_D("Write File start, model:[%{public}u]", netUidPolicyOpType);
     if (netUidPolicyOpType == NetUidPolicyOpType::NET_POLICY_UID_OP_TYPE_UPDATE) {
         for (auto &uidPolicy : netPolicy_.uidPolicies) {
@@ -423,7 +419,6 @@ void NetPolicyFile::WriteFirewallRules(uint32_t chainType, const std::set<uint32
 
 int32_t NetPolicyFile::ResetPolicies()
 {
-    std::lock_guard<std::mutex> guard(uidPoliciesMutex_);
     netPolicy_.uidPolicies.clear();
     netPolicy_.backgroundPolicyStatus = BACKGROUND_POLICY_ALLOW;
     netPolicy_.netQuotaPolicies.clear();
