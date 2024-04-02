@@ -164,6 +164,7 @@ ohos_static_library("net_policy_manager_static") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:app_manager",
+    "cJSON:cjson",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
@@ -181,10 +182,7 @@ ohos_static_library("net_policy_manager_static") {
     defines += [ "NETMGR_DEBUG" ]
   }
 
-  external_deps += [
-    "cJSON:cjson",
-    "hilog:libhilog",
-  ]
+  external_deps += [ "hilog:libhilog" ]
 
   part_name = "netmanager_base"
   subsystem_name = "communication"
