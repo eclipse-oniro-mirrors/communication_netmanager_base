@@ -1291,5 +1291,21 @@ HWTEST_F(NetConnClientTest, RegisterPreAirplaneCallback, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnClientTest, RegisterPreAirplaneCallback2, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    sptr<PreAirplaneCallbackTest> callback = nullptr;
+    int32_t ret = NetConnClient::GetInstance().RegisterPreAirplaneCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetConnClientTest, UnregisterPreAirplaneCallback, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    sptr<PreAirplaneCallbackTest> callback = new (std::nothrow) PreAirplaneCallbackTest();
+    int32_t ret = NetConnClient::GetInstance().UnregisterPreAirplaneCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS
