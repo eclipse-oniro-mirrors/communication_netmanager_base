@@ -123,6 +123,13 @@ bool NetConnService::Init()
         registerToService_ = false;
         return false;
     }
+    if (!registerToService_) {
+        if (!Publish(NetConnService::GetInstance().get())) {
+            NETMGR_LOG_E("Register to sa manager failed");
+            return false;
+        }
+        registerToService_ = true;
+    }
 
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
 
@@ -154,13 +161,6 @@ bool NetConnService::Init()
     }
 
     RecoverInfo();
-    if (!registerToService_) {
-        if (!Publish(NetConnService::GetInstance().get())) {
-            NETMGR_LOG_E("Register to sa manager failed");
-            return false;
-        }
-        registerToService_ = true;
-    }
     NETMGR_LOG_I("Init end");
     return true;
 }
