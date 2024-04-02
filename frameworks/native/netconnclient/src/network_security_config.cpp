@@ -413,7 +413,7 @@ void NetworkSecurityConfig::ParseJsonDomains(const cJSON* const root, std::vecto
 
 void NetworkSecurityConfig::ParseJsonPinSet(const cJSON* const root, PinSet &pinSet)
 {
-    if (!cJSON_IsArray(root)) {
+    if (root == nullptr) {
         return;
     }
     cJSON *expiration = cJSON_GetObjectItem(root, TAG_EXPIRATION.c_str());
