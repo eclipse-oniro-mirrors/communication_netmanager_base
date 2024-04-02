@@ -112,8 +112,8 @@ void NetPolicyFile::ParseUidPolicy(const cJSON* const root, NetPolicy &netPolicy
     UidPolicy uidPolicy;
     for (uint32_t i = 0; i < size; i++) {
         cJSON *uidPolicyItem = cJSON_GetArrayItem(netUidPolicy, i);
-        if (uidPolicyItem == nullptr || !cJSON_IsArray(uidPolicyItem)) {
-            NETMGR_LOG_E("uidPolicyItem is null or not array");
+        if (uidPolicyItem == nullptr) {
+            NETMGR_LOG_E("uidPolicyItem is null");
             continue;
         }
         cJSON *uid = cJSON_GetObjectItem(uidPolicyItem, CONFIG_UID);
@@ -147,8 +147,8 @@ void NetPolicyFile::ParseQuotaPolicy(const cJSON* const root, NetPolicy &netPoli
     NETMGR_LOG_D("netQuotaPolicy size: %{public}u", size);
     for (uint32_t i = 0; i < size; i++) {
         cJSON *quotaPolicyItem = cJSON_GetArrayItem(netQuotaPolicy, i);
-        if (quotaPolicyItem == nullptr || !cJSON_IsArray(quotaPolicyItem)) {
-            NETMGR_LOG_E("quotaPolicyItem is null or not array");
+        if (quotaPolicyItem == nullptr) {
+            NETMGR_LOG_E("quotaPolicyItem is null");
             continue;
         }
         cJSON *netType = cJSON_GetObjectItem(quotaPolicyItem, CONFIG_QUOTA_POLICY_NETTYPE);
@@ -271,9 +271,9 @@ bool NetPolicyFile::Obj2Json(const NetPolicy &netPolicy, std::string &content)
         return false;
     }
     content = jsonStr;
-    NETMGR_LOG_D("content: %{public}s", content.c_str());
     cJSON_Delete(root);
     free(jsonStr);
+    NETMGR_LOG_D("content: %{public}s", content.c_str());
     return true;
 }
 
