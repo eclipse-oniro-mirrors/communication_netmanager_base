@@ -32,8 +32,8 @@ namespace {
 
     const std::string TEST_TRUST_ANCHORS(R"([{"certificates": "@resource/raw/ca"}])");
 
-    const std::string TEST_DOMAINS(R"({[{"include-subdomains": false, "name": "baidu.com"},
-                                        {"include-subdomains": true, "name": "taobao.com"}]})");
+    const std::string TEST_DOMAINS(R"([{"include-subdomains": false, "name": "baidu.com"},
+                                       {"include-subdomains": true, "name": "taobao.com"}])");
 
     const std::string TEST_PINSET(R"({
                     "expiration": "2024-8-6",
@@ -61,7 +61,7 @@ void NetworkSecurityConfigTest::SetUp() {}
 
 void NetworkSecurityConfigTest::TearDown() {}
 
-void BuildTestJsonObject(std::string &content, cJSON *json)
+void BuildTestJsonObject(std::string &content, cJSON* &json)
 {
     json = cJSON_Parse(content.c_str());
 }
@@ -230,6 +230,7 @@ HWTEST_F(NetworkSecurityConfigTest, ParseJsonPinSet001, TestSize.Level1)
 
     std::cout << "ParseJsonPinSet001 In" << std::endl;
     NetworkSecurityConfig::GetInstance().ParseJsonPinSet(root, pinSet);
+    ASSERT_EQ(pinSet.expiration_, "2024-8-6");
     ASSERT_EQ(pinSet.pins_[0].digestAlgorithm_, "sha256");
     ASSERT_EQ(pinSet.pins_[0].digest_, "Q9TCQAWqP4t+eq41xnKaUgJdrPWqyG5L+Ni2YzMhqdY=");
     ASSERT_EQ(pinSet.pins_[1].digestAlgorithm_, "sha256");
