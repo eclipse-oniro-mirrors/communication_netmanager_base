@@ -32,7 +32,8 @@ namespace {
 
     const std::string TEST_TRUST_ANCHORS(R"([{"certificates": "@resource/raw/ca"}])");
 
-    const std::string TEST_DOMAINS(R"({[{"include-subdomains": false, "name": "baidu.com"}]})");
+    const std::string TEST_DOMAINS(R"({[{"include-subdomains": false, "name": "baidu.com"},
+                                        {"include-subdomains": true, "name": "huawei.com"}]})");
 
     const std::string TEST_PINSET(R"({
                     "expiration": "2024-8-6",
@@ -180,8 +181,8 @@ HWTEST_F(NetworkSecurityConfigTest, ReHashCAPathForX509001, TestSize.Level1)
  */
 HWTEST_F(NetworkSecurityConfigTest, ParseJsonTrustAnchorsTest001, TestSize.Level1)
 {
-    TrustAnchors trustAnchors;
     cJSON *root = nullptr;
+    TrustAnchors trustAnchors;
 
     std::string jsonTxt(TEST_TRUST_ANCHORS);
     BuildTestJsonObject(jsonTxt, root);
@@ -192,6 +193,28 @@ HWTEST_F(NetworkSecurityConfigTest, ParseJsonTrustAnchorsTest001, TestSize.Level
 }
 
 /**
+ * @tc.name: ParseJsonDomainsTest001
+ * @tc.desc: Test NetworkSecurityConfig::ParseJsonDomains, not applying for
+ * permission,return NETMANAGER_ERR_PERMISSION_DENIED
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetworkSecurityConfigTest, ParseJsonDomainsTest001, TestSize.Level1)
+{
+    cJSON *root = nullptr;
+    std::vector<Domain> domains;
+
+    std::string jsonTxt(TEST_DOMAINS);
+    BuildTestJsonObject(jsonTxt, root);
+
+    std::cout << "ParseJsonDomainsTest001 In" << std::endl;
+    NetworkSecurityConfig::GetInstance().ParseJsonDomains(root, domains);
+    ASSERT_EQ(domains[0].domainName_, "baidu.com");
+    ASSERT_EQ(domains[0].includeSubDomains_, false);
+    ASSERT_EQ(domains[1].domainName_, "huawei.com");
+    EXPECT_EQ(domains[1].includeSubDomains_, true);
+}
+
+/**
  * @tc.name: ParseJsonPinSet001
  * @tc.desc: Test NetworkSecurityConfig::ParseJsonPinSet, not applying for
  * permission,return NETMANAGER_ERR_PERMISSION_DENIED
@@ -199,8 +222,8 @@ HWTEST_F(NetworkSecurityConfigTest, ParseJsonTrustAnchorsTest001, TestSize.Level
  */
 HWTEST_F(NetworkSecurityConfigTest, ParseJsonPinSet001, TestSize.Level1)
 {
-    PinSet pinSet;
     cJSON *root = nullptr;
+    PinSet pinSet;
 
     std::string jsonTxt(TEST_PINSET);
     BuildTestJsonObject(jsonTxt, root);
