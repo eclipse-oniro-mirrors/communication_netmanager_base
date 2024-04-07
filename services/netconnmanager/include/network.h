@@ -60,7 +60,7 @@ public:
     void RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
     int32_t UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
     void StartNetDetection(bool needReport);
-    void SetNeedNetDetection(bool isNeed);
+    void SetNetCaps(const std::set<NetCap> &netCaps);
     void SetDefaultNetWork();
     void ClearDefaultNetWorkNetId();
     bool IsConnecting() const;
@@ -106,7 +106,7 @@ private:
     std::vector<sptr<INetDetectionCallback>> netDetectionRetCallback_;
     std::shared_ptr<NetConnEventHandler> eventHandler_;
     std::atomic<bool> isDetectingForDns_ = false;
-    std::atomic_bool isNeedNetDetection_ = true;
+    std::set<NetCap> netCaps_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

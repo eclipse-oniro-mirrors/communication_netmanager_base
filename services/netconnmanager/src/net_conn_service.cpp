@@ -395,7 +395,7 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
         std::bind(&NetConnService::HandleDetectionResult, shared_from_this(),
             std::placeholders::_1, std::placeholders::_2),
         bearerType, netConnEventHandler_);
-    network->SetNeedNetDetection(netCaps.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps.end());
+    network->SetNetCaps(netCaps);
     supplier->SetNetwork(network);
     supplier->SetNetValid(VERIFICATION_STATE);
     // save supplier

@@ -198,7 +198,8 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateTcpBufferSize(netLinkInfo);
 
     netLinkInfo_ = netLinkInfo;
-    if (netSupplierType_ != BEARER_VPN && isNeedNetDetection_) {
+    if (netSupplierType_ != BEARER_VPN &&
+        netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
         StartNetDetection(false);
     }
     return true;
@@ -461,10 +462,9 @@ void Network::StartNetDetection(bool needReport)
     }
 }
 
-void Network::SetNeedNetDetection(bool isNeed)
+void Network::SetNetCaps(const std::set<NetCap> &netCaps)
 {
-    NETMGR_LOG_I("set net detection flag to %{public}s", isNeed ? "true" : "false");
-    isNeedNetDetection_ = isNeed;
+    netCaps_ = netCaps;
 }
 
 void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
