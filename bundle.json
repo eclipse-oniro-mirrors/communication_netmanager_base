@@ -42,6 +42,7 @@
                 "access_token",
                 "hitrace",
                 "hisysevent",
+                "cJSON",
                 "c_utils",
                 "samgr",
                 "jsoncpp",

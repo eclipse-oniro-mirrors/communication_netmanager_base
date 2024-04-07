@@ -92,9 +92,9 @@
       "OHOS::NetManagerStandard::NetworkSecurityConfig::AddSurfixToCACertFileName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::set<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::less<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::GetCAFilesFromPath(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>&)";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::IsCACertFileName(char const*)";
-      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonPinSet(Json::Value const&, OHOS::NetManagerStandard::PinSet&)";
-      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonDomains(Json::Value const&, std::__h::vector<OHOS::NetManagerStandard::Domain, std::__h::allocator<OHOS::NetManagerStandard::Domain>>&)";
-      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonTrustAnchors(Json::Value const&, OHOS::NetManagerStandard::TrustAnchors&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonPinSet(cJSON const*, OHOS::NetManagerStandard::PinSet&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonDomains(cJSON const*, std::__h::vector<OHOS::NetManagerStandard::Domain, std::__h::allocator<OHOS::NetManagerStandard::Domain>>&)";
+      "OHOS::NetManagerStandard::NetworkSecurityConfig::ParseJsonTrustAnchors(cJSON const*, OHOS::NetManagerStandard::TrustAnchors&)";
       "OHOS::NetManagerStandard::NetworkSecurityConfig::GetPinSetForHostName(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
       "OHOS::NetManagerStandard::NetConnClient::FactoryResetNetwork()";
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetFactoryResetCallback(OHOS::sptr<OHOS::NetManagerStandard::INetFactoryResetCallback> const&)";
