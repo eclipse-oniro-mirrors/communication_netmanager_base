@@ -123,13 +123,6 @@ bool NetConnService::Init()
         registerToService_ = false;
         return false;
     }
-    if (!registerToService_) {
-        if (!Publish(NetConnService::GetInstance().get())) {
-            NETMGR_LOG_E("Register to sa manager failed");
-            return false;
-        }
-        registerToService_ = true;
-    }
 
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
 
@@ -139,6 +132,14 @@ bool NetConnService::Init()
         return false;
     }
     netConnEventHandler_ = std::make_shared<NetConnEventHandler>(netConnEventRunner_);
+
+    if (!registerToService_) {
+        if (!Publish(NetConnService::GetInstance().get())) {
+            NETMGR_LOG_E("Register to sa manager failed");
+            return false;
+        }
+        registerToService_ = true;
+    }
     serviceIface_ = std::make_unique<NetConnServiceIface>().release();
     NetManagerCenter::GetInstance().RegisterConnService(serviceIface_);
     netScore_ = std::make_unique<NetScore>();
