@@ -412,7 +412,7 @@ int32_t NetStatsServiceProxy::GetCookieRxBytes(uint64_t &stats, uint64_t cookie)
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     if (!data.WriteUint64(cookie)) {
-        NETMGR_LOG_E("proxy cookie%{public}llu", cookie);
+        NETMGR_LOG_E("proxy cookie write failed.");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
@@ -438,7 +438,7 @@ int32_t NetStatsServiceProxy::GetCookieTxBytes(uint64_t &stats, uint64_t cookie)
         return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
     }
     if (!data.WriteUint64(cookie)) {
-        NETMGR_LOG_E("proxy cookie%{public}llu", cookie);
+        NETMGR_LOG_E("proxy cookie write failed.");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
 
