@@ -2225,5 +2225,50 @@ int32_t NetsysNativeServiceProxy::UpdateNetworkSharingType(uint32_t type, bool i
 
     return ret;
 }
+
+int32_t NetsysNativeServiceProxy::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    NETNATIVE_LOGI("Begin to SetIpv6PrivacyExtensions");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(on)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_PRIVCAY_EXTENSION),
+                          data, reply, option);
+
+    return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    NETNATIVE_LOGI("Begin to SetEnableIpv6");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(on)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ENABLE_IPV6),
+                          data, reply, option);
+
+    return reply.ReadInt32();
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

@@ -1054,5 +1054,24 @@ int32_t NetsysController::UpdateNetworkSharingType(uint32_t type, bool isOpen)
     }
     return netsysService_->UpdateNetworkSharingType(type, isOpen);
 }
+
+int32_t NetsysController::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetIpv6PrivacyExtensions netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetIpv6PrivacyExtensions(interfaceName, on);
+}
+
+int32_t NetsysController::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetEnableIpv6 netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetEnableIpv6(interfaceName, on);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -741,6 +741,19 @@ int32_t NetsysNativeService::UnregisterDnsHealthCallback(const sptr<INetDnsHealt
     return netsysService_->UnregisterDnsHealthCallback(callback);
 }
 
+int32_t NetsysNativeService::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    int32_t result = netsysService_->SetIpv6PrivacyExtensions(interfaceName, on);
+    NETNATIVE_LOG_D("SetIpv6PrivacyExtensions");
+    return result;
+}
+int32_t NetsysNativeService::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    int32_t result = netsysService_->SetEnableIpv6(interfaceName, on);
+    NETNATIVE_LOG_D("SetEnableIpv6");
+    return result;
+}
+
 int32_t NetsysNativeService::GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie)
 {
     if (bpfStats_ == nullptr) {

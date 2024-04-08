@@ -831,6 +831,10 @@ public:
     virtual int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn) = 0;
 
     virtual int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) = 0;
+
+    virtual int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) = 0;
+
+    virtual int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

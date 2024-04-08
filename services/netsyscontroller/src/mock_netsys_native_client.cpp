@@ -603,5 +603,15 @@ int32_t MockNetsysNativeClient::StopDhcpService(const std::string &iface)
 {
     return 0;
 }
+
+int32_t MockNetsysNativeClient::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    return 0;
+}
+
+int32_t MockNetsysNativeClient::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    return 0;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
