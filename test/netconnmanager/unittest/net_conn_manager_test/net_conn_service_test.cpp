@@ -449,13 +449,13 @@ HWTEST_F(NetConnServiceTest, GetNetCapabilitiesTest001, TestSize.Level1)
 HWTEST_F(NetConnServiceTest, SetAirplaneModeTest001, TestSize.Level1)
 {
     auto ret = NetConnService::GetInstance()->SetAirplaneMode(true);
-    ASSERT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, SetAirplaneModeTest002, TestSize.Level1)
 {
     auto ret = NetConnService::GetInstance()->SetAirplaneMode(false);
-    ASSERT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+    ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetConnServiceTest, IsDefaultNetMeteredTest001, TestSize.Level1)

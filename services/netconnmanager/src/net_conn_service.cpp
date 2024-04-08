@@ -1528,6 +1528,10 @@ int32_t NetConnService::SetAirplaneMode(bool state)
             }
         }
     }
+    if (netConnEventHandler_ == nullptr) {
+        NETMGR_LOG_E("netConnEventHandler_ is nullptr.");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     netConnEventHandler_->RemoveAsyncTask("delay airplane mode");
     auto delayTime = GetDelayNotifyTime();
 
