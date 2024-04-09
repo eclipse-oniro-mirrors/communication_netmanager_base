@@ -24,22 +24,24 @@
 #include <mutex>
 #include <thread>
 
+#include "ffrt.h"
+#include "ffrt_inner.h"
 #include "net_mgr_log_wrapper.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 static constexpr const int TIMER_MAX_INTERVAL_MS = 200;
-class Timer {
+class FfrtTimer {
 public:
-    Timer() : stopStatus_(true), tryStopFlag_(false) {}
+    FfrtTimer() : stopStatus_(true), tryStopFlag_(false) {}
 
-    Timer(const Timer &timer)
+    FfrtTimer(const FfrtTimer &timer)
     {
         stopStatus_ = timer.stopStatus_.load();
         tryStopFlag_ = timer.tryStopFlag_.load();
     }
 
-    ~Timer()
+    ~FfrtTimer()
     {
         Stop();
     }
@@ -51,7 +53,7 @@ public:
         }
         NETMGR_LOG_D("start thread...");
         stopStatus_ = false;
-        std::thread([this, interval, taskFun]() {
+        std::function<void()> startTask = [this, interval, taskFun]() {
             while (!tryStopFlag_) {
                 OneTiming(interval);
                 if (!tryStopFlag_) {
@@ -59,10 +61,11 @@ public:
                 }
             }
 
-            std::lock_guard<std::mutex> locker(mutex_);
+            std::lock_guard<ffrt::mutex> locker(mutex_);
             stopStatus_ = true;
             timerCond_.notify_one();
-        }).detach();
+        };
+        ffrt::submit(std::move(startTask), {}, {}, ffrt::task_attr().name("timeStartTask"));
     }
 
     void Stop()
@@ -72,7 +75,7 @@ public:
         }
         NETMGR_LOG_D("stop thread...");
         tryStopFlag_ = true;
-        std::unique_lock<std::mutex> locker(mutex_);
+        std::unique_lock<ffrt::mutex> locker(mutex_);
         timerCond_.wait(locker, [this] { return stopStatus_ == true; });
 
         if (stopStatus_ == true) {
@@ -87,10 +90,10 @@ private:
         int remainTime = (time > TIMER_MAX_INTERVAL_MS) ? (time % TIMER_MAX_INTERVAL_MS) : time;
         while (!tryStopFlag_) {
             if (repeatCount > 0) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(TIMER_MAX_INTERVAL_MS));
+                ffrt::this_task::sleep_for(std::chrono::milliseconds(TIMER_MAX_INTERVAL_MS));
             } else {
                 if (remainTime) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(remainTime));
+                    ffrt::this_task::sleep_for(std::chrono::milliseconds(remainTime));
                 }
                 break;
             }
@@ -101,8 +104,8 @@ private:
 private:
     std::atomic<bool> stopStatus_;
     std::atomic<bool> tryStopFlag_;
-    std::mutex mutex_;
-    std::condition_variable timerCond_;
+    ffrt::mutex mutex_;
+    ffrt::condition_variable timerCond_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
