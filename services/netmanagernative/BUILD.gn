@@ -163,7 +163,7 @@ ohos_shared_library("netsys_native_manager") {
     "samgr:samgr_proxy",
   ]
 
-    if (build_selinux) {
+  if (build_selinux) {
     external_deps += [ "selinux:libselinux" ]
     defines += [ "USE_SELINUX" ]
   }
