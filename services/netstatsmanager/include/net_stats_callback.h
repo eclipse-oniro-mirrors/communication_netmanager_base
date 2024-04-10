@@ -20,6 +20,7 @@
 #include <vector>
 #include <mutex>
 
+#include "ffrt.h"
 #include "i_net_stats_callback.h"
 #include "netsys_controller_callback.h"
 
@@ -36,7 +37,7 @@ public:
 
 private:
     std::vector<sptr<INetStatsCallback>> netStatsCallback_;
-    std::mutex statsCallbackMetux_;
+    ffrt::mutex statsCallbackMetux_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

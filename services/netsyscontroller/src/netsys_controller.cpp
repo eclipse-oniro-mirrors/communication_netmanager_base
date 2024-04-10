@@ -14,6 +14,7 @@
  */
 #include "netsys_controller.h"
 
+#include "ffrt.h"
 #include "net_conn_constants.h"
 #include "net_conn_types.h"
 #include "net_mgr_log_wrapper.h"
@@ -40,9 +41,9 @@ void NetsysController::Init()
 NetsysController &NetsysController::GetInstance()
 {
     static NetsysController singleInstance_;
-    static std::mutex mutex_;
+    static ffrt::mutex mutex_;
     if (!singleInstance_.initFlag_) {
-        std::unique_lock<std::mutex> lock(mutex_);
+        std::unique_lock<ffrt::mutex> lock(mutex_);
         if (!singleInstance_.initFlag_) {
             singleInstance_.Init();
         }
