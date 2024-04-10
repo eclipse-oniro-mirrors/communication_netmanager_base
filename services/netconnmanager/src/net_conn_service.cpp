@@ -689,6 +689,18 @@ int32_t NetConnService::NetDetectionAsync(int32_t netId)
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetConnService::NetDetectionForDnsHealthSync(int32_t netId, bool dnsHealthSuccess)
+{
+    NETMGR_LOG_I("Enter NetConnService::NetDetectionForDnsHealthSync");
+    auto iterNetwork = networks_.find(netId);
+    if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
+        NETMGR_LOG_E("Could not find the corresponding network");
+        return NET_CONN_ERR_NETID_NOT_FOUND;
+    }
+    iterNetwork->second->NetDetectionForDnsHealth(dnsHealthSuccess);
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetConnService::RestrictBackgroundChangedAsync(bool restrictBackground)
 {
     NETMGR_LOG_I("Restrict background changed, background = %{public}d", restrictBackground);
@@ -1669,14 +1681,13 @@ int32_t NetConnService::GetNetInterfaceConfiguration(const std::string &iface, N
 
 int32_t NetConnService::NetDetectionForDnsHealth(int32_t netId, bool dnsHealthSuccess)
 {
-    NETMGR_LOG_D("Enter NetConnService::NetDetectionForDnsHealth");
-    auto iterNetwork = networks_.find(netId);
-    if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
-        NETMGR_LOG_E("Could not find the corresponding network");
-        return NET_CONN_ERR_NETID_NOT_FOUND;
+    int32_t result = NETMANAGER_ERROR;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask([netId, dnsHealthSuccess, &result, this]() {
+            result = this->NetDetectionForDnsHealthSync(netId, dnsHealthSuccess);
+        });
     }
-    iterNetwork->second->NetDetectionForDnsHealth(dnsHealthSuccess);
-    return NETMANAGER_SUCCESS;
+    return result;
 }
 
 void NetConnService::LoadGlobalHttpProxy()
