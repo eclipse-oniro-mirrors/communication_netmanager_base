@@ -17,6 +17,7 @@
 
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "net_stats_network.h"
 #include "netmanager_base_permission.h"
 
 namespace OHOS {
@@ -55,6 +56,14 @@ NetStatsServiceStub::NetStatsServiceStub()
         &NetStatsServiceStub::OnResetFactory;
     memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_STATS_INFO)] =
         &NetStatsServiceStub::OnGetAllStatsInfo;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_CONTAINER_STATS_INFO)] =
+        &NetStatsServiceStub::OnGetAllContainerStatsInfo;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK)] =
+        &NetStatsServiceStub::OnGetTrafficStatsByNetwork;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK)] =
+        &NetStatsServiceStub::OnGetTrafficStatsByUidNetwork;
+    memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_APP_STATS)] =
+        &NetStatsServiceStub::OnSetAppStats;
     memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_RXBYTES)] =
         &NetStatsServiceStub::OnGetCookieRxBytes;
     memberFuncMap_[static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_COOKIE_TXBYTES)] =
@@ -408,6 +417,92 @@ int32_t NetStatsServiceStub::OnGetAllStatsInfo(MessageParcel &data, MessageParce
         if (!NetStatsInfo::Marshalling(reply, infos)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
         }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsServiceStub::OnGetAllContainerStatsInfo(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = CheckNetManagerAvailable(reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    std::vector<NetStatsInfo> infos;
+    int32_t result = GetAllContainerStatsInfo(infos);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (result == NETMANAGER_SUCCESS) {
+        if (!NetStatsInfo::Marshalling(reply, infos)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsServiceStub::OnGetTrafficStatsByNetwork(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = CheckNetManagerAvailable(reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    sptr<Network> network = Network::Unmarshalling(data);
+    if (network == nullptr) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    std::vector<NetStatsInfo> infos;
+    int32_t result = GetTrafficStatsByNetwork(infos, network);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (result == NETMANAGER_SUCCESS) {
+        if (!NetStatsInfo::Marshalling(reply, infos)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsServiceStub::OnGetTrafficStatsByUidNetwork(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = CheckNetManagerAvailable(reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    uint32_t uid = 0;
+    if (!data.ReadUint32(uid)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    sptr<Network> network = Network::Unmarshalling(data);
+    if (network == nullptr) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    std::vector<NetStatsInfoSequence> infos;
+    int32_t result = GetTrafficStatsByUidNetwork(infos, uid, network);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (result == NETMANAGER_SUCCESS) {
+        if (!NetStatsInfoSequence::Marshalling(reply, infos)) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsServiceStub::OnSetAppStats(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = CheckNetManagerAvailable(reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    PushStatsInfo info;
+    if (!PushStatsInfo::Unmarshalling(data, info)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    int32_t result = SetAppStats(info);
+    if (!reply.WriteInt32(result)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
     return NETMANAGER_SUCCESS;
 }

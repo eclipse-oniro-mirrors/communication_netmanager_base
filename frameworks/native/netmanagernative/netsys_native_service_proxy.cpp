@@ -262,6 +262,56 @@ int32_t NetsysNativeServiceProxy::SetTcpBufferSizes(const std::string &tcpBuffer
     return reply.ReadInt32();
 }
 
+int32_t NetsysNativeServiceProxy::SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId)
+{
+    NETNATIVE_LOGI("Begin to SetInterfaceSimIdMap");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(simId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_INTERFACE_SIMID_MAP),
+                          data, reply, option);
+
+    return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::GetInterfaceSimIdMap(const std::string &interfaceName, uint32_t &simId)
+{
+    NETNATIVE_LOGI("Begin to GetInterfaceSimIdMap");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(simId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_INTERFACE_SIMID_MAP),
+                                           data, reply, option);
+    if (result != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed. ret=%{public}d", result);
+        return result;
+    }
+    if (!reply.ReadUint32(simId)) {
+        NETNATIVE_LOGE("parcel read simId failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
 int32_t NetsysNativeServiceProxy::GetInterfaceMtu(const std::string &interfaceName)
 {
     NETNATIVE_LOGI("Begin to GetInterfaceMtu");
@@ -1609,6 +1659,40 @@ int32_t NetsysNativeServiceProxy::GetIfaceStats(uint64_t &stats, uint32_t type, 
     return ERR_NONE;
 }
 
+int32_t NetsysNativeServiceProxy::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    auto result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_CONTAINER_STATS_INFO),
+                                        data,
+                                        reply,
+                                        option);
+    if (result != ERR_NONE) {
+        NETNATIVE_LOGE("proxy SendRequest failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t ret;
+    if (!reply.ReadInt32(ret)) {
+        NETNATIVE_LOGE("get ret falil");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("fail to GetAllContainerStatsInfo ret= %{public}d", ret);
+        return ret;
+    }
+    if (!OHOS::NetManagerStandard::NetStatsInfo::Unmarshalling(reply, stats)) {
+        NETNATIVE_LOGE("Read stats info failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    return ERR_NONE;
+}
+
 int32_t NetsysNativeServiceProxy::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     MessageParcel data;
@@ -2225,5 +2309,50 @@ int32_t NetsysNativeServiceProxy::UpdateNetworkSharingType(uint32_t type, bool i
 
     return ret;
 }
+
+int32_t NetsysNativeServiceProxy::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    NETNATIVE_LOGI("Begin to SetIpv6PrivacyExtensions");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(on)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_PRIVCAY_EXTENSION),
+                          data, reply, option);
+
+    return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    NETNATIVE_LOGI("Begin to SetEnableIpv6");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteUint32(on)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ENABLE_IPV6),
+                          data, reply, option);
+
+    return reply.ReadInt32();
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

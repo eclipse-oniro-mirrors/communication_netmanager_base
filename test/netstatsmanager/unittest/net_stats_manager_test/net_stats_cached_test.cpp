@@ -129,5 +129,33 @@ HWTEST_F(NetStatsCachedTest, WriteUidStatsTest001, TestSize.Level1)
     instance_->WriteUidStats();
     EXPECT_FALSE(instance_->CheckUidStor());
 }
+
+HWTEST_F(NetStatsCachedTest, WriteUidSimStatsTest001, TestSize.Level1)
+{
+    instance_->isForce_ = true;
+    instance_->stats_.currentUidSimStats_ = 0;
+    instance_->WriteUidSimStats();
+    instance_->stats_.currentUidSimStats_ = NetStatsCached::DEFAULT_TRAFFIC_STATISTICS_THRESHOLD_BYTES + 1;
+    instance_->WriteUidSimStats();
+    instance_->isForce_ = false;
+    instance_->stats_.currentUidSimStats_ = 0;
+    instance_->WriteUidSimStats();
+    instance_->stats_.currentUidSimStats_ = NetStatsCached::DEFAULT_TRAFFIC_STATISTICS_THRESHOLD_BYTES + 1;
+    instance_->WriteUidSimStats();
+    EXPECT_FALSE(instance_->CheckUidStor());
+}
+
+HWTEST_F(NetStatsCachedTest, SetAppStatsTest001, TestSize.Level1)
+{
+    PushStatsInfo info;
+    info.uid_ = 1001;
+    instance_->SetAppStats(info);
+}
+
+HWTEST_F(NetStatsCachedTest, GetKernelStatsTest001, TestSize.Level1)
+{
+    std::vector<NetStatsInfo> infos;
+    instance_->GetKernelStats(infos);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

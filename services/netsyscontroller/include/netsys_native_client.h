@@ -208,6 +208,24 @@ public:
     int32_t SetTcpBufferSizes(const std::string &tcpBufferSizes);
 
     /**
+     * Set the mapping relationship between the interface and the sim id
+     *
+     * @param interfaceName the name of interface
+     * @param simId the id of sim
+     * @return Return the return value of the netsys interface call
+     */
+    int32_t SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId);
+
+    /**
+     * Get the mapping relationship between the interface and the sim id
+     *
+     * @param interfaceName the name of interface
+     * @param simId the id of sim
+     * @return Return the return value of the netsys interface call
+     */
+    int32_t GetInterfaceSimIdMap(const std::string &interfaceName, uint32_t &simId);
+
+    /**
      * Add ip address
      *
      * @param ifName Network port device name
@@ -726,6 +744,13 @@ public:
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName);
 
     /**
+     * Get all container stats info
+     * @param stats stats
+     * @return returns the all info of the stats
+     */
+    int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
+
+    /**
      * Get all stats info
      *
      * @param stats stats
@@ -853,6 +878,9 @@ public:
 
     int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen);
 
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
+
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
 private:
     void ProcessDhcpResult(sptr<OHOS::NetsysNative::DhcpResultParcel> &dhcpResult);
     void ProcessBandwidthReachedLimit(const std::string &limitName, const std::string &iface);

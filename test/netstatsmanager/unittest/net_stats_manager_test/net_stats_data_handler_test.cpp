@@ -58,6 +58,7 @@ NetStatsInfo CreateMockStatsInfo()
 {
     NetStatsInfo info;
     info.uid_ = GetUint32();
+    info.simId_ = GetUint32();
     info.date_ = GetUint64();
     info.iface_ = GetMockIface();
     info.rxBytes_ = GetUint64();
@@ -73,6 +74,7 @@ void CreateMockStatsData()
     for (uint32_t i = 0; i < MAX_TEST_DATA; i++) {
         NetStatsInfo info;
         info.uid_ = GetUint32();
+        info.simId_ = GetUint32();
         info.date_ = GetUint64();
         info.iface_ = GetMockIface();
         info.rxBytes_ = GetUint64();
@@ -147,6 +149,15 @@ HWTEST_F(NetStatsDataHandlerTest, WriteStatsDataTest004, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetStatsDataHandlerTest, WriteStatsDataTest005, TestSize.Level1)
+{
+    NetStatsDataHandler handler;
+    CreateMockStatsData();
+    int32_t ret = handler.WriteStatsData(g_statsData, UID_SIM_TABLE);
+    ClearMockStatsData();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest001, TestSize.Level1)
 {
     NETMGR_LOG_E("NetStatsDataHandlerTest ReadStatsDataTest001 enter");
@@ -198,6 +209,17 @@ HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest005, TestSize.Level1)
     uint32_t testUid = 122;
     std::string iface = "testIface";
     int32_t ret = handler.ReadStatsData(infos, iface, 0, testUid, LONG_MAX);
+    std::cout << "Data size: " << infos.size() << std::endl;
+    std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest006, TestSize.Level1)
+{
+    NetStatsDataHandler handler;
+    std::vector<NetStatsInfo> infos;
+    uint32_t testSimId = 2;
+    int32_t ret = handler.ReadStatsData(infos, testSimId, 0, LONG_MAX);
     std::cout << "Data size: " << infos.size() << std::endl;
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);

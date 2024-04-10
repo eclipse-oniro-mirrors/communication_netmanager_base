@@ -44,6 +44,7 @@ constexpr uint32_t MAX_ROUTE_TABLE_SIZE = 128;
 NetsysNativeServiceStub::NetsysNativeServiceStub()
 {
     InitNetInfoOpToInterfaceMap();
+    InitNetInfoOpToInterfaceMapPart2();
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
     InitOpToInterfaceMapExt();
@@ -100,6 +101,18 @@ void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdAddInterfaceAddress;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_DEL_ADDRESS)] =
         &NetsysNativeServiceStub::CmdDelInterfaceAddress;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_PRIVCAY_EXTENSION)] =
+        &NetsysNativeServiceStub::CmdSetIpv6PrivacyExtensions;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ENABLE_IPV6)] =
+        &NetsysNativeServiceStub::CmdSetIpv6Enable;
+}
+
+void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMapPart2()
+{
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_INTERFACE_SIMID_MAP)] =
+        &NetsysNativeServiceStub::CmdSetInterfaceSimIdMap;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_INTERFACE_SIMID_MAP)] =
+        &NetsysNativeServiceStub::CmdGetInterfaceSimIdMap;
 }
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
@@ -112,6 +125,8 @@ void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdGetUidStats;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_IFACE_STATS)] =
         &NetsysNativeServiceStub::CmdGetIfaceStats;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_CONTAINER_STATS_INFO)] =
+        &NetsysNativeServiceStub::CmdGetAllContainerStatsInfo;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_STATS_INFO)] =
         &NetsysNativeServiceStub::CmdGetAllStatsInfo;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_COOKIE_STATS)] =
@@ -480,6 +495,30 @@ int32_t NetsysNativeServiceStub::CmdSetTcpBufferSizes(MessageParcel &data, Messa
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("SetTcpBufferSizes has recved result %{public}d", result);
 
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetInterfaceSimIdMap(MessageParcel &data, MessageParcel &reply)
+{
+    std::string interfaceName = data.ReadString();
+    uint32_t simId = data.ReadUint32();
+    int32_t ret = SetInterfaceSimIdMap(interfaceName, simId);
+    reply.WriteInt32(ret);
+    NETNATIVE_LOG_D("SetInterfaceSimIdMap has recved result %{public}d", ret);
+    return ERR_NONE;
+}
+
+int32_t NetsysNativeServiceStub::CmdGetInterfaceSimIdMap(MessageParcel &data, MessageParcel &reply)
+{
+    std::string interfaceName = data.ReadString();
+    uint32_t simId = data.ReadUint32();
+    int32_t ret = GetInterfaceSimIdMap(interfaceName, simId);
+    NETNATIVE_LOG_D("GetInterfaceSimIdMap has recved result %{public}d, ifaceName=%{public}s, simId=%{public}d",
+                    ret, interfaceName.c_str(), simId);
+    if (!reply.WriteInt32(simId)) {
+        NETNATIVE_LOGE("parcel write simId failed");
+        return ERR_FLATTEN_OBJECT;
+    }
     return ERR_NONE;
 }
 
@@ -1192,6 +1231,22 @@ int32_t NetsysNativeServiceStub::CmdGetIfaceStats(MessageParcel &data, MessagePa
     return result;
 }
 
+int32_t NetsysNativeServiceStub::CmdGetAllContainerStatsInfo(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
+    int32_t result = GetAllContainerStatsInfo(stats);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!OHOS::NetManagerStandard::NetStatsInfo::Marshalling(reply, stats)) {
+        NETNATIVE_LOGE("Read stats info failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+
 int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
@@ -1619,5 +1674,30 @@ int32_t NetsysNativeServiceStub::CmdUpdateNetworkSharingType(MessageParcel &data
 
     return ret;
 }
+
+int32_t NetsysNativeServiceStub::CmdSetIpv6PrivacyExtensions(MessageParcel &data, MessageParcel &reply)
+{
+    std::string interfaceName = data.ReadString();
+    int32_t on = data.ReadInt32();
+
+    int32_t result = SetIpv6PrivacyExtensions(interfaceName, on);
+    reply.WriteInt32(result);
+    NETNATIVE_LOGI("SetIpv6PrivacyExtensions has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetIpv6Enable(MessageParcel &data, MessageParcel &reply)
+{
+    std::string interfaceName = data.ReadString();
+    int32_t on = data.ReadInt32();
+
+    int32_t result = SetEnableIpv6(interfaceName, on);
+    reply.WriteInt32(result);
+    NETNATIVE_LOGI("SetIpv6Enable has recved result %{public}d", result);
+
+    return result;
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

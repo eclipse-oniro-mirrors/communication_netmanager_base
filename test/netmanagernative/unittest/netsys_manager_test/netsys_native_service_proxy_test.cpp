@@ -41,6 +41,7 @@ constexpr int32_t NETID = 101;
 constexpr int32_t UID = 1000;
 constexpr int32_t MTU = 1500;
 constexpr int32_t WHICH = 14;
+constexpr uint32_t SIM_ID = 6;
 const std::string INTERFACENAME = "wlan0";
 static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
@@ -80,6 +81,24 @@ void NetsysNativeServiceProxyTest::TearDownTestCase() {}
 void NetsysNativeServiceProxyTest::SetUp() {}
 
 void NetsysNativeServiceProxyTest::TearDown() {}
+
+/**
+ * @tc.name: SetAndGetInterfaceSimIdMapTest001
+ * @tc.desc: Test NetsysNativeServiceProxyTest SetInterfaceSimIdMap and GetInterfaceSimIdMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetsysNativeServiceProxyTest, SetAndGetInterfaceSimIdMapTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    int32_t ret = netsysNativeService->SetInterfaceSimIdMap(INTERFACENAME, SIM_ID);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    uint32_t simId = UINT32_MAX;
+    ret = netsysNativeService->GetInterfaceSimIdMap(INTERFACENAME, simId);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(simId, SIM_ID);
+}
 
 /**
  * @tc.name: AddInterfaceToNetworkTest001
@@ -330,6 +349,28 @@ HWTEST_F(NetsysNativeServiceProxyTest, UpdateNetworkSharingTypeTest001, TestSize
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = netsysNativeService->UpdateNetworkSharingType(type, false);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::string interface = "wlan0";
+    uint32_t on = 0;
+    int32_t ret = netsysNativeService->SetIpv6PrivacyExtensions(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = netsysNativeService->SetEnableIpv6(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, GetAllContainerStatsInfoTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
+    int32_t ret = netsysNativeService->GetAllContainerStatsInfo(stats);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative

@@ -192,6 +192,26 @@ int32_t NetsysNativeService::SetTcpBufferSizes(const std::string &tcpBufferSizes
     return netsysService_->SetTcpBufferSizes(tcpBufferSizes);
 }
 
+int32_t NetsysNativeService::SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId)
+{
+    NETNATIVE_LOG_D("SetInterfaceSimIdMap  Begin");
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return bpfStats_->SetIfaceSimMap(interfaceName, simId);
+}
+
+int32_t NetsysNativeService::GetInterfaceSimIdMap(const std::string &interfaceName, uint32_t &simId)
+{
+    NETNATIVE_LOG_D("GetInterfaceSimIdMap  Begin");
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return bpfStats_->GetIfaceSimMap(interfaceName, simId);
+}
+
 int32_t NetsysNativeService::RegisterNotifyCallback(sptr<INotifyCallback> &callback)
 {
     NETNATIVE_LOG_D("RegisterNotifyCallback");
@@ -618,6 +638,15 @@ int32_t NetsysNativeService::GetIfaceStats(uint64_t &stats, uint32_t type, const
     return bpfStats_->GetIfaceStats(stats, static_cast<OHOS::NetManagerStandard::StatsType>(type), interfaceName);
 }
 
+int32_t NetsysNativeService::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return bpfStats_->GetAllContainerStatsInfo(stats);
+}
+
 int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     if (bpfStats_ == nullptr) {
@@ -739,6 +768,19 @@ int32_t NetsysNativeService::RegisterDnsHealthCallback(const sptr<INetDnsHealthC
 int32_t NetsysNativeService::UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback)
 {
     return netsysService_->UnregisterDnsHealthCallback(callback);
+}
+
+int32_t NetsysNativeService::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    int32_t result = netsysService_->SetIpv6PrivacyExtensions(interfaceName, on);
+    NETNATIVE_LOG_D("SetIpv6PrivacyExtensions");
+    return result;
+}
+int32_t NetsysNativeService::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    int32_t result = netsysService_->SetEnableIpv6(interfaceName, on);
+    NETNATIVE_LOG_D("SetEnableIpv6");
+    return result;
 }
 
 int32_t NetsysNativeService::GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie)

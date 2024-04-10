@@ -166,6 +166,24 @@ public:
     int32_t SetTcpBufferSizes(const std::string &tcpBufferSizes) override;
 
     /**
+     * Set the mapping relationship between the interface and the sim id
+     *
+     * @param interfaceName the name of interface
+     * @param simId the id of sim
+     * @return Return the return value of the netsys interface call
+     */
+    int32_t SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId) override;
+
+    /**
+     * Get the mapping relationship between the interface and the sim id
+     *
+     * @param interfaceName the name of interface
+     * @param simId the id of sim
+     * @return Return the return value of the netsys interface call
+     */
+    int32_t GetInterfaceSimIdMap(const std::string &interfaceName, uint32_t &simId) override;
+
+    /**
      * Add ip address
      *
      * @param ifName Network port device name
@@ -683,6 +701,13 @@ public:
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) override;
 
     /**
+     * Get all container stats info
+     * @param stats stats
+     * @return returns the all info of the stats
+     */
+    int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
+
+    /**
      * Get all stats info
      *
      * @param stats stats
@@ -812,6 +837,9 @@ public:
     
     int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override;
 
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override;
+
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override;
 private:
     MockNetsysNativeClient mockNetsysClient_;
     NetsysNativeClient netsysClient_;

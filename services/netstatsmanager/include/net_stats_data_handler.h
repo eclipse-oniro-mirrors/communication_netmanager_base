@@ -32,6 +32,7 @@ public:
     int32_t ReadStatsData(std::vector<NetStatsInfo> &infos, const std::string &iface, uint64_t start, uint64_t end);
     int32_t ReadStatsData(std::vector<NetStatsInfo> &infos, const std::string &iface, const uint32_t uid,
                           uint64_t start, uint64_t end);
+    int32_t ReadStatsData(std::vector<NetStatsInfo> &infos, uint32_t simId, uint64_t start, uint64_t end);
     int32_t DeleteByUid(uint64_t uid);
     int32_t DeleteByDate(const std::string &tableName, uint64_t start, uint64_t end);
     int32_t ClearData();

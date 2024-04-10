@@ -44,6 +44,7 @@ constexpr const char *ERROR_MSG_SET_NET_RESOLVER_FAILED = "Set network resolver 
 constexpr const char *ERROR_MSG_UPDATE_NET_DNSES_FAILED = "Update netlink dns failed,dns list is empty";
 constexpr const char *ERROR_MSG_SET_NET_MTU_FAILED = "Set netlink interface mtu failed";
 constexpr const char *ERROR_MSG_SET_NET_TCP_BUFFER_SIZE_FAILED = "Set netlink tcp buffer size failed";
+constexpr const char *ERROR_MSG_SET_INTERFACE_SIMID_MAP_FAILED = "Set netlink interface and simId map failed";
 constexpr const char *ERROR_MSG_SET_DEFAULT_NETWORK_FAILED = "Set default network failed";
 constexpr const char *ERROR_MSG_CLEAR_DEFAULT_NETWORK_FAILED = "Clear default network failed";
 constexpr const char *LOCAL_ROUTE_NEXT_HOP = "0.0.0.0";
@@ -181,6 +182,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateDns(netLinkInfo);
     UpdateMtu(netLinkInfo);
     UpdateTcpBufferSize(netLinkInfo);
+    UpdateInterfaceSimId(netLinkInfo);
 
     netLinkInfo_ = netLinkInfo;
     if (netSupplierType_ != BEARER_VPN) {
@@ -384,6 +386,20 @@ void Network::UpdateTcpBufferSize(const NetLinkInfo &netLinkInfo)
         SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_SET_NET_TCP_BUFFER_SIZE_FAILED);
     }
     NETMGR_LOG_D("Network UpdateTcpBufferSize out.");
+}
+
+void Network::UpdateInterfaceSimId(const NetLinkInfo &netLinkInfo)
+{
+    NETMGR_LOG_D("Network UpdateInterfaceSimId in.");
+    if (netLinkInfo.ifaceName_ == netLinkInfo_.ifaceName_ && netLinkInfo.simId_ == netLinkInfo_.simId_) {
+        NETMGR_LOG_D("Network UpdateInterfaceSimId out. same with before");
+        return;
+    }
+    int32_t ret = NetsysController::GetInstance().SetInterfaceSimIdMap(netLinkInfo.ifaceName_, netLinkInfo.simId_);
+    if (ret != NETMANAGER_SUCCESS) {
+        SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_SET_INTERFACE_SIMID_MAP_FAILED);
+    }
+    NETMGR_LOG_D("Network UpdateInterfaceSimId out.");
 }
 
 void Network::RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback)

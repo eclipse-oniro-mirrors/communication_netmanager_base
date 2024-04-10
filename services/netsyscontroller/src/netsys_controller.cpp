@@ -252,6 +252,26 @@ int32_t NetsysController::SetTcpBufferSizes(const std::string &tcpBufferSizes)
     return netsysService_->SetTcpBufferSizes(tcpBufferSizes);
 }
 
+int32_t NetsysController::SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId)
+{
+    NETMGR_LOG_D("Set interface simId map: interface[%{public}s], simId[%{public}d]", interfaceName.c_str(), simId);
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetInterfaceSimIdMap(interfaceName, simId);
+}
+
+int32_t NetsysController::GetInterfaceSimIdMap(const std::string &interfaceName, uint32_t &simId)
+{
+    NETMGR_LOG_D("Get interface simId map: interface[%{public}s], simId[%{public}d]", interfaceName.c_str(), simId);
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->GetInterfaceSimIdMap(interfaceName, simId);
+}
+
 int32_t NetsysController::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                               int32_t prefixLength)
 {
@@ -891,6 +911,15 @@ int32_t NetsysController::GetIfaceStats(uint64_t &stats, uint32_t type, const st
     return netsysService_->GetIfaceStats(stats, static_cast<uint32_t>(type), interfaceName);
 }
 
+int32_t NetsysController::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->GetAllContainerStatsInfo(stats);
+}
+
 int32_t NetsysController::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     if (netsysService_ == nullptr) {
@@ -1055,5 +1084,24 @@ int32_t NetsysController::UpdateNetworkSharingType(uint32_t type, bool isOpen)
     }
     return netsysService_->UpdateNetworkSharingType(type, isOpen);
 }
+
+int32_t NetsysController::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetIpv6PrivacyExtensions netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetIpv6PrivacyExtensions(interfaceName, on);
+}
+
+int32_t NetsysController::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("SetEnableIpv6 netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetEnableIpv6(interfaceName, on);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

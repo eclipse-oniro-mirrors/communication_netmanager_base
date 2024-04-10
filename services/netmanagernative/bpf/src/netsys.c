@@ -44,10 +44,30 @@ bpf_map_def SEC("maps") app_uid_stats_map = {
     .numa_node = 0,
 };
 
+bpf_map_def SEC("maps") app_uid_sim_stats_map = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(app_uid_sim_stats_key),
+    .value_size = sizeof(app_uid_sim_stats_value),
+    .max_entries = APP_STATS_MAP_SIZE,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
 bpf_map_def SEC("maps") app_uid_if_stats_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(app_uid_if_stats_key),
     .value_size = sizeof(app_uid_if_stats_value),
+    .max_entries = IFACE_NAME_MAP_SIZE,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
+bpf_map_def SEC("maps") iface_simid_map = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(iface_simid_key),
+    .value_size = sizeof(iface_simid_value),
     .max_entries = IFACE_NAME_MAP_SIZE,
     .map_flags = 0,
     .inner_map_idx = 0,
@@ -114,16 +134,36 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
         __sync_fetch_and_add(&value->rxPackets, 1);
         __sync_fetch_and_add(&value->rxBytes, skb->len);
     }
-    app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
-    app_uid_if_stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
-    if (value_uid_if == NULL) {
-        app_uid_if_stats_value newValue = {};
-        bpf_map_update_elem(&app_uid_if_stats_map, &key, &newValue, BPF_NOEXIST);
-        value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+    uint16_t ifIndex = skb->ifindex;
+    __u32 simId = UINT32_MAX;
+    iface_simid_value *ifSimIdValue = bpf_map_lookup_elem(&iface_simid_map, &ifIndex);
+    if (ifSimIdValue != NULL) {
+        simId = *ifSimIdValue;
     }
-    if (value_uid_if != NULL) {
-        __sync_fetch_and_add(&value_uid_if->rxPackets, 1);
-        __sync_fetch_and_add(&value_uid_if->rxBytes, skb->len);
+    if (bpf_get_netns_cookie(skb->sk) == bpf_get_netns_cookie(NULL)) {
+        app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex, .simId = simId};
+        app_uid_if_stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+        if (value_uid_if == NULL) {
+            app_uid_if_stats_value newValue = {};
+            bpf_map_update_elem(&app_uid_if_stats_map, &key, &newValue, BPF_NOEXIST);
+            value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+        }
+        if (value_uid_if != NULL) {
+            __sync_fetch_and_add(&value_uid_if->rxPackets, 1);
+            __sync_fetch_and_add(&value_uid_if->rxBytes, skb->len);
+        }
+    } else {
+        app_uid_sim_stats_key uidSimStatsKey = {.uId = sock_uid, .ifIndex = skb->ifindex, .simId = simId};
+        app_uid_sim_stats_value *uidSimStatsValue = bpf_map_lookup_elem(&app_uid_sim_stats_map, &uidSimStatsKey);
+        if (uidSimStatsValue == NULL) {
+            app_uid_sim_stats_value newValue = {};
+            bpf_map_update_elem(&app_uid_sim_stats_map, &uidSimStatsKey, &newValue, BPF_NOEXIST);
+            uidSimStatsValue = bpf_map_lookup_elem(&app_uid_sim_stats_map, &uidSimStatsKey);
+        }
+        if (uidSimStatsValue != NULL) {
+            __sync_fetch_and_add(&uidSimStatsValue->rxPackets, 1);
+            __sync_fetch_and_add(&uidSimStatsValue->rxBytes, skb->len);
+        }
     }
     socket_cookie_stats_key sock_cookie = bpf_get_socket_cookie(skb);
     app_cookie_stats_value *value_cookie = bpf_map_lookup_elem(&app_cookie_stats_map, &sock_cookie);
@@ -156,16 +196,36 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
         __sync_fetch_and_add(&value->txPackets, 1);
         __sync_fetch_and_add(&value->txBytes, skb->len);
     }
-    app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
-    app_uid_if_stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
-    if (value_uid_if == NULL) {
-        app_uid_if_stats_value newValue = {};
-        bpf_map_update_elem(&app_uid_if_stats_map, &key, &newValue, BPF_NOEXIST);
-        value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+    uint16_t ifIndex = skb->ifindex;
+    __u32 simId = 0;
+    iface_simid_value *ifSimIdValue = bpf_map_lookup_elem(&iface_simid_map, &ifIndex);
+    if (ifSimIdValue != NULL) {
+        simId = *ifSimIdValue;
     }
-    if (value_uid_if != NULL) {
-        __sync_fetch_and_add(&value_uid_if->txPackets, 1);
-        __sync_fetch_and_add(&value_uid_if->txBytes, skb->len);
+    if (bpf_get_netns_cookie(skb->sk) == bpf_get_netns_cookie(NULL)) {
+        app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex, .simId = simId};
+        app_uid_if_stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+        if (value_uid_if == NULL) {
+            app_uid_if_stats_value newValue = {};
+            bpf_map_update_elem(&app_uid_if_stats_map, &key, &newValue, BPF_NOEXIST);
+            value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
+        }
+        if (value_uid_if != NULL) {
+            __sync_fetch_and_add(&value_uid_if->txPackets, 1);
+            __sync_fetch_and_add(&value_uid_if->txBytes, skb->len);
+        }
+    } else {
+        app_uid_sim_stats_key uidSimStatsKey = {.uId = sock_uid, .ifIndex = skb->ifindex, .simId = simId};
+        app_uid_sim_stats_value *uidSimStatsValue = bpf_map_lookup_elem(&app_uid_sim_stats_map, &uidSimStatsKey);
+        if (uidSimStatsValue == NULL) {
+            app_uid_sim_stats_value newValue = {};
+            bpf_map_update_elem(&app_uid_sim_stats_map, &uidSimStatsKey, &newValue, BPF_NOEXIST);
+            uidSimStatsValue = bpf_map_lookup_elem(&app_uid_sim_stats_map, &uidSimStatsKey);
+        }
+        if (uidSimStatsValue != NULL) {
+            __sync_fetch_and_add(&uidSimStatsValue->txPackets, 1);
+            __sync_fetch_and_add(&uidSimStatsValue->txBytes, skb->len);
+        }
     }
     socket_cookie_stats_key sock_cookie = bpf_get_socket_cookie(skb);
     app_cookie_stats_value *value_cookie = bpf_map_lookup_elem(&app_cookie_stats_map, &sock_cookie);

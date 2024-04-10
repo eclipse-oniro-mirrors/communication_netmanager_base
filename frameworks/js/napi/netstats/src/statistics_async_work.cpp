@@ -20,6 +20,8 @@
 #include "get_iface_rxbytes_context.h"
 #include "get_iface_stats_context.h"
 #include "get_iface_uid_stats_context.h"
+#include "get_traffic_stats_by_network_context.h"
+#include "get_traffic_stats_by_uid_network_context.h"
 #include "get_uid_rxbytes_context.h"
 #include "statistics_exec.h"
 #include "update_iface_stats_context.h"
@@ -94,6 +96,18 @@ void StatisticsAsyncWork::ExecGetSockfdRxBytes(napi_env env, void *data)
 void StatisticsAsyncWork::ExecGetSockfdTxBytes(napi_env env, void *data)
 {
     BaseAsyncWork::ExecAsyncWork<GetSockfdTxBytesContext, StatisticsExec::ExecGetSockfdTxBytes>(env, data);
+}
+
+void StatisticsAsyncWork::ExecGetTrafficStatsByNetwork(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetTrafficStatsByNetworkContext, StatisticsExec::ExecGetTrafficStatsByNetwork>(env,
+                                                                                                                data);
+}
+
+void StatisticsAsyncWork::ExecGetTrafficStatsByUidNetwork(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetTrafficStatsByUidNetworkContext, StatisticsExec::ExecGetTrafficStatsByUidNetwork>(
+        env, data);
 }
 
 void StatisticsAsyncWork::GetCellularRxBytesCallback(napi_env env, napi_status status, void *data)
@@ -172,6 +186,18 @@ void StatisticsAsyncWork::GetSockfdTxBytesCallback(napi_env env, napi_status sta
 {
     BaseAsyncWork::AsyncWorkCallback<GetSockfdTxBytesContext, StatisticsExec::GetSockfdTxBytesCallback>(env, status,
                                                                                                         data);
+}
+
+void StatisticsAsyncWork::GetTrafficStatsByNetworkCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetTrafficStatsByNetworkContext,
+                                     StatisticsExec::GetGetTrafficStatsByNetworkCallback>(env, status, data);
+}
+
+void StatisticsAsyncWork::GetTrafficStatsByUidNetworkCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetTrafficStatsByUidNetworkContext,
+                                     StatisticsExec::GetGetTrafficStatsByUidNetworkCallback>(env, status, data);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

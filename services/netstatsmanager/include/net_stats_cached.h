@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "ffrt.h"
+#include "net_push_stats_info.h"
 #include "net_stats_callback.h"
 #include "net_stats_info.h"
 #include "netmanager_base_common_utils.h"
@@ -41,7 +42,15 @@ public:
 
     void GetUidStatsCached(std::vector<NetStatsInfo> &uidStatsInfo);
 
+    void GetUidSimStatsCached(std::vector<NetStatsInfo> &uidSimStatsInfo);
+
+    void GetUidPushStatsCached(std::vector<NetStatsInfo> &uidPushStatsInfo);
+
     void GetIfaceStatsCached(std::vector<NetStatsInfo> &ifaceStatsInfo);
+
+    void SetAppStats(const PushStatsInfo &info);
+
+    void GetKernelStats(std::vector<NetStatsInfo> &statsInfo);
 
     inline void SetTrafficThreshold(uint64_t threshold)
     {
@@ -76,6 +85,19 @@ private:
             }
         }
 
+        void PushUidSimStats(NetStatsInfo &info)
+        {
+            if (info.HasNoData()) {
+                return;
+            }
+            info.date_ = CommonUtils::GetCurrentSecond();
+            uidSimStatsInfo_.push_back(info);
+            currentUidSimStats_ += info.GetStats();
+            if (netStatsCallbackManager_ != nullptr) {
+                netStatsCallbackManager_->NotifyNetUidStatsChanged(info.iface_, info.uid_);
+            }
+        }
+
         void PushIfaceStats(NetStatsInfo &info)
         {
             if (info.HasNoData()) {
@@ -94,6 +116,11 @@ private:
             return uidStatsInfo_;
         }
 
+        inline std::vector<NetStatsInfo> &GetUidSimStatsInfo()
+        {
+            return uidSimStatsInfo_;
+        }
+
         inline std::vector<NetStatsInfo> &GetIfaceStatsInfo()
         {
             return ifaceStatsInfo_;
@@ -104,6 +131,11 @@ private:
             return currentUidStats_;
         }
 
+        inline uint64_t GetCurrentUidSimStats() const
+        {
+            return currentUidSimStats_;
+        }
+
         inline uint64_t GetCurrentIfaceStats() const
         {
             return currentIfaceStats_;
@@ -112,6 +144,12 @@ private:
         void ResetUidStats()
         {
             uidStatsInfo_.clear();
+            currentUidStats_ = 0;
+        }
+
+        void ResetUidSimStats()
+        {
+            uidSimStatsInfo_.clear();
             currentUidStats_ = 0;
         }
 
@@ -128,8 +166,10 @@ private:
 
     private:
         uint64_t currentUidStats_ = 0;
+        uint64_t currentUidSimStats_ = 0;
         uint64_t currentIfaceStats_ = 0;
         std::vector<NetStatsInfo> uidStatsInfo_;
+        std::vector<NetStatsInfo> uidSimStatsInfo_;
         std::vector<NetStatsInfo> ifaceStatsInfo_;
         std::shared_ptr<NetStatsCallback> netStatsCallbackManager_ = nullptr;
     };
@@ -148,16 +188,23 @@ private:
     uint32_t cycleThreshold_ = DEFAULT_CACHE_CYCLE_MS;
     uint64_t trafficThreshold_ = DEFAULT_TRAFFIC_STATISTICS_THRESHOLD_BYTES;
     uint64_t dateCycle_ = DEFAULT_DATA_CYCLE_S;
+    std::vector<NetStatsInfo> uidPushStatsInfo_;
     std::vector<NetStatsInfo> lastUidStatsInfo_;
+    std::vector<NetStatsInfo> lastUidSimStatsInfo_;
     std::map<std::string, NetStatsInfo> lastIfaceStatsMap_;
 
     void CacheStats();
     void CacheUidStats();
+    void CacheUidSimStats();
     void CacheIfaceStats();
+    void CacheAppStats(NetStatsInfo &netStatsInfo);
 
     void WriteStats();
     void WriteUidStats();
+    void WriteUidSimStats();
     void WriteIfaceStats();
+
+    NetStatsInfo GetIncreasedStats(const NetStatsInfo &info);
 
     inline bool CheckUidStor()
     {

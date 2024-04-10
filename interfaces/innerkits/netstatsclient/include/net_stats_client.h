@@ -22,8 +22,11 @@
 #include "singleton.h"
 
 #include "i_net_stats_service.h"
+#include "net_push_stats_info.h"
 #include "net_stats_constants.h"
 #include "net_stats_info.h"
+#include "net_stats_info_sequence.h"
+#include "net_stats_network.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -145,6 +148,47 @@ public:
      * @systemapi Hide this for inner system use.
      */
     int32_t GetAllStatsInfo(std::vector<NetStatsInfo> &infos);
+
+    /**
+     * Get traffic details for all network cards with container application
+     *
+     * @param infos all network cards informations
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t GetAllContainerStatsInfo(std::vector<NetStatsInfo> &infos);
+
+    /**
+     * Get traffic of all application with the specified network cards
+     *
+     * @param infos traffic of all application
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t GetTrafficStatsByNetwork(std::vector<NetStatsInfo> &infos, const sptr<Network> &network);
+
+    /**
+     * Get traffic of the specified application with the specified network cards
+     *
+     * @param infos traffic of all application
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
+                                        const sptr<Network> &network);
+
+    /**
+     * Set traffic stats of the specified application
+     *
+     * @param info traffic of the application
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t SetAppStats(const PushStatsInfo &info);
 
     /**
      * Get the historical traffic details of the specified network card

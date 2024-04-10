@@ -21,6 +21,7 @@
 
 #include "net_detection_callback_stub.h"
 #include "net_manager_constants.h"
+#include "netsys_controller.h"
 #include "network.h"
 
 namespace OHOS {
@@ -30,7 +31,9 @@ using namespace testing::ext;
 constexpr int32_t TEST_NETID = 12;
 constexpr int32_t INVALID_VALUE = 100;
 constexpr uint32_t TEST_SUPPLIERID = 214;
+constexpr uint32_t TEST_SIM_ID = 6;
 constexpr const char *TEST_PROXY_HOST = "testHttpProxy";
+constexpr const char *TEST_IFACE_NAME = "eth0";
 
 class NetDetectionCallbackTest : public NetDetectionCallbackStub {
 public:
@@ -113,6 +116,18 @@ HWTEST_F(NetworkTest, UpdateNetLinkInfoTest001, TestSize.Level1)
     NetLinkInfo info;
     bool ret = instance_->UpdateNetLinkInfo(info);
     EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetworkTest, UpdateNetLinkInfoTest002, TestSize.Level1)
+{
+    NetLinkInfo info;
+    info.ifaceName_ = TEST_IFACE_NAME;
+    info.simId_ = TEST_SIM_ID;
+    bool ret = instance_->UpdateNetLinkInfo(info);
+    EXPECT_TRUE(ret);
+    uint32_t simId = UINT32_MAX;
+    EXPECT_EQ(NetsysController::GetInstance().GetInterfaceSimIdMap(info.ifaceName_, simId), NETMANAGER_SUCCESS);
+    EXPECT_EQ(simId, info.simId_);
 }
 
 HWTEST_F(NetworkTest, GetNetLinkInfoTest001, TestSize.Level1)

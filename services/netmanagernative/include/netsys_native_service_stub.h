@@ -46,6 +46,7 @@ private:
     using ServiceInterface = int32_t (NetsysNativeServiceStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, ServiceInterface> opToInterfaceMap_;
     void InitNetInfoOpToInterfaceMap();
+    void InitNetInfoOpToInterfaceMapPart2();
     void InitBandwidthOpToInterfaceMap();
     void InitFirewallOpToInterfaceMap();
     void InitOpToInterfaceMapExt();
@@ -60,6 +61,8 @@ private:
     int32_t CmdSetInterfaceMtu(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetInterfaceMtu(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetTcpBufferSizes(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetInterfaceSimIdMap(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetInterfaceSimIdMap(MessageParcel &data, MessageParcel &reply);
 
     int32_t CmdRegisterNotifyCallback(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUnRegisterNotifyCallback(MessageParcel &data, MessageParcel &reply);
@@ -117,6 +120,7 @@ private:
     int32_t CmdGetTotalStats(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetUidStats(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetIfaceStats(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetAllContainerStatsInfo(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetAllStatsInfo(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetDiagPingHost(MessageParcel &data, MessageParcel &reply);
@@ -134,7 +138,8 @@ private:
     int32_t CmdGetCookieStats(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetNetworkSharingType(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUpdateNetworkSharingType(MessageParcel &data, MessageParcel &reply);
-
+    int32_t CmdSetIpv6PrivacyExtensions(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetIpv6Enable(MessageParcel &data, MessageParcel &reply);
 private:
     std::vector<int32_t> uids_;
 };

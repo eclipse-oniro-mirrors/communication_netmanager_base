@@ -412,6 +412,106 @@ int32_t NetStatsServiceProxy::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
     return result;
 }
 
+int32_t NetStatsServiceProxy::GetAllContainerStatsInfo(std::vector<NetStatsInfo> &infos)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+
+    MessageParcel reply;
+    int32_t result =
+        SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_CONTAINER_STATS_INFO), data, reply);
+    if (result != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", result);
+        return result;
+    }
+    if (!NetStatsInfo::Unmarshalling(reply, infos)) {
+        NETMGR_LOG_E("Read stats info failed");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return result;
+}
+
+int32_t NetStatsServiceProxy::GetTrafficStatsByNetwork(std::vector<NetStatsInfo> &infos, const sptr<Network> &network)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!network->Marshalling(data)) {
+        NETMGR_LOG_E("proxy Marshalling failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    NETMGR_LOG_D("proxy sptr<Network> Marshalling success");
+    MessageParcel reply;
+    int32_t result =
+        SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK), data, reply);
+    if (result != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", result);
+        return result;
+    }
+    if (!NetStatsInfo::Unmarshalling(reply, infos)) {
+        NETMGR_LOG_E("Read stats info failed");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return result;
+}
+
+int32_t NetStatsServiceProxy::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
+                                                          const sptr<Network> &network)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!data.WriteUint32(uid)) {
+        NETMGR_LOG_E("WriteUint32 uid failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!network->Marshalling(data)) {
+        NETMGR_LOG_E("sptr<Network> Marshalling failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    NETMGR_LOG_D("proxy sptr<Network> Marshalling success");
+    MessageParcel reply;
+    int32_t ret =
+        SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK), data, reply);
+    if (ret != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", ret);
+        return ret;
+    }
+    if (!NetStatsInfoSequence::Unmarshalling(reply, infos)) {
+        NETMGR_LOG_E("Read stats info failed");
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    return ret;
+}
+
+int32_t NetStatsServiceProxy::SetAppStats(const PushStatsInfo &info)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (!info.Marshalling(data)) {
+        NETMGR_LOG_E("pushStatsInfo marshalling failed");
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    NETMGR_LOG_D("PushStatsInfo Marshalling success");
+    MessageParcel reply;
+    int32_t ret = SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_SET_APP_STATS), data, reply);
+    if (ret != ERR_NONE) {
+        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", ret);
+        return ret;
+    }
+    return ret;
+}
+
 int32_t NetStatsServiceProxy::GetCookieRxBytes(uint64_t &stats, uint64_t cookie)
 {
     MessageParcel data;

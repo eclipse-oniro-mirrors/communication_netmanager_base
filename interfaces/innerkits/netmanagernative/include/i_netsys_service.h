@@ -52,6 +52,8 @@ public:
     virtual int32_t GetInterfaceMtu(const std::string &interfaceName) = 0;
 
     virtual int32_t SetTcpBufferSizes(const std::string &tcpBufferSizes) = 0;
+    virtual int32_t SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId) = 0;
+    virtual int32_t GetInterfaceSimIdMap(const std::string &interfaceName, uint32_t &simId) = 0;
 
     virtual int32_t RegisterNotifyCallback(sptr<INotifyCallback> &callback) = 0;
     virtual int32_t UnRegisterNotifyCallback(sptr<INotifyCallback> &callback) = 0;
@@ -117,6 +119,7 @@ public:
     virtual int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) = 0;
     virtual int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) = 0;
     virtual int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
+    virtual int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
     virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) = 0;
     virtual int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) = 0;
     virtual int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) = 0;
@@ -136,6 +139,8 @@ public:
     virtual int32_t GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie) = 0;
     virtual int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn) = 0;
     virtual int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) = 0;
+    virtual int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) = 0;
+    virtual int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

@@ -386,6 +386,110 @@ int32_t NetStatsService::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
     return NetsysController::GetInstance().GetAllStatsInfo(infos);
 }
 
+int32_t NetStatsService::GetAllContainerStatsInfo(std::vector<NetStatsInfo> &infos)
+{
+    NETMGR_LOG_D("Enter GetAllContainerStatsInfo.");
+    return NetsysController::GetInstance().GetAllContainerStatsInfo(infos);
+}
+
+int32_t NetStatsService::GetTrafficStatsByNetwork(std::vector<NetStatsInfo> &infos, const sptr<Network> &network)
+{
+    NETMGR_LOG_D("Enter GetTrafficStatsByUidNetwork.");
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByNetwork start");
+    if (netStatsCached_ == nullptr) {
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    int32_t ret;
+    uint32_t simId = network->simId_;
+    uint32_t start = network->startTime_;
+    uint32_t end = network->endTime_;
+    std::vector<NetStatsInfo> allInfo;
+    auto history = std::make_unique<NetStatsHistory>();
+    ret = history->GetHistoryBySimId(allInfo, simId, start, end);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("get history by simId failed, err code=%{public}d", ret);
+        return ret;
+    }
+    netStatsCached_->GetKernelStats(allInfo);
+    netStatsCached_->GetUidPushStatsCached(allInfo);
+    netStatsCached_->GetUidStatsCached(allInfo);
+    netStatsCached_->GetUidSimStatsCached(allInfo);
+    std::for_each(allInfo.begin(), allInfo.end(), [&infos, &simId, &start, &end](const NetStatsInfo &info) {
+        if (simId != info.simId_) {
+            return;
+        }
+        if (start > info.date_ || end < info.date_) {
+            return;
+        }
+        for (auto &item: infos) {
+            if (item.uid_ == info.uid_) {
+                item += info;
+                return;
+            }
+        }
+        infos.push_back(info);
+    });
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByNetwork end");
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
+                                                     const sptr<Network> &network)
+{
+    NETMGR_LOG_D("Enter GetTrafficStatsByUidNetwork.");
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByUidNetwork start");
+    if (netStatsCached_ == nullptr) {
+        NETMGR_LOG_E("Cached is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    int32_t ret;
+    uint32_t simId = network->simId_;
+    uint32_t start = network->startTime_;
+    uint32_t end = network->endTime_;
+    std::vector<NetStatsInfo> allInfo;
+    auto history = std::make_unique<NetStatsHistory>();
+    ret = history->GetHistoryBySimId(allInfo, simId, start, end);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("get history by simId failed, err code=%{public}d", ret);
+        return ret;
+    }
+    netStatsCached_->GetKernelStats(allInfo);
+    netStatsCached_->GetUidPushStatsCached(allInfo);
+    netStatsCached_->GetUidStatsCached(allInfo);
+    netStatsCached_->GetUidSimStatsCached(allInfo);
+    std::for_each(allInfo.begin(), allInfo.end(), [&infos, &uid, &simId, &start, &end](const NetStatsInfo &info) {
+        if (simId != info.simId_) {
+            return;
+        }
+        if (start > info.date_ || end < info.date_) {
+            return;
+        }
+        if (uid != info.uid_) {
+            return;
+        }
+        NetStatsInfoSequence tmp;
+        tmp.startTime_ = info.date_;
+        tmp.endTime_ = info.date_;
+        tmp.info_ = info;
+        infos.push_back(tmp);
+    });
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByUidNetwork end");
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsService::SetAppStats(const PushStatsInfo &info)
+{
+    NETMGR_LOG_D("Enter GetTrafficStatsByUidNetwork.");
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService SetAppStats start");
+    if (netStatsCached_ == nullptr) {
+        NETMGR_LOG_E("Cached is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    netStatsCached_->SetAppStats(info);
+    NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService SetAppStats end");
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetStatsService::GetCookieRxBytes(uint64_t &stats, uint64_t cookie)
 {
     return NetsysController::GetInstance().GetCookieStats(stats, static_cast<uint32_t>(StatsType::STATS_TYPE_RX_BYTES),

@@ -311,6 +311,16 @@ int32_t NetManagerNative::IpEnableForwarding(const std::string &requester)
     return sharingManager_->IpEnableForwarding(requester);
 }
 
+int32_t NetManagerNative::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    return sharingManager_->SetIpv6PrivacyExtensions(interfaceName, on);
+}
+
+int32_t NetManagerNative::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    return sharingManager_->SetEnableIpv6(interfaceName, on);
+}
+
 int32_t NetManagerNative::IpDisableForwarding(const std::string &requester)
 {
     return sharingManager_->IpDisableForwarding(requester);

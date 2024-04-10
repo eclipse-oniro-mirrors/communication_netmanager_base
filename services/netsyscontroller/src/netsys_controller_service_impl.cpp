@@ -174,6 +174,21 @@ int32_t NetsysControllerServiceImpl::SetTcpBufferSizes(const std::string &tcpBuf
     return netsysClient_.SetTcpBufferSizes(tcpBufferSizes);
 }
 
+int32_t NetsysControllerServiceImpl::SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId)
+{
+    NETMGR_LOG_I("Set interface simId map: interface[%{public}s], simId[%{public}d]", interfaceName.c_str(), simId);
+    if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACESIMIDMAP_API)) {
+        return mockNetsysClient_.SetInterfaceSimIdMap(interfaceName, simId);
+    }
+    return netsysClient_.SetInterfaceSimIdMap(interfaceName, simId);
+}
+
+int32_t NetsysControllerServiceImpl::GetInterfaceSimIdMap(const std::string &interfaceName, uint32_t &simId)
+{
+    NETMGR_LOG_I("Get interface simId map: interface[%{public}s], simId[%{public}d]", interfaceName.c_str(), simId);
+    return netsysClient_.GetInterfaceSimIdMap(interfaceName, simId);
+}
+
 int32_t NetsysControllerServiceImpl::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                          int32_t prefixLength)
 {
@@ -646,6 +661,13 @@ int32_t NetsysControllerServiceImpl::GetIfaceStats(uint64_t &stats, uint32_t typ
     return netsysClient_.GetIfaceStats(stats, type, interfaceName);
 }
 
+int32_t NetsysControllerServiceImpl::GetAllContainerStatsInfo(
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    NETMGR_LOG_D("GetAllContainerStatsInfo");
+    return netsysClient_.GetAllContainerStatsInfo(stats);
+}
+
 int32_t NetsysControllerServiceImpl::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     NETMGR_LOG_D("GetAllStatsInfo");
@@ -754,6 +776,18 @@ int32_t NetsysControllerServiceImpl::UpdateNetworkSharingType(uint32_t type, boo
     NETMGR_LOG_D("UpdateNetworkSharingType: type=%{public}d isOpen=%{public}d",
                  type, isOpen);
     return netsysClient_.UpdateNetworkSharingType(type, isOpen);
+}
+
+int32_t NetsysControllerServiceImpl::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    NETMGR_LOG_I("SetIpv6PrivacyExtensions: interfaceName=%{public}s on=%{public}d", interfaceName.c_str(), on);
+    return netsysClient_.SetIpv6PrivacyExtensions(interfaceName, on);
+}
+
+int32_t NetsysControllerServiceImpl::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    NETMGR_LOG_I("SetEnableIpv6: interfaceName=%{public}s on=%{public}d", interfaceName.c_str(), on);
+    return netsysClient_.SetEnableIpv6(interfaceName, on);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

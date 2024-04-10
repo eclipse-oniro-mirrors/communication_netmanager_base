@@ -19,10 +19,13 @@
 #include "singleton.h"
 #include "system_ability.h"
 
+#include "net_push_stats_info.h"
 #include "net_stats_cached.h"
 #include "net_stats_callback.h"
 #include "net_stats_history.h"
+#include "net_stats_info_sequence.h"
 #include "net_stats_listener.h"
+#include "net_stats_network.h"
 #include "net_stats_service_stub.h"
 #include "netlink_manager.h"
 
@@ -48,6 +51,11 @@ public:
     int32_t GetUidRxBytes(uint64_t &stats, uint32_t uid) override;
     int32_t GetUidTxBytes(uint64_t &stats, uint32_t uid) override;
     int32_t GetAllStatsInfo(std::vector<NetStatsInfo> &infos) override;
+    int32_t GetAllContainerStatsInfo(std::vector<NetStatsInfo> &infos) override;
+    int32_t GetTrafficStatsByNetwork(std::vector<NetStatsInfo> &infos, const sptr<Network> &network) override;
+    int32_t GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
+                                        const sptr<Network> &network) override;
+    int32_t SetAppStats(const PushStatsInfo &info) override;
     int32_t RegisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;
     int32_t UnregisterNetStatsCallback(const sptr<INetStatsCallback> &callback) override;
     int32_t GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,

@@ -68,12 +68,32 @@ public:
     int32_t GetIfaceStats(uint64_t &stats, StatsType type, const std::string &interfaceName);
 
     /**
+     * Get the container uid Stats
+     *
+     * @param stats Stats data.
+     * @return returns 0 for success other as failed.
+     */
+    int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
+
+    /**
      * Get the Iface with uid Stats
      *
      * @param stats Stats data.
      * @return returns 0 for success other as failed.
      */
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats);
+
+    /**
+     * Set the iface and simId map
+     *
+     * @param ifaceName  the iface name
+     * @param simId the simId
+     * @return returns 0 for success other as failed.
+     */
+    int32_t SetIfaceSimMap(const std::string &ifaceName, uint32_t simId);
+
+    int32_t GetIfaceSimMap(const std::string &ifaceName, uint32_t &simId);
+
     int32_t GetCookieStats(uint64_t &stats, StatsType statsType, uint64_t cookie);
 
 private:

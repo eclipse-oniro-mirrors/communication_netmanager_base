@@ -33,6 +33,7 @@ struct NET_SYMBOL_VISIBLE NetLinkInfo final : public Parcelable {
     std::list<INetAddr> dnsList_;
     std::list<Route> routeList_;
     uint16_t mtu_ = 0;
+    uint32_t simId_ = 0;
     std::string tcpBufferSizes_;
     HttpProxy httpProxy_;
 

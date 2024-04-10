@@ -95,6 +95,8 @@ public:
     int32_t GetNetworkSharingTraffic(const std::string &downIface, const std::string &upIface,
                                      NetworkSharingTraffic &traffic);
 
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
 private:
     std::set<std::string> forwardingRequests_;
     std::set<std::string> interfaceForwards_;

@@ -415,6 +415,28 @@ int32_t NetsysNativeClient::SetTcpBufferSizes(const std::string &tcpBufferSizes)
     return proxy->SetTcpBufferSizes(tcpBufferSizes);
 }
 
+int32_t NetsysNativeClient::SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId)
+{
+    NETMGR_LOG_D("Set interface simId map: interface[%{public}s], simId[%{public}d]", interfaceName.c_str(), simId);
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetInterfaceSimIdMap(interfaceName, simId);
+}
+
+int32_t NetsysNativeClient::GetInterfaceSimIdMap(const std::string &interfaceName, uint32_t &simId)
+{
+    NETMGR_LOG_D("Get interface simId map: interface[%{public}s], simId[%{public}d]", interfaceName.c_str(), simId);
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetInterfaceSimIdMap(interfaceName, simId);
+}
+
 int32_t NetsysNativeClient::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                 int32_t prefixLength)
 {
@@ -1263,6 +1285,16 @@ int32_t NetsysNativeClient::GetIfaceStats(uint64_t &stats, uint32_t type, const 
     return proxy->GetIfaceStats(stats, type, interfaceName);
 }
 
+int32_t NetsysNativeClient::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetAllContainerStatsInfo(stats);
+}
+
 int32_t NetsysNativeClient::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     auto proxy = GetProxy();
@@ -1443,6 +1475,26 @@ int32_t NetsysNativeClient::UpdateNetworkSharingType(uint32_t type, bool isOpen)
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
     return proxy->UpdateNetworkSharingType(type, isOpen);
+}
+
+int32_t NetsysNativeClient::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetIpv6PrivacyExtensions(interfaceName, on);
+}
+
+int32_t NetsysNativeClient::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetEnableIpv6(interfaceName, on);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

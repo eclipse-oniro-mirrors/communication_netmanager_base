@@ -56,7 +56,9 @@ static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
 static constexpr uint32_t TEST_STATS_TYPE2 = 2;
 static constexpr uint32_t IPC_ERR_FLATTEN_OBJECT = 3;
+static constexpr uint32_t SIM_ID = 3;
 const int NET_ID = 2;
+const int TEST_SIM_ID = 6;
 const int PERMISSION = 5;
 const int PREFIX_LENGTH = 23;
 const int TEST_MTU = 111;
@@ -157,6 +159,9 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest006, TestSize.Level1)
     EXPECT_EQ(ret, -1);
 
     ret = NetsysController::GetInstance().SetTcpBufferSizes(TCP_BUFFER_SIZES);
+    EXPECT_EQ(ret, 0);
+
+    ret = NetsysController::GetInstance().SetInterfaceSimIdMap(ETH0, SIM_ID);
     EXPECT_EQ(ret, 0);
 }
 
@@ -416,6 +421,9 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest017, TestSize.Level1)
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
     ret = NetsysController::GetInstance().GetAllStatsInfo(statsInfo);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = NetsysController::GetInstance().GetAllContainerStatsInfo(statsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerTest, NetsysControllerTest018, TestSize.Level1)
@@ -430,6 +438,21 @@ HWTEST_F(NetsysControllerTest, NetsysControllerTest018, TestSize.Level1)
 
     ret = NetsysController::GetInstance().SetIptablesCommandForRes("-L", respond);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+HWTEST_F(NetsysControllerTest, NetsysControllerTest019, TestSize.Level1)
+{
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
+    int32_t ret = NetsysController::GetInstance().GetAllContainerStatsInfo(statsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = NetsysController::GetInstance().SetInterfaceSimIdMap(ETH0, TEST_SIM_ID);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    uint32_t simId = UINT32_MAX;
+    ret = NetsysController::GetInstance().GetInterfaceSimIdMap(ETH0, simId);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(simId, TEST_SIM_ID);
 }
 
 HWTEST_F(NetsysControllerTest, NetsysControllerErr001, TestSize.Level1)
@@ -1050,6 +1073,16 @@ HWTEST_F(NetsysControllerTest, NetsysControllerBranchTest004, TestSize.Level1)
 
     ret = NetsysController::GetInstance().UnregisterDnsHealthCallback(healthCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
+}
+
+HWTEST_F(NetsysControllerTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
+{
+    uint32_t on = 0;
+    std::string interface = "wlan0";
+    int32_t ret = NetsysController::GetInstance().SetIpv6PrivacyExtensions(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    ret = NetsysController::GetInstance().SetEnableIpv6(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -32,7 +32,7 @@ namespace {
 constexpr const char *IPV4_FORWARDING_PROC_FILE = "/proc/sys/net/ipv4/ip_forward";
 constexpr const char *IPV6_FORWARDING_PROC_FILE = "/proc/sys/net/ipv6/conf/all/forwarding";
 constexpr const char *IPTABLES_TMP_BAK = "/data/service/el1/public/netmanager/ipfwd.bak";
-
+constexpr const char *IPV6_PROC_PATH = "/proc/sys/net/ipv6/conf/";
 constexpr const int MAX_MATCH_SIZE = 4;
 constexpr const int TWO_LIST_CORRECT_DATA = 2;
 constexpr const int NEXT_LIST_CORRECT_DATA = 1;
@@ -43,6 +43,10 @@ constexpr const char *CREATE_TETHERCTRL_NAT_POSTROUTING = "-t nat -N tetherctrl_
 constexpr const char *CREATE_TETHERCTRL_FORWARD = "-t filter -N tetherctrl_FORWARD";
 constexpr const char *CREATE_TETHERCTRL_COUNTERS = "-t filter -N tetherctrl_counters";
 constexpr const char *CREATE_TETHERCTRL_MANGLE_FORWARD = "-t mangle -N tetherctrl_mangle_FORWARD";
+constexpr const char *OPEN_IPV6_PRIVACY_EXTENSIONS = "2";
+constexpr const char *CLOSE_IPV6_PRIVACY_EXTENSIONS = "0";
+constexpr const char *ENABLE_IPV6_VALUE = "0";
+constexpr const char *DISABLE_IPV6_VALUE = "1";
 
 // commands of set nat
 constexpr const char *APPEND_NAT_POSTROUTING = "-t nat -A POSTROUTING -j tetherctrl_nat_POSTROUTING";
@@ -219,6 +223,21 @@ int32_t SharingManager::DisableNat(const std::string &downstreamIface, const std
     iptablesWrapper_->RunCommand(IPTYPE_IPV4, DELETE_TETHERCTRL_NAT_POSTROUTING);
     iptablesWrapper_->RunCommand(IPTYPE_IPV4, DELETE_TETHERCTRL_MANGLE_FORWARD);
     return 0;
+}
+int32_t SharingManager::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    std::string option = IPV6_PROC_PATH + interfaceName + "/use_tempaddr";
+    const char *value = on ? OPEN_IPV6_PRIVACY_EXTENSIONS : CLOSE_IPV6_PRIVACY_EXTENSIONS;
+    bool ipv6Success = WriteToFile(option.c_str(), value);
+    return ipv6Success ? 0 : -1;
+}
+
+int32_t SharingManager::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    std::string option = IPV6_PROC_PATH + interfaceName + "/disable_ipv6";
+    const char *value = on ? ENABLE_IPV6_VALUE : DISABLE_IPV6_VALUE;
+    bool ipv6Success = WriteToFile(option.c_str(), value);
+    return ipv6Success ? 0 : -1;
 }
 
 int32_t SharingManager::SetIpFwdEnable()

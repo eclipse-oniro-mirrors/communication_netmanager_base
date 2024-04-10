@@ -29,6 +29,9 @@ bool NetStatsInfo::Marshalling(Parcel &parcel) const
     if (!parcel.WriteString(iface_)) {
         return false;
     }
+    if (!parcel.WriteUint32(simId_)) {
+        return false;
+    }
     if (!parcel.WriteUint64(date_)) {
         return false;
     }
@@ -53,6 +56,9 @@ bool NetStatsInfo::Marshalling(Parcel &parcel, const NetStatsInfo &stats)
         return false;
     }
     if (!parcel.WriteString(stats.iface_)) {
+        return false;
+    }
+    if (!parcel.WriteUint32(stats.simId_)) {
         return false;
     }
     if (!parcel.WriteUint64(stats.date_)) {
@@ -115,6 +121,9 @@ bool NetStatsInfo::Unmarshalling(Parcel &parcel, NetStatsInfo &stats)
         return false;
     }
     if (!parcel.ReadString(stats.iface_)) {
+        return false;
+    }
+    if (!parcel.ReadUint32(stats.simId_)) {
         return false;
     }
     if (!parcel.ReadUint64(stats.date_)) {

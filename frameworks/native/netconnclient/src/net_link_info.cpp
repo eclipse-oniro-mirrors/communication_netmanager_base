@@ -35,6 +35,7 @@ NetLinkInfo::NetLinkInfo(const NetLinkInfo &linkInfo)
     dnsList_.assign(linkInfo.dnsList_.begin(), linkInfo.dnsList_.end());
     routeList_.assign(linkInfo.routeList_.begin(), linkInfo.routeList_.end());
     mtu_ = linkInfo.mtu_;
+    simId_ = linkInfo.simId_;
     tcpBufferSizes_ = linkInfo.tcpBufferSizes_;
     httpProxy_ = linkInfo.httpProxy_;
 }
@@ -47,6 +48,7 @@ NetLinkInfo &NetLinkInfo::operator=(const NetLinkInfo &linkInfo)
     dnsList_.assign(linkInfo.dnsList_.begin(), linkInfo.dnsList_.end());
     routeList_.assign(linkInfo.routeList_.begin(), linkInfo.routeList_.end());
     mtu_ = linkInfo.mtu_;
+    simId_ = linkInfo.simId_;
     tcpBufferSizes_ = linkInfo.tcpBufferSizes_;
     httpProxy_ = linkInfo.httpProxy_;
     return *this;
@@ -87,7 +89,7 @@ bool NetLinkInfo::Marshalling(Parcel &parcel) const
             return false;
         }
     }
-    if (!parcel.WriteUint16(mtu_)) {
+    if (!parcel.WriteUint16(mtu_) || !parcel.WriteUint32(simId_)) {
         return false;
     }
     if (!parcel.WriteString(tcpBufferSizes_)) {
@@ -145,7 +147,7 @@ sptr<NetLinkInfo> NetLinkInfo::Unmarshalling(Parcel &parcel)
         }
         ptr->routeList_.push_back(*route);
     }
-    if (!parcel.ReadUint16(ptr->mtu_) || !parcel.ReadString(ptr->tcpBufferSizes_) ||
+    if (!parcel.ReadUint16(ptr->mtu_) || !parcel.ReadUint32(ptr->simId_) || !parcel.ReadString(ptr->tcpBufferSizes_) ||
         !HttpProxy::Unmarshalling(parcel, ptr->httpProxy_)) {
         return nullptr;
     }
@@ -191,10 +193,8 @@ bool NetLinkInfo::Marshalling(Parcel &parcel, const sptr<NetLinkInfo> &object)
             return false;
         }
     }
-    if (!parcel.WriteUint16(object->mtu_)) {
-        return false;
-    }
-    if (!parcel.WriteString(object->tcpBufferSizes_)) {
+    if (!parcel.WriteUint16(object->mtu_) || !parcel.WriteUint32(object->simId_) ||
+        !parcel.WriteString(object->tcpBufferSizes_)) {
         return false;
     }
     if (!object->httpProxy_.Marshalling(parcel)) {
@@ -212,6 +212,7 @@ void NetLinkInfo::Initialize()
     std::list<INetAddr>().swap(dnsList_);
     std::list<Route>().swap(routeList_);
     mtu_ = 0;
+    simId_ = 0;
     tcpBufferSizes_ = "";
 }
 
@@ -252,6 +253,10 @@ std::string NetLinkInfo::ToString(const std::string &tab) const
     str.append(tab);
     str.append("mtu_ = ");
     str.append(std::to_string(mtu_));
+
+    str.append(tab);
+    str.append("simId_ = ");
+    str.append(std::to_string(simId_));
 
     str.append(tab);
     str.append("tcpBufferSizes_ = ");
