@@ -55,7 +55,10 @@
                 "data_share",
                 "napi",
                 "bundle_framework",
-                "relational_store"
+                "relational_store",
+                "openssl",
+                "selinux",
+                "sqlite"
             ],
             "third_party": [
                 "curl",

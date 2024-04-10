@@ -68,7 +68,6 @@ ohos_shared_library("net_stats_manager") {
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/sqlite:sqlite",
   ]
 
   cflags = [
@@ -101,6 +100,7 @@ ohos_shared_library("net_stats_manager") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "sqlite:sqlite",
   ]
 
   defines = [
@@ -150,7 +150,6 @@ ohos_static_library("net_stats_manager_static") {
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
     "$NETSYSCONTROLLER_ROOT_DIR:netsys_controller",
-    "$THIRD_PARTY_ROOT/sqlite:sqlite",
   ]
 
   external_deps = [
@@ -159,6 +158,7 @@ ohos_static_library("net_stats_manager_static") {
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
+    "sqlite:sqlite",
   ]
 
   defines = [

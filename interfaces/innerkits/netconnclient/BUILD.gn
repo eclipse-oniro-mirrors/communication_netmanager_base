@@ -127,8 +127,6 @@ ohos_shared_library("net_conn_manager_if") {
   deps = [
     ":net_conn_parcel",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
-    "$THIRD_PARTY_ROOT/openssl:libcrypto_shared",
-    "$THIRD_PARTY_ROOT/openssl:libssl_shared",
   ]
 
   external_deps = [
@@ -136,6 +134,8 @@ ohos_shared_library("net_conn_manager_if") {
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
     "samgr:samgr_proxy",
+    "openssl:libcrypto_shared",
+    "openssl:libssl_shared",
   ]
 
   defines = [
