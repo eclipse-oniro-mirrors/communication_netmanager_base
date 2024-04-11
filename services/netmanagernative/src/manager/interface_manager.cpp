@@ -108,7 +108,7 @@ int InterfaceManager::GetMtu(const char *interfaceName)
     close(fd);
 
     int32_t mtu = -1;
-    (void)NetManagerStandard::CommonUtils::ParseInt(originMtuValue, &mtu);
+    mtu = StrToInt(originMtuValue);
     return mtu;
 }
 
