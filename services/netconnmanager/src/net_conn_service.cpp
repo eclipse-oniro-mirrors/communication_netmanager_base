@@ -67,7 +67,10 @@ NetConnService::NetConnService()
     CreateDefaultRequest();
 }
 
-NetConnService::~NetConnService() {}
+NetConnService::~NetConnService()
+{
+    RemoveALLClientDeathRecipient();
+}
 
 void NetConnService::OnStart()
 {
@@ -430,6 +433,7 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
+    AddClientDeathRecipient(callback);
     return ActivateNetwork(netSpecifier, callback, timeoutMS);
 }
 
@@ -519,6 +523,7 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
             }
         }
         iterActive = netActivates_.erase(iterActive);
+        RemoveClientDeathRecipient(callback);
     }
     NETMGR_LOG_I("UnregisterNetConnCallback End.");
     return NETMANAGER_SUCCESS;
@@ -2029,6 +2034,66 @@ std::vector<std::string> NetConnService::GetPreferredUrl()
         NETMGR_LOG_E("open prefer cellular url file failure.");
     }
     return preferCellularUrlList;
+}
+
+void NetConnService::OnRemoteDied(const wptr<IRemoteObject> &remoteObject)
+{
+    sptr<IRemoteObject> diedRemoted = remoteObject.promote();
+    if (diedRemoted == nullptr) {
+        NETMGR_LOG_E("diedRemoted is null");
+        return;
+    }
+    uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
+    NETMGR_LOG_I("OnRemoteDied, callingUid=%{public}u", callingUid);
+    sptr<INetConnCallback> callback = iface_cast<INetConnCallback>(diedRemoted);
+    UnregisterNetConnCallback(callback);
+}
+
+void NetConnService::RemoveClientDeathRecipient(const sptr<INetConnCallback> &callback)
+{
+    std::lock_guard<std::mutex> autoLock(remoteMutex_);
+    auto iter =
+        std::find_if(remoteCallback_.cbegin(), remoteCallback_.cend(), [&callback](const sptr<INetConnCallback> &item) {
+            return item->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr();
+        });
+    if (iter == remoteCallback_.cend()) {
+        return;
+    }
+    callback->AsObject()->RemoveDeathRecipient(deathRecipient_);
+    remoteCallback_.erase(iter);
+}
+
+void NetConnService::AddClientDeathRecipient(const sptr<INetConnCallback> &callback)
+{
+    std::lock_guard<std::mutex> autoLock(remoteMutex_);
+    if (deathRecipient_ == nullptr) {
+        deathRecipient_ = new (std::nothrow) ConnCallbackDeathRecipient(*this);
+    }
+    if (deathRecipient_ == nullptr) {
+        NETMGR_LOG_E("deathRecipient is null");
+        return;
+    }
+    if (!callback->AsObject()->AddDeathRecipient(deathRecipient_)) {
+        NETMGR_LOG_E("AddClientDeathRecipient failed");
+        return;
+    }
+    auto iter =
+        std::find_if(remoteCallback_.cbegin(), remoteCallback_.cend(), [&callback](const sptr<INetConnCallback> &item) {
+            return item->AsObject().GetRefPtr() == callback->AsObject().GetRefPtr();
+        });
+    if (iter == remoteCallback_.cend()) {
+        remoteCallback_.emplace_back(callback);
+    }
+}
+
+void NetConnService::RemoveALLClientDeathRecipient()
+{
+    std::lock_guard<std::mutex> autoLock(remoteMutex_);
+    for (auto &item : remoteCallback_) {
+        item->AsObject()->RemoveDeathRecipient(deathRecipient_);
+    }
+    remoteCallback_.clear();
+    deathRecipient_ = nullptr;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
