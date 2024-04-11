@@ -1444,5 +1444,25 @@ int32_t NetsysNativeClient::UpdateNetworkSharingType(uint32_t type, bool isOpen)
     }
     return proxy->UpdateNetworkSharingType(type, isOpen);
 }
+
+int32_t NetsysNativeClient::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetIpv6PrivacyExtensions(interfaceName, on);
+}
+
+int32_t NetsysNativeClient::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetEnableIpv6(interfaceName, on);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

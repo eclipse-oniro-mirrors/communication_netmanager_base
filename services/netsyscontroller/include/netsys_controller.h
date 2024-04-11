@@ -824,6 +824,9 @@ public:
 
     int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen);
 
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
+
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
 private:
     NetsysController() = default;
 

@@ -466,6 +466,9 @@ public:
      * @return Return the return value of the netsys interface call.
      */
     int32_t StopDhcpService(const std::string &iface);
+
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
 private:
     int64_t GetIfaceBytes(const std::string &interfaceName, const std::string &filename);
     int64_t GetAllBytes(const std::string &filename);

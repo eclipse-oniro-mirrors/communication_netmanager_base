@@ -812,6 +812,9 @@ public:
     
     int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override;
 
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override;
+
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override;
 private:
     MockNetsysNativeClient mockNetsysClient_;
     NetsysNativeClient netsysClient_;
