@@ -14,26 +14,6 @@
 import("//build/ohos.gni")
 import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
-ohos_ndk_library("libnet_connection") {
-  output_name = "net_connection"
-  output_extension = "so"
-  ndk_description_file = "./libnet_connection.ndk.json"
-  min_compact_version = "1"
-  system_capability = "SystemCapability.Communication.NetManager.Core"
-  system_capability_headers = [
-    "./include/net_connection.h",
-    "./include/net_connection_type.h",
-  ]
-}
-
-ohos_ndk_headers("netconn_header") {
-  dest_dir = "$ndk_headers_out_dir/network/netmanager"
-  sources = [
-    "./include/net_connection.h",
-    "./include/net_connection_type.h",
-  ]
-}
-
 ohos_shared_library("net_connection") {
   sanitize = {
     cfi = true
