@@ -38,6 +38,7 @@ constexpr uint8_t RESPONSE_FLAG = 0x80;
 constexpr uint8_t RESPONSE_FLAG_USED = 80;
 constexpr size_t FLAG_BUFF_LEN = 1;
 constexpr size_t FLAG_BUFF_OFFSET = 2;
+constexpr size_t DNS_HEAD_LENGTH = 12;
 DnsProxyListen::DnsProxyListen() : proxySockFd_(-1) {}
 DnsProxyListen::~DnsProxyListen()
 {
@@ -164,7 +165,7 @@ void DnsProxyListen::StartListen()
             NETNATIVE_LOGE("read errno %{public}d", errno);
             continue;
         }
-        if (CheckDnsResponse(recvBuff.questionsBuff, MAX_REQUESTDATA_LEN)) {
+        if (!CheckDnsQuestion(recvBuff.questionsBuff, MAX_REQUESTDATA_LEN)) {
             NETNATIVE_LOGE("read buff is not dns question");
             continue;
         }
@@ -176,6 +177,24 @@ void DnsProxyListen::StartListen()
             DnsProxyListen::DnsProxyGetPacket(proxySockFd_, recvBuff, proxyAddr);
         };
         ffrt::submit(std::move(dnsProxyPacket), {}, {}, ffrt::task_attr().name("DnsPxyPacket"));
+    }
+}
+
+bool DnsPrxoyListen::CheckDnsQuestion(char *recBuff, size_t recLen)
+{
+    if (recLen < DNS_HEAD_LENGTH) { 
+        return false;
+    }
+    uint8_t flagBuff;
+    char *recFlagBuff = recBuff + FLAG_BUFF_OFFSET;
+    if (memcpy_s(reinterpret_cast<char *>(&flagBuff), FLAG_BUFF_LEN, recFlagBuff, FLAG_BUFF_LEN) != 0) {
+        return false;
+    }
+    int reqFlag = (flagBuff & RESPONSE_FLAG) / RESPONSE_FLAG_USED;
+    if (reqFlag) {
+        return false; // answer
+    } else {
+        return true; // question
     }
 }
 
