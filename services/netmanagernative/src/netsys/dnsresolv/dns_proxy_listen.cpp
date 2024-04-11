@@ -180,7 +180,7 @@ void DnsProxyListen::StartListen()
     }
 }
 
-bool DnsPrxoyListen::CheckDnsQuestion(char *recBuff, size_t recLen)
+bool DnsProxyListen::CheckDnsQuestion(char *recBuff, size_t recLen)
 {
     if (recLen < DNS_HEAD_LENGTH) { 
         return false;
