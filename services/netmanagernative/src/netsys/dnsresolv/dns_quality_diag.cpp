@@ -106,11 +106,11 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
 {
     bool reportSizeReachLimit = (report_.size() >= MAX_RESULT_SIZE);
 
-    NETNATIVE_LOGI("ReportDnsResult: %{public}d, %{public}d, %{public}d, %{public}d, %{public}d, %{public}d",
+    NETNATIVE_LOG_D("ReportDnsResult: %{public}d, %{public}d, %{public}d, %{public}d, %{public}d, %{public}d",
                     netId, uid, pid, usedtime, size, failreason);
 
     if (queryParam.type == 1) {
-        NETNATIVE_LOGE("ReportDnsResult: query from Netmanager ignore report");
+        NETNATIVE_LOG_D("ReportDnsResult: query from Netmanager ignore report");
         return 0;
     }
 
