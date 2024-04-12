@@ -173,8 +173,9 @@ void DnsProxyListen::StartListen()
         if (DnsThreadClose()) {
             break;
         }
-        std::function<void()> dnsProxyPacket = [this, recvBuff, proxyAddr] () {
-            DnsProxyListen::DnsProxyGetPacket(proxySockFd_, recvBuff, proxyAddr);
+        auto fd = this->proxySockFd_;
+        std::function<void()> dnsProxyPacket = [fd, recvBuff, proxyAddr] () {
+            DnsProxyListen::DnsProxyGetPacket(fd, recvBuff, proxyAddr);
         };
         ffrt::submit(std::move(dnsProxyPacket), {}, {}, ffrt::task_attr().name("DnsPxyPacket"));
     }
