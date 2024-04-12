@@ -463,9 +463,6 @@ static int32_t NetSysPostDnsResultInternal(int sockFd, uint16_t netId, char* nam
         .netId = netId,
     };
 
-    //if (param->qp_type == 1) {
-    //	return 0;
-    //}
     int32_t uid = getuid();
     int32_t pid = getpid();
     uint32_t nameLen = strlen(name) + 1;
