@@ -142,7 +142,7 @@ void SendMessage(int32_t *serverSockfd)
         if (ffrt::this_task::get_id() != 0) {
             ffrt::sync_io(*serverSockfd);
         }
-        in32_t clientSockfd = accept(*serverSockfd, reinterpret_cast<struct sockaddr *>(&clientAddr), &len);
+        int32_t clientSockfd = accept(*serverSockfd, reinterpret_cast<struct sockaddr *>(&clientAddr), &len);
         FwmarkCommand fwmCmd;
         iovec iov = {.iov_base = &fwmCmd, .iov_len = sizeof(fwmCmd)};
         int32_t socketFd = -1;
