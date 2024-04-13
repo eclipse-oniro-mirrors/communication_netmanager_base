@@ -63,7 +63,7 @@ int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &com
     NETNATIVE_LOG_D("IptablesWrapper::RunCommand, ipType:%{public}d, command:%{public}s", ipType, command.c_str());
     if (!iptablesWrapperFfrtQueue_) {
         NETNATIVE_LOGE("FFRT Init Fail");
-        return NetManagerStandard::NETMANAGER_ERR_FFRT_INIT_FAIL;
+        return NETMANAGER_ERROR;
     }
 
     if (isIptablesSystemAccess_ && (ipType == IPTYPE_IPV4 || ipType == IPTYPE_IPV4V6)) {
