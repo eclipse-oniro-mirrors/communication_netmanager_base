@@ -47,7 +47,7 @@ static constexpr const int32_t ERROR_CODE_SET_MARK = -6;
 static constexpr const int32_t MAX_CONCURRENT_CONNECTION_REQUESTS = 10;
 union Cmsgu {
     cmsghdr cmh;
-    char cmsg[CMSG_SPACE(sizeof(socketFd))];
+    char cmsg[CMSG_SPACE(sizeof(0))];
 };
 void CloseSocket(int32_t *socket, int32_t ret, int32_t errorCode)
 {
