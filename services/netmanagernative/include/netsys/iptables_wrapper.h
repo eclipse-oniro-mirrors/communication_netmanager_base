@@ -71,6 +71,7 @@ private:
     std::condition_variable conditionVarLock_;
     bool isRunningFlag_ = false;
     bool isIptablesSystemAccess_ = false;
+    bool isIp6tablesSystemAccess_ = false;
     std::string result_;
     std::thread iptablesWrapperThread_;
     std::queue<std::string> commandsQueue_;
