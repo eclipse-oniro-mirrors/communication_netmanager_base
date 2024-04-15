@@ -401,6 +401,9 @@ int32_t NetStatsService::GetTrafficStatsByNetwork(std::vector<NetStatsInfo> &inf
     }
     int32_t ret;
     uint32_t simId = network->simId_;
+    if (network->type_ != 0) {
+        simId = UINT32_MAX;
+    }
     uint32_t start = network->startTime_;
     uint32_t end = network->endTime_;
     std::vector<NetStatsInfo> allInfo;
