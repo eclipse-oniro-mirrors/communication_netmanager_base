@@ -95,6 +95,9 @@ public:
     std::string TechToType(NetSlotTech type);
 
     bool ResumeNetworkInfo();
+    bool IsNetQualityPoor();
+    bool IsNetQualityGood();
+    void ResetNetQuality();
 
 private:
     NetBearType netSupplierType_;
@@ -113,6 +116,7 @@ private:
     sptr<NetHandle> netHandle_ = nullptr;
     bool restrictBackground_ = true;
     std::string type_ = "";
+    NetDetectionStatus netQuality_ = QUALITY_NORMAL_STATE;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

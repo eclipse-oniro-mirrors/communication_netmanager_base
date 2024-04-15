@@ -40,6 +40,7 @@ namespace OHOS {
 namespace NetManagerStandard {
 namespace {
 constexpr uint32_t MAX_ALLOW_UID_NUM = 2000;
+constexpr uint32_t INVALID_SUPPLIER_ID = 0;
 // hisysevent error messgae
 constexpr const char *ERROR_MSG_NULL_SUPPLIER_INFO = "Net supplier info is nullptr";
 constexpr const char *ERROR_MSG_NULL_NET_LINK_INFO = "Net link info is nullptr";
@@ -369,7 +370,8 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
     }
     // create network
     int32_t netId = GenerateNetId();
-    NETMGR_LOG_D("GenerateNetId is: [%{public}d]", netId);
+    NETMGR_LOG_D("GenerateNetId is: [%{public}d], bearerType: %{public}d, supplierId: %{public}d",
+        netId, bearerType, supplierId);
     if (netId == INVALID_NET_ID) {
         NETMGR_LOG_E("GenerateNetId fail");
         return NET_CONN_ERR_INVALID_NETWORK;
@@ -1142,7 +1144,9 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
         return;
     }
     supplier->SetNetValid(netState);
-    CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
+    if (netState != QUALITY_POOR_STATE && netState != QUALITY_NORMAL_STATE && netState != QUALITY_GOOD_STATE) {
+        CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
+    }
     if (!netScore_->GetServiceScore(supplier)) {
         NETMGR_LOG_E("GetServiceScore fail.");
         return;
@@ -2094,6 +2098,67 @@ void NetConnService::RemoveALLClientDeathRecipient()
     }
     remoteCallback_.clear();
     deathRecipient_ = nullptr;
+}
+
+std::vector<sptr<NetSupplier>> NetConnService::FindSupplierWithInternetByBearerType(NetBearType bearerType)
+{
+    std::vector<sptr<NetSupplier>> result;
+    NET_SUPPLIER_MAP::iterator iterSupplier;
+    for (iterSupplier = netSuppliers_.begin(); iterSupplier != netSuppliers_.end(); ++iterSupplier) {
+        if (iterSupplier->second == nullptr) {
+            continue;
+        }
+        if (!iterSupplier->second->GetNetCaps().HasNetCap(NET_CAPABILITY_INTERNET)) {
+            continue;
+        }
+        std::set<NetBearType>::iterator iter = iterSupplier->second->GetNetCapabilities().bearerTypes_.find(bearerType);
+        if (iter != iterSupplier->second->GetNetCapabilities().bearerTypes_.end()) {
+            NETMGR_LOG_I("found supplierId[%{public}d] by bearertype[%{public}d].", iterSupplier->first, bearerType);
+            result.push_back(iterSupplier->second);
+        }
+    }
+    return result;
+}
+
+int32_t NetConnService::UpdateSupplierScore(NetBearType bearerType, bool isBetter)
+{
+    int32_t result = NETMANAGER_ERROR;
+    if (netConnEventHandler_) {
+        netConnEventHandler_->PostSyncTask([this, bearerType, isBetter, &result]() {
+            result = this->UpdateSupplierScoreAsync(bearerType, isBetter);
+        });
+    }
+    return result;
+}
+
+int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, bool isBetter)
+{
+    NETMGR_LOG_I("update supplier score by bearertype[%{public}d], isBetter[%{public}d]", bearerType, isBetter);
+    std::vector<sptr<NetSupplier>> suppliers = FindSupplierWithInternetByBearerType(bearerType);
+    if (suppliers.empty()) {
+        NETMGR_LOG_E(" not found supplierId by bearertype[%{public}d].", bearerType);
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (!defaultNetSupplier_) {
+        NETMGR_LOG_E("default net supplier nullptr");
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    uint32_t supplierId = INVALID_SUPPLIER_ID;
+    std::vector<sptr<NetSupplier>>::iterator iter;
+    for (iter = suppliers.begin(); iter != suppliers.end(); ++iter) {
+        if (defaultNetSupplier_->GetNetId() == (*iter)->GetNetId()) {
+            supplierId = (*iter)->GetSupplierId();
+            break;
+        }
+    }
+    if (supplierId == INVALID_SUPPLIER_ID) {
+        NETMGR_LOG_E("not found supplierId, default supplier id[%{public}d], netId:[%{public}d]",
+            defaultNetSupplier_->GetSupplierId(), defaultNetSupplier_->GetNetId());
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    NetDetectionStatus state = isBetter ? QUALITY_GOOD_STATE : QUALITY_POOR_STATE;
+    HandleDetectionResult(supplierId, state);
+    return NETMANAGER_SUCCESS;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

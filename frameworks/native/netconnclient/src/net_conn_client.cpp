@@ -789,5 +789,15 @@ int32_t NetConnClient::UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCall
 
     return ret;
 }
+
+int32_t NetConnClient::UpdateSupplierScore(NetBearType bearerType, bool isBetter)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr.");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->UpdateSupplierScore(bearerType, isBetter);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
