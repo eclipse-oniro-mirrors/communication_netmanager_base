@@ -26,6 +26,7 @@
 #include "event_runner.h"
 #include "event_handler.h"
 #include "singleton.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace nmd {
@@ -75,8 +76,7 @@ private:
     std::string result_;
     std::thread iptablesWrapperThread_;
     std::queue<std::string> commandsQueue_;
-    std::shared_ptr<EventHandler> handler_ = nullptr;
-    std::shared_ptr<EventRunner> handlerRunner_ = nullptr;
+    std::shared_ptr<ffrt::queue> iptablesWrapperFfrtQueue_ = nullptr;
 };
 } // namespace nmd
 } // namespace OHOS
