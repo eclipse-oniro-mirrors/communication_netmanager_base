@@ -16,7 +16,6 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 config("netsys_native_manager_config") {
   include_dirs = [
-    "$C_UTILS_ROOT/base/include",
     "$DHCP_MANAGER_ROOT/interfaces/inner_api/include",
     "$DHCP_MANAGER_ROOT/interfaces/inner_api/interfaces",
     "$INNERKITS_ROOT/include",
@@ -27,7 +26,6 @@ config("netsys_native_manager_config") {
     "include/manager",
     "include/netsys",
     "include/netsys/wrapper",
-    "$C_UTILS_ROOT/base/include",
     "$DHCP_MANAGER_ROOT/interfaces/inner_api/include",
     "$DHCP_MANAGER_ROOT/interfaces/inner_api/interfaces",
     "$FWMARK_CLIENT_DIR/include",
@@ -154,11 +152,6 @@ ohos_shared_library("netsys_native_manager") {
     "NETSYS_DNS_MONITOR=0",
   ]
 
-  if (build_selinux) {
-    deps += [ "$THIRD_PARTY_ROOT/selinux:libselinux" ]
-    defines += [ "USE_SELINUX" ]
-  }
-
   external_deps = [
     "c_utils:utils",
     "dhcp:dhcp_sdk",
@@ -169,6 +162,11 @@ ohos_shared_library("netsys_native_manager") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  if (build_selinux) {
+    external_deps += [ "selinux:libselinux" ]
+    defines += [ "USE_SELINUX" ]
+  }
 
   public_configs = [ "$NETMANAGER_BASE_ROOT/utils:netmgr_common_config" ]
 
@@ -220,7 +218,7 @@ ohos_static_library("netsys_native_manager_static") {
   ]
 
   if (build_selinux) {
-    deps += [ "$THIRD_PARTY_ROOT/selinux:libselinux" ]
+    external_deps += [ "selinux:libselinux" ]
     defines += [ "USE_SELINUX" ]
   }
 
