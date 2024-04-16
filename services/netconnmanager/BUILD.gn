@@ -28,7 +28,6 @@ config("net_conn_manager_config") {
     "$NETSYSCONTROLLER_ROOT_DIR/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient/include",
     "$INNERKITS_ROOT/netmanagernative/include",
-    "$THIRD_PARTY_ROOT/curl/include",
   ]
 }
 

@@ -117,7 +117,6 @@ ohos_shared_library("net_conn_manager_if") {
     "$NETMANAGER_BASE_ROOT/utils/bundle_utils/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
     "//third_party/musl/porting/linux/user/src/hook",
-    "//third_party/openssl/include",
   ]
 
   version_script = "libnetconn_kits.map"
