@@ -321,6 +321,16 @@ static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct
     return resNum;
 }
 
+static int32_t FillQueryParam(struct queryparam *orig, struct QueryParam *dest)
+{
+    dest->type = orig->qp_type;
+    dest->netId = orig->qp_netid;
+    dest->mark = orig->qp_mark;
+    dest->flags = orig->qp_flag;
+    dest->qHook = NULL;
+    return 0;
+}
+
 static int32_t NetSysSetResolvCacheInternal(int sockFd, uint16_t netId, const struct ParamWrapper param,
                                             struct addrinfo *res)
 {
@@ -446,7 +456,7 @@ static int32_t NetSysPostDnsResultPollSendData(int sockFd, int queryret, int32_t
 }
 
 static int32_t NetSysPostDnsResultInternal(int sockFd, uint16_t netId, char* name, int usedtime, int queryret,
-                                           struct addrinfo *res, struct QueryParam *param)
+                                           struct addrinfo *res, struct queryparam *param)
 {
     struct RequestInfo info = {
         .command = POST_DNS_RESULT,
@@ -459,6 +469,7 @@ static int32_t NetSysPostDnsResultInternal(int sockFd, uint16_t netId, char* nam
     NETSYS_CLIENT_PRINT("NetSysPostDnsResultInternal uid %d, pid %d, netid %d pkg", uid, pid, netId);
 
     struct AddrInfo addrInfo[MAX_RESULTS] = {};
+    struct QueryParam netparam = {};
     int32_t resNum = 0;
     if (queryret == 0) {
         resNum = FillAddrInfo(addrInfo, res);
@@ -466,6 +477,7 @@ static int32_t NetSysPostDnsResultInternal(int sockFd, uint16_t netId, char* nam
     if (resNum < 0) {
         return CloseSocketReturn(sockFd, -1);
     }
+    FillQueryParam(param, &netparam);
 
     if (!PollSendData(sockFd, (const char *)(&info), sizeof(info))) {
         DNS_CONFIG_PRINT("send failed %d", errno);
@@ -497,11 +509,11 @@ static int32_t NetSysPostDnsResultInternal(int sockFd, uint16_t netId, char* nam
         return CloseSocketReturn(sockFd, -errno);
     }
 
-    return NetSysPostDnsResultPollSendData(sockFd, queryret, resNum, param, addrInfo);
+    return NetSysPostDnsResultPollSendData(sockFd, queryret, resNum, &netparam, addrInfo);
 }
 
 int32_t NetSysPostDnsResult(int netid, char* name, int usedtime, int queryret,
-                            struct addrinfo *res, struct QueryParam *param)
+                            struct addrinfo *res, struct queryparam *param)
 {
     if (name == NULL) {
         return -1;
