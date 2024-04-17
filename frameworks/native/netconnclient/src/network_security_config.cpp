@@ -494,7 +494,6 @@ int32_t NetworkSecurityConfig::ParseJsonConfig(const std::string &content)
         NETMGR_LOG_E("Failed to parse network json profile.");
         return NETMANAGER_ERR_INTERNAL;
     }
-    NETMGR_LOG_D("root : %{public}s", cJSON_PrintUnformatted(root));
 
     cJSON *networkSecurityConfig = cJSON_GetObjectItem(root, TAG_NETWORK_SECURITY_CONFIG.c_str());
     if (networkSecurityConfig == nullptr) {

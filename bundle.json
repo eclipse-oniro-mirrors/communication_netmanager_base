@@ -45,7 +45,6 @@
                 "cJSON",
                 "c_utils",
                 "samgr",
-                "jsoncpp",
                 "libuv",
                 "curl",
                 "init",
@@ -62,7 +61,6 @@
             ],
             "third_party": [
                 "curl",
-                "jsoncpp",
                 "libuv",
                 "iptables"
             ]
