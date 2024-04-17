@@ -696,7 +696,7 @@ int32_t NetConnService::NetDetectionAsync(int32_t netId)
 
 int32_t NetConnService::NetDetectionForDnsHealthSync(int32_t netId, bool dnsHealthSuccess)
 {
-    NETMGR_LOG_I("Enter NetConnService::NetDetectionForDnsHealthSync");
+    NETMGR_LOG_D("Enter NetDetectionForDnsHealthSync");
     auto iterNetwork = networks_.find(netId);
     if ((iterNetwork == networks_.end()) || (iterNetwork->second == nullptr)) {
         NETMGR_LOG_E("Could not find the corresponding network");

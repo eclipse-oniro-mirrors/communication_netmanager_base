@@ -50,9 +50,6 @@ int32_t NetDetectionCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &
 
 int32_t NetDetectionCallbackStub::OnNetDetectionResult(MessageParcel &data, MessageParcel &reply)
 {
-    if (!data.ContainFileDescriptors()) {
-        NETMGR_LOG_E("Execute ContainFileDescriptors failed");
-    }
     std::string urlRedirect;
     if (!data.ReadString(urlRedirect)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;

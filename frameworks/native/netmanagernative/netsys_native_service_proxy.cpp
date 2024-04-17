@@ -1561,7 +1561,9 @@ int32_t NetsysNativeServiceProxy::GetUidStats(uint64_t &stats, uint32_t type, ui
         return ERR_FLATTEN_OBJECT;
     }
     if (ret != ERR_NONE) {
-        NETNATIVE_LOGE("fail to GetUidStats ret= %{public}d", ret);
+        if (ret != STATS_ERR_READ_BPF_FAIL) {
+            NETNATIVE_LOGE("fail to GetUidStats ret= %{public}d", ret);
+        }
         return ret;
     }
     if (!reply.ReadUint64(stats)) {
