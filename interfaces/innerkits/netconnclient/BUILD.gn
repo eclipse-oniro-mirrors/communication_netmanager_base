@@ -132,7 +132,6 @@ ohos_shared_library("net_conn_manager_if") {
   external_deps = [
     "cJSON:cjson",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "openssl:libcrypto_shared",
     "openssl:libssl_shared",
     "samgr:samgr_proxy",
