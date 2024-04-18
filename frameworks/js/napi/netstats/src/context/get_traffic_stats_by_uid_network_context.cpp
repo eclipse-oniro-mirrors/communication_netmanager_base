@@ -119,22 +119,22 @@ void GetTrafficStatsByUidNetworkContext::SetUid(uint32_t uid)
     uid_ = uid;
 }
 
-void GetTrafficStatsByNetworkContext::SetNetBearType(uint32_t bearerType)
+void GetTrafficStatsByUidNetworkContext::SetNetBearType(uint32_t bearerType)
 {
     netBearType_ = bearerType;
 }
 
-void GetTrafficStatsByNetworkContext::SetStartTime(uint32_t startTime)
+void GetTrafficStatsByUidNetworkContext::SetStartTime(uint32_t startTime)
 {
     startTime_ = startTime;
 }
 
-void GetTrafficStatsByNetworkContext::SetEndTime(uint32_t endTime)
+void GetTrafficStatsByUidNetworkContext::SetEndTime(uint32_t endTime)
 {
     endTime_ = endTime;
 }
 
-void GetTrafficStatsByNetworkContext::SetSimId(uint32_t simId)
+void GetTrafficStatsByUidNetworkContext::SetSimId(uint32_t simId)
 {
     simId_ = simId;
 }
@@ -144,22 +144,22 @@ uint32_t GetTrafficStatsByUidNetworkContext::GetUid() const
     return uid_;
 }
 
-uint32_t GetTrafficStatsByNetworkContext::GetNetBearType() const
+uint32_t GetTrafficStatsByUidNetworkContext::GetNetBearType() const
 {
     return netBearType_;
 }
 
-uint32_t GetTrafficStatsByNetworkContext::GetStartTime() const
+uint32_t GetTrafficStatsByUidNetworkContext::GetStartTime() const
 {
     return startTime_;
 }
 
-uint32_t GetTrafficStatsByNetworkContext::GetEndTime() const
+uint32_t GetTrafficStatsByUidNetworkContext::GetEndTime() const
 {
     return endTime_;
 }
 
-uint32_t GetTrafficStatsByNetworkContext::GetSimId() const
+uint32_t GetTrafficStatsByUidNetworkContext::GetSimId() const
 {
     return simId_;
 }
