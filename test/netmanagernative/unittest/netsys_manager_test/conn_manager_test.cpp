@@ -276,8 +276,9 @@ HWTEST_F(ConnManagerTest, RemoveInterfaceFromNetworkTest001, TestSize.Level1)
     int32_t ret = instance_->RemoveInterfaceFromNetwork(NETID, iface);
     EXPECT_LE(ret, NETMANAGER_SUCCESS);
 
+    iface = INTERNAL_INTERFACENAME;
     ret = instance_->RemoveInterfaceFromNetwork(INTERNAL_NETID, iface);
-    EXPECT_LE(ret, NETMANAGER_SUCCESS);
+    EXPECT_NE(ret, NETMANAGER_SUCCESS);
 }
 
 /**

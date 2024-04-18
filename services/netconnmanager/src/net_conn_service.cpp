@@ -2050,7 +2050,7 @@ void NetConnService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::s
 bool NetConnService::IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns)
 {
     if (ns == nullptr) {
-        NETMGR_LOG_E("supplier is null");
+        NETMGR_LOG_E("supplier is nullptr");
         return false;
     }
     NET_ACTIVATE_MAP::iterator iterActive;

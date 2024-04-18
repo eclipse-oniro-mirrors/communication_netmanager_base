@@ -789,8 +789,8 @@ HWTEST_F(NetConnManagerTest, NetConnManager021, TestSize.Level1)
 
 HWTEST_F(NetConnManagerTest, NetConnManager022, TestSize.Level1)
 {
-    NetManagerBaseDataShareToken token;
-    sptr<InetConnService> proxy = NetConnManagerTest::GetProxy();
+    NetManagerBaseAccessToken token;
+    sptr<INetConnService> proxy = NetConnManagerTest::GetProxy();
     if (proxy == nullptr) {
         return;
     }
@@ -801,11 +801,11 @@ HWTEST_F(NetConnManagerTest, NetConnManager022, TestSize.Level1)
         NetBearType::BEARER_CELLULAR, testString, netCaps, supplierId);
     EXPECT_EQ(netSupplierRet, NETMANAGER_SUCCESS);
     sptr<NetSupplierInfo> netSupplierInfo = std::make_unique<NetSupplierInfo>().release();
-    netSupplierInfo->isAvailable = true;
+    netSupplierInfo->isAvailable_ = true;
     NetConnClient::GetInstance().UpdateNetSupplierInfo(supplierId, netSupplierInfo);
     NetConnClient::GetInstance().UpdateNetLinkInfo(supplierId, GetUpdateLinkInfoSample());
     std::string ident = "ident";
-    sptr<NetSpecifier> netSpecifier = std::make_unique<NetSpecifier>().release();
+    sptr<NetSpecifier> netSpecifier = (std::make_unique<NetSpecifier>()).release();
     netSpecifier->ident_ = ident;
     netSpecifier->SetCapabilities(netCaps);
     sptr<NetConnCallbackTest> callback = GetINetConnCallbackSample();

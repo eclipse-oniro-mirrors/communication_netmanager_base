@@ -957,7 +957,7 @@ HWTEST_F(NetConnServiceStubTest, OnRequestNetConnectionBySpecifierTest001, TestS
         return;
     }
 
-    if (!data.WriteInt32(TEST_UINT32_VALUE)) {
+    if (!data.WriteUint32(TEST_UINT32_VALUE)) {
         return;
     }
 

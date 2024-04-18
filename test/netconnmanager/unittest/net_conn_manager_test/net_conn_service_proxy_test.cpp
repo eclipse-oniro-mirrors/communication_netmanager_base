@@ -282,7 +282,7 @@ HWTEST_F(NetConnServiceProxyTest, RegisterNetConnCallbackTest002, TestSize.Level
  */
 HWTEST_F(NetConnServiceProxyTest, RequestNetConnectionTest001, TestSize.Level1)
 {
-    sptr<NetSpecifier> netSpecifier = net (std::nothrow) NetSpecifier();
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
     int32_t ret = instance_->RequestNetConnection(netSpecifier, netConnCallback_, TEST_TIMEOUTMS);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }

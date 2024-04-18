@@ -853,20 +853,20 @@ HWTEST_F(NetConnClientTest, UnRegisterNetConnCallback001, TestSize.Level1)
 }
 
 /**
- * @tc.name: RegisterNetConnCallback001
+ * @tc.name: RequestNetConnection001
  * @tc.desc: Test NetConnClient::RequestNetConnection, not applying for
- * permission,return NETMANAGER_ERR_PERMISSION_DENIED
+ * permission,return NETMANAGER_SUCCESS
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnClientTest, RequestNetConnection001, TestSize.Level1)
 {
-    NetManagerBaseDataShareToken token;
+    NetManagerBaseAccessToken token;
     sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
     netSpecifier->netCapabilities_.bearerTypes_.emplace(NetManagerStandard::BEARER_CELLULAR);
     netSpecifier->netCapabilities_.netCaps_.emplace(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT);
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
-    uint32_t timeOut = 0;
-    auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timeOut);
+    uint32_t timesOut = 0;
+    auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timesOut);
     ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
@@ -874,15 +874,15 @@ HWTEST_F(NetConnClientTest, RequestNetConnection001, TestSize.Level1)
 /**
  * @tc.name: RequestNetConnection002
  * @tc.desc: Test NetConnClient::RequestNetConnection, not applying for
- * permission,return NETMANAGER_ERR_PERMISSION_DENIED
+ * permission,return NETMANAGER_ERR_PARAMETER_ERROR
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnClientTest, RequestNetConnection002, TestSize.Level1)
 {
     sptr<NetSpecifier> netSpecifier = nullptr;
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
-    uint32_t timeOut = 1;
-    auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timeOut);
+    uint32_t timesOut = 1;
+    auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timesOut);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
@@ -909,13 +909,12 @@ HWTEST_F(NetConnClientTest, RequestNetConnection003, TestSize.Level1)
  */
 HWTEST_F(NetConnClientTest, RequestNetConnection004, TestSize.Level1)
 {
-    NetManagerBaseDataShareToken token;
     sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
     netSpecifier->netCapabilities_.bearerTypes_.emplace(NetManagerStandard::BEARER_CELLULAR);
     netSpecifier->netCapabilities_.netCaps_.emplace(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT);
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
-    uint32_t timeOut = 0;
-    auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timeOut);
+    uint32_t timesOut = 0;
+    auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timesOut);
     ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }

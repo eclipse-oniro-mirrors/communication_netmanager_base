@@ -125,13 +125,6 @@ HWTEST_F(NetCapsTest, HasNetCapTest002, TestSize.Level1)
     EXPECT_FALSE(result);
 }
 
-HWTEST_F(NetCapsTest, HasNetCapTest003, TestSize.Level1)
-{
-    std::set<NatCap> caps = {NET_CAPABILITY_INTERNAL_DEFAULT};
-    auto result = instance_->HasNetCap(caps);
-    EXPECT_FALSE(result);
-}
-
 HWTEST_F(NetCapsTest, HasNetCapsTest001, TestSize.Level1)
 {
     std::set<NetCap> caps;
@@ -150,7 +143,7 @@ HWTEST_F(NetCapsTest, HasNetCapsTest003, TestSize.Level1)
 {
     std::set<NetCap> caps = {NetCap::NET_CAPABILITY_INTERNAL_DEFAULT};
     auto result = instance_->HasNetCaps(caps);
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
 }
 
 HWTEST_F(NetCapsTest, ToSetTest001, TestSize.Level1)

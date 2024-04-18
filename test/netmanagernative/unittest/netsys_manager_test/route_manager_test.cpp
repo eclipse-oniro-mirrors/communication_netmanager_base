@@ -205,7 +205,7 @@ HWTEST_F(RouteManagerTest, AddInterfaceToPhysicalNetworkTest005, TestSize.Level1
 {
     uint16_t testNetId = 1;
     const std::string testInterfaceName = "rmnet0";
-    auto ret = RouteManager::AddInterfaceToPhysicalNetwork(testNetId, testInterfaceName, PERMISSION_SYSTEM);
+    auto ret = RouteManager::AddInterfaceToPhysicalNetwork(testNetId, testInterfaceName, PERMISSION_NONE);
     EXPECT_LE(ret, 0);
 }
 
@@ -244,10 +244,10 @@ HWTEST_F(RouteManagerTest, RemoveInterfaceFromPhysicalNetworkTest005, TestSize.L
 {
     uint16_t testNetId = 1;
     const std::string testInterfaceName = "rmnet0";
-    auto ret = RouteManager::RemoveInterfaceFromPhysicalNetwork(testNetId, testInterfaceName, PERMISSION_SYSTEM);
+    auto ret = RouteManager::RemoveInterfaceFromPhysicalNetwork(testNetId, testInterfaceName, PERMISSION_NONE);
     EXPECT_LE(ret, 0);
 
-    ret = RouteManager::RemoveInterfaceFromPhysicalNetwork(testNetId, testInterfaceName, PERMISSION_SYSTEM);
+    ret = RouteManager::RemoveInterfaceFromPhysicalNetwork(testNetId, testInterfaceName, PERMISSION_NONE);
     EXPECT_LE(ret, -1);
 }
 

@@ -31,7 +31,7 @@ enum {
     RTN_UNICAST = 1,
     RTN_UNREACHABLE = 7,
     RTN_THROW = 9
-}
+};
 
 #define NET_SYMBOL_VISIBLE __attribute__ ((visibility("default")))
 struct NET_SYMBOL_VISIBLE Route final : public Parcelable {

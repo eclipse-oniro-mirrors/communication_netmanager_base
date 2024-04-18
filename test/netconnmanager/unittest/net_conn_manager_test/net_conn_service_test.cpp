@@ -201,7 +201,7 @@ HWTEST_F(NetConnServiceTest, RegisterNetSupplierTest002, TestSize.Level1)
     std::set<NetCap> netCaps;
     netCaps.insert(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT);
     netCaps.insert(NetCap::NET_CAPABILITY_INTERNET);
-    int32_t ret = NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_CELLULAR, TEST_IDENT,
+    auto ret = NetConnService::GetInstance()->RegisterNetSupplier(NetBearType::BEARER_CELLULAR, TEST_IDENT,
         netCaps, g_supplierId);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
@@ -269,7 +269,7 @@ HWTEST_F(NetConnServiceTest, UpdateNetLinkInfoTest002, TestSize.Level1)
 
     ret = NetConnService::GetInstance()->IsAddrInOtherNetwork("rmnet0", 1, netAddr);
     EXPECT_FALSE(ret);
-    ret = NetConnService::GetInstance()->IsIfaceNameInUse("rmnet0", 100, netAddr);
+    ret = NetConnService::GetInstance()->IsAddrInOtherNetwork("rmnet0", 100, netAddr);
     EXPECT_TRUE(ret);
 }
 
@@ -279,21 +279,21 @@ HWTEST_F(NetConnServiceTest, RequestNetConnectionTest001, TestSize.Level1)
     netSpecifier->netCapabilities_.bearerTypes_.emplace(NetManagerStandard::BEARER_CELLULAR);
     netSpecifier->netCapabilities_.netCaps_.emplace(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT);
     ASSERT_NE(netSpecifier, nullptr);
-    auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, g_callback, TEST_TIMEOUTMS);
+    auto ret = NetConnService::GetInstance().RequestNetConnection(netSpecifier, g_callback, TEST_TIMEOUTMS);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 
     sptr<INetConnCallback> callback = nullptr;
     uint32_t timeoutMS = 0;
     sptr<NetSpecifier> invalidNetSpecifier = nullptr;
-    ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timeoutMS);
+    ret = NetConnService::GetInstance().RequestNetConnection(netSpecifier, callback, timeoutMS);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     NetConnService::RegisterType registerType = NetConnService::RegisterType::INVALIDTYPE;
     uint32_t reqId = 0;
-    NetConnService::GetInstance().FindSameCallback(g_callback, reqId, registerType);
+    NetConnService::GetInstance()->FindSameCallback(g_callback, reqId, registerType);
     EXPECT_EQ(registerType, NetConnService::RegisterType::REQUEST);
 
-    ret = NetConnClient::GetInstance().UnregisterNetConnCallback(g_callback);
+    ret = NetConnService::GetInstance()->UnregisterNetConnCallback(g_callback);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 }
 
