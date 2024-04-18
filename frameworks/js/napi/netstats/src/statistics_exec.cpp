@@ -145,9 +145,9 @@ bool StatisticsExec::ExecGetTrafficStatsByNetwork(GetTrafficStatsByNetworkContex
         return false;
     }
     network->simId_ = context->GetSimId();
-    network->startTime_ = context->GetStart();
-    network->endTime_ = context->GetEnd();
-    network->type_ = context->GetType();
+    network->startTime_ = context->GetStartTime();
+    network->endTime_ = context->GetEndTime();
+    network->type_ = context->GetNetBearType();
     int32_t result = NetStatsClient::GetInstance().GetTrafficStatsByNetwork(context->GetNetStatsInfo(), network);
     context->SetErrorCode(result);
     return result == NETMANAGER_SUCCESS;
@@ -161,9 +161,9 @@ bool StatisticsExec::ExecGetTrafficStatsByUidNetwork(GetTrafficStatsByUidNetwork
         return false;
     }
     network->simId_ = context->GetSimId();
-    network->startTime_ = context->GetStart();
-    network->endTime_ = context->GetEnd();
-    network->type_ = context->GetType();
+    network->startTime_ = context->GetStartTime();
+    network->endTime_ = context->GetEndTime();
+    network->type_ = context->GetNetBearType();
     int32_t result = NetStatsClient::GetInstance().GetTrafficStatsByUidNetwork(context->GetNetStatsInfoSequence(),
                                                                                context->GetUid(), network);
     context->SetErrorCode(result);
