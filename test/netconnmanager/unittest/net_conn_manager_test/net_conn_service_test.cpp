@@ -279,13 +279,13 @@ HWTEST_F(NetConnServiceTest, RequestNetConnectionTest001, TestSize.Level1)
     netSpecifier->netCapabilities_.bearerTypes_.emplace(NetManagerStandard::BEARER_CELLULAR);
     netSpecifier->netCapabilities_.netCaps_.emplace(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT);
     ASSERT_NE(netSpecifier, nullptr);
-    auto ret = NetConnService::GetInstance().RequestNetConnection(netSpecifier, g_callback, TEST_TIMEOUTMS);
+    auto ret = NetConnService::GetInstance()->RequestNetConnection(netSpecifier, g_callback, TEST_TIMEOUTMS);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 
     sptr<INetConnCallback> callback = nullptr;
     uint32_t timeoutMS = 0;
     sptr<NetSpecifier> invalidNetSpecifier = nullptr;
-    ret = NetConnService::GetInstance().RequestNetConnection(netSpecifier, callback, timeoutMS);
+    ret = NetConnService::GetInstance()->RequestNetConnection(invalidNetSpecifier, callback, timeoutMS);
     EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
 
     NetConnService::RegisterType registerType = NetConnService::RegisterType::INVALIDTYPE;

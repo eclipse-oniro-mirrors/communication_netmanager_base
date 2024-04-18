@@ -889,15 +889,15 @@ HWTEST_F(NetConnClientTest, RequestNetConnection002, TestSize.Level1)
 /**
  * @tc.name: RequestNetConnection003
  * @tc.desc: Test NetConnClient::RequestNetConnection, not applying for
- * permission,return NETMANAGER_ERR_PERMISSION_DENIED
+ * permission,return NETMANAGER_ERR_PARAMETER_ERROR
  * @tc.type: FUNC
  */
 HWTEST_F(NetConnClientTest, RequestNetConnection003, TestSize.Level1)
 {
     sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
     sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
-    uint32_t timeOut = 1;
-    auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timeOut);
+    uint32_t timesOut = 1;
+    auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timesOut);
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
 }
 
