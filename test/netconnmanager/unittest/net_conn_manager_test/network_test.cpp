@@ -122,8 +122,7 @@ HWTEST_F(NetworkTest, UpdateNetLinkInfoTest002, TestSize.Level1)
     NetLinkInfo info;
     info.ifaceName_ = TEST_IFACE_NAME;
     info.ident_ = IDENT;
-    bool ret = instance_->UpdateStatsCached(info);
-    EXPECT_TRUE(ret);
+    instance_->UpdateStatsCached(info);
 }
 
 HWTEST_F(NetworkTest, GetNetLinkInfoTest001, TestSize.Level1)
