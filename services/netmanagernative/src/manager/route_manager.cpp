@@ -784,16 +784,16 @@ int32_t RouteManager::UpdateRouteRule(uint16_t action, uint16_t flags, RouteInfo
     msg.rtm_dst_len = BIT_32_LEN;
     msg.rtm_protocol = RTPROT_STATIC;
     msg.rtm_scope = RT_SCOPE_UNIVERSE;
-    msg.rtm_type = RTN_UNICAST;
+    msg.rtm_type = OHOS::NetManagerStandard::RTN_UNICAST;
     msg.rtm_table = RT_TABLE_UNSPEC;
 
     uint32_t index = 0;
     if (!routeInfo.routeNextHop.empty() && !strcmp(routeInfo.routeNextHop.c_str(), "unreachable")) {
-        msg.rtm_type = RTN_UNREACHABLE;
+        msg.rtm_type = OHOS::NetManagerStandard::RTN_UNREACHABLE;
         routeInfoModify.routeInterfaceName = "";
         routeInfoModify.routeNextHop = "";
     } else if (!routeInfo.routeNextHop.empty() && !strcmp(routeInfo.routeNextHop.c_str(), "throw")) {
-        msg.rtm_type = RTN_THROW;
+        msg.rtm_type = OHOS::NetManagerStandard::RTN_THROW;
         routeInfoModify.routeInterfaceName = "";
         routeInfoModify.routeNextHop = "";
     } else {

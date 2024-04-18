@@ -934,5 +934,40 @@ HWTEST_F(NetConnServiceStubTest, OnIsPreferCellularUrlTest001, TestSize.Level1)
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_IS_PREFER_CELLULAR_URL);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.name: OnRequestNetConnectionBySpecifierTest001
+ * @tc.desc: Test NetConnServiceStub OnRequestNetConnection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnRequestNetConnectionBySpecifierTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    if (netSpecifier == nullptr) {
+        return;
+    }
+
+    if (!netSpecifier->Marshalling(data)) {
+        return;
+    }
+
+    if (!data.WriteInt32(TEST_UINT32_VALUE)) {
+        return;
+    }
+
+    sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
+    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        return;
+    }
+
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_REQUEST_NET_CONNECTION);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

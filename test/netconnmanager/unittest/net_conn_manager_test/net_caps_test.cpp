@@ -43,7 +43,8 @@ void NetCapsTest::SetUpTestCase()
                              NetCap::NET_CAPABILITY_INTERNET,
                              NetCap::NET_CAPABILITY_VALIDATED,
                              NetCap::NET_CAPABILITY_CAPTIVE_PORTAL,
-                             NetCap::NET_CAPABILITY_INTERNAL_DEFAULT};
+                             NetCap::NET_CAPABILITY_INTERNAL_DEFAULT,
+                             NetCap::NET_CAPABILITY_END};
     instance_ = std::make_unique<NetCaps>(caps);
 }
 
@@ -67,7 +68,8 @@ HWTEST_F(NetCapsTest, ConstructorTest002, TestSize.Level1)
                              NetCap::NET_CAPABILITY_NOT_VPN,
                              NetCap::NET_CAPABILITY_VALIDATED,
                              NetCap::NET_CAPABILITY_CAPTIVE_PORTAL,
-                             NetCap::NET_CAPABILITY_INTERNAL_DEFAULT};
+                             NetCap::NET_CAPABILITY_INTERNAL_DEFAULT,
+                             NetCap::NET_CAPABILITY_END};
     std::unique_ptr<NetCaps> netCaps = std::make_unique<NetCaps>(caps);
     EXPECT_NE(netCaps, nullptr);
 }
@@ -89,6 +91,12 @@ HWTEST_F(NetCapsTest, IsValidNetCapTest002, TestSize.Level1)
 {
     auto result = instance_->IsValidNetCap(static_cast<NetCap>(INVALID_NET_CAP));
     EXPECT_FALSE(result);
+}
+
+HWTEST_F(NetCapsTest, IsValidNetCapTest003, TestSize.Level1)
+{
+    auto result = instance_->IsValidNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT);
+    EXPECT_TRUE(result);
 }
 
 HWTEST_F(NetCapsTest, InsertNetCapTest001, TestSize.Level1)
@@ -117,6 +125,13 @@ HWTEST_F(NetCapsTest, HasNetCapTest002, TestSize.Level1)
     EXPECT_FALSE(result);
 }
 
+HWTEST_F(NetCapsTest, HasNetCapTest003, TestSize.Level1)
+{
+    std::set<NatCap> caps = {NET_CAPABILITY_INTERNAL_DEFAULT};
+    auto result = instance_->HasNetCap(caps);
+    EXPECT_FALSE(result);
+}
+
 HWTEST_F(NetCapsTest, HasNetCapsTest001, TestSize.Level1)
 {
     std::set<NetCap> caps;
@@ -127,6 +142,13 @@ HWTEST_F(NetCapsTest, HasNetCapsTest001, TestSize.Level1)
 HWTEST_F(NetCapsTest, HasNetCapsTest002, TestSize.Level1)
 {
     std::set<NetCap> caps = {NetCap::NET_CAPABILITY_NOT_VPN};
+    auto result = instance_->HasNetCaps(caps);
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(NetCapsTest, HasNetCapsTest003, TestSize.Level1)
+{
+    std::set<NetCap> caps = {NetCap::NET_CAPABILITY_INTERNAL_DEFAULT};
     auto result = instance_->HasNetCaps(caps);
     EXPECT_FALSE(result);
 }

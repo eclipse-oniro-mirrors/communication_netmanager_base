@@ -1322,7 +1322,9 @@ int32_t NetConnService::GetAllNets(std::list<int32_t> &netIdList)
             int32_t netId = network.second->GetNetId();
             sptr<NetSupplier> curSupplier = FindNetSupplier(network.second->GetSupplierId());
             // inner virtual interface and uid is not trusted, skip
-            if (curSupplier->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT) && !IsInRequestNetUids(currentUid)) {
+            if (curSupplier != nullptr &&
+                curSupplier->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT) &&
+                !IsInRequestNetUids(currentUid)) {
                 NETMGR_LOG_D("Network [%{public}d] is internal, uid [%{public}d] skips.", netId, currentUid);
                 continue;
             }
@@ -2047,6 +2049,10 @@ void NetConnService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::s
 
 bool NetConnService::IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns)
 {
+    if (ns == nullptr) {
+        NETMGR_LOG_E("supplier is null");
+        return false;
+    }
     NET_ACTIVATE_MAP::iterator iterActive;
     for (iterActive = netActivates_.begin(); iterActive != netActivates_.end(); ++iterActive) {
         if (!iterActive->second) {
@@ -2130,7 +2136,7 @@ bool NetConnService::IsIfaceNameInUse(const std::string &ifaceName, int32_t netI
     }
     return false;
 }
- 
+
 std::vector<std::string> NetConnService::GetPreferredUrl()
 {
     std::vector<std::string> preferCellularUrlList;

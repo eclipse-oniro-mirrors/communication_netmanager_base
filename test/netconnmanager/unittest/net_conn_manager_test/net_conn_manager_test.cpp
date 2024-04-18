@@ -27,6 +27,8 @@
 #include "netmanager_base_test_security.h"
 #include "system_ability_definition.h"
 #include "net_detection_callback_stub.h"
+#include "network.h"
+
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
@@ -783,6 +785,61 @@ HWTEST_F(NetConnManagerTest, NetConnManager021, TestSize.Level1)
     INetAddr addr;
     result = proxy->GetAddressByName(host, netId, addr);
     EXPECT_NE(result, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnManagerTest, NetConnManager022, TestSize.Level1)
+{
+    NetManagerBaseDataShareToken token;
+    sptr<InetConnService> proxy = NetConnManagerTest::GetProxy();
+    if (proxy == nullptr) {
+        return;
+    }
+    uint32_t supplierId = 0;
+    std::string testString = "test";
+    std::set<NetCap> netCaps{NetCap::NET_CAPABILITY_INTERNAL_DEFAULT};
+    auto netSupplierRet = NetConnClient::GetInstance().RegisterNetSupplier(
+        NetBearType::BEARER_CELLULAR, testString, netCaps, supplierId);
+    EXPECT_EQ(netSupplierRet, NETMANAGER_SUCCESS);
+    sptr<NetSupplierInfo> netSupplierInfo = std::make_unique<NetSupplierInfo>().release();
+    netSupplierInfo->isAvailable = true;
+    NetConnClient::GetInstance().UpdateNetSupplierInfo(supplierId, netSupplierInfo);
+    NetConnClient::GetInstance().UpdateNetLinkInfo(supplierId, GetUpdateLinkInfoSample());
+    std::string ident = "ident";
+    sptr<NetSpecifier> netSpecifier = std::make_unique<NetSpecifier>().release();
+    netSpecifier->ident_ = ident;
+    netSpecifier->SetCapabilities(netCaps);
+    sptr<NetConnCallbackTest> callback = GetINetConnCallbackSample();
+    constexpr uint32_t TEST_TIMEOUTMS = 1000;
+    auto netConnRet = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, TEST_TIMEOUTMS);
+    EXPECT_EQ(netConnRet, NETMANAGER_SUCCESS);
+
+    std::list<sptr<NetHandle>> netList;
+    auto ret = NetConnClient::GetInstance().GetAllNets(netList);
+
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    bool isInternalDefaultNetIdIn = false;
+    for (auto net : netList) {
+        if (net->GetNetId() >= MIN_INTERNAL_NET_ID && net->GetNetId() <= MAX_INTERNAL_NET_ID) {
+            isInternalDefaultNetIdIn = true;
+        }
+    }
+
+    EXPECT_TRUE(isInternalDefaultNetIdIn);
+    auto unRegisterRet = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
+    EXPECT_EQ(unRegisterRet, NETSYS_SUCCESS);
+
+    std::list<sptr<NetHandle>> otherNetList;
+    auto result = NetConnClient::GetInstance().GetAllNets(otherNetList);
+    EXPECT_EQ(result, NETMANAGER_SUCCESS);
+
+    isInternalDefaultNetIdIn = false;
+    for (auto net : otherNetList) {
+        if (net->GetNetId() >= MIN_INTERNAL_NET_ID && net->GetNetId() <= MAX_INTERNAL_NET_ID) {
+            isInternalDefaultNetIdIn = true;
+        }
+    }
+
+    EXPECT_FALSE(isInternalDefaultNetIdIn);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
