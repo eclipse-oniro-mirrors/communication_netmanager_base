@@ -327,6 +327,7 @@ public:
     int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) override;
     int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
+    int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter) override;
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -394,6 +395,7 @@ private:
     int32_t UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo);
     int32_t NetDetectionAsync(int32_t netId);
     int32_t RestrictBackgroundChangedAsync(bool restrictBackground);
+    int32_t UpdateSupplierScoreAsync(NetBearType bearerType, bool isBetter);
     void SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy);
     void RequestAllNetworkExceptDefault();
     void LoadGlobalHttpProxy();
@@ -409,6 +411,7 @@ private:
     bool IsValidDecValue(const std::string &inputValue);
     int32_t GetDelayNotifyTime();
     int32_t NetDetectionForDnsHealthSync(int32_t netId, bool dnsHealthSuccess);
+    std::vector<sptr<NetSupplier>> FindSupplierWithInternetByBearerType(NetBearType bearerType);
 
 private:
     enum ServiceRunningState {
