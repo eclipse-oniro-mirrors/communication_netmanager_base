@@ -27,35 +27,21 @@ namespace nmd {
 using namespace NetManagerStandard;
 namespace {
 constexpr const char *IPATBLES_CMD_PATH = "/system/bin/iptables";
+constexpr const char *IP6TABLES_CMD_PATH = "/system/bin/ip6tables";
 } // namespace
 
 IptablesWrapper::IptablesWrapper()
 {
     isRunningFlag_ = true;
-    if (access(IPATBLES_CMD_PATH, F_OK) == 0) {
-        isIptablesSystemAccess_ = true;
-    } else {
-        isIptablesSystemAccess_ = false;
-    }
+    isIptablesSystemAccess_ = access(IPATBLES_CMD_PATH, F_OK) == 0;
+    isIp6tablesSystemAccess_ = access(IP6TABLES_CMD_PATH, F_OK) == 0;
 
-    handlerRunner_ = AppExecFwk::EventRunner::Create("IptablesWrapper");
-    if (handlerRunner_ == nullptr) {
-        return;
-    }
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(handlerRunner_);
+    iptablesWrapperFfrtQueue_ = std::make_shared<ffrt::queue>("IptablesWrapper");
 }
 
 IptablesWrapper::~IptablesWrapper()
 {
     isRunningFlag_ = false;
-    if (handlerRunner_) {
-        handlerRunner_->Stop();
-        handlerRunner_.reset();
-    }
-    if (handler_) {
-        handler_.reset();
-        handler_ = nullptr;
-    }
 }
 
 void IptablesWrapper::ExecuteCommand(const std::string &command)
@@ -75,13 +61,23 @@ void IptablesWrapper::ExecuteCommandForRes(const std::string &command)
 int32_t IptablesWrapper::RunCommand(const IpType &ipType, const std::string &command)
 {
     NETNATIVE_LOG_D("IptablesWrapper::RunCommand, ipType:%{public}d, command:%{public}s", ipType, command.c_str());
-    if (handler_ == nullptr) {
-        NETNATIVE_LOGE("RunCommand failed! handler is nullptr");
+    if (!iptablesWrapperFfrtQueue_) {
+        NETNATIVE_LOGE("FFRT Init Fail");
         return NETMANAGER_ERROR;
     }
-    std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
-    std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
-    handler_->PostTask(executeCommand);
+
+    if (isIptablesSystemAccess_ && (ipType == IPTYPE_IPV4 || ipType == IPTYPE_IPV4V6)) {
+        std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
+        std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
+        iptablesWrapperFfrtQueue_->submit(executeCommand);
+    }
+
+    if (isIp6tablesSystemAccess_ && (ipType == IPTYPE_IPV6 || ipType == IPTYPE_IPV4V6)) {
+        std::string cmd = std::string(IP6TABLES_CMD_PATH) + " " + command;
+        std::function<void()> executeCommand = std::bind(&IptablesWrapper::ExecuteCommand, shared_from_this(), cmd);
+        iptablesWrapperFfrtQueue_->submit(executeCommand);
+    }
+
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
@@ -89,17 +85,28 @@ std::string IptablesWrapper::RunCommandForRes(const IpType &ipType, const std::s
 {
     NETNATIVE_LOG_D("IptablesWrapper::RunCommandForRes, ipType:%{public}d, command:%{public}s", ipType,
                     command.c_str());
-    if (handler_ == nullptr) {
-        NETNATIVE_LOGE("RunCommandForRes failed! handler is nullptr");
-        return result_;
-    }
-    std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
-    std::function<void()> executeCommandForRes =
-        std::bind(&IptablesWrapper::ExecuteCommandForRes, shared_from_this(), cmd);
 
-    int64_t start = GetTickCount();
-    handler_->PostSyncTask(executeCommandForRes);
-    NETNATIVE_LOGI("PostSyncTask cost:%{public}lld ms", static_cast<long long>(GetTickCount() - start));
+    if (ipType == IPTYPE_IPV4 || ipType == IPTYPE_IPV4V6) {
+        std::string cmd = std::string(IPATBLES_CMD_PATH) + " " + command;
+        std::function<void()> executeCommandForRes =
+            std::bind(&IptablesWrapper::ExecuteCommandForRes, shared_from_this(), cmd);
+
+        int64_t start = GetTickCount();
+        ffrt::task_handle RunCommandForResTaskIpv4 = iptablesWrapperFfrtQueue_->submit_h(executeCommandForRes);
+        iptablesWrapperFfrtQueue_->wait(RunCommandForResTaskIpv4);
+        NETNATIVE_LOGI("FFRT cost:%{public}lld ms", static_cast<long long>(GetTickCount() - start));
+    }
+
+    if (ipType == IPTYPE_IPV6 || ipType == IPTYPE_IPV4V6) {
+        std::string cmd = std::string(IP6TABLES_CMD_PATH) + " " + command;
+        std::function<void()> executeCommandForRes =
+            std::bind(&IptablesWrapper::ExecuteCommandForRes, shared_from_this(), cmd);
+
+        int64_t start = GetTickCount();
+        ffrt::task_handle RunCommandForResTaskIpv6 = iptablesWrapperFfrtQueue_->submit_h(executeCommandForRes);
+        iptablesWrapperFfrtQueue_->wait(RunCommandForResTaskIpv6);
+        NETNATIVE_LOGI("FFRT cost:%{public}lld ms", static_cast<long long>(GetTickCount() - start));
+    }
 
     return result_;
 }

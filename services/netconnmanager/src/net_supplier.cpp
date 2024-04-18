@@ -186,7 +186,8 @@ int32_t NetSupplier::GetSupplierUid() const
 
 bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps)
 {
-    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request connect", supplierId_, netSupplierIdent_.c_str());
+    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request connect, available=%{public}d", supplierId_,
+                 netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
     if (netSupplierInfo_.isAvailable_) {
         NETMGR_LOG_D("The supplier is currently available, there is no need to repeat the request for connection.");
         return true;
@@ -218,9 +219,10 @@ bool NetSupplier::GetRestrictBackground() const
 
 bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
 {
-    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request disconnect", supplierId_, netSupplierIdent_.c_str());
+    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request disconnect, available=%{public}d", supplierId_,
+                 netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
     if (!netSupplierInfo_.isAvailable_) {
-        NETMGR_LOG_W("The supplier is currently unavailable, there is no need to repeat the request to disconnect.");
+        NETMGR_LOG_D("The supplier is currently unavailable, there is no need to repeat the request to disconnect.");
         return true;
     }
     if (netController_ == nullptr) {
@@ -366,6 +368,10 @@ void NetSupplier::SetNetValid(NetDetectionStatus netState)
             netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_VALIDATED);
             NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_VALIDATED");
         }
+    } else if (netState == QUALITY_POOR_STATE) {
+        netQuality_ = QUALITY_POOR_STATE;
+    } else if (netState == QUALITY_GOOD_STATE) {
+        netQuality_ = QUALITY_GOOD_STATE;
     } else {
         if (HasNetCap(NET_CAPABILITY_VALIDATED)) {
             netCaps_.RemoveNetCap(NET_CAPABILITY_VALIDATED);
@@ -463,6 +469,21 @@ bool NetSupplier::ResumeNetworkInfo()
     }
 
     return network_->ResumeNetworkInfo();
+}
+
+bool NetSupplier::IsNetQualityPoor()
+{
+    return netQuality_ == QUALITY_POOR_STATE;
+}
+
+bool NetSupplier::IsNetQualityGood()
+{
+    return netQuality_ == QUALITY_GOOD_STATE;
+}
+
+void NetSupplier::ResetNetQuality()
+{
+    netQuality_ = QUALITY_NORMAL_STATE;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

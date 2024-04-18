@@ -79,10 +79,7 @@ ohos_shared_library("net_manager_common") {
     defines += [ "STANDARD_SYSTEM_ENABLE" ]
   }
 
-  public_configs = [
-    ":netmgr_common_config",
-    "$C_UTILS_ROOT/base:utils_config",
-  ]
+  public_configs = [ ":netmgr_common_config" ]
 
   external_deps = [ "hilog:libhilog" ]
 

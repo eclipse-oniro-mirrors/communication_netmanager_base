@@ -134,7 +134,8 @@ private:
     int32_t CmdGetCookieStats(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetNetworkSharingType(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUpdateNetworkSharingType(MessageParcel &data, MessageParcel &reply);
-
+    int32_t CmdSetIpv6PrivacyExtensions(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdSetIpv6Enable(MessageParcel &data, MessageParcel &reply);
 private:
     std::vector<int32_t> uids_;
 };

@@ -104,6 +104,8 @@ void NetConnServiceStub::InitInterfaceFuncToInterfaceMap()
         &NetConnServiceStub::OnRegisterPreAirplaneCallback, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_PREAIRPLANE_CALLBACK)] = {
         &NetConnServiceStub::OnUnregisterPreAirplaneCallback, {Permission::CONNECTIVITY_INTERNAL}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE)] = {
+        &NetConnServiceStub::OnUpdateSupplierScore, {Permission::CONNECTIVITY_INTERNAL}};
 }
 
 void NetConnServiceStub::InitResetNetFuncToInterfaceMap()
@@ -1347,6 +1349,27 @@ int32_t NetConnServiceStub::OnIsPreferCellularUrl(MessageParcel &data, MessagePa
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
  
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnServiceStub::OnUpdateSupplierScore(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t type = 0;
+    bool isBetter;
+    if (!data.ReadUint32(type)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (!data.ReadBool(isBetter)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (type > static_cast<uint32_t>(NetBearType::BEARER_DEFAULT)) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    NetBearType bearerType = static_cast<NetBearType>(type);
+    int32_t ret = UpdateSupplierScore(bearerType, isBetter);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
     return NETMANAGER_SUCCESS;
 }
 

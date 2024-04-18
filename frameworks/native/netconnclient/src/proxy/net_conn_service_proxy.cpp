@@ -1519,5 +1519,28 @@ int32_t NetConnServiceProxy::UnregisterPreAirplaneCallback(const sptr<IPreAirpla
     }
     return replyParcel.ReadInt32();
 }
+
+int32_t NetConnServiceProxy::UpdateSupplierScore(NetBearType bearerType, bool isBetter)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    uint32_t type = static_cast<uint32_t>(bearerType);
+    if (!data.WriteUint32(type)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    if (!data.WriteBool(isBetter)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t retCode = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE),
+        data, reply);
+    if (retCode != NETMANAGER_SUCCESS) {
+        return retCode;
+    }
+    return reply.ReadInt32();
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

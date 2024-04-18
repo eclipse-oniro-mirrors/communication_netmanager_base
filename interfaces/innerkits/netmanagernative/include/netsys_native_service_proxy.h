@@ -126,6 +126,8 @@ public:
     int32_t GetNetworkSharingType(std::set<uint32_t>& sharingTypeIsOn)  override;
     int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override;
 
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override;
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override;
 private:
     int32_t DealBandwidth(uint32_t uid, uint32_t code);
     static inline BrokerDelegator<NetsysNativeServiceProxy> delegator_;

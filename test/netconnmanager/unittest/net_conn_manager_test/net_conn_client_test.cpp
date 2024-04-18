@@ -1358,5 +1358,36 @@ HWTEST_F(NetConnClientTest, RegisterPreAirplaneCallback, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetConnClientTest, RegisterPreAirplaneCallback2, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    sptr<PreAirplaneCallbackTest> callback = nullptr;
+    int32_t ret = NetConnClient::GetInstance().RegisterPreAirplaneCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_LOCAL_PTR_NULL);
+}
+
+HWTEST_F(NetConnClientTest, UnregisterPreAirplaneCallback, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    sptr<PreAirplaneCallbackTest> callback = new (std::nothrow) PreAirplaneCallbackTest();
+    int32_t ret = NetConnClient::GetInstance().UnregisterPreAirplaneCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetConnClientTest, UpdateSupplierScore001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    bool isBetter = false;
+    int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(NetBearType::BEARER_WIFI, isBetter);
+    EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+HWTEST_F(NetConnClientTest, UpdateSupplierScore002, TestSize.Level1)
+{
+    bool isBetter = false;
+    int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(NetBearType::BEARER_WIFI, isBetter);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

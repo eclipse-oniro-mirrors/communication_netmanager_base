@@ -52,7 +52,7 @@ std::vector<std::string> DnsParamCache::SelectNameservers(const std::vector<std:
 int32_t DnsParamCache::CreateCacheForNet(uint16_t netId)
 {
     NETNATIVE_LOG_D("DnsParamCache::CreateCacheForNet, netid:%{public}d,", netId);
-    std::lock_guard<std::mutex> guard(cacheMutex_);
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     auto it = serverConfigMap_.find(netId);
     if (it != serverConfigMap_.end()) {
         NETNATIVE_LOGE("DnsParamCache::CreateCacheForNet, netid already exist, no need to create");
@@ -65,7 +65,7 @@ int32_t DnsParamCache::CreateCacheForNet(uint16_t netId)
 int32_t DnsParamCache::DestroyNetworkCache(uint16_t netId)
 {
     NETNATIVE_LOG_D("DnsParamCache::CreateCacheForNet, netid:%{public}d,", netId);
-    std::lock_guard<std::mutex> guard(cacheMutex_);
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     auto it = serverConfigMap_.find(netId);
     if (it == serverConfigMap_.end()) {
         return -ENOENT;
@@ -85,7 +85,7 @@ int32_t DnsParamCache::SetResolverConfig(uint16_t netId, uint16_t baseTimeoutMse
     NETNATIVE_LOG_D("DnsParamCache::SetResolverConfig, netid:%{public}d, numServers:%{public}d,", netId,
                     static_cast<int>(nameservers.size()));
 
-    std::lock_guard<std::mutex> guard(cacheMutex_);
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
 
     // select_domains
     auto it = serverConfigMap_.find(netId);
@@ -127,7 +127,7 @@ void DnsParamCache::SetDefaultNetwork(uint16_t netId)
 
 void DnsParamCache::EnableIpv6(uint16_t netId)
 {
-    std::lock_guard<std::mutex> guard(cacheMutex_);
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     auto it = serverConfigMap_.find(netId);
     if (it == serverConfigMap_.end()) {
         DNS_CONFIG_PRINT("get Config failed: netid is not have netid:%{public}d,", netId);
@@ -143,7 +143,7 @@ bool DnsParamCache::IsIpv6Enable(uint16_t netId)
         netId = defaultNetId_;
     }
 
-    std::lock_guard<std::mutex> guard(cacheMutex_);
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     auto it = serverConfigMap_.find(netId);
     if (it == serverConfigMap_.end()) {
         DNS_CONFIG_PRINT("get Config failed: netid is not have netid:%{public}d,", netId);
@@ -161,7 +161,7 @@ int32_t DnsParamCache::GetResolverConfig(uint16_t netId, std::vector<std::string
         netId = defaultNetId_;
     }
 
-    std::lock_guard<std::mutex> guard(cacheMutex_);
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     auto it = serverConfigMap_.find(netId);
     if (it == serverConfigMap_.end()) {
         DNS_CONFIG_PRINT("get Config failed: netid is not have netid:%{public}d,", netId);
@@ -186,7 +186,7 @@ void DnsParamCache::SetDnsCache(uint16_t netId, const std::string &hostName, con
     if (netId == 0) {
         netId = defaultNetId_;
     }
-    std::lock_guard<std::mutex> guard(cacheMutex_);
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     auto it = serverConfigMap_.find(netId);
     if (it == serverConfigMap_.end()) {
         DNS_CONFIG_PRINT("SetDnsCache failed: netid is not have netid:%{public}d,", netId);
@@ -202,7 +202,7 @@ std::vector<AddrInfo> DnsParamCache::GetDnsCache(uint16_t netId, const std::stri
         netId = defaultNetId_;
     }
 
-    std::lock_guard<std::mutex> guard(cacheMutex_);
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     auto it = serverConfigMap_.find(netId);
     if (it == serverConfigMap_.end()) {
         DNS_CONFIG_PRINT("GetDnsCache failed: netid is not have netid:%{public}d,", netId);
@@ -218,7 +218,7 @@ void DnsParamCache::SetCacheDelayed(uint16_t netId, const std::string &hostName)
         netId = defaultNetId_;
     }
 
-    std::lock_guard<std::mutex> guard(cacheMutex_);
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     auto it = serverConfigMap_.find(netId);
     if (it == serverConfigMap_.end()) {
         DNS_CONFIG_PRINT("SetCacheDelayed failed: netid is not have netid:%{public}d,", netId);

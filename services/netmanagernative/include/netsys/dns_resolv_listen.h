@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "event_handler.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace nmd {
@@ -42,8 +43,7 @@ private:
     static bool ProcPostDnsThreadResult(int clientSockFd, uint32_t &uid, uint32_t &pid);
 
     int32_t serverSockFd_;
-    std::shared_ptr<AppExecFwk::EventRunner> dnsResolvRunner_ = nullptr;
-    std::shared_ptr<AppExecFwk::EventHandler> dnsResolvHandler_ = nullptr;
+    std::shared_ptr<ffrt::queue> dnsResolvListenFfrtQueue_ = nullptr;
 };
 } // namespace nmd
 } // namespace OHOS

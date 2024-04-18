@@ -100,6 +100,10 @@ void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdAddInterfaceAddress;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_INTERFACE_DEL_ADDRESS)] =
         &NetsysNativeServiceStub::CmdDelInterfaceAddress;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_SET_IPV6_PRIVCAY_EXTENSION)] =
+        &NetsysNativeServiceStub::CmdSetIpv6PrivacyExtensions;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ENABLE_IPV6)] =
+        &NetsysNativeServiceStub::CmdSetIpv6Enable;
 }
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
@@ -1619,5 +1623,30 @@ int32_t NetsysNativeServiceStub::CmdUpdateNetworkSharingType(MessageParcel &data
 
     return ret;
 }
+
+int32_t NetsysNativeServiceStub::CmdSetIpv6PrivacyExtensions(MessageParcel &data, MessageParcel &reply)
+{
+    std::string interfaceName = data.ReadString();
+    int32_t on = data.ReadInt32();
+
+    int32_t result = SetIpv6PrivacyExtensions(interfaceName, on);
+    reply.WriteInt32(result);
+    NETNATIVE_LOGI("SetIpv6PrivacyExtensions has recved result %{public}d", result);
+
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetIpv6Enable(MessageParcel &data, MessageParcel &reply)
+{
+    std::string interfaceName = data.ReadString();
+    int32_t on = data.ReadInt32();
+
+    int32_t result = SetEnableIpv6(interfaceName, on);
+    reply.WriteInt32(result);
+    NETNATIVE_LOGI("SetIpv6Enable has recved result %{public}d", result);
+
+    return result;
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

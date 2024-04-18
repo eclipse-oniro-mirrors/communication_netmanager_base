@@ -100,6 +100,7 @@ public:
     virtual int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) = 0;
     virtual int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) = 0;
     virtual int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) = 0;
+    virtual int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

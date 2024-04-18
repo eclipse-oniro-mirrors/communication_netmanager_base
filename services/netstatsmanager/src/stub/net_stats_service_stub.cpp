@@ -346,6 +346,11 @@ int32_t NetStatsServiceStub::OnGetUidStatsDetail(MessageParcel &data, MessagePar
 
 int32_t NetStatsServiceStub::OnUpdateIfacesStats(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t ret = CheckNetManagerAvailable(reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+
     std::string iface;
     uint64_t start = 0;
     uint64_t end = 0;
@@ -358,7 +363,7 @@ int32_t NetStatsServiceStub::OnUpdateIfacesStats(MessageParcel &data, MessagePar
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
 
-    int32_t ret = UpdateIfacesStats(iface, start, end, infos);
+    ret = UpdateIfacesStats(iface, start, end, infos);
     if (!reply.WriteInt32(ret)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }

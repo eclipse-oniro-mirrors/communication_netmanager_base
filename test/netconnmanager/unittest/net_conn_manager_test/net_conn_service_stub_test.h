@@ -282,6 +282,11 @@ public:
     {
         return 0;
     }
+
+    int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter) override
+    {
+        return 0;
+    }
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
