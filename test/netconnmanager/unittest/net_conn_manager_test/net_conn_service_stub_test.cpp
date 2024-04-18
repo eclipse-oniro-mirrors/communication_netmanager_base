@@ -511,7 +511,7 @@ HWTEST_F(NetConnServiceStubTest, OnGetIfaceNameIdentMapsTest001, TestSize.Level1
         return;
     }
     if (!data.WriteUint32(0)) {
-        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+        return;
     }
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_GET_IFACENAME_IDENT_MAPS);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
