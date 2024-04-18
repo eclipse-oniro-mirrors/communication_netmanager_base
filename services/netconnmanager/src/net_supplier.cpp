@@ -186,7 +186,8 @@ int32_t NetSupplier::GetSupplierUid() const
 
 bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps)
 {
-    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request connect", supplierId_, netSupplierIdent_.c_str());
+    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request connect, available=%{public}d", supplierId_,
+                 netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
     if (netSupplierInfo_.isAvailable_) {
         NETMGR_LOG_D("The supplier is currently available, there is no need to repeat the request for connection.");
         return true;
@@ -218,9 +219,10 @@ bool NetSupplier::GetRestrictBackground() const
 
 bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
 {
-    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request disconnect", supplierId_, netSupplierIdent_.c_str());
+    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request disconnect, available=%{public}d", supplierId_,
+                 netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
     if (!netSupplierInfo_.isAvailable_) {
-        NETMGR_LOG_W("The supplier is currently unavailable, there is no need to repeat the request to disconnect.");
+        NETMGR_LOG_D("The supplier is currently unavailable, there is no need to repeat the request to disconnect.");
         return true;
     }
     if (netController_ == nullptr) {

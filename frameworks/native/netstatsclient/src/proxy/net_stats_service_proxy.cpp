@@ -258,7 +258,9 @@ int32_t NetStatsServiceProxy::GetUidRxBytes(uint64_t &stats, uint32_t uid)
     int32_t error =
         SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_RXBYTES), data, reply);
     if (error != 0) {
-        NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        if (error != STATS_ERR_READ_BPF_FAIL) {
+            NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", error);
+        }
         return error;
     }
     if (!reply.ReadUint64(stats)) {

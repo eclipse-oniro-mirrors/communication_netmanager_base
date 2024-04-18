@@ -134,7 +134,7 @@ int32_t DnsManager::GetAddrInfo(const std::string &hostName, const std::string &
     }
 
     qparam.qp_netid = netId;
-    qparam.qp_type = 0;
+    qparam.qp_type = 1;
 
     hint.ai_family = hints.aiFamily;
     hint.ai_flags = hints.aiFlags;

@@ -68,7 +68,6 @@ int32_t NetDataShareHelperUtils::Query(Uri &uri, const std::string &key, std::st
     }
 
     if (result->GoToFirstRow() != DataShare::E_OK) {
-        NETMGR_LOG_E("DataShareHelper query failed,go to first row error");
         result->Close();
         return NETMANAGER_ERROR;
     }

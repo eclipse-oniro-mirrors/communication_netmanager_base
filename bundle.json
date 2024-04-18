@@ -56,16 +56,16 @@
                 "napi",
                 "bundle_framework",
                 "relational_store",
+                "openssl",
+                "selinux",
+                "sqlite",
                 "os_account"
             ],
             "third_party": [
                 "curl",
                 "jsoncpp",
                 "libuv",
-                "iptables",
-                "openssl",
-                "selinux",
-                "sqlite"
+                "iptables"
             ]
         },
         "build": {

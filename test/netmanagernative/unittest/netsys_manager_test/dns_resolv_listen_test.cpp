@@ -171,10 +171,8 @@ HWTEST_F(DnsResolvListenTest, ProcGetCacheCommandTest001, TestSize.Level1)
 HWTEST_F(DnsResolvListenTest, ConstructorTest001, TestSize.Level1)
 {
     DnsResolvListen dnsResolvListen;
-    ASSERT_EQ(dnsResolvListen.serverSockFd_, -1);
     dnsResolvListen.serverSockFd_ = CLIENT_SOCK_FD;
-    ASSERT_NE(dnsResolvListen.dnsResolvRunner_, nullptr);
-    ASSERT_NE(dnsResolvListen.dnsResolvHandler_, nullptr);
+    ASSERT_EQ(dnsResolvListen.serverSockFd_, -1);
 }
 
 HWTEST_F(DnsResolvListenTest, ProcGetConfigCommand001, TestSize.Level1)

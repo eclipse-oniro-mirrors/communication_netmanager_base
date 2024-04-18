@@ -55,7 +55,7 @@ bool NetHttpProbe::CurlGlobalInit()
     NETMGR_LOG_D("curl_global_init() in");
     std::lock_guard<std::mutex> lock(initCurlMutex_);
     if (useCurlCount_ == 0) {
-        NETMGR_LOG_I("Call curl_global_init()");
+        NETMGR_LOG_D("Call curl_global_init()");
         if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
             NETMGR_LOG_E("curl_global_init() failed");
             return false;
@@ -73,7 +73,7 @@ void NetHttpProbe::CurlGlobalCleanup()
     useCurlCount_ = useCurlCount_ > 0 ? (useCurlCount_ - 1) : 0;
     NETMGR_LOG_D("Curl global used count remain:[%{public}d]", useCurlCount_);
     if (useCurlCount_ == 0) {
-        NETMGR_LOG_I("Call curl_global_cleanup()");
+        NETMGR_LOG_D("Call curl_global_cleanup()");
         curl_global_cleanup();
     }
 }
@@ -362,7 +362,7 @@ bool NetHttpProbe::SetProxyOption(ProbeType probeType, bool &useHttpProxy)
     int32_t proxyPort = 0;
     /* Prioritize the use of global HTTP proxy, if there is no global proxy, use network http proxy */
     if (!LoadProxy(proxyHost, proxyPort)) {
-        NETMGR_LOG_E("global http proxy or network proxy is empty.");
+        NETMGR_LOG_D("global http proxy or network proxy is empty.");
         return true;
     }
 
