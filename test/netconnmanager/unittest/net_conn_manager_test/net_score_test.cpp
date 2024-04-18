@@ -83,6 +83,21 @@ HWTEST_F(NetScoreTest, GetServiceScore, TestSize.Level1)
     ASSERT_TRUE(result == true);
     ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
     ASSERT_TRUE(supplier->GetRealScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
+
+    // quality_poor
+    supplier->SetNetValid(QUALITY_POOR_STATE);
+    result = netScore_->GetServiceScore(supplier);
+    ASSERT_TRUE(result == true);
+    ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
+    ASSERT_TRUE(supplier->GetRealScore() ==
+        static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE) - DIFF_SCORE_BETWEEN_GOOD_POOR);
+    // quality_good
+    supplier->SetNetValid(QUALITY_GOOD_STATE);
+    result = netScore_->GetServiceScore(supplier);
+    ASSERT_TRUE(result == true);
+    ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
+    ASSERT_TRUE(supplier->GetRealScore() ==
+        static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE) + DIFF_SCORE_BETWEEN_GOOD_POOR);
 }
 
 HWTEST_F(NetScoreTest, NetSupplierBranchTest, TestSize.Level1)
