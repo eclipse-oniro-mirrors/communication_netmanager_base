@@ -262,8 +262,8 @@ int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const st
     return Step(infos);
 }
 
-int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const uint32_t uid, const std::string &ident, uint64_t start,
-                  uint64_t end, std::vector<NetStatsInfo> &infos)
+int32_t NetStatsDatabaseHelper::QueryData(const std::string &tableName, const uint32_t uid, const std::string &ident,
+                                          uint64_t start, uint64_t end, std::vector<NetStatsInfo> &infos)
 {
     infos.clear();
     std::string sql = "SELECT * FROM " + tableName + " t WHERE 1=1 AND T.UID = ? AND t.Ident = ?" + " AND t.Date >= ?" +

@@ -19,6 +19,7 @@
 #include <list>
 #include <pthread.h>
 
+#include "net_conn_client.h"
 #include "net_mgr_log_wrapper.h"
 #include "net_stats_constants.h"
 #include "net_stats_data_handler.h"

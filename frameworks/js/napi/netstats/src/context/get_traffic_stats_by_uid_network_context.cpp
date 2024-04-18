@@ -81,7 +81,7 @@ bool GetTrafficStatsByUidNetworkContext::CheckNetworkParams(napi_value *params, 
     bool checkNetBearType = NapiUtils::GetValueType(
         GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_1], NET_BEAR_TYPE)) == napi_number;
     bool checkStartTime = NapiUtils::GetValueType(
-        GetEnv(),NapiUtils::GetNamedProperty(GetEnv(),params[ARG_INDEX_1],START_TIME)) == napi_number;
+        GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_1], START_TIME)) == napi_number;
     bool checkEndTime = NapiUtils::GetValueType(
         GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_1], END_TIME)) == napi_number;
     bool checkSimId = true;
