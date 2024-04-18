@@ -20,11 +20,12 @@
 #include <mutex>
 #include <vector>
 
+#include "ffrt.h"
 #include "net_stats_callback.h"
 #include "net_stats_info.h"
 #include "netmanager_base_common_utils.h"
 
-#include "timer.h"
+#include "ffrt_timer.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -140,10 +141,10 @@ private:
     static constexpr uint64_t STATS_PACKET_CYCLE_MS = 1 * 60 * 60 * 1000;
 
     CachedInfo stats_;
-    std::mutex lock_;
+    ffrt::mutex lock_;
     bool isForce_ = false;
-    std::unique_ptr<Timer> cacheTimer_ = nullptr;
-    std::unique_ptr<Timer> writeTimer_ = nullptr;
+    std::unique_ptr<FfrtTimer> cacheTimer_ = nullptr;
+    std::unique_ptr<FfrtTimer> writeTimer_ = nullptr;
     uint32_t cycleThreshold_ = DEFAULT_CACHE_CYCLE_MS;
     uint64_t trafficThreshold_ = DEFAULT_TRAFFIC_STATISTICS_THRESHOLD_BYTES;
     uint64_t dateCycle_ = DEFAULT_DATA_CYCLE_S;

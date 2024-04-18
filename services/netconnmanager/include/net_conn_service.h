@@ -329,6 +329,7 @@ public:
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     bool IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr);
     bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId);
+    int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter) override;
 
 private:
     class NetInterfaceStateCallback : public NetsysControllerCallback {
@@ -407,6 +408,7 @@ private:
     int32_t UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<NetLinkInfo> &netLinkInfo);
     int32_t NetDetectionAsync(int32_t netId);
     int32_t RestrictBackgroundChangedAsync(bool restrictBackground);
+    int32_t UpdateSupplierScoreAsync(NetBearType bearerType, bool isBetter);
     void SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy);
     void RequestAllNetworkExceptDefault();
     void LoadGlobalHttpProxy();
@@ -423,6 +425,8 @@ private:
     std::vector<std::string> GetPreferredUrl();
     bool IsValidDecValue(const std::string &inputValue);
     int32_t GetDelayNotifyTime();
+    int32_t NetDetectionForDnsHealthSync(int32_t netId, bool dnsHealthSuccess);
+    std::vector<sptr<NetSupplier>> FindSupplierWithInternetByBearerType(NetBearType bearerType);
 
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);
@@ -465,6 +469,27 @@ private:
     std::mutex preAirplaneCbsMutex_;
 
     bool hasSARemoved_ = false;
+
+private:
+    class ConnCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
+    public:
+        explicit ConnCallbackDeathRecipient(NetConnService &client) : client_(client) {}
+        ~ConnCallbackDeathRecipient() override = default;
+        void OnRemoteDied(const wptr<IRemoteObject> &remote) override
+        {
+            client_.OnRemoteDied(remote);
+        }
+
+    private:
+        NetConnService &client_;
+    };
+    void OnRemoteDied(const wptr<IRemoteObject> &remoteObject);
+    void AddClientDeathRecipient(const sptr<INetConnCallback> &callback);
+    void RemoveClientDeathRecipient(const sptr<INetConnCallback> &callback);
+    void RemoveALLClientDeathRecipient();
+    std::mutex remoteMutex_;
+    sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
+    std::vector<sptr<INetConnCallback>> remoteCallback_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

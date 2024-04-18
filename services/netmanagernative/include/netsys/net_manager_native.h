@@ -128,7 +128,8 @@ public:
     int32_t UnregisterDnsResultCallback(const sptr<INetDnsResultCallback> &callback);
     int32_t RegisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback);
     int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback);
-
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
 private:
     std::shared_ptr<BandwidthManager> bandwidthManager_ = nullptr;
     std::shared_ptr<ConnManager> connManager_ = nullptr;

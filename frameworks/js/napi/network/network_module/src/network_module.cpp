@@ -47,7 +47,7 @@ napi_value NetworkModule::InitNetworkModule(napi_env env, napi_value exports)
 
 napi_value NetworkModule::GetType(napi_env env, napi_callback_info info)
 {
-    NETMANAGER_BASE_LOGI("GetType is called");
+    NETMANAGER_BASE_LOGD("GetType is called");
     return ModuleTemplate::InterfaceWithoutManager<GetTypeContext>(
         env, info, "SystemNetworkGetType", nullptr, NetworkAsyncWork::ExecGetType, NetworkAsyncWork::GetTypeCallback);
 }

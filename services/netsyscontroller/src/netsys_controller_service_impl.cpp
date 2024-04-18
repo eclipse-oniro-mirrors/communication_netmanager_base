@@ -739,7 +739,7 @@ int32_t NetsysControllerServiceImpl::UnregisterDnsHealthCallback(const sptr<INet
 
 int32_t NetsysControllerServiceImpl::GetCookieStats(uint64_t &stats, uint32_t type, uint64_t cookie)
 {
-    NETMGR_LOG_D("GetCookieStats: type=%{public}d", type);
+    NETMGR_LOG_D("GetCookieStats: type=%{public}u", type);
     return netsysClient_.GetCookieStats(stats, type, cookie);
 }
 
@@ -754,6 +754,18 @@ int32_t NetsysControllerServiceImpl::UpdateNetworkSharingType(uint32_t type, boo
     NETMGR_LOG_D("UpdateNetworkSharingType: type=%{public}d isOpen=%{public}d",
                  type, isOpen);
     return netsysClient_.UpdateNetworkSharingType(type, isOpen);
+}
+
+int32_t NetsysControllerServiceImpl::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    NETMGR_LOG_I("SetIpv6PrivacyExtensions: interfaceName=%{public}s on=%{public}d", interfaceName.c_str(), on);
+    return netsysClient_.SetIpv6PrivacyExtensions(interfaceName, on);
+}
+
+int32_t NetsysControllerServiceImpl::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    NETMGR_LOG_I("SetEnableIpv6: interfaceName=%{public}s on=%{public}d", interfaceName.c_str(), on);
+    return netsysClient_.SetEnableIpv6(interfaceName, on);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

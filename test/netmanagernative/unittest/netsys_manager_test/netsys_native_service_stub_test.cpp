@@ -472,6 +472,16 @@ public:
     {
         return 0;
     }
+
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override
+    {
+        return 0;
+    }
+
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
@@ -1717,5 +1727,28 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateNetworkSharingType001, TestSize.L
     int32_t ret = notifyStub_->CmdUpdateNetworkSharingType(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpv6PrivacyExtensions001, TestSize.Level1)
+{
+    std::string interface = "wlan0";
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteString(interface)) {
+        return;
+    }
+    if (!data.WriteUint32(0)) {
+        return;
+    }
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetIpv6PrivacyExtensions(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+
+    ret = notifyStub_->CmdSetIpv6Enable(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

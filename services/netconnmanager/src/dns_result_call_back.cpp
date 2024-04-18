@@ -19,7 +19,7 @@
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr double FAIL_RATE = 0.2;
+constexpr double FAIL_RATE = 0.6;
 int32_t NetDnsResultCallback::OnDnsResultReport(uint32_t size,
     const std::list<NetsysNative::NetDnsResultReport> netDnsResultReport)
 {

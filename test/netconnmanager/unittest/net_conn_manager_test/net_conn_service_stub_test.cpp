@@ -936,6 +936,30 @@ HWTEST_F(NetConnServiceStubTest, OnIsPreferCellularUrlTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnUpdateSupplierScore001
+ * @tc.desc: Test NetConnServiceStub OnUpdateSupplierScore.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnUpdateSupplierScore001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    uint32_t bearerType = 0;
+    if (!data.WriteUint32(bearerType)) {
+        return;
+    }
+    bool isBetter = true;
+    if (!data.WriteBool(isBetter)) {
+        return;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: OnRequestNetConnectionBySpecifierTest001
  * @tc.desc: Test NetConnServiceStub OnRequestNetConnection.
  * @tc.type: FUNC
@@ -957,7 +981,7 @@ HWTEST_F(NetConnServiceStubTest, OnRequestNetConnectionBySpecifierTest001, TestS
         return;
     }
 
-    if (!data.WriteInt32(TEST_UINT32_VALUE)) {
+    if (!data.WriteUint32(TEST_UINT32_VALUE)) {
         return;
     }
 

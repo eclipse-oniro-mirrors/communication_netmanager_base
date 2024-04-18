@@ -32,7 +32,8 @@ namespace {
 constexpr const char *IPV4_FORWARDING_PROC_FILE = "/proc/sys/net/ipv4/ip_forward";
 constexpr const char *IPV6_FORWARDING_PROC_FILE = "/proc/sys/net/ipv6/conf/all/forwarding";
 constexpr const char *IPTABLES_TMP_BAK = "/data/service/el1/public/netmanager/ipfwd.bak";
-
+constexpr const char *IPV6_PROC_PATH = "/proc/sys/net/ipv6/conf/";
+constexpr const char *IP6TABLES_TMP_BAK = "/data/service/el1/public/netmanager/ip6fwd.bak";
 constexpr const int MAX_MATCH_SIZE = 4;
 constexpr const int TWO_LIST_CORRECT_DATA = 2;
 constexpr const int NEXT_LIST_CORRECT_DATA = 1;
@@ -43,6 +44,10 @@ constexpr const char *CREATE_TETHERCTRL_NAT_POSTROUTING = "-t nat -N tetherctrl_
 constexpr const char *CREATE_TETHERCTRL_FORWARD = "-t filter -N tetherctrl_FORWARD";
 constexpr const char *CREATE_TETHERCTRL_COUNTERS = "-t filter -N tetherctrl_counters";
 constexpr const char *CREATE_TETHERCTRL_MANGLE_FORWARD = "-t mangle -N tetherctrl_mangle_FORWARD";
+constexpr const char *OPEN_IPV6_PRIVACY_EXTENSIONS = "2";
+constexpr const char *CLOSE_IPV6_PRIVACY_EXTENSIONS = "0";
+constexpr const char *ENABLE_IPV6_VALUE = "0";
+constexpr const char *DISABLE_IPV6_VALUE = "1";
 
 // commands of set nat
 constexpr const char *APPEND_NAT_POSTROUTING = "-t nat -A POSTROUTING -j tetherctrl_nat_POSTROUTING";
@@ -57,6 +62,9 @@ constexpr const char *DELETE_TETHERCTRL_MANGLE_FORWARD = "-t mangle -D FORWARD -
 
 constexpr const char *IPATBLES_RESTORE_CMD_PATH = "/system/bin/iptables-restore";
 constexpr const char *IPATBLES_SAVE_CMD_PATH = "/system/bin/iptables-save";
+
+constexpr const char *IP6ATBLES_RESTORE_CMD_PATH = "/system/bin/ip6tables-restore";
+constexpr const char *IP6ATBLES_SAVE_CMD_PATH = "/system/bin/ip6tables-save";
 
 const std::string EnableNatCmd(const std::string &down)
 {
@@ -121,6 +129,10 @@ void Rollback()
     std::string rollBak = std::string(IPATBLES_RESTORE_CMD_PATH) + " -T filter < ";
     rollBak.append(IPTABLES_TMP_BAK);
     CommonUtils::ForkExec(rollBak);
+
+    rollBak = std::string(IP6ATBLES_RESTORE_CMD_PATH) + " -T filter < ";
+    rollBak.append(IP6TABLES_TMP_BAK);
+    CommonUtils::ForkExec(rollBak);
 }
 } // namespace
 
@@ -131,10 +143,10 @@ SharingManager::SharingManager()
 
 void SharingManager::InitChildChains()
 {
-    iptablesWrapper_->RunCommand(IPTYPE_IPV4, CREATE_TETHERCTRL_NAT_POSTROUTING);
-    iptablesWrapper_->RunCommand(IPTYPE_IPV4, CREATE_TETHERCTRL_FORWARD);
-    iptablesWrapper_->RunCommand(IPTYPE_IPV4, CREATE_TETHERCTRL_COUNTERS);
-    iptablesWrapper_->RunCommand(IPTYPE_IPV4, CREATE_TETHERCTRL_MANGLE_FORWARD);
+    iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, CREATE_TETHERCTRL_NAT_POSTROUTING);
+    iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, CREATE_TETHERCTRL_FORWARD);
+    iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, CREATE_TETHERCTRL_COUNTERS);
+    iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, CREATE_TETHERCTRL_MANGLE_FORWARD);
     inited_ = true;
 }
 
@@ -170,19 +182,19 @@ int32_t SharingManager::EnableNat(const std::string &downstreamIface, const std:
         NETNATIVE_LOGE("iface name valid check fail: %{public}s", upstreamIface.c_str());
         return -1;
     }
-    iptablesWrapper_->RunCommand(IPTYPE_IPV4, APPEND_NAT_POSTROUTING);
-    iptablesWrapper_->RunCommand(IPTYPE_IPV4, APPEND_MANGLE_FORWARD);
+    iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, APPEND_NAT_POSTROUTING);
+    iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, APPEND_MANGLE_FORWARD);
 
     NETNATIVE_LOGI("EnableNat downstreamIface: %{public}s, upstreamIface: %{public}s", downstreamIface.c_str(),
                    upstreamIface.c_str());
 
-    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4, EnableNatCmd(upstreamIface)) !=
+    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, EnableNatCmd(upstreamIface)) !=
         NetManagerStandard::NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("IptablesWrapper run command failed");
         return -1;
     }
 
-    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4, APPEND_TETHERCTRL_MANGLE_FORWARD) !=
+    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, APPEND_TETHERCTRL_MANGLE_FORWARD) !=
         NetManagerStandard::NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("IptablesWrapper run command failed");
         return -1;
@@ -205,20 +217,35 @@ int32_t SharingManager::DisableNat(const std::string &downstreamIface, const std
     NETNATIVE_LOGI("DisableNat downstreamIface: %{public}s, upstreamIface: %{public}s", downstreamIface.c_str(),
                    upstreamIface.c_str());
 
-    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4, CLEAR_TETHERCTRL_NAT_POSTROUTING) !=
+    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, CLEAR_TETHERCTRL_NAT_POSTROUTING) !=
         NetManagerStandard::NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("IptablesWrapper run command failed");
         return -1;
     }
-    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4, CLEAR_TETHERCTRL_MANGLE_FORWARD) !=
+    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, CLEAR_TETHERCTRL_MANGLE_FORWARD) !=
         NetManagerStandard::NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("IptablesWrapper run command failed");
         return -1;
     }
 
-    iptablesWrapper_->RunCommand(IPTYPE_IPV4, DELETE_TETHERCTRL_NAT_POSTROUTING);
-    iptablesWrapper_->RunCommand(IPTYPE_IPV4, DELETE_TETHERCTRL_MANGLE_FORWARD);
+    iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, DELETE_TETHERCTRL_NAT_POSTROUTING);
+    iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, DELETE_TETHERCTRL_MANGLE_FORWARD);
     return 0;
+}
+int32_t SharingManager::SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on)
+{
+    std::string option = IPV6_PROC_PATH + interfaceName + "/use_tempaddr";
+    const char *value = on ? OPEN_IPV6_PRIVACY_EXTENSIONS : CLOSE_IPV6_PRIVACY_EXTENSIONS;
+    bool ipv6Success = WriteToFile(option.c_str(), value);
+    return ipv6Success ? 0 : -1;
+}
+
+int32_t SharingManager::SetEnableIpv6(const std::string &interfaceName, const uint32_t on)
+{
+    std::string option = IPV6_PROC_PATH + interfaceName + "/disable_ipv6";
+    const char *value = on ? ENABLE_IPV6_VALUE : DISABLE_IPV6_VALUE;
+    bool ipv6Success = WriteToFile(option.c_str(), value);
+    return ipv6Success ? 0 : -1;
 }
 
 int32_t SharingManager::SetIpFwdEnable()
@@ -228,6 +255,16 @@ int32_t SharingManager::SetIpFwdEnable()
     bool ipv4Success = WriteToFile(IPV4_FORWARDING_PROC_FILE, value);
     bool ipv6Success = WriteToFile(IPV6_FORWARDING_PROC_FILE, value);
     return (ipv4Success && ipv6Success) ? 0 : -1;
+}
+
+void SharingManager::IpfwdExecSaveBak()
+{
+    std::string saveBak = std::string(IPATBLES_SAVE_CMD_PATH) + " -t filter > ";
+    saveBak.append(IPTABLES_TMP_BAK);
+    CommonUtils::ForkExec(saveBak);
+    saveBak = std::string(IP6ATBLES_SAVE_CMD_PATH) + " -t filter > ";
+    saveBak.append(IP6TABLES_TMP_BAK);
+    CommonUtils::ForkExec(saveBak);
 }
 
 int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, const std::string &toIface)
@@ -243,14 +280,12 @@ int32_t SharingManager::IpfwdAddInterfaceForward(const std::string &fromIface, c
     }
     NETNATIVE_LOGI("IpfwdAddInterfaceForward fromIface: %{public}s, toIface: %{public}s", fromIface.c_str(),
                    toIface.c_str());
-
     if (interfaceForwards_.empty()) {
         SetForwardRules(true, FORWARD_JUMP_TETHERCTRL_FORWARD);
     }
+
+    IpfwdExecSaveBak();
     int32_t result = 0;
-    std::string saveBak = std::string(IPATBLES_SAVE_CMD_PATH) + " -t filter > ";
-    saveBak.append(IPTABLES_TMP_BAK);
-    CommonUtils::ForkExec(saveBak);
 
     /*
      * Add a forward rule, when the status of packets is RELATED,
@@ -343,7 +378,7 @@ int32_t SharingManager::GetNetworkSharingTraffic(const std::string &downIface, c
                                                  NetworkSharingTraffic &traffic)
 {
     const std::string cmds = "-t filter -L tetherctrl_counters -nvx";
-    std::string result = iptablesWrapper_->RunCommandForRes(IPTYPE_IPV4, cmds);
+    std::string result = iptablesWrapper_->RunCommandForRes(IPTYPE_IPV4V6, cmds);
 
     const std::string num = "(\\d+)";
     const std::string iface = "([^\\s]+)";
@@ -402,7 +437,8 @@ int32_t SharingManager::SetForwardRules(bool set, const std::string &cmds)
 {
     const std::string op = set ? "-A" : "-D";
 
-    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4, "-t filter " + op + cmds) != NetManagerStandard::NETMANAGER_SUCCESS) {
+    if (iptablesWrapper_->RunCommand(IPTYPE_IPV4V6, "-t filter " + op + cmds) !=
+        NetManagerStandard::NETMANAGER_SUCCESS) {
         NETNATIVE_LOGE("IptablesWrapper run command failed");
         return -1;
     }
