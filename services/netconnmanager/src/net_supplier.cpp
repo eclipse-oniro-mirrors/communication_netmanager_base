@@ -368,6 +368,10 @@ void NetSupplier::SetNetValid(NetDetectionStatus netState)
             netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_VALIDATED);
             NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_VALIDATED");
         }
+    } else if (netState == QUALITY_POOR_STATE) {
+        netQuality_ = QUALITY_POOR_STATE;
+    } else if (netState == QUALITY_GOOD_STATE) {
+        netQuality_ = QUALITY_GOOD_STATE;
     } else {
         if (HasNetCap(NET_CAPABILITY_VALIDATED)) {
             netCaps_.RemoveNetCap(NET_CAPABILITY_VALIDATED);
@@ -465,6 +469,21 @@ bool NetSupplier::ResumeNetworkInfo()
     }
 
     return network_->ResumeNetworkInfo();
+}
+
+bool NetSupplier::IsNetQualityPoor()
+{
+    return netQuality_ == QUALITY_POOR_STATE;
+}
+
+bool NetSupplier::IsNetQualityGood()
+{
+    return netQuality_ == QUALITY_GOOD_STATE;
+}
+
+void NetSupplier::ResetNetQuality()
+{
+    netQuality_ = QUALITY_NORMAL_STATE;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

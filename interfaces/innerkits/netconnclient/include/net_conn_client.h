@@ -419,6 +419,8 @@ public:
 
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback);
 
+    int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter);
+
 private:
     class NetConnDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
