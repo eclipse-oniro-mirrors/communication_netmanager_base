@@ -46,8 +46,10 @@ public:
     int32_t SelectData(const std::string &iface, uint64_t start, uint64_t end, std::vector<NetStatsInfo> &infos);
     int32_t SelectData(const std::string &iface, const uint32_t uid, uint64_t start, uint64_t end,
                        std::vector<NetStatsInfo> &infos);
-    int32_t QueryData(const std::string &tableName, const uint32_t simId, uint64_t start, uint64_t end,
+    int32_t QueryData(const std::string &tableName, const std::string &ident, uint64_t start, uint64_t end,
                       std::vector<NetStatsInfo> &infos);
+    int32_t QueryData(const std::string &tableName, const uint32_t uid, const std::string &ident, uint64_t start,
+                      uint64_t end, std::vector<NetStatsInfo> &infos);
     int32_t DeleteData(const std::string &tableName, uint64_t start, uint64_t end);
     int32_t DeleteData(const std::string &tableName, uint64_t uid);
     int32_t ClearData(const std::string &tableName);

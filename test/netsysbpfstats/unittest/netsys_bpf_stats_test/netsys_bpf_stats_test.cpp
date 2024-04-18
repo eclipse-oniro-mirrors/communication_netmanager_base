@@ -41,12 +41,9 @@ static constexpr uint32_t TEST_UID1 = 10010;
 static constexpr uint32_t TEST_UID2 = 10100;
 static constexpr uint32_t TEST_UID_IF1 = 11001;
 static constexpr uint32_t TEST_UID_IF2 = 11002;
-static constexpr uint32_t TEST_SIM_ID1 = 1;
 static constexpr uint32_t TEST_BYTES0 = 11;
 static constexpr uint32_t STATS_TYPE_INVALID_VALUE = 4;
 static constexpr uint64_t TEST_COOKIE1 = 1;
-static constexpr uint32_t TEST_SIMID1 = 1;
-static constexpr uint32_t TEST_SIMID2 = 2;
 static constexpr const char *TEST_IFACE_NAME_WLAN0 = "wlan0";
 static constexpr const char *TEST_IFACE_NAME_LO = "lo";
 static constexpr const char *TEST_IFACE_NAME_DUMMY0 = "dummy0";
@@ -318,40 +315,6 @@ HWTEST_F(NetsysBpfStatsTest, GetNumberFromStatsValue, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NetStatsResultCode::STATS_ERR_READ_BPF_FAIL);
 }
 
-HWTEST_F(NetsysBpfStatsTest, SetIfaceSimIdMapTest001, TestSize.Level1)
-{
-    std::string ifaceName = TEST_IFACE_NAME_LO;
-    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
-    EXPECT_EQ(bpfStats->SetIfaceSimMap(ifaceName, TEST_SIM_ID1), NETSYS_SUCCESS);
-    BpfMapper<iface_simid_key, iface_simid_value> ifaceSimIdMap(IFACE_SIM_MAP_PATH, BPF_ANY);
-    EXPECT_TRUE(ifaceSimIdMap.IsValid());
-    auto ifIndex = if_nametoindex(ifaceName.c_str());
-    EXPECT_TRUE(ifIndex >= 0);
-    uint32_t simId;
-    EXPECT_EQ(ifaceSimIdMap.Read(ifIndex, simId), NETSYS_SUCCESS);
-    EXPECT_EQ(simId, TEST_SIM_ID1);
-}
-
-HWTEST_F(NetsysBpfStatsTest, GetIfaceSimIdMapTest001, TestSize.Level1)
-{
-    BpfMapper<iface_simid_key, iface_simid_value> ifaceSimIdMap(IFACE_SIM_MAP_PATH, BPF_ANY);
-    EXPECT_TRUE(ifaceSimIdMap.IsValid());
-
-    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
-    auto keys = ifaceSimIdMap.GetAllKeys();
-    char if_name[IFNAME_SIZE] = {0};
-    for (const auto ifIndex : keys) {
-        EXPECT_TRUE(memset_s(if_name, sizeof(if_name), 0, sizeof(if_name)) == EOK);
-        char *pName = if_indextoname(ifIndex, if_name);
-        if (pName == nullptr) {
-            continue;
-        }
-        uint32_t simId = UINT32_MAX;
-        EXPECT_EQ(ifaceSimIdMap.Read(ifIndex, simId), NETSYS_SUCCESS);
-        EXPECT_EQ(bpfStats->GetIfaceSimMap(pName, simId), NETSYS_SUCCESS);
-    }
-}
-
 HWTEST_F(NetsysBpfStatsTest, GetAllStatsInfoTest001, TestSize.Level1)
 {
     BpfMapper<app_uid_sim_stats_key, app_uid_sim_stats_value> uidSimStatsMap(APP_UID_SIM_STATS_MAP_PATH, BPF_ANY);
@@ -365,14 +328,12 @@ HWTEST_F(NetsysBpfStatsTest, GetAllStatsInfoTest001, TestSize.Level1)
     app_uid_sim_stats_key key1 = {0};
     key1.ifIndex = TEST_UID_IF1;
     key1.uId = TEST_UID1;
-    key1.simId = TEST_SIMID1;
     auto ret = uidSimStatsMap.Write(key1, value, BPF_ANY);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 
     app_uid_sim_stats_key key2 = {0};
     key2.ifIndex = TEST_UID_IF2;
     key2.uId = TEST_UID2;
-    key2.simId = TEST_SIMID2;
     ret = uidSimStatsMap.Write(key2, value, BPF_ANY);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 
@@ -394,14 +355,12 @@ HWTEST_F(NetsysBpfStatsTest, GetAllContainerStatsInfo001, TestSize.Level1)
     app_uid_sim_stats_key key1 = {0};
     key1.ifIndex = TEST_UID_IF1;
     key1.uId = TEST_UID1;
-    key1.simId = TEST_SIMID1;
     auto ret = uidSimStatsMap.Write(key1, value, BPF_ANY);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 
     app_uid_sim_stats_key key2 = {0};
     key2.ifIndex = TEST_UID_IF2;
     key2.uId = TEST_UID2;
-    key2.simId = TEST_SIMID2;
     ret = uidSimStatsMap.Write(key2, value, BPF_ANY);
     EXPECT_EQ(ret, NETSYS_SUCCESS);
 

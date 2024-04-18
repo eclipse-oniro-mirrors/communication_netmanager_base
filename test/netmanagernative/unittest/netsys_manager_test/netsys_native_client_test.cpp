@@ -44,7 +44,6 @@ static constexpr uint32_t TEST_STATS_TYPE1 = 0;
 static constexpr uint32_t TEST_STATS_TYPE2 = 2;
 const int32_t MTU = 111;
 const int32_t NET_ID = 2;
-const uint32_t SIM_ID = 1;
 const int32_t IFACEFD = 5;
 const int64_t UID = 1010;
 const int32_t APP_ID = 101010;
@@ -119,9 +118,6 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest001, TestSize.Level1)
 
     ret = nativeClient_.SetInterfaceMtu(IF_NAME, MTU);
     EXPECT_EQ(ret, -1);
-
-    ret = nativeClient_.SetInterfaceSimIdMap(IF_NAME, SIM_ID);
-    EXPECT_EQ(ret, 0);
 
     ret = nativeClient_.SetTcpBufferSizes(TCP_BUFFER_SIZES);
     EXPECT_EQ(ret, 0);
@@ -367,21 +363,6 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest014, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest015, TestSize.Level1)
-{
-    std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
-    int32_t ret = nativeClient_.GetAllContainerStatsInfo(statsInfo);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
-    ret = nativeClient_.SetInterfaceSimIdMap(ETH0, SIM_ID);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-
-    uint32_t simId = UINT32_MAX;
-    ret = nativeClient_.GetInterfaceSimIdMap(ETH0, simId);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    EXPECT_EQ(simId, SIM_ID);
-}
-
 HWTEST_F(NetsysNativeClientTest, GetCookieStatsTest001, TestSize.Level1)
 {
     uint64_t stats = 0;
@@ -421,16 +402,6 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientBranchTest001, TestSize.Level
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
     ret = nativeClient_.UnregisterDnsHealthCallback(healthCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
-}
-
-HWTEST_F(NetsysNativeClientTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
-{
-    uint32_t on = 0;
-    std::string interface = "wlan0";
-    int32_t ret = nativeClient_.SetIpv6PrivacyExtensions(interface, on);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-    ret = nativeClient_.SetEnableIpv6(interface, on);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

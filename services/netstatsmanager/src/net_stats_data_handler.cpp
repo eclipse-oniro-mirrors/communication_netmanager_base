@@ -60,15 +60,32 @@ int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, con
     return helper->SelectData(iface, uid, start, end, infos);
 }
 
-int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uint32_t simId, uint64_t start,
-                                           uint64_t end)
+int32_t NetStatsDataHandler::ReadStatsDataByIdent(std::vector<NetStatsInfo> &infos, const std::string &ident,
+                                                  uint64_t start, uint64_t end)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
     int32_t ret1;
     int32_t ret2;
     std::vector<NetStatsInfo> uidSimTableInfos;
-    ret1 = helper->QueryData(UID_TABLE, simId, start, end, infos);
-    ret2 = helper->QueryData(UID_SIM_TABLE, simId, start, end, uidSimTableInfos);
+    ret1 = helper->QueryData(UID_TABLE, ident, start, end, infos);
+    ret2 = helper->QueryData(UID_SIM_TABLE, ident, start, end, uidSimTableInfos);
+    if (ret1 != NETMANAGER_SUCCESS || ret2 != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("QueryData wrong, ret1=%{public}d, ret2=%{public}d", ret1, ret2);
+        return NETMANAGER_ERROR;
+    }
+    infos.insert(infos.end(), uidSimTableInfos.begin(), uidSimTableInfos.end());
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetStatsDataHandler::ReadStatsData(std::vector<NetStatsInfo> &infos, uint32_t uid, const std::string &ident,
+                                           uint64_t start, uint64_t end)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_PATH);
+    int32_t ret1;
+    int32_t ret2;
+    std::vector<NetStatsInfo> uidSimTableInfos;
+    ret1 = helper->QueryData(UID_TABLE, uid, ident, start, end, infos);
+    ret2 = helper->QueryData(UID_SIM_TABLE, uid, ident, start, end, uidSimTableInfos);
     if (ret1 != NETMANAGER_SUCCESS || ret2 != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("QueryData wrong, ret1=%{public}d, ret2=%{public}d", ret1, ret2);
         return NETMANAGER_ERROR;

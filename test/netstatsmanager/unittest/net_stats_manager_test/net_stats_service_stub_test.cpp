@@ -45,9 +45,9 @@ constexpr int32_t TEST_SIM_ID = 1;
 constexpr int64_t TEST_START_TIME = 100;
 constexpr int64_t TEST_END_TIME = 200;
 
-sptr<Network> GetSptrNetworkData()
+sptr<NetStatsNetwork> GetSptrNetworkData()
 {
-    sptr<Network> network;
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     network->type_ = TEST_TYPE;
     network->startTime_ = TEST_START_TIME;
     network->endTime_ = TEST_END_TIME;
@@ -110,13 +110,14 @@ public:
         return 0;
     }
 
-    int32_t GetTrafficStatsByNetwork(std::vector<NetStatsInfo> &infos, const sptr<Network> &network) override
+    int32_t GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                     const sptr<NetStatsNetwork> &network) override
     {
         return 0;
     }
 
     int32_t GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
-                                        const sptr<Network> &network) override
+                                        const sptr<NetStatsNetwork> &network) override
     {
         return 0;
     }
@@ -576,7 +577,7 @@ HWTEST_F(TestNetStatsServiceStub, GetTrafficStatsByNetworkTest001, TestSize.Leve
     if (!data.WriteInterfaceToken(NetStatsServiceStub::GetDescriptor())) {
         return;
     }
-    sptr<Network> network = GetSptrNetworkData();
+    sptr<NetStatsNetwork> network = GetSptrNetworkData();
     if (!network->Marshalling(data)) {
         return;
     }
@@ -602,7 +603,7 @@ HWTEST_F(TestNetStatsServiceStub, GetTrafficStatsByUidNetworkTest001, TestSize.L
     if (!data.WriteUint32(uid)) {
         return;
     }
-    sptr<Network> network = GetSptrNetworkData();
+    sptr<NetStatsNetwork> network = GetSptrNetworkData();
     if (!network->Marshalling(data)) {
         return;
     }

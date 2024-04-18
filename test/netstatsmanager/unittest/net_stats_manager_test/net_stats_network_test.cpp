@@ -24,18 +24,18 @@ constexpr int32_t TEST_TYPE = 0;
 constexpr int32_t TEST_SIM_ID = 1;
 constexpr int64_t TEST_START_TIME = 100;
 constexpr int64_t TEST_END_TIME = 200;
-Network GetNetworkData()
+NetStatsNetwork GetNetworkData()
 {
-    Network network;
+    NetStatsNetwork network;
     network.type_ = TEST_TYPE;
     network.startTime_ = TEST_START_TIME;
     network.endTime_ = TEST_END_TIME;
     network.simId_ = TEST_SIM_ID;
     return network;
 }
-sptr<Network> GetSptrNetworkData()
+sptr<NetStatsNetwork> GetSptrNetworkData()
 {
-    sptr<Network> network = new (std::nothrow) Network();
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     network->type_ = TEST_TYPE;
     network->startTime_ = TEST_START_TIME;
     network->endTime_ = TEST_END_TIME;
@@ -65,9 +65,9 @@ void NetStatsNetworkTest::TearDown() {}
 HWTEST_F(NetStatsNetworkTest, MarshallingAndUnmarshallingTest001, TestSize.Level1)
 {
     Parcel parcel;
-    Network info = GetNetworkData();
+    NetStatsNetwork info = GetNetworkData();
     EXPECT_TRUE(info.Marshalling(parcel));
-    sptr<Network> result = Network::Unmarshalling(parcel);
+    sptr<NetStatsNetwork> result = NetStatsNetwork::Unmarshalling(parcel);
     EXPECT_EQ(result->type_, info.type_);
     EXPECT_EQ(result->startTime_, info.startTime_);
     EXPECT_EQ(result->endTime_, info.endTime_);
@@ -77,9 +77,9 @@ HWTEST_F(NetStatsNetworkTest, MarshallingAndUnmarshallingTest001, TestSize.Level
 HWTEST_F(NetStatsNetworkTest, MarshallingAndUnmarshallingTest002, TestSize.Level1)
 {
     Parcel parcel;
-    sptr<Network> info = GetSptrNetworkData();
-    EXPECT_TRUE(Network::Marshalling(parcel, info));
-    sptr<Network> result = Network::Unmarshalling(parcel);
+    sptr<NetStatsNetwork> info = GetSptrNetworkData();
+    EXPECT_TRUE(NetStatsNetwork::Marshalling(parcel, info));
+    sptr<NetStatsNetwork> result = NetStatsNetwork::Unmarshalling(parcel);
     EXPECT_EQ(result->type_, info->type_);
     EXPECT_EQ(result->startTime_, info->startTime_);
     EXPECT_EQ(result->endTime_, info->endTime_);

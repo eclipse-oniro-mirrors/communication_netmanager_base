@@ -171,14 +171,31 @@ HWTEST_F(NetStatsDatabaseHelperTest, QueryDataDataHelperTest001, TestSize.Level1
     NETMGR_LOG_I("QueryDataDataHelperTest001");
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
     std::vector<NetStatsInfo> infos;
-    uint32_t simId = 2;
-    int32_t ret = helper->QueryData(UID_TABLE, simId, 0, LONG_MAX, infos);
+    std::string ident = "2";
+    int32_t ret = helper->QueryData(UID_TABLE, ident, 0, LONG_MAX, infos);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     infos.clear();
     uint64_t date = 15254400;
-    ret = helper->QueryData(UID_TABLE, simId, date, LONG_MAX, infos);
+    ret = helper->QueryData(UID_TABLE, ident, date, LONG_MAX, infos);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    ret = helper->QueryData("", simId, 0, LONG_MAX, infos);
+    ret = helper->QueryData("", ident, 0, LONG_MAX, infos);
+    EXPECT_EQ(ret, STATS_ERR_READ_DATA_FAIL);
+}
+
+HWTEST_F(NetStatsDatabaseHelperTest, QueryDataDataHelperTest002, TestSize.Level1)
+{
+    NETMGR_LOG_I("QueryDataDataHelperTest002");
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    std::vector<NetStatsInfo> infos;
+    uint32_t uid = 200022;
+    std::string ident = "2";
+    int32_t ret = helper->QueryData(UID_TABLE, uid, ident, 0, LONG_MAX, infos);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    infos.clear();
+    uint64_t date = 15254400;
+    ret = helper->QueryData(UID_TABLE, uid, ident, date, LONG_MAX, infos);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = helper->QueryData("", uid, ident, 0, LONG_MAX, infos);
     EXPECT_EQ(ret, STATS_ERR_READ_DATA_FAIL);
 }
 

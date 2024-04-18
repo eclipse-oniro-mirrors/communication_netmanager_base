@@ -486,6 +486,46 @@ int32_t NetConnServiceProxy::GetIfaceNameByType(NetBearType bearerType, const st
     return ret;
 }
 
+int32_t NetConnServiceProxy::GetIfaceNameIdentMaps(NetBearType bearerType,
+                              std::unordered_map<std::string, std::string> &ifaceNameIdentMaps)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        NETMGR_LOG_E("WriteInterfaceToken failed");
+        return NETMANAGER_ERR_WRITE_DESCRIPTOR_TOKEN_FAIL;
+    }
+    if (bearerType >= BEARER_DEFAULT) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    uint32_t netType = static_cast<NetBearType>(bearerType);
+    if (!data.WriteUint32(netType)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    MessageParcel reply;
+    int32_t ret = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_GET_IFACENAME_IDENT_MAPS),
+                                      data, reply);
+    if (ret != NETMANAGER_SUCCESS) {
+        return ret;
+    }
+    if (!reply.ReadInt32(ret)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    uint32_t size = 0;
+    if (!reply.ReadUint32(size)) {
+        return NETMANAGER_ERR_READ_REPLY_FAIL;
+    }
+    size = size > MAX_IFACE_NUM ? MAX_IFACE_NUM : size;
+    for (uint32_t i = 0; i < size; ++i) {
+        std::string key;
+        std::string value;
+        if (!reply.ReadString(key) || !reply.ReadString(value)) {
+            return NETMANAGER_ERR_READ_REPLY_FAIL;
+        }
+        ifaceNameIdentMaps.emplace(key, value);
+    }
+    return ret;
+}
+
 bool NetConnServiceProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(NetConnServiceProxy::GetDescriptor())) {

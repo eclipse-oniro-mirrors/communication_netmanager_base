@@ -174,21 +174,6 @@ int32_t NetsysControllerServiceImpl::SetTcpBufferSizes(const std::string &tcpBuf
     return netsysClient_.SetTcpBufferSizes(tcpBufferSizes);
 }
 
-int32_t NetsysControllerServiceImpl::SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId)
-{
-    NETMGR_LOG_I("Set interface simId map: interface[%{public}s], simId[%{public}d]", interfaceName.c_str(), simId);
-    if (mockNetsysClient_.CheckMockApi(MOCK_INTERFACESIMIDMAP_API)) {
-        return mockNetsysClient_.SetInterfaceSimIdMap(interfaceName, simId);
-    }
-    return netsysClient_.SetInterfaceSimIdMap(interfaceName, simId);
-}
-
-int32_t NetsysControllerServiceImpl::GetInterfaceSimIdMap(const std::string &interfaceName, uint32_t &simId)
-{
-    NETMGR_LOG_I("Get interface simId map: interface[%{public}s], simId[%{public}d]", interfaceName.c_str(), simId);
-    return netsysClient_.GetInterfaceSimIdMap(interfaceName, simId);
-}
-
 int32_t NetsysControllerServiceImpl::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                          int32_t prefixLength)
 {

@@ -135,6 +135,12 @@ public:
         return 0;
     }
 
+    int32_t GetIfaceNameIdentMaps(NetBearType bearerType,
+                                  std::unordered_map<std::string, std::string> &ifaceNameIdentMaps) override
+    {
+        return 0;
+    }
+
     int32_t GetSpecificNet(NetBearType bearerType, std::list<int32_t> &netIdList) override
     {
         return 0;

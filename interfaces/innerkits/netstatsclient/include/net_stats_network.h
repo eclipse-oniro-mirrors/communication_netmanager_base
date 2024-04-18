@@ -21,15 +21,15 @@
 namespace OHOS {
 namespace NetManagerStandard {
 #define NET_SYMBOL_VISIBLE_NETWORK __attribute__((visibility("default")))
-struct NET_SYMBOL_VISIBLE_NETWORK Network final : public Parcelable {
+struct NET_SYMBOL_VISIBLE_NETWORK NetStatsNetwork final : public Parcelable {
     uint32_t type_ = 0;
     uint64_t startTime_ = 0;
     uint64_t endTime_ = 0;
     uint32_t simId_ = UINT32_MAX;
 
     bool Marshalling(Parcel &parcel) const override;
-    static bool Marshalling(Parcel &parcel, const sptr<Network> &object);
-    static sptr<Network> Unmarshalling(Parcel &parcel);
+    static bool Marshalling(Parcel &parcel, const sptr<NetStatsNetwork> &object);
+    static sptr<NetStatsNetwork> Unmarshalling(Parcel &parcel);
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

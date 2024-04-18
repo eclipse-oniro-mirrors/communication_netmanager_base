@@ -17,7 +17,6 @@
 #define NETMANAGER_BASE_BPF_PATH_H
 namespace OHOS::NetManagerStandard {
 static constexpr const char *IFACE_STATS_MAP_PATH = "/sys/fs/bpf/netsys/maps/iface_stats_map";
-static constexpr const char *IFACE_SIM_MAP_PATH = "/sys/fs/bpf/netsys/maps/iface_simid_map";
 static constexpr const char *APP_UID_STATS_MAP_PATH = "/sys/fs/bpf/netsys/maps/app_uid_stats_map";
 static constexpr const char *APP_UID_IF_STATS_MAP_PATH = "/sys/fs/bpf/netsys/maps/app_uid_if_stats_map";
 static constexpr const char *APP_UID_SIM_STATS_MAP_PATH = "/sys/fs/bpf/netsys/maps/app_uid_sim_stats_map";

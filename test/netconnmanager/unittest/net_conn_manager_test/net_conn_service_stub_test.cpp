@@ -499,6 +499,25 @@ HWTEST_F(NetConnServiceStubTest, OnGetAddressByNameTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnGetIfaceNameIdentMapsTest001
+ * @tc.desc: Test NetConnServiceStub GetIfaceNameIdentMaps.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnServiceStubTest, OnGetIfaceNameIdentMapsTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetConnServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteUint32(0)) {
+        return NETMANAGER_ERR_WRITE_DATA_FAIL;
+    }
+    int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_GET_IFACENAME_IDENT_MAPS);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: OnBindSocketTest001
  * @tc.desc: Test NetConnServiceStub OnBindSocket.
  * @tc.type: FUNC

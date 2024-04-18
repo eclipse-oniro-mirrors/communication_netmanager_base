@@ -252,26 +252,6 @@ int32_t NetsysController::SetTcpBufferSizes(const std::string &tcpBufferSizes)
     return netsysService_->SetTcpBufferSizes(tcpBufferSizes);
 }
 
-int32_t NetsysController::SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId)
-{
-    NETMGR_LOG_D("Set interface simId map: interface[%{public}s], simId[%{public}d]", interfaceName.c_str(), simId);
-    if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("netsysService_ is null");
-        return NETSYS_NETSYSSERVICE_NULL;
-    }
-    return netsysService_->SetInterfaceSimIdMap(interfaceName, simId);
-}
-
-int32_t NetsysController::GetInterfaceSimIdMap(const std::string &interfaceName, uint32_t &simId)
-{
-    NETMGR_LOG_D("Get interface simId map: interface[%{public}s], simId[%{public}d]", interfaceName.c_str(), simId);
-    if (netsysService_ == nullptr) {
-        NETMGR_LOG_E("netsysService_ is null");
-        return NETSYS_NETSYSSERVICE_NULL;
-    }
-    return netsysService_->GetInterfaceSimIdMap(interfaceName, simId);
-}
-
 int32_t NetsysController::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                               int32_t prefixLength)
 {

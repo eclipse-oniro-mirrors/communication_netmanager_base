@@ -34,14 +34,13 @@ public:
     explicit GetTrafficStatsByUidNetworkContext(napi_env env, EventManager *manager);
 
     void SetUid(uint32_t uid);
-    void SetType(uint32_t typ);
-    void SetStart(uint32_t startTime);
-    void SetEnd(uint32_t endTime);
+    void SetNetBearType(uint32_t bearerType);
+    void SetStartTime(uint32_t startTime);
+    void SetEndTime(uint32_t endTime);
     void SetSimId(uint32_t simId);
-    uint32_t GetUid() const;
-    uint32_t GetType() const;
-    uint32_t GetStart() const;
-    uint32_t GetEnd() const;
+    uint32_t GetNetBearType() const;
+    uint32_t GetStartTime() const;
+    uint32_t GetEndTime() const;
     uint32_t GetSimId() const;
 
     std::vector<NetStatsInfoSequence> &GetNetStatsInfoSequence();
@@ -55,10 +54,10 @@ private:
 
 private:
     uint32_t uid_ = 0;
-    uint32_t type_ = 0;
-    uint32_t start_ = 0;
-    uint32_t end_ = 0;
-    uint32_t simId_;
+    uint32_t netBearType_ = 0;
+    uint32_t startTime_ = 0;
+    uint32_t endTime_ = 0;
+    uint32_t simId_ = UINT32_MAX;
 
     std::vector<NetStatsInfoSequence> stats_;
 };

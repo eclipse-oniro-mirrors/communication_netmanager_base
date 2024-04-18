@@ -39,7 +39,6 @@ constexpr const char *MOCK_SETINTERFACEUP_API = "SetInterfaceUp";
 constexpr const char *MOCK_INTERFACECLEARADDRS_API = "ClearInterfaceAddrs";
 constexpr const char *MOCK_INTERFACEGETMTU_API = "GetInterfaceMtu";
 constexpr const char *MOCK_INTERFACESETMTU_API = "SetInterfaceMtu";
-constexpr const char *MOCK_INTERFACESIMIDMAP_API = "SetInterfaceSimIdMap";
 constexpr const char *MOCK_INTERFACEADDADDRESS_API = "AddInterfaceAddress";
 constexpr const char *MOCK_INTERFACEDELADDRESS_API = "DelInterfaceAddress";
 constexpr const char *MOCK_SETRESOLVERCONFIG_API = "SetResolverConfig";
@@ -182,15 +181,6 @@ public:
      * @return Return the return value of the netsys interface call
      */
     int32_t SetInterfaceMtu(const std::string &ifName, int32_t mtu);
-
-    /**
-     * @brief Set the mapping relationship between the interface and the sim id
-     *
-     * @param interfaceName the name of interface
-     * @param simId the id of sim
-     * @return Return the return value of the netsys interface call
-     */
-    int32_t SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId);
 
     /**
      * @brief Add ip address

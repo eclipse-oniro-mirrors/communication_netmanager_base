@@ -32,8 +32,6 @@ namespace NetsysNative {
 namespace {
 using namespace testing::ext;
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
-static constexpr uint32_t TEST_SIM_ID = 2;
-static constexpr const char *ETH0 = "eth0";
 } // namespace
 static constexpr uint64_t TEST_COOKIE = 1;
 
@@ -108,16 +106,6 @@ public:
     }
 
     int32_t GetInterfaceMtu(const std::string &interfaceName) override
-    {
-        return 0;
-    }
-
-    int32_t SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId) override
-    {
-        return 0;
-    }
-
-    int32_t GetInterfaceSimIdMap(const std::string &interfaceName, uint32_t &simId) override
     {
         return 0;
     }
@@ -489,16 +477,6 @@ public:
     {
         return 0;
     }
-
-    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override
-    {
-        return 0;
-    }
-
-    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override
-    {
-        return 0;
-    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
@@ -724,50 +702,6 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetInterfaceMtu001, TestSize.Level1)
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdGetInterfaceMtu(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
-}
-
-HWTEST_F(NetsysNativeServiceStubTest, CmdSetInterfaceSimIdMap001, TestSize.Level1)
-{
-    std::string ifName = ETH0;
-    uint32_t simId = TEST_SIM_ID;
-
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(ifName)) {
-        return;
-    }
-    if (!data.WriteUint32(simId)) {
-        return;
-    }
-
-    MessageParcel reply;
-    int32_t ret = notifyStub_->CmdSetInterfaceSimIdMap(data, reply);
-    EXPECT_EQ(ret, ERR_NONE);
-}
-
-HWTEST_F(NetsysNativeServiceStubTest, CmdGetInterfaceSimIdMap001, TestSize.Level1)
-{
-    std::string ifName = ETH0;
-    uint32_t simId = UINT32_MAX;
-
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(ifName)) {
-        return;
-    }
-    if (!data.WriteUint32(simId)) {
-        return;
-    }
-
-    MessageParcel reply;
-    int32_t ret = notifyStub_->CmdSetInterfaceSimIdMap(data, reply);
-    EXPECT_EQ(ret, ERR_NONE);
-    EXPECT_TRUE(reply.ReadUint32(simId));
-    EXPECT_EQ(simId, TEST_SIM_ID);
 }
 
 HWTEST_F(NetsysNativeServiceStubTest, CmdRegisterNotifyCallback001, TestSize.Level1)
@@ -1797,28 +1731,5 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateNetworkSharingType001, TestSize.L
     int32_t ret = notifyStub_->CmdUpdateNetworkSharingType(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
-
-HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpv6PrivacyExtensions001, TestSize.Level1)
-{
-    std::string interface = "wlan0";
-
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(interface)) {
-        return;
-    }
-    if (!data.WriteUint32(0)) {
-        return;
-    }
-    MessageParcel reply;
-    int32_t ret = notifyStub_->CmdSetIpv6PrivacyExtensions(data, reply);
-    EXPECT_EQ(ret, ERR_NONE);
-
-    ret = notifyStub_->CmdSetIpv6Enable(data, reply);
-    EXPECT_EQ(ret, ERR_NONE);
-}
-
 } // namespace NetsysNative
 } // namespace OHOS

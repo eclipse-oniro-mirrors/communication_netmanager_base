@@ -38,8 +38,6 @@ using namespace NetManagerStandard;
 using namespace testing::ext;
 static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
-static constexpr uint32_t TEST_SIM_ID = 2;
-static constexpr const char *ETH0 = "eth0";
 #define DTEST_LOG std::cout << __func__ << ":" << __LINE__ << ":"
 } // namespace
 
@@ -193,23 +191,6 @@ HWTEST_F(NetsysNativeServiceTest, SetTcpBufferSizes001, TestSize.Level1)
     std::string tcpBufferSizes = "524288,1048576,2097152,262144,524288,1048576";
     int32_t ret = instance_->SetTcpBufferSizes(tcpBufferSizes);
     EXPECT_EQ(ret, 0);
-}
-
-HWTEST_F(NetsysNativeServiceTest, SetInterfaceSimIdMapTest001, TestSize.Level1)
-{
-    std::string ifName = ETH0;
-    uint32_t simId = TEST_SIM_ID;
-    int32_t ret = instance_->SetInterfaceSimIdMap(ifName, simId);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetsysNativeServiceTest, GetInterfaceSimIdMapTest001, TestSize.Level1)
-{
-    std::string ifName = ETH0;
-    uint32_t simId = UINT32_MAX;
-    int32_t ret = instance_->GetInterfaceSimIdMap(ifName, simId);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
-    EXPECT_EQ(simId, TEST_SIM_ID);
 }
 
 HWTEST_F(NetsysNativeServiceTest, GetInterfaceMtu001, TestSize.Level1)
@@ -785,16 +766,6 @@ HWTEST_F(NetsysNativeServiceTest, UpdateNetworkSharingTypeTest001, TestSize.Leve
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->UpdateNetworkSharingType(type, false);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetsysNativeServiceTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
-{
-    uint32_t on = 0;
-    std::string interface = "wlan0";
-    int32_t ret = instance_->SetIpv6PrivacyExtensions(interface, on);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-    ret = instance_->SetEnableIpv6(interface, on);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative

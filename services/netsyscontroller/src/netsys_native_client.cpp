@@ -415,28 +415,6 @@ int32_t NetsysNativeClient::SetTcpBufferSizes(const std::string &tcpBufferSizes)
     return proxy->SetTcpBufferSizes(tcpBufferSizes);
 }
 
-int32_t NetsysNativeClient::SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId)
-{
-    NETMGR_LOG_D("Set interface simId map: interface[%{public}s], simId[%{public}d]", interfaceName.c_str(), simId);
-    auto proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NETMANAGER_ERR_GET_PROXY_FAIL;
-    }
-    return proxy->SetInterfaceSimIdMap(interfaceName, simId);
-}
-
-int32_t NetsysNativeClient::GetInterfaceSimIdMap(const std::string &interfaceName, uint32_t &simId)
-{
-    NETMGR_LOG_D("Get interface simId map: interface[%{public}s], simId[%{public}d]", interfaceName.c_str(), simId);
-    auto proxy = GetProxy();
-    if (proxy == nullptr) {
-        NETMGR_LOG_E("proxy is nullptr");
-        return NETMANAGER_ERR_GET_PROXY_FAIL;
-    }
-    return proxy->GetInterfaceSimIdMap(interfaceName, simId);
-}
-
 int32_t NetsysNativeClient::AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr,
                                                 int32_t prefixLength)
 {

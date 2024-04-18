@@ -262,56 +262,6 @@ int32_t NetsysNativeServiceProxy::SetTcpBufferSizes(const std::string &tcpBuffer
     return reply.ReadInt32();
 }
 
-int32_t NetsysNativeServiceProxy::SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId)
-{
-    NETNATIVE_LOGI("Begin to SetInterfaceSimIdMap");
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(interfaceName)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteUint32(simId)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_INTERFACE_SIMID_MAP),
-                          data, reply, option);
-
-    return reply.ReadInt32();
-}
-
-int32_t NetsysNativeServiceProxy::GetInterfaceSimIdMap(const std::string &interfaceName, uint32_t &simId)
-{
-    NETNATIVE_LOGI("Begin to GetInterfaceSimIdMap");
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(interfaceName)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteUint32(simId)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    MessageParcel reply;
-    MessageOption option;
-    int32_t result = Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_INTERFACE_SIMID_MAP),
-                                           data, reply, option);
-    if (result != ERR_NONE) {
-        NETNATIVE_LOGE("proxy SendRequest failed. ret=%{public}d", result);
-        return result;
-    }
-    if (!reply.ReadUint32(simId)) {
-        NETNATIVE_LOGE("parcel read simId failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-    return result;
-}
-
 int32_t NetsysNativeServiceProxy::GetInterfaceMtu(const std::string &interfaceName)
 {
     NETNATIVE_LOGI("Begin to GetInterfaceMtu");

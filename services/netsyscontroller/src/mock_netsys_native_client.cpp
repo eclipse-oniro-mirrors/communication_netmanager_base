@@ -105,7 +105,6 @@ void MockNetsysNativeClient::RegisterMockApi()
     mockApi_.insert(MOCK_ENABLEVIRTUALNETIFACECARD_API);
     mockApi_.insert(MOCK_SETIPADDRESS_API);
     mockApi_.insert(MOCK_SETBLOCKING_API);
-    mockApi_.insert(MOCK_INTERFACESIMIDMAP_API);
 }
 
 bool MockNetsysNativeClient::CheckMockApi(const std::string &api)
@@ -181,12 +180,6 @@ int32_t MockNetsysNativeClient::GetInterfaceMtu(const std::string &ifName)
 int32_t MockNetsysNativeClient::SetInterfaceMtu(const std::string &ifName, int32_t mtu)
 {
     NETMGR_LOG_I("Set mtu: ifName[%{public}s], mtu[%{public}d]", ifName.c_str(), mtu);
-    return 0;
-}
-
-int32_t MockNetsysNativeClient::SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId)
-{
-    NETMGR_LOG_I("Set interface simId map: ifName[%{public}s], simId[%{public}d]", interfaceName.c_str(), simId);
     return 0;
 }
 

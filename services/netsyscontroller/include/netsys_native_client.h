@@ -208,24 +208,6 @@ public:
     int32_t SetTcpBufferSizes(const std::string &tcpBufferSizes);
 
     /**
-     * Set the mapping relationship between the interface and the sim id
-     *
-     * @param interfaceName the name of interface
-     * @param simId the id of sim
-     * @return Return the return value of the netsys interface call
-     */
-    int32_t SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId);
-
-    /**
-     * Get the mapping relationship between the interface and the sim id
-     *
-     * @param interfaceName the name of interface
-     * @param simId the id of sim
-     * @return Return the return value of the netsys interface call
-     */
-    int32_t GetInterfaceSimIdMap(const std::string &interfaceName, uint32_t &simId);
-
-    /**
      * Add ip address
      *
      * @param ifName Network port device name

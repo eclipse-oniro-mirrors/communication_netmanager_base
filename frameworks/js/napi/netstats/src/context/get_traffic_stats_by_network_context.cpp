@@ -27,6 +27,7 @@ constexpr const char *START_TIME = "startTime";
 constexpr const char *END_TIME = "endTime";
 constexpr const char *SIM_ID = "simId";
 } // namespace
+
 GetTrafficStatsByNetworkContext::GetTrafficStatsByNetworkContext(napi_env env, EventManager *manager)
     : BaseContext(env, manager) {}
 
@@ -41,9 +42,9 @@ void GetTrafficStatsByNetworkContext::ParseParams(napi_value *params, size_t par
     if (!CheckNetworkParams(params, paramsCount)) {
         return;
     }
-    type_ = NapiUtils::GetUint32Property(GetEnv(), params[ARG_INDEX_0], NET_BEAR_TYPE);
-    start_ = NapiUtils::GetUint32Property(GetEnv(), params[ARG_INDEX_0], START_TIME);
-    end_ = NapiUtils::GetUint32Property(GetEnv(), params[ARG_INDEX_0], END_TIME);
+    netBearType_ = NapiUtils::GetUint32Property(GetEnv(), params[ARG_INDEX_0], NET_BEAR_TYPE);
+    startTime_ = NapiUtils::GetUint32Property(GetEnv(), params[ARG_INDEX_0], START_TIME);
+    endTime_ = NapiUtils::GetUint32Property(GetEnv(), params[ARG_INDEX_0], END_TIME);
     bool hasSimId = NapiUtils::HasNamedProperty(GetEnv(), params[ARG_INDEX_0], SIM_ID);
     if (hasSimId) {
         simId_ = NapiUtils::GetUint32Property(GetEnv(), params[ARG_INDEX_0], SIM_ID);
@@ -60,39 +61,32 @@ void GetTrafficStatsByNetworkContext::ParseParams(napi_value *params, size_t par
 bool GetTrafficStatsByNetworkContext::CheckNetworkParams(napi_value *params, size_t paramsCount)
 {
     bool hasNetBearType = NapiUtils::HasNamedProperty(GetEnv(), params[ARG_INDEX_0], NET_BEAR_TYPE);
-    bool hasStart = NapiUtils::HasNamedProperty(GetEnv(), params[ARG_INDEX_0], START_TIME);
-    bool hasEnd = NapiUtils::HasNamedProperty(GetEnv(), params[ARG_INDEX_0], END_TIME);
+    bool hasStartTime = NapiUtils::HasNamedProperty(GetEnv(), params[ARG_INDEX_0], START_TIME);
+    bool hasEndTime = NapiUtils::HasNamedProperty(GetEnv(), params[ARG_INDEX_0], END_TIME);
     bool hasSimId = NapiUtils::HasNamedProperty(GetEnv(), params[ARG_INDEX_0], SIM_ID);
-    if (!(hasNetBearType && hasStart && hasEnd)) {
-        NETMANAGER_BASE_LOGE("param error hasNetBearType=%{public}d, hasStart=%{public}d, hasEnd=%{public}d",
-                             hasNetBearType, hasStart, hasEnd);
+    if (!(hasNetBearType && hasStartTime && hasEndTime)) {
+        NETMANAGER_BASE_LOGE("param error hasNetBearType=%{public}d, hasStartTime=%{public}d, hasEndTime=%{public}d",
+                             hasNetBearType, hasStartTime, hasEndTime);
         SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
         SetNeedThrowException(true);
         return false;
     }
-    bool checkNetBearType = NapiUtils::GetValueType(GetEnv(),
-                                                    NapiUtils::GetNamedProperty(GetEnv(),
-                                                                                params[ARG_INDEX_0],
-                                                                                NET_BEAR_TYPE)) == napi_number;
-    bool checkStart = NapiUtils::GetValueType(GetEnv(),
-                                              NapiUtils::GetNamedProperty(GetEnv(),
-                                                                          params[ARG_INDEX_0],
-                                                                          START_TIME)) == napi_number;
-    bool checkEnd = NapiUtils::GetValueType(GetEnv(),
-                                            NapiUtils::GetNamedProperty(GetEnv(),
-                                                                        params[ARG_INDEX_0],
-                                                                        END_TIME)) == napi_number;
+    bool checkNetBearType = NapiUtils::GetValueType(
+        GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0], NET_BEAR_TYPE)) == napi_number;
+    bool checkStartTime = NapiUtils::GetValueType(
+        GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0], START_TIME)) == napi_number;
+    bool checkEndTime = NapiUtils::GetValueType(
+        GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0], END_TIME)) == napi_number;
     bool checkSimId = true;
     if (hasSimId) {
-        checkSimId = NapiUtils::GetValueType(GetEnv(),
-                                             NapiUtils::GetNamedProperty(GetEnv(),
-                                                                         params[ARG_INDEX_0],
-                                                                         SIM_ID)) == napi_number;
+        checkSimId = NapiUtils::GetValueType(
+            GetEnv(), NapiUtils::GetNamedProperty(GetEnv(), params[ARG_INDEX_0], SIM_ID)) == napi_number;
     }
-    if (!(checkNetBearType && checkStart && checkEnd && checkSimId)) {
+    if (!(checkNetBearType && checkStartTime && checkEndTime && checkSimId)) {
         NETMANAGER_BASE_LOGE(
-            "param check checkType=%{public}d, checkStart=%{public}d, checkEnd=%{public}d, checkSimId=%{public}d",
-            checkNetBearType, checkStart, checkEnd, checkSimId);
+            "param check checkType=%{public}d, checkStartTime=%{public}d, checkEndTime=%{public}d, "
+            "checkSimId=%{public}d",
+            checkNetBearType, checkStartTime, checkEndTime, checkSimId);
         SetErrorCode(NETMANAGER_ERR_PARAMETER_ERROR);
         SetNeedThrowException(true);
         return false;
@@ -113,19 +107,19 @@ bool GetTrafficStatsByNetworkContext::CheckParamsType(napi_value *params, size_t
     return false;
 }
 
-void GetTrafficStatsByNetworkContext::SetType(uint32_t typ)
+void GetTrafficStatsByNetworkContext::SetNetBearType(uint32_t bearerType)
 {
-    type_ = typ;
+    netBearType_ = bearerType;
 }
 
-void GetTrafficStatsByNetworkContext::SetStart(uint32_t startTime)
+void GetTrafficStatsByNetworkContext::SetStartTime(uint32_t startTime)
 {
-    start_ = startTime;
+    startTime_ = startTime;
 }
 
-void GetTrafficStatsByNetworkContext::SetEnd(uint32_t endTime)
+void GetTrafficStatsByNetworkContext::SetEndTime(uint32_t endTime)
 {
-    end_ = endTime;
+    endTime_ = endTime;
 }
 
 void GetTrafficStatsByNetworkContext::SetSimId(uint32_t simId)
@@ -133,19 +127,19 @@ void GetTrafficStatsByNetworkContext::SetSimId(uint32_t simId)
     simId_ = simId;
 }
 
-uint32_t GetTrafficStatsByNetworkContext::GetType() const
+uint32_t GetTrafficStatsByNetworkContext::GetNetBearType() const
 {
-    return type_;
+    return netBearType_;
 }
 
-uint32_t GetTrafficStatsByNetworkContext::GetStart() const
+uint32_t GetTrafficStatsByNetworkContext::GetStartTime() const
 {
-    return start_;
+    return startTime_;
 }
 
-uint32_t GetTrafficStatsByNetworkContext::GetEnd() const
+uint32_t GetTrafficStatsByNetworkContext::GetEndTime() const
 {
-    return end_;
+    return endTime_;
 }
 
 uint32_t GetTrafficStatsByNetworkContext::GetSimId() const
@@ -153,7 +147,7 @@ uint32_t GetTrafficStatsByNetworkContext::GetSimId() const
     return simId_;
 }
 
-std::vector<NetStatsInfo> &GetTrafficStatsByNetworkContext::GetNetStatsInfo()
+std::unordered_map<uint32_t, NetStatsInfo> &GetTrafficStatsByNetworkContext::GetNetStatsInfo()
 {
     return stats_;
 }

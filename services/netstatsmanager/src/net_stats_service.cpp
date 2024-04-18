@@ -392,7 +392,8 @@ int32_t NetStatsService::GetAllContainerStatsInfo(std::vector<NetStatsInfo> &inf
     return NetsysController::GetInstance().GetAllContainerStatsInfo(infos);
 }
 
-int32_t NetStatsService::GetTrafficStatsByNetwork(std::vector<NetStatsInfo> &infos, const sptr<Network> &network)
+int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                                  const sptr<NetStatsNetwork> &network)
 {
     NETMGR_LOG_D("Enter GetTrafficStatsByUidNetwork.");
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByNetwork start");
@@ -404,11 +405,12 @@ int32_t NetStatsService::GetTrafficStatsByNetwork(std::vector<NetStatsInfo> &inf
     if (network->type_ != 0) {
         simId = UINT32_MAX;
     }
+    std::string ident = std::to_string(simId);
     uint32_t start = network->startTime_;
     uint32_t end = network->endTime_;
     std::vector<NetStatsInfo> allInfo;
     auto history = std::make_unique<NetStatsHistory>();
-    ret = history->GetHistoryBySimId(allInfo, simId, start, end);
+    ret = history->GetHistoryByIdent(allInfo, ident, start, end);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("get history by simId failed, err code=%{public}d", ret);
         return ret;
@@ -417,27 +419,26 @@ int32_t NetStatsService::GetTrafficStatsByNetwork(std::vector<NetStatsInfo> &inf
     netStatsCached_->GetUidPushStatsCached(allInfo);
     netStatsCached_->GetUidStatsCached(allInfo);
     netStatsCached_->GetUidSimStatsCached(allInfo);
-    std::for_each(allInfo.begin(), allInfo.end(), [&infos, &simId, &start, &end](const NetStatsInfo &info) {
-        if (simId != info.simId_) {
+    std::for_each(allInfo.begin(), allInfo.end(), [&infos, &ident, &start, &end](const NetStatsInfo &info) {
+        if (ident != info.ident_) {
             return;
         }
         if (start > info.date_ || end < info.date_) {
             return;
         }
-        for (auto &item: infos) {
-            if (item.uid_ == info.uid_) {
-                item += info;
-                return;
-            }
+        auto item = infos.find(info.uid_);
+        if (item == infos.end()) {
+            infos.emplace(info.uid_, info);
+        } else {
+            item->second += info;
         }
-        infos.push_back(info);
     });
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByNetwork end");
     return NETMANAGER_SUCCESS;
 }
 
 int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
-                                                     const sptr<Network> &network)
+                                                     const sptr<NetStatsNetwork> &network)
 {
     NETMGR_LOG_D("Enter GetTrafficStatsByUidNetwork.");
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByUidNetwork start");
@@ -447,11 +448,15 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
     }
     int32_t ret;
     uint32_t simId = network->simId_;
+    if (network->type_ != 0) {
+        simId = UINT32_MAX;
+    }
+    std::string ident = std::to_string(simId);
     uint32_t start = network->startTime_;
     uint32_t end = network->endTime_;
     std::vector<NetStatsInfo> allInfo;
     auto history = std::make_unique<NetStatsHistory>();
-    ret = history->GetHistoryBySimId(allInfo, simId, start, end);
+    ret = history->GetHistory(allInfo, uid, ident, start, end);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("get history by simId failed, err code=%{public}d", ret);
         return ret;
@@ -460,21 +465,21 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
     netStatsCached_->GetUidPushStatsCached(allInfo);
     netStatsCached_->GetUidStatsCached(allInfo);
     netStatsCached_->GetUidSimStatsCached(allInfo);
-    std::for_each(allInfo.begin(), allInfo.end(), [&infos, &uid, &simId, &start, &end](const NetStatsInfo &info) {
-        if (simId != info.simId_) {
+    std::for_each(allInfo.begin(), allInfo.end(), [&infos, &uid, &ident, &start, &end](const NetStatsInfo &info) {
+        if (uid != info.uid_) {
+            return;
+        }
+        if (ident != info.ident_) {
             return;
         }
         if (start > info.date_ || end < info.date_) {
-            return;
-        }
-        if (uid != info.uid_) {
             return;
         }
         NetStatsInfoSequence tmp;
         tmp.startTime_ = info.date_;
         tmp.endTime_ = info.date_;
         tmp.info_ = info;
-        infos.push_back(tmp);
+        infos.push_back(std::move(tmp));
     });
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByUidNetwork end");
     return NETMANAGER_SUCCESS;

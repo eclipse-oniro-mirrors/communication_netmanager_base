@@ -182,6 +182,7 @@ private:
 
     CachedInfo stats_;
     ffrt::mutex lock_;
+    ffrt::mutex pushLock_;
     bool isForce_ = false;
     std::unique_ptr<FfrtTimer> cacheTimer_ = nullptr;
     std::unique_ptr<FfrtTimer> writeTimer_ = nullptr;
@@ -192,6 +193,11 @@ private:
     std::vector<NetStatsInfo> lastUidStatsInfo_;
     std::vector<NetStatsInfo> lastUidSimStatsInfo_;
     std::map<std::string, NetStatsInfo> lastIfaceStatsMap_;
+
+    std::atomic<bool> isIfaceNameIdentMapLoaded_ = false;
+    std::unordered_map<std::string, std::string> ifaceNameIdentMap_;
+
+    void LoadIfaceNameIdentMaps();
 
     void CacheStats();
     void CacheUidStats();

@@ -322,6 +322,17 @@ int32_t NetConnClient::GetAddressByName(const std::string &host, int32_t netId, 
     return proxy->GetAddressByName(host, netId, addr);
 }
 
+int32_t NetConnClient::GetIfaceNameIdentMaps(NetBearType bearerType,
+                                             std::unordered_map<std::string, std::string> &ifaceNameIdentMaps)
+{
+    sptr<INetConnService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetIfaceNameIdentMaps(bearerType, ifaceNameIdentMaps);
+}
+
 int32_t NetConnClient::BindSocket(int32_t socketFd, int32_t netId)
 {
     if (netId < MIN_VALID_NETID) {

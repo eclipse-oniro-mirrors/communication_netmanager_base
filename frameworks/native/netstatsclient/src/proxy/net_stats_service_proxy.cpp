@@ -434,7 +434,8 @@ int32_t NetStatsServiceProxy::GetAllContainerStatsInfo(std::vector<NetStatsInfo>
     return result;
 }
 
-int32_t NetStatsServiceProxy::GetTrafficStatsByNetwork(std::vector<NetStatsInfo> &infos, const sptr<Network> &network)
+int32_t NetStatsServiceProxy::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                                       const sptr<NetStatsNetwork> &network)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -445,7 +446,7 @@ int32_t NetStatsServiceProxy::GetTrafficStatsByNetwork(std::vector<NetStatsInfo>
         NETMGR_LOG_E("proxy Marshalling failed");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
-    NETMGR_LOG_D("proxy sptr<Network> Marshalling success");
+    NETMGR_LOG_D("proxy sptr<NetStatsNetwork> Marshalling success");
     MessageParcel reply;
     int32_t result =
         SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK), data, reply);
@@ -461,7 +462,7 @@ int32_t NetStatsServiceProxy::GetTrafficStatsByNetwork(std::vector<NetStatsInfo>
 }
 
 int32_t NetStatsServiceProxy::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
-                                                          const sptr<Network> &network)
+                                                          const sptr<NetStatsNetwork> &network)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -473,10 +474,10 @@ int32_t NetStatsServiceProxy::GetTrafficStatsByUidNetwork(std::vector<NetStatsIn
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
     if (!network->Marshalling(data)) {
-        NETMGR_LOG_E("sptr<Network> Marshalling failed");
+        NETMGR_LOG_E("sptr<NetStatsNetwork> Marshalling failed");
         return NETMANAGER_ERR_WRITE_DATA_FAIL;
     }
-    NETMGR_LOG_D("proxy sptr<Network> Marshalling success");
+    NETMGR_LOG_D("proxy sptr<NetStatsNetwork> Marshalling success");
     MessageParcel reply;
     int32_t ret =
         SendRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK), data, reply);

@@ -37,8 +37,6 @@ using namespace testing::ext;
 static constexpr uint64_t TEST_COOKIE = 1;
 static constexpr uint32_t TEST_STATS_TYPE1 = 0;
 static constexpr uint32_t TEST_STATS_TYPE2 = 2;
-static constexpr uint32_t TEST_SIM_ID = 2;
-static constexpr const char *ETH0 = "eth0";
 
 class NetsysControllerServiceImplTest : public testing::Test {
 public:
@@ -71,7 +69,6 @@ void NetsysControllerServiceImplTest::SetUpTestCase()
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_SETINTERFACEUP_API);
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_INTERFACEGETMTU_API);
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_INTERFACESETMTU_API);
-        instance_->mockNetsysClient_.mockApi_.insert(MOCK_INTERFACESIMIDMAP_API);
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_INTERFACEADDADDRESS_API);
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_INTERFACEDELADDRESS_API);
         instance_->mockNetsysClient_.mockApi_.insert(MOCK_SETRESOLVERCONFIG_API);
@@ -156,9 +153,6 @@ HWTEST_F(NetsysControllerServiceImplTest, NoRegisterMockApi, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->SetInterfaceMtu(testName, 1);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = instance_->SetInterfaceSimIdMap(testName, 1);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->AddInterfaceAddress(testName, testName, 1);
@@ -303,21 +297,6 @@ HWTEST_F(NetsysControllerServiceImplTest, ServiceImplTest002, TestSize.Level1)
 
     ret = instance_->DelStaticArp(ipAddr, macAddr, ifName);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetsysControllerServiceImplTest, ServiceImplTest003, TestSize.Level1)
-{
-    std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo = {};
-    auto ret = instance_->GetAllContainerStatsInfo(statsInfo);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = instance_->SetInterfaceSimIdMap(ETH0, TEST_SIM_ID);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    uint32_t simId = UINT32_MAX;
-    ret = instance_->GetInterfaceSimIdMap(ETH0, simId);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-    EXPECT_EQ(simId, TEST_SIM_ID);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest001, TestSize.Level1)
@@ -617,6 +596,13 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysControllerServiceImplTest, GetAllContainerStatsInfo001, TestSize.Level1)
+{
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo = {};
+    auto ret = instance_->GetAllContainerStatsInfo(statsInfo);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest006, TestSize.Level1)
 {
     instance_->mockNetsysClient_.mockApi_.clear();
@@ -736,14 +722,6 @@ HWTEST_F(NetsysControllerServiceImplTest, UpdateNetworkSharingTypeTest001, TestS
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
-HWTEST_F(NetsysControllerServiceImplTest, SetInterfaceSimIdMap001, TestSize.Level1)
-{
-    std::string ifName = "eth0";
-    uint32_t simId = 1;
-    auto ret = instance_->SetInterfaceSimIdMap(ifName, simId);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
 HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest009, TestSize.Level1)
 {
     uint32_t timeStep = 0;
@@ -760,24 +738,6 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
 
     ret = instance_->UnregisterDnsHealthCallback(healthCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
-}
-
-HWTEST_F(NetsysControllerServiceImplTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
-{
-    std::string interface = "wlan0";
-    uint32_t on = 1;
-    int32_t ret = instance_->SetIpv6PrivacyExtensions(interface, on);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-
-    ret = instance_->SetEnableIpv6(interface, on);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetsysControllerServiceImplTest, GetAllContainerStatsInfo001, TestSize.Level1)
-{
-    std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo = {};
-    auto ret = instance_->GetAllContainerStatsInfo(statsInfo);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

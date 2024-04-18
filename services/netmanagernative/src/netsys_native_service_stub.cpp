@@ -44,7 +44,6 @@ constexpr uint32_t MAX_ROUTE_TABLE_SIZE = 128;
 NetsysNativeServiceStub::NetsysNativeServiceStub()
 {
     InitNetInfoOpToInterfaceMap();
-    InitNetInfoOpToInterfaceMapPart2();
     InitBandwidthOpToInterfaceMap();
     InitFirewallOpToInterfaceMap();
     InitOpToInterfaceMapExt();
@@ -105,14 +104,6 @@ void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdSetIpv6PrivacyExtensions;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_ENABLE_IPV6)] =
         &NetsysNativeServiceStub::CmdSetIpv6Enable;
-}
-
-void NetsysNativeServiceStub::InitNetInfoOpToInterfaceMapPart2()
-{
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_INTERFACE_SIMID_MAP)] =
-        &NetsysNativeServiceStub::CmdSetInterfaceSimIdMap;
-    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_INTERFACE_SIMID_MAP)] =
-        &NetsysNativeServiceStub::CmdGetInterfaceSimIdMap;
 }
 
 void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
@@ -495,30 +486,6 @@ int32_t NetsysNativeServiceStub::CmdSetTcpBufferSizes(MessageParcel &data, Messa
     reply.WriteInt32(result);
     NETNATIVE_LOG_D("SetTcpBufferSizes has recved result %{public}d", result);
 
-    return ERR_NONE;
-}
-
-int32_t NetsysNativeServiceStub::CmdSetInterfaceSimIdMap(MessageParcel &data, MessageParcel &reply)
-{
-    std::string interfaceName = data.ReadString();
-    uint32_t simId = data.ReadUint32();
-    int32_t ret = SetInterfaceSimIdMap(interfaceName, simId);
-    reply.WriteInt32(ret);
-    NETNATIVE_LOG_D("SetInterfaceSimIdMap has recved result %{public}d", ret);
-    return ERR_NONE;
-}
-
-int32_t NetsysNativeServiceStub::CmdGetInterfaceSimIdMap(MessageParcel &data, MessageParcel &reply)
-{
-    std::string interfaceName = data.ReadString();
-    uint32_t simId = data.ReadUint32();
-    int32_t ret = GetInterfaceSimIdMap(interfaceName, simId);
-    NETNATIVE_LOG_D("GetInterfaceSimIdMap has recved result %{public}d, ifaceName=%{public}s, simId=%{public}d",
-                    ret, interfaceName.c_str(), simId);
-    if (!reply.WriteInt32(simId)) {
-        NETNATIVE_LOGE("parcel write simId failed");
-        return ERR_FLATTEN_OBJECT;
-    }
     return ERR_NONE;
 }
 

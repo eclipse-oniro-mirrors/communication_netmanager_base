@@ -20,7 +20,7 @@
 namespace OHOS {
 namespace NetManagerStandard {
 
-bool Network::Marshalling(Parcel &parcel) const
+bool NetStatsNetwork::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteUint32(type_)) {
         return false;
@@ -37,10 +37,10 @@ bool Network::Marshalling(Parcel &parcel) const
     return true;
 }
 
-bool Network::Marshalling(Parcel &parcel, const sptr<Network> &object)
+bool NetStatsNetwork::Marshalling(Parcel &parcel, const sptr<NetStatsNetwork> &object)
 {
     if (object == nullptr) {
-        NETMGR_LOG_E("Network object ptr is nullptr");
+        NETMGR_LOG_E("NetStatsNetwork object ptr is nullptr");
         return false;
     }
     if (!parcel.WriteUint32(object->type_)) {
@@ -58,11 +58,11 @@ bool Network::Marshalling(Parcel &parcel, const sptr<Network> &object)
     return true;
 }
 
-sptr<Network> Network::Unmarshalling(Parcel &parcel)
+sptr<NetStatsNetwork> NetStatsNetwork::Unmarshalling(Parcel &parcel)
 {
-    sptr<Network> ptr = new (std::nothrow) Network();
+    sptr<NetStatsNetwork> ptr = new (std::nothrow) NetStatsNetwork();
     if (ptr == nullptr) {
-        NETMGR_LOG_E("make_unique<Network>() failed");
+        NETMGR_LOG_E("make_unique<NetStatsNetwork>() failed");
         return nullptr;
     }
     if (!parcel.ReadUint32(ptr->type_)) {

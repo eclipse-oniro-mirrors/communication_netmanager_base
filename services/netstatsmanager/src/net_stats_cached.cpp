@@ -83,7 +83,7 @@ void NetStatsCached::GetIfaceStatsCached(std::vector<NetStatsInfo> &ifaceStatsIn
 
 void NetStatsCached::SetAppStats(const PushStatsInfo &info)
 {
-    std::lock_guard<ffrt::mutex> lock(lock_);
+    std::lock_guard<ffrt::mutex> lock(pushLock_);
     NetStatsInfo stats;
     stats.uid_ = info.uid_;
     stats.iface_ = info.iface_;
@@ -92,11 +92,12 @@ void NetStatsCached::SetAppStats(const PushStatsInfo &info)
     stats.txBytes_ = info.txBytes_;
     stats.rxPackets_ = 1;
     stats.txPackets_ = 1;
-    stats.simId_ = UINT32_MAX;
+    stats.ident_ = "";
     if (info.netBearType_ == 0) {
-        NetsysController::GetInstance().GetInterfaceSimIdMap(info.iface_, stats.simId_);
+        LoadIfaceNameIdentMaps();
+        stats.ident_ = ifaceNameIdentMap_[info.iface_];
     }
-    uidPushStatsInfo_.push_back(stats);
+    uidPushStatsInfo_.push_back(std::move(stats));
     NETMGR_LOG_D("SetAppStats info=%{public}s", stats.UidData().c_str());
 }
 
@@ -141,10 +142,13 @@ void NetStatsCached::CacheUidStats()
         return;
     }
 
+    LoadIfaceNameIdentMaps();
+
     std::for_each(statsInfos.begin(), statsInfos.end(), [this](NetStatsInfo &info) {
         if (info.iface_ == IFACE_LO) {
             return;
         }
+        info.ident_ = ifaceNameIdentMap_[info.iface_];
         std::for_each(uidPushStatsInfo_.begin(), uidPushStatsInfo_.end(), [&info](const NetStatsInfo &pushInfo) {
             if (pushInfo.Equals(info)) {
                 info += pushInfo;
@@ -173,10 +177,13 @@ void NetStatsCached::CacheUidSimStats()
         return;
     }
 
+    LoadIfaceNameIdentMaps();
+
     std::for_each(statsInfos.begin(), statsInfos.end(), [this](NetStatsInfo &info) {
         if (info.iface_ == IFACE_LO) {
             return;
         }
+        info.ident_ = ifaceNameIdentMap_[info.iface_];
         auto findRet = std::find_if(lastUidSimStatsInfo_.begin(), lastUidSimStatsInfo_.end(),
                                     [this, &info](const NetStatsInfo &lastInfo) { return info.Equals(lastInfo); });
         if (findRet == lastUidSimStatsInfo_.end()) {
@@ -265,6 +272,18 @@ void NetStatsCached::WriteUidSimStats()
     handler->WriteStatsData(stats_.GetUidSimStatsInfo(), NetStatsDatabaseDefines::UID_SIM_TABLE);
     handler->DeleteByDate(NetStatsDatabaseDefines::UID_SIM_TABLE, 0, CommonUtils::GetCurrentSecond() - dateCycle_);
     stats_.ResetUidSimStats();
+}
+
+void NetStatsCached::LoadIfaceNameIdentMaps()
+{
+    if (isIfaceNameIdentMapLoaded_.load()) {
+        NETMGR_LOG_D("ifaceNameIdentMaps has been loaded from netConnClient.");
+        return;
+    }
+    int32_t ret = NetConnClient::GetInstance().GetIfaceNameIdentMaps(NetBearType::BEARER_CELLULAR, ifaceNameIdentMap_);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("GetIfaceNameIdentMaps error. ret=%{public}d", ret);
+    }
 }
 
 void NetStatsCached::SetCycleThreshold(uint32_t threshold)

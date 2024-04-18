@@ -446,11 +446,11 @@ int32_t NetStatsServiceStub::OnGetTrafficStatsByNetwork(MessageParcel &data, Mes
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
-    sptr<Network> network = Network::Unmarshalling(data);
+    sptr<NetStatsNetwork> network = NetStatsNetwork::Unmarshalling(data);
     if (network == nullptr) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
-    std::vector<NetStatsInfo> infos;
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
     int32_t result = GetTrafficStatsByNetwork(infos, network);
     if (!reply.WriteInt32(result)) {
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
@@ -473,7 +473,7 @@ int32_t NetStatsServiceStub::OnGetTrafficStatsByUidNetwork(MessageParcel &data, 
     if (!data.ReadUint32(uid)) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }
-    sptr<Network> network = Network::Unmarshalling(data);
+    sptr<NetStatsNetwork> network = NetStatsNetwork::Unmarshalling(data);
     if (network == nullptr) {
         return NETMANAGER_ERR_READ_DATA_FAIL;
     }

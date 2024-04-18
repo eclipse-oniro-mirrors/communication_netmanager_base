@@ -139,7 +139,7 @@ bool StatisticsExec::ExecGetSockfdTxBytes(GetSockfdTxBytesContext *context)
 
 bool StatisticsExec::ExecGetTrafficStatsByNetwork(GetTrafficStatsByNetworkContext *context)
 {
-    sptr<Network> network = new (std::nothrow) Network();
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     if (network == nullptr) {
         NETMANAGER_BASE_LOGE("the network of param to get traffic stats is null");
         return false;
@@ -155,7 +155,7 @@ bool StatisticsExec::ExecGetTrafficStatsByNetwork(GetTrafficStatsByNetworkContex
 
 bool StatisticsExec::ExecGetTrafficStatsByUidNetwork(GetTrafficStatsByUidNetworkContext *context)
 {
-    sptr<Network> network = new (std::nothrow) Network();
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     if (network == nullptr) {
         NETMANAGER_BASE_LOGE("the network of param to get traffic stats is null");
         return false;
@@ -236,11 +236,11 @@ napi_value StatisticsExec::GetGetTrafficStatsByNetworkCallback(GetTrafficStatsBy
     auto data = context->GetNetStatsInfo();
     for (const auto &item : data) {
         napi_value tmp = NapiUtils::CreateObject(context->GetEnv());
-        NapiUtils::SetInt64Property(context->GetEnv(), tmp, RX_BYTES, item.rxBytes_);
-        NapiUtils::SetInt64Property(context->GetEnv(), tmp, TX_BYTES, item.txBytes_);
-        NapiUtils::SetInt64Property(context->GetEnv(), tmp, RX_PACKETS, item.rxPackets_);
-        NapiUtils::SetInt64Property(context->GetEnv(), tmp, TX_PACKETS, item.txPackets_);
-        std::string key = std::to_string(item.uid_);
+        NapiUtils::SetInt64Property(context->GetEnv(), tmp, RX_BYTES, item.second.rxBytes_);
+        NapiUtils::SetInt64Property(context->GetEnv(), tmp, TX_BYTES, item.second.txBytes_);
+        NapiUtils::SetInt64Property(context->GetEnv(), tmp, RX_PACKETS, item.second.rxPackets_);
+        NapiUtils::SetInt64Property(context->GetEnv(), tmp, TX_PACKETS, item.second.txPackets_);
+        std::string key = std::to_string(item.first);
         NapiUtils::SetNamedProperty(context->GetEnv(), infos, key, tmp);
     }
     return infos;

@@ -61,8 +61,6 @@ private:
     int32_t CmdSetInterfaceMtu(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetInterfaceMtu(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetTcpBufferSizes(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdSetInterfaceSimIdMap(MessageParcel &data, MessageParcel &reply);
-    int32_t CmdGetInterfaceSimIdMap(MessageParcel &data, MessageParcel &reply);
 
     int32_t CmdRegisterNotifyCallback(MessageParcel &data, MessageParcel &reply);
     int32_t CmdUnRegisterNotifyCallback(MessageParcel &data, MessageParcel &reply);

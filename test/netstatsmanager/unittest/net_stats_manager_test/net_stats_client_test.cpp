@@ -327,8 +327,8 @@ HWTEST_F(NetStatsClientTest, GetTrafficStatsByNetwork001, TestSize.Level1)
         new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
     sptr<IRemoteObject> remote = nullptr;
     deathRecipient->OnRemoteDied(remote);
-    std::vector<NetStatsInfo> infos;
-    sptr<Network> network;
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
+    sptr<NetStatsNetwork> network;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetTrafficStatsByNetwork(infos, network);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
@@ -342,7 +342,7 @@ HWTEST_F(NetStatsClientTest, GetTrafficStatsByUidNetwork001, TestSize.Level1)
     deathRecipient->OnRemoteDied(remote);
     std::vector<NetStatsInfoSequence> infos;
     uint32_t uid = 1;
-    sptr<Network> network;
+    sptr<NetStatsNetwork> network;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetTrafficStatsByUidNetwork(infos, uid, network);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }

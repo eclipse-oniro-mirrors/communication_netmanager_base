@@ -58,8 +58,6 @@ public:
     int32_t GetInterfaceMtu(const std::string &interfaceName) override;
 
     int32_t SetTcpBufferSizes(const std::string &tcpBufferSizes) override;
-    int32_t SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId) override;
-    int32_t GetInterfaceSimIdMap(const std::string &interfaceName, uint32_t &simId) override;
 
     int32_t RegisterNotifyCallback(sptr<INotifyCallback> &callback) override;
     int32_t UnRegisterNotifyCallback(sptr<INotifyCallback> &callback) override;

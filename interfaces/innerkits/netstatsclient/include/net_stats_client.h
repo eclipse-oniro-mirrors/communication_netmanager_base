@@ -167,7 +167,8 @@ public:
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
      */
-    int32_t GetTrafficStatsByNetwork(std::vector<NetStatsInfo> &infos, const sptr<Network> &network);
+    int32_t GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                     const sptr<NetStatsNetwork> &network);
 
     /**
      * Get traffic of the specified application with the specified network cards
@@ -178,7 +179,7 @@ public:
      * @systemapi Hide this for inner system use.
      */
     int32_t GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
-                                        const sptr<Network> &network);
+                                        const sptr<NetStatsNetwork> &network);
 
     /**
      * Set traffic stats of the specified application

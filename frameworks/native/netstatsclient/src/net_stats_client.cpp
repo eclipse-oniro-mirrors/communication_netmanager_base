@@ -306,7 +306,8 @@ int32_t NetStatsClient::GetAllContainerStatsInfo(std::vector<NetStatsInfo> &info
     return proxy->GetAllContainerStatsInfo(infos);
 }
 
-int32_t NetStatsClient::GetTrafficStatsByNetwork(std::vector<NetStatsInfo> &infos, const sptr<Network> &network)
+int32_t NetStatsClient::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                                 const sptr<NetStatsNetwork> &network)
 {
     sptr<INetStatsService> proxy = GetProxy();
     if (proxy == nullptr) {
@@ -317,7 +318,7 @@ int32_t NetStatsClient::GetTrafficStatsByNetwork(std::vector<NetStatsInfo> &info
 }
 
 int32_t NetStatsClient::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
-                                                    const sptr<Network> &network)
+                                                    const sptr<NetStatsNetwork> &network)
 {
     sptr<INetStatsService> proxy = GetProxy();
     if (proxy == nullptr) {

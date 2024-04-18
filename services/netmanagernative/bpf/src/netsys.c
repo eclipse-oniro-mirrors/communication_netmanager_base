@@ -64,16 +64,6 @@ bpf_map_def SEC("maps") app_uid_if_stats_map = {
     .numa_node = 0,
 };
 
-bpf_map_def SEC("maps") iface_simid_map = {
-    .type = BPF_MAP_TYPE_HASH,
-    .key_size = sizeof(iface_simid_key),
-    .value_size = sizeof(iface_simid_value),
-    .max_entries = IFACE_NAME_MAP_SIZE,
-    .map_flags = 0,
-    .inner_map_idx = 0,
-    .numa_node = 0,
-};
-
 bpf_map_def SEC("maps") app_cookie_stats_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(socket_cookie_stats_key),
@@ -134,13 +124,7 @@ int bpf_cgroup_skb_uid_ingress(struct __sk_buff *skb)
         __sync_fetch_and_add(&value->rxPackets, 1);
         __sync_fetch_and_add(&value->rxBytes, skb->len);
     }
-    uint16_t ifIndex = skb->ifindex;
-    __u32 simId = UINT32_MAX;
-    iface_simid_value *ifSimIdValue = bpf_map_lookup_elem(&iface_simid_map, &ifIndex);
-    if (ifSimIdValue != NULL) {
-        simId = *ifSimIdValue;
-    }
-    app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex, .simId = simId};
+    app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
     app_uid_if_stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
     if (value_uid_if == NULL) {
         app_uid_if_stats_value newValue = {};
@@ -182,13 +166,7 @@ int bpf_cgroup_skb_uid_egress(struct __sk_buff *skb)
         __sync_fetch_and_add(&value->txPackets, 1);
         __sync_fetch_and_add(&value->txBytes, skb->len);
     }
-    uint16_t ifIndex = skb->ifindex;
-    __u32 simId = 0;
-    iface_simid_value *ifSimIdValue = bpf_map_lookup_elem(&iface_simid_map, &ifIndex);
-    if (ifSimIdValue != NULL) {
-        simId = *ifSimIdValue;
-    }
-    app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex, .simId = simId};
+    app_uid_if_stats_key key = {.uId = sock_uid, .ifIndex = skb->ifindex};
     app_uid_if_stats_value *value_uid_if = bpf_map_lookup_elem(&app_uid_if_stats_map, &key);
     if (value_uid_if == NULL) {
         app_uid_if_stats_value newValue = {};

@@ -192,26 +192,6 @@ int32_t NetsysNativeService::SetTcpBufferSizes(const std::string &tcpBufferSizes
     return netsysService_->SetTcpBufferSizes(tcpBufferSizes);
 }
 
-int32_t NetsysNativeService::SetInterfaceSimIdMap(const std::string &interfaceName, uint32_t simId)
-{
-    NETNATIVE_LOG_D("SetInterfaceSimIdMap  Begin");
-    if (bpfStats_ == nullptr) {
-        NETNATIVE_LOGE("bpfStats is null");
-        return NetManagerStandard::NETMANAGER_ERROR;
-    }
-    return bpfStats_->SetIfaceSimMap(interfaceName, simId);
-}
-
-int32_t NetsysNativeService::GetInterfaceSimIdMap(const std::string &interfaceName, uint32_t &simId)
-{
-    NETNATIVE_LOG_D("GetInterfaceSimIdMap  Begin");
-    if (bpfStats_ == nullptr) {
-        NETNATIVE_LOGE("bpfStats is null");
-        return NetManagerStandard::NETMANAGER_ERROR;
-    }
-    return bpfStats_->GetIfaceSimMap(interfaceName, simId);
-}
-
 int32_t NetsysNativeService::RegisterNotifyCallback(sptr<INotifyCallback> &callback)
 {
     NETNATIVE_LOG_D("RegisterNotifyCallback");
