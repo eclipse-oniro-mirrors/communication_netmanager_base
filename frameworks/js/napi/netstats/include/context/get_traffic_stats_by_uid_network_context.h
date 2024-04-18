@@ -38,6 +38,7 @@ public:
     void SetStartTime(uint32_t startTime);
     void SetEndTime(uint32_t endTime);
     void SetSimId(uint32_t simId);
+    uint32_t GetUid() const;
     uint32_t GetNetBearType() const;
     uint32_t GetStartTime() const;
     uint32_t GetEndTime() const;

@@ -1349,7 +1349,7 @@ int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::st
 }
 
 int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
-                              std::unordered_map<std::string, std::string> &ifaceNameIdentMaps)
+                                              std::unordered_map<std::string, std::string> &ifaceNameIdentMaps)
 {
     if (bearerType < BEARER_CELLULAR || bearerType >= BEARER_DEFAULT) {
         return NET_CONN_ERR_NET_TYPE_NOT_FOUND;

@@ -487,7 +487,7 @@ int32_t NetConnServiceProxy::GetIfaceNameByType(NetBearType bearerType, const st
 }
 
 int32_t NetConnServiceProxy::GetIfaceNameIdentMaps(NetBearType bearerType,
-                              std::unordered_map<std::string, std::string> &ifaceNameIdentMaps)
+                                                   std::unordered_map<std::string, std::string> &ifaceNameIdentMaps)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -503,7 +503,7 @@ int32_t NetConnServiceProxy::GetIfaceNameIdentMaps(NetBearType bearerType,
     }
     MessageParcel reply;
     int32_t ret = RemoteSendRequest(static_cast<uint32_t>(ConnInterfaceCode::CMD_GET_IFACENAME_IDENT_MAPS),
-                                      data, reply);
+                                    data, reply);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }

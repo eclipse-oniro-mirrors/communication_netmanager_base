@@ -73,6 +73,7 @@ ohos_shared_library("net_conn_manager") {
   configs = [ ":net_conn_manager_config" ]
 
   deps = [
+    "$INNERKITS_ROOT/netstatsclient:net_stats_manager_if",
     "$NETCONNMANAGER_COMMON_DIR:net_service_common",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative:netsys_native_manager",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/fwmarkclient:fwmark_client",
@@ -114,6 +115,7 @@ ohos_shared_library("net_conn_manager") {
     "eventhandler:libeventhandler",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
