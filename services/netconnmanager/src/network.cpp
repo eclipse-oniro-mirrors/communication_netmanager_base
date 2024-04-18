@@ -182,7 +182,7 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateDns(netLinkInfo);
     UpdateMtu(netLinkInfo);
     UpdateTcpBufferSize(netLinkInfo);
-    UpdateStatsCached(netLinkInfo);s
+    UpdateStatsCached(netLinkInfo);
 
     netLinkInfo_ = netLinkInfo;
     if (netSupplierType_ != BEARER_VPN) {
