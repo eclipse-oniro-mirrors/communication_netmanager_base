@@ -59,10 +59,10 @@
       "OHOS::NetManagerStandard::NetStatsClient::UnregisterNetStatsCallback(OHOS::sptr<OHOS::NetManagerStandard::INetStatsCallback> const&)";
       "OHOS::NetManagerStandard::NetStatsClient::GetAllStatsInfo(std::__h::vector<OHOS::NetManagerStandard::NetStatsInfo, std::__h::allocator<OHOS::NetManagerStandard::NetStatsInfo>>&)";
       "OHOS::NetManagerStandard::NetStatsClient::GetAllContainerStatsInfo(std::__h::vector<OHOS::NetManagerStandard::NetStatsInfo, std::__h::allocator<OHOS::NetManagerStandard::NetStatsInfo>>&)";
-      "OHOS::NetManagerStandard::NetStatsClient::GetTrafficStatsByNetwork(std::__h::unordered_map<unsigned int, OHOS::NetManagerStandard::NetStatsInfo, std::__h::hash<unsigned int>, std::__h::equal_to<unsigned int>, std::__h::allocator<std::__h::pair<unsigned int const, OHOS::NetManagerStandard::NetStatsInfo>>&, OHOS::sptr<OHOS::NetManagerStandard::NetStatsNetwork> const&)";
+      "OHOS::NetManagerStandard::NetStatsClient::GetTrafficStatsByNetwork(std::__h::unordered_map<unsigned int, OHOS::NetManagerStandard::NetStatsInfo, std::__h::hash<unsigned int>, std::__h::equal_to<unsigned int>, std::__h::allocator<std::__h::pair<unsigned int const, OHOS::NetManagerStandard::NetStatsInfo>>>&, OHOS::sptr<OHOS::NetManagerStandard::NetStatsNetwork> const&)";
       "OHOS::NetManagerStandard::NetStatsClient::GetTrafficStatsByUidNetwork(std::__h::vector<OHOS::NetManagerStandard::NetStatsInfoSequence, std::__h::allocator<OHOS::NetManagerStandard::NetStatsInfoSequence>>&, unsigned int, OHOS::sptr<OHOS::NetManagerStandard::NetStatsNetwork> const&)";
       "OHOS::NetManagerStandard::NetStatsClient::SetAppStats(OHOS::NetManagerStandard::PushStatsInfo const&)";
-      "OHOS::NetManagerStandard::NetStatsServiceProxy::GetTrafficStatsByNetwork(std::__h::unordered_map<unsigned int, OHOS::NetManagerStandard::NetStatsInfo, std::__h::hash<unsigned int>, std::__h::equal_to<unsigned int>, std::__h::allocator<std::__h::pair<unsigned int const, OHOS::NetManagerStandard::NetStatsInfo>>&, OHOS::sptr<OHOS::NetManagerStandard::NetStatsNetwork> const&)";
+      "OHOS::NetManagerStandard::NetStatsServiceProxy::GetTrafficStatsByNetwork(std::__h::unordered_map<unsigned int, OHOS::NetManagerStandard::NetStatsInfo, std::__h::hash<unsigned int>, std::__h::equal_to<unsigned int>, std::__h::allocator<std::__h::pair<unsigned int const, OHOS::NetManagerStandard::NetStatsInfo>>>&, OHOS::sptr<OHOS::NetManagerStandard::NetStatsNetwork> const&)";
       "OHOS::NetManagerStandard::NetStatsServiceProxy::GetTrafficStatsByUidNetwork(std::__h::vector<OHOS::NetManagerStandard::NetStatsInfoSequence, std::__h::allocator<OHOS::NetManagerStandard::NetStatsInfoSequence>>&, unsigned int, OHOS::sptr<OHOS::NetManagerStandard::NetStatsNetwork> const&)";
       "OHOS::NetManagerStandard::NetStatsServiceProxy::SetAppStats(OHOS::NetManagerStandard::PushStatsInfo const&)";
       "OHOS::NetManagerStandard::NetStatsServiceProxy::GetAllContainerStatsInfo(std::__h::vector<OHOS::NetManagerStandard::NetStatsInfo, std::__h::allocator<OHOS::NetManagerStandard::NetStatsInfo>>&)";
@@ -115,8 +115,6 @@
       "OHOS::NetManagerStandard::NetStatsServiceProxy::UpdateIfacesStats(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned long, unsigned long, OHOS::NetManagerStandard::NetStatsInfo const&)";
       "OHOS::NetManagerStandard::NetStatsInfo::Unmarshalling(OHOS::Parcel&, std::__h::vector<OHOS::NetManagerStandard::NetStatsInfo, std::__h::allocator<OHOS::NetManagerStandard::NetStatsInfo>>&)";
       "OHOS::NetManagerStandard::PushStatsInfo::Unmarshalling(OHOS::Parcel&, OHOS::NetManagerStandard::PushStatsInfo&)";
-      "OHOS::NetManagerStandard::NetStatsHistory::GetHistoryByIdent(std::__h::vector<OHOS::NetManagerStandard::NetStatsInfo, std::__h::allocator<OHOS::NetManagerStandard::NetStatsInfo>>&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned long long, unsigned long long)";
-      "OHOS::NetManagerStandard::NetStatsHistory::GetHistory(std::__h::vector<OHOS::NetManagerStandard::NetStatsInfo, std::__h::allocator<OHOS::NetManagerStandard::NetStatsInfo>>&, unsigned int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned long long, unsigned long long)";
     };
   local:
    *;
