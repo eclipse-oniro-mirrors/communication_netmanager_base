@@ -115,12 +115,12 @@ void NetStatsCached::GetKernelStats(std::vector<NetStatsInfo> &statsInfo)
         if (info.iface_ == IFACE_LO) {
             return;
         }
+        info.ident_ = ifaceNameIdentMap_[info.iface_];
         NetStatsInfo tmp = GetIncreasedStats(info);
         if (tmp.HasNoData()) {
             return;
         }
         tmp.date_ = CommonUtils::GetCurrentSecond();
-        tmp.ident_ = ifaceNameIdentMap_[info.iface_];
         statsInfo.push_back(std::move(tmp));
     });
 }
