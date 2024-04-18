@@ -477,6 +477,16 @@ public:
     {
         return 0;
     }
+
+    int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override
+    {
+        return 0;
+    }
+
+    int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
