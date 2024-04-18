@@ -110,6 +110,7 @@ void NetStatsCached::GetKernelStats(std::vector<NetStatsInfo> &statsInfo)
     NetsysController::GetInstance().GetAllContainerStatsInfo(containerInfos);
     allInfos.insert(allInfos.end(), containerInfos.begin(), containerInfos.end());
 
+    LoadIfaceNameIdentMaps();
     std::for_each(allInfos.begin(), allInfos.end(), [this, &statsInfo](NetStatsInfo &info) {
         if (info.iface_ == IFACE_LO) {
             return;
@@ -119,7 +120,8 @@ void NetStatsCached::GetKernelStats(std::vector<NetStatsInfo> &statsInfo)
             return;
         }
         tmp.date_ = CommonUtils::GetCurrentSecond();
-        statsInfo.push_back(tmp);
+        tmp.ident_ = ifaceNameIdentMap_[info.iface_];
+        statsInfo.push_back(std::move(tmp));
     });
 }
 
@@ -285,6 +287,7 @@ void NetStatsCached::LoadIfaceNameIdentMaps()
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("GetIfaceNameIdentMaps error. ret=%{public}d", ret);
     }
+    isIfaceNameIdentMapLoaded_ = true;
 }
 
 void NetStatsCached::SetCycleThreshold(uint32_t threshold)
