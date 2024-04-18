@@ -19,6 +19,7 @@
 #include "event_report.h"
 #include "net_manager_constants.h"
 #include "net_mgr_log_wrapper.h"
+#include "net_stats_client.h"
 #include "netmanager_base_common_utils.h"
 #include "netsys_controller.h"
 #include "network.h"
