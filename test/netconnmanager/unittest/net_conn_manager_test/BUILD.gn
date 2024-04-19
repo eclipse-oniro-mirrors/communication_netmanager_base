@@ -107,6 +107,7 @@ ohos_unittest("net_conn_manager_test") {
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hisysevent:libhisysevent",
     "ipc:ipc_core",
     "relational_store:native_rdb",
