@@ -26,18 +26,10 @@
 #include "net_monitor.h"
 #include "net_supplier_info.h"
 #include "route.h"
+#include "netmanager_base_common_utils.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
-constexpr uint32_t INVALID_NET_ID = 0;
-constexpr int32_t MIN_INTERNAL_NET_ID = 1;
-constexpr int32_t MAX_INTERNAL_NET_ID = 50;
-constexpr int32_t MIN_NET_ID = 100;
-constexpr int32_t MAX_NET_ID = 0xFFFF - 0x400;
-inline bool IsInternalNetId(int32_t netId)
-{
-    return netId >= MIN_INTERNAL_NET_ID && netId <= MAX_INTERNAL_NET_ID;
-}
 using NetDetectionHandler = std::function<void(uint32_t supplierId, NetDetectionStatus netState)>;
 class Network : public virtual RefBase, public INetMonitorCallback, public std::enable_shared_from_this<Network> {
 public:
