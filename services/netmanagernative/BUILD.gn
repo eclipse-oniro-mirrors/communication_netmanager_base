@@ -33,7 +33,6 @@ config("netsys_native_manager_config") {
     "$NETCONNMANAGER_SOURCE_DIR/include",
     "$NETCONNMANAGER_SOURCE_DIR/include/stub",
     "$INNERKITS_ROOT/netconnclient/include/proxy",
-    "$THIRD_PARTY_ROOT/curl/include",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
   ]
 
