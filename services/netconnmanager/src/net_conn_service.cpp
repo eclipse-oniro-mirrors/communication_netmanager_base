@@ -1341,7 +1341,7 @@ int32_t NetConnService::GetAllNets(std::list<int32_t> &netIdList)
     auto currentUid = IPCSkeleton::GetCallingUid();
     for (const auto &network : networks_) {
         if (network.second != nullptr && network.second->IsConnected()) {
-            int32_t netId = network.second->GetNetId();
+            auto netId = network.second->GetNetId();
             sptr<NetSupplier> curSupplier = FindNetSupplier(network.second->GetSupplierId());
             // inner virtual interface and uid is not trusted, skip
             if (curSupplier != nullptr &&
@@ -2081,10 +2081,6 @@ bool NetConnService::IsSupplierMatchRequestAndNetwork(sptr<NetSupplier> ns)
     NET_ACTIVATE_MAP::iterator iterActive;
     for (iterActive = netActivates_.begin(); iterActive != netActivates_.end(); ++iterActive) {
         if (!iterActive->second) {
-            continue;
-        }
-        if (ns->HasNetCap(NetCap::NET_CAPABILITY_INTERNAL_DEFAULT)) {
-            NETMGR_LOG_D("Supplier[%{public}d] is internal, skip.", ns->GetSupplierId());
             continue;
         }
         if (iterActive->second->MatchRequestAndNetwork(ns)) {
