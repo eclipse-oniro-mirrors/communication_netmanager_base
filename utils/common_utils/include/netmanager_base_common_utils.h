@@ -19,6 +19,7 @@
 #include <iosfwd>
 #include <sstream>
 #include <vector>
+
 namespace OHOS::NetManagerStandard {
 constexpr uint32_t INVALID_NET_ID = 0;
 constexpr int32_t MIN_INTERNAL_NET_ID = 1;
