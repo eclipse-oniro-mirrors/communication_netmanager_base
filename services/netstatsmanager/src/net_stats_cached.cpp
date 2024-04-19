@@ -286,6 +286,7 @@ void NetStatsCached::LoadIfaceNameIdentMaps()
     int32_t ret = NetConnClient::GetInstance().GetIfaceNameIdentMaps(NetBearType::BEARER_CELLULAR, ifaceNameIdentMap_);
     if (ret != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("GetIfaceNameIdentMaps error. ret=%{public}d", ret);
+        return;
     }
     isIfaceNameIdentMapLoaded_ = true;
 }

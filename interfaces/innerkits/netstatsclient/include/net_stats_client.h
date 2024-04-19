@@ -163,6 +163,7 @@ public:
      * Get traffic of all application with the specified network cards
      *
      * @param infos traffic of all application
+     * @param network the network of traffic stats
      * @return Returns 0 success. Otherwise fail.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
@@ -174,6 +175,8 @@ public:
      * Get traffic of the specified application with the specified network cards
      *
      * @param infos traffic of all application
+     * @param uid the id of the specified application
+     * @param network the network of traffic stats
      * @return Returns 0 success. Otherwise fail.
      * @permission ohos.permission.CONNECTIVITY_INTERNAL
      * @systemapi Hide this for inner system use.
