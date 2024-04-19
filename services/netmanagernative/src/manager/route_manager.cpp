@@ -39,7 +39,6 @@
 #include "securec.h"
 
 #include "route_manager.h"
-#include "network.h"
 
 using namespace OHOS::NetManagerStandard;
 using namespace OHOS::NetManagerStandard::CommonUtils;

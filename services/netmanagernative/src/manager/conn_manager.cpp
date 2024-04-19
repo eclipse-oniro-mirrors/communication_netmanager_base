@@ -20,10 +20,10 @@
 #include "bpf_path.h"
 #include "local_network.h"
 #include "net_manager_constants.h"
+#include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "physical_network.h"
 #include "virtual_network.h"
-#include "network.h"
 
 namespace OHOS {
 namespace nmd {
