@@ -22,6 +22,7 @@
 
 #include "singleton.h"
 
+#include "ffrt.h"
 #include "event_handler.h"
 #include "i_net_policy_callback.h"
 #include "net_quota_policy.h"
@@ -95,8 +96,7 @@ private:
 
 private:
     std::vector<sptr<INetPolicyCallback>> callbacks_;
-    std::shared_ptr<AppExecFwk::EventRunner> policyCallRunner_ = nullptr;
-    std::shared_ptr<AppExecFwk::EventHandler> policyCallHandler_ = nullptr;
+    std::shared_ptr<ffrt::queue> netPolicyCallbackFfrtQueue_ = nullptr;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
