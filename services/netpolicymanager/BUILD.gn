@@ -34,7 +34,7 @@ ohos_shared_library("net_policy_manager") {
     cfi = true
     cfi_cross_dso = true
     boundary_sanitize = true
-    all_ubsan = true
+    ubsan = true
     blocklist = "./policy_blocklist.txt"
     debug = false
   }
@@ -100,6 +100,7 @@ ohos_shared_library("net_policy_manager") {
     "cJSON:cjson",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
@@ -169,6 +170,7 @@ ohos_static_library("net_policy_manager_static") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",

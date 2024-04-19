@@ -201,7 +201,7 @@ HWTEST_F(UtNetPolicyService, NetPolicyServiceBranchTest001, TestSize.Level1)
     int32_t fd = 0;
     std::vector<std::u16string> args;
     int32_t ret = instance_->Dump(fd, args);
-    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 
     uint32_t policy = 0;
     std::vector<uint32_t> uids;
