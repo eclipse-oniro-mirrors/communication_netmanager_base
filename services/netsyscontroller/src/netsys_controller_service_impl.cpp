@@ -646,6 +646,13 @@ int32_t NetsysControllerServiceImpl::GetIfaceStats(uint64_t &stats, uint32_t typ
     return netsysClient_.GetIfaceStats(stats, type, interfaceName);
 }
 
+int32_t NetsysControllerServiceImpl::GetAllContainerStatsInfo(
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    NETMGR_LOG_D("GetAllContainerStatsInfo");
+    return netsysClient_.GetAllContainerStatsInfo(stats);
+}
+
 int32_t NetsysControllerServiceImpl::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     NETMGR_LOG_D("GetAllStatsInfo");

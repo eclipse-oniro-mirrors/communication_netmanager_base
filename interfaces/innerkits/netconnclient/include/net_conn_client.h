@@ -263,6 +263,18 @@ public:
     int32_t GetAddressByName(const std::string &host, int32_t netId, INetAddr &addr);
 
     /**
+     * The interface is to get all iface and ident maps
+     *
+     * @param bearerType the type of network
+     * @param ifaceNameIdentMaps the map of ifaceName and ident
+     * @return Returns 0 success. Otherwise fail.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t GetIfaceNameIdentMaps(NetBearType bearerType,
+                                 std::unordered_map<std::string, std::string> &ifaceNameIdentMaps);
+
+    /**
      * The interface is to bind socket
      *
      * @param socketFd socket file description

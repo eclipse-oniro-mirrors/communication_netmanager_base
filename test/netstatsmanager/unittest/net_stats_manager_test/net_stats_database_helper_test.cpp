@@ -60,14 +60,7 @@ HWTEST_F(NetStatsDatabaseHelperTest, CreateTableTest001, TestSize.Level1)
 HWTEST_F(NetStatsDatabaseHelperTest, CreateTableTest002, TestSize.Level1)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
-    const std::string tableInfo =
-        "UID INTEGER NOT NULL,"
-        "IFace CHAR(50) NOT NULL,"
-        "Date INTEGER NOT NULL,"
-        "RxBytes INTEGER NOT NULL,"
-        "RxPackets INTEGER NOT NULL,"
-        "TxBytes INTEGER NOT NULL,"
-        "TxPackets INTEGER NOT NULL";
+    const std::string tableInfo = UID_TABLE_CREATE_PARAM;
     int32_t ret = helper->CreateTable(UID_TABLE, tableInfo);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
@@ -75,14 +68,16 @@ HWTEST_F(NetStatsDatabaseHelperTest, CreateTableTest002, TestSize.Level1)
 HWTEST_F(NetStatsDatabaseHelperTest, CreateTableTest003, TestSize.Level1)
 {
     auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
-    const std::string tableInfo =
-        "UID INTEGER NOT NULL,"
-        "Date INTEGER NOT NULL,"
-        "RxBytes INTEGER NOT NULL,"
-        "RxPackets INTEGER NOT NULL,"
-        "TxBytes INTEGER NOT NULL,"
-        "TxPackets INTEGER NOT NULL";
+    const std::string tableInfo = IFACE_TABLE_CREATE_PARAM;
     int32_t ret = helper->CreateTable(IFACE_TABLE, tableInfo);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsDatabaseHelperTest, CreateTableTest004, TestSize.Level1)
+{
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    const std::string tableInfo = UID_SIM_TABLE_CREATE_PARAM;
+    int32_t ret = helper->CreateTable(UID_SIM_TABLE, tableInfo);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
@@ -101,6 +96,11 @@ HWTEST_F(NetStatsDatabaseHelperTest, InsertDataHelperTest001, TestSize.Level1)
     int32_t ret = helper->InsertData(UID_TABLE, UID_TABLE_PARAM_LIST, info);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     ret = helper->InsertData("", UID_TABLE_PARAM_LIST, info);
+    EXPECT_EQ(ret, NetStatsResultCode::STATS_ERR_WRITE_DATA_FAIL);
+
+    ret = helper->InsertData(UID_SIM_TABLE, UID_SIM_TABLE_PARAM_LIST, info);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = helper->InsertData("", UID_SIM_TABLE_PARAM_LIST, info);
     EXPECT_EQ(ret, NetStatsResultCode::STATS_ERR_WRITE_DATA_FAIL);
 }
 
@@ -164,6 +164,39 @@ HWTEST_F(NetStatsDatabaseHelperTest, SelectDataHelperTest004, TestSize.Level1)
     uint64_t date = 15254400;
     ret = helper->SelectData(iface, uid, date, LONG_MAX, infos);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsDatabaseHelperTest, QueryDataDataHelperTest001, TestSize.Level1)
+{
+    NETMGR_LOG_I("QueryDataDataHelperTest001");
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    std::vector<NetStatsInfo> infos;
+    std::string ident = "2";
+    int32_t ret = helper->QueryData(UID_TABLE, ident, 0, LONG_MAX, infos);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    infos.clear();
+    uint64_t date = 15254400;
+    ret = helper->QueryData(UID_TABLE, ident, date, LONG_MAX, infos);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = helper->QueryData("", ident, 0, LONG_MAX, infos);
+    EXPECT_EQ(ret, STATS_ERR_READ_DATA_FAIL);
+}
+
+HWTEST_F(NetStatsDatabaseHelperTest, QueryDataDataHelperTest002, TestSize.Level1)
+{
+    NETMGR_LOG_I("QueryDataDataHelperTest002");
+    auto helper = std::make_unique<NetStatsDatabaseHelper>(NET_STATS_DATABASE_TEST_PATH);
+    std::vector<NetStatsInfo> infos;
+    uint32_t uid = 200022;
+    std::string ident = "2";
+    int32_t ret = helper->QueryData(UID_TABLE, uid, ident, 0, LONG_MAX, infos);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    infos.clear();
+    uint64_t date = 15254400;
+    ret = helper->QueryData(UID_TABLE, uid, ident, date, LONG_MAX, infos);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    ret = helper->QueryData("", uid, ident, 0, LONG_MAX, infos);
+    EXPECT_EQ(ret, STATS_ERR_READ_DATA_FAIL);
 }
 
 HWTEST_F(NetStatsDatabaseHelperTest, DeleteDataHelperTest001, TestSize.Level1)

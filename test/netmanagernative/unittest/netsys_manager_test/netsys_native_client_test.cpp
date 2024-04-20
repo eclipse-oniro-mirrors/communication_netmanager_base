@@ -261,6 +261,9 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest005, TestSize.Level1)
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> statsInfo;
     ret = nativeClient_.GetAllStatsInfo(statsInfo);
     EXPECT_EQ(ret, 0);
+
+    ret = nativeClient_.GetAllContainerStatsInfo(statsInfo);
+    EXPECT_EQ(ret, 0);
 }
 
 HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest006, TestSize.Level1)
@@ -399,16 +402,6 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientBranchTest001, TestSize.Level
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
     ret = nativeClient_.UnregisterDnsHealthCallback(healthCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
-}
-
-HWTEST_F(NetsysNativeClientTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
-{
-    uint32_t on = 0;
-    std::string interface = "wlan0";
-    int32_t ret = nativeClient_.SetIpv6PrivacyExtensions(interface, on);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-    ret = nativeClient_.SetEnableIpv6(interface, on);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

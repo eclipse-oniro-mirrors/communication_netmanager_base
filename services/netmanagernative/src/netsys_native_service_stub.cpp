@@ -116,6 +116,8 @@ void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdGetUidStats;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_IFACE_STATS)] =
         &NetsysNativeServiceStub::CmdGetIfaceStats;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_CONTAINER_STATS_INFO)] =
+        &NetsysNativeServiceStub::CmdGetAllContainerStatsInfo;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_ALL_STATS_INFO)] =
         &NetsysNativeServiceStub::CmdGetAllStatsInfo;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_GET_COOKIE_STATS)] =
@@ -1195,6 +1197,22 @@ int32_t NetsysNativeServiceStub::CmdGetIfaceStats(MessageParcel &data, MessagePa
     }
     return result;
 }
+
+int32_t NetsysNativeServiceStub::CmdGetAllContainerStatsInfo(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
+    int32_t result = GetAllContainerStatsInfo(stats);
+    if (!reply.WriteInt32(result)) {
+        NETNATIVE_LOGE("Write parcel failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!OHOS::NetManagerStandard::NetStatsInfo::Marshalling(reply, stats)) {
+        NETNATIVE_LOGE("Read stats info failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
 
 int32_t NetsysNativeServiceStub::CmdGetAllStatsInfo(MessageParcel &data, MessageParcel &reply)
 {

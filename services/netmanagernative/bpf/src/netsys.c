@@ -44,6 +44,16 @@ bpf_map_def SEC("maps") app_uid_stats_map = {
     .numa_node = 0,
 };
 
+bpf_map_def SEC("maps") app_uid_sim_stats_map = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = sizeof(app_uid_sim_stats_key),
+    .value_size = sizeof(app_uid_sim_stats_value),
+    .max_entries = APP_STATS_MAP_SIZE,
+    .map_flags = 0,
+    .inner_map_idx = 0,
+    .numa_node = 0,
+};
+
 bpf_map_def SEC("maps") app_uid_if_stats_map = {
     .type = BPF_MAP_TYPE_HASH,
     .key_size = sizeof(app_uid_if_stats_key),

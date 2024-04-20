@@ -36,6 +36,12 @@ public:
     int32_t GetUidRxBytes(uint64_t &stats, uint32_t uid) override;
     int32_t GetUidTxBytes(uint64_t &stats, uint32_t uid) override;
     int32_t GetAllStatsInfo(std::vector<NetStatsInfo> &infos) override;
+    int32_t GetAllContainerStatsInfo(std::vector<NetStatsInfo> &infos) override;
+    int32_t GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                     const sptr<NetStatsNetwork> &network) override;
+    int32_t GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
+                                        const sptr<NetStatsNetwork> &network) override;
+    int32_t SetAppStats(const PushStatsInfo &info) override;
     int32_t GetIfaceStatsDetail(const std::string &iface, uint64_t start, uint64_t end,
                                 NetStatsInfo &statsInfo) override;
     int32_t GetUidStatsDetail(const std::string &iface, uint32_t uid, uint64_t start, uint64_t end,

@@ -618,6 +618,15 @@ int32_t NetsysNativeService::GetIfaceStats(uint64_t &stats, uint32_t type, const
     return bpfStats_->GetIfaceStats(stats, static_cast<OHOS::NetManagerStandard::StatsType>(type), interfaceName);
 }
 
+int32_t NetsysNativeService::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    if (bpfStats_ == nullptr) {
+        NETNATIVE_LOGE("bpfStats is null.");
+        return NetManagerStandard::NETMANAGER_ERROR;
+    }
+    return bpfStats_->GetAllContainerStatsInfo(stats);
+}
+
 int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     if (bpfStats_ == nullptr) {

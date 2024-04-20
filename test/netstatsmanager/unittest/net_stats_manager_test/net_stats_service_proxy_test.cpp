@@ -689,6 +689,60 @@ HWTEST_F(NetStatsServiceProxyTest, GetUidStatsDetailTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetAllContainerStatsInfoTest001
+ * @tc.desc: Test NetStatsServiceProxy GetAllContainerStatsInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, GetAllContainerStatsInfoTest001, TestSize.Level1)
+{
+    remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
+    NetStatsServiceProxy instance_(remoteObj_);
+    std::vector<NetStatsInfo> infos;
+    EXPECT_EQ(instance_.GetAllContainerStatsInfo(infos), NETSYS_SUCCESS);
+}
+
+/**
+ * @tc.name: GetTrafficStatsByNetworkTest001
+ * @tc.desc: Test NetStatsServiceProxy GetTrafficStatsByNetwork.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByNetworkTest001, TestSize.Level1)
+{
+    remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
+    NetStatsServiceProxy instance_(remoteObj_);
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
+    sptr<NetStatsNetwork> network;
+    EXPECT_EQ(instance_.GetTrafficStatsByNetwork(infos, network), NETSYS_SUCCESS);
+}
+
+/**
+ * @tc.name: GetTrafficStatsByUidNetworkTest001
+ * @tc.desc: Test NetStatsServiceProxy GetTrafficStatsByUidNetwork.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByUidNetworkTest001, TestSize.Level1)
+{
+    remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
+    NetStatsServiceProxy instance_(remoteObj_);
+    std::vector<NetStatsInfoSequence> infos;
+    sptr<NetStatsNetwork> network;
+    EXPECT_EQ(instance_.GetTrafficStatsByUidNetwork(infos, TEST_UID, network), NETSYS_SUCCESS);
+}
+
+/**
+ * @tc.name: SetAppStatsTest001
+ * @tc.desc: Test NetStatsServiceProxy SetAppStats.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, SetAppStatsTest001, TestSize.Level1)
+{
+    remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
+    NetStatsServiceProxy instance_(remoteObj_);
+    PushStatsInfo info;
+    EXPECT_EQ(instance_.SetAppStats(info), NETSYS_SUCCESS);
+}
+
+/**
  * @tc.name: UpdateIfacesStatsTest001
  * @tc.desc: Test NetStatsServiceProxy UpdateIfacesStats.
  * @tc.type: FUNC

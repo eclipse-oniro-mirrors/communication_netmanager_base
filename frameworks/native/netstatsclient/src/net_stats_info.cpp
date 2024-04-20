@@ -29,6 +29,9 @@ bool NetStatsInfo::Marshalling(Parcel &parcel) const
     if (!parcel.WriteString(iface_)) {
         return false;
     }
+    if (!parcel.WriteString(ident_)) {
+        return false;
+    }
     if (!parcel.WriteUint64(date_)) {
         return false;
     }
@@ -53,6 +56,9 @@ bool NetStatsInfo::Marshalling(Parcel &parcel, const NetStatsInfo &stats)
         return false;
     }
     if (!parcel.WriteString(stats.iface_)) {
+        return false;
+    }
+    if (!parcel.WriteString(stats.ident_)) {
         return false;
     }
     if (!parcel.WriteUint64(stats.date_)) {
@@ -88,6 +94,22 @@ bool NetStatsInfo::Marshalling(Parcel &parcel, const std::vector<NetStatsInfo> &
     return true;
 }
 
+bool NetStatsInfo::Marshalling(Parcel &parcel, const std::unordered_map<uint32_t, NetStatsInfo> &statsInfos)
+{
+    uint32_t vSize = statsInfos.size();
+    if (vSize > STATS_INFO_MAX_SIZE) {
+        NETMGR_LOG_E("Size of the statsInfos exceeds maximum.");
+        return false;
+    }
+    if (!parcel.WriteUint32(vSize)) {
+        return false;
+    }
+    std::for_each(statsInfos.begin(), statsInfos.end(), [&parcel](const std::pair<uint32_t, NetStatsInfo> &info) {
+        info.second.Marshalling(parcel);
+    });
+    return true;
+}
+
 bool NetStatsInfo::Unmarshalling(Parcel &parcel, std::vector<NetStatsInfo> &statsInfos)
 {
     uint32_t vSize = 0;
@@ -103,9 +125,27 @@ bool NetStatsInfo::Unmarshalling(Parcel &parcel, std::vector<NetStatsInfo> &stat
     for (uint32_t i = 0; i < vSize; i++) {
         NetStatsInfo tmpData;
         NetStatsInfo::Unmarshalling(parcel, tmpData);
-        statsInfos.push_back(tmpData);
+        statsInfos.push_back(std::move(tmpData));
     }
 
+    return true;
+}
+
+bool NetStatsInfo::Unmarshalling(Parcel &parcel, std::unordered_map<uint32_t, NetStatsInfo> &statsInfos)
+{
+    uint32_t vSize = 0;
+    if (!parcel.ReadUint32(vSize)) {
+        return false;
+    }
+    if (vSize > STATS_INFO_MAX_SIZE) {
+        NETMGR_LOG_E("Size of the statsInfos exceeds maximum.");
+        return false;
+    }
+    for (uint32_t i = 0; i < vSize; i++) {
+        NetStatsInfo tmpData;
+        NetStatsInfo::Unmarshalling(parcel, tmpData);
+        statsInfos.emplace(tmpData.uid_, std::move(tmpData));
+    }
     return true;
 }
 
@@ -115,6 +155,9 @@ bool NetStatsInfo::Unmarshalling(Parcel &parcel, NetStatsInfo &stats)
         return false;
     }
     if (!parcel.ReadString(stats.iface_)) {
+        return false;
+    }
+    if (!parcel.ReadString(stats.ident_)) {
         return false;
     }
     if (!parcel.ReadUint64(stats.date_)) {

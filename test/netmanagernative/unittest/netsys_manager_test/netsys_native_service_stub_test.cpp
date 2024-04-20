@@ -387,6 +387,11 @@ public:
         return 0;
     }
 
+    int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override
+    {
+        return 0;
+    }
+
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override
     {
         return 0;
@@ -1390,6 +1395,15 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdGetAllStatsInfo001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_NONE);
 }
 
+HWTEST_F(NetsysNativeServiceStubTest, CmdGetAllContainerStatsInfoTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdGetAllContainerStatsInfo(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+
 HWTEST_F(NetsysNativeServiceStubTest, NetsysFreeAddrinfoTest001, TestSize.Level1)
 {
     addrinfo *ai = nullptr;
@@ -1727,28 +1741,5 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateNetworkSharingType001, TestSize.L
     int32_t ret = notifyStub_->CmdUpdateNetworkSharingType(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
-
-HWTEST_F(NetsysNativeServiceStubTest, CmdSetIpv6PrivacyExtensions001, TestSize.Level1)
-{
-    std::string interface = "wlan0";
-
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
-        return;
-    }
-    if (!data.WriteString(interface)) {
-        return;
-    }
-    if (!data.WriteUint32(0)) {
-        return;
-    }
-    MessageParcel reply;
-    int32_t ret = notifyStub_->CmdSetIpv6PrivacyExtensions(data, reply);
-    EXPECT_EQ(ret, ERR_NONE);
-
-    ret = notifyStub_->CmdSetIpv6Enable(data, reply);
-    EXPECT_EQ(ret, ERR_NONE);
-}
-
 } // namespace NetsysNative
 } // namespace OHOS

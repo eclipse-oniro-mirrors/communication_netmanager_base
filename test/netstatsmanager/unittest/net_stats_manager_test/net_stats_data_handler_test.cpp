@@ -35,6 +35,7 @@ using namespace testing::ext;
 namespace {
 constexpr uint32_t UID_MAX_TEST = 200;
 constexpr uint32_t MAX_TEST_DATA = 100;
+constexpr uint32_t UID = 2000222;
 const std::vector<std::string> MOCK_IFACE = {"wlan0", "eth0", "eth1", "usb0", "wlan1", "usb1"};
 std::random_device g_rd;
 std::mt19937 g_regn(g_rd());
@@ -58,6 +59,7 @@ NetStatsInfo CreateMockStatsInfo()
 {
     NetStatsInfo info;
     info.uid_ = GetUint32();
+    info.ident_ = std::to_string(GetUint32());
     info.date_ = GetUint64();
     info.iface_ = GetMockIface();
     info.rxBytes_ = GetUint64();
@@ -73,6 +75,7 @@ void CreateMockStatsData()
     for (uint32_t i = 0; i < MAX_TEST_DATA; i++) {
         NetStatsInfo info;
         info.uid_ = GetUint32();
+        info.ident_ = std::to_string(GetUint32());
         info.date_ = GetUint64();
         info.iface_ = GetMockIface();
         info.rxBytes_ = GetUint64();
@@ -147,6 +150,15 @@ HWTEST_F(NetStatsDataHandlerTest, WriteStatsDataTest004, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetStatsDataHandlerTest, WriteStatsDataTest005, TestSize.Level1)
+{
+    NetStatsDataHandler handler;
+    CreateMockStatsData();
+    int32_t ret = handler.WriteStatsData(g_statsData, UID_SIM_TABLE);
+    ClearMockStatsData();
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest001, TestSize.Level1)
 {
     NETMGR_LOG_E("NetStatsDataHandlerTest ReadStatsDataTest001 enter");
@@ -185,7 +197,7 @@ HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest004, TestSize.Level1)
     NetStatsDataHandler handler;
     std::vector<NetStatsInfo> infos;
     uint32_t testUid = 122;
-    int32_t ret = handler.ReadStatsData(infos, {}, 0, testUid, LONG_MAX);
+    int32_t ret = handler.ReadStatsData(infos, "testIface", testUid, 0, LONG_MAX);
     std::cout << "Data size: " << infos.size() << std::endl;
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
@@ -198,6 +210,29 @@ HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest005, TestSize.Level1)
     uint32_t testUid = 122;
     std::string iface = "testIface";
     int32_t ret = handler.ReadStatsData(infos, iface, 0, testUid, LONG_MAX);
+    std::cout << "Data size: " << infos.size() << std::endl;
+    std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest006, TestSize.Level1)
+{
+    NetStatsDataHandler handler;
+    std::vector<NetStatsInfo> infos;
+    std::string ident = "2";
+    int32_t ret = handler.ReadStatsDataByIdent(infos, ident, 0, LONG_MAX);
+    std::cout << "Data size: " << infos.size() << std::endl;
+    std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest007, TestSize.Level1)
+{
+    NetStatsDataHandler handler;
+    std::vector<NetStatsInfo> infos;
+    uint32_t uid = UID;
+    std::string ident = "2";
+    int32_t ret = handler.ReadStatsData(infos, uid, ident, 0, LONG_MAX);
     std::cout << "Data size: " << infos.size() << std::endl;
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);

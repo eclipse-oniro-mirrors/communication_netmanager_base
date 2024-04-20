@@ -30,7 +30,9 @@ using namespace testing::ext;
 constexpr int32_t TEST_NETID = 12;
 constexpr int32_t INVALID_VALUE = 100;
 constexpr uint32_t TEST_SUPPLIERID = 214;
+constexpr const char *IDENT = "666";
 constexpr const char *TEST_PROXY_HOST = "testHttpProxy";
+constexpr const char *TEST_IFACE_NAME = "eth0";
 
 class NetDetectionCallbackTest : public NetDetectionCallbackStub {
 public:
@@ -113,6 +115,14 @@ HWTEST_F(NetworkTest, UpdateNetLinkInfoTest001, TestSize.Level1)
     NetLinkInfo info;
     bool ret = instance_->UpdateNetLinkInfo(info);
     EXPECT_TRUE(ret);
+}
+
+HWTEST_F(NetworkTest, UpdateNetLinkInfoTest002, TestSize.Level1)
+{
+    NetLinkInfo info;
+    info.ifaceName_ = TEST_IFACE_NAME;
+    info.ident_ = IDENT;
+    instance_->UpdateStatsCached(info);
 }
 
 HWTEST_F(NetworkTest, GetNetLinkInfoTest001, TestSize.Level1)

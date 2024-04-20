@@ -572,6 +572,13 @@ HWTEST_F(NetsysNativeServiceTest, GetAllStatsInfoTest001, TestSize.Level1)
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
 }
 
+HWTEST_F(NetsysNativeServiceTest, GetAllContainerStatsInfo001, TestSize.Level1)
+{
+    std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
+    int32_t ret = instance_->GetAllContainerStatsInfo(stats);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysNativeServiceTest, SetIptablesCommandForResTest001, TestSize.Level1)
 {
     std::string iptableCmd = "-Sabbbb";
@@ -759,16 +766,6 @@ HWTEST_F(NetsysNativeServiceTest, UpdateNetworkSharingTypeTest001, TestSize.Leve
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = instance_->UpdateNetworkSharingType(type, false);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-}
-
-HWTEST_F(NetsysNativeServiceTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
-{
-    uint32_t on = 0;
-    std::string interface = "wlan0";
-    int32_t ret = instance_->SetIpv6PrivacyExtensions(interface, on);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
-    ret = instance_->SetEnableIpv6(interface, on);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetsysNative

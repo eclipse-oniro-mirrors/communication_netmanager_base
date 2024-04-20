@@ -1454,6 +1454,32 @@ int32_t NetConnService::GetIfaceNameByType(NetBearType bearerType, const std::st
     return NETMANAGER_SUCCESS;
 }
 
+int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
+                                              std::unordered_map<std::string, std::string> &ifaceNameIdentMaps)
+{
+    if (bearerType < BEARER_CELLULAR || bearerType >= BEARER_DEFAULT) {
+        return NET_CONN_ERR_NET_TYPE_NOT_FOUND;
+    }
+
+    auto suppliers = GetNetSupplierFromList(bearerType);
+    for (auto supplier : suppliers) {
+        if (supplier == nullptr) {
+            continue;
+        }
+        std::shared_ptr<Network> network = supplier->GetNetwork();
+        if (network == nullptr) {
+            continue;
+        }
+        std::string ifaceName = network->GetNetLinkInfo().ifaceName_;
+        if (!ifaceName.empty()) {
+            continue;
+        }
+        std::string ident = network->GetNetLinkInfo().ident_;
+        ifaceNameIdentMaps.emplace(std::move(ifaceName), std::move(ident));
+    }
+    return NETMANAGER_SUCCESS;
+}
+
 int32_t NetConnService::GetGlobalHttpProxy(HttpProxy &httpProxy)
 {
     LoadGlobalHttpProxy();

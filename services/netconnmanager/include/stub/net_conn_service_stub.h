@@ -60,6 +60,7 @@ private:
     int32_t OnHasDefaultNet(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetIfaceNames(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetIfaceNameByType(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetIfaceNameIdentMaps(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetDetectionCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnRegisterNetDetectionCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnNetDetection(MessageParcel &data, MessageParcel &reply);

@@ -32,7 +32,17 @@ constexpr const char *UID_TABLE_CREATE_PARAM =
     "RxBytes INTEGER NOT NULL,"
     "RxPackets INTEGER NOT NULL,"
     "TxBytes INTEGER NOT NULL,"
-    "TxPackets INTEGER NOT NULL";
+    "TxPackets INTEGER NOT NULL,"
+    "Ident INTEGER NOT NULL";
+constexpr const char *UID_SIM_TABLE_CREATE_PARAM =
+    "UID INTEGER NOT NULL,"
+    "IFace CHAR(50) NOT NULL,"
+    "Date INTEGER NOT NULL,"
+    "RxBytes INTEGER NOT NULL,"
+    "RxPackets INTEGER NOT NULL,"
+    "TxBytes INTEGER NOT NULL,"
+    "TxPackets INTEGER NOT NULL,"
+    "Ident INTEGER NOT NULL";
 constexpr const char *IFACE_TABLE_CREATE_PARAM =
     "IFace CHAR(50) NOT NULL,"
     "Date INTEGER NOT NULL,"
@@ -40,12 +50,14 @@ constexpr const char *IFACE_TABLE_CREATE_PARAM =
     "RxPackets INTEGER NOT NULL,"
     "TxBytes INTEGER NOT NULL,"
     "TxPackets INTEGER NOT NULL";
-constexpr const char *UID_TABLE_PARAM_LIST = "UID,IFace,Date,RxBytes,RxPackets,TxBytes,TxPackets";
+constexpr const char *UID_TABLE_PARAM_LIST = "UID,IFace,Date,RxBytes,RxPackets,TxBytes,TxPackets,Ident";
+constexpr const char *UID_SIM_TABLE_PARAM_LIST = "UID,IFace,Date,RxBytes,RxPackets,TxBytes,TxPackets,Ident";
 constexpr const char *IFACE_TABLE_PARAM_LIST = "IFace,Date,RxBytes,RxPackets,TxBytes,TxPackets";
 constexpr const char *IFACE_TABLE = "T_iface";
 constexpr const char *UID_TABLE = "T_uid";
+constexpr const char *UID_SIM_TABLE = "T_uid_sim";
 
-constexpr int32_t UID_PARAM_NUM = 7;
+constexpr int32_t UID_PARAM_NUM = 8;
 
 enum class DataType {
     UID,

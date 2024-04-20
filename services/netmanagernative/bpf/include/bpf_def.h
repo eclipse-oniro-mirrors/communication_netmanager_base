@@ -58,6 +58,9 @@ typedef stats_value iface_stats_value;
 typedef __u64 app_uid_stats_key;
 typedef stats_value app_uid_stats_value;
 
+typedef stats_key app_uid_sim_stats_key;
+typedef stats_value app_uid_sim_stats_value;
+
 typedef stats_key app_uid_if_stats_key;
 typedef stats_value app_uid_if_stats_value;
 

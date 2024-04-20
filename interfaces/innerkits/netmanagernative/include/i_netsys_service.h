@@ -117,6 +117,7 @@ public:
     virtual int32_t GetUidStats(uint64_t &stats, uint32_t type, uint32_t uid) = 0;
     virtual int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) = 0;
     virtual int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
+    virtual int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) = 0;
     virtual int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) = 0;
     virtual int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) = 0;
     virtual int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) = 0;

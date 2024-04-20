@@ -296,6 +296,48 @@ int32_t NetStatsClient::GetAllStatsInfo(std::vector<NetStatsInfo> &infos)
     return proxy->GetAllStatsInfo(infos);
 }
 
+int32_t NetStatsClient::GetAllContainerStatsInfo(std::vector<NetStatsInfo> &infos)
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetAllContainerStatsInfo(infos);
+}
+
+int32_t NetStatsClient::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
+                                                 const sptr<NetStatsNetwork> &network)
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetTrafficStatsByNetwork(infos, network);
+}
+
+int32_t NetStatsClient::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequence> &infos, uint32_t uid,
+                                                    const sptr<NetStatsNetwork> &network)
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetTrafficStatsByUidNetwork(infos, uid, network);
+}
+
+int32_t NetStatsClient::SetAppStats(const PushStatsInfo &info)
+{
+    sptr<INetStatsService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->SetAppStats(info);
+}
+
 int32_t NetStatsClient::GetSockfdRxBytes(uint64_t &stats, int32_t sockfd)
 {
     if (sockfd <= 0) {

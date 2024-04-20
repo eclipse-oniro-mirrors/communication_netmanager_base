@@ -46,6 +46,7 @@ private:
     using ServiceInterface = int32_t (NetsysNativeServiceStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, ServiceInterface> opToInterfaceMap_;
     void InitNetInfoOpToInterfaceMap();
+    void InitNetInfoOpToInterfaceMapPart2();
     void InitBandwidthOpToInterfaceMap();
     void InitFirewallOpToInterfaceMap();
     void InitOpToInterfaceMapExt();
@@ -117,6 +118,7 @@ private:
     int32_t CmdGetTotalStats(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetUidStats(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetIfaceStats(MessageParcel &data, MessageParcel &reply);
+    int32_t CmdGetAllContainerStatsInfo(MessageParcel &data, MessageParcel &reply);
     int32_t CmdGetAllStatsInfo(MessageParcel &data, MessageParcel &reply);
     int32_t CmdSetIptablesCommandForRes(MessageParcel &data, MessageParcel &reply);
     int32_t CmdNetDiagPingHost(MessageParcel &data, MessageParcel &reply);

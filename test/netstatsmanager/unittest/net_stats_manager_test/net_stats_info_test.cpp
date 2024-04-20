@@ -24,9 +24,11 @@ constexpr int64_t TEST_RXBYTES = 15453;
 constexpr int64_t TEST_TXBYTES = 45115;
 constexpr int64_t TEST_RXPACKETS = 5646894;
 constexpr int64_t TEST_TXPACKETS = 7894;
+constexpr const char *TEST_IDENT = "2";
 NetStatsInfo GetNetStatsInfoData()
 {
     NetStatsInfo info;
+    info.ident_ = TEST_IDENT;
     info.rxBytes_ = TEST_RXBYTES;
     info.rxPackets_ = TEST_RXPACKETS;
     info.txBytes_ = TEST_TXBYTES;
@@ -65,6 +67,7 @@ HWTEST_F(NetStatsInfoTest, MarshallingTest001, TestSize.Level1)
     EXPECT_TRUE(info.Marshalling(parcel));
     NetStatsInfo result;
     EXPECT_TRUE(NetStatsInfo::Unmarshalling(parcel, result));
+    EXPECT_EQ(result.ident_, info.ident_);
     EXPECT_EQ(result.rxBytes_, info.rxBytes_);
     EXPECT_EQ(result.txBytes_, info.txBytes_);
     EXPECT_EQ(result.rxPackets_, info.rxPackets_);
@@ -83,6 +86,7 @@ HWTEST_F(NetStatsInfoTest, MarshallingUnmarshallingTest002, TestSize.Level1)
     EXPECT_TRUE(NetStatsInfo::Marshalling(parcel, info));
     NetStatsInfo result;
     EXPECT_TRUE(NetStatsInfo::Unmarshalling(parcel, result));
+    EXPECT_EQ(result.ident_, info.ident_);
     EXPECT_EQ(result.rxBytes_, info.rxBytes_);
     EXPECT_EQ(result.txBytes_, info.txBytes_);
     EXPECT_EQ(result.rxPackets_, info.rxPackets_);

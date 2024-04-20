@@ -25,6 +25,8 @@
 #include "get_iface_rxbytes_context.h"
 #include "get_iface_stats_context.h"
 #include "get_iface_uid_stats_context.h"
+#include "get_traffic_stats_by_network_context.h"
+#include "get_traffic_stats_by_uid_network_context.h"
 #include "get_uid_rxbytes_context.h"
 #include "update_iface_stats_context.h"
 #include "get_sockfd_rxbytes_context.h"
@@ -50,6 +52,8 @@ public:
     static bool ExecUpdateStatsData(UpdateStatsDataContext *context);
     static bool ExecGetSockfdRxBytes(GetSockfdRxBytesContext *context);
     static bool ExecGetSockfdTxBytes(GetSockfdTxBytesContext *context);
+    static bool ExecGetTrafficStatsByNetwork(GetTrafficStatsByNetworkContext *context);
+    static bool ExecGetTrafficStatsByUidNetwork(GetTrafficStatsByUidNetworkContext *context);
 
     static napi_value GetCellularRxBytesCallback(GetCellularRxBytesContext *context);
     static napi_value GetCellularTxBytesCallback(GetCellularTxBytesContext *context);
@@ -65,6 +69,8 @@ public:
     static napi_value UpdateStatsDataCallback(UpdateStatsDataContext *context);
     static napi_value GetSockfdRxBytesCallback(GetSockfdRxBytesContext *context);
     static napi_value GetSockfdTxBytesCallback(GetSockfdTxBytesContext *context);
+    static napi_value GetGetTrafficStatsByNetworkCallback(GetTrafficStatsByNetworkContext *context);
+    static napi_value GetGetTrafficStatsByUidNetworkCallback(GetTrafficStatsByUidNetworkContext *context);
 
     static napi_value CreateCodeMessage(napi_env env, const std::string &msg, int32_t code);
 };

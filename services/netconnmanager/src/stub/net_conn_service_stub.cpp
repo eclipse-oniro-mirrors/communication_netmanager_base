@@ -130,6 +130,8 @@ void NetConnServiceStub::InitQueryFuncToInterfaceMap()
         &NetConnServiceStub::OnGetIfaceNames, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GET_IFACENAME_BY_TYPE)] = {
         &NetConnServiceStub::OnGetIfaceNameByType, {}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_GET_IFACENAME_IDENT_MAPS)] = {
+        &NetConnServiceStub::OnGetIfaceNameIdentMaps, {}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_GETDEFAULTNETWORK)] = {
         &NetConnServiceStub::OnGetDefaultNet, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_HASDEFAULTNET)] = {
@@ -657,6 +659,34 @@ int32_t NetConnServiceStub::OnGetIfaceNameByType(MessageParcel &data, MessagePar
     if (ret == NETMANAGER_SUCCESS) {
         if (!reply.WriteString(ifaceName)) {
             return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+    }
+    return ret;
+}
+
+int32_t NetConnServiceStub::OnGetIfaceNameIdentMaps(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t netType = 0;
+    if (!data.ReadUint32(netType)) {
+        return NETMANAGER_ERR_READ_DATA_FAIL;
+    }
+    if (netType > static_cast<uint32_t>(NetBearType::BEARER_DEFAULT)) {
+        return NETMANAGER_ERR_INTERNAL;
+    }
+    NetBearType bearerType = static_cast<NetBearType>(netType);
+    std::unordered_map<std::string, std::string> ifaceNameIdentMaps;
+    int32_t ret = GetIfaceNameIdentMaps(bearerType, ifaceNameIdentMaps);
+    if (!reply.WriteInt32(ret)) {
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+    }
+    if (ret == NETMANAGER_SUCCESS) {
+        if (!reply.WriteUint32(ifaceNameIdentMaps.size())) {
+            return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+        }
+        for (const auto &item: ifaceNameIdentMaps) {
+            if (!reply.WriteString(item.first) || !reply.WriteString(item.second)) {
+                return NETMANAGER_ERR_WRITE_REPLY_FAIL;
+            }
         }
     }
     return ret;

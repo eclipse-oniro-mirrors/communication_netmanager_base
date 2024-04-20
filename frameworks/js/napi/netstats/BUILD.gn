@@ -53,6 +53,8 @@ ohos_shared_library("statistics") {
     "src/context/get_iface_stats_context.cpp",
     "src/context/get_iface_uid_stats_context.cpp",
     "src/context/get_sockfd_rxbytes_context.cpp",
+    "src/context/get_traffic_stats_by_network_context.cpp",
+    "src/context/get_traffic_stats_by_uid_network_context.cpp",
     "src/context/get_uid_rxbytes_context.cpp",
     "src/context/update_iface_stats_context.cpp",
     "src/statistics_async_work.cpp",

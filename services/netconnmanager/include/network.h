@@ -49,6 +49,7 @@ public:
     void UpdateDns(const NetLinkInfo &netLinkInfo);
     void UpdateMtu(const NetLinkInfo &netLinkInfo);
     void UpdateTcpBufferSize(const NetLinkInfo &netLinkInfo);
+    void UpdateStatsCached(const NetLinkInfo &netLinkInfo);
     void RegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
     int32_t UnRegisterNetDetectionCallback(const sptr<INetDetectionCallback> &callback);
     void StartNetDetection(bool needReport);

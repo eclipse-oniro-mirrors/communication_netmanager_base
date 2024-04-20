@@ -43,6 +43,10 @@ private:
     int32_t OnGetUidRxBytes(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetUidTxBytes(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetAllStatsInfo(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetAllContainerStatsInfo(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetTrafficStatsByNetwork(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetTrafficStatsByUidNetwork(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetAppStats(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetIfaceStatsDetail(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetUidStatsDetail(MessageParcel &data, MessageParcel &reply);
     int32_t OnUpdateIfacesStats(MessageParcel &data, MessageParcel &reply);

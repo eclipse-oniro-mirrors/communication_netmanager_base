@@ -87,6 +87,43 @@ int32_t NetsysBpfStats::GetUidStats(uint64_t &stats, StatsType statsType, uint32
     return GetNumberFromStatsValue(stats, statsType, uidStats);
 }
 
+int32_t NetsysBpfStats::GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
+{
+    BpfMapper<stats_key, stats_value> uidSimStatsMap(APP_UID_SIM_STATS_MAP_PATH, BPF_F_RDONLY);
+    if (!uidSimStatsMap.IsValid()) {
+        return STATS_ERR_INVALID_IFACE_NAME_MAP;
+    }
+
+    stats.clear();
+    char if_name[IFNAME_SIZE] = {0};
+    auto keys = uidSimStatsMap.GetAllKeys();
+    for (const auto &k : keys) {
+        stats_value v = {};
+        if (uidSimStatsMap.Read(k, v) < 0) {
+            NETNATIVE_LOGE("Read uid_sim_map err");
+            return STATS_ERR_READ_BPF_FAIL;
+        }
+
+        NetStatsInfo tempStats;
+        tempStats.uid_ = k.uId;
+        if (memset_s(if_name, sizeof(if_name), 0, sizeof(if_name)) != EOK) {
+            return STATS_ERR_READ_BPF_FAIL;
+        }
+
+        char *pName = if_indextoname(k.ifIndex, if_name);
+        if (pName != nullptr) {
+            tempStats.iface_ = pName;
+        }
+        tempStats.rxBytes_ = v.rxBytes;
+        tempStats.txBytes_ = v.txBytes;
+        tempStats.rxPackets_ = v.rxPackets;
+        tempStats.txPackets_ = v.txPackets;
+        stats.emplace_back(tempStats);
+    }
+
+    return NETSYS_SUCCESS;
+}
+
 int32_t NetsysBpfStats::GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats)
 {
     BpfMapper<stats_key, stats_value> uidIfaceStatsMap(APP_UID_IF_STATS_MAP_PATH, BPF_F_RDONLY);
