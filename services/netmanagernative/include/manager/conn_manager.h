@@ -234,7 +234,7 @@ private:
     SafeMap<int32_t, std::shared_ptr<NetsysNetwork>> networks_;
     std::mutex interfaceNameMutex_;
     std::tuple<bool, std::shared_ptr<NetsysNetwork>> FindNetworkById(int32_t netId);
-    int32_t GetNetworkForInterface(std::string &interfaceName);
+    int32_t GetNetworkForInterface(int32_t netId, std::string &interfaceName);
     RouteManager::TableType GetTableType(int32_t netId);
 };
 } // namespace nmd

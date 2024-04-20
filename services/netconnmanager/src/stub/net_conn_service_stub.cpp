@@ -43,6 +43,8 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnRegisterNetConnCallback, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REGISTER_NET_CONN_CALLBACK_BY_SPECIFIER)] = {
         &NetConnServiceStub::OnRegisterNetConnCallbackBySpecifier, {Permission::GET_NETWORK_INFO}};
+    memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_REQUEST_NET_CONNECTION)] = {
+        &NetConnServiceStub::OnRequestNetConnectionBySpecifier, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UNREGISTER_NET_CONN_CALLBACK)] = {
         &NetConnServiceStub::OnUnregisterNetConnCallback, {Permission::GET_NETWORK_INFO}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_UPDATE_NET_STATE_FOR_TEST)] = {
@@ -81,6 +83,11 @@ NetConnServiceStub::NetConnServiceStub()
         &NetConnServiceStub::OnRemoveNetworkRoute, {Permission::CONNECTIVITY_INTERNAL}};
     memberFuncMap_[static_cast<uint32_t>(ConnInterfaceCode::CMD_NM_IS_PREFER_CELLULAR_URL)] = {
         &NetConnServiceStub::OnIsPreferCellularUrl, {Permission::GET_NETWORK_INFO}};
+    InitAll();
+}
+
+void NetConnServiceStub::InitAll()
+{
     InitInterfaceFuncToInterfaceMap();
     InitResetNetFuncToInterfaceMap();
     InitStaticArpToInterfaceMap();
@@ -314,7 +321,7 @@ int32_t NetConnServiceStub::OnRegisterNetSupplier(MessageParcel &data, MessagePa
         if (!data.ReadUint32(value)) {
             return NETMANAGER_ERR_READ_DATA_FAIL;
         }
-        if (value < NET_CAPABILITY_INTERNAL_DEFAULT) {
+        if (value < NET_CAPABILITY_END) {
             netCaps.insert(static_cast<NetCap>(value));
         }
     }
@@ -416,6 +423,30 @@ int32_t NetConnServiceStub::OnRegisterNetConnCallbackBySpecifier(MessageParcel &
     }
 
     result = RegisterNetConnCallback(netSpecifier, callback, timeoutMS);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetConnServiceStub::OnRequestNetConnectionBySpecifier(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NetSpecifier> netSpecifier = NetSpecifier::Unmarshalling(data);
+    uint32_t timeoutMS = data.ReadUint32();
+    int32_t result = NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL;
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        NETMGR_LOG_E("callback ptr is nullptr.");
+        reply.WriteInt32(result);
+        return result;
+    }
+
+    sptr<INetConnCallback> callback = iface_cast<INetConnCallback>(remote);
+    if (callback == nullptr) {
+        result = NETMANAGER_ERR_LOCAL_PTR_NULL;
+        reply.WriteInt32(result);
+        return result;
+    }
+
+    result = RequestNetConnection(netSpecifier, callback, timeoutMS);
     reply.WriteInt32(result);
     return result;
 }

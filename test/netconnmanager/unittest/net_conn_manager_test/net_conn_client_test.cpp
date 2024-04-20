@@ -853,6 +853,73 @@ HWTEST_F(NetConnClientTest, UnRegisterNetConnCallback001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RequestNetConnection001
+ * @tc.desc: Test NetConnClient::RequestNetConnection, not applying for
+ * permission,return NETMANAGER_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RequestNetConnection001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    netSpecifier->netCapabilities_.bearerTypes_.emplace(NetManagerStandard::BEARER_CELLULAR);
+    netSpecifier->netCapabilities_.netCaps_.emplace(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT);
+    sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
+    uint32_t timesOut = 0;
+    auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timesOut);
+    ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: RequestNetConnection002
+ * @tc.desc: Test NetConnClient::RequestNetConnection, not applying for
+ * permission,return NETMANAGER_ERR_PARAMETER_ERROR
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RequestNetConnection002, TestSize.Level1)
+{
+    sptr<NetSpecifier> netSpecifier = nullptr;
+    sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
+    uint32_t timesOut = 1;
+    auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timesOut);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+/**
+ * @tc.name: RequestNetConnection003
+ * @tc.desc: Test NetConnClient::RequestNetConnection, not applying for
+ * permission,return NETMANAGER_ERR_PARAMETER_ERROR
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RequestNetConnection003, TestSize.Level1)
+{
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
+    uint32_t timesOut = 1;
+    auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timesOut);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);
+}
+
+/**
+ * @tc.name: RequestNetConnection004
+ * @tc.desc: Test NetConnClient::RequestNetConnection, not applying for
+ * permission,return NETMANAGER_ERR_PERMISSION_DENIED
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, RequestNetConnection004, TestSize.Level1)
+{
+    sptr<NetSpecifier> netSpecifier = new (std::nothrow) NetSpecifier();
+    netSpecifier->netCapabilities_.bearerTypes_.emplace(NetManagerStandard::BEARER_CELLULAR);
+    netSpecifier->netCapabilities_.netCaps_.emplace(NetManagerStandard::NET_CAPABILITY_INTERNAL_DEFAULT);
+    sptr<INetConnCallbackTest> callback = new (std::nothrow) INetConnCallbackTest();
+    uint32_t timesOut = 0;
+    auto ret = NetConnClient::GetInstance().RequestNetConnection(netSpecifier, callback, timesOut);
+    ret = NetConnClient::GetInstance().UnregisterNetConnCallback(callback);
+    EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
+}
+
+/**
  * @tc.name: UpdateNetSupplierInfo001
  * @tc.desc: Test NetConnClient::UpdateNetSupplierInfo, not applying for
  * permission,return NETMANAGER_ERR_PERMISSION_DENIED

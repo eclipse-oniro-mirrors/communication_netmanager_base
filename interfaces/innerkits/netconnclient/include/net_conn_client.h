@@ -142,6 +142,18 @@ public:
                                     const uint32_t &timeoutMS);
 
     /**
+     * Request net connection callback by NetSpecifier
+     *
+     * @param netSpecifier specifier information
+     * @param callback The callback of INetConnCallback interface
+     * @param timeoutMS net connection time out
+     * @return Returns 0, successfully register net connection callback, otherwise it will failed
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t RequestNetConnection(const sptr<NetSpecifier> netSpecifier, const sptr<INetConnCallback> callback,
+                                    const uint32_t timeoutMS);
+    /**
      * Unregister net connection callback
      *
      * @param callback The callback of INetConnCallback interface

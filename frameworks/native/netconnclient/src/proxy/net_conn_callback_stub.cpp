@@ -101,7 +101,7 @@ int32_t NetConnCallbackStub::OnNetCapabilitiesChange(MessageParcel &data, Messag
         if (!data.ReadUint32(value)) {
             return NETMANAGER_ERR_READ_DATA_FAIL;
         }
-        if (value < NET_CAPABILITY_INTERNAL_DEFAULT) {
+        if (value < NET_CAPABILITY_END) {
             netAllCap->netCaps_.insert(static_cast<NetCap>(value));
         }
     }

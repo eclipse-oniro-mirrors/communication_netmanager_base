@@ -16,6 +16,7 @@
 #ifndef NET_CONN_SERVICE_H
 #define NET_CONN_SERVICE_H
 
+#include <cstdint>
 #include <functional>
 #include <list>
 #include <memory>
@@ -132,6 +133,17 @@ public:
     int32_t RegisterNetConnCallback(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> callback,
                                     const uint32_t &timeoutMS) override;
 
+    /**
+     * Request net connection callback by NetSpecifier
+     *
+     * @param netSpecifier specifier information
+     * @param callback The callback of INetConnCallback interface
+     * @param timeoutMS net connection time out
+     *
+     * @return Returns 0, successfully register net connection callback, otherwise it will failed
+     */
+    int32_t RequestNetConnection(const sptr<NetSpecifier> netSpecifier, const sptr<INetConnCallback> callback,
+                                    const uint32_t timeoutMS) override;
     /**
      * Unregister net connection callback
      *
@@ -315,6 +327,8 @@ public:
     int32_t IsPreferCellularUrl(const std::string& url, bool& preferCellular) override;
     int32_t RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
     int32_t UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback) override;
+    bool IsAddrInOtherNetwork(const std::string &ifaceName, int32_t netId, const INetAddr &netAddr);
+    bool IsIfaceNameInUse(const std::string &ifaceName, int32_t netId);
     int32_t UpdateSupplierScore(NetBearType bearerType, bool isBetter) override;
 
 private:
@@ -347,6 +361,11 @@ protected:
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
 
 private:
+    enum RegisterType {
+        INVALIDTYPE,
+        REGISTER,
+        REQUEST,
+    };
     bool Init();
     void RecoverInfo();
     std::list<sptr<NetSupplier>> GetNetSupplierFromList(NetBearType bearerType, const std::string &ident = "");
@@ -357,6 +376,8 @@ private:
     void CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackType type);
     void CallbackForAvailable(sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback);
     uint32_t FindBestNetworkForRequest(sptr<NetSupplier> &supplier, std::shared_ptr<NetActivate> &netActivateNetwork);
+    uint32_t FindInternalNetworkForRequest(std::shared_ptr<NetActivate> &netActivateNetwork,
+                                           sptr<NetSupplier> &supplier);
     void SendRequestToAllNetwork(std::shared_ptr<NetActivate> request);
     void SendBestScoreAllNetwork(uint32_t reqId, int32_t bestScore, uint32_t supplierId);
     void SendAllRequestToNetwork(sptr<NetSupplier> supplier);
@@ -367,7 +388,9 @@ private:
     void CreateDefaultRequest();
     int32_t RegUnRegNetDetectionCallback(int32_t netId, const sptr<INetDetectionCallback> &callback, bool isReg);
     int32_t GenerateNetId();
+    int32_t GenerateInternalNetId();
     bool FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId);
+    bool FindSameCallback(const sptr<INetConnCallback> &callback, uint32_t &reqId, RegisterType &registerType);
     void GetDumpMessage(std::string &message);
     sptr<NetSupplier> FindNetSupplier(uint32_t supplierId);
     int32_t RegisterNetSupplierAsync(NetBearType bearerType, const std::string &ident, const std::set<NetCap> &netCaps,
@@ -375,6 +398,8 @@ private:
     int32_t UnregisterNetSupplierAsync(uint32_t supplierId);
     int32_t RegisterNetSupplierCallbackAsync(uint32_t supplierId, const sptr<INetSupplierCallback> &callback);
     int32_t RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
+                                         const uint32_t &timeoutMS, const uint32_t callingUid);
+    int32_t RequestNetConnectionAsync(const sptr<NetSpecifier> &netSpecifier, const sptr<INetConnCallback> &callback,
                                          const uint32_t &timeoutMS, const uint32_t callingUid);
     int32_t UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback, const uint32_t callingUid);
     int32_t RegUnRegNetDetectionCallbackAsync(int32_t netId, const sptr<INetDetectionCallback> &callback, bool isReg);
@@ -389,8 +414,10 @@ private:
     void LoadGlobalHttpProxy();
     void UpdateGlobalHttpProxy(const HttpProxy &httpProxy);
     void ActiveHttpProxy();
-    void DecreaseNetConnCallbackCntForUid(const uint32_t callingUid);
-    int32_t IncreaseNetConnCallbackCntForUid(const uint32_t callingUid);
+    void DecreaseNetConnCallbackCntForUid(const uint32_t callingUid,
+        const RegisterType registerType = REGISTER);
+    int32_t IncreaseNetConnCallbackCntForUid(const uint32_t callingUid,
+        const RegisterType registerType = REGISTER);
 
     void OnNetSysRestart();
 
@@ -401,6 +428,8 @@ private:
     int32_t NetDetectionForDnsHealthSync(int32_t netId, bool dnsHealthSuccess);
     std::vector<sptr<NetSupplier>> FindSupplierWithInternetByBearerType(NetBearType bearerType);
 
+    // for NET_CAPABILITY_INTERNAL_DEFAULT
+    bool IsInRequestNetUids(int32_t uid);
 private:
     enum ServiceRunningState {
         STATE_STOPPED = 0,
@@ -415,10 +444,12 @@ private:
     NET_SUPPLIER_MAP netSuppliers_;
     NET_ACTIVATE_MAP netActivates_;
     NET_UIDREQUEST_MAP netUidRequest_;
+    NET_UIDREQUEST_MAP internalDefaultUidRequest_;
     NET_NETWORK_MAP networks_;
     std::unique_ptr<NetScore> netScore_ = nullptr;
     sptr<NetConnServiceIface> serviceIface_ = nullptr;
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
+    std::atomic<int32_t> internalNetIdLastValue_ = MIN_INTERNAL_NET_ID;
     std::atomic<bool> isGlobalProxyLoaded_ = false;
     HttpProxy globalHttpProxy_;
     std::mutex globalHttpProxyMutex_;

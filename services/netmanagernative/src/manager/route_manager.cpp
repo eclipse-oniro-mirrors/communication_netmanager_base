@@ -24,6 +24,7 @@
 #include <net/if.h>
 #include <netlink_socket.h>
 #include <sstream>
+#include <cstdint>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
@@ -54,6 +55,7 @@ constexpr int32_t RULE_LEVEL_SHARING = 14000;
 constexpr int32_t RULE_LEVEL_DEFAULT = 16000;
 constexpr uint32_t ROUTE_VPN_NETWORK_TABLE = 98;
 constexpr uint32_t ROUTE_LOCAL_NETWORK_TABLE = 99;
+constexpr uint32_t ROUTE_INTERNAL_DEFAULT_TABLE = 1;
 constexpr uint32_t OUTPUT_MAX = 128;
 constexpr uint32_t BIT_32_LEN = 32;
 constexpr uint32_t BIT_MAX_LEN = 255;
@@ -64,6 +66,7 @@ constexpr uint16_t LOCAL_NET_ID = 99;
 constexpr uint16_t NETID_UNSET = 0;
 constexpr uint32_t MARK_UNSET = 0;
 constexpr uid_t UID_ROOT = 0;
+constexpr std::pair<uid_t, uid_t> UID_ALLOW_INTERNAL = {7023, 7023};
 constexpr uint32_t ROUTEMANAGER_SUCCESS = 0;
 constexpr uint32_t ROUTEMANAGER_ERROR = -1;
 constexpr bool ADD_CONTROL = true;
@@ -200,9 +203,13 @@ int32_t RouteManager::RemoveInterfaceFromPhysicalNetwork(uint16_t netId, const s
         NETNATIVE_LOGE("UpdatePhysicalNetwork err, error is %{public}d", ret);
         return ret;
     }
-    if (int32_t ret = ClearRoutes(interfaceName)) {
+    if (int32_t ret = ClearRoutes(interfaceName, netId)) {
         NETNATIVE_LOGE("ClearRoutes err, error is %{public}d", ret);
         return ret;
+    }
+    if (NetManagerStandard::IsInternalNetId(netId)) {
+        NETNATIVE_LOGI("InternalNetId skip");
+        return 0;
     }
     if (int32_t ret = ClearSharingRules(interfaceName)) {
         NETNATIVE_LOGE("ClearSharingRules err, error is %{public}d", ret);
@@ -507,16 +514,16 @@ int32_t RouteManager::ClearRules()
     return ClearRouteInfo(RTM_GETRULE, 0) >= 0 ? 0 : -1;
 }
 
-int32_t RouteManager::ClearRoutes(const std::string &interfaceName)
+int32_t RouteManager::ClearRoutes(const std::string &interfaceName, int32_t netId)
 {
     std::lock_guard lock(RouteManager::interfaceToTableLock_);
-    uint32_t table = FindTableByInterfacename(interfaceName);
+    uint32_t table = FindTableByInterfacename(interfaceName, netId);
     NETNATIVE_LOGI("ClearRoutes--table==:%{public}d", table);
     if (table == RT_TABLE_UNSPEC) {
         return -1;
     }
     int32_t ret = ClearRouteInfo(RTM_GETROUTE, table);
-    if (ret == 0) {
+    if (ret == 0 && table != ROUTE_INTERNAL_DEFAULT_TABLE) {
         interfaceToTable_.erase(interfaceName);
     }
 
@@ -552,7 +559,7 @@ int32_t RouteManager::UpdatePhysicalNetwork(uint16_t netId, const std::string &i
                                             NetworkPermission permission, bool add)
 {
     NETNATIVE_LOGI("UpdatePhysicalNetwork,add===%{public}d", add);
-    uint32_t table = FindTableByInterfacename(interfaceName);
+    uint32_t table = FindTableByInterfacename(interfaceName, netId);
     if (table == RT_TABLE_UNSPEC) {
         NETNATIVE_LOGE("table == RT_TABLE_UNSPEC, this is error");
         return -1;
@@ -622,6 +629,10 @@ int32_t RouteManager::UpdateExplicitNetworkRule(uint16_t netId, uint32_t table, 
     ruleInfo.ruleIif = RULEIIF_LOOPBACK;
     ruleInfo.ruleOif = RULEOIF_NULL;
 
+    if (NetManagerStandard::IsInternalNetId(netId)) {
+        return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL,
+            ruleInfo, UID_ALLOW_INTERNAL.first, UID_ALLOW_INTERNAL.second);
+    }
     return UpdateRuleInfo(add ? RTM_NEWRULE : RTM_DELRULE, FR_ACT_TO_TBL, ruleInfo);
 }
 
@@ -846,8 +857,12 @@ int32_t RouteManager::SendRouteToKernel(uint16_t action, uint16_t routeFlag, rtm
     return SendNetlinkMsgToKernel(nlmsg.GetNetLinkMessage());
 }
 
-uint32_t RouteManager::FindTableByInterfacename(const std::string &interfaceName)
+uint32_t RouteManager::FindTableByInterfacename(const std::string &interfaceName, int32_t netId)
 {
+    NETNATIVE_LOGI("FindTableByInterfacename netId %{public}d", netId);
+    if (NetManagerStandard::IsInternalNetId(netId)) {
+        return ROUTE_INTERNAL_DEFAULT_TABLE;
+    }
     auto iter = interfaceToTable_.find(interfaceName);
     if (iter != interfaceToTable_.end()) {
         return iter->second;
@@ -872,6 +887,8 @@ uint32_t RouteManager::GetRouteTableFromType(TableType tableType, const std::str
             return ROUTE_LOCAL_NETWORK_TABLE;
         case RouteManager::VPN_NETWORK:
             return ROUTE_VPN_NETWORK_TABLE;
+        case RouteManager::INTERNAL_DEFAULT:
+            return ROUTE_INTERNAL_DEFAULT_TABLE;
         default:
             NETNATIVE_LOGE("tableType [%{tableType}d] is error", tableType);
             return RT_TABLE_UNSPEC;

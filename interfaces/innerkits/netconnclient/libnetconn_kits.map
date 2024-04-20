@@ -54,6 +54,7 @@
       "OHOS::NetManagerStandard::NetConnClient::OnRemoteDied(OHOS::wptr<OHOS::IRemoteObject> const&)";
       "OHOS::NetManagerStandard::NetConnClient::NetConnClient()";
       "OHOS::NetManagerStandard::NetConnClient::~NetConnClient()";
+      "OHOS::NetManagerStandard::NetConnClient::RequestNetConnection(OHOS::sptr<OHOS::NetManagerStandard::NetSpecifier>, OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback>, unsigned int)";
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetConnCallback(OHOS::sptr<OHOS::NetManagerStandard::NetSpecifier> const&, OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback>, unsigned int const&)";
       "OHOS::NetManagerStandard::NetConnClient::RegisterNetConnCallback(OHOS::sptr<OHOS::NetManagerStandard::INetConnCallback>)";
       "OHOS::NetManagerStandard::NetConnClient::RegisterPreAirplaneCallback(OHOS::sptr<OHOS::NetManagerStandard::IPreAirplaneCallback>)";

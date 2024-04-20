@@ -24,6 +24,7 @@
 #include "network.h"
 #include "route_utils.h"
 #include "securec.h"
+#include "net_conn_service_iface.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 
@@ -64,6 +65,11 @@ Network::Network(int32_t netId, uint32_t supplierId, const NetDetectionHandler &
 int32_t Network::GetNetId() const
 {
     return netId_;
+}
+
+uint32_t Network::GetSupplierId() const
+{
+    return supplierId_;
 }
 
 bool Network::operator==(const Network &network) const
@@ -119,18 +125,28 @@ bool Network::CreateVirtualNetwork()
     return true;
 }
 
+bool Network::IsAddrInOtherNetwork(const INetAddr &netAddr)
+{
+    return NetConnServiceIface().IsAddrInOtherNetwork(netLinkInfo_.ifaceName_, netId_, netAddr);
+}
+
+bool Network::IsIfaceNameInUse()
+{
+    return NetConnServiceIface().IsIfaceNameInUse(netLinkInfo_.ifaceName_, netId_);
+}
+
 bool Network::ReleaseBasicNetwork()
 {
     NETMGR_LOG_D("Enter ReleaseBasicNetwork");
     if (isPhyNetCreated_) {
         NETMGR_LOG_D("Destroy physical network");
         StopNetDetection();
-        for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
-            int32_t prefixLen = inetAddr.prefixlen_;
-            if (prefixLen == 0) {
-                prefixLen = Ipv4PrefixLen(inetAddr.netMask_);
+        if (!IsIfaceNameInUse()) {
+            for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+                int32_t prefixLen = inetAddr.prefixlen_ == 0 ? Ipv4PrefixLen(inetAddr.netMask_) : inetAddr.prefixlen_;
+                NetsysController::GetInstance().DelInterfaceAddress(
+                    netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
             }
-            NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_, inetAddr.address_, prefixLen);
         }
         for (const auto &route : netLinkInfo_.routeList_) {
             std::string destAddress = route.destination_.address_ + "/" + std::to_string(route.destination_.prefixlen_);
@@ -183,7 +199,8 @@ bool Network::UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo)
     UpdateTcpBufferSize(netLinkInfo);
 
     netLinkInfo_ = netLinkInfo;
-    if (netSupplierType_ != BEARER_VPN) {
+    if (netSupplierType_ != BEARER_VPN &&
+        netCaps_.find(NetCap::NET_CAPABILITY_INTERNET) != netCaps_.end()) {
         StartNetDetection(false);
     }
     return true;
@@ -235,15 +252,17 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
     // Update: remove old Ips first, then add the new Ips
     NETMGR_LOG_I("UpdateIpAddrs, old ip addrs size: [%{public}zu]", netLinkInfo_.netAddrList_.size());
     for (const auto &inetAddr : netLinkInfo_.netAddrList_) {
+        if (IsAddrInOtherNetwork(inetAddr)) {
+            continue;
+        }
         if (newNetLinkInfo.HasNetAddr(inetAddr)) {
             NETMGR_LOG_W("Same ip address:[%{public}s], there is not need to be deleted",
                          CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
             continue;
         }
         auto family = GetAddrFamily(inetAddr.address_);
-        auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_)
-                                             : ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_)
-                                                                     : Ipv4PrefixLen(inetAddr.netMask_));
+        auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_) :
+            ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_) : Ipv4PrefixLen(inetAddr.netMask_));
         int32_t ret = NetsysController::GetInstance().DelInterfaceAddress(netLinkInfo_.ifaceName_,
             inetAddr.address_, prefixLen);
         if (NETMANAGER_SUCCESS != ret) {
@@ -265,17 +284,24 @@ void Network::UpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
         }
     }
 
-    NETMGR_LOG_I("UpdateIpAddrs, new ip addrs size: [%{public}zu]", newNetLinkInfo.netAddrList_.size());
+    HandleUpdateIpAddrs(newNetLinkInfo);
+}
+
+void Network::HandleUpdateIpAddrs(const NetLinkInfo &newNetLinkInfo)
+{
+    NETMGR_LOG_I("HandleUpdateIpAddrs, new ip addrs size: [%{public}zu]", newNetLinkInfo.netAddrList_.size());
     for (const auto &inetAddr : newNetLinkInfo.netAddrList_) {
+        if (IsAddrInOtherNetwork(inetAddr)) {
+            continue;
+        }
         if (netLinkInfo_.HasNetAddr(inetAddr)) {
             NETMGR_LOG_W("Same ip address:[%{public}s], there is no need to add it again",
                          CommonUtils::ToAnonymousIp(inetAddr.address_).c_str());
             continue;
         }
         auto family = GetAddrFamily(inetAddr.address_);
-        auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_)
-                                             : ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_)
-                                                                     : Ipv4PrefixLen(inetAddr.netMask_));
+        auto prefixLen = inetAddr.prefixlen_ ? static_cast<int32_t>(inetAddr.prefixlen_) :
+            ((family == AF_INET6) ? Ipv6PrefixLen(inetAddr.netMask_) : Ipv4PrefixLen(inetAddr.netMask_));
         if (NETMANAGER_SUCCESS != NetsysController::GetInstance().AddInterfaceAddress(newNetLinkInfo.ifaceName_,
                                                                                       inetAddr.address_, prefixLen)) {
             SendSupplierFaultHiSysEvent(FAULT_UPDATE_NETLINK_INFO_FAILED, ERROR_MSG_ADD_NET_IP_ADDR_FAILED);
@@ -435,6 +461,11 @@ void Network::StartNetDetection(bool needReport)
         InitNetMonitor();
         return;
     }
+}
+
+void Network::SetNetCaps(const std::set<NetCap> &netCaps)
+{
+    netCaps_ = netCaps;
 }
 
 void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)

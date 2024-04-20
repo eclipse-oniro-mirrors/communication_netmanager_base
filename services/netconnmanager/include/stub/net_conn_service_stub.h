@@ -40,6 +40,7 @@ private:
     void InitStaticArpToInterfaceMap();
     void InitInterfaceFuncToInterfaceMap();
     void InitResetNetFuncToInterfaceMap();
+    void InitAll();
     bool CheckPermission(const std::set<std::string> &permissions);
     bool CheckPermissionWithCache(const std::set<std::string> &permissions);
     int32_t OnRequestCheck(uint32_t code, const std::set<std::string> &permissions);
@@ -50,6 +51,7 @@ private:
     int32_t OnRegisterNetSupplierCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetConnCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnRegisterNetConnCallbackBySpecifier(MessageParcel &data, MessageParcel &reply);
+    int32_t OnRequestNetConnectionBySpecifier(MessageParcel &data, MessageParcel &reply);
     int32_t OnUnregisterNetConnCallback(MessageParcel &data, MessageParcel &reply);
     int32_t OnUpdateNetStateForTest(MessageParcel &data, MessageParcel &reply);
     int32_t OnUpdateNetSupplierInfo(MessageParcel &data, MessageParcel &reply);
