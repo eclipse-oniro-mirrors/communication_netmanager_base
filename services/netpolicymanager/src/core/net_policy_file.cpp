@@ -191,8 +191,6 @@ void NetPolicyFile::ParseFirewallRule(const cJSON* const root, NetPolicy &netPol
         uint32_t chainType = CommonUtils::StrToUint(firewallRulesItemStr);
         cJSON *netDeniedList = cJSON_GetObjectItem(firewallRulesItem, CONFIG_FIREWALL_RULE_DENIEDLIST);
         cJSON *netAllowedList = cJSON_GetObjectItem(firewallRulesItem, CONFIG_FIREWALL_RULE_ALLOWEDLIST);
-        NETMGR_LOG_D("netDeniedList[%{public}u]: %{public}s", chainType, cJSON_PrintUnformatted(netDeniedList));
-        NETMGR_LOG_D("netAllowedList[%{public}u]: %{public}s", chainType, cJSON_PrintUnformatted(netAllowedList));
         uint32_t itemSize = cJSON_GetArraySize(netDeniedList);
         for (uint32_t j = 0; j < itemSize; j++) {
             cJSON *netDeniedListItem = cJSON_GetArrayItem(netDeniedList, j);
@@ -222,7 +220,6 @@ bool NetPolicyFile::Json2Obj(const std::string &content, NetPolicy &netPolicy)
     if (root == nullptr) {
         return false;
     }
-    NETMGR_LOG_D("root: %{public}s", cJSON_PrintUnformatted(root));
 
     cJSON *hosVersion = cJSON_GetObjectItem(root, CONFIG_HOS_VERSION);
     if (hosVersion == nullptr) {
@@ -263,7 +260,6 @@ bool NetPolicyFile::Obj2Json(const NetPolicy &netPolicy, std::string &content)
     AddBackgroundPolicy(root);
     AddQuotaPolicy(root);
     AddFirewallRule(root);
-    NETMGR_LOG_D("root: %{public}s", cJSON_PrintUnformatted(root));
     char *jsonStr = cJSON_Print(root);
     if (jsonStr == nullptr) {
         NETMGR_LOG_E("jsonStr write fail");
