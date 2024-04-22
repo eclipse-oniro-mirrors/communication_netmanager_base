@@ -791,7 +791,7 @@ void NetConnService::SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy)
     int32_t userId;
     int32_t ret = GetCallingUserId(userId);
     if (ret == NETMANAGER_SUCCESS) {
-        param.emplace("UserId", std::to_string(userId))
+        param.emplace("UserId", std::to_string(userId));
     } else {
         NETMGR_LOG_E("SendHttpProxyChangeBroadcast get calling userId fail.");
     }
