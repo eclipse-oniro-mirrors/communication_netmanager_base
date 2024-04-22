@@ -57,7 +57,8 @@
                 "relational_store",
                 "openssl",
                 "selinux",
-                "sqlite"
+                "sqlite",
+                "os_account"
             ],
             "third_party": [
                 "curl",
