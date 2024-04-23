@@ -288,7 +288,7 @@ void NetStatsCached::LoadIfaceNameIdentMaps()
         NETMGR_LOG_E("GetIfaceNameIdentMaps error. ret=%{public}d", ret);
         return;
     }
-    isIfaceNameIdentMapLoaded_ = true;
+    isIfaceNameIdentMapLoaded_.store(true);
 }
 
 void NetStatsCached::SetCycleThreshold(uint32_t threshold)
@@ -301,6 +301,10 @@ void NetStatsCached::SetCycleThreshold(uint32_t threshold)
 
 void NetStatsCached::ForceUpdateStats()
 {
+    if (isIfaceNameIdentMapLoaded_.load()) {
+        NETMGR_LOG_D("ifaceNameIdentMaps need to reload from netConnClient.");
+        isIfaceNameIdentMapLoaded_.store(false);
+    }
     isForce_ = true;
     std::function<void()> netCachedStats = [this] () {
         CacheStats();

@@ -1478,7 +1478,7 @@ int32_t NetConnService::GetIfaceNameIdentMaps(NetBearType bearerType,
             continue;
         }
         std::string ifaceName = network->GetNetLinkInfo().ifaceName_;
-        if (!ifaceName.empty()) {
+        if (ifaceName.empty()) {
             continue;
         }
         std::string ident = network->GetNetLinkInfo().ident_;

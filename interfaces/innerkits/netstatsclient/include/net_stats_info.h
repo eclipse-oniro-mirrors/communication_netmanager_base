@@ -33,7 +33,7 @@ struct NET_SYMBOL_VISIBLE NetStatsInfo final : public Parcelable {
 
     inline const std::string UidData() const
     {
-        return std::to_string(uid_) + ",'" + ident_ + "," + iface_ + "'," + std::to_string(date_) +
+        return std::to_string(uid_) + "," + ident_ + "," + iface_ + "," + std::to_string(date_) +
                "," + std::to_string(rxBytes_) + "," + std::to_string(rxPackets_) + "," + std::to_string(txBytes_) +
                "," + std::to_string(txPackets_);
     }

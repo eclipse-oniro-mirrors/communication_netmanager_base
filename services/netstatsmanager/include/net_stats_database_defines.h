@@ -33,7 +33,7 @@ constexpr const char *UID_TABLE_CREATE_PARAM =
     "RxPackets INTEGER NOT NULL,"
     "TxBytes INTEGER NOT NULL,"
     "TxPackets INTEGER NOT NULL,"
-    "Ident INTEGER NOT NULL";
+    "Ident CHAR(100) NOT NULL";
 constexpr const char *UID_SIM_TABLE_CREATE_PARAM =
     "UID INTEGER NOT NULL,"
     "IFace CHAR(50) NOT NULL,"
@@ -42,7 +42,7 @@ constexpr const char *UID_SIM_TABLE_CREATE_PARAM =
     "RxPackets INTEGER NOT NULL,"
     "TxBytes INTEGER NOT NULL,"
     "TxPackets INTEGER NOT NULL,"
-    "Ident INTEGER NOT NULL";
+    "Ident CHAR(100) NOT NULL";
 constexpr const char *IFACE_TABLE_CREATE_PARAM =
     "IFace CHAR(50) NOT NULL,"
     "Date INTEGER NOT NULL,"
