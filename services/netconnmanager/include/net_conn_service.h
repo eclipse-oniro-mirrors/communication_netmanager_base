@@ -38,9 +38,13 @@
 #include "network.h"
 #include "dns_result_call_back.h"
 #include "net_factoryreset_callback.h"
+#include "os_account_manager.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
+namespace {
+const int32_t PRIMARY_USER_ID = 100;
+}
 
 class NetConnService : public SystemAbility,
                        public INetActivateCallback,
@@ -439,6 +443,11 @@ private:
     int32_t GetDelayNotifyTime();
     int32_t NetDetectionForDnsHealthSync(int32_t netId, bool dnsHealthSuccess);
     std::vector<sptr<NetSupplier>> FindSupplierWithInternetByBearerType(NetBearType bearerType);
+    int32_t GetCallingUserId(int32_t &userId);
+    inline bool IsPrimaryUserId(const int32_t userId)
+    {
+        return userId == PRIMARY_USER_ID;
+    }
 
     // for NET_CAPABILITY_INTERNAL_DEFAULT
     bool IsInRequestNetUids(int32_t uid);

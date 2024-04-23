@@ -667,6 +667,13 @@ HWTEST_F(NetConnServiceTest, GetDefaultHttpProxyTest002, TestSize.Level1)
     ASSERT_TRUE(ret == NET_CONN_SUCCESS);
 }
 
+HWTEST_F(NetConnServiceTest, GetCallingUserIdTest001, TestSize.Level1)
+{
+    int32_t userId;
+    int32_t ret = NetConnService::GetInstance()->GetCallingUserId(userId);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetConnServiceTest, GetTest001, TestSize.Level1)
 {
     std::list<int32_t> netIdList;

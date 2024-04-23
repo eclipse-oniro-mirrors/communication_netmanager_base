@@ -788,6 +788,13 @@ void NetConnService::SendHttpProxyChangeBroadcast(const HttpProxy &httpProxy)
     info.data = "Global HttpProxy Changed";
     info.ordered = false;
     std::map<std::string, std::string> param = {{"HttpProxy", httpProxy.ToString()}};
+    int32_t userId;
+    int32_t ret = GetCallingUserId(userId);
+    if (ret == NETMANAGER_SUCCESS) {
+        param.emplace("UserId", std::to_string(userId));
+    } else {
+        NETMGR_LOG_E("SendHttpProxyChangeBroadcast get calling userId fail.");
+    }
     BroadcastManager::GetInstance().SendBroadcast(info, param);
 }
 
@@ -1769,15 +1776,37 @@ int32_t NetConnService::SetGlobalHttpProxy(const HttpProxy &httpProxy)
             globalHttpProxy_ = httpProxy;
         }
         httpProxyThreadCv_.notify_all();
+        int32_t userId;
+        int32_t ret = GetCallingUserId(userId);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("GlobalHttpProxy get calling userId fail.");
+            return ret;
+        }
         NetHttpProxyTracker httpProxyTracker;
-        if (!httpProxyTracker.WriteToSettingsData(globalHttpProxy_)) {
-            NETMGR_LOG_E("GlobalHttpProxy write settingDate fail.");
+        if (IsPrimaryUserId(userId)) {
+            if (!httpProxyTracker.WriteToSettingsData(globalHttpProxy_)) {
+                NETMGR_LOG_E("GlobalHttpProxy write settingDate fail.");
+                return NETMANAGER_ERR_INTERNAL;
+            }
+        }
+        if (!httpProxyTracker.WriteToSettingsDataUser(globalHttpProxy_, userId)) {
+            NETMGR_LOG_E("GlobalHttpProxy write settingDateUser fail. userId=%{public}d", userId);
             return NETMANAGER_ERR_INTERNAL;
         }
         SendHttpProxyChangeBroadcast(globalHttpProxy_);
         UpdateGlobalHttpProxy(globalHttpProxy_);
     }
     NETMGR_LOG_I("End SetGlobalHttpProxy.");
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t NetConnService::GetCallingUserId(int32_t &userId)
+{
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
+        NETMGR_LOG_E("GetOsAccountLocalIdFromUid error, uid: %{public}d.", uid);
+        return NETMANAGER_ERR_INTERNAL;
+    }
     return NETMANAGER_SUCCESS;
 }
 
@@ -1833,8 +1862,18 @@ void NetConnService::LoadGlobalHttpProxy()
         NETMGR_LOG_D("Global http proxy has been loaded from the SettingsData database.");
         return;
     }
+    int32_t userId;
+    int32_t ret = GetCallingUserId(userId);
+    if (ret != NETMANAGER_SUCCESS) {
+        NETMGR_LOG_E("LoadGlobalHttpProxy get calling userId fail.");
+        return;
+    }
     NetHttpProxyTracker httpProxyTracker;
-    httpProxyTracker.ReadFromSettingsData(globalHttpProxy_);
+    if (IsPrimaryUserId(userId)) {
+        httpProxyTracker.ReadFromSettingsData(globalHttpProxy_);
+    } else {
+        httpProxyTracker.ReadFromSettingsDataUser(globalHttpProxy_, userId);
+    }
     isGlobalProxyLoaded_ = true;
 }
 
