@@ -76,7 +76,7 @@ void Init()
     }
 }
 
-int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
+__attribute__((no_sanitize("cfi"))) int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
 {
     if (!g_isInited) {
         Init();

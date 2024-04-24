@@ -21,6 +21,7 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 ohos_fuzztest("NetStatsClientFuzzTest") {
   module_out_path = fuzz_test_path
   fuzz_config_file = "$NETMANAGER_BASE_ROOT/test/fuzztest/netstatsclient_fuzzer"
+  _cfi_blocklist_path = "$NETMANAGER_BASE_ROOT/test/fuzztest/netstatsclient_fuzzer/cfi_blocklist.txt"
 
   include_dirs = [
     "$INNERKITS_ROOT/netstatsclient/include",
@@ -42,6 +43,7 @@ ohos_fuzztest("NetStatsClientFuzzTest") {
     "-fsanitize=cfi",
     "-fsanitize-cfi-cross-dso",
     "-fvisibility=hidden",
+    "-fsanitize-blacklist=" + rebase_path(_cfi_blocklist_path, root_build_dir),
   ]
 
   ldflags = [

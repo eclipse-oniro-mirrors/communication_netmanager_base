@@ -88,7 +88,7 @@ void Init()
     }
 }
 
-int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
+__attribute__((no_sanitize("cfi"))) int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
 {
     if (!g_isInited) {
         Init();
@@ -165,7 +165,7 @@ void UnregisterNetStatsCallbackFuzzTest(const uint8_t *data, size_t size)
     OnRemoteRequest(static_cast<uint32_t>(StatsInterfaceCode::CMD_NSM_UNREGISTER_NET_STATS_CALLBACK), dataParcel);
 }
 
-void GetIfaceRxBytesFuzzTest(const uint8_t *data, size_t size)
+__attribute__((no_sanitize("cfi"))) void GetIfaceRxBytesFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     CheckParamVaild(dataParcel, data, size);
