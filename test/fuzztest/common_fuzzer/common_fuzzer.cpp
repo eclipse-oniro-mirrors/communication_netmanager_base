@@ -138,7 +138,7 @@ void UpdateNetSupplierInfoFuzzTest(const uint8_t *data, size_t size)
     g_netManagerCenter->UpdateNetSupplierInfo(supplierId, netSupplierInfo);
 }
 
-void RegisterConnServiceFuzzTest(const uint8_t *data, size_t size)
+__attribute__((no_sanitize("cfi"))) void RegisterConnServiceFuzzTest(const uint8_t *data, size_t size)
 {
     if (!IsCommonFuzzValidData(data, size)) {
         return;

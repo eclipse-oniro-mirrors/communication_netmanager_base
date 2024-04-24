@@ -22,6 +22,7 @@ ohos_fuzztest("NetSysClientNetDiagFuzzTest") {
   module_out_path = fuzz_test_path
   fuzz_config_file =
       "$NETMANAGER_BASE_ROOT/test/fuzztest/netsysclientnetdiag_fuzzer"
+  _cfi_blocklist_path = "$NETMANAGER_BASE_ROOT/test/fuzztest/netsysclientnetdiag_fuzzer/cfi_blocklist.txt"
 
   include_dirs = [
     "$NETCONNMANAGER_COMMON_DIR/include",
@@ -47,6 +48,7 @@ ohos_fuzztest("NetSysClientNetDiagFuzzTest") {
     "-fsanitize=cfi",
     "-fsanitize-cfi-cross-dso",
     "-fvisibility=hidden",
+    "-fsanitize-blacklist=" + rebase_path(_cfi_blocklist_path, root_build_dir),
   ]
 
   ldflags = [

@@ -67,13 +67,13 @@ std::string NetDiagGetString(int strlen)
 }
 
 static bool g_isInited = false;
-void Init()
+__attribute__((no_sanitize("cfi"))) void Init()
 {
     nmd::IptablesWrapper::GetInstance();
     g_isInited = DelayedSingleton<NetsysNative::NetsysNativeService>::GetInstance()->Init();
 }
 
-int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
+__attribute__((no_sanitize("cfi"))) int32_t OnRemoteRequest(uint32_t code, MessageParcel &data)
 {
     if (!g_isInited) {
         Init();
@@ -132,7 +132,7 @@ void NetDiagGetRouteTableFuzzTest(const uint8_t *data, size_t size)
                     dataParcel);
 }
 
-void NetDiagUpdateInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
+__attribute__((no_sanitize("cfi"))) void NetDiagUpdateInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
 {
     MessageParcel dataParcel;
     if (!IsDataAndSizeValid(data, size, dataParcel)) {
@@ -190,7 +190,7 @@ void NetDiagGetInterfaceConfigFuzzTest(const uint8_t *data, size_t size)
                     dataParcel);
 }
 
-void NetDiagPingFuzzTest(const uint8_t *data, size_t size)
+__attribute__((no_sanitize("cfi"))) void NetDiagPingFuzzTest(const uint8_t *data, size_t size)
 {
     const int maxWaitSecond = 10;
     const int numberTow = 2;
