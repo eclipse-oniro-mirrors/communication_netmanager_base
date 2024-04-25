@@ -505,5 +505,19 @@ int32_t NetManagerNative::UnregisterDnsHealthCallback(const sptr<INetDnsHealthCa
     return dnsManager_->UnregisterDnsHealthCallback(callback);
 }
 
+int32_t NetManagerNative::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+{
+    return connManager_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+}
+
+int32_t NetManagerNative::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    return connManager_->DeleteNetworkAccessPolicy(uid);
+}
+
+int32_t NetManagerNative::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
+{
+    return connManager_->NotifyNetBearerTypeChange(bearerTypes);
+}
 } // namespace nmd
 } // namespace OHOS

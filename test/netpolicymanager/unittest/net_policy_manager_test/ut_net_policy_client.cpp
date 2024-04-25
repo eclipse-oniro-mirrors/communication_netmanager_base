@@ -511,5 +511,42 @@ HWTEST_F(UtNetPolicyClient, CheckPermission001, TestSize.Level1)
     std::cout << "NetPolicyClient026 CheckPermission ret:" << ret << std::endl;
     ASSERT_EQ(ret, NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.name: SetNetworkAccessPolicy001
+ * @tc.desc: Test NetPolicyClient SetNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, SetNetworkAccessPolicy001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+
+    int32_t result1 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetworkAccessPolicy(
+        TEST_UID, netAccessPolicy, reconfirmFlag);
+    std::cout << "NetPolicyClient025 SetNetworkAccessPolicy ret:" << result1 << std::endl;
+    ASSERT_EQ(result1, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: GetNetworkAccessPolicy001
+ * @tc.desc: Test NetPolicyClient GetNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, GetNetworkAccessPolicy001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    AccessPolicyParameter parameter;
+    parameter.flag = 0;
+    parameter.uid = TEST_UID;
+    AccessPolicySave resultSave;
+
+    int32_t result1 = DelayedSingleton<NetPolicyClient>::GetInstance()->GetNetworkAccessPolicy(parameter, resultSave);
+    std::cout << "NetPolicyClient026 GetNetworkAccessPolicy ret:" << result1 << std::endl;
+    ASSERT_EQ(result1, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

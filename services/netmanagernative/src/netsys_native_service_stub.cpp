@@ -144,6 +144,12 @@ void NetsysNativeServiceStub::InitBandwidthOpToInterfaceMap()
         &NetsysNativeServiceStub::CmdBandwidthRemoveAllowedList;
     opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_INTERNET_PERMISSION)] =
         &NetsysNativeServiceStub::CmdSetInternetPermission;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NETWORK_ACCESS_POLICY)] =
+        &NetsysNativeServiceStub::CmdSetNetworkAccessPolicy;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_NETWORK_ACCESS_POLICY)] =
+        &NetsysNativeServiceStub::CmdDelNetworkAccessPolicy;
+    opToInterfaceMap_[static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NOTIFY_NETWORK_BEARER_TYPE_CHANGE)] =
+        &NetsysNativeServiceStub::CmdNotifyNetBearerTypeChange;
 }
 
 void NetsysNativeServiceStub::InitFirewallOpToInterfaceMap()
@@ -1663,6 +1669,74 @@ int32_t NetsysNativeServiceStub::CmdSetIpv6Enable(MessageParcel &data, MessagePa
     reply.WriteInt32(result);
     NETNATIVE_LOGI("SetIpv6Enable has recved result %{public}d", result);
 
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdSetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = 0;
+    if (!data.ReadUint32(uid)) {
+        NETNATIVE_LOGE("Read uint32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    uint8_t wifi_allow = 0;
+    if (!data.ReadUint8(wifi_allow)) {
+        NETNATIVE_LOGE("Read uint8 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    uint8_t cellular_allow = 0;
+    if (!data.ReadUint8(cellular_allow)) {
+        NETNATIVE_LOGE("Read uint8 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    bool reconfirmFlag = true;
+    if (!data.ReadBool(reconfirmFlag)) {
+        NETNATIVE_LOGE("Read bool failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    NetworkAccessPolicy policy;
+    policy.wifiAllow = wifi_allow;
+    policy.cellularAllow = cellular_allow;
+    int32_t result = SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdDelNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t uid = 0;
+    if (!data.ReadUint32(uid)) {
+        NETNATIVE_LOGE("Read uint32 failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = DeleteNetworkAccessPolicy(uid);
+    reply.WriteInt32(result);
+    return result;
+}
+
+int32_t NetsysNativeServiceStub::CmdNotifyNetBearerTypeChange(MessageParcel &data, MessageParcel &reply)
+{
+    std::set<NetBearType> bearerTypes;
+
+    uint32_t size = 0;
+    uint32_t value = 0;
+    if (!data.ReadUint32(size)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    for (uint32_t i = 0; i < size; i++) {
+        if (!data.ReadUint32(value)) {
+            return ERR_FLATTEN_OBJECT;
+        }
+        if (value >= BEARER_DEFAULT) {
+            return ERR_FLATTEN_OBJECT;
+        }
+        bearerTypes.insert(static_cast<NetBearType>(value));
+    }
+    int32_t result = NotifyNetBearerTypeChange(bearerTypes);
+    reply.WriteInt32(result);
     return result;
 }
 

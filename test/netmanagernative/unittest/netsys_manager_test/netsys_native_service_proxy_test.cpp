@@ -346,5 +346,41 @@ HWTEST_F(NetsysNativeServiceProxyTest, UpdateNetworkSharingTypeTest001, TestSize
     ret = netsysNativeService->UpdateNetworkSharingType(type, false);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+
+HWTEST_F(NetsysNativeServiceProxyTest, SetNetworkAccessPolicy001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+
+    uint32_t uid = 0;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    int32_t ret = netsysNativeService->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, NotifyNetBearerTypeChange001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+
+    std::set<NetManagerStandard::NetBearType> bearerTypes;
+    bearerTypes.insert(NetManagerStandard::NetBearType::BEARER_CELLULAR);
+    int32_t ret = netsysNativeService->NotifyNetBearerTypeChange(bearerTypes);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceProxyTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+
+    uint32_t uid = 0;
+    int32_t ret = netsysNativeService->DeleteNetworkAccessPolicy(uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

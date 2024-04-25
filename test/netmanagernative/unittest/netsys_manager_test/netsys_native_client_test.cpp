@@ -403,5 +403,31 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientBranchTest001, TestSize.Level
     ret = nativeClient_.UnregisterDnsHealthCallback(healthCallback);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
+
+HWTEST_F(NetsysNativeClientTest, SetNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    int32_t ret = nativeClient_.SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, NotifyNetBearerTypeChange001, TestSize.Level1)
+{
+    std::set<NetManagerStandard::NetBearType> bearerTypes;
+    bearerTypes.insert(NetManagerStandard::NetBearType::BEARER_CELLULAR);
+    int32_t ret = nativeClient_.NotifyNetBearerTypeChange(bearerTypes);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeClientTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    int32_t ret = nativeClient_.DeleteNetworkAccessPolicy(uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

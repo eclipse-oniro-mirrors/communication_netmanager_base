@@ -1376,6 +1376,63 @@ void CmdUpdateNetworkSharingTypeFuzzTest(const uint8_t *data, size_t size)
                     dataParcel);
 }
 
+void CmdSetNetworkAccessPolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+    NetworkAccessPolicy netAccessPolicy;
+    uint32_t uid = NetSysGetData<uint32_t>();
+    netAccessPolicy.wifiAllow = NetSysGetData<bool>();
+    netAccessPolicy.cellularAllow = NetSysGetData<bool>();
+    bool reconfirmFlag = NetSysGetData<bool>();
+
+    dataParcel.WriteUint32(uid);
+    dataParcel.WriteUint8(netAccessPolicy.wifiAllow);
+    dataParcel.WriteUint8(netAccessPolicy.cellularAllow);
+    dataParcel.WriteBool(reconfirmFlag);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_SET_NETWORK_ACCESS_POLICY),
+                    dataParcel);
+}
+
+void CmdDeleteNetworkAccessPolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    uint32_t uid = NetSysGetData<uint32_t>();
+    dataParcel.WriteUint32(uid);
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_DEL_NETWORK_ACCESS_POLICY),
+                    dataParcel);
+}
+
+void CmdNotifyNetBearerTypeChangeFuzzTest(const uint8_t *data, size_t size)
+{
+    MessageParcel dataParcel;
+    if (!IsDataAndSizeValid(data, size, dataParcel)) {
+        return;
+    }
+
+    uint32_t rangesSize = NetSysGetData<uint32_t>();
+    uint32_t bearerType = NetSysGetData<uint32_t>();
+
+    std::set<uint32_t> bearerTypes;
+    dataParcel.WriteUint32(rangesSize);
+    for (uint32_t i = 0; i < rangesSize; i++) {
+        bearerTypes.insert(static_cast<uint32_t>(bearerType));
+    }
+
+    for (auto iter : bearerTypes) {
+        dataParcel.WriteUint32(iter);
+    }
+
+    OnRemoteRequest(static_cast<uint32_t>(NetsysNative::NetsysInterfaceCode::NETSYS_NOTIFY_NETWORK_BEARER_TYPE_CHANGE),
+                    dataParcel);
+}
+
 void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
 {
     OHOS::NetManagerStandard::RegisterNotifyCallbackFuzzTest(data, size);
@@ -1425,6 +1482,13 @@ void LLVMFuzzerTestOneInputNew(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::CmdGetNetworkSharingTypeFuzzTest(data, size);
     OHOS::NetManagerStandard::CmdUpdateNetworkSharingTypeFuzzTest(data, size);
 }
+
+void LLVMFuzzerTestOneInputOthers(const uint8_t *data, size_t size)
+{
+    OHOS::NetManagerStandard::CmdSetNetworkAccessPolicyFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdDeleteNetworkAccessPolicyFuzzTest(data, size);
+    OHOS::NetManagerStandard::CmdNotifyNetBearerTypeChangeFuzzTest(data, size);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -1465,5 +1529,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::FirewallSetUidsDeniedListChainFuzzTest(data, size);
     OHOS::NetManagerStandard::FirewallSetUidRuleFuzzTest(data, size);
     OHOS::NetManagerStandard::LLVMFuzzerTestOneInputNew(data, size);
+    OHOS::NetManagerStandard::LLVMFuzzerTestOneInputOthers(data, size);
     return 0;
 }

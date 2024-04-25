@@ -1474,5 +1474,38 @@ int32_t NetsysNativeClient::SetEnableIpv6(const std::string &interfaceName, cons
     }
     return proxy->SetEnableIpv6(interfaceName, on);
 }
+
+int32_t NetsysNativeClient::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+}
+
+int32_t NetsysNativeClient::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->DeleteNetworkAccessPolicy(uid);
+}
+
+int32_t NetsysNativeClient::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
+{
+    auto proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->NotifyNetBearerTypeChange(bearerTypes);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

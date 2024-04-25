@@ -66,6 +66,9 @@
       "OHOS::NetManagerStandard::NetPolicyClient::SetPowerSaveTrustlist(std::__h::vector<unsigned int, std::__h::allocator<unsigned int>> const&, bool)";
       "OHOS::NetManagerStandard::NetPolicyClient::SetPowerSavePolicy(bool)";
       "OHOS::NetManagerStandard::NetPolicyClient::CheckPermission()";
+      "OHOS::NetManagerStandard::NetPolicyClient::SetNetworkAccessPolicy(unsigned int, OHOS::NetManagerStandard::NetworkAccessPolicy, bool)";
+      "OHOS::NetManagerStandard::NetPolicyClient::GetNetworkAccessPolicy(OHOS::NetManagerStandard::AccessPolicyParameter, OHOS::NetManagerStandard::AccessPolicySave&)";
+      "OHOS::NetManagerStandard::NetPolicyClient::NotifyNetAccessPolicyDiag(unsigned int)";
       "OHOS::NetManagerStandard::NetPolicyClient::OnRemoteDied(OHOS::wptr<OHOS::IRemoteObject> const&)";
     };
   local:

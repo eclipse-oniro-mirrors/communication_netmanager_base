@@ -30,6 +30,7 @@
 #include "route_type.h"
 #include "sharing_manager.h"
 #include "uid_range.h"
+#include "net_all_capabilities.h"
 
 namespace OHOS {
 namespace nmd {
@@ -130,6 +131,9 @@ public:
     int32_t UnregisterDnsHealthCallback(const sptr<INetDnsHealthCallback> &callback);
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on);
     int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on);
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag);
+    int32_t DeleteNetworkAccessPolicy(uint32_t uid);
+    int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes);
 private:
     std::shared_ptr<BandwidthManager> bandwidthManager_ = nullptr;
     std::shared_ptr<ConnManager> connManager_ = nullptr;

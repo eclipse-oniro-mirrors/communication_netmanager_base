@@ -454,5 +454,15 @@ void NetPolicyRule::GetDumpMessage(std::string &message)
     message.append(TAB + "PowerSaveMode: " + std::to_string(powerSaveMode_) + "\n");
     message.append(TAB + "BackgroundPolicy: " + std::to_string(backgroundAllow_) + "\n");
 }
+
+int32_t NetPolicyRule::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+{
+    return GetNetsysInst()->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+}
+
+int32_t NetPolicyRule::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    return GetNetsysInst()->DeleteNetworkAccessPolicy(uid);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

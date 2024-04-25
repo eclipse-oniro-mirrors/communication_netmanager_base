@@ -18,7 +18,6 @@
 
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
-
 #include "net_mgr_log_wrapper.h"
 
 static constexpr uint32_t WAIT_FOR_SERVICE_TIME_MS = 500;
@@ -396,6 +395,38 @@ int32_t NetPolicyClient::CheckPermission()
     }
 
     return proxy->CheckPermission();
+}
+
+int32_t NetPolicyClient::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+{
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+}
+
+int32_t NetPolicyClient::GetNetworkAccessPolicy(AccessPolicyParameter parameter, AccessPolicySave& policy)
+{
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    return proxy->GetNetworkAccessPolicy(parameter, policy);
+}
+
+int32_t NetPolicyClient::NotifyNetAccessPolicyDiag(uint32_t uid)
+{
+    sptr<INetPolicyService> proxy = GetProxy();
+    if (proxy == nullptr) {
+        NETMGR_LOG_E("proxy is nullptr");
+        return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+
+    return proxy->NotifyNetAccessPolicyDiag(uid);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

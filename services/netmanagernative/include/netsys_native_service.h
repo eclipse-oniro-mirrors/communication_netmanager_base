@@ -31,6 +31,7 @@
 #include "netlink_manager.h"
 #include "netsys_native_service_stub.h"
 #include "sharing_manager.h"
+#include "netsys_access_policy.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -145,6 +146,10 @@ public:
     int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) override;
     int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) override;
     int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) override;
+
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override;
+    int32_t DeleteNetworkAccessPolicy(uint32_t uid) override;
+    int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) override;
 protected:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
@@ -179,6 +184,8 @@ private:
     std::mutex instanceLock_;
     bool hasSARemoved_ = false;
     std::set<uint32_t> sharingTypeIsOn_;
+
+    static void ListenThread();
 };
 } // namespace NetsysNative
 } // namespace OHOS

@@ -15,6 +15,11 @@
 
 #include "conn_manager.h"
 
+#include <linux/if_ether.h>
+#include <net/if.h>
+#include <ifaddrs.h>
+#include <string>
+
 #include "bpf_def.h"
 #include "bpf_mapper.h"
 #include "bpf_path.h"
@@ -24,6 +29,8 @@
 #include "netnative_log_wrapper.h"
 #include "physical_network.h"
 #include "virtual_network.h"
+#include "securec.h"
+#include "bpf_ring_buffer.h"
 
 namespace OHOS {
 namespace nmd {
@@ -355,6 +362,91 @@ void ConnManager::GetDumpInfos(std::string &infos)
         }
         infos.append(interfaces + "}\n");
     });
+}
+
+int32_t ConnManager::SetNetworkAccessPolicy(uint32_t uid, NetManagerStandard::NetworkAccessPolicy policy,
+                                            bool reconfirmFlag)
+{
+    NETNATIVE_LOGI("SetNetworkAccessPolicy");
+    BpfMapper<app_uid_key, uid_access_policy_value> uidAccessPolicyMap(APP_UID_PERMISSION_MAP_PATH, BPF_ANY);
+    if (!uidAccessPolicyMap.IsValid()) {
+        NETNATIVE_LOGE("SetNetworkAccessPolicy uidAccessPolicyMap not exist.");
+        return NETMANAGER_ERROR;
+    }
+
+    uid_access_policy_value v = {0};
+    uid_access_policy_value v2 = {0};
+    (void)uidAccessPolicyMap.Read(uid, v);
+
+    v.configSetFromFlag = reconfirmFlag;
+    v.diagAckFlag = 0;
+    v.wifiPolicy = policy.wifiAllow;
+    v.cellularPolicy = policy.cellularAllow;
+
+    NETNATIVE_LOG_D(
+        "SetNetworkAccessPolicy uid:%{public}u, wifi:%{public}u, cellular:%{public}u, reconfirmFlag:%{public}u", uid,
+        policy.wifiAllow, policy.cellularAllow, v.configSetFromFlag);
+    if (uidAccessPolicyMap.Write(uid, v, 0) != 0) {
+        (void)uidAccessPolicyMap.Read(uid, v2);
+        NETNATIVE_LOGE("SetNetworkAccessPolicy Write uidAccessPolicyMap err");
+        return NETMANAGER_ERROR;
+    }
+
+    (void)uidAccessPolicyMap.Read(uid, v2);
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t ConnManager::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    BpfMapper<app_uid_key, uid_access_policy_value> uidAccessPolicyMap(APP_UID_PERMISSION_MAP_PATH, BPF_ANY);
+    if (!uidAccessPolicyMap.IsValid()) {
+        NETNATIVE_LOGE("uidAccessPolicyMap not exist");
+        return NETMANAGER_ERROR;
+    }
+
+    if (uidAccessPolicyMap.Delete(uid) != 0) {
+        NETNATIVE_LOGE("DeleteNetworkAccessPolicy err");
+        return NETMANAGER_ERROR;
+    }
+
+    return NETMANAGER_SUCCESS;
+}
+
+int32_t ConnManager::NotifyNetBearerTypeChange(std::set<NetManagerStandard::NetBearType> bearerTypes)
+{
+    NETNATIVE_LOGI("NotifyNetBearerTypeChange");
+    BpfMapper<net_bear_id_key, net_bear_type_map_value> NetBearerTypeMap(NET_BEAR_TYPE_MAP_PATH, BPF_ANY);
+    if (!NetBearerTypeMap.IsValid()) {
+        NETNATIVE_LOGE("NetBearerTypeMap not exist");
+        return NETMANAGER_ERROR;
+    }
+
+    // -1 means invalid
+    int32_t netbearerType = -1;
+    for (const auto& bearerType : bearerTypes) {
+        if (bearerType == BEARER_CELLULAR) {
+            netbearerType = NETWORK_BEARER_TYPE_CELLULAR;
+        }
+        if (bearerType == BEARER_WIFI) {
+            netbearerType = NETWORK_BEARER_TYPE_WIFI;
+        }
+        NETNATIVE_LOGI("NotifyNetBearTypeChange Type: %{public}d", static_cast<int32_t>(bearerType));
+    }
+
+    net_bear_type_map_value v = 0;
+    int32_t ret = NetBearerTypeMap.Read(0, v);
+
+    net_bear_id_key key = DEFAULT_NETWORK_BEARER_MAP_KEY;
+    // -1 means current bearer independent network access.
+    if (netbearerType != -1 && (((ret == NETSYS_SUCCESS) && (v != netbearerType)) || (ret != NETSYS_SUCCESS))) {
+        v = netbearerType;
+        if (NetBearerTypeMap.Write(key, v, 0) != 0) {
+            NETNATIVE_LOGE("Could not update NetBearerTypeMap");
+            return NETMANAGER_ERROR;
+        }
+    }
+
+    return NETMANAGER_SUCCESS;
 }
 } // namespace nmd
 } // namespace OHOS

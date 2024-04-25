@@ -22,6 +22,7 @@
 #include "net_policy_constants.h"
 #include "net_quota_policy.h"
 #include "policy_ipc_interface_code.h"
+#include "net_access_policy.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -222,6 +223,27 @@ public:
      * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
      */
     virtual int32_t FactoryResetPolicies() = 0;
+
+    /**
+     * Set the policy to access the network of the specified application.
+     *
+     * @param uid The specified UID of application.
+     * @param policy The network access policy of application, {@link NetworkAccessPolicy}.
+     * @param reconfirmFlag true means a reconfirm diaglog trigger while policy deny network access.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    virtual int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) = 0;
+
+    /**
+     * Query the network access policy of the specified application or all applications.
+     *
+     * @param parameter Indicate to get all or an application network access policy, {@link AccessPolicyParameter}.
+     * @param policy The network access policy of application, {@link AccessPolicySave}.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     */
+    virtual int32_t GetNetworkAccessPolicy(AccessPolicyParameter parameter, AccessPolicySave& policy) = 0;
+
+    virtual int32_t NotifyNetAccessPolicyDiag(uint32_t uid) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

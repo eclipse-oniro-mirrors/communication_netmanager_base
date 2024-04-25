@@ -52,8 +52,10 @@ config("net_policy_manager_if_config") {
 }
 
 ohos_source_set("net_policy_parcel") {
-  sources =
-      [ "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/net_quota_policy.cpp" ]
+  sources = [
+    "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/net_access_policy.cpp",
+    "$NETPOLICYMANAGER_INNERKITS_SOURCE_DIR/src/net_quota_policy.cpp",
+  ]
 
   include_dirs = [
     "$INNERKITS_ROOT/include",
@@ -105,6 +107,8 @@ ohos_shared_library("net_policy_manager_if") {
   deps = [ ":net_policy_parcel" ]
 
   external_deps = [
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]

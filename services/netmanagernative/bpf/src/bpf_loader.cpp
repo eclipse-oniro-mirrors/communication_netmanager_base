@@ -48,6 +48,10 @@
     {                                        \
         progName, progType                   \
     }
+#define DEFINE_ATTACH_TYPE(progName, attachType, needExpectedAttach) \
+    {                                                               \
+        progName, attachType, needExpectedAttach                    \
+    }
 
 namespace OHOS::NetManagerStandard {
 static constexpr const char *BPF_DIR = "/sys/fs/bpf";
@@ -76,6 +80,7 @@ static const struct SectionName {
     DEFINE_SECTION_NAME("schedcls"),
     DEFINE_SECTION_NAME("classifier"),
     DEFINE_SECTION_NAME("cgroup_sock"),
+    DEFINE_SECTION_NAME("cgroup_addr"),
 };
 
 static const constexpr struct {
@@ -89,15 +94,23 @@ static const constexpr struct {
     DEFINE_PROG_TYPE("schedcls", BPF_PROG_TYPE_SCHED_CLS),
     DEFINE_PROG_TYPE("classifier", BPF_PROG_TYPE_SCHED_CLS),
     DEFINE_PROG_TYPE("cgroup_sock", BPF_PROG_TYPE_CGROUP_SOCK),
+    DEFINE_PROG_TYPE("cgroup_addr", BPF_PROG_TYPE_CGROUP_SOCK_ADDR),
 };
 
 static const constexpr struct {
     const char *progName;
     bpf_attach_type attachType;
+    bool needExpectedAttach;
 } PROG_ATTACH_TYPES[] = {
-    DEFINE_PROG_TYPE("cgroup_sock_inet_create_socket", BPF_CGROUP_INET_SOCK_CREATE),
-    DEFINE_PROG_TYPE("cgroup_skb_uid_ingress", BPF_CGROUP_INET_INGRESS),
-    DEFINE_PROG_TYPE("cgroup_skb_uid_egress", BPF_CGROUP_INET_EGRESS),
+    DEFINE_ATTACH_TYPE("cgroup_sock_inet_create_socket", BPF_CGROUP_INET_SOCK_CREATE, false),
+    DEFINE_ATTACH_TYPE("cgroup_skb_uid_ingress", BPF_CGROUP_INET_INGRESS, false),
+    DEFINE_ATTACH_TYPE("cgroup_skb_uid_egress", BPF_CGROUP_INET_EGRESS, false),
+    DEFINE_ATTACH_TYPE("cgroup_addr_bind4", BPF_CGROUP_INET4_BIND, true),
+    DEFINE_ATTACH_TYPE("cgroup_addr_bind6", BPF_CGROUP_INET6_BIND, true),
+    DEFINE_ATTACH_TYPE("cgroup_addr_connect4", BPF_CGROUP_INET4_CONNECT, true),
+    DEFINE_ATTACH_TYPE("cgroup_addr_connect6", BPF_CGROUP_INET6_CONNECT, true),
+    DEFINE_ATTACH_TYPE("cgroup_addr_sendmsg4", BPF_CGROUP_UDP4_SENDMSG, true),
+    DEFINE_ATTACH_TYPE("cgroup_addr_sendmsg6", BPF_CGROUP_UDP6_SENDMSG, true),
 };
 
 int32_t g_sockFd = -1;
@@ -578,7 +591,7 @@ private:
         return true;
     }
 
-    int32_t BpfLoadProgram(bpf_prog_type type, const bpf_insn *insns, size_t insnsCnt)
+    int32_t BpfLoadProgram(std::string &progName, bpf_prog_type type, const bpf_insn *insns, size_t insnsCnt)
     {
         if (insns == nullptr) {
             return NETMANAGER_ERROR;
@@ -596,6 +609,15 @@ private:
         attr.insn_cnt = static_cast<uint32_t>(insnsCnt);
         attr.insns = PtrToU64(insns);
         attr.license = PtrToU64(license_.c_str());
+        for (const auto &prog : PROG_ATTACH_TYPES) {
+            if (prog.progName != nullptr && progName == prog.progName) {
+                if (prog.needExpectedAttach) {
+                    attr.expected_attach_type = prog.attachType;
+                }
+                break;
+            }
+        }
+
         return SysBpfProgLoad(&attr, sizeof(attr));
     }
 
@@ -690,13 +712,14 @@ private:
             return false;
         }
 
-        int32_t progFd = BpfLoadProgram(progType, insn, insnCnt);
+        std::string progName = event;
+        std::replace(progName.begin(), progName.end(), '/', '_');
+        int32_t progFd = BpfLoadProgram(progName, progType, insn, insnCnt);
         if (progFd < NETSYS_SUCCESS) {
             NETNATIVE_LOGE("Failed to load bpf prog, error = %{public}d", errno);
             return false;
         }
-        std::string progName = event;
-        std::replace(progName.begin(), progName.end(), '/', '_');
+
         std::string progPinLocation = std::string(PROGS_DIR) + "/" + progName;
         if (access(progPinLocation.c_str(), F_OK) == 0) {
             NETNATIVE_LOGI("prog: %{public}s has already been pinned", progPinLocation.c_str());

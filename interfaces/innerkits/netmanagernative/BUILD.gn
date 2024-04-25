@@ -21,6 +21,7 @@ config("net_native_manager_if_config") {
     "$INNERKITS_ROOT/netstatsclient/include/proxy",
     "$INNERKITS_ROOT/netstatsclient/include",
     "$INNERKITS_ROOT/netmanagernative/include",
+    "$INNERKITS_ROOT/netconnclient/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
   ]
 

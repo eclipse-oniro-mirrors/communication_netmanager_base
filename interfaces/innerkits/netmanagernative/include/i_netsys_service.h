@@ -31,6 +31,8 @@
 #include "netsys_ipc_interface_code.h"
 #include "route_type.h"
 #include "uid_range.h"
+#include "netsys_access_policy.h"
+#include "net_all_capabilities.h"
 
 namespace OHOS {
 namespace NetsysNative {
@@ -139,6 +141,9 @@ public:
     virtual int32_t UpdateNetworkSharingType(uint32_t type, bool isOpen) = 0;
     virtual int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) = 0;
     virtual int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) = 0;
+    virtual int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) = 0;
+    virtual int32_t DeleteNetworkAccessPolicy(uint32_t uid) = 0;
+    virtual int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.NetsysNative.INetsysService")
 };
 } // namespace NetsysNative

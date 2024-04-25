@@ -26,12 +26,16 @@
 #include "netmanager_base_common_utils.h"
 #include "netnative_log_wrapper.h"
 #include "netsys_native_service.h"
+#include "bpf_ring_buffer.h"
+#include "parameters.h"
 
 using namespace OHOS::NetManagerStandard::CommonUtils;
 namespace OHOS {
 namespace NetsysNative {
 static constexpr const char *BFP_NAME_NETSYS_PATH = "/system/etc/bpf/netsys.o";
 const std::regex REGEX_CMD_IPTABLES(std::string(R"(^-[\S]*[\s\S]*)"));
+const std::string DEVICETYPE_KEY = "const.product.devicetype";
+const std::string PHONE_TYPE = "phone";
 
 REGISTER_SYSTEM_ABILITY_BY_ID(NetsysNativeService, COMM_NETSYS_NATIVE_SYS_ABILITY_ID, true)
 
@@ -74,6 +78,7 @@ void NetsysNativeService::OnStop()
     NETNATIVE_LOGI("stop listener");
     manager_->StopListener();
     NETNATIVE_LOGI("stop listener end on stop end");
+    NetsysBpfRingBuffer::ExistRingBufferPoll();
 }
 
 int32_t NetsysNativeService::Dump(int32_t fd, const std::vector<std::u16string> &args)
@@ -122,6 +127,13 @@ bool NetsysNativeService::Init()
 
     auto ret = OHOS::NetManagerStandard::LoadElf(BFP_NAME_NETSYS_PATH);
     NETNATIVE_LOGI("LoadElf is %{public}d", ret);
+
+    if (OHOS::system::GetParameter(DEVICETYPE_KEY, "") == PHONE_TYPE) {
+        std::thread t(NetsysNativeService::ListenThread);
+        std::string threadName = "NetAccessEventListen";
+        pthread_setname_np(t.native_handle(), threadName.c_str());
+        t.detach();
+    }
     AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     return true;
 }
@@ -793,5 +805,28 @@ int32_t NetsysNativeService::UpdateNetworkSharingType(uint32_t type, bool isOpen
     return NETSYS_SUCCESS;
 }
 
+void NetsysNativeService::ListenThread()
+{
+    NetsysBpfRingBuffer::ListenRingBufferThread();
+}
+
+int32_t NetsysNativeService::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+{
+    NETNATIVE_LOGI("SetNetworkAccessPolicy");
+
+    return netsysService_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+}
+
+int32_t NetsysNativeService::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    NETNATIVE_LOGI("DeleteNetworkAccessPolicy");
+    return netsysService_->DeleteNetworkAccessPolicy(uid);
+}
+
+int32_t NetsysNativeService::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
+{
+    NETNATIVE_LOGI("NotifyNetBearerTypeChange");
+    return netsysService_->NotifyNetBearerTypeChange(bearerTypes);
+}
 } // namespace NetsysNative
 } // namespace OHOS

@@ -58,12 +58,14 @@
                 "openssl",
                 "selinux",
                 "sqlite",
-                "os_account"
+                "os_account",
+                "libbpf"
             ],
             "third_party": [
                 "curl",
                 "libuv",
-                "iptables"
+                "iptables",
+                "libbpf"
             ]
         },
         "build": {

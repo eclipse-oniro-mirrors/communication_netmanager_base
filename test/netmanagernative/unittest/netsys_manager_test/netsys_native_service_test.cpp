@@ -768,5 +768,31 @@ HWTEST_F(NetsysNativeServiceTest, UpdateNetworkSharingTypeTest001, TestSize.Leve
     ret = instance_->UpdateNetworkSharingType(type, false);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
+
+HWTEST_F(NetsysNativeServiceTest, SetNetworkAccessPolicyTest001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, DeleteNetworkAccessPolicyTest001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    int32_t ret = instance_->DeleteNetworkAccessPolicy(uid);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysNativeServiceTest, NotifyNetBearerTypeChangeTest001, TestSize.Level1)
+{
+    std::set<NetManagerStandard::NetBearType> bearerTypes;
+    bearerTypes.insert(NetManagerStandard::NetBearType::BEARER_CELLULAR);
+    int32_t ret = instance_->NotifyNetBearerTypeChange(bearerTypes);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 } // namespace NetsysNative
 } // namespace OHOS

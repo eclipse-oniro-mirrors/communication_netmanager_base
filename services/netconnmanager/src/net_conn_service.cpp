@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include <atomic>
-#include <cstdint>
 #include <fstream>
 #include <functional>
 #include <memory>
@@ -1205,6 +1204,7 @@ void NetConnService::CallbackForAvailable(sptr<NetSupplier> &supplier, const spt
         *pInfo = network->GetNetLinkInfo();
     }
     callback->NetConnectionPropertiesChange(netHandle, pInfo);
+    NetsysController::GetInstance().NotifyNetBearerTypeChange(pNetAllCap->bearerTypes_);
 }
 
 void NetConnService::MakeDefaultNetWork(sptr<NetSupplier> &oldSupplier, sptr<NetSupplier> &newSupplier)

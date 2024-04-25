@@ -337,5 +337,47 @@ HWTEST_F(UtNetPolicyService, OnAddSystemAbility001, TestSize.Level1)
     instance_->OnAddSystemAbility(COMM_NETSYS_NATIVE_SYS_ABILITY_ID, deviceId);
     EXPECT_FALSE(instance_->hasSARemoved_);
 }
+
+/**
+ * @tc.name: SetNetworkAccessPolicy01
+ * @tc.desc: Test NetPolicyService SetNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyService, SetNetworkAccessPolicy01, TestSize.Level1)
+{
+    int32_t uid = 666;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    auto ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, true);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: GetNetworkAccessPolicy01
+ * @tc.desc: Test NetPolicyService GetNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyService, GetNetworkAccessPolicy01, TestSize.Level1)
+{
+    AccessPolicyParameter parameter;
+    parameter.flag = 0;
+    parameter.uid = 666;
+    AccessPolicySave resultSave;
+    auto ret = instance_->GetNetworkAccessPolicy(parameter, resultSave);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: DeleteNetworkAccessPolicy01
+ * @tc.desc: Test NetPolicyService DeleteNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyService, DeleteNetworkAccessPolicy01, TestSize.Level1)
+{
+    int32_t uid = 666;
+    auto ret = instance_->DeleteNetworkAccessPolicy(uid);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -1083,5 +1083,32 @@ int32_t NetsysController::SetEnableIpv6(const std::string &interfaceName, const 
     return netsysService_->SetEnableIpv6(interfaceName, on);
 }
 
+int32_t NetsysController::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+}
+
+int32_t NetsysController::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->NotifyNetBearerTypeChange(bearerTypes);
+}
+
+int32_t NetsysController::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("netsysService_ is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->DeleteNetworkAccessPolicy(uid);
+}
+
 } // namespace NetManagerStandard
 } // namespace OHOS

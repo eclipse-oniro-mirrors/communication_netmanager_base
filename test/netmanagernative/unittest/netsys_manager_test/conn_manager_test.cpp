@@ -438,5 +438,46 @@ HWTEST_F(ConnManagerTest, ConnManagerBranchTest001, TestSize.Level1)
     result = instance_->FindVirtualNetwork(netId);
     EXPECT_EQ(result, nullptr);
 }
+
+/**
+ * @tc.name: SetNetworkAccessPolicy001
+ * @tc.desc: Test ConnManager SetNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConnManagerTest, SetNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    int32_t ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+/**
+ * @tc.name: DeleteNetworkAccessPolicy001
+ * @tc.desc: Test ConnManager DeleteNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConnManagerTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    int32_t ret = instance_->DeleteNetworkAccessPolicy(uid);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
+
+/**
+ * @tc.name: NotifyNetBearerTypeChange001
+ * @tc.desc: Test ConnManager NotifyNetBearerTypeChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ConnManagerTest, NotifyNetBearerTypeChange001, TestSize.Level1)
+{
+    std::set<NetManagerStandard::NetBearType> bearTypes;
+
+    int32_t ret = instance_->NotifyNetBearerTypeChange(bearTypes);
+    EXPECT_EQ(ret, NETMANAGER_ERROR);
+}
 } // namespace NetsysNative
 } // namespace OHOS

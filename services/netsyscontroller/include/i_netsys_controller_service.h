@@ -34,6 +34,8 @@
 #include "netsys_controller_define.h"
 #include "network_sharing.h"
 #include "uid_range.h"
+#include "netsys_access_policy.h"
+#include "net_all_capabilities.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
@@ -842,6 +844,18 @@ public:
     virtual int32_t SetIpv6PrivacyExtensions(const std::string &interfaceName, const uint32_t on) = 0;
 
     virtual int32_t SetEnableIpv6(const std::string &interfaceName, const uint32_t on) = 0;
+
+    /**
+     * Set the policy to access the network of the specified application.
+     *
+     * @param uid - The specified UID of application.
+     * @param policy - the network access policy of application. For details, see {@link NetworkAccessPolicy}.
+     * @param reconfirmFlag true means a reconfirm diaglog trigger while policy deny network access.
+     * @return return 0 if OK, return error number if not OK
+     */
+    virtual int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) = 0;
+    virtual int32_t DeleteNetworkAccessPolicy(uint32_t uid) = 0;
+    virtual int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) = 0;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -306,6 +306,31 @@ public:
      */
     [[nodiscard]] int32_t CheckPermission();
 
+    /**
+     * Set the policy to access the network of the specified application.
+     *
+     * @param uid The specified UID of application.
+     * @param policy The network access policy of application, {@link NetworkAccessPolicy}.
+     * @param reconfirmFlag true means a reconfirm diaglog trigger while policy deny network access.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag);
+
+    /**
+     * Query the network access policy of the specified application or all applications.
+     *
+     * @param parameter Indicate to get all or an application network access policy, {@link AccessPolicyParameter}.
+     * @param policy The network access policy of application, {@link AccessPolicySave}.
+     * @return Returns 0 success. Otherwise fail, {@link NetPolicyResultCode}.
+     * @permission ohos.permission.CONNECTIVITY_INTERNAL
+     * @systemapi Hide this for inner system use.
+     */
+    int32_t GetNetworkAccessPolicy(AccessPolicyParameter parameter, AccessPolicySave& policy);
+
+    int32_t NotifyNetAccessPolicyDiag(uint32_t uid);
+
 private:
     class NetPolicyDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

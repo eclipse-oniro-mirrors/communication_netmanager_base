@@ -143,6 +143,21 @@ public:
         return 0;
     }
 
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override
+    {
+        return 0;
+    }
+
+    int32_t GetNetworkAccessPolicy(AccessPolicyParameter parameter, AccessPolicySave& policy) override
+    {
+        return 0;
+    }
+
+    int32_t NotifyNetAccessPolicyDiag(uint32_t uid) override
+    {
+        return 0;
+    }
+
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
     {
         bool byPassPolicyPermission = false;
@@ -565,6 +580,55 @@ HWTEST_F(NetPolicyServiceStubTest, OnFactoryResetPoliciesTest001, TestSize.Level
     MessageOption option;
     int32_t ret = instance_->OnRemoteRequest(
         static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_FACTORYRESET_POLICIES), data, reply, option);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnSetNetworkAccessPolicyTest001
+ * @tc.desc: Test NetPolicyServiceStub OnSetNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyServiceStubTest, OnSetNetworkAccessPolicyTest001, TestSize.Level1)
+{
+    MessageParcel data;
+    data.WriteBool(false);
+    if (!data.WriteInterfaceToken(NetPolicyServiceStub::GetDescriptor())) {
+        return;
+    }
+    bool wifiBool = true;
+    bool cellularBool = true;
+    data.WriteUint32(TEST_UID);
+    data.WriteUint8(wifiBool);
+    data.WriteUint8(cellularBool);
+    data.WriteBool(true);
+    MessageParcel reply;
+    MessageOption option;
+    std::cout << TEST_UID << std::endl;
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NETWORK_ACCESS_POLICY), data, reply, option);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
+ * @tc.name: OnGetNetworkAccessPolicy001
+ * @tc.desc: Test NetPolicyServiceStub OnGetNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetPolicyServiceStubTest, OnGetNetworkAccessPolicy001, TestSize.Level1)
+{
+    MessageParcel data;
+    uint32_t userId = 1;
+    data.WriteBool(false);
+    if (!data.WriteInterfaceToken(NetPolicyServiceStub::GetDescriptor())) {
+        return;
+    }
+    data.WriteBool(true);
+    data.WriteInt32(TEST_UID);
+    data.WriteUint32(userId);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = instance_->OnRemoteRequest(
+        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NETWORK_ACCESS_POLICY), data, reply, option);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
