@@ -229,3 +229,22 @@ int32_t OHOS_NetConn_UnregisterDnsResolver()
     int32_t ret = removednsresolvehook();
     return ret;
 }
+
+int32_t OH_NetConn_BindSocket(int32_t socketFd, NetConn_NetHandle *netHandle)
+{
+    if (netHandle == nullptr) {
+        NETMGR_LOG_E("OH_NetConn_BindSocket netHandle is NULL");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    if (socketFd < 0) {
+        NETMGR_LOG_E("OH_NetConn_BindSocket socketFd is invalid");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+    if (netHandle->netId < VALID_NETID_START) {
+        NETMGR_LOG_E("OH_NetConn_BindSocket netId is invalid");
+        return NETMANAGER_ERR_PARAMETER_ERROR;
+    }
+
+    int32_t ret = NetConnClient::GetInstance().BindSocket(socketFd, netHandle->netId);
+    return ret;
+}
