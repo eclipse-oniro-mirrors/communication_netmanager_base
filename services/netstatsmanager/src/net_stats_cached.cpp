@@ -93,13 +93,9 @@ void NetStatsCached::SetAppStats(const PushStatsInfo &info)
     stats.txBytes_ = info.txBytes_;
     stats.rxPackets_ = 1;
     stats.txPackets_ = 1;
-    stats.ident_ = "";
-    if (info.netBearType_ == 0) {
-        LoadIfaceNameIdentMaps();
-        stats.ident_ = ifaceNameIdentMap_[info.iface_];
-    }
-    uidPushStatsInfo_.push_back(std::move(stats));
+    stats.ident_ = std::to_string(info.simId_);
     NETMGR_LOG_D("SetAppStats info=%{public}s", stats.UidData().c_str());
+    uidPushStatsInfo_.push_back(std::move(stats));
 }
 
 void NetStatsCached::GetKernelStats(std::vector<NetStatsInfo> &statsInfo)
@@ -288,7 +284,7 @@ void NetStatsCached::LoadIfaceNameIdentMaps()
         NETMGR_LOG_E("GetIfaceNameIdentMaps error. ret=%{public}d", ret);
         return;
     }
-    isIfaceNameIdentMapLoaded_ = true;
+    isIfaceNameIdentMapLoaded_.store(true);
 }
 
 void NetStatsCached::SetCycleThreshold(uint32_t threshold)
@@ -301,6 +297,10 @@ void NetStatsCached::SetCycleThreshold(uint32_t threshold)
 
 void NetStatsCached::ForceUpdateStats()
 {
+    if (isIfaceNameIdentMapLoaded_.load()) {
+        NETMGR_LOG_D("ifaceNameIdentMaps need to reload from netConnClient.");
+        isIfaceNameIdentMapLoaded_.store(false);
+    }
     isForce_ = true;
     std::function<void()> netCachedStats = [this] () {
         CacheStats();

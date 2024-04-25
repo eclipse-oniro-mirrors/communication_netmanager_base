@@ -395,24 +395,25 @@ int32_t NetStatsService::GetAllContainerStatsInfo(std::vector<NetStatsInfo> &inf
 int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, NetStatsInfo> &infos,
                                                   const sptr<NetStatsNetwork> &network)
 {
-    NETMGR_LOG_D("Enter GetTrafficStatsByUidNetwork.");
+    NETMGR_LOG_D("Enter GetTrafficStatsByNetwork.");
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByNetwork start");
     if (netStatsCached_ == nullptr) {
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     int32_t ret;
-    uint32_t simId = network->simId_;
-    if (network->type_ != 0) {
-        simId = UINT32_MAX;
+    std::string ident;
+    if (network->type_ == 0) {
+        ident = std::to_string(network->simId_);
     }
-    std::string ident = std::to_string(simId);
     uint32_t start = network->startTime_;
     uint32_t end = network->endTime_;
+    NETMGR_LOG_D("GetTrafficStatsByNetwork param: ident=%{public}s, start=%{public}u, end=%{public}u", ident.c_str(),
+                 start, end);
     std::vector<NetStatsInfo> allInfo;
     auto history = std::make_unique<NetStatsHistory>();
     ret = history->GetHistoryByIdent(allInfo, ident, start, end);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("get history by simId failed, err code=%{public}d", ret);
+        NETMGR_LOG_E("get history by ident failed, err code=%{public}d", ret);
         return ret;
     }
     netStatsCached_->GetKernelStats(allInfo);
@@ -447,18 +448,19 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     int32_t ret;
-    uint32_t simId = network->simId_;
-    if (network->type_ != 0) {
-        simId = UINT32_MAX;
+    std::string ident;
+    if (network->type_ == 0) {
+        ident = std::to_string(network->simId_);
     }
-    std::string ident = std::to_string(simId);
     uint32_t start = network->startTime_;
     uint32_t end = network->endTime_;
+    NETMGR_LOG_D("GetTrafficStatsByUidNetwork param: "
+        "uid=%{public}u, ident=%{public}s, start=%{public}u, end=%{public}u", uid, ident.c_str(), start, end);
     std::vector<NetStatsInfo> allInfo;
     auto history = std::make_unique<NetStatsHistory>();
     ret = history->GetHistory(allInfo, uid, ident, start, end);
     if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("get history by simId failed, err code=%{public}d", ret);
+        NETMGR_LOG_E("get history by uid and ident failed, err code=%{public}d", ret);
         return ret;
     }
     netStatsCached_->GetKernelStats(allInfo);
