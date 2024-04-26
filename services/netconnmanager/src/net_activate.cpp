@@ -73,7 +73,7 @@ void NetActivate::TimeOutNetAvailable()
 
 bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier)
 {
-    NETMGR_LOG_I("supplier[%{public}d, %{public}s], request[%{public}d]",
+    NETMGR_LOG_D("supplier[%{public}d, %{public}s], request[%{public}d]",
                  (supplier ? supplier->GetSupplierId() : 0),
                  (supplier ? supplier->GetNetSupplierIdent().c_str() : "nullptr"), requestId_);
     if (supplier == nullptr) {
@@ -81,20 +81,24 @@ bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier)
         return false;
     }
     if (!CompareByNetworkIdent(supplier->GetNetSupplierIdent())) {
-        NETMGR_LOG_W("Supplier ident is not matched");
+        NETMGR_LOG_W("Supplier[%{public}d], request[%{public}d], Supplier ident is not matched",
+                     supplier->GetSupplierId(), requestId_);
         return false;
     }
     if (!CompareByNetworkCapabilities(supplier->GetNetCaps())) {
-        NETMGR_LOG_W("Supplier capability is not matched");
+        NETMGR_LOG_W("Supplier[%{public}d], request[%{public}d], capability is not matched", supplier->GetSupplierId(),
+                     requestId_);
         return false;
     }
     if (!CompareByNetworkNetType((supplier->GetNetSupplierType()))) {
-        NETMGR_LOG_W("Supplier net type not matched");
+        NETMGR_LOG_W("Supplier[%{public}d], request[%{public}d], Supplier net type not matched",
+                     supplier->GetSupplierId(), requestId_);
         return false;
     }
     NetAllCapabilities netAllCaps = supplier->GetNetCapabilities();
     if (!CompareByNetworkBand(netAllCaps.linkUpBandwidthKbps_, netAllCaps.linkDownBandwidthKbps_)) {
-        NETMGR_LOG_W("Supplier net band not matched");
+        NETMGR_LOG_W("Supplier[%{public}d], request[%{public}d], supplier net band not matched",
+                     supplier->GetSupplierId(), requestId_);
         return false;
     }
 
@@ -119,7 +123,7 @@ bool NetActivate::CompareByNetworkCapabilities(const NetCaps &netCaps)
     }
     std::set<NetCap> &reqCaps = netSpecifier_->netCapabilities_.netCaps_;
     if (reqCaps.empty()) {
-        NETMGR_LOG_I("Use default Supplier for empty cap");
+        NETMGR_LOG_D("Use default Supplier for empty cap");
         return netCaps.HasNetCap(NET_CAPABILITY_INTERNET);
     }
     return netCaps.HasNetCaps(reqCaps);
