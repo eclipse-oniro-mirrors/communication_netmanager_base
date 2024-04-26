@@ -50,7 +50,7 @@ public:
     bool operator==(const NetSupplier &netSupplier) const;
     void SetNetwork(const std::shared_ptr<Network> &network);
     void UpdateNetSupplierInfo(const NetSupplierInfo &netSupplierInfo);
-    int32_t UpdateNetLinkInfo(const NetLinkInfo &netLinkInfo);
+    int32_t UpdateNetLinkInfo(NetLinkInfo &netLinkInfo);
     uint32_t GetSupplierId() const;
     NetBearType GetNetSupplierType() const;
     std::string GetNetSupplierIdent() const;
