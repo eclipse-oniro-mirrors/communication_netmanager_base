@@ -336,7 +336,7 @@ HWTEST_F(NetStatsServiceTest, GetAllContainerStatsInfoTest001, TestSize.Level1)
 HWTEST_F(NetStatsServiceTest, GetTrafficStatsByNetworkTest001, TestSize.Level1)
 {
     std::unordered_map<uint32_t, NetStatsInfo> infos;
-    sptr<NetStatsNetwork> network;
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetTrafficStatsByNetwork(infos, network);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
@@ -345,7 +345,7 @@ HWTEST_F(NetStatsServiceTest, GetTrafficStatsByUidNetworkTest001, TestSize.Level
 {
     std::vector<NetStatsInfoSequence> infos;
     uint32_t uid = 1;
-    sptr<NetStatsNetwork> network;
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     int32_t ret = DelayedSingleton<NetStatsService>::GetInstance()->GetTrafficStatsByUidNetwork(infos, uid, network);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
