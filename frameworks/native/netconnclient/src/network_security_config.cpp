@@ -296,6 +296,23 @@ int32_t NetworkSecurityConfig::CreateRehashedCertFiles()
 
 bool NetworkSecurityConfig::ValidateDate(const std::string &dateStr)
 {
+    if (dateStr.empty()) {
+        return true;
+    }
+    std::tm tm = {};
+    std::istringstream ss(dateStr);
+    if (!(ss >> std::get_time(&tm, "%Y-%m-%d"))) {
+        return false;
+    }
+    time_t expiryTime = mktime(&tm);
+    if (expiryTime == -1) {
+        return false;
+    }
+    auto expiryPoint = std::chrono::system_clock::from_time_t(expiryTime);
+    auto nowPoint = std::chrono::system_clock::now();
+    if (nowPoint > expiryPoint) {
+        return false;
+    }
     return true;
 }
 
@@ -540,7 +557,8 @@ int32_t NetworkSecurityConfig::GetPinSetForHostName(const std::string &hostname,
     }
 
     if (!ValidateDate(pPinSet->expiration_)) {
-        return NETMANAGER_ERR_PERMISSION_DENIED;
+        NETMGR_LOG_W("expiration date is invalid %{public}s", pPinSet->expiration_.c_str());
+        return NETMANAGER_SUCCESS;
     }
 
     std::stringstream ss;
