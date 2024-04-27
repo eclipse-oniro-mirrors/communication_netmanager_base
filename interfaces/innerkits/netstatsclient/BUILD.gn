@@ -18,8 +18,9 @@ config("net_stats_manager_if_config") {
   # header file path
   include_dirs = [
     "$INNERKITS_ROOT/include",
-    "$INNERKITS_ROOT/netmanagernative/include",
     "$INNERKITS_ROOT/netstatsclient/include/proxy",
+    "$INNERKITS_ROOT/netstatsclient/include",
+    "$INNERKITS_ROOT/netmanagernative/include",
     "$NETSYSNATIVE_SOURCE_DIR/include/netsys",
   ]
 
