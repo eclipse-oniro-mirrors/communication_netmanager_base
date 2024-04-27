@@ -400,6 +400,10 @@ int32_t NetStatsService::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, N
     if (netStatsCached_ == nullptr) {
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
+    if (network == nullptr) {
+        NETMGR_LOG_E("param network is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
     int32_t ret;
     std::string ident;
     if (network->type_ == 0) {
@@ -445,6 +449,10 @@ int32_t NetStatsService::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSeq
     NetmanagerHiTrace::NetmanagerStartSyncTrace("NetStatsService GetTrafficStatsByUidNetwork start");
     if (netStatsCached_ == nullptr) {
         NETMGR_LOG_E("Cached is nullptr");
+        return NETMANAGER_ERR_LOCAL_PTR_NULL;
+    }
+    if (network == nullptr) {
+        NETMGR_LOG_E("param network is nullptr");
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     int32_t ret;

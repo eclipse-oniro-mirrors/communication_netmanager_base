@@ -197,7 +197,8 @@ HWTEST_F(NetStatsDataHandlerTest, ReadStatsDataTest004, TestSize.Level1)
     NetStatsDataHandler handler;
     std::vector<NetStatsInfo> infos;
     uint32_t testUid = 122;
-    int32_t ret = handler.ReadStatsData(infos, "testIface", testUid, 0, LONG_MAX);
+    std::string emptyIface = "";
+    int32_t ret = handler.ReadStatsData(infos, emptyIface, testUid, 0, LONG_MAX);
     std::cout << "Data size: " << infos.size() << std::endl;
     std::for_each(infos.begin(), infos.end(), [](const auto &info) { std::cout << info.UidData() << std::endl; });
     EXPECT_EQ(ret, NETMANAGER_ERR_PARAMETER_ERROR);

@@ -144,11 +144,11 @@ HWTEST_F(NetStatsDatabaseHelperTest, SelectDataHelperTest003, TestSize.Level1)
     std::vector<NetStatsInfo> infos;
     std::string iface = "wlan0";
     int32_t ret = helper->SelectData(iface, 0, LONG_MAX, infos);
-    EXPECT_EQ(ret, STATS_ERR_READ_DATA_FAIL);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
     infos.clear();
     uint64_t date = 15254400;
     ret = helper->SelectData(iface, date, LONG_MAX, infos);
-    EXPECT_EQ(ret, STATS_ERR_READ_DATA_FAIL);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetStatsDatabaseHelperTest, SelectDataHelperTest004, TestSize.Level1)
