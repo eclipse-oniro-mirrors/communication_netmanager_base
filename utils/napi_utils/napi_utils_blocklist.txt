@@ -14,3 +14,4 @@
 [cfi]
 src:*/event_manager.cpp
 src:*/event_listener.cpp
+src:*/napi_utils.cpp
