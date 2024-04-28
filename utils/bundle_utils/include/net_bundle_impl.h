@@ -23,6 +23,7 @@ namespace NetManagerStandard {
 class NetBundleImpl : public INetBundle {
 public:
     int32_t GetJsonFromBundle(std::string &jsonProfile) override;
+    bool IsAtomicService(std::string &bundleName) override;
 };
 extern "C" __attribute__((visibility("default"))) INetBundle *GetNetBundle();
 } // namespace NetManagerStandard

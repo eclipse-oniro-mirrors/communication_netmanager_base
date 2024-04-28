@@ -61,6 +61,24 @@ int32_t NetBundleImpl::GetJsonFromBundle(std::string &jsonProfile)
     return NETMANAGER_SUCCESS;
 }
 
+bool NetBundleImpl::IsAtomicService(std::string &bundleName)
+{
+    sptr<AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    if (bundleMgrProxy == nullptr) {
+        NETMGR_LOG_E("Failed to get bundle manager proxy.");
+        return false;
+    }
+    AppExecFwk::BundleInfo bundleInfo;
+    auto flags = AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION;
+    auto ret = bundleMgrProxy->GetBundleInfoForSelf(static_cast<int32_t>(flags), bundleInfo);
+    if (ret != ERR_OK) {
+        NETMGR_LOG_E("GetSelfBundleName: bundleName get fail.");
+        return false;
+    }
+    bundleName = bundleInfo.applicationInfo.bundleName;
+    return bundleInfo.applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE;
+}
+
 INetBundle *GetNetBundle()
 {
     static NetBundleImpl impl;

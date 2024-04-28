@@ -23,6 +23,7 @@ namespace NetManagerStandard {
 class INetBundle {
 public:
     virtual int32_t GetJsonFromBundle(std::string &jsonProfile) = 0;
+    virtual bool IsAtomicService(std::string &bundleName) = 0;
 };
 extern "C" __attribute__((visibility("default"))) INetBundle *GetNetBundle();
 } // namespace NetManagerStandard
