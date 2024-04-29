@@ -44,6 +44,7 @@ constexpr size_t MAX_DISPLAY_NUM = 2;
 constexpr uint32_t IPV4_DOT_NUM = 3;
 constexpr int32_t MIN_BYTE = 0;
 constexpr int32_t MAX_BYTE = 255;
+constexpr int32_t BYTE_16 = 16;
 constexpr uint32_t BIT_NUM_BYTE = 8;
 constexpr int32_t BITS_32 = 32;
 constexpr int32_t BITS_24 = 24;
@@ -280,29 +281,45 @@ int32_t Ipv4PrefixLen(const std::string &ip)
 
 int32_t Ipv6PrefixLen(const std::string &ip)
 {
-    auto calBitLen = [](uint16_t bit) -> int32_t {
-        int maskLen = 0;
-        for (int j = 0; j < BITS_16; ++j) {
-            if ((bit & (0x0001 << j)) != 0) {
-                break;
-            }
-            ++maskLen;
-        }
-        return maskLen;
-    };
-
+    constexpr int32_t LENGTH_8 = 8;
+    constexpr int32_t LENGTH_7 = 7;
+    constexpr int32_t LENGTH_6 = 6;
+    constexpr int32_t LENGTH_5 = 5;
+    constexpr int32_t LENGTH_4 = 4;
+    constexpr int32_t LENGTH_3 = 3;
+    constexpr int32_t LENGTH_2 = 2;
+    constexpr int32_t LENGTH_1 = 1;
     if (ip.empty()) {
         return 0;
     }
     in6_addr addr{};
     inet_pton(AF_INET6, ip.c_str(), &addr);
-    int32_t prefixLen = MAX_IPV6_PREFIX_LENGTH;
-    for (int32_t i = sizeof(in6_addr) / sizeof(addr.s6_addr16[0]) - 1; i >= 0; --i) {
-        if (addr.s6_addr16[i] == 0) {
-            prefixLen -= BITS_16;
+    int32_t prefixLen = 0;
+    for (int32_t i = 0; i < BYTE_16; ++i) {
+        if (addr.s6_addr[i] == 0xFF) {
+            prefixLen += LENGTH_8;
+        } else if (addr.s6_addr[i] == 0xFE) {
+            prefixLen += LENGTH_7;
+            break;
+        } else if (addr.s6_addr[i] == 0xFC) {
+            prefixLen += LENGTH_6;
+            break;
+        } else if (addr.s6_addr[i] == 0xF8) {
+            prefixLen += LENGTH_5;
+            break;
+        } else if (addr.s6_addr[i] == 0xF0) {
+            prefixLen += LENGTH_4;
+            break;
+        } else if (addr.s6_addr[i] == 0xE0) {
+            prefixLen += LENGTH_3;
+            break;
+        } else if (addr.s6_addr[i] == 0xC0) {
+            prefixLen += LENGTH_2;
+            break;
+        } else if (addr.s6_addr[i] == 0x80) {
+            prefixLen += LENGTH_1;
+            break;
         } else {
-            uint16_t bit = ntohs(static_cast<uint16_t>(addr.s6_addr16[i]));
-            prefixLen -= calBitLen(bit);
             break;
         }
     }
