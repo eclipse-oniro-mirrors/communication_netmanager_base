@@ -26,6 +26,7 @@ public:
     virtual bool IsAtomicService(std::string &bundleName) = 0;
 };
 extern "C" __attribute__((visibility("default"))) INetBundle *GetNetBundle();
+extern "C" __attribute__((visibility("default"))) bool IsAtomicService(std::string &bundleName);
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NET_BUNDLE__H

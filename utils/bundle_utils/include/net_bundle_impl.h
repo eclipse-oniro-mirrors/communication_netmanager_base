@@ -26,6 +26,7 @@ public:
     bool IsAtomicService(std::string &bundleName) override;
 };
 extern "C" __attribute__((visibility("default"))) INetBundle *GetNetBundle();
+extern "C" __attribute__((visibility("default"))) bool IsAtomicService(std::string &bundleName);
 } // namespace NetManagerStandard
 } // namespace OHOS
 #endif // NET_BUNDLE_IMPL_H

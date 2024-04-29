@@ -84,5 +84,11 @@ INetBundle *GetNetBundle()
     static NetBundleImpl impl;
     return &impl;
 }
+
+bool IsAtomicService(std::string &bundleName)
+{
+    NetBundleImpl impl;
+    return impl.IsAtomicService(bundleName);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
