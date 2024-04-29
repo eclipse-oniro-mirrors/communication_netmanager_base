@@ -59,7 +59,10 @@ public:
                 return NETMANAGER_ERROR;
             }
         } else if (code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_IFACE_STATS_DETAIL) ||
-                   code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_STATS_DETAIL)) {
+                   code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_UID_STATS_DETAIL) ||
+                   code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_ALL_CONTAINER_STATS_INFO) ||
+                   code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_NETWORK) ||
+                   code == static_cast<uint32_t>(StatsInterfaceCode::CMD_GET_TRAFFIC_STATS_BY_UID_NETWORK)) {
             if (eCode == NETMANAGER_ERR_READ_REPLY_FAIL) {
                 return NETSYS_SUCCESS;
             }
@@ -68,6 +71,9 @@ public:
                 return NETMANAGER_ERROR;
             }
             if (!reply.WriteString("wlan0")) {
+                return NETMANAGER_ERROR;
+            }
+            if (!reply.WriteString("ident0")) {
                 return NETMANAGER_ERROR;
             }
             if (!reply.WriteUint64(TEST_UID)) {
@@ -695,6 +701,44 @@ HWTEST_F(NetStatsServiceProxyTest, GetUidStatsDetailTest004, TestSize.Level1)
  */
 HWTEST_F(NetStatsServiceProxyTest, GetAllContainerStatsInfoTest001, TestSize.Level1)
 {
+    NetStatsServiceProxy instance_(nullptr);
+    std::vector<NetStatsInfo> infos;
+    EXPECT_EQ(instance_.GetAllContainerStatsInfo(infos), NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: GetAllContainerStatsInfoTest002
+ * @tc.desc: Test NetStatsServiceProxy GetAllContainerStatsInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, GetAllContainerStatsInfoTest002, TestSize.Level1)
+{
+    remoteObj_->SetErrorCode(NETMANAGER_ERROR);
+    NetStatsServiceProxy instance_(remoteObj_);
+    std::vector<NetStatsInfo> infos;
+    EXPECT_EQ(instance_.GetAllContainerStatsInfo(infos), NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: GetAllContainerStatsInfoTest003
+ * @tc.desc: Test NetStatsServiceProxy GetAllContainerStatsInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, GetAllContainerStatsInfoTest003, TestSize.Level1)
+{
+    remoteObj_->SetErrorCode(NETMANAGER_ERR_READ_REPLY_FAIL);
+    NetStatsServiceProxy instance_(remoteObj_);
+    std::vector<NetStatsInfo> infos;
+    EXPECT_EQ(instance_.GetAllContainerStatsInfo(infos), NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+/**
+ * @tc.name: GetAllContainerStatsInfoTest004
+ * @tc.desc: Test NetStatsServiceProxy GetAllContainerStatsInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, GetAllContainerStatsInfoTest004, TestSize.Level1)
+{
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
     NetStatsServiceProxy instance_(remoteObj_);
     std::vector<NetStatsInfo> infos;
@@ -708,10 +752,51 @@ HWTEST_F(NetStatsServiceProxyTest, GetAllContainerStatsInfoTest001, TestSize.Lev
  */
 HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByNetworkTest001, TestSize.Level1)
 {
+    NetStatsServiceProxy instance_(nullptr);
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
+    EXPECT_EQ(instance_.GetTrafficStatsByNetwork(infos, network), NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: GetTrafficStatsByNetworkTest002
+ * @tc.desc: Test NetStatsServiceProxy GetTrafficStatsByNetwork.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByNetworkTest002, TestSize.Level1)
+{
+    remoteObj_->SetErrorCode(NETMANAGER_ERROR);
+    NetStatsServiceProxy instance_(remoteObj_);
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
+    EXPECT_EQ(instance_.GetTrafficStatsByNetwork(infos, network), NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: GetTrafficStatsByNetworkTest003
+ * @tc.desc: Test NetStatsServiceProxy GetTrafficStatsByNetwork.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByNetworkTest003, TestSize.Level1)
+{
+    remoteObj_->SetErrorCode(NETMANAGER_ERR_READ_REPLY_FAIL);
+    NetStatsServiceProxy instance_(remoteObj_);
+    std::unordered_map<uint32_t, NetStatsInfo> infos;
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
+    EXPECT_EQ(instance_.GetTrafficStatsByNetwork(infos, network), NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+/**
+ * @tc.name: GetTrafficStatsByNetworkTest004
+ * @tc.desc: Test NetStatsServiceProxy GetTrafficStatsByNetwork.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByNetworkTest004, TestSize.Level1)
+{
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
     NetStatsServiceProxy instance_(remoteObj_);
     std::unordered_map<uint32_t, NetStatsInfo> infos;
-    sptr<NetStatsNetwork> network;
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     EXPECT_EQ(instance_.GetTrafficStatsByNetwork(infos, network), NETSYS_SUCCESS);
 }
 
@@ -722,10 +807,51 @@ HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByNetworkTest001, TestSize.Lev
  */
 HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByUidNetworkTest001, TestSize.Level1)
 {
+    NetStatsServiceProxy instance_(nullptr);
+    std::vector<NetStatsInfoSequence> infos;
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
+    EXPECT_EQ(instance_.GetTrafficStatsByUidNetwork(infos, TEST_UID, network), NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: GetTrafficStatsByUidNetworkTest002
+ * @tc.desc: Test NetStatsServiceProxy GetTrafficStatsByUidNetwork.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByUidNetworkTest002, TestSize.Level1)
+{
+    remoteObj_->SetErrorCode(NETMANAGER_ERROR);
+    NetStatsServiceProxy instance_(remoteObj_);
+    std::vector<NetStatsInfoSequence> infos;
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
+    EXPECT_EQ(instance_.GetTrafficStatsByUidNetwork(infos, TEST_UID, network), NETMANAGER_ERR_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: GetTrafficStatsByUidNetworkTest003
+ * @tc.desc: Test NetStatsServiceProxy GetTrafficStatsByUidNetwork.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByUidNetworkTest003, TestSize.Level1)
+{
+    remoteObj_->SetErrorCode(NETMANAGER_ERR_READ_REPLY_FAIL);
+    NetStatsServiceProxy instance_(remoteObj_);
+    std::vector<NetStatsInfoSequence> infos;
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
+    EXPECT_EQ(instance_.GetTrafficStatsByUidNetwork(infos, TEST_UID, network), NETMANAGER_ERR_READ_REPLY_FAIL);
+}
+
+/**
+ * @tc.name: GetTrafficStatsByUidNetworkTest004
+ * @tc.desc: Test NetStatsServiceProxy GetTrafficStatsByUidNetwork.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsServiceProxyTest, GetTrafficStatsByUidNetworkTest004, TestSize.Level1)
+{
     remoteObj_->SetErrorCode(NETMANAGER_SUCCESS);
     NetStatsServiceProxy instance_(remoteObj_);
     std::vector<NetStatsInfoSequence> infos;
-    sptr<NetStatsNetwork> network;
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     EXPECT_EQ(instance_.GetTrafficStatsByUidNetwork(infos, TEST_UID, network), NETSYS_SUCCESS);
 }
 

@@ -66,10 +66,7 @@ ohos_source_set("net_stats_parcel") {
 
   branch_protector_ret = "pac_ret"
 
-  include_dirs = [
-    "$INNERKITS_ROOT/netconnclient/include",
-    "$INNERKITS_ROOT/netstatsclient/include",
-  ]
+  include_dirs = [ "$INNERKITS_ROOT/netstatsclient/include" ]
 
   deps = [ "$NETMANAGER_BASE_ROOT/utils:net_manager_common" ]
   external_deps = [ "c_utils:utils" ]

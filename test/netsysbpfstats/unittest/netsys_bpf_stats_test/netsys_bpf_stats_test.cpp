@@ -296,25 +296,6 @@ HWTEST_F(NetsysBpfStatsTest, LoadAndCookieStats, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERROR);
 }
 
-HWTEST_F(NetsysBpfStatsTest, UnloadElf, TestSize.Level1)
-{
-    auto ret = OHOS::NetManagerStandard::UnloadElf(BFP_NAME_NETSYS_PATH);
-    EXPECT_EQ(ret, NETSYS_SUCCESS);
-
-    ret = OHOS::NetManagerStandard::UnloadElf(TEST_BFP_NAME_NETSYS_PATH);
-    EXPECT_GE(ret, NETSYS_SUCCESS);
-}
-
-HWTEST_F(NetsysBpfStatsTest, GetNumberFromStatsValue, TestSize.Level1)
-{
-    uint64_t stats = 0;
-    StatsType statsType = static_cast<StatsType>(STATS_TYPE_INVALID_VALUE);
-    stats_value value = {};
-    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
-    auto ret = bpfStats->GetNumberFromStatsValue(stats, statsType, value);
-    EXPECT_EQ(ret, NetManagerStandard::NetStatsResultCode::STATS_ERR_READ_BPF_FAIL);
-}
-
 HWTEST_F(NetsysBpfStatsTest, GetAllStatsInfoTest001, TestSize.Level1)
 {
     BpfMapper<app_uid_sim_stats_key, app_uid_sim_stats_value> uidSimStatsMap(APP_UID_SIM_STATS_MAP_PATH, BPF_ANY);
@@ -368,6 +349,25 @@ HWTEST_F(NetsysBpfStatsTest, GetAllContainerStatsInfo001, TestSize.Level1)
     std::vector<OHOS::NetManagerStandard::NetStatsInfo> stats;
     EXPECT_EQ(bpfStats->GetAllContainerStatsInfo(stats), NETSYS_SUCCESS);
     EXPECT_EQ(stats.size(), 2);
+}
+
+HWTEST_F(NetsysBpfStatsTest, UnloadElf, TestSize.Level1)
+{
+    auto ret = OHOS::NetManagerStandard::UnloadElf(BFP_NAME_NETSYS_PATH);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+
+    ret = OHOS::NetManagerStandard::UnloadElf(TEST_BFP_NAME_NETSYS_PATH);
+    EXPECT_GE(ret, NETSYS_SUCCESS);
+}
+
+HWTEST_F(NetsysBpfStatsTest, GetNumberFromStatsValue, TestSize.Level1)
+{
+    uint64_t stats = 0;
+    StatsType statsType = static_cast<StatsType>(STATS_TYPE_INVALID_VALUE);
+    stats_value value = {};
+    std::unique_ptr<NetsysBpfStats> bpfStats = std::make_unique<NetsysBpfStats>();
+    auto ret = bpfStats->GetNumberFromStatsValue(stats, statsType, value);
+    EXPECT_EQ(ret, NetManagerStandard::NetStatsResultCode::STATS_ERR_READ_BPF_FAIL);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS
