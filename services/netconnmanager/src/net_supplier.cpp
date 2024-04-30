@@ -356,16 +356,16 @@ void NetSupplier::SetNetValid(NetDetectionStatus netState)
             netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_VALIDATED);
             NETMGR_LOG_I("NetSupplier inserted cap:NET_CAPABILITY_VALIDATED");
         }
-        if (HasNetCap(NET_CAPABILITY_CAPTIVE_PORTAL)) {
-            netCaps_.RemoveNetCap(NET_CAPABILITY_CAPTIVE_PORTAL);
-            netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_CAPTIVE_PORTAL);
-            NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_CAPTIVE_PORTAL");
+        if (HasNetCap(NET_CAPABILITY_PORTAL)) {
+            netCaps_.RemoveNetCap(NET_CAPABILITY_PORTAL);
+            netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_PORTAL);
+            NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_PORTAL");
         }
     } else if (netState == CAPTIVE_PORTAL_STATE) {
-        if (!HasNetCap(NET_CAPABILITY_CAPTIVE_PORTAL)) {
-            netCaps_.InsertNetCap(NET_CAPABILITY_CAPTIVE_PORTAL);
-            netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_CAPTIVE_PORTAL);
-            NETMGR_LOG_I("NetSupplier inserted cap:NET_CAPABILITY_CAPTIVE_PORTAL");
+        if (!HasNetCap(NET_CAPABILITY_PORTAL)) {
+            netCaps_.InsertNetCap(NET_CAPABILITY_PORTAL);
+            netAllCapabilities_.netCaps_.insert(NET_CAPABILITY_PORTAL);
+            NETMGR_LOG_I("NetSupplier inserted cap:NET_CAPABILITY_PORTAL");
         }
         if (HasNetCap(NET_CAPABILITY_VALIDATED)) {
             netCaps_.RemoveNetCap(NET_CAPABILITY_VALIDATED);
@@ -382,10 +382,10 @@ void NetSupplier::SetNetValid(NetDetectionStatus netState)
             netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_VALIDATED);
             NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_VALIDATED");
         }
-        if (HasNetCap(NET_CAPABILITY_CAPTIVE_PORTAL)) {
-            netCaps_.RemoveNetCap(NET_CAPABILITY_CAPTIVE_PORTAL);
-            netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_CAPTIVE_PORTAL);
-            NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_CAPTIVE_PORTAL");
+        if (HasNetCap(NET_CAPABILITY_PORTAL)) {
+            netCaps_.RemoveNetCap(NET_CAPABILITY_PORTAL);
+            netAllCapabilities_.netCaps_.erase(NET_CAPABILITY_PORTAL);
+            NETMGR_LOG_I("NetSupplier remove cap:NET_CAPABILITY_PORTAL");
         }
     }
 }
