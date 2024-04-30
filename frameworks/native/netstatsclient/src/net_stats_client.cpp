@@ -383,5 +383,25 @@ int32_t NetStatsClient::GetSockfdTxBytes(uint64_t &stats, int32_t sockfd)
 
     return proxy->GetCookieTxBytes(stats, optrval);
 }
+
+extern "C" int32_t GetUidTxBytesEx(uint64_t *stats, uint32_t uid)
+{
+    NETMGR_LOG_D("GetUidTxBytesEx in");
+    if (!stats) {
+        NETMGR_LOG_E("stats is null");
+        return -1;
+    }
+    return DelayedSingleton<NetManagerStandard::NetStatsClient>::GetInstance()->GetUidTxBytes(*stats, uid);
+}
+
+extern "C" int32_t GetUidRxBytesEx(uint64_t *stats, uint32_t uid)
+{
+    NETMGR_LOG_D("GetUidRxBytesEx in");
+    if (!stats) {
+        NETMGR_LOG_E("stats is null");
+        return -1;
+    }
+    return DelayedSingleton<NetManagerStandard::NetStatsClient>::GetInstance()->GetUidRxBytes(*stats, uid);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
