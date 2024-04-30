@@ -112,6 +112,16 @@ void NetPolicyAsyncWork::ExecUpdateRemindPolicy(napi_env env, void *data)
     BaseAsyncWork::ExecAsyncWork<UpdateRemindPolicyContext, NetPolicyExec::ExecUpdateRemindPolicy>(env, data);
 }
 
+void NetPolicyAsyncWork::ExecSetNetworkAccessPolicy(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<SetNetworkAccessPolicyContext, NetPolicyExec::ExecSetNetworkAccessPolicy>(env, data);
+}
+
+void NetPolicyAsyncWork::ExecGetNetworkAccessPolicy(napi_env env, void *data)
+{
+    BaseAsyncWork::ExecAsyncWork<GetNetworkAccessPolicyContext, NetPolicyExec::ExecGetNetworkAccessPolicy>(env, data);
+}
+
 void NetPolicyAsyncWork::SetPolicyByUidCallback(napi_env env, napi_status status, void *data)
 {
     BaseAsyncWork::AsyncWorkCallback<SetPolicyByUidContext, NetPolicyExec::SetPolicyByUidCallback>(env, status, data);
@@ -200,6 +210,18 @@ void NetPolicyAsyncWork::GetPowerSaveTrustlistCallback(napi_env env, napi_status
 {
     BaseAsyncWork::AsyncWorkCallback<GetPowerSaveTrustlistContext, NetPolicyExec::GetPowerSaveTrustlistCallback>(
         env, status, data);
+}
+
+void NetPolicyAsyncWork::SetNetworkAccessPolicyCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<SetNetworkAccessPolicyContext, NetPolicyExec::SetNetworkAccessPolicyCallback>(env,
+        status, data);
+}
+
+void NetPolicyAsyncWork::GetNetworkAccessPolicyCallback(napi_env env, napi_status status, void *data)
+{
+    BaseAsyncWork::AsyncWorkCallback<GetNetworkAccessPolicyContext, NetPolicyExec::GetNetworkAccessPolicyCallback>(env,
+        status, data);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

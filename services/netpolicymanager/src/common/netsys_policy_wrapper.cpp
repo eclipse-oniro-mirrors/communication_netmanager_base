@@ -113,5 +113,21 @@ int32_t NetsysPolicyWrapper::FirewallEnableChain(uint32_t chain, bool enable)
                  netsysReturnValue);
     return netsysReturnValue;
 }
+
+int32_t NetsysPolicyWrapper::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+{
+    auto netsysReturnValue = NetsysController::GetInstance().SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
+    NETMGR_LOG_D(
+        "SetNetworkAccessPolicy uid[%{public}u] policy wifi_enable[%{public}d] and cellular_enable[%{public}d] "
+        "netsys return[%{public}d]",
+        uid, policy.wifiAllow, policy.cellularAllow, netsysReturnValue);
+    return netsysReturnValue;
+}
+
+int32_t NetsysPolicyWrapper::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    auto netsysReturnValue = NetsysController::GetInstance().DeleteNetworkAccessPolicy(uid);
+    return netsysReturnValue;
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

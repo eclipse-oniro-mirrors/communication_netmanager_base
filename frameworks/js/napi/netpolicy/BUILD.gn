@@ -54,6 +54,7 @@ ohos_shared_library("policy") {
 
   sources = [
     "src/context/get_net_quota_policies_context.cpp",
+    "src/context/get_network_access_policy_context.cpp",
     "src/context/get_policy_by_uid_context.cpp",
     "src/context/get_uids_by_policy_context.cpp",
     "src/context/is_uid_net_allowed_context.cpp",
@@ -61,6 +62,7 @@ ohos_shared_library("policy") {
     "src/context/set_bg_policy_context.cpp",
     "src/context/set_device_idle_allow_list_context.cpp",
     "src/context/set_net_quota_policies_context.cpp",
+    "src/context/set_network_access_policy_context.cpp",
     "src/context/set_policy_by_uid_context.cpp",
     "src/context/set_power_save_allow_list_context.cpp",
     "src/context/update_remind_policy_context.cpp",

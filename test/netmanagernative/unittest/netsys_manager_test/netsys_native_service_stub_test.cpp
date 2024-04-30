@@ -487,6 +487,21 @@ public:
     {
         return 0;
     }
+
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override
+    {
+        return 0;
+    }
+
+    int32_t DeleteNetworkAccessPolicy(uint32_t uid) override
+    {
+        return 0;
+    }
+
+    int32_t NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {
@@ -1739,6 +1754,77 @@ HWTEST_F(NetsysNativeServiceStubTest, CmdUpdateNetworkSharingType001, TestSize.L
 
     MessageParcel reply;
     int32_t ret = notifyStub_->CmdUpdateNetworkSharingType(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdSetNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteUint32(uid)) {
+        return;
+    }
+
+    if (!data.WriteUint8(netAccessPolicy.wifiAllow)) {
+        return;
+    }
+
+    if (!data.WriteUint8(netAccessPolicy.cellularAllow)) {
+        return;
+    }
+
+    if (!data.WriteBool(reconfirmFlag)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdSetNetworkAccessPolicy(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdDeleteNetworkAccessPolicy001, TestSize.Level1)
+{
+    uint32_t uid = 0;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NetsysNativeServiceStub::GetDescriptor())) {
+        return;
+    }
+    if (!data.WriteUint32(uid)) {
+        return;
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdDelNetworkAccessPolicy(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+HWTEST_F(NetsysNativeServiceStubTest, CmdNotifyNetBearerTypeChange001, TestSize.Level1)
+{
+    std::set<NetManagerStandard::NetBearType> bearerTypes;
+    bearerTypes.clear();
+    bearerTypes.insert(NetManagerStandard::NetBearType::BEARER_CELLULAR);
+    MessageParcel data;
+
+    uint32_t size = static_cast<uint32_t>(bearerTypes.size());
+    if (!data.WriteUint32(size)) {
+        return;
+    }
+
+    for (auto bearerType : bearerTypes) {
+        if (!data.WriteUint32(static_cast<uint32_t>(bearerType))) {
+            return;
+        }
+    }
+
+    MessageParcel reply;
+    int32_t ret = notifyStub_->CmdNotifyNetBearerTypeChange(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
 }
 } // namespace NetsysNative

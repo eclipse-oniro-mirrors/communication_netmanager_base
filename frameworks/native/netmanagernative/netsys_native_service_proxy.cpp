@@ -2306,5 +2306,82 @@ int32_t NetsysNativeServiceProxy::SetEnableIpv6(const std::string &interfaceName
     return reply.ReadInt32();
 }
 
+int32_t NetsysNativeServiceProxy::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)
+{
+    NETNATIVE_LOGI("SetNetworkAccessPolicy");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint32(uid)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint8(policy.wifiAllow)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint8(policy.cellularAllow)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteBool(reconfirmFlag)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_SET_NETWORK_ACCESS_POLICY), data, reply,
+                          option);
+
+    return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::DeleteNetworkAccessPolicy(uint32_t uid)
+{
+    NETNATIVE_LOGI("DeleteNetworkAccessPolicy");
+    MessageParcel data;
+
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteUint32(uid)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_DEL_NETWORK_ACCESS_POLICY), data, reply,
+                          option);
+
+    return reply.ReadInt32();
+}
+
+int32_t NetsysNativeServiceProxy::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
+{
+    NETNATIVE_LOGI("NotifyNetBearerTypeChange");
+    MessageParcel data;
+
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    uint32_t size = static_cast<uint32_t>(bearerTypes.size());
+    if (!data.WriteUint32(size)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (auto bearerType : bearerTypes) {
+        if (!data.WriteUint32(static_cast<uint32_t>(bearerType))) {
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    Remote()->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NOTIFY_NETWORK_BEARER_TYPE_CHANGE), data,
+                          reply, option);
+    return reply.ReadInt32();
+}
+
 } // namespace NetsysNative
 } // namespace OHOS

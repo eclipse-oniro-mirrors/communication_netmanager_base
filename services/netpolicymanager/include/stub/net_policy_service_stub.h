@@ -45,6 +45,7 @@ private:
 
 private:
     void InitEventHandler();
+    void ExtraNetPolicyServiceStub();
     int32_t OnSetPolicyByUid(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetPolicyByUid(MessageParcel &data, MessageParcel &reply);
     int32_t OnGetUidsByPolicy(MessageParcel &data, MessageParcel &reply);
@@ -67,6 +68,9 @@ private:
     int32_t OnSetPowerSavePolicy(MessageParcel &data, MessageParcel &reply);
     int32_t OnCheckPermission(MessageParcel &data, MessageParcel &reply);
     int32_t OnFactoryResetPolicies(MessageParcel &data, MessageParcel &reply);
+    int32_t OnSetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGetNetworkAccessPolicy(MessageParcel &data, MessageParcel &reply);
+    int32_t OnNotifyNetAccessPolicyDiag(MessageParcel &data, MessageParcel &reply);
 
 private:
     std::map<uint32_t, NetPolicyServiceFunc> memberFuncMap_;

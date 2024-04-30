@@ -130,5 +130,23 @@ HWTEST_F(NetsysPolicyWrapperTest, FirewallEnableChainTest001, TestSize.Level1)
     EXPECT_LE(ret, 0);
     std::remove(POLICY_FILE_NAME);
 }
+
+HWTEST_F(NetsysPolicyWrapperTest, SetNetworkAccessPolicyTest001, TestSize.Level1)
+{
+    uint32_t uid = 666;
+    NetworkAccessPolicy netAccessPolicy;
+    netAccessPolicy.wifiAllow = false;
+    netAccessPolicy.cellularAllow = false;
+    bool reconfirmFlag = true;
+    auto ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetsysPolicyWrapperTest, DeleteNetworkAccessPolicyTest001, TestSize.Level1)
+{
+    uint32_t uid = 666;
+    auto ret = instance_->DeleteNetworkAccessPolicy(uid);
+    EXPECT_GE(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

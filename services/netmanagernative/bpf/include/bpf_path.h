@@ -24,5 +24,8 @@ static constexpr const char *OH_SOCKET_PERMISSION_MAP_PATH = "/sys/fs/bpf/netsys
 static constexpr const char *BROKER_SOCKET_PERMISSION_MAP_PATH =
     "/sys/fs/bpf/netsys/maps/broker_sock_permission_map";
 static constexpr const char *APP_COOKIE_STATS_MAP_PATH = "/sys/fs/bpf/netsys/maps/app_cookie_stats_map";
+static constexpr const char *APP_UID_PERMISSION_MAP_PATH = "/sys/fs/bpf/netsys/maps/app_uid_access_policy_map";
+static constexpr const char *RING_BUFFER_MAP_PATH = "/sys/fs/bpf/netsys/maps/ringbuf_map";
+static constexpr const char *NET_BEAR_TYPE_MAP_PATH = "/sys/fs/bpf/netsys/maps/net_bear_type_map";
 } // namespace OHOS::NetManagerStandard
 #endif /* NETMANAGER_BASE_BPF_PATH_H */

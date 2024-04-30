@@ -485,6 +485,57 @@ void CheckPermissionFuzzTest(const uint8_t *data, size_t size)
 
     OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_CHECK_PERMISSION), dataParcel);
 }
+
+/**
+ * @tc.name: SetNetworkAccessPolicy001
+ * @tc.desc: Test NetPolicyClient SetNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+void SetNetworkAccessPolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+    NetworkAccessPolicy netAccessPolicy;
+    uint32_t uid = NetPolicyGetData<uint32_t>();
+    netAccessPolicy.wifiAllow = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL;
+    netAccessPolicy.cellularAllow = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL;
+    bool reconfirmFlag = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL;
+
+    dataParcel.WriteUint32(uid);
+    dataParcel.WriteUint8(netAccessPolicy.wifiAllow);
+    dataParcel.WriteUint8(netAccessPolicy.cellularAllow);
+    dataParcel.WriteBool(reconfirmFlag);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_NETWORK_ACCESS_POLICY), dataParcel);
+}
+
+/**
+ * @tc.name: GetNetworkAccessPolicy001
+ * @tc.desc: Test NetPolicyClient GetNetworkAccessPolicy.
+ * @tc.type: FUNC
+ */
+void GetNetworkAccessPolicyFuzzTest(const uint8_t *data, size_t size)
+{
+    NetManagerBaseAccessToken token;
+    MessageParcel dataParcel;
+    if (!IsValidPolicyFuzzData(data, size, dataParcel)) {
+        return;
+    }
+
+    if (!WriteInterfaceToken(dataParcel)) {
+        return;
+    }
+
+    bool flag = NetPolicyGetData<uint32_t>() % CONVERT_NUMBER_TO_BOOL;
+    uint32_t uid = NetPolicyGetData<uint32_t>();
+    uint32_t userId = NetPolicyGetData<uint32_t>();
+    dataParcel.WriteBool(flag);
+    dataParcel.WriteInt32(uid);
+    dataParcel.WriteUint32(userId);
+    OnRemoteRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NETWORK_ACCESS_POLICY), dataParcel);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS
 
@@ -511,5 +562,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::NetManagerStandard::GetBackgroundPolicyFuzzTest(data, size);
     OHOS::NetManagerStandard::SetPowerSavePolicyFuzzTest(data, size);
     OHOS::NetManagerStandard::CheckPermissionFuzzTest(data, size);
+    OHOS::NetManagerStandard::SetNetworkAccessPolicyFuzzTest(data, size);
+    OHOS::NetManagerStandard::GetNetworkAccessPolicyFuzzTest(data, size);
     return 0;
 }

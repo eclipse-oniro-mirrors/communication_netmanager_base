@@ -50,6 +50,9 @@ public:
     int32_t SetPowerSavePolicy(bool enable) override;
     int32_t CheckPermission() override;
     int32_t FactoryResetPolicies() override;
+    int32_t SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag) override;
+    int32_t GetNetworkAccessPolicy(AccessPolicyParameter parameter, AccessPolicySave& policy) override;
+    int32_t NotifyNetAccessPolicyDiag(uint32_t uid) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
