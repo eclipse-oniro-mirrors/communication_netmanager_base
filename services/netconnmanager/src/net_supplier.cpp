@@ -304,8 +304,7 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
         return;
     }
     if (netScore_ >= bestScore) {
-        NETMGR_LOG_W("[%{public}d, %{public}d, %{public}d], high priority network, no need to disconnect", supplierId_,
-                     reqId, bestScore);
+        NETMGR_LOG_D("High priority network, no need to disconnect");
         return;
     }
     requestList_.erase(reqId);
