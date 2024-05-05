@@ -1292,7 +1292,7 @@ int32_t NetConnService::GetDefaultNet(int32_t &netId)
 {
     std::lock_guard<std::mutex> locker(netManagerMutex_);
     if (!defaultNetSupplier_) {
-        NETMGR_LOG_D("not found the netId");
+        NETMGR_LOG_E("not found the netId");
         return NETMANAGER_SUCCESS;
     }
 
