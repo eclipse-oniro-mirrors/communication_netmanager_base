@@ -108,6 +108,7 @@ int32_t NetSupplierCallbackStub::OnReleaseNetwork(MessageParcel &data, MessagePa
 int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
 {
     if (callback_ != nullptr) {
+        NETMGR_LOG_I("RequestNetwork[%{public}s]", ident.c_str());
         callback_->RequestNetwork(ident, netCaps);
     }
     return 0;
@@ -116,6 +117,7 @@ int32_t NetSupplierCallbackStub::RequestNetwork(const std::string &ident, const 
 int32_t NetSupplierCallbackStub::ReleaseNetwork(const std::string &ident, const std::set<NetCap> &netCaps)
 {
     if (callback_ != nullptr) {
+        NETMGR_LOG_I("ReleaseNetwork[%{public}s]", ident.c_str());
         callback_->ReleaseNetwork(ident, netCaps);
     }
     return 0;
