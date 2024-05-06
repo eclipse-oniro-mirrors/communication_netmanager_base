@@ -223,7 +223,7 @@ bool NetSupplier::GetRestrictBackground() const
 
 bool NetSupplier::SupplierDisconnection(const std::set<NetCap> &netCaps)
 {
-    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request disconnect, available=%{public}d", supplierId_,
+    NETMGR_LOG_D("Supplier[%{public}d, %{public}s] request disconnect, available=%{public}d", supplierId_,
                  netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
     if (!netSupplierInfo_.isAvailable_) {
         NETMGR_LOG_D("The supplier is currently unavailable, there is no need to repeat the request to disconnect.");
@@ -292,7 +292,7 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
     NETMGR_LOG_D("Supplier[%{public}d, %{public}s] receive best score, bestSupplierId[%{public}d]", supplierId_,
                  netSupplierIdent_.c_str(), supplierId);
     if (supplierId == supplierId_) {
-        NETMGR_LOG_W("Same net supplier, no need to disconnect.");
+        NETMGR_LOG_D("Same net supplier, no need to disconnect.");
         return;
     }
     if (requestList_.empty()) {
@@ -304,7 +304,7 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
         return;
     }
     if (netScore_ >= bestScore) {
-        NETMGR_LOG_W("High priority network, no need to disconnect");
+        NETMGR_LOG_D("High priority network, no need to disconnect");
         return;
     }
     requestList_.erase(reqId);
