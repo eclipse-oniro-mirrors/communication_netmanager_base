@@ -42,7 +42,7 @@ void NetCapsTest::SetUpTestCase()
                              NetCap::NET_CAPABILITY_NOT_METERED,
                              NetCap::NET_CAPABILITY_INTERNET,
                              NetCap::NET_CAPABILITY_VALIDATED,
-                             NetCap::NET_CAPABILITY_CAPTIVE_PORTAL,
+                             NetCap::NET_CAPABILITY_PORTAL,
                              NetCap::NET_CAPABILITY_INTERNAL_DEFAULT,
                              NetCap::NET_CAPABILITY_END};
     instance_ = std::make_unique<NetCaps>(caps);
@@ -67,7 +67,7 @@ HWTEST_F(NetCapsTest, ConstructorTest002, TestSize.Level1)
                              NetCap::NET_CAPABILITY_INTERNET,
                              NetCap::NET_CAPABILITY_NOT_VPN,
                              NetCap::NET_CAPABILITY_VALIDATED,
-                             NetCap::NET_CAPABILITY_CAPTIVE_PORTAL,
+                             NetCap::NET_CAPABILITY_PORTAL,
                              NetCap::NET_CAPABILITY_INTERNAL_DEFAULT,
                              NetCap::NET_CAPABILITY_END};
     std::unique_ptr<NetCaps> netCaps = std::make_unique<NetCaps>(caps);

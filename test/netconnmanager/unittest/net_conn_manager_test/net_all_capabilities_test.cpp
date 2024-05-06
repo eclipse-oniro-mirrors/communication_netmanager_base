@@ -53,7 +53,7 @@ HWTEST_F(NetAllCapabilitiesTest, ToStringTest, TestSize.Level1)
         NetCap::NET_CAPABILITY_INTERNET,
         NetCap::NET_CAPABILITY_NOT_VPN,
         NetCap::NET_CAPABILITY_VALIDATED,
-        NetCap::NET_CAPABILITY_CAPTIVE_PORTAL,
+        NetCap::NET_CAPABILITY_PORTAL,
         NetCap::NET_CAPABILITY_INTERNAL_DEFAULT,
         NetCap::NET_CAPABILITY_END
     };
@@ -92,7 +92,7 @@ HWTEST_F(NetAllCapabilitiesTest, ParcelTest, TestSize.Level1)
         NetCap::NET_CAPABILITY_INTERNET,
         NetCap::NET_CAPABILITY_NOT_VPN,
         NetCap::NET_CAPABILITY_VALIDATED,
-        NetCap::NET_CAPABILITY_CAPTIVE_PORTAL,
+        NetCap::NET_CAPABILITY_PORTAL,
         NetCap::NET_CAPABILITY_INTERNAL_DEFAULT,
         NetCap::NET_CAPABILITY_END
     };

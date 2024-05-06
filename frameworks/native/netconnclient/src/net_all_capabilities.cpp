@@ -197,8 +197,8 @@ void NetAllCapabilities::ToStrNetCaps(const std::set<NetCap> &netCaps, std::stri
             case NET_CAPABILITY_VALIDATED:
                 str.append("NET_CAPABILITY_VALIDATED");
                 break;
-            case NET_CAPABILITY_CAPTIVE_PORTAL:
-                str.append("NET_CAPABILITY_CAPTIVE_PORTAL");
+            case NET_CAPABILITY_PORTAL:
+                str.append("NET_CAPABILITY_PORTAL");
                 break;
             case NET_CAPABILITY_INTERNAL_DEFAULT:
                 str.append("NET_CAPABILITY_INTERNAL_DEFAULT");
