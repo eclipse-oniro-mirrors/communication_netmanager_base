@@ -55,7 +55,7 @@ void NetlinkMsg::AddRule(uint16_t action, struct fib_rule_hdr msg)
     if (result != 0) {
         NETNATIVE_LOGE("[AddRule]: string copy failed result %{public}d", result);
     }
-    netlinkMessage_->nlmsg_len = NLMSG_LENGTH(sizeof(struct fib_rule_hdr));
+    netlinkMessage_->nlmsg_len = static_cast<uint32_t>(NLMSG_LENGTH(sizeof(struct fib_rule_hdr)));
 }
 
 void NetlinkMsg::AddAddress(uint16_t action, struct ifaddrmsg msg)
@@ -66,7 +66,7 @@ void NetlinkMsg::AddAddress(uint16_t action, struct ifaddrmsg msg)
         NETNATIVE_LOGE("[AddAddress]: string copy failed result %{public}d", result);
         return;
     }
-    netlinkMessage_->nlmsg_len = NLMSG_LENGTH(sizeof(struct ifaddrmsg));
+    netlinkMessage_->nlmsg_len = static_cast<uint32_t>(NLMSG_LENGTH(sizeof(struct ifaddrmsg)));
 }
 
 int32_t NetlinkMsg::AddAttr(uint16_t type, void *data, size_t alen)

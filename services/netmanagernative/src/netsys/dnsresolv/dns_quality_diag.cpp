@@ -119,8 +119,8 @@ int32_t DnsQualityDiag::ReportDnsResult(uint16_t netId, uint16_t uid, uint32_t p
         report.netid_ = netId;
         report.uid_ = uid;
         report.pid_ = pid;
-        report.timeused_ = usedtime;
-        report.queryresult_ = failreason;
+        report.timeused_ = static_cast<uint32_t>(usedtime);
+        report.queryresult_ = static_cast<uint32_t>(failreason);
         report.host_ = name;
         if (failreason == 0) {
             ParseReportAddr(size, addrinfo, report);
@@ -184,7 +184,7 @@ int32_t DnsQualityDiag::UnregisterHealthListener(const sptr<INetDnsHealthCallbac
 
 int32_t DnsQualityDiag::SetLoopDelay(int32_t delay)
 {
-    monitor_loop_delay = delay;
+    monitor_loop_delay = static_cast<uint32_t>(delay);
     return 0;
 }
 
