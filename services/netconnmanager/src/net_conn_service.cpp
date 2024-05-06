@@ -2177,12 +2177,12 @@ void NetConnService::OnNetSysRestart()
 
         iter->second->ResumeNetworkInfo();
     }
-
+    std::unique_lock<std::mutex> locker(netManagerMutex_);
     if (defaultNetSupplier_ != nullptr) {
         defaultNetSupplier_->ClearDefault();
         defaultNetSupplier_ = nullptr;
     }
-
+    locker.unlock();
     FindBestNetworkForAllRequest();
 }
 
