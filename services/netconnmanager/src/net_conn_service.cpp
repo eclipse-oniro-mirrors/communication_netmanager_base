@@ -276,7 +276,7 @@ int32_t NetConnService::UnregisterNetSupplier(uint32_t supplierId)
 
 int32_t NetConnService::UnregisterNetConnCallback(const sptr<INetConnCallback> &callback)
 {
-    int32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
+    uint32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
         netConnEventHandler_->PostSyncTask(
@@ -1657,7 +1657,7 @@ int32_t NetConnService::GetDelayNotifyTime()
 
 int32_t NetConnService::RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback)
 {
-    int32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
+    int32_t callingUid = static_cast<int32_t>(IPCSkeleton::GetCallingUid());
     NETMGR_LOG_D("RegisterPreAirplaneCallback, calllinguid [%{public}d]", callingUid);
     std::lock_guard guard(preAirplaneCbsMutex_);
     preAirplaneCallbacks_[callingUid] = callback;
@@ -1666,7 +1666,7 @@ int32_t NetConnService::RegisterPreAirplaneCallback(const sptr<IPreAirplaneCallb
 
 int32_t NetConnService::UnregisterPreAirplaneCallback(const sptr<IPreAirplaneCallback> callback)
 {
-    int32_t callingUid = static_cast<uint32_t>(IPCSkeleton::GetCallingUid());
+    int32_t callingUid = static_cast<int32_t>(IPCSkeleton::GetCallingUid());
     NETMGR_LOG_D("UnregisterPreAirplaneCallback, calllinguid [%{public}d]", callingUid);
     std::lock_guard guard(preAirplaneCbsMutex_);
     preAirplaneCallbacks_.erase(callingUid);

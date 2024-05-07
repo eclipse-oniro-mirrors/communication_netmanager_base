@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { AsyncCallback, Callback } from "./basic";
-import connection from "./@ohos.net.connection";
+import { AsyncCallback, Callback } from './basic';
+import connection from './@ohos.net.connection';
 
 /**
  * Provides interfaces to manage network policy rules.

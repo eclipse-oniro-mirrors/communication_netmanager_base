@@ -558,7 +558,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressesByName(GetAddressByNameConte
     if (!context->IsParseOK()) {
         return false;
     }
-    uint32_t netid = context->netId_;
+    uint32_t netid = static_cast<uint32_t>(context->netId_);
     addrinfo *res = nullptr;
     queryparam param;
     param.qp_type = QEURY_TYPE_NORMAL;
@@ -611,7 +611,7 @@ bool ConnectionExec::NetHandleExec::ExecGetAddressByName(GetAddressByNameContext
     if (!context->IsParseOK()) {
         return false;
     }
-    uint32_t netid = context->netId_;
+    uint32_t netid = static_cast<uint32_t>(context->netId_);
     addrinfo *res = nullptr;
     queryparam param;
     param.qp_type = QEURY_TYPE_NORMAL;
