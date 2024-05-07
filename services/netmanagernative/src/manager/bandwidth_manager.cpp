@@ -463,10 +463,9 @@ int32_t BandwidthManager::AddDeniedList(uint32_t uid)
     std::unique_lock<std::mutex> lock(bandwidthMutex_);
     CheckChainInitialization();
 
-    if (std::find(deniedListUids_.begin(), deniedListUids_.end(), uid) != deniedListUids_.end()) {
+    auto [_, inserted] = deniedListUids_.insert(uid);
+    if (!inserted) {
         return NETMANAGER_ERROR;
-    } else {
-        deniedListUids_.push_back(uid);
     }
 
     std::string strUid = std::to_string(uid);
@@ -483,11 +482,9 @@ int32_t BandwidthManager::RemoveDeniedList(uint32_t uid)
     std::unique_lock<std::mutex> lock(bandwidthMutex_);
     CheckChainInitialization();
 
-    std::vector<uint32_t>::iterator iter = std::find(deniedListUids_.begin(), deniedListUids_.end(), uid);
-    if (iter == deniedListUids_.end()) {
+    if (deniedListUids_.erase(uid) == 0) {
         return NETMANAGER_ERROR;
     }
-    deniedListUids_.erase(iter);
 
     std::string strUid = std::to_string(uid);
     std::string command;
@@ -503,10 +500,9 @@ int32_t BandwidthManager::AddAllowedList(uint32_t uid)
     std::unique_lock<std::mutex> lock(bandwidthMutex_);
     CheckChainInitialization();
 
-    if (std::find(allowedListUids_.begin(), allowedListUids_.end(), uid) != allowedListUids_.end()) {
+    auto [_, inserted] = allowedListUids_.insert(uid);
+    if (!inserted) {
         return NETMANAGER_ERROR;
-    } else {
-        allowedListUids_.push_back(uid);
     }
 
     std::string strUid = std::to_string(uid);
@@ -523,11 +519,8 @@ int32_t BandwidthManager::RemoveAllowedList(uint32_t uid)
     std::unique_lock<std::mutex> lock(bandwidthMutex_);
     CheckChainInitialization();
 
-    std::vector<uint32_t>::iterator iter = std::find(allowedListUids_.begin(), allowedListUids_.end(), uid);
-    if (iter == allowedListUids_.end()) {
+    if (allowedListUids_.erase(uid) == 0) {
         return NETMANAGER_ERROR;
-    } else {
-        allowedListUids_.erase(iter);
     }
 
     std::string strUid = std::to_string(uid);
