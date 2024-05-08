@@ -649,5 +649,16 @@ HWTEST_F(UtNetmanagerBaseCommon, HasInternetPermission001, TestSize.Level2)
     bool result = CommonUtils::HasInternetPermission();
     EXPECT_TRUE(result);
 }
+
+HWTEST_F(UtNetmanagerBaseCommon, CheckIfaceName001, TestSize.Level2)
+{
+    std::string name = "";
+    bool result = CommonUtils::CheckIfaceName(name);
+    EXPECT_FALSE(result);
+
+    name = TEST_TEXT;
+    result = CommonUtils::CheckIfaceName(name);
+    EXPECT_FALSE(result);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

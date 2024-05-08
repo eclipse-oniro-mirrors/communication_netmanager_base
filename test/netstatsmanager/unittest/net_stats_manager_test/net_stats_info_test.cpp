@@ -113,6 +113,25 @@ HWTEST_F(NetStatsInfoTest, MarshallingUnmarshallingTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MarshallingUnmarshallingTest004
+ * @tc.desc: Test NetStatsInfo Marshalling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsInfoTest, MarshallingUnmarshallingTest004, TestSize.Level1)
+{
+    Parcel parcel;
+    std::unordered_map<uint32_t, NetStatsInfo> statsInfos;
+    NetStatsInfo infoa = GetNetStatsInfoData();
+    statsInfos.emplace(0, infoa);
+    NetStatsInfo infob = GetNetStatsInfoData();
+    statsInfos.emplace(1, infob);
+
+    EXPECT_TRUE(NetStatsInfo::Marshalling(parcel, statsInfos));
+    std::unordered_map<uint32_t, NetStatsInfo> results;
+    EXPECT_TRUE(NetStatsInfo::Unmarshalling(parcel, results));
+}
+
+/**
  * @tc.name: NetStatsInfoOperator
  * @tc.desc: Test NetStatsInfo Operator.
  * @tc.type: FUNC
