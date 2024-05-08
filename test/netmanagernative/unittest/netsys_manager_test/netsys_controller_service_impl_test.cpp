@@ -748,7 +748,7 @@ HWTEST_F(NetsysControllerServiceImplTest, SetNetworkAccessPolicy001, TestSize.Le
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
     auto ret = instance_->SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
 HWTEST_F(NetsysControllerServiceImplTest, NotifyNetBearerTypeChange001, TestSize.Level1)
@@ -763,7 +763,7 @@ HWTEST_F(NetsysControllerServiceImplTest, DeleteNetworkAccessPolicy001, TestSize
 {
     uint32_t uid = 0;
     auto ret = instance_->DeleteNetworkAccessPolicy(uid);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERROR);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

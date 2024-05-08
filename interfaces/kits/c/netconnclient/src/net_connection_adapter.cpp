@@ -112,7 +112,7 @@ int32_t Conv2HttpProxy(HttpProxy &httpProxyObj, NetConn_HttpProxy *httpProxy)
         }
     }
 
-    httpProxy->exclusionListSize = httpProxyObj.GetExclusionList().size();
+    httpProxy->exclusionListSize = static_cast<int32_t>(httpProxyObj.GetExclusionList().size());
 
     return NETMANAGER_SUCCESS;
 }
@@ -144,7 +144,7 @@ int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, NetConn_ConnectionProperties *pro
             return ret;
         }
     }
-    prop->netAddrListSize = infoObj.netAddrList_.size();
+    prop->netAddrListSize = static_cast<int32_t>(infoObj.netAddrList_.size());
 
     i = 0;
     for (const auto& dns : infoObj.dnsList_) {
@@ -157,7 +157,7 @@ int32_t Conv2NetLinkInfo(NetLinkInfo &infoObj, NetConn_ConnectionProperties *pro
             return ret;
         }
     }
-    prop->dnsListSize = infoObj.dnsList_.size();
+    prop->dnsListSize = static_cast<int32_t>(infoObj.dnsList_.size());
 
     ret = Conv2HttpProxy(infoObj.httpProxy_, &(prop->httpProxy));
     if (ret != NETMANAGER_SUCCESS) {
@@ -202,7 +202,7 @@ int32_t Conv2NetAllCapabilities(NetAllCapabilities &netAllCapsObj, NetConn_NetCa
         }
         netAllCaps->bearerTypes[i++] = iterMap->second;
     }
-    netAllCaps->bearerTypesSize = netAllCapsObj.bearerTypes_.size();
+    netAllCaps->bearerTypesSize = static_cast<int32_t>(netAllCapsObj.bearerTypes_.size());
 
     return NETMANAGER_SUCCESS;
 }

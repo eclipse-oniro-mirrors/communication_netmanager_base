@@ -180,10 +180,10 @@ int32_t DnsManager::FillAddrInfo(std::vector<AddrInfo> &addrInfo, addrinfo *res)
 
     while (tmp) {
         AddrInfo info;
-        info.aiFlags = tmp->ai_flags;
-        info.aiFamily = tmp->ai_family;
-        info.aiSockType = tmp->ai_socktype;
-        info.aiProtocol = tmp->ai_protocol;
+        info.aiFlags = static_cast<int32_t>(tmp->ai_flags);
+        info.aiFamily = static_cast<int32_t>(tmp->ai_family);
+        info.aiSockType = static_cast<int32_t>(tmp->ai_socktype);
+        info.aiProtocol = static_cast<int32_t>(tmp->ai_protocol);
         info.aiAddrLen = tmp->ai_addrlen;
         if (memcpy_s(&info.aiAddr, sizeof(info.aiAddr), tmp->ai_addr, tmp->ai_addrlen) != 0) {
             NETNATIVE_LOGE("memcpy_s failed");

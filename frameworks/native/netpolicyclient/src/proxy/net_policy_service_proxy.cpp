@@ -760,8 +760,8 @@ int32_t NetPolicyServiceProxy::GetNetworkAccessPolicy(AccessPolicyParameter para
 
     MessageParcel reply;
     MessageOption option;
-    int32_t retCode = remote->SendRequest(static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NETWORK_ACCESS_POLICY),
-                                          data, reply, option);
+    int32_t retCode = SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_GET_NETWORK_ACCESS_POLICY),
+                                  data, reply, option);
     if (retCode != NETMANAGER_SUCCESS) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return retCode;
@@ -796,8 +796,9 @@ int32_t NetPolicyServiceProxy::NotifyNetAccessPolicyDiag(uint32_t uid)
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
 
-    int32_t retCode = remote->SendRequest(
-        static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_NOTIFY_NETWORK_ACCESS_POLICY_DIAG), data, reply, option);
+    int32_t retCode =
+        SendRequest(remote, static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_NOTIFY_NETWORK_ACCESS_POLICY_DIAG), data,
+                    reply, option);
     if (retCode != 0) {
         NETMGR_LOG_E("proxy SendRequest failed, error code: [%{public}d]", retCode);
         return retCode;

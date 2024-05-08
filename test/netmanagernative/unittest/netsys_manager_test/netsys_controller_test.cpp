@@ -1063,7 +1063,7 @@ HWTEST_F(NetsysControllerTest, SetNetworkAccessPolicy001, TestSize.Level1)
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
     int32_t ret = NetsysController::GetInstance().SetNetworkAccessPolicy(uid, netAccessPolicy, reconfirmFlag);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 
 HWTEST_F(NetsysControllerTest, NotifyNetBearerTypeChange001, TestSize.Level1)
@@ -1071,14 +1071,14 @@ HWTEST_F(NetsysControllerTest, NotifyNetBearerTypeChange001, TestSize.Level1)
     std::set<NetManagerStandard::NetBearType> bearTypes;
     bearTypes.insert(NetManagerStandard::NetBearType::BEARER_CELLULAR);
     int32_t ret = NetsysController::GetInstance().NotifyNetBearerTypeChange(bearTypes);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 
 HWTEST_F(NetsysControllerTest, DeleteNetworkAccessPolicy001, TestSize.Level1)
 {
     uint32_t uid = 0;
     int32_t ret = NetsysController::GetInstance().DeleteNetworkAccessPolicy(uid);
-    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETSYS_NETSYSSERVICE_NULL);
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

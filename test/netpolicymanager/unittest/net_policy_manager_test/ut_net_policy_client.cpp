@@ -525,7 +525,7 @@ HWTEST_F(UtNetPolicyClient, SetNetworkAccessPolicy001, TestSize.Level1)
     netAccessPolicy.cellularAllow = false;
     bool reconfirmFlag = true;
 
-    int32_t result1 = DelayedSingleton<NetPolicyClient>::GetInstance()->SetNetworkAccessPolicy(
+    int32_t result1 = g_netPolicyClient->SetNetworkAccessPolicy(
         TEST_UID, netAccessPolicy, reconfirmFlag);
     std::cout << "NetPolicyClient025 SetNetworkAccessPolicy ret:" << result1 << std::endl;
     ASSERT_EQ(result1, NETMANAGER_SUCCESS);
@@ -540,11 +540,11 @@ HWTEST_F(UtNetPolicyClient, GetNetworkAccessPolicy001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
     AccessPolicyParameter parameter;
-    parameter.flag = 0;
+    parameter.flag = 1;
     parameter.uid = TEST_UID;
     AccessPolicySave resultSave;
 
-    int32_t result1 = DelayedSingleton<NetPolicyClient>::GetInstance()->GetNetworkAccessPolicy(parameter, resultSave);
+    int32_t result1 = g_netPolicyClient->GetNetworkAccessPolicy(parameter, resultSave);
     std::cout << "NetPolicyClient026 GetNetworkAccessPolicy ret:" << result1 << std::endl;
     ASSERT_EQ(result1, NETMANAGER_SUCCESS);
 }

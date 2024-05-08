@@ -98,7 +98,7 @@ int32_t ClearRouteInfo(uint16_t clearThing, uint32_t table)
     if (copeResult != 0) {
         NETNATIVE_LOGE("[AddRoute]: string copy failed result %{public}d", copeResult);
     }
-    msghdr->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
+    msghdr->nlmsg_len = static_cast<uint32_t>(NLMSG_LENGTH(sizeof(struct rtmsg)));
     msghdr->nlmsg_type = clearThing;
     msghdr->nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
     return SendNetlinkMsgToKernel(msghdr);
@@ -113,7 +113,7 @@ int32_t GetInfoFromKernel(int32_t sock, uint16_t clearThing, uint32_t table)
         return -errno;
     }
     while (readedInfos > 0) {
-        uint32_t readLength = readedInfos;
+        uint32_t readLength = static_cast<uint32_t>(readedInfos);
         // Traverse and read the information returned by the kernel for item by item processing.
         for (nlmsghdr *nlmsgHeader = reinterpret_cast<nlmsghdr *>(readBuffer); NLMSG_OK(nlmsgHeader, readLength);
              nlmsgHeader = NLMSG_NEXT(nlmsgHeader, readLength)) {

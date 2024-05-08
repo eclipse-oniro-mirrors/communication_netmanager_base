@@ -660,6 +660,7 @@ int32_t NetPolicyServiceStub::OnSetNetworkAccessPolicy(MessageParcel &data, Mess
     policy.cellularAllow = cellular_allow;
     int32_t ret = SetNetworkAccessPolicy(uid, policy, reconfirmFlag);
     if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
@@ -690,15 +691,17 @@ int32_t NetPolicyServiceStub::OnGetNetworkAccessPolicy(MessageParcel &data, Mess
     parameters.userId = userId;
 
     int32_t ret = GetNetworkAccessPolicy(parameters, policies);
-    if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("GetNetworkAccessPolicy reply failed");
-        return ret;
+    if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("Write int32 reply failed");
+        return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    ret = NetworkAccessPolicy::Marshalling(reply, policies, flag);
-    if (ret != NETMANAGER_SUCCESS) {
-        NETMGR_LOG_E("GetNetworkAccessPolicy marshalling failed");
-        return ret;
+    if (ret == NETMANAGER_SUCCESS) {
+        ret = NetworkAccessPolicy::Marshalling(reply, policies, flag);
+        if (ret != NETMANAGER_SUCCESS) {
+            NETMGR_LOG_E("GetNetworkAccessPolicy marshalling failed");
+            return ret;
+        }
     }
 
     return ret;
@@ -715,10 +718,11 @@ int32_t NetPolicyServiceStub::OnNotifyNetAccessPolicyDiag(MessageParcel &data, M
 
     int32_t ret = NotifyNetAccessPolicyDiag(uid);
     if (!reply.WriteInt32(ret)) {
+        NETMGR_LOG_E("Write int32 reply failed");
         return NETMANAGER_ERR_WRITE_REPLY_FAIL;
     }
 
-    return NETMANAGER_SUCCESS;
+    return ret;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

@@ -300,7 +300,7 @@ static int32_t FillAddrInfo(struct AddrInfo addrInfo[static MAX_RESULTS], struct
     for (struct addrinfo *tmp = res; tmp != NULL; tmp = tmp->ai_next) {
         addrInfo[resNum].aiFlags = tmp->ai_flags;
         addrInfo[resNum].aiFamily = tmp->ai_family;
-        addrInfo[resNum].aiSockType = tmp->ai_socktype;
+        addrInfo[resNum].aiSockType = (uint32_t)(tmp->ai_socktype);
         addrInfo[resNum].aiProtocol = tmp->ai_protocol;
         addrInfo[resNum].aiAddrLen = tmp->ai_addrlen;
         if (memcpy_s(&addrInfo[resNum].aiAddr, sizeof(addrInfo[resNum].aiAddr), tmp->ai_addr, tmp->ai_addrlen) != 0) {
@@ -463,7 +463,7 @@ static int32_t NetSysPostDnsResultInternal(int sockFd, uint16_t netId, char* nam
         .netId = netId,
     };
 
-    int32_t uid = getuid();
+    int32_t uid = (int32_t)(getuid());
     int32_t pid = getpid();
     uint32_t nameLen = strlen(name) + 1;
     NETSYS_CLIENT_PRINT("NetSysPostDnsResultInternal uid %d, pid %d, netid %d pkg", uid, pid, netId);
