@@ -34,6 +34,10 @@ namespace OHOS {
 namespace NetsysNative {
 static constexpr const char *BFP_NAME_NETSYS_PATH = "/system/etc/bpf/netsys.o";
 const std::regex REGEX_CMD_IPTABLES(std::string(R"(^-[\S]*[\s\S]*)"));
+const std::regex ipv4Regex("((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
+const std::regex ipv6Regex("([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}");
+const std::regex icmpv6Regex("icmpv6", std::regex_constants::icase);
+const std::regex tcp6Regex("tcp6", std::regex_constants::icase);
 const std::string DEVICETYPE_KEY = "const.product.devicetype";
 const std::string PHONE_TYPE = "phone";
 
@@ -656,7 +660,14 @@ int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, st
         NETNATIVE_LOGE("SetIptablesCommandForRes iptablesWrapper_ is null");
         return NetManagerStandard::NETMANAGER_ERROR;
     }
-    respond = iptablesWrapper_->RunCommandForRes(IPTYPE_IPV4V6, cmd);
+    IpType ipType = IPTYPE_IPV4;
+    if (std::regex_search(cmd, ipv4Regex)) {
+        ipType = IPTYPE_IPV4;
+    }
+    if (std::regex_search(cmd, ipv6Regex) || std::regex_search(cmd, icmpv6Regex) || std::regex_search(cmd, tcp6Regex)) {
+        ipType = IPTYPE_IPV6;
+    }
+    respond = iptablesWrapper_->RunCommandForRes(ipType, cmd);
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
