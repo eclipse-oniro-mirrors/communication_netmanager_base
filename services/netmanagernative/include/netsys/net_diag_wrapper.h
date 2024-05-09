@@ -33,7 +33,7 @@ using namespace NetsysNative;
 class NetDiagWrapper : public std::enable_shared_from_this<NetDiagWrapper> {
 public:
     NetDiagWrapper();
-    ~NetDiagWrapper() = default;
+    ~NetDiagWrapper();
     static std::shared_ptr<NetDiagWrapper> &GetInstance()
     {
         static std::shared_ptr<NetDiagWrapper> instance = std::make_shared<NetDiagWrapper>();
