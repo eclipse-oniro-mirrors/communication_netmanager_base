@@ -54,6 +54,7 @@ constexpr const char *CFG_NETWORK_PRE_AIRPLANE_MODE_WAIT_TIMES = "persist.networ
 constexpr const char *NO_DELAY_TIME_CONFIG = "100";
 constexpr uint32_t INPUT_VALUE_LENGTH = 10;
 constexpr uint32_t MAX_DELAY_TIME = 200;
+constexpr uint16_t DEFAULT_MTU = 1500;
 } // namespace
 
 const bool REGISTER_LOCAL_RESULT =
@@ -1267,6 +1268,9 @@ int32_t NetConnService::GetConnectionProperties(int32_t netId, NetLinkInfo &info
     }
 
     info = iterNetwork->second->GetNetLinkInfo();
+    if (info.mtu_ == 0) {
+        info.mtu_ = DEFAULT_MTU;
+    }
     return NETMANAGER_SUCCESS;
 }
 
