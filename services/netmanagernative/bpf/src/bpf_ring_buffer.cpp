@@ -16,6 +16,8 @@
 #include "bpf_ring_buffer.h"
 #include "net_policy_client.h"
 #include "libbpf.h"
+#include "ffrt.h"
+#include "ffrt_inner.h"
 
 namespace OHOS::NetManagerStandard {
 namespace {
@@ -71,6 +73,9 @@ void NetsysBpfRingBuffer::ListenRingBufferThread(void)
 
         /* Process events */
         while (existThread_) {
+            if (ffrt::this_task::get_id() != 0) {
+                ffrt::sync_io(ringbufFd);
+            }
             err = ring_buffer__poll(rb, RING_BUFFER_POLL_TIME_OUT_MS);
             if (err < 0) {
                 NETNATIVE_LOGE("Bpf ring buffer poll fail");
@@ -83,6 +88,11 @@ void NetsysBpfRingBuffer::ListenRingBufferThread(void)
 
     NETNATIVE_LOGE("Could not get bpf ring buffer map");
     return;
+}
+
+void NetsysBpfRingBuffer::ListenNetworkAccessPolicyEvent(void)
+{
+    ffrt::submit(ListenRingBufferThread, {}, {}, ffrt::task_attr().name("ListenRingBufferThread"));
 }
 
 void NetsysBpfRingBuffer::ExistRingBufferPoll(void)
