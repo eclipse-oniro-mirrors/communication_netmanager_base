@@ -129,10 +129,7 @@ bool NetsysNativeService::Init()
     NETNATIVE_LOGI("LoadElf is %{public}d", ret);
 
     if (OHOS::system::GetParameter(DEVICETYPE_KEY, "") == PHONE_TYPE) {
-        std::thread t(NetsysNativeService::ListenThread);
-        std::string threadName = "NetAccessEventListen";
-        pthread_setname_np(t.native_handle(), threadName.c_str());
-        t.detach();
+        NetsysBpfRingBuffer::ListenNetworkAccessPolicyEvent();
     }
     AddSystemAbilityListener(COMM_NET_CONN_MANAGER_SYS_ABILITY_ID);
     return true;
@@ -803,11 +800,6 @@ int32_t NetsysNativeService::UpdateNetworkSharingType(uint32_t type, bool isOpen
         sharingTypeIsOn_.erase(type);
     }
     return NETSYS_SUCCESS;
-}
-
-void NetsysNativeService::ListenThread()
-{
-    NetsysBpfRingBuffer::ListenRingBufferThread();
 }
 
 int32_t NetsysNativeService::SetNetworkAccessPolicy(uint32_t uid, NetworkAccessPolicy policy, bool reconfirmFlag)

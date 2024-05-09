@@ -184,8 +184,6 @@ private:
     std::mutex instanceLock_;
     bool hasSARemoved_ = false;
     std::set<uint32_t> sharingTypeIsOn_;
-
-    static void ListenThread();
 };
 } // namespace NetsysNative
 } // namespace OHOS

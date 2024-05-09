@@ -53,6 +53,7 @@ public:
 
     static int HandleNetworkPolicyEventCallback(void *ctx, void *data, size_t data_sz);
     static void ListenRingBufferThread(void);
+    static void ListenNetworkAccessPolicyEvent();
     static void ExistRingBufferPoll(void);
 
 private:
