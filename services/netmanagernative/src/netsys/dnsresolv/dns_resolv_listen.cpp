@@ -24,7 +24,7 @@
 #include "netsys_client.h"
 #include "init_socket.h"
 #ifdef USE_SELINUX
-#include "selinux.h"
+#include "selinux/selinux.h"
 #endif
 #include "singleton.h"
 #include <ipc_skeleton.h>

@@ -16,8 +16,6 @@ import("//foundation/communication/netmanager_base/netmanager_base_config.gni")
 
 config("netsys_native_manager_config") {
   include_dirs = [
-    "$DHCP_MANAGER_ROOT/interfaces/inner_api/include",
-    "$DHCP_MANAGER_ROOT/interfaces/inner_api/interfaces",
     "$INNERKITS_ROOT/include",
     "$NETMANAGER_BASE_ROOT/services/common/include",
     "$NETMANAGER_BASE_ROOT/utils/common_utils/include",
@@ -26,8 +24,6 @@ config("netsys_native_manager_config") {
     "include/manager",
     "include/netsys",
     "include/netsys/wrapper",
-    "$DHCP_MANAGER_ROOT/interfaces/inner_api/include",
-    "$DHCP_MANAGER_ROOT/interfaces/inner_api/interfaces",
     "$FWMARK_CLIENT_DIR/include",
     "$NETMANAGER_BASE_ROOT/services/netmanagernative/bpf/include",
     "$NETCONNMANAGER_SOURCE_DIR/include",
@@ -35,10 +31,6 @@ config("netsys_native_manager_config") {
     "$INNERKITS_ROOT/netconnclient/include/proxy",
     "$NETSYSCONTROLLER_ROOT_DIR/include",
   ]
-
-  if (build_selinux) {
-    include_dirs += [ "$THIRD_PARTY_ROOT/selinux/libselinux/include/selinux" ]
-  }
 }
 
 netsys_native_manager_sources = [

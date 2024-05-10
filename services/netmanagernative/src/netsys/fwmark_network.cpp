@@ -30,7 +30,7 @@
 #include "init_socket.h"
 #include "netnative_log_wrapper.h"
 #ifdef USE_SELINUX
-#include "selinux.h"
+#include "selinux/selinux.h"
 #endif
 #include "securec.h"
 
