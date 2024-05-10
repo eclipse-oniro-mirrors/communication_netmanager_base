@@ -33,9 +33,6 @@ ohos_shared_library("net_policy_manager") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    boundary_sanitize = true
-    ubsan = true
-    blocklist = "./policy_blocklist.txt"
     debug = false
   }
 

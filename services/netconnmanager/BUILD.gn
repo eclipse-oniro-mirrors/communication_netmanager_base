@@ -35,9 +35,6 @@ ohos_shared_library("net_conn_manager") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
-    boundary_sanitize = true
-    ubsan = true
-    blocklist = "./connect_blocklist.txt"
     debug = false
   }
 

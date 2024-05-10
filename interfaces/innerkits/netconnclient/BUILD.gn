@@ -76,15 +76,6 @@ ohos_static_library("net_conn_parcel") {
 }
 
 ohos_shared_library("net_conn_manager_if") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    blocklist = "./connect_blocklist.txt"
-    debug = false
-  }
-
-  branch_protector_ret = "pac_ret"
-
   cflags = [
     "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
@@ -160,17 +151,6 @@ config("socket_permission_config") {
 }
 
 ohos_shared_library("socket_permission") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    boundary_sanitize = true
-    all_ubsan = true
-    blocklist = "./connect_blocklist.txt"
-    debug = false
-  }
-
-  branch_protector_ret = "pac_ret"
-
   cflags = [
     "-fstack-protector-strong",
     "-D_FORTIFY_SOURCE=2",
