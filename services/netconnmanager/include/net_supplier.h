@@ -63,8 +63,8 @@ public:
     int8_t GetStrength() const;
     uint16_t GetFrequency() const;
     int32_t GetSupplierUid() const;
-    std::shared_ptr<Network> GetNetwork() const;
     bool GetIsAvailable() const;
+    std::shared_ptr<Network> GetNetwork() const;
     int32_t GetNetId() const;
     sptr<NetHandle> GetNetHandle() const;
     void GetHttpProxy(HttpProxy &httpProxy);

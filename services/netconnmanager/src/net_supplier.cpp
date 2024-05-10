@@ -184,7 +184,7 @@ int32_t NetSupplier::GetSupplierUid() const
     return netSupplierInfo_.uid_;
 }
 
-StrToBool NetSupplier::GetIsAvailable() const
+bool NetSupplier::GetIsAvailable() const
 {
     return netSupplierInfo_.isAvailable_;
 }

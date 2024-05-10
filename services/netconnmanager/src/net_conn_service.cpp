@@ -2148,7 +2148,7 @@ bool NetConnService::IsAddrInOtherNetwork(const std::string &ifaceName, int32_t 
 
 bool NetConnService::IsIfaceNameInUse(const std::string &ifaceName, int32_t netId)
 {
-    for (const auto &netSupplier : netSupplier_) {
+    for (const auto &netSupplier : netSuppliers_) {
         if (netSupplier.second->GetNetwork()->GetNetId() == netId) {
             continue;
         }
