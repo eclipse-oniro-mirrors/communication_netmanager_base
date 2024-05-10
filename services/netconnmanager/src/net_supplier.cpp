@@ -184,6 +184,11 @@ int32_t NetSupplier::GetSupplierUid() const
     return netSupplierInfo_.uid_;
 }
 
+StrToBool NetSupplier::GetIsAvailable() const
+{
+    return netSupplierInfo_.isAvailable_;
+}
+
 bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps)
 {
     NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request connect, available=%{public}d", supplierId_,

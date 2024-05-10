@@ -481,6 +481,7 @@ int32_t NetConnService::RequestNetConnectionAsync(const sptr<NetSpecifier> &netS
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
     }
+    AddClientDeathRecipient(callback);
     return ActivateNetwork(netSpecifier, callback, timeoutMS);
 }
 
@@ -2147,11 +2148,14 @@ bool NetConnService::IsAddrInOtherNetwork(const std::string &ifaceName, int32_t 
 
 bool NetConnService::IsIfaceNameInUse(const std::string &ifaceName, int32_t netId)
 {
-    for (const auto &network : networks_) {
-        if (network.second->GetNetId() == netId) {
+    for (const auto &netSupplier : netSupplier_) {
+        if (netSupplier.second->GetNetwork()->GetNetId() == netId) {
             continue;
         }
-        if (network.second->GetNetLinkInfo().ifaceName_ == ifaceName) {
+        if (!netSupplier.second->GetIsAvailable()) {
+            continue;
+        }
+        if (netSupplier.second->GetNetwork()->GetNetLinkInfo().ifaceName_ == ifaceName) {
             return true;
         }
     }
