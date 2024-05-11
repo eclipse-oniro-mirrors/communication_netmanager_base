@@ -59,7 +59,8 @@
                 "selinux",
                 "sqlite",
                 "os_account",
-                "libbpf"
+                "libbpf",
+                "elfio"
             ],
             "third_party": [
                 "curl",
