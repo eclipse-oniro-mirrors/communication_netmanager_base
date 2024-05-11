@@ -106,7 +106,8 @@ public:
     int32_t GetIfaceStats(uint64_t &stats, uint32_t type, const std::string &interfaceName) override;
     int32_t GetAllStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
     int32_t GetAllContainerStatsInfo(std::vector<OHOS::NetManagerStandard::NetStatsInfo> &stats) override;
-    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond) override;
+    int32_t SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
+                                     IptablesType ipType = IPTYPE_IPV4) override;
     int32_t NetDiagPingHost(const NetDiagPingOption &pingOption, const sptr<INetDiagCallback> &callback) override;
     int32_t NetDiagGetRouteTable(std::list<NetDiagRouteTable> &routeTables) override;
     int32_t NetDiagGetSocketsInfo(NetDiagProtocolType socketType, NetDiagSocketsInfo &socketsInfo) override;

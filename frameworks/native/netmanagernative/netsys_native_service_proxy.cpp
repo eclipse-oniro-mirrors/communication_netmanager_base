@@ -1676,7 +1676,8 @@ int32_t NetsysNativeServiceProxy::GetAllStatsInfo(std::vector<OHOS::NetManagerSt
     return ERR_NONE;
 }
 
-int32_t NetsysNativeServiceProxy::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)
+int32_t NetsysNativeServiceProxy::SetIptablesCommandForRes(const std::string &cmd, std::string &respond,
+                                                           IptablesType ipType)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
