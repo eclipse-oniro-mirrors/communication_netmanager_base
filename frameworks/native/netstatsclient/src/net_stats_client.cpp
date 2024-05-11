@@ -314,6 +314,14 @@ int32_t NetStatsClient::GetTrafficStatsByNetwork(std::unordered_map<uint32_t, Ne
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
     }
+    if (network == nullptr) {
+        NETMGR_LOG_E("network is nullptr");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (network->startTime_ > network->endTime_) {
+        NETMGR_LOG_E("network is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     return proxy->GetTrafficStatsByNetwork(infos, network);
 }
 
@@ -324,6 +332,14 @@ int32_t NetStatsClient::GetTrafficStatsByUidNetwork(std::vector<NetStatsInfoSequ
     if (proxy == nullptr) {
         NETMGR_LOG_E("proxy is nullptr");
         return NETMANAGER_ERR_GET_PROXY_FAIL;
+    }
+    if (network == nullptr) {
+        NETMGR_LOG_E("network is nullptr");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
+    }
+    if (network->startTime_ > network->endTime_) {
+        NETMGR_LOG_E("network is invalid");
+        return NETMANAGER_ERR_INVALID_PARAMETER;
     }
     return proxy->GetTrafficStatsByUidNetwork(infos, uid, network);
 }
