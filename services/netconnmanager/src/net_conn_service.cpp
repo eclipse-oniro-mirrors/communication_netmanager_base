@@ -2152,7 +2152,7 @@ bool NetConnService::IsIfaceNameInUse(const std::string &ifaceName, int32_t netI
         if (netSupplier.second->GetNetwork()->GetNetId() == netId) {
             continue;
         }
-        if (!netSupplier.second->GetIsAvailable()) {
+        if (!netSupplier.second->IsAvailable()) {
             continue;
         }
         if (netSupplier.second->GetNetwork()->GetNetLinkInfo().ifaceName_ == ifaceName) {
