@@ -21,13 +21,13 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
-constexpr int32_t TEST_UID = 20011212;
-constexpr int32_t TEST_SIM_ID = 1;
-constexpr int32_t TEST_TYPE = 0;
-constexpr int32_t TEST_BEGIN_TIME = 179122111;
-constexpr int32_t TEST_END_TIME = 179123233;
-constexpr int32_t TEST_RX_BYTES = 7894;
-constexpr int32_t TEST_TX_BYTES = 8923;
+constexpr int32_t TEST_UID = 20020142;
+constexpr int64_t TEST_RXBYTES = 15453;
+constexpr int64_t TEST_TXBYTES = 45115;
+constexpr int64_t TEST_RXPACKETS = 5646894;
+constexpr int64_t TEST_TXPACKETS = 7894;
+constexpr const char *TEST_IFACE = "eth0";
+constexpr const char *TEST_IDENT = "2";
 NetStatsInfoSequence GetNetStatsInfoSequenceData()
 {
     NetStatsInfoSequence infoSequence;
