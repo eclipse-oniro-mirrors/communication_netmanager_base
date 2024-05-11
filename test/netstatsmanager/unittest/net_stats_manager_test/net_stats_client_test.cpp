@@ -321,6 +321,30 @@ HWTEST_F(NetStatsClientTest, NetStatsClient008, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
 }
 
+HWTEST_F(NetStatsClientTest, NetStatsClient009, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    sptr<IRemoteObject::DeathRecipient> deathRecipient =
+            new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient->OnRemoteDied(remote);
+    std::vector<NetStatsInfo> infos;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllContainerStatsInfo(infos);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+HWTEST_F(NetStatsClientTest, NetStatsClient010, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    sptr<IRemoteObject::DeathRecipient> deathRecipient =
+            new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient->OnRemoteDied(remote);
+    PushStatsInfo pushInfo;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->SetAppStats(pushInfo);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetStatsClientTest, GetTrafficStatsByNetwork001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;

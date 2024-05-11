@@ -20,15 +20,20 @@
 namespace OHOS {
 namespace NetManagerStandard {
 namespace {
+constexpr int32_t TEST_UID = 20020142;
 constexpr int64_t TEST_RXBYTES = 15453;
 constexpr int64_t TEST_TXBYTES = 45115;
 constexpr int64_t TEST_RXPACKETS = 5646894;
 constexpr int64_t TEST_TXPACKETS = 7894;
+constexpr const char *TEST_IFACE = "eth0";
 constexpr const char *TEST_IDENT = "2";
 NetStatsInfo GetNetStatsInfoData()
 {
     NetStatsInfo info;
+    info.uid_ = TEST_UID;
+    info.iface_ = TEST_IFACE;
     info.ident_ = TEST_IDENT;
+    info.date_ = TEST_RXPACKETS;
     info.rxBytes_ = TEST_RXBYTES;
     info.rxPackets_ = TEST_RXPACKETS;
     info.txBytes_ = TEST_TXBYTES;
@@ -110,6 +115,24 @@ HWTEST_F(NetStatsInfoTest, MarshallingUnmarshallingTest003, TestSize.Level1)
     EXPECT_TRUE(NetStatsInfo::Marshalling(parcel, statsInfos));
     std::vector<NetStatsInfo> results;
     EXPECT_TRUE(NetStatsInfo::Unmarshalling(parcel, results));
+}
+
+/**
+ * @tc.name: MarshallingUnmarshallingTest004
+ * @tc.desc: Test NetStatsInfo Marshalling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetStatsInfoTest, MarshallingUnmarshallingTest004, TestSize.Level1)
+{
+    Parcel parcel;
+    std::unordered_map<uint32_t, NetStatsInfo> statsInfos;
+    NetStatsInfo info = GetNetStatsInfoData();
+    statsInfos.emplace(info.uid_, std::move(info));
+
+    EXPECT_TRUE(NetStatsInfo::Marshalling(parcel, statsInfos));
+    std::unordered_map<uint32_t, NetStatsInfo> results;
+    EXPECT_TRUE(NetStatsInfo::Unmarshalling(parcel, results));
+    EXPECT_EQ(results.size(), 1);
 }
 
 /**

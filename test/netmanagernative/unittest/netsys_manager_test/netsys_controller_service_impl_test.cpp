@@ -740,6 +740,17 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_ERR_LOCAL_PTR_NULL);
 }
 
+HWTEST_F(NetsysControllerServiceImplTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
+{
+    std::string interface = "wlan0";
+    uint32_t on = 1;
+    int32_t ret = instance_->SetIpv6PrivacyExtensions(interface, on);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = instance_->SetEnableIpv6(interface, on);
+    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetsysControllerServiceImplTest, SetNetworkAccessPolicy001, TestSize.Level1)
 {
     uint32_t uid = 0;

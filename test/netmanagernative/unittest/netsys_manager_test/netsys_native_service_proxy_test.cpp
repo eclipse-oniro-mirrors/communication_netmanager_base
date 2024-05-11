@@ -347,6 +347,18 @@ HWTEST_F(NetsysNativeServiceProxyTest, UpdateNetworkSharingTypeTest001, TestSize
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 }
 
+HWTEST_F(NetsysNativeServiceProxyTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
+{
+    OHOS::sptr<OHOS::NetsysNative::INetsysService> netsysNativeService = ConnManagerGetProxy();
+    ASSERT_NE(netsysNativeService, nullptr);
+    std::string interface = "wlan0";
+    uint32_t on = 0;
+    int32_t ret = netsysNativeService->SetIpv6PrivacyExtensions(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+
+    ret = netsysNativeService->SetEnableIpv6(interface, on);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+}
 
 HWTEST_F(NetsysNativeServiceProxyTest, SetNetworkAccessPolicy001, TestSize.Level1)
 {

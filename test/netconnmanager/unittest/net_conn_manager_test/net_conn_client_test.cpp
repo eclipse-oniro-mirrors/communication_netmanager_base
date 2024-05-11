@@ -1088,6 +1088,20 @@ HWTEST_F(NetConnClientTest, GetAddressByNameTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetIfaceNameIdentMapsTest001
+ * @tc.desc: Test NetConnClient::GetIfaceNameIdentMaps
+ * @tc.type: FUNC
+ */
+HWTEST_F(NetConnClientTest, GetIfaceNameIdentMapsTest001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    std::unordered_map<std::string, std::string> data;
+    int32_t ret = DelayedSingleton<NetConnClient>::GetInstance()->GetIfaceNameIdentMaps(NetBearType::BEARER_CELLULAR,
+                                                                                        data);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
+/**
  * @tc.name: BindSocketTest002
  * @tc.desc: Test NetConnClient::BindSocket
  * @tc.type: FUNC
