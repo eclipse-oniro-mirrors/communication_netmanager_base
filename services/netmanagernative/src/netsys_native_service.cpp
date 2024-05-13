@@ -656,7 +656,6 @@ int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, st
         NETNATIVE_LOGE("SetIptablesCommandForRes iptablesWrapper_ is null");
         return NetManagerStandard::NETMANAGER_ERROR;
     }
-
     switch (ipType) {
         case OHOS::NetsysNative::IptablesType::IPTYPE_IPV4:
             respond = iptablesWrapper_->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, cmd);
@@ -671,7 +670,6 @@ int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, st
             NETNATIVE_LOGE("IptablesWrapper ipputType is invalid");
             return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
     }
-
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 
