@@ -25,7 +25,6 @@ config("napi_utils_config") {
 config("napi_utils_public_config") {
   include_dirs = [
     "include",
-    "$THIRD_PARTY_ROOT/node/src",
     "$INNERKITS_ROOT/include",
     "$NETMANAGER_BASE_ROOT/log/include",
     "$NETMANAGER_BASE_ROOT/utils/errorcode_utils/include",
