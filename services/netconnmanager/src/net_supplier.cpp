@@ -190,7 +190,7 @@ int32_t NetSupplier::GetSupplierUid() const
 
 bool NetSupplier::SupplierConnection(const std::set<NetCap> &netCaps)
 {
-    NETMGR_LOG_I("Supplier[%{public}d, %{public}s] request connect, available=%{public}d", supplierId_,
+    NETMGR_LOG_D("Supplier[%{public}d, %{public}s] request connect, available=%{public}d", supplierId_,
                  netSupplierIdent_.c_str(), netSupplierInfo_.isAvailable_);
     if (netSupplierInfo_.isAvailable_) {
         NETMGR_LOG_D("The supplier is currently available, there is no need to repeat the request for connection.");
@@ -318,11 +318,11 @@ void NetSupplier::ReceiveBestScore(uint32_t reqId, int32_t bestScore, uint32_t s
 
 int32_t NetSupplier::CancelRequest(uint32_t reqId)
 {
-    NETMGR_LOG_I("CancelRequest netId = %{public}u", reqId);
     auto iter = requestList_.find(reqId);
     if (iter == requestList_.end()) {
         return NET_CONN_ERR_SERVICE_NO_REQUEST;
     }
+    NETMGR_LOG_I("CancelRequest netId = %{public}u", reqId);
     requestList_.erase(reqId);
     if (requestList_.empty()) {
         SupplierDisconnection(netCaps_.ToSet());
@@ -333,12 +333,12 @@ int32_t NetSupplier::CancelRequest(uint32_t reqId)
 
 void NetSupplier::RemoveBestRequest(uint32_t reqId)
 {
-    NETMGR_LOG_I("Enter RemoveBestRequest supplierId=[%{public}d], reqId=[%{public}d]", supplierId_, reqId);
     auto iter = bestReqList_.find(reqId);
     if (iter == bestReqList_.end()) {
         return;
     }
     bestReqList_.erase(reqId);
+    NETMGR_LOG_I("RemoveBestRequest supplierId=[%{public}d], reqId=[%{public}u]", supplierId_, reqId);
 }
 
 std::set<uint32_t> &NetSupplier::GetBestRequestList()

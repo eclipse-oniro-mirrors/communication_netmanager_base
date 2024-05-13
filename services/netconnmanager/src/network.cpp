@@ -493,7 +493,13 @@ void Network::NetDetectionForDnsHealth(bool dnsHealthSuccess)
         return;
     }
     NetDetectionStatus lastDetectResult = detectResult_;
-    NETMGR_LOG_I("Last netDetectionState: [%{public}d]", lastDetectResult);
+    {
+        static NetDetectionStatus preStatus = UNKNOWN_STATE;
+        if (preStatus != lastDetectResult) {
+            NETMGR_LOG_I("Last netDetectionState: [%{public}d->%{public}d]", preStatus, lastDetectResult);
+            preStatus = lastDetectResult;
+        }
+    }
     if (IsDetectionForDnsSuccess(lastDetectResult, dnsHealthSuccess)) {
         NETMGR_LOG_I("Dns report success, so restart detection.");
         isDetectingForDns_ = true;

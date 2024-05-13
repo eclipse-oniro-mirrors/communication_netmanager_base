@@ -86,7 +86,7 @@ bool NetActivate::MatchRequestAndNetwork(sptr<NetSupplier> supplier)
         return false;
     }
     if (!CompareByNetworkCapabilities(supplier->GetNetCaps())) {
-        NETMGR_LOG_W("Supplier[%{public}d], request[%{public}d], capability is not matched", supplier->GetSupplierId(),
+        NETMGR_LOG_D("Supplier[%{public}d], request[%{public}d], capability is not matched", supplier->GetSupplierId(),
                      requestId_);
         return false;
     }

@@ -439,7 +439,6 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
                                                      const sptr<INetConnCallback> &callback, const uint32_t &timeoutMS,
                                                      const uint32_t callingUid)
 {
-    NETMGR_LOG_I("Register net connect callback async, call uid [%{public}u]", callingUid);
     if (netSpecifier == nullptr || callback == nullptr) {
         NETMGR_LOG_E("The parameter of netSpecifier or callback is null");
         struct EventInfo eventInfo = {.errorType = static_cast<int32_t>(FAULT_INVALID_PARAMETER),
@@ -449,9 +448,11 @@ int32_t NetConnService::RegisterNetConnCallbackAsync(const sptr<NetSpecifier> &n
     }
     uint32_t reqId = 0;
     if (FindSameCallback(callback, reqId)) {
-        NETMGR_LOG_E("RegisterNetConnCallback find same callback");
+        NETMGR_LOG_E("RegisterNetConnCallback find same callback, callUid[%{public}u], reqId[%{public}u]", callingUid,
+                     reqId);
         return NET_CONN_ERR_SAME_CALLBACK;
     }
+    NETMGR_LOG_I("Register net connect callback async, callUid[%{public}u], reqId[%{public}u]", callingUid, reqId);
     int32_t ret = IncreaseNetConnCallbackCntForUid(callingUid);
     if (ret != NETMANAGER_SUCCESS) {
         return ret;
@@ -529,17 +530,18 @@ int32_t NetConnService::UnregisterNetSupplierAsync(uint32_t supplierId)
 int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallback> &callback,
                                                        const uint32_t callingUid)
 {
-    NETMGR_LOG_I("UnregisterNetConnCallback Enter, call uid [%{public}u]", callingUid);
     if (callback == nullptr) {
-        NETMGR_LOG_E("callback is null");
+        NETMGR_LOG_E("callback is null, callUid[%{public}u]", callingUid);
         return NETMANAGER_ERR_LOCAL_PTR_NULL;
     }
     RegisterType registerType = INVALIDTYPE;
     uint32_t reqId = 0;
     if (!FindSameCallback(callback, reqId, registerType) || registerType == INVALIDTYPE) {
-        NETMGR_LOG_E("UnregisterNetConnCallback can not find same callback or callback is invalid.");
+        NETMGR_LOG_E("UnregisterNetConnCallback can not find callback, callUid[%{public}u], reqId[%{public}u]",
+                     callingUid, reqId);
         return NET_CONN_ERR_CALLBACK_NOT_FOUND;
     }
+    NETMGR_LOG_I("UnregisterNetConnCallback start, callUid[%{public}u], reqId[%{public}u]", callingUid, reqId);
     DecreaseNetConnCallbackCntForUid(callingUid, registerType);
     
     NET_ACTIVATE_MAP::iterator iterActive;
@@ -574,7 +576,7 @@ int32_t NetConnService::UnregisterNetConnCallbackAsync(const sptr<INetConnCallba
         iterActive = netActivates_.erase(iterActive);
         RemoveClientDeathRecipient(callback);
     }
-    NETMGR_LOG_I("UnregisterNetConnCallback End.");
+    NETMGR_LOG_I("UnregisterNetConnCallback end, callUid[%{public}u], reqId[%{public}u]", callingUid, reqId);
     return NETMANAGER_SUCCESS;
 }
 
@@ -811,13 +813,15 @@ int32_t NetConnService::ActivateNetwork(const sptr<NetSpecifier> &netSpecifier, 
         std::make_shared<NetActivate>(netSpecifier, callback, timeoutCb, timeoutMS, netActEventHandler_);
     request->StartTimeOutNetAvailable();
     uint32_t reqId = request->GetRequestId();
-    NETMGR_LOG_I("Make a new request, request id:[%{public}d]", reqId);
+    NETMGR_LOG_I("Make a new request, request id:[%{public}u]", reqId);
     netActivates_[reqId] = request;
     sptr<NetSupplier> bestNet = nullptr;
     int bestScore = static_cast<int>(FindBestNetworkForRequest(bestNet, request));
     if (bestScore != 0 && bestNet != nullptr) {
-        NETMGR_LOG_I("Match to optimal supplier:[%{public}d %{public}s], netId[%{public}d], score:[%{public}d]",
-                     bestNet->GetSupplierId(), bestNet->GetNetSupplierIdent().c_str(), bestNet->GetNetId(), bestScore);
+        NETMGR_LOG_I(
+            "Match to optimal supplier:[%{public}d %{public}s], netId[%{public}d], score[%{public}d], "
+            "reqId[%{public}u]",
+            bestNet->GetSupplierId(), bestNet->GetNetSupplierIdent().c_str(), bestNet->GetNetId(), bestScore, reqId);
         bestNet->SelectAsBestNetwork(reqId);
         request->SetServiceSupply(bestNet);
         CallbackForAvailable(bestNet, callback);
@@ -1187,13 +1191,12 @@ void NetConnService::CallbackForSupplier(sptr<NetSupplier> &supplier, CallbackTy
 
 void NetConnService::CallbackForAvailable(sptr<NetSupplier> &supplier, const sptr<INetConnCallback> &callback)
 {
-    NETMGR_LOG_I("Callback net available for supplier[%{public}d, %{public}s]",
-                 supplier ? supplier->GetSupplierId() : 0,
-                 supplier ? supplier->GetNetSupplierIdent().c_str() : "nullptr");
     if (supplier == nullptr || callback == nullptr) {
         NETMGR_LOG_E("Input parameter is null.");
         return;
     }
+    NETMGR_LOG_I("Callback net available for supplier[%{public}d, %{public}s]", supplier->GetSupplierId(),
+                 supplier->GetNetSupplierIdent().c_str());
     sptr<NetHandle> netHandle = supplier->GetNetHandle();
     callback->NetAvailable(netHandle);
     sptr<NetAllCapabilities> pNetAllCap = std::make_unique<NetAllCapabilities>().release();
