@@ -60,12 +60,12 @@
                 "sqlite",
                 "os_account",
                 "libbpf",
-                "elfio"
+                "elfio",
+                "iptables"
             ],
             "third_party": [
                 "curl",
                 "libuv",
-                "iptables",
                 "libbpf"
             ]
         },
