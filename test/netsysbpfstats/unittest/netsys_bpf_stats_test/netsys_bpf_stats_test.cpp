@@ -351,6 +351,27 @@ HWTEST_F(NetsysBpfStatsTest, GetAllContainerStatsInfo001, TestSize.Level1)
     EXPECT_EQ(stats.size(), 2);
 }
 
+HWTEST_F(NetsysBpfStatsTest, SockNetnsMapTest001, TestSize.Level1)
+{
+    BpfMapper<sock_netns_key, sock_netns_value> sockNetnsMap(SOCK_NETNS_MAP_PATH, BPF_ANY);
+    EXPECT_TRUE(sockNetnsMap.IsValid());
+
+    auto keys = sockNetnsMap.GetAllKeys();
+    for (const auto &k : keys) {
+        sock_netns_value v = {};
+        EXPECT_EQ(sockNetnsMap.Read(k, v), NETSYS_SUCCESS);
+    }
+
+    sock_netns_key key = nullptr;
+    sock_netns_value value = 1;
+    auto ret = sockNetnsMap.Write(key, value, BPF_ANY);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+    sock_netns_value result = {};
+    ret = sockNetnsMap.Read(key, result);
+    EXPECT_EQ(ret, NETSYS_SUCCESS);
+    EXPECT_EQ(result, value);
+}
+
 HWTEST_F(NetsysBpfStatsTest, UnloadElf, TestSize.Level1)
 {
     auto ret = OHOS::NetManagerStandard::UnloadElf(BFP_NAME_NETSYS_PATH);
