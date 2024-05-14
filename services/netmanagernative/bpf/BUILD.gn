@@ -69,10 +69,10 @@ ohos_shared_library("netsys_bpf_utils") {
 
   external_deps = [
     "c_utils:utils",
+    "elfio:elfio",
     "ffrt:libffrt",
     "hilog:libhilog",
     "libbpf:libbpf",
-    "elfio:elfio",
   ]
 
   deps = [ "$INNERKITS_ROOT/netpolicyclient:net_policy_manager_if" ]
