@@ -646,7 +646,7 @@ int32_t NetsysNativeService::GetAllStatsInfo(std::vector<OHOS::NetManagerStandar
     return bpfStats_->GetAllStatsInfo(stats);
 }
 
-int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, std::string &respond)
+int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, std::string &respond, IptablesType ipType)
 {
     if (!regex_match(cmd, REGEX_CMD_IPTABLES)) {
         NETNATIVE_LOGE("IptablesWrapper command format is invalid");
@@ -656,7 +656,20 @@ int32_t NetsysNativeService::SetIptablesCommandForRes(const std::string &cmd, st
         NETNATIVE_LOGE("SetIptablesCommandForRes iptablesWrapper_ is null");
         return NetManagerStandard::NETMANAGER_ERROR;
     }
-    respond = iptablesWrapper_->RunCommandForRes(IPTYPE_IPV4V6, cmd);
+    switch (ipType) {
+        case OHOS::NetsysNative::IptablesType::IPTYPE_IPV4:
+            respond = iptablesWrapper_->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4, cmd);
+            break;
+        case OHOS::NetsysNative::IptablesType::IPTYPE_IPV6:
+            respond = iptablesWrapper_->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV6, cmd);
+            break;
+        case OHOS::NetsysNative::IptablesType::IPTYPE_IPV4V6:
+            respond = iptablesWrapper_->RunCommandForRes(OHOS::nmd::IpType::IPTYPE_IPV4V6, cmd);
+            break;
+        default:
+            NETNATIVE_LOGE("IptablesWrapper ipputType is invalid");
+            return NetManagerStandard::NETMANAGER_ERR_INVALID_PARAMETER;
+    }
     return NetManagerStandard::NETMANAGER_SUCCESS;
 }
 

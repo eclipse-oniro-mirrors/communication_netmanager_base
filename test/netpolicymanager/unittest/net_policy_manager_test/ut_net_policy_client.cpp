@@ -548,5 +548,19 @@ HWTEST_F(UtNetPolicyClient, GetNetworkAccessPolicy001, TestSize.Level1)
     std::cout << "NetPolicyClient026 GetNetworkAccessPolicy ret:" << result1 << std::endl;
     ASSERT_EQ(result1, NETMANAGER_SUCCESS);
 }
+
+/**
+ * @tc.name: NotifyNetAccessPolicyDiag001
+ * @tc.desc: Test NetPolicyClient NotifyNetAccessPolicyDiag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtNetPolicyClient, NotifyNetAccessPolicyDiag001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    uint32_t uid = 0;
+    int32_t result = g_netPolicyClient->NotifyNetAccessPolicyDiag(uid);
+    std::cout << "NetPolicyClient027 NotifyNetAccessPolicyDiag ret:" << result << std::endl;
+    ASSERT_EQ(result, NETMANAGER_ERR_IPC_CONNECT_STUB_FAIL);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

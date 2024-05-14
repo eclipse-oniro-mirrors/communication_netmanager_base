@@ -56,6 +56,7 @@ constexpr const char *TEST_LONG_EXCLUSION_LIST =
 constexpr const char *TEST_IFACE = "eth0";
 constexpr const char *PROXY_NAME = "123456789";
 constexpr const int32_t PROXY_NAME_SIZE = 9;
+constexpr const int32_t INVALID_VALUE = 100;
 } // namespace
 
 class NetConnClientTest : public testing::Test {
@@ -1403,5 +1404,17 @@ HWTEST_F(NetConnClientTest, UpdateSupplierScore002, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
+HWTEST_F(NetConnClientTest, GetIfaceNameIdentMaps001, TestSize.Level1)
+{
+    uint32_t invalidValue = INVALID_VALUE;
+    NetBearType bearerType = static_cast<NetBearType>(invalidValue);
+    std::unordered_map<std::string, std::string> ifaceNameIdentMaps;
+    int32_t ret = NetConnClient::GetInstance().GetIfaceNameIdentMaps(bearerType, ifaceNameIdentMaps);
+    EXPECT_EQ(ret, NETMANAGER_ERR_INTERNAL);
+
+    bearerType = NetBearType::BEARER_BLUETOOTH;
+    ret = NetConnClient::GetInstance().GetIfaceNameIdentMaps(bearerType, ifaceNameIdentMaps);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

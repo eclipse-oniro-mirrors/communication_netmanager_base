@@ -976,8 +976,8 @@ int32_t NetsysNativeServiceStub::CmdDisableNat(MessageParcel &data, MessageParce
 int32_t NetsysNativeServiceStub::CmdIpfwdAddInterfaceForward(MessageParcel &data, MessageParcel &reply)
 {
     NETNATIVE_LOG_D("Begin to dispatch cmd CmdIpfwdAddInterfaceForward");
-    const auto &fromIface = data.ReadString();
-    const auto &toIface = data.ReadString();
+    std::string fromIface = data.ReadString();
+    std::string toIface = data.ReadString();
     int32_t result = IpfwdAddInterfaceForward(fromIface, toIface);
     reply.WriteInt32(result);
     return result;

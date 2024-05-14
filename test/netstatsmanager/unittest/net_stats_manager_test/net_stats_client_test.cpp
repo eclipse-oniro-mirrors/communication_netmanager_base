@@ -376,6 +376,18 @@ HWTEST_F(NetStatsClientTest, GetTrafficStatsByNetwork002, TestSize.Level1)
     EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
+HWTEST_F(NetStatsClientTest, GetAllContainerStatsInfo001, TestSize.Level1)
+{
+    NetManagerBaseAccessToken token;
+    sptr<IRemoteObject::DeathRecipient> deathRecipient =
+        new (std::nothrow) NetStatsClient::NetStatsDeathRecipient(*DelayedSingleton<NetStatsClient>::GetInstance());
+    sptr<IRemoteObject> remote = nullptr;
+    deathRecipient->OnRemoteDied(remote);
+    std::vector<NetStatsInfo> infos;
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllContainerStatsInfo(infos);
+    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+}
+
 HWTEST_F(NetStatsClientTest, GetTrafficStatsByUidNetwork001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
