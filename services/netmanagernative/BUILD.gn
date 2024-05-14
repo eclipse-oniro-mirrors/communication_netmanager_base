@@ -155,11 +155,11 @@ ohos_shared_library("netsys_native_manager") {
     "ffrt:libffrt",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
     "iptables:iptables",
     "iptables:iptables-restore",
     "iptables:iptables-save",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
 
   if (build_selinux) {
