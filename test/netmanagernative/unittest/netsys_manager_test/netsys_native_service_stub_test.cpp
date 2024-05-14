@@ -502,6 +502,16 @@ public:
     {
         return 0;
     }
+
+    int32_t StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr) override
+    {
+        return 0;
+    }
+
+    int32_t StopClat(const std::string &interfaceName) override
+    {
+        return 0;
+    }
 };
 
 class NetsysNativeServiceStubTest : public testing::Test {

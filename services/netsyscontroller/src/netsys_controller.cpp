@@ -1110,5 +1110,22 @@ int32_t NetsysController::DeleteNetworkAccessPolicy(uint32_t uid)
     return netsysService_->DeleteNetworkAccessPolicy(uid);
 }
 
+int32_t NetsysController::StartClat(const std::string &interfaceName, int32_t netId, const std::string &nat64PrefixStr)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("StartClat netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->StartClat(interfaceName, netId, nat64PrefixStr);
+}
+
+int32_t NetsysController::StopClat(const std::string &interfaceName)
+{
+    if (netsysService_ == nullptr) {
+        NETMGR_LOG_E("StopClat netsysService is null");
+        return NETSYS_NETSYSSERVICE_NULL;
+    }
+    return netsysService_->StopClat(interfaceName);
+}
 } // namespace NetManagerStandard
 } // namespace OHOS

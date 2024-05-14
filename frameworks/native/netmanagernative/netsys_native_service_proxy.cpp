@@ -2384,5 +2384,72 @@ int32_t NetsysNativeServiceProxy::NotifyNetBearerTypeChange(std::set<NetBearType
     return reply.ReadInt32();
 }
 
+int32_t NetsysNativeServiceProxy::StartClat(const std::string &interfaceName, int32_t netId,
+                                            const std::string &nat64PrefixStr)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(netId)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(nat64PrefixStr)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t ret =
+        remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_START_CLAT), data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("StartClat proxy SendRequest failed, error code: [%{public}d]", ret);
+        return IPC_INVOKER_ERR;
+    }
+
+    int32_t result = ERR_INVALID_DATA;
+    if (!reply.ReadInt32(result)) {
+        return IPC_PROXY_TRANSACTION_ERR;
+    }
+    return result;
+}
+
+int32_t NetsysNativeServiceProxy::StopClat(const std::string &interfaceName)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(interfaceName)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        return IPC_PROXY_NULL_INVOKER_ERR;
+    }
+    int32_t ret =
+        remote->SendRequest(static_cast<uint32_t>(NetsysInterfaceCode::NETSYS_NETWORK_STOP_CLAT), data, reply, option);
+    if (ret != ERR_NONE) {
+        NETNATIVE_LOGE("StopClat proxy SendRequest failed, error code: [%{public}d]", ret);
+        return IPC_INVOKER_ERR;
+    }
+
+    int32_t result = ERR_INVALID_DATA;
+    if (!reply.ReadInt32(result)) {
+        return IPC_PROXY_TRANSACTION_ERR;
+    }
+    return result;
+}
+
 } // namespace NetsysNative
 } // namespace OHOS
