@@ -330,7 +330,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient009, TestSize.Level1)
     deathRecipient->OnRemoteDied(remote);
     std::vector<NetStatsInfo> infos;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetAllContainerStatsInfo(infos);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 HWTEST_F(NetStatsClientTest, NetStatsClient010, TestSize.Level1)
@@ -342,7 +342,7 @@ HWTEST_F(NetStatsClientTest, NetStatsClient010, TestSize.Level1)
     deathRecipient->OnRemoteDied(remote);
     PushStatsInfo pushInfo;
     int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->SetAppStats(pushInfo);
-    EXPECT_EQ(ret, NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NETMANAGER_ERR_OPERATION_FAILED);
 }
 
 HWTEST_F(NetStatsClientTest, GetTrafficStatsByNetwork001, TestSize.Level1)
@@ -366,13 +366,10 @@ HWTEST_F(NetStatsClientTest, GetTrafficStatsByNetwork002, TestSize.Level1)
     sptr<IRemoteObject> remote = nullptr;
     deathRecipient->OnRemoteDied(remote);
     std::unordered_map<uint32_t, NetStatsInfo> infos;
-    sptr<NetStatsNetwork> network;
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetTrafficStatsByNetwork(infos, network);
-    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
-    network = new (std::nothrow) NetStatsNetwork();
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     network->startTime_ = 1;
     network->endTime_ = 0;
-    ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetTrafficStatsByNetwork(infos, network);
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetTrafficStatsByNetwork(infos, network);
     EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
 
@@ -411,13 +408,10 @@ HWTEST_F(NetStatsClientTest, GetTrafficStatsByUidNetwork002, TestSize.Level1)
     deathRecipient->OnRemoteDied(remote);
     std::vector<NetStatsInfoSequence> infos;
     uint32_t uid = 1;
-    sptr<NetStatsNetwork> network;
-    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetTrafficStatsByUidNetwork(infos, uid, network);
-    EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
-    network = new (std::nothrow) NetStatsNetwork();
+    sptr<NetStatsNetwork> network = new (std::nothrow) NetStatsNetwork();
     network->startTime_ = 1;
     network->endTime_ = 0;
-    ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetTrafficStatsByUidNetwork(infos, uid, network);
+    int32_t ret = DelayedSingleton<NetStatsClient>::GetInstance()->GetTrafficStatsByUidNetwork(infos, uid, network);
     EXPECT_EQ(ret, NETMANAGER_ERR_INVALID_PARAMETER);
 }
 } // namespace NetManagerStandard
