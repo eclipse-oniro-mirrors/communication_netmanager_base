@@ -198,7 +198,7 @@ HWTEST_F(UtNetPolicyService, NetPolicyServiceBranchTest001, TestSize.Level1)
     instance_->OnAddSystemAbility(systemAbilityId, deviceId);
     instance_->OnRemoveSystemAbility(systemAbilityId, deviceId);
 
-    int32_t fd = 0;
+    int32_t fd = 1;
     std::vector<std::u16string> args;
     int32_t ret = instance_->Dump(fd, args);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
