@@ -26,13 +26,15 @@ constexpr int64_t TEST_RXBYTES = 15453;
 constexpr int64_t TEST_TXBYTES = 45115;
 constexpr int64_t TEST_RXPACKETS = 5646894;
 constexpr int64_t TEST_TXPACKETS = 7894;
+constexpr uint64_t TEST_START_TIME = 1;
+constexpr uint64_t TEST_END_TIME = 200;
 constexpr const char *TEST_IFACE = "eth0";
 constexpr const char *TEST_IDENT = "2";
 NetStatsInfoSequence GetNetStatsInfoSequenceData()
 {
     NetStatsInfoSequence infoSequence;
-    infoSequence.startTime_ = 1;
-    infoSequence.endTime_ = 2;
+    infoSequence.startTime_ = TEST_START_TIME;
+    infoSequence.endTime_ = TEST_END_TIME;
     NetStatsInfo info;
     info.uid_ = TEST_UID;
     info.iface_ = TEST_IFACE;
