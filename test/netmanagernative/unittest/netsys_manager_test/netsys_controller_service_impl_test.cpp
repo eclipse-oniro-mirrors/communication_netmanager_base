@@ -743,7 +743,7 @@ HWTEST_F(NetsysControllerServiceImplTest, NetsysControllerServiceImplBranchTest0
 HWTEST_F(NetsysControllerServiceImplTest, SetIpv6PrivacyExtensionsTest001, TestSize.Level1)
 {
     std::string interface = "wlan0";
-    uint32_t on = 1;
+    uint32_t on = 0;
     int32_t ret = instance_->SetIpv6PrivacyExtensions(interface, on);
     EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
