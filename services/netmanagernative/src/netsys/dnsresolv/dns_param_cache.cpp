@@ -232,6 +232,7 @@ void DnsParamCache::GetDumpInfo(std::string &info)
 {
     std::string dnsData;
     static const std::string TAB = "  ";
+    std::lock_guard<ffrt::mutex> guard(cacheMutex_);
     std::for_each(serverConfigMap_.begin(), serverConfigMap_.end(), [&dnsData](const auto &serverConfig) {
         dnsData.append(TAB + "NetId: " + std::to_string(serverConfig.second.GetNetId()) + "\n");
         dnsData.append(TAB + "TimeoutMsec: " + std::to_string(serverConfig.second.GetTimeoutMsec()) + "\n");
