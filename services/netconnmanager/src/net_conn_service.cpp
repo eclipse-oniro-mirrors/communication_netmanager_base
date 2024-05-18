@@ -1509,7 +1509,7 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
     LoadGlobalHttpProxy();
     if (!globalHttpProxy_.GetHost().empty()) {
         httpProxy = globalHttpProxy_;
-        NETMGR_LOG_D("Return global http proxy as default.");
+        NETMGR_LOG_I("Return global http proxy as default.");
         return NETMANAGER_SUCCESS;
     }
 
@@ -1517,16 +1517,16 @@ int32_t NetConnService::GetDefaultHttpProxy(int32_t bindNetId, HttpProxy &httpPr
     auto iter = networks_.find(bindNetId);
     if ((iter != networks_.end()) && (iter->second != nullptr)) {
         httpProxy = iter->second->GetNetLinkInfo().httpProxy_;
-        NETMGR_LOG_D("Return bound network's http proxy as default.");
+        NETMGR_LOG_I("Return bound network's http proxy as default.");
         return NETMANAGER_SUCCESS;
     }
 
     if (defaultNetSupplier_ != nullptr) {
         defaultNetSupplier_->GetHttpProxy(httpProxy);
-        NETMGR_LOG_D("Return default network's http proxy as default.");
+        NETMGR_LOG_I("Return default network's http proxy as default.");
         return NETMANAGER_SUCCESS;
     }
-    NETMGR_LOG_D("No default http proxy.");
+    NETMGR_LOG_I("No default http proxy.");
     return NETMANAGER_SUCCESS;
 }
 
@@ -1699,7 +1699,7 @@ int32_t NetConnService::SetAirplaneMode(bool state)
 
     netConnEventHandler_->PostAsyncTask(
         [state]() {
-            NETMGR_LOG_D("Enter delay");
+            NETMGR_LOG_I("Enter delay");
             auto dataShareHelperUtils = std::make_unique<NetDataShareHelperUtils>();
             std::string airplaneMode = std::to_string(state);
             Uri uri(AIRPLANE_MODE_URI);
