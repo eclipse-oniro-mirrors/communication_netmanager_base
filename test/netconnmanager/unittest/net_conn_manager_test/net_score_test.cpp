@@ -32,23 +32,13 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-public:
-    std::unique_ptr<NetScore> netScore_ = nullptr;
 };
 
-void NetScoreTest::SetUpTestCase()
-{}
+void NetScoreTest::SetUpTestCase() {}
 
 void NetScoreTest::TearDownTestCase() {}
 
-void NetScoreTest::SetUp()
-{
-    netScore_ = std::make_unique<NetScore>();
-    if (netScore_ == nullptr) {
-        NETMGR_LOG_E("Make NetScore failed");
-        return;
-    }
-}
+void NetScoreTest::SetUp() {}
 
 void NetScoreTest::TearDown() {}
 
@@ -62,7 +52,7 @@ HWTEST_F(NetScoreTest, GetServiceScore, TestSize.Level1)
     // mock Failed to detect network
     supplier->SetNetValid(INVALID_DETECTION_STATE);
 
-    bool result = netScore_->GetServiceScore(supplier);
+    bool result = NetScore::GetServiceScore(supplier);
     ASSERT_TRUE(result == true);
     ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
     ASSERT_TRUE(supplier->GetRealScore() ==
@@ -70,7 +60,7 @@ HWTEST_F(NetScoreTest, GetServiceScore, TestSize.Level1)
 
     supplier->SetNetValid(CAPTIVE_PORTAL_STATE);
 
-    result = netScore_->GetServiceScore(supplier);
+    result = NetScore::GetServiceScore(supplier);
     ASSERT_TRUE(result == true);
     ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
     ASSERT_TRUE(supplier->GetRealScore() ==
@@ -79,21 +69,21 @@ HWTEST_F(NetScoreTest, GetServiceScore, TestSize.Level1)
     // mock successed to detect network
     supplier->SetNetValid(VERIFICATION_STATE);
 
-    result = netScore_->GetServiceScore(supplier);
+    result = NetScore::GetServiceScore(supplier);
     ASSERT_TRUE(result == true);
     ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
     ASSERT_TRUE(supplier->GetRealScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
 
     // quality_poor
     supplier->SetNetValid(QUALITY_POOR_STATE);
-    result = netScore_->GetServiceScore(supplier);
+    result = NetScore::GetServiceScore(supplier);
     ASSERT_TRUE(result == true);
     ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
     ASSERT_TRUE(supplier->GetRealScore() ==
         static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE) - DIFF_SCORE_BETWEEN_GOOD_POOR);
     // quality_good
     supplier->SetNetValid(QUALITY_GOOD_STATE);
-    result = netScore_->GetServiceScore(supplier);
+    result = NetScore::GetServiceScore(supplier);
     ASSERT_TRUE(result == true);
     ASSERT_TRUE(supplier->GetNetScore() == static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE));
     ASSERT_TRUE(supplier->GetRealScore() ==

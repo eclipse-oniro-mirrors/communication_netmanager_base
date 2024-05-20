@@ -41,10 +41,10 @@ class NetScore {
 public:
     NetScore() = default;
     ~NetScore() = default;
-    bool GetServiceScore(sptr<NetSupplier> &supplier);
+    static bool GetServiceScore(sptr<NetSupplier> &supplier);
 
 private:
-    NetTypeScore netTypeScore_ = {
+    static inline NetTypeScore netTypeScore_ = {
         {BEARER_CELLULAR, static_cast<int32_t>(NetTypeScoreValue::CELLULAR_VALUE)},
         {BEARER_WIFI, static_cast<int32_t>(NetTypeScoreValue::WIFI_VALUE)},
         {BEARER_BLUETOOTH, static_cast<int32_t>(NetTypeScoreValue::BLUETOOTH_VALUE)},

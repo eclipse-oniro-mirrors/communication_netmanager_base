@@ -467,7 +467,6 @@ private:
     NET_UIDREQUEST_MAP netUidRequest_;
     NET_UIDREQUEST_MAP internalDefaultUidRequest_;
     NET_NETWORK_MAP networks_;
-    std::unique_ptr<NetScore> netScore_ = nullptr;
     sptr<NetConnServiceIface> serviceIface_ = nullptr;
     std::atomic<int32_t> netIdLastValue_ = MIN_NET_ID - 1;
     std::atomic<int32_t> internalNetIdLastValue_ = MIN_INTERNAL_NET_ID;
