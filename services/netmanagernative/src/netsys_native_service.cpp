@@ -830,7 +830,7 @@ int32_t NetsysNativeService::DeleteNetworkAccessPolicy(uint32_t uid)
 
 int32_t NetsysNativeService::NotifyNetBearerTypeChange(std::set<NetBearType> bearerTypes)
 {
-    NETNATIVE_LOGI("NotifyNetBearerTypeChange");
+    NETNATIVE_LOG_D("NotifyNetBearerTypeChange");
     return netsysService_->NotifyNetBearerTypeChange(bearerTypes);
 }
 } // namespace NetsysNative

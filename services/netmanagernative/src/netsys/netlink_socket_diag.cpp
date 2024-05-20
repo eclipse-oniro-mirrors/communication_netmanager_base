@@ -243,7 +243,7 @@ void NetLinkSocketDiag::SockDiagDumpCallback(uint8_t proto, const inet_diag_msg 
     }
 
     if (!IsMatchNetwork(msg, ipAddr)) {
-        NETNATIVE_LOGE("Socket is not associated with the network");
+        NETNATIVE_LOG_D("Socket is not associated with the network");
         return;
     }
 

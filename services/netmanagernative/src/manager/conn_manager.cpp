@@ -414,7 +414,7 @@ int32_t ConnManager::DeleteNetworkAccessPolicy(uint32_t uid)
 
 int32_t ConnManager::NotifyNetBearerTypeChange(std::set<NetManagerStandard::NetBearType> bearerTypes)
 {
-    NETNATIVE_LOGI("NotifyNetBearerTypeChange");
+    NETNATIVE_LOG_D("NotifyNetBearerTypeChange");
     BpfMapper<net_bear_id_key, net_bear_type_map_value> NetBearerTypeMap(NET_BEAR_TYPE_MAP_PATH, BPF_ANY);
     if (!NetBearerTypeMap.IsValid()) {
         NETNATIVE_LOGE("NetBearerTypeMap not exist");
@@ -430,8 +430,8 @@ int32_t ConnManager::NotifyNetBearerTypeChange(std::set<NetManagerStandard::NetB
         if (bearerType == BEARER_WIFI) {
             netbearerType = NETWORK_BEARER_TYPE_WIFI;
         }
-        NETNATIVE_LOGI("NotifyNetBearTypeChange Type: %{public}d", static_cast<int32_t>(bearerType));
     }
+    NETNATIVE_LOGI("NotifyNetBearerTypeChange Type: %{public}d", static_cast<int32_t>(netbearerType));
 
     net_bear_type_map_value v = 0;
     int32_t ret = NetBearerTypeMap.Read(0, v);
