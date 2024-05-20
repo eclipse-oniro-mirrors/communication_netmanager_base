@@ -33,6 +33,7 @@
         ],
         "deps": {
             "components": [
+                "bounds_checking_function",
                 "ipc",
                 "safwk",
                 "hilog",
@@ -59,8 +60,7 @@
                 "selinux",
                 "sqlite",
                 "os_account",
-                "libbpf",
-                "bounds_checking_function"
+                "libbpf"
             ],
             "third_party": [
                 "curl",

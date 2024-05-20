@@ -194,12 +194,12 @@ ohos_static_library("netsys_native_manager_static") {
   deps = netsys_native_manager_deps
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "dhcp:dhcp_sdk",
     "eventhandler:libeventhandler",
     "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "bounds_checking_function:libsec_shared",
   ]
 
   defines = [

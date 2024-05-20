@@ -71,10 +71,10 @@ ohos_shared_library("net_service_common") {
 
   external_deps = [
     "ability_base:want",
+    "bounds_checking_function:libsec_shared",
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
     "ipc:ipc_core",
-    "bounds_checking_function:libsec_shared",
   ]
 
   defines = [
