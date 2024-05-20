@@ -59,7 +59,8 @@
                 "selinux",
                 "sqlite",
                 "os_account",
-                "libbpf"
+                "libbpf",
+                "bounds_checking_function"
             ],
             "third_party": [
                 "curl",

@@ -112,6 +112,7 @@ ohos_shared_library("net_stats_manager_if") {
   external_deps = [
     "ipc:ipc_single",
     "samgr:samgr_proxy",
+    "bounds_checking_function:libsec_shared",
   ]
 
   defines = [

@@ -133,6 +133,7 @@ ohos_shared_library("net_conn_manager_if") {
     "openssl:libcrypto_shared",
     "openssl:libssl_shared",
     "samgr:samgr_proxy",
+    "bounds_checking_function:libsec_shared",
   ]
 
   defines = [
@@ -185,6 +186,7 @@ ohos_shared_library("socket_permission") {
   sources = [ "$NETCONNMANAGER_INNERKITS_SOURCE_DIR/src/socket_permission.cpp" ]
   deps = [ "$INNERKITS_ROOT/netconnclient:net_conn_manager_if" ]
   public_configs = [ ":socket_permission_config" ]
+  external_deps = [ "bounds_checking_function:libsec_shared" ]
   part_name = "netmanager_base"
   subsystem_name = "communication"
 }
