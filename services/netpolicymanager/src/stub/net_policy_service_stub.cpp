@@ -118,10 +118,10 @@ NetPolicyServiceStub::~NetPolicyServiceStub() = default;
 
 void NetPolicyServiceStub::InitEventHandler()
 {
-    std::call_once(onceFlag, [this](){
-            auto core = DelayedSingleton<NetPolicyCore>::GetInstance();
-            handler_ = std::make_shared<NetPolicyEventHandler>(core, ffrtQueue_);
-            core->Init(handler_);
+    std::call_once(onceFlag, [this]() {
+        auto core = DelayedSingleton<NetPolicyCore>::GetInstance();
+        handler_ = std::make_shared<NetPolicyEventHandler>(core, ffrtQueue_);
+        core->Init(handler_);
     });
 }
 
