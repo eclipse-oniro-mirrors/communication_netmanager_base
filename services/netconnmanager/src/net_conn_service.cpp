@@ -2331,38 +2331,33 @@ std::vector<sptr<NetSupplier>> NetConnService::FindSupplierWithInternetByBearerT
     return result;
 }
 
-int32_t NetConnService::UpdateSupplierScore(NetBearType bearerType, bool isBetter)
+int32_t NetConnService::UpdateSupplierScore(NetBearType bearerType, bool isBetter, uint32_t& supplierId)
 {
     int32_t result = NETMANAGER_ERROR;
     if (netConnEventHandler_) {
-        netConnEventHandler_->PostSyncTask([this, bearerType, isBetter, &result]() {
-            result = this->UpdateSupplierScoreAsync(bearerType, isBetter);
+        netConnEventHandler_->PostSyncTask([this, bearerType, isBetter, &supplierId, &result]() {
+            result = this->UpdateSupplierScoreAsync(bearerType, isBetter, supplierId);
         });
     }
     return result;
 }
 
-int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, bool isBetter)
+int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, bool isBetter, uint32_t& supplierId)
 {
-    NETMGR_LOG_I("update supplier score by bearertype[%{public}d], isBetter[%{public}d]", bearerType, isBetter);
+    NETMGR_LOG_I("update supplier score by bearertype[%{public}d], isBetter[%{public}d], supplierId:%{public}d",
+        bearerType, isBetter, supplierId);
     std::vector<sptr<NetSupplier>> suppliers = FindSupplierWithInternetByBearerType(bearerType);
     if (suppliers.empty()) {
         NETMGR_LOG_E(" not found supplierId by bearertype[%{public}d].", bearerType);
         return NETMANAGER_ERR_INVALID_PARAMETER;
     }
-    if (!defaultNetSupplier_) {
-        NETMGR_LOG_E("default net supplier nullptr");
-        return NETMANAGER_ERR_INTERNAL;
+    uint32_t tmpSupplierId = INVALID_SUPPLIER_ID;
+    if (!isBetter) {
+        tmpSupplierId = FindSupplierToReduceScore(suppliers, supplierId);
+    } else {
+        tmpSupplierId = FindSupplierToIncreaseScore(suppliers, supplierId);
     }
-    uint32_t supplierId = INVALID_SUPPLIER_ID;
-    std::vector<sptr<NetSupplier>>::iterator iter;
-    for (iter = suppliers.begin(); iter != suppliers.end(); ++iter) {
-        if (defaultNetSupplier_->GetNetId() == (*iter)->GetNetId()) {
-            supplierId = (*iter)->GetSupplierId();
-            break;
-        }
-    }
-    if (supplierId == INVALID_SUPPLIER_ID) {
+    if (tmpSupplierId == INVALID_SUPPLIER_ID) {
         NETMGR_LOG_E("not found supplierId, default supplier id[%{public}d], netId:[%{public}d]",
             defaultNetSupplier_->GetSupplierId(), defaultNetSupplier_->GetNetId());
         return NETMANAGER_ERR_INVALID_PARAMETER;
@@ -2370,6 +2365,37 @@ int32_t NetConnService::UpdateSupplierScoreAsync(NetBearType bearerType, bool is
     NetDetectionStatus state = isBetter ? QUALITY_GOOD_STATE : QUALITY_POOR_STATE;
     HandleDetectionResult(supplierId, state);
     return NETMANAGER_SUCCESS;
+}
+
+uint32_t NetConnService::FindSupplierToReduceScore(std::vector<sptr<NetSupplier>>& suppliers, uint32_t& supplierId)
+{
+    uint32_t ret = INVALID_SUPPLIER_ID;
+    if (!defaultNetSupplier_) {
+        NETMGR_LOG_E("default net supplier nullptr");
+        return ret;
+    }
+    std::vector<sptr<NetSupplier>>::iterator iter;
+    for (iter = suppliers.begin(); iter != suppliers.end(); ++iter) {
+        if (defaultNetSupplier_->GetNetId() == (*iter)->GetNetId()) {
+            ret = (*iter)->GetSupplierId();
+            supplierId = ret;
+            break;
+        }
+    }
+    return ret;
+}
+
+uint32_t NetConnService::FindSupplierToIncreaseScore(std::vector<sptr<NetSupplier>>& suppliers, uint32_t supplierId)
+{
+    uint32_t ret = INVALID_SUPPLIER_ID;
+    std::vector<sptr<NetSupplier>>::iterator iter;
+    for (iter = suppliers.begin(); iter != suppliers.end(); ++iter) {
+        if (supplierId == (*iter)->GetSupplierId() && (*iter)->AlreadyReducedScore()) {
+            ret = supplierId;
+            break;
+        }
+    }
+    return ret;
 }
 } // namespace NetManagerStandard
 } // namespace OHOS

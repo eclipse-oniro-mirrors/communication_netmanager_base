@@ -1393,14 +1393,16 @@ HWTEST_F(NetConnClientTest, UpdateSupplierScore001, TestSize.Level1)
 {
     NetManagerBaseAccessToken token;
     bool isBetter = false;
-    int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(NetBearType::BEARER_WIFI, isBetter);
+    uint32_t supplierId = 100;
+    int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(NetBearType::BEARER_WIFI, isBetter, supplierId);
     EXPECT_NE(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 
 HWTEST_F(NetConnClientTest, UpdateSupplierScore002, TestSize.Level1)
 {
     bool isBetter = false;
-    int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(NetBearType::BEARER_WIFI, isBetter);
+    uint32_t supplierId = 100;
+    int32_t ret = NetConnClient::GetInstance().UpdateSupplierScore(NetBearType::BEARER_WIFI, isBetter, supplierId);
     EXPECT_EQ(ret, NETMANAGER_ERR_PERMISSION_DENIED);
 }
 

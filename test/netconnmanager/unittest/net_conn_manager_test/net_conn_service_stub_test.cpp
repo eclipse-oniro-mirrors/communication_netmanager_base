@@ -974,6 +974,10 @@ HWTEST_F(NetConnServiceStubTest, OnUpdateSupplierScore001, TestSize.Level1)
     if (!data.WriteBool(isBetter)) {
         return;
     }
+    uint32_t supplierId = 100;
+    if (!data.WriteUint32(supplierId)) {
+        return;
+    }
     int32_t ret = SendRemoteRequest(data, ConnInterfaceCode::CMD_NM_UPDATE_SUPPLIER_SCORE);
     EXPECT_EQ(ret, NETMANAGER_SUCCESS);
 }

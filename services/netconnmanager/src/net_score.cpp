@@ -41,11 +41,14 @@ bool NetScore::GetServiceScore(sptr<NetSupplier> &supplier)
     }
     if (supplier->IsNetQualityPoor()) {
         netScore -= DIFF_SCORE_BETWEEN_GOOD_POOR;
+        supplier->SetReducedScored(true);
         NETMGR_LOG_I("supplier net quality poor, supplierId[%{public}d], bearerType[%{public}d], score[%{public}d]",
             supplier->GetSupplierId(), bearerType, netScore);
     }
     if (supplier->IsNetQualityGood()) {
+        netScore = supplier->GetRealScore();
         netScore += DIFF_SCORE_BETWEEN_GOOD_POOR;
+        supplier->SetReducedScored(false);
         NETMGR_LOG_I("supplier net quality good, supplierId[%{public}d], bearerType[%{public}d], score[%{public}d]",
             supplier->GetSupplierId(), bearerType, netScore);
     }
