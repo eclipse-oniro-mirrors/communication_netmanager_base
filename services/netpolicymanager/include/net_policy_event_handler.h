@@ -20,12 +20,14 @@
 
 #include "event_handler.h"
 #include "event_runner.h"
+#include "ffrt.h"
+#include "net_policy_core.h"
 #include "singleton.h"
 
 namespace OHOS {
 namespace NetManagerStandard {
 class NetPolicyCore;
-class NetPolicyEventHandler : public AppExecFwk::EventHandler {
+class NetPolicyEventHandler {
 public:
     static constexpr int32_t MSG_DEVICE_IDLE_LIST_UPDATED = 1;
     static constexpr int32_t MSG_DEVICE_IDLE_MODE_CHANGED = 2;
@@ -35,9 +37,8 @@ public:
     static constexpr int32_t MSG_UID_STATE_FOREGROUND = 6;
     static constexpr int32_t MSG_UID_STATE_BACKGROUND = 7;
 
-    NetPolicyEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner,
-                          const std::shared_ptr<NetPolicyCore> &core);
-    virtual ~NetPolicyEventHandler() override;
+    NetPolicyEventHandler(const std::shared_ptr<NetPolicyCore> &core, ffrt::queue& ffrtQueue);
+    ~NetPolicyEventHandler() = default;
 
     /**
      * Process the event from EventHandler
@@ -45,10 +46,13 @@ public:
      * @param eventId The event id
      * @param policyEvent The informations passed from other core
      */
-    void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;
+    void ProcessEvent(int32_t eventId, std::shared_ptr<PolicyEvent> eventData);
+
+    void SendEvent(const AppExecFwk::InnerEvent::Pointer &event, int64_t delayTime);
 
 private:
     std::shared_ptr<NetPolicyCore> core_;
+    ffrt::queue& ffrtQueue_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS

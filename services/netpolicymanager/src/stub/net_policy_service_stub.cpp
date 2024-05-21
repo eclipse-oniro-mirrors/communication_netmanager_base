@@ -53,7 +53,7 @@ std::map<uint32_t, const char *> g_codeNPS = {
 };
 } // namespace
 
-NetPolicyServiceStub::NetPolicyServiceStub()
+NetPolicyServiceStub::NetPolicyServiceStub() : ffrtQueue_(NET_POLICY_STUB_QUEUE)
 {
     memberFuncMap_[static_cast<uint32_t>(PolicyInterfaceCode::CMD_NPS_SET_POLICY_BY_UID)] =
         &NetPolicyServiceStub::OnSetPolicyByUid;
@@ -118,14 +118,11 @@ NetPolicyServiceStub::~NetPolicyServiceStub() = default;
 
 void NetPolicyServiceStub::InitEventHandler()
 {
-    runner_ = AppExecFwk::EventRunner::Create(NET_POLICY_WORK_THREAD);
-    if (!runner_) {
-        NETMGR_LOG_E("Create net policy work event runner.");
-        return;
-    }
-    auto core = DelayedSingleton<NetPolicyCore>::GetInstance();
-    handler_ = std::make_shared<NetPolicyEventHandler>(runner_, core);
-    core->Init(handler_);
+    std::call_once(onceFlag, [this]() {
+        auto core = DelayedSingleton<NetPolicyCore>::GetInstance();
+        handler_ = std::make_shared<NetPolicyEventHandler>(core, ffrtQueue_);
+        core->Init(handler_);
+    });
 }
 
 int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
@@ -158,9 +155,10 @@ int32_t NetPolicyServiceStub::OnRemoteRequest(uint32_t code, MessageParcel &data
         int32_t result = NETMANAGER_SUCCESS;
         auto requestFunc = itFunc->second;
         if (requestFunc != nullptr) {
-            handler_->PostSyncTask(
-                [this, &data, &reply, &requestFunc, &result]() { result = (this->*requestFunc)(data, reply); },
-                AppExecFwk::EventQueue::Priority::HIGH);
+            auto task = ffrtQueue_.submit_h([this, &data, &reply, &requestFunc, &result]() {
+                          result = (this->*requestFunc)(data, reply);
+                      });
+            ffrtQueue_.wait(task);
             NETMGR_LOG_D("stub call end, code = [%{public}d], ret = [%{public}d]", code, result);
             return result;
         }

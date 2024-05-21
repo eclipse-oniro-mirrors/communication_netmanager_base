@@ -76,9 +76,7 @@ void NetPolicyService::OnStart()
 
 void NetPolicyService::OnStop()
 {
-    runner_->Stop();
     handler_.reset();
-    runner_.reset();
     netPolicyCore_.reset();
     netPolicyCallback_.reset();
     netPolicyTraffic_.reset();
@@ -101,7 +99,7 @@ void NetPolicyService::Init()
 {
     NETMGR_LOG_D("Init");
     AddSystemAbilityListener(COMM_NETSYS_NATIVE_SYS_ABILITY_ID);
-    handler_->PostTask(
+    ffrtQueue_.submit(
         [this]() {
             serviceComm_ = (std::make_unique<NetPolicyServiceCommon>()).release();
             NetManagerCenter::GetInstance().RegisterPolicyService(serviceComm_);
@@ -113,8 +111,7 @@ void NetPolicyService::Init()
             RegisterFactoryResetCallback();
             netAccessPolicy_.InitRdbStore();
             UpdateNetAccessPolicyToMapFromDB();
-        },
-        AppExecFwk::EventQueue::Priority::HIGH);
+        });
 }
 
 int32_t NetPolicyService::SetPolicyByUid(uint32_t uid, uint32_t policy)

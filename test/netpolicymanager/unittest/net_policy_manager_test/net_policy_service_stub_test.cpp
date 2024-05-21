@@ -174,9 +174,9 @@ public:
         if (itFunc != memberFuncMap_.end()) {
             auto requestFunc = itFunc->second;
             if (requestFunc != nullptr) {
-                handler_->PostSyncTask(
-                    [this, &data, &reply, &requestFunc, &result]() { result = (this->*requestFunc)(data, reply); },
-                    AppExecFwk::EventQueue::Priority::HIGH);
+                auto task = ffrtQueue_.submit_h(
+                    [this, &data, &reply, &requestFunc, &result]() { result = (this->*requestFunc)(data, reply); });
+                ffrtQueue_.wait(task);
                 return result;
             }
         }

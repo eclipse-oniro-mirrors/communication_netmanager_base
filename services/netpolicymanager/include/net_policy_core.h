@@ -63,9 +63,9 @@ public:
      * Handle the event from NetPolicyCore
      *
      * @param eventId The event id
-     * @param policyEvent The infomations passed from other core
+     * @param eventData The event data ptr
      */
-    void HandleEvent(const AppExecFwk::InnerEvent::Pointer &event);
+    void HandleEvent(int32_t eventId, std::shared_ptr<PolicyEvent> eventData);
 
     /**
      * Send events to other policy cores.
