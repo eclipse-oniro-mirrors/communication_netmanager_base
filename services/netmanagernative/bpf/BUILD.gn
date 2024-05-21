@@ -48,8 +48,6 @@ ohos_shared_library("netsys_bpf_utils") {
     "$NETMANAGER_BASE_ROOT/interfaces/innerkits/netstatsclient/include",
     "$NETMANAGER_BASE_ROOT/utils/log/include",
     "$NETPOLICYMANAGER_SOURCE_DIR/include",
-    "//third_party/elfio",
-    "//third_party/elfio/elfio",
   ]
 
   cflags = [
@@ -71,6 +69,7 @@ ohos_shared_library("netsys_bpf_utils") {
 
   external_deps = [
     "c_utils:utils",
+    "elfio:elfio",
     "ffrt:libffrt",
     "hilog:libhilog",
     "libbpf:libbpf",

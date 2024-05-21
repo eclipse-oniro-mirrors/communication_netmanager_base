@@ -90,9 +90,6 @@ netsys_native_manager_deps = [
   "$INNERKITS_ROOT/netconnclient:net_conn_manager_if",
   "$NETMANAGERNATIVE_ROOT/netsys_client",
   "$NETMANAGER_BASE_ROOT/utils:net_manager_common",
-  "$THIRD_PARTY_ROOT/iptables:iptables",
-  "$THIRD_PARTY_ROOT/iptables:iptables-restore",
-  "$THIRD_PARTY_ROOT/iptables:iptables-save",
   "bpf:netsys",
   "bpf:netsys_bpf_utils",
 ]
@@ -150,6 +147,9 @@ ohos_shared_library("netsys_native_manager") {
     "ffrt:libffrt",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "iptables:iptables",
+    "iptables:iptables-restore",
+    "iptables:iptables-save",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]

@@ -60,12 +60,13 @@
                 "selinux",
                 "sqlite",
                 "os_account",
-                "libbpf"
+                "libbpf",
+                "elfio",
+                "iptables"
             ],
             "third_party": [
                 "curl",
                 "libuv",
-                "iptables",
                 "libbpf"
             ]
         },

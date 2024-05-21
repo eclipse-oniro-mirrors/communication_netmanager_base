@@ -38,9 +38,9 @@
 
 #include "securec.h"
 
-#include "elfio/elf_types.hpp"
-#include "elfio/elfio.hpp"
-#include "elfio/elfio_relocation.hpp"
+#include "elf_types.hpp"
+#include "elfio.hpp"
+#include "elfio_relocation.hpp"
 
 namespace OHOS {
 namespace Bpf {
