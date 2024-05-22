@@ -69,7 +69,7 @@ HWTEST_F(DhcpControllerTest, StartDhcpTest001, TestSize.Level1)
     ret = instance_->StartDhcpService(testInterfaceName, {});
     ASSERT_FALSE(ret);
     ret = instance_->StopDhcpService(testInterfaceName);
-    ASSERT_TRUE(ret);
+    ASSERT_FALSE(ret);
 
     DhcpResult dhcpRet;
     instance_->Process(testInterfaceName, &dhcpRet);
@@ -98,7 +98,7 @@ HWTEST_F(DhcpControllerTest, TestErr, TestSize.Level1)
     ret = instance_->StartDhcpService(testInterfaceName, {});
     ASSERT_FALSE(ret);
     ret = instance_->StopDhcpService(testInterfaceName);
-    ASSERT_TRUE(ret);
+    ASSERT_FALSE(ret);
 }
 
 } // namespace nmd

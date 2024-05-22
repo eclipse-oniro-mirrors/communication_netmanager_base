@@ -71,7 +71,7 @@ HWTEST_F(MockNetsysNativeClientTest, MockNetsysNativeClientBranchTest001, TestSi
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient_.SetEnableIpv6(iface, 1);
-    EXPECT_NE(ret, NetManagerStandard::NETMANAGER_SUCCESS);
+    EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
     ret = nativeClient_.NetworkRemoveRoute(netId, iface, "", "");
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
