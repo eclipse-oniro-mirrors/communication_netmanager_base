@@ -281,10 +281,10 @@ SEC("cgroup_sock/inet_create_socket")
 int inet_create_socket(struct bpf_sock *sk)
 {
     sock_netns_key key_sock_netns1 = sk;
-    sock_netns_value value_sock_netns1 = bpf_get_netns_cookie(sk);
+    sock_netns_value value_sock_netns1 = bpf_get_netns_cookie(key_sock_netns1);
     bpf_map_update_elem(&sock_netns_map, &key_sock_netns1, &value_sock_netns1, BPF_NOEXIST);
     sock_netns_key key_sock_netns2 = NULL;
-    sock_netns_value value_sock_netns2 = bpf_get_netns_cookie(NULL);
+    sock_netns_value value_sock_netns2 = bpf_get_netns_cookie(key_sock_netns2);
     bpf_map_update_elem(&sock_netns_map, &key_sock_netns2, &value_sock_netns2, BPF_NOEXIST);
 
     void *map_ptr = &oh_sock_permission_map;
