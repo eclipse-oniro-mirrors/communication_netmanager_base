@@ -151,11 +151,6 @@ bool NetConnService::Init()
     }
     serviceIface_ = std::make_unique<NetConnServiceIface>().release();
     NetManagerCenter::GetInstance().RegisterConnService(serviceIface_);
-    netScore_ = std::make_unique<NetScore>();
-    if (netScore_ == nullptr) {
-        NETMGR_LOG_E("Make NetScore failed");
-        return false;
-    }
 
     interfaceStateCallback_ = new (std::nothrow) NetInterfaceStateCallback();
     if (interfaceStateCallback_) {
@@ -384,7 +379,7 @@ int32_t NetConnService::RegisterNetSupplierAsync(NetBearType bearerType, const s
         return NET_CONN_ERR_NO_SUPPLIER;
     }
     supplierId = supplier->GetSupplierId();
-    if (!netScore_->GetServiceScore(supplier)) {
+    if (!NetScore::GetServiceScore(supplier)) {
         NETMGR_LOG_E("GetServiceScore fail.");
     }
     // create network
@@ -679,7 +674,7 @@ int32_t NetConnService::UpdateNetSupplierInfoAsync(uint32_t supplierId, const sp
     } else {
         CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     }
-    if (!netScore_->GetServiceScore(supplier)) {
+    if (!NetScore::GetServiceScore(supplier)) {
         NETMGR_LOG_E("GetServiceScore fail.");
     }
     FindBestNetworkForAllRequest();
@@ -729,7 +724,7 @@ int32_t NetConnService::UpdateNetLinkInfoAsync(uint32_t supplierId, const sptr<N
     }
 
     CallbackForSupplier(supplier, CALL_TYPE_UPDATE_LINK);
-    if (!netScore_->GetServiceScore(supplier)) {
+    if (!NetScore::GetServiceScore(supplier)) {
         NETMGR_LOG_E("GetServiceScore fail.");
     }
     FindBestNetworkForAllRequest();
@@ -1246,7 +1241,7 @@ void NetConnService::HandleDetectionResult(uint32_t supplierId, NetDetectionStat
     if (netState != QUALITY_POOR_STATE && netState != QUALITY_NORMAL_STATE && netState != QUALITY_GOOD_STATE) {
         CallbackForSupplier(supplier, CALL_TYPE_UPDATE_CAP);
     }
-    if (!netScore_->GetServiceScore(supplier)) {
+    if (!NetScore::GetServiceScore(supplier)) {
         NETMGR_LOG_E("GetServiceScore fail.");
         return;
     }
