@@ -471,6 +471,7 @@ private:
     std::list<std::tuple<sptr<NetSpecifier>, sptr<INetConnCallback>, uint32_t>> registerConnTupleList_;
     SafeMap<uint32_t, uint8_t> netPermissionMap_;
     sptr<IPreAirplaneCallback> preAirplaneCallback_;
+    std::mutex registerConnTupleListMutex_;
 };
 } // namespace NetManagerStandard
 } // namespace OHOS
