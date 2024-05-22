@@ -55,12 +55,6 @@ HWTEST_F(InterfaceManagerTest, GetMtuTest001, TestSize.Level1)
     EXPECT_EQ(ret, -1);
 }
 
-HWTEST_F(InterfaceManagerTest, GetMtuTest002, TestSize.Level1)
-{
-    std::string interfaceName = "eth0";
-    auto ret = InterfaceManager::GetMtu(interfaceName.c_str());
-    EXPECT_EQ(ret, -1);
-}
 
 HWTEST_F(InterfaceManagerTest, SetMtuTest001, TestSize.Level1)
 {

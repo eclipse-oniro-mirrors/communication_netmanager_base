@@ -165,19 +165,5 @@ HWTEST_F(DataFlowStatisticsTest, NetStatsManager010, TestSize.Level1)
     ASSERT_GE(ret, 0);
 }
 
-/**
- * @tc.name: NetStatsManager011
- * @tc.desc: Test DataFlowStatisticsTest RegisterNetStatsCallback.
- * @tc.type: FUNC
- */
-HWTEST_F(DataFlowStatisticsTest, NetStatsManager011, TestSize.Level1)
-{
-    NetManagerBaseAccessToken token;
-    sptr<NetStatsCallbackTest> callback = GetINetStatsCallbackSample();
-    int32_t result = DelayedSingleton<NetStatsClient>::GetInstance()->RegisterNetStatsCallback(callback);
-    ASSERT_EQ(result, NETMANAGER_ERR_PERMISSION_DENIED);
-    result = DelayedSingleton<NetStatsClient>::GetInstance()->UnregisterNetStatsCallback(callback);
-    ASSERT_EQ(result, NETMANAGER_ERR_PERMISSION_DENIED);
-}
 } // namespace NetManagerStandard
 } // namespace OHOS

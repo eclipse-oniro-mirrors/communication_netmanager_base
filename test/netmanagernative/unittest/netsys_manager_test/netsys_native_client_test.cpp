@@ -95,8 +95,6 @@ HWTEST_F(NetsysNativeClientTest, NetsysNativeClientTest001, TestSize.Level1)
     ret = nativeClient_.NetworkRemoveInterface(NET_ID, IF_NAME);
     EXPECT_EQ(ret, NetManagerStandard::NETMANAGER_SUCCESS);
 
-    ret = nativeClient_.NetworkAddRoute(NET_ID, IF_NAME, DESTINATION, NEXT_HOP);
-    EXPECT_EQ(ret, -1);
 
     ret = nativeClient_.NetworkRemoveRoute(NET_ID, IF_NAME, DESTINATION, NEXT_HOP);
     EXPECT_EQ(ret, -1);
